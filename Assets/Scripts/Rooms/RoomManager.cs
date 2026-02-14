@@ -20,6 +20,9 @@ namespace Assets.Scripts.Rooms
         private RoomActionUI _roomActionUI;
 
         [SerializeField]
+        private Color _wallColor = new Color(0.15f, 0.1f, 0.08f, 1f);
+
+        [SerializeField]
         private bool _randomGenerateOn;
 
         [SerializeField]
@@ -98,6 +101,10 @@ namespace Assets.Scripts.Rooms
                         CreateDoor(node, conn);
                 }
             }
+
+            // Place walls around rooms (after doors so we can skip door edges)
+            var wallGen = new WallGenerator(_wallColor);
+            wallGen.PlaceWalls(_spawnedRooms);
 
             // Spawn player in a random room
             SpawnPlayer();
