@@ -16,3 +16,8 @@ MonoBehaviour:
   Width: 3
   Height: 3
   Color: {r: 0.38679248, g: 0.15331188, b: 0, a: 1}
+  ExamineOptions:
+  - Search for cavaties
+  - Look at the ceiling
+  ActionOptions:
+  - Stomp your feet

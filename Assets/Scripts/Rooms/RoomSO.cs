@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Assets.Scripts.Rooms
 {
@@ -12,5 +13,11 @@ namespace Assets.Scripts.Rooms
         public int Height;
 
         public Color Color;
+
+        [TextArea]
+        public List<string> ExamineOptions;
+
+        [TextArea]
+        public List<string> ActionOptions;
     }
 }

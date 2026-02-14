@@ -14,6 +14,12 @@ namespace Assets.Scripts.Rooms
         private GameObject _roomParentPrefab, _doorPrefab;
 
         [SerializeField]
+        private GameObject _playerPrefab;
+
+        [SerializeField]
+        private RoomActionUI _roomActionUI;
+
+        [SerializeField]
         private bool _randomGenerateOn;
 
         [SerializeField]
@@ -25,8 +31,11 @@ namespace Assets.Scripts.Rooms
         [SerializeField]
         private List<RoomSO> _roomSOs;
 
+        private Player _player;
+
 
         private List<Room> _spawnedRooms = new List<Room>();
+        private List<Door> _spawnedDoors = new List<Door>();
         private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
 
         private void Start()
@@ -45,38 +54,6 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        private void SpawnGrid()
-        {
-            var seed = _customSeed;
-
-            if (seed == 0)
-            {
-                var random = Random.Range(int.MinValue, int.MaxValue);
-
-                Debug.Log(random);
-
-                seed = random;
-            }
-
-            Random.InitState(seed);
-
-            for (int i = 0; i < _roomsToGenerate; i++)
-            {
-                var roomSo = _roomSOs.TakeRandom();
-
-                var roomBehaviour = Instantiate(_roomParentPrefab); // TODO room position
-
-                for (int w = 0; w < roomSo.Width; w++)
-                {
-                    for (int h = 0; h < roomSo.Height; h++)
-                    {
-                        var obj = Instantiate(_tilePrefab, new Vector3(w, h, 0), Quaternion.identity, roomBehaviour.transform);
-
-                        obj.GetComponent<SpriteRenderer>().color = roomSo.Color; 
-                    }
-                }
-            }
-        }
 
         [ContextMenu("Spawn Dungeon")]
         private void SpawnDungeon()
@@ -95,7 +72,11 @@ namespace Assets.Scripts.Rooms
             Random.InitState(seed);
 
             _spawnedRooms.DestroyAndClear(true);
+            _spawnedDoors.DestroyAndClear(true);
             _occupiedTiles.Clear();
+
+            if (_player != null)
+                Destroy(_player.gameObject);
 
             var graph = GenerateGraph(_roomsToGenerate);
 
@@ -117,6 +98,9 @@ namespace Assets.Scripts.Rooms
                         CreateDoor(node, conn);
                 }
             }
+
+            // Spawn player in a random room
+            SpawnPlayer();
         }
 
         private List<RoomNode> GenerateGraph(int count)
@@ -314,7 +298,17 @@ namespace Assets.Scripts.Rooms
             }
 
             Vector2 doorPos = ((Vector2)doorA + (Vector2)doorB) / 2f;
-            Instantiate(_doorPrefab, doorPos, Quaternion.identity, transform);
+            var doorObj = Instantiate(_doorPrefab, doorPos, Quaternion.identity, transform);
+            var door = doorObj.GetComponent<Door>();
+
+            door.RoomA = a.room;
+            door.RoomB = b.room;
+            door.PositionInA = (Vector2)doorA;
+            door.PositionInB = (Vector2)doorB;
+
+            a.room.Doors.Add(door);
+            b.room.Doors.Add(door);
+            _spawnedDoors.Add(door);
         }
 
         private bool CanPlaceRoom(RoomSO room, Vector2Int startPos)
@@ -341,6 +335,7 @@ namespace Assets.Scripts.Rooms
             roomNode.room = roomBehaviour;
 
             roomBehaviour.RoomSO = roomNode.roomData;
+            roomBehaviour.GridPosition = startPos;
 
             _spawnedRooms.Add(roomBehaviour);
 
@@ -356,6 +351,19 @@ namespace Assets.Scripts.Rooms
             }
 
             return roomBehaviour;
+        }
+
+        private void SpawnPlayer()
+        {
+            if (_playerPrefab == null) return;
+
+            var startRoom = _spawnedRooms[Random.Range(0, _spawnedRooms.Count)];
+            var playerObj = Instantiate(_playerPrefab, transform);
+            _player = playerObj.GetComponent<Player>();
+            _player.PlaceInRoom(startRoom);
+
+            GameManager.Instance.Initialize(_player, _roomActionUI);
+            GameManager.Instance.EnterRoom(startRoom);
         }
     }
 }

@@ -16,3 +16,6 @@ MonoBehaviour:
   Width: 4
   Height: 1
   Color: {r: 0.31140804, g: 0.972549, b: 0.2980393, a: 1}
+  ExamineOptions:
+  - Examine the painting
+  ActionOptions: []
