@@ -14,7 +14,6 @@ namespace Assets.Scripts.Rooms
         // Main action panel (bottom center)
         private GameObject _mainPanel;
         private Button _examineButton;
-        private Button _moveButton;
         private Button _actionButton;
 
         // Sub panel for listing options (center)
@@ -22,7 +21,7 @@ namespace Assets.Scripts.Rooms
         private Transform _optionListParent;
         private Button _backButton;
 
-        // Detail popup (replaces PopupManager)
+        // Detail popup
         private GameObject _detailPanel;
         private TextMeshProUGUI _detailTitle;
         private TextMeshProUGUI _detailMessage;
@@ -33,13 +32,11 @@ namespace Assets.Scripts.Rooms
 
         private Room _currentRoom;
         private Door _selectedDoor;
-        private List<Door> _highlightedDoors = new List<Door>();
         private List<GameObject> _spawnedOptions = new List<GameObject>();
 
         private static readonly Color PanelColor = new Color(0.12f, 0.12f, 0.18f, 0.92f);
         private static readonly Color ButtonColor = new Color(0.22f, 0.22f, 0.32f, 1f);
         private static readonly Color ButtonHoverColor = new Color(0.30f, 0.30f, 0.42f, 1f);
-        private static readonly Color AccentColor = new Color(0.35f, 0.65f, 0.95f, 1f);
 
         private void Awake()
         {
@@ -49,17 +46,21 @@ namespace Assets.Scripts.Rooms
 
         public void Show(Room room)
         {
+            UnsubscribeDoors();
+            DestroyDoorConfirm();
+
             _currentRoom = room;
             _mainPanel.SetActive(true);
             _subPanel.SetActive(false);
             _detailPanel.SetActive(false);
-            DestroyDoorConfirm();
+
+            SubscribeDoors();
         }
 
         public void Hide()
         {
             HideAll();
-            UnhighlightAllDoors();
+            UnsubscribeDoors();
             DestroyDoorConfirm();
         }
 
@@ -76,7 +77,6 @@ namespace Assets.Scripts.Rooms
 
         private void BuildUI()
         {
-            // Canvas
             var canvasObj = new GameObject("RoomActionCanvas");
             canvasObj.transform.SetParent(transform);
             _canvas = canvasObj.AddComponent<Canvas>();
@@ -92,11 +92,9 @@ namespace Assets.Scripts.Rooms
             BuildDetailPanel(canvasObj.transform);
         }
 
-        // --- Main Panel (bottom center): Examine / Move / Action ---
-
         private void BuildMainPanel(Transform parent)
         {
-            _mainPanel = CreatePanel(parent, "MainPanel", new Vector2(0, 0), new Vector2(420, 70));
+            _mainPanel = CreatePanel(parent, "MainPanel", new Vector2(0, 0), new Vector2(300, 70));
             SetAnchors(_mainPanel.GetComponent<RectTransform>(), new Vector2(0.5f, 0), new Vector2(0.5f, 0));
             _mainPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 30);
 
@@ -108,15 +106,11 @@ namespace Assets.Scripts.Rooms
             hlg.childForceExpandHeight = true;
 
             _examineButton = CreateButton(_mainPanel.transform, "Examine");
-            _moveButton = CreateButton(_mainPanel.transform, "Move");
             _actionButton = CreateButton(_mainPanel.transform, "Action");
 
             _examineButton.onClick.AddListener(OnExamine);
-            _moveButton.onClick.AddListener(OnMove);
             _actionButton.onClick.AddListener(OnAction);
         }
-
-        // --- Sub Panel (center): scrollable option list + Back ---
 
         private void BuildSubPanel(Transform parent)
         {
@@ -130,7 +124,6 @@ namespace Assets.Scripts.Rooms
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            // Scroll content area
             var scrollArea = new GameObject("OptionList");
             scrollArea.transform.SetParent(_subPanel.transform, false);
             var scrollRT = scrollArea.AddComponent<RectTransform>();
@@ -146,14 +139,11 @@ namespace Assets.Scripts.Rooms
             layoutEl.flexibleHeight = 1;
             _optionListParent = scrollArea.transform;
 
-            // Back button
             _backButton = CreateButton(_subPanel.transform, "Back");
             var backLE = _backButton.gameObject.AddComponent<LayoutElement>();
             backLE.preferredHeight = 45;
             _backButton.onClick.AddListener(OnBack);
         }
-
-        // --- Detail Panel (center): title, message, Ok ---
 
         private void BuildDetailPanel(Transform parent)
         {
@@ -250,35 +240,21 @@ namespace Assets.Scripts.Rooms
         }
 
         // ============================================================
-        //  MOVE FLOW
+        //  DOOR CLICK (always active while in a room)
         // ============================================================
 
-        private void OnMove()
+        private void SubscribeDoors()
         {
-            _mainPanel.SetActive(false);
-            HighlightDoors();
-        }
-
-        private void HighlightDoors()
-        {
-            UnhighlightAllDoors();
-
+            if (_currentRoom == null) return;
             foreach (var door in _currentRoom.Doors)
-            {
-                door.Highlight();
                 door.OnDoorClicked += OnDoorSelected;
-                _highlightedDoors.Add(door);
-            }
         }
 
-        private void UnhighlightAllDoors()
+        private void UnsubscribeDoors()
         {
-            foreach (var door in _highlightedDoors)
-            {
-                door.Unhighlight();
+            if (_currentRoom == null) return;
+            foreach (var door in _currentRoom.Doors)
                 door.OnDoorClicked -= OnDoorSelected;
-            }
-            _highlightedDoors.Clear();
         }
 
         private void OnDoorSelected(Door door)
@@ -291,7 +267,6 @@ namespace Assets.Scripts.Rooms
         {
             DestroyDoorConfirm();
 
-            // World-space canvas near the door
             _doorConfirmRoot = new GameObject("DoorConfirm");
             _doorConfirmRoot.transform.position = door.transform.position + Vector3.up * 1.2f;
 
@@ -304,7 +279,6 @@ namespace Assets.Scripts.Rooms
             rt.sizeDelta = new Vector2(220, 80);
             rt.localScale = Vector3.one * 0.015f;
 
-            // Background
             var bg = _doorConfirmRoot.AddComponent<Image>();
             bg.color = PanelColor;
 
@@ -334,7 +308,7 @@ namespace Assets.Scripts.Rooms
         private void OnConfirmMove()
         {
             DestroyDoorConfirm();
-            UnhighlightAllDoors();
+            UnsubscribeDoors();
 
             var player = GameManager.Instance.Player;
             var fromRoom = _currentRoom;
