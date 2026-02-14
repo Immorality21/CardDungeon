@@ -1,0 +1,361 @@
+using ImmoralityGaming.Extensions;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace Assets.Scripts.Rooms
+{
+    public class RoomManager : MonoBehaviour
+    {
+        [SerializeField]
+        private GameObject _tilePrefab;
+
+        [SerializeField]
+        private GameObject _roomParentPrefab, _doorPrefab;
+
+        [SerializeField]
+        private bool _randomGenerateOn;
+
+        [SerializeField]
+        private int _roomsToGenerate;
+
+        [SerializeField]
+        private int _customSeed = 0;
+
+        [SerializeField]
+        private List<RoomSO> _roomSOs;
+
+
+        private List<Room> _spawnedRooms = new List<Room>();
+        private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
+
+        private void Start()
+        {
+            if (_randomGenerateOn)
+            {
+                SpawnDungeon();
+            }
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                SpawnDungeon();   
+            }
+        }
+
+        private void SpawnGrid()
+        {
+            var seed = _customSeed;
+
+            if (seed == 0)
+            {
+                var random = Random.Range(int.MinValue, int.MaxValue);
+
+                Debug.Log(random);
+
+                seed = random;
+            }
+
+            Random.InitState(seed);
+
+            for (int i = 0; i < _roomsToGenerate; i++)
+            {
+                var roomSo = _roomSOs.TakeRandom();
+
+                var roomBehaviour = Instantiate(_roomParentPrefab); // TODO room position
+
+                for (int w = 0; w < roomSo.Width; w++)
+                {
+                    for (int h = 0; h < roomSo.Height; h++)
+                    {
+                        var obj = Instantiate(_tilePrefab, new Vector3(w, h, 0), Quaternion.identity, roomBehaviour.transform);
+
+                        obj.GetComponent<SpriteRenderer>().color = roomSo.Color; 
+                    }
+                }
+            }
+        }
+
+        [ContextMenu("Spawn Dungeon")]
+        private void SpawnDungeon()
+        {
+            var seed = _customSeed;
+
+            if (seed == 0)
+            {
+                var random = Random.Range(int.MinValue, int.MaxValue);
+
+                Debug.Log(random);
+
+                seed = random;
+            }
+
+            Random.InitState(seed);
+
+            _spawnedRooms.DestroyAndClear(true);
+            _occupiedTiles.Clear();
+
+            var graph = GenerateGraph(_roomsToGenerate);
+
+            // Place the first room manually
+            var start = graph[0];
+            PlaceRoom(start, Vector2Int.zero, transform);
+            start.position = Vector2Int.zero;
+
+            // Layout and connect the rest
+            LayoutGraph(start);
+
+            // Add doors
+            foreach (var node in graph)
+            {
+                foreach (var conn in node.connections
+                    .Where(x => x.room))
+                {
+                    if (graph.IndexOf(node) < graph.IndexOf(conn)) // avoid duplicates
+                        CreateDoor(node, conn);
+                }
+            }
+        }
+
+        private List<RoomNode> GenerateGraph(int count)
+        {
+            List<RoomNode> graph = new List<RoomNode>();
+
+            // First room (start)
+            var first = new RoomNode
+            {
+                roomData = _roomSOs.TakeRandom(),
+                position = Vector2Int.zero
+            };
+            graph.Add(first);
+
+            for (int i = 1; i < count; i++)
+            {
+                var node = new RoomNode
+                {
+                    roomData = _roomSOs.TakeRandom(),
+                    position = Vector2Int.zero
+                };
+
+                // Connect to a random existing node (tree-like)
+                var parent = graph[Random.Range(0, graph.Count)];
+                parent.connections.Add(node);
+                node.connections.Add(parent);
+
+                graph.Add(node);
+            }
+
+            return graph;
+        }
+
+        private void LayoutGraph(RoomNode start)
+        {
+            Queue<RoomNode> queue = new Queue<RoomNode>();
+            HashSet<RoomNode> visited = new HashSet<RoomNode>();
+
+            queue.Enqueue(start);
+            visited.Add(start);
+
+            List<RoomNode> placed = new List<RoomNode> { start };
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+
+                foreach (var child in current.connections)
+                {
+                    if (visited.Contains(child)) continue;
+
+                    TryPlaceChild(current, child, placed);
+
+                    visited.Add(child);
+                    placed.Add(child);
+                    queue.Enqueue(child);
+                }
+
+                //var current = queue.Dequeue();
+
+                //// Try to place children around this room
+                //foreach (var childNode in current.connections)
+                //{
+                //    if (visited.Contains(childNode)) continue;
+
+                //    // Pick a random direction (up, down, left, right)
+                //    var directions = new List<Vector2Int>
+                //    {
+                //        Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
+                //    };
+                //    var dir = directions[Random.Range(0, directions.Count)];
+
+                //    // Place child directly adjacent
+                //    Vector2Int candidate = GetAdjacentPlacement(current.roomData, childNode.roomData, current.position, dir);
+
+                //    // Retry if overlapping
+                //    int safety = 0;
+                //    while (!CanPlaceRoom(childNode.roomData, candidate) && safety < 10)
+                //    {
+                //        dir = directions[Random.Range(0, directions.Count)];
+                //        candidate = GetAdjacentPlacement(current.roomData, childNode.roomData, current.position, dir);
+                //        safety++;
+                //    }
+
+                //    childNode.position = candidate;
+                //    var roomBehaviour = PlaceRoom(childNode, candidate, transform);
+
+                //    queue.Enqueue(childNode);
+                //    visited.Add(childNode);
+
+                //    // TODO: Mark door tiles between current and child
+                //}
+            }
+        }
+
+        private void TryPlaceChild(RoomNode current, RoomNode child, List<RoomNode> allPlaced)
+        {
+            // Step 1: Try to place relative to the intended parent (current)
+            if (TryPlaceAdjacent(current, child))
+                return;
+
+            // Step 2: If failed, try other already placed nodes that are connected to the child
+            foreach (var altParent in child.connections)
+            {
+                if (allPlaced.Contains(altParent) && TryPlaceAdjacent(altParent, child))
+                    return;
+            }
+
+            // Step 3: As a last resort, skip the room (or force-place somewhere else)
+            Debug.LogWarning($"Failed to place {child.roomData.name}, skipping...");
+        }
+
+        private bool TryPlaceAdjacent(RoomNode parent, RoomNode child)
+        {
+            var directions = new List<Vector2Int>
+            {
+                Vector2Int.up,
+                Vector2Int.down,
+                Vector2Int.left,
+                Vector2Int.right
+            };
+
+            // Shuffle directions
+            for (int i = 0; i < directions.Count; i++)
+            {
+                var tmp = directions[i];
+                int swapIndex = Random.Range(i, directions.Count);
+                directions[i] = directions[swapIndex];
+                directions[swapIndex] = tmp;
+            }
+
+            // Try each direction once
+            foreach (var dir in directions)
+            {
+                var candidate = GetAdjacentPlacement(parent.roomData, child.roomData, parent.position, dir);
+
+                if (CanPlaceRoom(child.roomData, candidate))
+                {
+                    child.position = candidate;
+                    PlaceRoom(child, candidate, transform);
+                    return true;
+                }
+            }
+
+            return false; // No valid placement
+        }
+
+        private Vector2Int GetAdjacentPlacement(RoomSO parent, RoomSO child, Vector2Int parentPos, Vector2Int direction)
+        {
+            // Start with child origin same as parent
+            Vector2Int candidate = parentPos;
+
+            if (direction == Vector2Int.right)
+                candidate += new Vector2Int(parent.Width, 0); // place child immediately to the right
+            else if (direction == Vector2Int.left)
+                candidate += new Vector2Int(-child.Width, 0);
+            else if (direction == Vector2Int.up)
+                candidate += new Vector2Int(0, parent.Height);
+            else if (direction == Vector2Int.down)
+                candidate += new Vector2Int(0, -child.Height);
+
+            return candidate;
+        }
+
+        private void CreateDoor(RoomNode a, RoomNode b)
+        {
+            Vector2Int dir = b.position - a.position;
+
+            Vector2Int doorA = Vector2Int.zero;
+            Vector2Int doorB = Vector2Int.zero;
+
+            if (dir.x > 0) // b is right
+            {
+                int y = Random.Range(0, Mathf.Min(a.roomData.Height, b.roomData.Height));
+                doorA = a.position + new Vector2Int(a.roomData.Width - 1, y);
+                doorB = b.position + new Vector2Int(0, y);
+            }
+            else if (dir.x < 0) // b is left
+            {
+                int y = Random.Range(0, Mathf.Min(a.roomData.Height, b.roomData.Height));
+                doorA = a.position + new Vector2Int(0, y);
+                doorB = b.position + new Vector2Int(b.roomData.Width - 1, y);
+            }
+            else if (dir.y > 0) // b is above
+            {
+                int x = Random.Range(0, Mathf.Min(a.roomData.Width, b.roomData.Width));
+                doorA = a.position + new Vector2Int(x, a.roomData.Height - 1);
+                doorB = b.position + new Vector2Int(x, 0);
+            }
+            else if (dir.y < 0) // b is below
+            {
+                int x = Random.Range(0, Mathf.Min(a.roomData.Width, b.roomData.Width));
+                doorA = a.position + new Vector2Int(x, 0);
+                doorB = b.position + new Vector2Int(x, b.roomData.Height - 1);
+            }
+
+            Vector2 doorPos = ((Vector2)doorA + (Vector2)doorB) / 2f;
+            Instantiate(_doorPrefab, doorPos, Quaternion.identity, transform);
+        }
+
+        private bool CanPlaceRoom(RoomSO room, Vector2Int startPos)
+        {
+            for (int w = 0; w < room.Width; w++)
+            {
+                for (int h = 0; h < room.Height; h++)
+                {
+                    var tile = startPos + new Vector2Int(w, h);
+                    if (_occupiedTiles.Contains(tile))
+                    {
+                        return false; // Overlap detected
+                    }
+                }
+            }
+            return true;
+        }
+
+        private Room PlaceRoom(RoomNode roomNode, Vector2Int startPos, Transform parent)
+        {
+            var roomObj = Instantiate(_roomParentPrefab, parent);
+
+            var roomBehaviour = roomObj.GetComponent<Room>();
+            roomNode.room = roomBehaviour;
+
+            roomBehaviour.RoomSO = roomNode.roomData;
+
+            _spawnedRooms.Add(roomBehaviour);
+
+            for (int w = 0; w < roomNode.roomData.Width; w++)
+            {
+                for (int h = 0; h < roomNode.roomData.Height; h++)
+                {
+                    var tilePos = startPos + new Vector2Int(w, h);
+                    var obj = Instantiate(_tilePrefab, new Vector3(tilePos.x, tilePos.y, 0), Quaternion.identity, roomObj.transform);
+                    obj.GetComponent<SpriteRenderer>().color = roomNode.roomData.Color;
+                    _occupiedTiles.Add(tilePos);
+                }
+            }
+
+            return roomBehaviour;
+        }
+    }
+}
