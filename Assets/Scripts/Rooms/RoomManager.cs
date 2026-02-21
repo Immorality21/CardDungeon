@@ -35,7 +35,7 @@ namespace Assets.Scripts.Rooms
         private List<RoomSO> _roomSOs;
 
         private Player _player;
-
+        private List<Enemy> _spawnedEnemies = new List<Enemy>();
 
         private List<Room> _spawnedRooms = new List<Room>();
         private List<Door> _spawnedDoors = new List<Door>();
@@ -78,6 +78,13 @@ namespace Assets.Scripts.Rooms
             _spawnedDoors.DestroyAndClear(true);
             _occupiedTiles.Clear();
 
+            foreach (var enemy in _spawnedEnemies)
+            {
+                if (enemy != null)
+                    Destroy(enemy.gameObject);
+            }
+            _spawnedEnemies.Clear();
+
             if (_player != null)
                 Destroy(_player.gameObject);
 
@@ -108,6 +115,9 @@ namespace Assets.Scripts.Rooms
 
             // Spawn player in a random room
             SpawnPlayer();
+
+            // Spawn enemies in some rooms (not the player's room)
+            SpawnEnemies();
         }
 
         private List<RoomNode> GenerateGraph(int count)
@@ -371,6 +381,30 @@ namespace Assets.Scripts.Rooms
 
             GameManager.Instance.Initialize(_player, _roomActionUI);
             GameManager.Instance.EnterRoom(startRoom);
+        }
+
+        private void SpawnEnemies()
+        {
+            foreach (var room in _spawnedRooms)
+            {
+                if (room == _player.CurrentRoom) continue;
+                if (Random.value >= 0.25f) continue;
+
+                var enemyObj = new GameObject("Enemy");
+                enemyObj.transform.SetParent(transform);
+
+                var sr = enemyObj.AddComponent<SpriteRenderer>();
+                sr.sprite = _tilePrefab.GetComponent<SpriteRenderer>().sprite;
+                sr.color = Color.red;
+                sr.sortingOrder = 5;
+
+                var enemy = enemyObj.AddComponent<Enemy>();
+                enemy.Stats = new Stats(3, 1, 10);
+                enemy.PlaceInRoom(room);
+
+                room.Enemy = enemy;
+                _spawnedEnemies.Add(enemy);
+            }
         }
     }
 }

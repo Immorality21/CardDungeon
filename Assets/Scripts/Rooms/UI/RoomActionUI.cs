@@ -16,6 +16,11 @@ namespace Assets.Scripts.Rooms
         private Button _examineButton;
         private Button _actionButton;
 
+        // Combat panel (bottom center, replaces main when enemy present)
+        private GameObject _combatPanel;
+        private Button _fightButton;
+        private Button _fleeButton;
+
         // Sub panel for listing options (center)
         private GameObject _subPanel;
         private Transform _optionListParent;
@@ -50,11 +55,15 @@ namespace Assets.Scripts.Rooms
             DestroyDoorConfirm();
 
             _currentRoom = room;
-            _mainPanel.SetActive(true);
             _subPanel.SetActive(false);
             _detailPanel.SetActive(false);
 
-            SubscribeDoors();
+            bool hasEnemy = room.Enemy != null && room.Enemy.IsAlive;
+            _combatPanel.SetActive(hasEnemy);
+            _mainPanel.SetActive(!hasEnemy);
+
+            if (!hasEnemy)
+                SubscribeDoors();
         }
 
         public void Hide()
@@ -67,6 +76,7 @@ namespace Assets.Scripts.Rooms
         private void HideAll()
         {
             _mainPanel.SetActive(false);
+            _combatPanel.SetActive(false);
             _subPanel.SetActive(false);
             _detailPanel.SetActive(false);
         }
@@ -88,6 +98,7 @@ namespace Assets.Scripts.Rooms
             _scaler.referenceResolution = new Vector2(1920, 1080);
 
             BuildMainPanel(canvasObj.transform);
+            BuildCombatPanel(canvasObj.transform);
             BuildSubPanel(canvasObj.transform);
             BuildDetailPanel(canvasObj.transform);
         }
@@ -110,6 +121,26 @@ namespace Assets.Scripts.Rooms
 
             _examineButton.onClick.AddListener(OnExamine);
             _actionButton.onClick.AddListener(OnAction);
+        }
+
+        private void BuildCombatPanel(Transform parent)
+        {
+            _combatPanel = CreatePanel(parent, "CombatPanel", new Vector2(0, 0), new Vector2(300, 70));
+            SetAnchors(_combatPanel.GetComponent<RectTransform>(), new Vector2(0.5f, 0), new Vector2(0.5f, 0));
+            _combatPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 30);
+
+            var hlg = _combatPanel.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 10;
+            hlg.padding = new RectOffset(10, 10, 10, 10);
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
+
+            _fightButton = CreateButton(_combatPanel.transform, "Fight");
+            _fleeButton = CreateButton(_combatPanel.transform, "Flee");
+
+            _fightButton.onClick.AddListener(OnFight);
+            _fleeButton.onClick.AddListener(OnFlee);
         }
 
         private void BuildSubPanel(Transform parent)
@@ -169,11 +200,7 @@ namespace Assets.Scripts.Rooms
             _detailOkButton = CreateButton(_detailPanel.transform, "Ok");
             var okLE = _detailOkButton.gameObject.AddComponent<LayoutElement>();
             okLE.preferredHeight = 45;
-            _detailOkButton.onClick.AddListener(() =>
-            {
-                _detailPanel.SetActive(false);
-                _subPanel.SetActive(true);
-            });
+            // Default listener set per-use via ShowDetail/ShowCombatResult
         }
 
         // ============================================================
@@ -223,6 +250,13 @@ namespace Assets.Scripts.Rooms
             _detailPanel.SetActive(true);
             _detailTitle.text = title;
             _detailMessage.text = message;
+
+            _detailOkButton.onClick.RemoveAllListeners();
+            _detailOkButton.onClick.AddListener(() =>
+            {
+                _detailPanel.SetActive(false);
+                _subPanel.SetActive(true);
+            });
         }
 
         private void ClearOptions()
@@ -237,6 +271,95 @@ namespace Assets.Scripts.Rooms
             _subPanel.SetActive(false);
             ClearOptions();
             _mainPanel.SetActive(true);
+        }
+
+        // ============================================================
+        //  COMBAT
+        // ============================================================
+
+        private void OnFight()
+        {
+            var player = GameManager.Instance.Player;
+            var enemy = _currentRoom.Enemy;
+            if (enemy == null || !enemy.IsAlive) return;
+
+            var log = "";
+
+            // Player attacks enemy
+            int playerDmg = Mathf.Max(1, player.Stats.Attack - enemy.Stats.Defense);
+            enemy.Stats.Health -= playerDmg;
+            log += $"You deal {playerDmg} damage to the enemy.\n";
+
+            if (!enemy.IsAlive)
+            {
+                log += "Enemy defeated!";
+                Destroy(enemy.gameObject);
+                _currentRoom.Enemy = null;
+                _combatPanel.SetActive(false);
+                ShowCombatResult("Victory!", log, showNormalAfter: true);
+                return;
+            }
+
+            // Enemy attacks player
+            int enemyDmg = Mathf.Max(1, enemy.Stats.Attack - player.Stats.Defense);
+            player.Stats.Health -= enemyDmg;
+            log += $"Enemy deals {enemyDmg} damage to you.\n";
+            log += $"\nYour HP: {player.Stats.Health}/{player.Stats.MaxHealth}";
+            log += $"\nEnemy HP: {enemy.Stats.Health}/{enemy.Stats.MaxHealth}";
+
+            if (player.Stats.Health <= 0)
+            {
+                _combatPanel.SetActive(false);
+                ShowCombatResult("You Died!", log, showNormalAfter: false);
+                return;
+            }
+
+            // Both alive — show log and return to combat panel
+            ShowCombatResult("Combat", log, showNormalAfter: false, returnToCombat: true);
+        }
+
+        private void OnFlee()
+        {
+            var player = GameManager.Instance.Player;
+            if (player.PreviousRoom == null)
+            {
+                _combatPanel.SetActive(false);
+                ShowCombatResult("Flee", "Nowhere to flee!", showNormalAfter: false, returnToCombat: true);
+                return;
+            }
+
+            _combatPanel.SetActive(false);
+            UnsubscribeDoors();
+            DestroyDoorConfirm();
+
+            player.PlaceInRoom(player.PreviousRoom);
+            GameManager.Instance.EnterRoom(player.CurrentRoom);
+        }
+
+        private void ShowCombatResult(string title, string message, bool showNormalAfter, bool returnToCombat = false)
+        {
+            _mainPanel.SetActive(false);
+            _combatPanel.SetActive(false);
+            _subPanel.SetActive(false);
+            _detailPanel.SetActive(true);
+            _detailTitle.text = title;
+            _detailMessage.text = message;
+
+            _detailOkButton.onClick.RemoveAllListeners();
+            _detailOkButton.onClick.AddListener(() =>
+            {
+                _detailPanel.SetActive(false);
+                if (showNormalAfter)
+                {
+                    _mainPanel.SetActive(true);
+                    SubscribeDoors();
+                }
+                else if (returnToCombat)
+                {
+                    _combatPanel.SetActive(true);
+                }
+                // else: game over — panels stay hidden
+            });
         }
 
         // ============================================================

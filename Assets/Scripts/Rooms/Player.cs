@@ -4,10 +4,13 @@ namespace Assets.Scripts.Rooms
 {
     public class Player : MonoBehaviour
     {
+        public Stats Stats = new Stats(5, 2, 20);
         public Room CurrentRoom { get; private set; }
+        public Room PreviousRoom { get; private set; }
 
         public void PlaceInRoom(Room room)
         {
+            PreviousRoom = CurrentRoom;
             CurrentRoom = room;
             var center = new Vector3(
                 room.GridPosition.x + room.RoomSO.Width / 2f - 0.5f,
@@ -18,6 +21,7 @@ namespace Assets.Scripts.Rooms
 
         public void PlaceAtDoor(Door door, Room fromRoom)
         {
+            PreviousRoom = CurrentRoom;
             var destRoom = door.GetOtherRoom(fromRoom);
             CurrentRoom = destRoom;
             var doorPos = door.GetPositionInRoom(destRoom);
