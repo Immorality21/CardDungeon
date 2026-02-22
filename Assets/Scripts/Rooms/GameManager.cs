@@ -19,10 +19,10 @@ namespace Assets.Scripts.Rooms
             _followPlayer = true;
         }
 
-        public void EnterRoom(Room room)
+        public void EnterRoom(Room room, Door entryDoor = null)
         {
             if (_roomActionUI != null)
-                _roomActionUI.Show(room);
+                _roomActionUI.Show(room, entryDoor);
         }
 
         private void Update()

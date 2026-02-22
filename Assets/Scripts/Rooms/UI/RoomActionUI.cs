@@ -37,6 +37,7 @@ namespace Assets.Scripts.Rooms
 
         private Room _currentRoom;
         private Door _selectedDoor;
+        private Door _entryDoor;
         private List<GameObject> _spawnedOptions = new List<GameObject>();
 
         private static readonly Color PanelColor = new Color(0.12f, 0.12f, 0.18f, 0.92f);
@@ -49,12 +50,13 @@ namespace Assets.Scripts.Rooms
             HideAll();
         }
 
-        public void Show(Room room)
+        public void Show(Room room, Door entryDoor = null)
         {
             UnsubscribeDoors();
             DestroyDoorConfirm();
 
             _currentRoom = room;
+            _entryDoor = entryDoor;
             _subPanel.SetActive(false);
             _detailPanel.SetActive(false);
 
@@ -62,8 +64,17 @@ namespace Assets.Scripts.Rooms
             _combatPanel.SetActive(hasEnemy);
             _mainPanel.SetActive(!hasEnemy);
 
-            if (!hasEnemy)
+            if (hasEnemy)
+            {
+                SetDoorsEnabled(room, entryDoor);
+                if (_entryDoor != null)
+                    _entryDoor.OnDoorClicked += OnEntryDoorFlee;
+            }
+            else
+            {
+                EnableAllDoors(room);
                 SubscribeDoors();
+            }
         }
 
         public void Hide()
@@ -332,8 +343,17 @@ namespace Assets.Scripts.Rooms
             UnsubscribeDoors();
             DestroyDoorConfirm();
 
+            // The entry door is the one we came through — use it to flee back
+            var fleeDoor = _entryDoor;
+            EnableAllDoors(_currentRoom);
+
             player.PlaceInRoom(player.PreviousRoom);
-            GameManager.Instance.EnterRoom(player.CurrentRoom);
+            GameManager.Instance.EnterRoom(player.CurrentRoom, fleeDoor);
+        }
+
+        private void OnEntryDoorFlee(Door door)
+        {
+            OnFlee();
         }
 
         private void ShowCombatResult(string title, string message, bool showNormalAfter, bool returnToCombat = false)
@@ -351,6 +371,7 @@ namespace Assets.Scripts.Rooms
                 _detailPanel.SetActive(false);
                 if (showNormalAfter)
                 {
+                    EnableAllDoors(_currentRoom);
                     _mainPanel.SetActive(true);
                     SubscribeDoors();
                 }
@@ -366,6 +387,28 @@ namespace Assets.Scripts.Rooms
         //  DOOR CLICK (always active while in a room)
         // ============================================================
 
+        private void SetDoorsEnabled(Room room, Door excludeDoor)
+        {
+            if (room == null) return;
+            foreach (var door in room.Doors)
+            {
+                var col = door.GetComponent<Collider2D>();
+                if (col != null)
+                    col.enabled = excludeDoor == null || door == excludeDoor;
+            }
+        }
+
+        private void EnableAllDoors(Room room)
+        {
+            if (room == null) return;
+            foreach (var door in room.Doors)
+            {
+                var col = door.GetComponent<Collider2D>();
+                if (col != null)
+                    col.enabled = true;
+            }
+        }
+
         private void SubscribeDoors()
         {
             if (_currentRoom == null) return;
@@ -378,6 +421,8 @@ namespace Assets.Scripts.Rooms
             if (_currentRoom == null) return;
             foreach (var door in _currentRoom.Doors)
                 door.OnDoorClicked -= OnDoorSelected;
+            if (_entryDoor != null)
+                _entryDoor.OnDoorClicked -= OnEntryDoorFlee;
         }
 
         private void OnDoorSelected(Door door)
@@ -435,12 +480,15 @@ namespace Assets.Scripts.Rooms
 
             var player = GameManager.Instance.Player;
             var fromRoom = _currentRoom;
-            player.PlaceAtDoor(_selectedDoor, fromRoom);
+            var usedDoor = _selectedDoor;
+            player.PlaceAtDoor(usedDoor, fromRoom);
 
-            var destRoom = _selectedDoor.GetOtherRoom(fromRoom);
+            EnableAllDoors(fromRoom);
+
+            var destRoom = usedDoor.GetOtherRoom(fromRoom);
             _selectedDoor = null;
 
-            GameManager.Instance.EnterRoom(destRoom);
+            GameManager.Instance.EnterRoom(destRoom, usedDoor);
         }
 
         private void OnCancelMove()

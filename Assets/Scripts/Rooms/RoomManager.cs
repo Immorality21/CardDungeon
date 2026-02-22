@@ -17,6 +17,9 @@ namespace Assets.Scripts.Rooms
         private GameObject _playerPrefab;
 
         [SerializeField]
+        private GameObject _enemyPrefab;
+
+        [SerializeField]
         private RoomActionUI _roomActionUI;
 
         [SerializeField]
@@ -78,15 +81,18 @@ namespace Assets.Scripts.Rooms
             _spawnedDoors.DestroyAndClear(true);
             _occupiedTiles.Clear();
 
-            foreach (var enemy in _spawnedEnemies)
+            foreach (var enemy in _spawnedEnemies
+                .Where(x => x))
             {
-                if (enemy != null)
-                    Destroy(enemy.gameObject);
+                Destroy(enemy.gameObject);
             }
+
             _spawnedEnemies.Clear();
 
             if (_player != null)
+            {
                 Destroy(_player.gameObject);
+            }
 
             var graph = GenerateGraph(_roomsToGenerate);
 
@@ -99,13 +105,16 @@ namespace Assets.Scripts.Rooms
             LayoutGraph(start);
 
             // Add doors
-            foreach (var node in graph)
+            foreach (var node in graph
+                .Where(x => x.room))
             {
                 foreach (var conn in node.connections
                     .Where(x => x.room))
                 {
                     if (graph.IndexOf(node) < graph.IndexOf(conn)) // avoid duplicates
+                    {
                         CreateDoor(node, conn);
+                    }
                 }
             }
 
@@ -130,6 +139,7 @@ namespace Assets.Scripts.Rooms
                 roomData = _roomSOs.TakeRandom(),
                 position = Vector2Int.zero
             };
+
             graph.Add(first);
 
             for (int i = 1; i < count; i++)
@@ -167,7 +177,10 @@ namespace Assets.Scripts.Rooms
 
                 foreach (var child in current.connections)
                 {
-                    if (visited.Contains(child)) continue;
+                    if (visited.Contains(child))
+                    {
+                        continue;
+                    }
 
                     TryPlaceChild(current, child, placed);
 
@@ -175,41 +188,6 @@ namespace Assets.Scripts.Rooms
                     placed.Add(child);
                     queue.Enqueue(child);
                 }
-
-                //var current = queue.Dequeue();
-
-                //// Try to place children around this room
-                //foreach (var childNode in current.connections)
-                //{
-                //    if (visited.Contains(childNode)) continue;
-
-                //    // Pick a random direction (up, down, left, right)
-                //    var directions = new List<Vector2Int>
-                //    {
-                //        Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
-                //    };
-                //    var dir = directions[Random.Range(0, directions.Count)];
-
-                //    // Place child directly adjacent
-                //    Vector2Int candidate = GetAdjacentPlacement(current.roomData, childNode.roomData, current.position, dir);
-
-                //    // Retry if overlapping
-                //    int safety = 0;
-                //    while (!CanPlaceRoom(childNode.roomData, candidate) && safety < 10)
-                //    {
-                //        dir = directions[Random.Range(0, directions.Count)];
-                //        candidate = GetAdjacentPlacement(current.roomData, childNode.roomData, current.position, dir);
-                //        safety++;
-                //    }
-
-                //    childNode.position = candidate;
-                //    var roomBehaviour = PlaceRoom(childNode, candidate, transform);
-
-                //    queue.Enqueue(childNode);
-                //    visited.Add(childNode);
-
-                //    // TODO: Mark door tiles between current and child
-                //}
             }
         }
 
@@ -223,7 +201,9 @@ namespace Assets.Scripts.Rooms
             foreach (var altParent in child.connections)
             {
                 if (allPlaced.Contains(altParent) && TryPlaceAdjacent(altParent, child))
+                {
                     return;
+                }
             }
 
             // Step 3: As a last resort, skip the room (or force-place somewhere else)
@@ -390,15 +370,8 @@ namespace Assets.Scripts.Rooms
                 if (room == _player.CurrentRoom) continue;
                 if (Random.value >= 0.25f) continue;
 
-                var enemyObj = new GameObject("Enemy");
-                enemyObj.transform.SetParent(transform);
-
-                var sr = enemyObj.AddComponent<SpriteRenderer>();
-                sr.sprite = _tilePrefab.GetComponent<SpriteRenderer>().sprite;
-                sr.color = Color.red;
-                sr.sortingOrder = 5;
-
-                var enemy = enemyObj.AddComponent<Enemy>();
+                var enemyObj = Instantiate(_enemyPrefab, transform);
+                var enemy = enemyObj.GetComponent<Enemy>();
                 enemy.Stats = new Stats(3, 1, 10);
                 enemy.PlaceInRoom(room);
 
