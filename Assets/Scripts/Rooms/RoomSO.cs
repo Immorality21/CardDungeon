@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Assets.Scripts.Enemies;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms
@@ -19,5 +20,7 @@ namespace Assets.Scripts.Rooms
 
         [TextArea]
         public List<string> ActionOptions;
+
+        public List<EnemySpawnEntry> EnemySpawnTable;
     }
 }

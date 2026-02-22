@@ -1,3 +1,4 @@
+using Assets.Scripts.Enemies;
 using ImmoralityGaming.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,6 @@ namespace Assets.Scripts.Rooms
 
         [SerializeField]
         private GameObject _playerPrefab;
-
-        [SerializeField]
-        private GameObject _enemyPrefab;
 
         [SerializeField]
         private RoomActionUI _roomActionUI;
@@ -38,7 +36,6 @@ namespace Assets.Scripts.Rooms
         private List<RoomSO> _roomSOs;
 
         private Player _player;
-        private List<Enemy> _spawnedEnemies = new List<Enemy>();
 
         private List<Room> _spawnedRooms = new List<Room>();
         private List<Door> _spawnedDoors = new List<Door>();
@@ -81,13 +78,7 @@ namespace Assets.Scripts.Rooms
             _spawnedDoors.DestroyAndClear(true);
             _occupiedTiles.Clear();
 
-            foreach (var enemy in _spawnedEnemies
-                .Where(x => x))
-            {
-                Destroy(enemy.gameObject);
-            }
-
-            _spawnedEnemies.Clear();
+            EnemyManager.Instance.CleanupEnemies();
 
             if (_player != null)
             {
@@ -126,7 +117,7 @@ namespace Assets.Scripts.Rooms
             SpawnPlayer();
 
             // Spawn enemies in some rooms (not the player's room)
-            SpawnEnemies();
+            EnemyManager.Instance.SpawnEnemies(_spawnedRooms, _player.CurrentRoom);
         }
 
         private List<RoomNode> GenerateGraph(int count)
@@ -363,21 +354,5 @@ namespace Assets.Scripts.Rooms
             GameManager.Instance.EnterRoom(startRoom);
         }
 
-        private void SpawnEnemies()
-        {
-            foreach (var room in _spawnedRooms)
-            {
-                if (room == _player.CurrentRoom) continue;
-                if (Random.value >= 0.25f) continue;
-
-                var enemyObj = Instantiate(_enemyPrefab, transform);
-                var enemy = enemyObj.GetComponent<Enemy>();
-                enemy.Stats = new Stats(3, 1, 10);
-                enemy.PlaceInRoom(room);
-
-                room.Enemy = enemy;
-                _spawnedEnemies.Add(enemy);
-            }
-        }
     }
 }

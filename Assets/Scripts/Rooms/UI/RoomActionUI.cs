@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,7 +61,7 @@ namespace Assets.Scripts.Rooms
             _subPanel.SetActive(false);
             _detailPanel.SetActive(false);
 
-            bool hasEnemy = room.Enemy != null && room.Enemy.IsAlive;
+            bool hasEnemy = room.Enemies.Any(e => e != null && e.IsAlive);
             _combatPanel.SetActive(hasEnemy);
             _mainPanel.SetActive(!hasEnemy);
 
@@ -291,8 +292,8 @@ namespace Assets.Scripts.Rooms
         private void OnFight()
         {
             var player = GameManager.Instance.Player;
-            var enemy = _currentRoom.Enemy;
-            if (enemy == null || !enemy.IsAlive) return;
+            var enemy = _currentRoom.Enemies.FirstOrDefault(e => e != null && e.IsAlive);
+            if (enemy == null) return;
 
             var log = "";
 
@@ -305,9 +306,20 @@ namespace Assets.Scripts.Rooms
             {
                 log += "Enemy defeated!";
                 Destroy(enemy.gameObject);
-                _currentRoom.Enemy = null;
-                _combatPanel.SetActive(false);
-                ShowCombatResult("Victory!", log, showNormalAfter: true);
+                _currentRoom.Enemies.Remove(enemy);
+
+                // Check if more enemies remain
+                bool moreEnemies = _currentRoom.Enemies.Any(e => e != null && e.IsAlive);
+                if (moreEnemies)
+                {
+                    log += $"\n{_currentRoom.Enemies.Count(e => e != null && e.IsAlive)} enemies remaining!";
+                    ShowCombatResult("Enemy Down!", log, showNormalAfter: false, returnToCombat: true);
+                }
+                else
+                {
+                    _combatPanel.SetActive(false);
+                    ShowCombatResult("Victory!", log, showNormalAfter: true);
+                }
                 return;
             }
 
