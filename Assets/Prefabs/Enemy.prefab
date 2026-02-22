@@ -103,3 +103,4 @@ MonoBehaviour:
     Health: 0
     MaxHealth: 0
   Room: {fileID: 0}
+  LootItem: {fileID: 0}

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Items;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -305,6 +306,7 @@ namespace Assets.Scripts.Rooms
             if (!enemy.IsAlive)
             {
                 log += "Enemy defeated!";
+                InventoryManager.Instance.TryDropItem(enemy.LootItem);
                 Destroy(enemy.gameObject);
                 _currentRoom.Enemies.Remove(enemy);
 

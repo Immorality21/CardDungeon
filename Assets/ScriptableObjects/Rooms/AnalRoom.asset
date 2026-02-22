@@ -10,16 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af198de09aeca534b959292a4b71d567, type: 3}
-  m_Name: VasectomyRoom
+  m_Name: AnalRoom
   m_EditorClassIdentifier: 
-  Name: Vasectomy Room
-  Width: 4
-  Height: 5
-  Color: {r: 0.2979263, g: 0.2979263, b: 0.9716981, a: 1}
-  ExamineOptions: []
+  Name: Anulingus room
+  Width: 3
+  Height: 3
+  Color: {r: 0.38679248, g: 0.15331188, b: 0, a: 1}
+  ExamineOptions:
+  - Search for cavaties
+  - Look at the ceiling
   ActionOptions:
-  - Beg for mercy
+  - Stomp your feet
   EnemySpawnTable:
   - Prefab: {fileID: 542091458053358184, guid: 74d54fbb83f9e7e4fb046d878fba8212, type: 3}
-    SpawnChance: 0.8
-    EvaluationCount: 3
+    Stats:
+      Attack: 3
+      Defense: 1
+      Health: 10
+      MaxHealth: 10
+    LootItem: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
+    SpawnChance: 0.5
+    EvaluationCount: 1

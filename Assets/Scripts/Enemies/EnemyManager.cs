@@ -43,6 +43,7 @@ namespace Assets.Scripts.Enemies
                         var enemyObj = Instantiate(entry.Prefab, transform);
                         var enemy = enemyObj.GetComponent<Enemy>();
                         enemy.Stats = new Stats(entry.Stats.Attack, entry.Stats.Defense, entry.Stats.Health);
+                        enemy.LootItem = entry.LootItem;
                         enemy.PlaceInRoom(room, position);
 
                         room.Enemies.Add(enemy);
@@ -79,7 +80,7 @@ namespace Assets.Scripts.Enemies
             {
                 return new Vector3(
                     gridPos.x + width / 2f - 0.5f,
-                    gridPos.y + height / 2f - 0.5f,
+                    gridPos.y + height / 2f - 0.5f, 
                     -1f);
             }
 

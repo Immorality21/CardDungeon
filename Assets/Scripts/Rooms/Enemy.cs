@@ -1,3 +1,4 @@
+using Assets.Scripts.Items;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms
@@ -6,6 +7,7 @@ namespace Assets.Scripts.Rooms
     {
         public Stats Stats;
         public Room Room;
+        public ItemSO LootItem;
 
         public bool IsAlive => Stats != null && Stats.Health > 0;
 
