@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts.Items;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -68,13 +67,15 @@ namespace Assets.Scripts.Rooms
 
             if (hasEnemy)
             {
-                SetDoorsEnabled(room, entryDoor);
+                room.SetDoorsEnabled(entryDoor);
                 if (_entryDoor != null)
+                {
                     _entryDoor.OnDoorClicked += OnEntryDoorFlee;
+                }
             }
             else
             {
-                EnableAllDoors(room);
+                room.EnableAllDoors();
                 SubscribeDoors();
             }
         }
@@ -213,7 +214,6 @@ namespace Assets.Scripts.Rooms
             _detailOkButton = CreateButton(_detailPanel.transform, "Ok");
             var okLE = _detailOkButton.gameObject.AddComponent<LayoutElement>();
             okLE.preferredHeight = 45;
-            // Default listener set per-use via ShowDetail/ShowCombatResult
         }
 
         // ============================================================
@@ -275,7 +275,9 @@ namespace Assets.Scripts.Rooms
         private void ClearOptions()
         {
             foreach (var obj in _spawnedOptions)
+            {
                 Destroy(obj);
+            }
             _spawnedOptions.Clear();
         }
 
@@ -293,60 +295,32 @@ namespace Assets.Scripts.Rooms
         private void OnFight()
         {
             var player = GameManager.Instance.Player;
-            var enemy = _currentRoom.Enemies.FirstOrDefault(e => e != null && e.IsAlive);
-            if (enemy == null) return;
+            var result = CombatManager.Instance.ExecuteAttack(player, _currentRoom);
 
-            var log = "";
-
-            // Player attacks enemy
-            int playerDmg = Mathf.Max(1, player.Stats.Attack - enemy.Stats.Defense);
-            enemy.Stats.Health -= playerDmg;
-            log += $"You deal {playerDmg} damage to the enemy.\n";
-
-            if (!enemy.IsAlive)
+            switch (result.Outcome)
             {
-                log += "Enemy defeated!";
-                InventoryManager.Instance.TryDropItem(enemy.LootItem);
-                Destroy(enemy.gameObject);
-                _currentRoom.Enemies.Remove(enemy);
-
-                // Check if more enemies remain
-                bool moreEnemies = _currentRoom.Enemies.Any(e => e != null && e.IsAlive);
-                if (moreEnemies)
-                {
-                    log += $"\n{_currentRoom.Enemies.Count(e => e != null && e.IsAlive)} enemies remaining!";
-                    ShowCombatResult("Enemy Down!", log, showNormalAfter: false, returnToCombat: true);
-                }
-                else
-                {
+                case CombatOutcome.EnemyDown:
+                    ShowCombatResult("Enemy Down!", result.Log, showNormalAfter: false, returnToCombat: true);
+                    break;
+                case CombatOutcome.Victory:
                     _combatPanel.SetActive(false);
-                    ShowCombatResult("Victory!", log, showNormalAfter: true);
-                }
-                return;
+                    ShowCombatResult("Victory!", result.Log, showNormalAfter: true);
+                    break;
+                case CombatOutcome.PlayerDied:
+                    _combatPanel.SetActive(false);
+                    ShowCombatResult("You Died!", result.Log, showNormalAfter: false);
+                    break;
+                case CombatOutcome.Continue:
+                    ShowCombatResult("Combat", result.Log, showNormalAfter: false, returnToCombat: true);
+                    break;
             }
-
-            // Enemy attacks player
-            int enemyDmg = Mathf.Max(1, enemy.Stats.Attack - player.Stats.Defense);
-            player.Stats.Health -= enemyDmg;
-            log += $"Enemy deals {enemyDmg} damage to you.\n";
-            log += $"\nYour HP: {player.Stats.Health}/{player.Stats.MaxHealth}";
-            log += $"\nEnemy HP: {enemy.Stats.Health}/{enemy.Stats.MaxHealth}";
-
-            if (player.Stats.Health <= 0)
-            {
-                _combatPanel.SetActive(false);
-                ShowCombatResult("You Died!", log, showNormalAfter: false);
-                return;
-            }
-
-            // Both alive — show log and return to combat panel
-            ShowCombatResult("Combat", log, showNormalAfter: false, returnToCombat: true);
         }
 
         private void OnFlee()
         {
             var player = GameManager.Instance.Player;
-            if (player.PreviousRoom == null)
+
+            if (!CombatManager.Instance.CanFlee(player))
             {
                 _combatPanel.SetActive(false);
                 ShowCombatResult("Flee", "Nowhere to flee!", showNormalAfter: false, returnToCombat: true);
@@ -357,12 +331,7 @@ namespace Assets.Scripts.Rooms
             UnsubscribeDoors();
             DestroyDoorConfirm();
 
-            // The entry door is the one we came through — use it to flee back
-            var fleeDoor = _entryDoor;
-            EnableAllDoors(_currentRoom);
-
-            player.PlaceInRoom(player.PreviousRoom);
-            GameManager.Instance.EnterRoom(player.CurrentRoom, fleeDoor);
+            CombatManager.Instance.Flee(player, _entryDoor, _currentRoom);
         }
 
         private void OnEntryDoorFlee(Door door)
@@ -385,7 +354,7 @@ namespace Assets.Scripts.Rooms
                 _detailPanel.SetActive(false);
                 if (showNormalAfter)
                 {
-                    EnableAllDoors(_currentRoom);
+                    _currentRoom.EnableAllDoors();
                     _mainPanel.SetActive(true);
                     SubscribeDoors();
                 }
@@ -393,50 +362,39 @@ namespace Assets.Scripts.Rooms
                 {
                     _combatPanel.SetActive(true);
                 }
-                // else: game over — panels stay hidden
             });
         }
 
         // ============================================================
-        //  DOOR CLICK (always active while in a room)
+        //  DOOR CLICK
         // ============================================================
-
-        private void SetDoorsEnabled(Room room, Door excludeDoor)
-        {
-            if (room == null) return;
-            foreach (var door in room.Doors)
-            {
-                var col = door.GetComponent<Collider2D>();
-                if (col != null)
-                    col.enabled = excludeDoor == null || door == excludeDoor;
-            }
-        }
-
-        private void EnableAllDoors(Room room)
-        {
-            if (room == null) return;
-            foreach (var door in room.Doors)
-            {
-                var col = door.GetComponent<Collider2D>();
-                if (col != null)
-                    col.enabled = true;
-            }
-        }
 
         private void SubscribeDoors()
         {
-            if (_currentRoom == null) return;
+            if (_currentRoom == null)
+            {
+                return;
+            }
             foreach (var door in _currentRoom.Doors)
+            {
                 door.OnDoorClicked += OnDoorSelected;
+            }
         }
 
         private void UnsubscribeDoors()
         {
-            if (_currentRoom == null) return;
+            if (_currentRoom == null)
+            {
+                return;
+            }
             foreach (var door in _currentRoom.Doors)
+            {
                 door.OnDoorClicked -= OnDoorSelected;
+            }
             if (_entryDoor != null)
+            {
                 _entryDoor.OnDoorClicked -= OnEntryDoorFlee;
+            }
         }
 
         private void OnDoorSelected(Door door)
@@ -497,7 +455,7 @@ namespace Assets.Scripts.Rooms
             var usedDoor = _selectedDoor;
             player.PlaceAtDoor(usedDoor, fromRoom);
 
-            EnableAllDoors(fromRoom);
+            fromRoom.EnableAllDoors();
 
             var destRoom = usedDoor.GetOtherRoom(fromRoom);
             _selectedDoor = null;
