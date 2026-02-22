@@ -1,3 +1,4 @@
+using Assets.Scripts.Items;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms
@@ -7,6 +8,30 @@ namespace Assets.Scripts.Rooms
         public Stats Stats = new Stats(5, 2, 20);
         public Room CurrentRoom { get; private set; }
         public Room PreviousRoom { get; private set; }
+
+        public int GetEffectiveAttack()
+        {
+            var raw = InventoryManager.Instance.ComputeRawBonuses();
+            var pct = InventoryManager.Instance.ComputePercentageBonuses();
+            float baseVal = Stats.Attack + raw[StatType.Attack];
+            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.Attack] / 100f));
+        }
+
+        public int GetEffectiveDefense()
+        {
+            var raw = InventoryManager.Instance.ComputeRawBonuses();
+            var pct = InventoryManager.Instance.ComputePercentageBonuses();
+            float baseVal = Stats.Defense + raw[StatType.Defense];
+            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.Defense] / 100f));
+        }
+
+        public int GetEffectiveMaxHealth()
+        {
+            var raw = InventoryManager.Instance.ComputeRawBonuses();
+            var pct = InventoryManager.Instance.ComputePercentageBonuses();
+            float baseVal = Stats.MaxHealth + raw[StatType.MaxHealth];
+            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.MaxHealth] / 100f));
+        }
 
         public void PlaceInRoom(Room room)
         {

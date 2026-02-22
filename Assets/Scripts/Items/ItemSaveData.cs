@@ -6,5 +6,6 @@ namespace Assets.Scripts.Items
     public class ItemSaveData
     {
         public string ItemKey;
+        public string EquippedSlot;
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Items
@@ -8,5 +9,9 @@ namespace Assets.Scripts.Items
         public string Key;
         public string DisplayName;
         public Sprite Icon;
+        public SlotType SlotType;
+        public ItemRarity Rarity;
+        public int ItemLevel = 1;
+        public List<ItemBonus> Bonuses = new List<ItemBonus>();
     }
 }

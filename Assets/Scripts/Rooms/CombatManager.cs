@@ -38,7 +38,7 @@ namespace Assets.Scripts.Rooms
             var log = "";
 
             // Player attacks enemy
-            int playerDmg = Mathf.Max(1, player.Stats.Attack - enemy.Stats.Defense);
+            int playerDmg = Mathf.Max(1, player.GetEffectiveAttack() - enemy.Stats.Defense);
             enemy.Stats.Health -= playerDmg;
             log += $"You deal {playerDmg} damage to the enemy.\n";
 
@@ -70,10 +70,10 @@ namespace Assets.Scripts.Rooms
             }
 
             // Enemy attacks player
-            int enemyDmg = Mathf.Max(1, enemy.Stats.Attack - player.Stats.Defense);
+            int enemyDmg = Mathf.Max(1, enemy.Stats.Attack - player.GetEffectiveDefense());
             player.Stats.Health -= enemyDmg;
             log += $"Enemy deals {enemyDmg} damage to you.\n";
-            log += $"\nYour HP: {player.Stats.Health}/{player.Stats.MaxHealth}";
+            log += $"\nYour HP: {player.Stats.Health}/{player.GetEffectiveMaxHealth()}";
             log += $"\nEnemy HP: {enemy.Stats.Health}/{enemy.Stats.MaxHealth}";
 
             if (player.Stats.Health <= 0)
