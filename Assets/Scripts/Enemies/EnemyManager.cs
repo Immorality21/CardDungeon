@@ -42,6 +42,7 @@ namespace Assets.Scripts.Enemies
                         var position = GetSpawnPosition(room);
                         var enemyObj = Instantiate(entry.Prefab, transform);
                         var enemy = enemyObj.GetComponent<Enemy>();
+                        enemy.Stats = new Stats(entry.Stats.Attack, entry.Stats.Defense, entry.Stats.Health);
                         enemy.PlaceInRoom(room, position);
 
                         room.Enemies.Add(enemy);

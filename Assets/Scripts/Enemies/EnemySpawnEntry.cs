@@ -1,4 +1,5 @@
 using System;
+using Assets.Scripts.Rooms;
 using UnityEngine;
 
 namespace Assets.Scripts.Enemies
@@ -7,6 +8,8 @@ namespace Assets.Scripts.Enemies
     public class EnemySpawnEntry
     {
         public GameObject Prefab;
+
+        public Stats Stats = new Stats(3, 1, 10);
 
         [Range(0f, 1f)]
         public float SpawnChance;
