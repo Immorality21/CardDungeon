@@ -67,7 +67,7 @@ namespace Assets.Scripts.Items.UI
 
         private void OnDestroy()
         {
-            if (InventoryManager.Instance != null)
+            if (InventoryManager.HasInstance)
             {
                 InventoryManager.Instance.OnInventoryChanged -= RefreshAll;
             }

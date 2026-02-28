@@ -95,16 +95,17 @@ namespace Assets.Scripts.Rooms
             // Layout and connect the rest
             LayoutGraph(start);
 
-            // Add doors
-            foreach (var node in graph
-                .Where(x => x.room))
+            // Add doors between all rooms that share an edge (not just graph connections).
+            // This ensures rooms are reachable even when placed via alternate parents,
+            // and creates natural-feeling bonus connections between neighbors.
+            var placedRooms = graph.Where(x => x.room).ToList();
+            for (int i = 0; i < placedRooms.Count; i++)
             {
-                foreach (var conn in node.connections
-                    .Where(x => x.room))
+                for (int j = i + 1; j < placedRooms.Count; j++)
                 {
-                    if (graph.IndexOf(node) < graph.IndexOf(conn)) // avoid duplicates
+                    if (SharesEdge(placedRooms[i], placedRooms[j]))
                     {
-                        CreateDoor(node, conn);
+                        CreateDoor(placedRooms[i], placedRooms[j]);
                     }
                 }
             }
@@ -347,7 +348,7 @@ namespace Assets.Scripts.Rooms
 
             if (!found)
             {
-                Debug.LogWarning($"No shared edge found between {a.roomData.name} and {b.roomData.name}, skipping door.");
+                // Connected rooms may not be adjacent if one was placed via an alternate parent during layout.
                 return;
             }
 
@@ -363,6 +364,32 @@ namespace Assets.Scripts.Rooms
             a.room.Doors.Add(door);
             b.room.Doors.Add(door);
             _spawnedDoors.Add(door);
+        }
+
+        private bool SharesEdge(RoomNode a, RoomNode b)
+        {
+            int aRight = a.position.x + a.roomData.Width;
+            int bRight = b.position.x + b.roomData.Width;
+            int aTop = a.position.y + a.roomData.Height;
+            int bTop = b.position.y + b.roomData.Height;
+
+            // Vertical edge (left/right neighbors): x edges touch and y ranges overlap
+            if (aRight == b.position.x || bRight == a.position.x)
+            {
+                int overlapMin = Mathf.Max(a.position.y, b.position.y);
+                int overlapMax = Mathf.Min(aTop, bTop);
+                return overlapMax > overlapMin;
+            }
+
+            // Horizontal edge (top/bottom neighbors): y edges touch and x ranges overlap
+            if (aTop == b.position.y || bTop == a.position.y)
+            {
+                int overlapMin = Mathf.Max(a.position.x, b.position.x);
+                int overlapMax = Mathf.Min(aRight, bRight);
+                return overlapMax > overlapMin;
+            }
+
+            return false;
         }
 
         private bool CanPlaceRoom(RoomSO room, Vector2Int startPos)
