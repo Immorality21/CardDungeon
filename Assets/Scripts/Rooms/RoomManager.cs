@@ -155,17 +155,29 @@ namespace Assets.Scripts.Rooms
 
         private void LayoutGraph(RoomNode start)
         {
-            Queue<RoomNode> queue = new Queue<RoomNode>();
+            List<RoomNode> queue = new List<RoomNode>();
             HashSet<RoomNode> visited = new HashSet<RoomNode>();
 
-            queue.Enqueue(start);
+            queue.Add(start);
             visited.Add(start);
 
             List<RoomNode> placed = new List<RoomNode> { start };
 
             while (queue.Count > 0)
             {
-                var current = queue.Dequeue();
+                // Prioritize connector rooms that only have 1 placed neighbor (1 door).
+                // This ensures hallways get a second connection before other rooms are processed.
+                int bestIndex = 0;
+                for (int i = 1; i < queue.Count; i++)
+                {
+                    if (ShouldPrioritize(queue[i], placed) && !ShouldPrioritize(queue[bestIndex], placed))
+                    {
+                        bestIndex = i;
+                    }
+                }
+
+                var current = queue[bestIndex];
+                queue.RemoveAt(bestIndex);
 
                 foreach (var child in current.connections)
                 {
@@ -178,9 +190,30 @@ namespace Assets.Scripts.Rooms
 
                     visited.Add(child);
                     placed.Add(child);
-                    queue.Enqueue(child);
+                    queue.Add(child);
                 }
             }
+        }
+
+        private bool ShouldPrioritize(RoomNode node, List<RoomNode> placed)
+        {
+            if (!node.roomData.IsConnectorRoom)
+            {
+                return false;
+            }
+
+            // Count how many of this connector's neighbors are already placed (i.e. will become doors)
+            int placedNeighborCount = 0;
+            foreach (var conn in node.connections)
+            {
+                if (placed.Contains(conn))
+                {
+                    placedNeighborCount++;
+                }
+            }
+
+            // Prioritize if it only has 1 placed neighbor — it needs more connections
+            return placedNeighborCount <= 1;
         }
 
         private void TryPlaceChild(RoomNode current, RoomNode child, List<RoomNode> allPlaced)

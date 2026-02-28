@@ -19,3 +19,5 @@ MonoBehaviour:
   ExamineOptions:
   - Examine the painting
   ActionOptions: []
+  IsConnectorRoom: 1
+  EnemySpawnTable: []

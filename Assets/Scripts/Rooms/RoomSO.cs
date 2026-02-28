@@ -21,6 +21,8 @@ namespace Assets.Scripts.Rooms
         [TextArea]
         public List<string> ActionOptions;
 
+        public bool IsConnectorRoom;
+
         public List<EnemySpawnEntry> EnemySpawnTable;
     }
 }

@@ -521,7 +521,7 @@ MonoBehaviour:
   _roomActionUI: {fileID: 69318183}
   _wallColor: {r: 0.15, g: 0.1, b: 0.08, a: 1}
   _randomGenerateOn: 1
-  _roomsToGenerate: 10
+  _roomsToGenerate: 29
   _customSeed: 0
   _roomSOs:
   - {fileID: 11400000, guid: 8a98a175962275c4f84e7b71e66db482, type: 2}
