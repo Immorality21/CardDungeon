@@ -40,6 +40,7 @@ namespace Assets.Scripts.Rooms
         private List<Room> _spawnedRooms = new List<Room>();
         private List<Door> _spawnedDoors = new List<Door>();
         private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
+        private List<(RoomNode, RoomNode)> _placementPairs = new List<(RoomNode, RoomNode)>();
 
         private void Start()
         {
@@ -93,21 +94,13 @@ namespace Assets.Scripts.Rooms
             start.position = Vector2Int.zero;
 
             // Layout and connect the rest
+            _placementPairs.Clear();
             LayoutGraph(start);
 
-            // Add doors between all rooms that share an edge (not just graph connections).
-            // This ensures rooms are reachable even when placed via alternate parents,
-            // and creates natural-feeling bonus connections between neighbors.
-            var placedRooms = graph.Where(x => x.room).ToList();
-            for (int i = 0; i < placedRooms.Count; i++)
+            // Only create doors between rooms that were actually placed next to each other
+            foreach (var (parent, child) in _placementPairs)
             {
-                for (int j = i + 1; j < placedRooms.Count; j++)
-                {
-                    if (SharesEdge(placedRooms[i], placedRooms[j]))
-                    {
-                        CreateDoor(placedRooms[i], placedRooms[j]);
-                    }
-                }
+                CreateDoor(parent, child);
             }
 
             // Place walls around rooms (after doors so we can skip door edges)
@@ -220,13 +213,17 @@ namespace Assets.Scripts.Rooms
         {
             // Step 1: Try to place relative to the intended parent (current)
             if (TryPlaceAdjacent(current, child))
+            {
+                _placementPairs.Add((current, child));
                 return;
+            }
 
             // Step 2: If failed, try other already placed nodes that are connected to the child
             foreach (var altParent in child.connections)
             {
                 if (allPlaced.Contains(altParent) && TryPlaceAdjacent(altParent, child))
                 {
+                    _placementPairs.Add((altParent, child));
                     return;
                 }
             }
@@ -397,32 +394,6 @@ namespace Assets.Scripts.Rooms
             a.room.Doors.Add(door);
             b.room.Doors.Add(door);
             _spawnedDoors.Add(door);
-        }
-
-        private bool SharesEdge(RoomNode a, RoomNode b)
-        {
-            int aRight = a.position.x + a.roomData.Width;
-            int bRight = b.position.x + b.roomData.Width;
-            int aTop = a.position.y + a.roomData.Height;
-            int bTop = b.position.y + b.roomData.Height;
-
-            // Vertical edge (left/right neighbors): x edges touch and y ranges overlap
-            if (aRight == b.position.x || bRight == a.position.x)
-            {
-                int overlapMin = Mathf.Max(a.position.y, b.position.y);
-                int overlapMax = Mathf.Min(aTop, bTop);
-                return overlapMax > overlapMin;
-            }
-
-            // Horizontal edge (top/bottom neighbors): y edges touch and x ranges overlap
-            if (aTop == b.position.y || bTop == a.position.y)
-            {
-                int overlapMin = Mathf.Max(a.position.x, b.position.x);
-                int overlapMax = Mathf.Min(aRight, bRight);
-                return overlapMax > overlapMin;
-            }
-
-            return false;
         }
 
         private bool CanPlaceRoom(RoomSO room, Vector2Int startPos)
