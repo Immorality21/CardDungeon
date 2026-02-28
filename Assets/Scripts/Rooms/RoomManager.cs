@@ -35,6 +35,12 @@ namespace Assets.Scripts.Rooms
         [SerializeField]
         private List<RoomSO> _roomSOs;
 
+        [SerializeField, Range(0f, 1f), Tooltip("How likely new rooms attach to leaf nodes vs random nodes. Higher = longer branches.")]
+        private float _chainBias = 0.6f;
+
+        [SerializeField, Range(0f, 1f), Tooltip("How likely a room continues in the same direction as its parent. Higher = straighter corridors.")]
+        private float _momentumBias = 0.5f;
+
         private Player _player;
 
         private List<Room> _spawnedRooms = new List<Room>();
@@ -135,8 +141,19 @@ namespace Assets.Scripts.Rooms
                     position = Vector2Int.zero
                 };
 
-                // Connect to a random existing node (tree-like)
-                var parent = graph[Random.Range(0, graph.Count)];
+                RoomNode parent;
+
+                // Chain bias: prefer leaf nodes (1 connection) to create longer branches
+                if (Random.Range(0f, 1f) < _chainBias)
+                {
+                    var leaves = graph.FindAll(n => n.connections.Count <= 1);
+                    parent = leaves[Random.Range(0, leaves.Count)];
+                }
+                else
+                {
+                    parent = graph[Random.Range(0, graph.Count)];
+                }
+
                 parent.connections.Add(node);
                 node.connections.Add(parent);
 
@@ -182,8 +199,12 @@ namespace Assets.Scripts.Rooms
                     TryPlaceChild(current, child, placed);
 
                     visited.Add(child);
-                    placed.Add(child);
-                    queue.Add(child);
+
+                    if (child.room != null)
+                    {
+                        placed.Add(child);
+                        queue.Add(child);
+                    }
                 }
             }
         }
@@ -251,6 +272,13 @@ namespace Assets.Scripts.Rooms
                 directions[swapIndex] = tmp;
             }
 
+            // Momentum: if the parent was placed in a direction, try that direction first
+            if (parent.placedDirection != Vector2Int.zero && Random.Range(0f, 1f) < _momentumBias)
+            {
+                directions.Remove(parent.placedDirection);
+                directions.Insert(0, parent.placedDirection);
+            }
+
             // Try each direction once
             foreach (var dir in directions)
             {
@@ -259,6 +287,7 @@ namespace Assets.Scripts.Rooms
                 if (CanPlaceRoom(child.roomData, candidate))
                 {
                     child.position = candidate;
+                    child.placedDirection = dir;
                     PlaceRoom(child, candidate, transform);
                     return true;
                 }

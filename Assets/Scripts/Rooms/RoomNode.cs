@@ -10,6 +10,7 @@ namespace Assets.Scripts.Rooms
         public RoomSO roomData;
         public Room room;
         public Vector2Int position;
+        public Vector2Int placedDirection;
         public List<RoomNode> connections = new List<RoomNode>();
     }
 }
