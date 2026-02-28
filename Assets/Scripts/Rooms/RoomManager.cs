@@ -242,47 +242,113 @@ namespace Assets.Scripts.Rooms
             Vector2Int candidate = parentPos;
 
             if (direction == Vector2Int.right)
-                candidate += new Vector2Int(parent.Width, 0); // place child immediately to the right
+            {
+                candidate += new Vector2Int(parent.Width, 0);
+            }
             else if (direction == Vector2Int.left)
+            {
                 candidate += new Vector2Int(-child.Width, 0);
+            }
             else if (direction == Vector2Int.up)
+            {
                 candidate += new Vector2Int(0, parent.Height);
+            }
             else if (direction == Vector2Int.down)
+            {
                 candidate += new Vector2Int(0, -child.Height);
+            }
+
+            // Add a random slide offset along the shared edge so rooms aren't always corner-aligned.
+            // The offset is clamped so at least 1 tile of overlap remains (required for door placement).
+            if (direction == Vector2Int.right || direction == Vector2Int.left)
+            {
+                int maxSlide = parent.Height + child.Height - 2; // total range preserving 1-tile overlap
+                int slide = Random.Range(0, maxSlide + 1) - (child.Height - 1);
+                candidate += new Vector2Int(0, slide);
+            }
+            else
+            {
+                int maxSlide = parent.Width + child.Width - 2;
+                int slide = Random.Range(0, maxSlide + 1) - (child.Width - 1);
+                candidate += new Vector2Int(slide, 0);
+            }
 
             return candidate;
         }
 
         private void CreateDoor(RoomNode a, RoomNode b)
         {
-            Vector2Int dir = b.position - a.position;
-
+            // Determine which axis the rooms are adjacent on by checking for a shared edge.
+            // Rooms may be offset along the shared edge, so we compute the actual overlap.
             Vector2Int doorA = Vector2Int.zero;
             Vector2Int doorB = Vector2Int.zero;
+            bool found = false;
 
-            if (dir.x > 0) // b is right
+            int aRight = a.position.x + a.roomData.Width;
+            int bRight = b.position.x + b.roomData.Width;
+            int aTop = a.position.y + a.roomData.Height;
+            int bTop = b.position.y + b.roomData.Height;
+
+            // Check if b is directly to the right of a (shared vertical edge)
+            if (!found && aRight == b.position.x)
             {
-                int y = Random.Range(0, Mathf.Min(a.roomData.Height, b.roomData.Height));
-                doorA = a.position + new Vector2Int(a.roomData.Width - 1, y);
-                doorB = b.position + new Vector2Int(0, y);
+                int overlapMin = Mathf.Max(a.position.y, b.position.y);
+                int overlapMax = Mathf.Min(aTop, bTop);
+                if (overlapMax > overlapMin)
+                {
+                    int y = Random.Range(overlapMin, overlapMax);
+                    doorA = new Vector2Int(aRight - 1, y);
+                    doorB = new Vector2Int(b.position.x, y);
+                    found = true;
+                }
             }
-            else if (dir.x < 0) // b is left
+
+            // Check if b is directly to the left of a
+            if (!found && bRight == a.position.x)
             {
-                int y = Random.Range(0, Mathf.Min(a.roomData.Height, b.roomData.Height));
-                doorA = a.position + new Vector2Int(0, y);
-                doorB = b.position + new Vector2Int(b.roomData.Width - 1, y);
+                int overlapMin = Mathf.Max(a.position.y, b.position.y);
+                int overlapMax = Mathf.Min(aTop, bTop);
+                if (overlapMax > overlapMin)
+                {
+                    int y = Random.Range(overlapMin, overlapMax);
+                    doorA = new Vector2Int(a.position.x, y);
+                    doorB = new Vector2Int(bRight - 1, y);
+                    found = true;
+                }
             }
-            else if (dir.y > 0) // b is above
+
+            // Check if b is directly above a (shared horizontal edge)
+            if (!found && aTop == b.position.y)
             {
-                int x = Random.Range(0, Mathf.Min(a.roomData.Width, b.roomData.Width));
-                doorA = a.position + new Vector2Int(x, a.roomData.Height - 1);
-                doorB = b.position + new Vector2Int(x, 0);
+                int overlapMin = Mathf.Max(a.position.x, b.position.x);
+                int overlapMax = Mathf.Min(aRight, bRight);
+                if (overlapMax > overlapMin)
+                {
+                    int x = Random.Range(overlapMin, overlapMax);
+                    doorA = new Vector2Int(x, aTop - 1);
+                    doorB = new Vector2Int(x, b.position.y);
+                    found = true;
+                }
             }
-            else if (dir.y < 0) // b is below
+
+            // Check if b is directly below a
+            if (!found && bTop == a.position.y)
             {
-                int x = Random.Range(0, Mathf.Min(a.roomData.Width, b.roomData.Width));
-                doorA = a.position + new Vector2Int(x, 0);
-                doorB = b.position + new Vector2Int(x, b.roomData.Height - 1);
+                int overlapMin = Mathf.Max(a.position.x, b.position.x);
+                int overlapMax = Mathf.Min(aRight, bRight);
+                if (overlapMax > overlapMin)
+                {
+                    int x = Random.Range(overlapMin, overlapMax);
+                    doorA = new Vector2Int(x, a.position.y);
+                    doorB = new Vector2Int(x, bTop - 1);
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                Debug.LogWarning($"No shared edge found between {a.roomData.name} and {b.roomData.name}, skipping door.");
+                return;
             }
 
             Vector2 doorPos = ((Vector2)doorA + (Vector2)doorB) / 2f;
