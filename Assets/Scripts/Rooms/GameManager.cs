@@ -1,3 +1,4 @@
+using Assets.Scripts.Heroes;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
 
@@ -7,29 +8,34 @@ namespace Assets.Scripts.Rooms
     {
         [SerializeField] private float _cameraFollowSpeed = 5f;
 
-        public Player Player { get; private set; }
+        public Party Party { get; private set; }
 
-        private bool _followPlayer;
+        private bool _followParty;
         private RoomActionUI _roomActionUI;
 
-        public void Initialize(Player player, RoomActionUI roomActionUI)
+        public void Initialize(Party party, RoomActionUI roomActionUI)
         {
-            Player = player;
+            Party = party;
             _roomActionUI = roomActionUI;
-            _followPlayer = true;
+            _followParty = true;
         }
 
         public void EnterRoom(Room room, Door entryDoor = null)
         {
             if (_roomActionUI != null)
+            {
                 _roomActionUI.Show(room, entryDoor);
+            }
         }
 
         private void Update()
         {
-            if (!_followPlayer || Player == null) return;
+            if (!_followParty || Party == null)
+            {
+                return;
+            }
 
-            var target = Player.transform.position;
+            var target = Party.transform.position;
             target.z = MainCamera.Instance.transform.position.z;
             MainCamera.Instance.transform.position = Vector3.Lerp(
                 MainCamera.Instance.transform.position,

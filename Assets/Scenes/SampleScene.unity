@@ -517,7 +517,10 @@ MonoBehaviour:
   _tilePrefab: {fileID: 6327214266315479558, guid: 80649105c1eec05458a093ec99dfc392, type: 3}
   _roomParentPrefab: {fileID: 7917512315774064781, guid: 09c3295d5b509524d863f3d09e988e2e, type: 3}
   _doorPrefab: {fileID: 173774846346689678, guid: 0454ad2dc20b16143892edbaa927d37a, type: 3}
-  _playerPrefab: {fileID: 9053048336144284059, guid: 5c46b282318778b4ca4b33a522117985, type: 3}
+  _partyPrefab: {fileID: 3142318499616511648, guid: 0973078ade93ba94d9bcadfe1844f1cd, type: 3}
+  _heroDefinitions:
+  - {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
+  - {fileID: 11400000, guid: d0d0529f46172044d9494619917b8364, type: 2}
   _roomActionUI: {fileID: 69318183}
   _wallColor: {r: 0.15, g: 0.1, b: 0.08, a: 1}
   _randomGenerateOn: 1
@@ -528,6 +531,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7a40b3590a49a88429da204fea73306d, type: 2}
   - {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
   - {fileID: 11400000, guid: 0b978dd4c559e8942b3546543c74ef50, type: 2}
+  _chainBias: 0.6
+  _momentumBias: 0.5
 --- !u!1 &1686025438
 GameObject:
   m_ObjectHideFlags: 0

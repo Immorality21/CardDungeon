@@ -15,7 +15,8 @@ namespace Assets.Scripts.Items
 
         private FileHandler _fileHandler;
         private ItemCollectionSaveData _saveData;
-        private Dictionary<SlotType, ItemSaveData> _equipped = new Dictionary<SlotType, ItemSaveData>();
+        private Dictionary<string, Dictionary<SlotType, ItemSaveData>> _equipped =
+            new Dictionary<string, Dictionary<SlotType, ItemSaveData>>();
 
         public event Action OnInventoryChanged;
 
@@ -59,13 +60,17 @@ namespace Assets.Scripts.Items
             return _allItems.Find(x => x.Key == key);
         }
 
-        public ItemSaveData GetEquipped(SlotType slot)
+        public ItemSaveData GetEquipped(SlotType slot, string heroKey)
         {
-            _equipped.TryGetValue(slot, out var item);
-            return item;
+            if (_equipped.TryGetValue(heroKey, out var slots))
+            {
+                slots.TryGetValue(slot, out var item);
+                return item;
+            }
+            return null;
         }
 
-        public void Equip(ItemSaveData item, SlotType slot)
+        public void Equip(ItemSaveData item, SlotType slot, string heroKey)
         {
             var so = GetItemSO(item.ItemKey);
             if (so == null || so.SlotType != slot)
@@ -73,27 +78,38 @@ namespace Assets.Scripts.Items
                 return;
             }
 
-            // Unequip existing item in that slot
-            Unequip(slot);
+            // Unequip existing item in that slot for this hero
+            Unequip(slot, heroKey);
 
             item.EquippedSlot = slot.ToString();
-            _equipped[slot] = item;
+            item.EquippedHeroKey = heroKey;
+
+            if (!_equipped.ContainsKey(heroKey))
+            {
+                _equipped[heroKey] = new Dictionary<SlotType, ItemSaveData>();
+            }
+            _equipped[heroKey][slot] = item;
+
             Save();
             OnInventoryChanged?.Invoke();
         }
 
-        public void Unequip(SlotType slot)
+        public void Unequip(SlotType slot, string heroKey)
         {
-            if (_equipped.TryGetValue(slot, out var existing))
+            if (_equipped.TryGetValue(heroKey, out var slots))
             {
-                existing.EquippedSlot = null;
-                _equipped.Remove(slot);
-                Save();
-                OnInventoryChanged?.Invoke();
+                if (slots.TryGetValue(slot, out var existing))
+                {
+                    existing.EquippedSlot = null;
+                    existing.EquippedHeroKey = null;
+                    slots.Remove(slot);
+                    Save();
+                    OnInventoryChanged?.Invoke();
+                }
             }
         }
 
-        public Dictionary<StatType, float> ComputeRawBonuses()
+        public Dictionary<StatType, float> ComputeRawBonuses(string heroKey)
         {
             var raw = new Dictionary<StatType, float>();
             foreach (StatType stat in Enum.GetValues(typeof(StatType)))
@@ -101,7 +117,12 @@ namespace Assets.Scripts.Items
                 raw[stat] = 0f;
             }
 
-            foreach (var kvp in _equipped)
+            if (!_equipped.TryGetValue(heroKey, out var slots))
+            {
+                return raw;
+            }
+
+            foreach (var kvp in slots)
             {
                 var so = GetItemSO(kvp.Value.ItemKey);
                 if (so == null)
@@ -121,7 +142,7 @@ namespace Assets.Scripts.Items
             return raw;
         }
 
-        public Dictionary<StatType, float> ComputePercentageBonuses()
+        public Dictionary<StatType, float> ComputePercentageBonuses(string heroKey)
         {
             var pct = new Dictionary<StatType, float>();
             foreach (StatType stat in Enum.GetValues(typeof(StatType)))
@@ -129,7 +150,12 @@ namespace Assets.Scripts.Items
                 pct[stat] = 0f;
             }
 
-            foreach (var kvp in _equipped)
+            if (!_equipped.TryGetValue(heroKey, out var slots))
+            {
+                return pct;
+            }
+
+            foreach (var kvp in slots)
             {
                 var so = GetItemSO(kvp.Value.ItemKey);
                 if (so == null)
@@ -181,7 +207,12 @@ namespace Assets.Scripts.Items
                 if (!string.IsNullOrEmpty(item.EquippedSlot) &&
                     Enum.TryParse<SlotType>(item.EquippedSlot, out var slot))
                 {
-                    _equipped[slot] = item;
+                    var heroKey = item.EquippedHeroKey ?? "";
+                    if (!_equipped.ContainsKey(heroKey))
+                    {
+                        _equipped[heroKey] = new Dictionary<SlotType, ItemSaveData>();
+                    }
+                    _equipped[heroKey][slot] = item;
                 }
             }
         }

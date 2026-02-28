@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.Rooms;
 using TMPro;
 using UnityEngine;
@@ -120,28 +121,29 @@ namespace Assets.Scripts.Items.UI
 
         private void RefreshStats()
         {
-            var player = GameManager.Instance.Player;
-            if (player == null)
+            var party = GameManager.Instance.Party;
+            if (party == null || party.Leader == null)
             {
-                _statsText.text = "No player";
+                _statsText.text = "No party";
                 return;
             }
 
-            var raw = InventoryManager.Instance.ComputeRawBonuses();
-            var pct = InventoryManager.Instance.ComputePercentageBonuses();
+            var leader = party.Leader;
+            var raw = InventoryManager.Instance.ComputeRawBonuses(leader.HeroKey);
+            var pct = InventoryManager.Instance.ComputePercentageBonuses(leader.HeroKey);
 
-            int effAtk = player.GetEffectiveAttack();
-            int effDef = player.GetEffectiveDefense();
-            int effHp = player.GetEffectiveMaxHealth();
+            int effAtk = leader.GetEffectiveAttack();
+            int effDef = leader.GetEffectiveDefense();
+            int effHp = leader.GetEffectiveMaxHealth();
 
             string atkBonus = FormatBonus(raw[StatType.Attack], pct[StatType.Attack]);
             string defBonus = FormatBonus(raw[StatType.Defense], pct[StatType.Defense]);
             string hpBonus = FormatBonus(raw[StatType.MaxHealth], pct[StatType.MaxHealth]);
 
             _statsText.text =
-                $"ATK: {effAtk} ({player.Stats.Attack}{atkBonus})   " +
-                $"DEF: {effDef} ({player.Stats.Defense}{defBonus})   " +
-                $"HP: {player.Stats.Health}/{effHp} ({player.Stats.MaxHealth}{hpBonus})";
+                $"ATK: {effAtk} ({leader.Stats.Attack}{atkBonus})   " +
+                $"DEF: {effDef} ({leader.Stats.Defense}{defBonus})   " +
+                $"HP: {leader.Stats.Health}/{effHp} ({leader.Stats.MaxHealth}{hpBonus})";
         }
 
         private string FormatBonus(float rawVal, float pctVal)
@@ -178,13 +180,24 @@ namespace Assets.Scripts.Items.UI
             }
             _spawnedSlotEntries.Clear();
 
+            var heroKey = GetLeaderHeroKey();
             foreach (SlotType slot in Enum.GetValues(typeof(SlotType)))
             {
-                var equipped = InventoryManager.Instance.GetEquipped(slot);
+                var equipped = InventoryManager.Instance.GetEquipped(slot, heroKey);
                 var entry = CreateSlotEntry(slot, equipped);
                 entry.transform.SetParent(_equipSlotsParent, false);
                 _spawnedSlotEntries.Add(entry);
             }
+        }
+
+        private string GetLeaderHeroKey()
+        {
+            var party = GameManager.Instance.Party;
+            if (party != null && party.Leader != null)
+            {
+                return party.Leader.HeroKey;
+            }
+            return "";
         }
 
         private GameObject CreateSlotEntry(SlotType slot, ItemSaveData item)
@@ -366,6 +379,7 @@ namespace Assets.Scripts.Items.UI
             _detailActionButton.gameObject.SetActive(true);
             _detailActionButton.onClick.RemoveAllListeners();
 
+            var heroKey = GetLeaderHeroKey();
             if (isEquipped)
             {
                 _detailActionLabel.text = "Unequip";
@@ -373,7 +387,7 @@ namespace Assets.Scripts.Items.UI
                 {
                     if (Enum.TryParse<SlotType>(item.EquippedSlot, out var slot))
                     {
-                        InventoryManager.Instance.Unequip(slot);
+                        InventoryManager.Instance.Unequip(slot, heroKey);
                     }
                     _detailPanel.SetActive(false);
                 });
@@ -383,7 +397,7 @@ namespace Assets.Scripts.Items.UI
                 _detailActionLabel.text = "Equip";
                 _detailActionButton.onClick.AddListener(() =>
                 {
-                    InventoryManager.Instance.Equip(item, so.SlotType);
+                    InventoryManager.Instance.Equip(item, so.SlotType, heroKey);
                     _detailPanel.SetActive(false);
                 });
             }

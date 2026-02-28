@@ -7,5 +7,6 @@ namespace Assets.Scripts.Items
     {
         public string ItemKey;
         public string EquippedSlot;
+        public string EquippedHeroKey;
     }
 }

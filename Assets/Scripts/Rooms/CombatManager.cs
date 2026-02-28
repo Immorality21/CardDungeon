@@ -1,4 +1,5 @@
 using System.Linq;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
@@ -22,8 +23,9 @@ namespace Assets.Scripts.Rooms
 
     public class CombatManager : SingletonBehaviour<CombatManager>
     {
-        public CombatResult ExecuteAttack(Player player, Room room)
+        public CombatResult ExecuteAttack(Party party, Room room)
         {
+            var leader = party.Leader;
             var enemy = room.Enemies.FirstOrDefault(e => e != null && e.IsAlive);
             if (enemy == null)
             {
@@ -37,8 +39,8 @@ namespace Assets.Scripts.Rooms
 
             var log = "";
 
-            // Player attacks enemy
-            int playerDmg = Mathf.Max(1, player.GetEffectiveAttack() - enemy.Stats.Defense);
+            // Leader attacks enemy
+            int playerDmg = Mathf.Max(1, leader.GetEffectiveAttack() - enemy.Stats.Defense);
             enemy.Stats.Health -= playerDmg;
             log += $"You deal {playerDmg} damage to the enemy.\n";
 
@@ -69,14 +71,14 @@ namespace Assets.Scripts.Rooms
                 };
             }
 
-            // Enemy attacks player
-            int enemyDmg = Mathf.Max(1, enemy.Stats.Attack - player.GetEffectiveDefense());
-            player.Stats.Health -= enemyDmg;
+            // Enemy attacks leader
+            int enemyDmg = Mathf.Max(1, enemy.Stats.Attack - leader.GetEffectiveDefense());
+            leader.Stats.Health -= enemyDmg;
             log += $"Enemy deals {enemyDmg} damage to you.\n";
-            log += $"\nYour HP: {player.Stats.Health}/{player.GetEffectiveMaxHealth()}";
+            log += $"\nYour HP: {leader.Stats.Health}/{leader.GetEffectiveMaxHealth()}";
             log += $"\nEnemy HP: {enemy.Stats.Health}/{enemy.Stats.MaxHealth}";
 
-            if (player.Stats.Health <= 0)
+            if (leader.Stats.Health <= 0)
             {
                 return new CombatResult
                 {
@@ -94,16 +96,16 @@ namespace Assets.Scripts.Rooms
             };
         }
 
-        public bool CanFlee(Player player)
+        public bool CanFlee(Party party)
         {
-            return player.PreviousRoom != null;
+            return party.PreviousRoom != null;
         }
 
-        public void Flee(Player player, Door entryDoor, Room currentRoom)
+        public void Flee(Party party, Door entryDoor, Room currentRoom)
         {
             currentRoom.EnableAllDoors();
-            player.PlaceInRoom(player.PreviousRoom);
-            GameManager.Instance.EnterRoom(player.CurrentRoom, entryDoor);
+            party.PlaceInRoom(party.PreviousRoom);
+            GameManager.Instance.EnterRoom(party.CurrentRoom, entryDoor);
         }
     }
 }

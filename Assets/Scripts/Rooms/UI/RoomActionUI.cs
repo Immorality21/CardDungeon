@@ -294,8 +294,8 @@ namespace Assets.Scripts.Rooms
 
         private void OnFight()
         {
-            var player = GameManager.Instance.Player;
-            var result = CombatManager.Instance.ExecuteAttack(player, _currentRoom);
+            var party = GameManager.Instance.Party;
+            var result = CombatManager.Instance.ExecuteAttack(party, _currentRoom);
 
             switch (result.Outcome)
             {
@@ -318,9 +318,9 @@ namespace Assets.Scripts.Rooms
 
         private void OnFlee()
         {
-            var player = GameManager.Instance.Player;
+            var party = GameManager.Instance.Party;
 
-            if (!CombatManager.Instance.CanFlee(player))
+            if (!CombatManager.Instance.CanFlee(party))
             {
                 _combatPanel.SetActive(false);
                 ShowCombatResult("Flee", "Nowhere to flee!", showNormalAfter: false, returnToCombat: true);
@@ -331,7 +331,7 @@ namespace Assets.Scripts.Rooms
             UnsubscribeDoors();
             DestroyDoorConfirm();
 
-            CombatManager.Instance.Flee(player, _entryDoor, _currentRoom);
+            CombatManager.Instance.Flee(party, _entryDoor, _currentRoom);
         }
 
         private void OnEntryDoorFlee(Door door)
@@ -450,10 +450,10 @@ namespace Assets.Scripts.Rooms
             DestroyDoorConfirm();
             UnsubscribeDoors();
 
-            var player = GameManager.Instance.Player;
+            var party = GameManager.Instance.Party;
             var fromRoom = _currentRoom;
             var usedDoor = _selectedDoor;
-            player.PlaceAtDoor(usedDoor, fromRoom);
+            party.PlaceAtDoor(usedDoor, fromRoom);
 
             fromRoom.EnableAllDoors();
 

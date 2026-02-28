@@ -1,4 +1,5 @@
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Heroes;
 using ImmoralityGaming.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,10 @@ namespace Assets.Scripts.Rooms
         private GameObject _roomParentPrefab, _doorPrefab;
 
         [SerializeField]
-        private GameObject _playerPrefab;
+        private GameObject _partyPrefab;
+
+        [SerializeField]
+        private List<HeroSO> _heroDefinitions;
 
         [SerializeField]
         private RoomActionUI _roomActionUI;
@@ -41,7 +45,7 @@ namespace Assets.Scripts.Rooms
         [SerializeField, Range(0f, 1f), Tooltip("How likely a room continues in the same direction as its parent. Higher = straighter corridors.")]
         private float _momentumBias = 0.5f;
 
-        private Player _player;
+        private Party _party;
 
         private List<Room> _spawnedRooms = new List<Room>();
         private List<Door> _spawnedDoors = new List<Door>();
@@ -87,9 +91,9 @@ namespace Assets.Scripts.Rooms
 
             EnemyManager.Instance.CleanupEnemies();
 
-            if (_player != null)
+            if (_party != null)
             {
-                Destroy(_player.gameObject);
+                Destroy(_party.gameObject);
             }
 
             var graph = GenerateGraph(_roomsToGenerate);
@@ -113,11 +117,11 @@ namespace Assets.Scripts.Rooms
             var wallGen = new WallGenerator(_wallColor);
             wallGen.PlaceWalls(_spawnedRooms);
 
-            // Spawn player in a random room
-            SpawnPlayer();
+            // Spawn party in a random room
+            SpawnParty();
 
-            // Spawn enemies in some rooms (not the player's room)
-            EnemyManager.Instance.SpawnEnemies(_spawnedRooms, _player.CurrentRoom);
+            // Spawn enemies in some rooms (not the party's room)
+            EnemyManager.Instance.SpawnEnemies(_spawnedRooms, _party.CurrentRoom);
         }
 
         private List<RoomNode> GenerateGraph(int count)
@@ -467,16 +471,20 @@ namespace Assets.Scripts.Rooms
             return roomBehaviour;
         }
 
-        private void SpawnPlayer()
+        private void SpawnParty()
         {
-            if (_playerPrefab == null) return;
+            if (_partyPrefab == null)
+            {
+                return;
+            }
 
             var startRoom = _spawnedRooms[Random.Range(0, _spawnedRooms.Count)];
-            var playerObj = Instantiate(_playerPrefab, transform);
-            _player = playerObj.GetComponent<Player>();
-            _player.PlaceInRoom(startRoom);
+            var partyObj = Instantiate(_partyPrefab, transform);
+            _party = partyObj.GetComponent<Party>();
+            _party.Initialize(_heroDefinitions);
+            _party.PlaceInRoom(startRoom);
 
-            GameManager.Instance.Initialize(_player, _roomActionUI);
+            GameManager.Instance.Initialize(_party, _roomActionUI);
             GameManager.Instance.EnterRoom(startRoom);
         }
 
