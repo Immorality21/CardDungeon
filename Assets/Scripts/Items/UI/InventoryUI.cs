@@ -7,10 +7,11 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts.Items.UI
 {
+    [RequireComponent(typeof(Canvas))]
+    [RequireComponent(typeof(CanvasScaler))]
+    [RequireComponent(typeof(GraphicRaycaster))]
     public class InventoryUI : MonoBehaviour
     {
-        private Canvas _canvas;
-
         // Root container
         private GameObject _rootPanel;
 
@@ -55,7 +56,7 @@ namespace Assets.Scripts.Items.UI
 
         private void Awake()
         {
-            BuildUI();
+            BuildPanels();
             _rootPanel.SetActive(false);
         }
 
@@ -230,7 +231,6 @@ namespace Assets.Scripts.Items.UI
             }
 
             var capturedItem = item;
-            var capturedSlot = slot;
             btn.onClick.AddListener(() =>
             {
                 if (capturedItem != null)
@@ -390,23 +390,15 @@ namespace Assets.Scripts.Items.UI
         }
 
         // ============================================================
-        //  UI CONSTRUCTION
+        //  PANEL CONSTRUCTION (builds child elements under this Canvas)
         // ============================================================
 
-        private void BuildUI()
+        private void BuildPanels()
         {
-            var canvasObj = new GameObject("InventoryCanvas");
-            canvasObj.transform.SetParent(transform);
-            _canvas = canvasObj.AddComponent<Canvas>();
-            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _canvas.sortingOrder = 150;
-            canvasObj.AddComponent<GraphicRaycaster>();
-            var scaler = canvasObj.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
+            var canvasTransform = transform;
 
-            // Root panel — full-width overlay
-            _rootPanel = CreatePanel(canvasObj.transform, "RootPanel", Vector2.zero, Vector2.zero);
+            // Root panel — fills most of the screen
+            _rootPanel = CreatePanel(canvasTransform, "RootPanel", Vector2.zero, Vector2.zero);
             var rootRT = _rootPanel.GetComponent<RectTransform>();
             rootRT.anchorMin = new Vector2(0.05f, 0.05f);
             rootRT.anchorMax = new Vector2(0.95f, 0.95f);
@@ -428,8 +420,8 @@ namespace Assets.Scripts.Items.UI
             // Main content area (equipment left, bag right)
             BuildContentArea(_rootPanel.transform);
 
-            // Detail panel (overlay)
-            BuildDetailPanel(canvasObj.transform);
+            // Detail panel (overlay on canvas)
+            BuildDetailPanel(canvasTransform);
         }
 
         private void BuildTitleBar(Transform parent)
@@ -639,7 +631,7 @@ namespace Assets.Scripts.Items.UI
         }
 
         // ============================================================
-        //  UI HELPERS (matching RoomActionUI pattern)
+        //  UI HELPERS
         // ============================================================
 
         private GameObject CreatePanel(Transform parent, string name, Vector2 position, Vector2 size)

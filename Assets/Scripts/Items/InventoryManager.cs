@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.IO;
-using Assets.Scripts.Items.UI;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
 using Random = UnityEngine.Random;
