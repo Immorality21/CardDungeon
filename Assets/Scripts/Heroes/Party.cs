@@ -26,7 +26,7 @@ namespace Assets.Scripts.Heroes
                 var heroObj = new GameObject(heroSO.Label);
                 heroObj.transform.SetParent(transform, false);
                 var hero = heroObj.AddComponent<Hero>();
-
+                 
                 var savedHero = _saveData.Heroes.Find(h => h.HeroKey == heroSO.Label);
                 if (savedHero != null)
                 {
