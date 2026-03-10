@@ -66,6 +66,12 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
+    public void StartNewDungeon()
+    {
+        RoomManager.SeedToLoad = null;
+        SceneManager.LoadScene("MainGameScene");
+    }
+
     private void LoadDungeon(int seed)
     {
         RoomManager.SeedToLoad = seed;

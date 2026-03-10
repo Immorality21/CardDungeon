@@ -589,23 +589,5 @@ namespace Assets.Scripts.Rooms
 
             return roomBehaviour;
         }
-
-        private void SpawnParty()
-        {
-            if (_partyPrefab == null)
-            {
-                return;
-            }
-
-            var startRoom = SpawnedRooms[Random.Range(0, SpawnedRooms.Count)];
-            var partyObj = Instantiate(_partyPrefab, transform);
-            _party = partyObj.GetComponent<Party>();
-            _party.Initialize(_heroDefinitions);
-            _party.PlaceInRoom(startRoom);
-
-            GameManager.Instance.Initialize(_party, _roomActionUI);
-            GameManager.Instance.EnterRoom(startRoom);
-        }
-
     }
 }
