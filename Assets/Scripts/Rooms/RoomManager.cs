@@ -153,38 +153,36 @@ namespace Assets.Scripts.Rooms
 
         private void SpawnFreshDungeon(int seed)
         {
-            DungeonSaveManager.Instance.Initialize(seed);
+            // Pick starting room and spawn enemies first (deterministic seed order)
+            var startRoom = SpawnedRooms[Random.Range(0, SpawnedRooms.Count)];
+            EnemyManager.Instance.SpawnEnemies(SpawnedRooms, startRoom);
 
-            // Spawn party in a random room
-            SpawnParty();
-
-            // Spawn enemies in some rooms (not the party's room)
-            EnemyManager.Instance.SpawnEnemies(SpawnedRooms, _party.CurrentRoom);
+            // Now spawn the party in the chosen room
+            var partyObj = Instantiate(_partyPrefab, transform);
+            _party = partyObj.GetComponent<Party>();
+            _party.Initialize(_heroDefinitions);
+            _party.PlaceInRoom(startRoom);
+            GameManager.Instance.Initialize(_party, _roomActionUI);
 
             // Hide all rooms (fog of war), then reveal the starting room
             foreach (var room in SpawnedRooms)
             {
                 room.Hide();
             }
-            _party.CurrentRoom.Reveal();
+            startRoom.Reveal();
 
-            // Initialize save manager for this dungeon
-            DungeonSaveManager.Instance.Save(_party.CurrentRoom);
+            // Initialize save manager and persist initial state
+            DungeonSaveManager.Instance.Initialize(seed);
+            DungeonSaveManager.Instance.Save(startRoom);
+
+            GameManager.Instance.EnterRoom(startRoom);
         }
 
         private void RestoreSavedState(DungeonSaveData saveData)
         {
-            // Spawn party in the saved room
-            var startRoom = SpawnedRooms[saveData.CurrentRoomIndex];
-            var partyObj = Instantiate(_partyPrefab, transform);
-            _party = partyObj.GetComponent<Party>();
-            _party.Initialize(_heroDefinitions);
-            _party.PlaceInRoom(startRoom);
-
-            GameManager.Instance.Initialize(_party, _roomActionUI);
-
-            // Spawn enemies in all rooms except the party's room (same as fresh)
-            EnemyManager.Instance.SpawnEnemies(SpawnedRooms, startRoom);
+            // Pick the same starting room to keep seed in sync (value is discarded)
+            var originalStartRoom = SpawnedRooms[Random.Range(0, SpawnedRooms.Count)];
+            EnemyManager.Instance.SpawnEnemies(SpawnedRooms, originalStartRoom);
 
             // Remove killed enemies based on saved counts
             foreach (var roomData in saveData.Rooms)
@@ -196,8 +194,6 @@ namespace Assets.Scripts.Rooms
 
                 var room = SpawnedRooms[roomData.RoomIndex];
 
-                // The saved EnemyCount is how many were alive at save time.
-                // Remove extras from the end until the count matches.
                 while (room.Enemies.Count > roomData.EnemyCount)
                 {
                     var last = room.Enemies[room.Enemies.Count - 1];
@@ -208,6 +204,14 @@ namespace Assets.Scripts.Rooms
                     }
                 }
             }
+
+            // Spawn party in the saved current room
+            var currentRoom = SpawnedRooms[saveData.CurrentRoomIndex];
+            var partyObj = Instantiate(_partyPrefab, transform);
+            _party = partyObj.GetComponent<Party>();
+            _party.Initialize(_heroDefinitions);
+            _party.PlaceInRoom(currentRoom);
+            GameManager.Instance.Initialize(_party, _roomActionUI);
 
             // Hide all rooms, then reveal explored ones
             foreach (var room in SpawnedRooms)
@@ -223,9 +227,8 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            // Initialize save manager and enter the room (shows UI)
             DungeonSaveManager.Instance.Initialize(saveData.Seed);
-            GameManager.Instance.EnterRoom(startRoom);
+            GameManager.Instance.EnterRoom(currentRoom);
         }
 
         public void LoadSavedDungeon()
