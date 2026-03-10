@@ -53,11 +53,18 @@ namespace Assets.Scripts.Rooms
         private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
         private List<(RoomNode, RoomNode)> _placementPairs = new List<(RoomNode, RoomNode)>();
 
+        /// <summary>
+        /// Set before loading the game scene to load a specific saved dungeon.
+        /// </summary>
+        public static int? SeedToLoad;
+
         private void Start()
         {
-            if (DungeonSaveManager.Instance != null && DungeonSaveManager.Instance.HasSave())
+            if (SeedToLoad.HasValue)
             {
-                LoadSavedDungeon();
+                var seed = SeedToLoad.Value;
+                SeedToLoad = null;
+                LoadSavedDungeon(seed);
             }
             else if (_randomGenerateOn)
             {
@@ -69,10 +76,6 @@ namespace Assets.Scripts.Rooms
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
-                if (DungeonSaveManager.Instance != null)
-                {
-                    DungeonSaveManager.Instance.Delete();
-                }
                 SpawnDungeon();
             }
         }
@@ -231,9 +234,9 @@ namespace Assets.Scripts.Rooms
             GameManager.Instance.EnterRoom(currentRoom);
         }
 
-        public void LoadSavedDungeon()
+        public void LoadSavedDungeon(int seed)
         {
-            var saveData = DungeonSaveManager.Instance.Load();
+            var saveData = DungeonSaveManager.Instance.Load(seed);
             if (saveData.Seed != 0)
             {
                 SpawnDungeon(saveData);

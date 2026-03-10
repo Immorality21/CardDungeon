@@ -1,7 +1,9 @@
-using System.Linq;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Assets.Scripts.IO;
 using ImmoralityGaming.Fundamentals;
+using UnityEngine;
 
 namespace Assets.Scripts.Rooms
 {
@@ -42,20 +44,38 @@ namespace Assets.Scripts.Rooms
             _fileHandler.Save(data);
         }
 
-        public DungeonSaveData Load()
+        public DungeonSaveData Load(int seed)
         {
-            return _fileHandler.Load<DungeonSaveData>();
+            return _fileHandler.LoadFromFile<DungeonSaveData>($"Dungeon_{seed}");
         }
 
-        public bool HasSave()
+        public List<DungeonSaveData> LoadAll()
         {
-            var data = Load();
+            var results = new List<DungeonSaveData>();
+            var files = _fileHandler.FindFiles("Dungeon_");
+
+            foreach (var filePath in files)
+            {
+                var fileName = Path.GetFileNameWithoutExtension(filePath);
+                var data = _fileHandler.LoadFromFile<DungeonSaveData>(fileName);
+                if (data.Seed != 0)
+                {
+                    results.Add(data);
+                }
+            }
+
+            return results;
+        }
+
+        public bool HasSave(int seed)
+        {
+            var data = Load(seed);
             return data.Seed != 0;
         }
 
-        public void Delete()
+        public void Delete(int seed)
         {
-            _fileHandler.Delete(new DungeonSaveData());
+            _fileHandler.Delete(new DungeonSaveData { Seed = seed });
         }
     }
 }

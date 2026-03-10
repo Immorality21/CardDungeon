@@ -45,6 +45,31 @@ namespace Assets.Scripts.IO
             return data;
         }
 
+        public T LoadFromFile<T>(string fileName) where T : new()
+        {
+            var data = new T();
+            var filePath = $"{_directoryPath}/{fileName}{FILE_EXTENSION}";
+
+            if (!File.Exists(filePath))
+            {
+                return data;
+            }
+
+            var json = File.ReadAllText(filePath);
+            JsonUtility.FromJsonOverwrite(json, data);
+            return data;
+        }
+
+        public string[] FindFiles(string prefix)
+        {
+            if (!Directory.Exists(_directoryPath))
+            {
+                return new string[0];
+            }
+
+            return Directory.GetFiles(_directoryPath, $"{prefix}*{FILE_EXTENSION}");
+        }
+
         public void Delete(IWriteable writeable)
         {
             var filePath = $"{_directoryPath}/{writeable.GetFileName()}{FILE_EXTENSION}";

@@ -13,7 +13,7 @@ namespace Assets.Scripts.Rooms
 
         public string GetFileName()
         {
-            return "Dungeon";
+            return $"Dungeon_{Seed}";
         }
     }
 }
