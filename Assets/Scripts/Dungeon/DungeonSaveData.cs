@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.IO;
+using Assets.Scripts.Rooms;
 
-namespace Assets.Scripts.Rooms
+namespace Assets.Scripts.Dungeon
 {
     [Serializable]
     public class DungeonSaveData : IWriteable

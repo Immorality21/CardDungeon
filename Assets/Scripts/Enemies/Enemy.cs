@@ -1,7 +1,8 @@
 using Assets.Scripts.Items;
+using Assets.Scripts.Rooms;
 using UnityEngine;
 
-namespace Assets.Scripts.Rooms
+namespace Assets.Scripts.Enemies
 {
     public class Enemy : MonoBehaviour
     {
