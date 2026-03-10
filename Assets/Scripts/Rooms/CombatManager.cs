@@ -51,6 +51,11 @@ namespace Assets.Scripts.Rooms
                 Destroy(enemy.gameObject);
                 room.Enemies.Remove(enemy);
 
+                if (DungeonSaveManager.Instance != null)
+                {
+                    DungeonSaveManager.Instance.Save(party.CurrentRoom);
+                }
+
                 int remaining = room.Enemies.Count(e => e != null && e.IsAlive);
                 if (remaining > 0)
                 {

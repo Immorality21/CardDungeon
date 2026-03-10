@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms
@@ -9,6 +10,7 @@ namespace Assets.Scripts.Rooms
         public List<Door> Doors = new List<Door>();
         public Vector2Int GridPosition;
         public List<Enemy> Enemies = new List<Enemy>();
+        public int RoomIndex { get; set; }
         public bool IsExplored { get; private set; }
 
         public void Reveal()
@@ -48,10 +50,11 @@ namespace Assets.Scripts.Rooms
 
         private void SetEnemyRenderersEnabled(bool enabled)
         {
-            foreach (var enemy in Enemies)
+            foreach (var enemy in Enemies
+                .Where(x => x))
             {
-                if (enemy == null) continue;
                 var sr = enemy.GetComponent<SpriteRenderer>();
+
                 if (sr != null)
                 {
                     sr.enabled = enabled;
@@ -62,6 +65,7 @@ namespace Assets.Scripts.Rooms
         private void SetDoorRenderersEnabled(Door door, bool enabled)
         {
             var sr = door.GetComponent<SpriteRenderer>();
+
             if (sr != null)
             {
                 sr.enabled = enabled;

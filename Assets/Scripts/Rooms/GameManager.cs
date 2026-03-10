@@ -28,6 +28,11 @@ namespace Assets.Scripts.Rooms
             {
                 _roomActionUI.Show(room, entryDoor);
             }
+
+            if (DungeonSaveManager.Instance != null)
+            {
+                DungeonSaveManager.Instance.Save(room);
+            }
         }
 
         private void Update()

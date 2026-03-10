@@ -1,13 +1,14 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using ImmoralityGaming.Extensions;
+using ImmoralityGaming.Fundamentals;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms
 {
-    public class RoomManager : MonoBehaviour
+    public class RoomManager : SingletonBehaviour<RoomManager>
     {
         [SerializeField]
         private GameObject _tilePrefab;
@@ -47,14 +48,18 @@ namespace Assets.Scripts.Rooms
 
         private Party _party;
 
-        private List<Room> _spawnedRooms = new List<Room>();
+        public List<Room> SpawnedRooms { get; private set; } = new List<Room>();
         private List<Door> _spawnedDoors = new List<Door>();
         private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
         private List<(RoomNode, RoomNode)> _placementPairs = new List<(RoomNode, RoomNode)>();
 
         private void Start()
         {
-            if (_randomGenerateOn)
+            if (DungeonSaveManager.Instance != null && DungeonSaveManager.Instance.HasSave())
+            {
+                LoadSavedDungeon();
+            }
+            else if (_randomGenerateOn)
             {
                 SpawnDungeon();
             }
@@ -64,7 +69,11 @@ namespace Assets.Scripts.Rooms
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
-                SpawnDungeon();   
+                if (DungeonSaveManager.Instance != null)
+                {
+                    DungeonSaveManager.Instance.Delete();
+                }
+                SpawnDungeon();
             }
         }
 
@@ -72,9 +81,18 @@ namespace Assets.Scripts.Rooms
         [ContextMenu("Spawn Dungeon")]
         private void SpawnDungeon()
         {
+            SpawnDungeon(null);
+        }
+
+        private void SpawnDungeon(DungeonSaveData saveData)
+        {
             var seed = _customSeed;
 
-            if (seed == 0)
+            if (saveData != null)
+            {
+                seed = saveData.Seed;
+            }
+            else if (seed == 0)
             {
                 var random = Random.Range(int.MinValue, int.MaxValue);
 
@@ -85,7 +103,7 @@ namespace Assets.Scripts.Rooms
 
             Random.InitState(seed);
 
-            _spawnedRooms.DestroyAndClear(true);
+            SpawnedRooms.DestroyAndClear(true);
             _spawnedDoors.DestroyAndClear(true);
             _occupiedTiles.Clear();
 
@@ -115,20 +133,108 @@ namespace Assets.Scripts.Rooms
 
             // Place walls around rooms (after doors so we can skip door edges)
             var wallGen = new WallGenerator(_wallColor);
-            wallGen.PlaceWalls(_spawnedRooms);
+            wallGen.PlaceWalls(SpawnedRooms);
+
+            // Assign stable room indices
+            for (int i = 0; i < SpawnedRooms.Count; i++)
+            {
+                SpawnedRooms[i].RoomIndex = i;
+            }
+
+            if (saveData != null)
+            {
+                RestoreSavedState(saveData);
+            }
+            else
+            {
+                SpawnFreshDungeon(seed);
+            }
+        }
+
+        private void SpawnFreshDungeon(int seed)
+        {
+            DungeonSaveManager.Instance.Initialize(seed);
 
             // Spawn party in a random room
             SpawnParty();
 
             // Spawn enemies in some rooms (not the party's room)
-            EnemyManager.Instance.SpawnEnemies(_spawnedRooms, _party.CurrentRoom);
+            EnemyManager.Instance.SpawnEnemies(SpawnedRooms, _party.CurrentRoom);
 
             // Hide all rooms (fog of war), then reveal the starting room
-            foreach (var room in _spawnedRooms)
+            foreach (var room in SpawnedRooms)
             {
                 room.Hide();
             }
             _party.CurrentRoom.Reveal();
+
+            // Initialize save manager for this dungeon
+            DungeonSaveManager.Instance.Save(_party.CurrentRoom);
+        }
+
+        private void RestoreSavedState(DungeonSaveData saveData)
+        {
+            // Spawn party in the saved room
+            var startRoom = SpawnedRooms[saveData.CurrentRoomIndex];
+            var partyObj = Instantiate(_partyPrefab, transform);
+            _party = partyObj.GetComponent<Party>();
+            _party.Initialize(_heroDefinitions);
+            _party.PlaceInRoom(startRoom);
+
+            GameManager.Instance.Initialize(_party, _roomActionUI);
+
+            // Spawn enemies in all rooms except the party's room (same as fresh)
+            EnemyManager.Instance.SpawnEnemies(SpawnedRooms, startRoom);
+
+            // Remove killed enemies based on saved counts
+            foreach (var roomData in saveData.Rooms)
+            {
+                if (roomData.RoomIndex < 0 || roomData.RoomIndex >= SpawnedRooms.Count)
+                {
+                    continue;
+                }
+
+                var room = SpawnedRooms[roomData.RoomIndex];
+
+                // The saved EnemyCount is how many were alive at save time.
+                // Remove extras from the end until the count matches.
+                while (room.Enemies.Count > roomData.EnemyCount)
+                {
+                    var last = room.Enemies[room.Enemies.Count - 1];
+                    room.Enemies.RemoveAt(room.Enemies.Count - 1);
+                    if (last != null)
+                    {
+                        Destroy(last.gameObject);
+                    }
+                }
+            }
+
+            // Hide all rooms, then reveal explored ones
+            foreach (var room in SpawnedRooms)
+            {
+                room.Hide();
+            }
+
+            foreach (var roomData in saveData.Rooms)
+            {
+                if (roomData.IsExplored && roomData.RoomIndex >= 0 && roomData.RoomIndex < SpawnedRooms.Count)
+                {
+                    SpawnedRooms[roomData.RoomIndex].Reveal();
+                }
+            }
+
+            // Initialize save manager and enter the room (shows UI)
+            DungeonSaveManager.Instance.Initialize(saveData.Seed);
+            GameManager.Instance.EnterRoom(startRoom);
+        }
+
+        public void LoadSavedDungeon()
+        {
+            var saveData = DungeonSaveManager.Instance.Load();
+            if (saveData.Seed != 0)
+            {
+                SpawnDungeon(saveData);
+            }
         }
 
         private List<RoomNode> GenerateGraph(int count)
@@ -462,7 +568,7 @@ namespace Assets.Scripts.Rooms
             roomBehaviour.RoomSO = roomNode.roomData;
             roomBehaviour.GridPosition = startPos;
 
-            _spawnedRooms.Add(roomBehaviour);
+            SpawnedRooms.Add(roomBehaviour);
 
             for (int w = 0; w < roomNode.roomData.Width; w++)
             {
@@ -485,7 +591,7 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
-            var startRoom = _spawnedRooms[Random.Range(0, _spawnedRooms.Count)];
+            var startRoom = SpawnedRooms[Random.Range(0, SpawnedRooms.Count)];
             var partyObj = Instantiate(_partyPrefab, transform);
             _party = partyObj.GetComponent<Party>();
             _party.Initialize(_heroDefinitions);
