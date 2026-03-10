@@ -22,6 +22,8 @@ namespace Assets.Scripts.Rooms
 
         public void EnterRoom(Room room, Door entryDoor = null)
         {
+            room.Reveal();
+
             if (_roomActionUI != null)
             {
                 _roomActionUI.Show(room, entryDoor);

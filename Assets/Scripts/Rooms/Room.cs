@@ -9,6 +9,64 @@ namespace Assets.Scripts.Rooms
         public List<Door> Doors = new List<Door>();
         public Vector2Int GridPosition;
         public List<Enemy> Enemies = new List<Enemy>();
+        public bool IsExplored { get; private set; }
+
+        public void Reveal()
+        {
+            IsExplored = true;
+            SetChildRenderersEnabled(true);
+            SetEnemyRenderersEnabled(true);
+
+            foreach (var door in Doors)
+            {
+                SetDoorRenderersEnabled(door, true);
+            }
+        }
+
+        public void Hide()
+        {
+            SetChildRenderersEnabled(false);
+            SetEnemyRenderersEnabled(false);
+
+            foreach (var door in Doors)
+            {
+                var otherRoom = door.GetOtherRoom(this);
+                if (otherRoom == null || !otherRoom.IsExplored)
+                {
+                    SetDoorRenderersEnabled(door, false);
+                }
+            }
+        }
+
+        private void SetChildRenderersEnabled(bool enabled)
+        {
+            foreach (var sr in GetComponentsInChildren<SpriteRenderer>())
+            {
+                sr.enabled = enabled;
+            }
+        }
+
+        private void SetEnemyRenderersEnabled(bool enabled)
+        {
+            foreach (var enemy in Enemies)
+            {
+                if (enemy == null) continue;
+                var sr = enemy.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.enabled = enabled;
+                }
+            }
+        }
+
+        private void SetDoorRenderersEnabled(Door door, bool enabled)
+        {
+            var sr = door.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.enabled = enabled;
+            }
+        }
 
         public void SetDoorsEnabled(Door excludeDoor)
         {

@@ -122,6 +122,13 @@ namespace Assets.Scripts.Rooms
 
             // Spawn enemies in some rooms (not the party's room)
             EnemyManager.Instance.SpawnEnemies(_spawnedRooms, _party.CurrentRoom);
+
+            // Hide all rooms (fog of war), then reveal the starting room
+            foreach (var room in _spawnedRooms)
+            {
+                room.Hide();
+            }
+            _party.CurrentRoom.Reveal();
         }
 
         private List<RoomNode> GenerateGraph(int count)
