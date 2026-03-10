@@ -15,10 +15,10 @@ public class MainMenuManager : MonoBehaviour
     private GameObject _levelSelectPrefab;
 
     [SerializeField]
-    private LevelDefinitionSO _defaultLevel;
+    private List<LevelDefinitionSO> _availableLevelTemplates;
 
     [SerializeField]
-    private List<LevelDefinitionSO> _availableLevelTemplates;
+    private TMP_Dropdown _levelDropdown;
 
     private FileHandler _fileHandler;
     private List<GameObject> _spawnedEntries = new List<GameObject>();
@@ -26,8 +26,24 @@ public class MainMenuManager : MonoBehaviour
     private void Start()
     {
         _fileHandler = new FileHandler();
+        PopulateLevelDropdown();
         PopulateSaveList();
     }
+
+    private void PopulateLevelDropdown()
+    {
+        _levelDropdown.ClearOptions();
+
+        var options = new List<string>();
+        foreach (var level in _availableLevelTemplates)
+        {
+            options.Add(level.name);
+        }
+
+        _levelDropdown.AddOptions(options);
+    }
+
+    private LevelDefinitionSO SelectedLevel => _availableLevelTemplates[_levelDropdown.value];
 
     private void PopulateSaveList()
     {
@@ -76,7 +92,7 @@ public class MainMenuManager : MonoBehaviour
     public void StartNewDungeon()
     {
         DungeonManager.SeedToLoad = null;
-        DungeonManager.LevelToLoad = _defaultLevel;
+        DungeonManager.LevelToLoad = SelectedLevel;
         SceneManager.LoadScene("MainGameScene");
     }
 
@@ -97,7 +113,7 @@ public class MainMenuManager : MonoBehaviour
             }
         }
 
-        Debug.LogWarning($"Level with key '{key}' not found, using default.");
-        return _defaultLevel;
+        Debug.LogWarning($"Level with key '{key}' not found, using first available.");
+        return _availableLevelTemplates[0];
     }
 }
