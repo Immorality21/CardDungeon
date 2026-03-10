@@ -27,12 +27,20 @@ namespace Assets.Scripts.Dungeon
         [SerializeField]
         private int _customSeed = 0;
 
-        public static int? SeedToLoad;
+        [SerializeField]
+        private LevelDefinitionSO _testLevel;
 
+        public static int? SeedToLoad;
+        public static LevelDefinitionSO LevelToLoad;
+
+        private LevelDefinitionSO _level;
         private Party _party;
 
         private void Start()
         {
+            _level = LevelToLoad != null ? LevelToLoad : _testLevel;
+            LevelToLoad = null;
+
             if (SeedToLoad.HasValue)
             {
                 var seed = SeedToLoad.Value;
@@ -76,7 +84,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             // Step 1: Generate rooms, doors, and walls
-            var rooms = _roomManager.GenerateDungeon();
+            var rooms = _roomManager.GenerateDungeon(_level);
 
             // Step 2: Assign stable room indices
             for (int i = 0; i < rooms.Count; i++)
@@ -117,7 +125,7 @@ namespace Assets.Scripts.Dungeon
             startRoom.Reveal();
 
             // Initialize save manager and persist initial state
-            DungeonSaveManager.Instance.Initialize(seed, rooms);
+            DungeonSaveManager.Instance.Initialize(seed, _level.Key, rooms);
             DungeonSaveManager.Instance.Save(startRoom);
 
             GameManager.Instance.EnterRoom(startRoom);
@@ -168,7 +176,7 @@ namespace Assets.Scripts.Dungeon
                 }
             }
 
-            DungeonSaveManager.Instance.Initialize(saveData.Seed, rooms);
+            DungeonSaveManager.Instance.Initialize(saveData.Seed, _level.Key, rooms);
             GameManager.Instance.EnterRoom(currentRoom);
         }
 

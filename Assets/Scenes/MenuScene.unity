@@ -421,6 +421,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _levelParent: {fileID: 2136444493}
   _levelSelectPrefab: {fileID: 7091981651360129574, guid: 2e0d34ad738557145a2595d3defa4d15, type: 3}
+  _defaultLevel: {fileID: 11400000, guid: eac98a3da612d49499a92d78cd394b7f, type: 2}
+  _availableLevelTemplates:
+  - {fileID: 11400000, guid: eac98a3da612d49499a92d78cd394b7f, type: 2}
+  - {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
 --- !u!1 &495210843
 GameObject:
   m_ObjectHideFlags: 0

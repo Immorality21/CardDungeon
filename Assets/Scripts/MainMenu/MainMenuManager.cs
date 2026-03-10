@@ -14,6 +14,12 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField]
     private GameObject _levelSelectPrefab;
 
+    [SerializeField]
+    private LevelDefinitionSO _defaultLevel;
+
+    [SerializeField]
+    private List<LevelDefinitionSO> _availableLevelTemplates;
+
     private FileHandler _fileHandler;
     private List<GameObject> _spawnedEntries = new List<GameObject>();
 
@@ -61,7 +67,8 @@ public class MainMenuManager : MonoBehaviour
             if (button != null)
             {
                 var seed = data.Seed;
-                button.onClick.AddListener(() => LoadDungeon(seed));
+                var levelKey = data.LevelKey;
+                button.onClick.AddListener(() => LoadDungeon(seed, levelKey));
             }
         }
     }
@@ -69,12 +76,28 @@ public class MainMenuManager : MonoBehaviour
     public void StartNewDungeon()
     {
         DungeonManager.SeedToLoad = null;
+        DungeonManager.LevelToLoad = _defaultLevel;
         SceneManager.LoadScene("MainGameScene");
     }
 
-    private void LoadDungeon(int seed)
+    private void LoadDungeon(int seed, string levelKey)
     {
         DungeonManager.SeedToLoad = seed;
+        DungeonManager.LevelToLoad = FindLevel(levelKey);
         SceneManager.LoadScene("MainGameScene");
+    }
+
+    private LevelDefinitionSO FindLevel(string key)
+    {
+        foreach (var level in _availableLevelTemplates)
+        {
+            if (level.Key == key)
+            {
+                return level;
+            }
+        }
+
+        Debug.LogWarning($"Level with key '{key}' not found, using default.");
+        return _defaultLevel;
     }
 }

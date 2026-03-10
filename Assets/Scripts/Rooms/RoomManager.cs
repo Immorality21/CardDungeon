@@ -1,3 +1,4 @@
+using Assets.Scripts.Dungeon;
 using ImmoralityGaming.Extensions;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,33 +13,22 @@ namespace Assets.Scripts.Rooms
         [SerializeField]
         private GameObject _roomParentPrefab, _doorPrefab;
 
-        [SerializeField]
-        private Color _wallColor = new Color(0.15f, 0.1f, 0.08f, 1f);
-
-        [SerializeField]
-        private int _roomsToGenerate;
-
-        [SerializeField]
-        private List<RoomSO> _roomSOs;
-
-        [SerializeField, Range(0f, 1f), Tooltip("How likely new rooms attach to leaf nodes vs random nodes. Higher = longer branches.")]
-        private float _chainBias = 0.6f;
-
-        [SerializeField, Range(0f, 1f), Tooltip("How likely a room continues in the same direction as its parent. Higher = straighter corridors.")]
-        private float _momentumBias = 0.5f;
+        private LevelDefinitionSO _currentLevel;
 
         public List<Room> SpawnedRooms { get; private set; } = new List<Room>();
         private List<Door> _spawnedDoors = new List<Door>();
         private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
         private List<(RoomNode, RoomNode)> _placementPairs = new List<(RoomNode, RoomNode)>();
 
-        public List<Room> GenerateDungeon()
+        public List<Room> GenerateDungeon(LevelDefinitionSO level)
         {
+            _currentLevel = level;
+
             SpawnedRooms.DestroyAndClear(true);
             _spawnedDoors.DestroyAndClear(true);
             _occupiedTiles.Clear();
 
-            var graph = GenerateGraph(_roomsToGenerate);
+            var graph = GenerateGraph(level.RoomsToGenerate);
 
             // Place the first room manually
             var start = graph[0];
@@ -56,7 +46,7 @@ namespace Assets.Scripts.Rooms
             }
 
             // Place walls around rooms (after doors so we can skip door edges)
-            var wallGen = new WallGenerator(_wallColor);
+            var wallGen = new WallGenerator(_currentLevel.WallColor);
             wallGen.PlaceWalls(SpawnedRooms);
 
             return SpawnedRooms;
@@ -69,7 +59,7 @@ namespace Assets.Scripts.Rooms
             // First room (start)
             var first = new RoomNode
             {
-                roomData = _roomSOs.TakeRandom(),
+                roomData = _currentLevel.RoomPool.TakeRandom(),
                 position = Vector2Int.zero
             };
 
@@ -79,14 +69,14 @@ namespace Assets.Scripts.Rooms
             {
                 var node = new RoomNode
                 {
-                    roomData = _roomSOs.TakeRandom(),
+                    roomData = _currentLevel.RoomPool.TakeRandom(),
                     position = Vector2Int.zero
                 };
 
                 RoomNode parent;
 
                 // Chain bias: prefer leaf nodes (1 connection) to create longer branches
-                if (Random.Range(0f, 1f) < _chainBias)
+                if (Random.Range(0f, 1f) < _currentLevel.ChainBias)
                 {
                     var leaves = graph.FindAll(n => n.connections.Count <= 1);
                     parent = leaves[Random.Range(0, leaves.Count)];
@@ -215,7 +205,7 @@ namespace Assets.Scripts.Rooms
             }
 
             // Momentum: if the parent was placed in a direction, try that direction first
-            if (parent.placedDirection != Vector2Int.zero && Random.Range(0f, 1f) < _momentumBias)
+            if (parent.placedDirection != Vector2Int.zero && Random.Range(0f, 1f) < _currentLevel.MomentumBias)
             {
                 directions.Remove(parent.placedDirection);
                 directions.Insert(0, parent.placedDirection);

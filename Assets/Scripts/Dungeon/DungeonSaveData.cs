@@ -9,6 +9,7 @@ namespace Assets.Scripts.Dungeon
     public class DungeonSaveData : IWriteable
     {
         public int Seed;
+        public string LevelKey;
         public int CurrentRoomIndex;
         public List<RoomSaveData> Rooms = new List<RoomSaveData>();
 

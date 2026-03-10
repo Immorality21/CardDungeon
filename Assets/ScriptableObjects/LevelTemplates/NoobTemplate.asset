@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97814ecae76f824da768a0e914775eb, type: 3}
+  m_Name: NoobTemplate
+  m_EditorClassIdentifier: 
+  Key: NoobTemplate
+  RoomPool:
+  - {fileID: 11400000, guid: 7a40b3590a49a88429da204fea73306d, type: 2}
+  - {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
+  - {fileID: 11400000, guid: 0b978dd4c559e8942b3546543c74ef50, type: 2}
+  - {fileID: 11400000, guid: 3eb0f9f0d8481fc4cb32d83a3cbc2448, type: 2}
+  RoomsToGenerate: 15
+  ChainBias: 0.667
+  MomentumBias: 0.498
+  WallColor: {r: 0.6037736, g: 0.52273244, b: 0.16803133, a: 1}

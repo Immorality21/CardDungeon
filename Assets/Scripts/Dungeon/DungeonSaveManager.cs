@@ -11,6 +11,7 @@ namespace Assets.Scripts.Dungeon
     {
         private FileHandler _fileHandler;
         private int _seed;
+        private string _levelKey;
         private List<Room> _rooms;
 
         protected override void Awake()
@@ -19,9 +20,10 @@ namespace Assets.Scripts.Dungeon
             _fileHandler = new FileHandler();
         }
 
-        public void Initialize(int seed, List<Room> rooms)
+        public void Initialize(int seed, string levelKey, List<Room> rooms)
         {
             _seed = seed;
+            _levelKey = levelKey;
             _rooms = rooms;
         }
 
@@ -30,6 +32,7 @@ namespace Assets.Scripts.Dungeon
             var data = new DungeonSaveData
             {
                 Seed = _seed,
+                LevelKey = _levelKey,
                 CurrentRoomIndex = currentRoom.RoomIndex
             };
 
