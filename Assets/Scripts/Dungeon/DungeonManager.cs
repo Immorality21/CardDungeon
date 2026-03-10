@@ -69,9 +69,8 @@ namespace Assets.Scripts.Dungeon
             }
             else if (seed == 0)
             {
-                var random = Random.Range(int.MinValue, int.MaxValue);
-                Debug.Log(random);
-                seed = random;
+                seed = System.Guid.NewGuid().GetHashCode();
+                Debug.Log(seed);
             }
 
             Random.InitState(seed);
