@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.IO;
-using Assets.Scripts.Rooms;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -69,13 +68,13 @@ public class MainMenuManager : MonoBehaviour
 
     public void StartNewDungeon()
     {
-        RoomManager.SeedToLoad = null;
+        DungeonManager.SeedToLoad = null;
         SceneManager.LoadScene("MainGameScene");
     }
 
     private void LoadDungeon(int seed)
     {
-        RoomManager.SeedToLoad = seed;
+        DungeonManager.SeedToLoad = seed;
         SceneManager.LoadScene("MainGameScene");
     }
 }

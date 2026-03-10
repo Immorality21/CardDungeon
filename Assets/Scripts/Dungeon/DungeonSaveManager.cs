@@ -11,6 +11,7 @@ namespace Assets.Scripts.Dungeon
     {
         private FileHandler _fileHandler;
         private int _seed;
+        private List<Room> _rooms;
 
         protected override void Awake()
         {
@@ -18,9 +19,10 @@ namespace Assets.Scripts.Dungeon
             _fileHandler = new FileHandler();
         }
 
-        public void Initialize(int seed)
+        public void Initialize(int seed, List<Room> rooms)
         {
             _seed = seed;
+            _rooms = rooms;
         }
 
         public void Save(Room currentRoom)
@@ -31,7 +33,7 @@ namespace Assets.Scripts.Dungeon
                 CurrentRoomIndex = currentRoom.RoomIndex
             };
 
-            foreach (var room in RoomManager.Instance.SpawnedRooms)
+            foreach (var room in _rooms)
             {
                 data.Rooms.Add(new RoomSaveData
                 {
