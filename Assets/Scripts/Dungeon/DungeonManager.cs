@@ -45,14 +45,6 @@ namespace Assets.Scripts.Dungeon
             }
         }
 
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.G))
-            {
-                SpawnDungeon();
-            }
-        }
-
         [ContextMenu("Spawn Dungeon")]
         private void SpawnDungeon()
         {
