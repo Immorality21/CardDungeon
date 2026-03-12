@@ -33,11 +33,7 @@ namespace Assets.Scripts.Rooms
         private TextMeshProUGUI _detailMessage;
         private Button _detailOkButton;
 
-        // World-space door confirm
-        private GameObject _doorConfirmRoot;
-
         private Room _currentRoom;
-        private Door _selectedDoor;
         private Door _entryDoor;
         private List<GameObject> _spawnedOptions = new List<GameObject>();
 
@@ -54,7 +50,6 @@ namespace Assets.Scripts.Rooms
         public void Show(Room room, Door entryDoor = null)
         {
             UnsubscribeDoors();
-            DestroyDoorConfirm();
 
             _currentRoom = room;
             _entryDoor = entryDoor;
@@ -84,7 +79,6 @@ namespace Assets.Scripts.Rooms
         {
             HideAll();
             UnsubscribeDoors();
-            DestroyDoorConfirm();
         }
 
         private void HideAll()
@@ -330,7 +324,6 @@ namespace Assets.Scripts.Rooms
 
             _combatPanel.SetActive(false);
             UnsubscribeDoors();
-            DestroyDoorConfirm();
 
             CombatManager.Instance.Flee(party, _entryDoor, _currentRoom);
         }
@@ -400,74 +393,16 @@ namespace Assets.Scripts.Rooms
 
         private void OnDoorSelected(Door door)
         {
-            _selectedDoor = door;
-            ShowDoorConfirm(door);
-        }
-
-        private void ShowDoorConfirm(Door door)
-        {
-            DestroyDoorConfirm();
-
-            _doorConfirmRoot = new GameObject("DoorConfirm");
-            _doorConfirmRoot.transform.position = door.transform.position + Vector3.up * 1.2f;
-
-            var canvas = _doorConfirmRoot.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.WorldSpace;
-            canvas.sortingOrder = 200;
-            _doorConfirmRoot.AddComponent<GraphicRaycaster>();
-
-            var rt = _doorConfirmRoot.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(220, 80);
-            rt.localScale = Vector3.one * 0.015f;
-
-            var bg = _doorConfirmRoot.AddComponent<Image>();
-            bg.color = PanelColor;
-
-            var hlg = _doorConfirmRoot.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 8;
-            hlg.padding = new RectOffset(10, 10, 10, 10);
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childForceExpandWidth = true;
-            hlg.childForceExpandHeight = true;
-
-            var confirmBtn = CreateButton(_doorConfirmRoot.transform, "Go");
-            confirmBtn.onClick.AddListener(OnConfirmMove);
-
-            var cancelBtn = CreateButton(_doorConfirmRoot.transform, "Cancel");
-            cancelBtn.onClick.AddListener(OnCancelMove);
-        }
-
-        private void DestroyDoorConfirm()
-        {
-            if (_doorConfirmRoot != null)
-            {
-                Destroy(_doorConfirmRoot);
-                _doorConfirmRoot = null;
-            }
-        }
-
-        private void OnConfirmMove()
-        {
-            DestroyDoorConfirm();
             UnsubscribeDoors();
 
             var party = GameManager.Instance.Party;
             var fromRoom = _currentRoom;
-            var usedDoor = _selectedDoor;
-            party.PlaceAtDoor(usedDoor, fromRoom);
+            party.PlaceAtDoor(door, fromRoom);
 
             fromRoom.EnableAllDoors();
 
-            var destRoom = usedDoor.GetOtherRoom(fromRoom);
-            _selectedDoor = null;
-
-            GameManager.Instance.EnterRoom(destRoom, usedDoor);
-        }
-
-        private void OnCancelMove()
-        {
-            DestroyDoorConfirm();
-            _selectedDoor = null;
+            var destRoom = door.GetOtherRoom(fromRoom);
+            GameManager.Instance.EnterRoom(destRoom, door);
         }
 
         // ============================================================
