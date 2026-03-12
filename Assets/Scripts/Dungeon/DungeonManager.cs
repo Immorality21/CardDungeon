@@ -1,5 +1,6 @@
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
+using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
 using ImmoralityGaming.Fundamentals;
 using System.Collections.Generic;
@@ -32,9 +33,9 @@ namespace Assets.Scripts.Dungeon
 
         public static int? SeedToLoad;
         public static LevelDefinitionSO LevelToLoad;
+        public Party Party { get; private set; }
 
         private LevelDefinitionSO _level;
-        private Party _party;
 
         private void Start()
         {
@@ -77,9 +78,9 @@ namespace Assets.Scripts.Dungeon
 
             EnemyManager.Instance.CleanupEnemies();
 
-            if (_party != null)
+            if (Party != null)
             {
-                Destroy(_party.gameObject);
+                Destroy(Party.gameObject);
             }
 
             // Step 1: Generate rooms, doors, and walls
@@ -111,10 +112,10 @@ namespace Assets.Scripts.Dungeon
         {
             // Spawn party in the chosen starting room
             var partyObj = Instantiate(_partyPrefab, transform);
-            _party = partyObj.GetComponent<Party>();
-            _party.Initialize(_heroDefinitions);
-            _party.PlaceInRoom(startRoom);
-            GameManager.Instance.Initialize(_party, _roomActionUI);
+            Party = partyObj.GetComponent<Party>();
+            Party.Initialize(_heroDefinitions);
+            Party.PlaceInRoom(startRoom);
+            GameManager.Instance.Initialize(Party, _roomActionUI);
 
             // Hide all rooms (fog of war), then reveal the starting room
             foreach (var room in rooms)
@@ -122,6 +123,12 @@ namespace Assets.Scripts.Dungeon
                 room.Hide();
             }
             startRoom.Reveal();
+
+            // Replenish party resources to their maximums for the new dungeon
+            if (PartyResourceManager.Instance != null)
+            {
+                PartyResourceManager.Instance.ReplenishAll();
+            }
 
             // Initialize save manager and persist initial state
             DungeonSaveManager.Instance.Initialize(seed, _level.Key, rooms);
@@ -156,10 +163,10 @@ namespace Assets.Scripts.Dungeon
             // Spawn party in the saved current room
             var currentRoom = rooms[saveData.CurrentRoomIndex];
             var partyObj = Instantiate(_partyPrefab, transform);
-            _party = partyObj.GetComponent<Party>();
-            _party.Initialize(_heroDefinitions);
-            _party.PlaceInRoom(currentRoom);
-            GameManager.Instance.Initialize(_party, _roomActionUI);
+            Party = partyObj.GetComponent<Party>();
+            Party.Initialize(_heroDefinitions);
+            Party.PlaceInRoom(currentRoom);
+            GameManager.Instance.Initialize(Party, _roomActionUI);
 
             // Hide all rooms, then reveal explored ones
             foreach (var room in rooms)
@@ -173,6 +180,12 @@ namespace Assets.Scripts.Dungeon
                 {
                     rooms[roomData.RoomIndex].Reveal();
                 }
+            }
+
+            // Restore party resource state from save
+            if (PartyResourceManager.Instance != null)
+            {
+                PartyResourceManager.Instance.RestoreFromSave(saveData.Resources);
             }
 
             DungeonSaveManager.Instance.Initialize(saveData.Seed, _level.Key, rooms);

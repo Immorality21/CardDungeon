@@ -296,6 +296,7 @@ namespace Assets.Scripts.Rooms
         {
             var party = GameManager.Instance.Party;
             var result = CombatManager.Instance.ExecuteAttack(party, _currentRoom);
+            party.SaveParty();
 
             switch (result.Outcome)
             {
