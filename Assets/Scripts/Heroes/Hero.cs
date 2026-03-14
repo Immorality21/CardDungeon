@@ -28,6 +28,12 @@ namespace Assets.Scripts.Heroes
             Stats = new Stats(heroSO.BaseAttack, heroSO.BaseDefense, heroSO.BaseHealth, heroSO.BaseAgility);
         }
 
+        public void InitializeFromSave(HeroSO heroSO, int savedXp)
+        {
+            Initialize(heroSO);
+            AddXp(savedXp);
+        }
+
         public void AddXp(int amount)
         {
             CurrentXp += amount;
@@ -44,7 +50,7 @@ namespace Assets.Scripts.Heroes
             }
         }
 
-        public void ApplyLevelUp(LevelConfiguration config)
+        private void ApplyLevelUp(LevelConfiguration config)
         {
             Level = config.Level;
             Stats.Attack += config.AttackGain;

@@ -41,13 +41,7 @@ namespace Assets.Scripts.Heroes
                 var savedHero = _saveData.Heroes.Find(h => h.HeroKey == heroSO.Label);
                 if (savedHero != null)
                 {
-                    hero.HeroSO = heroSO;
-                    hero.Level = savedHero.Level;
-                    hero.CurrentXp = savedHero.CurrentXp;
-                    hero.Stats = new Stats(savedHero.Attack, savedHero.Defense, savedHero.Health, savedHero.Agility)
-                    {
-                        MaxHealth = savedHero.MaxHealth
-                    };
+                    hero.InitializeFromSave(heroSO, savedHero.CurrentXp);
                 }
                 else
                 {
@@ -273,13 +267,7 @@ namespace Assets.Scripts.Heroes
                 _saveData.Heroes.Add(new HeroSaveData
                 {
                     HeroKey = hero.HeroKey,
-                    Level = hero.Level,
-                    CurrentXp = hero.CurrentXp,
-                    Attack = hero.Stats.Attack,
-                    Defense = hero.Stats.Defense,
-                    Health = hero.Stats.Health,
-                    MaxHealth = hero.Stats.MaxHealth,
-                    Agility = hero.Stats.Agility
+                    CurrentXp = hero.CurrentXp
                 });
             }
             _fileHandler.Save(_saveData);
