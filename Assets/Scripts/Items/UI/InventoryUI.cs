@@ -8,43 +8,43 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts.Items.UI
 {
-    [RequireComponent(typeof(Canvas))]
-    [RequireComponent(typeof(CanvasScaler))]
-    [RequireComponent(typeof(GraphicRaycaster))]
     public class InventoryUI : MonoBehaviour
     {
-        // Root container
-        private GameObject _rootPanel;
+        [Header("Root")]
+        [SerializeField] private GameObject _rootPanel;
 
-        // Stats summary (top)
-        private TextMeshProUGUI _statsText;
+        [Header("Stats")]
+        [SerializeField] private TextMeshProUGUI _statsText;
 
-        // Equipment panel (left)
-        private Transform _equipSlotsParent;
+        [Header("Equipment")]
+        [SerializeField] private Transform _equipSlotsParent;
+        [SerializeField] private InventoryEntryUI _slotEntryPrefab;
+
+        [Header("Bag")]
+        [SerializeField] private Transform _bagListParent;
+        [SerializeField] private InventoryEntryUI _bagEntryPrefab;
+
+        [Header("Detail Panel")]
+        [SerializeField] private GameObject _detailPanel;
+        [SerializeField] private TextMeshProUGUI _detailTitle;
+        [SerializeField] private TextMeshProUGUI _detailBody;
+        [SerializeField] private Button _detailActionButton;
+        [SerializeField] private TextMeshProUGUI _detailActionLabel;
+        [SerializeField] private Button _detailCloseButton;
+
+        [Header("Buttons")]
+        [SerializeField] private Button _closeButton;
+
         private List<GameObject> _spawnedSlotEntries = new List<GameObject>();
-
-        // Bag panel (right)
-        private Transform _bagListParent;
         private List<GameObject> _spawnedBagEntries = new List<GameObject>();
-
-        // Detail panel (center overlay)
-        private GameObject _detailPanel;
-        private TextMeshProUGUI _detailTitle;
-        private TextMeshProUGUI _detailBody;
-        private Button _detailActionButton;
-        private TextMeshProUGUI _detailActionLabel;
-        private Button _detailCloseButton;
 
         private ItemSaveData _selectedItem;
         private bool _selectedIsEquipped;
 
         private bool _isOpen;
 
-        private static readonly Color PanelColor = new Color(0.12f, 0.12f, 0.18f, 0.92f);
-        private static readonly Color ButtonColor = new Color(0.22f, 0.22f, 0.32f, 1f);
-        private static readonly Color ButtonHoverColor = new Color(0.30f, 0.30f, 0.42f, 1f);
         private static readonly Color SlotEmptyColor = new Color(0.18f, 0.18f, 0.26f, 0.8f);
-        private static readonly Color HeaderColor = new Color(0.16f, 0.16f, 0.24f, 1f);
+        private static readonly Color SlotFilledColor = new Color(0.22f, 0.22f, 0.32f, 1f);
 
         private static readonly Dictionary<ItemRarity, Color> RarityColors = new Dictionary<ItemRarity, Color>
         {
@@ -57,8 +57,18 @@ namespace Assets.Scripts.Items.UI
 
         private void Awake()
         {
-            BuildPanels();
             _rootPanel.SetActive(false);
+            _detailPanel.SetActive(false);
+
+            if (_closeButton != null)
+            {
+                _closeButton.onClick.AddListener(Close);
+            }
+
+            if (_detailCloseButton != null)
+            {
+                _detailCloseButton.onClick.AddListener(() => _detailPanel.SetActive(false));
+            }
         }
 
         private void Start()
@@ -185,8 +195,7 @@ namespace Assets.Scripts.Items.UI
             {
                 var equipped = InventoryManager.Instance.GetEquipped(slot, heroKey);
                 var entry = CreateSlotEntry(slot, equipped);
-                entry.transform.SetParent(_equipSlotsParent, false);
-                _spawnedSlotEntries.Add(entry);
+                _spawnedSlotEntries.Add(entry.gameObject);
             }
         }
 
@@ -200,59 +209,32 @@ namespace Assets.Scripts.Items.UI
             return "";
         }
 
-        private GameObject CreateSlotEntry(SlotType slot, ItemSaveData item)
+        private InventoryEntryUI CreateSlotEntry(SlotType slot, ItemSaveData item)
         {
-            var obj = new GameObject(slot.ToString());
-            var rt = obj.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 40);
-            var img = obj.AddComponent<Image>();
-            img.color = item != null ? ButtonColor : SlotEmptyColor;
+            var entry = Instantiate(_slotEntryPrefab, _equipSlotsParent);
 
-            var le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 40;
-
-            var btn = obj.AddComponent<Button>();
-            var colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = ButtonHoverColor;
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-            btn.colors = colors;
-
-            string label;
             if (item != null)
             {
                 var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
                 string displayName = so != null ? so.DisplayName : item.ItemKey;
-                label = $"[{slot}] {displayName}";
+                entry.SetLabel($"[{slot}] {displayName}");
+                entry.SetBackgroundColor(SlotFilledColor);
+
+                if (so != null && RarityColors.TryGetValue(so.Rarity, out var rarityColor))
+                {
+                    entry.SetLabelColor(rarityColor);
+                }
+
+                var capturedItem = item;
+                entry.Button.onClick.AddListener(() => ShowDetail(capturedItem, true));
             }
             else
             {
-                label = $"[{slot}] Empty";
+                entry.SetLabel($"[{slot}] Empty");
+                entry.SetBackgroundColor(SlotEmptyColor);
             }
 
-            var text = CreateText(obj.transform, slot + "Text", label, 15, FontStyles.Normal);
-            text.alignment = TextAlignmentOptions.MidlineLeft;
-            text.margin = new Vector4(8, 0, 8, 0);
-
-            if (item != null)
-            {
-                var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
-                if (so != null && RarityColors.TryGetValue(so.Rarity, out var rarityColor))
-                {
-                    text.color = rarityColor;
-                }
-            }
-
-            var capturedItem = item;
-            btn.onClick.AddListener(() =>
-            {
-                if (capturedItem != null)
-                {
-                    ShowDetail(capturedItem, true);
-                }
-            });
-
-            return obj;
+            return entry;
         }
 
         // ============================================================
@@ -270,61 +252,39 @@ namespace Assets.Scripts.Items.UI
             var bagItems = InventoryManager.Instance.GetBagItems();
             if (bagItems.Count == 0)
             {
-                var emptyLabel = new GameObject("EmptyLabel");
-                var rt = emptyLabel.AddComponent<RectTransform>();
-                rt.sizeDelta = new Vector2(0, 40);
-                emptyLabel.transform.SetParent(_bagListParent, false);
-                var le = emptyLabel.AddComponent<LayoutElement>();
-                le.preferredHeight = 40;
-                var text = CreateText(emptyLabel.transform, "EmptyText", "Bag is empty", 15, FontStyles.Italic);
-                text.color = new Color(0.5f, 0.5f, 0.5f);
-                _spawnedBagEntries.Add(emptyLabel);
+                var entry = Instantiate(_bagEntryPrefab, _bagListParent);
+                entry.SetLabel("Bag is empty");
+                entry.SetLabelColor(new Color(0.5f, 0.5f, 0.5f));
+                entry.Button.interactable = false;
+                _spawnedBagEntries.Add(entry.gameObject);
                 return;
             }
 
             foreach (var item in bagItems)
             {
                 var entry = CreateBagEntry(item);
-                entry.transform.SetParent(_bagListParent, false);
-                _spawnedBagEntries.Add(entry);
+                _spawnedBagEntries.Add(entry.gameObject);
             }
         }
 
-        private GameObject CreateBagEntry(ItemSaveData item)
+        private InventoryEntryUI CreateBagEntry(ItemSaveData item)
         {
             var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
             string displayName = so != null ? so.DisplayName : item.ItemKey;
-
-            var obj = new GameObject(displayName);
-            var rt = obj.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 36);
-            var img = obj.AddComponent<Image>();
-            img.color = ButtonColor;
-
-            var le = obj.AddComponent<LayoutElement>();
-            le.preferredHeight = 36;
-
-            var btn = obj.AddComponent<Button>();
-            var colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = ButtonHoverColor;
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-            btn.colors = colors;
-
             string rarityTag = so != null ? $"[{so.Rarity}] " : "";
-            var text = CreateText(obj.transform, "ItemText", rarityTag + displayName, 14, FontStyles.Normal);
-            text.alignment = TextAlignmentOptions.MidlineLeft;
-            text.margin = new Vector4(8, 0, 8, 0);
+
+            var entry = Instantiate(_bagEntryPrefab, _bagListParent);
+            entry.SetLabel(rarityTag + displayName);
 
             if (so != null && RarityColors.TryGetValue(so.Rarity, out var rarityColor))
             {
-                text.color = rarityColor;
+                entry.SetLabelColor(rarityColor);
             }
 
             var capturedItem = item;
-            btn.onClick.AddListener(() => ShowDetail(capturedItem, false));
+            entry.Button.onClick.AddListener(() => ShowDetail(capturedItem, false));
 
-            return obj;
+            return entry;
         }
 
         // ============================================================
@@ -401,304 +361,6 @@ namespace Assets.Scripts.Items.UI
                     _detailPanel.SetActive(false);
                 });
             }
-        }
-
-        // ============================================================
-        //  PANEL CONSTRUCTION (builds child elements under this Canvas)
-        // ============================================================
-
-        private void BuildPanels()
-        {
-            var canvasTransform = transform;
-
-            // Root panel — fills most of the screen
-            _rootPanel = CreatePanel(canvasTransform, "RootPanel", Vector2.zero, Vector2.zero);
-            var rootRT = _rootPanel.GetComponent<RectTransform>();
-            rootRT.anchorMin = new Vector2(0.05f, 0.05f);
-            rootRT.anchorMax = new Vector2(0.95f, 0.95f);
-            rootRT.offsetMin = Vector2.zero;
-            rootRT.offsetMax = Vector2.zero;
-
-            var rootVLG = _rootPanel.AddComponent<VerticalLayoutGroup>();
-            rootVLG.spacing = 6;
-            rootVLG.padding = new RectOffset(10, 10, 10, 10);
-            rootVLG.childForceExpandWidth = true;
-            rootVLG.childForceExpandHeight = false;
-
-            // Title bar with close button
-            BuildTitleBar(_rootPanel.transform);
-
-            // Stats bar
-            BuildStatsBar(_rootPanel.transform);
-
-            // Main content area (equipment left, bag right)
-            BuildContentArea(_rootPanel.transform);
-
-            // Detail panel (overlay on canvas)
-            BuildDetailPanel(canvasTransform);
-        }
-
-        private void BuildTitleBar(Transform parent)
-        {
-            var bar = new GameObject("TitleBar");
-            bar.transform.SetParent(parent, false);
-            var rt = bar.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 40);
-            var img = bar.AddComponent<Image>();
-            img.color = HeaderColor;
-            var le = bar.AddComponent<LayoutElement>();
-            le.preferredHeight = 40;
-
-            var hlg = bar.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 10;
-            hlg.padding = new RectOffset(12, 12, 4, 4);
-            hlg.childAlignment = TextAnchor.MiddleLeft;
-            hlg.childForceExpandWidth = false;
-            hlg.childForceExpandHeight = true;
-
-            var titleText = CreateText(bar.transform, "TitleLabel", "Inventory", 22, FontStyles.Bold);
-            var titleLE = titleText.gameObject.AddComponent<LayoutElement>();
-            titleLE.flexibleWidth = 1;
-
-            var closeBtn = CreateButton(bar.transform, "Close [I]");
-            var closeBtnLE = closeBtn.gameObject.AddComponent<LayoutElement>();
-            closeBtnLE.preferredWidth = 100;
-            closeBtnLE.preferredHeight = 32;
-            closeBtn.onClick.AddListener(Close);
-        }
-
-        private void BuildStatsBar(Transform parent)
-        {
-            var bar = new GameObject("StatsBar");
-            bar.transform.SetParent(parent, false);
-            var rt = bar.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0, 30);
-            var img = bar.AddComponent<Image>();
-            img.color = new Color(0.14f, 0.14f, 0.20f, 0.9f);
-            var le = bar.AddComponent<LayoutElement>();
-            le.preferredHeight = 30;
-
-            _statsText = CreateText(bar.transform, "StatsText", "", 15, FontStyles.Normal);
-            _statsText.alignment = TextAlignmentOptions.Center;
-        }
-
-        private void BuildContentArea(Transform parent)
-        {
-            var content = new GameObject("ContentArea");
-            content.transform.SetParent(parent, false);
-            var rt = content.AddComponent<RectTransform>();
-            var le = content.AddComponent<LayoutElement>();
-            le.flexibleHeight = 1;
-
-            var hlg = content.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 8;
-            hlg.childForceExpandWidth = false;
-            hlg.childForceExpandHeight = true;
-
-            // Equipment panel (left, ~40%)
-            BuildEquipmentPanel(content.transform);
-
-            // Bag panel (right, ~60%)
-            BuildBagPanel(content.transform);
-        }
-
-        private void BuildEquipmentPanel(Transform parent)
-        {
-            var panel = CreatePanel(parent, "EquipPanel", Vector2.zero, Vector2.zero);
-            var panelLE = panel.AddComponent<LayoutElement>();
-            panelLE.flexibleWidth = 0.4f;
-
-            var vlg = panel.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 4;
-            vlg.padding = new RectOffset(8, 8, 8, 8);
-            vlg.childAlignment = TextAnchor.UpperCenter;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-
-            var header = CreateText(panel.transform, "EquipHeader", "Equipment", 18, FontStyles.Bold);
-            var headerLE = header.gameObject.AddComponent<LayoutElement>();
-            headerLE.preferredHeight = 28;
-
-            // Scroll area for slots
-            var scrollArea = new GameObject("EquipSlotList");
-            scrollArea.transform.SetParent(panel.transform, false);
-            var scrollRT = scrollArea.AddComponent<RectTransform>();
-            var scrollVLG = scrollArea.AddComponent<VerticalLayoutGroup>();
-            scrollVLG.spacing = 4;
-            scrollVLG.childForceExpandWidth = true;
-            scrollVLG.childForceExpandHeight = false;
-            scrollVLG.childAlignment = TextAnchor.UpperCenter;
-            var scrollLE = scrollArea.AddComponent<LayoutElement>();
-            scrollLE.flexibleHeight = 1;
-
-            _equipSlotsParent = scrollArea.transform;
-        }
-
-        private void BuildBagPanel(Transform parent)
-        {
-            var panel = CreatePanel(parent, "BagPanel", Vector2.zero, Vector2.zero);
-            var panelLE = panel.AddComponent<LayoutElement>();
-            panelLE.flexibleWidth = 0.6f;
-
-            var vlg = panel.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 4;
-            vlg.padding = new RectOffset(8, 8, 8, 8);
-            vlg.childAlignment = TextAnchor.UpperCenter;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-
-            var header = CreateText(panel.transform, "BagHeader", "Bag", 18, FontStyles.Bold);
-            var headerLE = header.gameObject.AddComponent<LayoutElement>();
-            headerLE.preferredHeight = 28;
-
-            // Scroll area for bag items
-            var scrollObj = new GameObject("BagScroll");
-            scrollObj.transform.SetParent(panel.transform, false);
-
-            var scrollRect = scrollObj.AddComponent<ScrollRect>();
-            var scrollRT = scrollObj.GetComponent<RectTransform>();
-            var scrollLE = scrollObj.AddComponent<LayoutElement>();
-            scrollLE.flexibleHeight = 1;
-
-            // Viewport
-            var viewport = new GameObject("Viewport");
-            viewport.transform.SetParent(scrollObj.transform, false);
-            var vpRT = viewport.AddComponent<RectTransform>();
-            vpRT.anchorMin = Vector2.zero;
-            vpRT.anchorMax = Vector2.one;
-            vpRT.offsetMin = Vector2.zero;
-            vpRT.offsetMax = Vector2.zero;
-            var vpMask = viewport.AddComponent<Mask>();
-            vpMask.showMaskGraphic = false;
-            var vpImg = viewport.AddComponent<Image>();
-            vpImg.color = Color.white;
-
-            // Content
-            var contentObj = new GameObject("Content");
-            contentObj.transform.SetParent(viewport.transform, false);
-            var contentRT = contentObj.AddComponent<RectTransform>();
-            contentRT.anchorMin = new Vector2(0, 1);
-            contentRT.anchorMax = new Vector2(1, 1);
-            contentRT.pivot = new Vector2(0.5f, 1);
-            contentRT.offsetMin = new Vector2(0, 0);
-            contentRT.offsetMax = new Vector2(0, 0);
-
-            var contentVLG = contentObj.AddComponent<VerticalLayoutGroup>();
-            contentVLG.spacing = 4;
-            contentVLG.childForceExpandWidth = true;
-            contentVLG.childForceExpandHeight = false;
-            contentVLG.childAlignment = TextAnchor.UpperCenter;
-
-            var fitter = contentObj.AddComponent<ContentSizeFitter>();
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            scrollRect.content = contentRT;
-            scrollRect.viewport = vpRT;
-            scrollRect.horizontal = false;
-            scrollRect.vertical = true;
-
-            _bagListParent = contentObj.transform;
-        }
-
-        private void BuildDetailPanel(Transform parent)
-        {
-            _detailPanel = CreatePanel(parent, "DetailPanel", Vector2.zero, new Vector2(400, 320));
-            var detailRT = _detailPanel.GetComponent<RectTransform>();
-            detailRT.anchorMin = new Vector2(0.5f, 0.5f);
-            detailRT.anchorMax = new Vector2(0.5f, 0.5f);
-
-            var vlg = _detailPanel.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 8;
-            vlg.padding = new RectOffset(16, 16, 16, 16);
-            vlg.childAlignment = TextAnchor.UpperCenter;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-
-            _detailTitle = CreateText(_detailPanel.transform, "DetailTitle", "", 20, FontStyles.Bold);
-            var titleLE = _detailTitle.gameObject.AddComponent<LayoutElement>();
-            titleLE.preferredHeight = 28;
-
-            _detailBody = CreateText(_detailPanel.transform, "DetailBody", "", 15, FontStyles.Normal);
-            _detailBody.alignment = TextAlignmentOptions.TopLeft;
-            var bodyLE = _detailBody.gameObject.AddComponent<LayoutElement>();
-            bodyLE.flexibleHeight = 1;
-
-            // Button row
-            var btnRow = new GameObject("ButtonRow");
-            btnRow.transform.SetParent(_detailPanel.transform, false);
-            var btnRowRT = btnRow.AddComponent<RectTransform>();
-            var btnRowLE = btnRow.AddComponent<LayoutElement>();
-            btnRowLE.preferredHeight = 42;
-            var btnRowHLG = btnRow.AddComponent<HorizontalLayoutGroup>();
-            btnRowHLG.spacing = 10;
-            btnRowHLG.childAlignment = TextAnchor.MiddleCenter;
-            btnRowHLG.childForceExpandWidth = true;
-            btnRowHLG.childForceExpandHeight = true;
-
-            _detailActionButton = CreateButton(btnRow.transform, "Equip");
-            _detailActionLabel = _detailActionButton.GetComponentInChildren<TextMeshProUGUI>();
-
-            _detailCloseButton = CreateButton(btnRow.transform, "Close");
-            _detailCloseButton.onClick.AddListener(() => _detailPanel.SetActive(false));
-
-            _detailPanel.SetActive(false);
-        }
-
-        // ============================================================
-        //  UI HELPERS
-        // ============================================================
-
-        private GameObject CreatePanel(Transform parent, string name, Vector2 position, Vector2 size)
-        {
-            var panel = new GameObject(name);
-            panel.transform.SetParent(parent, false);
-            var rt = panel.AddComponent<RectTransform>();
-            rt.anchoredPosition = position;
-            rt.sizeDelta = size;
-            var img = panel.AddComponent<Image>();
-            img.color = PanelColor;
-            return panel;
-        }
-
-        private Button CreateButton(Transform parent, string label)
-        {
-            var btnObj = new GameObject(label + "Btn");
-            btnObj.transform.SetParent(parent, false);
-            var rt = btnObj.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(120, 42);
-
-            var img = btnObj.AddComponent<Image>();
-            img.color = ButtonColor;
-
-            var btn = btnObj.AddComponent<Button>();
-            var colors = btn.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = ButtonHoverColor;
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-            btn.colors = colors;
-
-            CreateText(btnObj.transform, label + "Text", label, 18, FontStyles.Bold);
-            return btn;
-        }
-
-        private TextMeshProUGUI CreateText(Transform parent, string name, string text, int fontSize, FontStyles style)
-        {
-            var textObj = new GameObject(name);
-            textObj.transform.SetParent(parent, false);
-            var rt = textObj.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-
-            var tmp = textObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = fontSize;
-            tmp.fontStyle = style;
-            tmp.color = Color.white;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.enableWordWrapping = true;
-            return tmp;
         }
     }
 }
