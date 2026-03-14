@@ -34,7 +34,7 @@ namespace Assets.Scripts.Enemies
 
                     for (int i = 0; i < entry.EvaluationCount; i++)
                     {
-                        if (Random.Range(0f, 1f) >= entry.SpawnChance)
+                        if (Random.Range(0f, 1f) > entry.SpawnChance)
                         {
                             continue;
                         }

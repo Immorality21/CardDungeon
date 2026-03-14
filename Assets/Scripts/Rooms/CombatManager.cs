@@ -157,6 +157,8 @@ namespace Assets.Scripts.Rooms
             int dmg = Mathf.Max(1, hero.GetEffectiveAttack() - target.GetEffectiveDefense());
             target.Stats.Health -= dmg;
 
+            ShowDamageText(target.Transform.position, dmg, Color.white);
+
             string log = $"{hero.DisplayName} attacks {target.DisplayName} for {dmg} damage.";
 
             if (!target.IsAlive)
@@ -179,6 +181,8 @@ namespace Assets.Scripts.Rooms
             int dmg = Mathf.Max(1, enemy.GetEffectiveAttack() - target.GetEffectiveDefense());
             target.Stats.Health -= dmg;
 
+            ShowDamageText(target.Transform.position, dmg, Color.red);
+
             string log = $"{enemy.DisplayName} attacks {target.DisplayName} for {dmg} damage.";
 
             if (!target.IsAlive)
@@ -189,6 +193,21 @@ namespace Assets.Scripts.Rooms
             }
 
             return log;
+        }
+
+        private void ShowDamageText(Vector3 position, int damage, Color color)
+        {
+            if (FloatingTextHandler.HasInstance)
+            {
+                FloatingTextHandler.Instance.CreateFloatingText(
+                    position,
+                    damage.ToString(),
+                    color,
+                    0.4f,   // fadeSpeed — slower fade
+                    0.8f,   // fadeRange — gentle drift
+                    0.15f,  // scale
+                    TextFadeMode.FadeUp);
+            }
         }
 
         private void HandleEnemyDeath(Enemy enemy, Room room)

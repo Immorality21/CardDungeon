@@ -41,4 +41,18 @@ public class FloatingTextHandler : SingletonBehaviour<FloatingTextHandler>
         floatingText.fadeRange = fadeRange;
         obj.SetActive(true);
     }
+
+    public void CreateFloatingText(Vector3 targetLocation, string text, Color color, float fadeSpeed, float fadeRange, float scale, TextFadeMode fadeMode)
+    {
+        var obj = objectPooler.GetPooledObject();
+        obj.transform.position = new Vector3 { x = targetLocation.x, y = targetLocation.y, z = -1 };
+        obj.transform.localScale = new Vector3(scale, scale, scale);
+        obj.GetComponent<TextMesh>().text = text;
+        obj.GetComponent<TextMesh>().color = color;
+        var floatingText = obj.GetComponent<FloatingText>();
+        floatingText.fadeMode = fadeMode;
+        floatingText.fadeSpeed = fadeSpeed;
+        floatingText.fadeRange = fadeRange;
+        obj.SetActive(true);
+    }
 }
