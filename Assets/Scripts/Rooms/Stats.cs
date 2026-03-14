@@ -9,13 +9,15 @@ namespace Assets.Scripts.Rooms
         public int Defense;
         public int Health;
         public int MaxHealth;
+        public int Agility;
 
-        public Stats(int attack, int defense, int health)
+        public Stats(int attack, int defense, int health, int agility = 5)
         {
             Attack = attack;
             Defense = defense;
             Health = health;
             MaxHealth = health;
+            Agility = agility;
         }
     }
 }

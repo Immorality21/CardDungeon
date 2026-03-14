@@ -114,6 +114,7 @@ namespace Assets.Scripts.Dungeon
             var partyObj = Instantiate(_partyPrefab, transform);
             Party = partyObj.GetComponent<Party>();
             Party.Initialize(_heroDefinitions);
+            Party.HealAll();
             Party.PlaceInRoom(startRoom);
             GameManager.Instance.Initialize(Party, _roomActionUI);
 

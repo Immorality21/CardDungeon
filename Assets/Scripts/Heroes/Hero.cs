@@ -1,10 +1,11 @@
+using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
 using UnityEngine;
 
 namespace Assets.Scripts.Heroes
 {
-    public class Hero : MonoBehaviour
+    public class Hero : MonoBehaviour, ICombatUnit
     {
         public HeroSO HeroSO;
         public Stats Stats;
@@ -12,13 +13,19 @@ namespace Assets.Scripts.Heroes
         public int CurrentXp;
 
         public string HeroKey => HeroSO != null ? HeroSO.Label : "";
+        public string DisplayName => HeroKey;
+        public bool IsAlive => Stats != null && Stats.Health > 0;
+        public bool IsHero => true;
+        public Transform Transform => transform;
+
+        Stats ICombatUnit.Stats => Stats;
 
         public void Initialize(HeroSO heroSO)
         {
             HeroSO = heroSO;
             Level = 1;
             CurrentXp = 0;
-            Stats = new Stats(heroSO.BaseAttack, heroSO.BaseDefense, heroSO.BaseHealth);
+            Stats = new Stats(heroSO.BaseAttack, heroSO.BaseDefense, heroSO.BaseHealth, heroSO.BaseAgility);
         }
 
         public void AddXp(int amount)
@@ -44,6 +51,7 @@ namespace Assets.Scripts.Heroes
             Stats.Defense += config.DefenseGain;
             Stats.MaxHealth += config.HealthGain;
             Stats.Health += config.HealthGain;
+            Stats.Agility += config.AgilityGain;
             Debug.Log($"{HeroKey} leveled up to {Level}!");
         }
 

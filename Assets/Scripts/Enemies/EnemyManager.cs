@@ -42,7 +42,7 @@ namespace Assets.Scripts.Enemies
                         var position = GetSpawnPosition(room);
                         var enemyObj = Instantiate(entry.Prefab, transform);
                         var enemy = enemyObj.GetComponent<Enemy>();
-                        enemy.Stats = new Stats(entry.Stats.Attack, entry.Stats.Defense, entry.Stats.Health);
+                        enemy.Stats = new Stats(entry.Stats.Attack, entry.Stats.Defense, entry.Stats.Health, entry.Stats.Agility);
                         enemy.LootItem = entry.LootItem;
                         enemy.PlaceInRoom(room, position);
 

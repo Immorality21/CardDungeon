@@ -1,5 +1,10 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
+using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using ImmoralityGaming.Fundamentals;
@@ -24,82 +29,224 @@ namespace Assets.Scripts.Rooms
 
     public class CombatManager : SingletonBehaviour<CombatManager>
     {
-        public CombatResult ExecuteAttack(Party party, Room room)
+        [SerializeField] private float _turnDelay = 0.6f;
+
+        public event Action OnCombatStarted;
+        public event Action<string> OnTurnExecuted;
+        public event Action<CombatResult> OnCombatEnded;
+
+        public bool InCombat { get; private set; }
+
+        private TurnManager _turnManager = new TurnManager();
+
+        public void StartCombat(Party party, Room room)
         {
-            var leader = party.Leader;
-            var enemy = room.Enemies.FirstOrDefault(e => e != null && e.IsAlive);
-            if (enemy == null)
+            if (InCombat)
             {
-                return new CombatResult
-                {
-                    Outcome = CombatOutcome.Victory,
-                    Log = "No enemies remain.",
-                    RemainingEnemies = 0
-                };
+                return;
             }
 
-            var log = "";
+            StartCoroutine(RunCombat(party, room));
+        }
 
-            // Leader attacks enemy
-            int playerDmg = Mathf.Max(1, leader.GetEffectiveAttack() - enemy.Stats.Defense);
-            enemy.Stats.Health -= playerDmg;
-            log += $"You deal {playerDmg} damage to the enemy.\n";
+        private IEnumerator RunCombat(Party party, Room room)
+        {
+            InCombat = true;
+            OnCombatStarted?.Invoke();
 
-            if (!enemy.IsAlive)
+            // Fan out heroes into the room
+            yield return party.FanOutHeroes(room);
+
+            // Build the unit list
+            var units = new List<ICombatUnit>();
+            foreach (var hero in party.Heroes)
             {
-                log += "Enemy defeated!";
-                InventoryManager.Instance.TryDropItem(enemy.LootItem);
-                Destroy(enemy.gameObject);
-                room.Enemies.Remove(enemy);
-
-                if (DungeonSaveManager.Instance != null)
+                if (hero.IsAlive)
                 {
-                    DungeonSaveManager.Instance.Save(party.CurrentRoom);
+                    units.Add(hero);
+                }
+            }
+            foreach (var enemy in room.Enemies)
+            {
+                if (enemy != null && enemy.IsAlive)
+                {
+                    units.Add(enemy);
+                }
+            }
+
+            _turnManager.Initialize(units);
+
+            var fullLog = "";
+
+            // Combat loop
+            while (HasAliveHeroes(party) && HasAliveEnemies(room))
+            {
+                var unit = _turnManager.GetNextUnit();
+                if (unit == null)
+                {
+                    break;
                 }
 
-                int remaining = room.Enemies.Count(e => e != null && e.IsAlive);
-                if (remaining > 0)
+                if (!unit.IsAlive)
                 {
-                    log += $"\n{remaining} enemies remaining!";
-                    return new CombatResult
-                    {
-                        Outcome = CombatOutcome.EnemyDown,
-                        Log = log,
-                        RemainingEnemies = remaining
-                    };
+                    continue;
                 }
 
-                return new CombatResult
+                string turnLog;
+                if (unit.IsHero)
                 {
-                    Outcome = CombatOutcome.Victory,
-                    Log = log,
-                    RemainingEnemies = 0
-                };
+                    turnLog = ExecuteHeroTurn(unit, room);
+                }
+                else
+                {
+                    turnLog = ExecuteEnemyTurn(unit, party);
+                }
+
+                fullLog += turnLog + "\n";
+                OnTurnExecuted?.Invoke(turnLog);
+
+                yield return new WaitForSeconds(_turnDelay);
             }
 
-            // Enemy attacks leader
-            int enemyDmg = Mathf.Max(1, enemy.Stats.Attack - leader.GetEffectiveDefense());
-            leader.Stats.Health -= enemyDmg;
-            log += $"Enemy deals {enemyDmg} damage to you.\n";
-            log += $"\nYour HP: {leader.Stats.Health}/{leader.GetEffectiveMaxHealth()}";
-            log += $"\nEnemy HP: {enemy.Stats.Health}/{enemy.Stats.MaxHealth}";
-
-            if (leader.Stats.Health <= 0)
+            // Determine outcome
+            CombatOutcome outcome;
+            if (!HasAliveHeroes(party))
             {
-                return new CombatResult
-                {
-                    Outcome = CombatOutcome.PlayerDied,
-                    Log = log,
-                    RemainingEnemies = room.Enemies.Count(e => e != null && e.IsAlive)
-                };
+                outcome = CombatOutcome.PlayerDied;
+                fullLog += "\nYour party has been defeated!";
+            }
+            else
+            {
+                outcome = CombatOutcome.Victory;
+                fullLog += "\nAll enemies defeated!";
+
+                // Gather heroes back to party
+                yield return party.GatherHeroes();
+
+                // Enable all doors
+                room.EnableAllDoors();
             }
 
-            return new CombatResult
+            // Save state
+            if (DungeonSaveManager.Instance != null)
             {
-                Outcome = CombatOutcome.Continue,
-                Log = log,
+                DungeonSaveManager.Instance.Save(party.CurrentRoom);
+            }
+            party.SaveParty();
+
+            InCombat = false;
+
+            var result = new CombatResult
+            {
+                Outcome = outcome,
+                Log = fullLog,
                 RemainingEnemies = room.Enemies.Count(e => e != null && e.IsAlive)
             };
+
+            OnCombatEnded?.Invoke(result);
+        }
+
+        private string ExecuteHeroTurn(ICombatUnit hero, Room room)
+        {
+            var target = GetRandomAliveEnemy(room);
+            if (target == null)
+            {
+                return $"{hero.DisplayName} has no target.";
+            }
+
+            int dmg = Mathf.Max(1, hero.GetEffectiveAttack() - target.GetEffectiveDefense());
+            target.Stats.Health -= dmg;
+
+            string log = $"{hero.DisplayName} attacks {target.DisplayName} for {dmg} damage.";
+
+            if (!target.IsAlive)
+            {
+                log += $" {target.DisplayName} defeated!";
+                HandleEnemyDeath(target as Enemy, room);
+            }
+
+            return log;
+        }
+
+        private string ExecuteEnemyTurn(ICombatUnit enemy, Party party)
+        {
+            var target = GetRandomAliveHero(party);
+            if (target == null)
+            {
+                return $"{enemy.DisplayName} has no target.";
+            }
+
+            int dmg = Mathf.Max(1, enemy.GetEffectiveAttack() - target.GetEffectiveDefense());
+            target.Stats.Health -= dmg;
+
+            string log = $"{enemy.DisplayName} attacks {target.DisplayName} for {dmg} damage.";
+
+            if (!target.IsAlive)
+            {
+                log += $" {target.DisplayName} has fallen!";
+                HandleHeroDeath(target as Hero);
+                _turnManager.RemoveUnit(target);
+            }
+
+            return log;
+        }
+
+        private void HandleEnemyDeath(Enemy enemy, Room room)
+        {
+            if (enemy == null)
+            {
+                return;
+            }
+
+            InventoryManager.Instance.TryDropItem(enemy.LootItem);
+            _turnManager.RemoveUnit(enemy);
+            room.Enemies.Remove(enemy);
+            Destroy(enemy.gameObject);
+        }
+
+        private void HandleHeroDeath(Hero hero)
+        {
+            if (hero == null)
+            {
+                return;
+            }
+
+            // Disable the hero's sprite to show they've fallen
+            var sr = hero.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.enabled = false;
+            }
+        }
+
+        private Enemy GetRandomAliveEnemy(Room room)
+        {
+            var alive = room.Enemies.Where(e => e != null && e.IsAlive).ToList();
+            if (alive.Count == 0)
+            {
+                return null;
+            }
+            return alive[UnityEngine.Random.Range(0, alive.Count)];
+        }
+
+        private Hero GetRandomAliveHero(Party party)
+        {
+            var alive = party.Heroes.Where(h => h != null && h.IsAlive).ToList();
+            if (alive.Count == 0)
+            {
+                return null;
+            }
+            return alive[UnityEngine.Random.Range(0, alive.Count)];
+        }
+
+        private bool HasAliveHeroes(Party party)
+        {
+            return party.Heroes.Any(h => h != null && h.IsAlive);
+        }
+
+        private bool HasAliveEnemies(Room room)
+        {
+            return room.Enemies.Any(e => e != null && e.IsAlive);
         }
 
         public bool CanFlee(Party party)

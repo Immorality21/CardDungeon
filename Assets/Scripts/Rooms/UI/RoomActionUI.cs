@@ -289,24 +289,40 @@ namespace Assets.Scripts.Rooms
         private void OnFight()
         {
             var party = GameManager.Instance.Party;
-            var result = CombatManager.Instance.ExecuteAttack(party, _currentRoom);
-            party.SaveParty();
+
+            // Hide combat UI and show live combat log
+            _combatPanel.SetActive(false);
+            _detailPanel.SetActive(true);
+            _detailTitle.text = "Combat";
+            _detailMessage.text = "Battle begins...";
+            _detailOkButton.gameObject.SetActive(false);
+
+            // Subscribe to combat events
+            CombatManager.Instance.OnTurnExecuted += OnCombatTurnExecuted;
+            CombatManager.Instance.OnCombatEnded += OnCombatEnded;
+
+            // Start turn-based combat
+            CombatManager.Instance.StartCombat(party, _currentRoom);
+        }
+
+        private void OnCombatTurnExecuted(string turnLog)
+        {
+            _detailMessage.text = turnLog;
+        }
+
+        private void OnCombatEnded(CombatResult result)
+        {
+            // Unsubscribe from combat events
+            CombatManager.Instance.OnTurnExecuted -= OnCombatTurnExecuted;
+            CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
 
             switch (result.Outcome)
             {
-                case CombatOutcome.EnemyDown:
-                    ShowCombatResult("Enemy Down!", result.Log, showNormalAfter: false, returnToCombat: true);
-                    break;
                 case CombatOutcome.Victory:
-                    _combatPanel.SetActive(false);
                     ShowCombatResult("Victory!", result.Log, showNormalAfter: true);
                     break;
                 case CombatOutcome.PlayerDied:
-                    _combatPanel.SetActive(false);
                     ShowCombatResult("You Died!", result.Log, showNormalAfter: false);
-                    break;
-                case CombatOutcome.Continue:
-                    ShowCombatResult("Combat", result.Log, showNormalAfter: false, returnToCombat: true);
                     break;
             }
         }
@@ -339,6 +355,7 @@ namespace Assets.Scripts.Rooms
             _combatPanel.SetActive(false);
             _subPanel.SetActive(false);
             _detailPanel.SetActive(true);
+            _detailOkButton.gameObject.SetActive(true);
             _detailTitle.text = title;
             _detailMessage.text = message;
 

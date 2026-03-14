@@ -27,8 +27,9 @@ MonoBehaviour:
     Stats:
       Attack: 3
       Defense: 1
-      Health: 10
-      MaxHealth: 10
+      Health: 5
+      MaxHealth: 5
+      Agility: 5
     LootItem: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
     SpawnChance: 0.5
     EvaluationCount: 1

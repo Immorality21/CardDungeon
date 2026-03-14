@@ -7,9 +7,11 @@ namespace Assets.Scripts.Heroes
     public class HeroSO : ScriptableObject
     {
         public string Label;
+        public Sprite Sprite;
         public int BaseAttack;
         public int BaseDefense;
         public int BaseHealth;
+        public int BaseAgility = 5;
         public List<LevelConfiguration> LevelProgression = new List<LevelConfiguration>();
     }
 }

@@ -13,12 +13,15 @@ MonoBehaviour:
   m_Name: Warrior
   m_EditorClassIdentifier: 
   Label: Warrior
+  Sprite: {fileID: 21300000, guid: b2ddfcceaadefd6f5add82a8c4549a7a, type: 3}
   BaseAttack: 10
   BaseDefense: 5
   BaseHealth: 5
+  BaseAgility: 5
   LevelProgression:
   - Level: 2
     XpRequired: 100
     AttackGain: 3
     DefenseGain: 1
     HealthGain: 1
+    AgilityGain: 5

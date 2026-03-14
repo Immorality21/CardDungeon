@@ -10,5 +10,6 @@ namespace Assets.Scripts.Heroes
         public int AttackGain;
         public int DefenseGain;
         public int HealthGain;
+        public int AgilityGain;
     }
 }
