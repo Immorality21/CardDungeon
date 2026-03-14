@@ -34,6 +34,7 @@ namespace Assets.Scripts.Rooms
         public event Action OnCombatStarted;
         public event Action<string> OnTurnExecuted;
         public event Action<CombatResult> OnCombatEnded;
+        public event Action<List<ICombatUnit>> OnTurnOrderChanged;
 
         public bool InCombat { get; private set; }
 
@@ -75,6 +76,7 @@ namespace Assets.Scripts.Rooms
             }
 
             _turnManager.Initialize(units);
+            BroadcastTurnOrder();
 
             var fullLog = "";
 
@@ -104,9 +106,13 @@ namespace Assets.Scripts.Rooms
 
                 fullLog += turnLog + "\n";
                 OnTurnExecuted?.Invoke(turnLog);
+                BroadcastTurnOrder();
 
                 yield return new WaitForSeconds(_turnDelay);
             }
+
+            // Clear turn order display
+            OnTurnOrderChanged?.Invoke(new List<ICombatUnit>());
 
             // Determine outcome
             CombatOutcome outcome;
@@ -193,6 +199,12 @@ namespace Assets.Scripts.Rooms
             }
 
             return log;
+        }
+
+        private void BroadcastTurnOrder()
+        {
+            var order = _turnManager.GetTurnOrder(10);
+            OnTurnOrderChanged?.Invoke(order);
         }
 
         private void ShowDamageText(Vector3 position, int damage, Color color)

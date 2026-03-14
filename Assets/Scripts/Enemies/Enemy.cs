@@ -11,7 +11,10 @@ namespace Assets.Scripts.Enemies
         public Room Room;
         public ItemSO LootItem;
 
+        private SpriteRenderer _spriteRenderer;
+
         public string DisplayName => gameObject.name;
+        public Sprite Icon => GetIcon();
         public bool IsAlive => Stats != null && Stats.Health > 0;
         public bool IsHero => false;
         public Transform Transform => transform;
@@ -32,6 +35,15 @@ namespace Assets.Scripts.Enemies
         public int GetEffectiveDefense()
         {
             return Stats.Defense;
+        }
+
+        private Sprite GetIcon()
+        {
+            if (_spriteRenderer == null)
+            {
+                _spriteRenderer = GetComponent<SpriteRenderer>();
+            }
+            return _spriteRenderer != null ? _spriteRenderer.sprite : null;
         }
     }
 }

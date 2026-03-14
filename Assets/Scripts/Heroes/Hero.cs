@@ -14,6 +14,7 @@ namespace Assets.Scripts.Heroes
 
         public string HeroKey => HeroSO != null ? HeroSO.Label : "";
         public string DisplayName => HeroKey;
+        public Sprite Icon => HeroSO != null ? HeroSO.Sprite : null;
         public bool IsAlive => Stats != null && Stats.Health > 0;
         public bool IsHero => true;
         public Transform Transform => transform;
