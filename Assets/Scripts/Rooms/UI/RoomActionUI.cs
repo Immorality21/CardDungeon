@@ -290,30 +290,15 @@ namespace Assets.Scripts.Rooms
         {
             var party = GameManager.Instance.Party;
 
-            // Hide combat UI and show live combat log
-            _combatPanel.SetActive(false);
-            _detailPanel.SetActive(true);
-            _detailTitle.text = "Combat";
-            _detailMessage.text = "Battle begins...";
-            _detailOkButton.gameObject.SetActive(false);
+            // Hide all UI during combat
+            HideAll();
 
-            // Subscribe to combat events
-            CombatManager.Instance.OnTurnExecuted += OnCombatTurnExecuted;
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
-
-            // Start turn-based combat
             CombatManager.Instance.StartCombat(party, _currentRoom);
-        }
-
-        private void OnCombatTurnExecuted(string turnLog)
-        {
-            _detailMessage.text = turnLog;
         }
 
         private void OnCombatEnded(CombatResult result)
         {
-            // Unsubscribe from combat events
-            CombatManager.Instance.OnTurnExecuted -= OnCombatTurnExecuted;
             CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
 
             switch (result.Outcome)
