@@ -20,6 +20,13 @@ namespace Assets.Scripts.Rooms
         PlayerDied
     }
 
+    public enum HeroAction
+    {
+        None,
+        Attack,
+        Skip
+    }
+
     public class CombatResult
     {
         public CombatOutcome Outcome;
@@ -35,10 +42,17 @@ namespace Assets.Scripts.Rooms
         public event Action<string> OnTurnExecuted;
         public event Action<CombatResult> OnCombatEnded;
         public event Action<List<ICombatUnit>> OnTurnOrderChanged;
+        public event Action<ICombatUnit> OnHeroTurnStarted;
 
         public bool InCombat { get; private set; }
 
         private TurnManager _turnManager = new TurnManager();
+        private HeroAction _pendingAction = HeroAction.None;
+
+        public void SubmitHeroAction(HeroAction action)
+        {
+            _pendingAction = action;
+        }
 
         public void StartCombat(Party party, Room room)
         {
@@ -97,18 +111,33 @@ namespace Assets.Scripts.Rooms
                 string turnLog;
                 if (unit.IsHero)
                 {
-                    turnLog = ExecuteHeroTurn(unit, room);
+                    // Wait for player input
+                    _pendingAction = HeroAction.None;
+                    OnHeroTurnStarted?.Invoke(unit);
+
+                    while (_pendingAction == HeroAction.None)
+                    {
+                        yield return null;
+                    }
+
+                    if (_pendingAction == HeroAction.Attack)
+                    {
+                        turnLog = ExecuteHeroTurn(unit, room);
+                    }
+                    else
+                    {
+                        turnLog = $"{unit.DisplayName} skips their turn.";
+                    }
                 }
                 else
                 {
+                    yield return new WaitForSeconds(_turnDelay);
                     turnLog = ExecuteEnemyTurn(unit, party);
                 }
 
                 fullLog += turnLog + "\n";
                 OnTurnExecuted?.Invoke(turnLog);
                 BroadcastTurnOrder();
-
-                yield return new WaitForSeconds(_turnDelay);
             }
 
             // Clear turn order display

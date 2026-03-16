@@ -27,6 +27,12 @@ namespace Assets.Scripts.Rooms
         private Transform _optionListParent;
         private Button _backButton;
 
+        // Hero action panel (during combat, on hero turn)
+        private GameObject _heroActionPanel;
+        private TextMeshProUGUI _heroActionLabel;
+        private Button _attackButton;
+        private Button _skipButton;
+
         // Detail popup
         private GameObject _detailPanel;
         private TextMeshProUGUI _detailTitle;
@@ -85,6 +91,7 @@ namespace Assets.Scripts.Rooms
         {
             _mainPanel.SetActive(false);
             _combatPanel.SetActive(false);
+            _heroActionPanel.SetActive(false);
             _subPanel.SetActive(false);
             _detailPanel.SetActive(false);
         }
@@ -107,6 +114,7 @@ namespace Assets.Scripts.Rooms
 
             BuildMainPanel(canvasObj.transform);
             BuildCombatPanel(canvasObj.transform);
+            BuildHeroActionPanel(canvasObj.transform);
             BuildSubPanel(canvasObj.transform);
             BuildDetailPanel(canvasObj.transform);
         }
@@ -149,6 +157,41 @@ namespace Assets.Scripts.Rooms
 
             _fightButton.onClick.AddListener(OnFight);
             _fleeButton.onClick.AddListener(OnFlee);
+        }
+
+        private void BuildHeroActionPanel(Transform parent)
+        {
+            _heroActionPanel = CreatePanel(parent, "HeroActionPanel", new Vector2(0, 0), new Vector2(340, 100));
+            SetAnchors(_heroActionPanel.GetComponent<RectTransform>(), new Vector2(0.5f, 0), new Vector2(0.5f, 0));
+            _heroActionPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 30);
+
+            var vlg = _heroActionPanel.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 6;
+            vlg.padding = new RectOffset(10, 10, 6, 6);
+            vlg.childAlignment = TextAnchor.MiddleCenter;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            _heroActionLabel = CreateText(_heroActionPanel.transform, "HeroActionLabel", "", 16, FontStyles.Bold);
+            var labelLE = _heroActionLabel.gameObject.AddComponent<LayoutElement>();
+            labelLE.preferredHeight = 24;
+
+            var buttonRow = new GameObject("ButtonRow");
+            buttonRow.transform.SetParent(_heroActionPanel.transform, false);
+            buttonRow.AddComponent<RectTransform>();
+            var hlg = buttonRow.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 10;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
+            var rowLE = buttonRow.AddComponent<LayoutElement>();
+            rowLE.preferredHeight = 42;
+
+            _attackButton = CreateButton(buttonRow.transform, "Attack");
+            _skipButton = CreateButton(buttonRow.transform, "Skip");
+
+            _attackButton.onClick.AddListener(OnHeroAttack);
+            _skipButton.onClick.AddListener(OnHeroSkip);
         }
 
         private void BuildSubPanel(Transform parent)
@@ -294,12 +337,33 @@ namespace Assets.Scripts.Rooms
             HideAll();
 
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
+            CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
             CombatManager.Instance.StartCombat(party, _currentRoom);
+        }
+
+        private void OnHeroTurnStarted(Combat.ICombatUnit hero)
+        {
+            _heroActionLabel.text = $"{hero.DisplayName}'s Turn";
+            _heroActionPanel.SetActive(true);
+        }
+
+        private void OnHeroAttack()
+        {
+            _heroActionPanel.SetActive(false);
+            CombatManager.Instance.SubmitHeroAction(HeroAction.Attack);
+        }
+
+        private void OnHeroSkip()
+        {
+            _heroActionPanel.SetActive(false);
+            CombatManager.Instance.SubmitHeroAction(HeroAction.Skip);
         }
 
         private void OnCombatEnded(CombatResult result)
         {
             CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
+            CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
+            _heroActionPanel.SetActive(false);
 
             switch (result.Outcome)
             {
