@@ -37,6 +37,8 @@ namespace Assets.Scripts.Rooms
     public class CombatManager : SingletonBehaviour<CombatManager>
     {
         [SerializeField] private float _turnDelay = 0.6f;
+        [SerializeField] private float _lungeDistance = 0.3f;
+        [SerializeField] private float _lungeDuration = 0.12f;
 
         public event Action OnCombatStarted;
         public event Action<string> OnTurnExecuted;
@@ -48,6 +50,7 @@ namespace Assets.Scripts.Rooms
 
         private TurnManager _turnManager = new TurnManager();
         private HeroAction _pendingAction = HeroAction.None;
+        private string _lastTurnLog;
 
         public void SubmitHeroAction(HeroAction action)
         {
@@ -108,7 +111,6 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
 
-                string turnLog;
                 if (unit.IsHero)
                 {
                     // Wait for player input
@@ -122,21 +124,21 @@ namespace Assets.Scripts.Rooms
 
                     if (_pendingAction == HeroAction.Attack)
                     {
-                        turnLog = ExecuteHeroTurn(unit, room);
+                        yield return ExecuteHeroTurn(unit, room);
                     }
                     else
                     {
-                        turnLog = $"{unit.DisplayName} skips their turn.";
+                        _lastTurnLog = $"{unit.DisplayName} skips their turn.";
                     }
                 }
                 else
                 {
                     yield return new WaitForSeconds(_turnDelay);
-                    turnLog = ExecuteEnemyTurn(unit, party);
+                    yield return ExecuteEnemyTurn(unit, party);
                 }
 
-                fullLog += turnLog + "\n";
-                OnTurnExecuted?.Invoke(turnLog);
+                fullLog += _lastTurnLog + "\n";
+                OnTurnExecuted?.Invoke(_lastTurnLog);
                 BroadcastTurnOrder();
             }
 
@@ -181,13 +183,17 @@ namespace Assets.Scripts.Rooms
             OnCombatEnded?.Invoke(result);
         }
 
-        private string ExecuteHeroTurn(ICombatUnit hero, Room room)
+        private IEnumerator ExecuteHeroTurn(ICombatUnit hero, Room room)
         {
             var target = GetRandomAliveEnemy(room);
             if (target == null)
             {
-                return $"{hero.DisplayName} has no target.";
+                _lastTurnLog = $"{hero.DisplayName} has no target.";
+                yield break;
             }
+
+            // Lunge forward (heroes lunge right)
+            yield return LungeAnimation(hero.Transform, Vector3.right);
 
             int dmg = Mathf.Max(1, hero.GetEffectiveAttack() - target.GetEffectiveDefense());
             target.Stats.Health -= dmg;
@@ -202,16 +208,20 @@ namespace Assets.Scripts.Rooms
                 HandleEnemyDeath(target as Enemy, room);
             }
 
-            return log;
+            _lastTurnLog = log;
         }
 
-        private string ExecuteEnemyTurn(ICombatUnit enemy, Party party)
+        private IEnumerator ExecuteEnemyTurn(ICombatUnit enemy, Party party)
         {
             var target = GetRandomAliveHero(party);
             if (target == null)
             {
-                return $"{enemy.DisplayName} has no target.";
+                _lastTurnLog = $"{enemy.DisplayName} has no target.";
+                yield break;
             }
+
+            // Lunge forward (enemies lunge left)
+            yield return LungeAnimation(enemy.Transform, Vector3.left);
 
             int dmg = Mathf.Max(1, enemy.GetEffectiveAttack() - target.GetEffectiveDefense());
             target.Stats.Health -= dmg;
@@ -227,7 +237,35 @@ namespace Assets.Scripts.Rooms
                 _turnManager.RemoveUnit(target);
             }
 
-            return log;
+            _lastTurnLog = log;
+        }
+
+        private IEnumerator LungeAnimation(Transform unit, Vector3 direction)
+        {
+            var startPos = unit.position;
+            var lungePos = startPos + direction * _lungeDistance;
+
+            // Lunge forward
+            float elapsed = 0f;
+            while (elapsed < _lungeDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / _lungeDuration;
+                unit.position = Vector3.Lerp(startPos, lungePos, t);
+                yield return null;
+            }
+
+            // Snap back
+            elapsed = 0f;
+            while (elapsed < _lungeDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / _lungeDuration;
+                unit.position = Vector3.Lerp(lungePos, startPos, t);
+                yield return null;
+            }
+
+            unit.position = startPos;
         }
 
         private void BroadcastTurnOrder()
@@ -244,7 +282,7 @@ namespace Assets.Scripts.Rooms
                     position,
                     damage.ToString(),
                     color,
-                    0.4f,   // fadeSpeed — slower fade
+                    1f,     // fadeSpeed — fade out over ~1 second
                     0.8f,   // fadeRange — gentle drift
                     0.15f,  // scale
                     TextFadeMode.FadeUp);

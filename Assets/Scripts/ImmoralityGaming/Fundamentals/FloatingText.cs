@@ -10,12 +10,14 @@ public class FloatingText : MonoBehaviour
 
     private TextMesh text;
     private Vector3 fadeDirection;
+    private float _elapsed;
 
     private void OnEnable()
     {
         text = GetComponent<TextMesh>();
         GetComponent<MeshRenderer>().sortingOrder = 1000;
-        
+        _elapsed = 0f;
+
         SetFadeDirection();
         StartCoroutine(FadeTextToZeroAlpha());
         StartCoroutine(FadeInDirection());
@@ -28,7 +30,11 @@ public class FloatingText : MonoBehaviour
 
     void Update ()
     {
-		if (text.color.a <= 0f)
+        _elapsed += Time.deltaTime;
+
+        // Hard lifetime cap: deactivate after fade should be complete plus a small buffer
+        float maxLifetime = (1f / Mathf.Max(fadeSpeed, 0.01f)) + 0.5f;
+		if (text.color.a <= 0f || _elapsed >= maxLifetime)
         {
             gameObject.SetActive(false);
         }
