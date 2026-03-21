@@ -1,3 +1,4 @@
+using Assets.Scripts.Cards;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Resources;
@@ -34,6 +35,7 @@ namespace Assets.Scripts.Dungeon
         public static int? SeedToLoad;
         public static LevelDefinitionSO LevelToLoad;
         public Party Party { get; private set; }
+        public DungeonDeckState DeckState { get; private set; }
 
         private LevelDefinitionSO _level;
 
@@ -125,6 +127,13 @@ namespace Assets.Scripts.Dungeon
             }
             startRoom.Reveal();
 
+            // Initialize card deck state for this dungeon
+            if (CardCollectionManager.HasInstance)
+            {
+                DeckState = new DungeonDeckState();
+                DeckState.Initialize(Party.Heroes, CardCollectionManager.Instance);
+            }
+
             // Replenish party resources to their maximums for the new dungeon
             if (PartyResourceManager.Instance != null)
             {
@@ -181,6 +190,14 @@ namespace Assets.Scripts.Dungeon
                 {
                     rooms[roomData.RoomIndex].Reveal();
                 }
+            }
+
+            // Restore card deck state from save
+            if (CardCollectionManager.HasInstance)
+            {
+                DeckState = new DungeonDeckState();
+                DeckState.Initialize(Party.Heroes, CardCollectionManager.Instance);
+                DeckState.RestoreUsedCards(saveData.UsedCards);
             }
 
             // Restore party resource state from save

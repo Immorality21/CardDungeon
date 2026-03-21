@@ -1,3 +1,4 @@
+using Assets.Scripts.Cards;
 using Assets.Scripts.IO;
 using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
@@ -50,6 +51,11 @@ namespace Assets.Scripts.Dungeon
             if (PartyResourceManager.Instance != null)
             {
                 data.Resources = PartyResourceManager.Instance.GetSaveData();
+            }
+
+            if (DungeonManager.HasInstance && DungeonManager.Instance.DeckState != null)
+            {
+                data.UsedCards = DungeonManager.Instance.DeckState.GetSaveData();
             }
 
             _fileHandler.Save(data);
