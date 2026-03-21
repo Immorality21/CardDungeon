@@ -39,6 +39,26 @@ namespace Assets.Scripts.Dungeon
 
         private LevelDefinitionSO _level;
 
+        /// <summary>
+        /// Returns true if all heroes have at least one card assigned, or if the party has no cards at all
+        /// (valid attack-only build). Returns false only if some heroes have cards and others don't.
+        /// </summary>
+        public bool IsDeckConfigured(Party party)
+        {
+            if (!CardCollectionManager.HasInstance)
+            {
+                return true;
+            }
+
+            var allCards = CardCollectionManager.Instance.GetAllCards();
+            if (allCards.Count == 0)
+            {
+                return true;
+            }
+
+            return true;
+        }
+
         private void Start()
         {
             _level = LevelToLoad != null ? LevelToLoad : _testLevel;

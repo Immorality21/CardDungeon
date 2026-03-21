@@ -393,6 +393,11 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.OnCardDeckRequested?.Invoke(_currentHeroTurn, available);
         }
 
+        public void CancelCardSelection()
+        {
+            _heroActionPanel.SetActive(true);
+        }
+
         private void OnHeroSkip()
         {
             _heroActionPanel.SetActive(false);
