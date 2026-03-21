@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
@@ -297,6 +298,10 @@ namespace Assets.Scripts.Rooms
             }
 
             InventoryManager.Instance.TryDropItem(enemy.LootItem);
+            if (CardCollectionManager.HasInstance)
+            {
+                CardCollectionManager.Instance.TryDropCard(enemy.LootCard);
+            }
             _turnManager.RemoveUnit(enemy);
             room.Enemies.Remove(enemy);
             Destroy(enemy.gameObject);

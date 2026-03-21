@@ -44,6 +44,7 @@ namespace Assets.Scripts.Enemies
                         var enemy = enemyObj.GetComponent<Enemy>();
                         enemy.Stats = new Stats(entry.Stats.Attack, entry.Stats.Defense, entry.Stats.Health, entry.Stats.Agility);
                         enemy.LootItem = entry.LootItem;
+                        enemy.LootCard = entry.LootCard;
                         enemy.PlaceInRoom(room, position);
 
                         room.Enemies.Add(enemy);

@@ -1,3 +1,4 @@
+using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
@@ -10,6 +11,7 @@ namespace Assets.Scripts.Enemies
         public Stats Stats;
         public Room Room;
         public ItemSO LootItem;
+        public CardSO LootCard;
 
         private SpriteRenderer _spriteRenderer;
 
