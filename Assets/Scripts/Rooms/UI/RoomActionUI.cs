@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Cards;
+using Assets.Scripts.Combat;
+using Assets.Scripts.Dungeon;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,7 +34,10 @@ namespace Assets.Scripts.Rooms
         private GameObject _heroActionPanel;
         private TextMeshProUGUI _heroActionLabel;
         private Button _attackButton;
+        private Button _cardsButton;
         private Button _skipButton;
+
+        private ICombatUnit _currentHeroTurn;
 
         // Detail popup
         private GameObject _detailPanel;
@@ -161,7 +167,7 @@ namespace Assets.Scripts.Rooms
 
         private void BuildHeroActionPanel(Transform parent)
         {
-            _heroActionPanel = CreatePanel(parent, "HeroActionPanel", new Vector2(0, 0), new Vector2(340, 100));
+            _heroActionPanel = CreatePanel(parent, "HeroActionPanel", new Vector2(0, 0), new Vector2(460, 100));
             SetAnchors(_heroActionPanel.GetComponent<RectTransform>(), new Vector2(0.5f, 0), new Vector2(0.5f, 0));
             _heroActionPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 30);
 
@@ -188,9 +194,11 @@ namespace Assets.Scripts.Rooms
             rowLE.preferredHeight = 42;
 
             _attackButton = CreateButton(buttonRow.transform, "Attack");
+            _cardsButton = CreateButton(buttonRow.transform, "Cards");
             _skipButton = CreateButton(buttonRow.transform, "Skip");
 
             _attackButton.onClick.AddListener(OnHeroAttack);
+            _cardsButton.onClick.AddListener(OnHeroCards);
             _skipButton.onClick.AddListener(OnHeroSkip);
         }
 
@@ -341,9 +349,25 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.StartCombat(party, _currentRoom);
         }
 
-        private void OnHeroTurnStarted(Combat.ICombatUnit hero)
+        private void OnHeroTurnStarted(ICombatUnit hero)
         {
+            _currentHeroTurn = hero;
             _heroActionLabel.text = $"{hero.DisplayName}'s Turn";
+
+            // Show/hide cards button based on available cards
+            bool hasCards = false;
+            if (CardCollectionManager.HasInstance && DungeonManager.HasInstance && DungeonManager.Instance.DeckState != null)
+            {
+                var heroComponent = hero as Heroes.Hero;
+                if (heroComponent != null)
+                {
+                    var available = DungeonManager.Instance.DeckState.GetAvailableCards(
+                        heroComponent.HeroKey, CardCollectionManager.Instance);
+                    hasCards = available.Count > 0;
+                }
+            }
+            _cardsButton.gameObject.SetActive(hasCards);
+
             _heroActionPanel.SetActive(true);
         }
 
@@ -351,6 +375,22 @@ namespace Assets.Scripts.Rooms
         {
             _heroActionPanel.SetActive(false);
             CombatManager.Instance.SubmitHeroAction(HeroAction.Attack);
+        }
+
+        private void OnHeroCards()
+        {
+            _heroActionPanel.SetActive(false);
+
+            var heroComponent = _currentHeroTurn as Heroes.Hero;
+            if (heroComponent == null)
+            {
+                return;
+            }
+
+            var available = DungeonManager.Instance.DeckState.GetAvailableCards(
+                heroComponent.HeroKey, CardCollectionManager.Instance);
+
+            CombatManager.Instance.OnCardDeckRequested?.Invoke(_currentHeroTurn, available);
         }
 
         private void OnHeroSkip()

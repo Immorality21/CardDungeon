@@ -25,7 +25,8 @@ namespace Assets.Scripts.Rooms
     {
         None,
         Attack,
-        Skip
+        Skip,
+        Card
     }
 
     public class CombatResult
@@ -46,16 +47,51 @@ namespace Assets.Scripts.Rooms
         public event Action<CombatResult> OnCombatEnded;
         public event Action<List<ICombatUnit>> OnTurnOrderChanged;
         public event Action<ICombatUnit> OnHeroTurnStarted;
+        public event Action<ICombatUnit, List<CardSO>> OnCardDeckRequested;
 
         public bool InCombat { get; private set; }
+        public CombatBuffTracker BuffTracker { get; private set; }
 
         private TurnManager _turnManager = new TurnManager();
         private HeroAction _pendingAction = HeroAction.None;
+        private CardAction _pendingCardAction;
         private string _lastTurnLog;
+        private Room _currentCombatRoom;
 
         public void SubmitHeroAction(HeroAction action)
         {
             _pendingAction = action;
+        }
+
+        public void SubmitCardAction(CardSO card, ICombatUnit caster, List<ICombatUnit> targets)
+        {
+            _pendingCardAction = new CardAction
+            {
+                Card = card,
+                Caster = caster,
+                Targets = targets
+            };
+            _pendingAction = HeroAction.Card;
+        }
+
+        public List<ICombatUnit> GetAliveEnemies()
+        {
+            if (_currentCombatRoom == null)
+            {
+                return new List<ICombatUnit>();
+            }
+            return _currentCombatRoom.Enemies
+                .Where(e => e != null && e.IsAlive)
+                .Cast<ICombatUnit>()
+                .ToList();
+        }
+
+        public List<ICombatUnit> GetAliveHeroes(Party party)
+        {
+            return party.Heroes
+                .Where(h => h != null && h.IsAlive)
+                .Cast<ICombatUnit>()
+                .ToList();
         }
 
         public void StartCombat(Party party, Room room)
@@ -71,6 +107,8 @@ namespace Assets.Scripts.Rooms
         private IEnumerator RunCombat(Party party, Room room)
         {
             InCombat = true;
+            _currentCombatRoom = room;
+            BuffTracker = new CombatBuffTracker();
             OnCombatStarted?.Invoke();
 
             // Fan out heroes into the room
@@ -116,6 +154,7 @@ namespace Assets.Scripts.Rooms
                 {
                     // Wait for player input
                     _pendingAction = HeroAction.None;
+                    _pendingCardAction = null;
                     OnHeroTurnStarted?.Invoke(unit);
 
                     while (_pendingAction == HeroAction.None)
@@ -126,6 +165,10 @@ namespace Assets.Scripts.Rooms
                     if (_pendingAction == HeroAction.Attack)
                     {
                         yield return ExecuteHeroTurn(unit, room);
+                    }
+                    else if (_pendingAction == HeroAction.Card && _pendingCardAction != null)
+                    {
+                        yield return ExecuteCardAction(_pendingCardAction, room);
                     }
                     else
                     {
@@ -138,6 +181,7 @@ namespace Assets.Scripts.Rooms
                     yield return ExecuteEnemyTurn(unit, party);
                 }
 
+                BuffTracker.TickBuffs(unit);
                 fullLog += _lastTurnLog + "\n";
                 OnTurnExecuted?.Invoke(_lastTurnLog);
                 BroadcastTurnOrder();
@@ -172,6 +216,8 @@ namespace Assets.Scripts.Rooms
             }
             party.SaveParty();
 
+            BuffTracker.Clear();
+            _currentCombatRoom = null;
             InCombat = false;
 
             var result = new CombatResult
@@ -182,6 +228,28 @@ namespace Assets.Scripts.Rooms
             };
 
             OnCombatEnded?.Invoke(result);
+        }
+
+        private IEnumerator ExecuteCardAction(CardAction cardAction, Room room)
+        {
+            yield return CardExecutor.Execute(cardAction, BuffTracker);
+
+            _lastTurnLog = CardExecutor.GetLastLog(cardAction);
+
+            // Mark card as used in dungeon deck state
+            var hero = cardAction.Caster as Hero;
+            if (hero != null && DungeonManager.HasInstance && DungeonManager.Instance.DeckState != null)
+            {
+                DungeonManager.Instance.DeckState.MarkCardUsed(hero.HeroKey, cardAction.Card.Key);
+            }
+
+            // Check for enemy deaths caused by card
+            var deadEnemies = room.Enemies.Where(e => e != null && !e.IsAlive).ToList();
+            foreach (var dead in deadEnemies)
+            {
+                _lastTurnLog += $" {dead.DisplayName} defeated!";
+                HandleEnemyDeath(dead, room);
+            }
         }
 
         private IEnumerator ExecuteHeroTurn(ICombatUnit hero, Room room)
@@ -196,7 +264,9 @@ namespace Assets.Scripts.Rooms
             // Lunge forward (heroes lunge right)
             yield return LungeAnimation(hero.Transform, Vector3.right);
 
-            int dmg = Mathf.Max(1, hero.GetEffectiveAttack() - target.GetEffectiveDefense());
+            int attackBonus = BuffTracker.GetBuffAmount(hero, StatType.Attack);
+            int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Defense);
+            int dmg = Mathf.Max(1, hero.GetEffectiveAttack() + attackBonus - target.GetEffectiveDefense() - defenseBonus);
             target.Stats.Health -= dmg;
 
             ShowDamageText(target.Transform.position, dmg, Color.white);
@@ -224,7 +294,9 @@ namespace Assets.Scripts.Rooms
             // Lunge forward (enemies lunge left)
             yield return LungeAnimation(enemy.Transform, Vector3.left);
 
-            int dmg = Mathf.Max(1, enemy.GetEffectiveAttack() - target.GetEffectiveDefense());
+            int attackBonus = BuffTracker.GetBuffAmount(enemy, StatType.Attack);
+            int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Defense);
+            int dmg = Mathf.Max(1, enemy.GetEffectiveAttack() + attackBonus - target.GetEffectiveDefense() - defenseBonus);
             target.Stats.Health -= dmg;
 
             ShowDamageText(target.Transform.position, dmg, Color.red);
