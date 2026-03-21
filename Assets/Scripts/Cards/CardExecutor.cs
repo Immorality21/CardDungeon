@@ -9,8 +9,16 @@ namespace Assets.Scripts.Cards
 {
     public static class CardExecutor
     {
-        public static IEnumerator Execute(CardAction action, CombatBuffTracker buffTracker)
+        private static string _comboLog;
+
+        public static IEnumerator Execute(
+            CardAction action,
+            CombatBuffTracker buffTracker,
+            CardTagTracker tagTracker = null,
+            ComboDetector comboDetector = null)
         {
+            _comboLog = null;
+
             switch (action.Card.EffectType)
             {
                 case CardEffectType.Damage:
@@ -29,11 +37,40 @@ namespace Assets.Scripts.Cards
                     yield return ExecuteDebuff(action, buffTracker);
                     break;
             }
+
+            // Check for combos on each target
+            if (tagTracker != null && comboDetector != null && action.Card.Tags.Count > 0)
+            {
+                foreach (var target in action.Targets)
+                {
+                    if (!target.IsAlive)
+                    {
+                        continue;
+                    }
+
+                    var combo = comboDetector.DetectCombo(action.Card.Tags, target, tagTracker);
+                    if (combo != null)
+                    {
+                        yield return ExecuteCombo(combo, target, action.Caster, buffTracker);
+                    }
+                }
+
+                // Apply this card's tags to targets after combo check
+                foreach (var target in action.Targets)
+                {
+                    tagTracker.ApplyTags(target, action.Card.Tags);
+                }
+            }
         }
 
         public static string GetLastLog(CardAction action)
         {
-            return $"{action.Caster.DisplayName} plays {action.Card.DisplayName}!";
+            var log = $"{action.Caster.DisplayName} plays {action.Card.DisplayName}!";
+            if (!string.IsNullOrEmpty(_comboLog))
+            {
+                log += " " + _comboLog;
+            }
+            return log;
         }
 
         private static IEnumerator ExecuteDamage(CardAction action, CombatBuffTracker buffTracker)
@@ -112,6 +149,51 @@ namespace Assets.Scripts.Cards
                 ShowFloatingText(target.Transform.position, label, new Color(0.8f, 0.2f, 0.8f));
                 yield return new WaitForSeconds(0.2f);
             }
+        }
+
+        private static IEnumerator ExecuteCombo(
+            CardComboSO combo,
+            ICombatUnit target,
+            ICombatUnit caster,
+            CombatBuffTracker buffTracker)
+        {
+            _comboLog = $"COMBO: {combo.ComboName}!";
+
+            // Show combo name
+            ShowFloatingText(
+                target.Transform.position + Vector3.up * 0.3f,
+                combo.ComboName,
+                new Color(1f, 0.6f, 0f));
+            yield return new WaitForSeconds(0.3f);
+
+            switch (combo.BonusEffect)
+            {
+                case CardEffectType.Damage:
+                    int damage = combo.BonusPower;
+                    target.Stats.Health -= damage;
+                    ShowFloatingText(target.Transform.position, damage.ToString(), new Color(1f, 0.4f, 0f));
+                    break;
+                case CardEffectType.Heal:
+                    int heal = Mathf.Min(combo.BonusPower, caster.Stats.MaxHealth - caster.Stats.Health);
+                    caster.Stats.Health += heal;
+                    ShowFloatingText(caster.Transform.position, heal.ToString(), Color.green);
+                    break;
+                case CardEffectType.BuffAttack:
+                    buffTracker.ApplyBuff(caster, StatType.Attack, combo.BonusPower, 3);
+                    ShowFloatingText(caster.Transform.position, $"+{combo.BonusPower} Atk", Color.cyan);
+                    break;
+                case CardEffectType.BuffDefense:
+                    buffTracker.ApplyBuff(caster, StatType.Defense, combo.BonusPower, 3);
+                    ShowFloatingText(caster.Transform.position, $"+{combo.BonusPower} Def", Color.cyan);
+                    break;
+                case CardEffectType.Debuff:
+                    buffTracker.ApplyBuff(target, StatType.Attack, -combo.BonusPower, 3);
+                    buffTracker.ApplyBuff(target, StatType.Defense, -combo.BonusPower, 3);
+                    ShowFloatingText(target.Transform.position, $"-{combo.BonusPower} Stats", new Color(0.8f, 0.2f, 0.8f));
+                    break;
+            }
+
+            yield return new WaitForSeconds(0.3f);
         }
 
         private static void ShowFloatingText(Vector3 position, string text, Color color)

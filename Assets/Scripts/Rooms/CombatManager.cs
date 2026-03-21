@@ -49,6 +49,8 @@ namespace Assets.Scripts.Rooms
         public event Action<ICombatUnit> OnHeroTurnStarted;
         public event Action<ICombatUnit, List<CardSO>> OnCardDeckRequested;
 
+        [SerializeField] private List<CardComboSO> _cardCombos;
+
         public bool InCombat { get; private set; }
         public CombatBuffTracker BuffTracker { get; private set; }
 
@@ -57,6 +59,8 @@ namespace Assets.Scripts.Rooms
         private CardAction _pendingCardAction;
         private string _lastTurnLog;
         private Room _currentCombatRoom;
+        private CardTagTracker _tagTracker;
+        private ComboDetector _comboDetector;
 
         public void SubmitHeroAction(HeroAction action)
         {
@@ -109,6 +113,8 @@ namespace Assets.Scripts.Rooms
             InCombat = true;
             _currentCombatRoom = room;
             BuffTracker = new CombatBuffTracker();
+            _tagTracker = new CardTagTracker();
+            _comboDetector = new ComboDetector(_cardCombos);
             OnCombatStarted?.Invoke();
 
             // Fan out heroes into the room
@@ -217,6 +223,7 @@ namespace Assets.Scripts.Rooms
             party.SaveParty();
 
             BuffTracker.Clear();
+            _tagTracker.Clear();
             _currentCombatRoom = null;
             InCombat = false;
 
@@ -232,7 +239,7 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteCardAction(CardAction cardAction, Room room)
         {
-            yield return CardExecutor.Execute(cardAction, BuffTracker);
+            yield return CardExecutor.Execute(cardAction, BuffTracker, _tagTracker, _comboDetector);
 
             _lastTurnLog = CardExecutor.GetLastLog(cardAction);
 
