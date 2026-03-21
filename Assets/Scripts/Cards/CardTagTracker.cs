@@ -4,11 +4,17 @@ using Assets.Scripts.Combat;
 
 namespace Assets.Scripts.Cards
 {
+    public class TagEntry
+    {
+        public string Tag;
+        public int TurnsRemaining;
+    }
+
     public class CardTagTracker
     {
-        private Dictionary<ICombatUnit, HashSet<string>> _appliedTags = new Dictionary<ICombatUnit, HashSet<string>>();
+        private Dictionary<ICombatUnit, List<TagEntry>> _appliedTags = new Dictionary<ICombatUnit, List<TagEntry>>();
 
-        public void ApplyTags(ICombatUnit target, List<string> tags)
+        public void ApplyTags(ICombatUnit target, List<string> tags, int duration)
         {
             if (tags == null || tags.Count == 0)
             {
@@ -17,22 +23,58 @@ namespace Assets.Scripts.Cards
 
             if (!_appliedTags.ContainsKey(target))
             {
-                _appliedTags[target] = new HashSet<string>();
+                _appliedTags[target] = new List<TagEntry>();
             }
 
+            var entries = _appliedTags[target];
             foreach (var tag in tags)
             {
-                _appliedTags[target].Add(tag);
+                // If tag already exists, refresh to the longer duration
+                var existing = entries.Find(e => e.Tag == tag);
+                if (existing != null)
+                {
+                    if (duration > existing.TurnsRemaining)
+                    {
+                        existing.TurnsRemaining = duration;
+                    }
+                }
+                else
+                {
+                    entries.Add(new TagEntry { Tag = tag, TurnsRemaining = duration });
+                }
             }
         }
 
         public HashSet<string> GetTagsOnUnit(ICombatUnit unit)
         {
-            if (_appliedTags.TryGetValue(unit, out var tags))
+            if (_appliedTags.TryGetValue(unit, out var entries))
             {
-                return tags;
+                return new HashSet<string>(entries.Select(e => e.Tag));
             }
             return new HashSet<string>();
+        }
+
+        /// <summary>
+        /// Tick tag durations for a unit. Call this on the affected unit's turn only.
+        /// </summary>
+        public void TickTags(ICombatUnit unit)
+        {
+            if (!_appliedTags.TryGetValue(unit, out var entries))
+            {
+                return;
+            }
+
+            foreach (var entry in entries)
+            {
+                entry.TurnsRemaining--;
+            }
+
+            entries.RemoveAll(e => e.TurnsRemaining <= 0);
+
+            if (entries.Count == 0)
+            {
+                _appliedTags.Remove(unit);
+            }
         }
 
         public void Clear()

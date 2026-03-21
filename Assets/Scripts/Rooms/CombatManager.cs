@@ -188,6 +188,7 @@ namespace Assets.Scripts.Rooms
                 }
 
                 BuffTracker.TickBuffs(unit);
+                _tagTracker.TickTags(unit);
                 fullLog += _lastTurnLog + "\n";
                 OnTurnExecuted?.Invoke(_lastTurnLog);
                 BroadcastTurnOrder();

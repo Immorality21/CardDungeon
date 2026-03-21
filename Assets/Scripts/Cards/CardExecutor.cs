@@ -58,7 +58,7 @@ namespace Assets.Scripts.Cards
                 // Apply this card's tags to targets after combo check
                 foreach (var target in action.Targets)
                 {
-                    tagTracker.ApplyTags(target, action.Card.Tags);
+                    tagTracker.ApplyTags(target, action.Card.Tags, action.Card.TagDuration);
                 }
             }
         }

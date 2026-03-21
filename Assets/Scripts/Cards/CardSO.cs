@@ -16,5 +16,6 @@ namespace Assets.Scripts.Cards
         public int Power;
         public CardRarity Rarity;
         public List<string> Tags = new List<string>();
+        public int TagDuration = 3;
     }
 }
