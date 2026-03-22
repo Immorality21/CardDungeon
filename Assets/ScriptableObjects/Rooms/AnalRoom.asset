@@ -31,5 +31,6 @@ MonoBehaviour:
       MaxHealth: 5
       Agility: 5
     LootItem: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
+    LootCard: {fileID: 11400000, guid: 7eb83123e11d47b3ae4da91e88d37cb0, type: 2}
     SpawnChance: 0.5
     EvaluationCount: 1

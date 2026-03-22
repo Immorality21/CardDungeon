@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9f42194ff54842f4a6058ac3b040a155, type: 3}
-  m_Name: Conductor
-  m_EditorClassIdentifier:
+  m_Name: ConductorCombo
+  m_EditorClassIdentifier: 
   ComboName: Conductor
   Description: Lightning arcs through metal for doubled impact!
   RequiredTags:
