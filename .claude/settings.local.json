@@ -4,7 +4,8 @@
       "Bash(python3:*)",
       "Bash(python:*)",
       "Bash(pip install:*)",
-      "Bash(find \"/c/Repos/Games/Merge/Card Dungeon/Assets\" -name \"*Inventory*\" -type f 2>/dev/null | grep -v \".meta\")"
+      "Bash(find \"/c/Repos/Games/Merge/Card Dungeon/Assets\" -name \"*Inventory*\" -type f 2>/dev/null | grep -v \".meta\")",
+      "Bash(cd:*)"
     ]
   }
 }
