@@ -67,6 +67,11 @@ namespace Assets.Scripts.Rooms
             _pendingAction = action;
         }
 
+        public void RequestCardDeck(ICombatUnit hero, List<CardSO> availableCards)
+        {
+            OnCardDeckRequested?.Invoke(hero, availableCards);
+        }
+
         public void SubmitCardAction(CardSO card, ICombatUnit caster, List<ICombatUnit> targets)
         {
             _pendingCardAction = new CardAction

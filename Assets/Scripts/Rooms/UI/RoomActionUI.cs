@@ -390,7 +390,7 @@ namespace Assets.Scripts.Rooms
             var available = DungeonManager.Instance.DeckState.GetAvailableCards(
                 heroComponent.HeroKey, CardCollectionManager.Instance);
 
-            CombatManager.Instance.OnCardDeckRequested?.Invoke(_currentHeroTurn, available);
+            CombatManager.Instance.RequestCardDeck(_currentHeroTurn, available);
         }
 
         public void CancelCardSelection()
