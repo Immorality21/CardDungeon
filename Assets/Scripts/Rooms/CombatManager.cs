@@ -61,6 +61,8 @@ namespace Assets.Scripts.Rooms
         private Room _currentCombatRoom;
         private CardTagTracker _tagTracker;
         private ComboDetector _comboDetector;
+        private CardEffectCalculator _calculator = new CardEffectCalculator();
+        private CardEffectPresenter _presenter = new CardEffectPresenter();
 
         public void SubmitHeroAction(HeroAction action)
         {
@@ -245,9 +247,9 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteCardAction(CardAction cardAction, Room room)
         {
-            yield return CardExecutor.Execute(cardAction, BuffTracker, _tagTracker, _comboDetector);
-
-            _lastTurnLog = CardExecutor.GetLastLog(cardAction);
+            var result = _calculator.Execute(cardAction, BuffTracker, _tagTracker, _comboDetector);
+            _lastTurnLog = result.BuildLog(cardAction);
+            yield return _presenter.Present(result);
 
             // Mark card as used in dungeon deck state
             var hero = cardAction.Caster as Hero;
