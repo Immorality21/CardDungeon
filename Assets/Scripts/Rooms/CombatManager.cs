@@ -281,7 +281,9 @@ namespace Assets.Scripts.Rooms
 
             int attackBonus = BuffTracker.GetBuffAmount(hero, StatType.Attack);
             int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Defense);
-            int dmg = Mathf.Max(1, hero.GetEffectiveAttack() + attackBonus - target.GetEffectiveDefense() - defenseBonus);
+            int rawAttack = hero.GetEffectiveAttack() + attackBonus;
+            int defense = target.GetEffectiveDefense() + defenseBonus;
+            int dmg = DamageCalculator.Calculate(rawAttack, defense, DamageType.Normal, target.Resistances);
             target.Stats.Health -= dmg;
 
             ShowDamageText(target.Transform.position, dmg, Color.white);
@@ -311,7 +313,9 @@ namespace Assets.Scripts.Rooms
 
             int attackBonus = BuffTracker.GetBuffAmount(enemy, StatType.Attack);
             int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Defense);
-            int dmg = Mathf.Max(1, enemy.GetEffectiveAttack() + attackBonus - target.GetEffectiveDefense() - defenseBonus);
+            int rawAttack = enemy.GetEffectiveAttack() + attackBonus;
+            int defense = target.GetEffectiveDefense() + defenseBonus;
+            int dmg = DamageCalculator.Calculate(rawAttack, defense, DamageType.Normal, target.Resistances);
             target.Stats.Health -= dmg;
 
             ShowDamageText(target.Transform.position, dmg, Color.red);

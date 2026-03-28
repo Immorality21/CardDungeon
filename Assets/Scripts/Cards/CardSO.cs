@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Combat;
 using UnityEngine;
 
 namespace Assets.Scripts.Cards
@@ -13,6 +14,7 @@ namespace Assets.Scripts.Cards
         public Sprite Icon;
         public CardTargetType TargetType;
         public CardEffectType EffectType;
+        public DamageType DamageType;
         public int Power;
         public CardRarity Rarity;
         public List<string> Tags = new List<string>();

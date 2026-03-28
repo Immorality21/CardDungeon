@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Assets.Scripts.Rooms;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace Assets.Scripts.Combat
         bool IsAlive { get; }
         bool IsHero { get; }
         Transform Transform { get; }
+        List<Resistance> Resistances { get; }
         int GetEffectiveAttack();
         int GetEffectiveDefense();
     }

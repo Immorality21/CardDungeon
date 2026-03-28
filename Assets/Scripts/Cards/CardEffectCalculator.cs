@@ -73,7 +73,7 @@ namespace Assets.Scripts.Cards
         private void ApplyDamage(CardAction action, CombatBuffTracker buffTracker, CardEffectResult result)
         {
             int attackBonus = buffTracker.GetBuffAmount(action.Caster, StatType.Attack);
-            int baseAttack = action.Caster.GetEffectiveAttack() + attackBonus;
+            int rawAttack = action.Caster.GetEffectiveAttack() + attackBonus + action.Card.Power;
 
             foreach (var target in action.Targets)
             {
@@ -84,17 +84,32 @@ namespace Assets.Scripts.Cards
 
                 int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Defense);
                 int defense = target.GetEffectiveDefense() + defenseBonus;
-                int damage = Mathf.Max(1, baseAttack + action.Card.Power - defense);
+                int damage = DamageCalculator.Calculate(rawAttack, defense, action.Card.DamageType, target.Resistances);
 
-                target.Stats.Health -= damage;
-
-                result.Entries.Add(new EffectEntry
+                if (damage < 0)
                 {
-                    Target = target,
-                    Text = damage.ToString(),
-                    Color = DamageColor,
-                    Delay = EffectDelay
-                });
+                    // Absorption: negative damage heals the target
+                    int heal = Mathf.Min(-damage, target.Stats.MaxHealth - target.Stats.Health);
+                    target.Stats.Health += heal;
+                    result.Entries.Add(new EffectEntry
+                    {
+                        Target = target,
+                        Text = $"+{heal}",
+                        Color = HealColor,
+                        Delay = EffectDelay
+                    });
+                }
+                else
+                {
+                    target.Stats.Health -= damage;
+                    result.Entries.Add(new EffectEntry
+                    {
+                        Target = target,
+                        Text = damage.ToString(),
+                        Color = DamageColor,
+                        Delay = EffectDelay
+                    });
+                }
             }
         }
 
@@ -188,11 +203,15 @@ namespace Assets.Scripts.Cards
             switch (combo.BonusEffect)
             {
                 case CardEffectType.Damage:
-                    target.Stats.Health -= combo.BonusPower;
+                    int comboDefenseBonus = buffTracker.GetBuffAmount(target, StatType.Defense);
+                    int comboDefense = target.GetEffectiveDefense() + comboDefenseBonus;
+                    int comboDmg = DamageCalculator.Calculate(
+                        combo.BonusPower, comboDefense, combo.DamageType, target.Resistances);
+                    target.Stats.Health -= comboDmg;
                     result.Entries.Add(new EffectEntry
                     {
                         Target = target,
-                        Text = combo.BonusPower.ToString(),
+                        Text = comboDmg.ToString(),
                         Color = ComboDamageColor,
                         Delay = ComboDelay
                     });

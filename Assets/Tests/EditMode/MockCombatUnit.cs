@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Rooms;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace Tests.EditMode
         public bool IsAlive => Stats.Health > 0;
         public bool IsHero { get; set; }
         public Transform Transform => null;
+        public List<Resistance> Resistances { get; set; } = new List<Resistance>();
 
         public int GetEffectiveAttack()
         {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
@@ -12,6 +13,7 @@ namespace Assets.Scripts.Enemies
         public Room Room;
         public ItemSO LootItem;
         public CardSO LootCard;
+        public List<Resistance> Resistances = new List<Resistance>();
 
         private SpriteRenderer _spriteRenderer;
 
@@ -22,6 +24,7 @@ namespace Assets.Scripts.Enemies
         public Transform Transform => transform;
 
         Stats ICombatUnit.Stats => Stats;
+        List<Resistance> ICombatUnit.Resistances => Resistances;
 
         public void PlaceInRoom(Room room, Vector3 position)
         {

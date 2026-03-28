@@ -124,7 +124,7 @@ public class CardCollectionEditor : EditorWindow
 
             // Key & info
             string label = so != null
-                ? $"{so.Key}  ({so.DisplayName} — {so.Rarity} {so.EffectType} Pow:{so.Power})"
+                ? $"{so.Key}  ({so.DisplayName} — {so.Rarity} {so.EffectType} {so.DamageType} Pow:{so.Power})"
                 : $"{entry.CardKey}  (MISSING SO)";
             EditorGUILayout.LabelField(label);
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Combat;
 using UnityEngine;
 
 namespace Assets.Scripts.Cards
@@ -11,6 +12,7 @@ namespace Assets.Scripts.Cards
         public string Description;
         public List<string> RequiredTags = new List<string>();
         public CardEffectType BonusEffect;
+        public DamageType DamageType;
         public int BonusPower;
     }
 }

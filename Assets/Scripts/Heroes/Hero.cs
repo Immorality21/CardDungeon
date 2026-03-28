@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
@@ -11,6 +12,7 @@ namespace Assets.Scripts.Heroes
         public Stats Stats;
         public int Level = 1;
         public int CurrentXp;
+        public List<Resistance> Resistances = new List<Resistance>();
 
         public string HeroKey => HeroSO != null ? HeroSO.Label : "";
         public string DisplayName => HeroKey;
@@ -20,6 +22,7 @@ namespace Assets.Scripts.Heroes
         public Transform Transform => transform;
 
         Stats ICombatUnit.Stats => Stats;
+        List<Resistance> ICombatUnit.Resistances => Resistances;
 
         public void Initialize(HeroSO heroSO)
         {
