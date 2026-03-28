@@ -567,6 +567,33 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Combo_OilThenFire_DealsCardDamagePlusComboDamage()
+        {
+            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 20);
+            var detector = new ComboDetector(new List<CardComboSO> { combo });
+
+            // Turn 1: OilSlick applies "Oil" tag, no combo yet
+            var oilCard = CreateCard("OilSlick", CardEffectType.Debuff, power: 2, tags: new List<string> { "Oil" });
+            var oilAction = MakeAction(oilCard, _hero, _enemy);
+            _calculator.Execute(oilAction, _buffTracker, _tagTracker, detector);
+
+            int healthAfterOil = _enemy.Stats.Health;
+
+            // Turn 2: Fireball deals card damage AND triggers Ignite combo for bonus damage
+            var fireCard = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var fireAction = MakeAction(fireCard, _hero, _enemy);
+            var result = _calculator.Execute(fireAction, _buffTracker, _tagTracker, detector);
+
+            // Card damage: Max(1, hero.Attack(10) + power(5) - enemy.Defense(3) - debuff(-2)) = Max(1, 10+5-3+2) = 14
+            // Combo damage: 20 (flat)
+            int expectedCardDamage = 14;
+            int expectedComboDamage = 20;
+
+            Assert.AreEqual("Ignite", result.ComboName);
+            Assert.AreEqual(healthAfterOil - expectedCardDamage - expectedComboDamage, _enemy.Stats.Health);
+        }
+
+        [Test]
         public void Combo_DamageWithAttackDebuff_ComboIgnoresDebuff()
         {
             // Verify combo damage is flat (not affected by attack/defense)
