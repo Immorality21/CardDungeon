@@ -17,7 +17,7 @@ namespace Tests.EditMode
         private CardSO CreateCard(
             string key,
             CardEffectType effect,
-            int power,
+            int power, 
             List<string> tags = null,
             int tagDuration = 3)
         {
@@ -443,6 +443,150 @@ namespace Tests.EditMode
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
             Assert.AreEqual("Hero plays Fireball! COMBO: Ignite!", result.BuildLog(action));
+        }
+
+        [Test]
+        public void Combo_BuffDefenseBonus_BuffsCaster()
+        {
+            var combo = CreateCombo("Fortify", new List<string> { "Earth", "Iron" }, CardEffectType.BuffDefense, 6);
+            var detector = new ComboDetector(new List<CardComboSO> { combo });
+
+            _tagTracker.ApplyTags(_enemy, new List<string> { "Iron" }, 3);
+
+            var card = CreateCard("Quake", CardEffectType.Damage, power: 3, tags: new List<string> { "Earth" });
+            var action = MakeAction(card, _hero, _enemy);
+
+            _calculator.Execute(action, _buffTracker, _tagTracker, detector);
+
+            Assert.AreEqual(6, _buffTracker.GetBuffAmount(_hero, StatType.Defense));
+        }
+
+        [Test]
+        public void Combo_MultiTarget_TriggersOnEachEligible()
+        {
+            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var detector = new ComboDetector(new List<CardComboSO> { combo });
+
+            var enemy2 = new MockCombatUnit("Orc", attack: 4, defense: 2, health: 40, isHero: false);
+
+            // Both enemies have Oil
+            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(enemy2, new List<string> { "Oil" }, 3);
+
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var action = MakeAction(card, _hero, _enemy, enemy2);
+
+            int goblinBefore = _enemy.Stats.Health;
+            int orcBefore = enemy2.Stats.Health;
+            _calculator.Execute(action, _buffTracker, _tagTracker, detector);
+
+            // Goblin: damage 12 + combo 10 = 22
+            Assert.AreEqual(goblinBefore - 22, _enemy.Stats.Health);
+            // Orc: damage 13 + combo 10 = 23
+            Assert.AreEqual(orcBefore - 23, enemy2.Stats.Health);
+        }
+
+        [Test]
+        public void Combo_MultiTarget_OnlyTriggersWhereTagsPresent()
+        {
+            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var detector = new ComboDetector(new List<CardComboSO> { combo });
+
+            var enemy2 = new MockCombatUnit("Orc", attack: 4, defense: 2, health: 40, isHero: false);
+
+            // Only first enemy has Oil
+            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var action = MakeAction(card, _hero, _enemy, enemy2);
+
+            int goblinBefore = _enemy.Stats.Health;
+            int orcBefore = enemy2.Stats.Health;
+            _calculator.Execute(action, _buffTracker, _tagTracker, detector);
+
+            // Goblin: damage 12 + combo 10 = 22
+            Assert.AreEqual(goblinBefore - 22, _enemy.Stats.Health);
+            // Orc: damage 13 only, no combo
+            Assert.AreEqual(orcBefore - 13, enemy2.Stats.Health);
+        }
+
+        [Test]
+        public void Combo_HealCard_WithCombo_BothApply()
+        {
+            var combo = CreateCombo("Rejuvenate", new List<string> { "Nature", "Water" }, CardEffectType.Heal, 15);
+            var detector = new ComboDetector(new List<CardComboSO> { combo });
+
+            // Tags on the hero (self-target for heal)
+            _tagTracker.ApplyTags(_hero, new List<string> { "Water" }, 3);
+
+            _hero.Stats.Health = 50;
+            var card = CreateCard("Bloom", CardEffectType.Heal, power: 10, tags: new List<string> { "Nature" });
+            var action = MakeAction(card, _hero, _hero);
+
+            _calculator.Execute(action, _buffTracker, _tagTracker, detector);
+
+            // Heal 10 + combo heal 15 = 75
+            Assert.AreEqual(75, _hero.Stats.Health);
+        }
+
+        [Test]
+        public void Combo_NoTagsOnCard_NoComboPossible()
+        {
+            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var detector = new ComboDetector(new List<CardComboSO> { combo });
+
+            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+
+            // Card has no tags
+            var card = CreateCard("BasicSlash", CardEffectType.Damage, power: 5);
+            var action = MakeAction(card, _hero, _enemy);
+
+            var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
+
+            Assert.IsNull(result.ComboName);
+        }
+
+        [Test]
+        public void Combo_ChainedCombos_SecondCardTriggersAfterFirstAppliedTags()
+        {
+            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var detector = new ComboDetector(new List<CardComboSO> { combo });
+
+            // First card applies Oil tag, no combo
+            var oilCard = CreateCard("OilSlick", CardEffectType.Debuff, power: 1, tags: new List<string> { "Oil" });
+            var oilAction = MakeAction(oilCard, _hero, _enemy);
+            var result1 = _calculator.Execute(oilAction, _buffTracker, _tagTracker, detector);
+            Assert.IsNull(result1.ComboName);
+
+            // Second card has Fire, now Oil is on enemy -> combo triggers
+            var fireCard = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var fireAction = MakeAction(fireCard, _hero, _enemy);
+            var result2 = _calculator.Execute(fireAction, _buffTracker, _tagTracker, detector);
+
+            Assert.AreEqual("Ignite", result2.ComboName);
+        }
+
+        [Test]
+        public void Combo_DamageWithAttackDebuff_ComboIgnoresDebuff()
+        {
+            // Verify combo damage is flat (not affected by attack/defense)
+            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 20);
+            var detector = new ComboDetector(new List<CardComboSO> { combo });
+
+            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+
+            // Give hero a massive attack debuff
+            _buffTracker.ApplyBuff(_hero, StatType.Attack, -100, 3);
+
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 0, tags: new List<string> { "Fire" });
+            var action = MakeAction(card, _hero, _enemy);
+
+            int healthBefore = _enemy.Stats.Health;
+            _calculator.Execute(action, _buffTracker, _tagTracker, detector);
+
+            // Card damage: Max(1, (10-100) + 0 - 3) = 1 (minimum)
+            // Combo damage: 20 (flat, unaffected by buffs)
+            Assert.AreEqual(healthBefore - 21, _enemy.Stats.Health);
         }
 
         // ---- Entry count ----
