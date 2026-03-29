@@ -17,8 +17,12 @@ MonoBehaviour:
   Description: A toxic dart that damages and poisons an enemy.
   Icon: {fileID: 21300000, guid: d7434fcc47784f9782829d5963291aae, type: 3}
   TargetType: 0
-  EffectType: 0
-  Power: 2
   Rarity: 1
+  Effects:
+  - EffectType: 0
+    Power: 2
+    DamageType: 0
+    BuffType: 0
+    Duration: 3
   Tags:
   - Poison

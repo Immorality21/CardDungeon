@@ -17,5 +17,9 @@ MonoBehaviour:
   RequiredTags:
   - Lightning
   - Metal
-  BonusEffect: 0
-  BonusPower: 10
+  BonusEffects:
+  - EffectType: 0
+    Power: 10
+    DamageType: 3
+    BuffType: 0
+    Duration: 3

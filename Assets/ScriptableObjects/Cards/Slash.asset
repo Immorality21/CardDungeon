@@ -17,8 +17,12 @@ MonoBehaviour:
   Description: A swift blade strike against a single enemy.
   Icon: {fileID: 21300000, guid: b53101fc46804016a6bb310d446bd7c9, type: 3}
   TargetType: 0
-  EffectType: 0
-  Power: 3
   Rarity: 0
+  Effects:
+  - EffectType: 0
+    Power: 3
+    DamageType: 0
+    BuffType: 0
+    Duration: 3
   Tags:
   - Physical

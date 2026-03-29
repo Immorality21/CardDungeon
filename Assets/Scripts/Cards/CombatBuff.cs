@@ -7,5 +7,7 @@ namespace Assets.Scripts.Cards
         public StatType Stat;
         public int Amount;
         public int TurnsRemaining;
+        public bool IsStatusEffect;
+        public BuffType BuffType;
     }
 }

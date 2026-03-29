@@ -17,8 +17,12 @@ MonoBehaviour:
   Description: Douses an enemy in slippery oil, weakening their stats.
   Icon: {fileID: 21300000, guid: 82067118dbdd458a9a50325256cd5138, type: 3}
   TargetType: 0
-  EffectType: 4
-  Power: 3
   Rarity: 1
+  Effects:
+  - EffectType: 3
+    Power: 3
+    DamageType: 0
+    BuffType: 2
+    Duration: 3
   Tags:
   - Oil

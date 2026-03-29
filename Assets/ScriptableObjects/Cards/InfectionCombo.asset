@@ -17,5 +17,14 @@ MonoBehaviour:
   RequiredTags:
   - Poison
   - Physical
-  BonusEffect: 4
-  BonusPower: 4
+  BonusEffects:
+  - EffectType: 3
+    Power: 4
+    DamageType: 0
+    BuffType: 0
+    Duration: 3
+  - EffectType: 3
+    Power: 4
+    DamageType: 0
+    BuffType: 1
+    Duration: 3

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Combat;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -16,8 +17,10 @@ namespace Tests.EditMode
             var combo = ScriptableObject.CreateInstance<CardComboSO>();
             combo.ComboName = name;
             combo.RequiredTags = requiredTags;
-            combo.BonusEffect = effect;
-            combo.BonusPower = power;
+            combo.BonusEffects = new List<CardEffect>
+            {
+                new CardEffect { EffectType = effect, Power = power }
+            };
             return combo;
         }
 

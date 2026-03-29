@@ -18,15 +18,42 @@ namespace Tests.EditMode
         private CardSO CreateCard(
             string key,
             CardEffectType effect,
-            int power, 
+            int power,
+            DamageType damageType = DamageType.Normal,
+            BuffType buffType = BuffType.Attack,
+            int duration = 3,
             List<string> tags = null,
             int tagDuration = 3)
         {
             var card = ScriptableObject.CreateInstance<CardSO>();
             card.Key = key;
             card.DisplayName = key;
-            card.EffectType = effect;
-            card.Power = power;
+            card.Effects = new List<CardEffect>
+            {
+                new CardEffect
+                {
+                    EffectType = effect,
+                    Power = power,
+                    DamageType = damageType,
+                    BuffType = buffType,
+                    Duration = duration
+                }
+            };
+            card.Tags = tags ?? new List<string>();
+            card.TagDuration = tagDuration;
+            return card;
+        }
+
+        private CardSO CreateMultiEffectCard(
+            string key,
+            List<CardEffect> effects,
+            List<string> tags = null,
+            int tagDuration = 3)
+        {
+            var card = ScriptableObject.CreateInstance<CardSO>();
+            card.Key = key;
+            card.DisplayName = key;
+            card.Effects = effects;
             card.Tags = tags ?? new List<string>();
             card.TagDuration = tagDuration;
             return card;
@@ -36,13 +63,25 @@ namespace Tests.EditMode
             string name,
             List<string> requiredTags,
             CardEffectType effect,
-            int power)
+            int power,
+            DamageType damageType = DamageType.Normal,
+            BuffType buffType = BuffType.Attack,
+            int duration = 3)
         {
             var combo = ScriptableObject.CreateInstance<CardComboSO>();
             combo.ComboName = name;
             combo.RequiredTags = requiredTags;
-            combo.BonusEffect = effect;
-            combo.BonusPower = power;
+            combo.BonusEffects = new List<CardEffect>
+            {
+                new CardEffect
+                {
+                    EffectType = effect,
+                    Power = power,
+                    DamageType = damageType,
+                    BuffType = buffType,
+                    Duration = duration
+                }
+            };
             return combo;
         }
 
@@ -52,7 +91,7 @@ namespace Tests.EditMode
             {
                 Card = card,
                 Caster = caster,
-                Targets = new List<Assets.Scripts.Combat.ICombatUnit>(targets)
+                Targets = new List<ICombatUnit>(targets)
             };
         }
 
@@ -89,14 +128,12 @@ namespace Tests.EditMode
         [Test]
         public void Damage_MinimumOneDamage()
         {
-            // Enemy has massive defense
             var tank = new MockCombatUnit("Tank", attack: 1, defense: 999, health: 100, isHero: false);
             var card = CreateCard("Poke", CardEffectType.Damage, power: 0);
             var action = MakeAction(card, _hero, tank);
 
             _calculator.Execute(action, _buffTracker);
 
-            // Defense diminishing returns ensures minimum 1
             Assert.AreEqual(100 - 1, tank.Stats.Health);
         }
 
@@ -210,7 +247,7 @@ namespace Tests.EditMode
         [Test]
         public void BuffAttack_AppliesBuff()
         {
-            var card = CreateCard("WarCry", CardEffectType.BuffAttack, power: 7);
+            var card = CreateCard("WarCry", CardEffectType.Buff, power: 7, buffType: BuffType.Attack);
             var action = MakeAction(card, _hero, _hero);
 
             _calculator.Execute(action, _buffTracker);
@@ -221,7 +258,7 @@ namespace Tests.EditMode
         [Test]
         public void BuffDefense_AppliesBuff()
         {
-            var card = CreateCard("ShieldUp", CardEffectType.BuffDefense, power: 4);
+            var card = CreateCard("ShieldUp", CardEffectType.Buff, power: 4, buffType: BuffType.Defense);
             var action = MakeAction(card, _hero, _hero);
 
             _calculator.Execute(action, _buffTracker);
@@ -232,7 +269,7 @@ namespace Tests.EditMode
         [Test]
         public void Buff_GeneratesCorrectEntryText()
         {
-            var card = CreateCard("WarCry", CardEffectType.BuffAttack, power: 7);
+            var card = CreateCard("WarCry", CardEffectType.Buff, power: 7, buffType: BuffType.Attack);
             var action = MakeAction(card, _hero, _hero);
 
             var result = _calculator.Execute(action, _buffTracker);
@@ -244,27 +281,96 @@ namespace Tests.EditMode
         // ---- Debuff ----
 
         [Test]
-        public void Debuff_ReducesBothStats()
+        public void Debuff_ReducesStat()
         {
-            var card = CreateCard("Curse", CardEffectType.Debuff, power: 3);
+            var card = CreateCard("Curse", CardEffectType.Debuff, power: 3, buffType: BuffType.Attack);
             var action = MakeAction(card, _hero, _enemy);
 
             _calculator.Execute(action, _buffTracker);
 
             Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Attack));
-            Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Defense));
         }
 
         [Test]
         public void Debuff_GeneratesCorrectEntryText()
         {
-            var card = CreateCard("Curse", CardEffectType.Debuff, power: 3);
+            var card = CreateCard("Curse", CardEffectType.Debuff, power: 3, buffType: BuffType.Attack);
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker);
 
             Assert.AreEqual(1, result.Entries.Count);
-            Assert.AreEqual("-3 Stats", result.Entries[0].Text);
+            Assert.AreEqual("-3 Attack", result.Entries[0].Text);
+        }
+
+        // ---- Multi-Effect ----
+
+        [Test]
+        public void MultiEffect_DamageAndDebuff_BothApply()
+        {
+            var card = CreateMultiEffectCard("LightningBolt", new List<CardEffect>
+            {
+                new CardEffect { EffectType = CardEffectType.Damage, Power = 5, DamageType = DamageType.Lightning },
+                new CardEffect { EffectType = CardEffectType.Debuff, Power = 2, BuffType = BuffType.Defense, Duration = 3 }
+            });
+            var action = MakeAction(card, _hero, _enemy);
+
+            int healthBefore = _enemy.Stats.Health;
+            _calculator.Execute(action, _buffTracker);
+
+            int expectedDmg = ExpectedDamage(10 + 5, 3, DamageType.Lightning);
+            Assert.AreEqual(healthBefore - expectedDmg, _enemy.Stats.Health);
+            Assert.AreEqual(-2, _buffTracker.GetBuffAmount(_enemy, StatType.Defense));
+        }
+
+        [Test]
+        public void MultiEffect_EffectsExecuteInOrder()
+        {
+            // Debuff defense first, then damage — but damage should NOT benefit from
+            // the debuff applied in the same card (debuff hasn't been factored into the
+            // defense query yet because it's applied via buff tracker in the same action)
+            var card = CreateMultiEffectCard("Combo", new List<CardEffect>
+            {
+                new CardEffect { EffectType = CardEffectType.Debuff, Power = 3, BuffType = BuffType.Defense, Duration = 3 },
+                new CardEffect { EffectType = CardEffectType.Damage, Power = 5, DamageType = DamageType.Normal }
+            });
+            var action = MakeAction(card, _hero, _enemy);
+
+            int healthBefore = _enemy.Stats.Health;
+            _calculator.Execute(action, _buffTracker);
+
+            // Defense debuff IS already applied when damage calculates (same buff tracker)
+            int expectedDmg = ExpectedDamage(10 + 5, 3 + (-3));
+            Assert.AreEqual(healthBefore - expectedDmg, _enemy.Stats.Health);
+            Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Defense));
+        }
+
+        [Test]
+        public void MultiEffect_DebuffTwoStats()
+        {
+            // Old-style debuff that hits both Attack and Defense
+            var card = CreateMultiEffectCard("OilSlick", new List<CardEffect>
+            {
+                new CardEffect { EffectType = CardEffectType.Debuff, Power = 2, BuffType = BuffType.Attack, Duration = 3 },
+                new CardEffect { EffectType = CardEffectType.Debuff, Power = 2, BuffType = BuffType.Defense, Duration = 3 }
+            });
+            var action = MakeAction(card, _hero, _enemy);
+
+            _calculator.Execute(action, _buffTracker);
+
+            Assert.AreEqual(-2, _buffTracker.GetBuffAmount(_enemy, StatType.Attack));
+            Assert.AreEqual(-2, _buffTracker.GetBuffAmount(_enemy, StatType.Defense));
+        }
+
+        [Test]
+        public void MultiEffect_BuffAgility()
+        {
+            var card = CreateCard("Haste", CardEffectType.Buff, power: 3, buffType: BuffType.Agility);
+            var action = MakeAction(card, _hero, _hero);
+
+            _calculator.Execute(action, _buffTracker);
+
+            Assert.AreEqual(3, _buffTracker.GetBuffAmount(_hero, StatType.Agility));
         }
 
         // ---- Combos ----
@@ -275,7 +381,6 @@ namespace Tests.EditMode
             var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 15);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            // Pre-apply Oil tag
             _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
 
             var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
@@ -326,7 +431,7 @@ namespace Tests.EditMode
         [Test]
         public void Combo_BuffAttackBonus_BuffsCaster()
         {
-            var combo = CreateCombo("Empower", new List<string> { "Fire", "Wind" }, CardEffectType.BuffAttack, 8);
+            var combo = CreateCombo("Empower", new List<string> { "Fire", "Wind" }, CardEffectType.Buff, 8, buffType: BuffType.Attack);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
             _tagTracker.ApplyTags(_enemy, new List<string> { "Wind" }, 3);
@@ -342,7 +447,7 @@ namespace Tests.EditMode
         [Test]
         public void Combo_DebuffBonus_DebuffsTarget()
         {
-            var combo = CreateCombo("Weaken", new List<string> { "Ice", "Water" }, CardEffectType.Debuff, 5);
+            var combo = CreateCombo("Weaken", new List<string> { "Ice", "Water" }, CardEffectType.Debuff, 5, buffType: BuffType.Attack);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
             _tagTracker.ApplyTags(_enemy, new List<string> { "Water" }, 3);
@@ -353,7 +458,6 @@ namespace Tests.EditMode
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
             Assert.AreEqual(-5, _buffTracker.GetBuffAmount(_enemy, StatType.Attack));
-            Assert.AreEqual(-5, _buffTracker.GetBuffAmount(_enemy, StatType.Defense));
         }
 
         [Test]
@@ -378,15 +482,12 @@ namespace Tests.EditMode
             var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            // No existing tags — card has Fire, but combo needs Oil too
             var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
-            // No combo should trigger
             Assert.IsNull(result.ComboName);
-            // But Fire tag should now be on the enemy
             Assert.IsTrue(_tagTracker.GetTagsOnUnit(_enemy).Contains("Fire"));
         }
 
@@ -398,13 +499,11 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
 
-            // Card will kill the enemy (massive power)
             var card = CreateCard("Nuke", CardEffectType.Damage, power: 999, tags: new List<string> { "Fire" });
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
-            // Enemy died from damage, so combo should not trigger
             Assert.IsNull(result.ComboName);
         }
 
@@ -419,7 +518,6 @@ namespace Tests.EditMode
             var result = _calculator.Execute(action, _buffTracker);
 
             Assert.IsNull(result.ComboName);
-            // Only the damage entry
             Assert.AreEqual(1, result.Entries.Count);
         }
 
@@ -455,7 +553,7 @@ namespace Tests.EditMode
         [Test]
         public void Combo_BuffDefenseBonus_BuffsCaster()
         {
-            var combo = CreateCombo("Fortify", new List<string> { "Earth", "Iron" }, CardEffectType.BuffDefense, 6);
+            var combo = CreateCombo("Fortify", new List<string> { "Earth", "Iron" }, CardEffectType.Buff, 6, buffType: BuffType.Defense);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
             _tagTracker.ApplyTags(_enemy, new List<string> { "Iron" }, 3);
@@ -476,7 +574,6 @@ namespace Tests.EditMode
 
             var enemy2 = new MockCombatUnit("Orc", attack: 4, defense: 2, health: 40, isHero: false);
 
-            // Both enemies have Oil
             _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
             _tagTracker.ApplyTags(enemy2, new List<string> { "Oil" }, 3);
 
@@ -503,7 +600,6 @@ namespace Tests.EditMode
 
             var enemy2 = new MockCombatUnit("Orc", attack: 4, defense: 2, health: 40, isHero: false);
 
-            // Only first enemy has Oil
             _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
 
             var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
@@ -526,7 +622,6 @@ namespace Tests.EditMode
             var combo = CreateCombo("Rejuvenate", new List<string> { "Nature", "Water" }, CardEffectType.Heal, 15);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            // Tags on the hero (self-target for heal)
             _tagTracker.ApplyTags(_hero, new List<string> { "Water" }, 3);
 
             _hero.Stats.Health = 50;
@@ -535,7 +630,6 @@ namespace Tests.EditMode
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
-            // Heal 10 + combo heal 15 = 75
             Assert.AreEqual(75, _hero.Stats.Health);
         }
 
@@ -547,7 +641,6 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
 
-            // Card has no tags
             var card = CreateCard("BasicSlash", CardEffectType.Damage, power: 5);
             var action = MakeAction(card, _hero, _enemy);
 
@@ -562,13 +655,14 @@ namespace Tests.EditMode
             var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            // First card applies Oil tag, no combo
-            var oilCard = CreateCard("OilSlick", CardEffectType.Debuff, power: 1, tags: new List<string> { "Oil" });
+            var oilCard = CreateMultiEffectCard("OilSlick", new List<CardEffect>
+            {
+                new CardEffect { EffectType = CardEffectType.Debuff, Power = 1, BuffType = BuffType.Attack, Duration = 3 }
+            }, tags: new List<string> { "Oil" });
             var oilAction = MakeAction(oilCard, _hero, _enemy);
             var result1 = _calculator.Execute(oilAction, _buffTracker, _tagTracker, detector);
             Assert.IsNull(result1.ComboName);
 
-            // Second card has Fire, now Oil is on enemy -> combo triggers
             var fireCard = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
             var fireAction = MakeAction(fireCard, _hero, _enemy);
             var result2 = _calculator.Execute(fireAction, _buffTracker, _tagTracker, detector);
@@ -583,7 +677,11 @@ namespace Tests.EditMode
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
             // Turn 1: OilSlick applies "Oil" tag and debuffs
-            var oilCard = CreateCard("OilSlick", CardEffectType.Debuff, power: 2, tags: new List<string> { "Oil" });
+            var oilCard = CreateMultiEffectCard("OilSlick", new List<CardEffect>
+            {
+                new CardEffect { EffectType = CardEffectType.Debuff, Power = 2, BuffType = BuffType.Attack, Duration = 3 },
+                new CardEffect { EffectType = CardEffectType.Debuff, Power = 2, BuffType = BuffType.Defense, Duration = 3 }
+            }, tags: new List<string> { "Oil" });
             var oilAction = MakeAction(oilCard, _hero, _enemy);
             _calculator.Execute(oilAction, _buffTracker, _tagTracker, detector);
 
@@ -610,7 +708,6 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
 
-            // Give hero a massive attack debuff — card raw damage becomes 0 (clamped)
             _buffTracker.ApplyBuff(_hero, StatType.Attack, -100, 3);
 
             var card = CreateCard("Fireball", CardEffectType.Damage, power: 0, tags: new List<string> { "Fire" });
@@ -619,9 +716,6 @@ namespace Tests.EditMode
             int healthBefore = _enemy.Stats.Health;
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
-            // Card raw damage: 10 + (-100) + 0 = negative => Calculate returns 0
-            // Combo uses its own BonusPower through DamageCalculator
-            int comboDmg = ExpectedDamage(20, 3);
             Assert.IsTrue(_enemy.Stats.Health < healthBefore, "Enemy should take at least combo damage");
         }
 
@@ -642,6 +736,45 @@ namespace Tests.EditMode
 
             // 1 damage entry + 1 combo name entry + 1 combo damage entry = 3
             Assert.AreEqual(3, result.Entries.Count);
+        }
+
+        // ---- Frozen status effect ----
+
+        [Test]
+        public void Frozen_AppliedViaDebuff()
+        {
+            var card = CreateCard("FrostNova", CardEffectType.Debuff, power: 0, buffType: BuffType.Frozen, duration: 2);
+            var action = MakeAction(card, _hero, _enemy);
+
+            _calculator.Execute(action, _buffTracker);
+
+            Assert.IsTrue(_buffTracker.HasStatusEffect(_enemy, BuffType.Frozen));
+        }
+
+        [Test]
+        public void Frozen_RemovedByFireDamage()
+        {
+            _buffTracker.ApplyStatusEffect(_enemy, BuffType.Frozen, 3);
+
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, damageType: DamageType.Fire);
+            var action = MakeAction(card, _hero, _enemy);
+
+            _calculator.Execute(action, _buffTracker);
+
+            Assert.IsFalse(_buffTracker.HasStatusEffect(_enemy, BuffType.Frozen));
+        }
+
+        [Test]
+        public void Frozen_NotRemovedByNonFireDamage()
+        {
+            _buffTracker.ApplyStatusEffect(_enemy, BuffType.Frozen, 3);
+
+            var card = CreateCard("IceShard", CardEffectType.Damage, power: 5, damageType: DamageType.Ice);
+            var action = MakeAction(card, _hero, _enemy);
+
+            _calculator.Execute(action, _buffTracker);
+
+            Assert.IsTrue(_buffTracker.HasStatusEffect(_enemy, BuffType.Frozen));
         }
     }
 }

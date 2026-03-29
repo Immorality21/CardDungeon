@@ -17,8 +17,12 @@ MonoBehaviour:
   Description: Raises a sturdy shield, boosting defense.
   Icon: {fileID: 21300000, guid: 8a51e70095bc4789b91f496a992b7cc1, type: 3}
   TargetType: 2
-  EffectType: 3
-  Power: 4
   Rarity: 0
+  Effects:
+  - EffectType: 2
+    Power: 4
+    DamageType: 0
+    BuffType: 1
+    Duration: 3
   Tags:
   - Metal

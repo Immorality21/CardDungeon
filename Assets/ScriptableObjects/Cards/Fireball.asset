@@ -17,8 +17,12 @@ MonoBehaviour:
   Description: Hurls a ball of fire at all enemies.
   Icon: {fileID: 21300000, guid: 64265e59b4da49ae842d6c083b334cce, type: 3}
   TargetType: 1
-  EffectType: 0
-  Power: 4
   Rarity: 2
+  Effects:
+  - EffectType: 0
+    Power: 4
+    DamageType: 1
+    BuffType: 0
+    Duration: 3
   Tags:
   - Fire

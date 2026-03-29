@@ -4,6 +4,7 @@ namespace Assets.Scripts.Items
     {
         Attack,
         Defense,
-        MaxHealth
+        MaxHealth,
+        Agility
     }
 }

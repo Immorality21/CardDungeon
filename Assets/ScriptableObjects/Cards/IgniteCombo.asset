@@ -17,5 +17,9 @@ MonoBehaviour:
   RequiredTags:
   - Fire
   - Oil
-  BonusEffect: 0
-  BonusPower: 8
+  BonusEffects:
+  - EffectType: 0
+    Power: 8
+    DamageType: 1
+    BuffType: 0
+    Duration: 3

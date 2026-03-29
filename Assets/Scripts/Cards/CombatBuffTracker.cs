@@ -24,6 +24,46 @@ namespace Assets.Scripts.Cards
             });
         }
 
+        public void ApplyStatusEffect(ICombatUnit unit, BuffType type, int duration)
+        {
+            if (!_activeBuffs.ContainsKey(unit))
+            {
+                _activeBuffs[unit] = new List<CombatBuff>();
+            }
+
+            _activeBuffs[unit].Add(new CombatBuff
+            {
+                BuffType = type,
+                IsStatusEffect = true,
+                TurnsRemaining = duration
+            });
+        }
+
+        public bool HasStatusEffect(ICombatUnit unit, BuffType type)
+        {
+            if (!_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                return false;
+            }
+
+            return buffs.Any(b => b.IsStatusEffect && b.BuffType == type);
+        }
+
+        public void RemoveStatusEffect(ICombatUnit unit, BuffType type)
+        {
+            if (!_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                return;
+            }
+
+            buffs.RemoveAll(b => b.IsStatusEffect && b.BuffType == type);
+
+            if (buffs.Count == 0)
+            {
+                _activeBuffs.Remove(unit);
+            }
+        }
+
         public int GetBuffAmount(ICombatUnit unit, StatType stat)
         {
             if (!_activeBuffs.TryGetValue(unit, out var buffs))
@@ -31,7 +71,7 @@ namespace Assets.Scripts.Cards
                 return 0;
             }
 
-            return buffs.Where(b => b.Stat == stat).Sum(b => b.Amount);
+            return buffs.Where(b => !b.IsStatusEffect && b.Stat == stat).Sum(b => b.Amount);
         }
 
         public void TickBuffs(ICombatUnit unit)
@@ -56,7 +96,6 @@ namespace Assets.Scripts.Cards
 
         public List<string> GetActiveTagsOnUnit(ICombatUnit unit)
         {
-            // Tags are tracked separately via CardTagTracker, not here
             return new List<string>();
         }
 

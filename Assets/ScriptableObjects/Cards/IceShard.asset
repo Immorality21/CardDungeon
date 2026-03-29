@@ -17,8 +17,12 @@ MonoBehaviour:
   Description: Launches a razor-sharp shard of ice at a single enemy.
   Icon: {fileID: 21300000, guid: 013e46b359b949c3bbac3a2da41f2d41, type: 3}
   TargetType: 0
-  EffectType: 0
-  Power: 4
   Rarity: 1
+  Effects:
+  - EffectType: 0
+    Power: 4
+    DamageType: 2
+    BuffType: 0
+    Duration: 3
   Tags:
   - Ice

@@ -17,8 +17,17 @@ MonoBehaviour:
   Description: Strikes an enemy with a crackling bolt of lightning.
   Icon: {fileID: 21300000, guid: 4a51662343c14245a100998681f5ef51, type: 3}
   TargetType: 0
-  EffectType: 0
-  Power: 5
   Rarity: 1
+  Effects:
+  - EffectType: 0
+    Power: 5
+    DamageType: 3
+    BuffType: 0
+    Duration: 3
+  - EffectType: 3
+    Power: 2
+    DamageType: 0
+    BuffType: 1
+    Duration: 2
   Tags:
   - Lightning

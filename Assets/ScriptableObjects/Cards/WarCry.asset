@@ -17,7 +17,11 @@ MonoBehaviour:
   Description: A thunderous battle cry that boosts all allies' attack.
   Icon: {fileID: 21300000, guid: fc5a42e03d25418494ff19dfa14b9258, type: 3}
   TargetType: 4
-  EffectType: 2
-  Power: 3
   Rarity: 2
+  Effects:
+  - EffectType: 2
+    Power: 3
+    DamageType: 0
+    BuffType: 0
+    Duration: 3
   Tags: []

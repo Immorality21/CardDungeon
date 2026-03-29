@@ -163,6 +163,17 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
 
+                if (BuffTracker.HasStatusEffect(unit, BuffType.Frozen))
+                {
+                    _lastTurnLog = $"{unit.DisplayName} is frozen!";
+                    BuffTracker.TickBuffs(unit);
+                    _tagTracker.TickTags(unit);
+                    fullLog += _lastTurnLog + "\n";
+                    OnTurnExecuted?.Invoke(_lastTurnLog);
+                    BroadcastTurnOrder();
+                    continue;
+                }
+
                 if (unit.IsHero)
                 {
                     // Wait for player input

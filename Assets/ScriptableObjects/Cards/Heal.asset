@@ -17,7 +17,11 @@ MonoBehaviour:
   Description: Restores health to yourself.
   Icon: {fileID: 21300000, guid: 47433f2f5a174f969fefbf17f86f06b7, type: 3}
   TargetType: 2
-  EffectType: 1
-  Power: 8
   Rarity: 0
+  Effects:
+  - EffectType: 1
+    Power: 8
+    DamageType: 0
+    BuffType: 0
+    Duration: 3
   Tags: []

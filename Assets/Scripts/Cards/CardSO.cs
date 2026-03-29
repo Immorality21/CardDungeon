@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Combat;
 using UnityEngine;
 
@@ -13,11 +14,14 @@ namespace Assets.Scripts.Cards
         public string Description;
         public Sprite Icon;
         public CardTargetType TargetType;
-        public CardEffectType EffectType;
-        public DamageType DamageType;
-        public int Power;
         public CardRarity Rarity;
+        public List<CardEffect> Effects = new List<CardEffect>();
         public List<string> Tags = new List<string>();
         public int TagDuration = 3;
+
+        public bool HasEffectType(CardEffectType type)
+        {
+            return Effects.Any(e => e.EffectType == type);
+        }
     }
 }

@@ -17,8 +17,12 @@ MonoBehaviour:
   Description: A torrent of water crashes into all enemies.
   Icon: {fileID: 21300000, guid: 17abe2609df24702851cf30afe084386, type: 3}
   TargetType: 1
-  EffectType: 0
-  Power: 2
   Rarity: 0
+  Effects:
+  - EffectType: 0
+    Power: 2
+    DamageType: 0
+    BuffType: 0
+    Duration: 3
   Tags:
   - Water

@@ -17,5 +17,9 @@ MonoBehaviour:
   RequiredTags:
   - Ice
   - Water
-  BonusEffect: 4
-  BonusPower: 5
+  BonusEffects:
+  - EffectType: 3
+    Power: 0
+    DamageType: 0
+    BuffType: 8
+    Duration: 2

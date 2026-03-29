@@ -69,7 +69,7 @@ namespace Assets.Scripts.Cards.UI
                 var label = btnObj.GetComponentInChildren<TextMeshProUGUI>();
                 if (label != null)
                 {
-                    label.text = $"{card.DisplayName} ({card.Power})";
+                    label.text = card.DisplayName;
                 }
 
                 var icon = btnObj.transform.Find("Icon");

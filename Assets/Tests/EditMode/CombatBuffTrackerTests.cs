@@ -1,4 +1,5 @@
 using Assets.Scripts.Cards;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using NUnit.Framework;
 
@@ -133,6 +134,63 @@ namespace Tests.EditMode
 
             Assert.AreEqual(0, _tracker.GetBuffAmount(_hero, StatType.Attack));
             Assert.AreEqual(0, _tracker.GetBuffAmount(_enemy, StatType.Defense));
+        }
+
+        // ---- Status Effects ----
+
+        [Test]
+        public void ApplyStatusEffect_CanBeQueried()
+        {
+            _tracker.ApplyStatusEffect(_enemy, BuffType.Frozen, 3);
+
+            Assert.IsTrue(_tracker.HasStatusEffect(_enemy, BuffType.Frozen));
+        }
+
+        [Test]
+        public void HasStatusEffect_WhenNotApplied_ReturnsFalse()
+        {
+            Assert.IsFalse(_tracker.HasStatusEffect(_enemy, BuffType.Frozen));
+        }
+
+        [Test]
+        public void RemoveStatusEffect_RemovesIt()
+        {
+            _tracker.ApplyStatusEffect(_enemy, BuffType.Frozen, 3);
+
+            _tracker.RemoveStatusEffect(_enemy, BuffType.Frozen);
+
+            Assert.IsFalse(_tracker.HasStatusEffect(_enemy, BuffType.Frozen));
+        }
+
+        [Test]
+        public void StatusEffect_ExpiresAfterDuration()
+        {
+            _tracker.ApplyStatusEffect(_enemy, BuffType.Frozen, 2);
+
+            _tracker.TickBuffs(_enemy);
+            Assert.IsTrue(_tracker.HasStatusEffect(_enemy, BuffType.Frozen));
+
+            _tracker.TickBuffs(_enemy);
+            Assert.IsFalse(_tracker.HasStatusEffect(_enemy, BuffType.Frozen));
+        }
+
+        [Test]
+        public void StatusEffect_DoesNotAffectStatBuffs()
+        {
+            _tracker.ApplyStatusEffect(_enemy, BuffType.Frozen, 3);
+            _tracker.ApplyBuff(_enemy, StatType.Attack, 5, 3);
+
+            Assert.AreEqual(5, _tracker.GetBuffAmount(_enemy, StatType.Attack));
+        }
+
+        [Test]
+        public void Clear_RemovesStatusEffects()
+        {
+            _tracker.ApplyStatusEffect(_enemy, BuffType.Frozen, 3);
+
+            _tracker.Clear();
+
+            Assert.IsFalse(_tracker.HasStatusEffect(_enemy, BuffType.Frozen));
         }
     }
 }

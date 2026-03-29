@@ -1,22 +1,16 @@
 using System.Collections.Generic;
+using Assets.Scripts.Cards.Effects;
 using Assets.Scripts.Combat;
-using Assets.Scripts.Items;
 using UnityEngine;
 
 namespace Assets.Scripts.Cards
 {
     public class CardEffectCalculator
     {
-        private static readonly Color DamageColor = Color.white;
-        private static readonly Color HealColor = Color.green;
-        private static readonly Color BuffColor = Color.cyan;
-        private static readonly Color DebuffColor = new Color(0.8f, 0.2f, 0.8f);
         private static readonly Color ComboNameColor = new Color(1f, 0.6f, 0f);
-        private static readonly Color ComboDamageColor = new Color(1f, 0.4f, 0f);
-
-        private const float EffectDelay = 0.2f;
         private const float ComboDelay = 0.3f;
-        private const int BuffDuration = 3;
+
+        private readonly EffectExecutorFactory _factory = new EffectExecutorFactory();
 
         public CardEffectResult Execute(
             CardAction action,
@@ -26,23 +20,10 @@ namespace Assets.Scripts.Cards
         {
             var result = new CardEffectResult();
 
-            switch (action.Card.EffectType)
+            foreach (var effect in action.Card.Effects)
             {
-                case CardEffectType.Damage:
-                    ApplyDamage(action, buffTracker, result);
-                    break;
-                case CardEffectType.Heal:
-                    ApplyHeal(action, result);
-                    break;
-                case CardEffectType.BuffAttack:
-                    ApplyBuff(action, buffTracker, StatType.Attack, result);
-                    break;
-                case CardEffectType.BuffDefense:
-                    ApplyBuff(action, buffTracker, StatType.Defense, result);
-                    break;
-                case CardEffectType.Debuff:
-                    ApplyDebuff(action, buffTracker, result);
-                    break;
+                var executor = _factory.GetExecutor(effect.EffectType);
+                executor.Execute(effect, action.Caster, action.Targets, buffTracker, result);
             }
 
             if (tagTracker != null && comboDetector != null && action.Card.Tags.Count > 0)
@@ -70,116 +51,6 @@ namespace Assets.Scripts.Cards
             return result;
         }
 
-        private void ApplyDamage(CardAction action, CombatBuffTracker buffTracker, CardEffectResult result)
-        {
-            int attackBonus = buffTracker.GetBuffAmount(action.Caster, StatType.Attack);
-            int rawAttack = action.Caster.GetEffectiveAttack() + attackBonus + action.Card.Power;
-
-            foreach (var target in action.Targets)
-            {
-                if (!target.IsAlive)
-                {
-                    continue;
-                }
-
-                int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Defense);
-                int defense = target.GetEffectiveDefense() + defenseBonus;
-                int damage = DamageCalculator.Calculate(rawAttack, defense, action.Card.DamageType, target.Resistances);
-
-                if (damage < 0)
-                {
-                    // Absorption: negative damage heals the target
-                    int heal = Mathf.Min(-damage, target.Stats.MaxHealth - target.Stats.Health);
-                    target.Stats.Health += heal;
-                    result.Entries.Add(new EffectEntry
-                    {
-                        Target = target,
-                        Text = $"+{heal}",
-                        Color = HealColor,
-                        Delay = EffectDelay
-                    });
-                }
-                else
-                {
-                    target.Stats.Health -= damage;
-                    result.Entries.Add(new EffectEntry
-                    {
-                        Target = target,
-                        Text = damage.ToString(),
-                        Color = DamageColor,
-                        Delay = EffectDelay
-                    });
-                }
-            }
-        }
-
-        private void ApplyHeal(CardAction action, CardEffectResult result)
-        {
-            foreach (var target in action.Targets)
-            {
-                if (!target.IsAlive)
-                {
-                    continue;
-                }
-
-                int healAmount = action.Card.Power;
-                int newHealth = Mathf.Min(target.Stats.Health + healAmount, target.Stats.MaxHealth);
-                int actualHeal = newHealth - target.Stats.Health;
-                target.Stats.Health = newHealth;
-
-                result.Entries.Add(new EffectEntry
-                {
-                    Target = target,
-                    Text = actualHeal.ToString(),
-                    Color = HealColor,
-                    Delay = EffectDelay
-                });
-            }
-        }
-
-        private void ApplyBuff(CardAction action, CombatBuffTracker buffTracker, StatType stat, CardEffectResult result)
-        {
-            foreach (var target in action.Targets)
-            {
-                if (!target.IsAlive)
-                {
-                    continue;
-                }
-
-                buffTracker.ApplyBuff(target, stat, action.Card.Power, BuffDuration);
-
-                result.Entries.Add(new EffectEntry
-                {
-                    Target = target,
-                    Text = $"+{action.Card.Power} {stat}",
-                    Color = BuffColor,
-                    Delay = EffectDelay
-                });
-            }
-        }
-
-        private void ApplyDebuff(CardAction action, CombatBuffTracker buffTracker, CardEffectResult result)
-        {
-            foreach (var target in action.Targets)
-            {
-                if (!target.IsAlive)
-                {
-                    continue;
-                }
-
-                buffTracker.ApplyBuff(target, StatType.Attack, -action.Card.Power, BuffDuration);
-                buffTracker.ApplyBuff(target, StatType.Defense, -action.Card.Power, BuffDuration);
-
-                result.Entries.Add(new EffectEntry
-                {
-                    Target = target,
-                    Text = $"-{action.Card.Power} Stats",
-                    Color = DebuffColor,
-                    Delay = EffectDelay
-                });
-            }
-        }
-
         private void ApplyCombo(
             CardComboSO combo,
             ICombatUnit target,
@@ -189,7 +60,6 @@ namespace Assets.Scripts.Cards
         {
             result.ComboName = combo.ComboName;
 
-            // Combo name floating text
             result.Entries.Add(new EffectEntry
             {
                 Target = target,
@@ -199,69 +69,23 @@ namespace Assets.Scripts.Cards
                 PositionOffset = Vector3.up * 0.3f
             });
 
-            // Apply combo bonus effect
-            switch (combo.BonusEffect)
+            foreach (var effect in combo.BonusEffects)
             {
-                case CardEffectType.Damage:
-                    int comboDefenseBonus = buffTracker.GetBuffAmount(target, StatType.Defense);
-                    int comboDefense = target.GetEffectiveDefense() + comboDefenseBonus;
-                    int comboDmg = DamageCalculator.Calculate(
-                        combo.BonusPower, comboDefense, combo.DamageType, target.Resistances);
-                    target.Stats.Health -= comboDmg;
-                    result.Entries.Add(new EffectEntry
-                    {
-                        Target = target,
-                        Text = comboDmg.ToString(),
-                        Color = ComboDamageColor,
-                        Delay = ComboDelay
-                    });
-                    break;
+                var comboTargets = GetComboTargets(effect.EffectType, caster, target);
+                var executor = _factory.GetExecutor(effect.EffectType);
+                executor.Execute(effect, caster, comboTargets, buffTracker, result, isComboEffect: true);
+            }
+        }
 
+        private List<ICombatUnit> GetComboTargets(CardEffectType effectType, ICombatUnit caster, ICombatUnit target)
+        {
+            switch (effectType)
+            {
                 case CardEffectType.Heal:
-                    int heal = Mathf.Min(combo.BonusPower, caster.Stats.MaxHealth - caster.Stats.Health);
-                    caster.Stats.Health += heal;
-                    result.Entries.Add(new EffectEntry
-                    {
-                        Target = caster,
-                        Text = heal.ToString(),
-                        Color = HealColor,
-                        Delay = ComboDelay
-                    });
-                    break;
-
-                case CardEffectType.BuffAttack:
-                    buffTracker.ApplyBuff(caster, StatType.Attack, combo.BonusPower, BuffDuration);
-                    result.Entries.Add(new EffectEntry
-                    {
-                        Target = caster,
-                        Text = $"+{combo.BonusPower} Atk",
-                        Color = BuffColor,
-                        Delay = ComboDelay
-                    });
-                    break;
-
-                case CardEffectType.BuffDefense:
-                    buffTracker.ApplyBuff(caster, StatType.Defense, combo.BonusPower, BuffDuration);
-                    result.Entries.Add(new EffectEntry
-                    {
-                        Target = caster,
-                        Text = $"+{combo.BonusPower} Def",
-                        Color = BuffColor,
-                        Delay = ComboDelay
-                    });
-                    break;
-
-                case CardEffectType.Debuff:
-                    buffTracker.ApplyBuff(target, StatType.Attack, -combo.BonusPower, BuffDuration);
-                    buffTracker.ApplyBuff(target, StatType.Defense, -combo.BonusPower, BuffDuration);
-                    result.Entries.Add(new EffectEntry
-                    {
-                        Target = target,
-                        Text = $"-{combo.BonusPower} Stats",
-                        Color = DebuffColor,
-                        Delay = ComboDelay
-                    });
-                    break;
+                case CardEffectType.Buff:
+                    return new List<ICombatUnit> { caster };
+                default:
+                    return new List<ICombatUnit> { target };
             }
         }
     }
