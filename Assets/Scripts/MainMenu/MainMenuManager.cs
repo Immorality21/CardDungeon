@@ -1,3 +1,4 @@
+using Assets.Scripts.Cards.UI;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.IO;
 using TMPro;
@@ -23,6 +24,9 @@ public class MainMenuManager : MonoBehaviour
 
     [SerializeField]
     private Button _manageDeckButton;
+
+    [SerializeField]
+    private DeckManagementUI _deckManagementUI;
 
     [Header("Run Progress Panel")]
     [SerializeField]
@@ -60,6 +64,7 @@ public class MainMenuManager : MonoBehaviour
         _enterDungeonButton.onClick.AddListener(OnEnterDungeon);
         _backButton.onClick.AddListener(OnBack);
         _runCompleteReturnButton.onClick.AddListener(OnRunCompleteReturn);
+        _manageDeckButton.onClick.AddListener(OnManageDeck);
 
         // Check if run was just completed (ActiveRun cleared after final level)
         if (DungeonManager.ActiveRun == null && !string.IsNullOrEmpty(_runSaveData.RunKey))
@@ -166,6 +171,27 @@ public class MainMenuManager : MonoBehaviour
         }
 
         SceneManager.LoadScene("MainGameScene");
+    }
+
+    private void OnManageDeck()
+    {
+        _homePanel.SetActive(false);
+
+        if (_deckManagementUI != null)
+        {
+            _deckManagementUI.OnClosed += OnDeckClosed;
+            _deckManagementUI.Show();
+        }
+    }
+
+    private void OnDeckClosed()
+    {
+        if (_deckManagementUI != null)
+        {
+            _deckManagementUI.OnClosed -= OnDeckClosed;
+        }
+
+        ShowHomePanel();
     }
 
     private void OnBack()

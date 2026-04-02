@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Heroes;
@@ -29,6 +30,8 @@ namespace Assets.Scripts.Cards.UI
 
         [Header("Buttons")]
         [SerializeField] private Button _closeButton;
+
+        public event Action OnClosed;
 
         private string _selectedHeroKey;
         private List<GameObject> _spawnedHeroTabs = new List<GameObject>();
@@ -64,6 +67,7 @@ namespace Assets.Scripts.Cards.UI
             ClearSpawned(_spawnedHeroTabs);
             ClearSpawned(_spawnedDeckCards);
             ClearSpawned(_spawnedAvailableCards);
+            OnClosed?.Invoke();
         }
 
         private void BuildHeroTabs()

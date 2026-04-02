@@ -8,10 +8,14 @@ using Assets.Scripts.Heroes;
 
 public class DeckManagementUISetup : Editor
 {
-    private static readonly Color PanelColor = new Color(0.12f, 0.12f, 0.18f, 0.95f);
-    private static readonly Color SubPanelColor = new Color(0.16f, 0.16f, 0.24f, 0.9f);
-    private static readonly Color ButtonColor = new Color(0.22f, 0.22f, 0.32f, 1f);
-    private static readonly Color AccentColor = new Color(0.3f, 0.5f, 0.8f, 1f);
+    private static readonly Color TextColor = new Color(0.18f, 0.12f, 0.06f, 1f);
+    private static readonly Color LightTextColor = new Color(0.95f, 0.88f, 0.72f, 1f);
+    private static readonly Color SubPanelColor = new Color(0.16f, 0.12f, 0.08f, 0.35f);
+
+    private static Sprite _parchmentSprite;
+    private static Sprite _dungeonFrameSprite;
+    private static Sprite _stoneButtonSprite;
+    private static Sprite _stoneButtonHoverSprite;
 
     [MenuItem("Tools/Cards/Setup Deck Management UI")]
     public static void Setup()
@@ -29,6 +33,12 @@ public class DeckManagementUISetup : Editor
             Debug.LogWarning("DeckManagementUI already exists under MainMenuCanvas. Delete it first to re-create.");
             return;
         }
+
+        // Load sprites
+        _parchmentSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/ParchmentPanel.png");
+        _dungeonFrameSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/DungeonFrame.png");
+        _stoneButtonSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButton.png");
+        _stoneButtonHoverSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButtonHover.png");
 
         // Load prefabs
         var cardButtonPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Combat/CardButton.prefab");
@@ -51,7 +61,7 @@ public class DeckManagementUISetup : Editor
             }
         }
 
-        // Root panel
+        // Root panel (full screen overlay)
         var root = CreateUIObject("DeckManagementUI", mainMenuCanvas.transform);
         var rootRT = root.GetComponent<RectTransform>();
         rootRT.anchorMin = Vector2.zero;
@@ -60,8 +70,9 @@ public class DeckManagementUISetup : Editor
         rootRT.offsetMax = Vector2.zero;
         var deckUI = root.AddComponent<DeckManagementUI>();
 
-        // Background panel
-        var rootPanel = CreatePanel("RootPanel", root.transform, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.95f));
+        // Framed background panel (dungeon frame + parchment)
+        var rootPanel = CreateFramedPanel("RootPanel", root.transform,
+            new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.95f));
 
         // Title
         var title = CreateLabel("Title", rootPanel.transform, "Deck Management", 28);
@@ -70,14 +81,15 @@ public class DeckManagementUISetup : Editor
         titleRT.anchorMax = new Vector2(1, 1);
         titleRT.offsetMin = new Vector2(10, 0);
         titleRT.offsetMax = new Vector2(-10, -5);
+        title.GetComponent<TextMeshProUGUI>().color = TextColor;
 
         // === HERO TABS (top row) ===
         var heroTabArea = CreateUIObject("HeroTabArea", rootPanel.transform);
         var heroTabRT = heroTabArea.GetComponent<RectTransform>();
-        heroTabRT.anchorMin = new Vector2(0, 0.82f);
-        heroTabRT.anchorMax = new Vector2(1, 0.91f);
-        heroTabRT.offsetMin = new Vector2(10, 0);
-        heroTabRT.offsetMax = new Vector2(-10, 0);
+        heroTabRT.anchorMin = new Vector2(0.02f, 0.82f);
+        heroTabRT.anchorMax = new Vector2(0.98f, 0.91f);
+        heroTabRT.offsetMin = Vector2.zero;
+        heroTabRT.offsetMax = Vector2.zero;
         var heroTabHLG = heroTabArea.AddComponent<HorizontalLayoutGroup>();
         heroTabHLG.spacing = 8;
         heroTabHLG.childForceExpandWidth = true;
@@ -88,10 +100,10 @@ public class DeckManagementUISetup : Editor
         // === HERO NAME + DECK COUNT ===
         var heroInfoBar = CreateUIObject("HeroInfoBar", rootPanel.transform);
         var heroInfoRT = heroInfoBar.GetComponent<RectTransform>();
-        heroInfoRT.anchorMin = new Vector2(0, 0.74f);
-        heroInfoRT.anchorMax = new Vector2(1, 0.82f);
-        heroInfoRT.offsetMin = new Vector2(10, 0);
-        heroInfoRT.offsetMax = new Vector2(-10, 0);
+        heroInfoRT.anchorMin = new Vector2(0.02f, 0.74f);
+        heroInfoRT.anchorMax = new Vector2(0.98f, 0.82f);
+        heroInfoRT.offsetMin = Vector2.zero;
+        heroInfoRT.offsetMax = Vector2.zero;
         var heroInfoHLG = heroInfoBar.AddComponent<HorizontalLayoutGroup>();
         heroInfoHLG.spacing = 10;
         heroInfoHLG.childForceExpandWidth = true;
@@ -102,15 +114,16 @@ public class DeckManagementUISetup : Editor
         var heroNameLabel = CreateLabel("HeroNameLabel", heroInfoBar.transform, "Hero Name", 22);
         var heroNameTMP = heroNameLabel.GetComponent<TextMeshProUGUI>();
         heroNameTMP.alignment = TextAlignmentOptions.Left;
+        heroNameTMP.color = TextColor;
 
         var deckCountLabel = CreateLabel("DeckCountLabel", heroInfoBar.transform, "0 / 5", 20);
         var deckCountTMP = deckCountLabel.GetComponent<TextMeshProUGUI>();
         deckCountTMP.alignment = TextAlignmentOptions.Right;
+        deckCountTMP.color = TextColor;
 
         // === DECK CARDS SECTION (left) ===
-        var deckSection = CreatePanel("DeckSection", rootPanel.transform, new Vector2(0.01f, 0.12f), new Vector2(0.48f, 0.73f));
-        var deckSectionImg = deckSection.GetComponent<Image>();
-        deckSectionImg.color = SubPanelColor;
+        var deckSection = CreateSubPanel("DeckSection", rootPanel.transform,
+            new Vector2(0.02f, 0.12f), new Vector2(0.48f, 0.73f));
 
         var deckTitle = CreateLabel("DeckTitle", deckSection.transform, "Assigned Cards", 18);
         var deckTitleRT = deckTitle.GetComponent<RectTransform>();
@@ -118,6 +131,7 @@ public class DeckManagementUISetup : Editor
         deckTitleRT.anchorMax = new Vector2(1, 1);
         deckTitleRT.offsetMin = new Vector2(5, 0);
         deckTitleRT.offsetMax = new Vector2(-5, -2);
+        deckTitle.GetComponent<TextMeshProUGUI>().color = TextColor;
 
         var deckScrollArea = CreateUIObject("DeckCardParent", deckSection.transform);
         var deckScrollRT = deckScrollArea.GetComponent<RectTransform>();
@@ -135,9 +149,8 @@ public class DeckManagementUISetup : Editor
         deckCSF.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         // === AVAILABLE CARDS SECTION (right) ===
-        var availSection = CreatePanel("AvailableSection", rootPanel.transform, new Vector2(0.52f, 0.12f), new Vector2(0.99f, 0.73f));
-        var availSectionImg = availSection.GetComponent<Image>();
-        availSectionImg.color = SubPanelColor;
+        var availSection = CreateSubPanel("AvailableSection", rootPanel.transform,
+            new Vector2(0.52f, 0.12f), new Vector2(0.98f, 0.73f));
 
         var availTitle = CreateLabel("AvailTitle", availSection.transform, "Available Cards", 18);
         var availTitleRT = availTitle.GetComponent<RectTransform>();
@@ -145,6 +158,7 @@ public class DeckManagementUISetup : Editor
         availTitleRT.anchorMax = new Vector2(1, 1);
         availTitleRT.offsetMin = new Vector2(5, 0);
         availTitleRT.offsetMax = new Vector2(-5, -2);
+        availTitle.GetComponent<TextMeshProUGUI>().color = TextColor;
 
         var availScrollArea = CreateUIObject("AvailableCardParent", availSection.transform);
         var availScrollRT = availScrollArea.GetComponent<RectTransform>();
@@ -162,7 +176,7 @@ public class DeckManagementUISetup : Editor
         availCSF.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         // === CLOSE BUTTON ===
-        var closeBtn = CreateButton("CloseButton", rootPanel.transform, "Close");
+        var closeBtn = CreateStoneButton("CloseButton", rootPanel.transform, "Close");
         var closeBtnRT = closeBtn.GetComponent<RectTransform>();
         closeBtnRT.anchorMin = new Vector2(0.35f, 0.02f);
         closeBtnRT.anchorMax = new Vector2(0.65f, 0.1f);
@@ -170,22 +184,6 @@ public class DeckManagementUISetup : Editor
         closeBtnRT.offsetMax = Vector2.zero;
 
         rootPanel.SetActive(false);
-
-        // === OPEN BUTTON (visible when deck panel is closed) ===
-        var openBtn = CreateButton("OpenDecksButton", root.transform, "Manage Decks");
-        var openBtnRT = openBtn.GetComponent<RectTransform>();
-        openBtnRT.anchorMin = new Vector2(0.35f, 0.02f);
-        openBtnRT.anchorMax = new Vector2(0.65f, 0.08f);
-        openBtnRT.offsetMin = Vector2.zero;
-        openBtnRT.offsetMax = Vector2.zero;
-        var openBtnImg = openBtn.GetComponent<Image>();
-        openBtnImg.color = AccentColor;
-
-        // Wire open button to call Show()
-        var openBtnComponent = openBtn.GetComponent<Button>();
-        UnityEditor.Events.UnityEventTools.AddPersistentListener(
-            openBtnComponent.onClick,
-            new UnityEngine.Events.UnityAction(deckUI.Show));
 
         // === Wire up serialized fields ===
         var so = new SerializedObject(deckUI);
@@ -210,10 +208,99 @@ public class DeckManagementUISetup : Editor
 
         so.ApplyModifiedProperties();
 
+        // Wire MainMenuManager._deckManagementUI if present
+        var menuManager = mainMenuCanvas.GetComponent<MainMenuManager>();
+        if (menuManager != null)
+        {
+            var menuSO = new SerializedObject(menuManager);
+            menuSO.FindProperty("_deckManagementUI").objectReferenceValue = deckUI;
+            menuSO.ApplyModifiedProperties();
+        }
+
         Undo.RegisterCreatedObjectUndo(root, "Setup Deck Management UI");
         EditorUtility.SetDirty(mainMenuCanvas);
 
-        Debug.Log($"DeckManagementUI created under MainMenuCanvas with {heroSOs.Count} heroes. Save the scene to persist.");
+        Debug.Log($"DeckManagementUI created with fantasy theme under MainMenuCanvas with {heroSOs.Count} heroes. Save the scene to persist.");
+    }
+
+    private static GameObject CreateFramedPanel(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        var frame = CreateUIObject(name, parent);
+        var frameRT = frame.GetComponent<RectTransform>();
+        frameRT.anchorMin = anchorMin;
+        frameRT.anchorMax = anchorMax;
+        frameRT.offsetMin = Vector2.zero;
+        frameRT.offsetMax = Vector2.zero;
+        frame.AddComponent<CanvasRenderer>();
+        var frameImg = frame.AddComponent<Image>();
+        frameImg.sprite = _dungeonFrameSprite;
+        frameImg.type = Image.Type.Sliced;
+        frameImg.pixelsPerUnitMultiplier = 1f;
+
+        var inner = CreateUIObject("ParchmentBg", frame.transform);
+        var innerRT = inner.GetComponent<RectTransform>();
+        innerRT.anchorMin = new Vector2(0.06f, 0.06f);
+        innerRT.anchorMax = new Vector2(0.94f, 0.94f);
+        innerRT.offsetMin = Vector2.zero;
+        innerRT.offsetMax = Vector2.zero;
+        inner.AddComponent<CanvasRenderer>();
+        var innerImg = inner.AddComponent<Image>();
+        innerImg.sprite = _parchmentSprite;
+        innerImg.type = Image.Type.Tiled;
+        innerImg.pixelsPerUnitMultiplier = 2f;
+
+        return frame;
+    }
+
+    private static GameObject CreateSubPanel(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        var obj = CreateUIObject(name, parent);
+        var rt = obj.GetComponent<RectTransform>();
+        rt.anchorMin = anchorMin;
+        rt.anchorMax = anchorMax;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        obj.AddComponent<CanvasRenderer>();
+        var img = obj.AddComponent<Image>();
+        img.color = SubPanelColor;
+
+        return obj;
+    }
+
+    private static GameObject CreateStoneButton(string name, Transform parent, string label)
+    {
+        var obj = CreateUIObject(name, parent);
+        obj.AddComponent<CanvasRenderer>();
+        var img = obj.AddComponent<Image>();
+        img.sprite = _stoneButtonSprite;
+        img.type = Image.Type.Sliced;
+        img.pixelsPerUnitMultiplier = 1f;
+
+        var btn = obj.AddComponent<Button>();
+        var spriteState = new SpriteState();
+        spriteState.highlightedSprite = _stoneButtonHoverSprite;
+        spriteState.pressedSprite = _stoneButtonHoverSprite;
+        spriteState.selectedSprite = _stoneButtonHoverSprite;
+        btn.spriteState = spriteState;
+        btn.transition = Selectable.Transition.SpriteSwap;
+
+        var textObj = CreateUIObject("Text", obj.transform);
+        textObj.AddComponent<CanvasRenderer>();
+        var textRT = textObj.GetComponent<RectTransform>();
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.offsetMin = new Vector2(8, 2);
+        textRT.offsetMax = new Vector2(-8, -2);
+
+        var tmp = textObj.AddComponent<TextMeshProUGUI>();
+        tmp.text = label;
+        tmp.fontSize = 18;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.color = LightTextColor;
+        tmp.alignment = TextAlignmentOptions.Center;
+
+        return obj;
     }
 
     private static GameObject CreateUIObject(string name, Transform parent)
@@ -225,52 +312,6 @@ public class DeckManagementUISetup : Editor
         return obj;
     }
 
-    private static GameObject CreatePanel(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax)
-    {
-        var obj = CreateUIObject(name, parent);
-        var rt = obj.GetComponent<RectTransform>();
-        rt.anchorMin = anchorMin;
-        rt.anchorMax = anchorMax;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-
-        obj.AddComponent<CanvasRenderer>();
-        var img = obj.AddComponent<Image>();
-        img.color = PanelColor;
-
-        return obj;
-    }
-
-    private static GameObject CreateButton(string name, Transform parent, string label)
-    {
-        var obj = CreateUIObject(name, parent);
-        obj.AddComponent<CanvasRenderer>();
-        var img = obj.AddComponent<Image>();
-        img.color = ButtonColor;
-
-        var btn = obj.AddComponent<Button>();
-        var colors = btn.colors;
-        colors.highlightedColor = new Color(0.3f, 0.3f, 0.42f, 1f);
-        btn.colors = colors;
-
-        var textObj = CreateUIObject("Text", obj.transform);
-        textObj.AddComponent<CanvasRenderer>();
-        var textRT = textObj.GetComponent<RectTransform>();
-        textRT.anchorMin = Vector2.zero;
-        textRT.anchorMax = Vector2.one;
-        textRT.offsetMin = Vector2.zero;
-        textRT.offsetMax = Vector2.zero;
-
-        var tmp = textObj.AddComponent<TextMeshProUGUI>();
-        tmp.text = label;
-        tmp.fontSize = 18;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white;
-        tmp.alignment = TextAlignmentOptions.Center;
-
-        return obj;
-    }
-
     private static GameObject CreateLabel(string name, Transform parent, string text, int fontSize)
     {
         var obj = CreateUIObject(name, parent);
@@ -279,7 +320,7 @@ public class DeckManagementUISetup : Editor
         tmp.text = text;
         tmp.fontSize = fontSize;
         tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white;
+        tmp.color = LightTextColor;
         tmp.alignment = TextAlignmentOptions.Center;
         return obj;
     }

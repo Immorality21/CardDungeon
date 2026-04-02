@@ -1,3 +1,4 @@
+using Assets.Scripts.Cards.UI;
 using Assets.Scripts.Dungeon;
 using TMPro;
 using UnityEditor;
@@ -204,6 +205,13 @@ public class MainMenuUISetup : Editor
 
         so.FindProperty("_runCompletePanel").objectReferenceValue = runCompletePanel;
         so.FindProperty("_runCompleteReturnButton").objectReferenceValue = returnBtn.GetComponent<Button>();
+
+        // Wire DeckManagementUI if it exists in the scene
+        var deckUI = canvas.GetComponentInChildren<DeckManagementUI>(true);
+        if (deckUI != null)
+        {
+            so.FindProperty("_deckManagementUI").objectReferenceValue = deckUI;
+        }
 
         so.ApplyModifiedProperties();
 

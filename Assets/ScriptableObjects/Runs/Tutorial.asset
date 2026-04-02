@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: 
   DisplayName: 
   Levels:
-  - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
+  - LevelTemplate: {fileID: 11400000, guid: b2a362ec7000ace46ad22ed1b533bf55, type: 2}
     LevelName: Tutorial
     IsStatic: 1
     FixedSeed: 100
