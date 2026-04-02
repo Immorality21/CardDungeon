@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.IO;
 using TMPro;
@@ -8,112 +7,174 @@ using UnityEngine.UI;
 
 public class MainMenuManager : MonoBehaviour
 {
+    [Header("Run Definition")]
     [SerializeField]
-    private Transform _levelParent;
+    private RunDefinitionSO _runDefinition;
+
+    [Header("Home Panel")]
+    [SerializeField]
+    private GameObject _homePanel;
 
     [SerializeField]
-    private GameObject _levelSelectPrefab;
+    private Button _continueRunButton;
 
     [SerializeField]
-    private List<LevelDefinitionSO> _availableLevelTemplates;
+    private Button _newRunButton;
 
     [SerializeField]
-    private TMP_Dropdown _levelDropdown;
+    private Button _manageDeckButton;
+
+    [Header("Run Progress Panel")]
+    [SerializeField]
+    private GameObject _runProgressPanel;
+
+    [SerializeField]
+    private TextMeshProUGUI _levelIndicatorLabel;
+
+    [SerializeField]
+    private TextMeshProUGUI _levelNameLabel;
+
+    [SerializeField]
+    private Button _enterDungeonButton;
+
+    [SerializeField]
+    private Button _backButton;
+
+    [Header("Run Complete Panel")]
+    [SerializeField]
+    private GameObject _runCompletePanel;
+
+    [SerializeField]
+    private Button _runCompleteReturnButton;
 
     private FileHandler _fileHandler;
-    private List<GameObject> _spawnedEntries = new List<GameObject>();
+    private RunSaveData _runSaveData;
 
     private void Start()
     {
         _fileHandler = new FileHandler();
-        PopulateLevelDropdown();
-        PopulateSaveList();
-    }
+        _runSaveData = _fileHandler.Load<RunSaveData>();
 
-    private void PopulateLevelDropdown()
-    {
-        _levelDropdown.ClearOptions();
+        _newRunButton.onClick.AddListener(OnNewRun);
+        _continueRunButton.onClick.AddListener(OnContinueRun);
+        _enterDungeonButton.onClick.AddListener(OnEnterDungeon);
+        _backButton.onClick.AddListener(OnBack);
+        _runCompleteReturnButton.onClick.AddListener(OnRunCompleteReturn);
 
-        var options = new List<string>();
-        foreach (var level in _availableLevelTemplates)
+        // Check if run was just completed (ActiveRun cleared after final level)
+        if (DungeonManager.ActiveRun == null && !string.IsNullOrEmpty(_runSaveData.RunKey))
         {
-            options.Add(level.name);
+            // Run still in progress — show home
+            ShowHomePanel();
         }
-
-        _levelDropdown.AddOptions(options);
-    }
-
-    private LevelDefinitionSO SelectedLevel => _availableLevelTemplates[_levelDropdown.value];
-
-    private void PopulateSaveList()
-    {
-        foreach (var entry in _spawnedEntries)
+        else if (DungeonManager.ActiveRun == null && string.IsNullOrEmpty(_runSaveData.RunKey) && WasRunJustCompleted())
         {
-            Destroy(entry);
+            ShowRunCompletePanel();
         }
-        _spawnedEntries.Clear();
-
-        var files = _fileHandler.FindFiles("Dungeon_");
-
-        foreach (var filePath in files)
+        else
         {
-            var fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
-            var data = _fileHandler.LoadFromFile<DungeonSaveData>(fileName);
-
-            if (data.Seed == 0)
-            {
-                continue;
-            }
-
-            var entry = Instantiate(_levelSelectPrefab, _levelParent);
-            _spawnedEntries.Add(entry);
-
-            var label = entry.GetComponentInChildren<TextMeshProUGUI>();
-            if (label != null)
-            {
-                int exploredCount = 0;
-                foreach (var room in data.Rooms)
-                {
-                    if (room.IsExplored) exploredCount++;
-                }
-                label.text = $"Seed: {data.Seed}  ({exploredCount}/{data.Rooms.Count} rooms)";
-            }
-
-            var button = entry.GetComponentInChildren<Button>();
-            if (button != null)
-            {
-                var seed = data.Seed;
-                var levelKey = data.LevelKey;
-                button.onClick.AddListener(() => LoadDungeon(seed, levelKey));
-            }
+            ShowHomePanel();
         }
     }
 
-    public void StartNewDungeon()
+    private bool WasRunJustCompleted()
     {
+        // If we arrived from a dungeon clear and run save was deleted, the run is complete
+        // We detect this by checking if ActiveRun was cleared by DungeonManager.OnDungeonCleared
+        // Since ActiveRun is set to null when the final level is cleared, and we just came from
+        // the game scene, we use a simple static flag
+        return _justCompletedRun;
+    }
+
+    private static bool _justCompletedRun;
+
+    public static void MarkRunCompleted()
+    {
+        _justCompletedRun = true;
+    }
+
+    private void ShowHomePanel()
+    {
+        _homePanel.SetActive(true);
+        _runProgressPanel.SetActive(false);
+        _runCompletePanel.SetActive(false);
+
+        bool hasActiveRun = !string.IsNullOrEmpty(_runSaveData.RunKey);
+        _continueRunButton.gameObject.SetActive(hasActiveRun);
+    }
+
+    private void ShowRunProgressPanel()
+    {
+        _homePanel.SetActive(false);
+        _runProgressPanel.SetActive(true);
+        _runCompletePanel.SetActive(false);
+
+        var levelIndex = _runSaveData.CurrentLevelIndex;
+        var totalLevels = _runDefinition.Levels.Count;
+        var levelEntry = _runDefinition.Levels[levelIndex];
+
+        _levelIndicatorLabel.text = $"Level {levelIndex + 1} of {totalLevels}";
+        _levelNameLabel.text = levelEntry.LevelName;
+    }
+
+    private void ShowRunCompletePanel()
+    {
+        _homePanel.SetActive(false);
+        _runProgressPanel.SetActive(false);
+        _runCompletePanel.SetActive(true);
+        _justCompletedRun = false;
+    }
+
+    private void OnNewRun()
+    {
+        // Delete any existing dungeon saves for a clean start
+        var dungeonSaveManager = new DungeonSaveManager();
+
+        // Create fresh run save
+        _runSaveData = new RunSaveData
+        {
+            RunKey = _runDefinition.Key,
+            CurrentLevelIndex = 0
+        };
+        _fileHandler.Save(_runSaveData);
+
+        ShowRunProgressPanel();
+    }
+
+    private void OnContinueRun()
+    {
+        ShowRunProgressPanel();
+    }
+
+    private void OnEnterDungeon()
+    {
+        var levelIndex = _runSaveData.CurrentLevelIndex;
+        var levelEntry = _runDefinition.Levels[levelIndex];
+
+        DungeonManager.ActiveRun = _runDefinition;
+        DungeonManager.RunLevelIndex = levelIndex;
+        DungeonManager.LevelToLoad = levelEntry.LevelTemplate;
         DungeonManager.SeedToLoad = null;
-        DungeonManager.LevelToLoad = SelectedLevel;
-        SceneManager.LoadScene("MainGameScene");
-    }
 
-    private void LoadDungeon(int seed, string levelKey)
-    {
-        DungeonManager.SeedToLoad = seed;
-        DungeonManager.LevelToLoad = FindLevel(levelKey);
-        SceneManager.LoadScene("MainGameScene");
-    }
-
-    private LevelDefinitionSO FindLevel(string key)
-    {
-        foreach (var level in _availableLevelTemplates)
+        if (levelEntry.IsStatic)
         {
-            if (level.Key == key)
-            {
-                return level;
-            }
+            DungeonManager.FixedSeed = levelEntry.FixedSeed;
+        }
+        else
+        {
+            DungeonManager.FixedSeed = 0;
         }
 
-        Debug.LogWarning($"Level with key '{key}' not found, using first available.");
-        return _availableLevelTemplates[0];
+        SceneManager.LoadScene("MainGameScene");
+    }
+
+    private void OnBack()
+    {
+        ShowHomePanel();
+    }
+
+    private void OnRunCompleteReturn()
+    {
+        ShowHomePanel();
     }
 }

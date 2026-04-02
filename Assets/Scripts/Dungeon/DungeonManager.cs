@@ -39,6 +39,7 @@ namespace Assets.Scripts.Dungeon
         public static LevelDefinitionSO LevelToLoad;
         public static RunDefinitionSO ActiveRun;
         public static int RunLevelIndex;
+        public static int FixedSeed;
         public Party Party { get; private set; }
         public DungeonDeckState DeckState { get; private set; }
 
@@ -80,6 +81,13 @@ namespace Assets.Scripts.Dungeon
 
             // Subscribe to dungeon cleared event
             CombatManager.Instance.OnDungeonCleared += OnDungeonCleared;
+
+            // Apply fixed seed for static levels (overrides _customSeed)
+            if (FixedSeed != 0)
+            {
+                _customSeed = FixedSeed;
+                FixedSeed = 0;
+            }
 
             if (SeedToLoad.HasValue)
             {
@@ -328,6 +336,7 @@ namespace Assets.Scripts.Dungeon
                     // Run complete — clear run save
                     _fileHandler.Delete(runSave);
                     ActiveRun = null;
+                    MainMenuManager.MarkRunCompleted();
                 }
             }
 
