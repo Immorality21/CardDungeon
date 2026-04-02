@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
   m_Name: WaterSplash
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: WaterSplash
   DisplayName: Water Splash
   Description: A torrent of water crashes into all enemies.
@@ -26,3 +26,4 @@ MonoBehaviour:
     Duration: 3
   Tags:
   - Water
+  TagDuration: 3

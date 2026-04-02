@@ -10,7 +10,8 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.
 
 - **Unity version:** 2022.3.43f1 (must match exactly)
 - **Solution file:** `Card Dungeon.sln` (Visual Studio or Rider)
-- **Main scene:** `Assets/Scenes/SampleScene.unity`
+- **Menu scene:** `Assets/Scenes/MenuScene.unity`
+- **Game scene:** `Assets/Scenes/MainGameScene.unity`
 - **Target platform:** Windows 64-bit Standalone
 - No custom build scripts — use Unity Editor build pipeline or IDE compilation
 - Unity Test Framework (1.1.33) is installed but no tests exist yet
@@ -31,16 +32,33 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`
 - `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system)
 - `Items/` — `ItemSO`, `InventoryManager`, `InventoryUI`, `InventoryEntryUI`
-- `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`
+- `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`, `RunDefinitionSO`, `RunLevelEntry`, `RunSaveData`
 - `Resources/` — `PartyResourceManager`, `PartyResourceType`
 - `IO/` — `FileHandler`, `IWriteable`
+
+### Run Progression System
+
+- **RunDefinitionSO** defines a campaign: an ordered list of `RunLevelEntry` (each references a `LevelDefinitionSO`, a display name, and optional static seed).
+- **RunSaveData** (`Run.json`) tracks which level the player is on (`CurrentLevelIndex`).
+- **Flow:** Menu → New Run → enter level 1 → clear exit room → level complete → menu shows next level → ... → all levels cleared → run complete.
+- **Win condition:** Each dungeon level is complete when the **exit room** is cleared (farthest room from start, designated via BFS).
+- **Room.IsExit** marks the exit room. `CombatManager.OnDungeonCleared` fires when it's cleared.
+- **Static levels:** `RunLevelEntry.IsStatic = true` + `FixedSeed` generates a deterministic dungeon layout (used for tutorial).
+
+### Deferred Persistence
+
+- **XP and inventory are NOT saved during dungeon play.** Changes accumulate in memory only.
+- **On level completion:** `Party.CommitProgress()` and `InventoryManager.CommitInventory()` write to persistent files.
+- **On party death:** Dungeon and run saves are deleted. `InventoryManager.Load()` reloads from disk, discarding in-memory changes. All XP/items earned during the dungeon are lost.
+- `InventoryManager.SetDeferSaves(bool)` controls whether `AddItem`/`RemoveItem`/`Equip`/`Unequip` write to disk immediately or defer.
 
 ### Dungeon Generation Pipeline (RoomManager)
 
 1. **Graph generation** — Creates a tree of `RoomNode` connections
 2. **Room layout** — BFS placement on a 2D grid, resolving overlaps
 3. **Door placement** — Random door positions between connected adjacent rooms
-4. **Seeding** — Supports custom seed for reproducible generation
+4. **Exit room** — BFS from start room, farthest room is designated `IsExit = true`
+5. **Seeding** — Supports custom seed for reproducible generation
 
 ### Combat System
 
@@ -48,7 +66,8 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.
 - **ICombatUnit interface:** Shared by `Hero` and `Enemy` MonoBehaviours. Provides `DisplayName`, `Stats`, `IsAlive`, `IsHero`, `GetEffectiveAttack()`, `GetEffectiveDefense()`.
 - **Combat flow:** Press Fight → party sprite hides → heroes fan out into room (animated) → turn loop (auto-attack random opponents) → victory/defeat → heroes gather back.
 - **Damage feedback:** `FloatingTextHandler` shows damage numbers above targets (white for enemy damage, red for hero damage). No text-based combat log UI.
-- **CombatManager events:** `OnCombatStarted`, `OnTurnExecuted`, `OnCombatEnded` for UI integration.
+- **CombatManager events:** `OnCombatStarted`, `OnTurnExecuted`, `OnCombatEnded`, `OnDungeonCleared` for UI integration.
+- **Death flow:** Full party wipe → death screen → `DungeonManager.HandlePartyDeath()` wipes saves → return to menu. All in-dungeon XP/items are lost.
 
 ### Hero & Stats System
 
@@ -67,17 +86,25 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.
 ### Persistence
 
 - **Save location:** `Application.persistentDataPath/savedata/` (JSON files via `FileHandler`)
-- **Party.json:** Only `HeroKey` + `CurrentXp` per hero. Stats are derived at runtime.
-- **Dungeon saves:** Seed, level key, room explored state, enemy counts, resource amounts.
-- **Inventory:** Item collection with equipped slots per hero.
+- **Party.json:** Only `HeroKey` + `CurrentXp` per hero. Stats are derived at runtime. **Only written on level completion** (not during dungeon play).
+- **Run.json:** `RunKey` + `CurrentLevelIndex`. Deleted on death or run completion.
+- **Dungeon saves:** Seed, level key, room explored state, enemy counts, resource amounts. Deleted on level completion or death.
+- **Inventory:** Item collection with equipped slots per hero. **Deferred during dungeon play** — committed on level completion, reloaded from disk on death.
 - **Resource maximums:** Persisted separately.
 
 ### Key Patterns
 
 - **Singleton** — All managers inherit `SingletonBehaviour<T>` (auto-creates if missing, supports DontDestroyOnLoad). Use `HasInstance` to safely check before accessing.
-- **ScriptableObjects** — Room types, hero definitions, items, level definitions as `.asset` files in `Assets/ScriptableObjects/`
+- **ScriptableObjects** — Room types, hero definitions, items, level definitions, run definitions as `.asset` files in `Assets/ScriptableObjects/`
 - **Object pooling** — `ObjectPooler` reuses inactive GameObjects (used by `FloatingTextHandler`)
 - **Prefabs** — `Room.prefab`, `Door.prefab`, `Square.prefab` (tile), enemy prefabs in `Assets/`
+
+### Main Menu (MainMenuManager)
+
+- **Run-based flow:** HomePanel (New Run / Continue Run) → RunProgressPanel (level info + Enter Dungeon) → game scene → level complete → back to menu.
+- **All UI is inspector-wired** via `[SerializeField]` references. Panels are scene objects or prefabs — never constructed at runtime.
+- `MainMenuManager` loads `RunSaveData` to determine state (active run, current level, run complete).
+- `RunDefinitionSO` is assigned in the inspector and defines the campaign.
 
 ### Runtime Controls
 
