@@ -13,6 +13,7 @@ namespace Assets.Scripts.Rooms
         public List<Enemy> Enemies = new List<Enemy>();
         public int RoomIndex { get; set; }
         public bool IsExplored { get; private set; }
+        public bool IsExit { get; set; }
 
         public void Reveal()
         {

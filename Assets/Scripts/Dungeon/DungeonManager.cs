@@ -34,6 +34,8 @@ namespace Assets.Scripts.Dungeon
 
         public static int? SeedToLoad;
         public static LevelDefinitionSO LevelToLoad;
+        public static RunDefinitionSO ActiveRun;
+        public static int RunLevelIndex;
         public Party Party { get; private set; }
         public DungeonDeckState DeckState { get; private set; }
 
@@ -117,7 +119,10 @@ namespace Assets.Scripts.Dungeon
             // Step 3: Pick starting room (deterministic from seed)
             var startRoom = rooms[Random.Range(0, rooms.Count)];
 
-            // Step 4: Spawn enemies
+            // Step 4: Designate exit room (farthest from start via BFS)
+            DesignateExitRoom(rooms, startRoom);
+
+            // Step 5: Spawn enemies
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom);
 
             if (saveData != null)
@@ -228,6 +233,42 @@ namespace Assets.Scripts.Dungeon
 
             DungeonSaveManager.Instance.Initialize(saveData.Seed, _level.Key, rooms);
             GameManager.Instance.EnterRoom(currentRoom);
+        }
+
+        private void DesignateExitRoom(List<Room> rooms, Room startRoom)
+        {
+            var distance = new Dictionary<Room, int>();
+            var queue = new Queue<Room>();
+
+            distance[startRoom] = 0;
+            queue.Enqueue(startRoom);
+
+            Room farthest = startRoom;
+            int maxDist = 0;
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+
+                foreach (var door in current.Doors)
+                {
+                    var neighbor = door.GetOtherRoom(current);
+                    if (neighbor != null && !distance.ContainsKey(neighbor))
+                    {
+                        var dist = distance[current] + 1;
+                        distance[neighbor] = dist;
+                        queue.Enqueue(neighbor);
+
+                        if (dist > maxDist)
+                        {
+                            maxDist = dist;
+                            farthest = neighbor;
+                        }
+                    }
+                }
+            }
+
+            farthest.IsExit = true;
         }
 
         public void LoadSavedDungeon(int seed)
