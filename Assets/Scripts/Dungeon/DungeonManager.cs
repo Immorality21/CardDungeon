@@ -204,6 +204,14 @@ namespace Assets.Scripts.Dungeon
             DungeonSaveManager.Instance.Initialize(seed, _level.Key, rooms);
             DungeonSaveManager.Instance.Save(startRoom);
 
+            // Store active dungeon seed in run save so we can resume
+            if (ActiveRun != null)
+            {
+                var runSave = _fileHandler.Load<RunSaveData>();
+                runSave.ActiveDungeonSeed = seed;
+                _fileHandler.Save(runSave);
+            }
+
             GameManager.Instance.EnterRoom(startRoom);
         }
 
@@ -347,6 +355,7 @@ namespace Assets.Scripts.Dungeon
                 var runSave = _fileHandler.Load<RunSaveData>();
                 runSave.RunKey = !string.IsNullOrEmpty(ActiveRun.Key) ? ActiveRun.Key : ActiveRun.name;
                 runSave.CurrentLevelIndex = RunLevelIndex + 1;
+                runSave.ActiveDungeonSeed = 0;
                 _fileHandler.Save(runSave);
                 Debug.Log($"Run advanced to level {runSave.CurrentLevelIndex}/{ActiveRun.Levels.Count}, RunKey={runSave.RunKey}");
 

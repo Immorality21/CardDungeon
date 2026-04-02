@@ -8,6 +8,7 @@ namespace Assets.Scripts.Dungeon
     {
         public string RunKey;
         public int CurrentLevelIndex;
+        public int ActiveDungeonSeed;
 
         public string GetFileName()
         {

@@ -161,14 +161,21 @@ public class MainMenuManager : MonoBehaviour
         DungeonManager.ActiveRun = _runDefinition;
         DungeonManager.RunLevelIndex = levelIndex;
         DungeonManager.LevelToLoad = levelEntry.LevelTemplate;
-        DungeonManager.SeedToLoad = null;
 
-        if (levelEntry.IsStatic)
+        // Resume from existing dungeon save if available
+        if (_runSaveData.ActiveDungeonSeed != 0)
         {
+            DungeonManager.SeedToLoad = _runSaveData.ActiveDungeonSeed;
+            DungeonManager.FixedSeed = 0;
+        }
+        else if (levelEntry.IsStatic)
+        {
+            DungeonManager.SeedToLoad = null;
             DungeonManager.FixedSeed = levelEntry.FixedSeed;
         }
         else
         {
+            DungeonManager.SeedToLoad = null;
             DungeonManager.FixedSeed = 0;
         }
 
