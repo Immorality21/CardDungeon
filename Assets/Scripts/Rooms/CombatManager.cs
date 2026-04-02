@@ -460,6 +460,11 @@ namespace Assets.Scripts.Rooms
             return room.Enemies.Any(e => e != null && e.IsAlive);
         }
 
+        public void NotifyDungeonCleared()
+        {
+            OnDungeonCleared?.Invoke();
+        }
+
         public bool CanFlee(Party party)
         {
             return party.PreviousRoom != null;

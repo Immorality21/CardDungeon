@@ -35,6 +35,9 @@ namespace Assets.Scripts.Dungeon
         [SerializeField]
         private LevelDefinitionSO _testLevel;
 
+        [SerializeField]
+        private Sprite _exitRoomMarkerSprite;
+
         public static int? SeedToLoad;
         public static LevelDefinitionSO LevelToLoad;
         public static RunDefinitionSO ActiveRun;
@@ -148,8 +151,8 @@ namespace Assets.Scripts.Dungeon
                 rooms[i].RoomIndex = i;
             }
 
-            // Step 3: Pick starting room (deterministic from seed)
-            var startRoom = rooms[Random.Range(0, rooms.Count)];
+            // Step 3: Pick starting room (first room = graph root, always at one end)
+            var startRoom = rooms[0];
 
             // Step 4: Designate exit room (farthest from start via BFS)
             DesignateExitRoom(rooms, startRoom);
@@ -301,6 +304,21 @@ namespace Assets.Scripts.Dungeon
             }
 
             farthest.IsExit = true;
+
+            // Place visual marker on exit room
+            if (_exitRoomMarkerSprite != null)
+            {
+                var markerObj = new GameObject("ExitMarker");
+                markerObj.transform.SetParent(farthest.transform, false);
+                var center = new Vector3(
+                    farthest.GridPosition.x + farthest.RoomSO.Width / 2f - 0.5f,
+                    farthest.GridPosition.y + farthest.RoomSO.Height / 2f - 0.5f,
+                    -0.5f);
+                markerObj.transform.position = center;
+                var sr = markerObj.AddComponent<SpriteRenderer>();
+                sr.sprite = _exitRoomMarkerSprite;
+                sr.sortingOrder = 3;
+            }
         }
 
         private void OnDungeonCleared()

@@ -1,3 +1,4 @@
+using System.Linq;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
 using ImmoralityGaming.Fundamentals;
@@ -24,6 +25,16 @@ namespace Assets.Scripts.Rooms
         public void EnterRoom(Room room, Door entryDoor = null)
         {
             room.Reveal();
+
+            // Check if entering a cleared exit room
+            if (room.IsExit && !room.Enemies.Any(e => e != null && e.IsAlive))
+            {
+                if (CombatManager.HasInstance)
+                {
+                    CombatManager.Instance.NotifyDungeonCleared();
+                }
+                return;
+            }
 
             if (_roomActionUI != null)
             {
