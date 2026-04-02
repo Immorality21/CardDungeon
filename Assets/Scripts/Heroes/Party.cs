@@ -284,12 +284,16 @@ namespace Assets.Scripts.Heroes
             }
         }
 
+        public void CommitProgress()
+        {
+            SaveParty();
+        }
+
         public void AddXpToLeader(int amount)
         {
             if (Leader != null)
             {
                 Leader.AddXp(amount);
-                SaveParty();
             }
         }
     }

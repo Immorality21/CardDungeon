@@ -6,6 +6,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.Rooms
@@ -416,9 +417,30 @@ namespace Assets.Scripts.Rooms
                     ShowCombatResult("Victory!", result.Log, showNormalAfter: true);
                     break;
                 case CombatOutcome.PlayerDied:
-                    ShowCombatResult("You Died!", result.Log, showNormalAfter: false);
+                    ShowDeathScreen(result.Log);
                     break;
             }
+        }
+
+        private void ShowDeathScreen(string log)
+        {
+            _mainPanel.SetActive(false);
+            _combatPanel.SetActive(false);
+            _subPanel.SetActive(false);
+            _detailPanel.SetActive(true);
+            _detailTitle.text = "Your Party Has Fallen...";
+            _detailMessage.text = log;
+
+            _detailOkButton.onClick.RemoveAllListeners();
+            _detailOkButton.onClick.AddListener(() =>
+            {
+                // Wipe run and dungeon saves, return to menu
+                if (DungeonManager.HasInstance)
+                {
+                    DungeonManager.Instance.HandlePartyDeath();
+                }
+                SceneManager.LoadScene("MenuScene");
+            });
         }
 
         private void OnFlee()

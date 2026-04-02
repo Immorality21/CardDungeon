@@ -1,11 +1,14 @@
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
+using Assets.Scripts.IO;
+using Assets.Scripts.Items;
 using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
 using ImmoralityGaming.Fundamentals;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.Dungeon
 {
@@ -40,6 +43,8 @@ namespace Assets.Scripts.Dungeon
         public DungeonDeckState DeckState { get; private set; }
 
         private LevelDefinitionSO _level;
+        private FileHandler _fileHandler;
+        private int _currentSeed;
 
         /// <summary>
         /// Returns true if all heroes have at least one card assigned, or if the party has no cards at all
@@ -63,8 +68,18 @@ namespace Assets.Scripts.Dungeon
 
         private void Start()
         {
+            _fileHandler = new FileHandler();
             _level = LevelToLoad != null ? LevelToLoad : _testLevel;
             LevelToLoad = null;
+
+            // Defer inventory saves during dungeon play
+            if (InventoryManager.HasInstance)
+            {
+                InventoryManager.Instance.SetDeferSaves(true);
+            }
+
+            // Subscribe to dungeon cleared event
+            CombatManager.Instance.OnDungeonCleared += OnDungeonCleared;
 
             if (SeedToLoad.HasValue)
             {
@@ -75,6 +90,14 @@ namespace Assets.Scripts.Dungeon
             else if (_randomGenerateOn)
             {
                 SpawnDungeon();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (CombatManager.HasInstance)
+            {
+                CombatManager.Instance.OnDungeonCleared -= OnDungeonCleared;
             }
         }
 
@@ -98,6 +121,7 @@ namespace Assets.Scripts.Dungeon
                 Debug.Log(seed);
             }
 
+            _currentSeed = seed;
             Random.InitState(seed);
 
             EnemyManager.Instance.CleanupEnemies();
@@ -269,6 +293,69 @@ namespace Assets.Scripts.Dungeon
             }
 
             farthest.IsExit = true;
+        }
+
+        private void OnDungeonCleared()
+        {
+            // Commit all deferred progress to persistent save files
+            if (Party != null)
+            {
+                Party.CommitProgress();
+            }
+
+            if (InventoryManager.HasInstance)
+            {
+                InventoryManager.Instance.CommitInventory();
+                InventoryManager.Instance.SetDeferSaves(false);
+            }
+
+            // Delete dungeon save
+            if (DungeonSaveManager.HasInstance)
+            {
+                DungeonSaveManager.Instance.DeleteCurrentSave();
+            }
+
+            // Advance run progress
+            if (ActiveRun != null)
+            {
+                var runSave = _fileHandler.Load<RunSaveData>();
+                runSave.RunKey = ActiveRun.Key;
+                runSave.CurrentLevelIndex = RunLevelIndex + 1;
+                _fileHandler.Save(runSave);
+
+                if (runSave.CurrentLevelIndex >= ActiveRun.Levels.Count)
+                {
+                    // Run complete — clear run save
+                    _fileHandler.Delete(runSave);
+                    ActiveRun = null;
+                }
+            }
+
+            SceneManager.LoadScene("MenuScene");
+        }
+
+        public void HandlePartyDeath()
+        {
+            // Delete dungeon save — all in-memory XP/items are discarded with the scene
+            if (DungeonSaveManager.HasInstance)
+            {
+                DungeonSaveManager.Instance.DeleteCurrentSave();
+            }
+
+            // Delete run save — run is over
+            if (ActiveRun != null)
+            {
+                var runSave = new RunSaveData();
+                _fileHandler.Delete(runSave);
+                ActiveRun = null;
+            }
+
+            // Reload inventory from disk to discard in-memory changes
+            if (InventoryManager.HasInstance)
+            {
+                InventoryManager.Instance.Load();
+                InventoryManager.Instance.SetDeferSaves(false);
+            }
         }
 
         public void LoadSavedDungeon(int seed)

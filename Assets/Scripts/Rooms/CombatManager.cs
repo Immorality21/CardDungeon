@@ -48,6 +48,7 @@ namespace Assets.Scripts.Rooms
         public event Action<List<ICombatUnit>> OnTurnOrderChanged;
         public event Action<ICombatUnit> OnHeroTurnStarted;
         public event Action<ICombatUnit, List<CardSO>> OnCardDeckRequested;
+        public event Action OnDungeonCleared;
 
         [SerializeField] private List<CardComboSO> _cardCombos;
 
@@ -234,12 +235,11 @@ namespace Assets.Scripts.Rooms
                 room.EnableAllDoors();
             }
 
-            // Save state
+            // Save dungeon state (not party — deferred until level completion)
             if (DungeonSaveManager.Instance != null)
             {
                 DungeonSaveManager.Instance.Save(party.CurrentRoom);
             }
-            party.SaveParty();
 
             BuffTracker.Clear();
             _tagTracker.Clear();
@@ -254,6 +254,12 @@ namespace Assets.Scripts.Rooms
             };
 
             OnCombatEnded?.Invoke(result);
+
+            // Check if the exit room has been cleared
+            if (outcome == CombatOutcome.Victory && room.IsExit && !HasAliveEnemies(room))
+            {
+                OnDungeonCleared?.Invoke();
+            }
         }
 
         private IEnumerator ExecuteCardAction(CardAction cardAction, Room room)

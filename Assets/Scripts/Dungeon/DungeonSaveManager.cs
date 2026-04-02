@@ -90,6 +90,14 @@ namespace Assets.Scripts.Dungeon
             return data.Seed != 0;
         }
 
+        public void DeleteCurrentSave()
+        {
+            if (_seed != 0)
+            {
+                Delete(_seed);
+            }
+        }
+
         public void Delete(int seed)
         {
             _fileHandler.Delete(new DungeonSaveData { Seed = seed });

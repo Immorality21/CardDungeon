@@ -20,6 +20,8 @@ namespace Assets.Scripts.Items
 
         public event Action OnInventoryChanged;
 
+        private bool _deferSaves;
+
         private void Start()
         {
             _fileHandler = new FileHandler();
@@ -27,10 +29,23 @@ namespace Assets.Scripts.Items
             RebuildEquippedCache();
         }
 
+        public void SetDeferSaves(bool defer)
+        {
+            _deferSaves = defer;
+        }
+
+        public void CommitInventory()
+        {
+            Save();
+        }
+
         public void AddItem(ItemSO item)
         {
             _saveData.Items.Add(new ItemSaveData { ItemKey = item.Key });
-            Save();
+            if (!_deferSaves)
+            {
+                Save();
+            }
             OnInventoryChanged?.Invoke();
         }
 
@@ -40,7 +55,10 @@ namespace Assets.Scripts.Items
             if (index >= 0)
             {
                 _saveData.Items.RemoveAt(index);
-                Save();
+                if (!_deferSaves)
+                {
+                    Save();
+                }
                 OnInventoryChanged?.Invoke();
             }
         }
@@ -90,7 +108,10 @@ namespace Assets.Scripts.Items
             }
             _equipped[heroKey][slot] = item;
 
-            Save();
+            if (!_deferSaves)
+            {
+                Save();
+            }
             OnInventoryChanged?.Invoke();
         }
 
@@ -103,7 +124,10 @@ namespace Assets.Scripts.Items
                     existing.EquippedSlot = null;
                     existing.EquippedHeroKey = null;
                     slots.Remove(slot);
-                    Save();
+                    if (!_deferSaves)
+                    {
+                        Save();
+                    }
                     OnInventoryChanged?.Invoke();
                 }
             }
