@@ -105,6 +105,7 @@ public class MainMenuManager : MonoBehaviour
         _runCompletePanel.SetActive(false);
 
         bool hasActiveRun = !string.IsNullOrEmpty(_runSaveData.RunKey);
+        Debug.Log($"ShowHomePanel: RunKey='{_runSaveData.RunKey}', CurrentLevel={_runSaveData.CurrentLevelIndex}, hasActiveRun={hasActiveRun}");
         _continueRunButton.gameObject.SetActive(hasActiveRun);
     }
 
@@ -136,9 +137,10 @@ public class MainMenuManager : MonoBehaviour
         var dungeonSaveManager = new DungeonSaveManager();
 
         // Create fresh run save
+        var runKey = !string.IsNullOrEmpty(_runDefinition.Key) ? _runDefinition.Key : _runDefinition.name;
         _runSaveData = new RunSaveData
         {
-            RunKey = _runDefinition.Key,
+            RunKey = runKey,
             CurrentLevelIndex = 0
         };
         _fileHandler.Save(_runSaveData);

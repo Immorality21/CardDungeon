@@ -345,9 +345,10 @@ namespace Assets.Scripts.Dungeon
             if (ActiveRun != null)
             {
                 var runSave = _fileHandler.Load<RunSaveData>();
-                runSave.RunKey = ActiveRun.Key;
+                runSave.RunKey = !string.IsNullOrEmpty(ActiveRun.Key) ? ActiveRun.Key : ActiveRun.name;
                 runSave.CurrentLevelIndex = RunLevelIndex + 1;
                 _fileHandler.Save(runSave);
+                Debug.Log($"Run advanced to level {runSave.CurrentLevelIndex}/{ActiveRun.Levels.Count}, RunKey={runSave.RunKey}");
 
                 if (runSave.CurrentLevelIndex >= ActiveRun.Levels.Count)
                 {
