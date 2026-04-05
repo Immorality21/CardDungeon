@@ -23,8 +23,16 @@ namespace Assets.Scripts.Dungeon
         [SerializeField]
         private List<HeroSO> _heroDefinitions;
 
-        [SerializeField]
         private RoomActionUI _roomActionUI;
+
+        private RoomActionUI GetRoomActionUI()
+        {
+            if (_roomActionUI == null)
+            {
+                _roomActionUI = FindObjectOfType<RoomActionUI>(true);
+            }
+            return _roomActionUI;
+        }
 
         [SerializeField]
         private bool _randomGenerateOn;
@@ -236,7 +244,7 @@ namespace Assets.Scripts.Dungeon
             Party.Initialize(_heroDefinitions);
             Party.HealAll();
             Party.PlaceInRoom(startRoom);
-            GameManager.Instance.Initialize(Party, _roomActionUI);
+            GameManager.Instance.Initialize(Party, GetRoomActionUI());
 
             // Hide all rooms (fog of war), then reveal the starting room
             foreach (var room in rooms)
@@ -303,7 +311,7 @@ namespace Assets.Scripts.Dungeon
             Party = partyObj.GetComponent<Party>();
             Party.Initialize(_heroDefinitions);
             Party.PlaceInRoom(currentRoom);
-            GameManager.Instance.Initialize(Party, _roomActionUI);
+            GameManager.Instance.Initialize(Party, GetRoomActionUI());
 
             // Hide all rooms, then reveal explored ones
             foreach (var room in rooms)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
@@ -66,12 +67,7 @@ namespace Assets.Scripts.Cards.UI
                 var btnObj = Instantiate(_cardButtonPrefab, _cardListParent);
                 btnObj.SetActive(true);
 
-                var label = btnObj.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
-                {
-                    label.text = card.DisplayName;
-                }
-
+                // Set icon
                 var icon = btnObj.transform.Find("Icon");
                 if (icon != null)
                 {
@@ -79,6 +75,47 @@ namespace Assets.Scripts.Cards.UI
                     if (img != null && card.Icon != null)
                     {
                         img.sprite = card.Icon;
+                    }
+                }
+
+                // Set name
+                var nameLabel = btnObj.transform.Find("NameLabel");
+                if (nameLabel != null)
+                {
+                    var tmp = nameLabel.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null)
+                    {
+                        tmp.text = card.DisplayName;
+                    }
+                }
+                else
+                {
+                    var label = btnObj.GetComponentInChildren<TextMeshProUGUI>();
+                    if (label != null)
+                    {
+                        label.text = card.DisplayName;
+                    }
+                }
+
+                // Set description
+                var descLabel = btnObj.transform.Find("DescriptionLabel");
+                if (descLabel != null)
+                {
+                    var tmp = descLabel.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null)
+                    {
+                        tmp.text = card.Description ?? "";
+                    }
+                }
+
+                // Set effects summary
+                var effectsLabel = btnObj.transform.Find("EffectsLabel");
+                if (effectsLabel != null)
+                {
+                    var tmp = effectsLabel.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null)
+                    {
+                        tmp.text = GetEffectsSummary(card);
                     }
                 }
 
@@ -223,6 +260,46 @@ namespace Assets.Scripts.Cards.UI
             _targetPanel.SetActive(false);
             ClearSpawned(_spawnedCardButtons);
             ClearSpawned(_spawnedTargetButtons);
+        }
+
+        private string GetEffectsSummary(CardSO cardSO)
+        {
+            if (cardSO.Effects == null || cardSO.Effects.Count == 0)
+            {
+                return "";
+            }
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < cardSO.Effects.Count; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+
+                var effect = cardSO.Effects[i];
+                switch (effect.EffectType)
+                {
+                    case CardEffectType.Damage:
+                        sb.Append($"DMG {effect.Power}");
+                        if (effect.DamageType != DamageType.Normal)
+                        {
+                            sb.Append($" {effect.DamageType}");
+                        }
+                        break;
+                    case CardEffectType.Heal:
+                        sb.Append($"Heal {effect.Power}");
+                        break;
+                    case CardEffectType.Buff:
+                        sb.Append($"+{effect.BuffType}");
+                        break;
+                    case CardEffectType.Debuff:
+                        sb.Append($"-{effect.BuffType}");
+                        break;
+                }
+            }
+
+            return sb.ToString();
         }
 
         private void ClearSpawned(List<GameObject> list)

@@ -6,8 +6,14 @@ using Assets.Scripts.Cards.UI;
 
 public class CardSelectionUISetup : Editor
 {
-    private static readonly Color PanelColor = new Color(0.12f, 0.12f, 0.18f, 0.92f);
-    private static readonly Color ButtonColor = new Color(0.22f, 0.22f, 0.32f, 1f);
+    private static readonly Color TextColor = new Color(0.18f, 0.12f, 0.06f, 1f);
+    private static readonly Color LightTextColor = new Color(0.95f, 0.88f, 0.72f, 1f);
+    private static readonly Color SubPanelColor = new Color(0.16f, 0.12f, 0.08f, 0.35f);
+
+    private static Sprite _parchmentSprite;
+    private static Sprite _dungeonFrameSprite;
+    private static Sprite _stoneButtonSprite;
+    private static Sprite _stoneButtonHoverSprite;
 
     [MenuItem("Tools/Cards/Setup Card Selection UI")]
     public static void Setup()
@@ -19,21 +25,27 @@ public class CardSelectionUISetup : Editor
             return;
         }
 
-        // Check if already set up
+        // Delete existing if present
         var existing = combatCanvas.GetComponentInChildren<CardSelectionUI>(true);
         if (existing != null)
         {
-            Debug.LogWarning("CardSelectionUI already exists under CombatCanvas. Delete it first to re-create.");
+            Undo.DestroyObjectImmediate(existing.gameObject);
+        }
+
+        LoadSprites();
+
+        // Load prefabs
+        var cardEntryPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Cards/DeckCardEntry.prefab");
+        if (cardEntryPrefab == null)
+        {
+            Debug.LogError("DeckCardEntry.prefab not found. Run Tools > Cards > Create Deck Card Entry Prefab first.");
             return;
         }
 
-        // Load prefabs
-        var cardButtonPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Combat/CardButton.prefab");
         var targetButtonPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Combat/TargetButton.prefab");
-
-        if (cardButtonPrefab == null || targetButtonPrefab == null)
+        if (targetButtonPrefab == null)
         {
-            Debug.LogError("CardButton.prefab or TargetButton.prefab not found in Assets/Prefabs/UI/Combat/");
+            Debug.LogError("TargetButton.prefab not found in Assets/Prefabs/UI/Combat/");
             return;
         }
 
@@ -46,35 +58,30 @@ public class CardSelectionUISetup : Editor
         rootRT.offsetMax = Vector2.zero;
         var cardSelectionUI = root.AddComponent<CardSelectionUI>();
 
-        // === CARD LIST PANEL ===
-        var cardListPanel = CreatePanel("CardListPanel", root.transform, new Vector2(0.2f, 0.1f), new Vector2(0.8f, 0.9f));
+        // === CARD LIST PANEL (framed) ===
+        var cardListPanel = CreateFramedPanel("CardListPanel", root.transform,
+            new Vector2(0.15f, 0.05f), new Vector2(0.85f, 0.95f));
+
+        // Get the parchment inner panel for placing children
+        var cardListInner = cardListPanel.transform.Find("ParchmentBg");
 
         // Title
-        var cardTitle = CreateLabel("CardTitle", cardListPanel.transform, "Choose a Card", 24);
+        var cardTitle = CreateLabel("CardTitle", cardListInner, "Choose a Card", 24);
         var cardTitleRT = cardTitle.GetComponent<RectTransform>();
-        cardTitleRT.anchorMin = new Vector2(0, 0.88f);
+        cardTitleRT.anchorMin = new Vector2(0, 0.9f);
         cardTitleRT.anchorMax = new Vector2(1, 1);
         cardTitleRT.offsetMin = new Vector2(10, 0);
         cardTitleRT.offsetMax = new Vector2(-10, -5);
+        cardTitle.GetComponent<TextMeshProUGUI>().color = TextColor;
 
-        // Scroll area for card list
-        var cardScrollArea = CreateUIObject("CardScrollArea", cardListPanel.transform);
-        var cardScrollRT = cardScrollArea.GetComponent<RectTransform>();
-        cardScrollRT.anchorMin = new Vector2(0, 0.12f);
-        cardScrollRT.anchorMax = new Vector2(1, 0.87f);
-        cardScrollRT.offsetMin = new Vector2(10, 0);
-        cardScrollRT.offsetMax = new Vector2(-10, 0);
-        var cardVLG = cardScrollArea.AddComponent<VerticalLayoutGroup>();
-        cardVLG.spacing = 6;
-        cardVLG.childForceExpandWidth = true;
-        cardVLG.childForceExpandHeight = false;
-        cardVLG.childControlWidth = true;
-        cardVLG.childControlHeight = false;
-        var cardCSF = cardScrollArea.AddComponent<ContentSizeFitter>();
-        cardCSF.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        // ScrollRect for card list with CardHandLayout
+        var cardScrollObj = CreateScrollArea("CardScrollArea", cardListInner,
+            new Vector2(0, 0.12f), new Vector2(1, 0.88f), new Vector2(10, 0), new Vector2(-10, 0));
+        var cardContent = cardScrollObj.transform.Find("Content");
+        cardContent.gameObject.AddComponent<CardHandLayout>();
 
         // Back button
-        var cardBackBtn = CreateButton("BackButton", cardListPanel.transform, "Back");
+        var cardBackBtn = CreateStoneButton("BackButton", cardListInner, "Back");
         var cardBackRT = cardBackBtn.GetComponent<RectTransform>();
         cardBackRT.anchorMin = new Vector2(0.3f, 0.01f);
         cardBackRT.anchorMax = new Vector2(0.7f, 0.1f);
@@ -83,24 +90,38 @@ public class CardSelectionUISetup : Editor
 
         cardListPanel.SetActive(false);
 
-        // === TARGET PANEL ===
-        var targetPanel = CreatePanel("TargetPanel", root.transform, new Vector2(0.2f, 0.1f), new Vector2(0.8f, 0.9f));
+        // === TARGET PANEL (framed) ===
+        var targetPanel = CreateFramedPanel("TargetPanel", root.transform,
+            new Vector2(0.2f, 0.1f), new Vector2(0.8f, 0.9f));
+
+        var targetInner = targetPanel.transform.Find("ParchmentBg");
 
         // Target prompt
-        var targetPrompt = CreateLabel("TargetPromptLabel", targetPanel.transform, "Select Target", 24);
+        var targetPrompt = CreateLabel("TargetPromptLabel", targetInner, "Select Target", 24);
         var targetPromptRT = targetPrompt.GetComponent<RectTransform>();
         targetPromptRT.anchorMin = new Vector2(0, 0.88f);
         targetPromptRT.anchorMax = new Vector2(1, 1);
         targetPromptRT.offsetMin = new Vector2(10, 0);
         targetPromptRT.offsetMax = new Vector2(-10, -5);
+        targetPrompt.GetComponent<TextMeshProUGUI>().color = TextColor;
 
-        // Scroll area for targets
-        var targetScrollArea = CreateUIObject("TargetScrollArea", targetPanel.transform);
+        // Scroll area for targets (vertical list with sub-panel background)
+        var targetScrollBg = CreateUIObject("TargetScrollBg", targetInner);
+        var targetScrollBgRT = targetScrollBg.GetComponent<RectTransform>();
+        targetScrollBgRT.anchorMin = new Vector2(0.05f, 0.12f);
+        targetScrollBgRT.anchorMax = new Vector2(0.95f, 0.86f);
+        targetScrollBgRT.offsetMin = Vector2.zero;
+        targetScrollBgRT.offsetMax = Vector2.zero;
+        targetScrollBg.AddComponent<CanvasRenderer>();
+        var targetBgImg = targetScrollBg.AddComponent<Image>();
+        targetBgImg.color = SubPanelColor;
+
+        var targetScrollArea = CreateUIObject("TargetScrollArea", targetScrollBg.transform);
         var targetScrollRT = targetScrollArea.GetComponent<RectTransform>();
-        targetScrollRT.anchorMin = new Vector2(0, 0.12f);
-        targetScrollRT.anchorMax = new Vector2(1, 0.87f);
-        targetScrollRT.offsetMin = new Vector2(10, 0);
-        targetScrollRT.offsetMax = new Vector2(-10, 0);
+        targetScrollRT.anchorMin = Vector2.zero;
+        targetScrollRT.anchorMax = Vector2.one;
+        targetScrollRT.offsetMin = new Vector2(10, 5);
+        targetScrollRT.offsetMax = new Vector2(-10, -5);
         var targetVLG = targetScrollArea.AddComponent<VerticalLayoutGroup>();
         targetVLG.spacing = 6;
         targetVLG.childForceExpandWidth = true;
@@ -111,7 +132,7 @@ public class CardSelectionUISetup : Editor
         targetCSF.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         // Target back button
-        var targetBackBtn = CreateButton("TargetBackButton", targetPanel.transform, "Back");
+        var targetBackBtn = CreateStoneButton("TargetBackButton", targetInner, "Back");
         var targetBackRT = targetBackBtn.GetComponent<RectTransform>();
         targetBackRT.anchorMin = new Vector2(0.3f, 0.01f);
         targetBackRT.anchorMax = new Vector2(0.7f, 0.1f);
@@ -123,8 +144,8 @@ public class CardSelectionUISetup : Editor
         // === Wire up serialized fields ===
         var so = new SerializedObject(cardSelectionUI);
         so.FindProperty("_cardListPanel").objectReferenceValue = cardListPanel;
-        so.FindProperty("_cardListParent").objectReferenceValue = cardScrollArea.transform;
-        so.FindProperty("_cardButtonPrefab").objectReferenceValue = cardButtonPrefab;
+        so.FindProperty("_cardListParent").objectReferenceValue = cardContent;
+        so.FindProperty("_cardButtonPrefab").objectReferenceValue = cardEntryPrefab;
         so.FindProperty("_backButton").objectReferenceValue = cardBackBtn.GetComponent<Button>();
         so.FindProperty("_targetPanel").objectReferenceValue = targetPanel;
         so.FindProperty("_targetListParent").objectReferenceValue = targetScrollArea.transform;
@@ -136,61 +157,125 @@ public class CardSelectionUISetup : Editor
         Undo.RegisterCreatedObjectUndo(root, "Setup Card Selection UI");
         EditorUtility.SetDirty(combatCanvas);
 
-        Debug.Log("CardSelectionUI created under CombatCanvas. Save the scene to persist.");
+        Debug.Log("CardSelectionUI created with fantasy theme under CombatCanvas. Save the scene to persist.");
     }
 
-    private static GameObject CreateUIObject(string name, Transform parent)
+    private static void LoadSprites()
     {
-        var obj = new GameObject(name);
-        obj.transform.SetParent(parent, false);
-        obj.layer = 5; // UI layer
-        obj.AddComponent<RectTransform>();
-        return obj;
+        _parchmentSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/ParchmentPanel.png");
+        _dungeonFrameSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/DungeonFrame.png");
+        _stoneButtonSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButton.png");
+        _stoneButtonHoverSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButtonHover.png");
     }
 
-    private static GameObject CreatePanel(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax)
+    private static GameObject CreateScrollArea(string name, Transform parent,
+        Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
+    {
+        var scrollObj = CreateUIObject(name, parent);
+        var scrollRT = scrollObj.GetComponent<RectTransform>();
+        scrollRT.anchorMin = anchorMin;
+        scrollRT.anchorMax = anchorMax;
+        scrollRT.offsetMin = offsetMin;
+        scrollRT.offsetMax = offsetMax;
+
+        scrollObj.AddComponent<CanvasRenderer>();
+        var maskImg = scrollObj.AddComponent<Image>();
+        maskImg.color = new Color(0, 0, 0, 0.01f);
+        scrollObj.AddComponent<Mask>().showMaskGraphic = false;
+
+        var scrollRect = scrollObj.AddComponent<ScrollRect>();
+        scrollRect.horizontal = true;
+        scrollRect.vertical = false;
+        scrollRect.movementType = ScrollRect.MovementType.Elastic;
+        scrollRect.elasticity = 0.1f;
+
+        var content = CreateUIObject("Content", scrollObj.transform);
+        var contentRT = content.GetComponent<RectTransform>();
+        contentRT.anchorMin = new Vector2(0, 0);
+        contentRT.anchorMax = new Vector2(0, 1);
+        contentRT.pivot = new Vector2(0, 0.5f);
+        contentRT.offsetMin = Vector2.zero;
+        contentRT.offsetMax = Vector2.zero;
+
+        var csf = content.AddComponent<ContentSizeFitter>();
+        csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        csf.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+        scrollRect.content = contentRT;
+
+        return scrollObj;
+    }
+
+    private static GameObject CreateFramedPanel(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        var frame = CreateUIObject(name, parent);
+        var frameRT = frame.GetComponent<RectTransform>();
+        frameRT.anchorMin = anchorMin;
+        frameRT.anchorMax = anchorMax;
+        frameRT.offsetMin = Vector2.zero;
+        frameRT.offsetMax = Vector2.zero;
+        frame.AddComponent<CanvasRenderer>();
+        var frameImg = frame.AddComponent<Image>();
+        frameImg.sprite = _dungeonFrameSprite;
+        frameImg.type = Image.Type.Sliced;
+        frameImg.pixelsPerUnitMultiplier = 1f;
+
+        var inner = CreateUIObject("ParchmentBg", frame.transform);
+        var innerRT = inner.GetComponent<RectTransform>();
+        innerRT.anchorMin = new Vector2(0.06f, 0.06f);
+        innerRT.anchorMax = new Vector2(0.94f, 0.94f);
+        innerRT.offsetMin = Vector2.zero;
+        innerRT.offsetMax = Vector2.zero;
+        inner.AddComponent<CanvasRenderer>();
+        var innerImg = inner.AddComponent<Image>();
+        innerImg.sprite = _parchmentSprite;
+        innerImg.type = Image.Type.Tiled;
+        innerImg.pixelsPerUnitMultiplier = 2f;
+
+        return frame;
+    }
+
+    private static GameObject CreateStoneButton(string name, Transform parent, string label)
     {
         var obj = CreateUIObject(name, parent);
-        var rt = obj.GetComponent<RectTransform>();
-        rt.anchorMin = anchorMin;
-        rt.anchorMax = anchorMax;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-
         obj.AddComponent<CanvasRenderer>();
         var img = obj.AddComponent<Image>();
-        img.color = PanelColor;
-
-        return obj;
-    }
-
-    private static GameObject CreateButton(string name, Transform parent, string label)
-    {
-        var obj = CreateUIObject(name, parent);
-        obj.AddComponent<CanvasRenderer>();
-        var img = obj.AddComponent<Image>();
-        img.color = ButtonColor;
+        img.sprite = _stoneButtonSprite;
+        img.type = Image.Type.Sliced;
+        img.pixelsPerUnitMultiplier = 1f;
 
         var btn = obj.AddComponent<Button>();
-        var colors = btn.colors;
-        colors.highlightedColor = new Color(0.3f, 0.3f, 0.42f, 1f);
-        btn.colors = colors;
+        var spriteState = new SpriteState();
+        spriteState.highlightedSprite = _stoneButtonHoverSprite;
+        spriteState.pressedSprite = _stoneButtonHoverSprite;
+        spriteState.selectedSprite = _stoneButtonHoverSprite;
+        btn.spriteState = spriteState;
+        btn.transition = Selectable.Transition.SpriteSwap;
 
         var textObj = CreateUIObject("Text", obj.transform);
         textObj.AddComponent<CanvasRenderer>();
         var textRT = textObj.GetComponent<RectTransform>();
         textRT.anchorMin = Vector2.zero;
         textRT.anchorMax = Vector2.one;
-        textRT.offsetMin = Vector2.zero;
-        textRT.offsetMax = Vector2.zero;
+        textRT.offsetMin = new Vector2(8, 2);
+        textRT.offsetMax = new Vector2(-8, -2);
 
         var tmp = textObj.AddComponent<TextMeshProUGUI>();
         tmp.text = label;
         tmp.fontSize = 18;
         tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white;
+        tmp.color = LightTextColor;
         tmp.alignment = TextAlignmentOptions.Center;
 
+        return obj;
+    }
+
+    private static GameObject CreateUIObject(string name, Transform parent)
+    {
+        var obj = new GameObject(name);
+        obj.transform.SetParent(parent, false);
+        obj.layer = 5;
+        obj.AddComponent<RectTransform>();
         return obj;
     }
 
@@ -202,7 +287,7 @@ public class CardSelectionUISetup : Editor
         tmp.text = text;
         tmp.fontSize = fontSize;
         tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white;
+        tmp.color = LightTextColor;
         tmp.alignment = TextAlignmentOptions.Center;
         return obj;
     }
