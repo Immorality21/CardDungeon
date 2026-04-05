@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Heroes;
 using UnityEngine;
@@ -121,41 +123,28 @@ namespace Assets.Scripts.Cards.UI
             var assigned = CardCollectionManager.Instance.GetCardsForHero(_selectedHeroKey);
             _deckCountLabel.text = $"{assigned.Count} / {CardCollectionManager.MaxDeckSize}";
 
-            foreach (var cardData in assigned)
+            // Group by CardKey
+            var groups = assigned.GroupBy(c => c.CardKey);
+
+            foreach (var group in groups)
             {
-                var cardSO = CardCollectionManager.Instance.GetCardSO(cardData.CardKey);
+                var cardSO = CardCollectionManager.Instance.GetCardSO(group.Key);
                 if (cardSO == null)
                 {
                     continue;
                 }
 
-                var btnObj = Instantiate(_deckCardPrefab, _deckCardParent);
-                btnObj.SetActive(true);
+                int count = group.Count();
+                var cardObj = SpawnCardEntry(_deckCardPrefab, _deckCardParent, cardSO, count);
 
-                var label = btnObj.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
-                {
-                    label.text = cardSO.DisplayName;
-                }
-
-                var icon = btnObj.transform.Find("Icon");
-                if (icon != null)
-                {
-                    var img = icon.GetComponent<Image>();
-                    if (img != null && cardSO.Icon != null)
-                    {
-                        img.sprite = cardSO.Icon;
-                    }
-                }
-
-                var captured = cardData;
-                var btn = btnObj.GetComponent<Button>();
+                var capturedKey = group.Key;
+                var btn = cardObj.GetComponent<Button>();
                 if (btn != null)
                 {
-                    btn.onClick.AddListener(() => OnUnassignCard(captured));
+                    btn.onClick.AddListener(() => OnUnassignCard(capturedKey));
                 }
 
-                _spawnedDeckCards.Add(btnObj);
+                _spawnedDeckCards.Add(cardObj);
             }
         }
 
@@ -165,58 +154,157 @@ namespace Assets.Scripts.Cards.UI
 
             var unassigned = CardCollectionManager.Instance.GetUnassignedCards();
 
-            foreach (var cardData in unassigned)
+            // Group by CardKey
+            var groups = unassigned.GroupBy(c => c.CardKey);
+
+            foreach (var group in groups)
             {
-                var cardSO = CardCollectionManager.Instance.GetCardSO(cardData.CardKey);
+                var cardSO = CardCollectionManager.Instance.GetCardSO(group.Key);
                 if (cardSO == null)
                 {
                     continue;
                 }
 
-                var btnObj = Instantiate(_availableCardPrefab, _availableCardParent);
-                btnObj.SetActive(true);
+                int count = group.Count();
+                var cardObj = SpawnCardEntry(_availableCardPrefab, _availableCardParent, cardSO, count);
 
-                var label = btnObj.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
-                {
-                    label.text = cardSO.DisplayName;
-                }
-
-                var icon = btnObj.transform.Find("Icon");
-                if (icon != null)
-                {
-                    var img = icon.GetComponent<Image>();
-                    if (img != null && cardSO.Icon != null)
-                    {
-                        img.sprite = cardSO.Icon;
-                    }
-                }
-
-                var captured = cardData;
-                var btn = btnObj.GetComponent<Button>();
+                var capturedKey = group.Key;
+                var btn = cardObj.GetComponent<Button>();
                 if (btn != null)
                 {
-                    btn.onClick.AddListener(() => OnAssignCard(captured));
+                    btn.onClick.AddListener(() => OnAssignCard(capturedKey));
                 }
 
-                _spawnedAvailableCards.Add(btnObj);
+                _spawnedAvailableCards.Add(cardObj);
             }
         }
 
-        private void OnAssignCard(CardSaveData cardData)
+        private GameObject SpawnCardEntry(GameObject prefab, Transform parent, CardSO cardSO, int count)
         {
-            if (CardCollectionManager.Instance.AssignCardToHero(cardData, _selectedHeroKey))
+            var cardObj = Instantiate(prefab, parent);
+            cardObj.SetActive(true);
+
+            // Set icon
+            var icon = cardObj.transform.Find("Icon");
+            if (icon != null)
             {
+                var img = icon.GetComponent<Image>();
+                if (img != null && cardSO.Icon != null)
+                {
+                    img.sprite = cardSO.Icon;
+                }
+            }
+
+            // Set name with count
+            var nameLabel = cardObj.transform.Find("NameLabel");
+            if (nameLabel != null)
+            {
+                var tmp = nameLabel.GetComponent<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    tmp.text = count > 1 ? $"{cardSO.DisplayName} ({count})" : cardSO.DisplayName;
+                }
+            }
+
+            // Fallback: try the generic Label child (old prefab compat)
+            if (nameLabel == null)
+            {
+                var label = cardObj.GetComponentInChildren<TextMeshProUGUI>();
+                if (label != null)
+                {
+                    label.text = count > 1 ? $"{cardSO.DisplayName} ({count})" : cardSO.DisplayName;
+                }
+            }
+
+            // Set description
+            var descLabel = cardObj.transform.Find("DescriptionLabel");
+            if (descLabel != null)
+            {
+                var tmp = descLabel.GetComponent<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    tmp.text = cardSO.Description ?? "";
+                }
+            }
+
+            // Set effects summary
+            var effectsLabel = cardObj.transform.Find("EffectsLabel");
+            if (effectsLabel != null)
+            {
+                var tmp = effectsLabel.GetComponent<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    tmp.text = GetEffectsSummary(cardSO);
+                }
+            }
+
+            return cardObj;
+        }
+
+        private void OnAssignCard(string cardKey)
+        {
+            var unassigned = CardCollectionManager.Instance.GetUnassignedCards();
+            var cardData = unassigned.FirstOrDefault(c => c.CardKey == cardKey);
+            if (cardData != null)
+            {
+                if (CardCollectionManager.Instance.AssignCardToHero(cardData, _selectedHeroKey))
+                {
+                    RefreshDeck();
+                    RefreshAvailable();
+                }
+            }
+        }
+
+        private void OnUnassignCard(string cardKey)
+        {
+            var assigned = CardCollectionManager.Instance.GetCardsForHero(_selectedHeroKey);
+            var cardData = assigned.FirstOrDefault(c => c.CardKey == cardKey);
+            if (cardData != null)
+            {
+                CardCollectionManager.Instance.UnassignCard(cardData);
                 RefreshDeck();
                 RefreshAvailable();
             }
         }
 
-        private void OnUnassignCard(CardSaveData cardData)
+        private string GetEffectsSummary(CardSO cardSO)
         {
-            CardCollectionManager.Instance.UnassignCard(cardData);
-            RefreshDeck();
-            RefreshAvailable();
+            if (cardSO.Effects == null || cardSO.Effects.Count == 0)
+            {
+                return "";
+            }
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < cardSO.Effects.Count; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+
+                var effect = cardSO.Effects[i];
+                switch (effect.EffectType)
+                {
+                    case CardEffectType.Damage:
+                        sb.Append($"DMG {effect.Power}");
+                        if (effect.DamageType != Combat.DamageType.Normal)
+                        {
+                            sb.Append($" {effect.DamageType}");
+                        }
+                        break;
+                    case CardEffectType.Heal:
+                        sb.Append($"Heal {effect.Power}");
+                        break;
+                    case CardEffectType.Buff:
+                        sb.Append($"+{effect.BuffType}");
+                        break;
+                    case CardEffectType.Debuff:
+                        sb.Append($"-{effect.BuffType}");
+                        break;
+                }
+            }
+
+            return sb.ToString();
         }
 
         private void ClearSpawned(List<GameObject> list)

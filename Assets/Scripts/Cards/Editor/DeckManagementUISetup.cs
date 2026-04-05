@@ -11,11 +11,24 @@ public class DeckManagementUISetup : Editor
     private static readonly Color TextColor = new Color(0.18f, 0.12f, 0.06f, 1f);
     private static readonly Color LightTextColor = new Color(0.95f, 0.88f, 0.72f, 1f);
     private static readonly Color SubPanelColor = new Color(0.16f, 0.12f, 0.08f, 0.35f);
+    private static readonly Color CardBgColor = new Color(0.25f, 0.18f, 0.10f, 1f);
+    private static readonly Color EffectsTextColor = new Color(0.75f, 0.65f, 0.45f, 1f);
 
     private static Sprite _parchmentSprite;
     private static Sprite _dungeonFrameSprite;
     private static Sprite _stoneButtonSprite;
     private static Sprite _stoneButtonHoverSprite;
+
+    [MenuItem("Tools/Cards/Create Deck Card Entry Prefab")]
+    public static void CreateDeckCardEntryPrefab()
+    {
+        LoadSprites();
+        var prefab = BuildDeckCardEntry();
+        if (prefab != null)
+        {
+            Debug.Log("DeckCardEntry.prefab created at Assets/Prefabs/UI/Cards/DeckCardEntry.prefab");
+        }
+    }
 
     [MenuItem("Tools/Cards/Setup Deck Management UI")]
     public static void Setup()
@@ -34,15 +47,24 @@ public class DeckManagementUISetup : Editor
             return;
         }
 
-        // Load sprites
-        _parchmentSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/ParchmentPanel.png");
-        _dungeonFrameSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/DungeonFrame.png");
-        _stoneButtonSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButton.png");
-        _stoneButtonHoverSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButtonHover.png");
+        LoadSprites();
 
-        // Load prefabs
-        var cardButtonPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Combat/CardButton.prefab");
-        if (cardButtonPrefab == null)
+        // Ensure card entry prefab exists
+        var cardEntryPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Cards/DeckCardEntry.prefab");
+        if (cardEntryPrefab == null)
+        {
+            cardEntryPrefab = BuildDeckCardEntry();
+        }
+
+        if (cardEntryPrefab == null)
+        {
+            Debug.LogError("Failed to create DeckCardEntry prefab.");
+            return;
+        }
+
+        // Load hero tab prefab
+        var heroTabPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Combat/CardButton.prefab");
+        if (heroTabPrefab == null)
         {
             Debug.LogError("CardButton.prefab not found in Assets/Prefabs/UI/Combat/");
             return;
@@ -133,20 +155,11 @@ public class DeckManagementUISetup : Editor
         deckTitleRT.offsetMax = new Vector2(-5, -2);
         deckTitle.GetComponent<TextMeshProUGUI>().color = TextColor;
 
-        var deckScrollArea = CreateUIObject("DeckCardParent", deckSection.transform);
-        var deckScrollRT = deckScrollArea.GetComponent<RectTransform>();
-        deckScrollRT.anchorMin = new Vector2(0, 0);
-        deckScrollRT.anchorMax = new Vector2(1, 0.89f);
-        deckScrollRT.offsetMin = new Vector2(5, 5);
-        deckScrollRT.offsetMax = new Vector2(-5, 0);
-        var deckVLG = deckScrollArea.AddComponent<VerticalLayoutGroup>();
-        deckVLG.spacing = 4;
-        deckVLG.childForceExpandWidth = true;
-        deckVLG.childForceExpandHeight = false;
-        deckVLG.childControlWidth = true;
-        deckVLG.childControlHeight = false;
-        var deckCSF = deckScrollArea.AddComponent<ContentSizeFitter>();
-        deckCSF.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        // ScrollRect for deck cards
+        var deckScrollObj = CreateScrollArea("DeckScroll", deckSection.transform,
+            new Vector2(0, 0), new Vector2(1, 0.89f), new Vector2(5, 5), new Vector2(-5, 0));
+        var deckContent = deckScrollObj.transform.Find("Content");
+        deckContent.gameObject.AddComponent<CardHandLayout>();
 
         // === AVAILABLE CARDS SECTION (right) ===
         var availSection = CreateSubPanel("AvailableSection", rootPanel.transform,
@@ -160,20 +173,11 @@ public class DeckManagementUISetup : Editor
         availTitleRT.offsetMax = new Vector2(-5, -2);
         availTitle.GetComponent<TextMeshProUGUI>().color = TextColor;
 
-        var availScrollArea = CreateUIObject("AvailableCardParent", availSection.transform);
-        var availScrollRT = availScrollArea.GetComponent<RectTransform>();
-        availScrollRT.anchorMin = new Vector2(0, 0);
-        availScrollRT.anchorMax = new Vector2(1, 0.89f);
-        availScrollRT.offsetMin = new Vector2(5, 5);
-        availScrollRT.offsetMax = new Vector2(-5, 0);
-        var availVLG = availScrollArea.AddComponent<VerticalLayoutGroup>();
-        availVLG.spacing = 4;
-        availVLG.childForceExpandWidth = true;
-        availVLG.childForceExpandHeight = false;
-        availVLG.childControlWidth = true;
-        availVLG.childControlHeight = false;
-        var availCSF = availScrollArea.AddComponent<ContentSizeFitter>();
-        availCSF.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        // ScrollRect for available cards
+        var availScrollObj = CreateScrollArea("AvailableScroll", availSection.transform,
+            new Vector2(0, 0), new Vector2(1, 0.89f), new Vector2(5, 5), new Vector2(-5, 0));
+        var availContent = availScrollObj.transform.Find("Content");
+        availContent.gameObject.AddComponent<CardHandLayout>();
 
         // === CLOSE BUTTON ===
         var closeBtn = CreateStoneButton("CloseButton", rootPanel.transform, "Close");
@@ -189,13 +193,13 @@ public class DeckManagementUISetup : Editor
         var so = new SerializedObject(deckUI);
         so.FindProperty("_rootPanel").objectReferenceValue = rootPanel;
         so.FindProperty("_heroTabParent").objectReferenceValue = heroTabArea.transform;
-        so.FindProperty("_heroTabPrefab").objectReferenceValue = cardButtonPrefab;
+        so.FindProperty("_heroTabPrefab").objectReferenceValue = heroTabPrefab;
         so.FindProperty("_heroNameLabel").objectReferenceValue = heroNameTMP;
         so.FindProperty("_deckCountLabel").objectReferenceValue = deckCountTMP;
-        so.FindProperty("_deckCardParent").objectReferenceValue = deckScrollArea.transform;
-        so.FindProperty("_deckCardPrefab").objectReferenceValue = cardButtonPrefab;
-        so.FindProperty("_availableCardParent").objectReferenceValue = availScrollArea.transform;
-        so.FindProperty("_availableCardPrefab").objectReferenceValue = cardButtonPrefab;
+        so.FindProperty("_deckCardParent").objectReferenceValue = deckContent;
+        so.FindProperty("_deckCardPrefab").objectReferenceValue = cardEntryPrefab;
+        so.FindProperty("_availableCardParent").objectReferenceValue = availContent;
+        so.FindProperty("_availableCardPrefab").objectReferenceValue = cardEntryPrefab;
         so.FindProperty("_closeButton").objectReferenceValue = closeBtn.GetComponent<Button>();
 
         // Wire hero SOs
@@ -220,7 +224,156 @@ public class DeckManagementUISetup : Editor
         Undo.RegisterCreatedObjectUndo(root, "Setup Deck Management UI");
         EditorUtility.SetDirty(mainMenuCanvas);
 
-        Debug.Log($"DeckManagementUI created with fantasy theme under MainMenuCanvas with {heroSOs.Count} heroes. Save the scene to persist.");
+        Debug.Log($"DeckManagementUI created with card hand layout under MainMenuCanvas with {heroSOs.Count} heroes. Save the scene to persist.");
+    }
+
+    private static GameObject BuildDeckCardEntry()
+    {
+        // Create the prefab hierarchy in memory
+        var root = CreateUIObject("DeckCardEntry", null);
+        var rootRT = root.GetComponent<RectTransform>();
+        rootRT.sizeDelta = new Vector2(90, 150);
+
+        // Background
+        root.AddComponent<CanvasRenderer>();
+        var bgImg = root.AddComponent<Image>();
+        bgImg.sprite = _stoneButtonSprite;
+        bgImg.type = Image.Type.Sliced;
+        bgImg.color = CardBgColor;
+
+        // Button for click handling
+        var btn = root.AddComponent<Button>();
+        var spriteState = new SpriteState();
+        spriteState.highlightedSprite = _stoneButtonHoverSprite;
+        spriteState.pressedSprite = _stoneButtonHoverSprite;
+        spriteState.selectedSprite = _stoneButtonHoverSprite;
+        btn.spriteState = spriteState;
+        btn.transition = Selectable.Transition.SpriteSwap;
+
+        // Hover effect
+        root.AddComponent<CardHoverEffect>();
+
+        // Vertical layout for contents
+        var vlg = root.AddComponent<VerticalLayoutGroup>();
+        vlg.padding = new RectOffset(4, 4, 6, 4);
+        vlg.spacing = 2;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = false;
+        vlg.childAlignment = TextAnchor.UpperCenter;
+
+        // Icon
+        var iconObj = CreateUIObject("Icon", root.transform);
+        iconObj.AddComponent<CanvasRenderer>();
+        var iconImg = iconObj.AddComponent<Image>();
+        iconImg.preserveAspect = true;
+        var iconLE = iconObj.AddComponent<LayoutElement>();
+        iconLE.preferredHeight = 50;
+        iconLE.preferredWidth = 50;
+
+        // Name label
+        var nameObj = CreateUIObject("NameLabel", root.transform);
+        nameObj.AddComponent<CanvasRenderer>();
+        var nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
+        nameTMP.text = "Card Name";
+        nameTMP.fontSize = 11;
+        nameTMP.fontStyle = FontStyles.Bold;
+        nameTMP.color = LightTextColor;
+        nameTMP.alignment = TextAlignmentOptions.Center;
+        nameTMP.enableWordWrapping = true;
+        var nameLE = nameObj.AddComponent<LayoutElement>();
+        nameLE.preferredHeight = 30;
+
+        // Description label
+        var descObj = CreateUIObject("DescriptionLabel", root.transform);
+        descObj.AddComponent<CanvasRenderer>();
+        var descTMP = descObj.AddComponent<TextMeshProUGUI>();
+        descTMP.text = "";
+        descTMP.fontSize = 8;
+        descTMP.fontStyle = FontStyles.Italic;
+        descTMP.color = EffectsTextColor;
+        descTMP.alignment = TextAlignmentOptions.Center;
+        descTMP.enableWordWrapping = true;
+        var descLE = descObj.AddComponent<LayoutElement>();
+        descLE.preferredHeight = 20;
+
+        // Effects label
+        var effectsObj = CreateUIObject("EffectsLabel", root.transform);
+        effectsObj.AddComponent<CanvasRenderer>();
+        var effectsTMP = effectsObj.AddComponent<TextMeshProUGUI>();
+        effectsTMP.text = "DMG 5";
+        effectsTMP.fontSize = 9;
+        effectsTMP.color = EffectsTextColor;
+        effectsTMP.alignment = TextAlignmentOptions.Center;
+        effectsTMP.enableWordWrapping = true;
+        var effectsLE = effectsObj.AddComponent<LayoutElement>();
+        effectsLE.preferredHeight = 20;
+
+        // Save as prefab
+        if (!AssetDatabase.IsValidFolder("Assets/Prefabs/UI/Cards"))
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/Prefabs/UI"))
+            {
+                AssetDatabase.CreateFolder("Assets/Prefabs", "UI");
+            }
+            AssetDatabase.CreateFolder("Assets/Prefabs/UI", "Cards");
+        }
+
+        var prefabPath = "Assets/Prefabs/UI/Cards/DeckCardEntry.prefab";
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+        DestroyImmediate(root);
+
+        return prefab;
+    }
+
+    private static GameObject CreateScrollArea(string name, Transform parent,
+        Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
+    {
+        var scrollObj = CreateUIObject(name, parent);
+        var scrollRT = scrollObj.GetComponent<RectTransform>();
+        scrollRT.anchorMin = anchorMin;
+        scrollRT.anchorMax = anchorMax;
+        scrollRT.offsetMin = offsetMin;
+        scrollRT.offsetMax = offsetMax;
+
+        // Mask so cards clip at edges
+        scrollObj.AddComponent<CanvasRenderer>();
+        var maskImg = scrollObj.AddComponent<Image>();
+        maskImg.color = new Color(0, 0, 0, 0.01f); // Nearly invisible, needed for Mask
+        scrollObj.AddComponent<Mask>().showMaskGraphic = false;
+
+        // ScrollRect
+        var scrollRect = scrollObj.AddComponent<ScrollRect>();
+        scrollRect.horizontal = true;
+        scrollRect.vertical = false;
+        scrollRect.movementType = ScrollRect.MovementType.Elastic;
+        scrollRect.elasticity = 0.1f;
+
+        // Content container
+        var content = CreateUIObject("Content", scrollObj.transform);
+        var contentRT = content.GetComponent<RectTransform>();
+        contentRT.anchorMin = new Vector2(0, 0);
+        contentRT.anchorMax = new Vector2(0, 1);
+        contentRT.pivot = new Vector2(0, 0.5f);
+        contentRT.offsetMin = Vector2.zero;
+        contentRT.offsetMax = Vector2.zero;
+
+        var csf = content.AddComponent<ContentSizeFitter>();
+        csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        csf.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+        scrollRect.content = contentRT;
+
+        return scrollObj;
+    }
+
+    private static void LoadSprites()
+    {
+        _parchmentSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/ParchmentPanel.png");
+        _dungeonFrameSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/DungeonFrame.png");
+        _stoneButtonSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButton.png");
+        _stoneButtonHoverSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButtonHover.png");
     }
 
     private static GameObject CreateFramedPanel(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax)
@@ -306,7 +459,10 @@ public class DeckManagementUISetup : Editor
     private static GameObject CreateUIObject(string name, Transform parent)
     {
         var obj = new GameObject(name);
-        obj.transform.SetParent(parent, false);
+        if (parent != null)
+        {
+            obj.transform.SetParent(parent, false);
+        }
         obj.layer = 5;
         obj.AddComponent<RectTransform>();
         return obj;
