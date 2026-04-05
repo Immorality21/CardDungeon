@@ -71,11 +71,7 @@ namespace Assets.Scripts.Heroes
         {
             PreviousRoom = CurrentRoom;
             CurrentRoom = room;
-            var center = new Vector3(
-                room.GridPosition.x + room.RoomSO.Width / 2f - 0.5f,
-                room.GridPosition.y + room.RoomSO.Height / 2f - 0.5f,
-                -1f);
-            transform.position = center;
+            transform.position = room.GetCenter();
         }
 
         public void PlaceAtDoor(Door door, Room fromRoom)
@@ -101,6 +97,16 @@ namespace Assets.Scripts.Heroes
             var targets = new List<Vector3>();
             var aliveHeroes = new List<Hero>();
 
+            // Build avoid list starting with enemy positions
+            var avoidPositions = new List<Vector3>();
+            foreach (var enemy in room.Enemies)
+            {
+                if (enemy != null)
+                {
+                    avoidPositions.Add(enemy.transform.position);
+                }
+            }
+
             foreach (var hero in Heroes)
             {
                 if (!hero.IsAlive)
@@ -109,7 +115,8 @@ namespace Assets.Scripts.Heroes
                 }
 
                 aliveHeroes.Add(hero);
-                var worldPos = GetRandomPositionInRoom(room, targets);
+                var worldPos = room.GetRandomWalkablePosition(avoidPositions, 0.8f);
+                avoidPositions.Add(worldPos);
                 var localPos = worldPos - transform.position;
                 localPos.z = 0f;
                 targets.Add(localPos);
@@ -195,69 +202,6 @@ namespace Assets.Scripts.Heroes
             _spriteRenderer.enabled = true;
         }
 
-        private Vector3 GetRandomPositionInRoom(Room room, List<Vector3> existingLocalPositions)
-        {
-            var gridPos = room.GridPosition;
-            var width = room.RoomSO.Width;
-            var height = room.RoomSO.Height;
-
-            float minX = gridPos.x + 1;
-            float maxX = gridPos.x + width - 2;
-            float minY = gridPos.y + 1;
-            float maxY = gridPos.y + height - 2;
-
-            if (minX > maxX || minY > maxY)
-            {
-                return new Vector3(
-                    gridPos.x + width / 2f - 0.5f,
-                    gridPos.y + height / 2f - 0.5f,
-                    -1f);
-            }
-
-            for (int attempt = 0; attempt < 10; attempt++)
-            {
-                var worldPos = new Vector3(
-                    Random.Range(minX, maxX + 1),
-                    Random.Range(minY, maxY + 1),
-                    -1f);
-
-                var localPos = worldPos - transform.position;
-                localPos.z = 0f;
-
-                bool overlaps = false;
-                foreach (var existing in existingLocalPositions)
-                {
-                    if (Vector3.Distance(existing, localPos) < 0.8f)
-                    {
-                        overlaps = true;
-                        break;
-                    }
-                }
-
-                // Also check against enemies
-                if (!overlaps)
-                {
-                    foreach (var enemy in room.Enemies)
-                    {
-                        if (enemy != null && Vector3.Distance(enemy.transform.position, worldPos) < 0.8f)
-                        {
-                            overlaps = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!overlaps)
-                {
-                    return worldPos;
-                }
-            }
-
-            return new Vector3(
-                Random.Range(minX, maxX + 1),
-                Random.Range(minY, maxY + 1),
-                -1f);
-        }
 
         public void SaveParty()
         {

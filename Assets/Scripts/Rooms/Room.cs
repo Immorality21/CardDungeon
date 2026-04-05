@@ -97,5 +97,55 @@ namespace Assets.Scripts.Rooms
                 }
             }
         }
+
+        public Vector3 GetCenter()
+        {
+            return new Vector3(
+                GridPosition.x + RoomSO.Width / 2f - 0.5f,
+                GridPosition.y + RoomSO.Height / 2f - 0.5f,
+                -1f);
+        }
+
+        public Vector3 GetRandomWalkablePosition(List<Vector3> avoidWorldPositions, float minDistance)
+        {
+            float minX = GridPosition.x + 1;
+            float maxX = GridPosition.x + RoomSO.Width - 2;
+            float minY = GridPosition.y + 1;
+            float maxY = GridPosition.y + RoomSO.Height - 2;
+
+            if (minX > maxX || minY > maxY)
+            {
+                return GetCenter();
+            }
+
+            Vector3 bestPos = Vector3.zero;
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                bestPos = new Vector3(
+                    Random.Range(minX, maxX + 1),
+                    Random.Range(minY, maxY + 1),
+                    -1f);
+
+                bool overlaps = false;
+                if (avoidWorldPositions != null)
+                {
+                    foreach (var existing in avoidWorldPositions)
+                    {
+                        if (Vector3.Distance(existing, bestPos) < minDistance)
+                        {
+                            overlaps = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!overlaps)
+                {
+                    return bestPos;
+                }
+            }
+
+            return bestPos;
+        }
     }
 }

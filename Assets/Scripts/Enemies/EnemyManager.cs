@@ -65,7 +65,11 @@ namespace Assets.Scripts.Enemies
                             continue;
                         }
 
-                        var position = GetSpawnPosition(room);
+                        var occupied = room.Enemies
+                            .Where(e => e != null)
+                            .Select(e => e.transform.position)
+                            .ToList();
+                        var position = room.GetRandomWalkablePosition(occupied, 0.5f);
                         var enemyObj = Instantiate(entry.Prefab, transform);
                         var enemy = enemyObj.GetComponent<Enemy>();
                         enemy.Stats = new Stats(entry.Stats.Attack, entry.Stats.Defense, entry.Stats.Health, entry.Stats.Agility);
@@ -90,52 +94,5 @@ namespace Assets.Scripts.Enemies
             _spawnedEnemies.Clear();
         }
 
-        private Vector3 GetSpawnPosition(Room room)
-        {
-            var gridPos = room.GridPosition;
-            var width = room.RoomSO.Width;
-            var height = room.RoomSO.Height;
-
-            // Walkable area: 1 tile inward from walls
-            float minX = gridPos.x + 1;
-            float maxX = gridPos.x + width - 2;
-            float minY = gridPos.y + 1;
-            float maxY = gridPos.y + height - 2;
-
-            // For very small rooms, fall back to center
-            if (minX > maxX || minY > maxY)
-            {
-                return new Vector3(
-                    gridPos.x + width / 2f - 0.5f,
-                    gridPos.y + height / 2f - 0.5f, 
-                    -1f);
-            }
-
-            Vector3 bestPos = Vector3.zero;
-            for (int attempt = 0; attempt < 10; attempt++)
-            {
-                bestPos = new Vector3(
-                    Random.Range(minX, maxX + 1),
-                    Random.Range(minY, maxY + 1),
-                    -1f);
-
-                bool overlaps = false;
-                foreach (var existing in room.Enemies)
-                {
-                    if (Vector3.Distance(existing.transform.position, bestPos) < 0.5f)
-                    {
-                        overlaps = true;
-                        break;
-                    }
-                }
-
-                if (!overlaps)
-                {
-                    return bestPos;
-                }
-            }
-
-            return bestPos;
-        }
     }
 }

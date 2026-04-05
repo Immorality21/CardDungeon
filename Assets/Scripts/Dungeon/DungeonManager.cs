@@ -372,10 +372,8 @@ namespace Assets.Scripts.Dungeon
 
             var markerObj = new GameObject("ExitMarker");
             markerObj.transform.SetParent(room.transform, false);
-            var center = new Vector3(
-                room.GridPosition.x + room.RoomSO.Width / 2f - 0.5f,
-                room.GridPosition.y + room.RoomSO.Height / 2f - 0.5f,
-                -0.5f);
+            var center = room.GetCenter();
+            center.z = -0.5f;
             markerObj.transform.position = center;
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = _exitRoomMarkerSprite;
