@@ -13,6 +13,9 @@ namespace Assets.Scripts.Cards.UI
         private float _cardWidth = 90f;
 
         [SerializeField]
+        private float _cardHeight = 0f;
+
+        [SerializeField]
         private float _minVisibleWidth = 30f;
 
         [SerializeField]
@@ -71,11 +74,18 @@ namespace Assets.Scripts.Cards.UI
 
         public override void SetLayoutVertical()
         {
-            float height = rectTransform.rect.height - padding.vertical;
+            float availableHeight = rectTransform.rect.height - padding.vertical;
+            float cardH = _cardHeight > 0 ? _cardHeight : availableHeight;
+            float startY = padding.top;
+
+            if (_cardHeight > 0 && cardH < availableHeight)
+            {
+                startY += (availableHeight - cardH) * 0.5f;
+            }
 
             for (int i = 0; i < rectChildren.Count; i++)
             {
-                SetChildAlongAxis(rectChildren[i], 1, padding.top, height);
+                SetChildAlongAxis(rectChildren[i], 1, startY, cardH);
             }
         }
 

@@ -1433,6 +1433,7 @@ MonoBehaviour:
     m_Bottom: 0
   m_ChildAlignment: 0
   _cardWidth: 90
+  _cardHeight: 0
   _minVisibleWidth: 30
   _maxSpacing: 10
 --- !u!114 &648176048
@@ -4090,6 +4091,7 @@ MonoBehaviour:
     m_Bottom: 0
   m_ChildAlignment: 0
   _cardWidth: 90
+  _cardHeight: 0
   _minVisibleWidth: 30
   _maxSpacing: 10
 --- !u!114 &1793675952

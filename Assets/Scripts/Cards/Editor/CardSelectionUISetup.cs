@@ -78,7 +78,13 @@ public class CardSelectionUISetup : Editor
         var cardScrollObj = CreateScrollArea("CardScrollArea", cardListInner,
             new Vector2(0, 0.12f), new Vector2(1, 0.88f), new Vector2(10, 0), new Vector2(-10, 0));
         var cardContent = cardScrollObj.transform.Find("Content");
-        cardContent.gameObject.AddComponent<CardHandLayout>();
+        var cardHandLayout = cardContent.gameObject.AddComponent<CardHandLayout>();
+        var cardHandSO = new SerializedObject(cardHandLayout);
+        cardHandSO.FindProperty("_cardWidth").floatValue = 180f;
+        cardHandSO.FindProperty("_cardHeight").floatValue = 300f;
+        cardHandSO.FindProperty("_minVisibleWidth").floatValue = 60f;
+        cardHandSO.FindProperty("_maxSpacing").floatValue = 20f;
+        cardHandSO.ApplyModifiedProperties();
 
         // Back button
         var cardBackBtn = CreateStoneButton("BackButton", cardListInner, "Back");
