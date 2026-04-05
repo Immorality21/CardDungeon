@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
 using ImmoralityGaming.Fundamentals;
@@ -23,17 +21,6 @@ namespace Assets.Scripts.Resources
             base.Awake();
             _fileHandler = new FileHandler();
             LoadMaximums();
-        }
-
-        private void Update()
-        {
-            // To test
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                var hero = DungeonManager.Instance.Party.Heroes.OrderBy(x => x.Stats.Health).First();
-
-                UseHealingPotion(hero);
-            }
         }
 
         /// <summary>
