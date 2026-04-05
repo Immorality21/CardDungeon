@@ -23,7 +23,7 @@ namespace Assets.Scripts.Dungeon.Editor
         // Dragging
         private bool _isDragging;
         private int _dragRoomIndex = -1;
-        private Vector2Int _dragStartPos;
+        private Vector2 _dragGridOffset;
 
         // Room template to use when adding rooms
         private RoomSO _addRoomTemplate;
@@ -435,7 +435,9 @@ namespace Assets.Scripts.Dungeon.Editor
                             _selectedRoomIndex = clickedRoom;
                             _isDragging = true;
                             _dragRoomIndex = clickedRoom;
-                            _dragStartPos = _layout.Rooms[clickedRoom].GridPosition;
+                            var clickGrid = ScreenToGrid(localMouse);
+                            var roomPos = _layout.Rooms[clickedRoom].GridPosition;
+                            _dragGridOffset = new Vector2(clickGrid.x - roomPos.x, clickGrid.y - roomPos.y);
                             evt.Use();
                         }
                         else
@@ -460,9 +462,11 @@ namespace Assets.Scripts.Dungeon.Editor
                     }
                     else if (evt.button == 0 && _isDragging && _dragRoomIndex >= 0)
                     {
-                        // Convert mouse position to grid coordinates and snap
+                        // Convert mouse position to grid coordinates, subtract click offset, and snap
                         var gridPos = ScreenToGrid(localMouse);
-                        var snapped = new Vector2Int(Mathf.RoundToInt(gridPos.x), Mathf.RoundToInt(gridPos.y));
+                        var snapped = new Vector2Int(
+                            Mathf.RoundToInt(gridPos.x - _dragGridOffset.x),
+                            Mathf.RoundToInt(gridPos.y - _dragGridOffset.y));
 
                         if (snapped != _layout.Rooms[_dragRoomIndex].GridPosition)
                         {
