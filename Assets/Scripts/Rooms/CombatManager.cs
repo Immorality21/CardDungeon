@@ -293,27 +293,13 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
-            // Lunge forward (heroes lunge right)
-            yield return LungeAnimation(hero.Transform, Vector3.right);
-
-            int attackBonus = BuffTracker.GetBuffAmount(hero, StatType.Attack);
-            int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Defense);
-            int rawAttack = hero.GetEffectiveAttack() + attackBonus;
-            int defense = target.GetEffectiveDefense() + defenseBonus;
-            int dmg = DamageCalculator.Calculate(rawAttack, defense, DamageType.Normal, target.Resistances);
-            target.Stats.Health -= dmg;
-
-            ShowDamageText(target.Transform.position, dmg, Color.white);
-
-            string log = $"{hero.DisplayName} attacks {target.DisplayName} for {dmg} damage.";
+            yield return ExecuteAttack(hero, target, Vector3.right, Color.white);
 
             if (!target.IsAlive)
             {
-                log += $" {target.DisplayName} defeated!";
+                _lastTurnLog += $" {target.DisplayName} defeated!";
                 HandleEnemyDeath(target as Enemy, room);
             }
-
-            _lastTurnLog = log;
         }
 
         private IEnumerator ExecuteEnemyTurn(ICombatUnit enemy, Party party)
@@ -325,28 +311,30 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
-            // Lunge forward (enemies lunge left)
-            yield return LungeAnimation(enemy.Transform, Vector3.left);
+            yield return ExecuteAttack(enemy, target, Vector3.left, Color.red);
 
-            int attackBonus = BuffTracker.GetBuffAmount(enemy, StatType.Attack);
+            if (!target.IsAlive)
+            {
+                _lastTurnLog += $" {target.DisplayName} has fallen!";
+                HandleHeroDeath(target as Hero);
+                _turnManager.RemoveUnit(target);
+            }
+        }
+
+        private IEnumerator ExecuteAttack(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor)
+        {
+            yield return LungeAnimation(attacker.Transform, lungeDirection);
+
+            int attackBonus = BuffTracker.GetBuffAmount(attacker, StatType.Attack);
             int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Defense);
-            int rawAttack = enemy.GetEffectiveAttack() + attackBonus;
+            int rawAttack = attacker.GetEffectiveAttack() + attackBonus;
             int defense = target.GetEffectiveDefense() + defenseBonus;
             int dmg = DamageCalculator.Calculate(rawAttack, defense, DamageType.Normal, target.Resistances);
             target.Stats.Health -= dmg;
 
-            ShowDamageText(target.Transform.position, dmg, Color.red);
+            ShowDamageText(target.Transform.position, dmg, damageColor);
 
-            string log = $"{enemy.DisplayName} attacks {target.DisplayName} for {dmg} damage.";
-
-            if (!target.IsAlive)
-            {
-                log += $" {target.DisplayName} has fallen!";
-                HandleHeroDeath(target as Hero);
-                _turnManager.RemoveUnit(target);
-            }
-
-            _lastTurnLog = log;
+            _lastTurnLog = $"{attacker.DisplayName} attacks {target.DisplayName} for {dmg} damage.";
         }
 
         private IEnumerator LungeAnimation(Transform unit, Vector3 direction)
