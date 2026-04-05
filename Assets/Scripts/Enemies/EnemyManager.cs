@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.Rooms;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
@@ -12,20 +13,45 @@ namespace Assets.Scripts.Enemies
 
         public void SpawnEnemies(List<Room> rooms, Room playerRoom)
         {
-            foreach (var room in rooms)
+            SpawnEnemies(rooms, playerRoom, null);
+        }
+
+        public void SpawnEnemies(List<Room> rooms, Room playerRoom, List<ManualRoomEntry> manualEntries)
+        {
+            for (int roomIdx = 0; roomIdx < rooms.Count; roomIdx++)
             {
+                var room = rooms[roomIdx];
                 if (room == playerRoom)
                 {
                     continue;
                 }
 
-                var roomSO = room.RoomSO;
-                if (roomSO.EnemySpawnTable == null || roomSO.EnemySpawnTable.Count == 0)
+                // Determine spawn table: use manual override if provided, otherwise RoomSO table
+                List<EnemySpawnEntry> spawnTable = null;
+                bool guaranteeAll = false;
+
+                if (manualEntries != null && roomIdx < manualEntries.Count &&
+                    manualEntries[roomIdx].EnemySpawnOverride != null &&
+                    manualEntries[roomIdx].EnemySpawnOverride.Count > 0)
+                {
+                    spawnTable = manualEntries[roomIdx].EnemySpawnOverride;
+                    guaranteeAll = manualEntries[roomIdx].GuaranteeAllSpawns;
+                }
+                else
+                {
+                    var roomSO = room.RoomSO;
+                    if (roomSO.EnemySpawnTable != null && roomSO.EnemySpawnTable.Count > 0)
+                    {
+                        spawnTable = roomSO.EnemySpawnTable;
+                    }
+                }
+
+                if (spawnTable == null)
                 {
                     continue;
                 }
 
-                foreach (var entry in roomSO.EnemySpawnTable)
+                foreach (var entry in spawnTable)
                 {
                     if (entry.Prefab == null)
                     {
@@ -34,7 +60,7 @@ namespace Assets.Scripts.Enemies
 
                     for (int i = 0; i < entry.EvaluationCount; i++)
                     {
-                        if (Random.Range(0f, 1f) > entry.SpawnChance)
+                        if (!guaranteeAll && Random.Range(0f, 1f) > entry.SpawnChance)
                         {
                             continue;
                         }

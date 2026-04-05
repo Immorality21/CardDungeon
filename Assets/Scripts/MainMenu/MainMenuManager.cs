@@ -166,17 +166,10 @@ public class MainMenuManager : MonoBehaviour
         if (_runSaveData.ActiveDungeonSeed != 0)
         {
             DungeonManager.SeedToLoad = _runSaveData.ActiveDungeonSeed;
-            DungeonManager.FixedSeed = 0;
-        }
-        else if (levelEntry.IsStatic)
-        {
-            DungeonManager.SeedToLoad = null;
-            DungeonManager.FixedSeed = levelEntry.FixedSeed;
         }
         else
         {
             DungeonManager.SeedToLoad = null;
-            DungeonManager.FixedSeed = 0;
         }
 
         SceneManager.LoadScene("MainGameScene");

@@ -8,8 +8,6 @@ namespace Assets.Scripts.Dungeon
     {
         public LevelDefinitionSO LevelTemplate;
         public string LevelName;
-        public bool IsStatic;
-        [Tooltip("Only used when IsStatic is true")]
-        public int FixedSeed;
+        public ManualLevelLayoutSO ManualLayout;
     }
 }

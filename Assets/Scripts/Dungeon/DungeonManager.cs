@@ -42,11 +42,11 @@ namespace Assets.Scripts.Dungeon
         public static LevelDefinitionSO LevelToLoad;
         public static RunDefinitionSO ActiveRun;
         public static int RunLevelIndex;
-        public static int FixedSeed;
         public Party Party { get; private set; }
         public DungeonDeckState DeckState { get; private set; }
 
         private LevelDefinitionSO _level;
+        private ManualLevelLayoutSO _manualLayout;
         private FileHandler _fileHandler;
         private int _currentSeed;
 
@@ -85,14 +85,18 @@ namespace Assets.Scripts.Dungeon
             // Subscribe to dungeon cleared event
             CombatManager.Instance.OnDungeonCleared += OnDungeonCleared;
 
-            // Apply fixed seed for static levels (overrides _customSeed)
-            if (FixedSeed != 0)
+            // Resolve manual layout from active run
+            ManualLevelLayoutSO manualLayout = null;
+            if (ActiveRun != null && RunLevelIndex >= 0 && RunLevelIndex < ActiveRun.Levels.Count)
             {
-                _customSeed = FixedSeed;
-                FixedSeed = 0;
+                manualLayout = ActiveRun.Levels[RunLevelIndex].ManualLayout;
             }
 
-            if (SeedToLoad.HasValue)
+            if (manualLayout != null)
+            {
+                SpawnManualDungeon(manualLayout);
+            }
+            else if (SeedToLoad.HasValue)
             {
                 var seed = SeedToLoad.Value;
                 SeedToLoad = null;
@@ -109,6 +113,60 @@ namespace Assets.Scripts.Dungeon
             if (CombatManager.HasInstance)
             {
                 CombatManager.Instance.OnDungeonCleared -= OnDungeonCleared;
+            }
+        }
+
+        private void SpawnManualDungeon(ManualLevelLayoutSO layout)
+        {
+            _manualLayout = layout;
+            var seed = layout.GetDeterministicSeed();
+            _currentSeed = seed;
+            Random.InitState(seed);
+
+            EnemyManager.Instance.CleanupEnemies();
+
+            if (Party != null)
+            {
+                Destroy(Party.gameObject);
+            }
+
+            // Build dungeon from manual layout
+            var rooms = _roomManager.BuildManualDungeon(layout);
+
+            // Assign stable room indices
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                rooms[i].RoomIndex = i;
+            }
+
+            // Designate start and exit rooms
+            var startRoom = rooms[layout.StartRoomIndex];
+            var exitRoom = rooms[layout.ExitRoomIndex];
+            exitRoom.IsExit = true;
+            PlaceExitMarker(exitRoom);
+
+            // Spawn enemies with manual overrides
+            EnemyManager.Instance.SpawnEnemies(rooms, startRoom, layout.Rooms);
+
+            // Check for saved state to resume
+            DungeonSaveData saveData = null;
+            if (SeedToLoad.HasValue)
+            {
+                saveData = DungeonSaveManager.Instance.Load(SeedToLoad.Value);
+                SeedToLoad = null;
+                if (saveData.Seed == 0)
+                {
+                    saveData = null;
+                }
+            }
+
+            if (saveData != null)
+            {
+                RestoreSavedState(saveData, rooms);
+            }
+            else
+            {
+                SpawnFreshDungeon(seed, rooms, startRoom);
             }
         }
 
@@ -201,7 +259,8 @@ namespace Assets.Scripts.Dungeon
             }
 
             // Initialize save manager and persist initial state
-            DungeonSaveManager.Instance.Initialize(seed, _level.Key, rooms);
+            var levelKey = _level != null ? _level.Key : _manualLayout != null ? _manualLayout.Key : "unknown";
+            DungeonSaveManager.Instance.Initialize(seed, levelKey, rooms);
             DungeonSaveManager.Instance.Save(startRoom);
 
             // Store active dungeon seed in run save so we can resume
@@ -274,7 +333,8 @@ namespace Assets.Scripts.Dungeon
                 PartyResourceManager.Instance.RestoreFromSave(saveData.Resources);
             }
 
-            DungeonSaveManager.Instance.Initialize(saveData.Seed, _level.Key, rooms);
+            var restoreLevelKey = _level != null ? _level.Key : _manualLayout != null ? _manualLayout.Key : "unknown";
+            DungeonSaveManager.Instance.Initialize(saveData.Seed, restoreLevelKey, rooms);
             GameManager.Instance.EnterRoom(currentRoom);
         }
 
@@ -312,21 +372,26 @@ namespace Assets.Scripts.Dungeon
             }
 
             farthest.IsExit = true;
+            PlaceExitMarker(farthest);
+        }
 
-            // Place visual marker on exit room
-            if (_exitRoomMarkerSprite != null)
+        private void PlaceExitMarker(Room room)
+        {
+            if (_exitRoomMarkerSprite == null)
             {
-                var markerObj = new GameObject("ExitMarker");
-                markerObj.transform.SetParent(farthest.transform, false);
-                var center = new Vector3(
-                    farthest.GridPosition.x + farthest.RoomSO.Width / 2f - 0.5f,
-                    farthest.GridPosition.y + farthest.RoomSO.Height / 2f - 0.5f,
-                    -0.5f);
-                markerObj.transform.position = center;
-                var sr = markerObj.AddComponent<SpriteRenderer>();
-                sr.sprite = _exitRoomMarkerSprite;
-                sr.sortingOrder = 3;
+                return;
             }
+
+            var markerObj = new GameObject("ExitMarker");
+            markerObj.transform.SetParent(room.transform, false);
+            var center = new Vector3(
+                room.GridPosition.x + room.RoomSO.Width / 2f - 0.5f,
+                room.GridPosition.y + room.RoomSO.Height / 2f - 0.5f,
+                -0.5f);
+            markerObj.transform.position = center;
+            var sr = markerObj.AddComponent<SpriteRenderer>();
+            sr.sprite = _exitRoomMarkerSprite;
+            sr.sortingOrder = 3;
         }
 
         private void OnDungeonCleared()

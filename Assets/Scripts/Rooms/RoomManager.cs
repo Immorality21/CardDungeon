@@ -1,6 +1,7 @@
 using Assets.Scripts.Dungeon;
 using ImmoralityGaming.Extensions;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms
@@ -19,6 +20,42 @@ namespace Assets.Scripts.Rooms
         private List<Door> _spawnedDoors = new List<Door>();
         private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
         private List<(RoomNode, RoomNode)> _placementPairs = new List<(RoomNode, RoomNode)>();
+
+        public List<Room> BuildManualDungeon(ManualLevelLayoutSO layout)
+        {
+            SpawnedRooms.DestroyAndClear(true);
+            _spawnedDoors.DestroyAndClear(true);
+            _occupiedTiles.Clear();
+
+            // Build RoomNodes from manual entries
+            var nodes = new List<RoomNode>();
+            foreach (var entry in layout.Rooms)
+            {
+                var node = new RoomNode
+                {
+                    roomData = entry.RoomTemplate,
+                    position = entry.GridPosition
+                };
+                PlaceRoom(node, entry.GridPosition, transform);
+                nodes.Add(node);
+            }
+
+            // Create doors from manual connections
+            foreach (var door in layout.Doors)
+            {
+                if (door.RoomIndexA >= 0 && door.RoomIndexA < nodes.Count &&
+                    door.RoomIndexB >= 0 && door.RoomIndexB < nodes.Count)
+                {
+                    CreateDoor(nodes[door.RoomIndexA], nodes[door.RoomIndexB]);
+                }
+            }
+
+            // Place walls
+            var wallGen = new WallGenerator(layout.WallColor);
+            wallGen.PlaceWalls(SpawnedRooms);
+
+            return SpawnedRooms.ToList();
+        }
 
         public List<Room> GenerateDungeon(LevelDefinitionSO level)
         {

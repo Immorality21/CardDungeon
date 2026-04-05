@@ -41,13 +41,13 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.
 
 ### Run Progression System
 
-- **RunDefinitionSO** defines a campaign: an ordered list of `RunLevelEntry` (each references a `LevelDefinitionSO`, a display name, and optional scene name for static levels).
+- **RunDefinitionSO** defines a campaign: an ordered list of `RunLevelEntry` (each references a `LevelDefinitionSO`, a display name, and optional `ManualLevelLayoutSO`).
 - **RunSaveData** (`Run.json`) tracks which level the player is on (`CurrentLevelIndex`) and `ActiveDungeonSeed` for resuming mid-dungeon.
 - **Flow:** Menu → New Run → enter level 1 → clear exit room → level complete → menu shows next level → ... → all levels cleared → run complete.
 - **Win condition:** Each dungeon level is complete when the **exit room** is cleared (farthest room from start, designated via BFS).
 - **Room.IsExit** marks the exit room. `CombatManager.OnDungeonCleared` fires when it's cleared.
-- **Static (scene-based) levels:** `RunLevelEntry.SceneName` set to a scene name loads a hand-crafted scene instead of generating a procedural dungeon. Rooms, enemies, and doors are placed in the scene via the editor. `Room.IsStartRoom` and `Room.IsExit` are set via inspector. Used for tutorial levels.
-- **Procedural levels:** `RunLevelEntry.SceneName` left empty — loads `MainGameScene` and generates a dungeon from `LevelTemplate`.
+- **Manual levels:** `RunLevelEntry.ManualLayout` references a `ManualLevelLayoutSO` that defines room positions, door connections, start/exit rooms, and optional enemy overrides. Edited via a visual editor window (Tools → Dungeon → Manual Level Layout Editor). Used for tutorial levels.
+- **Procedural levels:** `RunLevelEntry.ManualLayout` left null — generates a dungeon from `LevelTemplate` using the procedural pipeline.
 
 ### Card System
 

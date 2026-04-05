@@ -10,24 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ebc985730f692f54eafd123ca62fd64f, type: 3}
-  m_Name: Tutorial
+  m_Name: TutorialRun
   m_EditorClassIdentifier: 
   Key: 
   DisplayName: 
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: b2a362ec7000ace46ad22ed1b533bf55, type: 2}
     LevelName: Tutorial
-    IsStatic: 1
-    FixedSeed: 100
+    ManualLayout: {fileID: 11400000, guid: 81a86b4d14ab1a34792bcf19bfcaee94, type: 2}
   - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
     LevelName: Test1
-    IsStatic: 0
-    FixedSeed: 0
+    ManualLayout: {fileID: 0}
   - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
     LevelName: Test2
-    IsStatic: 0
-    FixedSeed: 0
+    ManualLayout: {fileID: 0}
   - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
     LevelName: Test3
-    IsStatic: 0
-    FixedSeed: 0
+    ManualLayout: {fileID: 0}
