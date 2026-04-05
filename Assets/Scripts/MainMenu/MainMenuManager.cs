@@ -133,9 +133,6 @@ public class MainMenuManager : MonoBehaviour
 
     private void OnNewRun()
     {
-        // Delete any existing dungeon saves for a clean start
-        var dungeonSaveManager = new DungeonSaveManager();
-
         // Create fresh run save
         var runKey = !string.IsNullOrEmpty(_runDefinition.Key) ? _runDefinition.Key : _runDefinition.name;
         _runSaveData = new RunSaveData
