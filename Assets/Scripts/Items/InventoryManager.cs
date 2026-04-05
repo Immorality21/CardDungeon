@@ -135,48 +135,25 @@ namespace Assets.Scripts.Items
 
         public Dictionary<StatType, float> ComputeRawBonuses(string heroKey)
         {
-            var raw = new Dictionary<StatType, float>();
-            foreach (StatType stat in Enum.GetValues(typeof(StatType)))
-            {
-                raw[stat] = 0f;
-            }
-
-            if (!_equipped.TryGetValue(heroKey, out var slots))
-            {
-                return raw;
-            }
-
-            foreach (var kvp in slots)
-            {
-                var so = GetItemSO(kvp.Value.ItemKey);
-                if (so == null)
-                {
-                    continue;
-                }
-
-                foreach (var bonus in so.Bonuses)
-                {
-                    if (bonus.BonusType == BonusType.Raw)
-                    {
-                        raw[bonus.StatType] += bonus.Value;
-                    }
-                }
-            }
-
-            return raw;
+            return ComputeBonuses(heroKey, BonusType.Raw);
         }
 
         public Dictionary<StatType, float> ComputePercentageBonuses(string heroKey)
         {
-            var pct = new Dictionary<StatType, float>();
+            return ComputeBonuses(heroKey, BonusType.Percentage);
+        }
+
+        private Dictionary<StatType, float> ComputeBonuses(string heroKey, BonusType bonusType)
+        {
+            var result = new Dictionary<StatType, float>();
             foreach (StatType stat in Enum.GetValues(typeof(StatType)))
             {
-                pct[stat] = 0f;
+                result[stat] = 0f;
             }
 
             if (!_equipped.TryGetValue(heroKey, out var slots))
             {
-                return pct;
+                return result;
             }
 
             foreach (var kvp in slots)
@@ -189,14 +166,14 @@ namespace Assets.Scripts.Items
 
                 foreach (var bonus in so.Bonuses)
                 {
-                    if (bonus.BonusType == BonusType.Percentage)
+                    if (bonus.BonusType == bonusType)
                     {
-                        pct[bonus.StatType] += bonus.Value;
+                        result[bonus.StatType] += bonus.Value;
                     }
                 }
             }
 
-            return pct;
+            return result;
         }
 
         public void Save()
