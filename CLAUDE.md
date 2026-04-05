@@ -31,7 +31,7 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `LevelConfiguration`, `HeroSaveData`
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`
 - `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`
-- `Cards/` — Card system: `CardSO`, `CardCollectionManager`, `DungeonDeckState`, `CardEffectCalculator`, `ComboDetector`, `CombatBuffTracker`, `CardTagTracker`, `CardComboSO`
+- `Cards/` — Card system: `CardSO`, `CardTag` (enum), `CardCollectionManager`, `DungeonDeckState`, `CardEffectCalculator`, `ComboDetector`, `CombatBuffTracker`, `CardTagTracker`, `CardComboSO`
 - `Cards/Effects/` — Effect executors: `IEffectExecutor`, `DamageEffectExecutor`, `HealEffectExecutor`, `BuffEffectExecutor`, `DebuffEffectExecutor`, `EffectExecutorFactory`
 - `Cards/UI/` — `CardSelectionUI`, `DeckManagementUI`
 - `Items/` — `ItemSO`, `InventoryManager`, `InventoryUI`, `InventoryEntryUI`
@@ -51,7 +51,7 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.
 
 ### Card System
 
-- **CardSO** (ScriptableObject): defines a card with `Key`, `DisplayName`, `Description`, `Icon`, `TargetType` (Enemy/Ally/Self/AllEnemies/AllAllies), `Rarity`, `Effects` (list of `CardEffect`), `Tags` (list of strings), `TagDuration`.
+- **CardSO** (ScriptableObject): defines a card with `Key`, `DisplayName`, `Description`, `Icon`, `TargetType` (Enemy/Ally/Self/AllEnemies/AllAllies), `Rarity`, `Effects` (list of `CardEffect`), `Tags` (list of `CardTag` enum values), `TagDuration`.
 - **CardEffect**: `EffectType` (Damage/Heal/Buff/Debuff), `Power`, `DamageType` (Normal/Fire/Ice/Lightning/Holy/Shadow), `BuffType`, `Duration`.
 - **CardCollectionManager** (singleton): manages the player's card collection. Cards are added as loot (50% drop chance via `TryDropCard`). Cards are assigned to heroes (max 5 per hero deck). Persisted via `CardCollectionSaveData`.
 - **DungeonDeckState**: tracks which cards each hero has available during a dungeon run. Cards are single-use per dungeon — `MarkCardUsed` removes availability. Used card state is saved/restored with dungeon saves.
