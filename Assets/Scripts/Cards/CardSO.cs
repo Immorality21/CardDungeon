@@ -16,7 +16,7 @@ namespace Assets.Scripts.Cards
         public CardTargetType TargetType;
         public CardRarity Rarity;
         public List<CardEffect> Effects = new List<CardEffect>();
-        public List<string> Tags = new List<string>();
+        public List<CardTag> Tags = new List<CardTag>();
         public int TagDuration = 3;
 
         public bool HasEffectType(CardEffectType type)

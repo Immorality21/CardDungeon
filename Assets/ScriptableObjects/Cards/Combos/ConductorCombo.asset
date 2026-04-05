@@ -15,8 +15,8 @@ MonoBehaviour:
   ComboName: Conductor
   Description: Lightning arcs through metal for doubled impact!
   RequiredTags:
-  - Lightning
-  - Metal
+  - 2
+  - 5
   BonusEffects:
   - EffectType: 0
     Power: 10

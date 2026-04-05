@@ -15,8 +15,8 @@ MonoBehaviour:
   ComboName: Ignite
   Description: 
   RequiredTags:
-  - Fire
-  - Oil
+  - 0
+  - 3
   BonusEffects:
   - EffectType: 0
     Power: 8

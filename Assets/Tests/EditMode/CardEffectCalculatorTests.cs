@@ -22,7 +22,7 @@ namespace Tests.EditMode
             DamageType damageType = DamageType.Normal,
             BuffType buffType = BuffType.Attack,
             int duration = 3,
-            List<string> tags = null,
+            List<CardTag> tags = null,
             int tagDuration = 3)
         {
             var card = ScriptableObject.CreateInstance<CardSO>();
@@ -39,7 +39,7 @@ namespace Tests.EditMode
                     Duration = duration
                 }
             };
-            card.Tags = tags ?? new List<string>();
+            card.Tags = tags ?? new List<CardTag>();
             card.TagDuration = tagDuration;
             return card;
         }
@@ -47,21 +47,21 @@ namespace Tests.EditMode
         private CardSO CreateMultiEffectCard(
             string key,
             List<CardEffect> effects,
-            List<string> tags = null,
+            List<CardTag> tags = null,
             int tagDuration = 3)
         {
             var card = ScriptableObject.CreateInstance<CardSO>();
             card.Key = key;
             card.DisplayName = key;
             card.Effects = effects;
-            card.Tags = tags ?? new List<string>();
+            card.Tags = tags ?? new List<CardTag>();
             card.TagDuration = tagDuration;
             return card;
         }
 
         private CardComboSO CreateCombo(
             string name,
-            List<string> requiredTags,
+            List<CardTag> requiredTags,
             CardEffectType effect,
             int power,
             DamageType damageType = DamageType.Normal,
@@ -378,12 +378,12 @@ namespace Tests.EditMode
         [Test]
         public void Combo_DamageBonus_Applied()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 15);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 15);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Oil }, 3);
 
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy);
 
             int healthBefore = _enemy.Stats.Health;
@@ -397,13 +397,13 @@ namespace Tests.EditMode
         [Test]
         public void Combo_HealBonus_HealsCaster()
         {
-            var combo = CreateCombo("LifeDrain", new List<string> { "Dark", "Blood" }, CardEffectType.Heal, 10);
+            var combo = CreateCombo("LifeDrain", new List<CardTag> { CardTag.Dark, CardTag.Blood }, CardEffectType.Heal, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Blood" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Blood }, 3);
 
             _hero.Stats.Health = 70;
-            var card = CreateCard("DarkBolt", CardEffectType.Damage, power: 5, tags: new List<string> { "Dark" });
+            var card = CreateCard("DarkBolt", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Dark });
             var action = MakeAction(card, _hero, _enemy);
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
@@ -414,13 +414,13 @@ namespace Tests.EditMode
         [Test]
         public void Combo_HealBonus_ClampsToMaxHealth()
         {
-            var combo = CreateCombo("LifeDrain", new List<string> { "Dark", "Blood" }, CardEffectType.Heal, 50);
+            var combo = CreateCombo("LifeDrain", new List<CardTag> { CardTag.Dark, CardTag.Blood }, CardEffectType.Heal, 50);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Blood" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Blood }, 3);
 
             _hero.Stats.Health = 90;
-            var card = CreateCard("DarkBolt", CardEffectType.Damage, power: 5, tags: new List<string> { "Dark" });
+            var card = CreateCard("DarkBolt", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Dark });
             var action = MakeAction(card, _hero, _enemy);
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
@@ -431,12 +431,12 @@ namespace Tests.EditMode
         [Test]
         public void Combo_BuffAttackBonus_BuffsCaster()
         {
-            var combo = CreateCombo("Empower", new List<string> { "Fire", "Wind" }, CardEffectType.Buff, 8, buffType: BuffType.Attack);
+            var combo = CreateCombo("Empower", new List<CardTag> { CardTag.Fire, CardTag.Wind }, CardEffectType.Buff, 8, buffType: BuffType.Attack);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Wind" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Wind }, 3);
 
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy);
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
@@ -447,12 +447,12 @@ namespace Tests.EditMode
         [Test]
         public void Combo_DebuffBonus_DebuffsTarget()
         {
-            var combo = CreateCombo("Weaken", new List<string> { "Ice", "Water" }, CardEffectType.Debuff, 5, buffType: BuffType.Attack);
+            var combo = CreateCombo("Weaken", new List<CardTag> { CardTag.Ice, CardTag.Water }, CardEffectType.Debuff, 5, buffType: BuffType.Attack);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Water" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Water }, 3);
 
-            var card = CreateCard("IceShard", CardEffectType.Damage, power: 3, tags: new List<string> { "Ice" });
+            var card = CreateCard("IceShard", CardEffectType.Damage, power: 3, tags: new List<CardTag> { CardTag.Ice });
             var action = MakeAction(card, _hero, _enemy);
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
@@ -463,12 +463,12 @@ namespace Tests.EditMode
         [Test]
         public void Combo_SetsComboNameInResult()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Oil }, 3);
 
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
@@ -479,27 +479,27 @@ namespace Tests.EditMode
         [Test]
         public void Combo_TagsAppliedAfterDetection()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
             Assert.IsNull(result.ComboName);
-            Assert.IsTrue(_tagTracker.GetTagsOnUnit(_enemy).Contains("Fire"));
+            Assert.IsTrue(_tagTracker.GetTagsOnUnit(_enemy).Contains(CardTag.Fire));
         }
 
         [Test]
         public void Combo_SkipsDeadTargets()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Oil }, 3);
 
-            var card = CreateCard("Nuke", CardEffectType.Damage, power: 999, tags: new List<string> { "Fire" });
+            var card = CreateCard("Nuke", CardEffectType.Damage, power: 999, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
@@ -512,7 +512,7 @@ namespace Tests.EditMode
         [Test]
         public void Execute_WithoutTagTracker_SkipsCombos()
         {
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker);
@@ -537,12 +537,12 @@ namespace Tests.EditMode
         [Test]
         public void BuildLog_IncludesComboName()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Oil }, 3);
 
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
@@ -553,12 +553,12 @@ namespace Tests.EditMode
         [Test]
         public void Combo_BuffDefenseBonus_BuffsCaster()
         {
-            var combo = CreateCombo("Fortify", new List<string> { "Earth", "Iron" }, CardEffectType.Buff, 6, buffType: BuffType.Defense);
+            var combo = CreateCombo("Fortify", new List<CardTag> { CardTag.Earth, CardTag.Iron }, CardEffectType.Buff, 6, buffType: BuffType.Defense);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Iron" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Iron }, 3);
 
-            var card = CreateCard("Quake", CardEffectType.Damage, power: 3, tags: new List<string> { "Earth" });
+            var card = CreateCard("Quake", CardEffectType.Damage, power: 3, tags: new List<CardTag> { CardTag.Earth });
             var action = MakeAction(card, _hero, _enemy);
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
@@ -569,15 +569,15 @@ namespace Tests.EditMode
         [Test]
         public void Combo_MultiTarget_TriggersOnEachEligible()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
             var enemy2 = new MockCombatUnit("Orc", attack: 4, defense: 2, health: 40, isHero: false);
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
-            _tagTracker.ApplyTags(enemy2, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Oil }, 3);
+            _tagTracker.ApplyTags(enemy2, new List<CardTag> { CardTag.Oil }, 3);
 
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy, enemy2);
 
             int goblinBefore = _enemy.Stats.Health;
@@ -595,14 +595,14 @@ namespace Tests.EditMode
         [Test]
         public void Combo_MultiTarget_OnlyTriggersWhereTagsPresent()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
             var enemy2 = new MockCombatUnit("Orc", attack: 4, defense: 2, health: 40, isHero: false);
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Oil }, 3);
 
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy, enemy2);
 
             int goblinBefore = _enemy.Stats.Health;
@@ -619,13 +619,13 @@ namespace Tests.EditMode
         [Test]
         public void Combo_HealCard_WithCombo_BothApply()
         {
-            var combo = CreateCombo("Rejuvenate", new List<string> { "Nature", "Water" }, CardEffectType.Heal, 15);
+            var combo = CreateCombo("Rejuvenate", new List<CardTag> { CardTag.Nature, CardTag.Water }, CardEffectType.Heal, 15);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_hero, new List<string> { "Water" }, 3);
+            _tagTracker.ApplyTags(_hero, new List<CardTag> { CardTag.Water }, 3);
 
             _hero.Stats.Health = 50;
-            var card = CreateCard("Bloom", CardEffectType.Heal, power: 10, tags: new List<string> { "Nature" });
+            var card = CreateCard("Bloom", CardEffectType.Heal, power: 10, tags: new List<CardTag> { CardTag.Nature });
             var action = MakeAction(card, _hero, _hero);
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
@@ -636,10 +636,10 @@ namespace Tests.EditMode
         [Test]
         public void Combo_NoTagsOnCard_NoComboPossible()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Oil }, 3);
 
             var card = CreateCard("BasicSlash", CardEffectType.Damage, power: 5);
             var action = MakeAction(card, _hero, _enemy);
@@ -652,18 +652,18 @@ namespace Tests.EditMode
         [Test]
         public void Combo_ChainedCombos_SecondCardTriggersAfterFirstAppliedTags()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
             var oilCard = CreateMultiEffectCard("OilSlick", new List<CardEffect>
             {
                 new CardEffect { EffectType = CardEffectType.Debuff, Power = 1, BuffType = BuffType.Attack, Duration = 3 }
-            }, tags: new List<string> { "Oil" });
+            }, tags: new List<CardTag> { CardTag.Oil });
             var oilAction = MakeAction(oilCard, _hero, _enemy);
             var result1 = _calculator.Execute(oilAction, _buffTracker, _tagTracker, detector);
             Assert.IsNull(result1.ComboName);
 
-            var fireCard = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var fireCard = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var fireAction = MakeAction(fireCard, _hero, _enemy);
             var result2 = _calculator.Execute(fireAction, _buffTracker, _tagTracker, detector);
 
@@ -673,7 +673,7 @@ namespace Tests.EditMode
         [Test]
         public void Combo_OilThenFire_DealsCardDamagePlusComboDamage()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 20);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 20);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
             // Turn 1: OilSlick applies "Oil" tag and debuffs
@@ -681,14 +681,14 @@ namespace Tests.EditMode
             {
                 new CardEffect { EffectType = CardEffectType.Debuff, Power = 2, BuffType = BuffType.Attack, Duration = 3 },
                 new CardEffect { EffectType = CardEffectType.Debuff, Power = 2, BuffType = BuffType.Defense, Duration = 3 }
-            }, tags: new List<string> { "Oil" });
+            }, tags: new List<CardTag> { CardTag.Oil });
             var oilAction = MakeAction(oilCard, _hero, _enemy);
             _calculator.Execute(oilAction, _buffTracker, _tagTracker, detector);
 
             int healthAfterOil = _enemy.Stats.Health;
 
             // Turn 2: Fireball deals card damage AND triggers Ignite combo
-            var fireCard = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var fireCard = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var fireAction = MakeAction(fireCard, _hero, _enemy);
             var result = _calculator.Execute(fireAction, _buffTracker, _tagTracker, detector);
 
@@ -703,14 +703,14 @@ namespace Tests.EditMode
         [Test]
         public void Combo_DamageWithAttackDebuff_ComboUsesOwnPower()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 20);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 20);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Oil }, 3);
 
             _buffTracker.ApplyBuff(_hero, StatType.Attack, -100, 3);
 
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 0, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 0, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy);
 
             int healthBefore = _enemy.Stats.Health;
@@ -724,12 +724,12 @@ namespace Tests.EditMode
         [Test]
         public void Result_HasCorrectEntryCount_DamageWithCombo()
         {
-            var combo = CreateCombo("Ignite", new List<string> { "Fire", "Oil" }, CardEffectType.Damage, 10);
+            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil }, CardEffectType.Damage, 10);
             var detector = new ComboDetector(new List<CardComboSO> { combo });
 
-            _tagTracker.ApplyTags(_enemy, new List<string> { "Oil" }, 3);
+            _tagTracker.ApplyTags(_enemy, new List<CardTag> { CardTag.Oil }, 3);
 
-            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<string> { "Fire" });
+            var card = CreateCard("Fireball", CardEffectType.Damage, power: 5, tags: new List<CardTag> { CardTag.Fire });
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);

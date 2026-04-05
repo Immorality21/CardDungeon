@@ -10,7 +10,7 @@ namespace Assets.Scripts.Cards
         public string ComboName;
         [TextArea(2, 4)]
         public string Description;
-        public List<string> RequiredTags = new List<string>();
+        public List<CardTag> RequiredTags = new List<CardTag>();
         public List<CardEffect> BonusEffects = new List<CardEffect>();
     }
 }

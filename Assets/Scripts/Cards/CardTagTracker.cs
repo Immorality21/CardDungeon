@@ -6,7 +6,7 @@ namespace Assets.Scripts.Cards
 {
     public class TagEntry
     {
-        public string Tag;
+        public CardTag Tag;
         public int TurnsRemaining;
     }
 
@@ -14,7 +14,7 @@ namespace Assets.Scripts.Cards
     {
         private Dictionary<ICombatUnit, List<TagEntry>> _appliedTags = new Dictionary<ICombatUnit, List<TagEntry>>();
 
-        public void ApplyTags(ICombatUnit target, List<string> tags, int duration)
+        public void ApplyTags(ICombatUnit target, List<CardTag> tags, int duration)
         {
             if (tags == null || tags.Count == 0)
             {
@@ -45,13 +45,13 @@ namespace Assets.Scripts.Cards
             }
         }
 
-        public HashSet<string> GetTagsOnUnit(ICombatUnit unit)
+        public HashSet<CardTag> GetTagsOnUnit(ICombatUnit unit)
         {
             if (_appliedTags.TryGetValue(unit, out var entries))
             {
-                return new HashSet<string>(entries.Select(e => e.Tag));
+                return new HashSet<CardTag>(entries.Select(e => e.Tag));
             }
-            return new HashSet<string>();
+            return new HashSet<CardTag>();
         }
 
         /// <summary>

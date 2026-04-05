@@ -15,8 +15,8 @@ MonoBehaviour:
   ComboName: Freeze
   Description: Ice and water combine to freeze the enemy solid.
   RequiredTags:
-  - Ice
-  - Water
+  - 1
+  - 7
   BonusEffects:
   - EffectType: 3
     Power: 0

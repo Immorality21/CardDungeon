@@ -15,8 +15,8 @@ MonoBehaviour:
   ComboName: Infection
   Description: Poison seeps into physical wounds, sapping all strength.
   RequiredTags:
-  - Poison
-  - Physical
+  - 4
+  - 6
   BonusEffects:
   - EffectType: 3
     Power: 4
