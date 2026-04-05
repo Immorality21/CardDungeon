@@ -126,7 +126,7 @@ namespace Assets.Scripts.Rooms
         {
             _mainPanel.SetActive(false);
             _subPanel.SetActive(true);
-            ClearOptions();
+            _spawnedOptions.DestroyAndClear();
 
             if (options == null || options.Count == 0)
             {
@@ -171,19 +171,11 @@ namespace Assets.Scripts.Rooms
             });
         }
 
-        private void ClearOptions()
-        {
-            foreach (var obj in _spawnedOptions)
-            {
-                Destroy(obj);
-            }
-            _spawnedOptions.Clear();
-        }
 
         private void OnBack()
         {
             _subPanel.SetActive(false);
-            ClearOptions();
+            _spawnedOptions.DestroyAndClear();
             _mainPanel.SetActive(true);
         }
 

@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using System.Text;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
-using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Rooms;
 using UnityEngine;
@@ -60,7 +58,7 @@ namespace Assets.Scripts.Cards.UI
             _currentHero = hero;
             _selectedCard = null;
 
-            ClearSpawned(_spawnedCardButtons);
+            _spawnedCardButtons.DestroyAndClear();
 
             foreach (var card in availableCards)
             {
@@ -115,7 +113,7 @@ namespace Assets.Scripts.Cards.UI
                     var tmp = effectsLabel.GetComponent<TextMeshProUGUI>();
                     if (tmp != null)
                     {
-                        tmp.text = GetEffectsSummary(card);
+                        tmp.text = card.GetEffectsSummary();
                     }
                 }
 
@@ -163,7 +161,7 @@ namespace Assets.Scripts.Cards.UI
 
         private void ShowTargetSelection(CardTargetType targetType)
         {
-            ClearSpawned(_spawnedTargetButtons);
+            _spawnedTargetButtons.DestroyAndClear();
 
             List<ICombatUnit> targets;
             if (targetType == CardTargetType.SingleEnemy)
@@ -258,57 +256,9 @@ namespace Assets.Scripts.Cards.UI
         {
             _cardListPanel.SetActive(false);
             _targetPanel.SetActive(false);
-            ClearSpawned(_spawnedCardButtons);
-            ClearSpawned(_spawnedTargetButtons);
+            _spawnedCardButtons.DestroyAndClear();
+            _spawnedTargetButtons.DestroyAndClear();
         }
 
-        private string GetEffectsSummary(CardSO cardSO)
-        {
-            if (cardSO.Effects == null || cardSO.Effects.Count == 0)
-            {
-                return "";
-            }
-
-            var sb = new StringBuilder();
-            for (int i = 0; i < cardSO.Effects.Count; i++)
-            {
-                if (i > 0)
-                {
-                    sb.Append(", ");
-                }
-
-                var effect = cardSO.Effects[i];
-                switch (effect.EffectType)
-                {
-                    case CardEffectType.Damage:
-                        sb.Append($"DMG {effect.Power}");
-                        if (effect.DamageType != DamageType.Normal)
-                        {
-                            sb.Append($" {effect.DamageType}");
-                        }
-                        break;
-                    case CardEffectType.Heal:
-                        sb.Append($"Heal {effect.Power}");
-                        break;
-                    case CardEffectType.Buff:
-                        sb.Append($"+{effect.BuffType}");
-                        break;
-                    case CardEffectType.Debuff:
-                        sb.Append($"-{effect.BuffType}");
-                        break;
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        private void ClearSpawned(List<GameObject> list)
-        {
-            foreach (var obj in list)
-            {
-                Destroy(obj);
-            }
-            list.Clear();
-        }
     }
 }

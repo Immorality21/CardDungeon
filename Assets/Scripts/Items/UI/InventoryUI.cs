@@ -184,11 +184,7 @@ namespace Assets.Scripts.Items.UI
 
         private void RefreshEquipmentSlots()
         {
-            foreach (var obj in _spawnedSlotEntries)
-            {
-                Destroy(obj);
-            }
-            _spawnedSlotEntries.Clear();
+            _spawnedSlotEntries.DestroyAndClear();
 
             var heroKey = GetLeaderHeroKey();
             foreach (SlotType slot in Enum.GetValues(typeof(SlotType)))
@@ -243,11 +239,7 @@ namespace Assets.Scripts.Items.UI
 
         private void RefreshBag()
         {
-            foreach (var obj in _spawnedBagEntries)
-            {
-                Destroy(obj);
-            }
-            _spawnedBagEntries.Clear();
+            _spawnedBagEntries.DestroyAndClear();
 
             var bagItems = InventoryManager.Instance.GetBagItems();
             if (bagItems.Count == 0)
