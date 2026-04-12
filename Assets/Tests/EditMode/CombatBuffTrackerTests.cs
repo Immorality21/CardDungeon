@@ -192,5 +192,27 @@ namespace Tests.EditMode
 
             Assert.IsFalse(_tracker.HasStatusEffect(_enemy, BuffType.Frozen));
         }
+
+        // ---- Slow / Haste ----
+
+        [Test]
+        public void GetActiveStatusEffects_ReturnsAllActive()
+        {
+            _tracker.ApplyStatusEffect(_enemy, BuffType.Frozen, 3);
+            _tracker.ApplyStatusEffect(_enemy, BuffType.Slow, 2);
+
+            var effects = _tracker.GetActiveStatusEffects(_enemy);
+
+            Assert.Contains(BuffType.Frozen, effects);
+            Assert.Contains(BuffType.Slow, effects);
+        }
+
+        [Test]
+        public void GetActiveStatusEffects_EmptyWhenNone()
+        {
+            var effects = _tracker.GetActiveStatusEffects(_hero);
+
+            Assert.IsEmpty(effects);
+        }
     }
 }

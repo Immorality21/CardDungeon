@@ -10,6 +10,8 @@ namespace Assets.Scripts.Cards
         LightningResistance,
         HolyResistance,
         ShadowResistance,
-        Frozen
+        Frozen,
+        Slow,
+        Haste
     }
 }

@@ -12,7 +12,9 @@
       "Bash(sed 's/^[[:space:]]*//')",
       "Bash(grep -E \"\\\\.\\(asset|ttf\\)$\")",
       "Bash(grep -r \"MenuItem\\\\|Editor\\\\|CustomEditor\\\\|EditorWindow\" \"/c/Repos/Games/Merge/Card Dungeon/Assets/Scripts/\"*\"/Editor/\"*.cs)",
-      "Bash(grep -v \"m_Name: $\")"
+      "Bash(grep -v \"m_Name: $\")",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet build:*)"
     ]
   }
 }

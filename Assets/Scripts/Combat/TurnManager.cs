@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Cards;
+using Assets.Scripts.Items;
 using UnityEngine;
 
 namespace Assets.Scripts.Combat
@@ -9,6 +11,12 @@ namespace Assets.Scripts.Combat
         private const float BASE_TICKS = 100f;
 
         private Dictionary<ICombatUnit, float> _ticksUntilTurn = new Dictionary<ICombatUnit, float>();
+        private CombatBuffTracker _buffTracker;
+
+        public void SetBuffTracker(CombatBuffTracker buffTracker)
+        {
+            _buffTracker = buffTracker;
+        }
 
         public void Initialize(List<ICombatUnit> units)
         {
@@ -16,7 +24,7 @@ namespace Assets.Scripts.Combat
 
             foreach (var unit in units)
             {
-                float agility = Mathf.Max(1, unit.Stats.Agility);
+                float agility = Mathf.Max(1, GetEffectiveAgility(unit));
                 _ticksUntilTurn[unit] = BASE_TICKS / agility;
             }
         }
@@ -48,8 +56,8 @@ namespace Assets.Scripts.Combat
                 _ticksUntilTurn[unit] -= lowest;
             }
 
-            // The acting unit gets a new turn timer based on their agility
-            float agility = Mathf.Max(1, next.Stats.Agility);
+            // The acting unit gets a new turn timer based on their effective agility
+            float agility = Mathf.Max(1, GetEffectiveAgility(next));
             _ticksUntilTurn[next] = BASE_TICKS / agility;
 
             return next;
@@ -91,12 +99,23 @@ namespace Assets.Scripts.Combat
                     snapshot[unit] -= lowest;
                 }
 
-                float agility = Mathf.Max(1, next.Stats.Agility);
+                float agility = Mathf.Max(1, GetEffectiveAgility(next));
                 snapshot[next] = BASE_TICKS / agility;
                 order.Add(next);
             }
 
             return order;
+        }
+
+        private int GetEffectiveAgility(ICombatUnit unit)
+        {
+            int baseAgility = unit.Stats.Agility;
+            if (_buffTracker != null)
+            {
+                baseAgility += _buffTracker.GetBuffAmount(unit, StatType.Agility);
+            }
+
+            return baseAgility;
         }
     }
 }

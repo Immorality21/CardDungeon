@@ -122,6 +122,7 @@ namespace Assets.Scripts.Rooms
             InCombat = true;
             _currentCombatRoom = room;
             BuffTracker = new CombatBuffTracker();
+            _turnManager.SetBuffTracker(BuffTracker);
             _tagTracker = new CardTagTracker();
             _comboDetector = new ComboDetector(_cardCombos);
             OnCombatStarted?.Invoke();
