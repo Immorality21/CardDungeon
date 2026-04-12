@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using UnityEngine;
@@ -57,10 +58,13 @@ namespace Assets.Scripts.Cards.Effects
                 {
                     target.Stats.Health -= damage;
 
-                    // Fire damage thaws frozen targets
-                    if (effect.DamageType == DamageType.Fire)
+                    foreach (var statusEffect in buffTracker.GetActiveStatusEffects(target))
                     {
-                        buffTracker.RemoveStatusEffect(target, BuffType.Frozen);
+                        var handler = BuffHandlerRegistry.Get(statusEffect);
+                        if (handler.IsRemovedByDamageType(effect.DamageType))
+                        {
+                            buffTracker.RemoveStatusEffect(target, statusEffect);
+                        }
                     }
 
                     result.Entries.Add(new EffectEntry

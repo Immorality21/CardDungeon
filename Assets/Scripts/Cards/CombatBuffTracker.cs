@@ -94,6 +94,25 @@ namespace Assets.Scripts.Cards
             }
         }
 
+        public List<BuffType> GetActiveStatusEffects(ICombatUnit unit)
+        {
+            var result = new List<BuffType>();
+            if (!_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                return result;
+            }
+
+            foreach (var buff in buffs)
+            {
+                if (buff.IsStatusEffect)
+                {
+                    result.Add(buff.BuffType);
+                }
+            }
+
+            return result;
+        }
+
         public List<string> GetActiveTagsOnUnit(ICombatUnit unit)
         {
             return new List<string>();

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
 using UnityEngine;
 
@@ -17,6 +18,8 @@ namespace Assets.Scripts.Cards.Effects
             CardEffectResult result,
             bool isComboEffect = false)
         {
+            var handler = BuffHandlerRegistry.Get(effect.BuffType);
+
             foreach (var target in targets)
             {
                 if (!target.IsAlive)
@@ -24,33 +27,15 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
-                if (effect.BuffType == BuffType.Frozen)
-                {
-                    buffTracker.ApplyStatusEffect(target, BuffType.Frozen, effect.Duration);
-                    result.Entries.Add(new EffectEntry
-                    {
-                        Target = target,
-                        Text = "Frozen!",
-                        Color = BuffColor,
-                        Delay = EffectDelay
-                    });
-                }
-                else
-                {
-                    var stat = BuffTypeMapper.ToStatType(effect.BuffType);
-                    if (stat.HasValue)
-                    {
-                        buffTracker.ApplyBuff(target, stat.Value, effect.Power, effect.Duration);
-                    }
+                handler.Apply(target, effect.Power, effect.Duration, buffTracker);
 
-                    result.Entries.Add(new EffectEntry
-                    {
-                        Target = target,
-                        Text = $"+{effect.Power} {effect.BuffType}",
-                        Color = BuffColor,
-                        Delay = EffectDelay
-                    });
-                }
+                result.Entries.Add(new EffectEntry
+                {
+                    Target = target,
+                    Text = handler.GetDisplayText(effect.Power),
+                    Color = BuffColor,
+                    Delay = EffectDelay
+                });
             }
         }
     }

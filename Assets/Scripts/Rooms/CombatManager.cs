@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
@@ -164,9 +165,10 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
 
-                if (BuffTracker.HasStatusEffect(unit, BuffType.Frozen))
+                string skipMessage = GetTurnSkipMessage(unit);
+                if (skipMessage != null)
                 {
-                    _lastTurnLog = $"{unit.DisplayName} is frozen!";
+                    _lastTurnLog = skipMessage;
                     BuffTracker.TickBuffs(unit);
                     _tagTracker.TickTags(unit);
                     fullLog += _lastTurnLog + "\n";
@@ -363,6 +365,20 @@ namespace Assets.Scripts.Rooms
             }
 
             unit.position = startPos;
+        }
+
+        private string GetTurnSkipMessage(ICombatUnit unit)
+        {
+            foreach (var statusEffect in BuffTracker.GetActiveStatusEffects(unit))
+            {
+                var handler = BuffHandlerRegistry.Get(statusEffect);
+                if (handler.SkipsTurn)
+                {
+                    return handler.GetSkipTurnMessage(unit);
+                }
+            }
+
+            return null;
         }
 
         private void BroadcastTurnOrder()
