@@ -14,12 +14,15 @@ namespace Assets.Scripts.Cards.UI
         [Header("Root")]
         [SerializeField] private GameObject _rootPanel;
 
-        [Header("Hero Tabs")]
-        [SerializeField] private Transform _heroTabParent;
-        [SerializeField] private GameObject _heroTabPrefab;
+        [Header("Hero Select Panel")]
+        [SerializeField] private GameObject _heroSelectPanel;
+        [SerializeField] private Transform _heroSelectParent;
+        [SerializeField] private GameObject _heroSelectPrefab;
         [SerializeField] private List<HeroSO> _heroes;
 
-        [Header("Deck Panel")]
+        [Header("Deck Edit Panel")]
+        [SerializeField] private GameObject _deckEditPanel;
+        [SerializeField] private Button _deckBackButton;
         [SerializeField] private TextMeshProUGUI _heroNameLabel;
         [SerializeField] private TextMeshProUGUI _deckCountLabel;
         [SerializeField] private Transform _deckCardParent;
@@ -35,7 +38,7 @@ namespace Assets.Scripts.Cards.UI
         public event Action OnClosed;
 
         private string _selectedHeroKey;
-        private List<GameObject> _spawnedHeroTabs = new List<GameObject>();
+        private List<GameObject> _spawnedHeroEntries = new List<GameObject>();
         private List<GameObject> _spawnedDeckCards = new List<GameObject>();
         private List<GameObject> _spawnedAvailableCards = new List<GameObject>();
 
@@ -43,6 +46,7 @@ namespace Assets.Scripts.Cards.UI
         {
             _rootPanel.SetActive(false);
             _closeButton.onClick.AddListener(Hide);
+            _deckBackButton.onClick.AddListener(ShowHeroSelect);
         }
 
         public void Show()
@@ -54,39 +58,52 @@ namespace Assets.Scripts.Cards.UI
             }
 
             _rootPanel.SetActive(true);
-            BuildHeroTabs();
-
-            if (_heroes.Count > 0)
-            {
-                SelectHero(_heroes[0].Label);
-            }
+            ShowHeroSelect();
         }
 
         public void Hide()
         {
             _rootPanel.SetActive(false);
-            _spawnedHeroTabs.DestroyAndClear();
+            _spawnedHeroEntries.DestroyAndClear();
             _spawnedDeckCards.DestroyAndClear();
             _spawnedAvailableCards.DestroyAndClear();
             OnClosed?.Invoke();
         }
 
-        private void BuildHeroTabs()
+        private void ShowHeroSelect()
         {
-            _spawnedHeroTabs.DestroyAndClear();
+            _spawnedDeckCards.DestroyAndClear();
+            _spawnedAvailableCards.DestroyAndClear();
+
+            _heroSelectPanel.SetActive(true);
+            _deckEditPanel.SetActive(false);
+
+            BuildHeroEntries();
+        }
+
+        private void ShowDeckEdit(string heroKey)
+        {
+            _spawnedHeroEntries.DestroyAndClear();
+
+            _selectedHeroKey = heroKey;
+            _heroSelectPanel.SetActive(false);
+            _deckEditPanel.SetActive(true);
+
+            _heroNameLabel.text = heroKey;
+            RefreshDeck();
+            RefreshAvailable();
+        }
+
+        private void BuildHeroEntries()
+        {
+            _spawnedHeroEntries.DestroyAndClear();
 
             foreach (var hero in _heroes)
             {
-                var tabObj = Instantiate(_heroTabPrefab, _heroTabParent);
-                tabObj.SetActive(true);
+                var entry = Instantiate(_heroSelectPrefab, _heroSelectParent);
+                entry.SetActive(true);
 
-                var label = tabObj.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
-                {
-                    label.text = hero.Label;
-                }
-
-                var icon = tabObj.transform.Find("Icon");
+                var icon = entry.transform.Find("Icon");
                 if (icon != null)
                 {
                     var img = icon.GetComponent<Image>();
@@ -96,23 +113,46 @@ namespace Assets.Scripts.Cards.UI
                     }
                 }
 
-                var captured = hero.Label;
-                var btn = tabObj.GetComponent<Button>();
-                if (btn != null)
+                var nameLabel = entry.transform.Find("NameLabel");
+                if (nameLabel != null)
                 {
-                    btn.onClick.AddListener(() => SelectHero(captured));
+                    var tmp = nameLabel.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null)
+                    {
+                        tmp.text = hero.Label;
+                    }
                 }
 
-                _spawnedHeroTabs.Add(tabObj);
-            }
-        }
+                var descLabel = entry.transform.Find("DescriptionLabel");
+                if (descLabel != null)
+                {
+                    var tmp = descLabel.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null)
+                    {
+                        tmp.text = string.Empty;
+                    }
+                }
 
-        private void SelectHero(string heroKey)
-        {
-            _selectedHeroKey = heroKey;
-            _heroNameLabel.text = heroKey;
-            RefreshDeck();
-            RefreshAvailable();
+                int deckCount = CardCollectionManager.Instance.GetCardsForHero(hero.Label).Count;
+                var effectsLabel = entry.transform.Find("EffectsLabel");
+                if (effectsLabel != null)
+                {
+                    var tmp = effectsLabel.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null)
+                    {
+                        tmp.text = $"Deck {deckCount} / {CardCollectionManager.MaxDeckSize}";
+                    }
+                }
+
+                var captured = hero.Label;
+                var btn = entry.GetComponent<Button>();
+                if (btn != null)
+                {
+                    btn.onClick.AddListener(() => ShowDeckEdit(captured));
+                }
+
+                _spawnedHeroEntries.Add(entry);
+            }
         }
 
         private void RefreshDeck()
@@ -122,7 +162,6 @@ namespace Assets.Scripts.Cards.UI
             var assigned = CardCollectionManager.Instance.GetCardsForHero(_selectedHeroKey);
             _deckCountLabel.text = $"{assigned.Count} / {CardCollectionManager.MaxDeckSize}";
 
-            // Group by CardKey
             var groups = assigned.GroupBy(c => c.CardKey);
 
             foreach (var group in groups)
@@ -153,7 +192,6 @@ namespace Assets.Scripts.Cards.UI
 
             var unassigned = CardCollectionManager.Instance.GetUnassignedCards();
 
-            // Group by CardKey
             var groups = unassigned.GroupBy(c => c.CardKey);
 
             foreach (var group in groups)
@@ -183,7 +221,6 @@ namespace Assets.Scripts.Cards.UI
             var cardObj = Instantiate(prefab, parent);
             cardObj.SetActive(true);
 
-            // Set icon
             var icon = cardObj.transform.Find("Icon");
             if (icon != null)
             {
@@ -194,7 +231,6 @@ namespace Assets.Scripts.Cards.UI
                 }
             }
 
-            // Set name with count
             var nameLabel = cardObj.transform.Find("NameLabel");
             if (nameLabel != null)
             {
@@ -205,7 +241,6 @@ namespace Assets.Scripts.Cards.UI
                 }
             }
 
-            // Fallback: try the generic Label child (old prefab compat)
             if (nameLabel == null)
             {
                 var label = cardObj.GetComponentInChildren<TextMeshProUGUI>();
@@ -215,7 +250,6 @@ namespace Assets.Scripts.Cards.UI
                 }
             }
 
-            // Set description
             var descLabel = cardObj.transform.Find("DescriptionLabel");
             if (descLabel != null)
             {
@@ -226,7 +260,6 @@ namespace Assets.Scripts.Cards.UI
                 }
             }
 
-            // Set effects summary
             var effectsLabel = cardObj.transform.Find("EffectsLabel");
             if (effectsLabel != null)
             {

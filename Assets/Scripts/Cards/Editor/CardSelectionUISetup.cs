@@ -80,10 +80,10 @@ public class CardSelectionUISetup : Editor
         var cardContent = cardScrollObj.transform.Find("Content");
         var cardHandLayout = cardContent.gameObject.AddComponent<CardHandLayout>();
         var cardHandSO = new SerializedObject(cardHandLayout);
-        cardHandSO.FindProperty("_cardWidth").floatValue = 180f;
-        cardHandSO.FindProperty("_cardHeight").floatValue = 300f;
-        cardHandSO.FindProperty("_minVisibleWidth").floatValue = 60f;
-        cardHandSO.FindProperty("_maxSpacing").floatValue = 20f;
+        cardHandSO.FindProperty("_cardWidth").floatValue = 260f;
+        cardHandSO.FindProperty("_cardHeight").floatValue = 400f;
+        cardHandSO.FindProperty("_minVisibleWidth").floatValue = 90f;
+        cardHandSO.FindProperty("_maxSpacing").floatValue = 24f;
         cardHandSO.ApplyModifiedProperties();
 
         // Back button
