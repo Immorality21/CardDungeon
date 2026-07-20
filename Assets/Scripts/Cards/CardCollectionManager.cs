@@ -48,6 +48,17 @@ namespace Assets.Scripts.Cards
             return _allCards.Find(x => x.Key == key);
         }
 
+        /// <summary>Returns a random card definition from the full catalog, or null if none exist.</summary>
+        public CardSO GetRandomCard()
+        {
+            if (_allCards == null || _allCards.Count == 0)
+            {
+                return null;
+            }
+            int index = UnityEngine.Random.Range(0, _allCards.Count);
+            return _allCards[index];
+        }
+
         public List<CardSaveData> GetAllCards()
         {
             return _saveData.Cards;

@@ -9,6 +9,7 @@ using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
+using Assets.Scripts.Progression;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
 
@@ -267,7 +268,10 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteCardAction(CardAction cardAction, Room room)
         {
-            var result = _calculator.Execute(cardAction, BuffTracker, _tagTracker, _comboDetector);
+            int powerBonus = MetaProgressManager.HasInstance
+                ? MetaProgressManager.Instance.GetCardPowerBonus(cardAction.Card.Key)
+                : 0;
+            var result = _calculator.Execute(cardAction, BuffTracker, _tagTracker, _comboDetector, powerBonus);
             _lastTurnLog = result.BuildLog(cardAction);
             yield return _presenter.Present(result);
 

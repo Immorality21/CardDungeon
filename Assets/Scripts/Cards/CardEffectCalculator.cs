@@ -16,14 +16,16 @@ namespace Assets.Scripts.Cards
             CardAction action,
             CombatBuffTracker buffTracker,
             CardTagTracker tagTracker = null,
-            ComboDetector comboDetector = null)
+            ComboDetector comboDetector = null,
+            int powerBonus = 0)
         {
             var result = new CardEffectResult();
 
             foreach (var effect in action.Card.Effects)
             {
-                var executor = _factory.GetExecutor(effect.EffectType);
-                executor.Execute(effect, action.Caster, action.Targets, buffTracker, result);
+                var effectToUse = ApplyPowerBonus(effect, powerBonus);
+                var executor = _factory.GetExecutor(effectToUse.EffectType);
+                executor.Execute(effectToUse, action.Caster, action.Targets, buffTracker, result);
             }
 
             if (tagTracker != null && comboDetector != null && action.Card.Tags.Count > 0)
@@ -49,6 +51,33 @@ namespace Assets.Scripts.Cards
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Returns a copy of the effect with a permanent card-upgrade bonus folded into its
+        /// Power, for Damage/Heal effects only. Buff/Debuff power (a stat amount) is left
+        /// unchanged. Returns the original effect when there is no bonus to apply.
+        /// </summary>
+        private CardEffect ApplyPowerBonus(CardEffect effect, int powerBonus)
+        {
+            if (powerBonus <= 0)
+            {
+                return effect;
+            }
+
+            if (effect.EffectType != CardEffectType.Damage && effect.EffectType != CardEffectType.Heal)
+            {
+                return effect;
+            }
+
+            return new CardEffect
+            {
+                EffectType = effect.EffectType,
+                Power = effect.Power + powerBonus,
+                DamageType = effect.DamageType,
+                BuffType = effect.BuffType,
+                Duration = effect.Duration
+            };
         }
 
         private void ApplyCombo(

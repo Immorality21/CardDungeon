@@ -3,6 +3,7 @@ using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
 using Assets.Scripts.Items;
+using Assets.Scripts.Progression;
 using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
 using ImmoralityGaming.Fundamentals;
@@ -388,6 +389,9 @@ namespace Assets.Scripts.Dungeon
                 Party.CommitProgress();
             }
 
+            // Award persistent meta-currency for clearing the level
+            MetaProgressManager.Instance.AwardLevelClear();
+
             if (InventoryManager.HasInstance)
             {
                 InventoryManager.Instance.CommitInventory();
@@ -424,6 +428,13 @@ namespace Assets.Scripts.Dungeon
 
         public void HandlePartyDeath()
         {
+            // Award consolation meta-currency for run progress before wiping saves.
+            // Meta-progress persists immediately, so this survives the death wipe.
+            if (ActiveRun != null)
+            {
+                MetaProgressManager.Instance.AwardRunProgressOnDeath(RunLevelIndex);
+            }
+
             // Delete dungeon save — all in-memory XP/items are discarded with the scene
             if (DungeonSaveManager.HasInstance)
             {

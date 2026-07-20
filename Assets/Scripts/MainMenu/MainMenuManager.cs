@@ -1,6 +1,8 @@
 using Assets.Scripts.Cards.UI;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.IO;
+using Assets.Scripts.MainMenu;
+using Assets.Scripts.Progression;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -27,6 +29,25 @@ public class MainMenuManager : MonoBehaviour
 
     [SerializeField]
     private DeckManagementUI _deckManagementUI;
+
+    [SerializeField]
+    private Button _merchantButton;
+
+    [SerializeField]
+    private MerchantUI _merchantUI;
+
+    [SerializeField]
+    private Button _forgeButton;
+
+    [SerializeField]
+    private CardUpgradeUI _cardUpgradeUI;
+
+    [Header("Currency Header (optional)")]
+    [SerializeField]
+    private TextMeshProUGUI _goldLabel;
+
+    [SerializeField]
+    private TextMeshProUGUI _essenceLabel;
 
     [Header("Run Progress Panel")]
     [SerializeField]
@@ -65,6 +86,15 @@ public class MainMenuManager : MonoBehaviour
         _backButton.onClick.AddListener(OnBack);
         _runCompleteReturnButton.onClick.AddListener(OnRunCompleteReturn);
         _manageDeckButton.onClick.AddListener(OnManageDeck);
+
+        if (_merchantButton != null)
+        {
+            _merchantButton.onClick.AddListener(OnVisitMerchant);
+        }
+        if (_forgeButton != null)
+        {
+            _forgeButton.onClick.AddListener(OnVisitForge);
+        }
 
         // Check if run was just completed (ActiveRun cleared after final level)
         if (DungeonManager.ActiveRun == null && !string.IsNullOrEmpty(_runSaveData.RunKey))
@@ -107,6 +137,20 @@ public class MainMenuManager : MonoBehaviour
         bool hasActiveRun = !string.IsNullOrEmpty(_runSaveData.RunKey);
         Debug.Log($"ShowHomePanel: RunKey='{_runSaveData.RunKey}', CurrentLevel={_runSaveData.CurrentLevelIndex}, hasActiveRun={hasActiveRun}");
         _continueRunButton.gameObject.SetActive(hasActiveRun);
+
+        RefreshCurrencyHeader();
+    }
+
+    private void RefreshCurrencyHeader()
+    {
+        if (_goldLabel != null)
+        {
+            _goldLabel.text = $"Gold: {MetaProgressManager.Instance.Gold}";
+        }
+        if (_essenceLabel != null)
+        {
+            _essenceLabel.text = $"Essence: {MetaProgressManager.Instance.Essence}";
+        }
     }
 
     private void ShowRunProgressPanel()
@@ -190,6 +234,42 @@ public class MainMenuManager : MonoBehaviour
             _deckManagementUI.OnClosed -= OnDeckClosed;
         }
 
+        ShowHomePanel();
+    }
+
+    private void OnVisitMerchant()
+    {
+        if (_merchantUI == null)
+        {
+            return;
+        }
+
+        _homePanel.SetActive(false);
+        _merchantUI.OnClosed += OnMerchantClosed;
+        _merchantUI.Show();
+    }
+
+    private void OnMerchantClosed()
+    {
+        _merchantUI.OnClosed -= OnMerchantClosed;
+        ShowHomePanel();
+    }
+
+    private void OnVisitForge()
+    {
+        if (_cardUpgradeUI == null)
+        {
+            return;
+        }
+
+        _homePanel.SetActive(false);
+        _cardUpgradeUI.OnClosed += OnForgeClosed;
+        _cardUpgradeUI.Show();
+    }
+
+    private void OnForgeClosed()
+    {
+        _cardUpgradeUI.OnClosed -= OnForgeClosed;
         ShowHomePanel();
     }
 
