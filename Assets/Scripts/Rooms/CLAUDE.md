@@ -12,8 +12,10 @@
 
 ## Combat Flow (CombatManager)
 
-- **Flow:** Press Fight → party sprite hides → heroes fan out into room (animated) → turn loop (auto-attack or play cards) → victory/defeat → heroes gather back.
+- **Flow:** Press Fight → party sprite hides → heroes fan out into room (animated) → turn loop (Attack / Cards / Skip per hero turn) → victory/defeat → heroes gather back.
+- **Attack targeting:** On a hero's Attack, the player picks which enemy to hit — `RoomActionUI.OnHeroAttack` calls `CombatManager.RequestAttackTargets`, which raises `OnAttackTargetRequested`; `CardSelectionUI` reuses its target panel to pick, then `SubmitAttackAction(target)` sets `_pendingAttackTarget` for `ExecuteHeroTurn`. A single remaining enemy is auto-targeted; it falls back to a random enemy only if the chosen target is gone.
 - **Card integration:** During a hero's turn, available cards from `DungeonDeckState` can be played. Cards are single-use per dungeon run. `ExecuteCardAction` applies the meta card-upgrade power bonus via `MetaProgressManager.GetCardPowerBonus(cardKey)` — see the Progression guide.
+- **Enemy turns** are behavior-driven: `ExecuteEnemyTurn` asks the enemy's `IEnemyBehavior` for an `EnemyDecision`, then runs the matching helper (basic attack / charge / heavy attack / heal ally / weaken hero). Behaviors and archetypes are documented in the Enemies guide. Charging enemies are telegraphed (red tint + "Charging!" floating label + log) a turn before their heavy hit. `ExecuteAttack` takes an optional damage multiplier and log verb to support heavy blows.
 - **Damage feedback:** `FloatingTextHandler` shows damage numbers above targets (white for enemy damage, red for hero damage). Combo names shown in orange.
 - **CombatManager events:** `OnCombatStarted`, `OnTurnExecuted`, `OnCombatEnded`, `OnDungeonCleared` for UI integration. `OnDungeonCleared` fires when the exit room is cleared (drives level completion — see the Dungeon guide).
 - **Death flow:** Full party wipe → death screen → `DungeonManager.HandlePartyDeath()` wipes saves → return to menu. All in-dungeon XP/items are lost (but meta-currency is awarded first — see the Progression guide).

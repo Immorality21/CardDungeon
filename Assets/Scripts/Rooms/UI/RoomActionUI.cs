@@ -220,7 +220,16 @@ namespace Assets.Scripts.Rooms
         private void OnHeroAttack()
         {
             _heroActionPanel.SetActive(false);
-            CombatManager.Instance.SubmitHeroAction(HeroAction.Attack);
+
+            var enemies = CombatManager.Instance.GetAliveEnemies();
+            if (enemies.Count <= 1)
+            {
+                // Zero or one enemy — no meaningful choice, attack directly.
+                CombatManager.Instance.SubmitAttackAction(enemies.Count == 1 ? enemies[0] : null);
+                return;
+            }
+
+            CombatManager.Instance.RequestAttackTargets(_currentHeroTurn, enemies);
         }
 
         private void OnHeroCards()

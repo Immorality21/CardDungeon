@@ -13,6 +13,8 @@ namespace Assets.Scripts.Enemies
 
         public Stats Stats = new Stats(3, 1, 10);
 
+        public EnemyArchetype Archetype;
+
         public ItemSO LootItem;
         public CardSO LootCard;
 

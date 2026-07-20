@@ -26,12 +26,14 @@ namespace Assets.Scripts.Cards.UI
 
         private ICombatUnit _currentHero;
         private CardSO _selectedCard;
+        private bool _isAttackTargeting;
         private List<GameObject> _spawnedCardButtons = new List<GameObject>();
         private List<GameObject> _spawnedTargetButtons = new List<GameObject>();
 
         private void OnEnable()
         {
             CombatManager.Instance.OnCardDeckRequested += ShowCardList;
+            CombatManager.Instance.OnAttackTargetRequested += ShowAttackTargets;
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
         }
 
@@ -40,6 +42,7 @@ namespace Assets.Scripts.Cards.UI
             if (CombatManager.HasInstance)
             {
                 CombatManager.Instance.OnCardDeckRequested -= ShowCardList;
+                CombatManager.Instance.OnAttackTargetRequested -= ShowAttackTargets;
                 CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             }
         }
@@ -161,20 +164,35 @@ namespace Assets.Scripts.Cards.UI
 
         private void ShowTargetSelection(CardTargetType targetType)
         {
-            _spawnedTargetButtons.DestroyAndClear();
-
             List<ICombatUnit> targets;
+            string prompt;
             if (targetType == CardTargetType.SingleEnemy)
             {
                 targets = CombatManager.Instance.GetAliveEnemies();
-                _targetPromptLabel.text = "Select Enemy Target";
+                prompt = "Select Enemy Target";
             }
             else
             {
                 var party = GameManager.Instance.Party;
                 targets = CombatManager.Instance.GetAliveHeroes(party);
-                _targetPromptLabel.text = "Select Ally Target";
+                prompt = "Select Ally Target";
             }
+
+            PopulateTargetButtons(targets, prompt);
+        }
+
+        // Entry point for basic-attack targeting (raised by CombatManager.RequestAttackTargets).
+        private void ShowAttackTargets(ICombatUnit hero, List<ICombatUnit> enemies)
+        {
+            _currentHero = hero;
+            _isAttackTargeting = true;
+            PopulateTargetButtons(enemies, "Select Attack Target");
+        }
+
+        private void PopulateTargetButtons(List<ICombatUnit> targets, string prompt)
+        {
+            _spawnedTargetButtons.DestroyAndClear();
+            _targetPromptLabel.text = prompt;
 
             foreach (var target in targets)
             {
@@ -213,6 +231,15 @@ namespace Assets.Scripts.Cards.UI
 
         private void OnTargetSelected(ICombatUnit target)
         {
+            if (_isAttackTargeting)
+            {
+                _isAttackTargeting = false;
+                _targetPanel.SetActive(false);
+                _spawnedTargetButtons.DestroyAndClear();
+                CombatManager.Instance.SubmitAttackAction(target);
+                return;
+            }
+
             SubmitCard(new List<ICombatUnit> { target });
         }
 
@@ -240,6 +267,19 @@ namespace Assets.Scripts.Cards.UI
         private void OnBackToCardList()
         {
             _targetPanel.SetActive(false);
+            _spawnedTargetButtons.DestroyAndClear();
+
+            // Attack targeting has no card list behind it — return to the hero action panel.
+            if (_isAttackTargeting)
+            {
+                _isAttackTargeting = false;
+                var roomActionUI = FindObjectOfType<RoomActionUI>();
+                if (roomActionUI != null)
+                {
+                    roomActionUI.CancelCardSelection();
+                }
+                return;
+            }
 
             // Re-show the card list with the same hero
             var heroComponent = _currentHero as Hero;
@@ -254,6 +294,7 @@ namespace Assets.Scripts.Cards.UI
 
         private void OnCombatEnded(CombatResult result)
         {
+            _isAttackTargeting = false;
             _cardListPanel.SetActive(false);
             _targetPanel.SetActive(false);
             _spawnedCardButtons.DestroyAndClear();

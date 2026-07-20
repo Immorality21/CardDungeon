@@ -13,7 +13,12 @@ namespace Assets.Scripts.Enemies
         public Room Room;
         public ItemSO LootItem;
         public CardSO LootCard;
+        public EnemyArchetype Archetype;
         public List<Resistance> Resistances = new List<Resistance>();
+
+        // Runtime combat state (not persisted).
+        [System.NonSerialized] public bool IsCharging;
+        [System.NonSerialized] public ICombatUnit ChargeTarget;
 
         private SpriteRenderer _spriteRenderer;
 

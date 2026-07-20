@@ -7,6 +7,7 @@ using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Enemies.Behaviors;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
@@ -50,6 +51,7 @@ namespace Assets.Scripts.Rooms
         public event Action<List<ICombatUnit>> OnTurnOrderChanged;
         public event Action<ICombatUnit> OnHeroTurnStarted;
         public event Action<ICombatUnit, List<CardSO>> OnCardDeckRequested;
+        public event Action<ICombatUnit, List<ICombatUnit>> OnAttackTargetRequested;
         public event Action OnDungeonCleared;
 
         [SerializeField] private List<CardComboSO> _cardCombos;
@@ -60,6 +62,7 @@ namespace Assets.Scripts.Rooms
         private TurnManager _turnManager = new TurnManager();
         private HeroAction _pendingAction = HeroAction.None;
         private CardAction _pendingCardAction;
+        private ICombatUnit _pendingAttackTarget;
         private string _lastTurnLog;
         private Room _currentCombatRoom;
         private CardTagTracker _tagTracker;
@@ -75,6 +78,18 @@ namespace Assets.Scripts.Rooms
         public void RequestCardDeck(ICombatUnit hero, List<CardSO> availableCards)
         {
             OnCardDeckRequested?.Invoke(hero, availableCards);
+        }
+
+        public void RequestAttackTargets(ICombatUnit hero, List<ICombatUnit> enemies)
+        {
+            OnAttackTargetRequested?.Invoke(hero, enemies);
+        }
+
+        /// <summary>Submits a basic attack against the chosen target for the current hero turn.</summary>
+        public void SubmitAttackAction(ICombatUnit target)
+        {
+            _pendingAttackTarget = target;
+            _pendingAction = HeroAction.Attack;
         }
 
         public void SubmitCardAction(CardSO card, ICombatUnit caster, List<ICombatUnit> targets)
@@ -184,6 +199,7 @@ namespace Assets.Scripts.Rooms
                     // Wait for player input
                     _pendingAction = HeroAction.None;
                     _pendingCardAction = null;
+                    _pendingAttackTarget = null;
                     OnHeroTurnStarted?.Invoke(unit);
 
                     while (_pendingAction == HeroAction.None)
@@ -293,7 +309,14 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteHeroTurn(ICombatUnit hero, Room room)
         {
-            var target = GetRandomAliveEnemy(room);
+            // Use the player's chosen target; fall back to a random enemy if it's
+            // missing or already dead (e.g. single-enemy auto-target edge cases).
+            ICombatUnit target = _pendingAttackTarget;
+            if (target == null || !target.IsAlive)
+            {
+                target = GetRandomAliveEnemy(room);
+            }
+
             if (target == null)
             {
                 _lastTurnLog = $"{hero.DisplayName} has no target.";
@@ -309,17 +332,132 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        private IEnumerator ExecuteEnemyTurn(ICombatUnit enemy, Party party)
+        private IEnumerator ExecuteEnemyTurn(ICombatUnit enemyUnit, Party party)
         {
-            var target = GetRandomAliveHero(party);
+            var enemy = enemyUnit as Enemy;
+            var archetype = enemy != null ? enemy.Archetype : EnemyArchetype.Aggressor;
+            var behavior = EnemyBehaviorFactory.Get(archetype);
+
+            var context = new EnemyCombatContext
+            {
+                Heroes = GetAliveHeroes(party),
+                Allies = GetAliveEnemies().Where(u => u != enemyUnit).ToList(),
+                BuffTracker = BuffTracker,
+                SelfIsCharging = enemy != null && enemy.IsCharging
+            };
+
+            var decision = behavior.Decide(enemyUnit, context);
+
+            switch (decision.Type)
+            {
+                case EnemyActionType.ChargeHeavy:
+                    yield return ExecuteEnemyCharge(enemy, decision.Target);
+                    break;
+                case EnemyActionType.HeavyAttack:
+                    yield return ExecuteEnemyHeavyAttack(enemyUnit, enemy, party, decision.Multiplier);
+                    break;
+                case EnemyActionType.Heal:
+                    yield return ExecuteEnemyHeal(enemyUnit, decision.Target, decision.Amount);
+                    break;
+                case EnemyActionType.Debuff:
+                    yield return ExecuteEnemyDebuff(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration);
+                    break;
+                default:
+                    yield return ExecuteEnemyBasicAttack(enemyUnit, decision.Target, party);
+                    break;
+            }
+        }
+
+        private IEnumerator ExecuteEnemyBasicAttack(ICombatUnit enemyUnit, ICombatUnit target, Party party)
+        {
+            if (target == null || !target.IsAlive)
+            {
+                target = GetRandomAliveHero(party);
+            }
+
             if (target == null)
             {
-                _lastTurnLog = $"{enemy.DisplayName} has no target.";
+                _lastTurnLog = $"{enemyUnit.DisplayName} has no target.";
                 yield break;
             }
 
-            yield return ExecuteAttack(enemy, target, Vector3.left, Color.red);
+            yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red);
+            ResolveHeroDamaged(target);
+        }
 
+        private IEnumerator ExecuteEnemyCharge(Enemy enemy, ICombatUnit target)
+        {
+            if (enemy == null)
+            {
+                yield break;
+            }
+
+            enemy.IsCharging = true;
+            enemy.ChargeTarget = target;
+            SetChargingVisual(enemy, true);
+            ShowFloatingLabel(enemy.Transform.position, "Charging!", new Color(1f, 0.5f, 0.2f));
+            _lastTurnLog = $"{enemy.DisplayName} is winding up a heavy blow!";
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
+        private IEnumerator ExecuteEnemyHeavyAttack(ICombatUnit enemyUnit, Enemy enemy, Party party, float multiplier)
+        {
+            ICombatUnit target = enemy != null ? enemy.ChargeTarget : null;
+            if (target == null || !target.IsAlive)
+            {
+                target = GetRandomAliveHero(party);
+            }
+
+            if (enemy != null)
+            {
+                enemy.IsCharging = false;
+                enemy.ChargeTarget = null;
+                SetChargingVisual(enemy, false);
+            }
+
+            if (target == null)
+            {
+                _lastTurnLog = $"{enemyUnit.DisplayName} has no target.";
+                yield break;
+            }
+
+            yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "unleashes a heavy blow on");
+            ResolveHeroDamaged(target);
+        }
+
+        private IEnumerator ExecuteEnemyHeal(ICombatUnit enemyUnit, ICombatUnit target, int amount)
+        {
+            if (target == null || !target.IsAlive)
+            {
+                _lastTurnLog = $"{enemyUnit.DisplayName} has no one to heal.";
+                yield break;
+            }
+
+            int before = target.Stats.Health;
+            target.Stats.Health = Mathf.Min(target.Stats.Health + amount, target.Stats.MaxHealth);
+            int healed = target.Stats.Health - before;
+
+            ShowDamageText(target.Transform.position, healed, Color.green);
+            _lastTurnLog = $"{enemyUnit.DisplayName} heals {target.DisplayName} for {healed}.";
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
+        private IEnumerator ExecuteEnemyDebuff(ICombatUnit enemyUnit, ICombatUnit target, StatType stat, int amount, int duration)
+        {
+            if (target == null || !target.IsAlive)
+            {
+                _lastTurnLog = $"{enemyUnit.DisplayName} has no target.";
+                yield break;
+            }
+
+            BuffTracker.ApplyBuff(target, stat, -amount, duration);
+            ShowFloatingLabel(target.Transform.position, $"-{amount} {stat}", new Color(0.7f, 0.4f, 1f));
+            _lastTurnLog = $"{enemyUnit.DisplayName} weakens {target.DisplayName}'s {stat}!";
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
+        private void ResolveHeroDamaged(ICombatUnit target)
+        {
             if (!target.IsAlive)
             {
                 _lastTurnLog += $" {target.DisplayName} has fallen!";
@@ -328,20 +466,30 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        private IEnumerator ExecuteAttack(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor)
+        private void SetChargingVisual(Enemy enemy, bool charging)
+        {
+            var sr = enemy.GetComponent<SpriteRenderer>();
+            if (sr == null)
+            {
+                return;
+            }
+            sr.color = charging ? new Color(1f, 0.55f, 0.4f) : Color.white;
+        }
+
+        private IEnumerator ExecuteAttack(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor, float damageMultiplier = 1f, string verb = "attacks")
         {
             yield return LungeAnimation(attacker.Transform, lungeDirection);
 
             int attackBonus = BuffTracker.GetBuffAmount(attacker, StatType.Attack);
             int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Defense);
-            int rawAttack = attacker.GetEffectiveAttack() + attackBonus;
+            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttack() + attackBonus) * damageMultiplier);
             int defense = target.GetEffectiveDefense() + defenseBonus;
             int dmg = DamageCalculator.Calculate(rawAttack, defense, DamageType.Normal, target.Resistances);
             target.Stats.Health -= dmg;
 
             ShowDamageText(target.Transform.position, dmg, damageColor);
 
-            _lastTurnLog = $"{attacker.DisplayName} attacks {target.DisplayName} for {dmg} damage.";
+            _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName} for {dmg} damage.";
         }
 
         private IEnumerator LungeAnimation(Transform unit, Vector3 direction)
@@ -394,11 +542,16 @@ namespace Assets.Scripts.Rooms
 
         private void ShowDamageText(Vector3 position, int damage, Color color)
         {
+            ShowFloatingLabel(position, damage.ToString(), color);
+        }
+
+        private void ShowFloatingLabel(Vector3 position, string text, Color color)
+        {
             if (FloatingTextHandler.HasInstance)
             {
                 FloatingTextHandler.Instance.CreateFloatingText(
                     position,
-                    damage.ToString(),
+                    text,
                     color,
                     1f,     // fadeSpeed — fade out over ~1 second
                     0.8f,   // fadeRange — gentle drift
