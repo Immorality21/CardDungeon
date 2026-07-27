@@ -12,7 +12,11 @@ namespace Assets.Scripts.Enemies
         public Stats Stats;
         public Room Room;
         public ItemSO LootItem;
-        public CardSO LootCard;
+
+        // The Draw list: magics the player can extract from this enemy mid-combat,
+        // each with the charges a successful draw grants (see EquippedMagicState).
+        public List<DrawableMagicEntry> DrawableMagics = new List<DrawableMagicEntry>();
+
         public EnemyArchetype Archetype;
         public List<Resistance> Resistances = new List<Resistance>();
 

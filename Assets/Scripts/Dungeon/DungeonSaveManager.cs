@@ -53,9 +53,9 @@ namespace Assets.Scripts.Dungeon
                 data.Resources = PartyResourceManager.Instance.GetSaveData();
             }
 
-            if (DungeonManager.HasInstance && DungeonManager.Instance.DeckState != null)
+            if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
-                data.UsedCards = DungeonManager.Instance.DeckState.GetSaveData();
+                data.EquippedMagic = DungeonManager.Instance.MagicState.GetSaveData();
             }
 
             _fileHandler.Save(data);

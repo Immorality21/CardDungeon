@@ -8,18 +8,18 @@ namespace Tests.EditMode
 {
     public class ComboDetectorTests
     {
-        private CardTagTracker _tagTracker;
+        private MagicTagTracker _tagTracker;
         private MockCombatUnit _target;
 
-        private CardComboSO CreateCombo(string name, List<CardTag> requiredTags,
-            CardEffectType effect = CardEffectType.Damage, int power = 10)
+        private MagicComboSO CreateCombo(string name, List<MagicTag> requiredTags,
+            SpellEffectType effect = SpellEffectType.Damage, int power = 10)
         {
-            var combo = ScriptableObject.CreateInstance<CardComboSO>();
+            var combo = ScriptableObject.CreateInstance<MagicComboSO>();
             combo.ComboName = name;
             combo.RequiredTags = requiredTags;
-            combo.BonusEffects = new List<CardEffect>
+            combo.BonusEffects = new List<SpellEffect>
             {
-                new CardEffect { EffectType = effect, Power = power }
+                new SpellEffect { EffectType = effect, Power = power }
             };
             return combo;
         }
@@ -27,17 +27,17 @@ namespace Tests.EditMode
         [SetUp]
         public void SetUp()
         {
-            _tagTracker = new CardTagTracker();
+            _tagTracker = new MagicTagTracker();
             _target = new MockCombatUnit("Enemy", attack: 5, defense: 3, health: 50, isHero: false);
         }
 
         [Test]
         public void DetectCombo_NoIncomingTags_ReturnsNull()
         {
-            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Oil }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Oil }, 3);
 
             var result = detector.DetectCombo(null, _target, _tagTracker);
 
@@ -47,12 +47,12 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_EmptyIncomingTags_ReturnsNull()
         {
-            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Oil }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Oil }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag>(), _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag>(), _target, _tagTracker);
 
             Assert.IsNull(result);
         }
@@ -60,10 +60,10 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_NoExistingTags_ReturnsNull()
         {
-            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Fire, CardTag.Oil }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Fire, MagicTag.Oil }, _target, _tagTracker);
 
             Assert.IsNull(result);
         }
@@ -71,10 +71,10 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_AllTagsFromIncoming_NoneExisting_ReturnsNull()
         {
-            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Fire, CardTag.Oil }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Fire, MagicTag.Oil }, _target, _tagTracker);
 
             Assert.IsNull(result);
         }
@@ -82,12 +82,12 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_MatchingTags_ReturnsCombo()
         {
-            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Oil }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Oil }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Fire }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Fire }, _target, _tagTracker);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Ignite", result.ComboName);
@@ -96,12 +96,12 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_ReversedTagOrder_StillTriggers()
         {
-            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Fire }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Fire }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Oil }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Oil }, _target, _tagTracker);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Ignite", result.ComboName);
@@ -110,12 +110,12 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_PartialMatch_ReturnsNull()
         {
-            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil, CardTag.Wind });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil, MagicTag.Wind });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Oil }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Oil }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Fire }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Fire }, _target, _tagTracker);
 
             Assert.IsNull(result);
         }
@@ -123,12 +123,12 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_ThreeTagCombo_AllPresent_Triggers()
         {
-            var combo = CreateCombo("Storm", new List<CardTag> { CardTag.Fire, CardTag.Oil, CardTag.Wind });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Storm", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil, MagicTag.Wind });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Oil, CardTag.Wind }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Oil, MagicTag.Wind }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Fire }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Fire }, _target, _tagTracker);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Storm", result.ComboName);
@@ -137,13 +137,13 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_MultipleCombos_ReturnsFirst()
         {
-            var ignite = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var freeze = CreateCombo("Freeze", new List<CardTag> { CardTag.Ice, CardTag.Water });
-            var detector = new ComboDetector(new List<CardComboSO> { ignite, freeze });
+            var ignite = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var freeze = CreateCombo("Freeze", new List<MagicTag> { MagicTag.Ice, MagicTag.Water });
+            var detector = new ComboDetector(new List<MagicComboSO> { ignite, freeze });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Oil }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Oil }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Fire }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Fire }, _target, _tagTracker);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Ignite", result.ComboName);
@@ -152,12 +152,12 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_WrongComboTags_ReturnsNull()
         {
-            var ignite = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { ignite });
+            var ignite = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { ignite });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Ice }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Ice }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Water }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Water }, _target, _tagTracker);
 
             Assert.IsNull(result);
         }
@@ -165,11 +165,11 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_EmptyCombos_ReturnsNull()
         {
-            var detector = new ComboDetector(new List<CardComboSO>());
+            var detector = new ComboDetector(new List<MagicComboSO>());
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Fire }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Fire }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Oil }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Oil }, _target, _tagTracker);
 
             Assert.IsNull(result);
         }
@@ -179,9 +179,9 @@ namespace Tests.EditMode
         {
             var detector = new ComboDetector(null);
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Fire }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Fire }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Oil }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Oil }, _target, _tagTracker);
 
             Assert.IsNull(result);
         }
@@ -189,13 +189,13 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_ComboWithEmptyRequiredTags_Skipped()
         {
-            var broken = CreateCombo("Broken", new List<CardTag>());
-            var ignite = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { broken, ignite });
+            var broken = CreateCombo("Broken", new List<MagicTag>());
+            var ignite = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { broken, ignite });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Oil }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Oil }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Fire }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Fire }, _target, _tagTracker);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Ignite", result.ComboName);
@@ -204,12 +204,12 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_ExtraTags_StillTriggers()
         {
-            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Oil, CardTag.Poison }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Oil, MagicTag.Poison }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Fire, CardTag.Ice }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Fire, MagicTag.Ice }, _target, _tagTracker);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Ignite", result.ComboName);
@@ -218,12 +218,12 @@ namespace Tests.EditMode
         [Test]
         public void DetectCombo_RequiresMixOfExistingAndIncoming()
         {
-            var combo = CreateCombo("Ignite", new List<CardTag> { CardTag.Fire, CardTag.Oil });
-            var detector = new ComboDetector(new List<CardComboSO> { combo });
+            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            _tagTracker.ApplyTags(_target, new List<CardTag> { CardTag.Poison }, 3);
+            _tagTracker.ApplyTags(_target, new List<MagicTag> { MagicTag.Poison }, 3);
 
-            var result = detector.DetectCombo(new List<CardTag> { CardTag.Fire, CardTag.Oil }, _target, _tagTracker);
+            var result = detector.DetectCombo(new List<MagicTag> { MagicTag.Fire, MagicTag.Oil }, _target, _tagTracker);
 
             Assert.IsNull(result);
         }

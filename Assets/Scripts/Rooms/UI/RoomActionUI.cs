@@ -7,6 +7,7 @@ using Assets.Scripts.Dungeon;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.Rooms
@@ -27,7 +28,9 @@ namespace Assets.Scripts.Rooms
         [SerializeField] private GameObject _heroActionPanel;
         [SerializeField] private TextMeshProUGUI _heroActionLabel;
         [SerializeField] private Button _attackButton;
-        [SerializeField] private Button _cardsButton;
+        [FormerlySerializedAs("_cardsButton")]
+        [SerializeField] private Button _magicButton;
+        [SerializeField] private Button _drawButton;
         [SerializeField] private Button _skipButton;
 
         [Header("Sub Panel")]
@@ -56,7 +59,11 @@ namespace Assets.Scripts.Rooms
             _fightButton.onClick.AddListener(OnFight);
             _fleeButton.onClick.AddListener(OnFlee);
             _attackButton.onClick.AddListener(OnHeroAttack);
-            _cardsButton.onClick.AddListener(OnHeroCards);
+            _magicButton.onClick.AddListener(OnHeroMagic);
+            if (_drawButton != null)
+            {
+                _drawButton.onClick.AddListener(OnHeroDraw);
+            }
             _skipButton.onClick.AddListener(OnHeroSkip);
             _backButton.onClick.AddListener(OnBack);
         }
@@ -200,19 +207,21 @@ namespace Assets.Scripts.Rooms
             _currentHeroTurn = hero;
             _heroActionLabel.text = $"{hero.DisplayName}'s Turn";
 
-            // Show/hide cards button based on available cards
-            bool hasCards = false;
-            if (CardCollectionManager.HasInstance && DungeonManager.HasInstance && DungeonManager.Instance.DeckState != null)
+            // Show the Magic button only when this hero has a castable (charged) slot.
+            bool hasMagic = false;
+            var heroComponent = hero as Heroes.Hero;
+            if (heroComponent != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
-                var heroComponent = hero as Heroes.Hero;
-                if (heroComponent != null)
-                {
-                    var available = DungeonManager.Instance.DeckState.GetAvailableCards(
-                        heroComponent.HeroKey, CardCollectionManager.Instance);
-                    hasCards = available.Count > 0;
-                }
+                hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
             }
-            _cardsButton.gameObject.SetActive(hasCards);
+            _magicButton.gameObject.SetActive(hasMagic);
+
+            // Show the Draw button only when an enemy has magic to draw.
+            if (_drawButton != null)
+            {
+                bool hasDrawable = CombatManager.Instance.GetDrawableEnemies().Count > 0;
+                _drawButton.gameObject.SetActive(hasDrawable);
+            }
 
             _heroActionPanel.SetActive(true);
         }
@@ -232,23 +241,37 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.RequestAttackTargets(_currentHeroTurn, enemies);
         }
 
-        private void OnHeroCards()
+        private void OnHeroMagic()
         {
             _heroActionPanel.SetActive(false);
 
             var heroComponent = _currentHeroTurn as Heroes.Hero;
-            if (heroComponent == null)
+            if (heroComponent == null || !DungeonManager.HasInstance || DungeonManager.Instance.MagicState == null)
             {
+                _heroActionPanel.SetActive(true);
                 return;
             }
 
-            var available = DungeonManager.Instance.DeckState.GetAvailableCards(
-                heroComponent.HeroKey, CardCollectionManager.Instance);
-
-            CombatManager.Instance.RequestCardDeck(_currentHeroTurn, available);
+            var slots = DungeonManager.Instance.MagicState.GetSlots(heroComponent.HeroKey);
+            CombatManager.Instance.RequestMagicSlots(_currentHeroTurn, slots);
         }
 
-        public void CancelCardSelection()
+        private void OnHeroDraw()
+        {
+            _heroActionPanel.SetActive(false);
+
+            var drawable = CombatManager.Instance.GetDrawableEnemies();
+            if (drawable.Count == 0)
+            {
+                _heroActionPanel.SetActive(true);
+                return;
+            }
+
+            CombatManager.Instance.RequestDrawTargets(_currentHeroTurn, drawable);
+        }
+
+        /// <summary>Called by the selection UI to return to the Attack/Magic/Draw/Skip panel.</summary>
+        public void ReturnToHeroActions()
         {
             _heroActionPanel.SetActive(true);
         }

@@ -1,5 +1,4 @@
 using System;
-using Assets.Scripts.Cards;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Resources;
 using TMPro;
@@ -9,13 +8,11 @@ using UnityEngine.UI;
 namespace Assets.Scripts.MainMenu
 {
     /// <summary>
-    /// Hub merchant that spends Gold. Offers are fixed for now: buy a random card
-    /// (feeds the collection) and enlarge the potion belt (raises healing-potion max).
-    /// Both scale in cost so gold stays meaningful across a campaign.
+    /// Hub merchant that spends Gold. Offers are fixed for now: enlarge the potion belt
+    /// (raises healing-potion max). Cost scales so gold stays meaningful across a campaign.
     /// </summary>
     public class MerchantUI : MonoBehaviour
     {
-        private const int CardPackCost = 40;
         private const int PotionCostPerCurrentMax = 25;
 
         [Header("Root")]
@@ -24,10 +21,6 @@ namespace Assets.Scripts.MainMenu
         [Header("Currency Display")]
         [SerializeField] private TextMeshProUGUI _goldLabel;
         [SerializeField] private TextMeshProUGUI _essenceLabel;
-
-        [Header("Card Pack Offer")]
-        [SerializeField] private Button _cardPackButton;
-        [SerializeField] private TextMeshProUGUI _cardPackLabel;
 
         [Header("Potion Belt Offer")]
         [SerializeField] private Button _potionButton;
@@ -51,10 +44,6 @@ namespace Assets.Scripts.MainMenu
             if (_closeButton != null)
             {
                 _closeButton.onClick.AddListener(Hide);
-            }
-            if (_cardPackButton != null)
-            {
-                _cardPackButton.onClick.AddListener(OnBuyCardPack);
             }
             if (_potionButton != null)
             {
@@ -101,15 +90,6 @@ namespace Assets.Scripts.MainMenu
                 _essenceLabel.text = $"Essence: {essence}";
             }
 
-            if (_cardPackLabel != null)
-            {
-                _cardPackLabel.text = $"Card Pack — {CardPackCost} gold";
-            }
-            if (_cardPackButton != null)
-            {
-                _cardPackButton.interactable = gold >= CardPackCost && CardCollectionManager.HasInstance;
-            }
-
             int potionCost = PotionBeltCost();
             int currentMax = PartyResourceManager.Instance.GetMax(PartyResourceType.HealingPotion);
             if (_potionLabel != null)
@@ -120,34 +100,6 @@ namespace Assets.Scripts.MainMenu
             {
                 _potionButton.interactable = gold >= potionCost;
             }
-        }
-
-        private void OnBuyCardPack()
-        {
-            if (!CardCollectionManager.HasInstance)
-            {
-                SetFeedback("No card catalog available.");
-                return;
-            }
-
-            if (!MetaProgressManager.Instance.TrySpendGold(CardPackCost))
-            {
-                SetFeedback("Not enough gold.");
-                return;
-            }
-
-            var card = CardCollectionManager.Instance.GetRandomCard();
-            if (card == null)
-            {
-                // Refund if the catalog was unexpectedly empty
-                MetaProgressManager.Instance.AddGold(CardPackCost);
-                SetFeedback("The merchant is out of cards.");
-                return;
-            }
-
-            CardCollectionManager.Instance.AddCard(card);
-            SetFeedback($"You bought: {card.DisplayName}!");
-            Refresh();
         }
 
         private void OnBuyPotionBelt()

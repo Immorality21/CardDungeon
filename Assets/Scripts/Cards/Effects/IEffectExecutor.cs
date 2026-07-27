@@ -6,11 +6,11 @@ namespace Assets.Scripts.Cards.Effects
     public interface IEffectExecutor
     {
         void Execute(
-            CardEffect effect,
+            SpellEffect effect,
             ICombatUnit caster,
             List<ICombatUnit> targets,
             CombatBuffTracker buffTracker,
-            CardEffectResult result,
+            EffectResult result,
             bool isComboEffect = false);
     }
 }

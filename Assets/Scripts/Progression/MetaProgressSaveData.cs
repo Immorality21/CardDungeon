@@ -5,24 +5,25 @@ using Assets.Scripts.IO;
 namespace Assets.Scripts.Progression
 {
     [Serializable]
-    public class CardUpgradeEntry
+    public class MagicUpgradeEntry
     {
-        public string CardKey;
+        public string MagicKey;
         public int Level;
     }
 
     /// <summary>
     /// Persistent meta-progression that survives runs and party death.
     /// Gold is the flow currency (spent at the merchant); Essence is the
-    /// investment currency (spent upgrading cards). Card upgrade levels are
-    /// tracked per card key (per card type), not per owned copy.
+    /// investment currency (spent upgrading magic and buying extra slots).
+    /// Magic upgrade levels are tracked per magic key (per magic type).
     /// </summary>
     [Serializable]
     public class MetaProgressSaveData : IWriteable
     {
         public int Gold;
         public int Essence;
-        public List<CardUpgradeEntry> CardUpgrades = new List<CardUpgradeEntry>();
+        public List<MagicUpgradeEntry> MagicUpgrades = new List<MagicUpgradeEntry>();
+        public int BonusSlots;
 
         public string GetFileName()
         {

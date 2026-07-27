@@ -25,12 +25,6 @@ public class MainMenuManager : MonoBehaviour
     private Button _newRunButton;
 
     [SerializeField]
-    private Button _manageDeckButton;
-
-    [SerializeField]
-    private DeckManagementUI _deckManagementUI;
-
-    [SerializeField]
     private Button _merchantButton;
 
     [SerializeField]
@@ -40,7 +34,7 @@ public class MainMenuManager : MonoBehaviour
     private Button _forgeButton;
 
     [SerializeField]
-    private CardUpgradeUI _cardUpgradeUI;
+    private MagicForgeUI _cardUpgradeUI;
 
     [Header("Currency Header (optional)")]
     [SerializeField]
@@ -85,7 +79,6 @@ public class MainMenuManager : MonoBehaviour
         _enterDungeonButton.onClick.AddListener(OnEnterDungeon);
         _backButton.onClick.AddListener(OnBack);
         _runCompleteReturnButton.onClick.AddListener(OnRunCompleteReturn);
-        _manageDeckButton.onClick.AddListener(OnManageDeck);
 
         if (_merchantButton != null)
         {
@@ -214,27 +207,6 @@ public class MainMenuManager : MonoBehaviour
         }
 
         SceneManager.LoadScene("MainGameScene");
-    }
-
-    private void OnManageDeck()
-    {
-        _homePanel.SetActive(false);
-
-        if (_deckManagementUI != null)
-        {
-            _deckManagementUI.OnClosed += OnDeckClosed;
-            _deckManagementUI.Show();
-        }
-    }
-
-    private void OnDeckClosed()
-    {
-        if (_deckManagementUI != null)
-        {
-            _deckManagementUI.OnClosed -= OnDeckClosed;
-        }
-
-        ShowHomePanel();
     }
 
     private void OnVisitMerchant()

@@ -15,7 +15,7 @@ namespace Assets.Scripts.Dungeon
         public int CurrentRoomIndex;
         public List<RoomSaveData> Rooms = new List<RoomSaveData>();
         public List<ResourceSaveData> Resources = new List<ResourceSaveData>();
-        public List<DeckSaveData> UsedCards = new List<DeckSaveData>();
+        public List<MagicSlotSaveData> EquippedMagic = new List<MagicSlotSaveData>();
 
         public string GetFileName()
         {

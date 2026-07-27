@@ -1,5 +1,5 @@
 using System;
-using Assets.Scripts.Cards;
+using System.Collections.Generic;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
 using UnityEngine;
@@ -16,7 +16,9 @@ namespace Assets.Scripts.Enemies
         public EnemyArchetype Archetype;
 
         public ItemSO LootItem;
-        public CardSO LootCard;
+
+        // The Draw list: magics the player can extract from this enemy, each with charges.
+        public List<DrawableMagicEntry> DrawableMagics = new List<DrawableMagicEntry>();
 
         [Range(0f, 1f)]
         public float SpawnChance;

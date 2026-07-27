@@ -110,9 +110,8 @@ public class MainMenuUISetup : Editor
 
         var continueBtn = CreateStoneButton("ContinueRunButton", buttonArea.transform, "Continue Run", 52);
         var newRunBtn = CreateStoneButton("NewRunButton", buttonArea.transform, "New Run", 52);
-        var manageDeckBtn = CreateStoneButton("ManageDeckButton", buttonArea.transform, "Manage Deck", 52);
         var merchantBtn = CreateStoneButton("MerchantButton", buttonArea.transform, "Visit Merchant", 52);
-        var forgeBtn = CreateStoneButton("ForgeButton", buttonArea.transform, "Card Forge", 52);
+        var forgeBtn = CreateStoneButton("ForgeButton", buttonArea.transform, "Magic Forge", 52);
 
         // Currency header (bottom strip of home panel)
         var currencyArea = CreateUIObject("CurrencyHeader", homePanel.transform);
@@ -224,9 +223,7 @@ public class MainMenuUISetup : Editor
         AnchorStretchTop(merchantEssence, 0.68f, 0.74f);
         merchantEssence.GetComponent<TextMeshProUGUI>().color = TextColor;
 
-        var cardPackRow = CreateOfferRow("CardPackOffer", merchantPanel.transform, 0.5f, 0.66f,
-            "Card Pack", out var cardPackLabel, out var cardPackBuyBtn);
-        var potionRow = CreateOfferRow("PotionOffer", merchantPanel.transform, 0.32f, 0.48f,
+        var potionRow = CreateOfferRow("PotionOffer", merchantPanel.transform, 0.5f, 0.66f,
             "Enlarge Potion Belt", out var potionLabel, out var potionBuyBtn);
 
         var merchantFeedback = CreateLabel("MerchantFeedback", merchantPanel.transform, "", 16);
@@ -249,19 +246,17 @@ public class MainMenuUISetup : Editor
         merchantSO.FindProperty("_rootPanel").objectReferenceValue = merchantPanel;
         merchantSO.FindProperty("_goldLabel").objectReferenceValue = merchantGold.GetComponent<TextMeshProUGUI>();
         merchantSO.FindProperty("_essenceLabel").objectReferenceValue = merchantEssence.GetComponent<TextMeshProUGUI>();
-        merchantSO.FindProperty("_cardPackButton").objectReferenceValue = cardPackBuyBtn;
-        merchantSO.FindProperty("_cardPackLabel").objectReferenceValue = cardPackLabel;
         merchantSO.FindProperty("_potionButton").objectReferenceValue = potionBuyBtn;
         merchantSO.FindProperty("_potionLabel").objectReferenceValue = potionLabel;
         merchantSO.FindProperty("_feedbackLabel").objectReferenceValue = merchantFeedback.GetComponent<TextMeshProUGUI>();
         merchantSO.FindProperty("_closeButton").objectReferenceValue = merchantClose.GetComponent<Button>();
         merchantSO.ApplyModifiedProperties();
 
-        // === FORGE PANEL (card upgrades) ===
+        // === FORGE PANEL (magic upgrades) ===
         var forgePanel = CreateFramedPanel("ForgePanel", canvas.transform, new Vector2(0.18f, 0.1f), new Vector2(0.82f, 0.9f));
         forgePanel.SetActive(false);
 
-        var forgeTitle = CreateLabel("ForgeTitle", forgePanel.transform, "Card Forge", 34);
+        var forgeTitle = CreateLabel("ForgeTitle", forgePanel.transform, "Magic Forge", 34);
         AnchorStretchTop(forgeTitle, 0.85f, 0.96f);
         forgeTitle.GetComponent<TextMeshProUGUI>().color = TextColor;
 
@@ -286,7 +281,7 @@ public class MainMenuUISetup : Editor
         listVLG.childControlHeight = false;
 
         var forgeEmpty = CreateLabel("ForgeEmptyLabel", forgePanel.transform,
-            "No cards yet. Buy card packs from the merchant, then forge them here.", 16);
+            "No magic in the catalog yet.", 16);
         AnchorStretchTop(forgeEmpty, 0.45f, 0.6f);
         forgeEmpty.GetComponent<TextMeshProUGUI>().color = TextColor;
 
@@ -299,10 +294,10 @@ public class MainMenuUISetup : Editor
         forgeCloseRT.offsetMin = Vector2.zero;
         forgeCloseRT.offsetMax = Vector2.zero;
 
-        var forgeUI = canvas.GetComponent<CardUpgradeUI>();
+        var forgeUI = canvas.GetComponent<MagicForgeUI>();
         if (forgeUI == null)
         {
-            forgeUI = canvas.AddComponent<CardUpgradeUI>();
+            forgeUI = canvas.AddComponent<MagicForgeUI>();
         }
         var forgeSO = new SerializedObject(forgeUI);
         forgeSO.FindProperty("_rootPanel").objectReferenceValue = forgePanel;
@@ -324,7 +319,6 @@ public class MainMenuUISetup : Editor
         so.FindProperty("_homePanel").objectReferenceValue = homePanel;
         so.FindProperty("_continueRunButton").objectReferenceValue = continueBtn.GetComponent<Button>();
         so.FindProperty("_newRunButton").objectReferenceValue = newRunBtn.GetComponent<Button>();
-        so.FindProperty("_manageDeckButton").objectReferenceValue = manageDeckBtn.GetComponent<Button>();
 
         so.FindProperty("_runProgressPanel").objectReferenceValue = runProgressPanel;
         so.FindProperty("_levelIndicatorLabel").objectReferenceValue = levelIndTMP;
@@ -341,13 +335,6 @@ public class MainMenuUISetup : Editor
         so.FindProperty("_cardUpgradeUI").objectReferenceValue = forgeUI;
         so.FindProperty("_goldLabel").objectReferenceValue = homeGoldLabel.GetComponent<TextMeshProUGUI>();
         so.FindProperty("_essenceLabel").objectReferenceValue = homeEssenceLabel.GetComponent<TextMeshProUGUI>();
-
-        // Wire DeckManagementUI if it exists in the scene
-        var deckUI = canvas.GetComponentInChildren<DeckManagementUI>(true);
-        if (deckUI != null)
-        {
-            so.FindProperty("_deckManagementUI").objectReferenceValue = deckUI;
-        }
 
         so.ApplyModifiedProperties();
 

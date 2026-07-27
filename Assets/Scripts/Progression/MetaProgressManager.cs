@@ -6,17 +6,23 @@ using UnityEngine;
 namespace Assets.Scripts.Progression
 {
     /// <summary>
-    /// Owns the persistent meta-progression currencies (Gold, Essence) and
-    /// permanent card upgrade levels. Persists immediately on every change, so
-    /// awards survive party death even though dungeon/run saves are wiped.
+    /// Owns the persistent meta-progression currencies (Gold, Essence) and permanent
+    /// magic upgrades (per magic key) plus purchased extra magic slots. Persists
+    /// immediately on every change, so awards survive party death even though
+    /// dungeon/run saves are wiped.
     /// </summary>
     public class MetaProgressManager : SingletonBehaviour<MetaProgressManager>
     {
-        // --- Card upgrade tuning ---
+        // --- Magic upgrade tuning ---
         public const int PowerPerUpgradeLevel = 2;
-        public const int MaxCardUpgradeLevel = 5;
-        private const int BaseCardUpgradeCost = 15;
-        private const int CardUpgradeCostIncrement = 15;
+        public const int MaxMagicUpgradeLevel = 5;
+        private const int BaseMagicUpgradeCost = 15;
+        private const int MagicUpgradeCostIncrement = 15;
+
+        // --- Slot upgrade tuning ---
+        public const int MaxBonusSlots = 2;
+        private const int BaseSlotUpgradeCost = 40;
+        private const int SlotUpgradeCostIncrement = 40;
 
         // --- Award tuning ---
         public const int GoldPerLevelCleared = 25;
@@ -26,11 +32,12 @@ namespace Assets.Scripts.Progression
         private FileHandler _fileHandler;
         private MetaProgressSaveData _saveData;
 
-        /// <summary>Raised whenever gold, essence, or a card upgrade changes.</summary>
+        /// <summary>Raised whenever gold, essence, a magic upgrade, or slot count changes.</summary>
         public event Action OnChanged;
 
         public int Gold => _saveData.Gold;
         public int Essence => _saveData.Essence;
+        public int BonusSlots => _saveData.BonusSlots;
 
         protected override void Awake()
         {
@@ -41,8 +48,8 @@ namespace Assets.Scripts.Progression
 
         // --- Pure helpers (no state / disk) so economy math is unit-testable ---
 
-        /// <summary>Flat power added to Damage/Heal effects for a card at the given upgrade level.</summary>
-        public static int CardPowerBonusForLevel(int level)
+        /// <summary>Flat power added to Damage/Heal effects for a magic at the given upgrade level.</summary>
+        public static int MagicPowerBonusForLevel(int level)
         {
             if (level <= 0)
             {
@@ -52,13 +59,23 @@ namespace Assets.Scripts.Progression
         }
 
         /// <summary>Essence cost to go from currentLevel to currentLevel + 1.</summary>
-        public static int CardUpgradeCostForNextLevel(int currentLevel)
+        public static int MagicUpgradeCostForNextLevel(int currentLevel)
         {
             if (currentLevel < 0)
             {
                 currentLevel = 0;
             }
-            return BaseCardUpgradeCost + (currentLevel * CardUpgradeCostIncrement);
+            return BaseMagicUpgradeCost + (currentLevel * MagicUpgradeCostIncrement);
+        }
+
+        /// <summary>Essence cost to buy the next extra magic slot (from currentBonus to currentBonus + 1).</summary>
+        public static int SlotUpgradeCostForNext(int currentBonus)
+        {
+            if (currentBonus < 0)
+            {
+                currentBonus = 0;
+            }
+            return BaseSlotUpgradeCost + (currentBonus * SlotUpgradeCostIncrement);
         }
 
         // --- Currency ---
@@ -132,18 +149,18 @@ namespace Assets.Scripts.Progression
             OnChanged?.Invoke();
         }
 
-        // --- Card upgrades (per card key) ---
+        // --- Magic upgrades (per magic key) ---
 
-        public int GetCardUpgradeLevel(string cardKey)
+        public int GetMagicUpgradeLevel(string magicKey)
         {
-            if (string.IsNullOrEmpty(cardKey))
+            if (string.IsNullOrEmpty(magicKey))
             {
                 return 0;
             }
 
-            foreach (var entry in _saveData.CardUpgrades)
+            foreach (var entry in _saveData.MagicUpgrades)
             {
-                if (entry.CardKey == cardKey)
+                if (entry.MagicKey == magicKey)
                 {
                     return entry.Level;
                 }
@@ -151,58 +168,97 @@ namespace Assets.Scripts.Progression
             return 0;
         }
 
-        /// <summary>Flat power bonus applied to this card's Damage/Heal effects.</summary>
-        public int GetCardPowerBonus(string cardKey)
+        /// <summary>Flat power bonus applied to this magic's Damage/Heal effects.</summary>
+        public int GetMagicPowerBonus(string magicKey)
         {
-            return CardPowerBonusForLevel(GetCardUpgradeLevel(cardKey));
+            return MagicPowerBonusForLevel(GetMagicUpgradeLevel(magicKey));
         }
 
         /// <summary>Essence cost of the next upgrade, or 0 if already at max level.</summary>
-        public int GetCardUpgradeCost(string cardKey)
+        public int GetMagicUpgradeCost(string magicKey)
         {
-            int level = GetCardUpgradeLevel(cardKey);
-            if (level >= MaxCardUpgradeLevel)
+            int level = GetMagicUpgradeLevel(magicKey);
+            if (level >= MaxMagicUpgradeLevel)
             {
                 return 0;
             }
-            return CardUpgradeCostForNextLevel(level);
+            return MagicUpgradeCostForNextLevel(level);
         }
 
-        public bool CanUpgradeCard(string cardKey)
+        public bool CanUpgradeMagic(string magicKey)
         {
-            if (string.IsNullOrEmpty(cardKey))
+            if (string.IsNullOrEmpty(magicKey))
             {
                 return false;
             }
 
-            int level = GetCardUpgradeLevel(cardKey);
-            if (level >= MaxCardUpgradeLevel)
+            int level = GetMagicUpgradeLevel(magicKey);
+            if (level >= MaxMagicUpgradeLevel)
             {
                 return false;
             }
-            return _saveData.Essence >= CardUpgradeCostForNextLevel(level);
+            return _saveData.Essence >= MagicUpgradeCostForNextLevel(level);
         }
 
-        /// <summary>Spends Essence to raise a card's upgrade level by one. Returns false if unaffordable or maxed.</summary>
-        public bool TryUpgradeCard(string cardKey)
+        /// <summary>Spends Essence to raise a magic's upgrade level by one. Returns false if unaffordable or maxed.</summary>
+        public bool TryUpgradeMagic(string magicKey)
         {
-            if (!CanUpgradeCard(cardKey))
+            if (!CanUpgradeMagic(magicKey))
             {
                 return false;
             }
 
-            int level = GetCardUpgradeLevel(cardKey);
-            int cost = CardUpgradeCostForNextLevel(level);
+            int level = GetMagicUpgradeLevel(magicKey);
+            int cost = MagicUpgradeCostForNextLevel(level);
             _saveData.Essence -= cost;
 
-            var entry = _saveData.CardUpgrades.Find(e => e.CardKey == cardKey);
+            var entry = _saveData.MagicUpgrades.Find(e => e.MagicKey == magicKey);
             if (entry == null)
             {
-                entry = new CardUpgradeEntry { CardKey = cardKey, Level = 0 };
-                _saveData.CardUpgrades.Add(entry);
+                entry = new MagicUpgradeEntry { MagicKey = magicKey, Level = 0 };
+                _saveData.MagicUpgrades.Add(entry);
             }
             entry.Level += 1;
 
+            Save();
+            OnChanged?.Invoke();
+            return true;
+        }
+
+        // --- Magic slot upgrades ---
+
+        /// <summary>Extra magic slots purchased on top of the base slot count.</summary>
+        public int GetBonusSlotCount()
+        {
+            return Mathf.Clamp(_saveData.BonusSlots, 0, MaxBonusSlots);
+        }
+
+        /// <summary>Essence cost of the next extra slot, or 0 if already at max.</summary>
+        public int GetSlotUpgradeCost()
+        {
+            if (_saveData.BonusSlots >= MaxBonusSlots)
+            {
+                return 0;
+            }
+            return SlotUpgradeCostForNext(_saveData.BonusSlots);
+        }
+
+        public bool CanUpgradeSlots()
+        {
+            return _saveData.BonusSlots < MaxBonusSlots &&
+                   _saveData.Essence >= SlotUpgradeCostForNext(_saveData.BonusSlots);
+        }
+
+        /// <summary>Spends Essence to buy one extra magic slot. Returns false if unaffordable or maxed.</summary>
+        public bool TryUpgradeSlots()
+        {
+            if (!CanUpgradeSlots())
+            {
+                return false;
+            }
+
+            _saveData.Essence -= SlotUpgradeCostForNext(_saveData.BonusSlots);
+            _saveData.BonusSlots += 1;
             Save();
             OnChanged?.Invoke();
             return true;

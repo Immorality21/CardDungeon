@@ -52,7 +52,7 @@ namespace Assets.Scripts.Dungeon
         public static RunDefinitionSO ActiveRun;
         public static int RunLevelIndex;
         public Party Party { get; private set; }
-        public DungeonDeckState DeckState { get; private set; }
+        public EquippedMagicState MagicState { get; private set; }
 
         private LevelDefinitionSO _level;
         private ManualLevelLayoutSO _manualLayout;
@@ -234,11 +234,14 @@ namespace Assets.Scripts.Dungeon
             }
             startRoom.Reveal();
 
-            // Initialize card deck state for this dungeon
-            if (CardCollectionManager.HasInstance)
+            // Initialize equipped-magic state, carrying magic drawn on earlier levels of
+            // this run (persisted in the run save; empty on the first level or a fresh run).
+            MagicState = new EquippedMagicState();
+            MagicState.Initialize(Party.Heroes, GetMagicSlotCount());
+            if (ActiveRun != null && MagicCatalog.HasInstance)
             {
-                DeckState = new DungeonDeckState();
-                DeckState.Initialize(Party.Heroes, CardCollectionManager.Instance);
+                var carried = _fileHandler.Load<RunSaveData>();
+                MagicState.Restore(carried.EquippedMagic, MagicCatalog.Instance.GetMagic);
             }
 
             // Replenish party resources to their maximums for the new dungeon
@@ -308,12 +311,12 @@ namespace Assets.Scripts.Dungeon
                 }
             }
 
-            // Restore card deck state from save
-            if (CardCollectionManager.HasInstance)
+            // Restore equipped-magic state from the dungeon save (mid-level resume)
+            MagicState = new EquippedMagicState();
+            MagicState.Initialize(Party.Heroes, GetMagicSlotCount());
+            if (MagicCatalog.HasInstance)
             {
-                DeckState = new DungeonDeckState();
-                DeckState.Initialize(Party.Heroes, CardCollectionManager.Instance);
-                DeckState.RestoreUsedCards(saveData.UsedCards);
+                MagicState.Restore(saveData.EquippedMagic, MagicCatalog.Instance.GetMagic);
             }
 
             // Restore party resource state from save
@@ -411,6 +414,13 @@ namespace Assets.Scripts.Dungeon
                 runSave.RunKey = !string.IsNullOrEmpty(ActiveRun.Key) ? ActiveRun.Key : ActiveRun.name;
                 runSave.CurrentLevelIndex = RunLevelIndex + 1;
                 runSave.ActiveDungeonSeed = 0;
+
+                // Carry equipped magic to the next level of the run.
+                if (MagicState != null)
+                {
+                    runSave.EquippedMagic = MagicState.GetSaveData();
+                }
+
                 _fileHandler.Save(runSave);
                 Debug.Log($"Run advanced to level {runSave.CurrentLevelIndex}/{ActiveRun.Levels.Count}, RunKey={runSave.RunKey}");
 
@@ -424,6 +434,13 @@ namespace Assets.Scripts.Dungeon
             }
 
             SceneManager.LoadScene("MenuScene");
+        }
+
+        /// <summary>Number of equipped-magic slots each hero gets (raised by meta slot upgrades).</summary>
+        private int GetMagicSlotCount()
+        {
+            int bonus = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.GetBonusSlotCount() : 0;
+            return EquippedMagicState.DefaultSlotCount + bonus;
         }
 
         public void HandlePartyDeath()

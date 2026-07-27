@@ -6,18 +6,18 @@ namespace Assets.Scripts.Cards
 {
     public class ComboDetector
     {
-        private List<CardComboSO> _combos;
+        private List<MagicComboSO> _combos;
 
-        public ComboDetector(List<CardComboSO> combos)
+        public ComboDetector(List<MagicComboSO> combos)
         {
-            _combos = combos ?? new List<CardComboSO>();
+            _combos = combos ?? new List<MagicComboSO>();
         }
 
         /// <summary>
         /// Check if playing a card with the given tags on a target triggers any combo.
         /// The target must already have some tags applied from previous cards.
         /// </summary>
-        public CardComboSO DetectCombo(List<CardTag> incomingTags, ICombatUnit target, CardTagTracker tagTracker)
+        public MagicComboSO DetectCombo(List<MagicTag> incomingTags, ICombatUnit target, MagicTagTracker tagTracker)
         {
             if (incomingTags == null || incomingTags.Count == 0)
             {
@@ -31,7 +31,7 @@ namespace Assets.Scripts.Cards
             }
 
             // Combine existing tags on target with the new card's tags
-            var allTags = new HashSet<CardTag>(existingTags);
+            var allTags = new HashSet<MagicTag>(existingTags);
             foreach (var tag in incomingTags)
             {
                 allTags.Add(tag);

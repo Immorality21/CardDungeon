@@ -10,11 +10,11 @@ namespace Assets.Scripts.Cards.Effects
         private const float EffectDelay = 0.2f;
 
         public void Execute(
-            CardEffect effect,
+            SpellEffect effect,
             ICombatUnit caster,
             List<ICombatUnit> targets,
             CombatBuffTracker buffTracker,
-            CardEffectResult result,
+            EffectResult result,
             bool isComboEffect = false)
         {
             foreach (var target in targets)

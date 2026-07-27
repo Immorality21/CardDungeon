@@ -1,8 +1,9 @@
 # Enemy System (`Assets.Scripts.Enemies`)
 
-- **EnemySpawnEntry** (in `RoomSO.EnemySpawnTable`): defines `Prefab`, `Stats` (Attack, Defense, Health, Agility), `Archetype`, `LootItem`, `SpawnChance`, `EvaluationCount`.
-- **EnemyManager** spawns enemies into rooms (with optional manual-layout overrides) and tracks/cleans up live enemies. Copies `entry.Archetype` onto the spawned `Enemy`.
-- **Enemy** implements `ICombatUnit` (see the Combat guide). `GetEffectiveAttack()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Carries `Archetype` plus runtime charge state (`IsCharging`, `ChargeTarget`).
+- **EnemySpawnEntry** (in `RoomSO.EnemySpawnTable`): defines `Prefab`, `Stats` (Attack, Defense, Health, Agility), `Archetype`, `LootItem`, `DrawableMagics` (the enemy's **Draw list** — a `List<DrawableMagicEntry>`, each `{ MagicSO Magic; int Charges }`), `SpawnChance`, `EvaluationCount`.
+- **DrawableMagicEntry**: one offering on an enemy's Draw list — a `MagicSO` plus the `Charges` (1–9) a successful draw grants.
+- **EnemyManager** spawns enemies into rooms (with optional manual-layout overrides) and tracks/cleans up live enemies. Copies `entry.Archetype` and a copy of `entry.DrawableMagics` onto the spawned `Enemy`.
+- **Enemy** implements `ICombatUnit` (see the Combat guide). `GetEffectiveAttack()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Carries `Archetype`, `DrawableMagics` (the Draw list the player picks from — see the Magic/Draw guide), plus runtime charge state (`IsCharging`, `ChargeTarget`).
 
 ## Behaviors (`Behaviors/`)
 

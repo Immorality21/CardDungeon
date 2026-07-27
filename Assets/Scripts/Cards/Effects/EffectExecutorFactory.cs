@@ -4,20 +4,20 @@ namespace Assets.Scripts.Cards.Effects
 {
     public class EffectExecutorFactory
     {
-        private readonly Dictionary<CardEffectType, IEffectExecutor> _executors;
+        private readonly Dictionary<SpellEffectType, IEffectExecutor> _executors;
 
         public EffectExecutorFactory()
         {
-            _executors = new Dictionary<CardEffectType, IEffectExecutor>
+            _executors = new Dictionary<SpellEffectType, IEffectExecutor>
             {
-                { CardEffectType.Damage, new DamageEffectExecutor() },
-                { CardEffectType.Heal, new HealEffectExecutor() },
-                { CardEffectType.Buff, new BuffEffectExecutor() },
-                { CardEffectType.Debuff, new DebuffEffectExecutor() }
+                { SpellEffectType.Damage, new DamageEffectExecutor() },
+                { SpellEffectType.Heal, new HealEffectExecutor() },
+                { SpellEffectType.Buff, new BuffEffectExecutor() },
+                { SpellEffectType.Debuff, new DebuffEffectExecutor() }
             };
         }
 
-        public IEffectExecutor GetExecutor(CardEffectType type)
+        public IEffectExecutor GetExecutor(SpellEffectType type)
         {
             return _executors[type];
         }

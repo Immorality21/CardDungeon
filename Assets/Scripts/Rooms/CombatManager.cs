@@ -29,7 +29,8 @@ namespace Assets.Scripts.Rooms
         None,
         Attack,
         Skip,
-        Card
+        Cast,
+        Draw
     }
 
     public class CombatResult
@@ -50,39 +51,59 @@ namespace Assets.Scripts.Rooms
         public event Action<CombatResult> OnCombatEnded;
         public event Action<List<ICombatUnit>> OnTurnOrderChanged;
         public event Action<ICombatUnit> OnHeroTurnStarted;
-        public event Action<ICombatUnit, List<CardSO>> OnCardDeckRequested;
+        public event Action<ICombatUnit, List<MagicSlot>> OnMagicSlotsRequested;
         public event Action<ICombatUnit, List<ICombatUnit>> OnAttackTargetRequested;
+        public event Action<ICombatUnit, List<ICombatUnit>> OnDrawTargetRequested;
         public event Action OnDungeonCleared;
 
-        [SerializeField] private List<CardComboSO> _cardCombos;
+        [SerializeField] private List<MagicComboSO> _cardCombos;
 
         public bool InCombat { get; private set; }
         public CombatBuffTracker BuffTracker { get; private set; }
 
         private TurnManager _turnManager = new TurnManager();
         private HeroAction _pendingAction = HeroAction.None;
-        private CardAction _pendingCardAction;
+        private SpellcastAction _pendingCastAction;
+        private int _pendingCastSlot;
+        private Enemy _pendingDrawSource;
+        private MagicSO _pendingDrawMagic;
+        private int _pendingDrawCharges;
+        private int _pendingDrawSlot;
         private ICombatUnit _pendingAttackTarget;
         private string _lastTurnLog;
         private Room _currentCombatRoom;
-        private CardTagTracker _tagTracker;
+        private MagicTagTracker _tagTracker;
         private ComboDetector _comboDetector;
-        private CardEffectCalculator _calculator = new CardEffectCalculator();
-        private CardEffectPresenter _presenter = new CardEffectPresenter();
+        private EffectResolver _calculator = new EffectResolver();
+        private EffectPresenter _presenter = new EffectPresenter();
 
         public void SubmitHeroAction(HeroAction action)
         {
             _pendingAction = action;
         }
 
-        public void RequestCardDeck(ICombatUnit hero, List<CardSO> availableCards)
+        public void RequestMagicSlots(ICombatUnit hero, List<MagicSlot> slots)
         {
-            OnCardDeckRequested?.Invoke(hero, availableCards);
+            OnMagicSlotsRequested?.Invoke(hero, slots);
         }
 
         public void RequestAttackTargets(ICombatUnit hero, List<ICombatUnit> enemies)
         {
             OnAttackTargetRequested?.Invoke(hero, enemies);
+        }
+
+        /// <summary>Raises the draw target picker with the enemies that have magic to draw.</summary>
+        public void RequestDrawTargets(ICombatUnit hero, List<ICombatUnit> drawableEnemies)
+        {
+            OnDrawTargetRequested?.Invoke(hero, drawableEnemies);
+        }
+
+        /// <summary>Enemies in the current combat room that have a non-empty Draw list.</summary>
+        public List<ICombatUnit> GetDrawableEnemies()
+        {
+            return GetAliveEnemies()
+                .Where(u => u is Enemy e && e.DrawableMagics != null && e.DrawableMagics.Count > 0)
+                .ToList();
         }
 
         /// <summary>Submits a basic attack against the chosen target for the current hero turn.</summary>
@@ -92,15 +113,27 @@ namespace Assets.Scripts.Rooms
             _pendingAction = HeroAction.Attack;
         }
 
-        public void SubmitCardAction(CardSO card, ICombatUnit caster, List<ICombatUnit> targets)
+        /// <summary>Submits casting the magic in <paramref name="slotIndex"/> at the chosen targets.</summary>
+        public void SubmitCastAction(MagicSO magic, int slotIndex, ICombatUnit caster, List<ICombatUnit> targets)
         {
-            _pendingCardAction = new CardAction
+            _pendingCastAction = new SpellcastAction
             {
-                Card = card,
+                Magic = magic,
                 Caster = caster,
                 Targets = targets
             };
-            _pendingAction = HeroAction.Card;
+            _pendingCastSlot = slotIndex;
+            _pendingAction = HeroAction.Cast;
+        }
+
+        /// <summary>Submits drawing <paramref name="magic"/> from <paramref name="source"/> into the chosen slot.</summary>
+        public void SubmitDrawAction(Enemy source, MagicSO magic, int charges, int slotIndex)
+        {
+            _pendingDrawSource = source;
+            _pendingDrawMagic = magic;
+            _pendingDrawCharges = charges;
+            _pendingDrawSlot = slotIndex;
+            _pendingAction = HeroAction.Draw;
         }
 
         public List<ICombatUnit> GetAliveEnemies()
@@ -139,8 +172,15 @@ namespace Assets.Scripts.Rooms
             _currentCombatRoom = room;
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
-            _tagTracker = new CardTagTracker();
+            _tagTracker = new MagicTagTracker();
             _comboDetector = new ComboDetector(_cardCombos);
+
+            // Refill equipped-magic charges at the start of each combat (per-room refresh).
+            if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            {
+                DungeonManager.Instance.MagicState.RefillCharges();
+            }
+
             OnCombatStarted?.Invoke();
 
             // Fan out heroes into the room
@@ -198,8 +238,10 @@ namespace Assets.Scripts.Rooms
                 {
                     // Wait for player input
                     _pendingAction = HeroAction.None;
-                    _pendingCardAction = null;
+                    _pendingCastAction = null;
                     _pendingAttackTarget = null;
+                    _pendingDrawSource = null;
+                    _pendingDrawMagic = null;
                     OnHeroTurnStarted?.Invoke(unit);
 
                     while (_pendingAction == HeroAction.None)
@@ -211,9 +253,13 @@ namespace Assets.Scripts.Rooms
                     {
                         yield return ExecuteHeroTurn(unit, room);
                     }
-                    else if (_pendingAction == HeroAction.Card && _pendingCardAction != null)
+                    else if (_pendingAction == HeroAction.Cast && _pendingCastAction != null)
                     {
-                        yield return ExecuteCardAction(_pendingCardAction, room);
+                        yield return ExecuteCastAction(_pendingCastAction, _pendingCastSlot, room);
+                    }
+                    else if (_pendingAction == HeroAction.Draw && _pendingDrawMagic != null)
+                    {
+                        yield return ExecuteDrawAction(unit, _pendingDrawSource, _pendingDrawMagic, _pendingDrawCharges, _pendingDrawSlot);
                     }
                     else
                     {
@@ -282,29 +328,49 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        private IEnumerator ExecuteCardAction(CardAction cardAction, Room room)
+        private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex, Room room)
         {
-            int powerBonus = MetaProgressManager.HasInstance
-                ? MetaProgressManager.Instance.GetCardPowerBonus(cardAction.Card.Key)
+            int powerBonus = MetaProgressManager.HasInstance && castAction.Magic != null
+                ? MetaProgressManager.Instance.GetMagicPowerBonus(castAction.Magic.Key)
                 : 0;
-            var result = _calculator.Execute(cardAction, BuffTracker, _tagTracker, _comboDetector, powerBonus);
-            _lastTurnLog = result.BuildLog(cardAction);
+            var result = _calculator.Execute(castAction, BuffTracker, _tagTracker, _comboDetector, powerBonus);
+            _lastTurnLog = result.BuildLog(castAction);
             yield return _presenter.Present(result);
 
-            // Mark card as used in dungeon deck state
-            var hero = cardAction.Caster as Hero;
-            if (hero != null && DungeonManager.HasInstance && DungeonManager.Instance.DeckState != null)
+            // Spend a charge from the cast slot
+            var hero = castAction.Caster as Hero;
+            if (hero != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
-                DungeonManager.Instance.DeckState.MarkCardUsed(hero.HeroKey, cardAction.Card.Key);
+                DungeonManager.Instance.MagicState.TryCast(hero.HeroKey, slotIndex);
             }
 
-            // Check for enemy deaths caused by card
+            // Check for enemy deaths caused by the cast
             var deadEnemies = room.Enemies.Where(e => e != null && !e.IsAlive).ToList();
             foreach (var dead in deadEnemies)
             {
                 _lastTurnLog += $" {dead.DisplayName} defeated!";
                 HandleEnemyDeath(dead, room);
             }
+        }
+
+        private IEnumerator ExecuteDrawAction(ICombatUnit heroUnit, Enemy source, MagicSO magic, int charges, int slotIndex)
+        {
+            var hero = heroUnit as Hero;
+            if (hero == null || magic == null)
+            {
+                _lastTurnLog = $"{heroUnit.DisplayName} finds no magic to draw.";
+                yield break;
+            }
+
+            if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            {
+                DungeonManager.Instance.MagicState.DrawInto(hero.HeroKey, slotIndex, magic, charges);
+            }
+
+            string sourceName = source != null ? source.DisplayName : "the enemy";
+            ShowFloatingLabel(heroUnit.Transform.position, $"Draw {magic.DisplayName}!", new Color(0.5f, 0.8f, 1f));
+            _lastTurnLog = $"{heroUnit.DisplayName} draws {magic.DisplayName} from {sourceName}!";
+            yield return new WaitForSeconds(_turnDelay);
         }
 
         private IEnumerator ExecuteHeroTurn(ICombatUnit hero, Room room)
@@ -568,10 +634,6 @@ namespace Assets.Scripts.Rooms
             }
 
             InventoryManager.Instance.TryDropItem(enemy.LootItem);
-            if (CardCollectionManager.HasInstance)
-            {
-                CardCollectionManager.Instance.TryDropCard(enemy.LootCard);
-            }
             _turnManager.RemoveUnit(enemy);
             room.Enemies.Remove(enemy);
             Destroy(enemy.gameObject);

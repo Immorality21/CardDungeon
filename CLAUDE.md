@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.3.43f1 LTS** and **C#**. It generates grid-based dungeons with interconnected rooms, doors, and configurable room types via ScriptableObjects. Features a turn-based combat system inspired by Final Fantasy X's CTB (Conditional Turn-Based) system, with a card-based ability system featuring tag combos, buffs/debuffs, and elemental damage types, plus a persistent between-run hub economy (Gold/Essence).
+Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.3.43f1 LTS** and **C#**. It generates grid-based dungeons with interconnected rooms, doors, and configurable room types via ScriptableObjects. Features a turn-based combat system inspired by Final Fantasy X's CTB (Conditional Turn-Based) system, with an FFVIII-style **Draw** ability system — extract magic from enemies mid-combat, equip it into charge-based slots, and cast it — featuring tag combos, buffs/debuffs, and elemental damage types, plus a persistent between-run hub economy (Gold/Essence).
 
 ## Build & Run
 
@@ -31,9 +31,9 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `LevelConfiguration`, `HeroSaveData`
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`
 - `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`
-- `Cards/` — Card system: `CardSO`, `CardTag` (enum), `CardCollectionManager`, `DungeonDeckState`, `CardEffectCalculator`, `ComboDetector`, `CombatBuffTracker`, `CardTagTracker`, `CardComboSO`
+- `Cards/` — Magic/Draw system (namespace still `Cards`): `MagicSO`, `MagicTag` (enum), `MagicCatalog`, `EquippedMagicState` (draw slots + charges), `EffectResolver`, `ComboDetector`, `CombatBuffTracker`, `MagicTagTracker`, `MagicComboSO`
 - `Cards/Effects/` — Effect executors: `IEffectExecutor`, `DamageEffectExecutor`, `HealEffectExecutor`, `BuffEffectExecutor`, `DebuffEffectExecutor`, `EffectExecutorFactory`
-- `Cards/UI/` — `CardSelectionUI`, `DeckManagementUI`, `CardUpgradeUI`
+- `Cards/UI/` — `MagicSelectionUI`, `MagicForgeUI`
 - `Items/` — `ItemSO`, `InventoryManager`, `InventoryUI`, `InventoryEntryUI`
 - `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`, `RunDefinitionSO`, `RunLevelEntry`, `RunSaveData`
 - `Resources/` — `PartyResourceManager`, `PartyResourceType`
@@ -47,7 +47,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 
 - **Combat mechanics** (turn order, damage, `ICombatUnit`) → `Assets/Scripts/Combat/CLAUDE.md`
 - **Dungeon generation + combat flow + runtime controls** → `Assets/Scripts/Rooms/CLAUDE.md`
-- **Card system** (cards, effects, combos, buffs, deck state) → `Assets/Scripts/Cards/CLAUDE.md`
+- **Magic/Draw system** (magic defs, draw slots + charges, effects, combos, buffs) → `Assets/Scripts/Cards/CLAUDE.md`
 - **Run progression + deferred persistence** → `Assets/Scripts/Dungeon/CLAUDE.md`
 - **Meta-progression / hub** (Gold, Essence, card upgrades) → `Assets/Scripts/Progression/CLAUDE.md`
 - **Hero & stats** → `Assets/Scripts/Heroes/CLAUDE.md`
@@ -68,6 +68,6 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 
 - **Location:** `Assets/Tests/EditMode/`
 - **Framework:** Unity Test Framework 1.1.33 (NUnit-based). Run via Unity Test Runner.
-- **Test coverage:** `TurnManager`, `DamageCalculator`, `CombatBuffTracker`, `CardTagTracker`, `ComboDetector`, `CardEffectCalculator`, `DungeonDeckState`, `Stats`, card upgrade power bonus + meta economy math (`CardUpgradeTests`), extension methods
+- **Test coverage:** `TurnManager`, `DamageCalculator`, `CombatBuffTracker`, `MagicTagTracker`, `ComboDetector`, `EffectResolver`, `Stats`, magic upgrade power bonus + meta economy math (`MagicUpgradeTests`), extension methods
 - **MockCombatUnit:** Test helper implementing `ICombatUnit` for unit testing combat logic without MonoBehaviours
 - **Convention:** Tests use `MethodName_Scenario_ExpectedResult` naming. All combat/card logic is testable without Unity runtime (pure C# classes).
