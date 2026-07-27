@@ -104,7 +104,8 @@ public class RoomActionUISetup : Editor
         rowLE.preferredHeight = 42;
 
         var attackBtn = CreateStoneButton("AttackBtn", buttonRow.transform, "Attack");
-        var cardsBtn = CreateStoneButton("CardsBtn", buttonRow.transform, "Cards");
+        var magicBtn = CreateStoneButton("MagicBtn", buttonRow.transform, "Magic");
+        var drawBtn = CreateStoneButton("DrawBtn", buttonRow.transform, "Draw");
         var skipBtn = CreateStoneButton("SkipBtn", buttonRow.transform, "Skip");
         heroPanel.SetActive(false);
 
@@ -175,7 +176,8 @@ public class RoomActionUISetup : Editor
         so.FindProperty("_heroActionPanel").objectReferenceValue = heroPanel;
         so.FindProperty("_heroActionLabel").objectReferenceValue = heroLabel.GetComponent<TextMeshProUGUI>();
         so.FindProperty("_attackButton").objectReferenceValue = attackBtn.GetComponent<Button>();
-        so.FindProperty("_cardsButton").objectReferenceValue = cardsBtn.GetComponent<Button>();
+        so.FindProperty("_magicButton").objectReferenceValue = magicBtn.GetComponent<Button>();
+        so.FindProperty("_drawButton").objectReferenceValue = drawBtn.GetComponent<Button>();
         so.FindProperty("_skipButton").objectReferenceValue = skipBtn.GetComponent<Button>();
         so.FindProperty("_subPanel").objectReferenceValue = subPanel;
         so.FindProperty("_optionListParent").objectReferenceValue = optionList.transform;
