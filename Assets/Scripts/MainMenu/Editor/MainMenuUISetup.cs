@@ -100,13 +100,15 @@ public class MainMenuUISetup : Editor
         buttonAreaRT.offsetMin = Vector2.zero;
         buttonAreaRT.offsetMax = Vector2.zero;
         var buttonVLG = buttonArea.AddComponent<VerticalLayoutGroup>();
-        buttonVLG.spacing = 16;
-        buttonVLG.padding = new RectOffset(20, 20, 20, 20);
+        buttonVLG.spacing = 14;
+        buttonVLG.padding = new RectOffset(20, 20, 12, 12);
         buttonVLG.childAlignment = TextAnchor.MiddleCenter;
         buttonVLG.childForceExpandWidth = true;
         buttonVLG.childForceExpandHeight = false;
         buttonVLG.childControlWidth = true;
-        buttonVLG.childControlHeight = false;
+        // Must control height so each button honors its LayoutElement.preferredHeight;
+        // otherwise the VLG sizes children by their raw RectTransform and they overflow.
+        buttonVLG.childControlHeight = true;
 
         var continueBtn = CreateStoneButton("ContinueRunButton", buttonArea.transform, "Continue Run", 52);
         var newRunBtn = CreateStoneButton("NewRunButton", buttonArea.transform, "New Run", 52);

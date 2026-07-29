@@ -15,7 +15,12 @@ public class MagicSelectionUISetup : Editor
     private static Sprite _stoneButtonSprite;
     private static Sprite _stoneButtonHoverSprite;
 
-    [MenuItem("Tools/Cards/Setup Card Selection UI")]
+    // Compact lower-center command window (fraction of screen). FFVIII-style: small,
+    // out of the way, anchored toward the bottom rather than filling the screen.
+    private static readonly Vector2 WindowAnchorMin = new Vector2(0.34f, 0.14f);
+    private static readonly Vector2 WindowAnchorMax = new Vector2(0.66f, 0.56f);
+
+    [MenuItem("Tools/Cards/Setup Magic Selection UI")]
     public static void Setup()
     {
         var combatCanvas = GameObject.Find("CombatCanvas");
@@ -34,14 +39,6 @@ public class MagicSelectionUISetup : Editor
 
         LoadSprites();
 
-        // Load prefabs
-        var cardEntryPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Cards/DeckCardEntry.prefab");
-        if (cardEntryPrefab == null)
-        {
-            Debug.LogError("DeckCardEntry.prefab not found. Run Tools > Cards > Create Deck Card Entry Prefab first.");
-            return;
-        }
-
         var targetButtonPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UI/Combat/TargetButton.prefab");
         if (targetButtonPrefab == null)
         {
@@ -49,121 +46,223 @@ public class MagicSelectionUISetup : Editor
             return;
         }
 
-        // Root: MagicSelectionUI
+        var magicRowPrefab = BuildMagicRowPrefab();
+
+        // Root: fills the canvas but is transparent; the windows inside are compact.
         var root = CreateUIObject("MagicSelectionUI", combatCanvas.transform);
         var rootRT = root.GetComponent<RectTransform>();
         rootRT.anchorMin = Vector2.zero;
         rootRT.anchorMax = Vector2.one;
         rootRT.offsetMin = Vector2.zero;
         rootRT.offsetMax = Vector2.zero;
-        var cardSelectionUI = root.AddComponent<MagicSelectionUI>();
+        var magicSelectionUI = root.AddComponent<MagicSelectionUI>();
 
-        // === CARD LIST PANEL (framed) ===
-        var cardListPanel = CreateFramedPanel("CardListPanel", root.transform,
-            new Vector2(0.15f, 0.05f), new Vector2(0.85f, 0.95f));
-
-        // Get the parchment inner panel for placing children
+        // === MAGIC / SLOT LIST WINDOW (compact) ===
+        var cardListPanel = CreateFramedPanel("MagicListPanel", root.transform, WindowAnchorMin, WindowAnchorMax);
         var cardListInner = cardListPanel.transform.Find("ParchmentBg");
 
-        // Title
-        var cardTitle = CreateLabel("CardTitle", cardListInner, "Choose Magic", 24);
-        var cardTitleRT = cardTitle.GetComponent<RectTransform>();
-        cardTitleRT.anchorMin = new Vector2(0, 0.9f);
-        cardTitleRT.anchorMax = new Vector2(1, 1);
-        cardTitleRT.offsetMin = new Vector2(10, 0);
-        cardTitleRT.offsetMax = new Vector2(-10, -5);
-        cardTitle.GetComponent<TextMeshProUGUI>().color = TextColor;
+        var listTitle = CreateLabel("MagicTitle", cardListInner, "Magic", 22);
+        var listTitleRT = listTitle.GetComponent<RectTransform>();
+        listTitleRT.anchorMin = new Vector2(0, 0.87f);
+        listTitleRT.anchorMax = new Vector2(1, 1);
+        listTitleRT.offsetMin = new Vector2(8, 0);
+        listTitleRT.offsetMax = new Vector2(-8, -4);
+        listTitle.GetComponent<TextMeshProUGUI>().color = TextColor;
 
-        // ScrollRect for card list with MagicHandLayout
-        var cardScrollObj = CreateScrollArea("CardScrollArea", cardListInner,
-            new Vector2(0, 0.12f), new Vector2(1, 0.88f), new Vector2(10, 0), new Vector2(-10, 0));
-        var cardContent = cardScrollObj.transform.Find("Content");
-        var cardHandLayout = cardContent.gameObject.AddComponent<MagicHandLayout>();
-        var cardHandSO = new SerializedObject(cardHandLayout);
-        cardHandSO.FindProperty("_cardWidth").floatValue = 260f;
-        cardHandSO.FindProperty("_cardHeight").floatValue = 400f;
-        cardHandSO.FindProperty("_minVisibleWidth").floatValue = 90f;
-        cardHandSO.FindProperty("_maxSpacing").floatValue = 24f;
-        cardHandSO.ApplyModifiedProperties();
+        var listContent = CreateVerticalScrollList("MagicListScroll", cardListInner,
+            new Vector2(0.04f, 0.14f), new Vector2(0.96f, 0.85f));
 
-        // Back button
-        var cardBackBtn = CreateStoneButton("BackButton", cardListInner, "Back");
-        var cardBackRT = cardBackBtn.GetComponent<RectTransform>();
-        cardBackRT.anchorMin = new Vector2(0.3f, 0.01f);
-        cardBackRT.anchorMax = new Vector2(0.7f, 0.1f);
-        cardBackRT.offsetMin = Vector2.zero;
-        cardBackRT.offsetMax = Vector2.zero;
+        var listBackBtn = CreateStoneButton("BackButton", cardListInner, "Back");
+        var listBackRT = listBackBtn.GetComponent<RectTransform>();
+        listBackRT.anchorMin = new Vector2(0.28f, 0.01f);
+        listBackRT.anchorMax = new Vector2(0.72f, 0.12f);
+        listBackRT.offsetMin = Vector2.zero;
+        listBackRT.offsetMax = Vector2.zero;
 
         cardListPanel.SetActive(false);
 
-        // === TARGET PANEL (framed) ===
-        var targetPanel = CreateFramedPanel("TargetPanel", root.transform,
-            new Vector2(0.2f, 0.1f), new Vector2(0.8f, 0.9f));
-
+        // === TARGET WINDOW (same compact footprint) ===
+        var targetPanel = CreateFramedPanel("TargetPanel", root.transform, WindowAnchorMin, WindowAnchorMax);
         var targetInner = targetPanel.transform.Find("ParchmentBg");
 
-        // Target prompt
-        var targetPrompt = CreateLabel("TargetPromptLabel", targetInner, "Select Target", 24);
+        var targetPrompt = CreateLabel("TargetPromptLabel", targetInner, "Select Target", 22);
         var targetPromptRT = targetPrompt.GetComponent<RectTransform>();
-        targetPromptRT.anchorMin = new Vector2(0, 0.88f);
+        targetPromptRT.anchorMin = new Vector2(0, 0.87f);
         targetPromptRT.anchorMax = new Vector2(1, 1);
-        targetPromptRT.offsetMin = new Vector2(10, 0);
-        targetPromptRT.offsetMax = new Vector2(-10, -5);
+        targetPromptRT.offsetMin = new Vector2(8, 0);
+        targetPromptRT.offsetMax = new Vector2(-8, -4);
         targetPrompt.GetComponent<TextMeshProUGUI>().color = TextColor;
 
-        // Scroll area for targets (vertical list with sub-panel background)
-        var targetScrollBg = CreateUIObject("TargetScrollBg", targetInner);
-        var targetScrollBgRT = targetScrollBg.GetComponent<RectTransform>();
-        targetScrollBgRT.anchorMin = new Vector2(0.05f, 0.12f);
-        targetScrollBgRT.anchorMax = new Vector2(0.95f, 0.86f);
-        targetScrollBgRT.offsetMin = Vector2.zero;
-        targetScrollBgRT.offsetMax = Vector2.zero;
-        targetScrollBg.AddComponent<CanvasRenderer>();
-        var targetBgImg = targetScrollBg.AddComponent<Image>();
-        targetBgImg.color = SubPanelColor;
+        var targetContent = CreateVerticalScrollList("TargetListScroll", targetInner,
+            new Vector2(0.04f, 0.14f), new Vector2(0.96f, 0.85f));
 
-        var targetScrollArea = CreateUIObject("TargetScrollArea", targetScrollBg.transform);
-        var targetScrollRT = targetScrollArea.GetComponent<RectTransform>();
-        targetScrollRT.anchorMin = Vector2.zero;
-        targetScrollRT.anchorMax = Vector2.one;
-        targetScrollRT.offsetMin = new Vector2(10, 5);
-        targetScrollRT.offsetMax = new Vector2(-10, -5);
-        var targetVLG = targetScrollArea.AddComponent<VerticalLayoutGroup>();
-        targetVLG.spacing = 6;
-        targetVLG.childForceExpandWidth = true;
-        targetVLG.childForceExpandHeight = false;
-        targetVLG.childControlWidth = true;
-        targetVLG.childControlHeight = false;
-        var targetCSF = targetScrollArea.AddComponent<ContentSizeFitter>();
-        targetCSF.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        // Target back button
         var targetBackBtn = CreateStoneButton("TargetBackButton", targetInner, "Back");
         var targetBackRT = targetBackBtn.GetComponent<RectTransform>();
-        targetBackRT.anchorMin = new Vector2(0.3f, 0.01f);
-        targetBackRT.anchorMax = new Vector2(0.7f, 0.1f);
+        targetBackRT.anchorMin = new Vector2(0.28f, 0.01f);
+        targetBackRT.anchorMax = new Vector2(0.72f, 0.12f);
         targetBackRT.offsetMin = Vector2.zero;
         targetBackRT.offsetMax = Vector2.zero;
 
         targetPanel.SetActive(false);
 
-        // === Wire up serialized fields ===
-        var so = new SerializedObject(cardSelectionUI);
+        // === Wire serialized fields ===
+        var so = new SerializedObject(magicSelectionUI);
         so.FindProperty("_cardListPanel").objectReferenceValue = cardListPanel;
-        so.FindProperty("_cardListParent").objectReferenceValue = cardContent;
-        so.FindProperty("_cardButtonPrefab").objectReferenceValue = cardEntryPrefab;
-        so.FindProperty("_backButton").objectReferenceValue = cardBackBtn.GetComponent<Button>();
+        so.FindProperty("_cardListParent").objectReferenceValue = listContent;
+        so.FindProperty("_cardButtonPrefab").objectReferenceValue = magicRowPrefab;
+        so.FindProperty("_backButton").objectReferenceValue = listBackBtn.GetComponent<Button>();
         so.FindProperty("_targetPanel").objectReferenceValue = targetPanel;
-        so.FindProperty("_targetListParent").objectReferenceValue = targetScrollArea.transform;
+        so.FindProperty("_targetListParent").objectReferenceValue = targetContent;
         so.FindProperty("_targetButtonPrefab").objectReferenceValue = targetButtonPrefab;
         so.FindProperty("_targetBackButton").objectReferenceValue = targetBackBtn.GetComponent<Button>();
         so.FindProperty("_targetPromptLabel").objectReferenceValue = targetPrompt.GetComponent<TextMeshProUGUI>();
         so.ApplyModifiedProperties();
 
-        Undo.RegisterCreatedObjectUndo(root, "Setup Card Selection UI");
+        Undo.RegisterCreatedObjectUndo(root, "Setup Magic Selection UI");
         EditorUtility.SetDirty(combatCanvas);
 
-        Debug.Log("MagicSelectionUI created with fantasy theme under CombatCanvas. Save the scene to persist.");
+        Debug.Log("MagicSelectionUI created as compact lower-center windows under CombatCanvas. Save the scene to persist.");
+    }
+
+    /// <summary>
+    /// Compact one-line magic row: icon (left), name (middle), charges (right).
+    /// Children are named to match MagicSelectionUI's lookups (Icon / NameLabel / DescriptionLabel).
+    /// </summary>
+    private static GameObject BuildMagicRowPrefab()
+    {
+        var obj = CreateUIObject("MagicRow", null);
+        var rt = obj.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(0, 50);
+
+        obj.AddComponent<CanvasRenderer>();
+        var img = obj.AddComponent<Image>();
+        img.sprite = _stoneButtonSprite;
+        img.type = Image.Type.Sliced;
+        img.pixelsPerUnitMultiplier = 1f;
+
+        var btn = obj.AddComponent<Button>();
+        var spriteState = new SpriteState();
+        spriteState.highlightedSprite = _stoneButtonHoverSprite;
+        spriteState.pressedSprite = _stoneButtonHoverSprite;
+        spriteState.selectedSprite = _stoneButtonHoverSprite;
+        btn.spriteState = spriteState;
+        btn.transition = Selectable.Transition.SpriteSwap;
+
+        var le = obj.AddComponent<LayoutElement>();
+        le.preferredHeight = 50;
+        le.minHeight = 50;
+
+        // Icon (left)
+        var icon = CreateUIObject("Icon", obj.transform);
+        icon.AddComponent<CanvasRenderer>();
+        var iconImg = icon.AddComponent<Image>();
+        iconImg.preserveAspect = true;
+        var iconRT = icon.GetComponent<RectTransform>();
+        iconRT.anchorMin = new Vector2(0, 0.5f);
+        iconRT.anchorMax = new Vector2(0, 0.5f);
+        iconRT.pivot = new Vector2(0, 0.5f);
+        iconRT.sizeDelta = new Vector2(38, 38);
+        iconRT.anchoredPosition = new Vector2(8, 0);
+
+        // Name (middle, left-aligned)
+        var name = CreateUIObject("NameLabel", obj.transform);
+        name.AddComponent<CanvasRenderer>();
+        var nameTMP = name.AddComponent<TextMeshProUGUI>();
+        nameTMP.text = "Magic";
+        nameTMP.fontSize = 18;
+        nameTMP.fontStyle = FontStyles.Bold;
+        nameTMP.color = LightTextColor;
+        nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+        nameTMP.overflowMode = TextOverflowModes.Ellipsis;
+        var nameRT = name.GetComponent<RectTransform>();
+        nameRT.anchorMin = new Vector2(0, 0);
+        nameRT.anchorMax = new Vector2(1, 1);
+        nameRT.offsetMin = new Vector2(54, 0);
+        nameRT.offsetMax = new Vector2(-96, 0);
+
+        // Charges / description (right-aligned)
+        var desc = CreateUIObject("DescriptionLabel", obj.transform);
+        desc.AddComponent<CanvasRenderer>();
+        var descTMP = desc.AddComponent<TextMeshProUGUI>();
+        descTMP.text = "";
+        descTMP.fontSize = 15;
+        descTMP.fontStyle = FontStyles.Normal;
+        descTMP.color = LightTextColor;
+        descTMP.alignment = TextAlignmentOptions.MidlineRight;
+        var descRT = desc.GetComponent<RectTransform>();
+        descRT.anchorMin = new Vector2(1, 0);
+        descRT.anchorMax = new Vector2(1, 1);
+        descRT.pivot = new Vector2(1, 0.5f);
+        descRT.sizeDelta = new Vector2(90, 0);
+        descRT.anchoredPosition = new Vector2(-10, 0);
+
+        const string folder = "Assets/Prefabs/UI/Combat";
+        if (!AssetDatabase.IsValidFolder(folder))
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/Prefabs/UI"))
+            {
+                if (!AssetDatabase.IsValidFolder("Assets/Prefabs"))
+                {
+                    AssetDatabase.CreateFolder("Assets", "Prefabs");
+                }
+                AssetDatabase.CreateFolder("Assets/Prefabs", "UI");
+            }
+            AssetDatabase.CreateFolder("Assets/Prefabs/UI", "Combat");
+        }
+
+        var prefabPath = folder + "/MagicRow.prefab";
+        var prefab = PrefabUtility.SaveAsPrefabAsset(obj, prefabPath);
+        DestroyImmediate(obj);
+
+        Debug.Log("MagicRow.prefab created at " + prefabPath);
+        return prefab;
+    }
+
+    /// <summary>Masked, vertically-scrolling list. Returns the Content transform to parent rows under.</summary>
+    private static Transform CreateVerticalScrollList(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        var viewport = CreateUIObject(name, parent);
+        var viewportRT = viewport.GetComponent<RectTransform>();
+        viewportRT.anchorMin = anchorMin;
+        viewportRT.anchorMax = anchorMax;
+        viewportRT.offsetMin = Vector2.zero;
+        viewportRT.offsetMax = Vector2.zero;
+        viewport.AddComponent<CanvasRenderer>();
+        var bgImg = viewport.AddComponent<Image>();
+        bgImg.color = SubPanelColor;
+        viewport.AddComponent<Mask>().showMaskGraphic = true;
+
+        var scrollRect = viewport.AddComponent<ScrollRect>();
+        scrollRect.horizontal = false;
+        scrollRect.vertical = true;
+        scrollRect.movementType = ScrollRect.MovementType.Elastic;
+        scrollRect.elasticity = 0.1f;
+        scrollRect.scrollSensitivity = 20f;
+
+        var content = CreateUIObject("Content", viewport.transform);
+        var contentRT = content.GetComponent<RectTransform>();
+        contentRT.anchorMin = new Vector2(0, 1);
+        contentRT.anchorMax = new Vector2(1, 1);
+        contentRT.pivot = new Vector2(0.5f, 1);
+        contentRT.offsetMin = Vector2.zero;
+        contentRT.offsetMax = Vector2.zero;
+
+        var vlg = content.AddComponent<VerticalLayoutGroup>();
+        vlg.spacing = 6;
+        vlg.padding = new RectOffset(6, 6, 6, 6);
+        vlg.childAlignment = TextAnchor.UpperCenter;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+
+        var csf = content.AddComponent<ContentSizeFitter>();
+        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        scrollRect.viewport = viewportRT;
+        scrollRect.content = contentRT;
+
+        return content.transform;
     }
 
     private static void LoadSprites()
@@ -172,44 +271,6 @@ public class MagicSelectionUISetup : Editor
         _dungeonFrameSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/DungeonFrame.png");
         _stoneButtonSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButton.png");
         _stoneButtonHoverSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/StoneButtonHover.png");
-    }
-
-    private static GameObject CreateScrollArea(string name, Transform parent,
-        Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
-    {
-        var scrollObj = CreateUIObject(name, parent);
-        var scrollRT = scrollObj.GetComponent<RectTransform>();
-        scrollRT.anchorMin = anchorMin;
-        scrollRT.anchorMax = anchorMax;
-        scrollRT.offsetMin = offsetMin;
-        scrollRT.offsetMax = offsetMax;
-
-        scrollObj.AddComponent<CanvasRenderer>();
-        var maskImg = scrollObj.AddComponent<Image>();
-        maskImg.color = new Color(0, 0, 0, 0.01f);
-        scrollObj.AddComponent<Mask>().showMaskGraphic = false;
-
-        var scrollRect = scrollObj.AddComponent<ScrollRect>();
-        scrollRect.horizontal = true;
-        scrollRect.vertical = false;
-        scrollRect.movementType = ScrollRect.MovementType.Elastic;
-        scrollRect.elasticity = 0.1f;
-
-        var content = CreateUIObject("Content", scrollObj.transform);
-        var contentRT = content.GetComponent<RectTransform>();
-        contentRT.anchorMin = new Vector2(0, 0);
-        contentRT.anchorMax = new Vector2(0, 1);
-        contentRT.pivot = new Vector2(0, 0.5f);
-        contentRT.offsetMin = Vector2.zero;
-        contentRT.offsetMax = Vector2.zero;
-
-        var csf = content.AddComponent<ContentSizeFitter>();
-        csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-        csf.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
-
-        scrollRect.content = contentRT;
-
-        return scrollObj;
     }
 
     private static GameObject CreateFramedPanel(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax)
@@ -279,7 +340,10 @@ public class MagicSelectionUISetup : Editor
     private static GameObject CreateUIObject(string name, Transform parent)
     {
         var obj = new GameObject(name);
-        obj.transform.SetParent(parent, false);
+        if (parent != null)
+        {
+            obj.transform.SetParent(parent, false);
+        }
         obj.layer = 5;
         obj.AddComponent<RectTransform>();
         return obj;

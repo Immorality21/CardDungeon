@@ -81,18 +81,24 @@ public class RoomActionUISetup : Editor
         combatPanel.SetActive(false);
 
         // === HERO ACTION PANEL (bottom center bar, wider) ===
-        var heroPanel = CreateActionBar("HeroActionPanel", canvasObj.transform, new Vector2(460, 100));
+        var heroPanel = CreateActionBar("HeroActionPanel", canvasObj.transform, new Vector2(540, 120));
+        // Raise above the default 60px so the taller bar keeps a margin from the screen edge.
+        heroPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 90);
         var heroVLG = heroPanel.AddComponent<VerticalLayoutGroup>();
         heroVLG.spacing = 6;
-        heroVLG.padding = new RectOffset(10, 10, 6, 6);
+        heroVLG.padding = new RectOffset(12, 12, 8, 8);
         heroVLG.childAlignment = TextAnchor.MiddleCenter;
         heroVLG.childForceExpandWidth = true;
         heroVLG.childForceExpandHeight = false;
+        // Control child sizes so LayoutElement heights are honored; without this the
+        // button row is sized by its raw RectTransform and spills off the bottom of the screen.
+        heroVLG.childControlWidth = true;
+        heroVLG.childControlHeight = true;
 
         var heroLabel = CreateLabel("HeroActionLabel", heroPanel.transform, "", 16);
         heroLabel.GetComponent<TextMeshProUGUI>().color = LightTextColor;
         var heroLabelLE = heroLabel.AddComponent<LayoutElement>();
-        heroLabelLE.preferredHeight = 24;
+        heroLabelLE.preferredHeight = 26;
 
         var buttonRow = CreateUIObject("ButtonRow", heroPanel.transform);
         var rowHLG = buttonRow.AddComponent<HorizontalLayoutGroup>();
@@ -100,8 +106,10 @@ public class RoomActionUISetup : Editor
         rowHLG.childAlignment = TextAnchor.MiddleCenter;
         rowHLG.childForceExpandWidth = true;
         rowHLG.childForceExpandHeight = true;
+        rowHLG.childControlWidth = true;
+        rowHLG.childControlHeight = true;
         var rowLE = buttonRow.AddComponent<LayoutElement>();
-        rowLE.preferredHeight = 42;
+        rowLE.preferredHeight = 46;
 
         var attackBtn = CreateStoneButton("AttackBtn", buttonRow.transform, "Attack");
         var magicBtn = CreateStoneButton("MagicBtn", buttonRow.transform, "Magic");
