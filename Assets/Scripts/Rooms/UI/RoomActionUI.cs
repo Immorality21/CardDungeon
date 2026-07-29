@@ -4,82 +4,127 @@ using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Rooms
 {
+    /// <summary>
+    /// Room + combat action UI, built on UI Toolkit. Presents non-combat actions
+    /// (Examine/Action), the combat start bar (Fight/Flee), the hero-turn command
+    /// window (Attack/Magic/Draw/Skip), and centered dialogs (options, results, death).
+    /// Driven by GameManager (Show) and CombatManager events.
+    /// </summary>
+    [RequireComponent(typeof(UIDocument))]
     public class RoomActionUI : MonoBehaviour
     {
-        [Header("Main Action Panel")]
-        [SerializeField] private GameObject _mainPanel;
-        [SerializeField] private Button _examineButton;
-        [SerializeField] private Button _actionButton;
+        [SerializeField] private UIDocument _document;
 
-        [Header("Combat Panel")]
-        [SerializeField] private GameObject _combatPanel;
-        [SerializeField] private Button _fightButton;
-        [SerializeField] private Button _fleeButton;
+        private VisualElement _mainBar;
+        private VisualElement _combatBar;
+        private VisualElement _heroBar;
+        private VisualElement _optionWindow;
+        private VisualElement _detailWindow;
 
-        [Header("Hero Action Panel")]
-        [SerializeField] private GameObject _heroActionPanel;
-        [SerializeField] private TextMeshProUGUI _heroActionLabel;
-        [SerializeField] private Button _attackButton;
-        [FormerlySerializedAs("_cardsButton")]
-        [SerializeField] private Button _magicButton;
-        [SerializeField] private Button _drawButton;
-        [SerializeField] private Button _skipButton;
+        private Label _heroTitle;
+        private Label _optionTitle;
+        private Label _detailTitle;
+        private Label _detailMessage;
+        private ScrollView _optionScroll;
 
-        [Header("Sub Panel")]
-        [SerializeField] private GameObject _subPanel;
-        [SerializeField] private Transform _optionListParent;
-        [SerializeField] private Button _backButton;
-        [SerializeField] private GameObject _optionButtonPrefab;
+        private Button _examineBtn;
+        private Button _actionBtn;
+        private Button _fightBtn;
+        private Button _fleeBtn;
+        private Button _attackBtn;
+        private Button _magicBtn;
+        private Button _drawBtn;
+        private Button _skipBtn;
+        private Button _optionBack;
+        private Button _detailOk;
 
-        [Header("Detail Panel")]
-        [SerializeField] private GameObject _detailPanel;
-        [SerializeField] private TextMeshProUGUI _detailTitle;
-        [SerializeField] private TextMeshProUGUI _detailMessage;
-        [SerializeField] private Button _detailOkButton;
+        private bool _refsReady;
+        private Action _detailOkAction;
 
         private ICombatUnit _currentHeroTurn;
         private Room _currentRoom;
         private Door _entryDoor;
-        private List<GameObject> _spawnedOptions = new List<GameObject>();
 
-        private void Awake()
+        private bool EnsureRefs()
         {
-            HideAll();
-
-            _examineButton.onClick.AddListener(OnExamine);
-            _actionButton.onClick.AddListener(OnAction);
-            _fightButton.onClick.AddListener(OnFight);
-            _fleeButton.onClick.AddListener(OnFlee);
-            _attackButton.onClick.AddListener(OnHeroAttack);
-            _magicButton.onClick.AddListener(OnHeroMagic);
-            if (_drawButton != null)
+            if (_refsReady)
             {
-                _drawButton.onClick.AddListener(OnHeroDraw);
+                return true;
             }
-            _skipButton.onClick.AddListener(OnHeroSkip);
-            _backButton.onClick.AddListener(OnBack);
+
+            if (_document == null)
+            {
+                _document = GetComponent<UIDocument>();
+            }
+
+            var root = _document != null ? _document.rootVisualElement : null;
+            if (root == null)
+            {
+                return false;
+            }
+
+            _mainBar = root.Q<VisualElement>("main-bar");
+            _combatBar = root.Q<VisualElement>("combat-bar");
+            _heroBar = root.Q<VisualElement>("hero-bar");
+            _optionWindow = root.Q<VisualElement>("option-window");
+            _detailWindow = root.Q<VisualElement>("detail-window");
+
+            _heroTitle = root.Q<Label>("hero-title");
+            _optionTitle = root.Q<Label>("option-title");
+            _detailTitle = root.Q<Label>("detail-title");
+            _detailMessage = root.Q<Label>("detail-message");
+            _optionScroll = root.Q<ScrollView>("option-scroll");
+
+            _examineBtn = root.Q<Button>("examine-btn");
+            _actionBtn = root.Q<Button>("action-btn");
+            _fightBtn = root.Q<Button>("fight-btn");
+            _fleeBtn = root.Q<Button>("flee-btn");
+            _attackBtn = root.Q<Button>("attack-btn");
+            _magicBtn = root.Q<Button>("magic-btn");
+            _drawBtn = root.Q<Button>("draw-btn");
+            _skipBtn = root.Q<Button>("skip-btn");
+            _optionBack = root.Q<Button>("option-back");
+            _detailOk = root.Q<Button>("detail-ok");
+
+            _examineBtn.clicked += OnExamine;
+            _actionBtn.clicked += OnAction;
+            _fightBtn.clicked += OnFight;
+            _fleeBtn.clicked += OnFlee;
+            _attackBtn.clicked += OnHeroAttack;
+            _magicBtn.clicked += OnHeroMagic;
+            _drawBtn.clicked += OnHeroDraw;
+            _skipBtn.clicked += OnHeroSkip;
+            _optionBack.clicked += OnBack;
+            _detailOk.clicked += () => _detailOkAction?.Invoke();
+
+            HideAll();
+            _refsReady = true;
+            return true;
         }
 
         public void Show(Room room, Door entryDoor = null)
         {
+            if (!EnsureRefs())
+            {
+                return;
+            }
+
             UnsubscribeDoors();
 
             _currentRoom = room;
             _entryDoor = entryDoor;
-            _subPanel.SetActive(false);
-            _detailPanel.SetActive(false);
+            SetShown(_optionWindow, false);
+            SetShown(_detailWindow, false);
 
             bool hasEnemy = room.Enemies.Any(e => e != null && e.IsAlive);
-            _combatPanel.SetActive(hasEnemy);
-            _mainPanel.SetActive(!hasEnemy);
+            SetShown(_combatBar, hasEnemy);
+            SetShown(_mainBar, !hasEnemy);
 
             if (hasEnemy)
             {
@@ -98,17 +143,20 @@ namespace Assets.Scripts.Rooms
 
         public void Hide()
         {
-            HideAll();
+            if (EnsureRefs())
+            {
+                HideAll();
+            }
             UnsubscribeDoors();
         }
 
         private void HideAll()
         {
-            _mainPanel.SetActive(false);
-            _combatPanel.SetActive(false);
-            _heroActionPanel.SetActive(false);
-            _subPanel.SetActive(false);
-            _detailPanel.SetActive(false);
+            SetShown(_mainBar, false);
+            SetShown(_combatBar, false);
+            SetShown(_heroBar, false);
+            SetShown(_optionWindow, false);
+            SetShown(_detailWindow, false);
         }
 
         // ============================================================
@@ -117,23 +165,21 @@ namespace Assets.Scripts.Rooms
 
         private void OnExamine()
         {
-            ShowOptionList(
-                _currentRoom.RoomSO.ExamineOptions,
+            ShowOptionList("Examine", _currentRoom.RoomSO.ExamineOptions,
                 text => ShowDetail("Examine", text));
         }
 
         private void OnAction()
         {
-            ShowOptionList(
-                _currentRoom.RoomSO.ActionOptions,
+            ShowOptionList("Action", _currentRoom.RoomSO.ActionOptions,
                 text => ShowDetail("Action", text));
         }
 
-        private void ShowOptionList(List<string> options, Action<string> onSelect)
+        private void ShowOptionList(string title, List<string> options, Action<string> onSelect)
         {
-            _mainPanel.SetActive(false);
-            _subPanel.SetActive(true);
-            _spawnedOptions.DestroyAndClear();
+            SetShown(_mainBar, false);
+            _optionTitle.text = title;
+            _optionScroll.Clear();
 
             if (options == null || options.Count == 0)
             {
@@ -143,47 +189,33 @@ namespace Assets.Scripts.Rooms
 
             foreach (var option in options)
             {
-                var btnObj = Instantiate(_optionButtonPrefab, _optionListParent);
-                btnObj.SetActive(true);
-
-                var label = btnObj.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
-                {
-                    label.text = option;
-                }
-
                 var captured = option;
-                var btn = btnObj.GetComponent<Button>();
-                if (btn != null)
-                {
-                    btn.onClick.AddListener(() => onSelect(captured));
-                }
-
-                _spawnedOptions.Add(btnObj);
+                var btn = new Button(() => onSelect(captured)) { text = option };
+                btn.AddToClassList("cd-list-button");
+                _optionScroll.Add(btn);
             }
+
+            SetShown(_optionWindow, true);
         }
 
         private void ShowDetail(string title, string message)
         {
-            _subPanel.SetActive(false);
-            _detailPanel.SetActive(true);
+            SetShown(_optionWindow, false);
             _detailTitle.text = title;
             _detailMessage.text = message;
-
-            _detailOkButton.onClick.RemoveAllListeners();
-            _detailOkButton.onClick.AddListener(() =>
+            _detailOkAction = () =>
             {
-                _detailPanel.SetActive(false);
-                _subPanel.SetActive(true);
-            });
+                SetShown(_detailWindow, false);
+                SetShown(_optionWindow, true);
+            };
+            SetShown(_detailWindow, true);
         }
-
 
         private void OnBack()
         {
-            _subPanel.SetActive(false);
-            _spawnedOptions.DestroyAndClear();
-            _mainPanel.SetActive(true);
+            SetShown(_optionWindow, false);
+            _optionScroll.Clear();
+            SetShown(_mainBar, true);
         }
 
         // ============================================================
@@ -194,7 +226,6 @@ namespace Assets.Scripts.Rooms
         {
             var party = GameManager.Instance.Party;
 
-            // Hide all UI during combat
             HideAll();
 
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
@@ -205,35 +236,31 @@ namespace Assets.Scripts.Rooms
         private void OnHeroTurnStarted(ICombatUnit hero)
         {
             _currentHeroTurn = hero;
-            _heroActionLabel.text = $"{hero.DisplayName}'s Turn";
+            _heroTitle.text = $"{hero.DisplayName}'s Turn";
 
-            // Show the Magic button only when this hero has a castable (charged) slot.
+            // Show Magic only when this hero has a charged slot.
             bool hasMagic = false;
             var heroComponent = hero as Heroes.Hero;
             if (heroComponent != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
             }
-            _magicButton.gameObject.SetActive(hasMagic);
+            SetShown(_magicBtn, hasMagic);
 
-            // Show the Draw button only when an enemy has magic to draw.
-            if (_drawButton != null)
-            {
-                bool hasDrawable = CombatManager.Instance.GetDrawableEnemies().Count > 0;
-                _drawButton.gameObject.SetActive(hasDrawable);
-            }
+            // Show Draw only when an enemy has magic to draw.
+            bool hasDrawable = CombatManager.Instance.GetDrawableEnemies().Count > 0;
+            SetShown(_drawBtn, hasDrawable);
 
-            _heroActionPanel.SetActive(true);
+            SetShown(_heroBar, true);
         }
 
         private void OnHeroAttack()
         {
-            _heroActionPanel.SetActive(false);
+            SetShown(_heroBar, false);
 
             var enemies = CombatManager.Instance.GetAliveEnemies();
             if (enemies.Count <= 1)
             {
-                // Zero or one enemy — no meaningful choice, attack directly.
                 CombatManager.Instance.SubmitAttackAction(enemies.Count == 1 ? enemies[0] : null);
                 return;
             }
@@ -243,12 +270,12 @@ namespace Assets.Scripts.Rooms
 
         private void OnHeroMagic()
         {
-            _heroActionPanel.SetActive(false);
+            SetShown(_heroBar, false);
 
             var heroComponent = _currentHeroTurn as Heroes.Hero;
             if (heroComponent == null || !DungeonManager.HasInstance || DungeonManager.Instance.MagicState == null)
             {
-                _heroActionPanel.SetActive(true);
+                SetShown(_heroBar, true);
                 return;
             }
 
@@ -258,27 +285,30 @@ namespace Assets.Scripts.Rooms
 
         private void OnHeroDraw()
         {
-            _heroActionPanel.SetActive(false);
+            SetShown(_heroBar, false);
 
             var drawable = CombatManager.Instance.GetDrawableEnemies();
             if (drawable.Count == 0)
             {
-                _heroActionPanel.SetActive(true);
+                SetShown(_heroBar, true);
                 return;
             }
 
             CombatManager.Instance.RequestDrawTargets(_currentHeroTurn, drawable);
         }
 
-        /// <summary>Called by the selection UI to return to the Attack/Magic/Draw/Skip panel.</summary>
+        /// <summary>Called by the selection UI to return to the Attack/Magic/Draw/Skip window.</summary>
         public void ReturnToHeroActions()
         {
-            _heroActionPanel.SetActive(true);
+            if (EnsureRefs())
+            {
+                SetShown(_heroBar, true);
+            }
         }
 
         private void OnHeroSkip()
         {
-            _heroActionPanel.SetActive(false);
+            SetShown(_heroBar, false);
             CombatManager.Instance.SubmitHeroAction(HeroAction.Skip);
         }
 
@@ -286,7 +316,7 @@ namespace Assets.Scripts.Rooms
         {
             CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
-            _heroActionPanel.SetActive(false);
+            SetShown(_heroBar, false);
 
             switch (result.Outcome)
             {
@@ -301,23 +331,20 @@ namespace Assets.Scripts.Rooms
 
         private void ShowDeathScreen(string log)
         {
-            _mainPanel.SetActive(false);
-            _combatPanel.SetActive(false);
-            _subPanel.SetActive(false);
-            _detailPanel.SetActive(true);
+            SetShown(_mainBar, false);
+            SetShown(_combatBar, false);
+            SetShown(_optionWindow, false);
             _detailTitle.text = "Your Party Has Fallen...";
             _detailMessage.text = log;
-
-            _detailOkButton.onClick.RemoveAllListeners();
-            _detailOkButton.onClick.AddListener(() =>
+            _detailOkAction = () =>
             {
-                // Wipe run and dungeon saves, return to menu
                 if (DungeonManager.HasInstance)
                 {
                     DungeonManager.Instance.HandlePartyDeath();
                 }
                 SceneManager.LoadScene("MenuScene");
-            });
+            };
+            SetShown(_detailWindow, true);
         }
 
         private void OnFlee()
@@ -326,12 +353,12 @@ namespace Assets.Scripts.Rooms
 
             if (!CombatManager.Instance.CanFlee(party))
             {
-                _combatPanel.SetActive(false);
+                SetShown(_combatBar, false);
                 ShowCombatResult("Flee", "Nowhere to flee!", showNormalAfter: false, returnToCombat: true);
                 return;
             }
 
-            _combatPanel.SetActive(false);
+            SetShown(_combatBar, false);
             UnsubscribeDoors();
 
             CombatManager.Instance.Flee(party, _entryDoor, _currentRoom);
@@ -344,29 +371,26 @@ namespace Assets.Scripts.Rooms
 
         private void ShowCombatResult(string title, string message, bool showNormalAfter, bool returnToCombat = false)
         {
-            _mainPanel.SetActive(false);
-            _combatPanel.SetActive(false);
-            _subPanel.SetActive(false);
-            _detailPanel.SetActive(true);
-            _detailOkButton.gameObject.SetActive(true);
+            SetShown(_mainBar, false);
+            SetShown(_combatBar, false);
+            SetShown(_optionWindow, false);
             _detailTitle.text = title;
             _detailMessage.text = message;
-
-            _detailOkButton.onClick.RemoveAllListeners();
-            _detailOkButton.onClick.AddListener(() =>
+            _detailOkAction = () =>
             {
-                _detailPanel.SetActive(false);
+                SetShown(_detailWindow, false);
                 if (showNormalAfter)
                 {
                     _currentRoom.EnableAllDoors();
-                    _mainPanel.SetActive(true);
+                    SetShown(_mainBar, true);
                     SubscribeDoors();
                 }
                 else if (returnToCombat)
                 {
-                    _combatPanel.SetActive(true);
+                    SetShown(_combatBar, true);
                 }
-            });
+            };
+            SetShown(_detailWindow, true);
         }
 
         // ============================================================
@@ -413,6 +437,14 @@ namespace Assets.Scripts.Rooms
 
             var destRoom = door.GetOtherRoom(fromRoom);
             GameManager.Instance.EnterRoom(destRoom, door);
+        }
+
+        private static void SetShown(VisualElement element, bool shown)
+        {
+            if (element != null)
+            {
+                element.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
     }
 }

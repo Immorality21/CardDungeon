@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="project://database/Assets/UI/Theme/CardDungeon.uss" />
+
+    <ui:VisualElement name="root" class="cd-root" picking-mode="Ignore">
+
+        <!-- Non-combat room actions -->
+        <ui:VisualElement name="main-bar" class="cd-bar cd-dock-bottom cd-hidden">
+            <ui:Button name="examine-btn" text="Examine" class="cd-cmd" />
+            <ui:Button name="action-btn" text="Action" class="cd-cmd" />
+        </ui:VisualElement>
+
+        <!-- Enemies present: start or flee -->
+        <ui:VisualElement name="combat-bar" class="cd-bar cd-dock-bottom cd-hidden">
+            <ui:Button name="fight-btn" text="Fight" class="cd-cmd" />
+            <ui:Button name="flee-btn" text="Flee" class="cd-cmd" />
+        </ui:VisualElement>
+
+        <!-- Hero turn command window -->
+        <ui:VisualElement name="hero-bar" class="cd-command-window cd-dock-bottom cd-hidden">
+            <ui:Label name="hero-title" text="" class="cd-command-window__header" />
+            <ui:VisualElement class="cd-command-window__row">
+                <ui:Button name="attack-btn" text="Attack" class="cd-cmd" />
+                <ui:Button name="magic-btn" text="Magic" class="cd-cmd" />
+                <ui:Button name="draw-btn" text="Draw" class="cd-cmd" />
+                <ui:Button name="skip-btn" text="Skip" class="cd-cmd" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Examine / Action option list -->
+        <ui:VisualElement name="option-window" class="cd-window cd-dock-center cd-hidden">
+            <ui:Label name="option-title" text="" class="cd-title" />
+            <ui:ScrollView name="option-scroll" class="cd-list" mode="Vertical" />
+            <ui:Button name="option-back" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- Detail / result / death dialog -->
+        <ui:VisualElement name="detail-window" class="cd-window cd-dock-center cd-hidden">
+            <ui:Label name="detail-title" text="" class="cd-title" />
+            <ui:Label name="detail-message" text="" class="cd-message" />
+            <ui:Button name="detail-ok" text="Ok" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

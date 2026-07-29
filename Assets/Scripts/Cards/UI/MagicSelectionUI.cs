@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
@@ -5,17 +6,17 @@ using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Rooms;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Cards.UI
 {
     /// <summary>
-    /// In-combat selection UI for the Draw/Magic system. Reuses two panels: the "slot list"
-    /// panel (equipped magic slots, for casting or picking a slot to overwrite when drawing)
-    /// and the "target" panel (pick a combat unit — cast target, attack target, or draw source).
-    /// Driven entirely by CombatManager events.
+    /// In-combat selection UI for the Draw/Magic system, built on UI Toolkit.
+    /// Two compact windows: a "list" window (equipped magic slots for casting, or an
+    /// enemy's draw list, or slot placement) and a "target" window (pick a combat unit).
+    /// Driven entirely by CombatManager events. Rows are built as VisualElements.
     /// </summary>
+    [RequireComponent(typeof(UIDocument))]
     public class MagicSelectionUI : MonoBehaviour
     {
         private enum SelectionMode
@@ -28,18 +29,18 @@ namespace Assets.Scripts.Cards.UI
             DrawPlacement
         }
 
-        [Header("Magic Slot Panel")]
-        [SerializeField] private GameObject _cardListPanel;
-        [SerializeField] private Transform _cardListParent;
-        [SerializeField] private GameObject _cardButtonPrefab;
-        [SerializeField] private Button _backButton;
+        [SerializeField] private UIDocument _document;
 
-        [Header("Target Selection Panel")]
-        [SerializeField] private GameObject _targetPanel;
-        [SerializeField] private Transform _targetListParent;
-        [SerializeField] private GameObject _targetButtonPrefab;
-        [SerializeField] private Button _targetBackButton;
-        [SerializeField] private TextMeshProUGUI _targetPromptLabel;
+        // Cached visual elements (queried from the UIDocument on first use).
+        private VisualElement _listPanel;
+        private VisualElement _targetPanel;
+        private Label _listTitle;
+        private Label _targetPrompt;
+        private ScrollView _listScroll;
+        private ScrollView _targetScroll;
+        private Button _listBack;
+        private Button _targetBack;
+        private bool _refsReady;
 
         private ICombatUnit _currentHero;
         private SelectionMode _mode = SelectionMode.Idle;
@@ -50,11 +51,9 @@ namespace Assets.Scripts.Cards.UI
         private MagicSO _drawMagic;
         private int _drawCharges;
 
-        private List<GameObject> _spawnedSlotButtons = new List<GameObject>();
-        private List<GameObject> _spawnedTargetButtons = new List<GameObject>();
-
         private void OnEnable()
         {
+            EnsureRefs();
             CombatManager.Instance.OnMagicSlotsRequested += ShowSlotListForCast;
             CombatManager.Instance.OnAttackTargetRequested += ShowAttackTargets;
             CombatManager.Instance.OnDrawTargetRequested += ShowDrawTargets;
@@ -72,13 +71,52 @@ namespace Assets.Scripts.Cards.UI
             }
         }
 
-        private void Start()
+        /// <summary>
+        /// Resolves and caches visual elements. UIDocument builds its tree in its own
+        /// OnEnable, whose order relative to this component isn't guaranteed, so we query
+        /// lazily and tolerate a not-yet-ready document.
+        /// </summary>
+        private bool EnsureRefs()
         {
-            _cardListPanel.SetActive(false);
-            _targetPanel.SetActive(false);
+            if (_refsReady)
+            {
+                return true;
+            }
 
-            _backButton.onClick.AddListener(OnBackToActions);
-            _targetBackButton.onClick.AddListener(OnTargetBack);
+            if (_document == null)
+            {
+                _document = GetComponent<UIDocument>();
+            }
+
+            var root = _document != null ? _document.rootVisualElement : null;
+            if (root == null)
+            {
+                return false;
+            }
+
+            _listPanel = root.Q<VisualElement>("magic-list-panel");
+            _targetPanel = root.Q<VisualElement>("target-panel");
+            _listTitle = root.Q<Label>("list-title");
+            _targetPrompt = root.Q<Label>("target-prompt");
+            _listScroll = root.Q<ScrollView>("list-scroll");
+            _targetScroll = root.Q<ScrollView>("target-scroll");
+            _listBack = root.Q<Button>("list-back");
+            _targetBack = root.Q<Button>("target-back");
+
+            if (_listBack != null)
+            {
+                _listBack.clicked += OnListBack;
+            }
+            if (_targetBack != null)
+            {
+                _targetBack.clicked += OnTargetBack;
+            }
+
+            HidePanel(_listPanel);
+            HidePanel(_targetPanel);
+
+            _refsReady = _listPanel != null && _targetPanel != null;
+            return _refsReady;
         }
 
         // ============================================================
@@ -87,45 +125,38 @@ namespace Assets.Scripts.Cards.UI
 
         private void ShowSlotListForCast(ICombatUnit hero, List<MagicSlot> slots)
         {
+            if (!EnsureRefs())
+            {
+                return;
+            }
+
             _currentHero = hero;
             _mode = SelectionMode.Cast;
             _selectedMagic = null;
-            PopulateSlotButtons(slots);
+            _listTitle.text = "Magic";
+            PopulateSlotRows(slots);
         }
 
-        private void PopulateSlotButtons(List<MagicSlot> slots)
+        private void PopulateSlotRows(List<MagicSlot> slots)
         {
-            _spawnedSlotButtons.DestroyAndClear();
+            _listScroll.Clear();
 
             for (int i = 0; i < slots.Count; i++)
             {
                 var slot = slots[i];
-                var btnObj = Instantiate(_cardButtonPrefab, _cardListParent);
-                btnObj.SetActive(true);
-
-                SetChild(btnObj, "Icon", slot.IsEmpty ? null : slot.Magic.Icon);
-                SetLabel(btnObj, "NameLabel", slot.IsEmpty ? "(empty)" : slot.Magic.DisplayName);
-                SetLabel(btnObj, "DescriptionLabel", slot.IsEmpty ? "" : $"Charges: {slot.Charges}/{slot.MaxCharges}");
-                SetLabel(btnObj, "EffectsLabel", slot.IsEmpty ? "" : slot.Magic.GetEffectsSummary());
-
                 bool selectable = _mode == SelectionMode.DrawPlacement || slot.CanCast;
 
-                var captured = i;
-                var btn = btnObj.GetComponent<Button>();
-                if (btn != null)
-                {
-                    btn.interactable = selectable;
-                    if (selectable)
-                    {
-                        btn.onClick.AddListener(() => OnSlotSelected(captured, slot));
-                    }
-                }
+                string name = slot.IsEmpty ? "(empty)" : slot.Magic.DisplayName;
+                string meta = slot.IsEmpty ? "" : $"{slot.Charges}/{slot.MaxCharges}";
+                Sprite icon = slot.IsEmpty ? null : slot.Magic.Icon;
 
-                _spawnedSlotButtons.Add(btnObj);
+                int captured = i;
+                var slotRef = slot;
+                _listScroll.Add(CreateRow(icon, name, meta, selectable, () => OnSlotSelected(captured, slotRef)));
             }
 
-            _cardListPanel.SetActive(true);
-            _targetPanel.SetActive(false);
+            ShowPanel(_listPanel);
+            HidePanel(_targetPanel);
         }
 
         private void OnSlotSelected(int slotIndex, MagicSlot slot)
@@ -136,7 +167,6 @@ namespace Assets.Scripts.Cards.UI
                 return;
             }
 
-            // Cast mode
             _selectedSlotIndex = slotIndex;
             _selectedMagic = slot.Magic;
 
@@ -172,14 +202,14 @@ namespace Assets.Scripts.Cards.UI
                 prompt = "Select Ally Target";
             }
 
-            PopulateTargetButtons(targets, prompt);
+            PopulateTargetRows(targets, prompt);
         }
 
         private void SubmitCast(List<ICombatUnit> targets)
         {
             _mode = SelectionMode.Idle;
-            _cardListPanel.SetActive(false);
-            _targetPanel.SetActive(false);
+            HidePanel(_listPanel);
+            HidePanel(_targetPanel);
             CombatManager.Instance.SubmitCastAction(_selectedMagic, _selectedSlotIndex, _currentHero, targets);
         }
 
@@ -189,9 +219,14 @@ namespace Assets.Scripts.Cards.UI
 
         private void ShowAttackTargets(ICombatUnit hero, List<ICombatUnit> enemies)
         {
+            if (!EnsureRefs())
+            {
+                return;
+            }
+
             _currentHero = hero;
             _mode = SelectionMode.AttackTarget;
-            PopulateTargetButtons(enemies, "Select Attack Target");
+            PopulateTargetRows(enemies, "Select Attack Target");
         }
 
         // ============================================================
@@ -200,9 +235,14 @@ namespace Assets.Scripts.Cards.UI
 
         private void ShowDrawTargets(ICombatUnit hero, List<ICombatUnit> enemies)
         {
+            if (!EnsureRefs())
+            {
+                return;
+            }
+
             _currentHero = hero;
             _mode = SelectionMode.DrawTarget;
-            PopulateTargetButtons(enemies, "Draw Magic From");
+            PopulateTargetRows(enemies, "Draw Magic From");
         }
 
         private void OnDrawSourceSelected(ICombatUnit source)
@@ -225,42 +265,27 @@ namespace Assets.Scripts.Cards.UI
             }
 
             _mode = SelectionMode.DrawChoice;
-            _targetPanel.SetActive(false);
-            _spawnedTargetButtons.DestroyAndClear();
-            PopulateDrawChoiceButtons(_drawSource.DrawableMagics);
+            _listTitle.text = $"Draw from {_drawSource.DisplayName}";
+            PopulateDrawChoiceRows(_drawSource.DrawableMagics);
         }
 
-        private void PopulateDrawChoiceButtons(List<DrawableMagicEntry> entries)
+        private void PopulateDrawChoiceRows(List<DrawableMagicEntry> entries)
         {
-            _spawnedSlotButtons.DestroyAndClear();
+            _listScroll.Clear();
 
             foreach (var entry in entries)
             {
-                var btnObj = Instantiate(_cardButtonPrefab, _cardListParent);
-                btnObj.SetActive(true);
-
                 bool valid = entry != null && entry.Magic != null;
-                SetChild(btnObj, "Icon", valid ? entry.Magic.Icon : null);
-                SetLabel(btnObj, "NameLabel", valid ? entry.Magic.DisplayName : "(none)");
-                SetLabel(btnObj, "DescriptionLabel", valid ? $"Charges: {entry.Charges}" : "");
-                SetLabel(btnObj, "EffectsLabel", valid ? entry.Magic.GetEffectsSummary() : "");
+                string name = valid ? entry.Magic.DisplayName : "(none)";
+                string meta = valid ? $"x{entry.Charges}" : "";
+                Sprite icon = valid ? entry.Magic.Icon : null;
 
                 var captured = entry;
-                var btn = btnObj.GetComponent<Button>();
-                if (btn != null)
-                {
-                    btn.interactable = valid;
-                    if (valid)
-                    {
-                        btn.onClick.AddListener(() => SelectDrawMagic(captured));
-                    }
-                }
-
-                _spawnedSlotButtons.Add(btnObj);
+                _listScroll.Add(CreateRow(icon, name, meta, valid, () => SelectDrawMagic(captured)));
             }
 
-            _cardListPanel.SetActive(true);
-            _targetPanel.SetActive(false);
+            ShowPanel(_listPanel);
+            HidePanel(_targetPanel);
         }
 
         private void SelectDrawMagic(DrawableMagicEntry entry)
@@ -285,51 +310,36 @@ namespace Assets.Scripts.Cards.UI
             }
 
             _mode = SelectionMode.DrawPlacement;
-            PopulateSlotButtons(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
+            _listTitle.text = "Replace which slot?";
+            PopulateSlotRows(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
         }
 
         private void SubmitDraw(int slotIndex)
         {
             _mode = SelectionMode.Idle;
-            _cardListPanel.SetActive(false);
-            _targetPanel.SetActive(false);
+            HidePanel(_listPanel);
+            HidePanel(_targetPanel);
             CombatManager.Instance.SubmitDrawAction(_drawSource, _drawMagic, _drawCharges, slotIndex);
         }
 
         // ============================================================
-        //  TARGET BUTTONS (shared)
+        //  TARGET ROWS (shared)
         // ============================================================
 
-        private void PopulateTargetButtons(List<ICombatUnit> targets, string prompt)
+        private void PopulateTargetRows(List<ICombatUnit> targets, string prompt)
         {
-            _spawnedTargetButtons.DestroyAndClear();
-            _targetPromptLabel.text = prompt;
+            _targetScroll.Clear();
+            _targetPrompt.text = prompt;
 
             foreach (var target in targets)
             {
-                var btnObj = Instantiate(_targetButtonPrefab, _targetListParent);
-                btnObj.SetActive(true);
-
-                var label = btnObj.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
-                {
-                    label.text = $"{target.DisplayName} (HP: {target.Stats.Health})";
-                }
-
-                SetChild(btnObj, "Icon", target.Icon);
-
                 var captured = target;
-                var btn = btnObj.GetComponent<Button>();
-                if (btn != null)
-                {
-                    btn.onClick.AddListener(() => OnTargetSelected(captured));
-                }
-
-                _spawnedTargetButtons.Add(btnObj);
+                string meta = $"HP {target.Stats.Health}";
+                _targetScroll.Add(CreateRow(target.Icon, target.DisplayName, meta, true, () => OnTargetSelected(captured)));
             }
 
-            _cardListPanel.SetActive(false);
-            _targetPanel.SetActive(true);
+            HidePanel(_listPanel);
+            ShowPanel(_targetPanel);
         }
 
         private void OnTargetSelected(ICombatUnit target)
@@ -338,8 +348,7 @@ namespace Assets.Scripts.Cards.UI
             {
                 case SelectionMode.AttackTarget:
                     _mode = SelectionMode.Idle;
-                    _targetPanel.SetActive(false);
-                    _spawnedTargetButtons.DestroyAndClear();
+                    HidePanel(_targetPanel);
                     CombatManager.Instance.SubmitAttackAction(target);
                     return;
                 case SelectionMode.DrawTarget:
@@ -355,21 +364,21 @@ namespace Assets.Scripts.Cards.UI
         //  BACK / RESET
         // ============================================================
 
-        private void OnBackToActions()
+        private void OnListBack()
         {
             ReturnToActions();
         }
 
         private void OnTargetBack()
         {
-            _targetPanel.SetActive(false);
-            _spawnedTargetButtons.DestroyAndClear();
+            HidePanel(_targetPanel);
 
-            // For cast targeting, step back to the slot list; everything else returns to actions.
+            // Cast targeting steps back to the slot list; everything else returns to actions.
             if (_mode == SelectionMode.Cast && _currentHero is Hero hero &&
                 DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
-                PopulateSlotButtons(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
+                _listTitle.text = "Magic";
+                PopulateSlotRows(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
                 return;
             }
 
@@ -379,8 +388,8 @@ namespace Assets.Scripts.Cards.UI
         private void ReturnToActions()
         {
             _mode = SelectionMode.Idle;
-            _cardListPanel.SetActive(false);
-            _targetPanel.SetActive(false);
+            HidePanel(_listPanel);
+            HidePanel(_targetPanel);
 
             var roomActionUI = FindObjectOfType<RoomActionUI>();
             if (roomActionUI != null)
@@ -392,50 +401,59 @@ namespace Assets.Scripts.Cards.UI
         private void OnCombatEnded(CombatResult result)
         {
             _mode = SelectionMode.Idle;
-            _cardListPanel.SetActive(false);
-            _targetPanel.SetActive(false);
-            _spawnedSlotButtons.DestroyAndClear();
-            _spawnedTargetButtons.DestroyAndClear();
+            if (_refsReady)
+            {
+                HidePanel(_listPanel);
+                HidePanel(_targetPanel);
+            }
         }
 
         // ============================================================
         //  HELPERS
         // ============================================================
 
-        private static void SetLabel(GameObject root, string childName, string text)
+        private Button CreateRow(Sprite icon, string name, string meta, bool enabled, Action onClick)
         {
-            var child = root.transform.Find(childName);
-            if (child != null)
-            {
-                var tmp = child.GetComponent<TextMeshProUGUI>();
-                if (tmp != null)
-                {
-                    tmp.text = text;
-                    return;
-                }
-            }
+            var row = new Button(onClick);
+            row.text = string.Empty;
+            row.AddToClassList("cd-row");
+            row.SetEnabled(enabled);
 
-            if (childName == "NameLabel")
+            var iconElement = new VisualElement();
+            iconElement.AddToClassList("cd-row__icon");
+            iconElement.pickingMode = PickingMode.Ignore;
+            if (icon != null)
             {
-                var fallback = root.GetComponentInChildren<TextMeshProUGUI>();
-                if (fallback != null)
-                {
-                    fallback.text = text;
-                }
+                iconElement.style.backgroundImage = new StyleBackground(icon);
+            }
+            row.Add(iconElement);
+
+            var nameLabel = new Label(name);
+            nameLabel.AddToClassList("cd-row__name");
+            nameLabel.pickingMode = PickingMode.Ignore;
+            row.Add(nameLabel);
+
+            var metaLabel = new Label(meta ?? string.Empty);
+            metaLabel.AddToClassList("cd-row__meta");
+            metaLabel.pickingMode = PickingMode.Ignore;
+            row.Add(metaLabel);
+
+            return row;
+        }
+
+        private static void ShowPanel(VisualElement panel)
+        {
+            if (panel != null)
+            {
+                panel.style.display = DisplayStyle.Flex;
             }
         }
 
-        private static void SetChild(GameObject root, string childName, Sprite sprite)
+        private static void HidePanel(VisualElement panel)
         {
-            var child = root.transform.Find(childName);
-            if (child == null || sprite == null)
+            if (panel != null)
             {
-                return;
-            }
-            var img = child.GetComponent<Image>();
-            if (img != null)
-            {
-                img.sprite = sprite;
+                panel.style.display = DisplayStyle.None;
             }
         }
     }

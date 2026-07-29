@@ -1,0 +1,242 @@
+/* ============================================================
+   Card Dungeon — shared UI Toolkit theme
+   Reusable across every screen. Flat-color, flexbox layout
+   (no fragile RectTransform anchor math). Swap the colors here
+   and every screen updates.
+   ============================================================ */
+
+:root {
+    --cd-overlay: rgba(12, 9, 26, 0.85);
+    --cd-parchment: rgb(216, 198, 154);
+    --cd-frame: rgb(58, 42, 22);
+    --cd-stone: rgb(107, 100, 134);
+    --cd-stone-hover: rgb(135, 128, 165);
+    --cd-stone-disabled: rgb(74, 70, 92);
+    --cd-text-dark: rgb(46, 31, 16);
+    --cd-text-light: rgb(242, 224, 184);
+    --cd-accent: rgb(128, 204, 255);
+}
+
+/* Full-screen transparent host; children position themselves. */
+.cd-root {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Compact command window, anchored toward the bottom (FFVIII-style). */
+.cd-window {
+    width: 620px;
+    max-width: 92%;
+    max-height: 62%;
+    margin-bottom: 8%;
+    padding: 14px 16px 16px 16px;
+    background-color: var(--cd-parchment);
+    border-width: 4px;
+    border-color: var(--cd-frame);
+    border-radius: 8px;
+}
+
+.cd-title {
+    -unity-font-style: bold;
+    font-size: 22px;
+    color: var(--cd-text-dark);
+    -unity-text-align: middle-center;
+    margin-bottom: 10px;
+}
+
+/* Scrollable list body — grows to fill, scrolls when overflowing. */
+.cd-list {
+    flex-grow: 1;
+    min-height: 120px;
+    background-color: rgba(41, 31, 20, 0.35);
+    border-radius: 4px;
+    padding: 6px;
+}
+
+/* One row (magic slot, draw option, or target). A clickable button. */
+.cd-row {
+    flex-direction: row;
+    align-items: center;
+    height: 50px;
+    margin: 3px 0;
+    padding: 0 10px;
+    background-color: var(--cd-stone);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 4px;
+    color: var(--cd-text-light);
+}
+
+.cd-row:hover {
+    background-color: var(--cd-stone-hover);
+}
+
+.cd-row:disabled {
+    background-color: var(--cd-stone-disabled);
+    opacity: 0.6;
+}
+
+.cd-row__icon {
+    width: 38px;
+    height: 38px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-row__name {
+    flex-grow: 1;
+    -unity-font-style: bold;
+    font-size: 18px;
+    -unity-text-align: middle-left;
+    color: var(--cd-text-light);
+}
+
+.cd-row__meta {
+    flex-shrink: 0;
+    width: 96px;
+    font-size: 15px;
+    -unity-text-align: middle-right;
+    color: var(--cd-text-light);
+}
+
+/* Standard stone button (Back, actions, menu buttons). */
+.cd-button {
+    height: 46px;
+    margin-top: 10px;
+    padding: 0 18px;
+    -unity-font-style: bold;
+    font-size: 18px;
+    color: var(--cd-text-light);
+    background-color: var(--cd-stone);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 4px;
+}
+
+.cd-button:hover {
+    background-color: var(--cd-stone-hover);
+}
+
+.cd-button:disabled {
+    background-color: var(--cd-stone-disabled);
+    opacity: 0.6;
+}
+
+/* A narrower button centered in its row (e.g. Back). */
+.cd-button--narrow {
+    width: 45%;
+    align-self: center;
+}
+
+/* ---- Docking (absolute overlays inside .cd-root) ----
+   Center the docked element by translating it, rather than stretching it with
+   left/right:0 — stretching forces full width and overrides the element's own
+   child alignment (which broke the command-window header and off-set dialogs). */
+.cd-dock-bottom {
+    position: absolute;
+    bottom: 42px;
+    left: 50%;
+    translate: -50% 0;
+}
+
+.cd-dock-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+}
+
+/* ---- Simple bottom command bar (Examine/Action, Fight/Flee) ---- */
+.cd-bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+    background-color: var(--cd-parchment);
+    border-width: 4px;
+    border-color: var(--cd-frame);
+    border-radius: 8px;
+}
+
+/* A command button used in bars and the hero command window. */
+.cd-cmd {
+    min-width: 120px;
+    height: 46px;
+    margin: 0 5px;
+    padding: 0 16px;
+    -unity-font-style: bold;
+    font-size: 18px;
+    color: var(--cd-text-light);
+    background-color: var(--cd-stone);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 6px;
+}
+
+.cd-cmd:hover {
+    background-color: var(--cd-stone-hover);
+}
+
+.cd-cmd:disabled {
+    background-color: var(--cd-stone-disabled);
+    opacity: 0.6;
+}
+
+/* ---- Hero command window (turn header + action row) ---- */
+.cd-command-window {
+    min-width: 560px;
+    background-color: var(--cd-parchment);
+    border-width: 4px;
+    border-color: var(--cd-frame);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cd-command-window__header {
+    -unity-font-style: bold;
+    font-size: 18px;
+    color: var(--cd-text-light);
+    background-color: var(--cd-frame);
+    -unity-text-align: middle-center;
+    padding: 9px 12px;
+}
+
+.cd-command-window__row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+}
+
+/* ---- Dialog message body (results, death, examine detail) ---- */
+.cd-message {
+    white-space: normal;
+    font-size: 17px;
+    color: var(--cd-text-dark);
+    -unity-text-align: upper-left;
+    min-height: 60px;
+    margin-bottom: 10px;
+}
+
+/* Full-width text button used for option lists (Examine/Action results). */
+.cd-list-button {
+    height: 44px;
+    margin: 3px 0;
+    -unity-font-style: bold;
+    font-size: 17px;
+    color: var(--cd-text-light);
+    background-color: var(--cd-stone);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 4px;
+}
+
+.cd-list-button:hover {
+    background-color: var(--cd-stone-hover);
+}
+
+/* Utility: hidden (controller toggles this). */
+.cd-hidden {
+    display: none;
+}

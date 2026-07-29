@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="project://database/Assets/UI/Theme/CardDungeon.uss" />
+
+    <ui:VisualElement name="root" class="cd-root" picking-mode="Ignore">
+
+        <!-- Magic / slot list window -->
+        <ui:VisualElement name="magic-list-panel" class="cd-window cd-hidden">
+            <ui:Label name="list-title" text="Magic" class="cd-title" />
+            <ui:ScrollView name="list-scroll" class="cd-list" mode="Vertical" />
+            <ui:Button name="list-back" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- Target picker window (cast target / attack target / draw source) -->
+        <ui:VisualElement name="target-panel" class="cd-window cd-hidden">
+            <ui:Label name="target-prompt" text="Select Target" class="cd-title" />
+            <ui:ScrollView name="target-scroll" class="cd-list" mode="Vertical" />
+            <ui:Button name="target-back" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>
