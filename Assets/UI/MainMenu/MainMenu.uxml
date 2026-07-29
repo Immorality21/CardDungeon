@@ -1,0 +1,59 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="project://database/Assets/UI/Theme/CardDungeon.uss" />
+
+    <ui:VisualElement name="root" class="cd-root">
+        <ui:VisualElement name="bg" class="cd-bg" picking-mode="Ignore" />
+
+        <!-- HOME -->
+        <ui:VisualElement name="home-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label text="Card Dungeon" class="cd-title cd-title--large" />
+            <ui:Button name="continue-btn" text="Continue Run" class="cd-menu-button" />
+            <ui:Button name="new-btn" text="New Run" class="cd-menu-button" />
+            <ui:Button name="merchant-btn" text="Visit Merchant" class="cd-menu-button" />
+            <ui:Button name="forge-btn" text="Magic Forge" class="cd-menu-button" />
+            <ui:VisualElement class="cd-currency-row">
+                <ui:Label name="home-gold" text="Gold: 0" />
+                <ui:Label name="home-essence" text="Essence: 0" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- RUN PROGRESS -->
+        <ui:VisualElement name="progress-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label name="level-indicator" text="Level 1 of 1" class="cd-info-label" />
+            <ui:Label name="level-name" text="" class="cd-title cd-title--large" />
+            <ui:VisualElement class="cd-button-row">
+                <ui:Button name="back-btn" text="Back" class="cd-menu-button" style="flex-grow: 1; margin-right: 6px;" />
+                <ui:Button name="enter-btn" text="Enter Dungeon" class="cd-menu-button" style="flex-grow: 1; margin-left: 6px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- RUN COMPLETE -->
+        <ui:VisualElement name="complete-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label text="Victory!" class="cd-title cd-title--large" />
+            <ui:Label text="You have conquered the dungeon.\nYour heroes stand victorious." class="cd-info-label" />
+            <ui:Button name="return-btn" text="Return" class="cd-menu-button" />
+        </ui:VisualElement>
+
+        <!-- MERCHANT -->
+        <ui:VisualElement name="merchant-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label text="Merchant" class="cd-title" />
+            <ui:VisualElement class="cd-currency-row">
+                <ui:Label name="merchant-gold" text="Gold: 0" />
+                <ui:Label name="merchant-essence" text="Essence: 0" />
+            </ui:VisualElement>
+            <ui:Button name="potion-btn" text="" class="cd-menu-button" />
+            <ui:Label name="merchant-feedback" text="" class="cd-feedback" />
+            <ui:Button name="merchant-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- FORGE -->
+        <ui:VisualElement name="forge-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label text="Magic Forge" class="cd-title" />
+            <ui:Label name="forge-essence" text="Essence: 0" class="cd-info-label" />
+            <ui:ScrollView name="forge-scroll" class="cd-list" mode="Vertical" />
+            <ui:Label name="forge-empty" text="No magic in the catalog yet." class="cd-info-label cd-hidden" />
+            <ui:Button name="forge-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -3,99 +3,99 @@ using Assets.Scripts.Dungeon;
 using Assets.Scripts.IO;
 using Assets.Scripts.MainMenu;
 using Assets.Scripts.Progression;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
+/// <summary>
+/// Main menu (UI Toolkit). Drives a single UIDocument holding the home, run-progress,
+/// run-complete, merchant, and forge views. Merchant/Forge are plain view-controllers
+/// operating on their subtrees. Run-save and scene-load logic is unchanged from the
+/// prior uGUI version.
+/// </summary>
+[RequireComponent(typeof(UIDocument))]
 public class MainMenuManager : MonoBehaviour
 {
-    [Header("Run Definition")]
-    [SerializeField]
-    private RunDefinitionSO _runDefinition;
+    [SerializeField] private RunDefinitionSO _runDefinition;
+    [SerializeField] private UIDocument _document;
 
-    [Header("Home Panel")]
-    [SerializeField]
-    private GameObject _homePanel;
+    private VisualElement _homeView;
+    private VisualElement _progressView;
+    private VisualElement _completeView;
+    private VisualElement _merchantView;
+    private VisualElement _forgeView;
 
-    [SerializeField]
-    private Button _continueRunButton;
-
-    [SerializeField]
+    private Button _continueButton;
     private Button _newRunButton;
-
-    [SerializeField]
     private Button _merchantButton;
-
-    [SerializeField]
-    private MerchantUI _merchantUI;
-
-    [SerializeField]
     private Button _forgeButton;
-
-    [SerializeField]
-    private MagicForgeUI _cardUpgradeUI;
-
-    [Header("Currency Header (optional)")]
-    [SerializeField]
-    private TextMeshProUGUI _goldLabel;
-
-    [SerializeField]
-    private TextMeshProUGUI _essenceLabel;
-
-    [Header("Run Progress Panel")]
-    [SerializeField]
-    private GameObject _runProgressPanel;
-
-    [SerializeField]
-    private TextMeshProUGUI _levelIndicatorLabel;
-
-    [SerializeField]
-    private TextMeshProUGUI _levelNameLabel;
-
-    [SerializeField]
-    private Button _enterDungeonButton;
-
-    [SerializeField]
     private Button _backButton;
+    private Button _enterButton;
+    private Button _returnButton;
 
-    [Header("Run Complete Panel")]
-    [SerializeField]
-    private GameObject _runCompletePanel;
+    private Label _homeGold;
+    private Label _homeEssence;
+    private Label _levelIndicator;
+    private Label _levelName;
 
-    [SerializeField]
-    private Button _runCompleteReturnButton;
+    private MerchantUI _merchant;
+    private MagicForgeUI _forge;
 
     private FileHandler _fileHandler;
     private RunSaveData _runSaveData;
+
+    private static bool _justCompletedRun;
+
+    public static void MarkRunCompleted()
+    {
+        _justCompletedRun = true;
+    }
 
     private void Start()
     {
         _fileHandler = new FileHandler();
         _runSaveData = _fileHandler.Load<RunSaveData>();
 
-        _newRunButton.onClick.AddListener(OnNewRun);
-        _continueRunButton.onClick.AddListener(OnContinueRun);
-        _enterDungeonButton.onClick.AddListener(OnEnterDungeon);
-        _backButton.onClick.AddListener(OnBack);
-        _runCompleteReturnButton.onClick.AddListener(OnRunCompleteReturn);
+        if (_document == null)
+        {
+            _document = GetComponent<UIDocument>();
+        }
+        var root = _document.rootVisualElement;
 
-        if (_merchantButton != null)
-        {
-            _merchantButton.onClick.AddListener(OnVisitMerchant);
-        }
-        if (_forgeButton != null)
-        {
-            _forgeButton.onClick.AddListener(OnVisitForge);
-        }
+        _homeView = root.Q<VisualElement>("home-view");
+        _progressView = root.Q<VisualElement>("progress-view");
+        _completeView = root.Q<VisualElement>("complete-view");
+        _merchantView = root.Q<VisualElement>("merchant-view");
+        _forgeView = root.Q<VisualElement>("forge-view");
 
-        // Check if run was just completed (ActiveRun cleared after final level)
-        if (DungeonManager.ActiveRun == null && !string.IsNullOrEmpty(_runSaveData.RunKey))
-        {
-            // Run still in progress — show home
-            ShowHomePanel();
-        }
-        else if (DungeonManager.ActiveRun == null && string.IsNullOrEmpty(_runSaveData.RunKey) && WasRunJustCompleted())
+        _continueButton = root.Q<Button>("continue-btn");
+        _newRunButton = root.Q<Button>("new-btn");
+        _merchantButton = root.Q<Button>("merchant-btn");
+        _forgeButton = root.Q<Button>("forge-btn");
+        _backButton = root.Q<Button>("back-btn");
+        _enterButton = root.Q<Button>("enter-btn");
+        _returnButton = root.Q<Button>("return-btn");
+
+        _homeGold = root.Q<Label>("home-gold");
+        _homeEssence = root.Q<Label>("home-essence");
+        _levelIndicator = root.Q<Label>("level-indicator");
+        _levelName = root.Q<Label>("level-name");
+
+        _newRunButton.clicked += OnNewRun;
+        _continueButton.clicked += OnContinueRun;
+        _enterButton.clicked += OnEnterDungeon;
+        _backButton.clicked += OnBack;
+        _returnButton.clicked += OnRunCompleteReturn;
+        _merchantButton.clicked += OnVisitMerchant;
+        _forgeButton.clicked += OnVisitForge;
+
+        _merchant = new MerchantUI(_merchantView);
+        _forge = new MagicForgeUI(_forgeView);
+        _merchant.OnClosed += ShowHomePanel;
+        _forge.OnClosed += ShowHomePanel;
+
+        // Initial panel: run complete only when we arrived from clearing the final level.
+        if (DungeonManager.ActiveRun == null && string.IsNullOrEmpty(_runSaveData.RunKey) && _justCompletedRun)
         {
             ShowRunCompletePanel();
         }
@@ -105,72 +105,50 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    private bool WasRunJustCompleted()
-    {
-        // If we arrived from a dungeon clear and run save was deleted, the run is complete
-        // We detect this by checking if ActiveRun was cleared by DungeonManager.OnDungeonCleared
-        // Since ActiveRun is set to null when the final level is cleared, and we just came from
-        // the game scene, we use a simple static flag
-        return _justCompletedRun;
-    }
-
-    private static bool _justCompletedRun;
-
-    public static void MarkRunCompleted()
-    {
-        _justCompletedRun = true;
-    }
-
     private void ShowHomePanel()
     {
-        _homePanel.SetActive(true);
-        _runProgressPanel.SetActive(false);
-        _runCompletePanel.SetActive(false);
+        SetShown(_homeView, true);
+        SetShown(_progressView, false);
+        SetShown(_completeView, false);
+        SetShown(_merchantView, false);
+        SetShown(_forgeView, false);
 
         bool hasActiveRun = !string.IsNullOrEmpty(_runSaveData.RunKey);
-        Debug.Log($"ShowHomePanel: RunKey='{_runSaveData.RunKey}', CurrentLevel={_runSaveData.CurrentLevelIndex}, hasActiveRun={hasActiveRun}");
-        _continueRunButton.gameObject.SetActive(hasActiveRun);
+        SetShown(_continueButton, hasActiveRun);
 
         RefreshCurrencyHeader();
     }
 
     private void RefreshCurrencyHeader()
     {
-        if (_goldLabel != null)
-        {
-            _goldLabel.text = $"Gold: {MetaProgressManager.Instance.Gold}";
-        }
-        if (_essenceLabel != null)
-        {
-            _essenceLabel.text = $"Essence: {MetaProgressManager.Instance.Essence}";
-        }
+        _homeGold.text = $"Gold: {MetaProgressManager.Instance.Gold}";
+        _homeEssence.text = $"Essence: {MetaProgressManager.Instance.Essence}";
     }
 
     private void ShowRunProgressPanel()
     {
-        _homePanel.SetActive(false);
-        _runProgressPanel.SetActive(true);
-        _runCompletePanel.SetActive(false);
+        SetShown(_homeView, false);
+        SetShown(_progressView, true);
+        SetShown(_completeView, false);
 
         var levelIndex = _runSaveData.CurrentLevelIndex;
         var totalLevels = _runDefinition.Levels.Count;
         var levelEntry = _runDefinition.Levels[levelIndex];
 
-        _levelIndicatorLabel.text = $"Level {levelIndex + 1} of {totalLevels}";
-        _levelNameLabel.text = levelEntry.LevelName;
+        _levelIndicator.text = $"Level {levelIndex + 1} of {totalLevels}";
+        _levelName.text = levelEntry.LevelName;
     }
 
     private void ShowRunCompletePanel()
     {
-        _homePanel.SetActive(false);
-        _runProgressPanel.SetActive(false);
-        _runCompletePanel.SetActive(true);
+        SetShown(_homeView, false);
+        SetShown(_progressView, false);
+        SetShown(_completeView, true);
         _justCompletedRun = false;
     }
 
     private void OnNewRun()
     {
-        // Create fresh run save
         var runKey = !string.IsNullOrEmpty(_runDefinition.Key) ? _runDefinition.Key : _runDefinition.name;
         _runSaveData = new RunSaveData
         {
@@ -196,53 +174,23 @@ public class MainMenuManager : MonoBehaviour
         DungeonManager.RunLevelIndex = levelIndex;
         DungeonManager.LevelToLoad = levelEntry.LevelTemplate;
 
-        // Resume from existing dungeon save if available
-        if (_runSaveData.ActiveDungeonSeed != 0)
-        {
-            DungeonManager.SeedToLoad = _runSaveData.ActiveDungeonSeed;
-        }
-        else
-        {
-            DungeonManager.SeedToLoad = null;
-        }
+        DungeonManager.SeedToLoad = _runSaveData.ActiveDungeonSeed != 0
+            ? _runSaveData.ActiveDungeonSeed
+            : (int?)null;
 
         SceneManager.LoadScene("MainGameScene");
     }
 
     private void OnVisitMerchant()
     {
-        if (_merchantUI == null)
-        {
-            return;
-        }
-
-        _homePanel.SetActive(false);
-        _merchantUI.OnClosed += OnMerchantClosed;
-        _merchantUI.Show();
-    }
-
-    private void OnMerchantClosed()
-    {
-        _merchantUI.OnClosed -= OnMerchantClosed;
-        ShowHomePanel();
+        SetShown(_homeView, false);
+        _merchant.Show();
     }
 
     private void OnVisitForge()
     {
-        if (_cardUpgradeUI == null)
-        {
-            return;
-        }
-
-        _homePanel.SetActive(false);
-        _cardUpgradeUI.OnClosed += OnForgeClosed;
-        _cardUpgradeUI.Show();
-    }
-
-    private void OnForgeClosed()
-    {
-        _cardUpgradeUI.OnClosed -= OnForgeClosed;
-        ShowHomePanel();
+        SetShown(_homeView, false);
+        _forge.Show();
     }
 
     private void OnBack()
@@ -253,5 +201,13 @@ public class MainMenuManager : MonoBehaviour
     private void OnRunCompleteReturn()
     {
         ShowHomePanel();
+    }
+
+    private static void SetShown(VisualElement element, bool shown)
+    {
+        if (element != null)
+        {
+            element.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+        }
     }
 }

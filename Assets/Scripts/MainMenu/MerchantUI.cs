@@ -1,72 +1,54 @@
 using System;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Resources;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace Assets.Scripts.MainMenu
 {
     /// <summary>
-    /// Hub merchant that spends Gold. Offers are fixed for now: enlarge the potion belt
-    /// (raises healing-potion max). Cost scales so gold stays meaningful across a campaign.
+    /// Hub merchant (UI Toolkit view-controller). Spends Gold to enlarge the potion belt
+    /// (raises healing-potion max). Operates on a VisualElement subtree owned by the menu's
+    /// UIDocument — not a MonoBehaviour. Cost scales so gold stays meaningful.
     /// </summary>
-    public class MerchantUI : MonoBehaviour
+    public class MerchantUI
     {
         private const int PotionCostPerCurrentMax = 25;
 
-        [Header("Root")]
-        [SerializeField] private GameObject _rootPanel;
-
-        [Header("Currency Display")]
-        [SerializeField] private TextMeshProUGUI _goldLabel;
-        [SerializeField] private TextMeshProUGUI _essenceLabel;
-
-        [Header("Potion Belt Offer")]
-        [SerializeField] private Button _potionButton;
-        [SerializeField] private TextMeshProUGUI _potionLabel;
-
-        [Header("Feedback")]
-        [SerializeField] private TextMeshProUGUI _feedbackLabel;
-
-        [Header("Buttons")]
-        [SerializeField] private Button _closeButton;
+        private readonly VisualElement _root;
+        private readonly Label _goldLabel;
+        private readonly Label _essenceLabel;
+        private readonly Label _feedbackLabel;
+        private readonly Button _potionButton;
+        private readonly Button _closeButton;
 
         public event Action OnClosed;
 
-        private void Start()
+        public MerchantUI(VisualElement root)
         {
-            if (_rootPanel != null)
-            {
-                _rootPanel.SetActive(false);
-            }
+            _root = root;
+            _goldLabel = root.Q<Label>("merchant-gold");
+            _essenceLabel = root.Q<Label>("merchant-essence");
+            _feedbackLabel = root.Q<Label>("merchant-feedback");
+            _potionButton = root.Q<Button>("potion-btn");
+            _closeButton = root.Q<Button>("merchant-close");
 
-            if (_closeButton != null)
-            {
-                _closeButton.onClick.AddListener(Hide);
-            }
-            if (_potionButton != null)
-            {
-                _potionButton.onClick.AddListener(OnBuyPotionBelt);
-            }
+            _potionButton.clicked += OnBuyPotionBelt;
+            _closeButton.clicked += Hide;
+
+            _root.style.display = DisplayStyle.None;
         }
 
         public void Show()
         {
-            if (_rootPanel != null)
-            {
-                _rootPanel.SetActive(true);
-            }
+            _root.style.display = DisplayStyle.Flex;
             SetFeedback(string.Empty);
             Refresh();
         }
 
         public void Hide()
         {
-            if (_rootPanel != null)
-            {
-                _rootPanel.SetActive(false);
-            }
+            _root.style.display = DisplayStyle.None;
             OnClosed?.Invoke();
         }
 
@@ -81,25 +63,13 @@ namespace Assets.Scripts.MainMenu
             int gold = MetaProgressManager.Instance.Gold;
             int essence = MetaProgressManager.Instance.Essence;
 
-            if (_goldLabel != null)
-            {
-                _goldLabel.text = $"Gold: {gold}";
-            }
-            if (_essenceLabel != null)
-            {
-                _essenceLabel.text = $"Essence: {essence}";
-            }
+            _goldLabel.text = $"Gold: {gold}";
+            _essenceLabel.text = $"Essence: {essence}";
 
             int potionCost = PotionBeltCost();
             int currentMax = PartyResourceManager.Instance.GetMax(PartyResourceType.HealingPotion);
-            if (_potionLabel != null)
-            {
-                _potionLabel.text = $"Enlarge Potion Belt ({currentMax} → {currentMax + 1}) — {potionCost} gold";
-            }
-            if (_potionButton != null)
-            {
-                _potionButton.interactable = gold >= potionCost;
-            }
+            _potionButton.text = $"Enlarge Potion Belt ({currentMax} → {currentMax + 1}) — {potionCost} gold";
+            _potionButton.SetEnabled(gold >= potionCost);
         }
 
         private void OnBuyPotionBelt()
