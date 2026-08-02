@@ -27,8 +27,8 @@ MonoBehaviour:
     Stats:
       Attack: 3
       Defense: 1
-      Health: 5
-      MaxHealth: 5
+      Health: 15
+      MaxHealth: 15
       Agility: 5
     Archetype: 0
     LootItem: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
