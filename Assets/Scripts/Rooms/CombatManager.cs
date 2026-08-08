@@ -575,7 +575,10 @@ namespace Assets.Scripts.Rooms
             int dmg = DamageCalculator.Calculate(rawAttack, defense, DamageType.Normal, target.Resistances);
             target.Stats.Health -= dmg;
 
+            // Impact juice: flash + damage-scaled shake (extra punch on heavy blows) + hit-stop.
+            CombatFeedback.Instance.PlayImpact(target, dmg, damageMultiplier > 1f ? 1.6f : 1f);
             ShowDamageText(target.Transform.position, dmg, damageColor);
+            yield return new WaitForSecondsRealtime(0.045f);
 
             _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName} for {dmg} damage.";
         }
@@ -658,7 +661,8 @@ namespace Assets.Scripts.Rooms
             InventoryManager.Instance.TryDropItem(enemy.LootItem);
             _turnManager.RemoveUnit(enemy);
             room.Enemies.Remove(enemy);
-            Destroy(enemy.gameObject);
+            // Removed from combat immediately; the object lingers only for its pop/fade.
+            CombatFeedback.Instance.KillWithEffect(enemy.gameObject);
         }
 
         private void HandleHeroDeath(Hero hero)

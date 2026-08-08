@@ -72,7 +72,8 @@ namespace Assets.Scripts.Cards.Effects
                         Target = target,
                         Text = damage.ToString(),
                         Color = DamageColor,
-                        Delay = EffectDelay
+                        Delay = EffectDelay,
+                        Impact = damage
                     });
                 }
             }

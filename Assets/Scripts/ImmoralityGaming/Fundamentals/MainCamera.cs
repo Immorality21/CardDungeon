@@ -71,9 +71,38 @@ public class MainCamera : SingletonBehaviour<MainCamera>
         SetCameraZoom(zoom);
     }
 
+    private float _shakeMagnitude;
+    private float _shakeDuration;
+    private float _shakeElapsed;
+    private Vector3 _appliedShake;
+
+    /// <summary>Kick off a decaying camera shake. Applied in LateUpdate on top of the follow position.</summary>
+    public void Shake(float magnitude, float duration)
+    {
+        _shakeMagnitude = magnitude;
+        _shakeDuration = duration;
+        _shakeElapsed = 0f;
+    }
+
     private void Update()
     {
         Drag();
+    }
+
+    private void LateUpdate()
+    {
+        // Undo last frame's shake first so it never accumulates into the follow position.
+        _cameraTransform.position -= _appliedShake;
+        _appliedShake = Vector3.zero;
+
+        if (_shakeElapsed < _shakeDuration)
+        {
+            _shakeElapsed += Time.deltaTime;
+            float damper = 1f - Mathf.Clamp01(_shakeElapsed / _shakeDuration);
+            float amt = _shakeMagnitude * damper;
+            _appliedShake = new Vector3(UnityEngine.Random.Range(-amt, amt), UnityEngine.Random.Range(-amt, amt), 0f);
+            _cameraTransform.position += _appliedShake;
+        }
     }
 
     public void MoveCamera(Vector3 direction)

@@ -11,6 +11,10 @@ namespace Assets.Scripts.Cards
         public Color Color;
         public float Delay;
         public Vector3 PositionOffset;
+
+        // Damage dealt by this entry (0 for non-damage). Drives the hit flash / camera shake
+        // in the presenter without coupling the (unit-tested) executors to the feedback layer.
+        public int Impact;
     }
 
     public class EffectResult

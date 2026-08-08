@@ -11,16 +11,38 @@ public class FloatingText : MonoBehaviour
     private TextMesh text;
     private Vector3 fadeDirection;
     private float _elapsed;
+    private Vector3 _baseScale;
 
     private void OnEnable()
     {
         text = GetComponent<TextMesh>();
         GetComponent<MeshRenderer>().sortingOrder = 1000;
         _elapsed = 0f;
+        // Capture the intended scale (the handler sets localScale before activating us).
+        _baseScale = transform.localScale;
 
         SetFadeDirection();
+        StartCoroutine(PopScale());
         StartCoroutine(FadeTextToZeroAlpha());
         StartCoroutine(FadeInDirection());
+    }
+
+    // Quick scale overshoot so numbers "punch" in rather than just appearing.
+    private IEnumerator PopScale()
+    {
+        const float dur = 0.16f;
+        float t = 0f;
+        while (t < dur)
+        {
+            t += Time.deltaTime;
+            float p = t / dur;
+            float s = p < 0.55f
+                ? Mathf.Lerp(0.4f, 1.18f, p / 0.55f)
+                : Mathf.Lerp(1.18f, 1f, (p - 0.55f) / 0.45f);
+            transform.localScale = _baseScale * s;
+            yield return null;
+        }
+        transform.localScale = _baseScale;
     }
 
     private void OnDisable()
