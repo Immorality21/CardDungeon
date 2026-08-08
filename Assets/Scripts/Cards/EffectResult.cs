@@ -18,6 +18,10 @@ namespace Assets.Scripts.Cards
         public List<EffectEntry> Entries = new List<EffectEntry>();
         public string ComboName;
 
+        // Keys of every combo that triggered this cast — CombatManager records these as
+        // discovered. Distinct from ComboName (display-only, last combo).
+        public List<string> TriggeredComboKeys = new List<string>();
+
         public string BuildLog(SpellcastAction action)
         {
             var log = $"{action.Caster.DisplayName} casts {action.Magic.DisplayName}!";

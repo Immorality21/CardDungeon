@@ -225,6 +225,119 @@ namespace Assets.Scripts.Progression
             return true;
         }
 
+        // --- Combo upgrades (per combo key) ---
+        // Reuse the magic upgrade curves so combos and magic share one progression feel.
+
+        public int GetComboUpgradeLevel(string comboKey)
+        {
+            if (string.IsNullOrEmpty(comboKey))
+            {
+                return 0;
+            }
+
+            foreach (var entry in _saveData.ComboUpgrades)
+            {
+                if (entry.ComboKey == comboKey)
+                {
+                    return entry.Level;
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>Flat power bonus applied to this combo's Damage/Heal bonus effects.</summary>
+        public int GetComboPowerBonus(string comboKey)
+        {
+            return MagicPowerBonusForLevel(GetComboUpgradeLevel(comboKey));
+        }
+
+        /// <summary>Essence cost of the next combo upgrade, or 0 if already at max level.</summary>
+        public int GetComboUpgradeCost(string comboKey)
+        {
+            int level = GetComboUpgradeLevel(comboKey);
+            if (level >= MaxMagicUpgradeLevel)
+            {
+                return 0;
+            }
+            return MagicUpgradeCostForNextLevel(level);
+        }
+
+        public bool CanUpgradeCombo(string comboKey)
+        {
+            if (string.IsNullOrEmpty(comboKey))
+            {
+                return false;
+            }
+
+            int level = GetComboUpgradeLevel(comboKey);
+            if (level >= MaxMagicUpgradeLevel)
+            {
+                return false;
+            }
+            return _saveData.Essence >= MagicUpgradeCostForNextLevel(level);
+        }
+
+        /// <summary>Spends Essence to raise a combo's upgrade level by one. Returns false if unaffordable or maxed.</summary>
+        public bool TryUpgradeCombo(string comboKey)
+        {
+            if (!CanUpgradeCombo(comboKey))
+            {
+                return false;
+            }
+
+            int level = GetComboUpgradeLevel(comboKey);
+            int cost = MagicUpgradeCostForNextLevel(level);
+            _saveData.Essence -= cost;
+
+            var entry = _saveData.ComboUpgrades.Find(e => e.ComboKey == comboKey);
+            if (entry == null)
+            {
+                entry = new ComboUpgradeEntry { ComboKey = comboKey, Level = 0 };
+                _saveData.ComboUpgrades.Add(entry);
+            }
+            entry.Level += 1;
+
+            Save();
+            OnChanged?.Invoke();
+            return true;
+        }
+
+        // --- Discovery (permanent; survives death) ---
+
+        public bool IsMagicDiscovered(string magicKey)
+        {
+            return !string.IsNullOrEmpty(magicKey) && _saveData.DiscoveredMagicKeys.Contains(magicKey);
+        }
+
+        /// <summary>Records a magic as discovered (first drawn). Idempotent; persists immediately.</summary>
+        public void MarkMagicDiscovered(string magicKey)
+        {
+            if (string.IsNullOrEmpty(magicKey) || _saveData.DiscoveredMagicKeys.Contains(magicKey))
+            {
+                return;
+            }
+            _saveData.DiscoveredMagicKeys.Add(magicKey);
+            Save();
+            OnChanged?.Invoke();
+        }
+
+        public bool IsComboDiscovered(string comboKey)
+        {
+            return !string.IsNullOrEmpty(comboKey) && _saveData.DiscoveredComboKeys.Contains(comboKey);
+        }
+
+        /// <summary>Records a combo as discovered (first triggered). Idempotent; persists immediately.</summary>
+        public void MarkComboDiscovered(string comboKey)
+        {
+            if (string.IsNullOrEmpty(comboKey) || _saveData.DiscoveredComboKeys.Contains(comboKey))
+            {
+                return;
+            }
+            _saveData.DiscoveredComboKeys.Add(comboKey);
+            Save();
+            OnChanged?.Invoke();
+        }
+
         // --- Magic slot upgrades ---
 
         /// <summary>Extra magic slots purchased on top of the base slot count.</summary>

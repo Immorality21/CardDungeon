@@ -95,6 +95,16 @@ namespace Tests.EditMode
             };
         }
 
+        private MagicComboSO CreateComboWithEffects(string key, string name, List<MagicTag> requiredTags, List<SpellEffect> bonusEffects)
+        {
+            var combo = ScriptableObject.CreateInstance<MagicComboSO>();
+            combo.Key = key;
+            combo.ComboName = name;
+            combo.RequiredTags = requiredTags;
+            combo.BonusEffects = bonusEffects;
+            return combo;
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -736,6 +746,97 @@ namespace Tests.EditMode
 
             // 1 damage entry + 1 combo name entry + 1 combo damage entry = 3
             Assert.AreEqual(3, result.Entries.Count);
+        }
+
+        // ---- UnlockLevel gating ----
+
+        [Test]
+        public void MagicEffect_AboveUpgradeLevel_IsSkipped()
+        {
+            var card = CreateMultiEffectCard("Gated", new List<SpellEffect>
+            {
+                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, UnlockLevel = 3 }
+            });
+            var action = MakeAction(card, _hero, _enemy);
+            int before = _enemy.Stats.Health;
+
+            _calculator.Execute(action, _buffTracker, magicUpgradeLevel: 2);
+
+            Assert.AreEqual(before, _enemy.Stats.Health, "Effect gated behind level 3 must not apply at level 2");
+        }
+
+        [Test]
+        public void MagicEffect_AtUnlockLevel_IsApplied()
+        {
+            var card = CreateMultiEffectCard("Gated", new List<SpellEffect>
+            {
+                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, UnlockLevel = 3 }
+            });
+            var action = MakeAction(card, _hero, _enemy);
+            int before = _enemy.Stats.Health;
+
+            _calculator.Execute(action, _buffTracker, magicUpgradeLevel: 3);
+
+            int expected = ExpectedDamage(10 + 5, 3);
+            Assert.AreEqual(before - expected, _enemy.Stats.Health);
+        }
+
+        [Test]
+        public void ComboEffect_AboveComboLevel_IsSkipped()
+        {
+            var combo = CreateComboWithEffects("ignite", "Ignite",
+                new List<MagicTag> { MagicTag.Fire, MagicTag.Oil },
+                new List<SpellEffect> { new SpellEffect { EffectType = SpellEffectType.Damage, Power = 15, UnlockLevel = 5 } });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
+
+            _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Oil }, 3);
+            var card = CreateCard("Fireball", SpellEffectType.Damage, power: 5, tags: new List<MagicTag> { MagicTag.Fire });
+            var action = MakeAction(card, _hero, _enemy);
+            int before = _enemy.Stats.Health;
+
+            var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector, comboLevelLookup: k => 4);
+
+            int cardDmg = ExpectedDamage(10 + 5, 3);
+            Assert.AreEqual("Ignite", result.ComboName, "Combo still triggers");
+            Assert.AreEqual(before - cardDmg, _enemy.Stats.Health, "Its level-5 bonus effect must not apply at combo level 4");
+        }
+
+        [Test]
+        public void ComboEffect_AtComboLevel_IsApplied()
+        {
+            var combo = CreateComboWithEffects("ignite", "Ignite",
+                new List<MagicTag> { MagicTag.Fire, MagicTag.Oil },
+                new List<SpellEffect> { new SpellEffect { EffectType = SpellEffectType.Damage, Power = 15, UnlockLevel = 5 } });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
+
+            _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Oil }, 3);
+            var card = CreateCard("Fireball", SpellEffectType.Damage, power: 5, tags: new List<MagicTag> { MagicTag.Fire });
+            var action = MakeAction(card, _hero, _enemy);
+            int before = _enemy.Stats.Health;
+
+            // Combo power bonus at level 5 = 5 * PowerPerUpgradeLevel; folded into the bonus effect.
+            var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector, comboLevelLookup: k => 5);
+
+            int cardDmg = ExpectedDamage(10 + 5, 3);
+            int comboDmg = ExpectedDamage(15 + Assets.Scripts.Progression.MetaProgressManager.MagicPowerBonusForLevel(5), 3);
+            Assert.AreEqual(before - cardDmg - comboDmg, _enemy.Stats.Health);
+        }
+
+        [Test]
+        public void Combo_RecordsTriggeredComboKey()
+        {
+            var combo = CreateComboWithEffects("ignite", "Ignite",
+                new List<MagicTag> { MagicTag.Fire, MagicTag.Oil },
+                new List<SpellEffect> { new SpellEffect { EffectType = SpellEffectType.Damage, Power = 10 } });
+            var detector = new ComboDetector(new List<MagicComboSO> { combo });
+
+            _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Oil }, 3);
+            var card = CreateCard("Fireball", SpellEffectType.Damage, power: 5, tags: new List<MagicTag> { MagicTag.Fire });
+            var action = MakeAction(card, _hero, _enemy);
+
+            var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
+
+            Assert.Contains("ignite", result.TriggeredComboKeys);
         }
 
         // ---- Frozen status effect ----

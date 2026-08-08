@@ -22,14 +22,14 @@ public class MagicComboSOEditor : Editor
         {
             var element = effectsProp.GetArrayElementAtIndex(index);
             var effectType = (SpellEffectType)element.FindPropertyRelative("EffectType").enumValueIndex;
-            int lines = 2;
+            int lines = 3; // EffectType + Power + UnlockLevel
             if (effectType == SpellEffectType.Damage)
             {
-                lines = 3;
+                lines = 4; // + DamageType
             }
             else if (effectType == SpellEffectType.Buff || effectType == SpellEffectType.Debuff)
             {
-                lines = 4;
+                lines = 5; // + BuffType + Duration
             }
             return lines * (EditorGUIUtility.singleLineHeight + 2) + 4;
         };
@@ -58,6 +58,7 @@ public class MagicComboSOEditor : Editor
                 EditorGUI.PropertyField(
                     new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
                     element.FindPropertyRelative("DamageType"));
+                rect.y += lineHeight;
             }
             else if (effectType == SpellEffectType.Buff || effectType == SpellEffectType.Debuff)
             {
@@ -69,7 +70,13 @@ public class MagicComboSOEditor : Editor
                 EditorGUI.PropertyField(
                     new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
                     element.FindPropertyRelative("Duration"));
+                rect.y += lineHeight;
             }
+
+            // Upgrade level at which this effect unlocks (0 = always active).
+            EditorGUI.PropertyField(
+                new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                element.FindPropertyRelative("UnlockLevel"));
         };
     }
 
@@ -77,8 +84,22 @@ public class MagicComboSOEditor : Editor
     {
         serializedObject.Update();
 
+        // Auto-generate a stable Key from the asset's name, then show it read-only.
+        // Discovery + upgrade data key off this, so it must never change once set — it is
+        // generated only while empty, and renaming the asset later does not touch it.
+        var keyProp = serializedObject.FindProperty("Key");
+        if (string.IsNullOrEmpty(keyProp.stringValue))
+        {
+            keyProp.stringValue = $"{target.name}-{System.Guid.NewGuid().ToString("N").Substring(0, 8)}";
+        }
+        using (new EditorGUI.DisabledScope(true))
+        {
+            EditorGUILayout.PropertyField(keyProp, new GUIContent("Key (auto)"));
+        }
+
         EditorGUILayout.PropertyField(serializedObject.FindProperty("ComboName"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Description"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("Icon"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("RequiredTags"), true);
 
         EditorGUILayout.Space(8);

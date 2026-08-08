@@ -11,6 +11,13 @@ namespace Assets.Scripts.Progression
         public int Level;
     }
 
+    [Serializable]
+    public class ComboUpgradeEntry
+    {
+        public string ComboKey;
+        public int Level;
+    }
+
     /// <summary>
     /// Persistent meta-progression that survives runs and party death.
     /// Gold is the flow currency (spent at the merchant); Essence is the
@@ -23,7 +30,13 @@ namespace Assets.Scripts.Progression
         public int Gold;
         public int Essence;
         public List<MagicUpgradeEntry> MagicUpgrades = new List<MagicUpgradeEntry>();
+        public List<ComboUpgradeEntry> ComboUpgrades = new List<ComboUpgradeEntry>();
         public int BonusSlots;
+
+        // Permanent discovery record (survives death). A magic is discovered when first drawn;
+        // a combo when first triggered in combat. Drives the Forge's collection grid.
+        public List<string> DiscoveredMagicKeys = new List<string>();
+        public List<string> DiscoveredComboKeys = new List<string>();
 
         public string GetFileName()
         {

@@ -50,8 +50,31 @@
         <ui:VisualElement name="forge-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
             <ui:Label text="Magic Forge" class="cd-title" />
             <ui:Label name="forge-essence" text="Essence: 0" class="cd-info-label" />
-            <ui:ScrollView name="forge-scroll" class="cd-list" mode="Vertical" />
-            <ui:Label name="forge-empty" text="No magic in the catalog yet." class="cd-info-label cd-hidden" />
+
+            <ui:VisualElement name="forge-tabs" class="cd-tabs">
+                <ui:Button name="tab-magic" text="Magic" class="cd-tab cd-tab--active" />
+                <ui:Button name="tab-combos" text="Combos" class="cd-tab" />
+            </ui:VisualElement>
+
+            <ui:ScrollView name="forge-grid" class="cd-grid-scroll" mode="Vertical" />
+            <ui:Label name="forge-empty" text="Nothing in the catalog yet." class="cd-info-label cd-hidden" />
+
+            <ui:VisualElement name="forge-inspect" class="cd-inspect cd-hidden">
+                <ui:VisualElement class="cd-inspect__header">
+                    <ui:VisualElement name="inspect-icon" class="cd-inspect__icon" />
+                    <ui:VisualElement class="cd-inspect__titlecol">
+                        <ui:Label name="inspect-name" text="" class="cd-inspect__name" />
+                        <ui:Label name="inspect-level" text="" class="cd-inspect__level" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label name="inspect-desc" text="" class="cd-inspect__desc" />
+                <ui:VisualElement name="inspect-effects" class="cd-inspect__effects" />
+                <ui:VisualElement class="cd-inspect__actions">
+                    <ui:Button name="inspect-back" text="Back" class="cd-button cd-button--narrow" />
+                    <ui:Button name="inspect-upgrade" text="Upgrade" class="cd-cmd" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
             <ui:Button name="forge-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 

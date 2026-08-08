@@ -317,47 +317,160 @@
     margin-top: 12px;
 }
 
-/* Forge upgrade row: name + info on the left, upgrade button on the right. */
-.cd-forge-row {
+/* ---- Forge: tabs ---- */
+.cd-tabs {
     flex-direction: row;
-    align-items: center;
-    margin: 3px 0;
-    padding: 6px 8px;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.cd-tab {
+    padding: 6px 20px;
+    margin: 0 4px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
     background-color: var(--cd-stone);
     border-width: 2px;
     border-color: var(--cd-frame);
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
-.cd-forge-row__text {
+.cd-tab:hover {
+    background-color: var(--cd-stone-hover);
+}
+
+.cd-tab--active {
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-accent);
+}
+
+/* ---- Forge: collection grid ---- */
+.cd-grid-scroll {
+    flex-grow: 1;
+    min-height: 220px;
+    background-color: rgba(41, 31, 20, 0.35);
+    border-radius: 4px;
+    padding: 6px;
+}
+
+/* Make the scroll view's content lay cells out in a wrapping grid. */
+.cd-grid-scroll .unity-scroll-view__content-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cd-cell {
+    width: 68px;
+    height: 68px;
+    margin: 5px;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cd-stone);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 6px;
+}
+
+.cd-cell:hover {
+    background-color: var(--cd-stone-hover);
+}
+
+.cd-cell--locked {
+    background-color: var(--cd-stone-disabled);
+}
+
+.cd-cell__icon {
+    width: 52px;
+    height: 52px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-cell__q {
+    font-size: 30px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+}
+
+/* ---- Forge: inspect panel ---- */
+.cd-inspect {
     flex-grow: 1;
 }
 
-.cd-forge-row__name {
-    color: var(--cd-text-light);
-    -unity-font-style: bold;
-    font-size: 16px;
+.cd-inspect__header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
 }
 
-.cd-forge-row__info {
-    color: var(--cd-text-light);
+.cd-inspect__icon {
+    width: 56px;
+    height: 56px;
+    margin-right: 10px;
+    background-color: var(--cd-stone);
+    border-radius: 6px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-inspect__titlecol {
+    flex-grow: 1;
+}
+
+.cd-inspect__name {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: var(--cd-text-dark);
+}
+
+.cd-inspect__level {
+    font-size: 14px;
+    color: var(--cd-text-dark);
+}
+
+.cd-inspect__desc {
+    white-space: normal;
+    font-size: 14px;
+    color: var(--cd-text-dark);
+    margin-bottom: 8px;
+}
+
+.cd-inspect__effects {
+    margin-bottom: 8px;
+}
+
+.cd-effect-row {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 3px 6px;
+    margin: 2px 0;
+    background-color: rgba(41, 31, 20, 0.22);
+    border-radius: 3px;
+}
+
+.cd-effect-row--locked {
+    opacity: 0.5;
+}
+
+.cd-effect-row__text {
     font-size: 13px;
+    color: var(--cd-text-dark);
 }
 
-.cd-forge-row__btn {
-    min-width: 96px;
-    height: 36px;
-    color: var(--cd-text-light);
-    background-color: var(--cd-stone-hover);
-    border-width: 2px;
-    border-color: var(--cd-frame);
-    border-radius: 4px;
+.cd-effect-row__lock {
+    font-size: 12px;
     -unity-font-style: bold;
+    color: var(--cd-text-dark);
 }
 
-.cd-forge-row__btn:disabled {
-    background-color: var(--cd-stone-disabled);
-    opacity: 0.6;
+.cd-inspect__actions {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.cd-inspect__actions > .cd-button--narrow {
+    margin-right: 8px;
 }
 
 /* Utility: hidden (controller toggles this). */

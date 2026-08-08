@@ -173,7 +173,12 @@ namespace Assets.Scripts.Rooms
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
             _tagTracker = new MagicTagTracker();
-            _comboDetector = new ComboDetector(_cardCombos);
+            // Prefer the shared combo catalog (single source of truth, also used by the hub
+            // Forge); fall back to the scene-serialized list if no catalog is present.
+            var combos = MagicComboCatalog.HasInstance
+                ? new List<MagicComboSO>(MagicComboCatalog.Instance.AllCombos)
+                : _cardCombos;
+            _comboDetector = new ComboDetector(combos);
 
             // Refill equipped-magic charges at the start of each combat (per-room refresh).
             if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
@@ -330,11 +335,26 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex, Room room)
         {
-            int powerBonus = MetaProgressManager.HasInstance && castAction.Magic != null
-                ? MetaProgressManager.Instance.GetMagicPowerBonus(castAction.Magic.Key)
-                : 0;
-            var result = _calculator.Execute(castAction, BuffTracker, _tagTracker, _comboDetector, powerBonus);
+            bool hasMeta = MetaProgressManager.HasInstance && castAction.Magic != null;
+            int powerBonus = hasMeta ? MetaProgressManager.Instance.GetMagicPowerBonus(castAction.Magic.Key) : 0;
+            int magicLevel = hasMeta ? MetaProgressManager.Instance.GetMagicUpgradeLevel(castAction.Magic.Key) : 0;
+            Func<string, int> comboLevelLookup = MetaProgressManager.HasInstance
+                ? MetaProgressManager.Instance.GetComboUpgradeLevel
+                : (Func<string, int>)null;
+
+            var result = _calculator.Execute(
+                castAction, BuffTracker, _tagTracker, _comboDetector, powerBonus, magicLevel, comboLevelLookup);
             _lastTurnLog = result.BuildLog(castAction);
+
+            // Record any triggered combos as discovered (permanent, survives death).
+            if (MetaProgressManager.HasInstance)
+            {
+                foreach (var comboKey in result.TriggeredComboKeys)
+                {
+                    MetaProgressManager.Instance.MarkComboDiscovered(comboKey);
+                }
+            }
+
             yield return _presenter.Present(result);
 
             // Spend a charge from the cast slot
@@ -365,6 +385,12 @@ namespace Assets.Scripts.Rooms
             if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 DungeonManager.Instance.MagicState.DrawInto(hero.HeroKey, slotIndex, magic, charges);
+            }
+
+            // Record the drawn magic as discovered (permanent, survives death).
+            if (MetaProgressManager.HasInstance)
+            {
+                MetaProgressManager.Instance.MarkMagicDiscovered(magic.Key);
             }
 
             string sourceName = source != null ? source.DisplayName : "the enemy";

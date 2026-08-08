@@ -23,4 +23,4 @@ All UI is **UI Toolkit** (UXML + USS), not uGUI. The pattern, used identically b
 
 - **MerchantUI** / **MagicForgeUI** are **plain view-controllers** (not MonoBehaviours): each takes the `VisualElement` subtree for its view, queries its controls, and exposes `Show()`/`Hide()` + an `OnClosed` event. `MainMenuManager` constructs them from the queried `merchant-view` / `forge-view` subtrees.
   - **MerchantUI** — Gold sink (enlarge potion belt). See the Progression guide.
-  - **MagicForgeUI** — Essence sink; lists every magic from `MagicCatalog` with level/cost and an Upgrade button. **Requires a `MagicCatalog` in the scene** or it logs a warning and won't open. See the Progression guide.
+  - **MagicForgeUI** — Essence sink + collection grid with All Magic / Combos tabs and click-to-inspect/upgrade; `?` for undiscovered. **Requires a `MagicCatalog` in the scene** (and a `MagicComboCatalog` for the Combos tab) or it logs a warning / shows empty. See the Progression guide.

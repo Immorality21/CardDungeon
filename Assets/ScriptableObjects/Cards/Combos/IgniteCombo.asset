@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f42194ff54842f4a6058ac3b040a155, type: 3}
   m_Name: IgniteCombo
   m_EditorClassIdentifier: 
+  Key: Ignite-1f2e3d4c
   ComboName: Ignite
   Description: 
+  Icon: {fileID: 21300000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 3}
   RequiredTags:
   - 0
   - 3

@@ -12,19 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f42194ff54842f4a6058ac3b040a155, type: 3}
   m_Name: InfectionCombo
   m_EditorClassIdentifier: 
+  Key: Infection-4c5b6a79
   ComboName: Infection
   Description: Poison seeps into physical wounds, sapping all strength.
-  RequiredTags:
-  - 4
-  - 6
+  Icon: {fileID: 21300000, guid: d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9, type: 3}
+  RequiredTags: 0400000006000000
   BonusEffects:
   - EffectType: 3
     Power: 4
     DamageType: 0
     BuffType: 0
     Duration: 3
+    UnlockLevel: 0
   - EffectType: 3
     Power: 4
     DamageType: 0
     BuffType: 1
     Duration: 3
+    UnlockLevel: 0
+  - EffectType: 3
+    Power: 5
+    DamageType: 0
+    BuffType: 2
+    Duration: 3
+    UnlockLevel: 5
