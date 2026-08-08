@@ -335,24 +335,22 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex, Room room)
         {
-            bool hasMeta = MetaProgressManager.HasInstance && castAction.Magic != null;
-            int powerBonus = hasMeta ? MetaProgressManager.Instance.GetMagicPowerBonus(castAction.Magic.Key) : 0;
-            int magicLevel = hasMeta ? MetaProgressManager.Instance.GetMagicUpgradeLevel(castAction.Magic.Key) : 0;
-            Func<string, int> comboLevelLookup = MetaProgressManager.HasInstance
-                ? MetaProgressManager.Instance.GetComboUpgradeLevel
-                : (Func<string, int>)null;
+            // Use Instance (auto-creates + loads Meta.json) rather than HasInstance: the
+            // manager may not exist yet mid-combat, and we must still apply upgrades and
+            // record combo discovery.
+            var meta = MetaProgressManager.Instance;
+            int powerBonus = castAction.Magic != null ? meta.GetMagicPowerBonus(castAction.Magic.Key) : 0;
+            int magicLevel = castAction.Magic != null ? meta.GetMagicUpgradeLevel(castAction.Magic.Key) : 0;
+            Func<string, int> comboLevelLookup = meta.GetComboUpgradeLevel;
 
             var result = _calculator.Execute(
                 castAction, BuffTracker, _tagTracker, _comboDetector, powerBonus, magicLevel, comboLevelLookup);
             _lastTurnLog = result.BuildLog(castAction);
 
             // Record any triggered combos as discovered (permanent, survives death).
-            if (MetaProgressManager.HasInstance)
+            foreach (var comboKey in result.TriggeredComboKeys)
             {
-                foreach (var comboKey in result.TriggeredComboKeys)
-                {
-                    MetaProgressManager.Instance.MarkComboDiscovered(comboKey);
-                }
+                meta.MarkComboDiscovered(comboKey);
             }
 
             yield return _presenter.Present(result);
@@ -387,11 +385,9 @@ namespace Assets.Scripts.Rooms
                 DungeonManager.Instance.MagicState.DrawInto(hero.HeroKey, slotIndex, magic, charges);
             }
 
-            // Record the drawn magic as discovered (permanent, survives death).
-            if (MetaProgressManager.HasInstance)
-            {
-                MetaProgressManager.Instance.MarkMagicDiscovered(magic.Key);
-            }
+            // Record the drawn magic as discovered (permanent, survives death). Use Instance
+            // (auto-creates + loads Meta.json) — the manager may not exist yet mid-combat.
+            MetaProgressManager.Instance.MarkMagicDiscovered(magic.Key);
 
             string sourceName = source != null ? source.DisplayName : "the enemy";
             ShowFloatingLabel(heroUnit.Transform.position, $"Draw {magic.DisplayName}!", new Color(0.5f, 0.8f, 1f));
