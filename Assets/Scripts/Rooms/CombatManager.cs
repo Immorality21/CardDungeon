@@ -72,6 +72,7 @@ namespace Assets.Scripts.Rooms
         private ICombatUnit _pendingAttackTarget;
         private string _lastTurnLog;
         private Room _currentCombatRoom;
+        private Party _currentParty;
         private MagicTagTracker _tagTracker;
         private ComboDetector _comboDetector;
         private EffectResolver _calculator = new EffectResolver();
@@ -96,6 +97,28 @@ namespace Assets.Scripts.Rooms
         public void RequestDrawTargets(ICombatUnit hero, List<ICombatUnit> drawableEnemies)
         {
             OnDrawTargetRequested?.Invoke(hero, drawableEnemies);
+        }
+
+        /// <summary>
+        /// Speculatively runs an enemy's behavior against the current state to preview the
+        /// action it would take next. Behaviors are pure, so this has no side effects.
+        /// </summary>
+        public EnemyActionType? PredictIntent(Enemy enemy)
+        {
+            if (!InCombat || enemy == null || !enemy.IsAlive || _currentParty == null)
+            {
+                return null;
+            }
+
+            var behavior = EnemyBehaviorFactory.Get(enemy.Archetype);
+            var context = new EnemyCombatContext
+            {
+                Heroes = GetAliveHeroes(_currentParty),
+                Allies = GetAliveEnemies().Where(u => !ReferenceEquals(u, enemy)).ToList(),
+                BuffTracker = BuffTracker,
+                SelfIsCharging = enemy.IsCharging
+            };
+            return behavior.Decide(enemy, context).Type;
         }
 
         /// <summary>Enemies in the current combat room that have a non-empty Draw list.</summary>
@@ -170,6 +193,7 @@ namespace Assets.Scripts.Rooms
         {
             InCombat = true;
             _currentCombatRoom = room;
+            _currentParty = party;
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
             _tagTracker = new MagicTagTracker();
