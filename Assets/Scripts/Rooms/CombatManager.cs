@@ -209,6 +209,7 @@ namespace Assets.Scripts.Rooms
             }
 
             _turnManager.Initialize(units);
+            EnsureHealthBars(units);
             BroadcastTurnOrder();
 
             var fullLog = "";
@@ -629,6 +630,23 @@ namespace Assets.Scripts.Rooms
         {
             var order = _turnManager.GetTurnOrder(10);
             OnTurnOrderChanged?.Invoke(order);
+        }
+
+        /// <summary>Ensures every combat unit has an HP bar (idempotent — bars self-manage visibility).</summary>
+        private void EnsureHealthBars(List<ICombatUnit> units)
+        {
+            foreach (var unit in units)
+            {
+                if (unit?.Transform == null)
+                {
+                    continue;
+                }
+                var go = unit.Transform.gameObject;
+                if (go.GetComponent<UnitHealthBar>() == null)
+                {
+                    go.AddComponent<UnitHealthBar>();
+                }
+            }
         }
 
         private void ShowDamageText(Vector3 position, int damage, Color color)
