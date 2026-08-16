@@ -148,6 +148,75 @@
     translate: -50% -50%;
 }
 
+/* FF-style two-corner combat HUD: status bottom-left, command box bottom-right. */
+.cd-dock-bottom-left {
+    position: absolute;
+    bottom: 42px;
+    left: 24px;
+}
+
+.cd-dock-bottom-right {
+    position: absolute;
+    bottom: 42px;
+    right: 24px;
+}
+
+/* ---- Party status window (hero names + HP) ---- */
+.cd-party-status {
+    min-width: 220px;
+    background-color: var(--cd-parchment);
+    border-width: 4px;
+    border-color: var(--cd-frame);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cd-party-status__header {
+    -unity-font-style: bold;
+    font-size: 16px;
+    color: var(--cd-text-light);
+    background-color: var(--cd-frame);
+    -unity-text-align: middle-center;
+    padding: 7px 10px;
+}
+
+.cd-party-status__rows {
+    padding: 8px 10px;
+}
+
+.cd-party-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    margin: 2px 0;
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 4px;
+}
+
+.cd-party-row__name {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--cd-text-dark);
+}
+
+.cd-party-row__hp {
+    font-size: 15px;
+    color: var(--cd-text-dark);
+    -unity-text-align: middle-right;
+    margin-left: 18px;
+}
+
+.cd-party-row--active {
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-accent);
+}
+
+.cd-party-row--dead {
+    opacity: 0.45;
+}
+
 /* ---- Simple bottom command bar (Examine/Action, Fight/Flee) ---- */
 .cd-bar {
     flex-direction: row;

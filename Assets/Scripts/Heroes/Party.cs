@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts.IO;
 using Assets.Scripts.Rooms;
@@ -8,9 +7,6 @@ namespace Assets.Scripts.Heroes
 {
     public class Party : MonoBehaviour
     {
-        [SerializeField] private float _fanOutDuration = 0.5f;
-        [SerializeField] private float _gatherDuration = 0.4f;
-
         public List<Hero> Heroes = new List<Hero>();
 
         public Hero Leader => Heroes.Count > 0 ? Heroes[0] : null;
@@ -83,114 +79,31 @@ namespace Assets.Scripts.Heroes
             transform.position = new Vector3(doorPos.x, doorPos.y, -1f);
         }
 
-        public Coroutine FanOutHeroes(Room room)
+        /// <summary>
+        /// Hides the travelling "party blob" sprite for the duration of combat. Hero sprites
+        /// are enabled and positioned by <see cref="Assets.Scripts.Combat.CombatStage"/>.
+        /// </summary>
+        public void HidePartyForCombat()
         {
-            return StartCoroutine(FanOutCoroutine(room));
+            if (_spriteRenderer != null)
+            {
+                _spriteRenderer.enabled = false;
+            }
         }
 
-        private IEnumerator FanOutCoroutine(Room room)
+        /// <summary>
+        /// Restores the party to its out-of-combat state: every hero snapped back to the party
+        /// centre with its combat sprite hidden, and the party blob sprite shown again. Called
+        /// by <see cref="Assets.Scripts.Combat.CombatStage"/> when the battle ends.
+        /// </summary>
+        public void RestoreAfterCombat()
         {
-            // Hide the party sprite
-            _spriteRenderer.enabled = false;
-
-            // Calculate random target positions for each alive hero
-            var targets = new List<Vector3>();
-            var aliveHeroes = new List<Hero>();
-
-            // Build avoid list starting with enemy positions
-            var avoidPositions = new List<Vector3>();
-            foreach (var enemy in room.Enemies)
-            {
-                if (enemy != null)
-                {
-                    avoidPositions.Add(enemy.transform.position);
-                }
-            }
-
             foreach (var hero in Heroes)
             {
-                if (!hero.IsAlive)
+                if (hero == null)
                 {
                     continue;
                 }
-
-                aliveHeroes.Add(hero);
-                var worldPos = room.GetRandomWalkablePosition(avoidPositions, 0.8f);
-                avoidPositions.Add(worldPos);
-                var localPos = worldPos - transform.position;
-                localPos.z = 0f;
-                targets.Add(localPos);
-
-                // Enable hero sprite for combat
-                var sr = hero.GetComponent<SpriteRenderer>();
-                if (sr != null)
-                {
-                    sr.enabled = true;
-                }
-            }
-
-            // Animate heroes from center to their positions
-            float elapsed = 0f;
-            while (elapsed < _fanOutDuration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.SmoothStep(0f, 1f, elapsed / _fanOutDuration);
-
-                for (int i = 0; i < aliveHeroes.Count; i++)
-                {
-                    aliveHeroes[i].transform.localPosition = Vector3.Lerp(Vector3.zero, targets[i], t);
-                }
-
-                yield return null;
-            }
-
-            // Snap to final positions
-            for (int i = 0; i < aliveHeroes.Count; i++)
-            {
-                aliveHeroes[i].transform.localPosition = targets[i];
-            }
-        }
-
-        public Coroutine GatherHeroes()
-        {
-            return StartCoroutine(GatherCoroutine());
-        }
-
-        private IEnumerator GatherCoroutine()
-        {
-            // Record starting positions
-            var startPositions = new List<Vector3>();
-            var aliveHeroes = new List<Hero>();
-
-            foreach (var hero in Heroes)
-            {
-                if (!hero.IsAlive)
-                {
-                    continue;
-                }
-
-                aliveHeroes.Add(hero);
-                startPositions.Add(hero.transform.localPosition);
-            }
-
-            // Animate back to center
-            float elapsed = 0f;
-            while (elapsed < _gatherDuration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.SmoothStep(0f, 1f, elapsed / _gatherDuration);
-
-                for (int i = 0; i < aliveHeroes.Count; i++)
-                {
-                    aliveHeroes[i].transform.localPosition = Vector3.Lerp(startPositions[i], Vector3.zero, t);
-                }
-
-                yield return null;
-            }
-
-            // Snap and hide hero sprites, restore party sprite
-            foreach (var hero in Heroes)
-            {
                 hero.transform.localPosition = Vector3.zero;
                 var sr = hero.GetComponent<SpriteRenderer>();
                 if (sr != null)
@@ -199,7 +112,10 @@ namespace Assets.Scripts.Heroes
                 }
             }
 
-            _spriteRenderer.enabled = true;
+            if (_spriteRenderer != null)
+            {
+                _spriteRenderer.enabled = true;
+            }
         }
 
 

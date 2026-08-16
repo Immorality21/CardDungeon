@@ -212,8 +212,11 @@ namespace Assets.Scripts.Rooms
 
             OnCombatStarted?.Invoke();
 
-            // Fan out heroes into the room
-            yield return party.FanOutHeroes(room);
+            // Raise the FF-style battle stage: heroes left, enemies right, over a background
+            // that hides the dungeon. Must run before EnsureHealthBars so the bars anchor at
+            // the battle positions. One frame lets the formation render before turn 1.
+            CombatStage.Instance.Begin(party, room);
+            yield return null;
 
             // Build the unit list
             var units = new List<ICombatUnit>();
@@ -318,14 +321,17 @@ namespace Assets.Scripts.Rooms
             {
                 outcome = CombatOutcome.PlayerDied;
                 fullLog += "\nYour party has been defeated!";
+
+                // Tear the stage down (unfreeze camera, drop background) before the death screen.
+                CombatStage.Instance.End(restoreEnemyPositions: false);
             }
             else
             {
                 outcome = CombatOutcome.Victory;
                 fullLog += "\nAll enemies defeated!";
 
-                // Gather heroes back to party
-                yield return party.GatherHeroes();
+                // Lower the battle stage and return the heroes to the party.
+                CombatStage.Instance.End(restoreEnemyPositions: false);
 
                 // Enable all doors
                 room.EnableAllDoors();

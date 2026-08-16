@@ -27,6 +27,11 @@ namespace Assets.Scripts.Rooms
         private VisualElement _heroBar;
         private VisualElement _optionWindow;
         private VisualElement _detailWindow;
+        private VisualElement _partyStatus;
+        private VisualElement _partyStatusRows;
+
+        private readonly Dictionary<Heroes.Hero, VisualElement> _partyRows = new Dictionary<Heroes.Hero, VisualElement>();
+        private readonly Dictionary<Heroes.Hero, Label> _partyHpLabels = new Dictionary<Heroes.Hero, Label>();
 
         private Label _heroTitle;
         private Label _optionTitle;
@@ -76,6 +81,8 @@ namespace Assets.Scripts.Rooms
             _heroBar = root.Q<VisualElement>("hero-bar");
             _optionWindow = root.Q<VisualElement>("option-window");
             _detailWindow = root.Q<VisualElement>("detail-window");
+            _partyStatus = root.Q<VisualElement>("party-status");
+            _partyStatusRows = root.Q<VisualElement>("party-status-rows");
 
             _heroTitle = root.Q<Label>("hero-title");
             _optionTitle = root.Q<Label>("option-title");
@@ -166,6 +173,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_heroBar, false);
             SetShown(_optionWindow, false);
             SetShown(_detailWindow, false);
+            SetShown(_partyStatus, false);
         }
 
         // ============================================================
@@ -239,6 +247,11 @@ namespace Assets.Scripts.Rooms
 
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
             CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
+            CombatManager.Instance.OnTurnExecuted += OnTurnExecuted;
+
+            BuildPartyStatus(party);
+            SetShown(_partyStatus, true);
+
             CombatManager.Instance.StartCombat(party, _currentRoom);
         }
 
@@ -246,6 +259,8 @@ namespace Assets.Scripts.Rooms
         {
             _currentHeroTurn = hero;
             _heroTitle.text = $"{hero.DisplayName}'s Turn";
+            HighlightActiveHero(hero);
+            RefreshPartyStatus();
 
             // Show Magic only when this hero has a charged slot.
             bool hasMagic = false;
@@ -392,11 +407,90 @@ namespace Assets.Scripts.Rooms
             }
         }
 
+        // ============================================================
+        //  PARTY STATUS WINDOW (FF-style, bottom-left)
+        // ============================================================
+
+        private void BuildPartyStatus(Heroes.Party party)
+        {
+            _partyStatusRows?.Clear();
+            _partyRows.Clear();
+            _partyHpLabels.Clear();
+            if (party == null || _partyStatusRows == null)
+            {
+                return;
+            }
+
+            foreach (var hero in party.Heroes)
+            {
+                if (hero == null)
+                {
+                    continue;
+                }
+
+                var row = new VisualElement();
+                row.AddToClassList("cd-party-row");
+
+                var name = new Label(hero.DisplayName);
+                name.AddToClassList("cd-party-row__name");
+                var hp = new Label();
+                hp.AddToClassList("cd-party-row__hp");
+
+                row.Add(name);
+                row.Add(hp);
+                _partyStatusRows.Add(row);
+                _partyRows[hero] = row;
+                _partyHpLabels[hero] = hp;
+            }
+
+            RefreshPartyStatus();
+        }
+
+        private void RefreshPartyStatus()
+        {
+            foreach (var pair in _partyHpLabels)
+            {
+                var hero = pair.Key;
+                var hp = pair.Value;
+                if (hero == null || hp == null)
+                {
+                    continue;
+                }
+                hp.text = $"HP {hero.Stats.Health}/{hero.Stats.MaxHealth}";
+                if (_partyRows.TryGetValue(hero, out var row) && row != null)
+                {
+                    row.EnableInClassList("cd-party-row--dead", !hero.IsAlive);
+                }
+            }
+        }
+
+        private void HighlightActiveHero(ICombatUnit active)
+        {
+            foreach (var pair in _partyRows)
+            {
+                if (pair.Value == null)
+                {
+                    continue;
+                }
+                pair.Value.EnableInClassList("cd-party-row--active", ReferenceEquals(pair.Key, active));
+            }
+        }
+
+        private void OnTurnExecuted(string log)
+        {
+            RefreshPartyStatus();
+        }
+
         private void OnCombatEnded(CombatResult result)
         {
             CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
+            CombatManager.Instance.OnTurnExecuted -= OnTurnExecuted;
             SetShown(_heroBar, false);
+            SetShown(_partyStatus, false);
+            _partyStatusRows?.Clear();
+            _partyRows.Clear();
+            _partyHpLabels.Clear();
 
             switch (result.Outcome)
             {

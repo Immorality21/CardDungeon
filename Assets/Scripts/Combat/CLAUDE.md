@@ -18,6 +18,21 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
 - **Defense formula**: diminishing returns via `defense / (defense + K)` where K=20. At 20 defense, 50% reduction.
 - **ICombatUnit** provides a `Resistances` list for per-unit elemental resistances.
 
+## Battle stage (FF side-view)
+
+- **CombatStage** (singleton, `Combat/CombatStage.cs`): presents combat as a Final-Fantasy
+  side-view battle. `Begin(party, room)` snaps + **freezes the camera** (`GameManager.SetCameraFollow(false)`),
+  raises a full-viewport **background** (sortingOrder 400, parented to the camera; solid fill or
+  a `_backgroundArt` sprite) that hides the dungeon, and relocates alive units into columns:
+  **heroes left (facing right), enemies right (facing left)**, bumping their sprite sortingOrder
+  to **600** (mandatory — enemies default to 5, *below* the background). It moves the existing
+  unit Transforms rather than making new sprites, so `UnitHealthBar`, `CombatFeedback`,
+  `FloatingText`, and the lunge all keep working at the new positions. `End(restoreEnemyPositions)`
+  restores sorting/facing, lowers the background, unfreezes the camera, and returns heroes to the
+  party (`Party.RestoreAfterCombat`). Called from `CombatManager.RunCombat` in place of the old
+  `Party.FanOutHeroes`/`GatherHeroes`. Flee is resolved pre-Fight, so enemy positions are never
+  disturbed by fleeing.
+
 ## Game feel & on-unit UI
 
 All auto-wired (no scene setup) and code/Resources-only — no manual assets:

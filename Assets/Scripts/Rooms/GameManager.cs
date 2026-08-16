@@ -22,6 +22,15 @@ namespace Assets.Scripts.Rooms
             _followParty = true;
         }
 
+        /// <summary>
+        /// Enables/disables the camera's party-follow lerp. Combat freezes it (via
+        /// <see cref="CombatStage"/>) so the battle stage stays centered on the frozen view.
+        /// </summary>
+        public void SetCameraFollow(bool follow)
+        {
+            _followParty = follow;
+        }
+
         public void EnterRoom(Room room, Door entryDoor = null)
         {
             room.Reveal();
