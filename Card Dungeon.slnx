@@ -1,0 +1,10 @@
+﻿<Solution>
+  <Project Path="CardDungeon.csproj" />
+  <Project Path="EditModeTests.csproj" />
+  <Project Path="CardDungeon.Dungeon.Editor.csproj" />
+  <Project Path="CardDungeon.Cards.Editor.csproj" />
+  <Project Path="CardDungeon.Rooms.Editor.csproj" />
+  <Project Path="CardDungeon.MainMenu.Editor.csproj" />
+  <Project Path="CardDungeon.Items.Editor.csproj" />
+  <Project Path="CardDungeon.ImmoralityGaming.Editor.csproj" />
+</Solution>

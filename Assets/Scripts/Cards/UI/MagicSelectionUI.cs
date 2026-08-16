@@ -57,6 +57,7 @@ namespace Assets.Scripts.Cards.UI
             CombatManager.Instance.OnMagicSlotsRequested += ShowSlotListForCast;
             CombatManager.Instance.OnAttackTargetRequested += ShowAttackTargets;
             CombatManager.Instance.OnDrawTargetRequested += ShowDrawTargets;
+            CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
         }
 
@@ -67,6 +68,7 @@ namespace Assets.Scripts.Cards.UI
                 CombatManager.Instance.OnMagicSlotsRequested -= ShowSlotListForCast;
                 CombatManager.Instance.OnAttackTargetRequested -= ShowAttackTargets;
                 CombatManager.Instance.OnDrawTargetRequested -= ShowDrawTargets;
+                CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
                 CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             }
         }
@@ -391,14 +393,29 @@ namespace Assets.Scripts.Cards.UI
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
 
-            var roomActionUI = FindObjectOfType<RoomActionUI>();
+            var roomActionUI = FindAnyObjectByType<RoomActionUI>();
             if (roomActionUI != null)
             {
                 roomActionUI.ReturnToHeroActions();
             }
         }
 
+        /// <summary>
+        /// Safeguard: a new hero turn must never inherit a selection window left open by the
+        /// previous turn (e.g. an abandoned Draw/Cast pick). Force everything back to Idle so
+        /// the RoomActionUI command bar is the only thing showing when a turn begins.
+        /// </summary>
+        private void OnHeroTurnStarted(ICombatUnit hero)
+        {
+            CloseAllPanels();
+        }
+
         private void OnCombatEnded(CombatResult result)
+        {
+            CloseAllPanels();
+        }
+
+        private void CloseAllPanels()
         {
             _mode = SelectionMode.Idle;
             if (_refsReady)

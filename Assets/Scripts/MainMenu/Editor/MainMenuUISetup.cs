@@ -41,7 +41,7 @@ public class MainMenuUISetup : Editor
         }
 
         // Remove the prior menu (old uGUI canvas hosting MainMenuManager, or a previous bootstrap).
-        var existing = Object.FindObjectOfType<MainMenuManager>(true);
+        var existing = Object.FindAnyObjectByType<MainMenuManager>(FindObjectsInactive.Include);
         if (existing != null)
         {
             Undo.DestroyObjectImmediate(existing.gameObject);

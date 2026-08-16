@@ -5,7 +5,7 @@ public class ScreenScaler : MonoBehaviour
     //public float orthographicSize = 5;
     public float aspect = 1.33333f;
 
-    protected new Camera camera => MainCamera.Camera;
+    protected Camera camera => MainCamera.Camera;
 
     void Awake()
     {

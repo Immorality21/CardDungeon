@@ -33,7 +33,7 @@ public class RoomActionUISetup : Editor
             return;
         }
 
-        var existing = Object.FindObjectOfType<RoomActionUI>(true);
+        var existing = Object.FindAnyObjectByType<RoomActionUI>(FindObjectsInactive.Include);
         if (existing != null)
         {
             Undo.DestroyObjectImmediate(existing.gameObject);

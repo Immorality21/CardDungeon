@@ -34,7 +34,7 @@ public class MagicSelectionUISetup : Editor
         }
 
         // Replace any prior instance (old uGUI object or a previous UITK bootstrap).
-        var existing = Object.FindObjectOfType<MagicSelectionUI>(true);
+        var existing = Object.FindAnyObjectByType<MagicSelectionUI>(FindObjectsInactive.Include);
         if (existing != null)
         {
             Undo.DestroyObjectImmediate(existing.gameObject);

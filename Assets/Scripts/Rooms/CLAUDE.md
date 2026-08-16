@@ -27,4 +27,5 @@
 - **I** — Toggle inventory
 - **Arrow keys / WASD** — Move camera
 - **Escape** — Menu back / quit
+- **Combat hotkeys** (`RoomActionUI.OnCombatHotkey`, mirror the on-screen buttons): **F** Fight / **R** Flee on the start bar; **A** Attack / **M** Magic / **D** Draw / **S** Skip on the hero command bar (M/D only when their buttons are shown). UI Toolkit routes key events to the focused element, so `RoomActionUI` focuses its panel root (`FocusRoot()`) whenever a combat bar appears.
 - `[ContextMenu("Spawn Dungeon")]` on RoomManager for editor-time generation

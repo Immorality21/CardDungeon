@@ -54,6 +54,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Enemies** → `Assets/Scripts/Enemies/CLAUDE.md`
 - **Main menu & hub UI** (incl. editor-driven UI setup) → `Assets/Scripts/MainMenu/CLAUDE.md`
 - **Persistence / save files** → `Assets/Scripts/IO/CLAUDE.md`
+- **Runtime/visual validation via the Unity MCP** (drive the running game, capture screenshots) → `docs/GAMEPLAY_VALIDATION.md`
 
 ### Key Patterns
 
@@ -71,3 +72,14 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Test coverage:** `TurnManager`, `DamageCalculator`, `CombatBuffTracker`, `MagicTagTracker`, `ComboDetector`, `EffectResolver`, `Stats`, magic upgrade power bonus + meta economy math (`MagicUpgradeTests`), extension methods
 - **MockCombatUnit:** Test helper implementing `ICombatUnit` for unit testing combat logic without MonoBehaviours
 - **Convention:** Tests use `MethodName_Scenario_ExpectedResult` naming. All combat/card logic is testable without Unity runtime (pure C# classes).
+
+### Runtime / visual validation (Unity MCP)
+
+For behaviour that unit tests and `dotnet build` can't confirm — fan-out, HP bars, floating
+text, camera shake, UI Toolkit panels, dungeon navigation, combat flow — drive the running
+game through the **Unity MCP** (`mcp__unity__*` tools, requires Unity 6). The full workflow —
+loading a scene + entering play mode, BFS-ing the door graph and walking it via door clicks,
+starting combat, applying feedback, and capturing screenshots with `Capture2DScene` (plus the
+`RunCommand` sandbox gotchas: no `System.Reflection`, `HashSet`→`List`, `GetInstanceID`
+obsolete) — is documented in **`docs/GAMEPLAY_VALIDATION.md`**. Read it before driving the
+editor.

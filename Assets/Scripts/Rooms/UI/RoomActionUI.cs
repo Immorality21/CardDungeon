@@ -21,6 +21,7 @@ namespace Assets.Scripts.Rooms
     {
         [SerializeField] private UIDocument _document;
 
+        private VisualElement _root;
         private VisualElement _mainBar;
         private VisualElement _combatBar;
         private VisualElement _heroBar;
@@ -68,6 +69,7 @@ namespace Assets.Scripts.Rooms
             {
                 return false;
             }
+            _root = root;
 
             _mainBar = root.Q<VisualElement>("main-bar");
             _combatBar = root.Q<VisualElement>("combat-bar");
@@ -103,6 +105,12 @@ namespace Assets.Scripts.Rooms
             _optionBack.clicked += OnBack;
             _detailOk.clicked += () => _detailOkAction?.Invoke();
 
+            // Keyboard hotkeys for the combat bars: F/R start-bar, A/M/D/S hero command bar.
+            // Registered on the root so the panel routes key presses here; each hotkey runs the
+            // same handler as its button, and only fires when the matching bar is visible.
+            root.RegisterCallback<KeyDownEvent>(OnCombatHotkey);
+            root.focusable = true;
+
             HideAll();
             _refsReady = true;
             return true;
@@ -133,6 +141,7 @@ namespace Assets.Scripts.Rooms
                 {
                     _entryDoor.OnDoorClicked += OnEntryDoorFlee;
                 }
+                FocusRoot();
             }
             else
             {
@@ -252,6 +261,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_drawBtn, hasDrawable);
 
             SetShown(_heroBar, true);
+            FocusRoot();
         }
 
         private void OnHeroAttack()
@@ -310,6 +320,76 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_heroBar, false);
             CombatManager.Instance.SubmitHeroAction(HeroAction.Skip);
+        }
+
+        /// <summary>
+        /// Keyboard shortcuts mirroring the combat buttons. Each key only acts when its bar is
+        /// visible, and only invokes actions whose buttons are currently shown (e.g. Magic/Draw
+        /// appear conditionally), so a hotkey can never do something the on-screen menu can't.
+        /// </summary>
+        private void OnCombatHotkey(KeyDownEvent evt)
+        {
+            if (IsShown(_combatBar))
+            {
+                if (evt.keyCode == KeyCode.F)
+                {
+                    OnFight();
+                    evt.StopPropagation();
+                }
+                else if (evt.keyCode == KeyCode.R)
+                {
+                    OnFlee();
+                    evt.StopPropagation();
+                }
+                return;
+            }
+
+            if (IsShown(_heroBar))
+            {
+                switch (evt.keyCode)
+                {
+                    case KeyCode.A:
+                        OnHeroAttack();
+                        evt.StopPropagation();
+                        break;
+                    case KeyCode.M:
+                        if (IsShown(_magicBtn))
+                        {
+                            OnHeroMagic();
+                            evt.StopPropagation();
+                        }
+                        break;
+                    case KeyCode.D:
+                        if (IsShown(_drawBtn))
+                        {
+                            OnHeroDraw();
+                            evt.StopPropagation();
+                        }
+                        break;
+                    case KeyCode.S:
+                        OnHeroSkip();
+                        evt.StopPropagation();
+                        break;
+                }
+            }
+        }
+
+        private static bool IsShown(VisualElement element)
+        {
+            return element != null && element.resolvedStyle.display == DisplayStyle.Flex;
+        }
+
+        /// <summary>
+        /// Gives the panel root keyboard focus so the combat hotkeys receive key events (UI
+        /// Toolkit routes KeyDownEvents to the focused element). Called whenever a combat bar
+        /// appears; harmless if already focused.
+        /// </summary>
+        private void FocusRoot()
+        {
+            if (_root != null && _root.panel != null)
+            {
+                _root.Focus();
+            }
         }
 
         private void OnCombatEnded(CombatResult result)

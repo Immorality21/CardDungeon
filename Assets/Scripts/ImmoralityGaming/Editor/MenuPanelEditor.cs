@@ -31,7 +31,7 @@ public class MenuPanelEditor : Editor
 
     private void ActivateThisPanel()
     {
-        var otherPanels = FindObjectOfType<MenuManager>().GetComponentsInChildren<MenuPanel>();
+        var otherPanels = FindAnyObjectByType<MenuManager>().GetComponentsInChildren<MenuPanel>();
         foreach (var panel in otherPanels)
         {
             if (panel == menuPanel)

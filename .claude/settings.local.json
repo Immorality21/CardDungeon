@@ -15,7 +15,11 @@
       "Bash(grep -v \"m_Name: $\")",
       "Bash(dotnet test:*)",
       "Bash(dotnet build:*)",
-      "WebFetch(domain:docs.unity3d.com)"
+      "WebFetch(domain:docs.unity3d.com)",
+      "mcp__unity__Unity_GetConsoleLogs",
+      "mcp__unity__Unity_RunCommand",
+      "mcp__unity__Unity_Camera_Capture",
+      "mcp__unity__Unity_SceneView_Capture2DScene"
     ]
   }
 }

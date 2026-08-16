@@ -30,7 +30,7 @@ namespace Assets.Scripts.Dungeon
         {
             if (_roomActionUI == null)
             {
-                _roomActionUI = FindObjectOfType<RoomActionUI>(true);
+                _roomActionUI = FindAnyObjectByType<RoomActionUI>(FindObjectsInactive.Include);
             }
             return _roomActionUI;
         }
