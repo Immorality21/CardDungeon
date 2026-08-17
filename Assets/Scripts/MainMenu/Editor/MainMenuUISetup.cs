@@ -40,6 +40,14 @@ public class MainMenuUISetup : Editor
             runDef = AssetDatabase.LoadAssetAtPath<RunDefinitionSO>(AssetDatabase.GUIDToAssetPath(runDefGuids[0]));
         }
 
+        Assets.Scripts.Heroes.PartyRosterSO partyRoster = null;
+        var rosterGuids = AssetDatabase.FindAssets("t:PartyRosterSO");
+        if (rosterGuids.Length > 0)
+        {
+            partyRoster = AssetDatabase.LoadAssetAtPath<Assets.Scripts.Heroes.PartyRosterSO>(
+                AssetDatabase.GUIDToAssetPath(rosterGuids[0]));
+        }
+
         // Remove the prior menu (old uGUI canvas hosting MainMenuManager, or a previous bootstrap).
         var existing = Object.FindAnyObjectByType<MainMenuManager>(FindObjectsInactive.Include);
         if (existing != null)
@@ -60,6 +68,10 @@ public class MainMenuUISetup : Editor
         if (runDef != null)
         {
             so.FindProperty("_runDefinition").objectReferenceValue = runDef;
+        }
+        if (partyRoster != null)
+        {
+            so.FindProperty("_partyRoster").objectReferenceValue = partyRoster;
         }
         so.ApplyModifiedProperties();
 

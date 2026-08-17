@@ -159,9 +159,11 @@ MonoBehaviour:
   DetachFromRoot: 0
   _roomManager: {fileID: 1478533990489703503}
   _partyPrefab: {fileID: 3142318499616511648, guid: 0973078ade93ba94d9bcadfe1844f1cd, type: 3}
+  _partyRoster: {fileID: 11400000, guid: f7d5a49e9b1c4d38e4f5a6b7c8d9e0f1, type: 2}
   _heroDefinitions:
   - {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
   - {fileID: 11400000, guid: d0d0529f46172044d9494619917b8364, type: 2}
+  _healingPotion: {fileID: 11400000, guid: b1e7c0a94f6d4a2b8c3d5e6f70819a2b, type: 2}
   _randomGenerateOn: 1
   _customSeed: 0
   _testLevel: {fileID: 11400000, guid: eac98a3da612d49499a92d78cd394b7f, type: 2}
@@ -261,6 +263,13 @@ MonoBehaviour:
   DetachFromRoot: 1
   _allItems:
   - {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
+  - {fileID: 11400000, guid: 098bb76c9957858418ab9ec1d033fcd7, type: 2}
+  - {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
+  - {fileID: 11400000, guid: 0af466e4089275b4d9535cd9f2710019, type: 2}
+  - {fileID: 11400000, guid: d584e10d49b161a4ebb6040a496455d6, type: 2}
+  - {fileID: 11400000, guid: 49f583fd473ca6144819051f4d6a6f7d, type: 2}
+  - {fileID: 11400000, guid: 48143a77cb3b71041a7cbf5a38862834, type: 2}
+  - {fileID: 11400000, guid: b1e7c0a94f6d4a2b8c3d5e6f70819a2b, type: 2}
 --- !u!1 &8158277390327044418
 GameObject:
   m_ObjectHideFlags: 0

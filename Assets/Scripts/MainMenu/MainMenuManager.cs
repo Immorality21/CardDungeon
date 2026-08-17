@@ -1,6 +1,8 @@
 using Assets.Scripts.Cards.UI;
 using Assets.Scripts.Dungeon;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
+using Assets.Scripts.Items.UI;
 using Assets.Scripts.MainMenu;
 using Assets.Scripts.Progression;
 using UnityEngine;
@@ -17,6 +19,7 @@ using UnityEngine.UIElements;
 public class MainMenuManager : MonoBehaviour
 {
     [SerializeField] private RunDefinitionSO _runDefinition;
+    [SerializeField] private PartyRosterSO _partyRoster;
     [SerializeField] private UIDocument _document;
 
     private VisualElement _homeView;
@@ -24,11 +27,13 @@ public class MainMenuManager : MonoBehaviour
     private VisualElement _completeView;
     private VisualElement _merchantView;
     private VisualElement _forgeView;
+    private VisualElement _inventoryView;
 
     private Button _continueButton;
     private Button _newRunButton;
     private Button _merchantButton;
     private Button _forgeButton;
+    private Button _inventoryButton;
     private Button _backButton;
     private Button _enterButton;
     private Button _returnButton;
@@ -40,6 +45,7 @@ public class MainMenuManager : MonoBehaviour
 
     private MerchantUI _merchant;
     private MagicForgeUI _forge;
+    private InventoryHubUI _inventory;
 
     private FileHandler _fileHandler;
     private RunSaveData _runSaveData;
@@ -67,11 +73,13 @@ public class MainMenuManager : MonoBehaviour
         _completeView = root.Q<VisualElement>("complete-view");
         _merchantView = root.Q<VisualElement>("merchant-view");
         _forgeView = root.Q<VisualElement>("forge-view");
+        _inventoryView = root.Q<VisualElement>("inventory-view");
 
         _continueButton = root.Q<Button>("continue-btn");
         _newRunButton = root.Q<Button>("new-btn");
         _merchantButton = root.Q<Button>("merchant-btn");
         _forgeButton = root.Q<Button>("forge-btn");
+        _inventoryButton = root.Q<Button>("inventory-btn");
         _backButton = root.Q<Button>("back-btn");
         _enterButton = root.Q<Button>("enter-btn");
         _returnButton = root.Q<Button>("return-btn");
@@ -88,11 +96,14 @@ public class MainMenuManager : MonoBehaviour
         _returnButton.clicked += OnRunCompleteReturn;
         _merchantButton.clicked += OnVisitMerchant;
         _forgeButton.clicked += OnVisitForge;
+        _inventoryButton.clicked += OnVisitInventory;
 
         _merchant = new MerchantUI(_merchantView);
         _forge = new MagicForgeUI(_forgeView);
+        _inventory = new InventoryHubUI(_inventoryView, _partyRoster);
         _merchant.OnClosed += ShowHomePanel;
         _forge.OnClosed += ShowHomePanel;
+        _inventory.OnClosed += ShowHomePanel;
 
         // Initial panel: run complete only when we arrived from clearing the final level.
         if (DungeonManager.ActiveRun == null && string.IsNullOrEmpty(_runSaveData.RunKey) && _justCompletedRun)
@@ -112,6 +123,7 @@ public class MainMenuManager : MonoBehaviour
         SetShown(_completeView, false);
         SetShown(_merchantView, false);
         SetShown(_forgeView, false);
+        SetShown(_inventoryView, false);
 
         bool hasActiveRun = !string.IsNullOrEmpty(_runSaveData.RunKey);
         SetShown(_continueButton, hasActiveRun);
@@ -191,6 +203,12 @@ public class MainMenuManager : MonoBehaviour
     {
         SetShown(_homeView, false);
         _forge.Show();
+    }
+
+    private void OnVisitInventory()
+    {
+        SetShown(_homeView, false);
+        _inventory.Show();
     }
 
     private void OnBack()

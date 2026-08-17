@@ -11,6 +11,7 @@
             <ui:Button name="new-btn" text="New Run" class="cd-menu-button" />
             <ui:Button name="merchant-btn" text="Visit Merchant" class="cd-menu-button" />
             <ui:Button name="forge-btn" text="Magic Forge" class="cd-menu-button" />
+            <ui:Button name="inventory-btn" text="Inventory" class="cd-menu-button" />
             <ui:VisualElement class="cd-currency-row">
                 <ui:Label name="home-gold" text="Gold: 0" />
                 <ui:Label name="home-essence" text="Essence: 0" />
@@ -76,6 +77,24 @@
             </ui:VisualElement>
 
             <ui:Button name="forge-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- INVENTORY -->
+        <ui:VisualElement name="inventory-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label text="Inventory" class="cd-title" />
+
+            <ui:VisualElement name="inventory-heroes" class="cd-tabs" />
+            <ui:Label name="inventory-stats" text="" class="cd-info-label" />
+
+            <ui:VisualElement name="inventory-tabs" class="cd-tabs">
+                <ui:Button name="tab-equipment" text="Equipment" class="cd-tab cd-tab--active" />
+                <ui:Button name="tab-consumables" text="Consumables" class="cd-tab" />
+            </ui:VisualElement>
+
+            <ui:ScrollView name="inventory-scroll" mode="Vertical" />
+            <ui:Label name="inventory-empty" text="" class="cd-info-label cd-hidden" />
+
+            <ui:Button name="inventory-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
     </ui:VisualElement>

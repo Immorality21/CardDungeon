@@ -30,7 +30,8 @@ namespace Assets.Scripts.Rooms
         Attack,
         Skip,
         Cast,
-        Draw
+        Draw,
+        UseItem
     }
 
     public class CombatResult
@@ -60,6 +61,7 @@ namespace Assets.Scripts.Rooms
         public event Action<ICombatUnit, List<MagicSlot>> OnMagicSlotsRequested;
         public event Action<ICombatUnit, List<ICombatUnit>> OnAttackTargetRequested;
         public event Action<ICombatUnit, List<ICombatUnit>> OnDrawTargetRequested;
+        public event Action<ICombatUnit, List<ItemSaveData>> OnItemListRequested;
         public event Action OnDungeonCleared;
 
         [SerializeField] private List<MagicComboSO> _cardCombos;
@@ -75,6 +77,8 @@ namespace Assets.Scripts.Rooms
         private MagicSO _pendingDrawMagic;
         private int _pendingDrawCharges;
         private int _pendingDrawSlot;
+        private ItemSO _pendingUseItem;
+        private ICombatUnit _pendingUseItemTarget;
         private ICombatUnit _pendingAttackTarget;
         private string _lastTurnLog;
         private Room _currentCombatRoom;
@@ -109,6 +113,12 @@ namespace Assets.Scripts.Rooms
         public void RequestDrawTargets(ICombatUnit hero, List<ICombatUnit> drawableEnemies)
         {
             OnDrawTargetRequested?.Invoke(hero, drawableEnemies);
+        }
+
+        /// <summary>Raises the consumable picker with the party's carried consumable stacks.</summary>
+        public void RequestItemList(ICombatUnit hero, List<ItemSaveData> consumables)
+        {
+            OnItemListRequested?.Invoke(hero, consumables);
         }
 
         /// <summary>
@@ -169,6 +179,14 @@ namespace Assets.Scripts.Rooms
             _pendingDrawCharges = charges;
             _pendingDrawSlot = slotIndex;
             _pendingAction = HeroAction.Draw;
+        }
+
+        /// <summary>Submits using a consumable <paramref name="item"/> on <paramref name="target"/>.</summary>
+        public void SubmitUseItemAction(ItemSO item, ICombatUnit target)
+        {
+            _pendingUseItem = item;
+            _pendingUseItemTarget = target;
+            _pendingAction = HeroAction.UseItem;
         }
 
         public List<ICombatUnit> GetAliveEnemies()
@@ -290,6 +308,8 @@ namespace Assets.Scripts.Rooms
                     _pendingAttackTarget = null;
                     _pendingDrawSource = null;
                     _pendingDrawMagic = null;
+                    _pendingUseItem = null;
+                    _pendingUseItemTarget = null;
                     OnHeroTurnStarted?.Invoke(unit);
 
                     while (_pendingAction == HeroAction.None)
@@ -308,6 +328,10 @@ namespace Assets.Scripts.Rooms
                     else if (_pendingAction == HeroAction.Draw && _pendingDrawMagic != null)
                     {
                         yield return ExecuteDrawAction(unit, _pendingDrawSource, _pendingDrawMagic, _pendingDrawCharges, _pendingDrawSlot);
+                    }
+                    else if (_pendingAction == HeroAction.UseItem && _pendingUseItem != null)
+                    {
+                        yield return ExecuteUseItemAction(unit, _pendingUseItem, _pendingUseItemTarget);
                     }
                     else
                     {
@@ -454,6 +478,45 @@ namespace Assets.Scripts.Rooms
             string sourceName = source != null ? source.DisplayName : "the enemy";
             ShowFloatingLabel(heroUnit.Transform.position, $"Draw {magic.DisplayName}!", new Color(0.5f, 0.8f, 1f));
             _lastTurnLog = $"{heroUnit.DisplayName} draws {magic.DisplayName} from {sourceName}!";
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
+        private IEnumerator ExecuteUseItemAction(ICombatUnit heroUnit, ItemSO item, ICombatUnit target)
+        {
+            if (item == null || item.Category != ItemCategory.Consumable)
+            {
+                _lastTurnLog = $"{heroUnit.DisplayName} has nothing to use.";
+                yield break;
+            }
+
+            // Default a missing/fallen target to the user themselves.
+            if (target == null || !target.IsAlive)
+            {
+                target = heroUnit;
+            }
+
+            // Spend the item first; if the party isn't actually carrying it, the turn is a no-op.
+            if (!InventoryManager.Instance.TryConsume(item.Key))
+            {
+                _lastTurnLog = $"{heroUnit.DisplayName} has no {item.DisplayName} left.";
+                yield break;
+            }
+
+            switch (item.ConsumableEffect)
+            {
+                case ConsumableEffectType.RestoreHealth:
+                    int max = target is Hero targetHero ? targetHero.GetEffectiveMaxHealth() : target.Stats.MaxHealth;
+                    int before = target.Stats.Health;
+                    target.Stats.Health = Mathf.Min(target.Stats.Health + item.ConsumableAmount, max);
+                    int healed = target.Stats.Health - before;
+                    ShowDamageText(target.Transform.position, healed, Color.green);
+                    _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, restoring {healed} HP.";
+                    break;
+                default:
+                    _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName}.";
+                    break;
+            }
+
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -737,11 +800,7 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
-            // Kill rewards: loot (per drop), XP (awarded now), gold (accumulated, banked on clear).
-            if (enemy.LootItem != null)
-            {
-                _combatLoot.Add(enemy.LootItem);
-            }
+            // Kill rewards: XP (awarded now), gold (accumulated, banked on clear).
             int xp = enemy.Definition != null ? enemy.Definition.XpReward : 0;
             int gold = enemy.Definition != null ? enemy.Definition.GoldReward : 0;
             if (xp > 0)
@@ -755,7 +814,16 @@ namespace Assets.Scripts.Rooms
                 MetaProgressManager.Instance.AddPendingGold(gold);
             }
 
-            InventoryManager.Instance.TryDropItem(enemy.LootItem);
+            // Loot: roll once (rarity + run-depth scaled) and only surface it in the victory
+            // summary if it actually dropped into the bag.
+            var loot = enemy.LootItem;
+            if (loot != null &&
+                LootRoller.ShouldDrop(loot, DungeonManager.RunLevelIndex, UnityEngine.Random.Range(0f, 1f)))
+            {
+                InventoryManager.Instance.AddItem(loot);
+                Debug.Log($"Item dropped: {loot.DisplayName} ({loot.Key})");
+                _combatLoot.Add(loot);
+            }
             _turnManager.RemoveUnit(enemy);
             room.Enemies.Remove(enemy);
             // Removed from combat immediately; the object lingers only for its pop/fade.

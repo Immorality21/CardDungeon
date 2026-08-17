@@ -4,6 +4,7 @@ using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
+using Assets.Scripts.Items;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -64,7 +65,7 @@ namespace Assets.Scripts.Rooms
         private Door _entryDoor;
 
         // Cursor-driven command menu (FFX-style selection list).
-        private enum HeroCommand { Attack, Magic, Draw, Skip }
+        private enum HeroCommand { Attack, Magic, Draw, Item, Skip }
 
         private struct CommandEntry
         {
@@ -353,7 +354,27 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.RequestDrawTargets(_currentHeroTurn, drawable);
         }
 
-        /// <summary>Called by the selection UI to return to the Attack/Magic/Draw/Skip window.</summary>
+        private void OnHeroItem()
+        {
+            SetShown(_heroBar, false);
+
+            if (!InventoryManager.HasInstance)
+            {
+                SetShown(_heroBar, true);
+                return;
+            }
+
+            var consumables = InventoryManager.Instance.GetConsumables();
+            if (consumables.Count == 0)
+            {
+                SetShown(_heroBar, true);
+                return;
+            }
+
+            CombatManager.Instance.RequestItemList(_currentHeroTurn, consumables);
+        }
+
+        /// <summary>Called by the selection UI to return to the Attack/Magic/Draw/Item/Skip window.</summary>
         public void ReturnToHeroActions()
         {
             if (EnsureRefs())
@@ -391,10 +412,12 @@ namespace Assets.Scripts.Rooms
                 hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
             }
             bool hasDrawable = CombatManager.Instance.GetDrawableEnemies().Count > 0;
+            bool hasItem = InventoryManager.HasInstance && InventoryManager.Instance.HasAnyConsumable();
 
             _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
             _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Magic", Enabled = hasMagic });
             _commands.Add(new CommandEntry { Command = HeroCommand.Draw, Label = "Draw", Enabled = hasDrawable });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem });
             _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
 
             for (int i = 0; i < _commands.Count; i++)
@@ -531,6 +554,9 @@ namespace Assets.Scripts.Rooms
                 case HeroCommand.Draw:
                     OnHeroDraw();
                     break;
+                case HeroCommand.Item:
+                    OnHeroItem();
+                    break;
                 case HeroCommand.Skip:
                     OnHeroSkip();
                     break;
@@ -638,6 +664,10 @@ namespace Assets.Scripts.Rooms
                         break;
                     case KeyCode.D:
                         InvokeCommandShortcut(HeroCommand.Draw);
+                        evt.StopPropagation();
+                        break;
+                    case KeyCode.T:
+                        InvokeCommandShortcut(HeroCommand.Item);
                         evt.StopPropagation();
                         break;
                     case KeyCode.S:

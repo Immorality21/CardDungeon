@@ -1,20 +1,20 @@
-using System;
 using System.Collections.Generic;
-using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
 using ImmoralityGaming.Fundamentals;
-using UnityEngine;
 
 namespace Assets.Scripts.Resources
 {
+    /// <summary>
+    /// Owns the persistent per-resource carry caps (e.g. the healing-potion "belt" size the
+    /// Merchant enlarges). Live consumable quantities now live in the item inventory
+    /// (<c>InventoryManager</c>); this class only tracks how many of each the party may carry.
+    /// </summary>
     public class PartyResourceManager : SingletonBehaviour<PartyResourceManager>
     {
         private const int DEFAULT_HEALING_POTION_MAX = 2;
-        private const int HEALING_POTION_AMOUNT = 5;
 
         private FileHandler _fileHandler;
         private ResourceMaxSaveData _maxData;
-        private Dictionary<PartyResourceType, int> _current = new Dictionary<PartyResourceType, int>();
 
         protected override void Awake()
         {
@@ -24,19 +24,7 @@ namespace Assets.Scripts.Resources
         }
 
         /// <summary>
-        /// Returns the current amount of a resource.
-        /// </summary>
-        public int GetCurrent(PartyResourceType type)
-        {
-            if (_current.TryGetValue(type, out int value))
-            {
-                return value;
-            }
-            return 0;
-        }
-
-        /// <summary>
-        /// Returns the global maximum for a resource.
+        /// Returns the carry cap ("belt" size) for a resource.
         /// </summary>
         public int GetMax(PartyResourceType type)
         {
@@ -51,7 +39,7 @@ namespace Assets.Scripts.Resources
         }
 
         /// <summary>
-        /// Sets the global maximum for a resource and persists it.
+        /// Sets the carry cap for a resource and persists it.
         /// </summary>
         public void SetMax(PartyResourceType type, int max)
         {
@@ -73,81 +61,12 @@ namespace Assets.Scripts.Resources
             _fileHandler.Save(_maxData);
         }
 
-        /// <summary>
-        /// Replenishes all resources to their maximums. Call when entering a new dungeon.
-        /// </summary>
-        public void ReplenishAll()
-        {
-            foreach (PartyResourceType type in Enum.GetValues(typeof(PartyResourceType)))
-            {
-                _current[type] = GetMax(type);
-            }
-        }
-
-        /// <summary>
-        /// Restores current resource amounts from dungeon save data.
-        /// </summary>
-        public void RestoreFromSave(List<ResourceSaveData> saved)
-        {
-            _current.Clear();
-
-            if (saved == null)
-            {
-                return;
-            }
-
-            foreach (var entry in saved)
-            {
-                _current[entry.ResourceType] = entry.Current;
-            }
-        }
-
-        /// <summary>
-        /// Builds a list of current resource states for saving in dungeon data.
-        /// </summary>
-        public List<ResourceSaveData> GetSaveData()
-        {
-            var list = new List<ResourceSaveData>();
-            foreach (var kvp in _current)
-            {
-                list.Add(new ResourceSaveData
-                {
-                    ResourceType = kvp.Key,
-                    Current = kvp.Value
-                });
-            }
-            return list;
-        }
-
-        /// <summary>
-        /// Uses a healing potion on the target hero. Returns true if successful.
-        /// </summary>
-        public bool UseHealingPotion(Hero target)
-        {
-            if (GetCurrent(PartyResourceType.HealingPotion) <= 0)
-            {
-                return false;
-            }
-
-            int effectiveMax = target.GetEffectiveMaxHealth();
-            if (target.Stats.Health >= effectiveMax)
-            {
-                return false;
-            }
-
-            _current[PartyResourceType.HealingPotion]--;
-            target.Stats.Health = Mathf.Min(target.Stats.Health + HEALING_POTION_AMOUNT, effectiveMax);
-
-            Debug.Log($"Used healing potion on {target.HeroKey}. HP: {target.Stats.Health}/{effectiveMax}");
-            return true;
-        }
-
         private void LoadMaximums()
         {
             _maxData = _fileHandler.Load<ResourceMaxSaveData>();
 
             // Ensure defaults exist for all resource types
-            foreach (PartyResourceType type in Enum.GetValues(typeof(PartyResourceType)))
+            foreach (PartyResourceType type in System.Enum.GetValues(typeof(PartyResourceType)))
             {
                 bool found = false;
                 foreach (var entry in _maxData.Entries)

@@ -291,6 +291,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _runDefinition: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
+  _partyRoster: {fileID: 11400000, guid: f7d5a49e9b1c4d38e4f5a6b7c8d9e0f1, type: 2}
   _document: {fileID: 741711302}
 --- !u!114 &741711302
 MonoBehaviour:

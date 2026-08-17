@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4a2f19b6e7d4c358a1b2d3e4f5a6b7c, type: 3}
+  m_Name: ItemCatalog
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemCatalogSO
+  Items:
+  - {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
+  - {fileID: 11400000, guid: 098bb76c9957858418ab9ec1d033fcd7, type: 2}
+  - {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
+  - {fileID: 11400000, guid: 0af466e4089275b4d9535cd9f2710019, type: 2}
+  - {fileID: 11400000, guid: d584e10d49b161a4ebb6040a496455d6, type: 2}
+  - {fileID: 11400000, guid: 49f583fd473ca6144819051f4d6a6f7d, type: 2}
+  - {fileID: 11400000, guid: 48143a77cb3b71041a7cbf5a38862834, type: 2}
+  - {fileID: 11400000, guid: b1e7c0a94f6d4a2b8c3d5e6f70819a2b, type: 2}

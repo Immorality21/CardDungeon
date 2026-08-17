@@ -109,7 +109,9 @@ namespace Assets.Scripts.Combat
 
         private int GetEffectiveAgility(ICombatUnit unit)
         {
-            int baseAgility = unit.Stats.Agility;
+            // Item/level bonuses fold in via the unit's own effective stat; combat buffs/debuffs
+            // stack on top of that.
+            int baseAgility = unit.GetEffectiveAgility();
             if (_buffTracker != null)
             {
                 baseAgility += _buffTracker.GetBuffAmount(unit, StatType.Agility);

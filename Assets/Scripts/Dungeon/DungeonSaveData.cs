@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.IO;
-using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
 
 namespace Assets.Scripts.Dungeon
@@ -14,7 +13,6 @@ namespace Assets.Scripts.Dungeon
         public string LevelKey;
         public int CurrentRoomIndex;
         public List<RoomSaveData> Rooms = new List<RoomSaveData>();
-        public List<ResourceSaveData> Resources = new List<ResourceSaveData>();
         public List<MagicSlotSaveData> EquippedMagic = new List<MagicSlotSaveData>();
 
         public string GetFileName()

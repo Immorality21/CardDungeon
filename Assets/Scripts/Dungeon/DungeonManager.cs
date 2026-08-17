@@ -22,7 +22,23 @@ namespace Assets.Scripts.Dungeon
         private GameObject _partyPrefab;
 
         [SerializeField]
+        [Tooltip("Shared party roster (single source of truth, also read by the hub). Falls back to " +
+                 "_heroDefinitions if unset.")]
+        private PartyRosterSO _partyRoster;
+
+        [SerializeField]
         private List<HeroSO> _heroDefinitions;
+
+        [SerializeField]
+        [Tooltip("Healing-potion consumable topped up to the belt cap on each fresh dungeon entry.")]
+        private ItemSO _healingPotion;
+
+        private List<HeroSO> RosterHeroes()
+        {
+            return _partyRoster != null && _partyRoster.Heroes.Count > 0
+                ? _partyRoster.Heroes
+                : _heroDefinitions;
+        }
 
         private RoomActionUI _roomActionUI;
 
@@ -222,7 +238,7 @@ namespace Assets.Scripts.Dungeon
             // Spawn party in the chosen starting room
             var partyObj = Instantiate(_partyPrefab, transform);
             Party = partyObj.GetComponent<Party>();
-            Party.Initialize(_heroDefinitions);
+            Party.Initialize(RosterHeroes());
             Party.HealAll();
             Party.PlaceInRoom(startRoom);
             GameManager.Instance.Initialize(Party, GetRoomActionUI());
@@ -244,10 +260,12 @@ namespace Assets.Scripts.Dungeon
                 MagicState.Restore(carried.EquippedMagic, MagicCatalog.Instance.GetMagic);
             }
 
-            // Replenish party resources to their maximums for the new dungeon
-            if (PartyResourceManager.Instance != null)
+            // Top the healing-potion belt back up to its cap for the new dungeon. Consumables
+            // now live in the item inventory; the "belt" is just the carry cap the Merchant raises.
+            if (_healingPotion != null && InventoryManager.HasInstance && PartyResourceManager.Instance != null)
             {
-                PartyResourceManager.Instance.ReplenishAll();
+                int cap = PartyResourceManager.Instance.GetMax(PartyResourceType.HealingPotion);
+                InventoryManager.Instance.TopUpConsumableToCap(_healingPotion, cap);
             }
 
             // Initialize save manager and persist initial state
@@ -293,7 +311,7 @@ namespace Assets.Scripts.Dungeon
             var currentRoom = rooms[saveData.CurrentRoomIndex];
             var partyObj = Instantiate(_partyPrefab, transform);
             Party = partyObj.GetComponent<Party>();
-            Party.Initialize(_heroDefinitions);
+            Party.Initialize(RosterHeroes());
             Party.PlaceInRoom(currentRoom);
             GameManager.Instance.Initialize(Party, GetRoomActionUI());
 
@@ -319,11 +337,8 @@ namespace Assets.Scripts.Dungeon
                 MagicState.Restore(saveData.EquippedMagic, MagicCatalog.Instance.GetMagic);
             }
 
-            // Restore party resource state from save
-            if (PartyResourceManager.Instance != null)
-            {
-                PartyResourceManager.Instance.RestoreFromSave(saveData.Resources);
-            }
+            // Consumable quantities are part of the item inventory now (committed on level-clear),
+            // so there is no separate per-dungeon resource state to restore here.
 
             var restoreLevelKey = _level != null ? _level.Key : _manualLayout != null ? _manualLayout.Key : "unknown";
             DungeonSaveManager.Instance.Initialize(saveData.Seed, restoreLevelKey, rooms);

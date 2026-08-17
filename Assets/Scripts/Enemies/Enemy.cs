@@ -81,6 +81,11 @@ namespace Assets.Scripts.Enemies
             return Stats.Defense;
         }
 
+        public int GetEffectiveAgility()
+        {
+            return Stats.Agility;
+        }
+
         private Sprite GetIcon()
         {
             if (_spriteRenderer == null)

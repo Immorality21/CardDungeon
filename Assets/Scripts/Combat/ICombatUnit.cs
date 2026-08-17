@@ -15,5 +15,6 @@ namespace Assets.Scripts.Combat
         List<Resistance> Resistances { get; }
         int GetEffectiveAttack();
         int GetEffectiveDefense();
+        int GetEffectiveAgility();
     }
 }

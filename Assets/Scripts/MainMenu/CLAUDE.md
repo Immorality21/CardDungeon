@@ -17,10 +17,11 @@ All UI is **UI Toolkit** (UXML + USS), not uGUI. The pattern, used identically b
 - A **controller MonoBehaviour** on a `UIDocument` queries elements by name (`root.Q<Button>("new-btn")`), registers `clicked` callbacks, and toggles views via `style.display`. Dynamic lists (magic slots, forge rows, targets) are built as `VisualElement`s in code — no prefabs.
 - An **editor bootstrap** (menu: **Tools → MainMenu → Setup Main Menu UI**) creates the shared `PanelSettings` asset (`Assets/UI/CardDungeonPanelSettings.asset`, sorting order 100 so UITK renders above any world/uGUI), drops a `UIDocument` into the open scene wired to the UXML, and wires the controller's serialized refs. Re-run after editing structure, then save the scene. The combat scene has its own bootstraps (**Tools → Rooms → Setup Room Action UI**, **Tools → Cards → Setup Magic Selection UI**).
 
-`MainMenuManager` owns one `UIDocument` holding all five views (home / progress / complete / merchant / forge) and toggles them.
+`MainMenuManager` owns one `UIDocument` holding all six views (home / progress / complete / merchant / forge / inventory) and toggles them.
 
 ## Panels
 
 - **MerchantUI** / **MagicForgeUI** are **plain view-controllers** (not MonoBehaviours): each takes the `VisualElement` subtree for its view, queries its controls, and exposes `Show()`/`Hide()` + an `OnClosed` event. `MainMenuManager` constructs them from the queried `merchant-view` / `forge-view` subtrees.
-  - **MerchantUI** — Gold sink (enlarge potion belt). See the Progression guide.
+  - **MerchantUI** — Gold sink (enlarge potion belt = the healing-potion carry cap). See the Progression guide.
+  - **InventoryHubUI** (`Items/UI/InventoryHubUI.cs`) — the between-runs gear screen (equipment is managed **only** here now; the old in-dungeon `InventoryUI` is retired). Equipment / Consumables tabs; a hero selector (equip is per-hero, keyed by `HeroSO.Label`); click-to-equip un-equipped gear, click-to-unequip a slot; a base+bonus stat preview. Reads the roster from a `PartyRosterSO` (the hub has no live `Party`) and all item state from `InventoryManager` (scene-independent via the Resources `ItemCatalog`). Wired in `MainMenuManager` exactly like the Merchant/Forge; `_partyRoster` is wired by the setup bootstrap (`AssetDatabase.FindAssets("t:PartyRosterSO")`).
   - **MagicForgeUI** — Essence sink + collection grid with All Magic / Combos tabs and click-to-inspect/upgrade; `?` for undiscovered. **Requires a `MagicCatalog` in the scene** (and a `MagicComboCatalog` for the Combos tab) or it logs a warning / shows empty. See the Progression guide.

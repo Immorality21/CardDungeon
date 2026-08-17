@@ -25,6 +25,14 @@ namespace Tests.EditMode
             return Stats.Defense;
         }
 
+        // When set, models item/level agility bonuses layered on top of the raw stat.
+        public int? EffectiveAgilityOverride { get; set; }
+
+        public int GetEffectiveAgility()
+        {
+            return EffectiveAgilityOverride ?? Stats.Agility;
+        }
+
         public MockCombatUnit(string name, int attack, int defense, int health, int agility = 5, bool isHero = true)
         {
             DisplayName = name;

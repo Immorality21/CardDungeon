@@ -88,5 +88,13 @@ namespace Assets.Scripts.Heroes
             float baseVal = Stats.MaxHealth + raw[StatType.MaxHealth];
             return Mathf.RoundToInt(baseVal * (1f + pct[StatType.MaxHealth] / 100f));
         }
+
+        public int GetEffectiveAgility()
+        {
+            var raw = InventoryManager.Instance.ComputeRawBonuses(HeroKey);
+            var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
+            float baseVal = Stats.Agility + raw[StatType.Agility];
+            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.Agility] / 100f));
+        }
     }
 }

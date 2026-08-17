@@ -541,7 +541,7 @@ namespace Tests.EditMode
 
             var result = _calculator.Execute(action, _buffTracker);
 
-            Assert.AreEqual("Hero plays Fireball!", result.BuildLog(action));
+            Assert.AreEqual("Hero casts Fireball!", result.BuildLog(action));
         }
 
         [Test]
@@ -557,7 +557,7 @@ namespace Tests.EditMode
 
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
-            Assert.AreEqual("Hero plays Fireball! COMBO: Ignite!", result.BuildLog(action));
+            Assert.AreEqual("Hero casts Fireball! COMBO: Ignite!", result.BuildLog(action));
         }
 
         [Test]

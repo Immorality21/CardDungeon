@@ -4,6 +4,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
+using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -26,7 +27,9 @@ namespace Assets.Scripts.Cards.UI
             AttackTarget,
             DrawTarget,
             DrawChoice,
-            DrawPlacement
+            DrawPlacement,
+            ItemChoice,
+            ItemTarget
         }
 
         [SerializeField] private UIDocument _document;
@@ -51,6 +54,7 @@ namespace Assets.Scripts.Cards.UI
         private Enemy _drawSource;
         private MagicSO _drawMagic;
         private int _drawCharges;
+        private ItemSO _selectedItem;
 
         // Cursor-driven keyboard navigation over the currently shown selectable rows.
         private readonly List<Button> _navRows = new List<Button>();
@@ -64,6 +68,7 @@ namespace Assets.Scripts.Cards.UI
             CombatManager.Instance.OnMagicSlotsRequested += ShowSlotListForCast;
             CombatManager.Instance.OnAttackTargetRequested += ShowAttackTargets;
             CombatManager.Instance.OnDrawTargetRequested += ShowDrawTargets;
+            CombatManager.Instance.OnItemListRequested += ShowItemList;
             CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
         }
@@ -75,6 +80,7 @@ namespace Assets.Scripts.Cards.UI
                 CombatManager.Instance.OnMagicSlotsRequested -= ShowSlotListForCast;
                 CombatManager.Instance.OnAttackTargetRequested -= ShowAttackTargets;
                 CombatManager.Instance.OnDrawTargetRequested -= ShowDrawTargets;
+                CombatManager.Instance.OnItemListRequested -= ShowItemList;
                 CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
                 CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             }
@@ -375,6 +381,77 @@ namespace Assets.Scripts.Cards.UI
         }
 
         // ============================================================
+        //  ITEM (CONSUMABLE) FLOW
+        // ============================================================
+
+        private void ShowItemList(ICombatUnit hero, List<ItemSaveData> consumables)
+        {
+            if (!EnsureRefs())
+            {
+                return;
+            }
+
+            _currentHero = hero;
+            _selectedItem = null;
+            _mode = SelectionMode.ItemChoice;
+            _listTitle.text = "Item";
+            PopulateItemRows(consumables);
+        }
+
+        private void PopulateItemRows(List<ItemSaveData> consumables)
+        {
+            _listScroll.Clear();
+            ClearNav();
+
+            foreach (var stack in consumables)
+            {
+                var so = InventoryManager.Instance.GetItemSO(stack.ItemKey);
+                bool valid = so != null && stack.Quantity > 0;
+                string name = valid ? so.DisplayName : "(none)";
+                string meta = valid ? $"x{stack.Quantity}" : string.Empty;
+                Sprite icon = valid ? so.Icon : null;
+
+                var captured = so;
+                _listScroll.Add(CreateRow(icon, name, meta, valid, () => OnItemSelected(captured)));
+            }
+
+            ShowPanel(_listPanel);
+            HidePanel(_targetPanel);
+            BeginNavigation();
+        }
+
+        private void OnItemSelected(ItemSO item)
+        {
+            if (item == null)
+            {
+                ReturnToActions();
+                return;
+            }
+
+            _selectedItem = item;
+
+            // Consumables currently restore/aid allies — target a hero. Single ally auto-targets.
+            var allies = CombatManager.Instance.GetAliveHeroes(GameManager.Instance.Party);
+            if (allies.Count <= 1)
+            {
+                SubmitUseItem(allies.Count == 1 ? allies[0] : _currentHero);
+                return;
+            }
+
+            _mode = SelectionMode.ItemTarget;
+            PopulateTargetRows(allies, $"Use {item.DisplayName} on");
+        }
+
+        private void SubmitUseItem(ICombatUnit target)
+        {
+            _mode = SelectionMode.Idle;
+            HidePanel(_listPanel);
+            HidePanel(_targetPanel);
+            ReleaseFocus();
+            CombatManager.Instance.SubmitUseItemAction(_selectedItem, target);
+        }
+
+        // ============================================================
         //  TARGET ROWS (shared)
         // ============================================================
 
@@ -409,6 +486,9 @@ namespace Assets.Scripts.Cards.UI
                 case SelectionMode.DrawTarget:
                     OnDrawSourceSelected(target);
                     return;
+                case SelectionMode.ItemTarget:
+                    SubmitUseItem(target);
+                    return;
                 default:
                     SubmitCast(new List<ICombatUnit> { target });
                     return;
@@ -428,12 +508,19 @@ namespace Assets.Scripts.Cards.UI
         {
             HidePanel(_targetPanel);
 
-            // Cast targeting steps back to the slot list; everything else returns to actions.
+            // Cast targeting steps back to the slot list; item targeting steps back to the item
+            // list; everything else returns to actions.
             if (_mode == SelectionMode.Cast && _currentHero is Hero hero &&
                 DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 _listTitle.text = "Magic";
                 PopulateSlotRows(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
+                return;
+            }
+
+            if (_mode == SelectionMode.ItemTarget)
+            {
+                ShowItemList(_currentHero, InventoryManager.Instance.GetConsumables());
                 return;
             }
 

@@ -28,6 +28,25 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void GetNextUnit_UsesEffectiveAgility_NotRawStat()
+        {
+            // Both have the same raw agility, but "Geared" carries item agility (effective override).
+            // Turn scheduling must honor the effective value, else item agility is a dead stat.
+            var geared = new MockCombatUnit("Geared", attack: 1, defense: 1, health: 10, agility: 5)
+            {
+                EffectiveAgilityOverride = 20
+            };
+            var bare = new MockCombatUnit("Bare", attack: 1, defense: 1, health: 10, agility: 5);
+
+            _turnManager.Initialize(new List<ICombatUnit> { bare, geared });
+
+            var next = _turnManager.GetNextUnit();
+
+            Assert.AreEqual("Geared", next.DisplayName,
+                "TurnManager should schedule on GetEffectiveAgility(), not Stats.Agility");
+        }
+
+        [Test]
         public void GetNextUnit_EqualAgility_BothGetTurns()
         {
             var a = new MockCombatUnit("A", attack: 1, defense: 1, health: 10, agility: 10);

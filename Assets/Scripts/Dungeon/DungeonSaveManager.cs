@@ -1,6 +1,5 @@
 using Assets.Scripts.Cards;
 using Assets.Scripts.IO;
-using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
 using ImmoralityGaming.Fundamentals;
 using System.Collections.Generic;
@@ -46,11 +45,6 @@ namespace Assets.Scripts.Dungeon
                     IsExplored = room.IsExplored,
                     EnemyCount = room.Enemies.Count(e => e != null && e.IsAlive)
                 });
-            }
-
-            if (PartyResourceManager.Instance != null)
-            {
-                data.Resources = PartyResourceManager.Instance.GetSaveData();
             }
 
             if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
