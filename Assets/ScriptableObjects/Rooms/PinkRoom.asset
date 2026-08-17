@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af198de09aeca534b959292a4b71d567, type: 3}
-  m_Name: AnalRoom
+  m_Name: PinkRoom
   m_EditorClassIdentifier: 
-  Name: Anulingus room
-  Width: 3
+  Name: Pink room
+  Width: 2
   Height: 3
-  Color: {r: 0.38679248, g: 0.15331188, b: 0, a: 1}
+  Color: {r: 0.8584906, g: 0.06479175, b: 0.6943518, a: 1}
   ExamineOptions:
   - Search for cavaties
   - Look at the ceiling

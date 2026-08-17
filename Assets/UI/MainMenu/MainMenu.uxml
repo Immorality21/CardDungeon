@@ -31,7 +31,7 @@
         <!-- RUN COMPLETE -->
         <ui:VisualElement name="complete-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
             <ui:Label text="Victory!" class="cd-title cd-title--large" />
-            <ui:Label text="You have conquered the dungeon.\nYour heroes stand victorious." class="cd-info-label" />
+            <ui:Label text="You have conquered the dungeon. Your heroes stand victorious." class="cd-info-label" />
             <ui:Button name="return-btn" text="Return" class="cd-menu-button" />
         </ui:VisualElement>
 
@@ -80,7 +80,11 @@
         </ui:VisualElement>
 
         <!-- INVENTORY -->
-        <ui:VisualElement name="inventory-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+        <!-- Fixed height: this view changes content between tabs (hero row / stats hide on the
+             Consumables tab). With the translate-centered cd-dock-center, a size change re-centers
+             the render but leaves UITK's input hit-testing on the old transform, offsetting every
+             click. A constant height keeps render and hit-testing aligned. -->
+        <ui:VisualElement name="inventory-view" class="cd-window cd-window--flush cd-window--fixed cd-dock-center cd-hidden">
             <ui:Label text="Inventory" class="cd-title" />
 
             <ui:VisualElement name="inventory-heroes" class="cd-tabs" />
@@ -91,9 +95,10 @@
                 <ui:Button name="tab-consumables" text="Consumables" class="cd-tab" />
             </ui:VisualElement>
 
-            <ui:ScrollView name="inventory-scroll" mode="Vertical" />
+            <ui:ScrollView name="inventory-scroll" class="cd-inv-scroll" mode="Vertical" />
             <ui:Label name="inventory-empty" text="" class="cd-info-label cd-hidden" />
 
+            <ui:Label name="inventory-hint" text="↑↓ select · Enter equip/unequip · ←→ tab · Q/E hero · Esc back" class="cd-info-label cd-hint" />
             <ui:Button name="inventory-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 

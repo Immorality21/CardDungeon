@@ -11,5 +11,6 @@ namespace Assets.Scripts.Enemies.Behaviors
         public List<ICombatUnit> Allies;        // living enemy allies, excluding self
         public CombatBuffTracker BuffTracker;
         public bool SelfIsCharging;             // whether this enemy is mid-charge
+        public int SelfTurnCount;               // turns this enemy has already taken (cadence-based behaviors)
     }
 }

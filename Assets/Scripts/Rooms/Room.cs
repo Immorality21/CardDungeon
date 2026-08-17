@@ -98,6 +98,19 @@ namespace Assets.Scripts.Rooms
             }
         }
 
+        /// <summary>Disables every door — used for boss rooms so the fight can't be fled.</summary>
+        public void DisableAllDoors()
+        {
+            foreach (var door in Doors)
+            {
+                var col = door.GetComponent<Collider2D>();
+                if (col != null)
+                {
+                    col.enabled = false;
+                }
+            }
+        }
+
         public Vector3 GetCenter()
         {
             return new Vector3(

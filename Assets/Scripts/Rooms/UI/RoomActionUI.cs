@@ -47,6 +47,9 @@ namespace Assets.Scripts.Rooms
         private Button _optionBack;
         private Button _detailOk;
 
+        private VisualElement _bossBanner;
+        private Label _bossBannerName;
+
         private VisualElement _commandList;
         private VisualElement _turnOrder;
         private VisualElement _turnOrderList;
@@ -126,6 +129,9 @@ namespace Assets.Scripts.Rooms
             _optionBack = root.Q<Button>("option-back");
             _detailOk = root.Q<Button>("detail-ok");
 
+            _bossBanner = root.Q<VisualElement>("boss-banner");
+            _bossBannerName = root.Q<Label>("boss-banner-name");
+
             _examineBtn.clicked += OnExamine;
             _actionBtn.clicked += OnAction;
             _fightBtn.clicked += OnFight;
@@ -180,12 +186,30 @@ namespace Assets.Scripts.Rooms
             SetShown(_combatBar, hasEnemy);
             SetShown(_mainBar, !hasEnemy);
 
+            // Boss rooms: announce the boss and remove Flee — the climax can't be skipped.
+            var boss = room.Enemies.FirstOrDefault(e => e != null && e.IsAlive && e.IsBoss);
+            bool isBossRoom = hasEnemy && boss != null;
+            SetShown(_fleeBtn, hasEnemy && !isBossRoom);
+            SetShown(_bossBanner, isBossRoom);
+            if (isBossRoom && _bossBannerName != null)
+            {
+                _bossBannerName.text = boss.DisplayName;
+            }
+
             if (hasEnemy)
             {
-                room.SetDoorsEnabled(entryDoor);
-                if (_entryDoor != null)
+                if (isBossRoom)
                 {
-                    _entryDoor.OnDoorClicked += OnEntryDoorFlee;
+                    // Seal the room — no door flee — so the boss must be fought.
+                    room.DisableAllDoors();
+                }
+                else
+                {
+                    room.SetDoorsEnabled(entryDoor);
+                    if (_entryDoor != null)
+                    {
+                        _entryDoor.OnDoorClicked += OnEntryDoorFlee;
+                    }
                 }
                 FocusRoot();
             }
@@ -209,6 +233,7 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_mainBar, false);
             SetShown(_combatBar, false);
+            SetShown(_bossBanner, false);
             SetShown(_heroBar, false);
             SetShown(_optionWindow, false);
             SetShown(_detailWindow, false);
@@ -873,7 +898,23 @@ namespace Assets.Scripts.Rooms
             SetShown(_optionWindow, false);
             SetShown(_detailWindow, false);
 
-            _victoryTitle.text = result.LevelCleared ? "Level Cleared!" : "Victory!";
+            // Escalate the copy toward the climax: run complete > boss slain > level cleared > victory.
+            if (result.RunCompleted)
+            {
+                _victoryTitle.text = "Dungeon Conquered!";
+            }
+            else if (result.BossDefeated)
+            {
+                _victoryTitle.text = "Boss Slain!";
+            }
+            else if (result.LevelCleared)
+            {
+                _victoryTitle.text = "Level Cleared!";
+            }
+            else
+            {
+                _victoryTitle.text = "Victory!";
+            }
             _victoryRewards.Clear();
 
             // Loot — a header row, then an icon+name line per item.

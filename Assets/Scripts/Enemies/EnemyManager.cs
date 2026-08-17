@@ -108,6 +108,58 @@ namespace Assets.Scripts.Enemies
             }
         }
 
+        /// <summary>
+        /// Removes and destroys every enemy currently in <paramref name="room"/> (used to clear an
+        /// exit room before dropping a boss in, so the climax is a clean fight).
+        /// </summary>
+        public void ClearRoomEnemies(Room room)
+        {
+            if (room == null)
+            {
+                return;
+            }
+
+            foreach (var enemy in room.Enemies.Where(e => e != null).ToList())
+            {
+                _spawnedEnemies.Remove(enemy);
+                Destroy(enemy.gameObject);
+            }
+            room.Enemies.Clear();
+        }
+
+        /// <summary>
+        /// Spawns a single enemy from <paramref name="definition"/> into <paramref name="room"/>
+        /// (guaranteed, no roll). Used for boss placement in the exit room.
+        /// </summary>
+        public Enemy SpawnSingle(EnemySO definition, Room room)
+        {
+            if (definition == null || room == null)
+            {
+                return null;
+            }
+
+            var prefab = EnemyPrefab();
+            if (prefab == null)
+            {
+                return null;
+            }
+
+            var occupied = room.Enemies
+                .Where(e => e != null)
+                .Select(e => e.transform.position)
+                .ToList();
+            var position = room.GetRandomWalkablePosition(occupied, 0.5f);
+
+            var enemyObj = Instantiate(prefab, transform);
+            var enemy = enemyObj.GetComponent<Enemy>();
+            enemy.Initialize(definition);
+            enemy.PlaceInRoom(room, position);
+
+            room.Enemies.Add(enemy);
+            _spawnedEnemies.Add(enemy);
+            return enemy;
+        }
+
         public void CleanupEnemies()
         {
             foreach (var enemy in _spawnedEnemies.Where(x => x))

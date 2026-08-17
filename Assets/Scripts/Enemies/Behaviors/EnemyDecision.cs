@@ -9,7 +9,9 @@ namespace Assets.Scripts.Enemies.Behaviors
         ChargeHeavy,
         HeavyAttack,
         Heal,
-        Debuff
+        Debuff,
+        ChargeAoe,   // boss: telegraph a signature move that hits the whole party next turn
+        AoeAttack    // boss: deliver the telegraphed signature across all living heroes
     }
 
     /// <summary>

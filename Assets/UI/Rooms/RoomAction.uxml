@@ -15,6 +15,13 @@
             <ui:Button name="flee-btn" text="Flee" class="cd-cmd" />
         </ui:VisualElement>
 
+        <!-- Boss encounter banner (top-center): announces the climax fight while the player
+             decides to engage; hidden once combat starts. -->
+        <ui:VisualElement name="boss-banner" class="cd-boss-banner cd-hidden" picking-mode="Ignore">
+            <ui:Label name="boss-banner-sub" text="BOSS" class="cd-boss-banner__sub" />
+            <ui:Label name="boss-banner-name" text="" class="cd-boss-banner__name" />
+        </ui:VisualElement>
+
         <!-- Turn-order list (FFX-style, top-right): upcoming turns, current on top -->
         <ui:VisualElement name="turn-order" class="cd-turn-order cd-dock-top-right cd-hidden">
             <ui:Label name="turn-order-title" text="Turn Order" class="cd-turn-order__header" />

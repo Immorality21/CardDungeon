@@ -9,6 +9,7 @@ namespace Assets.Scripts.Enemies
         Aggressor,
         Bruiser,
         Healer,
-        Debuffer
+        Debuffer,
+        Boss
     }
 }

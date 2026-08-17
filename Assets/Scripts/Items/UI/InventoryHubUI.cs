@@ -12,6 +12,10 @@ namespace Assets.Scripts.Items.UI
     /// runs. Operates on a VisualElement subtree owned by the menu's UIDocument (not a MonoBehaviour).
     /// Reads the roster from a <see cref="PartyRosterSO"/> because the hub has no live Party, and all
     /// item/equip state from the (scene-independent) <see cref="InventoryManager"/>.
+    ///
+    /// Interaction mirrors the battle scene's cursor selection list (see MagicSelectionUI): a ▸
+    /// cursor over the rows, driven by keyboard (Up/Down/Enter, Left/Right tabs, Q/E hero, Esc back)
+    /// while staying fully mouse-usable.
     /// </summary>
     public class InventoryHubUI
     {
@@ -31,6 +35,13 @@ namespace Assets.Scripts.Items.UI
 
         private Tab _tab = Tab.Equipment;
         private string _selectedHeroKey;
+        private bool _isShown;
+
+        // Cursor-driven keyboard navigation over the currently shown selectable rows.
+        private readonly List<VisualElement> _navRows = new List<VisualElement>();
+        private readonly List<Label> _navCursors = new List<Label>();
+        private readonly List<Action> _navActions = new List<Action>();
+        private int _navSelected = -1;
 
         public event Action OnClosed;
 
@@ -60,15 +71,31 @@ namespace Assets.Scripts.Items.UI
             if (_tabEquipment != null)
             {
                 _tabEquipment.clicked += () => SetTab(Tab.Equipment);
+                _tabEquipment.focusable = false;
             }
             if (_tabConsumables != null)
             {
                 _tabConsumables.clicked += () => SetTab(Tab.Consumables);
+                _tabConsumables.focusable = false;
             }
             if (_closeButton != null)
             {
                 _closeButton.clicked += Hide;
+                _closeButton.focusable = false;
             }
+            if (_scroll != null)
+            {
+                // Keep keyboard focus on the view root, not the ScrollView, so our cursor nav owns
+                // the arrows (UITK's default focus navigation would otherwise steal them).
+                _scroll.focusable = false;
+            }
+
+            // The view root owns keyboard input while open; swallow UITK's built-in navigation so
+            // it can't move focus off the root after the first arrow (mirrors the battle UI).
+            _root.RegisterCallback<KeyDownEvent>(OnKeyDown);
+            _root.RegisterCallback<NavigationMoveEvent>(evt => { if (_isShown) { evt.StopPropagation(); } });
+            _root.RegisterCallback<NavigationSubmitEvent>(evt => { if (_isShown) { evt.StopPropagation(); } });
+            _root.RegisterCallback<NavigationCancelEvent>(evt => { if (_isShown) { evt.StopPropagation(); } });
 
             _root.style.display = DisplayStyle.None;
         }
@@ -76,6 +103,7 @@ namespace Assets.Scripts.Items.UI
         public void Show()
         {
             _root.style.display = DisplayStyle.Flex;
+            _isShown = true;
             _tab = Tab.Equipment;
 
             // The hub MenuScene has no wired Managers prefab; touch Instance so the manager
@@ -93,12 +121,25 @@ namespace Assets.Scripts.Items.UI
             RefreshHeroes();
             RefreshStats();
             RefreshList();
+
+            FocusRoot();
         }
 
         public void Hide()
         {
+            _isShown = false;
             _root.style.display = DisplayStyle.None;
+            _root.focusable = false; // stop being a focus/nav target once closed
             OnClosed?.Invoke();
+        }
+
+        private void FocusRoot()
+        {
+            if (_root != null && _root.panel != null)
+            {
+                _root.focusable = true;
+                _root.Focus();
+            }
         }
 
         private void SetTab(Tab tab)
@@ -142,9 +183,9 @@ namespace Assets.Scripts.Items.UI
                 }
                 var key = hero.Label;
                 var btn = new Button(() => SelectHero(key)) { text = hero.Label };
-                btn.AddToClassList("cd-button");
-                btn.AddToClassList("cd-button--narrow");
+                btn.AddToClassList("cd-tab");
                 btn.EnableInClassList("cd-tab--active", key == _selectedHeroKey);
+                btn.focusable = false;
                 _heroesRow.Add(btn);
             }
         }
@@ -155,6 +196,26 @@ namespace Assets.Scripts.Items.UI
             RefreshHeroes();
             RefreshStats();
             RefreshList();
+        }
+
+        private void CycleHero(int delta)
+        {
+            if (_roster == null || _roster.Heroes.Count <= 1)
+            {
+                return;
+            }
+            int current = _roster.Heroes.FindIndex(h => h != null && h.Label == _selectedHeroKey);
+            if (current < 0)
+            {
+                current = 0;
+            }
+            int count = _roster.Heroes.Count;
+            int next = ((current + delta) % count + count) % count;
+            var hero = _roster.Heroes[next];
+            if (hero != null)
+            {
+                SelectHero(hero.Label);
+            }
         }
 
         // ============================================================
@@ -169,7 +230,7 @@ namespace Assets.Scripts.Items.UI
             }
 
             var hero = FindHero(_selectedHeroKey);
-            if (hero == null || !InventoryManager.HasInstance)
+            if (hero == null)
             {
                 _statsLabel.text = string.Empty;
                 return;
@@ -201,12 +262,7 @@ namespace Assets.Scripts.Items.UI
                 return;
             }
             _scroll.Clear();
-
-            if (!InventoryManager.HasInstance)
-            {
-                ShowEmpty("Inventory unavailable.");
-                return;
-            }
+            ClearNav();
 
             if (_tab == Tab.Equipment)
             {
@@ -216,13 +272,15 @@ namespace Assets.Scripts.Items.UI
             {
                 RefreshConsumables();
             }
+
+            BeginNavigation();
         }
 
         private void RefreshEquipment()
         {
             SetShown(_emptyLabel, false);
 
-            // Equipped slots (click a filled slot to unequip).
+            // Equipped slots (click / Enter a filled slot to unequip).
             foreach (SlotType slot in Enum.GetValues(typeof(SlotType)))
             {
                 var equipped = InventoryManager.Instance.GetEquipped(slot, _selectedHeroKey);
@@ -231,9 +289,8 @@ namespace Assets.Scripts.Items.UI
                     var so = InventoryManager.Instance.GetItemSO(equipped.ItemKey);
                     string name = so != null ? so.DisplayName : equipped.ItemKey;
                     var capturedSlot = slot;
-                    var row = BuildRow(so != null ? so.Icon : null, $"[{slot}] {name}", "Unequip", true,
-                        () => Unequip(capturedSlot), so);
-                    _scroll.Add(row);
+                    _scroll.Add(BuildRow(so != null ? so.Icon : null, $"[{slot}] {name}", "Unequip", true,
+                        () => Unequip(capturedSlot), so));
                 }
                 else
                 {
@@ -241,7 +298,7 @@ namespace Assets.Scripts.Items.UI
                 }
             }
 
-            // Un-equipped equipment in the bag (click to equip on the selected hero).
+            // Un-equipped equipment in the bag (click / Enter to equip on the selected hero).
             var bag = InventoryManager.Instance.GetBagEquipment();
             foreach (var item in bag)
             {
@@ -275,6 +332,7 @@ namespace Assets.Scripts.Items.UI
             {
                 var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
                 string name = so != null ? so.DisplayName : item.ItemKey;
+                // Display-only (used in combat, not the hub) → not selectable.
                 _scroll.Add(BuildRow(so != null ? so.Icon : null, name, $"x{item.Quantity}", false, null, so));
             }
         }
@@ -298,14 +356,28 @@ namespace Assets.Scripts.Items.UI
         }
 
         // ============================================================
-        //  HELPERS
+        //  ROW BUILDER (battle cd-sel-row style + rarity edge accent)
         // ============================================================
 
-        private Button BuildRow(Sprite icon, string name, string meta, bool enabled, Action onClick, ItemSO so)
+        private VisualElement BuildRow(Sprite icon, string name, string meta, bool enabled, Action onClick, ItemSO so)
         {
-            var row = new Button(onClick) { text = string.Empty };
+            // Plain VisualElement (not a Button) so it never grabs focus; the cursor nav + mouse
+            // clicks drive it, exactly like the battle selection rows.
+            var row = new VisualElement();
             row.AddToClassList("cd-sel-row");
             row.SetEnabled(enabled);
+
+            // Rarity as a left-edge accent — keeps the info without tinting (and washing out) text.
+            if (so != null && RarityColors.TryGetValue(so.Rarity, out var rarityColor))
+            {
+                row.style.borderLeftColor = rarityColor;
+                row.style.borderLeftWidth = 4;
+            }
+
+            var cursor = new Label(string.Empty);
+            cursor.AddToClassList("cd-sel-row__cursor");
+            cursor.pickingMode = PickingMode.Ignore;
+            row.Add(cursor);
 
             var iconElement = new VisualElement();
             iconElement.AddToClassList("cd-sel-row__icon");
@@ -319,10 +391,6 @@ namespace Assets.Scripts.Items.UI
             var nameLabel = new Label(name);
             nameLabel.AddToClassList("cd-sel-row__name");
             nameLabel.pickingMode = PickingMode.Ignore;
-            if (so != null && RarityColors.TryGetValue(so.Rarity, out var color))
-            {
-                nameLabel.style.color = color;
-            }
             row.Add(nameLabel);
 
             var metaLabel = new Label(meta ?? string.Empty);
@@ -330,8 +398,134 @@ namespace Assets.Scripts.Items.UI
             metaLabel.pickingMode = PickingMode.Ignore;
             row.Add(metaLabel);
 
+            if (enabled && onClick != null)
+            {
+                int idx = _navRows.Count;
+                _navRows.Add(row);
+                _navCursors.Add(cursor);
+                _navActions.Add(onClick);
+                row.RegisterCallback<ClickEvent>(_ => { SetNavSelected(idx); onClick(); });
+                row.RegisterCallback<MouseEnterEvent>(_ => SetNavSelected(idx));
+            }
+
             return row;
         }
+
+        // ============================================================
+        //  CURSOR NAVIGATION (keyboard / mouse), mirrors MagicSelectionUI
+        // ============================================================
+
+        private void ClearNav()
+        {
+            _navRows.Clear();
+            _navCursors.Clear();
+            _navActions.Clear();
+            _navSelected = -1;
+        }
+
+        private void BeginNavigation()
+        {
+            _navSelected = _navRows.Count > 0 ? 0 : -1;
+            RenderNavCursor();
+        }
+
+        private void RenderNavCursor()
+        {
+            for (int i = 0; i < _navRows.Count; i++)
+            {
+                bool selected = i == _navSelected;
+                _navCursors[i].text = selected ? "▸" : string.Empty;
+                _navRows[i].EnableInClassList("cd-sel-row--selected", selected);
+            }
+            if (_navSelected >= 0 && _navSelected < _navRows.Count && _scroll != null)
+            {
+                _scroll.ScrollTo(_navRows[_navSelected]);
+            }
+        }
+
+        private void SetNavSelected(int index)
+        {
+            if (index < 0 || index >= _navRows.Count)
+            {
+                return;
+            }
+            _navSelected = index;
+            RenderNavCursor();
+        }
+
+        private void MoveNav(int delta)
+        {
+            if (_navRows.Count == 0)
+            {
+                return;
+            }
+            _navSelected = (_navSelected + delta + _navRows.Count) % _navRows.Count;
+            RenderNavCursor();
+        }
+
+        private void ConfirmNav()
+        {
+            if (_navSelected >= 0 && _navSelected < _navActions.Count)
+            {
+                _navActions[_navSelected]?.Invoke();
+            }
+        }
+
+        private void OnKeyDown(KeyDownEvent evt)
+        {
+            if (!_isShown)
+            {
+                return;
+            }
+            switch (evt.keyCode)
+            {
+                case KeyCode.UpArrow:
+                    MoveNav(-1);
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.DownArrow:
+                    MoveNav(1);
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Space:
+                    ConfirmNav();
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.LeftArrow:
+                    SetTab(Tab.Equipment);
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.RightArrow:
+                    SetTab(Tab.Consumables);
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.Q:
+                    if (_tab == Tab.Equipment)
+                    {
+                        CycleHero(-1);
+                    }
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.E:
+                    if (_tab == Tab.Equipment)
+                    {
+                        CycleHero(1);
+                    }
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.Escape:
+                case KeyCode.Backspace:
+                    Hide();
+                    evt.StopPropagation();
+                    break;
+            }
+        }
+
+        // ============================================================
+        //  HELPERS
+        // ============================================================
 
         private HeroSO FindHero(string heroKey)
         {

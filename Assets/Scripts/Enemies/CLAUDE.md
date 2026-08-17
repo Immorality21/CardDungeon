@@ -15,5 +15,11 @@ Enemy turns are driven by an `EnemyArchetype` → `IEnemyBehavior` strategy (fac
 - **Bruiser** — spends a turn **charging** (telegraphed: red tint + "Charging!" + log), then hits ~2.5× the next turn. The one true multi-turn tell the player can react to.
 - **Healer** — heals the most-wounded ally (itself included); attacks if none are hurt. High-priority target.
 - **Debuffer** — weakens a hero's Attack (skips heroes already weakened); attacks otherwise.
+- **Boss** — the run's climax fight. Cycles basic attacks with a telegraphed **signature** AoE (`ChargeAoe` → `AoeAttack`, hits the whole party, charged a turn ahead like the Bruiser) and **enrages** below 30% HP (harder basic hits + a tighter signature cadence). Pure decider; cadence comes from `EnemyCombatContext.SelfTurnCount` (sourced from `Enemy.TurnsTaken`, reset per combat). Tuning constants live on `BossBehavior`. Covered by `BossBehaviorTests`.
 
 Tuning (heal amount, heavy multiplier, debuff magnitude/duration) lives as constants in each behavior. Default archetype is `Aggressor`, so untouched spawn entries behave as before.
+
+## Bosses
+
+- **`EnemySO.IsBoss`** flags a definition as a boss. It drives the boss-only combat/UI treatment: a larger crimson HP bar (`UnitHealthBar`), the no-flee rule + intro banner (`RoomActionUI`), and the run-complete/`Boss Slain!` victory copy. `Enemy.IsBoss` exposes it at runtime. Pair `IsBoss` with `Archetype = Boss` for the full effect.
+- **Placement** is authored on `RunLevelEntry.BossEnemy` (see the Dungeon guide), *not* via spawn tables: `DungeonManager.PlaceBossIfConfigured` guarantees the boss (alone) in the exit room, clearing that room's rolled enemies first (`EnemyManager.ClearRoomEnemies` + `SpawnSingle`). Example asset: `AbyssalWarden.asset` (wired into `TutorialRun`'s final level).

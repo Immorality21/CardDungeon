@@ -44,7 +44,9 @@ namespace Assets.Scripts.Rooms
         public List<ItemSO> Loot = new List<ItemSO>();
         public int XpGained;
         public int GoldGained;
-        public bool LevelCleared; // this victory cleared the exit room → level complete
+        public bool LevelCleared;  // this victory cleared the exit room → level complete
+        public bool BossDefeated;  // this victory felled a boss (drives the boss victory copy)
+        public bool RunCompleted;  // the boss on the final run level fell → the run is won
     }
 
     public class CombatManager : SingletonBehaviour<CombatManager>
@@ -89,6 +91,7 @@ namespace Assets.Scripts.Rooms
         private int _combatXp;
         private int _combatGold;
         private Room _lastVictoryRoom;
+        private bool _currentCombatHadBoss;
         private MagicTagTracker _tagTracker;
         private ComboDetector _comboDetector;
         private EffectResolver _calculator = new EffectResolver();
@@ -138,7 +141,8 @@ namespace Assets.Scripts.Rooms
                 Heroes = GetAliveHeroes(_currentParty),
                 Allies = GetAliveEnemies().Where(u => !ReferenceEquals(u, enemy)).ToList(),
                 BuffTracker = BuffTracker,
-                SelfIsCharging = enemy.IsCharging
+                SelfIsCharging = enemy.IsCharging,
+                SelfTurnCount = enemy.TurnsTaken
             };
             return behavior.Decide(enemy, context).Type;
         }
@@ -227,6 +231,7 @@ namespace Assets.Scripts.Rooms
             _combatLoot.Clear();
             _combatXp = 0;
             _combatGold = 0;
+            _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
             _tagTracker = new MagicTagTracker();
@@ -264,6 +269,10 @@ namespace Assets.Scripts.Rooms
             {
                 if (enemy != null && enemy.IsAlive)
                 {
+                    // Fresh per-combat runtime state (cadence + charge) for behaviors.
+                    enemy.TurnsTaken = 0;
+                    enemy.IsCharging = false;
+                    enemy.ChargeTarget = null;
                     units.Add(enemy);
                 }
             }
@@ -387,6 +396,7 @@ namespace Assets.Scripts.Rooms
             InCombat = false;
 
             bool levelCleared = outcome == CombatOutcome.Victory && room.IsExit && !HasAliveEnemies(room);
+            bool bossDefeated = outcome == CombatOutcome.Victory && _currentCombatHadBoss;
             var result = new CombatResult
             {
                 Outcome = outcome,
@@ -395,7 +405,9 @@ namespace Assets.Scripts.Rooms
                 Loot = new List<ItemSO>(_combatLoot),
                 XpGained = _combatXp,
                 GoldGained = _combatGold,
-                LevelCleared = levelCleared
+                LevelCleared = levelCleared,
+                BossDefeated = bossDefeated,
+                RunCompleted = levelCleared && DungeonManager.IsFinalRunLevel
             };
 
             OnCombatEnded?.Invoke(result);
@@ -556,7 +568,8 @@ namespace Assets.Scripts.Rooms
                 Heroes = GetAliveHeroes(party),
                 Allies = GetAliveEnemies().Where(u => u != enemyUnit).ToList(),
                 BuffTracker = BuffTracker,
-                SelfIsCharging = enemy != null && enemy.IsCharging
+                SelfIsCharging = enemy != null && enemy.IsCharging,
+                SelfTurnCount = enemy != null ? enemy.TurnsTaken : 0
             };
 
             var decision = behavior.Decide(enemyUnit, context);
@@ -569,6 +582,12 @@ namespace Assets.Scripts.Rooms
                 case EnemyActionType.HeavyAttack:
                     yield return ExecuteEnemyHeavyAttack(enemyUnit, enemy, party, decision.Multiplier);
                     break;
+                case EnemyActionType.ChargeAoe:
+                    yield return ExecuteEnemyChargeAoe(enemy);
+                    break;
+                case EnemyActionType.AoeAttack:
+                    yield return ExecuteEnemyAoeAttack(enemyUnit, enemy, party, decision.Multiplier);
+                    break;
                 case EnemyActionType.Heal:
                     yield return ExecuteEnemyHeal(enemyUnit, decision.Target, decision.Amount);
                     break;
@@ -576,12 +595,19 @@ namespace Assets.Scripts.Rooms
                     yield return ExecuteEnemyDebuff(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration);
                     break;
                 default:
-                    yield return ExecuteEnemyBasicAttack(enemyUnit, decision.Target, party);
+                    string verb = decision.Multiplier > 1f ? "strikes savagely at" : "attacks";
+                    yield return ExecuteEnemyBasicAttack(enemyUnit, decision.Target, party, decision.Multiplier, verb);
                     break;
+            }
+
+            // Count the turn after it resolves so cadence-based behaviors (boss signature) advance.
+            if (enemy != null)
+            {
+                enemy.TurnsTaken++;
             }
         }
 
-        private IEnumerator ExecuteEnemyBasicAttack(ICombatUnit enemyUnit, ICombatUnit target, Party party)
+        private IEnumerator ExecuteEnemyBasicAttack(ICombatUnit enemyUnit, ICombatUnit target, Party party, float multiplier = 1f, string verb = "attacks")
         {
             if (target == null || !target.IsAlive)
             {
@@ -594,7 +620,7 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
-            yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red);
+            yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, verb);
             ResolveHeroDamaged(target);
         }
 
@@ -636,6 +662,49 @@ namespace Assets.Scripts.Rooms
 
             yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "unleashes a heavy blow on");
             ResolveHeroDamaged(target);
+        }
+
+        private IEnumerator ExecuteEnemyChargeAoe(Enemy enemy)
+        {
+            if (enemy == null)
+            {
+                yield break;
+            }
+
+            enemy.IsCharging = true;
+            enemy.ChargeTarget = null;
+            SetChargingVisual(enemy, true);
+            ShowFloatingLabel(enemy.Transform.position, "Channeling!", new Color(1f, 0.35f, 0.35f));
+            _lastTurnLog = $"{enemy.DisplayName} is channeling a devastating attack!";
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
+        private IEnumerator ExecuteEnemyAoeAttack(ICombatUnit enemyUnit, Enemy enemy, Party party, float multiplier)
+        {
+            if (enemy != null)
+            {
+                enemy.IsCharging = false;
+                enemy.ChargeTarget = null;
+                SetChargingVisual(enemy, false);
+            }
+
+            var targets = GetAliveHeroes(party);
+            if (targets == null || targets.Count == 0)
+            {
+                _lastTurnLog = $"{enemyUnit.DisplayName} has no target.";
+                yield break;
+            }
+
+            _lastTurnLog = $"{enemyUnit.DisplayName} unleashes a devastating blow on the whole party!";
+            foreach (var target in targets)
+            {
+                if (target == null || !target.IsAlive)
+                {
+                    continue;
+                }
+                yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "smashes");
+                ResolveHeroDamaged(target);
+            }
         }
 
         private IEnumerator ExecuteEnemyHeal(ICombatUnit enemyUnit, ICombatUnit target, int amount)

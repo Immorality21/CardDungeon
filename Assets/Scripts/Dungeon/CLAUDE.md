@@ -4,7 +4,8 @@
 
 ## Run Progression System
 
-- **RunDefinitionSO** defines a campaign: an ordered list of `RunLevelEntry` (each references a `LevelDefinitionSO`, a display name, and optional `ManualLevelLayoutSO`).
+- **RunDefinitionSO** defines a campaign: an ordered list of `RunLevelEntry` (each references a `LevelDefinitionSO`, a display name, optional `ManualLevelLayoutSO`, and optional `BossEnemy`).
+- **Boss levels:** set `RunLevelEntry.BossEnemy` (an `EnemySO` with `IsBoss`) to make a level climax in a boss fight. After the exit room is designated and normal enemies spawn, `DungeonManager.PlaceBossIfConfigured` clears the exit room and drops the boss in alone. The exit room is sealed (no flee) and the run-complete fanfare fires when the boss on the **final** level falls (`DungeonManager.IsFinalRunLevel`, surfaced via `CombatResult.RunCompleted`/`BossDefeated`). See the Enemies guide.
 - **RunSaveData** (`Run.json`) tracks which level the player is on (`CurrentLevelIndex`), `ActiveDungeonSeed` for resuming mid-dungeon, and `EquippedMagic` (the drawn magic carried across levels of the run).
 - **Flow:** Menu → New Run → enter level 1 → clear exit room → level complete → menu shows next level → ... → all levels cleared → run complete.
 - **Win condition:** Each dungeon level is complete when the **exit room** is cleared (farthest room from start, designated via BFS). `Room.IsExit` marks it; `CombatManager.OnDungeonCleared` fires when it's cleared.

@@ -19,6 +19,7 @@ namespace Assets.Scripts.Combat
     {
         private const float Width = 0.85f;
         private const float Height = 0.12f;
+        private const float BossBarScale = 1.7f;   // bosses get a wider, taller bar
         private const int BgSortOrder = 900;
         private const float IconSize = 0.34f;
         private const float IconGap = 0.30f;
@@ -42,6 +43,8 @@ namespace Assets.Scripts.Combat
         private SpriteRenderer _fill;
         private Transform _statusRoot;
         private SpriteRenderer _intent;
+        private float _barWidth = Width;
+        private float _barHeight = Height;
         private readonly List<GameObject> _statusIcons = new List<GameObject>();
         private string _statusSig;
         private string _intentSig;
@@ -70,6 +73,10 @@ namespace Assets.Scripts.Combat
             }
             _enemy = GetComponent<Enemy>();
 
+            bool isBoss = _enemy != null && _enemy.IsBoss;
+            _barWidth = isBoss ? Width * BossBarScale : Width;
+            _barHeight = isBoss ? Height * BossBarScale : Height;
+
             var unitSprite = GetComponent<SpriteRenderer>();
             float topY = unitSprite != null ? unitSprite.bounds.extents.y + 0.18f : 0.6f;
 
@@ -77,14 +84,16 @@ namespace Assets.Scripts.Combat
             _barRoot.SetParent(transform, false);
             _barRoot.localPosition = new Vector3(0f, topY, -1f);
 
-            var bg = MakeRenderer(_barRoot, CenterSprite(), new Color(0.08f, 0.08f, 0.10f, 0.85f), BgSortOrder);
-            bg.transform.localScale = new Vector3(Width, Height, 1f);
+            // Boss bars get a crimson backdrop so they read as the climax fight.
+            Color bgColor = isBoss ? new Color(0.18f, 0.04f, 0.05f, 0.9f) : new Color(0.08f, 0.08f, 0.10f, 0.85f);
+            var bg = MakeRenderer(_barRoot, CenterSprite(), bgColor, BgSortOrder);
+            bg.transform.localScale = new Vector3(_barWidth, _barHeight, 1f);
 
             var fillAnchor = new GameObject("Fill").transform;
             fillAnchor.SetParent(_barRoot, false);
-            fillAnchor.localPosition = new Vector3(-Width * 0.5f, 0f, -0.01f);
+            fillAnchor.localPosition = new Vector3(-_barWidth * 0.5f, 0f, -0.01f);
             _fill = MakeRenderer(fillAnchor, LeftSprite(), Color.green, BgSortOrder + 1);
-            _fill.transform.localScale = new Vector3(Width, Height * 0.72f, 1f);
+            _fill.transform.localScale = new Vector3(_barWidth, _barHeight * 0.72f, 1f);
 
             _statusRoot = new GameObject("StatusIcons").transform;
             _statusRoot.SetParent(_barRoot, false);
@@ -129,7 +138,7 @@ namespace Assets.Scripts.Combat
             // HP fill — every frame (cheap).
             float max = Mathf.Max(1, _unit.Stats.MaxHealth);
             float ratio = Mathf.Clamp01(_unit.Stats.Health / max);
-            _fill.transform.localScale = new Vector3(Width * ratio, Height * 0.72f, 1f);
+            _fill.transform.localScale = new Vector3(_barWidth * ratio, _barHeight * 0.72f, 1f);
             _fill.color = ratio > 0.5f
                 ? Color.Lerp(Yellow, Green, (ratio - 0.5f) * 2f)
                 : Color.Lerp(Red, Yellow, ratio * 2f);
@@ -250,6 +259,8 @@ namespace Assets.Scripts.Combat
                     return new IconDesc { Name = "arrow", Tint = Purple, FlipY = true };
                 case EnemyActionType.ChargeHeavy:
                 case EnemyActionType.HeavyAttack:
+                case EnemyActionType.ChargeAoe:
+                case EnemyActionType.AoeAttack:
                     return new IconDesc { Name = "burst", Tint = Orange };
                 default:
                     return new IconDesc { Name = "sword", Tint = IntentRed };

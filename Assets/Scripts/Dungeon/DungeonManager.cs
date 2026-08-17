@@ -8,6 +8,7 @@ using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
 using ImmoralityGaming.Fundamentals;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -67,6 +68,10 @@ namespace Assets.Scripts.Dungeon
         public static LevelDefinitionSO LevelToLoad;
         public static RunDefinitionSO ActiveRun;
         public static int RunLevelIndex;
+
+        /// <summary>True when the active run is on its last level (drives the run-complete fanfare).</summary>
+        public static bool IsFinalRunLevel =>
+            ActiveRun != null && RunLevelIndex == ActiveRun.Levels.Count - 1;
         public Party Party { get; private set; }
         public EquippedMagicState MagicState { get; private set; }
 
@@ -152,6 +157,7 @@ namespace Assets.Scripts.Dungeon
 
             // Spawn enemies with manual overrides
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom, layout.Rooms);
+            PlaceBossIfConfigured(rooms);
 
             // Check for saved state to resume
             DungeonSaveData saveData = null;
@@ -222,6 +228,7 @@ namespace Assets.Scripts.Dungeon
 
             // Step 5: Spawn enemies
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom);
+            PlaceBossIfConfigured(rooms);
 
             if (saveData != null)
             {
@@ -380,6 +387,36 @@ namespace Assets.Scripts.Dungeon
 
             farthest.IsExit = true;
             PlaceExitMarker(farthest);
+        }
+
+        /// <summary>
+        /// If the active run's current level defines a boss, guarantees it (alone) in the exit
+        /// room so the level climaxes in a boss fight. No-op for normal levels or free-play.
+        /// Must run after the exit room is designated and normal enemies are spawned.
+        /// </summary>
+        private void PlaceBossIfConfigured(List<Room> rooms)
+        {
+            if (ActiveRun == null || RunLevelIndex < 0 || RunLevelIndex >= ActiveRun.Levels.Count)
+            {
+                return;
+            }
+
+            var boss = ActiveRun.Levels[RunLevelIndex].BossEnemy;
+            if (boss == null)
+            {
+                return;
+            }
+
+            var exitRoom = rooms.FirstOrDefault(r => r != null && r.IsExit);
+            if (exitRoom == null)
+            {
+                Debug.LogWarning("Boss configured for this level but no exit room was found; boss not placed.");
+                return;
+            }
+
+            // Clear the exit room's rolled enemies so the boss fight is a clean climax.
+            EnemyManager.Instance.ClearRoomEnemies(exitRoom);
+            EnemyManager.Instance.SpawnSingle(boss, exitRoom);
         }
 
         private void PlaceExitMarker(Room room)

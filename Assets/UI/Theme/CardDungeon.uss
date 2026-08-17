@@ -515,6 +515,13 @@
     margin-bottom: 0;
 }
 
+/* Fixed-height window: for views whose content changes size between states (e.g. the inventory
+   hiding its hero row/stats per tab). A constant height keeps the translate-centered window from
+   re-centering, which otherwise desyncs UITK's input hit-testing from the render (clicks miss). */
+.cd-window--fixed {
+    height: 62%;
+}
+
 .cd-title--large {
     font-size: 34px;
     margin-bottom: 18px;
@@ -533,6 +540,28 @@
     -unity-text-align: middle-center;
     min-height: 20px;
     margin-top: 6px;
+}
+
+/* Compact keyboard-controls hint line (e.g. under the inventory list).
+   margin-top: auto absorbs the fixed-height window's free space, anchoring the hint + the Back
+   button beneath it to the bottom so they don't jump as the list content changes size. */
+.cd-hint {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: auto;
+    margin-bottom: 2px;
+}
+
+/* Hub inventory list. Unlike the combat picker (cd-select-scroll), this lives in a NON-clipping
+   menu window, so it must NOT flex-grow: a stretched ScrollView content container would spill over
+   and swallow clicks meant for the Back button below it. Content-sized, capped, transparent so the
+   dark row text stays readable on parchment. */
+.cd-inv-scroll {
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-height: 40px;
+    max-height: 320px;
+    padding: 4px 2px;
 }
 
 /* Tall stacked menu button (full window width). */
@@ -803,6 +832,35 @@
 .cd-victory-loot__name {
     font-size: 15px;
     color: var(--cd-text-dark);
+}
+
+/* Boss encounter banner — top-center, announces the climax fight. */
+.cd-boss-banner {
+    position: absolute;
+    top: 48px;
+    left: 50%;
+    translate: -50% 0;
+    align-items: center;
+    padding: 10px 34px;
+    background-color: rgba(40, 8, 10, 0.9);
+    border-width: 2px;
+    border-color: rgb(150, 40, 40);
+    border-radius: 6px;
+}
+
+.cd-boss-banner__sub {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(224, 120, 110);
+    -unity-text-align: middle-center;
+    margin-bottom: 2px;
+}
+
+.cd-boss-banner__name {
+    font-size: 28px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
 }
 
 /* Utility: hidden (controller toggles this). */

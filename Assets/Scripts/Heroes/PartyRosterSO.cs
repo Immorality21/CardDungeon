@@ -14,3 +14,4 @@ namespace Assets.Scripts.Heroes
         public List<HeroSO> Heroes = new List<HeroSO>();
     }
 }
+ 

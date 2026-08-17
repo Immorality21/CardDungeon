@@ -27,3 +27,4 @@ MonoBehaviour:
   - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
     LevelName: Test3
     ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}

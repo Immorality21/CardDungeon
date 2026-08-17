@@ -7,6 +7,7 @@ namespace Assets.Scripts.Enemies.Behaviors
         private static readonly BruiserBehavior _bruiser = new BruiserBehavior();
         private static readonly HealerBehavior _healer = new HealerBehavior();
         private static readonly DebufferBehavior _debuffer = new DebufferBehavior();
+        private static readonly BossBehavior _boss = new BossBehavior();
 
         public static IEnemyBehavior Get(EnemyArchetype archetype)
         {
@@ -18,6 +19,8 @@ namespace Assets.Scripts.Enemies.Behaviors
                     return _healer;
                 case EnemyArchetype.Debuffer:
                     return _debuffer;
+                case EnemyArchetype.Boss:
+                    return _boss;
                 default:
                     return _aggressor;
             }

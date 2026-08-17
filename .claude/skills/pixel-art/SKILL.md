@@ -1,7 +1,7 @@
 ---
 name: pixel-art
 description: Generate pixel art as a PNG image. Use when the user asks to draw, create, or generate pixel art, sprites, icons, or small bitmap images.
-disable-model-invocation: true
+disable-model-invocation: false
 argument-hint: "description of what to draw, e.g. 32x32 treasure chest"
 ---
 

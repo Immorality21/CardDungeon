@@ -24,8 +24,15 @@ namespace Assets.Scripts.Enemies
         [System.NonSerialized] public bool IsCharging;
         [System.NonSerialized] public ICombatUnit ChargeTarget;
 
+        // How many turns this enemy has taken this combat. Drives cadence-based behaviors
+        // (e.g. the boss's signature move). Reset per combat; not persisted.
+        [System.NonSerialized] public int TurnsTaken;
+
         /// <summary>The definition this enemy was spawned from (set by <see cref="Initialize"/>).</summary>
         public EnemySO Definition { get; private set; }
+
+        /// <summary>Whether this enemy is a boss (from its definition) — drives boss-only combat/UI.</summary>
+        public bool IsBoss => Definition != null && Definition.IsBoss;
 
         private SpriteRenderer _spriteRenderer;
 
