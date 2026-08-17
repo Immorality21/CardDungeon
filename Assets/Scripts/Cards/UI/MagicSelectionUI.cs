@@ -32,6 +32,7 @@ namespace Assets.Scripts.Cards.UI
         [SerializeField] private UIDocument _document;
 
         // Cached visual elements (queried from the UIDocument on first use).
+        private VisualElement _root;
         private VisualElement _listPanel;
         private VisualElement _targetPanel;
         private Label _listTitle;
@@ -50,6 +51,12 @@ namespace Assets.Scripts.Cards.UI
         private Enemy _drawSource;
         private MagicSO _drawMagic;
         private int _drawCharges;
+
+        // Cursor-driven keyboard navigation over the currently shown selectable rows.
+        private readonly List<Button> _navRows = new List<Button>();
+        private readonly List<Label> _navCursors = new List<Label>();
+        private readonly List<Action> _navActions = new List<Action>();
+        private int _navSelected = -1;
 
         private void OnEnable()
         {
@@ -95,6 +102,16 @@ namespace Assets.Scripts.Cards.UI
             {
                 return false;
             }
+            _root = root;
+            // Only focusable while a picker is open (set in BeginNavigation) — otherwise this
+            // idle panel root would steal keyboard focus from the command menu's arrow nav.
+            _root.focusable = false;
+            // Own the arrow/submit/cancel input so keyboard focus stays on the root instead of
+            // UI Toolkit's default focus navigation stealing it (which killed arrows after one press).
+            _root.RegisterCallback<KeyDownEvent>(OnKeyDown);
+            _root.RegisterCallback<NavigationMoveEvent>(OnNavMove);
+            _root.RegisterCallback<NavigationSubmitEvent>(OnNavSubmit);
+            _root.RegisterCallback<NavigationCancelEvent>(OnNavCancel);
 
             _listPanel = root.Q<VisualElement>("magic-list-panel");
             _targetPanel = root.Q<VisualElement>("target-panel");
@@ -105,12 +122,26 @@ namespace Assets.Scripts.Cards.UI
             _listBack = root.Q<Button>("list-back");
             _targetBack = root.Q<Button>("target-back");
 
+            // ScrollViews are focusable by default and would grab focus on the first arrow key.
+            if (_listScroll != null)
+            {
+                _listScroll.focusable = false;
+            }
+            if (_targetScroll != null)
+            {
+                _targetScroll.focusable = false;
+            }
+
+            // Keep keyboard focus on the panel root (not individual buttons) so our cursor nav
+            // owns the arrow keys instead of UI Toolkit's default focus navigation.
             if (_listBack != null)
             {
+                _listBack.focusable = false;
                 _listBack.clicked += OnListBack;
             }
             if (_targetBack != null)
             {
+                _targetBack.focusable = false;
                 _targetBack.clicked += OnTargetBack;
             }
 
@@ -142,6 +173,7 @@ namespace Assets.Scripts.Cards.UI
         private void PopulateSlotRows(List<MagicSlot> slots)
         {
             _listScroll.Clear();
+            ClearNav();
 
             for (int i = 0; i < slots.Count; i++)
             {
@@ -159,6 +191,7 @@ namespace Assets.Scripts.Cards.UI
 
             ShowPanel(_listPanel);
             HidePanel(_targetPanel);
+            BeginNavigation();
         }
 
         private void OnSlotSelected(int slotIndex, MagicSlot slot)
@@ -204,6 +237,12 @@ namespace Assets.Scripts.Cards.UI
                 prompt = "Select Ally Target";
             }
 
+            // Only one valid target — cast straight at it, no picker.
+            if (targets.Count == 1)
+            {
+                SubmitCast(new List<ICombatUnit> { targets[0] });
+                return;
+            }
             PopulateTargetRows(targets, prompt);
         }
 
@@ -212,6 +251,7 @@ namespace Assets.Scripts.Cards.UI
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
+            ReleaseFocus();
             CombatManager.Instance.SubmitCastAction(_selectedMagic, _selectedSlotIndex, _currentHero, targets);
         }
 
@@ -244,6 +284,13 @@ namespace Assets.Scripts.Cards.UI
 
             _currentHero = hero;
             _mode = SelectionMode.DrawTarget;
+
+            // Only one enemy to draw from — skip the target picker.
+            if (enemies.Count == 1)
+            {
+                OnDrawSourceSelected(enemies[0]);
+                return;
+            }
             PopulateTargetRows(enemies, "Draw Magic From");
         }
 
@@ -274,6 +321,7 @@ namespace Assets.Scripts.Cards.UI
         private void PopulateDrawChoiceRows(List<DrawableMagicEntry> entries)
         {
             _listScroll.Clear();
+            ClearNav();
 
             foreach (var entry in entries)
             {
@@ -288,6 +336,7 @@ namespace Assets.Scripts.Cards.UI
 
             ShowPanel(_listPanel);
             HidePanel(_targetPanel);
+            BeginNavigation();
         }
 
         private void SelectDrawMagic(DrawableMagicEntry entry)
@@ -321,6 +370,7 @@ namespace Assets.Scripts.Cards.UI
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
+            ReleaseFocus();
             CombatManager.Instance.SubmitDrawAction(_drawSource, _drawMagic, _drawCharges, slotIndex);
         }
 
@@ -331,6 +381,7 @@ namespace Assets.Scripts.Cards.UI
         private void PopulateTargetRows(List<ICombatUnit> targets, string prompt)
         {
             _targetScroll.Clear();
+            ClearNav();
             _targetPrompt.text = prompt;
 
             foreach (var target in targets)
@@ -342,6 +393,7 @@ namespace Assets.Scripts.Cards.UI
 
             HidePanel(_listPanel);
             ShowPanel(_targetPanel);
+            BeginNavigation();
         }
 
         private void OnTargetSelected(ICombatUnit target)
@@ -351,6 +403,7 @@ namespace Assets.Scripts.Cards.UI
                 case SelectionMode.AttackTarget:
                     _mode = SelectionMode.Idle;
                     HidePanel(_targetPanel);
+                    ReleaseFocus();
                     CombatManager.Instance.SubmitAttackAction(target);
                     return;
                 case SelectionMode.DrawTarget:
@@ -392,6 +445,7 @@ namespace Assets.Scripts.Cards.UI
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
+            ReleaseFocus();
 
             var roomActionUI = FindAnyObjectByType<RoomActionUI>();
             if (roomActionUI != null)
@@ -423,21 +477,29 @@ namespace Assets.Scripts.Cards.UI
                 HidePanel(_listPanel);
                 HidePanel(_targetPanel);
             }
+            ReleaseFocus();
         }
 
         // ============================================================
         //  HELPERS
         // ============================================================
 
+        // Rows mirror the command menu: a ▸ cursor on the selected row, icon, dark name, meta.
         private Button CreateRow(Sprite icon, string name, string meta, bool enabled, Action onClick)
         {
             var row = new Button(onClick);
             row.text = string.Empty;
-            row.AddToClassList("cd-row");
+            row.focusable = false; // focus stays on the panel root; our cursor nav drives selection
+            row.AddToClassList("cd-sel-row");
             row.SetEnabled(enabled);
 
+            var cursor = new Label(string.Empty);
+            cursor.AddToClassList("cd-sel-row__cursor");
+            cursor.pickingMode = PickingMode.Ignore;
+            row.Add(cursor);
+
             var iconElement = new VisualElement();
-            iconElement.AddToClassList("cd-row__icon");
+            iconElement.AddToClassList("cd-sel-row__icon");
             iconElement.pickingMode = PickingMode.Ignore;
             if (icon != null)
             {
@@ -446,16 +508,171 @@ namespace Assets.Scripts.Cards.UI
             row.Add(iconElement);
 
             var nameLabel = new Label(name);
-            nameLabel.AddToClassList("cd-row__name");
+            nameLabel.AddToClassList("cd-sel-row__name");
             nameLabel.pickingMode = PickingMode.Ignore;
             row.Add(nameLabel);
 
             var metaLabel = new Label(meta ?? string.Empty);
-            metaLabel.AddToClassList("cd-row__meta");
+            metaLabel.AddToClassList("cd-sel-row__meta");
             metaLabel.pickingMode = PickingMode.Ignore;
             row.Add(metaLabel);
 
+            // Register selectable rows for cursor navigation; hovering moves the cursor too.
+            if (enabled)
+            {
+                int idx = _navRows.Count;
+                _navRows.Add(row);
+                _navCursors.Add(cursor);
+                _navActions.Add(onClick);
+                row.RegisterCallback<MouseEnterEvent>(_ => SetNavSelected(idx));
+            }
+
             return row;
+        }
+
+        // ============================================================
+        //  CURSOR NAVIGATION (keyboard / controller)
+        // ============================================================
+
+        /// <summary>Reset the nav row set — call before (re)populating a list.</summary>
+        private void ClearNav()
+        {
+            _navRows.Clear();
+            _navCursors.Clear();
+            _navActions.Clear();
+            _navSelected = -1;
+        }
+
+        /// <summary>Select the first row, draw the cursor, and focus the panel for key input.</summary>
+        private void BeginNavigation()
+        {
+            _navSelected = _navRows.Count > 0 ? 0 : -1;
+            RenderNavCursor();
+            if (_root != null && _root.panel != null)
+            {
+                _root.focusable = true;
+                _root.Focus();
+            }
+        }
+
+        /// <summary>Drop focusability when no picker is open so it stops being a nav target.</summary>
+        private void ReleaseFocus()
+        {
+            if (_root != null)
+            {
+                _root.focusable = false;
+            }
+        }
+
+        private void RenderNavCursor()
+        {
+            for (int i = 0; i < _navRows.Count; i++)
+            {
+                bool selected = i == _navSelected;
+                _navCursors[i].text = selected ? "▸" : string.Empty;
+                _navRows[i].EnableInClassList("cd-sel-row--selected", selected);
+            }
+        }
+
+        private void SetNavSelected(int index)
+        {
+            if (index < 0 || index >= _navRows.Count)
+            {
+                return;
+            }
+            _navSelected = index;
+            RenderNavCursor();
+        }
+
+        private void MoveNav(int delta)
+        {
+            if (_navRows.Count == 0)
+            {
+                return;
+            }
+            _navSelected = (_navSelected + delta + _navRows.Count) % _navRows.Count;
+            RenderNavCursor();
+        }
+
+        private void ConfirmNav()
+        {
+            if (_navSelected >= 0 && _navSelected < _navActions.Count)
+            {
+                _navActions[_navSelected]?.Invoke();
+            }
+        }
+
+        private void BackNav()
+        {
+            if (IsShown(_targetPanel))
+            {
+                OnTargetBack();
+            }
+            else if (IsShown(_listPanel))
+            {
+                OnListBack();
+            }
+        }
+
+        private void OnKeyDown(KeyDownEvent evt)
+        {
+            if (_mode == SelectionMode.Idle)
+            {
+                return;
+            }
+            switch (evt.keyCode)
+            {
+                case KeyCode.UpArrow:
+                    MoveNav(-1);
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.DownArrow:
+                    MoveNav(1);
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Space:
+                    ConfirmNav();
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.Escape:
+                case KeyCode.Backspace:
+                    BackNav();
+                    evt.StopPropagation();
+                    break;
+            }
+        }
+
+        // While a picker is open, swallow UI Toolkit's built-in navigation so it can't move
+        // keyboard focus off the root (our OnKeyDown drives selection instead).
+        private void OnNavMove(NavigationMoveEvent evt)
+        {
+            if (_mode != SelectionMode.Idle)
+            {
+                evt.StopPropagation();
+            }
+        }
+
+        private void OnNavSubmit(NavigationSubmitEvent evt)
+        {
+            if (_mode != SelectionMode.Idle)
+            {
+                evt.StopPropagation();
+            }
+        }
+
+        private void OnNavCancel(NavigationCancelEvent evt)
+        {
+            if (_mode != SelectionMode.Idle)
+            {
+                evt.StopPropagation();
+            }
+        }
+
+        private static bool IsShown(VisualElement element)
+        {
+            return element != null && element.style.display.value == DisplayStyle.Flex;
         }
 
         private static void ShowPanel(VisualElement panel)

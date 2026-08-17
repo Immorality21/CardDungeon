@@ -11,6 +11,24 @@ namespace Assets.Scripts.Enemies
     {
         private List<Enemy> _spawnedEnemies = new List<Enemy>();
 
+        // The single prefab every enemy spawns from; its identity comes from the EnemySO.
+        private const string EnemyPrefabResource = "Enemy";
+        private GameObject _enemyPrefab;
+
+        private GameObject EnemyPrefab()
+        {
+            if (_enemyPrefab == null)
+            {
+                // Qualify UnityEngine.Resources — the game has its own Assets.Scripts.Resources.
+                _enemyPrefab = UnityEngine.Resources.Load<GameObject>(EnemyPrefabResource);
+                if (_enemyPrefab == null)
+                {
+                    Debug.LogError($"Shared enemy prefab missing at Resources/{EnemyPrefabResource}.");
+                }
+            }
+            return _enemyPrefab;
+        }
+
         public void SpawnEnemies(List<Room> rooms, Room playerRoom)
         {
             SpawnEnemies(rooms, playerRoom, null);
@@ -51,9 +69,15 @@ namespace Assets.Scripts.Enemies
                     continue;
                 }
 
+                var prefab = EnemyPrefab();
+                if (prefab == null)
+                {
+                    continue;
+                }
+
                 foreach (var entry in spawnTable)
                 {
-                    if (entry.Prefab == null)
+                    if (entry.Enemy == null)
                     {
                         continue;
                     }
@@ -70,12 +94,11 @@ namespace Assets.Scripts.Enemies
                             .Select(e => e.transform.position)
                             .ToList();
                         var position = room.GetRandomWalkablePosition(occupied, 0.5f);
-                        var enemyObj = Instantiate(entry.Prefab, transform);
+
+                        // One shared prefab, stamped with the spawn entry's EnemySO definition.
+                        var enemyObj = Instantiate(prefab, transform);
                         var enemy = enemyObj.GetComponent<Enemy>();
-                        enemy.Stats = new Stats(entry.Stats.Attack, entry.Stats.Defense, entry.Stats.Health, entry.Stats.Agility);
-                        enemy.LootItem = entry.LootItem;
-                        enemy.DrawableMagics = new List<DrawableMagicEntry>(entry.DrawableMagics);
-                        enemy.Archetype = entry.Archetype;
+                        enemy.Initialize(entry.Enemy);
                         enemy.PlaceInRoom(room, position);
 
                         room.Enemies.Add(enemy);

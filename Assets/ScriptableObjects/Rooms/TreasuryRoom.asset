@@ -22,17 +22,6 @@ MonoBehaviour:
   - Loot the gold!
   IsConnectorRoom: 0
   EnemySpawnTable:
-  - Prefab: {fileID: 542091458053358184, guid: 74d54fbb83f9e7e4fb046d878fba8212, type: 3}
-    Stats:
-      Attack: 3
-      Defense: 3
-      Health: 15
-      MaxHealth: 15
-      Agility: 3
-    Archetype: 0
-    LootItem: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
-    DrawableMagics:
-    - Magic: {fileID: 11400000, guid: 8b88a57198b74076a36370c4a8e2d243, type: 2}
-      Charges: 3
+  - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
     SpawnChance: 1
     EvaluationCount: 1

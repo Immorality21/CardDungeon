@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5722227878338395255}
   - component: {fileID: -6796416267845525138}
   m_Layer: 0
-  m_Name: EyeBall
+  m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,24 +1,17 @@
 using System;
-using System.Collections.Generic;
-using Assets.Scripts.Items;
-using Assets.Scripts.Rooms;
 using UnityEngine;
 
 namespace Assets.Scripts.Enemies
 {
+    /// <summary>
+    /// One row of a room's spawn table: which enemy to spawn (an <see cref="EnemySO"/>
+    /// definition) plus the per-room roll parameters. The enemy's identity, sprite, stats,
+    /// archetype, Draw list, resistances and loot all live on the <see cref="EnemySO"/>.
+    /// </summary>
     [Serializable]
     public class EnemySpawnEntry
     {
-        public GameObject Prefab;
-
-        public Stats Stats = new Stats(3, 1, 10);
-
-        public EnemyArchetype Archetype;
-
-        public ItemSO LootItem;
-
-        // The Draw list: magics the player can extract from this enemy, each with charges.
-        public List<DrawableMagicEntry> DrawableMagics = new List<DrawableMagicEntry>();
+        public EnemySO Enemy;
 
         [Range(0f, 1f)]
         public float SpawnChance;

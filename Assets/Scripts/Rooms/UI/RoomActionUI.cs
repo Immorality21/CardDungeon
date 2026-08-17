@@ -43,12 +43,12 @@ namespace Assets.Scripts.Rooms
         private Button _actionBtn;
         private Button _fightBtn;
         private Button _fleeBtn;
-        private Button _attackBtn;
-        private Button _magicBtn;
-        private Button _drawBtn;
-        private Button _skipBtn;
         private Button _optionBack;
         private Button _detailOk;
+
+        private VisualElement _commandList;
+        private VisualElement _turnOrder;
+        private VisualElement _turnOrderList;
 
         private bool _refsReady;
         private Action _detailOkAction;
@@ -56,6 +56,21 @@ namespace Assets.Scripts.Rooms
         private ICombatUnit _currentHeroTurn;
         private Room _currentRoom;
         private Door _entryDoor;
+
+        // Cursor-driven command menu (FFX-style selection list).
+        private enum HeroCommand { Attack, Magic, Draw, Skip }
+
+        private struct CommandEntry
+        {
+            public HeroCommand Command;
+            public string Label;
+            public bool Enabled;
+        }
+
+        private readonly List<CommandEntry> _commands = new List<CommandEntry>();
+        private readonly List<VisualElement> _commandRows = new List<VisualElement>();
+        private readonly List<Label> _commandCursors = new List<Label>();
+        private int _selectedCommand;
 
         private bool EnsureRefs()
         {
@@ -83,6 +98,9 @@ namespace Assets.Scripts.Rooms
             _detailWindow = root.Q<VisualElement>("detail-window");
             _partyStatus = root.Q<VisualElement>("party-status");
             _partyStatusRows = root.Q<VisualElement>("party-status-rows");
+            _commandList = root.Q<VisualElement>("command-list");
+            _turnOrder = root.Q<VisualElement>("turn-order");
+            _turnOrderList = root.Q<VisualElement>("turn-order-list");
 
             _heroTitle = root.Q<Label>("hero-title");
             _optionTitle = root.Q<Label>("option-title");
@@ -94,10 +112,6 @@ namespace Assets.Scripts.Rooms
             _actionBtn = root.Q<Button>("action-btn");
             _fightBtn = root.Q<Button>("fight-btn");
             _fleeBtn = root.Q<Button>("flee-btn");
-            _attackBtn = root.Q<Button>("attack-btn");
-            _magicBtn = root.Q<Button>("magic-btn");
-            _drawBtn = root.Q<Button>("draw-btn");
-            _skipBtn = root.Q<Button>("skip-btn");
             _optionBack = root.Q<Button>("option-back");
             _detailOk = root.Q<Button>("detail-ok");
 
@@ -105,18 +119,31 @@ namespace Assets.Scripts.Rooms
             _actionBtn.clicked += OnAction;
             _fightBtn.clicked += OnFight;
             _fleeBtn.clicked += OnFlee;
-            _attackBtn.clicked += OnHeroAttack;
-            _magicBtn.clicked += OnHeroMagic;
-            _drawBtn.clicked += OnHeroDraw;
-            _skipBtn.clicked += OnHeroSkip;
             _optionBack.clicked += OnBack;
             _detailOk.clicked += () => _detailOkAction?.Invoke();
+
+            // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
+            // navigation has nowhere to move focus — keyboard focus stays on the root and our
+            // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
+            foreach (var focusable in new Focusable[] { _examineBtn, _actionBtn, _fightBtn, _fleeBtn, _optionBack, _detailOk, _optionScroll })
+            {
+                if (focusable != null)
+                {
+                    focusable.focusable = false;
+                }
+            }
 
             // Keyboard hotkeys for the combat bars: F/R start-bar, A/M/D/S hero command bar.
             // Registered on the root so the panel routes key presses here; each hotkey runs the
             // same handler as its button, and only fires when the matching bar is visible.
             root.RegisterCallback<KeyDownEvent>(OnCombatHotkey);
             root.focusable = true;
+
+            // While the command menu is up, swallow UI Toolkit's built-in navigation so it can't
+            // blur/steal keyboard focus off the root after the first arrow (our cursor nav owns it).
+            root.RegisterCallback<NavigationMoveEvent>(evt => { if (IsShown(_heroBar)) { evt.StopPropagation(); } });
+            root.RegisterCallback<NavigationSubmitEvent>(evt => { if (IsShown(_heroBar)) { evt.StopPropagation(); } });
+            root.RegisterCallback<NavigationCancelEvent>(evt => { if (IsShown(_heroBar)) { evt.StopPropagation(); } });
 
             HideAll();
             _refsReady = true;
@@ -174,6 +201,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_optionWindow, false);
             SetShown(_detailWindow, false);
             SetShown(_partyStatus, false);
+            SetShown(_turnOrder, false);
         }
 
         // ============================================================
@@ -248,9 +276,11 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
             CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
             CombatManager.Instance.OnTurnExecuted += OnTurnExecuted;
+            CombatManager.Instance.OnTurnOrderChanged += OnTurnOrderChanged;
 
             BuildPartyStatus(party);
             SetShown(_partyStatus, true);
+            SetShown(_turnOrder, true);
 
             CombatManager.Instance.StartCombat(party, _currentRoom);
         }
@@ -262,18 +292,7 @@ namespace Assets.Scripts.Rooms
             HighlightActiveHero(hero);
             RefreshPartyStatus();
 
-            // Show Magic only when this hero has a charged slot.
-            bool hasMagic = false;
-            var heroComponent = hero as Heroes.Hero;
-            if (heroComponent != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
-            {
-                hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
-            }
-            SetShown(_magicBtn, hasMagic);
-
-            // Show Draw only when an enemy has magic to draw.
-            bool hasDrawable = CombatManager.Instance.GetDrawableEnemies().Count > 0;
-            SetShown(_drawBtn, hasDrawable);
+            BuildCommandMenu(hero);
 
             SetShown(_heroBar, true);
             FocusRoot();
@@ -328,6 +347,7 @@ namespace Assets.Scripts.Rooms
             if (EnsureRefs())
             {
                 SetShown(_heroBar, true);
+                FocusRoot(); // reclaim keyboard focus from the (now closed) selection picker
             }
         }
 
@@ -335,6 +355,223 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_heroBar, false);
             CombatManager.Instance.SubmitHeroAction(HeroAction.Skip);
+        }
+
+        // ============================================================
+        //  COMMAND MENU (FFX-style cursor selection list)
+        // ============================================================
+
+        private void BuildCommandMenu(ICombatUnit hero)
+        {
+            _commands.Clear();
+            _commandRows.Clear();
+            _commandCursors.Clear();
+            _commandList?.Clear();
+            if (_commandList == null)
+            {
+                return;
+            }
+
+            bool hasMagic = false;
+            var heroComponent = hero as Heroes.Hero;
+            if (heroComponent != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            {
+                hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
+            }
+            bool hasDrawable = CombatManager.Instance.GetDrawableEnemies().Count > 0;
+
+            _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Magic", Enabled = hasMagic });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Draw, Label = "Draw", Enabled = hasDrawable });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
+
+            for (int i = 0; i < _commands.Count; i++)
+            {
+                var entry = _commands[i];
+                var row = new VisualElement();
+                row.AddToClassList("cd-cmd-row");
+                if (!entry.Enabled)
+                {
+                    row.AddToClassList("cd-cmd-row--disabled");
+                }
+
+                var cursor = new Label(string.Empty);
+                cursor.AddToClassList("cd-cmd-row__cursor");
+                var label = new Label(entry.Label);
+                label.AddToClassList("cd-cmd-row__label");
+                row.Add(cursor);
+                row.Add(label);
+
+                int idx = i;
+                row.RegisterCallback<ClickEvent>(_ => OnCommandClicked(idx));
+                row.RegisterCallback<MouseEnterEvent>(_ =>
+                {
+                    if (_commands[idx].Enabled)
+                    {
+                        SetSelectedCommand(idx);
+                    }
+                });
+
+                _commandList.Add(row);
+                _commandRows.Add(row);
+                _commandCursors.Add(cursor);
+            }
+
+            _selectedCommand = FirstEnabledCommand();
+            RenderCommandCursor();
+        }
+
+        private int FirstEnabledCommand()
+        {
+            for (int i = 0; i < _commands.Count; i++)
+            {
+                if (_commands[i].Enabled)
+                {
+                    return i;
+                }
+            }
+            return 0;
+        }
+
+        private void RenderCommandCursor()
+        {
+            for (int i = 0; i < _commandRows.Count; i++)
+            {
+                bool selected = i == _selectedCommand;
+                _commandRows[i].EnableInClassList("cd-cmd-row--selected", selected);
+                _commandCursors[i].text = selected ? "▸" : string.Empty;
+            }
+        }
+
+        private void SetSelectedCommand(int index)
+        {
+            if (index < 0 || index >= _commands.Count)
+            {
+                return;
+            }
+            _selectedCommand = index;
+            RenderCommandCursor();
+        }
+
+        private void MoveCommandCursor(int delta)
+        {
+            if (_commands.Count == 0)
+            {
+                return;
+            }
+            int i = _selectedCommand;
+            for (int step = 0; step < _commands.Count; step++)
+            {
+                i = (i + delta + _commands.Count) % _commands.Count;
+                if (_commands[i].Enabled)
+                {
+                    SetSelectedCommand(i);
+                    return;
+                }
+            }
+        }
+
+        private void ConfirmCommand()
+        {
+            if (_selectedCommand < 0 || _selectedCommand >= _commands.Count || !_commands[_selectedCommand].Enabled)
+            {
+                return;
+            }
+            InvokeCommand(_commands[_selectedCommand].Command);
+        }
+
+        private void OnCommandClicked(int index)
+        {
+            if (index < 0 || index >= _commands.Count || !_commands[index].Enabled)
+            {
+                return;
+            }
+            SetSelectedCommand(index);
+            ConfirmCommand();
+        }
+
+        /// <summary>Direct letter-key shortcut: acts only if that command is currently enabled.</summary>
+        private void InvokeCommandShortcut(HeroCommand command)
+        {
+            foreach (var entry in _commands)
+            {
+                if (entry.Command == command)
+                {
+                    if (entry.Enabled)
+                    {
+                        InvokeCommand(command);
+                    }
+                    return;
+                }
+            }
+        }
+
+        private void InvokeCommand(HeroCommand command)
+        {
+            switch (command)
+            {
+                case HeroCommand.Attack:
+                    OnHeroAttack();
+                    break;
+                case HeroCommand.Magic:
+                    OnHeroMagic();
+                    break;
+                case HeroCommand.Draw:
+                    OnHeroDraw();
+                    break;
+                case HeroCommand.Skip:
+                    OnHeroSkip();
+                    break;
+            }
+        }
+
+        // ============================================================
+        //  TURN-ORDER LIST (FFX-style, right side)
+        // ============================================================
+
+        private void OnTurnOrderChanged(List<ICombatUnit> order)
+        {
+            if (_turnOrderList == null)
+            {
+                return;
+            }
+            _turnOrderList.Clear();
+            if (order == null)
+            {
+                return;
+            }
+
+            int shown = 0;
+            for (int i = 0; i < order.Count && shown < 8; i++)
+            {
+                var unit = order[i];
+                if (unit == null)
+                {
+                    continue;
+                }
+
+                var row = new VisualElement();
+                row.AddToClassList("cd-turn-row");
+                if (shown == 0)
+                {
+                    row.AddToClassList("cd-turn-row--current");
+                }
+
+                var icon = new VisualElement();
+                icon.AddToClassList("cd-turn-row__icon");
+                if (unit.Icon != null)
+                {
+                    icon.style.backgroundImage = new StyleBackground(unit.Icon);
+                }
+
+                var name = new Label(unit.DisplayName);
+                name.AddToClassList("cd-turn-row__name");
+
+                row.Add(icon);
+                row.Add(name);
+                _turnOrderList.Add(row);
+                shown++;
+            }
         }
 
         /// <summary>
@@ -363,26 +600,36 @@ namespace Assets.Scripts.Rooms
             {
                 switch (evt.keyCode)
                 {
+                    // Cursor navigation (controller-friendly).
+                    case KeyCode.UpArrow:
+                        MoveCommandCursor(-1);
+                        evt.StopPropagation();
+                        break;
+                    case KeyCode.DownArrow:
+                        MoveCommandCursor(1);
+                        evt.StopPropagation();
+                        break;
+                    case KeyCode.Return:
+                    case KeyCode.KeypadEnter:
+                    case KeyCode.Space:
+                        ConfirmCommand();
+                        evt.StopPropagation();
+                        break;
+                    // Direct letter shortcuts (act only if that command is enabled).
                     case KeyCode.A:
-                        OnHeroAttack();
+                        InvokeCommandShortcut(HeroCommand.Attack);
                         evt.StopPropagation();
                         break;
                     case KeyCode.M:
-                        if (IsShown(_magicBtn))
-                        {
-                            OnHeroMagic();
-                            evt.StopPropagation();
-                        }
+                        InvokeCommandShortcut(HeroCommand.Magic);
+                        evt.StopPropagation();
                         break;
                     case KeyCode.D:
-                        if (IsShown(_drawBtn))
-                        {
-                            OnHeroDraw();
-                            evt.StopPropagation();
-                        }
+                        InvokeCommandShortcut(HeroCommand.Draw);
+                        evt.StopPropagation();
                         break;
                     case KeyCode.S:
-                        OnHeroSkip();
+                        InvokeCommandShortcut(HeroCommand.Skip);
                         evt.StopPropagation();
                         break;
                 }
@@ -486,11 +733,15 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
             CombatManager.Instance.OnTurnExecuted -= OnTurnExecuted;
+            CombatManager.Instance.OnTurnOrderChanged -= OnTurnOrderChanged;
             SetShown(_heroBar, false);
             SetShown(_partyStatus, false);
+            SetShown(_turnOrder, false);
             _partyStatusRows?.Clear();
             _partyRows.Clear();
             _partyHpLabels.Clear();
+            _turnOrderList?.Clear();
+            _commandList?.Clear();
 
             switch (result.Outcome)
             {

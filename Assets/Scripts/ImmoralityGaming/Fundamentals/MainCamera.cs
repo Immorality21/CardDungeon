@@ -23,6 +23,12 @@ public class MainCamera : SingletonBehaviour<MainCamera>
     [Range(2f, 15f)]
     public float moveSpeed = 5f;
 
+    /// <summary>
+    /// When false, keyboard camera panning is disabled. Combat sets this off so the arrow/WASD
+    /// keys drive the battle command cursor instead of moving the (frozen) camera.
+    /// </summary>
+    public bool AllowManualPan = true;
+
     private static Camera _staticCameraInstance { get; set; }
     public static Camera Camera => _staticCameraInstance = _staticCameraInstance ?? Instance._camera;
     public static bool IsMoving { get; set; }
@@ -124,6 +130,11 @@ public class MainCamera : SingletonBehaviour<MainCamera>
 
     private void Drag()
     {
+        if (!AllowManualPan)
+        {
+            return;
+        }
+
         float xValue = 0f; // Input.GetAxis(INPUT_MOUSE_X);
         float yValue = 0f; // Input.GetAxis(INPUT_MOUSE_Y);
 

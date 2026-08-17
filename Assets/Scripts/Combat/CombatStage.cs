@@ -58,6 +58,7 @@ namespace Assets.Scripts.Combat
             // Snap the camera to the party centre, then freeze the follow so the stage holds.
             var mainCamera = MainCamera.Instance;
             mainCamera.SetPosition(party.transform.position);
+            mainCamera.AllowManualPan = false; // arrow/WASD drive the command cursor, not the camera
             if (GameManager.HasInstance)
             {
                 GameManager.Instance.SetCameraFollow(false);
@@ -115,6 +116,10 @@ namespace Assets.Scripts.Combat
             if (_backgroundGo != null)
             {
                 _backgroundGo.SetActive(false);
+            }
+            if (MainCamera.HasInstance)
+            {
+                MainCamera.Instance.AllowManualPan = true;
             }
             if (GameManager.HasInstance)
             {

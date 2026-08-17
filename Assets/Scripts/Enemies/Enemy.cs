@@ -24,9 +24,12 @@ namespace Assets.Scripts.Enemies
         [System.NonSerialized] public bool IsCharging;
         [System.NonSerialized] public ICombatUnit ChargeTarget;
 
+        /// <summary>The definition this enemy was spawned from (set by <see cref="Initialize"/>).</summary>
+        public EnemySO Definition { get; private set; }
+
         private SpriteRenderer _spriteRenderer;
 
-        public string DisplayName => gameObject.name;
+        public string DisplayName => Definition != null ? Definition.DisplayName : gameObject.name;
         public Sprite Icon => GetIcon();
         public bool IsAlive => Stats != null && Stats.Health > 0;
         public bool IsHero => false;
@@ -34,6 +37,33 @@ namespace Assets.Scripts.Enemies
 
         Stats ICombatUnit.Stats => Stats;
         List<Resistance> ICombatUnit.Resistances => Resistances;
+
+        /// <summary>
+        /// Stamps this (shared-prefab) instance with an enemy definition: sprite, stats,
+        /// archetype, Draw list, resistances and loot. Called by <see cref="EnemyManager"/> at
+        /// spawn time so a single prefab can become any enemy type.
+        /// </summary>
+        public void Initialize(EnemySO definition)
+        {
+            Definition = definition;
+            if (definition == null)
+            {
+                return;
+            }
+
+            gameObject.name = definition.DisplayName;
+            Stats = new Stats(definition.Attack, definition.Defense, definition.Health, definition.Agility);
+            Archetype = definition.Archetype;
+            DrawableMagics = new List<DrawableMagicEntry>(definition.DrawableMagics);
+            Resistances = new List<Resistance>(definition.Resistances);
+            LootItem = definition.LootItem;
+
+            var sr = GetComponent<SpriteRenderer>();
+            if (sr != null && definition.Sprite != null)
+            {
+                sr.sprite = definition.Sprite;
+            }
+        }
 
         public void PlaceInRoom(Room room, Vector3 position)
         {

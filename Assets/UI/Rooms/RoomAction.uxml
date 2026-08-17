@@ -15,21 +15,22 @@
             <ui:Button name="flee-btn" text="Flee" class="cd-cmd" />
         </ui:VisualElement>
 
-        <!-- Party status window (FF-style, bottom-left): hero names + HP -->
-        <ui:VisualElement name="party-status" class="cd-party-status cd-dock-bottom-left cd-hidden">
+        <!-- Turn-order list (FFX-style, top-right): upcoming turns, current on top -->
+        <ui:VisualElement name="turn-order" class="cd-turn-order cd-dock-top-right cd-hidden">
+            <ui:Label name="turn-order-title" text="Turn Order" class="cd-turn-order__header" />
+            <ui:VisualElement name="turn-order-list" class="cd-turn-order__list" />
+        </ui:VisualElement>
+
+        <!-- Party status window (FF-style, bottom-right): hero names + HP -->
+        <ui:VisualElement name="party-status" class="cd-party-status cd-dock-bottom-right cd-hidden">
             <ui:Label name="party-status-title" text="Party" class="cd-party-status__header" />
             <ui:VisualElement name="party-status-rows" class="cd-party-status__rows" />
         </ui:VisualElement>
 
-        <!-- Hero turn command window (FF-style, bottom-right) -->
-        <ui:VisualElement name="hero-bar" class="cd-command-window cd-dock-bottom-right cd-hidden">
+        <!-- Hero turn command menu (FFX-style, bottom-left): a cursor-driven selection list -->
+        <ui:VisualElement name="hero-bar" class="cd-command-window cd-dock-bottom-left cd-hidden">
             <ui:Label name="hero-title" text="" class="cd-command-window__header" />
-            <ui:VisualElement class="cd-command-window__row">
-                <ui:Button name="attack-btn" text="Attack" class="cd-cmd" />
-                <ui:Button name="magic-btn" text="Magic" class="cd-cmd" />
-                <ui:Button name="draw-btn" text="Draw" class="cd-cmd" />
-                <ui:Button name="skip-btn" text="Skip" class="cd-cmd" />
-            </ui:VisualElement>
+            <ui:VisualElement name="command-list" class="cd-command-list" />
         </ui:VisualElement>
 
         <!-- Examine / Action option list -->

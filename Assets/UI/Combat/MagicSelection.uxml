@@ -3,17 +3,17 @@
 
     <ui:VisualElement name="root" class="cd-root" picking-mode="Ignore">
 
-        <!-- Magic / slot list window (docked bottom-right, over the command box slot) -->
-        <ui:VisualElement name="magic-list-panel" class="cd-window cd-window--combat cd-dock-bottom-right cd-hidden">
-            <ui:Label name="list-title" text="Magic" class="cd-title" />
-            <ui:ScrollView name="list-scroll" class="cd-list" mode="Vertical" />
+        <!-- Magic / slot list window (docked bottom-left, styled like the command menu) -->
+        <ui:VisualElement name="magic-list-panel" class="cd-window cd-window--combat cd-dock-bottom-left cd-hidden">
+            <ui:Label name="list-title" text="Magic" class="cd-command-window__header" />
+            <ui:ScrollView name="list-scroll" class="cd-select-scroll" mode="Vertical" />
             <ui:Button name="list-back" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- Target picker window (cast target / attack target / draw source) -->
-        <ui:VisualElement name="target-panel" class="cd-window cd-window--combat cd-dock-bottom-right cd-hidden">
-            <ui:Label name="target-prompt" text="Select Target" class="cd-title" />
-            <ui:ScrollView name="target-scroll" class="cd-list" mode="Vertical" />
+        <ui:VisualElement name="target-panel" class="cd-window cd-window--combat cd-dock-bottom-left cd-hidden">
+            <ui:Label name="target-prompt" text="Select Target" class="cd-command-window__header" />
+            <ui:ScrollView name="target-scroll" class="cd-select-scroll" mode="Vertical" />
             <ui:Button name="target-back" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 

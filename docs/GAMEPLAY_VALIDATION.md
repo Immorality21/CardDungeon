@@ -64,10 +64,25 @@ Hard-won gotchas (each cost a failed compile until learned):
    `Assets.Scripts.Combat` (not `.Combat.UI`, despite the folder).
 5. The tool returns `localFixedCode` — a reformatted copy of what actually compiled. Handy to
    confirm what ran.
-
-**Reading state cheaply:** one `RunCommand` that logs a compact line (positions, HP, counts)
-is worth more than several captures. Format numbers (`{0:0.0}`) and keep every value inside
-the arg count — trailing `{5}`/`{6}` beyond the args passed print literally.
+6. **`result.Log` has a dumb `{N}` formatter — NO format specifiers.** `result.Log("{0:0.0}", x)`
+   prints `{0:0.0}` literally (and worse, a `{1:0}` can suppress *all* later args). Format
+   numbers in C# **string interpolation first** (`$"{x:0.0}"`), then pass the finished string as
+   a plain `{0}` arg. Same rule for trailing `{5}`/`{6}` past the arg count — they print literally.
+7. **Don't nest a ternary with escaped quotes inside a `$"..."` interpolation** — the tool's
+   pre-parser mangles it (`CS1056: Unexpected character '\'`). Build such strings with a
+   `StringBuilder` or plain `+` concatenation instead.
+8. **`EditorApplication.isPlaying = false` does not take effect until the frame ends.** Setting
+   it and then calling `EditorSceneManager.OpenScene` in the *same* command throws
+   "cannot be used during play mode". Exit play in one command, re-open + `EnterPlaymode` in the
+   **next** one.
+9. **Editing project scripts while in play mode** triggers a recompile + domain reload that often
+   leaves the running game in a half-initialised / stuck state (combat mid-turn, empty menus).
+   After any code edit, **fully restart play** (exit → enter) before verifying.
+10. **Deleting a MonoBehaviour `.cs` orphans GUID references** on scene/prefab objects that used
+    it — a grep for the type *name* misses these (scenes reference by GUID). Symptom: a
+    "The referenced script (Unknown) is missing!" warning. Recover the GUID from git
+    (`git show HEAD:path.cs.meta`), grep `*.unity`/`*.prefab` for it, then clean with
+    `GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go)` and save the scene.
 
 ---
 
@@ -273,6 +288,50 @@ the exact method the panel calls:
 > **Magic is unavailable until you Draw.** On a fresh run the equipped slots are empty, so the
 > `M`/Magic button is hidden (`magic-btn` display `None`). To finish an enemy with a *skill*:
 > Draw a spell from it on one hero turn, then Cast on a later turn.
+
+---
+
+## UI Toolkit keyboard focus & navigation (the deepest rabbit hole)
+
+Combat uses cursor-driven selection lists (command menu in `RoomActionUI`, pickers in
+`MagicSelectionUI`) navigable by keyboard/controller. UITK's focus model has sharp edges — these
+cost the most time to work out, and the MCP tools *hide* the bug, so read this before touching it.
+
+**How it actually works in this game:**
+- Keyboard events route to the panel's **focused element**. Each combat UITK list makes its panel
+  root `focusable` and `Focus()`es it, registers `KeyDownEvent` for the actual nav (Up/Down move a
+  `▸` cursor over code-built rows; Enter confirms; Esc/Backspace = back), and renders selection via
+  a `--selected` USS class — *not* via UITK's built-in focus ring.
+- **Two things steal focus and kill arrows after one press** — both must be handled:
+  1. **`ScrollView` is `focusable` by default.** The first arrow's `NavigationMoveEvent` moves
+     focus onto the ScrollView. Fix: set the picker scrolls (and row Buttons, Back buttons)
+     `focusable = false`.
+  2. **Every `UIDocument` root is focusable, and arrow-nav hops focus between panels.** The
+     command menu lost focus to the *idle MagicSelection panel's root* (a different UIDocument).
+     Fix: **only ONE panel root may be `focusable` at a time** — each panel sets its root
+     `focusable = true` only while it is actively driving nav, and `false` when idle
+     (`MagicSelectionUI` toggles it in `BeginNavigation` / `ReleaseFocus`).
+- **`evt.StopPropagation()` on `NavigationMoveEvent` does NOT stop the focus move** (the focus
+  controller acts before/around the bubble handler). Removing the focus *targets* (the two fixes
+  above) is what actually works; the StopPropagation callbacks are belt-and-suspenders.
+
+**Why MCP testing is deceptive here:** `element.SendEvent(keyDownEvent)` **routes keyboard events
+to the panel's focused element, not to the element you call `SendEvent` on.** So dispatching arrow
+`KeyDownEvent`s to a root "works" in MCP as long as that root happens to be focused — which
+completely masks the real-keyboard focus-blur bug. To actually reproduce/verify it:
+
+```csharp
+root.Focus();
+var fc = root.panel.focusController;
+bool before = fc.focusedElement == root;
+using (var e = NavigationMoveEvent.GetPooled(NavigationMoveEvent.Direction.Down)) { root.SendEvent(e); }
+bool after = fc.focusedElement == root;   // BUG if this flipped to false (focus escaped)
+// Log fc.focusedElement's (VisualElement).name to see WHERE it went — e.g. another
+// UIDocument's "...-container" root reveals the cross-panel focus theft.
+```
+
+Dispatch a real `NavigationMoveEvent` (what a physical arrow generates) and assert
+`focusController.focusedElement` stays put — that's the only MCP check that catches the bug.
 
 ---
 
