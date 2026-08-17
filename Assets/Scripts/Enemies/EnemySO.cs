@@ -22,6 +22,10 @@ namespace Assets.Scripts.Enemies
         public int Health = 10;
         public int Agility = 5;
 
+        [Header("Kill rewards")]
+        public int XpReward = 10;    // awarded to the party leader immediately on kill
+        public int GoldReward = 5;   // shown per combat; only banked (persisted) on level-clear
+
         public EnemyArchetype Archetype = EnemyArchetype.Aggressor;
 
         // The Draw list: magics the player can extract from this enemy, each with charges.

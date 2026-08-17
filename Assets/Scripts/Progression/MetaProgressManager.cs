@@ -128,11 +128,33 @@ namespace Assets.Scripts.Progression
 
         // --- Awards (called from the run chokepoints) ---
 
-        /// <summary>Reward for clearing a dungeon level (exit room cleared).</summary>
+        // Gold earned from kills during the current level. Shown per combat, but only banked
+        // into persistent Gold on level-clear — a wipe forfeits it (keeps the meta-economy honest).
+        private int _pendingRunGold;
+        public int PendingRunGold => _pendingRunGold;
+
+        /// <summary>Accumulate kill-gold for the current level (not persisted until level-clear).</summary>
+        public void AddPendingGold(int amount)
+        {
+            if (amount > 0)
+            {
+                _pendingRunGold += amount;
+            }
+        }
+
+        /// <summary>Forfeit the current level's accumulated kill-gold (party death / new level).</summary>
+        public void DiscardPendingGold()
+        {
+            _pendingRunGold = 0;
+        }
+
+        /// <summary>Reward for clearing a dungeon level (exit room cleared): banks the level's
+        /// accumulated kill-gold plus the flat level-clear bonus.</summary>
         public void AwardLevelClear()
         {
-            _saveData.Gold += GoldPerLevelCleared;
+            _saveData.Gold += GoldPerLevelCleared + _pendingRunGold;
             _saveData.Essence += EssencePerLevelCleared;
+            _pendingRunGold = 0;
             Save();
             OnChanged?.Invoke();
         }

@@ -38,6 +38,12 @@ namespace Assets.Scripts.Rooms
         public CombatOutcome Outcome;
         public string Log;
         public int RemainingEnemies;
+
+        // Rewards earned this combat (for the victory summary).
+        public List<ItemSO> Loot = new List<ItemSO>();
+        public int XpGained;
+        public int GoldGained;
+        public bool LevelCleared; // this victory cleared the exit room → level complete
     }
 
     public class CombatManager : SingletonBehaviour<CombatManager>
@@ -73,6 +79,12 @@ namespace Assets.Scripts.Rooms
         private string _lastTurnLog;
         private Room _currentCombatRoom;
         private Party _currentParty;
+
+        // Rewards accumulated during the current combat (surfaced in the victory summary).
+        private readonly List<ItemSO> _combatLoot = new List<ItemSO>();
+        private int _combatXp;
+        private int _combatGold;
+        private Room _lastVictoryRoom;
         private MagicTagTracker _tagTracker;
         private ComboDetector _comboDetector;
         private EffectResolver _calculator = new EffectResolver();
@@ -194,6 +206,9 @@ namespace Assets.Scripts.Rooms
             InCombat = true;
             _currentCombatRoom = room;
             _currentParty = party;
+            _combatLoot.Clear();
+            _combatXp = 0;
+            _combatGold = 0;
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
             _tagTracker = new MagicTagTracker();
@@ -330,11 +345,10 @@ namespace Assets.Scripts.Rooms
                 outcome = CombatOutcome.Victory;
                 fullLog += "\nAll enemies defeated!";
 
-                // Lower the battle stage and return the heroes to the party.
-                CombatStage.Instance.End(restoreEnemyPositions: false);
-
-                // Enable all doors
-                room.EnableAllDoors();
+                // Keep the battle stage up so the victory summary shows over it; it is torn down
+                // (and doors enabled / level completed) when the summary is dismissed — see
+                // FinishVictory, called by RoomActionUI's Continue button.
+                _lastVictoryRoom = room;
             }
 
             // Save dungeon state (not party — deferred until level completion)
@@ -348,19 +362,36 @@ namespace Assets.Scripts.Rooms
             _currentCombatRoom = null;
             InCombat = false;
 
+            bool levelCleared = outcome == CombatOutcome.Victory && room.IsExit && !HasAliveEnemies(room);
             var result = new CombatResult
             {
                 Outcome = outcome,
                 Log = fullLog,
-                RemainingEnemies = room.Enemies.Count(e => e != null && e.IsAlive)
+                RemainingEnemies = room.Enemies.Count(e => e != null && e.IsAlive),
+                Loot = new List<ItemSO>(_combatLoot),
+                XpGained = _combatXp,
+                GoldGained = _combatGold,
+                LevelCleared = levelCleared
             };
 
             OnCombatEnded?.Invoke(result);
+            // Stage teardown + OnDungeonCleared are deferred to FinishVictory (the summary's Continue).
+        }
 
-            // Check if the exit room has been cleared
-            if (outcome == CombatOutcome.Victory && room.IsExit && !HasAliveEnemies(room))
+        /// <summary>
+        /// Called when the player dismisses the victory summary: lowers the battle stage, then
+        /// either completes the level (exit room) or re-opens the room's doors to keep exploring.
+        /// </summary>
+        public void FinishVictory(bool levelCleared)
+        {
+            CombatStage.Instance.End(restoreEnemyPositions: false);
+            if (levelCleared)
             {
                 OnDungeonCleared?.Invoke();
+            }
+            else
+            {
+                _lastVictoryRoom?.EnableAllDoors();
             }
         }
 
@@ -704,6 +735,24 @@ namespace Assets.Scripts.Rooms
             if (enemy == null)
             {
                 return;
+            }
+
+            // Kill rewards: loot (per drop), XP (awarded now), gold (accumulated, banked on clear).
+            if (enemy.LootItem != null)
+            {
+                _combatLoot.Add(enemy.LootItem);
+            }
+            int xp = enemy.Definition != null ? enemy.Definition.XpReward : 0;
+            int gold = enemy.Definition != null ? enemy.Definition.GoldReward : 0;
+            if (xp > 0)
+            {
+                _combatXp += xp;
+                _currentParty?.AddXpToLeader(xp);
+            }
+            if (gold > 0)
+            {
+                _combatGold += gold;
+                MetaProgressManager.Instance.AddPendingGold(gold);
             }
 
             InventoryManager.Instance.TryDropItem(enemy.LootItem);

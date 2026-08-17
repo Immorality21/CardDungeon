@@ -11,8 +11,9 @@ The persistent between-run economy, on top of hero XP.
   - **Slot upgrades**: `BonusSlots` (capped at `MaxBonusSlots`) raise how many magic slots each hero gets. `DungeonManager.GetMagicSlotCount` = `EquippedMagicState.DefaultSlotCount` + `GetBonusSlotCount()`.
   - **Pure helpers** `MagicPowerBonusForLevel` / `MagicUpgradeCostForNextLevel` / `SlotUpgradeCostForNext` hold the economy math (no state/disk) so it's unit-testable (`MagicUpgradeTests`). Tuning constants live at the top of the manager.
 - **Awards** (both call the manager, which auto-creates if absent):
-  - `DungeonManager.OnDungeonCleared` → `AwardLevelClear()` (Gold + Essence per level cleared).
-  - `DungeonManager.HandlePartyDeath` → `AwardRunProgressOnDeath(levelIndex)` (consolation Gold scaled by how far the run reached), awarded **before** saves are wiped.
+  - `DungeonManager.OnDungeonCleared` → `AwardLevelClear()` (flat Gold + Essence per level cleared, **plus** the level's accumulated kill-gold — see pending gold below).
+  - `DungeonManager.HandlePartyDeath` → `AwardRunProgressOnDeath(levelIndex)` (consolation Gold scaled by how far the run reached), awarded **before** saves are wiped; also `DiscardPendingGold()`.
+- **Pending kill-gold** (`_pendingRunGold`, in-memory, not persisted): enemies grant `GoldReward` per kill (`AddPendingGold`), **shown in the victory summary** but only banked into persistent Gold on level-clear (`AwardLevelClear` commits + resets it). A wipe forfeits it (`DiscardPendingGold`) — so gold, like XP/items, is only kept by clearing the level. (XP is awarded immediately per kill and committed on dungeon-clear like before; it is now actually sourced — enemies grant `EnemySO.XpReward`.)
 - **Combat integration:** `CombatManager.ExecuteCastAction` reads `GetMagicPowerBonus(magicKey)` and passes it as `EffectResolver.Execute(..., powerBonus)`. The resolver folds the bonus into a *copy* of each Damage/Heal effect (never mutates the `MagicSO`).
 - **Hub UI (spend sinks):**
   - **MerchantUI** (`MainMenu/MerchantUI.cs`) — Gold sink. Enlarges the potion belt (raises `PartyResourceManager` healing-potion max). Escalating cost. (The old card-pack offer is gone — magic is drawn in-run, not bought.)

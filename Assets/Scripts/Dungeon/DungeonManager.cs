@@ -452,6 +452,9 @@ namespace Assets.Scripts.Dungeon
                 MetaProgressManager.Instance.AwardRunProgressOnDeath(RunLevelIndex);
             }
 
+            // Forfeit this level's un-banked kill-gold.
+            MetaProgressManager.Instance.DiscardPendingGold();
+
             // Delete dungeon save — all in-memory XP/items are discarded with the scene
             if (DungeonSaveManager.HasInstance)
             {

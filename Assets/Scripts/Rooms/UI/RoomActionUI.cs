@@ -50,6 +50,12 @@ namespace Assets.Scripts.Rooms
         private VisualElement _turnOrder;
         private VisualElement _turnOrderList;
 
+        private VisualElement _victoryWindow;
+        private Label _victoryTitle;
+        private VisualElement _victoryRewards;
+        private Button _victoryContinue;
+        private bool _pendingLevelCleared;
+
         private bool _refsReady;
         private Action _detailOkAction;
 
@@ -101,6 +107,10 @@ namespace Assets.Scripts.Rooms
             _commandList = root.Q<VisualElement>("command-list");
             _turnOrder = root.Q<VisualElement>("turn-order");
             _turnOrderList = root.Q<VisualElement>("turn-order-list");
+            _victoryWindow = root.Q<VisualElement>("victory-window");
+            _victoryTitle = root.Q<Label>("victory-title");
+            _victoryRewards = root.Q<VisualElement>("victory-rewards");
+            _victoryContinue = root.Q<Button>("victory-continue");
 
             _heroTitle = root.Q<Label>("hero-title");
             _optionTitle = root.Q<Label>("option-title");
@@ -121,11 +131,12 @@ namespace Assets.Scripts.Rooms
             _fleeBtn.clicked += OnFlee;
             _optionBack.clicked += OnBack;
             _detailOk.clicked += () => _detailOkAction?.Invoke();
+            _victoryContinue.clicked += OnVictoryContinue;
 
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _examineBtn, _actionBtn, _fightBtn, _fleeBtn, _optionBack, _detailOk, _optionScroll })
+            foreach (var focusable in new Focusable[] { _examineBtn, _actionBtn, _fightBtn, _fleeBtn, _optionBack, _detailOk, _victoryContinue, _optionScroll })
             {
                 if (focusable != null)
                 {
@@ -202,6 +213,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_detailWindow, false);
             SetShown(_partyStatus, false);
             SetShown(_turnOrder, false);
+            SetShown(_victoryWindow, false);
         }
 
         // ============================================================
@@ -746,7 +758,7 @@ namespace Assets.Scripts.Rooms
             switch (result.Outcome)
             {
                 case CombatOutcome.Victory:
-                    ShowCombatResult("Victory!", result.Log, showNormalAfter: true);
+                    ShowVictory(result);
                     break;
                 case CombatOutcome.PlayerDied:
                     ShowDeathScreen(result.Log);
@@ -816,6 +828,89 @@ namespace Assets.Scripts.Rooms
                 }
             };
             SetShown(_detailWindow, true);
+        }
+
+        // ============================================================
+        //  VICTORY SUMMARY (loot / XP / gold, over the battle stage)
+        // ============================================================
+
+        private void ShowVictory(CombatResult result)
+        {
+            _pendingLevelCleared = result.LevelCleared;
+
+            SetShown(_mainBar, false);
+            SetShown(_combatBar, false);
+            SetShown(_optionWindow, false);
+            SetShown(_detailWindow, false);
+
+            _victoryTitle.text = result.LevelCleared ? "Level Cleared!" : "Victory!";
+            _victoryRewards.Clear();
+
+            // Loot — a header row, then an icon+name line per item.
+            if (result.Loot != null && result.Loot.Count > 0)
+            {
+                _victoryRewards.Add(MakeVictoryRow("Loot", result.Loot.Count > 1 ? $"x{result.Loot.Count}" : string.Empty));
+                foreach (var item in result.Loot)
+                {
+                    if (item == null)
+                    {
+                        continue;
+                    }
+                    var loot = new VisualElement();
+                    loot.AddToClassList("cd-victory-loot");
+                    var icon = new VisualElement();
+                    icon.AddToClassList("cd-victory-loot__icon");
+                    if (item.Icon != null)
+                    {
+                        icon.style.backgroundImage = new StyleBackground(item.Icon);
+                    }
+                    var name = new Label(item.DisplayName);
+                    name.AddToClassList("cd-victory-loot__name");
+                    loot.Add(icon);
+                    loot.Add(name);
+                    _victoryRewards.Add(loot);
+                }
+            }
+            else
+            {
+                _victoryRewards.Add(MakeVictoryRow("Loot", "None"));
+            }
+
+            _victoryRewards.Add(MakeVictoryRow("XP", "+" + result.XpGained));
+
+            string gold = "+" + result.GoldGained;
+            if (result.LevelCleared)
+            {
+                gold += "  (banked)";
+            }
+            _victoryRewards.Add(MakeVictoryRow("Gold", gold));
+
+            SetShown(_victoryWindow, true);
+        }
+
+        private VisualElement MakeVictoryRow(string label, string value)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("cd-victory-row");
+            var l = new Label(label);
+            l.AddToClassList("cd-victory-row__label");
+            var v = new Label(value);
+            v.AddToClassList("cd-victory-row__value");
+            row.Add(l);
+            row.Add(v);
+            return row;
+        }
+
+        private void OnVictoryContinue()
+        {
+            SetShown(_victoryWindow, false);
+            CombatManager.Instance.FinishVictory(_pendingLevelCleared);
+            if (!_pendingLevelCleared)
+            {
+                SetShown(_mainBar, true);
+                SubscribeDoors();
+            }
+            // If the level was cleared, FinishVictory raises OnDungeonCleared → scene loads to menu.
         }
 
         // ============================================================

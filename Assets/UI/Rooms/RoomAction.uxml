@@ -47,5 +47,12 @@
             <ui:Button name="detail-ok" text="Ok" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
+        <!-- Victory summary (shown over the battle stage) -->
+        <ui:VisualElement name="victory-window" class="cd-victory cd-dock-center cd-hidden">
+            <ui:Label name="victory-title" text="Victory!" class="cd-victory__title" />
+            <ui:VisualElement name="victory-rewards" class="cd-victory__rewards" />
+            <ui:Button name="victory-continue" text="Continue" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>
