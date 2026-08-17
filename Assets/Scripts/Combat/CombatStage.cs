@@ -24,7 +24,10 @@ namespace Assets.Scripts.Combat
         private const int BackgroundSortOrder = 400;
         private const int UnitSortOrder = 600;
 
-        [SerializeField] private Sprite _backgroundArt; // optional real art; falls back to a solid fill
+        // Battle backdrop loaded from Resources (drop a sprite here to replace the solid fill).
+        private const string BackgroundResourcePath = "CombatBackgrounds/battle";
+
+        [SerializeField] private Sprite _backgroundArt; // inspector override (wins over Resources)
 
         private static Sprite _solidSprite;
 
@@ -168,21 +171,42 @@ namespace Assets.Scripts.Combat
 
         private void RaiseBackground(Camera cam, float halfW, float halfH)
         {
+            // Inspector override wins; otherwise load the battle backdrop from Resources; a solid
+            // fill is the last-resort fallback so the dungeon is always hidden. (Qualify
+            // UnityEngine.Resources — the game has its own Assets.Scripts.Resources namespace.)
+            var art = _backgroundArt != null
+                ? _backgroundArt
+                : UnityEngine.Resources.Load<Sprite>(BackgroundResourcePath);
+
             if (_backgroundGo == null)
             {
                 _backgroundGo = new GameObject("BattleBackground");
                 _backgroundSr = _backgroundGo.AddComponent<SpriteRenderer>();
-                _backgroundSr.sprite = _backgroundArt != null ? _backgroundArt : SolidSprite();
-                _backgroundSr.color = _backgroundArt != null ? Color.white : new Color(0.10f, 0.09f, 0.16f);
                 _backgroundSr.sortingOrder = BackgroundSortOrder;
             }
+
+            _backgroundSr.sprite = art != null ? art : SolidSprite();
+            _backgroundSr.color = art != null ? Color.white : new Color(0.10f, 0.09f, 0.16f);
 
             // Parent to the camera so a screen shake never exposes an edge, and cover the view.
             var camTransform = cam != null ? cam.transform : MainCamera.Instance.transform;
             _backgroundGo.transform.SetParent(camTransform, false);
             _backgroundGo.transform.localPosition = new Vector3(0f, 0f, 10f);
             _backgroundGo.transform.localRotation = Quaternion.identity;
-            _backgroundGo.transform.localScale = new Vector3(halfW * 2f + 2f, halfH * 2f + 2f, 1f);
+
+            float coverW = halfW * 2f + 2f;
+            float coverH = halfH * 2f + 2f;
+            if (art != null)
+            {
+                // Uniform cover-fit so real art keeps its aspect (crops overflow, no stretch).
+                var size = art.bounds.size;
+                float scale = Mathf.Max(coverW / Mathf.Max(0.01f, size.x), coverH / Mathf.Max(0.01f, size.y));
+                _backgroundGo.transform.localScale = new Vector3(scale, scale, 1f);
+            }
+            else
+            {
+                _backgroundGo.transform.localScale = new Vector3(coverW, coverH, 1f);
+            }
             _backgroundGo.SetActive(true);
         }
 

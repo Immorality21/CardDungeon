@@ -161,6 +161,14 @@
     right: 24px;
 }
 
+/* Compact target/slot picker docked into the command-box corner during combat. */
+.cd-window--combat {
+    width: 380px;
+    max-width: 42%;
+    max-height: 54%;
+    margin-bottom: 0;
+}
+
 /* ---- Party status window (hero names + HP) ---- */
 .cd-party-status {
     min-width: 220px;
