@@ -10,12 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69b3836c2cb69fc4b815c96944749c08, type: 3}
-  m_Name: SimpleSword
-  m_EditorClassIdentifier: 
-  Key: SimpleSword
-  DisplayName: Simple Sword
-  Icon: {fileID: 21300000, guid: ad316f0080a7cbd4cad3915c9cc72701, type: 3}
-  SlotType: 0
+  m_Name: LeatherCap
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
+  Key: LeatherCap
+  DisplayName: Leather Cap
+  Icon: {fileID: 21300000, guid: 4898c3d62902b2b44be36d4ebe2e0be4, type: 3}
+  SlotType: 2
   Rarity: 0
   ItemLevel: 1
-  Bonuses: []
+  Bonuses:
+  - StatType: 2
+    BonusType: 0
+    Value: 6
