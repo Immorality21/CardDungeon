@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af198de09aeca534b959292a4b71d567, type: 3}
   m_Name: BlueRoom
   m_EditorClassIdentifier: 
-  Name: Vasectomy Room
+  Name: Blue Room
   Width: 4
   Height: 5
   Color: {r: 0.2979263, g: 0.2979263, b: 0.9716981, a: 1}
@@ -22,5 +22,8 @@ MonoBehaviour:
   IsConnectorRoom: 0
   EnemySpawnTable:
   - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
-    SpawnChance: 0.8
+    SpawnChance: 0.5
+    EvaluationCount: 3
+  - Enemy: {fileID: 11400000, guid: ff5b77fa3ce957149bdcb9bdd40a5d9c, type: 2}
+    SpawnChance: 0.4
     EvaluationCount: 3

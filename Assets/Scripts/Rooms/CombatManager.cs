@@ -5,6 +5,7 @@ using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
+using Assets.Scripts.Combat.Audio;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Enemies.Behaviors;
@@ -369,6 +370,7 @@ namespace Assets.Scripts.Rooms
             {
                 outcome = CombatOutcome.PlayerDied;
                 fullLog += "\nYour party has been defeated!";
+                CombatAudio.Play(CombatSound.Defeat);
 
                 // Tear the stage down (unfreeze camera, drop background) before the death screen.
                 CombatStage.Instance.End(restoreEnemyPositions: false);
@@ -377,6 +379,7 @@ namespace Assets.Scripts.Rooms
             {
                 outcome = CombatOutcome.Victory;
                 fullLog += "\nAll enemies defeated!";
+                CombatAudio.Play(CombatSound.Victory);
 
                 // Keep the battle stage up so the victory summary shows over it; it is torn down
                 // (and doors enabled / level completed) when the summary is dismissed — see
@@ -444,6 +447,7 @@ namespace Assets.Scripts.Rooms
             var result = _calculator.Execute(
                 castAction, BuffTracker, _tagTracker, _comboDetector, powerBonus, magicLevel, comboLevelLookup);
             _lastTurnLog = result.BuildLog(castAction);
+            CombatAudio.Play(CombatSound.MagicCast);
 
             // Record any triggered combos as discovered (permanent, survives death).
             foreach (var comboKey in result.TriggeredComboKeys)
@@ -488,6 +492,7 @@ namespace Assets.Scripts.Rooms
             MetaProgressManager.Instance.MarkMagicDiscovered(magic.Key);
 
             string sourceName = source != null ? source.DisplayName : "the enemy";
+            CombatAudio.Play(CombatSound.Draw);
             ShowFloatingLabel(heroUnit.Transform.position, $"Draw {magic.DisplayName}!", new Color(0.5f, 0.8f, 1f));
             _lastTurnLog = $"{heroUnit.DisplayName} draws {magic.DisplayName} from {sourceName}!";
             yield return new WaitForSeconds(_turnDelay);
@@ -521,6 +526,8 @@ namespace Assets.Scripts.Rooms
                     int before = target.Stats.Health;
                     target.Stats.Health = Mathf.Min(target.Stats.Health + item.ConsumableAmount, max);
                     int healed = target.Stats.Health - before;
+                    CombatAudio.Play(CombatSound.ItemUse);
+                    CombatAudio.Play(CombatSound.Heal);
                     ShowDamageText(target.Transform.position, healed, Color.green);
                     _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, restoring {healed} HP.";
                     break;
@@ -674,6 +681,7 @@ namespace Assets.Scripts.Rooms
             enemy.IsCharging = true;
             enemy.ChargeTarget = null;
             SetChargingVisual(enemy, true);
+            CombatAudio.Play(CombatSound.BossSignature);
             ShowFloatingLabel(enemy.Transform.position, "Channeling!", new Color(1f, 0.35f, 0.35f));
             _lastTurnLog = $"{enemy.DisplayName} is channeling a devastating attack!";
             yield return new WaitForSeconds(_turnDelay);
@@ -719,6 +727,7 @@ namespace Assets.Scripts.Rooms
             target.Stats.Health = Mathf.Min(target.Stats.Health + amount, target.Stats.MaxHealth);
             int healed = target.Stats.Health - before;
 
+            CombatAudio.Play(CombatSound.Heal);
             ShowDamageText(target.Transform.position, healed, Color.green);
             _lastTurnLog = $"{enemyUnit.DisplayName} heals {target.DisplayName} for {healed}.";
             yield return new WaitForSeconds(_turnDelay);
@@ -760,6 +769,7 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteAttack(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor, float damageMultiplier = 1f, string verb = "attacks")
         {
+            CombatAudio.Play(CombatSound.MeleeSwing);
             yield return LungeAnimation(attacker.Transform, lungeDirection);
 
             int attackBonus = BuffTracker.GetBuffAmount(attacker, StatType.Attack);
@@ -771,6 +781,7 @@ namespace Assets.Scripts.Rooms
 
             // Impact juice: flash + damage-scaled shake (extra punch on heavy blows) + hit-stop.
             CombatFeedback.Instance.PlayImpact(target, dmg, damageMultiplier > 1f ? 1.6f : 1f);
+            CombatAudio.Play(CombatSound.Impact, damageMultiplier > 1f ? 1f : 0.9f);
             ShowDamageText(target.Transform.position, dmg, damageColor);
             yield return new WaitForSecondsRealtime(0.045f);
 
@@ -896,6 +907,7 @@ namespace Assets.Scripts.Rooms
             _turnManager.RemoveUnit(enemy);
             room.Enemies.Remove(enemy);
             // Removed from combat immediately; the object lingers only for its pop/fade.
+            CombatAudio.Play(CombatSound.EnemyDeath);
             CombatFeedback.Instance.KillWithEffect(enemy.gameObject);
         }
 

@@ -21,6 +21,37 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
 
 ## Backlog
 
+### 1. Battle polish (feel & clarity)
+
+The combat *systems* are solid; the presentation is thin. Two structural gaps found in a scan:
+**combat is completely silent** (zero `AudioSource`/`AudioClip`/`PlayOneShot` in `Assets/Scripts`,
+despite unused sound packs in `Assets/Fantasy Interface Sounds/`), and **all motion is procedural**
+(lunge / flash / shake / floating text via `CombatFeedback` + `EffectPresenter`; no Animator, so
+sprites are otherwise frozen). Tiered by impact:
+
+- **Tier 1 — Audio.** ✅ *SFX shipped.* `CombatAudio` singleton + `SoundBankSO`
+  (`Resources/CombatSoundBank`) mapping `CombatSound` events → clips from the
+  `Fantasy Interface Sounds` pack; hooked into attack swing/impact, cast, draw, heal, item use,
+  boss signature wind-up, enemy death, victory/defeat, and command-menu cursor/confirm. **Still
+  open:** no **combat music** loop yet (add a looping `AudioSource`/track + `CombatStage`
+  start/stop), and no global volume/mute control. Consider dedicated combat SFX later — the
+  current clips are repurposed interface foley.
+- **Tier 2 — On-field readability & life.** Bobbing active-turn marker over the acting unit (the
+  turn cue currently lives only in the top-right list); subtle idle bob/breathing so units aren't
+  statues (wounded = tremble/flash); action-specific motion (melee step-in vs. magic projectile/
+  impact at target vs. green heal rise) instead of one shared lunge.
+- **Tier 3 — Feedback depth.** Differentiated damage numbers (crit = bigger/gold, `Miss`/`Immune`,
+  element-tinted with `Weak!`/`Resisted` popups — the resistance math already exists, just surface
+  it); boss AoE telegraph that highlights the heroes it will hit during wind-up; combo flourish
+  (hit-stop + banner when a combo fires).
+- **Tier 4 — Framing.** Victory/defeat transitions (fanfare + wipe; defeat desaturate), a small
+  camera zoom-punch toward the acting unit, and per-biome stage backgrounds.
+
+Touch points: `Assets/Scripts/Combat/CombatFeedback.cs`, `Assets/Scripts/Cards/EffectPresenter.cs`,
+`Assets/Scripts/Rooms/CombatManager.cs`, `Assets/Scripts/Combat/UI/UnitHealthBar.cs`,
+`Assets/Scripts/Rooms/UI/RoomActionUI.cs`, `Assets/Scripts/Combat/CombatStage.cs`,
+`Assets/Fantasy Interface Sounds/`.
+
 ### 2. Room-type variety + in-run choice
 
 Right now every room is the same: `RoomSO` only carries `Width/Height/Color/EnemySpawnTable`,

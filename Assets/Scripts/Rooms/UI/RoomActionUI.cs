@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
+using Assets.Scripts.Combat.Audio;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Items;
 using UnityEngine;
@@ -526,6 +527,7 @@ namespace Assets.Scripts.Rooms
                 if (_commands[i].Enabled)
                 {
                     SetSelectedCommand(i);
+                    CombatAudio.Play(CombatSound.CursorMove);
                     return;
                 }
             }
@@ -537,6 +539,7 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
+            CombatAudio.Play(CombatSound.Confirm);
             InvokeCommand(_commands[_selectedCommand].Command);
         }
 
