@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Assets.Scripts.IO;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
@@ -397,6 +398,30 @@ namespace Assets.Scripts.Progression
             Save();
             OnChanged?.Invoke();
             return true;
+        }
+
+        // --- Merchant gear stock (item keys) ---
+
+        /// <summary>The merchant's current gear stock (item keys). Never null.</summary>
+        public List<string> GetShopStock()
+        {
+            return _saveData.ShopStock ?? (_saveData.ShopStock = new List<string>());
+        }
+
+        /// <summary>Replace the whole gear stock (a restock) and persist.</summary>
+        public void SetShopStock(List<string> itemKeys)
+        {
+            _saveData.ShopStock = itemKeys ?? new List<string>();
+            Save();
+        }
+
+        /// <summary>Remove one item from the stock after it's bought, and persist.</summary>
+        public void RemoveFromShopStock(string itemKey)
+        {
+            if (_saveData.ShopStock != null && _saveData.ShopStock.Remove(itemKey))
+            {
+                Save();
+            }
         }
 
         // --- Persistence ---

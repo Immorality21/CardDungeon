@@ -33,6 +33,10 @@ namespace Assets.Scripts.Progression
         public List<ComboUpgradeEntry> ComboUpgrades = new List<ComboUpgradeEntry>();
         public int BonusSlots;
 
+        // The merchant's current gear stock (item keys). Persisted so the shop is stable across
+        // sessions and can't be free-rerolled by reopening; refilled when empty or on paid restock.
+        public List<string> ShopStock = new List<string>();
+
         // Permanent discovery record (survives death). A magic is discovered when first drawn;
         // a combo when first triggered in combat. Drives the Forge's collection grid.
         public List<string> DiscoveredMagicKeys = new List<string>();

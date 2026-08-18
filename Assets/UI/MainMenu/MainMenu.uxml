@@ -43,6 +43,14 @@
                 <ui:Label name="merchant-essence" text="Essence: 0" />
             </ui:VisualElement>
             <ui:Button name="potion-btn" text="" class="cd-menu-button" />
+
+            <ui:Label text="Wares" class="cd-subtitle" />
+            <ui:ScrollView name="shop-list" class="cd-shop-list" mode="Vertical" />
+            <ui:Button name="restock-btn" text="" class="cd-button cd-button--narrow" />
+
+            <ui:Label text="Sell Gear" class="cd-subtitle" />
+            <ui:ScrollView name="sell-list" class="cd-shop-list" mode="Vertical" />
+
             <ui:Label name="merchant-feedback" text="" class="cd-feedback" />
             <ui:Button name="merchant-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>

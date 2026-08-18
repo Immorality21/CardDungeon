@@ -75,6 +75,32 @@ namespace Assets.Scripts.Items
             }
         }
 
+        /// <summary>
+        /// Removes one <b>un-equipped</b> equipment entry with this key (a "bag" copy), never an
+        /// item a hero has equipped. Used by selling so a hero can't be stripped by selling a
+        /// duplicate. Returns true if a bag copy was found and removed.
+        /// </summary>
+        public bool RemoveBagEquipment(string itemKey)
+        {
+            var index = _saveData.Items.FindIndex(i =>
+                i.ItemKey == itemKey &&
+                string.IsNullOrEmpty(i.EquippedSlot) &&
+                IsCategory(i, ItemCategory.Equipment));
+
+            if (index < 0)
+            {
+                return false;
+            }
+
+            _saveData.Items.RemoveAt(index);
+            if (!_deferSaves)
+            {
+                Save();
+            }
+            OnInventoryChanged?.Invoke();
+            return true;
+        }
+
         public List<ItemSaveData> GetItems()
         {
             return _saveData.Items;

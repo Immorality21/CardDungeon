@@ -863,6 +863,55 @@
     -unity-text-align: middle-center;
 }
 
+/* Merchant gear shop (buy/sell rows). */
+.cd-subtitle {
+    -unity-font-style: bold;
+    font-size: 15px;
+    color: var(--cd-text-dark);
+    margin-top: 10px;
+    margin-bottom: 2px;
+}
+
+.cd-shop-list {
+    max-height: 150px;
+    margin-bottom: 2px;
+}
+
+.cd-shop-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 3px 4px;
+    margin: 2px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(58, 42, 22, 0.22);
+}
+
+.cd-shop-row__icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-shop-row__name {
+    flex-grow: 1;
+    font-size: 14px;
+    color: var(--cd-text-dark);
+}
+
+.cd-shop-row__btn {
+    flex-shrink: 0;
+    min-width: 96px;
+}
+
+.cd-shop-empty {
+    font-size: 13px;
+    -unity-font-style: italic;
+    color: var(--cd-text-dark);
+    padding: 6px 4px;
+}
+
 /* Utility: hidden (controller toggles this). */
 .cd-hidden {
     display: none;

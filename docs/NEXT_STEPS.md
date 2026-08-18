@@ -81,14 +81,15 @@ Touch points: `Assets/Scripts/Rooms/RoomSO.cs`, `Assets/Scripts/Rooms/UI/RoomAct
 
 ### 3. Sharpen hub sinks
 
-The hub *works* but the sinks are thin — do this **after** runs have stakes worth spending on.
+- **Gold gear shop.** ✅ Shipped. The Merchant now **buys** gear from a rotating (persisted,
+  paid-restock) stock and **sells** spare gear back at a loss (`ShopPricing`, rarity+level priced;
+  selling removes only un-equipped copies so heroes can't be stripped). Validated live in-editor.
+  *(Follow-up: auto-restock on run completion; gate rarer stock behind meta-progress.)*
+- **Magic slot-upgrade UI is still missing.** Logic exists (`MetaProgressManager.TryUpgradeSlots`)
+  but there's **no screen**. Note it costs **Essence**, not Gold — so it belongs in the **Forge**
+  (`MagicForgeUI`), not the Merchant.
+- **More Gold sinks to consider** (from the design chat): permanent **hero training** (base-stat
+  bumps), run **prep/consumables**, and a death **safety net** (revive / loot-insurance token).
 
-- **Gold sink is weak.** Gold currently only raises the healing-potion carry cap
-  (`MerchantUI` → `PartyResourceManager.SetMax`). Add meaningfully impactful Gold sinks
-  (gear purchases, re-rolls, unlocks).
-- **Magic slot-upgrade UI is missing.** The logic exists (`MetaProgressManager.TryUpgradeSlots`)
-  but there is **no screen** for it. Add the UI so players can spend to widen their Draw
-  loadout — a direct, legible power increase between runs.
-
-Touch points: `Assets/Scripts/MainMenu/MerchantUI.cs`,
+Touch points: `Assets/Scripts/MainMenu/MerchantUI.cs`, `Assets/Scripts/Items/ShopPricing.cs`,
 `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Cards/UI/MagicForgeUI.cs`.
