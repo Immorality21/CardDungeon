@@ -41,10 +41,12 @@ sprites are otherwise frozen). Tiered by impact:
   magic **projectile** (`EffectPresenter.FlyProjectile`) so casts read as ranged strikes vs. the
   melee lunge. *(Follow-up: a dedicated heal/buff flourish — heals still just show green rising
   text — and richer per-element cast visuals.)*
-- **Tier 3 — Feedback depth.** Differentiated damage numbers (crit = bigger/gold, `Miss`/`Immune`,
-  element-tinted with `Weak!`/`Resisted` popups — the resistance math already exists, just surface
-  it); boss AoE telegraph that highlights the heroes it will hit during wind-up; combo flourish
-  (hit-stop + banner when a combo fires).
+- **Tier 3 — Feedback depth.** ✅ Shipped. Basic-attack **crits** (gold `CRIT!` + bigger number +
+  punch); **resistance popups** (`Weak!`/`Resisted`/`Immune`/`Absorbed`) via
+  `DamageCalculator.Classify`, surfaced for both melee and magic; **boss AoE telegraph** (red `!`
+  over each targeted hero during the channel); **combo flourish** (camera punch + hit-stop on a
+  triggered combo). *(Follow-up: element-tinted damage numbers per `DamageType`; a bigger on-screen
+  combo banner beyond the floating name.)*
 - **Tier 4 — Framing.** Victory/defeat transitions (fanfare + wipe; defeat desaturate), a small
   camera zoom-punch toward the acting unit, and per-biome stage backgrounds.
 

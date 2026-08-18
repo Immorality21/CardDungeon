@@ -3,6 +3,16 @@ using UnityEngine;
 
 namespace Assets.Scripts.Combat
 {
+    /// <summary>How a target's resistance changed an incoming hit — surfaced as a combat popup.</summary>
+    public enum DamageEffectiveness
+    {
+        Normal,    // no resistance
+        Weak,      // negative resistance → took extra damage ("Weak!")
+        Resisted,  // partial resistance → took reduced damage ("Resisted")
+        Immune,    // 100% resistance → no damage ("Immune")
+        Absorbed   // >100% resistance → healed instead ("Absorbed")
+    }
+
     public static class DamageCalculator
     {
         /// <summary>
@@ -58,6 +68,33 @@ namespace Assets.Scripts.Combat
 
             // Minimum 1 damage
             return Mathf.Max(1, Mathf.RoundToInt(afterDefense));
+        }
+
+        /// <summary>
+        /// Classifies how the target's resistance affects a hit of this type, for the combat
+        /// popup (Weak! / Resisted / Immune / Absorbed). Reads the same resistance the damage
+        /// pipeline uses — presentation only, no effect on the numbers.
+        /// </summary>
+        public static DamageEffectiveness Classify(DamageType damageType, List<Resistance> resistances)
+        {
+            float r = GetResistance(damageType, resistances);
+            if (r > 100f)
+            {
+                return DamageEffectiveness.Absorbed;
+            }
+            if (Mathf.Approximately(r, 100f))
+            {
+                return DamageEffectiveness.Immune;
+            }
+            if (r > 0f)
+            {
+                return DamageEffectiveness.Resisted;
+            }
+            if (r < 0f)
+            {
+                return DamageEffectiveness.Weak;
+            }
+            return DamageEffectiveness.Normal;
         }
 
         /// <summary>

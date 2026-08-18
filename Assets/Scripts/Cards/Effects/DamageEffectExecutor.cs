@@ -73,7 +73,8 @@ namespace Assets.Scripts.Cards.Effects
                         Text = damage.ToString(),
                         Color = DamageColor,
                         Delay = EffectDelay,
-                        Impact = damage
+                        Impact = damage,
+                        Effectiveness = DamageCalculator.Classify(effect.DamageType, target.Resistances)
                     });
                 }
             }

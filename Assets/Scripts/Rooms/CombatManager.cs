@@ -56,6 +56,10 @@ namespace Assets.Scripts.Rooms
         [SerializeField] private float _lungeDistance = 0.3f;
         [SerializeField] private float _lungeDuration = 0.12f;
 
+        // Basic-attack critical hits (heroes and enemies).
+        private const float CritChance = 0.12f;
+        private const float CritMultiplier = 1.6f;
+
         public event Action OnCombatStarted;
         public event Action<string> OnTurnExecuted;
         public event Action<CombatResult> OnCombatEnded;
@@ -461,6 +465,14 @@ namespace Assets.Scripts.Rooms
 
             yield return _presenter.Present(result, castAction.Caster);
 
+            // Combo flourish: a camera punch + brief hit-stop so a triggered combo lands with weight
+            // (the combo name already floats up in orange from the resolver).
+            if (!string.IsNullOrEmpty(result.ComboName))
+            {
+                CombatFeedback.Instance.Shake(0.2f, 0.28f);
+                yield return new WaitForSecondsRealtime(0.12f);
+            }
+
             // Spend a charge from the cast slot
             var hero = castAction.Caster as Hero;
             if (hero != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
@@ -687,6 +699,19 @@ namespace Assets.Scripts.Rooms
             SetChargingVisual(enemy, true);
             CombatAudio.Play(CombatSound.BossSignature);
             ShowFloatingLabel(enemy.Transform.position, "Channeling!", new Color(1f, 0.35f, 0.35f));
+
+            // Telegraph who the party-wide signature will hit: a warning marker over every hero.
+            if (_currentParty != null)
+            {
+                foreach (var hero in GetAliveHeroes(_currentParty))
+                {
+                    if (hero.Transform != null)
+                    {
+                        ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.4f, 0f), "!", new Color(1f, 0.3f, 0.3f), 0.2f);
+                    }
+                }
+            }
+
             _lastTurnLog = $"{enemy.DisplayName} is channeling a devastating attack!";
             yield return new WaitForSeconds(_turnDelay);
         }
@@ -781,15 +806,29 @@ namespace Assets.Scripts.Rooms
             int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttack() + attackBonus) * damageMultiplier);
             int defense = target.GetEffectiveDefense() + defenseBonus;
             int dmg = DamageCalculator.Calculate(rawAttack, defense, DamageType.Normal, target.Resistances);
+
+            // Critical hit: a chance for a harder blow, called out with a gold popup + bigger number.
+            bool crit = dmg > 0 && UnityEngine.Random.Range(0f, 1f) < CritChance;
+            if (crit)
+            {
+                dmg = Mathf.Max(dmg + 1, Mathf.RoundToInt(dmg * CritMultiplier));
+            }
+
             target.Stats.Health -= dmg;
 
-            // Impact juice: flash + damage-scaled shake (extra punch on heavy blows) + hit-stop.
-            CombatFeedback.Instance.PlayImpact(target, dmg, damageMultiplier > 1f ? 1.6f : 1f);
+            // Impact juice: flash + damage-scaled shake (extra punch on heavy/crit blows) + hit-stop.
+            float punch = (damageMultiplier > 1f ? 1.6f : 1f) * (crit ? 1.4f : 1f);
+            CombatFeedback.Instance.PlayImpact(target, dmg, punch);
             CombatAudio.Play(CombatSound.Impact, damageMultiplier > 1f ? 1f : 0.9f);
-            ShowDamageText(target.Transform.position, dmg, damageColor);
-            yield return new WaitForSecondsRealtime(0.045f);
+            ShowDamageText(target.Transform.position, dmg, damageColor, crit ? 0.24f : 0.15f);
+            if (crit)
+            {
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.45f, 0f), "CRIT!", new Color(1f, 0.82f, 0.2f), 0.16f);
+            }
+            ShowEffectiveness(target, DamageType.Normal);
+            yield return new WaitForSecondsRealtime(crit ? 0.075f : 0.045f);
 
-            _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName} for {dmg} damage.";
+            _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName} for {dmg} damage{(crit ? " (CRIT!)" : "")}.";
         }
 
         private IEnumerator LungeAnimation(Transform unit, Vector3 direction)
@@ -861,12 +900,40 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        private void ShowDamageText(Vector3 position, int damage, Color color)
+        private void ShowDamageText(Vector3 position, int damage, Color color, float scale = 0.15f)
         {
-            ShowFloatingLabel(position, damage.ToString(), color);
+            ShowFloatingLabel(position, damage.ToString(), color, scale);
         }
 
-        private void ShowFloatingLabel(Vector3 position, string text, Color color)
+        /// <summary>Popup for a resistance outcome (Weak!/Resisted/Immune/Absorbed); no-op if Normal.</summary>
+        private void ShowEffectiveness(ICombatUnit target, DamageType type)
+        {
+            if (target == null || target.Transform == null)
+            {
+                return;
+            }
+
+            string word = null;
+            Color color = Color.white;
+            switch (DamageCalculator.Classify(type, target.Resistances))
+            {
+                case DamageEffectiveness.Weak:
+                    word = "Weak!"; color = new Color(1f, 0.85f, 0.2f); break;
+                case DamageEffectiveness.Resisted:
+                    word = "Resisted"; color = new Color(0.6f, 0.7f, 0.85f); break;
+                case DamageEffectiveness.Immune:
+                    word = "Immune"; color = new Color(0.78f, 0.78f, 0.82f); break;
+                case DamageEffectiveness.Absorbed:
+                    word = "Absorbed"; color = new Color(0.4f, 0.95f, 0.5f); break;
+            }
+
+            if (word != null)
+            {
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.45f, 0f), word, color, 0.13f);
+            }
+        }
+
+        private void ShowFloatingLabel(Vector3 position, string text, Color color, float scale = 0.15f)
         {
             if (FloatingTextHandler.HasInstance)
             {
@@ -876,7 +943,7 @@ namespace Assets.Scripts.Rooms
                     color,
                     1f,     // fadeSpeed — fade out over ~1 second
                     0.8f,   // fadeRange — gentle drift
-                    0.15f,  // scale
+                    scale,
                     TextFadeMode.FadeUp);
             }
         }

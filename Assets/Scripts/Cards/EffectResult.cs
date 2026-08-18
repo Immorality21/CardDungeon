@@ -15,6 +15,10 @@ namespace Assets.Scripts.Cards
         // Damage dealt by this entry (0 for non-damage). Drives the hit flash / camera shake
         // in the presenter without coupling the (unit-tested) executors to the feedback layer.
         public int Impact;
+
+        // How resistance affected this hit (Weak/Resisted/Immune/…) — the presenter turns a
+        // non-Normal value into a coloured popup. Default Normal for non-damage entries.
+        public DamageEffectiveness Effectiveness = DamageEffectiveness.Normal;
     }
 
     public class EffectResult

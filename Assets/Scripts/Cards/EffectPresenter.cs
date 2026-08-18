@@ -30,6 +30,20 @@ namespace Assets.Scripts.Cards
                         0.8f,
                         0.15f,
                         TextFadeMode.FadeUp);
+
+                    // Surface the resistance outcome (Weak! / Resisted / …) as a small popup above.
+                    var eff = EffectivenessPopup(entry.Effectiveness);
+                    if (eff.HasValue)
+                    {
+                        FloatingTextHandler.Instance.CreateFloatingText(
+                            position + new Vector3(0f, 0.45f, 0f),
+                            eff.Value.Item1,
+                            eff.Value.Item2,
+                            1f,
+                            0.8f,
+                            0.13f,
+                            TextFadeMode.FadeUp);
+                    }
                 }
 
                 // Impact juice for damaging entries: flash the target, shake the camera,
@@ -41,6 +55,24 @@ namespace Assets.Scripts.Cards
                 }
 
                 yield return new WaitForSeconds(entry.Delay);
+            }
+        }
+
+        /// <summary>Popup word + colour for a resistance outcome, or null for a normal hit.</summary>
+        private static (string, Color)? EffectivenessPopup(DamageEffectiveness eff)
+        {
+            switch (eff)
+            {
+                case DamageEffectiveness.Weak:
+                    return ("Weak!", new Color(1f, 0.85f, 0.2f));
+                case DamageEffectiveness.Resisted:
+                    return ("Resisted", new Color(0.6f, 0.7f, 0.85f));
+                case DamageEffectiveness.Immune:
+                    return ("Immune", new Color(0.78f, 0.78f, 0.82f));
+                case DamageEffectiveness.Absorbed:
+                    return ("Absorbed", new Color(0.4f, 0.95f, 0.5f));
+                default:
+                    return null;
             }
         }
 
