@@ -36,10 +36,11 @@ sprites are otherwise frozen). Tiered by impact:
   open:** no **combat music** loop yet (add a looping `AudioSource`/track + `CombatStage`
   start/stop), and no global volume/mute control. Consider dedicated combat SFX later — the
   current clips are repurposed interface foley.
-- **Tier 2 — On-field readability & life.** Bobbing active-turn marker over the acting unit (the
-  turn cue currently lives only in the top-right list); subtle idle bob/breathing so units aren't
-  statues (wounded = tremble/flash); action-specific motion (melee step-in vs. magic projectile/
-  impact at target vs. green heal rise) instead of one shared lunge.
+- **Tier 2 — On-field readability & life.** ✅ Shipped. `TurnIndicator` (bobbing arrow over the
+  acting unit), `CombatIdleMotion` (scale-based breathing; wounded units breathe harder), and a
+  magic **projectile** (`EffectPresenter.FlyProjectile`) so casts read as ranged strikes vs. the
+  melee lunge. *(Follow-up: a dedicated heal/buff flourish — heals still just show green rising
+  text — and richer per-element cast visuals.)*
 - **Tier 3 — Feedback depth.** Differentiated damage numbers (crit = bigger/gold, `Miss`/`Immune`,
   element-tinted with `Weak!`/`Resisted` popups — the resistance math already exists, just surface
   it); boss AoE telegraph that highlights the heroes it will hit during wind-up; combo flourish

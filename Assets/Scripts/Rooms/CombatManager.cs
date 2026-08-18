@@ -298,6 +298,9 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
 
+                // Point the on-field turn marker at whoever is acting.
+                TurnIndicator.Instance.SetTarget(unit);
+
                 string skipMessage = GetTurnSkipMessage(unit);
                 if (skipMessage != null)
                 {
@@ -361,8 +364,9 @@ namespace Assets.Scripts.Rooms
                 BroadcastTurnOrder();
             }
 
-            // Clear turn order display
+            // Clear turn order display + the on-field turn marker
             OnTurnOrderChanged?.Invoke(new List<ICombatUnit>());
+            TurnIndicator.Instance.Clear();
 
             // Determine outcome
             CombatOutcome outcome;
@@ -455,7 +459,7 @@ namespace Assets.Scripts.Rooms
                 meta.MarkComboDiscovered(comboKey);
             }
 
-            yield return _presenter.Present(result);
+            yield return _presenter.Present(result, castAction.Caster);
 
             // Spend a charge from the cast slot
             var hero = castAction.Caster as Hero;
@@ -849,6 +853,10 @@ namespace Assets.Scripts.Rooms
                 if (go.GetComponent<UnitHealthBar>() == null)
                 {
                     go.AddComponent<UnitHealthBar>();
+                }
+                if (go.GetComponent<CombatIdleMotion>() == null)
+                {
+                    go.AddComponent<CombatIdleMotion>();
                 }
             }
         }
