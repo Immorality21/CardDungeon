@@ -379,6 +379,8 @@ namespace Assets.Scripts.Rooms
                 outcome = CombatOutcome.PlayerDied;
                 fullLog += "\nYour party has been defeated!";
                 CombatAudio.Play(CombatSound.Defeat);
+                // Somber tint that lingers under the death screen (approximates a desaturate).
+                ScreenFade.Instance.FadeTo(new Color(0.06f, 0f, 0.02f), 0.55f, 0.7f);
 
                 // Tear the stage down (unfreeze camera, drop background) before the death screen.
                 CombatStage.Instance.End(restoreEnemyPositions: false);
@@ -388,6 +390,8 @@ namespace Assets.Scripts.Rooms
                 outcome = CombatOutcome.Victory;
                 fullLog += "\nAll enemies defeated!";
                 CombatAudio.Play(CombatSound.Victory);
+                // A quick warm flash to punctuate the win before the summary appears.
+                ScreenFade.Instance.Flash(new Color(1f, 0.92f, 0.55f), 0.5f, 0.06f, 0.4f);
 
                 // Keep the battle stage up so the victory summary shows over it; it is torn down
                 // (and doors enabled / level completed) when the summary is dismissed — see

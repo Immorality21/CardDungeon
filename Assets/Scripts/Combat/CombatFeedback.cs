@@ -24,6 +24,12 @@ namespace Assets.Scripts.Combat
             FlashUnit(target);
             float magnitude = Mathf.Clamp(0.03f + damage * 0.006f, 0.03f, 0.22f) * punch;
             Shake(magnitude, 0.18f);
+
+            // Subtle zoom-IN punch toward the action; scales with the hit's weight (crits/heavy).
+            if (MainCamera.HasInstance)
+            {
+                MainCamera.Instance.ZoomPunch(0.14f * punch, 0.16f);
+            }
         }
 
         public void FlashUnit(ICombatUnit unit)

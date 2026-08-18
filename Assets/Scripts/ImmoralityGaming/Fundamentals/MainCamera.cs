@@ -82,12 +82,34 @@ public class MainCamera : SingletonBehaviour<MainCamera>
     private float _shakeElapsed;
     private Vector3 _appliedShake;
 
+    private float _zoomBaseSize;
+    private float _zoomPunchAmount;
+    private float _zoomPunchDuration;
+    private float _zoomPunchElapsed;
+    private bool _zoomPunching;
+
     /// <summary>Kick off a decaying camera shake. Applied in LateUpdate on top of the follow position.</summary>
     public void Shake(float magnitude, float duration)
     {
         _shakeMagnitude = magnitude;
         _shakeDuration = duration;
         _shakeElapsed = 0f;
+    }
+
+    /// <summary>
+    /// A quick zoom-IN punch (orthographic size dips then eases back) for combat impact. Only ever
+    /// zooms in, so a full-viewport combat background parented to the camera keeps covering.
+    /// </summary>
+    public void ZoomPunch(float amount, float duration)
+    {
+        if (!_zoomPunching)
+        {
+            _zoomBaseSize = _camera.orthographicSize;
+        }
+        _zoomPunchAmount = amount;
+        _zoomPunchDuration = duration;
+        _zoomPunchElapsed = 0f;
+        _zoomPunching = true;
     }
 
     private void Update()
@@ -108,6 +130,22 @@ public class MainCamera : SingletonBehaviour<MainCamera>
             float amt = _shakeMagnitude * damper;
             _appliedShake = new Vector3(UnityEngine.Random.Range(-amt, amt), UnityEngine.Random.Range(-amt, amt), 0f);
             _cameraTransform.position += _appliedShake;
+        }
+
+        if (_zoomPunching)
+        {
+            _zoomPunchElapsed += Time.deltaTime;
+            if (_zoomPunchElapsed >= _zoomPunchDuration)
+            {
+                _camera.orthographicSize = _zoomBaseSize;
+                _zoomPunching = false;
+            }
+            else
+            {
+                // sin(0..π): 0 at both ends, peak dip in the middle → zoom in and back out.
+                float dip = Mathf.Sin((_zoomPunchElapsed / _zoomPunchDuration) * Mathf.PI) * _zoomPunchAmount;
+                _camera.orthographicSize = Mathf.Max(1f, _zoomBaseSize - dip);
+            }
         }
     }
 

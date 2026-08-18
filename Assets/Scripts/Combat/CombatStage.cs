@@ -176,12 +176,18 @@ namespace Assets.Scripts.Combat
 
         private void RaiseBackground(Camera cam, float halfW, float halfH)
         {
-            // Inspector override wins; otherwise load the battle backdrop from Resources; a solid
-            // fill is the last-resort fallback so the dungeon is always hidden. (Qualify
-            // UnityEngine.Resources — the game has its own Assets.Scripts.Resources namespace.)
-            var art = _backgroundArt != null
-                ? _backgroundArt
-                : UnityEngine.Resources.Load<Sprite>(BackgroundResourcePath);
+            // Precedence: the current level's per-level backdrop, then the inspector override, then
+            // the default Resources battle backdrop; a solid fill is the last-resort fallback so the
+            // dungeon is always hidden. (Qualify UnityEngine.Resources — the game has its own
+            // Assets.Scripts.Resources namespace.)
+            Sprite levelArt = Assets.Scripts.Dungeon.DungeonManager.HasInstance
+                ? Assets.Scripts.Dungeon.DungeonManager.Instance.CurrentLevel?.CombatBackground
+                : null;
+            var art = levelArt != null
+                ? levelArt
+                : (_backgroundArt != null
+                    ? _backgroundArt
+                    : UnityEngine.Resources.Load<Sprite>(BackgroundResourcePath));
 
             if (_backgroundGo == null)
             {

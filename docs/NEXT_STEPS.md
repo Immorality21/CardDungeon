@@ -47,8 +47,11 @@ sprites are otherwise frozen). Tiered by impact:
   over each targeted hero during the channel); **combo flourish** (camera punch + hit-stop on a
   triggered combo). *(Follow-up: element-tinted damage numbers per `DamageType`; a bigger on-screen
   combo banner beyond the floating name.)*
-- **Tier 4 — Framing.** Victory/defeat transitions (fanfare + wipe; defeat desaturate), a small
-  camera zoom-punch toward the acting unit, and per-biome stage backgrounds.
+- **Tier 4 — Framing.** ✅ Shipped. Victory **flash** + defeat **tint** (`ScreenFade`, full-viewport
+  overlay under the UI); a subtle **camera zoom-punch** on every impact (`MainCamera.ZoomPunch`,
+  zoom-in only so the battle background keeps covering); and **per-level combat backgrounds**
+  (`LevelDefinitionSO.CombatBackground`, used by `CombatStage`). *(Follow-up: true desaturate on
+  defeat needs post-processing; assign real per-biome background art.)*
 
 Touch points: `Assets/Scripts/Combat/CombatFeedback.cs`, `Assets/Scripts/Cards/EffectPresenter.cs`,
 `Assets/Scripts/Rooms/CombatManager.cs`, `Assets/Scripts/Combat/UI/UnitHealthBar.cs`,

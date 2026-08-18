@@ -75,6 +75,9 @@ namespace Assets.Scripts.Dungeon
         public Party Party { get; private set; }
         public EquippedMagicState MagicState { get; private set; }
 
+        /// <summary>The level definition currently being played (drives the per-level combat backdrop).</summary>
+        public LevelDefinitionSO CurrentLevel => _level;
+
         private LevelDefinitionSO _level;
         private ManualLevelLayoutSO _manualLayout;
         private FileHandler _fileHandler;
