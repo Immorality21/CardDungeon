@@ -72,6 +72,10 @@ namespace Assets.Scripts.Balance
         [Tooltip("Warn when two enemies' Draw offerings overlap by more than this share.")]
         [Range(0f, 1f)] public float MaxDrawTableOverlap = 0.60f;
 
+        [Tooltip("Largest share of the magic catalog a single level should hand over. Above this the " +
+                 "unlocks are front-loaded and the rest of the run has nothing left to reveal.")]
+        [Range(0.1f, 1f)] public float MaxUnlockSharePerLevel = 0.40f;
+
         [Header("Rewards")]
         [Tooltip("Largest acceptable spread in XP-per-danger across non-boss enemies. Above this, " +
                  "some enemies pay far worse than others for the same risk.")]

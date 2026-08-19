@@ -76,6 +76,7 @@ namespace Assets.Scripts.Balance
             }
 
             report.Variety = VarietyReport.Build(ProjectWideEnemySet(input.Enemies), input.Magic, rules);
+            report.Progression = ProgressionMap.Build(report.Runs, input.Magic, input.Combos);
 
             if (input.RunSimulation)
             {
@@ -86,6 +87,7 @@ namespace Assets.Scripts.Balance
             EvaluateEnemies(report, rules);
             EvaluateRuns(report, rules, input);
             EvaluateVariety(report, rules);
+            EvaluateProgression(report, rules);
             EvaluateEconomy(report, rules);
             EvaluateSimulations(report, rules);
             EvaluateSave(report, rules, input);
@@ -1048,6 +1050,130 @@ namespace Assets.Scripts.Balance
                     Detail = $"{variety.DrawCoverage:P0} coverage — the rest of the catalog is unreachable in play.",
                     Suggestion = "Spread the catalog across enemy Draw lists."
                 });
+            }
+        }
+
+        // ------------------------------------------------------------------ progression / unlocks
+
+        /// <summary>
+        /// The supply side of the elemental layer. Resistances and combos are both authored content that
+        /// only becomes live if the Draw tables hand the player the pieces — so a combo whose required
+        /// tag lives on undrawable magic, or a level that resists an element the player cannot yet deal,
+        /// is content that can never fire. Neither is visible in any inspector.
+        /// </summary>
+        private static void EvaluateProgression(BalanceReport report, BalanceRulesSO rules)
+        {
+            var map = report.Progression;
+            if (map == null)
+            {
+                return;
+            }
+
+            if (map.RunOrderIsImplicit)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Progression, "Run order",
+                    "No run declares a SequenceIndex, so the unlock order is guessed from asset names")
+                {
+                    Detail = "Every RunDefinitionSO has SequenceIndex 0. The progression view has to fall back "
+                           + "to alphabetical order, which may not be the intended play order.",
+                    Suggestion = "Set SequenceIndex on each run (0 = first)."
+                });
+            }
+
+            foreach (var combo in map.Combos)
+            {
+                if (combo.TagsWithNoMagic.Count > 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Progression, combo.Name,
+                        $"Combo '{combo.Name}' can never fire — no magic carries {string.Join(", ", combo.TagsWithNoMagic)}")
+                    {
+                        Asset = combo.Combo,
+                        Detail = $"RequiredTags are {string.Join(" + ", combo.RequiredTags)}, but no MagicSO in the "
+                               + $"catalog has the {string.Join(", ", combo.TagsWithNoMagic)} tag, so the combo is "
+                               + "unreachable by construction.",
+                        Suggestion = "Add the tag to a magic, or change the combo's RequiredTags."
+                    });
+                }
+                else if (combo.TagsNotDrawable.Count > 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, combo.Name,
+                        $"Combo '{combo.Name}' is unreachable — {string.Join(", ", combo.TagsNotDrawable)} only exists on undrawable magic")
+                    {
+                        Asset = combo.Combo,
+                        Detail = $"Requires {string.Join(" + ", combo.RequiredTags)}. "
+                               + $"{string.Join("; ", combo.EnablingMagic)}. Draw is the only route to new magic, "
+                               + "so a tag that no enemy offers cannot be brought to a fight.",
+                        Suggestion = "Add the carrying magic to an enemy's DrawableMagics list."
+                    });
+                }
+            }
+
+            // Name the unreachable magic outright — the variety tab only reports the count.
+            var unreachable = new List<string>();
+            foreach (var availability in map.Magic)
+            {
+                if (!availability.IsReachable)
+                {
+                    unreachable.Add(availability.DisplayName);
+                }
+            }
+
+            if (unreachable.Count > 0)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, "Draw tables",
+                    $"{unreachable.Count} magic(s) cannot be drawn anywhere")
+                {
+                    Detail = $"Unreachable: {string.Join(", ", unreachable)}. "
+                           + $"Draw coverage is {map.ReachableMagicCount}/{map.CatalogMagicCount}.",
+                    Suggestion = "Add each to an enemy's DrawableMagics, or accept it as Forge/merchant-only content."
+                });
+            }
+
+            foreach (var run in map.Runs)
+            {
+                foreach (var level in run.Levels)
+                {
+                    // Front-loading: if one level hands over most of the catalog, the rest of the run
+                    // has nothing left to reveal and Draw stops being a reason to fight anything.
+                    if (map.CatalogMagicCount > 0 && level.NewlyDrawable.Count > 0)
+                    {
+                        float share = (float)level.NewlyDrawable.Count / map.CatalogMagicCount;
+                        if (share > rules.MaxUnlockSharePerLevel)
+                        {
+                            report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression,
+                                $"{run.Name} / {level.Reference}",
+                                $"{level.Reference} unlocks {share:P0} of the magic catalog at once")
+                            {
+                                Asset = run.Run,
+                                Detail = $"{level.NewlyDrawable.Count} of {map.CatalogMagicCount} magics first "
+                                       + "become drawable here, because every enemy that offers them appears in "
+                                       + $"this level's room pool. Ceiling is {rules.MaxUnlockSharePerLevel:P0}.",
+                                Suggestion = "Hold some enemies back for later levels so Draw keeps paying out "
+                                       + "across the run."
+                            });
+                        }
+                    }
+
+                    if (!level.HasCombat || level.ResistingWeight + level.WeakWeight <= 0f)
+                    {
+                        continue;
+                    }
+
+                    if (!level.ElementChoiceMatters)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression,
+                            $"{run.Name} / {level.Reference}",
+                            $"{level.Reference} resists elements the player cannot bring yet")
+                        {
+                            Asset = run.Run,
+                            Detail = "Its enemies carry resistances, but none are in an element drawable by this "
+                                   + $"point in the run order. Available so far: "
+                                   + $"{(level.ElementsAvailable.Count > 0 ? string.Join(", ", level.ElementsAvailable) : "none")}.",
+                            Suggestion = "Either move the enabling magic earlier in the Draw tables, or retarget "
+                                   + "the resistances to an element the player already has."
+                        });
+                    }
+                }
             }
         }
 

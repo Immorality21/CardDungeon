@@ -23,6 +23,7 @@ namespace Assets.Scripts.Balance.Editor
             Enemies,
             Levels,
             Variety,
+            Elements,
             Simulation,
             Save,
             Issues
@@ -34,6 +35,7 @@ namespace Assets.Scripts.Balance.Editor
             "Enemies",
             "Levels & Runs",
             "Variety",
+            "Elements & Unlocks",
             "Simulation",
             "Save Audit",
             "Issues"
@@ -172,6 +174,9 @@ namespace Assets.Scripts.Balance.Editor
                     break;
                 case Tab.Variety:
                     DrawVarietyTab();
+                    break;
+                case Tab.Elements:
+                    DrawElementsTab();
                     break;
                 case Tab.Simulation:
                     DrawSimulationTab();

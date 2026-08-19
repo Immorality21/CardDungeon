@@ -129,6 +129,7 @@ namespace Assets.Scripts.Balance
         public List<EnemyMetrics> Enemies = new List<EnemyMetrics>();
         public List<RunCurve> Runs = new List<RunCurve>();
         public VarietyReport Variety;
+        public ProgressionMap Progression;
         public List<EncounterSimReport> Simulations = new List<EncounterSimReport>();
         public SaveAudit Save;
         public List<BalanceIssue> Issues = new List<BalanceIssue>();

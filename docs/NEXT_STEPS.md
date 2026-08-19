@@ -29,6 +29,13 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
   *Analyze balance* button that hands its layout to the window. See `Assets/Scripts/Balance/CLAUDE.md`.
   *(Follow-up: no `BalanceRules.asset` is checked in yet — the window's "Create rules asset" button
   writes one; until then it runs on the code defaults.)*
+- **Elements & Unlocks tab.** ✅ Shipped. `ProgressionMap` models the Draw tables as a supply chain and
+  the tab visualises it: an unlock timeline per run (what each run/level first makes drawable, and which
+  combos that enables), a magic availability matrix (every magic against every run, enemies and charge
+  counts in the tooltip, unreachable magic flagged), and per-level elemental coverage — resistance and
+  weakness share plus whether those resistances are in elements the player can bring *yet*. New findings:
+  unreachable combos, unreachable magic named outright, resistances the player cannot answer, front-loaded
+  unlocks. Covered by `ProgressionMapTests`.
 
 ## Backlog
 
@@ -50,10 +57,19 @@ The analyzer is in place; **its findings are not yet fixed.** Measured against t
   a level-scoped resource). 15 rooms from a 4-room pool means ~11.25 combat rooms per level against a
   22 HP sustain pool.
 - **Curve shape is +151%, 0%, +208%** — two spikes past the 75% ceiling around a flat middle.
-- **The elemental layer is inert.** Every `EnemySO` has `Resistances: []`, so `DamageType` cannot
-  change any outcome and Fire/Ice/Lightning/Holy/Shadow are decoration.
-- **Draw and loot are duplicated.** Floating Eye and Abyssal Warden offer the *same two* magics and
-  drop the *same* item; 2 of 3 enemies are `Aggressor`.
+- ~~**The elemental layer is inert.**~~ ✅ Fixed. Every enemy now carries one weakness and one
+  resistance at ±50%, in elements the player can actually draw: Floating Eye (weak Fire / resists Ice),
+  Dragon (resists Fire / weak Ice), Abyssal Warden (resists Fire / weak Lightning). Resistance is applied
+  *before* defense, so ±50% is a 1.5x/0.5x swing; 100% is flat immunity and above it **heals the target**,
+  which is why nothing is authored past ±50 while the player still cannot see resistances pre-cast.
+- ~~**Draw tables starve the elemental and combo layers.**~~ ✅ Fixed. Draw coverage went 4/10 → **10/10**
+  and reachable combos 1/4 → **4/4**: Floating Eye offers IceShard/WaterSplash/Heal (Freeze), Dragon offers
+  Fireball/OilSlick/Slash/WarCry (Ignite), Abyssal Warden offers LightningBolt/ShieldUp/PoisonDart at boss
+  charge counts (Conductor; Infection pairs the boss's PoisonDart with the Dragon's Slash). No two enemies
+  share a magic any more. *(Follow-up: `Tutorial` now unlocks 70% of the catalog at once — both trash types
+  are in its room pool — so the unlocks are front-loaded and the tool flags it. Loot is still duplicated
+  between Floating Eye and the Warden.)*
+- **2 of 3 enemies are still `Aggressor`** — the archetype mix has not been touched.
 - **Healing has no texture.** `Heal` power 8 and the potion's 5 HP both exceed a hero's whole bar.
 - **Progression dead-ends at level 2** (one `LevelConfiguration` each, +1/+2 HP), its Agility gain of
   +5 on a base of 5 doubles turn rate in one level, and **only the leader gains XP**
@@ -73,6 +89,22 @@ level curve → XP distribution. `BalanceRegressionTests` goes green as these la
 *(Also worth deciding before hand-tuning: whether enemy difficulty stays hand-authored per `EnemySO`
 or scales from data (a per-`RunLevelEntry` multiplier or an enemy tier + curve). Retuning by hand now
 and adding scaling later means doing it twice.)*
+
+### 0b. Elemental layer — next steps
+
+Enemy resistances are configured, but the layer is only half-built: the player cannot **see** a resistance
+before spending a charge, and cannot **defend** against an element at all —
+`ResistanceBuffHandler.Apply` is an empty method, so all five resistance `BuffType`s silently do nothing.
+Full plan, with the decisions it needs, in **`docs/ELEMENTAL_PLAN.md`**: resistance buffs on
+`CombatBuffTracker`, a flat `HealthCost` effect type so cards like **Fire Cloak** (+40% fire resistance,
+1 HP to cast) can be authored at all, and three increments of surfacing resistances in the combat UI.
+
+### 0c. Run chaining (needs a design discussion)
+
+There is one real run and no chaining: `MainMenuManager` holds a single `RunDefinitionSO` and
+`MainMenuUISetup` just grabs `guids[0]`. `RunDefinitionSO.SequenceIndex` was added so the balance
+analyzer has an intended play order to report unlocks against — it is **not** wired to anything in game.
+Chaining runs (selection, gating, escalating difficulty, what carries over) is its own brainstorm.
 
 ### 1. Battle polish (feel & clarity)
 

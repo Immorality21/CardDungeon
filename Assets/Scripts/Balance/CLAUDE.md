@@ -62,9 +62,30 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `EncounterModel` | `WeightedEnemyGroup` + `RoomEncounter` — fractional spawn-table expectation |
 | `RunCurveModel` | `LevelCurve` / `RunCurve` — attrition, peak danger, boss ratio, difficulty jumps |
 | `VarietyAnalyzer` | the one-dimensionality axis: archetype share, resistance coverage, inert damage types, Draw overlap |
+| `ProgressionMap` | the **supply chain**: which magic is drawable where, when each combo becomes possible, and whether a level's resistances are in elements the player can bring yet |
 | `EncounterSimulator` | headless battles under three policies (`AttackOnly` / `MagicFirst` / `Adaptive`) |
 | `SaveAudit` | reads the live save files and rebuilds the real party + economy state |
 | `BalanceAnalyzer` | the **only** place rules are interpreted into findings |
+
+## The supply-chain view (Elements & Unlocks tab)
+
+Resistances and combos are authored content that only becomes live if the Draw tables hand the player the
+pieces. `ProgressionMap` models that, and it is the reason the tab exists:
+
+- **Magic availability** — every `MagicSO` against every run/level that offers it, and from which enemy.
+  Draw is the only route to new magic, so anything unreachable here is unreachable in play.
+- **Combo reachability** — a combo needs one required tag already on the target and another arriving with
+  the incoming cast (`ComboDetector`), so *every* required tag must be carried by drawable magic. A combo
+  unlocks at the **latest** of the earliest sources across its tags, since the player needs all of them
+  at once.
+- **Element relevance per level** — a resistance in an element the player cannot obtain yet cannot change
+  a decision. `LevelElementProfile.ElementChoiceMatters` is false in that case, which is a finding.
+- **Front-loading** — one level handing over more than `MaxUnlockSharePerLevel` of the catalog leaves the
+  rest of the run with nothing to reveal.
+
+Runs are ordered by `RunDefinitionSO.SequenceIndex`. Runs are **not chained in game yet**
+(`MainMenuManager` points at a single run); that field exists so the analysis has an intended order, and
+`ProgressionMap.RunOrderIsImplicit` says so out loud when nothing sets it.
 
 ## The two metrics worth understanding
 
