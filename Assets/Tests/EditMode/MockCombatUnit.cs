@@ -15,6 +15,9 @@ namespace Tests.EditMode
         public Transform Transform => null;
         public List<Resistance> Resistances { get; set; } = new List<Resistance>();
 
+        /// <summary>Element this unit's basic attacks carry. Normal keeps existing tests unaffected.</summary>
+        public DamageType AttackDamageType { get; set; } = DamageType.Normal;
+
         public int GetEffectiveAttack()
         {
             return Stats.Attack;

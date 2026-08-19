@@ -35,14 +35,19 @@ namespace Assets.Scripts.Combat
         /// 3. Apply defense reduction with diminishing returns: reduction = defense / (defense + K)
         /// 4. Minimum 1 damage (unless absorbed)
         /// </summary>
-        public static int Calculate(int rawDamage, int defense, DamageType damageType, List<Resistance> resistances)
+        public static int Calculate(
+            int rawDamage,
+            int defense,
+            DamageType damageType,
+            List<Resistance> resistances,
+            float resistanceBonusPercent = 0f)
         {
             if (rawDamage <= 0)
             {
                 return 0;
             }
 
-            float resistPercent = GetResistance(damageType, resistances);
+            float resistPercent = GetResistance(damageType, resistances) + resistanceBonusPercent;
             resistPercent = Mathf.Clamp(resistPercent, -100f, 200f);
 
             // Resistance multiplier: 0% resist = 1.0x, 100% = 0.0x, -100% = 2.0x, 200% = -1.0x
@@ -75,9 +80,12 @@ namespace Assets.Scripts.Combat
         /// popup (Weak! / Resisted / Immune / Absorbed). Reads the same resistance the damage
         /// pipeline uses — presentation only, no effect on the numbers.
         /// </summary>
-        public static DamageEffectiveness Classify(DamageType damageType, List<Resistance> resistances)
+        public static DamageEffectiveness Classify(
+            DamageType damageType,
+            List<Resistance> resistances,
+            float resistanceBonusPercent = 0f)
         {
-            float r = GetResistance(damageType, resistances);
+            float r = GetResistance(damageType, resistances) + resistanceBonusPercent;
             if (r > 100f)
             {
                 return DamageEffectiveness.Absorbed;
@@ -98,8 +106,10 @@ namespace Assets.Scripts.Combat
         }
 
         /// <summary>
-        /// Gets the resistance percentage for a given damage type.
-        /// Returns 0 if no matching resistance is found.
+        /// Total resistance percentage for a damage type. Entries <b>sum</b>: innate resistance, gear and
+        /// (via the bonus argument on <see cref="Calculate"/>) temporary buffs stack, so a deliberately
+        /// assembled build can pass 100% and start absorbing — the FFVIII behaviour. Returns 0 when
+        /// nothing matches.
         /// </summary>
         public static float GetResistance(DamageType damageType, List<Resistance> resistances)
         {
@@ -108,15 +118,16 @@ namespace Assets.Scripts.Combat
                 return 0f;
             }
 
+            float total = 0f;
             foreach (var r in resistances)
             {
-                if (r.DamageType == damageType)
+                if (r != null && r.DamageType == damageType)
                 {
-                    return r.Percent;
+                    total += r.Percent;
                 }
             }
 
-            return 0f;
+            return total;
         }
     }
 }

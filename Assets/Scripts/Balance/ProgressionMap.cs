@@ -3,6 +3,7 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Items;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -112,6 +113,19 @@ namespace Assets.Scripts.Balance
         /// <summary>Magic first drawable in this level.</summary>
         public List<MagicSO> NewlyDrawable = new List<MagicSO>();
 
+        /// <summary>
+        /// What the level's enemies attack *with*, weighted by expected count. The defensive mirror of
+        /// the resistance columns: elemental resistance on the hero side is only worth anything against
+        /// elements something actually deals.
+        /// </summary>
+        public Dictionary<DamageType, float> IncomingWeightByType = new Dictionary<DamageType, float>();
+
+        /// <summary>
+        /// Elements this level deals that nothing in the project can resist - no gear, no magic. Authored
+        /// threat the player has no answer to.
+        /// </summary>
+        public List<DamageType> UndefendableIncoming = new List<DamageType>();
+
         /// <summary>Elements (excluding Normal) the player can deal by the time they reach this level.</summary>
         public List<DamageType> ElementsAvailable = new List<DamageType>();
 
@@ -157,6 +171,13 @@ namespace Assets.Scripts.Balance
         public int ReachableMagicCount;
         public int ReachableComboCount;
 
+        /// <summary>
+        /// Damage types the hero side can resist at all, from any source: gear
+        /// (<see cref="ItemSO.Resistances"/>) or magic granting a resistance buff. Used to tell authored
+        /// elemental threat apart from threat the player has no answer to.
+        /// </summary>
+        public List<DamageType> DefendableTypes = new List<DamageType>();
+
         public float MagicCoverage => CatalogMagicCount > 0
             ? (float)ReachableMagicCount / CatalogMagicCount
             : 0f;
@@ -170,10 +191,12 @@ namespace Assets.Scripts.Balance
         public static ProgressionMap Build(
             IList<RunCurve> runCurves,
             IList<MagicSO> catalog,
-            IList<MagicComboSO> combos)
+            IList<MagicComboSO> combos,
+            IList<ItemSO> items = null)
         {
             var map = new ProgressionMap();
             map.CatalogMagicCount = catalog != null ? catalog.Count : 0;
+            map.DefendableTypes = CollectDefendableTypes(catalog, items);
 
             var byMagic = new Dictionary<MagicSO, MagicAvailability>();
             if (catalog != null)
@@ -232,6 +255,73 @@ namespace Assets.Scripts.Balance
 
             AssignComboUnlockRuns(map);
             return map;
+        }
+
+        /// <summary>
+        /// Every damage type the hero side has some way of resisting. Gear resistance is immediate; magic
+        /// resistance buffs are counted too, but note <c>ResistanceBuffHandler.Apply</c> is still a no-op
+        /// (see docs/ELEMENTAL_PLAN.md), so those are potential rather than live.
+        /// </summary>
+        private static List<DamageType> CollectDefendableTypes(IList<MagicSO> catalog, IList<ItemSO> items)
+        {
+            var types = new List<DamageType>();
+
+            if (items != null)
+            {
+                foreach (var item in items)
+                {
+                    if (item == null || item.Resistances == null)
+                    {
+                        continue;
+                    }
+                    foreach (var resistance in item.Resistances)
+                    {
+                        if (resistance != null && resistance.Percent > 0f && !types.Contains(resistance.DamageType))
+                        {
+                            types.Add(resistance.DamageType);
+                        }
+                    }
+                }
+            }
+
+            if (catalog != null)
+            {
+                foreach (var magic in catalog)
+                {
+                    if (magic == null || magic.Effects == null)
+                    {
+                        continue;
+                    }
+                    foreach (var effect in magic.Effects)
+                    {
+                        if (effect == null || effect.EffectType != SpellEffectType.Buff)
+                        {
+                            continue;
+                        }
+                        DamageType type;
+                        if (TryMapResistanceBuff(effect.BuffType, out type) && !types.Contains(type))
+                        {
+                            types.Add(type);
+                        }
+                    }
+                }
+            }
+
+            return types;
+        }
+
+        /// <summary>Maps the resistance <see cref="BuffType"/>s onto their damage types.</summary>
+        private static bool TryMapResistanceBuff(BuffType buffType, out DamageType type)
+        {
+            switch (buffType)
+            {
+                case BuffType.FireResistance: type = DamageType.Fire; return true;
+                case BuffType.IceResistance: type = DamageType.Ice; return true;
+                case BuffType.LightningResistance: type = DamageType.Lightning; return true;
+                case BuffType.HolyResistance: type = DamageType.Holy; return true;
+                case BuffType.ShadowResistance: type = DamageType.Shadow; return true;
+                default: type = DamageType.Normal; return false;
+            }
         }
 
         private static List<RunCurve> OrderRuns(IList<RunCurve> runCurves, ProgressionMap map)
@@ -305,11 +395,24 @@ namespace Assets.Scripts.Balance
                         profile.EnemyWeight += weight;
 
                         AccumulateResistances(profile, enemy, weight);
+
+                        if (enemy.AttackDamageType != DamageType.Normal)
+                        {
+                            Add(profile.IncomingWeightByType, enemy.AttackDamageType, weight);
+                        }
                         RecordDrawSources(map, byMagic, curve, level, enemy, kvp.Value, seenMagic, profile, runProgression, elements);
                     }
 
                     profile.ElementsAvailable = new List<DamageType>(elements);
                     profile.ElementChoiceMatters = ChoiceMatters(profile, elements);
+
+                    foreach (var incoming in profile.IncomingWeightByType)
+                    {
+                        if (!map.DefendableTypes.Contains(incoming.Key))
+                        {
+                            profile.UndefendableIncoming.Add(incoming.Key);
+                        }
+                    }
                     runProgression.Levels.Add(profile);
                 }
 

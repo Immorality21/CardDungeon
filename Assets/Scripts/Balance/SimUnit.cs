@@ -54,6 +54,9 @@ namespace Assets.Scripts.Balance
         public int EffectiveDefense;
         public int EffectiveAgility;
 
+        /// <summary>Element this unit's physical attacks carry; Normal for heroes.</summary>
+        public DamageType AttackDamageType { get; set; } = DamageType.Normal;
+
         public int GetEffectiveAttack()
         {
             return EffectiveAttack;
@@ -94,6 +97,7 @@ namespace Assets.Scripts.Balance
                 EffectiveAttack = EffectiveAttack,
                 EffectiveDefense = EffectiveDefense,
                 EffectiveAgility = EffectiveAgility,
+                AttackDamageType = AttackDamageType,
                 HeroKey = HeroKey,
                 Definition = Definition,
                 Archetype = Archetype
@@ -126,6 +130,7 @@ namespace Assets.Scripts.Balance
                 EffectiveAttack = definition.Attack,
                 EffectiveDefense = definition.Defense,
                 EffectiveAgility = definition.Agility,
+                AttackDamageType = definition.AttackDamageType,
                 Definition = definition,
                 Archetype = definition.Archetype
             };

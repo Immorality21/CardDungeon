@@ -45,6 +45,9 @@ namespace Assets.Scripts.Enemies
         Stats ICombatUnit.Stats => Stats;
         List<Resistance> ICombatUnit.Resistances => Resistances;
 
+        public DamageType AttackDamageType =>
+            Definition != null ? Definition.AttackDamageType : DamageType.Normal;
+
         /// <summary>
         /// Stamps this (shared-prefab) instance with an enemy definition: sprite, stats,
         /// archetype, Draw list, resistances and loot. Called by <see cref="EnemyManager"/> at

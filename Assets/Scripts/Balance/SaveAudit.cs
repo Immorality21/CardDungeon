@@ -269,7 +269,8 @@ namespace Assets.Scripts.Balance
                     Stats = new Rooms.Stats(effective.Attack, effective.Defense, effective.MaxHealth, effective.Agility),
                     EffectiveAttack = effective.Attack,
                     EffectiveDefense = effective.Defense,
-                    EffectiveAgility = effective.Agility
+                    EffectiveAgility = effective.Agility,
+                    Resistances = InventoryOperations.ComputeResistances(gear)
                 };
 
                 party.Heroes.Add(hero);

@@ -651,11 +651,20 @@ namespace Assets.Scripts.Balance
             int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Defense);
             int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttack() + attackBonus) * multiplier);
             int defense = target.GetEffectiveDefense() + defenseBonus;
-            int damage = DamageCalculator.Calculate(rawAttack, defense, DamageType.Normal, target.Resistances);
+            int damage = DamageCalculator.Calculate(
+                rawAttack, defense, attacker.AttackDamageType, target.Resistances);
 
             if (damage > 0 && Random.Range(0f, 1f) < CombatManager.CritChance)
             {
                 damage = Mathf.Max(damage + 1, Mathf.RoundToInt(damage * CombatManager.CritMultiplier));
+            }
+
+            if (damage < 0)
+            {
+                // Absorbed, clamped to the target's maximum — same rule as CombatManager.ExecuteAttack.
+                int absorbed = Mathf.Min(-damage, Mathf.Max(0, target.Stats.MaxHealth - target.Stats.Health));
+                target.Stats.Health += absorbed;
+                return -absorbed;
             }
 
             target.Stats.Health -= damage;

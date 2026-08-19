@@ -95,9 +95,39 @@ and adding scaling later means doing it twice.)*
 Enemy resistances are configured, but the layer is only half-built: the player cannot **see** a resistance
 before spending a charge, and cannot **defend** against an element at all —
 `ResistanceBuffHandler.Apply` is an empty method, so all five resistance `BuffType`s silently do nothing.
-Full plan, with the decisions it needs, in **`docs/ELEMENTAL_PLAN.md`**: resistance buffs on
-`CombatBuffTracker`, a flat `HealthCost` effect type so cards like **Fire Cloak** (+40% fire resistance,
-1 HP to cast) can be authored at all, and three increments of surfacing resistances in the combat UI.
+Full plan in **`docs/ELEMENTAL_PLAN.md`** (design decisions now settled): a `PowerMode` on `SpellEffect`
+(base-power / flat / % of max health), a `HealthCost` effect type so **Fire Cloak** (+40% fire resistance,
+10% of max HP to cast) can be authored at all, summing resistances so >100% becomes FFVIII-style
+**absorption**, and three increments of surfacing resistances in the combat UI.
+
+**Shipped since:** resistances now **sum** across innate + gear + (future) buffs, so >100% is reachable and
+absorbs FFVIII-style; absorbed basic attacks clamp to max health instead of overhealing;
+`EnemySO.AttackDamageType` gives enemy attacks an element (`ICombatUnit.AttackDamageType`, default
+`Normal`); `ItemSO.Resistances` + `Hero.GetEffectiveResistances()` let gear contribute to a build. Covered
+by `ElementalResistanceTests`.
+
+**Still open:** `PowerMode` on `SpellEffect` (base-power / flat / % of max health), the `HealthCost` effect
+type, the cloak cards, resistance **buffs** (`ResistanceBuffHandler.Apply` is still a no-op, so the five
+resistance `BuffType`s do nothing), and the discovery-gated reveal. Resistances stay **hidden** from the
+player by design - the plan is discovery-gated reveal only, no static display.
+
+### 0b-2. Elemental content follow-ups
+
+- **Placeholder sprites.** The four new enemies (**Stone Sentinel**, **Cinder Imp**, **Bog Shaman**,
+  **Hex Weaver**) reuse the existing three sprites: Sentinel borrows the Warden's, Cinder Imp the Dragon's,
+  and both Bog Shaman and Hex Weaver the Floating Eye's. They need their own art, and Bog Shaman/Hex Weaver
+  are currently visually identical to each other in play.
+- **New enemies raised the attrition load.** `NoobTemplate`'s pool went from 4 rooms to 6 (added **Cavern**
+  and **Sunken Swamp**), which takes expected enemies per level from ~10.5 to ~12.8 and pushed levels 1-3
+  from *warning* to **critical** on the unclearable check. The room count (`RoomsToGenerate: 15`) is the
+  lever; it was left alone deliberately rather than quietly retuning level design.
+- **Worst-case spawn rolls.** Cavern at a full roll (Stone Sentinel + 2 Cinder Imps) reads a worst-case
+  danger of 1.30 - survivable in simulation (100% win rate) but over the 1.00 line on the closed-form model.
+- **`EnemySO` has no stable `Key`.** Needed before discovery-gated reveal can persist "player has seen this
+  enemy resists Fire"; keying off `DisplayName` breaks the moment a name is edited.
+- **Loot is still duplicated** between Floating Eye and the Abyssal Warden.
+- **Holy and Shadow** are unused by any magic and unresisted by anything - the analyzer reports them, and
+  they are free slots if a later biome wants an element of its own.
 
 ### 0c. Run chaining (needs a design discussion)
 

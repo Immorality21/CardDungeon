@@ -811,7 +811,11 @@ namespace Assets.Scripts.Rooms
             int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Defense);
             int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttack() + attackBonus) * damageMultiplier);
             int defense = target.GetEffectiveDefense() + defenseBonus;
-            int dmg = DamageCalculator.Calculate(rawAttack, defense, DamageType.Normal, target.Resistances);
+
+            // Physical attacks carry the attacker's element, so elemental resistance applies to them too.
+            // Normal is the default on both sides and bypasses the elemental layer entirely.
+            var damageType = attacker.AttackDamageType;
+            int dmg = DamageCalculator.Calculate(rawAttack, defense, damageType, target.Resistances);
 
             // Critical hit: a chance for a harder blow, called out with a gold popup + bigger number.
             bool crit = dmg > 0 && UnityEngine.Random.Range(0f, 1f) < CritChance;
@@ -820,21 +824,38 @@ namespace Assets.Scripts.Rooms
                 dmg = Mathf.Max(dmg + 1, Mathf.RoundToInt(dmg * CritMultiplier));
             }
 
-            target.Stats.Health -= dmg;
+            if (dmg < 0)
+            {
+                // Absorbed: resistance above 100% turns the hit into healing. Clamp to the target's
+                // maximum — without this an absorbing unit heals past full and the popup reads "-7".
+                int absorbed = Mathf.Min(-dmg, Mathf.Max(0, target.Stats.MaxHealth - target.Stats.Health));
+                target.Stats.Health += absorbed;
+                dmg = -absorbed;
+            }
+            else
+            {
+                target.Stats.Health -= dmg;
+            }
 
             // Impact juice: flash + damage-scaled shake (extra punch on heavy/crit blows) + hit-stop.
             float punch = (damageMultiplier > 1f ? 1.6f : 1f) * (crit ? 1.4f : 1f);
-            CombatFeedback.Instance.PlayImpact(target, dmg, punch);
+            CombatFeedback.Instance.PlayImpact(target, Mathf.Abs(dmg), punch);
             CombatAudio.Play(CombatSound.Impact, damageMultiplier > 1f ? 1f : 0.9f);
-            ShowDamageText(target.Transform.position, dmg, damageColor, crit ? 0.24f : 0.15f);
+            ShowDamageText(
+                target.Transform.position,
+                Mathf.Abs(dmg),
+                dmg < 0 ? Color.green : damageColor,
+                crit ? 0.24f : 0.15f);
             if (crit)
             {
                 ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.45f, 0f), "CRIT!", new Color(1f, 0.82f, 0.2f), 0.16f);
             }
-            ShowEffectiveness(target, DamageType.Normal);
+            ShowEffectiveness(target, damageType);
             yield return new WaitForSecondsRealtime(crit ? 0.075f : 0.045f);
 
-            _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName} for {dmg} damage{(crit ? " (CRIT!)" : "")}.";
+            _lastTurnLog = dmg < 0
+                ? $"{attacker.DisplayName} {verb} {target.DisplayName}, who absorbs {-dmg} health!"
+                : $"{attacker.DisplayName} {verb} {target.DisplayName} for {dmg} damage{(crit ? " (CRIT!)" : "")}.";
         }
 
         private IEnumerator LungeAnimation(Transform unit, Vector3 direction)

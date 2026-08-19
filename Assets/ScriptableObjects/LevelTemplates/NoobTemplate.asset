@@ -18,7 +18,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
   - {fileID: 11400000, guid: 0b978dd4c559e8942b3546543c74ef50, type: 2}
   - {fileID: 11400000, guid: 3eb0f9f0d8481fc4cb32d83a3cbc2448, type: 2}
+  - {fileID: 11400000, guid: 6ed684b32798dbd41bb36ef247b4072c, type: 2}
+  - {fileID: 11400000, guid: 2746458f24f978b4eb0fa89fa0f4a04f, type: 2}
   RoomsToGenerate: 15
   ChainBias: 0.667
   MomentumBias: 0.498
   WallColor: {r: 0.6037736, g: 0.52273244, b: 0.16803133, a: 1}
+  CombatBackground: {fileID: 0}

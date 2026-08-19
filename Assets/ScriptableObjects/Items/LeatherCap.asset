@@ -15,10 +15,17 @@ MonoBehaviour:
   Key: LeatherCap
   DisplayName: Leather Cap
   Icon: {fileID: 21300000, guid: 4898c3d62902b2b44be36d4ebe2e0be4, type: 3}
-  SlotType: 2
   Rarity: 0
   ItemLevel: 1
+  Category: 0
+  SlotType: 2
   Bonuses:
   - StatType: 2
     BonusType: 0
     Value: 6
+  Resistances:
+  - DamageType: 3
+    Percent: 10
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  MaxStack: 99

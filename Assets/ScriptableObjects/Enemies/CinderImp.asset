@@ -10,31 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
-  m_Name: Dragon
+  m_Name: CinderImp
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
-  DisplayName: Dragon
+  DisplayName: Cinder Imp
   Sprite: {fileID: 21300000, guid: c63e0d29d5d04db3b133f261668e6868, type: 3}
   IsBoss: 0
-  Attack: 3
-  Defense: 2
-  Health: 9
-  Agility: 5
-  XpReward: 10
-  GoldReward: 5
+  Attack: 2
+  Defense: 0
+  Health: 8
+  Agility: 8
+  XpReward: 8
+  GoldReward: 4
   AttackDamageType: 1
   Archetype: 0
   DrawableMagics:
   - Magic: {fileID: 11400000, guid: 7eb83123e11d47b3ae4da91e88d37cb0, type: 2}
-    Charges: 2
-  - Magic: {fileID: 11400000, guid: 2eadbe7f36fe4473b34f4e2b11a452cd, type: 2}
-    Charges: 2
-  - Magic: {fileID: 11400000, guid: 5a6c46af09324a6f933b7c6b755f387a, type: 2}
-    Charges: 2
-  - Magic: {fileID: 11400000, guid: 2ca64f0892a84f2181d73f56d8fdf4ef, type: 2}
     Charges: 2
   Resistances:
   - DamageType: 1
     Percent: 50
   - DamageType: 2
     Percent: -50
-  LootItem: {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
+  LootItem: {fileID: 11400000, guid: 0af466e4089275b4d9535cd9f2710019, type: 2}

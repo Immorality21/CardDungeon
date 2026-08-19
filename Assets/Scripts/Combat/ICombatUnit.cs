@@ -13,6 +13,14 @@ namespace Assets.Scripts.Combat
         bool IsHero { get; }
         Transform Transform { get; }
         List<Resistance> Resistances { get; }
+
+        /// <summary>
+        /// Damage type this unit's physical attacks deal. <see cref="DamageType.Normal"/> bypasses the
+        /// elemental layer entirely, so it stays the default for heroes and for any enemy that has not
+        /// opted into an element.
+        /// </summary>
+        DamageType AttackDamageType { get; }
+
         int GetEffectiveAttack();
         int GetEffectiveDefense();
         int GetEffectiveAgility();

@@ -30,6 +30,11 @@ namespace Assets.Scripts.Enemies
         public int XpReward = 10;    // awarded to the party leader immediately on kill
         public int GoldReward = 5;   // shown per combat; only banked (persisted) on level-clear
 
+        [Tooltip("Damage type this enemy's physical attacks deal (basic, heavy and boss signature). " +
+                 "Normal bypasses the elemental layer, so leave it there for a purely physical enemy. " +
+                 "Anything else makes the hero side's elemental resistance matter defensively.")]
+        public DamageType AttackDamageType = DamageType.Normal;
+
         public EnemyArchetype Archetype = EnemyArchetype.Aggressor;
 
         // The Draw list: magics the player can extract from this enemy, each with charges.

@@ -139,7 +139,9 @@ namespace Assets.Scripts.Balance
                     EffectiveAttack = effective.Attack,
                     EffectiveDefense = effective.Defense,
                     EffectiveAgility = effective.Agility,
-                    Resistances = new List<Resistance>()
+                    // Heroes deal physical damage; gear resistance folds in the same way Hero does.
+                    AttackDamageType = Combat.DamageType.Normal,
+                    Resistances = InventoryOperations.ComputeResistances(gear)
                 };
 
                 baseline.Heroes.Add(hero);

@@ -15,10 +15,17 @@ MonoBehaviour:
   Key: RubyAmulet
   DisplayName: Ruby Amulet
   Icon: {fileID: 21300000, guid: 08c06902d7f319c41ac2a5f580e367a8, type: 3}
-  SlotType: 6
   Rarity: 2
   ItemLevel: 4
+  Category: 0
+  SlotType: 6
   Bonuses:
   - StatType: 0
     BonusType: 1
     Value: 10
+  Resistances:
+  - DamageType: 1
+    Percent: 25
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  MaxStack: 99

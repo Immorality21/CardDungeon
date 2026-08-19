@@ -139,7 +139,8 @@ namespace Assets.Scripts.Balance
                 foreach (var member in Members)
                 {
                     perTurn += (member.Weight / weightTotal)
-                             * BalanceMath.AverageDamage(hero.Unit.GetEffectiveAttack(), member.Unit);
+                             * BalanceMath.AverageDamage(
+                                 hero.Unit.GetEffectiveAttack(), member.Unit, hero.Unit.AttackDamageType);
                 }
 
                 total += perTurn * BalanceMath.TurnsPerTick(hero.Unit);

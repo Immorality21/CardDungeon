@@ -76,7 +76,7 @@ namespace Assets.Scripts.Balance
             }
 
             report.Variety = VarietyReport.Build(ProjectWideEnemySet(input.Enemies), input.Magic, rules);
-            report.Progression = ProgressionMap.Build(report.Runs, input.Magic, input.Combos);
+            report.Progression = ProgressionMap.Build(report.Runs, input.Magic, input.Combos, input.Items);
 
             if (input.RunSimulation)
             {
@@ -617,8 +617,13 @@ namespace Assets.Scripts.Balance
                         Suggestion = SuggestEnemySoftening(metrics, rules)
                     });
                 }
-                else if (metrics.SoloDangerIndex < rules.MinMeaningfulDanger && metrics.SoloDangerIndex > 0f)
+                else if (metrics.SoloDangerIndex < rules.MinMeaningfulDanger
+                         && metrics.SoloDangerIndex > 0f
+                         && metrics.Archetype != EnemyArchetype.Healer)
                 {
+                    // Healers are exempt: the danger index measures a damage race, and a Healer's cost to
+                    // the player is the turns it adds by undoing damage, not the damage it deals. Judging
+                    // one on offence would always read as "no threat".
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Name,
                         $"{metrics.Name} is no threat at all (danger {metrics.SoloDangerIndex:0.000})")
                     {
@@ -730,7 +735,12 @@ namespace Assets.Scripts.Balance
 
             foreach (var metrics in report.Enemies)
             {
-                if (metrics.IsBoss || metrics.XpPerDanger <= 0f || float.IsInfinity(metrics.XpPerDanger))
+                // Bosses are their own tier, and a Healer's danger index understates it by design (see
+                // the exemption in EvaluateEnemies), so neither belongs in a reward-per-danger comparison.
+                if (metrics.IsBoss
+                    || metrics.Archetype == EnemyArchetype.Healer
+                    || metrics.XpPerDanger <= 0f
+                    || float.IsInfinity(metrics.XpPerDanger))
                 {
                     continue;
                 }
@@ -1152,6 +1162,22 @@ namespace Assets.Scripts.Balance
                                        + "across the run."
                             });
                         }
+                    }
+
+                    // Defensive mirror: elemental threat the hero side has no way to resist at all.
+                    if (level.UndefendableIncoming.Count > 0)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression,
+                            $"{run.Name} / {level.Reference}",
+                            $"{level.Reference} deals {string.Join(", ", level.UndefendableIncoming)} damage that nothing can resist")
+                        {
+                            Asset = run.Run,
+                            Detail = "No gear grants resistance to it and no magic buffs it, so the element is pure "
+                                   + "downside for the player. Resistible types today: "
+                                   + $"{(map.DefendableTypes.Count > 0 ? string.Join(", ", map.DefendableTypes) : "none")}.",
+                            Suggestion = "Add the resistance to a piece of gear, or give those enemies a different "
+                                   + "attack element."
+                        });
                     }
 
                     if (!level.HasCombat || level.ResistingWeight + level.WeakWeight <= 0f)

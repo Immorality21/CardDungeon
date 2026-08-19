@@ -110,6 +110,7 @@ namespace Assets.Scripts.Balance.Editor
             BalanceGui.HeaderCell("Weak", 130f, "Share carrying a weakness (negative resistance).");
             BalanceGui.HeaderCell("Resisted types", 150f);
             BalanceGui.HeaderCell("Weak types", 150f);
+            BalanceGui.HeaderCell("Deals", 150f, "Elements the level's enemies attack with — what the party has to defend against.");
             BalanceGui.HeaderCell("Player has", 150f, "Elements the player can deal by this point, Normal aside.");
             BalanceGui.HeaderCell("Matters?", 70f, "Whether any resistance here is in an element the player has.");
             BalanceGui.HeaderCell("Unlocks here", 200f);
@@ -155,6 +156,14 @@ namespace Assets.Scripts.Balance.Editor
 
                 BalanceGui.Cell(FormatTypes(level.ResistWeightByType), 150f);
                 BalanceGui.Cell(FormatTypes(level.WeakWeightByType), 150f);
+                BalanceGui.Cell(
+                    FormatTypes(level.IncomingWeightByType),
+                    150f,
+                    level.UndefendableIncoming.Count > 0 ? BalanceSeverity.Warning : BalanceSeverity.Ok,
+                    level.UndefendableIncoming.Count > 0
+                        ? $"Nothing in the project resists {string.Join(", ", level.UndefendableIncoming)} — "
+                          + "no gear grants it and no magic buffs it, so the element is pure downside."
+                        : "Physical (Normal) attacks are not listed: they bypass the elemental layer.");
                 BalanceGui.Cell(
                     level.ElementsAvailable.Count > 0 ? string.Join(", ", level.ElementsAvailable) : "none",
                     150f,

@@ -12,6 +12,8 @@ namespace Assets.Scripts.Heroes
         public Stats Stats;
         public int Level = 1;
         public int CurrentXp;
+        [Tooltip("Innate elemental resistance. Gear resistance sums on top of this — see " +
+                 "GetEffectiveResistances().")]
         public List<Resistance> Resistances = new List<Resistance>();
 
         public string HeroKey => HeroSO != null ? HeroSO.Label : "";
@@ -22,7 +24,13 @@ namespace Assets.Scripts.Heroes
         public Transform Transform => transform;
 
         Stats ICombatUnit.Stats => Stats;
-        List<Resistance> ICombatUnit.Resistances => Resistances;
+
+        // The combat pipeline reads resistance through the interface, so this is where gear has to be
+        // folded in — exactly like GetEffectiveAttack() and friends.
+        List<Resistance> ICombatUnit.Resistances => GetEffectiveResistances();
+
+        /// <summary>Heroes deal physical damage; elemental output comes from magic, not basic attacks.</summary>
+        public DamageType AttackDamageType => DamageType.Normal;
 
         public void Initialize(HeroSO heroSO)
         {
@@ -87,6 +95,27 @@ namespace Assets.Scripts.Heroes
             var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
             float baseVal = Stats.MaxHealth + raw[StatType.MaxHealth];
             return Mathf.RoundToInt(baseVal * (1f + pct[StatType.MaxHealth] / 100f));
+        }
+
+        /// <summary>
+        /// Innate resistance plus everything equipped gear grants, summed per damage type. Temporary
+        /// combat buffs are <b>not</b> included: those stack at the damage call site through
+        /// <c>CombatBuffTracker</c>, the same way stat buffs do.
+        /// </summary>
+        public List<Resistance> GetEffectiveResistances()
+        {
+            var gear = InventoryManager.Instance.ComputeResistances(HeroKey);
+            if (gear.Count == 0)
+            {
+                return Resistances;
+            }
+
+            var combined = new List<Resistance>(Resistances);
+            foreach (var entry in gear)
+            {
+                combined.Add(entry);
+            }
+            return combined;
         }
 
         public int GetEffectiveAgility()

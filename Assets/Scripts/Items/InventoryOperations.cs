@@ -152,6 +152,45 @@ namespace Assets.Scripts.Items
             return result;
         }
 
+        /// <summary>
+        /// Sums the elemental resistance granted by a set of equipped items, one entry per damage type.
+        /// Kept pure and beside <see cref="ComputeBonuses"/> so the balance model can fold gear into a
+        /// hero without a live <see cref="InventoryManager"/>.
+        /// </summary>
+        public static List<Combat.Resistance> ComputeResistances(IEnumerable<ItemSO> equippedItems)
+        {
+            var totals = new Dictionary<Combat.DamageType, float>();
+            if (equippedItems != null)
+            {
+                foreach (var so in equippedItems)
+                {
+                    if (so == null || so.Resistances == null)
+                    {
+                        continue;
+                    }
+                    foreach (var resistance in so.Resistances)
+                    {
+                        if (resistance == null)
+                        {
+                            continue;
+                        }
+                        if (!totals.ContainsKey(resistance.DamageType))
+                        {
+                            totals[resistance.DamageType] = 0f;
+                        }
+                        totals[resistance.DamageType] += resistance.Percent;
+                    }
+                }
+            }
+
+            var result = new List<Combat.Resistance>();
+            foreach (var kvp in totals)
+            {
+                result.Add(new Combat.Resistance { DamageType = kvp.Key, Percent = kvp.Value });
+            }
+            return result;
+        }
+
         private static bool IsCategory(ItemSaveData item, ItemCategory category, Func<string, ItemSO> resolve)
         {
             if (resolve == null)

@@ -175,7 +175,8 @@ namespace Assets.Scripts.Balance
                 ? 1f
                 : AverageOffenseMultiplier(attacker.Archetype, opposingCount);
 
-            float perTurn = AverageDamageAgainstGroup(attacker.GetEffectiveAttack(), targets) * multiplier;
+            float perTurn = AverageDamageAgainstGroup(
+                attacker.GetEffectiveAttack(), targets, attacker.AttackDamageType) * multiplier;
             return perTurn * TurnsPerTick(attacker);
         }
 

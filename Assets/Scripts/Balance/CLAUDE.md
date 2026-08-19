@@ -44,6 +44,8 @@ the game's numbers:
 | enemy decisions in simulation | the real `IEnemyBehavior` implementations via `EnemyBehaviorFactory` |
 | spell effects, buffs, combos | `EffectResolver`, `CombatBuffTracker`, `ComboDetector` |
 | gear bonuses | `InventoryOperations.ComputeBonuses` |
+| gear elemental resistance | `InventoryOperations.ComputeResistances` |
+| the element a unit's attacks carry | `ICombatUnit.AttackDamageType` (`EnemySO.AttackDamageType`) |
 | economy pacing | `MetaProgressManager` constants |
 | potion belt capacity | `PartyResourceManager.DEFAULT_HEALING_POTION_MAX` |
 
@@ -82,6 +84,13 @@ pieces. `ProgressionMap` models that, and it is the reason the tab exists:
   a decision. `LevelElementProfile.ElementChoiceMatters` is false in that case, which is a finding.
 - **Front-loading** — one level handing over more than `MaxUnlockSharePerLevel` of the catalog leaves the
   rest of the run with nothing to reveal.
+- **Defensive coverage** — the mirror of the offensive columns. `IncomingWeightByType` is what a level's
+  enemies attack *with* (from `EnemySO.AttackDamageType`), and `DefendableTypes` is every element the hero
+  side can resist at all, from gear (`ItemSO.Resistances`) or a resistance buff. The difference,
+  `UndefendableIncoming`, is elemental threat the player has no answer to.
+
+Note that resistance-buff magic counts toward `DefendableTypes` as *potential*: `ResistanceBuffHandler.Apply`
+is still a no-op, so those buffs do nothing in play yet. See `docs/ELEMENTAL_PLAN.md`.
 
 Runs are ordered by `RunDefinitionSO.SequenceIndex`. Runs are **not chained in game yet**
 (`MainMenuManager` points at a single run); that field exists so the analysis has an intended order, and

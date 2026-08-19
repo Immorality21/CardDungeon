@@ -15,9 +15,10 @@ MonoBehaviour:
   Key: SteelPlate
   DisplayName: Steel Plate
   Icon: {fileID: 21300000, guid: bccfd3bb4cbda0648afbf9e511e88119, type: 3}
-  SlotType: 3
   Rarity: 1
   ItemLevel: 3
+  Category: 0
+  SlotType: 3
   Bonuses:
   - StatType: 1
     BonusType: 0
@@ -25,3 +26,9 @@ MonoBehaviour:
   - StatType: 2
     BonusType: 0
     Value: 12
+  Resistances:
+  - DamageType: 2
+    Percent: 20
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  MaxStack: 99

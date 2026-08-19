@@ -19,6 +19,11 @@ namespace Assets.Scripts.Items
         public SlotType SlotType;
         public List<ItemBonus> Bonuses = new List<ItemBonus>();
 
+        [Tooltip("Elemental resistance this item grants while equipped. Resistances sum across gear, " +
+                 "innate resistance and temporary buffs, so a deliberately assembled set can pass 100% " +
+                 "and absorb that element instead of taking it.")]
+        public List<Combat.Resistance> Resistances = new List<Combat.Resistance>();
+
         [Header("Consumable (Category == Consumable)")]
         public ConsumableEffectType ConsumableEffect = ConsumableEffectType.RestoreHealth;
         public int ConsumableAmount;

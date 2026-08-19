@@ -305,7 +305,8 @@ namespace Assets.Scripts.Items
             return ComputeBonuses(heroKey, BonusType.Percentage);
         }
 
-        private Dictionary<StatType, float> ComputeBonuses(string heroKey, BonusType bonusType)
+        /// <summary>Every equipment ScriptableObject a hero currently has equipped.</summary>
+        public List<ItemSO> GetEquippedItems(string heroKey)
         {
             var equipped = new List<ItemSO>();
             if (_equipped.TryGetValue(heroKey, out var slots))
@@ -319,7 +320,18 @@ namespace Assets.Scripts.Items
                     }
                 }
             }
-            return InventoryOperations.ComputeBonuses(equipped, bonusType);
+            return equipped;
+        }
+
+        /// <summary>Elemental resistance a hero's equipped gear grants, summed per damage type.</summary>
+        public List<Combat.Resistance> ComputeResistances(string heroKey)
+        {
+            return InventoryOperations.ComputeResistances(GetEquippedItems(heroKey));
+        }
+
+        private Dictionary<StatType, float> ComputeBonuses(string heroKey, BonusType bonusType)
+        {
+            return InventoryOperations.ComputeBonuses(GetEquippedItems(heroKey), bonusType);
         }
 
         public void Save()
