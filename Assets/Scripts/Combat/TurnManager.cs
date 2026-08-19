@@ -8,7 +8,9 @@ namespace Assets.Scripts.Combat
 {
     public class TurnManager
     {
-        private const float BASE_TICKS = 100f;
+        // Public so the balance model can convert agility into turn frequency without
+        // hardcoding a second copy of this constant.
+        public const float BASE_TICKS = 100f;
 
         private Dictionary<ICombatUnit, float> _ticksUntilTurn = new Dictionary<ICombatUnit, float>();
         private CombatBuffTracker _buffTracker;

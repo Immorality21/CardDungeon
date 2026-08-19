@@ -1,9 +1,8 @@
 {
-    "name": "CardDungeon.Dungeon.Editor",
+    "name": "CardDungeon.Balance.Editor",
     "rootNamespace": "",
     "references": [
-        "CardDungeon",
-        "CardDungeon.Balance.Editor"
+        "CardDungeon"
     ],
     "includePlatforms": [
         "Editor"

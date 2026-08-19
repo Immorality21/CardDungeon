@@ -101,6 +101,14 @@ namespace Assets.Scripts.Dungeon.Editor
             EditorGUILayout.PropertyField(_serializedLayout.FindProperty("Key"));
             EditorGUILayout.PropertyField(_serializedLayout.FindProperty("WallColor"));
 
+            // Spatial authoring lives here; the numbers live in the balance window. This hands the
+            // current layout over rather than duplicating any analysis into this tool.
+            if (GUILayout.Button(new GUIContent("Analyze balance",
+                "Open the Balance Analyzer focused on the run that uses this layout.")))
+            {
+                Balance.Editor.BalanceWindow.OpenForLayout(_layout);
+            }
+
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Layout", EditorStyles.boldLabel);
 

@@ -19,7 +19,60 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
   `BossBehaviorTests`. *(Follow-up: swap the placeholder sprite for real boss art; consider
   boss-specific loot/Draw tables and multi-add boss rooms.)*
 
+- **Balance analyzer (tooling).** ✅ Shipped. `Assets/Scripts/Balance/` is a pure-C# balance model
+  (`BalanceRulesSO` targets, `BalanceMath` danger index, `EncounterModel` spawn-table expectation,
+  `RunCurveModel` attrition curve, `VarietyAnalyzer` one-dimensionality, `EncounterSimulator` headless
+  battles, `SaveAudit` live-save progression) driving three consumers: the
+  **`Tools ▸ Balance ▸ Balance Analyzer`** window (colour-coded tables with the offending stats
+  editable in place), **`BalanceRegressionTests`** (the same analysis as EditMode assertions), and a
+  derived-numbers footer on the `EnemySO` inspector. The Manual Level Layout editor has an
+  *Analyze balance* button that hands its layout to the window. See `Assets/Scripts/Balance/CLAUDE.md`.
+  *(Follow-up: no `BalanceRules.asset` is checked in yet — the window's "Create rules asset" button
+  writes one; until then it runs on the code defaults.)*
+
 ## Backlog
+
+### 0. Act on the balance findings (highest priority)
+
+The analyzer is in place; **its findings are not yet fixed.** Measured against the level-1 party
+(Warrior 10/5/**5**/5, Tank 5/15/**7**/5, 12 HP pool + 2 potions):
+
+- **Hero HP is on the same scale as per-hit damage** — the root cause of nearly everything below.
+  Dragon two-shots the Warrior; the Abyssal Warden one-shots it (6.4 avg damage into a 5 HP bar), and
+  its ×1.6 signature AoE lands **11.8 on a 5 HP hero**. Healthy design is HP ≈ 5–10× a plain hit;
+  we are at ~0.7×. Raising hero HP fixes every enemy at once, which no per-enemy tuning can.
+- **Boss danger index 5.20** (band ceiling 1.40): the party needs ~18.7 turns to kill the Warden and
+  survives ~3.6. Trash sits at a healthy 0.22 — the boss, not the trash, is the outlier. The boss is
+  **22× the level's average room**, against a 1.8–6× band, and the simulator wins **0 of 200** battles
+  against it (party wiped in ~7.3 turns, both heroes dead, under all three policies).
+- **`TutorialRun` levels 2–4 are unclearable on one health bar** — attrition load 1.35× / 1.35× /
+  4.16× of the party's HP + potion pool (`HealAll()` only fires on entering a fresh dungeon, so HP is
+  a level-scoped resource). 15 rooms from a 4-room pool means ~11.25 combat rooms per level against a
+  22 HP sustain pool.
+- **Curve shape is +151%, 0%, +208%** — two spikes past the 75% ceiling around a flat middle.
+- **The elemental layer is inert.** Every `EnemySO` has `Resistances: []`, so `DamageType` cannot
+  change any outcome and Fire/Ice/Lightning/Holy/Shadow are decoration.
+- **Draw and loot are duplicated.** Floating Eye and Abyssal Warden offer the *same two* magics and
+  drop the *same* item; 2 of 3 enemies are `Aggressor`.
+- **Healing has no texture.** `Heal` power 8 and the potion's 5 HP both exceed a hero's whole bar.
+- **Progression dead-ends at level 2** (one `LevelConfiguration` each, +1/+2 HP), its Agility gain of
+  +5 on a base of 5 doubles turn rate in one level, and **only the leader gains XP**
+  (`Party.AddXpToLeader`), so the Tank never levels at all.
+- **Fights have no decisions in them.** The simulator scores attack-spam against competent play:
+  Floating Eye has a depth gap of **0.000** (magic, items and targeting change nothing), and the
+  Dragon is flagged a formality — always won at full health, in 2 turns.
+- **Save audit agrees.** The live save (Gold 1321, Essence 25) has the Warrior capped at level 2 with
+  50 XP going nowhere, and would **die on Test3**. Maxing a single magic costs 45 level-clears.
+
+Baseline as of the analyzer landing: **7 critical / 15 warning / 6 info** closed-form, rising to
+**10 / 16 / 9** with simulation and the save audit enabled.
+
+Fix order that unblocks the most at once: hero HP scale → level room counts → boss → resistances →
+level curve → XP distribution. `BalanceRegressionTests` goes green as these land.
+
+*(Also worth deciding before hand-tuning: whether enemy difficulty stays hand-authored per `EnemySO`
+or scales from data (a per-`RunLevelEntry` multiplier or an enemy tier + curve). Retuning by hand now
+and adding scaling later means doing it twice.)*
 
 ### 1. Battle polish (feel & clarity)
 

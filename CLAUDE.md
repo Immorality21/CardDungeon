@@ -44,6 +44,7 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 - `IO/` — `FileHandler`, `IWriteable`
 - `Progression/` — `MetaProgressManager` (persistent Gold/Essence + per-card upgrade levels), `MetaProgressSaveData`
 - `MainMenu/` — `MainMenuManager`, `MerchantUI`
+- `Balance/` — Balance analysis model (`BalanceRulesSO` targets, `BalanceMath`, `EncounterModel`, `RunCurveModel`, `VarietyAnalyzer`, `EncounterSimulator`, `SaveAudit`, `BalanceAnalyzer`) + the `Tools ▸ Balance ▸ Balance Analyzer` editor window
 
 ### Subsystem Guides
 
@@ -58,6 +59,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Enemies** → `Assets/Scripts/Enemies/CLAUDE.md`
 - **Main menu & hub UI** (incl. editor-driven UI setup) → `Assets/Scripts/MainMenu/CLAUDE.md`
 - **Persistence / save files** → `Assets/Scripts/IO/CLAUDE.md`
+- **Balance analysis** (difficulty targets, danger index, attrition, the analyzer window) → `Assets/Scripts/Balance/CLAUDE.md`
 - **Runtime/visual validation via the Unity MCP** (drive the running game, capture screenshots) → `docs/GAMEPLAY_VALIDATION.md`
 
 ### Key Patterns
@@ -73,7 +75,8 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 
 - **Location:** `Assets/Tests/EditMode/`
 - **Framework:** Unity Test Framework 1.1.33 (NUnit-based). Run via Unity Test Runner.
-- **Test coverage:** `TurnManager`, `DamageCalculator`, `CombatBuffTracker`, `MagicTagTracker`, `ComboDetector`, `EffectResolver`, `Stats`, magic upgrade power bonus + meta economy math (`MagicUpgradeTests`), extension methods
+- **Test coverage:** `TurnManager`, `DamageCalculator`, `CombatBuffTracker`, `MagicTagTracker`, `ComboDetector`, `EffectResolver`, `Stats`, magic upgrade power bonus + meta economy math (`MagicUpgradeTests`), extension methods, balance metrics (`BalanceMathTests`, `RunCurveModelTests`, `EncounterSimulatorTests`)
+- **Balance regression suite:** `BalanceRegressionTests` runs the balance analyzer over the project's real assets and fails on any finding outside the bands in `BalanceRules`. Category `Balance`, so it can be filtered out of a quick unit pass. See `Assets/Scripts/Balance/CLAUDE.md`.
 - **MockCombatUnit:** Test helper implementing `ICombatUnit` for unit testing combat logic without MonoBehaviours
 - **Convention:** Tests use `MethodName_Scenario_ExpectedResult` naming. All combat/card logic is testable without Unity runtime (pure C# classes).
 

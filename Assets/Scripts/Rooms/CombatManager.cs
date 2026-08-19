@@ -57,8 +57,10 @@ namespace Assets.Scripts.Rooms
         [SerializeField] private float _lungeDuration = 0.12f;
 
         // Basic-attack critical hits (heroes and enemies).
-        private const float CritChance = 0.12f;
-        private const float CritMultiplier = 1.6f;
+        // Public so the balance model (Assets/Scripts/Balance) reads the real crit numbers
+        // instead of duplicating them and drifting.
+        public const float CritChance = 0.12f;
+        public const float CritMultiplier = 1.6f;
 
         public event Action OnCombatStarted;
         public event Action<string> OnTurnExecuted;

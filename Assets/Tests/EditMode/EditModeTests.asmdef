@@ -4,7 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "CardDungeon"
+        "CardDungeon",
+        "CardDungeon.Balance.Editor"
     ],
     "includePlatforms": [
         "Editor"

@@ -11,7 +11,9 @@ namespace Assets.Scripts.Resources
     /// </summary>
     public class PartyResourceManager : SingletonBehaviour<PartyResourceManager>
     {
-        private const int DEFAULT_HEALING_POTION_MAX = 2;
+        // Public so the balance model can size the party's healing pool from the real default
+        // rather than guessing at it.
+        public const int DEFAULT_HEALING_POTION_MAX = 2;
 
         private FileHandler _fileHandler;
         private ResourceMaxSaveData _maxData;

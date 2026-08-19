@@ -1,0 +1,1272 @@
+using System;
+using System.Collections.Generic;
+using Assets.Scripts.Cards;
+using Assets.Scripts.Dungeon;
+using Assets.Scripts.Enemies;
+using Assets.Scripts.Heroes;
+using Assets.Scripts.Items;
+using Assets.Scripts.Progression;
+using Assets.Scripts.Resources;
+using UnityEngine;
+
+namespace Assets.Scripts.Balance
+{
+    /// <summary>
+    /// Everything the analyzer needs, handed in rather than discovered — the runtime assembly has no
+    /// AssetDatabase, so the editor window (or a test) collects the assets and passes them here. That
+    /// also means a test can analyze a hand-built set of assets in isolation.
+    /// </summary>
+    public class BalanceInput
+    {
+        public BalanceRulesSO Rules;
+
+        public List<HeroSO> Heroes = new List<HeroSO>();
+        public List<EnemySO> Enemies = new List<EnemySO>();
+        public List<RunDefinitionSO> Runs = new List<RunDefinitionSO>();
+        public List<MagicSO> Magic = new List<MagicSO>();
+        public List<MagicComboSO> Combos = new List<MagicComboSO>();
+        public List<ItemSO> Items = new List<ItemSO>();
+        public ItemSO HealingPotion;
+
+        public bool RunSimulation = true;
+        public bool IncludeSaveAudit = true;
+
+        public Func<string, HeroSO> ResolveHero;
+        public Func<string, ItemSO> ResolveItem;
+    }
+
+    /// <summary>
+    /// Turns the measured metrics into findings by comparing them with <see cref="BalanceRulesSO"/>.
+    /// This is the only place the rules are interpreted, so the editor window and the EditMode balance
+    /// tests always agree on what "off" means.
+    /// </summary>
+    public static class BalanceAnalyzer
+    {
+        public static BalanceReport Analyze(BalanceInput input)
+        {
+            var report = new BalanceReport();
+            if (input == null)
+            {
+                return report;
+            }
+
+            var rules = input.Rules ?? BalanceRulesSO.CreateDefault();
+
+            if (input.IncludeSaveAudit)
+            {
+                report.Save = SaveAudit.Load(input.ResolveHero, input.ResolveItem, input.HealingPotion);
+            }
+
+            report.Party = BuildReferenceParty(input, rules, report.Save);
+
+            foreach (var enemy in input.Enemies)
+            {
+                if (enemy != null)
+                {
+                    report.Enemies.Add(EnemyMetrics.Compute(enemy, report.Party, rules));
+                }
+            }
+
+            foreach (var run in input.Runs)
+            {
+                if (run != null)
+                {
+                    report.Runs.Add(RunCurve.Build(run, report.Party, rules));
+                }
+            }
+
+            report.Variety = VarietyReport.Build(ProjectWideEnemySet(input.Enemies), input.Magic, rules);
+
+            if (input.RunSimulation)
+            {
+                RunSimulations(input, rules, report);
+            }
+
+            EvaluateParty(report, rules, input);
+            EvaluateEnemies(report, rules);
+            EvaluateRuns(report, rules, input);
+            EvaluateVariety(report, rules);
+            EvaluateEconomy(report, rules);
+            EvaluateSimulations(report, rules);
+            EvaluateSave(report, rules, input);
+
+            return report;
+        }
+
+        private static PartyBaseline BuildReferenceParty(BalanceInput input, BalanceRulesSO rules, SaveAudit save)
+        {
+            Func<HeroSO, List<ItemSO>> gearLookup = null;
+            if (rules.ReferencePartyUsesSavedGear && save != null)
+            {
+                gearLookup = hero =>
+                {
+                    foreach (var saved in save.Heroes)
+                    {
+                        if (saved.Definition == hero)
+                        {
+                            return saved.Gear;
+                        }
+                    }
+                    return new List<ItemSO>();
+                };
+            }
+
+            int potionCount = save != null && save.PotionCap > 0
+                ? save.PotionCap
+                : PartyResourceManager.DEFAULT_HEALING_POTION_MAX;
+
+            var party = PartyBaseline.Build(
+                input.Heroes,
+                rules.ReferenceHeroLevel,
+                gearLookup,
+                input.HealingPotion,
+                potionCount);
+
+            party.SourceLabel = rules.ReferencePartyUsesSavedGear
+                ? $"Designed baseline (level {rules.ReferenceHeroLevel}, saved gear)"
+                : $"Designed baseline (level {rules.ReferenceHeroLevel}, no gear)";
+
+            return party;
+        }
+
+        private static List<WeightedEnemy> ProjectWideEnemySet(List<EnemySO> enemies)
+        {
+            var members = new List<WeightedEnemy>();
+            foreach (var enemy in enemies)
+            {
+                if (enemy == null)
+                {
+                    continue;
+                }
+                members.Add(new WeightedEnemy
+                {
+                    Definition = enemy,
+                    Unit = SimUnit.FromEnemy(enemy),
+                    Weight = 1f
+                });
+            }
+            return members;
+        }
+
+        // ------------------------------------------------------------------ simulation
+
+        private static void RunSimulations(BalanceInput input, BalanceRulesSO rules, BalanceReport report)
+        {
+            var settings = new SimSettings
+            {
+                Trials = rules.SimulationTrials,
+                Seed = rules.SimulationSeed,
+                MaxTurns = rules.MaxSimTurns,
+                Combos = input.Combos,
+                PotionCount = report.Party.PotionCount,
+                PotionHealAmount = report.Party.PotionHealAmount
+            };
+
+            // Every enemy on its own: the cleanest read on one asset's difficulty.
+            foreach (var metrics in report.Enemies)
+            {
+                var unit = SimUnit.FromEnemy(metrics.Definition);
+                if (unit == null)
+                {
+                    continue;
+                }
+
+                var simReport = new EncounterSimReport
+                {
+                    Label = $"{metrics.Name} (solo)",
+                    Asset = metrics.Definition,
+                    IsBoss = metrics.IsBoss
+                };
+                simReport.Enemies.Add(unit);
+
+                AssignDrawLoadout(report.Party, simReport.Enemies, report.Save);
+                simReport.Outcomes = EncounterSimulator.RunAllPolicies(report.Party, simReport.Enemies, settings);
+                report.Simulations.Add(simReport);
+            }
+
+            // Each level's hardest expected room, which is where runs actually end.
+            foreach (var run in report.Runs)
+            {
+                foreach (var level in run.Levels)
+                {
+                    RoomEncounter worst = null;
+                    foreach (var room in level.Rooms)
+                    {
+                        if (!room.IsCombatRoom)
+                        {
+                            continue;
+                        }
+                        if (worst == null || room.WorstCaseDanger > worst.WorstCaseDanger)
+                        {
+                            worst = room;
+                        }
+                    }
+
+                    if (worst == null)
+                    {
+                        continue;
+                    }
+
+                    var units = worst.WorstCase.ToDiscreteUnits();
+                    if (units.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    var simReport = new EncounterSimReport
+                    {
+                        Label = $"{run.Name} / {level.Reference} — worst room ({worst.RoomName})",
+                        Asset = run.Run,
+                        IsBoss = level.IsBossLevel && worst.Room == null,
+                        Enemies = units
+                    };
+
+                    AssignDrawLoadout(report.Party, units, report.Save);
+                    simReport.Outcomes = EncounterSimulator.RunAllPolicies(report.Party, units, settings);
+                    report.Simulations.Add(simReport);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gives every simulated hero the magic this encounter's enemies actually offer, which is how
+        /// the game's loop works: you fight with what the fight lets you Draw. Without this the
+        /// simulated party has empty slots, and the attack-spam comparison would only be measuring
+        /// potion use rather than whether magic changes the outcome.
+        ///
+        /// Charges and slot count come from <see cref="EquippedMagicState"/>'s own defaults (plus any
+        /// bonus slots the save has bought), and upgrade levels from the save, so the simulated loadout
+        /// matches what a player at this point could really be holding. Note that the turn a Draw costs
+        /// is not modelled — the loadout is assumed already in hand.
+        /// </summary>
+        private static void AssignDrawLoadout(PartyBaseline party, IList<SimUnit> enemies, SaveAudit save)
+        {
+            if (party == null)
+            {
+                return;
+            }
+
+            int slotCount = EquippedMagicState.DefaultSlotCount + (save != null ? save.BonusMagicSlots : 0);
+
+            var offered = new List<MagicSO>();
+            var seen = new HashSet<string>();
+            foreach (var enemy in enemies)
+            {
+                if (enemy == null || enemy.Definition == null || enemy.Definition.DrawableMagics == null)
+                {
+                    continue;
+                }
+
+                foreach (var draw in enemy.Definition.DrawableMagics)
+                {
+                    if (draw == null || draw.Magic == null)
+                    {
+                        continue;
+                    }
+
+                    string key = string.IsNullOrEmpty(draw.Magic.Key) ? draw.Magic.name : draw.Magic.Key;
+                    if (seen.Add(key) && offered.Count < slotCount)
+                    {
+                        offered.Add(draw.Magic);
+                    }
+                }
+            }
+
+            foreach (var hero in party.Heroes)
+            {
+                if (hero.Unit == null)
+                {
+                    continue;
+                }
+
+                hero.Unit.MagicSlots.Clear();
+                foreach (var magic in offered)
+                {
+                    hero.Unit.MagicSlots.Add(new SimMagicSlot
+                    {
+                        Magic = magic,
+                        Charges = EquippedMagicState.DefaultMaxCharges,
+                        MaxCharges = EquippedMagicState.DefaultMaxCharges,
+                        UpgradeLevel = UpgradeLevelFor(magic, save)
+                    });
+                }
+            }
+        }
+
+        private static int UpgradeLevelFor(MagicSO magic, SaveAudit save)
+        {
+            if (save == null || magic == null)
+            {
+                return 0;
+            }
+
+            string key = string.IsNullOrEmpty(magic.Key) ? magic.name : magic.Key;
+            foreach (var upgrade in save.MagicUpgrades)
+            {
+                if (upgrade.Key == key)
+                {
+                    return upgrade.Level;
+                }
+            }
+            return 0;
+        }
+
+        // ------------------------------------------------------------------ party
+
+        private static void EvaluateParty(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
+        {
+            var party = report.Party;
+            if (party == null || party.Size == 0)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Party, "Party",
+                    "No heroes to analyze")
+                {
+                    Detail = "The analyzer found no HeroSO assets, so nothing can be measured against a party.",
+                    Suggestion = "Check that hero definitions exist under Assets/ScriptableObjects/Heroes."
+                });
+                return;
+            }
+
+            // The single most important ratio in the game: how many ordinary hits a hero survives.
+            foreach (var hero in party.Heroes)
+            {
+                int worstHitsToKill = int.MaxValue;
+                string worstEnemy = "";
+
+                foreach (var metrics in report.Enemies)
+                {
+                    if (metrics.IsBoss)
+                    {
+                        continue;
+                    }
+                    foreach (var record in metrics.PerHero)
+                    {
+                        if (record.HeroName != hero.Name)
+                        {
+                            continue;
+                        }
+                        if (record.HitsToKill < worstHitsToKill)
+                        {
+                            worstHitsToKill = record.HitsToKill;
+                            worstEnemy = metrics.Name;
+                        }
+                    }
+                }
+
+                if (worstHitsToKill == int.MaxValue)
+                {
+                    continue;
+                }
+
+                if (worstHitsToKill <= 1)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Party, hero.Name,
+                        $"{hero.Name} is one-shot by ordinary enemies")
+                    {
+                        Asset = hero.Definition,
+                        Detail = $"{worstEnemy} kills {hero.Name} in a single hit "
+                               + $"({hero.Stats.MaxHealth} max HP). Fights are decided by turn order, not play.",
+                        Suggestion = $"Raise max HP to roughly {SuggestedHeroHealth(hero, report, rules)} "
+                               + $"so a plain hit costs about {(1f / rules.TargetHitsToKillHero):P0} of the bar."
+                    });
+                }
+                else if (worstHitsToKill < rules.MinHitsToKillHero)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Party, hero.Name,
+                        $"{hero.Name} survives only {worstHitsToKill} ordinary hits")
+                    {
+                        Asset = hero.Definition,
+                        Detail = $"Worst case is {worstEnemy}; the target is at least {rules.MinHitsToKillHero} hits.",
+                        Suggestion = $"Raise max HP toward {SuggestedHeroHealth(hero, report, rules)}."
+                    });
+                }
+
+                // A progression that stops immediately is a dead end no amount of stat tuning fixes.
+                if (hero.MaxDefinedLevel <= 1)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, hero.Name,
+                        $"{hero.Name} has no level progression")
+                    {
+                        Asset = hero.Definition,
+                        Detail = "LevelProgression is empty, so this hero can never level up.",
+                        Suggestion = "Add LevelConfiguration entries, or drop XP as a mechanic for this hero."
+                    });
+                }
+                else if (hero.MaxDefinedLevel <= 2)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, hero.Name,
+                        $"{hero.Name} caps at level {hero.MaxDefinedLevel}")
+                    {
+                        Asset = hero.Definition,
+                        Detail = $"Only {hero.MaxDefinedLevel - 1} level-up(s) are configured, so XP stops "
+                               + "mattering almost immediately.",
+                        Suggestion = "Extend LevelProgression to cover the levels the later run content assumes."
+                    });
+                }
+
+                EvaluateLevelUpShape(hero, report);
+            }
+
+            EvaluateHealing(report, rules, input);
+            EvaluateMaxHealthGearMismatch(report, input);
+        }
+
+        /// <summary>
+        /// Flags level-up entries that move a stat by an implausible share of its base — a +5 Agility
+        /// gain on a base of 5 doubles the hero's turn rate in one level, which no other number in the
+        /// game is scaled for.
+        /// </summary>
+        private static void EvaluateLevelUpShape(HeroBaseline hero, BalanceReport report)
+        {
+            if (hero.Definition == null || hero.Definition.LevelProgression == null)
+            {
+                return;
+            }
+
+            foreach (var config in hero.Definition.LevelProgression)
+            {
+                if (config == null)
+                {
+                    continue;
+                }
+
+                CheckGain(hero, report, config.Level, "Agility", config.AgilityGain, hero.Definition.BaseAgility);
+                CheckGain(hero, report, config.Level, "Attack", config.AttackGain, hero.Definition.BaseAttack);
+                CheckGain(hero, report, config.Level, "Defense", config.DefenseGain, hero.Definition.BaseDefense);
+            }
+        }
+
+        private static void CheckGain(HeroBaseline hero, BalanceReport report, int level, string stat, int gain, int baseValue)
+        {
+            if (baseValue <= 0 || gain <= 0)
+            {
+                return;
+            }
+
+            float share = (float)gain / baseValue;
+            if (share < 0.5f)
+            {
+                return;
+            }
+
+            report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, hero.Name,
+                $"Level {level} raises {hero.Name}'s {stat} by {share:P0}")
+            {
+                Asset = hero.Definition,
+                Detail = $"+{gain} on a base of {baseValue}. A single level-up should not reshape a stat this much.",
+                Suggestion = $"Spread the {stat} gain across more levels."
+            });
+        }
+
+        private static void EvaluateHealing(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
+        {
+            var party = report.Party;
+
+            // Potions and heal spells that top a hero straight off have no decision in them.
+            if (input.HealingPotion != null && input.HealingPotion.ConsumableAmount > 0)
+            {
+                foreach (var hero in party.Heroes)
+                {
+                    if (hero.Stats.MaxHealth <= 0)
+                    {
+                        continue;
+                    }
+
+                    float fraction = (float)input.HealingPotion.ConsumableAmount / hero.Stats.MaxHealth;
+                    if (fraction >= rules.MaxSingleHealFraction)
+                    {
+                        var severity = fraction >= 1f ? BalanceSeverity.Warning : BalanceSeverity.Info;
+                        report.Issues.Add(new BalanceIssue(severity, BalanceCategory.Party, hero.Name,
+                            $"One potion restores {fraction:P0} of {hero.Name}'s health")
+                        {
+                            Asset = input.HealingPotion,
+                            Detail = $"{input.HealingPotion.ConsumableAmount} HP against a {hero.Stats.MaxHealth} HP bar.",
+                            Suggestion = "Either raise hero max HP or lower ConsumableAmount so healing is a partial recovery."
+                        });
+                    }
+                }
+            }
+
+            foreach (var magic in input.Magic)
+            {
+                if (magic == null || magic.Effects == null)
+                {
+                    continue;
+                }
+
+                foreach (var effect in magic.Effects)
+                {
+                    if (effect == null || effect.EffectType != SpellEffectType.Heal || effect.Power <= 0)
+                    {
+                        continue;
+                    }
+
+                    foreach (var hero in party.Heroes)
+                    {
+                        if (hero.Stats.MaxHealth <= 0 || effect.Power < hero.Stats.MaxHealth)
+                        {
+                            continue;
+                        }
+
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Party, magic.DisplayName,
+                            $"{magic.DisplayName} heals more than {hero.Name}'s entire health bar")
+                        {
+                            Asset = magic,
+                            Detail = $"Heal power {effect.Power} against {hero.Stats.MaxHealth} max HP — always a full heal.",
+                            Suggestion = "Scale heal power to a fraction of a hero's bar once HP is retuned."
+                        });
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Party.HealAll() fills Stats.MaxHealth, which excludes gear, while the heal cap and HP bar
+        /// read GetEffectiveMaxHealth(). Any +MaxHealth item therefore grants a slice of health the
+        /// party can never actually be healed into at level start.
+        /// </summary>
+        private static void EvaluateMaxHealthGearMismatch(BalanceReport report, BalanceInput input)
+        {
+            foreach (var item in input.Items)
+            {
+                if (item == null || item.Bonuses == null)
+                {
+                    continue;
+                }
+
+                foreach (var bonus in item.Bonuses)
+                {
+                    if (bonus == null || bonus.StatType != StatType.MaxHealth || bonus.Value <= 0f)
+                    {
+                        continue;
+                    }
+
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Party, item.DisplayName,
+                        "+MaxHealth gear is never filled at level start")
+                    {
+                        Asset = item,
+                        Detail = "Party.HealAll() sets Health = Stats.MaxHealth (base only), but the heal cap and "
+                               + "HP bar use GetEffectiveMaxHealth() (base + gear). Heroes start each level short "
+                               + $"by this item's {bonus.Value:0.#} MaxHealth.",
+                        Suggestion = "Have HealAll() heal to GetEffectiveMaxHealth() for heroes."
+                    });
+                    return;
+                }
+            }
+        }
+
+        private static int SuggestedHeroHealth(HeroBaseline hero, BalanceReport report, BalanceRulesSO rules)
+        {
+            // Size the bar so an average non-boss hit costs 1/TargetHitsToKillHero of it.
+            float worstHit = 0f;
+            foreach (var metrics in report.Enemies)
+            {
+                if (metrics.IsBoss)
+                {
+                    continue;
+                }
+                foreach (var record in metrics.PerHero)
+                {
+                    if (record.HeroName == hero.Name && record.DamagePerHit > worstHit)
+                    {
+                        worstHit = record.DamagePerHit;
+                    }
+                }
+            }
+
+            if (worstHit <= 0f)
+            {
+                return hero.Stats.MaxHealth;
+            }
+
+            return Mathf.Max(1, Mathf.RoundToInt(worstHit * rules.TargetHitsToKillHero));
+        }
+
+        // ------------------------------------------------------------------ enemies
+
+        private static void EvaluateEnemies(BalanceReport report, BalanceRulesSO rules)
+        {
+            foreach (var metrics in report.Enemies)
+            {
+                float ceiling = metrics.DangerCeiling(rules);
+
+                if (metrics.SoloDangerIndex >= 1f)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Enemy, metrics.Name,
+                        $"{metrics.Name} beats the party on paper (danger {metrics.SoloDangerIndex:0.00})")
+                    {
+                        Asset = metrics.Definition,
+                        Detail = $"The party needs {metrics.PartyTurnsToKill:0.0} turns to kill it; it needs fewer "
+                               + "to wipe the party. Danger at or above 1.00 means the encounter is lost before "
+                               + "any decisions are made.",
+                        Suggestion = SuggestEnemySoftening(metrics, rules)
+                    });
+                }
+                else if (metrics.SoloDangerIndex > ceiling)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Name,
+                        $"{metrics.Name} is above its danger band ({metrics.SoloDangerIndex:0.00} > {ceiling:0.00})")
+                    {
+                        Asset = metrics.Definition,
+                        Detail = $"{(metrics.IsBoss ? "Boss" : "Trash")} target is {ceiling:0.00}. "
+                               + $"Effective damage per turn {metrics.EffectiveDamagePerTurn:0.0}, "
+                               + $"party turns to kill {metrics.PartyTurnsToKill:0.0}.",
+                        Suggestion = SuggestEnemySoftening(metrics, rules)
+                    });
+                }
+                else if (metrics.SoloDangerIndex < rules.MinMeaningfulDanger && metrics.SoloDangerIndex > 0f)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Name,
+                        $"{metrics.Name} is no threat at all (danger {metrics.SoloDangerIndex:0.000})")
+                    {
+                        Asset = metrics.Definition,
+                        Detail = $"It deals {metrics.EffectiveDamagePerTurn:0.0} per turn and dies in "
+                               + $"{metrics.PartyTurnsToKill:0.0} party turns. It costs the player time, not resources.",
+                        Suggestion = "Raise Attack, or drop it from spawn tables in favour of a real encounter."
+                    });
+                }
+
+                if (metrics.FewestHitsToKillAHero <= 1 && metrics.FewestHitsToKillAHero > 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Enemy, metrics.Name,
+                        $"{metrics.Name} one-shots {metrics.FastestKillTarget}")
+                    {
+                        Asset = metrics.Definition,
+                        Detail = $"Attack {metrics.Definition.Attack} lands "
+                               + $"{FindPerHero(metrics, metrics.FastestKillTarget):0.0} average damage on a hero who "
+                               + "cannot survive one hit.",
+                        Suggestion = "Lower Attack, or raise hero max HP — the HP:damage scale is the root cause."
+                    });
+                }
+
+                float ttkCeiling = metrics.TimeToKillCeiling(rules);
+                if (metrics.PartyTurnsToKill > ttkCeiling)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Name,
+                        $"{metrics.Name} takes {metrics.PartyTurnsToKill:0.0} party turns to kill")
+                    {
+                        Asset = metrics.Definition,
+                        Detail = $"Target ceiling is {ttkCeiling:0.0} turns. Long fights without added pressure read as a slog.",
+                        Suggestion = $"Lower Health toward "
+                               + $"{Mathf.RoundToInt(metrics.Definition.Health * ttkCeiling / Mathf.Max(0.01f, metrics.PartyTurnsToKill))}."
+                    });
+                }
+                else if (metrics.PartyTurnsToKill < rules.MinEnemyTimeToKill && metrics.PartyTurnsToKill > 0f)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy, metrics.Name,
+                        $"{metrics.Name} dies in {metrics.PartyTurnsToKill:0.0} party turns")
+                    {
+                        Asset = metrics.Definition,
+                        Detail = $"Below the {rules.MinEnemyTimeToKill:0.0}-turn floor: it never gets to act meaningfully.",
+                        Suggestion = "Raise Health, or use it only in groups."
+                    });
+                }
+
+                if (metrics.ActionShareVsParty >= 1.5f)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy, metrics.Name,
+                        $"{metrics.Name} acts {metrics.ActionShareVsParty:0.0}x as often as a hero")
+                    {
+                        Asset = metrics.Definition,
+                        Detail = $"Agility {metrics.Definition.Agility} against the party average. Its real threat is "
+                               + "that multiple of what its Attack suggests, and nothing in the inspector shows it.",
+                        Suggestion = "Treat Agility as a damage multiplier when tuning this enemy."
+                    });
+                }
+
+                if (metrics.Definition.XpReward <= 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Economy, metrics.Name,
+                        $"{metrics.Name} awards no XP")
+                    {
+                        Asset = metrics.Definition,
+                        Detail = "XpReward is 0, so killing it cannot advance hero levels.",
+                        Suggestion = "Set an XpReward proportional to its danger."
+                    });
+                }
+            }
+
+            EvaluateRewardSpread(report, rules);
+        }
+
+        private static float FindPerHero(EnemyMetrics metrics, string heroName)
+        {
+            foreach (var record in metrics.PerHero)
+            {
+                if (record.HeroName == heroName)
+                {
+                    return record.DamagePerHit;
+                }
+            }
+            return 0f;
+        }
+
+        private static string SuggestEnemySoftening(EnemyMetrics metrics, BalanceRulesSO rules)
+        {
+            float ceiling = metrics.DangerCeiling(rules);
+            if (metrics.SoloDangerIndex <= 0f || float.IsInfinity(metrics.SoloDangerIndex))
+            {
+                return "Reduce Attack or Health until the danger index falls inside the band.";
+            }
+
+            float scale = ceiling / metrics.SoloDangerIndex;
+            int suggestedAttack = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.Attack * scale));
+            int suggestedHealth = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.Health * scale));
+
+            return $"Either Attack {metrics.Definition.Attack} → {suggestedAttack}, or Health "
+                 + $"{metrics.Definition.Health} → {suggestedHealth} (or split the difference). "
+                 + "Raising hero HP instead fixes it for every enemy at once.";
+        }
+
+        private static void EvaluateRewardSpread(BalanceReport report, BalanceRulesSO rules)
+        {
+            float min = float.MaxValue;
+            float max = 0f;
+            string minName = "";
+            string maxName = "";
+
+            foreach (var metrics in report.Enemies)
+            {
+                if (metrics.IsBoss || metrics.XpPerDanger <= 0f || float.IsInfinity(metrics.XpPerDanger))
+                {
+                    continue;
+                }
+                if (metrics.XpPerDanger < min)
+                {
+                    min = metrics.XpPerDanger;
+                    minName = metrics.Name;
+                }
+                if (metrics.XpPerDanger > max)
+                {
+                    max = metrics.XpPerDanger;
+                    maxName = metrics.Name;
+                }
+            }
+
+            if (min >= float.MaxValue || min <= 0f)
+            {
+                return;
+            }
+
+            float spread = max / min;
+            if (spread > rules.MaxRewardEfficiencySpread)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Economy, "Reward curve",
+                    $"XP per unit of danger varies {spread:0.0}x across enemies")
+                {
+                    Detail = $"{maxName} pays {max:0} XP per danger; {minName} pays {min:0}. "
+                           + $"The band allows {rules.MaxRewardEfficiencySpread:0.0}x.",
+                    Suggestion = $"Scale XpReward with danger — {minName} is underpaying for the risk it carries."
+                });
+            }
+        }
+
+        // ------------------------------------------------------------------ runs and levels
+
+        private static void EvaluateRuns(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
+        {
+            foreach (var run in report.Runs)
+            {
+                if (run.Levels.Count == 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Run, run.Name,
+                        "Run has no levels")
+                    {
+                        Asset = run.Run,
+                        Detail = "The Levels list is empty, so this run cannot be played."
+                    });
+                    continue;
+                }
+
+                foreach (var level in run.Levels)
+                {
+                    EvaluateLevel(run, level, report, rules);
+                }
+
+                for (int i = 0; i < run.DifficultyJumps.Count; i++)
+                {
+                    float jump = run.DifficultyJumps[i];
+                    string from = run.Levels[i].Reference;
+                    string to = run.Levels[i + 1].Reference;
+
+                    if (jump > rules.MaxDifficultyJump)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Run, run.Name,
+                            $"Difficulty spikes {jump:P0} from {from} to {to}")
+                        {
+                            Asset = run.Run,
+                            Detail = $"Attrition load {run.Levels[i].AttritionLoad:0.00} → "
+                                   + $"{run.Levels[i + 1].AttritionLoad:0.00}; the ceiling is {rules.MaxDifficultyJump:P0}.",
+                            Suggestion = "Add an intermediate step, or soften the later level's spawn tables."
+                        });
+                    }
+                    else if (jump < rules.MinDifficultyJump)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Run, run.Name,
+                            $"{to} is no harder than {from} ({jump:P0})")
+                        {
+                            Asset = run.Run,
+                            Detail = $"Attrition load {run.Levels[i].AttritionLoad:0.00} → "
+                                   + $"{run.Levels[i + 1].AttritionLoad:0.00}. A flat curve gives the run no shape.",
+                            Suggestion = "Vary the level templates or spawn tables so each level escalates."
+                        });
+                    }
+                }
+
+                EvaluateRunXpSupply(run, report, input);
+            }
+        }
+
+        private static void EvaluateLevel(RunCurve run, LevelCurve level, BalanceReport report, BalanceRulesSO rules)
+        {
+            string subject = $"{run.Name} / {level.Reference}";
+
+            if (level.ExpectedCombatRooms <= 0f)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Level, subject,
+                    $"{level.Reference} has no combat")
+                {
+                    Asset = run.Run,
+                    Detail = "No room in this level has a populated spawn table."
+                });
+                return;
+            }
+
+            if (level.AttritionMargin < 0f)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Level, subject,
+                    $"{level.Reference} is unclearable on one health bar")
+                {
+                    Asset = run.Run,
+                    Detail = $"Expected cost {level.ExpectedHealthCost:0} HP against a sustain pool of "
+                           + $"{report.Party.SustainPool} (HP {report.Party.HealthPool} + potions "
+                           + $"{report.Party.HealingPool}) across {level.ExpectedCombatRooms:0.0} combat rooms. "
+                           + "Health only refills between levels, so the party runs out mid-level.",
+                    Suggestion = $"Cut expected combat rooms to about "
+                           + $"{level.ExpectedCombatRooms * (1f - rules.MinAttritionMargin) / Mathf.Max(0.01f, level.AttritionLoad):0.0}, "
+                           + "soften the spawn tables, or raise party HP."
+                });
+            }
+            else if (level.AttritionMargin < rules.MinAttritionMargin)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Level, subject,
+                    $"{level.Reference} leaves only {level.AttritionMargin:P0} of the party's resources")
+                {
+                    Asset = run.Run,
+                    Detail = $"Expected cost {level.ExpectedHealthCost:0} HP of a {report.Party.SustainPool} pool; "
+                           + $"the target margin is {rules.MinAttritionMargin:P0}.",
+                    Suggestion = "Reduce room count or spawn density, or add in-level healing."
+                });
+            }
+
+            if (level.PeakWorstCaseDanger >= 1f)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Level, subject,
+                    $"A bad spawn roll in {level.Reference} is unwinnable (worst-case danger {level.PeakWorstCaseDanger:0.00})")
+                {
+                    Asset = run.Run,
+                    Detail = $"Expected peak danger is {level.PeakRoomDanger:0.00}, but every spawn roll landing "
+                           + $"gives {level.PeakWorstCaseDanger:0.00}. Players meet the worst case regularly.",
+                    Suggestion = "Lower SpawnChance or EvaluationCount so the tail is survivable."
+                });
+            }
+
+            if (level.Boss != null && level.BossToTrashRatio > 0f)
+            {
+                if (level.BossToTrashRatio > rules.MaxBossToTrashRatio)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Level, subject,
+                        $"{level.Reference} boss is {level.BossToTrashRatio:0.0}x the level's trash difficulty")
+                    {
+                        Asset = level.Boss,
+                        Detail = $"Boss danger {level.BossDanger:0.00} against an average room of "
+                               + $"{level.BossDanger / Mathf.Max(0.001f, level.BossToTrashRatio):0.00}. "
+                               + $"The band is {rules.MinBossToTrashRatio:0.0}x–{rules.MaxBossToTrashRatio:0.0}x.",
+                        Suggestion = "Nothing in the level prepares the player for this. Soften the boss or "
+                               + "escalate the trash leading to it."
+                    });
+                }
+                else if (level.BossToTrashRatio < rules.MinBossToTrashRatio)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Level, subject,
+                        $"{level.Reference} boss is only {level.BossToTrashRatio:0.0}x the level's trash difficulty")
+                    {
+                        Asset = level.Boss,
+                        Detail = $"A climax should stand out; the floor is {rules.MinBossToTrashRatio:0.0}x.",
+                        Suggestion = "Raise the boss's Health or Attack, or give it adds."
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Does the run actually pay out the XP the hero curve asks for? XP goes to the leader alone
+        /// (Party.AddXpToLeader), so the rest of the party never levels at all — worth stating plainly
+        /// because no amount of stat tuning will surface it.
+        /// </summary>
+        private static void EvaluateRunXpSupply(RunCurve run, BalanceReport report, BalanceInput input)
+        {
+            if (report.Party == null || report.Party.Size == 0)
+            {
+                return;
+            }
+
+            var leader = report.Party.Heroes[0];
+            int xpForNext = HeroStatCalculator.XpToReachLevel(leader.Definition, leader.Level + 1);
+
+            if (xpForNext > 0 && run.TotalExpectedXp < xpForNext)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, run.Name,
+                    $"The whole run pays less XP than one level-up costs")
+                {
+                    Asset = run.Run,
+                    Detail = $"Expected {run.TotalExpectedXp:0} XP across every room; {leader.Name} needs "
+                           + $"{xpForNext} to reach level {leader.Level + 1}.",
+                    Suggestion = "Raise XpReward on enemies, or lower XpRequired on the level curve."
+                });
+            }
+
+            if (report.Party.Size > 1)
+            {
+                var followers = new List<string>();
+                for (int i = 1; i < report.Party.Heroes.Count; i++)
+                {
+                    followers.Add(report.Party.Heroes[i].Name);
+                }
+
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, run.Name,
+                    "Only the party leader gains XP")
+                {
+                    Asset = run.Run,
+                    Detail = $"CombatManager awards kills through Party.AddXpToLeader, so {string.Join(", ", followers)} "
+                           + "never level up however long the run goes.",
+                    Suggestion = "Split XP across the living party, or make the follower's power come from gear instead."
+                });
+            }
+        }
+
+        // ------------------------------------------------------------------ variety
+
+        private static void EvaluateVariety(BalanceReport report, BalanceRulesSO rules)
+        {
+            var variety = report.Variety;
+            if (variety == null || variety.TotalWeight <= 0f)
+            {
+                return;
+            }
+
+            if (variety.DominantArchetypeShare > rules.MaxArchetypeShare)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Variety, variety.Scope,
+                    $"{variety.DominantArchetypeShare:P0} of enemies are {variety.DominantArchetype}")
+                {
+                    Detail = $"The ceiling is {rules.MaxArchetypeShare:P0}. When one archetype dominates, every "
+                           + "fight asks the player the same question.",
+                    Suggestion = "Re-archetype some enemies, or add Bruiser/Healer/Debuffer definitions."
+                });
+            }
+
+            if (variety.ResistanceCoverage < rules.MinResistanceCoverage)
+            {
+                var severity = variety.ResistanceCoverage <= 0f ? BalanceSeverity.Critical : BalanceSeverity.Warning;
+                report.Issues.Add(new BalanceIssue(severity, BalanceCategory.Variety, variety.Scope,
+                    variety.ResistanceCoverage <= 0f
+                        ? "No enemy has any resistance — the elemental layer does nothing"
+                        : $"Only {variety.ResistanceCoverage:P0} of enemies carry a resistance")
+                {
+                    Detail = "DamageCalculator applies resistance before defense, so with no resistances anywhere "
+                           + "every damage type is arithmetically identical. Fire, Ice, Lightning, Holy and Shadow "
+                           + "are decoration, and choosing which magic to cast never depends on the target.",
+                    Suggestion = $"Give at least {rules.MinResistanceCoverage:P0} of enemies a meaningful "
+                           + "resistance (and a weakness) so element choice becomes a real decision."
+                });
+            }
+
+            if (variety.InertDamageTypes.Count > 0)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Variety, variety.Scope,
+                    $"{variety.InertDamageTypes.Count} damage type(s) exist in magic but nothing resists them")
+                {
+                    Detail = $"Inert: {string.Join(", ", variety.InertDamageTypes)}. Spells deal these types but no "
+                           + "enemy in scope resists or is weak to them, so the type never changes an outcome.",
+                    Suggestion = "Add resistances covering these types to some enemies."
+                });
+            }
+
+            if (variety.UnusedDamageTypes.Count > 0)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Variety, variety.Scope,
+                    $"{variety.UnusedDamageTypes.Count} damage type(s) are unused by any magic")
+                {
+                    Detail = $"Unused: {string.Join(", ", variety.UnusedDamageTypes)}.",
+                    Suggestion = "Either author magic that uses them or trim the DamageType enum."
+                });
+            }
+
+            foreach (var overlap in variety.DrawOverlaps)
+            {
+                string a = string.IsNullOrEmpty(overlap.A.DisplayName) ? overlap.A.name : overlap.A.DisplayName;
+                string b = string.IsNullOrEmpty(overlap.B.DisplayName) ? overlap.B.name : overlap.B.DisplayName;
+
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Variety, $"{a} / {b}",
+                    $"{a} and {b} offer {overlap.Share:P0} the same Draw list")
+                {
+                    Asset = overlap.A,
+                    Detail = $"Shared: {string.Join(", ", overlap.SharedMagic)}. Draw variety is what makes two "
+                           + "fights play differently; identical offerings collapse that.",
+                    Suggestion = "Give each enemy a distinctive magic so the player has a reason to fight it."
+                });
+            }
+
+            foreach (var duplicate in variety.DuplicateLootPairs)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Variety, "Loot",
+                    "Several enemies drop the same item")
+                {
+                    Detail = duplicate,
+                    Suggestion = "Vary LootItem so kills feel distinct."
+                });
+            }
+
+            if (variety.EnemiesWithoutDrawList > 0)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Variety, variety.Scope,
+                    $"{variety.EnemiesWithoutDrawList} enemy definition(s) offer no Draw")
+                {
+                    Detail = "Draw is the party's only route to new magic; an enemy with an empty DrawableMagics "
+                           + "list contributes nothing to it.",
+                    Suggestion = "Give every enemy at least one drawable magic."
+                });
+            }
+
+            if (variety.CatalogMagicCount > 0 && variety.DrawCoverage < 0.5f)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Variety, variety.Scope,
+                    $"Only {variety.DistinctDrawableMagic} of {variety.CatalogMagicCount} magics are drawable anywhere")
+                {
+                    Detail = $"{variety.DrawCoverage:P0} coverage — the rest of the catalog is unreachable in play.",
+                    Suggestion = "Spread the catalog across enemy Draw lists."
+                });
+            }
+        }
+
+        // ------------------------------------------------------------------ economy
+
+        private static void EvaluateEconomy(BalanceReport report, BalanceRulesSO rules)
+        {
+            var save = report.Save;
+            float clearsToFirst = save != null
+                ? save.ClearsToFirstUpgrade
+                : (float)MetaProgressManager.MagicUpgradeCostForNextLevel(0) / MetaProgressManager.EssencePerLevelCleared;
+            float clearsToMax = save != null
+                ? save.ClearsToMaxOneMagic
+                : (float)SaveAudit.TotalEssenceToMaxOneMagic() / MetaProgressManager.EssencePerLevelCleared;
+
+            if (clearsToFirst > rules.TargetClearsToFirstUpgrade * 1.5f)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Economy, "Essence",
+                    $"First magic upgrade takes {clearsToFirst:0.0} level-clears")
+                {
+                    Detail = $"{MetaProgressManager.MagicUpgradeCostForNextLevel(0)} Essence at "
+                           + $"{MetaProgressManager.EssencePerLevelCleared} per clear; the target is "
+                           + $"{rules.TargetClearsToFirstUpgrade}.",
+                    Suggestion = "Raise EssencePerLevelCleared or lower the base upgrade cost — the first upgrade "
+                           + "is what teaches the player the meta-loop exists."
+                });
+            }
+
+            if (clearsToMax > rules.MaxClearsToMaxOneMagic)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Economy, "Essence",
+                    $"Maxing one magic takes {clearsToMax:0} level-clears")
+                {
+                    Detail = $"{SaveAudit.TotalEssenceToMaxOneMagic()} Essence total at "
+                           + $"{MetaProgressManager.EssencePerLevelCleared} per clear, and that is for a single "
+                           + $"magic out of the whole catalog. Ceiling in the rules is {rules.MaxClearsToMaxOneMagic}.",
+                    Suggestion = "Intentional grind or not, this is the shape of the Essence economy — worth a "
+                           + "deliberate decision rather than an accident of two constants."
+                });
+            }
+        }
+
+        // ------------------------------------------------------------------ simulation
+
+        private static void EvaluateSimulations(BalanceReport report, BalanceRulesSO rules)
+        {
+            foreach (var simulation in report.Simulations)
+            {
+                var best = simulation.Best;
+                if (best == null || best.Trials == 0)
+                {
+                    continue;
+                }
+
+                if (best.WinRate <= 0f)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Simulation, simulation.Label,
+                        "Party never wins this encounter")
+                    {
+                        Asset = simulation.Asset,
+                        Detail = $"0 wins in {best.Trials} simulated battles under the best policy "
+                               + $"({best.Policy}); average {best.AverageTurns:0.0} turns, "
+                               + $"{best.AverageHeroDeaths:0.0} hero deaths per attempt.",
+                        Suggestion = "This encounter cannot be played around — it has to be retuned."
+                    });
+                }
+                else if (best.WinRate < rules.MinEncounterWinRate)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, simulation.Label,
+                        $"Win rate {best.WinRate:P0} under best play")
+                    {
+                        Asset = simulation.Asset,
+                        Detail = $"{best.Wins}/{best.Trials} wins with policy {best.Policy}; the target floor is "
+                               + $"{rules.MinEncounterWinRate:P0}. Average {best.AverageHeroDeaths:0.0} hero deaths.",
+                        Suggestion = "Soften the encounter, or accept it as an intentional wall."
+                    });
+                }
+                else if (best.WinRate >= 1f && best.AverageEndHealthFraction >= rules.TrivialEndHealthFraction)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Simulation, simulation.Label,
+                        "Encounter is a formality")
+                    {
+                        Asset = simulation.Asset,
+                        Detail = $"Always won, ending at {best.AverageEndHealthFraction:P0} health. It consumes "
+                               + "turns without consuming resources.",
+                        Suggestion = "Raise the threat, or use this enemy only as filler in mixed groups."
+                    });
+                }
+
+                if (simulation.DepthGap <= rules.DominantStrategyTolerance && best.WinRate > 0f)
+                {
+                    var attackOnly = simulation.AttackOnly;
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, simulation.Label,
+                        "Attack-spam plays this fight as well as thinking does")
+                    {
+                        Asset = simulation.Asset,
+                        Detail = $"Attack-only scores {(attackOnly != null ? attackOnly.Score : 0f):0.000} against "
+                               + $"{best.Score:0.000} for the best policy — a gap of {simulation.DepthGap:0.000}, "
+                               + $"inside the {rules.DominantStrategyTolerance:0.000} tolerance. Magic, items and "
+                               + "targeting make no measurable difference here.",
+                        Suggestion = "Give the encounter something attack-spam cannot answer: a resistance that "
+                               + "punishes the wrong element, a healer that must be focused, or a charge that has "
+                               + "to be pre-empted."
+                    });
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------ save
+
+        private static void EvaluateSave(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
+        {
+            var save = report.Save;
+            if (save == null || !save.HasPartySave)
+            {
+                return;
+            }
+
+            foreach (var hero in save.Heroes)
+            {
+                if (hero.Definition == null)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Save, hero.HeroKey,
+                        $"Saved hero '{hero.HeroKey}' has no matching HeroSO")
+                    {
+                        Detail = "The save references a hero key no asset in the project provides, so the party "
+                               + "cannot be rebuilt from it.",
+                        Suggestion = "Restore the hero asset, or clear the save."
+                    });
+                    continue;
+                }
+
+                if (hero.AtMaxDefinedLevel && hero.Xp > 0)
+                {
+                    int wasted = hero.Definition.LevelProgression != null
+                        ? hero.Xp - HeroStatCalculator.XpToReachLevel(hero.Definition, hero.Level)
+                        : hero.Xp;
+
+                    if (wasted > 0)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Save, hero.Name(),
+                            $"{hero.Name()} is capped at level {hero.Level} with {wasted} XP going nowhere")
+                        {
+                            Asset = hero.Definition,
+                            Detail = "No further LevelConfiguration exists, so every kill from here on is wasted XP.",
+                            Suggestion = "Extend the level curve."
+                        });
+                    }
+                }
+            }
+
+            // The question the designed baseline cannot answer: would this save survive the run?
+            if (save.Party != null && save.Party.Size > 0)
+            {
+                foreach (var run in report.Runs)
+                {
+                    if (run.Run == null)
+                    {
+                        continue;
+                    }
+
+                    var realCurve = RunCurve.Build(run.Run, save.Party, rules);
+                    for (int i = 0; i < realCurve.Levels.Count; i++)
+                    {
+                        var level = realCurve.Levels[i];
+                        if (level.ExpectedCombatRooms <= 0f)
+                        {
+                            continue;
+                        }
+
+                        if (level.AttritionMargin < 0f)
+                        {
+                            report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Save,
+                                $"{run.Name} / {level.Reference}",
+                                $"The current save cannot clear {level.Reference}")
+                            {
+                                Asset = run.Run,
+                                Detail = $"Real party (HP {save.Party.HealthPool}, potions {save.Party.PotionCount}) "
+                                       + $"faces an expected cost of {level.ExpectedHealthCost:0} HP — "
+                                       + $"{level.AttritionLoad:0.00}x its whole sustain pool. "
+                                       + $"Save is currently at level index {save.CurrentLevelIndex}.",
+                                Suggestion = "This is where the run ends for this player. Either the level or the "
+                                       + "party's power budget has to move."
+                            });
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Is the player's wallet where the reward model expects it to be?
+            int expectedGold = MetaProgressManager.GoldPerLevelCleared * Mathf.Max(0, save.CurrentLevelIndex);
+            if (save.CurrentLevelIndex > 0 && expectedGold > 0)
+            {
+                float ratio = (float)save.Gold / expectedGold;
+                if (ratio > 3f)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Economy, "Save wallet",
+                        $"Save holds {ratio:0.0}x the Gold the clear model predicts")
+                    {
+                        Detail = $"{save.Gold} Gold against {expectedGold} expected from {save.CurrentLevelIndex} "
+                               + "level-clear(s). Either enemy GoldReward is generous or there is nothing to spend it on.",
+                        Suggestion = "Check the Merchant's prices against this figure."
+                    });
+                }
+            }
+        }
+    }
+
+    /// <summary>Display-name helper so save rows read the same as baseline rows.</summary>
+    internal static class SavedHeroExtensions
+    {
+        public static string Name(this SavedHero hero)
+        {
+            if (hero.Definition != null)
+            {
+                return string.IsNullOrEmpty(hero.Definition.Label) ? hero.Definition.name : hero.Definition.Label;
+            }
+            return hero.HeroKey;
+        }
+    }
+}
