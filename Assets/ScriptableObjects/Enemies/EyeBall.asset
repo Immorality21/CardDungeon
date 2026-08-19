@@ -14,15 +14,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   DisplayName: Floating Eye
   Sprite: {fileID: 21300000, guid: 77f73150858844a8a871d79b104f0900, type: 3}
+  IsBoss: 0
   Attack: 3
   Defense: 1
   Health: 20
   Agility: 5
+  XpReward: 10
+  GoldReward: 5
   Archetype: 0
   DrawableMagics:
-  - Magic: {fileID: 11400000, guid: ead34de402bb4c92918ed84428ea5e70, type: 2}
+  - Magic: {fileID: 11400000, guid: deb21fb233d948bd9cc682419cb51afd, type: 2}
     Charges: 2
-  - Magic: {fileID: 11400000, guid: 2eadbe7f36fe4473b34f4e2b11a452cd, type: 2}
+  - Magic: {fileID: 11400000, guid: 8b88a57198b74076a36370c4a8e2d243, type: 2}
     Charges: 2
-  Resistances: []
+  - Magic: {fileID: 11400000, guid: 41114d713b3e47f89593db976c59b551, type: 2}
+    Charges: 2
+  Resistances:
+  - DamageType: 1
+    Percent: -50
+  - DamageType: 2
+    Percent: 50
   LootItem: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}

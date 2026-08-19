@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
   m_Name: Heal
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Heal
   DisplayName: Heal
   Description: Restores health to yourself.
@@ -20,8 +20,10 @@ MonoBehaviour:
   Rarity: 0
   Effects:
   - EffectType: 1
-    Power: 8
+    Power: 6
     DamageType: 0
     BuffType: 0
     Duration: 3
-  Tags: []
+    UnlockLevel: 0
+  Tags: 
+  TagDuration: 3
