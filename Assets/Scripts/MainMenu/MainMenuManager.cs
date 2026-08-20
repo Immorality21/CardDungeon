@@ -26,12 +26,14 @@ public class MainMenuManager : MonoBehaviour
     private VisualElement _progressView;
     private VisualElement _completeView;
     private VisualElement _merchantView;
+    private VisualElement _tavernView;
     private VisualElement _forgeView;
     private VisualElement _inventoryView;
 
     private Button _continueButton;
     private Button _newRunButton;
     private Button _merchantButton;
+    private Button _tavernButton;
     private Button _forgeButton;
     private Button _inventoryButton;
     private Button _backButton;
@@ -44,6 +46,7 @@ public class MainMenuManager : MonoBehaviour
     private Label _levelName;
 
     private MerchantUI _merchant;
+    private TavernUI _tavern;
     private MagicForgeUI _forge;
     private InventoryHubUI _inventory;
 
@@ -72,12 +75,14 @@ public class MainMenuManager : MonoBehaviour
         _progressView = root.Q<VisualElement>("progress-view");
         _completeView = root.Q<VisualElement>("complete-view");
         _merchantView = root.Q<VisualElement>("merchant-view");
+        _tavernView = root.Q<VisualElement>("tavern-view");
         _forgeView = root.Q<VisualElement>("forge-view");
         _inventoryView = root.Q<VisualElement>("inventory-view");
 
         _continueButton = root.Q<Button>("continue-btn");
         _newRunButton = root.Q<Button>("new-btn");
         _merchantButton = root.Q<Button>("merchant-btn");
+        _tavernButton = root.Q<Button>("tavern-btn");
         _forgeButton = root.Q<Button>("forge-btn");
         _inventoryButton = root.Q<Button>("inventory-btn");
         _backButton = root.Q<Button>("back-btn");
@@ -95,13 +100,19 @@ public class MainMenuManager : MonoBehaviour
         _backButton.clicked += OnBack;
         _returnButton.clicked += OnRunCompleteReturn;
         _merchantButton.clicked += OnVisitMerchant;
+        if (_tavernButton != null)
+        {
+            _tavernButton.clicked += OnVisitTavern;
+        }
         _forgeButton.clicked += OnVisitForge;
         _inventoryButton.clicked += OnVisitInventory;
 
         _merchant = new MerchantUI(_merchantView);
+        _tavern = new TavernUI(_tavernView, _partyRoster);
         _forge = new MagicForgeUI(_forgeView);
         _inventory = new InventoryHubUI(_inventoryView, _partyRoster);
         _merchant.OnClosed += ShowHomePanel;
+        _tavern.OnClosed += ShowHomePanel;
         _forge.OnClosed += ShowHomePanel;
         _inventory.OnClosed += ShowHomePanel;
 
@@ -122,6 +133,7 @@ public class MainMenuManager : MonoBehaviour
         SetShown(_progressView, false);
         SetShown(_completeView, false);
         SetShown(_merchantView, false);
+        SetShown(_tavernView, false);
         SetShown(_forgeView, false);
         SetShown(_inventoryView, false);
 
@@ -197,6 +209,12 @@ public class MainMenuManager : MonoBehaviour
     {
         SetShown(_homeView, false);
         _merchant.Show();
+    }
+
+    private void OnVisitTavern()
+    {
+        SetShown(_homeView, false);
+        _tavern.Show();
     }
 
     private void OnVisitForge()

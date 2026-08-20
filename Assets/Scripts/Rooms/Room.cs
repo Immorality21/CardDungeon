@@ -11,6 +11,13 @@ namespace Assets.Scripts.Rooms
         public List<Door> Doors = new List<Door>();
         public Vector2Int GridPosition;
         public List<Enemy> Enemies = new List<Enemy>();
+
+        /// <summary>
+        /// A captive hero waiting in this room, placed by <c>DungeonManager</c> from
+        /// <c>RunLevelEntry.RescueHero</c>. Non-null means the room offers a Rescue action once the
+        /// room is clear of enemies; cleared back to null the moment they are freed.
+        /// </summary>
+        public Assets.Scripts.Heroes.HeroSO CaptiveHero;
         public int RoomIndex { get; set; }
         public bool IsExplored { get; private set; }
         public bool IsExit { get; set; }

@@ -109,12 +109,17 @@ written. Current party: Warrior 10/5/**13**/5, Tank 5/15/**17**/5, 30 HP pool + 
   with 68 XP going nowhere, and maxing a single magic costs 45 level-clears. Both heroes resolve
   cleanly against the new `HeroSO.Key` values (`Warrior`, `Tank`).
 
-Where the count stands — real analyzer, closed-form, level-1 party, no simulation or save audit:
-**0 critical / 12 warning / 9 info**, from 3 / 12 / 11 before the HP pass. `BalanceRegressionTests`
-is at **7 of 9 green**; the two reds are `RunDifficultyEscalates` (the +234% Tutorial→Test1 spike)
-and `EveryHeroHasSomewhereToLevelTo` (both heroes cap at level 2). Both pre-date the HP pass and
-both are unaffected by it — attrition scales uniformly, so the *ratio* between levels does not
-move. `EveryRunLevelIsClearableOnOneHealthBar` is the test the HP pass turned green.
+Where the count stands — real analyzer, closed-form, no simulation or save audit:
+**0 critical / 5 warning / 11 info**. The path there: 3 / 12 / 11 → 0 / 12 / 9 after the hero-HP
+pass → 0 / 5 / 11 after the solo-start roster rework (§5), which also took
+`BalanceRegressionTests` from 7/9 to **8 of 9 green**. The single red left is
+`EveryHeroHasSomewhereToLevelTo` (the Warrior caps at level 2), which §4 replaces outright.
+
+Two findings closed themselves as a consequence of §5 rather than any tuning: the three
+*no threat at all* enemies (a solo starting party makes trash matter again) and the
+Tutorial→Test1 difficulty spike (+234% → **+27%**, because the level-1 party is one hero and the
+level-2 party is two). The bullets above that describe those problems are kept for the reasoning,
+not as current state.
 
 The 12 open warnings, grouped: three *no threat at all* enemies and `Test3`'s thin margin (above);
 four progression warnings (two heroes capping at level 2, two level-2 Agility doublings of +100%);
@@ -293,11 +298,30 @@ Direction:
 Touch points: `Assets/Scripts/Heroes/LevelConfiguration.cs`, `Hero.cs`, `HeroSO.cs`,
 `HeroSaveData.cs`, `Party.cs` (`AddXpToLeader`), `Assets/Scripts/Balance/RunCurveModel.cs`.
 
-### 5. Roster progression — solo start, then recruit heroes
+### 5. Roster progression — solo start, then recruit heroes — *acquisition* ✅ shipped
 
-Heroes are fixed today: `PartyRosterSO.Heroes` is an authored list of two, both always present, and
-there is no way to acquire one. The plan is to **start with a single hero** and grow the roster over
-time — which turns out to be a difficulty fix as much as a progression feature.
+Implemented on 2026-08-20. `PartyRosterSO` is now the authored **catalog**; ownership lives in
+`PartySaveData.OwnedHeroKeys` behind **`HeroRoster`**, and a new save starts with
+`StartingHeroes` — the **Warrior alone**. Two acquisition routes, as designed below:
+**rescue** (`RunLevelEntry.RescueHero` → a captive in a non-start/non-exit room, freed via the
+room's Rescue action, joining the live party at once, ownership committed only on level clear so
+it is forfeited on death) and the **tavern** (`TavernUI`, a persisted paid-restock offer of
+unowned catalog heroes, priced by `ShopPricing.RecruitPrice`). `TutorialRun` level 0 rescues
+**The Tank**; **Scout** (8/3/10/9, 220g) and **Acolyte** (4/8/19/6, 260g) were added to the
+catalog as the tavern's opening stock. The hub inventory now lists owned heroes only.
+
+**It fixed two balance problems as a side effect.** With the analyzer measuring the *starting*
+party and growing the roster per level, findings went **0 critical / 12 warning / 9 info →
+0 / 5 / 11**, and `BalanceRegressionTests` from 7/9 to **8/9 green**. The three *no threat at
+all* enemies are gone (a solo party makes trash matter again) and `RunDifficultyEscalates` now
+passes, because Tutorial→1 is +27% solo→pair instead of the old +234%. Per-level attrition:
+Tutorial 0.56 (1 hero, sustain 23) → Test1/2 0.71 → Test3 0.93 (2 heroes, sustain 40).
+
+*(Follow-ups: Scout and Acolyte reuse the Warrior's and Tank's sprites and need their own art;
+there is still no party-select step, so every owned hero enters every run — see the open
+decisions below; and the Warrior capping at level 2 is the last regression red, which §4 replaces.)*
+
+The design reasoning that produced this, kept because the numbers still drive the tuning:
 
 #### Start solo, and start with the Warrior
 
@@ -350,25 +374,81 @@ Recommended split: **dungeon rescues are immediate and permanent** and draw from
 **the tavern is where specific or rarer classes are bought.** That keeps luck from deciding builds
 while keeping Gold meaningful, and it stops the two routes competing.
 
-#### Open decisions
+#### Next: party management + even-split XP (the missing half)
 
-- **Owned roster vs. active party.** Recruiting adds to an owned roster; the player then picks who
-  goes on a run under a party-size cap. Needs `PartyRosterSO` split into *authored catalog* vs.
-  *owned + selected* save state (`PartySaveData`), plus a party-select step before run start. The
-  party-size cap is itself a progression unlock (and a Gold sink — extra roster slots).
+The catalog/owned split shipped; **selected** did not. Every owned hero enters every run, so
+recruiting a third halves per-enemy danger again with no way to decline. Two changes, and they only
+work as a pair — the party-size choice is meaningless without a cost attached to going wide.
+
+**1. Party size 1–4, chosen before the run.**
+
+- A **party-select screen** between the hub and *Enter Dungeon*: pick from the owned roster, **min 1,
+  max 4**. Selection is save state (`PartySaveData`, alongside `OwnedHeroKeys`), so it persists
+  between runs and the hub can show who is currently fielded.
+- `DungeonManager.RosterHeroes()` returns the *selected* party rather than everything owned; the
+  owned-but-benched heroes still need their gear managed in the hub, so `InventoryHubUI` keeps
+  listing all owned heroes, not just the fielded ones.
+- The cap should be **earned, not given**: start the cap at 2–3 and sell the 4th slot as a
+  meta-progress unlock (a Gold sink in the spirit of §3's roster slots), so party width is itself a
+  progression axis.
+
+**2. XP splits evenly across the party.**
+
+Today `Party.AddXpToLeader` hands the *entire* kill reward to `Heroes[0]` — the only XP path in the
+game (called once, from `CombatManager` at `CombatManager.cs:991`) — so followers never level at all.
+Replace it with an even split: **each hero in the party receives `xp / partySize`**.
+
+That single change is what makes party size a real decision instead of a straight upgrade:
+
+| Party | Per-enemy danger | XP per hero |
+|---|---|---|
+| 1 hero | ~4× a full party's | 100% of the kill |
+| 2 heroes | ~2× | 50% |
+| 4 heroes | baseline | 25% |
+
+Going wide buys safety and faster clears; going narrow buys **depth** — a solo hero levels four
+times as fast. Neither dominates, which is exactly what the current fixed party lacks. It also
+pairs directly with §4: once XP is a currency spent on sphere-grid nodes, a 4-hero party advances
+each hero's grid at a quarter rate, so "one deep build or four shallow ones" becomes the run's
+defining choice.
+
+Decisions to settle while implementing:
+
+- **The remainder.** Integer division drops XP (7 xp across 4 heroes = 1 each, 3 lost). Either give
+  the remainder to the killer, to the leader, or carry it in a party-level accumulator. Silently
+  dropping it is the one option to avoid — it makes wide parties worse than the table says.
+- **Do downed heroes share?** FFX pays only characters who acted. Excluding the downed adds a nice
+  pressure (keep everyone alive to keep everyone growing) but punishes the tank role; leaning
+  toward paying everyone in the party, alive or not, and keeping death's cost in HP and items.
+- **Does a mid-run rescue dilute the split?** A hero freed on level 1 joins the split immediately,
+  which quietly slows the starter. Probably correct — it is the same trade as recruiting — but worth
+  playing before committing.
+- **Rename the API.** `Party.AddXpToLeader` becomes `AddXp` / `DistributeXp`. The name is quoted in
+  `BalanceAnalyzer` (the *only the party leader gains XP* finding), `SaveAudit`, and the Heroes
+  guide — all three need updating, and that analyzer finding should disappear once the split lands.
+- **Balance bands will move.** The analyzer now models roster growth per level, but it assumes the
+  party is *everyone acquired so far*. With selection, party size becomes a player choice of 1–4, so
+  the honest model is a **range** — report each level at min and max party size, and treat a level
+  as broken only if it fails across the whole band. Expect `BalanceRules` to need a second look:
+  a level tuned for 4 heroes is roughly 4× harder solo.
+
+#### Other open questions
+
 - **Do new hires arrive scaled?** With §4 in place a fresh recruit has no nodes spent, so recruiting
   late costs XP as well as Gold. Either they arrive scaled to progress (recruiting stays viable
   late) or truly from scratch (early recruits are strictly better). Leaning scaled-to-progress,
-  since a hero you cannot afford to level is not a reward.
+  since a hero you cannot afford to level is not a reward. Even-split XP sharpens this: a late hire
+  starts from nothing *and* dilutes everyone else's share.
 - **What happens on death?** A solo start makes hero death run-ending. Decide whether death is
   permanent (roster loss — harsh, and pairs with the §3 safety-net token) or the hero simply
   returns downed.
-- **Balance model.** `PartyBaseline` is built from `PartyRosterSO`, so the analyzer would silently
-  keep measuring against the full authored roster. It needs to model the *expected* roster at each
-  point in the run order — otherwise every finding is measured against a party the player does not
-  have yet.
+- ~~**Balance model measures the wrong party.**~~ ✅ Fixed with the roster rework: `BalanceInput.Heroes`
+  is the starting lineup and `RunCurve` grows the roster per level from each `RunLevelEntry.RescueHero`,
+  recording the `PartySize`/`SustainPool` each level was judged against.
 
-Touch points: `Assets/Scripts/Heroes/PartyRosterSO.cs`, `PartySaveData.cs`, `Party.cs`,
+Touch points: `Assets/Scripts/Heroes/PartyRosterSO.cs`, `PartySaveData.cs`, `Party.cs`
+(`AddXpToLeader` → even split), `Assets/Scripts/Rooms/CombatManager.cs` (the single XP call site),
+`Assets/Scripts/Dungeon/DungeonManager.cs` (`RosterHeroes`), `Assets/Scripts/Balance/RunCurveModel.cs`,
 `Assets/Scripts/MainMenu/` (new `TavernUI` + `MainMenuUISetup`), `Assets/Scripts/Items/ShopPricing.cs`,
 `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Rooms/RoomSO.cs` (rescue room
 kind, with §2), `Assets/Scripts/Balance/PartyBaseline.cs`.

@@ -15,6 +15,14 @@ namespace Assets.Scripts.Heroes
         [Tooltip("Name shown to the player. Safe to rename at any time — it is not a save key.")]
         public string Label;
 
+        [Tooltip("One-line pitch shown when recruiting or rescuing this hero. Flavour plus a hint " +
+                 "at the stat line, since the player is spending gold on a role.")]
+        public string Blurb;
+
+        [Tooltip("Gold the tavern charges to recruit this hero. 0 falls back to a price derived " +
+                 "from the stat line (see ShopPricing.RecruitPrice).")]
+        public int RecruitCost;
+
         public Sprite Sprite;
         public int BaseAttack;
         public int BaseDefense;

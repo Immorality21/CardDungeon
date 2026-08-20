@@ -10,6 +10,7 @@
             <ui:Button name="continue-btn" text="Continue Run" class="cd-menu-button" />
             <ui:Button name="new-btn" text="New Run" class="cd-menu-button" />
             <ui:Button name="merchant-btn" text="Visit Merchant" class="cd-menu-button" />
+            <ui:Button name="tavern-btn" text="The Tavern" class="cd-menu-button" />
             <ui:Button name="forge-btn" text="Magic Forge" class="cd-menu-button" />
             <ui:Button name="inventory-btn" text="Inventory" class="cd-menu-button" />
             <ui:VisualElement class="cd-currency-row">
@@ -53,6 +54,20 @@
 
             <ui:Label name="merchant-feedback" text="" class="cd-feedback" />
             <ui:Button name="merchant-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- TAVERN -->
+        <ui:VisualElement name="tavern-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label text="The Tavern" class="cd-title" />
+            <ui:Label name="tavern-gold" text="Gold: 0" class="cd-info-label" />
+            <ui:Label name="tavern-roster" text="" class="cd-info-label" />
+
+            <ui:Label text="Looking for work" class="cd-subtitle" />
+            <ui:ScrollView name="tavern-list" class="cd-shop-list" mode="Vertical" />
+            <ui:Button name="tavern-restock" text="" class="cd-button cd-button--narrow" />
+
+            <ui:Label name="tavern-feedback" text="" class="cd-feedback" />
+            <ui:Button name="tavern-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- FORGE -->

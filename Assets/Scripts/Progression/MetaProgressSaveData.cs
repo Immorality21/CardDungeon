@@ -37,6 +37,10 @@ namespace Assets.Scripts.Progression
         // sessions and can't be free-rerolled by reopening; refilled when empty or on paid restock.
         public List<string> ShopStock = new List<string>();
 
+        // The tavern's current recruitment offer (hero save keys), persisted for the same reason as
+        // ShopStock: reopening the screen must not re-roll it for free.
+        public List<string> TavernStock = new List<string>();
+
         // Permanent discovery record (survives death). A magic is discovered when first drawn;
         // a combo when first triggered in combat. Drives the Forge's collection grid.
         public List<string> DiscoveredMagicKeys = new List<string>();

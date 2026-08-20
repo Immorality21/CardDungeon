@@ -23,6 +23,7 @@ namespace Assets.Scripts.Items.UI
 
         private readonly VisualElement _root;
         private readonly PartyRosterSO _roster;
+        private List<HeroSO> _ownedHeroes;
 
         private readonly VisualElement _heroesRow;
         private readonly Label _statsLabel;
@@ -110,11 +111,14 @@ namespace Assets.Scripts.Items.UI
             // auto-creates and loads (in Awake) before we read equip/consumable state.
             _ = InventoryManager.Instance;
 
-            // Default to the first roster hero.
+            // Default to the first owned hero. The catalog lists every hero in the game; only the
+            // ones the player has actually acquired get gear slots here.
+            _ownedHeroes = null;
             _selectedHeroKey = null;
-            if (_roster != null && _roster.Heroes.Count > 0 && _roster.Heroes[0] != null)
+            var owned = RosterHeroes();
+            if (owned.Count > 0)
             {
-                _selectedHeroKey = _roster.Heroes[0].SaveKey;
+                _selectedHeroKey = owned[0].SaveKey;
             }
 
             RefreshTabs();
@@ -175,7 +179,7 @@ namespace Assets.Scripts.Items.UI
                 return;
             }
 
-            foreach (var hero in _roster.Heroes)
+            foreach (var hero in RosterHeroes())
             {
                 if (hero == null)
                 {
@@ -190,6 +194,22 @@ namespace Assets.Scripts.Items.UI
             }
         }
 
+        /// <summary>
+        /// The heroes this screen manages: the *owned* subset of the catalog, via
+        /// <see cref="HeroRoster"/>. Cached per Show() because it reads the party save off disk and
+        /// the list is queried on every refresh.
+        /// </summary>
+        private List<HeroSO> RosterHeroes()
+        {
+            if (_ownedHeroes == null)
+            {
+                _ownedHeroes = _roster != null
+                    ? HeroRoster.GetOwnedHeroes(_roster)
+                    : new List<HeroSO>();
+            }
+            return _ownedHeroes;
+        }
+
         private void SelectHero(string heroKey)
         {
             _selectedHeroKey = heroKey;
@@ -200,18 +220,19 @@ namespace Assets.Scripts.Items.UI
 
         private void CycleHero(int delta)
         {
-            if (_roster == null || _roster.Heroes.Count <= 1)
+            var heroes = RosterHeroes();
+            if (heroes.Count <= 1)
             {
                 return;
             }
-            int current = _roster.Heroes.FindIndex(h => h != null && h.SaveKey == _selectedHeroKey);
+            int current = heroes.FindIndex(h => h != null && h.SaveKey == _selectedHeroKey);
             if (current < 0)
             {
                 current = 0;
             }
-            int count = _roster.Heroes.Count;
+            int count = heroes.Count;
             int next = ((current + delta) % count + count) % count;
-            var hero = _roster.Heroes[next];
+            var hero = heroes[next];
             if (hero != null)
             {
                 SelectHero(hero.SaveKey);
@@ -533,7 +554,7 @@ namespace Assets.Scripts.Items.UI
             {
                 return null;
             }
-            return _roster.Heroes.Find(h => h != null && h.SaveKey == heroKey);
+            return RosterHeroes().Find(h => h != null && h.SaveKey == heroKey);
         }
 
         private void ShowEmpty(string message)

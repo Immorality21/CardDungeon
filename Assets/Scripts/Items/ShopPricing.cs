@@ -37,6 +37,31 @@ namespace Assets.Scripts.Items
             return Mathf.Max(1, Mathf.RoundToInt(BuyPrice(item) * SellFraction));
         }
 
+        /// <summary>
+        /// Gold the tavern charges for <paramref name="hero"/>. Uses the authored
+        /// <c>HeroSO.RecruitCost</c> when set; otherwise derives one from the stat line so a hero
+        /// added to the catalog is immediately hireable without also needing a price. The weights
+        /// mirror the balance model's view that a point of Attack or Agility is worth more than a
+        /// point of HP.
+        /// </summary>
+        public static int RecruitPrice(Assets.Scripts.Heroes.HeroSO hero)
+        {
+            if (hero == null)
+            {
+                return 0;
+            }
+            if (hero.RecruitCost > 0)
+            {
+                return hero.RecruitCost;
+            }
+
+            float score = hero.BaseAttack * 12f
+                        + hero.BaseDefense * 8f
+                        + hero.BaseHealth * 4f
+                        + hero.BaseAgility * 10f;
+            return Mathf.Max(25, Mathf.RoundToInt(score / 5f) * 5);
+        }
+
         private static int RarityBaseCost(ItemRarity rarity)
         {
             switch (rarity)

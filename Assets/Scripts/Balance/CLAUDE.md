@@ -102,6 +102,8 @@ Runs are ordered by `RunDefinitionSO.SequenceIndex`. Runs are **not chained in g
 with margin; at 1 the fight is decided by turn order; above 1 it is lost on paper. Agility-aware on
 both sides, so a fast enemy's hidden threat shows up.
 
+**The party is not fixed across a run.** `BalanceInput.Heroes` is the roster's **starting lineup** (`PartyRosterSO.StartingLineup()`), not every `HeroSO` in the project — heroes are acquired by rescue or recruitment, so judging level 1 against a fully-recruited roster would understate every number. `RunCurve.Build` then grows the roster level by level from each `RunLevelEntry.RescueHero`, rebuilding the `PartyBaseline` per level; a hero freed *during* a level counts only from the next one (the conservative reading). Each `LevelCurve` records the `PartySize` and `SustainPool` it was measured against, and the findings quote those rather than the run-wide baseline. Note the save audit still resolves against the **full** catalog, since a save can reference any hero.
+
 **Attrition load** = a level's expected HP cost ÷ the party's HP + potion pool. This is the metric
 that ends runs, because `Party.HealAll()` only fires when a fresh dungeon is entered — within a level
 health is a consumable resource. At or above 1.00 the level cannot be cleared, whatever the per-room

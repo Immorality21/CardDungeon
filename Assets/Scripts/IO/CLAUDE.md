@@ -3,10 +3,10 @@
 `FileHandler` reads/writes JSON; every save type implements `IWriteable.GetFileName()`. The deferred commit/discard lifecycle (what's held in memory during a dungeon vs. written on clear/death) is documented in `Assets/Scripts/Dungeon/CLAUDE.md`.
 
 - **Save location:** `Application.persistentDataPath/savedata/` (JSON via `FileHandler`)
-- **Party.json:** Only `HeroKey` + `CurrentXp` per hero. Stats are derived at runtime. **Only written on level completion** (not during dungeon play). `HeroKey` is `HeroSO.SaveKey` (the `Key` field, **not** `Label`) — see the Heroes guide.
+- **Party.json:** `HeroKey` + `CurrentXp` per hero, plus `OwnedHeroKeys` — the heroes the player owns (see the Heroes guide; `HeroRoster` migrates saves that predate the field by treating the XP list as the roster). Stats are derived at runtime. **Only written on level completion** (not during dungeon play). `HeroKey` is `HeroSO.SaveKey` (the `Key` field, **not** `Label`) — see the Heroes guide.
 - **Run.json:** `RunKey` + `CurrentLevelIndex` + `ActiveDungeonSeed`. Deleted on death or run completion.
-- **Dungeon saves (`Dungeon_{seed}.json`):** Seed, level key, room explored state, enemy counts, resource amounts, used cards. Deleted on level completion or death.
+- **Dungeon saves (`Dungeon_{seed}.json`):** Seed, level key, room explored state, enemy counts, resource amounts, used cards. Written immediately on dungeon generation (`DungeonManager.SpawnFreshDungeon`), deleted on level completion or death. **Orphans accumulate by design:** running `MainGameScene` directly generates a random playtest dungeon, and stopping play mode leaves its file behind; only the seed in `Run.json`'s `ActiveDungeonSeed` is ever resumable, so the rest are unreachable. Do **not** add an automatic reaper keyed on `ActiveDungeonSeed` — it would delete playtest dungeons. (`DungeonSaveManager.LoadAll()` enumerates them and currently has no callers.)
 - **CardCollection.json:** all owned cards with hero assignments. Persisted immediately (not deferred).
 - **ItemCollection.json:** item collection with equipped slots per hero. **Deferred during dungeon play** — committed on level completion, reloaded from disk on death.
 - **ResourceMaximums.json:** per-`PartyResourceType` maximums (e.g. healing-potion cap). Persisted globally.
-- **Meta.json:** Gold, Essence, and per-card upgrade levels. Persisted **immediately** on every change, so it survives party death (unlike XP/inventory). See the Progression guide.
+- **Meta.json:** Gold, Essence, per-card upgrade levels, the merchant's `ShopStock` and the tavern's `TavernStock`. Persisted **immediately** on every change, so it survives party death (unlike XP/inventory). See the Progression guide.

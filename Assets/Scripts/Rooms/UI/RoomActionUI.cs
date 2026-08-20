@@ -43,6 +43,7 @@ namespace Assets.Scripts.Rooms
 
         private Button _examineBtn;
         private Button _actionBtn;
+        private Button _rescueBtn;
         private Button _fightBtn;
         private Button _fleeBtn;
         private Button _optionBack;
@@ -125,6 +126,7 @@ namespace Assets.Scripts.Rooms
 
             _examineBtn = root.Q<Button>("examine-btn");
             _actionBtn = root.Q<Button>("action-btn");
+            _rescueBtn = root.Q<Button>("rescue-btn");
             _fightBtn = root.Q<Button>("fight-btn");
             _fleeBtn = root.Q<Button>("flee-btn");
             _optionBack = root.Q<Button>("option-back");
@@ -135,6 +137,10 @@ namespace Assets.Scripts.Rooms
 
             _examineBtn.clicked += OnExamine;
             _actionBtn.clicked += OnAction;
+            if (_rescueBtn != null)
+            {
+                _rescueBtn.clicked += OnRescue;
+            }
             _fightBtn.clicked += OnFight;
             _fleeBtn.clicked += OnFlee;
             _optionBack.clicked += OnBack;
@@ -144,7 +150,7 @@ namespace Assets.Scripts.Rooms
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _examineBtn, _actionBtn, _fightBtn, _fleeBtn, _optionBack, _detailOk, _victoryContinue, _optionScroll })
+            foreach (var focusable in new Focusable[] { _examineBtn, _actionBtn, _rescueBtn, _fightBtn, _fleeBtn, _optionBack, _detailOk, _victoryContinue, _optionScroll })
             {
                 if (focusable != null)
                 {
@@ -186,6 +192,9 @@ namespace Assets.Scripts.Rooms
             bool hasEnemy = room.Enemies.Any(e => e != null && e.IsAlive);
             SetShown(_combatBar, hasEnemy);
             SetShown(_mainBar, !hasEnemy);
+
+            // A captive is only reachable once the room is clear - guards first.
+            SetShown(_rescueBtn, !hasEnemy && room.CaptiveHero != null);
 
             // Boss rooms: announce the boss and remove Flee — the climax can't be skipped.
             var boss = room.Enemies.FirstOrDefault(e => e != null && e.IsAlive && e.IsBoss);
@@ -300,6 +309,62 @@ namespace Assets.Scripts.Rooms
             SetShown(_optionWindow, false);
             _optionScroll.Clear();
             SetShown(_mainBar, true);
+        }
+
+        /// <summary>
+        /// Frees the captive in this room. Two beats on purpose: the first panel introduces who they
+        /// are (the player has only seen a tinted portrait), the second confirms they have joined -
+        /// so a permanent reward is not a single unread popup.
+        /// </summary>
+        private void OnRescue()
+        {
+            var captive = _currentRoom != null ? _currentRoom.CaptiveHero : null;
+            if (captive == null)
+            {
+                SetShown(_rescueBtn, false);
+                return;
+            }
+
+            SetShown(_mainBar, false);
+
+            string blurb = string.IsNullOrEmpty(captive.Blurb)
+                ? "They look ready to fight."
+                : captive.Blurb;
+
+            ShowDetail("A Prisoner",
+                $"{captive.DisplayName} is bound here. {blurb}\n\nFree them?");
+
+            _detailOkAction = () =>
+            {
+                SetShown(_detailWindow, false);
+
+                if (!DungeonManager.Instance.TryRescueCaptive(_currentRoom))
+                {
+                    SetShown(_mainBar, true);
+                    SetShown(_rescueBtn, false);
+                    return;
+                }
+
+                SetShown(_rescueBtn, false);
+                if (FloatingTextHandler.HasInstance)
+                {
+                    FloatingTextHandler.Instance.CreateFloatingText(
+                        GameManager.Instance.Party.transform.position,
+                        $"{captive.DisplayName} joined!",
+                        Color.cyan);
+                }
+
+                ShowDetail($"{captive.DisplayName} joins you",
+                    $"{captive.DisplayName} takes up arms alongside the party.\n\n"
+                    + "They are yours for good once this level is cleared - fall here and they are "
+                    + "lost with the rest of the run.");
+                _detailOkAction = () =>
+                {
+                    SetShown(_detailWindow, false);
+                    SetShown(_mainBar, true);
+                    RefreshPartyStatus();
+                };
+            };
         }
 
         // ============================================================

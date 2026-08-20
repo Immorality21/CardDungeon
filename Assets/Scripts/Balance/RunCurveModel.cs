@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Rooms;
 using UnityEngine;
@@ -43,6 +44,15 @@ namespace Assets.Scripts.Balance
 
         public float ExpectedXp;
         public float ExpectedGold;
+
+        /// <summary>Heroes in the party entering this level. Roster growth makes this vary per level.</summary>
+        public int PartySize;
+
+        /// <summary>HP + healing the party brings into this level — the denominator of AttritionLoad.</summary>
+        public int SustainPool;
+
+        /// <summary>Hero acquired during this level, if the run entry defines a rescue.</summary>
+        public HeroSO RescuedHere;
 
         public bool IsBossLevel => Boss != null;
 
@@ -97,6 +107,18 @@ namespace Assets.Scripts.Balance
                 return curve;
             }
 
+            // The party is not fixed across a run: a level can hand over a rescued hero, and each
+            // hero added roughly halves per-enemy danger while raising the sustain pool. Measuring
+            // every level against the starting party would overstate the back half's difficulty.
+            var roster = new List<HeroSO>();
+            foreach (var hero in party.Heroes)
+            {
+                if (hero.Definition != null && !roster.Contains(hero.Definition))
+                {
+                    roster.Add(hero.Definition);
+                }
+            }
+
             for (int i = 0; i < run.Levels.Count; i++)
             {
                 var entry = run.Levels[i];
@@ -104,7 +126,24 @@ namespace Assets.Scripts.Balance
                 {
                     continue;
                 }
-                curve.Levels.Add(BuildLevel(i, entry, party, rules));
+
+                // Level 0 reuses the caller's baseline so gear/save options are honoured; later
+                // levels are rebuilt from the grown roster.
+                var levelParty = i == 0
+                    ? party
+                    : PartyBaseline.Build(roster, rules.ReferenceHeroLevel, null,
+                        party.PotionItem, party.PotionCount);
+
+                var level = BuildLevel(i, entry, levelParty, rules);
+                level.RescuedHere = entry.RescueHero;
+                curve.Levels.Add(level);
+
+                // A hero freed *during* a level only helps for part of it, so they count from the
+                // next level on — the conservative reading.
+                if (entry.RescueHero != null && !roster.Contains(entry.RescueHero))
+                {
+                    roster.Add(entry.RescueHero);
+                }
             }
 
             foreach (var level in curve.Levels)
@@ -301,6 +340,8 @@ namespace Assets.Scripts.Balance
                 : 0f;
 
             int sustain = party.SustainPool;
+            level.PartySize = party.Size;
+            level.SustainPool = sustain;
             level.AttritionLoad = sustain > 0 ? level.ExpectedHealthCost / sustain : 0f;
         }
     }

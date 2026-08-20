@@ -900,6 +900,14 @@
     color: var(--cd-text-dark);
 }
 
+.cd-shop-row__sub {
+    font-size: 11px;
+    -unity-font-style: italic;
+    color: var(--cd-text-dark);
+    opacity: 0.75;
+    white-space: normal;
+}
+
 .cd-shop-row__btn {
     flex-shrink: 0;
     min-width: 96px;

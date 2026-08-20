@@ -7,6 +7,7 @@
         <ui:VisualElement name="main-bar" class="cd-bar cd-dock-bottom cd-hidden">
             <ui:Button name="examine-btn" text="Examine" class="cd-cmd" />
             <ui:Button name="action-btn" text="Action" class="cd-cmd" />
+            <ui:Button name="rescue-btn" text="Rescue" class="cd-cmd cd-hidden" />
         </ui:VisualElement>
 
         <!-- Enemies present: start or flee -->

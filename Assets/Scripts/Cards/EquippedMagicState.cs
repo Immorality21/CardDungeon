@@ -43,6 +43,24 @@ namespace Assets.Scripts.Cards
             }
         }
 
+        /// <summary>
+        /// Gives a hero who joined after <see cref="Initialize"/> their own empty slots - a captive
+        /// freed mid-dungeon has no entry yet, and without one they can neither draw nor cast.
+        /// No-op if they already have slots.
+        /// </summary>
+        public void AddHero(Hero hero, int slotCount)
+        {
+            if (hero == null || string.IsNullOrEmpty(hero.HeroKey))
+            {
+                return;
+            }
+            if (_heroSlots.ContainsKey(hero.HeroKey))
+            {
+                return;
+            }
+            _heroSlots[hero.HeroKey] = CreateEmptySlots(slotCount > 0 ? slotCount : _slotCount);
+        }
+
         private static List<MagicSlot> CreateEmptySlots(int count)
         {
             var slots = new List<MagicSlot>(count);

@@ -34,11 +34,23 @@ namespace Assets.Scripts.Dungeon
         [Tooltip("Healing-potion consumable topped up to the belt cap on each fresh dungeon entry.")]
         private ItemSO _healingPotion;
 
+        /// <summary>
+        /// The heroes that actually enter the dungeon: the *owned* subset of the roster catalog, not
+        /// every authored hero. A fresh save starts with <c>PartyRosterSO.StartingHeroes</c> only and
+        /// grows by rescuing captives or recruiting at the tavern. Falls back to the inline
+        /// definitions when no roster is wired (free-play in the scene).
+        /// </summary>
         private List<HeroSO> RosterHeroes()
         {
-            return _partyRoster != null && _partyRoster.Heroes.Count > 0
-                ? _partyRoster.Heroes
-                : _heroDefinitions;
+            if (_partyRoster != null && _partyRoster.Heroes.Count > 0)
+            {
+                var owned = HeroRoster.GetOwnedHeroes(_partyRoster);
+                if (owned.Count > 0)
+                {
+                    return owned;
+                }
+            }
+            return _heroDefinitions;
         }
 
         private RoomActionUI _roomActionUI;
@@ -161,6 +173,7 @@ namespace Assets.Scripts.Dungeon
             // Spawn enemies with manual overrides
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom, layout.Rooms);
             PlaceBossIfConfigured(rooms);
+            PlaceCaptiveIfConfigured(rooms, startRoom);
 
             // Check for saved state to resume
             DungeonSaveData saveData = null;
@@ -232,6 +245,7 @@ namespace Assets.Scripts.Dungeon
             // Step 5: Spawn enemies
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom);
             PlaceBossIfConfigured(rooms);
+            PlaceCaptiveIfConfigured(rooms, startRoom);
 
             if (saveData != null)
             {
@@ -421,6 +435,126 @@ namespace Assets.Scripts.Dungeon
             EnemyManager.Instance.ClearRoomEnemies(exitRoom);
             EnemyManager.Instance.SpawnSingle(boss, exitRoom);
         }
+
+        /// <summary>
+        /// If the active run's current level defines a captive hero the player does not already own,
+        /// puts them in one room off the critical endpoints. Skips the start room (a free hero on
+        /// turn one is not a discovery) and the exit room (entering a cleared exit ends the level, so
+        /// the player would never get the chance to act). Must run after the exit room is designated.
+        ///
+        /// Placement is deliberately random among the remaining rooms: on a generated level the
+        /// captive may sit off the path and be missed, which is the intended risk. Hand-authored
+        /// levels guarantee the find by shape - every room in the tutorial layout is on the route.
+        /// </summary>
+        private void PlaceCaptiveIfConfigured(List<Room> rooms, Room startRoom)
+        {
+            if (ActiveRun == null || RunLevelIndex < 0 || RunLevelIndex >= ActiveRun.Levels.Count)
+            {
+                return;
+            }
+
+            var captive = ActiveRun.Levels[RunLevelIndex].RescueHero;
+            if (captive == null)
+            {
+                return;
+            }
+
+            // Already recruited (rescued before, or bought at the tavern) - nothing to find.
+            if (_partyRoster != null && HeroRoster.Owns(_partyRoster, captive))
+            {
+                return;
+            }
+
+            var candidates = rooms
+                .Where(r => r != null && r != startRoom && !r.IsExit && !r.RoomSO.IsConnectorRoom)
+                .ToList();
+
+            if (candidates.Count == 0)
+            {
+                Debug.LogWarning($"Captive {captive.DisplayName} configured but no eligible room was found; not placed.");
+                return;
+            }
+
+            var room = candidates[Random.Range(0, candidates.Count)];
+            room.CaptiveHero = captive;
+            PlaceCaptiveMarker(room, captive);
+        }
+
+        /// <summary>
+        /// Shows the captive in the room using their own portrait, so the room reads as holding
+        /// someone without needing bespoke cage art. Tinted down to suggest captivity and to keep it
+        /// distinct from the hero sprites that appear during combat fan-out.
+        /// </summary>
+        private void PlaceCaptiveMarker(Room room, HeroSO captive)
+        {
+            if (captive.Sprite == null)
+            {
+                return;
+            }
+
+            var markerObj = new GameObject("Captive");
+            markerObj.transform.SetParent(room.transform, false);
+            var center = room.GetCenter();
+            center.z = -0.5f;
+            markerObj.transform.position = center;
+
+            var sr = markerObj.AddComponent<SpriteRenderer>();
+            sr.sprite = captive.Sprite;
+            sr.sortingOrder = 2;
+            sr.color = new Color(0.55f, 0.55f, 0.7f, 1f);
+            _captiveMarkers[room] = markerObj;
+        }
+
+        /// <summary>
+        /// Frees the captive in <paramref name="room"/>: they join the live party at once so the
+        /// rescue pays off in this level's remaining fights, and ownership is recorded *deferred* -
+        /// written only when the level is cleared, so dying loses them along with the run's XP and
+        /// loot. Returns false when there was nobody to free.
+        /// </summary>
+        public bool TryRescueCaptive(Room room)
+        {
+            if (room == null || room.CaptiveHero == null || Party == null)
+            {
+                return false;
+            }
+
+            var captive = room.CaptiveHero;
+            var hero = Party.AddHero(captive);
+            if (hero == null)
+            {
+                // Already in the party somehow - clear the marker so it cannot be re-triggered.
+                room.CaptiveHero = null;
+                RemoveCaptiveMarker(room);
+                return false;
+            }
+
+            Party.MarkOwnedDeferred(captive);
+            room.CaptiveHero = null;
+            RemoveCaptiveMarker(room);
+
+            // Give the newcomer their own magic slots, or they cannot cast anything this run.
+            if (MagicState != null)
+            {
+                MagicState.AddHero(hero, GetMagicSlotCount());
+            }
+
+            Debug.Log($"Rescued {captive.DisplayName}; party is now {Party.Heroes.Count} strong.");
+            return true;
+        }
+
+        private void RemoveCaptiveMarker(Room room)
+        {
+            if (_captiveMarkers.TryGetValue(room, out var marker))
+            {
+                if (marker != null)
+                {
+                    Destroy(marker);
+                }
+                _captiveMarkers.Remove(room);
+            }
+        }
+
+        private readonly Dictionary<Room, GameObject> _captiveMarkers = new Dictionary<Room, GameObject>();
 
         private void PlaceExitMarker(Room room)
         {

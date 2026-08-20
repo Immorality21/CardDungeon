@@ -403,6 +403,31 @@ namespace Assets.Scripts.Progression
         // --- Merchant gear stock (item keys) ---
 
         /// <summary>The merchant's current gear stock (item keys). Never null.</summary>
+        // --- Tavern stock (hero save keys) ------------------------------------
+
+        public List<string> GetTavernStock()
+        {
+            return _saveData.TavernStock ?? (_saveData.TavernStock = new List<string>());
+        }
+
+        public void SetTavernStock(List<string> heroKeys)
+        {
+            _saveData.TavernStock = heroKeys ?? new List<string>();
+            Save();
+        }
+
+        public void RemoveFromTavernStock(string heroKey)
+        {
+            if (_saveData.TavernStock == null || string.IsNullOrEmpty(heroKey))
+            {
+                return;
+            }
+            if (_saveData.TavernStock.Remove(heroKey))
+            {
+                Save();
+            }
+        }
+
         public List<string> GetShopStock()
         {
             return _saveData.ShopStock ?? (_saveData.ShopStock = new List<string>());

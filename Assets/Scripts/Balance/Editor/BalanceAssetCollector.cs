@@ -23,10 +23,22 @@ namespace Assets.Scripts.Balance.Editor
             var heroes = FindAll<HeroSO>();
             var items = FindAll<ItemSO>();
 
+            // Measure against the *starting* party. Every hero asset in the project is not the
+            // party: heroes are acquired by rescue or recruitment, so judging level 1 against a
+            // fully-recruited roster would understate every danger and attrition number.
+            var roster = FindAll<Assets.Scripts.Heroes.PartyRosterSO>();
+            var startingParty = roster.Count > 0 && roster[0] != null
+                ? roster[0].StartingLineup()
+                : heroes;
+            if (startingParty.Count == 0)
+            {
+                startingParty = heroes;
+            }
+
             var input = new BalanceInput
             {
                 Rules = rules,
-                Heroes = heroes,
+                Heroes = startingParty,
                 Enemies = FindAll<EnemySO>(),
                 Runs = FindAll<RunDefinitionSO>(),
                 Magic = FindAll<MagicSO>(),

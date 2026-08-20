@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
+  m_Name: Scout
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.HeroSO
+  Key: Scout
+  Label: Scout
+  Blurb: Fast and fragile - strikes twice for every swing the Warrior takes.
+  RecruitCost: 220
+  Sprite: {fileID: 21300000, guid: b2ddfcceaadefd6f5add82a8c4549a7a, type: 3}
+  BaseAttack: 8
+  BaseDefense: 3
+  BaseHealth: 10
+  BaseAgility: 9
+  LevelProgression:
+  - Level: 2
+    XpRequired: 100
+    AttackGain: 2
+    DefenseGain: 1
+    HealthGain: 5
+    AgilityGain: 2

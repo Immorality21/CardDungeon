@@ -852,8 +852,8 @@ namespace Assets.Scripts.Balance
                 {
                     Asset = run.Run,
                     Detail = $"Expected cost {level.ExpectedHealthCost:0} HP against a sustain pool of "
-                           + $"{report.Party.SustainPool} (HP {report.Party.HealthPool} + potions "
-                           + $"{report.Party.HealingPool}) across {level.ExpectedCombatRooms:0.0} combat rooms. "
+                           + $"{level.SustainPool} ({level.PartySize} hero(es) + potions) across "
+                           + $"{level.ExpectedCombatRooms:0.0} combat rooms. "
                            + "Health only refills between levels, so the party runs out mid-level.",
                     Suggestion = $"Cut expected combat rooms to about "
                            + $"{level.ExpectedCombatRooms * (1f - rules.MinAttritionMargin) / Mathf.Max(0.01f, level.AttritionLoad):0.0}, "
@@ -866,8 +866,8 @@ namespace Assets.Scripts.Balance
                     $"{level.Reference} leaves only {level.AttritionMargin:P0} of the party's resources")
                 {
                     Asset = run.Run,
-                    Detail = $"Expected cost {level.ExpectedHealthCost:0} HP of a {report.Party.SustainPool} pool; "
-                           + $"the target margin is {rules.MinAttritionMargin:P0}.",
+                    Detail = $"Expected cost {level.ExpectedHealthCost:0} HP of a {level.SustainPool} pool "
+                           + $"({level.PartySize} hero(es)); the target margin is {rules.MinAttritionMargin:P0}.",
                     Suggestion = "Reduce room count or spawn density, or add in-level healing."
                 });
             }
