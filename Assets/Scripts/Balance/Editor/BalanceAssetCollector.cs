@@ -43,7 +43,7 @@ namespace Assets.Scripts.Balance.Editor
             {
                 foreach (var hero in heroes)
                 {
-                    if (hero != null && hero.Label == key)
+                    if (hero != null && hero.SaveKey == key)
                     {
                         return hero;
                     }

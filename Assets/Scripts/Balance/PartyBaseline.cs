@@ -18,9 +18,7 @@ namespace Assets.Scripts.Balance
         public List<ItemSO> Gear = new List<ItemSO>();
         public SimUnit Unit;
 
-        public string Name => Definition != null
-            ? (string.IsNullOrEmpty(Definition.Label) ? Definition.name : Definition.Label)
-            : "(none)";
+        public string Name => Definition != null ? Definition.DisplayName : "(none)";
 
         /// <summary>Fraction of incoming damage this hero's defense removes.</summary>
         public float DefenseReduction => BalanceMath.DefenseReduction(Stats.Defense);
@@ -133,7 +131,7 @@ namespace Assets.Scripts.Balance
                 hero.Unit = new SimUnit
                 {
                     DisplayName = hero.Name,
-                    HeroKey = definition.Label,
+                    HeroKey = definition.SaveKey,
                     IsHero = true,
                     Stats = new Rooms.Stats(effective.Attack, effective.Defense, effective.MaxHealth, effective.Agility),
                     EffectiveAttack = effective.Attack,

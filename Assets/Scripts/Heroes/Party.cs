@@ -30,11 +30,11 @@ namespace Assets.Scripts.Heroes
 
             foreach (var heroSO in heroDefinitions)
             {
-                var heroObj = new GameObject(heroSO.Label);
+                var heroObj = new GameObject(heroSO.DisplayName);
                 heroObj.transform.SetParent(transform, false);
                 var hero = heroObj.AddComponent<Hero>();
 
-                var savedHero = _saveData.Heroes.Find(h => h.HeroKey == heroSO.Label);
+                var savedHero = _saveData.Heroes.Find(h => h.HeroKey == heroSO.SaveKey);
                 if (savedHero != null)
                 {
                     hero.InitializeFromSave(heroSO, savedHero.CurrentXp);

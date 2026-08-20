@@ -114,7 +114,7 @@ namespace Assets.Scripts.Items.UI
             _selectedHeroKey = null;
             if (_roster != null && _roster.Heroes.Count > 0 && _roster.Heroes[0] != null)
             {
-                _selectedHeroKey = _roster.Heroes[0].Label;
+                _selectedHeroKey = _roster.Heroes[0].SaveKey;
             }
 
             RefreshTabs();
@@ -181,8 +181,8 @@ namespace Assets.Scripts.Items.UI
                 {
                     continue;
                 }
-                var key = hero.Label;
-                var btn = new Button(() => SelectHero(key)) { text = hero.Label };
+                var key = hero.SaveKey;
+                var btn = new Button(() => SelectHero(key)) { text = hero.DisplayName };
                 btn.AddToClassList("cd-tab");
                 btn.EnableInClassList("cd-tab--active", key == _selectedHeroKey);
                 btn.focusable = false;
@@ -204,7 +204,7 @@ namespace Assets.Scripts.Items.UI
             {
                 return;
             }
-            int current = _roster.Heroes.FindIndex(h => h != null && h.Label == _selectedHeroKey);
+            int current = _roster.Heroes.FindIndex(h => h != null && h.SaveKey == _selectedHeroKey);
             if (current < 0)
             {
                 current = 0;
@@ -214,7 +214,7 @@ namespace Assets.Scripts.Items.UI
             var hero = _roster.Heroes[next];
             if (hero != null)
             {
-                SelectHero(hero.Label);
+                SelectHero(hero.SaveKey);
             }
         }
 
@@ -533,7 +533,7 @@ namespace Assets.Scripts.Items.UI
             {
                 return null;
             }
-            return _roster.Heroes.Find(h => h != null && h.Label == heroKey);
+            return _roster.Heroes.Find(h => h != null && h.SaveKey == heroKey);
         }
 
         private void ShowEmpty(string message)

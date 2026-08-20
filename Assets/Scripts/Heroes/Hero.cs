@@ -16,8 +16,8 @@ namespace Assets.Scripts.Heroes
                  "GetEffectiveResistances().")]
         public List<Resistance> Resistances = new List<Resistance>();
 
-        public string HeroKey => HeroSO != null ? HeroSO.Label : "";
-        public string DisplayName => HeroKey;
+        public string HeroKey => HeroSO != null ? HeroSO.SaveKey : "";
+        public string DisplayName => HeroSO != null ? HeroSO.DisplayName : "";
         public Sprite Icon => HeroSO != null ? HeroSO.Sprite : null;
         public bool IsAlive => Stats != null && Stats.Health > 0;
         public bool IsHero => true;

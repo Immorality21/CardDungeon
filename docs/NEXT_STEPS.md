@@ -41,22 +41,41 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
 
 ### 0. Act on the balance findings (highest priority)
 
-The analyzer is in place; **its findings are not yet fixed.** Measured against the level-1 party
-(Warrior 10/5/**5**/5, Tank 5/15/**7**/5, 12 HP pool + 2 potions):
+The analyzer is in place; **most of its findings are still open.** The numbers below were
+re-measured on 2026-08-20 against the level-1 party — the earlier figures in this section had gone
+stale, because both the Abyssal Warden's Attack and the hero bars had been edited since they were
+written. Current party: Warrior 10/5/**13**/5, Tank 5/15/**17**/5, 30 HP pool + 2 potions (sustain 40).
 
-- **Hero HP is on the same scale as per-hit damage** — the root cause of nearly everything below.
-  Dragon two-shots the Warrior; the Abyssal Warden one-shots it (6.4 avg damage into a 5 HP bar), and
-  its ×1.6 signature AoE lands **11.8 on a 5 HP hero**. Healthy design is HP ≈ 5–10× a plain hit;
-  we are at ~0.7×. Raising hero HP fixes every enemy at once, which no per-enemy tuning can.
-- **Boss danger index 5.20** (band ceiling 1.40): the party needs ~18.7 turns to kill the Warden and
-  survives ~3.6. Trash sits at a healthy 0.22 — the boss, not the trash, is the outlier. The boss is
-  **22× the level's average room**, against a 1.8–6× band, and the simulator wins **0 of 200** battles
-  against it (party wiped in ~7.3 turns, both heroes dead, under all three policies).
-- **`TutorialRun` levels 2–4 are unclearable on one health bar** — attrition load 1.35× / 1.35× /
-  4.16× of the party's HP + potion pool (`HealAll()` only fires on entering a fresh dungeon, so HP is
-  a level-scoped resource). 15 rooms from a 4-room pool means ~11.25 combat rooms per level against a
-  22 HP sustain pool.
-- **Curve shape is +151%, 0%, +208%** — two spikes past the 75% ceiling around a flat middle.
+- ~~**Hero HP is on the same scale as per-hit damage.**~~ ✅ Fixed. Hero bars went 6/8 → **13/17**
+  (`HeroSO.BaseHealth`; level-2 `HealthGain` scaled 3/4 → 7/9 to keep the same ~50%-of-base step).
+  13 is the analyzer's own `SuggestedHeroHealth` — worst ordinary hit × `TargetHitsToKillHero`; the
+  Tank is set higher so its role reads. Every ordinary enemy lands 2.14 average damage, so the
+  Warrior now survives **7 hits** and the Tank **8**, against a floor of 3 and a target of 6. This
+  cleared all three *unclearable level* criticals, all three *bad spawn roll is unwinnable*
+  warnings (worst-case danger 1.30 → under 1.00), the *Heal heals more than the Warrior's entire
+  bar* warning, and both *potion* findings. Verified in-editor against the real analyzer:
+  **3 critical / 12 warning / 11 info → 0 critical / 12 warning / 9 info** (four warnings fixed,
+  four new ones opened — see the next bullet).
+- **Nothing is a threat on its own any more — the flip side of the HP fix.** Cinder Imp, Dragon and
+  Hex Weaver now sit at solo danger 0.043–0.068, under the 0.08 *no threat at all* floor, and
+  Cinder Imp / Dragon / Hex Weaver die in 1.0 / 1.2 / 1.9 party-turns against a 2-turn floor. The
+  cause is that **every enemy in the game has `Attack: 3`**, which after the defense curve rounds to
+  2 damage against *both* heroes — so the Tank's 15 Defense (a 43% reduction) buys literally nothing
+  over the Warrior's 5. Enemy Attack is the next lever, and it is blocked (see below).
+- **Room count is the gate on everything else.** `TestTemplate` generates **25 rooms** from a 4-room
+  pool → ~12.5 combat rooms per level, and `HealAll()` only fires on entering a fresh dungeon, so HP
+  is a level-scoped resource. That room count is what forces enemy damage to stay trivial: modelled
+  at the current 12.5 rooms, raising every enemy's Attack to put trash back inside its danger band
+  (×4–×5, Attack 12–15) takes attrition to **3.8–4.7×** the sustain pool. The three levers are
+  coupled — hero HP ↓ danger, enemy Attack ↑ attrition, room count ↑ attrition — so **room counts
+  have to come down before enemy Attack can come up.** Left alone here deliberately: it is level
+  design, not a stat tweak.
+- **`Test3` still leaves only 7% of the party's resources** (attrition 0.93 against a 0.80 ceiling).
+  It is the one level the HP pass could not pull into band, and it is a room-count problem —
+  inflating HP further to fix it only pushes more enemies under the threat floor.
+- **Curve shape is +234%, 0%, +31%** — the Tutorial→Test1 jump is 3× the +75% ceiling and
+  Test1→Test2 is flat, because Test1/2/3 all share `TestTemplate`. Three levels from one template is
+  the actual cause; the curve cannot escalate while it is the same level three times.
 - ~~**The elemental layer is inert.**~~ ✅ Fixed. Every enemy now carries one weakness and one
   resistance at ±50%, in elements the player can actually draw: Floating Eye (weak Fire / resists Ice),
   Dragon (resists Fire / weak Ice), Abyssal Warden (resists Fire / weak Lightning). Resistance is applied
@@ -69,22 +88,50 @@ The analyzer is in place; **its findings are not yet fixed.** Measured against t
   share a magic any more. *(Follow-up: `Tutorial` now unlocks 70% of the catalog at once — both trash types
   are in its room pool — so the unlocks are front-loaded and the tool flags it. Loot is still duplicated
   between Floating Eye and the Warden.)*
-- **2 of 3 enemies are still `Aggressor`** — the archetype mix has not been touched.
-- **Healing has no texture.** `Heal` power 8 and the potion's 5 HP both exceed a hero's whole bar.
-- **Progression dead-ends at level 2** (one `LevelConfiguration` each, +1/+2 HP), its Agility gain of
+- **The boss is in band, the trash is not.** Abyssal Warden: solo danger 0.72 against a 1.40
+  ceiling, 9.0 party-turns to kill against a 20-turn ceiling, and **4.3×** the level's average trash
+  room (band 1.8–6×). Its ×1.6 signature AoE lands 4.29 on the Warrior and 3.22 on the Tank — no
+  longer a one-shot. The boss no longer needs softening; the trash around it needs sharpening.
+- **4 of 7 enemies are `Aggressor`** — Stone Sentinel (Bruiser), Bog Shaman (Healer) and Hex Weaver
+  (Debuffer) added a mix, but the archetype share is still the majority.
+- **A bad spawn roll is still unwinnable on paper** — Cavern at a full roll (Stone Sentinel + 2
+  Cinder Imps) reads worst-case danger **1.30** on every generated level.
+- ~~**Healing has no texture.**~~ ✅ Fixed by the HP pass. The 5 HP potion is now 38% of the
+  Warrior's bar and 29% of the Tank's (ceiling 60%), and `Heal` at power 6 is 46% / 35%.
+- **Progression dead-ends at level 2** (one `LevelConfiguration` each, now +7/+9 HP), its Agility gain of
   +5 on a base of 5 doubles turn rate in one level, and **only the leader gains XP**
   (`Party.AddXpToLeader`), so the Tank never levels at all.
 - **Fights have no decisions in them.** The simulator scores attack-spam against competent play:
   Floating Eye has a depth gap of **0.000** (magic, items and targeting change nothing), and the
   Dragon is flagged a formality — always won at full health, in 2 turns.
-- **Save audit agrees.** The live save (Gold 1321, Essence 25) has the Warrior capped at level 2 with
-  50 XP going nowhere, and would **die on Test3**. Maxing a single magic costs 45 level-clears.
+- **Save audit.** Re-run after the HP pass: the live save (Gold 1363, Essence 30) no longer **dies on
+  Test3** — that finding is gone. What remains is *informational*: the Warrior is capped at level 2
+  with 68 XP going nowhere, and maxing a single magic costs 45 level-clears. Both heroes resolve
+  cleanly against the new `HeroSO.Key` values (`Warrior`, `Tank`).
 
-Baseline as of the analyzer landing: **7 critical / 15 warning / 6 info** closed-form, rising to
-**10 / 16 / 9** with simulation and the save audit enabled.
+Where the count stands — real analyzer, closed-form, level-1 party, no simulation or save audit:
+**0 critical / 12 warning / 9 info**, from 3 / 12 / 11 before the HP pass. `BalanceRegressionTests`
+is at **7 of 9 green**; the two reds are `RunDifficultyEscalates` (the +234% Tutorial→Test1 spike)
+and `EveryHeroHasSomewhereToLevelTo` (both heroes cap at level 2). Both pre-date the HP pass and
+both are unaffected by it — attrition scales uniformly, so the *ratio* between levels does not
+move. `EveryRunLevelIsClearableOnOneHealthBar` is the test the HP pass turned green.
 
-Fix order that unblocks the most at once: hero HP scale → level room counts → boss → resistances →
-level curve → XP distribution. `BalanceRegressionTests` goes green as these land.
+The 12 open warnings, grouped: three *no threat at all* enemies and `Test3`'s thin margin (above);
+four progression warnings (two heroes capping at level 2, two level-2 Agility doublings of +100%);
+*only the party leader gains XP*; *+MaxHealth gear is never filled at level start* (`HealAll()` sets
+base MaxHealth while the bar uses `GetEffectiveMaxHealth()`, so geared heroes start every level
+short); `Tutorial` unlocking 60% of the magic catalog at once; and the Tutorial→Test1 spike.
+
+Revised fix order, now that HP is done: **level room counts → enemy Attack → per-level templates
+(curve shape) → archetype mix → XP distribution.** Room counts come first because they gate the
+enemy-Attack pass, and enemy Attack is what makes the elemental and Draw layers matter — at 2 damage
+a hit, no resistance or combo can change a decision.
+
+> **Verification note.** These numbers come from `BalanceAnalyzer` itself, run in-editor over the
+> real assets via the Unity MCP, and the `BalanceRegressionTests` predicates were evaluated against
+> that same report. **Not** re-measured: the simulator (win rates, depth gaps) and the save audit,
+> both of which were left off for speed. Open `Tools ▸ Balance ▸ Balance Analyzer` with simulation
+> enabled to fill those in.
 
 *(Also worth deciding before hand-tuning: whether enemy difficulty stays hand-authored per `EnemySO`
 or scales from data (a per-`RunLevelEntry` multiplier or an enemy tier + curve). Retuning by hand now
@@ -124,7 +171,9 @@ player by design - the plan is discovery-gated reveal only, no static display.
 - **Worst-case spawn rolls.** Cavern at a full roll (Stone Sentinel + 2 Cinder Imps) reads a worst-case
   danger of 1.30 - survivable in simulation (100% win rate) but over the 1.00 line on the closed-form model.
 - **`EnemySO` has no stable `Key`.** Needed before discovery-gated reveal can persist "player has seen this
-  enemy resists Fire"; keying off `DisplayName` breaks the moment a name is edited.
+  enemy resists Fire"; keying off `DisplayName` breaks the moment a name is edited. `HeroSO` now has the
+  pattern to copy: a `Key` field plus a `SaveKey` property that falls back to the display name, so existing
+  saves keep resolving while the display name becomes free to rename.
 - **Loot is still duplicated** between Floating Eye and the Abyssal Warden.
 - **Holy and Shadow** are unused by any magic and unresisted by anything - the analyzer reports them, and
   they are free slots if a later biome wants an element of its own.
@@ -208,3 +257,118 @@ Touch points: `Assets/Scripts/Rooms/RoomSO.cs`, `Assets/Scripts/Rooms/UI/RoomAct
 
 Touch points: `Assets/Scripts/MainMenu/MerchantUI.cs`, `Assets/Scripts/Items/ShopPricing.cs`,
 `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Cards/UI/MagicForgeUI.cs`.
+
+### 4. Hero progression → FFX-style sphere grid (design + implementation)
+
+Replace bare levelling with a **spend-XP-on-nodes** grid, so growth is a build decision instead
+of an automatic stat drip. Today `LevelConfiguration` is a flat table (`Level`, `XpRequired`,
+`AttackGain`/`DefenseGain`/`HealthGain`/`AgilityGain`) applied automatically on level-up, there is
+exactly one entry per hero (progression dead-ends at level 2 — see §0), and **only the leader earns
+XP** (`Party.AddXpToLeader`), so the Tank never grows at all.
+
+Direction:
+
+- **XP becomes a currency, not a threshold.** No auto stat gains; XP is banked per hero and spent
+  to activate nodes. Decide whether XP stays per-hero or becomes a party-wide pool (party-wide
+  sidesteps the leader-only XP bug and lets the player choose who to invest in).
+- **Grid data model.** A `SphereGridSO` (nodes + edges) with `SphereNodeSO`-style entries: stat
+  nodes (+Attack/+Defense/+Health/+Agility), and later ability/magic-slot/resistance nodes so the
+  grid can gate content, not just numbers. Nodes activate only when adjacent to an activated node,
+  which is what makes the layout meaningful.
+- **Shared vs. per-hero grid.** FFX uses one grid with per-character start positions. A single
+  shared grid with different entry points is cheaper to author and creates natural
+  "Warrior can eventually reach the Tank's branch" moments; per-hero grids are simpler but
+  multiply authoring.
+- **Persistence.** `HeroSaveData` currently stores only `HeroKey` + `CurrentXp`; it needs an
+  activated-node list (node keys, so renames don't wipe builds — same stable-`Key` problem noted
+  for `EnemySO` in §0b-2). Stats stay **derived** at runtime from `HeroSO` base + activated nodes,
+  matching the existing save-data design (nothing computed is persisted).
+- **UI.** A hub screen to view the grid and spend XP (UI Toolkit, editor-built refs). Pan/zoom over
+  a node graph is a real chunk of work — worth scoping a simple branch-list view as step 1 before
+  a true 2D grid.
+- **Interaction with the balance model.** The analyzer's party power currently comes from
+  `LevelConfiguration`; `RunCurveModel`/`EncounterSimulator` will need a way to model "party at
+  N spent XP" instead of "party at level N". Expect `BalanceRules` bands to need revisiting.
+
+Touch points: `Assets/Scripts/Heroes/LevelConfiguration.cs`, `Hero.cs`, `HeroSO.cs`,
+`HeroSaveData.cs`, `Party.cs` (`AddXpToLeader`), `Assets/Scripts/Balance/RunCurveModel.cs`.
+
+### 5. Roster progression — solo start, then recruit heroes
+
+Heroes are fixed today: `PartyRosterSO.Heroes` is an authored list of two, both always present, and
+there is no way to acquire one. The plan is to **start with a single hero** and grow the roster over
+time — which turns out to be a difficulty fix as much as a progression feature.
+
+#### Start solo, and start with the Warrior
+
+Measured on 2026-08-20 (closed-form model, post-HP-pass assets):
+
+| Start | HP / sustain | trash solo danger | boss danger | boss party-turns |
+|---|---|---|---|---|
+| Warrior + Tank (today) | 30 / 40 | 0.028–0.089 | 0.34 | 9.0 |
+| **Warrior solo** | 13 / 23 | **0.123–0.429** | **0.80** | 6.8 |
+| Tank solo | 17 / 27 | 0.106–0.471 | 1.23 | 13.5 |
+| *bands* | | *0.08 – 0.45* | *≤ 1.40* | *≤ 20* |
+
+The second party member is what makes the current trash trivial. **Solo Warrior puts every ordinary
+enemy back inside its danger band** — without touching a single `EnemySO` — and leaves the boss a
+real but winnable climax at 0.80. This is the cheapest available fix for the *no threat at all*
+findings in §0, and it comes free with a feature we want anyway.
+
+The Warrior is the right solo start over the Tank on three counts: the Tank's boss fight is a
+13.5-turn slog at danger 1.23 (nearly the 1.40 ceiling), its attrition is already 0.92 in the
+*tutorial* level, and the Warrior is already `Heroes[0]` — the `Leader`, and the only hero
+`Party.AddXpToLeader` ever pays. Starting solo makes that leader-only-XP bug *moot* instead of
+exposing it, which buys time for §4.
+
+**Roster size is therefore the game's real difficulty dial** — each hero added roughly halves
+per-enemy danger, since it adds both a health bar and a turn's worth of damage. Two consequences:
+level/enemy difficulty has to be authored against *expected roster size at that point*, not against
+a fixed party (this is the "hand-authored vs. scales-from-data" decision §0 flagged, and roster
+growth is the strongest argument for data-driven scaling); and the boss is the one enemy that
+partly self-corrects, because `BossBehavior`'s party-wide signature makes
+`AverageOffenseMultiplier` grow with party size (0.9 solo → 1.3 at two → 1.7 at three).
+
+**Blocked on the same thing as everything else:** a solo party's attrition is 2.09–2.46 against the
+current ~12.5 combat rooms per level. Room counts have to come down first (§0).
+
+#### Two unlock routes, doing different jobs
+
+Use both, but give each a distinct job rather than two doors to the same thing:
+
+- **Tavern = the reliable, paid route.** A rotating, persisted, paid-restock offer of recruitable
+  `HeroSO`s in the hub, priced by class/rarity — reuse the `ShopPricing` + persisted-stock pattern
+  the Merchant already established rather than inventing a second one. You *choose* who, and it is
+  always available if you banked the Gold. This is the headline Gold sink §3 is missing, and the
+  floor under roster growth: no run is ever a dead end.
+- **Dungeon rescue = the free, random route.** A caged/captive hero as the payload of a non-combat
+  room kind, which is exactly what §2 needs — non-combat rooms currently have no mechanical
+  consequence, and a *permanent* reward is the strongest reason to take a risky detour off the
+  critical path. You do not choose who; that is the point.
+
+Recommended split: **dungeon rescues are immediate and permanent** and draw from the common classes;
+**the tavern is where specific or rarer classes are bought.** That keeps luck from deciding builds
+while keeping Gold meaningful, and it stops the two routes competing.
+
+#### Open decisions
+
+- **Owned roster vs. active party.** Recruiting adds to an owned roster; the player then picks who
+  goes on a run under a party-size cap. Needs `PartyRosterSO` split into *authored catalog* vs.
+  *owned + selected* save state (`PartySaveData`), plus a party-select step before run start. The
+  party-size cap is itself a progression unlock (and a Gold sink — extra roster slots).
+- **Do new hires arrive scaled?** With §4 in place a fresh recruit has no nodes spent, so recruiting
+  late costs XP as well as Gold. Either they arrive scaled to progress (recruiting stays viable
+  late) or truly from scratch (early recruits are strictly better). Leaning scaled-to-progress,
+  since a hero you cannot afford to level is not a reward.
+- **What happens on death?** A solo start makes hero death run-ending. Decide whether death is
+  permanent (roster loss — harsh, and pairs with the §3 safety-net token) or the hero simply
+  returns downed.
+- **Balance model.** `PartyBaseline` is built from `PartyRosterSO`, so the analyzer would silently
+  keep measuring against the full authored roster. It needs to model the *expected* roster at each
+  point in the run order — otherwise every finding is measured against a party the player does not
+  have yet.
+
+Touch points: `Assets/Scripts/Heroes/PartyRosterSO.cs`, `PartySaveData.cs`, `Party.cs`,
+`Assets/Scripts/MainMenu/` (new `TavernUI` + `MainMenuUISetup`), `Assets/Scripts/Items/ShopPricing.cs`,
+`Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Rooms/RoomSO.cs` (rescue room
+kind, with §2), `Assets/Scripts/Balance/PartyBaseline.cs`.

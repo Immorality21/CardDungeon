@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Card Dungeon is a 2D procedural dungeon generation game built with **Unity 2022.3.43f1 LTS** and **C#**. It generates grid-based dungeons with interconnected rooms, doors, and configurable room types via ScriptableObjects. Features a turn-based combat system inspired by Final Fantasy X's CTB (Conditional Turn-Based) system, with an FFVIII-style **Draw** ability system — extract magic from enemies mid-combat, equip it into charge-based slots, and cast it — featuring tag combos, buffs/debuffs, and elemental damage types, plus a persistent between-run hub economy (Gold/Essence).
+Card Dungeon is a 2D procedural dungeon generation game built with **Unity 6 (6000.5.8f1)** and **C#**. It generates grid-based dungeons with interconnected rooms, doors, and configurable room types via ScriptableObjects. Features a turn-based combat system inspired by Final Fantasy X's CTB (Conditional Turn-Based) system, with an FFVIII-style **Draw** ability system — extract magic from enemies mid-combat, equip it into charge-based slots, and cast it — featuring tag combos, buffs/debuffs, and elemental damage types, plus a persistent between-run hub economy (Gold/Essence).
 
 ## Roadmap
 
@@ -12,7 +12,7 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 
 ## Build & Run
 
-- **Unity version:** 2022.3.43f1 (must match exactly)
+- **Unity version:** 6000.5.8f1 (Unity 6; must match exactly)
 - **Solution file:** `Card Dungeon.sln` (Visual Studio or Rider)
 - **Menu scene:** `Assets/Scenes/MenuScene.unity`
 - **Game scene:** `Assets/Scenes/MainGameScene.unity`

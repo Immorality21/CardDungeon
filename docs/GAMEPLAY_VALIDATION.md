@@ -83,6 +83,20 @@ Hard-won gotchas (each cost a failed compile until learned):
     "The referenced script (Unknown) is missing!" warning. Recover the GUID from git
     (`git show HEAD:path.cs.meta`), grep `*.unity`/`*.prefab` for it, then clean with
     `GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go)` and save the scene.
+11. **No nested classes.** The tool's pre-parser lifts a nested `private class` out to namespace
+    scope and then fails on it (`CS1527: Elements defined in a namespace cannot be explicitly
+    declared as private`). Declare helper types as *separate top-level* `internal` classes
+    alongside `CommandScript` — several top-level classes in one command is fine.
+12. **You cannot observe an EditMode test run from inside a command.** `TestRunnerApi.Execute`
+    triggers a domain reload that destroys the sandbox assembly, so your `ICallbacks` object dies
+    before `RunFinished` and the console comes back empty. To check the balance suite headlessly,
+    run `BalanceAnalyzer` directly and evaluate `BalanceRegressionTests`' predicates against the
+    returned `report.Issues` — same logic, one command, no reload. (See
+    `Assets/Scripts/Balance/CLAUDE.md`.)
+13. **To A/B a ScriptableObject value without touching the asset**, `Object.Instantiate` it, mutate
+    the clone, swap it into the input (e.g. `BalanceInput.Heroes`), analyse, then
+    `Object.DestroyImmediate` the clone. Mutating the asset instance returned by
+    `AssetDatabase.LoadAssetAtPath` risks writing the change to disk.
 
 ---
 

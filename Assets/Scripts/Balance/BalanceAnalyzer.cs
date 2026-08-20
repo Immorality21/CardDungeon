@@ -1416,7 +1416,7 @@ namespace Assets.Scripts.Balance
         {
             if (hero.Definition != null)
             {
-                return string.IsNullOrEmpty(hero.Definition.Label) ? hero.Definition.name : hero.Definition.Label;
+                return hero.Definition.DisplayName;
             }
             return hero.HeroKey;
         }

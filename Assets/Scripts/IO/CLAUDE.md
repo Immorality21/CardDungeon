@@ -3,7 +3,7 @@
 `FileHandler` reads/writes JSON; every save type implements `IWriteable.GetFileName()`. The deferred commit/discard lifecycle (what's held in memory during a dungeon vs. written on clear/death) is documented in `Assets/Scripts/Dungeon/CLAUDE.md`.
 
 - **Save location:** `Application.persistentDataPath/savedata/` (JSON via `FileHandler`)
-- **Party.json:** Only `HeroKey` + `CurrentXp` per hero. Stats are derived at runtime. **Only written on level completion** (not during dungeon play).
+- **Party.json:** Only `HeroKey` + `CurrentXp` per hero. Stats are derived at runtime. **Only written on level completion** (not during dungeon play). `HeroKey` is `HeroSO.SaveKey` (the `Key` field, **not** `Label`) — see the Heroes guide.
 - **Run.json:** `RunKey` + `CurrentLevelIndex` + `ActiveDungeonSeed`. Deleted on death or run completion.
 - **Dungeon saves (`Dungeon_{seed}.json`):** Seed, level key, room explored state, enemy counts, resource amounts, used cards. Deleted on level completion or death.
 - **CardCollection.json:** all owned cards with hero assignments. Persisted immediately (not deferred).

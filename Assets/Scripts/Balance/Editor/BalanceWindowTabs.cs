@@ -1013,7 +1013,7 @@ namespace Assets.Scripts.Balance.Editor
                         : BalanceSeverity.Ok;
 
                 EditorGUILayout.BeginHorizontal();
-                BalanceGui.AssetCell(hero.Definition, hero.Definition != null ? hero.Definition.Label : hero.HeroKey,
+                BalanceGui.AssetCell(hero.Definition, hero.Definition != null ? hero.Definition.DisplayName : hero.HeroKey,
                     NameWidth, severity);
                 BalanceGui.Cell(hero.Xp.ToString(), MetricWidth);
                 BalanceGui.Cell(hero.Level.ToString(), StatWidth);
