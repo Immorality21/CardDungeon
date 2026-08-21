@@ -245,6 +245,67 @@ Turn rooms into real *kinds* so the dungeon becomes a series of decisions:
 - Consider path/branch choice at the dungeon-generation level (`RoomManager`) so players pick
   *which* rooms to enter, trading safety for reward.
 
+#### Examine / Action as stat-driven risk vs. reward
+
+The single highest-leverage piece of the above, because the buttons already exist and are already
+in the player's hands — they just do nothing. Today `RoomSO.ExamineOptions` / `ActionOptions` are
+`List<string>` and `RoomActionUI.OnAction` pipes the chosen string straight to `ShowDetail`. Turn
+each option into a **gamble the party's stats resolve**.
+
+The shape:
+
+> *You see a musty old tome, thick with spider webs. Reaching in looks like a **slight risk**.*
+> → *Pick it up* / *Leave it.* Resolved against **Intelligence** — succeed and you keep the tome;
+> fail and something in the webs bites back (damage + Poison for the level).
+
+- **Options become data, not strings.** A `RoomEventSO` (or a serialisable `RoomOption` on `RoomSO`)
+  carrying: prompt text, the choice labels, and per-outcome effects with weights. Effects should
+  reuse what exists rather than inventing a parallel system — `IEffectExecutor` /
+  `EffectResolver` already apply damage, heals, buffs and debuffs, and `LootRoller` already rolls
+  rarity/depth-scaled drops. An event outcome is then just "run these effects on these targets"
+  plus an optional loot roll.
+- **A stat sets the odds, and *which* stat is part of the event's identity.** Each event names the
+  stat it is resolved against, so the fiction and the check match: **Agility** for acrobatics (jump
+  the lava pit, scale the collapsed stair), **Intelligence** for knowledge (decipher the ancient
+  runes, identify the tome), **Spirit** for anything consecrated or cursed, **Luck** as the
+  catch-all for blind risk, and the physical stats where force is the answer (**Attack** to force a
+  seized door, **Defense** to shoulder through a cave-in). See §6 for the stats themselves.
+  Still to decide: **whose** value is used — the leader's, the party best, or the party sum.
+  Party-best is the most interesting, because it makes bringing a specialist worth a party slot and
+  gives every hero in the roster a reason to exist beyond combat throughput.
+- **Failure costs, it does not end the run — and the currency varies by event type.** The outcome
+  pool draws from: **damage** (lands on a level-scoped HP pool, so 30% of a bar is a real attrition
+  decision), a **debuff that lasts the level**, **spawning enemies** (the noise wakes something —
+  turns a safe room into a fight you did not choose), **losing a consumable**, and a **wasted turn**
+  equivalent. Which of those are eligible should depend on the event: a lava pit deals damage, a
+  disturbed tomb spawns something, a cursed idol applies the long debuff. Partial successes are worth
+  having too — "you get the tome *and* the spider bite" is a better outcome than a coin flip.
+- **Odds are shown qualitatively, never as a number.** A band — *"almost certain" / "very likely" /
+  "even odds" / "slight chance" / "near hopeless"* — driven by the resolved chance. Raw percentages
+  turn the game into arithmetic; a band keeps the decision a judgement call while still rewarding
+  stat investment visibly. Worth considering: the band **sharpens** as the governing stat rises, so a
+  high-Intelligence party reads the runes' difficulty accurately while a dull one only gets a vague
+  impression — the stat then buys *information* as well as odds.
+- **Most rooms have no event at all.** Events are opt-in per `RoomSO` (and per manual-layout room),
+  not a property of every room — scarcity is what makes finding one feel like something. Rooms
+  without one keep today's flavour-text Examine/Action.
+- **One-shot, and it must persist.** An event is marked consumed on the `Room` (like `CaptiveHero`)
+  **and** written into `DungeonSaveData`, or the player re-rolls a bad outcome by walking out and
+  back in, or by quitting to the menu and resuming. This is the one part that is a correctness
+  requirement rather than a design choice.
+
+Why it is worth doing early: it is the cheapest route to *decisions between fights*, the simulator's
+depth-gap findings say combat alone is not providing them, and it gives `Luck` — and therefore gear
+and buffs — a second axis to matter on beyond damage. It also gives the balance model something new
+to measure: expected HP cost per room stops being purely combat-driven, so `EncounterModel` would
+need an event term.
+
+Touch points: `Assets/Scripts/Rooms/RoomSO.cs`, `Assets/Scripts/Rooms/UI/RoomActionUI.cs`
+(`OnExamine`/`OnAction`), `Assets/Scripts/Rooms/Room.cs` (consumed flags),
+`Assets/Scripts/Dungeon/DungeonSaveManager.cs` (persist them), `Assets/Scripts/Cards/Effects/`
+(reuse the executors), `Assets/Scripts/Items/LootRoller.cs`, `Assets/Scripts/Heroes/HeroSO.cs` +
+`Assets/Scripts/Rooms/Stats.cs` (the new `Luck` stat).
+
 Touch points: `Assets/Scripts/Rooms/RoomSO.cs`, `Assets/Scripts/Rooms/UI/RoomActionUI.cs`,
 `Assets/Scripts/Rooms/RoomManager.cs`, `Assets/Scripts/Items/LootRoller.cs`.
 
@@ -452,3 +513,79 @@ Touch points: `Assets/Scripts/Heroes/PartyRosterSO.cs`, `PartySaveData.cs`, `Par
 `Assets/Scripts/MainMenu/` (new `TavernUI` + `MainMenuUISetup`), `Assets/Scripts/Items/ShopPricing.cs`,
 `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Rooms/RoomSO.cs` (rescue room
 kind, with §2), `Assets/Scripts/Balance/PartyBaseline.cs`.
+
+### 6. Three new stats: Intelligence, Spirit, Luck
+
+`Stats` currently holds **Attack / Defense / Health / MaxHealth / Agility** and nothing else, so
+every hero is differentiated on the same four axes and magic is flat — a `SpellEffect` has a
+`Power` int and no notion of who cast it. Three additions fix both, and give §2's events something
+to check against:
+
+| Stat | Drives |
+|---|---|
+| **Intelligence** | damage of Intelligence-scaled spells (the offensive elemental kit) |
+| **Spirit** | healing, shields and Holy — the restorative/protective kit |
+| **Luck** | crit chance across the board, plus blind-risk event checks |
+
+#### Spells scale off a stat
+
+Every `SpellEffect` names the stat (or stats) that modify it — add a `ScalingStat` to
+`SpellEffect` alongside `Power`, so `Power` becomes a base and the caster's stat scales it. Damage
+spells scale on Intelligence, heals and shields on Spirit; a hybrid effect can list more than one.
+This is what makes a caster build distinct from a weapon build, and it is what finally makes
+*which hero casts this* a real question — today any hero casting a given magic gets the identical
+number.
+
+**Design this together with `PowerMode`.** `docs/ELEMENTAL_PLAN.md` already plans a `PowerMode` on
+`SpellEffect` (base-power / flat / % of max health). `PowerMode` and `ScalingStat` are the same
+field's neighbours and will fight each other if added separately — a `% of max health` effect
+presumably ignores Intelligence. Settle both in one pass.
+
+#### Luck and crit
+
+`CombatManager.CritChance` is a `const float = 0.12f` read by `ExecuteAttack` **and** by
+`BalanceMath.ExpectedCritMultiplier()`. Making crit per-unit means the constant becomes a *base*
+and both readers need a unit passed in — `ExpectedCritMultiplier()` loses its zero-argument form,
+which touches `AverageDamage` and every metric downstream of it. Not hard, but it is the one change
+here that ripples through the balance model rather than sitting beside it. Decide the curve too:
+flat `+x% per point` runs away at high Luck, so a diminishing form (the same
+`stat / (stat + K)` shape `DamageCalculator` already uses for Defense) is probably right, and reuses
+a curve the player has already learned.
+
+#### The plumbing this touches
+
+`Stats` is shared by heroes **and** enemies, so this is wider than it looks:
+
+- **`Stats`** — three new fields. Its constructor is positional (`Stats(attack, defense, health, agility)`)
+  and called from `Hero.Initialize`, `SimUnit`, `PartyBaseline` and the tests; adding three more
+  positional args is a trap. Prefer optional named parameters or an init-style struct.
+- **`ICombatUnit`** — `GetEffectiveIntelligence/Spirit/Luck()` to sit beside the existing three, so
+  gear folds in the same way.
+- **`HeroSO`** — `BaseIntelligence/Spirit/Luck`. **`EnemySO`** needs them too (enemies cast and
+  crit); a sensible default keeps every existing enemy asset valid.
+- **`StatType`** (`Assets/Scripts/Items/StatType.cs`) — three new entries so `ItemSO` bonuses can
+  grant them, which immediately gives gear a second axis to matter on. **`BuffType`** likewise, so
+  buffs/debuffs can move them.
+- **`LevelConfiguration`** — would need three more `...Gain` fields, *but* §4 replaces the whole
+  table with the sphere grid. Do the grid first and author these as node types instead of adding
+  fields that are about to be deleted.
+- **Balance model** — `EffectiveStats`/`HeroStatCalculator`, `SimUnit`, `PowerScore`'s weights in
+  `BalanceRulesSO`, and the crit path above. `BalanceMath` deliberately models *basic attacks only*,
+  so Intelligence/Spirit change nothing there until the simulator's magic path reads them — worth
+  checking `EncounterSimulator` picks up spell scaling, or the closed-form and simulated numbers
+  will disagree in a new way.
+- **The `EnemySO` inspector footer** and the Balance Analyzer's tables show the four stats; both
+  want the new ones or the tool stops matching the data.
+
+*(Suggested order: `Stats` + `ICombatUnit` + `HeroSO`/`EnemySO` fields → `StatType`/`BuffType` so
+gear and buffs can move them → `SpellEffect.ScalingStat` together with `PowerMode` → Luck/crit →
+balance model. Events (§2) can be built against Agility/Attack/Defense before the three new stats
+land, and gain the rest for free.)*
+
+Touch points: `Assets/Scripts/Rooms/Stats.cs`, `Assets/Scripts/Combat/ICombatUnit.cs`,
+`Assets/Scripts/Heroes/HeroSO.cs`, `Assets/Scripts/Heroes/Hero.cs`,
+`Assets/Scripts/Enemies/EnemySO.cs`, `Assets/Scripts/Items/StatType.cs`,
+`Assets/Scripts/Cards/SpellEffect.cs`, `Assets/Scripts/Cards/Effects/`,
+`Assets/Scripts/Cards/EffectResolver.cs`, `Assets/Scripts/Rooms/CombatManager.cs` (crit),
+`Assets/Scripts/Balance/BalanceMath.cs`, `HeroStatCalculator.cs`, `SimUnit.cs`, `BalanceRulesSO.cs`,
+`docs/ELEMENTAL_PLAN.md` (`PowerMode`).

@@ -194,7 +194,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_mainBar, !hasEnemy);
 
             // A captive is only reachable once the room is clear - guards first.
-            SetShown(_rescueBtn, !hasEnemy && room.CaptiveHero != null);
+            RefreshRescueButton();
 
             // Boss rooms: announce the boss and remove Flee — the climax can't be skipped.
             var boss = room.Enemies.FirstOrDefault(e => e != null && e.IsAlive && e.IsBoss);
@@ -308,7 +308,7 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_optionWindow, false);
             _optionScroll.Clear();
-            SetShown(_mainBar, true);
+            ShowMainBar();
         }
 
         /// <summary>
@@ -340,7 +340,7 @@ namespace Assets.Scripts.Rooms
 
                 if (!DungeonManager.Instance.TryRescueCaptive(_currentRoom))
                 {
-                    SetShown(_mainBar, true);
+                    ShowMainBar();
                     SetShown(_rescueBtn, false);
                     return;
                 }
@@ -361,7 +361,7 @@ namespace Assets.Scripts.Rooms
                 _detailOkAction = () =>
                 {
                     SetShown(_detailWindow, false);
-                    SetShown(_mainBar, true);
+                    ShowMainBar();
                     RefreshPartyStatus();
                 };
             };
@@ -942,7 +942,7 @@ namespace Assets.Scripts.Rooms
                 if (showNormalAfter)
                 {
                     _currentRoom.EnableAllDoors();
-                    SetShown(_mainBar, true);
+                    ShowMainBar();
                     SubscribeDoors();
                 }
                 else if (returnToCombat)
@@ -1046,7 +1046,7 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.FinishVictory(_pendingLevelCleared);
             if (!_pendingLevelCleared)
             {
-                SetShown(_mainBar, true);
+                ShowMainBar();
                 SubscribeDoors();
             }
             // If the level was cleared, FinishVictory raises OnDungeonCleared → scene loads to menu.
@@ -1096,6 +1096,26 @@ namespace Assets.Scripts.Rooms
 
             var destRoom = door.GetOtherRoom(fromRoom);
             GameManager.Instance.EnterRoom(destRoom, door);
+        }
+
+        /// <summary>
+        /// Shows the non-combat action bar and re-evaluates what it can offer. Always use this rather
+        /// than showing <c>_mainBar</c> directly: whether a Rescue is available depends on room state
+        /// that changes *after* <see cref="Show"/> ran - clearing the room's guards is exactly what
+        /// makes a captive reachable - so a bare SetShown would leave Rescue hidden for good in any
+        /// room that had enemies in it.
+        /// </summary>
+        private void ShowMainBar()
+        {
+            SetShown(_mainBar, true);
+            RefreshRescueButton();
+        }
+
+        /// <summary>Rescue is offered only in a room that still holds a captive and has no living enemies.</summary>
+        private void RefreshRescueButton()
+        {
+            bool clear = _currentRoom != null && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive);
+            SetShown(_rescueBtn, clear && _currentRoom.CaptiveHero != null);
         }
 
         private static void SetShown(VisualElement element, bool shown)
