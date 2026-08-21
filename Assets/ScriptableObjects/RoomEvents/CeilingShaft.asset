@@ -15,7 +15,6 @@ MonoBehaviour:
   Key: CeilingShaft
   Title: 'A Shaft in the Ceiling'
   Prompt: 'A shaft opens in the ceiling well above head height, and something on the ledge up there catches what little light there is. The wall under it is damp and crumbling, with just enough to hold on to.'
-  Trigger: 0
   GoverningStat: 3
   Difficulty: 8
   Options:

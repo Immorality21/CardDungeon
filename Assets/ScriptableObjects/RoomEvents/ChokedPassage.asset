@@ -15,7 +15,6 @@ MonoBehaviour:
   Key: ChokedPassage
   Title: 'A Choked Passage'
   Prompt: 'Half the ceiling has come down across a side passage, and the draught coming through the gap smells of open air rather than more dungeon. The top slab is the only thing holding the rest up. Somebody could get a shoulder under it.'
-  Trigger: 1
   GoverningStat: 2
   Difficulty: 10
   Options:

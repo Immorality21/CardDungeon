@@ -573,8 +573,30 @@ namespace Assets.Scripts.Dungeon
         /// </summary>
         private void PlaceRoomEvents(List<Room> rooms, Room startRoom)
         {
+            if (rooms == null)
+            {
+                return;
+            }
+
+            // Rooms whose identity IS an interaction (a treasury) carry their event on every
+            // instance, outside the level budget - otherwise a treasury the budget did not pick
+            // would be a room called Treasury with nothing to take. These are then off the table
+            // for budgeted placement, so such a room offers exactly one thing.
+            foreach (var room in rooms)
+            {
+                if (room == null || room.RoomSO == null || room.RoomSO.GuaranteedEvent == null)
+                {
+                    continue;
+                }
+
+                // The exit room is fair game: taking the stairs is a button now, so the player
+                // gets their turn in the room before the level ends. (Budgeted events still skip
+                // it - see PlaceRoomEvents - to keep a scarce find from competing with the boss.)
+                room.RoomEvent = room.RoomSO.GuaranteedEvent;
+            }
+
             int budget = _level != null ? _level.EventsPerLevel : 0;
-            if (budget <= 0 || rooms == null)
+            if (budget <= 0)
             {
                 return;
             }
@@ -584,6 +606,7 @@ namespace Assets.Scripts.Dungeon
                             && r != startRoom
                             && !r.IsExit
                             && r.CaptiveHero == null
+                            && r.RoomEvent == null
                             && r.RoomSO != null
                             && !r.RoomSO.IsConnectorRoom
                             && r.RoomSO.PossibleEvents != null

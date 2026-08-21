@@ -1,4 +1,3 @@
-using System.Linq;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
 using ImmoralityGaming.Fundamentals;
@@ -35,16 +34,10 @@ namespace Assets.Scripts.Rooms
         {
             room.Reveal();
 
-            // Check if entering a cleared exit room
-            if (room.IsExit && !room.Enemies.Any(e => e != null && e.IsAlive))
-            {
-                if (CombatManager.HasInstance)
-                {
-                    CombatManager.Instance.NotifyDungeonCleared();
-                }
-                return;
-            }
-
+            // The exit room is an ordinary room: it completes the level only when the player takes
+            // the stairs (RoomActionUI's Descend button). Ending the level on entry meant walking
+            // into the wrong room finished it for you, with a level's worth of unexplored rooms and
+            // unspent room events behind you.
             if (_roomActionUI != null)
             {
                 _roomActionUI.Show(room, entryDoor);

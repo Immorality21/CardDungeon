@@ -15,7 +15,6 @@ MonoBehaviour:
   Key: MustyTome
   Title: 'A Musty Tome'
   Prompt: 'A swollen leather tome lies open on a lectern, its pages furred with mould and strung across with old web. Whatever is written in it was worth writing down carefully. Something has been living in the spine for a long time.'
-  Trigger: 0
   GoverningStat: 4
   Difficulty: 6
   Options:

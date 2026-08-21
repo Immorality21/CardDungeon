@@ -26,13 +26,30 @@
 
 ## Room Events (`Assets.Scripts.Rooms.Events`)
 
-`RoomSO.ExamineOptions` / `ActionOptions` are still flavour strings, but a room can now also carry
-one **event**: a gamble the party's stats resolve. The option list for the matching button gains one
-real entry (listed first), and taking it costs or pays something.
+**Every button on the room bar is conditional, and the bar hides itself when none of them applies**
+(`ShowMainBar` / `HasRoomActions`) - an ordinary cleared room shows no bar at all rather than an
+empty frame docked at the bottom:
+
+- **Action** - the room's event. `RefreshActionButton` hides it when there is no unresolved event.
+- **Rescue** - a captive, once the room is clear.
+- **Descend** - a cleared **exit** room; taking it is the *only* way a level completes (see below).
+
+**Anything irreversible asks first.** `ShowConfirm(title, message, confirmLabel, onConfirm)` puts a
+**Cancel** beside the Ok, and `ShowDetail` hides it again for plain statements. Both Descend and
+Rescue go through it - they used to be questions ("Free them?", "Descend?") whose only button was
+consent.
+
+**There is no Examine button, and `RoomSO` has no flavour text.** `ExamineOptions`/`ActionOptions`
+were `List<string>` piped straight to a dialog, which is why most rooms had two buttons and no
+consequences. They were briefly replaced by a `RoomSurvey` - a generated description of the room -
+and that was removed too, because it restated what the player was already looking at: `Room.Reveal()`
+shows **every** door of the current room and leaves unexplored neighbours dark, so "which way leads
+somewhere new" is on screen; enemies, the exit marker and a captive's portrait are all sprites. A
+free, repeatable button is never a decision, so it was friction in front of information the player
+already had. If a room needs to *say* something, that is what an event's `Prompt` is for.
 
 - **Data.** `RoomEventSO` (`SO/Room Event`, assets in `Assets/ScriptableObjects/RoomEvents/`) holds a
-  `Key`/`SaveKey`, `Title`, `Prompt`, a `Trigger` (which button offers it — the other keeps its
-  flavour text), a `GoverningStat`, a `Difficulty`, and `Options`. Each `RoomEventOption` is a
+  `Key`/`SaveKey`, `Title`, `Prompt`, a `GoverningStat`, a `Difficulty`, and `Options`. Each `RoomEventOption` is a
   `StatCheck` (rolled), `Guaranteed` (a known trade, no roll) or `Decline` (walk away), and carries
   weighted `Success` / `Failure` pools of `RoomEventOutcome`. An outcome can hold **any mix** of
   `SpellEffect`s, a `LootTable`, `Gold`, `LoseAConsumable` and `AwakenedEnemies` — so a partial
@@ -64,10 +81,30 @@ real entry (listed first), and taking it costs or pays something.
   corridor. `CombatManager.RunCombat` **seeds** each fight's tracker from it, so the cost is paid in
   every encounter for the rest of the level. Level-scoped like health: cleared on fresh entry, and
   saved with the dungeon so quitting to the menu is not a cure.
-- **UI.** `RoomActionUI` shows `#event-window` (title / prompt / odds line / one button per option),
-  then reuses `#detail-window` for the result: the outcome's copy, then one line per concrete
-  consequence. If the outcome woke something, **Ok re-shows the room** so the Fight/Flee bar replaces
-  the Examine/Action one.
+- **UI.** Action opens `#event-window` (title / prompt / odds line / one button per option), then
+  reuses `#detail-window` for the result: the outcome's copy, then one line per concrete consequence.
+  If the outcome woke something, **Ok re-shows the room** so the Fight/Flee bar replaces the
+  room bar. There is no option-list window any more - it was retired with the flavour strings, since
+  its only real entry was the event itself.
+- **The odds line is about the gamble, not the window.** It is hidden unless some option is a
+  `StatCheck`, and worded "anything you chance here turns on Luck", because an event can mix a sure
+  thing with a gamble - the Treasury offers loose coin *or* the gilded chest - and a bare "this looks
+  dangerous" over the whole window would be claiming the safe option is risky.
+
+### Guaranteed events, for rooms that *are* an interaction
+
+`RoomSO.PossibleEvents` is the scarce pool, rationed by `LevelDefinitionSO.EventsPerLevel`. That is
+right for a tome or a cave-in, and wrong for a **Treasury**: a room named Treasury that the budget
+did not happen to pick is a room with nothing to take. `RoomSO.GuaranteedEvent` is offered by **every
+instance** of that room type, outside the budget, and a room with one is skipped by budgeted
+placement (so it offers exactly one thing) and skipped when it is the **exit** room (entering a
+cleared exit ends the level, so an event there could never be used - the same reason captives skip
+it).
+
+`TreasuryHoard` is the example: *gather the loose coin* (guaranteed, 15 gold) **or** *throw the lid
+back on the gilded chest* (a Luck check with the old `GildedChest` outcomes, up from gear and 30 gold
+to a poisoned needle or a woken Cinder Imp) **or** walk away. Taking the sure thing consumes the
+event, so the chest is the road not taken - which is the decision the room exists to pose.
 
 ### One-shot, and it has to persist
 
@@ -78,6 +115,26 @@ dungeon save records the consumed flag, the event key, and the **option + outcom
 reload `DungeonManager.RestoreRoomEvent` re-marks it and re-spawns whatever the outcome woke, keyed
 on the event key so a re-authored pool cannot apply a stale flag to a different event. See the
 Dungeon guide for placement and the restore ordering.
+
+### Descending is a choice
+
+Entering a cleared exit room used to call `CombatManager.NotifyDungeonCleared()` straight from
+`GameManager.EnterRoom`, so walking into the wrong room finished the level for you - with unexplored
+rooms and unspent room events behind you. Now the exit room is an ordinary room with one extra
+button, and `NotifyDungeonCleared` has exactly one caller: `RoomActionUI.OnDescend`, behind a
+confirm.
+
+Consequences worth knowing:
+
+- **`CombatManager.FinishVictory()` no longer completes the level** (and lost its `levelCleared`
+  parameter). Clearing the exit room raises the victory summary as usual, and dismissing it returns
+  the player to the room with Descend available. `CombatResult.LevelCleared` is still used, but only
+  to escalate the summary copy and add a "The way down: open" row.
+- **Doors are re-enabled unconditionally** after any victory, which also un-seals a boss room
+  (`Room.DisableAllDoors`) so the player can go back for anything they skipped.
+- **Guaranteed events are allowed in the exit room again.** The only reason they were excluded was
+  that the level ended before the player could act; a Treasury that is also the exit now works.
+  Budgeted events still skip it, to keep a scarce find from competing with the boss.
 
 ## Runtime Controls
 

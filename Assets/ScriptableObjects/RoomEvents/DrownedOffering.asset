@@ -15,7 +15,6 @@ MonoBehaviour:
   Key: DrownedOffering
   Title: 'A Drowned Offering'
   Prompt: 'Knee-deep in the standing water, a stone bowl still holds its offering: coins, teeth, something folded in oilcloth. The water around it is warmer than the water around your boots.'
-  Trigger: 0
   GoverningStat: 5
   Difficulty: 10
   Options:

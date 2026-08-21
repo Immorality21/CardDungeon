@@ -28,7 +28,6 @@ namespace Assets.Scripts.Rooms
         private VisualElement _mainBar;
         private VisualElement _combatBar;
         private VisualElement _heroBar;
-        private VisualElement _optionWindow;
         private VisualElement _detailWindow;
         private VisualElement _eventWindow;
         private VisualElement _partyStatus;
@@ -38,10 +37,8 @@ namespace Assets.Scripts.Rooms
         private readonly Dictionary<Heroes.Hero, Label> _partyHpLabels = new Dictionary<Heroes.Hero, Label>();
 
         private Label _heroTitle;
-        private Label _optionTitle;
         private Label _detailTitle;
         private Label _detailMessage;
-        private ScrollView _optionScroll;
 
         private Label _eventTitle;
         private Label _eventPrompt;
@@ -49,13 +46,13 @@ namespace Assets.Scripts.Rooms
         private ScrollView _eventOptions;
         private Button _eventBack;
 
-        private Button _examineBtn;
         private Button _actionBtn;
         private Button _rescueBtn;
+        private Button _descendBtn;
         private Button _fightBtn;
         private Button _fleeBtn;
-        private Button _optionBack;
         private Button _detailOk;
+        private Button _detailCancel;
 
         private VisualElement _bossBanner;
         private Label _bossBannerName;
@@ -68,10 +65,10 @@ namespace Assets.Scripts.Rooms
         private Label _victoryTitle;
         private VisualElement _victoryRewards;
         private Button _victoryContinue;
-        private bool _pendingLevelCleared;
 
         private bool _refsReady;
         private Action _detailOkAction;
+        private Action _detailCancelAction;
 
         private ICombatUnit _currentHeroTurn;
         private Room _currentRoom;
@@ -120,7 +117,6 @@ namespace Assets.Scripts.Rooms
             _mainBar = root.Q<VisualElement>("main-bar");
             _combatBar = root.Q<VisualElement>("combat-bar");
             _heroBar = root.Q<VisualElement>("hero-bar");
-            _optionWindow = root.Q<VisualElement>("option-window");
             _detailWindow = root.Q<VisualElement>("detail-window");
             _eventWindow = root.Q<VisualElement>("event-window");
             _partyStatus = root.Q<VisualElement>("party-status");
@@ -134,10 +130,8 @@ namespace Assets.Scripts.Rooms
             _victoryContinue = root.Q<Button>("victory-continue");
 
             _heroTitle = root.Q<Label>("hero-title");
-            _optionTitle = root.Q<Label>("option-title");
             _detailTitle = root.Q<Label>("detail-title");
             _detailMessage = root.Q<Label>("detail-message");
-            _optionScroll = root.Q<ScrollView>("option-scroll");
 
             _eventTitle = root.Q<Label>("event-title");
             _eventPrompt = root.Q<Label>("event-prompt");
@@ -145,37 +139,43 @@ namespace Assets.Scripts.Rooms
             _eventOptions = root.Q<ScrollView>("event-options");
             _eventBack = root.Q<Button>("event-back");
 
-            _examineBtn = root.Q<Button>("examine-btn");
             _actionBtn = root.Q<Button>("action-btn");
             _rescueBtn = root.Q<Button>("rescue-btn");
+            _descendBtn = root.Q<Button>("descend-btn");
             _fightBtn = root.Q<Button>("fight-btn");
             _fleeBtn = root.Q<Button>("flee-btn");
-            _optionBack = root.Q<Button>("option-back");
             _detailOk = root.Q<Button>("detail-ok");
+            _detailCancel = root.Q<Button>("detail-cancel");
 
             _bossBanner = root.Q<VisualElement>("boss-banner");
             _bossBannerName = root.Q<Label>("boss-banner-name");
 
-            _examineBtn.clicked += OnExamine;
             _actionBtn.clicked += OnAction;
             if (_rescueBtn != null)
             {
                 _rescueBtn.clicked += OnRescue;
             }
+            if (_descendBtn != null)
+            {
+                _descendBtn.clicked += OnDescend;
+            }
             _fightBtn.clicked += OnFight;
             _fleeBtn.clicked += OnFlee;
-            _optionBack.clicked += OnBack;
             if (_eventBack != null)
             {
                 _eventBack.clicked += OnEventBack;
             }
             _detailOk.clicked += () => _detailOkAction?.Invoke();
+            if (_detailCancel != null)
+            {
+                _detailCancel.clicked += () => _detailCancelAction?.Invoke();
+            }
             _victoryContinue.clicked += OnVictoryContinue;
 
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _examineBtn, _actionBtn, _rescueBtn, _fightBtn, _fleeBtn, _optionBack, _detailOk, _victoryContinue, _optionScroll, _eventBack, _eventOptions })
+            foreach (var focusable in new Focusable[] { _actionBtn, _rescueBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -211,16 +211,26 @@ namespace Assets.Scripts.Rooms
 
             _currentRoom = room;
             _entryDoor = entryDoor;
-            SetShown(_optionWindow, false);
             SetShown(_detailWindow, false);
             SetShown(_eventWindow, false);
 
             bool hasEnemy = room.Enemies.Any(e => e != null && e.IsAlive);
             SetShown(_combatBar, hasEnemy);
-            SetShown(_mainBar, !hasEnemy);
 
-            // A captive is only reachable once the room is clear - guards first.
-            RefreshRescueButton();
+            // A captive is only reachable once the room is clear - guards first. With enemies up the
+            // room bar is irrelevant anyway; without them, ShowMainBar decides whether there is
+            // anything to show.
+            if (hasEnemy)
+            {
+                SetShown(_mainBar, false);
+                RefreshRescueButton();
+                RefreshActionButton();
+                RefreshDescendButton();
+            }
+            else
+            {
+                ShowMainBar();
+            }
 
             // Boss rooms: announce the boss and remove Flee — the climax can't be skipped.
             var boss = room.Enemies.FirstOrDefault(e => e != null && e.IsAlive && e.IsBoss);
@@ -271,7 +281,6 @@ namespace Assets.Scripts.Rooms
             SetShown(_combatBar, false);
             SetShown(_bossBanner, false);
             SetShown(_heroBar, false);
-            SetShown(_optionWindow, false);
             SetShown(_detailWindow, false);
             SetShown(_eventWindow, false);
             SetShown(_partyStatus, false);
@@ -283,79 +292,33 @@ namespace Assets.Scripts.Rooms
         //  EXAMINE / ACTION FLOWS
         // ============================================================
 
-        private void OnExamine()
-        {
-            ShowOptionList("Examine", _currentRoom.RoomSO.ExamineOptions,
-                Events.RoomEventTrigger.Examine,
-                text => ShowDetail("Examine", text));
-        }
-
+        /// <summary>
+        /// Action is the verb that costs something, so it only exists when there is something to
+        /// spend it on: the room's event. <see cref="RefreshActionButton"/> hides it otherwise
+        /// rather than offering a dead affordance.
+        /// </summary>
         private void OnAction()
         {
-            ShowOptionList("Action", _currentRoom.RoomSO.ActionOptions,
-                Events.RoomEventTrigger.Action,
-                text => ShowDetail("Action", text));
-        }
-
-        private void ShowOptionList(
-            string title,
-            List<string> options,
-            Events.RoomEventTrigger trigger,
-            Action<string> onSelect)
-        {
-            SetShown(_mainBar, false);
-            _optionTitle.text = title;
-            _optionScroll.Clear();
-
-            var roomEvent = PendingEventFor(trigger);
-            bool hasFlavour = options != null && options.Count > 0;
-
-            if (roomEvent == null && !hasFlavour)
+            var roomEvent = PendingEvent();
+            if (roomEvent == null)
             {
-                ShowDetail("Nothing", "There is nothing here.");
+                RefreshActionButton();
                 return;
             }
 
-            // Listed first: it is the one entry in here that does something, and burying it under
-            // three lines of flavour would make the room's one decision easy to walk past.
-            if (roomEvent != null)
-            {
-                var eventBtn = new Button(() => ShowRoomEvent(roomEvent)) { text = roomEvent.Title };
-                eventBtn.AddToClassList("cd-list-button");
-                eventBtn.focusable = false;
-                _optionScroll.Add(eventBtn);
-            }
-
-            if (hasFlavour)
-            {
-                foreach (var option in options)
-                {
-                    var captured = option;
-                    var btn = new Button(() => onSelect(captured)) { text = option };
-                    btn.AddToClassList("cd-list-button");
-                    _optionScroll.Add(btn);
-                }
-            }
-
-            SetShown(_optionWindow, true);
+            SetShown(_mainBar, false);
+            ShowRoomEvent(roomEvent);
         }
+
 
         // ============================================================
         //  ROOM EVENTS
         // ============================================================
 
-        /// <summary>
-        /// The room's unresolved event, when this button is the one that offers it. The other button
-        /// keeps its flavour text, so which one hides the gamble is part of the event's authoring.
-        /// </summary>
-        private Events.RoomEventSO PendingEventFor(Events.RoomEventTrigger trigger)
+        /// <summary>The room's unresolved event, or null when there is nothing left to do here.</summary>
+        private Events.RoomEventSO PendingEvent()
         {
-            if (_currentRoom == null || !_currentRoom.HasPendingEvent)
-            {
-                return null;
-            }
-
-            return _currentRoom.RoomEvent.Trigger == trigger ? _currentRoom.RoomEvent : null;
+            return _currentRoom != null && _currentRoom.HasPendingEvent ? _currentRoom.RoomEvent : null;
         }
 
         /// <summary>
@@ -389,10 +352,23 @@ namespace Assets.Scripts.Rooms
             var band = Events.RoomEventResolver.BandFor(_eventChance);
             var clarity = Events.RoomEventResolver.ClarityFor(statValue, roomEvent.Difficulty);
 
-            SetShown(_optionWindow, false);
             _eventTitle.text = roomEvent.Title;
             _eventPrompt.text = roomEvent.Prompt;
-            _eventOdds.text = BuildOddsLine(roomEvent, band, clarity);
+            // Only events that actually gamble get an odds line, and it says "anything you chance"
+            // rather than "this": an event can mix a sure thing with a gamble (take the loose coin,
+            // or open the chest), and a bare "this looks dangerous" over the whole window would be
+            // claiming the safe option is risky.
+            bool hasCheck = false;
+            foreach (var option in roomEvent.Options)
+            {
+                if (option != null && option.Kind == Events.RoomEventOptionKind.StatCheck)
+                {
+                    hasCheck = true;
+                    break;
+                }
+            }
+            SetShown(_eventOdds, hasCheck);
+            _eventOdds.text = hasCheck ? BuildOddsLine(roomEvent, band, clarity) : string.Empty;
 
             _eventOptions.Clear();
             for (int i = 0; i < roomEvent.Options.Count; i++)
@@ -423,10 +399,11 @@ namespace Assets.Scripts.Rooms
 
             if (_eventActingHero == null)
             {
-                return $"This comes down to {statName}. {reading}";
+                return $"Anything you chance here turns on {statName}. {reading}";
             }
 
-            return $"This comes down to {statName} - {_eventActingHero.DisplayName} has the best of it. {reading}";
+            return $"Anything you chance here turns on {statName} - "
+                   + $"{_eventActingHero.DisplayName} has the best of it. {reading}";
         }
 
         /// <summary>
@@ -510,6 +487,31 @@ namespace Assets.Scripts.Rooms
             };
         }
 
+        /// <summary>
+        /// A question: Ok runs <paramref name="onConfirm"/>, Cancel puts the player back in the room
+        /// having changed nothing. Anything irreversible - freeing a captive, leaving a level behind -
+        /// should ask this way rather than through <see cref="ShowDetail"/>, where the only button is
+        /// consent.
+        /// </summary>
+        private void ShowConfirm(string title, string message, string confirmLabel, Action onConfirm)
+        {
+            ShowDetail(title, message);
+            _detailOk.text = confirmLabel;
+            _detailOkAction = () =>
+            {
+                _detailOk.text = "Ok";
+                SetShown(_detailWindow, false);
+                onConfirm();
+            };
+            _detailCancelAction = () =>
+            {
+                _detailOk.text = "Ok";
+                SetShown(_detailWindow, false);
+                ShowMainBar();
+            };
+            SetShown(_detailCancel, true);
+        }
+
         private void CloseEventResult()
         {
             SetShown(_detailWindow, false);
@@ -527,24 +529,44 @@ namespace Assets.Scripts.Rooms
             ShowMainBar();
         }
 
+        /// <summary>
+        /// A statement: one button, and dismissing it returns to the room. Callers that need a second
+        /// beat overwrite <c>_detailOkAction</c> after calling this.
+        /// </summary>
         private void ShowDetail(string title, string message)
         {
-            SetShown(_optionWindow, false);
+            SetShown(_detailCancel, false);
+            _detailCancelAction = null;
             _detailTitle.text = title;
             _detailMessage.text = message;
+            // Default: dismissing returns to the room. Callers that need a second beat (the rescue
+            // flow, an event outcome) overwrite _detailOkAction after calling this.
             _detailOkAction = () =>
             {
                 SetShown(_detailWindow, false);
-                SetShown(_optionWindow, true);
+                ShowMainBar();
             };
             SetShown(_detailWindow, true);
         }
 
-        private void OnBack()
+        /// <summary>
+        /// Takes the stairs: this is the one place a level is completed. Confirmed first, because it
+        /// ends the level and abandons anything still unspent on it.
+        /// </summary>
+        private void OnDescend()
         {
-            SetShown(_optionWindow, false);
-            _optionScroll.Clear();
-            ShowMainBar();
+            if (_currentRoom == null || !_currentRoom.IsExit)
+            {
+                RefreshDescendButton();
+                return;
+            }
+
+            SetShown(_mainBar, false);
+            ShowConfirm("The Way Down",
+                "The stairs drop away into the dark below.\n\nAnything still unfound on this level "
+                + "stays here.",
+                "Descend",
+                () => CombatManager.Instance.NotifyDungeonCleared());
         }
 
         /// <summary>
@@ -567,13 +589,11 @@ namespace Assets.Scripts.Rooms
                 ? "They look ready to fight."
                 : captive.Blurb;
 
-            ShowDetail("A Prisoner",
-                $"{captive.DisplayName} is bound here. {blurb}\n\nFree them?");
-
-            _detailOkAction = () =>
+            ShowConfirm("A Prisoner",
+                $"{captive.DisplayName} is bound here. {blurb}",
+                "Free them",
+                () =>
             {
-                SetShown(_detailWindow, false);
-
                 if (!DungeonManager.Instance.TryRescueCaptive(_currentRoom))
                 {
                     ShowMainBar();
@@ -600,7 +620,7 @@ namespace Assets.Scripts.Rooms
                     ShowMainBar();
                     RefreshPartyStatus();
                 };
-            };
+            });
         }
 
         // ============================================================
@@ -1129,7 +1149,6 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_mainBar, false);
             SetShown(_combatBar, false);
-            SetShown(_optionWindow, false);
             _detailTitle.text = "Your Party Has Fallen...";
             _detailMessage.text = log;
             _detailOkAction = () =>
@@ -1169,7 +1188,6 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_mainBar, false);
             SetShown(_combatBar, false);
-            SetShown(_optionWindow, false);
             _detailTitle.text = title;
             _detailMessage.text = message;
             _detailOkAction = () =>
@@ -1195,11 +1213,8 @@ namespace Assets.Scripts.Rooms
 
         private void ShowVictory(CombatResult result)
         {
-            _pendingLevelCleared = result.LevelCleared;
-
             SetShown(_mainBar, false);
             SetShown(_combatBar, false);
-            SetShown(_optionWindow, false);
             SetShown(_detailWindow, false);
 
             // Escalate the copy toward the climax: run complete > boss slain > level cleared > victory.
@@ -1260,6 +1275,11 @@ namespace Assets.Scripts.Rooms
             }
             _victoryRewards.Add(MakeVictoryRow("Gold", gold));
 
+            if (result.LevelCleared)
+            {
+                _victoryRewards.Add(MakeVictoryRow("The way down", "open"));
+            }
+
             SetShown(_victoryWindow, true);
         }
 
@@ -1279,13 +1299,11 @@ namespace Assets.Scripts.Rooms
         private void OnVictoryContinue()
         {
             SetShown(_victoryWindow, false);
-            CombatManager.Instance.FinishVictory(_pendingLevelCleared);
-            if (!_pendingLevelCleared)
-            {
-                ShowMainBar();
-                SubscribeDoors();
-            }
-            // If the level was cleared, FinishVictory raises OnDungeonCleared → scene loads to menu.
+            CombatManager.Instance.FinishVictory();
+            // Always back to the room, even after clearing the exit: the level completes when the
+            // player takes the stairs, which ShowMainBar surfaces as the Descend button.
+            ShowMainBar();
+            SubscribeDoors();
         }
 
         // ============================================================
@@ -1341,10 +1359,21 @@ namespace Assets.Scripts.Rooms
         /// makes a captive reachable - so a bare SetShown would leave Rescue hidden for good in any
         /// room that had enemies in it.
         /// </summary>
+        /// <summary>
+        /// Shows the room bar, or nothing at all. Every button on it is conditional now, so an
+        /// ordinary cleared room has no bar rather than an empty frame docked at the bottom.
+        /// </summary>
         private void ShowMainBar()
         {
-            SetShown(_mainBar, true);
             RefreshRescueButton();
+            RefreshActionButton();
+            RefreshDescendButton();
+            SetShown(_mainBar, HasRoomActions());
+        }
+
+        private bool HasRoomActions()
+        {
+            return IsShown(_actionBtn) || IsShown(_rescueBtn) || IsShown(_descendBtn);
         }
 
         /// <summary>Rescue is offered only in a room that still holds a captive and has no living enemies.</summary>
@@ -1352,6 +1381,27 @@ namespace Assets.Scripts.Rooms
         {
             bool clear = _currentRoom != null && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive);
             SetShown(_rescueBtn, clear && _currentRoom.CaptiveHero != null);
+        }
+
+        /// <summary>
+        /// The stairs, in a cleared exit room. Shown rather than fired automatically so finishing a
+        /// level is the player's decision - they may want to sweep the rooms they skipped, or spend
+        /// an event they walked past, before leaving.
+        /// </summary>
+        private void RefreshDescendButton()
+        {
+            bool clear = _currentRoom != null && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive);
+            SetShown(_descendBtn, clear && _currentRoom != null && _currentRoom.IsExit);
+        }
+
+        /// <summary>
+        /// Action exists only when the room has an unresolved event. Hiding it is the point: a
+        /// button that reports "there is nothing here" teaches the player to stop pressing it, and
+        /// then they miss the rooms where it mattered. Examine always stays - looking is free.
+        /// </summary>
+        private void RefreshActionButton()
+        {
+            SetShown(_actionBtn, PendingEvent() != null);
         }
 
         private static void SetShown(VisualElement element, bool shown)

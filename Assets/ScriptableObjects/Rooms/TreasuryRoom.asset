@@ -16,14 +16,9 @@ MonoBehaviour:
   Width: 3
   Height: 3
   Color: {r: 0.9528302, g: 0.8596208, b: 0.16629584, a: 1}
-  ExamineOptions:
-  - Look for more gold
-  ActionOptions:
-  - Loot the gold!
   IsConnectorRoom: 0
-  PossibleEvents:
-  - {fileID: 11400000, guid: 272fbd1c330543fba2c463ac97960741, type: 2}
-  - {fileID: 11400000, guid: f477e0e5900f4be6bd7f499aa7de4e4d, type: 2}
+  PossibleEvents: []
+  GuaranteedEvent: {fileID: 11400000, guid: 9fc41391ad0c4ded8aefa97a43e1fcb8, type: 2}
   EnemySpawnTable:
   - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
     SpawnChance: 1

@@ -16,9 +16,6 @@ MonoBehaviour:
   Width: 4
   Height: 5
   Color: {r: 0.2979263, g: 0.2979263, b: 0.9716981, a: 1}
-  ExamineOptions: []
-  ActionOptions:
-  - Beg for mercy
   IsConnectorRoom: 0
   EnemySpawnTable:
   - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}

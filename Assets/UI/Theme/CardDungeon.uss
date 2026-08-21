@@ -479,6 +479,21 @@
     margin-bottom: 10px;
 }
 
+/* Detail-window button row. One button centres; two sit side by side, so a question always has
+   a visible way to decline it. */
+.cd-detail-buttons {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.cd-detail-buttons > .cd-button--wide {
+    flex-grow: 1;
+    flex-basis: 0;
+    max-width: 45%;
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
 /* Content-sized variant of .cd-list. Use inside .cd-window (which does not clip): a flex-grow
    scroll view spills its content container past its own box and swallows clicks on the buttons
    below it. */

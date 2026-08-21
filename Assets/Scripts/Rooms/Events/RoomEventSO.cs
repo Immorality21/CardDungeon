@@ -4,16 +4,6 @@ using UnityEngine;
 
 namespace Assets.Scripts.Rooms.Events
 {
-    /// <summary>Which room button offers the event; the other one keeps its flavour text.</summary>
-    public enum RoomEventTrigger
-    {
-        /// <summary>Something the party notices - a tome, a carving, a glint in the water.</summary>
-        Examine = 0,
-
-        /// <summary>Something the party does to the room - a lever, a door, a body.</summary>
-        Action = 1
-    }
-
     /// <summary>
     /// A gamble the party's stats resolve, offered by a room. This is what turns
     /// <c>RoomSO.ExamineOptions</c> / <c>ActionOptions</c> from flavour strings into a decision:
@@ -42,8 +32,6 @@ namespace Assets.Scripts.Rooms.Events
         [TextArea]
         [Tooltip("The fiction. Set the scene and imply the risk; the odds line states it.")]
         public string Prompt;
-
-        public RoomEventTrigger Trigger = RoomEventTrigger.Examine;
 
         [Tooltip("The stat every StatCheck option on this event is resolved against.")]
         public StatType GoverningStat = StatType.Luck;

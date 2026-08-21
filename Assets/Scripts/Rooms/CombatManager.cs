@@ -473,20 +473,17 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Called when the player dismisses the victory summary: lowers the battle stage, then
-        /// either completes the level (exit room) or re-opens the room's doors to keep exploring.
+        /// Called when the player dismisses the victory summary: lowers the battle stage and re-opens
+        /// the room's doors.
+        ///
+        /// <para>It no longer completes the level, even after clearing the exit room - that is the
+        /// Descend button's job. Doors are re-enabled unconditionally, which also un-seals a boss
+        /// room (<c>DisableAllDoors</c>) so the player can go back for anything they left.</para>
         /// </summary>
-        public void FinishVictory(bool levelCleared)
+        public void FinishVictory()
         {
             CombatStage.Instance.End(restoreEnemyPositions: false);
-            if (levelCleared)
-            {
-                OnDungeonCleared?.Invoke();
-            }
-            else
-            {
-                _lastVictoryRoom?.EnableAllDoors();
-            }
+            _lastVictoryRoom?.EnableAllDoors();
         }
 
         private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex, Room room)
@@ -1100,6 +1097,10 @@ namespace Assets.Scripts.Rooms
             return room.Enemies.Any(e => e != null && e.IsAlive);
         }
 
+        /// <summary>
+        /// Completes the level. Raised by the player taking the stairs in a cleared exit room, so
+        /// finishing a level is always a decision.
+        /// </summary>
         public void NotifyDungeonCleared()
         {
             OnDungeonCleared?.Invoke();

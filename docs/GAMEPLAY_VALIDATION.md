@@ -139,6 +139,11 @@ Hard-won gotchas (each cost a failed compile until learned):
     }
     ```
 
+    **Tests cannot run while the editor is in play mode** - `TestRunnerApi` throws
+    "This cannot be used during play mode" and the run comes back with 0 cases. Guard on
+    `EditorApplication.isPlaying` (and remember that leaving play mode only takes effect at the end
+    of the frame, so exit in one command and run in the next).
+
     Narrow it with `Filter.groupNames` (regex on the full class name, e.g.
     `"Tests\.EditMode\.TurnManagerTests"`) or `Filter.testNames`, and
     `Filter.categoryNames = new[] { "Balance" }` to include/exclude the balance suite. Keep the
@@ -350,6 +355,25 @@ the exact method the panel calls:
 - **Cast:** press `M` (opens the slot picker via `RequestMagicSlots`), then
   `CombatManager.SubmitCastAction(magic, slotIndex, caster, targets)` — resolves through
   `EffectResolver` (combos, buffs, elemental damage) and spends a charge.
+
+> ### ⚠️ `worldBound` is NOT `panel.Pick`'s coordinate space
+> Clicking `element.worldBound.center` works *sometimes*, which is worse than never. Measured on the
+> room action bar: a button with visual bounds `x 1153..1272` was only pickable at `x 1143..1208` -
+> about 55% of the width, shifted left. The panel's scale mode maps layout space to screen space, and
+> `Pick` wants the latter. A pick at the visual centre returns the **parent**, the dispatch goes to
+> the parent, and the click silently does nothing.
+>
+> Don't compute the point - **search for it**, and assert you found one:
+> ```csharp
+> var b = btn.worldBound;
+> Vector2 hit = Vector2.zero; bool found = false;
+> for (float x = b.xMin - 40f; x <= b.xMax + 40f && !found; x += 2f)
+> for (float y = b.yMin - 40f; y <= b.yMax + 40f && !found; y += 2f)
+>     if (panel.Pick(new Vector2(x, y)) == btn) { hit = new Vector2(x, y); found = true; }
+> ```
+> then dispatch to `panel.Pick(hit)`. If `found` is false, the button is genuinely unreachable -
+> that is the real dead-click bug, and it looks identical to this coordinate mismatch, so always
+> report which one you measured.
 
 > **Gotcha — don't leave the picker open.** `MagicSelectionUI` only closes its list/target
 > panels when *its own* rows are clicked. Opening it with `D`/`M` and then finishing via

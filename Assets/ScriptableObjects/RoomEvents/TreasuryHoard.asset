@@ -10,20 +10,36 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
-  m_Name: GildedChest
+  m_Name: TreasuryHoard
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
-  Key: GildedChest
-  Title: 'A Gilded Chest'
-  Prompt: 'A low chest sits alone in the middle of the floor, gilt still bright, lock already sprung. Nobody leaves a chest like this open in a place like this. There is no way to tell what is waiting under the lid.'
-  Trigger: 1
+  Key: TreasuryHoard
+  Title: 'The Treasury'
+  Prompt: 'Strongboxes line the walls, prised open and emptied a long time ago. There is loose coin
+    in the corners for anyone patient enough to go along the shelves - and one gilded chest, lock
+    already sprung, that nobody has touched.'
   GoverningStat: 6
   Difficulty: 8
   Options:
-  - Label: 'Throw the lid back'
+  - Label: 'Gather the loose coin'
+    Kind: 1
+    DeclineText: ''
+    Success:
+    - Text: 'You work along the shelves and come away with a respectable double handful. The gilded
+        chest is still sitting there, still untouched, as you leave.'
+      Weight: 1
+      Effects: []
+      Targets: 0
+      LootTable: []
+      Gold: 15
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+    Failure: []
+  - Label: 'Throw the lid back on the gilded chest'
     Kind: 0
     DeclineText: ''
     Success:
-    - Text: 'The lid swings clear of a needle you never saw. Underneath: coin, and gear somebody else did not live to use.'
+    - Text: 'The lid swings clear of a needle you never saw. Underneath: coin, and gear somebody else
+        did not live to use.'
       Weight: 3
       Effects: []
       Targets: 0
@@ -43,7 +59,8 @@ MonoBehaviour:
       LoseAConsumable: 0
       AwakenedEnemies: []
     Failure:
-    - Text: 'The needle goes in above the knuckle. Whatever was on it burns all the way up the arm, and does not stop burning.'
+    - Text: 'The needle goes in above the knuckle. Whatever was on it burns all the way up the arm,
+        and does not stop burning.'
       Weight: 2
       Effects:
       - EffectType: 0
@@ -65,7 +82,8 @@ MonoBehaviour:
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
-    - Text: 'The lid comes back on a spring and the crack of it goes down every corridor on this floor. Something answers.'
+    - Text: 'The lid comes back on a spring and the crack of it goes down every corridor on this
+        floor. Something answers.'
       Weight: 1
       Effects: []
       Targets: 0
@@ -74,8 +92,8 @@ MonoBehaviour:
       LoseAConsumable: 0
       AwakenedEnemies:
       - {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
-  - Label: 'Walk past it'
+  - Label: 'Take nothing and move on'
     Kind: 2
-    DeclineText: 'You step around the chest and leave it grinning at the ceiling.'
+    DeclineText: 'You leave the shelves and the chest exactly as you found them.'
     Success: []
     Failure: []

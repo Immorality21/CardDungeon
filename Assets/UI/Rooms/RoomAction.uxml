@@ -5,9 +5,9 @@
 
         <!-- Non-combat room actions -->
         <ui:VisualElement name="main-bar" class="cd-bar cd-dock-bottom cd-hidden">
-            <ui:Button name="examine-btn" text="Examine" class="cd-cmd" />
             <ui:Button name="action-btn" text="Action" class="cd-cmd" />
             <ui:Button name="rescue-btn" text="Rescue" class="cd-cmd cd-hidden" />
+            <ui:Button name="descend-btn" text="Descend" class="cd-cmd cd-hidden" />
         </ui:VisualElement>
 
         <!-- Enemies present: start or flee -->
@@ -41,13 +41,6 @@
             <ui:VisualElement name="command-list" class="cd-command-list" />
         </ui:VisualElement>
 
-        <!-- Examine / Action option list -->
-        <ui:VisualElement name="option-window" class="cd-window cd-dock-center cd-hidden">
-            <ui:Label name="option-title" text="" class="cd-title" />
-            <ui:ScrollView name="option-scroll" class="cd-list" mode="Vertical" />
-            <ui:Button name="option-back" text="Back" class="cd-button cd-button--narrow" />
-        </ui:VisualElement>
-
         <!-- Room event: the prompt, how well the party can read its odds, and the choices -->
         <ui:VisualElement name="event-window" class="cd-window cd-dock-center cd-hidden">
             <ui:Label name="event-title" text="" class="cd-title" />
@@ -63,7 +56,10 @@
         <ui:VisualElement name="detail-window" class="cd-window cd-dock-center cd-hidden">
             <ui:Label name="detail-title" text="" class="cd-title" />
             <ui:Label name="detail-message" text="" class="cd-message" />
-            <ui:Button name="detail-ok" text="Ok" class="cd-button cd-button--narrow" />
+            <ui:VisualElement name="detail-buttons" class="cd-detail-buttons">
+                <ui:Button name="detail-ok" text="Ok" class="cd-button cd-button--wide" />
+                <ui:Button name="detail-cancel" text="Cancel" class="cd-button cd-button--wide cd-hidden" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Victory summary (shown over the battle stage) -->

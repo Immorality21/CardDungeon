@@ -7,11 +7,13 @@
 - **RunDefinitionSO** defines a campaign: an ordered list of `RunLevelEntry` (each references a `LevelDefinitionSO`, a display name, optional `ManualLevelLayoutSO`, and optional `BossEnemy`).
 - **Boss levels:** set `RunLevelEntry.BossEnemy` (an `EnemySO` with `IsBoss`) to make a level climax in a boss fight. After the exit room is designated and normal enemies spawn, `DungeonManager.PlaceBossIfConfigured` clears the exit room and drops the boss in alone. The exit room is sealed (no flee) and the run-complete fanfare fires when the boss on the **final** level falls (`DungeonManager.IsFinalRunLevel`, surfaced via `CombatResult.RunCompleted`/`BossDefeated`). See the Enemies guide.
 - **RunSaveData** (`Run.json`) tracks which level the player is on (`CurrentLevelIndex`), `ActiveDungeonSeed` for resuming mid-dungeon, and `EquippedMagic` (the drawn magic carried across levels of the run).
-- **Flow:** Menu → New Run → enter level 1 → clear exit room → level complete → menu shows next level → ... → all levels cleared → run complete.
-- **Win condition:** Each dungeon level is complete when the **exit room** is cleared (farthest room from start, designated via BFS). `Room.IsExit` marks it; `CombatManager.OnDungeonCleared` fires when it's cleared.
-- **Room events:** `LevelDefinitionSO.EventsPerLevel` says how many rooms in this level get a
-  stat-check event; `DungeonManager.PlaceRoomEvents` picks that many eligible rooms and draws one
-  event from each room's own `RoomSO.PossibleEvents`. Authoring is therefore split on purpose — the
+- **Flow:** Menu → New Run → enter level 1 → clear exit room → **Descend** → level complete → menu shows next level → ... → all levels cleared → run complete.
+- **Win condition:** Each dungeon level is complete when the player **takes the stairs** in a cleared **exit room** (farthest room from start, designated via BFS). `Room.IsExit` marks it; `RoomActionUI`'s **Descend** button is the only caller of `CombatManager.NotifyDungeonCleared()`, so finishing a level is always a decision - the player can sweep rooms they skipped or spend an event they walked past first. Clearing the exit room does *not* end the level by itself.
+- **Room events:** `DungeonManager.PlaceRoomEvents` runs in two passes. First, every room whose
+  template declares a `RoomSO.GuaranteedEvent` gets it - outside the budget, because a Treasury the
+  budget did not pick would be a room with nothing to take. The exit room is fair game, since
+  descending is a button. Then `LevelDefinitionSO.EventsPerLevel` says how many *remaining* rooms
+  get a scarce one, drawn from each room's own `RoomSO.PossibleEvents`. Authoring is therefore split on purpose — the
   room template says what *kind* of event fits it, the level says how *many* the player meets, so a
   template used three times in one level does not offer the same event three times. Skips the start
   room, the exit room, connectors and any room already holding a captive, and never places the same

@@ -287,10 +287,9 @@ Touch points: `Assets/Scripts/Combat/CombatFeedback.cs`, `Assets/Scripts/Cards/E
 
 ### 2. Room-type variety + in-run choice
 
-Right now every room is the same: `RoomSO` only carries `Width/Height/Color/EnemySpawnTable`,
-and its `ExamineOptions`/`ActionOptions` are **flavor text** with no mechanical consequence
-(`RoomActionUI.OnAction` → `ShowDetail`). The dungeon is a corridor of identical fights, so the
-player makes no meaningful decisions during a run.
+~~Right now every room is the same~~ - the room-interaction half of this is **done** (see below).
+What remains is the room-*kind* work: a `RoomKind` concept, non-combat kinds beyond the interaction
+events already in, and path/branch choice at generation time.
 
 Turn rooms into real *kinds* so the dungeon becomes a series of decisions:
 
@@ -339,6 +338,51 @@ outcome's spawned enemies are re-created on resume.
 - **Failure cannot kill.** `KeepEveryoneStanding` clamps event damage to a floor of 1 HP. There is
   no combat loop outside a fight to run a death through, so a wipe in a corridor would strand the
   game rather than show a death screen.
+
+**Then the buttons themselves were fixed (2026-08-21, after play-testing).** Events are scarce by
+design, so most rooms still had two buttons and nothing behind them - the Treasury's "Loot the gold!"
+was text. The verbs are now split by cost:
+
+- **Action costs something, so it only exists when there is something to spend it on.** It is
+  *hidden* unless the room has an unresolved event. A button that answers "there is nothing here"
+  teaches the player to stop pressing it, and then they miss the rooms where it mattered. Every
+  button on the bar is conditional now, and the bar hides itself when none applies, so an ordinary
+  cleared room shows nothing at all.
+- **Examine is gone, and so is room flavour text.** `ExamineOptions`/`ActionOptions` went first,
+  along with the option-list window whose only real entry was the event. They were briefly replaced
+  by a generated `RoomSurvey`, which was then removed as well: it restated what the player was
+  looking at. `Room.Reveal()` shows every door of the current room and leaves unexplored neighbours
+  dark, so "which way leads somewhere new" - the one line I had argued earned its place - is already
+  on screen, and enemies, the exit marker and a captive's portrait are all sprites. A free,
+  repeatable button is never a decision. `RoomEventTrigger` went too: every event is an Action, which
+  is what they all were in fiction anyway.
+- **`RoomSO.GuaranteedEvent`** for rooms that *are* an interaction. The scarce pool is right for a
+  tome and wrong for a Treasury, so a guaranteed event is offered by every instance of its room type,
+  outside the level budget (and skipped in the exit room, where entering a cleared exit ends the
+  level before anything could be used). `TreasuryHoard` is the example: *gather the loose coin*
+  (guaranteed, 15 gold) **or** *throw the lid back on the gilded chest* (the old `GildedChest` Luck
+  gamble, folded in and its asset retired) **or** walk away. Taking the sure thing spends the event,
+  so the chest is the road not taken - the decision the room exists to pose.
+- **The odds line is now about the gamble, not the window** - hidden unless an option is a
+  `StatCheck`, and worded "anything you chance here turns on Luck". With a sure thing and a gamble in
+  one event, a bare "this looks dangerous" was claiming the safe option was risky.
+
+**Then descending became a choice (2026-08-21).** Entering a cleared exit room used to complete the
+level from `GameManager.EnterRoom`, so walking into the wrong room ended it with unexplored rooms and
+unspent events behind you. The exit room is now an ordinary room plus a **Descend** button, and
+`NotifyDungeonCleared` has exactly one caller (`RoomActionUI.OnDescend`), behind a confirm.
+`FinishVictory` no longer completes the level and lost its `levelCleared` parameter; doors re-enable
+unconditionally after a win, which also un-seals a boss room. Guaranteed events are allowed in the
+exit room again - the exclusion existed only because the level used to end first, so a
+Treasury-that-is-also-the-exit works now.
+
+That also exposed a flaw in the dialogs: `ShowDetail` only ever had an Ok, so "Free them?" and
+"Descend?" were questions the player could not decline. `ShowConfirm` adds a Cancel beside it, and
+both Rescue and Descend use it.
+
+*Balance note:* every Treasury now pays at least 15 gold, against roughly 70-85 gold a
+level. Not modelled by the analyzer (it does not read events at all), so treat the curve as that much
+optimistic.
 
 **Authored content:** six events, one per stat —
 `MustyTome` (Intelligence), `GildedChest` (Luck), `SealedTomb` (Strength), `DrownedOffering`

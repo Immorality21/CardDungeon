@@ -16,8 +16,6 @@ MonoBehaviour:
   Width: 4
   Height: 4
   Color: {r: 0.35, g: 0.33, b: 0.3, a: 1}
-  ExamineOptions: []
-  ActionOptions: []
   IsConnectorRoom: 0
   PossibleEvents:
   - {fileID: 11400000, guid: 2fd1a731a1db42b79da28ade75858bb8, type: 2}
