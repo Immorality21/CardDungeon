@@ -19,6 +19,9 @@ MonoBehaviour:
   ExamineOptions: []
   ActionOptions: []
   IsConnectorRoom: 0
+  PossibleEvents:
+  - {fileID: 11400000, guid: 2fd1a731a1db42b79da28ade75858bb8, type: 2}
+  - {fileID: 11400000, guid: 9af35de6983d4f5bbbf3157922c3c6e4, type: 2}
   EnemySpawnTable:
   - Enemy: {fileID: 11400000, guid: a848d09629a0a134084775e476779b74, type: 2}
     SpawnChance: 0.4

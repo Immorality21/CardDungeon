@@ -35,6 +35,11 @@ namespace Tests.EditMode
                 {
                     EffectType = effect,
                     Power = power,
+                    // Damage scaling is opt-in per effect now, and these tests all assert
+                    // "the hero's Strength plus the card's power" - so the cards they build are
+                    // Strength-scaled cards. Heals, buffs and debuffs assert their power alone,
+                    // which is StatType.None (flat).
+                    ScalingStat = effect == SpellEffectType.Damage ? StatType.Strength : StatType.None,
                     DamageType = damageType,
                     BuffType = buffType,
                     Duration = duration
@@ -192,7 +197,9 @@ namespace Tests.EditMode
         [Test]
         public void Damage_SkipsDeadTargets()
         {
-            _enemy.Stats[StatType.MaxHealth] = 0;
+            // Health, not MaxHealth: IsAlive reads current health, and zeroing the bar under a
+            // full one leaves the unit standing.
+            _enemy.Stats.Health = 0;
             var card = CreateCard("Slash", SpellEffectType.Damage, power: 5);
             var action = MakeAction(card, _hero, _enemy);
 
@@ -207,7 +214,7 @@ namespace Tests.EditMode
         [Test]
         public void Heal_IncreasesHealth()
         {
-            _hero.Stats[StatType.MaxHealth] = 60;
+            _hero.Stats.Health = 60;
             var card = CreateCard("Heal", SpellEffectType.Heal, power: 20);
             var action = MakeAction(card, _hero, _hero);
 
@@ -219,7 +226,7 @@ namespace Tests.EditMode
         [Test]
         public void Heal_ClampsToMaxHealth()
         {
-            _hero.Stats[StatType.MaxHealth] = 95;
+            _hero.Stats.Health = 95;
             var card = CreateCard("Heal", SpellEffectType.Heal, power: 20);
             var action = MakeAction(card, _hero, _hero);
 
@@ -243,7 +250,7 @@ namespace Tests.EditMode
         [Test]
         public void Heal_SkipsDeadTargets()
         {
-            _hero.Stats[StatType.MaxHealth] = 0;
+            _hero.Stats.Health = 0;
             var card = CreateCard("Heal", SpellEffectType.Heal, power: 20);
             var action = MakeAction(card, _hero, _hero);
 
@@ -286,7 +293,7 @@ namespace Tests.EditMode
             var result = _calculator.Execute(action, _buffTracker);
 
             Assert.AreEqual(1, result.Entries.Count);
-            Assert.AreEqual("+7 Attack", result.Entries[0].Text);
+            Assert.AreEqual("+7 Strength", result.Entries[0].Text);
         }
 
         // ---- Debuff ----
@@ -311,7 +318,7 @@ namespace Tests.EditMode
             var result = _calculator.Execute(action, _buffTracker);
 
             Assert.AreEqual(1, result.Entries.Count);
-            Assert.AreEqual("-3 Attack", result.Entries[0].Text);
+            Assert.AreEqual("-3 Strength", result.Entries[0].Text);
         }
 
         // ---- Multi-Effect ----
@@ -321,7 +328,7 @@ namespace Tests.EditMode
         {
             var card = CreateMultiEffectCard("LightningBolt", new List<SpellEffect>
             {
-                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, DamageType = DamageType.Lightning },
+                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, ScalingStat = StatType.Strength, DamageType = DamageType.Lightning },
                 new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Endurance, Duration = 3 }
             });
             var action = MakeAction(card, _hero, _enemy);
@@ -343,7 +350,7 @@ namespace Tests.EditMode
             var card = CreateMultiEffectCard("Combo", new List<SpellEffect>
             {
                 new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 3, BuffType = BuffType.Endurance, Duration = 3 },
-                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, DamageType = DamageType.Normal }
+                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, ScalingStat = StatType.Strength, DamageType = DamageType.Normal }
             });
             var action = MakeAction(card, _hero, _enemy);
 
@@ -413,7 +420,7 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Blood }, 3);
 
-            _hero.Stats[StatType.MaxHealth] = 70;
+            _hero.Stats.Health = 70;
             var card = CreateCard("DarkBolt", SpellEffectType.Damage, power: 5, tags: new List<MagicTag> { MagicTag.Dark });
             var action = MakeAction(card, _hero, _enemy);
 
@@ -430,7 +437,7 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Blood }, 3);
 
-            _hero.Stats[StatType.MaxHealth] = 90;
+            _hero.Stats.Health = 90;
             var card = CreateCard("DarkBolt", SpellEffectType.Damage, power: 5, tags: new List<MagicTag> { MagicTag.Dark });
             var action = MakeAction(card, _hero, _enemy);
 
@@ -635,7 +642,7 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_hero, new List<MagicTag> { MagicTag.Water }, 3);
 
-            _hero.Stats[StatType.MaxHealth] = 50;
+            _hero.Stats.Health = 50;
             var card = CreateCard("Bloom", SpellEffectType.Heal, power: 10, tags: new List<MagicTag> { MagicTag.Nature });
             var action = MakeAction(card, _hero, _hero);
 
@@ -756,7 +763,7 @@ namespace Tests.EditMode
         {
             var card = CreateMultiEffectCard("Gated", new List<SpellEffect>
             {
-                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, UnlockLevel = 3 }
+                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, ScalingStat = StatType.Strength, UnlockLevel = 3 }
             });
             var action = MakeAction(card, _hero, _enemy);
             int before = _enemy.Stats.Health;
@@ -771,7 +778,7 @@ namespace Tests.EditMode
         {
             var card = CreateMultiEffectCard("Gated", new List<SpellEffect>
             {
-                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, UnlockLevel = 3 }
+                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, ScalingStat = StatType.Strength, UnlockLevel = 3 }
             });
             var action = MakeAction(card, _hero, _enemy);
             int before = _enemy.Stats.Health;

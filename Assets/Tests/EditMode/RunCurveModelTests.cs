@@ -166,9 +166,11 @@ namespace Tests.EditMode
 
             var curve = RunCurve.Build(run, SturdyParty(), Rules());
 
-            // Ten rooms drawn uniformly from a two-room pool: five of each, and only one has enemies.
-            Assert.AreEqual(5f, curve.Levels[0].ExpectedCombatRooms, 0.0001f);
-            Assert.AreEqual(5f, curve.Levels[0].ExpectedEnemyCount, 0.0001f);
+            // Ten rooms drawn uniformly from a two-room pool, minus the party's starting room
+            // (EnemyManager.SpawnEnemies skips it): 9 populated, 4.5 of each, and only one of the
+            // two pool entries has enemies.
+            Assert.AreEqual(4.5f, curve.Levels[0].ExpectedCombatRooms, 0.0001f);
+            Assert.AreEqual(4.5f, curve.Levels[0].ExpectedEnemyCount, 0.0001f);
         }
 
         [Test]
@@ -253,8 +255,9 @@ namespace Tests.EditMode
             var plain = RunCurve.Build(withoutBoss, party, rules);
             var bossed = RunCurve.Build(withBoss, party, rules);
 
-            Assert.AreEqual(4f, plain.Levels[0].ExpectedCombatRooms, 0.0001f);
-            Assert.AreEqual(4f, bossed.Levels[0].ExpectedCombatRooms, 0.0001f,
+            // Four generated rooms less the unpopulated starting room.
+            Assert.AreEqual(3f, plain.Levels[0].ExpectedCombatRooms, 0.0001f);
+            Assert.AreEqual(3f, bossed.Levels[0].ExpectedCombatRooms, 0.0001f,
                 "EnemyManager wipes the exit room before placing the boss, so the boss replaces a room.");
             Assert.Greater(bossed.Levels[0].BossDanger, 0f);
             Assert.Greater(bossed.Levels[0].BossToTrashRatio, 1f, "A boss should outweigh the level's trash.");
@@ -283,7 +286,9 @@ namespace Tests.EditMode
             var curve = RunCurve.Build(run, SturdyParty(), Rules());
 
             Assert.AreEqual("Manual", curve.Levels[0].LayoutKind);
-            Assert.AreEqual(3f, curve.Levels[0].ExpectedCombatRooms, 0.0001f);
+            // Three hand-placed rooms, one of which is the start room (StartRoomIndex 0) and so
+            // never spawns anything.
+            Assert.AreEqual(2f, curve.Levels[0].ExpectedCombatRooms, 0.0001f);
         }
 
         [Test]
@@ -304,8 +309,9 @@ namespace Tests.EditMode
 
             var curve = RunCurve.Build(run, SturdyParty(), Rules());
 
-            Assert.AreEqual(60f, curve.TotalExpectedXp, 0.0001f);
-            Assert.AreEqual(30f, curve.TotalExpectedGold, 0.0001f);
+            // Two levels x (3 generated rooms - the empty start room) x one 10xp/5g goblin.
+            Assert.AreEqual(40f, curve.TotalExpectedXp, 0.0001f);
+            Assert.AreEqual(20f, curve.TotalExpectedGold, 0.0001f);
         }
 
         [Test]

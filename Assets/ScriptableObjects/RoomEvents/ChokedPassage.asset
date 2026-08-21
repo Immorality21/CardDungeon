@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: ChokedPassage
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: ChokedPassage
+  Title: 'A Choked Passage'
+  Prompt: 'Half the ceiling has come down across a side passage, and the draught coming through the gap smells of open air rather than more dungeon. The top slab is the only thing holding the rest up. Somebody could get a shoulder under it.'
+  Trigger: 1
+  GoverningStat: 2
+  Difficulty: 10
+  Options:
+  - Label: 'Get a shoulder under it'
+    Kind: 0
+    DeclineText: ''
+    Success:
+    - Text: 'You take the weight long enough for the rest of the party to clear the gap, and what is behind it: a dead porter, still carrying.'
+      Weight: 3
+      Effects: []
+      Targets: 0
+      LootTable:
+      - {fileID: 11400000, guid: 48143a77cb3b71041a7cbf5a38862834, type: 2}
+      - {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
+      Gold: 20
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+    - Text: 'You hold it. It costs you something to hold it, and the passage behind is empty besides a dropped purse.'
+      Weight: 1
+      Effects:
+      - EffectType: 0
+        Power: 3
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 0
+        Duration: 3
+        UnlockLevel: 0
+      Targets: 0
+      LootTable: []
+      Gold: 15
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+    Failure:
+    - Text: 'The slab shifts the wrong way and the rest of it follows. Everyone comes out of the dust coughing and bleeding.'
+      Weight: 2
+      Effects:
+      - EffectType: 0
+        Power: 3
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 0
+        Duration: 3
+        UnlockLevel: 0
+      Targets: 1
+      LootTable: []
+      Gold: 0
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+    - Text: 'It settles onto your back before you can get clear. Nothing broken - but nothing works quite right for a while either.'
+      Weight: 1
+      Effects:
+      - EffectType: 0
+        Power: 4
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 0
+        Duration: 3
+        UnlockLevel: 0
+      - EffectType: 3
+        Power: 2
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 2
+        Duration: 3
+        UnlockLevel: 0
+      Targets: 0
+      LootTable: []
+      Gold: 0
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+  - Label: 'Leave the passage blocked'
+    Kind: 2
+    DeclineText: 'The draught is not worth the ceiling. You go the long way.'
+    Success: []
+    Failure: []

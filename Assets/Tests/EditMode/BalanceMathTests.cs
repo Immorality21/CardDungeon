@@ -26,6 +26,12 @@ namespace Tests.EditMode
                 DisplayName = name,
                 IsHero = isHero,
                 Stats = TestStats.Make(attack, defense, health, agility),
+                // Effective is what SimUnit.GetEffectiveStat reads (gear and level gains are
+                // folded in at build time), and AttackStat is what a Strength buff has to name to
+                // reach the attacker. Neither is derived from Stats, so a factory that sets only
+                // Stats produces a unit with 0 defense, 0 agility and no buffable attack stat.
+                Effective = TestStats.Block(attack, defense, health, agility),
+                AttackStat = StatType.Strength,
                 EffectiveAttackPower = attack,
                 Resistances = new List<Resistance>()
             };

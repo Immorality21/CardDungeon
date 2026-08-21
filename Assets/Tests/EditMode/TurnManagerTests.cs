@@ -94,8 +94,9 @@ namespace Tests.EditMode
 
             _turnManager.Initialize(new List<ICombatUnit> { alive, dead });
 
-            // Kill the fast unit
-            dead.Stats[StatType.MaxHealth] = 0;
+            // Kill the fast unit. Health, not MaxHealth: IsAlive reads current health, so
+            // resizing the bar under a full one leaves the unit standing (and fast).
+            dead.Stats.Health = 0;
 
             var next = _turnManager.GetNextUnit();
 
@@ -109,7 +110,7 @@ namespace Tests.EditMode
 
             _turnManager.Initialize(new List<ICombatUnit> { unit });
 
-            unit.Stats[StatType.MaxHealth] = 0;
+            unit.Stats.Health = 0;
 
             var next = _turnManager.GetNextUnit();
 
@@ -171,7 +172,7 @@ namespace Tests.EditMode
 
             _turnManager.Initialize(new List<ICombatUnit> { alive, dead });
 
-            dead.Stats[StatType.MaxHealth] = 0;
+            dead.Stats.Health = 0;
 
             var order = _turnManager.GetTurnOrder(3);
 

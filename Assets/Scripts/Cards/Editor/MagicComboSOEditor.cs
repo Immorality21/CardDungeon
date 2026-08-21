@@ -16,7 +16,7 @@ public class MagicComboSOEditor : Editor
         _effectsList.drawHeaderCallback = rect =>
         {
             // No Scaling Stat field here on purpose: EffectResolver runs combo effects with
-            // isComboEffect = true, which uses Power flat. Combo power belongs to the combo,
+            // flatPower = true, which uses Power flat. Combo power belongs to the combo,
             // not to whoever happened to land the second tag.
             EditorGUI.LabelField(rect, new GUIContent("Bonus Effects (flat power — not caster-scaled)",
                 "Combo effects ignore the caster's stats by design."));

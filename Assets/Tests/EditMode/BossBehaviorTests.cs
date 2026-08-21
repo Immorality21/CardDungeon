@@ -71,7 +71,9 @@ namespace Tests.EditMode
         [Test]
         public void Enraged_AttacksHarder()
         {
-            _self.Stats[StatType.MaxHealth] = 20; // 20% of 100 → below the enrage threshold
+            // Health, not MaxHealth: the enrage check is Health/MaxHealth, so shrinking the bar
+            // under a full one reads as 500% health rather than 20%.
+            _self.Stats.Health = 20; // 20% of 100 → below the enrage threshold
 
             var decision = _boss.Decide(_self, Context(turnCount: 1));
 
@@ -82,7 +84,7 @@ namespace Tests.EditMode
         [Test]
         public void Enraged_UsesTighterSignatureCadence()
         {
-            _self.Stats[StatType.MaxHealth] = 20; // enraged
+            _self.Stats.Health = 20; // enraged
 
             // EnragedSignatureInterval (2) triggers on a turn the normal interval (3) would not.
             var decision = _boss.Decide(_self, Context(turnCount: BossBehavior.EnragedSignatureInterval));
@@ -93,7 +95,7 @@ namespace Tests.EditMode
         [Test]
         public void Charging_TakesPriorityOverEnrageCadence()
         {
-            _self.Stats[StatType.MaxHealth] = 20; // enraged
+            _self.Stats.Health = 20; // enraged
 
             var decision = _boss.Decide(_self, Context(turnCount: BossBehavior.EnragedSignatureInterval, charging: true));
 

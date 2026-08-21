@@ -6,6 +6,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Combat.Audio;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -29,6 +30,7 @@ namespace Assets.Scripts.Rooms
         private VisualElement _heroBar;
         private VisualElement _optionWindow;
         private VisualElement _detailWindow;
+        private VisualElement _eventWindow;
         private VisualElement _partyStatus;
         private VisualElement _partyStatusRows;
 
@@ -40,6 +42,12 @@ namespace Assets.Scripts.Rooms
         private Label _detailTitle;
         private Label _detailMessage;
         private ScrollView _optionScroll;
+
+        private Label _eventTitle;
+        private Label _eventPrompt;
+        private Label _eventOdds;
+        private ScrollView _eventOptions;
+        private Button _eventBack;
 
         private Button _examineBtn;
         private Button _actionBtn;
@@ -68,6 +76,12 @@ namespace Assets.Scripts.Rooms
         private ICombatUnit _currentHeroTurn;
         private Room _currentRoom;
         private Door _entryDoor;
+
+        // Room-event state, live only while the event window is up.
+        private readonly Events.RoomEventRunner _eventRunner = new Events.RoomEventRunner();
+        private Events.RoomEventSO _currentEvent;
+        private Heroes.Hero _eventActingHero;
+        private float _eventChance;
 
         // Cursor-driven command menu (FFX-style selection list).
         private enum HeroCommand { Attack, Magic, Draw, Item, Skip }
@@ -108,6 +122,7 @@ namespace Assets.Scripts.Rooms
             _heroBar = root.Q<VisualElement>("hero-bar");
             _optionWindow = root.Q<VisualElement>("option-window");
             _detailWindow = root.Q<VisualElement>("detail-window");
+            _eventWindow = root.Q<VisualElement>("event-window");
             _partyStatus = root.Q<VisualElement>("party-status");
             _partyStatusRows = root.Q<VisualElement>("party-status-rows");
             _commandList = root.Q<VisualElement>("command-list");
@@ -123,6 +138,12 @@ namespace Assets.Scripts.Rooms
             _detailTitle = root.Q<Label>("detail-title");
             _detailMessage = root.Q<Label>("detail-message");
             _optionScroll = root.Q<ScrollView>("option-scroll");
+
+            _eventTitle = root.Q<Label>("event-title");
+            _eventPrompt = root.Q<Label>("event-prompt");
+            _eventOdds = root.Q<Label>("event-odds");
+            _eventOptions = root.Q<ScrollView>("event-options");
+            _eventBack = root.Q<Button>("event-back");
 
             _examineBtn = root.Q<Button>("examine-btn");
             _actionBtn = root.Q<Button>("action-btn");
@@ -144,13 +165,17 @@ namespace Assets.Scripts.Rooms
             _fightBtn.clicked += OnFight;
             _fleeBtn.clicked += OnFlee;
             _optionBack.clicked += OnBack;
+            if (_eventBack != null)
+            {
+                _eventBack.clicked += OnEventBack;
+            }
             _detailOk.clicked += () => _detailOkAction?.Invoke();
             _victoryContinue.clicked += OnVictoryContinue;
 
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _examineBtn, _actionBtn, _rescueBtn, _fightBtn, _fleeBtn, _optionBack, _detailOk, _victoryContinue, _optionScroll })
+            foreach (var focusable in new Focusable[] { _examineBtn, _actionBtn, _rescueBtn, _fightBtn, _fleeBtn, _optionBack, _detailOk, _victoryContinue, _optionScroll, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -188,6 +213,7 @@ namespace Assets.Scripts.Rooms
             _entryDoor = entryDoor;
             SetShown(_optionWindow, false);
             SetShown(_detailWindow, false);
+            SetShown(_eventWindow, false);
 
             bool hasEnemy = room.Enemies.Any(e => e != null && e.IsAlive);
             SetShown(_combatBar, hasEnemy);
@@ -247,6 +273,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_heroBar, false);
             SetShown(_optionWindow, false);
             SetShown(_detailWindow, false);
+            SetShown(_eventWindow, false);
             SetShown(_partyStatus, false);
             SetShown(_turnOrder, false);
             SetShown(_victoryWindow, false);
@@ -259,36 +286,245 @@ namespace Assets.Scripts.Rooms
         private void OnExamine()
         {
             ShowOptionList("Examine", _currentRoom.RoomSO.ExamineOptions,
+                Events.RoomEventTrigger.Examine,
                 text => ShowDetail("Examine", text));
         }
 
         private void OnAction()
         {
             ShowOptionList("Action", _currentRoom.RoomSO.ActionOptions,
+                Events.RoomEventTrigger.Action,
                 text => ShowDetail("Action", text));
         }
 
-        private void ShowOptionList(string title, List<string> options, Action<string> onSelect)
+        private void ShowOptionList(
+            string title,
+            List<string> options,
+            Events.RoomEventTrigger trigger,
+            Action<string> onSelect)
         {
             SetShown(_mainBar, false);
             _optionTitle.text = title;
             _optionScroll.Clear();
 
-            if (options == null || options.Count == 0)
+            var roomEvent = PendingEventFor(trigger);
+            bool hasFlavour = options != null && options.Count > 0;
+
+            if (roomEvent == null && !hasFlavour)
             {
                 ShowDetail("Nothing", "There is nothing here.");
                 return;
             }
 
-            foreach (var option in options)
+            // Listed first: it is the one entry in here that does something, and burying it under
+            // three lines of flavour would make the room's one decision easy to walk past.
+            if (roomEvent != null)
             {
-                var captured = option;
-                var btn = new Button(() => onSelect(captured)) { text = option };
-                btn.AddToClassList("cd-list-button");
-                _optionScroll.Add(btn);
+                var eventBtn = new Button(() => ShowRoomEvent(roomEvent)) { text = roomEvent.Title };
+                eventBtn.AddToClassList("cd-list-button");
+                eventBtn.focusable = false;
+                _optionScroll.Add(eventBtn);
+            }
+
+            if (hasFlavour)
+            {
+                foreach (var option in options)
+                {
+                    var captured = option;
+                    var btn = new Button(() => onSelect(captured)) { text = option };
+                    btn.AddToClassList("cd-list-button");
+                    _optionScroll.Add(btn);
+                }
             }
 
             SetShown(_optionWindow, true);
+        }
+
+        // ============================================================
+        //  ROOM EVENTS
+        // ============================================================
+
+        /// <summary>
+        /// The room's unresolved event, when this button is the one that offers it. The other button
+        /// keeps its flavour text, so which one hides the gamble is part of the event's authoring.
+        /// </summary>
+        private Events.RoomEventSO PendingEventFor(Events.RoomEventTrigger trigger)
+        {
+            if (_currentRoom == null || !_currentRoom.HasPendingEvent)
+            {
+                return null;
+            }
+
+            return _currentRoom.RoomEvent.Trigger == trigger ? _currentRoom.RoomEvent : null;
+        }
+
+        /// <summary>
+        /// Opens the event: the fiction, how well the party can read the risk, and the choices. The
+        /// check resolves against the party's <i>best</i> hero at the governing stat, and that hero
+        /// is named - the point of a specialist is being able to see them earn their slot.
+        /// </summary>
+        private void ShowRoomEvent(Events.RoomEventSO roomEvent)
+        {
+            var party = GameManager.Instance.Party;
+            var units = new List<ICombatUnit>();
+            if (party != null)
+            {
+                foreach (var hero in party.Heroes)
+                {
+                    if (hero != null)
+                    {
+                        units.Add(hero);
+                    }
+                }
+            }
+
+            _currentEvent = roomEvent;
+            _eventActingHero = Events.RoomEventResolver.BestFor(units, roomEvent.GoverningStat) as Heroes.Hero;
+
+            int statValue = _eventActingHero != null
+                ? _eventActingHero.GetEffectiveStat(roomEvent.GoverningStat)
+                : 0;
+            _eventChance = Events.RoomEventResolver.SuccessChance(statValue, roomEvent.Difficulty);
+
+            var band = Events.RoomEventResolver.BandFor(_eventChance);
+            var clarity = Events.RoomEventResolver.ClarityFor(statValue, roomEvent.Difficulty);
+
+            SetShown(_optionWindow, false);
+            _eventTitle.text = roomEvent.Title;
+            _eventPrompt.text = roomEvent.Prompt;
+            _eventOdds.text = BuildOddsLine(roomEvent, band, clarity);
+
+            _eventOptions.Clear();
+            for (int i = 0; i < roomEvent.Options.Count; i++)
+            {
+                var option = roomEvent.Options[i];
+                if (option == null || string.IsNullOrEmpty(option.Label))
+                {
+                    continue;
+                }
+
+                int captured = i;
+                var btn = new Button(() => OnEventOptionChosen(captured)) { text = option.Label };
+                btn.AddToClassList("cd-list-button");
+                btn.focusable = false;
+                _eventOptions.Add(btn);
+            }
+
+            SetShown(_eventWindow, true);
+        }
+
+        private string BuildOddsLine(
+            Events.RoomEventSO roomEvent,
+            Events.OddsBand band,
+            Events.OddsClarity clarity)
+        {
+            string reading = Events.RoomEventResolver.DescribeOdds(band, clarity);
+            string statName = StatCatalog.DisplayName(roomEvent.GoverningStat);
+
+            if (_eventActingHero == null)
+            {
+                return $"This comes down to {statName}. {reading}";
+            }
+
+            return $"This comes down to {statName} - {_eventActingHero.DisplayName} has the best of it. {reading}";
+        }
+
+        /// <summary>
+        /// Resolves the chosen option and applies whatever came of it. The resolution is written to
+        /// the room <b>and</b> saved at once: without that the player re-rolls a bad outcome by
+        /// walking out and back in, or by quitting to the menu and resuming.
+        /// </summary>
+        private void OnEventOptionChosen(int optionIndex)
+        {
+            if (_currentEvent == null || optionIndex < 0 || optionIndex >= _currentEvent.Options.Count)
+            {
+                return;
+            }
+
+            var option = _currentEvent.Options[optionIndex];
+            SetShown(_eventWindow, false);
+
+            if (option.Kind == Events.RoomEventOptionKind.Decline)
+            {
+                // Walking away leaves the event unconsumed - the choice is deferred, not spent.
+                string declineText = string.IsNullOrEmpty(option.DeclineText)
+                    ? "You leave it be."
+                    : option.DeclineText;
+                ShowDetail(_currentEvent.Title, declineText);
+                _detailOkAction = CloseEventResult;
+                return;
+            }
+
+            bool succeeded = option.Kind == Events.RoomEventOptionKind.Guaranteed
+                || Events.RoomEventResolver.Passes(_eventChance, UnityEngine.Random.Range(0f, 1f));
+
+            var pool = succeeded ? option.Success : option.Failure;
+            int outcomeIndex = Events.RoomEventResolver.PickOutcomeIndex(pool, UnityEngine.Random.Range(0f, 1f));
+            var outcome = outcomeIndex >= 0 ? pool[outcomeIndex] : null;
+
+            var report = _eventRunner.Apply(
+                outcome,
+                succeeded,
+                _currentRoom,
+                GameManager.Instance.Party,
+                _eventActingHero,
+                DungeonManager.HasInstance ? DungeonManager.Instance.Afflictions : null);
+
+            _currentRoom.MarkEventResolved(optionIndex, outcomeIndex, succeeded);
+            if (DungeonSaveManager.HasInstance)
+            {
+                DungeonSaveManager.Instance.Save(_currentRoom);
+            }
+
+            ShowEventResult(report);
+        }
+
+        private void ShowEventResult(Events.RoomEventOutcomeReport report)
+        {
+            string message = string.IsNullOrEmpty(report.Text) ? "Nothing comes of it." : report.Text;
+            if (report.Lines.Count > 0)
+            {
+                message += "\n\n" + string.Join("\n", report.Lines);
+            }
+
+            ShowDetail(_currentEvent.Title, message);
+
+            // A woken room is a different room: re-show it so the Fight/Flee bar replaces the
+            // Examine/Action one, rather than leaving the player among live enemies with
+            // non-combat buttons.
+            bool woken = report.SpawnedEnemies;
+            _detailOkAction = () =>
+            {
+                SetShown(_detailWindow, false);
+                _currentEvent = null;
+                _eventActingHero = null;
+
+                if (woken)
+                {
+                    Show(_currentRoom, _entryDoor);
+                }
+                else
+                {
+                    ShowMainBar();
+                }
+            };
+        }
+
+        private void CloseEventResult()
+        {
+            SetShown(_detailWindow, false);
+            _currentEvent = null;
+            _eventActingHero = null;
+            ShowMainBar();
+        }
+
+        private void OnEventBack()
+        {
+            SetShown(_eventWindow, false);
+            _eventOptions.Clear();
+            _currentEvent = null;
+            _eventActingHero = null;
+            ShowMainBar();
         }
 
         private void ShowDetail(string title, string message)

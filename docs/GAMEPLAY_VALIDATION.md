@@ -87,12 +87,72 @@ Hard-won gotchas (each cost a failed compile until learned):
     scope and then fails on it (`CS1527: Elements defined in a namespace cannot be explicitly
     declared as private`). Declare helper types as *separate top-level* `internal` classes
     alongside `CommandScript` — several top-level classes in one command is fine.
-12. **You cannot observe an EditMode test run from inside a command.** `TestRunnerApi.Execute`
-    triggers a domain reload that destroys the sandbox assembly, so your `ICallbacks` object dies
-    before `RunFinished` and the console comes back empty. To check the balance suite headlessly,
-    run `BalanceAnalyzer` directly and evaluate `BalanceRegressionTests`' predicates against the
-    returned `report.Issues` — same logic, one command, no reload. (See
-    `Assets/Scripts/Balance/CLAUDE.md`.)
+12. **You CAN run the EditMode suite from inside a command — set `runSynchronously`.** This entry
+    used to say it was impossible: `TestRunnerApi.Execute` triggers a domain reload that destroys
+    the sandbox assembly, so the `ICallbacks` object dies before `RunFinished` and the console comes
+    back empty. That is only true for the default async run. `ExecutionSettings.runSynchronously =
+    true` runs EditMode tests in-process with **no** reload, so a callback declared as a top-level
+    class in the same command survives and `Execute` returns with results in hand. (Verified on Unity
+    Test Framework **1.7.0**; the whole 369-case suite finishes in about a second.)
+
+    ```csharp
+    using UnityEditor.TestTools.TestRunner.Api;
+
+    internal class Collector : ICallbacks
+    {
+        public static readonly List<string> Failures = new List<string>();
+        public static string Summary;
+        public void RunStarted(ITestAdaptor t) { }
+        public void RunFinished(ITestResultAdaptor r)
+        {
+            Summary = "passed=" + r.PassCount + " failed=" + r.FailCount;
+        }
+        public void TestStarted(ITestAdaptor t) { }
+        public void TestFinished(ITestResultAdaptor r)
+        {
+            // Leaf results only — HasChildren nodes are suites and would double-count.
+            if (r.TestStatus == TestStatus.Failed && !r.HasChildren)
+            {
+                Failures.Add(r.FullName + " :: " + r.Message);
+            }
+        }
+    }
+
+    internal class CommandScript : IRunCommand
+    {
+        public void Execute(ExecutionResult result)
+        {
+            Collector.Failures.Clear();
+            var api = ScriptableObject.CreateInstance<TestRunnerApi>();
+            var collector = new Collector();
+            api.RegisterCallbacks(collector);
+
+            var settings = new ExecutionSettings(new Filter { testMode = TestMode.EditMode });
+            settings.runSynchronously = true;          // <-- the whole trick
+            api.Execute(settings);
+            api.UnregisterCallbacks(collector);
+
+            result.Log(Collector.Summary + "
+" + string.Join("
+", Collector.Failures));
+        }
+    }
+    ```
+
+    Narrow it with `Filter.groupNames` (regex on the full class name, e.g.
+    `"Tests\.EditMode\.TurnManagerTests"`) or `Filter.testNames`, and
+    `Filter.categoryNames = new[] { "Balance" }` to include/exclude the balance suite. Keep the
+    callback's static state cleared at the top of each run — statics survive between commands.
+
+    **Use this to establish a baseline before you change anything.** `git stash push -u`, run the
+    suite, `git stash pop`, run again, and diff the failure *names*: that is how "did I break this?"
+    becomes a measurement instead of an argument. Unity needs an `AssetDatabase.Refresh` and a beat
+    to recompile after the stash, and the discovered *case count* moving is your proof the recompile
+    actually happened.
+
+    The old workaround still has a use: to check only the balance findings without a test run, call
+    `BalanceAnalyzer.Analyze` directly and evaluate `BalanceRegressionTests`' predicates against the
+    returned `report.Issues`. (See `Assets/Scripts/Balance/CLAUDE.md`.)
 13. **To A/B a ScriptableObject value without touching the asset**, `Object.Instantiate` it, mutate
     the clone, swap it into the input (e.g. `BalanceInput.Heroes`), analyse, then
     `Object.DestroyImmediate` the clone. Mutating the asset instance returned by

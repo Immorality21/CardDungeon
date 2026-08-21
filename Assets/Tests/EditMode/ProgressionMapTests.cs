@@ -107,10 +107,16 @@ namespace Tests.EditMode
             return room;
         }
 
+        /// <summary>
+        /// A level built from exactly these rooms. Generates <c>rooms.Length + 1</c>: the model takes
+        /// the party's starting room off the total before spreading the rest across the pool (
+        /// <c>EnemyManager.SpawnEnemies</c> skips the room the party spawns in), so asking for one
+        /// room per pool entry would leave every entry expected zero times and every weight at 0.
+        /// </summary>
         private LevelDefinitionSO Template(params RoomSO[] rooms)
         {
             var template = Make<LevelDefinitionSO>();
-            template.RoomsToGenerate = rooms.Length;
+            template.RoomsToGenerate = rooms.Length + 1;
             template.RoomPool = new List<RoomSO>(rooms);
             return template;
         }

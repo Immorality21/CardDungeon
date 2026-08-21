@@ -48,6 +48,17 @@
             <ui:Button name="option-back" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
+        <!-- Room event: the prompt, how well the party can read its odds, and the choices -->
+        <ui:VisualElement name="event-window" class="cd-window cd-dock-center cd-hidden">
+            <ui:Label name="event-title" text="" class="cd-title" />
+            <ui:Label name="event-prompt" text="" class="cd-message" />
+            <ui:Label name="event-odds" text="" class="cd-event-odds" />
+            <!-- The fit variant keeps this list content-sized: a flex-grow list inside a window
+                 that does not clip spills over the Back button below and eats its clicks. -->
+            <ui:ScrollView name="event-options" class="cd-list cd-list--fit" mode="Vertical" />
+            <ui:Button name="event-back" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
         <!-- Detail / result / death dialog -->
         <ui:VisualElement name="detail-window" class="cd-window cd-dock-center cd-hidden">
             <ui:Label name="detail-title" text="" class="cd-title" />

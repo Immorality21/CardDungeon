@@ -18,7 +18,7 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 - **Game scene:** `Assets/Scenes/MainGameScene.unity`
 - **Target platform:** Windows 64-bit Standalone
 - No custom build scripts — use Unity Editor build pipeline or IDE compilation
-- **Tests:** Unity Test Framework (1.1.33) — EditMode tests in `Assets/Tests/EditMode/`. Run via Unity Test Runner (Window → General → Test Runner). `dotnet test` cannot run these (no test SDK/adapter in the Unity csproj); use it only to compile-check.
+- **Tests:** Unity Test Framework (**1.7.0**) — EditMode tests in `Assets/Tests/EditMode/`. Run via Unity Test Runner (Window → General → Test Runner), or **headlessly through the Unity MCP** with `ExecutionSettings.runSynchronously = true` — see gotcha 12 in `docs/GAMEPLAY_VALIDATION.md` for a copy-paste harness. `dotnet test` cannot run these (no test SDK/adapter in the Unity csproj); use it only to compile-check.
 
 ## Architecture
 
@@ -33,6 +33,7 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 **`Assets.Scripts.*`** — Game-specific code:
 - `UnitStats/` — **the stat model**: `StatType` (the one stat enum, `None = 0`), `UnitStat` (one stat + amount), `StatBlock` (a sparse, indexable set), **`StatCatalog`** (the one per-stat mapping — labels, recruit/power weights, authoring defaults, iteration order), and `Editor/StatBlockDrawer` (one labelled row per stat in the inspector). **Adding a stat is one `StatType` member plus one `StatCatalog` row**; `StatCatalogTests` fails if the row is missing.
 - `Rooms/` — Dungeon generation (`RoomManager`, `RoomNode`, `Room`, `Door`, `RoomSO`), `GameManager`, `CombatManager`
+- `Rooms/Events/` — **room events**: stat-resolved Examine/Action gambles (`RoomEventSO`, `RoomEventResolver`, `RoomEventRunner`, `LevelAfflictionTracker`)
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `LevelConfiguration`, `HeroSaveData`
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`
 - `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`
@@ -76,7 +77,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 ## Testing
 
 - **Location:** `Assets/Tests/EditMode/`
-- **Framework:** Unity Test Framework 1.1.33 (NUnit-based). Run via Unity Test Runner.
+- **Framework:** Unity Test Framework 1.7.0 (NUnit-based). Run via Unity Test Runner, or headlessly via the Unity MCP (`runSynchronously`) — see `docs/GAMEPLAY_VALIDATION.md` gotcha 12.
 - **Test coverage:** `TurnManager`, `DamageCalculator`, `CombatBuffTracker`, `MagicTagTracker`, `ComboDetector`, `EffectResolver`, `Stats`, magic upgrade power bonus + meta economy math (`MagicUpgradeTests`), extension methods, balance metrics (`BalanceMathTests`, `RunCurveModelTests`, `EncounterSimulatorTests`, `ProgressionMapTests`)
 - **Balance regression suite:** `BalanceRegressionTests` runs the balance analyzer over the project's real assets and fails on any finding outside the bands in `BalanceRules`. Category `Balance`, so it can be filtered out of a quick unit pass. See `Assets/Scripts/Balance/CLAUDE.md`.
 - **MockCombatUnit:** Test helper implementing `ICombatUnit` for unit testing combat logic without MonoBehaviours

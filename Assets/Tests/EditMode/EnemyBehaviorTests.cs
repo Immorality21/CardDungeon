@@ -67,7 +67,7 @@ namespace Tests.EditMode
         public void Healer_HealsMostWoundedAlly()
         {
             var hurt = new MockCombatUnit("Goblin", strength: 4, endurance: 1, health: 20, isHero: false);
-            hurt.Stats[StatType.MaxHealth] = 5; // wounded
+            hurt.Stats.Health = 5; // wounded (of a 20 bar) - Health, not the MaxHealth stat
             var healthy = new MockCombatUnit("Orc", strength: 6, endurance: 2, health: 25, isHero: false);
 
             var decision = new HealerBehavior().Decide(
@@ -92,7 +92,7 @@ namespace Tests.EditMode
         [Test]
         public void Healer_SelfWounded_NoAllies_HealsSelf()
         {
-            _self.Stats[StatType.MaxHealth] = 10; // wounded, MaxHealth 30
+            _self.Stats.Health = 10; // wounded, MaxHealth 30
 
             var decision = new HealerBehavior().Decide(_self, Context());
 

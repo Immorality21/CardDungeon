@@ -23,6 +23,11 @@ namespace Assets.Scripts.Rooms
 
         public bool IsConnectorRoom;
 
+        [Tooltip("Events this kind of room CAN offer - a swamp offers swamp events. How many rooms " +
+                 "in a level actually get one is LevelDefinitionSO.EventsPerLevel, so a template " +
+                 "used three times in a level does not repeat its event three times.")]
+        public List<Events.RoomEventSO> PossibleEvents = new List<Events.RoomEventSO>();
+
         public List<EnemySpawnEntry> EnemySpawnTable;
     }
 }

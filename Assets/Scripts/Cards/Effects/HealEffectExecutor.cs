@@ -15,11 +15,11 @@ namespace Assets.Scripts.Cards.Effects
             List<ICombatUnit> targets,
             CombatBuffTracker buffTracker,
             EffectResult result,
-            bool isComboEffect = false)
+            bool flatPower = false)
         {
             // Healing scales off the caster the same way damage does, so a Spirit build actually
-            // heals for more. Combo heals stay flat, matching combo damage.
-            int scaled = isComboEffect
+            // heals for more. Flat-power heals stay as authored, matching flat damage.
+            int scaled = flatPower
                 ? effect.Power
                 : effect.Power + SpellScaling.CasterContribution(caster, effect.ScalingStat, buffTracker);
 

@@ -85,9 +85,16 @@ namespace Assets.Scripts.Cards
             {
                 EffectType = effect.EffectType,
                 Power = effect.Power + powerBonus,
+                // Every other field has to be carried across, or the copy quietly differs from the
+                // authored effect. ScalingStat was the one that mattered: it defaults to None, so an
+                // upgraded magic lost its caster contribution entirely - upgrading a caster's spell
+                // made it weaker by that caster's whole scaling stat, and still hit for a plausible
+                // number, so nothing looked wrong.
+                ScalingStat = effect.ScalingStat,
                 DamageType = effect.DamageType,
                 BuffType = effect.BuffType,
-                Duration = effect.Duration
+                Duration = effect.Duration,
+                UnlockLevel = effect.UnlockLevel
             };
         }
 
@@ -128,7 +135,7 @@ namespace Assets.Scripts.Cards
                 var effectToUse = ApplyPowerBonus(effect, comboPowerBonus);
                 var comboTargets = GetComboTargets(effectToUse.EffectType, caster, target);
                 var executor = _factory.GetExecutor(effectToUse.EffectType);
-                executor.Execute(effectToUse, caster, comboTargets, buffTracker, result, isComboEffect: true);
+                executor.Execute(effectToUse, caster, comboTargets, buffTracker, result, flatPower: true);
             }
         }
 

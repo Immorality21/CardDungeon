@@ -26,7 +26,8 @@ namespace Tests.EditMode
         }
 
         private MagicSO CreateCard(string key, SpellEffectType effect, int power,
-            DamageType damageType = DamageType.Normal, BuffType buffType = BuffType.Strength)
+            DamageType damageType = DamageType.Normal, BuffType buffType = BuffType.Strength,
+            StatType scalingStat = StatType.None)
         {
             var card = ScriptableObject.CreateInstance<MagicSO>();
             card.Key = key;
@@ -37,6 +38,12 @@ namespace Tests.EditMode
                 {
                     EffectType = effect,
                     Power = power,
+                    // Damage scaling is opt-in per effect. These tests assert "the hero's Strength
+                    // plus the card's power" for damage and bare power for heals/buffs, so that is
+                    // the default here; an explicit scalingStat still wins.
+                    ScalingStat = scalingStat != StatType.None
+                        ? scalingStat
+                        : (effect == SpellEffectType.Damage ? StatType.Strength : StatType.None),
                     DamageType = damageType,
                     BuffType = buffType,
                     Duration = 3
@@ -91,7 +98,9 @@ namespace Tests.EditMode
         [Test]
         public void PowerBonus_IncreasesHeal()
         {
-            _hero.Stats[StatType.MaxHealth] = 50;
+            // Health, not MaxHealth: the heal clamps to the bar, so shrinking the bar under a
+            // full one heals nothing and lands the hero on 50.
+            _hero.Stats.Health = 50;
             var card = CreateCard("Heal", SpellEffectType.Heal, power: 10);
             var action = MakeAction(card, _hero, _hero);
 
@@ -122,6 +131,49 @@ namespace Tests.EditMode
             _calculator.Execute(action, _buffTracker, powerBonus: 5);
 
             Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Endurance));
+        }
+
+        /// <summary>
+        /// The upgrade bonus is folded in by <b>copying</b> the effect, and the copy has to carry
+        /// every other field. <c>ScalingStat</c> was the one that got dropped, and it defaults to
+        /// <see cref="StatType.None"/> - so any upgrade level at all silently removed the caster's
+        /// contribution. An upgraded caster spell hit for *less* than the same spell unupgraded, and
+        /// still produced a plausible number, so nothing looked wrong.
+        /// </summary>
+        [Test]
+        public void PowerBonus_PreservesScalingStat()
+        {
+            _hero.Stats[StatType.Intelligence] = 12;
+            var card = CreateCard("Fireball", SpellEffectType.Damage, power: 5,
+                scalingStat: StatType.Intelligence);
+            var action = MakeAction(card, _hero, _enemy);
+
+            _calculator.Execute(action, _buffTracker, powerBonus: 4);
+
+            int expected = ExpectedDamage(5 + 4 + 12, 3);
+            Assert.AreEqual(50 - expected, _enemy.Stats.Health,
+                "An upgraded magic must still scale off its caster.");
+        }
+
+        [Test]
+        public void PowerBonus_ScalingStat_UpgradeNeverMakesASpellWeaker()
+        {
+            _hero.Stats[StatType.Intelligence] = 12;
+
+            var plain = CreateCard("Fireball", SpellEffectType.Damage, power: 5,
+                scalingStat: StatType.Intelligence);
+            _calculator.Execute(MakeAction(plain, _hero, _enemy), _buffTracker, powerBonus: 0);
+            int unupgraded = 50 - _enemy.Stats.Health;
+
+            _enemy.Stats.Health = 50;
+            var upgraded = CreateCard("Fireball", SpellEffectType.Damage, power: 5,
+                scalingStat: StatType.Intelligence);
+            _calculator.Execute(MakeAction(upgraded, _hero, _enemy), _buffTracker, powerBonus: 4);
+            int withUpgrade = 50 - _enemy.Stats.Health;
+
+            Assert.Greater(withUpgrade, unupgraded,
+                "This is the shape of the bug: spending Essence on a caster's spell used to cost "
+                + "more damage than the upgrade added.");
         }
 
         // ---- Economy math (pure helpers) ----

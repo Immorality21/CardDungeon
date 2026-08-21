@@ -22,6 +22,9 @@ MonoBehaviour:
   ActionOptions:
   - Stomp your feet
   IsConnectorRoom: 0
+  PossibleEvents:
+  - {fileID: 11400000, guid: 272fbd1c330543fba2c463ac97960741, type: 2}
+  - {fileID: 11400000, guid: b731fb0552a046489a7988e04a9a52fc, type: 2}
   EnemySpawnTable:
   - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
     SpawnChance: 0.5

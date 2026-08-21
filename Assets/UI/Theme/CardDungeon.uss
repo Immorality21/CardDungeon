@@ -479,6 +479,26 @@
     margin-bottom: 10px;
 }
 
+/* Content-sized variant of .cd-list. Use inside .cd-window (which does not clip): a flex-grow
+   scroll view spills its content container past its own box and swallows clicks on the buttons
+   below it. */
+.cd-list--fit {
+    flex-grow: 0;
+    min-height: 0;
+    max-height: 260px;
+}
+
+/* The room-event odds line. Set apart from the prompt: it is the mechanical read on the gamble,
+   not part of the fiction. */
+.cd-event-odds {
+    white-space: normal;
+    font-size: 16px;
+    -unity-font-style: italic;
+    color: var(--cd-text-dark);
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+}
+
 /* Full-width text button used for option lists (Examine/Action results). */
 .cd-list-button {
     height: 44px;

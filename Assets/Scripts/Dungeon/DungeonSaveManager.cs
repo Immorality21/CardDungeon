@@ -43,13 +43,23 @@ namespace Assets.Scripts.Dungeon
                 {
                     RoomIndex = room.RoomIndex,
                     IsExplored = room.IsExplored,
-                    EnemyCount = room.Enemies.Count(e => e != null && e.IsAlive)
+                    EnemyCount = room.Enemies.Count(e => e != null && e.IsAlive),
+                    EventConsumed = room.EventConsumed,
+                    EventKey = room.RoomEvent != null ? room.RoomEvent.SaveKey : null,
+                    EventOptionIndex = room.EventOptionIndex,
+                    EventOutcomeIndex = room.EventOutcomeIndex,
+                    EventSucceeded = room.EventSucceeded
                 });
             }
 
             if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 data.EquippedMagic = DungeonManager.Instance.MagicState.GetSaveData();
+            }
+
+            if (DungeonManager.HasInstance && DungeonManager.Instance.Afflictions != null)
+            {
+                data.Afflictions = DungeonManager.Instance.Afflictions.GetSaveData();
             }
 
             _fileHandler.Save(data);

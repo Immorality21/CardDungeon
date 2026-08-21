@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: CeilingShaft
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: CeilingShaft
+  Title: 'A Shaft in the Ceiling'
+  Prompt: 'A shaft opens in the ceiling well above head height, and something on the ledge up there catches what little light there is. The wall under it is damp and crumbling, with just enough to hold on to.'
+  Trigger: 0
+  GoverningStat: 3
+  Difficulty: 8
+  Options:
+  - Label: 'Climb for it'
+    Kind: 0
+    DeclineText: ''
+    Success:
+    - Text: 'Three quick holds and you are on the ledge. Somebody stashed this up here and never came back for it.'
+      Weight: 3
+      Effects: []
+      Targets: 0
+      LootTable:
+      - {fileID: 11400000, guid: 49f583fd473ca6144819051f4d6a6f7d, type: 2}
+      - {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
+      Gold: 15
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+    - Text: 'You get up, get a hand on it, and get back down before the wall gives. Coin, and nothing else worth the climb.'
+      Weight: 1
+      Effects: []
+      Targets: 0
+      LootTable: []
+      Gold: 25
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+    Failure:
+    - Text: 'The wall lets go halfway up. You land badly and stay landed for a while.'
+      Weight: 2
+      Effects:
+      - EffectType: 0
+        Power: 4
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 0
+        Duration: 3
+        UnlockLevel: 0
+      - EffectType: 3
+        Power: 2
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 3
+        Duration: 3
+        UnlockLevel: 0
+      Targets: 0
+      LootTable: []
+      Gold: 0
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+    - Text: 'You bring most of the wall down with you, and the noise brings something else.'
+      Weight: 1
+      Effects:
+      - EffectType: 0
+        Power: 2
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 0
+        Duration: 3
+        UnlockLevel: 0
+      Targets: 0
+      LootTable: []
+      Gold: 0
+      LoseAConsumable: 0
+      AwakenedEnemies:
+      - {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+  - Label: 'Leave whatever it is up there'
+    Kind: 2
+    DeclineText: 'Whatever is on the ledge can stay on the ledge.'
+    Success: []
+    Failure: []

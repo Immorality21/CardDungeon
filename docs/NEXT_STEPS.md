@@ -37,6 +37,33 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
   unreachable combos, unreachable magic named outright, resistances the player cannot answer, front-loaded
   unlocks. Covered by `ProgressionMapTests`.
 
+- **Test suite repair + a headless test runner.** ✅ Shipped 2026-08-21. The EditMode suite had rotted
+  to **46 failures of 339** during the §6 stat rework and nobody could see it, because the project's
+  own notes said an EditMode run could not be observed from an MCP command (the domain reload kills
+  the sandbox assembly holding the `ICallbacks`). That is only true of the *async* run:
+  **`ExecutionSettings.runSynchronously = true`** runs in-process with no reload, so the whole suite
+  now runs from one command in about a second. `docs/GAMEPLAY_VALIDATION.md` gotcha 12 carries a
+  copy-paste harness, and the root `CLAUDE.md` had the framework version wrong (1.1.33 → **1.7.0**).
+
+  With that in hand the 46 were diagnosed and fixed - every one a stale *test*; the production code
+  was right every time. Four root causes, all §6 fallout:
+  **(1) `Stats.Health` became separate from the `MaxHealth` attribute**, so 13 tests that staged a
+  wounded, dead or enraged unit by writing `Stats[MaxHealth]` were resizing the bar under a full one -
+  a "dead" unit stayed alive, an "enraged" boss read 500% health, and a heal clamped to nothing.
+  **(2) Damage scaling became opt-in** (`SpellEffect.ScalingStat`, `None` = flat), so 26 assertions
+  written as "caster's Strength + card power" no longer described the cards they built.
+  **(3) `SimUnit.Effective`/`AttackStat` are not derived from `Stats`**, so balance-model test
+  factories produced units with 0 defense, 0 agility and no buffable attack stat (5 tests).
+  **(4) `RunCurve` deliberately discounts the party's starting room** (`EnemyManager` never spawns
+  there), which the model documents and 7 tests predated.
+  Baseline measured by stashing the room-events work and re-running: **46 before, 46 after** - so
+  none of it was caused by that change - then **1 after the repair**.
+
+  The one remaining red is `BalanceRegressionTests.EveryHeroHasSomewhereToLevelTo`, which is a *true
+  positive*, not rot: the Warrior has one `LevelConfiguration` and caps at level 2. §4 deletes
+  `LevelConfiguration` outright, so the options are to author more level curves (a balance change,
+  and throwaway work once §4 lands) or to mark the test skipped against §4. Left red deliberately.
+
 ## Backlog
 
 ### 0. Act on the balance findings (highest priority)
@@ -110,7 +137,11 @@ written. Current party: Warrior 10/5/**13**/5, Tank 5/15/**17**/5, 30 HP pool + 
   cleanly against the new `HeroSO.Key` values (`Warrior`, `Tank`).
 
 Where the count stands — real analyzer, closed-form, no simulation or save audit:
-**0 critical / 5 warning / 11 info**. The path there: 3 / 12 / 11 → 0 / 12 / 9 after the hero-HP
+**0 critical / 4 warning / 9 info** (re-measured 2026-08-21 after the room-events change, which the
+balance model does not read at all). The four: the Warrior's level-2 cap, the Warrior's and the
+Tank's +100% level-2 Agility steps, and *+MaxHealth gear is never filled at level start*. Earlier
+notes in this section quote **0 / 3 / 9** — that undercounted by one, missing the Tank's Agility
+step, which is an authoring warning rather than a starting-lineup one. The path there: 3 / 12 / 11 → 0 / 12 / 9 after the hero-HP
 pass → 0 / 5 / 11 after the solo-start roster rework (§5), which also took
 `BalanceRegressionTests` from 7/9 to **8 of 9 green**. The single red left is
 `EveryHeroHasSomewhereToLevelTo` (the Warrior caps at level 2), which §4 replaces outright.
@@ -200,6 +231,12 @@ player by design - the plan is discovery-gated reveal only, no static display.
   enemy resists Fire"; keying off `DisplayName` breaks the moment a name is edited. `HeroSO` now has the
   pattern to copy: a `Key` field plus a `SaveKey` property that falls back to the display name, so existing
   saves keep resolving while the display name becomes free to rename.
+- ~~**An upgraded magic silently lost its caster scaling.**~~ ✅ Fixed 2026-08-21 (found while
+  building room events). `EffectResolver.ApplyPowerBonus` builds a *copy* of the effect to fold the
+  upgrade bonus into `Power`, and the copy did not carry `ScalingStat` — which defaults to `None`.
+  So the moment a Damage or Heal magic had any upgrade level, its caster contribution dropped to
+  zero: upgrading the Acolyte's magic made it *weaker* by the Acolyte's whole Intelligence. Silent,
+  because the effect still fired and still hit for a plausible number.
 - **Loot is still duplicated** between Floating Eye and the Abyssal Warden.
 - **Holy and Shadow** are unused by any magic and unresisted by anything - the analyzer reports them, and
   they are free slots if a later biome wants an element of its own.
@@ -266,14 +303,89 @@ Turn rooms into real *kinds* so the dungeon becomes a series of decisions:
 - Consider path/branch choice at the dungeon-generation level (`RoomManager`) so players pick
   *which* rooms to enter, trading safety for reward.
 
-#### Examine / Action as stat-driven risk vs. reward
+#### Examine / Action as stat-driven risk vs. reward — ✅ shipped
 
-The single highest-leverage piece of the above, because the buttons already exist and are already
-in the player's hands — they just do nothing. Today `RoomSO.ExamineOptions` / `ActionOptions` are
-`List<string>` and `RoomActionUI.OnAction` pipes the chosen string straight to `ShowDetail`. Turn
-each option into a **gamble the party's stats resolve**.
+Landed 2026-08-21. `Assets/Scripts/Rooms/Events/` is the whole feature: `RoomEventSO` (+
+`RoomEventOption` / `RoomEventOutcome`) is the data, `RoomEventResolver` is the pure, tested
+decision layer, `RoomEventRunner` applies an outcome, and `LevelAfflictionTracker` holds what
+outlives the room. Full reference in **`Assets/Scripts/Rooms/CLAUDE.md`** (placement and the
+restore ordering are in the Dungeon guide, the save fields in the IO guide).
 
-The shape:
+What it does, against the design below: the matching button's option list gains one real entry
+listed first; the event window shows the prompt, a qualitative odds line and one button per option;
+the result window shows the outcome's copy plus one line per concrete consequence. Outcomes reuse
+`IEffectExecutor` (with `flatPower`), `LootRoller`, `MetaProgressManager.AddPendingGold`,
+`InventoryManager.TryConsume` and `EnemyManager.SpawnSingle` — no parallel effect system. Consumed
+state persists into `DungeonSaveData` immediately, keyed on the event's `SaveKey`, and a consumed
+outcome's spawned enemies are re-created on resume.
+
+**The open questions, decided:**
+
+- **Whose stat: party-best.** Not the leader, not the party sum — party-best is the one rule that
+  makes bringing a specialist worth a slot, and the hero is *named* in the odds line so the
+  investment is visible. Every hero in the roster is the best reader of at least one authored event
+  (Warrior/Strength, Tank/Endurance, Scout/Luck and Agility, Acolyte/Intelligence and Spirit) - the
+  Tank had no non-combat moment before this.
+- **The band sharpens with the stat** (this was the "worth considering" note). Clarity comes off the
+  same stat: matching the difficulty reads the band exactly, half of it gets an impression, under
+  that the party is told it has no idea. Deterministic, so re-reading an event is not a way to farm
+  information.
+- **Where scarcity is authored: split.** `RoomSO.PossibleEvents` says what *kind* of event fits a
+  room; `LevelDefinitionSO.EventsPerLevel` says how *many* rooms in a level get one. Placement is
+  per-instance (on `Room`, not `RoomSO`), so a template used three times does not offer the same
+  event three times — and no event is placed twice in one level.
+- **Declining does not consume.** Walking away defers the choice rather than spending it; only a
+  resolved check or a `Guaranteed` option consumes.
+- **Failure cannot kill.** `KeepEveryoneStanding` clamps event damage to a floor of 1 HP. There is
+  no combat loop outside a fight to run a death through, so a wipe in a corridor would strand the
+  game rather than show a death screen.
+
+**Authored content:** six events, one per stat —
+`MustyTome` (Intelligence), `GildedChest` (Luck), `SealedTomb` (Strength), `DrownedOffering`
+(Spirit), `ChokedPassage` (Endurance), `CeilingShaft` (Agility). Two per room template
+(BrownRoom and CavernRoom offer `ChokedPassage`, PinkRoom and TreasuryRoom offer `CeilingShaft`),
+except SwampRoom which has only `DrownedOffering` - a template needs two so a level whose generated
+rooms collapse onto one template can still fill a budget of 2. Budgets: `DungeonEntrance` 0 (it is a
+tutorial, and its only non-start/non-exit room holds the captive), `UpperHalls` 1,
+`CollapsedCaverns` 2, `SunkenDepths` 2.
+
+**Verified in-editor** via the Unity MCP against a real generated dungeon: placement (2 of 2 in
+`CollapsedCaverns`), the real Action button → the event entry in the list → the event window with
+its odds line → resolving an option → gold banked → the consumed flag in `Dungeon_{seed}.json`
+with option/outcome indices → the event gone from the list on re-open. Also the failure paths:
+damage + a level affliction recorded, two enemies spawned into the room with renderers enabled, and
+the affliction re-seeded into the next fight's `CombatBuffTracker` (Warrior Agility -2, Tank
+unaffected). Covered by `RoomEventResolverTests` and `LevelAfflictionTrackerTests` (run them in the
+Unity Test Runner — `dotnet` can only compile-check).
+
+**Found and fixed on the way:** `EffectResolver.ApplyPowerBonus` was dropping `ScalingStat` when it
+copied an effect to fold in an upgrade bonus, so **an upgraded magic silently lost its caster
+scaling** — see the bullet under §0b-2. The `isComboEffect` executor flag was also renamed
+`flatPower`, since events are now a second, non-combo caller of the same behaviour.
+
+**The EditMode suite was 46 tests red before this work, and is now 1.** See the *Test suite repair*
+entry in the Done section - the rot was refactoring fallout from §6, invisible because nobody could
+run the suite headlessly. It can be run headlessly now (`docs/GAMEPLAY_VALIDATION.md` gotcha 12).
+
+**Follow-ups:**
+
+- **No manual-layout override.** `ManualRoomEntry` has no per-room event field, so a hand-authored
+  level can only get events through its rooms' templates. Cheap to add if the tutorial should
+  guarantee a specific one.
+- **The balance model does not know events exist.** `EncounterModel` measures expected HP cost per
+  room from combat only, so an event's attrition is invisible to the analyzer and to
+  `BalanceRegressionTests`. Grep confirms nothing in `Assets/Scripts/Balance/` reads
+  `EventsPerLevel`, `PossibleEvents` or the affliction tracker — which is why this change moved no
+  findings, and also why the attrition curve is now optimistic by however much events cost.
+- **Mid-level hero HP is still not persisted at all** (`DungeonSaveData` has no hero health, and
+  `RestoreSavedState` re-initialises the party at full). So a quit-resume already undoes combat
+  damage, and therefore event damage too. The consumed flag and the afflictions survive; the HP cost
+  does not. Pre-existing, but events make it easier to notice.
+- **A room whose event sits behind a fight** only offers it after the fight is won (the main bar
+  replaces the Fight bar). That reads fine, but it means an event in a combat room is never a
+  decision *before* the fight — worth a look if events should ever be a way to *avoid* one.
+
+The design this was built to, kept for the reasoning:
 
 > *You see a musty old tome, thick with spider webs. Reaching in looks like a **slight risk**.*
 > → *Pick it up* / *Leave it.* Resolved against **Intelligence** — succeed and you keep the tome;
@@ -291,9 +403,9 @@ The shape:
   runes, identify the tome), **Spirit** for anything consecrated or cursed, **Luck** as the
   catch-all for blind risk, and the physical stats where force is the answer (**Attack** to force a
   seized door, **Defense** to shoulder through a cave-in). See §6 for the stats themselves.
-  Still to decide: **whose** value is used — the leader's, the party best, or the party sum.
-  Party-best is the most interesting, because it makes bringing a specialist worth a party slot and
-  gives every hero in the roster a reason to exist beyond combat throughput.
+  ~~Still to decide: **whose** value is used.~~ Decided: **party-best**, for the reason given —
+  it makes bringing a specialist worth a party slot and gives every hero in the roster a reason to
+  exist beyond combat throughput.
 - **Failure costs, it does not end the run — and the currency varies by event type.** The outcome
   pool draws from: **damage** (lands on a level-scoped HP pool, so 30% of a bar is a real attrition
   decision), a **debuff that lasts the level**, **spawning enemies** (the noise wakes something —
@@ -321,14 +433,9 @@ and buffs — a second axis to matter on beyond damage. It also gives the balanc
 to measure: expected HP cost per room stops being purely combat-driven, so `EncounterModel` would
 need an event term.
 
-Touch points: `Assets/Scripts/Rooms/RoomSO.cs`, `Assets/Scripts/Rooms/UI/RoomActionUI.cs`
-(`OnExamine`/`OnAction`), `Assets/Scripts/Rooms/Room.cs` (consumed flags),
-`Assets/Scripts/Dungeon/DungeonSaveManager.cs` (persist them), `Assets/Scripts/Cards/Effects/`
-(reuse the executors), `Assets/Scripts/Items/LootRoller.cs`, `Assets/Scripts/Heroes/HeroSO.cs` +
-`Assets/Scripts/Rooms/Stats.cs` (the new `Luck` stat).
-
-Touch points: `Assets/Scripts/Rooms/RoomSO.cs`, `Assets/Scripts/Rooms/UI/RoomActionUI.cs`,
-`Assets/Scripts/Rooms/RoomManager.cs`, `Assets/Scripts/Items/LootRoller.cs`.
+Touch points for the **rest** of §2 (the room-*kind* work above, still open):
+`Assets/Scripts/Rooms/RoomSO.cs`, `Assets/Scripts/Rooms/UI/RoomActionUI.cs`,
+`Assets/Scripts/Rooms/RoomManager.cs` (path/branch choice), `Assets/Scripts/Items/LootRoller.cs`.
 
 ### 3. Sharpen hub sinks
 

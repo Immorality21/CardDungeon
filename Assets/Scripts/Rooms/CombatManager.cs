@@ -281,6 +281,21 @@ namespace Assets.Scripts.Rooms
                 DungeonManager.Instance.MagicState.RefillCharges();
             }
 
+            // Seed the fresh buff tracker with anything room events hung on the party for this
+            // level. The tracker is rebuilt per fight and ticks per turn, so a level-scoped curse
+            // has to be re-applied here or it would only ever affect the fight it was picked up in
+            // - and there is no fight when it is picked up.
+            if (DungeonManager.HasInstance && DungeonManager.Instance.Afflictions != null)
+            {
+                foreach (var hero in party.Heroes)
+                {
+                    if (hero != null && hero.IsAlive)
+                    {
+                        DungeonManager.Instance.Afflictions.SeedCombat(hero.HeroKey, hero, BuffTracker);
+                    }
+                }
+            }
+
             OnCombatStarted?.Invoke();
 
             // Raise the FF-style battle stage: heroes left, enemies right, over a background

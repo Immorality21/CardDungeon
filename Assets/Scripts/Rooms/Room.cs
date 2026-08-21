@@ -18,9 +18,51 @@ namespace Assets.Scripts.Rooms
         /// room is clear of enemies; cleared back to null the moment they are freed.
         /// </summary>
         public Assets.Scripts.Heroes.HeroSO CaptiveHero;
+        /// <summary>
+        /// The stat-check event this room offers, assigned at placement by <c>DungeonManager</c> from
+        /// the room template's <c>RoomSO.PossibleEvents</c>. Lives on the instance, not the template,
+        /// so a template used three times in one level does not offer the same event three times.
+        /// </summary>
+        public Events.RoomEventSO RoomEvent;
+
         public int RoomIndex { get; set; }
         public bool IsExplored { get; private set; }
         public bool IsExit { get; set; }
+
+        /// <summary>
+        /// Whether this room's event has been resolved. One-shot and persisted (see
+        /// <c>RoomSaveData</c>): without it the player re-rolls a bad outcome by walking out and back
+        /// in, or by quitting to the menu and resuming.
+        /// </summary>
+        public bool EventConsumed { get; private set; }
+
+        /// <summary>Index into <c>RoomEvent.Options</c> that resolved it, or -1.</summary>
+        public int EventOptionIndex { get; private set; } = -1;
+
+        /// <summary>Index into that option's success or failure pool, or -1.</summary>
+        public int EventOutcomeIndex { get; private set; } = -1;
+
+        /// <summary>Which of the two pools <see cref="EventOutcomeIndex"/> indexes.</summary>
+        public bool EventSucceeded { get; private set; }
+
+        /// <summary>Whether the room still has an event to offer.</summary>
+        public bool HasPendingEvent
+        {
+            get { return RoomEvent != null && !EventConsumed; }
+        }
+
+        /// <summary>
+        /// Records that the event resolved. The coordinates are kept (rather than a manifest of what
+        /// happened) because the outcome is still in the asset on reload, so re-spawning whatever it
+        /// woke up only needs to know which outcome it was.
+        /// </summary>
+        public void MarkEventResolved(int optionIndex, int outcomeIndex, bool succeeded)
+        {
+            EventConsumed = true;
+            EventOptionIndex = optionIndex;
+            EventOutcomeIndex = outcomeIndex;
+            EventSucceeded = succeeded;
+        }
 
         public void Reveal()
         {

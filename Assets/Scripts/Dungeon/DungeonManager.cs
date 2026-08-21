@@ -87,6 +87,14 @@ namespace Assets.Scripts.Dungeon
         public Party Party { get; private set; }
         public EquippedMagicState MagicState { get; private set; }
 
+        /// <summary>
+        /// Buffs and debuffs room events hung on the party, standing until the level is cleared.
+        /// Level-scoped like health: <c>CombatManager</c> seeds each fight's buff tracker from here,
+        /// so a curse picked up in a corridor is paid for in every encounter that follows.
+        /// </summary>
+        public Rooms.Events.LevelAfflictionTracker Afflictions { get; private set; }
+            = new Rooms.Events.LevelAfflictionTracker();
+
         /// <summary>The level definition currently being played (drives the per-level combat backdrop).</summary>
         public LevelDefinitionSO CurrentLevel => _level;
 
@@ -174,6 +182,7 @@ namespace Assets.Scripts.Dungeon
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom, layout.Rooms);
             PlaceBossIfConfigured(rooms);
             PlaceCaptiveIfConfigured(rooms, startRoom);
+            PlaceRoomEvents(rooms, startRoom);
 
             // Check for saved state to resume
             DungeonSaveData saveData = null;
@@ -246,6 +255,7 @@ namespace Assets.Scripts.Dungeon
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom);
             PlaceBossIfConfigured(rooms);
             PlaceCaptiveIfConfigured(rooms, startRoom);
+            PlaceRoomEvents(rooms, startRoom);
 
             if (saveData != null)
             {
@@ -264,6 +274,8 @@ namespace Assets.Scripts.Dungeon
             Party = partyObj.GetComponent<Party>();
             Party.Initialize(RosterHeroes());
             Party.HealAll();
+            // Afflictions are level-scoped like health, so a fresh level starts clean.
+            Afflictions.Clear();
             Party.PlaceInRoom(startRoom);
             GameManager.Instance.Initialize(Party, GetRoomActionUI());
 
@@ -310,7 +322,6 @@ namespace Assets.Scripts.Dungeon
 
         private void RestoreSavedState(DungeonSaveData saveData, List<Room> rooms)
         {
-            // Remove killed enemies based on saved counts
             foreach (var roomData in saveData.Rooms)
             {
                 if (roomData.RoomIndex < 0 || roomData.RoomIndex >= rooms.Count)
@@ -320,6 +331,12 @@ namespace Assets.Scripts.Dungeon
 
                 var room = rooms[roomData.RoomIndex];
 
+                // Re-apply the room's event state *before* trimming enemies: a consumed event may
+                // have woken something, and those spawns have to exist again before the saved
+                // enemy count decides how many of them the player has since killed.
+                RestoreRoomEvent(room, roomData);
+
+                // Remove killed enemies based on saved counts.
                 while (room.Enemies.Count > roomData.EnemyCount)
                 {
                     var last = room.Enemies[room.Enemies.Count - 1];
@@ -360,6 +377,8 @@ namespace Assets.Scripts.Dungeon
             {
                 MagicState.Restore(saveData.EquippedMagic, MagicCatalog.Instance.GetMagic);
             }
+
+            Afflictions.Restore(saveData.Afflictions);
 
             // Consumable quantities are part of the item inventory now (committed on level-clear),
             // so there is no separate per-dungeon resource state to restore here.
@@ -478,6 +497,128 @@ namespace Assets.Scripts.Dungeon
             var room = candidates[Random.Range(0, candidates.Count)];
             room.CaptiveHero = captive;
             PlaceCaptiveMarker(room, captive);
+        }
+
+        /// <summary>
+        /// Puts a room's event back the way the save left it. Two jobs: mark a resolved event
+        /// consumed so it cannot be re-rolled, and re-spawn whatever its outcome woke up so quitting
+        /// to the menu is not an escape from a fight the player started.
+        ///
+        /// <para>Guarded on the event key. Placement is seed-deterministic, so the same event should
+        /// land in the same room - but if the pools have been re-authored since the save, a stale
+        /// consumed flag would silently eat a different event, so a mismatch is left alone.</para>
+        /// </summary>
+        private void RestoreRoomEvent(Room room, RoomSaveData roomData)
+        {
+            if (!roomData.EventConsumed || room.RoomEvent == null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(roomData.EventKey) && roomData.EventKey != room.RoomEvent.SaveKey)
+            {
+                Debug.LogWarning($"Room {roomData.RoomIndex} saved event '{roomData.EventKey}' but "
+                    + $"regenerated '{room.RoomEvent.SaveKey}'; leaving it unconsumed.");
+                return;
+            }
+
+            room.MarkEventResolved(roomData.EventOptionIndex, roomData.EventOutcomeIndex, roomData.EventSucceeded);
+
+            var outcome = ResolvedOutcome(room.RoomEvent, roomData);
+            if (outcome == null || outcome.AwakenedEnemies == null)
+            {
+                return;
+            }
+
+            foreach (var definition in outcome.AwakenedEnemies)
+            {
+                if (definition != null)
+                {
+                    EnemyManager.Instance.SpawnSingle(definition, room);
+                }
+            }
+        }
+
+        /// <summary>The outcome the save says resolved, or null when the indices no longer fit.</summary>
+        private Rooms.Events.RoomEventOutcome ResolvedOutcome(Rooms.Events.RoomEventSO roomEvent, RoomSaveData roomData)
+        {
+            if (roomData.EventOptionIndex < 0 || roomData.EventOptionIndex >= roomEvent.Options.Count)
+            {
+                return null;
+            }
+
+            var option = roomEvent.Options[roomData.EventOptionIndex];
+            var pool = roomData.EventSucceeded ? option.Success : option.Failure;
+
+            if (pool == null || roomData.EventOutcomeIndex < 0 || roomData.EventOutcomeIndex >= pool.Count)
+            {
+                return null;
+            }
+
+            return pool[roomData.EventOutcomeIndex];
+        }
+
+        /// <summary>
+        /// Hands out this level's room events. Each room template lists the events it <i>can</i>
+        /// offer; the level says how many rooms actually get one, so scarcity is a level-design knob
+        /// and a template used three times does not repeat its event three times.
+        ///
+        /// <para>Skips the start room, the exit room, connectors and any room already holding a
+        /// captive - the specials stay spread out. No event is placed twice in one level, so a level
+        /// is a set of distinct decisions rather than the same gamble repeated.</para>
+        ///
+        /// <para>Placement is random but seed-deterministic, exactly like captive placement, which is
+        /// what lets the dungeon save record only <i>that</i> an event was consumed and trust
+        /// regeneration to put the same event back in the same room.</para>
+        /// </summary>
+        private void PlaceRoomEvents(List<Room> rooms, Room startRoom)
+        {
+            int budget = _level != null ? _level.EventsPerLevel : 0;
+            if (budget <= 0 || rooms == null)
+            {
+                return;
+            }
+
+            var candidates = rooms
+                .Where(r => r != null
+                            && r != startRoom
+                            && !r.IsExit
+                            && r.CaptiveHero == null
+                            && r.RoomSO != null
+                            && !r.RoomSO.IsConnectorRoom
+                            && r.RoomSO.PossibleEvents != null
+                            && r.RoomSO.PossibleEvents.Count > 0)
+                .ToList();
+
+            var usedKeys = new HashSet<string>();
+            int placed = 0;
+
+            while (placed < budget && candidates.Count > 0)
+            {
+                int roomPick = Random.Range(0, candidates.Count);
+                var room = candidates[roomPick];
+                candidates.RemoveAt(roomPick);
+
+                var pool = room.RoomSO.PossibleEvents
+                    .Where(e => e != null && !usedKeys.Contains(e.SaveKey))
+                    .ToList();
+
+                if (pool.Count == 0)
+                {
+                    continue;
+                }
+
+                var chosen = pool[Random.Range(0, pool.Count)];
+                room.RoomEvent = chosen;
+                usedKeys.Add(chosen.SaveKey);
+                placed++;
+            }
+
+            if (placed < budget)
+            {
+                Debug.LogWarning($"Level asked for {budget} room events but only {placed} could be "
+                    + "placed; add PossibleEvents to more room templates in the pool.");
+            }
         }
 
         /// <summary>

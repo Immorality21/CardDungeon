@@ -19,13 +19,13 @@ namespace Assets.Scripts.Cards.Effects
             List<ICombatUnit> targets,
             CombatBuffTracker buffTracker,
             EffectResult result,
-            bool isComboEffect = false)
+            bool flatPower = false)
         {
             int rawAttack;
-            if (isComboEffect)
+            if (flatPower)
             {
-                // Combo damage is flat: it comes from the combo definition, not from whoever
-                // happened to land the second tag.
+                // Flat damage: it comes from the definition (a combo's bonus effect, a room
+                // event's outcome), not from whoever happened to trigger it.
                 rawAttack = effect.Power;
             }
             else

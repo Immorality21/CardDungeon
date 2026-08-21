@@ -16,7 +16,7 @@ namespace Assets.Scripts.Cards.Effects
             List<ICombatUnit> targets,
             CombatBuffTracker buffTracker,
             EffectResult result,
-            bool isComboEffect = false)
+            bool flatPower = false)
         {
             var handler = BuffHandlerRegistry.Get(effect.BuffType);
             if (handler == null)
@@ -26,9 +26,9 @@ namespace Assets.Scripts.Cards.Effects
                 return;
             }
 
-            // Combo debuff stay flat; a cast one adds a fraction of the caster's stat, so a
-            // high-Spirit caster's shields are better without dwarfing the stat being changed.
-            int magnitude = isComboEffect
+            // Flat-power debuffs stay as authored; a cast one adds a fraction of the caster's
+            // stat, so a high-Spirit caster's shields are better without dwarfing the stat changed.
+            int magnitude = flatPower
                 ? effect.Power
                 : effect.Power + SpellScaling.BuffContribution(caster, effect.ScalingStat, buffTracker);
 
