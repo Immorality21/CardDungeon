@@ -106,14 +106,14 @@ namespace Tests.EditMode
 
             Assert.AreEqual(EnemyActionType.Debuff, decision.Type);
             Assert.AreSame(_hero, decision.Target);
-            Assert.AreEqual(StatType.Attack, decision.DebuffStat);
+            Assert.AreEqual(StatType.Strength, decision.DebuffStat);
             Assert.Greater(decision.Amount, 0);
         }
 
         [Test]
         public void Debuffer_AllHeroesAlreadyWeakened_Attacks()
         {
-            _buffTracker.ApplyBuff(_hero, StatType.Attack, -2, 3); // already weakened
+            _buffTracker.ApplyBuff(_hero, StatType.Strength, -2, 3); // already weakened
 
             var decision = new DebufferBehavior().Decide(_self, Context());
 

@@ -24,8 +24,8 @@ namespace Tests.EditMode
                 HeroKey = name,
                 IsHero = true,
                 Stats = new Stats(attack, defense, health, agility),
-                EffectiveAttack = attack,
-                EffectiveDefense = defense,
+                EffectiveAttackPower = attack,
+                EffectiveEndurance = defense,
                 EffectiveAgility = agility,
                 Resistances = new List<Resistance>()
             };
@@ -40,8 +40,8 @@ namespace Tests.EditMode
                 IsHero = false,
                 Archetype = archetype,
                 Stats = new Stats(attack, defense, health, agility),
-                EffectiveAttack = attack,
-                EffectiveDefense = defense,
+                EffectiveAttackPower = attack,
+                EffectiveEndurance = defense,
                 EffectiveAgility = agility,
                 Resistances = new List<Resistance>()
             };
@@ -58,8 +58,8 @@ namespace Tests.EditMode
                     MaxDefinedLevel = 1,
                     Stats = new EffectiveStats
                     {
-                        Attack = hero.EffectiveAttack,
-                        Defense = hero.EffectiveDefense,
+                        Strength = hero.EffectiveAttackPower,
+                        Endurance = hero.EffectiveEndurance,
                         MaxHealth = hero.Stats.MaxHealth,
                         Agility = hero.EffectiveAgility
                     },
@@ -142,7 +142,7 @@ namespace Tests.EditMode
         {
             var attacker = Enemy("attacker", 10, 0, 100);
             var buffTracker = new CombatBuffTracker();
-            buffTracker.ApplyBuff(attacker, Assets.Scripts.Items.StatType.Attack, 10, 5);
+            buffTracker.ApplyBuff(attacker, Assets.Scripts.Items.StatType.Strength, 10, 5);
 
             int expected = DamageCalculator.Calculate(20, 0, DamageType.Normal, new List<Resistance>());
 

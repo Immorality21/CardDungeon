@@ -16,16 +16,16 @@ MonoBehaviour:
   DisplayName: 
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: b2a362ec7000ace46ad22ed1b533bf55, type: 2}
-    LevelName: Tutorial
+    LevelName: Dungeon Entrance
     ManualLayout: {fileID: 11400000, guid: 81a86b4d14ab1a34792bcf19bfcaee94, type: 2}
     RescueHero: {fileID: 11400000, guid: d0d0529f46172044d9494619917b8364, type: 2}
   - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
-    LevelName: Test1
+    LevelName: Upper Halls
     ManualLayout: {fileID: 0}
-  - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
-    LevelName: Test2
+  - LevelTemplate: {fileID: 11400000, guid: eac98a3da612d49499a92d78cd394b7f, type: 2}
+    LevelName: Collapsed Caverns
     ManualLayout: {fileID: 0}
-  - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
-    LevelName: Test3
+  - LevelTemplate: {fileID: 11400000, guid: 6517393ec276405b8c88463d92983e27, type: 2}
+    LevelName: Sunken Depths
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}

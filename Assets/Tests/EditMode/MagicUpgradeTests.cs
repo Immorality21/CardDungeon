@@ -25,7 +25,7 @@ namespace Tests.EditMode
         }
 
         private MagicSO CreateCard(string key, SpellEffectType effect, int power,
-            DamageType damageType = DamageType.Normal, BuffType buffType = BuffType.Attack)
+            DamageType damageType = DamageType.Normal, BuffType buffType = BuffType.Strength)
         {
             var card = ScriptableObject.CreateInstance<MagicSO>();
             card.Key = key;
@@ -103,24 +103,24 @@ namespace Tests.EditMode
         [Test]
         public void PowerBonus_DoesNotAffectBuffPower()
         {
-            var card = CreateCard("WarCry", SpellEffectType.Buff, power: 7, buffType: BuffType.Attack);
+            var card = CreateCard("WarCry", SpellEffectType.Buff, power: 7, buffType: BuffType.Strength);
             var action = MakeAction(card, _hero, _hero);
 
             _calculator.Execute(action, _buffTracker, powerBonus: 5);
 
             // Buff amount must remain the card's declared power, unaffected by the upgrade bonus.
-            Assert.AreEqual(7, _buffTracker.GetBuffAmount(_hero, StatType.Attack));
+            Assert.AreEqual(7, _buffTracker.GetBuffAmount(_hero, StatType.Strength));
         }
 
         [Test]
         public void PowerBonus_DoesNotAffectDebuffPower()
         {
-            var card = CreateCard("Curse", SpellEffectType.Debuff, power: 3, buffType: BuffType.Defense);
+            var card = CreateCard("Curse", SpellEffectType.Debuff, power: 3, buffType: BuffType.Endurance);
             var action = MakeAction(card, _hero, _enemy);
 
             _calculator.Execute(action, _buffTracker, powerBonus: 5);
 
-            Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Defense));
+            Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Endurance));
         }
 
         // ---- Economy math (pure helpers) ----

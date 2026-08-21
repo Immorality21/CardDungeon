@@ -10,8 +10,8 @@ namespace Tests.EditMode
         {
             var stats = new Stats(10, 5, 100, 8);
 
-            Assert.AreEqual(10, stats.Attack);
-            Assert.AreEqual(5, stats.Defense);
+            Assert.AreEqual(10, stats.Strength);
+            Assert.AreEqual(5, stats.Endurance);
             Assert.AreEqual(100, stats.Health);
             Assert.AreEqual(100, stats.MaxHealth);
             Assert.AreEqual(8, stats.Agility);

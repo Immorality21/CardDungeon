@@ -218,7 +218,7 @@ namespace Assets.Scripts.MainMenu
             textCol.style.flexGrow = 1f;
 
             var name = new Label($"{hero.DisplayName}   " +
-                                 $"ATK {hero.BaseAttack} · DEF {hero.BaseDefense} · " +
+                                 $"STR {hero.BaseStrength} · END {hero.BaseEndurance} · " +
                                  $"HP {hero.BaseHealth} · AGI {hero.BaseAgility}");
             name.AddToClassList("cd-shop-row__name");
             textCol.Add(name);

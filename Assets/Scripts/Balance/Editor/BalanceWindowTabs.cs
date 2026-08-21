@@ -78,13 +78,13 @@ namespace Assets.Scripts.Balance.Editor
             BalanceGui.HeaderCell("Hero", NameWidth);
             BalanceGui.HeaderCell("Lvl", StatWidth, "Level the reference party is measured at.");
             BalanceGui.HeaderCell("Cap", StatWidth, "Highest level this hero has a LevelConfiguration for.");
-            BalanceGui.HeaderCell("ATK", StatWidth, "BaseAttack (editable)");
-            BalanceGui.HeaderCell("DEF", StatWidth, "BaseDefense (editable)");
+            BalanceGui.HeaderCell("STR", StatWidth, "BaseStrength (editable)");
+            BalanceGui.HeaderCell("END", StatWidth, "BaseEndurance (editable)");
             BalanceGui.HeaderCell("HP", StatWidth, "BaseHealth (editable)");
             BalanceGui.HeaderCell("AGI", StatWidth, "BaseAgility (editable)");
-            BalanceGui.HeaderCell("Eff ATK", MetricWidth, "After level gains and gear.");
+            BalanceGui.HeaderCell("Atk pwr", MetricWidth, "The attribute this hero attacks with, after level gains and gear.");
             BalanceGui.HeaderCell("Eff HP", MetricWidth, "After level gains and gear.");
-            BalanceGui.HeaderCell("DEF cut", MetricWidth, "Share of incoming damage the defense curve removes.");
+            BalanceGui.HeaderCell("END cut", MetricWidth, "Share of incoming damage the Endurance curve removes.");
             BalanceGui.HeaderCell("Survives", WideWidth, "Fewest ordinary (non-boss) hits that would kill this hero.");
             BalanceGui.HeaderCell("Worst hit", WideWidth, "Biggest average non-boss hit, and from whom.");
             EditorGUILayout.EndHorizontal();
@@ -112,15 +112,15 @@ namespace Assets.Scripts.Balance.Editor
                     hero.MaxDefinedLevel <= 2 ? BalanceSeverity.Warning : BalanceSeverity.Ok,
                     "A cap of 1 or 2 means XP stops mattering almost immediately.");
 
-                changed |= BalanceGui.EditableCell(serialized, "BaseAttack", StatWidth);
-                changed |= BalanceGui.EditableCell(serialized, "BaseDefense", StatWidth);
+                changed |= BalanceGui.EditableCell(serialized, "BaseStrength", StatWidth);
+                changed |= BalanceGui.EditableCell(serialized, "BaseEndurance", StatWidth);
                 changed |= BalanceGui.EditableCell(serialized, "BaseHealth", StatWidth, durability,
                     "The root cause of one-shot fights lives here.");
                 changed |= BalanceGui.EditableCell(serialized, "BaseAgility", StatWidth);
 
-                BalanceGui.Cell(hero.Stats.Attack.ToString(), MetricWidth);
+                BalanceGui.Cell(hero.Stats.Strength.ToString(), MetricWidth);
                 BalanceGui.Cell(hero.Stats.MaxHealth.ToString(), MetricWidth, durability);
-                BalanceGui.Cell($"{hero.DefenseReduction:P0}", MetricWidth);
+                BalanceGui.Cell($"{hero.EnduranceReduction:P0}", MetricWidth);
                 BalanceGui.Cell(
                     hitsToKill == int.MaxValue ? "—" : $"{hitsToKill} hit{(hitsToKill == 1 ? "" : "s")}",
                     WideWidth, durability,
@@ -252,8 +252,8 @@ namespace Assets.Scripts.Balance.Editor
                 GUILayout.Space(16f);
                 BalanceGui.HeaderCell("Level", StatWidth);
                 BalanceGui.HeaderCell("Total XP", MetricWidth, "Cumulative XP needed to reach this level.");
-                BalanceGui.HeaderCell("+ATK", StatWidth);
-                BalanceGui.HeaderCell("+DEF", StatWidth);
+                BalanceGui.HeaderCell("+STR", StatWidth);
+                BalanceGui.HeaderCell("+END", StatWidth);
                 BalanceGui.HeaderCell("+HP", StatWidth);
                 BalanceGui.HeaderCell("+AGI", StatWidth);
                 BalanceGui.HeaderCell("", 60f);
@@ -274,8 +274,8 @@ namespace Assets.Scripts.Balance.Editor
                     GUILayout.Space(16f);
                     changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("Level"), StatWidth);
                     changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("XpRequired"), MetricWidth);
-                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("AttackGain"), StatWidth);
-                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("DefenseGain"), StatWidth);
+                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("StrengthGain"), StatWidth);
+                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("EnduranceGain"), StatWidth);
                     changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("HealthGain"), StatWidth);
                     changed |= BalanceGui.EditableCell(agilityGain, StatWidth, agilitySeverity,
                         "A gain of half the base stat or more doubles this hero's turn rate in one level.");
@@ -326,8 +326,8 @@ namespace Assets.Scripts.Balance.Editor
             BalanceGui.HeaderCell("Enemy", NameWidth);
             BalanceGui.HeaderCell("Boss", 34f);
             BalanceGui.HeaderCell("Archetype", WideWidth);
-            BalanceGui.HeaderCell("ATK", StatWidth);
-            BalanceGui.HeaderCell("DEF", StatWidth);
+            BalanceGui.HeaderCell("STR", StatWidth);
+            BalanceGui.HeaderCell("END", StatWidth);
             BalanceGui.HeaderCell("HP", StatWidth);
             BalanceGui.HeaderCell("AGI", StatWidth);
             BalanceGui.HeaderCell("XP", StatWidth);
@@ -384,8 +384,8 @@ namespace Assets.Scripts.Balance.Editor
                 BalanceGui.AssetCell(metrics.Definition, metrics.Name, NameWidth, worst);
                 changed |= BalanceGui.EditableCell(serialized, "IsBoss", 34f);
                 changed |= BalanceGui.EditableCell(serialized, "Archetype", WideWidth);
-                changed |= BalanceGui.EditableCell(serialized, "Attack", StatWidth, killsSeverity);
-                changed |= BalanceGui.EditableCell(serialized, "Defense", StatWidth);
+                changed |= BalanceGui.EditableCell(serialized, "Strength", StatWidth, killsSeverity);
+                changed |= BalanceGui.EditableCell(serialized, "Endurance", StatWidth);
                 changed |= BalanceGui.EditableCell(serialized, "Health", StatWidth, ttkSeverity);
                 changed |= BalanceGui.EditableCell(serialized, "Agility", StatWidth,
                     metrics.ActionShareVsParty >= 1.5f ? BalanceSeverity.Info : BalanceSeverity.Ok);

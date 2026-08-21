@@ -60,7 +60,15 @@ namespace Assets.Scripts.Balance
         public int ResistanceCount;
         public int DrawableCount;
 
-        public static EnemyMetrics Compute(EnemySO enemy, PartyBaseline party, BalanceRulesSO rules)
+        /// <param name="party">Who this enemy is judged against — the party it is first met with.</param>
+        /// <param name="rewardParty">
+        /// Party used for the reward-per-danger figures only. Danger is measured against whoever
+        /// meets the enemy, which varies by run position, so comparing XP-per-danger across enemies
+        /// needs one common yardstick or the spread just reports roster growth. Defaults to
+        /// <paramref name="party"/>.
+        /// </param>
+        public static EnemyMetrics Compute(EnemySO enemy, PartyBaseline party, BalanceRulesSO rules,
+            PartyBaseline rewardParty = null)
         {
             var metrics = new EnemyMetrics { Definition = enemy };
             if (enemy == null || party == null || rules == null)
@@ -82,7 +90,7 @@ namespace Assets.Scripts.Balance
             metrics.PartyTurnsToKill = BalanceMath.PartyTurnsToKill(partyUnits, unit);
             metrics.SoloDangerIndex = BalanceMath.DangerIndex(partyUnits, group);
             metrics.OffenseMultiplier = BalanceMath.AverageOffenseMultiplier(enemy.Archetype, party.Size);
-            metrics.AverageDamagePerHit = BalanceMath.AverageDamageAgainstGroup(enemy.Attack, partyUnits);
+            metrics.AverageDamagePerHit = BalanceMath.AverageDamageAgainstGroup(enemy.Strength, partyUnits);
             metrics.EffectiveDamagePerTurn = metrics.AverageDamagePerHit * metrics.OffenseMultiplier;
 
             // Per-hero breakdown: plain hits, since that is what the player actually feels turn to turn.
@@ -93,7 +101,7 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                float perHit = BalanceMath.AverageDamage(enemy.Attack, hero.Unit);
+                float perHit = BalanceMath.AverageDamage(enemy.Strength, hero.Unit);
                 int htk = BalanceMath.HitsToKill(perHit, hero.Stats.MaxHealth);
 
                 metrics.PerHero.Add(new EnemyVsHero
@@ -118,7 +126,10 @@ namespace Assets.Scripts.Balance
 
             metrics.ActionShareVsParty = ComputeActionShare(unit, party);
 
-            float danger = metrics.SoloDangerIndex;
+            var yardstick = rewardParty ?? party;
+            float danger = ReferenceEquals(yardstick, party)
+                ? metrics.SoloDangerIndex
+                : BalanceMath.DangerIndex(yardstick.Units, group);
             if (danger > 0f && !float.IsInfinity(danger))
             {
                 metrics.XpPerDanger = enemy.XpReward / danger;

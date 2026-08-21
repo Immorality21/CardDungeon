@@ -229,7 +229,7 @@ namespace Tests.EditMode
         {
             var enemy = Make<EnemySO>();
             enemy.DisplayName = "Cinder Imp";
-            enemy.Attack = 6;
+            enemy.Strength = 6;
             enemy.Health = 10;
             enemy.AttackDamageType = DamageType.Fire;
 
@@ -242,7 +242,7 @@ namespace Tests.EditMode
         public void BalanceMath_BasicAttackUsesTheAttackersElement()
         {
             var fireEnemy = Make<EnemySO>();
-            fireEnemy.Attack = 20;
+            fireEnemy.Strength = 20;
             fireEnemy.Health = 10;
             fireEnemy.AttackDamageType = DamageType.Fire;
             var attacker = SimUnit.FromEnemy(fireEnemy);
@@ -252,8 +252,8 @@ namespace Tests.EditMode
                 DisplayName = "hero",
                 IsHero = true,
                 Stats = new Stats(0, 0, 100, 5),
-                EffectiveAttack = 0,
-                EffectiveDefense = 0,
+                EffectiveAttackPower = 0,
+                EffectiveEndurance = 0,
                 EffectiveAgility = 5,
                 Resistances = Resist(DamageType.Fire, 50f)
             };
@@ -276,8 +276,8 @@ namespace Tests.EditMode
                 DisplayName = "flamer",
                 IsHero = false,
                 Stats = new Stats(50, 0, 100, 5),
-                EffectiveAttack = 50,
-                EffectiveDefense = 0,
+                EffectiveAttackPower = 50,
+                EffectiveEndurance = 0,
                 EffectiveAgility = 5,
                 AttackDamageType = DamageType.Fire
             };
@@ -287,8 +287,8 @@ namespace Tests.EditMode
                 DisplayName = "absorber",
                 IsHero = true,
                 Stats = new Stats(0, 0, 100, 5) { Health = 95 },
-                EffectiveAttack = 0,
-                EffectiveDefense = 0,
+                EffectiveAttackPower = 0,
+                EffectiveEndurance = 0,
                 EffectiveAgility = 5,
                 Resistances = Resist(DamageType.Fire, 200f)
             };

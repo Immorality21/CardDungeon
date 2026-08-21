@@ -26,7 +26,7 @@ namespace Assets.Scripts.Heroes
         Stats ICombatUnit.Stats => Stats;
 
         // The combat pipeline reads resistance through the interface, so this is where gear has to be
-        // folded in — exactly like GetEffectiveAttack() and friends.
+        // folded in — exactly like GetEffectiveAttackPower() and friends.
         List<Resistance> ICombatUnit.Resistances => GetEffectiveResistances();
 
         /// <summary>Heroes deal physical damage; elemental output comes from magic, not basic attacks.</summary>
@@ -37,7 +37,8 @@ namespace Assets.Scripts.Heroes
             HeroSO = heroSO;
             Level = 1;
             CurrentXp = 0;
-            Stats = new Stats(heroSO.BaseAttack, heroSO.BaseDefense, heroSO.BaseHealth, heroSO.BaseAgility);
+            Stats = new Stats(heroSO.BaseStrength, heroSO.BaseEndurance, heroSO.BaseHealth, heroSO.BaseAgility,
+                heroSO.BaseIntelligence, heroSO.BaseSpirit, heroSO.BaseLuck);
         }
 
         public void InitializeFromSave(HeroSO heroSO, int savedXp)
@@ -65,28 +66,77 @@ namespace Assets.Scripts.Heroes
         private void ApplyLevelUp(LevelConfiguration config)
         {
             Level = config.Level;
-            Stats.Attack += config.AttackGain;
-            Stats.Defense += config.DefenseGain;
+            Stats.Strength += config.StrengthGain;
+            Stats.Endurance += config.EnduranceGain;
             Stats.MaxHealth += config.HealthGain;
             Stats.Health += config.HealthGain;
             Stats.Agility += config.AgilityGain;
             Debug.Log($"{HeroKey} leveled up to {Level}!");
         }
 
-        public int GetEffectiveAttack()
+        /// <summary>
+        /// The attribute this hero swings with, per <see cref="HeroSO.AttackStat"/>. Falls back to
+        /// Strength when no definition is set, which is what every hero did before the field existed.
+        /// </summary>
+        public int GetEffectiveAttackPower()
         {
-            var raw = InventoryManager.Instance.ComputeRawBonuses(HeroKey);
-            var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
-            float baseVal = Stats.Attack + raw[StatType.Attack];
-            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.Attack] / 100f));
+            if (HeroSO == null)
+            {
+                return GetEffectiveStrength();
+            }
+
+            switch (HeroSO.AttackStat)
+            {
+                case StatType.Agility:
+                    return GetEffectiveAgility();
+                case StatType.Intelligence:
+                    return GetEffectiveIntelligence();
+                case StatType.Spirit:
+                    return GetEffectiveSpirit();
+                case StatType.Luck:
+                    return GetEffectiveLuck();
+                case StatType.Endurance:
+                    return GetEffectiveEndurance();
+                default:
+                    return GetEffectiveStrength();
+            }
         }
 
-        public int GetEffectiveDefense()
+        public int GetEffectiveStrength()
+        {
+            return EffectiveStat(Stats.Strength, StatType.Strength);
+        }
+
+        public int GetEffectiveIntelligence()
+        {
+            return EffectiveStat(Stats.Intelligence, StatType.Intelligence);
+        }
+
+        public int GetEffectiveSpirit()
+        {
+            return EffectiveStat(Stats.Spirit, StatType.Spirit);
+        }
+
+        public int GetEffectiveLuck()
+        {
+            return EffectiveStat(Stats.Luck, StatType.Luck);
+        }
+
+        /// <summary>Base value plus this hero's raw then percentage gear bonuses for that stat.</summary>
+        private int EffectiveStat(int baseValue, StatType stat)
         {
             var raw = InventoryManager.Instance.ComputeRawBonuses(HeroKey);
             var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
-            float baseVal = Stats.Defense + raw[StatType.Defense];
-            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.Defense] / 100f));
+            float value = baseValue + raw[stat];
+            return Mathf.RoundToInt(value * (1f + pct[stat] / 100f));
+        }
+
+        public int GetEffectiveEndurance()
+        {
+            var raw = InventoryManager.Instance.ComputeRawBonuses(HeroKey);
+            var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
+            float baseVal = Stats.Endurance + raw[StatType.Endurance];
+            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.Endurance] / 100f));
         }
 
         public int GetEffectiveMaxHealth()

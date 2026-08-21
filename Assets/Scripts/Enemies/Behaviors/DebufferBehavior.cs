@@ -14,7 +14,7 @@ namespace Assets.Scripts.Enemies.Behaviors
 
         public EnemyDecision Decide(ICombatUnit self, EnemyCombatContext context)
         {
-            var target = EnemyTargeting.FirstWithoutDebuff(context.Heroes, context.BuffTracker, StatType.Attack);
+            var target = EnemyTargeting.FirstWithoutDebuff(context.Heroes, context.BuffTracker, StatType.Strength);
             if (target != null)
             {
                 return new EnemyDecision
@@ -23,7 +23,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                     Target = target,
                     Amount = DebuffAmount,
                     Duration = DebuffDuration,
-                    DebuffStat = StatType.Attack
+                    DebuffStat = StatType.Strength
                 };
             }
 

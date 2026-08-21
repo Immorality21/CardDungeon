@@ -21,7 +21,7 @@ namespace Assets.Scripts.Balance
         public string Name => Definition != null ? Definition.DisplayName : "(none)";
 
         /// <summary>Fraction of incoming damage this hero's defense removes.</summary>
-        public float DefenseReduction => BalanceMath.DefenseReduction(Stats.Defense);
+        public float EnduranceReduction => BalanceMath.EnduranceReduction(Stats.Endurance);
     }
 
     /// <summary>
@@ -133,10 +133,17 @@ namespace Assets.Scripts.Balance
                     DisplayName = hero.Name,
                     HeroKey = definition.SaveKey,
                     IsHero = true,
-                    Stats = new Rooms.Stats(effective.Attack, effective.Defense, effective.MaxHealth, effective.Agility),
-                    EffectiveAttack = effective.Attack,
-                    EffectiveDefense = effective.Defense,
+                    Stats = new Rooms.Stats(effective.Strength, effective.Endurance, effective.MaxHealth, effective.Agility,
+                        effective.Intelligence, effective.Spirit, effective.Luck),
+                    // Resolve the hero's chosen attack attribute the same way Hero does, or the
+                    // model would have every hero swinging off Strength while the game does not.
+                    EffectiveAttackPower = AttackPowerFor(definition, effective),
+                    EffectiveStrength = effective.Strength,
+                    EffectiveEndurance = effective.Endurance,
                     EffectiveAgility = effective.Agility,
+                    EffectiveIntelligence = effective.Intelligence,
+                    EffectiveSpirit = effective.Spirit,
+                    EffectiveLuck = effective.Luck,
                     // Heroes deal physical damage; gear resistance folds in the same way Hero does.
                     AttackDamageType = Combat.DamageType.Normal,
                     Resistances = InventoryOperations.ComputeResistances(gear)
@@ -146,6 +153,34 @@ namespace Assets.Scripts.Balance
             }
 
             return baseline;
+        }
+
+        /// <summary>
+        /// Mirrors <c>Hero.GetEffectiveAttackPower()</c>: the attribute named by
+        /// <see cref="HeroSO.AttackStat"/>, defaulting to Strength.
+        /// </summary>
+        private static int AttackPowerFor(HeroSO definition, EffectiveStats effective)
+        {
+            if (definition == null)
+            {
+                return effective.Strength;
+            }
+
+            switch (definition.AttackStat)
+            {
+                case Items.StatType.Agility:
+                    return effective.Agility;
+                case Items.StatType.Intelligence:
+                    return effective.Intelligence;
+                case Items.StatType.Spirit:
+                    return effective.Spirit;
+                case Items.StatType.Luck:
+                    return effective.Luck;
+                case Items.StatType.Endurance:
+                    return effective.Endurance;
+                default:
+                    return effective.Strength;
+            }
         }
 
         /// <summary>Fresh, full-health clones of the party — one set per simulated battle.</summary>

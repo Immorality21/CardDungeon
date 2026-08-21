@@ -21,10 +21,16 @@ namespace Assets.Scripts.Enemies
         public bool IsBoss;
 
         [Header("Base stats")]
-        public int Attack = 3;
-        public int Defense = 1;
+        public int Strength = 3;
+        public int Endurance = 1;
         public int Health = 10;
         public int Agility = 5;
+
+        [Tooltip("Caster stats. Default 0: an enemy that never casts needs neither, and leaving " +
+                 "Luck at 0 keeps its crit rate at the base so existing encounters are unchanged.")]
+        public int Intelligence;
+        public int Spirit;
+        public int Luck;
 
         [Header("Kill rewards")]
         public int XpReward = 10;    // awarded to the party leader immediately on kill

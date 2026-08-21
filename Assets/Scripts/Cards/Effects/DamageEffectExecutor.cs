@@ -23,12 +23,14 @@ namespace Assets.Scripts.Cards.Effects
             int rawAttack;
             if (isComboEffect)
             {
+                // Combo damage is flat: it comes from the combo definition, not from whoever
+                // happened to land the second tag.
                 rawAttack = effect.Power;
             }
             else
             {
-                int attackBonus = buffTracker.GetBuffAmount(caster, StatType.Attack);
-                rawAttack = caster.GetEffectiveAttack() + attackBonus + effect.Power;
+                rawAttack = effect.Power
+                          + SpellScaling.CasterContribution(caster, effect.ScalingStat, buffTracker);
             }
 
             foreach (var target in targets)
@@ -38,8 +40,8 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
-                int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Defense);
-                int defense = target.GetEffectiveDefense() + defenseBonus;
+                int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Endurance);
+                int defense = target.GetEffectiveEndurance() + defenseBonus;
                 int damage = DamageCalculator.Calculate(rawAttack, defense, effect.DamageType, target.Resistances);
 
                 if (damage < 0)

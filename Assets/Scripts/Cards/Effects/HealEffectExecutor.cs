@@ -17,6 +17,12 @@ namespace Assets.Scripts.Cards.Effects
             EffectResult result,
             bool isComboEffect = false)
         {
+            // Healing scales off the caster the same way damage does, so a Spirit build actually
+            // heals for more. Combo heals stay flat, matching combo damage.
+            int scaled = isComboEffect
+                ? effect.Power
+                : effect.Power + SpellScaling.CasterContribution(caster, effect.ScalingStat, buffTracker);
+
             foreach (var target in targets)
             {
                 if (!target.IsAlive)
@@ -24,7 +30,7 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
-                int healAmount = effect.Power;
+                int healAmount = scaled;
                 int newHealth = Mathf.Min(target.Stats.Health + healAmount, target.Stats.MaxHealth);
                 int actualHeal = newHealth - target.Stats.Health;
                 target.Stats.Health = newHealth;

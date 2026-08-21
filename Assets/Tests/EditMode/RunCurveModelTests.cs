@@ -48,8 +48,8 @@ namespace Tests.EditMode
         {
             var hero = Make<HeroSO>();
             hero.Label = "Tester";
-            hero.BaseAttack = 12;
-            hero.BaseDefense = 5;
+            hero.BaseStrength = 12;
+            hero.BaseEndurance = 5;
             hero.BaseHealth = 120;
             hero.BaseAgility = 5;
             hero.LevelProgression = new List<LevelConfiguration>();
@@ -61,8 +61,8 @@ namespace Tests.EditMode
         {
             var enemy = Make<EnemySO>();
             enemy.DisplayName = "Goblin";
-            enemy.Attack = attack;
-            enemy.Defense = 1;
+            enemy.Strength = attack;
+            enemy.Endurance = 1;
             enemy.Health = health;
             enemy.Agility = 5;
             enemy.XpReward = xp;

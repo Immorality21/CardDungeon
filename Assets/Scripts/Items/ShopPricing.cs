@@ -55,8 +55,8 @@ namespace Assets.Scripts.Items
                 return hero.RecruitCost;
             }
 
-            float score = hero.BaseAttack * 12f
-                        + hero.BaseDefense * 8f
+            float score = hero.BaseStrength * 12f
+                        + hero.BaseEndurance * 8f
                         + hero.BaseHealth * 4f
                         + hero.BaseAgility * 10f;
             return Mathf.Max(25, Mathf.RoundToInt(score / 5f) * 5);

@@ -2,9 +2,12 @@ namespace Assets.Scripts.Items
 {
     public enum StatType
     {
-        Attack,
-        Defense,
+        Strength,
+        Endurance,
         MaxHealth,
-        Agility
+        Agility,
+        Intelligence,
+        Spirit,
+        Luck
     }
 }

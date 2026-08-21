@@ -5,6 +5,16 @@
 > mid-combat, equips it into charge-based slots, and casts it. There is no pre-run
 > deck building and no persistent card collection.
 
+## Spell power scales off a caster stat
+
+`SpellEffect.Power` is a **base**; `SpellEffect.ScalingStat` (a `SpellScalingStat`) names the caster stat added on top, resolved through `SpellScaling.CasterContribution` so damage, healing and anything added later scale identically instead of each executor re-deriving it. Damage and debuff effects are authored as **Intelligence**, heals and buffs as **Spirit**.
+
+`SpellScalingStat.Attack` is deliberately the enum's zero value: before caster stats existed every damage effect used `caster.GetEffectiveAttack() + Power`, so magic authored then keeps its exact numbers until it is re-pointed. **Combo effects stay flat** (`isComboEffect`) — their power comes from the combo definition, not from whoever happened to land the second tag.
+
+Consequence worth knowing: a damage spell in the Warrior's hands is now much weaker than it was (Intelligence 3 vs Attack 10) and much stronger in the Acolyte's (Intelligence 10). That is the intended differentiation, but it means *who casts* now matters and the starting party is a poor caster.
+
+Still to design: `PowerMode` from `docs/ELEMENTAL_PLAN.md` (base-power / flat / % of max health) sits on the same field and needs settling together with `ScalingStat` — a `% of max health` effect presumably ignores Intelligence.
+
 ## Magic definitions & effects
 
 - **MagicSO** (ScriptableObject, `SO/Magic`): defines a magic with `Key`, `DisplayName`, `Description`, `Icon`, `TargetType` (`MagicTargetType`: Enemy/Ally/Self/AllEnemies/AllAllies), `Rarity` (`MagicRarity`), `Effects` (list of `SpellEffect`), `Tags` (list of `MagicTag`), `TagDuration`. Pure data — no acquisition/slot logic.

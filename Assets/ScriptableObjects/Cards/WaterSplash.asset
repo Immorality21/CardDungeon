@@ -20,6 +20,7 @@ MonoBehaviour:
   Rarity: 0
   Effects:
   - EffectType: 0
+    ScalingStat: 1
     Power: 2
     DamageType: 0
     BuffType: 0

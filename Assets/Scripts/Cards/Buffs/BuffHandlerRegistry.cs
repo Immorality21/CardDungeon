@@ -7,8 +7,8 @@ namespace Assets.Scripts.Cards.Buffs
     {
         private static readonly Dictionary<BuffType, IBuffHandler> Handlers = new Dictionary<BuffType, IBuffHandler>
         {
-            { BuffType.Attack, new StatBuffHandler(StatType.Attack, "Attack") },
-            { BuffType.Defense, new StatBuffHandler(StatType.Defense, "Defense") },
+            { BuffType.Strength, new StatBuffHandler(StatType.Strength, "Attack") },
+            { BuffType.Endurance, new StatBuffHandler(StatType.Endurance, "Defense") },
             { BuffType.Agility, new StatBuffHandler(StatType.Agility, "Agility") },
             { BuffType.FireResistance, new ResistanceBuffHandler("FireResistance") },
             { BuffType.IceResistance, new ResistanceBuffHandler("IceResistance") },

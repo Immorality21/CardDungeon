@@ -7,7 +7,19 @@ namespace Assets.Scripts.Cards
     public class SpellEffect
     {
         public SpellEffectType EffectType;
+
+        /// <summary>
+        /// Base power before the caster's stat is added. <see cref="ScalingStat"/> decides which stat
+        /// that is, so the same magic hits harder in the right hands.
+        /// </summary>
         public int Power;
+
+        /// <summary>
+        /// Which caster stat scales this effect. Defaults to <see cref="SpellScalingStat.Strength"/>
+        /// because that is what every effect used before the caster stats existed - magic authored
+        /// then keeps its exact numbers until it is deliberately re-pointed at Intelligence or Spirit.
+        /// </summary>
+        public SpellScalingStat ScalingStat = SpellScalingStat.Strength;
         public DamageType DamageType;
         public BuffType BuffType;
         public int Duration = 3;

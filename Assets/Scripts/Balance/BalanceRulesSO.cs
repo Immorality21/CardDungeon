@@ -83,9 +83,15 @@ namespace Assets.Scripts.Balance
 
         [Header("Stat weights for the power score")]
         public float HealthWeight = 1f;
-        public float AttackWeight = 6f;
-        public float DefenseWeight = 4f;
+        public float StrengthWeight = 6f;
+        public float EnduranceWeight = 4f;
         public float AgilityWeight = 3f;
+
+        [Tooltip("Caster stats are worth less on an enemy that never casts, so these start low; " +
+                 "raise them once enemy spellcasting exists.")]
+        public float IntelligenceWeight = 2f;
+        public float SpiritWeight = 2f;
+        public float LuckWeight = 3f;
 
         [Header("Simulation")]
         [Tooltip("Battles run per encounter. Higher is smoother but slower; 200 is plenty for a " +

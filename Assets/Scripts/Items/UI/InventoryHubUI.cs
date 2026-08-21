@@ -261,8 +261,8 @@ namespace Assets.Scripts.Items.UI
             var pct = InventoryManager.Instance.ComputePercentageBonuses(_selectedHeroKey);
 
             _statsLabel.text =
-                $"ATK {Effective(hero.BaseAttack, raw[StatType.Attack], pct[StatType.Attack])}   " +
-                $"DEF {Effective(hero.BaseDefense, raw[StatType.Defense], pct[StatType.Defense])}   " +
+                $"STR {Effective(hero.BaseStrength, raw[StatType.Strength], pct[StatType.Strength])}   " +
+                $"END {Effective(hero.BaseEndurance, raw[StatType.Endurance], pct[StatType.Endurance])}   " +
                 $"HP {Effective(hero.BaseHealth, raw[StatType.MaxHealth], pct[StatType.MaxHealth])}   " +
                 $"AGI {Effective(hero.BaseAgility, raw[StatType.Agility], pct[StatType.Agility])}";
         }

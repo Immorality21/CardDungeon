@@ -22,7 +22,7 @@ namespace Tests.EditMode
         [Test]
         public void GetBuffAmount_NoBuff_ReturnsZero()
         {
-            int amount = _tracker.GetBuffAmount(_hero, StatType.Attack);
+            int amount = _tracker.GetBuffAmount(_hero, StatType.Strength);
 
             Assert.AreEqual(0, amount);
         }
@@ -30,92 +30,92 @@ namespace Tests.EditMode
         [Test]
         public void ApplyBuff_SingleBuff_ReturnsCorrectAmount()
         {
-            _tracker.ApplyBuff(_hero, StatType.Attack, 5, 3);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 5, 3);
 
-            Assert.AreEqual(5, _tracker.GetBuffAmount(_hero, StatType.Attack));
+            Assert.AreEqual(5, _tracker.GetBuffAmount(_hero, StatType.Strength));
         }
 
         [Test]
         public void ApplyBuff_MultipleBuffsSameStat_Stacks()
         {
-            _tracker.ApplyBuff(_hero, StatType.Attack, 5, 3);
-            _tracker.ApplyBuff(_hero, StatType.Attack, 3, 2);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 5, 3);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 3, 2);
 
-            Assert.AreEqual(8, _tracker.GetBuffAmount(_hero, StatType.Attack));
+            Assert.AreEqual(8, _tracker.GetBuffAmount(_hero, StatType.Strength));
         }
 
         [Test]
         public void ApplyBuff_DifferentStats_TrackedSeparately()
         {
-            _tracker.ApplyBuff(_hero, StatType.Attack, 5, 3);
-            _tracker.ApplyBuff(_hero, StatType.Defense, 10, 3);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 5, 3);
+            _tracker.ApplyBuff(_hero, StatType.Endurance, 10, 3);
 
-            Assert.AreEqual(5, _tracker.GetBuffAmount(_hero, StatType.Attack));
-            Assert.AreEqual(10, _tracker.GetBuffAmount(_hero, StatType.Defense));
+            Assert.AreEqual(5, _tracker.GetBuffAmount(_hero, StatType.Strength));
+            Assert.AreEqual(10, _tracker.GetBuffAmount(_hero, StatType.Endurance));
         }
 
         [Test]
         public void ApplyBuff_DifferentUnits_TrackedSeparately()
         {
-            _tracker.ApplyBuff(_hero, StatType.Attack, 5, 3);
-            _tracker.ApplyBuff(_enemy, StatType.Attack, 99, 3);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 5, 3);
+            _tracker.ApplyBuff(_enemy, StatType.Strength, 99, 3);
 
-            Assert.AreEqual(5, _tracker.GetBuffAmount(_hero, StatType.Attack));
-            Assert.AreEqual(99, _tracker.GetBuffAmount(_enemy, StatType.Attack));
+            Assert.AreEqual(5, _tracker.GetBuffAmount(_hero, StatType.Strength));
+            Assert.AreEqual(99, _tracker.GetBuffAmount(_enemy, StatType.Strength));
         }
 
         [Test]
         public void ApplyBuff_NegativeAmount_WorksAsDebuff()
         {
-            _tracker.ApplyBuff(_enemy, StatType.Attack, -4, 3);
+            _tracker.ApplyBuff(_enemy, StatType.Strength, -4, 3);
 
-            Assert.AreEqual(-4, _tracker.GetBuffAmount(_enemy, StatType.Attack));
+            Assert.AreEqual(-4, _tracker.GetBuffAmount(_enemy, StatType.Strength));
         }
 
         [Test]
         public void TickBuffs_DecrementsDuration()
         {
-            _tracker.ApplyBuff(_hero, StatType.Attack, 5, 2);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 5, 2);
 
             _tracker.TickBuffs(_hero);
 
             // Still active after first tick (1 turn remaining)
-            Assert.AreEqual(5, _tracker.GetBuffAmount(_hero, StatType.Attack));
+            Assert.AreEqual(5, _tracker.GetBuffAmount(_hero, StatType.Strength));
         }
 
         [Test]
         public void TickBuffs_ExpiresAfterDurationReachesZero()
         {
-            _tracker.ApplyBuff(_hero, StatType.Attack, 5, 2);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 5, 2);
 
             _tracker.TickBuffs(_hero);
             _tracker.TickBuffs(_hero);
 
-            Assert.AreEqual(0, _tracker.GetBuffAmount(_hero, StatType.Attack));
+            Assert.AreEqual(0, _tracker.GetBuffAmount(_hero, StatType.Strength));
         }
 
         [Test]
         public void TickBuffs_OnlyAffectsTargetUnit()
         {
-            _tracker.ApplyBuff(_hero, StatType.Attack, 5, 1);
-            _tracker.ApplyBuff(_enemy, StatType.Attack, 5, 1);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 5, 1);
+            _tracker.ApplyBuff(_enemy, StatType.Strength, 5, 1);
 
             _tracker.TickBuffs(_hero);
 
-            Assert.AreEqual(0, _tracker.GetBuffAmount(_hero, StatType.Attack));
-            Assert.AreEqual(5, _tracker.GetBuffAmount(_enemy, StatType.Attack));
+            Assert.AreEqual(0, _tracker.GetBuffAmount(_hero, StatType.Strength));
+            Assert.AreEqual(5, _tracker.GetBuffAmount(_enemy, StatType.Strength));
         }
 
         [Test]
         public void TickBuffs_MixedDurations_OnlyShorterExpires()
         {
-            _tracker.ApplyBuff(_hero, StatType.Attack, 3, 1);
-            _tracker.ApplyBuff(_hero, StatType.Attack, 7, 3);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 3, 1);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 7, 3);
 
             _tracker.TickBuffs(_hero);
 
             // 3-point buff expired (was 1 turn), 7-point buff remains
-            Assert.AreEqual(7, _tracker.GetBuffAmount(_hero, StatType.Attack));
+            Assert.AreEqual(7, _tracker.GetBuffAmount(_hero, StatType.Strength));
         }
 
         [Test]
@@ -127,13 +127,13 @@ namespace Tests.EditMode
         [Test]
         public void Clear_RemovesAllBuffs()
         {
-            _tracker.ApplyBuff(_hero, StatType.Attack, 5, 3);
-            _tracker.ApplyBuff(_enemy, StatType.Defense, 10, 3);
+            _tracker.ApplyBuff(_hero, StatType.Strength, 5, 3);
+            _tracker.ApplyBuff(_enemy, StatType.Endurance, 10, 3);
 
             _tracker.Clear();
 
-            Assert.AreEqual(0, _tracker.GetBuffAmount(_hero, StatType.Attack));
-            Assert.AreEqual(0, _tracker.GetBuffAmount(_enemy, StatType.Defense));
+            Assert.AreEqual(0, _tracker.GetBuffAmount(_hero, StatType.Strength));
+            Assert.AreEqual(0, _tracker.GetBuffAmount(_enemy, StatType.Endurance));
         }
 
         // ---- Status Effects ----
@@ -178,9 +178,9 @@ namespace Tests.EditMode
         public void StatusEffect_DoesNotAffectStatBuffs()
         {
             _tracker.ApplyStatusEffect(_enemy, BuffType.Frozen, 3);
-            _tracker.ApplyBuff(_enemy, StatType.Attack, 5, 3);
+            _tracker.ApplyBuff(_enemy, StatType.Strength, 5, 3);
 
-            Assert.AreEqual(5, _tracker.GetBuffAmount(_enemy, StatType.Attack));
+            Assert.AreEqual(5, _tracker.GetBuffAmount(_enemy, StatType.Strength));
         }
 
         [Test]

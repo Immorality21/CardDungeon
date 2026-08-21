@@ -25,6 +25,6 @@ namespace Assets.Scripts.Enemies.Behaviors
         public float Multiplier = 1f;         // damage multiplier for HeavyAttack
         public int Amount;                    // heal amount / debuff magnitude
         public int Duration;                  // debuff duration in turns
-        public StatType DebuffStat = StatType.Attack;
+        public StatType DebuffStat = StatType.Strength;
     }
 }

@@ -62,7 +62,8 @@ namespace Assets.Scripts.Enemies
             }
 
             gameObject.name = definition.DisplayName;
-            Stats = new Stats(definition.Attack, definition.Defense, definition.Health, definition.Agility);
+            Stats = new Stats(definition.Strength, definition.Endurance, definition.Health, definition.Agility,
+                definition.Intelligence, definition.Spirit, definition.Luck);
             Archetype = definition.Archetype;
             DrawableMagics = new List<DrawableMagicEntry>(definition.DrawableMagics);
             Resistances = new List<Resistance>(definition.Resistances);
@@ -81,19 +82,40 @@ namespace Assets.Scripts.Enemies
             transform.position = position;
         }
 
-        public int GetEffectiveAttack()
+        /// <summary>Enemies always swing off Strength; only heroes pick an attack attribute.</summary>
+        public int GetEffectiveAttackPower()
         {
-            return Stats.Attack;
+            return Stats.Strength;
         }
 
-        public int GetEffectiveDefense()
+        public int GetEffectiveStrength()
         {
-            return Stats.Defense;
+            return Stats.Strength;
+        }
+
+        public int GetEffectiveEndurance()
+        {
+            return Stats.Endurance;
         }
 
         public int GetEffectiveAgility()
         {
             return Stats.Agility;
+        }
+
+        public int GetEffectiveIntelligence()
+        {
+            return Stats.Intelligence;
+        }
+
+        public int GetEffectiveSpirit()
+        {
+            return Stats.Spirit;
+        }
+
+        public int GetEffectiveLuck()
+        {
+            return Stats.Luck;
         }
 
         private Sprite GetIcon()

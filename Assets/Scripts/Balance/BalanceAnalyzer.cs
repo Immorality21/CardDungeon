@@ -59,11 +59,23 @@ namespace Assets.Scripts.Balance
 
             report.Party = BuildReferenceParty(input, rules, report.Save);
 
+            // Judge each enemy against the party it is actually first met with. The roster grows
+            // during a run (RunLevelEntry.RescueHero), and party size is the strongest lever on
+            // danger there is, so measuring a level-3 enemy against the level-1 party reports it as
+            // out of band when it never gets fought that way. Falls back to the starting party for
+            // anything no run places.
+            var partyByEnemy = BuildFirstEncounterParties(input, rules, report.Party);
+
             foreach (var enemy in input.Enemies)
             {
                 if (enemy != null)
                 {
-                    report.Enemies.Add(EnemyMetrics.Compute(enemy, report.Party, rules));
+                    PartyBaseline against;
+                    if (!partyByEnemy.TryGetValue(enemy, out against) || against == null)
+                    {
+                        against = report.Party;
+                    }
+                    report.Enemies.Add(EnemyMetrics.Compute(enemy, against, rules, report.Party));
                 }
             }
 
@@ -93,6 +105,136 @@ namespace Assets.Scripts.Balance
             EvaluateSave(report, rules, input);
 
             return report;
+        }
+
+        /// <summary>
+        /// Maps every enemy a run places to the party it is *first* encountered with. Walks the runs
+        /// in order, growing a roster as each level's <c>RescueHero</c> is passed, and records the
+        /// smallest roster that meets each enemy. A hero rescued *during* a level does not count for
+        /// that level's enemies, matching <see cref="RunCurve"/>'s conservative reading.
+        ///
+        /// This exists because party size roughly halves per-enemy danger, so a fixed reference
+        /// party makes late-run enemies read as out of band and early ones as harmless.
+        /// </summary>
+        private static Dictionary<EnemySO, PartyBaseline> BuildFirstEncounterParties(
+            BalanceInput input, BalanceRulesSO rules, PartyBaseline starting)
+        {
+            var result = new Dictionary<EnemySO, PartyBaseline>();
+            if (input.Runs == null)
+            {
+                return result;
+            }
+
+            var startRoster = new List<HeroSO>();
+            foreach (var hero in starting.Heroes)
+            {
+                if (hero.Definition != null && !startRoster.Contains(hero.Definition))
+                {
+                    startRoster.Add(hero.Definition);
+                }
+            }
+
+            // One baseline per roster size, so a four-level run builds at most a handful.
+            var bySize = new Dictionary<int, PartyBaseline>();
+            bySize[startRoster.Count] = starting;
+
+            var ordered = new List<RunDefinitionSO>(input.Runs);
+            ordered.Sort((a, b) =>
+            {
+                int ai = a != null ? a.SequenceIndex : 0;
+                int bi = b != null ? b.SequenceIndex : 0;
+                return ai.CompareTo(bi);
+            });
+
+            foreach (var run in ordered)
+            {
+                if (run == null || run.Levels == null)
+                {
+                    continue;
+                }
+
+                var roster = new List<HeroSO>(startRoster);
+                foreach (var entry in run.Levels)
+                {
+                    if (entry == null)
+                    {
+                        continue;
+                    }
+
+                    PartyBaseline party;
+                    if (!bySize.TryGetValue(roster.Count, out party))
+                    {
+                        party = PartyBaseline.Build(roster, rules.ReferenceHeroLevel, null,
+                            starting.PotionItem, starting.PotionCount);
+                        bySize[roster.Count] = party;
+                    }
+
+                    foreach (var enemy in EnemiesInLevel(entry))
+                    {
+                        if (enemy != null && !result.ContainsKey(enemy))
+                        {
+                            result[enemy] = party;
+                        }
+                    }
+
+                    if (entry.RescueHero != null && !roster.Contains(entry.RescueHero))
+                    {
+                        roster.Add(entry.RescueHero);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>Every enemy a level can present: its rooms' spawn tables plus any boss.</summary>
+        private static IEnumerable<EnemySO> EnemiesInLevel(RunLevelEntry entry)
+        {
+            var rooms = new List<Rooms.RoomSO>();
+            if (entry.ManualLayout != null && entry.ManualLayout.Rooms != null)
+            {
+                foreach (var r in entry.ManualLayout.Rooms)
+                {
+                    if (r != null && r.RoomTemplate != null)
+                    {
+                        rooms.Add(r.RoomTemplate);
+                    }
+                    if (r != null && r.EnemySpawnOverride != null)
+                    {
+                        foreach (var e in r.EnemySpawnOverride)
+                        {
+                            if (e != null && e.Enemy != null)
+                            {
+                                yield return e.Enemy;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (entry.LevelTemplate != null && entry.LevelTemplate.RoomPool != null)
+            {
+                rooms.AddRange(entry.LevelTemplate.RoomPool);
+            }
+
+            foreach (var room in rooms)
+            {
+                if (room == null || room.EnemySpawnTable == null)
+                {
+                    continue;
+                }
+                foreach (var e in room.EnemySpawnTable)
+                {
+                    if (e != null && e.Enemy != null)
+                    {
+                        yield return e.Enemy;
+                    }
+                }
+            }
+
+            if (entry.BossEnemy != null)
+            {
+                yield return entry.BossEnemy;
+            }
         }
 
         private static PartyBaseline BuildReferenceParty(BalanceInput input, BalanceRulesSO rules, SaveAudit save)
@@ -433,8 +575,8 @@ namespace Assets.Scripts.Balance
                 }
 
                 CheckGain(hero, report, config.Level, "Agility", config.AgilityGain, hero.Definition.BaseAgility);
-                CheckGain(hero, report, config.Level, "Attack", config.AttackGain, hero.Definition.BaseAttack);
-                CheckGain(hero, report, config.Level, "Defense", config.DefenseGain, hero.Definition.BaseDefense);
+                CheckGain(hero, report, config.Level, "Strength", config.StrengthGain, hero.Definition.BaseStrength);
+                CheckGain(hero, report, config.Level, "Endurance", config.EnduranceGain, hero.Definition.BaseEndurance);
             }
         }
 
@@ -640,7 +782,7 @@ namespace Assets.Scripts.Balance
                         $"{metrics.Name} one-shots {metrics.FastestKillTarget}")
                     {
                         Asset = metrics.Definition,
-                        Detail = $"Attack {metrics.Definition.Attack} lands "
+                        Detail = $"Attack {metrics.Definition.Strength} lands "
                                + $"{FindPerHero(metrics, metrics.FastestKillTarget):0.0} average damage on a hero who "
                                + "cannot survive one hit.",
                         Suggestion = "Lower Attack, or raise hero max HP — the HP:damage scale is the root cause."
@@ -718,10 +860,10 @@ namespace Assets.Scripts.Balance
             }
 
             float scale = ceiling / metrics.SoloDangerIndex;
-            int suggestedAttack = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.Attack * scale));
+            int suggestedAttack = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.Strength * scale));
             int suggestedHealth = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.Health * scale));
 
-            return $"Either Attack {metrics.Definition.Attack} → {suggestedAttack}, or Health "
+            return $"Either Attack {metrics.Definition.Strength} → {suggestedAttack}, or Health "
                  + $"{metrics.Definition.Health} → {suggestedHealth} (or split the difference). "
                  + "Raising hero HP instead fixes it for every enemy at once.";
         }

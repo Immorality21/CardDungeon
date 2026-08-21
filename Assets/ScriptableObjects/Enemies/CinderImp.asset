@@ -15,10 +15,13 @@ MonoBehaviour:
   DisplayName: Cinder Imp
   Sprite: {fileID: 21300000, guid: c63e0d29d5d04db3b133f261668e6868, type: 3}
   IsBoss: 0
-  Attack: 2
-  Defense: 0
+  Strength: 5
+  Endurance: 0
   Health: 8
   Agility: 8
+  Intelligence: 4
+  Spirit: 0
+  Luck: 0
   XpReward: 8
   GoldReward: 4
   AttackDamageType: 1

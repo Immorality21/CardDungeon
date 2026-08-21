@@ -69,8 +69,8 @@ namespace Tests.EditMode
         {
             var enemy = Make<EnemySO>(name);
             enemy.DisplayName = name;
-            enemy.Attack = 4;
-            enemy.Defense = 1;
+            enemy.Strength = 4;
+            enemy.Endurance = 1;
             enemy.Health = 20;
             enemy.Agility = 5;
             enemy.XpReward = 10;
@@ -118,8 +118,8 @@ namespace Tests.EditMode
         {
             var hero = Make<HeroSO>();
             hero.Label = "Tester";
-            hero.BaseAttack = 12;
-            hero.BaseDefense = 5;
+            hero.BaseStrength = 12;
+            hero.BaseEndurance = 5;
             hero.BaseHealth = 200;
             hero.BaseAgility = 5;
             hero.LevelProgression = new List<LevelConfiguration>();

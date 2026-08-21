@@ -15,10 +15,13 @@ MonoBehaviour:
   DisplayName: Dragon
   Sprite: {fileID: 21300000, guid: c63e0d29d5d04db3b133f261668e6868, type: 3}
   IsBoss: 0
-  Attack: 3
-  Defense: 2
+  Strength: 5
+  Endurance: 2
   Health: 9
   Agility: 5
+  Intelligence: 5
+  Spirit: 0
+  Luck: 0
   XpReward: 10
   GoldReward: 5
   AttackDamageType: 1

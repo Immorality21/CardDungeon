@@ -15,10 +15,13 @@ MonoBehaviour:
   DisplayName: Floating Eye
   Sprite: {fileID: 21300000, guid: 77f73150858844a8a871d79b104f0900, type: 3}
   IsBoss: 0
-  Attack: 3
-  Defense: 1
-  Health: 20
+  Strength: 4
+  Endurance: 1
+  Health: 16
   Agility: 5
+  Intelligence: 3
+  Spirit: 0
+  Luck: 0
   XpReward: 10
   GoldReward: 5
   AttackDamageType: 2

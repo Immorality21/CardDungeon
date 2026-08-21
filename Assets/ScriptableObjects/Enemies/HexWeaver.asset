@@ -15,10 +15,13 @@ MonoBehaviour:
   DisplayName: Hex Weaver
   Sprite: {fileID: 21300000, guid: 77f73150858844a8a871d79b104f0900, type: 3}
   IsBoss: 0
-  Attack: 3
-  Defense: 2
+  Strength: 6
+  Endurance: 2
   Health: 14
   Agility: 6
+  Intelligence: 7
+  Spirit: 2
+  Luck: 0
   XpReward: 15
   GoldReward: 9
   AttackDamageType: 3

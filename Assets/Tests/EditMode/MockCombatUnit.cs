@@ -18,14 +18,14 @@ namespace Tests.EditMode
         /// <summary>Element this unit's basic attacks carry. Normal keeps existing tests unaffected.</summary>
         public DamageType AttackDamageType { get; set; } = DamageType.Normal;
 
-        public int GetEffectiveAttack()
+        public int GetEffectiveAttackPower()
         {
-            return Stats.Attack;
+            return Stats.Strength;
         }
 
-        public int GetEffectiveDefense()
+        public int GetEffectiveEndurance()
         {
-            return Stats.Defense;
+            return Stats.Endurance;
         }
 
         // When set, models item/level agility bonuses layered on top of the raw stat.
@@ -34,6 +34,26 @@ namespace Tests.EditMode
         public int GetEffectiveAgility()
         {
             return EffectiveAgilityOverride ?? Stats.Agility;
+        }
+
+        public int GetEffectiveStrength()
+        {
+            return Stats.Strength;
+        }
+
+        public int GetEffectiveIntelligence()
+        {
+            return Stats.Intelligence;
+        }
+
+        public int GetEffectiveSpirit()
+        {
+            return Stats.Spirit;
+        }
+
+        public int GetEffectiveLuck()
+        {
+            return Stats.Luck;
         }
 
         public MockCombatUnit(string name, int attack, int defense, int health, int agility = 5, bool isHero = true)

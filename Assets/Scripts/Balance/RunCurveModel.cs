@@ -204,9 +204,17 @@ namespace Assets.Scripts.Balance
                 return;
             }
 
-            foreach (var room in layout.Rooms)
+            for (int i = 0; i < layout.Rooms.Count; i++)
             {
+                var room = layout.Rooms[i];
                 if (room == null || room.RoomTemplate == null)
+                {
+                    continue;
+                }
+
+                // The party spawns here and EnemyManager.SpawnEnemies skips the room it is in
+                // (`if (room == playerRoom) continue`), so the start room never costs anything.
+                if (i == layout.StartRoomIndex)
                 {
                     continue;
                 }
@@ -230,8 +238,11 @@ namespace Assets.Scripts.Balance
             }
 
             // RoomManager draws each room uniformly from the pool (List.TakeRandom), so every pool
-            // entry is expected to appear RoomsToGenerate / poolSize times.
-            float perEntry = (float)template.RoomsToGenerate / template.RoomPool.Count;
+            // entry is expected to appear RoomsToGenerate / poolSize times. One of those rooms is
+            // the party's starting room, which EnemyManager.SpawnEnemies deliberately skips, so it
+            // contributes nothing and is taken off the total before spreading.
+            int populated = Mathf.Max(0, template.RoomsToGenerate - 1);
+            float perEntry = (float)populated / template.RoomPool.Count;
 
             foreach (var room in template.RoomPool)
             {
@@ -249,24 +260,29 @@ namespace Assets.Scripts.Balance
         private static void ReplaceExitRoomWithBoss(LevelCurve level, RunLevelEntry entry, PartyBaseline party, BalanceRulesSO rules)
         {
             // Take one ordinary combat room back out of the level: the exit room's spawns are wiped
-            // before the boss is placed.
-            for (int i = level.Rooms.Count - 1; i >= 0; i--)
+            // before the boss is placed. Spread that single room across every combat entry rather
+            // than deleting one outright -- which room the exit lands on is random, and removing a
+            // whole pool entry can erase an enemy from the level entirely (it once made Bog Shaman,
+            // and therefore Heal, unreachable on the only level that offered it).
+            float combatEntries = 0f;
+            foreach (var room in level.Rooms)
             {
-                var room = level.Rooms[i];
-                if (!room.IsCombatRoom)
+                if (room.IsCombatRoom)
                 {
-                    continue;
+                    combatEntries += 1f;
                 }
+            }
 
-                if (room.Occurrences <= 1f)
+            if (combatEntries > 0f)
+            {
+                float share = 1f / combatEntries;
+                foreach (var room in level.Rooms)
                 {
-                    level.Rooms.RemoveAt(i);
+                    if (room.IsCombatRoom)
+                    {
+                        room.Occurrences = Mathf.Max(0f, room.Occurrences - share);
+                    }
                 }
-                else
-                {
-                    room.Occurrences -= 1f;
-                }
-                break;
             }
 
             var bossEncounter = new RoomEncounter

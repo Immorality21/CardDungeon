@@ -516,8 +516,8 @@ namespace Assets.Scripts.Balance
         {
             float total = 0f;
             int powerBonus = MetaProgressManager.MagicPowerBonusForLevel(slot.UpgradeLevel);
-            int attackBonus = buffTracker.GetBuffAmount(caster, StatType.Attack);
-            int defense = target.GetEffectiveDefense() + buffTracker.GetBuffAmount(target, StatType.Defense);
+            int attackBonus = buffTracker.GetBuffAmount(caster, StatType.Strength);
+            int defense = target.GetEffectiveEndurance() + buffTracker.GetBuffAmount(target, StatType.Endurance);
 
             foreach (var effect in slot.Magic.Effects)
             {
@@ -526,7 +526,7 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                int raw = caster.GetEffectiveAttack() + attackBonus + effect.Power + powerBonus;
+                int raw = caster.GetEffectiveAttackPower() + attackBonus + effect.Power + powerBonus;
                 total += DamageCalculator.Calculate(raw, defense, effect.DamageType, target.Resistances);
             }
 
@@ -535,9 +535,9 @@ namespace Assets.Scripts.Balance
 
         private static float BasicAttackDamage(SimUnit attacker, SimUnit target, CombatBuffTracker buffTracker)
         {
-            int attackBonus = buffTracker.GetBuffAmount(attacker, StatType.Attack);
-            int defense = target.GetEffectiveDefense() + buffTracker.GetBuffAmount(target, StatType.Defense);
-            return DamageCalculator.Calculate(attacker.GetEffectiveAttack() + attackBonus, defense, DamageType.Normal, target.Resistances);
+            int attackBonus = buffTracker.GetBuffAmount(attacker, StatType.Strength);
+            int defense = target.GetEffectiveEndurance() + buffTracker.GetBuffAmount(target, StatType.Endurance);
+            return DamageCalculator.Calculate(attacker.GetEffectiveAttackPower() + attackBonus, defense, DamageType.Normal, target.Resistances);
         }
 
         // ---------------------------------------------------------------- enemy turns
@@ -647,14 +647,14 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static int ResolveAttack(SimUnit attacker, SimUnit target, CombatBuffTracker buffTracker, float multiplier = 1f)
         {
-            int attackBonus = buffTracker.GetBuffAmount(attacker, StatType.Attack);
-            int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Defense);
-            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttack() + attackBonus) * multiplier);
-            int defense = target.GetEffectiveDefense() + defenseBonus;
+            int attackBonus = buffTracker.GetBuffAmount(attacker, StatType.Strength);
+            int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Endurance);
+            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * multiplier);
+            int defense = target.GetEffectiveEndurance() + defenseBonus;
             int damage = DamageCalculator.Calculate(
                 rawAttack, defense, attacker.AttackDamageType, target.Resistances);
 
-            if (damage > 0 && Random.Range(0f, 1f) < CombatManager.CritChance)
+            if (damage > 0 && Random.Range(0f, 1f) < CombatManager.CritChanceFor(attacker))
             {
                 damage = Mathf.Max(damage + 1, Mathf.RoundToInt(damage * CombatManager.CritMultiplier));
             }

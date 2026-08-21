@@ -20,7 +20,7 @@ namespace Tests.EditMode
             SpellEffectType effect,
             int power,
             DamageType damageType = DamageType.Normal,
-            BuffType buffType = BuffType.Attack,
+            BuffType buffType = BuffType.Strength,
             int duration = 3,
             List<MagicTag> tags = null,
             int tagDuration = 3)
@@ -65,7 +65,7 @@ namespace Tests.EditMode
             SpellEffectType effect,
             int power,
             DamageType damageType = DamageType.Normal,
-            BuffType buffType = BuffType.Attack,
+            BuffType buffType = BuffType.Strength,
             int duration = 3)
         {
             var combo = ScriptableObject.CreateInstance<MagicComboSO>();
@@ -150,7 +150,7 @@ namespace Tests.EditMode
         [Test]
         public void Damage_IncludesAttackBuff()
         {
-            _buffTracker.ApplyBuff(_hero, StatType.Attack, 5, 3);
+            _buffTracker.ApplyBuff(_hero, StatType.Strength, 5, 3);
             var card = CreateCard("Slash", SpellEffectType.Damage, power: 0);
             var action = MakeAction(card, _hero, _enemy);
 
@@ -163,7 +163,7 @@ namespace Tests.EditMode
         [Test]
         public void Damage_IncludesDefenseBuff()
         {
-            _buffTracker.ApplyBuff(_enemy, StatType.Defense, 10, 3);
+            _buffTracker.ApplyBuff(_enemy, StatType.Endurance, 10, 3);
             var card = CreateCard("Slash", SpellEffectType.Damage, power: 5);
             var action = MakeAction(card, _hero, _enemy);
 
@@ -257,29 +257,29 @@ namespace Tests.EditMode
         [Test]
         public void BuffAttack_AppliesBuff()
         {
-            var card = CreateCard("WarCry", SpellEffectType.Buff, power: 7, buffType: BuffType.Attack);
+            var card = CreateCard("WarCry", SpellEffectType.Buff, power: 7, buffType: BuffType.Strength);
             var action = MakeAction(card, _hero, _hero);
 
             _calculator.Execute(action, _buffTracker);
 
-            Assert.AreEqual(7, _buffTracker.GetBuffAmount(_hero, StatType.Attack));
+            Assert.AreEqual(7, _buffTracker.GetBuffAmount(_hero, StatType.Strength));
         }
 
         [Test]
         public void BuffDefense_AppliesBuff()
         {
-            var card = CreateCard("ShieldUp", SpellEffectType.Buff, power: 4, buffType: BuffType.Defense);
+            var card = CreateCard("ShieldUp", SpellEffectType.Buff, power: 4, buffType: BuffType.Endurance);
             var action = MakeAction(card, _hero, _hero);
 
             _calculator.Execute(action, _buffTracker);
 
-            Assert.AreEqual(4, _buffTracker.GetBuffAmount(_hero, StatType.Defense));
+            Assert.AreEqual(4, _buffTracker.GetBuffAmount(_hero, StatType.Endurance));
         }
 
         [Test]
         public void Buff_GeneratesCorrectEntryText()
         {
-            var card = CreateCard("WarCry", SpellEffectType.Buff, power: 7, buffType: BuffType.Attack);
+            var card = CreateCard("WarCry", SpellEffectType.Buff, power: 7, buffType: BuffType.Strength);
             var action = MakeAction(card, _hero, _hero);
 
             var result = _calculator.Execute(action, _buffTracker);
@@ -293,18 +293,18 @@ namespace Tests.EditMode
         [Test]
         public void Debuff_ReducesStat()
         {
-            var card = CreateCard("Curse", SpellEffectType.Debuff, power: 3, buffType: BuffType.Attack);
+            var card = CreateCard("Curse", SpellEffectType.Debuff, power: 3, buffType: BuffType.Strength);
             var action = MakeAction(card, _hero, _enemy);
 
             _calculator.Execute(action, _buffTracker);
 
-            Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Attack));
+            Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Strength));
         }
 
         [Test]
         public void Debuff_GeneratesCorrectEntryText()
         {
-            var card = CreateCard("Curse", SpellEffectType.Debuff, power: 3, buffType: BuffType.Attack);
+            var card = CreateCard("Curse", SpellEffectType.Debuff, power: 3, buffType: BuffType.Strength);
             var action = MakeAction(card, _hero, _enemy);
 
             var result = _calculator.Execute(action, _buffTracker);
@@ -321,7 +321,7 @@ namespace Tests.EditMode
             var card = CreateMultiEffectCard("LightningBolt", new List<SpellEffect>
             {
                 new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, DamageType = DamageType.Lightning },
-                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Defense, Duration = 3 }
+                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Endurance, Duration = 3 }
             });
             var action = MakeAction(card, _hero, _enemy);
 
@@ -330,7 +330,7 @@ namespace Tests.EditMode
 
             int expectedDmg = ExpectedDamage(10 + 5, 3, DamageType.Lightning);
             Assert.AreEqual(healthBefore - expectedDmg, _enemy.Stats.Health);
-            Assert.AreEqual(-2, _buffTracker.GetBuffAmount(_enemy, StatType.Defense));
+            Assert.AreEqual(-2, _buffTracker.GetBuffAmount(_enemy, StatType.Endurance));
         }
 
         [Test]
@@ -341,7 +341,7 @@ namespace Tests.EditMode
             // defense query yet because it's applied via buff tracker in the same action)
             var card = CreateMultiEffectCard("Combo", new List<SpellEffect>
             {
-                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 3, BuffType = BuffType.Defense, Duration = 3 },
+                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 3, BuffType = BuffType.Endurance, Duration = 3 },
                 new SpellEffect { EffectType = SpellEffectType.Damage, Power = 5, DamageType = DamageType.Normal }
             });
             var action = MakeAction(card, _hero, _enemy);
@@ -352,7 +352,7 @@ namespace Tests.EditMode
             // Defense debuff IS already applied when damage calculates (same buff tracker)
             int expectedDmg = ExpectedDamage(10 + 5, 3 + (-3));
             Assert.AreEqual(healthBefore - expectedDmg, _enemy.Stats.Health);
-            Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Defense));
+            Assert.AreEqual(-3, _buffTracker.GetBuffAmount(_enemy, StatType.Endurance));
         }
 
         [Test]
@@ -361,15 +361,15 @@ namespace Tests.EditMode
             // Old-style debuff that hits both Attack and Defense
             var card = CreateMultiEffectCard("OilSlick", new List<SpellEffect>
             {
-                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Attack, Duration = 3 },
-                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Defense, Duration = 3 }
+                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Strength, Duration = 3 },
+                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Endurance, Duration = 3 }
             });
             var action = MakeAction(card, _hero, _enemy);
 
             _calculator.Execute(action, _buffTracker);
 
-            Assert.AreEqual(-2, _buffTracker.GetBuffAmount(_enemy, StatType.Attack));
-            Assert.AreEqual(-2, _buffTracker.GetBuffAmount(_enemy, StatType.Defense));
+            Assert.AreEqual(-2, _buffTracker.GetBuffAmount(_enemy, StatType.Strength));
+            Assert.AreEqual(-2, _buffTracker.GetBuffAmount(_enemy, StatType.Endurance));
         }
 
         [Test]
@@ -441,7 +441,7 @@ namespace Tests.EditMode
         [Test]
         public void Combo_BuffAttackBonus_BuffsCaster()
         {
-            var combo = CreateCombo("Empower", new List<MagicTag> { MagicTag.Fire, MagicTag.Wind }, SpellEffectType.Buff, 8, buffType: BuffType.Attack);
+            var combo = CreateCombo("Empower", new List<MagicTag> { MagicTag.Fire, MagicTag.Wind }, SpellEffectType.Buff, 8, buffType: BuffType.Strength);
             var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Wind }, 3);
@@ -451,13 +451,13 @@ namespace Tests.EditMode
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
-            Assert.AreEqual(8, _buffTracker.GetBuffAmount(_hero, StatType.Attack));
+            Assert.AreEqual(8, _buffTracker.GetBuffAmount(_hero, StatType.Strength));
         }
 
         [Test]
         public void Combo_DebuffBonus_DebuffsTarget()
         {
-            var combo = CreateCombo("Weaken", new List<MagicTag> { MagicTag.Ice, MagicTag.Water }, SpellEffectType.Debuff, 5, buffType: BuffType.Attack);
+            var combo = CreateCombo("Weaken", new List<MagicTag> { MagicTag.Ice, MagicTag.Water }, SpellEffectType.Debuff, 5, buffType: BuffType.Strength);
             var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Water }, 3);
@@ -467,7 +467,7 @@ namespace Tests.EditMode
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
-            Assert.AreEqual(-5, _buffTracker.GetBuffAmount(_enemy, StatType.Attack));
+            Assert.AreEqual(-5, _buffTracker.GetBuffAmount(_enemy, StatType.Strength));
         }
 
         [Test]
@@ -563,7 +563,7 @@ namespace Tests.EditMode
         [Test]
         public void Combo_BuffDefenseBonus_BuffsCaster()
         {
-            var combo = CreateCombo("Fortify", new List<MagicTag> { MagicTag.Earth, MagicTag.Iron }, SpellEffectType.Buff, 6, buffType: BuffType.Defense);
+            var combo = CreateCombo("Fortify", new List<MagicTag> { MagicTag.Earth, MagicTag.Iron }, SpellEffectType.Buff, 6, buffType: BuffType.Endurance);
             var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Iron }, 3);
@@ -573,7 +573,7 @@ namespace Tests.EditMode
 
             _calculator.Execute(action, _buffTracker, _tagTracker, detector);
 
-            Assert.AreEqual(6, _buffTracker.GetBuffAmount(_hero, StatType.Defense));
+            Assert.AreEqual(6, _buffTracker.GetBuffAmount(_hero, StatType.Endurance));
         }
 
         [Test]
@@ -667,7 +667,7 @@ namespace Tests.EditMode
 
             var oilCard = CreateMultiEffectCard("OilSlick", new List<SpellEffect>
             {
-                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 1, BuffType = BuffType.Attack, Duration = 3 }
+                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 1, BuffType = BuffType.Strength, Duration = 3 }
             }, tags: new List<MagicTag> { MagicTag.Oil });
             var oilAction = MakeAction(oilCard, _hero, _enemy);
             var result1 = _calculator.Execute(oilAction, _buffTracker, _tagTracker, detector);
@@ -689,8 +689,8 @@ namespace Tests.EditMode
             // Turn 1: OilSlick applies "Oil" tag and debuffs
             var oilCard = CreateMultiEffectCard("OilSlick", new List<SpellEffect>
             {
-                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Attack, Duration = 3 },
-                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Defense, Duration = 3 }
+                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Strength, Duration = 3 },
+                new SpellEffect { EffectType = SpellEffectType.Debuff, Power = 2, BuffType = BuffType.Endurance, Duration = 3 }
             }, tags: new List<MagicTag> { MagicTag.Oil });
             var oilAction = MakeAction(oilCard, _hero, _enemy);
             _calculator.Execute(oilAction, _buffTracker, _tagTracker, detector);
@@ -718,7 +718,7 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Oil }, 3);
 
-            _buffTracker.ApplyBuff(_hero, StatType.Attack, -100, 3);
+            _buffTracker.ApplyBuff(_hero, StatType.Strength, -100, 3);
 
             var card = CreateCard("Fireball", SpellEffectType.Damage, power: 0, tags: new List<MagicTag> { MagicTag.Fire });
             var action = MakeAction(card, _hero, _enemy);

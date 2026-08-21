@@ -50,26 +50,50 @@ namespace Assets.Scripts.Balance
         public Transform Transform => null;
         public List<Resistance> Resistances { get; set; } = new List<Resistance>();
 
-        public int EffectiveAttack;
-        public int EffectiveDefense;
+        public int EffectiveAttackPower;
+        public int EffectiveStrength;
+        public int EffectiveEndurance;
         public int EffectiveAgility;
+        public int EffectiveIntelligence;
+        public int EffectiveSpirit;
+        public int EffectiveLuck;
 
         /// <summary>Element this unit's physical attacks carry; Normal for heroes.</summary>
         public DamageType AttackDamageType { get; set; } = DamageType.Normal;
 
-        public int GetEffectiveAttack()
+        public int GetEffectiveAttackPower()
         {
-            return EffectiveAttack;
+            return EffectiveAttackPower;
         }
 
-        public int GetEffectiveDefense()
+        public int GetEffectiveStrength()
         {
-            return EffectiveDefense;
+            return EffectiveStrength;
+        }
+
+        public int GetEffectiveEndurance()
+        {
+            return EffectiveEndurance;
         }
 
         public int GetEffectiveAgility()
         {
             return EffectiveAgility;
+        }
+
+        public int GetEffectiveIntelligence()
+        {
+            return EffectiveIntelligence;
+        }
+
+        public int GetEffectiveSpirit()
+        {
+            return EffectiveSpirit;
+        }
+
+        public int GetEffectiveLuck()
+        {
+            return EffectiveLuck;
         }
 
         // ---- Hero-side ----
@@ -92,11 +116,15 @@ namespace Assets.Scripts.Balance
             {
                 DisplayName = DisplayName,
                 IsHero = IsHero,
-                Stats = new Stats(Stats.Attack, Stats.Defense, Stats.MaxHealth, Stats.Agility),
+                Stats = new Stats(Stats.Strength, Stats.Endurance, Stats.MaxHealth, Stats.Agility),
                 Resistances = new List<Resistance>(Resistances),
-                EffectiveAttack = EffectiveAttack,
-                EffectiveDefense = EffectiveDefense,
+                EffectiveAttackPower = EffectiveAttackPower,
+                EffectiveStrength = EffectiveStrength,
+                EffectiveEndurance = EffectiveEndurance,
                 EffectiveAgility = EffectiveAgility,
+                EffectiveIntelligence = EffectiveIntelligence,
+                EffectiveSpirit = EffectiveSpirit,
+                EffectiveLuck = EffectiveLuck,
                 AttackDamageType = AttackDamageType,
                 HeroKey = HeroKey,
                 Definition = Definition,
@@ -123,13 +151,17 @@ namespace Assets.Scripts.Balance
             {
                 DisplayName = string.IsNullOrEmpty(definition.DisplayName) ? definition.name : definition.DisplayName,
                 IsHero = false,
-                Stats = new Stats(definition.Attack, definition.Defense, definition.Health, definition.Agility),
+                Stats = new Stats(definition.Strength, definition.Endurance, definition.Health, definition.Agility),
                 Resistances = definition.Resistances != null
                     ? new List<Resistance>(definition.Resistances)
                     : new List<Resistance>(),
-                EffectiveAttack = definition.Attack,
-                EffectiveDefense = definition.Defense,
+                EffectiveAttackPower = definition.Strength,
+                EffectiveStrength = definition.Strength,
+                EffectiveEndurance = definition.Endurance,
                 EffectiveAgility = definition.Agility,
+                EffectiveIntelligence = definition.Intelligence,
+                EffectiveSpirit = definition.Spirit,
+                EffectiveLuck = definition.Luck,
                 AttackDamageType = definition.AttackDamageType,
                 Definition = definition,
                 Archetype = definition.Archetype

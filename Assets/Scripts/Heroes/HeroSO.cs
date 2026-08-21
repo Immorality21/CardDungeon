@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Items;
 using UnityEngine;
 
 namespace Assets.Scripts.Heroes
@@ -24,10 +25,25 @@ namespace Assets.Scripts.Heroes
         public int RecruitCost;
 
         public Sprite Sprite;
-        public int BaseAttack;
-        public int BaseDefense;
+        public int BaseStrength;
+        public int BaseEndurance;
         public int BaseHealth;
         public int BaseAgility = 5;
+
+        [Tooltip("Scales Intelligence-scaled spell power. A caster stat: it does nothing for basic attacks.")]
+        public int BaseIntelligence;
+
+        [Tooltip("Scales Spirit-scaled spell power - healing, shields and Holy.")]
+        public int BaseSpirit;
+
+        [Tooltip("Raises crit chance on every attack, and improves stat checks on room events.")]
+        public int BaseLuck;
+
+        [Tooltip("Which attribute this hero's basic Attack command scales off. Strength for a " +
+                 "fighter, Agility for a finesse duellist, Intelligence or Spirit for a caster who " +
+                 "should not be useless with a stick. MaxHealth is accepted but nonsensical.")]
+        public StatType AttackStat = StatType.Strength;
+
         public List<LevelConfiguration> LevelProgression = new List<LevelConfiguration>();
 
         /// <summary>

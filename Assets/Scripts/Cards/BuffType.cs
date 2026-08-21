@@ -2,8 +2,8 @@ namespace Assets.Scripts.Cards
 {
     public enum BuffType
     {
-        Attack,
-        Defense,
+        Strength,
+        Endurance,
         Agility,
         FireResistance,
         IceResistance,

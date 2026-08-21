@@ -7,8 +7,8 @@ namespace Assets.Scripts.Heroes
     {
         public int Level;
         public int XpRequired;
-        public int AttackGain;
-        public int DefenseGain;
+        public int StrengthGain;
+        public int EnduranceGain;
         public int HealthGain;
         public int AgilityGain;
     }

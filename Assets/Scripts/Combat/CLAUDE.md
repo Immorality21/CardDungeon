@@ -8,7 +8,7 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
 
 ## ICombatUnit
 
-- Shared by `Hero` and `Enemy` MonoBehaviours. Provides `DisplayName`, `Icon`, `Stats`, `IsAlive`, `IsHero`, `Resistances`, `Transform`, `GetEffectiveAttack()`, `GetEffectiveDefense()`.
+- Shared by `Hero` and `Enemy` MonoBehaviours. Provides `DisplayName`, `Icon`, `Stats`, `IsAlive`, `IsHero`, `Resistances`, `Transform`, `GetEffectiveAttackPower()`, `GetEffectiveDefense()`.
 - `Hero` layers item/level bonuses into its `GetEffective*()`; `Enemy` returns raw stats.
 
 ## Damage System
@@ -50,3 +50,9 @@ All auto-wired (no scene setup) and code/Resources-only — no manual assets:
 - **ScreenFade** (`Combat/ScreenFade.cs`): a full-viewport colour overlay (auto-created, camera-parented, sorting 1100 — under the UITK panels). `Flash` punctuates victory with a quick warm pop; `FadeTo` lays a lingering somber tint on defeat (approximates a desaturate; true grayscale would need post-processing). Wired in `CombatManager`'s victory/defeat branches.
 - **Per-level combat background**: `LevelDefinitionSO.CombatBackground` (optional) overrides the stage backdrop per level/biome. Precedence in `CombatStage.RaiseBackground`: level background → inspector `_backgroundArt` → `Resources/CombatBackgrounds/battle` → solid fill. `DungeonManager.CurrentLevel` exposes the active level.
 - **CombatAudio** (`Combat/Audio/CombatAudio.cs`): fire-and-forget combat SFX, auto-created like `CombatFeedback` (no scene wiring). `CombatAudio.Play(CombatSound.X)` picks a random clip for the event and plays it 2D via `PlayOneShot`. Clips are mapped by a **`SoundBankSO`** loaded from `Resources/CombatSoundBank` — a `CombatSound → {clips[], volume}` table (random clip per play so repeats vary), authored against the `Assets/Fantasy Interface Sounds/` pack. `CombatSound` events (append-only, ints serialized into the bank): `MeleeSwing`, `Impact`, `MagicCast`, `Draw`, `Heal`, `ItemUse`, `BossSignature`, `EnemyDeath`, `Victory`, `Defeat`, `CursorMove`, `Confirm`. Wired from `CombatManager` (attacks/cast/draw/item/heal/boss wind-up/death/victory/defeat) and `RoomActionUI` (command-menu cursor + confirm). No music track yet.
+
+## Crit is per-unit, driven by Luck
+
+`CombatManager.CritChance` (0.12) is the rate at **zero Luck**. Actual chance comes from `CombatManager.CritChanceFor(unit)`: `CritChance + MaxLuckCritBonus * luck/(luck + LuckCritConstant)` (0.30 max bonus, K = 20). Diminishing rather than linear, reusing the `stat/(stat+K)` shape `DamageCalculator` already uses for Defense, so Luck cannot run away and the player learns one curve.
+
+**Anything that rolls or models a crit must go through `CritChanceFor`**, or Luck silently does nothing. Three callers today: `CombatManager.ExecuteAttack` (the live roll), `EncounterSimulator` (kept in step deliberately — `EncounterSimulatorTests` pins the simulated hit to `ExecuteAttack`'s arithmetic), and `BalanceMath.ExpectedCritMultiplier(ICombatUnit)`. The zero-argument `ExpectedCritMultiplier()` still exists for callers with no attacker to hand and returns the base rate.

@@ -189,17 +189,17 @@ namespace Tests.EditMode
         public void ComputeBonuses_SumsOnlyMatchingBonusType()
         {
             var sword = MakeEquipment("Sword", SlotType.MainHand,
-                new ItemBonus { StatType = StatType.Attack, BonusType = BonusType.Raw, Value = 4 });
+                new ItemBonus { StatType = StatType.Strength, BonusType = BonusType.Raw, Value = 4 });
             var ring = MakeEquipment("Ring", SlotType.Necklace,
-                new ItemBonus { StatType = StatType.Attack, BonusType = BonusType.Raw, Value = 2 },
-                new ItemBonus { StatType = StatType.Attack, BonusType = BonusType.Percentage, Value = 10 });
+                new ItemBonus { StatType = StatType.Strength, BonusType = BonusType.Raw, Value = 2 },
+                new ItemBonus { StatType = StatType.Strength, BonusType = BonusType.Percentage, Value = 10 });
 
             var raw = InventoryOperations.ComputeBonuses(new[] { sword, ring }, BonusType.Raw);
             var pct = InventoryOperations.ComputeBonuses(new[] { sword, ring }, BonusType.Percentage);
 
-            Assert.AreEqual(6f, raw[StatType.Attack]);
-            Assert.AreEqual(10f, pct[StatType.Attack]);
-            Assert.AreEqual(0f, raw[StatType.Defense]);
+            Assert.AreEqual(6f, raw[StatType.Strength]);
+            Assert.AreEqual(10f, pct[StatType.Strength]);
+            Assert.AreEqual(0f, raw[StatType.Endurance]);
         }
     }
 }

@@ -190,12 +190,12 @@ namespace Assets.Scripts.Combat
                 return list;
             }
 
-            int atk = bt.GetBuffAmount(_unit, StatType.Attack);
+            int atk = bt.GetBuffAmount(_unit, StatType.Strength);
             if (atk != 0)
             {
                 list.Add(new IconDesc { Name = "sword", Tint = atk > 0 ? Green : Red });
             }
-            int def = bt.GetBuffAmount(_unit, StatType.Defense);
+            int def = bt.GetBuffAmount(_unit, StatType.Endurance);
             if (def != 0)
             {
                 list.Add(new IconDesc { Name = "shield", Tint = def > 0 ? Green : Red });

@@ -59,7 +59,32 @@ namespace Assets.Scripts.Rooms
         // Basic-attack critical hits (heroes and enemies).
         // Public so the balance model (Assets/Scripts/Balance) reads the real crit numbers
         // instead of duplicating them and drifting.
+        /// <summary>Crit chance at zero Luck. Luck adds to this - see <see cref="CritChanceFor"/>.</summary>
         public const float CritChance = 0.12f;
+
+        /// <summary>Most crit chance Luck can add on top of <see cref="CritChance"/>.</summary>
+        public const float MaxLuckCritBonus = 0.30f;
+
+        /// <summary>
+        /// Luck at which half of <see cref="MaxLuckCritBonus"/> is reached. Diminishing rather than
+        /// linear, using the same stat/(stat+K) shape as the defense curve, so Luck never runs away
+        /// and the player only has to learn one curve.
+        /// </summary>
+        public const float LuckCritConstant = 20f;
+
+        /// <summary>
+        /// Crit chance for a specific unit. Everything that rolls or models a crit must go through
+        /// this rather than reading <see cref="CritChance"/> directly, or Luck silently does nothing.
+        /// </summary>
+        public static float CritChanceFor(ICombatUnit unit)
+        {
+            if (unit == null)
+            {
+                return CritChance;
+            }
+            float luck = Mathf.Max(0, unit.GetEffectiveLuck());
+            return CritChance + MaxLuckCritBonus * (luck / (luck + LuckCritConstant));
+        }
         public const float CritMultiplier = 1.6f;
 
         public event Action OnCombatStarted;
@@ -807,10 +832,10 @@ namespace Assets.Scripts.Rooms
             CombatAudio.Play(CombatSound.MeleeSwing);
             yield return LungeAnimation(attacker.Transform, lungeDirection);
 
-            int attackBonus = BuffTracker.GetBuffAmount(attacker, StatType.Attack);
-            int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Defense);
-            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttack() + attackBonus) * damageMultiplier);
-            int defense = target.GetEffectiveDefense() + defenseBonus;
+            int attackBonus = BuffTracker.GetBuffAmount(attacker, StatType.Strength);
+            int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Endurance);
+            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * damageMultiplier);
+            int defense = target.GetEffectiveEndurance() + defenseBonus;
 
             // Physical attacks carry the attacker's element, so elemental resistance applies to them too.
             // Normal is the default on both sides and bypasses the elemental layer entirely.
@@ -818,7 +843,7 @@ namespace Assets.Scripts.Rooms
             int dmg = DamageCalculator.Calculate(rawAttack, defense, damageType, target.Resistances);
 
             // Critical hit: a chance for a harder blow, called out with a gold popup + bigger number.
-            bool crit = dmg > 0 && UnityEngine.Random.Range(0f, 1f) < CritChance;
+            bool crit = dmg > 0 && UnityEngine.Random.Range(0f, 1f) < CritChanceFor(attacker);
             if (crit)
             {
                 dmg = Mathf.Max(dmg + 1, Mathf.RoundToInt(dmg * CritMultiplier));

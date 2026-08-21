@@ -9,10 +9,13 @@ namespace Assets.Scripts.Balance
     /// <summary>A hero's stats after level-ups and gear, with no MonoBehaviour or singleton involved.</summary>
     public struct EffectiveStats
     {
-        public int Attack;
-        public int Defense;
+        public int Strength;
+        public int Endurance;
         public int MaxHealth;
         public int Agility;
+        public int Intelligence;
+        public int Spirit;
+        public int Luck;
     }
 
     /// <summary>
@@ -84,7 +87,8 @@ namespace Assets.Scripts.Balance
                 return new Stats(0, 0, 1);
             }
 
-            var stats = new Stats(hero.BaseAttack, hero.BaseDefense, hero.BaseHealth, hero.BaseAgility);
+            var stats = new Stats(hero.BaseStrength, hero.BaseEndurance, hero.BaseHealth, hero.BaseAgility,
+                hero.BaseIntelligence, hero.BaseSpirit, hero.BaseLuck);
             if (hero.LevelProgression == null)
             {
                 return stats;
@@ -97,8 +101,8 @@ namespace Assets.Scripts.Balance
                 {
                     continue;
                 }
-                stats.Attack += entry.AttackGain;
-                stats.Defense += entry.DefenseGain;
+                stats.Strength += entry.StrengthGain;
+                stats.Endurance += entry.EnduranceGain;
                 stats.MaxHealth += entry.HealthGain;
                 stats.Health += entry.HealthGain;
                 stats.Agility += entry.AgilityGain;
@@ -124,10 +128,13 @@ namespace Assets.Scripts.Balance
 
             return new EffectiveStats
             {
-                Attack = Apply(baseStats.Attack, raw[StatType.Attack], pct[StatType.Attack]),
-                Defense = Apply(baseStats.Defense, raw[StatType.Defense], pct[StatType.Defense]),
+                Strength = Apply(baseStats.Strength, raw[StatType.Strength], pct[StatType.Strength]),
+                Endurance = Apply(baseStats.Endurance, raw[StatType.Endurance], pct[StatType.Endurance]),
                 MaxHealth = Apply(baseStats.MaxHealth, raw[StatType.MaxHealth], pct[StatType.MaxHealth]),
-                Agility = Apply(baseStats.Agility, raw[StatType.Agility], pct[StatType.Agility])
+                Agility = Apply(baseStats.Agility, raw[StatType.Agility], pct[StatType.Agility]),
+                Intelligence = Apply(baseStats.Intelligence, raw[StatType.Intelligence], pct[StatType.Intelligence]),
+                Spirit = Apply(baseStats.Spirit, raw[StatType.Spirit], pct[StatType.Spirit]),
+                Luck = Apply(baseStats.Luck, raw[StatType.Luck], pct[StatType.Luck])
             };
         }
 

@@ -266,9 +266,9 @@ namespace Assets.Scripts.Balance
                     DisplayName = hero.Name,
                     HeroKey = saved.HeroKey,
                     IsHero = true,
-                    Stats = new Rooms.Stats(effective.Attack, effective.Defense, effective.MaxHealth, effective.Agility),
-                    EffectiveAttack = effective.Attack,
-                    EffectiveDefense = effective.Defense,
+                    Stats = new Rooms.Stats(effective.Strength, effective.Endurance, effective.MaxHealth, effective.Agility),
+                    EffectiveAttackPower = effective.Strength,
+                    EffectiveEndurance = effective.Endurance,
                     EffectiveAgility = effective.Agility,
                     Resistances = InventoryOperations.ComputeResistances(gear)
                 };

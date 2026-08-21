@@ -15,10 +15,13 @@ MonoBehaviour:
   DisplayName: Bog Shaman
   Sprite: {fileID: 21300000, guid: 77f73150858844a8a871d79b104f0900, type: 3}
   IsBoss: 0
-  Attack: 2
-  Defense: 3
+  Strength: 4
+  Endurance: 3
   Health: 18
   Agility: 4
+  Intelligence: 2
+  Spirit: 8
+  Luck: 0
   XpReward: 16
   GoldReward: 10
   AttackDamageType: 2

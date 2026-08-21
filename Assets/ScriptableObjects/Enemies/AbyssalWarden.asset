@@ -15,10 +15,13 @@ MonoBehaviour:
   DisplayName: Abyssal Warden
   Sprite: {fileID: 21300000, guid: 3539deaa538b42c19a830e172699a12a, type: 3}
   IsBoss: 1
-  Attack: 3
-  Defense: 4
+  Strength: 5
+  Endurance: 4
   Health: 58
   Agility: 4
+  Intelligence: 6
+  Spirit: 4
+  Luck: 0
   XpReward: 60
   GoldReward: 50
   AttackDamageType: 3

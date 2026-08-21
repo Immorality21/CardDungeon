@@ -19,17 +19,30 @@ namespace Assets.Scripts.Balance
     /// </summary>
     public static class BalanceMath
     {
-        /// <summary>Average damage multiplier once the crit chance is folded in.</summary>
+        /// <summary>
+        /// Average damage multiplier once crit is folded in, at the base crit rate (zero Luck).
+        /// Kept for callers that have no attacker to hand; prefer the overload.
+        /// </summary>
         public static float ExpectedCritMultiplier()
         {
             return 1f + CombatManager.CritChance * (CombatManager.CritMultiplier - 1f);
         }
 
         /// <summary>
+        /// Average damage multiplier for a specific attacker, so Luck shows up in every derived
+        /// metric instead of only in play. Falls back to the base rate for a null attacker.
+        /// </summary>
+        public static float ExpectedCritMultiplier(ICombatUnit attacker)
+        {
+            return 1f + CombatManager.CritChanceFor(attacker) * (CombatManager.CritMultiplier - 1f);
+        }
+
+        /// <summary>
         /// Average damage one basic attack lands on a target, crit included. Uses the real
         /// <see cref="DamageCalculator"/> so resistance and the defense curve behave identically.
         /// </summary>
-        public static float AverageDamage(int rawAttack, ICombatUnit target, DamageType type = DamageType.Normal, float multiplier = 1f)
+        public static float AverageDamage(int rawAttack, ICombatUnit target, DamageType type = DamageType.Normal,
+            float multiplier = 1f, ICombatUnit attacker = null)
         {
             if (target == null)
             {
@@ -37,12 +50,13 @@ namespace Assets.Scripts.Balance
             }
 
             int raw = Mathf.RoundToInt(rawAttack * multiplier);
-            int flat = DamageCalculator.Calculate(raw, target.GetEffectiveDefense(), type, target.Resistances);
-            return flat * ExpectedCritMultiplier();
+            int flat = DamageCalculator.Calculate(raw, target.GetEffectiveEndurance(), type, target.Resistances);
+            return flat * ExpectedCritMultiplier(attacker);
         }
 
         /// <summary>Average damage against a group, over a uniformly random living target.</summary>
-        public static float AverageDamageAgainstGroup(int rawAttack, IList<SimUnit> targets, DamageType type = DamageType.Normal, float multiplier = 1f)
+        public static float AverageDamageAgainstGroup(int rawAttack, IList<SimUnit> targets, DamageType type = DamageType.Normal,
+            float multiplier = 1f, ICombatUnit attacker = null)
         {
             if (targets == null || targets.Count == 0)
             {
@@ -57,7 +71,7 @@ namespace Assets.Scripts.Balance
                 {
                     continue;
                 }
-                total += AverageDamage(rawAttack, target, type, multiplier);
+                total += AverageDamage(rawAttack, target, type, multiplier, attacker);
                 counted++;
             }
 
@@ -176,7 +190,7 @@ namespace Assets.Scripts.Balance
                 : AverageOffenseMultiplier(attacker.Archetype, opposingCount);
 
             float perTurn = AverageDamageAgainstGroup(
-                attacker.GetEffectiveAttack(), targets, attacker.AttackDamageType) * multiplier;
+                attacker.GetEffectiveAttackPower(), targets, attacker.AttackDamageType, 1f, attacker) * multiplier;
             return perTurn * TurnsPerTick(attacker);
         }
 
@@ -267,16 +281,19 @@ namespace Assets.Scripts.Balance
             }
 
             return enemy.Health * rules.HealthWeight
-                 + enemy.Attack * rules.AttackWeight
-                 + enemy.Defense * rules.DefenseWeight
-                 + enemy.Agility * rules.AgilityWeight;
+                 + enemy.Strength * rules.StrengthWeight
+                 + enemy.Endurance * rules.EnduranceWeight
+                 + enemy.Agility * rules.AgilityWeight
+                 + enemy.Intelligence * rules.IntelligenceWeight
+                 + enemy.Spirit * rules.SpiritWeight
+                 + enemy.Luck * rules.LuckWeight;
         }
 
         /// <summary>Fraction of incoming damage the defense curve removes, for display.</summary>
-        public static float DefenseReduction(int defense)
+        public static float EnduranceReduction(int defense)
         {
             float def = Mathf.Max(0, defense);
-            return def / (def + DamageCalculator.DefenseConstant);
+            return def / (def + DamageCalculator.EnduranceConstant);
         }
 
         /// <summary>Grades a value against a target band. Used by every table cell that shows a colour.</summary>

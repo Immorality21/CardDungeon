@@ -25,8 +25,8 @@ namespace Tests.EditMode
                 DisplayName = name,
                 IsHero = isHero,
                 Stats = new Stats(attack, defense, health, agility),
-                EffectiveAttack = attack,
-                EffectiveDefense = defense,
+                EffectiveAttackPower = attack,
+                EffectiveEndurance = defense,
                 EffectiveAgility = agility,
                 Resistances = new List<Resistance>()
             };
@@ -65,7 +65,7 @@ namespace Tests.EditMode
         [Test]
         public void DefenseReduction_AtDefenseConstant_IsHalf()
         {
-            float reduction = BalanceMath.DefenseReduction((int)DamageCalculator.DefenseConstant);
+            float reduction = BalanceMath.EnduranceReduction((int)DamageCalculator.EnduranceConstant);
             Assert.AreEqual(0.5f, reduction, 0.0001f);
         }
 
@@ -161,14 +161,14 @@ namespace Tests.EditMode
         {
             var hero = ScriptableObject.CreateInstance<HeroSO>();
             hero.Label = "Test";
-            hero.BaseAttack = 5;
-            hero.BaseDefense = 2;
+            hero.BaseStrength = 5;
+            hero.BaseEndurance = 2;
             hero.BaseHealth = 40;
             hero.BaseAgility = 5;
             hero.LevelProgression = new List<LevelConfiguration>
             {
-                new LevelConfiguration { Level = 2, XpRequired = 100, AttackGain = 1, HealthGain = 5 },
-                new LevelConfiguration { Level = 3, XpRequired = 250, AttackGain = 1, HealthGain = 5 }
+                new LevelConfiguration { Level = 2, XpRequired = 100, StrengthGain = 1, HealthGain = 5 },
+                new LevelConfiguration { Level = 3, XpRequired = 250, StrengthGain = 1, HealthGain = 5 }
             };
 
             Assert.AreEqual(1, HeroStatCalculator.LevelForXp(hero, 99));
@@ -184,17 +184,17 @@ namespace Tests.EditMode
         public void HeroStatCalculator_BaseStatsAtLevel_AppliesEveryGainUpToThatLevel()
         {
             var hero = ScriptableObject.CreateInstance<HeroSO>();
-            hero.BaseAttack = 5;
+            hero.BaseStrength = 5;
             hero.BaseHealth = 40;
             hero.LevelProgression = new List<LevelConfiguration>
             {
-                new LevelConfiguration { Level = 2, XpRequired = 100, AttackGain = 2, HealthGain = 10 },
-                new LevelConfiguration { Level = 3, XpRequired = 250, AttackGain = 3, HealthGain = 10 }
+                new LevelConfiguration { Level = 2, XpRequired = 100, StrengthGain = 2, HealthGain = 10 },
+                new LevelConfiguration { Level = 3, XpRequired = 250, StrengthGain = 3, HealthGain = 10 }
             };
 
             var atThree = HeroStatCalculator.BaseStatsAtLevel(hero, 3);
 
-            Assert.AreEqual(10, atThree.Attack);
+            Assert.AreEqual(10, atThree.Strength);
             Assert.AreEqual(60, atThree.MaxHealth);
             Assert.AreEqual(atThree.MaxHealth, atThree.Health, "A freshly derived hero should start at full health.");
 
@@ -207,20 +207,20 @@ namespace Tests.EditMode
             var sword = ScriptableObject.CreateInstance<ItemSO>();
             sword.Bonuses = new List<ItemBonus>
             {
-                new ItemBonus { StatType = StatType.Attack, BonusType = BonusType.Raw, Value = 5f }
+                new ItemBonus { StatType = StatType.Strength, BonusType = BonusType.Raw, Value = 5f }
             };
 
             var amulet = ScriptableObject.CreateInstance<ItemSO>();
             amulet.Bonuses = new List<ItemBonus>
             {
-                new ItemBonus { StatType = StatType.Attack, BonusType = BonusType.Percentage, Value = 50f }
+                new ItemBonus { StatType = StatType.Strength, BonusType = BonusType.Percentage, Value = 50f }
             };
 
             var stats = new Stats(10, 0, 100, 5);
             var effective = HeroStatCalculator.WithGear(stats, new List<ItemSO> { sword, amulet });
 
             // (10 + 5) * 1.5 = 22.5, rounded to 22 by Mathf.RoundToInt's banker's rounding.
-            Assert.AreEqual(Mathf.RoundToInt(15f * 1.5f), effective.Attack);
+            Assert.AreEqual(Mathf.RoundToInt(15f * 1.5f), effective.Strength);
 
             Object.DestroyImmediate(sword);
             Object.DestroyImmediate(amulet);

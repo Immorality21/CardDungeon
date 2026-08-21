@@ -127,10 +127,31 @@ four progression warnings (two heroes capping at level 2, two level-2 Agility do
 base MaxHealth while the bar uses `GetEffectiveMaxHealth()`, so geared heroes start every level
 short); `Tutorial` unlocking 60% of the magic catalog at once; and the Tutorial→Test1 spike.
 
-Revised fix order, now that HP is done: **level room counts → enemy Attack → per-level templates
-(curve shape) → archetype mix → XP distribution.** Room counts come first because they gate the
-enemy-Attack pass, and enemy Attack is what makes the elemental and Draw layers matter — at 2 damage
-a hit, no resistance or combo can change a decision.
+~~Revised fix order, now that HP is done: **level room counts → enemy Attack → per-level templates
+(curve shape)**~~ ✅ **All three done 2026-08-21.**
+
+- **Templates renamed and split.** The placeholder `NoobTemplate` / `TestTemplate` / `TutorialTemplate`
+  became **`UpperHalls`** / **`CollapsedCaverns`** / **`DungeonEntrance`**, plus a new
+  **`SunkenDepths`**, and `TutorialRun`'s three generated levels now use **one template each**
+  instead of sharing one — which is what made `Test1→Test2` a flat 0% jump. Each pool escalates by
+  roster, not just size: Eye/Dragon → + Stone Sentinel (Bruiser) → + Bog Shaman (Healer) and Hex
+  Weaver (Debuffer). `BlueRoom` is deliberately unused — 6 spawn evaluations make it a 15 HP,
+  2.40-worst-case outlier that belongs in an elite room.
+- **Room counts down, enemy Attack up.** 15 rooms → **9 / 7 / 5** (about 6 / 4.5 / 3 combat rooms),
+  and Attack went off the flat 3 to a tiered **Eye 4, Dragon 5, Cinder Imp 5, Stone Sentinel 4,
+  Bog Shaman 4, Hex Weaver 6, Warden 5**. That fixes the granularity problem the HP pass exposed:
+  at Attack 3 every hit rounded to 2 against *both* heroes, so the Tank's 15 Defense bought nothing.
+  It now takes 4.3 on the Warrior and 3.2 on the Tank.
+- **Curve: 0.25 → 0.37 → 0.42 → 0.61**, jumps **+45% / +15% / +46%** — every level inside the 0.80
+  attrition ceiling and every jump inside the +10%..+75% band, with headroom left for §2's events to
+  spend. The tutorial was also lightened to a single Pink Room fight plus the exit: it is a tutorial,
+  and a solo party pays roughly 4× the attrition of a pair.
+- **Findings: 0 critical / 3 warning / 9 info**, regression **8 of 9 green**. The three warnings are
+  the Warrior's level-2 cap and its +100% Agility step (both §4's to delete) and the pre-existing
+  *+MaxHealth gear is never filled at level start* bug.
+
+What remains from the original list: **archetype mix** (4 of 7 enemies are still `Aggressor`) and
+**XP distribution** (now specified as even-split in §5).
 
 > **Verification note.** These numbers come from `BalanceAnalyzer` itself, run in-editor over the
 > real assets via the Unity MCP, and the `BalanceRegressionTests` predicates were evaluated against
@@ -328,7 +349,7 @@ Touch points: `Assets/Scripts/MainMenu/MerchantUI.cs`, `Assets/Scripts/Items/Sho
 
 Replace bare levelling with a **spend-XP-on-nodes** grid, so growth is a build decision instead
 of an automatic stat drip. Today `LevelConfiguration` is a flat table (`Level`, `XpRequired`,
-`AttackGain`/`DefenseGain`/`HealthGain`/`AgilityGain`) applied automatically on level-up, there is
+`StrengthGain`/`EnduranceGain`/`HealthGain`/`AgilityGain`) applied automatically on level-up, there is
 exactly one entry per hero (progression dead-ends at level 2 — see §0), and **only the leader earns
 XP** (`Party.AddXpToLeader`), so the Tank never grows at all.
 
@@ -338,7 +359,7 @@ Direction:
   to activate nodes. Decide whether XP stays per-hero or becomes a party-wide pool (party-wide
   sidesteps the leader-only XP bug and lets the player choose who to invest in).
 - **Grid data model.** A `SphereGridSO` (nodes + edges) with `SphereNodeSO`-style entries: stat
-  nodes (+Attack/+Defense/+Health/+Agility), and later ability/magic-slot/resistance nodes so the
+  nodes (+Strength/+Endurance/+Health/+Agility), and later ability/magic-slot/resistance nodes so the
   grid can gate content, not just numbers. Nodes activate only when adjacent to an activated node,
   which is what makes the layout meaningful.
 - **Shared vs. per-hero grid.** FFX uses one grid with per-character start positions. A single
@@ -514,9 +535,32 @@ Touch points: `Assets/Scripts/Heroes/PartyRosterSO.cs`, `PartySaveData.cs`, `Par
 `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Rooms/RoomSO.cs` (rescue room
 kind, with §2), `Assets/Scripts/Balance/PartyBaseline.cs`.
 
-### 6. Three new stats: Intelligence, Spirit, Luck
+### 6. Three new stats: Intelligence, Spirit, Luck — *core* ✅ shipped
 
-`Stats` currently holds **Attack / Defense / Health / MaxHealth / Agility** and nothing else, so
+Landed 2026-08-21. `Stats` carries **Intelligence / Spirit / Luck** (positional args for the four
+combat stats, optional named args for these three, so no existing call site changed);
+`ICombatUnit` exposes `GetEffectiveIntelligence/Spirit/Luck`; `StatType` gained entries so
+`ItemSO` bonuses reach them; `HeroSO` and `EnemySO` carry base values.
+`SpellEffect.ScalingStat` (a `SpellScalingStat`, resolved via `SpellScaling.CasterContribution`)
+scales damage/debuff effects on Intelligence and heals/buffs on Spirit — `Attack` is the enum's
+zero value so magic authored before the change keeps its exact numbers. Luck drives crit through
+`CombatManager.CritChanceFor` on a diminishing `luck/(luck+20)` curve capped at +30pp, honoured by
+the live loop, the simulator **and** `BalanceMath`. Authored spread: Acolyte 10 INT / 12 SPR
+(the caster), Scout 12 LCK (23.3% crit), Warrior 3/3/5, Tank 2/6/3; enemy Luck left at 0 so the
+balance pass was not disturbed.
+
+**Renamed with it (2026-08-21):** `Attack` → **`Strength`** and `Defense` → **`Endurance`** across `Stats`, `StatType`, `BuffType`, `SpellScalingStat`, `HeroSO`/`EnemySO`, `LevelConfiguration` and the asset YAML, so the six attributes read as one set. And the **basic Attack command now scales off a per-hero attribute**: `HeroSO.AttackStat` names it, `GetEffectiveAttackPower()` resolves it, making attack power derived rather than a stat — Scout swings off Agility, Acolyte off Intelligence, everyone else off Strength. Enemies always use Strength. The curve did not move (0.25 / 0.37 / 0.42 / 0.61, still 0 critical / 3 warning).
+
+**Still open here:** `BuffType` has no entries for the three stats, so buffs/debuffs cannot move
+them yet (gear can); `LevelConfiguration` deliberately gained no `...Gain` fields because §4
+deletes that table — author them as sphere-grid nodes instead; and the `EnemySO` inspector footer
+plus the analyzer's stat tables still show only the original four.
+
+The original design notes follow.
+
+#### Original design notes
+
+`Stats` currently holds **Strength / Endurance / Health / MaxHealth / Agility** and nothing else, so
 every hero is differentiated on the same four axes and magic is flat — a `SpellEffect` has a
 `Power` int and no notion of who cast it. Three additions fix both, and give §2's events something
 to check against:

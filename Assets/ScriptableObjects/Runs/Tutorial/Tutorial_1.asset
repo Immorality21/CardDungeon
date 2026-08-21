@@ -19,7 +19,7 @@ MonoBehaviour:
     GridPosition: {x: -3, y: 0}
     EnemySpawnOverride: []
     GuaranteeAllSpawns: 0
-  - RoomTemplate: {fileID: 11400000, guid: 7a40b3590a49a88429da204fea73306d, type: 2}
+  - RoomTemplate: {fileID: 11400000, guid: 3eb0f9f0d8481fc4cb32d83a3cbc2448, type: 2}
     GridPosition: {x: 4, y: 0}
     EnemySpawnOverride: []
     GuaranteeAllSpawns: 0

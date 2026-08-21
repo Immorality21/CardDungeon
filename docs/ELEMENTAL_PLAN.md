@@ -97,7 +97,7 @@ has to contribute:
 public List<Resistance> Resistances = new List<Resistance>();
 ```
 plus `Hero.GetEffectiveResistances()` summing innate + equipped, alongside the existing
-`GetEffectiveAttack()` family. Note `ICombatUnit.Resistances` is a plain `List<Resistance>` property, so
+`GetEffectiveAttackPower()` family. Note `ICombatUnit.Resistances` is a plain `List<Resistance>` property, so
 either that interface member becomes a method, or `Hero` recomputes its list on equip — the latter is
 less invasive but easier to leave stale. **This is the one interface decision in the plan.**
 

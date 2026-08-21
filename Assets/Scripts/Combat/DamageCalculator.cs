@@ -19,7 +19,7 @@ namespace Assets.Scripts.Combat
         /// Controls defense diminishing returns. At defense == K, reduction is 50%.
         /// Higher K means defense is less effective per point.
         /// </summary>
-        public const float DefenseConstant = 20f;
+        public const float EnduranceConstant = 20f;
 
         /// <summary>
         /// Calculates final damage after applying resistance and defense with diminishing returns.
@@ -68,7 +68,7 @@ namespace Assets.Scripts.Combat
 
             // Apply defense diminishing returns
             float effectiveDefense = Mathf.Max(0, defense);
-            float reduction = effectiveDefense / (effectiveDefense + DefenseConstant);
+            float reduction = effectiveDefense / (effectiveDefense + EnduranceConstant);
             float afterDefense = afterResist * (1f - reduction);
 
             // Minimum 1 damage
