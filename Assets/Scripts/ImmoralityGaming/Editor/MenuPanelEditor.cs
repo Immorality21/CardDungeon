@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-using UnityEditor;
 using ImmoralityGaming.Menu;
+using UnityEditor;
 
 [CustomEditor(typeof(MenuPanel), true)]
 [CanEditMultipleObjects]

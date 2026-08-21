@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 
 namespace Assets.Scripts.Cards
 {

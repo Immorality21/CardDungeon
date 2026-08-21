@@ -51,6 +51,12 @@ namespace Assets.Scripts.Balance
         /// <summary>HP + healing the party brings into this level — the denominator of AttritionLoad.</summary>
         public int SustainPool;
 
+        /// <summary>
+        /// The party this level was measured against. Held so the simulator can fight this level's
+        /// rooms with the roster the player actually has here, rather than the starting party.
+        /// </summary>
+        public PartyBaseline Party;
+
         /// <summary>Hero acquired during this level, if the run entry defines a rescue.</summary>
         public HeroSO RescuedHere;
 
@@ -358,6 +364,7 @@ namespace Assets.Scripts.Balance
             int sustain = party.SustainPool;
             level.PartySize = party.Size;
             level.SustainPool = sustain;
+            level.Party = party;
             level.AttritionLoad = sustain > 0 ? level.ExpectedHealthCost / sustain : 0f;
         }
     }

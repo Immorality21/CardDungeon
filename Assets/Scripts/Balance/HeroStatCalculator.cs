@@ -2,22 +2,11 @@ using System.Collections.Generic;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
 {
-    /// <summary>A hero's stats after level-ups and gear, with no MonoBehaviour or singleton involved.</summary>
-    public struct EffectiveStats
-    {
-        public int Strength;
-        public int Endurance;
-        public int MaxHealth;
-        public int Agility;
-        public int Intelligence;
-        public int Spirit;
-        public int Luck;
-    }
-
     /// <summary>
     /// Pure re-derivation of hero stats from a <see cref="HeroSO"/> plus XP and a gear loadout.
     /// <see cref="Hero"/> itself cannot be used here: its GetEffective* methods reach into
@@ -79,36 +68,31 @@ namespace Assets.Scripts.Balance
             return entry != null ? entry.XpRequired : -1;
         }
 
-        /// <summary>Base stats (no gear) at a level, applying every progression entry up to it.</summary>
+        /// <summary>
+        /// Base stats (no gear) at a level, applying every progression entry up to it. Stat-agnostic:
+        /// a level's <c>Gains</c> block is simply added, so a new StatType needs no change here.
+        /// </summary>
         public static Stats BaseStatsAtLevel(HeroSO hero, int level)
         {
             if (hero == null)
             {
-                return new Stats(0, 0, 1);
+                return new Stats(new StatBlock(new UnitStat(StatType.MaxHealth, 1)));
             }
 
-            var stats = new Stats(hero.BaseStrength, hero.BaseEndurance, hero.BaseHealth, hero.BaseAgility,
-                hero.BaseIntelligence, hero.BaseSpirit, hero.BaseLuck);
-            if (hero.LevelProgression == null)
+            var block = hero.BaseStats.Clone();
+            if (hero.LevelProgression != null)
             {
-                return stats;
-            }
-
-            for (int l = 2; l <= level; l++)
-            {
-                var entry = hero.LevelProgression.Find(e => e != null && e.Level == l);
-                if (entry == null)
+                for (int l = 2; l <= level; l++)
                 {
-                    continue;
+                    var entry = hero.LevelProgression.Find(e => e != null && e.Level == l);
+                    if (entry != null)
+                    {
+                        block.Add(entry.Gains);
+                    }
                 }
-                stats.Strength += entry.StrengthGain;
-                stats.Endurance += entry.EnduranceGain;
-                stats.MaxHealth += entry.HealthGain;
-                stats.Health += entry.HealthGain;
-                stats.Agility += entry.AgilityGain;
             }
 
-            return stats;
+            return new Stats(block);
         }
 
         /// <summary>Base stats for a saved XP total.</summary>
@@ -121,21 +105,17 @@ namespace Assets.Scripts.Balance
         /// Folds a gear loadout into base stats the same way Hero.GetEffective* does:
         /// (base + raw bonus) * (1 + percent/100), rounded.
         /// </summary>
-        public static EffectiveStats WithGear(Stats baseStats, IEnumerable<ItemSO> gear)
+        public static StatBlock WithGear(Stats baseStats, IEnumerable<ItemSO> gear)
         {
             var raw = InventoryOperations.ComputeBonuses(gear, BonusType.Raw);
             var pct = InventoryOperations.ComputeBonuses(gear, BonusType.Percentage);
 
-            return new EffectiveStats
+            var result = new StatBlock();
+            foreach (var stat in StatCatalog.Types)
             {
-                Strength = Apply(baseStats.Strength, raw[StatType.Strength], pct[StatType.Strength]),
-                Endurance = Apply(baseStats.Endurance, raw[StatType.Endurance], pct[StatType.Endurance]),
-                MaxHealth = Apply(baseStats.MaxHealth, raw[StatType.MaxHealth], pct[StatType.MaxHealth]),
-                Agility = Apply(baseStats.Agility, raw[StatType.Agility], pct[StatType.Agility]),
-                Intelligence = Apply(baseStats.Intelligence, raw[StatType.Intelligence], pct[StatType.Intelligence]),
-                Spirit = Apply(baseStats.Spirit, raw[StatType.Spirit], pct[StatType.Spirit]),
-                Luck = Apply(baseStats.Luck, raw[StatType.Luck], pct[StatType.Luck])
-            };
+                result[stat] = Apply(baseStats[stat], raw[stat], pct[stat]);
+            }
+            return result;
         }
 
         private static int Apply(int baseValue, float rawBonus, float percentBonus)

@@ -15,18 +15,33 @@ MonoBehaviour:
   Key: Tank
   Label: The Tank
   Sprite: {fileID: 21300000, guid: 10c7a212bf0fcb046a8499c268007bb2, type: 3}
-  BaseStrength: 5
-  BaseEndurance: 15
-  BaseHealth: 17
-  BaseAgility: 5
-  BaseIntelligence: 2
-  BaseSpirit: 6
-  BaseLuck: 3
-  AttackStat: 0
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 5
+    - Type: 2
+      Amount: 15
+    - Type: 3
+      Amount: 5
+    - Type: 4
+      Amount: 2
+    - Type: 5
+      Amount: 6
+    - Type: 6
+      Amount: 3
+    - Type: 7
+      Amount: 17
+  AttackStat: 1
   LevelProgression:
   - Level: 2
     XpRequired: 100
-    StrengthGain: 1
-    EnduranceGain: 3
-    HealthGain: 9
-    AgilityGain: 5
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 1
+      - Type: 2
+        Amount: 3
+      - Type: 7
+        Amount: 9
+      - Type: 3
+        Amount: 5

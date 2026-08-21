@@ -12,6 +12,7 @@ using Assets.Scripts.Enemies.Behaviors;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
+using Assets.Scripts.UnitStats;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
 
@@ -82,7 +83,7 @@ namespace Assets.Scripts.Rooms
             {
                 return CritChance;
             }
-            float luck = Mathf.Max(0, unit.GetEffectiveLuck());
+            float luck = Mathf.Max(0, unit.GetEffectiveStat(StatType.Luck));
             return CritChance + MaxLuckCritBonus * (luck / (luck + LuckCritConstant));
         }
         public const float CritMultiplier = 1.6f;
@@ -569,7 +570,7 @@ namespace Assets.Scripts.Rooms
             switch (item.ConsumableEffect)
             {
                 case ConsumableEffectType.RestoreHealth:
-                    int max = target is Hero targetHero ? targetHero.GetEffectiveMaxHealth() : target.Stats.MaxHealth;
+                    int max = target.GetEffectiveStat(StatType.MaxHealth);
                     int before = target.Stats.Health;
                     target.Stats.Health = Mathf.Min(target.Stats.Health + item.ConsumableAmount, max);
                     int healed = target.Stats.Health - before;
@@ -832,10 +833,11 @@ namespace Assets.Scripts.Rooms
             CombatAudio.Play(CombatSound.MeleeSwing);
             yield return LungeAnimation(attacker.Transform, lungeDirection);
 
-            int attackBonus = BuffTracker.GetBuffAmount(attacker, StatType.Strength);
+            // Buff the stat this attacker actually swings with, not Strength unconditionally.
+            int attackBonus = BuffTracker.GetBuffAmount(attacker, attacker.AttackStat);
             int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Endurance);
             int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * damageMultiplier);
-            int defense = target.GetEffectiveEndurance() + defenseBonus;
+            int defense = target.GetEffectiveStat(StatType.Endurance) + defenseBonus;
 
             // Physical attacks carry the attacker's element, so elemental resistance applies to them too.
             // Normal is the default on both sides and bypasses the elemental layer entirely.
@@ -916,7 +918,7 @@ namespace Assets.Scripts.Rooms
             foreach (var statusEffect in BuffTracker.GetActiveStatusEffects(unit))
             {
                 var handler = BuffHandlerRegistry.Get(statusEffect);
-                if (handler.SkipsTurn)
+                if (handler != null && handler.SkipsTurn)
                 {
                     return handler.GetSkipTurnMessage(unit);
                 }

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
@@ -7,8 +9,6 @@ using Assets.Scripts.Progression;
 using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
 using ImmoralityGaming.Fundamentals;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

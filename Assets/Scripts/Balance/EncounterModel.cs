@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -67,7 +68,7 @@ namespace Assets.Scripts.Balance
                 float total = 0f;
                 foreach (var member in Members)
                 {
-                    total += member.Weight * member.Definition.Health;
+                    total += member.Weight * member.Definition.BaseStats[StatType.MaxHealth];
                 }
                 return total;
             }

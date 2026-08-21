@@ -1,5 +1,6 @@
 using System;
 using Assets.Scripts.Combat;
+using Assets.Scripts.UnitStats;
 
 namespace Assets.Scripts.Cards
 {
@@ -15,17 +16,19 @@ namespace Assets.Scripts.Cards
         public int Power;
 
         /// <summary>
-        /// Which caster stat scales this effect. Defaults to <see cref="SpellScalingStat.Strength"/>
-        /// because that is what every effect used before the caster stats existed - magic authored
-        /// then keeps its exact numbers until it is deliberately re-pointed at Intelligence or Spirit.
+        /// Which caster stat scales this effect, or <see cref="StatType.None"/> for flat power.
+        /// Damage and healing add the stat in full; buffs and debuffs add a fraction of it
+        /// (<see cref="SpellScaling.BuffScalingDivisor"/>), because their Power is a stat delta
+        /// rather than a damage number.
         /// </summary>
-        public SpellScalingStat ScalingStat = SpellScalingStat.Strength;
+        public StatType ScalingStat = StatType.None;
+
         public DamageType DamageType;
         public BuffType BuffType;
         public int Duration = 3;
 
         // Upgrade level at which this effect becomes active (0 = always). Lets a magic or
-        // combo gate extra functionality behind upgrade levels — e.g. a combo that only
+        // combo gate extra functionality behind upgrade levels - e.g. a combo that only
         // debuffs Speed once its upgrade reaches level 5.
         public int UnlockLevel = 0;
     }

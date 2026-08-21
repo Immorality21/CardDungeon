@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Cards.Effects
@@ -41,7 +42,7 @@ namespace Assets.Scripts.Cards.Effects
                 }
 
                 int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Endurance);
-                int defense = target.GetEffectiveEndurance() + defenseBonus;
+                int defense = target.GetEffectiveStat(StatType.Endurance) + defenseBonus;
                 int damage = DamageCalculator.Calculate(rawAttack, defense, effect.DamageType, target.Resistances);
 
                 if (damage < 0)
@@ -63,7 +64,7 @@ namespace Assets.Scripts.Cards.Effects
                     foreach (var statusEffect in buffTracker.GetActiveStatusEffects(target))
                     {
                         var handler = BuffHandlerRegistry.Get(statusEffect);
-                        if (handler.IsRemovedByDamageType(effect.DamageType))
+                        if (handler != null && handler.IsRemovedByDamageType(effect.DamageType))
                         {
                             buffTracker.RemoveStatusEffect(target, statusEffect);
                         }

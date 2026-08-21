@@ -19,6 +19,6 @@ MonoBehaviour:
   Rarity: 0
   ItemLevel: 2
   Bonuses:
-  - StatType: 0
+  - StatType: 1
     BonusType: 0
     Value: 4

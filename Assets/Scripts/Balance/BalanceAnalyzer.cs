@@ -7,6 +7,7 @@ using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Resources;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -20,7 +21,25 @@ namespace Assets.Scripts.Balance
     {
         public BalanceRulesSO Rules;
 
+        /// <summary>
+        /// The *starting* party. Danger, attrition and win rates are all measured against this,
+        /// because judging level 1 content against a fully-recruited roster understates every number.
+        /// </summary>
         public List<HeroSO> Heroes = new List<HeroSO>();
+
+        /// <summary>
+        /// Every hero asset in the project. Checks about a hero's own authoring — the shape of its
+        /// level curve, say — belong here rather than on <see cref="Heroes"/>: they are properties of
+        /// the asset, not of who happens to be in the party. Falls back to <see cref="Heroes"/> when
+        /// a caller does not populate it.
+        /// </summary>
+        public List<HeroSO> AllHeroes = new List<HeroSO>();
+
+        /// <summary>Every hero whose own authoring should be checked, party membership aside.</summary>
+        public List<HeroSO> HeroesToAudit
+        {
+            get { return AllHeroes != null && AllHeroes.Count > 0 ? AllHeroes : Heroes; }
+        }
         public List<EnemySO> Enemies = new List<EnemySO>();
         public List<RunDefinitionSO> Runs = new List<RunDefinitionSO>();
         public List<MagicSO> Magic = new List<MagicSO>();
@@ -65,6 +84,7 @@ namespace Assets.Scripts.Balance
             // out of band when it never gets fought that way. Falls back to the starting party for
             // anything no run places.
             var partyByEnemy = BuildFirstEncounterParties(input, rules, report.Party);
+            report.PartyByEnemy = partyByEnemy;
 
             foreach (var enemy in input.Enemies)
             {
@@ -323,8 +343,16 @@ namespace Assets.Scripts.Balance
                 };
                 simReport.Enemies.Add(unit);
 
-                AssignDrawLoadout(report.Party, simReport.Enemies, report.Save);
-                simReport.Outcomes = EncounterSimulator.RunAllPolicies(report.Party, simReport.Enemies, settings);
+                // Fight it with the party that actually meets it, not the starting party - the boss
+                // is never fought solo, and reporting it as unwinnable was an artefact of doing so.
+                PartyBaseline against;
+                if (!report.PartyByEnemy.TryGetValue(metrics.Definition, out against) || against == null)
+                {
+                    against = report.Party;
+                }
+
+                AssignDrawLoadout(against, simReport.Enemies, report.Save);
+                simReport.Outcomes = EncounterSimulator.RunAllPolicies(against, simReport.Enemies, settings);
                 report.Simulations.Add(simReport);
             }
 
@@ -365,8 +393,9 @@ namespace Assets.Scripts.Balance
                         Enemies = units
                     };
 
-                    AssignDrawLoadout(report.Party, units, report.Save);
-                    simReport.Outcomes = EncounterSimulator.RunAllPolicies(report.Party, units, settings);
+                    var levelParty = level.Party ?? report.Party;
+                    AssignDrawLoadout(levelParty, units, report.Save);
+                    simReport.Outcomes = EncounterSimulator.RunAllPolicies(levelParty, units, settings);
                     report.Simulations.Add(simReport);
                 }
             }
@@ -509,7 +538,7 @@ namespace Assets.Scripts.Balance
                     {
                         Asset = hero.Definition,
                         Detail = $"{worstEnemy} kills {hero.Name} in a single hit "
-                               + $"({hero.Stats.MaxHealth} max HP). Fights are decided by turn order, not play.",
+                               + $"({hero.Effective[StatType.MaxHealth]} max HP). Fights are decided by turn order, not play.",
                         Suggestion = $"Raise max HP to roughly {SuggestedHeroHealth(hero, report, rules)} "
                                + $"so a plain hit costs about {(1f / rules.TargetHitsToKillHero):P0} of the bar."
                     });
@@ -548,7 +577,15 @@ namespace Assets.Scripts.Balance
                     });
                 }
 
-                EvaluateLevelUpShape(hero, report);
+            }
+
+            // Deliberately over every hero asset, not just the party: a curve is authored on the
+            // asset, so a hero who joins at depth 3 can carry a broken one for the whole run
+            // without ever being measured. The Tank's +5 Agility on a base of 5 was invisible for
+            // exactly this reason.
+            foreach (var definition in input.HeroesToAudit)
+            {
+                EvaluateLevelUpShape(definition, report);
             }
 
             EvaluateHealing(report, rules, input);
@@ -556,49 +593,70 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// Flags level-up entries that move a stat by an implausible share of its base — a +5 Agility
-        /// gain on a base of 5 doubles the hero's turn rate in one level, which no other number in the
-        /// game is scaled for.
+        /// Largest share of its base an <b>output</b> stat may gain in one level. +5 Agility on a base
+        /// of 5 doubles the hero's turn rate in a single level-up, which no other number is scaled for.
         /// </summary>
-        private static void EvaluateLevelUpShape(HeroBaseline hero, BalanceReport report)
+        private const float MaxOutputStatGainShare = 0.5f;
+
+        /// <summary>
+        /// The same limit for a <b>pool</b> stat, which is deliberately far looser. Health bars start
+        /// small and are *meant* to grow in large relative steps — every hero in the project gains
+        /// 50-54% of base MaxHealth at level 2, which is ordinary design. Holding pools to the output
+        /// threshold reported all four heroes and meant nothing.
+        /// </summary>
+        private const float MaxPoolStatGainShare = 1f;
+
+        /// <summary>
+        /// Flags level-up entries that move a stat by an implausible share of its base.
+        ///
+        /// <para>Every stat in <see cref="StatCatalog.Types"/> is checked — it used to name Agility,
+        /// Strength and Endurance one by one, so a runaway Intelligence or Luck gain went unreported.
+        /// The threshold comes from <see cref="StatDefinition.IsPool"/>, because a share means
+        /// something different for a health bar than for a damage stat.</para>
+        /// </summary>
+        private static void EvaluateLevelUpShape(HeroSO definition, BalanceReport report)
         {
-            if (hero.Definition == null || hero.Definition.LevelProgression == null)
+            if (definition == null || definition.LevelProgression == null)
             {
                 return;
             }
 
-            foreach (var config in hero.Definition.LevelProgression)
+            foreach (var config in definition.LevelProgression)
             {
                 if (config == null)
                 {
                     continue;
                 }
 
-                CheckGain(hero, report, config.Level, "Agility", config.AgilityGain, hero.Definition.BaseAgility);
-                CheckGain(hero, report, config.Level, "Strength", config.StrengthGain, hero.Definition.BaseStrength);
-                CheckGain(hero, report, config.Level, "Endurance", config.EnduranceGain, hero.Definition.BaseEndurance);
+                foreach (var stat in StatCatalog.Types)
+                {
+                    CheckGain(definition, report, config.Level, stat,
+                        config.Gains[stat], definition.BaseStats[stat]);
+                }
             }
         }
 
-        private static void CheckGain(HeroBaseline hero, BalanceReport report, int level, string stat, int gain, int baseValue)
+        private static void CheckGain(HeroSO definition, BalanceReport report, int level, StatType stat, int gain, int baseValue)
         {
             if (baseValue <= 0 || gain <= 0)
             {
                 return;
             }
 
+            float limit = StatCatalog.Of(stat).IsPool ? MaxPoolStatGainShare : MaxOutputStatGainShare;
             float share = (float)gain / baseValue;
-            if (share < 0.5f)
+            if (share < limit)
             {
                 return;
             }
 
-            report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, hero.Name,
-                $"Level {level} raises {hero.Name}'s {stat} by {share:P0}")
+            string name = definition.DisplayName;
+            report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, name,
+                $"Level {level} raises {name}'s {StatCatalog.DisplayName(stat)} by {share:P0}")
             {
-                Asset = hero.Definition,
+                Asset = definition,
                 Detail = $"+{gain} on a base of {baseValue}. A single level-up should not reshape a stat this much.",
-                Suggestion = $"Spread the {stat} gain across more levels."
+                Suggestion = $"Spread the {StatCatalog.DisplayName(stat)} gain across more levels."
             });
         }
 
@@ -611,12 +669,12 @@ namespace Assets.Scripts.Balance
             {
                 foreach (var hero in party.Heroes)
                 {
-                    if (hero.Stats.MaxHealth <= 0)
+                    if (hero.Effective[StatType.MaxHealth] <= 0)
                     {
                         continue;
                     }
 
-                    float fraction = (float)input.HealingPotion.ConsumableAmount / hero.Stats.MaxHealth;
+                    float fraction = (float)input.HealingPotion.ConsumableAmount / hero.Effective[StatType.MaxHealth];
                     if (fraction >= rules.MaxSingleHealFraction)
                     {
                         var severity = fraction >= 1f ? BalanceSeverity.Warning : BalanceSeverity.Info;
@@ -624,7 +682,7 @@ namespace Assets.Scripts.Balance
                             $"One potion restores {fraction:P0} of {hero.Name}'s health")
                         {
                             Asset = input.HealingPotion,
-                            Detail = $"{input.HealingPotion.ConsumableAmount} HP against a {hero.Stats.MaxHealth} HP bar.",
+                            Detail = $"{input.HealingPotion.ConsumableAmount} HP against a {hero.Effective[StatType.MaxHealth]} HP bar.",
                             Suggestion = "Either raise hero max HP or lower ConsumableAmount so healing is a partial recovery."
                         });
                     }
@@ -647,7 +705,7 @@ namespace Assets.Scripts.Balance
 
                     foreach (var hero in party.Heroes)
                     {
-                        if (hero.Stats.MaxHealth <= 0 || effect.Power < hero.Stats.MaxHealth)
+                        if (hero.Effective[StatType.MaxHealth] <= 0 || effect.Power < hero.Effective[StatType.MaxHealth])
                         {
                             continue;
                         }
@@ -656,7 +714,7 @@ namespace Assets.Scripts.Balance
                             $"{magic.DisplayName} heals more than {hero.Name}'s entire health bar")
                         {
                             Asset = magic,
-                            Detail = $"Heal power {effect.Power} against {hero.Stats.MaxHealth} max HP — always a full heal.",
+                            Detail = $"Heal power {effect.Power} against {hero.Effective[StatType.MaxHealth]} max HP — always a full heal.",
                             Suggestion = "Scale heal power to a fraction of a hero's bar once HP is retuned."
                         });
                         break;
@@ -721,7 +779,7 @@ namespace Assets.Scripts.Balance
 
             if (worstHit <= 0f)
             {
-                return hero.Stats.MaxHealth;
+                return hero.Effective[StatType.MaxHealth];
             }
 
             return Mathf.Max(1, Mathf.RoundToInt(worstHit * rules.TargetHitsToKillHero));
@@ -782,7 +840,7 @@ namespace Assets.Scripts.Balance
                         $"{metrics.Name} one-shots {metrics.FastestKillTarget}")
                     {
                         Asset = metrics.Definition,
-                        Detail = $"Attack {metrics.Definition.Strength} lands "
+                        Detail = $"Attack {metrics.Definition.BaseStats[StatType.Strength]} lands "
                                + $"{FindPerHero(metrics, metrics.FastestKillTarget):0.0} average damage on a hero who "
                                + "cannot survive one hit.",
                         Suggestion = "Lower Attack, or raise hero max HP — the HP:damage scale is the root cause."
@@ -798,7 +856,7 @@ namespace Assets.Scripts.Balance
                         Asset = metrics.Definition,
                         Detail = $"Target ceiling is {ttkCeiling:0.0} turns. Long fights without added pressure read as a slog.",
                         Suggestion = $"Lower Health toward "
-                               + $"{Mathf.RoundToInt(metrics.Definition.Health * ttkCeiling / Mathf.Max(0.01f, metrics.PartyTurnsToKill))}."
+                               + $"{Mathf.RoundToInt(metrics.Definition.BaseStats[StatType.MaxHealth] * ttkCeiling / Mathf.Max(0.01f, metrics.PartyTurnsToKill))}."
                     });
                 }
                 else if (metrics.PartyTurnsToKill < rules.MinEnemyTimeToKill && metrics.PartyTurnsToKill > 0f)
@@ -818,7 +876,7 @@ namespace Assets.Scripts.Balance
                         $"{metrics.Name} acts {metrics.ActionShareVsParty:0.0}x as often as a hero")
                     {
                         Asset = metrics.Definition,
-                        Detail = $"Agility {metrics.Definition.Agility} against the party average. Its real threat is "
+                        Detail = $"Agility {metrics.Definition.BaseStats[StatType.Agility]} against the party average. Its real threat is "
                                + "that multiple of what its Attack suggests, and nothing in the inspector shows it.",
                         Suggestion = "Treat Agility as a damage multiplier when tuning this enemy."
                     });
@@ -860,11 +918,11 @@ namespace Assets.Scripts.Balance
             }
 
             float scale = ceiling / metrics.SoloDangerIndex;
-            int suggestedAttack = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.Strength * scale));
-            int suggestedHealth = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.Health * scale));
+            int suggestedAttack = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.BaseStats[StatType.Strength] * scale));
+            int suggestedHealth = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.BaseStats[StatType.MaxHealth] * scale));
 
-            return $"Either Attack {metrics.Definition.Strength} → {suggestedAttack}, or Health "
-                 + $"{metrics.Definition.Health} → {suggestedHealth} (or split the difference). "
+            return $"Either Attack {metrics.Definition.BaseStats[StatType.Strength]} → {suggestedAttack}, or Health "
+                 + $"{metrics.Definition.BaseStats[StatType.MaxHealth]} → {suggestedHealth} (or split the difference). "
                  + "Raising hero HP instead fixes it for every enemy at once.";
         }
 

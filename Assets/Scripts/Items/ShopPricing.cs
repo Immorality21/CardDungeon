@@ -1,3 +1,4 @@
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Items
@@ -55,10 +56,14 @@ namespace Assets.Scripts.Items
                 return hero.RecruitCost;
             }
 
-            float score = hero.BaseStrength * 12f
-                        + hero.BaseEndurance * 8f
-                        + hero.BaseHealth * 4f
-                        + hero.BaseAgility * 10f;
+            // Weights come from StatCatalog, so a stat added to the enum is priced by its own row
+            // rather than being silently worth nothing here - which is how Intelligence, Spirit and
+            // Luck ended up contributing zero to a caster's price.
+            float score = 0f;
+            foreach (var stat in StatCatalog.Types)
+            {
+                score += hero.BaseStats[stat] * StatCatalog.Of(stat).RecruitWeight;
+            }
             return Mathf.Max(25, Mathf.RoundToInt(score / 5f) * 5);
         }
 

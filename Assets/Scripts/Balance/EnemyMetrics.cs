@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -90,7 +91,7 @@ namespace Assets.Scripts.Balance
             metrics.PartyTurnsToKill = BalanceMath.PartyTurnsToKill(partyUnits, unit);
             metrics.SoloDangerIndex = BalanceMath.DangerIndex(partyUnits, group);
             metrics.OffenseMultiplier = BalanceMath.AverageOffenseMultiplier(enemy.Archetype, party.Size);
-            metrics.AverageDamagePerHit = BalanceMath.AverageDamageAgainstGroup(enemy.Strength, partyUnits);
+            metrics.AverageDamagePerHit = BalanceMath.AverageDamageAgainstGroup(enemy.BaseStats[StatType.Strength], partyUnits);
             metrics.EffectiveDamagePerTurn = metrics.AverageDamagePerHit * metrics.OffenseMultiplier;
 
             // Per-hero breakdown: plain hits, since that is what the player actually feels turn to turn.
@@ -101,15 +102,15 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                float perHit = BalanceMath.AverageDamage(enemy.Strength, hero.Unit);
-                int htk = BalanceMath.HitsToKill(perHit, hero.Stats.MaxHealth);
+                float perHit = BalanceMath.AverageDamage(enemy.BaseStats[StatType.Strength], hero.Unit);
+                int htk = BalanceMath.HitsToKill(perHit, hero.Effective[StatType.MaxHealth]);
 
                 metrics.PerHero.Add(new EnemyVsHero
                 {
                     HeroName = hero.Name,
                     DamagePerHit = perHit,
                     HitsToKill = htk,
-                    HealthFractionPerHit = hero.Stats.MaxHealth > 0 ? perHit / hero.Stats.MaxHealth : 0f
+                    HealthFractionPerHit = hero.Effective[StatType.MaxHealth] > 0 ? perHit / hero.Effective[StatType.MaxHealth] : 0f
                 });
 
                 if (htk < metrics.FewestHitsToKillAHero)

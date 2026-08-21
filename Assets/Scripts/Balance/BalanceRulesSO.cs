@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -82,16 +84,40 @@ namespace Assets.Scripts.Balance
         public float MaxRewardEfficiencySpread = 2.5f;
 
         [Header("Stat weights for the power score")]
-        public float HealthWeight = 1f;
-        public float StrengthWeight = 6f;
-        public float EnduranceWeight = 4f;
-        public float AgilityWeight = 3f;
+        [Tooltip("How much one point of each stat contributes to an enemy's power score. A list " +
+                 "rather than a field per stat, so adding a StatType does not mean editing this " +
+                 "class and BalanceMath.PowerScore in lockstep. A stat with no row here uses its " +
+                 "StatCatalog weight, so rows are overrides rather than something to keep in sync. " +
+                 "To say a stat contributes nothing, set its row to 0 - deleting the row instead " +
+                 "restores the catalog default.")]
+        public List<StatWeight> PowerWeights = StatWeight.Defaults();
 
-        [Tooltip("Caster stats are worth less on an enemy that never casts, so these start low; " +
-                 "raise them once enemy spellcasting exists.")]
-        public float IntelligenceWeight = 2f;
-        public float SpiritWeight = 2f;
-        public float LuckWeight = 3f;
+        /// <summary>
+        /// Weight for one stat in the power score. An authored row wins; a stat the list does not
+        /// mention falls back to <see cref="StatCatalog"/>.
+        ///
+        /// <para>The fallback is the point. This list is serialized into the rules asset, so the
+        /// moment one is saved it becomes a frozen snapshot of whatever stats existed that day. A
+        /// stat added later would have no row and score <b>0</b> — an enemy built around it would be
+        /// measured as harmless, with nothing anywhere to say so. Deferring to the catalog means a
+        /// new stat arrives already weighted, and authoring a row is an override rather than a
+        /// requirement.</para>
+        /// </summary>
+        public float WeightFor(StatType stat)
+        {
+            if (PowerWeights != null)
+            {
+                foreach (var entry in PowerWeights)
+                {
+                    if (entry != null && entry.Stat == stat)
+                    {
+                        return entry.Weight;
+                    }
+                }
+            }
+
+            return stat == StatType.None ? 0f : StatCatalog.Of(stat).PowerWeight;
+        }
 
         [Header("Simulation")]
         [Tooltip("Battles run per encounter. Higher is smoother but slower; 200 is plenty for a " +

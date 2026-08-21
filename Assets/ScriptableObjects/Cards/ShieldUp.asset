@@ -20,10 +20,10 @@ MonoBehaviour:
   Rarity: 0
   Effects:
   - EffectType: 2
-    ScalingStat: 2
+    ScalingStat: 1
     Power: 4
     DamageType: 0
-    BuffType: 1
+    BuffType: 2
     Duration: 3
   Tags:
   - 5

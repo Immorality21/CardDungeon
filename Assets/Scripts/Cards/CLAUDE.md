@@ -7,7 +7,7 @@
 
 ## Spell power scales off a caster stat
 
-`SpellEffect.Power` is a **base**; `SpellEffect.ScalingStat` (a `SpellScalingStat`) names the caster stat added on top, resolved through `SpellScaling.CasterContribution` so damage, healing and anything added later scale identically instead of each executor re-deriving it. Damage and debuff effects are authored as **Intelligence**, heals and buffs as **Spirit**.
+`SpellEffect.Power` is a **base**; `SpellEffect.ScalingStat` (a **`StatType`** — there is no separate spell-scaling enum any more, and `StatType.None` means flat power) names the caster stat added on top, resolved through `SpellScaling.CasterContribution` so damage, healing, buffs and anything added later scale identically instead of each executor re-deriving it. **Which stat is per-effect data, not a rule** — a Buff can scale off Strength and a Damage effect off Agility if that is what the magic is. Current authoring: elemental damage on Intelligence, Heal on Spirit, Poison Dart on Agility, Slash / War Cry / Shield Up on Strength.
 
 **Damage and heals add the stat in full; buffs and debuffs add a quarter of it** (`SpellScaling.BuffContribution` / `BuffScalingDivisor`). A buff's `Power` is a flat delta applied to a stat, not a damage number — a +3 Strength buff is already +30% on a 10-Strength hero, so adding a caster's Spirit in full would swamp the stat being buffed. The divisor is one constant if that trade needs revisiting.
 
@@ -60,3 +60,21 @@ Still to design: `PowerMode` from `docs/ELEMENTAL_PLAN.md` (base-power / flat / 
 ## Persistence
 
 Equipped magic persists the **whole run** (carried across levels in `RunSaveData.EquippedMagic`, snapshotted mid-level in `DungeonSaveData.EquippedMagic`) and is **lost on party death**. See the Dungeon guide.
+
+## Enum ordinals: inserting a member is not a shift-by-one
+
+`StatType`, `BuffType` and `SpellEffectType` are all serialized **by ordinal** into magic, combo,
+hero, enemy and item assets. Appending is free. Inserting or reordering means rewriting every asset
+that stores the enum, and the remap is **not** uniform if members go in at different points.
+
+This bit `BuffType` once and is worth remembering: adding `None = 0` *and* the three caster stats
+(`Intelligence`/`Spirit`/`Luck`, inserted after `Agility`) shifted the low members by **+1** and
+everything from `FireResistance` up by **+4**. A migration that applied a flat +1 left
+`FreezeCombo`'s `Frozen` (old 8) pointing at `LightningResistance` (new 9) — whose handler is a
+deliberate no-op, so the Freeze combo silently stopped doing anything and nothing failed. When you
+touch one of these enums, write the old→new map out member by member and verify the assets after,
+rather than reaching for an offset.
+
+`BuffHandlerRegistry.Get` now returns **null** for an unhandled type instead of throwing, and every
+caller treats null as "inert". `BuffHandlerRegistry.Unhandled()` lists types with no handler, which
+is the hook for reporting them rather than discovering them mid-combat.

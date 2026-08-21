@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Combat
@@ -113,7 +114,7 @@ namespace Assets.Scripts.Combat
         {
             // Item/level bonuses fold in via the unit's own effective stat; combat buffs/debuffs
             // stack on top of that.
-            int baseAgility = unit.GetEffectiveAgility();
+            int baseAgility = unit.GetEffectiveStat(StatType.Agility);
             if (_buffTracker != null)
             {
                 baseAgility += _buffTracker.GetBuffAmount(unit, StatType.Agility);

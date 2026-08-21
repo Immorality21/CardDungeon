@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Enemies
@@ -21,16 +22,8 @@ namespace Assets.Scripts.Enemies
         public bool IsBoss;
 
         [Header("Base stats")]
-        public int Strength = 3;
-        public int Endurance = 1;
-        public int Health = 10;
-        public int Agility = 5;
-
-        [Tooltip("Caster stats. Default 0: an enemy that never casts needs neither, and leaving " +
-                 "Luck at 0 keeps its crit rate at the base so existing encounters are unchanged.")]
-        public int Intelligence;
-        public int Spirit;
-        public int Luck;
+        [Tooltip("This enemy's stats, MaxHealth included. Absent entries read as 0.")]
+        public StatBlock BaseStats = StatBlock.Defaults();
 
         [Header("Kill rewards")]
         public int XpReward = 10;    // awarded to the party leader immediately on kill

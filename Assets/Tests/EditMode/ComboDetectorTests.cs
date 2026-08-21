@@ -28,7 +28,7 @@ namespace Tests.EditMode
         public void SetUp()
         {
             _tagTracker = new MagicTagTracker();
-            _target = new MockCombatUnit("Enemy", attack: 5, defense: 3, health: 50, isHero: false);
+            _target = new MockCombatUnit("Enemy", strength: 5, endurance: 3, health: 50, isHero: false);
         }
 
         [Test]

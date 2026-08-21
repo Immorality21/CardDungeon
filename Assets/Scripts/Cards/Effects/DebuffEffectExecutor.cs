@@ -19,6 +19,12 @@ namespace Assets.Scripts.Cards.Effects
             bool isComboEffect = false)
         {
             var handler = BuffHandlerRegistry.Get(effect.BuffType);
+            if (handler == null)
+            {
+                // No handler for this BuffType - inert rather than a crash mid-combat.
+                // BuffHandlerRegistry.Unhandled() is what surfaces these to the analyzer.
+                return;
+            }
 
             // Combo debuff stay flat; a cast one adds a fraction of the caster's stat, so a
             // high-Spirit caster's shields are better without dwarfing the stat being changed.

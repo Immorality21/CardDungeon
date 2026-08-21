@@ -39,6 +39,8 @@ namespace Assets.Scripts.Balance.Editor
             {
                 Rules = rules,
                 Heroes = startingParty,
+                // Asset-level checks (level-curve shape) want every hero, not just the party.
+                AllHeroes = heroes,
                 Enemies = FindAll<EnemySO>(),
                 Runs = FindAll<RunDefinitionSO>(),
                 Magic = FindAll<MagicSO>(),

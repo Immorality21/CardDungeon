@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Enemies.Behaviors

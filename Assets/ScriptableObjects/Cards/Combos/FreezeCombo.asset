@@ -23,5 +23,5 @@ MonoBehaviour:
   - EffectType: 3
     Power: 0
     DamageType: 0
-    BuffType: 8
+    BuffType: 12
     Duration: 2

@@ -31,6 +31,7 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 - `Editor/` — Custom Unity editor tools
 
 **`Assets.Scripts.*`** — Game-specific code:
+- `UnitStats/` — **the stat model**: `StatType` (the one stat enum, `None = 0`), `UnitStat` (one stat + amount), `StatBlock` (a sparse, indexable set), **`StatCatalog`** (the one per-stat mapping — labels, recruit/power weights, authoring defaults, iteration order), and `Editor/StatBlockDrawer` (one labelled row per stat in the inspector). **Adding a stat is one `StatType` member plus one `StatCatalog` row**; `StatCatalogTests` fails if the row is missing.
 - `Rooms/` — Dungeon generation (`RoomManager`, `RoomNode`, `Room`, `Door`, `RoomSO`), `GameManager`, `CombatManager`
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `LevelConfiguration`, `HeroSaveData`
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`

@@ -4,6 +4,7 @@ using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -48,23 +49,23 @@ namespace Tests.EditMode
         {
             var hero = Make<HeroSO>();
             hero.Label = "Tester";
-            hero.BaseStrength = 12;
-            hero.BaseEndurance = 5;
-            hero.BaseHealth = 120;
-            hero.BaseAgility = 5;
+            hero.BaseStats[StatType.Strength] = 12;
+            hero.BaseStats[StatType.Endurance] = 5;
+            hero.BaseStats[StatType.MaxHealth] = 120;
+            hero.BaseStats[StatType.Agility] = 5;
             hero.LevelProgression = new List<LevelConfiguration>();
 
             return PartyBaseline.Build(new List<HeroSO> { hero }, 1);
         }
 
-        private EnemySO Goblin(int attack = 4, int health = 20, int xp = 10, int gold = 5)
+        private EnemySO Goblin(int strength = 4, int health = 20, int xp = 10, int gold = 5)
         {
             var enemy = Make<EnemySO>();
             enemy.DisplayName = "Goblin";
-            enemy.Strength = attack;
-            enemy.Endurance = 1;
-            enemy.Health = health;
-            enemy.Agility = 5;
+            enemy.BaseStats[StatType.Strength] = strength;
+            enemy.BaseStats[StatType.Endurance] = 1;
+            enemy.BaseStats[StatType.MaxHealth] = health;
+            enemy.BaseStats[StatType.Agility] = 5;
             enemy.XpReward = xp;
             enemy.GoldReward = gold;
             enemy.Archetype = EnemyArchetype.Aggressor;
@@ -123,8 +124,8 @@ namespace Tests.EditMode
         [Test]
         public void RoomEncounter_SpawnOverride_TakesPrecedenceOverTheRoomTable()
         {
-            var tableEnemy = Goblin(attack: 4, health: 20);
-            var overrideEnemy = Goblin(attack: 9, health: 90);
+            var tableEnemy = Goblin(strength: 4, health: 20);
+            var overrideEnemy = Goblin(strength: 9, health: 90);
             var room = Room(tableEnemy, 1f, 1);
 
             var overrideTable = new List<EnemySpawnEntry>
@@ -229,7 +230,7 @@ namespace Tests.EditMode
             template.RoomsToGenerate = 4;
             template.RoomPool = new List<RoomSO> { combat };
 
-            var boss = Goblin(attack: 9, health: 120, xp: 60, gold: 50);
+            var boss = Goblin(strength: 9, health: 120, xp: 60, gold: 50);
             boss.DisplayName = "Warden";
             boss.IsBoss = true;
             boss.Archetype = EnemyArchetype.Boss;

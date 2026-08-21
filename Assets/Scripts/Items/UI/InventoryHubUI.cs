@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Heroes;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -260,11 +261,15 @@ namespace Assets.Scripts.Items.UI
             var raw = InventoryManager.Instance.ComputeRawBonuses(_selectedHeroKey);
             var pct = InventoryManager.Instance.ComputePercentageBonuses(_selectedHeroKey);
 
-            _statsLabel.text =
-                $"STR {Effective(hero.BaseStrength, raw[StatType.Strength], pct[StatType.Strength])}   " +
-                $"END {Effective(hero.BaseEndurance, raw[StatType.Endurance], pct[StatType.Endurance])}   " +
-                $"HP {Effective(hero.BaseHealth, raw[StatType.MaxHealth], pct[StatType.MaxHealth])}   " +
-                $"AGI {Effective(hero.BaseAgility, raw[StatType.Agility], pct[StatType.Agility])}";
+            // Every stat, generated: the four hand-written ones used to hide Intelligence, Spirit
+            // and Luck entirely, which are exactly the stats that distinguish a caster.
+            var parts = new List<string>();
+            foreach (var stat in StatCatalog.Types)
+            {
+                parts.Add(StatCatalog.ShortName(stat) + " "
+                    + Effective(hero.BaseStats[stat], raw[stat], pct[stat]));
+            }
+            _statsLabel.text = string.Join("   ", parts);
         }
 
         private static int Effective(int baseVal, float raw, float pct)

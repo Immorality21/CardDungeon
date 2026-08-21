@@ -1,4 +1,5 @@
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 
 namespace Assets.Scripts.Cards
 {

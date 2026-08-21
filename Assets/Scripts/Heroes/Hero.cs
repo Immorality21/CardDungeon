@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Heroes
@@ -37,8 +38,7 @@ namespace Assets.Scripts.Heroes
             HeroSO = heroSO;
             Level = 1;
             CurrentXp = 0;
-            Stats = new Stats(heroSO.BaseStrength, heroSO.BaseEndurance, heroSO.BaseHealth, heroSO.BaseAgility,
-                heroSO.BaseIntelligence, heroSO.BaseSpirit, heroSO.BaseLuck);
+            Stats = new Stats(heroSO.BaseStats);
         }
 
         public void InitializeFromSave(HeroSO heroSO, int savedXp)
@@ -66,85 +66,49 @@ namespace Assets.Scripts.Heroes
         private void ApplyLevelUp(LevelConfiguration config)
         {
             Level = config.Level;
-            Stats.Strength += config.StrengthGain;
-            Stats.Endurance += config.EnduranceGain;
-            Stats.MaxHealth += config.HealthGain;
-            Stats.Health += config.HealthGain;
-            Stats.Agility += config.AgilityGain;
+            // Every stat the level grants, whatever they are - no per-stat lines to forget.
+            Stats.Attributes.Add(config.Gains);
+            // A bigger bar heals you into it, matching the old behaviour.
+            Stats.Health += config.Gains[StatType.MaxHealth];
             Debug.Log($"{HeroKey} leveled up to {Level}!");
         }
 
         /// <summary>
-        /// The attribute this hero swings with, per <see cref="HeroSO.AttackStat"/>. Falls back to
-        /// Strength when no definition is set, which is what every hero did before the field existed.
+        /// The stat this hero swings with, per <see cref="HeroSO.AttackStat"/>. Falls back to
+        /// Strength when unset or nonsensical (MaxHealth is a pool, not an output), which is what
+        /// every hero did before the field existed.
         /// </summary>
+        public StatType AttackStat
+        {
+            get { return HeroSO != null ? HeroSO.ResolvedAttackStat : StatType.Strength; }
+        }
+
         public int GetEffectiveAttackPower()
         {
-            if (HeroSO == null)
+            return GetEffectiveStat(AttackStat);
+        }
+
+        /// <summary>
+        /// Base stat plus this hero's raw then percentage gear bonuses. The one accessor for every
+        /// stat, so adding a <see cref="StatType"/> needs no change here or on the interface.
+        /// </summary>
+        public int GetEffectiveStat(StatType stat)
+        {
+            if (stat == StatType.None)
             {
-                return GetEffectiveStrength();
+                return 0;
             }
 
-            switch (HeroSO.AttackStat)
-            {
-                case StatType.Agility:
-                    return GetEffectiveAgility();
-                case StatType.Intelligence:
-                    return GetEffectiveIntelligence();
-                case StatType.Spirit:
-                    return GetEffectiveSpirit();
-                case StatType.Luck:
-                    return GetEffectiveLuck();
-                case StatType.Endurance:
-                    return GetEffectiveEndurance();
-                default:
-                    return GetEffectiveStrength();
-            }
-        }
-
-        public int GetEffectiveStrength()
-        {
-            return EffectiveStat(Stats.Strength, StatType.Strength);
-        }
-
-        public int GetEffectiveIntelligence()
-        {
-            return EffectiveStat(Stats.Intelligence, StatType.Intelligence);
-        }
-
-        public int GetEffectiveSpirit()
-        {
-            return EffectiveStat(Stats.Spirit, StatType.Spirit);
-        }
-
-        public int GetEffectiveLuck()
-        {
-            return EffectiveStat(Stats.Luck, StatType.Luck);
-        }
-
-        /// <summary>Base value plus this hero's raw then percentage gear bonuses for that stat.</summary>
-        private int EffectiveStat(int baseValue, StatType stat)
-        {
             var raw = InventoryManager.Instance.ComputeRawBonuses(HeroKey);
             var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
-            float value = baseValue + raw[stat];
+            float value = Stats[stat] + raw[stat];
             return Mathf.RoundToInt(value * (1f + pct[stat] / 100f));
         }
 
-        public int GetEffectiveEndurance()
-        {
-            var raw = InventoryManager.Instance.ComputeRawBonuses(HeroKey);
-            var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
-            float baseVal = Stats.Endurance + raw[StatType.Endurance];
-            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.Endurance] / 100f));
-        }
-
+        /// <summary>Convenience for the HP bar and heal clamps; MaxHealth is just another stat.</summary>
         public int GetEffectiveMaxHealth()
         {
-            var raw = InventoryManager.Instance.ComputeRawBonuses(HeroKey);
-            var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
-            float baseVal = Stats.MaxHealth + raw[StatType.MaxHealth];
-            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.MaxHealth] / 100f));
+            return GetEffectiveStat(StatType.MaxHealth);
         }
 
         /// <summary>
@@ -166,14 +130,6 @@ namespace Assets.Scripts.Heroes
                 combined.Add(entry);
             }
             return combined;
-        }
-
-        public int GetEffectiveAgility()
-        {
-            var raw = InventoryManager.Instance.ComputeRawBonuses(HeroKey);
-            var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
-            float baseVal = Stats.Agility + raw[StatType.Agility];
-            return Mathf.RoundToInt(baseVal * (1f + pct[StatType.Agility] / 100f));
         }
     }
 }

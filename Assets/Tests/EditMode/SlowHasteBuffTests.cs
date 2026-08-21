@@ -3,6 +3,7 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 
 namespace Tests.EditMode
@@ -16,7 +17,7 @@ namespace Tests.EditMode
         public void SetUp()
         {
             _tracker = new CombatBuffTracker();
-            _unit = new MockCombatUnit("Hero", attack: 10, defense: 5, health: 100, agility: 10);
+            _unit = new MockCombatUnit("Hero", strength: 10, endurance: 5, health: 100, agility: 10);
         }
 
         // ---- SlowBuffHandler ----
@@ -134,8 +135,8 @@ namespace Tests.EditMode
         [Test]
         public void TurnManager_SlowBuff_ReducesTurnFrequency()
         {
-            var fast = new MockCombatUnit("Fast", attack: 1, defense: 1, health: 10, agility: 20);
-            var normal = new MockCombatUnit("Normal", attack: 1, defense: 1, health: 10, agility: 10);
+            var fast = new MockCombatUnit("Fast", strength: 1, endurance: 1, health: 10, agility: 20);
+            var normal = new MockCombatUnit("Normal", strength: 1, endurance: 1, health: 10, agility: 10);
 
             // Apply slow to the fast unit, reducing agility by 15 (effective: 5)
             var handler = BuffHandlerRegistry.Get(BuffType.Slow);
@@ -153,8 +154,8 @@ namespace Tests.EditMode
         [Test]
         public void TurnManager_HasteBuff_IncreasesTurnFrequency()
         {
-            var slow = new MockCombatUnit("Slow", attack: 1, defense: 1, health: 10, agility: 5);
-            var normal = new MockCombatUnit("Normal", attack: 1, defense: 1, health: 10, agility: 10);
+            var slow = new MockCombatUnit("Slow", strength: 1, endurance: 1, health: 10, agility: 5);
+            var normal = new MockCombatUnit("Normal", strength: 1, endurance: 1, health: 10, agility: 10);
 
             // Apply haste to the slow unit, boosting agility by 10 (effective: 15)
             var handler = BuffHandlerRegistry.Get(BuffType.Haste);
@@ -172,8 +173,8 @@ namespace Tests.EditMode
         [Test]
         public void TurnManager_WithoutBuffTracker_UsesBaseAgility()
         {
-            var fast = new MockCombatUnit("Fast", attack: 1, defense: 1, health: 10, agility: 20);
-            var slow = new MockCombatUnit("Slow", attack: 1, defense: 1, health: 10, agility: 5);
+            var fast = new MockCombatUnit("Fast", strength: 1, endurance: 1, health: 10, agility: 20);
+            var slow = new MockCombatUnit("Slow", strength: 1, endurance: 1, health: 10, agility: 5);
 
             var turnManager = new TurnManager();
             // No SetBuffTracker call
@@ -186,7 +187,7 @@ namespace Tests.EditMode
         [Test]
         public void TurnManager_AgilityBuffClampsToMinimumOne()
         {
-            var unit = new MockCombatUnit("Debuffed", attack: 1, defense: 1, health: 10, agility: 5);
+            var unit = new MockCombatUnit("Debuffed", strength: 1, endurance: 1, health: 10, agility: 5);
 
             // Slow reduces agility by 100 — effective would be -95, clamped to 1
             var handler = BuffHandlerRegistry.Get(BuffType.Slow);
@@ -204,8 +205,8 @@ namespace Tests.EditMode
         [Test]
         public void TurnManager_GetTurnOrder_ReflectsAgilityBuffs()
         {
-            var hero = new MockCombatUnit("Hero", attack: 1, defense: 1, health: 10, agility: 10);
-            var enemy = new MockCombatUnit("Enemy", attack: 1, defense: 1, health: 10, agility: 10);
+            var hero = new MockCombatUnit("Hero", strength: 1, endurance: 1, health: 10, agility: 10);
+            var enemy = new MockCombatUnit("Enemy", strength: 1, endurance: 1, health: 10, agility: 10);
 
             // Haste the hero to agility 20
             var handler = BuffHandlerRegistry.Get(BuffType.Haste);

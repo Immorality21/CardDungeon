@@ -15,18 +15,33 @@ MonoBehaviour:
   Key: Warrior
   Label: Warrior
   Sprite: {fileID: 21300000, guid: b2ddfcceaadefd6f5add82a8c4549a7a, type: 3}
-  BaseStrength: 10
-  BaseEndurance: 5
-  BaseHealth: 13
-  BaseAgility: 5
-  BaseIntelligence: 3
-  BaseSpirit: 3
-  BaseLuck: 5
-  AttackStat: 0
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 10
+    - Type: 2
+      Amount: 5
+    - Type: 3
+      Amount: 5
+    - Type: 4
+      Amount: 3
+    - Type: 5
+      Amount: 3
+    - Type: 6
+      Amount: 5
+    - Type: 7
+      Amount: 13
+  AttackStat: 1
   LevelProgression:
   - Level: 2
     XpRequired: 100
-    StrengthGain: 3
-    EnduranceGain: 1
-    HealthGain: 7
-    AgilityGain: 5
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 3
+      - Type: 2
+        Amount: 1
+      - Type: 7
+        Amount: 7
+      - Type: 3
+        Amount: 5

@@ -17,18 +17,33 @@ MonoBehaviour:
   Blurb: Fast and fragile - strikes twice for every swing the Warrior takes.
   RecruitCost: 220
   Sprite: {fileID: 21300000, guid: b2ddfcceaadefd6f5add82a8c4549a7a, type: 3}
-  BaseStrength: 8
-  BaseEndurance: 3
-  BaseHealth: 10
-  BaseAgility: 9
-  BaseIntelligence: 4
-  BaseSpirit: 2
-  BaseLuck: 12
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 8
+    - Type: 2
+      Amount: 3
+    - Type: 3
+      Amount: 9
+    - Type: 4
+      Amount: 4
+    - Type: 5
+      Amount: 2
+    - Type: 6
+      Amount: 12
+    - Type: 7
+      Amount: 10
   AttackStat: 3
   LevelProgression:
   - Level: 2
     XpRequired: 100
-    StrengthGain: 2
-    EnduranceGain: 1
-    HealthGain: 5
-    AgilityGain: 2
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 2
+      - Type: 2
+        Amount: 1
+      - Type: 7
+        Amount: 5
+      - Type: 3
+        Amount: 2

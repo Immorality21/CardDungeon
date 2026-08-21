@@ -20,10 +20,10 @@ MonoBehaviour:
   Category: 0
   SlotType: 3
   Bonuses:
-  - StatType: 1
+  - StatType: 2
     BonusType: 0
     Value: 4
-  - StatType: 2
+  - StatType: 7
     BonusType: 0
     Value: 12
   Resistances:

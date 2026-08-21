@@ -4,6 +4,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -229,8 +230,8 @@ namespace Tests.EditMode
         {
             var enemy = Make<EnemySO>();
             enemy.DisplayName = "Cinder Imp";
-            enemy.Strength = 6;
-            enemy.Health = 10;
+            enemy.BaseStats[StatType.Strength] = 6;
+            enemy.BaseStats[StatType.MaxHealth] = 10;
             enemy.AttackDamageType = DamageType.Fire;
 
             var unit = SimUnit.FromEnemy(enemy);
@@ -242,8 +243,8 @@ namespace Tests.EditMode
         public void BalanceMath_BasicAttackUsesTheAttackersElement()
         {
             var fireEnemy = Make<EnemySO>();
-            fireEnemy.Strength = 20;
-            fireEnemy.Health = 10;
+            fireEnemy.BaseStats[StatType.Strength] = 20;
+            fireEnemy.BaseStats[StatType.MaxHealth] = 10;
             fireEnemy.AttackDamageType = DamageType.Fire;
             var attacker = SimUnit.FromEnemy(fireEnemy);
 
@@ -251,10 +252,8 @@ namespace Tests.EditMode
             {
                 DisplayName = "hero",
                 IsHero = true,
-                Stats = new Stats(0, 0, 100, 5),
+                Stats = TestStats.Make(0, 0, 100, 5),
                 EffectiveAttackPower = 0,
-                EffectiveEndurance = 0,
-                EffectiveAgility = 5,
                 Resistances = Resist(DamageType.Fire, 50f)
             };
 
@@ -275,10 +274,8 @@ namespace Tests.EditMode
             {
                 DisplayName = "flamer",
                 IsHero = false,
-                Stats = new Stats(50, 0, 100, 5),
+                Stats = TestStats.Make(50, 0, 100, 5),
                 EffectiveAttackPower = 50,
-                EffectiveEndurance = 0,
-                EffectiveAgility = 5,
                 AttackDamageType = DamageType.Fire
             };
 
@@ -286,10 +283,8 @@ namespace Tests.EditMode
             {
                 DisplayName = "absorber",
                 IsHero = true,
-                Stats = new Stats(0, 0, 100, 5) { Health = 95 },
+                Stats = TestStats.Make(0, 0, 100, 5, currentHealth: 95),
                 EffectiveAttackPower = 0,
-                EffectiveEndurance = 0,
-                EffectiveAgility = 5,
                 Resistances = Resist(DamageType.Fire, 200f)
             };
 

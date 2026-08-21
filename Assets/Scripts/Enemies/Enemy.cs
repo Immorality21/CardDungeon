@@ -3,6 +3,7 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Enemies
@@ -62,8 +63,7 @@ namespace Assets.Scripts.Enemies
             }
 
             gameObject.name = definition.DisplayName;
-            Stats = new Stats(definition.Strength, definition.Endurance, definition.Health, definition.Agility,
-                definition.Intelligence, definition.Spirit, definition.Luck);
+            Stats = new Stats(definition.BaseStats);
             Archetype = definition.Archetype;
             DrawableMagics = new List<DrawableMagicEntry>(definition.DrawableMagics);
             Resistances = new List<Resistance>(definition.Resistances);
@@ -82,40 +82,21 @@ namespace Assets.Scripts.Enemies
             transform.position = position;
         }
 
-        /// <summary>Enemies always swing off Strength; only heroes pick an attack attribute.</summary>
+        /// <summary>Enemies always swing off Strength; only heroes pick an attack stat.</summary>
+        public StatType AttackStat
+        {
+            get { return StatType.Strength; }
+        }
+
         public int GetEffectiveAttackPower()
         {
-            return Stats.Strength;
+            return GetEffectiveStat(AttackStat);
         }
 
-        public int GetEffectiveStrength()
+        /// <summary>Enemies carry no gear, so effective equals authored.</summary>
+        public int GetEffectiveStat(StatType stat)
         {
-            return Stats.Strength;
-        }
-
-        public int GetEffectiveEndurance()
-        {
-            return Stats.Endurance;
-        }
-
-        public int GetEffectiveAgility()
-        {
-            return Stats.Agility;
-        }
-
-        public int GetEffectiveIntelligence()
-        {
-            return Stats.Intelligence;
-        }
-
-        public int GetEffectiveSpirit()
-        {
-            return Stats.Spirit;
-        }
-
-        public int GetEffectiveLuck()
-        {
-            return Stats.Luck;
+            return Stats[stat];
         }
 
         private Sprite GetIcon()

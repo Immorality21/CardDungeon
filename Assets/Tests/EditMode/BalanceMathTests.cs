@@ -6,6 +6,7 @@ using Assets.Scripts.Enemies.Behaviors;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -24,10 +25,8 @@ namespace Tests.EditMode
             {
                 DisplayName = name,
                 IsHero = isHero,
-                Stats = new Stats(attack, defense, health, agility),
+                Stats = TestStats.Make(attack, defense, health, agility),
                 EffectiveAttackPower = attack,
-                EffectiveEndurance = defense,
-                EffectiveAgility = agility,
                 Resistances = new List<Resistance>()
             };
         }
@@ -161,14 +160,14 @@ namespace Tests.EditMode
         {
             var hero = ScriptableObject.CreateInstance<HeroSO>();
             hero.Label = "Test";
-            hero.BaseStrength = 5;
-            hero.BaseEndurance = 2;
-            hero.BaseHealth = 40;
-            hero.BaseAgility = 5;
+            hero.BaseStats[StatType.Strength] = 5;
+            hero.BaseStats[StatType.Endurance] = 2;
+            hero.BaseStats[StatType.MaxHealth] = 40;
+            hero.BaseStats[StatType.Agility] = 5;
             hero.LevelProgression = new List<LevelConfiguration>
             {
-                new LevelConfiguration { Level = 2, XpRequired = 100, StrengthGain = 1, HealthGain = 5 },
-                new LevelConfiguration { Level = 3, XpRequired = 250, StrengthGain = 1, HealthGain = 5 }
+                new LevelConfiguration { Level = 2, XpRequired = 100, Gains = new StatBlock(new UnitStat(StatType.Strength, 1), new UnitStat(StatType.MaxHealth, 5)) },
+                new LevelConfiguration { Level = 3, XpRequired = 250, Gains = new StatBlock(new UnitStat(StatType.Strength, 1), new UnitStat(StatType.MaxHealth, 5)) }
             };
 
             Assert.AreEqual(1, HeroStatCalculator.LevelForXp(hero, 99));
@@ -184,17 +183,17 @@ namespace Tests.EditMode
         public void HeroStatCalculator_BaseStatsAtLevel_AppliesEveryGainUpToThatLevel()
         {
             var hero = ScriptableObject.CreateInstance<HeroSO>();
-            hero.BaseStrength = 5;
-            hero.BaseHealth = 40;
+            hero.BaseStats[StatType.Strength] = 5;
+            hero.BaseStats[StatType.MaxHealth] = 40;
             hero.LevelProgression = new List<LevelConfiguration>
             {
-                new LevelConfiguration { Level = 2, XpRequired = 100, StrengthGain = 2, HealthGain = 10 },
-                new LevelConfiguration { Level = 3, XpRequired = 250, StrengthGain = 3, HealthGain = 10 }
+                new LevelConfiguration { Level = 2, XpRequired = 100, Gains = new StatBlock(new UnitStat(StatType.Strength, 2), new UnitStat(StatType.MaxHealth, 10)) },
+                new LevelConfiguration { Level = 3, XpRequired = 250, Gains = new StatBlock(new UnitStat(StatType.Strength, 3), new UnitStat(StatType.MaxHealth, 10)) }
             };
 
             var atThree = HeroStatCalculator.BaseStatsAtLevel(hero, 3);
 
-            Assert.AreEqual(10, atThree.Strength);
+            Assert.AreEqual(10, atThree[StatType.Strength]);
             Assert.AreEqual(60, atThree.MaxHealth);
             Assert.AreEqual(atThree.MaxHealth, atThree.Health, "A freshly derived hero should start at full health.");
 
@@ -216,11 +215,11 @@ namespace Tests.EditMode
                 new ItemBonus { StatType = StatType.Strength, BonusType = BonusType.Percentage, Value = 50f }
             };
 
-            var stats = new Stats(10, 0, 100, 5);
+            var stats = TestStats.Make(10, 0, 100, 5);
             var effective = HeroStatCalculator.WithGear(stats, new List<ItemSO> { sword, amulet });
 
             // (10 + 5) * 1.5 = 22.5, rounded to 22 by Mathf.RoundToInt's banker's rounding.
-            Assert.AreEqual(Mathf.RoundToInt(15f * 1.5f), effective.Strength);
+            Assert.AreEqual(Mathf.RoundToInt(15f * 1.5f), effective[StatType.Strength]);
 
             Object.DestroyImmediate(sword);
             Object.DestroyImmediate(amulet);

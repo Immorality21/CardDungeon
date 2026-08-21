@@ -3,6 +3,7 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -20,8 +21,8 @@ namespace Tests.EditMode
         {
             _calculator = new EffectResolver();
             _buffTracker = new CombatBuffTracker();
-            _hero = new MockCombatUnit("Hero", attack: 10, defense: 5, health: 100);
-            _enemy = new MockCombatUnit("Goblin", attack: 6, defense: 3, health: 50, isHero: false);
+            _hero = new MockCombatUnit("Hero", strength: 10, endurance: 5, health: 100);
+            _enemy = new MockCombatUnit("Goblin", strength: 6, endurance: 3, health: 50, isHero: false);
         }
 
         private MagicSO CreateCard(string key, SpellEffectType effect, int power,
@@ -90,7 +91,7 @@ namespace Tests.EditMode
         [Test]
         public void PowerBonus_IncreasesHeal()
         {
-            _hero.Stats.Health = 50;
+            _hero.Stats[StatType.MaxHealth] = 50;
             var card = CreateCard("Heal", SpellEffectType.Heal, power: 10);
             var action = MakeAction(card, _hero, _hero);
 

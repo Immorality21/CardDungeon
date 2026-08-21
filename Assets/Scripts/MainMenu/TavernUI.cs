@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -217,9 +218,19 @@ namespace Assets.Scripts.MainMenu
             var textCol = new VisualElement();
             textCol.style.flexGrow = 1f;
 
-            var name = new Label($"{hero.DisplayName}   " +
-                                 $"STR {hero.BaseStrength} · END {hero.BaseEndurance} · " +
-                                 $"HP {hero.BaseHealth} · AGI {hero.BaseAgility}");
+            // Show every stat the hero actually has. Listing four by hand hid the caster stats,
+            // so the Acolyte read as a weak fighter rather than the party's only real caster.
+            var statParts = new List<string>();
+            foreach (var stat in StatCatalog.Types)
+            {
+                int value = hero.BaseStats[stat];
+                if (value != 0)
+                {
+                    statParts.Add(StatCatalog.ShortName(stat) + " " + value);
+                }
+            }
+
+            var name = new Label(hero.DisplayName + "   " + string.Join(" · ", statParts));
             name.AddToClassList("cd-shop-row__name");
             textCol.Add(name);
 

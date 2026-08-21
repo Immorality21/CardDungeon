@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using UnityEditor;
 using UnityEngine;
 
@@ -78,11 +79,12 @@ namespace Assets.Scripts.Balance.Editor
             BalanceGui.HeaderCell("Hero", NameWidth);
             BalanceGui.HeaderCell("Lvl", StatWidth, "Level the reference party is measured at.");
             BalanceGui.HeaderCell("Cap", StatWidth, "Highest level this hero has a LevelConfiguration for.");
-            BalanceGui.HeaderCell("STR", StatWidth, "BaseStrength (editable)");
-            BalanceGui.HeaderCell("END", StatWidth, "BaseEndurance (editable)");
-            BalanceGui.HeaderCell("HP", StatWidth, "BaseHealth (editable)");
-            BalanceGui.HeaderCell("AGI", StatWidth, "BaseAgility (editable)");
-            BalanceGui.HeaderCell("Atk pwr", MetricWidth, "The attribute this hero attacks with, after level gains and gear.");
+            // One column per stat, generated: a new StatType appears here without touching this file.
+            foreach (var stat in StatCatalog.Types)
+            {
+                BalanceGui.HeaderCell(StatCatalog.ShortName(stat), StatWidth, stat + " (editable)");
+            }
+            BalanceGui.HeaderCell("Atk pwr", MetricWidth, "The stat this hero attacks with, after level gains and gear.");
             BalanceGui.HeaderCell("Eff HP", MetricWidth, "After level gains and gear.");
             BalanceGui.HeaderCell("END cut", MetricWidth, "Share of incoming damage the Endurance curve removes.");
             BalanceGui.HeaderCell("Survives", WideWidth, "Fewest ordinary (non-boss) hits that would kill this hero.");
@@ -112,14 +114,15 @@ namespace Assets.Scripts.Balance.Editor
                     hero.MaxDefinedLevel <= 2 ? BalanceSeverity.Warning : BalanceSeverity.Ok,
                     "A cap of 1 or 2 means XP stops mattering almost immediately.");
 
-                changed |= BalanceGui.EditableCell(serialized, "BaseStrength", StatWidth);
-                changed |= BalanceGui.EditableCell(serialized, "BaseEndurance", StatWidth);
-                changed |= BalanceGui.EditableCell(serialized, "BaseHealth", StatWidth, durability,
-                    "The root cause of one-shot fights lives here.");
-                changed |= BalanceGui.EditableCell(serialized, "BaseAgility", StatWidth);
+                foreach (var stat in StatCatalog.Types)
+                {
+                    changed |= BalanceGui.EditableStatCell(serialized, "BaseStats", stat, StatWidth,
+                        stat == StatType.MaxHealth ? durability : BalanceSeverity.Ok,
+                        stat == StatType.MaxHealth ? "The root cause of one-shot fights lives here." : null);
+                }
 
-                BalanceGui.Cell(hero.Stats.Strength.ToString(), MetricWidth);
-                BalanceGui.Cell(hero.Stats.MaxHealth.ToString(), MetricWidth, durability);
+                BalanceGui.Cell(hero.Unit != null ? hero.Unit.EffectiveAttackPower.ToString() : "—", MetricWidth);
+                BalanceGui.Cell(hero.Effective[StatType.MaxHealth].ToString(), MetricWidth, durability);
                 BalanceGui.Cell($"{hero.EnduranceReduction:P0}", MetricWidth);
                 BalanceGui.Cell(
                     hitsToKill == int.MaxValue ? "—" : $"{hitsToKill} hit{(hitsToKill == 1 ? "" : "s")}",
@@ -201,12 +204,12 @@ namespace Assets.Scripts.Balance.Editor
 
             foreach (var hero in party.Heroes)
             {
-                if (hero.Stats.MaxHealth <= 0)
+                if (hero.Effective[StatType.MaxHealth] <= 0)
                 {
                     continue;
                 }
 
-                float fraction = (float)party.PotionItem.ConsumableAmount / hero.Stats.MaxHealth;
+                float fraction = (float)party.PotionItem.ConsumableAmount / hero.Effective[StatType.MaxHealth];
                 var severity = fraction >= 1f
                     ? BalanceSeverity.Warning
                     : fraction >= _rules.MaxSingleHealFraction
@@ -252,33 +255,39 @@ namespace Assets.Scripts.Balance.Editor
                 GUILayout.Space(16f);
                 BalanceGui.HeaderCell("Level", StatWidth);
                 BalanceGui.HeaderCell("Total XP", MetricWidth, "Cumulative XP needed to reach this level.");
-                BalanceGui.HeaderCell("+STR", StatWidth);
-                BalanceGui.HeaderCell("+END", StatWidth);
-                BalanceGui.HeaderCell("+HP", StatWidth);
-                BalanceGui.HeaderCell("+AGI", StatWidth);
+                foreach (var stat in StatCatalog.Types)
+                {
+                    BalanceGui.HeaderCell("+" + StatCatalog.ShortName(stat), StatWidth,
+                        "Gains[" + stat + "] (editable)");
+                }
                 BalanceGui.HeaderCell("", 60f);
                 EditorGUILayout.EndHorizontal();
 
                 for (int i = 0; i < progression.arraySize; i++)
                 {
                     var entry = progression.GetArrayElementAtIndex(i);
-                    var agilityGain = entry.FindPropertyRelative("AgilityGain");
-
-                    // A single level-up that reshapes a stat by half its base is almost certainly a slip.
-                    var agilitySeverity = hero.Definition.BaseAgility > 0
-                        && agilityGain.intValue >= hero.Definition.BaseAgility * 0.5f
-                            ? BalanceSeverity.Warning
-                            : BalanceSeverity.Ok;
 
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.Space(16f);
                     changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("Level"), StatWidth);
                     changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("XpRequired"), MetricWidth);
-                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("StrengthGain"), StatWidth);
-                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("EnduranceGain"), StatWidth);
-                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("HealthGain"), StatWidth);
-                    changed |= BalanceGui.EditableCell(agilityGain, StatWidth, agilitySeverity,
-                        "A gain of half the base stat or more doubles this hero's turn rate in one level.");
+
+                    // One editable gain per stat, read out of the entry's Gains block.
+                    foreach (var stat in StatCatalog.Types)
+                    {
+                        // A single level-up that reshapes a stat by half its base is almost certainly
+                        // a slip - most visibly on Agility, which doubles the hero's turn rate.
+                        int baseValue = hero.Definition.BaseStats[stat];
+                        int gain = BalanceGui.StatEntryValue(entry, "Gains", stat);
+                        var severity = baseValue > 0 && gain >= baseValue * 0.5f
+                            ? BalanceSeverity.Warning
+                            : BalanceSeverity.Ok;
+
+                        changed |= BalanceGui.EditableStatCell(entry, "Gains", stat, StatWidth, severity,
+                            severity == BalanceSeverity.Warning
+                                ? "A gain of half the base stat or more reshapes this hero in one level."
+                                : null);
+                    }
 
                     if (GUILayout.Button("remove", EditorStyles.miniButton, GUILayout.Width(58f)))
                     {
@@ -326,10 +335,10 @@ namespace Assets.Scripts.Balance.Editor
             BalanceGui.HeaderCell("Enemy", NameWidth);
             BalanceGui.HeaderCell("Boss", 34f);
             BalanceGui.HeaderCell("Archetype", WideWidth);
-            BalanceGui.HeaderCell("STR", StatWidth);
-            BalanceGui.HeaderCell("END", StatWidth);
-            BalanceGui.HeaderCell("HP", StatWidth);
-            BalanceGui.HeaderCell("AGI", StatWidth);
+            foreach (var stat in StatCatalog.Types)
+            {
+                BalanceGui.HeaderCell(StatCatalog.ShortName(stat), StatWidth, stat + " (editable)");
+            }
             BalanceGui.HeaderCell("XP", StatWidth);
             BalanceGui.HeaderCell("Gold", StatWidth);
             BalanceGui.HeaderCell("Dmg/hit", MetricWidth, "Average damage on a party member, crit included.");
@@ -384,11 +393,28 @@ namespace Assets.Scripts.Balance.Editor
                 BalanceGui.AssetCell(metrics.Definition, metrics.Name, NameWidth, worst);
                 changed |= BalanceGui.EditableCell(serialized, "IsBoss", 34f);
                 changed |= BalanceGui.EditableCell(serialized, "Archetype", WideWidth);
-                changed |= BalanceGui.EditableCell(serialized, "Strength", StatWidth, killsSeverity);
-                changed |= BalanceGui.EditableCell(serialized, "Endurance", StatWidth);
-                changed |= BalanceGui.EditableCell(serialized, "Health", StatWidth, ttkSeverity);
-                changed |= BalanceGui.EditableCell(serialized, "Agility", StatWidth,
-                    metrics.ActionShareVsParty >= 1.5f ? BalanceSeverity.Info : BalanceSeverity.Ok);
+                // One editable column per stat. Only three carry a warning colour, and which three is
+                // the interesting part: Strength drives one-shots, MaxHealth drives time-to-kill, and
+                // Agility drives how often it acts.
+                foreach (var stat in StatCatalog.Types)
+                {
+                    var statSeverity = BalanceSeverity.Ok;
+                    if (stat == StatType.Strength)
+                    {
+                        statSeverity = killsSeverity;
+                    }
+                    else if (stat == StatType.MaxHealth)
+                    {
+                        statSeverity = ttkSeverity;
+                    }
+                    else if (stat == StatType.Agility && metrics.ActionShareVsParty >= 1.5f)
+                    {
+                        statSeverity = BalanceSeverity.Info;
+                    }
+
+                    changed |= BalanceGui.EditableStatCell(serialized, "BaseStats", stat, StatWidth, statSeverity);
+                }
+
                 changed |= BalanceGui.EditableCell(serialized, "XpReward", StatWidth,
                     metrics.Definition.XpReward <= 0 ? BalanceSeverity.Info : BalanceSeverity.Ok);
                 changed |= BalanceGui.EditableCell(serialized, "GoldReward", StatWidth);

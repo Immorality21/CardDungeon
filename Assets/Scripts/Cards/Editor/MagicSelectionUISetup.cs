@@ -1,9 +1,9 @@
 using System.IO;
+using Assets.Scripts.Cards.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Assets.Scripts.Cards.UI;
 
 /// <summary>
 /// Bootstraps the UI Toolkit magic/draw selection window: ensures a shared PanelSettings

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Heroes
@@ -25,24 +25,28 @@ namespace Assets.Scripts.Heroes
         public int RecruitCost;
 
         public Sprite Sprite;
-        public int BaseStrength;
-        public int BaseEndurance;
-        public int BaseHealth;
-        public int BaseAgility = 5;
 
-        [Tooltip("Scales Intelligence-scaled spell power. A caster stat: it does nothing for basic attacks.")]
-        public int BaseIntelligence;
+        [Tooltip("Starting stats. Absent entries read as 0, so only list what this hero has.")]
+        public StatBlock BaseStats = StatBlock.Defaults();
 
-        [Tooltip("Scales Spirit-scaled spell power - healing, shields and Holy.")]
-        public int BaseSpirit;
-
-        [Tooltip("Raises crit chance on every attack, and improves stat checks on room events.")]
-        public int BaseLuck;
-
-        [Tooltip("Which attribute this hero's basic Attack command scales off. Strength for a " +
-                 "fighter, Agility for a finesse duellist, Intelligence or Spirit for a caster who " +
-                 "should not be useless with a stick. MaxHealth is accepted but nonsensical.")]
+        [Tooltip("Which stat this hero's basic Attack command scales off. Strength for a fighter, " +
+                 "Agility for a duellist, Intelligence or Spirit for a caster who should not be " +
+                 "useless with a stick. None falls back to Strength.")]
         public StatType AttackStat = StatType.Strength;
+
+        /// <summary>
+        /// <see cref="AttackStat"/> with the nonsense cases folded away: unset, or any stat that is a
+        /// pool rather than an output, both mean Strength. Lives here rather than at each reader so
+        /// the fallback rule cannot drift between the game and the balance model.
+        ///
+        /// <para>The pool test is <see cref="StatCatalog.CanScalePower"/>, not a hand-written check
+        /// for MaxHealth. It used to name MaxHealth directly, which meant a second pool stat added
+        /// later (Mana, Stamina) would let a hero swing off its own resource bar.</para>
+        /// </summary>
+        public StatType ResolvedAttackStat
+        {
+            get { return StatCatalog.CanScalePower(AttackStat) ? AttackStat : StatType.Strength; }
+        }
 
         public List<LevelConfiguration> LevelProgression = new List<LevelConfiguration>();
 

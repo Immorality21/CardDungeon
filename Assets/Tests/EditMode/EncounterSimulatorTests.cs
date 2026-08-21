@@ -4,6 +4,7 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -23,10 +24,8 @@ namespace Tests.EditMode
                 DisplayName = name,
                 HeroKey = name,
                 IsHero = true,
-                Stats = new Stats(attack, defense, health, agility),
+                Stats = TestStats.Make(attack, defense, health, agility),
                 EffectiveAttackPower = attack,
-                EffectiveEndurance = defense,
-                EffectiveAgility = agility,
                 Resistances = new List<Resistance>()
             };
         }
@@ -39,10 +38,8 @@ namespace Tests.EditMode
                 DisplayName = name,
                 IsHero = false,
                 Archetype = archetype,
-                Stats = new Stats(attack, defense, health, agility),
+                Stats = TestStats.Make(attack, defense, health, agility),
                 EffectiveAttackPower = attack,
-                EffectiveEndurance = defense,
-                EffectiveAgility = agility,
                 Resistances = new List<Resistance>()
             };
         }
@@ -56,13 +53,11 @@ namespace Tests.EditMode
                 {
                     Level = 1,
                     MaxDefinedLevel = 1,
-                    Stats = new EffectiveStats
-                    {
-                        Strength = hero.EffectiveAttackPower,
-                        Endurance = hero.EffectiveEndurance,
-                        MaxHealth = hero.Stats.MaxHealth,
-                        Agility = hero.EffectiveAgility
-                    },
+                    Effective = TestStats.Block(
+                        hero.EffectiveAttackPower,
+                        hero.Effective[StatType.Endurance],
+                        hero.Effective[StatType.MaxHealth],
+                        hero.Effective[StatType.Agility]),
                     Unit = hero
                 });
             }
@@ -142,7 +137,7 @@ namespace Tests.EditMode
         {
             var attacker = Enemy("attacker", 10, 0, 100);
             var buffTracker = new CombatBuffTracker();
-            buffTracker.ApplyBuff(attacker, Assets.Scripts.Items.StatType.Strength, 10, 5);
+            buffTracker.ApplyBuff(attacker, Assets.Scripts.UnitStats.StatType.Strength, 10, 5);
 
             int expected = DamageCalculator.Calculate(20, 0, DamageType.Normal, new List<Resistance>());
 

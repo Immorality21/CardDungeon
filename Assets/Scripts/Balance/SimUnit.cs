@@ -3,6 +3,7 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -50,50 +51,33 @@ namespace Assets.Scripts.Balance
         public Transform Transform => null;
         public List<Resistance> Resistances { get; set; } = new List<Resistance>();
 
+        /// <summary>
+        /// Attack power is stored rather than derived: a hero's comes from its <c>AttackStat</c>,
+        /// which the model resolves once in <c>PartyBaseline</c> instead of re-deriving per call.
+        /// </summary>
         public int EffectiveAttackPower;
-        public int EffectiveStrength;
-        public int EffectiveEndurance;
-        public int EffectiveAgility;
-        public int EffectiveIntelligence;
-        public int EffectiveSpirit;
-        public int EffectiveLuck;
+
+        /// <summary>Stats after level gains and gear, i.e. what the unit actually fights with.</summary>
+        public StatBlock Effective = new StatBlock();
 
         /// <summary>Element this unit's physical attacks carry; Normal for heroes.</summary>
         public DamageType AttackDamageType { get; set; } = DamageType.Normal;
+
+        /// <summary>
+        /// Set by whoever built this unit: <c>PartyBaseline</c> resolves the hero's choice,
+        /// <c>FromEnemy</c> uses Strength. Stored rather than derived so the model does not have to
+        /// reach back into the definition on every read.
+        /// </summary>
+        public StatType AttackStat { get; set; }
 
         public int GetEffectiveAttackPower()
         {
             return EffectiveAttackPower;
         }
 
-        public int GetEffectiveStrength()
+        public int GetEffectiveStat(StatType stat)
         {
-            return EffectiveStrength;
-        }
-
-        public int GetEffectiveEndurance()
-        {
-            return EffectiveEndurance;
-        }
-
-        public int GetEffectiveAgility()
-        {
-            return EffectiveAgility;
-        }
-
-        public int GetEffectiveIntelligence()
-        {
-            return EffectiveIntelligence;
-        }
-
-        public int GetEffectiveSpirit()
-        {
-            return EffectiveSpirit;
-        }
-
-        public int GetEffectiveLuck()
-        {
-            return EffectiveLuck;
+            return Effective[stat];
         }
 
         // ---- Hero-side ----
@@ -116,15 +100,11 @@ namespace Assets.Scripts.Balance
             {
                 DisplayName = DisplayName,
                 IsHero = IsHero,
-                Stats = new Stats(Stats.Strength, Stats.Endurance, Stats.MaxHealth, Stats.Agility),
+                Stats = Stats.Clone(),
                 Resistances = new List<Resistance>(Resistances),
+                AttackStat = AttackStat,
                 EffectiveAttackPower = EffectiveAttackPower,
-                EffectiveStrength = EffectiveStrength,
-                EffectiveEndurance = EffectiveEndurance,
-                EffectiveAgility = EffectiveAgility,
-                EffectiveIntelligence = EffectiveIntelligence,
-                EffectiveSpirit = EffectiveSpirit,
-                EffectiveLuck = EffectiveLuck,
+                Effective = Effective.Clone(),
                 AttackDamageType = AttackDamageType,
                 HeroKey = HeroKey,
                 Definition = Definition,
@@ -151,17 +131,14 @@ namespace Assets.Scripts.Balance
             {
                 DisplayName = string.IsNullOrEmpty(definition.DisplayName) ? definition.name : definition.DisplayName,
                 IsHero = false,
-                Stats = new Stats(definition.Strength, definition.Endurance, definition.Health, definition.Agility),
+                Stats = new Stats(definition.BaseStats),
+                Effective = definition.BaseStats.Clone(),
                 Resistances = definition.Resistances != null
                     ? new List<Resistance>(definition.Resistances)
                     : new List<Resistance>(),
-                EffectiveAttackPower = definition.Strength,
-                EffectiveStrength = definition.Strength,
-                EffectiveEndurance = definition.Endurance,
-                EffectiveAgility = definition.Agility,
-                EffectiveIntelligence = definition.Intelligence,
-                EffectiveSpirit = definition.Spirit,
-                EffectiveLuck = definition.Luck,
+                // Enemies always swing off Strength; only heroes pick an attack stat.
+                AttackStat = StatType.Strength,
+                EffectiveAttackPower = definition.BaseStats[StatType.Strength],
                 AttackDamageType = definition.AttackDamageType,
                 Definition = definition,
                 Archetype = definition.Archetype

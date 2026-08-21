@@ -1,6 +1,7 @@
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 
 namespace Tests.EditMode
@@ -15,8 +16,8 @@ namespace Tests.EditMode
         public void SetUp()
         {
             _tracker = new CombatBuffTracker();
-            _hero = new MockCombatUnit("Hero", attack: 10, defense: 5, health: 100);
-            _enemy = new MockCombatUnit("Enemy", attack: 8, defense: 3, health: 50, isHero: false);
+            _hero = new MockCombatUnit("Hero", strength: 10, endurance: 5, health: 100);
+            _enemy = new MockCombatUnit("Enemy", strength: 8, endurance: 3, health: 50, isHero: false);
         }
 
         [Test]

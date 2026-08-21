@@ -3,6 +3,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Enemies.Behaviors;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -50,7 +51,7 @@ namespace Assets.Scripts.Balance
             }
 
             int raw = Mathf.RoundToInt(rawAttack * multiplier);
-            int flat = DamageCalculator.Calculate(raw, target.GetEffectiveEndurance(), type, target.Resistances);
+            int flat = DamageCalculator.Calculate(raw, target.GetEffectiveStat(StatType.Endurance), type, target.Resistances);
             return flat * ExpectedCritMultiplier(attacker);
         }
 
@@ -85,7 +86,7 @@ namespace Assets.Scripts.Balance
             {
                 return 0f;
             }
-            float agility = Mathf.Max(1, unit.GetEffectiveAgility());
+            float agility = Mathf.Max(1, unit.GetEffectiveStat(StatType.Agility));
             return agility / TurnManager.BASE_TICKS;
         }
 
@@ -280,13 +281,12 @@ namespace Assets.Scripts.Balance
                 return 0f;
             }
 
-            return enemy.Health * rules.HealthWeight
-                 + enemy.Strength * rules.StrengthWeight
-                 + enemy.Endurance * rules.EnduranceWeight
-                 + enemy.Agility * rules.AgilityWeight
-                 + enemy.Intelligence * rules.IntelligenceWeight
-                 + enemy.Spirit * rules.SpiritWeight
-                 + enemy.Luck * rules.LuckWeight;
+            float score = 0f;
+            foreach (var stat in StatCatalog.Types)
+            {
+                score += enemy.BaseStats[stat] * rules.WeightFor(stat);
+            }
+            return score;
         }
 
         /// <summary>Fraction of incoming damage the defense curve removes, for display.</summary>

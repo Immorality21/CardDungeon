@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Combat
@@ -22,22 +23,22 @@ namespace Assets.Scripts.Combat
         DamageType AttackDamageType { get; }
 
         /// <summary>
-        /// Damage the basic Attack command swings with. Derived, not a stat: each hero names the
-        /// attribute it reads through <c>HeroSO.AttackStat</c>, so a Scout can fight off Agility and
-        /// a caster off Intelligence while a Warrior fights off Strength. Enemies use Strength.
+        /// One stat, with gear and anything else the implementer layers on folded in. Replaces the
+        /// old per-stat getters: a new <see cref="StatType"/> needs no interface change.
         /// </summary>
-        int GetEffectiveAttackPower();
-
-        int GetEffectiveStrength();
-        int GetEffectiveEndurance();
-        int GetEffectiveAgility();
+        int GetEffectiveStat(StatType stat);
 
         /// <summary>
-        /// Caster and luck stats, gear folded in the same way as the three above. Spell power reads
-        /// Intelligence or Spirit depending on the effect's <c>ScalingStat</c>; Luck drives crit.
+        /// Which stat this unit's basic Attack scales off. Exposed on the interface because combat
+        /// needs it beyond the raw number: a buff to attack power has to target *this* stat, or a
+        /// Strength buff would boost an Agility-swinging Scout while Haste would not.
         /// </summary>
-        int GetEffectiveIntelligence();
-        int GetEffectiveSpirit();
-        int GetEffectiveLuck();
+        StatType AttackStat { get; }
+
+        /// <summary>
+        /// Damage the basic Attack command swings with: <see cref="GetEffectiveStat"/> of
+        /// <see cref="AttackStat"/>. Derived, not a stat.
+        /// </summary>
+        int GetEffectiveAttackPower();
     }
 }

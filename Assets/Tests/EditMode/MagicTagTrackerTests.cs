@@ -13,7 +13,7 @@ namespace Tests.EditMode
         public void SetUp()
         {
             _tracker = new MagicTagTracker();
-            _unit = new MockCombatUnit("Target", attack: 5, defense: 3, health: 50, isHero: false);
+            _unit = new MockCombatUnit("Target", strength: 5, endurance: 3, health: 50, isHero: false);
         }
 
         [Test]
@@ -95,7 +95,7 @@ namespace Tests.EditMode
         [Test]
         public void ApplyTags_DifferentUnits_TrackedSeparately()
         {
-            var unit2 = new MockCombatUnit("Other", attack: 1, defense: 1, health: 10, isHero: false);
+            var unit2 = new MockCombatUnit("Other", strength: 1, endurance: 1, health: 10, isHero: false);
 
             _tracker.ApplyTags(_unit, new List<MagicTag> { MagicTag.Fire }, 3);
             _tracker.ApplyTags(unit2, new List<MagicTag> { MagicTag.Ice }, 3);
@@ -134,7 +134,7 @@ namespace Tests.EditMode
         [Test]
         public void TickTags_OnlyAffectsTargetUnit()
         {
-            var unit2 = new MockCombatUnit("Other", attack: 1, defense: 1, health: 10, isHero: false);
+            var unit2 = new MockCombatUnit("Other", strength: 1, endurance: 1, health: 10, isHero: false);
             _tracker.ApplyTags(_unit, new List<MagicTag> { MagicTag.Fire }, 1);
             _tracker.ApplyTags(unit2, new List<MagicTag> { MagicTag.Fire }, 1);
 

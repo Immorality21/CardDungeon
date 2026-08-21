@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies.Behaviors;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 
 namespace Tests.EditMode
@@ -16,8 +17,8 @@ namespace Tests.EditMode
         public void SetUp()
         {
             _boss = new BossBehavior();
-            _self = new MockCombatUnit("Boss", attack: 12, defense: 4, health: 100, isHero: false);
-            _hero = new MockCombatUnit("Knight", attack: 10, defense: 5, health: 100);
+            _self = new MockCombatUnit("Boss", strength: 12, endurance: 4, health: 100, isHero: false);
+            _hero = new MockCombatUnit("Knight", strength: 10, endurance: 5, health: 100);
         }
 
         private EnemyCombatContext Context(int turnCount, bool charging = false)
@@ -70,7 +71,7 @@ namespace Tests.EditMode
         [Test]
         public void Enraged_AttacksHarder()
         {
-            _self.Stats.Health = 20; // 20% of 100 → below the enrage threshold
+            _self.Stats[StatType.MaxHealth] = 20; // 20% of 100 → below the enrage threshold
 
             var decision = _boss.Decide(_self, Context(turnCount: 1));
 
@@ -81,7 +82,7 @@ namespace Tests.EditMode
         [Test]
         public void Enraged_UsesTighterSignatureCadence()
         {
-            _self.Stats.Health = 20; // enraged
+            _self.Stats[StatType.MaxHealth] = 20; // enraged
 
             // EnragedSignatureInterval (2) triggers on a turn the normal interval (3) would not.
             var decision = _boss.Decide(_self, Context(turnCount: BossBehavior.EnragedSignatureInterval));
@@ -92,7 +93,7 @@ namespace Tests.EditMode
         [Test]
         public void Charging_TakesPriorityOverEnrageCadence()
         {
-            _self.Stats.Health = 20; // enraged
+            _self.Stats[StatType.MaxHealth] = 20; // enraged
 
             var decision = _boss.Decide(_self, Context(turnCount: BossBehavior.EnragedSignatureInterval, charging: true));
 

@@ -6,6 +6,7 @@ using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -69,10 +70,10 @@ namespace Tests.EditMode
         {
             var enemy = Make<EnemySO>(name);
             enemy.DisplayName = name;
-            enemy.Strength = 4;
-            enemy.Endurance = 1;
-            enemy.Health = 20;
-            enemy.Agility = 5;
+            enemy.BaseStats[StatType.Strength] = 4;
+            enemy.BaseStats[StatType.Endurance] = 1;
+            enemy.BaseStats[StatType.MaxHealth] = 20;
+            enemy.BaseStats[StatType.Agility] = 5;
             enemy.XpReward = 10;
             enemy.GoldReward = 5;
             enemy.DrawableMagics = new List<DrawableMagicEntry>();
@@ -118,10 +119,10 @@ namespace Tests.EditMode
         {
             var hero = Make<HeroSO>();
             hero.Label = "Tester";
-            hero.BaseStrength = 12;
-            hero.BaseEndurance = 5;
-            hero.BaseHealth = 200;
-            hero.BaseAgility = 5;
+            hero.BaseStats[StatType.Strength] = 12;
+            hero.BaseStats[StatType.Endurance] = 5;
+            hero.BaseStats[StatType.MaxHealth] = 200;
+            hero.BaseStats[StatType.Agility] = 5;
             hero.LevelProgression = new List<LevelConfiguration>();
             return PartyBaseline.Build(new List<HeroSO> { hero }, 1);
         }

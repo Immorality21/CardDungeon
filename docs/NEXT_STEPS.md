@@ -551,10 +551,78 @@ balance pass was not disturbed.
 
 **Renamed with it (2026-08-21):** `Attack` → **`Strength`** and `Defense` → **`Endurance`** across `Stats`, `StatType`, `BuffType`, `SpellScalingStat`, `HeroSO`/`EnemySO`, `LevelConfiguration` and the asset YAML, so the six attributes read as one set. And the **basic Attack command now scales off a per-hero attribute**: `HeroSO.AttackStat` names it, `GetEffectiveAttackPower()` resolves it, making attack power derived rather than a stat — Scout swings off Agility, Acolyte off Intelligence, everyone else off Strength. Enemies always use Strength. The curve did not move (0.25 / 0.37 / 0.42 / 0.61, still 0 critical / 3 warning).
 
-**Still open here:** `BuffType` has no entries for the three stats, so buffs/debuffs cannot move
-them yet (gear can); `LevelConfiguration` deliberately gained no `...Gain` fields because §4
-deletes that table — author them as sphere-grid nodes instead; and the `EnemySO` inspector footer
-plus the analyzer's stat tables still show only the original four.
+**Then made generic (2026-08-21).** The eight parallel per-stat field lists are gone. `StatType` (with `None = 0`) is the one stat enum; `UnitStat` is one stat plus an amount; `StatBlock` is a sparse indexable set of them, and it is what `Stats`, `HeroSO.BaseStats`, `EnemySO.BaseStats`, `LevelConfiguration.Gains`, `SimUnit.Effective` and `HeroStatCalculator` all carry. `ICombatUnit` dropped six per-stat getters for `GetEffectiveStat(StatType)`. `SpellScalingStat` and the `EffectiveStats` struct were deleted; `SpellEffect.ScalingStat` is a `StatType`. The analyzer's hero and enemy stat columns are generated from the catalog, so a new stat shows up in the window without touching it.
+
+That also closed the gaps the old shape had caused: `BuffType` covers all six stats (and gained `None = 0`), with the stat handlers **generated** in `BuffHandlerRegistry` from the catalog — they were three hand-written entries, so an Intelligence buff threw `KeyNotFoundException` even though the enum offered it. `LevelConfiguration` can now grant any stat because its `Gains` is a block rather than four ints — the caster stats had no level gains purely because adding them meant a fourth parallel list. `BalanceRulesSO`'s power weights became a `List<StatWeight>` for the same reason.
+
+Two independent review passes ran over the result, and between them caught: the **`FreezeCombo` ordinal break** (a flat +1 `BuffType` remap pointed `Frozen` at a no-op resistance handler, silently disabling the combo), the **level-curve tab's stale `FindProperty` paths** (an NRE the moment a hero's curve was expanded), **regressed authoring defaults** (a fresh `EnemySO` had 0 MaxHealth and spawned dead), and a **Strength buff boosting an Agility-swinging attacker**. All fixed; `AttackStat` is now on `ICombatUnit` with the fallback rule in one place (`HeroSO.ResolvedAttackStat`).
+
+**Then given one mapping file (2026-08-21).** Making the *shape* generic was not enough: the stat
+list was still copied by hand into everything that needed a *fact* about a stat. `ShopPricing`
+enumerated four of them, so the Acolyte's 26 points of Intelligence and Spirit and the Scout's 12
+Luck were literally free to recruit; the hub and tavern stat lines hid the same three; `StatTypes`
+had grown a second helper's worth of labels beside it.
+
+**`StatCatalog`** replaces all of it — one row per stat holding short name, display name,
+description, recruit weight, power weight, authoring default and whether the stat is a pool. It is
+also the iteration order (`StatCatalog.Types`), so `StatTypes` was deleted rather than left as a
+second way to do the same thing. Recruit pricing, `StatBlock.Defaults()`, `StatWeight.Defaults()`,
+the inspector drawer, every analyzer table and `EvaluateLevelUpShape` all read from it.
+`StatCatalogTests` fails if a row is missing, unlabelled, unpriced or unweighted, so the mistake
+surfaces in a test rather than as a blank column or a free hero.
+
+**Adding a stat is one `StatType` member plus one `StatCatalog` row — with one exception.** That was
+verified rather than asserted: a throwaway `Willpower` stat was added to exactly those two files, and
+recruit price, power weight, spell scaling, authoring defaults and the inspector drawer all picked it
+up with no other edit, then it was removed again. The exception is **`BuffType`**, which is a second
+per-stat list: a stat that should be buffable needs a member there too, because
+`BuffHandlerRegistry` generates handlers from it and silently skips a stat with no match.
+`BuffHandlerRegistry.StatsWithNoBuffType()` now reports that gap and a test asserts it is empty.
+Collapsing `BuffType` into `Kind + StatType` would remove the exception, and rewrites every magic and
+combo asset, so it stays a separate change.
+
+`BalanceRulesSO.WeightFor` returned **0** for a stat absent from its serialized list, so the first
+saved rules asset would have frozen the stat list and scored any later stat as harmless. It now falls
+back to the catalog weight, with authored rows still winning as overrides — so a deliberate 0 is
+still expressible, and only a *deleted* row falls back.
+
+**An independent review pass then found four more, all fixed.**
+
+- **`StatBlockDrawer` repeated a bug this same change had already fixed elsewhere.** For a stat with
+  no entry it drew an int field that became a `PropertyField` as soon as the first keystroke created
+  the entry — which loses keyboard focus, so typing `12` into an empty Intelligence row stored `1`
+  and swallowed the `2`. Worse, a zeroed row is deliberately kept, so the stray `1` survived the
+  tidy-up button too. Authoring a caster was exactly the workflow that hit it. `BalanceGui` had
+  already solved this with a `+` button *and documented why*; the drawer now does the same.
+- **`IsPool` was documented but never enforced.** `HeroSO.ResolvedAttackStat` hand-listed `MaxHealth`
+  and `SpellScaling` checked nothing at all, so a magic authored against `MaxHealth` would silently
+  add the caster's entire health bar to its power — 45 free damage on a geared hero. Both now ask
+  `StatCatalog.CanScalePower`, which also means a second pool stat (Mana, Stamina) is covered
+  without touching either.
+- **The level-curve check was a false positive on every hero, and I had recorded it as a find.** The
+  previous entry here claimed generalising `EvaluateLevelUpShape` had exposed the Warrior's level 2
+  raising Health by 54%. It had not exposed anything: HP pools *are* meant to grow in large relative
+  steps, and all four heroes gain 50-54% of base MaxHealth at level 2 (7/13, 5/10, 9/17, 10/19). One
+  threshold for a health bar and for a damage stat is the wrong shape — the limit now comes from
+  `StatDefinition.IsPool` (100% for pools, 50% for outputs). The check also only ever ran on the
+  *starting party*, i.e. the Warrior alone, so it now runs over every hero asset: a level curve is
+  authored on the asset, and a hero who joins at depth 3 could carry a broken one all run. That
+  surfaced a real finding the narrow scope had hidden — **the Tank's level 2 raises Agility by 100%**
+  (+5 on a base of 5, doubling their turn rate in one level-up).
+- **Two of the new tests did not test what they claimed.** The ordering test compared `Types` against
+  `All`, both built from the same array, so it could not fail; the actual promise is *enum
+  declaration order*, which is now structural (both sequences are built by walking `StatType`) and
+  asserted against the enum. And `ExactlyOneStatIsAPool` pinned a content decision as a code
+  invariant — adding a second pool stat would have failed a test, contradicting the whole point. It
+  now pins the *rule* (no pool can be a power source) rather than the count.
+
+Also from the review: a missing catalog row makes a stat **disappear** rather than throw, since every
+loop iterates `Types` which is built from the rows. A test failing only helps whoever runs the tests,
+so `StatCatalogValidator` (`[InitializeOnLoadMethod]`) now logs an error naming the stat as soon as
+the code compiles. And `StatCatalog.Types` was a `readonly` array, which protects the reference but
+not the elements; it is an `IReadOnlyList` now.
+
+**Still open here:** the `EnemySO` inspector footer shows derived numbers only, so it never listed stats and needs nothing; `§4` still owns replacing `LevelProgression` with grid nodes.
 
 The original design notes follow.
 

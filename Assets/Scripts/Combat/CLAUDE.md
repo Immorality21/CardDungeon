@@ -51,6 +51,14 @@ All auto-wired (no scene setup) and code/Resources-only — no manual assets:
 - **Per-level combat background**: `LevelDefinitionSO.CombatBackground` (optional) overrides the stage backdrop per level/biome. Precedence in `CombatStage.RaiseBackground`: level background → inspector `_backgroundArt` → `Resources/CombatBackgrounds/battle` → solid fill. `DungeonManager.CurrentLevel` exposes the active level.
 - **CombatAudio** (`Combat/Audio/CombatAudio.cs`): fire-and-forget combat SFX, auto-created like `CombatFeedback` (no scene wiring). `CombatAudio.Play(CombatSound.X)` picks a random clip for the event and plays it 2D via `PlayOneShot`. Clips are mapped by a **`SoundBankSO`** loaded from `Resources/CombatSoundBank` — a `CombatSound → {clips[], volume}` table (random clip per play so repeats vary), authored against the `Assets/Fantasy Interface Sounds/` pack. `CombatSound` events (append-only, ints serialized into the bank): `MeleeSwing`, `Impact`, `MagicCast`, `Draw`, `Heal`, `ItemUse`, `BossSignature`, `EnemyDeath`, `Victory`, `Defeat`, `CursorMove`, `Confirm`. Wired from `CombatManager` (attacks/cast/draw/item/heal/boss wind-up/death/victory/defeat) and `RoomActionUI` (command-menu cursor + confirm). No music track yet.
 
+## One stat accessor
+
+`ICombatUnit` exposes **`GetEffectiveStat(StatType)`**, **`AttackStat`** and **`GetEffectiveAttackPower()`**, and nothing per-stat. Attack power is *derived*: each hero names the stat its basic Attack scales off, enemies always use Strength.
+
+`AttackStat` is on the interface for a reason beyond the number — a **buff to attack power has to target that stat**. `CombatManager.ExecuteAttack` and `EncounterSimulator` add `GetBuffAmount(attacker, attacker.AttackStat)`; they used to hardcode Strength, so a Strength buff boosted the Agility-swinging Scout while Haste did not.
+
+The fallback rule (unset or MaxHealth → Strength) lives in **one** place, `HeroSO.ResolvedAttackStat`, which `Hero.AttackStat`, `PartyBaseline` and `SaveAudit` all read. It used to be copied into each of them.
+
 ## Crit is per-unit, driven by Luck
 
 `CombatManager.CritChance` (0.12) is the rate at **zero Luck**. Actual chance comes from `CombatManager.CritChanceFor(unit)`: `CritChance + MaxLuckCritBonus * luck/(luck + LuckCritConstant)` (0.30 max bonus, K = 20). Diminishing rather than linear, reusing the `stat/(stat+K)` shape `DamageCalculator` already uses for Defense, so Luck cannot run away and the player learns one curve.

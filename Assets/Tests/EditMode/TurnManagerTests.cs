@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 
 namespace Tests.EditMode
@@ -17,8 +18,8 @@ namespace Tests.EditMode
         [Test]
         public void GetNextUnit_HighestAgility_GoesFirst()
         {
-            var fast = new MockCombatUnit("Fast", attack: 1, defense: 1, health: 10, agility: 20);
-            var slow = new MockCombatUnit("Slow", attack: 1, defense: 1, health: 10, agility: 5);
+            var fast = new MockCombatUnit("Fast", strength: 1, endurance: 1, health: 10, agility: 20);
+            var slow = new MockCombatUnit("Slow", strength: 1, endurance: 1, health: 10, agility: 5);
 
             _turnManager.Initialize(new List<ICombatUnit> { slow, fast });
 
@@ -32,25 +33,25 @@ namespace Tests.EditMode
         {
             // Both have the same raw agility, but "Geared" carries item agility (effective override).
             // Turn scheduling must honor the effective value, else item agility is a dead stat.
-            var geared = new MockCombatUnit("Geared", attack: 1, defense: 1, health: 10, agility: 5)
+            var geared = new MockCombatUnit("Geared", strength: 1, endurance: 1, health: 10, agility: 5)
             {
                 EffectiveAgilityOverride = 20
             };
-            var bare = new MockCombatUnit("Bare", attack: 1, defense: 1, health: 10, agility: 5);
+            var bare = new MockCombatUnit("Bare", strength: 1, endurance: 1, health: 10, agility: 5);
 
             _turnManager.Initialize(new List<ICombatUnit> { bare, geared });
 
             var next = _turnManager.GetNextUnit();
 
             Assert.AreEqual("Geared", next.DisplayName,
-                "TurnManager should schedule on GetEffectiveAgility(), not Stats.Agility");
+                "TurnManager should schedule on GetEffectiveAgility(), not Stats[StatType.Agility]");
         }
 
         [Test]
         public void GetNextUnit_EqualAgility_BothGetTurns()
         {
-            var a = new MockCombatUnit("A", attack: 1, defense: 1, health: 10, agility: 10);
-            var b = new MockCombatUnit("B", attack: 1, defense: 1, health: 10, agility: 10);
+            var a = new MockCombatUnit("A", strength: 1, endurance: 1, health: 10, agility: 10);
+            var b = new MockCombatUnit("B", strength: 1, endurance: 1, health: 10, agility: 10);
 
             _turnManager.Initialize(new List<ICombatUnit> { a, b });
 
@@ -66,8 +67,8 @@ namespace Tests.EditMode
         [Test]
         public void GetNextUnit_HighAgilityUnit_GetsManyTurns()
         {
-            var fast = new MockCombatUnit("Fast", attack: 1, defense: 1, health: 10, agility: 20);
-            var slow = new MockCombatUnit("Slow", attack: 1, defense: 1, health: 10, agility: 5);
+            var fast = new MockCombatUnit("Fast", strength: 1, endurance: 1, health: 10, agility: 20);
+            var slow = new MockCombatUnit("Slow", strength: 1, endurance: 1, health: 10, agility: 5);
 
             _turnManager.Initialize(new List<ICombatUnit> { slow, fast });
 
@@ -88,13 +89,13 @@ namespace Tests.EditMode
         [Test]
         public void GetNextUnit_DeadUnitSkipped()
         {
-            var alive = new MockCombatUnit("Alive", attack: 1, defense: 1, health: 10, agility: 5);
-            var dead = new MockCombatUnit("Dead", attack: 1, defense: 0, health: 10, agility: 100);
+            var alive = new MockCombatUnit("Alive", strength: 1, endurance: 1, health: 10, agility: 5);
+            var dead = new MockCombatUnit("Dead", strength: 1, endurance: 0, health: 10, agility: 100);
 
             _turnManager.Initialize(new List<ICombatUnit> { alive, dead });
 
             // Kill the fast unit
-            dead.Stats.Health = 0;
+            dead.Stats[StatType.MaxHealth] = 0;
 
             var next = _turnManager.GetNextUnit();
 
@@ -104,11 +105,11 @@ namespace Tests.EditMode
         [Test]
         public void GetNextUnit_AllDead_ReturnsNull()
         {
-            var unit = new MockCombatUnit("Dead", attack: 1, defense: 1, health: 10, agility: 5);
+            var unit = new MockCombatUnit("Dead", strength: 1, endurance: 1, health: 10, agility: 5);
 
             _turnManager.Initialize(new List<ICombatUnit> { unit });
 
-            unit.Stats.Health = 0;
+            unit.Stats[StatType.MaxHealth] = 0;
 
             var next = _turnManager.GetNextUnit();
 
@@ -118,8 +119,8 @@ namespace Tests.EditMode
         [Test]
         public void RemoveUnit_RemovedUnitNeverActsAgain()
         {
-            var hero = new MockCombatUnit("Hero", attack: 1, defense: 1, health: 10, agility: 10);
-            var enemy = new MockCombatUnit("Enemy", attack: 1, defense: 1, health: 10, agility: 10);
+            var hero = new MockCombatUnit("Hero", strength: 1, endurance: 1, health: 10, agility: 10);
+            var enemy = new MockCombatUnit("Enemy", strength: 1, endurance: 1, health: 10, agility: 10);
 
             _turnManager.Initialize(new List<ICombatUnit> { hero, enemy });
 
@@ -135,8 +136,8 @@ namespace Tests.EditMode
         [Test]
         public void GetTurnOrder_PreviewsWithoutModifyingState()
         {
-            var fast = new MockCombatUnit("Fast", attack: 1, defense: 1, health: 10, agility: 20);
-            var slow = new MockCombatUnit("Slow", attack: 1, defense: 1, health: 10, agility: 5);
+            var fast = new MockCombatUnit("Fast", strength: 1, endurance: 1, health: 10, agility: 20);
+            var slow = new MockCombatUnit("Slow", strength: 1, endurance: 1, health: 10, agility: 5);
 
             _turnManager.Initialize(new List<ICombatUnit> { slow, fast });
 
@@ -152,8 +153,8 @@ namespace Tests.EditMode
         [Test]
         public void GetTurnOrder_ReturnsRequestedCount()
         {
-            var a = new MockCombatUnit("A", attack: 1, defense: 1, health: 10, agility: 10);
-            var b = new MockCombatUnit("B", attack: 1, defense: 1, health: 10, agility: 5);
+            var a = new MockCombatUnit("A", strength: 1, endurance: 1, health: 10, agility: 10);
+            var b = new MockCombatUnit("B", strength: 1, endurance: 1, health: 10, agility: 5);
 
             _turnManager.Initialize(new List<ICombatUnit> { a, b });
 
@@ -165,12 +166,12 @@ namespace Tests.EditMode
         [Test]
         public void GetTurnOrder_DeadUnitExcluded()
         {
-            var alive = new MockCombatUnit("Alive", attack: 1, defense: 1, health: 10, agility: 10);
-            var dead = new MockCombatUnit("Dead", attack: 1, defense: 1, health: 10, agility: 10);
+            var alive = new MockCombatUnit("Alive", strength: 1, endurance: 1, health: 10, agility: 10);
+            var dead = new MockCombatUnit("Dead", strength: 1, endurance: 1, health: 10, agility: 10);
 
             _turnManager.Initialize(new List<ICombatUnit> { alive, dead });
 
-            dead.Stats.Health = 0;
+            dead.Stats[StatType.MaxHealth] = 0;
 
             var order = _turnManager.GetTurnOrder(3);
 
@@ -183,7 +184,7 @@ namespace Tests.EditMode
         [Test]
         public void Initialize_ZeroAgility_ClampedToOne()
         {
-            var unit = new MockCombatUnit("Zero", attack: 1, defense: 1, health: 10, agility: 0);
+            var unit = new MockCombatUnit("Zero", strength: 1, endurance: 1, health: 10, agility: 0);
 
             _turnManager.Initialize(new List<ICombatUnit> { unit });
 

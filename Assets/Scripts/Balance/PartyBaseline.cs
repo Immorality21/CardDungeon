@@ -3,6 +3,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Resources;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -14,14 +15,16 @@ namespace Assets.Scripts.Balance
         public int Level;
         public int MaxDefinedLevel;
         public int SavedXp = -1;                    // -1 when not sourced from a save
-        public EffectiveStats Stats;
+        /// <summary>Stats after level gains and gear. Named to distinguish it from <c>SimUnit.Stats</c>,
+        /// which is a live <c>Stats</c> with current health.</summary>
+        public StatBlock Effective;
         public List<ItemSO> Gear = new List<ItemSO>();
         public SimUnit Unit;
 
         public string Name => Definition != null ? Definition.DisplayName : "(none)";
 
         /// <summary>Fraction of incoming damage this hero's defense removes.</summary>
-        public float EnduranceReduction => BalanceMath.EnduranceReduction(Stats.Endurance);
+        public float EnduranceReduction => BalanceMath.EnduranceReduction(Effective[StatType.Endurance]);
     }
 
     /// <summary>
@@ -64,7 +67,7 @@ namespace Assets.Scripts.Balance
                 int total = 0;
                 foreach (var hero in Heroes)
                 {
-                    total += hero.Stats.MaxHealth;
+                    total += hero.Effective[StatType.MaxHealth];
                 }
                 return total;
             }
@@ -124,7 +127,7 @@ namespace Assets.Scripts.Balance
                     Definition = definition,
                     Level = clampedLevel,
                     MaxDefinedLevel = HeroStatCalculator.MaxDefinedLevel(definition),
-                    Stats = effective,
+                    Effective = effective,
                     Gear = gear
                 };
 
@@ -133,17 +136,12 @@ namespace Assets.Scripts.Balance
                     DisplayName = hero.Name,
                     HeroKey = definition.SaveKey,
                     IsHero = true,
-                    Stats = new Rooms.Stats(effective.Strength, effective.Endurance, effective.MaxHealth, effective.Agility,
-                        effective.Intelligence, effective.Spirit, effective.Luck),
-                    // Resolve the hero's chosen attack attribute the same way Hero does, or the
-                    // model would have every hero swinging off Strength while the game does not.
+                    Stats = new Rooms.Stats(effective),
+                    Effective = effective.Clone(),
+                    // Resolve the hero's chosen attack stat the same way Hero does, or the model
+                    // would have every hero swinging off Strength while the game does not.
+                    AttackStat = definition != null ? definition.ResolvedAttackStat : StatType.Strength,
                     EffectiveAttackPower = AttackPowerFor(definition, effective),
-                    EffectiveStrength = effective.Strength,
-                    EffectiveEndurance = effective.Endurance,
-                    EffectiveAgility = effective.Agility,
-                    EffectiveIntelligence = effective.Intelligence,
-                    EffectiveSpirit = effective.Spirit,
-                    EffectiveLuck = effective.Luck,
                     // Heroes deal physical damage; gear resistance folds in the same way Hero does.
                     AttackDamageType = Combat.DamageType.Normal,
                     Resistances = InventoryOperations.ComputeResistances(gear)
@@ -156,43 +154,34 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// Mirrors <c>Hero.GetEffectiveAttackPower()</c>: the attribute named by
-        /// <see cref="HeroSO.AttackStat"/>, defaulting to Strength.
+        /// The stat named by <see cref="HeroSO.ResolvedAttackStat"/> — the same property
+        /// <c>Hero.AttackStat</c> reads, so the two cannot drift.
         /// </summary>
-        private static int AttackPowerFor(HeroSO definition, EffectiveStats effective)
+        private static int AttackPowerFor(HeroSO definition, StatBlock effective)
         {
-            if (definition == null)
-            {
-                return effective.Strength;
-            }
-
-            switch (definition.AttackStat)
-            {
-                case Items.StatType.Agility:
-                    return effective.Agility;
-                case Items.StatType.Intelligence:
-                    return effective.Intelligence;
-                case Items.StatType.Spirit:
-                    return effective.Spirit;
-                case Items.StatType.Luck:
-                    return effective.Luck;
-                case Items.StatType.Endurance:
-                    return effective.Endurance;
-                default:
-                    return effective.Strength;
-            }
+            return effective[definition != null ? definition.ResolvedAttackStat : StatType.Strength];
         }
 
-        /// <summary>Fresh, full-health clones of the party — one set per simulated battle.</summary>
+        /// <summary>
+        /// Fresh, full-health clones of the party — one set per simulated battle.
+        ///
+        /// <para>Health is reset here rather than relied upon: <c>SimUnit.Clone()</c> preserves
+        /// current health (it clones the whole <c>Stats</c>), so the guarantee in this method's name
+        /// would otherwise depend on nobody ever wounding a baseline unit. Enforcing it costs one
+        /// line and stops every later trial silently starting wounded.</para>
+        /// </summary>
         public List<SimUnit> CloneUnits()
         {
             var clones = new List<SimUnit>();
             foreach (var hero in Heroes)
             {
-                if (hero.Unit != null)
+                if (hero.Unit == null)
                 {
-                    clones.Add(hero.Unit.Clone());
+                    continue;
                 }
+                var clone = hero.Unit.Clone();
+                clone.Stats.Health = clone.Stats.MaxHealth;
+                clones.Add(clone);
             }
             return clones;
         }

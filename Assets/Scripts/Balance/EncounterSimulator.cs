@@ -7,6 +7,7 @@ using Assets.Scripts.Enemies.Behaviors;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -227,7 +228,7 @@ namespace Assets.Scripts.Balance
             int maxHealthPool = 0;
             foreach (var hero in heroes)
             {
-                maxHealthPool += hero.Stats.MaxHealth;
+                maxHealthPool += hero.Effective[StatType.MaxHealth];
             }
 
             while (AnyAlive(heroes) && AnyAlive(enemies) && result.Turns < settings.MaxTurns)
@@ -516,8 +517,8 @@ namespace Assets.Scripts.Balance
         {
             float total = 0f;
             int powerBonus = MetaProgressManager.MagicPowerBonusForLevel(slot.UpgradeLevel);
-            int attackBonus = buffTracker.GetBuffAmount(caster, StatType.Strength);
-            int defense = target.GetEffectiveEndurance() + buffTracker.GetBuffAmount(target, StatType.Endurance);
+            int attackBonus = buffTracker.GetBuffAmount(caster, caster.AttackStat);
+            int defense = target.GetEffectiveStat(StatType.Endurance) + buffTracker.GetBuffAmount(target, StatType.Endurance);
 
             foreach (var effect in slot.Magic.Effects)
             {
@@ -535,8 +536,8 @@ namespace Assets.Scripts.Balance
 
         private static float BasicAttackDamage(SimUnit attacker, SimUnit target, CombatBuffTracker buffTracker)
         {
-            int attackBonus = buffTracker.GetBuffAmount(attacker, StatType.Strength);
-            int defense = target.GetEffectiveEndurance() + buffTracker.GetBuffAmount(target, StatType.Endurance);
+            int attackBonus = buffTracker.GetBuffAmount(attacker, attacker.AttackStat);
+            int defense = target.GetEffectiveStat(StatType.Endurance) + buffTracker.GetBuffAmount(target, StatType.Endurance);
             return DamageCalculator.Calculate(attacker.GetEffectiveAttackPower() + attackBonus, defense, DamageType.Normal, target.Resistances);
         }
 
@@ -647,10 +648,10 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static int ResolveAttack(SimUnit attacker, SimUnit target, CombatBuffTracker buffTracker, float multiplier = 1f)
         {
-            int attackBonus = buffTracker.GetBuffAmount(attacker, StatType.Strength);
+            int attackBonus = buffTracker.GetBuffAmount(attacker, attacker.AttackStat);
             int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Endurance);
             int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * multiplier);
-            int defense = target.GetEffectiveEndurance() + defenseBonus;
+            int defense = target.GetEffectiveStat(StatType.Endurance) + defenseBonus;
             int damage = DamageCalculator.Calculate(
                 rawAttack, defense, attacker.AttackDamageType, target.Resistances);
 

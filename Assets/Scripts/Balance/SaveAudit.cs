@@ -7,6 +7,7 @@ using Assets.Scripts.IO;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Resources;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -257,7 +258,7 @@ namespace Assets.Scripts.Balance
                     Level = saved.Level,
                     MaxDefinedLevel = saved.MaxDefinedLevel,
                     SavedXp = saved.Xp,
-                    Stats = effective,
+                    Effective = effective,
                     Gear = gear
                 };
 
@@ -266,10 +267,16 @@ namespace Assets.Scripts.Balance
                     DisplayName = hero.Name,
                     HeroKey = saved.HeroKey,
                     IsHero = true,
-                    Stats = new Rooms.Stats(effective.Strength, effective.Endurance, effective.MaxHealth, effective.Agility),
-                    EffectiveAttackPower = effective.Strength,
-                    EffectiveEndurance = effective.Endurance,
-                    EffectiveAgility = effective.Agility,
+                    Stats = new Rooms.Stats(effective),
+                    Effective = effective.Clone(),
+                    // Honour the hero's chosen attack stat here too; this used to hardcode Strength,
+                    // so an audited Scout swung off a stat it does not invest in.
+                    AttackStat = saved.Definition != null
+                        ? saved.Definition.ResolvedAttackStat
+                        : StatType.Strength,
+                    EffectiveAttackPower = effective[saved.Definition != null
+                        ? saved.Definition.ResolvedAttackStat
+                        : StatType.Strength],
                     Resistances = InventoryOperations.ComputeResistances(gear)
                 };
 

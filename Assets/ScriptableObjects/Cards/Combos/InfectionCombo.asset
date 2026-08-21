@@ -21,18 +21,18 @@ MonoBehaviour:
   - EffectType: 3
     Power: 4
     DamageType: 0
-    BuffType: 0
+    BuffType: 1
     Duration: 3
     UnlockLevel: 0
   - EffectType: 3
     Power: 4
     DamageType: 0
-    BuffType: 1
+    BuffType: 2
     Duration: 3
     UnlockLevel: 0
   - EffectType: 3
     Power: 5
     DamageType: 0
-    BuffType: 2
+    BuffType: 3
     Duration: 3
     UnlockLevel: 5

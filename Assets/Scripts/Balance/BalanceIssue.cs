@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Enemies;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
@@ -130,6 +131,12 @@ namespace Assets.Scripts.Balance
         public List<RunCurve> Runs = new List<RunCurve>();
         public VarietyReport Variety;
         public ProgressionMap Progression;
+        /// <summary>
+        /// The party each enemy is first met with, so enemy metrics *and* the simulator judge it
+        /// against the roster the player actually brings. Filled by the analyzer.
+        /// </summary>
+        public Dictionary<EnemySO, PartyBaseline> PartyByEnemy = new Dictionary<EnemySO, PartyBaseline>();
+
         public List<EncounterSimReport> Simulations = new List<EncounterSimReport>();
         public SaveAudit Save;
         public List<BalanceIssue> Issues = new List<BalanceIssue>();

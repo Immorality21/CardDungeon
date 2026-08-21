@@ -1,7 +1,7 @@
-using Assets.Scripts.Dungeon;
-using ImmoralityGaming.Extensions;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Dungeon;
+using ImmoralityGaming.Extensions;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms

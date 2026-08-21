@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 using UnityEngine;
 

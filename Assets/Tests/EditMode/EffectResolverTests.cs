@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -111,8 +112,8 @@ namespace Tests.EditMode
             _calculator = new EffectResolver();
             _buffTracker = new CombatBuffTracker();
             _tagTracker = new MagicTagTracker();
-            _hero = new MockCombatUnit("Hero", attack: 10, defense: 5, health: 100);
-            _enemy = new MockCombatUnit("Goblin", attack: 6, defense: 3, health: 50, isHero: false);
+            _hero = new MockCombatUnit("Hero", strength: 10, endurance: 5, health: 100);
+            _enemy = new MockCombatUnit("Goblin", strength: 6, endurance: 3, health: 50, isHero: false);
         }
 
         // ---- Damage ----
@@ -138,7 +139,7 @@ namespace Tests.EditMode
         [Test]
         public void Damage_MinimumOneDamage()
         {
-            var tank = new MockCombatUnit("Tank", attack: 1, defense: 999, health: 100, isHero: false);
+            var tank = new MockCombatUnit("Tank", strength: 1, endurance: 999, health: 100, isHero: false);
             var card = CreateCard("Poke", SpellEffectType.Damage, power: 0);
             var action = MakeAction(card, _hero, tank);
 
@@ -176,7 +177,7 @@ namespace Tests.EditMode
         [Test]
         public void Damage_MultipleTargets()
         {
-            var enemy2 = new MockCombatUnit("Orc", attack: 4, defense: 2, health: 40, isHero: false);
+            var enemy2 = new MockCombatUnit("Orc", strength: 4, endurance: 2, health: 40, isHero: false);
             var card = CreateCard("Cleave", SpellEffectType.Damage, power: 5);
             var action = MakeAction(card, _hero, _enemy, enemy2);
 
@@ -191,7 +192,7 @@ namespace Tests.EditMode
         [Test]
         public void Damage_SkipsDeadTargets()
         {
-            _enemy.Stats.Health = 0;
+            _enemy.Stats[StatType.MaxHealth] = 0;
             var card = CreateCard("Slash", SpellEffectType.Damage, power: 5);
             var action = MakeAction(card, _hero, _enemy);
 
@@ -206,7 +207,7 @@ namespace Tests.EditMode
         [Test]
         public void Heal_IncreasesHealth()
         {
-            _hero.Stats.Health = 60;
+            _hero.Stats[StatType.MaxHealth] = 60;
             var card = CreateCard("Heal", SpellEffectType.Heal, power: 20);
             var action = MakeAction(card, _hero, _hero);
 
@@ -218,7 +219,7 @@ namespace Tests.EditMode
         [Test]
         public void Heal_ClampsToMaxHealth()
         {
-            _hero.Stats.Health = 95;
+            _hero.Stats[StatType.MaxHealth] = 95;
             var card = CreateCard("Heal", SpellEffectType.Heal, power: 20);
             var action = MakeAction(card, _hero, _hero);
 
@@ -242,7 +243,7 @@ namespace Tests.EditMode
         [Test]
         public void Heal_SkipsDeadTargets()
         {
-            _hero.Stats.Health = 0;
+            _hero.Stats[StatType.MaxHealth] = 0;
             var card = CreateCard("Heal", SpellEffectType.Heal, power: 20);
             var action = MakeAction(card, _hero, _hero);
 
@@ -412,7 +413,7 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Blood }, 3);
 
-            _hero.Stats.Health = 70;
+            _hero.Stats[StatType.MaxHealth] = 70;
             var card = CreateCard("DarkBolt", SpellEffectType.Damage, power: 5, tags: new List<MagicTag> { MagicTag.Dark });
             var action = MakeAction(card, _hero, _enemy);
 
@@ -429,7 +430,7 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Blood }, 3);
 
-            _hero.Stats.Health = 90;
+            _hero.Stats[StatType.MaxHealth] = 90;
             var card = CreateCard("DarkBolt", SpellEffectType.Damage, power: 5, tags: new List<MagicTag> { MagicTag.Dark });
             var action = MakeAction(card, _hero, _enemy);
 
@@ -582,7 +583,7 @@ namespace Tests.EditMode
             var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil }, SpellEffectType.Damage, 10);
             var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            var enemy2 = new MockCombatUnit("Orc", attack: 4, defense: 2, health: 40, isHero: false);
+            var enemy2 = new MockCombatUnit("Orc", strength: 4, endurance: 2, health: 40, isHero: false);
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Oil }, 3);
             _tagTracker.ApplyTags(enemy2, new List<MagicTag> { MagicTag.Oil }, 3);
@@ -608,7 +609,7 @@ namespace Tests.EditMode
             var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil }, SpellEffectType.Damage, 10);
             var detector = new ComboDetector(new List<MagicComboSO> { combo });
 
-            var enemy2 = new MockCombatUnit("Orc", attack: 4, defense: 2, health: 40, isHero: false);
+            var enemy2 = new MockCombatUnit("Orc", strength: 4, endurance: 2, health: 40, isHero: false);
 
             _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Oil }, 3);
 
@@ -634,7 +635,7 @@ namespace Tests.EditMode
 
             _tagTracker.ApplyTags(_hero, new List<MagicTag> { MagicTag.Water }, 3);
 
-            _hero.Stats.Health = 50;
+            _hero.Stats[StatType.MaxHealth] = 50;
             var card = CreateCard("Bloom", SpellEffectType.Heal, power: 10, tags: new List<MagicTag> { MagicTag.Nature });
             var action = MakeAction(card, _hero, _hero);
 

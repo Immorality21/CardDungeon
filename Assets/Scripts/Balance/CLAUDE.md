@@ -57,7 +57,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 |---|---|
 | `BalanceRulesSO` | the target bands (a `SO/Balance Rules` asset) |
 | `BalanceIssue` / `BalanceReport` | findings + the per-area records, severity `Ok/Info/Warning/Critical` |
-| `HeroStatCalculator` | pure hero stats from `HeroSO` + XP + gear (`Hero` itself needs `InventoryManager.Instance`) |
+| `HeroStatCalculator` | pure hero stats from `HeroSO` + XP + gear (`Hero` itself needs `InventoryManager.Instance`). Returns a `StatBlock`; the old `EffectiveStats` struct is gone, and both level gains and the gear sweep are stat-agnostic loops |
 | `SimUnit` | headless `ICombatUnit` for heroes and enemies, incl. per-fight enemy state |
 | `PartyBaseline` | the reference party every other metric is measured against |
 | `BalanceMath` | closed-form metrics: damage, hits-to-kill, ticks, **danger index**, power score |
@@ -102,7 +102,7 @@ Runs are ordered by `RunDefinitionSO.SequenceIndex`. Runs are **not chained in g
 with margin; at 1 the fight is decided by turn order; above 1 it is lost on paper. Agility-aware on
 both sides, so a fast enemy's hidden threat shows up.
 
-**Each enemy is judged against the party that first meets it.** `BuildFirstEncounterParties` walks the runs in order, growing a roster as each level's `RescueHero` is passed, and records the smallest roster that meets each enemy; `EnemyMetrics.Compute` is then given that party. Without this a level-3 enemy reads as wildly out of band and a level-1 enemy as harmless, because party size roughly halves per-enemy danger. Reward-per-danger is the exception: it takes a separate `rewardParty` (the starting party for everyone) because comparing XP-per-danger across enemies needs one common yardstick, or the spread just reports roster growth.
+**Each enemy is judged against the party that first meets it.** `BuildFirstEncounterParties` walks the runs in order, growing a roster as each level's `RescueHero` is passed, and records the smallest roster that meets each enemy; `EnemyMetrics.Compute` is then given that party. Without this a level-3 enemy reads as wildly out of band and a level-1 enemy as harmless, because party size roughly halves per-enemy danger. The **simulator** uses the same parties: solo-enemy runs fight the party from `BalanceReport.PartyByEnemy`, and per-level room runs fight `LevelCurve.Party`. Before that, every simulated battle used the starting party, which reported the boss as *never winnable* (0 of 200) purely because it was being fought solo — it is 100% against the pair that actually reaches it. Reward-per-danger is the exception: it takes a separate `rewardParty` (the starting party for everyone) because comparing XP-per-danger across enemies needs one common yardstick, or the spread just reports roster growth.
 
 **Two modelling corrections worth not regressing.** `EnemyManager.SpawnEnemies` skips the room the party is in, so `RunCurveModel` takes the start room out of both the manual and generated room counts — every level used to be overstated by one room's worth of enemies. And `ReplaceExitRoomWithBoss` now spreads the boss's displaced room across all combat entries instead of deleting one outright: deleting an entry whose expected occurrence was exactly 1.0 removed an enemy from the level entirely, which once made Bog Shaman — and therefore `Heal` — unreachable.
 
@@ -136,3 +136,32 @@ re-analysis for the end of the frame — closed-form only. **Simulation is behin
 runs hundreds of battles per encounter and is far too slow to re-run per keystroke.
 
 Nothing is ever auto-applied. Findings carry a `Suggestion` string; acting on it is the designer's call.
+
+## Stat-agnostic by construction
+
+Nothing in the model enumerates stats by hand any more — everything iterates **`StatCatalog.Types`**
+and reads per-stat facts from **`StatCatalog.Of(stat)`**:
+
+- `HeroStatCalculator.BaseStatsAtLevel` adds a level's `Gains` block; `WithGear` loops the catalog.
+- `BalanceMath.PowerScore` loops the catalog and asks `BalanceRulesSO.WeightFor(stat)`.
+- The analyzer window's hero, enemy and level-curve stat columns are all generated from
+  `StatCatalog.Types` via `BalanceGui.EditableStatCell`.
+- `EvaluateLevelUpShape` checks every stat's per-level gain. It used to name Agility, Strength and
+  Endurance one by one — which is why nobody had noticed the Warrior's level 2 raising Health by 54%.
+
+**`BalanceRulesSO.PowerWeights` is a `List<StatWeight>`, and a stat with no row falls back to its
+catalog `PowerWeight`.** The fallback matters more than it looks: the list is serialized, so a saved
+rules asset is a snapshot of whichever stats existed the day it was saved. Without the fallback a
+stat added afterwards would weigh **0**, and an enemy built around it would be scored as harmless
+with nothing anywhere reporting a problem. An authored row still wins, so rows are *overrides*, not
+something to keep in sync. `StatCatalogTests` pins both halves of that behaviour.
+
+`EditableStatCell` collapses duplicate entries for a stat before binding, because the runtime
+indexer **sums** duplicates — editing only the first would display 5 where the game fights with 12.
+For a stat with no entry it draws a **`+` button** rather than an int field: a field that becomes a
+`PropertyField` on the next repaint loses keyboard focus after one keystroke, which is exactly the
+"fill in the empty Luck column" workflow it exists for.
+
+`PartyBaseline.CloneUnits` resets each clone to full health explicitly. `SimUnit.Clone` copies the
+whole `Stats` including current health, so the "fresh, full-health" guarantee in the name would
+otherwise depend on nobody ever wounding a baseline unit.

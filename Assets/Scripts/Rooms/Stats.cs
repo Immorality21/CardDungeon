@@ -1,41 +1,65 @@
 using System;
+using Assets.Scripts.UnitStats;
+using UnityEngine;
 
 namespace Assets.Scripts.Rooms
 {
+    /// <summary>
+    /// A unit's live stats: a <see cref="StatBlock"/> of attributes plus current health.
+    ///
+    /// <para>Health is the one value that is deliberately *not* a stat. Every other value is a
+    /// standing property of the unit that gear, buffs and level-ups modify; current health is a
+    /// consumable resource that combat spends and <c>Party.HealAll()</c> refills. <c>MaxHealth</c>
+    /// lives in the block (gear and levels raise it), and is exposed here as a property because it
+    /// is read constantly alongside <see cref="Health"/>.</para>
+    /// </summary>
     [Serializable]
     public class Stats
     {
-        public int Strength;
-        public int Endurance;
+        [Tooltip("Current health. A resource, not a stat - see MaxHealth for the size of the bar.")]
         public int Health;
-        public int MaxHealth;
-        public int Agility;
 
-        /// <summary>Scales Intelligence-scaled spell power (the offensive magic kit).</summary>
-        public int Intelligence;
+        [Tooltip("Every standing stat this unit has. Absent entries read as 0.")]
+        public StatBlock Attributes = new StatBlock();
 
-        /// <summary>Scales Spirit-scaled spell power - healing, shields, Holy.</summary>
-        public int Spirit;
-
-        /// <summary>Raises crit chance (see CombatManager.CritChanceFor) and event checks.</summary>
-        public int Luck;
+        public Stats() { }
 
         /// <summary>
-        /// The four combat stats stay positional because every existing call site passes them that
-        /// way; Intelligence/Spirit/Luck are optional named arguments so adding them did not have to
-        /// touch Hero, SimUnit, PartyBaseline and the tests at once.
+        /// Builds live stats from an authored block. Health starts full, which is what every caller
+        /// wanted from the old positional constructor.
         /// </summary>
-        public Stats(int attack, int defense, int health, int agility = 5,
-                     int intelligence = 0, int spirit = 0, int luck = 0)
+        public Stats(StatBlock attributes)
         {
-            Strength = attack;
-            Endurance = defense;
-            Health = health;
-            MaxHealth = health;
-            Agility = agility;
-            Intelligence = intelligence;
-            Spirit = spirit;
-            Luck = luck;
+            Attributes = attributes != null ? attributes.Clone() : new StatBlock();
+            Health = MaxHealth;
+        }
+
+        /// <summary>Reads or writes one stat. The single accessor - no per-stat fields.</summary>
+        public int this[StatType stat]
+        {
+            get { return Attributes[stat]; }
+            set { Attributes[stat] = value; }
+        }
+
+        /// <summary>Size of the health bar. Stored in <see cref="Attributes"/> like any other stat.</summary>
+        public int MaxHealth
+        {
+            get { return Attributes[StatType.MaxHealth]; }
+            set { Attributes[StatType.MaxHealth] = value; }
+        }
+
+        public Stats Clone()
+        {
+            return new Stats
+            {
+                Health = Health,
+                Attributes = Attributes.Clone()
+            };
+        }
+
+        public override string ToString()
+        {
+            return "HP " + Health + "/" + MaxHealth + "  " + Attributes;
         }
     }
 }
