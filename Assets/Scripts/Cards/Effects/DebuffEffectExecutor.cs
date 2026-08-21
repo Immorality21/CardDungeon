@@ -20,6 +20,12 @@ namespace Assets.Scripts.Cards.Effects
         {
             var handler = BuffHandlerRegistry.Get(effect.BuffType);
 
+            // Combo debuff stay flat; a cast one adds a fraction of the caster's stat, so a
+            // high-Spirit caster's shields are better without dwarfing the stat being changed.
+            int magnitude = isComboEffect
+                ? effect.Power
+                : effect.Power + SpellScaling.BuffContribution(caster, effect.ScalingStat, buffTracker);
+
             foreach (var target in targets)
             {
                 if (!target.IsAlive)
@@ -27,12 +33,12 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
-                handler.Apply(target, -effect.Power, effect.Duration, buffTracker);
+                handler.Apply(target, -magnitude, effect.Duration, buffTracker);
 
                 result.Entries.Add(new EffectEntry
                 {
                     Target = target,
-                    Text = handler.GetDisplayText(-effect.Power),
+                    Text = handler.GetDisplayText(-magnitude),
                     Color = DebuffColor,
                     Delay = EffectDelay
                 });

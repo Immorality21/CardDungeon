@@ -22,14 +22,14 @@ public class MagicSOEditor : Editor
         {
             var element = effectsProp.GetArrayElementAtIndex(index);
             var effectType = (SpellEffectType)element.FindPropertyRelative("EffectType").enumValueIndex;
-            int lines = 3; // EffectType + Power + UnlockLevel
+            int lines = 4; // EffectType + Power + ScalingStat + UnlockLevel
             if (effectType == SpellEffectType.Damage)
             {
-                lines = 4; // + DamageType
+                lines = 5; // + DamageType
             }
             else if (effectType == SpellEffectType.Buff || effectType == SpellEffectType.Debuff)
             {
-                lines = 5; // + BuffType + Duration
+                lines = 6; // + BuffType + Duration
             }
             return lines * (EditorGUIUtility.singleLineHeight + 2) + 4;
         };
@@ -51,6 +51,16 @@ public class MagicSOEditor : Editor
             EditorGUI.PropertyField(
                 new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
                 element.FindPropertyRelative("Power"));
+            rect.y += lineHeight;
+
+            // Which caster stat is added to Power. Sits next to Power because the two are read
+            // together: Power is the floor, the stat is what a good caster brings.
+            EditorGUI.PropertyField(
+                new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                element.FindPropertyRelative("ScalingStat"),
+                new GUIContent("Scaling Stat", "Caster stat added to Power. Damage/heals add it in "
+                    + "full; buffs and debuffs add a quarter of it, since their Power is a flat stat "
+                    + "delta and full scaling would dwarf the stat being buffed."));
             rect.y += lineHeight;
 
             if (effectType == SpellEffectType.Damage)

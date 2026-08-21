@@ -23,6 +23,23 @@ namespace Assets.Scripts.Cards
     /// </summary>
     public static class SpellScaling
     {
+        /// <summary>
+        /// Buffs and debuffs get the caster stat divided by this. Their <c>Power</c> is a flat delta
+        /// applied to a stat, not a damage number: a +3 Strength buff is already +30% on a 10-Strength
+        /// hero, so adding a caster's Spirit in full would swamp the stat it is buffing. A quarter
+        /// keeps a high-Spirit caster's shields meaningfully better without rewriting the maths.
+        /// </summary>
+        public const int BuffScalingDivisor = 4;
+
+        /// <summary>
+        /// Caster contribution for a buff or debuff magnitude - see <see cref="BuffScalingDivisor"/>
+        /// for why this is not the full stat.
+        /// </summary>
+        public static int BuffContribution(ICombatUnit caster, SpellScalingStat stat, CombatBuffTracker buffTracker)
+        {
+            return CasterContribution(caster, stat, buffTracker) / BuffScalingDivisor;
+        }
+
         public static int CasterContribution(ICombatUnit caster, SpellScalingStat stat, CombatBuffTracker buffTracker)
         {
             if (caster == null)

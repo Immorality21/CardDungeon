@@ -9,6 +9,10 @@
 
 `SpellEffect.Power` is a **base**; `SpellEffect.ScalingStat` (a `SpellScalingStat`) names the caster stat added on top, resolved through `SpellScaling.CasterContribution` so damage, healing and anything added later scale identically instead of each executor re-deriving it. Damage and debuff effects are authored as **Intelligence**, heals and buffs as **Spirit**.
 
+**Damage and heals add the stat in full; buffs and debuffs add a quarter of it** (`SpellScaling.BuffContribution` / `BuffScalingDivisor`). A buff's `Power` is a flat delta applied to a stat, not a damage number — a +3 Strength buff is already +30% on a 10-Strength hero, so adding a caster's Spirit in full would swamp the stat being buffed. The divisor is one constant if that trade needs revisiting.
+
+**Inspector:** `MagicSOEditor` draws the effects list field-by-field, so a new `SpellEffect` field is invisible until it is added there *and* the `elementHeightCallback` line counts are bumped — that is how `ScalingStat` first shipped unseen. `MagicComboSOEditor` deliberately does **not** draw it, and says so in its header.
+
 `SpellScalingStat.Attack` is deliberately the enum's zero value: before caster stats existed every damage effect used `caster.GetEffectiveAttack() + Power`, so magic authored then keeps its exact numbers until it is re-pointed. **Combo effects stay flat** (`isComboEffect`) — their power comes from the combo definition, not from whoever happened to land the second tag.
 
 Consequence worth knowing: a damage spell in the Warrior's hands is now much weaker than it was (Intelligence 3 vs Attack 10) and much stronger in the Acolyte's (Intelligence 10). That is the intended differentiation, but it means *who casts* now matters and the starting party is a poor caster.
