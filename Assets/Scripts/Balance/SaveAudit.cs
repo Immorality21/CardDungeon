@@ -217,9 +217,10 @@ namespace Assets.Scripts.Balance
 
         /// <summary>
         /// Builds a <see cref="PartyBaseline"/> from the save: each hero at the level their saved XP
-        /// buys, wearing what they actually have equipped. Heroes can sit at different levels — only
-        /// the leader receives XP (<c>Party.AddXpToLeader</c>) — so each is levelled individually
-        /// rather than through the shared level parameter.
+        /// buys, wearing what they actually have equipped. Heroes can sit at different levels — XP is
+        /// split across whoever was fielded at the time (<c>Party.DistributeXp</c>), and a hero
+        /// recruited or benched partway through banked a different amount — so each is levelled
+        /// individually rather than through the shared level parameter.
         /// </summary>
         private static PartyBaseline BuildRealParty(
             SaveAudit audit,

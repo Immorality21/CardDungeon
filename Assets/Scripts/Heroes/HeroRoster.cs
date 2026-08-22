@@ -12,6 +12,12 @@ namespace Assets.Scripts.Heroes
     /// rescuing a captive mid-dungeon (<c>RunLevelEntry.RescueHero</c>) or recruiting at the hub
     /// tavern. Legacy saves written before ownership existed are migrated on first read: whoever
     /// already had a <see cref="HeroSaveData"/> entry is treated as owned, so nobody loses a hero.
+    ///
+    /// <para>Owning is not the same as <em>fielding</em>. The party the player takes into a dungeon is
+    /// a chosen subset of the owned roster (<see cref="PartySaveData.SelectedHeroKeys"/>), capped by
+    /// <see cref="PartySlots"/> - because with even-split XP a wider party is a trade rather than an
+    /// upgrade, and a trade needs a way to decline it. The cap is passed in rather than read here, so
+    /// this stays testable and free of the meta-progress singleton.</para>
     /// </summary>
     public static class HeroRoster
     {
@@ -109,6 +115,9 @@ namespace Assets.Scripts.Heroes
             {
                 return;
             }
+            // Un-field them too: a selection entry for a hero you do not own would be filtered out on
+            // the next read anyway, but leaving it there means the party silently shrinks by one.
+            save.SelectedHeroKeys?.Remove(hero.SaveKey);
             handler.Save(save);
         }
 
@@ -130,6 +139,174 @@ namespace Assets.Scripts.Heroes
                 }
             }
             return result;
+        }
+
+        // --- Selection: who actually enters the dungeon ------------------------
+
+        /// <summary>
+        /// Save keys of the fielded party, leader first. Persists a resolved list when the stored one
+        /// was empty, stale or over the cap, so the hub and the dungeon cannot disagree about who is
+        /// coming.
+        /// </summary>
+        public static List<string> GetSelectedKeys(PartyRosterSO catalog, int cap)
+        {
+            var handler = new FileHandler();
+            var save = handler.Load<PartySaveData>();
+            var owned = Resolve(save, catalog);
+            var keys = ResolveSelection(save, owned, cap);
+
+            if (!SameOrder(save.SelectedHeroKeys, keys))
+            {
+                save.SelectedHeroKeys = new List<string>(keys);
+                save.OwnedHeroKeys = new List<string>(owned);
+                handler.Save(save);
+            }
+
+            return keys;
+        }
+
+        /// <summary>The fielded party as definitions, resolved against the catalog and de-duplicated.</summary>
+        public static List<HeroSO> GetSelectedHeroes(PartyRosterSO catalog, int cap)
+        {
+            var heroes = new List<HeroSO>();
+            if (catalog == null)
+            {
+                return heroes;
+            }
+
+            foreach (var key in GetSelectedKeys(catalog, cap))
+            {
+                var hero = catalog.Find(key);
+                if (hero != null && !heroes.Contains(hero))
+                {
+                    heroes.Add(hero);
+                }
+            }
+            return heroes;
+        }
+
+        /// <summary>
+        /// Replaces the fielded party. Silently drops keys the player does not own and anything past
+        /// the cap; refuses an empty selection, since a party of nobody cannot enter a dungeon.
+        /// Returns the list as it was actually stored.
+        /// </summary>
+        public static List<string> SetSelectedKeys(PartyRosterSO catalog, IEnumerable<string> keys, int cap)
+        {
+            var handler = new FileHandler();
+            var save = handler.Load<PartySaveData>();
+            var owned = Resolve(save, catalog);
+
+            var wanted = new List<string>();
+            if (keys != null)
+            {
+                foreach (var key in keys)
+                {
+                    if (!string.IsNullOrEmpty(key) && owned.Contains(key) && !wanted.Contains(key))
+                    {
+                        wanted.Add(key);
+                    }
+                }
+            }
+
+            var stored = Clamp(wanted, cap);
+            if (stored.Count == 0)
+            {
+                // Nothing usable was asked for - fall back rather than write a party of nobody.
+                stored = ResolveSelection(save, owned, cap);
+            }
+
+            save.OwnedHeroKeys = new List<string>(owned);
+            save.SelectedHeroKeys = new List<string>(stored);
+            handler.Save(save);
+            return stored;
+        }
+
+        /// <summary>
+        /// Fields <paramref name="hero"/> if the cap has room, and writes it immediately. Called
+        /// wherever a hero becomes owned in the hub: recruiting someone and then finding they were
+        /// left at home is a worse surprise than a full party quietly benching them. Returns true if
+        /// they were added. Mid-dungeon rescues go through <c>Party.MarkOwnedDeferred</c> instead, so
+        /// they follow the run's deferred-commit rule.
+        /// </summary>
+        public static bool TryFieldIfRoom(PartyRosterSO catalog, HeroSO hero, int cap)
+        {
+            if (hero == null || string.IsNullOrEmpty(hero.SaveKey))
+            {
+                return false;
+            }
+
+            var handler = new FileHandler();
+            var save = handler.Load<PartySaveData>();
+            var owned = Resolve(save, catalog);
+            var selected = ResolveSelection(save, owned, cap);
+
+            if (selected.Contains(hero.SaveKey) || selected.Count >= EffectiveCap(cap))
+            {
+                return false;
+            }
+
+            selected.Add(hero.SaveKey);
+            save.OwnedHeroKeys = new List<string>(owned);
+            save.SelectedHeroKeys = selected;
+            handler.Save(save);
+            return true;
+        }
+
+        /// <summary>
+        /// The fielded party for a save, without touching disk: the stored selection filtered to what
+        /// is owned and clamped to the cap, falling back to the owned roster (also clamped) when that
+        /// leaves nobody. The fallback is what migrates a save written before selection existed and
+        /// what handles a cap that has since shrunk.
+        /// </summary>
+        public static List<string> ResolveSelection(PartySaveData save, List<string> owned, int cap)
+        {
+            var keys = new List<string>();
+            if (owned == null || owned.Count == 0)
+            {
+                return keys;
+            }
+
+            if (save != null && save.SelectedHeroKeys != null)
+            {
+                foreach (var key in save.SelectedHeroKeys)
+                {
+                    if (!string.IsNullOrEmpty(key) && owned.Contains(key) && !keys.Contains(key))
+                    {
+                        keys.Add(key);
+                    }
+                }
+            }
+
+            if (keys.Count == 0)
+            {
+                keys.AddRange(owned);
+            }
+
+            return Clamp(keys, cap);
+        }
+
+        /// <summary>The cap as a usable party size: at least one hero, never more than the ceiling.</summary>
+        private static int EffectiveCap(int cap)
+        {
+            if (cap < 1)
+            {
+                return 1;
+            }
+            if (cap > PartySlots.MaxCap)
+            {
+                return PartySlots.MaxCap;
+            }
+            return cap;
+        }
+
+        private static List<string> Clamp(List<string> keys, int cap)
+        {
+            int limit = EffectiveCap(cap);
+            if (keys.Count <= limit)
+            {
+                return keys;
+            }
+            return keys.GetRange(0, limit);
         }
 
         /// <summary>

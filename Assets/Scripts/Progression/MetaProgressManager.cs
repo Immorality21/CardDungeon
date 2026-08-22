@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
@@ -39,6 +40,7 @@ namespace Assets.Scripts.Progression
         public int Gold => _saveData.Gold;
         public int Essence => _saveData.Essence;
         public int BonusSlots => _saveData.BonusSlots;
+        public int BonusPartySlots => _saveData.BonusPartySlots;
 
         protected override void Awake()
         {
@@ -395,6 +397,45 @@ namespace Assets.Scripts.Progression
 
             _saveData.Essence -= SlotUpgradeCostForNext(_saveData.BonusSlots);
             _saveData.BonusSlots += 1;
+            Save();
+            OnChanged?.Invoke();
+            return true;
+        }
+
+        // --- Party slots (how many heroes can be fielded at once) ---
+
+        /// <summary>
+        /// Heroes this save can take into a dungeon at once. Starts at <see cref="PartySlots.BaseCap"/>
+        /// and is bought up to <see cref="PartySlots.MaxCap"/> with Gold - party width is a
+        /// progression axis, not a consequence of how many heroes you happen to have recruited.
+        /// </summary>
+        public int GetPartyCap()
+        {
+            return PartySlots.CapForBonus(_saveData.BonusPartySlots);
+        }
+
+        /// <summary>Gold cost of the next party slot, or 0 when already at the ceiling.</summary>
+        public int GetPartySlotCost()
+        {
+            return PartySlots.CostForNext(_saveData.BonusPartySlots);
+        }
+
+        public bool CanBuyPartySlot()
+        {
+            int cost = GetPartySlotCost();
+            return cost > 0 && _saveData.Gold >= cost;
+        }
+
+        /// <summary>Spends Gold to field one more hero. Returns false if unaffordable or maxed.</summary>
+        public bool TryBuyPartySlot()
+        {
+            if (!CanBuyPartySlot())
+            {
+                return false;
+            }
+
+            _saveData.Gold -= GetPartySlotCost();
+            _saveData.BonusPartySlots += 1;
             Save();
             OnChanged?.Invoke();
             return true;

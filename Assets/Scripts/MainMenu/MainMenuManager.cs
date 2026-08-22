@@ -11,9 +11,13 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// Main menu (UI Toolkit). Drives a single UIDocument holding the home, run-progress,
-/// run-complete, merchant, and forge views. Merchant/Forge are plain view-controllers
-/// operating on their subtrees. Run-save and scene-load logic is unchanged from the
+/// run-complete, merchant, tavern, party-select, forge and inventory views. Each panel is a plain
+/// view-controller operating on its subtree. Run-save and scene-load logic is unchanged from the
 /// prior uGUI version.
+///
+/// Party select is reachable from two places on purpose: from home like any other hub screen, and
+/// from the run-progress screen next to "Enter Dungeon", which is the moment the choice actually
+/// matters. Closing it returns to whichever of the two opened it.
 /// </summary>
 [RequireComponent(typeof(UIDocument))]
 public class MainMenuManager : MonoBehaviour
@@ -27,6 +31,7 @@ public class MainMenuManager : MonoBehaviour
     private VisualElement _completeView;
     private VisualElement _merchantView;
     private VisualElement _tavernView;
+    private VisualElement _partyView;
     private VisualElement _forgeView;
     private VisualElement _inventoryView;
 
@@ -34,6 +39,8 @@ public class MainMenuManager : MonoBehaviour
     private Button _newRunButton;
     private Button _merchantButton;
     private Button _tavernButton;
+    private Button _partyButton;
+    private Button _progressPartyButton;
     private Button _forgeButton;
     private Button _inventoryButton;
     private Button _backButton;
@@ -44,9 +51,11 @@ public class MainMenuManager : MonoBehaviour
     private Label _homeEssence;
     private Label _levelIndicator;
     private Label _levelName;
+    private Label _progressParty;
 
     private MerchantUI _merchant;
     private TavernUI _tavern;
+    private PartySelectUI _partySelect;
     private MagicForgeUI _forge;
     private InventoryHubUI _inventory;
 
@@ -54,6 +63,9 @@ public class MainMenuManager : MonoBehaviour
     private RunSaveData _runSaveData;
 
     private static bool _justCompletedRun;
+
+    // Which view the party screen was opened from, so Back goes where the player came from.
+    private bool _partyOpenedFromProgress;
 
     public static void MarkRunCompleted()
     {
@@ -76,6 +88,7 @@ public class MainMenuManager : MonoBehaviour
         _completeView = root.Q<VisualElement>("complete-view");
         _merchantView = root.Q<VisualElement>("merchant-view");
         _tavernView = root.Q<VisualElement>("tavern-view");
+        _partyView = root.Q<VisualElement>("party-view");
         _forgeView = root.Q<VisualElement>("forge-view");
         _inventoryView = root.Q<VisualElement>("inventory-view");
 
@@ -83,6 +96,8 @@ public class MainMenuManager : MonoBehaviour
         _newRunButton = root.Q<Button>("new-btn");
         _merchantButton = root.Q<Button>("merchant-btn");
         _tavernButton = root.Q<Button>("tavern-btn");
+        _partyButton = root.Q<Button>("party-btn");
+        _progressPartyButton = root.Q<Button>("progress-party-btn");
         _forgeButton = root.Q<Button>("forge-btn");
         _inventoryButton = root.Q<Button>("inventory-btn");
         _backButton = root.Q<Button>("back-btn");
@@ -93,6 +108,7 @@ public class MainMenuManager : MonoBehaviour
         _homeEssence = root.Q<Label>("home-essence");
         _levelIndicator = root.Q<Label>("level-indicator");
         _levelName = root.Q<Label>("level-name");
+        _progressParty = root.Q<Label>("progress-party");
 
         _newRunButton.clicked += OnNewRun;
         _continueButton.clicked += OnContinueRun;
@@ -104,15 +120,28 @@ public class MainMenuManager : MonoBehaviour
         {
             _tavernButton.clicked += OnVisitTavern;
         }
+        if (_partyButton != null)
+        {
+            _partyButton.clicked += OnVisitParty;
+        }
+        if (_progressPartyButton != null)
+        {
+            _progressPartyButton.clicked += OnChangePartyFromProgress;
+        }
         _forgeButton.clicked += OnVisitForge;
         _inventoryButton.clicked += OnVisitInventory;
 
         _merchant = new MerchantUI(_merchantView);
         _tavern = new TavernUI(_tavernView, _partyRoster);
+        _partySelect = _partyView != null ? new PartySelectUI(_partyView, _partyRoster) : null;
         _forge = new MagicForgeUI(_forgeView);
         _inventory = new InventoryHubUI(_inventoryView, _partyRoster);
         _merchant.OnClosed += ShowHomePanel;
         _tavern.OnClosed += ShowHomePanel;
+        if (_partySelect != null)
+        {
+            _partySelect.OnClosed += OnPartyClosed;
+        }
         _forge.OnClosed += ShowHomePanel;
         _inventory.OnClosed += ShowHomePanel;
 
@@ -134,6 +163,7 @@ public class MainMenuManager : MonoBehaviour
         SetShown(_completeView, false);
         SetShown(_merchantView, false);
         SetShown(_tavernView, false);
+        SetShown(_partyView, false);
         SetShown(_forgeView, false);
         SetShown(_inventoryView, false);
 
@@ -154,6 +184,7 @@ public class MainMenuManager : MonoBehaviour
         SetShown(_homeView, false);
         SetShown(_progressView, true);
         SetShown(_completeView, false);
+        SetShown(_partyView, false);
 
         var levelIndex = _runSaveData.CurrentLevelIndex;
         var totalLevels = _runDefinition.Levels.Count;
@@ -161,6 +192,11 @@ public class MainMenuManager : MonoBehaviour
 
         _levelIndicator.text = $"Level {levelIndex + 1} of {totalLevels}";
         _levelName.text = levelEntry.LevelName;
+
+        if (_progressParty != null)
+        {
+            _progressParty.text = _partySelect != null ? _partySelect.FieldedSummary() : string.Empty;
+        }
     }
 
     private void ShowRunCompletePanel()
@@ -215,6 +251,42 @@ public class MainMenuManager : MonoBehaviour
     {
         SetShown(_homeView, false);
         _tavern.Show();
+    }
+
+    private void OnVisitParty()
+    {
+        if (_partySelect == null)
+        {
+            return;
+        }
+        _partyOpenedFromProgress = false;
+        SetShown(_homeView, false);
+        _partySelect.Show();
+    }
+
+    private void OnChangePartyFromProgress()
+    {
+        if (_partySelect == null)
+        {
+            return;
+        }
+        _partyOpenedFromProgress = true;
+        SetShown(_progressView, false);
+        _partySelect.Show();
+    }
+
+    /// <summary>
+    /// Back out of party select. Returning to the run-progress screen re-renders it, so the lineup
+    /// line reflects whatever was just changed.
+    /// </summary>
+    private void OnPartyClosed()
+    {
+        if (_partyOpenedFromProgress)
+        {
+            ShowRunProgressPanel();
+            return;
+        }
+        ShowHomePanel();
     }
 
     private void OnVisitForge()

@@ -33,6 +33,11 @@ namespace Assets.Scripts.Progression
         public List<ComboUpgradeEntry> ComboUpgrades = new List<ComboUpgradeEntry>();
         public int BonusSlots;
 
+        // Party slots bought on top of PartySlots.BaseCap - how many heroes can be fielded at once.
+        // A Gold sink rather than an Essence one: it buys roster width, which is the same axis the
+        // tavern sells into, and Essence is reserved for magic.
+        public int BonusPartySlots;
+
         // The merchant's current gear stock (item keys). Persisted so the shop is stable across
         // sessions and can't be free-rerolled by reopening; refilled when empty or on paid restock.
         public List<string> ShopStock = new List<string>();

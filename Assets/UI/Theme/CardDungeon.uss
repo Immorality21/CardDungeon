@@ -948,6 +948,18 @@
     min-width: 96px;
 }
 
+/* Party select: a left accent bar so fielded and benched rows are distinguishable
+   without reading the button. */
+.cd-party-row--fielded {
+    border-left-width: 3px;
+    border-left-color: var(--cd-frame);
+    padding-left: 5px;
+}
+
+.cd-party-row--benched {
+    opacity: 0.72;
+}
+
 .cd-shop-empty {
     font-size: 13px;
     -unity-font-style: italic;

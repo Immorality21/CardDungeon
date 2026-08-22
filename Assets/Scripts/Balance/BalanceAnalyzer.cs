@@ -1113,9 +1113,11 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// Does the run actually pay out the XP the hero curve asks for? XP goes to the leader alone
-        /// (Party.AddXpToLeader), so the rest of the party never levels at all — worth stating plainly
-        /// because no amount of stat tuning will surface it.
+        /// Does the run actually pay out the XP the hero curve asks for? Measured as a <em>share</em>,
+        /// not a total: <c>Party.DistributeXp</c> splits every kill evenly across the fielded party
+        /// (<see cref="XpSplit"/>), so a run that looks generous in aggregate can still fail to level
+        /// anybody once it is divided four ways. That division is the intended cost of a wide party,
+        /// which is why this reports the shortfall rather than treating the split itself as a fault.
         /// </summary>
         private static void EvaluateRunXpSupply(RunCurve run, BalanceReport report, BalanceInput input)
         {
@@ -1127,33 +1129,32 @@ namespace Assets.Scripts.Balance
             var leader = report.Party.Heroes[0];
             int xpForNext = HeroStatCalculator.XpToReachLevel(leader.Definition, leader.Level + 1);
 
-            if (xpForNext > 0 && run.TotalExpectedXp < xpForNext)
+            // The party grows across a run, so the share shrinks as it goes. Judge against the
+            // widest party the run ever fields - the pessimistic reading, and the one a player who
+            // takes every recruit will actually see.
+            int widest = report.Party.Size;
+            foreach (var level in run.Levels)
             {
-                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, run.Name,
-                    $"The whole run pays less XP than one level-up costs")
+                if (level.PartySize > widest)
                 {
-                    Asset = run.Run,
-                    Detail = $"Expected {run.TotalExpectedXp:0} XP across every room; {leader.Name} needs "
-                           + $"{xpForNext} to reach level {leader.Level + 1}.",
-                    Suggestion = "Raise XpReward on enemies, or lower XpRequired on the level curve."
-                });
+                    widest = level.PartySize;
+                }
             }
 
-            if (report.Party.Size > 1)
+            float share = XpSplit.ExpectedShare(run.TotalExpectedXp, widest);
+            if (xpForNext > 0 && share < xpForNext)
             {
-                var followers = new List<string>();
-                for (int i = 1; i < report.Party.Heroes.Count; i++)
-                {
-                    followers.Add(report.Party.Heroes[i].Name);
-                }
-
+                string split = widest > 1
+                    ? $" split {widest} ways ({run.TotalExpectedXp:0} total)"
+                    : string.Empty;
                 report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, run.Name,
-                    "Only the party leader gains XP")
+                    "The whole run pays less XP than one level-up costs")
                 {
                     Asset = run.Run,
-                    Detail = $"CombatManager awards kills through Party.AddXpToLeader, so {string.Join(", ", followers)} "
-                           + "never level up however long the run goes.",
-                    Suggestion = "Split XP across the living party, or make the follower's power come from gear instead."
+                    Detail = $"Expected {share:0} XP per hero across every room{split}; {leader.Name} needs "
+                           + $"{xpForNext} to reach level {leader.Level + 1}.",
+                    Suggestion = "Raise XpReward on enemies, lower XpRequired on the level curve, or field "
+                               + "a narrower party."
                 });
             }
         }

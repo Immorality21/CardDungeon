@@ -154,7 +154,7 @@ not as current state.
 
 The 12 open warnings, grouped: three *no threat at all* enemies and `Test3`'s thin margin (above);
 four progression warnings (two heroes capping at level 2, two level-2 Agility doublings of +100%);
-*only the party leader gains XP*; *+MaxHealth gear is never filled at level start* (`HealAll()` sets
+*only the party leader gains XP* (**gone** since 2026-08-22 — see §5); *+MaxHealth gear is never filled at level start* (`HealAll()` sets
 base MaxHealth while the bar uses `GetEffectiveMaxHealth()`, so geared heroes start every level
 short); `Tutorial` unlocking 60% of the magic catalog at once; and the Tutorial→Test1 spike.
 
@@ -181,8 +181,8 @@ short); `Tutorial` unlocking 60% of the magic catalog at once; and the Tutorial�
   the Warrior's level-2 cap and its +100% Agility step (both §4's to delete) and the pre-existing
   *+MaxHealth gear is never filled at level start* bug.
 
-What remains from the original list: **archetype mix** (4 of 7 enemies are still `Aggressor`) and
-**XP distribution** (now specified as even-split in §5).
+What remains from the original list: **archetype mix** (4 of 7 enemies are still `Aggressor`).
+~~**XP distribution**~~ ✅ shipped 2026-08-22 as the even split in §5.
 
 > **Verification note.** These numbers come from `BalanceAnalyzer` itself, run in-editor over the
 > real assets via the Unity MCP, and the `BalanceRegressionTests` predicates were evaluated against
@@ -657,13 +657,93 @@ Recommended split: **dungeon rescues are immediate and permanent** and draw from
 **the tavern is where specific or rarer classes are bought.** That keeps luck from deciding builds
 while keeping Gold meaningful, and it stops the two routes competing.
 
-#### Next: party management + even-split XP (the missing half)
+#### Party management + even-split XP — *the missing half* ✅ shipped 2026-08-22
 
-The catalog/owned split shipped; **selected** did not. Every owned hero enters every run, so
-recruiting a third halves per-enemy danger again with no way to decline. Two changes, and they only
-work as a pair — the party-size choice is meaningless without a cost attached to going wide.
+~~The catalog/owned split shipped; **selected** did not.~~ Both halves are in now. Every owned hero
+used to enter every run, so recruiting a third halved per-enemy danger again with no way to decline.
+The two changes only work as a pair — the party-size choice is meaningless without a cost attached to
+going wide — and they shipped together.
 
-**1. Party size 1–4, chosen before the run.**
+**What landed.**
+
+- **`PartySaveData.SelectedHeroKeys`** is the fielded subset of `OwnedHeroKeys`, leader first, read
+  through `HeroRoster` (`GetSelectedKeys` / `GetSelectedHeroes` / `SetSelectedKeys` /
+  `TryFieldIfRoom`, plus a pure `ResolveSelection` the tests drive). An empty list means *not chosen
+  yet*, not *nobody*, so it falls back to the owned roster clamped to the cap — which is also how a
+  save written before selection existed migrates, with no migration code of its own.
+  `DungeonManager.RosterHeroes()` became **`FieldedHeroes()`** and is the only consumer;
+  `InventoryHubUI` still lists everyone owned, because a benched hero's gear still needs managing.
+- **The cap is bought, not given.** `PartySlots` holds the math (base **2**, ceiling **4**), and
+  `MetaProgressManager.TryBuyPartySlot` sells the next slot for **Gold** at **300 then 600**
+  (`MetaProgressSaveData.BonusPartySlots`). Gold rather than Essence because it buys roster width,
+  the axis the tavern already sells into. Priced against a recruitment (220-260g), not a restock: the
+  slot is permanent, and it is what makes the recruitment worth making.
+- **`Party.AddXpToLeader` → `Party.DistributeXp`**, an even split via the pure `XpSplit`. Two rules
+  settled from the open questions below: the **remainder goes to the leader** rather than being
+  dropped (silently losing up to `partySize - 1` XP per kill would make wide parties worse than the
+  table says, which is the one thing this change must not do), and **downed heroes are paid** — FFX
+  pays only who acted, but excluding them punishes the tank role for doing its job, so death's cost
+  stays HP and items.
+- **A newly acquired hero is fielded automatically if the cap has room**, benched with a message if
+  not. Both routes: `HeroRoster.TryFieldIfRoom` after a tavern purchase, and
+  `Party.MarkOwnedDeferred` → `MarkFieldedDeferred` for a rescue, deferred like the ownership it
+  accompanies. Without this a captive freed on level 1 fights the rest of that level and then
+  vanishes from the lineup, because the next level is built from the *selected* party — exactly what
+  the tutorial's Tank rescue would have hit.
+- **`PartySelectUI`** (`party-view`), reachable from **home** and from the **run-progress screen**
+  beside *Enter Dungeon*, which is when the choice actually matters; Back returns to whichever opened
+  it, and the progress screen now carries a `Party (2): Warrior, The Tank` line so *Enter Dungeon* is
+  never pressed blind. Two lists (*Marching out* / *Staying behind*), minimum one hero (the last
+  hero's button reads **Only hero** and is disabled), and the slot purchase sits on the same screen
+  as the XP-share line — the price of going wider next to the reason not to.
+
+**The share is stated, not implied.** The screen reads *"Each hero earns 50% of every kill's XP, and
+a bigger party spreads the damage thinner. Wide clears faster; narrow levels faster."* The trade only
+functions as a decision if it is on screen while the decision is being made.
+
+**Balance model.** `EvaluateRunXpSupply` now divides a run's expected XP by the **widest** party it
+ever fields (`XpSplit.ExpectedShare`) instead of reading the total, and the *only the party leader
+gains XP* warning is **deleted** — it was a bug report, and the bug is fixed. `RunCurveModel` caps
+modelled roster growth at `PartySlots.MaxCap`, since acquiring a fifth hero benches somebody rather
+than making the level easier (inert today: `TutorialRun` peaks at 2). Findings did **not** move —
+**0 critical / 4 warning / 9 info**, same four as before — because the leader-XP warning was
+*dormant*: it was guarded on `Party.Size > 1` and the starting party is solo. The new share check
+does not fire either: 206 expected XP split two ways is 103 per hero, above the Warrior's level-2
+cost.
+
+**Verified.** EditMode suite **406 passed / 1 failed**, the one red being the pre-existing
+`EveryHeroHasSomewhereToLevelTo` (the Warrior caps at level 2; §4 deletes `LevelConfiguration`
+outright). 16 new cases in `PartySelectionTests` cover the split (including that it always sums to
+the award), the slot cost curve, and every selection-resolution path — migration, truncation to the
+cap, unowned keys, duplicates, and a nonsense cap still fielding exactly one hero. Driven live in the
+editor via the Unity MCP against the real save: the panel populates (Warrior *(leads)* + Tank, cap
+2 of 2, 50% share), benching writes `SelectedHeroKeys` and flips the share to 100%, the last hero
+cannot be benched, both slot purchases charge 300 then 600 and the ceiling refuses a third, and the
+progress screen's lineup line and the Back-where-you-came-from routing both hold.
+
+*Not* driven live: entering an actual dungeon with a benched hero, because the live save sits
+mid-run at level 3 of `TutorialRun` and walking in would perturb it. `FieldedHeroes()` is a two-line
+wrapper over `HeroRoster.GetSelectedHeroes`, which *was* exercised against the real catalog with a
+benched selection and returned the Warrior alone.
+
+**Follow-ups this opened:**
+
+- **The analyzer models the widest legal party, so it is optimistic for anyone narrower.** The honest
+  model is a **range**: report each level at min (1) and max (cap) party size and treat a level as
+  broken only if it fails across the whole band. That means `LevelCurve`'s metrics become ranges,
+  which touches the analyzer window's tables and `BalanceRegressionTests` — deliberately left for its
+  own change. A level tuned for 4 heroes is roughly 4x harder solo, so expect `BalanceRules` to need a
+  second look at the same time.
+- **The party cap has no in-game explanation.** The slot is bought on the party screen with no
+  fiction attached — fine as a hub button, thin as a reward. If §3's other Gold sinks land, the cap
+  probably wants to be one of them rather than a bare button.
+- **Selection can change mid-run.** *Change Party* is reachable from the run-progress screen between
+  levels, so a run's difficulty band can shift under it. Arguably correct (it is the hub, and gear
+  can already be re-equipped there) but it is the reason the analyzer's band matters.
+
+The design this was built to, kept for the reasoning:
+
+**1. Party size 1–4, chosen before the run.** ✅ *Shipped as described, with the cap earned.*
 
 - A **party-select screen** between the hub and *Enter Dungeon*: pick from the owned roster, **min 1,
   max 4**. Selection is save state (`PartySaveData`, alongside `OwnedHeroKeys`), so it persists
@@ -675,11 +755,11 @@ work as a pair — the party-size choice is meaningless without a cost attached 
   meta-progress unlock (a Gold sink in the spirit of §3's roster slots), so party width is itself a
   progression axis.
 
-**2. XP splits evenly across the party.**
+**2. XP splits evenly across the party.** ✅ *Shipped.*
 
-Today `Party.AddXpToLeader` hands the *entire* kill reward to `Heroes[0]` — the only XP path in the
-game (called once, from `CombatManager` at `CombatManager.cs:991`) — so followers never level at all.
-Replace it with an even split: **each hero in the party receives `xp / partySize`**.
+`Party.AddXpToLeader` used to hand the *entire* kill reward to `Heroes[0]` — the only XP path in the
+game (called once, from `CombatManager.HandleEnemyDeath`) — so followers never levelled at all. It is
+now an even split: **each hero in the party receives `xp / partySize`**, remainder to the leader.
 
 That single change is what makes party size a real decision instead of a straight upgrade:
 
@@ -695,25 +775,28 @@ pairs directly with §4: once XP is a currency spent on sphere-grid nodes, a 4-h
 each hero's grid at a quarter rate, so "one deep build or four shallow ones" becomes the run's
 defining choice.
 
-Decisions to settle while implementing:
+Decisions settled while implementing (kept for the reasoning):
 
-- **The remainder.** Integer division drops XP (7 xp across 4 heroes = 1 each, 3 lost). Either give
-  the remainder to the killer, to the leader, or carry it in a party-level accumulator. Silently
-  dropping it is the one option to avoid — it makes wide parties worse than the table says.
-- **Do downed heroes share?** FFX pays only characters who acted. Excluding the downed adds a nice
-  pressure (keep everyone alive to keep everyone growing) but punishes the tank role; leaning
-  toward paying everyone in the party, alive or not, and keeping death's cost in HP and items.
+- ~~**The remainder.**~~ ✅ To the **leader**. Integer division drops XP (7 xp across 4 heroes = 1
+  each, 3 lost); the alternatives were the killer or a party-level accumulator. Silently dropping it
+  was the one option to avoid — it makes wide parties worse than the table says — and a test asserts
+  the split always sums to the award.
+- ~~**Do downed heroes share?**~~ ✅ **Yes.** FFX pays only characters who acted, and excluding the
+  downed adds a nice pressure (keep everyone alive to keep everyone growing) but punishes the tank
+  role for doing its job. Everyone in the party is paid, alive or not; death's cost stays HP and
+  items.
 - **Does a mid-run rescue dilute the split?** A hero freed on level 1 joins the split immediately,
   which quietly slows the starter. Probably correct — it is the same trade as recruiting — but worth
   playing before committing.
-- **Rename the API.** `Party.AddXpToLeader` becomes `AddXp` / `DistributeXp`. The name is quoted in
-  `BalanceAnalyzer` (the *only the party leader gains XP* finding), `SaveAudit`, and the Heroes
-  guide — all three need updating, and that analyzer finding should disappear once the split lands.
-- **Balance bands will move.** The analyzer now models roster growth per level, but it assumes the
-  party is *everyone acquired so far*. With selection, party size becomes a player choice of 1–4, so
-  the honest model is a **range** — report each level at min and max party size, and treat a level
-  as broken only if it fails across the whole band. Expect `BalanceRules` to need a second look:
-  a level tuned for 4 heroes is roughly 4× harder solo.
+- ~~**Rename the API.**~~ ✅ `Party.AddXpToLeader` → **`DistributeXp`**, with `BalanceAnalyzer`,
+  `SaveAudit` and the Heroes/Enemies guides updated and the *only the party leader gains XP* finding
+  deleted.
+- **Balance bands will move.** ⚠️ **Still open** — promoted to a follow-up above. The analyzer models
+  roster growth per level and now caps it at the party ceiling, but it still assumes the party is as
+  wide as the cap allows. With selection, party size is a player choice of 1–4, so the honest model
+  is a **range**: report each level at min and max party size and treat a level as broken only if it
+  fails across the whole band. Expect `BalanceRules` to need a second look — a level tuned for 4
+  heroes is roughly 4× harder solo.
 
 #### Other open questions
 

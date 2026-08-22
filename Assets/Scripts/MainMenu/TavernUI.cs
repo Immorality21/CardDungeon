@@ -142,7 +142,14 @@ namespace Assets.Scripts.MainMenu
             }
 
             MetaProgressManager.Instance.RemoveFromTavernStock(hero.SaveKey);
-            SetFeedback($"{hero.DisplayName} joins your roster.");
+
+            // Field them if the cap has room. Paying for a hero and then finding they were left at
+            // home is a worse surprise than a full party benching them, which the message names.
+            bool fielded = HeroRoster.TryFieldIfRoom(
+                _catalog, hero, MetaProgressManager.Instance.GetPartyCap());
+            SetFeedback(fielded
+                ? $"{hero.DisplayName} joins your roster."
+                : $"{hero.DisplayName} joins your roster, but the party is full - swap them in from Party.");
             Refresh();
         }
 

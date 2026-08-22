@@ -1027,7 +1027,7 @@ namespace Assets.Scripts.Rooms
             if (xp > 0)
             {
                 _combatXp += xp;
-                _currentParty?.AddXpToLeader(xp);
+                _currentParty?.DistributeXp(xp);
             }
             if (gold > 0)
             {

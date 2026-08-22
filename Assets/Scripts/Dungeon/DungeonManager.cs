@@ -37,22 +37,35 @@ namespace Assets.Scripts.Dungeon
         private ItemSO _healingPotion;
 
         /// <summary>
-        /// The heroes that actually enter the dungeon: the *owned* subset of the roster catalog, not
-        /// every authored hero. A fresh save starts with <c>PartyRosterSO.StartingHeroes</c> only and
-        /// grows by rescuing captives or recruiting at the tavern. Falls back to the inline
-        /// definitions when no roster is wired (free-play in the scene).
+        /// The heroes that actually enter the dungeon: the party the player *selected* in the hub, not
+        /// every hero they own and not every hero authored. A fresh save starts with
+        /// <c>PartyRosterSO.StartingHeroes</c>, grows by rescuing captives or recruiting at the tavern,
+        /// and is narrowed to a fielded lineup of at most <c>MetaProgressManager.GetPartyCap()</c> by
+        /// the party-select screen. Falls back to the inline definitions when no roster is wired
+        /// (free-play in the scene).
+        ///
+        /// <para>Party size is the game's strongest difficulty dial - each hero roughly halves
+        /// per-enemy danger while quartering each hero's XP share - so this is the one place that
+        /// decides both.</para>
         /// </summary>
-        private List<HeroSO> RosterHeroes()
+        private List<HeroSO> FieldedHeroes()
         {
             if (_partyRoster != null && _partyRoster.Heroes.Count > 0)
             {
-                var owned = HeroRoster.GetOwnedHeroes(_partyRoster);
-                if (owned.Count > 0)
+                var selected = HeroRoster.GetSelectedHeroes(_partyRoster, PartyCap());
+                if (selected.Count > 0)
                 {
-                    return owned;
+                    return selected;
                 }
             }
             return _heroDefinitions;
+        }
+
+        private static int PartyCap()
+        {
+            return MetaProgressManager.HasInstance
+                ? MetaProgressManager.Instance.GetPartyCap()
+                : PartySlots.BaseCap;
         }
 
         private RoomActionUI _roomActionUI;
@@ -274,7 +287,7 @@ namespace Assets.Scripts.Dungeon
             // Spawn party in the chosen starting room
             var partyObj = Instantiate(_partyPrefab, transform);
             Party = partyObj.GetComponent<Party>();
-            Party.Initialize(RosterHeroes());
+            Party.Initialize(FieldedHeroes());
             Party.HealAll();
             // Afflictions are level-scoped like health, so a fresh level starts clean.
             Afflictions.Clear();
@@ -354,7 +367,7 @@ namespace Assets.Scripts.Dungeon
             var currentRoom = rooms[saveData.CurrentRoomIndex];
             var partyObj = Instantiate(_partyPrefab, transform);
             Party = partyObj.GetComponent<Party>();
-            Party.Initialize(RosterHeroes());
+            Party.Initialize(FieldedHeroes());
             Party.PlaceInRoom(currentRoom);
             GameManager.Instance.Initialize(Party, GetRoomActionUI());
 
@@ -640,7 +653,9 @@ namespace Assets.Scripts.Dungeon
 
         /// <summary>
         /// Party-best effective value per stat, for the party as it enters this level: authored base
-        /// stats, plus the level-up gains its saved XP has already bought, plus equipped gear.
+        /// stats, plus the level-up gains its saved XP has already bought, plus equipped gear. The
+        /// *fielded* party, not the owned roster - a benched hero's Intelligence cannot open a tome
+        /// they are not there to read.
         ///
         /// <para>Built through <see cref="HeroStatCalculator"/> rather than <c>Hero</c>, because
         /// placement runs before the party is instantiated - and has to, since a resumed dungeon
@@ -658,7 +673,7 @@ namespace Assets.Scripts.Dungeon
             var best = new StatBlock();
             var partySave = _fileHandler.Load<PartySaveData>();
 
-            foreach (var heroSO in RosterHeroes())
+            foreach (var heroSO in FieldedHeroes())
             {
                 if (heroSO == null)
                 {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.IO;
+using Assets.Scripts.Progression;
 using Assets.Scripts.Rooms;
 using UnityEngine;
 
@@ -207,6 +208,58 @@ namespace Assets.Scripts.Heroes
             {
                 _saveData.OwnedHeroKeys.Add(heroSO.SaveKey);
             }
+
+            MarkFieldedDeferred(heroSO);
+        }
+
+        /// <summary>
+        /// Fields a newly acquired hero for the next level too, if the party cap has room. Without
+        /// this a captive rescued on level 1 fights the rest of that level and then vanishes from the
+        /// lineup, because the next level is built from the *selected* party - which is exactly the
+        /// bug the tutorial's Tank rescue would hit. Deferred like the ownership it accompanies.
+        /// </summary>
+        private void MarkFieldedDeferred(HeroSO heroSO)
+        {
+            if (_saveData.SelectedHeroKeys == null)
+            {
+                _saveData.SelectedHeroKeys = new List<string>();
+            }
+            if (_saveData.SelectedHeroKeys.Contains(heroSO.SaveKey))
+            {
+                return;
+            }
+
+            int cap = MetaProgressManager.HasInstance
+                ? MetaProgressManager.Instance.GetPartyCap()
+                : PartySlots.BaseCap;
+
+            // An empty stored selection means "everyone owned", so it is already implicitly full -
+            // count the live party instead, which is the roster plus whoever just joined.
+            int fielded = _saveData.SelectedHeroKeys.Count > 0
+                ? _saveData.SelectedHeroKeys.Count
+                : Heroes.Count;
+            if (fielded > cap)
+            {
+                return;
+            }
+
+            if (_saveData.SelectedHeroKeys.Count == 0)
+            {
+                // Materialise the implicit selection so adding to it means something.
+                foreach (var hero in Heroes)
+                {
+                    if (hero != null && !_saveData.SelectedHeroKeys.Contains(hero.HeroKey))
+                    {
+                        _saveData.SelectedHeroKeys.Add(hero.HeroKey);
+                    }
+                }
+            }
+
+            if (!_saveData.SelectedHeroKeys.Contains(heroSO.SaveKey) &&
+                _saveData.SelectedHeroKeys.Count < cap)
+            {
+                _saveData.SelectedHeroKeys.Add(heroSO.SaveKey);
+            }
         }
 
         public void HealAll()
@@ -225,11 +278,24 @@ namespace Assets.Scripts.Heroes
             SaveParty();
         }
 
-        public void AddXpToLeader(int amount)
+        /// <summary>
+        /// Splits <paramref name="amount"/> XP evenly across the whole party, the leader taking the
+        /// remainder. See <see cref="XpSplit"/> for why it is even and why the downed are paid.
+        ///
+        /// <para>This is the only XP path in the game: <c>CombatManager.HandleEnemyDeath</c> calls it
+        /// per kill, in memory, and <see cref="CommitProgress"/> writes it on level clear - so a wipe
+        /// forfeits the run's XP along with its gold and loot.</para>
+        /// </summary>
+        public void DistributeXp(int amount)
         {
-            if (Leader != null)
+            var shares = XpSplit.Split(amount, Heroes.Count);
+            for (int i = 0; i < shares.Length; i++)
             {
-                Leader.AddXp(amount);
+                // Unity-aware null check rather than ?., which reads a destroyed hero as non-null.
+                if (Heroes[i] != null)
+                {
+                    Heroes[i].AddXp(shares[i]);
+                }
             }
         }
     }

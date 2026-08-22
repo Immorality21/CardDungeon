@@ -13,6 +13,7 @@
             <ui:Button name="tavern-btn" text="The Tavern" class="cd-menu-button" />
             <ui:Button name="forge-btn" text="Magic Forge" class="cd-menu-button" />
             <ui:Button name="inventory-btn" text="Inventory" class="cd-menu-button" />
+            <ui:Button name="party-btn" text="Party" class="cd-menu-button" />
             <ui:VisualElement class="cd-currency-row">
                 <ui:Label name="home-gold" text="Gold: 0" />
                 <ui:Label name="home-essence" text="Essence: 0" />
@@ -23,6 +24,8 @@
         <ui:VisualElement name="progress-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
             <ui:Label name="level-indicator" text="Level 1 of 1" class="cd-info-label" />
             <ui:Label name="level-name" text="" class="cd-title cd-title--large" />
+            <ui:Label name="progress-party" text="" class="cd-info-label" />
+            <ui:Button name="progress-party-btn" text="Change Party" class="cd-menu-button" />
             <ui:VisualElement class="cd-button-row">
                 <ui:Button name="back-btn" text="Back" class="cd-menu-button" style="flex-grow: 1; margin-right: 6px;" />
                 <ui:Button name="enter-btn" text="Enter Dungeon" class="cd-menu-button" style="flex-grow: 1; margin-left: 6px;" />
@@ -68,6 +71,24 @@
 
             <ui:Label name="tavern-feedback" text="" class="cd-feedback" />
             <ui:Button name="tavern-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- PARTY SELECT -->
+        <ui:VisualElement name="party-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label text="Your Party" class="cd-title" />
+            <ui:Label name="party-gold" text="Gold: 0" class="cd-info-label" />
+            <ui:Label name="party-cap" text="" class="cd-info-label" />
+            <ui:Label name="party-share" text="" class="cd-shop-empty" />
+
+            <ui:Label text="Marching out" class="cd-subtitle" />
+            <ui:ScrollView name="party-fielded" class="cd-shop-list" mode="Vertical" />
+
+            <ui:Label text="Staying behind" class="cd-subtitle" />
+            <ui:ScrollView name="party-bench" class="cd-shop-list" mode="Vertical" />
+
+            <ui:Button name="party-buy-slot" text="" class="cd-button cd-button--narrow" />
+            <ui:Label name="party-feedback" text="" class="cd-feedback" />
+            <ui:Button name="party-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- FORGE -->

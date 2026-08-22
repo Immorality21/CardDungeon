@@ -146,7 +146,13 @@ namespace Assets.Scripts.Balance
 
                 // A hero freed *during* a level only helps for part of it, so they count from the
                 // next level on — the conservative reading.
-                if (entry.RescueHero != null && !roster.Contains(entry.RescueHero))
+                //
+                // Capped at PartySlots.MaxCap because that is the widest party the game can field:
+                // acquiring a fifth hero does not make level 5 easier, it benches somebody. This
+                // models the *widest* legal party, so a player who fields fewer sees a harder run
+                // than the curve reports — see the min/max band follow-up in docs/NEXT_STEPS.md.
+                if (entry.RescueHero != null && !roster.Contains(entry.RescueHero) &&
+                    roster.Count < PartySlots.MaxCap)
                 {
                     roster.Add(entry.RescueHero);
                 }
