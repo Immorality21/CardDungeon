@@ -22,5 +22,4 @@ MonoBehaviour:
   ChainBias: 0.667
   MomentumBias: 0.498
   WallColor: {r: 0.35, g: 0.33, b: 0.3, a: 1}
-  EventsPerLevel: 2
   CombatBackground: {fileID: 0}

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
@@ -8,6 +9,7 @@ using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -578,70 +580,118 @@ namespace Assets.Scripts.Dungeon
                 return;
             }
 
-            // Rooms whose identity IS an interaction (a treasury) carry their event on every
-            // instance, outside the level budget - otherwise a treasury the budget did not pick
-            // would be a room called Treasury with nothing to take. These are then off the table
-            // for budgeted placement, so such a room offers exactly one thing.
+            // Read once, not per roll: this loads the party save.
+            var partyStats = BestRosterStats();
+
             foreach (var room in rooms)
             {
-                if (room == null || room.RoomSO == null || room.RoomSO.GuaranteedEvent == null)
+                if (!IsEventEligible(room, startRoom))
                 {
                     continue;
                 }
 
-                // The exit room is fair game: taking the stairs is a button now, so the player
-                // gets their turn in the room before the level ends. (Budgeted events still skip
-                // it - see PlaceRoomEvents - to keep a scarce find from competing with the boss.)
-                room.RoomEvent = room.RoomSO.GuaranteedEvent;
+                // Each candidate gets its own roll, in authored order, and the first to pass takes
+                // the room - a room only ever offers one thing. Listing two events therefore raises
+                // the odds of the room having *something*, which is the intended lever: a common
+                // find and a once-a-run find can share a room pool.
+                foreach (var candidate in room.RoomSO.PossibleEvents)
+                {
+                    if (candidate == null)
+                    {
+                        continue;
+                    }
+
+                    // The gate first: no point rolling for a tome nobody can read.
+                    if (!Rooms.Events.RoomEventSpawn.MeetsRequirements(candidate.SpawnRequirements, partyStats))
+                    {
+                        continue;
+                    }
+
+                    float chance = Rooms.Events.RoomEventSpawn.ChancePercent(
+                        candidate.SpawnChancePercent,
+                        partyStats[candidate.SpawnModifierStat],
+                        candidate.SpawnModifierRate);
+
+                    if (Rooms.Events.RoomEventSpawn.Spawns(chance, Random.Range(0f, 100f)))
+                    {
+                        room.RoomEvent = candidate;
+                        break;
+                    }
+                }
             }
+        }
 
-            int budget = _level != null ? _level.EventsPerLevel : 0;
-            if (budget <= 0)
+        /// <summary>
+        /// Whether a room can hold an event at all. The start room is skipped (an event on turn one is
+        /// not a discovery), as are connectors and any room already holding a captive - the specials
+        /// stay spread out. The exit room <i>is</i> eligible: taking the stairs is a button, so the
+        /// player gets their turn in the room before the level ends.
+        /// </summary>
+        private bool IsEventEligible(Room room, Room startRoom)
+        {
+            return room != null
+                   && room != startRoom
+                   && room.CaptiveHero == null
+                   && room.RoomSO != null
+                   && !room.RoomSO.IsConnectorRoom
+                   && room.RoomSO.PossibleEvents != null
+                   && room.RoomSO.PossibleEvents.Count > 0;
+        }
+
+        /// <summary>
+        /// Party-best effective value per stat, for the party as it enters this level: authored base
+        /// stats, plus the level-up gains its saved XP has already bought, plus equipped gear.
+        ///
+        /// <para>Built through <see cref="HeroStatCalculator"/> rather than <c>Hero</c>, because
+        /// placement runs before the party is instantiated - and has to, since a resumed dungeon
+        /// re-applies its saved event state before the party exists. <c>Hero.GetEffectiveStat</c>
+        /// needs a live scene; the calculator re-derives the same numbers from the asset, the saved
+        /// XP and the gear loadout.</para>
+        ///
+        /// <para>Computed once per placement pass, not once per roll: it reads the party save off
+        /// disk. Stable across a save and resume, which placement relies on - XP and gear are both
+        /// committed only on level clear, so mid-dungeon progress cannot move a spawn threshold.
+        /// </para>
+        /// </summary>
+        private StatBlock BestRosterStats()
+        {
+            var best = new StatBlock();
+            var partySave = _fileHandler.Load<PartySaveData>();
+
+            foreach (var heroSO in RosterHeroes())
             {
-                return;
-            }
-
-            var candidates = rooms
-                .Where(r => r != null
-                            && r != startRoom
-                            && !r.IsExit
-                            && r.CaptiveHero == null
-                            && r.RoomEvent == null
-                            && r.RoomSO != null
-                            && !r.RoomSO.IsConnectorRoom
-                            && r.RoomSO.PossibleEvents != null
-                            && r.RoomSO.PossibleEvents.Count > 0)
-                .ToList();
-
-            var usedKeys = new HashSet<string>();
-            int placed = 0;
-
-            while (placed < budget && candidates.Count > 0)
-            {
-                int roomPick = Random.Range(0, candidates.Count);
-                var room = candidates[roomPick];
-                candidates.RemoveAt(roomPick);
-
-                var pool = room.RoomSO.PossibleEvents
-                    .Where(e => e != null && !usedKeys.Contains(e.SaveKey))
-                    .ToList();
-
-                if (pool.Count == 0)
+                if (heroSO == null)
                 {
                     continue;
                 }
 
-                var chosen = pool[Random.Range(0, pool.Count)];
-                room.RoomEvent = chosen;
-                usedKeys.Add(chosen.SaveKey);
-                placed++;
+                var baseStats = HeroStatCalculator.BaseStatsForXp(heroSO, SavedXpFor(partySave, heroSO.SaveKey));
+                var gear = InventoryManager.HasInstance
+                    ? InventoryManager.Instance.GetEquippedItems(heroSO.SaveKey)
+                    : null;
+                var effective = HeroStatCalculator.WithGear(baseStats, gear);
+
+                foreach (var stat in StatCatalog.Types)
+                {
+                    if (effective[stat] > best[stat])
+                    {
+                        best[stat] = effective[stat];
+                    }
+                }
             }
 
-            if (placed < budget)
+            return best;
+        }
+
+        private static int SavedXpFor(PartySaveData partySave, string heroKey)
+        {
+            if (partySave == null || partySave.Heroes == null || string.IsNullOrEmpty(heroKey))
             {
-                Debug.LogWarning($"Level asked for {budget} room events but only {placed} could be "
-                    + "placed; add PossibleEvents to more room templates in the pool.");
+                return 0;
             }
+
+            var entry = partySave.Heroes.Find(h => h != null && h.HeroKey == heroKey);
+            return entry != null ? entry.CurrentXp : 0;
         }
 
         /// <summary>

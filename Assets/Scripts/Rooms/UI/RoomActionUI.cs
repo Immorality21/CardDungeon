@@ -436,7 +436,11 @@ namespace Assets.Scripts.Rooms
                 || Events.RoomEventResolver.Passes(_eventChance, UnityEngine.Random.Range(0f, 1f));
 
             var pool = succeeded ? option.Success : option.Failure;
-            int outcomeIndex = Events.RoomEventResolver.PickOutcomeIndex(pool, UnityEngine.Random.Range(0f, 1f));
+
+            // The acting hero bends the pool - it is their hand in the chest. Party-best would mean
+            // the Scout's charm helping while the Warrior forces a door.
+            int outcomeIndex = Events.RoomEventResolver.PickOutcomeIndex(
+                pool, UnityEngine.Random.Range(0f, 1f), _eventActingHero);
             var outcome = outcomeIndex >= 0 ? pool[outcomeIndex] : null;
 
             var report = _eventRunner.Apply(

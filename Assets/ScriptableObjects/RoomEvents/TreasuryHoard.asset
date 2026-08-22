@@ -18,6 +18,9 @@ MonoBehaviour:
     in the corners for anyone patient enough to go along the shelves - and one gilded chest, lock
     already sprung, that nobody has touched.'
   GoverningStat: 6
+  SpawnChancePercent: 50
+  SpawnModifierStat: 6
+  SpawnModifierRate: 2
   Difficulty: 8
   Options:
   - Label: 'Gather the loose coin'
@@ -41,6 +44,8 @@ MonoBehaviour:
     - Text: 'The lid swings clear of a needle you never saw. Underneath: coin, and gear somebody else
         did not live to use.'
       Weight: 3
+      WeightModifierStat: 6
+      WeightModifierRate: 5
       Effects: []
       Targets: 0
       LootTable:
@@ -62,6 +67,8 @@ MonoBehaviour:
     - Text: 'The needle goes in above the knuckle. Whatever was on it burns all the way up the arm,
         and does not stop burning.'
       Weight: 2
+      WeightModifierStat: 6
+      WeightModifierRate: -5
       Effects:
       - EffectType: 0
         Power: 4

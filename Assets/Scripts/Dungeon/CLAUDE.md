@@ -9,18 +9,16 @@
 - **RunSaveData** (`Run.json`) tracks which level the player is on (`CurrentLevelIndex`), `ActiveDungeonSeed` for resuming mid-dungeon, and `EquippedMagic` (the drawn magic carried across levels of the run).
 - **Flow:** Menu → New Run → enter level 1 → clear exit room → **Descend** → level complete → menu shows next level → ... → all levels cleared → run complete.
 - **Win condition:** Each dungeon level is complete when the player **takes the stairs** in a cleared **exit room** (farthest room from start, designated via BFS). `Room.IsExit` marks it; `RoomActionUI`'s **Descend** button is the only caller of `CombatManager.NotifyDungeonCleared()`, so finishing a level is always a decision - the player can sweep rooms they skipped or spend an event they walked past first. Clearing the exit room does *not* end the level by itself.
-- **Room events:** `DungeonManager.PlaceRoomEvents` runs in two passes. First, every room whose
-  template declares a `RoomSO.GuaranteedEvent` gets it - outside the budget, because a Treasury the
-  budget did not pick would be a room with nothing to take. The exit room is fair game, since
-  descending is a button. Then `LevelDefinitionSO.EventsPerLevel` says how many *remaining* rooms
-  get a scarce one, drawn from each room's own `RoomSO.PossibleEvents`. Authoring is therefore split on purpose — the
-  room template says what *kind* of event fits it, the level says how *many* the player meets, so a
-  template used three times in one level does not offer the same event three times. Skips the start
-  room, the exit room, connectors and any room already holding a captive, and never places the same
-  event twice in one level (so a level needs enough distinct templates to fill its budget, or it logs
-  a warning). Random but seed-deterministic, exactly like captive placement — which is what lets the
-  save record only *that* an event was consumed and trust regeneration to put it back in the same
-  room. See `Assets/Scripts/Rooms/CLAUDE.md` for the event model itself.
+- **Room events:** `DungeonManager.PlaceRoomEvents` is one pass. For every eligible room
+  (`IsEventEligible`: not the start room, not a connector, no captive - the exit room *is* allowed,
+  since descending is a button), each of the room template's `RoomSO.PossibleEvents` is rolled against
+  its own `SpawnChancePercent` (plus an optional stat modifier) and the first to pass takes the room.
+  Authoring is therefore split on purpose: the room template says what *kind* of event fits it, the
+  event says how *rare* it is. `LevelDefinitionSO.EventsPerLevel` and `RoomSO.GuaranteedEvent` are
+  both gone - they were two ways of saying the same thing, and a per-level budget made every eligible
+  room in a small level a near certainty. Random but seed-deterministic, exactly like captive
+  placement — which is what lets the save record only *that* an event was consumed and trust
+  regeneration to put it back in the same room. See `Assets/Scripts/Rooms/CLAUDE.md`.
 - **Manual levels:** `RunLevelEntry.ManualLayout` references a `ManualLevelLayoutSO` (room positions, door connections, start/exit rooms, optional enemy overrides). Edited via Tools → Dungeon → Manual Level Layout Editor. Used for tutorial levels.
 - **Procedural levels:** `RunLevelEntry.ManualLayout` left null — generates a dungeon from `LevelTemplate` using the procedural pipeline (see the Rooms guide).
 

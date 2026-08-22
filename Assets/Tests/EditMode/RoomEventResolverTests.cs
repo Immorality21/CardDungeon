@@ -136,6 +136,76 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void PickOutcomeIndex_ModifierStat_TiltsThePoolTowardTheFavouredOutcome()
+        {
+            // Clean success weighted 3 and favoured by Luck; the one that bites weighted 1 and
+            // steered away from. Base split is 75/25; a lucky hero should widen it.
+            var pool = new List<RoomEventOutcome>
+            {
+                new RoomEventOutcome { Weight = 3, WeightModifierStat = StatType.Luck, WeightModifierRate = 5f },
+                new RoomEventOutcome { Weight = 1, WeightModifierStat = StatType.Luck, WeightModifierRate = -5f }
+            };
+
+            var unlucky = new MockCombatUnit("Tank", 5, 15, 17);
+            unlucky.Stats[StatType.Luck] = 0;
+            var lucky = new MockCombatUnit("Scout", 8, 3, 10);
+            lucky.Stats[StatType.Luck] = 12;
+
+            // A roll that lands in the bad outcome at base weights (0.75+) but not once Luck tilts it:
+            // lucky weights are 3*1.6=4.8 and 1*0.4=0.4, so the good outcome covers 92%.
+            Assert.AreEqual(1, RoomEventResolver.PickOutcomeIndex(pool, 0.80f, unlucky));
+            Assert.AreEqual(0, RoomEventResolver.PickOutcomeIndex(pool, 0.80f, lucky),
+                "Luck should buy the clean version of a success.");
+        }
+
+        [Test]
+        public void PickOutcomeIndex_ModifierStat_CanBeAnyStatNotJustLuck()
+        {
+            var pool = new List<RoomEventOutcome>
+            {
+                new RoomEventOutcome { Weight = 1 },
+                new RoomEventOutcome { Weight = 1, WeightModifierStat = StatType.Endurance, WeightModifierRate = 20f }
+            };
+
+            var frail = new MockCombatUnit("Scout", 8, 0, 10);
+            var sturdy = new MockCombatUnit("Tank", 5, 15, 17);
+
+            // frail: 1 vs 1 -> a 0.9 roll lands on the second anyway; use a low roll to separate.
+            Assert.AreEqual(0, RoomEventResolver.PickOutcomeIndex(pool, 0.20f, frail));
+            Assert.AreEqual(1, RoomEventResolver.PickOutcomeIndex(pool, 0.20f, sturdy),
+                "Endurance 15 at rate 20 makes the second outcome weight 4, so it owns 80% of the pool.");
+        }
+
+        [Test]
+        public void PickOutcomeIndex_NullActor_UsesAuthoredWeights()
+        {
+            var pool = new List<RoomEventOutcome>
+            {
+                new RoomEventOutcome { Weight = 3, WeightModifierStat = StatType.Luck, WeightModifierRate = 5f },
+                new RoomEventOutcome { Weight = 1 }
+            };
+
+            Assert.AreEqual(0, RoomEventResolver.PickOutcomeIndex(pool, 0.74f, null));
+            Assert.AreEqual(1, RoomEventResolver.PickOutcomeIndex(pool, 0.76f, null));
+        }
+
+        [Test]
+        public void PickOutcomeIndex_SteepNegativeRate_CanRemoveAnOutcomeEntirely()
+        {
+            var pool = new List<RoomEventOutcome>
+            {
+                new RoomEventOutcome { Weight = 1 },
+                new RoomEventOutcome { Weight = 1, WeightModifierStat = StatType.Luck, WeightModifierRate = -50f }
+            };
+
+            var lucky = new MockCombatUnit("Scout", 8, 3, 10);
+            lucky.Stats[StatType.Luck] = 12;
+
+            Assert.AreEqual(0, RoomEventResolver.PickOutcomeIndex(pool, 0.99f, lucky),
+                "A weight floored at 0 takes the outcome off the table, which is why you would author it.");
+        }
+
+        [Test]
         public void PickOutcomeIndex_AllWeightsZero_FallsBackToFirst()
         {
             var pool = new List<RoomEventOutcome>

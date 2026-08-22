@@ -167,30 +167,37 @@ namespace Assets.Scripts.Rooms.Events
         /// an empty pool. Non-positive weights are treated as zero, and a pool whose weights are all
         /// non-positive falls back to its first entry rather than dropping the outcome silently - an
         /// unweighted pool is an authoring slip, not a reason for nothing to happen.
+        ///
+        /// <para><paramref name="actor"/> - the hero the check was resolved against - bends the
+        /// weights through each outcome's <see cref="RoomEventOutcome.WeightModifierStat"/> and rate.
+        /// Whether the check passes is the event's <c>GoverningStat</c>'s business; this decides
+        /// <i>how it goes</i>: the clean success rather than the one that also costs you, the glancing
+        /// failure rather than the one that wakes something. Null actor = authored weights.</para>
         /// </summary>
-        public static int PickOutcomeIndex(IReadOnlyList<RoomEventOutcome> pool, float roll)
+        public static int PickOutcomeIndex(IReadOnlyList<RoomEventOutcome> pool, float roll,
+            ICombatUnit actor = null)
         {
             if (pool == null || pool.Count == 0)
             {
                 return -1;
             }
 
-            int total = 0;
+            float total = 0f;
             for (int i = 0; i < pool.Count; i++)
             {
-                total += WeightOf(pool[i]);
+                total += WeightOf(pool[i], actor);
             }
 
-            if (total <= 0)
+            if (total <= 0f)
             {
                 return 0;
             }
 
             float target = Mathf.Clamp01(roll) * total;
-            int running = 0;
+            float running = 0f;
             for (int i = 0; i < pool.Count; i++)
             {
-                running += WeightOf(pool[i]);
+                running += WeightOf(pool[i], actor);
                 if (target < running)
                 {
                     return i;
@@ -200,9 +207,35 @@ namespace Assets.Scripts.Rooms.Events
             return pool.Count - 1;
         }
 
-        private static int WeightOf(RoomEventOutcome outcome)
+        /// <summary>
+        /// An outcome's effective weight: <c>Weight * (1 + stat * rate / 100)</c>, floored at 0.
+        /// Relative to the authored weight, so a modifier tilts a pool without rewriting it - and a
+        /// steep negative rate can take an outcome off the table entirely for a hero with enough of
+        /// the stat, which is the point of authoring one.
+        /// </summary>
+        private static float WeightOf(RoomEventOutcome outcome, ICombatUnit actor)
         {
-            return outcome == null ? 0 : Mathf.Max(0, outcome.Weight);
+            if (outcome == null)
+            {
+                return 0f;
+            }
+
+            float weight = Mathf.Max(0, outcome.Weight);
+            if (weight <= 0f
+                || actor == null
+                || outcome.WeightModifierStat == StatType.None
+                || Mathf.Approximately(outcome.WeightModifierRate, 0f))
+            {
+                return weight;
+            }
+
+            int stat = actor.GetEffectiveStat(outcome.WeightModifierStat);
+            if (stat <= 0)
+            {
+                return weight;
+            }
+
+            return Mathf.Max(0f, weight * (1f + stat * outcome.WeightModifierRate / 100f));
         }
 
         /// <summary>

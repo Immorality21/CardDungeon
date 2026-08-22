@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Items;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms.Events
@@ -37,6 +38,18 @@ namespace Assets.Scripts.Rooms.Events
 
         [Tooltip("Relative likelihood within its pool. Two outcomes at 3 and 1 land 75% / 25%.")]
         public int Weight = 1;
+
+        [Tooltip("Optional: a stat on the acting hero that bends this outcome's weight. Luck is " +
+                 "the obvious one - fortune deciding how a gamble lands - but it is an authoring " +
+                 "choice, so an outcome can just as well turn on Endurance or Spirit.")]
+        public StatType WeightModifierStat = StatType.None;
+
+        [Tooltip("How hard that stat pushes, as a percent per point: effective weight = " +
+                 "Weight * (1 + stat * rate / 100). POSITIVE favours this outcome (the clean " +
+                 "success, the glancing failure); NEGATIVE steers away from it (the bite, the " +
+                 "collapse). 0 - the default - leaves the outcome purely weight-driven, so this is " +
+                 "opt-in per outcome.")]
+        public float WeightModifierRate;
 
         [Tooltip("Damage/heal land at once; buffs and debuffs are recorded as level afflictions " +
                  "(see LevelAfflictionTracker) because there is no combat running to hold them. " +

@@ -33,7 +33,7 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 **`Assets.Scripts.*`** — Game-specific code:
 - `UnitStats/` — **the stat model**: `StatType` (the one stat enum, `None = 0`), `UnitStat` (one stat + amount), `StatBlock` (a sparse, indexable set), **`StatCatalog`** (the one per-stat mapping — labels, recruit/power weights, authoring defaults, iteration order), and `Editor/StatBlockDrawer` (one labelled row per stat in the inspector). **Adding a stat is one `StatType` member plus one `StatCatalog` row**; `StatCatalogTests` fails if the row is missing.
 - `Rooms/` — Dungeon generation (`RoomManager`, `RoomNode`, `Room`, `Door`, `RoomSO`), `GameManager`, `CombatManager`
-- `Rooms/Events/` — **room events**: the stat-resolved gambles behind a room's **Action** button (`RoomEventSO`, `RoomEventResolver`, `RoomEventRunner`, `LevelAfflictionTracker`)
+- `Rooms/Events/` — **room events**: the stat-resolved gambles behind a room's **Action** button (`RoomEventSO`, `RoomEventSpawn`, `RoomEventResolver`, `RoomEventRunner`, `LevelAfflictionTracker`) — see its own `CLAUDE.md`
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `LevelConfiguration`, `HeroSaveData`
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`
 - `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`
@@ -53,7 +53,8 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automatically when you work on files there. Read the relevant one before changing that area:
 
 - **Combat mechanics** (turn order, damage, `ICombatUnit`) → `Assets/Scripts/Combat/CLAUDE.md`
-- **Dungeon generation + combat flow + runtime controls** → `Assets/Scripts/Rooms/CLAUDE.md`
+- **Dungeon generation + combat flow + the room bar + runtime controls** → `Assets/Scripts/Rooms/CLAUDE.md`
+- **Room events** (spawn odds, stat gates, checks, outcome weighting, level afflictions) → `Assets/Scripts/Rooms/Events/CLAUDE.md`
 - **Magic/Draw system** (magic defs, draw slots + charges, effects, combos, buffs) → `Assets/Scripts/Cards/CLAUDE.md`
 - **Run progression + deferred persistence** → `Assets/Scripts/Dungeon/CLAUDE.md`
 - **Meta-progression / hub** (Gold, Essence, card upgrades) → `Assets/Scripts/Progression/CLAUDE.md`

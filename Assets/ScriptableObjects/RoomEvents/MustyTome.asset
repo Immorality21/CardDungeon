@@ -16,6 +16,12 @@ MonoBehaviour:
   Title: 'A Musty Tome'
   Prompt: 'A swollen leather tome lies open on a lectern, its pages furred with mould and strung across with old web. Whatever is written in it was worth writing down carefully. Something has been living in the spine for a long time.'
   GoverningStat: 4
+  SpawnChancePercent: 10
+  SpawnModifierStat: 4
+  SpawnModifierRate: 5
+  SpawnRequirements:
+  - Type: 4
+    Amount: 6
   Difficulty: 6
   Options:
   - Label: 'Ease it off the lectern'
@@ -24,6 +30,8 @@ MonoBehaviour:
     Success:
     - Text: 'You lift the cover clear, copy what matters, and leave the rest to the damp. A collector will pay for this.'
       Weight: 3
+      WeightModifierStat: 6
+      WeightModifierRate: 4
       Effects: []
       Targets: 0
       LootTable: []
@@ -48,6 +56,8 @@ MonoBehaviour:
     Failure:
     - Text: 'The spine splits, the web comes alive, and something long-legged sinks its jaws in before you can pull back. The pages are ruined.'
       Weight: 2
+      WeightModifierStat: 6
+      WeightModifierRate: -4
       Effects:
       - EffectType: 0
         Power: 4

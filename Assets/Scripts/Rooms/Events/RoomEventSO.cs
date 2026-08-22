@@ -36,6 +36,29 @@ namespace Assets.Scripts.Rooms.Events
         [Tooltip("The stat every StatCheck option on this event is resolved against.")]
         public StatType GoverningStat = StatType.Luck;
 
+        [Header("Turning up at all")]
+        [Range(0f, 100f)]
+        [Tooltip("Percent chance this event is placed in an eligible room. 100 = always (a treasury " +
+                 "hoard); 0 = switched off. Defaults to 100 so a newly authored event is visible " +
+                 "immediately and gets tuned DOWN - a rarity default would look like a broken event.")]
+        public float SpawnChancePercent = 100f;
+
+        [Tooltip("Optional: a party stat that raises the spawn chance, read as the party's best at " +
+                 "it. Luck for blind finds, Intelligence for things only a scholar would notice.")]
+        public StatType SpawnModifierStat = StatType.None;
+
+        [Tooltip("How hard that stat pushes: chance = base + base * (stat * rate / 100). Relative to " +
+                 "the base, so it scales a rare find and a common one alike. Small rates are almost " +
+                 "invisible - at base 5 and rate 1.5, 10 Luck buys 0.75 of a percent.")]
+        public float SpawnModifierRate;
+
+        [Tooltip("Optional gate: minimum stat values, ALL of which must be met - though not " +
+                 "necessarily by the same hero, so 10 Strength AND 15 Intelligence can be covered by " +
+                 "two different heroes. Empty means no condition. For finds only a specialist would " +
+                 "register: a tome nobody in the party can read is not a decision, it is furniture. " +
+                 "Rows left at StatType.None are ignored.")]
+        public List<UnitStat> SpawnRequirements = new List<UnitStat>();
+
         [Tooltip("The stat value at which a check is an even bet. Above it the party is favoured, " +
                  "below it they are not - and a party under half this cannot read the odds at all.")]
         public int Difficulty = 8;

@@ -16,6 +16,9 @@ MonoBehaviour:
   Title: 'A Sealed Tomb'
   Prompt: 'A slab of stone has been dragged over a hole in the cavern floor and mortared down at the edges. Somebody wanted this shut. The mortar is old, and the slab has a lip you could get your hands under.'
   GoverningStat: 1
+  SpawnChancePercent: 10
+  SpawnModifierStat: 1
+  SpawnModifierRate: 5
   Difficulty: 10
   Options:
   - Label: 'Heave the slab aside'

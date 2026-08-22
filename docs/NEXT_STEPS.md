@@ -380,7 +380,57 @@ That also exposed a flaw in the dialogs: `ShowDetail` only ever had an Ok, so "F
 "Descend?" were questions the player could not decline. `ShowConfirm` adds a Cancel beside it, and
 both Rescue and Descend use it.
 
-*Balance note:* every Treasury now pays at least 15 gold, against roughly 70-85 gold a
+**Then rarity moved onto the event (2026-08-22).** With Examine gone, an Action button was the only
+thing on the bar - and it was showing up nearly everywhere, because `TreasuryRoom` is about a quarter
+of every level pool and its hoard was guaranteed. `RoomEventSO` now carries its own odds:
+`SpawnChancePercent` plus an optional `SpawnModifierStat`/`SpawnModifierRate`, where
+`chance = base + base * (stat * rate / 100)` - relative to the base, so one rate scales a rare find
+and a common one alike. The stat is the party's best for the party as it enters the level - base stats plus the level-up
+gains its saved XP has bought plus equipped gear - re-derived through `HeroStatCalculator`, since
+placement runs before the party is instantiated and `Hero.GetEffectiveStat` needs a live scene. (It
+read *only* level-1 base stats at first, which silently ignored levelling: the live save's level-2
+Warrior is AGI 5->10 and STR 10->13, so `CeilingShaft` and `SealedTomb` were both rolling off the
+wrong number.) Stable across a save/resume because XP and gear are both committed only on level
+clear. `RoomEventSpawn` is pure and covered by
+`RoomEventSpawnTests`, including the worked example from the request.
+
+That collapsed two knobs into one: **`LevelDefinitionSO.EventsPerLevel` and `RoomSO.GuaranteedEvent`
+are both gone.** A per-level budget made every eligible room in a small level close to a certainty,
+and the guaranteed flag existed only to escape the budget - both were really "how likely is this
+event to be here". `TreasuryHoard` is now just an event with a high base chance. Placement is one
+pass: each of a room's candidates is rolled in authored order and the first to pass takes the room,
+so listing two events raises the odds of that room having *something*.
+
+**Stats now drive an event at three points (2026-08-22),** all optional, all per-asset:
+
+1. **Whether it appears** - `SpawnChancePercent` + `SpawnModifierStat`/`Rate`, plus a
+   **`SpawnRequirements`** gate: a list of `UnitStat` thresholds where an empty list means no
+   condition and otherwise **every threshold must be met, though not necessarily by the same hero**
+   (10 STR + 15 INT passes with an 11-STR Warrior and a 20-INT Acolyte; it fails if nobody reaches 15
+   INT). That is why the check reads party-best *per stat*. `MustyTome` now needs
+   Intelligence 6 and `DrownedOffering` Spirit 6, so a solo Warrior is gated out of both and
+   recruiting the Acolyte visibly opens them.
+2. **Whether a check passes** - `GoverningStat` + `Difficulty`. This part existed from the start.
+3. **Which outcome you get** - new. `RoomEventOutcome.WeightModifierStat` + `WeightModifierRate` bend
+   an outcome's weight by `Weight * (1 + stat * rate / 100)`, read off the *acting* hero (their hand
+   is in the chest; party-best would mean the Scout's charm helping while the Warrior forces a door).
+   Positive favours an outcome, negative steers away, and a steep negative can remove it entirely.
+   Started as a hardcoded `LuckBias` and was generalised - Luck is the obvious authoring answer, not
+   a rule worth baking into the resolver. Measured on `MustyTome`'s success pool: the clean outcome
+   goes 75% -> 78.3% -> 81.6% at Luck 0 / 5 / 12.
+
+Outcome **magnitude** is still flat (`flatPower`) - the numbers belong to the event, not the caster.
+Only `MustyTome` and `TreasuryHoard` have outcome modifiers authored so far; the rest are 0, i.e. a
+balancing pass rather than a code change.
+
+Authored: base 10 with rate 5 for the five stat finds (8 for `DrownedOffering`), and
+`TreasuryHoard` at **50 + Luck rate 2** - at 100 it was what made an Action feel universal. Measured
+expected Action rooms per level: `UpperHalls` ~2.0-2.4, `CollapsedCaverns` ~1.6-1.8, `SunkenDepths`
+~0.6-0.7, `DungeonEntrance` ~0.8-0.9. *(One consequence of dropping the budget: nothing stops the
+same event appearing in two rooms of one level any more. At these odds it is uncommon, and a room
+only ever offers one thing, but it is no longer impossible.)*
+
+*Balance note:* every Treasury that rolls its hoard pays at least 15 gold, against roughly 70-85 gold a
 level. Not modelled by the analyzer (it does not read events at all), so treat the curve as that much
 optimistic.
 

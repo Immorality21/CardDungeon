@@ -16,6 +16,12 @@ MonoBehaviour:
   Title: 'A Drowned Offering'
   Prompt: 'Knee-deep in the standing water, a stone bowl still holds its offering: coins, teeth, something folded in oilcloth. The water around it is warmer than the water around your boots.'
   GoverningStat: 5
+  SpawnChancePercent: 8
+  SpawnModifierStat: 5
+  SpawnModifierRate: 5
+  SpawnRequirements:
+  - Type: 5
+    Amount: 6
   Difficulty: 10
   Options:
   - Label: 'Kneel and say the words'
