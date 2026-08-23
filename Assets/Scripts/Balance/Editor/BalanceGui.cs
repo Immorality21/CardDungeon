@@ -240,7 +240,7 @@ namespace Assets.Scripts.Balance.Editor
 
         /// <summary>
         /// The <c>StatBlock.Values</c> list under <paramref name="blockPath"/>, from either a whole
-        /// asset or a single array element (a <c>LevelConfiguration</c> entry, say). Null when the
+        /// asset or a single array element (a <c>SphereGridNode</c> entry, say). Null when the
         /// path does not resolve, which is the failure mode string-based property paths have.
         /// </summary>
         private static SerializedProperty StatValues(SerializedObject serialized, SerializedProperty element, string blockPath)

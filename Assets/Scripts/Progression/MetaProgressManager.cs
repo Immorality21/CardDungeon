@@ -9,9 +9,10 @@ namespace Assets.Scripts.Progression
 {
     /// <summary>
     /// Owns the persistent meta-progression currencies (Gold, Essence) and permanent
-    /// magic upgrades (per magic key) plus purchased extra magic slots. Persists
+    /// magic upgrades (per magic key) plus purchased party slots. Persists
     /// immediately on every change, so awards survive party death even though
-    /// dungeon/run saves are wiped.
+    /// dungeon/run saves are wiped. (Extra magic slots moved to the sphere grid —
+    /// per-hero MagicSlot nodes bought with XP.)
     /// </summary>
     public class MetaProgressManager : SingletonBehaviour<MetaProgressManager>
     {
@@ -20,11 +21,6 @@ namespace Assets.Scripts.Progression
         public const int MaxMagicUpgradeLevel = 5;
         private const int BaseMagicUpgradeCost = 15;
         private const int MagicUpgradeCostIncrement = 15;
-
-        // --- Slot upgrade tuning ---
-        public const int MaxBonusSlots = 2;
-        private const int BaseSlotUpgradeCost = 40;
-        private const int SlotUpgradeCostIncrement = 40;
 
         // --- Award tuning ---
         public const int GoldPerLevelCleared = 25;
@@ -39,7 +35,6 @@ namespace Assets.Scripts.Progression
 
         public int Gold => _saveData.Gold;
         public int Essence => _saveData.Essence;
-        public int BonusSlots => _saveData.BonusSlots;
         public int BonusPartySlots => _saveData.BonusPartySlots;
 
         protected override void Awake()
@@ -47,6 +42,27 @@ namespace Assets.Scripts.Progression
             base.Awake();
             _fileHandler = new FileHandler();
             Load();
+            RefundLegacyBonusSlots();
+        }
+
+        /// <summary>
+        /// The Essence-bought global magic-slot upgrade was retired when the sphere grid took slot
+        /// growth over (slots are per hero now, bought with XP as MagicSlot nodes). A save that had
+        /// paid for slots gets its Essence back in full, at the historical prices — slot i cost
+        /// 40 + 40*i — and the legacy counter is zeroed so a re-read never double-refunds.
+        /// </summary>
+        private void RefundLegacyBonusSlots()
+        {
+            if (_saveData.BonusSlots <= 0)
+            {
+                return;
+            }
+
+            int n = _saveData.BonusSlots;
+            _saveData.Essence += 40 * n + 40 * n * (n - 1) / 2;
+            _saveData.BonusSlots = 0;
+            Save();
+            OnChanged?.Invoke();
         }
 
         // --- Pure helpers (no state / disk) so economy math is unit-testable ---
@@ -69,16 +85,6 @@ namespace Assets.Scripts.Progression
                 currentLevel = 0;
             }
             return BaseMagicUpgradeCost + (currentLevel * MagicUpgradeCostIncrement);
-        }
-
-        /// <summary>Essence cost to buy the next extra magic slot (from currentBonus to currentBonus + 1).</summary>
-        public static int SlotUpgradeCostForNext(int currentBonus)
-        {
-            if (currentBonus < 0)
-            {
-                currentBonus = 0;
-            }
-            return BaseSlotUpgradeCost + (currentBonus * SlotUpgradeCostIncrement);
         }
 
         // --- Currency ---
@@ -363,43 +369,34 @@ namespace Assets.Scripts.Progression
             OnChanged?.Invoke();
         }
 
-        // --- Magic slot upgrades ---
+        // --- Run completion (which runs have been cleared to the end) ---
 
-        /// <summary>Extra magic slots purchased on top of the base slot count.</summary>
-        public int GetBonusSlotCount()
+        /// <summary>Whether the player has ever cleared this run's final level.</summary>
+        public bool HasCompletedRun(string runKey)
         {
-            return Mathf.Clamp(_saveData.BonusSlots, 0, MaxBonusSlots);
+            return !string.IsNullOrEmpty(runKey)
+                && _saveData.CompletedRunKeys != null
+                && _saveData.CompletedRunKeys.Contains(runKey);
         }
 
-        /// <summary>Essence cost of the next extra slot, or 0 if already at max.</summary>
-        public int GetSlotUpgradeCost()
+        /// <summary>Records a run as completed. Idempotent; persists immediately.</summary>
+        public void MarkRunCompleted(string runKey)
         {
-            if (_saveData.BonusSlots >= MaxBonusSlots)
+            if (string.IsNullOrEmpty(runKey))
             {
-                return 0;
+                return;
             }
-            return SlotUpgradeCostForNext(_saveData.BonusSlots);
-        }
-
-        public bool CanUpgradeSlots()
-        {
-            return _saveData.BonusSlots < MaxBonusSlots &&
-                   _saveData.Essence >= SlotUpgradeCostForNext(_saveData.BonusSlots);
-        }
-
-        /// <summary>Spends Essence to buy one extra magic slot. Returns false if unaffordable or maxed.</summary>
-        public bool TryUpgradeSlots()
-        {
-            if (!CanUpgradeSlots())
+            if (_saveData.CompletedRunKeys == null)
             {
-                return false;
+                _saveData.CompletedRunKeys = new List<string>();
             }
-
-            _saveData.Essence -= SlotUpgradeCostForNext(_saveData.BonusSlots);
-            _saveData.BonusSlots += 1;
+            if (_saveData.CompletedRunKeys.Contains(runKey))
+            {
+                return;
+            }
+            _saveData.CompletedRunKeys.Add(runKey);
             Save();
             OnChanged?.Invoke();
-            return true;
         }
 
         // --- Party slots (how many heroes can be fielded at once) ---

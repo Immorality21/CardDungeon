@@ -45,6 +45,10 @@ namespace Assets.Scripts.Balance
         public float ExpectedXp;
         public float ExpectedGold;
 
+        /// <summary>Per-hero XP budget the party entering this level was modelled at — the expected
+        /// income of every earlier floor, greedy-spent on each hero's sphere grid.</summary>
+        public int XpBudget;
+
         /// <summary>Heroes in the party entering this level. Roster growth makes this vary per level.</summary>
         public int PartySize;
 
@@ -125,6 +129,16 @@ namespace Assets.Scripts.Balance
                 }
             }
 
+            // The XP loop, closed: each floor's expected income is banked per hero and greedy-spent
+            // on their grids before the next floor is measured, so the back half of a run is judged
+            // against a party that grew on the way there — hero power finally moves within a run,
+            // not just roster width.
+            var lifetime = new Dictionary<HeroSO, float>();
+            foreach (var hero in roster)
+            {
+                lifetime[hero] = rules.ReferenceHeroXp;
+            }
+
             for (int i = 0; i < run.Levels.Count; i++)
             {
                 var entry = run.Levels[i];
@@ -134,15 +148,28 @@ namespace Assets.Scripts.Balance
                 }
 
                 // Level 0 reuses the caller's baseline so gear/save options are honoured; later
-                // levels are rebuilt from the grown roster.
+                // levels are rebuilt from the grown roster at its accumulated XP.
                 var levelParty = i == 0
                     ? party
-                    : PartyBaseline.Build(roster, rules.ReferenceHeroLevel, null,
-                        party.PotionItem, party.PotionCount);
+                    : PartyBaseline.Build(roster,
+                        h => Mathf.FloorToInt(lifetime.TryGetValue(h, out var xp) ? xp : 0f),
+                        null, party.PotionItem, party.PotionCount, null);
 
                 var level = BuildLevel(i, entry, levelParty, rules);
                 level.RescuedHere = entry.RescueHero;
+                level.XpBudget = i == 0
+                    ? rules.ReferenceHeroXp
+                    : Mathf.FloorToInt(RosterAverage(lifetime, roster));
                 curve.Levels.Add(level);
+
+                // Pay this floor's expected XP forward: every fielded hero banks an even share
+                // (XpSplit's model form), so floor i+1's party is the one that spent floors 0..i's
+                // income.
+                float share = XpSplit.ExpectedShare(level.ExpectedXp, Mathf.Max(1, roster.Count));
+                foreach (var hero in roster)
+                {
+                    lifetime[hero] += share;
+                }
 
                 // A hero freed *during* a level only helps for part of it, so they count from the
                 // next level on — the conservative reading.
@@ -155,6 +182,14 @@ namespace Assets.Scripts.Balance
                     roster.Count < PartySlots.MaxCap)
                 {
                     roster.Add(entry.RescueHero);
+                    // Recruits join with the same starter bank the game grants — one rule, one
+                    // function (SphereGridOps.StarterBank over the roster's lifetimes).
+                    var lifetimes = new List<int>();
+                    foreach (var pair in lifetime)
+                    {
+                        lifetimes.Add(Mathf.FloorToInt(pair.Value));
+                    }
+                    lifetime[entry.RescueHero] = SphereGridOps.StarterBank(lifetimes);
                 }
             }
 
@@ -175,6 +210,24 @@ namespace Assets.Scripts.Balance
             }
 
             return curve;
+        }
+
+        private static float RosterAverage(Dictionary<HeroSO, float> lifetime, List<HeroSO> roster)
+        {
+            if (roster == null || roster.Count == 0)
+            {
+                return 0f;
+            }
+
+            float total = 0f;
+            foreach (var hero in roster)
+            {
+                if (lifetime.TryGetValue(hero, out var xp))
+                {
+                    total += xp;
+                }
+            }
+            return total / roster.Count;
         }
 
         private static LevelCurve BuildLevel(int index, RunLevelEntry entry, PartyBaseline party, BalanceRulesSO rules)

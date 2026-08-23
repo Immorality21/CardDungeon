@@ -129,8 +129,7 @@ namespace Tests.EditMode
             hero.BaseStats[StatType.Endurance] = 5;
             hero.BaseStats[StatType.MaxHealth] = 200;
             hero.BaseStats[StatType.Agility] = 5;
-            hero.LevelProgression = new List<LevelConfiguration>();
-            return PartyBaseline.Build(new List<HeroSO> { hero }, 1);
+            return PartyBaseline.Build(new List<HeroSO> { hero }, 0);
         }
 
         private ProgressionMap Build(

@@ -1,0 +1,206 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
+  m_Name: TankGrid
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
+  StartNodeKey: tank-start
+  Nodes:
+  - Key: tank-start
+    DisplayName: 
+    Kind: 0
+    XpCost: 15
+    Position: {x: 0, y: -0}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors: []
+  - Key: tank-spine-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -90}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-start
+  - Key: tank-spine-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 25
+    Position: {x: 0, y: -180}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-spine-1
+  - Key: tank-spine-3
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -270}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-spine-2
+  - Key: tank-spine-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 25
+    Position: {x: 0, y: -360}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 1
+      - Type: 2
+        Amount: 1
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-spine-3
+  - Key: tank-immovable-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 40
+    Position: {x: -110, y: -415}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-spine-4
+  - Key: tank-immovable-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: -205, y: -470}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 7
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-immovable-1
+  - Key: tank-immovable-3
+    DisplayName: 
+    Kind: 1
+    XpCost: 55
+    Position: {x: -300, y: -525}
+    Gains:
+      Values: []
+    ResistType: 2
+    ResistPercent: 15
+    Neighbors:
+    - tank-immovable-2
+  - Key: tank-immovable-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 60
+    Position: {x: -395, y: -580}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 8
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-immovable-3
+  - Key: tank-immovable-5
+    DisplayName: 
+    Kind: 1
+    XpCost: 65
+    Position: {x: -490, y: -635}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 15
+    Neighbors:
+    - tank-immovable-4
+  - Key: tank-vanguard-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 35
+    Position: {x: 110, y: -235}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-spine-2
+  - Key: tank-vanguard-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 40
+    Position: {x: 205, y: -290}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 1
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-vanguard-1
+  - Key: tank-vanguard-3
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: 300, y: -345}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-vanguard-2
+  - Key: tank-vanguard-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 55
+    Position: {x: 395, y: -400}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-vanguard-3
+  - Key: tank-vanguard-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 80
+    Position: {x: 490, y: -455}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - tank-vanguard-4

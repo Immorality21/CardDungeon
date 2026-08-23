@@ -14,6 +14,10 @@ namespace Assets.Scripts.Dungeon
                  "to report what each run unlocks relative to the ones before it.")]
         public int SequenceIndex;
 
+        [Tooltip("Whether the run can be started again after it has been completed once. Off for " +
+                 "one-shot content like the tutorial; on for farmable runs.")]
+        public bool Repeatable;
+
         public List<RunLevelEntry> Levels = new List<RunLevelEntry>();
     }
 }

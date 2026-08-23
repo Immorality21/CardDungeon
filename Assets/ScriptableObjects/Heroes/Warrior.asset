@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Key: Warrior
   Label: Warrior
+  Blurb: 
+  RecruitCost: 0
   Sprite: {fileID: 21300000, guid: b2ddfcceaadefd6f5add82a8c4549a7a, type: 3}
   BaseStats:
     Values:
@@ -32,16 +34,4 @@ MonoBehaviour:
     - Type: 7
       Amount: 13
   AttackStat: 1
-  LevelProgression:
-  - Level: 2
-    XpRequired: 100
-    Gains:
-      Values:
-      - Type: 1
-        Amount: 3
-      - Type: 2
-        Amount: 1
-      - Type: 7
-        Amount: 7
-      - Type: 3
-        Amount: 5
+  SphereGrid: {fileID: 11400000, guid: 5a20bb614bb7b6e459b527d2ccc971bf, type: 2}

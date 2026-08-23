@@ -23,7 +23,7 @@ namespace Assets.Scripts.UnitStats
     /// <summary>
     /// A sparse set of <see cref="UnitStat"/> entries, addressed by <see cref="StatType"/>. Replaces
     /// the parallel lists of hard-coded int fields that used to live on <c>Stats</c>, <c>HeroSO</c>,
-    /// <c>EnemySO</c>, <c>LevelConfiguration</c> and the balance model — adding a stat used to mean
+    /// <c>EnemySO</c>, <c>SphereGridNode</c> and the balance model — adding a stat used to mean
     /// editing eight declarations plus their copy sites; now it means one enum member.
     ///
     /// <para>Sparse on purpose: an absent entry reads 0, so an asset only lists what it actually has

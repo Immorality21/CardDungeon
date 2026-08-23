@@ -1,6 +1,7 @@
 using Assets.Scripts.Cards.UI;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
+using Assets.Scripts.Heroes.UI;
 using Assets.Scripts.IO;
 using Assets.Scripts.Items.UI;
 using Assets.Scripts.MainMenu;
@@ -32,6 +33,7 @@ public class MainMenuManager : MonoBehaviour
     private VisualElement _merchantView;
     private VisualElement _tavernView;
     private VisualElement _partyView;
+    private VisualElement _gridView;
     private VisualElement _forgeView;
     private VisualElement _inventoryView;
 
@@ -40,6 +42,7 @@ public class MainMenuManager : MonoBehaviour
     private Button _merchantButton;
     private Button _tavernButton;
     private Button _partyButton;
+    private Button _gridButton;
     private Button _progressPartyButton;
     private Button _forgeButton;
     private Button _inventoryButton;
@@ -56,6 +59,7 @@ public class MainMenuManager : MonoBehaviour
     private MerchantUI _merchant;
     private TavernUI _tavern;
     private PartySelectUI _partySelect;
+    private SphereGridUI _sphereGrid;
     private MagicForgeUI _forge;
     private InventoryHubUI _inventory;
 
@@ -89,6 +93,7 @@ public class MainMenuManager : MonoBehaviour
         _merchantView = root.Q<VisualElement>("merchant-view");
         _tavernView = root.Q<VisualElement>("tavern-view");
         _partyView = root.Q<VisualElement>("party-view");
+        _gridView = root.Q<VisualElement>("grid-view");
         _forgeView = root.Q<VisualElement>("forge-view");
         _inventoryView = root.Q<VisualElement>("inventory-view");
 
@@ -97,6 +102,7 @@ public class MainMenuManager : MonoBehaviour
         _merchantButton = root.Q<Button>("merchant-btn");
         _tavernButton = root.Q<Button>("tavern-btn");
         _partyButton = root.Q<Button>("party-btn");
+        _gridButton = root.Q<Button>("grid-btn");
         _progressPartyButton = root.Q<Button>("progress-party-btn");
         _forgeButton = root.Q<Button>("forge-btn");
         _inventoryButton = root.Q<Button>("inventory-btn");
@@ -124,6 +130,10 @@ public class MainMenuManager : MonoBehaviour
         {
             _partyButton.clicked += OnVisitParty;
         }
+        if (_gridButton != null)
+        {
+            _gridButton.clicked += OnVisitSphereGrid;
+        }
         if (_progressPartyButton != null)
         {
             _progressPartyButton.clicked += OnChangePartyFromProgress;
@@ -134,6 +144,7 @@ public class MainMenuManager : MonoBehaviour
         _merchant = new MerchantUI(_merchantView);
         _tavern = new TavernUI(_tavernView, _partyRoster);
         _partySelect = _partyView != null ? new PartySelectUI(_partyView, _partyRoster) : null;
+        _sphereGrid = _gridView != null ? new SphereGridUI(_gridView, _partyRoster) : null;
         _forge = new MagicForgeUI(_forgeView);
         _inventory = new InventoryHubUI(_inventoryView, _partyRoster);
         _merchant.OnClosed += ShowHomePanel;
@@ -141,6 +152,10 @@ public class MainMenuManager : MonoBehaviour
         if (_partySelect != null)
         {
             _partySelect.OnClosed += OnPartyClosed;
+        }
+        if (_sphereGrid != null)
+        {
+            _sphereGrid.OnClosed += ShowHomePanel;
         }
         _forge.OnClosed += ShowHomePanel;
         _inventory.OnClosed += ShowHomePanel;
@@ -164,13 +179,26 @@ public class MainMenuManager : MonoBehaviour
         SetShown(_merchantView, false);
         SetShown(_tavernView, false);
         SetShown(_partyView, false);
+        SetShown(_gridView, false);
         SetShown(_forgeView, false);
         SetShown(_inventoryView, false);
 
         bool hasActiveRun = !string.IsNullOrEmpty(_runSaveData.RunKey);
         SetShown(_continueButton, hasActiveRun);
 
+        // A completed non-repeatable run (the tutorial) cannot be started again. An active run is
+        // still continuable — completion only gates starting fresh.
+        bool runLocked = _runDefinition != null
+            && !_runDefinition.Repeatable
+            && MetaProgressManager.Instance.HasCompletedRun(RunKeyOf(_runDefinition));
+        SetShown(_newRunButton, !runLocked);
+
         RefreshCurrencyHeader();
+    }
+
+    private static string RunKeyOf(RunDefinitionSO run)
+    {
+        return !string.IsNullOrEmpty(run.Key) ? run.Key : run.name;
     }
 
     private void RefreshCurrencyHeader()
@@ -209,7 +237,15 @@ public class MainMenuManager : MonoBehaviour
 
     private void OnNewRun()
     {
-        var runKey = !string.IsNullOrEmpty(_runDefinition.Key) ? _runDefinition.Key : _runDefinition.name;
+        var runKey = RunKeyOf(_runDefinition);
+
+        // Backstop for the home-panel gate: never restart a completed one-shot run.
+        if (!_runDefinition.Repeatable && MetaProgressManager.Instance.HasCompletedRun(runKey))
+        {
+            ShowHomePanel();
+            return;
+        }
+
         _runSaveData = new RunSaveData
         {
             RunKey = runKey,
@@ -251,6 +287,16 @@ public class MainMenuManager : MonoBehaviour
     {
         SetShown(_homeView, false);
         _tavern.Show();
+    }
+
+    private void OnVisitSphereGrid()
+    {
+        if (_sphereGrid == null)
+        {
+            return;
+        }
+        SetShown(_homeView, false);
+        _sphereGrid.Show();
     }
 
     private void OnVisitParty()

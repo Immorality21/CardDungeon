@@ -11,11 +11,21 @@ namespace Assets.Scripts.Heroes
     {
         public HeroSO HeroSO;
         public Stats Stats;
-        public int Level = 1;
+
+        /// <summary>Unspent XP bank. Kills add to it mid-run (in memory, committed on level clear);
+        /// sphere-grid activations at the hub draw it down. Nothing else reads or spends it.</summary>
         public int CurrentXp;
+
+        /// <summary>Activated sphere-grid node keys, restored from the save. Never changes mid-run —
+        /// spending is hub-only, which is what keeps room-event spawn thresholds stable.</summary>
+        public List<string> ActivatedNodes = new List<string>();
+
         [Tooltip("Innate elemental resistance. Gear resistance sums on top of this — see " +
                  "GetEffectiveResistances().")]
         public List<Resistance> Resistances = new List<Resistance>();
+
+        /// <summary>Resistance granted by activated sphere-grid nodes, derived once at initialize.</summary>
+        private List<Resistance> _nodeResistances = new List<Resistance>();
 
         public string HeroKey => HeroSO != null ? HeroSO.SaveKey : "";
         public string DisplayName => HeroSO != null ? HeroSO.DisplayName : "";
@@ -36,41 +46,47 @@ namespace Assets.Scripts.Heroes
         public void Initialize(HeroSO heroSO)
         {
             HeroSO = heroSO;
-            Level = 1;
             CurrentXp = 0;
+            ActivatedNodes = new List<string>();
+            _nodeResistances = new List<Resistance>();
             Stats = new Stats(heroSO.BaseStats);
         }
 
-        public void InitializeFromSave(HeroSO heroSO, int savedXp)
+        /// <summary>
+        /// Restores a hero from their save entry: base stats plus every activated sphere-grid
+        /// node's grants, at full health (a freshly derived hero always starts full). The XP bank
+        /// is restored as-is — there is no replay loop, because XP no longer buys anything by
+        /// itself; it is spent on nodes at the hub.
+        /// </summary>
+        public void InitializeFromSave(HeroSO heroSO, int savedXp, List<string> activatedNodes)
         {
-            Initialize(heroSO);
-            AddXp(savedXp);
+            HeroSO = heroSO;
+            CurrentXp = savedXp;
+            ActivatedNodes = SphereGridOps.SanitizeActivated(heroSO.SphereGrid, activatedNodes);
+
+            var block = heroSO.BaseStats.Clone();
+            block.Add(SphereGridOps.StatsForNodes(heroSO.SphereGrid, ActivatedNodes));
+            Stats = new Stats(block);
+
+            _nodeResistances = SphereGridOps.ResistancesForNodes(heroSO.SphereGrid, ActivatedNodes);
         }
 
+        /// <summary>Banks XP. Stats do not move mid-run — growth happens at the hub, on the grid.</summary>
         public void AddXp(int amount)
         {
             CurrentXp += amount;
-
-            while (true)
-            {
-                var nextLevel = HeroSO.LevelProgression.Find(l => l.Level == Level + 1);
-                if (nextLevel == null || CurrentXp < nextLevel.XpRequired)
-                {
-                    break;
-                }
-
-                ApplyLevelUp(nextLevel);
-            }
         }
 
-        private void ApplyLevelUp(LevelConfiguration config)
+        /// <summary>Extra equipped-magic slots granted by activated MagicSlot nodes. Read by
+        /// <c>EquippedMagicState</c> on top of its own default, keeping Cards → Heroes the
+        /// dependency direction.</summary>
+        public int BonusMagicSlots
         {
-            Level = config.Level;
-            // Every stat the level grants, whatever they are - no per-stat lines to forget.
-            Stats.Attributes.Add(config.Gains);
-            // A bigger bar heals you into it, matching the old behaviour.
-            Stats.Health += config.Gains[StatType.MaxHealth];
-            Debug.Log($"{HeroKey} leveled up to {Level}!");
+            get
+            {
+                return SphereGridOps.SlotBonusForNodes(
+                    HeroSO != null ? HeroSO.SphereGrid : null, ActivatedNodes);
+            }
         }
 
         /// <summary>
@@ -112,19 +128,23 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
-        /// Innate resistance plus everything equipped gear grants, summed per damage type. Temporary
-        /// combat buffs are <b>not</b> included: those stack at the damage call site through
-        /// <c>CombatBuffTracker</c>, the same way stat buffs do.
+        /// Innate resistance plus sphere-grid node grants plus everything equipped gear grants,
+        /// summed per damage type. Temporary combat buffs are <b>not</b> included: those stack at
+        /// the damage call site through <c>CombatBuffTracker</c>, the same way stat buffs do.
         /// </summary>
         public List<Resistance> GetEffectiveResistances()
         {
             var gear = InventoryManager.Instance.ComputeResistances(HeroKey);
-            if (gear.Count == 0)
+            if (gear.Count == 0 && _nodeResistances.Count == 0)
             {
                 return Resistances;
             }
 
             var combined = new List<Resistance>(Resistances);
+            foreach (var entry in _nodeResistances)
+            {
+                combined.Add(entry);
+            }
             foreach (var entry in gear)
             {
                 combined.Add(entry);

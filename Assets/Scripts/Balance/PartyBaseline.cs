@@ -12,10 +12,17 @@ namespace Assets.Scripts.Balance
     public class HeroBaseline
     {
         public HeroSO Definition;
-        public int Level;
-        public int MaxDefinedLevel;
-        public int SavedXp = -1;                    // -1 when not sourced from a save
-        /// <summary>Stats after level gains and gear. Named to distinguish it from <c>SimUnit.Stats</c>,
+        public int SavedXp = -1;                    // unspent bank; -1 when not sourced from a save
+        /// <summary>XP budget this baseline was modelled at (greedy-spent on the grid);
+        /// -1 when the node set came from a save instead.</summary>
+        public int XpBudget = -1;
+        /// <summary>Sphere-grid node keys this baseline's stats include.</summary>
+        public List<string> ActivatedNodes = new List<string>();
+        /// <summary>XP those activations cost, at current node prices.</summary>
+        public int SpentXp;
+        public int NodesActivated;
+        public int NodesTotal;
+        /// <summary>Stats after node gains and gear. Named to distinguish it from <c>SimUnit.Stats</c>,
         /// which is a live <c>Stats</c> with current health.</summary>
         public StatBlock Effective;
         public List<ItemSO> Gear = new List<ItemSO>();
@@ -29,8 +36,9 @@ namespace Assets.Scripts.Balance
 
     /// <summary>
     /// The party every other metric is measured against — "is this boss too hard" has no answer
-    /// without "for whom". Built from hero definitions plus a level and an optional gear loadout, so
-    /// the same code serves the designed baseline and a real save file.
+    /// without "for whom". Built from hero definitions plus an XP budget (greedy-spent on each
+    /// hero's sphere grid) and an optional gear loadout, so the same code serves the designed
+    /// baseline and a real save file (which supplies its actual node sets instead).
     /// </summary>
     public class PartyBaseline
     {
@@ -80,16 +88,34 @@ namespace Assets.Scripts.Balance
         public int SustainPool => HealthPool + HealingPool;
 
         /// <summary>
-        /// Builds a reference party. <paramref name="level"/> is applied to every hero; pass
+        /// Builds a reference party at a flat XP budget per hero, greedy-spent on each hero's
+        /// sphere grid (<see cref="SphereGridOps.GreedySpend"/>, deterministic). Pass
         /// <paramref name="gearLookup"/> to fold in equipped items (a save audit does, the designed
         /// baseline does not).
         /// </summary>
         public static PartyBaseline Build(
             IList<HeroSO> heroDefinitions,
-            int level,
+            int xpBudgetPerHero,
             System.Func<HeroSO, List<ItemSO>> gearLookup = null,
             ItemSO potionItem = null,
             int potionCount = -1)
+        {
+            return Build(heroDefinitions, _ => xpBudgetPerHero, gearLookup, potionItem, potionCount, null);
+        }
+
+        /// <summary>
+        /// The full form: a per-hero XP budget (the run curve grows it per floor), and an optional
+        /// <paramref name="nodesLookup"/> that supplies real activated node sets instead of the
+        /// budget spend — the save audit uses it so a save is measured at exactly the nodes it
+        /// bought, whatever today's prices would have afforded.
+        /// </summary>
+        public static PartyBaseline Build(
+            IList<HeroSO> heroDefinitions,
+            System.Func<HeroSO, int> xpBudgetFor,
+            System.Func<HeroSO, List<ItemSO>> gearLookup,
+            ItemSO potionItem,
+            int potionCount,
+            System.Func<HeroSO, List<string>> nodesLookup)
         {
             var baseline = new PartyBaseline();
 
@@ -118,18 +144,39 @@ namespace Assets.Scripts.Balance
                 var gear = gearLookup != null ? gearLookup(definition) : new List<ItemSO>();
                 gear = gear ?? new List<ItemSO>();
 
-                int clampedLevel = Mathf.Max(1, level);
-                var baseStats = HeroStatCalculator.BaseStatsAtLevel(definition, clampedLevel);
+                List<string> nodes;
+                int budget = -1;
+                if (nodesLookup != null)
+                {
+                    nodes = SphereGridOps.SanitizeActivated(definition.SphereGrid, nodesLookup(definition));
+                }
+                else
+                {
+                    budget = Mathf.Max(0, xpBudgetFor != null ? xpBudgetFor(definition) : 0);
+                    nodes = SphereGridOps.GreedySpend(definition.SphereGrid, null, budget, out _);
+                }
+
+                var baseStats = HeroStatCalculator.BaseStatsForNodes(definition, nodes);
                 var effective = HeroStatCalculator.WithGear(baseStats, gear);
 
                 var hero = new HeroBaseline
                 {
                     Definition = definition,
-                    Level = clampedLevel,
-                    MaxDefinedLevel = HeroStatCalculator.MaxDefinedLevel(definition),
+                    XpBudget = budget,
+                    ActivatedNodes = nodes,
+                    SpentXp = SphereGridOps.TotalCostOf(definition.SphereGrid, nodes),
+                    NodesActivated = nodes.Count,
+                    NodesTotal = definition.SphereGrid != null && definition.SphereGrid.Nodes != null
+                        ? definition.SphereGrid.Nodes.Count
+                        : 0,
                     Effective = effective,
                     Gear = gear
                 };
+
+                // Node resistances reach the danger index and the simulator through SimUnit, the
+                // same way gear resistance does — no separate plumbing.
+                var resistances = SphereGridOps.ResistancesForNodes(definition.SphereGrid, nodes);
+                resistances.AddRange(InventoryOperations.ComputeResistances(gear));
 
                 hero.Unit = new SimUnit
                 {
@@ -142,9 +189,9 @@ namespace Assets.Scripts.Balance
                     // would have every hero swinging off Strength while the game does not.
                     AttackStat = definition != null ? definition.ResolvedAttackStat : StatType.Strength,
                     EffectiveAttackPower = AttackPowerFor(definition, effective),
-                    // Heroes deal physical damage; gear resistance folds in the same way Hero does.
+                    // Heroes deal physical damage; node + gear resistance folds in like Hero does.
                     AttackDamageType = Combat.DamageType.Normal,
-                    Resistances = InventoryOperations.ComputeResistances(gear)
+                    Resistances = resistances
                 };
 
                 baseline.Heroes.Add(hero);

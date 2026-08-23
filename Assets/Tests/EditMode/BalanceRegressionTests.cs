@@ -102,12 +102,14 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void EveryHeroHasSomewhereToLevelTo()
+        public void EveryHeroHasSomewhereToSpendXp()
         {
+            // The grid-shaped successor to the old "somewhere to level to" check: a hero with no
+            // sphere grid (or a token one) turns every kill's XP into a number that buys nothing.
             AssertNoIssues(
                 issue => issue.Category == BalanceCategory.Progression
-                         && (issue.Title.Contains("no level progression") || issue.Title.Contains("caps at level")),
-                "A hero's LevelProgression runs out almost immediately, so XP stops mattering.");
+                         && (issue.Title.Contains("has no sphere grid") || issue.Title.Contains("grid runs out")),
+                "A hero's sphere grid is missing or runs out almost immediately, so XP stops mattering.");
         }
 
         [Test]

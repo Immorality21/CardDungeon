@@ -14,6 +14,7 @@
             <ui:Button name="forge-btn" text="Magic Forge" class="cd-menu-button" />
             <ui:Button name="inventory-btn" text="Inventory" class="cd-menu-button" />
             <ui:Button name="party-btn" text="Party" class="cd-menu-button" />
+            <ui:Button name="grid-btn" text="Sphere Grid" class="cd-menu-button" />
             <ui:VisualElement class="cd-currency-row">
                 <ui:Label name="home-gold" text="Gold: 0" />
                 <ui:Label name="home-essence" text="Essence: 0" />
@@ -144,6 +145,28 @@
 
             <ui:Label name="inventory-hint" text="↑↓ select · Enter equip/unequip · ←→ tab · Q/E hero · Esc back" class="cd-info-label cd-hint" />
             <ui:Button name="inventory-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+
+        <!-- SPHERE GRID (fixed size on both axes: the pannable graph and the always-present
+             detail panel must never resize the dock-centered window, or hit-testing desyncs) -->
+        <ui:VisualElement name="grid-view" class="cd-window cd-window--flush cd-window--fixed cd-window--wide cd-dock-center cd-hidden">
+            <ui:Label text="Sphere Grid" class="cd-title" />
+            <ui:VisualElement name="grid-heroes" class="cd-tabs" />
+            <ui:Label name="grid-xp" text="" class="cd-info-label" />
+            <ui:VisualElement class="sg-body">
+                <ui:VisualElement name="grid-graph" style="flex-grow: 1;" />
+                <ui:VisualElement name="grid-detail" class="sg-detail">
+                    <ui:Label name="grid-detail-name" text="Select a node." class="cd-inspect__name" />
+                    <ui:Label name="grid-detail-kind" text="" class="cd-inspect__level" />
+                    <ui:Label name="grid-detail-payload" text="" class="cd-inspect__desc" />
+                    <ui:Label name="grid-detail-cost" text="" class="cd-info-label" />
+                    <ui:Button name="grid-activate" text="Activate" class="cd-cmd" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label name="grid-hint" text="Drag pan · Scroll zoom · Click node · Q/E hero · Esc back" class="cd-info-label cd-hint" />
+            <ui:Label name="grid-feedback" text="" class="cd-feedback" />
+            <ui:Button name="grid-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
     </ui:VisualElement>

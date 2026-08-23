@@ -40,13 +40,30 @@ namespace Assets.Scripts.Rooms
                 nodes.Add(node);
             }
 
-            // Create doors from manual connections
+            // Create doors from manual connections. Unlike the procedural generator, an authored
+            // door that cannot be placed is a data bug (typically a room template resized after the
+            // layout was authored), and a dropped one can orphan the exit room - so it is an error,
+            // not a silent skip.
             foreach (var door in layout.Doors)
             {
                 if (door.RoomIndexA >= 0 && door.RoomIndexA < nodes.Count &&
                     door.RoomIndexB >= 0 && door.RoomIndexB < nodes.Count)
                 {
-                    CreateDoor(nodes[door.RoomIndexA], nodes[door.RoomIndexB]);
+                    if (!CreateDoor(nodes[door.RoomIndexA], nodes[door.RoomIndexB]))
+                    {
+                        Debug.LogError(
+                            $"Manual layout '{layout.name}': authored door {door.RoomIndexA} <-> " +
+                            $"{door.RoomIndexB} could not be placed - the rooms do not share an " +
+                            "edge. Fix the layout (Tools > Dungeon > Manual Level Layout Editor); " +
+                            "part of the level may be unreachable.");
+                    }
+                }
+                else
+                {
+                    Debug.LogError(
+                        $"Manual layout '{layout.name}': authored door {door.RoomIndexA} <-> " +
+                        $"{door.RoomIndexB} references a room index outside the layout's " +
+                        $"{nodes.Count} rooms.");
                 }
             }
 
@@ -305,7 +322,12 @@ namespace Assets.Scripts.Rooms
             return candidate;
         }
 
-        private void CreateDoor(RoomNode a, RoomNode b)
+        /// <summary>
+        /// Places a door between two rooms sharing an edge. Returns false when the rooms are not
+        /// adjacent - legitimate during procedural layout (a connection may have been rerouted via an
+        /// alternate parent), but a data bug in a manual layout, so callers decide how loud to be.
+        /// </summary>
+        private bool CreateDoor(RoomNode a, RoomNode b)
         {
             // Determine which axis the rooms are adjacent on by checking for a shared edge.
             // Rooms may be offset along the shared edge, so we compute the actual overlap.
@@ -377,7 +399,7 @@ namespace Assets.Scripts.Rooms
             if (!found)
             {
                 // Connected rooms may not be adjacent if one was placed via an alternate parent during layout.
-                return;
+                return false;
             }
 
             Vector2 doorPos = ((Vector2)doorA + (Vector2)doorB) / 2f;
@@ -392,6 +414,7 @@ namespace Assets.Scripts.Rooms
             a.room.Doors.Add(door);
             b.room.Doors.Add(door);
             _spawnedDoors.Add(door);
+            return true;
         }
 
         private bool CanPlaceRoom(RoomSO room, Vector2Int startPos)

@@ -41,7 +41,7 @@ namespace Tests.EditMode
         private BalanceRulesSO Rules()
         {
             var rules = Make<BalanceRulesSO>();
-            rules.ReferenceHeroLevel = 1;
+            rules.ReferenceHeroXp = 0;
             return rules;
         }
 
@@ -53,9 +53,7 @@ namespace Tests.EditMode
             hero.BaseStats[StatType.Endurance] = 5;
             hero.BaseStats[StatType.MaxHealth] = 120;
             hero.BaseStats[StatType.Agility] = 5;
-            hero.LevelProgression = new List<LevelConfiguration>();
-
-            return PartyBaseline.Build(new List<HeroSO> { hero }, 1);
+            return PartyBaseline.Build(new List<HeroSO> { hero }, 0);
         }
 
         private EnemySO Goblin(int strength = 4, int health = 20, int xp = 10, int gold = 5)

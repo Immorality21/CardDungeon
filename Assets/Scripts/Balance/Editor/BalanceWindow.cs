@@ -225,7 +225,7 @@ namespace Assets.Scripts.Balance.Editor
 
             EditorGUIUtility.labelWidth = 44f;
             EditorGUI.BeginChangeCheck();
-            int level = EditorGUILayout.IntField("Level", _rules != null ? _rules.ReferenceHeroLevel : 1, GUILayout.Width(90f));
+            int xp = EditorGUILayout.IntField("XP", _rules != null ? _rules.ReferenceHeroXp : 0, GUILayout.Width(90f));
             bool savedGear = GUILayout.Toggle(
                 _rules != null && _rules.ReferencePartyUsesSavedGear,
                 new GUIContent("Saved gear", "Include the gear the save file has equipped in the reference party."),
@@ -234,7 +234,7 @@ namespace Assets.Scripts.Balance.Editor
             if (EditorGUI.EndChangeCheck() && _rules != null)
             {
                 Undo.RecordObject(_rules, "Change balance reference party");
-                _rules.ReferenceHeroLevel = Mathf.Max(1, level);
+                _rules.ReferenceHeroXp = Mathf.Max(0, xp);
                 _rules.ReferencePartyUsesSavedGear = savedGear;
                 EditorUtility.SetDirty(_rules);
                 _needsReanalyze = true;

@@ -48,7 +48,9 @@ namespace Assets.Scripts.Heroes
             get { return StatCatalog.CanScalePower(AttackStat) ? AttackStat : StatType.Strength; }
         }
 
-        public List<LevelConfiguration> LevelProgression = new List<LevelConfiguration>();
+        [Tooltip("This hero's progression grid. XP banked per hero is spent here at the hub — " +
+                 "see SphereGridOps for the rules.")]
+        public SphereGridSO SphereGrid;
 
         /// <summary>
         /// The identifier save data is written under. Falls back to <see cref="Label"/> and then the

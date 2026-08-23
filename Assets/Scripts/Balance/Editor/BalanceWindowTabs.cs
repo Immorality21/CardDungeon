@@ -77,15 +77,15 @@ namespace Assets.Scripts.Balance.Editor
 
             EditorGUILayout.BeginHorizontal();
             BalanceGui.HeaderCell("Hero", NameWidth);
-            BalanceGui.HeaderCell("Lvl", StatWidth, "Level the reference party is measured at.");
-            BalanceGui.HeaderCell("Cap", StatWidth, "Highest level this hero has a LevelConfiguration for.");
+            BalanceGui.HeaderCell("Spent", StatWidth, "XP the modelled sphere-grid activations cost.");
+            BalanceGui.HeaderCell("Nodes", StatWidth, "Activated / authored sphere-grid nodes.");
             // One column per stat, generated: a new StatType appears here without touching this file.
             foreach (var stat in StatCatalog.Types)
             {
                 BalanceGui.HeaderCell(StatCatalog.ShortName(stat), StatWidth, stat + " (editable)");
             }
-            BalanceGui.HeaderCell("Atk pwr", MetricWidth, "The stat this hero attacks with, after level gains and gear.");
-            BalanceGui.HeaderCell("Eff HP", MetricWidth, "After level gains and gear.");
+            BalanceGui.HeaderCell("Atk pwr", MetricWidth, "The stat this hero attacks with, after node gains and gear.");
+            BalanceGui.HeaderCell("Eff HP", MetricWidth, "After node gains and gear.");
             BalanceGui.HeaderCell("END cut", MetricWidth, "Share of incoming damage the Endurance curve removes.");
             BalanceGui.HeaderCell("Survives", WideWidth, "Fewest ordinary (non-boss) hits that would kill this hero.");
             BalanceGui.HeaderCell("Worst hit", WideWidth, "Biggest average non-boss hit, and from whom.");
@@ -109,10 +109,12 @@ namespace Assets.Scripts.Balance.Editor
 
                 EditorGUILayout.BeginHorizontal();
                 BalanceGui.AssetCell(hero.Definition, hero.Name, NameWidth);
-                BalanceGui.Cell(hero.Level.ToString(), StatWidth);
-                BalanceGui.Cell(hero.MaxDefinedLevel.ToString(), StatWidth,
-                    hero.MaxDefinedLevel <= 2 ? BalanceSeverity.Warning : BalanceSeverity.Ok,
-                    "A cap of 1 or 2 means XP stops mattering almost immediately.");
+                BalanceGui.Cell(hero.SpentXp.ToString(), StatWidth);
+                BalanceGui.Cell($"{hero.NodesActivated}/{hero.NodesTotal}", StatWidth,
+                    hero.NodesTotal < _rules.MinGridNodes ? BalanceSeverity.Warning : BalanceSeverity.Ok,
+                    hero.NodesTotal < _rules.MinGridNodes
+                        ? "A grid this small means XP stops mattering almost immediately."
+                        : null);
 
                 foreach (var stat in StatCatalog.Types)
                 {
@@ -138,7 +140,7 @@ namespace Assets.Scripts.Balance.Editor
             EditorGUILayout.Space(6f);
             DrawHealingSection(party);
             EditorGUILayout.Space(6f);
-            DrawLevelCurveSection(party);
+            DrawSphereGridSection(party);
 
             EndScroll();
         }
@@ -227,12 +229,19 @@ namespace Assets.Scripts.Balance.Editor
             Commit(serialized, changed);
         }
 
-        private void DrawLevelCurveSection(PartyBaseline party)
+        /// <summary>
+        /// The sphere grid's *numbers*, per hero — cost and gains per node, with the same
+        /// half-of-base severity tint the old level curve had. Graph shape (positions, edges, adding
+        /// and deleting nodes) is authored in Tools ▸ Heroes ▸ Sphere Grid Editor; this table exists
+        /// so a balance pass can retune costs and gains next to the findings they cause.
+        /// </summary>
+        private void DrawSphereGridSection(PartyBaseline party)
         {
             BalanceGui.SectionHeader(
-                "Level curve",
-                "XpRequired is a cumulative total, matching Hero.AddXp. Note that only the party leader "
-                + "receives XP, so followers never advance along this curve at all.");
+                "Sphere grids",
+                "XP banked per hero (kills split evenly — XpSplit) is spent on nodes at the hub. "
+                + "Costs and stat gains are editable here; the graph itself is edited in "
+                + "Tools ▸ Heroes ▸ Sphere Grid Editor.");
 
             foreach (var hero in party.Heroes)
             {
@@ -241,41 +250,61 @@ namespace Assets.Scripts.Balance.Editor
                     continue;
                 }
 
-                if (!Foldout($"curve:{hero.Definition.GetHashCode()}", $"{hero.Name} — {hero.MaxDefinedLevel} level(s) defined"))
+                var grid = hero.Definition.SphereGrid;
+                if (grid == null || grid.Nodes == null || grid.Nodes.Count == 0)
+                {
+                    EditorGUILayout.HelpBox(
+                        $"{hero.Name} has no sphere grid — banked XP can never be spent.",
+                        MessageType.Warning);
+                    continue;
+                }
+
+                int totalCost = SphereGridOps.TotalGridCost(grid);
+                if (!Foldout($"grid:{grid.GetHashCode()}",
+                        $"{hero.Name} — {grid.Nodes.Count} node(s), {totalCost} XP to complete"))
                 {
                     continue;
                 }
 
-                var serialized = Serialized(hero.Definition);
-                var progression = serialized.FindProperty("LevelProgression");
+                var serialized = Serialized(grid);
+                var nodes = serialized.FindProperty("Nodes");
                 bool changed = false;
 
                 EditorGUI.indentLevel++;
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(16f);
-                BalanceGui.HeaderCell("Level", StatWidth);
-                BalanceGui.HeaderCell("Total XP", MetricWidth, "Cumulative XP needed to reach this level.");
+                BalanceGui.HeaderCell("Node", NameWidth, "Key (save data — rename in the grid editor only).");
+                BalanceGui.HeaderCell("Kind", MetricWidth);
+                BalanceGui.HeaderCell("XP", StatWidth, "XpCost (editable)");
                 foreach (var stat in StatCatalog.Types)
                 {
                     BalanceGui.HeaderCell("+" + StatCatalog.ShortName(stat), StatWidth,
-                        "Gains[" + stat + "] (editable)");
+                        "Gains[" + stat + "] (editable; Stat nodes only)");
                 }
-                BalanceGui.HeaderCell("", 60f);
+                BalanceGui.HeaderCell("Grant", WideWidth, "What a Resistance or MagicSlot node grants.");
                 EditorGUILayout.EndHorizontal();
 
-                for (int i = 0; i < progression.arraySize; i++)
+                for (int i = 0; i < nodes.arraySize && i < grid.Nodes.Count; i++)
                 {
-                    var entry = progression.GetArrayElementAtIndex(i);
+                    var entry = nodes.GetArrayElementAtIndex(i);
+                    var node = grid.Nodes[i];
+                    if (node == null)
+                    {
+                        continue;
+                    }
 
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.Space(16f);
-                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("Level"), StatWidth);
-                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("XpRequired"), MetricWidth);
+                    BalanceGui.Cell(
+                        node.Key == SphereGridOps.StartKey(grid) ? node.Key + " ★" : node.Key,
+                        NameWidth);
+                    BalanceGui.Cell(node.Kind.ToString(), MetricWidth);
+                    changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("XpCost"), StatWidth);
 
-                    // One editable gain per stat, read out of the entry's Gains block.
+                    // One editable gain per stat, read out of the node's Gains block.
                     foreach (var stat in StatCatalog.Types)
                     {
-                        // A single level-up that reshapes a stat by half its base is almost certainly
+                        // A single node that reshapes a stat by half its base is almost certainly
                         // a slip - most visibly on Agility, which doubles the hero's turn rate.
                         int baseValue = hero.Definition.BaseStats[stat];
                         int gain = BalanceGui.StatEntryValue(entry, "Gains", stat);
@@ -285,33 +314,18 @@ namespace Assets.Scripts.Balance.Editor
 
                         changed |= BalanceGui.EditableStatCell(entry, "Gains", stat, StatWidth, severity,
                             severity == BalanceSeverity.Warning
-                                ? "A gain of half the base stat or more reshapes this hero in one level."
+                                ? "A gain of half the base stat or more reshapes this hero in one node."
                                 : null);
                     }
 
-                    if (GUILayout.Button("remove", EditorStyles.miniButton, GUILayout.Width(58f)))
-                    {
-                        progression.DeleteArrayElementAtIndex(i);
-                        changed = true;
-                        EditorGUILayout.EndHorizontal();
-                        break;
-                    }
+                    string grant = node.Kind == SphereNodeKind.Resistance
+                        ? $"{node.ResistType} resist {node.ResistPercent:0}%"
+                        : node.Kind == SphereNodeKind.MagicSlot
+                            ? "+1 magic slot"
+                            : "";
+                    BalanceGui.Cell(grant, WideWidth);
                     EditorGUILayout.EndHorizontal();
                 }
-
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.Space(16f);
-                if (GUILayout.Button("Add level", EditorStyles.miniButton, GUILayout.Width(80f)))
-                {
-                    int index = progression.arraySize;
-                    progression.InsertArrayElementAtIndex(index);
-                    var added = progression.GetArrayElementAtIndex(index);
-                    added.FindPropertyRelative("Level").intValue = hero.MaxDefinedLevel + 1;
-                    added.FindPropertyRelative("XpRequired").intValue =
-                        Mathf.Max(100, HeroStatCalculator.XpToReachLevel(hero.Definition, hero.MaxDefinedLevel) * 2);
-                    changed = true;
-                }
-                EditorGUILayout.EndHorizontal();
                 EditorGUI.indentLevel--;
 
                 Commit(serialized, changed);
@@ -1018,15 +1032,15 @@ namespace Assets.Scripts.Balance.Editor
 
             BalanceGui.SectionHeader(
                 "Real party",
-                "Rebuilt from saved XP and equipped gear. Only the leader gains XP, so followers usually sit "
-                + "at level 1 however far the save has progressed.");
+                "Rebuilt from each hero's saved XP bank and activated sphere-grid nodes plus equipped "
+                + "gear. Kills split XP evenly across the fielded party (XpSplit), and each hero "
+                + "spends their own bank at the hub.");
 
             EditorGUILayout.BeginHorizontal();
             BalanceGui.HeaderCell("Hero", NameWidth);
-            BalanceGui.HeaderCell("XP", MetricWidth);
-            BalanceGui.HeaderCell("Level", StatWidth);
-            BalanceGui.HeaderCell("Cap", StatWidth);
-            BalanceGui.HeaderCell("To next", MetricWidth, "XP still needed for the next level.");
+            BalanceGui.HeaderCell("Bank", MetricWidth, "Unspent XP.");
+            BalanceGui.HeaderCell("Nodes", StatWidth, "Activated / authored sphere-grid nodes.");
+            BalanceGui.HeaderCell("Next cost", MetricWidth, "Cheapest node on the hero's frontier.");
             BalanceGui.HeaderCell("Gear", WideWidth);
             EditorGUILayout.EndHorizontal();
 
@@ -1034,18 +1048,19 @@ namespace Assets.Scripts.Balance.Editor
             {
                 var severity = hero.Definition == null
                     ? BalanceSeverity.Warning
-                    : hero.AtMaxDefinedLevel
+                    : hero.GridComplete
                         ? BalanceSeverity.Info
                         : BalanceSeverity.Ok;
 
                 EditorGUILayout.BeginHorizontal();
                 BalanceGui.AssetCell(hero.Definition, hero.Definition != null ? hero.Definition.DisplayName : hero.HeroKey,
                     NameWidth, severity);
-                BalanceGui.Cell(hero.Xp.ToString(), MetricWidth);
-                BalanceGui.Cell(hero.Level.ToString(), StatWidth);
-                BalanceGui.Cell(hero.MaxDefinedLevel.ToString(), StatWidth, severity,
-                    hero.AtMaxDefinedLevel ? "At the level cap: further XP does nothing." : null);
-                BalanceGui.Cell(hero.XpToNextLevel >= 0 ? hero.XpToNextLevel.ToString() : "capped", MetricWidth);
+                BalanceGui.Cell(hero.Xp.ToString(), MetricWidth,
+                    hero.CanAffordNext ? BalanceSeverity.Info : BalanceSeverity.Ok,
+                    hero.CanAffordNext ? "Can afford a node right now — a hub visit is due." : null);
+                BalanceGui.Cell($"{hero.NodesActivated}/{hero.NodesTotal}", StatWidth, severity,
+                    hero.GridComplete ? "Grid complete: further XP does nothing." : null);
+                BalanceGui.Cell(hero.CheapestNextCost >= 0 ? hero.CheapestNextCost.ToString() : "complete", MetricWidth);
                 BalanceGui.Cell(hero.Gear.Count > 0 ? $"{hero.Gear.Count} item(s)" : "none", WideWidth,
                     BalanceSeverity.Ok,
                     hero.Gear.Count > 0 ? string.Join(", ", GearNames(hero.Gear)) : null);
@@ -1057,7 +1072,12 @@ namespace Assets.Scripts.Balance.Editor
             EditorGUILayout.BeginHorizontal();
             BalanceGui.Cell($"Gold {save.Gold}", 120f);
             BalanceGui.Cell($"Essence {save.Essence}", 120f);
-            BalanceGui.Cell($"Bonus slots {save.BonusMagicSlots}", 120f);
+            if (save.LegacyBonusSlots > 0)
+            {
+                BalanceGui.Cell($"Legacy slots {save.LegacyBonusSlots} (refund pending)", 220f, BalanceSeverity.Info,
+                    "The Essence-bought global slot upgrade was retired for per-hero MagicSlot grid "
+                    + "nodes; the game refunds the Essence on its next launch.");
+            }
             BalanceGui.Cell($"Potions carried {save.PotionsCarried}/{save.PotionCap}", 220f, BalanceSeverity.Ok,
                 "Carried right now. The level analysis assumes a full belt instead, because DungeonManager "
                 + "tops the belt up to its cap on entering each dungeon — otherwise the same save would read "

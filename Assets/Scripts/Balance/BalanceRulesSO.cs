@@ -14,8 +14,13 @@ namespace Assets.Scripts.Balance
     public class BalanceRulesSO : ScriptableObject
     {
         [Header("Reference party — 'too hard' is meaningless without 'for whom'")]
-        [Tooltip("Hero level the analysis assumes when judging a level's difficulty.")]
-        public int ReferenceHeroLevel = 1;
+        [Tooltip("XP budget per hero the designed baseline is assumed to have spent on its sphere " +
+                 "grid before the run starts. 0 = a fresh party on base stats.")]
+        public int ReferenceHeroXp = 0;
+
+        [Tooltip("A hero's grid should offer at least this many nodes, or XP stops mattering " +
+                 "almost immediately — the grid-shaped version of the old level-2 cap warning.")]
+        public int MinGridNodes = 8;
 
         [Tooltip("Include each hero's currently-equipped gear (from the save) in the reference party.")]
         public bool ReferencePartyUsesSavedGear;

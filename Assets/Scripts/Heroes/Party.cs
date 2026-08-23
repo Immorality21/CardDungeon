@@ -18,10 +18,23 @@ namespace Assets.Scripts.Heroes
         private FileHandler _fileHandler;
         private PartySaveData _saveData;
 
+        /// <summary>Every definition this party has seen (initial lineup plus mid-run joins), so a
+        /// save entry's key can be resolved back to its grid for lifetime-XP math. A benched hero
+        /// whose definition is not here resolves to a null grid, i.e. lifetime = their bank.</summary>
+        private readonly List<HeroSO> _knownDefinitions = new List<HeroSO>();
+
         public void Initialize(List<HeroSO> heroDefinitions)
         {
             _fileHandler = new FileHandler();
             _saveData = _fileHandler.Load<PartySaveData>();
+            _knownDefinitions.Clear();
+            foreach (var definition in heroDefinitions)
+            {
+                if (definition != null && !_knownDefinitions.Contains(definition))
+                {
+                    _knownDefinitions.Add(definition);
+                }
+            }
 
             _spriteRenderer = GetComponent<SpriteRenderer>();
             if (_spriteRenderer == null)
@@ -58,13 +71,47 @@ namespace Assets.Scripts.Heroes
                 return null;
             }
 
+            if (!_knownDefinitions.Contains(heroSO))
+            {
+                _knownDefinitions.Add(heroSO);
+            }
+
+            bool isNewToTheSave = _saveData.Heroes.Find(h => h != null && h.HeroKey == heroSO.SaveKey) == null;
             var hero = SpawnHero(heroSO);
             if (hero != null && hero.Stats != null)
             {
                 // Joins at full health: they were not in the fights that wore the party down.
                 hero.Stats.Health = hero.Stats.MaxHealth;
             }
+
+            if (hero != null && isNewToTheSave)
+            {
+                // A brand-new rescue arrives with a starter XP bank seeded from the committed
+                // roster's progress, so a late join is not a hero the player cannot afford to
+                // build. In memory only, like the rescue itself: CommitProgress writes it on level
+                // clear, and a wipe forfeits it with everything else.
+                hero.CurrentXp = SphereGridOps.StarterBank(CommittedLifetimeXp());
+            }
             return hero;
+        }
+
+        /// <summary>Lifetime XP (bank + spent node cost) of every hero in the committed save —
+        /// the base a new recruit's starter bank is seeded from.</summary>
+        private List<int> CommittedLifetimeXp()
+        {
+            var lifetimes = new List<int>();
+            foreach (var entry in _saveData.Heroes)
+            {
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                var definition = _knownDefinitions.Find(d => d != null && d.SaveKey == entry.HeroKey);
+                lifetimes.Add(SphereGridOps.LifetimeXpFor(
+                    definition != null ? definition.SphereGrid : null, entry));
+            }
+            return lifetimes;
         }
 
         /// <summary>
@@ -85,7 +132,7 @@ namespace Assets.Scripts.Heroes
             var savedHero = _saveData.Heroes.Find(h => h.HeroKey == heroSO.SaveKey);
             if (savedHero != null)
             {
-                hero.InitializeFromSave(heroSO, savedHero.CurrentXp);
+                hero.InitializeFromSave(heroSO, savedHero.CurrentXp, savedHero.ActivatedNodes);
             }
             else
             {
@@ -176,13 +223,15 @@ namespace Assets.Scripts.Heroes
                 if (existing != null)
                 {
                     existing.CurrentXp = hero.CurrentXp;
+                    existing.ActivatedNodes = new List<string>(hero.ActivatedNodes);
                 }
                 else
                 {
                     _saveData.Heroes.Add(new HeroSaveData
                     {
                         HeroKey = hero.HeroKey,
-                        CurrentXp = hero.CurrentXp
+                        CurrentXp = hero.CurrentXp,
+                        ActivatedNodes = new List<string>(hero.ActivatedNodes)
                     });
                 }
             }
