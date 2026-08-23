@@ -2,12 +2,31 @@
 
 `DungeonManager` orchestrates a dungeon level's lifecycle and is the chokepoint for committing/discarding progress. `DungeonSaveManager` handles the per-dungeon save. Save-file formats are catalogued in `Assets/Scripts/IO/CLAUDE.md`.
 
+## The Campaign (which runs exist, and in what order)
+
+- **CampaignSO** (`Assets/Resources/Campaign.asset`, Resources-loaded like `ItemCatalogSO`) is the story line: a **directed graph of runs**, not a list. Each `CampaignNodeEntry` holds a `RunDefinitionSO`, the runs that must be cleared before it opens (`Requires` + `UnlockMode` All/Any), `Secret` (hidden on the map until unlocked), `Optional` (drawn as side content), and a `MapPosition`. Branching is the point: clearing one run can open two, one rejoining the main line (`UnlockMode.Any` on the rejoin node) and one dead-ending as optional/secret content.
+- **CampaignOps** is the pure rules layer over `(campaign, completedRunKeys, activeRunKey)` — the same shape as `SphereGridOps`. `GetStates` resolves every node to `Hidden / Locked / Available / InProgress / Completed` plus `CanStart`/`CanContinue`. **While a run is in progress nothing else is startable**, because starting a second run would overwrite `Run.json` and silently discard the first.
+- **Completion is meta progress, not run state.** `MetaProgressSaveData.CompletedRunKeys` records every run cleared to its final level (written by `DungeonManager.OnDungeonCleared` via `MetaProgressManager.MarkRunCompleted`), so it survives death and re-authoring. `RunDefinitionSO.Repeatable` decides whether a cleared run can be started again — **false for the tutorial**, which is what stops it being replayed.
+- **Authoring guard rails.** `CampaignOps` also answers every way a graph can be authored wrong: nodes with no run, duplicate runs, prerequisites outside the campaign, no root, and cycles/anything downstream of one (`GetUnreachableNodes`). `CampaignAssetTests` runs all of these over the real asset, plus "every run in the project is on the map".
+- **The map screen** is `Assets/Scripts/MainMenu/CampaignMapUI.cs` (+ `CampaignPresenter`), reusing `SphereGridView` as its graph renderer. Positions are authored, or auto-laid-out by tier when none are set. See the MainMenu guide.
+- **Play order is the graph, not `SequenceIndex`.** `CampaignOps.ComputeTiers` resolves how many runs sit before each one, using the same rule as unlocking: an `All` node lands one past its *deepest* prerequisite, an `Any` node one past its *shallowest* (the route the player can actually arrive on). `GetNodesInPlayOrder` sorts by that. Cycle members never resolve and stay at tier 0 - `GetUnreachableNodes` is what reports them. The balance analyzer walks this order; `SequenceIndex` survives only as a hint the graph supersedes.
+
+### The runs
+
+| Run | Key | Levels | Repeatable | Opens after | Boss |
+|---|---|---|---|---|---|
+| The Threshold | `TutorialRun` | 4 | no | — | Abyssal Warden |
+| The Drowned March | `DrownedMarch` | 4 | no | The Threshold | **Mirefather** |
+| The Warrens | `TheWarrens` | 2 | **yes** | The Threshold | **Gilded Hoarder** |
+
+The tutorial forks: `DrownedMarch` is the main line (one-shot, escalating), `TheWarrens` is an optional repeatable dead end whose job is to fund the hub's Gold sinks - party slots cost 300/600, and before it there was nowhere to farm them. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
+
 ## Run Progression System
 
-- **RunDefinitionSO** defines a campaign: an ordered list of `RunLevelEntry` (each references a `LevelDefinitionSO`, a display name, optional `ManualLevelLayoutSO`, and optional `BossEnemy`).
+- **RunDefinitionSO** defines one run: an ordered list of `RunLevelEntry` (each references a `LevelDefinitionSO`, a display name, optional `ManualLevelLayoutSO`, and optional `BossEnemy`).
 - **Boss levels:** set `RunLevelEntry.BossEnemy` (an `EnemySO` with `IsBoss`) to make a level climax in a boss fight. After the exit room is designated and normal enemies spawn, `DungeonManager.PlaceBossIfConfigured` clears the exit room and drops the boss in alone. The exit room is sealed (no flee) and the run-complete fanfare fires when the boss on the **final** level falls (`DungeonManager.IsFinalRunLevel`, surfaced via `CombatResult.RunCompleted`/`BossDefeated`). See the Enemies guide.
 - **RunSaveData** (`Run.json`) tracks which level the player is on (`CurrentLevelIndex`), `ActiveDungeonSeed` for resuming mid-dungeon, and `EquippedMagic` (the drawn magic carried across levels of the run).
-- **Flow:** Menu → New Run → enter level 1 → clear exit room → **Descend** → level complete → menu shows next level → ... → all levels cleared → run complete.
+- **Flow:** Menu → The Story (campaign map) → pick a run → enter level 1 → clear exit room → **Descend** → level complete → menu shows next level → ... → all levels cleared → run complete (the run key is banked in `CompletedRunKeys`, opening whatever it gated on the map).
 - **Win condition:** Each dungeon level is complete when the player **takes the stairs** in a cleared **exit room** (farthest room from start, designated via BFS). `Room.IsExit` marks it; `RoomActionUI`'s **Descend** button is the only caller of `CombatManager.NotifyDungeonCleared()`, so finishing a level is always a decision - the player can sweep rooms they skipped or spend an event they walked past first. Clearing the exit room does *not* end the level by itself.
 - **Room events:** `DungeonManager.PlaceRoomEvents` is one pass. For every eligible room
   (`IsEventEligible`: not the start room, not a connector, no captive - the exit room *is* allowed,
@@ -20,6 +39,7 @@
   placement — which is what lets the save record only *that* an event was consumed and trust
   regeneration to put it back in the same room. See `Assets/Scripts/Rooms/CLAUDE.md`.
 - **Manual levels:** `RunLevelEntry.ManualLayout` references a `ManualLevelLayoutSO` (room positions, door connections, start/exit rooms, optional enemy overrides). Edited via Tools → Dungeon → Manual Level Layout Editor. Used for tutorial levels.
+  - **A door is only placed when its two rooms share an edge.** Authored door pairs are room-index pairs, but `RoomManager.CreateDoor` needs real adjacency — so resizing a room template after a layout was authored silently severs the connection and can orphan the exit room, making the level uncompletable. (This shipped: the tutorial's room 1 went from a 3-wide to a 2-wide template and the exit became unreachable.) `RoomManager.BuildManualDungeon` now logs an **error** for any dropped authored door, the layout editor draws it red and refuses to stay quiet, and `ManualLayoutValidationTests` sweeps every layout asset for unplaceable doors and unreachable rooms. Validation lives on the SO itself: `IsDoorPlaceable`, `GetUnplaceableDoorIndices`, `GetUnreachableRoomIndices`.
 - **Procedural levels:** `RunLevelEntry.ManualLayout` left null — generates a dungeon from `LevelTemplate` using the procedural pipeline (see the Rooms guide).
 
 ## Deferred Persistence

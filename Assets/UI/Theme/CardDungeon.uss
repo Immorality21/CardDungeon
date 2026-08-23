@@ -1089,3 +1089,51 @@
     border-color: var(--cd-frame);
     border-radius: 6px;
 }
+
+/* ---- Campaign map ---- */
+/* The map reuses SphereGridView, so nodes keep the .sg-node geometry and only the state
+   vocabulary differs (CampaignPresenter.StateClasses drives these). Separate class names
+   rather than reusing sg-node--* so the two graphs cannot clear each other's states. */
+
+.cm-node--completed {
+    background-color: var(--cd-accent);
+}
+
+.cm-node--available {
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-accent);
+}
+
+/* The run underway: parchment fill so it reads as "you are here" at a glance. */
+.cm-node--active {
+    background-color: var(--cd-parchment);
+    border-color: var(--cd-text-light);
+}
+
+.cm-node--locked {
+    background-color: var(--cd-stone-disabled);
+    opacity: 0.45;
+}
+
+/* Optional side branches are outlined rather than filled, so the main line reads first. */
+.cm-node--optional {
+    border-color: var(--cd-stone-hover);
+}
+
+.cm-node--completed .sg-node__glyph,
+.cm-node--active .sg-node__glyph {
+    color: var(--cd-text-dark);
+}
+
+/* ---- Home window sizing ---- */
+/* Home stacks up to eight menu buttons plus the purse. At the shared 62% cap the flex layout
+   ran out of room and squeezed the last child to zero height, so Gold/Essence rendered outside
+   the frame. The purse must never be the row that gives way, and the window needs the headroom. */
+
+.cd-window--tall {
+    max-height: 88%;
+}
+
+.cd-currency-row {
+    flex-shrink: 0;
+}

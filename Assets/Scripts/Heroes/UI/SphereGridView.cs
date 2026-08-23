@@ -193,12 +193,31 @@ namespace Assets.Scripts.Heroes.UI
 
         // --- state -----------------------------------------------------------
 
-        private static readonly string[] StateClassNames =
+        private static readonly string[] SphereGridStateClasses =
         {
             "sg-node--activated", "sg-node--available", "sg-node--adjacent", "sg-node--locked"
         };
 
-        /// <summary>Swaps the node's activation-state class (one of the sg-node--* state names).</summary>
+        /// <summary>
+        /// The mutually exclusive state classes <see cref="SetNodeState"/> swaps between - it removes
+        /// every name in this set before adding the one asked for. Settable because this widget draws
+        /// more than one kind of graph: the campaign map reuses it with its own <c>cm-node--*</c>
+        /// vocabulary, and the two must not clear each other's classes.
+        /// </summary>
+        public string[] StateClassNames { get; set; } = SphereGridStateClasses;
+
+        /// <summary>
+        /// The state class an edge treats as "both ends done" (drawn in the accent colour), and the
+        /// one it treats as "reachable from here" (drawn brighter than dim). Settable for the same
+        /// reason as <see cref="StateClassNames"/> - edge tint has to be decided in code because
+        /// Painter2D cannot read USS.
+        /// </summary>
+        public string EdgeStrongStateClass { get; set; } = "sg-node--activated";
+
+        /// <inheritdoc cref="EdgeStrongStateClass"/>
+        public string EdgeOpenStateClass { get; set; } = "sg-node--available";
+
+        /// <summary>Swaps the node's state class (one of <see cref="StateClassNames"/>).</summary>
         public void SetNodeState(string key, string stateClass)
         {
             if (!_buttons.TryGetValue(key, out var button))
@@ -446,13 +465,11 @@ namespace Assets.Scripts.Heroes.UI
             string stateA = _stateClasses.TryGetValue(a, out var sa) ? sa : null;
             string stateB = _stateClasses.TryGetValue(b, out var sb) ? sb : null;
 
-            bool activatedA = stateA == "sg-node--activated";
-            bool activatedB = stateB == "sg-node--activated";
-            if (activatedA && activatedB)
+            if (stateA == EdgeStrongStateClass && stateB == EdgeStrongStateClass)
             {
                 return EdgeActivated;
             }
-            if (stateA == "sg-node--available" || stateB == "sg-node--available")
+            if (stateA == EdgeOpenStateClass || stateB == EdgeOpenStateClass)
             {
                 return EdgeAvailable;
             }

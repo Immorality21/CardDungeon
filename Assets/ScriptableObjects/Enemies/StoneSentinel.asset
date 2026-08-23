@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: StoneSentinel
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   DisplayName: Stone Sentinel
-  Sprite: {fileID: 21300000, guid: 3539deaa538b42c19a830e172699a12a, type: 3}
+  Sprite: {fileID: 21300000, guid: bd5521e79eb24421ab0bfc80cb393f36, type: 3}
   IsBoss: 0
   BaseStats:
     Values:

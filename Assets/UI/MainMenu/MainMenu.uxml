@@ -5,10 +5,10 @@
         <ui:VisualElement name="bg" class="cd-bg" picking-mode="Ignore" />
 
         <!-- HOME -->
-        <ui:VisualElement name="home-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+        <ui:VisualElement name="home-view" class="cd-window cd-window--flush cd-window--tall cd-dock-center cd-hidden">
             <ui:Label text="Card Dungeon" class="cd-title cd-title--large" />
             <ui:Button name="continue-btn" text="Continue Run" class="cd-menu-button" />
-            <ui:Button name="new-btn" text="New Run" class="cd-menu-button" />
+            <ui:Button name="new-btn" text="The Story" class="cd-menu-button" />
             <ui:Button name="merchant-btn" text="Visit Merchant" class="cd-menu-button" />
             <ui:Button name="tavern-btn" text="The Tavern" class="cd-menu-button" />
             <ui:Button name="forge-btn" text="Magic Forge" class="cd-menu-button" />
@@ -167,6 +167,25 @@
             <ui:Label name="grid-hint" text="Drag pan · Scroll zoom · Click node · Q/E hero · Esc back" class="cd-info-label cd-hint" />
             <ui:Label name="grid-feedback" text="" class="cd-feedback" />
             <ui:Button name="grid-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- CAMPAIGN MAP (fixed size on both axes, same reason as the sphere grid: a pannable
+             graph inside a dock-centered window must never change the window's size) -->
+        <ui:VisualElement name="campaign-view" class="cd-window cd-window--flush cd-window--fixed cd-window--wide cd-dock-center cd-hidden">
+            <ui:Label name="campaign-title" text="The Story" class="cd-title" />
+            <ui:VisualElement class="sg-body">
+                <ui:VisualElement name="campaign-graph" style="flex-grow: 1;" />
+                <ui:VisualElement name="campaign-detail" class="sg-detail">
+                    <ui:Label name="campaign-detail-name" text="Pick a place on the map." class="cd-inspect__name" />
+                    <ui:Label name="campaign-detail-status" text="" class="cd-inspect__level" />
+                    <ui:Label name="campaign-detail-blurb" text="" class="cd-inspect__desc" />
+                    <ui:Label name="campaign-detail-requires" text="" class="cd-shop-empty" />
+                    <ui:Button name="campaign-start" text="Begin" class="cd-cmd" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label name="campaign-hint" text="Drag pan · Scroll zoom · Click a run · Esc back" class="cd-info-label cd-hint" />
+            <ui:Label name="campaign-feedback" text="" class="cd-feedback" />
+            <ui:Button name="campaign-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
     </ui:VisualElement>

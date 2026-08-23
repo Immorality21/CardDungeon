@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebc985730f692f54eafd123ca62fd64f, type: 3}
+  m_Name: DrownedMarch
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
+  Key: DrownedMarch
+  DisplayName: The Drowned March
+  Blurb: The water that filled the lower halls came from somewhere. Something down
+    there is still breathing.
+  SequenceIndex: 1
+  Repeatable: 0
+  Levels:
+  - LevelTemplate: {fileID: 11400000, guid: 6e31f43ba8574e244840406384d1b907, type: 2}
+    LevelName: Silt Shallows
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 0}
+    RescueHero: {fileID: 0}
+  - LevelTemplate: {fileID: 11400000, guid: e5eb9c2b5c392894fb55360a188283b2, type: 2}
+    LevelName: The Weeping Causeway
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 0}
+    RescueHero: {fileID: 0}
+  - LevelTemplate: {fileID: 11400000, guid: 14a21a6d544c0814c8f45f51376aebb6, type: 2}
+    LevelName: Rotwater Deep
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 0}
+    RescueHero: {fileID: 0}
+  - LevelTemplate: {fileID: 11400000, guid: 98ab313d4419a5845a77a626e060d5b2, type: 2}
+    LevelName: The Mire Throne
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 11400000, guid: e62cccd795c1c1942b396724ce782f6f, type: 2}
+    RescueHero: {fileID: 0}

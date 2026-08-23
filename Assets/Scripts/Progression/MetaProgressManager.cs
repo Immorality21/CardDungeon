@@ -371,6 +371,12 @@ namespace Assets.Scripts.Progression
 
         // --- Run completion (which runs have been cleared to the end) ---
 
+        /// <summary>Every run this save has cleared. Never null; the live list, so do not mutate it.</summary>
+        public List<string> GetCompletedRunKeys()
+        {
+            return _saveData.CompletedRunKeys ?? (_saveData.CompletedRunKeys = new List<string>());
+        }
+
         /// <summary>Whether the player has ever cleared this run's final level.</summary>
         public bool HasCompletedRun(string runKey)
         {

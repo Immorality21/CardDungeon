@@ -43,6 +43,7 @@ namespace Assets.Scripts.Balance.Editor
                 AllHeroes = heroes,
                 Enemies = FindAll<EnemySO>(),
                 Runs = FindAll<RunDefinitionSO>(),
+                Campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath),
                 Magic = FindAll<MagicSO>(),
                 Combos = FindAll<MagicComboSO>(),
                 Items = items,

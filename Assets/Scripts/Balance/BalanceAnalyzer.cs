@@ -42,6 +42,13 @@ namespace Assets.Scripts.Balance
         }
         public List<EnemySO> Enemies = new List<EnemySO>();
         public List<RunDefinitionSO> Runs = new List<RunDefinitionSO>();
+
+        /// <summary>
+        /// The campaign graph, when the project has one. It supplies the order runs are actually
+        /// played in and, more importantly, which runs are already behind the player when a given
+        /// run starts - without it every run is measured against a fresh starting party.
+        /// </summary>
+        public CampaignSO Campaign;
         public List<MagicSO> Magic = new List<MagicSO>();
         public List<MagicComboSO> Combos = new List<MagicComboSO>();
         public List<ItemSO> Items = new List<ItemSO>();
@@ -83,7 +90,13 @@ namespace Assets.Scripts.Balance
             // danger there is, so measuring a level-3 enemy against the level-1 party reports it as
             // out of band when it never gets fought that way. Falls back to the starting party for
             // anything no run places.
-            var partyByEnemy = BuildFirstEncounterParties(input, rules, report.Party);
+            // Run curves come first now: they know the campaign order, so they are the authority on
+            // which party meets which enemy.
+            BuildRunCurves(input, rules, report);
+
+            var partyByEnemy = report.Runs.Count > 0
+                ? BuildEncounterPartiesFromCurves(report)
+                : BuildFirstEncounterParties(input, rules, report.Party);
             report.PartyByEnemy = partyByEnemy;
 
             foreach (var enemy in input.Enemies)
@@ -96,14 +109,6 @@ namespace Assets.Scripts.Balance
                         against = report.Party;
                     }
                     report.Enemies.Add(EnemyMetrics.Compute(enemy, against, rules, report.Party));
-                }
-            }
-
-            foreach (var run in input.Runs)
-            {
-                if (run != null)
-                {
-                    report.Runs.Add(RunCurve.Build(run, report.Party, rules));
                 }
             }
 
@@ -136,6 +141,123 @@ namespace Assets.Scripts.Balance
         /// This exists because party size roughly halves per-enemy danger, so a fixed reference
         /// party makes late-run enemies read as out of band and early ones as harmless.
         /// </summary>
+        /// <summary>
+        /// Models every run, walking the campaign shallowest-first so a run inherits the party its
+        /// prerequisites left behind. Where a run has several prerequisites the player can only have
+        /// arrived via one of them, so the *weakest* incoming state is used - the run has to be
+        /// clearable by whoever reaches it first, not only by a completionist.
+        ///
+        /// <para>Falls back to measuring every run against the starting party when no campaign is
+        /// authored, which is what the analyzer did before the graph existed.</para>
+        /// </summary>
+        private static void BuildRunCurves(BalanceInput input, BalanceRulesSO rules, BalanceReport report)
+        {
+            if (input.Runs == null)
+            {
+                return;
+            }
+
+            if (input.Campaign == null)
+            {
+                foreach (var run in input.Runs)
+                {
+                    if (run != null)
+                    {
+                        report.Runs.Add(RunCurve.Build(run, report.Party, rules));
+                    }
+                }
+                return;
+            }
+
+            var byKey = new Dictionary<string, RunCurve>();
+            var remaining = new List<RunDefinitionSO>(input.Runs);
+
+            foreach (var node in CampaignOps.GetNodesInPlayOrder(input.Campaign))
+            {
+                var run = node.Run;
+                if (run == null || !remaining.Contains(run))
+                {
+                    continue;
+                }
+                remaining.Remove(run);
+
+                List<HeroSO> seedRoster = null;
+                Dictionary<HeroSO, int> seedXp = null;
+
+                RunCurve weakest = null;
+                foreach (var prerequisite in node.Requires)
+                {
+                    if (prerequisite == null)
+                    {
+                        continue;
+                    }
+                    if (byKey.TryGetValue(CampaignOps.RunKeyOf(prerequisite), out var prior) &&
+                        (weakest == null || TotalBankedXp(prior) < TotalBankedXp(weakest)))
+                    {
+                        weakest = prior;
+                    }
+                }
+                if (weakest != null)
+                {
+                    seedRoster = weakest.EndRoster;
+                    seedXp = weakest.EndLifetimeXp;
+                }
+
+                var curve = RunCurve.Build(run, report.Party, rules, seedRoster, seedXp);
+                report.Runs.Add(curve);
+                byKey[CampaignOps.RunKeyOf(run)] = curve;
+            }
+
+            // Runs that exist as assets but are not on the map still get measured, as a fresh start -
+            // CampaignAssetTests is what actually objects to them being unreachable.
+            foreach (var run in remaining)
+            {
+                if (run != null)
+                {
+                    report.Runs.Add(RunCurve.Build(run, report.Party, rules));
+                }
+            }
+        }
+
+        private static int TotalBankedXp(RunCurve curve)
+        {
+            int total = 0;
+            foreach (var pair in curve.EndLifetimeXp)
+            {
+                total += pair.Value;
+            }
+            return total;
+        }
+
+        /// <summary>
+        /// Which party each enemy is first met by, read straight off the modelled run curves so the
+        /// answer cannot drift from the curve the rest of the report is drawn from. Every level
+        /// already records the party it was measured against; this just indexes it by enemy, in play
+        /// order, first writer wins.
+        /// </summary>
+        private static Dictionary<EnemySO, PartyBaseline> BuildEncounterPartiesFromCurves(BalanceReport report)
+        {
+            var result = new Dictionary<EnemySO, PartyBaseline>();
+            foreach (var curve in report.Runs)
+            {
+                foreach (var level in curve.Levels)
+                {
+                    if (level.Party == null || level.Entry == null)
+                    {
+                        continue;
+                    }
+                    foreach (var enemy in EnemiesInLevel(level.Entry))
+                    {
+                        if (enemy != null && !result.ContainsKey(enemy))
+                        {
+                            result[enemy] = level.Party;
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
         private static Dictionary<EnemySO, PartyBaseline> BuildFirstEncounterParties(
             BalanceInput input, BalanceRulesSO rules, PartyBaseline starting)
         {

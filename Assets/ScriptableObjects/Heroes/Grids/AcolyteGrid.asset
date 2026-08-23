@@ -156,6 +156,7 @@ MonoBehaviour:
     ResistPercent: 0
     Neighbors:
     - acolyte-devout-1
+    - node-1
   - Key: acolyte-devout-3
     DisplayName: 
     Kind: 0
@@ -191,3 +192,15 @@ MonoBehaviour:
     ResistPercent: 0
     Neighbors:
     - acolyte-devout-4
+  - Key: node-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 55
+    Position: {x: -126.8, y: -555.6}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 1
+    ResistPercent: 10
+    Neighbors: []

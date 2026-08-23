@@ -247,12 +247,47 @@ player by design - the plan is discovery-gated reveal only, no static display.
 - **Holy and Shadow** are unused by any magic and unresisted by anything - the analyzer reports them, and
   they are free slots if a later biome wants an element of its own.
 
-### 0c. Run chaining (needs a design discussion)
+### 0c. Run chaining — ✅ the system shipped, the content has not
 
-There is one real run and no chaining: `MainMenuManager` holds a single `RunDefinitionSO` and
-`MainMenuUISetup` just grabs `guids[0]`. `RunDefinitionSO.SequenceIndex` was added so the balance
-analyzer has an intended play order to report unlocks against — it is **not** wired to anything in game.
-Chaining runs (selection, gating, escalating difficulty, what carries over) is its own brainstorm.
+**The mechanism is done.** Runs are no longer a single serialized reference: `CampaignSO`
+(`Assets/Resources/Campaign.asset`) is a **directed graph of runs** with per-node prerequisites
+(`Requires` + `UnlockMode` All/Any), `Secret` (hidden until unlocked) and `Optional` flags, so the
+story line can fork — clear one run to open two, one rejoining the main line and one dead-ending as
+optional/secret content. `CampaignOps` is the pure rules layer, `CampaignMapUI` (home ▸ **The Story**)
+is the map screen, and clearing a run's final level banks its key in
+`MetaProgressSaveData.CompletedRunKeys`, which is also what stops the tutorial being replayed
+(`RunDefinitionSO.Repeatable`). Covered by `CampaignOpsTests` + `CampaignAssetTests`.
+
+**What is still open:**
+
+- ~~There is still only one run asset.~~ **Done.** The tutorial now forks into **The Drowned March**
+  (`DrownedMarch`, 4 levels, one-shot, boss *Mirefather*) and **The Warrens** (`TheWarrens`, 2 levels,
+  **repeatable**, boss *Gilded Hoarder*) — an escalating main line plus the farming run the Gold sinks
+  needed. Six new level templates; the previously orphaned `BlueRoom` is finally in a pool. The curve
+  is clean: Drowned March `0.18 / 0.29 / 0.44 / 0.54` with jumps 61% / 55% / 21%, inside the +75%
+  ceiling. **Still open:** a third tier past the Drowned March, and nothing yet uses `Secret`.
+- **Map positions are auto-laid-out.** `CampaignPresenter.ResolvePositions` tiers nodes by longest
+  prerequisite chain when no `MapPosition` is authored. Good enough to play; a hand-placed map wants a
+  **Campaign Map Editor** window, the obvious sibling to `Tools ▸ Dungeon ▸ Manual Level Layout Editor`
+  and `Tools ▸ Heroes ▸ Sphere Grid Editor` (both already do node-drag + connect over the same widget).
+- **No way to abandon a run.** While one is in progress every other node is deliberately un-startable,
+  because starting a second would overwrite `Run.json`. The player finishes or dies out. If a run can
+  be a dead end, an explicit *Abandon* (with confirmation) belongs on the progress screen.
+- ~~`SequenceIndex` is now redundant for ordering.~~ **Done.** The analyzer walks
+  `CampaignOps.GetNodesInPlayOrder` and seeds each run with its prerequisites' end party, so run
+  difficulty is finally measured against the party that actually arrives. `SequenceIndex` survives as
+  a hint only. **Still open:** retire the "no run declares a SequenceIndex" finding now that the graph
+  answers the question.
+- **Two trash enemies are provably trivial now.** With levels measured against their real, XP-grown
+  parties, `Cinder Imp` (danger 0.069) and `Hex Weaver` (0.067) fall under `MinMeaningfulDanger`. The
+  old measurement hid this by judging them against a fresh party. Both want a stat pass.
+- **Nothing resists Shadow.** `Mirefather` is the project's only Shadow attacker and no hero can
+  reduce it, so its damage is unmitigable by accident rather than by design. Either give a sphere grid
+  a Shadow-resistance node (`SphereGridSeeder`) or make it the boss's deliberate identity — see
+  `docs/ELEMENTAL_PLAN.md`.
+- **What carries between runs** is unchanged and unexamined: meta progress (Gold, Essence, heroes,
+  gear, sphere-grid nodes) persists; equipped magic is run-scoped and lost. Worth a pass once there is
+  more than one run to carry anything into.
 
 ### 1. Battle polish (feel & clarity)
 

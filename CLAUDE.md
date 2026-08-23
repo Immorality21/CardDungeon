@@ -41,11 +41,11 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 - `Cards/Effects/` — Effect executors: `IEffectExecutor`, `DamageEffectExecutor`, `HealEffectExecutor`, `BuffEffectExecutor`, `DebuffEffectExecutor`, `EffectExecutorFactory`
 - `Cards/UI/` — `MagicSelectionUI`, `MagicForgeUI`
 - `Items/` — `ItemSO` (equipment + consumables via `ItemCategory`/`ConsumableEffectType`), `InventoryManager` (+ pure `InventoryOperations`), `ItemCatalogSO` (Resources-loaded item DB so the hub resolves items without scene wiring), `LootRoller` (rarity/depth-scaled drops), `UI/InventoryHubUI` (hub equip + consumables screen)
-- `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`, `RunDefinitionSO`, `RunLevelEntry`, `RunSaveData`
+- `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`, `RunDefinitionSO`, `RunLevelEntry`, `RunSaveData`, and **the campaign graph** (`CampaignSO` + `CampaignOps` — which runs exist, what unlocks them, and which branches are optional/secret)
 - `Resources/` — `PartyResourceManager`, `PartyResourceType`
 - `IO/` — `FileHandler`, `IWriteable`
 - `Progression/` — `MetaProgressManager` (persistent Gold/Essence + per-card upgrade levels), `MetaProgressSaveData`
-- `MainMenu/` — `MainMenuManager`, `MerchantUI`
+- `MainMenu/` — `MainMenuManager`, `MerchantUI`, `CampaignMapUI` (the story map / run selection)
 - `Balance/` — Balance analysis model (`BalanceRulesSO` targets, `BalanceMath`, `EncounterModel`, `RunCurveModel`, `VarietyAnalyzer`, `ProgressionMap`, `EncounterSimulator`, `SaveAudit`, `BalanceAnalyzer`) + the `Tools ▸ Balance ▸ Balance Analyzer` editor window
 
 ### Subsystem Guides

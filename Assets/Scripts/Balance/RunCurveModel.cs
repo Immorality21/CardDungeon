@@ -22,6 +22,9 @@ namespace Assets.Scripts.Balance
         public ManualLevelLayoutSO Layout;
         public EnemySO Boss;
 
+        /// <summary>The run entry this level was built from, so consumers can re-read its spawn sources.</summary>
+        public RunLevelEntry Entry;
+
         public List<RoomEncounter> Rooms = new List<RoomEncounter>();
 
         public float ExpectedCombatRooms;
@@ -100,7 +103,29 @@ namespace Assets.Scripts.Balance
         /// <summary>Level-to-level growth in difficulty score; entry i is the jump from level i to i+1.</summary>
         public List<float> DifficultyJumps = new List<float>();
 
+        /// <summary>
+        /// The roster and banked lifetime XP the party walks out of this run with. A campaign is a
+        /// graph of runs, so the run after this one is played by *this* party - not by a fresh save.
+        /// <c>BalanceAnalyzer</c> feeds these forward along the prerequisite edges.
+        /// </summary>
+        public List<HeroSO> EndRoster = new List<HeroSO>();
+
+        public Dictionary<HeroSO, int> EndLifetimeXp = new Dictionary<HeroSO, int>();
+
         public static RunCurve Build(RunDefinitionSO run, PartyBaseline party, BalanceRulesSO rules)
+        {
+            return Build(run, party, rules, null, null);
+        }
+
+        /// <summary>
+        /// Models a run. <paramref name="seedRoster"/> and <paramref name="seedLifetimeXp"/> carry a
+        /// prior run's end state in, which is what makes a campaign's later runs measurable: without
+        /// them every run is judged against a fresh solo starting party, so a run gated behind three
+        /// others reads as brutally overtuned when in play it is fought by a grown party.
+        /// Pass null for both to measure the run as if it were played first.
+        /// </summary>
+        public static RunCurve Build(RunDefinitionSO run, PartyBaseline party, BalanceRulesSO rules,
+            IReadOnlyList<HeroSO> seedRoster, IReadOnlyDictionary<HeroSO, int> seedLifetimeXp)
         {
             var curve = new RunCurve { Run = run };
             if (run == null || party == null || rules == null)
@@ -128,6 +153,18 @@ namespace Assets.Scripts.Balance
                     roster.Add(hero.Definition);
                 }
             }
+            if (seedRoster != null)
+            {
+                foreach (var hero in seedRoster)
+                {
+                    // The widest legal party is the ceiling here for the same reason it is inside a
+                    // run: a hero past the cap gets benched, not fielded.
+                    if (hero != null && !roster.Contains(hero) && roster.Count < PartySlots.MaxCap)
+                    {
+                        roster.Add(hero);
+                    }
+                }
+            }
 
             // The XP loop, closed: each floor's expected income is banked per hero and greedy-spent
             // on their grids before the next floor is measured, so the back half of a run is judged
@@ -137,7 +174,12 @@ namespace Assets.Scripts.Balance
             foreach (var hero in roster)
             {
                 lifetime[hero] = rules.ReferenceHeroXp;
+                if (seedLifetimeXp != null && seedLifetimeXp.TryGetValue(hero, out int carried))
+                {
+                    lifetime[hero] = Mathf.Max(carried, rules.ReferenceHeroXp);
+                }
             }
+            bool carriedIn = seedRoster != null || seedLifetimeXp != null;
 
             for (int i = 0; i < run.Levels.Count; i++)
             {
@@ -149,7 +191,8 @@ namespace Assets.Scripts.Balance
 
                 // Level 0 reuses the caller's baseline so gear/save options are honoured; later
                 // levels are rebuilt from the grown roster at its accumulated XP.
-                var levelParty = i == 0
+                // Carried-in state beats the caller's baseline: that grown party is the truth here.
+                var levelParty = i == 0 && !carriedIn
                     ? party
                     : PartyBaseline.Build(roster,
                         h => Mathf.FloorToInt(lifetime.TryGetValue(h, out var xp) ? xp : 0f),
@@ -199,6 +242,12 @@ namespace Assets.Scripts.Balance
                 curve.TotalExpectedGold += level.ExpectedGold;
             }
 
+            curve.EndRoster = new List<HeroSO>(roster);
+            foreach (var hero in roster)
+            {
+                curve.EndLifetimeXp[hero] = Mathf.FloorToInt(lifetime.TryGetValue(hero, out var xp) ? xp : 0f);
+            }
+
             curve.ClearGold = MetaProgressManager.GoldPerLevelCleared * curve.Levels.Count;
             curve.ClearEssence = MetaProgressManager.EssencePerLevelCleared * curve.Levels.Count;
 
@@ -238,7 +287,8 @@ namespace Assets.Scripts.Balance
                 Name = string.IsNullOrEmpty(entry.LevelName) ? $"Level {index + 1}" : entry.LevelName,
                 Template = entry.LevelTemplate,
                 Layout = entry.ManualLayout,
-                Boss = entry.BossEnemy
+                Boss = entry.BossEnemy,
+                Entry = entry
             };
 
             if (entry.ManualLayout != null)
