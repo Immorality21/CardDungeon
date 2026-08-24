@@ -28,18 +28,19 @@ namespace Assets.Scripts.Cards
         public const int DefaultMaxCharges = 3;
 
         private readonly Dictionary<string, List<MagicSlot>> _heroSlots = new Dictionary<string, List<MagicSlot>>();
-        private int _slotCount = DefaultSlotCount;
 
-        public int SlotCount => _slotCount;
-
-        public void Initialize(List<Hero> heroes, int slotCount)
+        /// <summary>
+        /// Slot counts are per hero: the default plus whatever MagicSlot nodes that hero has
+        /// activated on their sphere grid (<see cref="Hero.BonusMagicSlots"/>). Nothing global —
+        /// the old Essence-bought bonus was retired when the grid took slot growth over.
+        /// </summary>
+        public void Initialize(List<Hero> heroes)
         {
-            _slotCount = slotCount > 0 ? slotCount : DefaultSlotCount;
             _heroSlots.Clear();
 
             foreach (var hero in heroes)
             {
-                _heroSlots[hero.HeroKey] = CreateEmptySlots(_slotCount);
+                _heroSlots[hero.HeroKey] = CreateEmptySlots(SlotCountFor(hero));
             }
         }
 
@@ -48,7 +49,7 @@ namespace Assets.Scripts.Cards
         /// freed mid-dungeon has no entry yet, and without one they can neither draw nor cast.
         /// No-op if they already have slots.
         /// </summary>
-        public void AddHero(Hero hero, int slotCount)
+        public void AddHero(Hero hero)
         {
             if (hero == null || string.IsNullOrEmpty(hero.HeroKey))
             {
@@ -58,7 +59,12 @@ namespace Assets.Scripts.Cards
             {
                 return;
             }
-            _heroSlots[hero.HeroKey] = CreateEmptySlots(slotCount > 0 ? slotCount : _slotCount);
+            _heroSlots[hero.HeroKey] = CreateEmptySlots(SlotCountFor(hero));
+        }
+
+        private static int SlotCountFor(Hero hero)
+        {
+            return DefaultSlotCount + (hero != null ? hero.BonusMagicSlots : 0);
         }
 
         private static List<MagicSlot> CreateEmptySlots(int count)

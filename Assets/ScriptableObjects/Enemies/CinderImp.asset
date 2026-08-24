@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CinderImp
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   DisplayName: Cinder Imp
-  Sprite: {fileID: 21300000, guid: c63e0d29d5d04db3b133f261668e6868, type: 3}
+  Sprite: {fileID: 21300000, guid: a1fb566fc3954623b4d197411b1327ea, type: 3}
   IsBoss: 0
   BaseStats:
     Values:

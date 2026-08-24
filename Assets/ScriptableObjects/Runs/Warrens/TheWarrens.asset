@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebc985730f692f54eafd123ca62fd64f, type: 3}
+  m_Name: TheWarrens
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
+  Key: TheWarrens
+  DisplayName: The Warrens
+  Blurb: 'A standing contract: clear the vault tunnels, keep what you carry out.
+    The hoard always grows back.'
+  SequenceIndex: 2
+  Repeatable: 1
+  Levels:
+  - LevelTemplate: {fileID: 11400000, guid: 18f6bc74a126b1b4898ed8fc8edfe79c, type: 2}
+    LevelName: Warren Tunnels
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 0}
+    RescueHero: {fileID: 0}
+  - LevelTemplate: {fileID: 11400000, guid: 7154cacde9cc3424c8d2974a4136b198, type: 2}
+    LevelName: The Counting Room
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
+    RescueHero: {fileID: 0}

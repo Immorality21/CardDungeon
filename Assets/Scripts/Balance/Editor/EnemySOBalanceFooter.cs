@@ -125,8 +125,8 @@ namespace Assets.Scripts.Balance.Editor
 
             _rules = BalanceAssetCollector.LoadOrCreateRules(false);
             _heroes = BalanceAssetCollector.FindAll<HeroSO>();
-            _party = PartyBaseline.Build(_heroes, _rules.ReferenceHeroLevel);
-            _party.SourceLabel = $"level {_rules.ReferenceHeroLevel} party, no gear";
+            _party = PartyBaseline.Build(_heroes, _rules.ReferenceHeroXp);
+            _party.SourceLabel = $"{_rules.ReferenceHeroXp} XP party, no gear";
             _cachedAt = now;
 
             return _party;

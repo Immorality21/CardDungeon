@@ -304,7 +304,7 @@ namespace Assets.Scripts.Dungeon
             // Initialize equipped-magic state, carrying magic drawn on earlier levels of
             // this run (persisted in the run save; empty on the first level or a fresh run).
             MagicState = new EquippedMagicState();
-            MagicState.Initialize(Party.Heroes, GetMagicSlotCount());
+            MagicState.Initialize(Party.Heroes);
             if (ActiveRun != null && MagicCatalog.HasInstance)
             {
                 var carried = _fileHandler.Load<RunSaveData>();
@@ -387,7 +387,7 @@ namespace Assets.Scripts.Dungeon
 
             // Restore equipped-magic state from the dungeon save (mid-level resume)
             MagicState = new EquippedMagicState();
-            MagicState.Initialize(Party.Heroes, GetMagicSlotCount());
+            MagicState.Initialize(Party.Heroes);
             if (MagicCatalog.HasInstance)
             {
                 MagicState.Restore(saveData.EquippedMagic, MagicCatalog.Instance.GetMagic);
@@ -653,20 +653,20 @@ namespace Assets.Scripts.Dungeon
 
         /// <summary>
         /// Party-best effective value per stat, for the party as it enters this level: authored base
-        /// stats, plus the level-up gains its saved XP has already bought, plus equipped gear. The
-        /// *fielded* party, not the owned roster - a benched hero's Intelligence cannot open a tome
-        /// they are not there to read.
+        /// stats, plus every sphere-grid node its saved activations have bought, plus equipped gear.
+        /// The *fielded* party, not the owned roster - a benched hero's Intelligence cannot open a
+        /// tome they are not there to read.
         ///
         /// <para>Built through <see cref="HeroStatCalculator"/> rather than <c>Hero</c>, because
         /// placement runs before the party is instantiated - and has to, since a resumed dungeon
         /// re-applies its saved event state before the party exists. <c>Hero.GetEffectiveStat</c>
         /// needs a live scene; the calculator re-derives the same numbers from the asset, the saved
-        /// XP and the gear loadout.</para>
+        /// node keys and the gear loadout.</para>
         ///
         /// <para>Computed once per placement pass, not once per roll: it reads the party save off
-        /// disk. Stable across a save and resume, which placement relies on - XP and gear are both
-        /// committed only on level clear, so mid-dungeon progress cannot move a spawn threshold.
-        /// </para>
+        /// disk. Stable across a save and resume, which placement relies on - node activation is
+        /// hub-only and gear is committed only on level clear, so mid-dungeon progress cannot move
+        /// a spawn threshold.</para>
         /// </summary>
         private StatBlock BestRosterStats()
         {
@@ -680,7 +680,7 @@ namespace Assets.Scripts.Dungeon
                     continue;
                 }
 
-                var baseStats = HeroStatCalculator.BaseStatsForXp(heroSO, SavedXpFor(partySave, heroSO.SaveKey));
+                var baseStats = HeroStatCalculator.BaseStatsForNodes(heroSO, SavedNodesFor(partySave, heroSO.SaveKey));
                 var gear = InventoryManager.HasInstance
                     ? InventoryManager.Instance.GetEquippedItems(heroSO.SaveKey)
                     : null;
@@ -698,15 +698,15 @@ namespace Assets.Scripts.Dungeon
             return best;
         }
 
-        private static int SavedXpFor(PartySaveData partySave, string heroKey)
+        private static List<string> SavedNodesFor(PartySaveData partySave, string heroKey)
         {
             if (partySave == null || partySave.Heroes == null || string.IsNullOrEmpty(heroKey))
             {
-                return 0;
+                return new List<string>();
             }
 
             var entry = partySave.Heroes.Find(h => h != null && h.HeroKey == heroKey);
-            return entry != null ? entry.CurrentXp : 0;
+            return entry != null && entry.ActivatedNodes != null ? entry.ActivatedNodes : new List<string>();
         }
 
         /// <summary>
@@ -764,7 +764,7 @@ namespace Assets.Scripts.Dungeon
             // Give the newcomer their own magic slots, or they cannot cast anything this run.
             if (MagicState != null)
             {
-                MagicState.AddHero(hero, GetMagicSlotCount());
+                MagicState.AddHero(hero);
             }
 
             Debug.Log($"Rescued {captive.DisplayName}; party is now {Party.Heroes.Count} strong.");
@@ -844,7 +844,9 @@ namespace Assets.Scripts.Dungeon
 
                 if (runSave.CurrentLevelIndex >= ActiveRun.Levels.Count)
                 {
-                    // Run complete — clear run save
+                    // Run complete — record it permanently (gates non-repeatable runs like the
+                    // tutorial out of the New Run button), then clear the run save.
+                    MetaProgressManager.Instance.MarkRunCompleted(runSave.RunKey);
                     _fileHandler.Delete(runSave);
                     ActiveRun = null;
                     MainMenuManager.MarkRunCompleted();
@@ -852,13 +854,6 @@ namespace Assets.Scripts.Dungeon
             }
 
             SceneManager.LoadScene("MenuScene");
-        }
-
-        /// <summary>Number of equipped-magic slots each hero gets (raised by meta slot upgrades).</summary>
-        private int GetMagicSlotCount()
-        {
-            int bonus = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.GetBonusSlotCount() : 0;
-            return EquippedMagicState.DefaultSlotCount + bonus;
         }
 
         public void HandlePartyDeath()

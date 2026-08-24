@@ -1,6 +1,7 @@
 ﻿<Solution>
   <Project Path="CardDungeon.csproj" />
   <Project Path="EditModeTests.csproj" />
+  <Project Path="CardDungeon.Heroes.Editor.csproj" />
   <Project Path="CardDungeon.Balance.Editor.csproj" />
   <Project Path="CardDungeon.Dungeon.Editor.csproj" />
   <Project Path="CardDungeon.Cards.Editor.csproj" />

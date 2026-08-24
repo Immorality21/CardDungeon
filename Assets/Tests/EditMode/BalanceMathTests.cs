@@ -162,51 +162,6 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void HeroStatCalculator_LevelForXp_UsesCumulativeThresholds()
-        {
-            var hero = ScriptableObject.CreateInstance<HeroSO>();
-            hero.Label = "Test";
-            hero.BaseStats[StatType.Strength] = 5;
-            hero.BaseStats[StatType.Endurance] = 2;
-            hero.BaseStats[StatType.MaxHealth] = 40;
-            hero.BaseStats[StatType.Agility] = 5;
-            hero.LevelProgression = new List<LevelConfiguration>
-            {
-                new LevelConfiguration { Level = 2, XpRequired = 100, Gains = new StatBlock(new UnitStat(StatType.Strength, 1), new UnitStat(StatType.MaxHealth, 5)) },
-                new LevelConfiguration { Level = 3, XpRequired = 250, Gains = new StatBlock(new UnitStat(StatType.Strength, 1), new UnitStat(StatType.MaxHealth, 5)) }
-            };
-
-            Assert.AreEqual(1, HeroStatCalculator.LevelForXp(hero, 99));
-            Assert.AreEqual(2, HeroStatCalculator.LevelForXp(hero, 100));
-            Assert.AreEqual(2, HeroStatCalculator.LevelForXp(hero, 249));
-            Assert.AreEqual(3, HeroStatCalculator.LevelForXp(hero, 250));
-            Assert.AreEqual(3, HeroStatCalculator.MaxDefinedLevel(hero));
-
-            Object.DestroyImmediate(hero);
-        }
-
-        [Test]
-        public void HeroStatCalculator_BaseStatsAtLevel_AppliesEveryGainUpToThatLevel()
-        {
-            var hero = ScriptableObject.CreateInstance<HeroSO>();
-            hero.BaseStats[StatType.Strength] = 5;
-            hero.BaseStats[StatType.MaxHealth] = 40;
-            hero.LevelProgression = new List<LevelConfiguration>
-            {
-                new LevelConfiguration { Level = 2, XpRequired = 100, Gains = new StatBlock(new UnitStat(StatType.Strength, 2), new UnitStat(StatType.MaxHealth, 10)) },
-                new LevelConfiguration { Level = 3, XpRequired = 250, Gains = new StatBlock(new UnitStat(StatType.Strength, 3), new UnitStat(StatType.MaxHealth, 10)) }
-            };
-
-            var atThree = HeroStatCalculator.BaseStatsAtLevel(hero, 3);
-
-            Assert.AreEqual(10, atThree[StatType.Strength]);
-            Assert.AreEqual(60, atThree.MaxHealth);
-            Assert.AreEqual(atThree.MaxHealth, atThree.Health, "A freshly derived hero should start at full health.");
-
-            Object.DestroyImmediate(hero);
-        }
-
-        [Test]
         public void HeroStatCalculator_WithGear_AppliesRawThenPercentage()
         {
             var sword = ScriptableObject.CreateInstance<ItemSO>();

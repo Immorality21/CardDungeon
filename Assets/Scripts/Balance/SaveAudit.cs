@@ -12,20 +12,34 @@ using UnityEngine;
 
 namespace Assets.Scripts.Balance
 {
-    /// <summary>One hero as the save file actually has them, with the level that XP total buys.</summary>
+    /// <summary>One hero as the save file actually has them: their XP bank and the sphere-grid
+    /// nodes it has bought.</summary>
     public class SavedHero
     {
         public string HeroKey = "";
         public HeroSO Definition;
+
+        /// <summary>Unspent XP bank.</summary>
         public int Xp;
-        public int Level;
-        public int MaxDefinedLevel;
+
+        public List<string> ActivatedNodes = new List<string>();
+
+        /// <summary>XP the activated nodes cost, at current prices.</summary>
+        public int SpentXp;
+
+        public int LifetimeXp => Xp + SpentXp;
+
+        public int NodesActivated;
+        public int NodesTotal;
+
+        public bool GridComplete => NodesTotal > 0 && NodesActivated >= NodesTotal;
+
+        /// <summary>Cheapest node the hero could buy next, or -1 when the grid is complete (or absent).</summary>
+        public int CheapestNextCost = -1;
+
+        public bool CanAffordNext => CheapestNextCost >= 0 && Xp >= CheapestNextCost;
+
         public List<ItemSO> Gear = new List<ItemSO>();
-
-        public bool AtMaxDefinedLevel => Level >= MaxDefinedLevel;
-
-        /// <summary>XP still needed for the next level, or -1 when no further level is configured.</summary>
-        public int XpToNextLevel = -1;
     }
 
     /// <summary>A magic the player has actually invested Essence in.</summary>
@@ -55,7 +69,11 @@ namespace Assets.Scripts.Balance
 
         public int Gold;
         public int Essence;
-        public int BonusMagicSlots;
+
+        /// <summary>Essence-bought global slots a pre-grid save still carries. The game refunds the
+        /// Essence and zeroes this on its next launch; reported so the audit explains the pending
+        /// refund rather than showing a stat that no longer does anything.</summary>
+        public int LegacyBonusSlots;
         public List<SavedUpgrade> MagicUpgrades = new List<SavedUpgrade>();
         public List<SavedUpgrade> ComboUpgrades = new List<SavedUpgrade>();
         public int DiscoveredMagicCount;
@@ -111,7 +129,7 @@ namespace Assets.Scripts.Balance
             var meta = fileHandler.Load<MetaProgressSaveData>();
             audit.Gold = meta.Gold;
             audit.Essence = meta.Essence;
-            audit.BonusMagicSlots = meta.BonusSlots;
+            audit.LegacyBonusSlots = meta.BonusSlots;
             audit.ShopStockCount = meta.ShopStock != null ? meta.ShopStock.Count : 0;
             audit.DiscoveredMagicCount = meta.DiscoveredMagicKeys != null ? meta.DiscoveredMagicKeys.Count : 0;
             audit.DiscoveredComboCount = meta.DiscoveredComboKeys != null ? meta.DiscoveredComboKeys.Count : 0;
@@ -184,18 +202,19 @@ namespace Assets.Scripts.Balance
                     }
 
                     var definition = resolveHero != null ? resolveHero(saved.HeroKey) : null;
-                    int level = HeroStatCalculator.LevelForXp(definition, saved.CurrentXp);
-                    int maxLevel = HeroStatCalculator.MaxDefinedLevel(definition);
-                    int nextXp = HeroStatCalculator.XpToReachLevel(definition, level + 1);
+                    var grid = definition != null ? definition.SphereGrid : null;
+                    var nodes = SphereGridOps.SanitizeActivated(grid, saved.ActivatedNodes);
 
                     var hero = new SavedHero
                     {
                         HeroKey = saved.HeroKey,
                         Definition = definition,
                         Xp = saved.CurrentXp,
-                        Level = level,
-                        MaxDefinedLevel = maxLevel,
-                        XpToNextLevel = nextXp >= 0 ? Mathf.Max(0, nextXp - saved.CurrentXp) : -1
+                        ActivatedNodes = nodes,
+                        SpentXp = SphereGridOps.TotalCostOf(grid, nodes),
+                        NodesActivated = nodes.Count,
+                        NodesTotal = grid != null && grid.Nodes != null ? grid.Nodes.Count : 0,
+                        CheapestNextCost = SphereGridOps.CheapestFrontierCost(grid, nodes)
                     };
 
                     if (gearByHero.TryGetValue(saved.HeroKey, out var gear))
@@ -216,11 +235,11 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// Builds a <see cref="PartyBaseline"/> from the save: each hero at the level their saved XP
-        /// buys, wearing what they actually have equipped. Heroes can sit at different levels — XP is
-        /// split across whoever was fielded at the time (<c>Party.DistributeXp</c>), and a hero
-        /// recruited or benched partway through banked a different amount — so each is levelled
-        /// individually rather than through the shared level parameter.
+        /// Builds a <see cref="PartyBaseline"/> from the save: each hero at exactly the sphere-grid
+        /// nodes their save has activated, wearing what they actually have equipped. Heroes can hold
+        /// different node sets — XP is split across whoever was fielded at the time
+        /// (<c>Party.DistributeXp</c>), and each spends their own bank — which is why the audit
+        /// supplies real node sets instead of a shared XP budget.
         /// </summary>
         private static PartyBaseline BuildRealParty(
             SaveAudit audit,
@@ -234,54 +253,34 @@ namespace Assets.Scripts.Balance
             // how many potions were left when the game was saved. Using the carried count instead
             // makes the same save read as clearable or unclearable depending on when it was written.
             // PotionsCarried is still reported on its own for the mid-level picture.
-            var party = new PartyBaseline
-            {
-                SourceLabel = "Save file",
-                PotionCount = Mathf.Max(0, audit.PotionCap),
-                PotionItem = healingPotion,
-                PotionHealAmount = healingPotion != null ? healingPotion.ConsumableAmount : 0
-            };
-
+            var savedByKey = new Dictionary<string, SavedHero>();
             foreach (var saved in audit.Heroes)
             {
-                if (saved.Definition == null)
+                if (saved.Definition != null && !savedByKey.ContainsKey(saved.Definition.SaveKey))
                 {
-                    continue;
+                    savedByKey[saved.Definition.SaveKey] = saved;
                 }
+            }
 
-                var gear = saved.Gear ?? new List<ItemSO>();
-                var baseStats = HeroStatCalculator.BaseStatsAtLevel(saved.Definition, saved.Level);
-                var effective = HeroStatCalculator.WithGear(baseStats, gear);
+            var party = PartyBaseline.Build(
+                heroDefinitions,
+                _ => 0,
+                definition => gearByHero.TryGetValue(definition.SaveKey, out var gear)
+                    ? gear
+                    : new List<ItemSO>(),
+                healingPotion,
+                Mathf.Max(0, audit.PotionCap),
+                definition => savedByKey.TryGetValue(definition.SaveKey, out var saved)
+                    ? saved.ActivatedNodes
+                    : new List<string>());
 
-                var hero = new HeroBaseline
+            party.SourceLabel = "Save file";
+            foreach (var hero in party.Heroes)
+            {
+                if (hero.Definition != null && savedByKey.TryGetValue(hero.Definition.SaveKey, out var saved))
                 {
-                    Definition = saved.Definition,
-                    Level = saved.Level,
-                    MaxDefinedLevel = saved.MaxDefinedLevel,
-                    SavedXp = saved.Xp,
-                    Effective = effective,
-                    Gear = gear
-                };
-
-                hero.Unit = new SimUnit
-                {
-                    DisplayName = hero.Name,
-                    HeroKey = saved.HeroKey,
-                    IsHero = true,
-                    Stats = new Rooms.Stats(effective),
-                    Effective = effective.Clone(),
-                    // Honour the hero's chosen attack stat here too; this used to hardcode Strength,
-                    // so an audited Scout swung off a stat it does not invest in.
-                    AttackStat = saved.Definition != null
-                        ? saved.Definition.ResolvedAttackStat
-                        : StatType.Strength,
-                    EffectiveAttackPower = effective[saved.Definition != null
-                        ? saved.Definition.ResolvedAttackStat
-                        : StatType.Strength],
-                    Resistances = InventoryOperations.ComputeResistances(gear)
-                };
-
-                party.Heroes.Add(hero);
+                    hero.SavedXp = saved.Xp;
+                }
             }
 
             return party;

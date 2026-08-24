@@ -22,4 +22,10 @@ Tuning (heal amount, heavy multiplier, debuff magnitude/duration) lives as const
 ## Bosses
 
 - **`EnemySO.IsBoss`** flags a definition as a boss. It drives the boss-only combat/UI treatment: a larger crimson HP bar (`UnitHealthBar`), the no-flee rule + intro banner (`RoomActionUI`), and the run-complete/`Boss Slain!` victory copy. `Enemy.IsBoss` exposes it at runtime. Pair `IsBoss` with `Archetype = Boss` for the full effect.
-- **Placement** is authored on `RunLevelEntry.BossEnemy` (see the Dungeon guide), *not* via spawn tables: `DungeonManager.PlaceBossIfConfigured` guarantees the boss (alone) in the exit room, clearing that room's rolled enemies first (`EnemyManager.ClearRoomEnemies` + `SpawnSingle`). Example asset: `AbyssalWarden.asset` (wired into `TutorialRun`'s final level).
+- **Placement** is authored on `RunLevelEntry.BossEnemy` (see the Dungeon guide), *not* via spawn tables: `DungeonManager.PlaceBossIfConfigured` guarantees the boss (alone) in the exit room, clearing that room's rolled enemies first (`EnemyManager.ClearRoomEnemies` + `SpawnSingle`).
+- **The three bosses**, one per run: `AbyssalWarden` (Lightning, `TutorialRun`), **`Mirefather`** (HP 74, Shadow, resists Ice/Shadow and burns — `DrownedMarch`), **`GildedHoarder`** (HP 52, Normal, resists Lightning, **−75% Fire** because it is a wooden chest — `TheWarrens`, and repeatable, so it is the game's gold faucet at 95 Gold a kill).
+- **A boss has to be proportionate to its level's trash**, not just survivable: `BalanceRegressionTests.BossesStandProportionateToTheirLevel` fails on a ratio outside **1.8–6.0×**, in *both* directions. The Mirefather first landed at 6.4× — the fix was giving its level hotter trash (`BlueRoom`) rather than inflating the boss.
+
+## Sprites
+
+Every `EnemySO` now has its **own** sprite. They did not: `AbyssalWarden`/`StoneSentinel` shared one, `BogShaman`/`EyeBall`/`HexWeaver` a second, and `CinderImp`/`Dragon` a third, which made three pairs of enemies visually indistinguishable in combat. `CinderImp`, `BogShaman` and `StoneSentinel` were drawn fresh (32×32 @ 32 PPU, matching the other trash), the two new bosses at 64×64 @ 64 PPU (matching `AbyssalWarden`), and `HexWeaver` took the already-shipped but unused `evil_wizard.png`. Convention: **trash 32px, bosses 64px, both one world unit**, `filterMode: 0`, `alphaIsTransparency: 1`.

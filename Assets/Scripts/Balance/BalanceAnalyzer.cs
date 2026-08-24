@@ -42,6 +42,13 @@ namespace Assets.Scripts.Balance
         }
         public List<EnemySO> Enemies = new List<EnemySO>();
         public List<RunDefinitionSO> Runs = new List<RunDefinitionSO>();
+
+        /// <summary>
+        /// The campaign graph, when the project has one. It supplies the order runs are actually
+        /// played in and, more importantly, which runs are already behind the player when a given
+        /// run starts - without it every run is measured against a fresh starting party.
+        /// </summary>
+        public CampaignSO Campaign;
         public List<MagicSO> Magic = new List<MagicSO>();
         public List<MagicComboSO> Combos = new List<MagicComboSO>();
         public List<ItemSO> Items = new List<ItemSO>();
@@ -83,7 +90,13 @@ namespace Assets.Scripts.Balance
             // danger there is, so measuring a level-3 enemy against the level-1 party reports it as
             // out of band when it never gets fought that way. Falls back to the starting party for
             // anything no run places.
-            var partyByEnemy = BuildFirstEncounterParties(input, rules, report.Party);
+            // Run curves come first now: they know the campaign order, so they are the authority on
+            // which party meets which enemy.
+            BuildRunCurves(input, rules, report);
+
+            var partyByEnemy = report.Runs.Count > 0
+                ? BuildEncounterPartiesFromCurves(report)
+                : BuildFirstEncounterParties(input, rules, report.Party);
             report.PartyByEnemy = partyByEnemy;
 
             foreach (var enemy in input.Enemies)
@@ -96,14 +109,6 @@ namespace Assets.Scripts.Balance
                         against = report.Party;
                     }
                     report.Enemies.Add(EnemyMetrics.Compute(enemy, against, rules, report.Party));
-                }
-            }
-
-            foreach (var run in input.Runs)
-            {
-                if (run != null)
-                {
-                    report.Runs.Add(RunCurve.Build(run, report.Party, rules));
                 }
             }
 
@@ -136,6 +141,123 @@ namespace Assets.Scripts.Balance
         /// This exists because party size roughly halves per-enemy danger, so a fixed reference
         /// party makes late-run enemies read as out of band and early ones as harmless.
         /// </summary>
+        /// <summary>
+        /// Models every run, walking the campaign shallowest-first so a run inherits the party its
+        /// prerequisites left behind. Where a run has several prerequisites the player can only have
+        /// arrived via one of them, so the *weakest* incoming state is used - the run has to be
+        /// clearable by whoever reaches it first, not only by a completionist.
+        ///
+        /// <para>Falls back to measuring every run against the starting party when no campaign is
+        /// authored, which is what the analyzer did before the graph existed.</para>
+        /// </summary>
+        private static void BuildRunCurves(BalanceInput input, BalanceRulesSO rules, BalanceReport report)
+        {
+            if (input.Runs == null)
+            {
+                return;
+            }
+
+            if (input.Campaign == null)
+            {
+                foreach (var run in input.Runs)
+                {
+                    if (run != null)
+                    {
+                        report.Runs.Add(RunCurve.Build(run, report.Party, rules));
+                    }
+                }
+                return;
+            }
+
+            var byKey = new Dictionary<string, RunCurve>();
+            var remaining = new List<RunDefinitionSO>(input.Runs);
+
+            foreach (var node in CampaignOps.GetNodesInPlayOrder(input.Campaign))
+            {
+                var run = node.Run;
+                if (run == null || !remaining.Contains(run))
+                {
+                    continue;
+                }
+                remaining.Remove(run);
+
+                List<HeroSO> seedRoster = null;
+                Dictionary<HeroSO, int> seedXp = null;
+
+                RunCurve weakest = null;
+                foreach (var prerequisite in node.Requires)
+                {
+                    if (prerequisite == null)
+                    {
+                        continue;
+                    }
+                    if (byKey.TryGetValue(CampaignOps.RunKeyOf(prerequisite), out var prior) &&
+                        (weakest == null || TotalBankedXp(prior) < TotalBankedXp(weakest)))
+                    {
+                        weakest = prior;
+                    }
+                }
+                if (weakest != null)
+                {
+                    seedRoster = weakest.EndRoster;
+                    seedXp = weakest.EndLifetimeXp;
+                }
+
+                var curve = RunCurve.Build(run, report.Party, rules, seedRoster, seedXp);
+                report.Runs.Add(curve);
+                byKey[CampaignOps.RunKeyOf(run)] = curve;
+            }
+
+            // Runs that exist as assets but are not on the map still get measured, as a fresh start -
+            // CampaignAssetTests is what actually objects to them being unreachable.
+            foreach (var run in remaining)
+            {
+                if (run != null)
+                {
+                    report.Runs.Add(RunCurve.Build(run, report.Party, rules));
+                }
+            }
+        }
+
+        private static int TotalBankedXp(RunCurve curve)
+        {
+            int total = 0;
+            foreach (var pair in curve.EndLifetimeXp)
+            {
+                total += pair.Value;
+            }
+            return total;
+        }
+
+        /// <summary>
+        /// Which party each enemy is first met by, read straight off the modelled run curves so the
+        /// answer cannot drift from the curve the rest of the report is drawn from. Every level
+        /// already records the party it was measured against; this just indexes it by enemy, in play
+        /// order, first writer wins.
+        /// </summary>
+        private static Dictionary<EnemySO, PartyBaseline> BuildEncounterPartiesFromCurves(BalanceReport report)
+        {
+            var result = new Dictionary<EnemySO, PartyBaseline>();
+            foreach (var curve in report.Runs)
+            {
+                foreach (var level in curve.Levels)
+                {
+                    if (level.Party == null || level.Entry == null)
+                    {
+                        continue;
+                    }
+                    foreach (var enemy in EnemiesInLevel(level.Entry))
+                    {
+                        if (enemy != null && !result.ContainsKey(enemy))
+                        {
+                            result[enemy] = level.Party;
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
         private static Dictionary<EnemySO, PartyBaseline> BuildFirstEncounterParties(
             BalanceInput input, BalanceRulesSO rules, PartyBaseline starting)
         {
@@ -184,7 +306,7 @@ namespace Assets.Scripts.Balance
                     PartyBaseline party;
                     if (!bySize.TryGetValue(roster.Count, out party))
                     {
-                        party = PartyBaseline.Build(roster, rules.ReferenceHeroLevel, null,
+                        party = PartyBaseline.Build(roster, rules.ReferenceHeroXp, null,
                             starting.PotionItem, starting.PotionCount);
                         bySize[roster.Count] = party;
                     }
@@ -281,14 +403,14 @@ namespace Assets.Scripts.Balance
 
             var party = PartyBaseline.Build(
                 input.Heroes,
-                rules.ReferenceHeroLevel,
+                rules.ReferenceHeroXp,
                 gearLookup,
                 input.HealingPotion,
                 potionCount);
 
             party.SourceLabel = rules.ReferencePartyUsesSavedGear
-                ? $"Designed baseline (level {rules.ReferenceHeroLevel}, saved gear)"
-                : $"Designed baseline (level {rules.ReferenceHeroLevel}, no gear)";
+                ? $"Designed baseline ({rules.ReferenceHeroXp} XP spent, saved gear)"
+                : $"Designed baseline ({rules.ReferenceHeroXp} XP spent, no gear)";
 
             return party;
         }
@@ -407,10 +529,10 @@ namespace Assets.Scripts.Balance
         /// simulated party has empty slots, and the attack-spam comparison would only be measuring
         /// potion use rather than whether magic changes the outcome.
         ///
-        /// Charges and slot count come from <see cref="EquippedMagicState"/>'s own defaults (plus any
-        /// bonus slots the save has bought), and upgrade levels from the save, so the simulated loadout
-        /// matches what a player at this point could really be holding. Note that the turn a Draw costs
-        /// is not modelled — the loadout is assumed already in hand.
+        /// Charges and slot counts come from <see cref="EquippedMagicState"/>'s default plus each
+        /// hero's activated MagicSlot grid nodes, and upgrade levels from the save, so the simulated
+        /// loadout matches what a player at this point could really be holding. Note that the turn a
+        /// Draw costs is not modelled — the loadout is assumed already in hand.
         /// </summary>
         private static void AssignDrawLoadout(PartyBaseline party, IList<SimUnit> enemies, SaveAudit save)
         {
@@ -419,7 +541,18 @@ namespace Assets.Scripts.Balance
                 return;
             }
 
-            int slotCount = EquippedMagicState.DefaultSlotCount + (save != null ? save.BonusMagicSlots : 0);
+            // Slot counts are per hero now; collect up to the widest count anyone can hold and let
+            // each hero take their own prefix of the offer.
+            int widestSlotCount = EquippedMagicState.DefaultSlotCount;
+            foreach (var hero in party.Heroes)
+            {
+                int slots = EquippedMagicState.DefaultSlotCount + SphereGridOps.SlotBonusForNodes(
+                    hero.Definition != null ? hero.Definition.SphereGrid : null, hero.ActivatedNodes);
+                if (slots > widestSlotCount)
+                {
+                    widestSlotCount = slots;
+                }
+            }
 
             var offered = new List<MagicSO>();
             var seen = new HashSet<string>();
@@ -438,7 +571,7 @@ namespace Assets.Scripts.Balance
                     }
 
                     string key = string.IsNullOrEmpty(draw.Magic.Key) ? draw.Magic.name : draw.Magic.Key;
-                    if (seen.Add(key) && offered.Count < slotCount)
+                    if (seen.Add(key) && offered.Count < widestSlotCount)
                     {
                         offered.Add(draw.Magic);
                     }
@@ -452,9 +585,17 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
+                int slotCount = EquippedMagicState.DefaultSlotCount + SphereGridOps.SlotBonusForNodes(
+                    hero.Definition != null ? hero.Definition.SphereGrid : null, hero.ActivatedNodes);
+
                 hero.Unit.MagicSlots.Clear();
                 foreach (var magic in offered)
                 {
+                    if (hero.Unit.MagicSlots.Count >= slotCount)
+                    {
+                        break;
+                    }
+
                     hero.Unit.MagicSlots.Add(new SimMagicSlot
                     {
                         Magic = magic,
@@ -555,37 +696,38 @@ namespace Assets.Scripts.Balance
                 }
 
                 // A progression that stops immediately is a dead end no amount of stat tuning fixes.
-                if (hero.MaxDefinedLevel <= 1)
+                if (hero.NodesTotal == 0)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, hero.Name,
-                        $"{hero.Name} has no level progression")
+                        $"{hero.Name} has no sphere grid")
                     {
                         Asset = hero.Definition,
-                        Detail = "LevelProgression is empty, so this hero can never level up.",
-                        Suggestion = "Add LevelConfiguration entries, or drop XP as a mechanic for this hero."
+                        Detail = "SphereGrid is unset or empty, so banked XP can never be spent.",
+                        Suggestion = "Author a grid asset and assign it to HeroSO.SphereGrid."
                     });
                 }
-                else if (hero.MaxDefinedLevel <= 2)
+                else if (hero.NodesTotal < rules.MinGridNodes)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, hero.Name,
-                        $"{hero.Name} caps at level {hero.MaxDefinedLevel}")
+                        $"{hero.Name}'s sphere grid runs out almost immediately")
                     {
                         Asset = hero.Definition,
-                        Detail = $"Only {hero.MaxDefinedLevel - 1} level-up(s) are configured, so XP stops "
-                               + "mattering almost immediately.",
-                        Suggestion = "Extend LevelProgression to cover the levels the later run content assumes."
+                        Detail = $"Only {hero.NodesTotal} node(s) are authored against a floor of "
+                               + $"{rules.MinGridNodes}, so XP stops mattering almost immediately.",
+                        Suggestion = "Extend the grid to cover the XP the later run content pays out."
                     });
                 }
 
             }
 
-            // Deliberately over every hero asset, not just the party: a curve is authored on the
+            // Deliberately over every hero asset, not just the party: a grid is authored on the
             // asset, so a hero who joins at depth 3 can carry a broken one for the whole run
             // without ever being measured. The Tank's +5 Agility on a base of 5 was invisible for
             // exactly this reason.
             foreach (var definition in input.HeroesToAudit)
             {
-                EvaluateLevelUpShape(definition, report);
+                EvaluateNodeGainShape(definition, report);
+                EvaluateGridAuthoring(definition, report);
             }
 
             EvaluateHealing(report, rules, input);
@@ -593,50 +735,49 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// Largest share of its base an <b>output</b> stat may gain in one level. +5 Agility on a base
-        /// of 5 doubles the hero's turn rate in a single level-up, which no other number is scaled for.
+        /// Largest share of its base an <b>output</b> stat may gain from one node. +5 Agility on a
+        /// base of 5 doubles the hero's turn rate in a single activation, which no other number is
+        /// scaled for.
         /// </summary>
         private const float MaxOutputStatGainShare = 0.5f;
 
         /// <summary>
         /// The same limit for a <b>pool</b> stat, which is deliberately far looser. Health bars start
-        /// small and are *meant* to grow in large relative steps — every hero in the project gains
-        /// 50-54% of base MaxHealth at level 2, which is ordinary design. Holding pools to the output
-        /// threshold reported all four heroes and meant nothing.
+        /// small and are *meant* to grow in large relative steps. Holding pools to the output
+        /// threshold reported every hero and meant nothing.
         /// </summary>
         private const float MaxPoolStatGainShare = 1f;
 
         /// <summary>
-        /// Flags level-up entries that move a stat by an implausible share of its base.
+        /// Flags grid nodes that move a stat by an implausible share of its base.
         ///
-        /// <para>Every stat in <see cref="StatCatalog.Types"/> is checked — it used to name Agility,
-        /// Strength and Endurance one by one, so a runaway Intelligence or Luck gain went unreported.
-        /// The threshold comes from <see cref="StatDefinition.IsPool"/>, because a share means
-        /// something different for a health bar than for a damage stat.</para>
+        /// <para>Every stat in <see cref="StatCatalog.Types"/> is checked, and the threshold comes
+        /// from <see cref="StatDefinition.IsPool"/>, because a share means something different for a
+        /// health bar than for a damage stat — the same rule the old level-curve check applied.</para>
         /// </summary>
-        private static void EvaluateLevelUpShape(HeroSO definition, BalanceReport report)
+        private static void EvaluateNodeGainShape(HeroSO definition, BalanceReport report)
         {
-            if (definition == null || definition.LevelProgression == null)
+            if (definition == null || definition.SphereGrid == null || definition.SphereGrid.Nodes == null)
             {
                 return;
             }
 
-            foreach (var config in definition.LevelProgression)
+            foreach (var node in definition.SphereGrid.Nodes)
             {
-                if (config == null)
+                if (node == null || node.Kind != SphereNodeKind.Stat || node.Gains == null)
                 {
                     continue;
                 }
 
                 foreach (var stat in StatCatalog.Types)
                 {
-                    CheckGain(definition, report, config.Level, stat,
-                        config.Gains[stat], definition.BaseStats[stat]);
+                    CheckGain(definition, report, node.Key, stat,
+                        node.Gains[stat], definition.BaseStats[stat]);
                 }
             }
         }
 
-        private static void CheckGain(HeroSO definition, BalanceReport report, int level, StatType stat, int gain, int baseValue)
+        private static void CheckGain(HeroSO definition, BalanceReport report, string nodeKey, StatType stat, int gain, int baseValue)
         {
             if (baseValue <= 0 || gain <= 0)
             {
@@ -652,12 +793,108 @@ namespace Assets.Scripts.Balance
 
             string name = definition.DisplayName;
             report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, name,
-                $"Level {level} raises {name}'s {StatCatalog.DisplayName(stat)} by {share:P0}")
+                $"Node '{nodeKey}' raises {name}'s {StatCatalog.DisplayName(stat)} by {share:P0}")
             {
                 Asset = definition,
-                Detail = $"+{gain} on a base of {baseValue}. A single level-up should not reshape a stat this much.",
-                Suggestion = $"Spread the {StatCatalog.DisplayName(stat)} gain across more levels."
+                Detail = $"+{gain} on a base of {baseValue}. A single node should not reshape a stat this much.",
+                Suggestion = $"Split the {StatCatalog.DisplayName(stat)} gain across more nodes."
             });
+        }
+
+        /// <summary>
+        /// Structural faults in a grid asset the rules layer merely survives: duplicate node keys
+        /// (first-in-list wins, the rest are dead weight), neighbour keys that match no node, and
+        /// nodes no path from the start can ever reach.
+        /// </summary>
+        private static void EvaluateGridAuthoring(HeroSO definition, BalanceReport report)
+        {
+            if (definition == null || definition.SphereGrid == null || definition.SphereGrid.Nodes == null)
+            {
+                return;
+            }
+
+            var grid = definition.SphereGrid;
+            string name = definition.DisplayName;
+            var seenKeys = new List<string>();
+
+            foreach (var node in grid.Nodes)
+            {
+                if (node == null || string.IsNullOrEmpty(node.Key))
+                {
+                    continue;
+                }
+
+                if (seenKeys.Contains(node.Key))
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, name,
+                        $"{name}'s grid has a duplicate node key '{node.Key}'")
+                    {
+                        Asset = grid,
+                        Detail = "Every rule resolves a key to the first node in the list, so the duplicate "
+                               + "can never be activated or granted.",
+                        Suggestion = "Rename one of them. Keys are save data, so rename the unused copy."
+                    });
+                    continue;
+                }
+                seenKeys.Add(node.Key);
+
+                if (node.Neighbors != null)
+                {
+                    foreach (var neighbor in node.Neighbors)
+                    {
+                        if (!string.IsNullOrEmpty(neighbor) &&
+                            SphereGridOps.FindNode(grid, neighbor) == null)
+                        {
+                            report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, name,
+                                $"Node '{node.Key}' on {name}'s grid lists a neighbour '{neighbor}' that does not exist")
+                            {
+                                Asset = grid,
+                                Detail = "Dangling edges are dropped at runtime, so this link silently does nothing.",
+                                Suggestion = "Fix the key or remove the edge."
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Reachability: flood out from the start node along real edges. A node the flood never
+            // touches can never be bought, whatever it costs.
+            var reachable = new List<string>();
+            string start = SphereGridOps.StartKey(grid);
+            if (!string.IsNullOrEmpty(start))
+            {
+                var adjacency = SphereGridOps.BuildAdjacency(grid);
+                var queue = new Queue<string>();
+                queue.Enqueue(start);
+                reachable.Add(start);
+                while (queue.Count > 0)
+                {
+                    var current = queue.Dequeue();
+                    foreach (var neighbor in adjacency[current])
+                    {
+                        if (!reachable.Contains(neighbor))
+                        {
+                            reachable.Add(neighbor);
+                            queue.Enqueue(neighbor);
+                        }
+                    }
+                }
+            }
+
+            foreach (var key in seenKeys)
+            {
+                if (!reachable.Contains(key))
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, name,
+                        $"Node '{key}' is orphaned — no path from the start node")
+                    {
+                        Asset = grid,
+                        Detail = "Activation grows along edges from the start node, so this node can never "
+                               + "be bought.",
+                        Suggestion = "Connect it to the reachable part of the grid."
+                    });
+                }
+            }
         }
 
         private static void EvaluateHealing(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
@@ -1127,7 +1364,9 @@ namespace Assets.Scripts.Balance
             }
 
             var leader = report.Party.Heroes[0];
-            int xpForNext = HeroStatCalculator.XpToReachLevel(leader.Definition, leader.Level + 1);
+            int cheapest = SphereGridOps.CheapestFrontierCost(
+                leader.Definition != null ? leader.Definition.SphereGrid : null,
+                leader.ActivatedNodes);
 
             // The party grows across a run, so the share shrinks as it goes. Judge against the
             // widest party the run ever fields - the pessimistic reading, and the one a player who
@@ -1142,19 +1381,19 @@ namespace Assets.Scripts.Balance
             }
 
             float share = XpSplit.ExpectedShare(run.TotalExpectedXp, widest);
-            if (xpForNext > 0 && share < xpForNext)
+            if (cheapest > 0 && share < cheapest)
             {
                 string split = widest > 1
                     ? $" split {widest} ways ({run.TotalExpectedXp:0} total)"
                     : string.Empty;
                 report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, run.Name,
-                    "The whole run pays less XP than one level-up costs")
+                    "The whole run pays less XP than one sphere node costs")
                 {
                     Asset = run.Run,
-                    Detail = $"Expected {share:0} XP per hero across every room{split}; {leader.Name} needs "
-                           + $"{xpForNext} to reach level {leader.Level + 1}.",
-                    Suggestion = "Raise XpReward on enemies, lower XpRequired on the level curve, or field "
-                               + "a narrower party."
+                    Detail = $"Expected {share:0} XP per hero across every room{split}; {leader.Name}'s "
+                           + $"cheapest unactivated node costs {cheapest}.",
+                    Suggestion = "Raise XpReward on enemies, lower XpCost on the grid's early nodes, or "
+                               + "field a narrower party."
                 });
             }
         }
@@ -1533,23 +1772,37 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                if (hero.AtMaxDefinedLevel && hero.Xp > 0)
+                if (hero.GridComplete && hero.Xp > 0)
                 {
-                    int wasted = hero.Definition.LevelProgression != null
-                        ? hero.Xp - HeroStatCalculator.XpToReachLevel(hero.Definition, hero.Level)
-                        : hero.Xp;
-
-                    if (wasted > 0)
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Save, hero.Name(),
+                        $"{hero.Name()}'s grid is fully activated — {hero.Xp} XP is overflowing")
                     {
-                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Save, hero.Name(),
-                            $"{hero.Name()} is capped at level {hero.Level} with {wasted} XP going nowhere")
-                        {
-                            Asset = hero.Definition,
-                            Detail = "No further LevelConfiguration exists, so every kill from here on is wasted XP.",
-                            Suggestion = "Extend the level curve."
-                        });
-                    }
+                        Asset = hero.Definition,
+                        Detail = "Every node is bought, so every kill from here on is wasted XP.",
+                        Suggestion = "Extend the grid."
+                    });
                 }
+                else if (hero.CanAffordNext)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Save, hero.Name(),
+                        $"{hero.Name()} has {hero.Xp} XP banked with an affordable node unspent")
+                    {
+                        Asset = hero.Definition,
+                        Detail = $"The cheapest node on their frontier costs {hero.CheapestNextCost}.",
+                        Suggestion = "Spend it on the sphere grid at the hub. (A nudge, not a fault.)"
+                    });
+                }
+            }
+
+            if (save.LegacyBonusSlots > 0)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Save, "Meta",
+                    $"Save has {save.LegacyBonusSlots} legacy bonus magic slot(s) awaiting Essence refund")
+                {
+                    Detail = "The Essence-bought global slot upgrade was retired for per-hero MagicSlot "
+                           + "grid nodes; the game refunds the Essence on its next launch.",
+                    Suggestion = "Launch the game once, or ignore — the refund is automatic."
+                });
             }
 
             // The question the designed baseline cannot answer: would this save survive the run?

@@ -59,10 +59,11 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
   Baseline measured by stashing the room-events work and re-running: **46 before, 46 after** - so
   none of it was caused by that change - then **1 after the repair**.
 
-  The one remaining red is `BalanceRegressionTests.EveryHeroHasSomewhereToLevelTo`, which is a *true
-  positive*, not rot: the Warrior has one `LevelConfiguration` and caps at level 2. §4 deletes
-  `LevelConfiguration` outright, so the options are to author more level curves (a balance change,
-  and throwaway work once §4 lands) or to mark the test skipped against §4. Left red deliberately.
+  The one remaining red was `BalanceRegressionTests.EveryHeroHasSomewhereToLevelTo`, a *true
+  positive*, not rot: the Warrior had one `LevelConfiguration` and capped at level 2. Left red
+  deliberately until §4 shipped (2026-08-22): the test is now `EveryHeroHasSomewhereToSpendXp`,
+  re-pointed at the sphere-grid findings, and went legitimately green when the four grids landed —
+  the suite is **435 passed / 0 failed** for the first time.
 
 ## Backlog
 
@@ -142,9 +143,14 @@ balance model does not read at all). The four: the Warrior's level-2 cap, the Wa
 Tank's +100% level-2 Agility steps, and *+MaxHealth gear is never filled at level start*. Earlier
 notes in this section quote **0 / 3 / 9** — that undercounted by one, missing the Tank's Agility
 step, which is an authoring warning rather than a starting-lineup one. The path there: 3 / 12 / 11 → 0 / 12 / 9 after the hero-HP
-pass → 0 / 5 / 11 after the solo-start roster rework (§5), which also took
-`BalanceRegressionTests` from 7/9 to **8 of 9 green**. The single red left is
-`EveryHeroHasSomewhereToLevelTo` (the Warrior caps at level 2), which §4 replaces outright.
+pass → 0 / 5 / 11 after the solo-start roster rework (§5) → **0 / 1 / 11 after the sphere grid
+(§4, 2026-08-22)**: the Warrior's level-2 cap and both +100% Agility warnings are gone (the grid
+splits the +5 AGI steps by construction), and the regression suite is fully green — the last red,
+`EveryHeroHasSomewhereToLevelTo`, was re-pointed at the grid findings as
+`EveryHeroHasSomewhereToSpendXp`. The one warning left is the pre-existing *+MaxHealth gear is
+never filled at level start* bug. Two new Infos are real signal from the model change: with the
+XP loop closed, the modelled party now grows per floor, which flattens the back half of the run
+curve (Levels 2→3 read -6% / +1%) — a tuning note for the next balance pass, not a regression.
 
 Two findings closed themselves as a consequence of §5 rather than any tuning: the three
 *no threat at all* enemies (a solo starting party makes trash matter again) and the
@@ -241,12 +247,47 @@ player by design - the plan is discovery-gated reveal only, no static display.
 - **Holy and Shadow** are unused by any magic and unresisted by anything - the analyzer reports them, and
   they are free slots if a later biome wants an element of its own.
 
-### 0c. Run chaining (needs a design discussion)
+### 0c. Run chaining — ✅ the system shipped, the content has not
 
-There is one real run and no chaining: `MainMenuManager` holds a single `RunDefinitionSO` and
-`MainMenuUISetup` just grabs `guids[0]`. `RunDefinitionSO.SequenceIndex` was added so the balance
-analyzer has an intended play order to report unlocks against — it is **not** wired to anything in game.
-Chaining runs (selection, gating, escalating difficulty, what carries over) is its own brainstorm.
+**The mechanism is done.** Runs are no longer a single serialized reference: `CampaignSO`
+(`Assets/Resources/Campaign.asset`) is a **directed graph of runs** with per-node prerequisites
+(`Requires` + `UnlockMode` All/Any), `Secret` (hidden until unlocked) and `Optional` flags, so the
+story line can fork — clear one run to open two, one rejoining the main line and one dead-ending as
+optional/secret content. `CampaignOps` is the pure rules layer, `CampaignMapUI` (home ▸ **The Story**)
+is the map screen, and clearing a run's final level banks its key in
+`MetaProgressSaveData.CompletedRunKeys`, which is also what stops the tutorial being replayed
+(`RunDefinitionSO.Repeatable`). Covered by `CampaignOpsTests` + `CampaignAssetTests`.
+
+**What is still open:**
+
+- ~~There is still only one run asset.~~ **Done.** The tutorial now forks into **The Drowned March**
+  (`DrownedMarch`, 4 levels, one-shot, boss *Mirefather*) and **The Warrens** (`TheWarrens`, 2 levels,
+  **repeatable**, boss *Gilded Hoarder*) — an escalating main line plus the farming run the Gold sinks
+  needed. Six new level templates; the previously orphaned `BlueRoom` is finally in a pool. The curve
+  is clean: Drowned March `0.18 / 0.29 / 0.44 / 0.54` with jumps 61% / 55% / 21%, inside the +75%
+  ceiling. **Still open:** a third tier past the Drowned March, and nothing yet uses `Secret`.
+- **Map positions are auto-laid-out.** `CampaignPresenter.ResolvePositions` tiers nodes by longest
+  prerequisite chain when no `MapPosition` is authored. Good enough to play; a hand-placed map wants a
+  **Campaign Map Editor** window, the obvious sibling to `Tools ▸ Dungeon ▸ Manual Level Layout Editor`
+  and `Tools ▸ Heroes ▸ Sphere Grid Editor` (both already do node-drag + connect over the same widget).
+- **No way to abandon a run.** While one is in progress every other node is deliberately un-startable,
+  because starting a second would overwrite `Run.json`. The player finishes or dies out. If a run can
+  be a dead end, an explicit *Abandon* (with confirmation) belongs on the progress screen.
+- ~~`SequenceIndex` is now redundant for ordering.~~ **Done.** The analyzer walks
+  `CampaignOps.GetNodesInPlayOrder` and seeds each run with its prerequisites' end party, so run
+  difficulty is finally measured against the party that actually arrives. `SequenceIndex` survives as
+  a hint only. **Still open:** retire the "no run declares a SequenceIndex" finding now that the graph
+  answers the question.
+- **Two trash enemies are provably trivial now.** With levels measured against their real, XP-grown
+  parties, `Cinder Imp` (danger 0.069) and `Hex Weaver` (0.067) fall under `MinMeaningfulDanger`. The
+  old measurement hid this by judging them against a fresh party. Both want a stat pass.
+- **Nothing resists Shadow.** `Mirefather` is the project's only Shadow attacker and no hero can
+  reduce it, so its damage is unmitigable by accident rather than by design. Either give a sphere grid
+  a Shadow-resistance node (`SphereGridSeeder`) or make it the boss's deliberate identity — see
+  `docs/ELEMENTAL_PLAN.md`.
+- **What carries between runs** is unchanged and unexamined: meta progress (Gold, Essence, heroes,
+  gear, sphere-grid nodes) persists; equipped magic is run-scoped and lost. Worth a pass once there is
+  more than one run to carry anything into.
 
 ### 1. Battle polish (feel & clarity)
 
@@ -537,22 +578,64 @@ Touch points for the **rest** of §2 (the room-*kind* work above, still open):
   paid-restock) stock and **sells** spare gear back at a loss (`ShopPricing`, rarity+level priced;
   selling removes only un-equipped copies so heroes can't be stripped). Validated live in-editor.
   *(Follow-up: auto-restock on run completion; gate rarer stock behind meta-progress.)*
-- **Magic slot-upgrade UI is still missing.** Logic exists (`MetaProgressManager.TryUpgradeSlots`)
-  but there's **no screen**. Note it costs **Essence**, not Gold — so it belongs in the **Forge**
-  (`MagicForgeUI`), not the Merchant.
+- ~~**Magic slot-upgrade UI is still missing.**~~ ✅ Resolved by design (2026-08-22): slot growth
+  moved onto the **sphere grid** as per-hero `MagicSlot` nodes bought with XP (§4), so the Essence
+  upgrade — and the screen it never got — were retired. `TryUpgradeSlots` is deleted; saves that had
+  bought slots get the Essence refunded in full on next load.
 - **More Gold sinks to consider** (from the design chat): permanent **hero training** (base-stat
   bumps), run **prep/consumables**, and a death **safety net** (revive / loot-insurance token).
 
 Touch points: `Assets/Scripts/MainMenu/MerchantUI.cs`, `Assets/Scripts/Items/ShopPricing.cs`,
 `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Cards/UI/MagicForgeUI.cs`.
 
-### 4. Hero progression → FFX-style sphere grid (design + implementation)
+### 4. Hero progression → FFX-style sphere grid — ✅ shipped 2026-08-22
 
-Replace bare levelling with a **spend-XP-on-nodes** grid, so growth is a build decision instead
-of an automatic stat drip. Today `LevelConfiguration` is a flat table (`Level`, `XpRequired`,
-`StrengthGain`/`EnduranceGain`/`HealthGain`/`AgilityGain`) applied automatically on level-up, there is
-exactly one entry per hero (progression dead-ends at level 2 — see §0), and **only the leader earns
-XP** (`Party.AddXpToLeader`), so the Tank never grows at all.
+Bare levelling is gone: `LevelConfiguration`, `Hero.Level` and the threshold loop are deleted, and
+**XP is a per-hero bank spent on grid nodes at the hub**. What landed:
+
+- **Data**: `SphereGridSO` per hero (`HeroSO.SphereGrid`) — nodes with stable string keys (save
+  data, write-once), per-node `XpCost`, kinds **Stat** (a `StatBlock` grant) / **Resistance**
+  (+X% to a `DamageType`, folded into `GetEffectiveResistances`) / **MagicSlot** (+1 draw slot,
+  per hero — the Essence slot upgrade is retired and refunded), authored 2D positions, undirected
+  neighbour lists. All rules in the pure `SphereGridOps` (`SphereGridOpsTests`, 22 cases):
+  adjacency-gated activation from a start node, no respec, validate→spend→append via
+  `HeroRoster.TryActivateNode` — **hub-only**, so `BestRosterStats` spawn gates stay stable mid-run.
+- **Save/migration**: `HeroSaveData` gained `ActivatedNodes`; `CurrentXp` is now the *unspent bank*.
+  A pre-grid save's lifetime XP arrives as a full refund with no nodes — zero migration code
+  (pinned by a `FromJsonOverwrite` test). Verified against the live save: the Warrior opened the
+  screen with 269 XP banked and bought its first node.
+- **Recruits arrive with a starter bank** — `SphereGridOps.StarterBank` (55% of the roster's
+  average lifetime XP), one function used by the tavern, the dungeon rescue *and* the balance model.
+- **UI**: one `SphereGridView` (UITK graph — pan/zoom, Painter2D edges) shared by the hub's
+  `grid-view` screen (`SphereGridUI`: hero tabs, bank line, detail panel, Activate) and the new
+  **Tools ▸ Heroes ▸ Sphere Grid Editor** window (drag with click-offset anchoring, connect mode
+  with ghost edge, add/delete/set-start, SerializedObject inspector pane so `StatBlockDrawer`
+  renders `Gains`, preview-at-N-XP running the game's own classifier). `SphereGridPresenter` is the
+  pure state/text layer both call (`SphereGridPresenterTests`).
+- **Content**: 4 starter grids (~15-17 nodes each) generated by **Tools ▸ Heroes ▸ Generate Starter
+  Sphere Grids** (`SphereGridSeeder`, idempotent, the tuning as code): a 5-node spine re-granting
+  the old level-2 gains for ~105 XP, then two themed branches per class with resistance + slot
+  leaves (Acolyte gets two slots — the caster grows the Draw kit). The two flagged **+5 AGI (+100%)
+  steps are split +2/+2/+1**, clearing both Agility warnings by construction. Full grid ≈ 650-750 XP.
+- **Balance model**: `PartyBaseline.Build` takes an **XP budget** (greedy-spent deterministically;
+  the save audit passes real node sets), `ReferenceHeroLevel` → `ReferenceHeroXp`, and
+  `RunCurveModel` **closes the XP loop** — each floor's expected income is banked and spent before
+  the next floor is measured, so hero power finally grows within a modelled run. Old level findings
+  became grid findings (*has no sphere grid*, *grid runs out*, per-node gain-shape, plus new
+  authoring checks: duplicate keys, dangling edges, orphaned nodes); the save audit reports
+  bank/nodes/next-cost; the analyzer window's level-curve table became an editable sphere-grid table.
+- **Tests: 435/0.** The suite's standing red (`EveryHeroHasSomewhereToLevelTo`, the Warrior's
+  level-2 cap) was re-pointed to the grid findings (`EveryHeroHasSomewhereToSpendXp`) and went
+  legitimately green when the grids shipped — along with both +100%-Agility warnings. Verified live
+  in-editor: the hub screen classifies/spends/persists correctly and the editor window renders the
+  same graph.
+
+*Follow-ups: the balance simulator's depth-gap metric doesn't model node choice; grid layouts are
+seeder-generated fans — worth an art pass in the editor window; XP has no in-run display of "you
+can afford a node when you get home"; per-hero XP display in the victory summary still shows the
+party total.*
+
+The original design notes follow, kept for the reasoning:
 
 Direction:
 

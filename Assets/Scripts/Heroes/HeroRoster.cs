@@ -76,6 +76,10 @@ namespace Assets.Scripts.Heroes
         /// tavern, where a purchase must survive whatever happens next. In-dungeon rescues go
         /// through <c>DungeonManager</c> instead, so they follow the run's deferred-commit rule and
         /// are forfeited on death.
+        ///
+        /// <para>A first-time recruit's XP entry is seeded with a starter bank derived from the
+        /// roster's progress (<see cref="SphereGridOps.StarterBank"/>), so a late hire arrives able
+        /// to buy into their grid rather than starting from nothing.</para>
         /// </summary>
         public static bool TryAddOwned(PartyRosterSO catalog, HeroSO hero)
         {
@@ -90,6 +94,15 @@ namespace Assets.Scripts.Heroes
             if (keys.Contains(hero.SaveKey))
             {
                 return false;
+            }
+
+            if (save.Heroes.Find(h => h != null && h.HeroKey == hero.SaveKey) == null)
+            {
+                save.Heroes.Add(new HeroSaveData
+                {
+                    HeroKey = hero.SaveKey,
+                    CurrentXp = SphereGridOps.StarterBank(LifetimeXpOf(save, keys, catalog))
+                });
             }
 
             keys.Add(hero.SaveKey);
@@ -118,7 +131,80 @@ namespace Assets.Scripts.Heroes
             // Un-field them too: a selection entry for a hero you do not own would be filtered out on
             // the next read anyway, but leaving it there means the party silently shrinks by one.
             save.SelectedHeroKeys?.Remove(hero.SaveKey);
+            // And take back the seeded starter bank — but only while it is untouched. A hero who has
+            // activated a node has a real record, and a paid-for hero never loses one.
+            var entry = save.Heroes.Find(h => h != null && h.HeroKey == hero.SaveKey);
+            if (entry != null && (entry.ActivatedNodes == null || entry.ActivatedNodes.Count == 0))
+            {
+                save.Heroes.Remove(entry);
+            }
             handler.Save(save);
+        }
+
+        /// <summary>Lifetime XP (bank + spent node cost) per owned hero — the base a recruit's
+        /// starter bank is computed from. Owned keys with no save entry count as 0.</summary>
+        private static List<int> LifetimeXpOf(PartySaveData save, List<string> ownedKeys, PartyRosterSO catalog)
+        {
+            var lifetimes = new List<int>();
+            foreach (var key in ownedKeys)
+            {
+                var entry = save.Heroes.Find(h => h != null && h.HeroKey == key);
+                var definition = catalog != null ? catalog.Find(key) : null;
+                lifetimes.Add(entry != null
+                    ? SphereGridOps.LifetimeXpFor(definition != null ? definition.SphereGrid : null, entry)
+                    : 0);
+            }
+            return lifetimes;
+        }
+
+        // --- Sphere grid: the hub's XP-spending surface -------------------------
+
+        /// <summary>
+        /// The save entry the grid screen renders from — the hero's XP bank plus activated node
+        /// keys. Returns a fresh, unpersisted entry when the hero has never been saved, so the
+        /// caller can treat "no record" and "empty record" the same way.
+        /// </summary>
+        public static HeroSaveData GetHeroSave(HeroSO hero)
+        {
+            if (hero == null || string.IsNullOrEmpty(hero.SaveKey))
+            {
+                return new HeroSaveData();
+            }
+
+            var handler = new FileHandler();
+            var save = handler.Load<PartySaveData>();
+            var entry = save.Heroes.Find(h => h != null && h.HeroKey == hero.SaveKey);
+            return entry ?? new HeroSaveData { HeroKey = hero.SaveKey };
+        }
+
+        /// <summary>
+        /// Spends banked XP to activate one sphere-grid node, validate → spend → save. Hub-only:
+        /// the dungeon never calls this, which is what keeps room-event spawn thresholds
+        /// (<c>DungeonManager.BestRosterStats</c>) stable across a run.
+        /// </summary>
+        public static bool TryActivateNode(HeroSO hero, string nodeKey)
+        {
+            if (hero == null || string.IsNullOrEmpty(hero.SaveKey) || hero.SphereGrid == null)
+            {
+                return false;
+            }
+
+            var handler = new FileHandler();
+            var save = handler.Load<PartySaveData>();
+            var entry = save.Heroes.Find(h => h != null && h.HeroKey == hero.SaveKey);
+            if (entry == null)
+            {
+                entry = new HeroSaveData { HeroKey = hero.SaveKey };
+                save.Heroes.Add(entry);
+            }
+
+            if (!SphereGridOps.TryActivate(hero.SphereGrid, entry, nodeKey))
+            {
+                return false;
+            }
+
+            handler.Save(save);
+            return true;
         }
 
         /// <summary>Catalog heroes the player does not own yet — the tavern's recruitment pool.</summary>

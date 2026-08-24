@@ -57,7 +57,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 |---|---|
 | `BalanceRulesSO` | the target bands (a `SO/Balance Rules` asset) |
 | `BalanceIssue` / `BalanceReport` | findings + the per-area records, severity `Ok/Info/Warning/Critical` |
-| `HeroStatCalculator` | pure hero stats from `HeroSO` + XP + gear (`Hero` itself needs `InventoryManager.Instance`). Returns a `StatBlock`; the old `EffectiveStats` struct is gone, and both level gains and the gear sweep are stat-agnostic loops |
+| `HeroStatCalculator` | pure hero stats from `HeroSO` + activated sphere-grid nodes + gear (`Hero` itself needs `InventoryManager.Instance`). `BaseStatsForNodes` + `WithGear`; the level methods are gone with `LevelConfiguration` |
 | `SimUnit` | headless `ICombatUnit` for heroes and enemies, incl. per-fight enemy state |
 | `PartyBaseline` | the reference party every other metric is measured against |
 | `BalanceMath` | closed-form metrics: damage, hits-to-kill, ticks, **danger index**, power score |
@@ -102,11 +102,17 @@ Runs are ordered by `RunDefinitionSO.SequenceIndex`. Runs are **not chained in g
 with margin; at 1 the fight is decided by turn order; above 1 it is lost on paper. Agility-aware on
 both sides, so a fast enemy's hidden threat shows up.
 
-**XP supply is judged as a share, not a total.** `EvaluateRunXpSupply` divides a run's `TotalExpectedXp` by the **widest** party the run ever fields (`XpSplit.ExpectedShare`), because `Party.DistributeXp` splits every kill evenly — a run that looks generous in aggregate can still fail to level anybody once it is divided four ways. The old *only the party leader gains XP* warning is gone: that was a bug report, and the bug is fixed. `RunCurveModel` also caps modelled roster growth at `PartySlots.MaxCap`, since acquiring a fifth hero benches somebody rather than making the level easier. Both model the **widest legal party**, so a player who fields fewer sees a harder run than the curve reports — the honest fix is a min/max band, tracked in `docs/NEXT_STEPS.md`.
+**XP supply is judged as a share, not a total.** `EvaluateRunXpSupply` divides a run's `TotalExpectedXp` by the **widest** party the run ever fields (`XpSplit.ExpectedShare`) and compares it against the leader's **cheapest unactivated sphere-grid node** (`SphereGridOps.CheapestFrontierCost`), because `Party.DistributeXp` splits every kill evenly — a run that looks generous in aggregate can still fail to buy anybody a node once it is divided four ways. The old *only the party leader gains XP* warning is gone: that was a bug report, and the bug is fixed. `RunCurveModel` also caps modelled roster growth at `PartySlots.MaxCap`, since acquiring a fifth hero benches somebody rather than making the level easier. Both model the **widest legal party**, so a player who fields fewer sees a harder run than the curve reports — the honest fix is a min/max band, tracked in `docs/NEXT_STEPS.md`.
+
+**The campaign decides which party each run is measured against.** `BalanceInput.Campaign` carries the `CampaignSO`, and `BalanceAnalyzer.BuildRunCurves` walks `CampaignOps.GetNodesInPlayOrder` so a run is modelled *after* everything that unlocks it, seeded with that prerequisite's end state (`RunCurve.EndRoster` + `EndLifetimeXp`, fed back through the `RunCurve.Build` overload). Where a node has several prerequisites the **weakest** incoming state wins — the run has to be clearable by whoever gets there first, not only by a completionist. Without this every run was judged against a fresh solo starting party, which made anything gated behind the tutorial read as unclearable (`Mirefather` scored danger **2.48**, and both new bosses tripped the *beats the party on paper* critical) and made an escalating second run impossible to author. Runs with no campaign node, and projects with no campaign asset at all, fall back to the old fresh-party path.
+
+**Enemy danger is read off those curves.** `BuildEncounterPartiesFromCurves` indexes `LevelCurve.Party` by the enemies each level can present, first writer wins in play order, so the party an enemy is judged against cannot drift from the curve the rest of the report is drawn from. (`BuildFirstEncounterParties` remains as the no-curves fallback.) One consequence worth knowing: level parties now carry *accumulated XP*, so weak trash reads weaker than it used to — `Cinder Imp` and `Hex Weaver` surface as "no threat at all", a real content gap the old measurement hid.
 
 **Each enemy is judged against the party that first meets it.** `BuildFirstEncounterParties` walks the runs in order, growing a roster as each level's `RescueHero` is passed, and records the smallest roster that meets each enemy; `EnemyMetrics.Compute` is then given that party. Without this a level-3 enemy reads as wildly out of band and a level-1 enemy as harmless, because party size roughly halves per-enemy danger. The **simulator** uses the same parties: solo-enemy runs fight the party from `BalanceReport.PartyByEnemy`, and per-level room runs fight `LevelCurve.Party`. Before that, every simulated battle used the starting party, which reported the boss as *never winnable* (0 of 200) purely because it was being fought solo — it is 100% against the pair that actually reaches it. Reward-per-danger is the exception: it takes a separate `rewardParty` (the starting party for everyone) because comparing XP-per-danger across enemies needs one common yardstick, or the spread just reports roster growth.
 
 **Two modelling corrections worth not regressing.** `EnemyManager.SpawnEnemies` skips the room the party is in, so `RunCurveModel` takes the start room out of both the manual and generated room counts — every level used to be overstated by one room's worth of enemies. And `ReplaceExitRoomWithBoss` now spreads the boss's displaced room across all combat entries instead of deleting one outright: deleting an entry whose expected occurrence was exactly 1.0 removed an enemy from the level entirely, which once made Bog Shaman — and therefore `Heal` — unreachable.
+
+**Hero power grows within a run now.** `PartyBaseline.Build` takes an **XP budget per hero** (was a level), greedy-spent on each hero's sphere grid via the deterministic `SphereGridOps.GreedySpend`; the save audit supplies real activated-node sets instead (`nodesLookup`). `RunCurveModel` closes the XP loop: each floor's expected income is banked per hero (`XpSplit.ExpectedShare`) and spent before the next floor is measured, rescued heroes joining at `SphereGridOps.StarterBank` — the same rule the game uses. `BalanceRulesSO.ReferenceHeroLevel` became **`ReferenceHeroXp`** (default 0 = fresh party) and `MinGridNodes` is the floor behind the "sphere grid runs out" finding. Node resistances reach the danger index and simulator through `SimUnit.Resistances`, beside gear.
 
 **The party is not fixed across a run.** `BalanceInput.Heroes` is the roster's **starting lineup** (`PartyRosterSO.StartingLineup()`), not every `HeroSO` in the project — heroes are acquired by rescue or recruitment, so judging level 1 against a fully-recruited roster would understate every number. `RunCurve.Build` then grows the roster level by level from each `RunLevelEntry.RescueHero`, rebuilding the `PartyBaseline` per level; a hero freed *during* a level counts only from the next one (the conservative reading). Each `LevelCurve` records the `PartySize` and `SustainPool` it was measured against, and the findings quote those rather than the run-wide baseline. Note the save audit still resolves against the **full** catalog, since a save can reference any hero.
 
@@ -144,12 +150,13 @@ Nothing is ever auto-applied. Findings carry a `Suggestion` string; acting on it
 Nothing in the model enumerates stats by hand any more — everything iterates **`StatCatalog.Types`**
 and reads per-stat facts from **`StatCatalog.Of(stat)`**:
 
-- `HeroStatCalculator.BaseStatsAtLevel` adds a level's `Gains` block; `WithGear` loops the catalog.
+- `HeroStatCalculator.BaseStatsForNodes` adds each activated node's `Gains` block (via `SphereGridOps.StatsForNodes`); `WithGear` loops the catalog.
 - `BalanceMath.PowerScore` loops the catalog and asks `BalanceRulesSO.WeightFor(stat)`.
-- The analyzer window's hero, enemy and level-curve stat columns are all generated from
+- The analyzer window's hero, enemy and sphere-grid stat columns are all generated from
   `StatCatalog.Types` via `BalanceGui.EditableStatCell`.
-- `EvaluateLevelUpShape` checks every stat's per-level gain. It used to name Agility, Strength and
-  Endurance one by one — which is why nobody had noticed the Warrior's level 2 raising Health by 54%.
+- `EvaluateNodeGainShape` checks every stat's per-node gain against the IsPool-split thresholds
+  (outputs 50% of base, pools 100%), and `EvaluateGridAuthoring` flags duplicate keys, dangling
+  neighbours and nodes unreachable from the start.
 
 **`BalanceRulesSO.PowerWeights` is a `List<StatWeight>`, and a stat with no row falls back to its
 catalog `PowerWeight`.** The fallback matters more than it looks: the list is serialized, so a saved

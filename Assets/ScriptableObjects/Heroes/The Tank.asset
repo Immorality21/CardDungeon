@@ -39,16 +39,4 @@ MonoBehaviour:
     - Type: 7
       Amount: 17
   AttackStat: 1
-  LevelProgression:
-  - Level: 2
-    XpRequired: 100
-    Gains:
-      Values:
-      - Type: 1
-        Amount: 1
-      - Type: 2
-        Amount: 3
-      - Type: 7
-        Amount: 9
-      - Type: 3
-        Amount: 5
+  SphereGrid: {fileID: 11400000, guid: 2fbc3ba63478e064ca162ee133006e9a, type: 2}

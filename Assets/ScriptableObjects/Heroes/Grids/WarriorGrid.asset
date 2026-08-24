@@ -1,0 +1,232 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
+  m_Name: WarriorGrid
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
+  StartNodeKey: warrior-start
+  Nodes:
+  - Key: warrior-start
+    DisplayName: 
+    Kind: 0
+    XpCost: 15
+    Position: {x: 0, y: -0}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors: []
+  - Key: warrior-spine-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -90}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-start
+  - Key: warrior-spine-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 25
+    Position: {x: 0, y: -180}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-spine-1
+  - Key: warrior-spine-3
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -270}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-spine-2
+  - Key: warrior-spine-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 25
+    Position: {x: 0, y: -360}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 1
+      - Type: 2
+        Amount: 1
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-spine-3
+  - Key: warrior-berserk-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 35
+    Position: {x: 110, y: -235}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-spine-2
+  - Key: warrior-berserk-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: 205, y: -290}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-berserk-1
+  - Key: warrior-berserk-3
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: 300, y: -345}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-berserk-2
+  - Key: warrior-berserk-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 60
+    Position: {x: 395, y: -400}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-berserk-3
+  - Key: warrior-berserk-5
+    DisplayName: 
+    Kind: 1
+    XpCost: 60
+    Position: {x: 490, y: -455}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 15
+    Neighbors:
+    - warrior-berserk-4
+  - Key: warrior-berserk-6
+    DisplayName: 
+    Kind: 2
+    XpCost: 80
+    Position: {x: 585, y: -510}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-berserk-5
+  - Key: warrior-bulwark-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 35
+    Position: {x: -110, y: -415}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-spine-4
+  - Key: warrior-bulwark-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 40
+    Position: {x: -205, y: -470}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-bulwark-1
+  - Key: warrior-bulwark-3
+    DisplayName: 
+    Kind: 0
+    XpCost: 40
+    Position: {x: -300, y: -525}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 1
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-bulwark-2
+  - Key: warrior-bulwark-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 50
+    Position: {x: -395, y: -580}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-bulwark-3
+  - Key: warrior-bulwark-5
+    DisplayName: 
+    Kind: 0
+    XpCost: 55
+    Position: {x: -490, y: -635}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - warrior-bulwark-4
+  - Key: warrior-bulwark-6
+    DisplayName: 
+    Kind: 1
+    XpCost: 60
+    Position: {x: -585, y: -690}
+    Gains:
+      Values: []
+    ResistType: 5
+    ResistPercent: 15
+    Neighbors:
+    - warrior-bulwark-5

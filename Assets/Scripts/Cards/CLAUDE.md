@@ -32,7 +32,7 @@ Still to design: `PowerMode` from `docs/ELEMENTAL_PLAN.md` (base-power / flat / 
   - `TryCast(heroKey, slotIndex)` — spends a charge (returns false if empty/no charges).
   - `RefillCharges()` — refills all slots to max; called at the start of each combat (per-room refresh).
   - `FirstEmptySlot`, `HasAnyCastable`, `GetSlots`, `GetSaveData`/`Restore` (persisted via `MagicSlotSaveData`).
-  - Slot count = `DefaultSlotCount` + meta bonus slots (`MetaProgressManager.GetBonusSlotCount`).
+  - Slot count is **per hero**: `DefaultSlotCount` + that hero's activated `MagicSlot` sphere-grid nodes (`Hero.BonusMagicSlots`); `Initialize(heroes)`/`AddHero(hero)` compute it themselves. The old global Essence-bought bonus is retired.
 - **Flow** (in `CombatManager`, see the Rooms guide): a hero turn offers Attack / **Magic** / **Draw** / Skip.
   - **Draw** → pick an enemy → pick which magic from its Draw list (`Enemy.DrawableMagics`; skipped if it offers only one) → magic goes into the first empty slot (or the player picks a slot to overwrite) at full charges. Draw consumes the turn.
   - **Magic (cast)** → pick a charged slot → pick target(s) → resolves through the shared effect engine, then spends one charge.

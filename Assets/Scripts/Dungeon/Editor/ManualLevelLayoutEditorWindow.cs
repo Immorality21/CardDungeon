@@ -222,10 +222,36 @@ namespace Assets.Scripts.Dungeon.Editor
 
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField($"Doors ({_layout.Doors.Count})", EditorStyles.boldLabel);
+            var unplaceable = _layout.GetUnplaceableDoorIndices();
             for (int i = 0; i < _layout.Doors.Count; i++)
             {
                 var door = _layout.Doors[i];
-                EditorGUILayout.LabelField($"  Room {door.RoomIndexA} <-> Room {door.RoomIndexB}");
+                var text = $"  Room {door.RoomIndexA} <-> Room {door.RoomIndexB}";
+                if (unplaceable.Contains(i))
+                {
+                    text += "  (BROKEN - rooms not adjacent)";
+                }
+                EditorGUILayout.LabelField(text);
+            }
+
+            // Loud validation: a door pair that is not edge-adjacent is silently dropped at build
+            // time, and an unreachable room (worst case: the exit) makes the level uncompletable.
+            // Both are easy to cause by resizing a room template after the layout was authored.
+            if (unplaceable.Count > 0)
+            {
+                EditorGUILayout.HelpBox(
+                    $"{unplaceable.Count} door(s) connect rooms that do not share an edge and will " +
+                    "NOT exist in-game (drawn in red on the map). Move the rooms until they touch.",
+                    MessageType.Error);
+            }
+            var unreachable = _layout.GetUnreachableRoomIndices();
+            if (unreachable.Count > 0)
+            {
+                bool exitCut = unreachable.Contains(_layout.ExitRoomIndex);
+                EditorGUILayout.HelpBox(
+                    $"Room(s) {string.Join(", ", unreachable)} cannot be reached from the start room" +
+                    (exitCut ? " - INCLUDING THE EXIT, so the level cannot be completed." : "."),
+                    MessageType.Error);
             }
 
             _serializedLayout.ApplyModifiedProperties();
@@ -251,7 +277,8 @@ namespace Assets.Scripts.Dungeon.Editor
             var localRect = new Rect(0, 0, mapRect.width, mapRect.height);
             DrawGridLines(localRect);
 
-            // Draw door connections
+            // Draw door connections - red when the pair is not edge-adjacent, because that door
+            // will be silently dropped at build time.
             for (int i = 0; i < _layout.Doors.Count; i++)
             {
                 var door = _layout.Doors[i];
@@ -264,7 +291,9 @@ namespace Assets.Scripts.Dungeon.Editor
                     {
                         var centerA = GetRoomScreenCenter(roomA);
                         var centerB = GetRoomScreenCenter(roomB);
-                        Handles.color = new Color(1f, 0.8f, 0.2f, 0.8f);
+                        Handles.color = _layout.IsDoorPlaceable(door)
+                            ? new Color(1f, 0.8f, 0.2f, 0.8f)
+                            : new Color(1f, 0.2f, 0.2f, 0.9f);
                         Handles.DrawLine(centerA, centerB);
                     }
                 }

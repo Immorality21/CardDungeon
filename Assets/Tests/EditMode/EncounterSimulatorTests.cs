@@ -59,8 +59,6 @@ namespace Tests.EditMode
             {
                 party.Heroes.Add(new HeroBaseline
                 {
-                    Level = 1,
-                    MaxDefinedLevel = 1,
                     Effective = TestStats.Block(
                         hero.EffectiveAttackPower,
                         hero.Effective[StatType.Endurance],

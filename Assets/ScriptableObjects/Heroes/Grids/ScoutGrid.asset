@@ -1,0 +1,208 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
+  m_Name: ScoutGrid
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
+  StartNodeKey: scout-start
+  Nodes:
+  - Key: scout-start
+    DisplayName: 
+    Kind: 0
+    XpCost: 15
+    Position: {x: 0, y: -0}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors: []
+  - Key: scout-spine-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -90}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 1
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-start
+  - Key: scout-spine-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -180}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 1
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-spine-1
+  - Key: scout-spine-3
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -270}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-spine-2
+  - Key: scout-spine-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 30
+    Position: {x: 0, y: -360}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 1
+      - Type: 2
+        Amount: 1
+      - Type: 3
+        Amount: 1
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-spine-3
+  - Key: scout-skirmisher-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 40
+    Position: {x: 110, y: -235}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-spine-2
+  - Key: scout-skirmisher-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 40
+    Position: {x: 205, y: -290}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-skirmisher-1
+  - Key: scout-skirmisher-3
+    DisplayName: 
+    Kind: 0
+    XpCost: 50
+    Position: {x: 300, y: -345}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-skirmisher-2
+  - Key: scout-skirmisher-4
+    DisplayName: 
+    Kind: 2
+    XpCost: 70
+    Position: {x: 395, y: -400}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-skirmisher-3
+  - Key: scout-skirmisher-5
+    DisplayName: 
+    Kind: 1
+    XpCost: 55
+    Position: {x: 490, y: -455}
+    Gains:
+      Values: []
+    ResistType: 3
+    ResistPercent: 15
+    Neighbors:
+    - scout-skirmisher-4
+  - Key: scout-survivor-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 35
+    Position: {x: -110, y: -415}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-spine-4
+  - Key: scout-survivor-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 35
+    Position: {x: -205, y: -470}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 1
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-survivor-1
+  - Key: scout-survivor-3
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: -300, y: -525}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-survivor-2
+  - Key: scout-survivor-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: -395, y: -580}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    Neighbors:
+    - scout-survivor-3
+  - Key: scout-survivor-5
+    DisplayName: 
+    Kind: 1
+    XpCost: 55
+    Position: {x: -490, y: -635}
+    Gains:
+      Values: []
+    ResistType: 5
+    ResistPercent: 15
+    Neighbors:
+    - scout-survivor-4

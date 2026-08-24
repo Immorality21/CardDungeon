@@ -31,6 +31,9 @@ namespace Assets.Scripts.Progression
         public int Essence;
         public List<MagicUpgradeEntry> MagicUpgrades = new List<MagicUpgradeEntry>();
         public List<ComboUpgradeEntry> ComboUpgrades = new List<ComboUpgradeEntry>();
+        // Legacy: Essence-bought global magic slots, retired when the sphere grid took slot growth
+        // over (MagicSlot nodes, per hero). Kept only so old saves deserialize; MetaProgressManager
+        // refunds the Essence on load and zeroes it. Never read anywhere else.
         public int BonusSlots;
 
         // Party slots bought on top of PartySlots.BaseCap - how many heroes can be fielded at once.
@@ -50,6 +53,10 @@ namespace Assets.Scripts.Progression
         // a combo when first triggered in combat. Drives the Forge's collection grid.
         public List<string> DiscoveredMagicKeys = new List<string>();
         public List<string> DiscoveredComboKeys = new List<string>();
+
+        // Run keys the player has cleared to the end (survives death, like all meta progress).
+        // Gates the main menu: a non-repeatable run - the tutorial - cannot be started again.
+        public List<string> CompletedRunKeys = new List<string>();
 
         public string GetFileName()
         {

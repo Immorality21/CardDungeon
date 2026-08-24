@@ -34,18 +34,18 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 - `UnitStats/` — **the stat model**: `StatType` (the one stat enum, `None = 0`), `UnitStat` (one stat + amount), `StatBlock` (a sparse, indexable set), **`StatCatalog`** (the one per-stat mapping — labels, recruit/power weights, authoring defaults, iteration order), and `Editor/StatBlockDrawer` (one labelled row per stat in the inspector). **Adding a stat is one `StatType` member plus one `StatCatalog` row**; `StatCatalogTests` fails if the row is missing.
 - `Rooms/` — Dungeon generation (`RoomManager`, `RoomNode`, `Room`, `Door`, `RoomSO`), `GameManager`, `CombatManager`
 - `Rooms/Events/` — **room events**: the stat-resolved gambles behind a room's **Action** button (`RoomEventSO`, `RoomEventSpawn`, `RoomEventResolver`, `RoomEventRunner`, `LevelAfflictionTracker`) — see its own `CLAUDE.md`
-- `Heroes/` — `Hero`, `HeroSO`, `Party`, `LevelConfiguration`, `HeroSaveData`
+- `Heroes/` — `Hero`, `HeroSO`, `Party`, `HeroSaveData`, **the sphere grid** (`SphereGridSO` node-graph assets + `SphereGridOps`, the pure rules — XP is a per-hero bank spent on nodes at the hub; `LevelConfiguration` is gone), and `UI/` (`SphereGridView` — the UITK graph renderer shared by the hub screen and the `Tools ▸ Heroes ▸ Sphere Grid Editor` window — `SphereGridPresenter`, `SphereGridUI`)
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`
 - `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`
 - `Cards/` — Magic/Draw system (namespace still `Cards`): `MagicSO`, `MagicTag` (enum), `MagicCatalog`, `EquippedMagicState` (draw slots + charges), `EffectResolver`, `ComboDetector`, `CombatBuffTracker`, `MagicTagTracker`, `MagicComboSO`
 - `Cards/Effects/` — Effect executors: `IEffectExecutor`, `DamageEffectExecutor`, `HealEffectExecutor`, `BuffEffectExecutor`, `DebuffEffectExecutor`, `EffectExecutorFactory`
 - `Cards/UI/` — `MagicSelectionUI`, `MagicForgeUI`
 - `Items/` — `ItemSO` (equipment + consumables via `ItemCategory`/`ConsumableEffectType`), `InventoryManager` (+ pure `InventoryOperations`), `ItemCatalogSO` (Resources-loaded item DB so the hub resolves items without scene wiring), `LootRoller` (rarity/depth-scaled drops), `UI/InventoryHubUI` (hub equip + consumables screen)
-- `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`, `RunDefinitionSO`, `RunLevelEntry`, `RunSaveData`
+- `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`, `RunDefinitionSO`, `RunLevelEntry`, `RunSaveData`, and **the campaign graph** (`CampaignSO` + `CampaignOps` — which runs exist, what unlocks them, and which branches are optional/secret)
 - `Resources/` — `PartyResourceManager`, `PartyResourceType`
 - `IO/` — `FileHandler`, `IWriteable`
 - `Progression/` — `MetaProgressManager` (persistent Gold/Essence + per-card upgrade levels), `MetaProgressSaveData`
-- `MainMenu/` — `MainMenuManager`, `MerchantUI`
+- `MainMenu/` — `MainMenuManager`, `MerchantUI`, `CampaignMapUI` (the story map / run selection)
 - `Balance/` — Balance analysis model (`BalanceRulesSO` targets, `BalanceMath`, `EncounterModel`, `RunCurveModel`, `VarietyAnalyzer`, `ProgressionMap`, `EncounterSimulator`, `SaveAudit`, `BalanceAnalyzer`) + the `Tools ▸ Balance ▸ Balance Analyzer` editor window
 
 ### Subsystem Guides
