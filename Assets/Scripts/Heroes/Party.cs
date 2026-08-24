@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Assets.Scripts.IO;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Rooms;
@@ -8,6 +8,12 @@ namespace Assets.Scripts.Heroes
 {
     public class Party : MonoBehaviour
     {
+        /// <summary>Sorting order of the travelling party sprite in the dungeon. Must sit above the
+        /// wall overlays (<see cref="Rooms.WallGenerator"/>, order 5) or the party is drawn behind
+        /// the walls of its own room, and below the doors (order 20) so a door stays readable when
+        /// the party stands on it.</summary>
+        private const int DungeonSortOrder = 10;
+
         public List<Hero> Heroes = new List<Hero>();
 
         public Hero Leader => Heroes.Count > 0 ? Heroes[0] : null;
@@ -44,6 +50,7 @@ namespace Assets.Scripts.Heroes
             {
                 _spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
             }
+            _spriteRenderer.sortingOrder = DungeonSortOrder;
 
             if (_spriteAnimator == null)
             {
