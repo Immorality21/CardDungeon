@@ -36,6 +36,7 @@ namespace Assets.Scripts.Enemies
         public bool IsBoss => Definition != null && Definition.IsBoss;
 
         private SpriteRenderer _spriteRenderer;
+        private SpriteAnimator _spriteAnimator;
 
         public string DisplayName => Definition != null ? Definition.DisplayName : gameObject.name;
         public Sprite Icon => GetIcon();
@@ -73,6 +74,19 @@ namespace Assets.Scripts.Enemies
             if (sr != null && definition.Sprite != null)
             {
                 sr.sprite = definition.Sprite;
+            }
+
+            var sa = GetComponent<SpriteAnimator>();
+
+            if (sa == null)
+            {
+                sa = gameObject.AddComponent<SpriteAnimator>();
+            }
+
+            // Set enemy animation
+            if (sa != null && definition.AnimationFrames != null && definition.AnimationFrames.Length > 0)
+            {
+                sa.Initialize(definition.AnimationFrames, definition.AnimationFps);
             }
         }
 

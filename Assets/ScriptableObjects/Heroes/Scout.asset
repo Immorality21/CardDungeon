@@ -16,7 +16,12 @@ MonoBehaviour:
   Label: Scout
   Blurb: Fast and fragile - strikes twice for every swing the Warrior takes.
   RecruitCost: 220
-  Sprite: {fileID: 21300000, guid: b2ddfcceaadefd6f5add82a8c4549a7a, type: 3}
+  Sprite: {fileID: -8526680762501642788, guid: cd3f917187991b340865bb9a2982a38b, type: 3}
+  AnimationFrames:
+  - {fileID: -8526680762501642788, guid: cd3f917187991b340865bb9a2982a38b, type: 3}
+  - {fileID: 3609660835623634842, guid: cd3f917187991b340865bb9a2982a38b, type: 3}
+  - {fileID: -7666127770915718556, guid: cd3f917187991b340865bb9a2982a38b, type: 3}
+  AnimationFps: 4
   BaseStats:
     Values:
     - Type: 1

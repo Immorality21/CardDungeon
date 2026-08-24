@@ -15,6 +15,7 @@ namespace Assets.Scripts.Heroes
         public Room PreviousRoom { get; private set; }
 
         private SpriteRenderer _spriteRenderer;
+        private SpriteAnimator _spriteAnimator;
         private FileHandler _fileHandler;
         private PartySaveData _saveData;
 
@@ -24,9 +25,16 @@ namespace Assets.Scripts.Heroes
             _saveData = _fileHandler.Load<PartySaveData>();
 
             _spriteRenderer = GetComponent<SpriteRenderer>();
+            _spriteAnimator = GetComponent<SpriteAnimator>();
+
             if (_spriteRenderer == null)
             {
                 _spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
+            }
+
+            if (_spriteAnimator == null)
+            {
+                _spriteAnimator = gameObject.AddComponent<SpriteAnimator>();
             }
 
             foreach (var heroSO in heroDefinitions)
@@ -38,6 +46,12 @@ namespace Assets.Scripts.Heroes
             if (Leader != null && Leader.HeroSO.Sprite != null)
             {
                 _spriteRenderer.sprite = Leader.HeroSO.Sprite;
+            }
+
+            // Set party leader animation
+            if (Leader != null && Leader.HeroSO.AnimationFrames != null && Leader.HeroSO.AnimationFrames.Length > 0)
+            {
+                _spriteAnimator.Initialize(Leader.HeroSO.AnimationFrames, Leader.HeroSO.AnimationFps);
             }
         }
 
@@ -73,6 +87,8 @@ namespace Assets.Scripts.Heroes
         /// </summary>
         private Hero SpawnHero(HeroSO heroSO)
         {
+
+
             if (heroSO == null)
             {
                 return null;
@@ -80,6 +96,7 @@ namespace Assets.Scripts.Heroes
 
             var heroObj = new GameObject(heroSO.DisplayName);
             heroObj.transform.SetParent(transform, false);
+
             var hero = heroObj.AddComponent<Hero>();
 
             var savedHero = _saveData.Heroes.Find(h => h.HeroKey == heroSO.SaveKey);
@@ -100,6 +117,12 @@ namespace Assets.Scripts.Heroes
             }
             heroSR.sortingOrder = 1;
             heroSR.enabled = false;
+
+            if (heroSO.AnimationFrames != null && heroSO.AnimationFrames.Length > 0)
+            {
+                var spriteAnimator = heroObj.AddComponent<SpriteAnimator>();
+                spriteAnimator.Initialize(heroSO.AnimationFrames, heroSO.AnimationFps);
+            }
 
             Heroes.Add(hero);
             return hero;

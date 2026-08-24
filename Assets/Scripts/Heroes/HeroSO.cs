@@ -26,6 +26,9 @@ namespace Assets.Scripts.Heroes
 
         public Sprite Sprite;
 
+        public Sprite[] AnimationFrames;
+        public float AnimationFps = 8f;
+
         [Tooltip("Starting stats. Absent entries read as 0, so only list what this hero has.")]
         public StatBlock BaseStats = StatBlock.Defaults();
 

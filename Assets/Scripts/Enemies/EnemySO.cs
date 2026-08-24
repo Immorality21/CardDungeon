@@ -17,6 +17,9 @@ namespace Assets.Scripts.Enemies
         public string DisplayName = "Enemy";
         public Sprite Sprite;
 
+        public Sprite[] AnimationFrames;
+        public float AnimationFps = 8f;
+
         [Tooltip("Marks this definition as a boss: drives the boss HP bar, the no-flee rule, " +
                  "the intro banner, and the run-complete fanfare. Placement is via RunLevelEntry.BossEnemy.")]
         public bool IsBoss;

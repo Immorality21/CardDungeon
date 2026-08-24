@@ -14,7 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Key: Tank
   Label: The Tank
-  Sprite: {fileID: 21300000, guid: 10c7a212bf0fcb046a8499c268007bb2, type: 3}
+  Blurb: 
+  RecruitCost: 0
+  Sprite: {fileID: 3264278526278153087, guid: 41f0e5ab51d31cb4bae7b792bc1383df, type: 3}
+  AnimationFrames:
+  - {fileID: 3264278526278153087, guid: 41f0e5ab51d31cb4bae7b792bc1383df, type: 3}
+  - {fileID: -7694697293529759401, guid: 41f0e5ab51d31cb4bae7b792bc1383df, type: 3}
+  - {fileID: 572648386705554699, guid: 41f0e5ab51d31cb4bae7b792bc1383df, type: 3}
+  AnimationFps: 4
   BaseStats:
     Values:
     - Type: 1
