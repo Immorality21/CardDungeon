@@ -88,6 +88,67 @@ namespace Assets.Scripts.Balance
         public int SustainPool => HealthPool + HealingPool;
 
         /// <summary>
+        /// The party's <b>best</b> value per stat - the maximum over heroes, stat by stat, so a
+        /// requirement covered by one hero and another covered by a different one both read as met.
+        /// This is the same shape <c>DungeonManager.BestRosterStats</c> hands to room-event
+        /// placement, and it is what those spawn rolls and stat checks are resolved against.
+        /// </summary>
+        public StatBlock BestStats
+        {
+            get
+            {
+                var best = new StatBlock();
+                foreach (var hero in Heroes)
+                {
+                    if (hero == null || hero.Effective == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var stat in StatCatalog.Types)
+                    {
+                        int value = hero.Effective[stat];
+                        if (value > best[stat])
+                        {
+                            best[stat] = value;
+                        }
+                    }
+                }
+                return best;
+            }
+        }
+
+        /// <summary>
+        /// The hero a room event's check would be resolved against: the party's best at
+        /// <paramref name="stat"/>, matching <see cref="Rooms.Events.RoomEventResolver.BestFor"/>.
+        /// Null for an empty party or <see cref="StatType.None"/>.
+        /// </summary>
+        public HeroBaseline BestAt(StatType stat)
+        {
+            if (stat == StatType.None)
+            {
+                return null;
+            }
+
+            HeroBaseline best = null;
+            int bestValue = int.MinValue;
+            foreach (var hero in Heroes)
+            {
+                if (hero == null || hero.Effective == null)
+                {
+                    continue;
+                }
+                int value = hero.Effective[stat];
+                if (value > bestValue)
+                {
+                    bestValue = value;
+                    best = hero;
+                }
+            }
+            return best;
+        }
+
+        /// <summary>
         /// Builds a reference party at a flat XP budget per hero, greedy-spent on each hero's
         /// sphere grid (<see cref="SphereGridOps.GreedySpend"/>, deterministic). Pass
         /// <paramref name="gearLookup"/> to fold in equipped items (a save audit does, the designed

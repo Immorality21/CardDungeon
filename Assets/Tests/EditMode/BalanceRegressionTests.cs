@@ -113,6 +113,41 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void EveryRoomEventCanActuallyBePlaced()
+        {
+            // Room events are authored content reached through a chain that is easy to break by
+            // accident: the event needs a room to list it, that room needs to be in a run's pool, its
+            // SpawnChancePercent needs to be above zero, and some level's party needs to clear its
+            // SpawnRequirements. Miss any link and the asset exists but nobody ever sees it.
+            AssertNoIssues(
+                issue => issue.Category == BalanceCategory.Event
+                         && (issue.Title.Contains("No room in any run offers")
+                             || issue.Title.Contains("can never be placed")
+                             || issue.Title.Contains("No hero in the project can reach")),
+                "A room event can never appear in play.");
+        }
+
+        [Test]
+        public void EveryRoomEventHasSomethingToDo()
+        {
+            AssertNoIssues(
+                issue => issue.Category == BalanceCategory.Event && issue.Title.Contains("nothing to do"),
+                "A room event offers no option but walking away, so its Action button is a dead end.");
+        }
+
+        [Test]
+        public void NoLevelTakesMostOfItsDifficultyFromRoomEvents()
+        {
+            // Events cost from the same health bar the fights do. Past the band in BalanceRules the
+            // level's difficulty is coming from gambles in corridors, and retuning the spawn tables
+            // will not move it.
+            AssertNoIssues(
+                issue => issue.Category == BalanceCategory.Level
+                         && issue.Title.Contains("attrition from room events"),
+                "A level takes more of its attrition from room events than the rules allow.");
+        }
+
+        [Test]
         public void NothingIsCriticallyOutOfBand()
         {
             // The umbrella assertion. Everything above is a named slice of this one, so this is what to

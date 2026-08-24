@@ -48,6 +48,9 @@ the game's numbers:
 | the element a unit's attacks carry | `ICombatUnit.AttackDamageType` (`EnemySO.AttackDamageType`) |
 | economy pacing | `MetaProgressManager` constants |
 | potion belt capacity | `PartyResourceManager.DEFAULT_HEALING_POTION_MAX` |
+| room-event placement odds | `RoomEventSpawn.ChancePercent` / `.MeetsRequirements` |
+| room-event check odds and outcome weights | `RoomEventResolver.SuccessChance` / `.EffectiveWeight` |
+| loot drop odds | `LootRoller.DropChance` |
 
 Those constants were made `public` **for this purpose** — do not copy their values into the model.
 
@@ -63,6 +66,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `BalanceMath` | closed-form metrics: damage, hits-to-kill, ticks, **danger index**, power score |
 | `EncounterModel` | `WeightedEnemyGroup` + `RoomEncounter` — fractional spawn-table expectation |
 | `RunCurveModel` | `LevelCurve` / `RunCurve` — attrition, peak danger, boss ratio, difficulty jumps |
+| `RoomEventModel` | what a level's **room events** cost and pay: placement odds, check odds, weighted outcome pools |
 | `VarietyAnalyzer` | the one-dimensionality axis: archetype share, resistance coverage, inert damage types, Draw overlap |
 | `ProgressionMap` | the **supply chain**: which magic is drawable where, when each combo becomes possible, and whether a level's resistances are in elements the player can bring yet |
 | `EncounterSimulator` | headless battles under three policies (`AttackOnly` / `MagicFirst` / `Adaptive`) |
@@ -115,6 +119,29 @@ both sides, so a fast enemy's hidden threat shows up.
 **Hero power grows within a run now.** `PartyBaseline.Build` takes an **XP budget per hero** (was a level), greedy-spent on each hero's sphere grid via the deterministic `SphereGridOps.GreedySpend`; the save audit supplies real activated-node sets instead (`nodesLookup`). `RunCurveModel` closes the XP loop: each floor's expected income is banked per hero (`XpSplit.ExpectedShare`) and spent before the next floor is measured, rescued heroes joining at `SphereGridOps.StarterBank` — the same rule the game uses. `BalanceRulesSO.ReferenceHeroLevel` became **`ReferenceHeroXp`** (default 0 = fresh party) and `MinGridNodes` is the floor behind the "sphere grid runs out" finding. Node resistances reach the danger index and simulator through `SimUnit.Resistances`, beside gear.
 
 **The party is not fixed across a run.** `BalanceInput.Heroes` is the roster's **starting lineup** (`PartyRosterSO.StartingLineup()`), not every `HeroSO` in the project — heroes are acquired by rescue or recruitment, so judging level 1 against a fully-recruited roster would understate every number. `RunCurve.Build` then grows the roster level by level from each `RunLevelEntry.RescueHero`, rebuilding the `PartyBaseline` per level; a hero freed *during* a level counts only from the next one (the conservative reading). Each `LevelCurve` records the `PartySize` and `SustainPool` it was measured against, and the findings quote those rather than the run-wide baseline. Note the save audit still resolves against the **full** catalog, since a save can reference any hero.
+
+**A difficulty jump is only judged off a base worth dividing by.** `MinAttritionForJumpCheck`
+(default 0.10) is the attrition a level has to reach before the step *off* it can be a spike warning.
+A deliberately light opening floor — the tutorial is one fight and the exit, at 0.04 — makes the first
+real level after it read as a +386% cliff while being about 3 HP in absolute terms, which says nothing
+about whether the step is survivable. Below the floor the finding is still reported, as an Info that
+quotes the absolute step alongside the ratio. This is the check being wrong, not the content: the
+tutorial is light on purpose.
+
+**Room events are part of the attrition curve.** `RoomEventModel` costs every event a level's rooms
+can offer and `RunCurveModel` folds it into `ExpectedHealthCost` beside the fights, with the split kept
+visible as `ExpectedCombatHealthCost` / `ExpectedEventHealthCost` and `EventAttritionShare`. Event gold
+lands in `ExpectedGold` and an awakened fight's XP in `ExpectedXp`, so the economy and the XP loop see
+them too. Before this the model measured combat only, which made the curve optimistic by whatever the
+gambles spend and the economy pessimistic by what they pay — the Treasury hoard alone is roughly a
+fifth of a level's gold. Three deliberate limits, all documented on `RoomEventModel`: it assumes the
+player **engages and takes the dearest option** (declining is free, so the cautious reading is the zero
+the model already had; `BalanceRulesSO.EventEngagementRate` scales it), it does **not** apply
+`RoomEventRunner`'s 1-HP floor (that clamps against current health, which a closed form does not track
+— the authoring is reported instead), and it **counts rather than prices** level afflictions. Placement
+mirrors `DungeonManager.PlaceRoomEvents` exactly: connectors and the start room are out, a captive's
+room is taken out of the budget, and a room's candidates roll in authored order with the first to pass
+taking it. Covered by `RoomEventModelTests`.
 
 **Attrition load** = a level's expected HP cost ÷ the party's HP + potion pool. This is the metric
 that ends runs, because `Party.HealAll()` only fires when a fresh dungeon is entered — within a level

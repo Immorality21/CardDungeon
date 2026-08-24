@@ -62,6 +62,29 @@ namespace Assets.Scripts.Dungeon
                 data.Afflictions = DungeonManager.Instance.Afflictions.GetSaveData();
             }
 
+            // Health is level-scoped (HealAll only fires on a fresh dungeon), so it belongs in the
+            // dungeon save alongside the afflictions. Every caller of Save() is a point where it
+            // just changed: entering a room, finishing a fight, resolving a room event.
+            if (DungeonManager.HasInstance && DungeonManager.Instance.Party != null)
+            {
+                var live = new List<KeyValuePair<string, int>>();
+                foreach (var hero in DungeonManager.Instance.Party.Heroes)
+                {
+                    if (hero != null && hero.Stats != null)
+                    {
+                        live.Add(new KeyValuePair<string, int>(hero.HeroKey, hero.Stats.Health));
+                    }
+                }
+                data.HeroHealth = PartyHealthSnapshot.Capture(live);
+            }
+
+            // The potion belt is the other half of the level's sustain pool, and it is deferred
+            // inventory - so what the level spent has to travel with the dungeon, not the item file.
+            if (Items.InventoryManager.HasInstance)
+            {
+                data.ConsumablesSpent = Items.InventoryManager.Instance.GetDungeonConsumption();
+            }
+
             _fileHandler.Save(data);
         }
 

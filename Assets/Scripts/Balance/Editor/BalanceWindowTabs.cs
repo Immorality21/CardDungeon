@@ -509,7 +509,10 @@ namespace Assets.Scripts.Balance.Editor
                 BalanceGui.HeaderCell("Rooms", 60f, "Rooms to generate, editable on the level template.");
                 BalanceGui.HeaderCell("Combat", MetricWidth, "Expected number of rooms containing enemies.");
                 BalanceGui.HeaderCell("Enemies", MetricWidth, "Expected total enemies across the level.");
-                BalanceGui.HeaderCell("HP cost", MetricWidth, "Expected party HP spent clearing the level.");
+                BalanceGui.HeaderCell("Events", MetricWidth, "Expected rooms offering an Action, and what "
+                    + "engaging with them costs. Scaled by EventEngagementRate.");
+                BalanceGui.HeaderCell("HP cost", MetricWidth, "Expected party HP spent on the level — "
+                    + "fights plus events.");
                 BalanceGui.HeaderCell("Attrition", 120f, "Share of the party's HP + healing pool consumed.");
                 BalanceGui.HeaderCell("Peak", MetricWidth, "Danger of the level's hardest expected room.");
                 BalanceGui.HeaderCell("Worst roll", MetricWidth, "Danger when every spawn roll lands.");
@@ -586,7 +589,22 @@ namespace Assets.Scripts.Balance.Editor
 
             BalanceGui.Cell($"{level.ExpectedCombatRooms:0.0}", MetricWidth);
             BalanceGui.Cell($"{level.ExpectedEnemyCount:0.0}", MetricWidth);
-            BalanceGui.Cell($"{level.ExpectedHealthCost:0}", MetricWidth, attritionSeverity);
+
+            var eventSeverity = level.EventAttritionShare > _rules.MaxEventAttritionShare
+                ? BalanceSeverity.Warning
+                : BalanceSeverity.Ok;
+            BalanceGui.Cell(level.ExpectedEventRooms > 0f ? $"{level.ExpectedEventRooms:0.0}" : "—",
+                MetricWidth, eventSeverity,
+                level.ExpectedEventRooms > 0f
+                    ? $"{level.ExpectedEventHealthCost:0} HP ({level.EventAttritionShare:P0} of the level's "
+                      + $"cost) and {level.ExpectedEventGold:0} gold, from {level.ExpectedEventRooms:0.0} "
+                      + $"expected event(s). {level.ExpectedAfflictions:0.0} level affliction(s), which the "
+                      + "curve counts but cannot price."
+                    : "No room in this level's pool offers an event.");
+
+            BalanceGui.Cell($"{level.ExpectedHealthCost:0}", MetricWidth, attritionSeverity,
+                $"{level.ExpectedCombatHealthCost:0} HP from fights + {level.ExpectedEventHealthCost:0} HP "
+                + "from room events.");
 
             EditorGUILayout.BeginVertical(GUILayout.Width(120f));
             EditorGUILayout.BeginHorizontal();

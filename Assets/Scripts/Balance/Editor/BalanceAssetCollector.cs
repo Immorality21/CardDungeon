@@ -47,6 +47,9 @@ namespace Assets.Scripts.Balance.Editor
                 Magic = FindAll<MagicSO>(),
                 Combos = FindAll<MagicComboSO>(),
                 Items = items,
+                // Reached through the room pools by the run curves; collected here as well so the
+                // analyzer can name an event asset that no room offers at all.
+                RoomEvents = FindAll<Assets.Scripts.Rooms.Events.RoomEventSO>(),
                 RunSimulation = runSimulation,
                 IncludeSaveAudit = includeSaveAudit
             };

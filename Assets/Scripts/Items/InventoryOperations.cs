@@ -78,6 +78,128 @@ namespace Assets.Scripts.Items
             return true;
         }
 
+        /// <summary>
+        /// Adds one to a key's tally in a consumption ledger, creating the entry if it is new.
+        /// </summary>
+        public static void RecordSpend(List<ConsumableSpend> ledger, string itemKey)
+        {
+            if (ledger == null || string.IsNullOrEmpty(itemKey))
+            {
+                return;
+            }
+
+            var entry = ledger.Find(e => e != null && e.ItemKey == itemKey);
+            if (entry != null)
+            {
+                entry.Count++;
+                return;
+            }
+
+            ledger.Add(new ConsumableSpend { ItemKey = itemKey, Count = 1 });
+        }
+
+        /// <summary>Count recorded against one key, or 0.</summary>
+        public static int SpendCount(List<ConsumableSpend> ledger, string itemKey)
+        {
+            if (ledger == null)
+            {
+                return 0;
+            }
+
+            var entry = ledger.Find(e => e != null && e.ItemKey == itemKey);
+            return entry != null ? Mathf.Max(0, entry.Count) : 0;
+        }
+
+        /// <summary>
+        /// What still has to be spent to bring <paramref name="current"/> up to <paramref name="target"/> -
+        /// the difference between two ledgers, never negative.
+        ///
+        /// <para>This is what makes replaying a dungeon save's consumption <b>idempotent</b>, which it
+        /// has to be: <c>InventoryManager</c> is a singleton that may or may not be marked
+        /// <c>dontDestroyOnLoad</c> in a given scene. If it is destroyed, the resumed inventory comes
+        /// back off disk at its level-start quantities and the whole ledger must be re-applied; if it
+        /// survives, the potions are already gone and applying the ledger again would charge the
+        /// player twice. Reconciling to a target handles both without either path having to know
+        /// which case it is in.</para>
+        /// </summary>
+        public static List<ConsumableSpend> SpendShortfall(
+            List<ConsumableSpend> current, List<ConsumableSpend> target)
+        {
+            var shortfall = new List<ConsumableSpend>();
+            if (target == null)
+            {
+                return shortfall;
+            }
+
+            foreach (var entry in target)
+            {
+                if (entry == null || string.IsNullOrEmpty(entry.ItemKey))
+                {
+                    continue;
+                }
+
+                int outstanding = Mathf.Max(0, entry.Count) - SpendCount(current, entry.ItemKey);
+                if (outstanding > 0)
+                {
+                    shortfall.Add(new ConsumableSpend { ItemKey = entry.ItemKey, Count = outstanding });
+                }
+            }
+
+            return shortfall;
+        }
+
+        /// <summary>
+        /// The ledger a reconcile leaves behind: every key at the higher of its two counts. A key
+        /// already spent more than the target says keeps its own count, because there is no way to
+        /// hand a consumable back.
+        /// </summary>
+        public static List<ConsumableSpend> MergeSpends(
+            List<ConsumableSpend> current, List<ConsumableSpend> target)
+        {
+            var merged = new List<ConsumableSpend>();
+
+            if (current != null)
+            {
+                foreach (var entry in current)
+                {
+                    if (entry != null && !string.IsNullOrEmpty(entry.ItemKey))
+                    {
+                        merged.Add(new ConsumableSpend
+                        {
+                            ItemKey = entry.ItemKey,
+                            Count = Mathf.Max(0, entry.Count)
+                        });
+                    }
+                }
+            }
+
+            if (target == null)
+            {
+                return merged;
+            }
+
+            foreach (var entry in target)
+            {
+                if (entry == null || string.IsNullOrEmpty(entry.ItemKey))
+                {
+                    continue;
+                }
+
+                int count = Mathf.Max(0, entry.Count);
+                var existing = merged.Find(e => e.ItemKey == entry.ItemKey);
+                if (existing == null)
+                {
+                    merged.Add(new ConsumableSpend { ItemKey = entry.ItemKey, Count = count });
+                }
+                else if (count > existing.Count)
+                {
+                    existing.Count = count;
+                }
+            }
+
+            return merged;
+        }
+
         /// <summary>Total carried quantity of a consumable across stacks.</summary>
         public static int GetConsumableQuantity(List<ItemSaveData> items, string itemKey, Func<string, ItemSO> resolve)
         {

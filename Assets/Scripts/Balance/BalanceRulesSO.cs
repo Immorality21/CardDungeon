@@ -60,9 +60,34 @@ namespace Assets.Scripts.Balance
         [Tooltip("Largest acceptable difficulty growth from one run level to the next (0.75 = +75%).")]
         public float MaxDifficultyJump = 0.75f;
 
+        [Header("Room events — gambles that spend the same HP pool the fights do")]
+        [Tooltip("How much of a level's event cost and reward to count. 1 = the player engages with " +
+                 "every event they find and takes its most expensive option, which is the reading " +
+                 "worth measuring: declining is free, so a cautious player is the zero the model " +
+                 "already had. Lower it to model a player who walks past some of them.")]
+        [Range(0f, 1f)] public float EventEngagementRate = 1f;
+
+        [Tooltip("Largest share of a level's expected HP cost that should come from room events " +
+                 "rather than from its fights. Above this the level's difficulty is coming from " +
+                 "gambles in corridors, and the spawn tables are no longer what the player is " +
+                 "playing against.")]
+        [Range(0f, 1f)] public float MaxEventAttritionShare = 0.35f;
+
+        [Tooltip("Warn when a single event outcome can take more than this share of a hero's health " +
+                 "bar. Above it the 1-HP floor in RoomEventRunner is doing the balancing instead of " +
+                 "the authored number, so the outcome reads the same however it is tuned.")]
+        [Range(0.1f, 2f)] public float MaxEventDamageFraction = 0.5f;
+
         [Tooltip("Smallest acceptable difficulty growth. At or below 0 the curve is flat or " +
                  "regressing and the run has no sense of escalation.")]
         public float MinDifficultyJump = 0.10f;
+
+        [Tooltip("Attrition a level has to reach before the jump OFF it is judged as a spike. A " +
+                 "ratio needs a meaningful base: a tutorial floor that costs 3% of the pool makes " +
+                 "any real level after it read as a several-hundred-percent spike, which says " +
+                 "nothing about whether the step is survivable. Below this the finding is reported " +
+                 "as an Info instead, quoting both the ratio and the absolute step.")]
+        [Range(0f, 1f)] public float MinAttritionForJumpCheck = 0.10f;
 
         [Tooltip("A boss should tower over the level's trash — but not by this much.")]
         public float MaxBossToTrashRatio = 6f;

@@ -27,6 +27,18 @@ namespace Assets.Scripts.Items
 
         private bool _deferSaves;
 
+        /// <summary>
+        /// What the level currently being played has spent, per consumable key. Health is not the
+        /// only level-scoped resource - the potion belt is the other half of the pool the balance
+        /// model's attrition curve divides by - so this is saved into the dungeon file and reconciled
+        /// on resume. Without it, quitting to the menu handed the potions back.
+        ///
+        /// <para>A ledger of deltas rather than a snapshot of quantities: the hub is reachable while a
+        /// run is paused, so restoring absolute counts would undo a merchant purchase. See
+        /// <see cref="ConsumableSpend"/>.</para>
+        /// </summary>
+        private List<ConsumableSpend> _dungeonConsumption = new List<ConsumableSpend>();
+
         // Load in Awake (like MetaProgressManager / PartyResourceManager) so an auto-created
         // instance — e.g. the hub MenuScene has no wired Managers prefab — is immediately usable.
         protected override void Awake()
@@ -149,12 +161,56 @@ namespace Assets.Scripts.Items
                 return false;
             }
 
+            InventoryOperations.RecordSpend(_dungeonConsumption, itemKey);
+
             if (!_deferSaves)
             {
                 Save();
             }
             OnInventoryChanged?.Invoke();
             return true;
+        }
+
+        /// <summary>
+        /// What this dungeon has spent so far, for <c>DungeonSaveData.ConsumablesSpent</c>.
+        /// </summary>
+        public List<ConsumableSpend> GetDungeonConsumption()
+        {
+            return InventoryOperations.MergeSpends(_dungeonConsumption, null);
+        }
+
+        /// <summary>Starts a fresh level's ledger. Called from <c>DungeonManager.SpawnFreshDungeon</c>.</summary>
+        public void BeginDungeonConsumption()
+        {
+            _dungeonConsumption = new List<ConsumableSpend>();
+        }
+
+        /// <summary>
+        /// Brings this dungeon's consumption up to what its save file recorded, spending only the
+        /// difference. Idempotent by construction, which it must be: whether the resumed inventory
+        /// still has the potions depends on whether this singleton was destroyed with the scene, and
+        /// neither caller should have to know. See <see cref="InventoryOperations.SpendShortfall"/>.
+        /// </summary>
+        public void ReconcileDungeonConsumption(List<ConsumableSpend> saved)
+        {
+            var shortfall = InventoryOperations.SpendShortfall(_dungeonConsumption, saved);
+
+            foreach (var entry in shortfall)
+            {
+                for (int i = 0; i < entry.Count; i++)
+                {
+                    // Best effort: an item the player no longer carries was already spent as far as
+                    // the level is concerned, so a miss here must not stall the reconcile.
+                    InventoryOperations.TryConsume(_saveData.Items, entry.ItemKey, GetItemSO);
+                }
+            }
+
+            _dungeonConsumption = InventoryOperations.MergeSpends(_dungeonConsumption, saved);
+
+            if (shortfall.Count > 0)
+            {
+                OnInventoryChanged?.Invoke();
+            }
         }
 
         /// <summary>
@@ -342,6 +398,9 @@ namespace Assets.Scripts.Items
 
         public void Load()
         {
+            // The ledger describes a level this freshly-read collection has not been through.
+            _dungeonConsumption = new List<ConsumableSpend>();
+
             _saveData = _fileHandler.Load<ItemCollectionSaveData>();
             InventoryOperations.NormalizeQuantities(_saveData.Items);
             RebuildEquippedCache();

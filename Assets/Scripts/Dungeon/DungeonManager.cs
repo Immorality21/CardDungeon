@@ -289,8 +289,13 @@ namespace Assets.Scripts.Dungeon
             Party = partyObj.GetComponent<Party>();
             Party.Initialize(FieldedHeroes());
             Party.HealAll();
-            // Afflictions are level-scoped like health, so a fresh level starts clean.
+            // Afflictions and the consumption ledger are level-scoped like health, so a fresh level
+            // starts clean on all three.
             Afflictions.Clear();
+            if (InventoryManager.HasInstance)
+            {
+                InventoryManager.Instance.BeginDungeonConsumption();
+            }
             Party.PlaceInRoom(startRoom);
             GameManager.Instance.Initialize(Party, GetRoomActionUI());
 
@@ -301,14 +306,21 @@ namespace Assets.Scripts.Dungeon
             }
             startRoom.Reveal();
 
-            // Initialize equipped-magic state, carrying magic drawn on earlier levels of
-            // this run (persisted in the run save; empty on the first level or a fresh run).
+            // Initialize equipped-magic state, then carry a loadout into it. Two sources, in
+            // precedence order: the run save holds what was drawn on earlier levels of *this* run,
+            // and the magic-loadout file holds what the heroes walked out of previous runs with.
+            // The run save wins while a run is in flight because it is the more recent of the two;
+            // on level 1 it is empty, and that is when a hero picks their old kit back up.
             MagicState = new EquippedMagicState();
             MagicState.Initialize(Party.Heroes);
-            if (ActiveRun != null && MagicCatalog.HasInstance)
+            if (MagicCatalog.HasInstance)
             {
-                var carried = _fileHandler.Load<RunSaveData>();
-                MagicState.Restore(carried.EquippedMagic, MagicCatalog.Instance.GetMagic);
+                var carried = ActiveRun != null ? _fileHandler.Load<RunSaveData>().EquippedMagic : null;
+                if (carried == null || carried.Count == 0)
+                {
+                    carried = _fileHandler.Load<MagicLoadoutSaveData>().Heroes;
+                }
+                MagicState.Restore(carried, MagicCatalog.Instance.GetMagic);
             }
 
             // Top the healing-potion belt back up to its cap for the new dungeon. Consumables
@@ -368,6 +380,21 @@ namespace Assets.Scripts.Dungeon
             var partyObj = Instantiate(_partyPrefab, transform);
             Party = partyObj.GetComponent<Party>();
             Party.Initialize(FieldedHeroes());
+
+            // Health carries across the resume. Party.Initialize derives every hero full, which is
+            // right for a fresh level and wrong here: health only refills on entering a *new*
+            // dungeon, so restoring it full made quitting to the menu a heal, and undid the damage
+            // every room event had already charged for.
+            foreach (var hero in Party.Heroes)
+            {
+                if (hero == null || hero.Stats == null)
+                {
+                    continue;
+                }
+                hero.Stats.Health = PartyHealthSnapshot.HealthFor(
+                    saveData.HeroHealth, hero.HeroKey, hero.GetEffectiveMaxHealth());
+            }
+
             Party.PlaceInRoom(currentRoom);
             GameManager.Instance.Initialize(Party, GetRoomActionUI());
 
@@ -395,8 +422,15 @@ namespace Assets.Scripts.Dungeon
 
             Afflictions.Restore(saveData.Afflictions);
 
-            // Consumable quantities are part of the item inventory now (committed on level-clear),
-            // so there is no separate per-dungeon resource state to restore here.
+            // Re-spend the consumables this level had already used. Consumables live in the item
+            // collection, which is deferred until level clear, so a resume otherwise came back with
+            // a full potion belt - the same free-heal this hero-health restore closes, in the other
+            // half of the sustain pool. The reconcile is idempotent, so it is correct whether or not
+            // InventoryManager survived the scene change with the potions already gone.
+            if (InventoryManager.HasInstance)
+            {
+                InventoryManager.Instance.ReconcileDungeonConsumption(saveData.ConsumablesSpent);
+            }
 
             var restoreLevelKey = _level != null ? _level.Key : _manualLayout != null ? _manualLayout.Key : "unknown";
             DungeonSaveManager.Instance.Initialize(saveData.Seed, restoreLevelKey, rooms);
@@ -810,6 +844,8 @@ namespace Assets.Scripts.Dungeon
                 Party.CommitProgress();
             }
 
+            CommitMagicLoadout();
+
             // Award persistent meta-currency for clearing the level
             MetaProgressManager.Instance.AwardLevelClear();
 
@@ -854,6 +890,27 @@ namespace Assets.Scripts.Dungeon
             }
 
             SceneManager.LoadScene("MenuScene");
+        }
+
+        /// <summary>
+        /// Banks what the party is carrying in its draw slots, so it is there at the start of the
+        /// next run. Deferred to level clear like every other in-run gain - XP, loot, banked gold, a
+        /// rescued hero - which is what makes magic drawn during a fatal run forfeit: nothing on the
+        /// death path writes this file, so the last committed loadout is what survives.
+        ///
+        /// <para>Merged rather than overwritten, because <c>GetSaveData</c> only knows about the
+        /// heroes this run fielded and a benched hero must not lose their kit.</para>
+        /// </summary>
+        private void CommitMagicLoadout()
+        {
+            if (MagicState == null)
+            {
+                return;
+            }
+
+            var loadout = _fileHandler.Load<MagicLoadoutSaveData>();
+            loadout.Heroes = EquippedMagicState.Merge(loadout.Heroes, MagicState.GetSaveData());
+            _fileHandler.Save(loadout);
         }
 
         public void HandlePartyDeath()

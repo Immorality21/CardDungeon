@@ -185,7 +185,7 @@ namespace Assets.Scripts.Rooms.Events
             float total = 0f;
             for (int i = 0; i < pool.Count; i++)
             {
-                total += WeightOf(pool[i], actor);
+                total += EffectiveWeight(pool[i], actor);
             }
 
             if (total <= 0f)
@@ -197,7 +197,7 @@ namespace Assets.Scripts.Rooms.Events
             float running = 0f;
             for (int i = 0; i < pool.Count; i++)
             {
-                running += WeightOf(pool[i], actor);
+                running += EffectiveWeight(pool[i], actor);
                 if (target < running)
                 {
                     return i;
@@ -212,8 +212,12 @@ namespace Assets.Scripts.Rooms.Events
         /// Relative to the authored weight, so a modifier tilts a pool without rewriting it - and a
         /// steep negative rate can take an outcome off the table entirely for a hero with enough of
         /// the stat, which is the point of authoring one.
+        ///
+        /// <para>Public because the balance model needs the same number to work out what an outcome
+        /// pool costs on average, and a second copy of this arithmetic would drift from the one the
+        /// game rolls against.</para>
         /// </summary>
-        private static float WeightOf(RoomEventOutcome outcome, ICombatUnit actor)
+        public static float EffectiveWeight(RoomEventOutcome outcome, ICombatUnit actor)
         {
             if (outcome == null)
             {

@@ -190,6 +190,25 @@ short); `Tutorial` unlocking 60% of the magic catalog at once; and the Tutorial�
 What remains from the original list: **archetype mix** (4 of 7 enemies are still `Aggressor`).
 ~~**XP distribution**~~ ✅ shipped 2026-08-22 as the even split in §5.
 
+~~**The suite has one standing red: `BalanceRegressionTests.RunDifficultyEscalates`.**~~ ✅ Fixed
+2026-08-24 — **in the check, not the content.** `The Threshold` was reading a **+353%** jump from
+`Dungeon Entrance` (attrition 0.033) to `Upper Halls` (0.148) against a +75% ceiling. Confirmed
+pre-existing by re-running the model with `EventEngagementRate = 0`, which reproduces the old
+combat-only arithmetic exactly; folding events in moved it to +386%, so it never crossed the line, it
+was already 4.7x over.
+
+The content is right and the metric was wrong: the tutorial floor is *deliberately* one Pink Room
+fight plus the exit, and a ratio off a base that small is an artefact. `BalanceRulesSO`
+gained **`MinAttritionForJumpCheck`** (default 0.10) — the attrition a level must reach before the
+step *off* it can be a spike warning. Below it the finding is still reported, as an Info quoting the
+absolute step (here 0.04 → 0.20, about 3 HP) beside the percentage. Only `Dungeon Entrance` falls
+under the floor; every other jump in the project is judged exactly as before.
+
+**The suite is 534 passed / 0 failed** — green for the first time since the campaign content landed.
+Analyzer: **0 critical / 7 warning / 14 info**. The seven remaining warnings are all content items
+already tracked in this section — five *no threat at all* enemies, the *+MaxHealth gear* bug, and
+`Mirefather`'s unresistable Shadow.
+
 > **Verification note.** These numbers come from `BalanceAnalyzer` itself, run in-editor over the
 > real assets via the Unity MCP, and the `BalanceRegressionTests` predicates were evaluated against
 > that same report. **Not** re-measured: the simulator (win rates, depth gaps) and the save audit,
@@ -285,9 +304,19 @@ is the map screen, and clearing a run's final level banks its key in
   reduce it, so its damage is unmitigable by accident rather than by design. Either give a sphere grid
   a Shadow-resistance node (`SphereGridSeeder`) or make it the boss's deliberate identity — see
   `docs/ELEMENTAL_PLAN.md`.
-- **What carries between runs** is unchanged and unexamined: meta progress (Gold, Essence, heroes,
-  gear, sphere-grid nodes) persists; equipped magic is run-scoped and lost. Worth a pass once there is
-  more than one run to carry anything into.
+- ~~**What carries between runs** is unchanged and unexamined: meta progress (Gold, Essence, heroes,
+  gear, sphere-grid nodes) persists; equipped magic is run-scoped and lost.~~ ✅ **Equipped magic now
+  carries too** (2026-08-24). `MagicLoadout.json` (`MagicLoadoutSaveData`) banks each hero's draw
+  slots on level clear, and the first level of a *new* run seeds from it when the run save is empty —
+  so a hero walks in still holding something they drew a few dungeons ago, instead of a four-floor kit
+  evaporating the moment the run was won. Two rules: the bank is **merged** per hero
+  (`EquippedMagicState.Merge`, `MagicLoadoutTests`), because a run only reports the heroes it fielded
+  and overwriting would strip a benched hero's slots; and it is committed on **level clear only**, so
+  magic drawn during a fatal run is forfeited exactly like that run's XP and loot while anything
+  banked earlier survives. A hero who buys a `MagicSlot` node between runs keeps everything and gains
+  room. Verified in-editor: drew Fireball → committed → a fresh `EquippedMagicState` restored
+  Fireball x3 into slot 0. *(Still open: nothing in the hub shows the player what their heroes are
+  carrying before a run starts.)*
 
 ### 1. Battle polish (feel & clarity)
 
@@ -507,15 +536,61 @@ run the suite headlessly. It can be run headlessly now (`docs/GAMEPLAY_VALIDATIO
 - **No manual-layout override.** `ManualRoomEntry` has no per-room event field, so a hand-authored
   level can only get events through its rooms' templates. Cheap to add if the tutorial should
   guarantee a specific one.
-- **The balance model does not know events exist.** `EncounterModel` measures expected HP cost per
-  room from combat only, so an event's attrition is invisible to the analyzer and to
-  `BalanceRegressionTests`. Grep confirms nothing in `Assets/Scripts/Balance/` reads
-  `EventsPerLevel`, `PossibleEvents` or the affliction tracker — which is why this change moved no
-  findings, and also why the attrition curve is now optimistic by however much events cost.
-- **Mid-level hero HP is still not persisted at all** (`DungeonSaveData` has no hero health, and
-  `RestoreSavedState` re-initialises the party at full). So a quit-resume already undoes combat
-  damage, and therefore event damage too. The consumed flag and the afflictions survive; the HP cost
-  does not. Pre-existing, but events make it easier to notice.
+- ~~**The balance model does not know events exist.**~~ ✅ Fixed 2026-08-24.
+  `Assets/Scripts/Balance/RoomEventModel.cs` costs a level's events - placement odds
+  (`RoomEventSpawn`), check odds (`RoomEventResolver.SuccessChance`), weighted outcome pools
+  (`RoomEventResolver.EffectiveWeight`, made public for it), damage through `DamageCalculator`, loot
+  through `LootRoller.DropChance` - and `RunCurveModel` folds the result into
+  `ExpectedHealthCost` beside the fights, keeping the split visible as `ExpectedCombatHealthCost` /
+  `ExpectedEventHealthCost` / `EventAttritionShare`. Event gold reaches `ExpectedGold` and an
+  awakened fight's XP reaches `ExpectedXp`, so the economy and the XP loop see them too. New
+  `BalanceCategory.Event` findings: an event no room offers, one that can never be placed, a gate no
+  hero in the project can reach, an all-Decline option list, a gamble with no downside, plus a
+  per-level *too much of this level's attrition is events* warning. Covered by `RoomEventModelTests`
+  and three new `BalanceRegressionTests`; surfaced as an **Events** column in the analyzer window.
+
+  Measured on the real assets, the curve moves as expected: The Threshold `0.033 / 0.148 / 0.144 /
+  0.209` → `0.040 / 0.195 / 0.190 / 0.230`, The Drowned March `0.102 / 0.168 / 0.269 / 0.361` →
+  `0.139 / 0.198 / 0.293 / 0.350`, The Warrens `0.124 / 0.204` → `0.170 / 0.248`. Events are worth
+  0.4–3.1 HP and 6–45 gold per level. Findings went **8 warning / 11 info → 8 warning / 13 info** —
+  two new Infos, no new warnings and no criticals.
+
+  Three deliberate limits, documented on the class: it assumes the player **engages and takes the
+  dearest option** (declining is free, so the cautious reading is the zero the model already had —
+  `BalanceRulesSO.EventEngagementRate` scales it, and `RoomEventEncounter.Safest` carries the
+  cheapest engagement); it does **not** apply `RoomEventRunner`'s 1-HP floor, because that clamps
+  against *current* health, so an outcome above a hero's whole bar is costed at face value and
+  reported instead (`MaxEventDamageFraction`); and level afflictions are **counted, not priced**, so
+  a level that hands one out is flagged as harder than its attrition figure says.
+
+  *(One thing the new checks exposed: the run curves grow a roster only through
+  `RunLevelEntry.RescueHero`, so a **tavern recruit is invisible to the whole balance model**.
+  `MustyTome`'s Intelligence 6 gate therefore reads as never-met on the modelled path even though the
+  Acolyte opens it in play. Reported as an Info with that caveat rather than a warning; the
+  project-wide reachability check is the one that fails a test.)*
+- ~~**Mid-level hero HP is still not persisted at all.**~~ ✅ Fixed 2026-08-24.
+  `DungeonSaveData.HeroHealth` carries current HP per hero, written by `DungeonSaveManager.Save`
+  (whose three call sites — entering a room, finishing a fight, resolving an event — are exactly the
+  points where it changed) and applied in `RestoreSavedState` right after `Party.Initialize`. The
+  rules are pure and tested in `PartyHealthSnapshot` / `PartyHealthSnapshotTests`: a hero with no
+  record resumes **full** (the only way to be absent is to have joined after the write, and a rescue
+  arrives full anyway), a record is clamped into the hero's *effective* max, and a 0 stays down.
+  Verified in-editor: wounded to 5 / 0 / 17, healed to full in memory, resumed → 5 / 0 / 17.
+
+  **The potion half is fixed too** (same day). `DungeonSaveData.ConsumablesSpent` is a per-level
+  ledger of what the party drank, written from `InventoryManager.GetDungeonConsumption` and
+  reconciled onto the inventory in `RestoreSavedState`, so the whole sustain pool the attrition curve
+  divides by is now persisted rather than half of it.
+
+  Two design points worth keeping. It is a **delta, not a snapshot of quantities**: the hub is
+  reachable while a run is paused, so restoring absolute counts would silently undo a merchant
+  purchase or an equip. And the reconcile is **idempotent** (`InventoryOperations.SpendShortfall`
+  applies `target - current`), because `SingletonBehaviour.dontDestroyOnLoad` is a per-scene
+  serialized flag — if `InventoryManager` is destroyed with the scene the potions come back off disk
+  and the whole ledger must re-apply, and if it survives they are already gone and re-applying would
+  charge the player twice. Neither caller has to know which case it is in. Covered by
+  `ConsumableLedgerTests`; verified in-editor across **both** cases: carrying 2, drank 1, reloaded
+  from disk → 2, resumed → 1, resumed again → still 1.
 - **A room whose event sits behind a fight** only offers it after the fight is won (the main bar
   replaces the Fight bar). That reads fine, but it means an event in a combat room is never a
   decision *before* the fight — worth a look if events should ever be a way to *avoid* one.

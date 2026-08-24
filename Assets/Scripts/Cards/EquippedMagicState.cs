@@ -185,8 +185,67 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
+        /// Folds a run's finished loadout into the stored one, entry by entry: a hero present in
+        /// <paramref name="incoming"/> takes their new slots, and a hero who is only in
+        /// <paramref name="stored"/> keeps what they had.
+        ///
+        /// <para>The keeping half is the point. <see cref="GetSaveData"/> only emits the heroes this
+        /// run fielded, so writing it over the file wholesale would delete the kit of everyone left
+        /// at home - clear a level with the Warrior and the Acolyte and the benched Tank would come
+        /// back from the next run empty-handed.</para>
+        ///
+        /// <para>Pure and static so the merge rule is testable without a dungeon; neither argument is
+        /// mutated.</para>
+        /// </summary>
+        public static List<MagicSlotSaveData> Merge(
+            List<MagicSlotSaveData> stored, List<MagicSlotSaveData> incoming)
+        {
+            var merged = new List<MagicSlotSaveData>();
+
+            if (stored != null)
+            {
+                foreach (var entry in stored)
+                {
+                    if (entry != null && !string.IsNullOrEmpty(entry.HeroKey))
+                    {
+                        merged.Add(entry);
+                    }
+                }
+            }
+
+            if (incoming == null)
+            {
+                return merged;
+            }
+
+            foreach (var entry in incoming)
+            {
+                if (entry == null || string.IsNullOrEmpty(entry.HeroKey))
+                {
+                    continue;
+                }
+
+                int existing = merged.FindIndex(e => e.HeroKey == entry.HeroKey);
+                if (existing >= 0)
+                {
+                    merged[existing] = entry;
+                }
+                else
+                {
+                    merged.Add(entry);
+                }
+            }
+
+            return merged;
+        }
+
+        /// <summary>
         /// Restores equipped magic from save, resolving each stored key back to a definition via
         /// <paramref name="resolveMagic"/>. Slots must already exist (call <see cref="Initialize"/> first).
+        ///
+        /// <para>Slots the save leaves empty are left alone rather than cleared, and a stored slot
+        /// past the hero's current slot count is dropped - so a hero who bought a MagicSlot node
+        /// between runs keeps everything and simply has room for more.</para>
         /// </summary>
         public void Restore(List<MagicSlotSaveData> saveData, Func<string, MagicSO> resolveMagic)
         {

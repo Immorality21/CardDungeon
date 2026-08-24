@@ -27,7 +27,7 @@ Still to design: `PowerMode` from `docs/ELEMENTAL_PLAN.md` (base-power / flat / 
 
 ## Equip / Draw / Cast
 
-- **EquippedMagicState**: per-run, per-hero fixed set of `MagicSlot { MagicSO Magic; int Charges; int MaxCharges }`. Owned by `DungeonManager.MagicState` (replaces the old `DungeonDeckState`).
+- **EquippedMagicState**: per-hero fixed set of `MagicSlot { MagicSO Magic; int Charges; int MaxCharges }`. Owned by `DungeonManager.MagicState` (replaces the old `DungeonDeckState`). Slots survive **between** runs, not just within one — see below.
   - `DrawInto(heroKey, slotIndex, magic, maxCharges)` — fills/overwrites a slot at full charges.
   - `TryCast(heroKey, slotIndex)` — spends a charge (returns false if empty/no charges).
   - `RefillCharges()` — refills all slots to max; called at the start of each combat (per-room refresh).
@@ -59,7 +59,9 @@ Still to design: `PowerMode` from `docs/ELEMENTAL_PLAN.md` (base-power / flat / 
 
 ## Persistence
 
-Equipped magic persists the **whole run** (carried across levels in `RunSaveData.EquippedMagic`, snapshotted mid-level in `DungeonSaveData.EquippedMagic`) and is **lost on party death**. See the Dungeon guide.
+Equipped magic persists **between runs**. Within a run it is carried across levels in `RunSaveData.EquippedMagic` and snapshotted mid-level in `DungeonSaveData.EquippedMagic`; on every level clear it is also banked into **`MagicLoadout.json`**, which is what the first level of a *new* run seeds from — so a hero can walk into a dungeon still holding something they drew a few dungeons ago. It was purely run-scoped before, so a kit assembled over four floors evaporated the moment the run was won.
+
+Two rules worth knowing. The bank is **merged** per hero (`EquippedMagicState.Merge`): a run only reports the heroes it fielded, so overwriting the file would strip a benched hero's slots. And it is committed on **level clear**, never on the death path, so magic drawn during a fatal run is **forfeited** like that run's XP and loot while anything banked earlier survives. A hero who buys a `MagicSlot` node between runs keeps everything and simply gains room — `Restore` walks `min(saved, current)` slots. See the Dungeon guide.
 
 ## Enum ordinals: inserting a member is not a shift-by-one
 

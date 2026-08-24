@@ -46,7 +46,7 @@ Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md
 - `IO/` — `FileHandler`, `IWriteable`
 - `Progression/` — `MetaProgressManager` (persistent Gold/Essence + per-card upgrade levels), `MetaProgressSaveData`
 - `MainMenu/` — `MainMenuManager`, `MerchantUI`, `CampaignMapUI` (the story map / run selection)
-- `Balance/` — Balance analysis model (`BalanceRulesSO` targets, `BalanceMath`, `EncounterModel`, `RunCurveModel`, `VarietyAnalyzer`, `ProgressionMap`, `EncounterSimulator`, `SaveAudit`, `BalanceAnalyzer`) + the `Tools ▸ Balance ▸ Balance Analyzer` editor window
+- `Balance/` — Balance analysis model (`BalanceRulesSO` targets, `BalanceMath`, `EncounterModel`, `RunCurveModel`, `RoomEventModel`, `VarietyAnalyzer`, `ProgressionMap`, `EncounterSimulator`, `SaveAudit`, `BalanceAnalyzer`) + the `Tools ▸ Balance ▸ Balance Analyzer` editor window
 
 ### Subsystem Guides
 

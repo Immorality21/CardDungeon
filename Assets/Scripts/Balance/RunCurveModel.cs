@@ -27,10 +27,40 @@ namespace Assets.Scripts.Balance
 
         public List<RoomEncounter> Rooms = new List<RoomEncounter>();
 
+        /// <summary>
+        /// Every room event this level's rooms can offer, with how often it turns up and what
+        /// engaging with it costs. See <see cref="RoomEventModel"/> — events are gambles that spend
+        /// HP, potions and the occasional woken enemy, so they belong in the attrition curve.
+        /// </summary>
+        public List<RoomEventEncounter> Events = new List<RoomEventEncounter>();
+
         public float ExpectedCombatRooms;
         public float ExpectedEnemyCount;
 
-        /// <summary>Party HP the whole level is expected to consume.</summary>
+        /// <summary>Expected rooms in this level that offer an Action, i.e. hold a placed event.</summary>
+        public float ExpectedEventRooms;
+
+        /// <summary>Party HP the level's fights are expected to consume.</summary>
+        public float ExpectedCombatHealthCost;
+
+        /// <summary>
+        /// Sustain the level's events are expected to consume: their damage, the healing lost with a
+        /// spent consumable, and the fights they wake. Scaled by
+        /// <c>BalanceRulesSO.EventEngagementRate</c>.
+        /// </summary>
+        public float ExpectedEventHealthCost;
+
+        /// <summary>Gold the level's events are expected to pay, on top of what its enemies drop.</summary>
+        public float ExpectedEventGold;
+
+        /// <summary>Level afflictions the events are expected to hang on the party. Counted, not priced.</summary>
+        public float ExpectedAfflictions;
+
+        /// <summary>Share of the level's expected cost that comes from events rather than fights.</summary>
+        public float EventAttritionShare =>
+            ExpectedHealthCost > 0f ? ExpectedEventHealthCost / ExpectedHealthCost : 0f;
+
+        /// <summary>Party HP the whole level is expected to consume — fights plus events.</summary>
         public float ExpectedHealthCost;
 
         /// <summary>Fraction of the party's HP + potion pool the level consumes. Above 1 = unclearable.</summary>
@@ -300,6 +330,11 @@ namespace Assets.Scripts.Balance
                 BuildGeneratedRooms(level, entry.LevelTemplate, party, rules);
             }
 
+            // Events are modelled before the boss displaces a room: the exit room still exists and
+            // is still event-eligible (descending is a button), it is only its spawn table that the
+            // boss wipes. Reading the post-displacement occurrences would quietly under-count.
+            BuildEvents(level, entry, party, rules);
+
             // A boss is guaranteed alone in the exit room, which is cleared of its normal spawns
             // first (see EnemyManager.PlaceBossIfConfigured), so it replaces one room's encounter
             // rather than adding to the level's load.
@@ -372,6 +407,32 @@ namespace Assets.Scripts.Balance
             }
         }
 
+        /// <summary>
+        /// Models the level's room events. Eligibility mirrors <c>DungeonManager.IsEventEligible</c>:
+        /// connectors are out (<see cref="RoomEventModel"/> drops them), the party's start room is
+        /// already out of every room's <c>Occurrences</c>, and the room holding a captive is taken out
+        /// here — one room of the level is spoken for whenever the entry defines a rescue.
+        /// </summary>
+        private static void BuildEvents(LevelCurve level, RunLevelEntry entry, PartyBaseline party, BalanceRulesSO rules)
+        {
+            float eligibleRooms = 0f;
+            foreach (var room in level.Rooms)
+            {
+                if (room != null && room.Room != null && !room.Room.IsConnectorRoom)
+                {
+                    eligibleRooms += room.Occurrences;
+                }
+            }
+
+            float factor = 1f;
+            if (entry.RescueHero != null && eligibleRooms > 1f)
+            {
+                factor = (eligibleRooms - 1f) / eligibleRooms;
+            }
+
+            level.Events = RoomEventModel.BuildForLevel(level.Rooms, party, rules, level.Index, factor);
+        }
+
         private static void ReplaceExitRoomWithBoss(LevelCurve level, RunLevelEntry entry, PartyBaseline party, BalanceRulesSO rules)
         {
             // Take one ordinary combat room back out of the level: the exit room's spawns are wiped
@@ -440,7 +501,7 @@ namespace Assets.Scripts.Balance
 
                 if (!float.IsInfinity(room.ExpectedHealthCost))
                 {
-                    level.ExpectedHealthCost += room.Occurrences * room.ExpectedHealthCost;
+                    level.ExpectedCombatHealthCost += room.Occurrences * room.ExpectedHealthCost;
                 }
 
                 if (room.ExpectedDanger > level.PeakRoomDanger)
@@ -469,6 +530,30 @@ namespace Assets.Scripts.Balance
             level.BossToTrashRatio = level.Boss != null && trashAverage > 0f
                 ? level.BossDanger / trashAverage
                 : 0f;
+
+            // Room events, folded in on the same footing as combat. They cost sustain (damage, a
+            // spent potion, the fight an outcome wakes) and pay gold, XP and loot back, so leaving
+            // them out made the attrition curve optimistic and the economy pessimistic at once.
+            // EventEngagementRate is the designer's dial for how much of that a player actually takes.
+            float engagement = Mathf.Clamp01(rules != null ? rules.EventEngagementRate : 1f);
+            foreach (var roomEvent in level.Events)
+            {
+                if (roomEvent == null)
+                {
+                    continue;
+                }
+
+                level.ExpectedEventRooms += roomEvent.Occurrences;
+                level.ExpectedEventHealthCost += engagement * roomEvent.ExpectedSustainCost;
+                level.ExpectedEventGold += engagement * roomEvent.ExpectedGold;
+                level.ExpectedAfflictions += engagement * roomEvent.ExpectedAfflictions;
+
+                // Only the XP an awakened fight pays; an event is not itself an XP source.
+                level.ExpectedXp += engagement * roomEvent.ExpectedXp;
+            }
+
+            level.ExpectedGold += level.ExpectedEventGold;
+            level.ExpectedHealthCost = level.ExpectedCombatHealthCost + level.ExpectedEventHealthCost;
 
             int sustain = party.SustainPool;
             level.PartySize = party.Size;

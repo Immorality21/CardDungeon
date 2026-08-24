@@ -156,6 +156,30 @@ which hero acts, and affliction save/restore. All caller-rolled, so none of it n
 `InventoryManager`, `EnemyManager` and `MetaProgressManager`. Verify that end-to-end in the editor -
 see `docs/GAMEPLAY_VALIDATION.md`.
 
-The balance analyzer does **not** model events at all (nothing under `Assets/Scripts/Balance/` reads
-`SpawnChancePercent`, `PossibleEvents` or the affliction tracker), so any attrition or reward they add
-is invisible to `BalanceRegressionTests` and the attrition curve is optimistic by that much.
+## The balance model reads all of this
+
+`Assets/Scripts/Balance/RoomEventModel.cs` costs a level's events and folds the result into
+`LevelCurve.ExpectedHealthCost`, so the attrition curve is no longer optimistic by whatever the
+gambles spend, and `ExpectedGold` finally includes what they pay. It reuses the code the game rolls
+against rather than re-deriving it - `RoomEventSpawn` for placement, `RoomEventResolver.SuccessChance`
+for the check, `RoomEventResolver.EffectiveWeight` for the outcome pool (which is why that method is
+public), `DamageCalculator` for damage and `LootRoller.DropChance` for loot.
+
+Three things worth knowing when you author against it:
+
+- **It assumes the player engages, and takes the dearest option.** Declining is free, so a cautious
+  player is the zero the model already had; what is worth measuring is what an event costs when it is
+  played. `RoomEventEncounter.Safest` carries the cheapest engagement for the spread, and
+  `BalanceRulesSO.EventEngagementRate` scales the whole contribution.
+- **The 1-HP floor is not applied**, because it clamps against *current* health and a closed-form pass
+  does not track that. An outcome authored above a hero's whole bar is costed at face value and
+  reported instead (`MaxEventDamageFraction`), since past 100% the authored number stops mattering.
+- **Afflictions are counted, not priced.** A -2 Endurance for the rest of the level does raise every
+  later fight, but pricing it means re-measuring the level against a second party. A level expected to
+  hand out one or more gets an Info saying its attrition figure is a floor.
+
+Findings live under `BalanceCategory.Event`: an event no room offers, one that can never be placed, a
+gate no hero in the project can reach, an option list that is all Declines, and a gamble with no
+downside. `BalanceRegressionTests` covers the reachability ones. The tuning figures quoted above are
+still hand figures from before this existed - the analyzer's own numbers are in the Levels tab's
+**Events** column.

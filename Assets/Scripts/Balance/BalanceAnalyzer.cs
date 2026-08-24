@@ -52,6 +52,14 @@ namespace Assets.Scripts.Balance
         public List<MagicSO> Magic = new List<MagicSO>();
         public List<MagicComboSO> Combos = new List<MagicComboSO>();
         public List<ItemSO> Items = new List<ItemSO>();
+
+        /// <summary>
+        /// Every room-event asset in the project. The run curves reach events through their rooms'
+        /// <c>PossibleEvents</c>, so this list is only needed for the checks that are about the asset
+        /// itself - chiefly whether any room offers it at all.
+        /// </summary>
+        public List<Rooms.Events.RoomEventSO> RoomEvents = new List<Rooms.Events.RoomEventSO>();
+
         public ItemSO HealingPotion;
 
         public bool RunSimulation = true;
@@ -123,6 +131,7 @@ namespace Assets.Scripts.Balance
             EvaluateParty(report, rules, input);
             EvaluateEnemies(report, rules);
             EvaluateRuns(report, rules, input);
+            EvaluateEvents(report, rules, input);
             EvaluateVariety(report, rules);
             EvaluateProgression(report, rules);
             EvaluateEconomy(report, rules);
@@ -1241,14 +1250,42 @@ namespace Assets.Scripts.Balance
 
                     if (jump > rules.MaxDifficultyJump)
                     {
-                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Run, run.Name,
-                            $"Difficulty spikes {jump:P0} from {from} to {to}")
+                        // A ratio needs a base worth dividing by. A deliberately light opening floor
+                        // - the tutorial is one fight and the exit - costs so little that the first
+                        // real level after it is arithmetically a several-hundred-percent spike while
+                        // being a couple of HP in absolute terms. Report it, but not as a warning:
+                        // the honest reading is the absolute step, and that is inside every band.
+                        float fromLoad = run.Levels[i].AttritionLoad;
+                        float toLoad = run.Levels[i + 1].AttritionLoad;
+                        bool baseTooLightToJudge = fromLoad < rules.MinAttritionForJumpCheck;
+
+                        if (baseTooLightToJudge)
                         {
-                            Asset = run.Run,
-                            Detail = $"Attrition load {run.Levels[i].AttritionLoad:0.00} → "
-                                   + $"{run.Levels[i + 1].AttritionLoad:0.00}; the ceiling is {rules.MaxDifficultyJump:P0}.",
-                            Suggestion = "Add an intermediate step, or soften the later level's spawn tables."
-                        });
+                            report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Run, run.Name,
+                                $"{to} is {jump:P0} up on {from}, but {from} is too light to measure against")
+                            {
+                                Asset = run.Run,
+                                Detail = $"Attrition load {fromLoad:0.00} → {toLoad:0.00}, an absolute step of "
+                                       + $"{toLoad - fromLoad:0.00} of the party's pool. {from} is under the "
+                                       + $"{rules.MinAttritionForJumpCheck:P0} floor at which a ratio means "
+                                       + "anything, so the percentage is an artefact of the small base rather "
+                                       + "than a difficulty cliff.",
+                                Suggestion = "Nothing to do if the opening floor is deliberately light. Raise "
+                                           + "MinAttritionForJumpCheck to stop hearing about it, or give that "
+                                           + "level more to do so the curve starts from somewhere."
+                            });
+                        }
+                        else
+                        {
+                            report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Run, run.Name,
+                                $"Difficulty spikes {jump:P0} from {from} to {to}")
+                            {
+                                Asset = run.Run,
+                                Detail = $"Attrition load {fromLoad:0.00} → {toLoad:0.00}; the ceiling is "
+                                       + $"{rules.MaxDifficultyJump:P0}.",
+                                Suggestion = "Add an intermediate step, or soften the later level's spawn tables."
+                            });
+                        }
                     }
                     else if (jump < rules.MinDifficultyJump)
                     {
@@ -1278,6 +1315,10 @@ namespace Assets.Scripts.Balance
                 {
                     Asset = run.Run,
                     Detail = "No room in this level has a populated spawn table."
+                           + (level.ExpectedEventRooms > 0f
+                               ? $" It does offer {level.ExpectedEventRooms:0.0} room event(s), costing "
+                                 + $"{level.ExpectedEventHealthCost:0} HP."
+                               : string.Empty)
                 });
                 return;
             }
@@ -1290,7 +1331,7 @@ namespace Assets.Scripts.Balance
                     Asset = run.Run,
                     Detail = $"Expected cost {level.ExpectedHealthCost:0} HP against a sustain pool of "
                            + $"{level.SustainPool} ({level.PartySize} hero(es) + potions) across "
-                           + $"{level.ExpectedCombatRooms:0.0} combat rooms. "
+                           + $"{level.ExpectedCombatRooms:0.0} combat rooms{EventShare(level)}. "
                            + "Health only refills between levels, so the party runs out mid-level.",
                     Suggestion = $"Cut expected combat rooms to about "
                            + $"{level.ExpectedCombatRooms * (1f - rules.MinAttritionMargin) / Mathf.Max(0.01f, level.AttritionLoad):0.0}, "
@@ -1304,7 +1345,8 @@ namespace Assets.Scripts.Balance
                 {
                     Asset = run.Run,
                     Detail = $"Expected cost {level.ExpectedHealthCost:0} HP of a {level.SustainPool} pool "
-                           + $"({level.PartySize} hero(es)); the target margin is {rules.MinAttritionMargin:P0}.",
+                           + $"({level.PartySize} hero(es)){EventShare(level)}; the target margin is "
+                           + $"{rules.MinAttritionMargin:P0}.",
                     Suggestion = "Reduce room count or spawn density, or add in-level healing."
                 });
             }
@@ -1346,6 +1388,350 @@ namespace Assets.Scripts.Balance
                         Suggestion = "Raise the boss's Health or Attack, or give it adds."
                     });
                 }
+            }
+        }
+
+        /// <summary>
+        /// The events half of a level's attrition, phrased for the findings that quote a level's HP
+        /// cost. Empty when the level has no events, so the sentence reads as it always did.
+        /// </summary>
+        private static string EventShare(LevelCurve level)
+        {
+            if (level == null || level.ExpectedEventHealthCost <= 0f)
+            {
+                return string.Empty;
+            }
+
+            return $", of which {level.ExpectedEventHealthCost:0} HP ({level.EventAttritionShare:P0}) is "
+                 + $"{level.ExpectedEventRooms:0.0} room event(s) rather than fights";
+        }
+
+        /// <summary>
+        /// What an event asset looks like across every level that offers it. Gathered before anything
+        /// is reported because most of these questions are only answerable run-wide: an event gated on
+        /// Intelligence 6 is *meant* to be shut to the solo Warrior on level 1 and open once the
+        /// Acolyte is recruited, so "no party can meet this gate" is only true when no level's party can.
+        /// </summary>
+        private class EventAudit
+        {
+            public Rooms.Events.RoomEventSO Definition;
+            public RoomEventEncounter First;
+            public bool RequirementsEverMet;
+            public bool AnyEngageableOption;
+            public bool AnyStatCheck;
+            public bool AnyDownside;
+            public float MaxAppearChance;
+            public float TotalOccurrences;
+            public float WorstDamageFraction;
+            public string WorstDamageWhere = "";
+            public readonly List<string> Levels = new List<string>();
+
+            public string Name => First != null ? First.Name : Definition.name;
+
+            public void Observe(RoomEventEncounter encounter, RunCurve run, LevelCurve level)
+            {
+                if (First == null)
+                {
+                    First = encounter;
+                }
+
+                Levels.Add($"{run.Name} / {level.Reference}");
+                RequirementsEverMet |= encounter.RequirementsMet;
+                MaxAppearChance = Mathf.Max(MaxAppearChance, encounter.AppearChancePerRoom);
+                TotalOccurrences += encounter.Occurrences;
+
+                int smallestBar = SmallestHealthBar(level.Party);
+
+                foreach (var option in encounter.Options)
+                {
+                    if (!option.IsEngageable)
+                    {
+                        continue;
+                    }
+
+                    AnyEngageableOption = true;
+                    AnyStatCheck |= option.Kind == Rooms.Events.RoomEventOptionKind.StatCheck;
+                    AnyDownside |= option.HasDownside;
+
+                    if (smallestBar > 0 && option.WorstSingleHeroDamage > 0f)
+                    {
+                        float fraction = option.WorstSingleHeroDamage / smallestBar;
+                        if (fraction > WorstDamageFraction)
+                        {
+                            WorstDamageFraction = fraction;
+                            WorstDamageWhere = $"{option.WorstSingleHeroDamage:0} damage against a "
+                                             + $"{smallestBar} HP bar in {level.Reference}";
+                        }
+                    }
+                }
+            }
+
+            private static int SmallestHealthBar(PartyBaseline party)
+            {
+                if (party == null)
+                {
+                    return 0;
+                }
+
+                int smallest = 0;
+                foreach (var hero in party.Heroes)
+                {
+                    int bar = hero.Effective[StatType.MaxHealth];
+                    if (bar > 0 && (smallest == 0 || bar < smallest))
+                    {
+                        smallest = bar;
+                    }
+                }
+                return smallest;
+            }
+        }
+
+        /// <summary>
+        /// Room events, judged the same way spawn tables are. Two shapes of finding: what the events do
+        /// to a <i>level</i> (how much of its attrition they are), and what is wrong with an
+        /// <i>event asset</i> (unreachable, ungated, or hitting harder than the 1-HP floor will allow).
+        /// </summary>
+        private static void EvaluateEvents(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
+        {
+            var audits = new Dictionary<Rooms.Events.RoomEventSO, EventAudit>();
+
+            foreach (var run in report.Runs)
+            {
+                foreach (var level in run.Levels)
+                {
+                    EvaluateLevelEvents(run, level, report, rules);
+
+                    foreach (var encounter in level.Events)
+                    {
+                        if (encounter == null || encounter.Event == null)
+                        {
+                            continue;
+                        }
+
+                        EventAudit audit;
+                        if (!audits.TryGetValue(encounter.Event, out audit))
+                        {
+                            audit = new EventAudit { Definition = encounter.Event };
+                            audits[encounter.Event] = audit;
+                        }
+                        audit.Observe(encounter, run, level);
+                    }
+                }
+            }
+
+            var ceiling = ProjectStatCeiling(input);
+            foreach (var pair in audits)
+            {
+                EvaluateEventAsset(pair.Value, report, rules, ceiling);
+            }
+
+            // An event asset no run's room pool lists is content nobody can reach - the room-event
+            // equivalent of ProgressionMap's unreachable magic. Only answerable from the project-wide
+            // list, since the curves can only see what the rooms offer.
+            if (input.RoomEvents != null)
+            {
+                foreach (var definition in input.RoomEvents)
+                {
+                    if (definition == null || audits.ContainsKey(definition))
+                    {
+                        continue;
+                    }
+
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Event,
+                        string.IsNullOrEmpty(definition.Title) ? definition.name : definition.Title,
+                        "No room in any run offers this event")
+                    {
+                        Asset = definition,
+                        Detail = "Nothing lists it in RoomSO.PossibleEvents, or the rooms that do are in no "
+                               + "run's level pool, so it can never be placed.",
+                        Suggestion = "Add it to a RoomSO.PossibleEvents that a run's templates draw from, "
+                                   + "or delete the asset."
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// What a level's events do to the level: how much of its attrition comes from gambles rather
+        /// than fights, and how many level-long afflictions the curve is not pricing.
+        /// </summary>
+        private static void EvaluateLevelEvents(RunCurve run, LevelCurve level, BalanceReport report, BalanceRulesSO rules)
+        {
+            if (level.ExpectedEventHealthCost <= 0f)
+            {
+                return;
+            }
+
+            string subject = $"{run.Name} / {level.Reference}";
+
+            if (level.EventAttritionShare > rules.MaxEventAttritionShare)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Level, subject,
+                    $"{level.Reference} takes {level.EventAttritionShare:P0} of its attrition from room events")
+                {
+                    Asset = run.Run,
+                    Detail = $"{level.ExpectedEventHealthCost:0} HP from {level.ExpectedEventRooms:0.0} "
+                           + $"event(s) against {level.ExpectedCombatHealthCost:0} HP from "
+                           + $"{level.ExpectedCombatRooms:0.0} combat room(s); the ceiling is "
+                           + $"{rules.MaxEventAttritionShare:P0}. Tuning the spawn tables will not move "
+                           + "most of this level's difficulty.",
+                    Suggestion = "Lower the events' SpawnChancePercent, soften their failure outcomes, or "
+                               + "raise the level's combat load to match."
+                });
+            }
+
+            if (level.ExpectedAfflictions >= 1f)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Level, subject,
+                    $"{level.Reference} hands out {level.ExpectedAfflictions:0.0} level affliction(s) the curve does not price")
+                {
+                    Asset = run.Run,
+                    Detail = "An affliction is a stat delta for the rest of the level, so it raises the cost "
+                           + "of every fight after it. The model counts them but cannot price them without "
+                           + "re-measuring the level against a second party, so this level is harder than "
+                           + "its attrition load says.",
+                    Suggestion = "Read the attrition figure as a floor on levels that hand out afflictions."
+                });
+            }
+        }
+
+        /// <summary>
+        /// The highest each stat can reach anywhere in the project: every authored hero with their
+        /// whole sphere grid bought. A spawn gate above this is unreachable by construction, which is
+        /// an authoring error; a gate the *modelled* run path never reaches is a much weaker claim,
+        /// because the model grows a roster only through <c>RunLevelEntry.RescueHero</c> and cannot
+        /// see a hero bought at the tavern.
+        /// </summary>
+        private static StatBlock ProjectStatCeiling(BalanceInput input)
+        {
+            var ceiling = new StatBlock();
+            if (input.HeroesToAudit == null)
+            {
+                return ceiling;
+            }
+
+            foreach (var hero in input.HeroesToAudit)
+            {
+                if (hero == null)
+                {
+                    continue;
+                }
+
+                // A budget nothing can exhaust, so this is the grid bought out.
+                var nodes = SphereGridOps.GreedySpend(hero.SphereGrid, null, int.MaxValue / 4, out _);
+                var stats = HeroStatCalculator.BaseStatsForNodes(hero, nodes);
+
+                foreach (var stat in StatCatalog.Types)
+                {
+                    if (stats[stat] > ceiling[stat])
+                    {
+                        ceiling[stat] = stats[stat];
+                    }
+                }
+            }
+
+            return ceiling;
+        }
+
+        /// <summary>One event asset, judged across every level that offers it.</summary>
+        private static void EvaluateEventAsset(
+            EventAudit audit, BalanceReport report, BalanceRulesSO rules, StatBlock projectCeiling)
+        {
+            var definition = audit.Definition;
+            string subject = audit.Name;
+
+            if (!audit.RequirementsEverMet)
+            {
+                var parts = new List<string>();
+                foreach (var requirement in definition.SpawnRequirements)
+                {
+                    if (requirement != null && requirement.Type != StatType.None)
+                    {
+                        parts.Add($"{StatCatalog.DisplayName(requirement.Type)} {requirement.Amount}");
+                    }
+                }
+
+                var beyondEveryone = RoomEventModel.UnmetRequirements(definition.SpawnRequirements, projectCeiling);
+                if (beyondEveryone.Count > 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Event, subject,
+                        "No hero in the project can reach this event's SpawnRequirements")
+                    {
+                        Asset = definition,
+                        Detail = $"Needs {string.Join(" + ", parts)}, which is past the best any authored hero "
+                               + "reaches with their whole sphere grid bought - so the event can never be "
+                               + $"placed, in any of the {audit.Levels.Count} level(s) that offer it.",
+                        Suggestion = "Lower the threshold, or add nodes that grant enough of the stat. A gate "
+                                   + "is meant to be a reason to recruit, not a wall."
+                    });
+                }
+                else
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Event, subject,
+                        "No party on the modelled run path meets this event's SpawnRequirements")
+                    {
+                        Asset = definition,
+                        Detail = $"Needs {string.Join(" + ", parts)}. A hero in the project reaches it, but the "
+                               + "run curves only grow a roster through RunLevelEntry.RescueHero - a hero "
+                               + "bought at the tavern is invisible to the model - so this may be a modelling "
+                               + "gap rather than unreachable content.",
+                        Suggestion = "If the stat is meant to come from a tavern recruit, this is working as "
+                                   + "designed; if not, the gate never opens on the rescue-only path."
+                    });
+                }
+            }
+            else if (audit.MaxAppearChance <= 0f)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Event, subject,
+                    "This event can never be placed")
+                {
+                    Asset = definition,
+                    Detail = $"SpawnChancePercent is {definition.SpawnChancePercent:0.#}, so every roll fails. "
+                           + "The rooms that list it always fall through to the next candidate.",
+                    Suggestion = "Raise SpawnChancePercent above 0, or remove it from the room pools."
+                });
+            }
+
+            if (!audit.AnyEngageableOption)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Event, subject,
+                    "This event has nothing to do")
+                {
+                    Asset = definition,
+                    Detail = "Every option is a Decline, so the Action button opens a window whose only exit "
+                           + "is walking away.",
+                    Suggestion = "Add a StatCheck or Guaranteed option, or delete the event."
+                });
+            }
+            else if (audit.AnyStatCheck && !audit.AnyDownside)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Event, subject,
+                    "This gamble has no downside")
+                {
+                    Asset = definition,
+                    Detail = "No outcome in any pool costs health, a consumable, an affliction or a woken "
+                           + "enemy, so taking the check is free. A risk-free gamble is a button.",
+                    Suggestion = "Give the failure pool a cost, or make the option Guaranteed and stop "
+                               + "presenting it as a risk."
+                });
+            }
+
+            if (audit.WorstDamageFraction > rules.MaxEventDamageFraction)
+            {
+                var severity = audit.WorstDamageFraction >= 1f
+                    ? BalanceSeverity.Warning
+                    : BalanceSeverity.Info;
+
+                report.Issues.Add(new BalanceIssue(severity, BalanceCategory.Event, subject,
+                    $"One outcome takes {audit.WorstDamageFraction:P0} of a hero's health bar")
+                {
+                    Asset = definition,
+                    Detail = $"{audit.WorstDamageWhere}; the ceiling is {rules.MaxEventDamageFraction:P0}. "
+                           + "RoomEventRunner clamps event damage to a floor of 1 HP, so past 100% the "
+                           + "authored number stops mattering and every failure reads the same.",
+                    Suggestion = "Lower the outcome's Power, or spread it over the party instead of the one "
+                               + "hero who reached in."
+                });
             }
         }
 

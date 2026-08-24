@@ -19,6 +19,7 @@ namespace Assets.Scripts.Balance
         public const string Party = "Party";
         public const string Enemy = "Enemy";
         public const string Level = "Level";
+        public const string Event = "Event";
         public const string Run = "Run";
         public const string Variety = "Variety";
         public const string Economy = "Economy";
