@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: CavernRoom
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.RoomSO
   Name: Cavern
-  Width: 4
-  Height: 4
+  Width: 5
+  Height: 5
   Color: {r: 0.35, g: 0.33, b: 0.3, a: 1}
   IsConnectorRoom: 0
   PossibleEvents:

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: SwampRoom
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.RoomSO
   Name: Sunken Swamp
-  Width: 3
-  Height: 4
+  Width: 4
+  Height: 5
   Color: {r: 0.18, g: 0.34, b: 0.22, a: 1}
   IsConnectorRoom: 0
   PossibleEvents:
