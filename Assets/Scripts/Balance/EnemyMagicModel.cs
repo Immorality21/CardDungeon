@@ -31,7 +31,7 @@ namespace Assets.Scripts.Balance
     /// <summary>
     /// Prices an enemy's <see cref="EnemySO.DrawableMagics"/> as offense, so the danger index and the
     /// attrition curve see the spells an enemy actually throws
-    /// (<see cref="EnemySO.MagicCastChance"/>) instead of measuring it as attack-only.
+    /// (its <c>CastMagic</c> actions) instead of measuring it as attack-only.
     ///
     /// <para>The arithmetic is the executors' arithmetic, deliberately: base Power scaled by the
     /// level's <see cref="LevelEnemyTuning.MagicPowerScaleFor(EnemySO)"/> exactly as
@@ -73,7 +73,9 @@ namespace Assets.Scripts.Balance
                 return profile;
             }
 
-            profile.CastChance = Mathf.Clamp01(enemy.MagicCastChance);
+            // Cast frequency is an authored action now, not a field: sum the share of turns the
+            // behaviour's CastMagic entries claim. EnemyBehaviorModel owns that arithmetic.
+            profile.CastChance = CastShareOf(enemy.ResolvedBehavior);
             float powerScale = LevelEnemyTuning.MagicPowerScaleFor(enemy, tuning);
 
             float totalWeight = 0f;
@@ -147,6 +149,16 @@ namespace Assets.Scripts.Balance
             }
 
             return total;
+        }
+
+        /// <summary>
+        /// Share of turns this behaviour spends casting. Reads the authored actions rather than a
+        /// per-enemy field, which is what <c>EnemySO.MagicCastChance</c> became.
+        /// </summary>
+        public static float CastShareOf(Assets.Scripts.Enemies.Behaviors.EnemyBehaviorSO behavior)
+        {
+            var profile = EnemyBehaviorModel.Profile(behavior, 1, 0f, 1f);
+            return Mathf.Clamp01(profile.CastShare);
         }
 
         /// <summary>Expected healing one cast returns to the enemy side, for reporting.</summary>

@@ -158,8 +158,14 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Speculatively runs an enemy's behavior against the current state to preview the
-        /// action it would take next. Behaviors are pure, so this has no side effects.
+        /// The action this enemy will take next, for the intent icon on its HP bar — or null when the
+        /// answer is not determined yet. Pure, so it has no side effects.
+        ///
+        /// <para>It reports **only** what is certain (see
+        /// <see cref="EnemyActionPlanner.PredictCertain"/>): a telegraph already in flight, or a
+        /// single ungated action that is the only thing the enemy can do. Authored behaviours are
+        /// probabilistic, and an intent icon that guesses wrong teaches the player to distrust the
+        /// telegraph, which is the one tell the fight depends on.</para>
         /// </summary>
         public EnemyActionType? PredictIntent(Enemy enemy)
         {
@@ -168,16 +174,20 @@ namespace Assets.Scripts.Rooms
                 return null;
             }
 
-            var behavior = EnemyBehaviorFactory.Get(enemy.Archetype);
+            var behavior = enemy.Behavior != null
+                ? enemy.Behavior
+                : EnemyBehaviorSO.BuiltInPreset(enemy.Archetype);
+
             var context = new EnemyCombatContext
             {
                 Heroes = GetAliveHeroes(_currentParty),
                 Allies = GetAliveEnemies().Where(u => !ReferenceEquals(u, enemy)).ToList(),
                 BuffTracker = BuffTracker,
-                SelfIsCharging = enemy.IsCharging,
-                SelfTurnCount = enemy.TurnsTaken
+                ChargingEntryIndex = enemy.ChargingEntryIndex,
+                SelfTurnCount = enemy.TurnsTaken,
+                DrawableMagics = enemy.DrawableMagics
             };
-            return behavior.Decide(enemy, context).Type;
+            return EnemyActionPlanner.PredictCertain(enemy, context, behavior);
         }
 
         /// <summary>Enemies in the current combat room that have a non-empty Draw list.</summary>
@@ -319,8 +329,7 @@ namespace Assets.Scripts.Rooms
                 {
                     // Fresh per-combat runtime state (cadence + charge) for behaviors.
                     enemy.TurnsTaken = 0;
-                    enemy.IsCharging = false;
-                    enemy.ChargeTarget = null;
+                    enemy.ClearCharge();
                     units.Add(enemy);
                 }
             }
@@ -627,22 +636,25 @@ namespace Assets.Scripts.Rooms
         private IEnumerator ExecuteEnemyTurn(ICombatUnit enemyUnit, Party party)
         {
             var enemy = enemyUnit as Enemy;
-            var archetype = enemy != null ? enemy.Archetype : EnemyArchetype.Aggressor;
-            var behavior = EnemyBehaviorFactory.Get(archetype);
+            var behavior = enemy != null && enemy.Behavior != null
+                ? enemy.Behavior
+                : EnemyBehaviorSO.BuiltInPreset(enemy != null ? enemy.Archetype : EnemyArchetype.Aggressor);
 
             var context = new EnemyCombatContext
             {
                 Heroes = GetAliveHeroes(party),
                 Allies = GetAliveEnemies().Where(u => u != enemyUnit).ToList(),
                 BuffTracker = BuffTracker,
-                SelfIsCharging = enemy != null && enemy.IsCharging,
-                SelfTurnCount = enemy != null ? enemy.TurnsTaken : 0
+                ChargingEntryIndex = enemy != null ? enemy.ChargingEntryIndex : EnemyActionPlanner.NoCharge,
+                SelfTurnCount = enemy != null ? enemy.TurnsTaken : 0,
+                DrawableMagics = enemy != null ? enemy.DrawableMagics : null
             };
 
-            // Casting sits *beside* the archetype, not inside it: roll first, and only consult the
-            // behavior when the roll misses. That keeps every existing archetype byte-for-byte the
-            // behavior it always was, and an enemy with MagicCastChance 0 never takes this branch.
-            var decision = TryPlanEnemyCast(enemy, enemyUnit, context) ?? behavior.Decide(enemyUnit, context);
+            // One authored list decides everything: gate, then priority, then weight. Casting is an
+            // entry in that list rather than a pre-roll around it, so the whole repertoire - swings,
+            // charges, heals, debuffs, the boss signature and spells - is chosen in one place.
+            var decision = EnemyActionPlanner.Plan(
+                enemyUnit, context, behavior, EnemyPlanRolls.Random(behavior.Actions.Count));
 
             switch (decision.Type)
             {
@@ -650,13 +662,13 @@ namespace Assets.Scripts.Rooms
                     yield return ExecuteEnemyCast(enemyUnit, enemy, decision, party);
                     break;
                 case EnemyActionType.ChargeHeavy:
-                    yield return ExecuteEnemyCharge(enemy, decision.Target);
+                    yield return ExecuteEnemyCharge(enemy, decision.Target, decision.EntryIndex);
                     break;
                 case EnemyActionType.HeavyAttack:
                     yield return ExecuteEnemyHeavyAttack(enemyUnit, enemy, party, decision.Multiplier);
                     break;
                 case EnemyActionType.ChargeAoe:
-                    yield return ExecuteEnemyChargeAoe(enemy);
+                    yield return ExecuteEnemyChargeAoe(enemy, decision.EntryIndex);
                     break;
                 case EnemyActionType.AoeAttack:
                     yield return ExecuteEnemyAoeAttack(enemyUnit, enemy, party, decision.Multiplier);
@@ -678,46 +690,6 @@ namespace Assets.Scripts.Rooms
             {
                 enemy.TurnsTaken++;
             }
-        }
-
-        /// <summary>
-        /// Rolls this enemy's <see cref="Enemy.MagicCastChance"/> and, on a hit, returns the cast to
-        /// perform. Null means "no cast this turn" and the archetype behavior decides as usual.
-        /// </summary>
-        private EnemyDecision TryPlanEnemyCast(Enemy enemy, ICombatUnit enemyUnit, EnemyCombatContext context)
-        {
-            if (enemy == null)
-            {
-                return null;
-            }
-
-            // Random.Range over Random.value deliberately - see the project's Unity gotchas.
-            if (!EnemyMagicPlan.ShouldCast(
-                    enemy.MagicCastChance, enemy.DrawableMagics, context.SelfIsCharging, UnityEngine.Random.Range(0f, 1f)))
-            {
-                return null;
-            }
-
-            var magic = EnemyMagicPlan.Select(enemy.DrawableMagics, UnityEngine.Random.Range(0f, 1f));
-            if (magic == null)
-            {
-                return null;
-            }
-
-            var targets = EnemyMagicPlan.ResolveTargets(
-                magic, enemyUnit, context.Heroes, context.Allies, UnityEngine.Random.Range(0f, 1f));
-            if (targets.Count == 0)
-            {
-                return null;
-            }
-
-            return new EnemyDecision
-            {
-                Type = EnemyActionType.CastMagic,
-                Magic = magic,
-                MagicTargets = targets,
-                Target = targets[0]
-            };
         }
 
         /// <summary>
@@ -793,15 +765,14 @@ namespace Assets.Scripts.Rooms
             ResolveHeroDamaged(target);
         }
 
-        private IEnumerator ExecuteEnemyCharge(Enemy enemy, ICombatUnit target)
+        private IEnumerator ExecuteEnemyCharge(Enemy enemy, ICombatUnit target, int entryIndex)
         {
             if (enemy == null)
             {
                 yield break;
             }
 
-            enemy.IsCharging = true;
-            enemy.ChargeTarget = target;
+            enemy.BeginCharge(entryIndex, target);
             SetChargingVisual(enemy, true);
             ShowFloatingLabel(enemy.Transform.position, "Charging!", new Color(1f, 0.5f, 0.2f));
             _lastTurnLog = $"{enemy.DisplayName} is winding up a heavy blow!";
@@ -818,8 +789,7 @@ namespace Assets.Scripts.Rooms
 
             if (enemy != null)
             {
-                enemy.IsCharging = false;
-                enemy.ChargeTarget = null;
+                enemy.ClearCharge();
                 SetChargingVisual(enemy, false);
             }
 
@@ -833,15 +803,14 @@ namespace Assets.Scripts.Rooms
             ResolveHeroDamaged(target);
         }
 
-        private IEnumerator ExecuteEnemyChargeAoe(Enemy enemy)
+        private IEnumerator ExecuteEnemyChargeAoe(Enemy enemy, int entryIndex)
         {
             if (enemy == null)
             {
                 yield break;
             }
 
-            enemy.IsCharging = true;
-            enemy.ChargeTarget = null;
+            enemy.BeginCharge(entryIndex, null);
             SetChargingVisual(enemy, true);
             CombatAudio.Play(CombatSound.BossSignature);
             ShowFloatingLabel(enemy.Transform.position, "Channeling!", new Color(1f, 0.35f, 0.35f));
@@ -866,8 +835,7 @@ namespace Assets.Scripts.Rooms
         {
             if (enemy != null)
             {
-                enemy.IsCharging = false;
-                enemy.ChargeTarget = null;
+                enemy.ClearCharge();
                 SetChargingVisual(enemy, false);
             }
 

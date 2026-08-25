@@ -10,7 +10,20 @@ namespace Assets.Scripts.Enemies.Behaviors
         public List<ICombatUnit> Heroes;        // living heroes (attack/debuff targets)
         public List<ICombatUnit> Allies;        // living enemy allies, excluding self
         public CombatBuffTracker BuffTracker;
-        public bool SelfIsCharging;             // whether this enemy is mid-charge
-        public int SelfTurnCount;               // turns this enemy has already taken (cadence-based behaviors)
+        public int SelfTurnCount;               // turns this enemy has already taken (cadence conditions)
+
+        /// <summary>
+        /// Index into the behaviour's <c>Actions</c> of the telegraphed action currently in flight, or
+        /// <see cref="EnemyActionPlanner.NoCharge"/>. This replaced a bare "is charging" bool: with
+        /// telegraphs authored per action rather than fixed per archetype, knowing *that* an enemy is
+        /// winding up is no longer enough to know what it is about to deliver.
+        /// </summary>
+        public int ChargingEntryIndex = EnemyActionPlanner.NoCharge;
+
+        /// <summary>What this enemy can cast (its own Draw list) — see EnemyMagicPlan.</summary>
+        public List<DrawableMagicEntry> DrawableMagics;
+
+        /// <summary>True while a telegraphed action is in flight.</summary>
+        public bool SelfIsCharging => ChargingEntryIndex >= 0;
     }
 }

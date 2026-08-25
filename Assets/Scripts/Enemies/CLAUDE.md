@@ -11,12 +11,11 @@
 - **EnemySO** (ScriptableObject, `SO/Enemy`, assets in `Assets/ScriptableObjects/Enemies/`): the **definition of an enemy type** — `DisplayName`, `Sprite`, base stats (`Attack`/`Defense`/`Health`/`Agility`), **kill rewards** (`XpReward`, `GoldReward`), `Archetype`, `DrawableMagics` (the **Draw list**), `Resistances`, `LootItem`. This is the single source of truth for what an enemy *is*. On death (`CombatManager.HandleEnemyDeath`): loot drops, `XpReward` is split evenly across the fielded party immediately (`Party.DistributeXp`), and `GoldReward` accumulates into `MetaProgressManager` pending gold (banked only on level-clear — see the Progression guide).
 - **One shared Enemy prefab** lives at `Assets/Resources/Enemy.prefab`. `EnemyManager` loads it once (`Resources.Load<GameObject>("Enemy")`) and stamps each instance with an `EnemySO` plus the level's tuning via `Enemy.Initialize(so, tuning)` — so there is exactly one prefab, and the SO drives the sprite/stats/name. (The old per-type `EyeBall.prefab` under `Assets/Prefabs/` is no longer referenced.)
 - **EnemySpawnEntry** (in `RoomSO.EnemySpawnTable`): now just `Enemy` (an `EnemySO`) + the per-room roll params `SpawnChance` and `EvaluationCount`. All identity/stats moved to the `EnemySO`.
-- **DrawableMagicEntry**: one offering on an enemy's Draw list — a `MagicSO` plus the `Charges` (1–9) a successful draw grants. It is also the list the enemy **casts** from: `CastWeight` biases which entry, and casting never touches `Charges` (those are the player's grant only).
-- **EnemyMagicPlan**: the pure, roll-injected decision layer for enemy casting — whether to cast (`EnemySO.MagicCastChance`), which magic, and at whom. It sits **beside** the archetype behaviours, never inside them: `CombatManager.ExecuteEnemyTurn` rolls it first and only calls `IEnemyBehavior.Decide` when the roll misses, so no existing archetype changed. Two rules worth not breaking: a **charging** enemy never casts (its telegraph must land), and `MagicTargetType` is authored from the *player's* side, so for an enemy "enemy" means the hero side and "ally" means the other monsters. `EncounterSimulator` and `EnemyCastingTests` call the same functions.
-- **Spell power is the level's, not the asset's.** `LevelEnemyTuning.MagicPowerScaleFor` returns the level's `Difficulty` — the dial that scales the Strength a swing uses — and `CombatManager` passes it to `EffectResolver.Execute` as `powerScale`. An enemy with an absolute `Overrides` row is exempt, exactly as its stats are.
-- **Enemy casts do not touch the tag/combo layer.** Neither `MagicTagTracker` nor `ComboDetector` is passed, so a cast resolves its effects and nothing more — combos carry player discovery and upgrades. See `docs/NEXT_STEPS.md` §0e before changing that.
+- **DrawableMagicEntry**: one offering on an enemy's Draw list — a `MagicSO` plus the `Charges` (1–9) a successful draw grants. It is also what a `CastMagic` action draws from when it names no specific magic: `CastWeight` biases which entry, and casting never touches `Charges` (those are the player's grant only).
+- **EnemyMagicPlan**: the pure helpers a `CastMagic` action uses — which magic (weighted by `CastWeight`) and at whom. `MagicTargetType` is authored from the *player's* side, so for an enemy "enemy" means the hero side and "ally" means the other monsters (a single-ally cast picks the most wounded). Called by `EnemyActionPlanner`, covered by `EnemyCastingTests`.
+- **EnemyBehaviorSO** is an enemy's repertoire as data — see *Behaviors* below. `EnemySO.Behavior` points at one; `ResolvedBehavior` falls back to the built-in preset for `Archetype`, and `ArchetypeOf` reports the assigned behaviour's label so the two cannot drift.
 - **EnemyManager** spawns enemies into rooms (with optional manual-layout overrides) and tracks/cleans up live enemies. For each entry it instantiates the shared prefab and calls `Enemy.Initialize(entry.Enemy)`.
-- **Enemy** implements `ICombatUnit` (see the Combat guide). `Initialize(EnemySO)` applies the definition (sprite, `Stats`, archetype, Draw list, resistances, loot, and `gameObject.name`); `DisplayName` comes from `Definition.DisplayName` (so it's the SO's name, **not** "Prefab(Clone)"). `GetEffectiveAttackPower()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Runtime charge state (`IsCharging`, `ChargeTarget`) is not persisted.
+- **Enemy** implements `ICombatUnit` (see the Combat guide). `Initialize(EnemySO)` applies the definition (sprite, `Stats`, archetype, Draw list, resistances, loot, and `gameObject.name`); `DisplayName` comes from `Definition.DisplayName` (so it's the SO's name, **not** "Prefab(Clone)"). `GetEffectiveAttackPower()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Runtime charge state (`ChargingEntryIndex`, `ChargeTarget`) is not persisted.
 
 ## Per-level tuning (`LevelEnemyTuning`)
 
@@ -48,22 +47,110 @@ template as authored**, which is what free-play in the scene gets.
 - **A boss must not ride the trash dial.** Scaling Mirefather's 74 HP by the level's multiplier made a
   21-turn slog. Every boss gets an `Overrides` row pinning it absolutely.
 - **`Difficulty` is capped in practice by hero durability, not by taste.** It scales Strength, and
-  `BalanceRules.MinHitsToKillHero` is 3 - so past roughly 1.5 the squishiest hero drops below the
-  floor. Buy the rest of a level's difficulty with a `MaxHealth` scale: danger goes as
-  `Difficulty^2 x healthScale` while time-to-kill only goes as `Difficulty x healthScale`, so
-  Difficulty is the better value per turn until it hits that cap.
+  `BalanceRules.MinHitsToKillHero` is 3, so past roughly **2.75** the squishiest hero drops below the
+  floor - measured, by pushing a level to 3.55 and watching the Warrior fall to 2 hits.
+- ~~Buy the rest of a level's difficulty with a `MaxHealth` scale.~~ **Do not.** That advice was
+  wrong and every level in the project followed it, which is what produced enemies that were
+  simultaneously *"no threat at all"* and *"takes too long to kill"*: health-only scaling buys danger
+  out of fight length. Escalate with `Difficulty` and leave the health scales alone. Full reasoning in
+  **`docs/BALANCING.md`**.
 
-## Behaviors (`Behaviors/`)
+## Behaviors (`Behaviors/`) — authored data, not classes
 
-Enemy turns are driven by an `EnemyArchetype` → `IEnemyBehavior` strategy (factory: `EnemyBehaviorFactory`), mirroring the card `IEffectExecutor` pattern. A behavior's `Decide(self, context)` is a **pure** function returning an `EnemyDecision` (action type + target + params); `CombatManager` executes it (see the Rooms guide). Pure deciders are unit-tested with `MockCombatUnit` (`EnemyBehaviorTests`).
+**An enemy's repertoire is an `EnemyBehaviorSO`.** Until 2026-08-25 an `EnemyArchetype` selected one
+of five hard-coded `IEnemyBehavior` classes whose every number was a compile-time constant, so two
+enemies sharing an archetype were the same fight with different stats and a new kind of behaviour
+meant writing a class. Those classes are **gone**; the archetype is now only a label.
 
-- **Aggressor** — attacks a random living hero.
-- **Bruiser** — spends a turn **charging** (telegraphed: red tint + "Charging!" + log), then hits ~2.5× the next turn. The one true multi-turn tell the player can react to.
-- **Healer** — heals the most-wounded ally (itself included); attacks if none are hurt. High-priority target.
-- **Debuffer** — weakens a hero's Attack (skips heroes already weakened); attacks otherwise.
-- **Boss** — the run's climax fight. Cycles basic attacks with a telegraphed **signature** AoE (`ChargeAoe` → `AoeAttack`, hits the whole party, charged a turn ahead like the Bruiser) and **enrages** below 30% HP (harder basic hits + a tighter signature cadence). Pure decider; cadence comes from `EnemyCombatContext.SelfTurnCount` (sourced from `Enemy.TurnsTaken`, reset per combat). Tuning constants live on `BossBehavior`. Covered by `BossBehaviorTests`.
+```
+EnemyBehaviorSO
+  DisplayName, Archetype (label only)
+  Actions: List<EnemyActionEntry>
 
-Tuning (heal amount, heavy multiplier, debuff magnitude/duration) lives as constants in each behavior. Default archetype is `Aggressor`, so untouched spawn entries behave as before.
+EnemyActionEntry
+  Kind          Attack | HeavyAttack | AoeAttack | Heal | Debuff | CastMagic
+  Priority      higher tiers pre-empt lower ones entirely
+  Weight        relative likelihood within a tier
+  ChanceGate    independent chance the entry is considered at all (0 = no gate)
+  Telegraphed   spend a turn winding up, then deliver (Heavy/Aoe only)
+  Multiplier / Power / Duration / TargetStat / Magic
+  Conditions    every one must hold
+```
+
+**Selection order is deliver, gate, priority, weight** (`EnemyActionPlanner.Plan`, pure and
+roll-injected so combat, `EncounterSimulator` and the tests decide identically):
+
+1. A telegraph already in flight **always** delivers. The player has been shown a wind-up, and
+   swallowing it would make the telegraph a lie.
+2. An entry is eligible only if every condition holds, its `ChanceGate` roll passes, **and the action
+   has somewhere to land** — a Heal with nobody wounded must not win a turn and then do nothing.
+3. The highest eligible `Priority` takes the turn outright.
+4. `Weight` picks between entries tied at that priority. Nothing eligible means a plain swing, so a
+   half-authored behaviour never wastes a turn.
+
+Two knobs rather than one because the old behaviours needed both: a boss is priority logic ("cadence
+up, so wind up the signature, else swing") while casting against attacking is a weighted coin flip.
+
+**A telegraphed action is one entry, not two.** `Enemy.ChargingEntryIndex` (was a bare `IsCharging`
+bool) records *which* action is in flight — with telegraphs authored per action, knowing that an enemy
+is winding up no longer says what it is about to deliver.
+
+**Conditions are a closed enum on purpose**: `SelfHealthBelow/Above`, `AllyWounded`,
+`HeroMissingDebuff`, `EveryNthTurn`, `NotFirstTurn`. `BalanceMath` has to price a behaviour in closed
+form — every danger and attrition number in the project comes from that — so a condition the analyzer
+cannot reason about would silently opt an enemy out of being measured. **Adding a member means
+teaching `EnemyBehaviorModel` its expected occupancy in the same change.**
+
+### Presets — duplicate one to make a variant
+
+`Assets/ScriptableObjects/Enemies/Behaviors/` holds `PresetAggressor`, `PresetBruiser`,
+`PresetHealer`, `PresetDebuffer`, `PresetBoss` — code-built from `EnemyBehaviorSO.PresetActions` and
+reproducing the original five archetypes **exactly**. Copy one and edit it; do not start from an empty
+list. `EnemyBehaviorSO.BuiltInPreset` is the same list in code, cached per archetype, and is what an
+enemy with no `Behavior` assigned falls back to — so nothing breaks half-way through authoring.
+
+The presets are covered by `EnemyBehaviorTests` and `BossBehaviorTests`, whose assertions are the
+*unchanged* ones from when each archetype was a class: 2.5x heavy, heal for 8, debuff 3 for 3 turns,
+signature every 3 turns at x1.6, enrage below 30% tightening the cadence to 2 and blows to x1.5.
+Those tests are the proof the migration changed nothing.
+
+Each enemy also has its own `Behavior<Enemy>` asset — the archetype preset plus its `CastMagic`
+action. That is the "one per enemy, duplicated from a preset" workflow in practice.
+
+### Casting is an action, not a special case
+
+`EnemySO.MagicCastChance` is **gone**. Cast frequency is a `CastMagic` entry with a `ChanceGate`
+(`EnemyBehaviorSO.CastFromDrawList`), at a priority above the situational actions because that is what
+the old pre-roll did — it was consulted before the behaviour, so a 20% caster cast 20% of the time even
+with a wounded ally to mend.
+
+- **Leave `Magic` empty** to draw from this enemy's own `DrawableMagics`, weighted by each entry's
+  `CastWeight` — so what it throws is what you can steal from it. Name a magic for a signature the
+  player cannot obtain.
+- **Charges are never spent.** `DrawableMagicEntry.Charges` is the player's Draw grant.
+- **`ChanceGate` 0 means "no gate", not "never"** — an enemy that should not cast simply has no
+  `CastMagic` action. `CastFromDrawList` throws on a 0 chance rather than authoring that trap.
+- **Spell power is the level's**: `LevelEnemyTuning.MagicPowerScaleFor` returns the level's
+  `Difficulty`, passed to `EffectResolver.Execute` as `powerScale`. An enemy with an absolute
+  `Overrides` row is exempt, exactly as its stats are — which is why boss casts read weaker than boss
+  swings (tracked in `docs/NEXT_STEPS.md`).
+- **No tags, no combos.** Enemy casts pass neither `MagicTagTracker` nor `ComboDetector`, so a cast
+  resolves its effects and nothing more; combos carry player-facing discovery and upgrades.
+
+### The intent icon only reports what is certain
+
+`CombatManager.PredictIntent` calls `EnemyActionPlanner.PredictCertain`, which returns **null** unless
+the answer is determined: a telegraph in flight, or a single ungated action that is the only thing the
+enemy can do. Behaviours used to be deterministic so a preview was simply the decision; they are
+probabilistic now, and an intent icon that guesses wrong teaches the player to distrust the telegraph —
+the one tell the fight depends on.
+
+### Inspector
+
+`EnemyBehaviorSOEditor` draws only the fields each `Kind` actually reads, and lists the actions in the
+order the planner resolves them. It also flags the two mistakes that make an action *dead* rather than
+mistuned: an ungated, unconditional entry in the top tier (nothing below it can ever run), and
+`Telegraphed` on a kind that cannot wind up.
 
 ## Bosses
 

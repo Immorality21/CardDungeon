@@ -54,7 +54,8 @@ why the analyzer's own suggestion says a hero-HP change fixes many enemies at on
 | `EnemySpawnEntry.EvaluationCount` | `RoomSO` | Multiplies the *worst-case* tail far faster than the expectation. Two entries at 2 evaluations = 4 enemies on a full roll. First thing to check on any *unwinnable spawn roll* finding. |
 | `RoomsToGenerate` / room pool | `LevelDefinitionSO` | Enemy count — the only lever on per-enemy meaningfulness (§1, consequence 2). Level design, so change it deliberately. |
 | Hero `BaseStats[MaxHealth]` | `HeroSO` | Raises the ceiling on every enemy's Strength at once (§1, consequence 4). |
-| `EnemySO.MagicCastChance` | `EnemySO` | Share of turns the enemy casts from its own Draw list instead of acting on its archetype. Raises danger **without** raising time-to-kill, which is the one lever that does — see §5. |
+| `CastMagic` action's `ChanceGate` | `EnemyBehaviorSO` | Share of turns the enemy casts instead of taking another action. Raises danger **without** raising time-to-kill, which is the one lever that does — see §5. |
+| Any other action's `Priority` / `Weight` | `EnemyBehaviorSO` | The whole repertoire is authored now, so "what this enemy does" is a tuning lever rather than a code path. `EnemyBehaviorModel` prices it. |
 | `DrawableMagicEntry.CastWeight` | `EnemySO` | Which of its spells it reaches for. All-zero weights mean uniform. |
 
 **Difficulty vs. a MaxHealth scale, concretely:** `Difficulty 2.0` and `Difficulty 1.0 +
@@ -159,9 +160,9 @@ Measured, on the campaign as authored: a uniform 15% cast chance took findings f
 3**, closing two *no threat at all* warnings that no amount of `Difficulty` could close without
 breaking hero durability or fight length. A per-enemy set did the same and read better.
 
-**Measure the spell before choosing the chance.** Set every enemy to `MagicCastChance = 1` and read
-`EnemyMetrics.ExpectedCastDamage` against `AverageDamagePerHit`. That one table is the whole design
-decision, and it was full of surprises:
+**Measure the spell before choosing the chance.** Point every enemy at a behaviour whose only
+action is an ungated `CastMagic`, and read `EnemyMetrics.ExpectedCastDamage` against
+`AverageDamagePerHit`. That one table is the whole design decision, and it was full of surprises:
 
 | | cast | swing | read |
 |---|---|---|---|
@@ -216,6 +217,30 @@ Both are real and both are now tracked in `NEXT_STEPS.md` §0d, because they dis
   0.5 factor for Healer is the existing hand-tuned workaround for the same gap.
 
 Until those are fixed, treat a support-casting enemy's measured danger as a floor, not a value.
+
+## 5b. Behaviours became data — what that changed for tuning
+
+Shipped 2026-08-25, after §5. An enemy's repertoire is an authored `EnemyBehaviorSO` action list
+instead of one of five hard-coded classes (details in `Assets/Scripts/Enemies/CLAUDE.md`). Three things
+matter for a tuning pass:
+
+- **`AverageOffenseMultiplier` is a real expectation now, not a constant per archetype.** It reads the
+  action list, so "make this enemy hit a bit more often" is a tuning lever rather than a code change.
+  The presets reproduce four of the five old constants exactly and the Boss lands +3.9% (it prices
+  enrage, which the old model ignored) — the project-wide analyzer diff was **zero**.
+- **Cast frequency is a `ChanceGate` on a `CastMagic` action.** The measured cast shares come out a
+  little *below* what you author for enemies that telegraph, and that is correct: a Bruiser or Boss
+  spends extra turns delivering wind-ups, so casting is a smaller share of clock turns than of
+  decision turns (Stone Sentinel authored 10% reads 5%; the Warden's 15% reads 12%).
+- **Occupancy assumptions are now explicit and tunable.** `EnemyBehaviorModel.AllyWoundedOccupancy`
+  (0.5) and `DebuffOpenOccupancy` (0.15) exist to reproduce the old Healer 0.5 and Debuffer 0.85
+  constants; `LowHealthOccupancy` (0.25) does not, and is the honest addition. If a healer or debuffer
+  ever reads wrong, those three numbers are the first place to look — they are assumptions, not facts.
+
+**A trap the rework introduced:** `ChanceGate` **0 means "no gate"**, not "never". An action you do not
+want simply should not be in the list. `CastFromDrawList` throws on a 0 chance for exactly this reason,
+and the inspector warns when an ungated, unconditional entry sits in the top tier — because then
+nothing below it can ever run.
 
 ## 6. Standing traps
 

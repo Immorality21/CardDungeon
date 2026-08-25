@@ -36,7 +36,7 @@ Still to design: `PowerMode` from `docs/ELEMENTAL_PLAN.md` (base-power / flat / 
 - **Flow** (in `CombatManager`, see the Rooms guide): a hero turn offers Attack / **Magic** / **Draw** / Skip.
   - **Draw** → pick an enemy → pick which magic from its Draw list (`Enemy.DrawableMagics`; skipped if it offers only one) → magic goes into the first empty slot (or the player picks a slot to overwrite) at full charges. Draw consumes the turn.
   - **Magic (cast)** → pick a charged slot → pick target(s) → resolves through the shared effect engine, then spends one charge.
-- **Enemies cast from their own Draw list too.** The same `MagicSO` the player can extract is what the enemy throws — `EnemySO.MagicCastChance` per turn, resolved through this same `EffectResolver`. It spends **no** charges, applies **no** upgrade bonus or level (so `UnlockLevel > 0` effects are skipped), and passes **no** tag tracker or combo detector. Owned by `EnemyMagicPlan`; see `Assets/Scripts/Enemies/CLAUDE.md`.
+- **Enemies cast from their own Draw list too.** The same `MagicSO` the player can extract is what the enemy throws, via a `CastMagic` action on its `EnemyBehaviorSO`, resolved through this same `EffectResolver`. It spends **no** charges, applies **no** upgrade bonus or level (so `UnlockLevel > 0` effects are skipped), and passes **no** tag tracker or combo detector. See `Assets/Scripts/Enemies/CLAUDE.md`.
 
 ## Discovery & upgrades
 

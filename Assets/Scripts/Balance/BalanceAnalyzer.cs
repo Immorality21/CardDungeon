@@ -1080,7 +1080,7 @@ namespace Assets.Scripts.Balance
 
         private static void EvaluateEnemies(BalanceReport report, BalanceRulesSO rules)
         {
-            // MagicCastChance is authored per *asset* while stats are authored per *level*, so the
+            // A behaviour is authored per *asset* while stats are authored per *level*, so the
             // findings about it that are not level-specific must be reported once, not once per
             // placement - otherwise one un-authored enemy in ten levels is ten identical findings.
             var castChanceReported = new HashSet<EnemySO>();
@@ -1196,10 +1196,10 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// Whether this placement's <see cref="EnemySO.MagicCastChance"/> is doing anything useful.
-        /// Casting is the one part of an enemy's offense that is authored per *asset* while its stats
-        /// are authored per *level*, so it is easy to leave in a state where the spells exist and
-        /// never fire, or fire so often the archetype stops mattering.
+        /// Whether this placement's <c>CastMagic</c> actions are doing anything useful. Casting is
+        /// authored on the enemy's behaviour while its stats come from the level, so it is easy to
+        /// leave in a state where the spells exist and never fire, or fire so often the rest of the
+        /// repertoire stops mattering.
         /// </summary>
         private static void EvaluateEnemyCasting(
             EnemyMetrics metrics, BalanceReport report, BalanceRulesSO rules, HashSet<EnemySO> alreadyReported)
@@ -1223,10 +1223,11 @@ namespace Assets.Scripts.Balance
                     $"{metrics.Name} never casts the magic it carries")
                 {
                     Asset = metrics.Definition,
-                    Detail = $"It offers {metrics.DrawableCount} magic(s) on its Draw list but MagicCastChance is 0, "
-                           + "so the spells are player supply only and the enemy itself does nothing with them.",
-                    Suggestion = "Set EnemySO.MagicCastChance above 0 to let it cast, or leave it at 0 deliberately "
-                               + "if this enemy is meant to be a pure Draw source."
+                    Detail = $"It offers {metrics.DrawableCount} magic(s) on its Draw list but its behaviour "
+                           + "has no CastMagic action, so the spells are player supply only and the enemy "
+                           + "itself does nothing with them.",
+                    Suggestion = "Add a CastMagic action to its EnemyBehavior (EnemyBehaviorSO.CastFromDrawList "
+                               + "is the shape), or leave it out deliberately if this enemy is a pure Draw source."
                 });
                 return;
             }
@@ -1237,10 +1238,10 @@ namespace Assets.Scripts.Balance
                     $"{metrics.Name} casts {metrics.MagicCastChance:0%} of its turns, so its archetype barely acts")
                 {
                     Asset = metrics.Definition,
-                    Detail = $"Above {rules.MaxEnemyCastChance:0%} the {metrics.Archetype} repertoire - charges, "
-                           + "heavies, heals, the boss signature - is what the player stops seeing. The archetype is "
-                           + "the enemy's identity; casting is meant to punctuate it.",
-                    Suggestion = $"Lower EnemySO.MagicCastChance toward {rules.MaxEnemyCastChance:0.00}."
+                    Detail = $"Above {rules.MaxEnemyCastChance:0%} the rest of the repertoire - charges, heavies, "
+                           + "heals, the boss signature - is what the player stops seeing. Those actions are the "
+                           + "enemy's identity; casting is meant to punctuate them.",
+                    Suggestion = $"Lower the CastMagic action's ChanceGate toward {rules.MaxEnemyCastChance:0.00}."
                 });
             }
 
@@ -1261,7 +1262,7 @@ namespace Assets.Scripts.Balance
                            + $"({(metrics.Tuning != null ? metrics.Tuning.Difficulty : 1f):0.00}), and a boss on an "
                            + "absolute Overrides row deliberately does not scale at all.",
                     Suggestion = "Raise the magic's authored Power, give the effect a ScalingStat the enemy actually "
-                               + "has, or drop MagicCastChance so it leans on its attack."
+                               + "has, or lower its CastMagic ChanceGate so it leans on its attack."
                 });
             }
         }

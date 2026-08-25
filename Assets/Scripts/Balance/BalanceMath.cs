@@ -144,38 +144,28 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static float AverageOffenseMultiplier(EnemyArchetype archetype, int partySize)
         {
-            int party = Mathf.Max(1, partySize);
+            // Compatibility shim: an archetype no longer *is* a behaviour, so this prices the
+            // built-in preset for it. Callers that have the real enemy should use the overload below,
+            // which reads that enemy's authored actions.
+            return AverageOffenseMultiplier(
+                EnemyBehaviorSO.BuiltInPreset(archetype), partySize, 0f, 1f);
+        }
 
-            switch (archetype)
-            {
-                case EnemyArchetype.Bruiser:
-                    // One dead charge turn, then one heavy: averaged over the two-turn cycle.
-                    return BruiserBehavior.HeavyMultiplier / 2f;
-
-                case EnemyArchetype.Healer:
-                    // Spends most turns healing rather than attacking; it buys time rather than
-                    // dealing damage. Its real cost to the player is the extra turns it adds.
-                    return 0.5f;
-
-                case EnemyArchetype.Debuffer:
-                    // Opens with a debuff, then attacks — and the Attack debuff eats into party
-                    // output, which shows up separately in the simulation.
-                    return 0.85f;
-
-                case EnemyArchetype.Boss:
-                {
-                    // One full signature cycle: (interval - 1) plain attacks, one dead charge turn,
-                    // then a party-wide signature that hits every living hero.
-                    int interval = BossBehavior.SignatureInterval;
-                    float cycleTurns = interval + 1f;
-                    float plainTurns = interval - 1f;
-                    float signature = BossBehavior.SignatureMultiplier * party;
-                    return (plainTurns + signature) / cycleTurns;
-                }
-
-                default:
-                    return 1f;
-            }
+        /// <summary>
+        /// Expected damage per turn as a multiple of one ordinary swing, from the enemy's authored
+        /// action list. Replaces the old switch over <see cref="EnemyArchetype"/> that returned one
+        /// constant per archetype — see <see cref="EnemyBehaviorModel"/> for the occupancy
+        /// assumptions behind the conditional entries.
+        /// </summary>
+        /// <param name="castMultiplier">
+        /// Expected damage of one cast in the same multiples-of-a-swing currency, so casting folds
+        /// into this one number instead of being blended on afterwards.
+        /// </param>
+        public static float AverageOffenseMultiplier(
+            EnemyBehaviorSO behavior, int partySize, float castMultiplier, float basicHit)
+        {
+            var profile = EnemyBehaviorModel.Profile(behavior, partySize, castMultiplier, basicHit);
+            return profile.OffenseMultiplier;
         }
 
         /// <summary>Damage a unit lands per tick against a group (its per-turn output x its turn rate).</summary>
@@ -186,26 +176,29 @@ namespace Assets.Scripts.Balance
                 return 0f;
             }
 
-            float multiplier = attacker.IsHero
-                ? 1f
-                : AverageOffenseMultiplier(attacker.Archetype, opposingCount);
+            float basicHit = AverageDamageAgainstGroup(
+                attacker.GetEffectiveAttackPower(), targets, attacker.AttackDamageType, 1f, attacker);
 
-            float perTurn = AverageDamageAgainstGroup(
-                attacker.GetEffectiveAttackPower(), targets, attacker.AttackDamageType, 1f, attacker) * multiplier;
-
-            // An enemy that casts is not attacking that turn, so the two are blended by the cast
-            // chance rather than added. Enemies with MagicCastChance 0 - every enemy before the
-            // field existed - take the early-out and read exactly as they did.
-            if (!attacker.IsHero && attacker.MagicCastChance > 0f)
+            if (attacker.IsHero)
             {
-                var cast = EnemyMagicModel.Profile(attacker.Definition, attacker.Tuning, attacker, targets);
-                if (cast.Casts)
-                {
-                    perTurn = (1f - cast.CastChance) * perTurn + cast.CastChance * cast.ExpectedDamage;
-                }
+                return basicHit * TurnsPerTick(attacker);
             }
 
-            return perTurn * TurnsPerTick(attacker);
+            // Everything the enemy can do - swings, telegraphed heavies, party-wide signatures, and
+            // its own casts - is priced as one expectation over its authored actions. Casting used to
+            // be blended on after this multiplier, in two places that had to be kept in step; it is
+            // inside the multiplier now.
+            float castMultiplier = 0f;
+            if (basicHit > 0f)
+            {
+                var cast = EnemyMagicModel.Profile(attacker.Definition, attacker.Tuning, attacker, targets);
+                castMultiplier = cast.ExpectedDamage / basicHit;
+            }
+
+            float multiplier = AverageOffenseMultiplier(
+                attacker.Behavior, opposingCount, castMultiplier, basicHit);
+
+            return basicHit * multiplier * TurnsPerTick(attacker);
         }
 
         /// <summary>Total damage per tick a whole side lands on the other.</summary>

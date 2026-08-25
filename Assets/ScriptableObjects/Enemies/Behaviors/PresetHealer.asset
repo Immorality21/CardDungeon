@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3c2fba8298ea4bbe2d1f705988216, type: 3}
+  m_Name: PresetHealer
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.Behaviors.EnemyBehaviorSO
+  DisplayName: Healer (preset)
+  Archetype: 2
+  Actions:
+  - Label: Mend an ally
+    Kind: 3
+    Priority: 10
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 0
+    Multiplier: 1
+    Power: 8
+    Duration: 3
+    TargetStat: 1
+    Magic: {fileID: 0}
+    Conditions:
+    - Kind: 3
+      Value: 0
+      Stat: 1
+  - Label: Attack
+    Kind: 0
+    Priority: 0
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 0
+    Multiplier: 1
+    Power: 0
+    Duration: 3
+    TargetStat: 1
+    Magic: {fileID: 0}
+    Conditions: []

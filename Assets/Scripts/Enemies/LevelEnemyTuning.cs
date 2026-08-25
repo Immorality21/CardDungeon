@@ -172,8 +172,8 @@ namespace Assets.Scripts.Enemies
         }
 
         /// <summary>
-        /// Multiplier this level applies to the base <c>Power</c> of a spell this enemy casts
-        /// (<see cref="EnemySO.MagicCastChance"/>), so its magic escalates across the campaign the
+        /// Multiplier this level applies to the base <c>Power</c> of a spell this enemy casts (from a
+        /// <c>CastMagic</c> action on its behaviour), so its magic escalates across the campaign the
         /// same way its attack does.
         ///
         /// <para>It is <see cref="Difficulty"/>, because that is the dial that scales Strength — the

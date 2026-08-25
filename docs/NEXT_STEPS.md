@@ -416,42 +416,60 @@ is the map screen, and clearing a run's final level banks its key in
   Fireball x3 into slot 0. *(Still open: nothing in the hub shows the player what their heroes are
   carrying before a run starts.)*
 
-### 0d. Enemy archetypes need real authoring depth — *the next thing to build here*
+### 0d. Enemy archetypes are authored data — ✅ shipped 2026-08-25
 
-**Enemies now cast** (shipped 2026-08-25, see below), but their *non-magic* repertoire is still
-chosen by a single enum field. `EnemyArchetype` has five members, `EnemyBehaviorFactory` maps each to
-one hard-coded `IEnemyBehavior`, and every number those behaviours use is a **compile-time constant**:
-`HealerBehavior.HealPower = 8`, `DebufferBehavior.DebuffAmount = 3` / `DebuffDuration = 3` on
-`StatType.Strength`, `BruiserBehavior.HeavyMultiplier`, `BossBehavior.SignatureInterval` /
-`SignatureMultiplier`. A designer cannot change *any* of that from an asset. Two enemies with the
-same archetype are the same fight with different stats, and authoring a new kind of enemy behaviour
-means writing a class.
+**An enemy's repertoire is an `EnemyBehaviorSO` now.** The five hard-coded `IEnemyBehavior` classes
+are deleted. Every number they held as a compile-time constant — `HealerBehavior.HealPower = 8`,
+`DebufferBehavior.DebuffAmount = 3` on `StatType.Strength`, `BruiserBehavior.HeavyMultiplier = 2.5`,
+`BossBehavior.SignatureInterval` / `SignatureMultiplier` / the enrage threshold — is a field on an
+authored action. Full reference in **`Assets/Scripts/Enemies/CLAUDE.md`**.
 
-Concretely, today's ceiling: you cannot author a Healer that heals for a different amount, a Debuffer
-that debuffs Agility instead of Strength, a Bruiser whose heavy lands on a different cadence, an
-enemy that does two of these things, or an enemy whose special is anything not already in
-`EnemyActionType`.
+An action carries a `Kind` (Attack / HeavyAttack / AoeAttack / Heal / Debuff / CastMagic), a
+`Priority`, a `Weight`, a `ChanceGate`, a `Telegraphed` flag and a list of `Conditions`. Selection is
+**deliver, gate, priority, weight**: a telegraph in flight always lands, then gates roll, then the
+highest eligible priority takes the turn outright, then weight breaks ties inside that tier. Two knobs
+because the old behaviours needed both — a boss is priority logic, casting-vs-attacking is a weighted
+coin flip.
 
-**What this should become.** The shape worth aiming at is the one `RoomEventSO` already proves out in
-this project: behaviour as *authored data*, with a small pure resolver. Sketch —
+**Casting folded in, as you'd expect.** `EnemySO.MagicCastChance` is gone; cast frequency is a
+`CastMagic` action with a `ChanceGate`, and `DrawableMagicEntry.CastWeight` now only picks *which*
+spell when an action draws from the whole Draw list. One selection layer instead of a pre-roll wrapped
+around one.
 
-- A **weighted action list** on `EnemySO` (or a shared `EnemyBehaviorSO`): each entry an action kind,
-  its numbers (power, multiplier, duration, target stat), a weight or cadence, and optional
-  conditions (`self below X% health`, `an ally is wounded`, `every Nth turn`, `no debuff on target
-  yet`). The existing archetypes become authored presets rather than code paths.
-- The behaviour constants above move onto those entries, so `HealPower` is a number on an asset.
-- `EnemyMagicPlan` is the template to copy for the resolver: pure, roll-injected, shared by
-  `CombatManager`, `EncounterSimulator` and the tests, so the three can never drift.
-- **The balance model has to move with it.** `BalanceMath.AverageOffenseMultiplier` currently
-  switches on `EnemyArchetype` and returns a flat factor per archetype (0.5 for Healer, 0.85 for
-  Debuffer, a computed cycle for Bruiser/Boss). Authored actions make that a real expectation over
-  the action list instead of a hand-tuned constant — which would also fix the two model blind spots
-  the casting work exposed: **buff and debuff casts are priced as nothing**, and a Healer's healing
-  never enters the danger index (it is the whole reason `XP per unit of danger varies 4.9x` is still
-  a warning, since Bog Shaman reads as harmless).
+**The migration is provably behaviour-preserving**, which was the point of doing it that way:
 
-Keep `EnemyArchetype` as the coarse label — it drives nothing else and it is a useful shorthand in
-the analyzer's variety checks — but stop making it the only lever.
+- Five preset assets (`PresetAggressor` … `PresetBoss`) reproduce the original archetypes exactly, and
+  `EnemyBehaviorTests` / `BossBehaviorTests` keep their *original* assertions — 2.5× heavy, heal for 8,
+  debuff 3 for 3 turns, signature every 3 turns at ×1.6, enrage below 30% tightening the cadence to 2
+  and blows to ×1.5. Those tests are the proof.
+- `BalanceMath.AverageOffenseMultiplier` became a real expectation over the action list
+  (`EnemyBehaviorModel`) instead of one constant per archetype. It reproduces four of the five old
+  constants **exactly** (Aggressor 1.00, Bruiser 1.25, Healer 0.50, Debuffer 0.85); the Boss reads
+  **+3.9%** because it now prices enrage, which the old model ignored.
+- Project-wide analyzer diff: **0 critical / 3 warning / 20 info, before and after.** Suite **590/0**.
+
+**Also landed:** a custom `EnemyBehaviorSOEditor` that draws only the fields each action kind reads and
+lists actions in resolution order, flagging the two mistakes that make an action *dead* (an ungated,
+unconditional entry in the top tier; `Telegraphed` on a kind that cannot wind up). `PredictIntent` now
+returns **null** unless the next action is genuinely determined — behaviours are probabilistic, and an
+intent icon that guesses wrong teaches the player to distrust the telegraph.
+
+**What is deliberately still open:**
+
+- **Buff and debuff actions are priced as neither damage nor healing** by the closed form — it has
+  nowhere to put a stat delta. So a boss casting Shield Up reads as a wasted turn. This is the one
+  remaining model blind spot.
+- **Healing is measured but not yet in the danger index.** `BehaviorProfile.HealingPerTurn` and
+  `EnemyMetrics.ExpectedHealingPerTurn` exist; feeding them in (as extra effective HP on the enemy
+  side) is what would finally close the *XP per unit of danger varies 4.9×* warning, since Bog Shaman
+  is the entire cause of that spread and reads as harmless today.
+- **No enemy actually uses the new expressiveness yet.** Every behaviour asset is still its archetype
+  preset plus a cast action, because the migration was deliberately behaviour-identical. The content
+  pass — a Debuffer that hits Agility, a Bruiser whose heavy lands on a different cadence, an enemy
+  that both heals and charges, low-health conditions on ordinary trash — is now pure authoring with no
+  code involved. That is the pass to do next in this area.
+- **`EnemyArchetype` survives as a label only.** It names the presets, drives the analyzer's variety
+  checks, and is the fallback for an enemy with no behaviour assigned. It selects no logic.
 
 ### 0e. Enemies cast their drawable magic — ✅ shipped 2026-08-25
 
@@ -463,10 +481,9 @@ elemental damage magic and only ever basic-attacked. The resemblance was coincid
 
 **Now they cast from that same list.** Four rules, all pinned by `EnemyCastingTests` (25 cases):
 
-- **A roll, beside the archetype rather than inside it.** `EnemyMagicPlan.ShouldCast` is consulted
-  *before* the behaviour; on a miss the archetype decides exactly as it always did, so no existing
-  behaviour changed. `EnemySO.MagicCastChance` (0..1) is the dial, and per-entry
-  `DrawableMagicEntry.CastWeight` biases *which* magic.
+- ~~**A roll, beside the archetype rather than inside it.**~~ Superseded by §0d the same day: casting
+  is now a `CastMagic` action in the enemy's authored list, gated by `ChanceGate`. The behaviour it
+  produces is the same; it is no longer a special case wrapped around the behaviour.
 - **Charges are never spent.** `Charges` is the player's Draw grant; an enemy casting from the same
   list is free, the way the FF games this is modelled on treat it.
 - **A charging enemy delivers its charge.** It has already telegraphed a heavy or a boss signature and

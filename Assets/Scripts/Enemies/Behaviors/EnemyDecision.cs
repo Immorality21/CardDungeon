@@ -39,5 +39,11 @@ namespace Assets.Scripts.Enemies.Behaviors
         /// stays the single-target field the other actions use.
         /// </summary>
         public List<ICombatUnit> MagicTargets;
+
+        /// <summary>
+        /// Index of the authored action this decision came from, or -1. The combat loop stores it on
+        /// the enemy when a telegraph starts, so the follow-up turn knows which payload to deliver.
+        /// </summary>
+        public int EntryIndex = -1;
     }
 }

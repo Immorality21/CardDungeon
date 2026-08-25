@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Enemies.Behaviors;
 using Assets.Scripts.Rooms;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
@@ -95,10 +96,12 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public LevelEnemyTuning Tuning;
 
-        /// <summary>Chance per turn this enemy casts from its Draw list instead of acting on its archetype.</summary>
-        public float MagicCastChance;
-        public bool IsCharging;
+        /// <summary>This enemy's authored repertoire — what <c>EnemyActionPlanner</c> reads.</summary>
+        public EnemyBehaviorSO Behavior;
+        /// <summary>Index of the telegraphed action in flight, or -1. Mirrors <c>Enemy.ChargingEntryIndex</c>.</summary>
+        public int ChargingEntryIndex = -1;
         public ICombatUnit ChargeTarget;
+        public bool IsCharging => ChargingEntryIndex >= 0;
         public int TurnsTaken;
 
         public bool IsBoss => Definition != null && Definition.IsBoss;
@@ -120,7 +123,7 @@ namespace Assets.Scripts.Balance
                 Definition = Definition,
                 Archetype = Archetype,
                 Tuning = Tuning,
-                MagicCastChance = MagicCastChance
+                Behavior = Behavior
             };
 
             foreach (var slot in MagicSlots)
@@ -162,9 +165,9 @@ namespace Assets.Scripts.Balance
                 EffectiveAttackPower = stats[StatType.Strength],
                 AttackDamageType = definition.AttackDamageType,
                 Definition = definition,
-                Archetype = definition.Archetype,
+                Archetype = definition.ArchetypeOf,
                 Tuning = tuning,
-                MagicCastChance = definition.MagicCastChance
+                Behavior = definition.ResolvedBehavior
             };
         }
     }

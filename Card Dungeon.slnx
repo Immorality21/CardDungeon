@@ -10,4 +10,5 @@
   <Project Path="CardDungeon.Items.Editor.csproj" />
   <Project Path="CardDungeon.UnitStats.Editor.csproj" />
   <Project Path="CardDungeon.ImmoralityGaming.Editor.csproj" />
+  <Project Path="CardDungeon.Enemies.Editor.csproj" />
 </Solution>

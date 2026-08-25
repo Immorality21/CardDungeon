@@ -99,7 +99,10 @@ namespace Tests.EditMode
         [Test]
         public void AverageOffenseMultiplier_Bruiser_AveragesChargeAndHeavy()
         {
-            float expected = BruiserBehavior.HeavyMultiplier / 2f;
+            // A telegraphed heavy is one dead wind-up turn and one 2.5x payload, so the long-run
+            // average is half the payload. The constant used to live on BruiserBehavior; it is
+            // authored on the Bruiser preset now, and this pins that the arithmetic survived.
+            float expected = 2.5f / 2f;
             Assert.AreEqual(expected, BalanceMath.AverageOffenseMultiplier(EnemyArchetype.Bruiser, 2), 0.0001f);
         }
 

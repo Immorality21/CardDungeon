@@ -16,21 +16,45 @@ namespace Assets.Scripts.Enemies
 
         // The Draw list: magics the player can extract from this enemy mid-combat,
         // each with the charges a successful draw grants (see EquippedMagicState). It is also the
-        // list this enemy casts from - see MagicCastChance.
+        // list a CastMagic action on its Behavior draws from.
         public List<DrawableMagicEntry> DrawableMagics = new List<DrawableMagicEntry>();
 
         /// <summary>
-        /// Chance per turn this enemy casts from <see cref="DrawableMagics"/> rather than acting on
-        /// its archetype. Stamped from the definition; 0 means it never casts.
+        /// This enemy's repertoire, as data. Stamped from the definition (falling back to the
+        /// built-in preset for its archetype), and what <c>EnemyActionPlanner</c> reads every turn.
         /// </summary>
-        public float MagicCastChance;
+        public Behaviors.EnemyBehaviorSO Behavior;
 
         public EnemyArchetype Archetype;
         public List<Resistance> Resistances = new List<Resistance>();
 
         // Runtime combat state (not persisted).
-        [System.NonSerialized] public bool IsCharging;
+
+        /// <summary>
+        /// Index into <see cref="Behavior"/>'s Actions of the telegraphed action in flight, or -1.
+        /// Replaced a bare "is charging" bool: telegraphs are authored per action now, so knowing
+        /// *that* the enemy is winding up no longer says what it is about to deliver.
+        /// </summary>
+        [System.NonSerialized] public int ChargingEntryIndex = -1;
+
         [System.NonSerialized] public ICombatUnit ChargeTarget;
+
+        /// <summary>True while a telegraphed action is in flight.</summary>
+        public bool IsCharging => ChargingEntryIndex >= 0;
+
+        /// <summary>Clears any telegraph in flight.</summary>
+        public void ClearCharge()
+        {
+            ChargingEntryIndex = -1;
+            ChargeTarget = null;
+        }
+
+        /// <summary>Starts a telegraph for the authored action at <paramref name="entryIndex"/>.</summary>
+        public void BeginCharge(int entryIndex, ICombatUnit target)
+        {
+            ChargingEntryIndex = entryIndex;
+            ChargeTarget = target;
+        }
 
         // How many turns this enemy has taken this combat. Drives cadence-based behaviors
         // (e.g. the boss's signature move). Reset per combat; not persisted.
@@ -98,9 +122,9 @@ namespace Assets.Scripts.Enemies
             Tuning = tuning;
             gameObject.name = definition.DisplayName;
             Stats = new Stats(LevelEnemyTuning.StatsFor(definition, tuning));
-            Archetype = definition.Archetype;
+            Archetype = definition.ArchetypeOf;
             DrawableMagics = new List<DrawableMagicEntry>(definition.DrawableMagics);
-            MagicCastChance = definition.MagicCastChance;
+            Behavior = definition.ResolvedBehavior;
             Resistances = new List<Resistance>(definition.Resistances);
             LootItem = definition.LootItem;
 

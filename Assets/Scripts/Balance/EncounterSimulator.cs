@@ -75,7 +75,7 @@ namespace Assets.Scripts.Balance
     /// A headless run of the real combat loop. It reuses <see cref="TurnManager"/>,
     /// <see cref="DamageCalculator"/>, <see cref="CombatBuffTracker"/>, <see cref="EffectResolver"/>,
     /// <see cref="MagicTagTracker"/>, <see cref="ComboDetector"/> and the actual
-    /// <see cref="IEnemyBehavior"/> implementations, so enemy decision-making, buffs, combos and
+    /// <see cref="EnemyActionPlanner"/>, so enemy decision-making, buffs, combos and
     /// damage are the game's, not a copy.
     ///
     /// What it re-implements is the turn *loop* in <see cref="CombatManager"/> (a coroutine on a
@@ -556,20 +556,24 @@ namespace Assets.Scripts.Balance
             List<SimUnit> enemies,
             CombatBuffTracker buffTracker)
         {
-            var behavior = EnemyBehaviorFactory.Get(enemy.Archetype);
+            var behavior = enemy.Behavior != null
+                ? enemy.Behavior
+                : EnemyBehaviorSO.BuiltInPreset(enemy.Archetype);
 
             var context = new EnemyCombatContext
             {
                 Heroes = AliveAs(heroes),
                 Allies = AliveAsExcept(enemies, enemy),
                 BuffTracker = buffTracker,
-                SelfIsCharging = enemy.IsCharging,
-                SelfTurnCount = enemy.TurnsTaken
+                ChargingEntryIndex = enemy.ChargingEntryIndex,
+                SelfTurnCount = enemy.TurnsTaken,
+                DrawableMagics = enemy.Definition != null ? enemy.Definition.DrawableMagics : null
             };
 
-            // Same order as CombatManager.ExecuteEnemyTurn: roll for a cast first, and only ask the
-            // archetype when the roll misses.
-            var decision = PlanCast(enemy, context) ?? behavior.Decide(enemy, context);
+            // The same planner call CombatManager.ExecuteEnemyTurn makes, so there is no second
+            // decision implementation to drift.
+            var decision = EnemyActionPlanner.Plan(
+                enemy, context, behavior, EnemyPlanRolls.Random(behavior.Actions.Count));
 
             switch (decision.Type)
             {
@@ -578,7 +582,7 @@ namespace Assets.Scripts.Balance
                     break;
 
                 case EnemyActionType.ChargeHeavy:
-                    enemy.IsCharging = true;
+                    enemy.ChargingEntryIndex = decision.EntryIndex;
                     enemy.ChargeTarget = decision.Target;
                     break;
 
@@ -589,7 +593,7 @@ namespace Assets.Scripts.Balance
                     {
                         target = RandomAlive(heroes);
                     }
-                    enemy.IsCharging = false;
+                    enemy.ChargingEntryIndex = -1;
                     enemy.ChargeTarget = null;
                     if (target != null)
                     {
@@ -599,13 +603,13 @@ namespace Assets.Scripts.Balance
                 }
 
                 case EnemyActionType.ChargeAoe:
-                    enemy.IsCharging = true;
+                    enemy.ChargingEntryIndex = decision.EntryIndex;
                     enemy.ChargeTarget = null;
                     break;
 
                 case EnemyActionType.AoeAttack:
                 {
-                    enemy.IsCharging = false;
+                    enemy.ChargingEntryIndex = -1;
                     enemy.ChargeTarget = null;
                     foreach (var hero in heroes)
                     {
@@ -653,46 +657,6 @@ namespace Assets.Scripts.Balance
             }
 
             enemy.TurnsTaken++;
-        }
-
-        /// <summary>
-        /// Rolls the enemy's cast chance, exactly as <c>CombatManager.TryPlanEnemyCast</c> does.
-        /// Null means no cast and the archetype decides.
-        /// </summary>
-        private static EnemyDecision PlanCast(SimUnit enemy, EnemyCombatContext context)
-        {
-            if (enemy == null || enemy.Definition == null)
-            {
-                return null;
-            }
-
-            if (!EnemyMagicPlan.ShouldCast(
-                    enemy.MagicCastChance, enemy.Definition.DrawableMagics,
-                    context.SelfIsCharging, Random.Range(0f, 1f)))
-            {
-                return null;
-            }
-
-            var magic = EnemyMagicPlan.Select(enemy.Definition.DrawableMagics, Random.Range(0f, 1f));
-            if (magic == null)
-            {
-                return null;
-            }
-
-            var targets = EnemyMagicPlan.ResolveTargets(
-                magic, enemy, context.Heroes, context.Allies, Random.Range(0f, 1f));
-            if (targets.Count == 0)
-            {
-                return null;
-            }
-
-            return new EnemyDecision
-            {
-                Type = EnemyActionType.CastMagic,
-                Magic = magic,
-                MagicTargets = targets,
-                Target = targets[0]
-            };
         }
 
         /// <summary>

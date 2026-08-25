@@ -47,8 +47,8 @@ the game's numbers:
 | damage, resistance, defense curve | `DamageCalculator.Calculate` / `.DefenseConstant` |
 | turn frequency from Agility | `TurnManager.BASE_TICKS` |
 | crit expectation | `CombatManager.CritChance` / `.CritMultiplier` |
-| archetype cadence (charges, heavies, AoE) | `BruiserBehavior` / `BossBehavior` constants |
-| enemy decisions in simulation | the real `IEnemyBehavior` implementations via `EnemyBehaviorFactory` |
+| what an enemy can do on a turn, and how often | `EnemyBehaviorSO.Actions` (authored) |
+| enemy decisions in simulation | the real `EnemyActionPlanner` |
 | spell effects, buffs, combos | `EffectResolver`, `CombatBuffTracker`, `ComboDetector` |
 | gear bonuses | `InventoryOperations.ComputeBonuses` |
 | gear elemental resistance | `InventoryOperations.ComputeResistances` |
@@ -77,7 +77,8 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `EncounterModel` | `WeightedEnemyGroup` + `RoomEncounter` — fractional spawn-table expectation |
 | `RunCurveModel` | `LevelCurve` / `RunCurve` — attrition, peak danger, boss ratio, difficulty jumps |
 | `RoomEventModel` | what a level's **room events** cost and pay: placement odds, check odds, weighted outcome pools |
-| `EnemyMagicModel` | what an enemy's **own casts** are worth: cast chance, expected damage and healing per cast |
+| `EnemyMagicModel` | what an enemy's **own casts** are worth: cast share, expected damage and healing per cast |
+| `EnemyBehaviorModel` | what an enemy's **authored repertoire** is worth per turn: the offense multiplier, healing, idle share |
 | `LevelEnemyTuning` (in `Enemies/`) | the per-level enemy numbers every metric is measured against |
 | `VarietyAnalyzer` | the one-dimensionality axis: archetype share, resistance coverage, inert damage types, Draw overlap |
 | `ProgressionMap` | the **supply chain**: which magic is drawable where, when each combo becomes possible, and whether a level's resistances are in elements the player can bring yet |
@@ -184,12 +185,32 @@ that ends runs, because `Party.HealAll()` only fires when a fresh dungeon is ent
 health is a consumable resource. At or above 1.00 the level cannot be cleared, whatever the per-room
 numbers look like. The run curve is drawn from this.
 
-**Enemies cast, and casting is blended with the swing, not added to it.** `EnemyMagicModel.Profile`
-prices an enemy's own `DrawableMagics` (`EnemySO.MagicCastChance`), and both `BalanceMath.DamagePerTick`
-and `EnemyMetrics.Compute` fold it in as `(1 - p) x attack + p x cast` — an enemy that casts is not
-attacking that turn. **Those two must not drift**: the danger index comes from the first and the
-tables/findings from the second. Enemies at `MagicCastChance` 0 take an early-out and read exactly as
-they did before casting existed.
+**An enemy's whole repertoire is one expectation.** `EnemyBehaviorModel.Profile` prices an
+`EnemyBehaviorSO`'s authored actions — swings, telegraphed heavies, party-wide signatures, heals,
+debuffs and its own casts — into a single offense multiplier, and both `BalanceMath.DamagePerTick` and
+`EnemyMetrics.Compute` call it. **Those two must not drift**: the danger index comes from the first and
+the tables and findings from the second.
+
+This replaced `AverageOffenseMultiplier`'s switch over `EnemyArchetype`, which returned one hand-tuned
+float per archetype. The presets reproduce four of those five constants **exactly** (Aggressor 1.0,
+Bruiser 1.25, Healer 0.5, Debuffer 0.85) and the Boss comes out **+3.9%** because the new model prices
+enrage, which the old one ignored. That equivalence is what made the behaviour rework safe to land:
+the analyzer diff across the whole project was **0 critical / 3 warning / 20 info, before and after**.
+
+Two pieces of arithmetic in there are easy to get wrong, and both were, first time:
+
+- **A telegraphed action costs two turns for one payload.** Everything is divided by
+  `1 + Σ(telegraphed claims)`, because a decision turn is worth more than one turn of the clock.
+  Without it the delivery turn was also counted as free for an ordinary swing, and the boss priced at
+  **a quarter** of its real output.
+- **A priority tier claims a turn only when one of its entries is actually available** —
+  `1 - Π(1 - available_i)`, not "all of it, because something in the tier is ungated". The first
+  version starved every lower tier whenever a top-tier entry had a condition on it.
+
+The conditions a closed form cannot evaluate (`AllyWounded`, `HeroMissingDebuff`, `SelfHealthBelow`)
+get one documented occupancy each on `EnemyBehaviorModel`. Two of them are deliberately set to
+reproduce the constants they replaced; `LowHealthOccupancy` is not, and that is the whole of the boss's
++3.9%.
 
 Three fidelity details, all documented on `EnemyMagicModel`. It calls `DamageCalculator` **directly**
 rather than going through `AverageDamageAgainstGroup`, because that helper always folds in an expected
@@ -198,11 +219,15 @@ opt out through it — and `DamageEffectExecutor` has no crit roll. It skips eff
 `UnlockLevel`, matching the `magicUpgradeLevel: 0` the enemy cast path passes. And it prices no combo
 follow-ups, because enemy casts pass no tag tracker or combo detector.
 
-**Two blind spots this exposed**, both real and both tracked in `docs/NEXT_STEPS.md` §0d: **buff and
-debuff casts are priced as nothing** (the closed form has nowhere to put a stat delta), and a
-**Healer's healing never enters the danger index** — which is why Bog Shaman reads as harmless and is
-the sole cause of the surviving *XP per unit of danger* warning. `AverageOffenseMultiplier`'s flat
-per-archetype factors are the existing workaround for the same gap.
+**One blind spot is still open**, tracked in `docs/NEXT_STEPS.md`: **buff and debuff actions are
+priced as neither damage nor healing**, because the closed form has nowhere to put a stat delta. A boss
+casting Shield Up therefore reads as a wasted turn.
+
+Healing is no longer in that list — `BehaviorProfile.HealingPerTurn` measures it, surfaced as
+`EnemyMetrics.ExpectedHealingPerTurn`. It does **not** yet feed the danger index (which would mean
+treating it as extra effective HP on the enemy side), which is why Bog Shaman still reads as harmless
+and why *XP per unit of danger* is still a warning. The number exists now; wiring it into the index is
+the remaining half.
 
 ## Simulator caveats — read before trusting it
 
@@ -212,9 +237,9 @@ the real game). That is the drift risk. `EncounterSimulatorTests.ResolveAttack_A
 pins the simulated hit to `CombatManager.ExecuteAttack`'s exact arithmetic — **keep that test passing
 when you touch either side.**
 
-Enemy casting **is** modelled: `PlanCast` rolls `EnemyMagicPlan` and `ResolveCast` goes through the real
-`EffectResolver` with the same arguments `CombatManager.ExecuteEnemyCast` uses, so there is no second
-implementation to drift.
+Enemy decisions are **not** re-implemented: `TakeEnemyTurn` calls the same `EnemyActionPlanner.Plan`
+the combat loop calls, and `ResolveCast` goes through the real `EffectResolver` with the same arguments
+`CombatManager.ExecuteEnemyCast` uses. Only the turn loop and the player's choices are simulated.
 
 Deliberate simplifications: mid-fight **Draw is not modelled** (heroes start with the magic the
 encounter's enemies offer, via `BalanceAnalyzer.AssignDrawLoadout`, and never spend a turn drawing);

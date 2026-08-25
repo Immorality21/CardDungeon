@@ -61,7 +61,7 @@ namespace Assets.Scripts.Balance
         public int ResistanceCount;
         public int DrawableCount;
 
-        /// <summary>Chance per turn this placement casts from its Draw list (EnemySO.MagicCastChance).</summary>
+        /// <summary>Share of turns this placement casts, from its behaviour's CastMagic actions.</summary>
         public float MagicCastChance;
 
         /// <summary>Expected damage one of its casts lands on the party, at this level's spell scale.</summary>
@@ -72,6 +72,15 @@ namespace Assets.Scripts.Balance
 
         /// <summary>True when this placement actually casts — it has a chance and something to cast.</summary>
         public bool Casts => MagicCastChance > 0f && DrawableCount > 0;
+
+        /// <summary>Healing this enemy returns to its own side per turn, from Heal actions.</summary>
+        public float ExpectedHealingPerTurn;
+
+        /// <summary>Share of its turns that land no damage — wind-ups, heals, debuffs.</summary>
+        public float IdleTurnShare;
+
+        /// <summary>The authored repertoire this placement fights with.</summary>
+        public Assets.Scripts.Enemies.Behaviors.EnemyBehaviorSO Behavior;
 
         /// <summary>
         /// The level tuning these numbers were measured under, and the stats it produced. An
@@ -136,7 +145,7 @@ namespace Assets.Scripts.Balance
 
             metrics.Name = string.IsNullOrEmpty(enemy.DisplayName) ? enemy.name : enemy.DisplayName;
             metrics.IsBoss = enemy.IsBoss;
-            metrics.Archetype = enemy.Archetype;
+            metrics.Archetype = enemy.ArchetypeOf;
             metrics.PowerScore = BalanceMath.PowerScore(metrics.Stats, rules);
             metrics.ResistanceCount = enemy.Resistances != null ? enemy.Resistances.Count : 0;
             metrics.DrawableCount = enemy.DrawableMagics != null ? enemy.DrawableMagics.Count : 0;
@@ -147,23 +156,27 @@ namespace Assets.Scripts.Balance
 
             metrics.PartyTurnsToKill = BalanceMath.PartyTurnsToKill(partyUnits, unit);
             metrics.SoloDangerIndex = BalanceMath.DangerIndex(partyUnits, group);
-            metrics.OffenseMultiplier = BalanceMath.AverageOffenseMultiplier(enemy.Archetype, party.Size);
             metrics.AverageDamagePerHit = BalanceMath.AverageDamageAgainstGroup(metrics.Stats[StatType.Strength], partyUnits);
-            metrics.EffectiveDamagePerTurn = metrics.AverageDamagePerHit * metrics.OffenseMultiplier;
 
-            // Casting is an alternative to attacking, not an addition to it, so the two blend by the
-            // cast chance. Same arithmetic as BalanceMath.DamagePerTick, which is what the danger
-            // index is drawn from - these two must not drift apart.
+            // One expectation over the authored actions covers everything the enemy can do, casting
+            // included. Same call BalanceMath.DamagePerTick makes - the danger index is drawn from
+            // that, and these two must not drift apart.
             var cast = EnemyMagicModel.Profile(enemy, tuning, unit, partyUnits);
             metrics.MagicCastChance = cast.CastChance;
             metrics.ExpectedCastDamage = cast.ExpectedDamage;
             metrics.ExpectedCastHealing = cast.ExpectedHealing;
-            if (cast.Casts)
-            {
-                metrics.EffectiveDamagePerTurn =
-                    (1f - cast.CastChance) * metrics.EffectiveDamagePerTurn
-                    + cast.CastChance * cast.ExpectedDamage;
-            }
+
+            float castMultiplier = metrics.AverageDamagePerHit > 0f
+                ? cast.ExpectedDamage / metrics.AverageDamagePerHit
+                : 0f;
+
+            var behavior = enemy.ResolvedBehavior;
+            var profile = EnemyBehaviorModel.Profile(behavior, party.Size, castMultiplier, metrics.AverageDamagePerHit);
+            metrics.OffenseMultiplier = profile.OffenseMultiplier;
+            metrics.EffectiveDamagePerTurn = metrics.AverageDamagePerHit * profile.OffenseMultiplier;
+            metrics.ExpectedHealingPerTurn = profile.HealingPerTurn;
+            metrics.IdleTurnShare = profile.IdleShare;
+            metrics.Behavior = behavior;
 
             // Per-hero breakdown: plain hits, since that is what the player actually feels turn to turn.
             foreach (var hero in party.Heroes)

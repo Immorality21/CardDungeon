@@ -3,6 +3,7 @@ using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Enemies.Behaviors;
 using Assets.Scripts.Rooms;
 using Assets.Scripts.UnitStats;
 using NUnit.Framework;
@@ -62,9 +63,28 @@ namespace Tests.EditMode
             enemy.BaseStats[StatType.MaxHealth] = 30;
             enemy.BaseStats[StatType.Endurance] = 2;
             enemy.BaseStats[StatType.Agility] = 5;
-            enemy.MagicCastChance = castChance;
             enemy.DrawableMagics = new List<DrawableMagicEntry>(entries);
+            enemy.Behavior = Caster(castChance);
             return enemy;
+        }
+
+        /// <summary>
+        /// Cast frequency is an authored action, not a field: a gated CastMagic entry above a plain
+        /// swing. This is what EnemySO.MagicCastChance became.
+        /// </summary>
+        private EnemyBehaviorSO Caster(float castChance)
+        {
+            var behavior = ScriptableObject.CreateInstance<EnemyBehaviorSO>();
+            _created.Add(behavior);
+            behavior.Actions = new List<EnemyActionEntry>();
+            if (castChance > 0f)
+            {
+                // ChanceGate 0 means "no gate", not "never" - a 0% caster is a behaviour with no cast
+                // action at all, which is also how the presets express it.
+                behavior.Actions.Add(EnemyBehaviorSO.CastFromDrawList(castChance));
+            }
+            behavior.Actions.Add(new EnemyActionEntry { Kind = EnemyActionKind.Attack });
+            return behavior;
         }
 
         private DrawableMagicEntry Entry(MagicSO magic, int charges = 3, float weight = 1f)
@@ -391,7 +411,7 @@ namespace Tests.EditMode
 
             float withCasting = BalanceMath.DamagePerTick(caster, heroes, heroes.Count);
 
-            enemy.MagicCastChance = 0f;
+            enemy.Behavior = Caster(0f);
             var attackOnly = SimUnit.FromEnemy(enemy, tuning);
             float withoutCasting = BalanceMath.DamagePerTick(attackOnly, heroes, heroes.Count);
 

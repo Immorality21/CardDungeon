@@ -35,6 +35,7 @@ MonoBehaviour:
   GoldReward: 95
   AttackDamageType: 0
   Archetype: 4
+  Behavior: {fileID: 11400000, guid: 7e5ad131807424d44aa814f2953fa832, type: 2}
   DrawableMagics:
   - Magic: {fileID: 11400000, guid: 36201a51cb01429fbed42d98c1e23162, type: 2}
     Charges: 3
@@ -42,7 +43,6 @@ MonoBehaviour:
   - Magic: {fileID: 11400000, guid: 2ca64f0892a84f2181d73f56d8fdf4ef, type: 2}
     Charges: 3
     CastWeight: 1
-  MagicCastChance: 0.1
   Resistances:
   - DamageType: 3
     Percent: 50
