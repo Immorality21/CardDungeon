@@ -11,3 +11,12 @@
 - **ItemCollection.json:** item collection with equipped slots per hero. **Deferred during dungeon play** — committed on level completion, reloaded from disk on death. What the *current level* has spent lives in the dungeon save (`ConsumablesSpent`), not here, so it is discarded with the dungeon on death and survives a quit in between.
 - **ResourceMaximums.json:** per-`PartyResourceType` maximums (e.g. healing-potion cap). Persisted globally.
 - **Meta.json:** Gold, Essence, per-card upgrade levels, the merchant's `ShopStock` and the tavern's `TavernStock`. Persisted **immediately** on every change, so it survives party death (unlike XP/inventory). See the Progression guide.
+
+## Saves that reference generated content
+
+`Dungeon.json` is the one save that references content it does not store: it holds **room indices**
+into a layout rebuilt from the level asset. `DungeonSaveCompatibility` decides whether such a save can
+still be restored (level key, room count, current-room range) and the floor restarts if not — see
+`Assets/Scripts/Dungeon/CLAUDE.md`. Any future save that stores an index into generated content needs
+the same kind of shape check; the failure mode without one is an exception on load, not a graceful
+reset.

@@ -226,12 +226,23 @@ namespace Assets.Scripts.Dungeon
                 }
             }
 
-            if (saveData != null)
+            if (saveData != null && DungeonSaveCompatibility.IsCompatible(saveData, LevelKeyForSave(), rooms.Count))
             {
                 RestoreSavedState(saveData, rooms);
             }
             else
             {
+                if (saveData != null)
+                {
+                    // The save is stale, not corrupt: start this level over rather than crashing on a
+                    // room index that no longer exists. Everything outside the level - which run,
+                    // which floor, XP, gear, meta progress - lives in other files and is untouched, so
+                    // the run continues and only this floor's progress is lost.
+                    Debug.LogWarning(
+                        $"Dungeon save for seed {saveData.Seed} no longer matches the layout "
+                        + $"'{LevelKeyForSave()}' generates ({DungeonSaveCompatibility.Describe(saveData, LevelKeyForSave(), rooms.Count)}). "
+                        + "Starting the level fresh.");
+                }
                 SpawnFreshDungeon(seed, rooms, startRoom);
             }
         }
@@ -292,14 +303,35 @@ namespace Assets.Scripts.Dungeon
             PlaceCaptiveIfConfigured(rooms, startRoom);
             PlaceRoomEvents(rooms, startRoom);
 
-            if (saveData != null)
+            if (saveData != null && DungeonSaveCompatibility.IsCompatible(saveData, LevelKeyForSave(), rooms.Count))
             {
                 RestoreSavedState(saveData, rooms);
             }
             else
             {
+                if (saveData != null)
+                {
+                    // The save is stale, not corrupt: start this level over rather than crashing on a
+                    // room index that no longer exists. Everything outside the level - which run,
+                    // which floor, XP, gear, meta progress - lives in other files and is untouched, so
+                    // the run continues and only this floor's progress is lost.
+                    Debug.LogWarning(
+                        $"Dungeon save for seed {saveData.Seed} no longer matches the layout "
+                        + $"'{LevelKeyForSave()}' generates ({DungeonSaveCompatibility.Describe(saveData, LevelKeyForSave(), rooms.Count)}). "
+                        + "Starting the level fresh.");
+                }
                 SpawnFreshDungeon(seed, rooms, startRoom);
             }
+        }
+
+        /// <summary>The key a dungeon save for the current level is stamped with.</summary>
+        private string LevelKeyForSave()
+        {
+            if (_level != null)
+            {
+                return _level.Key;
+            }
+            return _manualLayout != null ? _manualLayout.Key : "unknown";
         }
 
         private void SpawnFreshDungeon(int seed, List<Room> rooms, Room startRoom)
@@ -352,7 +384,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             // Initialize save manager and persist initial state
-            var levelKey = _level != null ? _level.Key : _manualLayout != null ? _manualLayout.Key : "unknown";
+            var levelKey = LevelKeyForSave();
             DungeonSaveManager.Instance.Initialize(seed, levelKey, rooms);
             DungeonSaveManager.Instance.Save(startRoom);
 
@@ -395,8 +427,10 @@ namespace Assets.Scripts.Dungeon
                 }
             }
 
-            // Spawn party in the saved current room
-            var currentRoom = rooms[saveData.CurrentRoomIndex];
+            // Spawn party in the saved current room. Clamped as well as gated: IsSaveCompatible is the
+            // real check, and this is here so a future caller that forgets it lands the party in a real
+            // room instead of throwing.
+            var currentRoom = rooms[Mathf.Clamp(saveData.CurrentRoomIndex, 0, rooms.Count - 1)];
             var partyObj = Instantiate(_partyPrefab, transform);
             Party = partyObj.GetComponent<Party>();
             Party.Initialize(FieldedHeroes());
@@ -452,8 +486,7 @@ namespace Assets.Scripts.Dungeon
                 InventoryManager.Instance.ReconcileDungeonConsumption(saveData.ConsumablesSpent);
             }
 
-            var restoreLevelKey = _level != null ? _level.Key : _manualLayout != null ? _manualLayout.Key : "unknown";
-            DungeonSaveManager.Instance.Initialize(saveData.Seed, restoreLevelKey, rooms);
+            DungeonSaveManager.Instance.Initialize(saveData.Seed, LevelKeyForSave(), rooms);
             GameManager.Instance.EnterRoom(currentRoom);
         }
 

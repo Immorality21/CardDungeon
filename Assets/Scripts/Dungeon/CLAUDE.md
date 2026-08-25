@@ -21,6 +21,36 @@
 
 The tutorial forks: `DrownedMarch` is the main line (one-shot, escalating), `TheWarrens` is an optional repeatable dead end whose job is to fund the hub's Gold sinks - party slots cost 300/600, and before it there was nowhere to farm them. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
 
+## A dungeon save is only valid while its level is unchanged
+
+`DungeonSaveData` stores **room indices** into a layout that is *rebuilt* from the level asset rather
+than stored. So a save is valid only as long as that asset's generation parameters are — and editing
+`RoomsToGenerate` or a room pool silently invalidates every in-flight save of that level. A balance
+pass does that routinely.
+
+Until 2026-08-25 nothing checked it. `WeepingCauseway` went from 11 rooms to 6 in a tuning pass, an
+in-flight save of it held `CurrentRoomIndex 6`, and pressing **Continue** threw an
+`ArgumentOutOfRangeException` out of `DungeonManager.RestoreSavedState` — which reads to a player as a
+corrupt save rather than an out-of-date one. `DungeonSaveData.LevelKey` was already being written for
+exactly this purpose and was never read back.
+
+**`DungeonSaveCompatibility`** is now the rule, pure and covered by `DungeonSaveCompatibilityTests`.
+A save is resumable only when:
+
+- its `LevelKey` matches the level being built — compared **only when both sides have one**, since a
+  save written before that field existed has none and rejecting those would throw away good runs;
+- it holds exactly one room entry per built room (a differing count means the layout changed shape);
+- its `CurrentRoomIndex` is inside that count.
+
+`DungeonManager` checks it on **both** resume paths — generated and manual-layout — and on a mismatch
+logs what disagreed (`Describe` names the numbers) and calls `SpawnFreshDungeon` instead. **Rejecting a
+save is not losing the run:** which run, which floor, XP, gear and meta progress all live in other
+files, so only the current floor restarts. The indexing in `RestoreSavedState` is also clamped, so a
+future caller that forgets the gate lands the party in a real room rather than throwing.
+
+**When you change a level's room count, expect in-flight saves of it to restart that floor.** That is
+the intended behaviour, not a bug to design around.
+
 ## Run Progression System
 
 - **RunDefinitionSO** defines one run: an ordered list of `RunLevelEntry` (each references a `LevelDefinitionSO`, a display name, optional `ManualLevelLayoutSO`, and optional `BossEnemy`).

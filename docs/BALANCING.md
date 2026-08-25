@@ -338,6 +338,11 @@ table, and the fourth to checking whether the two ends were the same enemy.
   damage source that does not crit (spell effects, room-event outcomes) has to call
   `DamageCalculator` directly. This cost a debugging round: every enemy spell number came out exactly
   7.2% high, which is `1 + CritChance x (CritMultiplier - 1)`.
+- **Changing a level's room count breaks in-flight saves of that level.** A dungeon save stores room
+  *indices* into a layout rebuilt from the asset, so thinning a level invalidates any save of it. Since
+  2026-08-25 that is detected (`DungeonSaveCompatibility`) and the floor restarts with a warning instead
+  of throwing on Continue — but it does mean a room-count change costs any tester mid-run their current
+  floor. Worth saying out loud when you hand a build over.
 - **No rules asset is checked in.** Everything runs on `BalanceRulesSO.CreateDefault()` unless
   someone presses *Create rules asset*. If findings ever disagree between two machines, check that
   first.
