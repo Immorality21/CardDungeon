@@ -72,6 +72,17 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
 
 ### 0. Act on the balance findings (highest priority)
 
+> **2026-08-25, from play: charges are now a *run* resource.** A full Drowned March clear reported as
+> "a breeze" turned out to be structural rather than a tuning miss - `CombatManager` refilled every
+> magic charge at the start of *every combat*, so a three-hero party entered every room with a dozen
+> casts including ~24 HP of free healing, and a floor's damage could never accumulate. All 63 simulated
+> encounters won 100% of the time with the worst room in the game ending at 70% health. `RefillCharges`
+> now runs only on a run's first floor, and `MagicKnown` sphere-grid nodes give each hero one
+> permanently-carried spell so a spent party is not an unarmed one. **The closed-form curve below is
+> therefore a better model than it was** (it always priced basic attacks only, which is now much closer
+> to how fights actually go) - but every number in this section predates the change and wants a
+> re-measure after play. Full write-up: `docs/BALANCING.md` §5f.
+
 The analyzer is in place; **most of its findings are still open.** The numbers below were
 re-measured on 2026-08-20 against the level-1 party — the earlier figures in this section had gone
 stale, because both the Abyssal Warden's Attack and the hero bars had been edited since they were

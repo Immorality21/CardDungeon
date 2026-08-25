@@ -383,6 +383,19 @@ namespace Assets.Scripts.Dungeon
                 MagicState.Restore(carried, MagicCatalog.Instance.GetMagic);
             }
 
+            // Charges are a *run* resource: spent across floors and topped up only by drawing again.
+            // So the run's opening floor seeds each hero's permanently known magic and fills every
+            // slot; after that nothing refills. A per-level refill would hand the resource back before
+            // it ran out, and a per-fight one (what this used to do) made magic effectively infinite.
+            if (EquippedMagicState.RefillsOnLevelStart(RunLevelIndex))
+            {
+                if (MagicCatalog.HasInstance)
+                {
+                    MagicState.SeedGrantedMagic(Party.Heroes, MagicCatalog.Instance.GetMagic);
+                }
+                MagicState.RefillCharges();
+            }
+
             // Top the healing-potion belt back up to its cap for the new dungeon. Consumables
             // now live in the item inventory; the "belt" is just the carry cap the Merchant raises.
             if (_healingPotion != null && InventoryManager.HasInstance && PartyResourceManager.Instance != null)
@@ -772,12 +785,22 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
-        /// Marks a payload room on the map. Reuses the exit marker sprite under a tint rather than
-        /// waiting on art: a room the player cannot see is a reward they walk past.
+        /// Marks a payload room on the map. A reward the player cannot see is a reward they walk past
+        /// - but the glyph has to be its <b>own</b> silhouette, not the exit door under a tint: the
+        /// first version of this reused the exit sprite recoloured and read as a second staircase,
+        /// which is worse than no marker at all. Loaded from Resources so the marker needs no scene
+        /// wiring, and it is skipped outright if the glyph is missing rather than falling back to
+        /// something that means "the way down".
         /// </summary>
         private void PlaceKindMarker(Room room)
         {
-            if (_exitRoomMarkerSprite == null || !room.Kind.HasPayload())
+            if (!room.Kind.HasPayload())
+            {
+                return;
+            }
+
+            var sprite = Combat.CombatIcons.Get(room.Kind == RoomKind.Treasure ? "chest" : "cross");
+            if (sprite == null)
             {
                 return;
             }
@@ -788,11 +811,11 @@ namespace Assets.Scripts.Dungeon
             center.z = -0.5f;
             markerObj.transform.position = center;
             var sr = markerObj.AddComponent<SpriteRenderer>();
-            sr.sprite = _exitRoomMarkerSprite;
+            sr.sprite = sprite;
             sr.sortingOrder = 3;
             sr.color = room.Kind == RoomKind.Treasure
                 ? new Color(1f, 0.85f, 0.25f)
-                : new Color(0.4f, 0.9f, 0.75f);
+                : new Color(0.45f, 0.95f, 0.8f);
             room.KindMarker = sr;
         }
 
@@ -972,10 +995,16 @@ namespace Assets.Scripts.Dungeon
             room.CaptiveHero = null;
             RemoveCaptiveMarker(room);
 
-            // Give the newcomer their own magic slots, or they cannot cast anything this run.
+            // Give the newcomer their own magic slots, or they cannot cast anything this run - and
+            // seed whatever they permanently know, since charges no longer refill and a hero who
+            // joined on floor three would otherwise be unarmed for the rest of the run.
             if (MagicState != null)
             {
                 MagicState.AddHero(hero);
+                if (MagicCatalog.HasInstance)
+                {
+                    MagicState.SeedGrantedMagic(new List<Hero> { hero }, MagicCatalog.Instance.GetMagic);
+                }
             }
 
             Debug.Log($"Rescued {captive.DisplayName}; party is now {Party.Heroes.Count} strong.");

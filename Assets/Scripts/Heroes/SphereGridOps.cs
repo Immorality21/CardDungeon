@@ -283,7 +283,11 @@ namespace Assets.Scripts.Heroes
             return result;
         }
 
-        /// <summary>How many extra equipped-magic slots the activated nodes grant (+1 per MagicSlot node).</summary>
+        /// <summary>
+        /// How many extra equipped-magic slots the activated nodes grant: +1 per MagicSlot node and
+        /// +1 per MagicKnown node. A known magic needs somewhere to live, so it brings its own slot
+        /// rather than consuming one the hero already bought.
+        /// </summary>
         public static int SlotBonusForNodes(SphereGridSO grid, IEnumerable<string> activated)
         {
             int bonus = 0;
@@ -295,12 +299,58 @@ namespace Assets.Scripts.Heroes
             foreach (var key in activated)
             {
                 var node = FindNode(grid, key);
-                if (node != null && node.Kind == SphereNodeKind.MagicSlot)
+                if (node != null
+                    && (node.Kind == SphereNodeKind.MagicSlot || node.Kind == SphereNodeKind.MagicKnown))
                 {
                     bonus += 1;
                 }
             }
             return bonus;
+        }
+
+        /// <summary>
+        /// Magic this hero permanently knows, as (key, charges) pairs in node order - what their slots
+        /// are seeded with at the start of a run.
+        ///
+        /// <para>Keys rather than <c>MagicSO</c> references on purpose: the Heroes layer does not know
+        /// about Cards (the dependency runs the other way, and the saves reference magic by key too),
+        /// so resolution happens where the catalog lives. Duplicate keys collapse - buying two nodes
+        /// for the same magic grants two slots but seeds it once, with the higher charge count.</para>
+        /// </summary>
+        public static List<KeyValuePair<string, int>> GrantedMagicForNodes(
+            SphereGridSO grid, IEnumerable<string> activated)
+        {
+            var granted = new List<KeyValuePair<string, int>>();
+            if (activated == null)
+            {
+                return granted;
+            }
+
+            foreach (var key in activated)
+            {
+                var node = FindNode(grid, key);
+                if (node == null
+                    || node.Kind != SphereNodeKind.MagicKnown
+                    || string.IsNullOrEmpty(node.GrantedMagicKey))
+                {
+                    continue;
+                }
+
+                int charges = Mathf.Max(1, node.GrantedCharges);
+                int existing = granted.FindIndex(pair => pair.Key == node.GrantedMagicKey);
+                if (existing >= 0)
+                {
+                    if (charges > granted[existing].Value)
+                    {
+                        granted[existing] = new KeyValuePair<string, int>(node.GrantedMagicKey, charges);
+                    }
+                    continue;
+                }
+
+                granted.Add(new KeyValuePair<string, int>(node.GrantedMagicKey, charges));
+            }
+
+            return granted;
         }
 
         /// <summary>XP spent to activate the given keys, at current node prices. Unknown keys count 0.</summary>

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.UnitStats;
+using UnityEngine;
 
 namespace Assets.Scripts.Heroes.UI
 {
@@ -84,6 +85,7 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.Resistance:
                     return "sg-node--resist";
                 case SphereNodeKind.MagicSlot:
+                case SphereNodeKind.MagicKnown:
                     return "sg-node--slot";
                 default:
                     return "sg-node--stat";
@@ -108,6 +110,8 @@ namespace Assets.Scripts.Heroes.UI
                     return "R";
                 case SphereNodeKind.MagicSlot:
                     return "M";
+                case SphereNodeKind.MagicKnown:
+                    return "✦";
                 default:
                     return "S";
             }
@@ -138,6 +142,13 @@ namespace Assets.Scripts.Heroes.UI
             if (node.Kind == SphereNodeKind.MagicSlot)
             {
                 return "+1 magic slot";
+            }
+            if (node.Kind == SphereNodeKind.MagicKnown)
+            {
+                // The charge count is the payload as much as the magic is: it is the whole run's
+                // allowance of that spell, because charges never refill mid-run.
+                string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
+                return $"Always carries {name} x{Mathf.Max(1, node.GrantedCharges)}";
             }
 
             var parts = new List<string>();
@@ -211,6 +222,8 @@ namespace Assets.Scripts.Heroes.UI
                     return "Resistance";
                 case SphereNodeKind.MagicSlot:
                     return "Magic slot";
+                case SphereNodeKind.MagicKnown:
+                    return "Known magic";
                 default:
                     return "Stat";
             }

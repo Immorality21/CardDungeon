@@ -275,7 +275,7 @@ the combat loop calls, and `ResolveCast` goes through the real `EffectResolver` 
 
 Deliberate simplifications: mid-fight **Draw is not modelled** (heroes start with the magic the
 encounter's enemies offer, via `BalanceAnalyzer.AssignDrawLoadout`, and never spend a turn drawing);
-fleeing is never attempted; charges refill per fight, matching `RefillCharges()`.
+fleeing is never attempted; and **every simulated fight starts on full charges**, which the game no longer does - charges are a run resource now, so a per-encounter simulation is an *optimistic* read of any fight after the first. Whole-floor attrition has to come from the run curve, not from here.
 
 Determinism: each batch seeds `Random.InitState(settings.Seed)` and restores `Random.state`
 afterwards, so a run never perturbs anything else and the same assets always give the same numbers.

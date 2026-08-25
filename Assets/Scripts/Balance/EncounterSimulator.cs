@@ -88,7 +88,10 @@ namespace Assets.Scripts.Balance
     /// <item>Drawing magic mid-fight is not modelled — a hero's slots are whatever they start with,
     /// so the simulator never spends a turn on Draw.</item>
     /// <item>Fleeing is never attempted.</item>
-    /// <item>Magic charges refill at the start of every fight, matching <c>RefillCharges()</c>.</item>
+    /// <item>Every simulated fight starts on <b>full</b> charges. The game no longer does that -
+    /// charges are a run resource, refilled only on the first floor - so a per-encounter simulation
+    /// is an <b>optimistic</b> reading of any fight after the first: it grants magic the real party
+    /// may have already spent. Reading a whole floor's attrition needs the run curve, not this.</item>
     /// </list>
     /// </summary>
     public static class EncounterSimulator
