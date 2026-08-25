@@ -195,7 +195,15 @@ namespace Assets.Scripts.Heroes
             var destRoom = door.GetOtherRoom(fromRoom);
             CurrentRoom = destRoom;
             var doorPos = door.GetPositionInRoom(destRoom);
-            transform.position = new Vector3(doorPos.x, doorPos.y, -1f);
+            var position = new Vector3(doorPos.x, doorPos.y, -1f);
+
+            var center = destRoom.GetCenter();
+
+            Vector3 inward = (center - position).normalized;
+
+            position += inward * 0.75f;
+
+            transform.position = position;
         }
 
         /// <summary>

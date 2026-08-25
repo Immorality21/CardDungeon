@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: PinkRoom
   m_EditorClassIdentifier: 
   Name: Pink room
-  Width: 2
-  Height: 3
+  Width: 3
+  Height: 4
   Color: {r: 0.8584906, g: 0.06479175, b: 0.6943518, a: 1}
   IsConnectorRoom: 0
   PossibleEvents:

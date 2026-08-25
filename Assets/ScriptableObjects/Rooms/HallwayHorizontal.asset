@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: HallwayHorizontal
   m_EditorClassIdentifier: 
   Name: Hallway
-  Width: 4
-  Height: 1
+  Width: 5
+  Height: 2
   Color: {r: 0.31140804, g: 0.972549, b: 0.2980393, a: 1}
+<<<<<<< HEAD
   Kind: 1
+=======
+  IsConnectorRoom: 1
+>>>>>>> 080cf1d81ae34468d717e777ec080fadd60c0f38
   PossibleEvents: []
   EnemySpawnTable: []

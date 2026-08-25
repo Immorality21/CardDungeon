@@ -68,7 +68,10 @@ namespace Assets.Scripts.Rooms
             }
 
             // Place walls
-            var wallGen = new WallGenerator(layout.WallColor);
+            var wallGen = new WallGenerator(
+                _currentLevel.WallTexture,
+                _currentLevel.WallColor
+            );
             wallGen.PlaceWalls(SpawnedRooms);
 
             return SpawnedRooms.ToList();
@@ -100,7 +103,10 @@ namespace Assets.Scripts.Rooms
             }
 
             // Place walls around rooms (after doors so we can skip door edges)
-            var wallGen = new WallGenerator(_currentLevel.WallColor);
+            var wallGen = new WallGenerator(
+                _currentLevel.WallTexture,
+                _currentLevel.WallColor
+            );
             wallGen.PlaceWalls(SpawnedRooms);
 
             return SpawnedRooms;
@@ -450,8 +456,8 @@ namespace Assets.Scripts.Rooms
                 for (int h = 0; h < roomNode.roomData.Height; h++)
                 {
                     var tilePos = startPos + new Vector2Int(w, h);
-                    var obj = Instantiate(_tilePrefab, new Vector3(tilePos.x, tilePos.y, 0), Quaternion.identity, roomObj.transform);
-                    obj.GetComponent<SpriteRenderer>().color = roomNode.roomData.Color;
+                    var obj = Instantiate(_tilePrefab, new Vector3(tilePos.x, tilePos.y, 1), Quaternion.identity, roomObj.transform);
+                    obj.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.white, roomNode.roomData.Color, 0.5f);
                     _occupiedTiles.Add(tilePos);
                 }
             }

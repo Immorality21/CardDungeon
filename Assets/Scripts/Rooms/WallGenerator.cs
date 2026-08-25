@@ -20,16 +20,17 @@ namespace Assets.Scripts.Rooms
         private const int Left = 8;
 
         private readonly Dictionary<int, Sprite> _wallSprites = new Dictionary<int, Sprite>();
+        private readonly Texture2D _wallTexture;
         private readonly Color _wallColor;
         private readonly int _sortingOrder;
 
-        public WallGenerator(Color wallColor, int sortingOrder = 5)
+        public WallGenerator(Texture2D wallTexture, Color wallColor, int sortingOrder = 5)
         {
+            _wallTexture = wallTexture;
             _wallColor = wallColor;
             _sortingOrder = sortingOrder;
             GenerateSprites();
         }
-
         /// <summary>
         /// Places walls around all rooms, skipping door edges.
         /// Walls appear on any edge where the neighbor tile belongs to a different room or is empty.
@@ -144,7 +145,18 @@ namespace Assets.Scripts.Rooms
             {
                 for (int y = startY; y < startY + height && y < TexSize; y++)
                 {
-                    pixels[y * TexSize + x] = _wallColor;
+                    Color source = Color.white;
+
+                    if (_wallTexture != null)
+                    {
+                        int tx = x % _wallTexture.width;
+                        int ty = y % _wallTexture.height;
+
+                        source = _wallTexture.GetPixel(tx, ty);
+                    }
+
+                    pixels[y * TexSize + x] =
+                        source * Color.Lerp(Color.white, _wallColor, 0.3f);
                 }
             }
         }

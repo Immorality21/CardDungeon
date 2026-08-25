@@ -13,6 +13,7 @@ namespace Assets.Scripts.Dungeon
         [Range(0f, 1f)] public float ChainBias = 0.6f;
         [Range(0f, 1f)] public float MomentumBias = 0.5f;
         public Color WallColor = new Color(0.15f, 0.1f, 0.08f, 1f);
+        public Texture2D WallTexture;
 
         [Tooltip("Rooms of this level promoted to a one-shot treasure cache: gold plus a depth-rolled " +
                  "item, and no enemies. Taken off the combat room count, so raising this lowers the " +
