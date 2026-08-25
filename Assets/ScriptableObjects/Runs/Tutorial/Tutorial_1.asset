@@ -20,19 +20,19 @@ MonoBehaviour:
     EnemySpawnOverride: []
     GuaranteeAllSpawns: 0
   - RoomTemplate: {fileID: 11400000, guid: 3eb0f9f0d8481fc4cb32d83a3cbc2448, type: 2}
-    GridPosition: {x: 4, y: 0}
+    GridPosition: {x: 6, y: 0}
     EnemySpawnOverride: []
     GuaranteeAllSpawns: 0
   - RoomTemplate: {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
-    GridPosition: {x: 0, y: 1}
+    GridPosition: {x: 1, y: 1}
     EnemySpawnOverride: []
     GuaranteeAllSpawns: 0
   - RoomTemplate: {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
-    GridPosition: {x: 6, y: 1}
+    GridPosition: {x: 9, y: 1}
     EnemySpawnOverride: []
     GuaranteeAllSpawns: 0
   - RoomTemplate: {fileID: 11400000, guid: 0b978dd4c559e8942b3546543c74ef50, type: 2}
-    GridPosition: {x: 10, y: 0}
+    GridPosition: {x: 14, y: 0}
     EnemySpawnOverride: []
     GuaranteeAllSpawns: 0
   Doors:
