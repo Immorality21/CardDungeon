@@ -357,6 +357,36 @@ Three things to carry forward:
   boss. That predates this change and no check fires on a *drop*, but a run whose finale is its
   third-hardest floor is worth a pass.
 
+## 5e. Authoring a tier — four passes, and what each one taught
+
+The Ashen Deep + The Hollow Vault (`NEXT_STEPS.md` §0c), 2026-08-25. A new tier is the hardest thing
+to author blind, because the party arriving at it has an XP budget three floors of sphere-grid
+spending wide. Every pass below was measured, not reasoned:
+
+| Pass | What I set | What the analyzer said |
+|---|---|---|
+| 1 | Difficulty 2.9 / 3.1 / 2.95, 6/7/5 rooms, boss 150 HP | **2 critical** — Emberfall and the Vault unclearable on one bar (126 HP cost vs 107 sustain); Slag Halls over the attrition ceiling |
+| 2 | Difficulty 2.45 / 2.6 / 2.4, refuges added | 0 critical, but the tier read **easier than the run before it** (0.37 / 0.32 / 0.51) and **four** *no threat at all* enemies |
+| 3 | Rooms 5/6/5, Difficulty back to 3.0–3.25 | Trash mattered again, but **three unwinnable worst-case rolls** (1.32–1.52) and an 80% spike |
+| 4 | Two spawn entries per room, Slag Halls cache-only, Difficulty 3.0 / 3.35 / 3.15, XP x1.5–1.75 | **0 critical / 3 warning** — the same three that predate this work |
+
+Five things worth keeping:
+
+- **A tier-3 party out-scales every existing trash enemy at a low dial.** Raising the dial instead
+  breaks the one-health-bar rule on a long floor, so the escalation has to be *fewer, harder fights*.
+  That is the coupling in §1 read from the other end: room counts come down so the dial can come up.
+- **Every extra entry in a spawn table is another body in the worst case.** Three entries at a
+  tier-3 dial is what "a bad spawn roll is unwinnable" means — two entries per room fixed all three
+  findings at once, with no change to expected difficulty.
+- **A room can smuggle an enemy into a biome through its spawn table.** The Slag Halls kept flagging
+  Stone Sentinel as an 8-turn slog after I had removed it from the Slag Hall's own table — it was
+  arriving via `CavernRoom`, still in the level's pool. Read the *pool*, not the room you edited.
+- **`XpMultiplier` is a level dial, exactly like `Difficulty`.** Without it the ash floors paid
+  tutorial XP for tier-3 danger, which is what pushed the XP-per-danger spread from 4.5x to 7.0x.
+  Setting 1.5–1.75 put it back to the pre-existing 4.5x with the pre-existing two ends.
+- **A boss floor is a fine place for a refuge.** Emberfall carries one and no cache: the relief lands
+  right before the climax, and it is the only reason a 5-room floor at Difficulty 3.15 clears.
+
 ## 6. Standing traps
 
 - **A trash buff breaks three other checks.** Boss:trash ratio (bosses are on absolute overrides),

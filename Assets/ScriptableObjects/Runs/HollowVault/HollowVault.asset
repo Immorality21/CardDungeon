@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebc985730f692f54eafd123ca62fd64f, type: 3}
+  m_Name: HollowVault
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
+  Key: HollowVault
+  DisplayName: The Hollow Vault
+  Blurb: The Hoarder was counting for someone. There is a door behind the ledger.
+  SequenceIndex: 3
+  Repeatable: 0
+  Levels:
+  - LevelTemplate: {fileID: 11400000, guid: 2b6cbd409987e0f4daa9c617dfa404e1, type: 2}
+    LevelName: The Hollow Vault
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
+    EnemyTuning:
+      Difficulty: 3.3
+      StatScales: []
+      XpMultiplier: 2
+      GoldMultiplier: 2
+      Overrides:
+      - Enemy: {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
+        Stats:
+          Values:
+          - Type: 7
+            Amount: 120
+          - Type: 1
+            Amount: 13
+        XpReward: 0
+        GoldReward: 260
+    RescueHero: {fileID: 0}

@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: CinderTyrant
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  DisplayName: Cinder Tyrant
+  Sprite: {fileID: 21300000, guid: c63e0d29d5d04db3b133f261668e6868, type: 3}
+  AnimationFrames: []
+  AnimationFps: 8
+  IsBoss: 1
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 7
+    - Type: 2
+      Amount: 6
+    - Type: 3
+      Amount: 5
+    - Type: 4
+      Amount: 7
+    - Type: 5
+      Amount: 4
+    - Type: 7
+      Amount: 90
+  XpReward: 110
+  GoldReward: 90
+  AttackDamageType: 1
+  Archetype: 4
+  Behavior: {fileID: 11400000, guid: f44cd441fff2fa54ba4ba21c6156acc7, type: 2}
+  DrawableMagics:
+  - Magic: {fileID: 11400000, guid: bd009311b97636c4d80e8990440636a6, type: 2}
+    Charges: 2
+    CastWeight: 1
+  Resistances:
+  - DamageType: 1
+    Percent: 50
+  - DamageType: 2
+    Percent: -50
+  LootItem: {fileID: 11400000, guid: 098bb76c9957858418ab9ec1d033fcd7, type: 2}

@@ -199,6 +199,88 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Campaign_HasASecretBranch_AndItIsHiddenOnAFreshSave()
+        {
+            // A secret node is the one campaign feature that is invisible when it is wrong: an
+            // unreachable or always-visible secret both look like "no secret" from the map screen.
+            var campaign = LoadCampaign();
+            var secrets = new List<CampaignNodeEntry>();
+            foreach (var node in campaign.Nodes)
+            {
+                if (node != null && node.Secret)
+                {
+                    secrets.Add(node);
+                }
+            }
+
+            CollectionAssert.IsNotEmpty(secrets, "No node uses Secret, so the flag is dead content.");
+
+            foreach (var node in secrets)
+            {
+                CollectionAssert.IsNotEmpty(node.Requires,
+                    $"Secret node '{CampaignOps.DisplayNameOf(node.Run)}' has no prerequisites, so it " +
+                    "is visible from the first minute and is not a secret.");
+
+                var fresh = CampaignOps.GetState(node, new List<string>(), null);
+                Assert.AreEqual(CampaignNodeStatus.Hidden, fresh.Status,
+                    $"Secret node '{CampaignOps.DisplayNameOf(node.Run)}' is not hidden on a fresh save.");
+            }
+        }
+
+        [Test]
+        public void Campaign_EverySecret_OpensOnceItsPrerequisitesAreCleared()
+        {
+            // The other half of the same failure: a secret nobody can reach is worse than no secret,
+            // because nothing reports it.
+            var campaign = LoadCampaign();
+            foreach (var node in campaign.Nodes)
+            {
+                if (node == null || !node.Secret)
+                {
+                    continue;
+                }
+
+                var cleared = new List<string>();
+                foreach (var prerequisite in node.Requires)
+                {
+                    cleared.Add(CampaignOps.RunKeyOf(prerequisite));
+                }
+
+                var state = CampaignOps.GetState(node, cleared, null);
+                Assert.AreNotEqual(CampaignNodeStatus.Hidden, state.Status,
+                    $"Secret node '{CampaignOps.DisplayNameOf(node.Run)}' stays hidden even with every " +
+                    "prerequisite cleared, so it is unreachable content.");
+            }
+        }
+
+        [Test]
+        public void Campaign_EveryRunHasLevelsWithTemplatesAndTuning()
+        {
+            // A run whose entry has no template generates an empty level and strands the player mid-run.
+            var campaign = LoadCampaign();
+            foreach (var node in campaign.Nodes)
+            {
+                if (node?.Run == null)
+                {
+                    continue;
+                }
+
+                string name = CampaignOps.DisplayNameOf(node.Run);
+                CollectionAssert.IsNotEmpty(node.Run.Levels, $"Run '{name}' has no levels.");
+
+                for (int i = 0; i < node.Run.Levels.Count; i++)
+                {
+                    var level = node.Run.Levels[i];
+                    Assert.IsTrue(level.LevelTemplate != null || level.ManualLayout != null,
+                        $"Run '{name}' level {i} has neither a template nor a manual layout.");
+                    Assert.IsNotNull(level.EnemyTuning, $"Run '{name}' level {i} has no EnemyTuning.");
+                    Assert.Greater(level.EnemyTuning.Difficulty, 0f,
+                        $"Run '{name}' level {i} has Difficulty 0, which zeroes its enemies.");
+                }
+            }
+        }
+
+        [Test]
         public void Campaign_LaidOutPositions_DoNotOverlap()
         {
             var campaign = LoadCampaign();

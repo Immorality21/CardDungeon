@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebc985730f692f54eafd123ca62fd64f, type: 3}
+  m_Name: AshenDeep
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
+  Key: AshenDeep
+  DisplayName: The Ashen Deep
+  Blurb: The water gave out and the rock began to weep heat. Something under the
+    March has been burning for a long time.
+  SequenceIndex: 2
+  Repeatable: 0
+  Levels:
+  - LevelTemplate: {fileID: 11400000, guid: aa42e7f1e085de54abd6c8682009b174, type: 2}
+    LevelName: Cinder Gate
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 0}
+    EnemyTuning:
+      Difficulty: 3
+      StatScales: []
+      XpMultiplier: 1.5
+      GoldMultiplier: 1
+      Overrides: []
+    RescueHero: {fileID: 0}
+  - LevelTemplate: {fileID: 11400000, guid: 7373b5a84f0ff9e42b3097b34eb9bc04, type: 2}
+    LevelName: The Slag Halls
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 0}
+    EnemyTuning:
+      Difficulty: 3.35
+      StatScales: []
+      XpMultiplier: 1.75
+      GoldMultiplier: 1
+      Overrides: []
+    RescueHero: {fileID: 0}
+  - LevelTemplate: {fileID: 11400000, guid: 3190c1df0653d6845a7267635e8a1a12, type: 2}
+    LevelName: Emberfall
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 11400000, guid: a3ec74314eaaa1546a44c86e575112d8, type: 2}
+    EnemyTuning:
+      Difficulty: 3.15
+      StatScales: []
+      XpMultiplier: 1.75
+      GoldMultiplier: 1
+      Overrides:
+      - Enemy: {fileID: 11400000, guid: a3ec74314eaaa1546a44c86e575112d8, type: 2}
+        Stats:
+          Values:
+          - Type: 7
+            Amount: 130
+          - Type: 1
+            Amount: 12
+        XpReward: 0
+        GoldReward: 0
+    RescueHero: {fileID: 0}

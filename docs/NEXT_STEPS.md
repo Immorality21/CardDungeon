@@ -393,7 +393,7 @@ taken while building, which is where the reasoning lives.
 - **Holy and Shadow** are unused by any magic and unresisted by anything - the analyzer reports them, and
   they are free slots if a later biome wants an element of its own.
 
-### 0c. Run chaining — ✅ the system shipped, the content has not
+### 0c. Run chaining — ✅ system + a third tier and the first secret (2026-08-25)
 
 **The mechanism is done.** Runs are no longer a single serialized reference: `CampaignSO`
 (`Assets/Resources/Campaign.asset`) is a **directed graph of runs** with per-node prerequisites
@@ -406,12 +406,40 @@ is the map screen, and clearing a run's final level banks its key in
 
 **What is still open:**
 
-- ~~There is still only one run asset.~~ **Done.** The tutorial now forks into **The Drowned March**
+- ~~There is still only one run asset.~~ **Done.** The tutorial forks into **The Drowned March**
   (`DrownedMarch`, 4 levels, one-shot, boss *Mirefather*) and **The Warrens** (`TheWarrens`, 2 levels,
   **repeatable**, boss *Gilded Hoarder*) — an escalating main line plus the farming run the Gold sinks
-  needed. Six new level templates; the previously orphaned `BlueRoom` is finally in a pool. The curve
-  is clean: Drowned March `0.18 / 0.29 / 0.44 / 0.54` with jumps 61% / 55% / 21%, inside the +75%
-  ceiling. **Still open:** a third tier past the Drowned March, and nothing yet uses `Secret`.
+  needed. Six new level templates; the previously orphaned `BlueRoom` is finally in a pool.
+- ~~A third tier past the Drowned March, and nothing yet uses `Secret`.~~ **Done 2026-08-25.**
+  **The Ashen Deep** (`AshenDeep`, 3 levels, one-shot, boss **Cinder Tyrant**) continues the main line
+  off the March, and **The Hollow Vault** (`HollowVault`, 1 level) is the campaign's **first secret**:
+  `Secret` + `Optional`, `UnlockMode.All` over *both* branches (Ashen Deep **and** The Warrens), so
+  the repeatable farming run finally has a reason to exist beyond gold. Its boss is the Gilded
+  Hoarder again at 120 HP / Strength 13 with a 260 gold override and a 2x XP multiplier — a hoard,
+  not a story beat.
+  - **A fire biome, which is what makes the elemental layer land.** Two new rooms (**Ember Vault**,
+    **Slag Hall**) built on Cinder Imp / Dragon / Hex Weaver, three new level templates (**Cinder
+    Gate** 5 rooms, **The Slag Halls** 6, **Emberfall** 5) and one for the vault. The Cinder Tyrant
+    attacks as **Fire** and resists it 50% while taking +50% from Ice — so the **Fire Cloak** drawn
+    off a Cinder Imp two tiers earlier finally has a fight that answers it, and Frost Cloak is the
+    wrong pick there.
+  - **One new drawable: `Cinderstorm`** (Epic, all-enemies Fire, Intelligence-scaled), off the
+    Tyrant. Tier-3 content the player cannot get earlier.
+  - **Tuning took four measured passes**, and the first three each failed differently: unclearable
+    floors at Difficulty 2.9–3.3, then an over-corrected tier *easier* than the March with four
+    *no threat at all* enemies, then unwinnable worst-case spawn rolls from three-entry tables, then
+    a Hex Weaver hit that broke the Warrior's three-hit floor at 3.5. Shipped shape: fewer, harder
+    fights (5 / 6 / 5 rooms at Difficulty 3.0 / 3.35 / 3.15, two spawn entries per room, XP
+    multipliers 1.5–1.75 because the same asset is worth more this deep). Curve **0.41 / 0.45 /
+    0.53** (+9% / +20%), vault 0.39, and findings back to the pre-existing **0 critical / 3 warning**.
+    Written up in `docs/BALANCING.md` §5e.
+  - **Covered by three new asset tests** (`CampaignAssetTests`): a secret must exist, be hidden on a
+    fresh save, *and* open once its prerequisites are cleared — an unreachable secret and an
+    always-visible one both look like "no secret" from the map screen. Plus every run's levels must
+    carry a template and a non-zero Difficulty.
+  - **Still open:** a fourth tier, and nothing uses `UnlockMode.Any` (two branches rejoining) yet.
+    The Tyrant reuses the Dragon's sprite and `BehaviorMirefather`, so it needs its own art and
+    arguably its own behaviour — a fire boss telegraphing a Shadow-flavoured pattern is a placeholder.
 - **Map positions are auto-laid-out.** `CampaignPresenter.ResolvePositions` tiers nodes by longest
   prerequisite chain when no `MapPosition` is authored. Good enough to play; a hand-placed map wants a
   **Campaign Map Editor** window, the obvious sibling to `Tools ▸ Dungeon ▸ Manual Level Layout Editor`

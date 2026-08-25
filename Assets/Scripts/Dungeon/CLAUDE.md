@@ -18,6 +18,15 @@
 | The Threshold | `TutorialRun` | 4 | no | — | Abyssal Warden |
 | The Drowned March | `DrownedMarch` | 4 | no | The Threshold | **Mirefather** |
 | The Warrens | `TheWarrens` | 2 | **yes** | The Threshold | **Gilded Hoarder** |
+| The Ashen Deep | `AshenDeep` | 3 | no | The Drowned March | **Cinder Tyrant** |
+| The Hollow Vault | `HollowVault` | 1 | no | Ashen Deep **and** The Warrens (`All`) | Gilded Hoarder (120 HP override) |
+
+**The Hollow Vault is the campaign's only `Secret` node**, and the only one whose prerequisites span
+both branches - which is what gives the optional repeatable run a reason to exist beyond gold. Secret
+means hidden on the map until it unlocks, so it fails silently in two directions (unreachable, or
+never hidden); `CampaignAssetTests` asserts both. **The Ashen Deep is a fire biome on purpose**: its
+boss attacks as Fire and resists it, so the Fire Cloak drawn off a Cinder Imp two tiers earlier is
+the answer to it - see `docs/BALANCING.md` §5e for the four tuning passes that shape took.
 
 The tutorial forks: `DrownedMarch` is the main line (one-shot, escalating), `TheWarrens` is an optional repeatable dead end whose job is to fund the hub's Gold sinks - party slots cost 300/600, and before it there was nowhere to farm them. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
 

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97814ecae76f824da768a0e914775eb, type: 3}
+  m_Name: CinderGate
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.LevelDefinitionSO
+  Key: CinderGate
+  RoomPool:
+  - {fileID: 11400000, guid: cf0984e512aff7f4bac932cd4de8645a, type: 2}
+  - {fileID: 11400000, guid: 0226a69f3442ea5478475523df22ad4b, type: 2}
+  RoomsToGenerate: 5
+  ChainBias: 0.667
+  MomentumBias: 0.498
+  WallColor: {r: 0.24, g: 0.14, b: 0.12, a: 1}
+  TreasureRooms: 1
+  RestRooms: 0
+  CombatBackground: {fileID: 0}
