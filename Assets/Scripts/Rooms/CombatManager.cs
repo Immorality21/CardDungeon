@@ -639,10 +639,16 @@ namespace Assets.Scripts.Rooms
                 SelfTurnCount = enemy != null ? enemy.TurnsTaken : 0
             };
 
-            var decision = behavior.Decide(enemyUnit, context);
+            // Casting sits *beside* the archetype, not inside it: roll first, and only consult the
+            // behavior when the roll misses. That keeps every existing archetype byte-for-byte the
+            // behavior it always was, and an enemy with MagicCastChance 0 never takes this branch.
+            var decision = TryPlanEnemyCast(enemy, enemyUnit, context) ?? behavior.Decide(enemyUnit, context);
 
             switch (decision.Type)
             {
+                case EnemyActionType.CastMagic:
+                    yield return ExecuteEnemyCast(enemyUnit, enemy, decision, party);
+                    break;
                 case EnemyActionType.ChargeHeavy:
                     yield return ExecuteEnemyCharge(enemy, decision.Target);
                     break;
@@ -671,6 +677,102 @@ namespace Assets.Scripts.Rooms
             if (enemy != null)
             {
                 enemy.TurnsTaken++;
+            }
+        }
+
+        /// <summary>
+        /// Rolls this enemy's <see cref="Enemy.MagicCastChance"/> and, on a hit, returns the cast to
+        /// perform. Null means "no cast this turn" and the archetype behavior decides as usual.
+        /// </summary>
+        private EnemyDecision TryPlanEnemyCast(Enemy enemy, ICombatUnit enemyUnit, EnemyCombatContext context)
+        {
+            if (enemy == null)
+            {
+                return null;
+            }
+
+            // Random.Range over Random.value deliberately - see the project's Unity gotchas.
+            if (!EnemyMagicPlan.ShouldCast(
+                    enemy.MagicCastChance, enemy.DrawableMagics, context.SelfIsCharging, UnityEngine.Random.Range(0f, 1f)))
+            {
+                return null;
+            }
+
+            var magic = EnemyMagicPlan.Select(enemy.DrawableMagics, UnityEngine.Random.Range(0f, 1f));
+            if (magic == null)
+            {
+                return null;
+            }
+
+            var targets = EnemyMagicPlan.ResolveTargets(
+                magic, enemyUnit, context.Heroes, context.Allies, UnityEngine.Random.Range(0f, 1f));
+            if (targets.Count == 0)
+            {
+                return null;
+            }
+
+            return new EnemyDecision
+            {
+                Type = EnemyActionType.CastMagic,
+                Magic = magic,
+                MagicTargets = targets,
+                Target = targets[0]
+            };
+        }
+
+        /// <summary>
+        /// Resolves an enemy cast through the same effect engine a hero cast uses, so resistances,
+        /// the defense curve, healing clamps and floating text all behave identically.
+        ///
+        /// <para>Three deliberate differences from <see cref="ExecuteCastAction"/>. No charge is
+        /// spent - <see cref="DrawableMagicEntry.Charges"/> is the player's Draw grant, and enemies
+        /// cast freely. No upgrade bonus or upgrade level applies, so an enemy casts the base version
+        /// of the magic and any effect gated behind an <c>UnlockLevel</c> is skipped. And no tag
+        /// tracker or combo detector is passed, so an enemy cast neither triggers combos nor leaves
+        /// tags: combos carry player-facing discovery and upgrades, and crediting the player for a
+        /// combo the monster set up would be wrong. Letting enemies into the tag layer is a
+        /// deliberate follow-up, tracked in docs/NEXT_STEPS.md.</para>
+        /// </summary>
+        private IEnumerator ExecuteEnemyCast(ICombatUnit enemyUnit, Enemy enemy, EnemyDecision decision, Party party)
+        {
+            var targets = new List<ICombatUnit>();
+            foreach (var target in decision.MagicTargets)
+            {
+                if (target != null && target.IsAlive)
+                {
+                    targets.Add(target);
+                }
+            }
+
+            if (decision.Magic == null || targets.Count == 0)
+            {
+                // Everything it wanted to hit died before its turn came up; fall back to a swing.
+                yield return ExecuteEnemyBasicAttack(enemyUnit, null, party);
+                yield break;
+            }
+
+            var castAction = new SpellcastAction
+            {
+                Magic = decision.Magic,
+                Caster = enemyUnit,
+                Targets = targets
+            };
+
+            float powerScale = enemy != null ? enemy.MagicPowerScale : 1f;
+            var result = _calculator.Execute(
+                castAction, BuffTracker, null, null, 0, 0, null, powerScale);
+
+            _lastTurnLog = result.BuildLog(castAction);
+            CombatAudio.Play(CombatSound.MagicCast);
+
+            yield return _presenter.Present(result, enemyUnit);
+
+            foreach (var target in targets)
+            {
+                if (target is Hero)
+                {
+                    ResolveHeroDamaged(target);
+                }
             }
         }
 

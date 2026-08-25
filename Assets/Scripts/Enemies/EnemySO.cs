@@ -40,7 +40,18 @@ namespace Assets.Scripts.Enemies
         public EnemyArchetype Archetype = EnemyArchetype.Aggressor;
 
         // The Draw list: magics the player can extract from this enemy, each with charges.
+        // It is also what this enemy casts from — see MagicCastChance.
         public List<DrawableMagicEntry> DrawableMagics = new List<DrawableMagicEntry>();
+
+        [Header("Casting")]
+        [Tooltip("Chance per turn that this enemy casts one of its DrawableMagics instead of acting " +
+                 "on its archetype. 0 = never casts, which is how every enemy behaved before this " +
+                 "existed and what un-authored assets read as. Casting does not spend the entry's " +
+                 "Charges (those are the player's Draw grant), and a charging enemy always delivers " +
+                 "its charge rather than casting. The spell's base Power scales with the level's " +
+                 "EnemyTuning.Difficulty, the same dial that scales its Strength.")]
+        [Range(0f, 1f)]
+        public float MagicCastChance;
 
         public List<Resistance> Resistances = new List<Resistance>();
 

@@ -36,6 +36,7 @@ Still to design: `PowerMode` from `docs/ELEMENTAL_PLAN.md` (base-power / flat / 
 - **Flow** (in `CombatManager`, see the Rooms guide): a hero turn offers Attack / **Magic** / **Draw** / Skip.
   - **Draw** → pick an enemy → pick which magic from its Draw list (`Enemy.DrawableMagics`; skipped if it offers only one) → magic goes into the first empty slot (or the player picks a slot to overwrite) at full charges. Draw consumes the turn.
   - **Magic (cast)** → pick a charged slot → pick target(s) → resolves through the shared effect engine, then spends one charge.
+- **Enemies cast from their own Draw list too.** The same `MagicSO` the player can extract is what the enemy throws — `EnemySO.MagicCastChance` per turn, resolved through this same `EffectResolver`. It spends **no** charges, applies **no** upgrade bonus or level (so `UnlockLevel > 0` effects are skipped), and passes **no** tag tracker or combo detector. Owned by `EnemyMagicPlan`; see `Assets/Scripts/Enemies/CLAUDE.md`.
 
 ## Discovery & upgrades
 
@@ -45,7 +46,7 @@ Still to design: `PowerMode` from `docs/ELEMENTAL_PLAN.md` (base-power / flat / 
 
 ## Effect engine (unchanged by the Draw refactor — reused verbatim)
 
-- **EffectResolver** (was `CardEffectCalculator`): executes a `SpellcastAction { MagicSO Magic; caster; targets }` via the strategy pattern (`IEffectExecutor` per `SpellEffectType`). Handles combo detection and combo bonus effects. `Execute(..., powerBonus)` folds the meta magic-upgrade bonus into a *copy* of each Damage/Heal effect (Buff/Debuff power unaffected; `MagicSO` never mutated).
+- **EffectResolver** (was `CardEffectCalculator`): executes a `SpellcastAction { MagicSO Magic; caster; targets }` via the strategy pattern (`IEffectExecutor` per `SpellEffectType`). Handles combo detection and combo bonus effects. `Execute(..., powerBonus)` folds the meta magic-upgrade bonus into a *copy* of each Damage/Heal effect (Buff/Debuff power unaffected; `MagicSO` never mutated). A trailing **`powerScale`** multiplies that same copy's Power, applied after the bonus: it is 1 for every hero cast and exists for **enemy** casts, whose spells scale with their level's `EnemyTuning.Difficulty` (see the Enemies guide). Buff/Debuff power is left alone by both, because it is a stat delta rather than a damage number.
 - **Combo system**: `MagicComboSO` (`RequiredTags` + `BonusEffects`), `ComboDetector`, `MagicTagTracker` (active tags on units with durations).
 - **Buff system**: `CombatBuffTracker` (stat buffs + status effects with turn durations); `BuffType`; handlers under `Buffs/` via `BuffHandlerRegistry`.
 - **Effects/**: `IEffectExecutor`, `EffectExecutorFactory`, `Damage/Heal/Buff/DebuffEffectExecutor`.

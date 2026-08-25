@@ -15,8 +15,15 @@ namespace Assets.Scripts.Enemies
         public ItemSO LootItem;
 
         // The Draw list: magics the player can extract from this enemy mid-combat,
-        // each with the charges a successful draw grants (see EquippedMagicState).
+        // each with the charges a successful draw grants (see EquippedMagicState). It is also the
+        // list this enemy casts from - see MagicCastChance.
         public List<DrawableMagicEntry> DrawableMagics = new List<DrawableMagicEntry>();
+
+        /// <summary>
+        /// Chance per turn this enemy casts from <see cref="DrawableMagics"/> rather than acting on
+        /// its archetype. Stamped from the definition; 0 means it never casts.
+        /// </summary>
+        public float MagicCastChance;
 
         public EnemyArchetype Archetype;
         public List<Resistance> Resistances = new List<Resistance>();
@@ -43,6 +50,13 @@ namespace Assets.Scripts.Enemies
 
         /// <summary>Gold this kill pays, after the level's tuning.</summary>
         public int GoldReward => LevelEnemyTuning.GoldFor(Definition, Tuning);
+
+        /// <summary>
+        /// Multiplier on the base Power of anything this enemy casts, so its magic escalates across
+        /// the campaign the same way its attack does. See
+        /// <see cref="LevelEnemyTuning.MagicPowerScaleFor(EnemySO)"/>.
+        /// </summary>
+        public float MagicPowerScale => LevelEnemyTuning.MagicPowerScaleFor(Definition, Tuning);
 
         /// <summary>Whether this enemy is a boss (from its definition) — drives boss-only combat/UI.</summary>
         public bool IsBoss => Definition != null && Definition.IsBoss;
@@ -86,6 +100,7 @@ namespace Assets.Scripts.Enemies
             Stats = new Stats(LevelEnemyTuning.StatsFor(definition, tuning));
             Archetype = definition.Archetype;
             DrawableMagics = new List<DrawableMagicEntry>(definition.DrawableMagics);
+            MagicCastChance = definition.MagicCastChance;
             Resistances = new List<Resistance>(definition.Resistances);
             LootItem = definition.LootItem;
 

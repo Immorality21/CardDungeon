@@ -52,6 +52,13 @@ namespace Assets.Scripts.Balance
         [Tooltip("Below this the encounter is a formality — no threat, no decisions.")]
         public float MinMeaningfulDanger = 0.08f;
 
+        [Header("Enemy casting — spells thrown from the enemy's own Draw list")]
+        [Tooltip("Largest share of its turns an enemy should spend casting (EnemySO.MagicCastChance). " +
+                 "Above this the archetype's repertoire — charges, heavies, heals, the boss " +
+                 "signature — is what the player stops seeing, and every enemy that casts starts to " +
+                 "read the same way.")]
+        [Range(0f, 1f)] public float MaxEnemyCastChance = 0.5f;
+
         [Header("Level attrition — HP is a level-scoped resource (HealAll only fires at level start)")]
         [Tooltip("Fraction of the party's HP + healing pool that should still be left after " +
                  "clearing every combat room in a level.")]

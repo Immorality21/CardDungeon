@@ -93,6 +93,13 @@ namespace Assets.Scripts.Balance
     /// </summary>
     public static class EncounterSimulator
     {
+        /// <summary>
+        /// Shared resolver for enemy casts. <see cref="EffectResolver"/> holds no per-fight state
+        /// (just its executor factory), so one instance is safe and saves threading it through
+        /// the enemy turn the way the hero turn threads its own.
+        /// </summary>
+        private static readonly EffectResolver CastResolver = new EffectResolver();
+
         public static SimOutcome Run(
             PartyBaseline party,
             IList<SimUnit> enemyTemplates,
@@ -560,10 +567,16 @@ namespace Assets.Scripts.Balance
                 SelfTurnCount = enemy.TurnsTaken
             };
 
-            var decision = behavior.Decide(enemy, context);
+            // Same order as CombatManager.ExecuteEnemyTurn: roll for a cast first, and only ask the
+            // archetype when the roll misses.
+            var decision = PlanCast(enemy, context) ?? behavior.Decide(enemy, context);
 
             switch (decision.Type)
             {
+                case EnemyActionType.CastMagic:
+                    ResolveCast(enemy, decision, buffTracker);
+                    break;
+
                 case EnemyActionType.ChargeHeavy:
                     enemy.IsCharging = true;
                     enemy.ChargeTarget = decision.Target;
@@ -640,6 +653,79 @@ namespace Assets.Scripts.Balance
             }
 
             enemy.TurnsTaken++;
+        }
+
+        /// <summary>
+        /// Rolls the enemy's cast chance, exactly as <c>CombatManager.TryPlanEnemyCast</c> does.
+        /// Null means no cast and the archetype decides.
+        /// </summary>
+        private static EnemyDecision PlanCast(SimUnit enemy, EnemyCombatContext context)
+        {
+            if (enemy == null || enemy.Definition == null)
+            {
+                return null;
+            }
+
+            if (!EnemyMagicPlan.ShouldCast(
+                    enemy.MagicCastChance, enemy.Definition.DrawableMagics,
+                    context.SelfIsCharging, Random.Range(0f, 1f)))
+            {
+                return null;
+            }
+
+            var magic = EnemyMagicPlan.Select(enemy.Definition.DrawableMagics, Random.Range(0f, 1f));
+            if (magic == null)
+            {
+                return null;
+            }
+
+            var targets = EnemyMagicPlan.ResolveTargets(
+                magic, enemy, context.Heroes, context.Allies, Random.Range(0f, 1f));
+            if (targets.Count == 0)
+            {
+                return null;
+            }
+
+            return new EnemyDecision
+            {
+                Type = EnemyActionType.CastMagic,
+                Magic = magic,
+                MagicTargets = targets,
+                Target = targets[0]
+            };
+        }
+
+        /// <summary>
+        /// Resolves an enemy cast through the real <see cref="EffectResolver"/> — the same call
+        /// <c>CombatManager.ExecuteEnemyCast</c> makes, with the same arguments: no upgrade bonus, no
+        /// upgrade level, no tag tracker or combo detector, and the level's spell-power scale. That
+        /// reuse is the point; a second implementation here would be free to drift.
+        /// </summary>
+        private static void ResolveCast(SimUnit enemy, EnemyDecision decision, CombatBuffTracker buffTracker)
+        {
+            var targets = new List<ICombatUnit>();
+            foreach (var target in decision.MagicTargets)
+            {
+                if (target != null && target.IsAlive)
+                {
+                    targets.Add(target);
+                }
+            }
+
+            if (decision.Magic == null || targets.Count == 0)
+            {
+                return;
+            }
+
+            var action = new SpellcastAction
+            {
+                Magic = decision.Magic,
+                Caster = enemy,
+                Targets = targets
+            };
+
+            float powerScale = LevelEnemyTuning.MagicPowerScaleFor(enemy.Definition, enemy.Tuning);
+            CastResolver.Execute(action, buffTracker, null, null, 0, 0, null, powerScale);
         }
 
         /// <summary>

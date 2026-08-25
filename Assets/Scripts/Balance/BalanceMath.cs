@@ -192,6 +192,19 @@ namespace Assets.Scripts.Balance
 
             float perTurn = AverageDamageAgainstGroup(
                 attacker.GetEffectiveAttackPower(), targets, attacker.AttackDamageType, 1f, attacker) * multiplier;
+
+            // An enemy that casts is not attacking that turn, so the two are blended by the cast
+            // chance rather than added. Enemies with MagicCastChance 0 - every enemy before the
+            // field existed - take the early-out and read exactly as they did.
+            if (!attacker.IsHero && attacker.MagicCastChance > 0f)
+            {
+                var cast = EnemyMagicModel.Profile(attacker.Definition, attacker.Tuning, attacker, targets);
+                if (cast.Casts)
+                {
+                    perTurn = (1f - cast.CastChance) * perTurn + cast.CastChance * cast.ExpectedDamage;
+                }
+            }
+
             return perTurn * TurnsPerTick(attacker);
         }
 

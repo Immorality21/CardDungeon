@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   DisplayName: Gilded Hoarder
   Sprite: {fileID: 21300000, guid: 2799f341fa0f4e86a1dcc43a82775672, type: 3}
+  AnimationFrames: []
+  AnimationFps: 8
   IsBoss: 1
   BaseStats:
     Values:
@@ -36,8 +38,11 @@ MonoBehaviour:
   DrawableMagics:
   - Magic: {fileID: 11400000, guid: 36201a51cb01429fbed42d98c1e23162, type: 2}
     Charges: 3
+    CastWeight: 1
   - Magic: {fileID: 11400000, guid: 2ca64f0892a84f2181d73f56d8fdf4ef, type: 2}
     Charges: 3
+    CastWeight: 1
+  MagicCastChance: 0.1
   Resistances:
   - DamageType: 3
     Percent: 50

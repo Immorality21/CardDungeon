@@ -34,6 +34,8 @@ MonoBehaviour:
   DrawableMagics:
   - Magic: {fileID: 11400000, guid: 7eb83123e11d47b3ae4da91e88d37cb0, type: 2}
     Charges: 2
+    CastWeight: 1
+  MagicCastChance: 0.1
   Resistances:
   - DamageType: 1
     Percent: 50

@@ -17,6 +17,14 @@ namespace Assets.Scripts.Cards
         /// <param name="powerBonus">Flat power added to the magic's Damage/Heal effects (from its upgrade level).</param>
         /// <param name="magicUpgradeLevel">The magic's upgrade level — effects with a higher UnlockLevel are skipped.</param>
         /// <param name="comboLevelLookup">Returns a combo's upgrade level by key (gates combo effects + scales combo power); null = level 0.</param>
+        /// <param name="powerScale">
+        /// Multiplier on each Damage/Heal effect's base Power, applied after <paramref name="powerBonus"/>.
+        /// 1 leaves the authored numbers alone, which is every hero cast. It exists for <b>enemy</b>
+        /// casts: an enemy's spells scale with its level's <c>EnemyTuning.Difficulty</c>, the same
+        /// dial that scales the Strength its basic attack swings off, so its magic escalates across
+        /// the campaign instead of staying at floor-one power. Buff/Debuff power is left alone for
+        /// the same reason the upgrade bonus leaves it alone - it is a stat delta, not a damage number.
+        /// </param>
         public EffectResult Execute(
             SpellcastAction action,
             CombatBuffTracker buffTracker,
@@ -24,7 +32,8 @@ namespace Assets.Scripts.Cards
             ComboDetector comboDetector = null,
             int powerBonus = 0,
             int magicUpgradeLevel = 0,
-            Func<string, int> comboLevelLookup = null)
+            Func<string, int> comboLevelLookup = null,
+            float powerScale = 1f)
         {
             var result = new EffectResult();
 
@@ -34,7 +43,7 @@ namespace Assets.Scripts.Cards
                 {
                     continue;
                 }
-                var effectToUse = ApplyPowerBonus(effect, powerBonus);
+                var effectToUse = ApplyPowerBonus(effect, powerBonus, powerScale);
                 var executor = _factory.GetExecutor(effectToUse.EffectType);
                 executor.Execute(effectToUse, action.Caster, action.Targets, buffTracker, result);
             }
@@ -66,12 +75,13 @@ namespace Assets.Scripts.Cards
 
         /// <summary>
         /// Returns a copy of the effect with a permanent card-upgrade bonus folded into its
-        /// Power, for Damage/Heal effects only. Buff/Debuff power (a stat amount) is left
+        /// Power and then multiplied by <paramref name="powerScale"/>, for Damage/Heal effects only. Buff/Debuff power (a stat amount) is left
         /// unchanged. Returns the original effect when there is no bonus to apply.
         /// </summary>
-        private SpellEffect ApplyPowerBonus(SpellEffect effect, int powerBonus)
+        private SpellEffect ApplyPowerBonus(SpellEffect effect, int powerBonus, float powerScale = 1f)
         {
-            if (powerBonus <= 0)
+            bool scales = !Mathf.Approximately(powerScale, 1f);
+            if (powerBonus <= 0 && !scales)
             {
                 return effect;
             }
@@ -81,10 +91,16 @@ namespace Assets.Scripts.Cards
                 return effect;
             }
 
+            int power = effect.Power + Mathf.Max(0, powerBonus);
+            if (scales && power > 0)
+            {
+                power = Mathf.Max(1, Mathf.RoundToInt(power * powerScale));
+            }
+
             return new SpellEffect
             {
                 EffectType = effect.EffectType,
-                Power = effect.Power + powerBonus,
+                Power = power,
                 // Every other field has to be carried across, or the copy quietly differs from the
                 // authored effect. ScalingStat was the one that mattered: it defaults to None, so an
                 // upgraded magic lost its caster contribution entirely - upgrading a caster's spell

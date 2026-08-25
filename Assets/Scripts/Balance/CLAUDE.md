@@ -54,6 +54,8 @@ the game's numbers:
 | gear elemental resistance | `InventoryOperations.ComputeResistances` |
 | the element a unit's attacks carry | `ICombatUnit.AttackDamageType` (`EnemySO.AttackDamageType`) |
 | the stats an enemy actually fights with | `LevelEnemyTuning.StatsFor` (template x the level's tuning) |
+| whether an enemy casts, and which spell | `EnemyMagicPlan.ShouldCast` / `.Select` / `.ScalePower` |
+| an enemy's spell power at a level | `LevelEnemyTuning.MagicPowerScaleFor` |
 | economy pacing | `MetaProgressManager` constants |
 | potion belt capacity | `PartyResourceManager.DEFAULT_HEALING_POTION_MAX` |
 | room-event placement odds | `RoomEventSpawn.ChancePercent` / `.MeetsRequirements` |
@@ -75,6 +77,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `EncounterModel` | `WeightedEnemyGroup` + `RoomEncounter` — fractional spawn-table expectation |
 | `RunCurveModel` | `LevelCurve` / `RunCurve` — attrition, peak danger, boss ratio, difficulty jumps |
 | `RoomEventModel` | what a level's **room events** cost and pay: placement odds, check odds, weighted outcome pools |
+| `EnemyMagicModel` | what an enemy's **own casts** are worth: cast chance, expected damage and healing per cast |
 | `LevelEnemyTuning` (in `Enemies/`) | the per-level enemy numbers every metric is measured against |
 | `VarietyAnalyzer` | the one-dimensionality axis: archetype share, resistance coverage, inert damage types, Draw overlap |
 | `ProgressionMap` | the **supply chain**: which magic is drawable where, when each combo becomes possible, and whether a level's resistances are in elements the player can bring yet |
@@ -181,6 +184,26 @@ that ends runs, because `Party.HealAll()` only fires when a fresh dungeon is ent
 health is a consumable resource. At or above 1.00 the level cannot be cleared, whatever the per-room
 numbers look like. The run curve is drawn from this.
 
+**Enemies cast, and casting is blended with the swing, not added to it.** `EnemyMagicModel.Profile`
+prices an enemy's own `DrawableMagics` (`EnemySO.MagicCastChance`), and both `BalanceMath.DamagePerTick`
+and `EnemyMetrics.Compute` fold it in as `(1 - p) x attack + p x cast` — an enemy that casts is not
+attacking that turn. **Those two must not drift**: the danger index comes from the first and the
+tables/findings from the second. Enemies at `MagicCastChance` 0 take an early-out and read exactly as
+they did before casting existed.
+
+Three fidelity details, all documented on `EnemyMagicModel`. It calls `DamageCalculator` **directly**
+rather than going through `AverageDamageAgainstGroup`, because that helper always folds in an expected
+crit multiplier — it falls back to the *base* rate for a null attacker, not to 1, so there is no way to
+opt out through it — and `DamageEffectExecutor` has no crit roll. It skips effects behind an
+`UnlockLevel`, matching the `magicUpgradeLevel: 0` the enemy cast path passes. And it prices no combo
+follow-ups, because enemy casts pass no tag tracker or combo detector.
+
+**Two blind spots this exposed**, both real and both tracked in `docs/NEXT_STEPS.md` §0d: **buff and
+debuff casts are priced as nothing** (the closed form has nowhere to put a stat delta), and a
+**Healer's healing never enters the danger index** — which is why Bog Shaman reads as harmless and is
+the sole cause of the surviving *XP per unit of danger* warning. `AverageOffenseMultiplier`'s flat
+per-archetype factors are the existing workaround for the same gap.
+
 ## Simulator caveats — read before trusting it
 
 `EncounterSimulator` reuses the real behaviours and resolvers, but it **re-implements the turn loop**
@@ -188,6 +211,10 @@ numbers look like. The run curve is drawn from this.
 the real game). That is the drift risk. `EncounterSimulatorTests.ResolveAttack_AlwaysMatchesCombatManagerArithmetic`
 pins the simulated hit to `CombatManager.ExecuteAttack`'s exact arithmetic — **keep that test passing
 when you touch either side.**
+
+Enemy casting **is** modelled: `PlanCast` rolls `EnemyMagicPlan` and `ResolveCast` goes through the real
+`EffectResolver` with the same arguments `CombatManager.ExecuteEnemyCast` uses, so there is no second
+implementation to drift.
 
 Deliberate simplifications: mid-fight **Draw is not modelled** (heroes start with the magic the
 encounter's enemies offer, via `BalanceAnalyzer.AssignDrawLoadout`, and never spend a turn drawing);

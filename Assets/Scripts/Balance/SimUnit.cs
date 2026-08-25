@@ -87,6 +87,16 @@ namespace Assets.Scripts.Balance
         // ---- Enemy-side (mirrors the per-fight state CombatManager keeps on Enemy) ----
         public EnemySO Definition;
         public EnemyArchetype Archetype = EnemyArchetype.Aggressor;
+
+        /// <summary>
+        /// The level tuning this enemy was built under. Held because spell power scales off it
+        /// (<see cref="LevelEnemyTuning.MagicPowerScaleFor(EnemySO)"/>) the same way the stat block
+        /// does, so the model can price a cast without reaching back for the level.
+        /// </summary>
+        public LevelEnemyTuning Tuning;
+
+        /// <summary>Chance per turn this enemy casts from its Draw list instead of acting on its archetype.</summary>
+        public float MagicCastChance;
         public bool IsCharging;
         public ICombatUnit ChargeTarget;
         public int TurnsTaken;
@@ -108,7 +118,9 @@ namespace Assets.Scripts.Balance
                 AttackDamageType = AttackDamageType,
                 HeroKey = HeroKey,
                 Definition = Definition,
-                Archetype = Archetype
+                Archetype = Archetype,
+                Tuning = Tuning,
+                MagicCastChance = MagicCastChance
             };
 
             foreach (var slot in MagicSlots)
@@ -150,7 +162,9 @@ namespace Assets.Scripts.Balance
                 EffectiveAttackPower = stats[StatType.Strength],
                 AttackDamageType = definition.AttackDamageType,
                 Definition = definition,
-                Archetype = definition.Archetype
+                Archetype = definition.Archetype,
+                Tuning = tuning,
+                MagicCastChance = definition.MagicCastChance
             };
         }
     }

@@ -54,6 +54,8 @@ why the analyzer's own suggestion says a hero-HP change fixes many enemies at on
 | `EnemySpawnEntry.EvaluationCount` | `RoomSO` | Multiplies the *worst-case* tail far faster than the expectation. Two entries at 2 evaluations = 4 enemies on a full roll. First thing to check on any *unwinnable spawn roll* finding. |
 | `RoomsToGenerate` / room pool | `LevelDefinitionSO` | Enemy count — the only lever on per-enemy meaningfulness (§1, consequence 2). Level design, so change it deliberately. |
 | Hero `BaseStats[MaxHealth]` | `HeroSO` | Raises the ceiling on every enemy's Strength at once (§1, consequence 4). |
+| `EnemySO.MagicCastChance` | `EnemySO` | Share of turns the enemy casts from its own Draw list instead of acting on its archetype. Raises danger **without** raising time-to-kill, which is the one lever that does — see §5. |
+| `DrawableMagicEntry.CastWeight` | `EnemySO` | Which of its spells it reaches for. All-zero weights mean uniform. |
 
 **Difficulty vs. a MaxHealth scale, concretely:** `Difficulty 2.0` and `Difficulty 1.0 +
 MaxHealth ×4.0` reach a similar danger number. The first is a 4-turn fight against something that
@@ -100,7 +102,7 @@ chase a per-enemy danger target and broke hero durability on the way (`Difficult
 every hero dropped to 2 hits). **Stop at the best measured point** and check the constraints the
 objective does not name — hero hits-to-kill, fight length, worst-case spawn rolls.
 
-## 4. Retune of 2026-08-25 — findings 17 → 5
+## 4. Retune of 2026-08-25 — findings 17 → 5 (then → 3, see §5)
 
 The state before: **0 critical / 17 warning / 10 info**. Fourteen of the seventeen were the same
 authoring mistake, and `NEXT_STEPS.md` had recorded the wrong cause for them ("an arithmetic wall,
@@ -131,7 +133,8 @@ coupled consequences that surfaced once the trash moved:
 threatens anyone. Their overrides are absolute, so they had sat still through every trash pass — the
 boss:trash ratio warnings were the retune *surfacing* a pre-existing problem, not causing one.
 
-Result: **0 critical / 5 warning / 9 info**, suite **554 / 0**. Curve `0.04 / 0.49 / 0.59 / 0.77`,
+Result: **0 critical / 5 warning / 9 info**, suite **554 / 0**. (Enemy casting, §5, later took the
+same content to **0 / 3**.) Curve `0.04 / 0.49 / 0.59 / 0.77`,
 `0.44 / 0.52 / 0.34 / 0.48`, `0.56 / 0.73` — all inside the 0.80 ceiling. Trash fights **3–7** party
 turns (was 3–11), worst hero case 3 hits, boss:trash **2.3 / 5.3 / 2.3**.
 
@@ -142,7 +145,79 @@ took the Warrior (26 HP) to 2 hits and put Stone Sentinel back over 8 party turn
 is a **hero-HP** problem, not a dial problem — the same conclusion the analyzer's suggestion text
 reaches from the other side. Sphere-grid growth is the intended route.
 
-## 5. Standing traps
+## 5. Enemy casting — the lever that adds danger without adding fight length
+
+Shipped 2026-08-25. Worth its own entry because it behaves differently from every dial in §2.
+
+`danger ≈ ttk × dpt` (§1), so **every stat lever raises danger by raising one of those two factors**,
+and `MaxHealth` raises the wrong one. Casting is the exception: it replaces a swing with a spell on
+some fraction of turns, so it moves `dpt` while leaving `ttk` untouched. That makes it the right tool
+for exactly the problem the §4 retune could not finish — trash that is harmless but already fast
+enough to kill.
+
+Measured, on the campaign as authored: a uniform 15% cast chance took findings from **5 warnings to
+3**, closing two *no threat at all* warnings that no amount of `Difficulty` could close without
+breaking hero durability or fight length. A per-enemy set did the same and read better.
+
+**Measure the spell before choosing the chance.** Set every enemy to `MagicCastChance = 1` and read
+`EnemyMetrics.ExpectedCastDamage` against `AverageDamagePerHit`. That one table is the whole design
+decision, and it was full of surprises:
+
+| | cast | swing | read |
+|---|---|---|---|
+| Cinder Imp | 27–32 | 8–10 | **3–4×** — a nuke; keep the chance low or it 2-shots heroes |
+| Floating Eye | 8–14 | 3–9 | 1.6–2.8× — casting is what makes the weakest enemy worth a turn |
+| Dragon | 9–13 | 7–11 | ~1.3× — comfortable |
+| Bog Shaman | 8 dmg / **12 heal** | 8 | its cast out-heals its archetype heal (8), which is the point |
+| Hex Weaver | 4.0 | 11.4 | **0.35×** — casting makes it weaker |
+| Stone Sentinel | 5–7 | 6–9 | below its swing, and it is already the longest fight |
+| Bosses | 3.6–4.1 | 8.6 | below, **because their `Overrides` row exempts them from the spell scale** |
+
+Two structural consequences fall out of that table:
+
+- **A cast is not automatically an upgrade.** Where `ExpectedCastDamage < AverageDamagePerHit` the
+  enemy is spending a turn making the fight easier. The analyzer reports it per placement; the fix is
+  the magic's authored `Power`, a `ScalingStat` the enemy actually has, or a lower chance.
+- **Bosses on absolute overrides cast at floor-one power.** `MagicPowerScaleFor` returns 1 for any
+  enemy with an `Overrides` row, deliberately (an override means the level's dial does not apply), so
+  a boss's spells fall behind its scaled Strength. Either author boss spells at boss power or give
+  `EnemyStatOverride` its own spell-power field — tracked in `NEXT_STEPS.md` §0e.
+
+Also worth knowing: raising the chance is **not** monotone in finding count. The sweep read
+5 → 3 → 6 → 9 warnings at 0%, 15%, 25%, 35% uniform, because past ~25% the trash overtakes the bosses
+(boss:trash ratio warnings) and pushes a level over its attrition ceiling. `MaxEnemyCastChance`
+(default 0.50) only catches the extreme case where the archetype stops being visible at all.
+
+### The simulator, finally re-measured
+
+Enemy casting was validated end-to-end by running the analyzer with `runSimulation: true` — 46
+encounters, hundreds of battles each, through the same `EnemyMagicPlan` + `EffectResolver` path
+`CombatManager` uses. It completes cleanly, which is the real proof the cast path works against the
+authored assets rather than only in unit tests.
+
+It also produced the first simulator measurement since the campaign content landed, and it is worth
+knowing before the next pass: **closed-form is 0 critical / 3 warning, but simulation adds 44 more**,
+every one of them *"Attack-spam plays this fight as well as thinking does"*, on all 46 placements.
+That is the pre-existing decision-depth gap `NEXT_STEPS.md` §0 already records (Floating Eye's depth
+gap of 0.000) — enemy casting neither caused it nor fixes it, because depth is about the *player's*
+policies, and every policy wins 100% of these fights. Do not read those 44 as a regression, and do
+not expect an enemy-side change to close them: the lever is giving the player decisions that matter,
+which is §2's room-kind work and the elemental layer.
+
+### Two model blind spots this exposed
+
+Both are real and both are now tracked in `NEXT_STEPS.md` §0d, because they distort the numbers above:
+
+- **Buff and debuff casts are priced as nothing.** The closed form has nowhere to put a stat delta, so
+  a boss casting Shield Up reads as a pure loss of a turn. The Gilded Hoarder's entire Draw list is
+  buffs, so its cast damage is 0.00 and any chance above zero *lowers* its measured danger.
+- **A Healer's healing never enters the danger index.** Which is why Bog Shaman reads as harmless and
+  is the sole remaining cause of the *XP per unit of danger* warning. `AverageOffenseMultiplier`'s flat
+  0.5 factor for Healer is the existing hand-tuned workaround for the same gap.
+
+Until those are fixed, treat a support-casting enemy's measured danger as a floor, not a value.
+
+## 6. Standing traps
 
 - **A trash buff breaks three other checks.** Boss:trash ratio (bosses are on absolute overrides),
   hero hits-to-kill (the party minimum), and worst-case spawn danger (which scales with the dial
@@ -157,6 +232,11 @@ reaches from the other side. Sphere-grid growth is the intended route.
   exactly that call.
 - **The model measures the widest legal party**, so a player fielding fewer heroes sees a harder run
   than the curve reports. Every number here is the optimistic reading.
+- **`AverageDamageAgainstGroup` always applies a crit multiplier**, and passing `attacker: null` does
+  *not* opt out — `ExpectedCritMultiplier(null)` falls back to the **base** crit rate, not to 1. Any
+  damage source that does not crit (spell effects, room-event outcomes) has to call
+  `DamageCalculator` directly. This cost a debugging round: every enemy spell number came out exactly
+  7.2% high, which is `1 + CritChance x (CritMultiplier - 1)`.
 - **No rules asset is checked in.** Everything runs on `BalanceRulesSO.CreateDefault()` unless
   someone presses *Create rules asset*. If findings ever disagree between two machines, check that
   first.

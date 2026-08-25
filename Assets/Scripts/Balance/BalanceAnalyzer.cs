@@ -1080,6 +1080,11 @@ namespace Assets.Scripts.Balance
 
         private static void EvaluateEnemies(BalanceReport report, BalanceRulesSO rules)
         {
+            // MagicCastChance is authored per *asset* while stats are authored per *level*, so the
+            // findings about it that are not level-specific must be reported once, not once per
+            // placement - otherwise one un-authored enemy in ten levels is ten identical findings.
+            var castChanceReported = new HashSet<EnemySO>();
+
             foreach (var metrics in report.Enemies)
             {
                 float ceiling = metrics.DangerCeiling(rules);
@@ -1183,9 +1188,82 @@ namespace Assets.Scripts.Balance
                         Suggestion = "Set an XpReward proportional to its danger."
                     });
                 }
+
+                EvaluateEnemyCasting(metrics, report, rules, castChanceReported);
             }
 
             EvaluateRewardSpread(report, rules);
+        }
+
+        /// <summary>
+        /// Whether this placement's <see cref="EnemySO.MagicCastChance"/> is doing anything useful.
+        /// Casting is the one part of an enemy's offense that is authored per *asset* while its stats
+        /// are authored per *level*, so it is easy to leave in a state where the spells exist and
+        /// never fire, or fire so often the archetype stops mattering.
+        /// </summary>
+        private static void EvaluateEnemyCasting(
+            EnemyMetrics metrics, BalanceReport report, BalanceRulesSO rules, HashSet<EnemySO> alreadyReported)
+        {
+            if (metrics.DrawableCount == 0)
+            {
+                return;
+            }
+
+            // The two chance findings are about the asset, not this placement; the damage one below is
+            // per-level, because the level owns the spell scale it is measured at.
+            bool firstForThisAsset = metrics.Definition == null || alreadyReported.Add(metrics.Definition);
+
+            if (metrics.MagicCastChance <= 0f)
+            {
+                if (!firstForThisAsset)
+                {
+                    return;
+                }
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy, metrics.Name,
+                    $"{metrics.Name} never casts the magic it carries")
+                {
+                    Asset = metrics.Definition,
+                    Detail = $"It offers {metrics.DrawableCount} magic(s) on its Draw list but MagicCastChance is 0, "
+                           + "so the spells are player supply only and the enemy itself does nothing with them.",
+                    Suggestion = "Set EnemySO.MagicCastChance above 0 to let it cast, or leave it at 0 deliberately "
+                               + "if this enemy is meant to be a pure Draw source."
+                });
+                return;
+            }
+
+            if (firstForThisAsset && metrics.MagicCastChance > rules.MaxEnemyCastChance)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Name,
+                    $"{metrics.Name} casts {metrics.MagicCastChance:0%} of its turns, so its archetype barely acts")
+                {
+                    Asset = metrics.Definition,
+                    Detail = $"Above {rules.MaxEnemyCastChance:0%} the {metrics.Archetype} repertoire - charges, "
+                           + "heavies, heals, the boss signature - is what the player stops seeing. The archetype is "
+                           + "the enemy's identity; casting is meant to punctuate it.",
+                    Suggestion = $"Lower EnemySO.MagicCastChance toward {rules.MaxEnemyCastChance:0.00}."
+                });
+            }
+
+            // A cast that lands less than an ordinary swing is a turn the enemy wastes, which reads to
+            // the player as the enemy helping them. Only judged for spells aimed at the hero side:
+            // a heal or a self-buff is not competing with the attack on damage.
+            if (metrics.ExpectedCastDamage > 0f
+                && metrics.AverageDamagePerHit > 0f
+                && metrics.ExpectedCastDamage < metrics.AverageDamagePerHit)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy, metrics.Reference,
+                    $"{metrics.Reference} casts for less than it hits for")
+                {
+                    Asset = metrics.Definition,
+                    Detail = $"A cast averages {metrics.ExpectedCastDamage:0.0} against this party where a plain swing "
+                           + $"averages {metrics.AverageDamagePerHit:0.0}, so every cast is a turn spent making the "
+                           + "fight easier. Spell power rides this level's Difficulty "
+                           + $"({(metrics.Tuning != null ? metrics.Tuning.Difficulty : 1f):0.00}), and a boss on an "
+                           + "absolute Overrides row deliberately does not scale at all.",
+                    Suggestion = "Raise the magic's authored Power, give the effect a ScalingStat the enemy actually "
+                               + "has, or drop MagicCastChance so it leans on its attack."
+                });
+            }
         }
 
         private static float FindPerHero(EnemyMetrics metrics, string heroName)

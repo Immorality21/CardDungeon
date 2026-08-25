@@ -61,6 +61,18 @@ namespace Assets.Scripts.Balance
         public int ResistanceCount;
         public int DrawableCount;
 
+        /// <summary>Chance per turn this placement casts from its Draw list (EnemySO.MagicCastChance).</summary>
+        public float MagicCastChance;
+
+        /// <summary>Expected damage one of its casts lands on the party, at this level's spell scale.</summary>
+        public float ExpectedCastDamage;
+
+        /// <summary>Expected healing one of its casts returns to the enemy side.</summary>
+        public float ExpectedCastHealing;
+
+        /// <summary>True when this placement actually casts — it has a chance and something to cast.</summary>
+        public bool Casts => MagicCastChance > 0f && DrawableCount > 0;
+
         /// <summary>
         /// The level tuning these numbers were measured under, and the stats it produced. An
         /// <c>EnemySO</c> is a template shared across the campaign, so "this enemy's danger" is only
@@ -138,6 +150,20 @@ namespace Assets.Scripts.Balance
             metrics.OffenseMultiplier = BalanceMath.AverageOffenseMultiplier(enemy.Archetype, party.Size);
             metrics.AverageDamagePerHit = BalanceMath.AverageDamageAgainstGroup(metrics.Stats[StatType.Strength], partyUnits);
             metrics.EffectiveDamagePerTurn = metrics.AverageDamagePerHit * metrics.OffenseMultiplier;
+
+            // Casting is an alternative to attacking, not an addition to it, so the two blend by the
+            // cast chance. Same arithmetic as BalanceMath.DamagePerTick, which is what the danger
+            // index is drawn from - these two must not drift apart.
+            var cast = EnemyMagicModel.Profile(enemy, tuning, unit, partyUnits);
+            metrics.MagicCastChance = cast.CastChance;
+            metrics.ExpectedCastDamage = cast.ExpectedDamage;
+            metrics.ExpectedCastHealing = cast.ExpectedHealing;
+            if (cast.Casts)
+            {
+                metrics.EffectiveDamagePerTurn =
+                    (1f - cast.CastChance) * metrics.EffectiveDamagePerTurn
+                    + cast.CastChance * cast.ExpectedDamage;
+            }
 
             // Per-hero breakdown: plain hits, since that is what the player actually feels turn to turn.
             foreach (var hero in party.Heroes)

@@ -171,6 +171,30 @@ namespace Assets.Scripts.Enemies
             return ScaleReward(enemy.GoldReward, GoldMultiplier);
         }
 
+        /// <summary>
+        /// Multiplier this level applies to the base <c>Power</c> of a spell this enemy casts
+        /// (<see cref="EnemySO.MagicCastChance"/>), so its magic escalates across the campaign the
+        /// same way its attack does.
+        ///
+        /// <para>It is <see cref="Difficulty"/>, because that is the dial that scales Strength — the
+        /// stat a basic attack swings off. A spell's caster contribution
+        /// (<c>SpellEffect.ScalingStat</c>) already rides the scaled stat block, so this covers the
+        /// authored base that otherwise would not move.</para>
+        ///
+        /// <para><b>An enemy with an absolute override does not scale.</b> An
+        /// <see cref="Overrides"/> row means "this level's dial does not apply to this enemy" — it is
+        /// how bosses are kept off the trash dial — so its spells stay on their authored power for
+        /// the same reason its Strength does.</para>
+        /// </summary>
+        public float MagicPowerScaleFor(EnemySO enemy)
+        {
+            if (enemy == null)
+            {
+                return 1f;
+            }
+            return OverrideFor(enemy) != null ? 1f : Mathf.Max(0.01f, Difficulty);
+        }
+
         private EnemyStatOverride OverrideFor(EnemySO enemy)
         {
             if (Overrides == null)
@@ -233,6 +257,16 @@ namespace Assets.Scripts.Enemies
                 return 0;
             }
             return tuning != null ? tuning.GoldFor(enemy) : enemy.GoldReward;
+        }
+
+        /// <summary>Spell power multiplier for an enemy under an optional tuning; 1 for none.</summary>
+        public static float MagicPowerScaleFor(EnemySO enemy, LevelEnemyTuning tuning)
+        {
+            if (enemy == null || tuning == null)
+            {
+                return 1f;
+            }
+            return tuning.MagicPowerScaleFor(enemy);
         }
     }
 }

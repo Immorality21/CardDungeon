@@ -416,6 +416,97 @@ is the map screen, and clearing a run's final level banks its key in
   Fireball x3 into slot 0. *(Still open: nothing in the hub shows the player what their heroes are
   carrying before a run starts.)*
 
+### 0d. Enemy archetypes need real authoring depth — *the next thing to build here*
+
+**Enemies now cast** (shipped 2026-08-25, see below), but their *non-magic* repertoire is still
+chosen by a single enum field. `EnemyArchetype` has five members, `EnemyBehaviorFactory` maps each to
+one hard-coded `IEnemyBehavior`, and every number those behaviours use is a **compile-time constant**:
+`HealerBehavior.HealPower = 8`, `DebufferBehavior.DebuffAmount = 3` / `DebuffDuration = 3` on
+`StatType.Strength`, `BruiserBehavior.HeavyMultiplier`, `BossBehavior.SignatureInterval` /
+`SignatureMultiplier`. A designer cannot change *any* of that from an asset. Two enemies with the
+same archetype are the same fight with different stats, and authoring a new kind of enemy behaviour
+means writing a class.
+
+Concretely, today's ceiling: you cannot author a Healer that heals for a different amount, a Debuffer
+that debuffs Agility instead of Strength, a Bruiser whose heavy lands on a different cadence, an
+enemy that does two of these things, or an enemy whose special is anything not already in
+`EnemyActionType`.
+
+**What this should become.** The shape worth aiming at is the one `RoomEventSO` already proves out in
+this project: behaviour as *authored data*, with a small pure resolver. Sketch —
+
+- A **weighted action list** on `EnemySO` (or a shared `EnemyBehaviorSO`): each entry an action kind,
+  its numbers (power, multiplier, duration, target stat), a weight or cadence, and optional
+  conditions (`self below X% health`, `an ally is wounded`, `every Nth turn`, `no debuff on target
+  yet`). The existing archetypes become authored presets rather than code paths.
+- The behaviour constants above move onto those entries, so `HealPower` is a number on an asset.
+- `EnemyMagicPlan` is the template to copy for the resolver: pure, roll-injected, shared by
+  `CombatManager`, `EncounterSimulator` and the tests, so the three can never drift.
+- **The balance model has to move with it.** `BalanceMath.AverageOffenseMultiplier` currently
+  switches on `EnemyArchetype` and returns a flat factor per archetype (0.5 for Healer, 0.85 for
+  Debuffer, a computed cycle for Bruiser/Boss). Authored actions make that a real expectation over
+  the action list instead of a hand-tuned constant — which would also fix the two model blind spots
+  the casting work exposed: **buff and debuff casts are priced as nothing**, and a Healer's healing
+  never enters the danger index (it is the whole reason `XP per unit of danger varies 4.9x` is still
+  a warning, since Bog Shaman reads as harmless).
+
+Keep `EnemyArchetype` as the coarse label — it drives nothing else and it is a useful shorthand in
+the analyzer's variety checks — but stop making it the only lever.
+
+### 0e. Enemies cast their drawable magic — ✅ shipped 2026-08-25
+
+Enemies used to have **no connection at all** between the magic you could Draw from them and what
+they did on their turn: `DrawableMagics` had zero readers outside the Draw UI and the balance model.
+Bog Shaman offered `Heal` and healed — for a hardcoded 8, not `Heal`'s authored power. Hex Weaver
+offered `PoisonDart` and debuffed — Strength −3, unrelated to the spell. Every Aggressor offered
+elemental damage magic and only ever basic-attacked. The resemblance was coincidental.
+
+**Now they cast from that same list.** Four rules, all pinned by `EnemyCastingTests` (25 cases):
+
+- **A roll, beside the archetype rather than inside it.** `EnemyMagicPlan.ShouldCast` is consulted
+  *before* the behaviour; on a miss the archetype decides exactly as it always did, so no existing
+  behaviour changed. `EnemySO.MagicCastChance` (0..1) is the dial, and per-entry
+  `DrawableMagicEntry.CastWeight` biases *which* magic.
+- **Charges are never spent.** `Charges` is the player's Draw grant; an enemy casting from the same
+  list is free, the way the FF games this is modelled on treat it.
+- **A charging enemy delivers its charge.** It has already telegraphed a heavy or a boss signature and
+  the player has been shown that, so a cast can never swallow it.
+- **Spell power scales with the level, not the asset.** `LevelEnemyTuning.MagicPowerScaleFor` returns
+  the level's `Difficulty` — the same dial that scales the Strength a basic attack swings off — folded
+  into base `Power` through a new `powerScale` argument on `EffectResolver.Execute`. An enemy with an
+  absolute `Overrides` row does **not** scale, for the same reason its Strength does not: an override
+  means the level's dial does not apply to it.
+
+Targeting mirrors the table: `MagicTargetType` is authored from the player's side, so for an enemy
+"enemy" is the hero side and "ally" is the other monsters (a single-ally cast picks the most wounded).
+Resolution goes through the real `EffectResolver`, so resistances, the defense curve, healing clamps
+and floating text all behave as they do for a hero cast.
+
+**Balance model.** `EnemyMagicModel` prices a cast in the same currency as everything else, and
+`BalanceMath.DamagePerTick` / `EnemyMetrics` **blend** it with the swing by the cast chance rather
+than adding it — casting is an alternative to attacking. Three new findings: an enemy that carries
+magic and never casts it, one that casts above `BalanceRulesSO.MaxEnemyCastChance` (so its archetype
+stops being visible), and a placement whose cast lands for *less* than its swing. `EncounterSimulator`
+rolls casts through the same `EnemyMagicPlan` + `EffectResolver` path.
+
+Authored chances: Floating Eye / Dragon **0.25** (their cast beats their swing, and the Eye is the
+weakest thing in the game), Bog Shaman **0.20**, Hex Weaver **0.15**, Cinder Imp **0.10** (its cast is
+3–4× its swing — rare, so it stays a spike), Stone Sentinel **0.10** (already the longest fight),
+bosses **0.15** / Hoarder **0.10**. Findings went **0 critical / 5 warning → 0 / 3**, suite 579/0.
+
+**Two deliberate limits, both open:**
+
+- **No tags, no combos.** Enemy casts pass neither `MagicTagTracker` nor `ComboDetector`, so they
+  apply effects but never trigger a combo or leave a tag. Combos carry player-facing discovery and
+  upgrade levels, and crediting the player for a combo a monster set up would be wrong. Letting
+  enemies into the tag layer is a real feature — an enemy applying `Oiled` for the *next* enemy to
+  `Ignite` is exactly the kind of pressure the elemental layer wants — but it needs a discovery
+  decision first, and `EnemyMagicModel` would have to price combo follow-ups to match.
+- **Boss casts read weaker than boss swings.** Because bosses sit on absolute `Overrides` rows their
+  spell power does not scale, so at Difficulty 2.5+ their authored spells fall behind their scaled
+  Strength — the analyzer says so out loud for the Warden and Mirefather. Either give
+  `EnemyStatOverride` its own spell-power field, or author boss spells at boss power.
+
 ### 1. Battle polish (feel & clarity)
 
 The combat *systems* are solid; the presentation is thin. Two structural gaps found in a scan:
