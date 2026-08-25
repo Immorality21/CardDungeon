@@ -24,10 +24,8 @@ MonoBehaviour:
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     EnemyTuning:
-      Difficulty: 1.55
-      StatScales:
-      - Stat: 7
-        Multiplier: 1.93
+      Difficulty: 2.35
+      StatScales: []
       XpMultiplier: 1
       GoldMultiplier: 1
       Overrides: []
@@ -37,10 +35,8 @@ MonoBehaviour:
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     EnemyTuning:
-      Difficulty: 1.55
-      StatScales:
-      - Stat: 7
-        Multiplier: 2.24
+      Difficulty: 2.5
+      StatScales: []
       XpMultiplier: 1
       GoldMultiplier: 1
       Overrides: []
@@ -50,10 +46,8 @@ MonoBehaviour:
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     EnemyTuning:
-      Difficulty: 1.55
-      StatScales:
-      - Stat: 7
-        Multiplier: 2.78
+      Difficulty: 2.75
+      StatScales: []
       XpMultiplier: 1
       GoldMultiplier: 1
       Overrides: []
@@ -63,10 +57,8 @@ MonoBehaviour:
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: e62cccd795c1c1942b396724ce782f6f, type: 2}
     EnemyTuning:
-      Difficulty: 1.55
-      StatScales:
-      - Stat: 7
-        Multiplier: 1.6
+      Difficulty: 2.55
+      StatScales: []
       XpMultiplier: 1
       GoldMultiplier: 1
       Overrides:
@@ -74,9 +66,9 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 118
+            Amount: 126
           - Type: 1
-            Amount: 8
+            Amount: 12
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

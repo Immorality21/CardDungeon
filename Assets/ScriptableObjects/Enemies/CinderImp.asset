@@ -27,7 +27,7 @@ MonoBehaviour:
       Amount: 4
     - Type: 7
       Amount: 14
-  XpReward: 8
+  XpReward: 14
   GoldReward: 4
   AttackDamageType: 1
   Archetype: 0

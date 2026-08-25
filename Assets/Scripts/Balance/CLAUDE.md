@@ -3,6 +3,10 @@
 Measures the game's authored numbers against explicit design targets and reports what is off. Read
 this before changing anything under `Assets/Scripts/Balance/`.
 
+This file is the **model**: what each metric means and how it is computed. For *using* it — which
+lever to reach for, how to measure an experiment without dirtying assets, and what previous tuning
+passes learned — see **`docs/BALANCING.md`**, and add to it after a pass.
+
 ## The one structural rule
 
 **The window is a view. All arithmetic lives in the runtime assembly.**

@@ -10,6 +10,8 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 6 (60
 
 Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md`**. Check it for what's in progress and what's queued before starting new feature work.
 
+Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCING.md`** — the arithmetic that couples the levers, the workflow that measures instead of guessing, and the ceilings already found. Read it before a balance pass and add to it after one.
+
 ## Build & Run
 
 - **Unity version:** 6000.5.8f1 (Unity 6; must match exactly)
@@ -63,6 +65,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Main menu & hub UI** (incl. editor-driven UI setup) → `Assets/Scripts/MainMenu/CLAUDE.md`
 - **Persistence / save files** → `Assets/Scripts/IO/CLAUDE.md`
 - **Balance analysis** (difficulty targets, danger index, attrition, Draw/combo supply chain, the analyzer window) → `Assets/Scripts/Balance/CLAUDE.md`
+- **Balancing playbook** (how the levers interact, the measure-don't-guess workflow, what past tuning passes learned) → `docs/BALANCING.md` — read this *before* changing a `Difficulty`, a hero bar or a spawn table, and record what a pass learned there afterwards
 - **Elemental layer roadmap** (resistance buffs, defensive magic, surfacing resistances) → `docs/ELEMENTAL_PLAN.md`
 - **Runtime/visual validation via the Unity MCP** (drive the running game, capture screenshots) → `docs/GAMEPLAY_VALIDATION.md`
 

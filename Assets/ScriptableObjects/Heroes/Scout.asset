@@ -37,6 +37,6 @@ MonoBehaviour:
     - Type: 6
       Amount: 12
     - Type: 7
-      Amount: 22
+      Amount: 30
   AttackStat: 3
   SphereGrid: {fileID: 11400000, guid: e65099c3b0614ee41bb44b281b3616bd, type: 2}

@@ -8,6 +8,9 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
 > next run). The remaining work is about making runs feel like *runs* — stakes, choice, and
 > a climax — rather than fixing broken plumbing.
 
+> Balance/tuning work: read **`docs/BALANCING.md`** first — it holds the lever interactions, the
+> measurement workflow and what previous passes learned, so a pass does not re-derive them.
+
 ## Done
 
 - **Boss encounters (run climax).** ✅ Shipped. `EnemySO.IsBoss` + `EnemyArchetype.Boss`
@@ -236,14 +239,55 @@ Result — **0 critical / 17 warning / 10 info**, suite **554 passed / 0 failed*
 (Warrens), all inside the 0.80 ceiling; boss-to-trash ratios are 2.0 / 2.2 / 2.1 against a 1.8–6 band;
 trash danger went from 0.006–0.047 to 0.05–0.14.
 
-**What is still open, and why.** Eight *no threat at all* warnings remain (danger 0.051–0.079 against
-the 0.08 floor), all Dragon/Floating Eye/Hex Weaver in the Drowned March back half and the Warrens,
-plus four *takes too long to kill* and one *bad spawn roll* on Rotwater Deep. These are the arithmetic
-wall, not slack: **mean per-enemy danger × enemy count = the level's attrition**, so at 5–6 enemies a
-level cannot put every one of them above 0.08 without exceeding its attrition ceiling. Closing them
-needs another round of thinning (toward 4 enemies per level) or a decision that `MinMeaningfulDanger`
-should be ~0.05 for wide levels. Also open: **archetype mix** (4 of 7 enemies are still `Aggressor`),
-*XP per unit of danger varies 8.6×*, and the two long-standing content items below.
+~~**What is still open, and why.** Eight *no threat at all* warnings remain (danger 0.051-0.079
+against the 0.08 floor) ... These are the arithmetic wall, not slack ... Closing them needs another
+round of thinning (toward 4 enemies per level).~~ ❌ **The diagnosis was wrong** — the constraint was
+real but it was not what was binding, and the prescription (more thinning) would not have closed
+these. Corrected and closed 2026-08-25 — see the entry below.
+
+**Findings 17 → 5, and the cause was one authoring mistake.** ✅ Shipped 2026-08-25. Fourteen of the
+seventeen warnings had a single root cause, visible in one dump of the level dials: **every
+non-tutorial level in the project sat at `Difficulty` 1.55, and the only thing that varied per level
+was a `MaxHealth` multiplier** (×1.32 … ×2.78). Enemies fought at ×2.0-4.3 health and ×1.55 strength,
+campaign-wide — the campaign escalated by making enemies *tankier*, never more *dangerous*. Since
+`danger ≈ ttk × dpt`, that buys danger out of fight length, which is why the findings read as
+self-contradictory: the same Floating Eye was *"no threat at all"* in one level and *"takes too long
+to kill"* in another. It also explains per-enemy danger **falling** across a run (Eye 0.079 → 0.078 →
+0.088 → 0.051 through the Drowned March) — the party grew through the XP loop while the enemies only
+grew health.
+
+The fix moved escalation onto `Difficulty` and dropped every `MaxHealth` scale: **1.80 / 2.05 / 2.70**
+(Threshold), **2.35 / 2.50 / 2.75 / 2.55** (Drowned March), **2.25 / 2.45** (Warrens). That closed all
+10 *no threat* and all 4 *takes too long* warnings and surfaced four coupled consequences, each fixed
+in the same pass: `BlueRoom`'s spawn evaluations 2 → 1 on both entries (it rolled 2 Eyes + 2 Dragons
+and was the **only** room behind both *unwinnable spawn roll* findings); boss overrides raised
+(Abyssal Warden 6/93 → **11/105**, Mirefather 8/118 → **12/126**, Gilded Hoarder 6/104 → **9/110**) —
+bosses had the same wrong shape as the trash, and being on absolute overrides had let them sit still
+through every previous pass; the **Scout** 22 → **30** HP, because the party minimum caps enemy
+Strength for the whole roster; and Cinder Imp / Bog Shaman XP retuned (8 → 14, 16 → 10).
+
+Result: **0 critical / 5 warning / 9 info**, suite **554 passed / 0 failed**. Curve `0.04 / 0.49 /
+0.59 / 0.77`, `0.44 / 0.52 / 0.34 / 0.48`, `0.56 / 0.73` — every level inside the 0.80 ceiling. Trash
+fights **3-7** party turns (was 3-11), worst hero case 3 hits, boss:trash **2.3 / 5.3 / 2.3**.
+
+**Ceiling found:** `Difficulty` ≈ **2.75** is the practical maximum until hero bars grow — pushing
+Rotwater Deep to 3.55 took the Warrior (26 HP) to 2 hits and Stone Sentinel back over 8 party turns.
+Further escalation is a hero-HP problem, not a dial problem.
+
+**The five that remain**, and why none is a straightforward tuning job: *XP per unit of danger varies
+6.9×* (band 2.5×) — driven by Bog Shaman, whose danger index does not price healing, so this is
+partly a **model gap**; *Floating Eye in `Dungeon Entrance` (0.034)* — correct by design, the tutorial
+is one fight and the exit; *Floating Eye at 0.077 and 0.078* in `The Mire Throne` and `Warren Tunnels`
+— a hair under the 0.080 floor, and raising either level's dial reopens something else; and
+*`Mirefather`'s unresistable Shadow*, a content decision tracked in §0c below. Consider whether the
+first is a `MinMeaningfulDanger` / danger-index question rather than a content one.
+
+**Method and learnings are now written down** in **`docs/BALANCING.md`** — the lever interactions, the
+snapshot/mutate/restore harness for measuring an experiment through the Unity MCP, the quadratic rule
+that makes a dial search converge in two or three iterations, and the standing traps (a trash buff
+breaks boss ratios, hero hits-to-kill and worst-case spawn danger at the same time). Read it before
+the next pass. **Not re-measured** in this pass: the simulator and the save audit.
+
 ~~**XP distribution**~~ ✅ shipped 2026-08-22 as the even split in §5.
 
 ~~**The suite has one standing red: `BalanceRegressionTests.RunDifficultyEscalates`.**~~ ✅ Fixed
