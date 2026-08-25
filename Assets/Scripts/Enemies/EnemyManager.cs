@@ -58,6 +58,14 @@ namespace Assets.Scripts.Enemies
                     continue;
                 }
 
+                // A non-combat room holds no guards. A treasure cache with three imps on it is just
+                // another fight, and the point of the kind is that it is not one - so this is what
+                // makes a level's room kinds cost it fights rather than merely decorate them.
+                if (!room.Kind.HoldsEnemies())
+                {
+                    continue;
+                }
+
                 // Determine spawn table: use manual override if provided, otherwise RoomSO table
                 List<EnemySpawnEntry> spawnTable = null;
                 bool guaranteeAll = false;

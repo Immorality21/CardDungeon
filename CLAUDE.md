@@ -34,7 +34,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 
 **`Assets.Scripts.*`** — Game-specific code:
 - `UnitStats/` — **the stat model**: `StatType` (the one stat enum, `None = 0`), `UnitStat` (one stat + amount), `StatBlock` (a sparse, indexable set), **`StatCatalog`** (the one per-stat mapping — labels, recruit/power weights, authoring defaults, iteration order), and `Editor/StatBlockDrawer` (one labelled row per stat in the inspector). **Adding a stat is one `StatType` member plus one `StatCatalog` row**; `StatCatalogTests` fails if the row is missing.
-- `Rooms/` — Dungeon generation (`RoomManager`, `RoomNode`, `Room`, `Door`, `RoomSO`), `GameManager`, `CombatManager`
+- `Rooms/` — Dungeon generation (`RoomManager`, `RoomNode`, `Room`, `Door`, `RoomSO`), **room kinds** (`RoomKind` + the pure `RoomKindPlanner` / `RoomKindRewards` — caches and refuges, placed per instance on a per-level quota), `GameManager`, `CombatManager`
 - `Rooms/Events/` — **room events**: the stat-resolved gambles behind a room's **Action** button (`RoomEventSO`, `RoomEventSpawn`, `RoomEventResolver`, `RoomEventRunner`, `LevelAfflictionTracker`) — see its own `CLAUDE.md`
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `HeroSaveData`, **the sphere grid** (`SphereGridSO` node-graph assets + `SphereGridOps`, the pure rules — XP is a per-hero bank spent on nodes at the hub; `LevelConfiguration` is gone), and `UI/` (`SphereGridView` — the UITK graph renderer shared by the hub screen and the `Tools ▸ Heroes ▸ Sphere Grid Editor` window — `SphereGridPresenter`, `SphereGridUI`)
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`

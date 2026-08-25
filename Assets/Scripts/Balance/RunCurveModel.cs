@@ -91,8 +91,16 @@ namespace Assets.Scripts.Balance
         /// <summary>Heroes in the party entering this level. Roster growth makes this vary per level.</summary>
         public int PartySize;
 
-        /// <summary>HP + healing the party brings into this level — the denominator of AttritionLoad.</summary>
+        /// <summary>HP + healing the party brings into this level, plus what its refuges give back — the denominator of AttritionLoad.</summary>
         public int SustainPool;
+
+        /// <summary>Rooms of this level promoted to a one-shot cache, and to a refuge.</summary>
+        public int TreasureRooms;
+
+        public int RestRooms;
+
+        /// <summary>Health the level's refuges are expected to return, already inside <see cref="SustainPool"/>.</summary>
+        public int RestHealing;
 
         /// <summary>
         /// The party this level was measured against. Held so the simulator can fight this level's
@@ -325,7 +333,12 @@ namespace Assets.Scripts.Balance
                 Layout = entry.ManualLayout,
                 Boss = entry.BossEnemy,
                 Entry = entry,
-                Tuning = entry.EnemyTuning
+                Tuning = entry.EnemyTuning,
+
+                // Room kinds are a level-template quota, and they cut both ways: each one is a fight
+                // the level does not have, and a cache or a refuge it does.
+                TreasureRooms = entry.LevelTemplate != null ? Mathf.Max(0, entry.LevelTemplate.TreasureRooms) : 0,
+                RestRooms = entry.LevelTemplate != null ? Mathf.Max(0, entry.LevelTemplate.RestRooms) : 0
             };
 
             if (entry.ManualLayout != null)
@@ -399,7 +412,13 @@ namespace Assets.Scripts.Balance
             // entry is expected to appear RoomsToGenerate / poolSize times. One of those rooms is
             // the party's starting room, which EnemyManager.SpawnEnemies deliberately skips, so it
             // contributes nothing and is taken off the total before spreading.
-            int populated = Mathf.Max(0, template.RoomsToGenerate - 1);
+            //
+            // The level's non-combat rooms come off too: DungeonManager promotes that many rooms to a
+            // cache or a refuge before anything spawns, and EnemyManager skips them. Without this the
+            // model prices fights the player never has, which reads as attrition the level does not
+            // actually charge.
+            int nonCombat = Mathf.Max(0, template.TreasureRooms) + Mathf.Max(0, template.RestRooms);
+            int populated = Mathf.Max(0, template.RoomsToGenerate - 1 - nonCombat);
             float perEntry = (float)populated / template.RoomPool.Count;
 
             foreach (var room in template.RoomPool)
@@ -565,10 +584,23 @@ namespace Assets.Scripts.Balance
             }
 
             level.ExpectedGold += level.ExpectedEventGold;
+
+            // Cache gold, priced at the same depth the loot roll uses. A cache is guaranteed once the
+            // player walks into it, so unlike an event there is no engagement rate to apply.
+            if (level.TreasureRooms > 0)
+            {
+                level.ExpectedGold += level.TreasureRooms * RoomKindRewards.TreasureGold(level.Index);
+            }
+
             level.ExpectedHealthCost = level.ExpectedCombatHealthCost + level.ExpectedEventHealthCost;
 
-            int sustain = party.SustainPool;
+            // A refuge is sustain the level hands back, so it belongs in the denominator beside the
+            // party's health and potions - otherwise adding one reads as pure difficulty relief the
+            // curve cannot see.
+            int restHealing = RoomKindRewards.ExpectedRestHealing(level.RestRooms, party.HealthPool);
+            int sustain = party.SustainPool + restHealing;
             level.PartySize = party.Size;
+            level.RestHealing = restHealing;
             level.SustainPool = sustain;
             level.Party = party;
             level.AttritionLoad = sustain > 0 ? level.ExpectedHealthCost / sustain : 0f;

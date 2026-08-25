@@ -6,6 +6,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Combat.Audio;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Items;
+using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -47,6 +48,8 @@ namespace Assets.Scripts.Rooms
         private Button _eventBack;
 
         private Button _actionBtn;
+        private Button _searchBtn;
+        private Button _restBtn;
         private Button _rescueBtn;
         private Button _descendBtn;
         private Button _fightBtn;
@@ -140,6 +143,8 @@ namespace Assets.Scripts.Rooms
             _eventBack = root.Q<Button>("event-back");
 
             _actionBtn = root.Q<Button>("action-btn");
+            _searchBtn = root.Q<Button>("search-btn");
+            _restBtn = root.Q<Button>("rest-btn");
             _rescueBtn = root.Q<Button>("rescue-btn");
             _descendBtn = root.Q<Button>("descend-btn");
             _fightBtn = root.Q<Button>("fight-btn");
@@ -151,6 +156,14 @@ namespace Assets.Scripts.Rooms
             _bossBannerName = root.Q<Label>("boss-banner-name");
 
             _actionBtn.clicked += OnAction;
+            if (_searchBtn != null)
+            {
+                _searchBtn.clicked += OnSearch;
+            }
+            if (_restBtn != null)
+            {
+                _restBtn.clicked += OnRest;
+            }
             if (_rescueBtn != null)
             {
                 _rescueBtn.clicked += OnRescue;
@@ -175,7 +188,7 @@ namespace Assets.Scripts.Rooms
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _actionBtn, _rescueBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _eventBack, _eventOptions })
+            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _rescueBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -225,6 +238,7 @@ namespace Assets.Scripts.Rooms
                 SetShown(_mainBar, false);
                 RefreshRescueButton();
                 RefreshActionButton();
+                RefreshPayloadButtons();
                 RefreshDescendButton();
             }
             else
@@ -625,6 +639,180 @@ namespace Assets.Scripts.Rooms
                     RefreshPartyStatus();
                 };
             });
+        }
+
+        /// <summary>
+        /// Empties a cache: gold, plus at most one depth-rolled item. Not confirmed, because nothing
+        /// is spent and nothing is risked - the decision a cache poses is only whether to walk to it.
+        /// </summary>
+        private void OnSearch()
+        {
+            if (_currentRoom == null || !_currentRoom.HasPendingPayload
+                || _currentRoom.Kind != RoomKind.Treasure)
+            {
+                RefreshPayloadButtons();
+                return;
+            }
+
+            SetShown(_mainBar, false);
+
+            var lines = new List<string>();
+
+            int gold = RoomKindRewards.TreasureGold(DungeonManager.RunLevelIndex);
+            if (gold > 0)
+            {
+                // Pending, not banked: cache gold is forfeited on death exactly like a kill's, so
+                // carrying it out of the level is the reward.
+                MetaProgressManager.Instance.AddPendingGold(gold);
+                lines.Add($"+{gold} gold.");
+            }
+
+            var item = RollTreasureItem();
+            if (item != null && InventoryManager.HasInstance)
+            {
+                InventoryManager.Instance.AddItem(item);
+                lines.Add($"Found: {item.DisplayName}.");
+            }
+            else
+            {
+                lines.Add("Nothing else worth carrying.");
+            }
+
+            TakePayload();
+
+            if (FloatingTextHandler.HasInstance && GameManager.Instance.Party != null)
+            {
+                FloatingTextHandler.Instance.CreateFloatingText(
+                    GameManager.Instance.Party.transform.position, $"+{gold} gold", new Color(1f, 0.85f, 0.25f));
+            }
+
+            ShowDetail("A Cache", "Coin and oddments, stashed here and forgotten.\n\n"
+                + string.Join("\n", lines));
+            _detailOkAction = ClosePayloadResult;
+        }
+
+        /// <summary>
+        /// One item from the whole catalog, rolled through the same rarity and depth rules a kill drop
+        /// follows. Shuffled first, so *which* item varies; capped at one, so a cache is a find rather
+        /// than a shop.
+        /// </summary>
+        private ItemSO RollTreasureItem()
+        {
+            if (!InventoryManager.HasInstance)
+            {
+                return null;
+            }
+
+            var candidates = InventoryManager.Instance.AllItems().Where(i => i != null).ToList();
+            for (int i = candidates.Count - 1; i > 0; i--)
+            {
+                int j = UnityEngine.Random.Range(0, i + 1);
+                var swap = candidates[i];
+                candidates[i] = candidates[j];
+                candidates[j] = swap;
+            }
+
+            return RoomKindRewards.PickTreasureItem(
+                candidates, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
+        }
+
+        /// <summary>
+        /// Takes the refuge: heals every hero a share of their bar, once. Confirmed, because resting
+        /// at full health throws the whole thing away - that timing is the decision the room poses,
+        /// and the party's current state is in the prompt so the player can make it.
+        /// </summary>
+        private void OnRest()
+        {
+            if (_currentRoom == null || !_currentRoom.HasPendingPayload
+                || _currentRoom.Kind != RoomKind.Rest)
+            {
+                RefreshPayloadButtons();
+                return;
+            }
+
+            var party = GameManager.Instance.Party;
+            int missing = 0;
+            if (party != null)
+            {
+                foreach (var hero in party.Heroes)
+                {
+                    if (hero != null && hero.Stats != null)
+                    {
+                        missing += Mathf.Max(0, hero.GetEffectiveMaxHealth() - hero.Stats.Health);
+                    }
+                }
+            }
+
+            SetShown(_mainBar, false);
+
+            string state = missing > 0
+                ? $"The party is down {missing} health between them."
+                : "Nobody here is hurt - resting now wastes the place.";
+
+            ShowConfirm("A Refuge",
+                $"Dry ground, and nothing watching. {state}\n\n"
+                + $"Resting restores {Mathf.RoundToInt(RoomKindRewards.RestHealFraction * 100f)}% of "
+                + "each hero's health. It can only be done once.",
+                "Rest",
+                ApplyRest);
+        }
+
+        private void ApplyRest()
+        {
+            var party = GameManager.Instance.Party;
+            var lines = new List<string>();
+
+            if (party != null)
+            {
+                foreach (var hero in party.Heroes)
+                {
+                    if (hero == null || hero.Stats == null || !hero.IsAlive)
+                    {
+                        continue;
+                    }
+
+                    int max = hero.GetEffectiveMaxHealth();
+                    int healed = Mathf.Min(
+                        RoomKindRewards.RestHealAmount(max), Mathf.Max(0, max - hero.Stats.Health));
+                    hero.Stats.Health += healed;
+                    lines.Add(healed > 0
+                        ? $"{hero.DisplayName} recovers {healed} health."
+                        : $"{hero.DisplayName} was already whole.");
+                }
+            }
+
+            TakePayload();
+
+            if (FloatingTextHandler.HasInstance && party != null)
+            {
+                FloatingTextHandler.Instance.CreateFloatingText(
+                    party.transform.position, "Rested", Color.green);
+            }
+
+            ShowDetail("A Refuge", "You make camp long enough to bind what can be bound.\n\n"
+                + string.Join("\n", lines));
+            _detailOkAction = ClosePayloadResult;
+            RefreshPartyStatus();
+        }
+
+        /// <summary>
+        /// Marks the room's payload spent and saves at once - the same rule an event follows, and for
+        /// the same reason: without it the player re-loots the cache by walking out and back in, or by
+        /// quitting to the menu and resuming.
+        /// </summary>
+        private void TakePayload()
+        {
+            _currentRoom.MarkPayloadTaken();
+            if (DungeonSaveManager.HasInstance)
+            {
+                DungeonSaveManager.Instance.Save(_currentRoom);
+            }
+        }
+
+        private void ClosePayloadResult()
+        {
+            SetShown(_detailWindow, false);
+            ShowMainBar();
         }
 
         // ============================================================
@@ -1371,13 +1559,29 @@ namespace Assets.Scripts.Rooms
         {
             RefreshRescueButton();
             RefreshActionButton();
+            RefreshPayloadButtons();
             RefreshDescendButton();
             SetShown(_mainBar, HasRoomActions());
         }
 
         private bool HasRoomActions()
         {
-            return IsShown(_actionBtn) || IsShown(_rescueBtn) || IsShown(_descendBtn);
+            return IsShown(_actionBtn) || IsShown(_searchBtn) || IsShown(_restBtn)
+                || IsShown(_rescueBtn) || IsShown(_descendBtn);
+        }
+
+        /// <summary>
+        /// Search and Rest exist only in a room of that kind whose payload is still unspent, and only
+        /// once the room is clear - same rule as Rescue. Conditional like every other button on the
+        /// bar: a Search that reports "nothing here" teaches the player to stop pressing it.
+        /// </summary>
+        private void RefreshPayloadButtons()
+        {
+            bool clear = _currentRoom != null && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive);
+            bool pending = clear && _currentRoom.HasPendingPayload;
+
+            SetShown(_searchBtn, pending && _currentRoom.Kind == RoomKind.Treasure);
+            SetShown(_restBtn, pending && _currentRoom.Kind == RoomKind.Rest);
         }
 
         /// <summary>Rescue is offered only in a room that still holds a captive and has no living enemies.</summary>

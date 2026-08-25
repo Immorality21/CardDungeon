@@ -318,6 +318,45 @@ precise enough to act on whenever that call is made.
 about the middle. Three of the four wrong diagnoses above would have died instantly to a per-placement
 table, and the fourth to checking whether the two ends were the same enemy.
 
+## 5d. Room kinds — a reward room is a difficulty change
+
+Shipped 2026-08-25 (`NEXT_STEPS.md` §2). `LevelDefinitionSO.TreasureRooms` / `RestRooms` promote
+rooms to a cache or a refuge, and **both remove a fight**: `EnemyManager` skips a promoted room, so a
+quota is a difficulty lever wearing a reward's clothes. Two model changes keep that visible instead of
+silent: `RunCurveModel` takes non-combat rooms off `populated` (the expected-combat-room count), and a
+refuge's healing goes into `SustainPool` beside health and potions.
+
+**The first quota I authored failed the regression suite, and it is worth knowing why.** "One cache
+from 5 rooms up, one refuge from 7 up" looks even-handed and produced this:
+
+| Level | Rooms | Quota | Attrition | Jump |
+|---|---|---|---|---|
+| Upper Halls | 9 | cache + refuge | 0.39 | — |
+| Collapsed Caverns | 7 | cache + refuge | 0.39 | −1% |
+| Sunken Depths | 5 | cache | **0.72** | **+84%** |
+
+The 7-room level lost *two* fights and gained ~28 HP of sustain, so it sagged to the level before it;
+the 5-room level lost one fight and gained nothing, so the step across them broke the +75% ceiling.
+Nothing was wrong with either level in isolation - the quota rule created the spike between them.
+
+What shipped instead: **a cache from 6 rooms up, a refuge only from 9** (today: Upper Halls alone).
+Curve, all runs inside the band, no new findings:
+
+- The Threshold: `0.06 → 0.39 → 0.63 → 0.74` (+61%, +17%)
+- The Drowned March: `0.45 → 0.58 → 0.48 → 0.49`
+- The Warrens: `0.58 → 0.63`
+
+Three things to carry forward:
+
+- **A refuge is worth roughly a third of the party's bar**, which on a short level is a bigger relief
+  than a fight is a cost. Long floors are where it belongs - which is also the design reason: a floor
+  long enough to need a mid-point.
+- **Quotas are a per-level dial, not a rule to apply uniformly.** Size is a decent first guess and
+  nothing more; the curve decides.
+- **The Drowned March still dips at Rotwater Deep** (`0.58 → 0.48`) and finishes nearly flat into its
+  boss. That predates this change and no check fires on a *drop*, but a run whose finale is its
+  third-hardest floor is worth a pass.
+
 ## 6. Standing traps
 
 - **A trash buff breaks three other checks.** Boss:trash ratio (bosses are on absolute overrides),
@@ -338,6 +377,9 @@ table, and the fourth to checking whether the two ends were the same enemy.
   damage source that does not crit (spell effects, room-event outcomes) has to call
   `DamageCalculator` directly. This cost a debugging round: every enemy spell number came out exactly
   7.2% high, which is `1 + CritChance x (CritMultiplier - 1)`.
+- **A room-kind quota is a room-count change in disguise.** Promoting a room removes a fight *and*
+  (for a refuge) adds sustain, so it moves attrition twice. Re-read the whole run curve, not the level
+  you edited - see §5d for the spike this produced the first time.
 - **Changing a level's room count breaks in-flight saves of that level.** A dungeon save stores room
   *indices* into a layout rebuilt from the asset, so thinning a level invalidates any save of it. Since
   2026-08-25 that is detected (`DungeonSaveCompatibility`) and the floor restarts with a warning instead

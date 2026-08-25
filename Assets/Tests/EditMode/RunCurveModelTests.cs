@@ -112,7 +112,7 @@ namespace Tests.EditMode
         public void RoomEncounter_ConnectorRoom_HasNoCombat()
         {
             var room = Room(Goblin(), 1f, 1);
-            room.IsConnectorRoom = true;
+            room.Kind = RoomKind.Connector;
 
             var encounter = RoomEncounter.Build(room, null, false, SturdyParty(), Rules());
 

@@ -20,4 +20,6 @@ MonoBehaviour:
   ChainBias: 0.667
   MomentumBias: 0.498
   WallColor: {r: 0.32, g: 0.26, b: 0.13, a: 1}
+  TreasureRooms: 1
+  RestRooms: 0
   CombatBackground: {fileID: 0}

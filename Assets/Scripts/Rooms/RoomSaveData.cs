@@ -29,5 +29,13 @@ namespace Assets.Scripts.Rooms
         public int EventOutcomeIndex = -1;
 
         public bool EventSucceeded;
+
+        // --- Room kind state. The kind itself is deterministic from the seed, so it is stored only as
+        // a guard: if a re-authored quota or a shifted RNG stream lands a different kind here on
+        // reload, a consumed flag must not be applied to somebody else's payload.
+        public int Kind;
+
+        /// <summary>Whether this room's one-shot payload (a cache, a refuge) has been taken.</summary>
+        public bool KindConsumed;
     }
 }

@@ -637,22 +637,54 @@ Touch points: `Assets/Scripts/Combat/CombatFeedback.cs`, `Assets/Scripts/Cards/E
 `Assets/Scripts/Rooms/UI/RoomActionUI.cs`, `Assets/Scripts/Combat/CombatStage.cs`,
 `Assets/Fantasy Interface Sounds/`.
 
-### 2. Room-type variety + in-run choice
+### 2. Room-type variety + in-run choice — ✅ kinds shipped 2026-08-25, branching has not
 
-~~Right now every room is the same~~ - the room-interaction half of this is **done** (see below).
-What remains is the room-*kind* work: a `RoomKind` concept, non-combat kinds beyond the interaction
-events already in, and path/branch choice at generation time.
+Both halves of "a room is a decision" are now in: the room-*interaction* half (stat-check events,
+2026-08-21, below) and the room-*kind* half.
 
-Turn rooms into real *kinds* so the dungeon becomes a series of decisions:
+**`RoomKind`** is what a room is: `Combat`, `Connector` (this absorbed `RoomSO.IsConnectorRoom`, now a
+property derived from the kind), `Treasure` (a one-shot cache) and `Rest` (a one-shot refuge). Members
+exist only when they *do* something — an enum entry no code acts on is the dead content this project
+keeps finding — so **Elite / Merchant / Boss are deliberately absent**; the boss room is already
+expressed by `RunLevelEntry.BossEnemy` claiming the exit.
 
-- Introduce a room-kind concept (e.g. a `RoomKind` enum or typed `RoomSO` subclasses):
-  **Combat**, **Treasure**, **Rest/Shrine**, **Merchant**, **Elite**, **Boss**, **Connector**.
-- Wire non-combat kinds into `RoomActionUI` so the "Action" affordance does something real
-  (grant loot, heal the party, open an in-run shop, risk/reward event) instead of showing text.
-- Even 2–3 non-combat kinds transform the run from a hallway into a sequence of choices —
-  this is where "one more run" replayability actually comes from.
-- Consider path/branch choice at the dungeon-generation level (`RoomManager`) so players pick
-  *which* rooms to enter, trading safety for reward.
+- **Placement is per instance on a level budget**, the same split room events use and for the same
+  reason: `LevelDefinitionSO.TreasureRooms` / `RestRooms` say how many, the pure `RoomKindPlanner`
+  says which, off the dungeon's seeded RNG so a resumed level reproduces its own caches.
+  `DungeonManager.PlaceRoomKinds` runs **before every other content pass**, because they all read the
+  kind: enemies skip a promoted room, and captives and events leave it alone, so a room offers exactly
+  one thing.
+- **A refuge** heals every hero **35% of their maximum** (a fraction, so it cannot go stale as bars
+  grow). Its button is **confirmed**, and the prompt names how much health the party is actually
+  missing — resting at full health wastes it, and that timing is the decision the room poses.
+- **A cache** pays `15 + 10 x (depth-1)` gold into the pending pool (forfeited on death, like a
+  kill's) plus at most **one** item through the ordinary `LootRoller` rarity/depth rules. Its button
+  is not confirmed: nothing is spent, so the only decision is whether to walk to it.
+- **Persisted** (`RoomSaveData.Kind` + `KindConsumed`, guarded against a shifted kind the way the
+  event key is) or the player re-loots the cache by leaving and coming back.
+- **Promoting a room costs the level a fight**, so the quotas are a difficulty lever wearing a
+  reward's clothes. `RunCurveModel` takes non-combat rooms off the combat-room count and adds a
+  refuge's healing to the sustain pool. The first quota rule I authored broke the run curve by +84%
+  between two levels; the measured version, and why, is in **`docs/BALANCING.md` §5d**. Shipped rule:
+  a cache from 6 rooms up, a refuge only from 9 (today: Upper Halls alone).
+- Suite **651 → 669, 0 failed**; analyzer still **0 critical / 3 warning**. Verified in play mode:
+  Collapsed Caverns promoted room 3 to a cache, it spawned no enemies, its marker drew, and the
+  **Search** button appeared there and nowhere else.
+
+**Still open on §2:**
+
+- **Path/branch choice at generation** (`RoomManager`) so the player picks *which* rooms to enter,
+  trading safety for reward. Untouched — this is the half that makes a level a route rather than a
+  sweep.
+- **Elite, Merchant and Shrine kinds.** Elite wants a danger multiplier and a loot table to justify
+  it; Merchant wants an in-run shop screen (the hub Merchant is not reusable as-is); a Shrine is a
+  refuge with a cost, which `HealthCost` now makes authorable.
+- **Marker art.** Both markers are the exit-room sprite under a tint (gold / teal).
+- **No per-room kind in a manual layout.** `ManualRoomEntry` has no kind field, so a hand-authored
+  level takes the level's quotas at random like a generated one — the same gap the events pass left.
+- **The refuge is nearly single-instance content.** Only Upper Halls is long enough to earn one under
+  the shipped rule, so `RoomKind.Rest` is reachable on one floor of one run. More long floors, or a
+  per-level authoring pass, would spread it.
 
 #### Examine / Action as stat-driven risk vs. reward — ✅ shipped
 

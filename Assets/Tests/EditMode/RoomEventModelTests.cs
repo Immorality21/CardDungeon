@@ -513,7 +513,7 @@ namespace Tests.EditMode
         {
             var party = Party(Hero("A"));
             var room = RoomOffering(GuaranteedEvent("Trap", 100f, Outcome()));
-            room.IsConnectorRoom = true;
+            room.Kind = RoomKind.Connector;
 
             var events = RoomEventModel.BuildForLevel(Encounters(party, 4f, room), party, Rules(), 0);
 

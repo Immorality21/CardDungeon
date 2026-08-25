@@ -208,6 +208,10 @@ namespace Assets.Scripts.Dungeon
             exitRoom.IsExit = true;
             PlaceExitMarker(exitRoom);
 
+            // Room kinds first, for the same reason as the generated path: a promoted room holds no
+            // guards, and EnemyManager has to see the kind before it populates anything.
+            PlaceRoomKinds(rooms, startRoom);
+
             // Spawn enemies with manual overrides
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom, layout.Rooms);
             PlaceBossIfConfigured(rooms);
@@ -297,7 +301,11 @@ namespace Assets.Scripts.Dungeon
             // Step 4: Designate exit room (farthest from start via BFS)
             DesignateExitRoom(rooms, startRoom);
 
-            // Step 5: Spawn enemies
+            // Step 5: Decide what each room *is*, then populate it. Kinds come first because a
+            // non-combat room holds no guards - EnemyManager reads the kind and skips it.
+            PlaceRoomKinds(rooms, startRoom);
+
+            // Step 6: Spawn enemies
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom);
             PlaceBossIfConfigured(rooms);
             PlaceCaptiveIfConfigured(rooms, startRoom);
@@ -414,6 +422,7 @@ namespace Assets.Scripts.Dungeon
                 // have woken something, and those spawns have to exist again before the saved
                 // enemy count decides how many of them the player has since killed.
                 RestoreRoomEvent(room, roomData);
+                RestoreRoomKind(room, roomData);
 
                 // Remove killed enemies based on saved counts.
                 while (room.Enemies.Count > roomData.EnemyCount)
@@ -587,7 +596,8 @@ namespace Assets.Scripts.Dungeon
             }
 
             var candidates = rooms
-                .Where(r => r != null && r != startRoom && !r.IsExit && !r.RoomSO.IsConnectorRoom)
+                .Where(r => r != null && r != startRoom && !r.IsExit && !r.RoomSO.IsConnectorRoom
+                            && r.Kind.AcceptsOtherSpecials())
                 .ToList();
 
             if (candidates.Count == 0)
@@ -641,6 +651,28 @@ namespace Assets.Scripts.Dungeon
             }
         }
 
+        /// <summary>
+        /// Re-applies a taken payload. The kind itself is regenerated from the seed, so the saved kind
+        /// is only a guard: if the quotas or the RNG stream have shifted since, a consumed flag would
+        /// otherwise empty a cache the player never opened.
+        /// </summary>
+        private void RestoreRoomKind(Room room, RoomSaveData roomData)
+        {
+            if (!roomData.KindConsumed || !room.Kind.HasPayload())
+            {
+                return;
+            }
+
+            if (roomData.Kind != (int)room.Kind)
+            {
+                Debug.LogWarning($"Room {roomData.RoomIndex} saved kind '{(RoomKind)roomData.Kind}' but "
+                    + $"regenerated '{room.Kind}'; leaving its payload unspent.");
+                return;
+            }
+
+            room.MarkPayloadTaken();
+        }
+
         /// <summary>The outcome the save says resolved, or null when the indices no longer fit.</summary>
         private Rooms.Events.RoomEventOutcome ResolvedOutcome(Rooms.Events.RoomEventSO roomEvent, RoomSaveData roomData)
         {
@@ -673,6 +705,97 @@ namespace Assets.Scripts.Dungeon
         /// what lets the dungeon save record only <i>that</i> an event was consumed and trust
         /// regeneration to put the same event back in the same room.</para>
         /// </summary>
+        /// <summary>
+        /// Promotes some of the level's ordinary rooms into non-combat kinds - a treasure cache, a
+        /// refuge - per the level's quotas. Runs <b>before</b> anything is placed in a room, because
+        /// every later pass reads the kind: enemies skip a promoted room, and captives and events
+        /// leave it alone so the room offers exactly one thing.
+        ///
+        /// <para>Drawn from the same seeded RNG stream as the rest of generation, so a resumed level
+        /// reproduces its own caches and refuges.</para>
+        /// </summary>
+        private void PlaceRoomKinds(List<Room> rooms, Room startRoom)
+        {
+            if (rooms == null)
+            {
+                return;
+            }
+
+            // Every room starts as whatever its template says it is; promotion only moves rooms the
+            // template left as ordinary Combat.
+            foreach (var room in rooms)
+            {
+                if (room != null && room.RoomSO != null)
+                {
+                    room.Kind = room.RoomSO.Kind;
+                }
+            }
+
+            if (_level == null || (_level.TreasureRooms <= 0 && _level.RestRooms <= 0))
+            {
+                return;
+            }
+
+            var eligible = new List<int>();
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                if (IsKindEligible(rooms[i], startRoom))
+                {
+                    eligible.Add(i);
+                }
+            }
+
+            var plan = RoomKindPlanner.Plan(
+                eligible, _level.TreasureRooms, _level.RestRooms, count => Random.Range(0, count));
+
+            foreach (var entry in plan)
+            {
+                var room = rooms[entry.Key];
+                room.Kind = entry.Value;
+                PlaceKindMarker(room);
+            }
+        }
+
+        /// <summary>
+        /// Whether an ordinary room can be promoted. The start room is out (a reward on turn one is
+        /// not a find, and a refuge there is wasted at full health), the exit room is out because it
+        /// holds the stairs and possibly the boss, and connectors are out because a hallway with a
+        /// treasure chest in it is not a hallway.
+        /// </summary>
+        private bool IsKindEligible(Room room, Room startRoom)
+        {
+            return room != null
+                   && room != startRoom
+                   && !room.IsExit
+                   && room.RoomSO != null
+                   && room.RoomSO.Kind == RoomKind.Combat;
+        }
+
+        /// <summary>
+        /// Marks a payload room on the map. Reuses the exit marker sprite under a tint rather than
+        /// waiting on art: a room the player cannot see is a reward they walk past.
+        /// </summary>
+        private void PlaceKindMarker(Room room)
+        {
+            if (_exitRoomMarkerSprite == null || !room.Kind.HasPayload())
+            {
+                return;
+            }
+
+            var markerObj = new GameObject(room.Kind + "Marker");
+            markerObj.transform.SetParent(room.transform, false);
+            var center = room.GetCenter();
+            center.z = -0.5f;
+            markerObj.transform.position = center;
+            var sr = markerObj.AddComponent<SpriteRenderer>();
+            sr.sprite = _exitRoomMarkerSprite;
+            sr.sortingOrder = 3;
+            sr.color = room.Kind == RoomKind.Treasure
+                ? new Color(1f, 0.85f, 0.25f)
+                : new Color(0.4f, 0.9f, 0.75f);
+            room.KindMarker = sr;
+        }
+
         private void PlaceRoomEvents(List<Room> rooms, Room startRoom)
         {
             if (rooms == null)
@@ -734,6 +857,7 @@ namespace Assets.Scripts.Dungeon
                    && room.CaptiveHero == null
                    && room.RoomSO != null
                    && !room.RoomSO.IsConnectorRoom
+                   && room.Kind.AcceptsOtherSpecials()
                    && room.RoomSO.PossibleEvents != null
                    && room.RoomSO.PossibleEvents.Count > 0;
         }

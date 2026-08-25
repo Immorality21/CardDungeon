@@ -48,7 +48,9 @@ namespace Assets.Scripts.Dungeon
                     EventKey = room.RoomEvent != null ? room.RoomEvent.SaveKey : null,
                     EventOptionIndex = room.EventOptionIndex,
                     EventOutcomeIndex = room.EventOutcomeIndex,
-                    EventSucceeded = room.EventSucceeded
+                    EventSucceeded = room.EventSucceeded,
+                    Kind = (int)room.Kind,
+                    KindConsumed = room.KindConsumed
                 });
             }
 

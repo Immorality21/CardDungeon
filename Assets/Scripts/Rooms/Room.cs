@@ -25,6 +25,16 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         public Events.RoomEventSO RoomEvent;
 
+        /// <summary>
+        /// What this room is. Starts as the template's <see cref="RoomSO.Kind"/> and can be promoted at
+        /// generation by <c>DungeonManager.PlaceRoomKinds</c> - per instance, so a template used three
+        /// times in one level does not become three treasure caches.
+        /// </summary>
+        public RoomKind Kind = RoomKind.Combat;
+
+        /// <summary>The marker sprite drawn for a payload room, so it can be dimmed once taken.</summary>
+        public SpriteRenderer KindMarker;
+
         public int RoomIndex { get; set; }
         public bool IsExplored { get; private set; }
         public bool IsExit { get; set; }
@@ -44,6 +54,34 @@ namespace Assets.Scripts.Rooms
 
         /// <summary>Which of the two pools <see cref="EventOutcomeIndex"/> indexes.</summary>
         public bool EventSucceeded { get; private set; }
+
+        /// <summary>
+        /// Whether this room's one-shot payload has been taken. Persisted for the same reason an event
+        /// is: without it the player re-loots the cache by walking out and back in.
+        /// </summary>
+        public bool KindConsumed { get; private set; }
+
+        /// <summary>Whether the room still has a cache or a refuge to offer.</summary>
+        public bool HasPendingPayload
+        {
+            get { return Kind.HasPayload() && !KindConsumed; }
+        }
+
+        /// <summary>Records the payload as taken and dims its marker.</summary>
+        public void MarkPayloadTaken()
+        {
+            KindConsumed = true;
+            DimKindMarker();
+        }
+
+        /// <summary>Greys out the payload marker - the room still reads as a cache, just an emptied one.</summary>
+        public void DimKindMarker()
+        {
+            if (KindMarker != null)
+            {
+                KindMarker.color = new Color(0.42f, 0.42f, 0.45f, 0.65f);
+            }
+        }
 
         /// <summary>Whether the room still has an event to offer.</summary>
         public bool HasPendingEvent

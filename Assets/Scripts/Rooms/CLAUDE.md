@@ -8,7 +8,7 @@
 2. **Room layout** — BFS placement on a 2D grid, resolving overlaps
 3. **Door placement** — Random door positions between connected adjacent rooms
 4. **Exit room** — BFS from start room, farthest room is designated `IsExit = true`; an exit marker sprite is placed at the room center
-5. **Contents, in this order** (all in `DungeonManager`, all drawing on the same seeded RNG stream, which is what lets a resumed dungeon reproduce them): `EnemyManager.SpawnEnemies` → `PlaceBossIfConfigured` → `PlaceCaptiveIfConfigured` → `PlaceRoomEvents`. The order matters — events skip rooms that already hold a captive, and the boss has already claimed the exit room. Each pass is documented where it belongs: bosses and captives in `Assets/Scripts/Dungeon/CLAUDE.md`, events in `Assets/Scripts/Rooms/Events/CLAUDE.md`.
+5. **Contents, in this order** (all in `DungeonManager`, all drawing on the same seeded RNG stream, which is what lets a resumed dungeon reproduce them): `PlaceRoomKinds` → `EnemyManager.SpawnEnemies` → `PlaceBossIfConfigured` → `PlaceCaptiveIfConfigured` → `PlaceRoomEvents`. The order matters — events skip rooms that already hold a captive, and the boss has already claimed the exit room. Each pass is documented where it belongs: bosses and captives in `Assets/Scripts/Dungeon/CLAUDE.md`, events in `Assets/Scripts/Rooms/Events/CLAUDE.md`.
 6. **Seeding** — Supports custom seed for reproducible generation. Everything above is a pure function of the seed, so the same seed regenerates the same level; the dungeon save stores only what the player *changed* (rooms explored, enemies killed, events resolved), not the layout.
 
 ## Combat Flow (CombatManager)
@@ -25,6 +25,39 @@
 - **Death flow:** Full party wipe → death screen → `DungeonManager.HandlePartyDeath()` wipes saves → return to menu. All in-dungeon XP/items are lost (but meta-currency is awarded first — see the Progression guide).
 - **Boss fights:** when the room contains an enemy whose `EnemySO.IsBoss` is set (placed via `RunLevelEntry.BossEnemy` — see the Dungeon/Enemies guides), `RoomActionUI.Show` shows a top-center boss banner, hides the **Flee** button, and seals the room (`Room.DisableAllDoors`) so the climax can't be skipped. `CombatResult` carries `BossDefeated`/`RunCompleted`, which escalate the victory-summary title (`Victory!` → `Level Cleared!` → `Boss Slain!` → `Dungeon Conquered!`). The boss's signature AoE runs through `ExecuteEnemyChargeAoe`/`ExecuteEnemyAoeAttack`.
 
+## Room kinds
+
+A room used to be an interchangeable box with a spawn table, which made a level a hallway.
+**`RoomKind`** is what a room *is*: `Combat` (may hold enemies), `Connector` (a hallway - this
+replaced `RoomSO.IsConnectorRoom`, now a property derived from the kind), `Treasure` (a one-shot
+cache) and `Rest` (a one-shot refuge). Members are added only when they *do* something - an enum
+entry no code acts on is the dead content this project keeps finding - so Elite / Merchant / Boss are
+absent for now (the boss room is already expressed by `RunLevelEntry.BossEnemy` claiming the exit).
+
+**Placement is per instance, on a level budget** - the same split as room events, for the same
+reason: a template used three times in one level must not become three caches.
+`LevelDefinitionSO.TreasureRooms` / `RestRooms` say how *many*; the pure `RoomKindPlanner` says
+*which*, drawing on the dungeon's seeded RNG so a resumed level reproduces its own caches.
+`DungeonManager.PlaceRoomKinds` runs **before every other content pass**, because they all read the
+kind: `EnemyManager` skips a promoted room entirely (`RoomKind.HoldsEnemies`), and captives and
+events leave it alone (`RoomKind.AcceptsOtherSpecials`) so a room offers exactly one thing.
+
+**What they pay out** is in the pure `RoomKindRewards`: a refuge heals every hero **35% of their
+maximum** (a fraction, not a flat number, so it keeps its meaning as bars grow); a cache pays
+`15 + 10 x (depth-1)` gold into the *pending* pool - forfeited on death like a kill's - plus at most
+**one** item rolled through the ordinary `LootRoller` rarity/depth rules. One item, because rolling
+the whole catalog would empty it into the party's bags.
+
+**Promoting a room costs the level a fight**, so the quotas are a difficulty lever as much as a
+reward: `RunCurveModel` takes non-combat rooms off the expected-combat-room count and adds a
+refuge's healing to the sustain pool. Getting that wrong is not theoretical - see the measured
+coupling in `docs/BALANCING.md`.
+
+Two markers are drawn at the room centre from the exit-marker sprite under a tint (gold for a cache,
+teal for a refuge) - placeholder art, but a reward the player cannot see is a reward they walk past.
+`Room.MarkPayloadTaken` dims it, and `RoomSaveData.KindConsumed` persists it: without that the
+player re-loots the cache by walking out and back in.
+
 ## The Room Bar (`Rooms/UI/RoomActionUI.cs`)
 
 **Every button on the room bar is conditional, and the bar hides itself when none of them applies**
@@ -32,6 +65,11 @@
 empty frame docked at the bottom:
 
 - **Action** - the room's event. `RefreshActionButton` hides it when there is no unresolved event.
+- **Search** - an unspent **Treasure** room, once it is clear. Not confirmed: nothing is spent and
+  nothing risked, so the only decision a cache poses is whether to walk to it.
+- **Rest** - an unspent **Rest** room, once it is clear. *Confirmed*, and the prompt names how much
+  health the party is actually missing, because resting at full health throws the refuge away - that
+  timing is the decision the room exists to pose.
 - **Rescue** - a captive, once the room is clear.
 - **Descend** - a cleared **exit** room; taking it is the *only* way a level completes (see below).
 
