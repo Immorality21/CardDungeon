@@ -925,7 +925,9 @@ namespace Assets.Scripts.Rooms
             // Physical attacks carry the attacker's element, so elemental resistance applies to them too.
             // Normal is the default on both sides and bypasses the elemental layer entirely.
             var damageType = attacker.AttackDamageType;
-            int dmg = DamageCalculator.Calculate(rawAttack, defense, damageType, target.Resistances);
+            float resistanceBonus = BuffTracker.GetResistanceBonus(target, damageType);
+            int dmg = DamageCalculator.Calculate(
+                rawAttack, defense, damageType, target.Resistances, resistanceBonus);
 
             // Critical hit: a chance for a harder blow, called out with a gold popup + bigger number.
             bool crit = dmg > 0 && UnityEngine.Random.Range(0f, 1f) < CritChanceFor(attacker);
@@ -961,7 +963,7 @@ namespace Assets.Scripts.Rooms
             {
                 ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.45f, 0f), "CRIT!", new Color(1f, 0.82f, 0.2f), 0.16f);
             }
-            ShowEffectiveness(target, damageType);
+            ShowEffectiveness(target, damageType, resistanceBonus);
             yield return new WaitForSecondsRealtime(crit ? 0.075f : 0.045f);
 
             _lastTurnLog = dmg < 0
@@ -1044,7 +1046,7 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>Popup for a resistance outcome (Weak!/Resisted/Immune/Absorbed); no-op if Normal.</summary>
-        private void ShowEffectiveness(ICombatUnit target, DamageType type)
+        private void ShowEffectiveness(ICombatUnit target, DamageType type, float resistanceBonus = 0f)
         {
             if (target == null || target.Transform == null)
             {
@@ -1053,7 +1055,7 @@ namespace Assets.Scripts.Rooms
 
             string word = null;
             Color color = Color.white;
-            switch (DamageCalculator.Classify(type, target.Resistances))
+            switch (DamageCalculator.Classify(type, target.Resistances, resistanceBonus))
             {
                 case DamageEffectiveness.Weak:
                     word = "Weak!"; color = new Color(1f, 0.85f, 0.2f); break;

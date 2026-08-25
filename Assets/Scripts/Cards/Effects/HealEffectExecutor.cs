@@ -18,12 +18,6 @@ namespace Assets.Scripts.Cards.Effects
             EffectResult result,
             bool flatPower = false)
         {
-            // Healing scales off the caster the same way damage does, so a Spirit build actually
-            // heals for more. Flat-power heals stay as authored, matching flat damage.
-            int scaled = flatPower
-                ? effect.Power
-                : effect.Power + SpellScaling.CasterContribution(caster, effect.ScalingStat, buffTracker);
-
             foreach (var target in targets)
             {
                 if (!target.IsAlive)
@@ -31,7 +25,10 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
-                int healAmount = scaled;
+                // Healing scales off the caster the same way damage does, so a Spirit build actually
+                // heals for more. Flat-power heals stay as authored, matching flat damage; a
+                // percentage heal reads the bar of whoever it lands on, so it is resolved per target.
+                int healAmount = SpellPower.Resolve(effect, caster, target, buffTracker, flatPower);
                 int newHealth = Mathf.Min(
                     target.Stats.Health + healAmount, target.GetEffectiveStat(StatType.MaxHealth));
                 int actualHeal = newHealth - target.Stats.Health;

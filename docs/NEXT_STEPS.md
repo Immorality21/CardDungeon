@@ -317,26 +317,55 @@ already tracked in this section — five *no threat at all* enemies, the *+MaxHe
 
 
 
-### 0b. Elemental layer — next steps
+### 0b. Elemental layer — ✅ defence shipped 2026-08-25, reveal has not
 
-Enemy resistances are configured, but the layer is only half-built: the player cannot **see** a resistance
-before spending a charge, and cannot **defend** against an element at all —
-`ResistanceBuffHandler.Apply` is an empty method, so all five resistance `BuffType`s silently do nothing.
-Full plan in **`docs/ELEMENTAL_PLAN.md`** (design decisions now settled): a `PowerMode` on `SpellEffect`
-(base-power / flat / % of max health), a `HealthCost` effect type so **Fire Cloak** (+40% fire resistance,
-10% of max HP to cast) can be authored at all, summing resistances so >100% becomes FFVIII-style
-**absorption**, and three increments of surfacing resistances in the combat UI.
+The layer was half-built: the player could not **defend** against an element at all, because
+`ResistanceBuffHandler.Apply` was an empty method and all five resistance `BuffType`s silently did
+nothing. **Phases 1–3 of `docs/ELEMENTAL_PLAN.md` are now in** — read that file for the decisions
+taken while building, which is where the reasoning lives.
 
-**Shipped since:** resistances now **sum** across innate + gear + (future) buffs, so >100% is reachable and
-absorbs FFVIII-style; absorbed basic attacks clamp to max health instead of overhealing;
-`EnemySO.AttackDamageType` gives enemy attacks an element (`ICombatUnit.AttackDamageType`, default
-`Normal`); `ItemSO.Resistances` + `Hero.GetEffectiveResistances()` let gear contribute to a build. Covered
-by `ElementalResistanceTests`.
+- **`PowerMode` on `SpellEffect`** (`BasePower` / `Flat` / `PercentOfMaxHealth`), resolved in one place
+  (`SpellPower`). `BasePower = 0`, so no existing asset moved — pinned by `SpellPowerTests`. A
+  percentage reads the max health of the unit the effect lands on and takes **no** upgrade bonus (+2
+  per level on a percentage would double a 10% spell at max upgrade).
+- **`SpellEffectType.HealthCost`** + `HealthCostEffectExecutor`: charges the **caster**, ignoring
+  defense, resistance and the upgrade bonus. `EffectResolver` runs **two passes, benefits then costs**,
+  so a cost authored first can no longer fizzle the buff it paid for. The cast is **gated**
+  (`SpellPower.CanAfford`, surfaced in `MagicSelectionUI` as a greyed row with the HP price beside the
+  charges) rather than allowed to kill — which is what keeps the death-mid-cast problem from existing
+  at all, since `ExecuteCastAction` has no death handling. The executor floors the caster at 1 HP as a
+  safety net.
+- **Resistance buffs work.** `CombatBuffTracker.ApplyResistance` / `GetResistanceBonus` — summed,
+  uncapped (three 40% cloaks reach 120%), riding on the existing `CombatBuff` record so they expire
+  through the same `TickBuffs` path. Deliberately *not* written into the unit's `Resistances` list,
+  which outlives the fight. Every damage path passes the bonus now: `DamageEffectExecutor`,
+  `CombatManager.ExecuteAttack` **and its popup**, and `EncounterSimulator` so the model cannot drift.
+- **Four cloak cards**, `Self`, each a resistance buff plus a percentage health cost: **Fire / Frost /
+  Storm Cloak** (40%, 3 turns, 10% HP) and **Ward** (Fire+Ice+Lightning 20% each, 2 turns, 20% HP).
+  Drawable from the enemy whose element they answer, at `CastWeight: 0` (drawable, never cast by its
+  owner — a cloak wards what that enemy *deals*, so casting it would waste its turn): Cinder Imp,
+  Bog Shaman, Hex Weaver, Mirefather. Placed on *later* enemies on purpose — the Tutorial already
+  front-loads most of the catalog.
+- Suite **609 → 651, 0 failed**; analyzer unchanged at **0 critical / 3 warning / 22 info**.
+- One trap found while wiring: `MagicCatalog` is a **prefab instance** in both scenes, so adding the
+  cloaks by overriding the array size on the scene instances grew the list with **nulls** — drawable
+  in combat, unresolvable from a save, invisible in the Forge. The list lives on
+  `Assets/Prefabs/MagicCatalog.prefab`, and `ElementalContentTests` now fails on either mistake.
 
-**Still open:** `PowerMode` on `SpellEffect` (base-power / flat / % of max health), the `HealthCost` effect
-type, the cloak cards, resistance **buffs** (`ResistanceBuffHandler.Apply` is still a no-op, so the five
-resistance `BuffType`s do nothing), and the discovery-gated reveal. Resistances stay **hidden** from the
-player by design - the plan is discovery-gated reveal only, no static display.
+**Still open:**
+
+- **Discovery-gated reveal (Phase 4c)** — still **blocked on a stable `EnemySO.Key`** (see §0b-2).
+  Resistances stay hidden by design, but note the argument has sharpened: with absorption now
+  reachable, casting the wrong element can *heal* an enemy, and blind absorption is a punish the
+  player cannot learn from without losing a fight to it.
+- **Phase 5's last two analyzer checks** — unintended absorption (an innate + max-stacked total
+  ≥100% for a type the *player* can deal) and cost/benefit sanity (a `HealthCost` that exceeds the
+  damage the buff avoids over its duration). The first two Phase 5 checks shipped as
+  `ElementalContentTests` instead, which is the stronger place for them: a dead effect now fails a
+  test rather than waiting in an unopened window.
+- **No Shadow or Holy defence exists**, so `Mirefather`'s Shadow damage is still unmitigable — the
+  cloaks cover Fire/Ice/Lightning only. Either a Shadow cloak or a sphere-grid node; see §0c.
+- **The cloaks use placeholder icons** borrowed from the elemental attack spell they answer.
 
 ### 0b-2. Elemental content follow-ups
 

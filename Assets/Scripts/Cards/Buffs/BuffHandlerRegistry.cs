@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Combat;
 using Assets.Scripts.UnitStats;
 
 namespace Assets.Scripts.Cards.Buffs
@@ -20,11 +21,11 @@ namespace Assets.Scripts.Cards.Buffs
         {
             var handlers = new Dictionary<BuffType, IBuffHandler>
             {
-                { BuffType.FireResistance, new ResistanceBuffHandler("FireResistance") },
-                { BuffType.IceResistance, new ResistanceBuffHandler("IceResistance") },
-                { BuffType.LightningResistance, new ResistanceBuffHandler("LightningResistance") },
-                { BuffType.HolyResistance, new ResistanceBuffHandler("HolyResistance") },
-                { BuffType.ShadowResistance, new ResistanceBuffHandler("ShadowResistance") },
+                { BuffType.FireResistance, new ResistanceBuffHandler(DamageType.Fire, "Fire Res") },
+                { BuffType.IceResistance, new ResistanceBuffHandler(DamageType.Ice, "Ice Res") },
+                { BuffType.LightningResistance, new ResistanceBuffHandler(DamageType.Lightning, "Lightning Res") },
+                { BuffType.HolyResistance, new ResistanceBuffHandler(DamageType.Holy, "Holy Res") },
+                { BuffType.ShadowResistance, new ResistanceBuffHandler(DamageType.Shadow, "Shadow Res") },
                 { BuffType.Frozen, new FrozenBuffHandler() },
                 { BuffType.Slow, new SlowBuffHandler() },
                 { BuffType.Haste, new HasteBuffHandler() }

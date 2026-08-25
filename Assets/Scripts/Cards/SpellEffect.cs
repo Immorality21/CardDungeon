@@ -16,6 +16,14 @@ namespace Assets.Scripts.Cards
         public int Power;
 
         /// <summary>
+        /// How <see cref="Power"/> is read: a base the caster's stat is added to, a flat number, or a
+        /// percentage of the affected unit's max health. Damage, Heal and HealthCost honour it; buff
+        /// and debuff magnitudes are stat deltas and ignore it. Defaults to
+        /// <see cref="Cards.PowerMode.BasePower"/>, so existing assets are unchanged.
+        /// </summary>
+        public PowerMode PowerMode = PowerMode.BasePower;
+
+        /// <summary>
         /// Which caster stat scales this effect, or <see cref="StatType.None"/> for flat power.
         /// Damage and healing add the stat in full; buffs and debuffs add a fraction of it
         /// (<see cref="SpellScaling.BuffScalingDivisor"/>), because their Power is a stat delta

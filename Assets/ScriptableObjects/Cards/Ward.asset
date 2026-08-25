@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
+  m_Name: Ward
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
+  Key: Ward
+  DisplayName: Ward
+  Description: A thinner ward against fire, ice and storm at once - and twice the
+    price.
+  Icon: {fileID: 21300000, guid: 8a51e70095bc4789b91f496a992b7cc1, type: 3}
+  TargetType: 2
+  Rarity: 2
+  Effects:
+  - EffectType: 2
+    Power: 20
+    PowerMode: 0
+    ScalingStat: 0
+    DamageType: 0
+    BuffType: 7
+    Duration: 2
+    UnlockLevel: 0
+  - EffectType: 2
+    Power: 20
+    PowerMode: 0
+    ScalingStat: 0
+    DamageType: 0
+    BuffType: 8
+    Duration: 2
+    UnlockLevel: 0
+  - EffectType: 2
+    Power: 20
+    PowerMode: 0
+    ScalingStat: 0
+    DamageType: 0
+    BuffType: 9
+    Duration: 2
+    UnlockLevel: 0
+  - EffectType: 4
+    Power: 20
+    PowerMode: 2
+    ScalingStat: 0
+    DamageType: 0
+    BuffType: 0
+    Duration: 0
+    UnlockLevel: 0
+  Tags: 
+  TagDuration: 3

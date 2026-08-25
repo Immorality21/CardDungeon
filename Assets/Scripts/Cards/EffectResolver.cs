@@ -37,15 +37,31 @@ namespace Assets.Scripts.Cards
         {
             var result = new EffectResult();
 
+            // Two passes, benefits before costs. A HealthCost authored first would take the caster
+            // down before the buff it paid for was applied, and BuffEffectExecutor skips dead targets
+            // — so the card would silently charge for nothing. Ordering it here rather than
+            // documenting an authoring rule means the card works however it is written.
             foreach (var effect in action.Magic.Effects)
             {
-                if (effect.UnlockLevel > magicUpgradeLevel)
+                if (effect.UnlockLevel > magicUpgradeLevel || effect.EffectType == SpellEffectType.HealthCost)
                 {
                     continue;
                 }
                 var effectToUse = ApplyPowerBonus(effect, powerBonus, powerScale);
                 var executor = _factory.GetExecutor(effectToUse.EffectType);
                 executor.Execute(effectToUse, action.Caster, action.Targets, buffTracker, result);
+            }
+
+            foreach (var effect in action.Magic.Effects)
+            {
+                if (effect.UnlockLevel > magicUpgradeLevel || effect.EffectType != SpellEffectType.HealthCost)
+                {
+                    continue;
+                }
+                // No upgrade bonus and no level scale: a health cost is a price, and upgrading a
+                // spell must never raise what it charges.
+                _factory.GetExecutor(SpellEffectType.HealthCost)
+                    .Execute(effect, action.Caster, action.Targets, buffTracker, result);
             }
 
             if (tagTracker != null && comboDetector != null && action.Magic.Tags.Count > 0)
@@ -91,6 +107,14 @@ namespace Assets.Scripts.Cards
                 return effect;
             }
 
+            // A percentage effect is already relative to the target's health bar, so it scales for
+            // the rest of the game's life on its own. Adding the flat upgrade bonus on top would read
+            // as percentage points — +2 per level turns a 10% spell into 20% at max upgrade.
+            if (effect.PowerMode == PowerMode.PercentOfMaxHealth)
+            {
+                return effect;
+            }
+
             int power = effect.Power + Mathf.Max(0, powerBonus);
             if (scales && power > 0)
             {
@@ -107,6 +131,7 @@ namespace Assets.Scripts.Cards
                 // made it weaker by that caster's whole scaling stat, and still hit for a plausible
                 // number, so nothing looked wrong.
                 ScalingStat = effect.ScalingStat,
+                PowerMode = effect.PowerMode,
                 DamageType = effect.DamageType,
                 BuffType = effect.BuffType,
                 Duration = effect.Duration,

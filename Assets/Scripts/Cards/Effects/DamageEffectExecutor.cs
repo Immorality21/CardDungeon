@@ -21,19 +21,6 @@ namespace Assets.Scripts.Cards.Effects
             EffectResult result,
             bool flatPower = false)
         {
-            int rawAttack;
-            if (flatPower)
-            {
-                // Flat damage: it comes from the definition (a combo's bonus effect, a room
-                // event's outcome), not from whoever happened to trigger it.
-                rawAttack = effect.Power;
-            }
-            else
-            {
-                rawAttack = effect.Power
-                          + SpellScaling.CasterContribution(caster, effect.ScalingStat, buffTracker);
-            }
-
             foreach (var target in targets)
             {
                 if (!target.IsAlive)
@@ -41,9 +28,16 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
+                // Resolved per target, because PowerMode.PercentOfMaxHealth reads the bar of the unit
+                // the effect lands on. Flat power comes from the definition (a combo's bonus effect, a
+                // room event's outcome) rather than from whoever happened to trigger it.
+                int rawAttack = SpellPower.Resolve(effect, caster, target, buffTracker, flatPower);
+
                 int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Endurance);
                 int defense = target.GetEffectiveStat(StatType.Endurance) + defenseBonus;
-                int damage = DamageCalculator.Calculate(rawAttack, defense, effect.DamageType, target.Resistances);
+                float resistanceBonus = buffTracker.GetResistanceBonus(target, effect.DamageType);
+                int damage = DamageCalculator.Calculate(
+                    rawAttack, defense, effect.DamageType, target.Resistances, resistanceBonus);
 
                 if (damage < 0)
                 {
@@ -78,7 +72,8 @@ namespace Assets.Scripts.Cards.Effects
                         Color = DamageColor,
                         Delay = EffectDelay,
                         Impact = damage,
-                        Effectiveness = DamageCalculator.Classify(effect.DamageType, target.Resistances)
+                        Effectiveness = DamageCalculator.Classify(
+                            effect.DamageType, target.Resistances, resistanceBonus)
                     });
                 }
             }

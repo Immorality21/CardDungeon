@@ -13,7 +13,8 @@ namespace Assets.Scripts.Cards.Effects
                 { SpellEffectType.Damage, new DamageEffectExecutor() },
                 { SpellEffectType.Heal, new HealEffectExecutor() },
                 { SpellEffectType.Buff, new BuffEffectExecutor() },
-                { SpellEffectType.Debuff, new DebuffEffectExecutor() }
+                { SpellEffectType.Debuff, new DebuffEffectExecutor() },
+                { SpellEffectType.HealthCost, new HealthCostEffectExecutor() }
             };
         }
 

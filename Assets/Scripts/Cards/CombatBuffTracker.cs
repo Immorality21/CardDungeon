@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Combat;
-using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
 
 namespace Assets.Scripts.Cards
@@ -40,6 +39,46 @@ namespace Assets.Scripts.Cards
             });
         }
 
+        /// <summary>
+        /// Grants <paramref name="unit"/> <paramref name="percent"/> extra resistance to
+        /// <paramref name="type"/> for <paramref name="duration"/> turns. Deliberately <b>not</b> a
+        /// write into the unit's <c>Resistances</c> list: that list outlives combat (a hero's innate
+        /// and gear resistance), so a temporary entry there would need its own expiry bookkeeping and
+        /// would leak into the next fight. The damage path adds this bonus at the call site instead,
+        /// exactly as it already does for stat buffs.
+        /// </summary>
+        public void ApplyResistance(ICombatUnit unit, DamageType type, int percent, int duration)
+        {
+            if (!_activeBuffs.ContainsKey(unit))
+            {
+                _activeBuffs[unit] = new List<CombatBuff>();
+            }
+
+            _activeBuffs[unit].Add(new CombatBuff
+            {
+                IsResistance = true,
+                ResistanceType = type,
+                Amount = percent,
+                TurnsRemaining = duration
+            });
+        }
+
+        /// <summary>
+        /// Total temporary resistance to <paramref name="type"/>, summed and <b>uncapped</b> — three
+        /// stacked 40% cloaks reach 120%, which is how absorption is meant to be reachable. The cap
+        /// lives in <see cref="DamageCalculator.Calculate"/>, which clamps innate + gear + this
+        /// together.
+        /// </summary>
+        public float GetResistanceBonus(ICombatUnit unit, DamageType type)
+        {
+            if (!_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                return 0f;
+            }
+
+            return buffs.Where(b => b.IsResistance && b.ResistanceType == type).Sum(b => b.Amount);
+        }
+
         public bool HasStatusEffect(ICombatUnit unit, BuffType type)
         {
             if (!_activeBuffs.TryGetValue(unit, out var buffs))
@@ -72,7 +111,7 @@ namespace Assets.Scripts.Cards
                 return 0;
             }
 
-            return buffs.Where(b => !b.IsStatusEffect && b.Stat == stat).Sum(b => b.Amount);
+            return buffs.Where(b => !b.IsStatusEffect && !b.IsResistance && b.Stat == stat).Sum(b => b.Amount);
         }
 
         public void TickBuffs(ICombatUnit unit)

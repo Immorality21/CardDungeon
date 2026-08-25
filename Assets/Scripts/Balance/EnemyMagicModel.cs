@@ -151,7 +151,7 @@ namespace Assets.Scripts.Balance
                 }
 
                 int raw = RawPower(effect, powerScale, caster);
-                float perTarget = AverageAgainst(raw, effect.DamageType, heroes);
+                float perTarget = AverageAgainst(effect, raw, heroes);
 
                 total += everyone ? perTarget * CountAlive(heroes) : perTarget;
             }
@@ -184,7 +184,9 @@ namespace Assets.Scripts.Balance
                 {
                     continue;
                 }
-                total += RawPower(effect, powerScale, caster);
+                total += effect.PowerMode == PowerMode.PercentOfMaxHealth
+                    ? SpellPower.PercentOfMaxHealth(effect.Power, caster)
+                    : RawPower(effect, powerScale, caster);
             }
             return total;
         }
@@ -247,7 +249,19 @@ namespace Assets.Scripts.Balance
             bool scales = effect.EffectType == SpellEffectType.Damage
                        || effect.EffectType == SpellEffectType.Heal;
 
+            if (effect.PowerMode == PowerMode.PercentOfMaxHealth)
+            {
+                // Percentage power is resolved against the unit the effect lands on, so a level scale
+                // and a caster stat have nothing to add to it. The per-target number comes from
+                // AverageAgainst.
+                return effect.Power;
+            }
+
             int power = scales ? EnemyMagicPlan.ScalePower(effect.Power, powerScale) : effect.Power;
+            if (effect.PowerMode == PowerMode.Flat)
+            {
+                return power;
+            }
             return power + SpellScaling.CasterContribution(caster, effect.ScalingStat, null);
         }
 
@@ -256,7 +270,7 @@ namespace Assets.Scripts.Balance
         /// <see cref="EnemyMagicPlan.ResolveTargets"/> picks a single target. Deliberately
         /// crit-free: <see cref="Cards.Effects.DamageEffectExecutor"/> has no crit roll.
         /// </summary>
-        private static float AverageAgainst(int rawPower, DamageType type, IList<SimUnit> heroes)
+        private static float AverageAgainst(SpellEffect effect, int rawPower, IList<SimUnit> heroes)
         {
             float total = 0f;
             int counted = 0;
@@ -267,8 +281,15 @@ namespace Assets.Scripts.Balance
                 {
                     continue;
                 }
+
+                // A PercentOfMaxHealth effect reads the bar of whoever it lands on, so its raw power
+                // is per hero rather than a single number for the whole party.
+                int raw = effect.PowerMode == PowerMode.PercentOfMaxHealth
+                    ? SpellPower.PercentOfMaxHealth(effect.Power, hero)
+                    : rawPower;
+
                 total += DamageCalculator.Calculate(
-                    rawPower, hero.GetEffectiveStat(StatType.Endurance), type, hero.Resistances);
+                    raw, hero.GetEffectiveStat(StatType.Endurance), effect.DamageType, hero.Resistances);
                 counted++;
             }
 

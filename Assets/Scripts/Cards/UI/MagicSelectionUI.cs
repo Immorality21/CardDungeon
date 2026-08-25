@@ -190,6 +190,23 @@ namespace Assets.Scripts.Cards.UI
                 string meta = slot.IsEmpty ? "" : $"{slot.Charges}/{slot.MaxCharges}";
                 Sprite icon = slot.IsEmpty ? null : slot.Magic.Icon;
 
+                // A spell with a health cost shows its price and is refused when the caster cannot
+                // pay it and stay standing — the same treatment a slot with no charges gets. The cost
+                // is deterministic, so the number shown here is the number that will be charged.
+                if (_mode == SelectionMode.Cast && !slot.IsEmpty)
+                {
+                    int upgradeLevel = MagicUpgradeLevelOf(slot.Magic);
+                    int healthCost = SpellPower.TotalHealthCost(slot.Magic, _currentHero, upgradeLevel);
+                    if (healthCost > 0)
+                    {
+                        meta = $"{meta}  {healthCost} HP";
+                        if (!SpellPower.CanAfford(slot.Magic, _currentHero, upgradeLevel))
+                        {
+                            selectable = false;
+                        }
+                    }
+                }
+
                 int captured = i;
                 var slotRef = slot;
                 _listScroll.Add(CreateRow(icon, name, meta, selectable, () => OnSlotSelected(captured, slotRef)));
@@ -570,6 +587,21 @@ namespace Assets.Scripts.Cards.UI
         // ============================================================
         //  HELPERS
         // ============================================================
+
+        /// <summary>
+        /// A magic's upgrade level, which gates which of its effects are live and therefore what it
+        /// costs. Uses <c>Instance</c> rather than <c>HasInstance</c> for the same reason
+        /// <c>CombatManager.ExecuteCastAction</c> does: the manager may not exist yet mid-combat and
+        /// the quoted price still has to match the one the resolver will apply.
+        /// </summary>
+        private static int MagicUpgradeLevelOf(MagicSO magic)
+        {
+            if (magic == null)
+            {
+                return 0;
+            }
+            return Progression.MetaProgressManager.Instance.GetMagicUpgradeLevel(magic.Key);
+        }
 
         // Rows mirror the command menu: a ▸ cursor on the selected row, icon, dark name, meta.
         private Button CreateRow(Sprite icon, string name, string meta, bool enabled, Action onClick)

@@ -41,23 +41,33 @@ namespace Assets.Scripts.Cards
                 }
 
                 var effect = Effects[i];
+
+                // A percentage effect reads as "30%" rather than "30", or the summary claims a 10%
+                // cloak costs 10 flat health.
+                string power = effect.PowerMode == PowerMode.PercentOfMaxHealth
+                    ? $"{effect.Power}%"
+                    : effect.Power.ToString();
+
                 switch (effect.EffectType)
                 {
                     case SpellEffectType.Damage:
-                        sb.Append($"DMG {effect.Power}");
+                        sb.Append($"DMG {power}");
                         if (effect.DamageType != DamageType.Normal)
                         {
                             sb.Append($" {effect.DamageType}");
                         }
                         break;
                     case SpellEffectType.Heal:
-                        sb.Append($"Heal {effect.Power}");
+                        sb.Append($"Heal {power}");
                         break;
                     case SpellEffectType.Buff:
                         sb.Append($"+{effect.BuffType}");
                         break;
                     case SpellEffectType.Debuff:
                         sb.Append($"-{effect.BuffType}");
+                        break;
+                    case SpellEffectType.HealthCost:
+                        sb.Append($"Costs {power} HP");
                         break;
                 }
             }

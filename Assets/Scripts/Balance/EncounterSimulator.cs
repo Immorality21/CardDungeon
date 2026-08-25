@@ -534,8 +534,25 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                int raw = caster.GetEffectiveAttackPower() + attackBonus + effect.Power + powerBonus;
-                total += DamageCalculator.Calculate(raw, defense, effect.DamageType, target.Resistances);
+                int raw;
+                if (effect.PowerMode == PowerMode.PercentOfMaxHealth)
+                {
+                    // Percentage damage reads the target's bar and takes no upgrade bonus, matching
+                    // EffectResolver.ApplyPowerBonus.
+                    raw = SpellPower.PercentOfMaxHealth(effect.Power, target);
+                }
+                else if (effect.PowerMode == PowerMode.Flat)
+                {
+                    raw = effect.Power + powerBonus;
+                }
+                else
+                {
+                    raw = caster.GetEffectiveAttackPower() + attackBonus + effect.Power + powerBonus;
+                }
+
+                total += DamageCalculator.Calculate(
+                    raw, defense, effect.DamageType, target.Resistances,
+                    buffTracker.GetResistanceBonus(target, effect.DamageType));
             }
 
             return total;
@@ -545,7 +562,9 @@ namespace Assets.Scripts.Balance
         {
             int attackBonus = buffTracker.GetBuffAmount(attacker, attacker.AttackStat);
             int defense = target.GetEffectiveStat(StatType.Endurance) + buffTracker.GetBuffAmount(target, StatType.Endurance);
-            return DamageCalculator.Calculate(attacker.GetEffectiveAttackPower() + attackBonus, defense, DamageType.Normal, target.Resistances);
+            return DamageCalculator.Calculate(
+                attacker.GetEffectiveAttackPower() + attackBonus, defense, attacker.AttackDamageType,
+                target.Resistances, buffTracker.GetResistanceBonus(target, attacker.AttackDamageType));
         }
 
         // ---------------------------------------------------------------- enemy turns
@@ -703,7 +722,8 @@ namespace Assets.Scripts.Balance
             int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * multiplier);
             int defense = target.GetEffectiveStat(StatType.Endurance) + defenseBonus;
             int damage = DamageCalculator.Calculate(
-                rawAttack, defense, attacker.AttackDamageType, target.Resistances);
+                rawAttack, defense, attacker.AttackDamageType, target.Resistances,
+                buffTracker.GetResistanceBonus(target, attacker.AttackDamageType));
 
             if (damage > 0 && Random.Range(0f, 1f) < CombatManager.CritChanceFor(attacker))
             {

@@ -25,11 +25,19 @@ public class MagicSOEditor : Editor
             int lines = 4; // EffectType + Power + ScalingStat + UnlockLevel
             if (effectType == SpellEffectType.Damage)
             {
-                lines = 5; // + DamageType
+                lines = 6; // + PowerMode + DamageType
+            }
+            else if (effectType == SpellEffectType.Heal)
+            {
+                lines = 5; // + PowerMode
             }
             else if (effectType == SpellEffectType.Buff || effectType == SpellEffectType.Debuff)
             {
                 lines = 6; // + BuffType + Duration
+            }
+            else if (effectType == SpellEffectType.HealthCost)
+            {
+                lines = 4; // EffectType + Power + PowerMode + UnlockLevel (no scaling stat)
             }
             return lines * (EditorGUIUtility.singleLineHeight + 2) + 4;
         };
@@ -53,15 +61,37 @@ public class MagicSOEditor : Editor
                 element.FindPropertyRelative("Power"));
             rect.y += lineHeight;
 
+            // How Power is read. Sits directly under Power because it changes what the number
+            // means: 10 is 10 damage in BasePower/Flat and 10% of a health bar in PercentOfMaxHealth.
+            // Buff/Debuff magnitudes are stat deltas and ignore the mode, so it is not drawn for them.
+            bool honoursPowerMode = effectType == SpellEffectType.Damage
+                                 || effectType == SpellEffectType.Heal
+                                 || effectType == SpellEffectType.HealthCost;
+            if (honoursPowerMode)
+            {
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("PowerMode"),
+                    new GUIContent("Power Mode", "BasePower adds the caster's Scaling Stat. Flat uses "
+                        + "Power as authored. PercentOfMaxHealth reads Power as a percentage of the "
+                        + "max health of the unit the effect lands on (the caster, for a health cost), "
+                        + "rounded down with a floor of 1, and takes no upgrade bonus."));
+                rect.y += lineHeight;
+            }
+
             // Which caster stat is added to Power. Sits next to Power because the two are read
-            // together: Power is the floor, the stat is what a good caster brings.
-            EditorGUI.PropertyField(
-                new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
-                element.FindPropertyRelative("ScalingStat"),
-                new GUIContent("Scaling Stat", "Caster stat added to Power. Damage/heals add it in "
-                    + "full; buffs and debuffs add a quarter of it, since their Power is a flat stat "
-                    + "delta and full scaling would dwarf the stat being buffed."));
-            rect.y += lineHeight;
+            // together: Power is the floor, the stat is what a good caster brings. A health cost has
+            // no caster contribution at all, so the field would be a lie there.
+            if (effectType != SpellEffectType.HealthCost)
+            {
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("ScalingStat"),
+                    new GUIContent("Scaling Stat", "Caster stat added to Power. Damage/heals add it in "
+                        + "full; buffs and debuffs add a quarter of it, since their Power is a flat stat "
+                        + "delta and full scaling would dwarf the stat being buffed."));
+                rect.y += lineHeight;
+            }
 
             if (effectType == SpellEffectType.Damage)
             {

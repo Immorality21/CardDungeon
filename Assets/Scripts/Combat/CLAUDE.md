@@ -14,7 +14,7 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
 ## Damage System
 
 - **DamageCalculator** (static): pipeline is raw damage → resistance modifier → defense with diminishing returns → minimum 1 damage.
-- **Resistance**: per-`DamageType` percentage. 0% = full damage, 100% = immune, >100% = absorb (heal), negative = weakness.
+- **Resistance**: per-`DamageType` percentage. 0% = full damage, 100% = immune, >100% = absorb (heal), negative = weakness. Sources **sum**: innate + gear (`ICombatUnit.Resistances`) plus the temporary buff total passed as `resistanceBonusPercent`, clamped to −100..200 once at the end. Temporary resistance lives in `CombatBuffTracker.GetResistanceBonus` rather than in the unit's list, because that list outlives the fight — see the Cards guide. Every call site has to pass the bonus (`CombatManager.ExecuteAttack` **and** its `ShowEffectiveness` popup, `DamageEffectExecutor`, `EncounterSimulator`), or the popup contradicts the number.
 - **Defense formula**: diminishing returns via `defense / (defense + K)` where K=20. At 20 defense, 50% reduction.
 - **ICombatUnit** provides a `Resistances` list for per-unit elemental resistances.
 

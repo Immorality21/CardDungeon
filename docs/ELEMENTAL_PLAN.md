@@ -44,10 +44,12 @@ gate to a confirmation prompt - the affordability check is the same function eit
 | Enemies deal elemental damage (Blocker A) | **done** - `EnemySO.AttackDamageType`, `ICombatUnit.AttackDamageType` |
 | Gear grants resistance (Blocker B) | **done** - `ItemSO.Resistances`, `Hero.GetEffectiveResistances()` |
 | Analyzer: defensive coverage | **done** - `ProgressionMap.DefendableTypes` / `UndefendableIncoming` |
-| `PowerMode` on `SpellEffect` | not started - Phase 1 |
-| `HealthCost` effect + the cloaks | not started - Phase 2 |
-| Resistance buffs (`ResistanceBuffHandler`) | not started - Phase 3 |
-| Discovery-gated reveal | not started - Phase 4c |
+| `PowerMode` on `SpellEffect` | **done** 2026-08-25 - `PowerMode` + `SpellPower`, `SpellPowerTests` |
+| `HealthCost` effect + the cloaks | **done** 2026-08-25 - `HealthCostEffectExecutor`, 4 cloak assets |
+| Resistance buffs (`ResistanceBuffHandler`) | **done** 2026-08-25 - `CombatBuffTracker.ApplyResistance`, `ResistanceBuffTests` |
+| Analyzer/test guard against dead effects | **done** 2026-08-25 - `ElementalContentTests` (Phase 5's checks 1-2, as tests) |
+| Discovery-gated reveal | not started - Phase 4c, **blocked on `EnemySO.Key`** |
+| Analyzer: unintended absorption, cost/benefit sanity | not started - Phase 5 checks 3-4 |
 
 ---
 
@@ -103,6 +105,45 @@ less invasive but easier to leave stale. **This is the one interface decision in
 
 ---
 
+## What shipped 2026-08-25 (Phases 1–3), and the calls made while building it
+
+Phases 1, 2 and 3 are in. The layer is now **playable defence**: a cloak drawn off the right enemy
+turns an element aside, and paying for it in health is the decision. Five things were decided at the
+keyboard that the plan below did not settle:
+
+- **The cloaks carry no tags.** The plan gave Fire Cloak the `Fire` tag. Tags exist to set combos up
+  *on an enemy*; a self-buff that leaves `Fire` on one of your own heroes is a combo waiting to fire
+  on your own party (`Ignite` is Fire + Oil, and its bonus effects land on the tagged unit). The
+  cloaks are untagged, which also keeps them out of the combo supply chain the analyzer models.
+- **Resistance buffs are authored unscaled** (`ScalingStat = None`). Their `Power` is a percentage, so
+  a quarter of the caster's Spirit on top would make "how much does a cloak defend" unpredictable -
+  the opposite of what a defensive choice needs.
+- **`PercentOfMaxHealth` takes no upgrade bonus**, as recommended - and neither does a `HealthCost`,
+  at any mode. Upgrading a spell must never raise its price.
+- **Buff/Debuff ignore `PowerMode` entirely**, and the inspector does not draw the field for them. A
+  percentage of a health bar is not a meaningful stat delta, so offering the mode there is a trap.
+- **Draw placement went to *later* enemies, at `CastWeight: 0`.** Cinder Imp -> Fire Cloak, Bog Shaman
+  -> Frost Cloak, Hex Weaver -> Storm Cloak, Mirefather -> Ward. The plan put them on the Eye, the
+  Dragon and the Warden; those are floor-one enemies and the Tutorial already front-loads most of the
+  catalog. Weight 0 makes each entry drawable but never cast by its owner - a cloak wards the element
+  that enemy *deals*, which is never what threatens it, so casting one would waste its turn and 10%
+  of its health.
+
+One trap worth recording: `MagicCatalog` is a **prefab instance** in both scenes, and adding the four
+cloaks by overriding the array size on the scene instances grew the list with **nulls** - drawable in
+combat, but unresolvable when a save restored the slot and invisible in the Forge. The list belongs on
+`Assets/Prefabs/MagicCatalog.prefab`; `ElementalContentTests` now fails on either mistake.
+
+Measured after the pass: suite **651/0** (42 new cases), analyzer **0 critical / 3 warning / 22 info**
+- the same three warnings as before, none of them from this change.
+
+**Still open, in the order the build order suggests:** Phase 4c (discovery-gated reveal, blocked on a
+stable `EnemySO.Key`) and Phase 5's remaining two analyzer checks (unintended absorption, cost/benefit
+sanity). Note that blind absorption is now *reachable* by the player against a hero - so the argument
+in Phase 4 for surfacing resistances is live, not hypothetical.
+
+---
+
 ## Phase 1 — `PowerMode`: flat, scaling, or percentage
 
 The generalisation of "differentiate flat numbers from base power".
@@ -148,7 +189,9 @@ public enum SpellEffectType { Damage = 0, Heal = 1, Buff = 2, Debuff = 3, Health
 Appending is safe: assets serialise by integer and only `EffectExecutorFactory` switches on this.
 
 `HealthCostEffectExecutor` subtracts the resolved cost from the **caster** — no attack scaling, no defense,
-no resistance. **It can kill the caster**, per your decision. Two consequences:
+no resistance. **As built it cannot kill the caster**: the cast is gated by `SpellPower.CanAfford` and the
+executor floors the caster at 1 HP, per *Affordability* above. The two consequences below are what that
+decision avoided, kept for the reasoning:
 
 - **Resolve costs last.** `EffectResolver` iterates effects in order and `BuffEffectExecutor` skips dead
   targets, so a cost listed first would kill the caster and silently fizzle the buff they paid for. Either
