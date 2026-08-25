@@ -90,6 +90,21 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
+        /// Magic this hero permanently knows, as (key, charges): the payload of activated MagicKnown
+        /// nodes. Seeded into their slots at the start of each run by <c>EquippedMagicState</c>, which
+        /// is also where the keys are resolved against the catalog - keeping Cards → Heroes the
+        /// dependency direction, same as <see cref="BonusMagicSlots"/>.
+        /// </summary>
+        public List<KeyValuePair<string, int>> GrantedMagic
+        {
+            get
+            {
+                return SphereGridOps.GrantedMagicForNodes(
+                    HeroSO != null ? HeroSO.SphereGrid : null, ActivatedNodes);
+            }
+        }
+
+        /// <summary>
         /// The stat this hero swings with, per <see cref="HeroSO.AttackStat"/>. Falls back to
         /// Strength when unset or nonsensical (MaxHealth is a pool, not an output), which is what
         /// every hero did before the field existed.

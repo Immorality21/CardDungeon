@@ -383,6 +383,19 @@ namespace Assets.Scripts.Dungeon
                 MagicState.Restore(carried, MagicCatalog.Instance.GetMagic);
             }
 
+            // Charges are a *run* resource: spent across floors and topped up only by drawing again.
+            // So the run's opening floor seeds each hero's permanently known magic and fills every
+            // slot; after that nothing refills. A per-level refill would hand the resource back before
+            // it ran out, and a per-fight one (what this used to do) made magic effectively infinite.
+            if (EquippedMagicState.RefillsOnLevelStart(RunLevelIndex))
+            {
+                if (MagicCatalog.HasInstance)
+                {
+                    MagicState.SeedGrantedMagic(Party.Heroes, MagicCatalog.Instance.GetMagic);
+                }
+                MagicState.RefillCharges();
+            }
+
             // Top the healing-potion belt back up to its cap for the new dungeon. Consumables
             // now live in the item inventory; the "belt" is just the carry cap the Merchant raises.
             if (_healingPotion != null && InventoryManager.HasInstance && PartyResourceManager.Instance != null)
@@ -982,10 +995,16 @@ namespace Assets.Scripts.Dungeon
             room.CaptiveHero = null;
             RemoveCaptiveMarker(room);
 
-            // Give the newcomer their own magic slots, or they cannot cast anything this run.
+            // Give the newcomer their own magic slots, or they cannot cast anything this run - and
+            // seed whatever they permanently know, since charges no longer refill and a hero who
+            // joined on floor three would otherwise be unarmed for the rest of the run.
             if (MagicState != null)
             {
                 MagicState.AddHero(hero);
+                if (MagicCatalog.HasInstance)
+                {
+                    MagicState.SeedGrantedMagic(new List<Hero> { hero }, MagicCatalog.Instance.GetMagic);
+                }
             }
 
             Debug.Log($"Rescued {captive.DisplayName}; party is now {Party.Heroes.Count} strong.");

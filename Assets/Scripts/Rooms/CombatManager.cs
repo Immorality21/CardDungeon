@@ -285,11 +285,11 @@ namespace Assets.Scripts.Rooms
                 : _cardCombos;
             _comboDetector = new ComboDetector(combos);
 
-            // Refill equipped-magic charges at the start of each combat (per-room refresh).
-            if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
-            {
-                DungeonManager.Instance.MagicState.RefillCharges();
-            }
+            // Charges are deliberately NOT refilled here. They are a run resource: drawn on one
+            // floor, spent across the next, and topped up only by drawing again. Refilling per fight
+            // made magic infinite - a dozen casts and two free Heals in every room, which is why a
+            // whole run could be cleared without the party's health ever trending down. See
+            // EquippedMagicState.RefillsOnLevelStart.
 
             // Seed the fresh buff tracker with anything room events hung on the party for this
             // level. The tracker is rebuilt per fight and ticks per turn, so a level-scoped curse

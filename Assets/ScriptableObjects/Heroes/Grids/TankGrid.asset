@@ -25,6 +25,8 @@ MonoBehaviour:
         Amount: 4
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors: []
   - Key: tank-spine-1
     DisplayName: 
@@ -37,6 +39,8 @@ MonoBehaviour:
         Amount: 2
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-start
   - Key: tank-spine-2
@@ -50,6 +54,8 @@ MonoBehaviour:
         Amount: 2
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-spine-1
   - Key: tank-spine-3
@@ -63,6 +69,8 @@ MonoBehaviour:
         Amount: 5
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-spine-2
   - Key: tank-spine-4
@@ -78,6 +86,8 @@ MonoBehaviour:
         Amount: 1
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-spine-3
   - Key: tank-immovable-1
@@ -91,6 +101,8 @@ MonoBehaviour:
         Amount: 3
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-spine-4
   - Key: tank-immovable-2
@@ -104,6 +116,8 @@ MonoBehaviour:
         Amount: 7
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-immovable-1
   - Key: tank-immovable-3
@@ -115,6 +129,8 @@ MonoBehaviour:
       Values: []
     ResistType: 2
     ResistPercent: 15
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-immovable-2
   - Key: tank-immovable-4
@@ -128,6 +144,8 @@ MonoBehaviour:
         Amount: 8
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-immovable-3
   - Key: tank-immovable-5
@@ -139,6 +157,8 @@ MonoBehaviour:
       Values: []
     ResistType: 1
     ResistPercent: 15
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-immovable-4
   - Key: tank-vanguard-1
@@ -152,6 +172,8 @@ MonoBehaviour:
         Amount: 2
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-spine-2
   - Key: tank-vanguard-2
@@ -165,6 +187,8 @@ MonoBehaviour:
         Amount: 1
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-vanguard-1
   - Key: tank-vanguard-3
@@ -178,6 +202,8 @@ MonoBehaviour:
         Amount: 2
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-vanguard-2
   - Key: tank-vanguard-4
@@ -191,6 +217,8 @@ MonoBehaviour:
         Amount: 2
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-vanguard-3
   - Key: tank-vanguard-5
@@ -202,5 +230,20 @@ MonoBehaviour:
       Values: []
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - tank-vanguard-4
+  - Key: tank-signature
+    DisplayName: Braced Guard
+    Kind: 3
+    XpCost: 40
+    Position: {x: 110, y: -145}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: ShieldUp
+    GrantedCharges: 2
+    Neighbors:
+    - tank-spine-1

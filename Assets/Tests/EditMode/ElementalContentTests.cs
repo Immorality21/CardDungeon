@@ -166,6 +166,80 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void EveryKnownMagicNode_NamesAMagicThatExists()
+        {
+            // A MagicKnown node whose key does not resolve grants an *empty* slot - it fails soft, on
+            // purpose, so a renamed magic asset cannot brick a run. Which is exactly why it needs a
+            // test: the failure is a hero who quietly starts every run one spell short.
+            var keys = new List<string>();
+            foreach (var magic in LoadAllMagic())
+            {
+                keys.Add(magic.Key);
+            }
+
+            var broken = new List<string>();
+            var authored = 0;
+            foreach (var guid in AssetDatabase.FindAssets("t:SphereGridSO"))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var grid = AssetDatabase.LoadAssetAtPath<Assets.Scripts.Heroes.SphereGridSO>(path);
+                if (grid == null)
+                {
+                    continue;
+                }
+
+                foreach (var node in grid.Nodes)
+                {
+                    if (node.Kind != Assets.Scripts.Heroes.SphereNodeKind.MagicKnown)
+                    {
+                        continue;
+                    }
+
+                    authored++;
+                    if (string.IsNullOrEmpty(node.GrantedMagicKey) || !keys.Contains(node.GrantedMagicKey))
+                    {
+                        broken.Add($"{grid.name}/{node.Key} -> '{node.GrantedMagicKey}'");
+                    }
+                }
+            }
+
+            CollectionAssert.IsEmpty(broken,
+                "Known-magic node(s) name a magic that does not exist: " + string.Join(", ", broken));
+            Assert.Greater(authored, 0,
+                "No grid authors a MagicKnown node, so the node kind is dead content - and with charges "
+                + "no longer refilling, every hero can start a run with nothing to cast.");
+        }
+
+        [Test]
+        public void EveryHeroGrid_OffersASignatureSpell()
+        {
+            // The reason the node kind exists: charges are a run resource now, so a hero must have
+            // *something* they always carry. One reachable known-magic node per grid is the floor.
+            foreach (var guid in AssetDatabase.FindAssets("t:HeroSO"))
+            {
+                var hero = AssetDatabase.LoadAssetAtPath<Assets.Scripts.Heroes.HeroSO>(
+                    AssetDatabase.GUIDToAssetPath(guid));
+                if (hero == null || hero.SphereGrid == null)
+                {
+                    continue;
+                }
+
+                bool hasKnown = false;
+                foreach (var node in hero.SphereGrid.Nodes)
+                {
+                    if (node.Kind == Assets.Scripts.Heroes.SphereNodeKind.MagicKnown)
+                    {
+                        hasKnown = true;
+                    }
+                }
+
+                Assert.IsTrue(hasKnown,
+                    $"{hero.DisplayName}'s grid has no MagicKnown node, so they can only ever cast what "
+                    + "they draw - and charges do not refill between floors.");
+            }
+        }
+
+        [Test]
         public void EveryCloak_IsDrawableFromSomeEnemy()
         {
             // Draw is the only way into the player's hands. A cloak on no enemy's list is content the

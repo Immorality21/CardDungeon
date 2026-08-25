@@ -13,7 +13,8 @@ namespace Assets.Scripts.Heroes
     {
         Stat = 0,       // grants Gains (a StatBlock)
         Resistance = 1, // grants +ResistPercent to ResistType
-        MagicSlot = 2   // grants +1 equipped-magic slot
+        MagicSlot = 2,  // grants +1 empty equipped-magic slot
+        MagicKnown = 3  // grants +1 slot that starts each run holding GrantedMagicKey
     }
 
     /// <summary>
@@ -47,6 +48,18 @@ namespace Assets.Scripts.Heroes
 
         [Tooltip("Kind == Resistance: percent granted. Sums with innate, gear and other nodes.")]
         public float ResistPercent = 10f;
+
+        [Tooltip("Kind == MagicKnown: MagicSO.Key of the magic this hero permanently knows. The " +
+                 "slot it grants is seeded with it at the start of every run, so a hero is never " +
+                 "empty-handed - charges are a run resource and drawing is the only other refill. " +
+                 "A key with no catalog entry grants an empty slot rather than failing.")]
+        public string GrantedMagicKey;
+
+        [Tooltip("Kind == MagicKnown: charges the granted slot starts a run with. This is the run's " +
+                 "whole allowance of that magic, so it is the node's real power dial - more so than " +
+                 "XpCost.")]
+        [Range(1, 9)]
+        public int GrantedCharges = 2;
 
         [Tooltip("Keys of neighbouring nodes. Edges are undirected: listing B on A is enough.")]
         public List<string> Neighbors = new List<string>();

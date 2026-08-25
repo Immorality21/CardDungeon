@@ -563,7 +563,7 @@ namespace Assets.Scripts.Balance
                     against = report.Party;
                 }
 
-                AssignDrawLoadout(against, simReport.Enemies, report.Save);
+                AssignDrawLoadout(against, simReport.Enemies, report.Save, input.Magic);
                 simReport.Outcomes = EncounterSimulator.RunAllPolicies(against, simReport.Enemies, settings);
                 report.Simulations.Add(simReport);
             }
@@ -606,7 +606,7 @@ namespace Assets.Scripts.Balance
                     };
 
                     var levelParty = level.Party ?? report.Party;
-                    AssignDrawLoadout(levelParty, units, report.Save);
+                    AssignDrawLoadout(levelParty, units, report.Save, input.Magic);
                     simReport.Outcomes = EncounterSimulator.RunAllPolicies(levelParty, units, settings);
                     report.Simulations.Add(simReport);
                 }
@@ -624,7 +624,8 @@ namespace Assets.Scripts.Balance
         /// loadout matches what a player at this point could really be holding. Note that the turn a
         /// Draw costs is not modelled — the loadout is assumed already in hand.
         /// </summary>
-        private static void AssignDrawLoadout(PartyBaseline party, IList<SimUnit> enemies, SaveAudit save)
+        private static void AssignDrawLoadout(
+            PartyBaseline party, IList<SimUnit> enemies, SaveAudit save, IList<MagicSO> allMagic)
         {
             if (party == null)
             {
@@ -679,6 +680,34 @@ namespace Assets.Scripts.Balance
                     hero.Definition != null ? hero.Definition.SphereGrid : null, hero.ActivatedNodes);
 
                 hero.Unit.MagicSlots.Clear();
+
+                // Permanently known magic first: a MagicKnown grid node seeds its slot at the start of
+                // every run, so this hero holds it whether or not the fight offers it. Its charge count
+                // is authored on the node, and unlike a drawn slot it is the run's whole allowance.
+                var known = SphereGridOps.GrantedMagicForNodes(
+                    hero.Definition != null ? hero.Definition.SphereGrid : null, hero.ActivatedNodes);
+                foreach (var granted in known)
+                {
+                    if (hero.Unit.MagicSlots.Count >= slotCount)
+                    {
+                        break;
+                    }
+
+                    var magic = ResolveMagicByKey(allMagic, granted.Key);
+                    if (magic == null)
+                    {
+                        continue;
+                    }
+
+                    hero.Unit.MagicSlots.Add(new SimMagicSlot
+                    {
+                        Magic = magic,
+                        Charges = granted.Value,
+                        MaxCharges = granted.Value,
+                        UpgradeLevel = UpgradeLevelFor(magic, save)
+                    });
+                }
+
                 foreach (var magic in offered)
                 {
                     if (hero.Unit.MagicSlots.Count >= slotCount)
@@ -695,6 +724,28 @@ namespace Assets.Scripts.Balance
                     });
                 }
             }
+        }
+
+        /// <summary>
+        /// A magic asset by <c>MagicSO.Key</c>, resolved from the analyzer's own input list. The
+        /// runtime <c>MagicCatalog</c> is a scene singleton the analyzer cannot reach, and reaching for
+        /// <c>AssetDatabase</c> here would put editor-only code in a runtime assembly.
+        /// </summary>
+        private static MagicSO ResolveMagicByKey(IList<MagicSO> allMagic, string key)
+        {
+            if (allMagic == null || string.IsNullOrEmpty(key))
+            {
+                return null;
+            }
+
+            foreach (var magic in allMagic)
+            {
+                if (magic != null && magic.Key == key)
+                {
+                    return magic;
+                }
+            }
+            return null;
         }
 
         private static int UpgradeLevelFor(MagicSO magic, SaveAudit save)

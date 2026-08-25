@@ -17,9 +17,18 @@ namespace Assets.Scripts.Cards
     }
 
     /// <summary>
-    /// Per-run equipped-magic state, one fixed set of slots per hero. Drawing from an
-    /// enemy fills/overwrites a slot at full charges; casting spends a charge; charges
-    /// refill each combat. Replaces the old single-use <c>DungeonDeckState</c> deck model.
+    /// Per-run equipped-magic state, one fixed set of slots per hero. Drawing from an enemy
+    /// fills/overwrites a slot at full charges; casting spends a charge.
+    ///
+    /// <para><b>Charges are a run resource.</b> They refill on the first floor of a run and never
+    /// again: spend them and the only way back is to draw the magic once more. They used to refill at
+    /// the start of every combat, which made magic effectively unlimited - a three-hero party walked
+    /// into every room with a dozen casts including free heals, so a floor's damage could never
+    /// accumulate and a whole run could be cleared without the party's health trending down.</para>
+    ///
+    /// <para>A hero is never left empty-handed by that: <c>MagicKnown</c> sphere-grid nodes grant a
+    /// slot that is <b>seeded</b> at the start of each run (<see cref="SeedGrantedMagic"/>).</para>
+    ///
     /// Persists via <see cref="MagicSlotSaveData"/> and survives the whole run (lost on death).
     /// </summary>
     public class EquippedMagicState
@@ -60,6 +69,80 @@ namespace Assets.Scripts.Cards
                 return;
             }
             _heroSlots[hero.HeroKey] = CreateEmptySlots(SlotCountFor(hero));
+        }
+
+        /// <summary>
+        /// Puts each hero's permanently known magic (activated <c>MagicKnown</c> grid nodes) into their
+        /// slots. Called once at the <b>start of a run</b>, right before the charge refill.
+        ///
+        /// <para>Three rules. It never overwrites a slot that already holds something - a kit carried
+        /// out of a previous run keeps precedence, and the granted magic simply lands in the empty slot
+        /// its own node paid for. It skips a magic the hero is already holding, so a carried Fireball
+        /// does not become two Fireballs. And a key the catalog cannot resolve leaves the slot empty
+        /// rather than throwing: a renamed magic asset must not brick a run.</para>
+        /// </summary>
+        /// <param name="resolve">Key → definition, i.e. <c>MagicCatalog.GetMagic</c>.</param>
+        public void SeedGrantedMagic(List<Hero> heroes, Func<string, MagicSO> resolve)
+        {
+            if (heroes == null || resolve == null)
+            {
+                return;
+            }
+
+            foreach (var hero in heroes)
+            {
+                if (hero == null || string.IsNullOrEmpty(hero.HeroKey))
+                {
+                    continue;
+                }
+                if (!_heroSlots.TryGetValue(hero.HeroKey, out var slots))
+                {
+                    continue;
+                }
+
+                foreach (var granted in hero.GrantedMagic)
+                {
+                    var magic = resolve(granted.Key);
+                    if (magic == null || Holds(slots, granted.Key))
+                    {
+                        continue;
+                    }
+
+                    int index = FirstEmptyIndex(slots);
+                    if (index < 0)
+                    {
+                        break;   // every slot is occupied by something carried in; nothing to seed into
+                    }
+
+                    slots[index].Magic = magic;
+                    slots[index].MaxCharges = granted.Value;
+                    slots[index].Charges = granted.Value;
+                }
+            }
+        }
+
+        private static bool Holds(List<MagicSlot> slots, string magicKey)
+        {
+            foreach (var slot in slots)
+            {
+                if (!slot.IsEmpty && slot.Magic.Key == magicKey)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static int FirstEmptyIndex(List<MagicSlot> slots)
+        {
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i].IsEmpty)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         private static int SlotCountFor(Hero hero)
@@ -147,7 +230,28 @@ namespace Assets.Scripts.Cards
             return true;
         }
 
-        /// <summary>Refills every occupied slot to its max charges — call on combat/room start.</summary>
+        /// <summary>
+        /// Whether a fresh level should top charges back up. <b>Only the first level of a run</b>
+        /// (and free play, which is a single level) - a charge is a <i>run</i> resource, so refilling
+        /// per level would hand it back before it ever ran out.
+        ///
+        /// <para>The rule lives here rather than inline at the call site because it is the whole
+        /// economy of the Draw system in one line: change this and magic goes from a resource the
+        /// player manages across a dungeon to a per-level allowance.</para>
+        /// </summary>
+        public static bool RefillsOnLevelStart(int runLevelIndex)
+        {
+            return runLevelIndex <= 0;
+        }
+
+        /// <summary>
+        /// Refills every occupied slot to its max charges. Called at the <b>start of a run</b> only.
+        ///
+        /// <para>It used to run at the start of every combat, which quietly made magic infinite:
+        /// with three heroes at four slots each, the party walked into every room with a dozen casts
+        /// and two free Heals, so a floor's damage could never accumulate. Drawing is the refill
+        /// now - spend a charge and the only way to get it back is to take the magic again.</para>
+        /// </summary>
         public void RefillCharges()
         {
             foreach (var slots in _heroSlots.Values)

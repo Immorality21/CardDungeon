@@ -387,6 +387,45 @@ Five things worth keeping:
 - **A boss floor is a fine place for a refuge.** Emberfall carries one and no cache: the relief lands
   right before the climax, and it is the only reason a 5-room floor at Difficulty 3.15 clears.
 
+## 5f. Why a whole run felt like a breeze - the model was measuring a different game
+
+Reported from play 2026-08-25: The Drowned March cleared with "no real difficulty", on a save whose
+heroes had **154/161/156 unspent XP** and almost no nodes bought. The curve said those floors cost
+0.45 / 0.58 / 0.48 / 0.49 of the party's sustain. Both were true, because they were about different
+games. Three biases, all pointing the same way:
+
+1. **`CombatManager` refilled every magic charge at the start of every combat.** Three heroes x four
+   slots = a dozen casts in *every room*, including the Tank's `Heal` at power 6 + Spirit 6 = **12 per
+   cast, x2 charges = ~24 HP per fight** against a ~94 HP party pool. Health refills per *level*;
+   healing magic refilled per *fight*. Attrition could not accumulate - it was structurally impossible.
+2. **`BalanceMath` prices basic attacks only, on both sides** (it says so in its own header). Real
+   fights end sooner than modelled, so the curve bills the party for damage taken on turns that never
+   happen.
+3. **`PartyBaseline.SustainPool = health + potions`.** The largest sustain source in the real game was
+   not in the denominator at all: two potions are 10 HP; one fight's Heals were 24.
+
+**The measurement that settled it:** run the analyzer with simulation on and read every encounter. All
+**63 simulated fights won 100% of the time**, and the worst room in the entire game (Rotwater Deep,
+Blue Room) ended at **70% health**. The simulator uses magic; the curve does not. When those two
+disagree by that much, the curve is not wrong about arithmetic - it is answering a different question.
+
+**What shipped:** charges became a **run** resource. `RefillCharges` moved out of combat start and onto
+the first floor of a run (`EquippedMagicState.RefillsOnLevelStart`), and `MagicKnown` sphere-grid nodes
+give each hero one permanently-carried spell so a spent party is not an unarmed one.
+
+Consequences for tuning, in order of importance:
+
+- **The closed-form curve is now a much better model of the game**, because with magic finite, basic
+  attacks really are the mainstay. The numbers in §5d/§5e did not move, but they mean more than they did.
+- **The simulator is now the optimistic one.** It still grants full charges per fight, which is only
+  true of a run's first fight. Read whole-floor attrition off the run curve, never off `Best.WinRate`.
+- **Expect to re-tune downward before upward.** Nothing was re-tuned in the same change on purpose: the
+  right move is to play it, then measure, because the model that would have justified a tuning pass is
+  the one that just turned out to be describing a different game.
+- **A per-fight refill is a difficulty dial disguised as a convenience.** If magic ever feels too thin,
+  the honest levers are `GrantedCharges` on the signature nodes and `DrawableMagicEntry.Charges` - both
+  authored, both visible in the analyzer - not a return to refilling.
+
 ## 6. Standing traps
 
 - **A trash buff breaks three other checks.** Boss:trash ratio (bosses are on absolute overrides),
@@ -407,6 +446,10 @@ Five things worth keeping:
   damage source that does not crit (spell effects, room-event outcomes) has to call
   `DamageCalculator` directly. This cost a debugging round: every enemy spell number came out exactly
   7.2% high, which is `1 + CritChance x (CritMultiplier - 1)`.
+- **Sustain is not just health and potions.** Anything that hands health back inside a fight - a heal
+  spell, a lifesteal effect, a room event that mends - is sustain the run curve cannot see, because
+  `SustainPool` only counts the health bar and the potion belt. If a new mechanic restores health,
+  either price it there or expect the curve to overstate that level's difficulty (§5f).
 - **A room-kind quota is a room-count change in disguise.** Promoting a room removes a fight *and*
   (for a refuge) adds sustain, so it moves attrition twice. Re-read the whole run curve, not the level
   you edited - see §5d for the spike this produced the first time.

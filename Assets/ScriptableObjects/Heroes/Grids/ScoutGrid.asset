@@ -25,6 +25,8 @@ MonoBehaviour:
         Amount: 2
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors: []
   - Key: scout-spine-1
     DisplayName: 
@@ -37,6 +39,8 @@ MonoBehaviour:
         Amount: 1
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-start
   - Key: scout-spine-2
@@ -50,6 +54,8 @@ MonoBehaviour:
         Amount: 1
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-spine-1
   - Key: scout-spine-3
@@ -63,6 +69,8 @@ MonoBehaviour:
         Amount: 3
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-spine-2
   - Key: scout-spine-4
@@ -80,6 +88,8 @@ MonoBehaviour:
         Amount: 1
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-spine-3
   - Key: scout-skirmisher-1
@@ -93,6 +103,8 @@ MonoBehaviour:
         Amount: 2
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-spine-2
   - Key: scout-skirmisher-2
@@ -106,6 +118,8 @@ MonoBehaviour:
         Amount: 3
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-skirmisher-1
   - Key: scout-skirmisher-3
@@ -119,6 +133,8 @@ MonoBehaviour:
         Amount: 2
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-skirmisher-2
   - Key: scout-skirmisher-4
@@ -130,6 +146,8 @@ MonoBehaviour:
       Values: []
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-skirmisher-3
   - Key: scout-skirmisher-5
@@ -141,6 +159,8 @@ MonoBehaviour:
       Values: []
     ResistType: 3
     ResistPercent: 15
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-skirmisher-4
   - Key: scout-survivor-1
@@ -154,6 +174,8 @@ MonoBehaviour:
         Amount: 3
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-spine-4
   - Key: scout-survivor-2
@@ -167,6 +189,8 @@ MonoBehaviour:
         Amount: 1
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-survivor-1
   - Key: scout-survivor-3
@@ -180,6 +204,8 @@ MonoBehaviour:
         Amount: 4
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-survivor-2
   - Key: scout-survivor-4
@@ -193,6 +219,8 @@ MonoBehaviour:
         Amount: 2
     ResistType: 0
     ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-survivor-3
   - Key: scout-survivor-5
@@ -204,5 +232,20 @@ MonoBehaviour:
       Values: []
     ResistType: 5
     ResistPercent: 15
+    GrantedMagicKey: 
+    GrantedCharges: 2
     Neighbors:
     - scout-survivor-4
+  - Key: scout-signature
+    DisplayName: Coated Blade
+    Kind: 3
+    XpCost: 40
+    Position: {x: 110, y: -145}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: PoisonDart
+    GrantedCharges: 2
+    Neighbors:
+    - scout-spine-1

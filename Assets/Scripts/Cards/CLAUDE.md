@@ -59,12 +59,37 @@ The five resistance `BuffType`s were a **no-op** until 2026-08-25: `ResistanceBu
 - **SpellEffect**: `EffectType` (`SpellEffectType`: Damage/Heal/Buff/Debuff/**HealthCost**), `Power`, **`PowerMode`**, `ScalingStat`, `DamageType`, `BuffType`, `Duration`, `UnlockLevel`.
 - **MagicCatalog** (singleton): scene-wired `List<MagicSO>` of every magic in the game, keyed by `Key`. Used to resolve saved magic keys when restoring equipped slots, and to list upgradeable magic in the hub Forge. **Edit `_allMagic` on `Assets/Prefabs/MagicCatalog.prefab`, not on the scene instance.** It is a prefab instance in *both* scenes, and overriding the array *size* on an instance grows it with **nulls** — which is how the cloaks first shipped drawable in combat but unresolvable from a save and invisible in the Forge. `ElementalContentTests.EveryMagicAsset_IsInTheCatalogPrefab` fails on both mistakes now.
 
+## Charges are a *run* resource
+
+**A charge spent is gone until the magic is drawn again.** `RefillCharges` runs on the **first floor of
+a run** and never again - not per level, not per fight.
+
+It used to run at the start of every combat, and that single line was the game's difficulty: with three
+heroes at four slots each, the party walked into every room with a dozen casts *including two free
+Heals*, so a floor's damage could never accumulate. A whole run could be cleared without the party's
+health trending downward - measured, after a full playthrough reported as "a breeze": 63 simulated
+encounters, win rate 1.00 on every one, worst room in the game ending at 70% health. See
+`docs/BALANCING.md` §5f.
+
+Three consequences worth holding on to:
+
+- **Draw is the refill**, which is what makes spending a turn on it a real decision rather than a
+  one-time setup cost. Drawing a magic the hero already holds tops that slot back up.
+- **A hero must have something they always carry**, or a fresh run starts with an empty hand. That is
+  what `MagicKnown` sphere-grid nodes are for (see the Heroes guide): each grants a slot *and* seeds it
+  at run start. Every hero's grid authors one, pinned by `ElementalContentTests`.
+- **The closed-form balance model got more accurate for free.** `BalanceMath` deliberately prices basic
+  attacks only; with magic finite, basic attacks really are the mainstay, so the run curve is no longer
+  measuring a different game. The simulator still grants full charges per fight, which now makes it an
+  *optimistic* read of any fight after the first - it says so in its own header.
+
 ## Equip / Draw / Cast
 
 - **EquippedMagicState**: per-hero fixed set of `MagicSlot { MagicSO Magic; int Charges; int MaxCharges }`. Owned by `DungeonManager.MagicState` (replaces the old `DungeonDeckState`). Slots survive **between** runs, not just within one — see below.
   - `DrawInto(heroKey, slotIndex, magic, maxCharges)` — fills/overwrites a slot at full charges.
   - `TryCast(heroKey, slotIndex)` — spends a charge (returns false if empty/no charges).
-  - `RefillCharges()` — refills all slots to max; called at the start of each combat (per-room refresh).
+  - `RefillCharges()` — refills all slots to max. Called **once per run**, on its first floor (`RefillsOnLevelStart`), and nowhere else.
+  - `SeedGrantedMagic(heroes, resolve)` — puts each hero's permanently known magic (their activated `MagicKnown` grid nodes) into empty slots at run start, at the charge count the node authors. Never overwrites a carried kit, never duplicates a magic the hero already holds, and leaves the slot empty if the key does not resolve.
   - `FirstEmptySlot`, `HasAnyCastable`, `GetSlots`, `GetSaveData`/`Restore` (persisted via `MagicSlotSaveData`).
   - Slot count is **per hero**: `DefaultSlotCount` + that hero's activated `MagicSlot` sphere-grid nodes (`Hero.BonusMagicSlots`); `Initialize(heroes)`/`AddHero(hero)` compute it themselves. The old global Essence-bought bonus is retired.
 - **Flow** (in `CombatManager`, see the Rooms guide): a hero turn offers Attack / **Magic** / **Draw** / Skip.
