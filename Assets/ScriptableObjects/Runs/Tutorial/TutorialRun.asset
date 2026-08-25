@@ -22,19 +22,60 @@ MonoBehaviour:
     LevelName: Dungeon Entrance
     ManualLayout: {fileID: 11400000, guid: 81a86b4d14ab1a34792bcf19bfcaee94, type: 2}
     BossEnemy: {fileID: 0}
+    EnemyTuning:
+      Difficulty: 1
+      StatScales:
+      - Stat: 7
+        Multiplier: 1.5
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides: []
     RescueHero: {fileID: 11400000, guid: d0d0529f46172044d9494619917b8364, type: 2}
   - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
     LevelName: Upper Halls
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    EnemyTuning:
+      Difficulty: 1.55
+      StatScales:
+      - Stat: 7
+        Multiplier: 1.32
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides: []
     RescueHero: {fileID: 0}
   - LevelTemplate: {fileID: 11400000, guid: eac98a3da612d49499a92d78cd394b7f, type: 2}
     LevelName: Collapsed Caverns
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    EnemyTuning:
+      Difficulty: 1.55
+      StatScales:
+      - Stat: 7
+        Multiplier: 1.74
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides: []
     RescueHero: {fileID: 0}
   - LevelTemplate: {fileID: 11400000, guid: 6517393ec276405b8c88463d92983e27, type: 2}
     LevelName: Sunken Depths
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
+    EnemyTuning:
+      Difficulty: 1.55
+      StatScales:
+      - Stat: 7
+        Multiplier: 1.8
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides:
+      - Enemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
+        Stats:
+          Values:
+          - Type: 7
+            Amount: 93
+          - Type: 1
+            Amount: 6
+        XpReward: 0
+        GoldReward: 0
     RescueHero: {fileID: 0}

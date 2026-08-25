@@ -36,10 +36,10 @@ namespace Assets.Scripts.Balance
     /// no <see cref="Assets.Scripts.Items.InventoryManager"/> is needed; combat buffs still stack on
     /// top via <see cref="CombatBuffTracker"/> exactly as in the live combat loop.
     ///
-    /// Note: unlike the live game, MaxHealth here *includes* gear MaxHealth bonuses. The live
-    /// <c>Party.HealAll()</c> fills only <c>Stats.MaxHealth</c> (no gear) while the heal cap and HP
-    /// bar read <c>GetEffectiveMaxHealth()</c> — that mismatch is reported as a finding rather than
-    /// reproduced here.
+    /// MaxHealth here includes gear MaxHealth bonuses, and so does the live game now: every health
+    /// ceiling — <c>Party.HealAll()</c>, the heal and absorb clamps, the HP bar — reads
+    /// <c>GetEffectiveStat(MaxHealth)</c>. It did not always, which is why this note exists: the
+    /// model was right and the game was short by exactly the gear bonus.
     /// </summary>
     public class SimUnit : ICombatUnit
     {
@@ -119,26 +119,35 @@ namespace Assets.Scripts.Balance
             return clone;
         }
 
-        /// <summary>Builds a simulated enemy straight from its definition.</summary>
-        public static SimUnit FromEnemy(EnemySO definition)
+        /// <summary>
+        /// Builds a simulated enemy from its definition, under an optional level tuning.
+        ///
+        /// <para>The tuning is where an enemy's real numbers come from: an <c>EnemySO</c> is a
+        /// template reused across the campaign, and the level it appears in owns its stats (see
+        /// <see cref="LevelEnemyTuning"/>). Null means the template's own values - which is right for
+        /// a project-wide authoring check, and wrong for anything measuring a fight.</para>
+        /// </summary>
+        public static SimUnit FromEnemy(EnemySO definition, LevelEnemyTuning tuning = null)
         {
             if (definition == null)
             {
                 return null;
             }
 
+            var stats = LevelEnemyTuning.StatsFor(definition, tuning);
+
             return new SimUnit
             {
                 DisplayName = string.IsNullOrEmpty(definition.DisplayName) ? definition.name : definition.DisplayName,
                 IsHero = false,
-                Stats = new Stats(definition.BaseStats),
-                Effective = definition.BaseStats.Clone(),
+                Stats = new Stats(stats),
+                Effective = stats.Clone(),
                 Resistances = definition.Resistances != null
                     ? new List<Resistance>(definition.Resistances)
                     : new List<Resistance>(),
                 // Enemies always swing off Strength; only heroes pick an attack stat.
                 AttackStat = StatType.Strength,
-                EffectiveAttackPower = definition.BaseStats[StatType.Strength],
+                EffectiveAttackPower = stats[StatType.Strength],
                 AttackDamageType = definition.AttackDamageType,
                 Definition = definition,
                 Archetype = definition.Archetype

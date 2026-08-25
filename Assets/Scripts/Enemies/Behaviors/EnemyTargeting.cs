@@ -32,12 +32,13 @@ namespace Assets.Scripts.Enemies.Behaviors
 
             foreach (var unit in units)
             {
-                if (unit == null || !unit.IsAlive || unit.Stats.MaxHealth <= 0)
+                int maxHealth = unit != null ? unit.GetEffectiveStat(StatType.MaxHealth) : 0;
+                if (unit == null || !unit.IsAlive || maxHealth <= 0)
                 {
                     continue;
                 }
 
-                float ratio = (float)unit.Stats.Health / unit.Stats.MaxHealth;
+                float ratio = (float)unit.Stats.Health / maxHealth;
                 if (ratio < bestRatio)
                 {
                     bestRatio = ratio;

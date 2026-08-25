@@ -113,6 +113,16 @@ namespace Assets.Scripts.Dungeon
         /// <summary>The level definition currently being played (drives the per-level combat backdrop).</summary>
         public LevelDefinitionSO CurrentLevel => _level;
 
+        /// <summary>
+        /// The run entry for the level being played, or null in free-play. The entry is where a
+        /// level's authored content that is not the room template lives - its boss, its rescue, and
+        /// its enemy tuning.
+        /// </summary>
+        public RunLevelEntry CurrentLevelEntry =>
+            ActiveRun != null && RunLevelIndex >= 0 && RunLevelIndex < ActiveRun.Levels.Count
+                ? ActiveRun.Levels[RunLevelIndex]
+                : null;
+
         private LevelDefinitionSO _level;
         private ManualLevelLayoutSO _manualLayout;
         private FileHandler _fileHandler;
@@ -170,6 +180,11 @@ namespace Assets.Scripts.Dungeon
             var seed = layout.GetDeterministicSeed();
             _currentSeed = seed;
             Random.InitState(seed);
+
+            // An EnemySO is a template; this level owns the numbers. Set before anything spawns,
+            // and it covers SpawnSingle too - the boss, and whatever a room event wakes up.
+            var levelEntry = CurrentLevelEntry;
+            EnemyManager.Instance.SetLevelTuning(levelEntry != null ? levelEntry.EnemyTuning : null);
 
             EnemyManager.Instance.CleanupEnemies();
 
@@ -243,6 +258,11 @@ namespace Assets.Scripts.Dungeon
 
             _currentSeed = seed;
             Random.InitState(seed);
+
+            // An EnemySO is a template; this level owns the numbers. Set before anything spawns,
+            // and it covers SpawnSingle too - the boss, and whatever a room event wakes up.
+            var levelEntry = CurrentLevelEntry;
+            EnemyManager.Instance.SetLevelTuning(levelEntry != null ? levelEntry.EnemyTuning : null);
 
             EnemyManager.Instance.CleanupEnemies();
 

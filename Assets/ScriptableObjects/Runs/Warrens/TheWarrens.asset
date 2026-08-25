@@ -23,9 +23,34 @@ MonoBehaviour:
     LevelName: Warren Tunnels
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    EnemyTuning:
+      Difficulty: 1.55
+      StatScales:
+      - Stat: 7
+        Multiplier: 1.42
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides: []
     RescueHero: {fileID: 0}
   - LevelTemplate: {fileID: 11400000, guid: 7154cacde9cc3424c8d2974a4136b198, type: 2}
     LevelName: The Counting Room
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
+    EnemyTuning:
+      Difficulty: 1.55
+      StatScales:
+      - Stat: 7
+        Multiplier: 1.86
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides:
+      - Enemy: {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
+        Stats:
+          Values:
+          - Type: 7
+            Amount: 104
+          - Type: 1
+            Amount: 6
+        XpReward: 0
+        GoldReward: 0
     RescueHero: {fileID: 0}

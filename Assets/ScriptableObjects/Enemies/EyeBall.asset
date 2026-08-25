@@ -32,7 +32,7 @@ MonoBehaviour:
     - Type: 4
       Amount: 3
     - Type: 7
-      Amount: 16
+      Amount: 20
   XpReward: 10
   GoldReward: 5
   AttackDamageType: 2

@@ -1,5 +1,6 @@
 using Assets.Scripts.Rooms;
 using UnityEngine;
+using Assets.Scripts.UnitStats;
 
 namespace Assets.Scripts.Combat
 {
@@ -61,8 +62,9 @@ namespace Assets.Scripts.Combat
 
             _t += Time.deltaTime;
 
-            float hpFrac = _unit.Stats != null && _unit.Stats.MaxHealth > 0
-                ? (float)_unit.Stats.Health / _unit.Stats.MaxHealth
+            int maxHealth = _unit.Stats != null ? _unit.GetEffectiveStat(StatType.MaxHealth) : 0;
+            float hpFrac = maxHealth > 0
+                ? (float)_unit.Stats.Health / maxHealth
                 : 1f;
             bool wounded = hpFrac <= 0.35f;
 

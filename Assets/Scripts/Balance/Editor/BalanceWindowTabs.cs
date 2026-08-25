@@ -339,7 +339,11 @@ namespace Assets.Scripts.Balance.Editor
             DrawFilterRow("Show only enemies with a finding against them.");
 
             BalanceGui.Paragraph(
-                "Danger index = ticks for the party to win ÷ ticks for the party to die. Under 1 the party wins "
+                "One row per enemy per level. An EnemySO is a template - the same enemy appears across the "
+                + "campaign against very different parties - so its real numbers come from the level's "
+                + "EnemyTuning, and the stat columns below show what it fights with there. Difficulty is the "
+                + "level's dial and is editable in place; it scales MaxHealth and Strength together. "
+                + "Danger index = ticks for the party to win / ticks for the party to die. Under 1 the party wins "
                 + "with margin; at 1 the fight is a coin flip on turn order.",
                 BalanceGui.WrapMiniStyle);
 
@@ -347,11 +351,16 @@ namespace Assets.Scripts.Balance.Editor
 
             EditorGUILayout.BeginHorizontal();
             BalanceGui.HeaderCell("Enemy", NameWidth);
+            BalanceGui.HeaderCell("Level", WideWidth, "Where this measurement is from. The same enemy "
+                + "elsewhere is a different row, with that level's numbers.");
+            BalanceGui.HeaderCell("Diff", 46f, "The level's EnemyTuning.Difficulty — editable. Scales "
+                + "MaxHealth and Strength; 1 means the template as authored.");
             BalanceGui.HeaderCell("Boss", 34f);
             BalanceGui.HeaderCell("Archetype", WideWidth);
             foreach (var stat in StatCatalog.Types)
             {
-                BalanceGui.HeaderCell(StatCatalog.ShortName(stat), StatWidth, stat + " (editable)");
+                BalanceGui.HeaderCell(StatCatalog.ShortName(stat), StatWidth,
+                    stat + " as fought in this level (template x the level's tuning).");
             }
             BalanceGui.HeaderCell("XP", StatWidth);
             BalanceGui.HeaderCell("Gold", StatWidth);
@@ -367,7 +376,8 @@ namespace Assets.Scripts.Balance.Editor
 
             foreach (var metrics in _report.Enemies)
             {
-                if (!MatchesFilter(metrics.Name) && !MatchesFilter(metrics.Definition.name))
+                if (!MatchesFilter(metrics.Name) && !MatchesFilter(metrics.Definition.name)
+                    && !MatchesFilter(metrics.LevelLabel))
                 {
                     continue;
                 }
@@ -405,6 +415,28 @@ namespace Assets.Scripts.Balance.Editor
 
                 EditorGUILayout.BeginHorizontal();
                 BalanceGui.AssetCell(metrics.Definition, metrics.Name, NameWidth, worst);
+
+                // The level, and its difficulty dial. Editing here edits the RunDefinitionSO's level
+                // entry, which is where an enemy's real numbers live now.
+                if (metrics.Run != null && metrics.LevelIndex >= 0)
+                {
+                    BalanceGui.AssetCell(metrics.Run, metrics.LevelLabel, WideWidth);
+                    var runSerialized = Serialized(metrics.Run);
+                    bool diffChanged = BalanceGui.EditableCell(
+                        runSerialized,
+                        $"Levels.Array.data[{metrics.LevelIndex}].EnemyTuning.Difficulty",
+                        46f,
+                        dangerSeverity);
+                    Commit(runSerialized, diffChanged);
+                }
+                else
+                {
+                    BalanceGui.Cell(metrics.LevelLabel, WideWidth, BalanceSeverity.Info,
+                        "No run places this enemy, so there is no level tuning and these are the "
+                        + "template's own numbers.");
+                    BalanceGui.Cell("—", 46f);
+                }
+
                 changed |= BalanceGui.EditableCell(serialized, "IsBoss", 34f);
                 changed |= BalanceGui.EditableCell(serialized, "Archetype", WideWidth);
                 // One editable column per stat. Only three carry a warning colour, and which three is
@@ -426,12 +458,34 @@ namespace Assets.Scripts.Balance.Editor
                         statSeverity = BalanceSeverity.Info;
                     }
 
-                    changed |= BalanceGui.EditableStatCell(serialized, "BaseStats", stat, StatWidth, statSeverity);
+                    if (metrics.Tuning != null && !metrics.Tuning.IsIdentity)
+                    {
+                        // Derived here: the number is template x tuning, so it is not editable in
+                        // place. Move Difficulty, or add a per-enemy override on the level.
+                        BalanceGui.Cell(metrics.Stats[stat].ToString(), StatWidth, statSeverity,
+                            $"{metrics.Definition.BaseStats[stat]} on the template, tuned to "
+                            + $"{metrics.Stats[stat]} by this level.");
+                    }
+                    else
+                    {
+                        changed |= BalanceGui.EditableStatCell(serialized, "BaseStats", stat, StatWidth, statSeverity);
+                    }
                 }
 
-                changed |= BalanceGui.EditableCell(serialized, "XpReward", StatWidth,
-                    metrics.Definition.XpReward <= 0 ? BalanceSeverity.Info : BalanceSeverity.Ok);
-                changed |= BalanceGui.EditableCell(serialized, "GoldReward", StatWidth);
+                if (metrics.Tuning != null && !metrics.Tuning.IsIdentity)
+                {
+                    BalanceGui.Cell(metrics.XpReward.ToString(), StatWidth,
+                        metrics.XpReward <= 0 ? BalanceSeverity.Info : BalanceSeverity.Ok,
+                        $"{metrics.Definition.XpReward} on the template, x{metrics.Tuning.XpMultiplier:0.00} here.");
+                    BalanceGui.Cell(metrics.GoldReward.ToString(), StatWidth, BalanceSeverity.Ok,
+                        $"{metrics.Definition.GoldReward} on the template, x{metrics.Tuning.GoldMultiplier:0.00} here.");
+                }
+                else
+                {
+                    changed |= BalanceGui.EditableCell(serialized, "XpReward", StatWidth,
+                        metrics.XpReward <= 0 ? BalanceSeverity.Info : BalanceSeverity.Ok);
+                    changed |= BalanceGui.EditableCell(serialized, "GoldReward", StatWidth);
+                }
 
                 BalanceGui.Cell(BalanceGui.Number(metrics.AverageDamagePerHit, "0.0"), MetricWidth);
                 BalanceGui.Cell(BalanceGui.Number(metrics.EffectiveDamagePerTurn, "0.0"), MetricWidth,

@@ -23,19 +23,60 @@ MonoBehaviour:
     LevelName: Silt Shallows
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    EnemyTuning:
+      Difficulty: 1.55
+      StatScales:
+      - Stat: 7
+        Multiplier: 1.93
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides: []
     RescueHero: {fileID: 0}
   - LevelTemplate: {fileID: 11400000, guid: e5eb9c2b5c392894fb55360a188283b2, type: 2}
     LevelName: The Weeping Causeway
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    EnemyTuning:
+      Difficulty: 1.55
+      StatScales:
+      - Stat: 7
+        Multiplier: 2.24
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides: []
     RescueHero: {fileID: 0}
   - LevelTemplate: {fileID: 11400000, guid: 14a21a6d544c0814c8f45f51376aebb6, type: 2}
     LevelName: Rotwater Deep
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    EnemyTuning:
+      Difficulty: 1.55
+      StatScales:
+      - Stat: 7
+        Multiplier: 2.78
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides: []
     RescueHero: {fileID: 0}
   - LevelTemplate: {fileID: 11400000, guid: 98ab313d4419a5845a77a626e060d5b2, type: 2}
     LevelName: The Mire Throne
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: e62cccd795c1c1942b396724ce782f6f, type: 2}
+    EnemyTuning:
+      Difficulty: 1.55
+      StatScales:
+      - Stat: 7
+        Multiplier: 1.6
+      XpMultiplier: 1
+      GoldMultiplier: 1
+      Overrides:
+      - Enemy: {fileID: 11400000, guid: e62cccd795c1c1942b396724ce782f6f, type: 2}
+        Stats:
+          Values:
+          - Type: 7
+            Amount: 118
+          - Type: 1
+            Amount: 8
+        XpReward: 0
+        GoldReward: 0
     RescueHero: {fileID: 0}

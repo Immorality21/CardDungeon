@@ -276,7 +276,16 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static float PowerScore(EnemySO enemy, BalanceRulesSO rules)
         {
-            if (enemy == null || rules == null)
+            return enemy != null ? PowerScore(enemy.BaseStats, rules) : 0f;
+        }
+
+        /// <summary>
+        /// The weighted stat budget of an arbitrary block — the form the model wants now that an
+        /// enemy's real stats come from the level it appears in rather than from its template.
+        /// </summary>
+        public static float PowerScore(StatBlock stats, BalanceRulesSO rules)
+        {
+            if (stats == null || rules == null)
             {
                 return 0f;
             }
@@ -284,7 +293,7 @@ namespace Assets.Scripts.Balance
             float score = 0f;
             foreach (var stat in StatCatalog.Types)
             {
-                score += enemy.BaseStats[stat] * rules.WeightFor(stat);
+                score += stats[stat] * rules.WeightFor(stat);
             }
             return score;
         }

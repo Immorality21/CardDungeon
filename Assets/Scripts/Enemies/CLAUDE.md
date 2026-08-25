@@ -1,11 +1,54 @@
 # Enemy System (`Assets.Scripts.Enemies`)
 
+> **An `EnemySO` is a template, not a stat block.** The same enemy appears all over the campaign -
+> Floating Eye and Dragon are in every authored level - against parties that range from 40 HP and no
+> spent XP to 64 HP and 176. One authored stat block provably cannot be right in both places, so the
+> template carries the enemy's **identity** and the level it appears in carries its **numbers**. See
+> *Per-level tuning* below; the `EnemySO` inspector deliberately has no balance footer any more,
+> because the numbers it would show belong to a level. Use `Tools > Balance > Balance Analyzer`,
+> whose Enemies tab is one row per enemy **per level**.
+
 - **EnemySO** (ScriptableObject, `SO/Enemy`, assets in `Assets/ScriptableObjects/Enemies/`): the **definition of an enemy type** — `DisplayName`, `Sprite`, base stats (`Attack`/`Defense`/`Health`/`Agility`), **kill rewards** (`XpReward`, `GoldReward`), `Archetype`, `DrawableMagics` (the **Draw list**), `Resistances`, `LootItem`. This is the single source of truth for what an enemy *is*. On death (`CombatManager.HandleEnemyDeath`): loot drops, `XpReward` is split evenly across the fielded party immediately (`Party.DistributeXp`), and `GoldReward` accumulates into `MetaProgressManager` pending gold (banked only on level-clear — see the Progression guide).
-- **One shared Enemy prefab** lives at `Assets/Resources/Enemy.prefab`. `EnemyManager` loads it once (`Resources.Load<GameObject>("Enemy")`) and stamps each instance with an `EnemySO` via `Enemy.Initialize(so)` — so there is exactly one prefab, and the SO drives the sprite/stats/name. (The old per-type `EyeBall.prefab` under `Assets/Prefabs/` is no longer referenced.)
+- **One shared Enemy prefab** lives at `Assets/Resources/Enemy.prefab`. `EnemyManager` loads it once (`Resources.Load<GameObject>("Enemy")`) and stamps each instance with an `EnemySO` plus the level's tuning via `Enemy.Initialize(so, tuning)` — so there is exactly one prefab, and the SO drives the sprite/stats/name. (The old per-type `EyeBall.prefab` under `Assets/Prefabs/` is no longer referenced.)
 - **EnemySpawnEntry** (in `RoomSO.EnemySpawnTable`): now just `Enemy` (an `EnemySO`) + the per-room roll params `SpawnChance` and `EvaluationCount`. All identity/stats moved to the `EnemySO`.
 - **DrawableMagicEntry**: one offering on an enemy's Draw list — a `MagicSO` plus the `Charges` (1–9) a successful draw grants.
 - **EnemyManager** spawns enemies into rooms (with optional manual-layout overrides) and tracks/cleans up live enemies. For each entry it instantiates the shared prefab and calls `Enemy.Initialize(entry.Enemy)`.
 - **Enemy** implements `ICombatUnit` (see the Combat guide). `Initialize(EnemySO)` applies the definition (sprite, `Stats`, archetype, Draw list, resistances, loot, and `gameObject.name`); `DisplayName` comes from `Definition.DisplayName` (so it's the SO's name, **not** "Prefab(Clone)"). `GetEffectiveAttackPower()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Runtime charge state (`IsCharging`, `ChargeTarget`) is not persisted.
+
+## Per-level tuning (`LevelEnemyTuning`)
+
+`RunLevelEntry.EnemyTuning` is where a fight's real numbers come from. Resolution order:
+
+```
+template BaseStats  ->  x Difficulty  ->  x StatScales[]  ->  Overrides[]  =  what you fight
+```
+
+| Field | What it does |
+|---|---|
+| `Difficulty` | the one-number dial: scales **MaxHealth and Strength**. 1 = the template exactly |
+| `StatScales` | per-stat multipliers on top, for a level that wants tanky *without* harder-hitting |
+| `Overrides` | absolute per-enemy stats that win outright; only the stats listed are replaced |
+| `XpMultiplier` / `GoldMultiplier` | so a harder floor pays more |
+
+`LevelEnemyTuning.StatsFor` / `XpFor` / `GoldFor` are pure and tested (`LevelEnemyTuningTests`), with
+static null-taking overloads so no caller has to null-check. Two rounding rules: a stat the template
+gives a **positive** value never scales to zero, and a stat the template leaves at **zero** stays zero.
+
+**How it reaches the game.** `DungeonManager` calls `EnemyManager.SetLevelTuning` before generation -
+once, rather than threading it through every spawn - because `SpawnSingle` is also reached from a room
+event waking something mid-level, and that caller has no idea which run it is in. `Enemy.Initialize`
+stamps it and keeps it, so `Enemy.XpReward`/`GoldReward` follow the level too. **Null tuning means the
+template as authored**, which is what free-play in the scene gets.
+
+**Two authoring rules worth knowing**, both learned the hard way during the first tuning pass:
+
+- **A boss must not ride the trash dial.** Scaling Mirefather's 74 HP by the level's multiplier made a
+  21-turn slog. Every boss gets an `Overrides` row pinning it absolutely.
+- **`Difficulty` is capped in practice by hero durability, not by taste.** It scales Strength, and
+  `BalanceRules.MinHitsToKillHero` is 3 - so past roughly 1.5 the squishiest hero drops below the
+  floor. Buy the rest of a level's difficulty with a `MaxHealth` scale: danger goes as
+  `Difficulty^2 x healthScale` while time-to-kill only goes as `Difficulty x healthScale`, so
+  Difficulty is the better value per turn until it hits that cap.
 
 ## Behaviors (`Behaviors/`)
 

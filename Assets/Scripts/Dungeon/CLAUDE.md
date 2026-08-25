@@ -40,6 +40,12 @@ The tutorial forks: `DrownedMarch` is the main line (one-shot, escalating), `The
   regeneration to put it back in the same room. See `Assets/Scripts/Rooms/CLAUDE.md`.
 - **Manual levels:** `RunLevelEntry.ManualLayout` references a `ManualLevelLayoutSO` (room positions, door connections, start/exit rooms, optional enemy overrides). Edited via Tools → Dungeon → Manual Level Layout Editor. Used for tutorial levels.
   - **A door is only placed when its two rooms share an edge.** Authored door pairs are room-index pairs, but `RoomManager.CreateDoor` needs real adjacency — so resizing a room template after a layout was authored silently severs the connection and can orphan the exit room, making the level uncompletable. (This shipped: the tutorial's room 1 went from a 3-wide to a 2-wide template and the exit became unreachable.) `RoomManager.BuildManualDungeon` now logs an **error** for any dropped authored door, the layout editor draws it red and refuses to stay quiet, and `ManualLayoutValidationTests` sweeps every layout asset for unplaceable doors and unreachable rooms. Validation lives on the SO itself: `IsDoorPlaceable`, `GetUnplaceableDoorIndices`, `GetUnreachableRoomIndices`.
+- **Enemy numbers are per level.** `RunLevelEntry.EnemyTuning` (a `LevelEnemyTuning`) is where an
+  enemy's real stats come from: an `EnemySO` is a template reused across the whole campaign, so the
+  level it appears in owns its numbers. `DungeonManager` hands it to `EnemyManager.SetLevelTuning`
+  before generation, which covers ordinary spawns, the boss, and anything a room event wakes. A
+  freshly authored level is `Difficulty 1` with nothing else set, i.e. exactly the template. See
+  `Assets/Scripts/Enemies/CLAUDE.md`.
 - **Procedural levels:** `RunLevelEntry.ManualLayout` left null — generates a dungeon from `LevelTemplate` using the procedural pipeline (see the Rooms guide).
 
 ## Deferred Persistence

@@ -137,7 +137,7 @@ namespace Assets.Scripts.Combat
             }
 
             // HP fill — every frame (cheap).
-            float max = Mathf.Max(1, _unit.Stats.MaxHealth);
+            float max = Mathf.Max(1, _unit.GetEffectiveStat(StatType.MaxHealth));
             float ratio = Mathf.Clamp01(_unit.Stats.Health / max);
             _fill.transform.localScale = new Vector3(_barWidth * ratio, _barHeight * 0.72f, 1f);
             _fill.color = ratio > 0.5f

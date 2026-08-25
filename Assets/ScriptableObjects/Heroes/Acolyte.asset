@@ -17,6 +17,8 @@ MonoBehaviour:
   Blurb: Slow to kill, hard to drop - buys the party the turns it needs.
   RecruitCost: 260
   Sprite: {fileID: 21300000, guid: 10c7a212bf0fcb046a8499c268007bb2, type: 3}
+  AnimationFrames: []
+  AnimationFps: 8
   BaseStats:
     Values:
     - Type: 1
@@ -32,6 +34,6 @@ MonoBehaviour:
     - Type: 6
       Amount: 4
     - Type: 7
-      Amount: 19
+      Amount: 24
   AttackStat: 4
   SphereGrid: {fileID: 11400000, guid: ab46d6464e6f2ea4791a611d390af83f, type: 2}

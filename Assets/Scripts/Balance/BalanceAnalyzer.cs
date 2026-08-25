@@ -107,18 +107,7 @@ namespace Assets.Scripts.Balance
                 : BuildFirstEncounterParties(input, rules, report.Party);
             report.PartyByEnemy = partyByEnemy;
 
-            foreach (var enemy in input.Enemies)
-            {
-                if (enemy != null)
-                {
-                    PartyBaseline against;
-                    if (!partyByEnemy.TryGetValue(enemy, out against) || against == null)
-                    {
-                        against = report.Party;
-                    }
-                    report.Enemies.Add(EnemyMetrics.Compute(enemy, against, rules, report.Party));
-                }
-            }
+            BuildEnemyMetrics(input, rules, report, partyByEnemy);
 
             report.Variety = VarietyReport.Build(ProjectWideEnemySet(input.Enemies), input.Magic, rules);
             report.Progression = ProgressionMap.Build(report.Runs, input.Magic, input.Combos, input.Items);
@@ -339,6 +328,98 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>Every enemy a level can present: its rooms' spawn tables plus any boss.</summary>
+        /// <summary>
+        /// One measurement per <b>placement</b> — per (enemy, level) — rather than one per asset.
+        ///
+        /// <para>An <c>EnemySO</c> is a template and the level it appears in owns its numbers
+        /// (<see cref="LevelEnemyTuning"/>), so "is the Floating Eye in band" has no answer on its
+        /// own: it is in all ten authored levels, against parties from 40 HP and no spent XP to 64 HP
+        /// and 176. A per-asset row could only ever be right about one of them. This is also why the
+        /// <c>EnemySO</c> inspector no longer carries a balance footer — the numbers it would show
+        /// belong to a level, not to the asset.</para>
+        ///
+        /// <para>An enemy no run places still gets a single template-only row, so authoring checks
+        /// (no XP, no Draw table) keep working on content that is not wired up yet.</para>
+        /// </summary>
+        private static void BuildEnemyMetrics(
+            BalanceInput input, BalanceRulesSO rules, BalanceReport report,
+            Dictionary<EnemySO, PartyBaseline> partyByEnemy)
+        {
+            var placed = new List<EnemySO>();
+
+            foreach (var run in report.Runs)
+            {
+                foreach (var level in run.Levels)
+                {
+                    string context = $"{run.Name} / {level.Reference}";
+
+                    foreach (var enemy in EnemiesInLevelCurve(level))
+                    {
+                        if (!placed.Contains(enemy))
+                        {
+                            placed.Add(enemy);
+                        }
+
+                        var metrics = EnemyMetrics.Compute(
+                            enemy, level.Party, rules, report.Party, level.Tuning, context);
+                        metrics.Run = run.Run;
+                        metrics.LevelIndex = level.Index;
+                        metrics.LevelLabel = level.Name;
+                        report.Enemies.Add(metrics);
+                    }
+                }
+            }
+
+            foreach (var enemy in input.Enemies)
+            {
+                if (enemy == null || placed.Contains(enemy))
+                {
+                    continue;
+                }
+
+                PartyBaseline against;
+                if (!partyByEnemy.TryGetValue(enemy, out against) || against == null)
+                {
+                    against = report.Party;
+                }
+
+                // No tuning: nothing places it, so the template's own numbers are all there is.
+                var unplaced = EnemyMetrics.Compute(enemy, against, rules, report.Party);
+                unplaced.LevelLabel = "(unplaced)";
+                report.Enemies.Add(unplaced);
+            }
+
+            report.Enemies.Sort((a, b) =>
+            {
+                int byName = string.Compare(a.Name, b.Name, StringComparison.Ordinal);
+                return byName != 0 ? byName : string.Compare(a.Context, b.Context, StringComparison.Ordinal);
+            });
+        }
+
+        /// <summary>Distinct enemies a modelled level can present, boss included.</summary>
+        private static IEnumerable<EnemySO> EnemiesInLevelCurve(LevelCurve level)
+        {
+            var seen = new List<EnemySO>();
+            foreach (var room in level.Rooms)
+            {
+                foreach (var member in room.Expected.Members)
+                {
+                    if (member.Definition != null && !seen.Contains(member.Definition))
+                    {
+                        seen.Add(member.Definition);
+                    }
+                }
+                foreach (var member in room.WorstCase.Members)
+                {
+                    if (member.Definition != null && !seen.Contains(member.Definition))
+                    {
+                        seen.Add(member.Definition);
+                    }
+                }
+            }
+            return seen;
+        }
+
         private static IEnumerable<EnemySO> EnemiesInLevel(RunLevelEntry entry)
         {
             var rooms = new List<Rooms.RoomSO>();
@@ -460,7 +541,7 @@ namespace Assets.Scripts.Balance
             // Every enemy on its own: the cleanest read on one asset's difficulty.
             foreach (var metrics in report.Enemies)
             {
-                var unit = SimUnit.FromEnemy(metrics.Definition);
+                var unit = SimUnit.FromEnemy(metrics.Definition, metrics.Tuning);
                 if (unit == null)
                 {
                     continue;
@@ -468,7 +549,7 @@ namespace Assets.Scripts.Balance
 
                 var simReport = new EncounterSimReport
                 {
-                    Label = $"{metrics.Name} (solo)",
+                    Label = $"{metrics.Reference} (solo)",
                     Asset = metrics.Definition,
                     IsBoss = metrics.IsBoss
                 };
@@ -740,7 +821,6 @@ namespace Assets.Scripts.Balance
             }
 
             EvaluateHealing(report, rules, input);
-            EvaluateMaxHealthGearMismatch(report, input);
         }
 
         /// <summary>
@@ -969,41 +1049,6 @@ namespace Assets.Scripts.Balance
             }
         }
 
-        /// <summary>
-        /// Party.HealAll() fills Stats.MaxHealth, which excludes gear, while the heal cap and HP bar
-        /// read GetEffectiveMaxHealth(). Any +MaxHealth item therefore grants a slice of health the
-        /// party can never actually be healed into at level start.
-        /// </summary>
-        private static void EvaluateMaxHealthGearMismatch(BalanceReport report, BalanceInput input)
-        {
-            foreach (var item in input.Items)
-            {
-                if (item == null || item.Bonuses == null)
-                {
-                    continue;
-                }
-
-                foreach (var bonus in item.Bonuses)
-                {
-                    if (bonus == null || bonus.StatType != StatType.MaxHealth || bonus.Value <= 0f)
-                    {
-                        continue;
-                    }
-
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Party, item.DisplayName,
-                        "+MaxHealth gear is never filled at level start")
-                    {
-                        Asset = item,
-                        Detail = "Party.HealAll() sets Health = Stats.MaxHealth (base only), but the heal cap and "
-                               + "HP bar use GetEffectiveMaxHealth() (base + gear). Heroes start each level short "
-                               + $"by this item's {bonus.Value:0.#} MaxHealth.",
-                        Suggestion = "Have HealAll() heal to GetEffectiveMaxHealth() for heroes."
-                    });
-                    return;
-                }
-            }
-        }
-
         private static int SuggestedHeroHealth(HeroBaseline hero, BalanceReport report, BalanceRulesSO rules)
         {
             // Size the bar so an average non-boss hit costs 1/TargetHitsToKillHero of it.
@@ -1041,26 +1086,26 @@ namespace Assets.Scripts.Balance
 
                 if (metrics.SoloDangerIndex >= 1f)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Enemy, metrics.Name,
-                        $"{metrics.Name} beats the party on paper (danger {metrics.SoloDangerIndex:0.00})")
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Enemy, metrics.Reference,
+                        $"{metrics.Reference} beats the party on paper (danger {metrics.SoloDangerIndex:0.00})")
                     {
                         Asset = metrics.Definition,
                         Detail = $"The party needs {metrics.PartyTurnsToKill:0.0} turns to kill it; it needs fewer "
                                + "to wipe the party. Danger at or above 1.00 means the encounter is lost before "
                                + "any decisions are made.",
-                        Suggestion = SuggestEnemySoftening(metrics, rules)
+                        Suggestion = SuggestDifficulty(metrics, metrics.DangerCeiling(rules))
                     });
                 }
                 else if (metrics.SoloDangerIndex > ceiling)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Name,
-                        $"{metrics.Name} is above its danger band ({metrics.SoloDangerIndex:0.00} > {ceiling:0.00})")
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Reference,
+                        $"{metrics.Reference} is above its danger band ({metrics.SoloDangerIndex:0.00} > {ceiling:0.00})")
                     {
                         Asset = metrics.Definition,
                         Detail = $"{(metrics.IsBoss ? "Boss" : "Trash")} target is {ceiling:0.00}. "
                                + $"Effective damage per turn {metrics.EffectiveDamagePerTurn:0.0}, "
                                + $"party turns to kill {metrics.PartyTurnsToKill:0.0}.",
-                        Suggestion = SuggestEnemySoftening(metrics, rules)
+                        Suggestion = SuggestDifficulty(metrics, metrics.DangerCeiling(rules))
                     });
                 }
                 else if (metrics.SoloDangerIndex < rules.MinMeaningfulDanger
@@ -1070,23 +1115,23 @@ namespace Assets.Scripts.Balance
                     // Healers are exempt: the danger index measures a damage race, and a Healer's cost to
                     // the player is the turns it adds by undoing damage, not the damage it deals. Judging
                     // one on offence would always read as "no threat".
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Name,
-                        $"{metrics.Name} is no threat at all (danger {metrics.SoloDangerIndex:0.000})")
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Reference,
+                        $"{metrics.Reference} is no threat at all (danger {metrics.SoloDangerIndex:0.000})")
                     {
                         Asset = metrics.Definition,
                         Detail = $"It deals {metrics.EffectiveDamagePerTurn:0.0} per turn and dies in "
                                + $"{metrics.PartyTurnsToKill:0.0} party turns. It costs the player time, not resources.",
-                        Suggestion = "Raise Attack, or drop it from spawn tables in favour of a real encounter."
+                        Suggestion = SuggestDifficulty(metrics, rules.MinMeaningfulDanger * 1.5f)
                     });
                 }
 
                 if (metrics.FewestHitsToKillAHero <= 1 && metrics.FewestHitsToKillAHero > 0)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Enemy, metrics.Name,
-                        $"{metrics.Name} one-shots {metrics.FastestKillTarget}")
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Enemy, metrics.Reference,
+                        $"{metrics.Reference} one-shots {metrics.FastestKillTarget}")
                     {
                         Asset = metrics.Definition,
-                        Detail = $"Attack {metrics.Definition.BaseStats[StatType.Strength]} lands "
+                        Detail = $"Attack {metrics.Stats[StatType.Strength]} lands "
                                + $"{FindPerHero(metrics, metrics.FastestKillTarget):0.0} average damage on a hero who "
                                + "cannot survive one hit.",
                         Suggestion = "Lower Attack, or raise hero max HP — the HP:damage scale is the root cause."
@@ -1096,39 +1141,39 @@ namespace Assets.Scripts.Balance
                 float ttkCeiling = metrics.TimeToKillCeiling(rules);
                 if (metrics.PartyTurnsToKill > ttkCeiling)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Name,
-                        $"{metrics.Name} takes {metrics.PartyTurnsToKill:0.0} party turns to kill")
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Reference,
+                        $"{metrics.Reference} takes {metrics.PartyTurnsToKill:0.0} party turns to kill")
                     {
                         Asset = metrics.Definition,
                         Detail = $"Target ceiling is {ttkCeiling:0.0} turns. Long fights without added pressure read as a slog.",
-                        Suggestion = $"Lower Health toward "
-                               + $"{Mathf.RoundToInt(metrics.Definition.BaseStats[StatType.MaxHealth] * ttkCeiling / Mathf.Max(0.01f, metrics.PartyTurnsToKill))}."
+                        Suggestion = $"Lower this level's Difficulty, or override Health here toward "
+                               + $"{Mathf.RoundToInt(metrics.Stats[StatType.MaxHealth] * ttkCeiling / Mathf.Max(0.01f, metrics.PartyTurnsToKill))}."
                     });
                 }
                 else if (metrics.PartyTurnsToKill < rules.MinEnemyTimeToKill && metrics.PartyTurnsToKill > 0f)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy, metrics.Name,
-                        $"{metrics.Name} dies in {metrics.PartyTurnsToKill:0.0} party turns")
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy, metrics.Reference,
+                        $"{metrics.Reference} dies in {metrics.PartyTurnsToKill:0.0} party turns")
                     {
                         Asset = metrics.Definition,
                         Detail = $"Below the {rules.MinEnemyTimeToKill:0.0}-turn floor: it never gets to act meaningfully.",
-                        Suggestion = "Raise Health, or use it only in groups."
+                        Suggestion = "Raise this level's Difficulty, or use the enemy only in groups."
                     });
                 }
 
                 if (metrics.ActionShareVsParty >= 1.5f)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy, metrics.Name,
-                        $"{metrics.Name} acts {metrics.ActionShareVsParty:0.0}x as often as a hero")
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy, metrics.Reference,
+                        $"{metrics.Reference} acts {metrics.ActionShareVsParty:0.0}x as often as a hero")
                     {
                         Asset = metrics.Definition,
-                        Detail = $"Agility {metrics.Definition.BaseStats[StatType.Agility]} against the party average. Its real threat is "
+                        Detail = $"Agility {metrics.Stats[StatType.Agility]} against the party average. Its real threat is "
                                + "that multiple of what its Attack suggests, and nothing in the inspector shows it.",
                         Suggestion = "Treat Agility as a damage multiplier when tuning this enemy."
                     });
                 }
 
-                if (metrics.Definition.XpReward <= 0)
+                if (metrics.XpReward <= 0)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Economy, metrics.Name,
                         $"{metrics.Name} awards no XP")
@@ -1155,21 +1200,31 @@ namespace Assets.Scripts.Balance
             return 0f;
         }
 
-        private static string SuggestEnemySoftening(EnemyMetrics metrics, BalanceRulesSO rules)
+        /// <summary>
+        /// What to change to bring a placement to <paramref name="targetDanger"/>.
+        ///
+        /// <para>The dial is the level's <c>EnemyTuning.Difficulty</c>, not the template's stats: the
+        /// same enemy is in other levels that may be perfectly in band. Difficulty scales MaxHealth
+        /// and Strength together and the danger index is roughly the product of the two, so the
+        /// multiplier needed is about <c>sqrt(target / current)</c> — a starting point rather than a
+        /// solved value, because the defense curve and turn order both bend it.</para>
+        /// </summary>
+        private static string SuggestDifficulty(EnemyMetrics metrics, float targetDanger)
         {
-            float ceiling = metrics.DangerCeiling(rules);
-            if (metrics.SoloDangerIndex <= 0f || float.IsInfinity(metrics.SoloDangerIndex))
+            if (metrics.SoloDangerIndex <= 0f || float.IsInfinity(metrics.SoloDangerIndex) || targetDanger <= 0f)
             {
-                return "Reduce Attack or Health until the danger index falls inside the band.";
+                return "Adjust this level's EnemyTuning.Difficulty until the danger index falls inside the band.";
             }
 
-            float scale = ceiling / metrics.SoloDangerIndex;
-            int suggestedAttack = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.BaseStats[StatType.Strength] * scale));
-            int suggestedHealth = Mathf.Max(1, Mathf.RoundToInt(metrics.Definition.BaseStats[StatType.MaxHealth] * scale));
+            float current = metrics.Tuning != null ? metrics.Tuning.Difficulty : 1f;
+            float factor = Mathf.Sqrt(targetDanger / metrics.SoloDangerIndex);
+            float suggested = Mathf.Max(0.1f, current * factor);
 
-            return $"Either Attack {metrics.Definition.BaseStats[StatType.Strength]} → {suggestedAttack}, or Health "
-                 + $"{metrics.Definition.BaseStats[StatType.MaxHealth]} → {suggestedHealth} (or split the difference). "
-                 + "Raising hero HP instead fixes it for every enemy at once.";
+            string where = string.IsNullOrEmpty(metrics.Context) ? "this level" : metrics.Context;
+            return $"Set {where}'s EnemyTuning.Difficulty to about {suggested:0.00} (from {current:0.00}), "
+                 + $"taking this enemy here to roughly Strength {Mathf.RoundToInt(metrics.Stats[StatType.Strength] * factor)} "
+                 + $"/ Health {Mathf.RoundToInt(metrics.Stats[StatType.MaxHealth] * factor)}. "
+                 + "A per-enemy override on the same tuning handles anything the level dial should not move.";
         }
 
         private static void EvaluateRewardSpread(BalanceReport report, BalanceRulesSO rules)

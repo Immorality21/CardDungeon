@@ -160,9 +160,17 @@ not as current state.
 
 The 12 open warnings, grouped: three *no threat at all* enemies and `Test3`'s thin margin (above);
 four progression warnings (two heroes capping at level 2, two level-2 Agility doublings of +100%);
-*only the party leader gains XP* (**gone** since 2026-08-22 — see §5); *+MaxHealth gear is never filled at level start* (`HealAll()` sets
-base MaxHealth while the bar uses `GetEffectiveMaxHealth()`, so geared heroes start every level
-short); `Tutorial` unlocking 60% of the magic catalog at once; and the Tutorial→Test1 spike.
+*only the party leader gains XP* (**gone** since 2026-08-22 — see §5);
+~~*+MaxHealth gear is never filled at level start*~~ ✅ **fixed 2026-08-25, and it was worse than the
+finding said**: `UnitHealthBar` read the base stat too, so **+MaxHealth gear was doing nothing at all**
+— only the potion path honoured it, which made the one place it applied an inconsistency rather than a
+bonus. Every health ceiling now reads `GetEffectiveStat(MaxHealth)`: `Party.HealAll`, the heal and
+absorb clamps in both executors and `CombatManager`, the HP bar, the room-bar HP text, the wounded-
+breathing threshold and enemy target selection. Enemies are unaffected (`Enemy.GetEffectiveStat`
+returns the raw stat). The analyzer check that proxied it is **deleted** — it fired on the mere
+existence of a +MaxHealth item, so it would have become a permanent false positive — and replaced by
+`EffectiveMaxHealthTests`, which pins the clamps reachable without a MonoBehaviour;
+`Tutorial` unlocking 60% of the magic catalog at once; and the Tutorial→Test1 spike.
 
 ~~Revised fix order, now that HP is done: **level room counts → enemy Attack → per-level templates
 (curve shape)**~~ ✅ **All three done 2026-08-21.**
@@ -187,7 +195,55 @@ short); `Tutorial` unlocking 60% of the magic catalog at once; and the Tutorial�
   the Warrior's level-2 cap and its +100% Agility step (both §4's to delete) and the pre-existing
   *+MaxHealth gear is never filled at level start* bug.
 
-What remains from the original list: **archetype mix** (4 of 7 enemies are still `Aggressor`).
+~~*(Also worth deciding before hand-tuning: whether enemy difficulty stays hand-authored per `EnemySO`
+or scales from data.)*~~ ✅ **Decided and built 2026-08-25 — it scales per level.** The question was
+answered by measurement, not taste: **Floating Eye and Dragon appear in all ten authored levels**,
+against parties from 40 HP / 0 spent XP to 64 HP / 176. Only the three bosses are single-level. One
+authored stat block provably cannot be right in both places.
+
+**An `EnemySO` is now a template and the level owns the numbers.** `RunLevelEntry.EnemyTuning`
+(`LevelEnemyTuning`) resolves as `template → × Difficulty → × StatScales[] → Overrides[]`, plus
+`XpMultiplier`/`GoldMultiplier`. `DungeonManager` hands it to `EnemyManager.SetLevelTuning` before
+generation so it covers ordinary spawns, the boss and anything a room event wakes; `Enemy.Initialize`
+stamps it and the kill rewards follow it. Pure and covered by `LevelEnemyTuningTests`. A level with
+nothing authored is `Difficulty 1`, i.e. exactly the old behaviour.
+
+Consequences through the model: `EnemyMetrics` is now **one row per (enemy, level)** rather than one
+per asset, findings name the placement ("Floating Eye in … Rotwater Deep") and their suggestions name
+that level's `Difficulty`. The **`EnemySO` balance footer is deleted** — the numbers it showed belong
+to a level, not an asset — and the analyzer's Enemies tab gained Level and Difficulty columns, the
+latter editable in place.
+
+**The hero-HP fix, and why "enemy Strength is maxed" was the wrong diagnosis.** Per-level measurement
+immediately exposed something the per-asset view hid: **11 of 36 placements sat on the 3-hit floor**
+and 34 of 36 were under the 6-hit target, almost always killing the **Scout** (10 HP / 3 Endurance).
+That is §5 fallout — the earlier 6/8 → 13/17 hero-HP pass predates the Scout and Acolyte, who never
+got it. Bars went **Warrior 13→26, Scout 10→22 (END 3→5), Acolyte 19→24, Tank 17→22**; the Tank was
+already at target because 15 Endurance halves incoming damage. Every placement is now 4–5 hits, which
+is what gives enemy Strength headroom at all.
+
+**The tuning pass itself.** Enemy templates were made proportionate to each other (they were spread
+3× apart — Dragon died in 1.1 party turns at 9 HP while Stone Sentinel took 4.0 at 26): Floating Eye
+16→20, Dragon 9→18, Cinder Imp 8→14, Hex Weaver 14→16, Bog Shaman 18→20, Stone Sentinel 26→20. Crowded
+levels were thinned so each fight can matter (`WeepingCauseway` 11→6 rooms, `RotwaterDeep` 8→5,
+`MireThrone` 8→5, `SiltShallows` 8→6, `WarrenTunnels` 7→6, `CountingRoom` 8→6), and `BlueRoom`'s six
+spawn evaluations went to four — it was the outlier behind both *bad spawn roll is unwinnable*
+warnings. Each level then got a solved `Difficulty` + `MaxHealth` scale, and each boss an absolute
+`Overrides` row so it cannot ride the trash dial.
+
+Result — **0 critical / 17 warning / 10 info**, suite **554 passed / 0 failed**. The attrition curve is
+`0.05 / 0.53 / 0.65 / 0.44` (Threshold), `0.39 / 0.48 / 0.61 / 0.50` (Drowned March), `0.42 / 0.56`
+(Warrens), all inside the 0.80 ceiling; boss-to-trash ratios are 2.0 / 2.2 / 2.1 against a 1.8–6 band;
+trash danger went from 0.006–0.047 to 0.05–0.14.
+
+**What is still open, and why.** Eight *no threat at all* warnings remain (danger 0.051–0.079 against
+the 0.08 floor), all Dragon/Floating Eye/Hex Weaver in the Drowned March back half and the Warrens,
+plus four *takes too long to kill* and one *bad spawn roll* on Rotwater Deep. These are the arithmetic
+wall, not slack: **mean per-enemy danger × enemy count = the level's attrition**, so at 5–6 enemies a
+level cannot put every one of them above 0.08 without exceeding its attrition ceiling. Closing them
+needs another round of thinning (toward 4 enemies per level) or a decision that `MinMeaningfulDanger`
+should be ~0.05 for wide levels. Also open: **archetype mix** (4 of 7 enemies are still `Aggressor`),
+*XP per unit of danger varies 8.6×*, and the two long-standing content items below.
 ~~**XP distribution**~~ ✅ shipped 2026-08-22 as the even split in §5.
 
 ~~**The suite has one standing red: `BalanceRegressionTests.RunDifficultyEscalates`.**~~ ✅ Fixed
@@ -215,9 +271,7 @@ already tracked in this section — five *no threat at all* enemies, the *+MaxHe
 > both of which were left off for speed. Open `Tools ▸ Balance ▸ Balance Analyzer` with simulation
 > enabled to fill those in.
 
-*(Also worth deciding before hand-tuning: whether enemy difficulty stays hand-authored per `EnemySO`
-or scales from data (a per-`RunLevelEntry` multiplier or an enemy tier + curve). Retuning by hand now
-and adding scaling later means doing it twice.)*
+
 
 ### 0b. Elemental layer — next steps
 

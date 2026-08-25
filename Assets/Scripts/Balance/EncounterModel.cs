@@ -17,12 +17,30 @@ namespace Assets.Scripts.Balance
         public EnemySO Definition;
         public SimUnit Unit;
         public float Weight;
+
+        /// <summary>The level tuning this member was built under; null for the template's own numbers.</summary>
+        public LevelEnemyTuning Tuning;
+
+        /// <summary>MaxHealth after the level's tuning — <b>not</b> the template's authored value.</summary>
+        public int MaxHealth => Unit != null ? Unit.Stats.MaxHealth : 0;
+
+        /// <summary>XP this level pays for the kill.</summary>
+        public int Xp => LevelEnemyTuning.XpFor(Definition, Tuning);
+
+        /// <summary>Gold this level pays for the kill.</summary>
+        public int Gold => LevelEnemyTuning.GoldFor(Definition, Tuning);
     }
 
     /// <summary>A fractional enemy group, and the pool/output arithmetic that goes with it.</summary>
     public class WeightedEnemyGroup
     {
         public List<WeightedEnemy> Members = new List<WeightedEnemy>();
+
+        /// <summary>
+        /// The level tuning every member of this group is built under. Set once by whoever builds the
+        /// group, so <see cref="Add"/> stays a two-argument call at its call sites.
+        /// </summary>
+        public LevelEnemyTuning Tuning;
 
         public float TotalCount
         {
@@ -56,8 +74,9 @@ namespace Assets.Scripts.Balance
             Members.Add(new WeightedEnemy
             {
                 Definition = enemy,
-                Unit = SimUnit.FromEnemy(enemy),
-                Weight = weight
+                Unit = SimUnit.FromEnemy(enemy, Tuning),
+                Weight = weight,
+                Tuning = Tuning
             });
         }
 
@@ -68,7 +87,7 @@ namespace Assets.Scripts.Balance
                 float total = 0f;
                 foreach (var member in Members)
                 {
-                    total += member.Weight * member.Definition.BaseStats[StatType.MaxHealth];
+                    total += member.Weight * member.MaxHealth;
                 }
                 return total;
             }
@@ -81,7 +100,7 @@ namespace Assets.Scripts.Balance
                 float total = 0f;
                 foreach (var member in Members)
                 {
-                    total += member.Weight * member.Definition.XpReward;
+                    total += member.Weight * member.Xp;
                 }
                 return total;
             }
@@ -94,7 +113,7 @@ namespace Assets.Scripts.Balance
                 float total = 0f;
                 foreach (var member in Members)
                 {
-                    total += member.Weight * member.Definition.GoldReward;
+                    total += member.Weight * member.Gold;
                 }
                 return total;
             }
@@ -221,6 +240,9 @@ namespace Assets.Scripts.Balance
         public string RoomName = "";
         public bool GuaranteedSpawns;
 
+        /// <summary>The level tuning this room's enemies were built under.</summary>
+        public LevelEnemyTuning Tuning;
+
         /// <summary>
         /// How many times this room is expected to appear in the level. A manual layout places
         /// rooms explicitly (1 each); a generated level draws <c>RoomsToGenerate</c> rooms uniformly
@@ -257,14 +279,20 @@ namespace Assets.Scripts.Balance
             List<EnemySpawnEntry> overrideTable,
             bool guaranteeAll,
             PartyBaseline party,
-            BalanceRulesSO rules)
+            BalanceRulesSO rules,
+            LevelEnemyTuning tuning = null)
         {
             var encounter = new RoomEncounter
             {
                 Room = room,
                 RoomName = room != null ? (string.IsNullOrEmpty(room.Name) ? room.name : room.Name) : "(none)",
-                GuaranteedSpawns = guaranteeAll
+                GuaranteedSpawns = guaranteeAll,
+                Tuning = tuning
             };
+
+            // Both groups fight with the level's numbers, not the templates'.
+            encounter.Expected.Tuning = tuning;
+            encounter.WorstCase.Tuning = tuning;
 
             if (room == null || party == null)
             {

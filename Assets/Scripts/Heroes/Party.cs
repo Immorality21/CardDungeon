@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Assets.Scripts.IO;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Rooms;
@@ -102,7 +102,7 @@ namespace Assets.Scripts.Heroes
             if (hero != null && hero.Stats != null)
             {
                 // Joins at full health: they were not in the fights that wore the party down.
-                hero.Stats.Health = hero.Stats.MaxHealth;
+                hero.Stats.Health = hero.GetEffectiveMaxHealth();
             }
 
             if (hero != null && isNewToTheSave)
@@ -341,13 +341,19 @@ namespace Assets.Scripts.Heroes
             }
         }
 
+        /// <summary>
+        /// Refills every hero to the top of the bar they actually fight with - <b>effective</b> max
+        /// health, gear included. Filling <c>Stats.MaxHealth</c> instead left a geared hero short by
+        /// exactly their +MaxHealth bonus at the start of every level, which is most of the reason
+        /// that bonus did nothing.
+        /// </summary>
         public void HealAll()
         {
             foreach (var hero in Heroes)
             {
                 if (hero.Stats != null)
                 {
-                    hero.Stats.Health = hero.Stats.MaxHealth;
+                    hero.Stats.Health = hero.GetEffectiveMaxHealth();
                 }
             }
         }

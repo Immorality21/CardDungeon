@@ -15,7 +15,10 @@ of "balanced":
 1. **`BalanceWindow`** — `Tools ▸ Balance ▸ Balance Analyzer`. Tables, colours, inline editing.
 2. **`BalanceRegressionTests`** (`Assets/Tests/EditMode/`) — the same analysis as assertions, so a
    balance regression fails a test instead of waiting for someone to open a window.
-3. **`EnemySOBalanceFooter`** — derived numbers in the `EnemySO` inspector, where the stats are authored.
+
+(There used to be a third: a balance footer on the `EnemySO` inspector. It is **gone**, and should not
+come back — an enemy's numbers now come from the level it appears in, so a per-asset footer could only
+ever be right about one of them.)
 
 If you add a metric, add it to the model, not to a tab.
 
@@ -46,6 +49,7 @@ the game's numbers:
 | gear bonuses | `InventoryOperations.ComputeBonuses` |
 | gear elemental resistance | `InventoryOperations.ComputeResistances` |
 | the element a unit's attacks carry | `ICombatUnit.AttackDamageType` (`EnemySO.AttackDamageType`) |
+| the stats an enemy actually fights with | `LevelEnemyTuning.StatsFor` (template x the level's tuning) |
 | economy pacing | `MetaProgressManager` constants |
 | potion belt capacity | `PartyResourceManager.DEFAULT_HEALING_POTION_MAX` |
 | room-event placement odds | `RoomEventSpawn.ChancePercent` / `.MeetsRequirements` |
@@ -67,6 +71,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `EncounterModel` | `WeightedEnemyGroup` + `RoomEncounter` — fractional spawn-table expectation |
 | `RunCurveModel` | `LevelCurve` / `RunCurve` — attrition, peak danger, boss ratio, difficulty jumps |
 | `RoomEventModel` | what a level's **room events** cost and pay: placement odds, check odds, weighted outcome pools |
+| `LevelEnemyTuning` (in `Enemies/`) | the per-level enemy numbers every metric is measured against |
 | `VarietyAnalyzer` | the one-dimensionality axis: archetype share, resistance coverage, inert damage types, Draw overlap |
 | `ProgressionMap` | the **supply chain**: which magic is drawable where, when each combo becomes possible, and whether a level's resistances are in elements the player can bring yet |
 | `EncounterSimulator` | headless battles under three policies (`AttackOnly` / `MagicFirst` / `Adaptive`) |
@@ -127,6 +132,30 @@ real level after it read as a +386% cliff while being about 3 HP in absolute ter
 about whether the step is survivable. Below the floor the finding is still reported, as an Info that
 quotes the absolute step alongside the ratio. This is the check being wrong, not the content: the
 tutorial is light on purpose.
+
+**Enemies are measured per placement, not per asset.** `report.Enemies` holds one `EnemyMetrics` per
+**(enemy, level)** pair, because an `EnemySO` is a template and the level owns its numbers
+(`LevelEnemyTuning`). "Is the Floating Eye in band" has no answer on its own — it is in every authored
+level, against parties from 40 HP and no spent XP to 64 HP and 176. Findings quote
+`EnemyMetrics.Reference` ("Floating Eye in The Drowned March / Levels[2] Rotwater Deep") and their
+suggestions name that level's `EnemyTuning.Difficulty`, since that is the dial that moves them.
+`EnemyMetrics.Stats` is the resolved block; nothing in the model reads `EnemySO.BaseStats` for a fight
+any more. An enemy no run places still gets one template-only row so authoring checks keep working.
+
+**The three coupled levers, with the arithmetic.** Worth knowing before a tuning pass, because they
+constrain each other and the analyzer cannot tell you which to move:
+
+- `danger ≈ ttk × enemyDPS / (partySize × partyHP)`, and a level's `attrition ≈ Σ danger` over its
+  **enemy instances**. So *mean per-enemy danger × enemy count = the level's attrition.* A level with
+  11 expected enemies cannot have each of them clear `MinMeaningfulDanger` without running at the
+  attrition ceiling — that is arithmetic, not tuning. **Enemy count is the only lever on whether any
+  one enemy can matter.**
+- `Difficulty` scales health and strength together, so danger goes as `d²` while time-to-kill only
+  goes as `d`. A `MaxHealth` scale moves both linearly. Difficulty is the better value per turn.
+- Enemy **strength** is capped by `MinHitsToKillHero` against the *squishiest* hero — the check takes
+  the party minimum, so one glass-cannon hero caps enemy damage for the whole roster. Raising hero HP
+  is what buys strength headroom, which is why the analyzer's own suggestion says it fixes every enemy
+  at once.
 
 **Room events are part of the attrition curve.** `RoomEventModel` costs every event a level's rooms
 can offer and `RunCurveModel` folds it into `ExpectedHealthCost` beside the fights, with the split kept

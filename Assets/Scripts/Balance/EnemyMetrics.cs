@@ -61,6 +61,42 @@ namespace Assets.Scripts.Balance
         public int ResistanceCount;
         public int DrawableCount;
 
+        /// <summary>
+        /// The level tuning these numbers were measured under, and the stats it produced. An
+        /// <c>EnemySO</c> is a template shared across the campaign, so "this enemy's danger" is only
+        /// a question with an answer once you say <i>where</i> - see <see cref="LevelEnemyTuning"/>.
+        /// Null tuning means the template's own values, which is what an enemy no run places gets.
+        /// </summary>
+        public LevelEnemyTuning Tuning;
+
+        /// <summary>Stats this enemy actually fights with here — template scaled by the level.</summary>
+        public StatBlock Stats = new StatBlock();
+
+        /// <summary>XP and gold this placement pays, after the level's multipliers.</summary>
+        public int XpReward;
+
+        public int GoldReward;
+
+        /// <summary>
+        /// Where this measurement is from: "The Threshold / Levels[2] Collapsed Caverns", or empty
+        /// for the template-only reading of an enemy no run places.
+        /// </summary>
+        public string Context = "";
+
+        /// <summary>
+        /// The run and level index this placement belongs to, so the window can bind an editor to the
+        /// level's own <c>EnemyTuning</c> — the dial that actually changes these numbers.
+        /// </summary>
+        public Assets.Scripts.Dungeon.RunDefinitionSO Run;
+
+        public int LevelIndex = -1;
+
+        /// <summary>Short label for the placement column: the level, or "(unplaced)".</summary>
+        public string LevelLabel = "";
+
+        /// <summary>Name plus placement, for a finding that has to be actionable per level.</summary>
+        public string Reference => string.IsNullOrEmpty(Context) ? Name : Name + " in " + Context;
+
         /// <param name="party">Who this enemy is judged against — the party it is first met with.</param>
         /// <param name="rewardParty">
         /// Party used for the reward-per-danger figures only. Danger is measured against whoever
@@ -68,30 +104,39 @@ namespace Assets.Scripts.Balance
         /// needs one common yardstick or the spread just reports roster growth. Defaults to
         /// <paramref name="party"/>.
         /// </param>
+        /// <param name="tuning">
+        /// The level's enemy tuning. This is where the numbers come from: the template only carries
+        /// the enemy's identity. Null measures the template as authored.
+        /// </param>
+        /// <param name="context">Run/level label, so a finding can name the placement it is about.</param>
         public static EnemyMetrics Compute(EnemySO enemy, PartyBaseline party, BalanceRulesSO rules,
-            PartyBaseline rewardParty = null)
+            PartyBaseline rewardParty = null, LevelEnemyTuning tuning = null, string context = "")
         {
-            var metrics = new EnemyMetrics { Definition = enemy };
+            var metrics = new EnemyMetrics { Definition = enemy, Tuning = tuning, Context = context ?? "" };
             if (enemy == null || party == null || rules == null)
             {
                 return metrics;
             }
 
+            metrics.Stats = LevelEnemyTuning.StatsFor(enemy, tuning);
+            metrics.XpReward = LevelEnemyTuning.XpFor(enemy, tuning);
+            metrics.GoldReward = LevelEnemyTuning.GoldFor(enemy, tuning);
+
             metrics.Name = string.IsNullOrEmpty(enemy.DisplayName) ? enemy.name : enemy.DisplayName;
             metrics.IsBoss = enemy.IsBoss;
             metrics.Archetype = enemy.Archetype;
-            metrics.PowerScore = BalanceMath.PowerScore(enemy, rules);
+            metrics.PowerScore = BalanceMath.PowerScore(metrics.Stats, rules);
             metrics.ResistanceCount = enemy.Resistances != null ? enemy.Resistances.Count : 0;
             metrics.DrawableCount = enemy.DrawableMagics != null ? enemy.DrawableMagics.Count : 0;
 
-            var unit = SimUnit.FromEnemy(enemy);
+            var unit = SimUnit.FromEnemy(enemy, tuning);
             var group = new List<SimUnit> { unit };
             var partyUnits = party.Units;
 
             metrics.PartyTurnsToKill = BalanceMath.PartyTurnsToKill(partyUnits, unit);
             metrics.SoloDangerIndex = BalanceMath.DangerIndex(partyUnits, group);
             metrics.OffenseMultiplier = BalanceMath.AverageOffenseMultiplier(enemy.Archetype, party.Size);
-            metrics.AverageDamagePerHit = BalanceMath.AverageDamageAgainstGroup(enemy.BaseStats[StatType.Strength], partyUnits);
+            metrics.AverageDamagePerHit = BalanceMath.AverageDamageAgainstGroup(metrics.Stats[StatType.Strength], partyUnits);
             metrics.EffectiveDamagePerTurn = metrics.AverageDamagePerHit * metrics.OffenseMultiplier;
 
             // Per-hero breakdown: plain hits, since that is what the player actually feels turn to turn.
@@ -102,7 +147,7 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                float perHit = BalanceMath.AverageDamage(enemy.BaseStats[StatType.Strength], hero.Unit);
+                float perHit = BalanceMath.AverageDamage(metrics.Stats[StatType.Strength], hero.Unit);
                 int htk = BalanceMath.HitsToKill(perHit, hero.Effective[StatType.MaxHealth]);
 
                 metrics.PerHero.Add(new EnemyVsHero
@@ -133,8 +178,8 @@ namespace Assets.Scripts.Balance
                 : BalanceMath.DangerIndex(yardstick.Units, group);
             if (danger > 0f && !float.IsInfinity(danger))
             {
-                metrics.XpPerDanger = enemy.XpReward / danger;
-                metrics.GoldPerDanger = enemy.GoldReward / danger;
+                metrics.XpPerDanger = metrics.XpReward / danger;
+                metrics.GoldPerDanger = metrics.GoldReward / danger;
             }
 
             return metrics;

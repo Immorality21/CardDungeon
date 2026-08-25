@@ -16,6 +16,12 @@ namespace Assets.Scripts.Dungeon
                  "the exit room, making the level's climax a boss fight. Leave null for a normal level.")]
         public EnemySO BossEnemy;
 
+        [Tooltip("What this level does to the enemies it spawns. An EnemySO is a template - the " +
+                 "same enemy appears across the whole campaign against wildly different parties - so " +
+                 "its numbers belong to the level, not the asset. Difficulty 1 with no overrides " +
+                 "means 'exactly as authored'.")]
+        public LevelEnemyTuning EnemyTuning = new LevelEnemyTuning();
+
         [Tooltip("Optional captive hero for this level. When set — and the player does not already " +
                  "own them — they are placed in a room off the start/exit rooms and can be freed " +
                  "for nothing, joining the party mid-run. Like XP, the rescue is only committed on " +

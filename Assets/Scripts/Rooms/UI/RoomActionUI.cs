@@ -1098,7 +1098,7 @@ namespace Assets.Scripts.Rooms
                 {
                     continue;
                 }
-                hp.text = $"HP {hero.Stats.Health}/{hero.Stats.MaxHealth}";
+                hp.text = $"HP {hero.Stats.Health}/{hero.GetEffectiveMaxHealth()}";
                 if (_partyRows.TryGetValue(hero, out var row) && row != null)
                 {
                     row.EnableInClassList("cd-party-row--dead", !hero.IsAlive);

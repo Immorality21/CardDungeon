@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using Assets.Scripts.UnitStats;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -31,7 +32,8 @@ namespace Assets.Scripts.Cards.Effects
                 }
 
                 int healAmount = scaled;
-                int newHealth = Mathf.Min(target.Stats.Health + healAmount, target.Stats.MaxHealth);
+                int newHealth = Mathf.Min(
+                    target.Stats.Health + healAmount, target.GetEffectiveStat(StatType.MaxHealth));
                 int actualHeal = newHealth - target.Stats.Health;
                 target.Stats.Health = newHealth;
 

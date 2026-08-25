@@ -47,7 +47,8 @@ namespace Assets.Scripts.Cards.Effects
 
                 if (damage < 0)
                 {
-                    int heal = Mathf.Min(-damage, target.Stats.MaxHealth - target.Stats.Health);
+                    int heal = Mathf.Min(
+                        -damage, target.GetEffectiveStat(StatType.MaxHealth) - target.Stats.Health);
                     target.Stats.Health += heal;
                     result.Entries.Add(new EffectEntry
                     {

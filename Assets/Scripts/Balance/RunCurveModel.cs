@@ -25,6 +25,12 @@ namespace Assets.Scripts.Balance
         /// <summary>The run entry this level was built from, so consumers can re-read its spawn sources.</summary>
         public RunLevelEntry Entry;
 
+        /// <summary>
+        /// What this level does to its enemies. An EnemySO is a template shared across the campaign,
+        /// so this is where the numbers a fight here actually uses come from.
+        /// </summary>
+        public LevelEnemyTuning Tuning;
+
         public List<RoomEncounter> Rooms = new List<RoomEncounter>();
 
         /// <summary>
@@ -318,7 +324,8 @@ namespace Assets.Scripts.Balance
                 Template = entry.LevelTemplate,
                 Layout = entry.ManualLayout,
                 Boss = entry.BossEnemy,
-                Entry = entry
+                Entry = entry,
+                Tuning = entry.EnemyTuning
             };
 
             if (entry.ManualLayout != null)
@@ -374,7 +381,8 @@ namespace Assets.Scripts.Balance
                     room.EnemySpawnOverride,
                     room.GuaranteeAllSpawns,
                     party,
-                    rules);
+                    rules,
+                    level.Tuning);
                 encounter.Occurrences = 1f;
                 level.Rooms.Add(encounter);
             }
@@ -401,7 +409,7 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                var encounter = RoomEncounter.Build(room, null, false, party, rules);
+                var encounter = RoomEncounter.Build(room, null, false, party, rules, level.Tuning);
                 encounter.Occurrences = perEntry;
                 level.Rooms.Add(encounter);
             }
@@ -430,7 +438,8 @@ namespace Assets.Scripts.Balance
                 factor = (eligibleRooms - 1f) / eligibleRooms;
             }
 
-            level.Events = RoomEventModel.BuildForLevel(level.Rooms, party, rules, level.Index, factor);
+            level.Events = RoomEventModel.BuildForLevel(
+                level.Rooms, party, rules, level.Index, factor, level.Tuning);
         }
 
         private static void ReplaceExitRoomWithBoss(LevelCurve level, RunLevelEntry entry, PartyBaseline party, BalanceRulesSO rules)
@@ -466,8 +475,11 @@ namespace Assets.Scripts.Balance
                 Room = null,
                 RoomName = $"Exit room — {(string.IsNullOrEmpty(entry.BossEnemy.DisplayName) ? entry.BossEnemy.name : entry.BossEnemy.DisplayName)}",
                 GuaranteedSpawns = true,
-                Occurrences = 1f
+                Occurrences = 1f,
+                Tuning = level.Tuning
             };
+            bossEncounter.Expected.Tuning = level.Tuning;
+            bossEncounter.WorstCase.Tuning = level.Tuning;
             bossEncounter.Expected.Add(entry.BossEnemy, 1f);
             bossEncounter.WorstCase.Add(entry.BossEnemy, 1f);
             bossEncounter.ExpectedDanger = bossEncounter.Expected.DangerIndex(party);

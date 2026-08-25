@@ -6,6 +6,7 @@ using Assets.Scripts.Rooms;
 using Assets.Scripts.Rooms.Events;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using Assets.Scripts.Enemies;
 
 namespace Assets.Scripts.Balance
 {
@@ -198,7 +199,8 @@ namespace Assets.Scripts.Balance
             PartyBaseline party,
             BalanceRulesSO rules,
             int runLevelIndex,
-            float eligibilityFactor = 1f)
+            float eligibilityFactor = 1f,
+            LevelEnemyTuning tuning = null)
         {
             var encounters = new List<RoomEventEncounter>();
             if (rooms == null || party == null || party.Size == 0)
@@ -231,7 +233,7 @@ namespace Assets.Scripts.Balance
                         continue;
                     }
 
-                    var encounter = Build(definition, party, best, runLevelIndex);
+                    var encounter = Build(definition, party, best, runLevelIndex, tuning);
                     encounter.Room = room;
                     encounter.RoomName = roomEncounter.RoomName;
 
@@ -261,7 +263,8 @@ namespace Assets.Scripts.Balance
             RoomEventSO definition,
             PartyBaseline party,
             StatBlock partyBest,
-            int runLevelIndex)
+            int runLevelIndex,
+            LevelEnemyTuning tuning = null)
         {
             var encounter = new RoomEventEncounter
             {
@@ -297,7 +300,7 @@ namespace Assets.Scripts.Balance
                         continue;
                     }
                     encounter.Options.Add(BuildOption(
-                        option, encounter.CheckSuccessChance, party, actor, runLevelIndex));
+                        option, encounter.CheckSuccessChance, party, actor, runLevelIndex, tuning));
                 }
             }
 
@@ -357,7 +360,8 @@ namespace Assets.Scripts.Balance
             float successChance,
             PartyBaseline party,
             ICombatUnit actor,
-            int runLevelIndex)
+            int runLevelIndex,
+            LevelEnemyTuning tuning)
         {
             var model = new EventOptionModel
             {
@@ -368,8 +372,8 @@ namespace Assets.Scripts.Balance
                 SuccessChance = option.Kind == RoomEventOptionKind.StatCheck ? successChance : 1f
             };
 
-            model.Success = CostPool(option.Success, party, actor, runLevelIndex);
-            model.Failure = CostPool(option.Failure, party, actor, runLevelIndex);
+            model.Success = CostPool(option.Success, party, actor, runLevelIndex, tuning);
+            model.Failure = CostPool(option.Failure, party, actor, runLevelIndex, tuning);
 
             if (option.Kind == RoomEventOptionKind.Decline)
             {
@@ -421,7 +425,8 @@ namespace Assets.Scripts.Balance
             List<RoomEventOutcome> pool,
             PartyBaseline party,
             ICombatUnit actor,
-            int runLevelIndex)
+            int runLevelIndex,
+            LevelEnemyTuning tuning)
         {
             var costs = new List<EventOutcomeCost>();
             if (pool == null || pool.Count == 0)
@@ -437,7 +442,7 @@ namespace Assets.Scripts.Balance
 
             for (int i = 0; i < pool.Count; i++)
             {
-                var cost = CostOutcome(pool[i], party, actor, runLevelIndex);
+                var cost = CostOutcome(pool[i], party, actor, runLevelIndex, tuning);
                 cost.Probability = total > 0f
                     ? RoomEventResolver.EffectiveWeight(pool[i], actor) / total
                     : (i == 0 ? 1f : 0f);
@@ -451,7 +456,8 @@ namespace Assets.Scripts.Balance
             RoomEventOutcome outcome,
             PartyBaseline party,
             ICombatUnit actor,
-            int runLevelIndex)
+            int runLevelIndex,
+            LevelEnemyTuning tuning)
         {
             var cost = new EventOutcomeCost { Outcome = outcome };
             if (outcome == null)
@@ -507,7 +513,7 @@ namespace Assets.Scripts.Balance
 
             if (outcome.AwakenedEnemies != null && outcome.AwakenedEnemies.Count > 0)
             {
-                var group = new WeightedEnemyGroup();
+                var group = new WeightedEnemyGroup { Tuning = tuning };
                 foreach (var definition in outcome.AwakenedEnemies)
                 {
                     group.Add(definition, 1f);

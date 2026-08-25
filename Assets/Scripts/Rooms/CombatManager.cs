@@ -797,7 +797,8 @@ namespace Assets.Scripts.Rooms
             }
 
             int before = target.Stats.Health;
-            target.Stats.Health = Mathf.Min(target.Stats.Health + amount, target.Stats.MaxHealth);
+            target.Stats.Health = Mathf.Min(
+                target.Stats.Health + amount, target.GetEffectiveStat(StatType.MaxHealth));
             int healed = target.Stats.Health - before;
 
             CombatAudio.Play(CombatSound.Heal);
@@ -867,7 +868,8 @@ namespace Assets.Scripts.Rooms
             {
                 // Absorbed: resistance above 100% turns the hit into healing. Clamp to the target's
                 // maximum — without this an absorbing unit heals past full and the popup reads "-7".
-                int absorbed = Mathf.Min(-dmg, Mathf.Max(0, target.Stats.MaxHealth - target.Stats.Health));
+                int absorbed = Mathf.Min(
+                    -dmg, Mathf.Max(0, target.GetEffectiveStat(StatType.MaxHealth) - target.Stats.Health));
                 target.Stats.Health += absorbed;
                 dmg = -absorbed;
             }
@@ -1022,8 +1024,9 @@ namespace Assets.Scripts.Rooms
             }
 
             // Kill rewards: XP (awarded now), gold (accumulated, banked on clear).
-            int xp = enemy.Definition != null ? enemy.Definition.XpReward : 0;
-            int gold = enemy.Definition != null ? enemy.Definition.GoldReward : 0;
+            // Through the enemy, not the definition: a level scales its rewards alongside its stats.
+            int xp = enemy.XpReward;
+            int gold = enemy.GoldReward;
             if (xp > 0)
             {
                 _combatXp += xp;

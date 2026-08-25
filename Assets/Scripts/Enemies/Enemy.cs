@@ -32,6 +32,18 @@ namespace Assets.Scripts.Enemies
         /// <summary>The definition this enemy was spawned from (set by <see cref="Initialize"/>).</summary>
         public EnemySO Definition { get; private set; }
 
+        /// <summary>
+        /// The level tuning this enemy was spawned under, or null for the template's own numbers.
+        /// Held so rewards scale with the level the same way stats do.
+        /// </summary>
+        public LevelEnemyTuning Tuning { get; private set; }
+
+        /// <summary>XP this kill pays, after the level's tuning.</summary>
+        public int XpReward => LevelEnemyTuning.XpFor(Definition, Tuning);
+
+        /// <summary>Gold this kill pays, after the level's tuning.</summary>
+        public int GoldReward => LevelEnemyTuning.GoldFor(Definition, Tuning);
+
         /// <summary>Whether this enemy is a boss (from its definition) — drives boss-only combat/UI.</summary>
         public bool IsBoss => Definition != null && Definition.IsBoss;
 
@@ -55,7 +67,13 @@ namespace Assets.Scripts.Enemies
         /// archetype, Draw list, resistances and loot. Called by <see cref="EnemyManager"/> at
         /// spawn time so a single prefab can become any enemy type.
         /// </summary>
-        public void Initialize(EnemySO definition)
+        /// <summary>
+        /// Stamps the shared enemy prefab with a definition. <paramref name="tuning"/> is the level's
+        /// enemy tuning: the definition carries the enemy's identity, the level carries its numbers
+        /// (see <see cref="LevelEnemyTuning"/>). Null means the template's own stats, which is what
+        /// free-play in the scene and any un-tuned level get.
+        /// </summary>
+        public void Initialize(EnemySO definition, LevelEnemyTuning tuning = null)
         {
             Definition = definition;
             if (definition == null)
@@ -63,8 +81,9 @@ namespace Assets.Scripts.Enemies
                 return;
             }
 
+            Tuning = tuning;
             gameObject.name = definition.DisplayName;
-            Stats = new Stats(definition.BaseStats);
+            Stats = new Stats(LevelEnemyTuning.StatsFor(definition, tuning));
             Archetype = definition.Archetype;
             DrawableMagics = new List<DrawableMagicEntry>(definition.DrawableMagics);
             Resistances = new List<Resistance>(definition.Resistances);

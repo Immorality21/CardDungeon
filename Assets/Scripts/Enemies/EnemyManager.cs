@@ -29,6 +29,20 @@ namespace Assets.Scripts.Enemies
             return _enemyPrefab;
         }
 
+        /// <summary>
+        /// What the level being played does to the enemies it spawns. Set once by
+        /// <c>DungeonManager</c> before generation rather than threaded through every spawn call,
+        /// because <see cref="SpawnSingle"/> is also reached from a room event waking something
+        /// mid-level, and that caller has no idea which run it is in. Null means the templates'
+        /// own numbers, which is what free-play in the scene gets.
+        /// </summary>
+        public LevelEnemyTuning LevelTuning { get; private set; }
+
+        public void SetLevelTuning(LevelEnemyTuning tuning)
+        {
+            LevelTuning = tuning;
+        }
+
         public void SpawnEnemies(List<Room> rooms, Room playerRoom)
         {
             SpawnEnemies(rooms, playerRoom, null);
@@ -98,7 +112,7 @@ namespace Assets.Scripts.Enemies
                         // One shared prefab, stamped with the spawn entry's EnemySO definition.
                         var enemyObj = Instantiate(prefab, transform);
                         var enemy = enemyObj.GetComponent<Enemy>();
-                        enemy.Initialize(entry.Enemy);
+                        enemy.Initialize(entry.Enemy, LevelTuning);
                         enemy.PlaceInRoom(room, position);
 
                         room.Enemies.Add(enemy);
@@ -152,7 +166,7 @@ namespace Assets.Scripts.Enemies
 
             var enemyObj = Instantiate(prefab, transform);
             var enemy = enemyObj.GetComponent<Enemy>();
-            enemy.Initialize(definition);
+            enemy.Initialize(definition, LevelTuning);
             enemy.PlaceInRoom(room, position);
 
             room.Enemies.Add(enemy);
