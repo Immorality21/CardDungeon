@@ -53,10 +53,13 @@ reward: `RunCurveModel` takes non-combat rooms off the expected-combat-room coun
 refuge's healing to the sustain pool. Getting that wrong is not theoretical - see the measured
 coupling in `docs/BALANCING.md`.
 
-Two markers are drawn at the room centre from the exit-marker sprite under a tint (gold for a cache,
-teal for a refuge) - placeholder art, but a reward the player cannot see is a reward they walk past.
-`Room.MarkPayloadTaken` dims it, and `RoomSaveData.KindConsumed` persists it: without that the
-player re-loots the cache by walking out and back in.
+A marker is drawn at the room centre - a **chest** for a cache, a **cross** for a refuge - loaded
+through `CombatIcons` from `Resources/CombatIcons`, so a payload room needs no scene wiring. It must
+have its **own silhouette**: the first version tinted the *exit-door* sprite gold and read as a second
+staircase in play, which is worse than no marker at all. If the glyph is missing the marker is skipped
+rather than falling back to something that means "the way down". `Room.MarkPayloadTaken` dims it, and
+`RoomSaveData.KindConsumed` persists it: without that the player re-loots the cache by walking out and
+back in.
 
 ## The Room Bar (`Rooms/UI/RoomActionUI.cs`)
 

@@ -772,12 +772,22 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
-        /// Marks a payload room on the map. Reuses the exit marker sprite under a tint rather than
-        /// waiting on art: a room the player cannot see is a reward they walk past.
+        /// Marks a payload room on the map. A reward the player cannot see is a reward they walk past
+        /// - but the glyph has to be its <b>own</b> silhouette, not the exit door under a tint: the
+        /// first version of this reused the exit sprite recoloured and read as a second staircase,
+        /// which is worse than no marker at all. Loaded from Resources so the marker needs no scene
+        /// wiring, and it is skipped outright if the glyph is missing rather than falling back to
+        /// something that means "the way down".
         /// </summary>
         private void PlaceKindMarker(Room room)
         {
-            if (_exitRoomMarkerSprite == null || !room.Kind.HasPayload())
+            if (!room.Kind.HasPayload())
+            {
+                return;
+            }
+
+            var sprite = Combat.CombatIcons.Get(room.Kind == RoomKind.Treasure ? "chest" : "cross");
+            if (sprite == null)
             {
                 return;
             }
@@ -788,11 +798,11 @@ namespace Assets.Scripts.Dungeon
             center.z = -0.5f;
             markerObj.transform.position = center;
             var sr = markerObj.AddComponent<SpriteRenderer>();
-            sr.sprite = _exitRoomMarkerSprite;
+            sr.sprite = sprite;
             sr.sortingOrder = 3;
             sr.color = room.Kind == RoomKind.Treasure
                 ? new Color(1f, 0.85f, 0.25f)
-                : new Color(0.4f, 0.9f, 0.75f);
+                : new Color(0.45f, 0.95f, 0.8f);
             room.KindMarker = sr;
         }
 
