@@ -17,6 +17,7 @@ MonoBehaviour:
   Height: 5
   Color: {r: 0.2979263, g: 0.2979263, b: 0.9716981, a: 1}
   IsConnectorRoom: 0
+  PossibleEvents: []
   EnemySpawnTable:
   - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
     SpawnChance: 0.5

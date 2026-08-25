@@ -818,6 +818,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1478533990489703503, guid: 89b9ceb51ab4ff647a176de908d43197, type: 3}
+      propertyPath: _tilePrefab
+      value: 
+      objectReference: {fileID: 6327214266315479558, guid: ecadd9f35a7295f4580cf49d45962f4d, type: 3}
     - target: {fileID: 3240549834120957663, guid: 89b9ceb51ab4ff647a176de908d43197, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
