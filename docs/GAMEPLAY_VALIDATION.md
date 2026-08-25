@@ -162,6 +162,16 @@ Hard-won gotchas (each cost a failed compile until learned):
     the clone, swap it into the input (e.g. `BalanceInput.Heroes`), analyse, then
     `Object.DestroyImmediate` the clone. Mutating the asset instance returned by
     `AssetDatabase.LoadAssetAtPath` risks writing the change to disk.
+14. **You cannot click a UI Toolkit button from a `RunCommand`.** Three ways were tried against
+    `RoomActionUI`'s room bar and all three are inert: `ClickEvent.GetPooled()` + `SendEvent`, a
+    synthetic `PointerDownEvent`/`PointerUpEvent` pair, and `Clickable.SimulateSingleClick` (which
+    does not exist in this Unity's public API). `Clickable` needs a real panel dispatch with pointer
+    capture, and `SendEvent` on the element bypasses it. What you *can* verify from a command, and
+    what is usually enough: **that the right button is showing**. Query the `UIDocument`'s root and
+    read `element.style.display.value` (`Flex` vs `None`) after driving the game into a state - that
+    catches the whole class of "the affordance never appears / appears in the wrong room" bugs. For
+    the handler itself, keep the logic in a pure helper the EditMode suite can call, and click it by
+    hand once.
 
 ---
 
