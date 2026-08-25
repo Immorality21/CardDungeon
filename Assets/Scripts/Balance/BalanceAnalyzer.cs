@@ -1144,7 +1144,26 @@ namespace Assets.Scripts.Balance
                 }
 
                 float ttkCeiling = metrics.TimeToKillCeiling(rules);
-                if (metrics.PartyTurnsToKill > ttkCeiling)
+                if (float.IsInfinity(metrics.PartyTurnsToKill))
+                {
+                    // The party cannot finish it at all: it heals or shields back at least everything
+                    // the party lands. Worth its own finding because the danger index cannot say so -
+                    // that measures a damage race, so an enemy the party also cannot be killed *by*
+                    // reads as 0.00, the safest-looking number there is for the worst encounter in the
+                    // game.
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Enemy, metrics.Reference,
+                        $"{metrics.Reference} cannot be killed by the party at all")
+                    {
+                        Asset = metrics.Definition,
+                        Detail = $"It restores or protects at least as much per tick as the party deals. "
+                               + $"Healing {metrics.ExpectedHealingPerTurn:0.0}/turn and party output "
+                               + $"x{metrics.PartyOutputMultiplier:0.00}. The fight is a stalemate, not a loss, "
+                               + "so the danger index reads 0.00 and every other check passes.",
+                        Suggestion = "Lower its Heal power, cut how often it heals, or give the party a way "
+                                   + "to out-damage the sustain."
+                    });
+                }
+                else if (metrics.PartyTurnsToKill > ttkCeiling)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Reference,
                         $"{metrics.Reference} takes {metrics.PartyTurnsToKill:0.0} party turns to kill")
@@ -1306,12 +1325,29 @@ namespace Assets.Scripts.Balance
                  + "A per-enemy override on the same tuning handles anything the level dial should not move.";
         }
 
+        /// <summary>
+        /// Whether XP is paid in proportion to danger, across every **placement** rather than every
+        /// enemy — the same enemy at two levels' worth of tuning is two different bargains, because
+        /// <c>XpReward</c> is per asset while its danger comes from the level.
+        ///
+        /// <para><b>A placement below <see cref="BalanceRulesSO.MinDangerForRewardCheck"/> does not set
+        /// the spread.</b> Reward efficiency is XP over danger, so something almost harmless produces a
+        /// huge ratio off a tiny denominator and would decide the finding on its own — the same
+        /// small-base artefact <c>MinAttritionForJumpCheck</c> exists for. Those placements are still
+        /// reported, as an Info, because a harmless enemy paying full XP is worth knowing about; they
+        /// just do not get to break the band.</para>
+        ///
+        /// <para>The finding names the <b>placement</b> at each end, not the enemy. It used to name only
+        /// the enemy, and this one warning was consequently mis-diagnosed four times over — the
+        /// endpoints are what tell you whether the cause is a mis-set <c>XpReward</c> (two different
+        /// enemies) or an untouched <c>XpMultiplier</c> (two placements of the same one).</para>
+        /// </summary>
         private static void EvaluateRewardSpread(BalanceReport report, BalanceRulesSO rules)
         {
-            float min = float.MaxValue;
-            float max = 0f;
-            string minName = "";
-            string maxName = "";
+            EnemyMetrics low = null;
+            EnemyMetrics high = null;
+            EnemyMetrics belowFloor = null;
+            int belowFloorCount = 0;
 
             foreach (var metrics in report.Enemies)
             {
@@ -1324,34 +1360,74 @@ namespace Assets.Scripts.Balance
                 {
                     continue;
                 }
-                if (metrics.XpPerDanger < min)
+
+                if (metrics.RewardYardstickDanger < rules.MinDangerForRewardCheck)
                 {
-                    min = metrics.XpPerDanger;
-                    minName = metrics.Name;
+                    belowFloorCount++;
+                    if (belowFloor == null || metrics.XpPerDanger > belowFloor.XpPerDanger)
+                    {
+                        belowFloor = metrics;
+                    }
+                    continue;
                 }
-                if (metrics.XpPerDanger > max)
+
+                if (low == null || metrics.XpPerDanger < low.XpPerDanger)
                 {
-                    max = metrics.XpPerDanger;
-                    maxName = metrics.Name;
+                    low = metrics;
+                }
+                if (high == null || metrics.XpPerDanger > high.XpPerDanger)
+                {
+                    high = metrics;
                 }
             }
 
-            if (min >= float.MaxValue || min <= 0f)
+            if (belowFloor != null)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Economy, "Reward curve",
+                    $"{belowFloorCount} placement(s) pay full XP for almost no danger")
+                {
+                    Asset = belowFloor.Definition,
+                    Detail = $"Highest is {belowFloor.Reference} at {belowFloor.XpPerDanger:0} XP per danger, "
+                           + $"off a danger of only {belowFloor.RewardYardstickDanger:0.000}. Below the "
+                           + $"{rules.MinDangerForRewardCheck:0.00} floor a ratio says more about the "
+                           + "denominator than about the reward, so these do not set the spread.",
+                    Suggestion = "Nothing to do if the floor is a deliberately gentle opening level - a "
+                               + "tutorial should pay generously for what it asks. Otherwise raise the "
+                               + "level's EnemyTuning.Difficulty until the fight is worth its reward."
+                });
+            }
+
+            if (low == null || high == null || low.XpPerDanger <= 0f)
             {
                 return;
             }
 
-            float spread = max / min;
-            if (spread > rules.MaxRewardEfficiencySpread)
+            float spread = high.XpPerDanger / low.XpPerDanger;
+            if (spread <= rules.MaxRewardEfficiencySpread)
             {
-                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Economy, "Reward curve",
-                    $"XP per unit of danger varies {spread:0.0}x across enemies")
-                {
-                    Detail = $"{maxName} pays {max:0} XP per danger; {minName} pays {min:0}. "
-                           + $"The band allows {rules.MaxRewardEfficiencySpread:0.0}x.",
-                    Suggestion = $"Scale XpReward with danger — {minName} is underpaying for the risk it carries."
-                });
+                return;
             }
+
+            // Same enemy at both ends means the level dial is the cause, not the enemy's XpReward.
+            bool sameEnemy = high.Definition != null && high.Definition == low.Definition;
+            string suggestion = sameEnemy
+                ? $"Both ends are {high.Name}, so its XpReward is not the problem - the levels are. Set "
+                + "EnemyTuning.XpMultiplier in proportion to each level's Difficulty (danger goes as "
+                + "Difficulty squared), which is what that field is for."
+                : $"Raise {low.Name}'s XpReward, or lower {high.Name}'s - and check "
+                + "EnemyTuning.XpMultiplier as well, since the same enemy is a different bargain at "
+                + "each level's Difficulty.";
+
+            report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Economy, "Reward curve",
+                $"XP per unit of danger varies {spread:0.0}x across placements")
+            {
+                Asset = low.Definition,
+                Detail = $"{high.Reference} pays {high.XpPerDanger:0} XP per danger (XP {high.XpReward} "
+                       + $"at danger {high.RewardYardstickDanger:0.000}); {low.Reference} pays "
+                       + $"{low.XpPerDanger:0} (XP {low.XpReward} at danger {low.RewardYardstickDanger:0.000}). "
+                       + $"The band allows {rules.MaxRewardEfficiencySpread:0.0}x.",
+                Suggestion = suggestion
+            });
         }
 
         // ------------------------------------------------------------------ runs and levels

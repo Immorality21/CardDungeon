@@ -1,14 +1,46 @@
 using System.Collections.Generic;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Enemies.Behaviors;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace Assets.Scripts.Balance
 {
+    /// <summary>
+    /// A stat this enemy expects to be shifting at any given moment, uptime included: its own buffs
+    /// and the debuffs it puts on the party.
+    /// </summary>
+    public class StatShift
+    {
+        public StatType Stat;
+
+        /// <summary>Magnitude of one application. Positive; <see cref="OnHeroSide"/> says which way it cuts.</summary>
+        public int Power;
+
+        /// <summary>Share of turns the shift is up — one application's duration times how often it lands.</summary>
+        public float Uptime;
+
+        /// <summary>True for a debuff on the party, false for a buff on this enemy.</summary>
+        public bool OnHeroSide;
+
+        /// <summary>Uptime-weighted magnitude, which is what a closed form can apply.</summary>
+        public int Expected => Mathf.RoundToInt(Power * Mathf.Clamp01(Uptime));
+    }
+
     /// <summary>What one authored behaviour is worth per turn, in multiples of a basic hit.</summary>
     public class BehaviorProfile
     {
+        /// <summary>
+        /// Share of turns each authored action is chosen, parallel to the behaviour's Actions list.
+        /// Exposed so anything else derived from the same selection maths (stat shifts, for one) does
+        /// not have to recompute the priority cascade and risk disagreeing with it.
+        /// </summary>
+        public float[] Claims = new float[0];
+
+        /// <summary>Turns of the clock one decision turn is worth — above 1 when telegraphs are in play.</summary>
+        public float TurnsPerDecision = 1f;
+
         /// <summary>
         /// Expected damage per turn as a multiple of one ordinary swing. This is what
         /// <c>AverageOffenseMultiplier</c> used to return as a hand-tuned constant per archetype.
@@ -26,6 +58,12 @@ namespace Assets.Scripts.Balance
 
         /// <summary>Number of authored actions that could ever be chosen.</summary>
         public int LiveActionCount;
+
+        /// <summary>
+        /// Stat buffs and debuffs this behaviour keeps up. Priced through the damage maths rather than
+        /// as a flat factor — see <c>BalanceMath.OutputSuppressionOf</c>.
+        /// </summary>
+        public List<StatShift> StatShifts = new List<StatShift>();
     }
 
     /// <summary>
@@ -202,7 +240,17 @@ namespace Assets.Scripts.Balance
                         break;
 
                     case EnemyActionKind.Debuff:
+                        // Not idle in the sense of wasted: a debuff cuts party output, which
+                        // OutputSuppressionOf prices through the real damage maths. It lands no
+                        // damage itself, which is what IdleShare records.
                         profile.IdleShare += claim;
+                        profile.StatShifts.Add(new StatShift
+                        {
+                            Stat = entry.TargetStat,
+                            Power = entry.Power,
+                            Uptime = Uptime(claim, entry.Duration),
+                            OnHeroSide = true
+                        });
                         break;
 
                     case EnemyActionKind.CastMagic:
@@ -220,7 +268,19 @@ namespace Assets.Scripts.Balance
             profile.HealingPerTurn /= turnsPerDecision;
             profile.CastShare /= turnsPerDecision;
             profile.IdleShare /= turnsPerDecision;
+            profile.Claims = claims;
+            profile.TurnsPerDecision = turnsPerDecision;
             return profile;
+        }
+
+        /// <summary>
+        /// Share of turns a shift is up: one application lasts <paramref name="duration"/> turns and
+        /// lands on <paramref name="claim"/> of them. Capped at 1 — re-applying something already up
+        /// does not stack it.
+        /// </summary>
+        public static float Uptime(float claim, int duration)
+        {
+            return Mathf.Clamp01(claim * Mathf.Max(1, duration));
         }
 
         /// <summary>Weight, treating an unweighted entry as 1 - the planner treats a zero tier as uniform.</summary>

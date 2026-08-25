@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
@@ -24,6 +25,12 @@ namespace Assets.Scripts.Balance
 
         /// <summary>How many of the enemy's entries the model could price at all.</summary>
         public int CastableCount;
+
+        /// <summary>
+        /// Stat buffs and debuffs its casts keep up. A cast is not only damage: Shield Up on itself
+        /// lengthens the fight, and a hero debuff shortens the party's output.
+        /// </summary>
+        public List<StatShift> StatShifts = new List<StatShift>();
 
         public bool Casts => CastChance > 0f && CastableCount > 0;
     }
@@ -114,6 +121,7 @@ namespace Assets.Scripts.Balance
 
                 profile.ExpectedDamage += share * DamageOfCast(entries[i].Magic, powerScale, caster, heroes);
                 profile.ExpectedHealing += share * HealingOfCast(entries[i].Magic, powerScale, caster);
+                CollectStatShifts(entries[i].Magic, share * profile.CastChance, profile.StatShifts);
             }
 
             return profile;
@@ -179,6 +187,54 @@ namespace Assets.Scripts.Balance
                 total += RawPower(effect, powerScale, caster);
             }
             return total;
+        }
+
+        /// <summary>
+        /// Buff and Debuff effects inside a cast, as stat shifts. Buff/Debuff <c>Power</c> is a stat
+        /// delta rather than a damage number, so it is neither damage nor healing — it belonged to
+        /// neither column, which is exactly why these used to price as nothing at all.
+        ///
+        /// <para><c>BuffType</c> maps to <c>StatType</c> by name, the same way
+        /// <c>BuffHandlerRegistry</c> builds its stat handlers, so a buff type with no matching stat
+        /// (a resistance, or a status effect like Frozen) is skipped rather than guessed at.</para>
+        /// </summary>
+        public static void CollectStatShifts(
+            MagicSO magic, float claim, List<StatShift> into)
+        {
+            if (magic == null || magic.Effects == null || claim <= 0f)
+            {
+                return;
+            }
+
+            bool onHeroSide = HitsHeroSide(magic.TargetType);
+
+            foreach (var effect in magic.Effects)
+            {
+                if (effect == null || effect.UnlockLevel > 0)
+                {
+                    continue;
+                }
+                if (effect.EffectType != SpellEffectType.Buff && effect.EffectType != SpellEffectType.Debuff)
+                {
+                    continue;
+                }
+
+                StatType stat;
+                if (!System.Enum.TryParse(effect.BuffType.ToString(), out stat)
+                    || stat == StatType.None
+                    || !StatCatalog.Types.Contains(stat))
+                {
+                    continue;   // a resistance or a status effect - not a stat shift
+                }
+
+                into.Add(new StatShift
+                {
+                    Stat = stat,
+                    Power = Mathf.Abs(effect.Power),
+                    Uptime = EnemyBehaviorModel.Uptime(claim, effect.Duration),
+                    OnHeroSide = onHeroSide
+                });
+            }
         }
 
         /// <summary>

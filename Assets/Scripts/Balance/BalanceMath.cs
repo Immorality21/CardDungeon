@@ -176,13 +176,17 @@ namespace Assets.Scripts.Balance
                 return 0f;
             }
 
-            float basicHit = AverageDamageAgainstGroup(
-                attacker.GetEffectiveAttackPower(), targets, attacker.AttackDamageType, 1f, attacker);
-
             if (attacker.IsHero)
             {
-                return basicHit * TurnsPerTick(attacker);
+                float heroHit = AverageDamageAgainstGroup(
+                    attacker.GetEffectiveAttackPower(), targets, attacker.AttackDamageType, 1f, attacker);
+                return heroHit * TurnsPerTick(attacker);
             }
+
+            // An enemy that buffs itself swings harder, so the buffs go on before its hit is measured.
+            var self = WithOwnBuffs(attacker);
+            float basicHit = AverageDamageAgainstGroup(
+                self.GetEffectiveAttackPower(), targets, self.AttackDamageType, 1f, self);
 
             // Everything the enemy can do - swings, telegraphed heavies, party-wide signatures, and
             // its own casts - is priced as one expectation over its authored actions. Casting used to
@@ -191,7 +195,7 @@ namespace Assets.Scripts.Balance
             float castMultiplier = 0f;
             if (basicHit > 0f)
             {
-                var cast = EnemyMagicModel.Profile(attacker.Definition, attacker.Tuning, attacker, targets);
+                var cast = EnemyMagicModel.Profile(attacker.Definition, attacker.Tuning, self, targets);
                 castMultiplier = cast.ExpectedDamage / basicHit;
             }
 
@@ -219,14 +223,204 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>CTB ticks one side needs to grind the other's health pool to zero.</summary>
+        // ------------------------------------------------------------------
+        //  Support: healing, buffs and debuffs
+        //
+        //  These used to be priced as nothing at all. A Healer read as harmless because its healing
+        //  never entered the danger index, and a Shield Up or a hero debuff read as a wasted turn
+        //  because a closed form had nowhere to put a stat delta. Both now go through one channel:
+        //  the rate at which the attacking side can actually clear the target side.
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// All the stat shifts a unit keeps up — from its authored Debuff actions and from Buff or
+        /// Debuff effects inside its casts. Empty for heroes, which have no behaviour.
+        /// </summary>
+        public static List<StatShift> StatShiftsOf(SimUnit unit)
+        {
+            var shifts = new List<StatShift>();
+            if (unit == null || unit.IsHero || unit.Behavior == null)
+            {
+                return shifts;
+            }
+
+            var profile = EnemyBehaviorModel.Profile(unit.Behavior, 1, 0f, 1f);
+            shifts.AddRange(profile.StatShifts);
+
+            // Casts carry their own buffs and debuffs; the cast profile collects those.
+            if (unit.Definition != null)
+            {
+                var cast = EnemyMagicModel.Profile(unit.Definition, unit.Tuning, unit, null);
+                shifts.AddRange(cast.StatShifts);
+            }
+
+            return shifts;
+        }
+
+        /// <summary>A copy of an enemy with its own expected buffs folded into its effective stats.</summary>
+        public static SimUnit WithOwnBuffs(SimUnit unit)
+        {
+            if (unit == null || unit.IsHero || unit.Behavior == null)
+            {
+                return unit;
+            }
+
+            var shifts = StatShiftsOf(unit);
+            SimUnit buffed = null;
+            foreach (var shift in shifts)
+            {
+                if (shift.OnHeroSide || shift.Expected == 0)
+                {
+                    continue;
+                }
+                buffed = buffed ?? unit.Clone();
+                Shift(buffed, shift.Stat, shift.Expected);
+            }
+
+            return buffed ?? unit;
+        }
+
+        /// <summary>
+        /// Healing a side restores to itself per CTB tick. Subtracted from the attackers' output
+        /// rather than added to the target pool, which is the same thing and exact: from
+        /// <c>T = (H + h*T) / D</c> it follows that <c>T = H / (D - h)</c>.
+        /// </summary>
+        public static float SustainPerTick(IList<SimUnit> units)
+        {
+            if (units == null)
+            {
+                return 0f;
+            }
+
+            float total = 0f;
+            foreach (var unit in units)
+            {
+                total += SustainPerTick(unit);
+            }
+            return total;
+        }
+
+        /// <summary>Healing one unit restores to its own side per CTB tick.</summary>
+        public static float SustainPerTick(SimUnit unit)
+        {
+            if (unit == null || !unit.IsAlive || unit.IsHero || unit.Behavior == null)
+            {
+                return 0f;
+            }
+            var profile = EnemyBehaviorModel.Profile(unit.Behavior, 1, 0f, 1f);
+            return profile.HealingPerTurn * TurnsPerTick(unit);
+        }
+
+        /// <summary>
+        /// The factor the target side's buffs and debuffs impose on the attackers' output. 1 means no
+        /// effect; 0.9 means the attackers land 10% less. Multiplicative across targets, because two
+        /// enemies each shielding themselves compound.
+        /// </summary>
+        public static float OutputSuppression(IList<SimUnit> attackers, IList<SimUnit> targets)
+        {
+            if (attackers == null || targets == null)
+            {
+                return 1f;
+            }
+
+            float factor = 1f;
+            foreach (var target in targets)
+            {
+                factor *= OutputSuppressionOf(attackers, target);
+            }
+            return Mathf.Clamp(factor, 0.01f, 1f);
+        }
+
+        /// <summary>
+        /// One target's suppression factor, measured rather than assumed: rebuild the attackers with
+        /// its debuffs applied and the target with its own buffs applied, and compare the raw damage.
+        /// That way the defense curve, resistances and turn-rate effects all come out right instead of
+        /// being approximated by a flat penalty per stat.
+        /// </summary>
+        public static float OutputSuppressionOf(IList<SimUnit> attackers, SimUnit target)
+        {
+            if (target == null || target.IsHero || target.Behavior == null || attackers == null)
+            {
+                return 1f;
+            }
+
+            var shifts = StatShiftsOf(target);
+            if (shifts.Count == 0)
+            {
+                return 1f;
+            }
+
+            var single = new List<SimUnit> { target };
+            float baseline = GroupDamagePerTick(attackers, single);
+            if (baseline <= 0f)
+            {
+                return 1f;
+            }
+
+            // Debuffs land on one hero at a time, so measure each hero's share and average it.
+            var debuffed = new List<SimUnit>();
+            foreach (var attacker in attackers)
+            {
+                debuffed.Add(attacker != null ? attacker.Clone() : null);
+            }
+
+            bool anyHeroShift = false;
+            foreach (var shift in shifts)
+            {
+                if (!shift.OnHeroSide || shift.Expected == 0)
+                {
+                    continue;
+                }
+                anyHeroShift = true;
+                foreach (var clone in debuffed)
+                {
+                    Shift(clone, shift.Stat, -shift.Expected);
+                }
+            }
+
+            var shielded = new List<SimUnit> { WithOwnBuffs(target) };
+            float after = GroupDamagePerTick(anyHeroShift ? debuffed : attackers, shielded);
+
+            return Mathf.Clamp(after / baseline, 0.01f, 1f);
+        }
+
+        /// <summary>
+        /// Applies a stat delta to a unit's effective stats, keeping its attack power in step when the
+        /// stat is what it swings off. Never takes a stat below zero.
+        /// </summary>
+        private static void Shift(SimUnit unit, StatType stat, int delta)
+        {
+            if (unit == null || stat == StatType.None || delta == 0)
+            {
+                return;
+            }
+
+            unit.Effective[stat] = Mathf.Max(0, unit.Effective[stat] + delta);
+            if (stat == unit.AttackStat)
+            {
+                unit.EffectiveAttackPower = Mathf.Max(0, unit.EffectiveAttackPower + delta);
+            }
+        }
+
+        /// <summary>
+        /// The rate the attackers actually clear the targets at: their raw output, cut by whatever the
+        /// target side buffs or debuffs, minus whatever it heals back. Zero or below means the fight
+        /// cannot be won — a healer out-healing the party is a real outcome the old model could not
+        /// express at all.
+        /// </summary>
+        public static float NetClearRate(float rawDamagePerTick, IList<SimUnit> attackers, IList<SimUnit> targets)
+        {
+            return rawDamagePerTick * OutputSuppression(attackers, targets) - SustainPerTick(targets);
+        }
+
         public static float TicksToClear(IList<SimUnit> attackers, IList<SimUnit> targets)
         {
-            float dps = GroupDamagePerTick(attackers, targets);
-            if (dps <= 0f)
+            float net = NetClearRate(GroupDamagePerTick(attackers, targets), attackers, targets);
+            if (net <= 0f)
             {
                 return float.PositiveInfinity;
             }
-            return HealthPool(targets) / dps;
+            return HealthPool(targets) / net;
         }
 
         /// <summary>

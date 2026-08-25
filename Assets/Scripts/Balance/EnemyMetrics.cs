@@ -56,6 +56,13 @@ namespace Assets.Scripts.Balance
 
         /// <summary>Reward paid per unit of danger — catches enemies that pay badly for their risk.</summary>
         public float XpPerDanger;
+
+        /// <summary>
+        /// Danger against the common reward yardstick party — the denominator behind
+        /// <see cref="XpPerDanger"/>. Held so the reward check can tell a genuinely cheap kill from a
+        /// huge ratio produced by dividing by almost nothing.
+        /// </summary>
+        public float RewardYardstickDanger;
         public float GoldPerDanger;
 
         public int ResistanceCount;
@@ -78,6 +85,12 @@ namespace Assets.Scripts.Balance
 
         /// <summary>Share of its turns that land no damage — wind-ups, heals, debuffs.</summary>
         public float IdleTurnShare;
+
+        /// <summary>
+        /// Factor this placement imposes on the party's damage output through its debuffs and its own
+        /// buffs. 1 = none; 0.75 means the party lands a quarter less against it.
+        /// </summary>
+        public float PartyOutputMultiplier = 1f;
 
         /// <summary>The authored repertoire this placement fights with.</summary>
         public Assets.Scripts.Enemies.Behaviors.EnemyBehaviorSO Behavior;
@@ -177,6 +190,7 @@ namespace Assets.Scripts.Balance
             metrics.ExpectedHealingPerTurn = profile.HealingPerTurn;
             metrics.IdleTurnShare = profile.IdleShare;
             metrics.Behavior = behavior;
+            metrics.PartyOutputMultiplier = BalanceMath.OutputSuppressionOf(partyUnits, unit);
 
             // Per-hero breakdown: plain hits, since that is what the player actually feels turn to turn.
             foreach (var hero in party.Heroes)
@@ -217,6 +231,7 @@ namespace Assets.Scripts.Balance
                 : BalanceMath.DangerIndex(yardstick.Units, group);
             if (danger > 0f && !float.IsInfinity(danger))
             {
+                metrics.RewardYardstickDanger = danger;
                 metrics.XpPerDanger = metrics.XpReward / danger;
                 metrics.GoldPerDanger = metrics.GoldReward / danger;
             }

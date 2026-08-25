@@ -205,18 +205,10 @@ policies, and every policy wins 100% of these fights. Do not read those 44 as a 
 not expect an enemy-side change to close them: the lever is giving the player decisions that matter,
 which is §2's room-kind work and the elemental layer.
 
-### Two model blind spots this exposed
+### Two model blind spots this exposed — ✅ both closed
 
-Both are real and both are now tracked in `NEXT_STEPS.md` §0d, because they distort the numbers above:
-
-- **Buff and debuff casts are priced as nothing.** The closed form has nowhere to put a stat delta, so
-  a boss casting Shield Up reads as a pure loss of a turn. The Gilded Hoarder's entire Draw list is
-  buffs, so its cast damage is 0.00 and any chance above zero *lowers* its measured danger.
-- **A Healer's healing never enters the danger index.** Which is why Bog Shaman reads as harmless and
-  is the sole remaining cause of the *XP per unit of danger* warning. `AverageOffenseMultiplier`'s flat
-  0.5 factor for Healer is the existing hand-tuned workaround for the same gap.
-
-Until those are fixed, treat a support-casting enemy's measured danger as a floor, not a value.
+Both were real, and both are fixed (2026-08-25). Healing, buffs and debuffs now go through one
+channel — see §5c.
 
 ## 5b. Behaviours became data — what that changed for tuning
 
@@ -241,6 +233,90 @@ matter for a tuning pass:
 want simply should not be in the list. `CastFromDrawList` throws on a 0 chance for exactly this reason,
 and the inspector warns when an ungated, unconditional entry sits in the top tier — because then
 nothing below it can ever run.
+
+## 5c. Support is priced now — and it moved the content
+
+Shipped 2026-08-25. Healing, buffs and debuffs used to be worth **nothing** in the closed form. They
+now all run through the rate at which the party can actually clear a side:
+`raw x suppression - sustain`. Details in `Assets/Scripts/Balance/CLAUDE.md`; what matters for tuning:
+
+**The numbers moved, and the content was tuned against the blind model.** Turning the channel on took
+the project from **0 critical / 3 warning** to **0 / 7** without touching a single asset — attrition
+rose everywhere and two levels crossed the 0.80 ceiling. That is not a regression, it is the first
+honest measurement. What the model could suddenly see:
+
+| | party output | why |
+|---|---|---|
+| Hex Weaver | **x0.754** | debuffs Strength *and* casts an Agility debuff — the most suppressive enemy in the game, and it had been reading as one of the weakest |
+| Dragon | **x0.789** | OilSlick slows the party, and it buffs its own Strength |
+| Warden / Hoarder / Sentinel | x0.96–0.99 | Shield Up on themselves |
+| Bog Shaman | — | heals 0.128/tick back into its own bar |
+
+Two dials brought it back into band (`Sunken Depths` 2.70 → **2.46**, `The Counting Room` 2.45 →
+**2.19**), returning to **0 / 3** with boss ratios *improved* to 2.3 / 4.4 / 2.1.
+
+**Expect this again.** Any future model improvement will move numbers that were tuned against the
+older, blinder version. The order that works: turn the improvement on, measure, then re-solve the dials
+with the quadratic rule from §3 — do not tune the improvement down to preserve the old figures.
+
+### Two things to know before trusting a support number
+
+- **A stalemate reads as danger 0.00.** The danger index is a *damage race*, so an enemy that out-heals
+  the party but also cannot kill it produces the safest-looking number in the report on the worst
+  encounter in the game. That is why an infinite `PartyTurnsToKill` is its own **Critical** now instead
+  of being left to the danger bands. If you author a healer, check that finding, not danger.
+- **Suppression is measured, not assumed per stat.** A debuff on something that does not affect damage
+  costs nothing, which is correct — but it also means an Agility debuff *does* register (fewer hero
+  turns is less damage per tick), and that is easy to under-estimate when authoring.
+
+### What the healing fix did *not* fix, and the diagnosis that finally held
+
+*XP per unit of danger* is **still** a warning (6.7x against a 2.5x band), and it is worth recording
+how many times its cause was mis-diagnosed, because every wrong answer was plausible:
+
+1. ~~"Only the party leader gains XP"~~ — a real bug, fixed, warning stayed.
+2. ~~"Bog Shaman reads as harmless because healing is invisible to the danger index"~~ — healing is
+   priced now, and the warning did not budge.
+3. ~~"Bog Shaman's heal is simply too small"~~ — swept it from 8 to 40. The spread **did not move at
+   all**, because Bog Shaman is not one of its endpoints.
+4. ~~"Per-enemy XP is mis-set"~~ — solving XP proportional to danger *per enemy* takes the
+   **per-asset** spread from 2.4x to 1.1x, but 2.4x was already inside the band.
+
+**The actual cause: `XpMultiplier` is 1.00 on every level while `Difficulty` spans 1.00 to 2.75.**
+The spread is not across enemies at all — it is across **placements of the same enemy**. A Floating Eye
+pays 10 XP whether it is a Difficulty-1.00 pushover in the tutorial (**203.6** XP per danger) or a
+Difficulty-2.75 threat in Rotwater Deep (**46.2**). That is the whole 6.7x, and the lever for it already
+exists and has never been touched — `LevelEnemyTuning.XpMultiplier`, whose own tooltip says *"a level
+that makes its enemies tougher should usually pay more for them"*.
+
+**What shipped: the check got a floor** (`BalanceRulesSO.MinDangerForRewardCheck`, default 0.08), the
+same fix `MinAttritionForJumpCheck` is for jumps. A placement below it no longer sets the spread — a
+reward ÷ near-zero danger says more about the denominator than about the reward — and is instead reported
+as an Info naming it. Only `Dungeon Entrance` falls under. The warning went **6.7x → 4.5x**, and the
+finding now **names the placement at each end** and says whether they are the same enemy (so: the level's
+`XpMultiplier`) or two different ones (so: `XpReward`). That message change is the actual fix for the
+mis-diagnoses.
+
+**What was measured and deliberately not applied.** Making `XpMultiplier` track `Difficulty²`:
+
+- **Normalised globally: unsafe.** It moves XP *between* runs. The Threshold's early floors are gentle
+  because it is the first run, so cutting their XP left the party too thin to reach its own boss floor —
+  4 new warnings on `Sunken Depths`, including *leaves only 12% of resources* and an unwinnable spawn
+  roll. The 7.6x figure that made this look impossible was itself an artefact of normalising against a
+  Difficulty-1.00 tutorial.
+- **Normalised per run: safe but partial.** Each run keeps its own XP total and only redistributes it
+  inside itself (Threshold 0.72 / 0.93 / 1.35, Drowned March 0.85 / 0.97 / 1.17 / 1.01, Warrens 1.03 /
+  0.97). Spread **4.5x → 3.5x**, no new warnings, attrition curve unchanged. Still outside the 2.5x band,
+  because the residual is per-enemy: `Stone Sentinel` overpays and `Dragon` underpays.
+- **Closing it fully** needs those `XpReward` values too — solved: Cinder Imp 14→18, Dragon 10→14, Stone
+  Sentinel 14→11, Bog Shaman 10→6, Floating Eye 10→9. That takes the per-asset spread to 1.1x.
+
+Left open on purpose: it is a progression-pacing decision, not a tuning one, and the finding is now
+precise enough to act on whenever that call is made.
+
+**The lesson worth keeping:** a spread metric names two ends — *print them* before believing any story
+about the middle. Three of the four wrong diagnoses above would have died instantly to a per-placement
+table, and the fourth to checking whether the two ends were the same enemy.
 
 ## 6. Standing traps
 

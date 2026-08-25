@@ -170,15 +170,53 @@ namespace Assets.Scripts.Balance
             return total;
         }
 
-        /// <summary>CTB ticks the party needs to clear the group.</summary>
+        /// <summary>
+        /// CTB ticks the party needs to clear the group, after the group's own support: healing
+        /// subtracted and its buffs/debuffs applied. Weighted by each member's expected occurrence, so
+        /// half a Bog Shaman heals half as much.
+        /// </summary>
         public float TicksToClear(PartyBaseline party)
         {
-            float dps = PartyDamagePerTick(party);
-            if (dps <= 0f)
+            float net = NetClearRate(party);
+            if (net <= 0f)
             {
                 return float.PositiveInfinity;
             }
-            return HealthPool / dps;
+            return HealthPool / net;
+        }
+
+        /// <summary>
+        /// Party output against this group after its support, in the same currency as
+        /// <see cref="PartyDamagePerTick"/>. Shares one definition with
+        /// <see cref="BalanceMath.NetClearRate"/> per member so the whole-unit and fractional-group
+        /// paths cannot drift.
+        /// </summary>
+        public float NetClearRate(PartyBaseline party)
+        {
+            if (party == null || party.Size == 0 || IsEmpty)
+            {
+                return 0f;
+            }
+
+            float raw = PartyDamagePerTick(party);
+            float suppression = 1f;
+            float sustain = 0f;
+
+            foreach (var member in Members)
+            {
+                if (member.Unit == null)
+                {
+                    continue;
+                }
+
+                // A fractional member suppresses and heals in proportion to how often it turns up.
+                float share = Mathf.Clamp01(member.Weight);
+                float unitFactor = BalanceMath.OutputSuppressionOf(party.Units, member.Unit);
+                suppression *= 1f - share * (1f - unitFactor);
+                sustain += member.Weight * BalanceMath.SustainPerTick(member.Unit);
+            }
+
+            return raw * Mathf.Clamp(suppression, 0.01f, 1f) - sustain;
         }
 
         /// <summary>Party HP spent clearing the group, ignoring healing.</summary>
@@ -200,19 +238,20 @@ namespace Assets.Scripts.Balance
                 return 0f;
             }
 
-            float partyDps = PartyDamagePerTick(party);
+            float partyNet = NetClearRate(party);
             float enemyDps = DamagePerTickAgainst(party);
 
             if (enemyDps <= 0f)
             {
                 return 0f;
             }
-            if (partyDps <= 0f)
+            if (partyNet <= 0f)
             {
+                // The group out-heals or out-shields the party's whole output: unwinnable on paper.
                 return float.PositiveInfinity;
             }
 
-            float partyNeeds = HealthPool / partyDps;
+            float partyNeeds = HealthPool / partyNet;
             float enemiesNeed = party.HealthPool / enemyDps;
             return enemiesNeed > 0f ? partyNeeds / enemiesNeed : float.PositiveInfinity;
         }

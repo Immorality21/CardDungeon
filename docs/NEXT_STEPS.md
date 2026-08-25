@@ -454,20 +454,67 @@ unconditional entry in the top tier; `Telegraphed` on a kind that cannot wind up
 returns **null** unless the next action is genuinely determined — behaviours are probabilistic, and an
 intent icon that guesses wrong teaches the player to distrust the telegraph.
 
+**The two model gaps this opened are now closed** (same day). Healing, buffs and debuffs all price
+through one channel: the rate at which a side can actually be cleared,
+`raw x suppression - sustain`. Healing is exact (`T = H / (D - h)`); buffs and debuffs are *measured*
+by rebuilding both sides and comparing real damage, so the defense curve and turn-rate effects come out
+right and a debuff on a stat that does not affect damage correctly costs nothing. An enemy's own buffs
+also reach its offense. Covered by `EnemySupportModelTests`; details in
+`Assets/Scripts/Balance/CLAUDE.md`.
+
+Turning it on moved the content — **0/3 warnings to 0/7 with no asset touched**, because the levels had
+been tuned against a model that could not see any of it. Hex Weaver turned out to be the most
+suppressive enemy in the game (party output **x0.754**) while reading as one of the weakest. Two dials
+brought it back: `Sunken Depths` 2.70 → **2.46**, `The Counting Room` 2.45 → **2.19**, returning to
+**0 critical / 3 warning / 21 info** with boss ratios improved to 2.3 / 4.4 / 2.1. Suite **601/0**.
+
+It also surfaced a trap worth knowing: **a stalemate reads as danger 0.00**, because the danger index
+measures a damage race and an enemy that out-heals the party but cannot kill it wins neither. An
+infinite `PartyTurnsToKill` is therefore its own **Critical** now rather than being left to the danger
+bands.
+
 **What is deliberately still open:**
 
-- **Buff and debuff actions are priced as neither damage nor healing** by the closed form — it has
-  nowhere to put a stat delta. So a boss casting Shield Up reads as a wasted turn. This is the one
-  remaining model blind spot.
-- **Healing is measured but not yet in the danger index.** `BehaviorProfile.HealingPerTurn` and
-  `EnemyMetrics.ExpectedHealingPerTurn` exist; feeding them in (as extra effective HP on the enemy
-  side) is what would finally close the *XP per unit of danger varies 4.9×* warning, since Bog Shaman
-  is the entire cause of that spread and reads as harmless today.
-- **No enemy actually uses the new expressiveness yet.** Every behaviour asset is still its archetype
-  preset plus a cast action, because the migration was deliberately behaviour-identical. The content
-  pass — a Debuffer that hits Agility, a Bruiser whose heavy lands on a different cadence, an enemy
-  that both heals and charges, low-health conditions on ordinary trash — is now pure authoring with no
-  code involved. That is the pass to do next in this area.
+- **Resistance and status-effect buffs are not priced** (`FireResistance`, `Frozen`, `Haste`).
+  `BuffType` maps to `StatType` by name and anything with no matching stat is skipped rather than
+  guessed at — an invented number in the danger index would be worse than a known omission.
+- **The *XP per unit of danger* warning survived, and its cause is finally pinned: every level has
+  `XpMultiplier` 1.00 while `Difficulty` spans 1.00 to 2.75.** The 6.7x spread is not across enemies,
+  it is across **placements of the same enemy** — a Floating Eye pays 10 XP whether it is a
+  Difficulty-1.00 pushover in the tutorial (203.6 per danger) or a Difficulty-2.75 threat in Rotwater
+  Deep (46.2). Per-*asset* XP is already fine: solving it proportional to danger moves that spread from
+  2.4x to 1.1x, and 2.4x was inside the 2.5x band to begin with.
+
+  **The check now has a floor** (`BalanceRulesSO.MinDangerForRewardCheck`, default 0.08), the same fix
+  `MinAttritionForJumpCheck` is for difficulty jumps: a placement below it no longer sets the spread, and
+  is reported as an Info instead. Only `Dungeon Entrance` falls under, and the warning went
+  **6.7x → 4.5x**. The finding also names the **placement** at each end now and says whether they are the
+  same enemy (pointing at `XpMultiplier`) or two different ones (pointing at `XpReward`) — that message
+  is what makes it self-diagnosing, and its absence is why it was mis-read four times.
+
+  The remaining **4.5x** is real content. Two follow-ons are measured and ready, both deliberately not
+  applied because this is progression pacing rather than tuning:
+
+  - `XpMultiplier ∝ Difficulty²` **normalised per run** — Threshold 0.72 / 0.93 / 1.35, Drowned March
+    0.85 / 0.97 / 1.17 / 1.01, Warrens 1.03 / 0.97. Takes it to **3.5x** with no new findings and no
+    change to the attrition curve. Do **not** normalise globally: that moves XP between runs and starved
+    The Threshold badly enough to make `Sunken Depths` unclearable (4 new warnings).
+  - Then `XpReward`: Cinder Imp 14→18, Dragon 10→14, Stone Sentinel 14→11, Bog Shaman 10→6, Floating Eye
+    10→9, which takes the per-asset spread to 1.1x and the whole finding inside the band.
+- **The content pass has started, with one enemy.** `BehaviorBogShaman` is the first behaviour authored
+  beyond its preset: a **two-phase healer**, with a `Mend an ally` at 14 (was a flat 8) and a
+  `Desperate mending` at 28 gated on `SelfHealthBelow 0.40` at a higher priority. It heals **9.8/turn
+  against 3.2** and takes 7.0 party turns to kill instead of 6.1, so it is now a "burst it before it
+  claws the fight back" target rather than a trickle the party could ignore. Zero new findings.
+
+  Worth knowing for the next one: its **solo danger index barely moved** (0.049 → 0.048), because the
+  desperate heal takes turns away from its attacks — sustain up, offense down, roughly cancelling. That
+  is not a modelling flaw. A healer's value is in a group, and the solo index measures it in the one
+  situation where it has nobody to heal. Judge a support enemy by `ExpectedHealingPerTurn` and its
+  level's attrition, not by solo danger.
+
+  Still unauthored: a Debuffer that hits Agility, a Bruiser whose heavy lands on a different cadence,
+  an enemy that both heals and charges, low-health conditions on ordinary trash. All pure authoring.
 - **`EnemyArchetype` survives as a label only.** It names the presets, drives the analyzer's variety
   checks, and is the fallback for an enemy with no behaviour assigned. It selects no logic.
 

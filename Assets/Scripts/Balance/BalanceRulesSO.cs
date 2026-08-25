@@ -120,6 +120,13 @@ namespace Assets.Scripts.Balance
                  "some enemies pay far worse than others for the same risk.")]
         public float MaxRewardEfficiencySpread = 2.5f;
 
+        [Tooltip("Danger a placement must reach before its XP-per-danger figure is allowed to set the " +
+                 "reward spread. Reward efficiency is XP divided by danger, so a near-harmless " +
+                 "placement produces a huge ratio off a tiny denominator - the same small-base " +
+                 "artefact MinAttritionForJumpCheck exists for. Below this the placement is still " +
+                 "reported, as an Info, but it does not decide whether the band is broken.")]
+        public float MinDangerForRewardCheck = 0.08f;
+
         [Header("Stat weights for the power score")]
         [Tooltip("How much one point of each stat contributes to an enemy's power score. A list " +
                  "rather than a field per stat, so adding a StatType does not mean editing this " +

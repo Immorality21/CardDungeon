@@ -15,6 +15,36 @@ MonoBehaviour:
   DisplayName: Bog Shaman
   Archetype: 2
   Actions:
+  - Label: Desperate mending
+    Kind: 3
+    Priority: 15
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 0
+    Multiplier: 1
+    Power: 28
+    Duration: 3
+    TargetStat: 1
+    Magic: {fileID: 0}
+    Conditions:
+    - Kind: 1
+      Value: 0.4
+      Stat: 1
+  - Label: Mend an ally
+    Kind: 3
+    Priority: 10
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 0
+    Multiplier: 1
+    Power: 14
+    Duration: 3
+    TargetStat: 1
+    Magic: {fileID: 0}
+    Conditions:
+    - Kind: 3
+      Value: 0
+      Stat: 1
   - Label: Cast from Draw list
     Kind: 5
     Priority: 20
@@ -27,21 +57,6 @@ MonoBehaviour:
     TargetStat: 1
     Magic: {fileID: 0}
     Conditions: []
-  - Label: Mend an ally
-    Kind: 3
-    Priority: 10
-    Weight: 1
-    ChanceGate: 0
-    Telegraphed: 0
-    Multiplier: 1
-    Power: 8
-    Duration: 3
-    TargetStat: 1
-    Magic: {fileID: 0}
-    Conditions:
-    - Kind: 3
-      Value: 0
-      Stat: 1
   - Label: Attack
     Kind: 0
     Priority: 0

@@ -35,7 +35,7 @@ MonoBehaviour:
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
     EnemyTuning:
-      Difficulty: 2.45
+      Difficulty: 2.19
       StatScales: []
       XpMultiplier: 1
       GoldMultiplier: 1

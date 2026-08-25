@@ -219,15 +219,47 @@ opt out through it — and `DamageEffectExecutor` has no crit roll. It skips eff
 `UnlockLevel`, matching the `magicUpgradeLevel: 0` the enemy cast path passes. And it prices no combo
 follow-ups, because enemy casts pass no tag tracker or combo detector.
 
-**One blind spot is still open**, tracked in `docs/NEXT_STEPS.md`: **buff and debuff actions are
-priced as neither damage nor healing**, because the closed form has nowhere to put a stat delta. A boss
-casting Shield Up therefore reads as a wasted turn.
+**Support — healing, buffs and debuffs — is priced through one channel.** All three used to be worth
+nothing at all: a Healer read as harmless because its healing never entered the danger index, and a
+Shield Up or a hero debuff read as a wasted turn because a closed form had nowhere to put a stat delta.
+They now all go through **the rate at which the attacking side can actually clear the target side**:
 
-Healing is no longer in that list — `BehaviorProfile.HealingPerTurn` measures it, surfaced as
-`EnemyMetrics.ExpectedHealingPerTurn`. It does **not** yet feed the danger index (which would mean
-treating it as extra effective HP on the enemy side), which is why Bog Shaman still reads as harmless
-and why *XP per unit of danger* is still a warning. The number exists now; wiring it into the index is
-the remaining half.
+```
+NetClearRate = rawDamagePerTick x OutputSuppression(targets) - SustainPerTick(targets)
+TicksToClear = HealthPool(targets) / NetClearRate
+```
+
+- **Healing is exact, not an approximation.** From `T = (H + h·T) / D` it follows that
+  `T = H / (D − h)`, so healing is subtracted from the attackers' output rather than added to the
+  target pool. Same answer, no iteration. `SustainPerTick` is turn-rate aware, so a fast healer heals
+  more per tick exactly as a fast attacker hits more per tick.
+- **Buffs and debuffs are measured, not assumed.** `OutputSuppressionOf` rebuilds the attackers with
+  the target's debuffs applied and the target with its own buffs applied, then compares raw damage. The
+  defense curve, resistances and turn-rate effects therefore all come out right — and a debuff on a
+  stat that does not touch damage (Spirit, say) correctly costs **nothing** instead of being credited a
+  flat penalty per stat. `StatShift.Uptime` is `claim × Duration`, capped at 1: re-applying something
+  already up does not stack it.
+- **An enemy's own buffs also reach its offense.** `DamagePerTick` folds them in before measuring its
+  hit, so a self Strength buff makes it swing harder while a self Endurance buff makes it slower to
+  kill — from the same shift list, because each channel only reads the stats it cares about.
+- Both directions use the same code, and heroes have no behaviour, so their contribution is
+  automatically zero rather than special-cased.
+
+`WeightedEnemyGroup` has its own `NetClearRate` for fractional spawn groups — weight-scaled, so half a
+Bog Shaman heals half as much — but it composes the **same** per-unit helpers, so the whole-unit and
+fractional paths cannot drift.
+
+**The trap this exposed, and why there is a separate critical for it.** The danger index measures a
+*damage race*. An enemy that out-heals the party but also cannot kill it is a **stalemate**, and
+`DangerIndex` reports that as **0.00** — the safest-looking number there is, on the worst encounter in
+the game, with every other check passing. So `PartyTurnsToKill` returning infinity is now its own
+`Critical` (*"cannot be killed by the party at all"*) rather than being left to the danger bands.
+`EnemySupportModelTests` pins it.
+
+**What is still not priced:** a resistance or status-effect buff (`FireResistance`, `Frozen`, `Haste`).
+`BuffType` maps to `StatType` by name, the same way `BuffHandlerRegistry` builds its stat handlers, and
+anything with no matching stat is **skipped rather than guessed at** — putting an invented number into
+the danger index would be worse than a known omission.
 
 ## Simulator caveats — read before trusting it
 
