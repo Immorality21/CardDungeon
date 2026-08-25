@@ -1,19 +1,16 @@
 fileFormatVersion: 2
-guid: 4279496594d3f2748b8a604d4cefafec
+guid: 04282a561b0708145945b8d75566cab2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1963694667719340775
-    second: evil-eye-sheet_0
+      213: -4695459402058557536
+    second: floating-eye_0
   - first:
-      213: 8618657346348231145
-    second: evil-eye-sheet_1
+      213: 2867073207862567102
+    second: floating-eye_1
   - first:
-      213: 1505926364069917640
-    second: evil-eye-sheet_2
-  - first:
-      213: 2401191911009187779
-    second: evil-eye-sheet_3
+      213: -1067371697327209973
+    second: floating-eye_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -60,7 +57,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 24
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -122,10 +119,10 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: evil-eye-sheet_0
+      name: floating-eye_0
       rect:
         serializedVersion: 2
-        x: 2
+        x: 3
         y: 5
         width: 29
         height: 24
@@ -137,14 +134,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 91d82439a1e8fb4e0800000000000000
-      internalID: -1963694667719340775
+      spriteID: 0a7180b2d8066deb0800000000000000
+      internalID: -4695459402058557536
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: evil-eye-sheet_1
+      name: floating-eye_1
       rect:
         serializedVersion: 2
         x: 34
@@ -159,14 +156,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9e9a5e1613f9b9770800000000000000
-      internalID: 8618657346348231145
+      spriteID: eb020b364e3e9c720800000000000000
+      internalID: 2867073207862567102
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: evil-eye-sheet_2
+      name: floating-eye_2
       rect:
         serializedVersion: 2
         x: 66
@@ -181,30 +178,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8c37844ac0026e410800000000000000
-      internalID: 1505926364069917640
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: evil-eye-sheet_3
-      rect:
-        serializedVersion: 2
-        x: 98
-        y: 5
-        width: 30
-        height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3c77e3d225fb25120800000000000000
-      internalID: 2401191911009187779
+      spriteID: b028181b81fef21f0800000000000000
+      internalID: -1067371697327209973
       vertices: []
       indices: 
       edges: []
@@ -223,10 +198,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      evil-eye-sheet_0: -1963694667719340775
-      evil-eye-sheet_1: 8618657346348231145
-      evil-eye-sheet_2: 1505926364069917640
-      evil-eye-sheet_3: 2401191911009187779
+      floating-eye_0: -4695459402058557536
+      floating-eye_1: 2867073207862567102
+      floating-eye_2: -1067371697327209973
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

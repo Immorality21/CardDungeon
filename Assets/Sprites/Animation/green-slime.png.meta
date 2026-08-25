@@ -1,16 +1,19 @@
 fileFormatVersion: 2
-guid: 3d1f68a2aa44ece478129e379971c582
+guid: f77c465981940954fbc186b265760637
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7066007825383017324
-    second: warrior-idle-sheet_0
+      213: -5994531514436782396
+    second: green-slime_0
   - first:
-      213: -8624272101738146181
-    second: warrior-idle-sheet_1
+      213: 4311501733960627359
+    second: green-slime_1
   - first:
-      213: 3588239136563056833
-    second: warrior-idle-sheet_2
+      213: 9106924797852624728
+    second: green-slime_2
+  - first:
+      213: -8396540761149796143
+    second: green-slime_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -119,13 +122,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: warrior-idle-sheet_0
+      name: green-slime_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 32
-        height: 32
+        width: 30
+        height: 26
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -134,20 +137,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4943ae3f15f70fd90800000000000000
-      internalID: -7066007825383017324
+      spriteID: 4c67c1719552fcca0800000000000000
+      internalID: -5994531514436782396
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: warrior-idle-sheet_1
+      name: green-slime_1
       rect:
         serializedVersion: 2
-        x: 31
-        y: 0
-        width: 33
-        height: 32
+        x: 2
+        y: 18
+        width: 14
+        height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -156,20 +159,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b761691873e605880800000000000000
-      internalID: -8624272101738146181
+      spriteID: f943435dbf785db30800000000000000
+      internalID: 4311501733960627359
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: warrior-idle-sheet_2
+      name: green-slime_2
       rect:
         serializedVersion: 2
-        x: 63
-        y: 0
-        width: 33
-        height: 32
+        x: 32
+        y: 1
+        width: 31
+        height: 31
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -178,8 +181,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1c0deffbb7cfbc130800000000000000
-      internalID: 3588239136563056833
+      spriteID: 857a3346adb426e70800000000000000
+      internalID: 9106924797852624728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green-slime_3
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 0
+        width: 29
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d0149d1aae797b80800000000000000
+      internalID: -8396540761149796143
       vertices: []
       indices: 
       edges: []
@@ -198,9 +223,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      warrior-idle-sheet_0: -7066007825383017324
-      warrior-idle-sheet_1: -8624272101738146181
-      warrior-idle-sheet_2: 3588239136563056833
+      green-slime_0: -5994531514436782396
+      green-slime_1: 4311501733960627359
+      green-slime_2: 9106924797852624728
+      green-slime_3: -8396540761149796143
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

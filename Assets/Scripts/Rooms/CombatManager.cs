@@ -516,7 +516,11 @@ namespace Assets.Scripts.Rooms
                 meta.MarkComboDiscovered(comboKey);
             }
 
-            yield return _presenter.Present(result, castAction.Caster);
+            yield return _presenter.Present(
+                result,
+                castAction.Caster,
+                castAction.Magic
+            );
 
             // Combo flourish: a camera punch + brief hit-stop so a triggered combo lands with weight
             // (the combo name already floats up in orange from the resolver).
@@ -737,7 +741,11 @@ namespace Assets.Scripts.Rooms
             _lastTurnLog = result.BuildLog(castAction);
             CombatAudio.Play(CombatSound.MagicCast);
 
-            yield return _presenter.Present(result, enemyUnit);
+            yield return _presenter.Present(
+                result,
+                castAction.Caster,
+                castAction.Magic
+            );
 
             foreach (var target in targets)
             {

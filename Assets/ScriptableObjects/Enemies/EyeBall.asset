@@ -15,10 +15,9 @@ MonoBehaviour:
   DisplayName: Floating Eye
   Sprite: {fileID: -1963694667719340775, guid: 4279496594d3f2748b8a604d4cefafec, type: 3}
   AnimationFrames:
-  - {fileID: -1963694667719340775, guid: 4279496594d3f2748b8a604d4cefafec, type: 3}
-  - {fileID: 8618657346348231145, guid: 4279496594d3f2748b8a604d4cefafec, type: 3}
-  - {fileID: 1505926364069917640, guid: 4279496594d3f2748b8a604d4cefafec, type: 3}
-  - {fileID: 2401191911009187779, guid: 4279496594d3f2748b8a604d4cefafec, type: 3}
+  - {fileID: -4695459402058557536, guid: 04282a561b0708145945b8d75566cab2, type: 3}
+  - {fileID: 2867073207862567102, guid: 04282a561b0708145945b8d75566cab2, type: 3}
+  - {fileID: -1067371697327209973, guid: 04282a561b0708145945b8d75566cab2, type: 3}
   AnimationFps: 4
   IsBoss: 0
   BaseStats:

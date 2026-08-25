@@ -23,6 +23,7 @@ namespace Assets.Scripts.Combat
         // sortingOrder 5, i.e. *below* the background, and would otherwise be hidden.
         private const int BackgroundSortOrder = 400;
         private const int UnitSortOrder = 600;
+        private const float CombatUnitScale = 1.5f;
 
         // Battle backdrop loaded from Resources (drop a sprite here to replace the solid fill).
         private const string BackgroundResourcePath = "CombatBackgrounds/battle";
@@ -37,13 +38,18 @@ namespace Assets.Scripts.Combat
             public int OrigSortingOrder;
             public bool OrigFlipX;
             public Vector3 OrigPos;
+            public Vector3 OrigScale;
             public bool IsHero;
         }
 
         private readonly List<UnitRestore> _restores = new List<UnitRestore>();
         private GameObject _backgroundGo;
         private SpriteRenderer _backgroundSr;
+        private Material _backgroundMaterial;
         private Party _party;
+        private Behaviour _partyLight;
+        private GameObject _leftCombatLight;
+        private GameObject _rightCombatLight;
 
         /// <summary>
         /// Freezes the camera, raises the background, and forms alive heroes (left) and enemies
@@ -53,6 +59,17 @@ namespace Assets.Scripts.Combat
         public void Begin(Party party, Room room)
         {
             _party = party;
+
+            foreach (var component in party.GetComponents<Behaviour>())
+            {
+                if (component.GetType().Name == "Light2D")
+                {
+                    _partyLight = component;
+                    _partyLight.enabled = false;
+                    break;
+                }
+            }
+
             _restores.Clear();
 
             // Snap the camera to the party centre, then freeze the follow so the stage holds.
@@ -69,6 +86,35 @@ namespace Assets.Scripts.Combat
             float halfW = halfH * (cam != null ? cam.aspect : 1.78f);
             var camPos = mainCamera.transform.position;
             var anchor = new Vector3(camPos.x, camPos.y, -1f);
+
+            _leftCombatLight = GameObject.Find("CombatLightLeft");
+            _rightCombatLight = GameObject.Find("CombatLightRight");
+
+            SetLightEnabled(_leftCombatLight, true);
+            SetLightEnabled(_rightCombatLight, true);
+
+            if (_leftCombatLight != null)
+            {
+                _leftCombatLight.transform.position = new Vector3(
+                    anchor.x - halfW * 0.88f,
+                    anchor.y + halfH * 0.15f,
+                    -1f
+                );
+
+                _leftCombatLight.SetActive(true);
+            }
+
+            if (_rightCombatLight != null)
+            {
+                _rightCombatLight.transform.position = new Vector3(
+                    anchor.x + halfW * 0.88f,
+                    anchor.y + halfH * 0.15f,
+                    -1f
+                );
+
+                _rightCombatLight.SetActive(true);
+            }
+
 
             RaiseBackground(cam, halfW, halfH);
 
@@ -106,6 +152,7 @@ namespace Assets.Scripts.Combat
                 }
                 rec.Sr.sortingOrder = rec.OrigSortingOrder;
                 rec.Sr.flipX = rec.OrigFlipX;
+                rec.Sr.transform.localScale = rec.OrigScale;
                 if (!rec.IsHero && restoreEnemyPositions)
                 {
                     rec.Sr.transform.position = rec.OrigPos;
@@ -128,6 +175,28 @@ namespace Assets.Scripts.Combat
             if (_party != null)
             {
                 _party.RestoreAfterCombat();
+
+                if (_partyLight != null)
+                {
+                    _partyLight.enabled = true;
+                }
+            }
+            SetLightEnabled(_leftCombatLight, false);
+            SetLightEnabled(_rightCombatLight, false);
+        }
+
+        private static void SetLightEnabled(GameObject lightObject, bool enabled)
+        {
+            if (lightObject == null)
+                return;
+
+            foreach (var component in lightObject.GetComponents<Behaviour>())
+            {
+                if (component.GetType().Name == "Light2D")
+                {
+                    component.enabled = enabled;
+                    return;
+                }
             }
         }
 
@@ -154,21 +223,36 @@ namespace Assets.Scripts.Combat
             var tr = unit.Transform;
             var sr = tr.GetComponent<SpriteRenderer>();
 
-            var rec = new UnitRestore { IsHero = isHero, Sr = sr, OrigPos = tr.position };
+            var rec = new UnitRestore
+            {
+                IsHero = isHero,
+                Sr = sr,
+                OrigPos = tr.position,
+                OrigScale = tr.localScale
+            };
+
             if (sr != null)
             {
                 rec.OrigSortingOrder = sr.sortingOrder;
                 rec.OrigFlipX = sr.flipX;
             }
+
             _restores.Add(rec);
 
             tr.position = slot;
+
+            // Make unit larger during combat
+            tr.localScale = isHero
+                ? rec.OrigScale * 1.5f
+                : rec.OrigScale * 2f;
+
             if (sr != null)
             {
                 if (isHero)
                 {
                     sr.enabled = true;
                 }
+
                 sr.sortingOrder = UnitSortOrder;
                 sr.flipX = !faceRight;
             }
@@ -194,6 +278,16 @@ namespace Assets.Scripts.Combat
                 _backgroundGo = new GameObject("BattleBackground");
                 _backgroundSr = _backgroundGo.AddComponent<SpriteRenderer>();
                 _backgroundSr.sortingOrder = BackgroundSortOrder;
+            }
+
+            var material =
+                UnityEngine.Resources.Load<Material>(
+                    "Lit-Material"
+                );
+
+            if (material != null)
+            {
+                _backgroundSr.material = material;
             }
 
             _backgroundSr.sprite = art != null ? art : SolidSprite();

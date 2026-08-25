@@ -7,7 +7,10 @@ namespace Assets.Scripts.Cards
 {
     public class EffectPresenter
     {
-        public IEnumerator Present(EffectResult result, ICombatUnit caster = null)
+        public IEnumerator Present(
+            EffectResult result,
+            ICombatUnit caster = null,
+            MagicSO magic = null)
         {
             foreach (var entry in result.Entries)
             {
@@ -16,7 +19,7 @@ namespace Assets.Scripts.Cards
                 if (caster != null && entry.Impact > 0 && entry.Target != null && entry.Target.IsAlive
                     && caster.Transform != null && entry.Target.Transform != null)
                 {
-                    yield return FlyProjectile(caster.Transform.position, entry.Target.Transform.position, entry.Color);
+                    yield return FlyProjectile(caster.Transform.position, entry.Target.Transform.position, entry.Color, magic != null ? magic.Icon : null);
                 }
 
                 if (entry.Target != null && entry.Target.Transform != null && FloatingTextHandler.HasInstance)
@@ -78,24 +81,41 @@ namespace Assets.Scripts.Cards
 
         /// <summary>A short glowing bolt that streaks from <paramref name="from"/> to
         /// <paramref name="to"/>, then is destroyed. Tinted to match the effect's colour.</summary>
-        private IEnumerator FlyProjectile(Vector3 from, Vector3 to, Color color)
+        private IEnumerator FlyProjectile(
+            Vector3 from,
+            Vector3 to,
+            Color color,
+            Sprite projectileSprite)
         {
             var go = new GameObject("MagicBolt");
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = CombatIcons.Get("burst");
+
+            sr.sprite = projectileSprite != null
+            ? projectileSprite
+            : CombatIcons.Get("burst");
+
             sr.color = color;
-            sr.sortingOrder = 850; // above units (600), below HP bars (900)
+            sr.sortingOrder = 850;
             go.transform.localScale = Vector3.one * 0.35f;
             go.transform.position = from;
 
-            const float duration = 0.18f;
+            Vector2 direction = to - from;
+
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            go.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+            const float duration = 0.5f;
             float t = 0f;
+
             while (t < duration && go != null)
             {
                 t += Time.deltaTime;
                 float p = Mathf.Clamp01(t / duration);
+
                 go.transform.position = Vector3.Lerp(from, to, p);
-                go.transform.Rotate(0f, 0f, 720f * Time.deltaTime);
+                //go.transform.Rotate(0f, 0f, 720f * Time.deltaTime);
+
                 yield return null;
             }
 

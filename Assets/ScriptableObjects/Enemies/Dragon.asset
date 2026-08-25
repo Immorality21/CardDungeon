@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: Dragon
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   DisplayName: Dragon
-  Sprite: {fileID: 21300000, guid: c63e0d29d5d04db3b133f261668e6868, type: 3}
-  AnimationFrames: []
+  Sprite: {fileID: -5994531514436782396, guid: f77c465981940954fbc186b265760637, type: 3}
+  AnimationFrames:
+  - {fileID: -5994531514436782396, guid: f77c465981940954fbc186b265760637, type: 3}
+  - {fileID: 9106924797852624728, guid: f77c465981940954fbc186b265760637, type: 3}
+  - {fileID: -8396540761149796143, guid: f77c465981940954fbc186b265760637, type: 3}
   AnimationFps: 8
   IsBoss: 0
   BaseStats:
