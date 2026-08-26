@@ -6,15 +6,18 @@
    ============================================================ */
 
 :root, .sg-scope {
-    --cd-overlay: rgba(12, 9, 26, 0.85);
-    --cd-parchment: rgb(216, 198, 154);
-    --cd-frame: rgb(58, 42, 22);
-    --cd-stone: rgb(107, 100, 134);
-    --cd-stone-hover: rgb(135, 128, 165);
-    --cd-stone-disabled: rgb(74, 70, 92);
-    --cd-text-dark: rgb(46, 31, 16);
-    --cd-text-light: rgb(242, 224, 184);
-    --cd-accent: rgb(128, 204, 255);
+    --cd-overlay: rgba(6, 3, 14, 0.92);
+    --cd-parchment: rgb(14, 7, 28);
+    --cd-frame: rgb(91, 42, 145);
+    --cd-stone: rgb(35, 18, 58);
+    --cd-stone-hover: rgb(104, 47, 165);
+    --cd-accent: rgb(205, 110, 255);
+    --cd-gold: rgb(236, 190, 72);
+
+    --cd-text-dark: rgb(245, 240, 255);
+    --cd-text-light: rgb(245, 240, 255);
+
+    --cd-stone-disabled: rgb(26, 17, 38);
 }
 
 /* Full-screen transparent host; children position themselves. */
@@ -174,7 +177,7 @@
 
 /* ---- Party status window (hero names + HP) ---- */
 .cd-party-status {
-    min-width: 220px;
+    min-width: 300px;
     background-color: var(--cd-parchment);
     border-width: 4px;
     border-color: var(--cd-frame);
@@ -184,22 +187,23 @@
 
 .cd-party-status__header {
     -unity-font-style: bold;
-    font-size: 16px;
-    color: var(--cd-text-light);
+    font-size: 19px;
+    padding: 9px 12px;
+    color: var(--cd-gold);
     background-color: var(--cd-frame);
     -unity-text-align: middle-center;
     padding: 7px 10px;
 }
 
 .cd-party-status__rows {
-    padding: 8px 10px;
+    padding: 10px 12px;
 }
 
 .cd-party-row {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 8px;
+    padding: 7px 10px;
     margin: 2px 0;
     border-width: 2px;
     border-color: rgba(0, 0, 0, 0);
@@ -207,13 +211,13 @@
 }
 
 .cd-party-row__name {
-    font-size: 15px;
+    font-size: 18px;
     -unity-font-style: bold;
     color: var(--cd-text-dark);
 }
 
 .cd-party-row__hp {
-    font-size: 15px;
+    font-size: 18px;
     color: var(--cd-text-dark);
     -unity-text-align: middle-right;
     margin-left: 18px;
@@ -252,12 +256,13 @@
 }
 
 .cd-cmd-row:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-accent);
 }
 
 .cd-cmd-row--selected {
-    background-color: rgba(128, 204, 255, 0.32);
-    border-color: var(--cd-frame);
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-accent);
 }
 
 .cd-cmd-row--disabled {
@@ -283,7 +288,7 @@
 
 /* ---- Turn-order list (FFX-style vertical column, top-right) ---- */
 .cd-turn-order {
-    width: 132px;
+    width: 180px;
     background-color: var(--cd-parchment);
     border-width: 4px;
     border-color: var(--cd-frame);
@@ -293,11 +298,11 @@
 
 .cd-turn-order__header {
     -unity-font-style: bold;
-    font-size: 13px;
-    color: var(--cd-text-light);
+    color: var(--cd-gold);
     background-color: var(--cd-frame);
     -unity-text-align: middle-center;
-    padding: 5px 8px;
+    font-size: 16px;
+    padding: 7px 10px;
 }
 
 .cd-turn-order__list {
@@ -307,9 +312,9 @@
 .cd-turn-row {
     flex-direction: row;
     align-items: center;
-    height: 34px;
+    height: 42px;
+    padding: 0 8px;
     margin: 2px 0;
-    padding: 0 6px;
     background-color: var(--cd-stone);
     border-width: 2px;
     border-color: rgba(0, 0, 0, 0);
@@ -322,9 +327,9 @@
 }
 
 .cd-turn-row__icon {
-    width: 26px;
-    height: 26px;
-    margin-right: 6px;
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
     flex-shrink: 0;
     background-color: var(--cd-frame);
     border-radius: 3px;
@@ -333,7 +338,7 @@
 
 .cd-turn-row__name {
     flex-grow: 1;
-    font-size: 12px;
+    font-size: 15px;
     -unity-font-style: bold;
     color: var(--cd-text-light);
     -unity-text-align: middle-left;
@@ -362,13 +367,13 @@
 }
 
 .cd-sel-row:hover {
-    background-color: rgba(128, 204, 255, 0.32);
-    border-color: var(--cd-frame);
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-accent);
 }
 
 .cd-sel-row--selected {
-    background-color: rgba(128, 204, 255, 0.32);
-    border-color: var(--cd-frame);
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-accent);
 }
 
 .cd-sel-row:disabled {
@@ -456,7 +461,7 @@
 .cd-command-window__header {
     -unity-font-style: bold;
     font-size: 18px;
-    color: var(--cd-text-light);
+    color: var(--cd-gold);
     background-color: var(--cd-frame);
     -unity-text-align: middle-center;
     padding: 9px 12px;
@@ -972,168 +977,53 @@
     display: none;
 }
 
-/* ============================================================
-   Sphere grid — shared graph view (hub screen + editor window)
-   ============================================================ */
-
-/* A wider window: the pannable graph plus its detail panel need more than 620px. */
-.cd-window--wide {
-    width: 1140px;
-}
-
-/* The graph viewport. overflow:hidden clips the pannable content, so nothing can spill
-   out and swallow clicks meant for the buttons beneath it (the ScrollView trap). */
-.sg-viewport {
-    flex-grow: 1;
-    overflow: hidden;
-    background-color: rgba(41, 31, 20, 0.35);
+.cd-command-window,
+.cd-party-status,
+.cd-turn-order {
+    border-radius: 12px;
     border-width: 2px;
     border-color: var(--cd-frame);
-    border-radius: 6px;
 }
 
-/* The panned/zoomed content plane. transform-origin must be the top-left corner:
-   UITK's default is 50% 50%, which makes scaling orbit the element's center and
-   desyncs the zoom-toward-cursor math. */
-.sg-content {
-    position: absolute;
-    left: 0;
-    top: 0;
-    transform-origin: left top;
+.cd-cmd-row,
+.cd-sel-row,
+.cd-party-row,
+.cd-turn-row {
+    border-radius: 8px;
 }
 
-.sg-node {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    border-radius: 22px;
-    border-width: 3px;
-    border-color: var(--cd-frame);
-    align-items: center;
-    justify-content: center;
-    background-color: var(--cd-stone-disabled);
-    margin: 0;
-    padding: 0;
+.cd-button {
+    border-radius: 10px;
 }
 
-.sg-node:hover {
-    border-color: var(--cd-accent);
-}
+/* Bright active selection */
 
-/* Activation states (SphereGridPresenter.StateClass drives these). */
-.sg-node--activated {
-    background-color: var(--cd-accent);
-}
-
-.sg-node--available {
-    background-color: var(--cd-stone-hover);
-    border-color: var(--cd-accent);
-}
-
-.sg-node--adjacent {
-    background-color: var(--cd-stone);
-}
-
-.sg-node--locked {
-    background-color: var(--cd-stone-disabled);
-    opacity: 0.45;
-}
-
-.sg-node--selected {
-    border-color: var(--cd-text-light);
-    scale: 1.15;
-}
-
-/* Editor connect-mode source highlight. */
-.sg-node--source {
-    border-color: var(--cd-parchment);
-}
-
-/* Kind accents. */
-.sg-node--start {
-    width: 54px;
-    height: 54px;
-    border-radius: 27px;
-    border-width: 4px;
-}
-
-.sg-node__glyph {
-    color: var(--cd-text-light);
-    font-size: 16px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    margin: 0;
-    padding: 0;
-}
-
-.sg-node--activated .sg-node__glyph {
-    color: var(--cd-text-dark);
-}
-
-/* Screen layout: graph on the left, always-present detail panel on the right, so the
-   window's size never changes between states (the dock-center hit-test trap). */
-.sg-body {
-    flex-direction: row;
-    flex-grow: 1;
-    min-height: 0;
-    margin-bottom: 8px;
-}
-
-.sg-detail {
-    width: 300px;
-    flex-shrink: 0;
-    margin-left: 10px;
-    padding: 10px;
-    background-color: rgba(58, 42, 22, 0.12);
+.cd-cmd-row--selected,
+.cd-sel-row--selected,
+.cd-party-row--active,
+.cd-turn-row--current {
+    background-color: rgb(102, 48, 158);
     border-width: 2px;
-    border-color: var(--cd-frame);
-    border-radius: 6px;
-}
-
-/* ---- Campaign map ---- */
-/* The map reuses SphereGridView, so nodes keep the .sg-node geometry and only the state
-   vocabulary differs (CampaignPresenter.StateClasses drives these). Separate class names
-   rather than reusing sg-node--* so the two graphs cannot clear each other's states. */
-
-.cm-node--completed {
-    background-color: var(--cd-accent);
-}
-
-.cm-node--available {
-    background-color: var(--cd-stone-hover);
     border-color: var(--cd-accent);
+    border-radius: 8px;
 }
 
-/* The run underway: parchment fill so it reads as "you are here" at a glance. */
-.cm-node--active {
-    background-color: var(--cd-parchment);
-    border-color: var(--cd-text-light);
+/* Hover */
+
+.cd-cmd-row:hover,
+.cd-sel-row:hover {
+    background-color: rgb(71, 34, 110);
+    border-color: rgb(156, 82, 210);
 }
 
-.cm-node--locked {
-    background-color: var(--cd-stone-disabled);
-    opacity: 0.45;
-}
+/* Brighter glossy-looking headers */
 
-/* Optional side branches are outlined rather than filled, so the main line reads first. */
-.cm-node--optional {
-    border-color: var(--cd-stone-hover);
-}
+.cd-party-status__header,
+.cd-turn-order__header,
+.cd-command-window__header {
+    background-color: rgb(67, 30, 108);
+    color: var(--cd-gold);
 
-.cm-node--completed .sg-node__glyph,
-.cm-node--active .sg-node__glyph {
-    color: var(--cd-text-dark);
-}
-
-/* ---- Home window sizing ---- */
-/* Home stacks up to eight menu buttons plus the purse. At the shared 62% cap the flex layout
-   ran out of room and squeezed the last child to zero height, so Gold/Essence rendered outside
-   the frame. The purse must never be the row that gives way, and the window needs the headroom. */
-
-.cd-window--tall {
-    max-height: 88%;
-}
-
-.cd-currency-row {
-    flex-shrink: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--cd-accent);
 }
