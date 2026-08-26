@@ -82,7 +82,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `LevelEnemyTuning` (in `Enemies/`) | the per-level enemy numbers every metric is measured against |
 | `VarietyAnalyzer` | the one-dimensionality axis: archetype share, resistance coverage, inert damage types, Draw overlap |
 | `ProgressionMap` | the **supply chain**: which magic is drawable where, when each combo becomes possible, and whether a level's resistances are in elements the player can bring yet |
-| `EncounterSimulator` | headless battles under three policies (`AttackOnly` / `MagicFirst` / `Adaptive`) |
+| `EncounterSimulator` | headless battles under three policies (`AttackOnly` / `MagicFirst` / `Adaptive`) — **per room** via `Run`, and **per floor** via `RunFloor` |
 | `SaveAudit` | reads the live save files and rebuilds the real party + economy state |
 | `BalanceAnalyzer` | the **only** place rules are interpreted into findings |
 
@@ -275,7 +275,27 @@ the combat loop calls, and `ResolveCast` goes through the real `EffectResolver` 
 
 Deliberate simplifications: mid-fight **Draw is not modelled** (heroes start with the magic the
 encounter's enemies offer, via `BalanceAnalyzer.AssignDrawLoadout`, and never spend a turn drawing);
-fleeing is never attempted; and **every simulated fight starts on full charges**, which the game no longer does - charges are a run resource now, so a per-encounter simulation is an *optimistic* read of any fight after the first. Whole-floor attrition has to come from the run curve, not from here.
+and fleeing is never attempted.
+
+### Rooms vs floors — which entry point answers which question
+
+**A per-room win rate cannot tell you whether a run can be lost.** `Run`/`RunAllPolicies` clone a
+fresh, full-health party with the *whole* potion belt for every encounter, so a floor of four rooms is
+measured as four independent opening fights. Measured against the real project, **every room in the
+game wins 100% of the time** — and no amount of content change moves that number, because the thing
+that kills parties is not one room.
+
+**`RunFloor`/`RunAllPoliciesOnFloor` fight a floor**: rooms in player order, boss last, off **one**
+pool of health, potions and charges, with refuges spread through the order. Three things only it can
+see — attrition compounding room to room, the fact that **nothing revives** mid-floor (so a hero lost
+early compounds for every room after), and a potion belt that is spent rather than refilled per fight.
+`StartsWithFullCharges` is true only for floor 0, matching charges being a run resource.
+
+So: **`Run` judges an asset, `RunFloor` judges a floor.** `BalanceAnalyzer.RunFloorSimulations` fills
+`BalanceReport.Floors`, and `EvaluateFloorSimulations` reads it against `MaxFloorWipeRate`,
+`MinFinalFloorWipeRate` and `TrivialFloorEndHealth`. Attrition and wipe rate are calibrated against
+each other in `docs/BALANCING.md` §5h — **death starts around attrition 0.70** — so tune with the
+cheap closed-form dial and confirm with the floor sim.
 
 Determinism: each batch seeds `Random.InitState(settings.Seed)` and restores `Random.state`
 afterwards, so a run never perturbs anything else and the same assets always give the same numbers.

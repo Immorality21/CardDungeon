@@ -140,7 +140,7 @@ namespace Assets.Scripts.Balance
                     {
                         lootOwners[lootKey] = new List<string>();
                     }
-                    lootOwners[lootKey].Add(string.IsNullOrEmpty(enemy.DisplayName) ? enemy.name : enemy.DisplayName);
+                    lootOwners[lootKey].Add(enemy.Label);
                 }
             }
 

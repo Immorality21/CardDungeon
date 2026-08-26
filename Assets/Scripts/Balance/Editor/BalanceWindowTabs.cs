@@ -819,7 +819,7 @@ namespace Assets.Scripts.Balance.Editor
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(40f);
                 BalanceGui.Cell(enemy != null
-                    ? (string.IsNullOrEmpty(enemy.DisplayName) ? enemy.name : enemy.DisplayName)
+                    ? enemy.Label
                     : "(empty)", NameWidth);
                 BalanceGui.HeaderCell("chance", 50f);
                 changed |= BalanceGui.EditableCell(entry.FindPropertyRelative("SpawnChance"), 60f);

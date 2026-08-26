@@ -199,13 +199,34 @@ namespace Assets.Scripts.Balance
             public int PotionsUsed;
             public int Casts;
             public float EndHealthFraction;
+
+            /// <summary>Set by the encounter loop so scoring does not have to re-walk the enemies.</summary>
+            public bool EnemiesAlive;
         }
 
         private static TrialResult RunOne(PartyBaseline party, IList<SimUnit> enemyTemplates, SimSettings settings)
         {
-            var result = new TrialResult();
-
             var heroes = party.CloneUnits();
+            int potionsLeft = settings.PotionCount;
+            var result = new TrialResult();
+            RunEncounter(heroes, enemyTemplates, settings, ref potionsLeft, result);
+            ScoreEncounter(heroes, result);
+            return result;
+        }
+
+        /// <summary>
+        /// One fight against hero instances the <b>caller</b> owns. Nothing in here resets health,
+        /// potions, charges or the dead - that is deliberately the caller's business, which is what
+        /// lets <see cref="RunFloor"/> run several of these in sequence off a single pool. Turns are
+        /// capped per encounter but accumulated onto <paramref name="result"/>.
+        /// </summary>
+        private static void RunEncounter(
+            List<SimUnit> heroes,
+            IList<SimUnit> enemyTemplates,
+            SimSettings settings,
+            ref int potionsLeft,
+            TrialResult result)
+        {
             var enemies = new List<SimUnit>();
             foreach (var template in enemyTemplates)
             {
@@ -234,14 +255,8 @@ namespace Assets.Scripts.Balance
             turnManager.SetBuffTracker(buffTracker);
             turnManager.Initialize(units);
 
-            int potionsLeft = settings.PotionCount;
-            int maxHealthPool = 0;
-            foreach (var hero in heroes)
-            {
-                maxHealthPool += hero.Effective[StatType.MaxHealth];
-            }
-
-            while (AnyAlive(heroes) && AnyAlive(enemies) && result.Turns < settings.MaxTurns)
+            int turns = 0;
+            while (AnyAlive(heroes) && AnyAlive(enemies) && turns < settings.MaxTurns)
             {
                 var unit = turnManager.GetNextUnit();
                 if (unit == null)
@@ -249,6 +264,7 @@ namespace Assets.Scripts.Balance
                     break;
                 }
 
+                turns++;
                 result.Turns++;
 
                 if (!unit.IsAlive)
@@ -300,8 +316,21 @@ namespace Assets.Scripts.Balance
                 }
             }
 
+            result.EnemiesAlive = AnyAlive(enemies);
+        }
+
+        /// <summary>
+        /// Turns a finished encounter into a verdict: who is down, whether the party won, stalled or
+        /// wiped, and what fraction of the party's bar is left. Split out of the loop so a floor can
+        /// score once at the end instead of once per room.
+        /// </summary>
+        private static void ScoreEncounter(List<SimUnit> heroes, TrialResult result)
+        {
+            result.HeroDeaths = 0;
+            int maxHealthPool = 0;
             foreach (var hero in heroes)
             {
+                maxHealthPool += hero.Effective[StatType.MaxHealth];
                 if (!hero.IsAlive)
                 {
                     result.HeroDeaths++;
@@ -309,9 +338,8 @@ namespace Assets.Scripts.Balance
             }
 
             bool heroesAlive = AnyAlive(heroes);
-            bool enemiesAlive = AnyAlive(enemies);
 
-            if (heroesAlive && enemiesAlive)
+            if (heroesAlive && result.EnemiesAlive)
             {
                 result.Stalemate = true;
             }
@@ -329,8 +357,339 @@ namespace Assets.Scripts.Balance
                 }
                 result.EndHealthFraction = (float)remaining / maxHealthPool;
             }
+        }
 
-            return result;
+
+        // ---------------------------------------------------------------- floors
+
+        /// <summary>
+        /// What a floor hands back mid-way through. A refuge heals a fraction of the party's bar
+        /// (<c>RoomKindRewards.RestHealFraction</c>), and it is the only healing a floor gives that is
+        /// not a potion or a spell.
+        /// </summary>
+        public class FloorSimSettings : SimSettings
+        {
+            /// <summary>Refuges on the floor. Spread evenly through the room order.</summary>
+            public int RestRooms;
+
+            /// <summary>Fraction of each hero's bar a refuge restores.</summary>
+            public float RestHealFraction;
+
+            /// <summary>
+            /// Charges are a <b>run</b> resource: only a run's first floor starts full. Leave true for
+            /// floor 0 and false for every floor after it, or the simulation grants magic the real
+            /// party has already spent - the exact optimism the per-encounter simulation carries.
+            /// </summary>
+            public bool StartsWithFullCharges = true;
+        }
+
+        /// <summary>Aggregated results over a batch of simulated floors.</summary>
+        public class FloorOutcome
+        {
+            public SimPolicy Policy;
+            public int Trials;
+
+            /// <summary>Trials where the whole party went down before the floor was cleared.</summary>
+            public int Wipes;
+
+            /// <summary>Trials that ran out of turns somewhere on the floor.</summary>
+            public int Stalemates;
+
+            public int Rooms;
+            public float AverageRoomsCleared;
+            public float AverageHeroDeaths;
+            public float AveragePotionsUsed;
+            public float AverageCastsUsed;
+            public float AverageTurns;
+
+            /// <summary>Over surviving trials only - a wipe has no end health worth averaging.</summary>
+            public float AverageEndHealthFraction;
+
+            public float WipeRate => Trials > 0 ? (float)Wipes / Trials : 0f;
+            public float ClearRate => Trials > 0 ? (float)(Trials - Wipes - Stalemates) / Trials : 0f;
+
+            /// <summary>Fraction of the floor's rooms the party got through, averaged.</summary>
+            public float FloorProgress => Rooms > 0 ? AverageRoomsCleared / Rooms : 0f;
+        }
+
+        /// <summary>
+        /// A whole floor, room after room, off <b>one</b> pool of health, potions and charges.
+        ///
+        /// <para>This exists because the per-encounter simulation structurally cannot report the way
+        /// runs actually end. It clones a fresh, full-health party for every fight and hands it the
+        /// entire potion belt each time, so a floor of four rooms is measured as four independent
+        /// first fights. Three things only a floor can see:</para>
+        /// <list type="bullet">
+        /// <item><b>Attrition compounds.</b> Room 3 is fought on what rooms 1 and 2 left.</item>
+        /// <item><b>Nothing revives.</b> There is no revive item, spell or between-room recovery in the
+        /// game - <c>Party.HealAll</c> fires only on entering a fresh dungeon - so a hero downed in
+        /// room 2 is gone for the rest of the floor, and the party gets weaker as the floor gets
+        /// harder. That death spiral is the actual failure mode, and it is invisible per room.</item>
+        /// <item><b>The potion belt is finite.</b> Per encounter it is effectively multiplied by the
+        /// room count.</item>
+        /// </list>
+        ///
+        /// <para>Rooms are fought in the order given. Pass them in the order the player meets them,
+        /// because the last room of a floor is the one fought on an empty belt.</para>
+        /// </summary>
+        public static FloorOutcome RunFloor(
+            PartyBaseline party,
+            IList<IList<SimUnit>> rooms,
+            FloorSimSettings settings)
+        {
+            var outcome = new FloorOutcome { Policy = settings != null ? settings.Policy : SimPolicy.Adaptive };
+            if (party == null || party.Size == 0 || rooms == null || rooms.Count == 0 || settings == null)
+            {
+                return outcome;
+            }
+
+            outcome.Rooms = rooms.Count;
+
+            var savedState = Random.state;
+            Random.InitState(settings.Seed);
+
+            float turnTotal = 0f;
+            float endHealthTotal = 0f;
+            float deathTotal = 0f;
+            float potionTotal = 0f;
+            float castTotal = 0f;
+            float clearedTotal = 0f;
+            int survived = 0;
+
+            try
+            {
+                for (int trial = 0; trial < settings.Trials; trial++)
+                {
+                    var floor = RunOneFloor(party, rooms, settings);
+
+                    outcome.Trials++;
+                    turnTotal += floor.Turns;
+                    potionTotal += floor.PotionsUsed;
+                    castTotal += floor.Casts;
+                    clearedTotal += floor.RoomsCleared;
+                    deathTotal += floor.HeroDeaths;
+
+                    if (floor.Wiped)
+                    {
+                        outcome.Wipes++;
+                    }
+                    else if (floor.Stalemate)
+                    {
+                        outcome.Stalemates++;
+                    }
+                    else
+                    {
+                        survived++;
+                        endHealthTotal += floor.EndHealthFraction;
+                    }
+                }
+            }
+            finally
+            {
+                Random.state = savedState;
+            }
+
+            if (outcome.Trials > 0)
+            {
+                outcome.AverageTurns = turnTotal / outcome.Trials;
+                outcome.AveragePotionsUsed = potionTotal / outcome.Trials;
+                outcome.AverageCastsUsed = castTotal / outcome.Trials;
+                outcome.AverageRoomsCleared = clearedTotal / outcome.Trials;
+                outcome.AverageHeroDeaths = deathTotal / outcome.Trials;
+            }
+            outcome.AverageEndHealthFraction = survived > 0 ? endHealthTotal / survived : 0f;
+
+            return outcome;
+        }
+
+        /// <summary>Runs every policy over the same floor, for the same comparison per-room sims make.</summary>
+        public static Dictionary<SimPolicy, FloorOutcome> RunAllPoliciesOnFloor(
+            PartyBaseline party,
+            IList<IList<SimUnit>> rooms,
+            FloorSimSettings settings)
+        {
+            var results = new Dictionary<SimPolicy, FloorOutcome>();
+            if (settings == null)
+            {
+                return results;
+            }
+
+            foreach (SimPolicy policy in System.Enum.GetValues(typeof(SimPolicy)))
+            {
+                var perPolicy = new FloorSimSettings
+                {
+                    Trials = settings.Trials,
+                    Seed = settings.Seed,
+                    MaxTurns = settings.MaxTurns,
+                    Policy = policy,
+                    PotionCount = settings.PotionCount,
+                    PotionHealAmount = settings.PotionHealAmount,
+                    Combos = settings.Combos,
+                    HealThreshold = settings.HealThreshold,
+                    RestRooms = settings.RestRooms,
+                    RestHealFraction = settings.RestHealFraction,
+                    StartsWithFullCharges = settings.StartsWithFullCharges
+                };
+                results[policy] = RunFloor(party, rooms, perPolicy);
+            }
+            return results;
+        }
+
+        private class FloorTrial
+        {
+            public bool Wiped;
+            public bool Stalemate;
+            public int RoomsCleared;
+            public int Turns;
+            public int PotionsUsed;
+            public int Casts;
+            public int HeroDeaths;
+            public float EndHealthFraction;
+        }
+
+        private static FloorTrial RunOneFloor(
+            PartyBaseline party,
+            IList<IList<SimUnit>> rooms,
+            FloorSimSettings settings)
+        {
+            var trial = new FloorTrial();
+
+            // Cloned once, then carried through every room: health, the dead, and charges all persist,
+            // which is the whole point.
+            var heroes = party.CloneUnits();
+            if (!settings.StartsWithFullCharges)
+            {
+                DrainCharges(heroes);
+            }
+
+            int potionsLeft = settings.PotionCount;
+
+            // Refuges spread evenly, and never before the first fight - resting at full health is a
+            // wasted room, the same reading RoomKindRewards takes.
+            var restAfter = RestPoints(rooms.Count, settings.RestRooms);
+
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                var room = rooms[i];
+                if (room == null || room.Count == 0)
+                {
+                    trial.RoomsCleared++;
+                    continue;
+                }
+
+                var step = new TrialResult();
+                RunEncounter(heroes, room, settings, ref potionsLeft, step);
+
+                trial.Turns += step.Turns;
+                trial.PotionsUsed += step.PotionsUsed;
+                trial.Casts += step.Casts;
+
+                if (!AnyAlive(heroes))
+                {
+                    trial.Wiped = true;
+                    break;
+                }
+
+                if (step.EnemiesAlive)
+                {
+                    // Out of turns with the room still standing: not a wipe, but not a clear either.
+                    trial.Stalemate = true;
+                    break;
+                }
+
+                trial.RoomsCleared++;
+
+                if (restAfter.Contains(i))
+                {
+                    Rest(heroes, settings.RestHealFraction);
+                }
+            }
+
+            int maxHealthPool = 0;
+            int remaining = 0;
+            foreach (var hero in heroes)
+            {
+                maxHealthPool += hero.Effective[StatType.MaxHealth];
+                remaining += Mathf.Max(0, hero.Stats != null ? hero.Stats.Health : 0);
+                if (!hero.IsAlive)
+                {
+                    trial.HeroDeaths++;
+                }
+            }
+            if (!trial.Wiped && !trial.Stalemate && maxHealthPool > 0)
+            {
+                trial.EndHealthFraction = (float)remaining / maxHealthPool;
+            }
+
+            return trial;
+        }
+
+        /// <summary>Empties every hero's charges, for a floor that is not the run's first.</summary>
+        private static void DrainCharges(List<SimUnit> heroes)
+        {
+            foreach (var hero in heroes)
+            {
+                if (hero == null || hero.MagicSlots == null)
+                {
+                    continue;
+                }
+                foreach (var slot in hero.MagicSlots)
+                {
+                    if (slot != null)
+                    {
+                        slot.Charges = 0;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// A refuge: every living hero regains <paramref name="fraction"/> of their bar, clamped to
+        /// it. The dead stay dead - a refuge is not a revive.
+        /// </summary>
+        private static void Rest(List<SimUnit> heroes, float fraction)
+        {
+            if (fraction <= 0f)
+            {
+                return;
+            }
+
+            foreach (var hero in heroes)
+            {
+                if (hero == null || hero.Stats == null || !hero.IsAlive)
+                {
+                    continue;
+                }
+                int max = hero.Effective[StatType.MaxHealth];
+                if (max <= 0)
+                {
+                    continue;
+                }
+                int healed = Mathf.Max(1, Mathf.FloorToInt(max * fraction));
+                hero.Stats.Health = Mathf.Min(max, hero.Stats.Health + healed);
+            }
+        }
+
+        /// <summary>
+        /// Which room indices a refuge follows, spread as evenly as the count allows. Never the last
+        /// room (nothing comes after it to spend the health on) and never before the first fight.
+        /// </summary>
+        private static HashSet<int> RestPoints(int roomCount, int restRooms)
+        {
+            var points = new HashSet<int>();
+            if (roomCount <= 1 || restRooms <= 0)
+            {
+                return points;
+            }
+
+            int usable = Mathf.Min(restRooms, roomCount - 1);
+            for (int r = 1; r <= usable; r++)
+            {
+                int index = Mathf.Clamp(Mathf.RoundToInt((float)r * roomCount / (usable + 1)) - 1,
+                    0, roomCount - 2);
+                points.Add(index);
+            }
+            return points;
         }
 
         // ---------------------------------------------------------------- hero turns

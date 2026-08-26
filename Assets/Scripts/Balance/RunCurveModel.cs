@@ -492,7 +492,7 @@ namespace Assets.Scripts.Balance
             var bossEncounter = new RoomEncounter
             {
                 Room = null,
-                RoomName = $"Exit room — {(string.IsNullOrEmpty(entry.BossEnemy.DisplayName) ? entry.BossEnemy.name : entry.BossEnemy.DisplayName)}",
+                RoomName = $"Exit room — {entry.BossEnemy.Label}",
                 GuaranteedSpawns = true,
                 Occurrences = 1f,
                 Tuning = level.Tuning

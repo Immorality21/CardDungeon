@@ -48,7 +48,7 @@ gate to a confirmation prompt - the affordability check is the same function eit
 | `HealthCost` effect + the cloaks | **done** 2026-08-25 - `HealthCostEffectExecutor`, 4 cloak assets |
 | Resistance buffs (`ResistanceBuffHandler`) | **done** 2026-08-25 - `CombatBuffTracker.ApplyResistance`, `ResistanceBuffTests` |
 | Analyzer/test guard against dead effects | **done** 2026-08-25 - `ElementalContentTests` (Phase 5's checks 1-2, as tests) |
-| Discovery-gated reveal | not started - Phase 4c, **blocked on `EnemySO.Key`** |
+| Discovery-gated reveal | not started - Phase 4c. **No longer blocked**: `EnemySO.Key` + `SaveKey` shipped 2026-08-26, all ten enemies keyed, pinned by `EnemyIdentityTests`. |
 | Analyzer: unintended absorption, cost/benefit sanity | not started - Phase 5 checks 3-4 |
 
 ---
@@ -137,9 +137,10 @@ combat, but unresolvable when a save restored the slot and invisible in the Forg
 Measured after the pass: suite **651/0** (42 new cases), analyzer **0 critical / 3 warning / 22 info**
 - the same three warnings as before, none of them from this change.
 
-**Still open, in the order the build order suggests:** Phase 4c (discovery-gated reveal, blocked on a
-stable `EnemySO.Key`) and Phase 5's remaining two analyzer checks (unintended absorption, cost/benefit
-sanity). Note that blind absorption is now *reachable* by the player against a hero - so the argument
+**Still open, in the order the build order suggests:** Phase 4c (discovery-gated reveal - the key it
+waited on now exists, so what remains is the knowledge record itself, the reveal in
+`MagicSelectionUI`/the target panel, and the moment of discovery) and Phase 5's remaining two analyzer
+checks (unintended absorption, cost/benefit sanity). Note that blind absorption is now *reachable* by the player against a hero - so the argument
 in Phase 4 for surfacing resistances is live, not hypothetical.
 
 ---

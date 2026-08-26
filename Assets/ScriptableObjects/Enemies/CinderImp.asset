@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
   m_Name: CinderImp
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: CinderImp
   DisplayName: Cinder Imp
   Sprite: {fileID: 21300000, guid: a1fb566fc3954623b4d197411b1327ea, type: 3}
   AnimationFrames: []

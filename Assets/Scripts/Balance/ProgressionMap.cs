@@ -541,7 +541,7 @@ namespace Assets.Scripts.Balance
                     LevelIndex = level.Index,
                     LevelReference = level.Reference,
                     Enemy = enemy,
-                    EnemyName = string.IsNullOrEmpty(enemy.DisplayName) ? enemy.name : enemy.DisplayName,
+                    EnemyName = enemy.Label,
                     BossOnly = presence.BossOnly,
                     Charges = draw.Charges,
                     ExpectedEnemies = presence.Weight

@@ -14,7 +14,15 @@ namespace Assets.Scripts.Enemies
     [CreateAssetMenu(fileName = "Enemy", menuName = "SO/Enemy")]
     public class EnemySO : ScriptableObject
     {
+        [Tooltip("Immutable identifier this enemy's persistent player knowledge is filed under - " +
+                 "what the player has learned about it (resistances seen, weaknesses discovered). " +
+                 "Never shown to the player. Changing it orphans every save that references the old " +
+                 "value, so treat it as write-once. Same contract as HeroSO.Key.")]
+        public string Key;
+
+        [Tooltip("Name shown to the player. Safe to rename at any time - it is not a save key.")]
         public string DisplayName = "Enemy";
+
         public Sprite Sprite;
 
         public Sprite[] AnimationFrames;
@@ -70,5 +78,35 @@ namespace Assets.Scripts.Enemies
         /// fields.
         /// </summary>
         public EnemyArchetype ArchetypeOf => Behavior != null ? Behavior.Archetype : Archetype;
+
+        /// <summary>
+        /// The identifier persistent knowledge about this enemy is written under. Falls back to
+        /// <see cref="DisplayName"/> and then the asset name, so enemies authored before
+        /// <see cref="Key"/> existed still resolve. Always key persistence off this, never off
+        /// <see cref="DisplayName"/> - a display name is renameable by design, and keying off it
+        /// would silently orphan the record the moment someone retitled an enemy.
+        /// </summary>
+        public string SaveKey
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(Key))
+                {
+                    return Key;
+                }
+                if (!string.IsNullOrEmpty(DisplayName))
+                {
+                    return DisplayName;
+                }
+                return name;
+            }
+        }
+
+        /// <summary>
+        /// The player-facing name, falling back to the asset name. Use this for anything on screen or
+        /// in a report - it replaces the DisplayName-or-name ternary that was repeated at every call
+        /// site.
+        /// </summary>
+        public string Label => string.IsNullOrEmpty(DisplayName) ? name : DisplayName;
     }
 }

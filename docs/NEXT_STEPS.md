@@ -143,9 +143,21 @@ written. Current party: Warrior 10/5/**13**/5, Tank 5/15/**17**/5, 30 HP pool + 
 - **Progression dead-ends at level 2** (one `LevelConfiguration` each, now +7/+9 HP), its Agility gain of
   +5 on a base of 5 doubles turn rate in one level, and **only the leader gains XP**
   (`Party.AddXpToLeader`), so the Tank never levels at all.
-- **Fights have no decisions in them.** The simulator scores attack-spam against competent play:
-  Floating Eye has a depth gap of **0.000** (magic, items and targeting change nothing), and the
-  Dragon is flagged a formality — always won at full health, in 2 turns.
+- **Fights have no decisions in them, and the re-measure says it is worse than this bullet.**
+  Re-measured 2026-08-26 with simulation on, against the real assets and the party that actually
+  reaches each fight: **63 of 63 simulated encounters win 100% of the time**, and all 63 trip
+  *Attack-spam plays this fight as well as thinking does*. The worst room in the game (Ember Vault)
+  ends at **63% health**. The best depth gap anywhere is the Dragon's **0.063** against a 0.05
+  tolerance, and what nine casts buy there is end-health (68% → 80%), never a loss turned into a win —
+  because there are no losses. **Depth is downstream of losability**: three policies that all win
+  every time are not three strategies. Meanwhile fight *length* is already over the line (Gilded
+  Hoarder 22.7 turns, Sunken Swamp 21.0, both at 80–100% end health), so enemy health is the wrong
+  lever and enemy strength is the right one. Hex Weaver and Stone Sentinel end fights at **99%**
+  health and Bog Shaman at 97–98%, so the Debuffer and the Healer are both formalities — a healer only
+  has to be focused if unfocused healing beats the party's damage. Full write-up, table and
+  reproduction: `docs/BALANCING.md` §5g. **Root cause found 2026-08-26** — the 100% was an artefact of
+  measuring rooms rather than floors, and the fights genuinely cannot be lost. See §0f below and
+  `docs/BALANCING.md` §5h.
 - **Save audit.** Re-run after the HP pass: the live save (Gold 1363, Essence 30) no longer **dies on
   Test3** — that finding is gone. What remains is *informational*: the Warrior is capped at level 2
   with 68 XP going nowhere, and maxing a single magic costs 45 level-clears. Both heroes resolve
@@ -365,7 +377,9 @@ taken while building, which is where the reasoning lives.
 
 **Still open:**
 
-- **Discovery-gated reveal (Phase 4c)** — still **blocked on a stable `EnemySO.Key`** (see §0b-2).
+- **Discovery-gated reveal (Phase 4c)** — **unblocked 2026-08-26**; `EnemySO.Key`/`SaveKey` exist and
+  every enemy is keyed (see §0b-2), so what is left is the knowledge record, the reveal in the UI, and
+  where discovery happens.
   Resistances stay hidden by design, but note the argument has sharpened: with absorption now
   reachable, casting the wrong element can *heal* an enemy, and blind absorption is a punish the
   player cannot learn from without losing a fight to it.
@@ -390,10 +404,15 @@ taken while building, which is where the reasoning lives.
   lever; it was left alone deliberately rather than quietly retuning level design.
 - **Worst-case spawn rolls.** Cavern at a full roll (Stone Sentinel + 2 Cinder Imps) reads a worst-case
   danger of 1.30 - survivable in simulation (100% win rate) but over the 1.00 line on the closed-form model.
-- **`EnemySO` has no stable `Key`.** Needed before discovery-gated reveal can persist "player has seen this
-  enemy resists Fire"; keying off `DisplayName` breaks the moment a name is edited. `HeroSO` now has the
-  pattern to copy: a `Key` field plus a `SaveKey` property that falls back to the display name, so existing
-  saves keep resolving while the display name becomes free to rename.
+- ~~**`EnemySO` has no stable `Key`.**~~ ✅ Shipped 2026-08-26. `EnemySO.Key` plus a `SaveKey` property
+  that falls back to `DisplayName` and then the asset name - the `HeroSO` contract exactly, so the
+  fallback is a migration path rather than somewhere to leave a new enemy. All ten enemy assets are
+  keyed off their asset name (`EyeBall`, `AbyssalWarden`, ...), deliberately *not* their display name,
+  which stays free to rename. `EnemyIdentityTests` fails on a blank or duplicated key, and the same
+  change added **`EnemySO.Label`** (display name or asset name) which collapsed the
+  `IsNullOrEmpty(DisplayName) ? name : DisplayName` ternary that had been copy-pasted into five
+  places across the balance model. **This unblocks discovery-gated reveal (§0b / `ELEMENTAL_PLAN.md`
+  Phase 4c)**, which is now the whole of the remaining work there.
 - ~~**An upgraded magic silently lost its caster scaling.**~~ ✅ Fixed 2026-08-21 (found while
   building room events). `EffectResolver.ApplyPowerBonus` builds a *copy* of the effect to fold the
   upgrade bonus into `Power`, and the copy did not carry `ScalingStat` — which defaults to `None`.
@@ -638,6 +657,56 @@ bosses **0.15** / Hoarder **0.10**. Findings went **0 critical / 5 warning → 0
   spell power does not scale, so at Difficulty 2.5+ their authored spells fall behind their scaled
   Strength — the analyzer says so out loud for the Warden and Mirefather. Either give
   `EnemyStatOverride` its own spell-power field, or author boss spells at boss power.
+
+### 0f. Losability — the measurement now exists; the tuning is a level-design call
+
+**Shipped 2026-08-26: the floor simulation.** §5g's "63 of 63 encounters win 100%" turned out to have
+a structural cause rather than a content one. `EncounterSimulator.Run` clones a **fresh, full-health
+party with the whole potion belt for every room**, so a four-room floor was measured as four
+independent opening fights — it could never report the way runs actually end. `RunFloor` fights a
+floor: rooms in player order, boss last, off one pool of health, potions and charges, refuges spread
+through it, and `StartsWithFullCharges` only on floor 0 (charges are a run resource). `RunOne` split
+into `RunEncounter` + `ScoreEncounter` to make that possible; ten cases in `FloorSimulatorTests` pin
+the three things a per-room run gets wrong. Wired into the analyzer as `BalanceReport.Floors` +
+`EvaluateFloorSimulations`, with three new rules (`MaxFloorWipeRate` 0.35, `MinFinalFloorWipeRate`
+0.05, `TrivialFloorEndHealth` 0.85). Suite **701 passed / 0 failed**. Full write-up, table and the
+attrition↔wipe calibration: `docs/BALANCING.md` §5h.
+
+**What it measured, and it is the opposite of what the per-room numbers said.** Zero rooms in the game
+can wipe the party; chained into floors, three can. And the distribution is backwards:
+
+- **The only floor in the game that can kill the party is `Sunken Depths` — the last floor of
+  `The Threshold`, which is the *first* run** (12% wipe, 0.67 heroes lost, both potions spent, ends at
+  45% health). Cinder Gate and Emberfall manage 1%. Every other floor is 0%.
+- **4 of 5 runs have a final floor that cannot end the run** — The Mire Throne, The Counting Room,
+  Emberfall, The Hollow Vault. **Depth is currently inversely correlated with danger.**
+- Nothing is *too* lethal: no floor trips the 35% ceiling.
+- Useful dial: **death starts at roughly attrition 0.70.** Floors at 0.64 and below wipe 0% of the
+  time; Sunken Depths at 0.745 wipes 12%. Every other floor sits at 0.39–0.64.
+
+**The open work, and the constraint that shapes it.** Enemy *strength* is out of headroom:
+`FewestHitsToKillAHero` is already **3**, `MinHitsToKillHero` exactly, for Cinder Imp, Dragon and Hex
+Weaver across all of The Ashen Deep. Raising `Difficulty` from here buys losability by making heroes
+one-shottable. That leaves three levers, and the first two are decisions rather than solves:
+
+1. **Rooms per floor / enemies per room** (§1 Consequence 2). The honest lever, and level design — so
+   it is a deliberate call, not something to solve for. Note The Counting Room already runs **6 rooms
+   at attrition 0.626 and still cannot kill**, so this is not a small nudge.
+2. **Sustain the floor hands back** — the 2-potion belt and the refuge quota. Cheaper to move than
+   room counts and it hits the attrition denominator directly. Sunken Depths is the one floor that
+   spends the *whole* belt, which is exactly why it is the one floor that kills.
+3. **Hero HP** would raise the strength ceiling and give levers 1–2 room to breathe, at the cost of
+   longer fights.
+
+Whichever is chosen, the deepest floor of each run is the place to start, and the target is a wipe rate
+that clears `MinFinalFloorWipeRate` without passing `MaxFloorWipeRate` — a band the analyzer now
+reports per floor.
+
+**This is also the root cause behind the depth-gap findings**, not a separate problem: a fight whose
+outcome is never in doubt cannot contain a decision, which is why all 63 encounters read
+*attack-spam plays this as well as thinking does*. Expect those to start moving on their own once
+floors can be lost — and note the elemental reveal (§0b Phase 4c, unblocked) is the other half, since
+a ±50% damage swing the player cannot see is depth already paid for and not yet spendable.
 
 ### 1. Battle polish (feel & clarity)
 
@@ -1015,6 +1084,71 @@ Touch points for the **rest** of §2 (the room-*kind* work above, still open):
 
 Touch points: `Assets/Scripts/MainMenu/MerchantUI.cs`, `Assets/Scripts/Items/ShopPricing.cs`,
 `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Cards/UI/MagicForgeUI.cs`.
+
+### 3b. Failure is a farm, not a wall — the retry economy is unmodelled
+
+**The intent:** a run should be able to *stop* the player, and the answer to being stopped should be
+a hub decision — deepen a sphere grid, buy the third party slot, upgrade a spell — rather than
+another attempt at the same wall.
+
+**What the code actually does:** a wipe is not a loss. `AwardLevelClear` banks
+`GoldPerLevelCleared` (25) **plus that level's whole pending kill-gold pool** into permanent save the
+moment the exit room is cleared, and `HandlePartyDeath` only calls `DiscardPendingGold` — which
+forfeits the *current* floor. Everything earned on floors already cleared is already permanent, and
+`AwardRunProgressOnDeath` pays a further 10 gold per floor reached on top. So dying on floor 3 of a
+run banks floors 1–2 in full, deletes the run save, and drops the player back at the hub strictly
+richer than they started.
+
+At ~5 gold an enemy over ~12 enemies a floor plus the 25 flat, a cleared floor is **~85 gold**, so a
+run that dies on floor 3 pays roughly **190 gold**. The third party slot costs **300**
+(`PartySlots.CostForNext`), the fourth 600. **Two deliberate failures buy the third hero**, and party
+width is the single strongest lever on danger in the game — each hero roughly halves per-enemy
+danger. The intended pressure inverts: failing is the cheapest way to buy the thing that stops you
+failing, and it requires no skill improvement, no build decision, and no risk beyond the floor
+already in hand.
+
+**The analyzer cannot see any of this**, in three separate ways:
+
+1. **It models one attempt.** `RunCurve` walks a run from floor 0 to the end against a party that
+   grows only from `RescueHero` and banked XP. There is no notion of the *n*-th attempt at a run, so
+   a level the tool calls unclearable is unclearable *once* — and the tool has no way to say that
+   attempt three clears it trivially.
+2. **It already assumes the cap is bought.** `RunCurveModel` grows the roster up to
+   `PartySlots.MaxCap` (4), not to the save's `BonusPartySlots` (base 2). So the widest party the
+   curve reports is a party the player has to spend 900 gold to field, and the analyzer prices the
+   run as though that spend already happened. This is the same optimism as the min/max band follow-up
+   in §5, from the other end: the band's *low* edge is the player who fields fewer heroes than the
+   cap allows, and its real *high* edge only exists after a Gold purchase the model never checks for.
+3. **`EvaluateEconomy` prices Essence only.** The single economy check is
+   `ClearsToFirstUpgrade` — Essence against magic-upgrade cost. **No Gold sink is priced against Gold
+   income anywhere**: not party slots, not the Merchant's stock, not the §3 sinks still to come. So
+   "how many floor-clears does the difficulty-breaking upgrade cost, and can it be farmed off floors
+   the player has already beaten" is a question the tool has no check for.
+
+**What to do about it** — the design decision comes first, the tooling second:
+
+- **Decide what a wipe costs.** The current answer is "one floor of gold", which is why the loop
+  farms. Candidates, cheapest first: bank pending gold at a **fraction** on death rather than paying
+  the 10/floor consolation on top; make the *run* rather than the floor the commit point for some
+  share of the income; or gate a re-attempt behind a cost (a run token, a restock) so attempts are
+  themselves a resource. The §3 death **safety-net token** is the same conversation from the other
+  side — it is a paid-for exception, which only reads as a reward if the default is harsh.
+- **Price the wall against the farm.** For each meta upgrade, the number that matters is
+  *floor-clears to afford it* versus *floor-clears the player can already reliably clear*. When the
+  second exceeds the first, the wall is decorative. Party slots at 300/600 against ~85 a floor is the
+  worked example above.
+- **Then teach the analyzer both.** Two checks, both cheap because the math already exists:
+  **(a)** an economy finding per Gold sink — cost against `LevelCurve.ExpectedGold` for the floors
+  the run curve says are clearable, flagged when a sink is affordable purely from floors already in
+  band; and **(b)** the min/max party band from §5, with the *cap the save actually owns* as the
+  band's realistic high edge rather than `MaxCap`. Together they answer "is this level a wall or a
+  toll booth" instead of "is this level hard for a party the player may not have".
+
+Touch points: `Assets/Scripts/Progression/MetaProgressManager.cs` (`AwardLevelClear`,
+`AwardRunProgressOnDeath`, `DiscardPendingGold`), `Assets/Scripts/Dungeon/DungeonManager.cs`
+(`OnDungeonCleared`, `HandlePartyDeath`), `Assets/Scripts/Heroes/PartySlots.cs`,
+`Assets/Scripts/Balance/RunCurveModel.cs`, `Assets/Scripts/Balance/BalanceAnalyzer.cs`
+(`EvaluateEconomy`), `docs/BALANCING.md` §6.
 
 ### 4. Hero progression → FFX-style sphere grid — ✅ shipped 2026-08-22
 

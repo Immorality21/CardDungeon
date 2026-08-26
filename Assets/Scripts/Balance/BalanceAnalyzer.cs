@@ -7,6 +7,7 @@ using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Resources;
+using Assets.Scripts.Rooms;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 
@@ -115,6 +116,7 @@ namespace Assets.Scripts.Balance
             if (input.RunSimulation)
             {
                 RunSimulations(input, rules, report);
+                RunFloorSimulations(input, rules, report);
             }
 
             EvaluateParty(report, rules, input);
@@ -125,6 +127,7 @@ namespace Assets.Scripts.Balance
             EvaluateProgression(report, rules);
             EvaluateEconomy(report, rules);
             EvaluateSimulations(report, rules);
+            EvaluateFloorSimulations(report, rules);
             EvaluateSave(report, rules, input);
 
             return report;
@@ -2390,6 +2393,205 @@ namespace Assets.Scripts.Balance
                         Suggestion = "Give the encounter something attack-spam cannot answer: a resistance that "
                                + "punishes the wrong element, a healer that must be focused, or a charge that has "
                                + "to be pre-empted."
+                    });
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Simulates every floor end to end, off one pool of health, potions and charges.
+        ///
+        /// <para>Why this is separate from <see cref="RunSimulations"/>: that one measures rooms, and a
+        /// room is not where runs end. It re-clones a full-health party with a full potion belt for
+        /// every encounter, so a four-room floor is measured as four independent opening fights - which
+        /// is why every single encounter in the project reports a 100% win rate while the closed-form
+        /// attrition model has floors running at three quarters of the party's resources. Both are
+        /// right about different questions. This answers the one the player asks.</para>
+        /// </summary>
+        private static void RunFloorSimulations(BalanceInput input, BalanceRulesSO rules, BalanceReport report)
+        {
+            foreach (var run in report.Runs)
+            {
+                foreach (var level in run.Levels)
+                {
+                    var rooms = BuildFloorRooms(level);
+                    if (rooms.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    var settings = new EncounterSimulator.FloorSimSettings
+                    {
+                        Trials = rules.SimulationTrials,
+                        Seed = rules.SimulationSeed,
+                        MaxTurns = rules.MaxSimTurns,
+                        Combos = input.Combos,
+                        PotionCount = level.Party.PotionCount,
+                        PotionHealAmount = level.Party.PotionHealAmount,
+                        RestRooms = level.RestRooms,
+                        RestHealFraction = RoomKindRewards.RestHealFraction,
+
+                        // Charges are a run resource: only floor 0 starts full. Granting every floor
+                        // full charges is exactly the optimism the per-room simulation carries.
+                        StartsWithFullCharges = level.Index == 0
+                    };
+
+                    // Same loadout rules as the per-room sims, so the two are comparable.
+                    var everyEnemy = new List<SimUnit>();
+                    foreach (var room in rooms)
+                    {
+                        foreach (var unit in room)
+                        {
+                            everyEnemy.Add(unit);
+                        }
+                    }
+                    AssignDrawLoadout(level.Party, everyEnemy, report.Save, input.Magic);
+
+                    var floorReport = new FloorSimReport
+                    {
+                        Label = $"{run.Name} / {level.Reference}",
+                        Asset = run.Run,
+                        Run = run.Run,
+                        LevelIndex = level.Index,
+                        Rooms = rooms.Count,
+                        PredictedAttrition = level.AttritionLoad,
+                        StartsWithFullCharges = settings.StartsWithFullCharges
+                    };
+                    floorReport.Outcomes = EncounterSimulator.RunAllPoliciesOnFloor(level.Party, rooms, settings);
+                    report.Floors.Add(floorReport);
+                }
+            }
+        }
+
+        /// <summary>
+        /// A floor's rooms in the order the player meets them: each combat room repeated as often as
+        /// the level is expected to contain it, then the boss alone in the sealed exit room.
+        /// </summary>
+        private static List<IList<SimUnit>> BuildFloorRooms(LevelCurve level)
+        {
+            var rooms = new List<IList<SimUnit>>();
+            if (level == null || level.Rooms == null)
+            {
+                return rooms;
+            }
+
+            foreach (var room in level.Rooms)
+            {
+                if (room == null || !room.IsCombatRoom)
+                {
+                    continue;
+                }
+
+                // Occurrences is fractional on a generated level (RoomsToGenerate / poolSize), so the
+                // floor is built at the nearest whole number of appearances - at least one, since the
+                // room is in the pool and can turn up.
+                int times = Mathf.Max(1, Mathf.RoundToInt(room.Occurrences));
+                for (int i = 0; i < times; i++)
+                {
+                    var units = room.Expected.ToDiscreteUnits();
+                    if (units.Count > 0)
+                    {
+                        rooms.Add(units);
+                    }
+                }
+            }
+
+            if (level.Boss != null)
+            {
+                var boss = SimUnit.FromEnemy(level.Boss, level.Tuning);
+                if (boss != null)
+                {
+                    rooms.Add(new List<SimUnit> { boss });
+                }
+            }
+
+            return rooms;
+        }
+
+        private static void EvaluateFloorSimulations(BalanceReport report, BalanceRulesSO rules)
+        {
+            // A run's last floor is the one that has to be able to end the run.
+            var finalFloorOf = new Dictionary<RunDefinitionSO, int>();
+            foreach (var floor in report.Floors)
+            {
+                if (floor.Run == null)
+                {
+                    continue;
+                }
+                if (!finalFloorOf.TryGetValue(floor.Run, out int deepest) || floor.LevelIndex > deepest)
+                {
+                    finalFloorOf[floor.Run] = floor.LevelIndex;
+                }
+            }
+
+            foreach (var floor in report.Floors)
+            {
+                var outcome = floor.Adaptive;
+                if (outcome == null || outcome.Trials == 0)
+                {
+                    continue;
+                }
+
+                if (outcome.WipeRate > rules.MaxFloorWipeRate)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
+                        $"Floor wipes the party {outcome.WipeRate:P0} of the time")
+                    {
+                        Asset = floor.Asset,
+                        Detail = $"Over {outcome.Trials} simulated floors of {floor.Rooms} room(s) under competent "
+                               + $"play the party died {outcome.WipeRate:P0} of the time, clearing "
+                               + $"{outcome.AverageRoomsCleared:0.0} rooms and losing {outcome.AverageHeroDeaths:0.00} "
+                               + $"heroes on average. The ceiling is {rules.MaxFloorWipeRate:P0}. Closed-form "
+                               + $"attrition predicted {floor.PredictedAttrition:0.00}.",
+                        Suggestion = "Thin the floor, add a refuge, or lower the level's Difficulty. Note nothing "
+                               + "revives mid-floor, so a hero lost early compounds for every room after it."
+                    });
+                }
+
+                bool isFinalFloor = floor.Run != null
+                    && finalFloorOf.TryGetValue(floor.Run, out int deepest)
+                    && floor.LevelIndex == deepest;
+
+                if (isFinalFloor && outcome.WipeRate < rules.MinFinalFloorWipeRate)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
+                        "The run's last floor cannot end the run")
+                    {
+                        Asset = floor.Asset,
+                        Detail = $"The deepest floor wipes the party {outcome.WipeRate:P0} of the time against a "
+                               + $"{rules.MinFinalFloorWipeRate:P0} floor, ending at "
+                               + $"{outcome.AverageEndHealthFraction:P0} health with "
+                               + $"{outcome.AveragePotionsUsed:0.0} of {outcome.Rooms} room(s) worth of potions "
+                               + "spent. A run with no failure state makes every decision inside it free, which "
+                               + "is the root cause behind the depth-gap findings rather than a separate problem.",
+                        Suggestion = "Enemy count is the lever with headroom - per-enemy strength is already at "
+                               + "MinHitsToKillHero. Add rooms or enemies per room on the deepest floor, or cut "
+                               + "the sustain the floor hands back (potions, refuges)."
+                    });
+                }
+
+                if (outcome.WipeRate <= 0f && outcome.AverageEndHealthFraction > rules.TrivialFloorEndHealth)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Simulation, floor.Label,
+                        "Floor never spends the party's resources")
+                    {
+                        Asset = floor.Asset,
+                        Detail = $"Ends at {outcome.AverageEndHealthFraction:P0} health (ceiling "
+                               + $"{rules.TrivialFloorEndHealth:P0}) having used "
+                               + $"{outcome.AveragePotionsUsed:0.0} potions, and never wipes. Fine for an opening "
+                               + "floor; a problem anywhere the run is supposed to be escalating."
+                    });
+                }
+
+                if (outcome.Stalemates > 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Simulation, floor.Label,
+                        $"{outcome.Stalemates} of {outcome.Trials} floors ran out of turns")
+                    {
+                        Asset = floor.Asset,
+                        Detail = "A room hit the turn cap with enemies still standing - neither side able to finish "
+                               + "the other, which usually means a heal or a defense outpaces the party's output."
                     });
                 }
             }

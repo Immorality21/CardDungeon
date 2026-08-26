@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using UnityEngine;
 
@@ -124,6 +125,59 @@ namespace Assets.Scripts.Balance
         }
     }
 
+    /// <summary>
+    /// One floor, simulated end to end off a single pool of health, potions and charges.
+    ///
+    /// <para>This is the report the per-encounter <see cref="EncounterSimReport"/> cannot produce. That
+    /// one re-clones a full-health party with a full potion belt for every room, so it measures a
+    /// floor of four rooms as four independent opening fights and can never report the way a run
+    /// actually ends: attrition compounding across rooms, with no revive to undo a hero lost on the
+    /// way.</para>
+    /// </summary>
+    public class FloorSimReport
+    {
+        public string Label = "";
+        public Object Asset;
+        public RunDefinitionSO Run;
+        public int LevelIndex = -1;
+
+        /// <summary>Combat rooms fought, in order, boss last.</summary>
+        public int Rooms;
+
+        /// <summary>The closed-form attrition the run curve predicted for this floor, for comparison.</summary>
+        public float PredictedAttrition;
+
+        /// <summary>True for a run's first floor, the only one that starts on full charges.</summary>
+        public bool StartsWithFullCharges;
+
+        public Dictionary<SimPolicy, EncounterSimulator.FloorOutcome> Outcomes =
+            new Dictionary<SimPolicy, EncounterSimulator.FloorOutcome>();
+
+        /// <summary>
+        /// The outcome to judge the floor by: competent play, not the best of three. A floor is too
+        /// lethal only if it is too lethal for someone playing well.
+        /// </summary>
+        public EncounterSimulator.FloorOutcome Adaptive =>
+            Outcomes.TryGetValue(SimPolicy.Adaptive, out var outcome) ? outcome : null;
+
+        /// <summary>The kindest reading across policies - the floor at its most survivable.</summary>
+        public EncounterSimulator.FloorOutcome Safest
+        {
+            get
+            {
+                EncounterSimulator.FloorOutcome best = null;
+                foreach (var kvp in Outcomes)
+                {
+                    if (best == null || kvp.Value.WipeRate < best.WipeRate)
+                    {
+                        best = kvp.Value;
+                    }
+                }
+                return best;
+            }
+        }
+    }
+
     /// <summary>The full output of an analysis pass: the per-area records plus the flat issue list.</summary>
     public class BalanceReport
     {
@@ -139,6 +193,9 @@ namespace Assets.Scripts.Balance
         public Dictionary<EnemySO, PartyBaseline> PartyByEnemy = new Dictionary<EnemySO, PartyBaseline>();
 
         public List<EncounterSimReport> Simulations = new List<EncounterSimReport>();
+
+        /// <summary>Per-floor simulations - the read on whether a run can actually be lost.</summary>
+        public List<FloorSimReport> Floors = new List<FloorSimReport>();
         public SaveAudit Save;
         public List<BalanceIssue> Issues = new List<BalanceIssue>();
 

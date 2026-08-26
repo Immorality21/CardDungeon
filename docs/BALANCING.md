@@ -426,6 +426,188 @@ Consequences for tuning, in order of importance:
   the honest levers are `GrantedCharges` on the signature nodes and `DrawableMagicEntry.Charges` - both
   authored, both visible in the analyzer - not a return to refilling.
 
+## 5g. The re-measure §5f asked for — 63 encounters, 63 wins, and why no fight has depth
+
+Run 2026-08-26 against the real assets, simulation on, no rules asset (code defaults), via
+`BalanceAssetCollector.Collect(rules, true, false)` → `BalanceAnalyzer.Analyze`. This supersedes every
+simulation number in `NEXT_STEPS.md` §0, which predated the charges-are-a-run-resource change.
+
+**0 critical / 63 warning / 44 info.** The warning count is not a spread of different problems: it is
+**one finding, 63 times**. Every simulated encounter in the game — 49 solo enemies plus 14 worst-room
+groups — trips *Attack-spam plays this fight as well as thinking does*.
+
+The reason is one line of the output, repeated 63 times: **`win 100%`**. Not one encounter, at any
+depth, in any run, against the party that actually reaches it, can be lost. The worst room in the game
+(Ember Vault, The Slag Halls) ends at **63% health**. The worst *anything* ends at 57%.
+
+```
+                                          gap    attack-only          best policy
+Dragon      / Ashen Deep L1               0.063  win 100% endHP 68%   MagicFirst  endHP 80%
+Abyssal Warden / Sunken Depths            0.059  win 100% endHP 78%   MagicFirst  endHP 90%
+Ember Vault / The Slag Halls (worst room) 0.043  win 100% endHP 63%   MagicFirst  endHP 71%
+Brown Room  / Warren Tunnels              0.041  win 100% endHP 73%   Adaptive    endHP 82%
+Floating Eye / anywhere                   0.000  win 100% endHP 87%   AttackOnly  (identical)
+Hex Weaver  / anywhere                    0.000  win 100% endHP 99%   AttackOnly  (identical)
+Stone Sentinel / Collapsed Caverns        0.000  win 100% endHP 99%   MagicFirst  (identical)
+```
+
+**The lesson, and it is a general one: depth is downstream of losability.** A decision is only a
+decision if a wrong choice costs something. When every policy wins every time, the three policies are
+not three strategies — they are three ways to spend a fight that was already over. The best case in
+the whole table is the Dragon at gap **0.063**, and what that buys is *end-health*: nine casts move
+the fight from 68% to 80%. It never moves a loss to a win, because there are no losses. So
+`DominantStrategyTolerance` (0.05) is not really measuring dominant strategy here; it is measuring
+that nothing is at stake. **Do not try to tune the depth gap up directly** — it is a symptom.
+
+**Corollary — and a correction: enemy strength has no headroom left.** The first draft of this section
+read the simulator's `AverageTurns` as fight length and called several fights slogs. That was wrong.
+The closed-form `PartyTurnsToKill` flags **nothing**: trash runs 3.1–7.7 party-turns against an 8-turn
+ceiling, and the longest boss (Gilded Hoarder, **19.7**) sits just under the 20-turn boss ceiling. No
+SLOG anywhere.
+
+What the closed-form *does* flag is the opposite constraint. **`FewestHitsToKillAHero` is already 3 —
+`MinHitsToKillHero` exactly — for Cinder Imp, Dragon and Hex Weaver across all of The Ashen Deep**, and
+4 nearly everywhere else against a target of 6. So the strength dial is not merely near its ceiling,
+it is *on* it: per §1 Consequence 4 the squishiest hero caps every enemy's Strength, and that cap is
+reached. **Raising `Difficulty` from here buys losability by breaking hero durability**, which the §3
+warning about overshooting solvers describes exactly. Trash danger looks like it has room
+(0.09–0.18 against a 0.45 ceiling) but it cannot be spent through strength.
+
+**Corollary — three enemies are pure formalities and one is a mystery.** Hex Weaver (a Debuffer) and
+Stone Sentinel end fights at **99%**, and Bog Shaman (a Healer) at **97–98%**. Both have a mechanic
+whose entire point is that ignoring it should cost you: a heal that outpaces incoming damage, a debuff
+that compounds. Neither can, at these numbers. A healer only "must be focused" if unfocused healing
+beats the party's damage output, which is a ratio nobody has ever set deliberately.
+
+**What the numbers say to do, in order.** Losability first, then visibility, then new verbs:
+
+1. **Make some fights losable at all.** Until at least the worst rooms and the bosses can go wrong,
+   every other depth change is unmeasurable — the simulator will keep reporting gap ≈ 0 no matter what
+   is added, because 100% and 100% differ by nothing.
+2. **Then surface what already exists.** The elemental layer is a **±50% swing** — a 1.5×/0.5× damage
+   multiplier, the single largest in the game — and it is *hidden*. That is depth already paid for and
+   not yet spendable (`ELEMENTAL_PLAN.md` Phase 4c, unblocked 2026-08-26).
+3. **Then add verbs, if still needed.** The hero command set is Attack / Magic / Draw / Item / **Skip**
+   — and Skip is a pass, not a guard. There is **no defensive action in the game**, which means the
+   boss telegraph (the `!` markers during a channel) is information the player can do nothing with
+   except drink. A Defend/Guard is the cheapest decision-per-line-of-code available, but it is worth
+   nothing while nothing can kill you — hence third, not first.
+
+Reproduce with the command in `docs/GAMEPLAY_VALIDATION.md` gotcha 12's sibling pattern:
+`BalanceAssetCollector.Collect(rules, runSimulation: true, includeSaveAudit: false)` then read
+`report.Simulations` for `DepthGap`, `AttackOnly.Score`, `Best.Policy` and `WinRate`. Note
+`result.Log` does **not** honour format specifiers like `{0:0.000}` — build the string with
+`string.Format` first or the numbers come back as the literal placeholder.
+
+## 5h. Floors, not rooms — the measurement that was missing, and the calibration it gave
+
+§5g ended on "63 of 63 encounters win 100%, so depth is downstream of losability." Acting on that
+turned up the reason, and it was not a content problem: **the per-encounter simulation cannot report
+a loss, by construction.** `RunSimulations` measures one room at a time, and `RunOne` clones a
+**fresh, full-health party with the full potion belt** for every encounter. A four-room floor was
+therefore measured as four independent opening fights. Three things it structurally cannot see:
+
+- **Attrition compounds.** Room 3 is fought on what rooms 1 and 2 left. Per room, it is fought on a
+  full bar.
+- **Nothing revives.** There is no revive item, spell or between-room recovery anywhere in the game -
+  `Party.HealAll` fires only on entering a *fresh dungeon*, and `ConsumableEffectType` has one member
+  (`RestoreHealth`). So a hero downed in room 2 is gone for the rest of the floor and the party gets
+  weaker as the floor gets harder. **That death spiral is the actual failure mode**, and per room it
+  reads as zero deaths.
+- **The potion belt is finite.** Per encounter it is effectively multiplied by the room count: a
+  2-potion belt across a 6-room floor was being simulated as 12 potions.
+
+So the closed-form model and the simulator were not disagreeing. They were answering different
+questions, and only one of them was the player's.
+
+### `EncounterSimulator.RunFloor`
+
+Rooms in the order the player meets them, off **one** pool of health, potions and charges, with the
+boss last and refuges spread through the order. `RunOne` was split into `RunEncounter` (a fight
+against hero instances the *caller* owns) plus `ScoreEncounter`, which is what lets a floor chain
+fights without resetting anything. `StartsWithFullCharges` is true only for floor 0, since charges are
+a run resource (§5f) - granting every floor full charges was the same optimism again.
+
+Pinned by `FloorSimulatorTests` (10 cases). The tests are written so that **if the floor sim ever
+stops carrying state they fail**, because each asserts something a room-at-a-time run gets wrong.
+
+*Fixture trap, cost a red run:* an enemy authored weak enough to die to the party's first swing
+**never takes a turn**, so a "this hero should die" test reports zero deaths for reasons that have
+nothing to do with the thing under test. Give a killer that has to act high Agility *and* enough
+health to survive a few rounds.
+
+### What it measured, 2026-08-26 (200 trials/floor, Adaptive)
+
+```
+floor                                    rooms  attrition   wipe   endHP  deaths  potions
+The Threshold      L0 Dungeon Entrance      1      0.062      0%     94%   0.00    0.0/2
+The Threshold      L1 Upper Halls           4      0.395      0%     80%   0.00    0.3/2
+The Threshold      L2 Collapsed Caverns     3      0.635      0%     67%   0.03    0.8/2
+The Threshold      L3 Sunken Depths         4      0.745     12%     45%   0.67    2.0/2
+The Drowned March  L3 The Mire Throne       2      0.494      0%     66%   0.05    1.4/2
+The Warrens        L1 The Counting Room     6      0.626      0%     54%   0.11    1.7/2
+The Ashen Deep     L0 Cinder Gate           4      0.409      1%     54%   0.21    1.8/2
+The Ashen Deep     L2 Emberfall             4      0.534      1%     51%   0.13    1.7/2
+The Hollow Vault   L0 The Hollow Vault      3      0.391      0%     71%   0.06    1.6/2
+```
+
+**Control, run through the same code path:** every one of those rooms as its own one-room floor -
+i.e. exactly what the per-encounter sim measures. **Zero rooms, on any floor, in any run, can wipe the
+party.** Average per-room end health 81-92%; the same rooms chained end at 45-83%.
+
+### The calibration this hands over — attrition predicts death
+
+The two models now agree, and the exchange rate is worth keeping:
+
+| Closed-form attrition | Measured wipe rate |
+|---|---|
+| 0.75 | 12% |
+| 0.64 and below | 0% |
+
+**Death starts at roughly attrition 0.70.** Every floor in the project except one sits at 0.39-0.64,
+which is why nothing dies. `MinAttritionMargin` (ceiling 0.80) was already pointing at the right
+place; what was missing was any evidence of what the ceiling *meant*. Use attrition as the cheap dial
+during a pass (closed-form is ~1s) and confirm with the floor sim, rather than running simulations to
+find a direction.
+
+### The finding that matters: the campaign gets *safer* as it goes deeper
+
+Three new checks - `MaxFloorWipeRate` (0.35), `MinFinalFloorWipeRate` (0.05), `TrivialFloorEndHealth`
+(0.85). **Nothing** trips the too-lethal ceiling. What trips is the other end:
+
+- **4 of 5 runs have a final floor that cannot end the run** - The Mire Throne, The Counting Room,
+  Emberfall and The Hollow Vault all wipe 0-1% of the time.
+- **The only floor in the game that can kill the party is Sunken Depths - the last floor of
+  `The Threshold`, which is the *first* run.** Depth is currently inversely correlated with danger.
+
+Issue counts went **0 critical / 63 warning / 44 info → 0 / 67 / 46**: the four unloseable final
+floors plus two opening floors that never spend a resource. All six are real.
+
+### Where the tuning has to go, and where it cannot
+
+**Enemy count is the only lever with headroom.** Per-enemy strength is *already at the floor*:
+`FewestHitsToKillAHero` is 3 - `MinHitsToKillHero` exactly - for Cinder Imp, Dragon and Hex Weaver
+throughout The Ashen Deep (§5g). Raising `Difficulty` from here buys losability by making heroes
+one-shottable, which the §3 overshoot warning describes precisely. That leaves:
+
+1. **Rooms per floor / enemies per room** (§1 Consequence 2) - level design, and the honest lever.
+   Note The Counting Room already runs 6 rooms at attrition 0.626 and still cannot kill, so this is
+   not a small nudge.
+2. **Sustain the floor hands back** - the 2-potion belt and refuge quotas. Cheaper to move than room
+   counts and it hits the denominator directly.
+3. **Hero HP** would raise the strength ceiling and let levers 1-2 breathe, at the cost of longer
+   fights.
+
+Lever 1 is level design and lever 2 is a design decision about how forgiving a floor should be, so
+both are calls to make deliberately rather than solve for. What is no longer in question is whether
+the change can be *measured*: it can, per floor, in about a minute.
+
+**Known coverage gap.** `FloorSimulatorTests` pins the floor *model*, but the project's actual floors
+are not asserted anywhere: `BalanceRegressionTests` collects with `runSimulation: false` (deliberately -
+it keeps the whole suite at ~1s), so the four *last floor cannot end the run* warnings are only visible
+by running the analyzer. A slow, `Category("Balance")`-gated test asserting each run's final floor
+clears `MinFinalFloorWipeRate` would close it, at the cost of a much longer suite.
+
 ## 6. Standing traps
 
 - **A trash buff breaks three other checks.** Boss:trash ratio (bosses are on absolute overrides),
@@ -440,7 +622,20 @@ Consequences for tuning, in order of importance:
   finding, decide whether the *check* is what is wrong — `MinAttritionForJumpCheck` exists because of
   exactly that call.
 - **The model measures the widest legal party**, so a player fielding fewer heroes sees a harder run
-  than the curve reports. Every number here is the optimistic reading.
+  than the curve reports. Every number here is the optimistic reading. Worse, "widest legal" means
+  `PartySlots.MaxCap` (4), not the cap the save has actually *bought* (`BaseCap` 2 + purchased
+  slots), so the curve prices every run as though 900 gold of party slots were already spent.
+- **A per-room simulation cannot report a loss.** `RunSimulations` re-clones a full-health party with
+  a full potion belt for every encounter, so a win rate from it means "no single room, entered fresh,
+  can kill you" - never "this floor is survivable". Judge losability with `RunFloor` (§5h) and read
+  per-room win rates as what they are: a check on individual assets.
+- **The model prices one attempt, not the retry loop.** `AwardLevelClear` banks a floor's gold
+  permanently and a wipe forfeits only the *current* floor, so a run that dies on floor 3 still pays
+  ~190 gold — and the third party slot costs 300. Two deliberate failures buy the strongest
+  difficulty lever in the game. `RunCurve` has no notion of an *n*-th attempt and `EvaluateEconomy`
+  prices **Essence only**, so no check anywhere compares a Gold sink's cost against the gold income
+  of the floors the player can already clear. Before concluding a level is a wall, work out what it
+  costs to farm past it — see `NEXT_STEPS.md` §3b.
 - **`AverageDamageAgainstGroup` always applies a crit multiplier**, and passing `attacker: null` does
   *not* opt out — `ExpectedCritMultiplier(null)` falls back to the **base** crit rate, not to 1. Any
   damage source that does not crit (spell effects, room-event outcomes) has to call

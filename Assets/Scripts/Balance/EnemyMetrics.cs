@@ -156,7 +156,7 @@ namespace Assets.Scripts.Balance
             metrics.XpReward = LevelEnemyTuning.XpFor(enemy, tuning);
             metrics.GoldReward = LevelEnemyTuning.GoldFor(enemy, tuning);
 
-            metrics.Name = string.IsNullOrEmpty(enemy.DisplayName) ? enemy.name : enemy.DisplayName;
+            metrics.Name = enemy.Label;
             metrics.IsBoss = enemy.IsBoss;
             metrics.Archetype = enemy.ArchetypeOf;
             metrics.PowerScore = BalanceMath.PowerScore(metrics.Stats, rules);

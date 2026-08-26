@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
   m_Name: StoneSentinel
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: StoneSentinel
   DisplayName: Stone Sentinel
   Sprite: {fileID: 21300000, guid: bd5521e79eb24421ab0bfc80cb393f36, type: 3}
   AnimationFrames: []

@@ -184,6 +184,20 @@ namespace Assets.Scripts.Balance
                  "no meaningful decisions in it.")]
         [Range(0f, 0.5f)] public float DominantStrategyTolerance = 0.05f;
 
+        [Tooltip("Most of a floor's rooms the party may lose to and still call the floor fair. Above " +
+                 "this a floor is punishing rather than tense. Measured by the floor simulation under " +
+                 "competent (Adaptive) play, not the best of three policies.")]
+        [Range(0f, 1f)] public float MaxFloorWipeRate = 0.35f;
+
+        [Tooltip("A run's *final* floor should be able to end the run. Below this wipe rate the run " +
+                 "has no failure state at all, which is what makes every in-fight decision free. " +
+                 "Earlier floors are deliberately exempt - an opening floor is allowed to be safe.")]
+        [Range(0f, 1f)] public float MinFinalFloorWipeRate = 0.05f;
+
+        [Tooltip("A floor ending above this share of the party's health never spent its resources, so " +
+                 "nothing that happened on it was a decision.")]
+        [Range(0f, 1f)] public float TrivialFloorEndHealth = 0.85f;
+
         [Header("Economy / progression")]
         [Tooltip("Level-clears a player should need to afford their first magic upgrade.")]
         public int TargetClearsToFirstUpgrade = 3;
