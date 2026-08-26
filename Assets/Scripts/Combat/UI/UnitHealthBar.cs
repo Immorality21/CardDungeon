@@ -108,6 +108,24 @@ namespace Assets.Scripts.Combat
             _built = true;
         }
 
+        public Vector3 EffectPopupPosition
+        {
+            get
+            {
+                EnsureBuilt();
+
+                if (_barRoot == null)
+                {
+                    return transform.position;
+                }
+
+                // Just to the right of the health bar
+                return _barRoot.TransformPoint(
+                    new Vector3(_barWidth * 0.75f, 0f, 0f)
+                );
+            }
+        }
+
         private void LateUpdate()
         {
             bool inCombat = CombatManager.HasInstance && CombatManager.Instance.InCombat;

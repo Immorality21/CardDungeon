@@ -50,6 +50,19 @@ namespace Assets.Scripts.Cards
                     }
                 }
 
+                if (magic != null &&
+                    magic.Icon != null &&
+                    entry.Target != null &&
+                    entry.Target.Transform != null &&
+                    entry.Impact <= 0)
+                {
+                    yield return ShowEffectIcon(
+                        entry.Target,
+                        magic.Icon,
+                        entry.Color
+                    );
+                }
+
                 // Impact juice for damaging entries: flash the target, shake the camera,
                 // and a brief hit-stop so magic hits land with weight.
                 if (entry.Impact > 0 && entry.Target != null && entry.Target.IsAlive)
@@ -77,6 +90,57 @@ namespace Assets.Scripts.Cards
                     return ("Absorbed", new Color(0.4f, 0.95f, 0.5f));
                 default:
                     return null;
+            }
+        }
+
+        private IEnumerator ShowEffectIcon(
+            ICombatUnit target,
+            Sprite sprite,
+            Color color)
+        {
+            var healthBar = target.Transform.GetComponent<UnitHealthBar>();
+
+            Vector3 start = healthBar != null
+                ? healthBar.EffectPopupPosition
+                : target.Transform.position + new Vector3(0.6f, 0.5f, 0f);
+
+            var go = new GameObject("SpellEffectPopup");
+
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
+            sr.sortingOrder = 1000;
+
+            go.transform.position = start;
+            go.transform.localScale = Vector3.one * 0.35f;
+
+            const float duration = 0.65f;
+            const float rise = 0.7f;
+
+            float elapsed = 0f;
+
+            while (elapsed < duration && go != null)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+
+                // Rise
+                go.transform.position =
+                    start + Vector3.up * rise * t;
+
+                // Fade
+                Color c = color;
+                c.a = 1f - t;
+
+                // Small pop
+                float scale = Mathf.Lerp(0.35f, 0.5f, Mathf.Sin(t * Mathf.PI));
+                go.transform.localScale = Vector3.one * scale;
+
+                yield return null;
+            }
+
+            if (go != null)
+            {
+                UnityEngine.Object.Destroy(go);
             }
         }
 
