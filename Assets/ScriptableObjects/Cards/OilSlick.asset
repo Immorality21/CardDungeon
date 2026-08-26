@@ -11,19 +11,21 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
   m_Name: OilSlick
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: OilSlick
   DisplayName: Oil Slick
   Description: Douses an enemy in slippery oil, weakening their stats.
-  Icon: {fileID: 21300000, guid: 82067118dbdd458a9a50325256cd5138, type: 3}
+  Icon: {fileID: -7156454362852396112, guid: 739be64d910edc641a828f8bb846bed6, type: 3}
   TargetType: 0
   Rarity: 1
   Effects:
   - EffectType: 3
-    ScalingStat: 4
     Power: 3
+    PowerMode: 0
+    ScalingStat: 4
     DamageType: 0
     BuffType: 3
     Duration: 3
-  Tags:
-  - 3
+    UnlockLevel: 0
+  Tags: 03000000
+  TagDuration: 3

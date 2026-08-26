@@ -1,6 +1,7 @@
-using System.Collections;
 using Assets.Scripts.Combat;
 using ImmoralityGaming.Fundamentals;
+using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Assets.Scripts.Cards
@@ -99,25 +100,62 @@ namespace Assets.Scripts.Cards
             go.transform.localScale = Vector3.one * 0.35f;
             go.transform.position = from;
 
-            Vector2 direction = to - from;
+            Vector3 start = from;
+            Vector3 end = to;
 
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            // Midpoint between caster and target
+            Vector3 midpoint = (start + end) * 0.5f;
 
-            go.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            float side = UnityEngine.Random.value < 0.5f ? 1f : -1f;
 
-            const float duration = 0.5f;
+            // Random arch height and direction
+            float archHeight = UnityEngine.Random.Range(0.5f, 2.5f);
+
+            // arch, but with some variation
+            Vector3 control =
+                midpoint +
+                Vector3.up * archHeight * side;
+
+            // Small sideways randomness
+            control.x += UnityEngine.Random.Range(-0.8f, 1.8f);
+
+            const float duration = 0.7f;
             float t = 0f;
+
+            Vector3 previousPosition = go.transform.position;
 
             while (t < duration && go != null)
             {
                 t += Time.deltaTime;
                 float p = Mathf.Clamp01(t / duration);
 
-                go.transform.position = Vector3.Lerp(from, to, p);
-                //go.transform.Rotate(0f, 0f, 720f * Time.deltaTime);
+                // Quadratic Bezier:
+                // (1-t)^2 * start
+                // + 2(1-t)t * control
+                // + t^2 * end
+                Vector3 a = Vector3.Lerp(start, control, p);
+                Vector3 b = Vector3.Lerp(control, end, p);
+                Vector3 newPosition = Vector3.Lerp(a, b, p);
+
+                Vector2 direction = newPosition - previousPosition;
+
+                if (direction.sqrMagnitude > 0.0001f)
+                {
+                    float angle =
+                        Mathf.Atan2(direction.y, direction.x)
+                        * Mathf.Rad2Deg;
+
+                    go.transform.rotation =
+                        Quaternion.Euler(0f, 0f, angle);
+                }
+
+
+                go.transform.position = Vector3.Lerp(a, b, p);
+                previousPosition = newPosition;
 
                 yield return null;
             }
+
 
             if (go != null)
             {

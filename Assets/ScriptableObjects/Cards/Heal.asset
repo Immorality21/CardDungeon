@@ -15,13 +15,14 @@ MonoBehaviour:
   Key: Heal
   DisplayName: Heal
   Description: Restores health to yourself.
-  Icon: {fileID: 21300000, guid: 47433f2f5a174f969fefbf17f86f06b7, type: 3}
+  Icon: {fileID: 2291012834914130869, guid: f75b4f2ca4ebefc4c938f40515ffba65, type: 3}
   TargetType: 2
   Rarity: 0
   Effects:
   - EffectType: 1
-    ScalingStat: 5
     Power: 6
+    PowerMode: 0
+    ScalingStat: 5
     DamageType: 0
     BuffType: 0
     Duration: 3

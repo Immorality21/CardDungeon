@@ -98,7 +98,7 @@ namespace Assets.Scripts.Combat
 
             _statusRoot = new GameObject("StatusIcons").transform;
             _statusRoot.SetParent(_barRoot, false);
-            _statusRoot.localPosition = new Vector3(0f, -0.22f, 0f);
+            _statusRoot.localPosition = new Vector3(-0.6f, -0.22f, 0f);
 
             _intent = MakeRenderer(_barRoot, null, Color.white, BgSortOrder + 2);
             _intent.transform.localPosition = new Vector3(0f, 0.30f, 0f);
