@@ -803,54 +803,66 @@
 }
 
 /* ---- Victory summary (shown over the battle stage) ---- */
+
 .cd-victory {
-    width: 440px;
+    width: 600px;
     max-width: 90%;
-    padding: 0 0 16px 0;
+    padding: 0 0 24px 0;
+
     background-color: var(--cd-parchment);
+
     border-width: 4px;
     border-color: var(--cd-frame);
-    border-radius: 10px;
+    border-radius: 14px;
+
     overflow: hidden;
     align-items: center;
 }
 
 .cd-victory__title {
     width: 100%;
+
     -unity-font-style: bold;
-    font-size: 30px;
+    font-size: 38px;
+
     color: var(--cd-text-light);
     background-color: var(--cd-frame);
+
     -unity-text-align: middle-center;
-    padding: 12px 0;
-    margin-bottom: 12px;
+
+    padding: 16px 0;
+    margin-bottom: 18px;
 }
 
 .cd-victory__rewards {
     width: 100%;
-    padding: 0 26px;
-    margin-bottom: 10px;
+
+    padding: 0 34px;
+    margin-bottom: 16px;
 }
 
 .cd-victory-row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 9px 4px;
-    margin: 2px 0;
+
+    padding: 13px 6px;
+    margin: 3px 0;
+
     border-bottom-width: 1px;
     border-bottom-color: rgba(58, 42, 22, 0.22);
 }
 
 .cd-victory-row__label {
-    font-size: 17px;
+    font-size: 21px;
     -unity-font-style: bold;
     color: var(--cd-text-dark);
 }
 
 .cd-victory-row__value {
-    font-size: 18px;
+    font-size: 22px;
     -unity-font-style: bold;
+
     color: var(--cd-text-dark);
     -unity-text-align: middle-right;
 }
@@ -858,19 +870,22 @@
 .cd-victory-loot {
     flex-direction: row;
     align-items: center;
-    padding: 3px 4px 3px 16px;
+
+    padding: 6px 6px 6px 20px;
 }
 
 .cd-victory-loot__icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 8px;
+    width: 32px;
+    height: 32px;
+
+    margin-right: 10px;
     flex-shrink: 0;
+
     -unity-background-scale-mode: scale-to-fit;
 }
 
 .cd-victory-loot__name {
-    font-size: 15px;
+    font-size: 18px;
     color: var(--cd-text-dark);
 }
 
