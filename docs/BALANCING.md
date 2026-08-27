@@ -593,8 +593,13 @@ one-shottable, which the §3 overshoot warning describes precisely. That leaves:
 1. **Rooms per floor / enemies per room** (§1 Consequence 2) - level design, and the honest lever.
    Note The Counting Room already runs 6 rooms at attrition 0.626 and still cannot kill, so this is
    not a small nudge.
-2. **Sustain the floor hands back** - the 2-potion belt and refuge quotas. Cheaper to move than room
-   counts and it hits the denominator directly.
+2. ~~**Sustain the floor hands back** - the 2-potion belt and refuge quotas.~~ **Wrong - retracted
+   2026-08-27.** `HealingPotion.ConsumableAmount` is **5 flat**, against enemy hits of **6.8-14.7**: one
+   potion heals less than a single enemy swing anywhere in the game. The whole belt is `2 x 5 = 10` HP
+   against health pools of 97-127, so `HealingPool` is **7-12% of `SustainPool`**. Emptying the belt
+   entirely moves a floor from 0.53 attrition to about 0.59 - nowhere near the 0.70 death line. The
+   belt correlates with lethality (Sunken Depths is the one floor that spends it all) but does not
+   *cause* it. Refuges are the real half of this lever at 35% of the bar each.
 3. **Hero HP** would raise the strength ceiling and let levers 1-2 breathe, at the cost of longer
    fights.
 
@@ -607,6 +612,100 @@ are not asserted anywhere: `BalanceRegressionTests` collects with `runSimulation
 it keeps the whole suite at ~1s), so the four *last floor cannot end the run* warnings are only visible
 by running the analyzer. A slow, `Category("Balance")`-gated test asserting each run's final floor
 clears `MinFinalFloorWipeRate` would close it, at the cost of a much longer suite.
+
+## 5i. The gate ladder — party width gates, XP does not, and the game already has the loop
+
+Measured 2026-08-27, after §5h's "make floors losable" ran into the question *losable for whom*. The
+design intent being tuned toward: **deeper runs should be unclearable until the player has invested, so
+dying is the tuition rather than a punishment.** That makes the target a function of investment, not a
+single number, so investment had to be measured as an axis.
+
+Two axes exist: **XP per hero** spent on a sphere grid (`BalanceRulesSO.ReferenceHeroXp`; a full grid
+costs **615-750**) and **party width** (`PartySlots`: `BaseCap` **2**, bought up to `MaxCap` 4 at
+300 then 600 gold).
+
+### Axis 1 — XP investment barely moves survivability
+
+Wipe rate of each run's *final* floor, at the roster the curve gives it (3 heroes):
+
+```
+run finale                          xp0   xp100  xp200  xp350  xp500  xp700
+The Threshold / Sunken Depths        12%     1%     0%     0%     0%     0%
+The Drowned March / Mire Throne       0%     0%     0%     0%     0%     0%
+The Warrens / The Counting Room       0%     0%     0%     0%     0%     0%
+The Ashen Deep / Emberfall            1%     0%     0%     0%     0%     0%
+The Hollow Vault                      0%     0%     0%     0%     0%     0%
+```
+
+**Every finale is clearable at zero investment.** There is no gate anywhere in the campaign. And the
+axis saturates early: party health pool runs **97 → 127 (+31%)** across the whole 0-700 span and stops
+moving at ~350 XP — half a grid. `FewestHitsToKillAHero` stays pinned at **3** in The Ashen Deep at
+*every* investment level, and only creeps 3→4 elsewhere.
+
+The grids do author more than that (`MaxHealth` totals: Warrior **+18** on a base of 26, Tank +24,
+Acolyte +17 on 24, Scout +12 on 30 — so +40-70%), but the realised party gain is +31% and flat after
+350. Worth a look on its own: **half of every grid buys no durability.**
+
+### Axis 2 — party width is a hard gate
+
+Same finales, same rooms, party truncated to width *k*:
+
+```
+run finale                          xp     k=1    k=2    k=3
+The Threshold / Sunken Depths        0    100%   100%    12%
+The Drowned March / Mire Throne      0    100%    54%     0%
+The Warrens / The Counting Room      0    100%   100%     0%
+The Ashen Deep / Emberfall           0    100%    99%     1%
+The Hollow Vault                     0    100%    95%     0%
+
+The Threshold / Sunken Depths      350     99%     1%     0%
+The Drowned March / Mire Throne    350     79%     0%     0%
+The Warrens / The Counting Room    350     97%     0%     0%
+The Ashen Deep / Emberfall         350    100%     0%     0%
+The Hollow Vault                   350    100%     0%     0%
+```
+
+**The third hero is worth more than a maxed sphere grid.** Emberfall goes 99% → 1% on one extra body.
+And the two axes are **multiplicative, not additive**: at k=2 the XP axis is enormous (Emberfall
+99% → 0% from 0 → 350 XP), while at k=3 it is worth nothing, because k=3 is already so far above the
+content that no other variable can reach it.
+
+### The finding that changes the plan: the loop already exists
+
+`PartySlots.BaseCap` is **2**. A fresh save can field **two** heroes — but `RunCurveModel` grows the
+roster to `PartySlots.MaxCap` (4) and the finales above were measured at the curve's **3**. So every
+number in §5g-§5h is one hero more generous than a new save actually gets, and the real fresh-save
+experience of the deeper finales is the **k=2** column: **54-100% wipe**.
+
+Which means the *die → bank gold → buy a slot → return* loop the design wants is **already
+implemented and already load-bearing** — the deeper runs genuinely do require the 300-gold third slot.
+It was invisible because nothing measured it and because the analyzer models the bought-out cap.
+
+**But it is a cliff, not a staircase.** One 300-gold purchase flips the whole campaign from
+"impossible" to "trivial" (99% → 1%), and it is the *same* purchase for every run. So depth still does
+not mean danger; there is exactly one gate and everything past it is free.
+
+### What this makes the tuning job
+
+Not "add a gate" — **stage the gates so each run demands the next increment**, and scale deep content
+hard enough that the increment is required. The headroom for that is now known and it is large: at k=3
+/ 350 XP the deep floors end at **83-90% health**, so there is room to multiply deep danger several
+times before an *invested* party is threatened. The constraint from §5g (enemy strength pinned at the
+3-hit floor) binds on the **fresh** party — which is exactly the party that is *supposed* to die.
+
+Corollary for the model: **a single reference party cannot express this design.** A floor's verdict
+needs to be a pair — *the minimum investment that clears it* and *the investment at which it stops
+being a threat* — and the finding is whether that pair rises with campaign depth. That supersedes the
+older min/max-party-band follow-up (`NEXT_STEPS.md` §5); the band is one slice of this ladder.
+
+### Two traps this measurement walked into
+
+- **`Object.Instantiate` a `BalanceRulesSO` to vary a rule**, then `DestroyImmediate` it. Editing the
+  checked-in asset in place dirties the project, and there is no rules asset checked in anyway, so a
+  mutation escapes as a silent default change.
+- **Rooms do not depend on the party, so they can be reused across parties.** `LevelCurve.Rooms`
+  carries enemy sets and level tuning; only the *metrics* on it are party-relative. That is what makes
+  the width sweep cheap — build the curve once, sim the same rooms against k=1..4.
 
 ## 6. Standing traps
 
@@ -625,6 +724,12 @@ clears `MinFinalFloorWipeRate` would close it, at the cost of a much longer suit
   than the curve reports. Every number here is the optimistic reading. Worse, "widest legal" means
   `PartySlots.MaxCap` (4), not the cap the save has actually *bought* (`BaseCap` 2 + purchased
   slots), so the curve prices every run as though 900 gold of party slots were already spent.
+- **"Too easy" and "too hard" are both meaningless without naming the party.** Party width and XP
+  investment are *multiplicative*, and the game's content sits past the point where either bites: at
+  3 heroes nothing matters, at 2 heroes everything does (§5i). Always state the width and the XP a
+  number was measured at, and remember `BaseCap` is **2** while the model assumes up to **4**.
+- **The potion belt is not a sustain lever.** 5 HP flat, less than one enemy hit, 7-12% of the pool.
+  Refuges (35% of the bar) are the half of that lever that actually moves.
 - **A per-room simulation cannot report a loss.** `RunSimulations` re-clones a full-health party with
   a full potion belt for every encounter, so a win rate from it means "no single room, entered fresh,
   can kill you" - never "this floor is survivable". Judge losability with `RunFloor` (§5h) and read

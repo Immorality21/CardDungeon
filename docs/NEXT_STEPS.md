@@ -692,11 +692,16 @@ one-shottable. That leaves three levers, and the first two are decisions rather 
 1. **Rooms per floor / enemies per room** (§1 Consequence 2). The honest lever, and level design — so
    it is a deliberate call, not something to solve for. Note The Counting Room already runs **6 rooms
    at attrition 0.626 and still cannot kill**, so this is not a small nudge.
-2. **Sustain the floor hands back** — the 2-potion belt and the refuge quota. Cheaper to move than
-   room counts and it hits the attrition denominator directly. Sunken Depths is the one floor that
-   spends the *whole* belt, which is exactly why it is the one floor that kills.
-3. **Hero HP** would raise the strength ceiling and give levers 1–2 room to breathe, at the cost of
+2. ~~**Sustain the floor hands back** — the 2-potion belt and the refuge quota.~~ **Retracted
+   2026-08-27.** The potion is **5 HP flat** against enemy hits of 6.8–14.7 — one potion heals less than
+   one swing, and the whole belt is 7–12% of the sustain pool. Emptying it moves a floor from 0.53 to
+   ~0.59 attrition, nowhere near the 0.70 death line. Refuges (35% of the bar) are the half of this
+   lever that actually moves. See `docs/BALANCING.md` §5h.
+3. **Hero HP** would raise the strength ceiling and give lever 1 room to breathe, at the cost of
    longer fights.
+
+**Superseded by §0g.** The framing above asks "how do we make floors lethal", which turned out to be
+the wrong question — the right one is *lethal for whom*. See §0g.
 
 Whichever is chosen, the deepest floor of each run is the place to start, and the target is a wipe rate
 that clears `MinFinalFloorWipeRate` without passing `MaxFloorWipeRate` — a band the analyzer now
@@ -707,6 +712,50 @@ outcome is never in doubt cannot contain a decision, which is why all 63 encount
 *attack-spam plays this as well as thinking does*. Expect those to start moving on their own once
 floors can be lost — and note the elemental reveal (§0b Phase 4c, unblocked) is the other half, since
 a ±50% damage swing the player cannot see is depth already paid for and not yet spendable.
+
+### 0g. Depth must mean danger — stage the investment gates
+
+**The design, in the user's words (2026-08-27):** *don't* make dying cost something — make dying
+**mandatory to progress the more challenging depths**. Death is the tuition, not the penalty. Deeper
+runs should be unclearable until the player has invested, so the loop is
+die → bank → upgrade → return.
+
+**Measured 2026-08-27 (`docs/BALANCING.md` §5i), and the headline is that the loop already exists.**
+`PartySlots.BaseCap` is **2**, so a fresh save fields two heroes — and at two heroes the deeper finales
+wipe **54–100%** of the time. The 300-gold third slot is genuinely load-bearing today. It was invisible
+because nothing measured it and because `RunCurveModel` grows the roster to `MaxCap` (4), making every
+number in §0f one hero more generous than a new save gets.
+
+**But it is a cliff, not a staircase**, and that is the actual bug:
+
+- **Party width gates; XP does not.** Every run finale is clearable at **zero** XP. The third hero is
+  worth more than a maxed sphere grid — Emberfall goes **99% → 1%** on one extra body.
+- **One purchase unlocks the entire campaign.** The same 300 gold clears run 2, run 3 and the secret
+  run. Past it, nothing is a threat; before it, nothing is passable.
+- **The XP axis saturates at half a grid.** Party health pool runs 97 → 127 (+31%) across 0–700 XP and
+  stops moving at ~350. `FewestHitsToKillAHero` stays pinned at 3 in The Ashen Deep at every level.
+  **Half of every grid buys no durability** — worth investigating on its own.
+- **The axes are multiplicative.** At 2 heroes the XP axis is huge (Emberfall 99% → 0% over 0–350 XP);
+  at 3 heroes it is worth nothing. The content sits past the point where either bites.
+
+**The work, then:** stage the gates so each run demands the next increment of investment, and scale
+deep content hard enough that the increment is *required*. The headroom is large and now known — at
+3 heroes / 350 XP the deep floors still end at **83–90% health**, so deep danger can multiply several
+times before an invested party is threatened. §5g's "enemy strength is pinned at the 3-hit floor"
+binds on the **fresh** party, which is precisely the party that is supposed to die.
+
+**Open decision — the ladder itself.** Which run demands what (3 heroes? 4? how much XP?) is a design
+call, not a solve. A proposed shape: run 1 clearable at 2 heroes / 0 XP; run 2 needs the 3rd hero;
+run 3 needs the 3rd hero plus real grid investment; the secret run needs 4 heroes and a near-maxed
+grid.
+
+**Tooling this needs (not built yet).** A single reference party cannot express the design. Each floor
+wants a **pair** of verdicts — the minimum investment that clears it, and the investment at which it
+stops being a threat — with the finding being whether that pair *rises with depth*. This supersedes the
+older min/max-party-band follow-up in §5; that band is one slice of this ladder. The measurement exists
+as an ad-hoc MCP command today (§5i has the recipe and the two traps); wiring it into `BalanceReport`
+alongside `Floors` is the next tooling step, and it needs the ladder decision above first so it has
+thresholds to check.
 
 ### 1. Battle polish (feel & clarity)
 
