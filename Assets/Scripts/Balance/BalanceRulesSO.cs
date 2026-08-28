@@ -198,12 +198,64 @@ namespace Assets.Scripts.Balance
                  "nothing that happened on it was a decision.")]
         [Range(0f, 1f)] public float TrivialFloorEndHealth = 0.85f;
 
+        [Header("Investment frontier — what each tier asks, and how the player may pay it")]
+        [Tooltip("Sweep every run's final floor across party width and sphere-grid XP, and report " +
+                 "the minimal mixes that clear it. Needs simulation; costs about a minute.")]
+        public bool MeasureInvestmentFrontiers = true;
+
+        [Tooltip("The exchange rate between the two investment axes: XP per hero that one extra " +
+                 "party slot is worth. Measured at roughly 100-350 depending on the floor, so this " +
+                 "is a design choice about which route should be favoured, not a fact.")]
+        [Min(1)] public int HeroXpEquivalent = 250;
+
+        [Tooltip("Investment each campaign tier should demand, indexed by CampaignOps.ComputeTiers " +
+                 "depth. In the same units as HeroXpEquivalent: a fresh save sits at 0. The list " +
+                 "rising is what 'depth means danger' means; the last entry covers anything deeper.")]
+        public List<int> TierInvestmentBudgets = new List<int> { 200, 450, 700, 1000 };
+
+        [Tooltip("How far off its tier budget a floor's frontier may sit before it is a finding. " +
+                 "Wide on purpose - the frontier is measured against a greedy (optimal) grid spend, " +
+                 "so tuning it tight would gate out every player who builds for flavour.")]
+        [Min(0)] public int InvestmentBudgetTolerance = 125;
+
+        [Tooltip("Two frontier mixes within this much of each other are genuine alternatives, so the " +
+                 "player picks how to pay. Only one affordable mix means the tier is a checklist.")]
+        [Min(0)] public int EquivalentInvestmentTolerance = 150;
+
+        [Tooltip("Party widths the frontier sweep tries. 1 is included deliberately: a solo hero on " +
+                 "a deep grid is a build path the game nearly supports already.")]
+        public List<int> FrontierPartyWidths = new List<int> { 1, 2, 3, 4 };
+
+        [Tooltip("Per-hero XP budgets the frontier sweep tries, cheapest first. Keyed off XP *spent*, " +
+                 "never off node identities, so a frontier survives the sphere grid being expanded. " +
+                 "The top of the ladder should sit near the dearest hero's full grid - past that the " +
+                 "XP axis saturates and a frontier point there is an investment nobody can make.")]
+        public List<int> FrontierXpSteps = new List<int> { 0, 75, 150, 225, 300, 375, 450, 550, 650, 750 };
+
+        [Tooltip("Battles per mix on the frontier sweep. Lower than SimulationTrials because a sweep " +
+                 "runs dozens of mixes and only needs the wipe rate to a couple of points.")]
+        [Range(10, 2000)] public int FrontierTrials = 120;
+
         [Header("Economy / progression")]
         [Tooltip("Level-clears a player should need to afford their first magic upgrade.")]
         public int TargetClearsToFirstUpgrade = 3;
 
         [Tooltip("Warn when maxing a single magic takes more level-clears than this.")]
         public int MaxClearsToMaxOneMagic = 25;
+
+        /// <summary>
+        /// Investment <paramref name="tier"/> should demand, or -1 when none is authored. The deepest
+        /// authored budget covers everything past it, so adding a run to the end of the campaign does
+        /// not silently exempt it from the ladder.
+        /// </summary>
+        public int InvestmentBudgetForTier(int tier)
+        {
+            if (tier < 0 || TierInvestmentBudgets == null || TierInvestmentBudgets.Count == 0)
+            {
+                return -1;
+            }
+            return TierInvestmentBudgets[Mathf.Min(tier, TierInvestmentBudgets.Count - 1)];
+        }
 
         /// <summary>
         /// An in-memory rules object with the defaults above, used when no rules asset exists yet so

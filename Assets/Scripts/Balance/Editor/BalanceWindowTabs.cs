@@ -1051,7 +1051,78 @@ namespace Assets.Scripts.Balance.Editor
                 }
             }
 
+            DrawFrontierSection();
+
             EndScroll();
+        }
+
+        /// <summary>
+        /// What each run's finale asks of the player, as a frontier over the two investment axes the
+        /// game sells rather than as a verdict against one modelled party.
+        ///
+        /// <para>The table above it answers "can this be won". This one answers "by whom, having paid
+        /// what" — which is the question the campaign's gating is designed around, and the one a
+        /// single reference party provably cannot answer (<c>docs/BALANCING.md</c> §5j).</para>
+        /// </summary>
+        private void DrawFrontierSection()
+        {
+            if (_report == null || _report.Frontiers.Count == 0)
+            {
+                return;
+            }
+
+            BalanceGui.Separator();
+            BalanceGui.SectionHeader(
+                "Investment frontiers",
+                "The cheapest mixes of party width and sphere-grid XP that bring each run's finale "
+                + $"inside the {_rules.MaxFloorWipeRate:P0} wipe ceiling. Cost is in XP-per-hero "
+                + $"units, one bought party slot counting as {_rules.HeroXpEquivalent}. Read them as "
+                + "optimistic: the grid is spent greedily, so a flavourful build is weaker at the "
+                + "same XP.");
+
+            EditorGUILayout.BeginHorizontal();
+            BalanceGui.HeaderCell("Finale", 260f);
+            BalanceGui.HeaderCell("Tier", StatWidth, "Campaign depth, from the prerequisite graph.");
+            BalanceGui.HeaderCell("Asks", MetricWidth, "Cheapest mix on the frontier, in investment units.");
+            BalanceGui.HeaderCell("Budget", MetricWidth, "What this tier is supposed to ask.");
+            BalanceGui.HeaderCell("Harmless", MetricWidth, "Investment at which the floor stops threatening anyone.");
+            BalanceGui.HeaderCell("Ways to pay", WideWidth, "Affordable mixes. One means a checklist, not a choice.");
+            BalanceGui.HeaderCell("Cheapest clearing mixes", 320f);
+            EditorGUILayout.EndHorizontal();
+
+            foreach (var frontier in _report.Frontiers)
+            {
+                if (!MatchesFilter(frontier.Label))
+                {
+                    continue;
+                }
+
+                bool unclearable = frontier.Unclearable;
+                int asked = frontier.AskedInvestment;
+
+                var askSeverity = unclearable
+                    ? BalanceSeverity.Critical
+                    : frontier.Budget >= 0 && Mathf.Abs(asked - frontier.Budget) > _rules.InvestmentBudgetTolerance
+                        ? BalanceSeverity.Warning
+                        : BalanceSeverity.Ok;
+
+                EditorGUILayout.BeginHorizontal();
+                BalanceGui.AssetCell(frontier.Asset, frontier.Label, 260f, askSeverity);
+                BalanceGui.Cell(frontier.Tier >= 0 ? frontier.Tier.ToString() : "—", StatWidth);
+                BalanceGui.Cell(unclearable ? "never" : asked.ToString(), MetricWidth, askSeverity,
+                    unclearable ? "No swept mix brings this floor inside the wipe ceiling." : null);
+                BalanceGui.Cell(frontier.Budget >= 0 ? frontier.Budget.ToString() : "—", MetricWidth,
+                    BalanceSeverity.Ok, $"Tolerance is ±{_rules.InvestmentBudgetTolerance}.");
+                BalanceGui.Cell(
+                    frontier.SafeInvestment == int.MaxValue ? "never" : frontier.SafeInvestment.ToString(),
+                    MetricWidth, BalanceSeverity.Ok,
+                    $"Wipe rate falls below {_rules.MinFinalFloorWipeRate:P0} here.");
+                BalanceGui.Cell(frontier.AffordableChoices.Count.ToString(), WideWidth,
+                    !unclearable && !frontier.OffersChoice ? BalanceSeverity.Warning : BalanceSeverity.Ok,
+                    $"Mixes within {_rules.EquivalentInvestmentTolerance} of the cheapest.");
+                BalanceGui.Cell(frontier.FrontierText, 320f);
+                EditorGUILayout.EndHorizontal();
+            }
         }
 
         // ================================================================== Save Audit

@@ -11,6 +11,46 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
 > Balance/tuning work: read **`docs/BALANCING.md`** first — it holds the lever interactions, the
 > measurement workflow and what previous passes learned, so a pass does not re-derive them.
 
+## Start here — the live thread (as of 2026-08-28)
+
+**Current work: making the campaign losable and gating depth behind investment. The gate ladder now
+exists** — the frontier is measured per floor and the three deep tiers were raised to their budgets
+on 2026-08-28 (§5k). Read in this order:
+
+1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k**, in that order. They are a single
+   investigation and the later ones **correct** the earlier ones — §5i's headline ("party width
+   gates, XP does not") is **wrong**, §5j has the corrected surface, and **§5k is what shipped**
+   (the frontier tool, two bugs it found in the floor model, and the retune). Do not act on §5i
+   alone, and do not trust any floor number measured before §5k.
+2. **§0f and §0g below** — what shipped and what is left.
+3. **§3b** — the retry economy, reframed: **death is tuition, not a penalty**, by explicit decision.
+
+**Decisions already taken — do not relitigate:**
+
+- **Death is mandatory to progress.** Deeper tiers should be unclearable until the player invests.
+  Do **not** add a death penalty or reduce the payout for dying (§3b).
+- **A range, not a checklist.** Each tier asks for more *total* investment than the last, and the
+  player chooses how to pay — a party slot, grid XP, or a blend. Roughly **1 hero ≈ 250 XP** (§0g).
+- **The potion belt is not a lever.** 5 HP flat, 7–12% of the sustain pool. Retracted (§5h).
+- **Party size being modelled at the bought-out cap is acceptable** for general difficulty reporting —
+  the user prefers the game to run harder than the model says — but it is *not* acceptable for the
+  frontier work, which is precisely about which party can pass.
+
+**The next concrete steps**, now that the ladder rises (150 → 475 → 800 → 1050 across the four tiers):
+
+1. **The Warrens is the one tier still flat** — The Counting Room asks 150 against a budget of 450.
+   It was out of scope for the §5k pass; the recipe is there.
+2. **Give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room, so a boss is
+   always alone — which puts `MinBossToTrashRatio` in direct conflict with dense trash rooms and caps
+   how hard a finale's rooms may be. The analyzer's own suggestion has been saying "or give it adds"
+   the whole time.
+3. **Play the deep floors.** Reaching the budgets cost 14–30-room floors, because per-enemy strength
+   is pinned by `MinHitsToKillHero` and room density is capped by the boss ratio. If that reads as a
+   slog, the way out is hero HP (§5h lever 3), which raises the ceiling every other lever sits under.
+
+**A published summary of all of this** (readable tables of the floor curve and the investment surface)
+lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606c48a1a3>.
+
 ## Done
 
 - **Boss encounters (run climax).** ✅ Shipped. `EnemySO.IsBoss` + `EnemyArchetype.Boss`
@@ -728,15 +768,33 @@ number in §0f one hero more generous than a new save gets.
 
 **But it is a cliff, not a staircase**, and that is the actual bug:
 
-- **Party width gates; XP does not.** Every run finale is clearable at **zero** XP. The third hero is
-  worth more than a maxed sphere grid — Emberfall goes **99% → 1%** on one extra body.
-- **One purchase unlocks the entire campaign.** The same 300 gold clears run 2, run 3 and the secret
-  run. Past it, nothing is a threat; before it, nothing is passable.
-- **The XP axis saturates at half a grid.** Party health pool runs 97 → 127 (+31%) across 0–700 XP and
-  stops moving at ~350. `FewestHitsToKillAHero` stays pinned at 3 in The Ashen Deep at every level.
-  **Half of every grid buys no durability** — worth investigating on its own.
-- **The axes are multiplicative.** At 2 heroes the XP axis is huge (Emberfall 99% → 0% over 0–350 XP);
-  at 3 heroes it is worth nothing. The content sits past the point where either bites.
+- ~~**Party width gates; XP does not.**~~ **Wrong — corrected 2026-08-27** (`BALANCING.md` §5j). The XP
+  axis had been swept only at 3 heroes, the saturated corner where nothing shows. Swept across width
+  *and* XP together, **both axes bite and they trade against each other**: Sunken Depths is beatable at
+  *(2 heroes, 200 XP)* **or** *(3 heroes, 0 XP)*, and the 200-XP route is the better one (4% vs 12%).
+  Exchange rate roughly **one hero ≈ 100–350 XP**, varying by floor.
+- **The substitutable "range of what the player should do" already exists in the mechanics.** It was
+  never measured, so it was never tuned.
+- **One purchase still unlocks too much.** Past 3 heroes nothing in the game is a threat, so the whole
+  surface saturates in that corner and every later decision is free.
+- **The frontiers barely differ across the campaign — this is the real bug.** Cheapest clearing mixes:
+  Sunken Depths (run 1) *(2, 200)*; Mire Throne (run 2) *(2, 100)*; Counting Room *(2, 100–200)*;
+  Emberfall (run 3) *(2, 350)*; **The Hollow Vault (secret endgame) *(2, 200)***. The secret endgame asks
+  for **less than the tutorial's finale**.
+- **A fresh save cannot beat run 1's finale, and that is arguably correct.** At *(2 heroes, 0 XP)* —
+  exactly what `BaseCap` gives — Sunken Depths wipes **100%**. Floors 0–2 are clearable, so the intended
+  path is: clear three floors, die on the fourth, bank the gold, upgrade, return. The loop is live on
+  the *first* run and has never been written down.
+- **Open question, and worth answering *before* the grid is expanded: a maxed grid under-delivers.**
+  The four grids author **+40–70% MaxHealth** each (Warrior +18 on a base of 26, Tank +24, Acolyte +17
+  on 24, Scout +12 on 30), but the measured party pool only runs **97 → 127 (+31%)** across 0–700 XP —
+  and stops moving at **~350 XP**, half a grid. So either `SphereGridOps`' greedy spend is not reaching
+  the health nodes, or reachability/cost is stranding them, or the seeded bank is not being fully spent.
+  Whatever the cause, **half of every grid currently buys no durability**, and expanding the grid on top
+  of that just adds more nodes nobody's power actually reflects. Diagnose first.
+- **Solo is nearly viable and nobody knew.** At 500 XP one hero clears Mire Throne 84% and Hollow Vault
+  89%. With `XpSplit` paying a solo hero 4× the share, "narrow but deep" is a real path that almost
+  works — worth finishing deliberately or closing deliberately.
 
 **The work, then:** stage the gates so each run demands the next increment of investment, and scale
 deep content hard enough that the increment is *required*. The headroom is large and now known — at
@@ -744,18 +802,64 @@ deep content hard enough that the increment is *required*. The headroom is large
 times before an invested party is threatened. §5g's "enemy strength is pinned at the 3-hit floor"
 binds on the **fresh** party, which is precisely the party that is supposed to die.
 
-**Open decision — the ladder itself.** Which run demands what (3 heroes? 4? how much XP?) is a design
-call, not a solve. A proposed shape: run 1 clearable at 2 heroes / 0 XP; run 2 needs the 3rd hero;
-run 3 needs the 3rd hero plus real grid investment; the secret run needs 4 heroes and a near-maxed
-grid.
+**The design, settled 2026-08-27:** *a bit in the middle* — neither one binary cliff nor a strict
+per-run checklist. Each tier should demand **more total investment** than the last while leaving the
+player a **range of ways to pay it**: buy the hero, or deepen the grid, or some mix. So a tier's
+requirement is a **frontier**, and the two properties to tune for are:
 
-**Tooling this needs (not built yet).** A single reference party cannot express the design. Each floor
-wants a **pair** of verdicts — the minimum investment that clears it, and the investment at which it
-stops being a threat — with the finding being whether that pair *rises with depth*. This supersedes the
-older min/max-party-band follow-up in §5; that band is one slice of this ladder. The measurement exists
-as an ad-hoc MCP command today (§5i has the recipe and the two traps); wiring it into `BalanceReport`
-alongside `Floors` is the next tooling step, and it needs the ladder decision above first so it has
-thresholds to check.
+1. **The frontier has at least two genuinely different points on it** — otherwise it is a checklist,
+   not a choice.
+2. **The frontier moves outward with depth.** This is "depth means danger" in the only currency that
+   survives content edits.
+
+Concretely, in units where **1 hero ≈ 250 XP**, a tier budget roughly like: run 1 ≈ 200, run 2 ≈ 450,
+run 3 ≈ 700, secret ≈ 1000+ — each satisfiable by width, XP, or a blend. Numbers are the *target*; the
+campaign has to be re-tuned to hold them, and §5g's "enemy strength is pinned at the 3-hit floor" binds
+on the fresh party, which is the one that is supposed to die.
+
+**Tooling — ✅ shipped 2026-08-28.** `InvestmentFrontier` sweeps party width against sphere-grid XP
+over a floor's rooms and returns the Pareto-minimal mixes that bring it inside the wipe band, plus
+where it stops threatening anyone. `BalanceReport.Frontiers` holds one per run finale; `BalanceRulesSO`
+carries the tier budgets, the exchange rate and the sweep axes; `EvaluateFrontiers` reports *no real
+choice*, *asks no more than the tier before it*, *off its tier budget*, *unclearable by anyone* and
+*goes from lethal to harmless in one purchase*. The Simulation tab draws the table; 14 cases in
+`InvestmentFrontierTests`. Use **`BalanceAnalyzer.MeasureFrontiers(input)`** while tuning — 16 seconds
+for the whole campaign, because it never simulates a mix the frontier already dominates. This
+supersedes the older min/max-party-band follow-up in §5; that band is one slice of the frontier.
+
+**The gates — ✅ raised 2026-08-28** (`docs/BALANCING.md` §5k). The ladder rises for the first time:
+
+| Finale | Tier | Budget | Was | Now | Ways to pay |
+|---|---|---|---|---|---|
+| Sunken Depths | 0 | 200 | 150 | 150 | 2 |
+| **The Mire Throne** | 1 | 450 | 150 | **475** | 1 |
+| The Counting Room | 1 | 450 | 150 | 150 | 2 |
+| **Emberfall** | 2 | 700 | 225 | **800** | 2 |
+| **The Hollow Vault** | 3 | 1000 | 150 | **1050** | 1 |
+
+Three things that pass turned up and are worth knowing before the next one:
+
+- **Enemies per room was the missing lever.** Every `RoomSO` had `EvaluationCount: 1`, so no room in
+  the game held more than about one enemy — which is why "add more rooms" saturated. Three dense
+  rooms now carry the deep floors (`MireCourtRoom`, `EmberCrucibleRoom`, `VaultReliquaryRoom`).
+- **Dense rooms cost you the boss.** `MinBossToTrashRatio` measures the boss against the *average*
+  room, and no legal solo boss can be 1.8× a three-enemy room. Mixing thin rooms back into each pool
+  is the workaround; **boss adds** is the real fix, and the game does not have them.
+- **The 250-XP-per-hero exchange rate only fits the shallow end.** At the endgame a fourth body is
+  worth 400+ XP, so the 3-hero and 4-hero routes drift apart and two tiers report a single way to
+  pay. A longer sphere grid is what would close it.
+
+**Two constraints from the grid being unfinished.** The sphere grid is going to be expanded a lot, with
+many branches and much more freedom in how each hero grows. So:
+
+- **Key the investment axis off XP *spent*, never off node identities.** A frontier stated as "200 XP"
+  survives the grid tripling; one stated as "has bought `warrior-spine-3`" does not. `SphereGridOps`
+  greedy-spends the best available nodes, so XP-spent stays meaningful as branches multiply.
+- **Every frontier number today is a best case.** The greedy spend approximates an *optimal* build; a
+  player taking a flavourful route through a wide grid will be weaker at the same XP. Once the grid is
+  wide the analyzer needs to sample several plausible builds per XP level and report the **spread**, and
+  the target becomes that the frontier holds for a *median* build. Until then, read the numbers as
+  optimistic. **Do not tune the frontiers tight** — the build-variance headroom is not measured yet.
 
 ### 1. Battle polish (feel & clarity)
 
@@ -1134,11 +1238,18 @@ Touch points for the **rest** of §2 (the room-*kind* work above, still open):
 Touch points: `Assets/Scripts/MainMenu/MerchantUI.cs`, `Assets/Scripts/Items/ShopPricing.cs`,
 `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Cards/UI/MagicForgeUI.cs`.
 
-### 3b. Failure is a farm, not a wall — the retry economy is unmodelled
+### 3b. The retry economy — death pays, and that is now deliberate
 
-**The intent:** a run should be able to *stop* the player, and the answer to being stopped should be
-a hub decision — deepen a sphere grid, buy the third party slot, upgrade a spell — rather than
-another attempt at the same wall.
+> **Design decision, 2026-08-27: do NOT make dying cost more.** Death is **tuition, not a penalty**.
+> The player is *supposed* to fail a tier, bank what they earned, upgrade, and come back. This section
+> was originally written the other way round — as "failure is a farm, close the loophole" — and that
+> framing is **rejected**. The mechanics description below is still accurate and worth keeping; only the
+> verdict changed. The open question is no longer *how do we punish a wipe* but **how many failed
+> attempts should a tier cost**, which is a pacing number and a tunable one.
+
+**The intent:** a run should be able to *stop* the player, and the answer to being stopped is a hub
+decision — deepen a sphere grid, buy a party slot, upgrade a spell — funded by the very run that
+stopped them.
 
 **What the code actually does:** a wipe is not a loss. `AwardLevelClear` banks
 `GoldPerLevelCleared` (25) **plus that level's whole pending kill-gold pool** into permanent save the
@@ -1174,24 +1285,27 @@ already in hand.
    "how many floor-clears does the difficulty-breaking upgrade cost, and can it be farmed off floors
    the player has already beaten" is a question the tool has no check for.
 
-**What to do about it** — the design decision comes first, the tooling second:
+**What to do about it, under the corrected design:**
 
-- **Decide what a wipe costs.** The current answer is "one floor of gold", which is why the loop
-  farms. Candidates, cheapest first: bank pending gold at a **fraction** on death rather than paying
-  the 10/floor consolation on top; make the *run* rather than the floor the commit point for some
-  share of the income; or gate a re-attempt behind a cost (a run token, a restock) so attempts are
-  themselves a resource. The §3 death **safety-net token** is the same conversation from the other
-  side — it is a paid-for exception, which only reads as a reward if the default is harsh.
-- **Price the wall against the farm.** For each meta upgrade, the number that matters is
-  *floor-clears to afford it* versus *floor-clears the player can already reliably clear*. When the
-  second exceeds the first, the wall is decorative. Party slots at 300/600 against ~85 a floor is the
-  worked example above.
-- **Then teach the analyzer both.** Two checks, both cheap because the math already exists:
-  **(a)** an economy finding per Gold sink — cost against `LevelCurve.ExpectedGold` for the floors
-  the run curve says are clearable, flagged when a sink is affordable purely from floors already in
-  band; and **(b)** the min/max party band from §5, with the *cap the save actually owns* as the
-  band's realistic high edge rather than `MaxCap`. Together they answer "is this level a wall or a
-  toll booth" instead of "is this level hard for a party the player may not have".
+- **Keep the payout.** ~190 gold for a run that dies on floor 3 is the tuition working. Do not add a
+  death penalty, do not reduce the consolation, do not make the commit point the run instead of the
+  floor. All three were proposed here before the decision and are now **out of scope**.
+- **Tune attempts-per-tier instead.** The number that matters is now: *given a tier's investment
+  budget (§0g), how many failed attempts does it take to afford it?* Two or three reads as learning;
+  ten reads as grinding. Worked example at today's numbers: a failed run pays ~190 gold, the third
+  slot costs 300 — so **two failures** buy it. That is probably about right for run 1 and much too
+  cheap for the secret run, which is the same "the price never rises" problem as §0g, seen from the
+  currency side.
+- **Price every Gold sink against run income.** `EvaluateEconomy` currently checks **Essence only**
+  (`ClearsToFirstUpgrade` against magic-upgrade cost). No Gold sink is priced against Gold income
+  anywhere — not party slots, not the Merchant, not the §3 sinks still to come. The check to add is
+  *attempts-to-afford* per sink, using `LevelCurve.ExpectedGold` over the floors a stopped player can
+  actually clear, flagged when it falls outside the intended attempts-per-tier band.
+- **Fix the model's party assumption.** `RunCurveModel` grows the roster to `PartySlots.MaxCap` (4),
+  not to the save's `BonusPartySlots` (base **2**), so every curve is priced as though 900 gold of
+  party slots were already spent. This is what hid the whole gate structure until §5i/§5j. Superseded
+  in scope by §0g's frontier work — the frontier *is* the fix — but noted here because it is the
+  reason this section's numbers were invisible for so long.
 
 Touch points: `Assets/Scripts/Progression/MetaProgressManager.cs` (`AwardLevelClear`,
 `AwardRunProgressOnDeath`, `DiscardPendingGold`), `Assets/Scripts/Dungeon/DungeonManager.cs`

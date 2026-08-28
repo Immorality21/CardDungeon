@@ -23,7 +23,7 @@ MonoBehaviour:
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
     EnemyTuning:
-      Difficulty: 3.3
+      Difficulty: 2.8
       StatScales: []
       XpMultiplier: 2
       GoldMultiplier: 2
@@ -32,9 +32,11 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 120
+            Amount: 200
           - Type: 1
-            Amount: 13
+            Amount: 22
+          - Type: 2
+            Amount: 3
         XpReward: 0
         GoldReward: 260
     RescueHero: {fileID: 0}

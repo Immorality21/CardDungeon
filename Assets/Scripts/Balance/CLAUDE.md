@@ -83,6 +83,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `VarietyAnalyzer` | the one-dimensionality axis: archetype share, resistance coverage, inert damage types, Draw overlap |
 | `ProgressionMap` | the **supply chain**: which magic is drawable where, when each combo becomes possible, and whether a level's resistances are in elements the player can bring yet |
 | `EncounterSimulator` | headless battles under three policies (`AttackOnly` / `MagicFirst` / `Adaptive`) — **per room** via `Run`, and **per floor** via `RunFloor` |
+| `InvestmentFrontier` | the **frontier**: party width × sphere-grid XP swept over a floor, reduced to the Pareto-minimal mixes that clear it. `FloorFrontier` / `InvestmentPoint` |
 | `SaveAudit` | reads the live save files and rebuilds the real party + economy state |
 | `BalanceAnalyzer` | the **only** place rules are interpreted into findings |
 
@@ -295,7 +296,46 @@ So: **`Run` judges an asset, `RunFloor` judges a floor.** `BalanceAnalyzer.RunFl
 `BalanceReport.Floors`, and `EvaluateFloorSimulations` reads it against `MaxFloorWipeRate`,
 `MinFinalFloorWipeRate` and `TrivialFloorEndHealth`. Attrition and wipe rate are calibrated against
 each other in `docs/BALANCING.md` §5h — **death starts around attrition 0.70** — so tune with the
-cheap closed-form dial and confirm with the floor sim.
+cheap closed-form dial and confirm with the floor sim. **That calibration was measured on one-enemy
+rooms and does not extend to dense ones** (§5k): on a floor of three-enemy rooms the closed form runs
+several times pessimistic, because it composes per enemy and never sees the party focus-firing a room
+down.
+
+**Two rounding rules the floor builder depends on.** `WeightedEnemyGroup.ToDiscreteUnits` rounds the
+group's *total* and apportions largest-remainder-first, and `BuildFloorRooms` does the same for room
+occurrences. Rounding the parts instead deletes whole rooms (`Bog Shaman 0.4 + Hex Weaver 0.5` → no
+enemies at all) and makes `RoomsToGenerate` 5 and 7 produce identical floors. `BuildFloorRooms` also
+skips `RoomEncounter.IsBossRoom`, because it appends the boss itself — without that every boss in the
+campaign was fought twice. All three were live bugs until 2026-08-28; `RunCurveModelTests` pins them.
+
+### The frontier — "losable" has no answer without "by whom"
+
+`RunFloor` asks whether *a* party can lose a floor. The campaign's gating asks something else: **how
+much investment does this tier demand, and how many ways may the player pay it?** That cannot be
+stated against a single reference party — sampling one corner of the surface produced a written report
+that was flatly wrong (`docs/BALANCING.md` §5i → §5j).
+
+`InvestmentFrontier.Measure` sweeps `FrontierPartyWidths` × `FrontierXpSteps`, rebuilding the party at
+each mix (`PartyBaseline.Build`, so the axis is keyed off **XP spent**, never node identities) and
+fighting the same rooms — rooms carry no party state, which is what makes this cheap. It returns the
+**Pareto-minimal** clearing mixes plus the mixes past which the floor stops being a threat.
+
+- **Only run finales are swept.** A tier's gate is its last floor, and a frontier costs a dozen floor
+  batches.
+- **The sweep is pruned, not exhaustive.** More width or more XP only ever helps, so once a width
+  clears at some XP every wider mix at that XP or above is dominated and is never simulated. That
+  pruning *is* the frontier's definition — do not replace it with a full grid.
+- **The width axis includes recruits.** `BalanceInput.Roster` is `PartyRosterSO.Heroes`, not the
+  starting lineup: buying a hero at the tavern is a gold purchase exactly like a party slot.
+- **`BalanceAnalyzer.MeasureFrontiers(input)`** is the public entry point for a tuning pass — curves
+  closed-form, finales simulated, no findings. ~16s for the whole campaign.
+
+`EvaluateFrontiers` turns the result into findings against `TierInvestmentBudgets` (indexed by
+`CampaignOps.ComputeTiers` depth), `HeroXpEquivalent`, `InvestmentBudgetTolerance` and
+`EquivalentInvestmentTolerance`. And because a gated finale is *designed* to be beyond the party the
+run curve walks in with, `EvaluateLevel` reports its attrition as an Info naming the price
+(*"gates its tier at N investment"*) rather than the usual unclearable Critical, and the
+difficulty-jump check skips the step onto it.
 
 Determinism: each batch seeds `Random.InitState(settings.Seed)` and restores `Random.state`
 afterwards, so a run never perturbs anything else and the same assets always give the same numbers.

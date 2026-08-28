@@ -26,6 +26,9 @@ namespace Assets.Scripts.Balance
         public const string Economy = "Economy";
         public const string Progression = "Progression";
         public const string Simulation = "Simulation";
+
+        /// <summary>What a tier asks of the player, and how many ways they may pay it.</summary>
+        public const string Frontier = "Frontier";
         public const string Save = "Save";
     }
 
@@ -196,6 +199,12 @@ namespace Assets.Scripts.Balance
 
         /// <summary>Per-floor simulations - the read on whether a run can actually be lost.</summary>
         public List<FloorSimReport> Floors = new List<FloorSimReport>();
+
+        /// <summary>
+        /// Per-floor investment frontiers - the read on whether a run can be lost *by whom*, and the
+        /// only unit in which "depth means danger" can be stated. One entry per run finale.
+        /// </summary>
+        public List<FloorFrontier> Frontiers = new List<FloorFrontier>();
         public SaveAudit Save;
         public List<BalanceIssue> Issues = new List<BalanceIssue>();
 

@@ -41,6 +41,20 @@ namespace Assets.Scripts.Balance
         {
             get { return AllHeroes != null && AllHeroes.Count > 0 ? AllHeroes : Heroes; }
         }
+
+        /// <summary>
+        /// Every hero the player can end up fielding, in <c>PartyRosterSO.Heroes</c> order — the
+        /// starting lineup plus everyone recruitable at the tavern.
+        ///
+        /// <para>This is not the same list as <see cref="AllHeroes"/> conceptually, even where the
+        /// project makes them equal: recruiting is a <b>gold purchase</b>, which makes party width an
+        /// axis the player invests along exactly like a bought party slot. The frontier sweep needs
+        /// it for that reason — without it the widest measurable party is however many heroes the
+        /// campaign hands over for free, and the endgame's "buy a fourth body" route is invisible.
+        /// Nothing else should use it: danger and attrition are still judged against the party a run
+        /// actually starts with.</para>
+        /// </summary>
+        public List<HeroSO> Roster = new List<HeroSO>();
         public List<EnemySO> Enemies = new List<EnemySO>();
         public List<RunDefinitionSO> Runs = new List<RunDefinitionSO>();
 
@@ -117,6 +131,10 @@ namespace Assets.Scripts.Balance
             {
                 RunSimulations(input, rules, report);
                 RunFloorSimulations(input, rules, report);
+                if (rules.MeasureInvestmentFrontiers)
+                {
+                    RunFrontierSweeps(input, rules, report);
+                }
             }
 
             EvaluateParty(report, rules, input);
@@ -128,6 +146,7 @@ namespace Assets.Scripts.Balance
             EvaluateEconomy(report, rules);
             EvaluateSimulations(report, rules);
             EvaluateFloorSimulations(report, rules);
+            EvaluateFrontiers(report, rules);
             EvaluateSave(report, rules, input);
 
             return report;
@@ -1486,8 +1505,50 @@ namespace Assets.Scripts.Balance
 
         // ------------------------------------------------------------------ runs and levels
 
+        /// <summary>
+        /// Investment the run curve's own party is holding at <paramref name="level"/>, in the same
+        /// units the tier budgets are written in: party slots past the free base cap, plus XP spent
+        /// per hero. This is what "the player who walked straight here and bought nothing extra"
+        /// arrives with.
+        /// </summary>
+        private static int CurvePartyInvestment(LevelCurve level, BalanceRulesSO rules)
+        {
+            int bought = Mathf.Max(0, level.PartySize - PartySlots.BaseCap);
+            return bought * Mathf.Max(0, rules.HeroXpEquivalent) + Mathf.Max(0, level.XpBudget);
+        }
+
+        /// <summary>
+        /// A run's last floor, when its tier is budgeted to demand more investment than the curve's
+        /// own party is carrying, is the tier's <b>gate</b> — and being unclearable by that party is
+        /// the design working rather than a defect. Returns the tier budget, or -1 when the floor is
+        /// not a gate.
+        ///
+        /// <para>This is the closed-form model catching up with §0g. Attrition asks "can <i>this</i>
+        /// party clear the level", and a gated finale is deliberately beyond the party that walks
+        /// into it: the answer is meant to be no until the player has paid the tier's price. Without
+        /// this the three deep finales report as broken content the moment they start gating, which
+        /// would train everyone to ignore the check that catches genuinely unclearable levels.</para>
+        /// </summary>
+        private static int GateBudgetFor(RunCurve run, LevelCurve level, BalanceRulesSO rules,
+            IDictionary<string, int> tiers)
+        {
+            if (run.Run == null || run.Levels.Count == 0 || level != run.Levels[run.Levels.Count - 1])
+            {
+                return -1;
+            }
+            if (tiers == null || !tiers.TryGetValue(CampaignOps.RunKeyOf(run.Run), out int tier))
+            {
+                return -1;
+            }
+
+            int budget = rules.InvestmentBudgetForTier(tier);
+            return budget > CurvePartyInvestment(level, rules) ? budget : -1;
+        }
+
         private static void EvaluateRuns(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
         {
+            var tiers = CampaignOps.ComputeTiers(input != null ? input.Campaign : null);
+
             foreach (var run in report.Runs)
             {
                 if (run.Levels.Count == 0)
@@ -1503,7 +1564,7 @@ namespace Assets.Scripts.Balance
 
                 foreach (var level in run.Levels)
                 {
-                    EvaluateLevel(run, level, report, rules);
+                    EvaluateLevel(run, level, report, rules, GateBudgetFor(run, level, rules, tiers));
                 }
 
                 for (int i = 0; i < run.DifficultyJumps.Count; i++)
@@ -1511,6 +1572,14 @@ namespace Assets.Scripts.Balance
                     float jump = run.DifficultyJumps[i];
                     string from = run.Levels[i].Reference;
                     string to = run.Levels[i + 1].Reference;
+
+                    // The step *onto* a gated finale is the gate. It is supposed to be a cliff for a
+                    // party that has not paid for the tier, so measuring it against the ordinary
+                    // level-to-level ceiling reports the design as a defect.
+                    if (GateBudgetFor(run, run.Levels[i + 1], rules, tiers) >= 0)
+                    {
+                        continue;
+                    }
 
                     if (jump > rules.MaxDifficultyJump)
                     {
@@ -1568,7 +1637,13 @@ namespace Assets.Scripts.Balance
             }
         }
 
-        private static void EvaluateLevel(RunCurve run, LevelCurve level, BalanceReport report, BalanceRulesSO rules)
+        /// <param name="gateBudget">
+        /// The tier investment this floor is budgeted to demand, when it is its tier's gate and that
+        /// budget is above what the curve's own party is carrying; -1 otherwise. A gate is meant to
+        /// be unclearable by the party walking into it, so the attrition verdict changes meaning.
+        /// </param>
+        private static void EvaluateLevel(RunCurve run, LevelCurve level, BalanceReport report,
+            BalanceRulesSO rules, int gateBudget = -1)
         {
             string subject = $"{run.Name} / {level.Reference}";
 
@@ -1587,7 +1662,29 @@ namespace Assets.Scripts.Balance
                 return;
             }
 
-            if (level.AttritionMargin < 0f)
+            if (gateBudget >= 0)
+            {
+                // The tier's gate. Being beyond the party that walks in is the point, so the only
+                // things worth saying are what it costs and that the closed form is out of its depth
+                // here: attrition composes per enemy and never sees a party focus-firing a four-enemy
+                // room down, so a dense floor reads several times more expensive than it plays. Trust
+                // the frontier (Frontier category), which is simulated, for the real verdict.
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Level, subject,
+                    $"{level.Reference} gates its tier at {gateBudget} investment")
+                {
+                    Asset = run.Run,
+                    Detail = $"Expected cost {level.ExpectedHealthCost:0} HP against a sustain pool of "
+                           + $"{level.SustainPool} ({level.PartySize} hero(es) + potions) across "
+                           + $"{level.ExpectedCombatRooms:0.0} combat rooms{EventShare(level)} — attrition "
+                           + $"{level.AttritionLoad:0.00}. The party the curve walks in here is carrying "
+                           + $"{CurvePartyInvestment(level, rules)} investment against a tier budget of "
+                           + $"{gateBudget}, so it is *supposed* to fail: dying here is how the player "
+                           + "learns what to buy. The closed-form number above is an upper bound only.",
+                    Suggestion = "Judge this floor by its investment frontier, not by attrition. The "
+                           + "attrition ceiling still applies to every other floor of the run."
+                });
+            }
+            else if (level.AttritionMargin < 0f)
             {
                 report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Level, subject,
                     $"{level.Reference} is unclearable on one health bar")
@@ -2476,20 +2573,65 @@ namespace Assets.Scripts.Balance
                 return rooms;
             }
 
+            // The floor's combat rooms, minus the sealed exit room: that is appended below, boss and
+            // all. Walking past it here as well fought every boss twice, which quietly doubled the
+            // climax of every finale in the campaign from the day the floor simulation shipped (§5h)
+            // until 2026-08-28.
+            var pool = new List<RoomEncounter>();
+            float expectedRooms = 0f;
             foreach (var room in level.Rooms)
             {
-                if (room == null || !room.IsCombatRoom)
+                if (room == null || !room.IsCombatRoom || room.IsBossRoom)
                 {
                     continue;
                 }
+                pool.Add(room);
+                expectedRooms += Mathf.Max(0f, room.Occurrences);
+            }
 
-                // Occurrences is fractional on a generated level (RoomsToGenerate / poolSize), so the
-                // floor is built at the nearest whole number of appearances - at least one, since the
-                // room is in the pool and can turn up.
-                int times = Mathf.Max(1, Mathf.RoundToInt(room.Occurrences));
-                for (int i = 0; i < times; i++)
+            // Occurrences is fractional on a generated level (RoomsToGenerate / poolSize), so the
+            // floor has to be rounded to whole rooms somewhere. Round the *total* once and apportion
+            // it largest-remainder-first, for the same reason ToDiscreteUnits does: rounding each
+            // pool entry on its own makes the floor's length depend on how many kinds of room it
+            // draws from rather than on how many rooms it generates. With two pool entries and a
+            // boss, `RoomsToGenerate` 5 and 7 both landed on 2.5 appearances each and produced the
+            // identical five-room floor - a whole authored room the model simply could not see.
+            int roomSeats = Mathf.RoundToInt(expectedRooms);
+            var appearances = new int[pool.Count];
+            int allocated = 0;
+            for (int i = 0; i < pool.Count && allocated < roomSeats; i++)
+            {
+                int whole = Mathf.Min(Mathf.FloorToInt(Mathf.Max(0f, pool[i].Occurrences)), roomSeats - allocated);
+                appearances[i] = whole;
+                allocated += whole;
+            }
+
+            // Leftovers go to the entries with the largest fractional part, ties to the likelier room.
+            var order = new List<int>();
+            for (int i = 0; i < pool.Count; i++)
+            {
+                order.Add(i);
+            }
+            order.Sort((a, b) =>
+            {
+                float occA = Mathf.Max(0f, pool[a].Occurrences);
+                float occB = Mathf.Max(0f, pool[b].Occurrences);
+                int byFraction = (occB - Mathf.Floor(occB)).CompareTo(occA - Mathf.Floor(occA));
+                return byFraction != 0 ? byFraction : occB.CompareTo(occA);
+            });
+            int next = 0;
+            while (allocated < roomSeats && order.Count > 0)
+            {
+                appearances[order[next % order.Count]]++;
+                allocated++;
+                next++;
+            }
+
+            for (int i = 0; i < pool.Count; i++)
+            {
+                for (int n = 0; n < appearances[i]; n++)
                 {
-                    var units = room.Expected.ToDiscreteUnits();
+                    var units = pool[i].Expected.ToDiscreteUnits();
                     if (units.Count > 0)
                     {
                         rooms.Add(units);
@@ -2595,6 +2737,364 @@ namespace Assets.Scripts.Balance
                     });
                 }
             }
+        }
+
+        // ------------------------------------------------- investment frontiers
+
+        /// <summary>
+        /// The frontier sweep on its own — run curves closed-form (about a second), then only the
+        /// finales simulated. This is the loop a tuning pass wants: a full <see cref="Analyze"/> with
+        /// simulation on runs hundreds of battles per *encounter* before it reaches the frontiers, and
+        /// none of that output moves while you are pushing a tier toward its budget.
+        ///
+        /// <para>No findings are produced. Read the returned frontiers, change one dial, measure
+        /// again; <see cref="Analyze"/> is what turns the result into issues once it is settled.</para>
+        /// </summary>
+        public static List<FloorFrontier> MeasureFrontiers(BalanceInput input)
+        {
+            var frontiers = new List<FloorFrontier>();
+            if (input == null)
+            {
+                return frontiers;
+            }
+
+            var rules = input.Rules ?? BalanceRulesSO.CreateDefault();
+            var report = new BalanceReport();
+            report.Party = BuildReferenceParty(input, rules, null);
+            BuildRunCurves(input, rules, report);
+            RunFrontierSweeps(input, rules, report);
+            return report.Frontiers;
+        }
+
+        /// <summary>
+        /// Measures what each run's <b>finale</b> asks of the player, as a frontier over the two
+        /// investment axes the game sells: party width and sphere-grid XP.
+        ///
+        /// <para>Why this exists beside <see cref="RunFloorSimulations"/>: that one answers "can this
+        /// floor be lost", against a single modelled party. The design being tuned toward is that
+        /// deeper tiers are <i>unclearable until the player invests</i>, which makes the honest
+        /// question "lost by whom, having paid what" — and a single reference party cannot express
+        /// that. Worse, sampling one party actively misleads: the first pass at this swept XP at a
+        /// three-hero party, found nothing, and reported that XP does not matter. Three heroes is the
+        /// corner of the surface where nothing matters. (<c>docs/BALANCING.md</c> §5i → §5j.)</para>
+        ///
+        /// <para>Only finales are swept. A tier's gate is its last floor — the earlier ones are the
+        /// run showing you what it is made of — and a frontier costs a dozen floor batches, so
+        /// sweeping every floor would multiply the analysis by the campaign's depth for findings
+        /// nothing acts on.</para>
+        /// </summary>
+        private static void RunFrontierSweeps(BalanceInput input, BalanceRulesSO rules, BalanceReport report)
+        {
+            var tiers = CampaignOps.ComputeTiers(input.Campaign);
+
+            foreach (var run in report.Runs)
+            {
+                var level = FinalLevelOf(run);
+                if (level == null || level.Party == null || level.Party.Heroes.Count == 0)
+                {
+                    continue;
+                }
+
+                var rooms = BuildFloorRooms(level);
+                if (rooms.Count == 0)
+                {
+                    continue;
+                }
+
+                // The roster in party order. Rooms carry no party state (LevelEnemyTuning owns the
+                // enemy numbers), which is exactly what lets one room list be fought by every mix.
+                var roster = new List<HeroSO>();
+                foreach (var hero in level.Party.Heroes)
+                {
+                    if (hero.Definition != null && !roster.Contains(hero.Definition))
+                    {
+                        roster.Add(hero.Definition);
+                    }
+                }
+
+                // Then everyone still recruitable, up to the widest party the game can field. A
+                // tavern hero is bought with gold exactly as a party slot is, so leaving them out
+                // would hide half the width axis - and with it the endgame's "buy another body"
+                // route, which is the alternative that keeps a deep tier from being a checklist.
+                if (input.Roster != null)
+                {
+                    foreach (var hero in input.Roster)
+                    {
+                        if (hero != null && !roster.Contains(hero) && roster.Count < PartySlots.MaxCap)
+                        {
+                            roster.Add(hero);
+                        }
+                    }
+                }
+
+                if (roster.Count == 0)
+                {
+                    continue;
+                }
+
+                var everyEnemy = new List<SimUnit>();
+                foreach (var room in rooms)
+                {
+                    foreach (var unit in room)
+                    {
+                        everyEnemy.Add(unit);
+                    }
+                }
+
+                int tier = -1;
+                if (run.Run != null && tiers.TryGetValue(CampaignOps.RunKeyOf(run.Run), out int depth))
+                {
+                    tier = depth;
+                }
+
+                var settings = new FrontierSweepSettings
+                {
+                    Roster = roster,
+                    Rooms = rooms,
+                    Widths = rules.FrontierPartyWidths,
+                    XpSteps = rules.FrontierXpSteps,
+                    HeroXpEquivalent = rules.HeroXpEquivalent,
+                    BaseWidth = PartySlots.BaseCap,
+                    ClearWipeRate = rules.MaxFloorWipeRate,
+                    SafeWipeRate = rules.MinFinalFloorWipeRate,
+                    EquivalentInvestmentTolerance = rules.EquivalentInvestmentTolerance,
+                    PotionItem = level.Party.PotionItem,
+                    PotionCount = level.Party.PotionCount,
+                    PrepareParty = party => AssignDrawLoadout(party, everyEnemy, report.Save, input.Magic),
+                    Sim = new EncounterSimulator.FloorSimSettings
+                    {
+                        Trials = rules.FrontierTrials,
+                        Seed = rules.SimulationSeed,
+                        MaxTurns = rules.MaxSimTurns,
+                        Policy = SimPolicy.Adaptive,
+                        Combos = input.Combos,
+                        RestRooms = level.RestRooms,
+                        RestHealFraction = RoomKindRewards.RestHealFraction,
+
+                        // Same rule as the floor sims: charges are a run resource, so only a run's
+                        // first floor starts full. A finale almost never is one.
+                        StartsWithFullCharges = level.Index == 0
+                    }
+                };
+
+                var frontier = InvestmentFrontier.Measure(settings);
+                frontier.Label = $"{run.Name} / {level.Reference}";
+                frontier.Asset = run.Run;
+                frontier.Run = run.Run;
+                frontier.LevelIndex = level.Index;
+                frontier.Tier = tier;
+                frontier.Budget = rules.InvestmentBudgetForTier(tier);
+                report.Frontiers.Add(frontier);
+            }
+        }
+
+        private static LevelCurve FinalLevelOf(RunCurve run)
+        {
+            if (run == null || run.Levels == null || run.Levels.Count == 0)
+            {
+                return null;
+            }
+            return run.Levels[run.Levels.Count - 1];
+        }
+
+        /// <summary>
+        /// Reads the frontiers against the two properties the design asks of them: that a tier offers
+        /// a <b>choice</b> of how to pay, and that the ladder <b>rises</b> with campaign depth.
+        ///
+        /// <para>Both are stated in investment cost rather than in content numbers on purpose. A
+        /// frontier stated as "asks 450" survives every edit to the enemies that produce it; one
+        /// stated as "Difficulty 2.8 across four rooms" is obsolete the moment anything moves.</para>
+        /// </summary>
+        private static void EvaluateFrontiers(BalanceReport report, BalanceRulesSO rules)
+        {
+            if (report.Frontiers.Count == 0)
+            {
+                return;
+            }
+
+            // Deepest ask seen at each shallower tier, so "did this tier move outward" is answered
+            // against the whole tier rather than against whichever run happened to be measured first.
+            var deepestAskByTier = new Dictionary<int, int>();
+            foreach (var frontier in report.Frontiers)
+            {
+                if (frontier.Tier < 0 || frontier.Unclearable)
+                {
+                    continue;
+                }
+                if (!deepestAskByTier.TryGetValue(frontier.Tier, out int ask) || frontier.AskedInvestment > ask)
+                {
+                    deepestAskByTier[frontier.Tier] = frontier.AskedInvestment;
+                }
+            }
+
+            foreach (var frontier in report.Frontiers)
+            {
+                if (frontier.Unclearable)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Frontier,
+                        frontier.Label, "No investment the player can make clears this floor")
+                    {
+                        Asset = frontier.Asset,
+                        Detail = $"Every mix on the sweep — up to {Widest(rules)} heroes at "
+                               + $"{Richest(rules)} XP each — still wipes above the "
+                               + $"{rules.MaxFloorWipeRate:P0} ceiling on this {frontier.Rooms}-room "
+                               + "floor. A tier the player cannot reach by investing is not a gate, "
+                               + "it is a wall: the die → bank → upgrade → return loop has nothing to "
+                               + "return to.",
+                        Suggestion = "Thin the floor or lower the level's Difficulty until the widest "
+                               + "swept mix clears it, then re-measure where the frontier lands."
+                    });
+                    continue;
+                }
+
+                int asked = frontier.AskedInvestment;
+
+                if (!frontier.OffersChoice)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Frontier,
+                        frontier.Label, "This tier is a checklist, not a choice")
+                    {
+                        Asset = frontier.Asset,
+                        Detail = $"Exactly one affordable way to clear it: {frontier.FrontierText}, at "
+                               + $"{asked} investment. The design asks for a range — buy the hero, or "
+                               + "deepen the grid, or blend the two — so a tier with one entry on its "
+                               + "frontier takes the decision away from the player and just tells them "
+                               + "what to buy.",
+                        Suggestion = "The two axes substitute at roughly "
+                               + $"{rules.HeroXpEquivalent} XP per hero. A tier offers a choice when a "
+                               + "narrower, better-grown party lands within "
+                               + $"{rules.EquivalentInvestmentTolerance} of the wider, greener one — so "
+                               + "move the floor's load off single big hits (which width answers) or "
+                               + "off raw volume (which XP answers), whichever it currently leans on."
+                    });
+                }
+
+                if (frontier.Tier > 0)
+                {
+                    int shallower = -1;
+                    string shallowerLabel = "";
+                    for (int tier = 0; tier < frontier.Tier; tier++)
+                    {
+                        if (deepestAskByTier.TryGetValue(tier, out int ask) && ask > shallower)
+                        {
+                            shallower = ask;
+                            shallowerLabel = $"tier {tier}";
+                        }
+                    }
+
+                    if (shallower >= 0 && asked <= shallower)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Frontier,
+                            frontier.Label, "This tier asks no more than the one before it")
+                        {
+                            Asset = frontier.Asset,
+                            Detail = $"Tier {frontier.Tier} asks {asked} investment; {shallowerLabel} "
+                                   + $"already asked {shallower}. Depth is supposed to be the axis "
+                                   + "along which the ask grows — a deeper tier that costs the same or "
+                                   + "less means every upgrade bought for the earlier one is spent, and "
+                                   + "the rest of the campaign is free.",
+                            Suggestion = "Raise this floor's load until its frontier sits past the "
+                                   + $"shallower tier's — the tier budget for depth {frontier.Tier} is "
+                                   + $"{frontier.Budget}. Enemy count is the lever with headroom; "
+                                   + "per-enemy strength is pinned at MinHitsToKillHero against the "
+                                   + "fresh party, which is the party that is meant to die here."
+                        });
+                    }
+                }
+
+                if (frontier.Budget >= 0)
+                {
+                    int tolerance = Mathf.Max(0, rules.InvestmentBudgetTolerance);
+                    if (asked < frontier.Budget - tolerance)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Frontier,
+                            frontier.Label, $"Tier asks {asked} investment against a budget of {frontier.Budget}")
+                        {
+                            Asset = frontier.Asset,
+                            Detail = $"Cheapest clearing mixes: {frontier.FrontierText}. The floor "
+                                   + $"stops threatening anyone at {SafeText(frontier)}. A tier under "
+                                   + "its budget is content the player walks through on upgrades they "
+                                   + "bought for something shallower.",
+                            Suggestion = $"Add roughly {frontier.Budget - asked} investment worth of "
+                                   + "load. Rooms per floor and enemies per room are the honest levers "
+                                   + "(see docs/BALANCING.md §1 Consequence 2); Difficulty buys danger "
+                                   + "quadratically but runs into hero one-shotting first."
+                        });
+                    }
+                    else if (asked > frontier.Budget + tolerance)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Frontier,
+                            frontier.Label, $"Tier asks {asked} investment against a budget of {frontier.Budget}")
+                        {
+                            Asset = frontier.Asset,
+                            Detail = $"Cheapest clearing mixes: {frontier.FrontierText}. Overshooting "
+                                   + "the budget is worse than it looks: every frontier here is "
+                                   + "measured against a greedy (near-optimal) grid spend, so a player "
+                                   + "who built for flavour is weaker than this number at the same XP.",
+                            Suggestion = "Thin the floor, hand back a refuge, or lower the level's "
+                                   + "Difficulty until the frontier comes back inside "
+                                   + $"±{tolerance} of {frontier.Budget}."
+                        });
+                    }
+                }
+
+                if (frontier.SafeInvestment != int.MaxValue
+                    && frontier.SafeInvestment <= asked + Mathf.Max(0, rules.EquivalentInvestmentTolerance))
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Frontier,
+                        frontier.Label, "The floor goes from lethal to harmless in one purchase")
+                    {
+                        Asset = frontier.Asset,
+                        Detail = $"It first clears at {asked} investment and stops being a threat at "
+                               + $"{frontier.SafeInvestment} — a band of "
+                               + $"{frontier.SafeInvestment - asked}. A tier whose whole difficulty "
+                               + "lives inside one upgrade is a cliff: before it the floor is "
+                               + "impossible, after it nothing on the floor is a decision.",
+                        Suggestion = "Widen the band by spreading the floor's threat across more "
+                               + "rooms rather than concentrating it in the boss, so extra investment "
+                               + "pays down gradually instead of all at once."
+                    });
+                }
+            }
+        }
+
+        private static string SafeText(FloorFrontier frontier)
+        {
+            return frontier.SafeInvestment == int.MaxValue
+                ? "no swept mix (it stays a threat throughout)"
+                : $"{frontier.SafeInvestment} investment";
+        }
+
+        private static int Widest(BalanceRulesSO rules)
+        {
+            int widest = 0;
+            if (rules.FrontierPartyWidths != null)
+            {
+                foreach (int width in rules.FrontierPartyWidths)
+                {
+                    if (width > widest)
+                    {
+                        widest = width;
+                    }
+                }
+            }
+            return widest;
+        }
+
+        private static int Richest(BalanceRulesSO rules)
+        {
+            int richest = 0;
+            if (rules.FrontierXpSteps != null)
+            {
+                foreach (int xp in rules.FrontierXpSteps)
+                {
+                    if (xp > richest)
+                    {
+                        richest = xp;
+                    }
+                }
+            }
+            return richest;
         }
 
         // ------------------------------------------------------------------ save

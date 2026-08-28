@@ -66,9 +66,9 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 126
+            Amount: 165
           - Type: 1
-            Amount: 12
+            Amount: 17
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

@@ -103,6 +103,137 @@ chase a per-enemy danger target and broke hero durability on the way (`Difficult
 every hero dropped to 2 hits). **Stop at the best measured point** and check the constraints the
 objective does not name — hero hits-to-kill, fight length, worst-case spawn rolls.
 
+
+### The investment-surface harness — **use `MeasureFrontiers` instead**
+
+> **Superseded 2026-08-28 (§5k).** The sweep below now lives in the project, pruned and tested. Call
+> it and read the result:
+>
+> ```csharp
+> var input = BalanceAssetCollector.Collect(rules, false, false);   // no sim: the curves only
+> foreach (var f in BalanceAnalyzer.MeasureFrontiers(input))
+> {
+>     Debug.Log($"{f.Label} asks {f.AskedInvestment} (budget {f.Budget}) — {f.FrontierText}");
+> }
+> ```
+>
+> **16 seconds for the whole campaign**, because it never simulates a mix the frontier already
+> dominates. The hand-written version below is kept for its four gotchas, which still apply to any
+> ad-hoc sweep — and because it is the shape the built-in one grew from.
+
+The sweep behind §5i/§5j. Run it through the Unity MCP (`Unity_RunCommand`); it needs the editor **out
+of play mode**. About a minute for 15 points per finale at 200 trials. Everything it needs is public,
+so it does not have to live in the project.
+
+```csharp
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEditor;
+using Assets.Scripts.Balance;
+using Assets.Scripts.Balance.Editor;
+using Assets.Scripts.Rooms;
+
+internal class CommandScript : IRunCommand
+{
+    // A floor's rooms in play order: each combat room as often as the level expects it, boss last.
+    private static List<IList<SimUnit>> BuildRooms(LevelCurve level)
+    {
+        var rooms = new List<IList<SimUnit>>();
+        foreach (var room in level.Rooms)
+        {
+            if (room == null || !room.IsCombatRoom) { continue; }
+            int times = Mathf.Max(1, Mathf.RoundToInt(room.Occurrences));
+            for (int i = 0; i < times; i++)
+            {
+                var units = room.Expected.ToDiscreteUnits();
+                if (units.Count > 0) { rooms.Add(units); }
+            }
+        }
+        if (level.Boss != null)
+        {
+            var boss = SimUnit.FromEnemy(level.Boss, level.Tuning);
+            if (boss != null) { rooms.Add(new List<SimUnit> { boss }); }
+        }
+        return rooms;
+    }
+
+    // Rooms do not depend on the party, so one curve can be fought by any width.
+    private static PartyBaseline Truncate(PartyBaseline src, int size)
+    {
+        var p = new PartyBaseline
+        {
+            SourceLabel = src.SourceLabel, PotionItem = src.PotionItem,
+            PotionCount = src.PotionCount, PotionHealAmount = src.PotionHealAmount
+        };
+        for (int i = 0; i < src.Heroes.Count && i < size; i++) { p.Heroes.Add(src.Heroes[i]); }
+        return p;
+    }
+
+    public void Execute(ExecutionResult result)
+    {
+        var baseRules = AssetDatabase.LoadAssetAtPath<BalanceRulesSO>(BalanceAssetCollector.RulesAssetPath)
+                        ?? BalanceRulesSO.CreateDefault();
+
+        int[] xps = { 0, 100, 200, 350, 500 };
+        int[] widths = { 1, 2, 3 };
+        var lines = new List<string>();
+
+        foreach (int xp in xps)
+        {
+            // Instantiate — never edit the checked-in asset in place.
+            var rules = Object.Instantiate(baseRules);
+            rules.ReferenceHeroXp = xp;
+
+            var input = BalanceAssetCollector.Collect(rules, false, false);   // no sim: the curve only
+            var report = BalanceAnalyzer.Analyze(input);
+
+            foreach (var run in report.Runs)
+            {
+                var level = run.Levels[run.Levels.Count - 1];                 // the finale
+                var rooms = BuildRooms(level);
+                if (rooms.Count == 0) { continue; }
+
+                foreach (int w in widths)
+                {
+                    var party = Truncate(level.Party, w);
+                    if (party.Heroes.Count < w) { continue; }
+
+                    var settings = new EncounterSimulator.FloorSimSettings
+                    {
+                        Trials = 200, Seed = rules.SimulationSeed, MaxTurns = rules.MaxSimTurns,
+                        Policy = SimPolicy.Adaptive, Combos = input.Combos,
+                        PotionCount = level.Party.PotionCount,
+                        PotionHealAmount = level.Party.PotionHealAmount,
+                        RestRooms = level.RestRooms,
+                        RestHealFraction = RoomKindRewards.RestHealFraction,
+                        StartsWithFullCharges = level.Index == 0
+                    };
+
+                    var o = EncounterSimulator.RunFloor(party, rooms, settings);
+                    lines.Add(string.Format("{0,-38} xp{1,-4} {2} hero(es)  wipe={3,6:P0} endHP={4,5:P0}",
+                        run.Name + " / " + level.Name, xp, w, o.WipeRate, o.AverageEndHealthFraction));
+                }
+            }
+
+            Object.DestroyImmediate(rules, true);
+        }
+
+        result.Log(string.Join("\n", lines));
+    }
+}
+```
+
+Four things that will bite:
+
+- **`result.Log` does not honour format specifiers.** `result.Log("{0:0.000}", x)` prints the literal
+  `{0:0.000}`. Build the string with `string.Format` first and log the result.
+- **`Object.Instantiate` the rules, never mutate the asset.** There is no `BalanceRules.asset` checked
+  in, so an escaped mutation silently becomes a changed default for everyone.
+- **Sweep the *surface*, not a line.** Sweeping XP at a fixed 3 heroes produces a flatly wrong answer,
+  because 3 heroes is the saturated corner. This mistake reached a written report (§5i → §5j).
+- **Set `StartsWithFullCharges` from the floor index.** Charges are a run resource; every floor but the
+  first starts empty, and granting them full is the optimism §5f was about.
+
 ## 4. Retune of 2026-08-25 — findings 17 → 5 (then → 3, see §5)
 
 The state before: **0 critical / 17 warning / 10 info**. Fourteen of the seventeen were the same
@@ -613,7 +744,13 @@ it keeps the whole suite at ~1s), so the four *last floor cannot end the run* wa
 by running the analyzer. A slow, `Category("Balance")`-gated test asserting each run's final floor
 clears `MinFinalFloorWipeRate` would close it, at the cost of a much longer suite.
 
-## 5i. The gate ladder — party width gates, XP does not, and the game already has the loop
+## 5i. The gate ladder — the loop already exists, but it is a cliff
+
+> **⚠ Partly superseded by §5j.** This section's headline claim - "party width gates, XP does not" -
+> is **wrong**. The XP axis was swept only at the 3-hero party, which is the saturated corner where
+> nothing shows. Swept across width *and* XP together, both axes bite and they trade against each
+> other. The rest of the section (the cliff, `BaseCap` 2, the saturation of the XP axis at 3 heroes)
+> holds. Read §5j before acting on anything here.
 
 Measured 2026-08-27, after §5h's "make floors losable" ran into the question *losable for whom*. The
 design intent being tuned toward: **deeper runs should be unclearable until the player has invested, so
@@ -707,8 +844,254 @@ older min/max-party-band follow-up (`NEXT_STEPS.md` §5); the band is one slice 
   carries enemy sets and level tuning; only the *metrics* on it are party-relative. That is what makes
   the width sweep cheap — build the curve once, sim the same rooms against k=1..4.
 
+## 5j. Correction to §5i — both axes work, and the frontier is the right unit
+
+§5i concluded "party width gates, XP does not." **That was wrong, and the error is instructive: the XP
+axis was swept only at the 3-hero party, which is the saturated corner of the surface.** At 3 heroes
+nothing matters, so nothing showed. Swept properly, over width *and* XP together:
+
+```
+wipe rate      XP per hero:        0    100    200    350    500
+The Threshold / Sunken Depths        (run 1 finale)
+   1 hero                        100%   100%   100%    99%    76%
+   2 heroes                      100%    86%     4%     1%     0%
+   3 heroes                       12%     1%     0%     0%     0%
+The Drowned March / The Mire Throne  (run 2 finale)
+   1 hero                        100%   100%   100%    79%    16%
+   2 heroes                       54%     1%     0%     0%     0%
+   3 heroes                        0%     0%     0%     0%     0%
+The Warrens / The Counting Room      (branch finale)
+   1 hero                        100%   100%   100%    97%    17%
+   2 heroes                      100%    11%     4%     0%     0%
+   3 heroes                        0%     0%     0%     0%     0%
+The Ashen Deep / Emberfall           (run 3 finale)
+   1 hero                        100%   100%   100%   100%    98%
+   2 heroes                       99%    82%    38%     0%     0%
+   3 heroes                        1%     0%     0%     0%     0%
+The Hollow Vault                     (secret finale)
+   1 hero                        100%   100%   100%   100%    11%
+   2 heroes                       95%    12%     0%     0%     0%
+   3 heroes                        0%     0%     0%     0%     0%
+```
+
+3-hero health pool by XP: 82 / 94 / 102 / 113 / 127.
+
+**Both axes bite, and they trade against each other.** Sunken Depths is beatable as
+*(2 heroes, 200 XP)* **or** *(3 heroes, 0 XP)* — and the 200-XP option is the *better* one (4% vs 12%).
+Emberfall wants *(2, 350)* or *(3, 0)*. The exchange rate is roughly **one hero ≈ 100-350 XP**,
+varying by floor. So the substitutable "range of what the player should do" that the design wants
+**already exists in the mechanics**; §5i missed it by sampling one corner.
+
+### The right unit is a frontier, not a party
+
+A floor's difficulty cannot be one number, and it cannot be one party either. It is a **frontier**: the
+set of minimum investment mixes that bring the floor inside the target wipe band. Everything useful is
+a statement about that frontier's *shape* and *position*:
+
+- **Is there a choice at all?** Two or more distinct mixes on the frontier = the player has a real
+  decision. One mix = a checklist.
+- **Does the frontier move outward with depth?** This is "depth means danger", stated in the only
+  currency that survives content changes.
+
+Measured against that, the actual bug is sharper than §5i said. The frontiers barely differ across the
+whole campaign:
+
+| Finale | Tier | Cheapest clearing mixes |
+|---|---|---|
+| Sunken Depths | run 1 | (2 heroes, 200 XP) · (3 heroes, 0 XP) |
+| The Mire Throne | run 2 | (2, 100) · (3, 0) |
+| The Counting Room | branch | (2, 100-200) · (3, 0) |
+| Emberfall | run 3 | (2, 350) · (3, 0) |
+| The Hollow Vault | **secret endgame** | (2, 200) · (3, 0) |
+
+**The secret endgame asks for less than the tutorial's finale.** Run 1 needs (2, 200); The Hollow Vault
+needs (2, 200). That is the whole "depth does not mean danger" problem in one line, and it is now
+expressed in a unit that a tuning pass can move.
+
+### Two things worth keeping
+
+- **A fresh save cannot beat run 1's finale, and that is arguably correct.** At (2 heroes, 0 XP) —
+  which is exactly what `PartySlots.BaseCap` gives a new player — Sunken Depths wipes **100%** of the
+  time. Floors 0-2 of that run *are* clearable, so the intended path is: clear three floors, die on the
+  fourth, bank the gold, buy the slot or spend the XP, come back. The die → upgrade → return loop is
+  live on the very first run. It has never been written down.
+- **Solo is nearly viable and nobody knew.** At 500 XP a lone hero clears The Mire Throne 84% of the
+  time and The Hollow Vault 89%. Given `XpSplit` pays a solo hero 4x the share, "narrow but deep" is a
+  real build path that almost works — worth deciding whether to finish it deliberately rather than
+  leaving it at the edge of viability by accident.
+
+### What this means for the model, given the grid is going to grow
+
+The sphere grid is planned to expand a lot, with many branches and much more build freedom. Two
+consequences for how gates get expressed:
+
+1. **Key the axis off XP *spent*, never off node identities.** A frontier stated as "200 XP" survives
+   the grid tripling in size; one stated as "has bought `warrior-spine-3`" does not. `SphereGridOps`
+   greedy-spends whatever is best available, so XP-spent stays a meaningful scalar as branches multiply.
+2. **Today's numbers are the *best case*, and build freedom will widen the gap.** The greedy spend
+   approximates an optimal build. A player following a flavourful path through a large grid will be
+   weaker at the same XP. So the target has to be that the frontier holds for a **median** build, not
+   only the greedy one — which means that once the grid is wide, the analyzer needs to sample a few
+   plausible builds per XP level and report the spread, not a single point. Until then, read every
+   frontier number as optimistic.
+
+## 5k. The frontier is measured now — and two model bugs it found on the way
+
+Shipped 2026-08-28. §5j asked for the frontier to become a first-class measurement instead of an
+ad-hoc MCP sweep; it now is. `InvestmentFrontier.Measure` sweeps party width against sphere-grid XP
+over a floor's rooms and returns the **Pareto-minimal mixes** that bring it inside the wipe band,
+plus the mixes past which it stops threatening anyone. `BalanceAnalyzer.RunFrontierSweeps` fills
+`BalanceReport.Frontiers` (one per run finale), `EvaluateFrontiers` reads it, and the Simulation tab
+draws it. Fourteen cases in `InvestmentFrontierTests`.
+
+**Use `BalanceAnalyzer.MeasureFrontiers(input)` while tuning.** It builds the curves closed-form and
+simulates only the finales — **16 seconds for the whole campaign**, against minutes for a full
+`Analyze` with simulation on. That is the iteration loop; `Analyze` is for turning the result into
+findings once it is settled.
+
+### The sweep is pruned, and that is what makes it cheap
+
+Widening a party or spending more XP only ever helps, so once a width clears at some XP every wider
+mix at that XP or above is dominated and is never simulated. The five finales cost **12-40 battles
+each** out of a 4 x 10 grid of 40. Do not "fix" this by sweeping the full grid — the pruning is the
+frontier's definition, not an optimisation on top of it.
+
+### Two bugs the frontier work turned up, both in the shipped floor model
+
+Both were silently wrong from the day `RunFloor` landed (§5h), and both made every measurement in
+§5g-§5j wrong in a way nothing could see.
+
+- **Every boss was fought twice.** `BuildFloorRooms` walked `level.Rooms` — which already contains
+  the synthetic exit-room entry `ReplaceExitRoomWithBoss` adds — *and then* appended `level.Boss`.
+  The climax of every finale in the campaign was simulated as two consecutive boss fights.
+  `RoomEncounter.IsBossRoom` now marks the synthetic entry so a floor builder can skip it.
+- **Rooms whose spawns rounded to nothing vanished.** `ToDiscreteUnits` rounded each spawn-table
+  member *independently*, so a room of `Bog Shaman 0.4 + Hex Weaver 0.5` — about one enemy —
+  contained **none**, and the floor dropped it. The Mire Throne is a four-combat-room floor that was
+  being simulated as its boss standing alone. It now rounds the group's **total** once and hands the
+  seats out largest-remainder-first. The bug is worst exactly where it matters most: a deep level
+  spreading its spawns over several enemy types is the most likely to have every weight land under a
+  half.
+
+A third, same-shaped one: `BuildFloorRooms` also rounded each pool entry's *occurrence* on its own,
+with a `Max(1, ...)` floor. With two pool entries and a boss, `RoomsToGenerate` 5 and 7 both landed on
+2.5 appearances each and produced the identical five-room floor — the model could not see a whole
+authored room. Same fix, same reason. **Lesson worth keeping: when a model turns an expectation into
+whole things, round the total, never the parts.**
+
+`LevelCurve.XpBudget` was also reporting `ReferenceHeroXp` for level 0 of *every* run, including runs
+reached along a campaign edge whose party is seeded from a prerequisite — so The Hollow Vault read as
+a fresh party's run. It now mirrors how `levelParty` is actually built.
+
+### The retune of 2026-08-28 — three tiers to their budgets
+
+Measured before (with the model fixed) and after:
+
+| Finale | Tier | Budget | Was | Now | Ways to pay | Floor |
+|---|---|---|---|---|---|---|
+| Sunken Depths | 0 | 200 | 150 | 150 | 2 | 3 rooms |
+| **The Mire Throne** | 1 | 450 | 150 | **475** | 1 | 15 rooms |
+| The Counting Room | 1 | 450 | 150 | 150 | 2 | 4 rooms |
+| **Emberfall** | 2 | 700 | 225 | **800** | 2 | 14 rooms |
+| **The Hollow Vault** | 3 | 1000 | 150 | **1050** | 1 | 30 rooms |
+
+The ladder rises at every tier for the first time: **150 → 475 → 800 → 1050**. Suite 719/0,
+analyzer 0 critical / 7 warning.
+
+**What actually moved, in order of how much it mattered:**
+
+1. **Enemies per room — the lever that was missing entirely.** Every `RoomSO` in the project had
+   `EvaluationCount: 1` and spawn chances of 0.4-1.0, so *no room in the game ever held more than
+   about one enemy*. That is why §5h's "add rooms" lever saturated: a party of four walking through
+   twenty one-enemy rooms spends nothing. Three new dense rooms — `MireCourtRoom`,
+   `EmberCrucibleRoom`, `VaultReliquaryRoom` — carry the deep floors. **Three kinds of enemy, one
+   roll each**, deliberately: two rolls of three kinds averages the same and can turn up **six**
+   bodies, which is a room no investment survives.
+2. **Floor length**, once the rooms were worth walking through.
+3. **Boss shape.** Buy a boss's danger in **Strength, not health**. A 240-HP Gilded Hoarder reached
+   **39 party turns to kill** — a slog, not a climax — while the same danger at 200 HP and a lower
+   Endurance override runs at 28.
+
+### The trap this pass fell into, and the shape of the fix
+
+**Dense trash rooms and `MinBossToTrashRatio` are in direct conflict, and the conflict is not
+tunable.** `BossToTrashRatio` compares the boss room against the level's *average* room. On a floor
+made only of three-enemy rooms, no legal solo boss can reach 1.8x: raising its health breaks
+`MaxBossTimeToKill`, raising its Strength breaks `MinHitsToKillHero`. Arithmetic, not tuning.
+
+The fix that worked is level design: **each deep finale draws from two ordinary rooms plus one dense
+court room**, so the average stays low enough for the boss to lead while the dense rooms carry the
+load. All three bosses clear 1.8 now.
+
+The fix that would work *better* is the one the analyzer's own suggestion names and the game does not
+have: **give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room before placing
+the boss, so a boss is always alone. Until that exists, a floor's peak fight and its climax are in
+tension, and the ratio rule caps how dense a finale's rooms may be.
+
+### What the frontiers now say that no other metric can
+
+- **The exchange rate between the two axes is not constant.** `HeroXpEquivalent` is authored at 250
+  and fits the shallow end. At the endgame a fourth body is worth **400+ XP**, because with three or
+  four enemies per room action economy compounds — more damage shortens the fight, which cuts
+  incoming damage, twice over. That is why two of the five finales report **one** affordable mix: the
+  3-hero and 4-hero routes drift more than `EquivalentInvestmentTolerance` apart. Reported rather
+  than tuned away; the honest fixes are a longer sphere grid (so XP can keep up) or a
+  depth-dependent exchange rate.
+- **The XP axis is too short to trade against a body at depth.** Full grids cost **615-750** (Warrior
+  750, Tank 665, Scout 615), so `FrontierXpSteps` tops out at 750 — past that the axis saturates and
+  a frontier point there is an investment nobody can make. The grid expansion planned in §0g is
+  therefore not only a content feature: it is what would give the deep tiers a second way to pay.
+- **The recruitable roster is part of the width axis.** `BalanceInput.Roster` (new) carries every
+  hero from `PartyRosterSO.Heroes`, not just the starting lineup, because recruiting the Acolyte at
+  the tavern is a gold purchase exactly like a party slot. Without it the sweep topped out at three
+  heroes and the endgame's "buy another body" route was invisible.
+
+### The closed form is now out of its depth on these floors — read the frontier instead
+
+`AttritionLoad` on the three gated finales reads **2.8 / 4.8 / 14.6**, while the simulation clears
+them at the frontier. Both agree the curve's own party cannot do it; they disagree on magnitude by
+roughly 6x, because attrition composes per enemy and never sees a party focus-firing a three-enemy
+room down. §5h's calibration (*death starts near attrition 0.70*) was measured on one-enemy rooms and
+**does not extend to dense ones.**
+
+So the analyzer now treats a run's final floor whose tier budget exceeds the curve party's investment
+as that tier's **gate**: the attrition verdict becomes an Info naming the price
+(*"gates its tier at 700 investment"*) instead of a Critical, and the difficulty-jump check skips the
+step onto it. Every other floor keeps the old behaviour. Without this the three deep finales report
+as broken content the moment they start gating, which would train everyone to ignore the check that
+catches genuinely unclearable levels.
+
+**Do not read the gated finales' attrition, danger or difficulty-jump numbers as tuning targets.**
+They are upper bounds against a party the design intends to fail. The frontier is the verdict.
+
+### Still open after this pass
+
+- **The Counting Room asks 150 against a tier budget of 450.** The optional branch was not in this
+  pass's scope; it is the one tier still flat.
+- **A 30-room endgame floor is what the budget cost.** With `MinHitsToKillHero` pinning per-enemy
+  strength and the boss ratio capping room density, length was the only lever left. If that reads as
+  a slog in play, the way out is hero HP (§5h lever 3) — it raises the strength ceiling and lets
+  every other lever breathe.
+- **A bad spawn roll on all three finales is still above danger 1** (1.20-1.70, down from 5.05-7.82).
+  Three kinds at one roll each is as tight as the tail gets without dropping to two kinds.
+- **`CampaignOps` seeds an `All`-mode node from its *weakest* prerequisite.** For The Hollow Vault —
+  which requires The Ashen Deep *and* The Warrens — the player has provably played both, so the
+  correct seed is the strongest, not the weakest. The rule is right for `Any` and wrong for `All`.
+
 ## 6. Standing traps
 
+- **When a model turns an expectation into whole things, round the total — never the parts.** Three
+  separate bugs in the floor model were the same mistake (§5k): per-member spawn rounding deleted
+  whole rooms, per-entry occurrence rounding hid whole floors, and the two together made
+  `RoomsToGenerate` 5 and 7 indistinguishable. Largest-remainder apportionment is the fix every time.
+- **Denser trash rooms cost you the boss.** `BossToTrashRatio` is measured against the level's
+  *average* room, so every enemy you add to a trash room raises the bar the climax has to clear — and
+  the boss cannot follow, because health runs into `MaxBossTimeToKill` and Strength into
+  `MinHitsToKillHero`. Mix thin rooms into the pool alongside the dense one (§5k).
+- **A gated finale's closed-form numbers are not tuning targets.** Attrition, danger and difficulty
+  jump are all measured against the party the run curve walks in with, and a gate is *designed* to be
+  beyond that party. The analyzer says so out loud now (*"gates its tier at N investment"*); read the
+  frontier for the verdict.
 - **A trash buff breaks three other checks.** Boss:trash ratio (bosses are on absolute overrides),
   hero hits-to-kill (the party minimum), and worst-case spawn danger (which scales with the dial
   while the expectation barely moves). Re-read all three after any `Difficulty` change.
@@ -724,6 +1107,10 @@ older min/max-party-band follow-up (`NEXT_STEPS.md` §5); the band is one slice 
   than the curve reports. Every number here is the optimistic reading. Worse, "widest legal" means
   `PartySlots.MaxCap` (4), not the cap the save has actually *bought* (`BaseCap` 2 + purchased
   slots), so the curve prices every run as though 900 gold of party slots were already spent.
+- **Never sweep one investment axis at a fixed value of the other.** Both party width and XP are real
+  levers and they *trade*, but at 3 heroes the content is saturated and the XP axis reads as worthless.
+  Sweeping XP there produced a flatly wrong conclusion that reached a written report (§5i → §5j). Sweep
+  the surface, not a line.
 - **"Too easy" and "too hard" are both meaningless without naming the party.** Party width and XP
   investment are *multiplicative*, and the game's content sits past the point where either bites: at
   3 heroes nothing matters, at 2 heroes everything does (§5i). Always state the width and the XP a

@@ -259,6 +259,97 @@ namespace Tests.EditMode
                 "EnemyManager wipes the exit room before placing the boss, so the boss replaces a room.");
             Assert.Greater(bossed.Levels[0].BossDanger, 0f);
             Assert.Greater(bossed.Levels[0].BossToTrashRatio, 1f, "A boss should outweigh the level's trash.");
+
+            // The sealed exit room is a synthetic entry, not a room from the pool. Anything walking
+            // a level's rooms to build a *floor* has to be able to tell the two apart and skip it,
+            // because it appends the boss itself — the floor simulation could not, and fought every
+            // boss in the campaign twice until 2026-08-28.
+            int bossRooms = 0;
+            foreach (var room in bossed.Levels[0].Rooms)
+            {
+                if (room.IsBossRoom)
+                {
+                    bossRooms++;
+                }
+            }
+            Assert.AreEqual(1, bossRooms, "Exactly one room of a boss level is the sealed exit room.");
+            foreach (var room in plain.Levels[0].Rooms)
+            {
+                Assert.IsFalse(room.IsBossRoom, "A level with no boss has no boss room.");
+            }
+        }
+
+        /// <summary>
+        /// Rounding a spawn table member by member deletes rooms. <c>Bog Shaman 0.4 +
+        /// Hex Weaver 0.5</c> describes a room holding about one enemy; rounded independently it holds
+        /// none, and the floor simulation drops it entirely. That is how The Mire Throne — a
+        /// four-combat-room floor — came to be simulated as its boss standing alone.
+        /// </summary>
+        [Test]
+        public void ToDiscreteUnits_FractionsThatRoundToNothingIndividuallyStillFillTheRoom()
+        {
+            var group = new WeightedEnemyGroup();
+            group.Add(Goblin(strength: 4, health: 20), 0.4f);
+            var weaver = Goblin(strength: 9, health: 30);
+            weaver.DisplayName = "Weaver";
+            group.Add(weaver, 0.5f);
+
+            var units = group.ToDiscreteUnits();
+
+            Assert.AreEqual(1, units.Count, "0.4 + 0.5 is one enemy's worth of room, not none.");
+            Assert.AreEqual("Weaver", units[0].DisplayName,
+                "The leftover seat goes to the likeliest occupant, not to whoever was authored first.");
+        }
+
+        [Test]
+        public void ToDiscreteUnits_KeepsTheGroupsTotalSize()
+        {
+            var group = new WeightedEnemyGroup();
+            group.Add(Goblin(), 1.4f);
+            var other = Goblin(strength: 6, health: 25);
+            other.DisplayName = "Other";
+            group.Add(other, 1.4f);
+
+            // 2.8 expected enemies rounds to three, and each member's whole part is honoured first.
+            Assert.AreEqual(3, group.ToDiscreteUnits().Count);
+        }
+
+        /// <summary>
+        /// A room the level barely populates is still allowed to be empty — apportionment moves the
+        /// rounding to the group total, it does not put a floor under it.
+        /// </summary>
+        [Test]
+        public void ToDiscreteUnits_ATrulyEmptyExpectationStaysEmpty()
+        {
+            var group = new WeightedEnemyGroup();
+            group.Add(Goblin(), 0.2f);
+
+            Assert.IsEmpty(group.ToDiscreteUnits());
+        }
+
+        /// <summary>
+        /// The result must not depend on the order the spawn table was authored in, or two rooms with
+        /// identical content would simulate differently.
+        /// </summary>
+        [Test]
+        public void ToDiscreteUnits_IsIndependentOfSpawnTableOrder()
+        {
+            var heavy = Goblin(strength: 9, health: 40);
+            heavy.DisplayName = "Heavy";
+            var light = Goblin(strength: 3, health: 15);
+            light.DisplayName = "Light";
+
+            var forwards = new WeightedEnemyGroup();
+            forwards.Add(light, 0.3f);
+            forwards.Add(heavy, 0.6f);
+
+            var backwards = new WeightedEnemyGroup();
+            backwards.Add(heavy, 0.6f);
+            backwards.Add(light, 0.3f);
+
+            Assert.AreEqual(1, forwards.ToDiscreteUnits().Count);
+            Assert.AreEqual(forwards.ToDiscreteUnits()[0].DisplayName,
+                backwards.ToDiscreteUnits()[0].DisplayName);
         }
 
         [Test]

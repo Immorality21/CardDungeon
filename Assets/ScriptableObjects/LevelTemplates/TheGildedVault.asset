@@ -16,10 +16,12 @@ MonoBehaviour:
   RoomPool:
   - {fileID: 11400000, guid: 0b978dd4c559e8942b3546543c74ef50, type: 2}
   - {fileID: 11400000, guid: 8a98a175962275c4f84e7b71e66db482, type: 2}
-  RoomsToGenerate: 5
+  - {fileID: 11400000, guid: a26892edb60e4ed4e8914caea192167b, type: 2}
+  RoomsToGenerate: 31
   ChainBias: 0.667
   MomentumBias: 0.498
   WallColor: {r: 0.26, g: 0.22, b: 0.1, a: 1}
-  TreasureRooms: 1
-  RestRooms: 1
+  WallTexture: {fileID: 0}
+  TreasureRooms: 0
+  RestRooms: 0
   CombatBackground: {fileID: 0}

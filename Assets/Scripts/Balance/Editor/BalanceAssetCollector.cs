@@ -41,6 +41,11 @@ namespace Assets.Scripts.Balance.Editor
                 Heroes = startingParty,
                 // Asset-level checks (level-curve shape) want every hero, not just the party.
                 AllHeroes = heroes,
+                // Everyone the player can end up fielding, recruits included. Only the frontier
+                // sweep reads this: recruiting is a gold purchase, so it is part of the width axis.
+                Roster = roster.Count > 0 && roster[0] != null && roster[0].Heroes.Count > 0
+                    ? new List<HeroSO>(roster[0].Heroes)
+                    : heroes,
                 Enemies = FindAll<EnemySO>(),
                 Runs = FindAll<RunDefinitionSO>(),
                 Campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath),

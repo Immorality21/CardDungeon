@@ -256,18 +256,72 @@ namespace Assets.Scripts.Balance
             return enemiesNeed > 0f ? partyNeeds / enemiesNeed : float.PositiveInfinity;
         }
 
-        /// <summary>Whole-number units for the simulator, rounding each weight to the nearest enemy.</summary>
+        /// <summary>
+        /// Whole-number units for the simulator: the group's <b>total</b> expected size rounded once,
+        /// then handed out to its members largest-share-first.
+        ///
+        /// <para>Rounding each member independently — which this did until 2026-08-28 — makes rooms
+        /// disappear. A spawn table of <c>Bog Shaman 0.4 + Hex Weaver 0.5</c> describes a room that
+        /// contains about one enemy; rounded per member it contains <b>none</b>, and the floor
+        /// simulation drops the room entirely. The Mire Throne is a four-combat-room floor that was
+        /// being simulated as the boss alone, and it was not the only one. The bug is worst exactly
+        /// where it matters most: a deep level spreading its spawns over several enemy types is more
+        /// likely to have every individual weight land under a half.</para>
+        ///
+        /// <para>Largest-remainder apportionment keeps the total honest (a 0.4 + 0.5 room is one
+        /// enemy, not zero and not two) and gives the seat to the likeliest occupant. It is still a
+        /// point estimate — the fractional part is a real coin-flip in play, and this resolves it the
+        /// same way every trial — but it is the *expected* room rather than an arbitrary one.</para>
+        /// </summary>
         public List<SimUnit> ToDiscreteUnits()
         {
             var units = new List<SimUnit>();
+            if (Members == null || Members.Count == 0)
+            {
+                return units;
+            }
+
+            float total = 0f;
             foreach (var member in Members)
             {
-                int count = Mathf.RoundToInt(member.Weight);
-                for (int i = 0; i < count; i++)
+                total += Mathf.Max(0f, member.Weight);
+            }
+
+            int seats = Mathf.RoundToInt(total);
+            if (seats <= 0)
+            {
+                return units;
+            }
+
+            // Whole units first, so a member expected three times still turns up three times.
+            var remainders = new List<WeightedEnemy>();
+            foreach (var member in Members)
+            {
+                int whole = Mathf.FloorToInt(Mathf.Max(0f, member.Weight));
+                for (int i = 0; i < whole && units.Count < seats; i++)
                 {
                     units.Add(member.Unit.Clone());
                 }
+                remainders.Add(member);
             }
+
+            // Then the leftover seats, biggest fraction first — and by weight when fractions tie, so
+            // the result cannot depend on the authoring order of the spawn table.
+            remainders.Sort((a, b) =>
+            {
+                float fa = Mathf.Max(0f, a.Weight) - Mathf.Floor(Mathf.Max(0f, a.Weight));
+                float fb = Mathf.Max(0f, b.Weight) - Mathf.Floor(Mathf.Max(0f, b.Weight));
+                int byFraction = fb.CompareTo(fa);
+                return byFraction != 0 ? byFraction : b.Weight.CompareTo(a.Weight);
+            });
+
+            int next = 0;
+            while (units.Count < seats && remainders.Count > 0)
+            {
+                units.Add(remainders[next % remainders.Count].Unit.Clone());
+                next++;
+            }
+
             return units;
         }
     }
@@ -296,6 +350,14 @@ namespace Assets.Scripts.Balance
         /// numbers in play live on the layout entry, not the room.
         /// </summary>
         public bool UsesSpawnOverride;
+
+        /// <summary>
+        /// True for the synthetic entry <c>RunCurveModel.ReplaceExitRoomWithBoss</c> adds: the sealed
+        /// exit room, with the boss alone in it. It is not a room from the pool, and anything walking
+        /// a level's rooms to *build a floor* must skip it or it fights the boss twice — which the
+        /// floor simulation did, silently, from the day it shipped until 2026-08-28.
+        /// </summary>
+        public bool IsBossRoom;
 
         public WeightedEnemyGroup Expected = new WeightedEnemyGroup();
         public WeightedEnemyGroup WorstCase = new WeightedEnemyGroup();

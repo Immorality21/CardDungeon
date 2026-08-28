@@ -244,7 +244,11 @@ namespace Assets.Scripts.Balance
 
                 var level = BuildLevel(i, entry, levelParty, rules);
                 level.RescuedHere = entry.RescueHero;
-                level.XpBudget = i == 0
+                // Mirror levelParty exactly: the only level measured at the bare ReferenceHeroXp is
+                // level 0 of a run nothing feeds into. A run reached along a campaign edge is fought
+                // by the party its prerequisite left behind, from its first floor on - reporting 0
+                // there understated every gated run's party by a whole campaign's worth of XP.
+                level.XpBudget = i == 0 && !carriedIn
                     ? rules.ReferenceHeroXp
                     : Mathf.FloorToInt(RosterAverage(lifetime, roster));
                 curve.Levels.Add(level);
@@ -494,6 +498,7 @@ namespace Assets.Scripts.Balance
                 Room = null,
                 RoomName = $"Exit room — {entry.BossEnemy.Label}",
                 GuaranteedSpawns = true,
+                IsBossRoom = true,
                 Occurrences = 1f,
                 Tuning = level.Tuning
             };
