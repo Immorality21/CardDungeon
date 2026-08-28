@@ -16,11 +16,11 @@ MonoBehaviour:
   Label: Warrior
   Blurb: 
   RecruitCost: 0
-  Sprite: {fileID: -7066007825383017324, guid: 3d1f68a2aa44ece478129e379971c582, type: 3}
+  Sprite: {fileID: 3944610533857416082, guid: 3e1d1e6f294b9b84db352a1806ddc276, type: 3}
   AnimationFrames:
-  - {fileID: -7066007825383017324, guid: 3d1f68a2aa44ece478129e379971c582, type: 3}
-  - {fileID: -8624272101738146181, guid: 3d1f68a2aa44ece478129e379971c582, type: 3}
-  - {fileID: 3588239136563056833, guid: 3d1f68a2aa44ece478129e379971c582, type: 3}
+  - {fileID: 3944610533857416082, guid: 3e1d1e6f294b9b84db352a1806ddc276, type: 3}
+  - {fileID: -8250692648091073042, guid: 3e1d1e6f294b9b84db352a1806ddc276, type: 3}
+  - {fileID: 6082431078867552424, guid: 3e1d1e6f294b9b84db352a1806ddc276, type: 3}
   AnimationFps: 4
   BaseStats:
     Values:

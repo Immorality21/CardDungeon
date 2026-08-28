@@ -11,19 +11,21 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
   m_Name: Fireball
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Fireball
   DisplayName: Fireball
   Description: Hurls a ball of fire at all enemies.
-  Icon: {fileID: 21300000, guid: 64265e59b4da49ae842d6c083b334cce, type: 3}
+  Icon: {fileID: -8176323626317577203, guid: 0258ccea7d255c5429e5f53dde1a61da, type: 3}
   TargetType: 1
   Rarity: 2
   Effects:
   - EffectType: 0
-    ScalingStat: 4
     Power: 4
+    PowerMode: 0
+    ScalingStat: 4
     DamageType: 1
     BuffType: 0
     Duration: 3
-  Tags:
-  - 0
+    UnlockLevel: 0
+  Tags: 00000000
+  TagDuration: 3

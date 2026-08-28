@@ -11,19 +11,21 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
   m_Name: Slash
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Slash
   DisplayName: Slash
   Description: A swift blade strike against a single enemy.
-  Icon: {fileID: 21300000, guid: b53101fc46804016a6bb310d446bd7c9, type: 3}
+  Icon: {fileID: -7438242413743671978, guid: f9b9570a47bee3541b17abf0c1f0c6c7, type: 3}
   TargetType: 0
   Rarity: 0
   Effects:
   - EffectType: 0
-    ScalingStat: 1
     Power: 3
+    PowerMode: 0
+    ScalingStat: 1
     DamageType: 0
     BuffType: 0
     Duration: 3
-  Tags:
-  - 6
+    UnlockLevel: 0
+  Tags: 06000000
+  TagDuration: 3

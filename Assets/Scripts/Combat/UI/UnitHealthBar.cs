@@ -98,7 +98,7 @@ namespace Assets.Scripts.Combat
 
             _statusRoot = new GameObject("StatusIcons").transform;
             _statusRoot.SetParent(_barRoot, false);
-            _statusRoot.localPosition = new Vector3(0f, -0.22f, 0f);
+            _statusRoot.localPosition = new Vector3(-0.6f, -0.22f, 0f);
 
             _intent = MakeRenderer(_barRoot, null, Color.white, BgSortOrder + 2);
             _intent.transform.localPosition = new Vector3(0f, 0.30f, 0f);
@@ -106,6 +106,24 @@ namespace Assets.Scripts.Combat
             _intent.enabled = false;
 
             _built = true;
+        }
+
+        public Vector3 EffectPopupPosition
+        {
+            get
+            {
+                EnsureBuilt();
+
+                if (_barRoot == null)
+                {
+                    return transform.position;
+                }
+
+                // Just to the right of the health bar
+                return _barRoot.TransformPoint(
+                    new Vector3(_barWidth * 0.75f, 0f, 0f)
+                );
+            }
         }
 
         private void LateUpdate()

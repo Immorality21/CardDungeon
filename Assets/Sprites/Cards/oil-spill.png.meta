@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 3d1f68a2aa44ece478129e379971c582
+guid: 739be64d910edc641a828f8bb846bed6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7066007825383017324
-    second: warrior-idle-sheet_0
-  - first:
-      213: -8624272101738146181
-    second: warrior-idle-sheet_1
-  - first:
-      213: 3588239136563056833
-    second: warrior-idle-sheet_2
+      213: -7156454362852396112
+    second: oil-spill_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -57,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 32
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -119,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: warrior-idle-sheet_0
+      name: oil-spill_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 1
         width: 32
-        height: 32
+        height: 31
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -134,52 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4943ae3f15f70fd90800000000000000
-      internalID: -7066007825383017324
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: warrior-idle-sheet_1
-      rect:
-        serializedVersion: 2
-        x: 31
-        y: 0
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b761691873e605880800000000000000
-      internalID: -8624272101738146181
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: warrior-idle-sheet_2
-      rect:
-        serializedVersion: 2
-        x: 63
-        y: 0
-        width: 33
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1c0deffbb7cfbc130800000000000000
-      internalID: 3588239136563056833
+      spriteID: 0b373ea6caa2fac90800000000000000
+      internalID: -7156454362852396112
       vertices: []
       indices: 
       edges: []
@@ -198,9 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      warrior-idle-sheet_0: -7066007825383017324
-      warrior-idle-sheet_1: -8624272101738146181
-      warrior-idle-sheet_2: 3588239136563056833
+      oil-spill_0: -7156454362852396112
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
