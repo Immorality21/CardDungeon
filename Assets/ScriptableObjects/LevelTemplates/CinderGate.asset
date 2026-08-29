@@ -16,7 +16,8 @@ MonoBehaviour:
   RoomPool:
   - {fileID: 11400000, guid: cf0984e512aff7f4bac932cd4de8645a, type: 2}
   - {fileID: 11400000, guid: 0226a69f3442ea5478475523df22ad4b, type: 2}
-  RoomsToGenerate: 8
+  - {fileID: 11400000, guid: d4f7b0e53c8a7f2b1d6e9a4c5b0f7d23, type: 2}
+  RoomsToGenerate: 7
   ChainBias: 0.9
   MomentumBias: 0.498
   WallColor: {r: 0.24, g: 0.14, b: 0.12, a: 1}

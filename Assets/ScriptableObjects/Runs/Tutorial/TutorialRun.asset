@@ -69,7 +69,7 @@ MonoBehaviour:
           - Type: 7
             Amount: 105
           - Type: 1
-            Amount: 11
+            Amount: 13
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

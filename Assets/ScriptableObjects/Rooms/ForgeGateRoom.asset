@@ -10,17 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af198de09aeca534b959292a4b71d567, type: 3}
-  m_Name: PinkRoom
-  m_EditorClassIdentifier: 
-  Name: Pink room
-  Width: 3
+  m_Name: ForgeGateRoom
+  m_EditorClassIdentifier:
+  Name: Forge Gate
+  Width: 5
   Height: 4
-  Color: {r: 0.8584906, g: 0.06479175, b: 0.6943518, a: 1}
-  IsConnectorRoom: 0
+  Color: {r: 0.33, g: 0.19, b: 0.15, a: 1}
+  Kind: 0
   PossibleEvents:
   - {fileID: 11400000, guid: 272fbd1c330543fba2c463ac97960741, type: 2}
-  - {fileID: 11400000, guid: b731fb0552a046489a7988e04a9a52fc, type: 2}
+  - {fileID: 11400000, guid: 9af35de6983d4f5bbbf3157922c3c6e4, type: 2}
   EnemySpawnTable:
   - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+    SpawnChance: 1
+    EvaluationCount: 1
+  - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
     SpawnChance: 1
     EvaluationCount: 1

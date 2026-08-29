@@ -1366,3 +1366,78 @@ less hub-and-spoke, which is worth eyes in play.
 - **Manual layouts get no traversal discount** (`LevelCurve.Traversal.FullClear` is 0 for them, e.g.
   Dungeon Entrance). Their graph is authored, so the exact figure is knowable rather than sampled —
   worth doing if manual layouts ever carry real content.
+
+## §5n — The mid-floor density pass (2026-08-29)
+
+§5m left the mid floors at **0.31–0.57** attrition against a death line of roughly 0.70, priced at the
+beeline. This closes that, and the shape of the fix matters more than the numbers.
+
+### Why `Difficulty` was not the lever
+
+Measured before choosing: **nearly every enemy placement already sits at exactly 3 hits to kill a
+hero**, which is `MinHitsToKillHero` exactly — Dragon, Hex Weaver and Cinder Imp are pinned at the
+floor across almost the whole campaign. Raising `RunLevelEntry.Difficulty` from there buys danger by
+making the Warrior one-shottable. Room count is the weakest lever (§5l) and `ChainBias` was spent in
+§5m, so **density was the only lever left**, which is what made this pass a content pass rather than a
+number pass.
+
+### The constraint that shaped it: rooms are shared, guard rooms are not
+
+`BrownRoom` appears in **7 levels**, `TreasuryRoom` in 6, `HallwayHorizontal` in 5, `SwampRoom` in 4.
+Editing a shared room to lift one floor also lifts two finales. Meanwhile every *finale* already had a
+bespoke, single-use dense room (Ledger Hall, Mire Court, Ember Crucible, Vault Reliquary) and no mid
+floor had one — which is exactly why the mid floors were flat.
+
+So the fix mirrors the finales: **one bespoke "guard" room per run**, every spawn guaranteed, added to
+that run's mid-floor pools. Single-run scope means a later nudge can never leak into another tier.
+
+| room | run | composition (all guaranteed) |
+|---|---|---|
+| **Warden's Post** | The Threshold | Stone Sentinel + Floating Eye |
+| **Drowned Shrine** | The Drowned March | Bog Shaman + Floating Eye |
+| **Toll Gate** | The Warrens | Floating Eye + Dragon |
+| **Forge Gate** | The Ashen Deep | Floating Eye + Hex Weaver |
+
+`PinkRoom` also went from a lone 50% spawn — an **empty room half the time** — to guaranteed.
+
+### Where it landed
+
+Attrition, priced at the beeline, before this pass → after:
+
+| run | floors |
+|---|---|
+| The Threshold | 0.09 → **0.55 → 0.66 → 0.81** (Sunken Depths, boss 1.81x) |
+| The Drowned March | **0.73 → 0.70 → 0.61** → 2.24 |
+| The Warrens | **0.73** → 1.72 |
+| The Ashen Deep | **0.66 → 0.80** → 1.69 |
+
+Suite **730 / 0**, analyzer **0 critical / 6 warning**, and **every worst-case room danger is under
+1.0** on every floor in the game — the first time that has been true. The two remaining margin
+warnings (Sunken Depths 19%, Slag Halls 20%) sit a point under the 20% rule and are **left
+deliberately**, per the standing preference for levels erring hard.
+
+### Four things this pass learned
+
+1. **A guard room in a two-room pool is a blunt instrument.** `RoomManager` draws uniformly, so adding
+   one room to a 2-entry pool hands it **a third of every draw**. The first attempt used the strongest
+   thematic pairs and sent five floors to 0.87–0.98 (2–11% resources left). The compositions had to
+   come *down* roughly a tier from what the finales use.
+2. **A duplicate entry in `RoomPool` is the weight dial.** Rotwater Deep has four pool entries where
+   its siblings have three, so its guard room was 1-in-4 draws and the floor sagged to 0.51. `RoomPool`
+   is a `List` drawn uniformly, so listing the same room twice makes it 2-in-5. That is the only
+   per-room weighting the generator has, and nothing else in the project uses it.
+3. **The XP feedback loop (§5m) bites during tuning, not just after it.** Making Sunken Depths harder
+   fed The Drowned March a *stronger* party, which dropped Rotwater Deep from 0.62 to 0.51 without
+   anyone touching it. **Re-measure the whole campaign after every edit**, never just the run you
+   changed — a floor you did not open can move under you.
+4. **Raising a floor's trash can break its boss.** Adding Warden's Post to Sunken Depths pushed the
+   Abyssal Warden to only **1.6x** its level's trash, under the 1.8x rule. Fixed the §5k way — bought
+   in **Strength (11 → 13), not health** — which restored 1.81x without adding turns to the fight.
+
+### Still open
+
+- **Rotwater Deep (0.61) dips below its siblings** (0.73, 0.70). It is the Drowned March's last mid
+  floor and should be its hardest. The duplicate-entry trick took it from 0.51 to 0.61; going further
+  wants either a third pool entry or a stronger Drowned Shrine, and both risk the 20% margin.
+- **`XP per unit of danger varies 5.4x across placements`** (was 4.5x before this pass). The guard
+  rooms pay the same XP as the rooms they outclass, so the reward curve drifted. Worth a look.
