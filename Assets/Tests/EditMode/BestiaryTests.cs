@@ -277,6 +277,38 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void DrawLines_HideTheNameUntilTheMagicHasBeenDrawnSomewhere()
+        {
+            var fireball = ScriptableObject.CreateInstance<Assets.Scripts.Cards.MagicSO>();
+            fireball.Key = "Fireball";
+            fireball.DisplayName = "Fireball";
+
+            var enemy = MakeEnemy();
+            enemy.DrawableMagics = new List<DrawableMagicEntry>
+            {
+                new DrawableMagicEntry { Magic = fireball, Charges = 2 }
+            };
+
+            var undiscovered = BestiaryPresenter.DrawLines(enemy, _ => false);
+            Assert.AreEqual(BestiaryPresenter.Unknown, undiscovered[0].Label);
+            Assert.AreEqual("x2", undiscovered[0].Value,
+                "The charge count is never hidden - what a draw is worth is the decision being made.");
+            Assert.AreEqual(BestiaryTone.Unknown, undiscovered[0].Tone);
+
+            var discovered = BestiaryPresenter.DrawLines(enemy, key => key == "Fireball");
+            Assert.AreEqual("Fireball", discovered[0].Label);
+            Assert.AreEqual(BestiaryTone.Neutral, discovered[0].Tone);
+        }
+
+        [Test]
+        public void IsDrawKnown_WithNoRecord_HidesRatherThanLeaks()
+        {
+            // A call site that forgets to pass the discovery record should over-hide, never leak.
+            Assert.IsFalse(BestiaryPresenter.IsDrawKnown("Fireball", null));
+            Assert.IsFalse(BestiaryPresenter.IsDrawKnown(null, _ => true));
+        }
+
+        [Test]
         public void StatLines_KeepAZeroOnStatsEveryUnitIsAuthoredWith()
         {
             // "No armour" is a finding; "INT 0" on a melee enemy is noise. The split is read off

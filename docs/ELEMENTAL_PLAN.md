@@ -181,8 +181,12 @@ Four calls made at the keyboard that the plan below did not settle:
 - **Zero stats are shown only when the stat is one every unit is authored with** — read off
   `StatCatalog.AuthoringDefault`, not a hard-coded list, so a stat added later sorts itself. "END 0"
   is a finding worth acting on; "INT 0 / SPR 0 / LCK 0" on every melee enemy is noise.
-- **The Draw list is deliberately *not* gated.** The Draw command already names an enemy's magic for
-  free, so hiding it on the page would only contradict a window the player can already open.
+- **The Draw list is gated on the magic-discovery record**, and the in-combat Draw picker was moved to
+  match. An offering never drawn from anywhere reads `???` with no icon, though its charge count still
+  shows - what a draw is worth is the decision, what it is called is the reward. Gating only the
+  knowledge pages was tried first and rejected: the picker named everything, so the gate was one menu
+  away from meaningless. This is the one part of the pass that changes play rather than presentation -
+  the first pull off a new enemy is now a small blind gamble on a turn, which is the FFVIII shape.
 
 Measured after the pass: suite **755/0** (24 new cases), no new console errors, and the whole loop
 driven in play mode through the Unity MCP — command menu → picker → page → back, with the turn

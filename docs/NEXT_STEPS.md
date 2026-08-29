@@ -462,6 +462,11 @@ taken while building, which is where the reasoning lives.
   - **A hit records its element even when the outcome is neutral.** The plan said to record only
     non-`Normal` classifications; that would have left every neutral element `???` forever. Pinned by
     `BestiaryTests`.
+  - **Undrawn magic is masked too**, on the existing `IsMagicDiscovered` record - `???`, no icon,
+    charge count still shown - **on the in-combat Draw picker as well as the knowledge pages**. That
+    last part is the only bit of this work that changes play: the first pull off a new enemy is a
+    small blind gamble on a turn. Gating the pages alone was rejected because the picker named
+    everything, leaving the gate one menu from meaningless.
   - Suite **731 → 755, 0 failed**. Whole loop driven in play mode through the Unity MCP.
 - **Phase 5's last two analyzer checks** — unintended absorption (an innate + max-stacked total
   ≥100% for a type the *player* can deal) and cost/benefit sanity (a `HealthCost` that exceeds the

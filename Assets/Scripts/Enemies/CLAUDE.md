@@ -190,8 +190,19 @@ machinery that makes that playable rather than a memory test.
   (`StatCatalog.AuthoringDefault > 0` — today Strength/Endurance/Agility). "END 0" is a finding worth
   acting on; "INT 0 / SPR 0 / LCK 0" on every melee enemy is noise. Reading it off the catalog rather
   than a hard-coded list means a stat added later sorts itself.
-- **The Draw list is deliberately *not* gated.** The Draw command already names an enemy's magic for
-  free, so hiding it on the page would only contradict a window the player can already open.
+- **The Draw list is gated too, on `MetaProgressManager.IsMagicDiscovered`** — the same permanent
+  record the Forge's collection grid reads, which means "drawn at least once, from any enemy". An
+  undrawn offering reads `???`, but its **charge count still shows**: what a draw is worth is the
+  decision the player is making with their turn; what it is called is the reward for making it.
+  The lookup is passed in as a `Func<string, bool>` so the presenter stays pure, and
+  `BestiaryPresenter.IsDrawKnown` treats a missing lookup as *not* discovered — a call site that
+  forgets to pass the record should over-hide, never leak.
+  - **The in-combat Draw picker masks the same entries** (`MagicSelectionUI.PopulateDrawChoiceRows`,
+    name and icon both). It has to: a gate on the knowledge pages that the player walks around by
+    opening Draw and backing out is decoration. This *does* change play — the first pull off a new
+    enemy is a small blind gamble on a turn — which is the FFVIII shape: drawing is the discovery.
+    (An earlier version of this guide argued the opposite, that gating here would contradict the
+    picker. The resolution was to move the picker, not to drop the gate.)
 
 ### `EnemyCatalogSO` — the bestiary's denominator
 

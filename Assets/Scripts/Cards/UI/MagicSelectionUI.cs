@@ -389,9 +389,20 @@ namespace Assets.Scripts.Cards.UI
             foreach (var entry in entries)
             {
                 bool valid = entry != null && entry.Magic != null;
-                string name = valid ? entry.Magic.DisplayName : "(none)";
+
+                // Magic the player has never drawn anywhere is offered unnamed and unillustrated:
+                // drawing IS the discovery, so the first pull off a new enemy is a small blind
+                // gamble on a turn. The charge count still shows - what the draw is worth is the
+                // decision being made, and hiding that would make the row unreadable rather than
+                // mysterious. The knowledge pages mask exactly the same entries; if this picker
+                // named them, that gate would be walked around by opening Draw and backing out.
+                bool known = valid && BestiaryPresenter.IsDrawKnown(
+                    entry.Magic.Key, MetaProgressManager.Instance.IsMagicDiscovered);
+
+                string name = !valid ? "(none)"
+                    : known ? entry.Magic.DisplayName : BestiaryPresenter.Unknown;
                 string meta = valid ? $"x{entry.Charges}" : "";
-                Sprite icon = valid ? entry.Magic.Icon : null;
+                Sprite icon = valid && known ? entry.Magic.Icon : null;
 
                 var captured = entry;
                 _listScroll.Add(CreateRow(icon, name, meta, valid, () => SelectDrawMagic(captured)));
@@ -582,7 +593,10 @@ namespace Assets.Scripts.Cards.UI
             BestiaryLineView.AddSection(_inspectBody, "Stats", LiveStatLines(enemy));
             BestiaryLineView.AddSection(_inspectBody, "Condition", ConditionLines(enemy));
             BestiaryLineView.AddSection(
-                _inspectBody, "Draw", BestiaryPresenter.DrawLines(definition));
+                _inspectBody,
+                "Draw",
+                BestiaryPresenter.DrawLines(
+                    definition, MetaProgressManager.Instance.IsMagicDiscovered));
 
             HidePanel(_listPanel);
             HidePanel(_targetPanel);

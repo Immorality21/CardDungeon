@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Assets.Scripts.Combat;
@@ -271,11 +272,20 @@ namespace Assets.Scripts.Enemies
         }
 
         /// <summary>
-        /// The magic drawable from this enemy. Deliberately <b>not</b> discovery-gated: the Draw
-        /// command already lists these by name for any enemy in the room, so hiding them here would
-        /// only contradict a window the player can already open.
+        /// The magic drawable from this enemy, named only once the player has drawn it at least once
+        /// <b>from anywhere</b> - the same permanent record the Forge's collection grid reads
+        /// (<c>MetaProgressManager.IsMagicDiscovered</c>), passed in as
+        /// <paramref name="isMagicDiscovered"/> so this stays pure.
+        ///
+        /// <para>The <b>charge count is never hidden</b>. What a draw is worth is the decision the
+        /// player is making with their turn; what it is called is the reward for making it. An
+        /// unknown entry that hid its charges too would just read as a broken row.</para>
+        ///
+        /// <para>The in-combat Draw picker masks the same entries the same way
+        /// (<c>MagicSelectionUI.PopulateDrawChoiceRows</c>). It has to: a gate here that the player
+        /// walks around by opening Draw and backing out is decoration.</para>
         /// </summary>
-        public static List<BestiaryLine> DrawLines(EnemySO definition)
+        public static List<BestiaryLine> DrawLines(EnemySO definition, Func<string, bool> isMagicDiscovered)
         {
             var lines = new List<BestiaryLine>();
             if (definition == null || definition.DrawableMagics == null)
@@ -289,10 +299,26 @@ namespace Assets.Scripts.Enemies
                 {
                     continue;
                 }
+
+                bool known = IsDrawKnown(entry.Magic.Key, isMagicDiscovered);
                 lines.Add(new BestiaryLine(
-                    entry.Magic.DisplayName, "x" + entry.Charges, BestiaryTone.Neutral));
+                    known ? entry.Magic.DisplayName : Unknown,
+                    "x" + entry.Charges,
+                    known ? BestiaryTone.Neutral : BestiaryTone.Unknown));
             }
             return lines;
+        }
+
+        /// <summary>
+        /// Whether a drawable magic may be named. A missing lookup means <b>not</b> discovered: if a
+        /// call site forgets to pass the record, the failure should be an over-hidden page, never a
+        /// leaked one.
+        /// </summary>
+        public static bool IsDrawKnown(string magicKey, Func<string, bool> isMagicDiscovered)
+        {
+            return isMagicDiscovered != null
+                && !string.IsNullOrEmpty(magicKey)
+                && isMagicDiscovered(magicKey);
         }
 
         // ============================================================

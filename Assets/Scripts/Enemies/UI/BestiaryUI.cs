@@ -210,7 +210,10 @@ namespace Assets.Scripts.Enemies.UI
             BestiaryLineView.AddSection(
                 _detail, "Base stats", BestiaryPresenter.StatLines(definition, known));
             BestiaryLineView.AddSection(
-                _detail, "Draw", BestiaryPresenter.DrawLines(definition));
+                _detail,
+                "Draw",
+                BestiaryPresenter.DrawLines(
+                    definition, MetaProgressManager.Instance.IsMagicDiscovered));
         }
     }
 }
