@@ -991,12 +991,12 @@ Measured before (with the model fixed) and after:
 |---|---|---|---|---|---|---|
 | Sunken Depths | 0 | 200 | 150 | 150 | 2 | 3 rooms |
 | **The Mire Throne** | 1 | 450 | 150 | **475** | 1 | 15 rooms |
-| The Counting Room | 1 | 450 | 150 | 150 | 2 | 4 rooms |
+| **The Counting Room** | 1 | 450 | 150 | **400** | 2 | 12 rooms |
 | **Emberfall** | 2 | 700 | 225 | **800** | 2 | 14 rooms |
 | **The Hollow Vault** | 3 | 1000 | 150 | **1050** | 1 | 30 rooms |
 
-The ladder rises at every tier for the first time: **150 → 475 → 800 → 1050**. Suite 719/0,
-analyzer 0 critical / 7 warning.
+The ladder rises at every tier for the first time: **150 → 400/475 → 800 → 1050**, and every finale
+is inside ±125 of its budget. Suite 719/0, analyzer 0 critical / 7 warning.
 
 **What actually moved, in order of how much it mattered:**
 
@@ -1010,7 +1010,17 @@ analyzer 0 critical / 7 warning.
 2. **Floor length**, once the rooms were worth walking through.
 3. **Boss shape.** Buy a boss's danger in **Strength, not health**. A 240-HP Gilded Hoarder reached
    **39 party turns to kill** — a slog, not a climax — while the same danger at 200 HP and a lower
-   Endurance override runs at 28.
+   Endurance override runs at 28. The Warrens' copy of the same boss went 110/9 → **125/14 with an
+   Endurance override of 3**: nearly double the danger *and* under the turn cap, from trading health
+   and armour for damage.
+
+**The Warrens (added 2026-08-28, same pass) is the cleanest of the four**, and worth copying:
+`LedgerHallRoom` holds **two guards, both at `SpawnChance` 1.0**, so its worst roll *is* its
+expectation — the one deep room in the game with no unwinnable spawn tail at all. Three kinds at 0.70
+averaged the same number of bodies, added a "Stone Sentinel is no threat at all" finding (it is tanky
+and weak at tier-1 Difficulty, so it pads a room without threatening it), and dragged the average room
+danger past what the Hoarder could out-rank. Fewer, guaranteed, appropriate enemies beat more
+probabilistic ones.
 
 ### The trap this pass fell into, and the shape of the fix
 
@@ -1066,14 +1076,14 @@ They are upper bounds against a party the design intends to fail. The frontier i
 
 ### Still open after this pass
 
-- **The Counting Room asks 150 against a tier budget of 450.** The optional branch was not in this
-  pass's scope; it is the one tier still flat.
 - **A 30-room endgame floor is what the budget cost.** With `MinHitsToKillHero` pinning per-enemy
   strength and the boss ratio capping room density, length was the only lever left. If that reads as
   a slog in play, the way out is hero HP (§5h lever 3) — it raises the strength ceiling and lets
   every other lever breathe.
-- **A bad spawn roll on all three finales is still above danger 1** (1.20-1.70, down from 5.05-7.82).
-  Three kinds at one roll each is as tight as the tail gets without dropping to two kinds.
+- **A bad spawn roll on the three dense finales is still above danger 1** (1.20-1.37, down from
+  5.05-7.82). Three kinds at one roll each is as tight as the tail gets without dropping to two —
+  which is exactly what the Warrens did, and it is the only one of the four with no tail finding.
+  Worth considering for the other three.
 - **`CampaignOps` seeds an `All`-mode node from its *weakest* prerequisite.** For The Hollow Vault —
   which requires The Ashen Deep *and* The Warrens — the player has provably played both, so the
   correct seed is the strongest, not the weakest. The rule is right for `Any` and wrong for `All`.

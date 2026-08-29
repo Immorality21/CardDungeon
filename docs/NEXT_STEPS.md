@@ -36,17 +36,18 @@ on 2026-08-28 (§5k). Read in this order:
   the user prefers the game to run harder than the model says — but it is *not* acceptable for the
   frontier work, which is precisely about which party can pass.
 
-**The next concrete steps**, now that the ladder rises (150 → 475 → 800 → 1050 across the four tiers):
+**The next concrete steps**, now that every tier is on budget (150 → 400/475 → 800 → 1050):
 
-1. **The Warrens is the one tier still flat** — The Counting Room asks 150 against a budget of 450.
-   It was out of scope for the §5k pass; the recipe is there.
-2. **Give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room, so a boss is
+1. **Give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room, so a boss is
    always alone — which puts `MinBossToTrashRatio` in direct conflict with dense trash rooms and caps
    how hard a finale's rooms may be. The analyzer's own suggestion has been saying "or give it adds"
    the whole time.
-3. **Play the deep floors.** Reaching the budgets cost 14–30-room floors, because per-enemy strength
+2. **Play the deep floors.** Reaching the budgets cost 12–30-room floors, because per-enemy strength
    is pinned by `MinHitsToKillHero` and room density is capped by the boss ratio. If that reads as a
    slog, the way out is hero HP (§5h lever 3), which raises the ceiling every other lever sits under.
+3. **Copy the Warrens' room shape to the other three finales.** `LedgerHallRoom` is two guards, both
+   guaranteed, so its worst spawn roll *is* its expectation — the only deep room with no "a bad spawn
+   roll is unwinnable" finding against it. The other three still carry one each (danger 1.20–1.37).
 
 **A published summary of all of this** (readable tables of the floor curve and the investment surface)
 lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606c48a1a3>.
@@ -833,9 +834,11 @@ supersedes the older min/max-party-band follow-up in §5; that band is one slice
 |---|---|---|---|---|---|
 | Sunken Depths | 0 | 200 | 150 | 150 | 2 |
 | **The Mire Throne** | 1 | 450 | 150 | **475** | 1 |
-| The Counting Room | 1 | 450 | 150 | 150 | 2 |
+| **The Counting Room** | 1 | 450 | 150 | **400** | 2 |
 | **Emberfall** | 2 | 700 | 225 | **800** | 2 |
 | **The Hollow Vault** | 3 | 1000 | 150 | **1050** | 1 |
+
+Every finale is inside ±125 of its tier budget, and the ask rises with depth.
 
 Three things that pass turned up and are worth knowing before the next one:
 
