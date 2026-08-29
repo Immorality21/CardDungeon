@@ -1158,3 +1158,104 @@ They are upper bounds against a party the design intends to fail. The frontier i
 - **No rules asset is checked in.** Everything runs on `BalanceRulesSO.CreateDefault()` unless
   someone presses *Create rules asset*. If findings ever disagree between two machines, check that
   first.
+
+## §5l — The Warrens shape applied, mid floors lengthened, and the traversal hole in the model (2026-08-29)
+
+Three things happened in this pass: §5k's follow-up #1 shipped, the mid floors were lengthened at the
+user's request, and a **structural gap in `RunCurveModel` was found** that qualifies every floor number
+in §5g–§5k.
+
+### The room-shape pass — what actually clears a spawn tail
+
+The three finale rooms went to the Warrens' shape: fewer kinds, every one guaranteed, so the worst
+roll *is* the expectation.
+
+| room | before | after | before exp / worst | after (exp = worst) |
+|---|---|---|---|---|
+| Mire Court | BogShaman + HexWeaver + Dragon @ 0.85 | **HexWeaver + Dragon @ 1.0** | 0.851 / **1.329** | **0.518** |
+| Ember Crucible | CinderImp + Dragon + HexWeaver @ 0.70 | **CinderImp + Dragon @ 1.0** | 0.535 / **1.201** | **0.476** |
+| Vault Reliquary | HexWeaver + Dragon + CinderImp @ 0.90 | **HexWeaver + CinderImp @ 1.0** | 1.073 / **1.374** | **0.801** |
+
+All three *bad spawn roll is unwinnable* warnings are gone. Analyzer **0 critical / 7 warning → 0
+critical / 5 warning**; suite **719 / 0**.
+
+**The correction to §5k's stated lesson.** §5k concluded "fewer, guaranteed, appropriate enemies beat
+more probabilistic ones", and read the Warrens' clean result as coming from the room shape. Measured
+here, that is only half of it. **Danger is sharply superlinear in body count** — at Mire Throne's
+tuning, against the party the model says is there:
+
+| bodies | danger |
+|---|---|
+| 1 (Dragon) | 0.122 |
+| 2 (HexWeaver + Dragon) | 0.564 |
+| 3 (BogShaman + HexWeaver + Dragon) | **1.329** |
+
+The third body does not add ~50%, it more than doubles — the party's clear rate cannot keep up, so
+`NetClearRate` collapses. Consequence: on these floors **no guaranteed 3-body room clears 1.0 with any
+margin.** Every 3-body multiset from each floor's own palette lands at 0.95–1.37; the handful under 1.0
+(0.97–0.99) sit right on the line. The Warrens' Ledger Hall reads 0.409 because it is **two** bodies at
+a **tier-1 Difficulty of 2.19**, not because guaranteeing spawns is itself cheap. Guaranteeing a spawn
+removes the *tail*; it does not remove the *danger*, and if the composition is unchanged it makes the
+worst case the average. **Cut to two bodies first, then guarantee them.**
+
+### Mid floors lengthened
+
+The floors between the openers and the finales were 4–9 rooms against finales of 14–31 — a cliff. They
+now ramp. Attrition before → after: Upper Halls 0.395 → **0.527**, Collapsed Caverns 0.635 → **0.762**,
+Silt Shallows 0.448 → **0.671**, Weeping Causeway 0.576 → **0.789**, Rotwater Deep 0.481 → **0.699**,
+Warren Tunnels 0.577 → **0.721**, Cinder Gate 0.309 → **0.608**, Slag Halls 0.336 → **0.644**.
+
+**Sunken Depths was deliberately left at 5.** It is The Threshold's finale and the one floor in the
+game that already sits in the losable band (0.745, 12% wipe). A first pass took it to 9 and it went
+**critical — unclearable at 1.281**, along with Collapsed Caverns at 1.016. The first run is the
+tightest thing in the campaign; lengthen it last, and measure after every step.
+
+### The traversal hole — `RunCurveModel` prices rooms the player never enters
+
+**`RoomManager.GenerateGraph` builds a tree.** Every node attaches to exactly one existing parent, and
+`GenerateDungeon` creates doors **only** for `_placementPairs` — one edge per placed child. There are no
+loops. `DungeonManager.DesignateExitRoom` then makes the BFS-farthest room the exit. So the path from
+start to exit is **unique**, and every other room hangs off it as an optional branch.
+
+`RunCurveModel.BuildGeneratedRooms` spreads the level's spawn expectation across
+`RoomsToGenerate - 1 - nonCombat` rooms — i.e. it assumes **the player clears the whole floor.** They do
+not have to. Simulating the real generator (`ChainBias` 0.667, 8000 layouts per floor), against a
+blind depth-first explorer that stops the moment it enters the exit:
+
+| floor | rooms | beeline (knows the way) | blind explorer |
+|---|---|---|---|
+| Upper Halls | 11 | 6.0 (55%) | 8.5 (77%) |
+| Collapsed Caverns | 8 | 5.0 (62%) | 6.5 (81%) |
+| The Counting Room | 14 | 6.9 (49%) | 10.5 (75%) |
+| The Mire Throne / Emberfall | 16 | 7.4 (46%) | 11.7 (73%) |
+| **The Hollow Vault** | **31** | **10.1 (33%)** | **20.6 (66%)** |
+
+**The model is the 100% column.** A first-time player, who cannot know where the exit is, sees roughly
+**66–89%** of a floor; one who beelines sees **33–79%**.
+
+Two consequences that matter more than the absolute error:
+
+1. **The error grows with floor length.** A room is worth ~0.85 of itself on an 8-room floor and ~0.66
+   on a 31-room floor. **Room count is the lever with the worst marginal efficiency**, and it is exactly
+   the lever §5k leaned on to reach the deep-tier budgets. Doubling 16 → 31 rooms moves the forced path
+   only 7.4 → 10.1.
+2. **`ChainBias` is a traversal lever nobody has used.** It is 0.667 on all fourteen templates. Raising
+   it makes the tree stringier, so more of the floor lies on the only road to the exit — at 16 rooms,
+   bias 0.667 → 0.95 takes the beeline from 7.4 to 9.5 rooms (46% → 60%) **without adding a single
+   room**. That is a bigger effect than the entire mid-floor lengthening above, and it costs nothing in
+   generation time or save size.
+
+Note the variance is not purely a modelling problem — it is also the game working. Rooms pay XP, gold
+and loot, so a healthy party clears and a hurt party runs for the exit. That is the "route, not a
+sweep" decision §2 wants. The fix is for the model to report the **band** (beeline → full clear) rather
+than a point estimate at the optimistic end, not to pretend the player is deterministic.
+
+### Equipment is not in the reference party at all
+
+`BalanceRulesSO.ReferencePartyUsesSavedGear` defaults to **false**, and no rules asset is checked in —
+so every number in this document describes a party in **no gear**. Even switched on, `BuildReferenceParty`
+reads gear from the local **save file**, which differs per machine and is excluded from
+`BalanceRegressionTests` for exactly that reason. And `LootRoller` drops are *counted* as rewards in
+`RoomEventModel` but never **equipped**: gear the player picks up mid-run never feeds back into party
+power. So the model has no notion of gear progression as an investment axis, which is a gap in the
+§0g frontier work — gear is a way to pay for depth and the frontier cannot price it.

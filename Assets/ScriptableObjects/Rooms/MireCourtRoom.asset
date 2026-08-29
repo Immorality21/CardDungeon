@@ -20,12 +20,9 @@ MonoBehaviour:
   PossibleEvents:
   - {fileID: 11400000, guid: 4effac966eef4baa8bada95503b6d6cd, type: 2}
   EnemySpawnTable:
-  - Enemy: {fileID: 11400000, guid: 96912e3cdfce0d24792157ecadc855fd, type: 2}
-    SpawnChance: 0.85
-    EvaluationCount: 1
   - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
-    SpawnChance: 0.85
+    SpawnChance: 1
     EvaluationCount: 1
   - Enemy: {fileID: 11400000, guid: ff5b77fa3ce957149bdcb9bdd40a5d9c, type: 2}
-    SpawnChance: 0.85
+    SpawnChance: 1
     EvaluationCount: 1

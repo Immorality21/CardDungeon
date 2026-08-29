@@ -15,13 +15,15 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
 
 **Current work: making the campaign losable and gating depth behind investment. The gate ladder now
 exists** — the frontier is measured per floor and the three deep tiers were raised to their budgets
-on 2026-08-28 (§5k). Read in this order:
+on 2026-08-28 (§5k); **§5l (2026-08-29) then cleared the last three spawn tails, lengthened the mid
+floors, and found that the floor model prices rooms the player never walks into.** Read in this order:
 
-1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k**, in that order. They are a single
+1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l**, in that order. They are a single
    investigation and the later ones **correct** the earlier ones — §5i's headline ("party width
    gates, XP does not") is **wrong**, §5j has the corrected surface, and **§5k is what shipped**
    (the frontier tool, two bugs it found in the floor model, and the retune). Do not act on §5i
-   alone, and do not trust any floor number measured before §5k.
+   alone, and do not trust any floor number measured before §5k. **§5l qualifies even those**: the
+   model assumes a full floor clear, and the player walks 33–89% of one.
 2. **§0f and §0g below** — what shipped and what is left.
 3. **§3b** — the retry economy, reframed: **death is tuition, not a penalty**, by explicit decision.
 
@@ -36,18 +38,30 @@ on 2026-08-28 (§5k). Read in this order:
   the user prefers the game to run harder than the model says — but it is *not* acceptable for the
   frontier work, which is precisely about which party can pass.
 
-**The next concrete steps**, now that every tier is on budget (150 → 400/475 → 800 → 1050):
+**The next concrete steps** (updated 2026-08-29 after the §5l pass — read §5l before acting on any
+floor number below, it qualifies all of them):
 
-1. **Give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room, so a boss is
+1. **Teach the model that the player does not clear the floor.** `RoomManager` builds a **tree** and
+   the exit is its farthest room, so the road to the exit is unique and everything else is optional —
+   but `RunCurveModel.BuildGeneratedRooms` spreads the spawn expectation across *every* room. Measured
+   against the real generator, a blind explorer sees **66–89%** of a floor and a beeline **33–79%**;
+   the 31-room Hollow Vault delivers **33% on a beeline, 66% exploring**. The error grows with length,
+   so room count — the lever §5k leaned on hardest — has the worst marginal efficiency of any lever.
+   The fix is a traversal band (beeline → full clear) per floor rather than a point estimate.
+2. **Use `ChainBias`.** It is 0.667 on all fourteen templates and nobody has touched it. At 16 rooms,
+   0.667 → 0.95 takes the forced path from 7.4 to 9.5 rooms (46% → 60%) **with no new rooms**. It is a
+   bigger traversal lever than the whole mid-floor lengthening in §5l, and it is free.
+3. **Give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room, so a boss is
    always alone — which puts `MinBossToTrashRatio` in direct conflict with dense trash rooms and caps
-   how hard a finale's rooms may be. The analyzer's own suggestion has been saying "or give it adds"
-   the whole time.
-2. **Play the deep floors.** Reaching the budgets cost 12–30-room floors, because per-enemy strength
-   is pinned by `MinHitsToKillHero` and room density is capped by the boss ratio. If that reads as a
-   slog, the way out is hero HP (§5h lever 3), which raises the ceiling every other lever sits under.
-3. **Copy the Warrens' room shape to the other three finales.** `LedgerHallRoom` is two guards, both
-   guaranteed, so its worst spawn roll *is* its expectation — the only deep room with no "a bad spawn
-   roll is unwinnable" finding against it. The other three still carry one each (danger 1.20–1.37).
+   how hard a finale's rooms may be. Now sharper than before: §5l measured danger as **superlinear in
+   body count** (2 bodies 0.56, 3 bodies 1.33 at Mire Throne tuning), so a boss room is the only place
+   left to spend danger once trash rooms are capped at two bodies.
+4. **Price gear.** `ReferencePartyUsesSavedGear` is **false** by default and no rules asset is checked
+   in, so every published number describes a party in **no gear**; loot is counted as a reward but
+   never equipped. The §0g frontier cannot price gear as a way to pay for depth until it can.
+5. **Blue Room is filler on a tier-1 finale.** With Mire Court cut to two bodies, the analyzer now
+   flags Floating Eye in The Mire Throne as *no threat at all* — Blue Room (EyeBall/Dragon) is a
+   generic early room reused on a finale. It wants floor-appropriate content.
 
 **A published summary of all of this** (readable tables of the floor curve and the investment surface)
 lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606c48a1a3>.

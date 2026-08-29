@@ -17,7 +17,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0226a69f3442ea5478475523df22ad4b, type: 2}
   - {fileID: 11400000, guid: cf0984e512aff7f4bac932cd4de8645a, type: 2}
   - {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
-  RoomsToGenerate: 6
+  RoomsToGenerate: 10
   ChainBias: 0.667
   MomentumBias: 0.498
   WallColor: {r: 0.22, g: 0.16, b: 0.14, a: 1}
