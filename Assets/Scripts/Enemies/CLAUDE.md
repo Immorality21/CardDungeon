@@ -164,3 +164,44 @@ mistuned: an ungated, unconditional entry in the top tier (nothing below it can 
 ## Sprites
 
 Every `EnemySO` now has its **own** sprite. They did not: `AbyssalWarden`/`StoneSentinel` shared one, `BogShaman`/`EyeBall`/`HexWeaver` a second, and `CinderImp`/`Dragon` a third, which made three pairs of enemies visually indistinguishable in combat. `CinderImp`, `BogShaman` and `StoneSentinel` were drawn fresh (32×32 @ 32 PPU, matching the other trash), the two new bosses at 64×64 @ 64 PPU (matching `AbyssalWarden`), and `HexWeaver` took the already-shipped but unused `evil_wizard.png`. Convention: **trash 32px, bosses 64px, both one world unit**, `filterMode: 0`, `alphaIsTransparency: 1`.
+
+## The bestiary — what the player has learned (`BestiaryPresenter`, `UI/`)
+
+Resistances are **hidden until observed**, by design (see `docs/ELEMENTAL_PLAN.md`). This is the
+machinery that makes that playable rather than a memory test.
+
+- **The record** lives in `MetaProgressSaveData.Bestiary` — a `List<BestiaryEntry>` keyed by
+  `EnemySO.SaveKey` — and the pure `BestiaryOps` holds its rules. See the Progression guide for the
+  write path and why every mutator reports whether it changed anything.
+- **Only observed *types* are stored, never the percentages.** The numbers are read back off the
+  live `EnemySO` at display time, so retuning an enemy can never leave a save quoting figures the
+  game no longer uses.
+- **`BestiaryPresenter` is the single place that decides wording and tone**, and it is pure: it takes
+  an `EnemySO` plus a `BestiaryEntry` (or null, meaning never met) and returns `BestiaryLine`s. Both
+  surfaces render through it — the in-combat Inspect page (`MagicSelectionUI`) and the hub Bestiary
+  (`UI/BestiaryUI`) — because duplicating "how do I phrase a 120% fire resistance" in two controllers
+  is how two screens start disagreeing. `UI/BestiaryLineView` turns a line into a row and owns the
+  colour, so the two cannot diverge there either.
+- **The classification word comes from `DamageCalculator.Classify`**, not a second set of thresholds
+  here, so the bestiary always says what the combat popup will say.
+- **`BestiaryTone` is written from the player's side**: `Good` means a weakness to exploit, `Bad`
+  means resisted/immune/absorbed or an element aimed at the party.
+- **A zero stat earns a row only when the stat is one every unit is authored with**
+  (`StatCatalog.AuthoringDefault > 0` — today Strength/Endurance/Agility). "END 0" is a finding worth
+  acting on; "INT 0 / SPR 0 / LCK 0" on every melee enemy is noise. Reading it off the catalog rather
+  than a hard-coded list means a stat added later sorts itself.
+- **The Draw list is deliberately *not* gated.** The Draw command already names an enemy's magic for
+  free, so hiding it on the page would only contradict a window the player can already open.
+
+### `EnemyCatalogSO` — the bestiary's denominator
+
+`Assets/Resources/EnemyCatalog.asset` lists every `EnemySO` in the game, loaded from Resources so the
+hub `MenuScene` (which wires no combat managers) can render the screen. It is what "N of M
+discovered" counts against, and an enemy missing from it is **invisible in the bestiary however often
+it is fought** — the same silent-gap failure that once shipped `MagicComboCatalog` with a duplicate
+and a missing combo. `BestiaryTests` fails on a null entry, a duplicate key, or an `EnemySO` asset
+that is not listed.
+
+**Edit the asset itself.** Unlike `MagicCatalog` this is a ScriptableObject rather than a prefab
+instance, so it has no override trap — but growing the list by size still leaves nulls, and the test
+catches that.

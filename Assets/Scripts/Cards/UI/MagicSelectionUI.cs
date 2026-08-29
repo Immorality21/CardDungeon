@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Enemies.UI;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
+using Assets.Scripts.Progression;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -13,9 +16,13 @@ namespace Assets.Scripts.Cards.UI
 {
     /// <summary>
     /// In-combat selection UI for the Draw/Magic system, built on UI Toolkit.
-    /// Two compact windows: a "list" window (equipped magic slots for casting, or an
-    /// enemy's draw list, or slot placement) and a "target" window (pick a combat unit).
+    /// Three compact windows: a "list" window (equipped magic slots for casting, or an
+    /// enemy's draw list, or slot placement), a "target" window (pick a combat unit), and the
+    /// "inspect" page - everything the party has learned about one enemy.
     /// Driven entirely by CombatManager events. Rows are built as VisualElements.
+    ///
+    /// Inspect is the odd one out: every other flow here ends in a Submit that spends the hero's
+    /// turn, while Inspect submits nothing and hands the turn straight back.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class MagicSelectionUI : MonoBehaviour
@@ -29,7 +36,9 @@ namespace Assets.Scripts.Cards.UI
             DrawChoice,
             DrawPlacement,
             ItemChoice,
-            ItemTarget
+            ItemTarget,
+            InspectTarget,
+            InspectDetail
         }
 
         [SerializeField] private UIDocument _document;
@@ -44,6 +53,12 @@ namespace Assets.Scripts.Cards.UI
         private ScrollView _targetScroll;
         private Button _listBack;
         private Button _targetBack;
+        private VisualElement _inspectPanel;
+        private VisualElement _inspectPortrait;
+        private Label _inspectName;
+        private Label _inspectHealth;
+        private ScrollView _inspectBody;
+        private Button _inspectClose;
         private bool _refsReady;
 
         private ICombatUnit _currentHero;
@@ -55,6 +70,10 @@ namespace Assets.Scripts.Cards.UI
         private MagicSO _drawMagic;
         private int _drawCharges;
         private ItemSO _selectedItem;
+
+        // Enemies offered to the last Inspect, so closing a page can step back to the picker rather
+        // than all the way out - comparing two enemies is the main reason to open it twice.
+        private List<ICombatUnit> _inspectTargets;
 
         // Cursor-driven keyboard navigation over the currently shown selectable rows.
         private readonly List<Button> _navRows = new List<Button>();
@@ -69,6 +88,7 @@ namespace Assets.Scripts.Cards.UI
             CombatManager.Instance.OnAttackTargetRequested += ShowAttackTargets;
             CombatManager.Instance.OnDrawTargetRequested += ShowDrawTargets;
             CombatManager.Instance.OnItemListRequested += ShowItemList;
+            CombatManager.Instance.OnInspectTargetRequested += ShowInspectTargets;
             CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
         }
@@ -81,6 +101,7 @@ namespace Assets.Scripts.Cards.UI
                 CombatManager.Instance.OnAttackTargetRequested -= ShowAttackTargets;
                 CombatManager.Instance.OnDrawTargetRequested -= ShowDrawTargets;
                 CombatManager.Instance.OnItemListRequested -= ShowItemList;
+                CombatManager.Instance.OnInspectTargetRequested -= ShowInspectTargets;
                 CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
                 CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             }
@@ -128,6 +149,22 @@ namespace Assets.Scripts.Cards.UI
             _listBack = root.Q<Button>("list-back");
             _targetBack = root.Q<Button>("target-back");
 
+            _inspectPanel = root.Q<VisualElement>("inspect-panel");
+            _inspectPortrait = root.Q<VisualElement>("inspect-portrait");
+            _inspectName = root.Q<Label>("inspect-name");
+            _inspectHealth = root.Q<Label>("inspect-health");
+            _inspectBody = root.Q<ScrollView>("inspect-body");
+            _inspectClose = root.Q<Button>("inspect-close");
+            if (_inspectBody != null)
+            {
+                _inspectBody.focusable = false;
+            }
+            if (_inspectClose != null)
+            {
+                _inspectClose.focusable = false;
+                _inspectClose.clicked += OnInspectBack;
+            }
+
             // ScrollViews are focusable by default and would grab focus on the first arrow key.
             if (_listScroll != null)
             {
@@ -153,6 +190,7 @@ namespace Assets.Scripts.Cards.UI
 
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
 
             _refsReady = _listPanel != null && _targetPanel != null;
             return _refsReady;
@@ -214,6 +252,7 @@ namespace Assets.Scripts.Cards.UI
 
             ShowPanel(_listPanel);
             HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
             BeginNavigation();
         }
 
@@ -274,6 +313,7 @@ namespace Assets.Scripts.Cards.UI
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
             ReleaseFocus();
             CombatManager.Instance.SubmitCastAction(_selectedMagic, _selectedSlotIndex, _currentHero, targets);
         }
@@ -359,6 +399,7 @@ namespace Assets.Scripts.Cards.UI
 
             ShowPanel(_listPanel);
             HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
             BeginNavigation();
         }
 
@@ -393,6 +434,7 @@ namespace Assets.Scripts.Cards.UI
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
             ReleaseFocus();
             CombatManager.Instance.SubmitDrawAction(_drawSource, _drawMagic, _drawCharges, slotIndex);
         }
@@ -434,6 +476,7 @@ namespace Assets.Scripts.Cards.UI
 
             ShowPanel(_listPanel);
             HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
             BeginNavigation();
         }
 
@@ -464,8 +507,167 @@ namespace Assets.Scripts.Cards.UI
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
             ReleaseFocus();
             CombatManager.Instance.SubmitUseItemAction(_selectedItem, target);
+        }
+
+        // ============================================================
+        //  INSPECT ("Scan")
+        // ============================================================
+
+        /// <summary>
+        /// Opens the Inspect target picker. Unlike every other command here this one submits
+        /// nothing — the hero's turn is still theirs when the page closes, so it can be used to
+        /// decide the turn rather than instead of it.
+        /// </summary>
+        private void ShowInspectTargets(ICombatUnit hero, List<ICombatUnit> enemies)
+        {
+            if (!EnsureRefs())
+            {
+                return;
+            }
+
+            _currentHero = hero;
+            _mode = SelectionMode.InspectTarget;
+            _inspectTargets = enemies;
+
+            // Nothing to choose between — go straight to the page.
+            if (enemies != null && enemies.Count == 1)
+            {
+                ShowInspectDetail(enemies[0]);
+                return;
+            }
+            PopulateTargetRows(enemies, "Inspect Which?");
+        }
+
+        /// <summary>
+        /// The knowledge page for one enemy. Live numbers (health, buffs, the telegraph) come from
+        /// the unit standing there; everything the player had to *learn* — resistances, the element
+        /// it attacks with, its loot — comes from the permanent bestiary record and reads "???"
+        /// until it has been observed in the field.
+        /// </summary>
+        private void ShowInspectDetail(ICombatUnit target)
+        {
+            var enemy = target as Enemy;
+            if (enemy == null || enemy.Definition == null)
+            {
+                ReturnToActions();
+                return;
+            }
+
+            _mode = SelectionMode.InspectDetail;
+            var definition = enemy.Definition;
+            var known = MetaProgressManager.Instance.GetBestiaryEntry(definition.SaveKey);
+
+            if (_inspectPortrait != null)
+            {
+                var icon = enemy.Icon;
+                _inspectPortrait.style.backgroundImage =
+                    icon != null ? new StyleBackground(icon) : new StyleBackground();
+            }
+            _inspectName.text = enemy.DisplayName;
+            _inspectHealth.text =
+                $"HP {enemy.Stats.Health} / {enemy.GetEffectiveStat(StatType.MaxHealth)}";
+
+            _inspectBody.Clear();
+            ClearNav();
+
+            _inspectBody.Add(BestiaryLineView.Row(BestiaryPresenter.AttackLine(definition, known)));
+            _inspectBody.Add(BestiaryLineView.Row(BestiaryPresenter.KillsLine(known)));
+            _inspectBody.Add(BestiaryLineView.Row(BestiaryPresenter.LootLine(definition, known)));
+
+            BestiaryLineView.AddSection(
+                _inspectBody, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
+            BestiaryLineView.AddSection(_inspectBody, "Stats", LiveStatLines(enemy));
+            BestiaryLineView.AddSection(_inspectBody, "Condition", ConditionLines(enemy));
+            BestiaryLineView.AddSection(
+                _inspectBody, "Draw", BestiaryPresenter.DrawLines(definition));
+
+            HidePanel(_listPanel);
+            HidePanel(_targetPanel);
+            ShowPanel(_inspectPanel);
+
+            // No rows to cursor through, but the panel still has to own the keyboard so Esc/Enter
+            // dismiss the page instead of leaking to the command menu behind it.
+            if (_root != null && _root.panel != null)
+            {
+                _root.focusable = true;
+                _root.Focus();
+            }
+        }
+
+        /// <summary>
+        /// The enemy's stats as they stand in this fight — level tuning and buffs folded in — rather
+        /// than the definition's base line the hub bestiary shows. The player is looking straight at
+        /// the thing, so these are never gated.
+        /// </summary>
+        private List<BestiaryLine> LiveStatLines(Enemy enemy)
+        {
+            var lines = new List<BestiaryLine>();
+            foreach (var stat in StatCatalog.Types)
+            {
+                if (stat == StatType.MaxHealth)
+                {
+                    continue;
+                }
+
+                int value = enemy.GetEffectiveStat(stat);
+                if (!BestiaryPresenter.IsWorthShowing(stat, value))
+                {
+                    continue;
+                }
+
+                int buff = CombatManager.Instance.BuffTracker != null
+                    ? CombatManager.Instance.BuffTracker.GetBuffAmount(enemy, stat)
+                    : 0;
+                string text = buff == 0 ? value.ToString() : $"{value} ({buff:+#;-#;0})";
+                var tone = buff > 0 ? BestiaryTone.Bad : buff < 0 ? BestiaryTone.Good : BestiaryTone.Neutral;
+                lines.Add(new BestiaryLine(StatCatalog.ShortName(stat), text, tone));
+            }
+            return lines;
+        }
+
+        /// <summary>Status effects riding on the enemy, and whether it is winding up a telegraphed hit.</summary>
+        private List<BestiaryLine> ConditionLines(Enemy enemy)
+        {
+            var lines = new List<BestiaryLine>();
+
+            if (enemy.IsCharging)
+            {
+                lines.Add(new BestiaryLine("Charging", "Heavy attack incoming", BestiaryTone.Bad));
+            }
+
+            var tracker = CombatManager.Instance.BuffTracker;
+            if (tracker != null)
+            {
+                foreach (var statusEffect in tracker.GetActiveStatusEffects(enemy))
+                {
+                    // A status effect on an *enemy* is something the party put there, so it reads as
+                    // in the player's favour.
+                    lines.Add(new BestiaryLine(statusEffect.ToString(), "Active", BestiaryTone.Good));
+                }
+            }
+
+            return lines;
+        }
+
+        /// <summary>
+        /// Closing a page steps back to the picker when there was a choice to make (comparing two
+        /// enemies is the point of opening it twice) and out to the command menu otherwise.
+        /// </summary>
+        private void OnInspectBack()
+        {
+            HidePanel(_inspectPanel);
+
+            if (_inspectTargets != null && _inspectTargets.Count > 1)
+            {
+                _mode = SelectionMode.InspectTarget;
+                PopulateTargetRows(_inspectTargets, "Inspect Which?");
+                return;
+            }
+
+            ReturnToActions();
         }
 
         // ============================================================
@@ -486,6 +688,7 @@ namespace Assets.Scripts.Cards.UI
             }
 
             HidePanel(_listPanel);
+            HidePanel(_inspectPanel);
             ShowPanel(_targetPanel);
             BeginNavigation();
         }
@@ -499,6 +702,9 @@ namespace Assets.Scripts.Cards.UI
                     HidePanel(_targetPanel);
                     ReleaseFocus();
                     CombatManager.Instance.SubmitAttackAction(target);
+                    return;
+                case SelectionMode.InspectTarget:
+                    ShowInspectDetail(target);
                     return;
                 case SelectionMode.DrawTarget:
                     OnDrawSourceSelected(target);
@@ -549,6 +755,7 @@ namespace Assets.Scripts.Cards.UI
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
             ReleaseFocus();
 
             var roomActionUI = FindAnyObjectByType<RoomActionUI>();
@@ -580,6 +787,7 @@ namespace Assets.Scripts.Cards.UI
             {
                 HidePanel(_listPanel);
                 HidePanel(_targetPanel);
+                HidePanel(_inspectPanel);
             }
             ReleaseFocus();
         }
@@ -723,7 +931,11 @@ namespace Assets.Scripts.Cards.UI
 
         private void BackNav()
         {
-            if (IsShown(_targetPanel))
+            if (IsShown(_inspectPanel))
+            {
+                OnInspectBack();
+            }
+            else if (IsShown(_targetPanel))
             {
                 OnTargetBack();
             }
@@ -739,6 +951,24 @@ namespace Assets.Scripts.Cards.UI
             {
                 return;
             }
+            // The inspect page has nothing to cursor through - it is read and dismissed, so every
+            // confirm/cancel key closes it.
+            if (_mode == SelectionMode.InspectDetail)
+            {
+                switch (evt.keyCode)
+                {
+                    case KeyCode.Return:
+                    case KeyCode.KeypadEnter:
+                    case KeyCode.Space:
+                    case KeyCode.Escape:
+                    case KeyCode.Backspace:
+                        OnInspectBack();
+                        evt.StopPropagation();
+                        break;
+                }
+                return;
+            }
+
             switch (evt.keyCode)
             {
                 case KeyCode.UpArrow:

@@ -17,7 +17,7 @@ namespace Assets.Scripts.Rooms
     /// <summary>
     /// Room + combat action UI, built on UI Toolkit. Presents non-combat actions
     /// (Examine/Action), the combat start bar (Fight/Flee), the hero-turn command
-    /// window (Attack/Magic/Draw/Skip), and centered dialogs (options, results, death).
+    /// window (Attack/Magic/Draw/Item/Inspect/Skip), and centered dialogs (options, results, death).
     /// Driven by GameManager (Show) and CombatManager events.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
@@ -84,7 +84,7 @@ namespace Assets.Scripts.Rooms
         private float _eventChance;
 
         // Cursor-driven command menu (FFX-style selection list).
-        private enum HeroCommand { Attack, Magic, Draw, Item, Skip }
+        private enum HeroCommand { Attack, Magic, Draw, Item, Inspect, Skip }
 
         private struct CommandEntry
         {
@@ -913,7 +913,27 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.RequestItemList(_currentHeroTurn, consumables);
         }
 
-        /// <summary>Called by the selection UI to return to the Attack/Magic/Draw/Item/Skip window.</summary>
+        /// <summary>
+        /// Opens the enemy knowledge page. The only hero command that costs nothing: it submits no
+        /// action, so <c>MagicSelectionUI</c> hands the turn back through
+        /// <see cref="ReturnToHeroActions"/> when the page closes. Reading what the party already
+        /// learned is not a move.
+        /// </summary>
+        private void OnHeroInspect()
+        {
+            SetShown(_heroBar, false);
+
+            var enemies = CombatManager.Instance.GetAliveEnemies();
+            if (enemies.Count == 0)
+            {
+                SetShown(_heroBar, true);
+                return;
+            }
+
+            CombatManager.Instance.RequestInspectTargets(_currentHeroTurn, enemies);
+        }
+
+        /// <summary>Called by the selection UI to return to the Attack/Magic/Draw/Item/Inspect/Skip window.</summary>
         public void ReturnToHeroActions()
         {
             if (EnsureRefs())
@@ -957,6 +977,9 @@ namespace Assets.Scripts.Rooms
             _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Magic", Enabled = hasMagic });
             _commands.Add(new CommandEntry { Command = HeroCommand.Draw, Label = "Draw", Enabled = hasDrawable });
             _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem });
+            // Inspect is free - it opens a page and hands the turn straight back - so it sits above
+            // Skip rather than among the actions that spend the turn.
+            _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
             _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
 
             for (int i = 0; i < _commands.Count; i++)
@@ -1098,6 +1121,9 @@ namespace Assets.Scripts.Rooms
                 case HeroCommand.Item:
                     OnHeroItem();
                     break;
+                case HeroCommand.Inspect:
+                    OnHeroInspect();
+                    break;
                 case HeroCommand.Skip:
                     OnHeroSkip();
                     break;
@@ -1209,6 +1235,10 @@ namespace Assets.Scripts.Rooms
                         break;
                     case KeyCode.T:
                         InvokeCommandShortcut(HeroCommand.Item);
+                        evt.StopPropagation();
+                        break;
+                    case KeyCode.I:
+                        InvokeCommandShortcut(HeroCommand.Inspect);
                         evt.StopPropagation();
                         break;
                     case KeyCode.S:

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d53179fabc5467d8e088fedd69b46e8, type: 3}
+  m_Name: EnemyCatalog
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemyCatalogSO
+  Enemies:
+  - {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+  - {fileID: 11400000, guid: ff5b77fa3ce957149bdcb9bdd40a5d9c, type: 2}
+  - {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
+  - {fileID: 11400000, guid: a848d09629a0a134084775e476779b74, type: 2}
+  - {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
+  - {fileID: 11400000, guid: 96912e3cdfce0d24792157ecadc855fd, type: 2}
+  - {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
+  - {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
+  - {fileID: 11400000, guid: e62cccd795c1c1942b396724ce782f6f, type: 2}
+  - {fileID: 11400000, guid: a3ec74314eaaa1546a44c86e575112d8, type: 2}

@@ -1042,3 +1042,172 @@
     border-bottom-width: 1px;
     border-bottom-color: var(--cd-accent);
 }
+
+/* ============================================================
+   Enemy knowledge ("Scan") — the in-combat Inspect page and the
+   hub bestiary render the same rows, so they share these classes.
+   Tone classes come from BestiaryLineView.ToneClass; nothing else
+   should decide what a known/unknown value looks like.
+   ============================================================ */
+
+.cd-scan__header {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+    background-color: rgb(67, 30, 108);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--cd-accent);
+}
+
+.cd-scan__portrait {
+    width: 52px;
+    height: 52px;
+    margin-right: 10px;
+    background-color: var(--cd-stone);
+    border-radius: 6px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-scan__titlecol {
+    flex-grow: 1;
+}
+
+.cd-scan__name {
+    font-size: 19px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+}
+
+.cd-scan__health {
+    font-size: 15px;
+    color: var(--cd-text-light);
+}
+
+.cd-scan__body {
+    flex-grow: 1;
+    min-height: 140px;
+    max-height: 320px;
+    margin: 8px 12px;
+    padding: 6px 8px;
+    background-color: rgba(41, 31, 20, 0.35);
+    border-radius: 4px;
+}
+
+/* A section heading inside the page ("Resistances", "Draw", ...). */
+.cd-scan__section {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: var(--cd-accent);
+    margin-top: 8px;
+    margin-bottom: 2px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(205, 110, 255, 0.35);
+}
+
+.cd-scan__row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 4px;
+}
+
+.cd-scan__label {
+    font-size: 15px;
+    color: var(--cd-text-light);
+}
+
+.cd-scan__value {
+    font-size: 15px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-right;
+}
+
+/* In the player's favour — a weakness to exploit, loot they have seen drop. */
+.cd-scan__value--good {
+    color: rgb(255, 217, 102);
+}
+
+/* Against the player — resisted, immune, absorbed, or an element aimed at the party. */
+.cd-scan__value--bad {
+    color: rgb(154, 178, 217);
+}
+
+.cd-scan__value--neutral {
+    color: var(--cd-text-light);
+}
+
+/* Not yet observed. Dim on purpose: an unread row should read as a gap in the record,
+   not as a value. */
+.cd-scan__value--unknown {
+    color: rgb(122, 106, 146);
+}
+
+/* ---- Hub bestiary ---- */
+
+.cd-bestiary__cols {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 300px;
+}
+
+.cd-bestiary__list {
+    width: 40%;
+    margin-right: 10px;
+    background-color: rgba(41, 31, 20, 0.35);
+    border-radius: 4px;
+    padding: 6px;
+}
+
+.cd-bestiary__detail {
+    flex-grow: 1;
+    background-color: rgba(41, 31, 20, 0.35);
+    border-radius: 4px;
+    padding: 6px 10px;
+}
+
+/* An enemy row in the left-hand list. */
+.cd-bestiary-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 8px;
+    margin: 2px 0;
+    background-color: var(--cd-stone);
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 4px;
+}
+
+.cd-bestiary-row:hover {
+    background-color: rgb(71, 34, 110);
+    border-color: rgb(156, 82, 210);
+}
+
+.cd-bestiary-row--selected {
+    background-color: rgb(102, 48, 158);
+    border-color: var(--cd-accent);
+}
+
+/* Never met: still listed, so the collection has a visible shape. */
+.cd-bestiary-row--locked {
+    background-color: var(--cd-stone-disabled);
+    opacity: 0.75;
+}
+
+.cd-bestiary-row__icon {
+    width: 34px;
+    height: 34px;
+    margin-right: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-bestiary-row__name {
+    flex-grow: 1;
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+}
+
+.cd-bestiary-row__kills {
+    font-size: 13px;
+    color: rgb(180, 164, 204);
+}

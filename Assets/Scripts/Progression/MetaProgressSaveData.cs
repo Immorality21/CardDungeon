@@ -54,6 +54,13 @@ namespace Assets.Scripts.Progression
         public List<string> DiscoveredMagicKeys = new List<string>();
         public List<string> DiscoveredComboKeys = new List<string>();
 
+        // What the player has learned about each enemy type, keyed by EnemySO.SaveKey: kills,
+        // which elements have been tried on it, whether it has been seen to attack, and which loot
+        // it has actually dropped. Written from the damage path as things are observed, read by the
+        // in-combat Inspect window and the hub bestiary. See BestiaryEntry for why the resistance
+        // *values* are deliberately not stored here.
+        public List<BestiaryEntry> Bestiary = new List<BestiaryEntry>();
+
         // Run keys the player has cleared to the end (survives death, like all meta progress).
         // Gates the main menu: a non-repeatable run - the tutorial - cannot be started again.
         public List<string> CompletedRunKeys = new List<string>();

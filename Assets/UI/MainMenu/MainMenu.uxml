@@ -15,6 +15,7 @@
             <ui:Button name="inventory-btn" text="Inventory" class="cd-menu-button" />
             <ui:Button name="party-btn" text="Party" class="cd-menu-button" />
             <ui:Button name="grid-btn" text="Sphere Grid" class="cd-menu-button" />
+            <ui:Button name="bestiary-btn" text="Bestiary" class="cd-menu-button" />
             <ui:VisualElement class="cd-currency-row">
                 <ui:Label name="home-gold" text="Gold: 0" />
                 <ui:Label name="home-essence" text="Essence: 0" />
@@ -122,6 +123,20 @@
             </ui:VisualElement>
 
             <ui:Button name="forge-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- BESTIARY -->
+        <!-- Fixed height for the same reason the inventory is: the detail column changes size as
+             enemies are selected, and a translate-centered window that resizes leaves UITK's input
+             hit-testing on the old transform, offsetting every click. -->
+        <ui:VisualElement name="bestiary-view" class="cd-window cd-window--flush cd-window--fixed cd-dock-center cd-hidden">
+            <ui:Label text="Bestiary" class="cd-title" />
+            <ui:Label name="bestiary-progress" text="" class="cd-info-label" />
+            <ui:VisualElement class="cd-bestiary__cols">
+                <ui:ScrollView name="bestiary-list" class="cd-bestiary__list" mode="Vertical" />
+                <ui:ScrollView name="bestiary-detail" class="cd-bestiary__detail" mode="Vertical" />
+            </ui:VisualElement>
+            <ui:Button name="bestiary-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- INVENTORY -->

@@ -369,6 +369,73 @@ namespace Assets.Scripts.Progression
             OnChanged?.Invoke();
         }
 
+        // --- Bestiary (permanent enemy knowledge; survives death) ---
+        //
+        // Every mutator delegates to the pure BestiaryOps and persists *only* when the record
+        // actually changed. That matters: these are called from the damage path, so a hit that
+        // teaches nothing new must not write Meta.json.
+
+        /// <summary>Every enemy the player has met. Never null; the live list, so do not mutate it.</summary>
+        public List<BestiaryEntry> GetBestiary()
+        {
+            return _saveData.Bestiary ?? (_saveData.Bestiary = new List<BestiaryEntry>());
+        }
+
+        /// <summary>What is known about one enemy, or null if it has never been met.</summary>
+        public BestiaryEntry GetBestiaryEntry(string enemyKey)
+        {
+            return BestiaryOps.Find(GetBestiary(), enemyKey);
+        }
+
+        /// <summary>Whether this enemy has ever been encountered.</summary>
+        public bool IsEnemySeen(string enemyKey)
+        {
+            return GetBestiaryEntry(enemyKey) != null;
+        }
+
+        /// <summary>Records meeting an enemy (combat start). Idempotent.</summary>
+        public void MarkEnemySeen(string enemyKey)
+        {
+            CommitBestiary(BestiaryOps.MarkSeen(GetBestiary(), enemyKey));
+        }
+
+        /// <summary>
+        /// Records that a hit of this damage type landed on the enemy, which is what reveals its
+        /// resistance to that element. Called for every typed hit; idempotent per type.
+        /// </summary>
+        public void MarkResistanceObserved(string enemyKey, Combat.DamageType type)
+        {
+            CommitBestiary(BestiaryOps.MarkDamageTypeObserved(GetBestiary(), enemyKey, type));
+        }
+
+        /// <summary>Records seeing the enemy attack, which reveals the element it swings with.</summary>
+        public void MarkAttackTypeObserved(string enemyKey)
+        {
+            CommitBestiary(BestiaryOps.MarkAttackTypeObserved(GetBestiary(), enemyKey));
+        }
+
+        /// <summary>Adds one to this enemy's kill tally.</summary>
+        public void MarkEnemyKilled(string enemyKey)
+        {
+            CommitBestiary(BestiaryOps.MarkKilled(GetBestiary(), enemyKey));
+        }
+
+        /// <summary>Records an item this enemy was actually seen to drop. Idempotent per item.</summary>
+        public void MarkLootObserved(string enemyKey, string itemKey)
+        {
+            CommitBestiary(BestiaryOps.MarkLootObserved(GetBestiary(), enemyKey, itemKey));
+        }
+
+        private void CommitBestiary(bool changed)
+        {
+            if (!changed)
+            {
+                return;
+            }
+            Save();
+            OnChanged?.Invoke();
+        }
+
         // --- Run completion (which runs have been cleared to the end) ---
 
         /// <summary>Every run this save has cleared. Never null; the live list, so do not mutate it.</summary>

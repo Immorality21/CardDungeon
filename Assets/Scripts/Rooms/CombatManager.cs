@@ -97,6 +97,7 @@ namespace Assets.Scripts.Rooms
         public event Action<ICombatUnit, List<ICombatUnit>> OnAttackTargetRequested;
         public event Action<ICombatUnit, List<ICombatUnit>> OnDrawTargetRequested;
         public event Action<ICombatUnit, List<ItemSaveData>> OnItemListRequested;
+        public event Action<ICombatUnit, List<ICombatUnit>> OnInspectTargetRequested;
         public event Action OnDungeonCleared;
 
         [SerializeField] private List<MagicComboSO> _cardCombos;
@@ -155,6 +156,17 @@ namespace Assets.Scripts.Rooms
         public void RequestItemList(ICombatUnit hero, List<ItemSaveData> consumables)
         {
             OnItemListRequested?.Invoke(hero, consumables);
+        }
+
+        /// <summary>
+        /// Raises the Inspect target picker. Inspect is the one hero command that is <b>free</b>:
+        /// it never submits an action, so the turn is still the player's when the window closes. It
+        /// reads back knowledge the party already earned in the field rather than granting any, so
+        /// charging a turn for it would be charging for the UI.
+        /// </summary>
+        public void RequestInspectTargets(ICombatUnit hero, List<ICombatUnit> enemies)
+        {
+            OnInspectTargetRequested?.Invoke(hero, enemies);
         }
 
         /// <summary>
@@ -331,6 +343,7 @@ namespace Assets.Scripts.Rooms
                     enemy.TurnsTaken = 0;
                     enemy.ClearCharge();
                     units.Add(enemy);
+                    RecordEnemySeen(enemy);
                 }
             }
 
@@ -515,6 +528,11 @@ namespace Assets.Scripts.Rooms
             {
                 meta.MarkComboDiscovered(comboKey);
             }
+
+            // ...and what the cast taught the player about the enemies it hit. Read off the magic's
+            // live Damage effects rather than the result entries, because an entry carries the
+            // number and the popup word but not the element that produced them.
+            RecordCastDamageObserved(castAction, magicLevel);
 
             yield return _presenter.Present(
                 result,
@@ -972,6 +990,12 @@ namespace Assets.Scripts.Rooms
                 ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.45f, 0f), "CRIT!", new Color(1f, 0.82f, 0.2f), 0.16f);
             }
             ShowEffectiveness(target, damageType, resistanceBonus);
+
+            // The player just watched this land, so the bestiary learns it: which element was tried
+            // on the enemy, and - when the enemy is the one swinging - what it attacks with.
+            RecordDamageObserved(target, damageType);
+            RecordAttackTypeObserved(attacker);
+
             yield return new WaitForSecondsRealtime(crit ? 0.075f : 0.045f);
 
             _lastTurnLog = dmg < 0
@@ -1045,6 +1069,99 @@ namespace Assets.Scripts.Rooms
                 {
                     go.AddComponent<CombatIdleMotion>();
                 }
+            }
+        }
+
+        // ============================================================
+        //  BESTIARY (what the player learns by fighting)
+        // ============================================================
+        //
+        // Knowledge is recorded from the combat path, at the moment the player sees the thing, so
+        // an Inspect window and the hub bestiary only ever show what was actually observed. All of
+        // these use MetaProgressManager.Instance (auto-creates + loads Meta.json) for the same
+        // reason ExecuteCastAction does: the manager may not exist yet mid-combat. Each mutator is
+        // idempotent and persists only on a real change, so calling them per hit is cheap.
+
+        /// <summary>The bestiary key for a combat unit, or null when it is not a keyed enemy.</summary>
+        private static string BestiaryKeyOf(ICombatUnit unit)
+        {
+            var enemy = unit as Enemy;
+            return enemy != null && enemy.Definition != null ? enemy.Definition.SaveKey : null;
+        }
+
+        /// <summary>Meeting an enemy is what puts it in the bestiary at all.</summary>
+        private static void RecordEnemySeen(Enemy enemy)
+        {
+            if (enemy != null && enemy.Definition != null)
+            {
+                MetaProgressManager.Instance.MarkEnemySeen(enemy.Definition.SaveKey);
+            }
+        }
+
+        /// <summary>
+        /// A hit of this element landed on the enemy, so its resistance to that element is now
+        /// observed. Recorded for <b>every</b> type including Normal - "Lightning does nothing
+        /// special to it" is a real finding, and gating on a non-Normal classification (as the
+        /// original plan did) would leave every neutral element permanently unreadable.
+        /// </summary>
+        private static void RecordDamageObserved(ICombatUnit target, DamageType type)
+        {
+            string key = BestiaryKeyOf(target);
+            if (key != null)
+            {
+                MetaProgressManager.Instance.MarkResistanceObserved(key, type);
+            }
+        }
+
+        /// <summary>Watching an enemy swing reveals the element it swings with.</summary>
+        private static void RecordAttackTypeObserved(ICombatUnit attacker)
+        {
+            string key = BestiaryKeyOf(attacker);
+            if (key != null)
+            {
+                MetaProgressManager.Instance.MarkAttackTypeObserved(key);
+            }
+        }
+
+        /// <summary>Every element the cast actually delivered, against every enemy it landed on.</summary>
+        private static void RecordCastDamageObserved(SpellcastAction castAction, int magicLevel)
+        {
+            if (castAction == null || castAction.Magic == null ||
+                castAction.Magic.Effects == null || castAction.Targets == null)
+            {
+                return;
+            }
+
+            foreach (var effect in castAction.Magic.Effects)
+            {
+                // Skip effects the magic has not unlocked yet - they never fired, so they taught
+                // the player nothing.
+                if (effect == null || effect.EffectType != SpellEffectType.Damage ||
+                    effect.UnlockLevel > magicLevel)
+                {
+                    continue;
+                }
+
+                foreach (var target in castAction.Targets)
+                {
+                    RecordDamageObserved(target, effect.DamageType);
+                }
+            }
+        }
+
+        private static void RecordEnemyKilled(Enemy enemy)
+        {
+            if (enemy != null && enemy.Definition != null)
+            {
+                MetaProgressManager.Instance.MarkEnemyKilled(enemy.Definition.SaveKey);
+            }
+        }
+
+        private static void RecordLootObserved(Enemy enemy, ItemSO loot)
+        {
+            if (enemy != null && enemy.Definition != null && loot != null)
+            {
+                MetaProgressManager.Instance.MarkLootObserved(enemy.Definition.SaveKey, loot.Key);
             }
         }
 
@@ -1127,7 +1244,10 @@ namespace Assets.Scripts.Rooms
                 InventoryManager.Instance.AddItem(loot);
                 Debug.Log($"Item dropped: {loot.DisplayName} ({loot.Key})");
                 _combatLoot.Add(loot);
+                RecordLootObserved(enemy, loot);
             }
+
+            RecordEnemyKilled(enemy);
             _turnManager.RemoveUnit(enemy);
             room.Enemies.Remove(enemy);
             // Removed from combat immediately; the object lingers only for its pop/fade.

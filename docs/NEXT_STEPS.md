@@ -44,12 +44,13 @@ that the floor model was pricing rooms the player never walks into; **§5m** fix
 **The next concrete steps** (updated 2026-08-29 after §5n — the mid-floor density pass; floor
 numbers are priced at the **beeline**, the cheapest way through a floor):
 
-1. **Elemental reveal (§0b Phase 4c).** The balance thread is out of cheap moves and this is the other
-   half of the depth problem §0f named: all 63 encounters read *attack-spam plays this as well as
-   thinking does*, and a ±50% damage swing the player cannot see is depth already built and not yet
-   spendable. Unblocked since `EnemySO.Key` shipped; what is left is the knowledge record, the reveal
-   in the UI, and where discovery happens. Sharper than when written: with absorption reachable,
-   casting the wrong element can **heal** an enemy — a punish the player cannot learn from.
+1. ~~**Elemental reveal (§0b Phase 4c).**~~ ✅ Shipped 2026-08-29 — the knowledge record, an
+   in-combat **Inspect** page (free, FFX-style *Scan*) and a hub **Bestiary**. See §0b and
+   `docs/ELEMENTAL_PLAN.md`. The depth §0f named is now *spendable*: a ±50% swing the player could
+   not see is now one the party can learn, remember across runs and read back mid-fight. **What this
+   did not do is make anything harder** — the balance numbers are unchanged, and whether encounters
+   still read as *attack-spam plays this as well as thinking does* now needs re-measuring with the
+   information available.
 2. **Give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room, so a boss is always
    alone, which puts `MinBossToTrashRatio` in direct conflict with dense trash rooms. §5n hit this
    live: raising Sunken Depths' trash dropped its boss to 1.6x and needed a Strength bump to recover.
@@ -403,7 +404,7 @@ already tracked in this section — five *no threat at all* enemies, the *+MaxHe
 
 
 
-### 0b. Elemental layer — ✅ defence shipped 2026-08-25, reveal has not
+### 0b. Elemental layer — ✅ defence shipped 2026-08-25, reveal 2026-08-29
 
 The layer was half-built: the player could not **defend** against an element at all, because
 `ResistanceBuffHandler.Apply` was an empty method and all five resistance `BuffType`s silently did
@@ -440,12 +441,28 @@ taken while building, which is where the reasoning lives.
 
 **Still open:**
 
-- **Discovery-gated reveal (Phase 4c)** — **unblocked 2026-08-26**; `EnemySO.Key`/`SaveKey` exist and
-  every enemy is keyed (see §0b-2), so what is left is the knowledge record, the reveal in the UI, and
-  where discovery happens.
-  Resistances stay hidden by design, but note the argument has sharpened: with absorption now
-  reachable, casting the wrong element can *heal* an enemy, and blind absorption is a punish the
-  player cannot learn from without losing a fight to it.
+- ~~**Discovery-gated reveal (Phase 4c)**~~ — ✅ **Shipped 2026-08-29.** Knowledge got its own
+  surfaces rather than being poured into the target picker:
+  - **`MetaProgressSaveData.Bestiary`** (`List<BestiaryEntry>`, keyed by `EnemySO.SaveKey`): kills,
+    observed damage types, whether the enemy has been *seen attacking*, and loot actually seen to
+    drop. Permanent, survives death. Pure list rules in `BestiaryOps`; every mutator reports whether
+    it changed anything so `MetaProgressManager` writes `Meta.json` only on a real change — they are
+    called from the damage path, on every hit.
+  - **Only the observed *types* are stored, never the percentages** — those are read back off the
+    live `EnemySO`, so retuning an enemy cannot leave a save quoting stale numbers.
+  - **In combat: `Inspect`**, a sixth hero command (hotkey `I`) — FFX/FFVIII *Scan*. **Free**: it
+    submits no action, so the turn survives the page. Live HP/stats/status off the unit in front of
+    you; the earned half (resistances, attack element, loot) reads `???` until observed.
+  - **At the hub: `Bestiary`**, a home-screen collection listing every enemy in the new
+    `Resources/EnemyCatalog.asset` with an "N of M discovered" header; unmet enemies are listed but
+    nameless so the collection has a visible shape.
+  - **One source of wording:** `BestiaryPresenter` (pure) + `BestiaryLineView` (rows) serve both
+    surfaces, and the classification word comes from `DamageCalculator.Classify`, so the page can
+    never disagree with the combat popup.
+  - **A hit records its element even when the outcome is neutral.** The plan said to record only
+    non-`Normal` classifications; that would have left every neutral element `???` forever. Pinned by
+    `BestiaryTests`.
+  - Suite **731 → 755, 0 failed**. Whole loop driven in play mode through the Unity MCP.
 - **Phase 5's last two analyzer checks** — unintended absorption (an innate + max-stacked total
   ≥100% for a type the *player* can deal) and cost/benefit sanity (a `HealthCost` that exceeds the
   damage the buff avoids over its duration). The first two Phase 5 checks shipped as

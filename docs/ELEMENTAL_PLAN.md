@@ -4,7 +4,7 @@ Turns resistance from an inert damage modifier into a mechanic the player can ex
 up to and including FFVIII-style **absorption** at >100%. Resistances stay **hidden** until observed, by
 design; the reveal is discovery-gated, not a static display.
 
-**Partly built.** See the Status table below for what is live and what is still planned.
+**Built.** Phases 1-4 are in; only Phase 5's last two analyzer checks remain. See the Status table.
 
 Decisions taken (recorded here so the plan is unambiguous):
 
@@ -48,7 +48,7 @@ gate to a confirmation prompt - the affordability check is the same function eit
 | `HealthCost` effect + the cloaks | **done** 2026-08-25 - `HealthCostEffectExecutor`, 4 cloak assets |
 | Resistance buffs (`ResistanceBuffHandler`) | **done** 2026-08-25 - `CombatBuffTracker.ApplyResistance`, `ResistanceBuffTests` |
 | Analyzer/test guard against dead effects | **done** 2026-08-25 - `ElementalContentTests` (Phase 5's checks 1-2, as tests) |
-| Discovery-gated reveal | not started - Phase 4c. **No longer blocked**: `EnemySO.Key` + `SaveKey` shipped 2026-08-26, all ten enemies keyed, pinned by `EnemyIdentityTests`. |
+| Discovery-gated reveal | **done** 2026-08-29 - the knowledge record, the in-combat **Inspect** page, and a hub **Bestiary**. See below. |
 | Analyzer: unintended absorption, cost/benefit sanity | not started - Phase 5 checks 3-4 |
 
 ---
@@ -137,11 +137,56 @@ combat, but unresolvable when a save restored the slot and invisible in the Forg
 Measured after the pass: suite **651/0** (42 new cases), analyzer **0 critical / 3 warning / 22 info**
 - the same three warnings as before, none of them from this change.
 
-**Still open, in the order the build order suggests:** Phase 4c (discovery-gated reveal - the key it
-waited on now exists, so what remains is the knowledge record itself, the reveal in
-`MagicSelectionUI`/the target panel, and the moment of discovery) and Phase 5's remaining two analyzer
-checks (unintended absorption, cost/benefit sanity). Note that blind absorption is now *reachable* by the player against a hero - so the argument
-in Phase 4 for surfacing resistances is live, not hypothetical.
+**Still open:** Phase 5's remaining two analyzer checks (unintended absorption, cost/benefit
+sanity). Phase 4c shipped 2026-08-29 - see the section below.
+
+---
+
+## What shipped 2026-08-29 (Phase 4c), and the calls made while building it
+
+The reveal is in, and it took a shape the plan did not anticipate: rather than dropping resistances
+into the target picker, knowledge got a **place of its own**. Two surfaces, one record.
+
+- **The record** is `MetaProgressSaveData.Bestiary` — a `List<BestiaryEntry>` keyed by
+  `EnemySO.SaveKey`, holding kills, observed damage types, whether the enemy has been *seen
+  attacking*, and the loot it has actually been seen to drop. Permanent, survives death, like every
+  other discovery. The pure `BestiaryOps` does the list work and every mutator returns *whether it
+  changed anything*, so `MetaProgressManager` persists only on a real change — these fire from the
+  damage path, on every hit.
+- **It stores which types were observed, never the percentages.** The numbers are read back off the
+  live `EnemySO`, so retuning an enemy can never leave a save quoting figures the game no longer
+  uses.
+- **In combat: `Inspect`**, a sixth hero command (hotkey `I`), FFX/FFVIII *Scan*. It is the one
+  command that is **free** — it submits no action, so the turn is still the player's when the page
+  closes. It shows live HP, live stats and status/telegraph off the unit in front of you; the
+  earned half (resistances, attack element, loot) reads `???` until observed. Charging a turn for it
+  would be charging for the UI, since it grants no knowledge, only reads it back.
+- **At the hub: `Bestiary`**, a home-screen collection page listing every enemy in the new
+  `Resources/EnemyCatalog.asset` with an "N of M discovered" header — unmet enemies are listed but
+  nameless, so the collection has a visible shape.
+- **`BestiaryPresenter` is the one place that decides wording and tone**, and both surfaces render
+  through it plus `BestiaryLineView`. The classification word comes from `DamageCalculator.Classify`
+  rather than a second set of thresholds, so the bestiary always says what the combat popup will.
+
+Four calls made at the keyboard that the plan below did not settle:
+
+- **A hit records the element even when the classification is `Normal`.** Phase 4c said "recorded
+  whenever `Classify` returns anything but `Normal`" — that is wrong, and it would have left every
+  neutral element permanently `???` no matter how often the player tried it. "Lightning does nothing
+  special to this" is a real finding. Pinned by
+  `BestiaryTests.ResistanceLine_ObservedAndNeutral_IsAKnownAnswer`.
+- **The attack element has its own flag.** It is learned by being *attacked*, not by attacking, so it
+  cannot ride on the observed-damage list — and it is the half that tells the player whether a cloak
+  is worth its health cost.
+- **Zero stats are shown only when the stat is one every unit is authored with** — read off
+  `StatCatalog.AuthoringDefault`, not a hard-coded list, so a stat added later sorts itself. "END 0"
+  is a finding worth acting on; "INT 0 / SPR 0 / LCK 0" on every melee enemy is noise.
+- **The Draw list is deliberately *not* gated.** The Draw command already names an enemy's magic for
+  free, so hiding it on the page would only contradict a window the player can already open.
+
+Measured after the pass: suite **755/0** (24 new cases), no new console errors, and the whole loop
+driven in play mode through the Unity MCP — command menu → picker → page → back, with the turn
+intact.
 
 ---
 
@@ -295,8 +340,12 @@ Three increments, each shippable on its own:
 - **4b — Pre-cast preview.** With a magic selected and a target highlighted, call `Classify` for that
   magic's `DamageType` and show the predicted `Weak!` / `Resisted` / `Absorbed` before committing. Nearly
   free once 4a exists, and it is what turns "know the table" into "see the consequence".
-- **4c — Discovery-gated reveal** (optional, if you want the knowledge to be a reward). Persist observed
-  resistances next to `DiscoveredMagicKeys` in `MetaProgressSaveData`:
+- **4c — Discovery-gated reveal** — ✅ **shipped 2026-08-29**, and it is what got built instead of
+  4a/4b: knowledge got its own surfaces (an in-combat **Inspect** page and a hub **Bestiary**) rather
+  than being dropped into the target picker. The sketch below is kept for the reasoning; the
+  `EnemySO.Key` blocker it names was cleared 2026-08-26, and what actually shipped is described in
+  *What shipped 2026-08-29* above. Persist observed resistances next to `DiscoveredMagicKeys` in
+  `MetaProgressSaveData`:
   ```csharp
   public List<string> DiscoveredResistances = new List<string>();   // "enemyKey:DamageType"
   ```
@@ -306,6 +355,12 @@ Three increments, each shippable on its own:
 
 Given absorption is now on the table, I would treat **4a as mandatory, not optional** — blind absorption
 is a punish the player cannot learn from without losing a fight to it.
+
+> **What was actually done instead.** 4a/4b were skipped and 4c built, because Inspect answers the
+> same objection without giving the table away: the punish is still learnable (one hit teaches you
+> that element, permanently, and the page remembers it for you) while the knowledge stays earned.
+> A player who has met an enemy before walks in already knowing; a player who has not, finds out the
+> expensive way exactly once.
 
 ## Phase 5 — Analyzer support
 

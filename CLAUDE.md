@@ -37,7 +37,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 - `Rooms/` — Dungeon generation (`RoomManager`, `RoomNode`, `Room`, `Door`, `RoomSO`), **room kinds** (`RoomKind` + the pure `RoomKindPlanner` / `RoomKindRewards` — caches and refuges, placed per instance on a per-level quota), `GameManager`, `CombatManager`
 - `Rooms/Events/` — **room events**: the stat-resolved gambles behind a room's **Action** button (`RoomEventSO`, `RoomEventSpawn`, `RoomEventResolver`, `RoomEventRunner`, `LevelAfflictionTracker`) — see its own `CLAUDE.md`
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `HeroSaveData`, **the sphere grid** (`SphereGridSO` node-graph assets + `SphereGridOps`, the pure rules — XP is a per-hero bank spent on nodes at the hub; `LevelConfiguration` is gone), and `UI/` (`SphereGridView` — the UITK graph renderer shared by the hub screen and the `Tools ▸ Heroes ▸ Sphere Grid Editor` window — `SphereGridPresenter`, `SphereGridUI`)
-- `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`
+- `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`, **the bestiary** (`EnemyCatalogSO` + the pure `BestiaryPresenter` and `UI/BestiaryLineView`/`UI/BestiaryUI` — what the player has *observed* about each enemy, shown by the in-combat Inspect page and the hub Bestiary screen)
 - `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`
 - `Cards/` — Magic/Draw system (namespace still `Cards`): `MagicSO`, `MagicTag` (enum), `MagicCatalog`, `EquippedMagicState` (draw slots + charges), `EffectResolver`, `ComboDetector`, `CombatBuffTracker`, `MagicTagTracker`, `MagicComboSO`
 - `Cards/Effects/` — Effect executors: `IEffectExecutor`, `DamageEffectExecutor`, `HealEffectExecutor`, `BuffEffectExecutor`, `DebuffEffectExecutor`, `EffectExecutorFactory`
@@ -46,8 +46,8 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 - `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`, `RunDefinitionSO`, `RunLevelEntry`, `RunSaveData`, and **the campaign graph** (`CampaignSO` + `CampaignOps` — which runs exist, what unlocks them, and which branches are optional/secret)
 - `Resources/` — `PartyResourceManager`, `PartyResourceType`
 - `IO/` — `FileHandler`, `IWriteable`
-- `Progression/` — `MetaProgressManager` (persistent Gold/Essence + per-card upgrade levels), `MetaProgressSaveData`
-- `MainMenu/` — `MainMenuManager`, `MerchantUI`, `CampaignMapUI` (the story map / run selection)
+- `Progression/` — `MetaProgressManager` (persistent Gold/Essence + per-card upgrade levels), `MetaProgressSaveData`, `BestiaryEntry`/`BestiaryOps` (the permanent enemy-knowledge record)
+- `MainMenu/` — `MainMenuManager`, `MerchantUI`, `CampaignMapUI` (the story map / run selection); the Bestiary screen lives in `Enemies/UI` but is driven from here, like the Forge
 - `Balance/` — Balance analysis model (`BalanceRulesSO` targets, `BalanceMath`, `EncounterModel`, `RunCurveModel`, `RoomEventModel`, `VarietyAnalyzer`, `ProgressionMap`, `EncounterSimulator`, `InvestmentFrontier`, `SaveAudit`, `BalanceAnalyzer`) + the `Tools ▸ Balance ▸ Balance Analyzer` editor window
 
 ### Subsystem Guides
@@ -66,7 +66,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Persistence / save files** → `Assets/Scripts/IO/CLAUDE.md`
 - **Balance analysis** (difficulty targets, danger index, attrition, the **investment frontier** — what each campaign tier demands and how many ways it can be paid — Draw/combo supply chain, the analyzer window) → `Assets/Scripts/Balance/CLAUDE.md`
 - **Balancing playbook** (how the levers interact, the measure-don't-guess workflow, what past tuning passes learned) → `docs/BALANCING.md` — read this *before* changing a `Difficulty`, a hero bar or a spawn table, and record what a pass learned there afterwards
-- **Elemental layer roadmap** (resistance buffs, defensive magic, surfacing resistances) → `docs/ELEMENTAL_PLAN.md`
+- **Elemental layer roadmap** (resistance buffs, defensive magic, the discovery-gated reveal) → `docs/ELEMENTAL_PLAN.md`
 - **Runtime/visual validation via the Unity MCP** (drive the running game, capture screenshots) → `docs/GAMEPLAY_VALIDATION.md`
 
 ### Key Patterns
@@ -82,7 +82,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 
 - **Location:** `Assets/Tests/EditMode/`
 - **Framework:** Unity Test Framework 1.7.0 (NUnit-based). Run via Unity Test Runner, or headlessly via the Unity MCP (`runSynchronously`) — see `docs/GAMEPLAY_VALIDATION.md` gotcha 12.
-- **Test coverage:** `TurnManager`, `DamageCalculator`, `CombatBuffTracker`, `MagicTagTracker`, `ComboDetector`, `EffectResolver`, `Stats`, magic upgrade power bonus + meta economy math (`MagicUpgradeTests`), extension methods, balance metrics (`BalanceMathTests`, `RunCurveModelTests`, `EncounterSimulatorTests`, `ProgressionMapTests`), whole-floor losability (`FloorSimulatorTests`), per-tier investment frontiers (`InvestmentFrontierTests`), and asset-integrity guards for hand-populated catalogs and identity keys (`MagicComboCatalogTests`, `EnemyIdentityTests`)
+- **Test coverage:** `TurnManager`, `DamageCalculator`, `CombatBuffTracker`, `MagicTagTracker`, `ComboDetector`, `EffectResolver`, `Stats`, magic upgrade power bonus + meta economy math (`MagicUpgradeTests`), extension methods, balance metrics (`BalanceMathTests`, `RunCurveModelTests`, `EncounterSimulatorTests`, `ProgressionMapTests`), whole-floor losability (`FloorSimulatorTests`), per-tier investment frontiers (`InvestmentFrontierTests`), the enemy-knowledge record and its presentation (`BestiaryTests`), and asset-integrity guards for hand-populated catalogs and identity keys (`MagicComboCatalogTests`, `EnemyIdentityTests`, `BestiaryTests`)
 - **Balance regression suite:** `BalanceRegressionTests` runs the balance analyzer over the project's real assets and fails on any finding outside the bands in `BalanceRules`. Category `Balance`, so it can be filtered out of a quick unit pass. See `Assets/Scripts/Balance/CLAUDE.md`.
 - **MockCombatUnit:** Test helper implementing `ICombatUnit` for unit testing combat logic without MonoBehaviours
 - **Convention:** Tests use `MethodName_Scenario_ExpectedResult` naming. All combat/card logic is testable without Unity runtime (pure C# classes).
