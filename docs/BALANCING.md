@@ -1259,3 +1259,110 @@ reads gear from the local **save file**, which differs per machine and is exclud
 `RoomEventModel` but never **equipped**: gear the player picks up mid-run never feeds back into party
 power. So the model has no notion of gear progression as an investment axis, which is a gap in the
 §0g frontier work — gear is a way to pay for depth and the frontier cannot price it.
+
+## §5m — Traversal is in the model, and `ChainBias` turned out to be the lever (2026-08-29)
+
+§5l *found* the traversal hole. This section *closes* it, and then uses it.
+
+### `TraversalModel` — what the run curve now prices
+
+`Assets/Scripts/Balance/TraversalModel.cs` is a pure topology model that mirrors the real generator
+rather than fitting a curve to it, so it stays correct if the generator is retuned: it rebuilds
+`RoomManager.GenerateGraph` (every node attaches to one already-placed parent; a leaf with probability
+`ChainBias`) and `DungeonManager.DesignateExitRoom` (BFS-farthest room wins, ties broken the same way),
+then reports a **band**:
+
+- **Beeline** — rooms on the unique road to the exit.
+- **Explorer** — rooms a blind depth-first walk opens before stumbling into the exit.
+- **FullClear** — every room, which is what the model assumed before today.
+
+It runs its own LCG rather than `UnityEngine.Random`, so it neither consumes the global sequence nor
+makes a test flaky, and memoises on `(rooms, bias, trials, seed)`. `BalanceRulesSO.Traversal` picks
+which end the curve prices and `RunCurveModel.BuildGeneratedRooms` scales `Occurrences` by it —
+`Occurrences` is the single choke point, so danger, attrition, XP, gold and the room-event budget all
+follow from that one multiplication. `LevelCurve.Traversal` carries the whole band for reporting even
+when only one end is priced. Ten cases in `TraversalModelTests`, plus
+`RunCurve_TraversalMode_DiscountsTheRoomsThePlayerNeverOpens` pinning that it reaches the curve.
+
+**The factor is `(visited - 1) / (rooms - 1)`, not `visited / rooms`.** The run curve has already taken
+the party's starting room off the total, so applying the raw share would discount that room twice.
+
+**Default: `Beeline`.** It is the cheapest way through a floor, so tuning against it can only make the
+real game harder than reported, never easier. This is the same call already taken for party size —
+modelled at the bought-out cap for exactly this reason — and it matches the standing preference for
+levels erring difficult over easy. `Explorer` is the honest estimate of a first-time player; use it to
+ask "what does this floor actually cost", and `Beeline` to ask "is this floor still dangerous to
+someone who runs".
+
+**Four tests went red and all four were stale**, in the §5l/§6 pattern — they asserted a full-clear
+spread while testing something else entirely (uniform spreading, boss replacement, the event budget).
+They now pin `Traversal = FullClear` in their own `Rules()` helper so an arithmetic assertion stays
+readable, and traversal has its own coverage. Suite **719 → 730 / 0**.
+
+### The second-order effect nobody predicted: traversal compounds through XP
+
+Switching the model from FullClear to Explorer made two levels get **harder**, which looked like a bug
+and is not. `RunCurve` grows the party per level from the XP the earlier levels paid, so a shorter
+floor is also a **poorer** one:
+
+| | FullClear | Explorer |
+|---|---|---|
+| Cinder Gate — XP the party arrives with | 243 | **201** |
+| Cinder Gate — sustain | 112 | **107** |
+| Cinder Gate — attrition | 0.608 | **0.630** ↑ |
+| Emberfall — XP the party arrives with | 325 | **268** |
+| The Hollow Vault — XP the party arrives with | 170 | **143** |
+
+So skipping rooms is not free: the player who runs for the exit arrives at the next tier
+**under-levelled**, and the campaign self-corrects. This is a point in favour of the current design and
+an argument against "fixing" the variance — it is the §2 "route, not a sweep" decision paying out. It
+also means **any change to floor length propagates forward through the whole campaign**, so a
+room-count edit must be re-measured on every *later* run, not just the one it touched.
+
+### `ChainBias` — the free lever, and where it actually peaks
+
+`ChainBias` was **0.667 on all fourteen templates** and had never been touched. Raising it makes the
+tree stringier, so more of the floor sits on the only road to the exit. Beeline rooms by floor size:
+
+| rooms | 0.667 | 0.85 | **0.90** | **0.95** | 1.00 |
+|---|---|---|---|---|---|
+| 5 | **3.3** | 3.1 | 3.1 | 3.0 | 3.0 |
+| 7 | **4.6** | 4.4 | 4.3 | 4.2 | 4.0 |
+| 8 | 5.2 | 5.3 | **5.3** | 5.1 | 5.0 |
+| 11 | 6.2 | 6.8 | **6.9** | 6.7 | 6.0 |
+| 16 | 7.7 | 9.4 | 9.8 | **9.9** | 9.0 |
+| 31 | 10.5 | 14.2 | 15.9 | **17.8** | 16.0 |
+
+**It peaks at 0.90–0.95 and gets worse at 1.0.** At bias 1.0 every node attaches to a leaf, which keeps
+the leaf count at two and grows the dungeon as a **path from both ends of the start room** — so the
+farthest room is only about *n/2* away. Maximum stringiness is not maximum distance.
+
+**It also does nothing for short floors.** Below about 8 rooms there is not enough tree to straighten,
+and 0.667 is marginally better. Shipped: **0.90** for the 8–11 room floors, **0.95** for the 14–31 room
+ones, **0.667 kept** on Dungeon Entrance (4), Sunken Depths (5) and Warren Tunnels (7).
+
+Result — beeline rooms, and what the floors now cost:
+
+| floor | rooms | beeline before | beeline after | attrition after |
+|---|---|---|---|---|
+| Upper Halls | 11 | 6.2 | **6.9** | 0.309 |
+| The Counting Room | 14 | 7.3 | **8.8** | 1.941 |
+| Mire Throne / Emberfall | 16 | 7.7 | **9.9** | 2.716 / 2.142 |
+| **The Hollow Vault** | 31 | 10.5 | **17.8** | 5.123 |
+
+The Vault gained **70% more forced rooms without a single new room**. Suite 730/0, analyzer 0 critical
+/ 6 warning. Note this is a *feel* change as well as a difficulty one: floors are now more winding and
+less hub-and-spoke, which is worth eyes in play.
+
+### Still open
+
+- **The mid floors are still soft.** Priced at Beeline they run **0.31–0.57** attrition against a death
+  line of roughly 0.70. Room count is the weakest lever (§5l) and `ChainBias` is now spent, so the
+  candidates are **denser rooms** (the two-guaranteed-bodies shape from §5l, which is efficient and
+  tail-free) or **`RunLevelEntry.Difficulty`**. This is the next tuning call.
+- **Sunken Depths trips two new warnings** under Beeline — *Bog Shaman takes 8.1 party turns to kill*
+  and *a bad spawn roll is unwinnable at exactly 1.00*. It is the intended tuition floor, so the second
+  is arguably the model agreeing with the design, but the grind warning is real.
+- **Manual layouts get no traversal discount** (`LevelCurve.Traversal.FullClear` is 0 for them, e.g.
+  Dungeon Entrance). Their graph is authored, so the exact figure is knowable rather than sampled —
+  worth doing if manual layouts ever carry real content.

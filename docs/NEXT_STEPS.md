@@ -11,19 +11,22 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
 > Balance/tuning work: read **`docs/BALANCING.md`** first — it holds the lever interactions, the
 > measurement workflow and what previous passes learned, so a pass does not re-derive them.
 
-## Start here — the live thread (as of 2026-08-28)
+## Start here — the live thread (as of 2026-08-29)
 
 **Current work: making the campaign losable and gating depth behind investment. The gate ladder now
-exists** — the frontier is measured per floor and the three deep tiers were raised to their budgets
-on 2026-08-28 (§5k); **§5l (2026-08-29) then cleared the last three spawn tails, lengthened the mid
-floors, and found that the floor model prices rooms the player never walks into.** Read in this order:
+exists** — the frontier is measured per floor and the three deep tiers were raised to their budgets on
+2026-08-28 (§5k). **§5l** then cleared the last three spawn tails, lengthened the mid floors, and found
+that the floor model was pricing rooms the player never walks into; **§5m** fixed the model
+(`TraversalModel`, defaulting to beeline pricing) and spent `ChainBias`, the free lever it exposed.
+Read in this order:
 
-1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l**, in that order. They are a single
+1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l → §5m**, in that order. They are a single
    investigation and the later ones **correct** the earlier ones — §5i's headline ("party width
    gates, XP does not") is **wrong**, §5j has the corrected surface, and **§5k is what shipped**
    (the frontier tool, two bugs it found in the floor model, and the retune). Do not act on §5i
-   alone, and do not trust any floor number measured before §5k. **§5l qualifies even those**: the
-   model assumes a full floor clear, and the player walks 33–89% of one.
+   alone, and do not trust any floor number measured before §5k. **§5l and §5m supersede even those**:
+   the model used to assume a full floor clear, and the player walks 32–89% of one. Every floor number
+   is now priced at the **beeline**, so it is not comparable to anything written before 2026-08-29.
 2. **§0f and §0g below** — what shipped and what is left.
 3. **§3b** — the retry economy, reframed: **death is tuition, not a penalty**, by explicit decision.
 
@@ -38,30 +41,34 @@ floors, and found that the floor model prices rooms the player never walks into.
   the user prefers the game to run harder than the model says — but it is *not* acceptable for the
   frontier work, which is precisely about which party can pass.
 
-**The next concrete steps** (updated 2026-08-29 after the §5l pass — read §5l before acting on any
-floor number below, it qualifies all of them):
+**The next concrete steps** (updated 2026-08-29 after §5m — the traversal model is now *in*, so the
+floor numbers below are priced at the **beeline**, the cheapest way through a floor):
 
-1. **Teach the model that the player does not clear the floor.** `RoomManager` builds a **tree** and
-   the exit is its farthest room, so the road to the exit is unique and everything else is optional —
-   but `RunCurveModel.BuildGeneratedRooms` spreads the spawn expectation across *every* room. Measured
-   against the real generator, a blind explorer sees **66–89%** of a floor and a beeline **33–79%**;
-   the 31-room Hollow Vault delivers **33% on a beeline, 66% exploring**. The error grows with length,
-   so room count — the lever §5k leaned on hardest — has the worst marginal efficiency of any lever.
-   The fix is a traversal band (beeline → full clear) per floor rather than a point estimate.
-2. **Use `ChainBias`.** It is 0.667 on all fourteen templates and nobody has touched it. At 16 rooms,
-   0.667 → 0.95 takes the forced path from 7.4 to 9.5 rooms (46% → 60%) **with no new rooms**. It is a
-   bigger traversal lever than the whole mid-floor lengthening in §5l, and it is free.
-3. **Give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room, so a boss is
-   always alone — which puts `MinBossToTrashRatio` in direct conflict with dense trash rooms and caps
-   how hard a finale's rooms may be. Now sharper than before: §5l measured danger as **superlinear in
-   body count** (2 bodies 0.56, 3 bodies 1.33 at Mire Throne tuning), so a boss room is the only place
-   left to spend danger once trash rooms are capped at two bodies.
-4. **Price gear.** `ReferencePartyUsesSavedGear` is **false** by default and no rules asset is checked
+1. **The mid floors are soft — this is the live tuning call.** Priced at the beeline they run
+   **0.31–0.57** attrition against a death line of roughly 0.70. `ChainBias` is now spent and room
+   count is the weakest lever (§5l), so the two candidates are **denser rooms** — the
+   two-guaranteed-bodies shape that worked on the finales, which is efficient and leaves no spawn
+   tail — or **`RunLevelEntry.Difficulty`**. Standing preference is that levels err difficult rather
+   than easy.
+2. **Give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room, so a boss is
+   always alone, which puts `MinBossToTrashRatio` in direct conflict with dense trash rooms. Sharper
+   after §5l: danger is **superlinear in body count** (2 bodies 0.56, 3 bodies 1.33 at Mire Throne
+   tuning), so once trash rooms are capped at two bodies the boss room is the only place left to
+   spend danger.
+3. **Price gear.** `ReferencePartyUsesSavedGear` is **false** by default and no rules asset is checked
    in, so every published number describes a party in **no gear**; loot is counted as a reward but
    never equipped. The §0g frontier cannot price gear as a way to pay for depth until it can.
-5. **Blue Room is filler on a tier-1 finale.** With Mire Court cut to two bodies, the analyzer now
-   flags Floating Eye in The Mire Throne as *no threat at all* — Blue Room (EyeBall/Dragon) is a
-   generic early room reused on a finale. It wants floor-appropriate content.
+4. **Blue Room is filler on a tier-1 finale.** With Mire Court cut to two bodies the analyzer flags
+   Floating Eye in The Mire Throne as *no threat at all* — Blue Room (EyeBall/Dragon) is a generic
+   early room reused on a finale. It wants floor-appropriate content.
+5. **Watch the new floor shapes in play.** `ChainBias` went 0.667 → 0.90/0.95 on eleven templates, so
+   floors are now more winding and less hub-and-spoke. That is a feel change as well as a difficulty
+   one.
+
+~~Teach the model that the player does not clear the floor~~ ✅ **Shipped 2026-08-29** — `TraversalModel`
++ `BalanceRulesSO.Traversal`, defaulting to **Beeline** so the real game can only be harder than
+reported. ~~Use `ChainBias`~~ ✅ **Shipped** — it peaks at 0.90–0.95, not 1.0, and does nothing below
+about 8 rooms. Both in `docs/BALANCING.md` §5m.
 
 **A published summary of all of this** (readable tables of the floor curve and the investment surface)
 lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606c48a1a3>.

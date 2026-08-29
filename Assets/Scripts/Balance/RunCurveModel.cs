@@ -43,6 +43,20 @@ namespace Assets.Scripts.Balance
         public float ExpectedCombatRooms;
         public float ExpectedEnemyCount;
 
+        /// <summary>
+        /// How much of this floor the player is expected to open — beeline, blind explorer, and the
+        /// full clear the model used to assume. Reported as a band because it is genuinely one: a
+        /// healthy party clears a floor for the XP and a hurt party runs for the exit.
+        /// Empty (<c>FullClear = 0</c>) for a manual layout, whose graph is authored rather than rolled.
+        /// </summary>
+        public TraversalBand Traversal;
+
+        /// <summary>
+        /// Share of this level's non-starting rooms the run curve actually priced, per
+        /// <c>BalanceRulesSO.Traversal</c>. 1 = every room, the pre-2026-08-29 behaviour.
+        /// </summary>
+        public float TraversalFraction = 1f;
+
         /// <summary>Expected rooms in this level that offer an Action, i.e. hold a placed event.</summary>
         public float ExpectedEventRooms;
 
@@ -423,7 +437,20 @@ namespace Assets.Scripts.Balance
             // actually charge.
             int nonCombat = Mathf.Max(0, template.TreasureRooms) + Mathf.Max(0, template.RestRooms);
             int populated = Mathf.Max(0, template.RoomsToGenerate - 1 - nonCombat);
-            float perEntry = (float)populated / template.RoomPool.Count;
+
+            // ...and the player does not fight all of what is left, because they do not walk the whole
+            // floor. The dungeon is a tree (RoomManager.GenerateGraph gives every node one parent and
+            // GenerateDungeon only doors the placement pairs) whose exit is its farthest room, so the
+            // route out is unique and everything else is an optional branch. Pricing every room reads
+            // as attrition the level cannot actually charge — the same mistake, one level up, that
+            // counting the party's start room used to be. See TraversalModel and BALANCING.md §5l.
+            level.Traversal = TraversalModel.Measure(
+                template.RoomsToGenerate, template.ChainBias, rules.TraversalTrials);
+            level.TraversalFraction = TraversalModel.PopulatedFraction(
+                template.RoomsToGenerate, template.ChainBias, rules.Traversal, rules.TraversalTrials);
+
+            float walked = populated * level.TraversalFraction;
+            float perEntry = walked / template.RoomPool.Count;
 
             foreach (var room in template.RoomPool)
             {

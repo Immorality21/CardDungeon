@@ -53,6 +53,12 @@ namespace Tests.EditMode
         {
             var rules = Make<BalanceRulesSO>();
             rules.ReferenceHeroXp = 0;
+
+            // These cases are about how a level's rooms are spread, replaced and budgeted, not about
+            // how much of the floor the player walks. Pin the traversal discount off so an arithmetic
+            // assertion here stays readable; TraversalModelTests covers the discount itself, and
+            // RunCurve_TraversalMode_DiscountsTheRoomsThePlayerNeverOpens covers it reaching the curve.
+            rules.Traversal = TraversalMode.FullClear;
             return rules;
         }
 

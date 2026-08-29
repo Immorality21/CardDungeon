@@ -25,6 +25,20 @@ namespace Assets.Scripts.Balance
         [Tooltip("Include each hero's currently-equipped gear (from the save) in the reference party.")]
         public bool ReferencePartyUsesSavedGear;
 
+        [Header("Traversal — how much of a floor the player actually walks")]
+        [Tooltip("A generated dungeon is a tree and the exit is its farthest room, so the route to " +
+                 "the exit is unique and every other room is optional. FullClear is what the model " +
+                 "assumed before 2026-08-29 and prices rooms the player may never open; Explorer is " +
+                 "what someone with no map is expected to walk; Beeline is the road to the exit alone.\n\n" +
+                 "Defaults to Beeline on purpose. It is the cheapest way through a floor, so tuning " +
+                 "against it can only make the real game harder than reported, never easier — the " +
+                 "same reason the reference party is modelled at the bought-out size cap.")]
+        public TraversalMode Traversal = TraversalMode.Beeline;
+
+        [Tooltip("Layouts sampled when measuring a floor's traversal band. Higher is steadier and " +
+                 "slower; 400 holds the mean inside about 1%.")]
+        public int TraversalTrials = TraversalModel.DefaultTrials;
+
         [Header("Hero durability — the HP:damage scale")]
         [Tooltip("Critical below this: a common enemy killing a hero in fewer hits than this means " +
                  "fights are decided by turn order, not play.")]

@@ -42,6 +42,12 @@ namespace Tests.EditMode
         {
             var rules = Make<BalanceRulesSO>();
             rules.ReferenceHeroXp = 0;
+
+            // These cases are about how a level's rooms are spread, replaced and budgeted, not about
+            // how much of the floor the player walks. Pin the traversal discount off so an arithmetic
+            // assertion here stays readable; TraversalModelTests covers the discount itself, and
+            // RunCurve_TraversalMode_DiscountsTheRoomsThePlayerNeverOpens covers it reaching the curve.
+            rules.Traversal = TraversalMode.FullClear;
             return rules;
         }
 
@@ -169,6 +175,54 @@ namespace Tests.EditMode
             // two pool entries has enemies.
             Assert.AreEqual(4.5f, curve.Levels[0].ExpectedCombatRooms, 0.0001f);
             Assert.AreEqual(4.5f, curve.Levels[0].ExpectedEnemyCount, 0.0001f);
+        }
+
+        [Test]
+        public void RunCurve_TraversalMode_DiscountsTheRoomsThePlayerNeverOpens()
+        {
+            // A generated dungeon is a tree whose exit is its farthest room, so the route out is
+            // unique and the rest is optional. The curve must price what is walked, not what is
+            // generated — otherwise a long floor reads as attrition it cannot actually charge.
+            var goblin = Goblin();
+            var combat = Room(goblin, 1f, 1);
+            var empty = Room(null, 0f, 1);
+
+            var template = Make<LevelDefinitionSO>();
+            template.Key = "T";
+            template.RoomsToGenerate = 20;
+            template.ChainBias = 0.667f;
+            template.RoomPool = new List<RoomSO> { combat, empty };
+
+            var run = Make<RunDefinitionSO>();
+            run.Levels = new List<RunLevelEntry>
+            {
+                new RunLevelEntry { LevelTemplate = template, LevelName = "L1" }
+            };
+
+            var full = Rules();
+            var explorer = Rules();
+            explorer.Traversal = TraversalMode.Explorer;
+            var beeline = Rules();
+            beeline.Traversal = TraversalMode.Beeline;
+
+            var fullCurve = RunCurve.Build(run, SturdyParty(), full).Levels[0];
+            var explorerCurve = RunCurve.Build(run, SturdyParty(), explorer).Levels[0];
+            var beelineCurve = RunCurve.Build(run, SturdyParty(), beeline).Levels[0];
+
+            Assert.AreEqual(1f, fullCurve.TraversalFraction, 0.0001f,
+                "FullClear must price every room — it is the pre-2026-08-29 behaviour.");
+            Assert.Less(explorerCurve.TraversalFraction, fullCurve.TraversalFraction);
+            Assert.Less(beelineCurve.TraversalFraction, explorerCurve.TraversalFraction);
+
+            Assert.Less(explorerCurve.ExpectedCombatRooms, fullCurve.ExpectedCombatRooms,
+                "A blind explorer should be charged for fewer fights than a full clear.");
+            Assert.Less(beelineCurve.ExpectedCombatRooms, explorerCurve.ExpectedCombatRooms,
+                "Running for the exit should be charged for fewer fights still.");
+
+            // The band itself is reported regardless of which end the curve was priced at, so the
+            // window can show what a floor costs a completionist *and* what it costs a runner.
+            Assert.AreEqual(20, fullCurve.Traversal.FullClear);
+            Assert.Greater(fullCurve.Traversal.Explorer, fullCurve.Traversal.Beeline);
         }
 
         [Test]
