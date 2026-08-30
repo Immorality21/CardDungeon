@@ -64,22 +64,26 @@ cheapest way through a floor. Steps 1–2 have shipped — **step 3, pricing gea
    `SpawnChance`") named a field it does not have. Covered by three new `RunCurveModelTests`; the
    suite is **771 passed / 0 failed**.
 
-   **No level uses it yet, and one measurably wants to.** Every boss in the campaign still stands
-   alone, all in band:
+   **Every boss now has one** (§5o, same day). The ratio band was passing a defect: it divides the
+   exit room by the level's *average* trash room, and against each floor's **hardest** room four of
+   five bosses were a dead heat — the Abyssal Warden was *easier* than a room on its own floor (0.47
+   against Warden's Post at 0.48). The fix was a **redistribution**, not an addition: one escort in,
+   the boss's own `Overrides` down ~45%, floor lethality held where §5k/§5n put it.
 
-   | Run / floor | Boss | Room danger | Ratio |
-   |---|---|---|---|
-   | The Threshold / Sunken Depths | Abyssal Warden | 0.47 | **1.81** |
-   | The Drowned March / The Mire Throne | Mirefather | 0.61 | 2.58 |
-   | The Warrens / The Counting Room | Gilded Hoarder | 0.42 | 1.92 |
-   | The Ashen Deep / Emberfall | Cinder Tyrant | 0.53 | 2.16 |
-   | The Hollow Vault | Gilded Hoarder | 0.95 | 3.36 |
+   | floor | boss | HP/STR | escort | boss ÷ peak room | simulated wipe |
+   |---|---|---|---|---|---|
+   | Sunken Depths | Abyssal Warden | 105/13 → 50/9 | 1× Floating Eye | 0.98 → **1.19** | 0.04 → 0.05 |
+   | The Mire Throne | Mirefather | 165/17 → 92/13 | 1× Floating Eye | 1.08 → **1.16** | 0.50 → 0.47 |
+   | The Counting Room | Gilded Hoarder | 125/14 → 70/10 | 1× Floating Eye | 1.04 → **1.14** | 0.18 → 0.17 |
+   | Emberfall | Cinder Tyrant | 160/16 → 88/12 | 1× Cinder Imp | 1.03 → **1.38** | 0.62 → 0.66 |
+   | The Hollow Vault | Gilded Hoarder | 200/22 → 112/16 | 1× Hex Weaver | 1.48 → **1.67** | 1.00 → 1.00 |
 
-   **Sunken Depths is the case §5n hit**: 1.81 against a 1.8 floor, and its boss room (0.47) is
-   *below its own worst trash room* (peak 0.48) — the average-based ratio hides that the climax is
-   the second-hardest fight on the floor. It is the obvious first customer for an add. Not authored
-   here on purpose: the floor deliberately sits at a 19–20% resource margin (§5n), and spending that
-   is a tuning decision, not a plumbing one.
+   Every boss room is now its floor's hardest fight and every simulated wipe rate is within 0.04 of
+   where it started. Findings **0 critical / 79 warning → 0 / 78** (the Hollow Vault Hoarder's
+   27.7-party-turn fight cleared itself when its health halved). The XP loop softened The Slag Halls
+   0.80 → 0.64 two runs away, restored with `Difficulty` 3.35 → 3.75. Suite **771 / 0**. Full
+   reasoning and the four things it learned: **`docs/BALANCING.md` §5o**.
+
 3. **Price gear.** `ReferencePartyUsesSavedGear` is **false** by default and no rules asset is checked
    in, so every published number describes a party in **no gear**; loot is counted as a reward but
    never equipped. The §0g frontier cannot price gear as a way to pay for depth until it can.

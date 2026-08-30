@@ -22,6 +22,7 @@ MonoBehaviour:
     LevelName: Dungeon Entrance
     ManualLayout: {fileID: 11400000, guid: 81a86b4d14ab1a34792bcf19bfcaee94, type: 2}
     BossEnemy: {fileID: 0}
+    BossAdds: []
     EnemyTuning:
       Difficulty: 1
       StatScales:
@@ -35,6 +36,7 @@ MonoBehaviour:
     LevelName: Upper Halls
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    BossAdds: []
     EnemyTuning:
       Difficulty: 1.8
       StatScales: []
@@ -46,6 +48,7 @@ MonoBehaviour:
     LevelName: Collapsed Caverns
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    BossAdds: []
     EnemyTuning:
       Difficulty: 2.05
       StatScales: []
@@ -57,6 +60,9 @@ MonoBehaviour:
     LevelName: Sunken Depths
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
+    BossAdds:
+    - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+      Count: 1
     EnemyTuning:
       Difficulty: 2.46
       StatScales: []
@@ -67,9 +73,9 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 105
+            Amount: 50
           - Type: 1
-            Amount: 13
+            Amount: 9
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

@@ -23,6 +23,7 @@ MonoBehaviour:
     LevelName: Silt Shallows
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    BossAdds: []
     EnemyTuning:
       Difficulty: 2.35
       StatScales: []
@@ -34,6 +35,7 @@ MonoBehaviour:
     LevelName: The Weeping Causeway
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    BossAdds: []
     EnemyTuning:
       Difficulty: 2.5
       StatScales: []
@@ -45,6 +47,7 @@ MonoBehaviour:
     LevelName: Rotwater Deep
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    BossAdds: []
     EnemyTuning:
       Difficulty: 2.75
       StatScales: []
@@ -56,6 +59,9 @@ MonoBehaviour:
     LevelName: The Mire Throne
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: e62cccd795c1c1942b396724ce782f6f, type: 2}
+    BossAdds:
+    - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+      Count: 1
     EnemyTuning:
       Difficulty: 2.55
       StatScales: []
@@ -66,9 +72,9 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 165
+            Amount: 92
           - Type: 1
-            Amount: 17
+            Amount: 13
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

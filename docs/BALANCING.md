@@ -1441,3 +1441,96 @@ deliberately**, per the standing preference for levels erring hard.
   wants either a third pool entry or a stronger Drowned Shrine, and both risk the 20% margin.
 - **`XP per unit of danger varies 5.4x across placements`** (was 4.5x before this pass). The guard
   rooms pay the same XP as the rooms they outclass, so the reward curve drifted. Worth a look.
+
+## §5o — Boss adds, and the climax that was not one (2026-08-30)
+
+`RunLevelEntry.BossAdds` shipped earlier the same day (see `docs/NEXT_STEPS.md` §0f). This is the
+tuning pass that used it, and the measurement that justified it is not the one the backlog predicted.
+
+### The ratio was passing a defect
+
+`BossToTrashRatio` divides the exit room by the level's **average** trash room, and every boss was
+comfortably inside the 1.8–6.0× band. Against the room the player actually remembers — the floor's
+**hardest** room — four of the five were a dead heat:
+
+| floor | bespoke dense room | its danger | boss room | boss ÷ peak |
+|---|---|---|---|---|
+| Sunken Depths | Warden's Post | 0.48 | 0.47 | **0.98×** |
+| The Mire Throne | Mire Court | 0.56 | 0.61 | 1.08× |
+| The Counting Room | Ledger Hall | 0.41 | 0.42 | 1.04× |
+| Emberfall | Ember Crucible | 0.51 | 0.53 | 1.03× |
+| The Hollow Vault | Vault Reliquary | 0.64 | 0.95 | 1.48× |
+
+The Abyssal Warden was **easier than a room on its own floor**. The average-based ratio hid it because
+§5n's guard rooms sit beside filler rooms scoring 0.07–0.17, which drags the denominator down. **A
+ratio against an average cannot tell you whether a climax is the climax.** Measure `BossDanger ÷
+PeakRoomDanger` as well; the band metric alone will happily certify a flat floor.
+
+### One body is worth more than the boss's whole health bar
+
+Adding a *single* Floating Eye to a boss room roughly **doubled** its danger (Sunken Depths 0.47 →
+1.07, Emberfall 0.53 → 1.21) and pushed the closed-form attrition of the tier-1 finale from 0.81 to
+1.35 — an outright *unclearable* critical. Two bodies (§C in the sweep) produced 11 criticals across
+the campaign. Superlinearity in body count (§5l) is far steeper at 1→2 than the guard-room work
+suggested, because the boss keeps swinging for every extra turn the escort survives.
+
+**So an add is never additive.** Adding one and stopping there is not a tuning knob, it is a new
+floor. The pass that works is a **redistribution**: escort in, boss's own `Overrides` down by roughly
+**45%**, floor lethality held where §5k/§5n put it, and only the *shape* of the floor changed.
+
+### Where it landed
+
+Every boss got exactly one escort and a ~45% lighter stat block:
+
+| floor | boss | HP/STR | escort |
+|---|---|---|---|
+| Sunken Depths | Abyssal Warden | 105/13 → **50/9** | 1× Floating Eye |
+| The Mire Throne | Mirefather | 165/17 → **92/13** | 1× Floating Eye |
+| The Counting Room | Gilded Hoarder | 125/14 → **70/10** | 1× Floating Eye |
+| Emberfall | Cinder Tyrant | 160/16 → **88/12** | 1× Cinder Imp |
+| The Hollow Vault | Gilded Hoarder | 200/22 → **112/16** | 1× Hex Weaver |
+
+| floor | boss ÷ peak | ratio | closed attrition | **simulated wipe** |
+|---|---|---|---|---|
+| Sunken Depths | 0.98 → **1.19** | 1.81 → 2.19 | 0.81 → 0.90 | 0.04 → **0.05** |
+| The Mire Throne | 1.08 → **1.16** | 2.58 → 2.74 | 2.24 → 2.28 | 0.50 → **0.47** |
+| The Counting Room | 1.04 → **1.14** | 1.92 → 2.12 | 1.72 → 1.76 | 0.18 → **0.17** |
+| Emberfall | 1.03 → **1.38** | 2.16 → 2.89 | 1.69 → 1.82 | 0.62 → **0.66** |
+| The Hollow Vault | 1.48 → **1.67** | 3.36 → 3.78 | 5.12 → 4.37 | 1.00 → **1.00** |
+
+Every boss room is now the hardest fight on its floor, **and every floor's simulated wipe rate is
+within 0.04 of where it started** — inside the noise of a 200-trial run. Findings went **0 critical /
+79 warning → 0 critical / 78**. Suite **771 / 0**.
+
+### Four things this pass learned
+
+1. **Trust the simulator over the closed form on a boss room, and know which way it lies.** The
+   closed form composes attrition per enemy and never sees a party focus-firing, so it over-prices a
+   multi-body room badly: it read Sunken Depths at 0.94 attrition (10% margin, down from a deliberate
+   19%) while the simulator put the wipe rate at 0.05 against a baseline 0.04 and end-health at 0.55
+   against 0.56 — the floor plays *identically*. Judge a redistribution by the wipe rate; use the
+   closed form only to stay the right side of the criticals.
+2. **A support escort makes a boss room easier, not harder.** The thematically perfect choice for the
+   Mirefather was a Bog Shaman — a shaman attending its master, and a healer, so a qualitatively
+   different fight. Measured, it *dropped* the Mire Throne's wipe rate from 0.47 to **0.32** and the
+   boss room from 0.65 to 0.58. A healer body contributes less threat than a plain attacker while
+   still being a target the party can kill first. Rejected on the number, not the theme. **If an
+   escort is meant to raise a climax, it has to be a damage body.**
+3. **Cutting boss HP fixed a warning nobody was hunting.** The Hollow Vault's Gilded Hoarder took
+   **27.7 party turns** to kill — past `MaxBossTimeToKill` (20) and a long-standing warning. Halving
+   its health to pay for an escort cleared it outright. A boss inflated to carry a ratio on its own
+   *is* the long-fight problem; the escort is what lets the health bar come back down.
+4. **The XP loop moved a floor two runs away — again.** Escorts add kills, so the finales pay more
+   XP, so The Ashen Deep's party arrives stronger and **The Slag Halls softened 0.80 → 0.64** without
+   being touched. That is §5n's learning #3 firing a second time, and it will keep firing:
+   **re-measure the whole campaign after every edit.** Restored with `Difficulty` 3.35 → **3.75**
+   (0.79, no margin warning, wipe 0.00).
+
+### Still open
+
+- **Rotwater Deep (0.61)** still dips below its siblings (0.73, 0.70) — carried over from §5n.
+- **XP per danger still varies 5.4×.** Untouched here, and the escorts add kills to the boss rooms,
+  so the finales' reward-per-danger moved again.
+- **The bosses' `Difficulty`-exempt casts** now read weaker relative to their swings than before,
+  since the swings came down ~45% but an absolute `Overrides` row still exempts the boss from
+  `MagicPowerScaleFor`. Five `casts for less than it hits for` infos remain.

@@ -23,6 +23,7 @@ MonoBehaviour:
     LevelName: Cinder Gate
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    BossAdds: []
     EnemyTuning:
       Difficulty: 3
       StatScales: []
@@ -34,8 +35,9 @@ MonoBehaviour:
     LevelName: The Slag Halls
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
+    BossAdds: []
     EnemyTuning:
-      Difficulty: 3.35
+      Difficulty: 3.75
       StatScales: []
       XpMultiplier: 1.75
       GoldMultiplier: 1
@@ -45,6 +47,9 @@ MonoBehaviour:
     LevelName: Emberfall
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: a3ec74314eaaa1546a44c86e575112d8, type: 2}
+    BossAdds:
+    - Enemy: {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
+      Count: 1
     EnemyTuning:
       Difficulty: 3.15
       StatScales: []
@@ -55,9 +60,9 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 160
+            Amount: 88
           - Type: 1
-            Amount: 16
+            Amount: 12
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

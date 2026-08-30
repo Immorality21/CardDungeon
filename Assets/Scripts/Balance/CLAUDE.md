@@ -139,6 +139,12 @@ whole **room**, not of the boss asset, and `BossToTrashRatio` compares that room
 average trash room — which is what makes adds the third way to satisfy `MinBossToTrashRatio`, beside
 softening the boss and escalating the trash.
 
+**`BossToTrashRatio` divides by an *average*, so it can certify a climax that is not one.** In
+§5o four of the five bosses sat comfortably inside the 1.8–6.0× band while being a dead heat with
+their own floor's hardest room — the Abyssal Warden was *easier* than a room on its own floor —
+because §5n's guard rooms sit beside filler rooms scoring 0.07–0.17 and those drag the denominator
+down. When judging a finale, read `BossDanger ÷ PeakRoomDanger` alongside the band.
+
 **A boss room answers to `MaxBossDanger`, not to the 1.0 spawn-tail ceiling.** Its spawns are
 guaranteed, so its worst case *is* its expected case: it carries no information about a bad roll.
 `RunCurveModel.Aggregate` keeps it out of `PeakRoomDanger`/`PeakWorstCaseDanger` (and out of the

@@ -22,6 +22,9 @@ MonoBehaviour:
     LevelName: The Hollow Vault
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
+    BossAdds:
+    - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
+      Count: 1
     EnemyTuning:
       Difficulty: 2.8
       StatScales: []
@@ -32,9 +35,9 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 200
+            Amount: 112
           - Type: 1
-            Amount: 22
+            Amount: 16
           - Type: 2
             Amount: 3
         XpReward: 0
