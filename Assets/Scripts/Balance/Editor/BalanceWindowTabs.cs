@@ -609,13 +609,19 @@ namespace Assets.Scripts.Balance.Editor
                 : BalanceSeverity.Ok;
 
             var bossSeverity = BalanceSeverity.Ok;
-            if (level.Boss != null && level.BossToTrashRatio > 0f)
+            if (level.Boss != null)
             {
-                if (level.BossToTrashRatio > _rules.MaxBossToTrashRatio)
+                // The boss room answers to MaxBossDanger rather than the 1.0 tail ceiling the rolled
+                // rooms do, because its spawns are guaranteed - see RunCurveModel.Aggregate.
+                if (level.BossDanger > _rules.MaxBossDanger)
                 {
                     bossSeverity = BalanceSeverity.Critical;
                 }
-                else if (level.BossToTrashRatio < _rules.MinBossToTrashRatio)
+                else if (level.BossToTrashRatio > _rules.MaxBossToTrashRatio)
+                {
+                    bossSeverity = BalanceSeverity.Critical;
+                }
+                else if (level.BossToTrashRatio > 0f && level.BossToTrashRatio < _rules.MinBossToTrashRatio)
                 {
                     bossSeverity = BalanceSeverity.Warning;
                 }
@@ -674,9 +680,19 @@ namespace Assets.Scripts.Balance.Editor
 
             if (level.Boss != null)
             {
-                BalanceGui.AssetCell(level.Boss, BalanceGui.Number(level.BossDanger), MetricWidth, bossSeverity);
+                // The whole sealed exit room, boss and adds - which is what the player walks into.
+                string composition = level.BossAddCount > 0
+                    ? $"{level.Boss.Label} + {level.BossAddCount} add(s)"
+                    : $"{level.Boss.Label}, alone";
+                BalanceGui.AssetCell(level.Boss,
+                    level.BossAddCount > 0
+                        ? $"{BalanceGui.Number(level.BossDanger)}+{level.BossAddCount}"
+                        : BalanceGui.Number(level.BossDanger),
+                    MetricWidth, bossSeverity);
                 BalanceGui.Cell($"{level.BossToTrashRatio:0.0}x", MetricWidth, bossSeverity,
-                    $"Band is {_rules.MinBossToTrashRatio:0.0}x–{_rules.MaxBossToTrashRatio:0.0}x.");
+                    $"{composition}: danger {level.BossDanger:0.00}, ceiling {_rules.MaxBossDanger:0.00}. "
+                    + $"Band against the level's trash is "
+                    + $"{_rules.MinBossToTrashRatio:0.0}x–{_rules.MaxBossToTrashRatio:0.0}x.");
             }
             else
             {

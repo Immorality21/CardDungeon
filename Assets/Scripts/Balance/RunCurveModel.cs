@@ -92,7 +92,16 @@ namespace Assets.Scripts.Balance
         public float PeakWorstCaseDanger;
         public float AverageRoomDanger;
 
+        /// <summary>
+        /// Danger of the whole sealed exit room — the boss plus its <see cref="BossAddCount"/> adds,
+        /// which is what the player actually walks into. Judged against <c>MaxBossDanger</c>, not
+        /// against the 1.0 spawn-tail ceiling the rolled rooms answer to.
+        /// </summary>
         public float BossDanger;
+
+        /// <summary>Bodies standing with the boss, from <see cref="RunLevelEntry.BossAdds"/>.</summary>
+        public int BossAddCount;
+
         public float BossToTrashRatio;
 
         public float ExpectedXp;
@@ -373,9 +382,9 @@ namespace Assets.Scripts.Balance
             // boss wipes. Reading the post-displacement occurrences would quietly under-count.
             BuildEvents(level, entry, party, rules);
 
-            // A boss is guaranteed alone in the exit room, which is cleared of its normal spawns
-            // first (see EnemyManager.PlaceBossIfConfigured), so it replaces one room's encounter
-            // rather than adding to the level's load.
+            // A boss is guaranteed in the exit room, which is cleared of its normal spawns first
+            // (see EnemyManager.PlaceBossIfConfigured), so it replaces one room's encounter rather
+            // than adding to the level's load. Its authored adds stand with it in that same room.
             if (entry.BossEnemy != null)
             {
                 ReplaceExitRoomWithBoss(level, entry, party, rules);
@@ -520,10 +529,18 @@ namespace Assets.Scripts.Balance
                 }
             }
 
+            int addCount = 0;
+            foreach (var unused in entry.EnumerateBossAdds())
+            {
+                addCount++;
+            }
+
             var bossEncounter = new RoomEncounter
             {
                 Room = null,
-                RoomName = $"Exit room — {entry.BossEnemy.Label}",
+                RoomName = addCount > 0
+                    ? $"Exit room — {entry.BossEnemy.Label} +{addCount}"
+                    : $"Exit room — {entry.BossEnemy.Label}",
                 GuaranteedSpawns = true,
                 IsBossRoom = true,
                 Occurrences = 1f,
@@ -533,6 +550,16 @@ namespace Assets.Scripts.Balance
             bossEncounter.WorstCase.Tuning = level.Tuning;
             bossEncounter.Expected.Add(entry.BossEnemy, 1f);
             bossEncounter.WorstCase.Add(entry.BossEnemy, 1f);
+
+            // The escort. Adds are guaranteed rather than rolled, so expected and worst case are the
+            // same group - a boss room has no spawn tail to be surprised by, which is exactly why it
+            // is a safe place to spend danger deliberately.
+            foreach (var add in entry.EnumerateBossAdds())
+            {
+                bossEncounter.Expected.Add(add, 1f);
+                bossEncounter.WorstCase.Add(add, 1f);
+            }
+
             bossEncounter.ExpectedDanger = bossEncounter.Expected.DangerIndex(party);
             bossEncounter.WorstCaseDanger = bossEncounter.ExpectedDanger;
             bossEncounter.ExpectedHealthCost = bossEncounter.Expected.ExpectedPartyHealthCost(party);
@@ -541,6 +568,7 @@ namespace Assets.Scripts.Balance
 
             level.Rooms.Add(bossEncounter);
             level.BossDanger = bossEncounter.ExpectedDanger;
+            level.BossAddCount = addCount;
         }
 
         private static void Aggregate(LevelCurve level, PartyBaseline party, BalanceRulesSO rules)
@@ -567,6 +595,20 @@ namespace Assets.Scripts.Balance
                     level.ExpectedCombatHealthCost += room.Occurrences * room.ExpectedHealthCost;
                 }
 
+                dangerSum += room.Occurrences * room.ExpectedDanger;
+                dangerWeightTotal += room.Occurrences;
+
+                // The peaks are the *rolled* rooms' peaks, and the boss room is not one. Its spawns
+                // are guaranteed, so its worst case is its expected case and carries no information
+                // about a tail; folding it in made "a bad spawn roll here is unwinnable" fire on a
+                // room that has no roll, and its only suggestion - lower SpawnChance - name a field
+                // the room does not have. The boss room is judged against MaxBossDanger instead
+                // (EvaluateLevel), which is the rule that already says a climax may sit above 1.
+                if (room.IsBossRoom)
+                {
+                    continue;
+                }
+
                 if (room.ExpectedDanger > level.PeakRoomDanger)
                 {
                     level.PeakRoomDanger = room.ExpectedDanger;
@@ -576,15 +618,8 @@ namespace Assets.Scripts.Balance
                     level.PeakWorstCaseDanger = room.WorstCaseDanger;
                 }
 
-                dangerSum += room.Occurrences * room.ExpectedDanger;
-                dangerWeightTotal += room.Occurrences;
-
-                bool isBossRoom = room.Room == null;
-                if (!isBossRoom)
-                {
-                    trashDangerSum += room.Occurrences * room.ExpectedDanger;
-                    trashWeight += room.Occurrences;
-                }
+                trashDangerSum += room.Occurrences * room.ExpectedDanger;
+                trashWeight += room.Occurrences;
             }
 
             level.AverageRoomDanger = dangerWeightTotal > 0f ? dangerSum / dangerWeightTotal : 0f;

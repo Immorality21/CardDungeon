@@ -41,8 +41,8 @@ that the floor model was pricing rooms the player never walks into; **§5m** fix
   the user prefers the game to run harder than the model says — but it is *not* acceptable for the
   frontier work, which is precisely about which party can pass.
 
-**The next concrete steps** (updated 2026-08-29 after §5n — the mid-floor density pass; floor
-numbers are priced at the **beeline**, the cheapest way through a floor):
+**The next concrete steps** (updated 2026-08-30; floor numbers are priced at the **beeline**, the
+cheapest way through a floor. Steps 1–2 have shipped — **step 3, pricing gear, is the live one**):
 
 1. ~~**Elemental reveal (§0b Phase 4c).**~~ ✅ Shipped 2026-08-29 — the knowledge record, an
    in-combat **Inspect** page (free, FFX-style *Scan*) and a hub **Bestiary**. See §0b and
@@ -51,11 +51,35 @@ numbers are priced at the **beeline**, the cheapest way through a floor):
    did not do is make anything harder** — the balance numbers are unchanged, and whether encounters
    still read as *attack-spam plays this as well as thinking does* now needs re-measuring with the
    information available.
-2. **Give bosses adds.** `EnemyManager.PlaceBossIfConfigured` clears the exit room, so a boss is always
-   alone, which puts `MinBossToTrashRatio` in direct conflict with dense trash rooms. §5n hit this
-   live: raising Sunken Depths' trash dropped its boss to 1.6x and needed a Strength bump to recover.
-   With trash rooms now capped at two bodies (danger is **superlinear** in body count — §5l), the boss
-   room is the only place left to spend danger.
+2. ~~**Give bosses adds.**~~ ✅ Shipped 2026-08-30. `RunLevelEntry.BossAdds` is an authored, guaranteed
+   escort standing with the boss in the sealed exit room — deliberately not an `EnemySpawnEntry`,
+   because a rolled climax is neither readable nor priceable. It reaches spawning
+   (`DungeonManager.PlaceBossIfConfigured`), the encounter model (`ReplaceExitRoomWithBoss`), the
+   floor simulation (`BuildFloorRooms`, which now takes the sealed room off the curve instead of
+   rebuilding it from `level.Boss`) and the per-level enemy list, all through one
+   `EnumerateBossAdds()`. Two model corrections came with it: `BossDanger` is now the whole **room**
+   (so `BossToTrashRatio` measures the climax the player walks into), and the boss room is judged
+   against `MaxBossDanger` (1.40) rather than the 1.0 spawn-tail ceiling — its spawns are guaranteed,
+   so it carries no information about a bad roll, and the tail finding's only suggestion ("lower
+   `SpawnChance`") named a field it does not have. Covered by three new `RunCurveModelTests`; the
+   suite is **771 passed / 0 failed**.
+
+   **No level uses it yet, and one measurably wants to.** Every boss in the campaign still stands
+   alone, all in band:
+
+   | Run / floor | Boss | Room danger | Ratio |
+   |---|---|---|---|
+   | The Threshold / Sunken Depths | Abyssal Warden | 0.47 | **1.81** |
+   | The Drowned March / The Mire Throne | Mirefather | 0.61 | 2.58 |
+   | The Warrens / The Counting Room | Gilded Hoarder | 0.42 | 1.92 |
+   | The Ashen Deep / Emberfall | Cinder Tyrant | 0.53 | 2.16 |
+   | The Hollow Vault | Gilded Hoarder | 0.95 | 3.36 |
+
+   **Sunken Depths is the case §5n hit**: 1.81 against a 1.8 floor, and its boss room (0.47) is
+   *below its own worst trash room* (peak 0.48) — the average-based ratio hides that the climax is
+   the second-hardest fight on the floor. It is the obvious first customer for an add. Not authored
+   here on purpose: the floor deliberately sits at a 19–20% resource margin (§5n), and spending that
+   is a tuning decision, not a plumbing one.
 3. **Price gear.** `ReferencePartyUsesSavedGear` is **false** by default and no rules asset is checked
    in, so every published number describes a party in **no gear**; loot is counted as a reward but
    never equipped. The §0g frontier cannot price gear as a way to pay for depth until it can.

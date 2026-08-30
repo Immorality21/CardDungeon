@@ -128,6 +128,27 @@ both sides, so a fast enemy's hidden threat shows up.
 
 **Each enemy is judged against the party that first meets it.** `BuildFirstEncounterParties` walks the runs in order, growing a roster as each level's `RescueHero` is passed, and records the smallest roster that meets each enemy; `EnemyMetrics.Compute` is then given that party. Without this a level-3 enemy reads as wildly out of band and a level-1 enemy as harmless, because party size roughly halves per-enemy danger. The **simulator** uses the same parties: solo-enemy runs fight the party from `BalanceReport.PartyByEnemy`, and per-level room runs fight `LevelCurve.Party`. Before that, every simulated battle used the starting party, which reported the boss as *never winnable* (0 of 200) purely because it was being fought solo — it is 100% against the pair that actually reaches it. Reward-per-danger is the exception: it takes a separate `rewardParty` (the starting party for everyone) because comparing XP-per-danger across enemies needs one common yardstick, or the spread just reports roster growth.
 
+**The sealed exit room is the boss *and* its adds.** `RunLevelEntry.BossAdds` is an authored,
+guaranteed escort (see the Dungeon guide), and it reaches the model in three places, all of which
+read `RunLevelEntry.EnumerateBossAdds()` so they cannot disagree: `ReplaceExitRoomWithBoss` puts the
+adds in the boss encounter's `Expected` *and* `WorstCase` groups, `BuildFloorRooms` takes the sealed
+room straight off the curve rather than rebuilding it from `level.Boss` (a floor that fought only the
+boss would under-price every finale the moment one gained an escort), and `EnumerateEnemies` counts
+them among the enemies a level can present. `LevelCurve.BossDanger` is therefore the danger of the
+whole **room**, not of the boss asset, and `BossToTrashRatio` compares that room against the level's
+average trash room — which is what makes adds the third way to satisfy `MinBossToTrashRatio`, beside
+softening the boss and escalating the trash.
+
+**A boss room answers to `MaxBossDanger`, not to the 1.0 spawn-tail ceiling.** Its spawns are
+guaranteed, so its worst case *is* its expected case: it carries no information about a bad roll.
+`RunCurveModel.Aggregate` keeps it out of `PeakRoomDanger`/`PeakWorstCaseDanger` (and out of the
+trash average that the ratio divides by) and `EvaluateLevel` checks `BossDanger` against
+`MaxBossDanger` (1.40) instead. Those two rules used to contradict each other for boss rooms — the
+per-enemy ceiling says a climax may read as lost on paper, while the level's tail check said nothing
+may pass 1.0 — and the contradiction only became load-bearing once adds gave a designer a reason to
+spend danger there. The tail finding was also simply wrong about a boss room: it reads *"a bad spawn
+roll here is unwinnable"* and suggests lowering `SpawnChance`, a field the exit room does not have.
+
 **Two modelling corrections worth not regressing.** `EnemyManager.SpawnEnemies` skips the room the party is in, so `RunCurveModel` takes the start room out of both the manual and generated room counts — every level used to be overstated by one room's worth of enemies. And `ReplaceExitRoomWithBoss` now spreads the boss's displaced room across all combat entries instead of deleting one outright: deleting an entry whose expected occurrence was exactly 1.0 removed an enemy from the level entirely, which once made Bog Shaman — and therefore `Heal` — unreachable.
 
 **Hero power grows within a run now.** `PartyBaseline.Build` takes an **XP budget per hero** (was a level), greedy-spent on each hero's sphere grid via the deterministic `SphereGridOps.GreedySpend`; the save audit supplies real activated-node sets instead (`nodesLookup`). `RunCurveModel` closes the XP loop: each floor's expected income is banked per hero (`XpSplit.ExpectedShare`) and spent before the next floor is measured, rescued heroes joining at `SphereGridOps.StarterBank` — the same rule the game uses. `BalanceRulesSO.ReferenceHeroLevel` became **`ReferenceHeroXp`** (default 0 = fresh party) and `MinGridNodes` is the floor behind the "sphere grid runs out" finding. Node resistances reach the danger index and simulator through `SimUnit.Resistances`, beside gear.

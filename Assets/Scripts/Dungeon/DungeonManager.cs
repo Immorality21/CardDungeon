@@ -550,9 +550,14 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
-        /// If the active run's current level defines a boss, guarantees it (alone) in the exit
-        /// room so the level climaxes in a boss fight. No-op for normal levels or free-play.
-        /// Must run after the exit room is designated and normal enemies are spawned.
+        /// If the active run's current level defines a boss, guarantees it in the exit room so the
+        /// level climaxes in a boss fight. No-op for normal levels or free-play. Must run after the
+        /// exit room is designated and normal enemies are spawned.
+        ///
+        /// The room's rolled spawns are wiped first, so the boss's only company is the level's
+        /// authored <see cref="RunLevelEntry.BossAdds"/>. It used to be none at all, which put
+        /// <c>MinBossToTrashRatio</c> in direct conflict with dense trash rooms: with trash capped
+        /// at two bodies, a boss alone cannot stay proportionate to the floor leading up to it.
         /// </summary>
         private void PlaceBossIfConfigured(List<Room> rooms)
         {
@@ -561,7 +566,8 @@ namespace Assets.Scripts.Dungeon
                 return;
             }
 
-            var boss = ActiveRun.Levels[RunLevelIndex].BossEnemy;
+            var entry = ActiveRun.Levels[RunLevelIndex];
+            var boss = entry.BossEnemy;
             if (boss == null)
             {
                 return;
@@ -574,9 +580,18 @@ namespace Assets.Scripts.Dungeon
                 return;
             }
 
-            // Clear the exit room's rolled enemies so the boss fight is a clean climax.
+            // Clear the exit room's rolled enemies so the climax is the authored fight and nothing
+            // else - the boss plus its escort, never a boss on top of whatever the room rolled.
             EnemyManager.Instance.ClearRoomEnemies(exitRoom);
+
+            // The boss lands first so it takes the room's preferred position and the adds arrange
+            // themselves around it (GetRandomWalkablePosition avoids what is already placed).
             EnemyManager.Instance.SpawnSingle(boss, exitRoom);
+
+            foreach (var add in entry.EnumerateBossAdds())
+            {
+                EnemyManager.Instance.SpawnSingle(add, exitRoom);
+            }
         }
 
         /// <summary>

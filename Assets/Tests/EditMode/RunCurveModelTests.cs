@@ -331,6 +331,159 @@ namespace Tests.EditMode
             {
                 Assert.IsFalse(room.IsBossRoom, "A level with no boss has no boss room.");
             }
+
+            Assert.AreEqual(0, bossed.Levels[0].BossAddCount, "A boss with no authored adds stands alone.");
+        }
+
+        /// <summary>
+        /// The escort has to reach the exit room's numbers. A boss alone put MinBossToTrashRatio in
+        /// direct conflict with dense trash rooms - with trash capped at two bodies, the only way
+        /// left to make a climax stand out was to inflate the boss, which buys a long fight rather
+        /// than a hard one. Adds are the lever; a lever the model cannot see is not a lever.
+        /// </summary>
+        [Test]
+        public void RunCurve_BossAdds_RaiseTheExitRoomsDangerWithoutAddingARoom()
+        {
+            var combat = Room(Goblin(), 1f, 1);
+
+            var template = Make<LevelDefinitionSO>();
+            template.RoomsToGenerate = 4;
+            template.RoomPool = new List<RoomSO> { combat };
+
+            var boss = Goblin(strength: 9, health: 120, xp: 60, gold: 50);
+            boss.DisplayName = "Warden";
+            boss.IsBoss = true;
+            boss.Archetype = EnemyArchetype.Boss;
+
+            var add = Goblin(strength: 5, health: 30);
+            add.DisplayName = "Warden's Hound";
+
+            var alone = Make<RunDefinitionSO>();
+            alone.Levels = new List<RunLevelEntry>
+            {
+                new RunLevelEntry { LevelTemplate = template, LevelName = "L", BossEnemy = boss }
+            };
+
+            var escorted = Make<RunDefinitionSO>();
+            escorted.Levels = new List<RunLevelEntry>
+            {
+                new RunLevelEntry
+                {
+                    LevelTemplate = template,
+                    LevelName = "L",
+                    BossEnemy = boss,
+                    BossAdds = new List<BossAddEntry> { new BossAddEntry { Enemy = add, Count = 2 } }
+                }
+            };
+
+            var party = SturdyParty();
+            var rules = Rules();
+
+            var lone = RunCurve.Build(alone, party, rules).Levels[0];
+            var withAdds = RunCurve.Build(escorted, party, rules).Levels[0];
+
+            Assert.AreEqual(2, withAdds.BossAddCount);
+            Assert.AreEqual(0, lone.BossAddCount);
+
+            Assert.Greater(withAdds.BossDanger, lone.BossDanger,
+                "Adds are the danger the exit room is spending; the model has to price them.");
+            Assert.Greater(withAdds.BossToTrashRatio, lone.BossToTrashRatio,
+                "Adds are what a level reaches for when its boss is under MinBossToTrashRatio.");
+
+            // Whatever the escort costs, it costs it inside the sealed exit room. Adds must not
+            // lengthen the floor - the boss still replaces exactly one rolled room.
+            Assert.AreEqual(lone.ExpectedCombatRooms, withAdds.ExpectedCombatRooms, 0.0001f,
+                "The escort stands in the exit room; it is not an extra room.");
+            Assert.AreEqual(lone.ExpectedEnemyCount + 2f, withAdds.ExpectedEnemyCount, 0.0001f,
+                "Two adds are two more bodies to kill.");
+
+            int bossRooms = 0;
+            RoomEncounter exit = null;
+            foreach (var room in withAdds.Rooms)
+            {
+                if (room.IsBossRoom)
+                {
+                    bossRooms++;
+                    exit = room;
+                }
+            }
+            Assert.AreEqual(1, bossRooms, "The escort joins the exit room rather than making rooms.");
+            Assert.AreEqual(3f, exit.Expected.TotalCount, 0.0001f, "One boss plus two adds.");
+
+            // A boss room is guaranteed, so it has no spawn tail: expected is worst case. That is
+            // exactly why it is a safe place to spend danger, and why RunCurveModel.Aggregate keeps
+            // it out of the peak-worst-case check the rolled rooms answer to.
+            Assert.AreEqual(exit.ExpectedDanger, exit.WorstCaseDanger, 0.0001f);
+        }
+
+        /// <summary>
+        /// The peak-danger findings are about a bad *roll*. The exit room has none, and folding it in
+        /// made "a bad spawn roll here is unwinnable" fire on a room with no SpawnChance to lower.
+        /// </summary>
+        [Test]
+        public void RunCurve_PeakRoomDanger_IgnoresTheGuaranteedBossRoom()
+        {
+            var combat = Room(Goblin(strength: 2, health: 10), 1f, 1);
+
+            var template = Make<LevelDefinitionSO>();
+            template.RoomsToGenerate = 4;
+            template.RoomPool = new List<RoomSO> { combat };
+
+            var boss = Goblin(strength: 40, health: 400, xp: 60, gold: 50);
+            boss.DisplayName = "Warden";
+            boss.IsBoss = true;
+            boss.Archetype = EnemyArchetype.Boss;
+
+            var run = Make<RunDefinitionSO>();
+            run.Levels = new List<RunLevelEntry>
+            {
+                new RunLevelEntry { LevelTemplate = template, LevelName = "L", BossEnemy = boss }
+            };
+
+            var level = RunCurve.Build(run, SturdyParty(), Rules()).Levels[0];
+
+            Assert.Greater(level.BossDanger, level.PeakWorstCaseDanger,
+                "A boss far above every rolled room must not become the level's worst spawn roll.");
+            Assert.Greater(level.BossDanger, level.PeakRoomDanger);
+        }
+
+        /// <summary>
+        /// An add authored on a level with no boss is an authoring slip, not permission to populate
+        /// the exit room: nothing places it in game, so nothing may price it either.
+        /// </summary>
+        [Test]
+        public void RunLevelEntry_BossAdds_AreIgnoredWithoutABoss()
+        {
+            var add = Goblin();
+            var entry = new RunLevelEntry
+            {
+                BossAdds = new List<BossAddEntry> { new BossAddEntry { Enemy = add, Count = 3 } }
+            };
+
+            int count = 0;
+            foreach (var unused in entry.EnumerateBossAdds())
+            {
+                count++;
+            }
+            Assert.AreEqual(0, count, "No boss, no escort.");
+
+            entry.BossEnemy = Goblin(strength: 9, health: 120);
+            count = 0;
+            foreach (var unused in entry.EnumerateBossAdds())
+            {
+                count++;
+            }
+            Assert.AreEqual(3, count, "Count is bodies, flattened one EnemySO per body.");
+
+            // Null rows are an authoring accident (a list grown by size), not a spawn.
+            entry.BossAdds.Add(null);
+            entry.BossAdds.Add(new BossAddEntry { Enemy = null, Count = 2 });
+            count = 0;
+            foreach (var unused in entry.EnumerateBossAdds())
+            {
+                count++;
+            }
+            Assert.AreEqual(3, count, "Null and empty rows contribute nothing.");
         }
 
         /// <summary>

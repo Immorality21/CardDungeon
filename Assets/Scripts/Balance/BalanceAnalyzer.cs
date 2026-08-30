@@ -489,6 +489,11 @@ namespace Assets.Scripts.Balance
             {
                 yield return entry.BossEnemy;
             }
+
+            foreach (var add in entry.EnumerateBossAdds())
+            {
+                yield return add;
+            }
         }
 
         private static PartyBaseline BuildReferenceParty(BalanceInput input, BalanceRulesSO rules, SaveAudit save)
@@ -1724,32 +1729,76 @@ namespace Assets.Scripts.Balance
                 });
             }
 
-            if (level.Boss != null && level.BossToTrashRatio > 0f)
+            if (level.Boss != null)
             {
-                if (level.BossToTrashRatio > rules.MaxBossToTrashRatio)
+                // The sealed exit room has no spawn roll, so it sits outside the peak-danger tail
+                // check the rolled rooms answer to (see RunCurveModel.Aggregate) and is judged here
+                // against the boss ceiling instead - the rule that already says a climax is allowed
+                // to read as lost on paper, because the closed form never sees a party focus-firing.
+                if (level.BossDanger > rules.MaxBossDanger)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Level, subject,
-                        $"{level.Reference} boss is {level.BossToTrashRatio:0.0}x the level's trash difficulty")
+                        $"{level.Reference}'s boss room is past the climax ceiling (danger {level.BossDanger:0.00})")
                     {
                         Asset = level.Boss,
-                        Detail = $"Boss danger {level.BossDanger:0.00} against an average room of "
-                               + $"{level.BossDanger / Mathf.Max(0.001f, level.BossToTrashRatio):0.00}. "
-                               + $"The band is {rules.MinBossToTrashRatio:0.0}x–{rules.MaxBossToTrashRatio:0.0}x.",
-                        Suggestion = "Nothing in the level prepares the player for this. Soften the boss or "
-                               + "escalate the trash leading to it."
+                        Detail = $"{BossRoomComposition(level)} scores {level.BossDanger:0.00} against a "
+                               + $"ceiling of {rules.MaxBossDanger:0.00}.",
+                        Suggestion = level.BossAddCount > 0
+                            ? "Danger is superlinear in body count - drop one add before touching the "
+                              + "boss's own stats."
+                            : "Soften the boss's Overrides row, or lower the level's Difficulty."
                     });
                 }
-                else if (level.BossToTrashRatio < rules.MinBossToTrashRatio)
+
+                if (level.BossToTrashRatio > 0f)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Level, subject,
-                        $"{level.Reference} boss is only {level.BossToTrashRatio:0.0}x the level's trash difficulty")
+                    if (level.BossToTrashRatio > rules.MaxBossToTrashRatio)
                     {
-                        Asset = level.Boss,
-                        Detail = $"A climax should stand out; the floor is {rules.MinBossToTrashRatio:0.0}x.",
-                        Suggestion = "Raise the boss's Health or Attack, or give it adds."
-                    });
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Level, subject,
+                            $"{level.Reference} boss room is {level.BossToTrashRatio:0.0}x the level's trash difficulty")
+                        {
+                            Asset = level.Boss,
+                            Detail = $"{BossRoomComposition(level)} scores {level.BossDanger:0.00} against an "
+                                   + $"average room of "
+                                   + $"{level.BossDanger / Mathf.Max(0.001f, level.BossToTrashRatio):0.00}. "
+                                   + $"The band is {rules.MinBossToTrashRatio:0.0}x–{rules.MaxBossToTrashRatio:0.0}x.",
+                            Suggestion = level.BossAddCount > 0
+                                ? "Nothing in the level prepares the player for this. Drop an add, or "
+                                  + "escalate the trash leading to it."
+                                : "Nothing in the level prepares the player for this. Soften the boss or "
+                                  + "escalate the trash leading to it."
+                        });
+                    }
+                    else if (level.BossToTrashRatio < rules.MinBossToTrashRatio)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Level, subject,
+                            $"{level.Reference} boss room is only {level.BossToTrashRatio:0.0}x the level's trash difficulty")
+                        {
+                            Asset = level.Boss,
+                            Detail = $"{BossRoomComposition(level)}. A climax should stand out; the floor is "
+                                   + $"{rules.MinBossToTrashRatio:0.0}x.",
+                            Suggestion = "Give it adds (RunLevelEntry.BossAdds) - with trash rooms capped at "
+                                   + "two bodies, the exit room is the level's remaining danger budget. "
+                                   + "Raising the boss's own Health or Attack works too, but a lone boss "
+                                   + "bought up to ratio is a long fight rather than a hard one."
+                        });
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// How the sealed exit room is populated, for the findings that quote its danger - the boss
+        /// alone reads differently from a boss holding a line, and the fix differs with it.
+        /// </summary>
+        private static string BossRoomComposition(LevelCurve level)
+        {
+            string boss = level.Boss != null ? level.Boss.Label : "The boss";
+            if (level.BossAddCount <= 0)
+            {
+                return $"{boss}, alone,";
+            }
+            return $"{boss} plus {level.BossAddCount} add{(level.BossAddCount == 1 ? "" : "s")}";
         }
 
         /// <summary>
@@ -2641,10 +2690,33 @@ namespace Assets.Scripts.Balance
 
             if (level.Boss != null)
             {
-                var boss = SimUnit.FromEnemy(level.Boss, level.Tuning);
-                if (boss != null)
+                // Take the sealed exit room straight off the curve rather than rebuilding it from
+                // level.Boss: the room is the boss *and* its adds, and a floor that fought only the
+                // boss would under-price every finale the moment one gained an escort.
+                RoomEncounter bossRoom = null;
+                foreach (var room in level.Rooms)
                 {
-                    rooms.Add(new List<SimUnit> { boss });
+                    if (room != null && room.IsBossRoom)
+                    {
+                        bossRoom = room;
+                        break;
+                    }
+                }
+
+                var units = bossRoom != null
+                    ? bossRoom.Expected.ToDiscreteUnits()
+                    : new List<SimUnit>();
+                if (units.Count == 0)
+                {
+                    var boss = SimUnit.FromEnemy(level.Boss, level.Tuning);
+                    if (boss != null)
+                    {
+                        units.Add(boss);
+                    }
+                }
+                if (units.Count > 0)
+                {
+                    rooms.Add(units);
                 }
             }
 
