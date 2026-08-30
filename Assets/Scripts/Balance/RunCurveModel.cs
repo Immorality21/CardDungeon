@@ -259,11 +259,17 @@ namespace Assets.Scripts.Balance
                 // Level 0 reuses the caller's baseline so gear/save options are honoured; later
                 // levels are rebuilt from the grown roster at its accumulated XP.
                 // Carried-in state beats the caller's baseline: that grown party is the truth here.
+                //
+                // The rebuild carries the baseline's *gear* forward, because gear is a between-run
+                // axis: equipping happens only in InventoryHubUI, so the party fights every floor of
+                // a run in what it walked in wearing. Passing null here - which this did until
+                // 2026-08-30 - silently undressed the party after floor 1, so a gear budget moved
+                // the opening floor and nothing else.
                 var levelParty = i == 0 && !carriedIn
                     ? party
                     : PartyBaseline.Build(roster,
                         h => Mathf.FloorToInt(lifetime.TryGetValue(h, out var xp) ? xp : 0f),
-                        null, party.PotionItem, party.PotionCount, null);
+                        party.GearLookup, party.PotionItem, party.PotionCount, null);
 
                 var level = BuildLevel(i, entry, levelParty, rules);
                 level.RescuedHere = entry.RescueHero;

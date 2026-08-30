@@ -45,6 +45,44 @@ namespace Assets.Scripts.Balance
         public List<HeroBaseline> Heroes = new List<HeroBaseline>();
         public string SourceLabel = "Designed baseline";
 
+        /// <summary>
+        /// The gear spend that produced this party's loadout, when it came from a designed gold
+        /// budget rather than a save file. Null for a gearless or save-derived party. Held so the
+        /// window and the findings can say what the gold actually bought - a budget nobody can see
+        /// the effect of is a number, not a lever.
+        /// </summary>
+        public GearSpend DesignedGear;
+
+        /// <summary>
+        /// This party's loadout as a lookup, so a caller rebuilding the party at a different XP
+        /// budget can keep the gear. Reads back off <see cref="Heroes"/> rather than off whatever
+        /// produced it, so the designed-budget and saved-gear paths hand over the same thing.
+        ///
+        /// <para>A hero this baseline does not contain gets an empty loadout, which is the honest
+        /// answer for one acquired mid-run: equipping happens only at the hub, so there is no way to
+        /// dress a rescue until the run is over.</para>
+        /// </summary>
+        public System.Func<HeroSO, List<ItemSO>> GearLookup
+        {
+            get
+            {
+                return hero =>
+                {
+                    if (hero != null)
+                    {
+                        foreach (var member in Heroes)
+                        {
+                            if (member != null && member.Definition == hero)
+                            {
+                                return member.Gear;
+                            }
+                        }
+                    }
+                    return new List<ItemSO>();
+                };
+            }
+        }
+
         /// <summary>Healing carried into a level: potion count x restore amount.</summary>
         public int PotionCount = PartyResourceManager.DEFAULT_HEALING_POTION_MAX;
         public int PotionHealAmount;

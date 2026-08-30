@@ -22,7 +22,16 @@ namespace Assets.Scripts.Balance
                  "almost immediately — the grid-shaped version of the old level-2 cap warning.")]
         public int MinGridNodes = 8;
 
-        [Tooltip("Include each hero's currently-equipped gear (from the save) in the reference party.")]
+        [Tooltip("Gold the designed reference party has spent on gear, greedy-spent by GearLoadout " +
+                 "(best power per gold, deterministic). 0 = no gear, which is what every number in " +
+                 "docs/BALANCING.md described before 2026-08-30. Unlike ReferencePartyUsesSavedGear " +
+                 "this is derived from the item catalog rather than from a save file, so it is " +
+                 "reproducible and the regression suite can assert on it.")]
+        [Min(0)] public int ReferencePartyGoldBudget = 0;
+
+        [Tooltip("Include each hero's currently-equipped gear (from the save) in the reference party. " +
+                 "Overrides ReferencePartyGoldBudget when a save is present. Machine-specific, so " +
+                 "BalanceRegressionTests never turns it on - use the gold budget for published numbers.")]
         public bool ReferencePartyUsesSavedGear;
 
         [Header("Traversal — how much of a floor the player actually walks")]
@@ -245,6 +254,19 @@ namespace Assets.Scripts.Balance
                  "The top of the ladder should sit near the dearest hero's full grid - past that the " +
                  "XP axis saturates and a frontier point there is an investment nobody can make.")]
         public List<int> FrontierXpSteps = new List<int> { 0, 75, 150, 225, 300, 375, 450, 550, 650, 750 };
+
+        [Tooltip("Gold budgets for gear the frontier sweep tries, cheapest first. Gear is the third " +
+                 "way to pay for depth, beside a party slot and grid XP, and unlike XP it is a " +
+                 "*between-run* axis: equipping happens only at the hub, so a loadout is fixed for a " +
+                 "whole run. The ladder should top out near a full loadout for the widest party - " +
+                 "past that the axis saturates because there is nothing left to buy.")]
+        public List<int> FrontierGoldSteps = new List<int> { 0, 350, 700, 1050 };
+
+        [Tooltip("Gold that buys one point of investment, for folding the gear axis into the same " +
+                 "cost as width and XP. 1:1 is not arbitrary: the tavern charges 220-260 gold for a " +
+                 "hero and HeroXpEquivalent prices that same hero at 250, so the game's own prices " +
+                 "already make a gold piece and an XP point interchangeable.")]
+        [Min(1)] public int GoldPerInvestmentPoint = 1;
 
         [Tooltip("Battles per mix on the frontier sweep. Lower than SimulationTrials because a sweep " +
                  "runs dozens of mixes and only needs the wipe rate to a couple of points.")]

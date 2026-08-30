@@ -52,6 +52,7 @@ the game's numbers:
 | spell effects, buffs, combos | `EffectResolver`, `CombatBuffTracker`, `ComboDetector` |
 | gear bonuses | `InventoryOperations.ComputeBonuses` |
 | gear elemental resistance | `InventoryOperations.ComputeResistances` |
+| what a piece of gear costs | `ShopPricing.BuyPrice` |
 | the element a unit's attacks carry | `ICombatUnit.AttackDamageType` (`EnemySO.AttackDamageType`) |
 | the stats an enemy actually fights with | `LevelEnemyTuning.StatsFor` (template x the level's tuning) |
 | whether an enemy casts, and which spell | `EnemyMagicPlan.ShouldCast` / `.Select` / `.ScalePower` |
@@ -73,6 +74,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `HeroStatCalculator` | pure hero stats from `HeroSO` + activated sphere-grid nodes + gear (`Hero` itself needs `InventoryManager.Instance`). `BaseStatsForNodes` + `WithGear`; the level methods are gone with `LevelConfiguration` |
 | `SimUnit` | headless `ICombatUnit` for heroes and enemies, incl. per-fight enemy state |
 | `PartyBaseline` | the reference party every other metric is measured against |
+| `GearLoadout` | spends a **gold budget** on equipment, greedily and deterministically — the gear counterpart of `SphereGridOps.GreedySpend`. `GearSpend.Lookup` is what `PartyBaseline.Build` wants |
 | `BalanceMath` | closed-form metrics: damage, hits-to-kill, ticks, **danger index**, power score |
 | `EncounterModel` | `WeightedEnemyGroup` + `RoomEncounter` — fractional spawn-table expectation |
 | `RunCurveModel` | `LevelCurve` / `RunCurve` — attrition, peak danger, boss ratio, difficulty jumps |
@@ -156,6 +158,21 @@ spend danger there. The tail finding was also simply wrong about a boss room: it
 roll here is unwinnable"* and suggests lowering `SpawnChance`, a field the exit room does not have.
 
 **Two modelling corrections worth not regressing.** `EnemyManager.SpawnEnemies` skips the room the party is in, so `RunCurveModel` takes the start room out of both the manual and generated room counts — every level used to be overstated by one room's worth of enemies. And `ReplaceExitRoomWithBoss` now spreads the boss's displaced room across all combat entries instead of deleting one outright: deleting an entry whose expected occurrence was exactly 1.0 removed an enemy from the level entirely, which once made Bog Shaman — and therefore `Heal` — unreachable.
+
+**Gear reaches the model two ways, and only one of them can back a published number.**
+`ReferencePartyUsesSavedGear` reads the local save file — right for auditing one player's progress,
+useless for a report, which is why `BalanceRegressionTests` never turns it on, which is why it
+defaulted to off, which is why every number in `docs/BALANCING.md` before 2026-08-30 described a party
+wearing **nothing**. `ReferencePartyGoldBudget` is the reproducible half: `GearLoadout.Spend` buys the
+best power-per-gold the item catalog offers, deterministically, so the same budget means the same
+loadout on every machine. It **defaults to 0** so the shipped numbers did not silently move; the
+saved-gear toggle still wins when both are set.
+
+**A party wears its gear for the whole run.** `RunCurveModel` rebuilds the party per floor to spend
+banked XP, and it now passes `PartyBaseline.GearLookup` into that rebuild. Passing `null` — which it
+did until 2026-08-30 — undressed the party after floor 1, so a gear budget moved the opening floor and
+nothing else. A hero rescued mid-run correctly gets an empty loadout: there is no way to equip them
+until the run ends.
 
 **Hero power grows within a run now.** `PartyBaseline.Build` takes an **XP budget per hero** (was a level), greedy-spent on each hero's sphere grid via the deterministic `SphereGridOps.GreedySpend`; the save audit supplies real activated-node sets instead (`nodesLookup`). `RunCurveModel` closes the XP loop: each floor's expected income is banked per hero (`XpSplit.ExpectedShare`) and spent before the next floor is measured, rescued heroes joining at `SphereGridOps.StarterBank` — the same rule the game uses. `BalanceRulesSO.ReferenceHeroLevel` became **`ReferenceHeroXp`** (default 0 = fresh party) and `MinGridNodes` is the floor behind the "sphere grid runs out" finding. Node resistances reach the danger index and simulator through `SimUnit.Resistances`, beside gear.
 
@@ -342,18 +359,31 @@ much investment does this tier demand, and how many ways may the player pay it?*
 stated against a single reference party — sampling one corner of the surface produced a written report
 that was flatly wrong (`docs/BALANCING.md` §5i → §5j).
 
-`InvestmentFrontier.Measure` sweeps `FrontierPartyWidths` × `FrontierXpSteps`, rebuilding the party at
-each mix (`PartyBaseline.Build`, so the axis is keyed off **XP spent**, never node identities) and
-fighting the same rooms — rooms carry no party state, which is what makes this cheap. It returns the
-**Pareto-minimal** clearing mixes plus the mixes past which the floor stops being a threat.
+`InvestmentFrontier.Measure` sweeps `FrontierPartyWidths` × `FrontierXpSteps` × `FrontierGoldSteps`,
+rebuilding the party at each mix (`PartyBaseline.Build`, so the axis is keyed off **XP spent**, never
+node identities) and fighting the same rooms — rooms carry no party state, which is what makes this
+cheap. It returns the **Pareto-minimal** clearing mixes plus the mixes past which the floor stops
+being a threat.
 
 - **Only run finales are swept.** A tier's gate is its last floor, and a frontier costs a dozen floor
   batches.
-- **The sweep is pruned, not exhaustive.** More width or more XP only ever helps, so once a width
-  clears at some XP every wider mix at that XP or above is dominated and is never simulated. That
-  pruning *is* the frontier's definition — do not replace it with a full grid.
+- **The sweep is pruned, not exhaustive.** More width, more XP or more gear only ever helps, so for
+  each `(width, gold)` pair the XP walk stops at the cheapest XP any pair that is no dearer on both
+  already needed — everything above that is dominated on all three axes and is never simulated. That
+  pruning *is* the frontier's definition, and it is what makes a third axis affordable at all (a full
+  grid would be 4 × 4 × 10 mixes per floor per pass). Widths and gold both ascend, so a pair found
+  later can never dominate one found earlier, which is why the result needs no second filtering pass.
 - **The width axis includes recruits.** `BalanceInput.Roster` is `PartyRosterSO.Heroes`, not the
   starting lineup: buying a hero at the tavern is a gold purchase exactly like a party slot.
+- **The gold axis is gear, and it is a *between-run* axis.** Equipping happens only in
+  `InventoryHubUI`, so a loadout is fixed for a whole run — unlike XP, which the run curve banks and
+  re-spends per floor. That is why one `GearLoadout.Spend` per mix is the right model rather than a
+  per-floor loop, and why loot picked up mid-run buys power in the *next* run, never the one that
+  found it. `MeasureMix` charges what the spend actually cost, not the ladder step, so a step past the
+  point the catalog runs dry is not billed for gear nobody could buy.
+- **Gold converts at `GoldPerInvestmentPoint`, 1:1 by default, and that is not arbitrary**: the tavern
+  charges 220–260 gold for a hero and `HeroXpEquivalent` prices the same hero at 250, so the game's
+  own prices already equate a gold piece with an XP point.
 - **`BalanceAnalyzer.MeasureFrontiers(input)`** is the public entry point for a tuning pass — curves
   closed-form, finales simulated, no findings. ~16s for the whole campaign.
 

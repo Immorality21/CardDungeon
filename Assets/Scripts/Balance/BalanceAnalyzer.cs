@@ -326,7 +326,9 @@ namespace Assets.Scripts.Balance
                     PartyBaseline party;
                     if (!bySize.TryGetValue(roster.Count, out party))
                     {
-                        party = PartyBaseline.Build(roster, rules.ReferenceHeroXp, null,
+                        // Same rule as the run curve: the starting baseline's loadout travels with
+                        // the party, since nothing can change it mid-run.
+                        party = PartyBaseline.Build(roster, rules.ReferenceHeroXp, starting.GearLookup,
                             starting.PotionItem, starting.PotionCount);
                         bySize[roster.Count] = party;
                     }
@@ -498,7 +500,15 @@ namespace Assets.Scripts.Balance
 
         private static PartyBaseline BuildReferenceParty(BalanceInput input, BalanceRulesSO rules, SaveAudit save)
         {
+            // Two ways gear can reach the reference party, and they are not interchangeable.
+            // A saved loadout is what one player on one machine actually equipped - right for a save
+            // audit, useless for a published number, which is why the regression suite never turns
+            // it on. A gold budget is derived from the item catalog by GearLoadout and is therefore
+            // reproducible anywhere, which is what makes gear something the model can *state*.
             Func<HeroSO, List<ItemSO>> gearLookup = null;
+            string gearLabel = "no gear";
+            GearSpend designedGear = null;
+
             if (rules.ReferencePartyUsesSavedGear && save != null)
             {
                 gearLookup = hero =>
@@ -512,6 +522,18 @@ namespace Assets.Scripts.Balance
                     }
                     return new List<ItemSO>();
                 };
+                gearLabel = "saved gear";
+            }
+            else if (rules.ReferencePartyGoldBudget > 0)
+            {
+                designedGear = GearLoadout.Spend(
+                    input.Heroes,
+                    rules.ReferenceHeroXp,
+                    input.Items,
+                    rules.ReferencePartyGoldBudget,
+                    rules.WeightFor);
+                gearLookup = designedGear.Lookup;
+                gearLabel = $"{designedGear.GoldSpent}g of gear";
             }
 
             int potionCount = save != null && save.PotionCap > 0
@@ -525,9 +547,8 @@ namespace Assets.Scripts.Balance
                 input.HealingPotion,
                 potionCount);
 
-            party.SourceLabel = rules.ReferencePartyUsesSavedGear
-                ? $"Designed baseline ({rules.ReferenceHeroXp} XP spent, saved gear)"
-                : $"Designed baseline ({rules.ReferenceHeroXp} XP spent, no gear)";
+            party.SourceLabel = $"Designed baseline ({rules.ReferenceHeroXp} XP spent, {gearLabel})";
+            party.DesignedGear = designedGear;
 
             return party;
         }
@@ -2925,7 +2946,11 @@ namespace Assets.Scripts.Balance
                     Rooms = rooms,
                     Widths = rules.FrontierPartyWidths,
                     XpSteps = rules.FrontierXpSteps,
+                    GoldSteps = rules.FrontierGoldSteps,
+                    Catalog = input.Items,
+                    StatWeightFor = rules.WeightFor,
                     HeroXpEquivalent = rules.HeroXpEquivalent,
+                    GoldPerInvestmentPoint = rules.GoldPerInvestmentPoint,
                     BaseWidth = PartySlots.BaseCap,
                     ClearWipeRate = rules.MaxFloorWipeRate,
                     SafeWipeRate = rules.MinFinalFloorWipeRate,

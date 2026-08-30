@@ -1252,6 +1252,11 @@ than a point estimate at the optimistic end, not to pretend the player is determ
 
 ### Equipment is not in the reference party at all
 
+> **Closed 2026-08-30 — see §5p.** `GearLoadout` spends a gold budget off the item catalog
+> deterministically, `ReferencePartyGoldBudget` is the reproducible alternative to the save-file
+> route, and gold is now the frontier's third axis. The diagnosis below is what was wrong; §5p is
+> what it turned out to mean, and the answer is bigger than anyone expected.
+
 `BalanceRulesSO.ReferencePartyUsesSavedGear` defaults to **false**, and no rules asset is checked in —
 so every number in this document describes a party in **no gear**. Even switched on, `BuildReferenceParty`
 reads gear from the local **save file**, which differs per machine and is excluded from
@@ -1534,3 +1539,95 @@ within 0.04 of where it started** — inside the noise of a 200-trial run. Findi
 - **The bosses' `Difficulty`-exempt casts** now read weaker relative to their swings than before,
   since the swings came down ~45% but an absolute `Overrides` row still exempts the boss from
   `MagicPowerScaleFor`. Five `casts for less than it hits for` infos remain.
+
+## §5p — Gear is priced now, and it is the strongest axis in the game (2026-08-30)
+
+§5l found that the model had no notion of gear. This closes that, and the closing turned up a balance
+finding much larger than the plumbing it came from.
+
+### Why gear was invisible, and the shape of the fix
+
+The only route gear had into the model was `ReferencePartyUsesSavedGear`, which reads the **local save
+file**. That is machine-specific, so `BalanceRegressionTests` could never turn it on, so it defaulted
+to off, so **every number ever published about this game described a party wearing nothing** — while
+the merchant sold equipment the whole time, bought with the same gold that buys a party slot.
+
+The fix has three parts, and the middle one is the one to remember:
+
+1. **`GearLoadout`** — the gear counterpart of `SphereGridOps.GreedySpend`. Given the item catalog and
+   a gold budget it repeatedly buys the best **power-per-gold** upgrade until nothing affordable
+   improves, one item per slot, ties broken on gain then price then name. Deterministic, derived from
+   assets rather than from a save, and therefore something a regression suite can assert on.
+2. **Gear is a *between-run* axis.** Equipping happens only in `InventoryHubUI`, so a loadout is fixed
+   for a whole run — unlike XP, which the run curve banks and re-spends per floor. So the model needs
+   one spend per run, not a per-floor loop, and **loot picked up mid-run buys power in the next run,
+   never the one that found it**. That single fact is what made the whole thing tractable.
+3. **Gold is the frontier's third axis**, converting at `GoldPerInvestmentPoint`. 1:1 is not
+   arbitrary: the tavern charges **220–260 gold** for a hero and `HeroXpEquivalent` already prices
+   that same hero at **250**, so the game's own prices equate a gold piece with an XP point.
+
+### The bug this immediately found
+
+`RunCurveModel` rebuilds the party per floor to spend banked XP, and passed **`null`** for the gear
+lookup. So a gear budget dressed the party for floor 1 and undressed it for every floor after —
+the first measurement showed The Threshold at `0.09 → 0.55 → 0.66 → 0.90` with no gear and
+`0.04 → 0.55 → 0.66 → 0.90` with 339g of it. Only the first number moved. Fixed by threading
+`PartyBaseline.GearLookup` through the rebuild. A rescued hero correctly gets nothing: there is no way
+to equip them mid-run.
+
+### The finding: gear is worth roughly 2.4× what XP is
+
+With the lookup carried, a **single 339-gold purchase — three swords, three breastplates, three
+shields — more than halves the attrition of the entire campaign**:
+
+| gear budget | actually spent | The Threshold | The Drowned March | Warrens | Ashen Deep | Vault |
+|---|---|---|---|---|---|---|
+| **0g** (shipped) | 0g | 0.09 0.55 0.66 **0.90** | 0.73 0.70 0.61 **2.28** | 0.73 **1.76** | 0.66 0.79 **1.82** | **4.37** |
+| 350g | 339g | 0.04 0.23 0.28 **0.41** | 0.30 0.30 0.27 **1.05** | 0.31 **0.77** | 0.30 0.37 **0.84** | **2.04** |
+| 700g | 603g | 0.02 0.12 0.16 **0.22** | 0.17 0.17 0.16 **0.58** | 0.18 **0.46** | 0.18 0.22 **0.53** | **1.21** |
+| 1100g | 1077g | 0.02 0.11 0.13 **0.20** | 0.15 0.15 0.14 **0.51** | 0.14 **0.38** | 0.16 0.20 **0.36** | **1.02** |
+
+At 350g every gate floor in the campaign falls inside the clearable band and the analyzer's warning
+count goes **4 → 48**, almost all of them *"no threat at all"*. 603g takes a Warrior from 26 HP to 50.
+
+The frontier says the same thing in its own units. Sunken Depths clears at **(1 hero, 550 XP)** or at
+**(1 hero, 75 XP, 201g gear)** — so 201 gold substituted for ~475 XP. At the 1:1 rate that is gear
+buying about **2.4× the survivability per investment point** that the sphere grid does.
+
+### What that means, and what was deliberately *not* done
+
+The default `ReferencePartyGoldBudget` is **0**, so no published number moved. That is on purpose:
+retuning the campaign around gear is a design decision, and there are two coherent answers —
+
+- **Gear is overpowered**, and the item catalog wants weakening (a Steel Plate at 68g granting +12 HP
+  and +4 END is a third of a hero's health bar for a quarter of a hero's price); or
+- **`GoldPerInvestmentPoint` is wrong**, and gear should cost more investment points per gold, which
+  says the *frontier* was mispricing rather than the *content*.
+
+The measurement cannot choose between those — it can only say they are not both already true. It is
+the user's call, and it is now a call that can be made against a number.
+
+### Three things this pass learned
+
+1. **A default that cannot be tested becomes a default nobody notices.** `ReferencePartyUsesSavedGear`
+   was off for a defensible reason (machine-specific), and the consequence — every published figure
+   describing a naked party — went unremarked for the whole life of the analyzer. When a knob has to
+   be off in CI, the fix is a *second, reproducible* knob, not a note in a doc.
+2. **Ask which axes move within a run and which do not.** Width and XP both grow mid-run; gear cannot.
+   Getting that right collapsed what looked like a per-floor gear loop into one spend per mix, and it
+   is also the honest answer to "loot is counted but never equipped" — loot's contribution *is* gold
+   and next run's options, so there was never a mid-run feedback loop to model.
+3. **A third axis is affordable if the pruning generalises.** A full 4 × 4 × 10 grid per floor per
+   pass would have been unusable. Taking, for each `(width, gold)` pair, the cheapest XP any pair no
+   dearer on both already needed keeps the sweep to 24–81 mixes per floor and the whole analysis at
+   **18.6s**, against ~16s for two axes.
+
+### Still open
+
+- **The gear-vs-XP exchange rate needs a decision** (above). Until then every frontier reads gear as
+  the cheap route, which it measurably is.
+- **`GearLoadout` ranks on `PowerScore` only**, so an item's `Resistances` are worth nothing to the
+  spend even though they reach the danger index once equipped. The Ruby Amulet (−25% Fire) and the
+  Leather Cap (−10%) are therefore bought for their stat lines alone and undervalued.
+- **Only 7 equipment items exist**, across 6 of the 7 slots — nothing fills `Hands`, and `MainHand`
+  has a strictly-dominated entry (Simple Sword, 20g, no bonuses). The axis saturates at 359g per hero.

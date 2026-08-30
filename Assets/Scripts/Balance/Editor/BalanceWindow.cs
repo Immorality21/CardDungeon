@@ -226,15 +226,26 @@ namespace Assets.Scripts.Balance.Editor
             EditorGUIUtility.labelWidth = 44f;
             EditorGUI.BeginChangeCheck();
             int xp = EditorGUILayout.IntField("XP", _rules != null ? _rules.ReferenceHeroXp : 0, GUILayout.Width(90f));
+
+            // The gold budget is the reproducible half of the gear story: it spends the item catalog
+            // through GearLoadout, so it means the same thing on every machine. The saved-gear toggle
+            // beside it reads one player's save and therefore cannot back a published number.
+            int gold = EditorGUILayout.IntField(
+                new GUIContent("Gold", "Gold the reference party has spent on gear, greedy-spent off "
+                    + "the item catalog. 0 = no gear. Reproducible, unlike Saved gear."),
+                _rules != null ? _rules.ReferencePartyGoldBudget : 0, GUILayout.Width(95f));
             bool savedGear = GUILayout.Toggle(
                 _rules != null && _rules.ReferencePartyUsesSavedGear,
-                new GUIContent("Saved gear", "Include the gear the save file has equipped in the reference party."),
+                new GUIContent("Saved gear", "Include the gear the save file has equipped in the reference "
+                    + "party. Overrides the Gold budget, and is machine-specific - the regression suite "
+                    + "never turns it on."),
                 EditorStyles.toolbarButton,
                 GUILayout.Width(80f));
             if (EditorGUI.EndChangeCheck() && _rules != null)
             {
                 Undo.RecordObject(_rules, "Change balance reference party");
                 _rules.ReferenceHeroXp = Mathf.Max(0, xp);
+                _rules.ReferencePartyGoldBudget = Mathf.Max(0, gold);
                 _rules.ReferencePartyUsesSavedGear = savedGear;
                 EditorUtility.SetDirty(_rules);
                 _needsReanalyze = true;

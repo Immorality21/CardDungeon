@@ -11,8 +11,8 @@ using UnityEngine;
 namespace Tests.EditMode
 {
     /// <summary>
-    /// The investment frontier: what a floor asks of the player, over the two axes the game actually
-    /// sells them — party width and sphere-grid XP.
+    /// The investment frontier: what a floor asks of the player, over the three axes the game
+    /// actually sells them — party width, sphere-grid XP and gear bought with gold.
     ///
     /// <para>Every test here pins something a single-party measurement gets wrong. The mistake this
     /// model exists to prevent is on record: the first sweep held the party at three heroes, found the
@@ -47,6 +47,83 @@ namespace Tests.EditMode
             Assert.AreEqual(250, InvestmentFrontier.CostOf(3, 0, HeroXpEquivalent, BaseWidth));
             Assert.AreEqual(500, InvestmentFrontier.CostOf(4, 0, HeroXpEquivalent, BaseWidth));
             Assert.AreEqual(600, InvestmentFrontier.CostOf(4, 100, HeroXpEquivalent, BaseWidth));
+        }
+
+        // --- the gear axis --------------------------------------------------------------
+
+        /// <summary>
+        /// Gold folds into the same cost as the other two axes. 1:1 is not an arbitrary rate: the
+        /// tavern charges 220-260 gold for a hero and <c>HeroXpEquivalent</c> prices that same hero
+        /// at 250, so the game's own prices already equate a gold piece with an XP point.
+        /// </summary>
+        [Test]
+        public void CostOf_GoldOnGearIsChargedAtTheConversionRate()
+        {
+            Assert.AreEqual(300, InvestmentFrontier.CostOf(2, 0, 300, HeroXpEquivalent, BaseWidth, 1));
+            Assert.AreEqual(400, InvestmentFrontier.CostOf(2, 100, 300, HeroXpEquivalent, BaseWidth, 1));
+            Assert.AreEqual(650, InvestmentFrontier.CostOf(3, 100, 300, HeroXpEquivalent, BaseWidth, 1));
+
+            // A dearer rate makes gear a cheaper route in investment terms, which is the dial.
+            Assert.AreEqual(100, InvestmentFrontier.CostOf(2, 0, 300, HeroXpEquivalent, BaseWidth, 3));
+        }
+
+        /// <summary>
+        /// The gearless overload has to keep answering exactly as it did, or every frontier number
+        /// written before the gear axis existed becomes incomparable to the ones after it.
+        /// </summary>
+        [Test]
+        public void CostOf_TheGearlessOverloadIsUnchanged()
+        {
+            for (int width = 1; width <= 4; width++)
+            {
+                for (int xp = 0; xp <= 600; xp += 150)
+                {
+                    Assert.AreEqual(
+                        InvestmentFrontier.CostOf(width, xp, 0, HeroXpEquivalent, BaseWidth, 1),
+                        InvestmentFrontier.CostOf(width, xp, HeroXpEquivalent, BaseWidth));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Three axes, so domination needs all three. Missing the gold term would silently prune
+        /// away the gear route — the mix would be measured and then dropped for being "dominated" by
+        /// something that is only cheaper on two of the three things the player pays with.
+        /// </summary>
+        [Test]
+        public void IsDominatedBy_GearCountsAsAnAxis()
+        {
+            var geared = new InvestmentPoint { PartySize = 2, XpPerHero = 100, GoldOnGear = 300 };
+            var bare = new InvestmentPoint { PartySize = 2, XpPerHero = 100, GoldOnGear = 0 };
+
+            Assert.IsTrue(geared.IsDominatedBy(bare), "Same width and XP, but one paid for gear too.");
+            Assert.IsFalse(bare.IsDominatedBy(geared));
+        }
+
+        /// <summary>
+        /// Buying gear instead of XP is a trade, not a saving, so neither mix dominates - which is
+        /// precisely the "range of ways to pay" gear was added to provide.
+        /// </summary>
+        [Test]
+        public void IsDominatedBy_GearTradedForXpDominatesNothing()
+        {
+            var richInGear = new InvestmentPoint { PartySize = 2, XpPerHero = 0, GoldOnGear = 400 };
+            var richInXp = new InvestmentPoint { PartySize = 2, XpPerHero = 400, GoldOnGear = 0 };
+
+            Assert.IsFalse(richInGear.IsDominatedBy(richInXp));
+            Assert.IsFalse(richInXp.IsDominatedBy(richInGear));
+        }
+
+        /// <summary>A mix that bought nothing reads as a gearless mix, in the label as well as the cost.</summary>
+        [Test]
+        public void Mix_NamesGearOnlyWhenSomeWasBought()
+        {
+            Assert.AreEqual("2 heroes, 100 XP",
+                new InvestmentPoint { PartySize = 2, XpPerHero = 100 }.Mix);
+            Assert.AreEqual("2 heroes, 100 XP, 300g gear",
+                new InvestmentPoint { PartySize = 2, XpPerHero = 100, GoldOnGear = 300 }.Mix);
+            Assert.AreEqual("1 hero, 0 XP",
+                new InvestmentPoint { PartySize = 1, XpPerHero = 0 }.Mix);
         }
 
         // --- dominance ------------------------------------------------------------------

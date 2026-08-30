@@ -42,7 +42,8 @@ that the floor model was pricing rooms the player never walks into; **§5m** fix
   frontier work, which is precisely about which party can pass.
 
 **The next concrete steps** (updated 2026-08-30; floor numbers are priced at the **beeline**, the
-cheapest way through a floor. Steps 1–2 have shipped — **step 3, pricing gear, is the live one**):
+cheapest way through a floor. Steps 1–3 have shipped; **step 3 left a balance decision open — see
+§5p — and steps 4–6 are the live ones**):
 
 1. ~~**Elemental reveal (§0b Phase 4c).**~~ ✅ Shipped 2026-08-29 — the knowledge record, an
    in-combat **Inspect** page (free, FFX-style *Scan*) and a hub **Bestiary**. See §0b and
@@ -84,9 +85,33 @@ cheapest way through a floor. Steps 1–2 have shipped — **step 3, pricing gea
    0.80 → 0.64 two runs away, restored with `Difficulty` 3.35 → 3.75. Suite **771 / 0**. Full
    reasoning and the four things it learned: **`docs/BALANCING.md` §5o**.
 
-3. **Price gear.** `ReferencePartyUsesSavedGear` is **false** by default and no rules asset is checked
-   in, so every published number describes a party in **no gear**; loot is counted as a reward but
-   never equipped. The §0g frontier cannot price gear as a way to pay for depth until it can.
+3. ~~**Price gear.**~~ ✅ Shipped 2026-08-30 (§5p). **`GearLoadout`** spends a gold budget off the item
+   catalog greedily and deterministically — the gear counterpart of `SphereGridOps.GreedySpend` — so
+   gear no longer depends on a machine-local save file. Gold is now the frontier's **third axis**,
+   converting at `GoldPerInvestmentPoint`; 1:1 is the game's own rate, since the tavern charges 220–260
+   gold for a hero and `HeroXpEquivalent` prices that same hero at 250. `ReferencePartyGoldBudget` is
+   the reproducible replacement for the saved-gear toggle, defaulting to **0** so no published number
+   moved. Covered by `GearLoadoutTests` + 5 new frontier tests; suite **788 / 0**.
+
+   **"Loot is counted but never equipped" turned out not to be a modelling gap.** Equipping happens
+   only in `InventoryHubUI`, so gear is a **between-run** axis: a loadout is fixed for a whole run,
+   and loot's contribution really is gold and *next* run's options. That collapsed what looked like a
+   per-floor gear loop into one spend per mix — but it did expose a real bug: `RunCurveModel` passed
+   `null` for the gear lookup when rebuilding the party per floor, so a gear budget dressed the party
+   for floor 1 and undressed it for every floor after.
+
+   **What it found is bigger than the plumbing.** With the lookup carried, one **339-gold** purchase
+   more than halves the attrition of the entire campaign (every gate floor falls inside the clearable
+   band; the analyzer's warning count goes 4 → 48, mostly *"no threat at all"*). The frontier agrees in
+   its own units: Sunken Depths clears at either **(1 hero, 550 XP)** or **(1 hero, 75 XP, 201g gear)**
+   — 201 gold substituting for ~475 XP, so gear buys roughly **2.4× the survivability per investment
+   point** that the sphere grid does. **This needs a decision** and §5p lays out the two coherent
+   answers (the item catalog is too strong, or `GoldPerInvestmentPoint` is mispriced). Nothing was
+   retuned: that is a design call, and it is now a call that can be made against a number.
+
+   One thing gear *did* fix outright: **"This tier is a checklist, not a choice" is gone.** Every tier
+   now offers at least two affordable ways to pay, which is §0g's "a range, not a checklist" — gear was
+   the missing third route.
 4. **XP per danger now varies 5.4x** (up from 4.5x). §5n's guard rooms pay the same XP as the rooms
    they outclass, so the reward curve drifted behind the difficulty curve.
 5. **Blue Room is filler on a tier-1 finale**, and **Rotwater Deep (0.61) dips below its siblings**
