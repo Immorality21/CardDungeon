@@ -178,20 +178,24 @@ public class MainCamera : SingletonBehaviour<MainCamera>
 
         // TODO mouse movement when edge of screen or swipe on mobile
 
-        if (xValue < -0.1f || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+        // WASD only. The arrow keys used to pan here too, but they now drive selection everywhere in
+        // the game - the door cursor in a room, the command menu in combat, the menus in the hub -
+        // and this runs off raw Input, which no amount of StopPropagation in UI Toolkit can hold
+        // back. Leaving them on meant every door the player picked also nudged the camera.
+        if (xValue < -0.1f || Input.GetKey(KeyCode.D))
         {
             _cameraTransform.position += (Vector3.right * Time.deltaTime * moveSpeed);
         }
-        else if (xValue > 0.1f || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+        else if (xValue > 0.1f || Input.GetKey(KeyCode.A))
         {
             _cameraTransform.position += (Vector3.left * Time.deltaTime * moveSpeed);
         }
 
-        if (yValue < -0.1f || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+        if (yValue < -0.1f || Input.GetKey(KeyCode.W))
         {
             _cameraTransform.position += (Vector3.up * Time.deltaTime * moveSpeed);
         }
-        else if (yValue > 0.1f || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+        else if (yValue > 0.1f || Input.GetKey(KeyCode.S))
         {
             _cameraTransform.position += (Vector3.down * Time.deltaTime * moveSpeed);
         }

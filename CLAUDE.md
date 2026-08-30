@@ -29,7 +29,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 **`ImmoralityGaming.*`** — Reusable game framework (engine-agnostic patterns):
 - `Fundamentals/` — `SingletonBehaviour<T>`, `ObjectPooler`, `CoroutineHandler`, `FloatingTextHandler`, camera control (`MainCamera`)
 - `Extensions/` — Utility extension methods for List, Enumerable, Vector2/3, Color, Transform, etc.
-- `Menu/` — UI system with `MenuManager` (singleton), `MenuPanel` base class, `PopupManager`
+- `Menu/` — UI system with `MenuManager` (singleton), `MenuPanel` base class, `PopupManager`, and the **keyboard cursor** shared by every screen in the game: `DirectionalNav` (the "which one is that way" maths, used by menu buttons, graph nodes and the doors of a room alike) and `KeyboardNavigator` (an arrow-key cursor over whatever buttons a UI Toolkit subtree currently shows) and `PanelKeyboard` (what actually makes the OS keyboard reach a runtime UITK panel — focus alone does not)
 - `Editor/` — Custom Unity editor tools
 
 **`Assets.Scripts.*`** — Game-specific code:

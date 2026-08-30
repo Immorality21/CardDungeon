@@ -71,5 +71,8 @@
             <ui:Button name="victory-continue" text="Continue" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
+        <!-- Keyboard hint. Shown only while the arrows actually mean "pick a door". -->
+        <ui:Label name="nav-hint" text="Arrows pick a door &#183; Enter walk through &#183; Tab room actions" class="cd-nav-hint cd-hidden" picking-mode="Ignore" />
+
     </ui:VisualElement>
 </ui:UXML>

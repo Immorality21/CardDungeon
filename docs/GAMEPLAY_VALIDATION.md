@@ -162,16 +162,70 @@ Hard-won gotchas (each cost a failed compile until learned):
     the clone, swap it into the input (e.g. `BalanceInput.Heroes`), analyse, then
     `Object.DestroyImmediate` the clone. Mutating the asset instance returned by
     `AssetDatabase.LoadAssetAtPath` risks writing the change to disk.
-14. **You cannot click a UI Toolkit button from a `RunCommand`.** Three ways were tried against
-    `RoomActionUI`'s room bar and all three are inert: `ClickEvent.GetPooled()` + `SendEvent`, a
-    synthetic `PointerDownEvent`/`PointerUpEvent` pair, and `Clickable.SimulateSingleClick` (which
-    does not exist in this Unity's public API). `Clickable` needs a real panel dispatch with pointer
-    capture, and `SendEvent` on the element bypasses it. What you *can* verify from a command, and
-    what is usually enough: **that the right button is showing**. Query the `UIDocument`'s root and
-    read `element.style.display.value` (`Flex` vs `None`) after driving the game into a state - that
-    catches the whole class of "the affordance never appears / appears in the wrong room" bugs. For
-    the handler itself, keep the logic in a pure helper the EditMode suite can call, and click it by
-    hand once.
+14. **You CAN press a UI Toolkit button from a `RunCommand` - send it a `NavigationSubmitEvent`.**
+    This entry used to say it was impossible. What is inert is the *pointer* route:
+    `ClickEvent.GetPooled()` + `SendEvent` does nothing (`Clickable` listens for pointer down/up, not
+    for `ClickEvent`), a synthetic `PointerDownEvent`/`PointerUpEvent` pair needs real pointer
+    capture, and `Clickable.SimulateSingleClick` is not in this Unity's public API. But
+    `NavigationSubmitEvent` is exactly what UI Toolkit sends when Enter is pressed on a focused
+    button, and `Button` handles it itself:
+
+    ```csharp
+    using (var submit = NavigationSubmitEvent.GetPooled())
+    {
+        submit.target = button;
+        button.SendEvent(submit);      // runs the button's clicked handler
+    }
+    ```
+
+    Verified against `MainMenuManager`'s `merchant-btn` (the merchant view opened). It works even
+    though these buttons are `focusable = false` - dispatching straight to the target does not go
+    through the focus controller. The game itself uses this: `KeyboardNavigator.Press`.
+
+    Keys work the same way - `KeyDownEvent.GetPooled('\0', KeyCode.DownArrow, EventModifiers.None)`
+    sent to the panel root drives every arrow-key cursor in the game, so a whole keyboard-only run
+    (walk the dungeon by door, Tab to the room bar, Enter through a dialog) can be scripted from a
+    command.
+
+    > **A synthetic `KeyDownEvent` proves the handler, NOT the keyboard.** Sending one straight to
+    > the panel root skips the entire real input path, so it passes even when a real key press could
+    > never arrive. This is not hypothetical - it hid a bug where every arrow key in the dungeon was
+    > dead while all the scripted checks were green. See gotcha 15; when you have "verified" a
+    > keyboard feature this way, say so in those words and have a human press the key.
+
+    Still worth doing alongside it: **check that the right button is showing**. Query the
+    `UIDocument`'s root and read `element.style.display.value` (`Flex` vs `None`) after driving the
+    game into a state - that catches the whole class of "the affordance never appears / appears in
+    the wrong room" bugs. Note `resolvedStyle` does **not** update within the same command that
+    changed it (no frame has passed); read `style.display.value` for a same-command check, or look
+    at `resolvedStyle` in a *later* command.
+
+15. **A runtime UI Toolkit panel gets no keyboard until its `PanelEventHandler` is the EventSystem's
+    *selected* GameObject.** `root.Focus()` is only half the story and looks like the whole of it.
+    The bridge that turns OS key presses into UITK `KeyDownEvent`s is a `PanelEventHandler` (Unity
+    creates one at runtime beside the `PanelSettings` asset - here on a GameObject named
+    `CardDungeonPanelSettings`), and `StandaloneInputModule` pumps keys into it only through
+    `IUpdateSelectedHandler`, i.e. only while it is selected. **Pointer** events take a different
+    route, through the panel raycaster, which needs no selection at all.
+
+    The failure mode is therefore silent and genuinely confusing: **the UI clicks perfectly and
+    ignores every key.** It also explains why menus can seem fine - clicking a UITK element selects
+    the handler as a side effect, so any screen you *enter by clicking a button* works, while a
+    screen reached without touching UI (a dungeon room, where the doors are world-space colliders)
+    never does. Clicking outside the UI clears the selection again, so a screen that worked a moment
+    ago stops.
+
+    Diagnose it in one command:
+
+    ```csharp
+    var es = EventSystem.current;
+    result.Log("selected={0}", es.currentSelectedGameObject != null
+        ? es.currentSelectedGameObject.name : "NULL");   // NULL => the keyboard is dead
+    ```
+
+    The fix in this project is `ImmoralityGaming.Menu.PanelKeyboard.Claim()`, called from
+    `RoomActionUI.FocusRoot`/`Update` and `MainMenuManager.Update`; it selects the handler whenever
+    nothing else is selected. Anything new that wants the keyboard must call it too.
 
 ---
 

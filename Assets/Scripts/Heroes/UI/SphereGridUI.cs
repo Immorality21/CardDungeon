@@ -338,7 +338,51 @@ namespace Assets.Scripts.Heroes.UI
                     CycleHero(1);
                     evt.StopPropagation();
                     break;
+                case KeyCode.UpArrow:
+                    MoveSelection(new Vector2(0f, -1f));
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.DownArrow:
+                    MoveSelection(new Vector2(0f, 1f));
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.LeftArrow:
+                    MoveSelection(new Vector2(-1f, 0f));
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.RightArrow:
+                    MoveSelection(new Vector2(1f, 0f));
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Space:
+                    OnActivate();
+                    evt.StopPropagation();
+                    break;
             }
+        }
+
+        /// <summary>
+        /// Walks the grid with the arrow keys, following the shape the player can see rather than any
+        /// authoring order. The view pans to keep the cursor on screen - without a mouse there is no
+        /// other way to bring a far node back into view.
+        /// </summary>
+        private void MoveSelection(Vector2 direction)
+        {
+            if (_view == null)
+            {
+                return;
+            }
+
+            var key = _view.NodeInDirection(_selectedNodeKey, direction);
+            if (string.IsNullOrEmpty(key))
+            {
+                return;
+            }
+
+            OnNodeClicked(key);
+            _view.EnsureNodeVisible(key);
         }
 
         private void SetFeedback(string message)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -47,6 +48,10 @@ namespace Assets.Scripts.Heroes.UI
         private readonly VisualElement _content;
         private readonly Dictionary<string, Button> _buttons = new Dictionary<string, Button>();
         private readonly Dictionary<string, NodeInfo> _nodes = new Dictionary<string, NodeInfo>();
+
+        // Scratch buffers for NodeInDirection, so walking a graph with the arrow keys allocates nothing.
+        private readonly List<string> _navKeys = new List<string>();
+        private readonly List<Vector2> _navPoints = new List<Vector2>();
         private readonly Dictionary<string, string> _stateClasses = new Dictionary<string, string>();
         private readonly List<(string A, string B)> _edges = new List<(string A, string B)>();
 
@@ -297,6 +302,73 @@ namespace Assets.Scripts.Heroes.UI
         {
             var local = this.WorldToLocal(panelPosition);
             return (local - _pan) / _zoom;
+        }
+
+        // ------------------------------------------------------------------
+        //  Keyboard navigation
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// The node lying in <paramref name="direction"/> from <paramref name="fromKey"/>, or null
+        /// when nothing does. Grid space shares UI Toolkit's downward y, so "up" is <c>(0,-1)</c>.
+        ///
+        /// <para>It lives on the widget rather than in the two screens that use it because the widget
+        /// is what holds the node set - a screen asking this question would otherwise have to keep a
+        /// parallel copy of the graph's geometry in sync with the one being drawn.</para>
+        /// </summary>
+        public string NodeInDirection(string fromKey, Vector2 direction)
+        {
+            if (_nodes.Count == 0)
+            {
+                return null;
+            }
+
+            _navKeys.Clear();
+            _navPoints.Clear();
+            int from = -1;
+            foreach (var pair in _nodes)
+            {
+                if (pair.Key == fromKey)
+                {
+                    from = _navKeys.Count;
+                }
+                _navKeys.Add(pair.Key);
+                _navPoints.Add(pair.Value.Position);
+            }
+
+            // With nothing selected yet, any arrow simply lands on a node rather than doing nothing.
+            int target = from >= 0
+                ? DirectionalNav.PickInDirection(_navPoints, from, direction)
+                : 0;
+            return target >= 0 ? _navKeys[target] : null;
+        }
+
+        /// <summary>
+        /// Pans the least amount needed to bring a node inside the viewport, leaving zoom alone
+        /// (fitting the whole graph is <see cref="FrameAll"/>'s job). Keyboard navigation needs this:
+        /// the cursor can walk off the visible area, and a player who is not using the mouse has no
+        /// way to drag the graph back.
+        /// </summary>
+        public void EnsureNodeVisible(string key)
+        {
+            if (string.IsNullOrEmpty(key) || !_nodes.TryGetValue(key, out var node))
+            {
+                return;
+            }
+
+            float width = resolvedStyle.width;
+            float height = resolvedStyle.height;
+            if (width <= 0f || height <= 0f || float.IsNaN(width) || float.IsNaN(height))
+            {
+                return;
+            }
+
+            float margin = NodeRadius * 2f;
+            var local = node.Position * _zoom + _pan;
+            var pan = _pan;
+            pan.x += Mathf.Max(0f, margin - local.x) - Mathf.Max(0f, local.x - (width - margin));
+            pan.y += Mathf.Max(0f, margin - local.y) - Mathf.Max(0f, local.y - (height - margin));
+            Pan = pan;
         }
 
         /// <summary>Fits every node inside the viewport (call after Show/SetGraph, once laid out).</summary>

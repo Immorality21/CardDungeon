@@ -7,6 +7,7 @@ using Assets.Scripts.IO;
 using Assets.Scripts.Items.UI;
 using Assets.Scripts.MainMenu;
 using Assets.Scripts.Progression;
+using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -63,6 +64,9 @@ public class MainMenuManager : MonoBehaviour
     private Label _levelName;
     private Label _progressParty;
 
+    private VisualElement _root;
+    private KeyboardNavigator _nav;
+
     private CampaignSO _campaign;
     private CampaignMapUI _campaignMap;
     private MerchantUI _merchant;
@@ -100,6 +104,7 @@ public class MainMenuManager : MonoBehaviour
             _document = GetComponent<UIDocument>();
         }
         var root = _document.rootVisualElement;
+        _root = root;
 
         _campaignView = root.Q<VisualElement>("campaign-view");
         _homeView = root.Q<VisualElement>("home-view");
@@ -194,6 +199,8 @@ public class MainMenuManager : MonoBehaviour
         }
         _inventory.OnClosed += ShowHomePanel;
 
+        SetUpKeyboardNavigation();
+
         // Initial panel: run complete only when we arrived from clearing the final level.
         if (DungeonManager.ActiveRun == null && string.IsNullOrEmpty(_runSaveData.RunKey) && _justCompletedRun)
         {
@@ -203,6 +210,127 @@ public class MainMenuManager : MonoBehaviour
         {
             ShowHomePanel();
         }
+    }
+
+    // ============================================================
+    //  KEYBOARD NAVIGATION
+    // ============================================================
+
+    /// <summary>
+    /// Arrow keys for the hub, matching how combat and the room bar are driven. One
+    /// <see cref="KeyboardNavigator"/> serves every screen this class owns, because it navigates
+    /// whatever buttons are visible rather than a list wired per screen - and only one of these views
+    /// is ever displayed at a time.
+    ///
+    /// <para>The screens that build their own cursors - the campaign map, the sphere grid, the
+    /// bestiary, the inventory - are excluded by <see cref="NavigatesCurrentView"/>. They are children
+    /// of this same root, so without that gate a key they chose not to handle would bubble up here and
+    /// be acted on twice.</para>
+    /// </summary>
+    private void SetUpKeyboardNavigation()
+    {
+        _nav = new KeyboardNavigator(_root);
+        _nav.Cancelled += OnNavigatorCancelled;
+
+        _root.focusable = true;
+        _root.RegisterCallback<KeyDownEvent>(OnMenuKeyDown);
+
+        // Swallow UI Toolkit's own focus navigation while our cursor owns the screen, or the first
+        // arrow key moves keyboard focus off the root and the second one never reaches us.
+        _root.RegisterCallback<NavigationMoveEvent>(evt => { if (NavigatesCurrentView()) { evt.StopPropagation(); } });
+        _root.RegisterCallback<NavigationCancelEvent>(evt => { if (NavigatesCurrentView()) { evt.StopPropagation(); } });
+    }
+
+    private void OnMenuKeyDown(KeyDownEvent evt)
+    {
+        if (!NavigatesCurrentView())
+        {
+            return;
+        }
+        if (_nav.HandleKey(evt))
+        {
+            evt.StopPropagation();
+        }
+    }
+
+    /// <summary>The views whose buttons the shared cursor drives - see <see cref="SetUpKeyboardNavigation"/>.</summary>
+    private bool NavigatesCurrentView()
+    {
+        return IsShown(_homeView) || IsShown(_progressView) || IsShown(_completeView)
+            || IsShown(_merchantView) || IsShown(_tavernView) || IsShown(_partyView)
+            || IsShown(_forgeView);
+    }
+
+    /// <summary>
+    /// Escape leaves the screen by pressing its own Back button rather than calling the panel's Hide
+    /// directly, so backing out with the keyboard runs exactly the same path as clicking it - the
+    /// panels raise <c>OnClosed</c> from there and this class depends on that to get home again.
+    /// </summary>
+    private void OnNavigatorCancelled()
+    {
+        KeyboardNavigator.Press(CancelButtonForCurrentView());
+    }
+
+    private Button CancelButtonForCurrentView()
+    {
+        if (IsShown(_merchantView))
+        {
+            return _root.Q<Button>("merchant-close");
+        }
+        if (IsShown(_tavernView))
+        {
+            return _root.Q<Button>("tavern-close");
+        }
+        if (IsShown(_partyView))
+        {
+            return _root.Q<Button>("party-close");
+        }
+        if (IsShown(_forgeView))
+        {
+            // The forge stacks an inspect page over its grid; Escape backs out one layer at a time.
+            var inspect = _root.Q<VisualElement>("forge-inspect");
+            return IsShown(inspect) ? _root.Q<Button>("inspect-back") : _root.Q<Button>("forge-close");
+        }
+        if (IsShown(_progressView))
+        {
+            return _backButton;
+        }
+        if (IsShown(_completeView))
+        {
+            return _returnButton;
+        }
+        // Home has nowhere to back out to.
+        return null;
+    }
+
+    /// <summary>
+    /// Puts keyboard focus back on the root and drops the cursor. Called from every panel switch: the
+    /// cursor pointed at a button on the screen that just went away, and focus may have been taken by
+    /// a panel that builds its own (the inventory and sphere grid both focus their own subtree).
+    /// </summary>
+    private void ResetKeyboardNavigation()
+    {
+        if (_nav == null)
+        {
+            return;
+        }
+        _nav.Reset();
+        if (_root.panel != null)
+        {
+            _root.Focus();
+        }
+        PanelKeyboard.Claim();
+    }
+
+    /// <summary>
+    /// Keeps the keyboard reachable. The hub only ever *seemed* not to need this: every screen here is
+    /// entered by clicking a button, and clicking a UI Toolkit element selects the keyboard bridge as a
+    /// side effect. Clicking the background instead clears it again, so the arrows would quietly stop
+    /// working with nothing on screen to explain why. See <see cref="PanelKeyboard"/>.
+    /// </summary>
+    private void Update()
+    {
+        PanelKeyboard.Claim();
     }
 
     private void ShowHomePanel()
@@ -218,6 +346,7 @@ public class MainMenuManager : MonoBehaviour
         SetShown(_forgeView, false);
         SetShown(_bestiaryView, false);
         SetShown(_inventoryView, false);
+        ResetKeyboardNavigation();
 
         bool hasActiveRun = !string.IsNullOrEmpty(_runSaveData.RunKey);
         SetShown(_continueButton, hasActiveRun);
@@ -277,6 +406,7 @@ public class MainMenuManager : MonoBehaviour
         SetShown(_progressView, true);
         SetShown(_completeView, false);
         SetShown(_partyView, false);
+        ResetKeyboardNavigation();
 
         var run = ActiveRunDefinition();
         if (run == null || run.Levels.Count == 0)
@@ -303,6 +433,7 @@ public class MainMenuManager : MonoBehaviour
         SetShown(_homeView, false);
         SetShown(_progressView, false);
         SetShown(_completeView, true);
+        ResetKeyboardNavigation();
         _justCompletedRun = false;
     }
 
@@ -394,12 +525,14 @@ public class MainMenuManager : MonoBehaviour
     {
         SetShown(_homeView, false);
         _merchant.Show();
+        ResetKeyboardNavigation();
     }
 
     private void OnVisitTavern()
     {
         SetShown(_homeView, false);
         _tavern.Show();
+        ResetKeyboardNavigation();
     }
 
     private void OnVisitSphereGrid()
@@ -421,6 +554,7 @@ public class MainMenuManager : MonoBehaviour
         _partyOpenedFromProgress = false;
         SetShown(_homeView, false);
         _partySelect.Show();
+        ResetKeyboardNavigation();
     }
 
     private void OnChangePartyFromProgress()
@@ -432,6 +566,7 @@ public class MainMenuManager : MonoBehaviour
         _partyOpenedFromProgress = true;
         SetShown(_progressView, false);
         _partySelect.Show();
+        ResetKeyboardNavigation();
     }
 
     /// <summary>
@@ -452,6 +587,7 @@ public class MainMenuManager : MonoBehaviour
     {
         SetShown(_homeView, false);
         _forge.Show();
+        ResetKeyboardNavigation();
     }
 
     private void OnVisitBestiary()
@@ -486,5 +622,10 @@ public class MainMenuManager : MonoBehaviour
         {
             element.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
         }
+    }
+
+    private static bool IsShown(VisualElement element)
+    {
+        return element != null && element.resolvedStyle.display == DisplayStyle.Flex;
     }
 }

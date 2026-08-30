@@ -1211,3 +1211,43 @@
     font-size: 13px;
     color: rgb(180, 164, 204);
 }
+
+/* ============================================================
+   Keyboard cursor — the arrow-key highlight painted by
+   ImmoralityGaming.Menu.KeyboardNavigator on whichever button
+   the cursor is on. Deliberately the last rule in the file:
+   every button class here (.cd-menu-button, .cd-button, .cd-tab,
+   the shop-row buttons) is a single-class selector of equal
+   specificity, so source order is what makes the cursor win over
+   the button's own background. Border width matches theirs (2px)
+   so highlighting never nudges a layout.
+   ============================================================ */
+
+.cd-nav--selected {
+    background-color: rgb(102, 48, 158);
+    border-width: 2px;
+    border-color: var(--cd-accent);
+    color: var(--cd-gold);
+}
+
+.cd-nav--selected:hover {
+    background-color: rgb(126, 62, 190);
+    border-color: rgb(156, 82, 210);
+}
+
+.cd-nav--selected:disabled {
+    background-color: var(--cd-stone-disabled);
+    border-color: var(--cd-frame);
+}
+
+/* Keyboard hint line, bottom-centre under the room bar. Deliberately quiet:
+   it is there to be found once, not read every room. */
+.cd-nav-hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    translate: -50% 0;
+    font-size: 12px;
+    color: var(--cd-text-dark);
+    opacity: 0.7;
+}

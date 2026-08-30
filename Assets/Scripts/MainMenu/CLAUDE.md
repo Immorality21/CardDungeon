@@ -21,6 +21,42 @@ All UI is **UI Toolkit** (UXML + USS), not uGUI. The pattern, used identically b
 
 `MainMenuManager` owns one `UIDocument` holding all eleven views (home / **campaign** (the story map) / progress / complete / merchant / tavern / party / **grid** (sphere grid) / forge / **bestiary** / inventory) and toggles them.
 
+## Keyboard navigation
+
+Every hub screen is reachable without the mouse. `MainMenuManager` owns **one**
+`ImmoralityGaming.Menu.KeyboardNavigator` on the document root (`SetUpKeyboardNavigation`), and it
+navigates *whatever buttons are currently visible* rather than a list wired per screen — which works
+because only one view is displayed at a time. Arrows move (spatially, falling back to document order
+for up/down so a plain column wraps), Tab steps, Enter/Space presses, Escape backs out.
+
+- **There is no cursor until the first arrow key.** A highlight painted the moment a screen opens
+  would sit on a mouse player's screen forever, and it also sidesteps the question of whether layout
+  has run yet — by the time a key is pressed, it has.
+- **`NavigatesCurrentView()` is the gate**, and it deliberately excludes the campaign map, the sphere
+  grid, the bestiary and the inventory. Those build their own cursors, and they are children of this
+  same root — without the gate a key they chose not to handle would bubble up here and be acted on
+  twice.
+- **Escape presses the screen's own Back button** (`CancelButtonForCurrentView`) rather than calling
+  the panel's `Hide` — the panels raise `OnClosed` from there and this class depends on that to get
+  home again. The forge stacks an inspect page over its grid, so Escape backs out one layer at a time.
+- **`PanelKeyboard.Claim()` runs every frame from `Update`.** A UITK panel receives the OS keyboard
+  only while its `PanelEventHandler` is the EventSystem's *selected* GameObject; clicking a UITK
+  element selects it as a side effect, which is why the hub appeared not to need this, and clicking
+  the background clears it again, which is why it did. See gotcha 15 in `docs/GAMEPLAY_VALIDATION.md`.
+- **Every panel switch calls `ResetKeyboardNavigation()`**: the cursor pointed at a button on the
+  screen that just went away, and focus may have been taken by a panel that focuses its own subtree.
+- Screens with their own cursors: **CampaignMapUI** and **SphereGridUI** walk their node graphs with
+  the arrows (`SphereGridView.NodeInDirection` + `EnsureNodeVisible` — the widget answers the
+  "which node is that way" question because it is what holds the geometry, and it pans to keep the
+  cursor on screen since a keyboard player cannot drag the graph back), Enter starts the run /
+  activates the node; **BestiaryUI** walks its list with up/down (moving the cursor reads the entry —
+  there is nothing to confirm, so a separate Enter would do nothing); **InventoryHubUI** was already
+  keyboard-driven.
+- The highlight class is `cd-nav--selected`, defined **last** in `CardDungeon.uss` on purpose: every
+  button class there is a single-class selector of equal specificity, so source order is what makes
+  the cursor win over the button's own background. Its border width matches theirs (2px) so
+  highlighting never nudges a layout.
+
 ## Panels
 
 - **MerchantUI** / **MagicForgeUI** are **plain view-controllers** (not MonoBehaviours): each takes the `VisualElement` subtree for its view, queries its controls, and exposes `Show()`/`Hide()` + an `OnClosed` event. `MainMenuManager` constructs them from the queried `merchant-view` / `forge-view` subtrees.
@@ -28,7 +64,7 @@ All UI is **UI Toolkit** (UXML + USS), not uGUI. The pattern, used identically b
   - **MerchantUI** — Gold sink (enlarge potion belt = the healing-potion carry cap). See the Progression guide.
   - **InventoryHubUI** (`Items/UI/InventoryHubUI.cs`) — the between-runs gear screen (equipment is managed **only** here now; the old in-dungeon `InventoryUI` is retired). Equipment / Consumables tabs; a hero selector listing **only owned heroes** (via `HeroRoster`, cached per `Show()`), equip keyed by `HeroSO.SaveKey`; click-to-equip un-equipped gear, click-to-unequip a slot; a base+bonus stat preview. Reads the roster from a `PartyRosterSO` (the hub has no live `Party`) and all item state from `InventoryManager` (scene-independent via the Resources `ItemCatalog`). Wired in `MainMenuManager` exactly like the Merchant/Forge; `_partyRoster` is wired by the setup bootstrap (`AssetDatabase.FindAssets("t:PartyRosterSO")`).
   - **TavernUI** — the Gold sink for **roster growth**: a rotating, persisted, paid-restock offer of heroes the player does not own yet (`MetaProgressSaveData.TavernStock`, same no-free-rerolls rule as the merchant's `ShopStock`). Stock is drawn from `HeroRoster.GetRecruitable` — the catalog minus what you own — so a hero rescued in a dungeon silently drops out of the offer. Priced by `ShopPricing.RecruitPrice` (`HeroSO.RecruitCost`, or derived from the stat line when unset). Constructed in `MainMenuManager` from the `tavern-view` subtree with the same `_partyRoster` the inventory uses; no new serialized ref, so the setup bootstrap does **not** need re-running for it.
-  - **SphereGridUI** (`Heroes/UI/SphereGridUI.cs`) — the sphere-grid screen: per-hero tabs, banked-XP line, the shared `SphereGridView` graph (pan/zoom, click a node), a detail panel and an Activate button that spends the bank through `HeroRoster.TryActivateNode`. Constructed from the `grid-view` subtree with the same `_partyRoster`, so the bootstrap does **not** need re-running — but the UXML gained `grid-view` and `grid-btn`, so an older scene simply won't show it until the UXML is picked up. The view is `cd-window--fixed cd-window--wide`: the pannable graph and the always-present detail panel must never resize the dock-centered window (the hit-test trap). Q/E cycles heroes, Esc closes.
+  - **SphereGridUI** (`Heroes/UI/SphereGridUI.cs`) — the sphere-grid screen: per-hero tabs, banked-XP line, the shared `SphereGridView` graph (pan/zoom, click a node), a detail panel and an Activate button that spends the bank through `HeroRoster.TryActivateNode`. Constructed from the `grid-view` subtree with the same `_partyRoster`, so the bootstrap does **not** need re-running — but the UXML gained `grid-view` and `grid-btn`, so an older scene simply won't show it until the UXML is picked up. The view is `cd-window--fixed cd-window--wide`: the pannable graph and the always-present detail panel must never resize the dock-centered window (the hit-test trap). Q/E cycles heroes, the arrows walk the node graph and Enter activates, Esc closes.
   - **PartySelectUI** — which of the owned heroes actually march out. Writes `PartySaveData.SelectedHeroKeys` through `HeroRoster.SetSelectedKeys`; `DungeonManager.FieldedHeroes()` reads it. Two lists (*Marching out* / *Staying behind*) with a Field/Bench button per row, a minimum of one hero, and the party cap from `MetaProgressManager.GetPartyCap()`. It also **sells the next party slot for Gold** (`TryBuyPartySlot`, `PartySlots`) — the price of going wider sits next to the reason not to, since the screen states the XP share (`Each hero earns N% of every kill's XP`) as the standing cost of width. Reachable from **home** and from the **run-progress screen** next to *Enter Dungeon*, which is when the choice actually matters; `MainMenuManager._partyOpenedFromProgress` sends Back where the player came from. Constructed from the `party-view` subtree with the same `_partyRoster`, so the setup bootstrap does **not** need re-running — but the UXML gained `party-view`, `party-btn`, `progress-party` and `progress-party-btn`, so an older scene will simply not show the screen until the UXML is picked up.
   - **BestiaryUI** (`Enemies/UI/BestiaryUI.cs`) — the enemy knowledge collection, reachable from home. A left list of **every** enemy in `Resources/EnemyCatalog.asset` (unmet ones listed but nameless, so the collection has a visible shape) with an "N of M discovered" header, and a right detail column. All wording and colour come from `BestiaryPresenter`/`BestiaryLineView`, which the in-combat Inspect page uses too — see the Enemies guide. Constructed from the `bestiary-view` subtree with no new serialized ref, so the setup bootstrap does **not** need re-running; but the UXML gained `bestiary-view` and `bestiary-btn`, so an older scene simply won't show the screen until the UXML is picked up. `cd-window--fixed` for the usual reason: the detail column changes size as enemies are selected, and a resizing translate-centered window desyncs UITK's hit-testing from the render.
   - **MagicForgeUI** — Essence sink + collection grid with All Magic / Combos tabs and click-to-inspect/upgrade; `?` for undiscovered. **Requires a `MagicCatalog` in the scene** (and a `MagicComboCatalog` for the Combos tab) or it logs a warning / shows empty. See the Progression guide.

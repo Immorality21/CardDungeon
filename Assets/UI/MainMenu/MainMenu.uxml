@@ -136,6 +136,7 @@
                 <ui:ScrollView name="bestiary-list" class="cd-bestiary__list" mode="Vertical" />
                 <ui:ScrollView name="bestiary-detail" class="cd-bestiary__detail" mode="Vertical" />
             </ui:VisualElement>
+            <ui:Label name="bestiary-hint" text="&#8593;&#8595; select &#183; Esc back" class="cd-info-label cd-hint" />
             <ui:Button name="bestiary-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 

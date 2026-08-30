@@ -255,11 +255,60 @@ namespace Assets.Scripts.MainMenu
             {
                 return;
             }
-            if (evt.keyCode == KeyCode.Escape || evt.keyCode == KeyCode.Backspace)
+
+            switch (evt.keyCode)
             {
-                Hide();
-                evt.StopPropagation();
+                case KeyCode.Escape:
+                case KeyCode.Backspace:
+                    Hide();
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.UpArrow:
+                    MoveSelection(new Vector2(0f, -1f));
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.DownArrow:
+                    MoveSelection(new Vector2(0f, 1f));
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.LeftArrow:
+                    MoveSelection(new Vector2(-1f, 0f));
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.RightArrow:
+                    MoveSelection(new Vector2(1f, 0f));
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Space:
+                    OnStart();
+                    evt.StopPropagation();
+                    break;
             }
+        }
+
+        /// <summary>
+        /// Walks the map with the arrow keys. The graph is laid out spatially, so the arrows follow the
+        /// same geometry the player is looking at rather than some authoring order - pressing Right at
+        /// a fork goes to the branch drawn on the right. The view pans to keep up, since a keyboard
+        /// player cannot drag the graph back into sight.
+        /// </summary>
+        private void MoveSelection(Vector2 direction)
+        {
+            if (_view == null)
+            {
+                return;
+            }
+
+            var key = _view.NodeInDirection(_selectedKey, direction);
+            if (string.IsNullOrEmpty(key))
+            {
+                return;
+            }
+
+            OnNodeClicked(key);
+            _view.EnsureNodeVisible(key);
         }
 
         // --- Helpers -----------------------------------------------------------------------

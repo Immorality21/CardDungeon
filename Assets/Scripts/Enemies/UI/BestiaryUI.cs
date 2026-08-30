@@ -34,6 +34,7 @@ namespace Assets.Scripts.Enemies.UI
         private readonly List<VisualElement> _rows = new List<VisualElement>();
         private List<EnemySO> _catalog = new List<EnemySO>();
         private int _selected = -1;
+        private bool _isShown;
 
         public event Action OnClosed;
 
@@ -48,27 +49,97 @@ namespace Assets.Scripts.Enemies.UI
             if (_closeButton != null)
             {
                 _closeButton.clicked += Hide;
+                _closeButton.focusable = false;
             }
+            if (_list != null)
+            {
+                _list.focusable = false;
+            }
+
+            // Arrow keys walk the list, like every other screen. The cursor is this screen's own
+            // rather than the shared KeyboardNavigator's because the rows are not Buttons and because
+            // moving the cursor here has to re-render the detail column beside it, not just highlight.
+            _root.RegisterCallback<KeyDownEvent>(OnKeyDown);
+            _root.RegisterCallback<NavigationMoveEvent>(evt => { if (_isShown) { evt.StopPropagation(); } });
+            _root.RegisterCallback<NavigationSubmitEvent>(evt => { if (_isShown) { evt.StopPropagation(); } });
+            _root.RegisterCallback<NavigationCancelEvent>(evt => { if (_isShown) { evt.StopPropagation(); } });
 
             _root.style.display = DisplayStyle.None;
         }
 
         public void Show()
         {
+            _isShown = true;
             _root.style.display = DisplayStyle.Flex;
             _catalog = LoadCatalog();
             _selected = -1;
             RefreshList();
             ShowEmptyDetail();
+
+            _root.focusable = true;
+            if (_root.panel != null)
+            {
+                _root.Focus();
+            }
         }
 
         public void Hide()
         {
+            _isShown = false;
+            _root.focusable = false; // stop being a focus/nav target once closed
             _root.style.display = DisplayStyle.None;
             _list?.Clear();
             _detail?.Clear();
             _rows.Clear();
             OnClosed?.Invoke();
+        }
+
+        // ============================================================
+        //  KEYBOARD
+        // ============================================================
+
+        private void OnKeyDown(KeyDownEvent evt)
+        {
+            if (!_isShown)
+            {
+                return;
+            }
+
+            switch (evt.keyCode)
+            {
+                case KeyCode.UpArrow:
+                    MoveSelection(-1);
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.DownArrow:
+                    MoveSelection(1);
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.Escape:
+                case KeyCode.Backspace:
+                    Hide();
+                    evt.StopPropagation();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Moves the cursor and reads the entry in one step - there is nothing to confirm on this
+        /// screen, so making Enter a second, separate press would only add a key that does nothing.
+        /// </summary>
+        private void MoveSelection(int delta)
+        {
+            if (_rows.Count == 0)
+            {
+                return;
+            }
+
+            int index = _selected < 0
+                ? (delta > 0 ? 0 : _rows.Count - 1)
+                : (_selected + delta + _rows.Count) % _rows.Count;
+
+            Select(index);
+            _list?.ScrollTo(_rows[index]);
         }
 
         /// <summary>

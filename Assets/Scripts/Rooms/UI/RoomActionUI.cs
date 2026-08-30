@@ -8,6 +8,7 @@ using Assets.Scripts.Dungeon;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
+using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -64,6 +65,8 @@ namespace Assets.Scripts.Rooms
         private VisualElement _turnOrder;
         private VisualElement _turnOrderList;
 
+        private Label _navHint;
+
         private VisualElement _victoryWindow;
         private Label _victoryTitle;
         private VisualElement _victoryRewards;
@@ -98,6 +101,15 @@ namespace Assets.Scripts.Rooms
         private readonly List<Label> _commandCursors = new List<Label>();
         private int _selectedCommand;
 
+        // Walking the dungeon from the keyboard: the arrows point at doors, Tab reaches the room bar.
+        private readonly List<Door> _navDoors = new List<Door>();
+        private readonly List<Vector2> _navDoorPoints = new List<Vector2>();
+        private Door _selectedDoor;
+        private bool _doorsLive;
+        private KeyboardNavigator _barNav;
+        private KeyboardNavigator _combatNav;
+        private KeyboardNavigator _eventNav;
+
         private bool EnsureRefs()
         {
             if (_refsReady)
@@ -131,6 +143,7 @@ namespace Assets.Scripts.Rooms
             _victoryTitle = root.Q<Label>("victory-title");
             _victoryRewards = root.Q<VisualElement>("victory-rewards");
             _victoryContinue = root.Q<Button>("victory-continue");
+            _navHint = root.Q<Label>("nav-hint");
 
             _heroTitle = root.Q<Label>("hero-title");
             _detailTitle = root.Q<Label>("detail-title");
@@ -202,11 +215,33 @@ namespace Assets.Scripts.Rooms
             root.RegisterCallback<KeyDownEvent>(OnCombatHotkey);
             root.focusable = true;
 
+            // Tab-driven cursor for the room bar, so Search/Rest/Rescue/Descend are reachable without
+            // the mouse while the arrow keys stay free for the doors. Scoped to the bar itself: it
+            // must never wander onto a combat button.
+            _barNav = new KeyboardNavigator(_mainBar);
+
+            // Fight/Flee is a bar like any other. It kept its F/R letters, but a player who has just
+            // learnt that arrows-and-Enter drive the room, the command menu and the whole hub should
+            // not have to discover that this one bar is different.
+            _combatNav = new KeyboardNavigator(_combatBar);
+
+            // The event window builds its options at runtime, so its cursor navigates whatever is on
+            // it rather than a fixed list. Escape leaves by its own Back button, so the keyboard route
+            // out runs the same teardown a click does.
+            _eventNav = new KeyboardNavigator(_eventWindow);
+            _eventNav.Cancelled += () =>
+            {
+                if (IsShown(_eventBack))
+                {
+                    KeyboardNavigator.Press(_eventBack);
+                }
+            };
+
             // While the command menu is up, swallow UI Toolkit's built-in navigation so it can't
             // blur/steal keyboard focus off the root after the first arrow (our cursor nav owns it).
-            root.RegisterCallback<NavigationMoveEvent>(evt => { if (IsShown(_heroBar)) { evt.StopPropagation(); } });
-            root.RegisterCallback<NavigationSubmitEvent>(evt => { if (IsShown(_heroBar)) { evt.StopPropagation(); } });
-            root.RegisterCallback<NavigationCancelEvent>(evt => { if (IsShown(_heroBar)) { evt.StopPropagation(); } });
+            root.RegisterCallback<NavigationMoveEvent>(evt => { if (OwnsNavigationKeys()) { evt.StopPropagation(); } });
+            root.RegisterCallback<NavigationSubmitEvent>(evt => { if (OwnsNavigationKeys()) { evt.StopPropagation(); } });
+            root.RegisterCallback<NavigationCancelEvent>(evt => { if (OwnsNavigationKeys()) { evt.StopPropagation(); } });
 
             HideAll();
             _refsReady = true;
@@ -229,6 +264,7 @@ namespace Assets.Scripts.Rooms
 
             bool hasEnemy = room.Enemies.Any(e => e != null && e.IsAlive);
             SetShown(_combatBar, hasEnemy);
+            _combatNav?.Reset();
 
             // A captive is only reachable once the room is clear - guards first. With enemies up the
             // room bar is irrelevant anyway; without them, ShowMainBar decides whether there is
@@ -277,6 +313,7 @@ namespace Assets.Scripts.Rooms
             {
                 room.EnableAllDoors();
                 SubscribeDoors();
+                FocusRoot();
             }
         }
 
@@ -400,6 +437,7 @@ namespace Assets.Scripts.Rooms
                 _eventOptions.Add(btn);
             }
 
+            _eventNav?.Reset();
             SetShown(_eventWindow, true);
         }
 
@@ -540,6 +578,7 @@ namespace Assets.Scripts.Rooms
 
         private void OnEventBack()
         {
+            _eventNav?.Reset();
             SetShown(_eventWindow, false);
             _eventOptions.Clear();
             _currentEvent = null;
@@ -1090,21 +1129,6 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>Direct letter-key shortcut: acts only if that command is currently enabled.</summary>
-        private void InvokeCommandShortcut(HeroCommand command)
-        {
-            foreach (var entry in _commands)
-            {
-                if (entry.Command == command)
-                {
-                    if (entry.Enabled)
-                    {
-                        InvokeCommand(command);
-                    }
-                    return;
-                }
-            }
-        }
-
         private void InvokeCommand(HeroCommand command)
         {
             switch (command)
@@ -1180,22 +1204,32 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Keyboard shortcuts mirroring the combat buttons. Each key only acts when its bar is
-        /// visible, and only invokes actions whose buttons are currently shown (e.g. Magic/Draw
-        /// appear conditionally), so a hotkey can never do something the on-screen menu can't.
+        /// The whole keyboard for this panel, dispatched by which bar is up: Fight/Flee on the combat
+        /// bar, the hero command cursor and its letter shortcuts on the command bar, and otherwise the
+        /// dungeon keys - arrows for doors, Tab for the room bar. A key only ever acts when its bar is
+        /// visible, and only invokes actions whose buttons are currently shown (Magic/Draw appear
+        /// conditionally), so a hotkey can never do something the on-screen menu cannot.
         /// </summary>
         private void OnCombatHotkey(KeyDownEvent evt)
         {
+            // Dialogs first: whatever is stacked over the room owns the keyboard while it is up.
+            if (HandleDialogKey(evt))
+            {
+                evt.StopPropagation();
+                return;
+            }
+            if (IsDialogUp())
+            {
+                // A dialog is up but did not want this key - it must not fall through to the room.
+                return;
+            }
+
             if (IsShown(_combatBar))
             {
-                if (evt.keyCode == KeyCode.F)
+                // Arrows/Tab move along the bar, Enter presses. Flee is hidden in a boss room, so the
+                // cursor cannot reach a way out the fight does not offer.
+                if (_combatNav != null && _combatNav.HandleKey(evt))
                 {
-                    OnFight();
-                    evt.StopPropagation();
-                }
-                else if (evt.keyCode == KeyCode.R)
-                {
-                    OnFlee();
                     evt.StopPropagation();
                 }
                 return;
@@ -1220,33 +1254,310 @@ namespace Assets.Scripts.Rooms
                         ConfirmCommand();
                         evt.StopPropagation();
                         break;
-                    // Direct letter shortcuts (act only if that command is enabled).
-                    case KeyCode.A:
-                        InvokeCommandShortcut(HeroCommand.Attack);
-                        evt.StopPropagation();
-                        break;
-                    case KeyCode.M:
-                        InvokeCommandShortcut(HeroCommand.Magic);
-                        evt.StopPropagation();
-                        break;
-                    case KeyCode.D:
-                        InvokeCommandShortcut(HeroCommand.Draw);
-                        evt.StopPropagation();
-                        break;
-                    case KeyCode.T:
-                        InvokeCommandShortcut(HeroCommand.Item);
-                        evt.StopPropagation();
-                        break;
-                    case KeyCode.I:
-                        InvokeCommandShortcut(HeroCommand.Inspect);
-                        evt.StopPropagation();
-                        break;
-                    case KeyCode.S:
-                        InvokeCommandShortcut(HeroCommand.Skip);
-                        evt.StopPropagation();
-                        break;
+                }
+                return;
+            }
+
+            if (DoorNavActive() && HandleDungeonKey(evt))
+            {
+                evt.StopPropagation();
+            }
+        }
+
+        /// <summary>Whether a window is stacked over the room, dialog-style.</summary>
+        private bool IsDialogUp()
+        {
+            return IsShown(_victoryWindow) || IsShown(_eventWindow) || IsShown(_detailWindow);
+        }
+
+        /// <summary>
+        /// The keyboard for the windows that stack over the room. Without these a player who searched
+        /// a cache or opened an event with the keyboard would have to reach for the mouse to get out
+        /// of the dialog, which defeats the point of the rest of it.
+        /// </summary>
+        private bool HandleDialogKey(KeyDownEvent evt)
+        {
+            if (IsShown(_victoryWindow))
+            {
+                // Nothing to choose on a spoils screen, so every confirm or cancel key dismisses it.
+                switch (evt.keyCode)
+                {
+                    case KeyCode.Return:
+                    case KeyCode.KeypadEnter:
+                    case KeyCode.Space:
+                    case KeyCode.Escape:
+                    case KeyCode.Backspace:
+                        OnVictoryContinue();
+                        return true;
+                }
+                return false;
+            }
+
+            if (IsShown(_eventWindow))
+            {
+                return _eventNav != null && _eventNav.HandleKey(evt);
+            }
+
+            if (IsShown(_detailWindow))
+            {
+                switch (evt.keyCode)
+                {
+                    case KeyCode.Return:
+                    case KeyCode.KeypadEnter:
+                    case KeyCode.Space:
+                        _detailOkAction?.Invoke();
+                        return true;
+                    case KeyCode.Escape:
+                    case KeyCode.Backspace:
+                        // Only a dialog that is actually offering a way out has one; a statement with a
+                        // single OK is dismissed by Escape too rather than trapping the player.
+                        if (_detailCancel != null && IsShown(_detailCancel))
+                        {
+                            _detailCancelAction?.Invoke();
+                        }
+                        else
+                        {
+                            _detailOkAction?.Invoke();
+                        }
+                        return true;
+                }
+                return false;
+            }
+
+            return false;
+        }
+
+        // ============================================================
+        //  WALKING THE DUNGEON FROM THE KEYBOARD
+        // ============================================================
+
+        /// <summary>
+        /// Keeps the keyboard hint in step with what the keys currently do. Driven from Update rather
+        /// than from the dozen places that swap a bar or open a window: the line is derived from what
+        /// is on screen, and re-deriving it each frame cannot fall out of sync the way a dozen call
+        /// sites can.
+        /// </summary>
+        private void Update()
+        {
+            if (!_refsReady)
+            {
+                return;
+            }
+
+            // Clicking anything that is not UI - a door, a wall, the floor - clears the EventSystem's
+            // selection and with it the keyboard. Re-claiming here costs a null check and means the
+            // arrows cannot go dead halfway across a floor the player is walking with the mouse.
+            PanelKeyboard.Claim();
+
+            // Fight/Flee is a question, so it carries its cursor from the moment it appears - the
+            // command menu already does, and Enter should not need an arrow press to wake it up.
+            // Armed here rather than where the bar is shown because on that frame the bar's resolved
+            // style is still stale and there would be nothing to select.
+            if (IsShown(_combatBar))
+            {
+                _combatNav?.SelectFirst();
+            }
+
+            var text = NavHintText();
+            SetShown(_navHint, text != null);
+            if (text != null && _navHint != null && _navHint.text != text)
+            {
+                _navHint.text = text;
+            }
+        }
+
+        /// <summary>
+        /// What the keys do right now, or null when there is nothing worth saying. The dialogs are
+        /// deliberately silent: Enter dismisses them and a line under a modal is noise.
+        /// </summary>
+        private string NavHintText()
+        {
+            if (IsDialogUp())
+            {
+                return null;
+            }
+
+            if (IsShown(_combatBar))
+            {
+                return "← → choose · Enter confirm";
+            }
+
+            if (IsShown(_heroBar))
+            {
+                return "↑↓ choose · Enter confirm";
+            }
+
+            if (DoorNavActive())
+            {
+                return "Arrows pick a door · Enter walk through · Tab room actions";
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Whether this panel is driving the arrow keys itself, and so must swallow UI Toolkit's own
+        /// focus navigation - one arrow through that would move focus off the root and the next key
+        /// would never arrive.
+        /// </summary>
+        private bool OwnsNavigationKeys()
+        {
+            return IsShown(_heroBar) || IsShown(_combatBar) || IsDialogUp() || DoorNavActive();
+        }
+
+        /// <summary>
+        /// Whether the arrow keys currently mean "pick a door". Doors being subscribed is the same
+        /// condition as being able to walk through one, but a dialog on top of the room owns the
+        /// keyboard while it is up - an arrow key must not move the party out from under an open
+        /// event window.
+        /// </summary>
+        private bool DoorNavActive()
+        {
+            return _doorsLive
+                && !IsShown(_combatBar) && !IsShown(_heroBar)
+                && !IsShown(_detailWindow) && !IsShown(_eventWindow) && !IsShown(_victoryWindow);
+        }
+
+        /// <summary>
+        /// The out-of-combat keyboard: arrows point at a door, Enter walks through it, and Tab reaches
+        /// the room bar instead. Two cursors share Enter, and the split is unambiguous because it is
+        /// the last thing the player touched that decides - an arrow key always hands Enter back to
+        /// the doors.
+        /// </summary>
+        private bool HandleDungeonKey(KeyDownEvent evt)
+        {
+            switch (evt.keyCode)
+            {
+                case KeyCode.UpArrow:
+                    MoveDoorCursor(new Vector2(0f, 1f));
+                    return true;
+                case KeyCode.DownArrow:
+                    MoveDoorCursor(new Vector2(0f, -1f));
+                    return true;
+                case KeyCode.LeftArrow:
+                    MoveDoorCursor(new Vector2(-1f, 0f));
+                    return true;
+                case KeyCode.RightArrow:
+                    MoveDoorCursor(new Vector2(1f, 0f));
+                    return true;
+                case KeyCode.Tab:
+                    return _barNav != null && _barNav.HandleKey(evt);
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Space:
+                    if (_barNav != null && _barNav.HasSelection)
+                    {
+                        return _barNav.HandleKey(evt);
+                    }
+                    return ConfirmDoor();
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Moves the door cursor. World space, so "up" is +y - unlike the UI cursors, which run in UI
+        /// Toolkit's y-down space.
+        ///
+        /// <para>With no door picked yet the arrow is measured from where the party is standing rather
+        /// than from the room's centre, so the first press means "the door that way from us". If
+        /// nothing lies that way at all, the nearest door is taken instead: a first arrow press that
+        /// appears to do nothing reads as the feature being missing.</para>
+        /// </summary>
+        private void MoveDoorCursor(Vector2 direction)
+        {
+            _barNav?.Reset();
+
+            _navDoorPoints.Clear();
+            int from = -1;
+            for (int i = 0; i < _navDoors.Count; i++)
+            {
+                _navDoorPoints.Add(_navDoors[i].transform.position);
+                if (_navDoors[i] == _selectedDoor)
+                {
+                    from = i;
                 }
             }
+            if (_navDoorPoints.Count == 0)
+            {
+                return;
+            }
+
+            if (from >= 0)
+            {
+                int next = DirectionalNav.PickInDirection(_navDoorPoints, from, direction);
+                if (next >= 0)
+                {
+                    SetDoorCursor(_navDoors[next]);
+                }
+                return;
+            }
+
+            var origin = PartyPosition();
+            int target = DirectionalNav.PickInDirection(_navDoorPoints, origin, direction);
+            SetDoorCursor(_navDoors[target >= 0 ? target : NearestDoorIndex(origin)]);
+        }
+
+        private Vector2 PartyPosition()
+        {
+            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
+            if (party != null)
+            {
+                return party.transform.position;
+            }
+            return _currentRoom != null ? (Vector2)_currentRoom.GetCenter() : Vector2.zero;
+        }
+
+        private int NearestDoorIndex(Vector2 origin)
+        {
+            int nearest = 0;
+            float best = float.MaxValue;
+            for (int i = 0; i < _navDoorPoints.Count; i++)
+            {
+                float distance = (_navDoorPoints[i] - origin).sqrMagnitude;
+                if (distance < best)
+                {
+                    best = distance;
+                    nearest = i;
+                }
+            }
+            return nearest;
+        }
+
+        private void SetDoorCursor(Door door)
+        {
+            if (_selectedDoor == door)
+            {
+                return;
+            }
+            if (_selectedDoor != null)
+            {
+                _selectedDoor.SetHighlighted(false);
+            }
+            _selectedDoor = door;
+            if (_selectedDoor != null)
+            {
+                _selectedDoor.SetHighlighted(true);
+            }
+        }
+
+        private void ClearDoorCursor()
+        {
+            SetDoorCursor(null);
+        }
+
+        /// <summary>Walks through the door under the cursor - the same path a click on it takes.</summary>
+        private bool ConfirmDoor()
+        {
+            var door = _selectedDoor;
+            if (door == null)
+            {
+                return false;
+            }
+
+            ClearDoorCursor();
+            OnDoorSelected(door);
+            return true;
         }
 
         private static bool IsShown(VisualElement element)
@@ -1265,6 +1576,8 @@ namespace Assets.Scripts.Rooms
             {
                 _root.Focus();
             }
+            // UI Toolkit focus alone does not make the OS keyboard arrive - see PanelKeyboard.
+            PanelKeyboard.Claim();
         }
 
         // ============================================================
@@ -1538,14 +1851,28 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
+
+            _navDoors.Clear();
             foreach (var door in _currentRoom.Doors)
             {
+                if (door == null)
+                {
+                    continue;
+                }
                 door.OnDoorClicked += OnDoorSelected;
+                _navDoors.Add(door);
             }
+            // The doors being subscribed is exactly the state in which walking through one is legal,
+            // so it is also the state in which the arrow keys point at them.
+            _doorsLive = _navDoors.Count > 0;
         }
 
         private void UnsubscribeDoors()
         {
+            ClearDoorCursor();
+            _doorsLive = false;
+            _navDoors.Clear();
+
             if (_currentRoom == null)
             {
                 return;
@@ -1587,6 +1914,9 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void ShowMainBar()
         {
+            // The bar is rebuilt button-by-button below; whatever the Tab cursor was on may be about
+            // to be hidden, so it starts over.
+            _barNav?.Reset();
             RefreshRescueButton();
             RefreshActionButton();
             RefreshPayloadButtons();
