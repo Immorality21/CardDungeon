@@ -1376,12 +1376,53 @@
 }
 
 /* ---- Home window sizing ---- */
-/* Home stacks nine menu buttons plus the purse. At the shared 62% cap the flex layout
+/* Home stacks ten menu buttons plus the purse. At the shared 62% cap the flex layout
    ran out of room and squeezed the last child to zero height, so Gold/Essence rendered outside
-   the frame. The purse must never be the row that gives way, and the window needs the headroom. */
+   the frame. The purse must never be the row that gives way, and the window needs the headroom.
+   Measured in play mode (2026-09-01): the content is 799.5 units against this 884.4 cap, so there
+   is room for roughly ONE more button. Do not raise the cap much past 88% to buy more - .cd-window
+   also carries margin-bottom: 8%, so 92% puts the frame against the top edge. */
 
 .cd-window--tall {
     max-height: 88%;
+}
+
+/* ---- Options: stepped dials ----
+   The volume rows are buttons rather than a UITK Slider on purpose: the hub's keyboard cursor
+   navigates buttons, so a slider would be a hole in a screen the player is meant to be able to
+   reach without a mouse. A step is 10% — see AudioOptions.Step. */
+
+.cd-option-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+}
+
+.cd-option-label {
+    flex-grow: 1;
+    color: var(--cd-text-dark);
+    font-size: 18px;
+    -unity-font-style: bold;
+}
+
+.cd-option-value {
+    width: 70px;
+    color: var(--cd-text-dark);
+    font-size: 18px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* A square nudge button. Fixed width so the two sit either side of the readout without the row
+   reflowing as the number changes width (9% and 100% are different sizes). */
+.cd-button--step {
+    width: 52px;
+    height: 40px;
+    margin-top: 0;
+    padding: 0;
+    font-size: 22px;
+    -unity-text-align: middle-center;
 }
 
 /* ============================================================

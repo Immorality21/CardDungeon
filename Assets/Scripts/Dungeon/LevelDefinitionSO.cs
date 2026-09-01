@@ -27,5 +27,13 @@ namespace Assets.Scripts.Dungeon
         [Tooltip("Optional per-level combat backdrop. When set, the battle stage uses this instead " +
                  "of the default Resources background — lets each level/biome look distinct.")]
         public Sprite CombatBackground;
+
+        [Tooltip("Optional per-level music while walking the floor. When set it wins over the " +
+                 "MusicBank's Exploration track, so a biome can sound distinct as well as look it.")]
+        public AudioClip ExplorationMusic;
+
+        [Tooltip("Optional per-level combat music. When set it wins over the MusicBank's Combat " +
+                 "track. Boss fights ignore it and use the bank's BossCombat track.")]
+        public AudioClip CombatMusic;
     }
 }

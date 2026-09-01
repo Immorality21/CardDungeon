@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Scripts.Combat.Audio
+namespace Assets.Scripts.Audio
 {
     /// <summary>
     /// Maps each <see cref="CombatSound"/> event to one or more interchangeable clips (a random

@@ -229,6 +229,27 @@ Hard-won gotchas (each cost a failed compile until learned):
 
 ---
 
+## Screenshotting a **UI Toolkit** screen — `ScreenCapture.CaptureScreenshot` + the Read tool
+
+`Capture2DScene` renders its own orthographic view of a **world-space** rectangle, so it cannot see
+a UITK panel at all — the hub, the room bar and the command menu are screen-overlay UI and come back
+absent from every frame it takes. For those, capture the **game view** from inside a `RunCommand` and
+then read the file:
+
+```csharp
+ScreenCapture.CaptureScreenshot("<scratchpad>/options.png");   // play mode
+```
+
+The write completes at end of frame, so **request it in one command and read the file in the next**
+(the read is just the ordinary `Read` tool on the PNG path — it comes back as an image). Verified
+2026-09-01 on the hub's home and Options screens; this is how the ten-button home layout was
+confirmed to still fit. Pair it with a geometry dump (`element.worldBound`) for the numbers, because
+a screenshot will not tell you how much headroom is left.
+
+**A `display: none` subtree reports stale/zero `worldBound`s**, and a `SetShown` in the *same* command
+has not been laid out yet — so switch the view in one command and measure in the next, or you will
+"discover" a layout overflow that is really an unresolved layout.
+
 ## `Unity_SceneView_Capture2DScene` — the screenshot that works
 
 Earlier attempts to capture the scene view came back **blank white**. The fix: this tool

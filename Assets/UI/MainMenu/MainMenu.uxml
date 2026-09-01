@@ -16,6 +16,7 @@
             <ui:Button name="party-btn" text="Party" class="cd-menu-button" />
             <ui:Button name="grid-btn" text="Sphere Grid" class="cd-menu-button" />
             <ui:Button name="bestiary-btn" text="Bestiary" class="cd-menu-button" />
+            <ui:Button name="options-btn" text="Options" class="cd-menu-button" />
             <ui:VisualElement class="cd-currency-row">
                 <ui:Label name="home-gold" text="Gold: 0" />
                 <ui:Label name="home-essence" text="Essence: 0" />
@@ -202,6 +203,36 @@
             <ui:Label name="campaign-hint" text="Drag pan · Scroll zoom · Click a run · Esc back" class="cd-info-label cd-hint" />
             <ui:Label name="campaign-feedback" text="" class="cd-feedback" />
             <ui:Button name="campaign-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- OPTIONS (audio). Stepped buttons rather than sliders so the hub's keyboard cursor,
+             which navigates buttons, can reach every control. -->
+        <ui:VisualElement name="options-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label text="Options" class="cd-title" />
+
+            <ui:Label text="Audio" class="cd-subtitle" />
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="Master" class="cd-option-label" />
+                <ui:Button name="master-down" text="-" class="cd-button cd-button--step" />
+                <ui:Label name="master-value" text="" class="cd-option-value" />
+                <ui:Button name="master-up" text="+" class="cd-button cd-button--step" />
+            </ui:VisualElement>
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="Music" class="cd-option-label" />
+                <ui:Button name="music-down" text="-" class="cd-button cd-button--step" />
+                <ui:Label name="music-value" text="" class="cd-option-value" />
+                <ui:Button name="music-up" text="+" class="cd-button cd-button--step" />
+            </ui:VisualElement>
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="Sound Effects" class="cd-option-label" />
+                <ui:Button name="sfx-down" text="-" class="cd-button cd-button--step" />
+                <ui:Label name="sfx-value" text="" class="cd-option-value" />
+                <ui:Button name="sfx-up" text="+" class="cd-button cd-button--step" />
+            </ui:VisualElement>
+
+            <ui:Button name="options-mute" text="" class="cd-menu-button" />
+            <ui:Label name="options-note" text="" class="cd-info-label cd-hint" />
+            <ui:Button name="options-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
     </ui:VisualElement>

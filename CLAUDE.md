@@ -39,6 +39,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `HeroSaveData`, **the sphere grid** (`SphereGridSO` node-graph assets + `SphereGridOps`, the pure rules — XP is a per-hero bank spent on nodes at the hub; `LevelConfiguration` is gone), and `UI/` (`SphereGridView` — the UITK graph renderer shared by the hub screen and the `Tools ▸ Heroes ▸ Sphere Grid Editor` window — `SphereGridPresenter`, `SphereGridUI`)
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`, **the bestiary** (`EnemyCatalogSO` + the pure `BestiaryPresenter` and `UI/BestiaryLineView`/`UI/BestiaryUI` — what the player has *observed* about each enemy, shown by the in-combat Inspect page and the hub Bestiary screen)
 - `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`
+- `Audio/` — **everything the game plays and the dials that scale it**: combat SFX (`CombatAudio`, `CombatSound`, `SoundBankSO`), the looping music bed (`MusicPlayer`, `MusicTrack`, `MusicBankSO`) and the player's volume/mute settings (`AudioOptions`, `AudioChannel`, `AudioOptionsSaveData` → `savedata/Audio.json`). **No music files exist yet** — the bank is authored and empty, so music is wired and silent until loops are dropped in.
 - `Cards/` — Magic/Draw system (namespace still `Cards`): `MagicSO`, `MagicTag` (enum), `MagicCatalog`, `EquippedMagicState` (draw slots + charges), `EffectResolver`, `ComboDetector`, `CombatBuffTracker`, `MagicTagTracker`, `MagicComboSO`
 - `Cards/Effects/` — Effect executors: `IEffectExecutor`, `DamageEffectExecutor`, `HealEffectExecutor`, `BuffEffectExecutor`, `DebuffEffectExecutor`, `EffectExecutorFactory`
 - `Cards/UI/` — `MagicSelectionUI`, `MagicForgeUI`
@@ -55,6 +56,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automatically when you work on files there. Read the relevant one before changing that area:
 
 - **Combat mechanics** (turn order, damage, `ICombatUnit`) → `Assets/Scripts/Combat/CLAUDE.md`
+- **Audio** (SFX banks, the music bed and its crossfade, volume/mute and where they are applied) → `Assets/Scripts/Audio/CLAUDE.md`
 - **Dungeon generation + combat flow + the room bar + runtime controls** → `Assets/Scripts/Rooms/CLAUDE.md`
 - **Room events** (spawn odds, stat gates, checks, outcome weighting, level afflictions) → `Assets/Scripts/Rooms/Events/CLAUDE.md`
 - **Magic/Draw system** (magic defs, draw slots + charges, effects, combos, buffs) → `Assets/Scripts/Cards/CLAUDE.md`

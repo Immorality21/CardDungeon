@@ -1,4 +1,4 @@
-namespace Assets.Scripts.Combat.Audio
+namespace Assets.Scripts.Audio
 {
     /// <summary>
     /// Semantic combat sound events. Mapped to one or more <c>AudioClip</c>s by the

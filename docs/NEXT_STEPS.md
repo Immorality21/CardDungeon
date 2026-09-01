@@ -963,19 +963,58 @@ many branches and much more freedom in how each hero grows. So:
 
 ### 1. Battle polish (feel & clarity)
 
-The combat *systems* are solid; the presentation is thin. Two structural gaps found in a scan:
-**combat is completely silent** (zero `AudioSource`/`AudioClip`/`PlayOneShot` in `Assets/Scripts`,
-despite unused sound packs in `Assets/Fantasy Interface Sounds/`), and **all motion is procedural**
+The combat *systems* are solid; the presentation is thin. Two structural gaps found in the original
+scan: **combat was completely silent** (zero `AudioSource`/`AudioClip`/`PlayOneShot` anywhere in
+`Assets/Scripts`, despite unused sound packs sitting in `Assets/Fantasy Interface Sounds/` — Tier 1
+below closed this), and **all motion is procedural**
 (lunge / flash / shake / floating text via `CombatFeedback` + `EffectPresenter`; no Animator, so
 sprites are otherwise frozen). Tiered by impact:
 
-- **Tier 1 — Audio.** ✅ *SFX shipped.* `CombatAudio` singleton + `SoundBankSO`
-  (`Resources/CombatSoundBank`) mapping `CombatSound` events → clips from the
-  `Fantasy Interface Sounds` pack; hooked into attack swing/impact, cast, draw, heal, item use,
-  boss signature wind-up, enemy death, victory/defeat, and command-menu cursor/confirm. **Still
-  open:** no **combat music** loop yet (add a looping `AudioSource`/track + `CombatStage`
-  start/stop), and no global volume/mute control. Consider dedicated combat SFX later — the
-  current clips are repurposed interface foley.
+- **Tier 1 — Audio.** ✅ Shipped. SFX first (`CombatAudio` + `SoundBankSO` at
+  `Resources/CombatSoundBank`, mapping `CombatSound` events → clips from the
+  `Fantasy Interface Sounds` pack; hooked into attack swing/impact, cast, draw, heal, item use, boss
+  signature wind-up, enemy death, victory/defeat and command-menu cursor/confirm), then the **music
+  bed and the volume controls** on 2026-09-01.
+
+  **What landed with the music pass.** Audio moved out of `Combat/Audio` into its own subsystem,
+  **`Assets/Scripts/Audio/`** — the bed and the dials serve the hub as much as they serve a fight, so
+  a folder called *Combat* was the wrong home. Three pieces now live there, with their own
+  `CLAUDE.md`:
+  - **`MusicPlayer`** — auto-creating and `DontDestroyOnLoad` (the hub and the dungeon are separate
+    scenes; a bed that restarted on every load would stutter exactly where the game wants continuity).
+    Two `AudioSource`s with a weight each, so every change is a **crossfade** and nothing cuts.
+    Requesting the track already playing is a no-op, and it checks the *track* before picking a clip —
+    a multi-clip track picks at random, so comparing the freshly picked clip would restart the theme
+    on every call, and the call sites fire far more often than the music needs to change.
+  - **`MusicTrack`/`MusicBankSO`** (`Resources/MusicBank`) — `Hub`, `Exploration`, `Combat`,
+    `BossCombat`. No `Victory`/`Defeat` track: those are one-shot stingers and the bed fades out under
+    them, so a member for them would be the dead content this project keeps finding. Per-level
+    overrides via **`LevelDefinitionSO.ExplorationMusic` / `.CombatMusic`**, resolved by
+    **`Dungeon/LevelMusic.cs`** — the same seam `CombatStage` uses for the per-level backdrop, so
+    `MusicPlayer` never learns that a dungeon exists. A boss ignores the level's combat theme and
+    takes the bank's `BossCombat`, because the point of a boss theme is that it is *not* the floor's.
+  - **`AudioOptions`** — Master / Music / SFX + mute, snapped to 10% steps, persisted to
+    `savedata/Audio.json` the moment a dial moves. **Master drives `AudioListener.volume`** (so it
+    scales sounds no channel knows about) and the other two are applied *at the source*, because a
+    listener volume cannot tell a hit from the bed playing under it. Mute is a gate, not a stored
+    zero, so un-muting gives back the dials the player set.
+
+  Reachable from a new hub **Options** screen (`AudioOptionsUI`, `options-view`, tenth button on
+  home). Its dials are **stepped buttons rather than sliders** — the hub's keyboard cursor navigates
+  buttons, so a slider would be unreachable without a mouse. Verified in play mode: the screen opens,
+  the dials move `AudioListener.volume`, mute silences and un-mute restores, the file round-trips, and
+  home still fits (799.5 units against the 88% cap of 884.4 — room for about one more button, now
+  recorded in the USS and the MainMenu guide). Suite **797 passed / 0 failed** (+9:
+  `AudioOptionsTests`).
+
+  **Still open, and the honest part: the project owns no music files.** `MusicBank.asset` is checked
+  in with all four tracks authored and **no clips in any of them**, so every path above works and is
+  silent. Adding music needs no code — drop loops on the bank's four entries, or on a
+  `LevelDefinitionSO` for a floor with a sound of its own. Also open: **a boss theme is game-wide**
+  (per-boss music would want a field on `RunLevelEntry` beside `BossAdds`), and **volume can only be
+  changed in the hub** — there is no in-dungeon pause menu, so a player mid-run cannot reach it. A
+  pause overlay is the natural home for it and for a quit-to-hub. Consider dedicated combat SFX later
+  — the current clips are repurposed interface foley.
 - **Tier 2 — On-field readability & life.** ✅ Shipped. `TurnIndicator` (bobbing arrow over the
   acting unit), `CombatIdleMotion` (scale-based breathing; wounded units breathe harder), and a
   magic **projectile** (`EffectPresenter.FlyProjectile`) so casts read as ranged strikes vs. the
@@ -996,7 +1035,8 @@ sprites are otherwise frozen). Tiered by impact:
 Touch points: `Assets/Scripts/Combat/CombatFeedback.cs`, `Assets/Scripts/Cards/EffectPresenter.cs`,
 `Assets/Scripts/Rooms/CombatManager.cs`, `Assets/Scripts/Combat/UI/UnitHealthBar.cs`,
 `Assets/Scripts/Rooms/UI/RoomActionUI.cs`, `Assets/Scripts/Combat/CombatStage.cs`,
-`Assets/Fantasy Interface Sounds/`.
+`Assets/Scripts/Audio/` (+ its `CLAUDE.md`), `Assets/Scripts/Dungeon/LevelMusic.cs`,
+`Assets/Resources/MusicBank.asset`, `Assets/Fantasy Interface Sounds/`.
 
 ### 2. Room-type variety + in-run choice — ✅ kinds shipped 2026-08-25, branching has not
 

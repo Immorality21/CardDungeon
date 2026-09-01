@@ -1,3 +1,4 @@
+using Assets.Scripts.Audio;
 using Assets.Scripts.Cards.UI;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies.UI;
@@ -14,7 +15,7 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// Main menu (UI Toolkit). Drives a single UIDocument holding the home, run-progress,
-/// run-complete, merchant, tavern, party-select, forge, bestiary and inventory views. Each panel is a plain
+/// run-complete, merchant, tavern, party-select, forge, bestiary, inventory and options views. Each panel is a plain
 /// view-controller operating on its subtree. Run-save and scene-load logic is unchanged from the
 /// prior uGUI version.
 ///
@@ -43,6 +44,7 @@ public class MainMenuManager : MonoBehaviour
     private VisualElement _forgeView;
     private VisualElement _bestiaryView;
     private VisualElement _inventoryView;
+    private VisualElement _optionsView;
 
     private Button _continueButton;
     private Button _newRunButton;
@@ -54,6 +56,7 @@ public class MainMenuManager : MonoBehaviour
     private Button _forgeButton;
     private Button _bestiaryButton;
     private Button _inventoryButton;
+    private Button _optionsButton;
     private Button _backButton;
     private Button _enterButton;
     private Button _returnButton;
@@ -76,6 +79,7 @@ public class MainMenuManager : MonoBehaviour
     private MagicForgeUI _forge;
     private BestiaryUI _bestiary;
     private InventoryHubUI _inventory;
+    private AudioOptionsUI _options;
 
     private FileHandler _fileHandler;
     private RunSaveData _runSaveData;
@@ -117,6 +121,7 @@ public class MainMenuManager : MonoBehaviour
         _forgeView = root.Q<VisualElement>("forge-view");
         _bestiaryView = root.Q<VisualElement>("bestiary-view");
         _inventoryView = root.Q<VisualElement>("inventory-view");
+        _optionsView = root.Q<VisualElement>("options-view");
 
         _continueButton = root.Q<Button>("continue-btn");
         _newRunButton = root.Q<Button>("new-btn");
@@ -128,6 +133,7 @@ public class MainMenuManager : MonoBehaviour
         _forgeButton = root.Q<Button>("forge-btn");
         _bestiaryButton = root.Q<Button>("bestiary-btn");
         _inventoryButton = root.Q<Button>("inventory-btn");
+        _optionsButton = root.Q<Button>("options-btn");
         _backButton = root.Q<Button>("back-btn");
         _enterButton = root.Q<Button>("enter-btn");
         _returnButton = root.Q<Button>("return-btn");
@@ -166,6 +172,10 @@ public class MainMenuManager : MonoBehaviour
             _bestiaryButton.clicked += OnVisitBestiary;
         }
         _inventoryButton.clicked += OnVisitInventory;
+        if (_optionsButton != null)
+        {
+            _optionsButton.clicked += OnVisitOptions;
+        }
 
         _campaignMap = _campaignView != null && _campaign != null
             ? new CampaignMapUI(_campaignView, _campaign)
@@ -177,6 +187,7 @@ public class MainMenuManager : MonoBehaviour
         _forge = new MagicForgeUI(_forgeView);
         _bestiary = _bestiaryView != null ? new BestiaryUI(_bestiaryView) : null;
         _inventory = new InventoryHubUI(_inventoryView, _partyRoster);
+        _options = _optionsView != null ? new AudioOptionsUI(_optionsView) : null;
         if (_campaignMap != null)
         {
             _campaignMap.OnClosed += ShowHomePanel;
@@ -198,8 +209,16 @@ public class MainMenuManager : MonoBehaviour
             _bestiary.OnClosed += ShowHomePanel;
         }
         _inventory.OnClosed += ShowHomePanel;
+        if (_options != null)
+        {
+            _options.OnClosed += ShowHomePanel;
+        }
 
         SetUpKeyboardNavigation();
+
+        // The hub's own bed. Starting it here rather than on the button that leaves the dungeon means
+        // it also covers a fresh launch and a return after a wipe.
+        MusicPlayer.Play(MusicTrack.Hub);
 
         // Initial panel: run complete only when we arrived from clearing the final level.
         if (DungeonManager.ActiveRun == null && string.IsNullOrEmpty(_runSaveData.RunKey) && _justCompletedRun)
@@ -258,7 +277,7 @@ public class MainMenuManager : MonoBehaviour
     {
         return IsShown(_homeView) || IsShown(_progressView) || IsShown(_completeView)
             || IsShown(_merchantView) || IsShown(_tavernView) || IsShown(_partyView)
-            || IsShown(_forgeView);
+            || IsShown(_forgeView) || IsShown(_optionsView);
     }
 
     /// <summary>
@@ -284,6 +303,10 @@ public class MainMenuManager : MonoBehaviour
         if (IsShown(_partyView))
         {
             return _root.Q<Button>("party-close");
+        }
+        if (IsShown(_optionsView))
+        {
+            return _root.Q<Button>("options-close");
         }
         if (IsShown(_forgeView))
         {
@@ -346,6 +369,7 @@ public class MainMenuManager : MonoBehaviour
         SetShown(_forgeView, false);
         SetShown(_bestiaryView, false);
         SetShown(_inventoryView, false);
+        SetShown(_optionsView, false);
         ResetKeyboardNavigation();
 
         bool hasActiveRun = !string.IsNullOrEmpty(_runSaveData.RunKey);
@@ -604,6 +628,17 @@ public class MainMenuManager : MonoBehaviour
     {
         SetShown(_homeView, false);
         _inventory.Show();
+    }
+
+    private void OnVisitOptions()
+    {
+        if (_options == null)
+        {
+            return; // an older scene whose UXML predates the screen
+        }
+        SetShown(_homeView, false);
+        _options.Show();
+        ResetKeyboardNavigation();
     }
 
     private void OnBack()

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
-using Assets.Scripts.Combat.Audio;
+using Assets.Scripts.Audio;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;

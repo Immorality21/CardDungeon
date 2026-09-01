@@ -5,7 +5,7 @@ using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
-using Assets.Scripts.Combat.Audio;
+using Assets.Scripts.Audio;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Enemies.Behaviors;
@@ -320,6 +320,9 @@ namespace Assets.Scripts.Rooms
 
             OnCombatStarted?.Invoke();
 
+            // Swap the floor's bed for a fight (a boss gets its own climax track).
+            LevelMusic.PlayCombat(_currentCombatHadBoss);
+
             // Raise the FF-style battle stage: heroes left, enemies right, over a background
             // that hides the dungeon. Must run before EnsureHealthBars so the bars anchor at
             // the battle positions. One frame lets the formation render before turn 1.
@@ -444,6 +447,9 @@ namespace Assets.Scripts.Rooms
                 outcome = CombatOutcome.PlayerDied;
                 fullLog += "\nYour party has been defeated!";
                 CombatAudio.Play(CombatSound.Defeat);
+                // The bed goes with the party: the defeat stinger and the death screen play out over
+                // silence, and the hub's own track comes up when the menu scene loads.
+                MusicPlayer.Stop(fadeSeconds: 1.5f);
                 // Somber tint that lingers under the death screen (approximates a desaturate).
                 ScreenFade.Instance.FadeTo(new Color(0.06f, 0f, 0.02f), 0.55f, 0.7f);
 
@@ -455,6 +461,9 @@ namespace Assets.Scripts.Rooms
                 outcome = CombatOutcome.Victory;
                 fullLog += "\nAll enemies defeated!";
                 CombatAudio.Play(CombatSound.Victory);
+                // Cut the fight's bed so the win stinger lands in the clear; the floor's theme comes
+                // back when the summary is dismissed (FinishVictory).
+                MusicPlayer.Stop(fadeSeconds: 0.6f);
                 // A quick warm flash to punctuate the win before the summary appears.
                 ScreenFade.Instance.Flash(new Color(1f, 0.92f, 0.55f), 0.5f, 0.06f, 0.4f);
 
@@ -505,6 +514,7 @@ namespace Assets.Scripts.Rooms
         public void FinishVictory()
         {
             CombatStage.Instance.End(restoreEnemyPositions: false);
+            LevelMusic.PlayExploration(); // back out of the fight, back onto the floor's theme
             _lastVictoryRoom?.EnableAllDoors();
         }
 

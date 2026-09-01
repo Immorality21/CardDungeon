@@ -19,6 +19,11 @@ namespace Assets.Scripts.Rooms
             Party = party;
             _roomActionUI = roomActionUI;
             _followParty = true;
+
+            // Both the new-level and the resumed-level paths come through here, so this is the one
+            // place a floor's theme has to start. Asking for the track already playing is a no-op,
+            // so descending into a level with no music of its own keeps the bed running.
+            LevelMusic.PlayExploration();
         }
 
         /// <summary>
