@@ -127,11 +127,16 @@ namespace Assets.Scripts.Audio
                 return;
             }
 
-            // The outgoing bed becomes the back bed and fades away; the incoming one starts silent
-            // and rises, so a swap is never a cut.
-            var incoming = _back;
-            _back = _front;
+            // The outgoing bed fades away and the incoming one starts silent and rises, so a swap is
+            // never a cut. Take the *quieter* bed for the incoming track rather than blindly swapping:
+            // if two swaps land inside one fade (victory's Stop, then the summary's Continue restoring
+            // the floor theme, is well under a second apart), a blind swap would hand the incoming
+            // clip the bed still audibly playing the first track and cut it dead.
+            bool backIsQuieter = IncomingTakesBackBed(_front.Weight, _back.Weight);
+            var incoming = backIsQuieter ? _back : _front;
+            var outgoing = backIsQuieter ? _front : _back;
             _front = incoming;
+            _back = outgoing;
 
             _back.TargetWeight = 0f;
 
@@ -158,6 +163,18 @@ namespace Assets.Scripts.Audio
         {
             _front.TargetWeight = 0f;
             _back.TargetWeight = 0f;
+        }
+
+        /// <summary>
+        /// Which of the two beds should carry an incoming track: the quieter one, because stealing an
+        /// audible bed cuts its clip dead instead of fading it. In the ordinary case the back bed is
+        /// already silent and this is just the obvious swap; it only differs when two swaps land
+        /// inside one fade. Pure so the rule is testable without an <c>AudioSource</c> — see
+        /// <c>AudioOptionsTests</c>.
+        /// </summary>
+        public static bool IncomingTakesBackBed(float frontWeight, float backWeight)
+        {
+            return backWeight <= frontWeight;
         }
 
         private static AudioClip PickClip(MusicBankSO.Entry entry)

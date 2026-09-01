@@ -14,14 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Audio.MusicBankSO
   Entries:
   - Key: 1
-    Volume: 0.5
-    Clips: []
+    Volume: 0.45
+    Clips:
+    - {fileID: 8300000, guid: aee395850b608794eac4c7d33a8c9740, type: 3}
   - Key: 2
-    Volume: 0.5
-    Clips: []
+    Volume: 0.3
+    Clips:
+    - {fileID: 8300000, guid: e382cc2a1502d0146860381a752f2edf, type: 3}
+    - {fileID: 8300000, guid: c855535ae54c34645b18b2770700bd52, type: 3}
   - Key: 3
-    Volume: 0.6
-    Clips: []
+    Volume: 0.5
+    Clips:
+    - {fileID: 8300000, guid: 73eb7e6210e089840962b95189d0d381, type: 3}
+    - {fileID: 8300000, guid: b268ec27e18977342b52a77822c685b0, type: 3}
   - Key: 4
-    Volume: 0.7
-    Clips: []
+    Volume: 0.35
+    Clips:
+    - {fileID: 8300000, guid: 4f0a646d44ae78f4cb218a5cc7017f03, type: 3}

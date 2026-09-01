@@ -71,6 +71,21 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void IncomingTakesBackBed_PicksTheQuieterBed()
+        {
+            // The ordinary swap: one bed is up, the other is silent and free.
+            Assert.IsTrue(MusicPlayer.IncomingTakesBackBed(frontWeight: 1f, backWeight: 0f));
+
+            // Two swaps inside one fade - the front bed only just started, so it is the cheap one to
+            // reuse and the still-loud back bed must be left alone to finish fading. Stealing it would
+            // cut a fully audible track dead, which is what victory-then-Continue used to do.
+            Assert.IsFalse(MusicPlayer.IncomingTakesBackBed(frontWeight: 0f, backWeight: 1f));
+
+            // Ties go to the back bed, so a cold start behaves like the ordinary swap.
+            Assert.IsTrue(MusicPlayer.IncomingTakesBackBed(frontWeight: 0f, backWeight: 0f));
+        }
+
+        [Test]
         public void MusicBank_Get_FindsTheAuthoredTrack()
         {
             var bank = ScriptableObject.CreateInstance<MusicBankSO>();

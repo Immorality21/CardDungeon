@@ -1004,13 +1004,44 @@ sprites are otherwise frozen). Tiered by impact:
   buttons, so a slider would be unreachable without a mouse. Verified in play mode: the screen opens,
   the dials move `AudioListener.volume`, mute silences and un-mute restores, the file round-trips, and
   home still fits (799.5 units against the 88% cap of 884.4 — room for about one more button, now
-  recorded in the USS and the MainMenu guide). Suite **797 passed / 0 failed** (+9:
+  recorded in the USS and the MainMenu guide). Suite **798 passed / 0 failed** (+10:
   `AudioOptionsTests`).
 
-  **Still open, and the honest part: the project owns no music files.** `MusicBank.asset` is checked
-  in with all four tracks authored and **no clips in any of them**, so every path above works and is
-  silent. Adding music needs no code — drop loops on the bank's four entries, or on a
-  `LevelDefinitionSO` for a floor with a sound of its own. Also open: **a boss theme is game-wide**
+  **The music itself landed the same day** — six loops from the *Ultimate Game Music Collection*
+  (John Leonard French): `Tavern LOOP SLOW` for the hub, `Ambient Dungeon LOOP` + `Murky Dungeon LOOP`
+  for floors, `Combat LOOP` + `Tense Combat LOOP` for fights, `Boss LOOP` for the climax — two clips
+  each on the two tracks the player hears most, since the bank picks at random per start and a 15-room
+  floor on one loop goes stale. Verified in play mode across every transition: floor → combat
+  crossfading with both beds live, boss swap, and the way back out picking the *other* exploration
+  clip.
+
+  **From play: "the tavern loop seems a bit quiet" — and the bank could not have fixed it.** The pack
+  does not master consistently. Measured with `ffmpeg ebur128`, the six loops span **−10.7 to −30.3
+  LUFS**: `Boss LOOP` is 5 dB hotter than the combat tracks and `Tavern LOOP SLOW` shipped **15 dB
+  quieter than everything else**, with 14.5 dB of true peak unused. Matching it needed ~6× gain and
+  `Entry.Volume` is `[Range(0f,1f)]`, so **1.0 would not have been enough** — the fix was gain on the
+  *source*, re-encoded from the original WAV at `volume=14dB` (peak −14.5 → −0.7 dBFS, nothing clips),
+  moving it −30.3 → −16.3 LUFS. With the bank retune that is **+16 dB** on where it started. All four
+  volumes were then set against measured loudness rather than intent, which flipped an assumption:
+  **`BossCombat` is now 0.35 against `Combat`'s 0.50 while remaining the loudest thing in the game**,
+  because the old 0.45 was doubling up on an already-hot master. The effective ladder is Exploration
+  −24.8 → Hub −23.2 → Combat −21.9 → Boss −19.8. Numbers and method in
+  `Assets/Scripts/Audio/CLAUDE.md`; the lesson is the same one `BALANCING.md` keeps re-learning —
+  **measure the asset before picking the lever.**
+
+  **Two things that pass came out of are worth keeping.** First, **the sources are OGG, not WAV, and
+  that is a repo decision, not an audio one**: Unity keeps source files in `Assets/` and compresses
+  only for the build, so WAV would have put **72 MB** into a 42 MB repo — transcoded to OGG q6 first
+  it is **8.4 MB**, and the build re-encodes to Vorbis either way. Only ~2% of the 4.7 GB pack is
+  imported; the archive stays in the machine-wide Asset Store cache, because *a download is not an
+  import* and Unity never moves it into the project. Second, driving the transitions live **found a
+  real bug in the crossfade**: `PlayInternal` swapped the two beds blindly, so two swaps inside one
+  fade handed the incoming clip the bed still audibly playing the *first* track and cut it dead —
+  reachable in play, because victory calls `Stop(0.6s)` and dismissing the summary calls
+  `PlayExploration()` well inside that window. It now takes the **quieter** bed
+  (`MusicPlayer.IncomingTakesBackBed`, pure and unit-tested), verified against the exact repro.
+
+  Also open: **a boss theme is game-wide**
   (per-boss music would want a field on `RunLevelEntry` beside `BossAdds`), and **volume can only be
   changed in the hub** — there is no in-dungeon pause menu, so a player mid-run cannot reach it. A
   pause overlay is the natural home for it and for a quit-to-hub. Consider dedicated combat SFX later
