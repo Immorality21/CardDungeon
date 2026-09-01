@@ -2072,3 +2072,42 @@ Touch points (anticipated): `Assets/Scripts/MainMenu/MainMenuManager.cs` + `Asse
 `SphereGridOps.cs`, `Assets/Scripts/Heroes/UI/SphereGridView.cs` (as the hub renderer),
 `Assets/Scripts/Heroes/PartySlots.cs`, `Assets/Scripts/Balance/InvestmentFrontier.cs` /
 `RunCurveModel.cs` / `BalanceRulesSO.cs`, `docs/BALANCING.md` (the early/late band split).
+
+---
+
+### 8. Migrate to the new Input System — *nice to have, not important*
+
+> **Status: considered and deferred (2026-09-01).** Raised while chasing a menu-click bug that
+> turned out to be unrelated. Nothing is broken by staying on legacy input, so this only earns its
+> place if gamepad support or rebindable controls become a goal. Recorded here so the investigation
+> does not have to be repeated.
+
+**Where the project actually is.** Entirely on the legacy Input Manager, uniformly — the earlier
+belief that `MainGameScene` was already on the new system was wrong. Both `MainGameScene` and
+`MenuScene` carry identical EventSystem GameObjects with the same `StandaloneInputModule`,
+`com.unity.inputsystem` is absent from `Packages/manifest.json`, `ProjectSettings.asset` has
+`activeInputHandler: 0`, and no script references `UnityEngine.InputSystem`.
+
+**What it would take.** Small, four steps: add the package; set Active Input Handling (needs an
+editor restart); swap both scenes to `InputSystemUIInputModule` (Unity offers a one-click replace);
+rewrite five call sites — `MainCamera.cs:185-198` (WASD pan) and `MenuManager.cs:35` (Escape).
+
+**The one trap.** `Door.cs:76` uses `OnMouseDown()`, and Unity only sends `OnMouseXXX` under the
+legacy backend — switching to *New only* silently kills mouse navigation through dungeon doors, with
+no error to explain it. Either set Active Input Handling to **Both**, or convert `Door` to a
+`Physics2D.Raycast` from a pointer position. Prefer the conversion: the doors are the only
+world-space mouse input in the game, and "Both" leaves a hidden dependency on a backend nobody
+thinks is in use any more.
+
+**What is *not* at risk.** The keyboard cursor. UI Toolkit's key path does not go through the input
+module at all — `PanelEventHandler.Update()` reads keys straight off the IMGUI queue via
+`Event.PopEvent`, gated only on `isCurrentFocusedPanel`, which is exactly
+`eventSystem.currentSelectedGameObject == selectableGameObject`. That is precisely what
+`PanelKeyboard.Claim()` arranges, so `PanelKeyboard`, `KeyboardNavigator` and every screen built on
+them survive a module swap untouched. (Pointer events *do* go through the module plus
+`PanelRaycaster`; `InputSystemUIInputModule` supports UI Toolkit fine.)
+
+Touch points (anticipated): `Packages/manifest.json`, `ProjectSettings/ProjectSettings.asset`,
+`Assets/Scenes/MainGameScene.unity` + `Assets/Scenes/MenuScene.unity` (EventSystem),
+`Assets/Scripts/ImmoralityGaming/Fundamentals/MainCamera.cs`,
+`Assets/Scripts/ImmoralityGaming/Menu/MenuManager.cs`, `Assets/Scripts/Rooms/Door.cs`.
