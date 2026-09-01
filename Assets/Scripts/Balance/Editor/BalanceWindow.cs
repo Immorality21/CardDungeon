@@ -61,6 +61,18 @@ namespace Assets.Scripts.Balance.Editor
         private bool _needsReanalyze;
         private double _lastAnalyzeSeconds;
 
+        /// <summary>Whether the report on screen was built with the simulated phases included.</summary>
+        private bool _reportIncludesSimulation;
+
+        /// <summary>
+        /// Something changed under a simulated report, and re-measuring it is too expensive to do
+        /// behind the user's back. The numbers stay on screen — stale and labelled — until Re-analyze.
+        /// </summary>
+        private bool _simulationStale;
+
+        /// <summary>The <see cref="BalanceAssetWatcher"/> tick the current report was measured at.</summary>
+        private int _analyzedAssetVersion;
+
         /// <summary>Set by OpenFor(...) so the Levels tab lands on the run you came from.</summary>
         private RunDefinitionSO _focusRun;
 
@@ -148,8 +160,14 @@ namespace Assets.Scripts.Balance.Editor
 
         private void OnFocus()
         {
-            // Assets can be edited elsewhere while this window is open; re-measure on return.
-            _needsReanalyze = true;
+            // Assets can be edited elsewhere while this window is open, so returning to it is the
+            // right moment to re-measure — but only when something actually moved. This used to be
+            // unconditional, which with Simulate on meant paying a ~19s analysis every time the
+            // window was clicked into, almost always to arrive at the identical report.
+            if (BalanceAssetWatcher.Version != _analyzedAssetVersion)
+            {
+                _needsReanalyze = true;
+            }
         }
 
         private void OnGUI()
@@ -193,9 +211,43 @@ namespace Assets.Scripts.Balance.Editor
 
             if (_needsReanalyze && Event.current.type == EventType.Repaint)
             {
-                Analyze();
+                ServicePendingAnalysis();
                 Repaint();
             }
+        }
+
+        /// <summary>
+        /// Acts on a queued re-measure — the automatic path, reached from focus, an inline edit or a
+        /// toolbar toggle.
+        ///
+        /// <para>The rule is that <b>an automatic trigger may never start the simulated phases.</b>
+        /// Without simulation an analysis costs ~130ms, which is inside the "re-measures as you type"
+        /// budget the window is built around. With it, the encounter sims, floor sims and frontier
+        /// sweeps cost ~19s on this project, which is not a re-measure but a hang — and the window was
+        /// spending it on every focus and every keystroke. So a simulated report is left standing and
+        /// flagged stale instead, and the user decides when to pay for a fresh one.</para>
+        ///
+        /// <para>This matches what the Simulate toggle already tells you it is for ("Slower — leave off
+        /// while tuning numbers"): sim off is the tuning loop, sim on is a measurement pass.</para>
+        /// </summary>
+        private void ServicePendingAnalysis()
+        {
+            if (!_needsReanalyze)
+            {
+                return;
+            }
+
+            if (_runSimulation && _report != null)
+            {
+                _needsReanalyze = false;
+                _simulationStale = true;
+                // The asset state is now accounted for: it is recorded as stale rather than measured,
+                // so refocusing does not queue this same decision over and over.
+                _analyzedAssetVersion = BalanceAssetWatcher.Version;
+                return;
+            }
+
+            Analyze();
         }
 
         // ------------------------------------------------------------------ chrome
@@ -259,19 +311,53 @@ namespace Assets.Scripts.Balance.Editor
                 new GUIContent("Read save", "Load the live save files and audit real progression."),
                 EditorStyles.toolbarButton, GUILayout.Width(70f));
             bool simulate = GUILayout.Toggle(_runSimulation,
-                new GUIContent("Simulate", "Run headless battles. Slower — leave off while tuning numbers."),
+                new GUIContent("Simulate", "Run headless battles: encounters, floors and investment "
+                    + "frontiers. Costs seconds, not milliseconds — leave off while tuning numbers. "
+                    + "While it is on, edits mark the report stale instead of re-measuring, so press "
+                    + "Re-analyze when you want fresh simulated numbers."),
                 EditorStyles.toolbarButton, GUILayout.Width(70f));
             if (EditorGUI.EndChangeCheck())
             {
+                bool simulationToggled = simulate != _runSimulation;
                 SetSimulation(simulate);
-                _needsReanalyze = true;
+
+                // Flipping Simulate is an explicit request to change what gets measured, so it
+                // measures now. Routing it through the automatic path would only ever mark a
+                // simulated report stale and never actually run the simulation the user just asked
+                // for.
+                if (simulationToggled)
+                {
+                    Analyze();
+                }
+                else
+                {
+                    _needsReanalyze = true;
+                }
             }
 
             GUILayout.FlexibleSpace();
 
+            if (_simulationStale)
+            {
+                var previous = GUI.color;
+                GUI.color = BalanceGui.TextColorFor(BalanceSeverity.Warning);
+                GUILayout.Label(
+                    new GUIContent("simulated numbers stale",
+                        "Something changed since the last simulated run. The simulation costs seconds, "
+                        + "so it is not re-run automatically — press Re-analyze."),
+                    EditorStyles.miniLabel);
+                GUI.color = previous;
+            }
+
             BalanceGui.SeveritySummary(_report);
 
-            if (GUILayout.Button("Re-analyze", EditorStyles.toolbarButton, GUILayout.Width(80f)))
+            if (GUILayout.Button(
+                    new GUIContent(_simulationStale ? "Re-analyze *" : "Re-analyze",
+                        _runSimulation
+                            ? "Re-measure everything, simulation included. Takes seconds."
+                            : "Re-measure everything."),
+                    EditorStyles.toolbarButton,
+                    GUILayout.Width(84f)))
             {
                 _serializedCache.Clear();
                 Analyze();
@@ -304,7 +390,11 @@ namespace Assets.Scripts.Balance.Editor
 
             GUILayout.FlexibleSpace();
 
-            GUILayout.Label($"analysed in {_lastAnalyzeSeconds * 1000f:0} ms", EditorStyles.miniLabel);
+            string scope = _reportIncludesSimulation ? "with simulation" : "no simulation";
+            string staleness = _simulationStale ? " — stale, press Re-analyze" : "";
+            GUILayout.Label(
+                $"analysed in {_lastAnalyzeSeconds * 1000f:0} ms ({scope}){staleness}",
+                EditorStyles.miniLabel);
             EditorGUILayout.EndHorizontal();
         }
 
@@ -331,13 +421,30 @@ namespace Assets.Scripts.Balance.Editor
             {
                 _rules = BalanceAssetCollector.LoadOrCreateRules(false);
             }
-            if (_report == null)
+            if (_report != null)
             {
-                Analyze();
+                return;
             }
+
+            // Opening the window is not an explicit request to simulate. The toggle is remembered
+            // across sessions, so honouring it here turned "open the Balance window" into a ~19s
+            // stall with nothing on screen to explain it — which is how this was first noticed. Show
+            // the cheap report immediately and let Re-analyze buy the simulated one.
+            Analyze(false);
+            _simulationStale = _runSimulation;
         }
 
+        /// <summary>
+        /// Measures the project, simulated phases included when the toggle asks for them. Only the
+        /// explicit paths call this — the Re-analyze button, the first open, and a toggle that changes
+        /// what is measured. Automatic triggers go through <see cref="ServicePendingAnalysis"/>.
+        /// </summary>
         private void Analyze()
+        {
+            Analyze(_runSimulation);
+        }
+
+        private void Analyze(bool includeSimulation)
         {
             _needsReanalyze = false;
 
@@ -346,10 +453,35 @@ namespace Assets.Scripts.Balance.Editor
                 _rules = BalanceAssetCollector.LoadOrCreateRules(false);
             }
 
-            double start = EditorApplication.timeSinceStartup;
-            var input = BalanceAssetCollector.Collect(_rules, _runSimulation, _includeSaveAudit);
-            _report = BalanceAnalyzer.Analyze(input);
-            _lastAnalyzeSeconds = EditorApplication.timeSinceStartup - start;
+            // The simulated path blocks the editor for seconds, so say so rather than going dark. It
+            // cannot report progress from inside BalanceAnalyzer without threading a callback through
+            // it, but naming the work beats an unexplained freeze.
+            try
+            {
+                if (includeSimulation)
+                {
+                    EditorUtility.DisplayProgressBar(
+                        "Balance",
+                        "Simulating encounters, floors and investment frontiers…",
+                        0.5f);
+                }
+
+                double start = EditorApplication.timeSinceStartup;
+                var input = BalanceAssetCollector.Collect(_rules, includeSimulation, _includeSaveAudit);
+                _report = BalanceAnalyzer.Analyze(input);
+                _lastAnalyzeSeconds = EditorApplication.timeSinceStartup - start;
+            }
+            finally
+            {
+                if (includeSimulation)
+                {
+                    EditorUtility.ClearProgressBar();
+                }
+            }
+
+            _reportIncludesSimulation = includeSimulation;
+            _simulationStale = false;
+            _analyzedAssetVersion = BalanceAssetWatcher.Version;
         }
 
         /// <summary>

@@ -406,6 +406,42 @@ runs hundreds of battles per encounter and is far too slow to re-run per keystro
 
 Nothing is ever auto-applied. Findings carry a `Suggestion` string; acting on it is the designer's call.
 
+### What a re-analysis costs, and who is allowed to start one
+
+Measured on this project (2026-09-01), one `Collect` + `Analyze`:
+
+| Scope | Cost |
+|---|---|
+| Closed-form only (`Simulate` off) | **~130 ms** |
+| \+ encounter and floor simulations | ~5.8 s |
+| \+ investment frontier sweeps | **~18.9 s** |
+
+The frontier sweep dominates because it is a grid: `FrontierPartyWidths` × `FrontierXpSteps` ×
+`FrontierGoldSteps` (4 × 10 × 4 = **160 mixes**) × `FrontierTrials` floor simulations, per run finale.
+That is the price of the question it answers, not a defect — see §"The frontier".
+
+So the window enforces one rule: **only an explicit action may start the simulated phases.** Explicit
+means pressing Re-analyze, or flipping `Simulate` on. Everything else — gaining focus, an inline edit,
+the save-audit toggle, *opening the window* — is automatic, and automatic triggers either run the
+~130 ms closed-form pass or, when a simulated report is already on screen, leave it standing and mark
+it **stale** (toolbar badge + footer) rather than silently spending 19 seconds.
+
+Two supporting pieces:
+
+- **`BalanceAssetWatcher`** ticks a counter on any asset import/delete/move. `OnFocus` only queues a
+  re-measure when that counter has moved, so refocusing the window with nothing changed costs
+  **0 ms**. Before this, focus re-measured unconditionally — with `Simulate` remembered across
+  sessions in `EditorPrefs`, that made every click into the window a ~19 s editor freeze.
+- **Opening the window never simulates**, even with the toggle remembered on. The first report is
+  always the cheap one, flagged stale; otherwise `Tools ▸ Balance ▸ Balance Analyzer` is a 19 s stall
+  with a blank window and nothing to explain it.
+
+If the simulation itself ever needs to be faster, the blocker is `EncounterSimulator`'s use of
+`UnityEngine.Random` (static, main-thread-only, save/restore around each run). Moving to a seeded
+`System.Random` per work item would open the door to `Parallel.For` over the sweep — but it changes
+every simulated number, so it means re-baselining `BalanceRegressionTests` and the findings recorded
+in `docs/BALANCING.md`. Don't do it casually.
+
 ## Stat-agnostic by construction
 
 Nothing in the model enumerates stats by hand any more — everything iterates **`StatCatalog.Types`**
