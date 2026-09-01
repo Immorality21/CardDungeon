@@ -40,10 +40,12 @@ namespace Assets.Scripts.Heroes.UI
 
         // Edge stroke colors are code-side because Painter2D cannot read USS. They mirror the
         // --cd-* theme values in CardDungeon.uss; change them together.
-        private static readonly Color EdgeActivated = new Color(128f / 255f, 204f / 255f, 1f);        // --cd-accent
-        private static readonly Color EdgeAvailable = new Color(135f / 255f, 128f / 255f, 165f / 255f); // --cd-stone-hover
-        private static readonly Color EdgeDim = new Color(58f / 255f, 42f / 255f, 22f / 255f);          // --cd-frame
-        private static readonly Color GhostEdge = new Color(216f / 255f, 198f / 255f, 154f / 255f, 0.7f); // --cd-parchment
+        private static readonly Color EdgeActivated = new Color(205f / 255f, 110f / 255f, 255f / 255f); // --cd-accent
+        private static readonly Color EdgeAvailable = new Color(104f / 255f, 47f / 255f, 165f / 255f);  // --cd-stone-hover
+        private static readonly Color EdgeDim = new Color(91f / 255f, 42f / 255f, 145f / 255f);         // --cd-frame
+        // Gold rather than --cd-parchment: parchment is a near-black ink in this theme, and a drag
+        // line the designer cannot see is worse than no line at all.
+        private static readonly Color GhostEdge = new Color(236f / 255f, 190f / 255f, 72f / 255f, 0.7f); // --cd-gold
 
         private readonly VisualElement _content;
         private readonly Dictionary<string, Button> _buttons = new Dictionary<string, Button>();

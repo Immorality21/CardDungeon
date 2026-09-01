@@ -631,6 +631,8 @@
     flex-direction: row;
     justify-content: center;
     margin-top: 14px;
+    /* Never the row that gives way when the window hits its height cap — see .cd-window--tall. */
+    flex-shrink: 0;
 }
 
 .cd-currency-row > Label {
@@ -1210,6 +1212,176 @@
 .cd-bestiary-row__kills {
     font-size: 13px;
     color: rgb(180, 164, 204);
+}
+
+/* ============================================================
+   Sphere grid — shared graph view (hub screen + editor window)
+
+   Restored after the dark-theme pass dropped the tail of this file; the
+   graph screens render nothing without it (see .sg-viewport / .sg-node).
+   Everything below is expressed in --cd-* tokens so it follows the theme,
+   except the two inset panel fills, which are deliberate blacks.
+   ============================================================ */
+
+/* A wider window: the pannable graph plus its detail panel need more than 620px. */
+.cd-window--wide {
+    width: 1140px;
+}
+
+/* The graph viewport. overflow:hidden clips the pannable content, so nothing can spill
+   out and swallow clicks meant for the buttons beneath it (the ScrollView trap). */
+.sg-viewport {
+    flex-grow: 1;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 6px;
+}
+
+/* The panned/zoomed content plane. transform-origin must be the top-left corner:
+   UITK's default is 50% 50%, which makes scaling orbit the element's center and
+   desyncs the zoom-toward-cursor math. */
+.sg-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: left top;
+}
+
+.sg-node {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    border-width: 3px;
+    border-color: var(--cd-frame);
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cd-stone-disabled);
+    margin: 0;
+    padding: 0;
+}
+
+.sg-node:hover {
+    border-color: var(--cd-accent);
+}
+
+/* Activation states (SphereGridPresenter.StateClass drives these). */
+.sg-node--activated {
+    background-color: var(--cd-accent);
+}
+
+.sg-node--available {
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-accent);
+}
+
+.sg-node--adjacent {
+    background-color: var(--cd-stone);
+}
+
+.sg-node--locked {
+    background-color: var(--cd-stone-disabled);
+    opacity: 0.45;
+}
+
+.sg-node--selected {
+    border-color: var(--cd-text-light);
+    scale: 1.15;
+}
+
+/* Editor connect-mode source highlight. Gold rather than the theme's parchment, which is
+   now a near-black ink and would read as no highlight at all. */
+.sg-node--source {
+    border-color: var(--cd-gold);
+}
+
+/* Kind accents. */
+.sg-node--start {
+    width: 54px;
+    height: 54px;
+    border-radius: 27px;
+    border-width: 4px;
+}
+
+.sg-node__glyph {
+    color: var(--cd-text-light);
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
+}
+
+/* Filled nodes are the theme's brightest surfaces, so their glyph flips to dark ink —
+   --cd-text-dark is itself near-white in this theme and would vanish. */
+.sg-node--activated .sg-node__glyph {
+    color: var(--cd-parchment);
+}
+
+/* Screen layout: graph on the left, always-present detail panel on the right, so the
+   window's size never changes between states (the dock-center hit-test trap). */
+.sg-body {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+    margin-bottom: 8px;
+}
+
+.sg-detail {
+    width: 300px;
+    flex-shrink: 0;
+    margin-left: 10px;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 6px;
+}
+
+/* ---- Campaign map ---- */
+/* The map reuses SphereGridView, so nodes keep the .sg-node geometry and only the state
+   vocabulary differs (CampaignPresenter.StateClasses drives these). Separate class names
+   rather than reusing sg-node--* so the two graphs cannot clear each other's states. */
+
+.cm-node--completed {
+    background-color: var(--cd-accent);
+}
+
+.cm-node--available {
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-accent);
+}
+
+/* The run underway: gold fill so it reads as "you are here" at a glance. */
+.cm-node--active {
+    background-color: var(--cd-gold);
+    border-color: var(--cd-text-light);
+}
+
+.cm-node--locked {
+    background-color: var(--cd-stone-disabled);
+    opacity: 0.45;
+}
+
+/* Optional side branches are outlined rather than filled, so the main line reads first. */
+.cm-node--optional {
+    border-color: var(--cd-stone-hover);
+}
+
+.cm-node--completed .sg-node__glyph,
+.cm-node--active .sg-node__glyph {
+    color: var(--cd-parchment);
+}
+
+/* ---- Home window sizing ---- */
+/* Home stacks nine menu buttons plus the purse. At the shared 62% cap the flex layout
+   ran out of room and squeezed the last child to zero height, so Gold/Essence rendered outside
+   the frame. The purse must never be the row that gives way, and the window needs the headroom. */
+
+.cd-window--tall {
+    max-height: 88%;
 }
 
 /* ============================================================
