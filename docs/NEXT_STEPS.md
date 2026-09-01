@@ -1335,6 +1335,11 @@ Touch points for the **rest** of §2 (the room-*kind* work above, still open):
 - **More Gold sinks to consider** (from the design chat): permanent **hero training** (base-stat
   bumps), run **prep/consumables**, and a death **safety net** (revive / loot-insurance token).
 
+> **Superseded in framing by §7.** The eventual home for every sink here is a **building** that has
+> to be placed and upgraded before it sells anything — the Merchant, the Tavern and the Forge all
+> become gated services rather than permanent buttons. Build sinks now, but prefer ones that a
+> building *level* can later scale (stock rarity, hero tier, upgrade cap) over one-shot purchases.
+
 Touch points: `Assets/Scripts/MainMenu/MerchantUI.cs`, `Assets/Scripts/Items/ShopPricing.cs`,
 `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Cards/UI/MagicForgeUI.cs`.
 
@@ -1893,3 +1898,177 @@ Touch points: `Assets/Scripts/Rooms/Stats.cs`, `Assets/Scripts/Combat/ICombatUni
 `Assets/Scripts/Cards/EffectResolver.cs`, `Assets/Scripts/Rooms/CombatManager.cs` (crit),
 `Assets/Scripts/Balance/BalanceMath.cs`, `HeroStatCalculator.cs`, `SimUnit.cs`, `BalanceRulesSO.cs`,
 `docs/ELEMENTAL_PLAN.md` (`PowerMode`).
+
+### 7. The hub becomes a place — buildings, materials, and a staged unlock of the game
+
+> **Status: outlined, not started (2026-09-01).** This is a direction, not a work item yet. The
+> phases below are ordered so the game is playable after every one of them; the open questions at the
+> end are the ones to settle before Phase 2, because they decide data shapes that are painful to
+> change later.
+
+**The vision.** The main menu stops being a menu and becomes **the hub** — a static, authored 2D
+layout the player looks at, not a column of buttons. You start with a **campfire and four spots
+around it** for heroes, and nothing else. As you go deeper you bring back **raw materials** (wood,
+iron, hide — enemy and room drops, not currency), and you spend them to **place buildings**; later
+you spend again to **upgrade** them. Every service the hub offers today is behind one of those
+buildings: the **Tavern**, the **Forge**, the **Merchant**, the **Inventory**, the **Bestiary**, the
+**sphere grid**. Buildings can also act as **gates on the sphere grid itself**, so a hero's grid is
+not merely expensive to walk but *blocked* until the hub can support it.
+
+The purpose is **pacing control**. The first hours become a designed sequence — one system arrives at
+a time, each one introduced when the player has a reason to want it — and the late game deliberately
+**fans out**, with many buildings, many grid branches and many viable ways to be strong. That split
+is also the answer to a balance problem the tool already has (§5p): tight difficulty bands are the
+right target for a narrow early game and the *wrong* target for a wide late one.
+
+#### Why this is worth doing (and what it fixes)
+
+- **Today every system is available in minute one.** `MainMenuManager` shows nine buttons at once —
+  so many that home had to become `cd-window--tall` (88%) to fit them (see the MainMenu guide). A new
+  player meets the Forge, the sphere grid, the Tavern, gear and the Bestiary simultaneously, and none
+  of them is *about* anything yet because there is no Essence, no XP, no roster and no gear.
+- **It adds the one progression axis the game does not have: content unlock.** Gold, Essence, XP and
+  gear are all *power*. Buildings are **access**, which is the only thing that can make the designer's
+  "not yet" stick. §0g's investment gates say *you are not strong enough*; buildings can say *you do
+  not have this system yet*, which is a much cleaner teaching tool for the opening hours.
+- **It gives loot a second job.** `LootRoller` already scales drops by rarity and depth, and
+  `BestiaryEntry` already records **which loot each enemy has actually dropped** — so "the Cinder Imp
+  drops ember-iron and you need ember-iron for the Forge" is a knowledge loop the game can already
+  display, for free, the day materials exist.
+- **It makes the campfire readable as state.** The four spots are not decoration: they should *be*
+  `PartySlots`. Buying the third slot puts a third hero at the fire. The hub then shows the player's
+  progress at a glance instead of hiding it inside `PartySelectUI`.
+
+#### The four pieces of new machinery
+
+**1. Materials — items, not a currency.** Resist adding `Wood`/`Iron` fields to
+`MetaProgressSaveData` beside `Gold`/`Essence`. Materials are open-ended and per-type, and the item
+system already models exactly this: add **`ItemCategory.Material`** next to `Equipment`/`Consumable`,
+and materials are `ItemSO`s that stack (`MaxStack` already exists), drop through `LootRoller`, live in
+`InventoryManager`, resolve without scene wiring through the Resources `ItemCatalog`, and appear in
+the Bestiary's drop record without a line of new code. `PartyResourceType` (one member,
+`HealingPotion`) is the wrong home — it is the *in-run* consumable belt, and materials are a
+between-runs bank.
+
+**2. `BuildingSO` + `HubSO` + `BuildingOps` — content, progress, rules, in three places.** Follow
+`CampaignSO` exactly, because it solved the same problem: one Resources-loaded asset holds every
+building, its authored position in the hub, its per-level material+gold cost, its unlock requirement
+and which view it opens; **progress lives in the save** (`MetaProgressSaveData.Buildings`, a
+key+level list, same shape as `CompletedRunKeys`) so the asset stays pure content and reads
+differently per save; and all rules live in a pure static `BuildingOps` — the established idiom
+(`CampaignOps`, `SphereGridOps`, `BestiaryOps`, `InventoryOperations`), which is also what makes the
+whole thing EditMode-testable without a MonoBehaviour.
+
+**3. The hub screen — a painted town that buildings phase into.** *(Decided 2026-09-01.)* The
+visual target is the **Heroes of Might & Magic town screen**: one painted backdrop, buildings drawn
+into it at authored positions, each **phasing in** when it is placed. That decides a question this
+section first left open, and it reverses the original recommendation — do **not** build this on
+`SphereGridView`. Two of that widget's three jobs (edges, pan/zoom) are wrong for a fixed town view,
+and the third is not really its own: **`DirectionalNav.PickInDirection`** is a standalone static
+already called by the sphere grid, the campaign map, `KeyboardNavigator` **and** the dungeon's door
+cursor. A new `HubView` calls it directly and owes the graph widget nothing. Keyboard reachability is
+still non-negotiable — `NavigatesCurrentView()` excludes the hub, as it does the map and the grid,
+and the hub drives its own cursor.
+
+What a painted town needs that a node canvas does not:
+
+- **A layered composite ordered by document order.** UI Toolkit has no `z-index` — siblings paint in
+  the order they were added. So `BuildingSO` needs an explicit draw order (or the standard 2D trick,
+  sort by `Position.y`) and `HubView` must add elements in *that* order, never in asset order.
+- **Per-state art on the building, not in the view.** `BuildingSO` carries a sprite per state:
+  **absent** (bare lot, or nothing at all), **available** (foundation/scaffold — the affordance that
+  says *this can be built now*, and the thing that makes a material worth wanting), and one **per
+  level**. `BuildingOps` decides the state, the view only picks the sprite; every rule stays testable
+  without a single asset existing.
+- **"Phase in" is a USS transition, not a new system.** `transition-property: opacity, scale` on the
+  building element plus a class toggled when the build confirms — the theme stylesheet already drives
+  the whole game's look from one file, so the animation is authored where every other visual decision
+  lives. This also means **the build must be confirmed in the hub**, not silently applied on load, or
+  the player never sees the thing the transition exists for.
+- **The town scales as one unit or the art desyncs from the hitboxes.** Positions are authored in the
+  backdrop's own reference space, so backdrop and buildings must live in one fixed-aspect container
+  that scales together — the same reason the map and grid screens are `cd-window--fixed` (a resizing
+  translate-centered window desyncs UITK's hit-testing from what is rendered).
+- **Hit-testing is rectangular.** UITK tests bounding boxes, so overlapping silhouettes steal each
+  other's clicks. Either keep footprints non-overlapping in the layout, or accept the box as the
+  clickable area and author the art to suit it.
+
+**4. Building gates on the sphere grid — cheap in the grid, expensive in the balance model.** The
+node change is small: `RequiredBuildingKey` + `RequiredBuildingLevel` on `SphereGridNode`, and one
+extra clause in `SphereGridOps.CanActivate`, which today is just *reachable && bank >= cost*. **The
+cost is downstream.** `CanActivate` is pure and positional, and `Frontier`, `CheapestFrontierCost`
+and `GreedySpend` all sit on top of it — and `GreedySpend` **is the balance model's spender**
+(`InvestmentFrontier`). The moment the grid gates on buildings, the frontier reports budgets the
+player cannot actually buy unless it models hub state too. Plan for a small context object threaded
+through those five methods rather than a fifth positional argument.
+
+#### What this does to the balance tool (the deliberate part)
+
+This is the point the design is actually making, so state it in `BalanceRulesSO` rather than leaving
+it implicit: **the analyzer's tight bands are an early-game contract, not a whole-game one.**
+
+- **Tiers 1–2 (few buildings, few reachable nodes, few known magics):** the current targets stand —
+  0 critical findings, wipe rates inside the clearable band, difficulty monotonically rising. The
+  possibility space is small enough to actually enumerate, which is what makes those numbers mean
+  something.
+- **Deep tiers (fan-out):** stop judging on wipe-rate bands and judge on **route count** — §5p's
+  finding that "every tier now offers at least two affordable ways to pay" is exactly the right
+  late-game metric, and gear was what turned a checklist into a choice. A deep floor being brutal for
+  one build and easy for another is the *goal*, and the current model reports that as a warning.
+- **The frontier gains a fourth axis.** Party width, grid XP and gold (§5p) become party width, grid
+  XP, gold and **hub state**. Note the danger: buildings are a *hard* axis — you cannot substitute XP
+  for a Forge you have not built — so unlike the other three it is a precondition on the frontier, not
+  a currency inside it.
+- **`RunCurveModel` will need to know which buildings a curve assumes**, the same way it now needs
+  `ReferencePartyGoldBudget`. Default it to "everything built" for general reporting (matching the
+  existing `MaxCap` optimism the user has accepted) and to explicit hub states for frontier work,
+  where the whole question is *which* player can pass.
+
+#### Suggested phases (each one leaves the game playable)
+
+| # | Phase | What lands | Why here |
+|---|---|---|---|
+| 1 | **Materials drop** | `ItemCategory.Material`, a handful of authored materials, drop tables per enemy, Bestiary shows them | Pure addition; nothing gates yet; the drop rates can be measured before anything depends on them |
+| 2 | **Buildings exist, nothing is locked** | `BuildingSO`/`HubSO`/`BuildingOps` + save + tests, **every building pre-built at level 1** | The data model and its rules land under test while the game plays exactly as today |
+| 3 | **The hub replaces home** | `HubView`: painted backdrop, buildings at authored positions with per-state sprites and the phase-in transition; the nine buttons become buildings; campfire seats = `PartySlots` | Migration risk is isolated from gating risk; placeholder art is enough to ship it |
+| 4 | **Turn the gates on** | Campfire only at start; author the first-run unlock sequence (Tavern → Merchant → Forge → …) | The actual design work, done against a hub that already renders |
+| 5 | **Grid gates + frontier axis** | `RequiredBuildingKey` on nodes, hub state threaded through `SphereGridOps`, `InvestmentFrontier` | Needs 4 to be authored before it can be tuned |
+| 6 | **Upgrades** | Building levels change what a screen *offers* — merchant stock rarity, tavern hero tier, forge upgrade cap, campfire seat count — **and what it looks like**: a level is a sprite swap plus the same phase-in | The long tail; each level is a content dial, not new plumbing |
+
+#### Open questions — settle these before Phase 2
+
+1. **Do materials survive a wipe?** They must, and by the same mechanism gold does. `AwardLevelClear`
+   banks a floor's gold the moment its exit room clears and `DiscardPendingGold` only forfeits the
+   current floor — materials should ride the identical path. Anything else turns buildings into the
+   death penalty §3b explicitly rejected.
+2. **Materials or gold — which pays for what?** Recommendation: **materials gate *whether*, gold gates
+   *when*.** Placing a building needs a material only found at a certain depth (so it is a
+   progression gate); upgrading it costs gold (so gold keeps the tuition role §3b gave it, and §3's
+   "more gold sinks" is answered by a sink that scales forever).
+3. **Are the campfire's four spots real?** Recommendation: yes — they are `PartySlots`, and buying
+   the next slot is done *at the campfire* rather than inside `PartySelectUI`.
+4. **Does the campaign map become a building?** Recommendation: no. It is the way *out*, not a
+   service — it stays a permanent fixture of the hub (a road, a gate), always available, because
+   `CampaignAssetTests.Campaign_NeverStrandsASaveWithNothingToPlay` encodes the rule that a save must
+   always have something to play. **A building must never be able to lock the player out of running.**
+5. **One scene or two?** Recommendation: one — this is a view swap inside `MenuScene`, not a new
+   scene. Every hub screen already lives in a single `UIDocument` that toggles eleven views.
+6. **What happens to the Bestiary and Inventory?** They are *knowledge* and *your own bag* rather than
+   services someone provides — plausibly they should never be gated at all, and be reachable from the
+   campfire from minute one. Decide before Phase 4 authoring.
+7. **What is the placeholder art plan?** The town is the first part of this game that cannot ship on
+   flat-color UITK panels, and art is the long pole. Recommendation: author the **sprite fields on
+   `BuildingSO` from Phase 2** and fill them with flat silhouettes (or generated pixel-art
+   placeholders) so Phases 3–5 are playable and testable before any real art exists — the same
+   discipline that keeps `BuildingOps` free of `Sprite` references. Decide the backdrop's reference
+   resolution at the same time, because every authored `Position` is expressed in it and changing it
+   later moves every building.
+
+Touch points (anticipated): `Assets/Scripts/MainMenu/MainMenuManager.cs` + `Assets/UI/MainMenu/MainMenu.uxml`
+(+ its setup bootstrap), a new `Assets/Scripts/Hub/` (`BuildingSO`, `HubSO`, `BuildingOps`),
+`Assets/Scripts/Progression/MetaProgressSaveData.cs` + `MetaProgressManager.cs`,
+`Assets/Scripts/Items/ItemCategory.cs` / `ItemSO.cs` / `LootRoller.cs` / `InventoryManager.cs`,
+`Assets/Scripts/Enemies/EnemySO.cs` (material drop tables), `Assets/Scripts/Heroes/SphereGridSO.cs` +
+`SphereGridOps.cs`, `Assets/Scripts/Heroes/UI/SphereGridView.cs` (as the hub renderer),
+`Assets/Scripts/Heroes/PartySlots.cs`, `Assets/Scripts/Balance/InvestmentFrontier.cs` /
+`RunCurveModel.cs` / `BalanceRulesSO.cs`, `docs/BALANCING.md` (the early/late band split).
