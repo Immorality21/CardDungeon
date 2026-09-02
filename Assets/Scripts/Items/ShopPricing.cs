@@ -67,22 +67,33 @@ namespace Assets.Scripts.Items
             return Mathf.Max(25, Mathf.RoundToInt(score / 5f) * 5);
         }
 
+        /// <summary>
+        /// Base gold for a rarity, before <see cref="LevelStep"/> scales it by item level.
+        ///
+        /// <para><b>Raised ~10% on 2026-09-02</b>, from 20/45/90/180/350. Gear measured as roughly
+        /// 2.4x the survivability per investment point that the sphere grid buys
+        /// (<c>docs/BALANCING.md</c> §5p), and the call was that the *items* are about right and the
+        /// *rate* was wrong - so almost all of that correction lives in
+        /// <c>BalanceRulesSO.InvestmentPointsPerGold</c> and only a light nudge lives here. Rounded to
+        /// readable numbers rather than exact multiples: a shop price the player reads is worth more
+        /// than a tenth of a gold piece of precision.</para>
+        /// </summary>
         private static int RarityBaseCost(ItemRarity rarity)
         {
             switch (rarity)
             {
                 case ItemRarity.Common:
-                    return 20;
+                    return 22;
                 case ItemRarity.Uncommon:
-                    return 45;
+                    return 50;
                 case ItemRarity.Rare:
-                    return 90;
+                    return 100;
                 case ItemRarity.Epic:
-                    return 180;
+                    return 200;
                 case ItemRarity.Legendary:
-                    return 350;
+                    return 385;
                 default:
-                    return 20;
+                    return 22;
             }
         }
     }

@@ -259,14 +259,16 @@ namespace Assets.Scripts.Balance
                  "way to pay for depth, beside a party slot and grid XP, and unlike XP it is a " +
                  "*between-run* axis: equipping happens only at the hub, so a loadout is fixed for a " +
                  "whole run. The ladder should top out near a full loadout for the widest party - " +
-                 "past that the axis saturates because there is nothing left to buy.")]
-        public List<int> FrontierGoldSteps = new List<int> { 0, 350, 700, 1050 };
+                 "past that the axis saturates because there is nothing left to buy. A full loadout " +
+                 "is about 1025g per hero, so the top step covers a fully-kitted party of three.")]
+        public List<int> FrontierGoldSteps = new List<int> { 0, 300, 700, 1200, 2000, 3000 };
 
-        [Tooltip("Gold that buys one point of investment, for folding the gear axis into the same " +
-                 "cost as width and XP. 1:1 is not arbitrary: the tavern charges 220-260 gold for a " +
-                 "hero and HeroXpEquivalent prices that same hero at 250, so the game's own prices " +
-                 "already make a gold piece and an XP point interchangeable.")]
-        [Min(1)] public int GoldPerInvestmentPoint = 1;
+        [Tooltip("Investment points one gold piece buys, for folding the gear axis into the same " +
+                 "cost as width and XP. This is a *measured* rate, not a shop rate: it is how much " +
+                 "survivability gold delivers against how much the sphere grid delivers, so it says " +
+                 "nothing about what things cost and everything about what they are worth. See " +
+                 "docs/BALANCING.md 5q.")]
+        [Min(0.01f)] public float InvestmentPointsPerGold = 1.4f;
 
         [Tooltip("Battles per mix on the frontier sweep. Lower than SimulationTrials because a sweep " +
                  "runs dozens of mixes and only needs the wipe rate to a couple of points.")]

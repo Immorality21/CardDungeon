@@ -381,9 +381,20 @@ being a threat.
   per-floor loop, and why loot picked up mid-run buys power in the *next* run, never the one that
   found it. `MeasureMix` charges what the spend actually cost, not the ladder step, so a step past the
   point the catalog runs dry is not billed for gear nobody could buy.
-- **Gold converts at `GoldPerInvestmentPoint`, 1:1 by default, and that is not arbitrary**: the tavern
-  charges 220–260 gold for a hero and `HeroXpEquivalent` prices the same hero at 250, so the game's
-  own prices already equate a gold piece with an XP point.
+- **Gold converts at `InvestmentPointsPerGold`, 1.4 by default, and it is charged *per hero*.** Both
+  halves are measured, not read off a price tag (§5q). The per-hero part is the one to remember: the
+  XP term is `xpPerHero` while `goldOnGear` is a pool the whole party shares, so converting the pool
+  as a total put the two axes in different units — which showed up as an exchange rate that fell with
+  every extra body (1.3 solo, 0.7 at two, 0.5 at three). Divided by width it is flat at ~1.4 across
+  the campaign. The tavern's 220–260 gold per hero against `HeroXpEquivalent`'s 250 is what the
+  *shop* charges; the frontier needs what a gold piece is *worth*, and those are different numbers.
+- **Item resistance is part of the gear spend's ranking**, via `IncomingDamageMix` — the share of a
+  floor's expected incoming damage carrying each `DamageType`, built from that floor's own rooms
+  (attack power weighted, split between swing and cast by the behaviour's cast share). Resistance is
+  scored as the equivalent MaxHealth it buys (`1/(1-share*resist)` effective health, weighted with
+  MaxHealth's own power weight), so it needs no tuning constant, compounds with the health bar, and
+  is *conditional*: a Fire ward is a purchase on Emberfall and a waste on the Mire. Pass no mix and
+  resistance prices at nothing, which is the honest answer when the opponent is unknown.
 - **`BalanceAnalyzer.MeasureFrontiers(input)`** is the public entry point for a tuning pass — curves
   closed-form, finales simulated, no findings. ~16s for the whole campaign.
 

@@ -14,7 +14,7 @@ namespace Assets.Scripts.Balance
     /// <para><see cref="Cost"/> is the three axes reduced to one number so tiers can be compared, in
     /// the exchange rate the design is stated in — <c>BalanceRulesSO.HeroXpEquivalent</c> XP per
     /// hero bought past <see cref="PartySlots.BaseCap"/>, and
-    /// <c>BalanceRulesSO.GoldPerInvestmentPoint</c> gold per point. Heroes below the base cap are
+    /// <c>BalanceRulesSO.InvestmentPointsPerGold</c> points per gold. Heroes below the base cap are
     /// free (a fresh save can already field two), so a narrow party is never *cheaper* than the full
     /// base party — only different, which is why the frontier keeps the axes rather than only the
     /// cost.</para>
@@ -198,7 +198,7 @@ namespace Assets.Scripts.Balance
         public System.Func<StatType, float> StatWeightFor;
 
         public int HeroXpEquivalent = 250;
-        public int GoldPerInvestmentPoint = 1;
+        public float InvestmentPointsPerGold = 1.4f;
         public int BaseWidth = PartySlots.BaseCap;
 
         /// <summary>At or below this wipe rate the floor counts as cleared by the mix.</summary>
@@ -249,17 +249,27 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static int CostOf(
             int partySize, int xpPerHero, int goldOnGear,
-            int heroXpEquivalent, int baseWidth, int goldPerInvestmentPoint)
+            int heroXpEquivalent, int baseWidth, float investmentPointsPerGold)
         {
             int boughtHeroes = Mathf.Max(0, partySize - baseWidth);
-            int gearCost = Mathf.Max(0, goldOnGear) / Mathf.Max(1, goldPerInvestmentPoint);
+
+            // Gold is charged PER HERO, because the XP term is per-hero and the two have to be in
+            // one unit. `xpPerHero` is what each hero spends on their own grid, whatever the party's
+            // width; `goldOnGear` is one pool the whole party shares. Converting the pool as a total
+            // made the measured exchange rate fall with every extra body - 1.3 points per gold at
+            // one hero, 0.7 at two, 0.5 at three - which is not a fact about gear, it is the two
+            // axes being in different units. Divided by width the rate is flat across the whole
+            // sweep. See docs/BALANCING.md §5q.
+            float goldPerHero = Mathf.Max(0, goldOnGear) / (float)Mathf.Max(1, partySize);
+            int gearCost = Mathf.RoundToInt(goldPerHero * Mathf.Max(0.01f, investmentPointsPerGold));
+
             return boughtHeroes * Mathf.Max(0, heroXpEquivalent) + Mathf.Max(0, xpPerHero) + gearCost;
         }
 
         /// <summary>The gearless form, kept so callers that do not sweep gold read unchanged.</summary>
         public static int CostOf(int partySize, int xpPerHero, int heroXpEquivalent, int baseWidth)
         {
-            return CostOf(partySize, xpPerHero, 0, heroXpEquivalent, baseWidth, 1);
+            return CostOf(partySize, xpPerHero, 0, heroXpEquivalent, baseWidth, 1f);
         }
 
         public static FloorFrontier Measure(FrontierSweepSettings settings)
@@ -294,9 +304,14 @@ namespace Assets.Scripts.Balance
             // mixes the "can clear it" frontier already paid for.
             var cache = new Dictionary<string, InvestmentPoint>();
 
-            frontier.Frontier = MinimalMixes(settings, widths, xpSteps, goldSteps, cache,
+            // What this floor hits with, computed once for the whole sweep: it depends on the rooms,
+            // which do not vary by mix. This is what makes an elemental ward worth buying on the
+            // floor that deals that element and worth skipping everywhere else.
+            var incoming = IncomingDamageMix.FromRooms(settings.Rooms);
+
+            frontier.Frontier = MinimalMixes(settings, widths, xpSteps, goldSteps, cache, incoming,
                 point => point.WipeRate <= settings.ClearWipeRate);
-            frontier.SafeFrontier = MinimalMixes(settings, widths, xpSteps, goldSteps, cache,
+            frontier.SafeFrontier = MinimalMixes(settings, widths, xpSteps, goldSteps, cache, incoming,
                 point => point.WipeRate < settings.SafeWipeRate);
 
             foreach (var point in cache.Values)
@@ -345,6 +360,7 @@ namespace Assets.Scripts.Balance
             List<int> xpSteps,
             List<int> goldSteps,
             Dictionary<string, InvestmentPoint> cache,
+            IncomingDamageMix incoming,
             System.Func<InvestmentPoint, bool> accept)
         {
             var minimal = new List<InvestmentPoint>();
@@ -377,7 +393,7 @@ namespace Assets.Scripts.Balance
                             break;
                         }
 
-                        var point = MeasureMix(settings, width, xp, gold, cache);
+                        var point = MeasureMix(settings, width, xp, gold, cache, incoming);
                         if (accept(point))
                         {
                             minimal.Add(point);
@@ -392,7 +408,7 @@ namespace Assets.Scripts.Balance
 
         private static InvestmentPoint MeasureMix(
             FrontierSweepSettings settings, int width, int xp, int gold,
-            Dictionary<string, InvestmentPoint> cache)
+            Dictionary<string, InvestmentPoint> cache, IncomingDamageMix incoming)
         {
             string key = width + "/" + xp + "/" + gold;
             if (cache.TryGetValue(key, out var cached))
@@ -415,7 +431,7 @@ namespace Assets.Scripts.Balance
                 XpPerHero = xp,
                 GoldOnGear = gold,
                 Cost = CostOf(width, xp, gold, settings.HeroXpEquivalent, settings.BaseWidth,
-                    settings.GoldPerInvestmentPoint),
+                    settings.InvestmentPointsPerGold),
                 // A mix that cannot be fielded is a total loss, not a free pass.
                 WipeRate = 1f
             };
@@ -428,12 +444,13 @@ namespace Assets.Scripts.Balance
                 System.Func<HeroSO, List<ItemSO>> gearLookup = null;
                 if (gold > 0 && settings.Catalog != null && settings.StatWeightFor != null)
                 {
-                    var spend = GearLoadout.Spend(roster, xp, settings.Catalog, gold, settings.StatWeightFor);
+                    var spend = GearLoadout.Spend(
+                        roster, xp, settings.Catalog, gold, settings.StatWeightFor, incoming);
                     // Charge what was actually bought, not what was offered: an axis step past the
                     // point the catalog runs dry would otherwise read as a dearer mix for nothing.
                     point.GoldOnGear = spend.GoldSpent;
                     point.Cost = CostOf(width, xp, spend.GoldSpent, settings.HeroXpEquivalent,
-                        settings.BaseWidth, settings.GoldPerInvestmentPoint);
+                        settings.BaseWidth, settings.InvestmentPointsPerGold);
                     gearLookup = spend.Lookup;
                 }
 

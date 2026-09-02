@@ -11,16 +11,19 @@ identified, and remove (or mark done) items as they ship. Ordered roughly by pri
 > Balance/tuning work: read **`docs/BALANCING.md`** first — it holds the lever interactions, the
 > measurement workflow and what previous passes learned, so a pass does not re-derive them.
 
-## Start here — the live thread (as of 2026-08-29)
+## Start here — the live thread (as of 2026-09-02)
 
 **Current work: making the campaign losable and gating depth behind investment. The gate ladder now
 exists** — the frontier is measured per floor and the three deep tiers were raised to their budgets on
 2026-08-28 (§5k). **§5l** then cleared the last three spawn tails, lengthened the mid floors, and found
 that the floor model was pricing rooms the player never walks into; **§5m** fixed the model
 (`TraversalModel`, defaulting to beeline pricing) and spent `ChainBias`, the free lever it exposed;
-**§5n** then closed the mid-floor softness with one bespoke guard room per run. Read in this order:
+**§5n** then closed the mid-floor softness with one bespoke guard room per run; **§5o** gave every boss
+an escort; **§5p** taught the model that gear exists at all; and **§5q** found that the rate it priced
+gear at was wrong in its units as well as its value. Read in this order:
 
-1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l → §5m → §5n**, in that order. They are a single
+1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l → §5m → §5n → §5o → §5p → §5q**,
+   in that order. They are a single
    investigation and the later ones **correct** the earlier ones — §5i's headline ("party width
    gates, XP does not") is **wrong**, §5j has the corrected surface, and **§5k is what shipped**
    (the frontier tool, two bugs it found in the floor model, and the retune). Do not act on §5i
@@ -37,13 +40,16 @@ that the floor model was pricing rooms the player never walks into; **§5m** fix
 - **A range, not a checklist.** Each tier asks for more *total* investment than the last, and the
   player chooses how to pay — a party slot, grid XP, or a blend. Roughly **1 hero ≈ 250 XP** (§0g).
 - **The potion belt is not a lever.** 5 HP flat, 7–12% of the sustain pool. Retracted (§5h).
+- **The item catalog is about right; the *rate* was what was mispriced** (2026-09-02, §5q). Do not
+  weaken gear to close the gear-vs-XP gap — that call was taken after play, and the correction went
+  into `InvestmentPointsPerGold` (1.4, charged **per hero**) plus a 10% shop-price nudge.
 - **Party size being modelled at the bought-out cap is acceptable** for general difficulty reporting —
   the user prefers the game to run harder than the model says — but it is *not* acceptable for the
   frontier work, which is precisely about which party can pass.
 
-**The next concrete steps** (updated 2026-08-30; floor numbers are priced at the **beeline**, the
-cheapest way through a floor. Steps 1–3 have shipped; **step 3 left a balance decision open — see
-§5p — and steps 4–6 are the live ones**):
+**The next concrete steps** (updated 2026-09-02; floor numbers are priced at the **beeline**, the
+cheapest way through a floor. Steps 1–4 have shipped — **step 4 took the decision step 3 left open,
+and its own follow-up is now step 5** — and steps 5–7 are the live ones):
 
 1. ~~**Elemental reveal (§0b Phase 4c).**~~ ✅ Shipped 2026-08-29 — the knowledge record, an
    in-combat **Inspect** page (free, FFX-style *Scan*) and a hub **Bestiary**. See §0b and
@@ -105,20 +111,63 @@ cheapest way through a floor. Steps 1–3 have shipped; **step 3 left a balance 
    band; the analyzer's warning count goes 4 → 48, mostly *"no threat at all"*). The frontier agrees in
    its own units: Sunken Depths clears at either **(1 hero, 550 XP)** or **(1 hero, 75 XP, 201g gear)**
    — 201 gold substituting for ~475 XP, so gear buys roughly **2.4× the survivability per investment
-   point** that the sphere grid does. **This needs a decision** and §5p lays out the two coherent
-   answers (the item catalog is too strong, or `GoldPerInvestmentPoint` is mispriced). Nothing was
-   retuned: that is a design call, and it is now a call that can be made against a number.
+   point** that the sphere grid does. ~~**This needs a decision**~~ — **taken 2026-09-02: the rate was
+   wrong, not the content. See step 4 and §5q.**
 
    One thing gear *did* fix outright: **"This tier is a checklist, not a choice" is gone.** Every tier
    now offers at least two affordable ways to pay, which is §0g's "a range, not a checklist" — gear was
    the missing third route.
-4. **XP per danger now varies 5.4x** (up from 4.5x). §5n's guard rooms pay the same XP as the rooms
+4. ~~**Price gold against XP honestly.**~~ ✅ Shipped 2026-09-02 (§5q). The user's call on step 3:
+   **the items are about right, the rate was wrong** — so shop prices got a light 10% nudge
+   (rarity bases 20/45/90/180/350 → 22/50/100/200/385) and the correction went into the frontier.
+   Three things came out of it:
+
+   - **The rate was in the wrong *unit*, and that mattered more than its value.** Swept as iso-clear
+     curves it fell with every extra body — 1.3 points per gold solo, 0.7 at two heroes, 0.5 at three
+     — because `xpPerHero` is per-hero while `goldOnGear` is a pool the whole party shares. `CostOf`
+     was adding two different units, so **no single scalar could have been right**. Charged per hero
+     it is flat at **≈1.4** across the whole campaign. `GoldPerInvestmentPoint` (an `int`, `Min(1)`,
+     which could not even *express* a rate above 1:1) is now **`InvestmentPointsPerGold`, a float**.
+   - **Resistance is part of the gear ranking now**, via a new `IncomingDamageMix` — the share of a
+     floor's incoming damage carrying each element. It is priced as the equivalent health it buys,
+     which needs no new tuning constant, compounds with the health bar, and is **conditional**: a Fire
+     ward is a purchase on Emberfall and a waste on the Mire.
+   - **Ten new items**, with placeholder pixel art. `Hands` is filled, the Simple Sword is no longer
+     a strictly-dominated empty row, gear touches Intelligence / Spirit / Luck for the first time, and
+     a full loadout is **1025g per hero** rather than 359g — so the gold axis stops saturating inside
+     its first rung. No Holy ward was authored: no enemy in the game deals Holy, so it would have
+     scored zero.
+
+   Findings **0 critical / 78 warning → 0 / 77**, suite **798 → 813 passed / 0 failed**. No attrition
+   or wipe number moved (`ReferencePartyGoldBudget` is still 0). Full reasoning:
+   **`docs/BALANCING.md` §5q**.
+
+5. **Three tiers now sit under budget, and the analyzer says so.** The gate ladder still rises
+   monotonically — 150 → 281 → 356 → 431 → 506 — but once gear became a route the model could see,
+   three finales fell short of what their tier is supposed to ask:
+
+   | Finale | Tier | Budget | §5k (gear invisible) | now |
+   |---|---|---|---|---|
+   | Sunken Depths | 0 | 200 | 150 | **150** |
+   | The Counting Room | 1 | 450 | 400 | **281** |
+   | The Mire Throne | 1 | 450 | 475 | **356** |
+   | Emberfall | 2 | 700 | 800 | **431** |
+   | The Hollow Vault | 3 | 1000 | 1050 | **506** |
+
+   **Nothing got easier — the measurement got honest**: gear was always buyable and every published
+   ask had been the price of the hardest route. Re-raising the three is the §5k retune redone with
+   three axes instead of two. Rooms per floor and enemies per room are still the levers with headroom.
+   One thing to *keep* while doing it: every finale now offers **3–4** affordable ways to pay, which
+   is §0g's "a range, not a checklist" satisfied across the whole campaign for the first time.
+6. **XP per danger now varies 5.4x** (up from 4.5x). §5n's guard rooms pay the same XP as the rooms
    they outclass, so the reward curve drifted behind the difficulty curve.
-5. **Blue Room is filler on a tier-1 finale**, and **Rotwater Deep (0.61) dips below its siblings**
+7. **Blue Room is filler on a tier-1 finale**, and **Rotwater Deep (0.61) dips below its siblings**
    (0.73, 0.70) when it should be the Drowned March's hardest mid floor.
-6. **Play it.** Three passes have landed without hands on the game: floors are more winding
-   (`ChainBias` 0.667 → 0.90/0.95), every run now has a bespoke guard room, and Sunken Depths and
-   The Slag Halls deliberately sit at a 19–20% resource margin.
+8. **Play it.** Four passes have now landed without hands on the game: floors are more winding
+   (`ChainBias` 0.667 → 0.90/0.95), every run has a bespoke guard room, Sunken Depths and The Slag
+   Halls deliberately sit at a 19–20% resource margin, and the merchant's stock has more than
+   doubled. The ten new icons are placeholders drawn to match the existing set — worth a look in the
+   hub inventory screen before they are treated as final.
 
 ~~Teach the model that the player does not clear the floor~~ ✅ **§5m** (`TraversalModel`, beeline
 default). ~~Use `ChainBias`~~ ✅ **§5m** (peaks at 0.90–0.95, useless below ~8 rooms).

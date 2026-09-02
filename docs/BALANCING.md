@@ -1624,10 +1624,158 @@ the user's call, and it is now a call that can be made against a number.
 
 ### Still open
 
-- **The gear-vs-XP exchange rate needs a decision** (above). Until then every frontier reads gear as
-  the cheap route, which it measurably is.
-- **`GearLoadout` ranks on `PowerScore` only**, so an item's `Resistances` are worth nothing to the
-  spend even though they reach the danger index once equipped. The Ruby Amulet (−25% Fire) and the
-  Leather Cap (−10%) are therefore bought for their stat lines alone and undervalued.
-- **Only 7 equipment items exist**, across 6 of the 7 slots — nothing fills `Hands`, and `MainHand`
-  has a strictly-dominated entry (Simple Sword, 20g, no bonuses). The axis saturates at 359g per hero.
+- ~~**The gear-vs-XP exchange rate needs a decision**~~ — **decided 2026-09-02, §5q: the rate was
+  wrong, not the content.** And it was wrong twice over — the scalar, and the units it was in.
+- ~~**`GearLoadout` ranks on `PowerScore` only**~~ — **closed 2026-09-02, §5q.** Resistance is now
+  priced as the equivalent health it buys against an `IncomingDamageMix`, so a ward is worth what the
+  element it answers actually turns up.
+- ~~**Only 7 equipment items exist**~~ — **closed 2026-09-02, §5q.** Seventeen now, `Hands` filled and
+  the Simple Sword given a stat line. A full loadout is 1025g per hero, not 359g.
+
+## §5q — The gold rate was mispriced in both the scalar and the units (2026-09-02)
+
+§5p ended with a decision to make: gear measured as **2.4× the survivability per investment point**
+that the sphere grid buys, and either the item catalog was too strong or `GoldPerInvestmentPoint` was
+wrong. **The call was the rate.** Played, the gear reads about right — so this pass corrected the
+frontier's pricing and left the content nearly alone, with only a light 10% nudge on shop prices.
+
+Three things came out of it, and the second is bigger than the decision that started it.
+
+### 1. The catalog was too thin to be an axis, so it grew
+
+Seven items across six of the seven slots, `Hands` empty, and a strictly-dominated `MainHand` entry
+(Simple Sword: 20g, no bonuses at all). The axis saturated at **359g per hero**, which is less than
+one `FrontierGoldSteps` rung — so every gold step past the first was buying nothing and the sweep
+could not tell a rich party from a very rich one.
+
+Ten items were authored, with placeholder pixel art matching the existing 32×32 set. They fill
+`Hands` (Leather Gloves, Warding Gauntlets), give the Simple Sword a reason to exist (STR+2, so it is
+a cheaper-but-weaker option rather than a dead row), and extend every slot's ladder upward. Two
+things they deliberately do:
+
+- **They give gear an Intelligence, Spirit and Luck line for the first time.** No item in the game
+  touched those three stats, so a caster got nothing from the merchant. Oak Staff, Arcane Circlet and
+  Luckstone Charm close that.
+- **They only ward elements something actually deals.** Enemy attack types across the whole bestiary
+  are Fire ×3, Lightning ×2, Ice ×2, Normal ×2, Shadow ×1 — and **no enemy deals Holy**. A Holy ward
+  was drafted and cut: with resistance now priced against the incoming mix (below) it would have
+  scored exactly zero, which is the dead content this project keeps rediscovering. Warden's Helm
+  wards Lightning instead.
+
+Base rarity costs went **20/45/90/180/350 → 22/50/100/200/385**, rounded to numbers a player reads
+rather than exact multiples. A full loadout is now **1025g per hero**, up from 359g, so
+`FrontierGoldSteps` was rewritten to `{0, 300, 700, 1200, 2000, 3000}` — the old top rung of 1050
+dressed a four-hero party in a quarter of a loadout each.
+
+### 2. Resistance is priced now, and it is conditional
+
+`GearLoadout` ranked on the weighted stat line alone. `PartyBaseline` meanwhile hands an item's
+`Resistances` straight to the simulator, where a ±25% swing plainly changes the fight — so the spend
+was buying the Ruby Amulet for its Strength and getting its Fire ward for free, and would happily
+skip it for something worth two more points of a stat.
+
+Pricing it needs one number the stat line cannot supply: **how much of the incoming damage is that
+element**. `IncomingDamageMix` is that number — built from a floor's own rooms, weighting each enemy
+by attack power and splitting between its swing and its casts by the behaviour's cast share. Support
+casts do not count: a heal aimed at the enemy's own side is not damage the party takes.
+
+The conversion needs **no new tuning constant**, which mattered — one invented here would have been a
+second, invisible balance lever. Resistance does not add a stat, it makes the health pool go further:
+if a share *s* of incoming damage carries an element resisted by *r*, damage taken scales by
+`1 - s*r`, so effective health scales by the reciprocal. Expressed as equivalent MaxHealth and
+weighted with MaxHealth's own power weight, resistance lands in one currency with everything else.
+
+Two consequences worth knowing:
+
+- **It compounds with the health bar**, so the gold axis and the XP axis pull together rather than
+  adding independently — the same ward is worth three times as much to a hero with three times the HP.
+- **Stacking one element is worth *more*, not less.** `1/(1-r)` is convex: 40%→80% halves incoming
+  damage again exactly as 0%→50% did. That felt wrong when first written down and went into a test as
+  a diminishing return, which promptly failed. It is what `DamageCalculator` actually does, so it is
+  what the ranking has to say — and it is why
+  `GearLoadout.MaxResistanceEffectiveHealthMultiplier` exists at all, capping a near-immunity at 10×
+  rather than infinity.
+
+### 3. The rate was not one number — it was the wrong *unit*
+
+Sweeping iso-clear curves (fixed width, fine gold ladder, measure the minimum XP that clears at each
+gold step) gave a rate that **fell with every extra body**:
+
+| party | Sunken | Mire | Counting | Emberfall | Vault |
+|---|---|---|---|---|---|
+| 1 hero | 1.35 | 0.75 | 1.19 | 1.77 | 0.55 |
+| 2 heroes | 0.68 | 0.74 | 0.52 | 0.78 | 0.61 |
+| 3 heroes | — | 0.50 | 0.50 | 0.60 | 0.51 |
+
+That is not a fact about gear. **`xpPerHero` is per-hero and `goldOnGear` is a party-wide pool**, so
+`CostOf` was adding two different units and no single scalar could reconcile them — any value picked
+would be right at one width and wrong at the others. Dividing the pool by party size first flattens
+it completely:
+
+| party | Sunken | Mire | Counting | Emberfall | Vault |
+|---|---|---|---|---|---|
+| 1 hero | 1.35 | 0.75 | 1.19 | 1.77 | 0.55 |
+| 2 heroes | 1.37 | 1.48 | 1.04 | 1.56 | 1.21 |
+| 3 heroes | — | 1.50 | 1.50 | 1.81 | 1.53 |
+
+No width trend left, median **≈1.4**. So `GoldPerInvestmentPoint` (an `int`, `Min(1)`, which could
+not even express a rate above 1:1) became **`InvestmentPointsPerGold`, a float, at 1.4**.
+
+The two low readings are real rather than noise: at one hero on a deep floor the 1025g catalog
+saturates, so the last gold buys nothing. A scalar cannot express a curve; the median is the honest
+summary, and the widened `FrontierGoldSteps` is what makes the saturation visible.
+
+### What it did to the ladder
+
+| Finale | Tier | Budget | §5k (gear invisible) | now |
+|---|---|---|---|---|
+| Sunken Depths | 0 | 200 | 150 | **150** |
+| The Counting Room | 1 | 450 | 400 | **281** |
+| The Mire Throne | 1 | 450 | 475 | **356** |
+| Emberfall | 2 | 700 | 800 | **431** |
+| The Hollow Vault | 3 | 1000 | 1050 | **506** |
+
+**Nothing got easier — the measurement got honest.** Gear was always buyable; the model was blind to
+it, so every published ask was the price of the *hardest* route. The ladder still rises monotonically
+with depth, and `ReferencePartyGoldBudget` stays 0, so no attrition or wipe number moved: findings
+**0 critical / 78 warning → 0 / 77**, suite **798 → 813 passed / 0 failed**.
+
+Two results are worth separating:
+
+- **"This tier is a checklist, not a choice" is gone everywhere, and now by a margin.** Every finale
+  offers **3–4** affordable ways to pay. That is §0g's first property satisfied across the whole
+  campaign for the first time.
+- **Three tiers now sit under budget** — Counting Room 281/450, Emberfall 431/700, Hollow Vault
+  506/1000 — and the analyzer says so. Re-raising them is the §5k retune redone with three axes
+  instead of two, and it is the next pass, not this one.
+
+### Four things this pass learned
+
+1. **A conversion between two axes is a units question before it is a tuning question.** The rate
+   varied 3× across the sweep and every reading was correct; the constant was fine and the dimensions
+   were not. Checking whether the two terms are per-hero or per-party would have found it in a minute,
+   and no amount of retuning would have.
+2. **A field's type can make a decision unrepresentable.** `GoldPerInvestmentPoint` was
+   `[Min(1)] int` gold-per-point, so "gold is worth more than an XP point" — the exact correction §5p
+   asked for — could not be written down at all. When a knob cannot express the fix, that is the
+   finding.
+3. **Price an item against what it is for.** Resistance was invisible because the score had no notion
+   of an opponent. Giving it one made the same item a purchase on one floor and a waste on another,
+   which is what an elemental layer is supposed to feel like.
+4. **Check the arithmetic against the combat code, not against intuition.** "Stacking resistance has
+   diminishing returns" is a strong prior and flatly wrong here. `DamageCalculator` is the authority;
+   a test written from the prior is a test that pins a bug.
+
+### Still open
+
+- **The three under-budget tiers** above. Rooms per floor and enemies per room remain the levers with
+  headroom.
+- **`GearLoadout` still buys one item per slot greedily**, so it approximates an optimal build. Read
+  every gold figure as optimistic, exactly as with the grid spend.
+- **`IncomingDamageMix` does not model spell magnitude** — a cast counts as one turn of that enemy's
+  damage whatever the spell does. Enough to rank items against each other; not a damage figure.
+- **The new items do not drop from any enemy's authored loot table.** They reach the player through
+  the merchant and through caches (both read `ItemCatalog`), which is enough to be buyable, but a boss
+  that drops its own themed gear is still unwritten.
+- **The placeholder art is placeholder.** Ten 32×32 icons drawn to match the existing set; readable,
+  not final.

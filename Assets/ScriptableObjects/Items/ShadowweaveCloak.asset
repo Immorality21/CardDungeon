@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69b3836c2cb69fc4b815c96944749c08, type: 3}
+  m_Name: ShadowweaveCloak
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
+  Key: ShadowweaveCloak
+  DisplayName: Shadowweave Cloak
+  Icon: {fileID: 21300000, guid: 8236202a4cf64b2eb85a88461145bb1d, type: 3}
+  Rarity: 2
+  ItemLevel: 4
+  Category: 0
+  SlotType: 3
+  Bonuses:
+  - StatType: 2
+    BonusType: 0
+    Value: 2
+  - StatType: 3
+    BonusType: 0
+    Value: 4
+  - StatType: 7
+    BonusType: 0
+    Value: 18
+  Resistances:
+  - DamageType: 5
+    Percent: 25
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  MaxStack: 99

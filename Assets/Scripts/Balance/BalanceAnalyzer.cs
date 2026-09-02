@@ -526,12 +526,16 @@ namespace Assets.Scripts.Balance
             }
             else if (rules.ReferencePartyGoldBudget > 0)
             {
+                // The reference party is built once for the whole campaign, so the mix its gear is
+                // ranked against is the campaign's, not a floor's. Per-floor wards are the
+                // frontier's business; this party has to be dressed for everything at once.
                 designedGear = GearLoadout.Spend(
                     input.Heroes,
                     rules.ReferenceHeroXp,
                     input.Items,
                     rules.ReferencePartyGoldBudget,
-                    rules.WeightFor);
+                    rules.WeightFor,
+                    IncomingDamageMix.FromEnemies(input.Enemies));
                 gearLookup = designedGear.Lookup;
                 gearLabel = $"{designedGear.GoldSpent}g of gear";
             }
@@ -2950,7 +2954,7 @@ namespace Assets.Scripts.Balance
                     Catalog = input.Items,
                     StatWeightFor = rules.WeightFor,
                     HeroXpEquivalent = rules.HeroXpEquivalent,
-                    GoldPerInvestmentPoint = rules.GoldPerInvestmentPoint,
+                    InvestmentPointsPerGold = rules.InvestmentPointsPerGold,
                     BaseWidth = PartySlots.BaseCap,
                     ClearWipeRate = rules.MaxFloorWipeRate,
                     SafeWipeRate = rules.MinFinalFloorWipeRate,

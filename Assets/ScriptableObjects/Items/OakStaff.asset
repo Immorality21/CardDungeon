@@ -10,15 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69b3836c2cb69fc4b815c96944749c08, type: 3}
-  m_Name: SimpleSword
-  m_EditorClassIdentifier: 
-  Key: SimpleSword
-  DisplayName: Simple Sword
-  Icon: {fileID: 21300000, guid: ad316f0080a7cbd4cad3915c9cc72701, type: 3}
-  SlotType: 0
+  m_Name: OakStaff
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
+  Key: OakStaff
+  DisplayName: Oak Staff
+  Icon: {fileID: 21300000, guid: 3a4a494d951d4d1c8faeed47d2764d3c, type: 3}
   Rarity: 0
-  ItemLevel: 1
+  ItemLevel: 2
+  Category: 0
+  SlotType: 0
   Bonuses:
-  - StatType: 1
+  - StatType: 4
+    BonusType: 0
+    Value: 5
+  - StatType: 5
     BonusType: 0
     Value: 2
+  Resistances: []
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  MaxStack: 99

@@ -52,19 +52,50 @@ namespace Tests.EditMode
         // --- the gear axis --------------------------------------------------------------
 
         /// <summary>
-        /// Gold folds into the same cost as the other two axes. 1:1 is not an arbitrary rate: the
-        /// tavern charges 220-260 gold for a hero and <c>HeroXpEquivalent</c> prices that same hero
-        /// at 250, so the game's own prices already equate a gold piece with an XP point.
+        /// Gold folds into the same cost as the other two axes, at
+        /// <c>InvestmentPointsPerGold</c>. The rate is measured, not read off a price tag: the tavern
+        /// and the merchant say what things *cost*, and the frontier needs what they are *worth*.
+        /// See <c>docs/BALANCING.md</c> §5q.
         /// </summary>
         [Test]
         public void CostOf_GoldOnGearIsChargedAtTheConversionRate()
         {
-            Assert.AreEqual(300, InvestmentFrontier.CostOf(2, 0, 300, HeroXpEquivalent, BaseWidth, 1));
-            Assert.AreEqual(400, InvestmentFrontier.CostOf(2, 100, 300, HeroXpEquivalent, BaseWidth, 1));
-            Assert.AreEqual(650, InvestmentFrontier.CostOf(3, 100, 300, HeroXpEquivalent, BaseWidth, 1));
+            // 300 gold over two heroes is 150 each, and at 1:1 that is 150 points.
+            Assert.AreEqual(150, InvestmentFrontier.CostOf(2, 0, 300, HeroXpEquivalent, BaseWidth, 1f));
+            Assert.AreEqual(250, InvestmentFrontier.CostOf(2, 100, 300, HeroXpEquivalent, BaseWidth, 1f));
+            Assert.AreEqual(450, InvestmentFrontier.CostOf(3, 100, 300, HeroXpEquivalent, BaseWidth, 1f));
 
-            // A dearer rate makes gear a cheaper route in investment terms, which is the dial.
-            Assert.AreEqual(100, InvestmentFrontier.CostOf(2, 0, 300, HeroXpEquivalent, BaseWidth, 3));
+            // Above 1:1, a gold piece buys more survivability than an XP point does, so the same
+            // gear reads as a *dearer* investment - which is the correction §5q makes.
+            Assert.AreEqual(450, InvestmentFrontier.CostOf(2, 0, 300, HeroXpEquivalent, BaseWidth, 3f));
+
+            // And below it, cheaper. The dial has to move both ways: it must be able to report gear
+            // as the bargain it was measured to be, or as the luxury a retune would make it.
+            Assert.AreEqual(75, InvestmentFrontier.CostOf(2, 0, 300, HeroXpEquivalent, BaseWidth, 0.5f));
+        }
+
+        /// <summary>
+        /// The gold term is charged <b>per hero</b>, because the XP term is. <c>xpPerHero</c> is what
+        /// each hero spends on their own grid whatever the party's width, while <c>goldOnGear</c> is
+        /// one pool the party shares — so converting the pool as a total put the two axes in
+        /// different units. Measured, that showed up as an exchange rate that fell with every extra
+        /// body (1.3 points per gold solo, 0.7 at two, 0.5 at three), which is not a fact about gear.
+        /// Per hero, the rate is flat. See <c>docs/BALANCING.md</c> §5q.
+        /// </summary>
+        [Test]
+        public void CostOf_GoldIsChargedPerHeroSoTheRateDoesNotMoveWithWidth()
+        {
+            // The same gear *per hero* costs the same investment at every width, once the bought
+            // bodies are subtracted. 300g each at 1:1 is 300 points each, every time.
+            Assert.AreEqual(300, InvestmentFrontier.CostOf(1, 0, 300, HeroXpEquivalent, BaseWidth, 1f));
+            Assert.AreEqual(300, InvestmentFrontier.CostOf(2, 0, 600, HeroXpEquivalent, BaseWidth, 1f));
+            Assert.AreEqual(
+                300 + HeroXpEquivalent,
+                InvestmentFrontier.CostOf(3, 0, 900, HeroXpEquivalent, BaseWidth, 1f));
+
+            // And one shared pool spread thinner buys proportionally less each.
+            Assert.AreEqual(600, InvestmentFrontier.CostOf(1, 0, 600, HeroXpEquivalent, BaseWidth, 1f));
+            Assert.AreEqual(300, InvestmentFrontier.CostOf(2, 0, 600, HeroXpEquivalent, BaseWidth, 1f));
         }
 
         /// <summary>
@@ -79,7 +110,7 @@ namespace Tests.EditMode
                 for (int xp = 0; xp <= 600; xp += 150)
                 {
                     Assert.AreEqual(
-                        InvestmentFrontier.CostOf(width, xp, 0, HeroXpEquivalent, BaseWidth, 1),
+                        InvestmentFrontier.CostOf(width, xp, 0, HeroXpEquivalent, BaseWidth, 1f),
                         InvestmentFrontier.CostOf(width, xp, HeroXpEquivalent, BaseWidth));
                 }
             }

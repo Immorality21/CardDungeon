@@ -75,6 +75,26 @@ namespace Tests.EditMode
             return item;
         }
 
+        private ItemSO Warded(
+            string key, SlotType slot, ItemRarity rarity, int level,
+            StatType stat, int amount, Assets.Scripts.Combat.DamageType element, float percent)
+        {
+            var item = Item(key, slot, rarity, level, stat, amount);
+            item.Resistances = new List<Assets.Scripts.Combat.Resistance>
+            {
+                new Assets.Scripts.Combat.Resistance { DamageType = element, Percent = percent }
+            };
+            return item;
+        }
+
+        /// <summary>A mix that is entirely one element, so a ward against it is worth its full value.</summary>
+        private static IncomingDamageMix AllOf(Assets.Scripts.Combat.DamageType element)
+        {
+            var mix = new IncomingDamageMix();
+            mix.Add(element, 100f);
+            return mix;
+        }
+
         private ItemSO Potion()
         {
             var item = Make<ItemSO>();
@@ -315,6 +335,149 @@ namespace Tests.EditMode
             Assert.Greater(geared.Heroes[0].Effective[StatType.Strength],
                 bare.Heroes[0].Effective[StatType.Strength],
                 "Gear the model bought has to reach the stats it measures.");
+        }
+
+        // --- resistance is part of the ranking ------------------------------------------
+
+        /// <summary>
+        /// The bug §5q fixes. Both items cost the same and carry the same stat line; one also wards
+        /// the element the floor actually deals. Ranking on the stat line alone made them a tie
+        /// broken by name, so the Ruby Amulet's 25% Fire was bought for its Strength and its
+        /// resistance counted for nothing — while <c>PartyBaseline</c> handed that same resistance to
+        /// the simulator, where it changed the fight.
+        /// </summary>
+        [Test]
+        public void Spend_PrefersTheWardedItemWhenTheFloorDealsThatElement()
+        {
+            var heroes = new List<HeroSO> { Hero("A") };
+            var plain = Item("APlain", SlotType.Chest, ItemRarity.Common, 1, StatType.MaxHealth, 6);
+            var warded = Warded("BWarded", SlotType.Chest, ItemRarity.Common, 1,
+                StatType.MaxHealth, 6, Assets.Scripts.Combat.DamageType.Fire, 25f);
+            var catalog = new List<ItemSO> { plain, warded };
+
+            // Name order puts the plain one first, so a tie would pick it.
+            var spend = GearLoadout.Spend(
+                heroes, Flat(heroes), catalog, ShopPricing.BuyPrice(plain), Weight, AllOf(
+                    Assets.Scripts.Combat.DamageType.Fire));
+
+            Assert.AreEqual(1, spend.Purchases.Count);
+            Assert.AreSame(warded, spend.Purchases[0].Item,
+                "A ward against the element the floor deals has to beat an identical item without one.");
+        }
+
+        /// <summary>
+        /// And it is <i>conditional</i>: the same ward against an element nothing deals is worth
+        /// nothing, so the tie falls back to the stat line. This is why the mix is a parameter rather
+        /// than a constant — a Fire ward should be a purchase on Emberfall and a waste on the Mire.
+        /// </summary>
+        [Test]
+        public void Spend_IgnoresAWardAgainstAnElementTheFloorNeverDeals()
+        {
+            var heroes = new List<HeroSO> { Hero("A") };
+            var plain = Item("APlain", SlotType.Chest, ItemRarity.Common, 1, StatType.MaxHealth, 6);
+            var warded = Warded("BWarded", SlotType.Chest, ItemRarity.Common, 1,
+                StatType.MaxHealth, 6, Assets.Scripts.Combat.DamageType.Fire, 25f);
+            var catalog = new List<ItemSO> { plain, warded };
+
+            var spend = GearLoadout.Spend(
+                heroes, Flat(heroes), catalog, ShopPricing.BuyPrice(plain), Weight, AllOf(
+                    Assets.Scripts.Combat.DamageType.Ice));
+
+            Assert.AreEqual(1, spend.Purchases.Count);
+            Assert.AreSame(plain, spend.Purchases[0].Item,
+                "With no fire incoming the two items are identical, so the stable tie-break decides.");
+        }
+
+        /// <summary>
+        /// No mix means no claim about what the party will face, so resistance prices at nothing
+        /// rather than at a guess. Every caller that does not sweep a floor reads unchanged.
+        /// </summary>
+        [Test]
+        public void Spend_WithNoDamageMix_RanksExactlyAsItDidBefore()
+        {
+            var heroes = new List<HeroSO> { Hero("A") };
+            var plain = Item("APlain", SlotType.Chest, ItemRarity.Common, 1, StatType.MaxHealth, 6);
+            var warded = Warded("BWarded", SlotType.Chest, ItemRarity.Common, 1,
+                StatType.MaxHealth, 6, Assets.Scripts.Combat.DamageType.Fire, 25f);
+            var catalog = new List<ItemSO> { plain, warded };
+
+            var spend = GearLoadout.Spend(heroes, Flat(heroes), catalog, ShopPricing.BuyPrice(plain), Weight);
+
+            Assert.AreEqual(1, spend.Purchases.Count);
+            Assert.AreSame(plain, spend.Purchases[0].Item);
+        }
+
+        /// <summary>
+        /// Resistance is priced as the health it effectively buys, so it compounds with the bar it
+        /// protects — the same ward is worth more to a hero with more health. That is what makes the
+        /// gold axis and the XP axis pull together instead of adding independently.
+        /// </summary>
+        [Test]
+        public void ResistanceValue_ScalesWithTheHealthPoolItProtects()
+        {
+            var warded = Warded("Ward", SlotType.Chest, ItemRarity.Common, 1,
+                StatType.MaxHealth, 0, Assets.Scripts.Combat.DamageType.Fire, 50f);
+            var gear = new List<ItemSO> { warded };
+            var none = new List<Assets.Scripts.Combat.Resistance>();
+            var mix = AllOf(Assets.Scripts.Combat.DamageType.Fire);
+
+            float small = GearLoadout.ResistanceValue(20, gear, none, mix, Weight);
+            float large = GearLoadout.ResistanceValue(60, gear, none, mix, Weight);
+
+            Assert.Greater(small, 0f);
+            Assert.AreEqual(3f, large / small, 0.01f, "Three times the bar, three times the ward.");
+        }
+
+        /// <summary>
+        /// The value is the <i>marginal</i> difference the gear makes over what the hero already
+        /// has, which is the only way to rank an item for a specific hero. And because effective
+        /// health is <c>1/(1-r)</c>, that margin <b>rises</b> as resistance stacks — 40% to 80% halves
+        /// incoming damage again, exactly as 0% to 50% did. That is not a quirk of the scoring: it is
+        /// what <c>DamageCalculator</c> does, and the ranking has to agree with the fight.
+        /// </summary>
+        [Test]
+        public void ResistanceValue_IsWorthMoreToAHeroWhoAlreadyResistsThatElement()
+        {
+            var warded = Warded("Ward", SlotType.Chest, ItemRarity.Common, 1,
+                StatType.MaxHealth, 0, Assets.Scripts.Combat.DamageType.Fire, 40f);
+            var gear = new List<ItemSO> { warded };
+            var mix = AllOf(Assets.Scripts.Combat.DamageType.Fire);
+
+            float bare = GearLoadout.ResistanceValue(
+                40, gear, new List<Assets.Scripts.Combat.Resistance>(), mix, Weight);
+            float onTop = GearLoadout.ResistanceValue(
+                40, gear,
+                new List<Assets.Scripts.Combat.Resistance>
+                {
+                    new Assets.Scripts.Combat.Resistance
+                    {
+                        DamageType = Assets.Scripts.Combat.DamageType.Fire, Percent = 40f
+                    }
+                },
+                mix, Weight);
+
+            Assert.Greater(bare, 0f);
+            Assert.Greater(onTop, bare);
+        }
+
+        /// <summary>
+        /// Which is exactly why there is a cap. Effective health goes to infinity as resistance
+        /// approaches immunity, and an unbounded score would let one 100% ward outbid the entire
+        /// rest of the catalog on a floor that deals one element.
+        /// </summary>
+        [Test]
+        public void ResistanceValue_IsCappedSoNearImmunityIsNotWorthInfinity()
+        {
+            var immune = Warded("Ward", SlotType.Chest, ItemRarity.Common, 1,
+                StatType.MaxHealth, 0, Assets.Scripts.Combat.DamageType.Fire, 100f);
+            var mix = AllOf(Assets.Scripts.Combat.DamageType.Fire);
+
+            float value = GearLoadout.ResistanceValue(
+                40, new List<ItemSO> { immune }, new List<Assets.Scripts.Combat.Resistance>(), mix, Weight);
+
+            float ceiling = 40 * (GearLoadout.MaxResistanceEffectiveHealthMultiplier - 1f)
+                * Weight(StatType.MaxHealth);
+            Assert.AreEqual(ceiling, value, 0.01f);
         }
 
         [Test]
