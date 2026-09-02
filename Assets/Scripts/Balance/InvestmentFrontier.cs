@@ -119,6 +119,26 @@ namespace Assets.Scripts.Balance
         public List<InvestmentPoint> AffordableChoices = new List<InvestmentPoint>();
 
         /// <summary>What the floor asks: the cheapest mix on the frontier. <see cref="int.MaxValue"/> when nothing clears it.</summary>
+        /// <summary>
+        /// The cheapest mix on the frontier, or null when nothing clears the floor. What the floor
+        /// actually *asks*, as a mix rather than a scalar.
+        /// </summary>
+        public InvestmentPoint CheapestMix
+        {
+            get
+            {
+                InvestmentPoint best = null;
+                foreach (var point in Frontier)
+                {
+                    if (best == null || point.Cost < best.Cost)
+                    {
+                        best = point;
+                    }
+                }
+                return best;
+            }
+        }
+
         public int AskedInvestment
         {
             get
@@ -197,8 +217,8 @@ namespace Assets.Scripts.Balance
         /// <summary>Power weight per stat, so the gear spend ranks items the way the model does.</summary>
         public System.Func<StatType, float> StatWeightFor;
 
-        public int HeroXpEquivalent = 250;
-        public float InvestmentPointsPerGold = 1.4f;
+        public int HeroXpEquivalent = 1875;
+        public float InvestmentPointsPerGold = 10.5f;
         public int BaseWidth = PartySlots.BaseCap;
 
         /// <summary>At or below this wipe rate the floor counts as cleared by the mix.</summary>
@@ -208,7 +228,7 @@ namespace Assets.Scripts.Balance
         public float SafeWipeRate = 0.05f;
 
         /// <summary>Mixes costing within this much of the cheapest count as a real alternative to it.</summary>
-        public int EquivalentInvestmentTolerance = 150;
+        public int EquivalentInvestmentTolerance = 1125;
 
         public ItemSO PotionItem;
         public int PotionCount = -1;

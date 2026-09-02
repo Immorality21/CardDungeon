@@ -18,11 +18,11 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 15
-    Position: {x: 0, y: -0}
+    Position: {x: 0, y: 0}
     Gains:
       Values:
       - Type: 7
-        Amount: 4
+        Amount: 8
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
@@ -46,7 +46,7 @@ MonoBehaviour:
   - Key: tank-spine-2
     DisplayName: 
     Kind: 0
-    XpCost: 25
+    XpCost: 30
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -61,12 +61,12 @@ MonoBehaviour:
   - Key: tank-spine-3
     DisplayName: 
     Kind: 0
-    XpCost: 20
+    XpCost: 45
     Position: {x: 0, y: -270}
     Gains:
       Values:
       - Type: 7
-        Amount: 5
+        Amount: 10
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
@@ -76,7 +76,7 @@ MonoBehaviour:
   - Key: tank-spine-4
     DisplayName: 
     Kind: 0
-    XpCost: 25
+    XpCost: 65
     Position: {x: 0, y: -360}
     Gains:
       Values:
@@ -93,7 +93,7 @@ MonoBehaviour:
   - Key: tank-immovable-1
     DisplayName: 
     Kind: 0
-    XpCost: 40
+    XpCost: 90
     Position: {x: -110, y: -415}
     Gains:
       Values:
@@ -108,7 +108,7 @@ MonoBehaviour:
   - Key: tank-immovable-2
     DisplayName: 
     Kind: 0
-    XpCost: 45
+    XpCost: 120
     Position: {x: -205, y: -470}
     Gains:
       Values:
@@ -123,7 +123,7 @@ MonoBehaviour:
   - Key: tank-immovable-3
     DisplayName: 
     Kind: 1
-    XpCost: 55
+    XpCost: 155
     Position: {x: -300, y: -525}
     Gains:
       Values: []
@@ -136,7 +136,7 @@ MonoBehaviour:
   - Key: tank-immovable-4
     DisplayName: 
     Kind: 0
-    XpCost: 60
+    XpCost: 195
     Position: {x: -395, y: -580}
     Gains:
       Values:
@@ -151,7 +151,7 @@ MonoBehaviour:
   - Key: tank-immovable-5
     DisplayName: 
     Kind: 1
-    XpCost: 65
+    XpCost: 245
     Position: {x: -490, y: -635}
     Gains:
       Values: []
@@ -164,7 +164,7 @@ MonoBehaviour:
   - Key: tank-vanguard-1
     DisplayName: 
     Kind: 0
-    XpCost: 35
+    XpCost: 45
     Position: {x: 110, y: -235}
     Gains:
       Values:
@@ -179,7 +179,7 @@ MonoBehaviour:
   - Key: tank-vanguard-2
     DisplayName: 
     Kind: 0
-    XpCost: 40
+    XpCost: 65
     Position: {x: 205, y: -290}
     Gains:
       Values:
@@ -194,7 +194,7 @@ MonoBehaviour:
   - Key: tank-vanguard-3
     DisplayName: 
     Kind: 0
-    XpCost: 45
+    XpCost: 90
     Position: {x: 300, y: -345}
     Gains:
       Values:
@@ -209,7 +209,7 @@ MonoBehaviour:
   - Key: tank-vanguard-4
     DisplayName: 
     Kind: 0
-    XpCost: 55
+    XpCost: 120
     Position: {x: 395, y: -400}
     Gains:
       Values:
@@ -224,7 +224,7 @@ MonoBehaviour:
   - Key: tank-vanguard-5
     DisplayName: 
     Kind: 2
-    XpCost: 80
+    XpCost: 155
     Position: {x: 490, y: -455}
     Gains:
       Values: []
@@ -237,7 +237,7 @@ MonoBehaviour:
   - Key: tank-signature
     DisplayName: Braced Guard
     Kind: 3
-    XpCost: 40
+    XpCost: 30
     Position: {x: 110, y: -145}
     Gains:
       Values: []
@@ -247,3 +247,207 @@ MonoBehaviour:
     GrantedCharges: 2
     Neighbors:
     - tank-spine-1
+  - Key: tank-spine-5
+    DisplayName: Set Stance
+    Kind: 0
+    XpCost: 90
+    Position: {x: 0, y: -450}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-spine-4
+  - Key: tank-spine-6
+    DisplayName: Iron Frame
+    Kind: 0
+    XpCost: 120
+    Position: {x: 0, y: -540}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-spine-5
+  - Key: tank-spine-7
+    DisplayName: Unbroken
+    Kind: 0
+    XpCost: 155
+    Position: {x: 0, y: -630}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 7
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-spine-6
+  - Key: tank-spine-8
+    DisplayName: Bulwark Drill
+    Kind: 0
+    XpCost: 195
+    Position: {x: 0, y: -720}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 2
+      - Type: 3
+        Amount: 1
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-spine-7
+  - Key: tank-sentinel-1
+    DisplayName: Sentinel's Watch
+    Kind: 0
+    XpCost: 155
+    Position: {x: 110, y: -595}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-spine-6
+  - Key: tank-sentinel-2
+    DisplayName: Grounded
+    Kind: 1
+    XpCost: 195
+    Position: {x: 205, y: -650}
+    Gains:
+      Values: []
+    ResistType: 3
+    ResistPercent: 15
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-sentinel-1
+  - Key: tank-sentinel-3
+    DisplayName: Deepstone
+    Kind: 0
+    XpCost: 245
+    Position: {x: 300, y: -705}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 9
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-sentinel-2
+  - Key: tank-sentinel-4
+    DisplayName: Nightward
+    Kind: 1
+    XpCost: 295
+    Position: {x: 395, y: -760}
+    Gains:
+      Values: []
+    ResistType: 5
+    ResistPercent: 15
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-sentinel-3
+  - Key: tank-sentinel-5
+    DisplayName: Standing Order
+    Kind: 2
+    XpCost: 350
+    Position: {x: 490, y: -815}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-sentinel-4
+  - Key: tank-aegis-1
+    DisplayName: Aegis
+    Kind: 0
+    XpCost: 245
+    Position: {x: -110, y: -775}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 8
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-spine-8
+  - Key: tank-aegis-2
+    DisplayName: Oath-Keeper
+    Kind: 0
+    XpCost: 295
+    Position: {x: -205, y: -830}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-aegis-1
+  - Key: tank-aegis-3
+    DisplayName: Immutable
+    Kind: 0
+    XpCost: 350
+    Position: {x: -300, y: -885}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-aegis-2
+  - Key: tank-aegis-4
+    DisplayName: Last Wall
+    Kind: 0
+    XpCost: 410
+    Position: {x: -395, y: -940}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 10
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-aegis-3
+  - Key: tank-aegis-5
+    DisplayName: Hallowed Plate
+    Kind: 1
+    XpCost: 475
+    Position: {x: -490, y: -995}
+    Gains:
+      Values: []
+    ResistType: 4
+    ResistPercent: 15
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tank-aegis-4

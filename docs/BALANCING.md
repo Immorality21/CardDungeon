@@ -13,6 +13,39 @@ a tuning pass starts from what was already measured rather than re-deriving it.
 
 ---
 
+## 0. The standing design rules — read these before any tuning target
+
+These are premises, not dials. **§5t** has the reasoning; this is the short form, because every
+number in this file is downstream of them and the numbers keep tempting a tuning pass into
+optimising the wrong thing.
+
+1. **The game must be a challenge.** Where the choice is between "the player can always get through"
+   and "the player has to come back stronger", the second wins. (§0g's *death is tuition* is this
+   stated for one mechanic.)
+2. **How the grid is spent matters more than how much of it is owned.** Two players at the same XP
+   should be differently capable. That is the point of a graph rather than a level counter.
+3. **Committing to one branch pays off by arriving somewhere early** — not with a bigger stat, but by
+   reaching a capability sooner than a breadth build could: an **Ability** or **Summon** (neither
+   exists yet) that answers a specific boss or obstacle. Breadth pays as even competence; depth pays
+   as one key, held early. **The spec is `docs/NEXT_STEPS.md` §4b** — two summons per grid at the tips
+   of two branches, on per-run charges. Read it before tuning anything deep: it is also **the second
+   difficulty dial this playbook keeps wanting** (see the note under §5r below).
+4. **Breadth and depth are never balanced 1:1, and must not be.** There is no exchange rate between
+   "broad and steady" and "narrow and early". This is configured **loosely** on purpose: both routes
+   viable and *different*, not equal. Equalising them turns two playstyles back into one.
+5. **Hard floor:** the campaign's **last** floor may never clear on under **15%** of a hero's grid
+   (`MinGridShareForLastFloor`). A floor only — no upper bound, no band, because rule 4 says a depth
+   build should be able to finish on a different share than a breadth build. Currently **37%**.
+
+**The trap this sets for the model:** `SphereGridOps.GreedySpend` buys best power-per-XP, which after
+§5s's depth-pricing is always a cheap shallow node — so **it is a breadth build by construction**, and
+every frontier figure in §5p–§5s describes only that playstyle. A depth build reads as strictly
+weaker on the stat line, because its advantage is a capability the model cannot represent yet. So
+**do not tune the deep branches toward the frontier**; they are not meant to win stats-at-equal-XP.
+See §5t.
+
+---
+
 ## 1. The arithmetic you cannot tune around
 
 Everything below follows from two identities. Internalise them and most "why won't this level
@@ -1870,6 +1903,13 @@ follow, under it it dies however few. So the ask snaps to the threshold and cont
 shifts it. **A long floor cannot be made to demand more investment by being made harder** — it can
 only be made to demand a different *rate*.
 
+**This is the finding that argues for summons.** Every lever the game has — HP, END, gear, party
+width, refuges — feeds the *same sustain pool*, so there is only one difficulty dial and it answers
+"can the party grind through fifteen rooms" and "can the party beat the thing at the end" with one
+number. A **bounded burst on a per-run charge** is a second dial: floors stay tuned against sustain,
+climaxes get tuned against burst, and a hard boss becomes authorable without breaking
+`MinHitsToKillHero` (§0f's standing complaint). Spec: `docs/NEXT_STEPS.md` **§4b**.
+
 The practical consequence: **tier 3's budget of 1000 is not reachable by this floor's content.** The
 coherent answers are a design call, not a measurement:
 
@@ -1931,3 +1971,220 @@ analyzer's own reward-curve finding held at 5.4x, i.e. the new enemies are no lo
 - **Filler art is placeholder** — two 32x32 sprites drawn to match the existing set.
 - **The shallow gates at 1.00–1.10x** may be too tight for an imperfect build. Unmeasured: the
   analyzer samples one optimal spend, and §0g wants a *median* build sampled instead.
+
+## §5s — Scaling for a much longer campaign: a body cap, and a grid priced by depth (2026-09-02)
+
+§5r ended on "a long floor's ask does not answer to its difficulty". This pass answers the question
+that follows — *then what does the game escalate along, over another twenty floors?* — and prepares
+the two things that make the answer work.
+
+### The framing: every ceiling in this model is a ratio
+
+Room danger is party-turns-to-win ÷ party-turns-to-die. So the ceilings that have shaped the last
+five passes — worst-case room under 1.0, `MaxBossDanger` 1.40, `MinHitsToKillHero` 3 — **do not cap
+absolute numbers at all. They cap the gap.** A floor twenty levels deeper can carry ten times the
+absolute HP and damage and still read 0.9, provided the party has grown with it.
+
+That reframes escalation entirely: it does not come from more bodies, and it cannot. It comes from
+enemy strength outpacing party strength by a controlled margin, and the only hard constraint on that
+is `MinHitsToKillHero` — which is itself a ratio of enemy damage to **hero HP**. §0f reports enemy
+strength as *pinned* at the 3-hit floor today, and the reason is that hero HP tops out around 120.
+**A much larger sphere grid is precisely what buys the headroom to keep raising enemy numbers.** The
+two things the user asked for in the same breath are the same mechanism.
+
+### Bodies are capped at 6, and it is a presentation rule
+
+`BalanceRulesSO.MaxBodiesPerRoom = 6`, with an `EvaluateLevel` finding when a worst-case roll (or a
+boss escort) exceeds it. It is deliberately **not** a difficulty number:
+
+`CombatStage.BuildColumn` spaces enemies at `min(halfH*0.5, halfH*1.3/count)`. At the default
+orthographic size of 5 that is **1.08 units at six bodies** against 1-unit-tall sprites — 8%
+clearance. At seven it is 0.93 and the sprites overlap. So six is what the battle stage fits, and
+the rule records a constraint that already existed rather than inventing one.
+
+It also happens to be where the danger arithmetic lands: six *regular* enemies would score ~2.0,
+twice past the unwinnable ceiling. Six can only ever mean **two or three real enemies plus filler**,
+which is exactly the shape §5r shipped (Ledger Hall: 2 real + 3 Motes at 0.82). Read the cap as
+"at most three enemies that matter, plus texture".
+
+### The grid: doubled, and priced by distance from the start
+
+Measured first, because the number was worse than expected:
+
+| | before |
+|---|---|
+| grid size | 16–18 nodes |
+| full grid | **615–750 xp** |
+| node cost spread | 15..80 — **5x across an entire grid** |
+| campaign pays | 712 xp/hero at 3 heroes |
+| **campaigns to fill one grid** | **1.0** |
+
+And worse than that headline: `XpSplit` gives a solo hero the whole pot, so solo fills a grid in a
+third of a campaign; and per-level XP escalates ~12x with depth (The Hollow Vault pays 698 for **one**
+level against The Threshold's 220 for four), so replaying the deepest run three times fills a grid
+from scratch.
+
+Both grids' problems were in the **cost curve**, not the node count. Node cost is now a function of
+BFS depth from `StartNodeKey`:
+
+    cost(d) = round5(15 + 3.5 * d^1.9)
+
+    d0=15  d2=30  d4=65  d6=120  d8=195  d10=295  d12=410  d14=540
+
+Early nodes stay cheap, so a new hero still feels like it is moving; the far reaches become a
+long-term goal. Same shape FFX uses, achieved with price rather than sphere scarcity.
+
+Each grid also gained four spine nodes and two new branches — Warlord/Reaver, Sentinel/Aegis,
+Pathfinder/Trapper, Oracle/Warden — with health arriving all the way down, so the back half is not
+durability-free. **Every existing node Key was left untouched**: a node key is a save identifier
+(write-once, same contract as `HeroSO.Key`), so growing a grid may only *add* keys. `XpCost` is not a
+save key, so repricing is safe.
+
+| | before | after |
+|---|---|---|
+| grid size | 16–18 | **30–32 nodes** |
+| full grid | 615–750 | **5060–5550 xp** |
+| campaign pays | 712/hero | **1423/hero** (XP multipliers doubled) |
+| **campaigns to fill one grid** | 1.0 | **3.6** |
+
+### Two things this broke, and both were findings rather than accidents
+
+**1. Every quantity denominated in investment points changed meaning.** "Investment" is measured in
+XP, and one XP now buys 1/7.6 of the power it used to. So `HeroXpEquivalent`, `TierInvestmentBudgets`,
+`InvestmentBudgetTolerance`, `EquivalentInvestmentTolerance`, `InvestmentPointsPerGold` and
+`FrontierXpSteps` were all converted by **x7.5**. That is a unit conversion, not a retune — it
+preserves every relationship §5p–§5r measured — but it means **every frontier number published before
+today is incomparable to one published after**, exactly as the beeline change did in §5m. They want
+re-deriving against the new grid rather than trusting the conversion.
+
+**2. Hero HP flatlined, and depth-pricing exposed it.** The measured pool sat at **33/26/35 from The
+Drowned March all the way to the endgame** while XP/hero climbed 146 → 500. That is §0g's "half of
+every grid buys no durability", and repricing sharpened it: the greedy spend now takes every cheap
+shallow node and stalls before it can afford a deep one. Three regression tests failed on it
+(`EveryHeroSurvivesTheMinimumNumberOfHits` — Hex Weaver killing a Warrior in 2 — plus The Slag Halls
+unclearable and the Vault's boss room at danger 1.94).
+
+The fix belonged in the *shallow* nodes, because those are the ones every party actually owns: early
+HP gains roughly doubled on all four grids (Warrior start 3→6 and spine-3 4→8, and so on). The pool
+now climbs **73 → 117** across a campaign instead of stalling, and every failure cleared. Suite
+**813 / 0, 0 critical**.
+
+Attrition load fell as a result — the Vault 7.57 → 5.38, Emberfall 2.82 → 1.96, The Counting Room
+2.84 → 2.33 — which is the party being genuinely tougher, not the floors being softened. Warnings
+rose 89 → 100, almost all *"encounter is a formality"* against the stronger party; that is the
+shallow floors wanting a pass once the deep ones are settled.
+
+### Three things this pass learned
+
+1. **Grid fill rate and mid-campaign party strength are the same ratio.** Both are
+   cumulative-XP ÷ grid-cost. You cannot slow completion without making the party weaker at every
+   point in the campaign — that is arithmetic, not tuning. Which means "the grid should take many
+   runs" *entails* "the current campaign must be beatable by a party owning a fraction of its grid",
+   and that is a content decision the payout dial only partly softens.
+2. **Depth-pricing changes which nodes a greedy spend reaches, not just what they cost.** Cheap
+   shallow nodes get bought and the deep ones become unreachable within a campaign — so whatever a
+   party *needs* must live shallow. Durability is the thing it needs.
+3. **A unit change is more dangerous than a value change.** Repricing the grid silently redefined
+   "investment point" and every budget, tolerance and exchange rate in the rules. Nothing failed
+   loudly; the numbers just quietly meant something else. Worth a rule of thumb: when a unit moves,
+   grep for everything denominated in it before running anything.
+
+### Still open
+
+- **The tier budgets need re-deriving, not converting.** Post-conversion the asks read 350 / 1200 /
+  1894 / 2744 / 3444 against budgets of 1500 / 3400 / 3400 / 5250 / 7500 — every tier under budget,
+  which is the conversion being coarse rather than five new findings.
+- **The pool still flatlines at 117 from The Drowned March on.** With a 5183-xp grid and 1423 xp per
+  campaign, a party legitimately only owns the shallow ~27% of its grid within one pass. That is now
+  intended (3.6 campaigns to fill), but it means the deep grid is aspirational content and the model
+  should sample a *median* build, not the greedy-optimal one (§0g).
+- **The 10x grid.** This pass doubled to 30–32 nodes at ~5,200 xp. At the same curve, 160–180 nodes
+  reaches depth ~30, where `cost(d)` is ~1,900 and a full grid is roughly **40,000 xp** — about 28
+  campaign passes at today's payout. That is the dial to set deliberately once the extra floors exist
+  and the payout they add is known.
+- ~~**Node cost is authored, not derived.**~~ Closed in the same pass: the curve lives in
+  **`SphereGridOps.CostForDepth`** beside **`DepthsFrom`**, and `SphereGridCostCurveTests` asserts
+  every node in every grid sits on it, is reachable from the start, and carries a unique key. A
+  hand-edited node now fails the suite instead of quietly changing the fill rate.
+
+## §5t — The standing design rules for grid progression (2026-09-02)
+
+Not a measurement pass. This records the design stance the balancing work has to serve, in the
+user's terms, because every number in §5g–§5s is downstream of it and the numbers keep tempting the
+model into optimising the wrong thing.
+
+### The stance
+
+1. **The game must be a challenge.** This is a premise, not a dial. Where a choice exists between
+   "the player can always get through" and "the player has to come back stronger", the second wins.
+   §0g's death-is-tuition decision is the same stance stated for one mechanic.
+
+2. **How the grid is spent matters more than how much of it is owned.** Two players at the same XP
+   should be differently capable, not equally capable. That is the point of a graph rather than a
+   level counter.
+
+3. **Committing to one branch pays off by arriving somewhere early.** The intended reward for depth
+   is not a bigger stat — it is reaching a capability *sooner than a breadth build could*: an
+   **Ability** or a **Summon** (neither exists yet) that answers a specific boss or obstacle. Breadth
+   pays off as even competence everywhere; depth pays off as one key, held early.
+
+4. **The two are never balanced 1:1, and must not be.** There is no exchange rate between "broad and
+   steady" and "narrow and early". Configuring this is deliberately **loose**: the goal is that both
+   routes are viable and feel different, not that they measure the same. Any attempt to equalise them
+   turns two playstyles back into one.
+
+5. **The one hard floor:** the campaign's **last** floor may never be clearable on less than
+   **15%** of a hero's grid (`BalanceRulesSO.MinGridShareForLastFloor`, reported by
+   `EvaluateGridShare`). A campaign finishable on starter nodes means grid progression was never the
+   difficulty curve. It is a floor and nothing else — no upper bound, no target band, because rule 4
+   says a depth build *should* be able to finish on a different share than a breadth build. Deeper
+   content and harder modes should ask far more, and that is a later decision.
+
+Today the last floor clears at **1900 xp per hero against a 5183-xp grid — 37%** — so the floor is
+satisfied with room to spare, and the check exists to catch an expansion that quietly breaks it.
+
+### What this means for the balance model, concretely
+
+The uncomfortable implication, and worth stating plainly because it invalidates a reading of every
+frontier number published so far:
+
+**`SphereGridOps.GreedySpend` is a breadth build by construction.** It buys the best
+power-per-XP available at each step, and after §5s's depth-pricing the best power-per-XP is always a
+cheap shallow node. So the greedy spend sweeps outward, never commits, and reaches the deep branches
+last. Every frontier figure in §5p–§5s therefore describes **one** of the two playstyles — the broad
+one — and the model cannot currently see the other at all:
+
+- A depth build at the same XP has **fewer, dearer nodes**, so it reads as *strictly weaker* on the
+  stat line the danger index is computed from.
+- Its actual advantage is a capability the model has no representation for, because Abilities and
+  Summons do not exist yet.
+- So if the deep branches are ever priced against the frontier as it stands, they will be priced as a
+  mistake the player made.
+
+Three consequences to hold onto:
+
+1. **Do not tune the deep branches toward the frontier.** They are not supposed to win the
+   stats-at-equal-XP comparison; they are supposed to win a specific fight the breadth build has to
+   grind past. Until the capability payload exists, deep-branch numbers are placeholders and the
+   analyzer's opinion of them is not evidence.
+2. **When Abilities/Summons land (spec: `docs/NEXT_STEPS.md` §4b), some content has to be gated by a
+   *key*, not by a wall.** The whole
+   model measures walls — attrition, danger, investment. A boss that a Summon answers is a different
+   shape of gate, and pricing it as "more investment" would flatten exactly the choice rule 3
+   creates. That likely wants its own model, not a bigger number in this one.
+3. **§0g's median-build sampling stops being a nicety.** It already says "read every frontier number
+   as optimistic". Once breadth and depth diverge, one greedy sample is not optimistic — it is
+   *unrepresentative*, and the honest report is a spread across several plausible builds.
+
+### Why the loose framing is the right call, not a cop-out
+
+The measurement this session keeps producing the same lesson from different directions: §5r found a
+long floor's ask barely answers to its difficulty; §5s found grid fill rate and party strength are
+one ratio you cannot separate. Both are cases where a system resisted being tuned to a target
+because the target was expressed in the wrong currency.
+
+"Breadth versus depth" is the same trap one level up. There is no currency in which one key held
+early equals five stat nodes held broadly — the value depends entirely on whether the fight in front
+of you is the one the key opens. So the right posture is floors and shapes: keep a minimum
+(rule 5), keep both routes reachable, check that they *differ*, and resist the urge to make them
+equal. Tight tuning here would be measuring a quantity that does not exist.

@@ -18,11 +18,11 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 15
-    Position: {x: 0, y: -0}
+    Position: {x: 0, y: 0}
     Gains:
       Values:
       - Type: 7
-        Amount: 2
+        Amount: 5
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
@@ -46,7 +46,7 @@ MonoBehaviour:
   - Key: scout-spine-2
     DisplayName: 
     Kind: 0
-    XpCost: 20
+    XpCost: 30
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -61,12 +61,12 @@ MonoBehaviour:
   - Key: scout-spine-3
     DisplayName: 
     Kind: 0
-    XpCost: 20
+    XpCost: 45
     Position: {x: 0, y: -270}
     Gains:
       Values:
       - Type: 7
-        Amount: 3
+        Amount: 7
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
@@ -76,7 +76,7 @@ MonoBehaviour:
   - Key: scout-spine-4
     DisplayName: 
     Kind: 0
-    XpCost: 30
+    XpCost: 65
     Position: {x: 0, y: -360}
     Gains:
       Values:
@@ -95,7 +95,7 @@ MonoBehaviour:
   - Key: scout-skirmisher-1
     DisplayName: 
     Kind: 0
-    XpCost: 40
+    XpCost: 45
     Position: {x: 110, y: -235}
     Gains:
       Values:
@@ -110,7 +110,7 @@ MonoBehaviour:
   - Key: scout-skirmisher-2
     DisplayName: 
     Kind: 0
-    XpCost: 40
+    XpCost: 65
     Position: {x: 205, y: -290}
     Gains:
       Values:
@@ -125,7 +125,7 @@ MonoBehaviour:
   - Key: scout-skirmisher-3
     DisplayName: 
     Kind: 0
-    XpCost: 50
+    XpCost: 90
     Position: {x: 300, y: -345}
     Gains:
       Values:
@@ -140,7 +140,7 @@ MonoBehaviour:
   - Key: scout-skirmisher-4
     DisplayName: 
     Kind: 2
-    XpCost: 70
+    XpCost: 120
     Position: {x: 395, y: -400}
     Gains:
       Values: []
@@ -153,7 +153,7 @@ MonoBehaviour:
   - Key: scout-skirmisher-5
     DisplayName: 
     Kind: 1
-    XpCost: 55
+    XpCost: 155
     Position: {x: 490, y: -455}
     Gains:
       Values: []
@@ -166,7 +166,7 @@ MonoBehaviour:
   - Key: scout-survivor-1
     DisplayName: 
     Kind: 0
-    XpCost: 35
+    XpCost: 90
     Position: {x: -110, y: -415}
     Gains:
       Values:
@@ -181,7 +181,7 @@ MonoBehaviour:
   - Key: scout-survivor-2
     DisplayName: 
     Kind: 0
-    XpCost: 35
+    XpCost: 120
     Position: {x: -205, y: -470}
     Gains:
       Values:
@@ -196,7 +196,7 @@ MonoBehaviour:
   - Key: scout-survivor-3
     DisplayName: 
     Kind: 0
-    XpCost: 45
+    XpCost: 155
     Position: {x: -300, y: -525}
     Gains:
       Values:
@@ -211,7 +211,7 @@ MonoBehaviour:
   - Key: scout-survivor-4
     DisplayName: 
     Kind: 0
-    XpCost: 45
+    XpCost: 195
     Position: {x: -395, y: -580}
     Gains:
       Values:
@@ -226,7 +226,7 @@ MonoBehaviour:
   - Key: scout-survivor-5
     DisplayName: 
     Kind: 1
-    XpCost: 55
+    XpCost: 245
     Position: {x: -490, y: -635}
     Gains:
       Values: []
@@ -239,7 +239,7 @@ MonoBehaviour:
   - Key: scout-signature
     DisplayName: Coated Blade
     Kind: 3
-    XpCost: 40
+    XpCost: 30
     Position: {x: 110, y: -145}
     Gains:
       Values: []
@@ -249,3 +249,209 @@ MonoBehaviour:
     GrantedCharges: 2
     Neighbors:
     - scout-spine-1
+  - Key: scout-spine-5
+    DisplayName: Second Wind
+    Kind: 0
+    XpCost: 90
+    Position: {x: 0, y: -450}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-spine-4
+  - Key: scout-spine-6
+    DisplayName: Quick Feet
+    Kind: 0
+    XpCost: 120
+    Position: {x: 0, y: -540}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-spine-5
+  - Key: scout-spine-7
+    DisplayName: Hard Miles
+    Kind: 0
+    XpCost: 155
+    Position: {x: 0, y: -630}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-spine-6
+  - Key: scout-spine-8
+    DisplayName: Outrider
+    Kind: 0
+    XpCost: 195
+    Position: {x: 0, y: -720}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 1
+      - Type: 1
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-spine-7
+  - Key: scout-pathfinder-1
+    DisplayName: Pathfinder
+    Kind: 0
+    XpCost: 155
+    Position: {x: 110, y: -595}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-spine-6
+  - Key: scout-pathfinder-2
+    DisplayName: Read the Room
+    Kind: 0
+    XpCost: 195
+    Position: {x: 205, y: -650}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-pathfinder-1
+  - Key: scout-pathfinder-3
+    DisplayName: Field Kit
+    Kind: 2
+    XpCost: 245
+    Position: {x: 300, y: -705}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-pathfinder-2
+  - Key: scout-pathfinder-4
+    DisplayName: Blur
+    Kind: 0
+    XpCost: 295
+    Position: {x: 395, y: -760}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-pathfinder-3
+  - Key: scout-pathfinder-5
+    DisplayName: Frostborn
+    Kind: 1
+    XpCost: 350
+    Position: {x: 490, y: -815}
+    Gains:
+      Values: []
+    ResistType: 2
+    ResistPercent: 15
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-pathfinder-4
+  - Key: scout-trapper-1
+    DisplayName: Trapper
+    Kind: 0
+    XpCost: 245
+    Position: {x: -110, y: -775}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-spine-8
+  - Key: scout-trapper-2
+    DisplayName: Rigged Odds
+    Kind: 0
+    XpCost: 295
+    Position: {x: -205, y: -830}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-trapper-1
+  - Key: scout-trapper-3
+    DisplayName: Sinew
+    Kind: 0
+    XpCost: 350
+    Position: {x: -300, y: -885}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-trapper-2
+  - Key: scout-trapper-4
+    DisplayName: Deadfall
+    Kind: 0
+    XpCost: 410
+    Position: {x: -395, y: -940}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-trapper-3
+  - Key: scout-trapper-5
+    DisplayName: Ashcloak
+    Kind: 1
+    XpCost: 475
+    Position: {x: -490, y: -995}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 15
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - scout-trapper-4

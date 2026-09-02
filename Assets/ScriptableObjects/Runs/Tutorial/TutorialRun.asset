@@ -28,7 +28,7 @@ MonoBehaviour:
       StatScales:
       - Stat: 7
         Multiplier: 1.5
-      XpMultiplier: 1
+      XpMultiplier: 2
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 11400000, guid: d0d0529f46172044d9494619917b8364, type: 2}
@@ -40,7 +40,7 @@ MonoBehaviour:
     EnemyTuning:
       Difficulty: 1.8
       StatScales: []
-      XpMultiplier: 1
+      XpMultiplier: 2
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 0}
@@ -52,7 +52,7 @@ MonoBehaviour:
     EnemyTuning:
       Difficulty: 2.05
       StatScales: []
-      XpMultiplier: 1
+      XpMultiplier: 2
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 0}
@@ -66,7 +66,7 @@ MonoBehaviour:
     EnemyTuning:
       Difficulty: 2.46
       StatScales: []
-      XpMultiplier: 1
+      XpMultiplier: 2
       GoldMultiplier: 1
       Overrides:
       - Enemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}

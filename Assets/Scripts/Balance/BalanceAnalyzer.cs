@@ -1754,6 +1754,28 @@ namespace Assets.Scripts.Balance
                 });
             }
 
+            // Bodies on screen, not difficulty: past MaxBodiesPerRoom the battle stage overlaps its
+            // own sprites (CombatStage.BuildColumn), so this fires however winnable the room is.
+            foreach (var room in level.Rooms)
+            {
+                float bodies = room.WorstCase != null ? room.WorstCase.TotalCount : 0f;
+                if (bodies <= rules.MaxBodiesPerRoom)
+                {
+                    continue;
+                }
+
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Level, subject,
+                    $"{room.RoomName} can field {bodies:0.#} enemies at once")
+                {
+                    Asset = room.Room != null ? (UnityEngine.Object)room.Room : run.Run,
+                    Detail = $"The battle stage fits {rules.MaxBodiesPerRoom}. Above that "
+                           + "CombatStage spaces the column tighter than one sprite height and the "
+                           + "enemies overlap, whatever the room's danger says.",
+                    Suggestion = "Drop an EvaluationCount, or a boss escort, until the worst-case "
+                               + $"roll is {rules.MaxBodiesPerRoom} or fewer."
+                });
+            }
+
             if (level.Boss != null)
             {
                 // The sealed exit room has no spawn roll, so it sits outside the peak-danger tail
@@ -3157,6 +3179,100 @@ namespace Assets.Scripts.Balance
                     });
                 }
             }
+
+            EvaluateGridShare(report, rules);
+        }
+
+        /// <summary>
+        /// The standing rule: the campaign's <b>last</b> floor may not be clearable on a token slice
+        /// of a hero's sphere grid. If it is, the grid was never the difficulty curve — the player
+        /// finishes on starter nodes and everything past them is decoration.
+        ///
+        /// <para>Only the deepest tier is judged, and only as a <i>floor</i>. That is deliberate:
+        /// <b>how</b> a player spends the grid is meant to matter more than how much of it they own
+        /// (<c>docs/BALANCING.md</c> §5t), so a tight band here would be measuring the wrong thing.
+        /// A breadth build and a single-branch build should reach the end at very different shares.</para>
+        /// </summary>
+        private static void EvaluateGridShare(BalanceReport report, BalanceRulesSO rules)
+        {
+            float fullGrid = AverageFullGridCost(report);
+            if (fullGrid <= 0f || rules.MinGridShareForLastFloor <= 0f)
+            {
+                return;
+            }
+
+            FloorFrontier last = null;
+            foreach (var frontier in report.Frontiers)
+            {
+                if (frontier.Unclearable)
+                {
+                    continue;
+                }
+                if (last == null || frontier.Tier > last.Tier)
+                {
+                    last = frontier;
+                }
+            }
+
+            var mix = last != null ? last.CheapestMix : null;
+            if (mix == null)
+            {
+                return;
+            }
+
+            float share = mix.XpPerHero / fullGrid;
+            if (share >= rules.MinGridShareForLastFloor)
+            {
+                return;
+            }
+
+            report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Frontier,
+                last.Label,
+                $"The campaign's last floor clears on {share:P0} of a sphere grid")
+            {
+                Asset = last.Asset,
+                Detail = $"Its cheapest clearing mix spends {mix.XpPerHero} xp per hero against an "
+                       + $"average full grid of {fullGrid:0} xp, with {mix.GoldOnGear} gold of gear "
+                       + $"and {mix.PartySize} hero(es). The standing floor is "
+                       + $"{rules.MinGridShareForLastFloor:P0}: a campaign finishable on starter "
+                       + "nodes means grid progression is not what the difficulty curve is made of.",
+                Suggestion = "Raise the deep floors' load, or lengthen the grid so the same nodes are "
+                           + "a smaller share of it. Note this is a floor, not a target — a player "
+                           + "who commits to one branch should still be able to finish on less of the "
+                           + "grid than a breadth build does."
+            });
+        }
+
+        /// <summary>Average full-grid XP across the party's heroes, or 0 when none has a grid.</summary>
+        private static float AverageFullGridCost(BalanceReport report)
+        {
+            if (report.Party == null)
+            {
+                return 0f;
+            }
+
+            float total = 0f;
+            int counted = 0;
+            foreach (var hero in report.Party.Heroes)
+            {
+                var grid = hero.Definition != null ? hero.Definition.SphereGrid : null;
+                if (grid == null || grid.Nodes == null || grid.Nodes.Count == 0)
+                {
+                    continue;
+                }
+
+                var every = new List<string>();
+                foreach (var node in grid.Nodes)
+                {
+                    if (node != null && !string.IsNullOrEmpty(node.Key))
+                    {
+                        every.Add(node.Key);
+                    }
+                }
+                total += SphereGridOps.TotalCostOf(grid, every);
+                counted++;
+            }
+            return counted > 0 ? total / counted : 0f;
         }
 
         private static string SafeText(FloorFrontier frontier)

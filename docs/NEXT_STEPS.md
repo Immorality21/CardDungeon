@@ -21,9 +21,11 @@ that the floor model was pricing rooms the player never walks into; **§5m** fix
 **§5n** then closed the mid-floor softness with one bespoke guard room per run; **§5o** gave every boss
 an escort; **§5p** taught the model that gear exists at all; **§5q** found that the rate it priced gear
 at was wrong in its units as well as its value; and **§5r** spent enemies-per-room and found that a
-long floor's ask does not answer to its difficulty at all. Read in this order:
+long floor's ask does not answer to its difficulty at all; and **§5s** capped bodies at 6, doubled
+the sphere grids and priced their nodes by depth — which is what buys the headroom to keep escalating
+across many more floors. Read in this order:
 
-1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l → §5m → §5n → §5o → §5p → §5q → §5r**,
+1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l → §5m → §5n → §5o → §5p → §5q → §5r → §5s**,
    in that order. They are a single
    investigation and the later ones **correct** the earlier ones — §5i's headline ("party width
    gates, XP does not") is **wrong**, §5j has the corrected surface, and **§5k is what shipped**
@@ -41,6 +43,14 @@ long floor's ask does not answer to its difficulty at all. Read in this order:
 - **A range, not a checklist.** Each tier asks for more *total* investment than the last, and the
   player chooses how to pay — a party slot, grid XP, or a blend. Roughly **1 hero ≈ 250 XP** (§0g).
 - **The potion belt is not a lever.** 5 HP flat, 7–12% of the sustain pool. Retracted (§5h).
+- **How the grid is spent matters more than how much of it is owned** (2026-09-02, `BALANCING.md`
+  §0 + §5t). Committing to one branch is meant to pay off by reaching a capability — an **Ability**
+  or **Summon**, neither of which exists yet — *earlier* than a breadth build could, so it answers a
+  specific boss or obstacle. Breadth pays as even competence. **The two are never balanced 1:1 and
+  must not be**; this is loose configuration by design. One hard floor: the campaign's last floor may
+  never clear on under **15%** of a grid (`MinGridShareForLastFloor`; currently 37%). Do **not** tune
+  the deep branches toward the frontier — `GreedySpend` is a breadth build by construction, so it
+  prices a depth build as a mistake.
 - **The item catalog is about right; the *rate* was what was mispriced** (2026-09-02, §5q). Do not
   weaken gear to close the gear-vs-XP gap — that call was taken after play, and the correction went
   into `InvestmentPointsPerGold` (1.4, charged **per hero**) plus a 10% shop-price nudge.
@@ -49,8 +59,8 @@ long floor's ask does not answer to its difficulty at all. Read in this order:
   frontier work, which is precisely about which party can pass.
 
 **The next concrete steps** (updated 2026-09-02; floor numbers are priced at the **beeline**, the
-cheapest way through a floor. Steps 1–5 and 7 have shipped; **step 6 is a decision waiting on you**,
-and steps 8–10 are the live ones):
+cheapest way through a floor. Steps 1–5 and 8 have shipped; **steps 6–7 are decisions waiting on
+you**, and steps 9–12 are the live ones):
 
 1. ~~**Elemental reveal (§0b Phase 4c).**~~ ✅ Shipped 2026-08-29 — the knowledge record, an
    in-combat **Inspect** page (free, FFX-style *Scan*) and a hub **Bestiary**. See §0b and
@@ -170,7 +180,19 @@ and steps 8–10 are the live ones):
 
    Every worst-case room is still under 1.0, every boss under 1.40, every ratio over 1.8, ways-to-pay
    up to 3–5 per tier, suite **813 / 0**.
-6. **The Hollow Vault cannot be made to ask more, and that needs your call.** Across §5r its attrition
+6. **Re-derive the tier budgets against the new grid, then settle the Hollow Vault.** §5s doubled
+   the sphere grids and repriced every node by depth, so **"investment point" now means something
+   different** — one XP buys 1/7.6 of the power it did. Every budget, tolerance and exchange rate was
+   converted x7.5, which preserves the measured relationships but is coarse: post-conversion every
+   tier reads under budget (asks 350 / 1200 / 1894 / 2744 / 3444 against 1500 / 3400 / 3400 / 5250 /
+   7500). **Those five findings are the conversion, not five new problems** — re-measure before acting
+   on any of them, and treat every frontier number written before 2026-09-02 as incomparable.
+
+   The Vault decision below still stands underneath it, and §5s makes one option much stronger:
+   with the grid now the long axis, the honest reading is that the *current* campaign is about to
+   become the early game, so a tier-3 budget set for "the endgame" belongs to whatever floor is last
+   *after* the expansion, not to the Hollow Vault.
+7. **The Hollow Vault cannot be made to ask more by making it harder.** Across §5r its attrition
    load went **4.37 → 7.57 (+73%)** and its ask went **506 → 615 → 611** — it stopped, and a whole
    extra dense room template moved it by −4. **A 17.8-room beeline gates on sustain *rate*, not on
    total damage**: over the line the party clears however many rooms follow, under it it dies however
@@ -179,21 +201,32 @@ and steps 8–10 are the live ones):
    short-and-lethal so it gates on a spike; or raise the ceilings and accept losable rooms. Until then
    the Vault also reports *asks no more than the tier before it* — because Emberfall rose to meet it,
    not because the Vault fell.
-7. ~~**The player arrives over-provisioned; trim the payout.**~~ **Measured 2026-09-02 and
+8. ~~**The player arrives over-provisioned; trim the payout.**~~ **Measured 2026-09-02 and
    deliberately not cut (§5r).** Against the new asks the cushion is 1.00x / 1.10x / 1.70x / 1.48x /
    1.88x — and §0g's own warning says every frontier number is measured against an *optimal* greedy
    spend, so a ~1.5x cushion on the deep floors is plausibly the build-variance margin it tells us not
    to tune away. That flips the reading: the suspicious rows are the **shallow** gates at 1.00x and
    1.10x, where an imperfect build has no slack at all. Sampling a *median* build rather than an
    optimal one (§0g) is the prerequisite for touching either.
-8. **XP per danger still varies 5.4x.** §5n's guard rooms pay the same XP as the rooms they outclass,
+9. **XP per danger still varies 5.4x.** §5n's guard rooms pay the same XP as the rooms they outclass,
    so the reward curve drifted behind the difficulty curve. §5r did *not* make this worse — filler
    pays 1–2 XP, after a first cut at 6 XP measured **516 XP per danger** against the Dragon's 30 and
    took the all-placement spread to 17x. Cut to filler wages it is back to 6.7x and the analyzer's own
    figure held at 5.4x.
-9. **Blue Room is filler on a tier-1 finale**, and **Rotwater Deep (0.61) dips below its siblings**
+10. **Build summons — §4b has the spec.** Depth in the sphere grid is supposed to pay off by
+   unlocking a *capability* early rather than a bigger stat, and nothing like that exists yet, so the
+   deep branches §5s added are stat nodes wearing thematic names. **Two summons per grid at the tips
+   of two branches**, on per-run charges, as a temporary extra combatant scheduled by `TurnManager`.
+
+   The balancing reason is the strong one: the game currently has **one difficulty dial** — every
+   lever feeds the same sustain pool, which is why §5r found a long floor's ask barely answers to its
+   difficulty. A bounded burst on a per-run charge splits it into **floor-attrition-versus-sustain**
+   and **boss-versus-burst**, and it is the first *key*-shaped gate the game would have. Build the
+   balance-model half last but non-negotiably: `InvestmentFrontier` reporting the ask **with and
+   without** a summon is the key-versus-wall number rule 3 has been missing (§5t).
+11. **Blue Room is filler on a tier-1 finale**, and **Rotwater Deep (0.61) dips below its siblings**
    (0.73, 0.70) when it should be the Drowned March's hardest mid floor.
-10. **Play it.** Four passes have now landed without hands on the game: floors are more winding
+12. **Play it.** Five passes have now landed without hands on the game: floors are more winding
    (`ChainBias` 0.667 → 0.90/0.95), every run has a bespoke guard room, Sunken Depths and The Slag
    Halls deliberately sit at a 19–20% resource margin, and the merchant's stock has more than
    doubled. The ten new item icons and two new enemy sprites are placeholders drawn to match the
@@ -1645,6 +1678,125 @@ Direction:
 
 Touch points: `Assets/Scripts/Heroes/LevelConfiguration.cs`, `Hero.cs`, `HeroSO.cs`,
 `HeroSaveData.cs`, `Party.cs` (`AddXpToLeader`), `Assets/Scripts/Balance/RunCurveModel.cs`.
+
+### 4b. Summons — the capability the deep grid pays out, and a second difficulty dial
+
+**Not shipped. This is the spec.** It is the payload `docs/BALANCING.md` §0 rule 3 depends on: right
+now committing to one sphere-grid branch buys a bigger stat, which is the one thing rule 3 says it
+must *not* be. A summon is what "arriving somewhere early" is supposed to arrive at.
+
+**Two per grid, at the tips of two different branches.** §5s left each hero with four branches; a
+summon sits at the end of two of them. That is the whole design in one sentence: **the XP to reach
+both is far more than a campaign pays, so a player picks one and gets it early, or goes broad and
+gets neither for a long time.** Which one they picked is then a fact about their party that the rest
+of the game can be built against.
+
+#### Why this helps the balancing, which is the real reason to build it
+
+§5r found something the model could not act on: **a long floor's investment ask barely answers to its
+difficulty.** The Hollow Vault's attrition load went +73% and its ask moved +21% then stopped, because
+at a 17.8-room beeline survival is decided by whether the party's *sustain rate* beats the drain rate.
+Every lever the game has — HP, END, gear, party width — feeds that same sustain pool. So there is
+currently **one dial**, and both "can the party grind through fifteen rooms" and "can the party beat
+the thing at the end" read off it.
+
+A summon is a **bounded burst on a per-run charge**, not a rate. That splits the dial in two:
+
+| | tuned against | levers |
+|---|---|---|
+| **floor attrition** | sustain rate | rooms, enemies per room, HP/END, refuges, gear |
+| **boss / obstacle** | burst | summon charges, its power, its cooldown |
+
+That is what makes a hard boss authorable without breaking `MinHitsToKillHero` — §0f's standing
+complaint that enemy strength is *pinned* at the 3-hit floor. A climax tuned on the assumption the
+player brought *a* summon can be far harder than one that is not, and the difference is a resource the
+player spends rather than a stat they own.
+
+It is also the first **key-shaped gate** the game would have. The balance model measures walls
+(attrition, danger, investment); "the Cinder Tyrant's signature is survivable if someone can absorb
+one hit of it" is a different shape, and pricing it as *more investment* would flatten exactly the
+choice rule 3 creates.
+
+#### Shape: which FF model
+
+The turn system is already FFX CTB (`TurnManager`), so FFX's Aeons are the closest lineage — but they
+replace the party outright, which means the party leaves the turn order, becomes untargetable, and the
+summon needs its own HP bar and dismissal rules. **Recommended instead: a temporary extra
+combatant.** It is much less surgery, it reuses `ICombatUnit` and the existing scheduler wholesale,
+and it fits the stage: a summon takes a hero-side slot, and `MaxBodiesPerRoom` (6, §5s) already says
+what the enemy side can hold.
+
+- **Summon** → a `SummonUnit : ICombatUnit` is spawned on the hero side, scheduled by `TurnManager`
+  on its own Agility like anything else, and acts for **N turns** before leaving.
+- **Its stats scale off the summoner**, so it grows with the grid rather than needing its own
+  progression: read the caster's `Spirit` (and `Intelligence` for the arcane ones) the way
+  `SpellPower` already does.
+- **Charges are a run resource**, exactly like Draw charges in `EquippedMagicState` — refilled between
+  runs, not between fights. That is what makes "save it for the boss" a decision.
+- It occupies a slot, so **the party is not removed** and a summon turn is not a party turn lost.
+
+The alternative (full FFX replacement) is worth revisiting if summons ever want their own Overdrive
+equivalent; note it and move on.
+
+#### The eight
+
+One per branch tip, each answering a *different* problem — that is what makes "which branch did you
+take" mean something rather than "how much damage did you buy":
+
+| hero | branch | summon | answers |
+|---|---|---|---|
+| Warrior | Warlord | **Ironclad Marshal** | a single huge target — execution damage |
+| Warrior | Reaver | **Red Hound** | a crowded room — fast multi-hit |
+| Tank | Sentinel | **Deepstone Colossus** | a telegraphed party-wide signature — soaks it |
+| Tank | Aegis | **Hallowed Sentinel** | sustained incoming — party-wide shield |
+| Scout | Pathfinder | **Pale Courser** | losing the tempo — party haste / extra turns |
+| Scout | Trapper | **Gloomsnare** | an enemy that must be stopped — control/debuff |
+| Acolyte | Oracle | **Choir of Ash** | an elemental wall — big typed burst |
+| Acolyte | Warden | **The Quiet Warden** | a wipe in progress — full heal and revive |
+
+Deliberately: two of the eight deal damage. The rest buy time, safety, tempo or control, because a
+roster of eight damage buttons is one summon with eight skins.
+
+#### What it needs, in build order
+
+1. **`SummonSO`** — display name, sprite, turns active, charges per run, stat scaling off the
+   summoner, and its action list. Its repertoire should reuse **`EnemyBehaviorSO`**: that is already
+   "what a unit can do on a turn, when, and how often" as authored data, and a summon is a unit with a
+   repertoire. Do not invent a second behaviour vocabulary.
+2. **`SphereNodeKind.Summon`** + `GrantedSummon` on `SphereGridNode`. One new enum member and one
+   field, the same shape `MagicKnown` already uses — and remember node `Key`s are write-once, so the
+   two tips get *new* keys rather than repurposed ones.
+3. **Persistence** — unlocked summons follow from activated nodes, so nothing new is saved; charges
+   are a run resource and belong with the run save, beside Draw charges.
+4. **Combat** — spawn, insert into `TurnManager`, act for N turns, leave. Plus a command-menu entry
+   gated on charges, and `CombatStage` slotting it on the hero side.
+5. **Presentation** — this is the moment the game most wants to feel big: a full-screen banner, the
+   camera punch `MainCamera.ZoomPunch` already has, and a dedicated `MusicTrack`. `CombatAudio` and
+   `EffectPresenter` are the seams.
+6. **The balance model, last and non-negotiable** — a summon nobody measures is a summon that silently
+   invalidates every frontier number:
+   - `PartyBaseline` carries unlocked summons and their charges.
+   - `EncounterSimulator` spends them the way it spends potions and Draw charges; the Adaptive policy
+     should hold one for the hardest room it can see.
+   - `InvestmentFrontier` reports the ask **with and without** a summon. That comparison *is* the
+     key-versus-wall measurement, and it is the number rule 3 has been missing.
+   - New bands worth having: a boss should not be beatable *only* with a summon
+     (`MaxSummonShareOfBossDamage`), and a summon should not trivialise a floor either.
+
+#### Two traps
+
+- **Do not price the deep branches against the frontier before this exists.** `GreedySpend` is a
+  breadth build by construction (§5t), so until a summon is something the model can spend, a depth
+  build reads as strictly weaker and the analyzer will call the whole design a mistake.
+- **Charges, not cooldowns, are the balance lever.** `DrawableMagicEntry.Charges` already learned this
+  once: the charge count is a magic's real power dial, more than its XP cost. A summon that recharges
+  inside a fight is a stat; one with two charges for a whole run is a decision.
+
+Touch points (all new unless noted): `Assets/Scripts/Heroes/SphereGridSO.cs` (`SphereNodeKind`,
+`SphereGridNode`), `Assets/Scripts/Heroes/SphereGridOps.cs`, `Assets/Scripts/Combat/` (`SummonUnit`,
+`TurnManager`, `CombatStage`), `Assets/Scripts/Enemies/Behaviors/EnemyBehaviorSO.cs` (reused),
+`Assets/Scripts/Balance/PartyBaseline.cs`, `EncounterSimulator.cs`, `InvestmentFrontier.cs`,
+`BalanceRulesSO.cs`, `Assets/Scripts/Audio/`.
 
 ### 5. Roster progression — solo start, then recruit heroes — *acquisition* ✅ shipped
 

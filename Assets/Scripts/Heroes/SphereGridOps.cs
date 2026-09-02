@@ -354,6 +354,99 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>XP spent to activate the given keys, at current node prices. Unknown keys count 0.</summary>
+        /// <summary>
+        /// Edge distance from <c>StartNodeKey</c> to every node, so pricing and reporting share one
+        /// notion of "how far in is this". Edges are undirected; unreachable nodes are absent.
+        /// </summary>
+        public static Dictionary<string, int> DepthsFrom(SphereGridSO grid)
+        {
+            var depths = new Dictionary<string, int>();
+            if (grid == null || grid.Nodes == null || grid.Nodes.Count == 0)
+            {
+                return depths;
+            }
+
+            string start = !string.IsNullOrEmpty(grid.StartNodeKey)
+                ? grid.StartNodeKey
+                : (grid.Nodes[0] != null ? grid.Nodes[0].Key : null);
+            if (string.IsNullOrEmpty(start))
+            {
+                return depths;
+            }
+
+            var adjacency = new Dictionary<string, List<string>>();
+            foreach (var node in grid.Nodes)
+            {
+                if (node == null || string.IsNullOrEmpty(node.Key))
+                {
+                    continue;
+                }
+                if (!adjacency.ContainsKey(node.Key))
+                {
+                    adjacency[node.Key] = new List<string>();
+                }
+                foreach (var neighbor in node.Neighbors)
+                {
+                    if (string.IsNullOrEmpty(neighbor))
+                    {
+                        continue;
+                    }
+                    adjacency[node.Key].Add(neighbor);
+                    if (!adjacency.ContainsKey(neighbor))
+                    {
+                        adjacency[neighbor] = new List<string>();
+                    }
+                    adjacency[neighbor].Add(node.Key);
+                }
+            }
+
+            depths[start] = 0;
+            var frontier = new List<string> { start };
+            while (frontier.Count > 0)
+            {
+                var next = new List<string>();
+                foreach (var key in frontier)
+                {
+                    if (!adjacency.TryGetValue(key, out var neighbors))
+                    {
+                        continue;
+                    }
+                    foreach (var neighbor in neighbors)
+                    {
+                        if (depths.ContainsKey(neighbor))
+                        {
+                            continue;
+                        }
+                        depths[neighbor] = depths[key] + 1;
+                        next.Add(neighbor);
+                    }
+                }
+                frontier = next;
+            }
+            return depths;
+        }
+
+        /// <summary>
+        /// The authored price of a node <paramref name="depth"/> edges from the start.
+        ///
+        /// <para><b>Superlinear on purpose.</b> Before 2026-09-02 the whole spread was 15..80 — 5x
+        /// across an entire grid — and a grid filled in about one pass of the campaign. Cost rising
+        /// with depth keeps the first nodes cheap, so a new hero still feels like it is moving, while
+        /// the far reaches become a long-term goal. Same pacing FFX gets from sphere scarcity,
+        /// achieved with price instead. See <c>docs/BALANCING.md</c> §5s.</para>
+        ///
+        /// <para>Rounded to 5 so a price reads cleanly in the grid UI.</para>
+        /// </summary>
+        public static int CostForDepth(int depth)
+        {
+            float raw = CostBase + CostFactor * Mathf.Pow(Mathf.Max(0, depth), CostExponent);
+            return Mathf.RoundToInt(raw / 5f) * 5;
+        }
+
+        public const int CostBase = 15;
+        public const float CostFactor = 3.5f;
+        public const float CostExponent = 1.9f;
+
         public static int TotalCostOf(SphereGridSO grid, IEnumerable<string> activated)
         {
             int total = 0;

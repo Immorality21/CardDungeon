@@ -75,6 +75,15 @@ namespace Assets.Scripts.Balance
         [Tooltip("Below this the encounter is a formality — no threat, no decisions.")]
         public float MinMeaningfulDanger = 0.08f;
 
+        [Tooltip("Most enemies a room may put on screen at once, counting a worst-case spawn roll " +
+                 "and a boss's escort. Six is not a difficulty number - it is what the battle stage " +
+                 "fits. CombatStage.BuildColumn spaces enemies at min(halfH*0.5, halfH*1.3/count), " +
+                 "so at the default orthographic size of 5 that is 1.08 units at six bodies against " +
+                 "1-unit sprites; at seven it is 0.93 and they overlap. Difficulty rides on the " +
+                 "strength ratio instead (see docs/BALANCING.md §5s), which has no ceiling as long " +
+                 "as hero power grows with it.")]
+        [Min(1)] public int MaxBodiesPerRoom = 6;
+
         [Header("Enemy casting — spells thrown from the enemy's own Draw list")]
         [Tooltip("Largest share of its turns an enemy should spend casting — the ChanceGate on its " +
                  "behaviour's CastMagic action. Above this the rest of its repertoire (charges, " +
@@ -227,23 +236,26 @@ namespace Assets.Scripts.Balance
         public bool MeasureInvestmentFrontiers = true;
 
         [Tooltip("The exchange rate between the two investment axes: XP per hero that one extra " +
-                 "party slot is worth. Measured at roughly 100-350 depending on the floor, so this " +
-                 "is a design choice about which route should be favoured, not a fact.")]
-        [Min(1)] public int HeroXpEquivalent = 250;
+                 "party slot is worth. RESCALED x7.5 on 2026-09-02 when the grids doubled " +
+                 "and were repriced by depth (full grid 680 -> 5182 xp). Every value below in " +
+                 "investment points moved by the same factor, because the unit itself changed - a " +
+                 "conversion, not a measurement. Re-derive them against the new grid before " +
+                 "trusting them. See docs/BALANCING.md 5s.")]
+        [Min(1)] public int HeroXpEquivalent = 1875;
 
         [Tooltip("Investment each campaign tier should demand, indexed by CampaignOps.ComputeTiers " +
                  "depth. In the same units as HeroXpEquivalent: a fresh save sits at 0. The list " +
                  "rising is what 'depth means danger' means; the last entry covers anything deeper.")]
-        public List<int> TierInvestmentBudgets = new List<int> { 200, 450, 700, 1000 };
+        public List<int> TierInvestmentBudgets = new List<int> { 1500, 3400, 5250, 7500 };
 
         [Tooltip("How far off its tier budget a floor's frontier may sit before it is a finding. " +
                  "Wide on purpose - the frontier is measured against a greedy (optimal) grid spend, " +
                  "so tuning it tight would gate out every player who builds for flavour.")]
-        [Min(0)] public int InvestmentBudgetTolerance = 125;
+        [Min(0)] public int InvestmentBudgetTolerance = 950;
 
         [Tooltip("Two frontier mixes within this much of each other are genuine alternatives, so the " +
                  "player picks how to pay. Only one affordable mix means the tier is a checklist.")]
-        [Min(0)] public int EquivalentInvestmentTolerance = 150;
+        [Min(0)] public int EquivalentInvestmentTolerance = 1125;
 
         [Tooltip("Party widths the frontier sweep tries. 1 is included deliberately: a solo hero on " +
                  "a deep grid is a build path the game nearly supports already.")]
@@ -253,7 +265,8 @@ namespace Assets.Scripts.Balance
                  "never off node identities, so a frontier survives the sphere grid being expanded. " +
                  "The top of the ladder should sit near the dearest hero's full grid - past that the " +
                  "XP axis saturates and a frontier point there is an investment nobody can make.")]
-        public List<int> FrontierXpSteps = new List<int> { 0, 75, 150, 225, 300, 375, 450, 550, 650, 750 };
+        public List<int> FrontierXpSteps =
+            new List<int> { 0, 150, 350, 700, 1200, 1900, 2800, 4000, 5600 };
 
         [Tooltip("Gold budgets for gear the frontier sweep tries, cheapest first. Gear is the third " +
                  "way to pay for depth, beside a party slot and grid XP, and unlike XP it is a " +
@@ -268,7 +281,14 @@ namespace Assets.Scripts.Balance
                  "survivability gold delivers against how much the sphere grid delivers, so it says " +
                  "nothing about what things cost and everything about what they are worth. See " +
                  "docs/BALANCING.md 5q.")]
-        [Min(0.01f)] public float InvestmentPointsPerGold = 1.4f;
+        [Min(0.01f)] public float InvestmentPointsPerGold = 10.5f;
+
+        [Tooltip("Smallest share of a hero's sphere grid the campaign's LAST floor may be clearable " +
+                 "with. A standing design rule, not a tuning target: finishing the campaign on a " +
+                 "handful of cheap starter nodes means the grid was never the difficulty curve. It " +
+                 "is a floor only - deliberately loose, because how a player spends the grid is " +
+                 "supposed to matter more than how much of it they own. See docs/BALANCING.md 5t.")]
+        [Range(0f, 1f)] public float MinGridShareForLastFloor = 0.15f;
 
         [Tooltip("Battles per mix on the frontier sweep. Lower than SimulationTrials because a sweep " +
                  "runs dozens of mixes and only needs the wipe rate to a couple of points.")]

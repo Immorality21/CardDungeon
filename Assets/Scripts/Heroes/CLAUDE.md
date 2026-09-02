@@ -25,3 +25,51 @@
 - **Two XP rules that are choices, not consequences** (both in `XpSplit`): the integer-division **remainder goes to the leader** rather than being dropped, because silently losing up to `partySize - 1` XP per kill would make wide parties worse than the split implies; and **downed heroes are paid**, unlike FFX, because excluding them punishes the tank role for doing its job. Death's cost stays HP and items.
 - **Party heals to full** on new dungeon spawn (`Party.HealAll()` in `DungeonManager.SpawnFreshDungeon`).
 - **Party sprite** uses the Leader's `HeroSO.Sprite`. Each hero has a hidden `SpriteRenderer` that becomes visible during combat fan-out.
+
+## Growing a sphere grid
+
+**Node cost is a function of depth, not a free field.** `SphereGridOps.CostForDepth(d)` is
+`round5(15 + 3.5 * d^1.9)` — 15 at the start, ~120 six steps in, ~540 at fourteen — and
+`SphereGridCostCurveTests` fails if any node in any grid is priced off it. Use
+`SphereGridOps.DepthsFrom(grid)` to get each node's distance from `StartNodeKey`.
+
+Why it is superlinear: before 2026-09-02 the whole spread was 15..80 (5x across an entire grid) and
+a grid filled in roughly **one pass of the campaign**. Cost rising with depth keeps the first nodes
+cheap, so a new hero still feels like it is moving, while the far reaches stay a long-term goal.
+Grids are 30–32 nodes and ~5,200 xp today; the campaign pays ~1,423 xp per hero, so a grid takes
+about **3.6 passes**. See `docs/BALANCING.md` §5s.
+
+**What the branches are FOR** (`docs/BALANCING.md` §0 rules 2–4, the standing design stance): how a
+player spends the grid is meant to matter more than how much of it they own. Going broad buys even
+competence; **committing to one branch is meant to pay off by reaching a capability early** — an
+Ability or Summon (neither exists yet) that answers a specific boss or obstacle. The two are
+**deliberately not balanced 1:1** and must not be tuned toward each other.
+
+Two consequences when authoring:
+
+- **A deep node's payload should eventually be a capability, not a bigger stat.** The deep nodes added
+  in §5s are stat nodes wearing thematic names, standing in until summons exist — **two per grid at
+  the tips of two branches**, spec in `docs/NEXT_STEPS.md` §4b. It adds `SphereNodeKind.Summon` and a
+  `GrantedSummon` field, the same shape `MagicKnown` already uses, so the two tips will want *new*
+  node keys rather than repurposed ones.
+- **Do not price a deep branch against the balance analyzer.** `SphereGridOps.GreedySpend` buys best
+  power-per-XP, which after depth-pricing is always a cheap shallow node — so it is a *breadth* build
+  by construction, and it will always report a depth build as strictly weaker. That is the model
+  missing a capability it cannot represent, not a design error to fix.
+
+Three rules when adding nodes:
+
+- **Only ever ADD keys.** A node `Key` is a save identifier (write-once, same contract as
+  `HeroSO.Key`): renaming or removing one orphans every save that bought it. `XpCost`, `DisplayName`,
+  `Position` and `Gains` are all safe to change.
+- **Put durability shallow.** A greedy XP spend takes the cheap nodes near the start and stalls
+  before it can afford a deep one, so whatever a party *needs* has to live shallow. Health is that
+  thing: hero HP is what gives enemy damage room to grow while `MinHitsToKillHero` holds, which is
+  the only axis long-run difficulty escalation actually has (§5s).
+- **Every node must be reachable.** The grid editor window makes it easy to drop an edgeless node;
+  the test catches it, but an unreachable node is content nobody sees.
+
+Layout convention: spine straight down from the start at `x: 0`, 90 units per step; branches
+diagonally at `dx 110` for the first step then 95, `dy -55` per step, mirrored to negative `x` for
+left-hand branches. Positions are read only by the UI and the editor window — no game rule uses them.
+

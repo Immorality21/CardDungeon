@@ -27,7 +27,7 @@ MonoBehaviour:
     EnemyTuning:
       Difficulty: 3
       StatScales: []
-      XpMultiplier: 1.5
+      XpMultiplier: 3
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 0}
@@ -39,7 +39,7 @@ MonoBehaviour:
     EnemyTuning:
       Difficulty: 3.75
       StatScales: []
-      XpMultiplier: 1.75
+      XpMultiplier: 3.5
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 0}
@@ -55,7 +55,7 @@ MonoBehaviour:
     EnemyTuning:
       Difficulty: 3.15
       StatScales: []
-      XpMultiplier: 1.75
+      XpMultiplier: 3.5
       GoldMultiplier: 1
       Overrides:
       - Enemy: {fileID: 11400000, guid: a3ec74314eaaa1546a44c86e575112d8, type: 2}

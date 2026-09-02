@@ -30,7 +30,7 @@ MonoBehaviour:
     EnemyTuning:
       Difficulty: 2.8
       StatScales: []
-      XpMultiplier: 2
+      XpMultiplier: 4
       GoldMultiplier: 2
       Overrides:
       - Enemy: {fileID: 11400000, guid: b3bcee460cbc7484bb4420ae09132d24, type: 2}
