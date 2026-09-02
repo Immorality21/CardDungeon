@@ -10,22 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af198de09aeca534b959292a4b71d567, type: 3}
-  m_Name: VaultReliquaryRoom
+  m_Name: CoinfallGalleryRoom
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.RoomSO
-  Name: Vault Reliquary
-  Width: 5
+  Name: Coinfall Gallery
+  Width: 6
   Height: 4
-  Color: {r: 0.42, g: 0.35, b: 0.14, a: 1}
+  Color: {r: 0.48, g: 0.4, b: 0.16, a: 1}
   Kind: 0
   PossibleEvents:
   - {fileID: 11400000, guid: 9fc41391ad0c4ded8aefa97a43e1fcb8, type: 2}
   EnemySpawnTable:
-  - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
-    SpawnChance: 1
-    EvaluationCount: 1
-  - Enemy: {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
+  - Enemy: {fileID: 11400000, guid: ff5b77fa3ce957149bdcb9bdd40a5d9c, type: 2}
     SpawnChance: 1
     EvaluationCount: 1
   - Enemy: {fileID: 11400000, guid: 2ad323473fd341edb4cff1ccae486514, type: 2}
     SpawnChance: 1
-    EvaluationCount: 2
+    EvaluationCount: 4

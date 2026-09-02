@@ -17,6 +17,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0b978dd4c559e8942b3546543c74ef50, type: 2}
   - {fileID: 11400000, guid: 8a98a175962275c4f84e7b71e66db482, type: 2}
   - {fileID: 11400000, guid: a26892edb60e4ed4e8914caea192167b, type: 2}
+  - {fileID: 11400000, guid: 26d8eff018804051a2f37bbec15f1ec6, type: 2}
   RoomsToGenerate: 31
   ChainBias: 0.95
   MomentumBias: 0.498

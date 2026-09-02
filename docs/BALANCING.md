@@ -1768,8 +1768,10 @@ Two results are worth separating:
 
 ### Still open
 
-- **The three under-budget tiers** above. Rooms per floor and enemies per room remain the levers with
-  headroom.
+- ~~**The three under-budget tiers**~~ — **two closed 2026-09-02, §5r** (The Counting Room and
+  Emberfall are inside their band). The Hollow Vault turned out **not to be reachable by content**:
+  +73% attrition load bought +21% ask and then stopped. Enemies per room was the live lever; rooms per
+  floor was not, and §5r says why.
 - **`GearLoadout` still buys one item per slot greedily**, so it approximates an optimal build. Read
   every gold figure as optimistic, exactly as with the grid spend.
 - **`IncomingDamageMix` does not model spell magnitude** — a cast counts as one turn of that enemy's
@@ -1779,3 +1781,153 @@ Two results are worth separating:
   that drops its own themed gear is still unwritten.
 - **The placeholder art is placeholder.** Ten 32×32 icons drawn to match the existing set; readable,
   not final.
+
+## §5r — Densifying the beeline, and the ceiling it ran into (2026-09-02)
+
+§5q left three tiers under budget and named rooms-per-floor and enemies-per-room as the levers with
+headroom. This pass spent the second one. Two tiers came inside their band; the third turned out not
+to be reachable by content at all, and *that* is the finding.
+
+### The lever was not more rooms, and the numbers said so before anything was touched
+
+The three under-budget finales are already the longest floors in the game:
+
+| Finale | authored | beeline | combat rooms | load | **peak room** |
+|---|---|---|---|---|---|
+| The Counting Room | 14 | 8.8 | 7.2 | 1.76 | **0.41** |
+| Emberfall | 16 | 9.9 | 8.3 | 1.82 | **0.51** |
+| The Hollow Vault | 31 | 17.8 | 16.8 | 4.37 | **0.53** |
+
+Three things ruled out floor length:
+
+1. **They are built entirely from trivial rooms.** Peak worst-case 0.41–0.53 against the 1.0
+   unwinnable-roll ceiling — nearly a doubling available *per room*, which needs no extra corridor.
+2. **Rooms are a linear lever against a flattening curve.** Off §5p's gear table, ~500 → ~1000
+   investment only drops the Vault's load by 1.8x, so doubling the *ask* needs roughly doubling the
+   *load*: 31 rooms → ~60, a 35-room beeline.
+3. **~40% of every room added is never walked** (§5m: these floors are 57–66% traversed).
+
+### What was in the way: the roster had no small enemies
+
+`EvaluationCount` was **1 on every spawn entry in the game**, including the three rooms §5k calls
+dense — that density came from `SpawnChance: 1`, not from evaluation counts. So the lever really was
+unspent. But spending it overshot immediately: bumping each guard room to three bodies took Emberfall
+to worst-case **1.19** and the Vault to **1.14**, both past the ceiling, and broke two boss-to-trash
+ratios — for asks of +27% and **+6%**.
+
+The cause is the roster: **eight non-boss enemies, all the same size** (HP 14–20, STR 4–6, danger
+0.04–0.18). Adding any body to a two-body room takes it from 0.41 to 0.78–0.93. There was no
+increment smaller than "one whole enemy".
+
+**And the first attempt at a minion missed why.** `GildedMote` was authored at HP 8 / STR 3 / AGI 9 —
+fragile and fast — and added **+0.37** to a room, barely less than a full enemy. In a CTB system an
+enemy's danger contribution is dominated by **how often it acts**, not by how much health it has: the
+party spends a turn killing it either way, and a fast one acts more before dying. Restatted to
+HP 6 / STR 2 / **AGI 4** it adds **+0.12**, which is an increment a tuning pass can aim with. Swept:
+
+| Mote stats | 3-body room | Mote's own danger |
+|---|---|---|
+| HP6 STR2 AGI2 | 0.50 | 0.003 |
+| HP6 STR2 **AGI4** | **0.53** | 0.007 |
+| HP6 STR2 AGI9 | 0.60 | 0.015 |
+| HP8 STR3 AGI9 | 0.78 | 0.041 |
+
+Two filler enemies now exist, with placeholder art: **`GildedMote`** (Normal, HP 6/STR 2/END 1/AGI 4)
+for the two gold-themed floors, and **`SlagHound`** (Fire, HP 8/STR 2/END 2/AGI 4) for Emberfall. Both
+are Aggressor-preset and pay filler wages — see the reward note below.
+
+### What shipped
+
+Filler bodies into the three bespoke guard rooms (the only rooms used by one level each — Treasury,
+Brown Room and Blue Room are shared with 3–7 other floors and editing them is a campaign-wide edit),
+plus boss escorts, because denser trash pulls `MinBossToTrashRatio` down and the climax has to rise
+with the floor. Escorts rather than boss stats: an authored escort is readable to the player and the
+model prices the whole room (§5o).
+
+| Finale | guard room | boss escort | worst room | boss | ratio | ask |
+|---|---|---|---|---|---|---|
+| The Counting Room | +3 Mote | +3 Mote | 0.41 → **0.82** | 0.47 → **0.82** | **2.28** | 281 → **356** |
+| Emberfall | +2 Hound | +2 Hound | 0.51 → **0.93** | 0.71 → **1.13** | **2.92** | 431 → **611** |
+| The Hollow Vault | +2 Mote | +2 Mote | 0.53 → **0.93** | 0.89 → **1.29** | **3.00** | 506 → **611** |
+
+Every worst-case room is still under 1.0, every boss under `MaxBossDanger` 1.40, every ratio over 1.8.
+**The Counting Room and Emberfall are now inside their tier band** (356 against 450−125, 611 against
+700−125), and "ways to pay" rose to 3–5 per tier. Suite **813 / 0**.
+
+The Vault also gained a fourth room template, **`CoinfallGalleryRoom`** (a Dragon and four Motes) —
+31 rooms drawn from three templates is thin for the game's endgame, and a fourth entry raises the
+average by displacing filler slots rather than by pushing any one room past the ceiling.
+
+### The finding: the Vault's ask is insensitive to the Vault's difficulty
+
+Across this pass the Vault's attrition load went **4.37 → 7.57 (+73%)** and its ask went
+**506 → 615 → 611**. It stopped moving, and the last change — a whole extra dense room template —
+moved it by **−4**.
+
+That is a threshold, not a curve. At a 17.8-room beeline, survival is decided almost entirely by
+whether the party's sustain *rate* beats the drain rate; over that line it clears however many rooms
+follow, under it it dies however few. So the ask snaps to the threshold and content difficulty barely
+shifts it. **A long floor cannot be made to demand more investment by being made harder** — it can
+only be made to demand a different *rate*.
+
+The practical consequence: **tier 3's budget of 1000 is not reachable by this floor's content.** The
+coherent answers are a design call, not a measurement:
+
+- **Lower the tier-3 budget** to roughly what the content can demand (~650). Three passes of
+  escalation now agree on that number, and the budgets were always targets rather than findings.
+- **Change the Vault's shape** — far shorter and far more lethal per room, so it gates on a spike
+  rather than a marathon. That rewrites its identity as the long descent.
+- **Raise the ceilings** (`MaxBossDanger`, the 1.0 worst-case room rule) and accept rooms a bad roll
+  can lose.
+
+Until one is chosen the Vault reports two warnings: *asks 611 against a budget of 1000*, and *asks no
+more than the tier before it* — the second because Emberfall rose to meet it, not because the Vault
+fell.
+
+### Step 2, the payout: measured, and deliberately not cut
+
+The other half of §5q's plan was that the player arrives over-provisioned. Measured against the new
+asks, with gold converted at `InvestmentPointsPerGold` per hero:
+
+| gate | available walking in | ask | over-provision |
+|---|---|---|---|
+| Sunken Depths | 150 | 150 | **1.00x** |
+| The Mire Throne | 392 | 356 | **1.10x** |
+| The Counting Room | 604 | 356 | 1.70x |
+| Emberfall | 907 | 611 | 1.48x |
+| The Hollow Vault | 1154 | 611 | 1.88x |
+
+**Nothing was cut, and the reason is in §0g's own warning:** every frontier number is measured against
+a *greedy, optimal* spend, and "a player taking a flavourful route through a wide grid will be weaker
+at the same XP — do not tune the frontiers tight." A 1.5x cushion on the deep floors is plausibly
+exactly that build-variance margin. Which flips the reading: the suspicious rows are the **shallow**
+gates at 1.00x and 1.10x, where a player who spent imperfectly has no slack at all. That wants
+answering before the economy is trimmed, and it is the opposite of the change §5q proposed.
+
+One payout change *was* made, because it was a defect rather than a tuning choice. At `XpReward` 6 the
+Mote measured **516 XP per danger** against the Dragon's 30 — filler paying a real enemy's wage. Cut
+to 1 XP / 1 gold (and the Hound to 2/1), the spread across placements went **17.0x → 6.7x** and the
+analyzer's own reward-curve finding held at 5.4x, i.e. the new enemies are no longer outliers in it.
+
+### Four things this pass learned
+
+1. **Check the traversal fraction before adding rooms.** The player walks 57–66% of these floors, so
+   a room added at random is 0.6 of a room priced. Length is the most expensive lever and the least
+   effective one.
+2. **In a CTB system, an enemy's danger is about action frequency, not health.** The first minion was
+   designed fragile-and-fast and came out nearly as dangerous as a full enemy. Agility is the dial for
+   "how much does one more body cost the party".
+3. **A roster with no small enemies has no fine tuning dial.** Eight enemies within a 4x danger band
+   meant every density change was a 2x jump. The fix was a new *kind* of enemy, not a new number.
+4. **Ask whether a floor gates on a total or on a rate.** A short floor gates on total damage, so
+   difficulty moves its ask. A long floor gates on sustain rate, so difficulty does not. The Vault
+   proved this the expensive way: +73% load bought +21% ask and then nothing.
+
+### Still open
+
+- **The tier-3 budget decision** above.
+- **New enemies have no `DrawableMagics`**, so nothing can be stolen from them. Correct for filler,
+  but it means the two densest floors in the game got denser without adding Draw supply.
+- **Filler art is placeholder** — two 32x32 sprites drawn to match the existing set.
+- **The shallow gates at 1.00–1.10x** may be too tight for an imperfect build. Unmeasured: the
+  analyzer samples one optimal spend, and §0g wants a *median* build sampled instead.

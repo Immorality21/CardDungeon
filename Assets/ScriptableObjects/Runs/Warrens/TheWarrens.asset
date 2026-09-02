@@ -38,6 +38,8 @@ MonoBehaviour:
     BossAdds:
     - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
       Count: 1
+    - Enemy: {fileID: 11400000, guid: 2ad323473fd341edb4cff1ccae486514, type: 2}
+      Count: 3
     EnemyTuning:
       Difficulty: 2.19
       StatScales: []

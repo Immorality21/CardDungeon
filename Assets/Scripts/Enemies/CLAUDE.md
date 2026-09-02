@@ -154,6 +154,32 @@ order the planner resolves them. It also flags the two mistakes that make an act
 mistuned: an ungated, unconditional entry in the top tier (nothing below it can ever run), and
 `Telegraphed` on a kind that cannot wind up.
 
+## Sizing a new enemy — Agility is the danger dial, not health
+
+**An enemy's contribution to a room's danger is dominated by how often it acts, not by how much
+health it has.** The party spends a turn killing a body either way; a fast one simply acts more times
+before it dies. That is a fact about `TurnManager`'s CTB scheduling, and it is unintuitive enough to
+have cost a pass (`docs/BALANCING.md` §5r): `GildedMote` was first authored fragile-and-fast at
+HP 8 / STR 3 / **AGI 9** and added **+0.37** to a room's danger — barely less than a full-size enemy.
+Restatted to HP 6 / STR 2 / **AGI 4** it adds **+0.12**.
+
+So when authoring **filler** — a body meant to thicken a room without redefining it — reach for low
+Agility first, and treat HP as the cosmetic half of "fragile".
+
+| role | shape | adds to a room |
+|---|---|---|
+| filler (`GildedMote`, `SlagHound`) | HP 6–8, STR 2, AGI 4 | ~+0.12 |
+| regular (`EyeBall`, `CinderImp`, `Dragon`, …) | HP 14–20, STR 4–6 | ~+0.4 |
+
+Two other things a new enemy owes:
+
+- **`Key` is write-once** and `EnemyIdentityTests` fails if it is blank or duplicated — it is what the
+  bestiary files persistent knowledge under.
+- **Add it to `Resources/EnemyCatalog`** or `BestiaryTests` fails: an enemy outside the catalog can
+  never appear in the bestiary however often it is fought.
+- **Pay it for the danger it carries.** Filler on a full enemy's `XpReward` wrecks the reward curve:
+  at 6 XP the Mote measured **516 XP per danger** against the Dragon's 30. Filler wages are 1–2 XP.
+
 ## Bosses
 
 - **`EnemySO.IsBoss`** flags a definition as a boss. It drives the boss-only combat/UI treatment: a larger crimson HP bar (`UnitHealthBar`), the no-flee rule + intro banner (`RoomActionUI`), and the run-complete/`Boss Slain!` victory copy. `Enemy.IsBoss` exposes it at runtime. Pair `IsBoss` with `Archetype = Boss` for the full effect.

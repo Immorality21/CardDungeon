@@ -19,10 +19,11 @@ exists** — the frontier is measured per floor and the three deep tiers were ra
 that the floor model was pricing rooms the player never walks into; **§5m** fixed the model
 (`TraversalModel`, defaulting to beeline pricing) and spent `ChainBias`, the free lever it exposed;
 **§5n** then closed the mid-floor softness with one bespoke guard room per run; **§5o** gave every boss
-an escort; **§5p** taught the model that gear exists at all; and **§5q** found that the rate it priced
-gear at was wrong in its units as well as its value. Read in this order:
+an escort; **§5p** taught the model that gear exists at all; **§5q** found that the rate it priced gear
+at was wrong in its units as well as its value; and **§5r** spent enemies-per-room and found that a
+long floor's ask does not answer to its difficulty at all. Read in this order:
 
-1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l → §5m → §5n → §5o → §5p → §5q**,
+1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l → §5m → §5n → §5o → §5p → §5q → §5r**,
    in that order. They are a single
    investigation and the later ones **correct** the earlier ones — §5i's headline ("party width
    gates, XP does not") is **wrong**, §5j has the corrected surface, and **§5k is what shipped**
@@ -48,8 +49,8 @@ gear at was wrong in its units as well as its value. Read in this order:
   frontier work, which is precisely about which party can pass.
 
 **The next concrete steps** (updated 2026-09-02; floor numbers are priced at the **beeline**, the
-cheapest way through a floor. Steps 1–4 have shipped — **step 4 took the decision step 3 left open,
-and its own follow-up is now step 5** — and steps 5–7 are the live ones):
+cheapest way through a floor. Steps 1–5 and 7 have shipped; **step 6 is a decision waiting on you**,
+and steps 8–10 are the live ones):
 
 1. ~~**Elemental reveal (§0b Phase 4c).**~~ ✅ Shipped 2026-08-29 — the knowledge record, an
    in-combat **Inspect** page (free, FFX-style *Scan*) and a hub **Bestiary**. See §0b and
@@ -142,32 +143,63 @@ and its own follow-up is now step 5** — and steps 5–7 are the live ones):
    or wipe number moved (`ReferencePartyGoldBudget` is still 0). Full reasoning:
    **`docs/BALANCING.md` §5q**.
 
-5. **Three tiers now sit under budget, and the analyzer says so.** The gate ladder still rises
-   monotonically — 150 → 281 → 356 → 431 → 506 — but once gear became a route the model could see,
-   three finales fell short of what their tier is supposed to ask:
+5. ~~**Three tiers sit under budget.**~~ ✅ **Two closed 2026-09-02 (§5r); the third is a decision —
+   see step 6.** Enemies per room was the live lever; rooms per floor was not, and the reason is
+   §5m: the player walks only 57–66% of these floors, so a room added at random is 0.6 of a room
+   priced, and these floors were already the longest in the game.
 
-   | Finale | Tier | Budget | §5k (gear invisible) | now |
-   |---|---|---|---|---|
-   | Sunken Depths | 0 | 200 | 150 | **150** |
-   | The Counting Room | 1 | 450 | 400 | **281** |
-   | The Mire Throne | 1 | 450 | 475 | **356** |
-   | Emberfall | 2 | 700 | 800 | **431** |
-   | The Hollow Vault | 3 | 1000 | 1050 | **506** |
+   | Finale | Tier | Budget | §5k | §5q | now |
+   |---|---|---|---|---|---|
+   | Sunken Depths | 0 | 200 | 150 | 150 | **150** |
+   | The Counting Room | 1 | 450 | 400 | 281 | **356** ✅ |
+   | The Mire Throne | 1 | 450 | 475 | 356 | **356** ✅ |
+   | Emberfall | 2 | 700 | 800 | 431 | **611** ✅ |
+   | The Hollow Vault | 3 | 1000 | 1050 | 506 | **611** ❌ |
 
-   **Nothing got easier — the measurement got honest**: gear was always buyable and every published
-   ask had been the price of the hardest route. Re-raising the three is the §5k retune redone with
-   three axes instead of two. Rooms per floor and enemies per room are still the levers with headroom.
-   One thing to *keep* while doing it: every finale now offers **3–4** affordable ways to pay, which
-   is §0g's "a range, not a checklist" satisfied across the whole campaign for the first time.
-6. **XP per danger now varies 5.4x** (up from 4.5x). §5n's guard rooms pay the same XP as the rooms
-   they outclass, so the reward curve drifted behind the difficulty curve.
-7. **Blue Room is filler on a tier-1 finale**, and **Rotwater Deep (0.61) dips below its siblings**
+   **What was in the way was the roster, not the rooms.** `EvaluationCount` was 1 on every spawn entry
+   in the game, but spending it overshot instantly — eight non-boss enemies all sit in a 4x danger
+   band (HP 14–20, STR 4–6), so adding any body to a two-body room took it from 0.41 to 0.78–0.93,
+   past the 1.0 unwinnable-roll ceiling, for an ask of +6% on the Vault. Two **filler enemies** now
+   exist (`GildedMote`, `SlagHound`, placeholder art) plus a fourth Vault room template
+   (`CoinfallGalleryRoom`). Boss escorts rose with the trash to hold `MinBossToTrashRatio`.
+
+   **The lesson worth keeping: in a CTB system an enemy's danger is driven by how often it acts, not
+   by how much health it has.** The first Mote was authored fragile-and-fast (HP 8 / AGI 9) and added
+   +0.37 to a room — nearly a whole enemy. At HP 6 / AGI 4 it adds +0.12, which is an increment a
+   tuning pass can actually aim with.
+
+   Every worst-case room is still under 1.0, every boss under 1.40, every ratio over 1.8, ways-to-pay
+   up to 3–5 per tier, suite **813 / 0**.
+6. **The Hollow Vault cannot be made to ask more, and that needs your call.** Across §5r its attrition
+   load went **4.37 → 7.57 (+73%)** and its ask went **506 → 615 → 611** — it stopped, and a whole
+   extra dense room template moved it by −4. **A 17.8-room beeline gates on sustain *rate*, not on
+   total damage**: over the line the party clears however many rooms follow, under it it dies however
+   few. So tier 3's budget of 1000 is not reachable by this floor's content. Three coherent answers,
+   all design calls: lower the tier-3 budget to what the content can demand (~650); reshape the Vault
+   short-and-lethal so it gates on a spike; or raise the ceilings and accept losable rooms. Until then
+   the Vault also reports *asks no more than the tier before it* — because Emberfall rose to meet it,
+   not because the Vault fell.
+7. ~~**The player arrives over-provisioned; trim the payout.**~~ **Measured 2026-09-02 and
+   deliberately not cut (§5r).** Against the new asks the cushion is 1.00x / 1.10x / 1.70x / 1.48x /
+   1.88x — and §0g's own warning says every frontier number is measured against an *optimal* greedy
+   spend, so a ~1.5x cushion on the deep floors is plausibly the build-variance margin it tells us not
+   to tune away. That flips the reading: the suspicious rows are the **shallow** gates at 1.00x and
+   1.10x, where an imperfect build has no slack at all. Sampling a *median* build rather than an
+   optimal one (§0g) is the prerequisite for touching either.
+8. **XP per danger still varies 5.4x.** §5n's guard rooms pay the same XP as the rooms they outclass,
+   so the reward curve drifted behind the difficulty curve. §5r did *not* make this worse — filler
+   pays 1–2 XP, after a first cut at 6 XP measured **516 XP per danger** against the Dragon's 30 and
+   took the all-placement spread to 17x. Cut to filler wages it is back to 6.7x and the analyzer's own
+   figure held at 5.4x.
+9. **Blue Room is filler on a tier-1 finale**, and **Rotwater Deep (0.61) dips below its siblings**
    (0.73, 0.70) when it should be the Drowned March's hardest mid floor.
-8. **Play it.** Four passes have now landed without hands on the game: floors are more winding
+10. **Play it.** Four passes have now landed without hands on the game: floors are more winding
    (`ChainBias` 0.667 → 0.90/0.95), every run has a bespoke guard room, Sunken Depths and The Slag
    Halls deliberately sit at a 19–20% resource margin, and the merchant's stock has more than
-   doubled. The ten new icons are placeholders drawn to match the existing set — worth a look in the
-   hub inventory screen before they are treated as final.
+   doubled. The ten new item icons and two new enemy sprites are placeholders drawn to match the
+   existing sets — worth a look in the hub inventory screen and in a Counting Room fight before they
+   are treated as final. The Gilded Mote and Slag Hound also mean the three deepest floors now field
+   5–6 bodies at once, which no one has seen in play.
 
 ~~Teach the model that the player does not clear the floor~~ ✅ **§5m** (`TraversalModel`, beeline
 default). ~~Use `ChainBias`~~ ✅ **§5m** (peaks at 0.90–0.95, useless below ~8 rooms).
