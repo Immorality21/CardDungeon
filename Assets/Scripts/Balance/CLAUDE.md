@@ -301,10 +301,29 @@ the game, with every other check passing. So `PartyTurnsToKill` returning infini
 `Critical` (*"cannot be killed by the party at all"*) rather than being left to the danger bands.
 `EnemySupportModelTests` pins it.
 
-**What is still not priced:** a resistance or status-effect buff (`FireResistance`, `Frozen`, `Haste`).
-`BuffType` maps to `StatType` by name, the same way `BuffHandlerRegistry` builds its stat handlers, and
-anything with no matching stat is **skipped rather than guessed at** — putting an invented number into
-the danger index would be worse than a known omission.
+**Damage-over-time is priced; command gates and resistance buffs are not.** `EnemyMagicModel.OverTimeAgainst`
+folds a damaging over-time effect (`Burning`/`Poisoned`/`Bleeding`) into `DamageOfCast` over its full
+duration, using the tick's own element and its handler's `IgnoresDefense`. Without it a poison would
+price as **nothing at all** — it is authored as a Debuff, so the Damage filter skips it, and
+`CollectStatShifts` skips it too because its `BuffType` has no matching `StatType`. That is the exact
+shape of the resistance-buff bug: an effect that looked handled by two systems and was handled by
+neither. Two documented approximations, both pushing the term *up*: duration is charged in full, so a
+re-applied effect (the tracker refreshes rather than stacks) and one that outlives the fight are both
+over-counted.
+
+**What is still not priced:** a resistance buff (`FireResistance`), a turn-denial status (`Frozen`) and
+a **command gate** (`Silenced`). `BuffType` maps to `StatType` by name, the same way
+`BuffHandlerRegistry` builds its stat handlers, and anything with no matching stat is **skipped rather
+than guessed at** — putting an invented number into the danger index would be worse than a known
+omission. Silence is the one that bites hardest: it removes a hero's entire magic verb and prices as
+zero, which is why `Hush` ships at `CastWeight: 0` (drawable, never cast) rather than on an enemy's
+rotation. Pricing it needs a turn-denial term the closed form does not have; the nearest existing idiom
+is `EnemySupportModel`'s *measured* output suppression.
+
+**`EncounterSimulator` honours Silence on both sides.** `TakeHeroTurn` checks it before reaching for a
+slot, matching `RoomActionUI.BuildCommandMenu`; the enemy side is `EnemyActionPlanner`. Gating only one
+side would make the model read a silenced party as still casting — over-rating it against exactly the
+enemy Silence exists to make dangerous.
 
 ## Simulator caveats — read before trusting it
 

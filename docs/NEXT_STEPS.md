@@ -1,1683 +1,332 @@
 # Next Steps / TODO
 
-Running backlog of planned gameplay work. Keep this list current: add items as they're
-identified, and remove (or mark done) items as they ship. Ordered roughly by priority.
+Running backlog of planned gameplay work. Keep this list current: add items as they're identified,
+and **delete** them as they ship. Shipped work is recorded as one line in the ledger at the bottom —
+the *reasoning* behind it lives in `docs/BALANCING.md` and the per-subsystem `CLAUDE.md` files, not
+here. This file is a backlog, not a changelog.
 
-> Context: the core gameplay loop is mechanically **closed** (run start → multi-level
-> dungeon → CTB combat + Draw → win/death → persistent Gold/Essence → hub spend → stronger
-> next run). The remaining work is about making runs feel like *runs* — stakes, choice, and
-> a climax — rather than fixing broken plumbing.
+> Context: the core gameplay loop is mechanically **closed** (run start → multi-level dungeon → CTB
+> combat + Draw → win/death → persistent Gold/Essence → hub spend → stronger next run). The
+> remaining work is about making runs feel like *runs* — stakes, choice, and a climax — and about
+> giving the systems layer the content and the player-facing information it deserves.
 
 > Balance/tuning work: read **`docs/BALANCING.md`** first — it holds the lever interactions, the
 > measurement workflow and what previous passes learned, so a pass does not re-derive them.
 
-## Start here — the live thread (as of 2026-09-02)
+---
 
-**Current work: making the campaign losable and gating depth behind investment. The gate ladder now
-exists** — the frontier is measured per floor and the three deep tiers were raised to their budgets on
-2026-08-28 (§5k). **§5l** then cleared the last three spawn tails, lengthened the mid floors, and found
-that the floor model was pricing rooms the player never walks into; **§5m** fixed the model
-(`TraversalModel`, defaulting to beeline pricing) and spent `ChainBias`, the free lever it exposed;
-**§5n** then closed the mid-floor softness with one bespoke guard room per run; **§5o** gave every boss
-an escort; **§5p** taught the model that gear exists at all; **§5q** found that the rate it priced gear
-at was wrong in its units as well as its value; and **§5r** spent enemies-per-room and found that a
-long floor's ask does not answer to its difficulty at all; and **§5s** capped bodies at 6, doubled
-the sphere grids and priced their nodes by depth — which is what buys the headroom to keep escalating
-across many more floors. Read in this order:
+## Start here — the live thread (as of 2026-09-03)
 
-1. **`docs/BALANCING.md` §5g → §5h → §5i → §5j → §5k → §5l → §5m → §5n → §5o → §5p → §5q → §5r → §5s**,
-   in that order. They are a single
-   investigation and the later ones **correct** the earlier ones — §5i's headline ("party width
-   gates, XP does not") is **wrong**, §5j has the corrected surface, and **§5k is what shipped**
-   (the frontier tool, two bugs it found in the floor model, and the retune). Do not act on §5i
-   alone, and do not trust any floor number measured before §5k. **§5l and §5m supersede even those**:
-   the model used to assume a full floor clear, and the player walks 32–89% of one. Every floor number
-   is now priced at the **beeline**, so it is not comparable to anything written before 2026-08-29.
-2. **§0f and §0g below** — what shipped and what is left.
-3. **§3b** — the retry economy, reframed: **death is tuition, not a penalty**, by explicit decision.
+Three threads are live:
 
-**Decisions already taken — do not relitigate:**
+1. **Balance / losability** (§0–§0g) — making the campaign losable and gating depth behind
+   investment. The gate ladder exists and the frontier is measured per floor. Mature; mostly
+   decisions waiting on the user now.
+2. **Combat depth** (§9–§13) — added 2026-09-03 after a broad scan. The systems layer is far deeper
+   than the *verbs* sitting on it. **§9 (status effects) shipped the same day**: damage-over-time,
+   Silence, regeneration and the cure loop. **§10 (Defend) and §11 (threat/cover) are the next two**,
+   and they are the cheapest remaining wins in the section.
+3. **How the player gets magic** (§9b) — an open design question, raised 2026-09-03: should Draw stay
+   the primary route, or should the sphere grid become it? **Settle this before §4b (summons)**, which
+   assumes the grid's tips are where capability lives.
+
+**Reading order for the balance thread:** `docs/BALANCING.md` §5g → §5t, in order. The later ones
+**correct** the earlier ones — §5i's headline ("party width gates, XP does not") is **wrong**, §5j
+has the corrected surface, and §5k is what shipped. Every floor number is priced at the **beeline**
+since 2026-08-29 (§5m) and is not comparable to anything written before it. §5s repriced the sphere
+grid, so every *investment point* number written before 2026-09-02 is also incomparable.
+
+### Decisions already taken — do not relitigate
 
 - **Death is mandatory to progress.** Deeper tiers should be unclearable until the player invests.
   Do **not** add a death penalty or reduce the payout for dying (§3b).
 - **A range, not a checklist.** Each tier asks for more *total* investment than the last, and the
-  player chooses how to pay — a party slot, grid XP, or a blend. Roughly **1 hero ≈ 250 XP** (§0g).
+  player chooses how to pay — a party slot, grid XP, gear, or a blend. Roughly **1 hero ≈ 250 XP**
+  in pre-§5s units (§0g).
 - **The potion belt is not a lever.** 5 HP flat, 7–12% of the sustain pool. Retracted (§5h).
-- **How the grid is spent matters more than how much of it is owned** (2026-09-02, `BALANCING.md`
-  §0 + §5t). Committing to one branch is meant to pay off by reaching a capability — an **Ability**
-  or **Summon**, neither of which exists yet — *earlier* than a breadth build could, so it answers a
-  specific boss or obstacle. Breadth pays as even competence. **The two are never balanced 1:1 and
-  must not be**; this is loose configuration by design. One hard floor: the campaign's last floor may
-  never clear on under **15%** of a grid (`MinGridShareForLastFloor`; currently 37%). Do **not** tune
-  the deep branches toward the frontier — `GreedySpend` is a breadth build by construction, so it
-  prices a depth build as a mistake.
-- **The item catalog is about right; the *rate* was what was mispriced** (2026-09-02, §5q). Do not
-  weaken gear to close the gear-vs-XP gap — that call was taken after play, and the correction went
-  into `InvestmentPointsPerGold` (1.4, charged **per hero**) plus a 10% shop-price nudge.
-- **Party size being modelled at the bought-out cap is acceptable** for general difficulty reporting —
-  the user prefers the game to run harder than the model says — but it is *not* acceptable for the
-  frontier work, which is precisely about which party can pass.
+- **How the grid is spent matters more than how much of it is owned** (`BALANCING.md` §0 + §5t).
+  Committing to one branch is meant to pay off by reaching a **capability** — an Ability or a
+  **Summon** (§4b), neither of which exists yet — *earlier* than a breadth build could. Breadth pays
+  as even competence. **The two are never balanced 1:1 and must not be.** One hard floor: the
+  campaign's last floor may never clear on under **15%** of a grid (`MinGridShareForLastFloor`;
+  currently 37%). Do **not** tune the deep branches toward the frontier — `GreedySpend` is a breadth
+  build by construction, so it prices a depth build as a mistake.
+- **The item catalog is about right; the *rate* was what was mispriced** (§5q). Do not weaken gear to
+  close the gear-vs-XP gap. The correction went into `InvestmentPointsPerGold` (1.4, charged **per
+  hero**) plus a 10% shop-price nudge.
+- **Party size modelled at the bought-out cap is acceptable** for general difficulty reporting — the
+  user prefers the game to run harder than the model says — but **not** for frontier work, which is
+  precisely about which party can pass.
 
-**The next concrete steps** (updated 2026-09-02; floor numbers are priced at the **beeline**, the
-cheapest way through a floor. Steps 1–5 and 8 have shipped; **steps 6–7 are decisions waiting on
-you**, and steps 9–12 are the live ones):
+### Open balance steps
 
-1. ~~**Elemental reveal (§0b Phase 4c).**~~ ✅ Shipped 2026-08-29 — the knowledge record, an
-   in-combat **Inspect** page (free, FFX-style *Scan*) and a hub **Bestiary**. See §0b and
-   `docs/ELEMENTAL_PLAN.md`. The depth §0f named is now *spendable*: a ±50% swing the player could
-   not see is now one the party can learn, remember across runs and read back mid-fight. **What this
-   did not do is make anything harder** — the balance numbers are unchanged, and whether encounters
-   still read as *attack-spam plays this as well as thinking does* now needs re-measuring with the
-   information available.
-2. ~~**Give bosses adds.**~~ ✅ Shipped 2026-08-30. `RunLevelEntry.BossAdds` is an authored, guaranteed
-   escort standing with the boss in the sealed exit room — deliberately not an `EnemySpawnEntry`,
-   because a rolled climax is neither readable nor priceable. It reaches spawning
-   (`DungeonManager.PlaceBossIfConfigured`), the encounter model (`ReplaceExitRoomWithBoss`), the
-   floor simulation (`BuildFloorRooms`, which now takes the sealed room off the curve instead of
-   rebuilding it from `level.Boss`) and the per-level enemy list, all through one
-   `EnumerateBossAdds()`. Two model corrections came with it: `BossDanger` is now the whole **room**
-   (so `BossToTrashRatio` measures the climax the player walks into), and the boss room is judged
-   against `MaxBossDanger` (1.40) rather than the 1.0 spawn-tail ceiling — its spawns are guaranteed,
-   so it carries no information about a bad roll, and the tail finding's only suggestion ("lower
-   `SpawnChance`") named a field it does not have. Covered by three new `RunCurveModelTests`; the
-   suite is **771 passed / 0 failed**.
-
-   **Every boss now has one** (§5o, same day). The ratio band was passing a defect: it divides the
-   exit room by the level's *average* trash room, and against each floor's **hardest** room four of
-   five bosses were a dead heat — the Abyssal Warden was *easier* than a room on its own floor (0.47
-   against Warden's Post at 0.48). The fix was a **redistribution**, not an addition: one escort in,
-   the boss's own `Overrides` down ~45%, floor lethality held where §5k/§5n put it.
-
-   | floor | boss | HP/STR | escort | boss ÷ peak room | simulated wipe |
-   |---|---|---|---|---|---|
-   | Sunken Depths | Abyssal Warden | 105/13 → 50/9 | 1× Floating Eye | 0.98 → **1.19** | 0.04 → 0.05 |
-   | The Mire Throne | Mirefather | 165/17 → 92/13 | 1× Floating Eye | 1.08 → **1.16** | 0.50 → 0.47 |
-   | The Counting Room | Gilded Hoarder | 125/14 → 70/10 | 1× Floating Eye | 1.04 → **1.14** | 0.18 → 0.17 |
-   | Emberfall | Cinder Tyrant | 160/16 → 88/12 | 1× Cinder Imp | 1.03 → **1.38** | 0.62 → 0.66 |
-   | The Hollow Vault | Gilded Hoarder | 200/22 → 112/16 | 1× Hex Weaver | 1.48 → **1.67** | 1.00 → 1.00 |
-
-   Every boss room is now its floor's hardest fight and every simulated wipe rate is within 0.04 of
-   where it started. Findings **0 critical / 79 warning → 0 / 78** (the Hollow Vault Hoarder's
-   27.7-party-turn fight cleared itself when its health halved). The XP loop softened The Slag Halls
-   0.80 → 0.64 two runs away, restored with `Difficulty` 3.35 → 3.75. Suite **771 / 0**. Full
-   reasoning and the four things it learned: **`docs/BALANCING.md` §5o**.
-
-3. ~~**Price gear.**~~ ✅ Shipped 2026-08-30 (§5p). **`GearLoadout`** spends a gold budget off the item
-   catalog greedily and deterministically — the gear counterpart of `SphereGridOps.GreedySpend` — so
-   gear no longer depends on a machine-local save file. Gold is now the frontier's **third axis**,
-   converting at `GoldPerInvestmentPoint`; 1:1 is the game's own rate, since the tavern charges 220–260
-   gold for a hero and `HeroXpEquivalent` prices that same hero at 250. `ReferencePartyGoldBudget` is
-   the reproducible replacement for the saved-gear toggle, defaulting to **0** so no published number
-   moved. Covered by `GearLoadoutTests` + 5 new frontier tests; suite **788 / 0**.
-
-   **"Loot is counted but never equipped" turned out not to be a modelling gap.** Equipping happens
-   only in `InventoryHubUI`, so gear is a **between-run** axis: a loadout is fixed for a whole run,
-   and loot's contribution really is gold and *next* run's options. That collapsed what looked like a
-   per-floor gear loop into one spend per mix — but it did expose a real bug: `RunCurveModel` passed
-   `null` for the gear lookup when rebuilding the party per floor, so a gear budget dressed the party
-   for floor 1 and undressed it for every floor after.
-
-   **What it found is bigger than the plumbing.** With the lookup carried, one **339-gold** purchase
-   more than halves the attrition of the entire campaign (every gate floor falls inside the clearable
-   band; the analyzer's warning count goes 4 → 48, mostly *"no threat at all"*). The frontier agrees in
-   its own units: Sunken Depths clears at either **(1 hero, 550 XP)** or **(1 hero, 75 XP, 201g gear)**
-   — 201 gold substituting for ~475 XP, so gear buys roughly **2.4× the survivability per investment
-   point** that the sphere grid does. ~~**This needs a decision**~~ — **taken 2026-09-02: the rate was
-   wrong, not the content. See step 4 and §5q.**
-
-   One thing gear *did* fix outright: **"This tier is a checklist, not a choice" is gone.** Every tier
-   now offers at least two affordable ways to pay, which is §0g's "a range, not a checklist" — gear was
-   the missing third route.
-4. ~~**Price gold against XP honestly.**~~ ✅ Shipped 2026-09-02 (§5q). The user's call on step 3:
-   **the items are about right, the rate was wrong** — so shop prices got a light 10% nudge
-   (rarity bases 20/45/90/180/350 → 22/50/100/200/385) and the correction went into the frontier.
-   Three things came out of it:
-
-   - **The rate was in the wrong *unit*, and that mattered more than its value.** Swept as iso-clear
-     curves it fell with every extra body — 1.3 points per gold solo, 0.7 at two heroes, 0.5 at three
-     — because `xpPerHero` is per-hero while `goldOnGear` is a pool the whole party shares. `CostOf`
-     was adding two different units, so **no single scalar could have been right**. Charged per hero
-     it is flat at **≈1.4** across the whole campaign. `GoldPerInvestmentPoint` (an `int`, `Min(1)`,
-     which could not even *express* a rate above 1:1) is now **`InvestmentPointsPerGold`, a float**.
-   - **Resistance is part of the gear ranking now**, via a new `IncomingDamageMix` — the share of a
-     floor's incoming damage carrying each element. It is priced as the equivalent health it buys,
-     which needs no new tuning constant, compounds with the health bar, and is **conditional**: a Fire
-     ward is a purchase on Emberfall and a waste on the Mire.
-   - **Ten new items**, with placeholder pixel art. `Hands` is filled, the Simple Sword is no longer
-     a strictly-dominated empty row, gear touches Intelligence / Spirit / Luck for the first time, and
-     a full loadout is **1025g per hero** rather than 359g — so the gold axis stops saturating inside
-     its first rung. No Holy ward was authored: no enemy in the game deals Holy, so it would have
-     scored zero.
-
-   Findings **0 critical / 78 warning → 0 / 77**, suite **798 → 813 passed / 0 failed**. No attrition
-   or wipe number moved (`ReferencePartyGoldBudget` is still 0). Full reasoning:
-   **`docs/BALANCING.md` §5q**.
-
-5. ~~**Three tiers sit under budget.**~~ ✅ **Two closed 2026-09-02 (§5r); the third is a decision —
-   see step 6.** Enemies per room was the live lever; rooms per floor was not, and the reason is
-   §5m: the player walks only 57–66% of these floors, so a room added at random is 0.6 of a room
-   priced, and these floors were already the longest in the game.
-
-   | Finale | Tier | Budget | §5k | §5q | now |
-   |---|---|---|---|---|---|
-   | Sunken Depths | 0 | 200 | 150 | 150 | **150** |
-   | The Counting Room | 1 | 450 | 400 | 281 | **356** ✅ |
-   | The Mire Throne | 1 | 450 | 475 | 356 | **356** ✅ |
-   | Emberfall | 2 | 700 | 800 | 431 | **611** ✅ |
-   | The Hollow Vault | 3 | 1000 | 1050 | 506 | **611** ❌ |
-
-   **What was in the way was the roster, not the rooms.** `EvaluationCount` was 1 on every spawn entry
-   in the game, but spending it overshot instantly — eight non-boss enemies all sit in a 4x danger
-   band (HP 14–20, STR 4–6), so adding any body to a two-body room took it from 0.41 to 0.78–0.93,
-   past the 1.0 unwinnable-roll ceiling, for an ask of +6% on the Vault. Two **filler enemies** now
-   exist (`GildedMote`, `SlagHound`, placeholder art) plus a fourth Vault room template
-   (`CoinfallGalleryRoom`). Boss escorts rose with the trash to hold `MinBossToTrashRatio`.
-
-   **The lesson worth keeping: in a CTB system an enemy's danger is driven by how often it acts, not
-   by how much health it has.** The first Mote was authored fragile-and-fast (HP 8 / AGI 9) and added
-   +0.37 to a room — nearly a whole enemy. At HP 6 / AGI 4 it adds +0.12, which is an increment a
-   tuning pass can actually aim with.
-
-   Every worst-case room is still under 1.0, every boss under 1.40, every ratio over 1.8, ways-to-pay
-   up to 3–5 per tier, suite **813 / 0**.
-6. **Re-derive the tier budgets against the new grid, then settle the Hollow Vault.** §5s doubled
-   the sphere grids and repriced every node by depth, so **"investment point" now means something
+1. **Re-derive the tier budgets against the new grid, then settle the Hollow Vault.** §5s doubled the
+   sphere grids and repriced every node by depth, so **"investment point" now means something
    different** — one XP buys 1/7.6 of the power it did. Every budget, tolerance and exchange rate was
-   converted x7.5, which preserves the measured relationships but is coarse: post-conversion every
+   converted ×7.5, which preserves the measured relationships but is coarse: post-conversion every
    tier reads under budget (asks 350 / 1200 / 1894 / 2744 / 3444 against 1500 / 3400 / 3400 / 5250 /
-   7500). **Those five findings are the conversion, not five new problems** — re-measure before acting
-   on any of them, and treat every frontier number written before 2026-09-02 as incomparable.
-
-   The Vault decision below still stands underneath it, and §5s makes one option much stronger:
-   with the grid now the long axis, the honest reading is that the *current* campaign is about to
-   become the early game, so a tier-3 budget set for "the endgame" belongs to whatever floor is last
-   *after* the expansion, not to the Hollow Vault.
-7. **The Hollow Vault cannot be made to ask more by making it harder.** Across §5r its attrition
-   load went **4.37 → 7.57 (+73%)** and its ask went **506 → 615 → 611** — it stopped, and a whole
-   extra dense room template moved it by −4. **A 17.8-room beeline gates on sustain *rate*, not on
-   total damage**: over the line the party clears however many rooms follow, under it it dies however
-   few. So tier 3's budget of 1000 is not reachable by this floor's content. Three coherent answers,
-   all design calls: lower the tier-3 budget to what the content can demand (~650); reshape the Vault
-   short-and-lethal so it gates on a spike; or raise the ceilings and accept losable rooms. Until then
-   the Vault also reports *asks no more than the tier before it* — because Emberfall rose to meet it,
-   not because the Vault fell.
-8. ~~**The player arrives over-provisioned; trim the payout.**~~ **Measured 2026-09-02 and
-   deliberately not cut (§5r).** Against the new asks the cushion is 1.00x / 1.10x / 1.70x / 1.48x /
-   1.88x — and §0g's own warning says every frontier number is measured against an *optimal* greedy
-   spend, so a ~1.5x cushion on the deep floors is plausibly the build-variance margin it tells us not
-   to tune away. That flips the reading: the suspicious rows are the **shallow** gates at 1.00x and
-   1.10x, where an imperfect build has no slack at all. Sampling a *median* build rather than an
-   optimal one (§0g) is the prerequisite for touching either.
-9. **XP per danger still varies 5.4x.** §5n's guard rooms pay the same XP as the rooms they outclass,
-   so the reward curve drifted behind the difficulty curve. §5r did *not* make this worse — filler
-   pays 1–2 XP, after a first cut at 6 XP measured **516 XP per danger** against the Dragon's 30 and
-   took the all-placement spread to 17x. Cut to filler wages it is back to 6.7x and the analyzer's own
-   figure held at 5.4x.
-10. **Build summons — §4b has the spec.** Depth in the sphere grid is supposed to pay off by
-   unlocking a *capability* early rather than a bigger stat, and nothing like that exists yet, so the
-   deep branches §5s added are stat nodes wearing thematic names. **Two summons per grid at the tips
-   of two branches**, on per-run charges, as a temporary extra combatant scheduled by `TurnManager`.
-
-   The balancing reason is the strong one: the game currently has **one difficulty dial** — every
-   lever feeds the same sustain pool, which is why §5r found a long floor's ask barely answers to its
-   difficulty. A bounded burst on a per-run charge splits it into **floor-attrition-versus-sustain**
-   and **boss-versus-burst**, and it is the first *key*-shaped gate the game would have. Build the
-   balance-model half last but non-negotiably: `InvestmentFrontier` reporting the ask **with and
-   without** a summon is the key-versus-wall number rule 3 has been missing (§5t).
-11. **Blue Room is filler on a tier-1 finale**, and **Rotwater Deep (0.61) dips below its siblings**
+   7500). **Those five findings are the conversion, not five new problems** — re-measure before
+   acting on any of them.
+2. **The Hollow Vault cannot be made to ask more by making it harder.** Across §5r its attrition load
+   went **4.37 → 7.57 (+73%)** and its ask went **506 → 615 → 611** — it stopped, and a whole extra
+   dense room template moved it by −4. **A 17.8-room beeline gates on sustain *rate*, not on total
+   damage.** Three coherent answers, all design calls: lower the tier-3 budget to what the content
+   can demand (~650); reshape the Vault short-and-lethal so it gates on a spike; or raise the
+   ceilings and accept losable rooms. §5s makes a fourth reading strong: the *current* campaign is
+   about to become the early game, so a tier-3 budget set for "the endgame" belongs to whatever floor
+   is last *after* the expansion. Until then the Vault also reports *asks no more than the tier
+   before it* — because Emberfall rose to meet it, not because the Vault fell.
+3. **The cushion is 1.00× / 1.10× / 1.70× / 1.48× / 1.88×** against the new asks and was deliberately
+   **not** cut (§5r). Every frontier number is measured against an *optimal* greedy spend, so a ~1.5×
+   cushion on deep floors is plausibly the build-variance margin §0g says not to tune away. That
+   flips the reading: the suspicious rows are the **shallow** gates at 1.00× and 1.10×, where an
+   imperfect build has no slack at all. **Sampling a *median* build rather than an optimal one is the
+   prerequisite for touching either.**
+4. **XP per danger still varies 5.4×.** §5n's guard rooms pay the same XP as the rooms they outclass,
+   so the reward curve drifted behind the difficulty curve. Two measured, ready, deliberately
+   unapplied follow-ons (this is progression pacing, not tuning): `XpMultiplier ∝ Difficulty²`
+   **normalised per run** (takes it to 3.5× with no new findings — do **not** normalise globally, it
+   starves The Threshold badly enough to make Sunken Depths unclearable), then a per-asset `XpReward`
+   pass (Cinder Imp 14→18, Dragon 10→14, Stone Sentinel 14→11, Bog Shaman 10→6, Floating Eye 10→9)
+   which takes the per-asset spread to 1.1×.
+5. **Build summons — §4b has the spec.** The game currently has **one difficulty dial**: every lever
+   feeds the same sustain pool, which is why §5r found a long floor's ask barely answers to its
+   difficulty. A bounded burst on a per-run charge splits it into floor-attrition-versus-sustain and
+   boss-versus-burst, and it is the first *key*-shaped gate the game would have.
+6. **Blue Room is filler on a tier-1 finale**, and **Rotwater Deep (0.61) dips below its siblings**
    (0.73, 0.70) when it should be the Drowned March's hardest mid floor.
-12. **Play it.** Five passes have now landed without hands on the game: floors are more winding
+7. **Play it.** Six passes have landed without hands on the game. Floors are more winding
    (`ChainBias` 0.667 → 0.90/0.95), every run has a bespoke guard room, Sunken Depths and The Slag
    Halls deliberately sit at a 19–20% resource margin, and the merchant's stock has more than
-   doubled. The ten new item icons and two new enemy sprites are placeholders drawn to match the
-   existing sets — worth a look in the hub inventory screen and in a Counting Room fight before they
-   are treated as final. The Gilded Mote and Slag Hound also mean the three deepest floors now field
-   5–6 bodies at once, which no one has seen in play.
+   doubled. The ten new item icons and two new enemy sprites are placeholders. The Gilded Mote and
+   Slag Hound mean the three deepest floors now field 5–6 bodies at once, which no one has seen in
+   play.
 
-~~Teach the model that the player does not clear the floor~~ ✅ **§5m** (`TraversalModel`, beeline
-default). ~~Use `ChainBias`~~ ✅ **§5m** (peaks at 0.90–0.95, useless below ~8 rooms).
-~~The mid floors are soft~~ ✅ **§5n** — one bespoke guard room per run; every mid floor is now
-0.55–0.81 and **every worst-case room danger in the game is under 1.0** for the first time.
+A published summary of the balance work (readable tables of the floor curve and the investment
+surface) lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606c48a1a3>.
 
-**A published summary of all of this** (readable tables of the floor curve and the investment surface)
-lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606c48a1a3>.
-
-## Done
-
-- **Boss encounters (run climax).** ✅ Shipped. `EnemySO.IsBoss` + `EnemyArchetype.Boss`
-  (`BossBehavior`: telegraphed party-wide signature AoE + enrage below 30% HP). Placed via
-  `RunLevelEntry.BossEnemy` — guaranteed alone in the exit room, which is sealed (no flee).
-  Boss-only presentation: intro banner, larger crimson HP bar, and escalating victory copy
-  (`Boss Slain!` / `Dungeon Conquered!` via `CombatResult.BossDefeated`/`RunCompleted`).
-  Example asset `AbyssalWarden` wired into `TutorialRun`'s final level. Covered by
-  `BossBehaviorTests`. *(Follow-up: swap the placeholder sprite for real boss art; consider
-  boss-specific loot/Draw tables and multi-add boss rooms.)*
-
-- **Balance analyzer (tooling).** ✅ Shipped. `Assets/Scripts/Balance/` is a pure-C# balance model
-  (`BalanceRulesSO` targets, `BalanceMath` danger index, `EncounterModel` spawn-table expectation,
-  `RunCurveModel` attrition curve, `VarietyAnalyzer` one-dimensionality, `EncounterSimulator` headless
-  battles, `SaveAudit` live-save progression) driving three consumers: the
-  **`Tools ▸ Balance ▸ Balance Analyzer`** window (colour-coded tables with the offending stats
-  editable in place), **`BalanceRegressionTests`** (the same analysis as EditMode assertions), and a
-  derived-numbers footer on the `EnemySO` inspector. The Manual Level Layout editor has an
-  *Analyze balance* button that hands its layout to the window. See `Assets/Scripts/Balance/CLAUDE.md`.
-  *(Follow-up: no `BalanceRules.asset` is checked in yet — the window's "Create rules asset" button
-  writes one; until then it runs on the code defaults.)*
-- **Elements & Unlocks tab.** ✅ Shipped. `ProgressionMap` models the Draw tables as a supply chain and
-  the tab visualises it: an unlock timeline per run (what each run/level first makes drawable, and which
-  combos that enables), a magic availability matrix (every magic against every run, enemies and charge
-  counts in the tooltip, unreachable magic flagged), and per-level elemental coverage — resistance and
-  weakness share plus whether those resistances are in elements the player can bring *yet*. New findings:
-  unreachable combos, unreachable magic named outright, resistances the player cannot answer, front-loaded
-  unlocks. Covered by `ProgressionMapTests`.
-
-- **Test suite repair + a headless test runner.** ✅ Shipped 2026-08-21. The EditMode suite had rotted
-  to **46 failures of 339** during the §6 stat rework and nobody could see it, because the project's
-  own notes said an EditMode run could not be observed from an MCP command (the domain reload kills
-  the sandbox assembly holding the `ICallbacks`). That is only true of the *async* run:
-  **`ExecutionSettings.runSynchronously = true`** runs in-process with no reload, so the whole suite
-  now runs from one command in about a second. `docs/GAMEPLAY_VALIDATION.md` gotcha 12 carries a
-  copy-paste harness, and the root `CLAUDE.md` had the framework version wrong (1.1.33 → **1.7.0**).
-
-  With that in hand the 46 were diagnosed and fixed - every one a stale *test*; the production code
-  was right every time. Four root causes, all §6 fallout:
-  **(1) `Stats.Health` became separate from the `MaxHealth` attribute**, so 13 tests that staged a
-  wounded, dead or enraged unit by writing `Stats[MaxHealth]` were resizing the bar under a full one -
-  a "dead" unit stayed alive, an "enraged" boss read 500% health, and a heal clamped to nothing.
-  **(2) Damage scaling became opt-in** (`SpellEffect.ScalingStat`, `None` = flat), so 26 assertions
-  written as "caster's Strength + card power" no longer described the cards they built.
-  **(3) `SimUnit.Effective`/`AttackStat` are not derived from `Stats`**, so balance-model test
-  factories produced units with 0 defense, 0 agility and no buffable attack stat (5 tests).
-  **(4) `RunCurve` deliberately discounts the party's starting room** (`EnemyManager` never spawns
-  there), which the model documents and 7 tests predated.
-  Baseline measured by stashing the room-events work and re-running: **46 before, 46 after** - so
-  none of it was caused by that change - then **1 after the repair**.
-
-  The one remaining red was `BalanceRegressionTests.EveryHeroHasSomewhereToLevelTo`, a *true
-  positive*, not rot: the Warrior had one `LevelConfiguration` and capped at level 2. Left red
-  deliberately until §4 shipped (2026-08-22): the test is now `EveryHeroHasSomewhereToSpendXp`,
-  re-pointed at the sphere-grid findings, and went legitimately green when the four grids landed —
-  the suite is **435 passed / 0 failed** for the first time.
+---
 
 ## Backlog
 
-### 0. Act on the balance findings (highest priority)
+### 0. Open balance findings
 
-> **2026-08-25, from play: charges are now a *run* resource.** A full Drowned March clear reported as
-> "a breeze" turned out to be structural rather than a tuning miss - `CombatManager` refilled every
-> magic charge at the start of *every combat*, so a three-hero party entered every room with a dozen
-> casts including ~24 HP of free healing, and a floor's damage could never accumulate. All 63 simulated
-> encounters won 100% of the time with the worst room in the game ending at 70% health. `RefillCharges`
-> now runs only on a run's first floor, and `MagicKnown` sphere-grid nodes give each hero one
-> permanently-carried spell so a spent party is not an unarmed one. **The closed-form curve below is
-> therefore a better model than it was** (it always priced basic attacks only, which is now much closer
-> to how fights actually go) - but every number in this section predates the change and wants a
-> re-measure after play. Full write-up: `docs/BALANCING.md` §5f.
+Current analyzer state: **0 critical / 77 warning**; suite **813 passed / 0 failed**.
 
-The analyzer is in place; **most of its findings are still open.** The numbers below were
-re-measured on 2026-08-20 against the level-1 party — the earlier figures in this section had gone
-stale, because both the Abyssal Warden's Attack and the hero bars had been edited since they were
-written. Current party: Warrior 10/5/**13**/5, Tank 5/15/**17**/5, 30 HP pool + 2 potions (sustain 40).
-
-- ~~**Hero HP is on the same scale as per-hit damage.**~~ ✅ Fixed. Hero bars went 6/8 → **13/17**
-  (`HeroSO.BaseHealth`; level-2 `HealthGain` scaled 3/4 → 7/9 to keep the same ~50%-of-base step).
-  13 is the analyzer's own `SuggestedHeroHealth` — worst ordinary hit × `TargetHitsToKillHero`; the
-  Tank is set higher so its role reads. Every ordinary enemy lands 2.14 average damage, so the
-  Warrior now survives **7 hits** and the Tank **8**, against a floor of 3 and a target of 6. This
-  cleared all three *unclearable level* criticals, all three *bad spawn roll is unwinnable*
-  warnings (worst-case danger 1.30 → under 1.00), the *Heal heals more than the Warrior's entire
-  bar* warning, and both *potion* findings. Verified in-editor against the real analyzer:
-  **3 critical / 12 warning / 11 info → 0 critical / 12 warning / 9 info** (four warnings fixed,
-  four new ones opened — see the next bullet).
-- **Nothing is a threat on its own any more — the flip side of the HP fix.** Cinder Imp, Dragon and
-  Hex Weaver now sit at solo danger 0.043–0.068, under the 0.08 *no threat at all* floor, and
-  Cinder Imp / Dragon / Hex Weaver die in 1.0 / 1.2 / 1.9 party-turns against a 2-turn floor. The
-  cause is that **every enemy in the game has `Attack: 3`**, which after the defense curve rounds to
-  2 damage against *both* heroes — so the Tank's 15 Defense (a 43% reduction) buys literally nothing
-  over the Warrior's 5. Enemy Attack is the next lever, and it is blocked (see below).
-- **Room count is the gate on everything else.** `TestTemplate` generates **25 rooms** from a 4-room
-  pool → ~12.5 combat rooms per level, and `HealAll()` only fires on entering a fresh dungeon, so HP
-  is a level-scoped resource. That room count is what forces enemy damage to stay trivial: modelled
-  at the current 12.5 rooms, raising every enemy's Attack to put trash back inside its danger band
-  (×4–×5, Attack 12–15) takes attrition to **3.8–4.7×** the sustain pool. The three levers are
-  coupled — hero HP ↓ danger, enemy Attack ↑ attrition, room count ↑ attrition — so **room counts
-  have to come down before enemy Attack can come up.** Left alone here deliberately: it is level
-  design, not a stat tweak.
-- **`Test3` still leaves only 7% of the party's resources** (attrition 0.93 against a 0.80 ceiling).
-  It is the one level the HP pass could not pull into band, and it is a room-count problem —
-  inflating HP further to fix it only pushes more enemies under the threat floor.
-- **Curve shape is +234%, 0%, +31%** — the Tutorial→Test1 jump is 3× the +75% ceiling and
-  Test1→Test2 is flat, because Test1/2/3 all share `TestTemplate`. Three levels from one template is
-  the actual cause; the curve cannot escalate while it is the same level three times.
-- ~~**The elemental layer is inert.**~~ ✅ Fixed. Every enemy now carries one weakness and one
-  resistance at ±50%, in elements the player can actually draw: Floating Eye (weak Fire / resists Ice),
-  Dragon (resists Fire / weak Ice), Abyssal Warden (resists Fire / weak Lightning). Resistance is applied
-  *before* defense, so ±50% is a 1.5x/0.5x swing; 100% is flat immunity and above it **heals the target**,
-  which is why nothing is authored past ±50 while the player still cannot see resistances pre-cast.
-- ~~**Draw tables starve the elemental and combo layers.**~~ ✅ Fixed. Draw coverage went 4/10 → **10/10**
-  and reachable combos 1/4 → **4/4**: Floating Eye offers IceShard/WaterSplash/Heal (Freeze), Dragon offers
-  Fireball/OilSlick/Slash/WarCry (Ignite), Abyssal Warden offers LightningBolt/ShieldUp/PoisonDart at boss
-  charge counts (Conductor; Infection pairs the boss's PoisonDart with the Dragon's Slash). No two enemies
-  share a magic any more. *(Follow-up: `Tutorial` now unlocks 70% of the catalog at once — both trash types
-  are in its room pool — so the unlocks are front-loaded and the tool flags it. Loot is still duplicated
-  between Floating Eye and the Warden.)*
-- **The boss is in band, the trash is not.** Abyssal Warden: solo danger 0.72 against a 1.40
-  ceiling, 9.0 party-turns to kill against a 20-turn ceiling, and **4.3×** the level's average trash
-  room (band 1.8–6×). Its ×1.6 signature AoE lands 4.29 on the Warrior and 3.22 on the Tank — no
-  longer a one-shot. The boss no longer needs softening; the trash around it needs sharpening.
-- **4 of 7 enemies are `Aggressor`** — Stone Sentinel (Bruiser), Bog Shaman (Healer) and Hex Weaver
-  (Debuffer) added a mix, but the archetype share is still the majority.
-- **A bad spawn roll is still unwinnable on paper** — Cavern at a full roll (Stone Sentinel + 2
-  Cinder Imps) reads worst-case danger **1.30** on every generated level.
-- ~~**Healing has no texture.**~~ ✅ Fixed by the HP pass. The 5 HP potion is now 38% of the
-  Warrior's bar and 29% of the Tank's (ceiling 60%), and `Heal` at power 6 is 46% / 35%.
-- **Progression dead-ends at level 2** (one `LevelConfiguration` each, now +7/+9 HP), its Agility gain of
-  +5 on a base of 5 doubles turn rate in one level, and **only the leader gains XP**
-  (`Party.AddXpToLeader`), so the Tank never levels at all.
-- **Fights have no decisions in them, and the re-measure says it is worse than this bullet.**
-  Re-measured 2026-08-26 with simulation on, against the real assets and the party that actually
-  reaches each fight: **63 of 63 simulated encounters win 100% of the time**, and all 63 trip
-  *Attack-spam plays this fight as well as thinking does*. The worst room in the game (Ember Vault)
-  ends at **63% health**. The best depth gap anywhere is the Dragon's **0.063** against a 0.05
-  tolerance, and what nine casts buy there is end-health (68% → 80%), never a loss turned into a win —
-  because there are no losses. **Depth is downstream of losability**: three policies that all win
-  every time are not three strategies. Meanwhile fight *length* is already over the line (Gilded
-  Hoarder 22.7 turns, Sunken Swamp 21.0, both at 80–100% end health), so enemy health is the wrong
-  lever and enemy strength is the right one. Hex Weaver and Stone Sentinel end fights at **99%**
-  health and Bog Shaman at 97–98%, so the Debuffer and the Healer are both formalities — a healer only
-  has to be focused if unfocused healing beats the party's damage. Full write-up, table and
-  reproduction: `docs/BALANCING.md` §5g. **Root cause found 2026-08-26** — the 100% was an artefact of
-  measuring rooms rather than floors, and the fights genuinely cannot be lost. See §0f below and
-  `docs/BALANCING.md` §5h.
-- **Save audit.** Re-run after the HP pass: the live save (Gold 1363, Essence 30) no longer **dies on
-  Test3** — that finding is gone. What remains is *informational*: the Warrior is capped at level 2
-  with 68 XP going nowhere, and maxing a single magic costs 45 level-clears. Both heroes resolve
-  cleanly against the new `HeroSO.Key` values (`Warrior`, `Tank`).
-
-Where the count stands — real analyzer, closed-form, no simulation or save audit:
-**0 critical / 4 warning / 9 info** (re-measured 2026-08-21 after the room-events change, which the
-balance model does not read at all). The four: the Warrior's level-2 cap, the Warrior's and the
-Tank's +100% level-2 Agility steps, and *+MaxHealth gear is never filled at level start*. Earlier
-notes in this section quote **0 / 3 / 9** — that undercounted by one, missing the Tank's Agility
-step, which is an authoring warning rather than a starting-lineup one. The path there: 3 / 12 / 11 → 0 / 12 / 9 after the hero-HP
-pass → 0 / 5 / 11 after the solo-start roster rework (§5) → **0 / 1 / 11 after the sphere grid
-(§4, 2026-08-22)**: the Warrior's level-2 cap and both +100% Agility warnings are gone (the grid
-splits the +5 AGI steps by construction), and the regression suite is fully green — the last red,
-`EveryHeroHasSomewhereToLevelTo`, was re-pointed at the grid findings as
-`EveryHeroHasSomewhereToSpendXp`. The one warning left is the pre-existing *+MaxHealth gear is
-never filled at level start* bug. Two new Infos are real signal from the model change: with the
-XP loop closed, the modelled party now grows per floor, which flattens the back half of the run
-curve (Levels 2→3 read -6% / +1%) — a tuning note for the next balance pass, not a regression.
-
-Two findings closed themselves as a consequence of §5 rather than any tuning: the three
-*no threat at all* enemies (a solo starting party makes trash matter again) and the
-Tutorial→Test1 difficulty spike (+234% → **+27%**, because the level-1 party is one hero and the
-level-2 party is two). The bullets above that describe those problems are kept for the reasoning,
-not as current state.
-
-The 12 open warnings, grouped: three *no threat at all* enemies and `Test3`'s thin margin (above);
-four progression warnings (two heroes capping at level 2, two level-2 Agility doublings of +100%);
-*only the party leader gains XP* (**gone** since 2026-08-22 — see §5);
-~~*+MaxHealth gear is never filled at level start*~~ ✅ **fixed 2026-08-25, and it was worse than the
-finding said**: `UnitHealthBar` read the base stat too, so **+MaxHealth gear was doing nothing at all**
-— only the potion path honoured it, which made the one place it applied an inconsistency rather than a
-bonus. Every health ceiling now reads `GetEffectiveStat(MaxHealth)`: `Party.HealAll`, the heal and
-absorb clamps in both executors and `CombatManager`, the HP bar, the room-bar HP text, the wounded-
-breathing threshold and enemy target selection. Enemies are unaffected (`Enemy.GetEffectiveStat`
-returns the raw stat). The analyzer check that proxied it is **deleted** — it fired on the mere
-existence of a +MaxHealth item, so it would have become a permanent false positive — and replaced by
-`EffectiveMaxHealthTests`, which pins the clamps reachable without a MonoBehaviour;
-`Tutorial` unlocking 60% of the magic catalog at once; and the Tutorial→Test1 spike.
-
-~~Revised fix order, now that HP is done: **level room counts → enemy Attack → per-level templates
-(curve shape)**~~ ✅ **All three done 2026-08-21.**
-
-- **Templates renamed and split.** The placeholder `NoobTemplate` / `TestTemplate` / `TutorialTemplate`
-  became **`UpperHalls`** / **`CollapsedCaverns`** / **`DungeonEntrance`**, plus a new
-  **`SunkenDepths`**, and `TutorialRun`'s three generated levels now use **one template each**
-  instead of sharing one — which is what made `Test1→Test2` a flat 0% jump. Each pool escalates by
-  roster, not just size: Eye/Dragon → + Stone Sentinel (Bruiser) → + Bog Shaman (Healer) and Hex
-  Weaver (Debuffer). `BlueRoom` is deliberately unused — 6 spawn evaluations make it a 15 HP,
-  2.40-worst-case outlier that belongs in an elite room.
-- **Room counts down, enemy Attack up.** 15 rooms → **9 / 7 / 5** (about 6 / 4.5 / 3 combat rooms),
-  and Attack went off the flat 3 to a tiered **Eye 4, Dragon 5, Cinder Imp 5, Stone Sentinel 4,
-  Bog Shaman 4, Hex Weaver 6, Warden 5**. That fixes the granularity problem the HP pass exposed:
-  at Attack 3 every hit rounded to 2 against *both* heroes, so the Tank's 15 Defense bought nothing.
-  It now takes 4.3 on the Warrior and 3.2 on the Tank.
-- **Curve: 0.25 → 0.37 → 0.42 → 0.61**, jumps **+45% / +15% / +46%** — every level inside the 0.80
-  attrition ceiling and every jump inside the +10%..+75% band, with headroom left for §2's events to
-  spend. The tutorial was also lightened to a single Pink Room fight plus the exit: it is a tutorial,
-  and a solo party pays roughly 4× the attrition of a pair.
-- **Findings: 0 critical / 3 warning / 9 info**, regression **8 of 9 green**. The three warnings are
-  the Warrior's level-2 cap and its +100% Agility step (both §4's to delete) and the pre-existing
-  *+MaxHealth gear is never filled at level start* bug.
-
-~~*(Also worth deciding before hand-tuning: whether enemy difficulty stays hand-authored per `EnemySO`
-or scales from data.)*~~ ✅ **Decided and built 2026-08-25 — it scales per level.** The question was
-answered by measurement, not taste: **Floating Eye and Dragon appear in all ten authored levels**,
-against parties from 40 HP / 0 spent XP to 64 HP / 176. Only the three bosses are single-level. One
-authored stat block provably cannot be right in both places.
-
-**An `EnemySO` is now a template and the level owns the numbers.** `RunLevelEntry.EnemyTuning`
-(`LevelEnemyTuning`) resolves as `template → × Difficulty → × StatScales[] → Overrides[]`, plus
-`XpMultiplier`/`GoldMultiplier`. `DungeonManager` hands it to `EnemyManager.SetLevelTuning` before
-generation so it covers ordinary spawns, the boss and anything a room event wakes; `Enemy.Initialize`
-stamps it and the kill rewards follow it. Pure and covered by `LevelEnemyTuningTests`. A level with
-nothing authored is `Difficulty 1`, i.e. exactly the old behaviour.
-
-Consequences through the model: `EnemyMetrics` is now **one row per (enemy, level)** rather than one
-per asset, findings name the placement ("Floating Eye in … Rotwater Deep") and their suggestions name
-that level's `Difficulty`. The **`EnemySO` balance footer is deleted** — the numbers it showed belong
-to a level, not an asset — and the analyzer's Enemies tab gained Level and Difficulty columns, the
-latter editable in place.
-
-**The hero-HP fix, and why "enemy Strength is maxed" was the wrong diagnosis.** Per-level measurement
-immediately exposed something the per-asset view hid: **11 of 36 placements sat on the 3-hit floor**
-and 34 of 36 were under the 6-hit target, almost always killing the **Scout** (10 HP / 3 Endurance).
-That is §5 fallout — the earlier 6/8 → 13/17 hero-HP pass predates the Scout and Acolyte, who never
-got it. Bars went **Warrior 13→26, Scout 10→22 (END 3→5), Acolyte 19→24, Tank 17→22**; the Tank was
-already at target because 15 Endurance halves incoming damage. Every placement is now 4–5 hits, which
-is what gives enemy Strength headroom at all.
-
-**The tuning pass itself.** Enemy templates were made proportionate to each other (they were spread
-3× apart — Dragon died in 1.1 party turns at 9 HP while Stone Sentinel took 4.0 at 26): Floating Eye
-16→20, Dragon 9→18, Cinder Imp 8→14, Hex Weaver 14→16, Bog Shaman 18→20, Stone Sentinel 26→20. Crowded
-levels were thinned so each fight can matter (`WeepingCauseway` 11→6 rooms, `RotwaterDeep` 8→5,
-`MireThrone` 8→5, `SiltShallows` 8→6, `WarrenTunnels` 7→6, `CountingRoom` 8→6), and `BlueRoom`'s six
-spawn evaluations went to four — it was the outlier behind both *bad spawn roll is unwinnable*
-warnings. Each level then got a solved `Difficulty` + `MaxHealth` scale, and each boss an absolute
-`Overrides` row so it cannot ride the trash dial.
-
-Result — **0 critical / 17 warning / 10 info**, suite **554 passed / 0 failed**. The attrition curve is
-`0.05 / 0.53 / 0.65 / 0.44` (Threshold), `0.39 / 0.48 / 0.61 / 0.50` (Drowned March), `0.42 / 0.56`
-(Warrens), all inside the 0.80 ceiling; boss-to-trash ratios are 2.0 / 2.2 / 2.1 against a 1.8–6 band;
-trash danger went from 0.006–0.047 to 0.05–0.14.
-
-~~**What is still open, and why.** Eight *no threat at all* warnings remain (danger 0.051-0.079
-against the 0.08 floor) ... These are the arithmetic wall, not slack ... Closing them needs another
-round of thinning (toward 4 enemies per level).~~ ❌ **The diagnosis was wrong** — the constraint was
-real but it was not what was binding, and the prescription (more thinning) would not have closed
-these. Corrected and closed 2026-08-25 — see the entry below.
-
-**Findings 17 → 5, and the cause was one authoring mistake.** ✅ Shipped 2026-08-25. Fourteen of the
-seventeen warnings had a single root cause, visible in one dump of the level dials: **every
-non-tutorial level in the project sat at `Difficulty` 1.55, and the only thing that varied per level
-was a `MaxHealth` multiplier** (×1.32 … ×2.78). Enemies fought at ×2.0-4.3 health and ×1.55 strength,
-campaign-wide — the campaign escalated by making enemies *tankier*, never more *dangerous*. Since
-`danger ≈ ttk × dpt`, that buys danger out of fight length, which is why the findings read as
-self-contradictory: the same Floating Eye was *"no threat at all"* in one level and *"takes too long
-to kill"* in another. It also explains per-enemy danger **falling** across a run (Eye 0.079 → 0.078 →
-0.088 → 0.051 through the Drowned March) — the party grew through the XP loop while the enemies only
-grew health.
-
-The fix moved escalation onto `Difficulty` and dropped every `MaxHealth` scale: **1.80 / 2.05 / 2.70**
-(Threshold), **2.35 / 2.50 / 2.75 / 2.55** (Drowned March), **2.25 / 2.45** (Warrens). That closed all
-10 *no threat* and all 4 *takes too long* warnings and surfaced four coupled consequences, each fixed
-in the same pass: `BlueRoom`'s spawn evaluations 2 → 1 on both entries (it rolled 2 Eyes + 2 Dragons
-and was the **only** room behind both *unwinnable spawn roll* findings); boss overrides raised
-(Abyssal Warden 6/93 → **11/105**, Mirefather 8/118 → **12/126**, Gilded Hoarder 6/104 → **9/110**) —
-bosses had the same wrong shape as the trash, and being on absolute overrides had let them sit still
-through every previous pass; the **Scout** 22 → **30** HP, because the party minimum caps enemy
-Strength for the whole roster; and Cinder Imp / Bog Shaman XP retuned (8 → 14, 16 → 10).
-
-Result: **0 critical / 5 warning / 9 info**, suite **554 passed / 0 failed**. Curve `0.04 / 0.49 /
-0.59 / 0.77`, `0.44 / 0.52 / 0.34 / 0.48`, `0.56 / 0.73` — every level inside the 0.80 ceiling. Trash
-fights **3-7** party turns (was 3-11), worst hero case 3 hits, boss:trash **2.3 / 5.3 / 2.3**.
-
-**Ceiling found:** `Difficulty` ≈ **2.75** is the practical maximum until hero bars grow — pushing
-Rotwater Deep to 3.55 took the Warrior (26 HP) to 2 hits and Stone Sentinel back over 8 party turns.
-Further escalation is a hero-HP problem, not a dial problem.
-
-**The five that remain**, and why none is a straightforward tuning job: *XP per unit of danger varies
-6.9×* (band 2.5×) — driven by Bog Shaman, whose danger index does not price healing, so this is
-partly a **model gap**; *Floating Eye in `Dungeon Entrance` (0.034)* — correct by design, the tutorial
-is one fight and the exit; *Floating Eye at 0.077 and 0.078* in `The Mire Throne` and `Warren Tunnels`
-— a hair under the 0.080 floor, and raising either level's dial reopens something else; and
-*`Mirefather`'s unresistable Shadow*, a content decision tracked in §0c below. Consider whether the
-first is a `MinMeaningfulDanger` / danger-index question rather than a content one.
-
-**Method and learnings are now written down** in **`docs/BALANCING.md`** — the lever interactions, the
-snapshot/mutate/restore harness for measuring an experiment through the Unity MCP, the quadratic rule
-that makes a dial search converge in two or three iterations, and the standing traps (a trash buff
-breaks boss ratios, hero hits-to-kill and worst-case spawn danger at the same time). Read it before
-the next pass. **Not re-measured** in this pass: the simulator and the save audit.
-
-~~**XP distribution**~~ ✅ shipped 2026-08-22 as the even split in §5.
-
-~~**The suite has one standing red: `BalanceRegressionTests.RunDifficultyEscalates`.**~~ ✅ Fixed
-2026-08-24 — **in the check, not the content.** `The Threshold` was reading a **+353%** jump from
-`Dungeon Entrance` (attrition 0.033) to `Upper Halls` (0.148) against a +75% ceiling. Confirmed
-pre-existing by re-running the model with `EventEngagementRate = 0`, which reproduces the old
-combat-only arithmetic exactly; folding events in moved it to +386%, so it never crossed the line, it
-was already 4.7x over.
-
-The content is right and the metric was wrong: the tutorial floor is *deliberately* one Pink Room
-fight plus the exit, and a ratio off a base that small is an artefact. `BalanceRulesSO`
-gained **`MinAttritionForJumpCheck`** (default 0.10) — the attrition a level must reach before the
-step *off* it can be a spike warning. Below it the finding is still reported, as an Info quoting the
-absolute step (here 0.04 → 0.20, about 3 HP) beside the percentage. Only `Dungeon Entrance` falls
-under the floor; every other jump in the project is judged exactly as before.
-
-**The suite is 534 passed / 0 failed** — green for the first time since the campaign content landed.
-Analyzer: **0 critical / 7 warning / 14 info**. The seven remaining warnings are all content items
-already tracked in this section — five *no threat at all* enemies, the *+MaxHealth gear* bug, and
-`Mirefather`'s unresistable Shadow.
-
-> **Verification note.** These numbers come from `BalanceAnalyzer` itself, run in-editor over the
-> real assets via the Unity MCP, and the `BalanceRegressionTests` predicates were evaluated against
-> that same report. **Not** re-measured: the simulator (win rates, depth gaps) and the save audit,
-> both of which were left off for speed. Open `Tools ▸ Balance ▸ Balance Analyzer` with simulation
-> enabled to fill those in.
-
-
-
-### 0b. Elemental layer — ✅ defence shipped 2026-08-25, reveal 2026-08-29
-
-The layer was half-built: the player could not **defend** against an element at all, because
-`ResistanceBuffHandler.Apply` was an empty method and all five resistance `BuffType`s silently did
-nothing. **Phases 1–3 of `docs/ELEMENTAL_PLAN.md` are now in** — read that file for the decisions
-taken while building, which is where the reasoning lives.
-
-- **`PowerMode` on `SpellEffect`** (`BasePower` / `Flat` / `PercentOfMaxHealth`), resolved in one place
-  (`SpellPower`). `BasePower = 0`, so no existing asset moved — pinned by `SpellPowerTests`. A
-  percentage reads the max health of the unit the effect lands on and takes **no** upgrade bonus (+2
-  per level on a percentage would double a 10% spell at max upgrade).
-- **`SpellEffectType.HealthCost`** + `HealthCostEffectExecutor`: charges the **caster**, ignoring
-  defense, resistance and the upgrade bonus. `EffectResolver` runs **two passes, benefits then costs**,
-  so a cost authored first can no longer fizzle the buff it paid for. The cast is **gated**
-  (`SpellPower.CanAfford`, surfaced in `MagicSelectionUI` as a greyed row with the HP price beside the
-  charges) rather than allowed to kill — which is what keeps the death-mid-cast problem from existing
-  at all, since `ExecuteCastAction` has no death handling. The executor floors the caster at 1 HP as a
-  safety net.
-- **Resistance buffs work.** `CombatBuffTracker.ApplyResistance` / `GetResistanceBonus` — summed,
-  uncapped (three 40% cloaks reach 120%), riding on the existing `CombatBuff` record so they expire
-  through the same `TickBuffs` path. Deliberately *not* written into the unit's `Resistances` list,
-  which outlives the fight. Every damage path passes the bonus now: `DamageEffectExecutor`,
-  `CombatManager.ExecuteAttack` **and its popup**, and `EncounterSimulator` so the model cannot drift.
-- **Four cloak cards**, `Self`, each a resistance buff plus a percentage health cost: **Fire / Frost /
-  Storm Cloak** (40%, 3 turns, 10% HP) and **Ward** (Fire+Ice+Lightning 20% each, 2 turns, 20% HP).
-  Drawable from the enemy whose element they answer, at `CastWeight: 0` (drawable, never cast by its
-  owner — a cloak wards what that enemy *deals*, so casting it would waste its turn): Cinder Imp,
-  Bog Shaman, Hex Weaver, Mirefather. Placed on *later* enemies on purpose — the Tutorial already
-  front-loads most of the catalog.
-- Suite **609 → 651, 0 failed**; analyzer unchanged at **0 critical / 3 warning / 22 info**.
-- One trap found while wiring: `MagicCatalog` is a **prefab instance** in both scenes, so adding the
-  cloaks by overriding the array size on the scene instances grew the list with **nulls** — drawable
-  in combat, unresolvable from a save, invisible in the Forge. The list lives on
-  `Assets/Prefabs/MagicCatalog.prefab`, and `ElementalContentTests` now fails on either mistake.
-
-**Still open:**
-
-- ~~**Discovery-gated reveal (Phase 4c)**~~ — ✅ **Shipped 2026-08-29.** Knowledge got its own
-  surfaces rather than being poured into the target picker:
-  - **`MetaProgressSaveData.Bestiary`** (`List<BestiaryEntry>`, keyed by `EnemySO.SaveKey`): kills,
-    observed damage types, whether the enemy has been *seen attacking*, and loot actually seen to
-    drop. Permanent, survives death. Pure list rules in `BestiaryOps`; every mutator reports whether
-    it changed anything so `MetaProgressManager` writes `Meta.json` only on a real change — they are
-    called from the damage path, on every hit.
-  - **Only the observed *types* are stored, never the percentages** — those are read back off the
-    live `EnemySO`, so retuning an enemy cannot leave a save quoting stale numbers.
-  - **In combat: `Inspect`**, a sixth hero command (hotkey `I`) — FFX/FFVIII *Scan*. **Free**: it
-    submits no action, so the turn survives the page. Live HP/stats/status off the unit in front of
-    you; the earned half (resistances, attack element, loot) reads `???` until observed.
-  - **At the hub: `Bestiary`**, a home-screen collection listing every enemy in the new
-    `Resources/EnemyCatalog.asset` with an "N of M discovered" header; unmet enemies are listed but
-    nameless so the collection has a visible shape.
-  - **One source of wording:** `BestiaryPresenter` (pure) + `BestiaryLineView` (rows) serve both
-    surfaces, and the classification word comes from `DamageCalculator.Classify`, so the page can
-    never disagree with the combat popup.
-  - **A hit records its element even when the outcome is neutral.** The plan said to record only
-    non-`Normal` classifications; that would have left every neutral element `???` forever. Pinned by
-    `BestiaryTests`.
-  - **Undrawn magic is masked too**, on the existing `IsMagicDiscovered` record - `???`, no icon,
-    charge count still shown - **on the in-combat Draw picker as well as the knowledge pages**. That
-    last part is the only bit of this work that changes play: the first pull off a new enemy is a
-    small blind gamble on a turn. Gating the pages alone was rejected because the picker named
-    everything, leaving the gate one menu from meaningless.
-  - Suite **731 → 755, 0 failed**. Whole loop driven in play mode through the Unity MCP.
-- **Phase 5's last two analyzer checks** — unintended absorption (an innate + max-stacked total
-  ≥100% for a type the *player* can deal) and cost/benefit sanity (a `HealthCost` that exceeds the
-  damage the buff avoids over its duration). The first two Phase 5 checks shipped as
-  `ElementalContentTests` instead, which is the stronger place for them: a dead effect now fails a
-  test rather than waiting in an unopened window.
-- **No Shadow or Holy defence exists**, so `Mirefather`'s Shadow damage is still unmitigable — the
-  cloaks cover Fire/Ice/Lightning only. Either a Shadow cloak or a sphere-grid node; see §0c.
-- **The cloaks use placeholder icons** borrowed from the elemental attack spell they answer.
-
-### 0b-2. Elemental content follow-ups
-
-- **Placeholder sprites.** The four new enemies (**Stone Sentinel**, **Cinder Imp**, **Bog Shaman**,
-  **Hex Weaver**) reuse the existing three sprites: Sentinel borrows the Warden's, Cinder Imp the Dragon's,
-  and both Bog Shaman and Hex Weaver the Floating Eye's. They need their own art, and Bog Shaman/Hex Weaver
-  are currently visually identical to each other in play.
-- **New enemies raised the attrition load.** `NoobTemplate`'s pool went from 4 rooms to 6 (added **Cavern**
-  and **Sunken Swamp**), which takes expected enemies per level from ~10.5 to ~12.8 and pushed levels 1-3
-  from *warning* to **critical** on the unclearable check. The room count (`RoomsToGenerate: 15`) is the
-  lever; it was left alone deliberately rather than quietly retuning level design.
-- **Worst-case spawn rolls.** Cavern at a full roll (Stone Sentinel + 2 Cinder Imps) reads a worst-case
-  danger of 1.30 - survivable in simulation (100% win rate) but over the 1.00 line on the closed-form model.
-- ~~**`EnemySO` has no stable `Key`.**~~ ✅ Shipped 2026-08-26. `EnemySO.Key` plus a `SaveKey` property
-  that falls back to `DisplayName` and then the asset name - the `HeroSO` contract exactly, so the
-  fallback is a migration path rather than somewhere to leave a new enemy. All ten enemy assets are
-  keyed off their asset name (`EyeBall`, `AbyssalWarden`, ...), deliberately *not* their display name,
-  which stays free to rename. `EnemyIdentityTests` fails on a blank or duplicated key, and the same
-  change added **`EnemySO.Label`** (display name or asset name) which collapsed the
-  `IsNullOrEmpty(DisplayName) ? name : DisplayName` ternary that had been copy-pasted into five
-  places across the balance model. **This unblocks discovery-gated reveal (§0b / `ELEMENTAL_PLAN.md`
-  Phase 4c)**, which is now the whole of the remaining work there.
-- ~~**An upgraded magic silently lost its caster scaling.**~~ ✅ Fixed 2026-08-21 (found while
-  building room events). `EffectResolver.ApplyPowerBonus` builds a *copy* of the effect to fold the
-  upgrade bonus into `Power`, and the copy did not carry `ScalingStat` — which defaults to `None`.
-  So the moment a Damage or Heal magic had any upgrade level, its caster contribution dropped to
-  zero: upgrading the Acolyte's magic made it *weaker* by the Acolyte's whole Intelligence. Silent,
-  because the effect still fired and still hit for a plausible number.
-- **Loot is still duplicated** between Floating Eye and the Abyssal Warden.
-- **Holy and Shadow** are unused by any magic and unresisted by anything - the analyzer reports them, and
-  they are free slots if a later biome wants an element of its own.
-
-### 0c. Run chaining — ✅ system + a third tier and the first secret (2026-08-25)
-
-**The mechanism is done.** Runs are no longer a single serialized reference: `CampaignSO`
-(`Assets/Resources/Campaign.asset`) is a **directed graph of runs** with per-node prerequisites
-(`Requires` + `UnlockMode` All/Any), `Secret` (hidden until unlocked) and `Optional` flags, so the
-story line can fork — clear one run to open two, one rejoining the main line and one dead-ending as
-optional/secret content. `CampaignOps` is the pure rules layer, `CampaignMapUI` (home ▸ **The Story**)
-is the map screen, and clearing a run's final level banks its key in
-`MetaProgressSaveData.CompletedRunKeys`, which is also what stops the tutorial being replayed
-(`RunDefinitionSO.Repeatable`). Covered by `CampaignOpsTests` + `CampaignAssetTests`.
-
-**What is still open:**
-
-- ~~There is still only one run asset.~~ **Done.** The tutorial forks into **The Drowned March**
-  (`DrownedMarch`, 4 levels, one-shot, boss *Mirefather*) and **The Warrens** (`TheWarrens`, 2 levels,
-  **repeatable**, boss *Gilded Hoarder*) — an escalating main line plus the farming run the Gold sinks
-  needed. Six new level templates; the previously orphaned `BlueRoom` is finally in a pool.
-- ~~A third tier past the Drowned March, and nothing yet uses `Secret`.~~ **Done 2026-08-25.**
-  **The Ashen Deep** (`AshenDeep`, 3 levels, one-shot, boss **Cinder Tyrant**) continues the main line
-  off the March, and **The Hollow Vault** (`HollowVault`, 1 level) is the campaign's **first secret**:
-  `Secret` + `Optional`, `UnlockMode.All` over *both* branches (Ashen Deep **and** The Warrens), so
-  the repeatable farming run finally has a reason to exist beyond gold. Its boss is the Gilded
-  Hoarder again at 120 HP / Strength 13 with a 260 gold override and a 2x XP multiplier — a hoard,
-  not a story beat.
-  - **A fire biome, which is what makes the elemental layer land.** Two new rooms (**Ember Vault**,
-    **Slag Hall**) built on Cinder Imp / Dragon / Hex Weaver, three new level templates (**Cinder
-    Gate** 5 rooms, **The Slag Halls** 6, **Emberfall** 5) and one for the vault. The Cinder Tyrant
-    attacks as **Fire** and resists it 50% while taking +50% from Ice — so the **Fire Cloak** drawn
-    off a Cinder Imp two tiers earlier finally has a fight that answers it, and Frost Cloak is the
-    wrong pick there.
-  - **One new drawable: `Cinderstorm`** (Epic, all-enemies Fire, Intelligence-scaled), off the
-    Tyrant. Tier-3 content the player cannot get earlier.
-  - **Tuning took four measured passes**, and the first three each failed differently: unclearable
-    floors at Difficulty 2.9–3.3, then an over-corrected tier *easier* than the March with four
-    *no threat at all* enemies, then unwinnable worst-case spawn rolls from three-entry tables, then
-    a Hex Weaver hit that broke the Warrior's three-hit floor at 3.5. Shipped shape: fewer, harder
-    fights (5 / 6 / 5 rooms at Difficulty 3.0 / 3.35 / 3.15, two spawn entries per room, XP
-    multipliers 1.5–1.75 because the same asset is worth more this deep). Curve **0.41 / 0.45 /
-    0.53** (+9% / +20%), vault 0.39, and findings back to the pre-existing **0 critical / 3 warning**.
-    Written up in `docs/BALANCING.md` §5e.
-  - **Covered by three new asset tests** (`CampaignAssetTests`): a secret must exist, be hidden on a
-    fresh save, *and* open once its prerequisites are cleared — an unreachable secret and an
-    always-visible one both look like "no secret" from the map screen. Plus every run's levels must
-    carry a template and a non-zero Difficulty.
-  - **Still open:** a fourth tier, and nothing uses `UnlockMode.Any` (two branches rejoining) yet.
-    The Tyrant reuses the Dragon's sprite and `BehaviorMirefather`, so it needs its own art and
-    arguably its own behaviour — a fire boss telegraphing a Shadow-flavoured pattern is a placeholder.
-- **Map positions are auto-laid-out.** `CampaignPresenter.ResolvePositions` tiers nodes by longest
-  prerequisite chain when no `MapPosition` is authored. Good enough to play; a hand-placed map wants a
-  **Campaign Map Editor** window, the obvious sibling to `Tools ▸ Dungeon ▸ Manual Level Layout Editor`
-  and `Tools ▸ Heroes ▸ Sphere Grid Editor` (both already do node-drag + connect over the same widget).
-- **No way to abandon a run.** While one is in progress every other node is deliberately un-startable,
-  because starting a second would overwrite `Run.json`. The player finishes or dies out. If a run can
-  be a dead end, an explicit *Abandon* (with confirmation) belongs on the progress screen.
-- ~~`SequenceIndex` is now redundant for ordering.~~ **Done.** The analyzer walks
-  `CampaignOps.GetNodesInPlayOrder` and seeds each run with its prerequisites' end party, so run
-  difficulty is finally measured against the party that actually arrives. `SequenceIndex` survives as
-  a hint only. **Still open:** retire the "no run declares a SequenceIndex" finding now that the graph
-  answers the question.
-- **Two trash enemies are provably trivial now.** With levels measured against their real, XP-grown
-  parties, `Cinder Imp` (danger 0.069) and `Hex Weaver` (0.067) fall under `MinMeaningfulDanger`. The
-  old measurement hid this by judging them against a fresh party. Both want a stat pass.
-- **Nothing resists Shadow.** `Mirefather` is the project's only Shadow attacker and no hero can
-  reduce it, so its damage is unmitigable by accident rather than by design. Either give a sphere grid
-  a Shadow-resistance node (`SphereGridSeeder`) or make it the boss's deliberate identity — see
-  `docs/ELEMENTAL_PLAN.md`.
-- ~~**What carries between runs** is unchanged and unexamined: meta progress (Gold, Essence, heroes,
-  gear, sphere-grid nodes) persists; equipped magic is run-scoped and lost.~~ ✅ **Equipped magic now
-  carries too** (2026-08-24). `MagicLoadout.json` (`MagicLoadoutSaveData`) banks each hero's draw
-  slots on level clear, and the first level of a *new* run seeds from it when the run save is empty —
-  so a hero walks in still holding something they drew a few dungeons ago, instead of a four-floor kit
-  evaporating the moment the run was won. Two rules: the bank is **merged** per hero
-  (`EquippedMagicState.Merge`, `MagicLoadoutTests`), because a run only reports the heroes it fielded
-  and overwriting would strip a benched hero's slots; and it is committed on **level clear only**, so
-  magic drawn during a fatal run is forfeited exactly like that run's XP and loot while anything
-  banked earlier survives. A hero who buys a `MagicSlot` node between runs keeps everything and gains
-  room. Verified in-editor: drew Fireball → committed → a fresh `EquippedMagicState` restored
-  Fireball x3 into slot 0. *(Still open: nothing in the hub shows the player what their heroes are
-  carrying before a run starts.)*
-
-### 0d. Enemy archetypes are authored data — ✅ shipped 2026-08-25
-
-**An enemy's repertoire is an `EnemyBehaviorSO` now.** The five hard-coded `IEnemyBehavior` classes
-are deleted. Every number they held as a compile-time constant — `HealerBehavior.HealPower = 8`,
-`DebufferBehavior.DebuffAmount = 3` on `StatType.Strength`, `BruiserBehavior.HeavyMultiplier = 2.5`,
-`BossBehavior.SignatureInterval` / `SignatureMultiplier` / the enrage threshold — is a field on an
-authored action. Full reference in **`Assets/Scripts/Enemies/CLAUDE.md`**.
-
-An action carries a `Kind` (Attack / HeavyAttack / AoeAttack / Heal / Debuff / CastMagic), a
-`Priority`, a `Weight`, a `ChanceGate`, a `Telegraphed` flag and a list of `Conditions`. Selection is
-**deliver, gate, priority, weight**: a telegraph in flight always lands, then gates roll, then the
-highest eligible priority takes the turn outright, then weight breaks ties inside that tier. Two knobs
-because the old behaviours needed both — a boss is priority logic, casting-vs-attacking is a weighted
-coin flip.
-
-**Casting folded in, as you'd expect.** `EnemySO.MagicCastChance` is gone; cast frequency is a
-`CastMagic` action with a `ChanceGate`, and `DrawableMagicEntry.CastWeight` now only picks *which*
-spell when an action draws from the whole Draw list. One selection layer instead of a pre-roll wrapped
-around one.
-
-**The migration is provably behaviour-preserving**, which was the point of doing it that way:
-
-- Five preset assets (`PresetAggressor` … `PresetBoss`) reproduce the original archetypes exactly, and
-  `EnemyBehaviorTests` / `BossBehaviorTests` keep their *original* assertions — 2.5× heavy, heal for 8,
-  debuff 3 for 3 turns, signature every 3 turns at ×1.6, enrage below 30% tightening the cadence to 2
-  and blows to ×1.5. Those tests are the proof.
-- `BalanceMath.AverageOffenseMultiplier` became a real expectation over the action list
-  (`EnemyBehaviorModel`) instead of one constant per archetype. It reproduces four of the five old
-  constants **exactly** (Aggressor 1.00, Bruiser 1.25, Healer 0.50, Debuffer 0.85); the Boss reads
-  **+3.9%** because it now prices enrage, which the old model ignored.
-- Project-wide analyzer diff: **0 critical / 3 warning / 20 info, before and after.** Suite **590/0**.
-
-**Also landed:** a custom `EnemyBehaviorSOEditor` that draws only the fields each action kind reads and
-lists actions in resolution order, flagging the two mistakes that make an action *dead* (an ungated,
-unconditional entry in the top tier; `Telegraphed` on a kind that cannot wind up). `PredictIntent` now
-returns **null** unless the next action is genuinely determined — behaviours are probabilistic, and an
-intent icon that guesses wrong teaches the player to distrust the telegraph.
-
-**The two model gaps this opened are now closed** (same day). Healing, buffs and debuffs all price
-through one channel: the rate at which a side can actually be cleared,
-`raw x suppression - sustain`. Healing is exact (`T = H / (D - h)`); buffs and debuffs are *measured*
-by rebuilding both sides and comparing real damage, so the defense curve and turn-rate effects come out
-right and a debuff on a stat that does not affect damage correctly costs nothing. An enemy's own buffs
-also reach its offense. Covered by `EnemySupportModelTests`; details in
-`Assets/Scripts/Balance/CLAUDE.md`.
-
-Turning it on moved the content — **0/3 warnings to 0/7 with no asset touched**, because the levels had
-been tuned against a model that could not see any of it. Hex Weaver turned out to be the most
-suppressive enemy in the game (party output **x0.754**) while reading as one of the weakest. Two dials
-brought it back: `Sunken Depths` 2.70 → **2.46**, `The Counting Room` 2.45 → **2.19**, returning to
-**0 critical / 3 warning / 21 info** with boss ratios improved to 2.3 / 4.4 / 2.1. Suite **601/0**.
-
-It also surfaced a trap worth knowing: **a stalemate reads as danger 0.00**, because the danger index
-measures a damage race and an enemy that out-heals the party but cannot kill it wins neither. An
-infinite `PartyTurnsToKill` is therefore its own **Critical** now rather than being left to the danger
-bands.
-
-**What is deliberately still open:**
-
-- **Resistance and status-effect buffs are not priced** (`FireResistance`, `Frozen`, `Haste`).
-  `BuffType` maps to `StatType` by name and anything with no matching stat is skipped rather than
-  guessed at — an invented number in the danger index would be worse than a known omission.
-- **The *XP per unit of danger* warning survived, and its cause is finally pinned: every level has
-  `XpMultiplier` 1.00 while `Difficulty` spans 1.00 to 2.75.** The 6.7x spread is not across enemies,
-  it is across **placements of the same enemy** — a Floating Eye pays 10 XP whether it is a
-  Difficulty-1.00 pushover in the tutorial (203.6 per danger) or a Difficulty-2.75 threat in Rotwater
-  Deep (46.2). Per-*asset* XP is already fine: solving it proportional to danger moves that spread from
-  2.4x to 1.1x, and 2.4x was inside the 2.5x band to begin with.
-
-  **The check now has a floor** (`BalanceRulesSO.MinDangerForRewardCheck`, default 0.08), the same fix
-  `MinAttritionForJumpCheck` is for difficulty jumps: a placement below it no longer sets the spread, and
-  is reported as an Info instead. Only `Dungeon Entrance` falls under, and the warning went
-  **6.7x → 4.5x**. The finding also names the **placement** at each end now and says whether they are the
-  same enemy (pointing at `XpMultiplier`) or two different ones (pointing at `XpReward`) — that message
-  is what makes it self-diagnosing, and its absence is why it was mis-read four times.
-
-  The remaining **4.5x** is real content. Two follow-ons are measured and ready, both deliberately not
-  applied because this is progression pacing rather than tuning:
-
-  - `XpMultiplier ∝ Difficulty²` **normalised per run** — Threshold 0.72 / 0.93 / 1.35, Drowned March
-    0.85 / 0.97 / 1.17 / 1.01, Warrens 1.03 / 0.97. Takes it to **3.5x** with no new findings and no
-    change to the attrition curve. Do **not** normalise globally: that moves XP between runs and starved
-    The Threshold badly enough to make `Sunken Depths` unclearable (4 new warnings).
-  - Then `XpReward`: Cinder Imp 14→18, Dragon 10→14, Stone Sentinel 14→11, Bog Shaman 10→6, Floating Eye
-    10→9, which takes the per-asset spread to 1.1x and the whole finding inside the band.
-- **The content pass has started, with one enemy.** `BehaviorBogShaman` is the first behaviour authored
-  beyond its preset: a **two-phase healer**, with a `Mend an ally` at 14 (was a flat 8) and a
-  `Desperate mending` at 28 gated on `SelfHealthBelow 0.40` at a higher priority. It heals **9.8/turn
-  against 3.2** and takes 7.0 party turns to kill instead of 6.1, so it is now a "burst it before it
-  claws the fight back" target rather than a trickle the party could ignore. Zero new findings.
-
-  Worth knowing for the next one: its **solo danger index barely moved** (0.049 → 0.048), because the
-  desperate heal takes turns away from its attacks — sustain up, offense down, roughly cancelling. That
-  is not a modelling flaw. A healer's value is in a group, and the solo index measures it in the one
-  situation where it has nobody to heal. Judge a support enemy by `ExpectedHealingPerTurn` and its
-  level's attrition, not by solo danger.
-
-  Still unauthored: a Debuffer that hits Agility, a Bruiser whose heavy lands on a different cadence,
-  an enemy that both heals and charges, low-health conditions on ordinary trash. All pure authoring.
+- **Room count is coupled to enemy Attack and hero HP** — raising one forces the others. Recorded
+  here because every tuning pass re-derives it: `hero HP ↓ danger`, `enemy Attack ↑ attrition`,
+  `room count ↑ attrition`. `docs/BALANCING.md` has the arithmetic.
+- **`Difficulty` ≈ 2.75 was the practical ceiling** before hero bars grew, and hero bars have grown
+  since. Re-derive rather than assuming the old ceiling.
+- **XP per unit of danger varies 5.4×** — see live step 4.
+- **A stalemate reads as danger 0.00.** The danger index measures a damage race, so an enemy that
+  out-heals the party but cannot kill it wins neither. An infinite `PartyTurnsToKill` is its own
+  **Critical** rather than being left to the danger bands. Worth knowing before authoring a healer.
+- **Resistance and status-effect buffs are not priced** by the danger index (`FireResistance`,
+  `Frozen`, `Haste`). `BuffType` maps to `StatType` by name and anything with no matching stat is
+  skipped rather than guessed at. **§9 makes this worse and must close it** — a DoT the model cannot
+  see is a damage source the whole attrition curve is blind to.
+- **Judge a support enemy by `ExpectedHealingPerTurn` and its level's attrition, not by solo danger.**
+  A healer's solo index measures it in the one situation where it has nobody to heal.
+- **Enemy variety.** Still unauthored: a Debuffer that hits Agility, a Bruiser whose heavy lands on a
+  different cadence, an enemy that both heals and charges, low-health conditions on ordinary trash.
+  Pure authoring — see also §12, which adds the verbs these would want.
 - **`EnemyArchetype` survives as a label only.** It names the presets, drives the analyzer's variety
   checks, and is the fallback for an enemy with no behaviour assigned. It selects no logic.
 
-### 0e. Enemies cast their drawable magic — ✅ shipped 2026-08-25
+### 0b. Elemental layer — follow-ups
 
-Enemies used to have **no connection at all** between the magic you could Draw from them and what
-they did on their turn: `DrawableMagics` had zero readers outside the Draw UI and the balance model.
-Bog Shaman offered `Heal` and healed — for a hardcoded 8, not `Heal`'s authored power. Hex Weaver
-offered `PoisonDart` and debuffed — Strength −3, unrelated to the spell. Every Aggressor offered
-elemental damage magic and only ever basic-attacked. The resemblance was coincidental.
+The defence half shipped 2026-08-25 and the discovery-gated reveal 2026-08-29 (Inspect + Bestiary).
+`docs/ELEMENTAL_PLAN.md` holds the decisions taken while building. What is left:
 
-**Now they cast from that same list.** Four rules, all pinned by `EnemyCastingTests` (25 cases):
+- **No Shadow or Holy defence exists**, so `Mirefather`'s Shadow damage is unmitigable by accident
+  rather than by design — the cloaks cover Fire/Ice/Lightning only. Either a Shadow cloak, or a
+  sphere-grid resistance node (`SphereGridSeeder`), or make it the boss's deliberate identity.
+- **Holy and Shadow are unused by any magic** and unresisted by anything. Free slots if a later biome
+  wants an element of its own.
+- **Phase 5's last two analyzer checks** — unintended absorption (an innate + max-stacked total
+  ≥100% for a type the *player* can deal, which **heals** the target) and cost/benefit sanity (a
+  `HealthCost` exceeding the damage its buff avoids over its duration).
+- **The four cloaks use placeholder icons** borrowed from the elemental attack spell they answer.
+- **Placeholder enemy sprites.** Stone Sentinel borrows the Warden's, Cinder Imp the Dragon's, and
+  Bog Shaman and Hex Weaver both borrow the Floating Eye's — so those two are visually identical in
+  play. The Cinder Tyrant reuses the Dragon's sprite *and* `BehaviorMirefather`, so a fire boss
+  telegraphs a Shadow-flavoured pattern.
+- **Loot is duplicated** between Floating Eye and the Abyssal Warden.
+- **Enemy casts leave no tags and trigger no combos.** Deliberate: combos carry player-facing
+  discovery and upgrade levels, and crediting the player for a combo a monster set up would be wrong.
+  Letting enemies into the tag layer is a real feature — one enemy applying `Oiled` for the next to
+  `Ignite` is exactly the pressure the elemental layer wants — but it needs a discovery decision
+  first, and `EnemyMagicModel` would have to price combo follow-ups.
+- **Boss casts read weaker than boss swings.** Bosses sit on absolute `Overrides` rows so their spell
+  power does not scale; at Difficulty 2.5+ their authored spells fall behind their scaled Strength.
+  Either give `EnemyStatOverride` its own spell-power field, or author boss spells at boss power.
 
-- ~~**A roll, beside the archetype rather than inside it.**~~ Superseded by §0d the same day: casting
-  is now a `CastMagic` action in the enemy's authored list, gated by `ChanceGate`. The behaviour it
-  produces is the same; it is no longer a special case wrapped around the behaviour.
-- **Charges are never spent.** `Charges` is the player's Draw grant; an enemy casting from the same
-  list is free, the way the FF games this is modelled on treat it.
-- **A charging enemy delivers its charge.** It has already telegraphed a heavy or a boss signature and
-  the player has been shown that, so a cast can never swallow it.
-- **Spell power scales with the level, not the asset.** `LevelEnemyTuning.MagicPowerScaleFor` returns
-  the level's `Difficulty` — the same dial that scales the Strength a basic attack swings off — folded
-  into base `Power` through a new `powerScale` argument on `EffectResolver.Execute`. An enemy with an
-  absolute `Overrides` row does **not** scale, for the same reason its Strength does not: an override
-  means the level's dial does not apply to it.
+### 0c. Campaign graph — follow-ups
 
-Targeting mirrors the table: `MagicTargetType` is authored from the player's side, so for an enemy
-"enemy" is the hero side and "ally" is the other monsters (a single-ally cast picks the most wounded).
-Resolution goes through the real `EffectResolver`, so resistances, the defense curve, healing clamps
-and floating text all behave as they do for a hero cast.
+`CampaignSO` + `CampaignOps` + `CampaignMapUI` shipped 2026-08-25 with five runs and the first
+secret (`HollowVault`, gated on **both** branches). Open:
 
-**Balance model.** `EnemyMagicModel` prices a cast in the same currency as everything else, and
-`BalanceMath.DamagePerTick` / `EnemyMetrics` **blend** it with the swing by the cast chance rather
-than adding it — casting is an alternative to attacking. Three new findings: an enemy that carries
-magic and never casts it, one that casts above `BalanceRulesSO.MaxEnemyCastChance` (so its archetype
-stops being visible), and a placement whose cast lands for *less* than its swing. `EncounterSimulator`
-rolls casts through the same `EnemyMagicPlan` + `EffectResolver` path.
+- **A fourth tier**, and **nothing uses `UnlockMode.Any`** (two branches rejoining) yet.
+- **Map positions are auto-laid-out.** `CampaignPresenter.ResolvePositions` tiers nodes by longest
+  prerequisite chain. Good enough to play; a hand-placed map wants a **Campaign Map Editor** window —
+  the obvious sibling to `Tools ▸ Dungeon ▸ Manual Level Layout Editor` and
+  `Tools ▸ Heroes ▸ Sphere Grid Editor`, both of which already do node-drag + connect over the same
+  widget.
+- **No way to abandon a run.** While one is in progress every other node is deliberately
+  un-startable, because starting a second would overwrite `Run.json`. The player finishes or dies
+  out. If a run can be a dead end, an explicit **Abandon** (with confirmation) belongs on the
+  progress screen.
+- **Retire the "no run declares a SequenceIndex" finding** — the graph answers that question now and
+  `SequenceIndex` survives as a hint only.
+- **Nothing in the hub shows what the heroes are carrying** before a run starts. Equipped magic now
+  banks between runs (`MagicLoadout.json`), so a hero walks in holding something drawn several
+  dungeons ago — and the player cannot see it.
 
-Authored chances: Floating Eye / Dragon **0.25** (their cast beats their swing, and the Eye is the
-weakest thing in the game), Bog Shaman **0.20**, Hex Weaver **0.15**, Cinder Imp **0.10** (its cast is
-3–4× its swing — rare, so it stays a spike), Stone Sentinel **0.10** (already the longest fight),
-bosses **0.15** / Hoarder **0.10**. Findings went **0 critical / 5 warning → 0 / 3**, suite 579/0.
+### 0g. Losability and the investment gates
 
-**Two deliberate limits, both open:**
-
-- **No tags, no combos.** Enemy casts pass neither `MagicTagTracker` nor `ComboDetector`, so they
-  apply effects but never trigger a combo or leave a tag. Combos carry player-facing discovery and
-  upgrade levels, and crediting the player for a combo a monster set up would be wrong. Letting
-  enemies into the tag layer is a real feature — an enemy applying `Oiled` for the *next* enemy to
-  `Ignite` is exactly the kind of pressure the elemental layer wants — but it needs a discovery
-  decision first, and `EnemyMagicModel` would have to price combo follow-ups to match.
-- **Boss casts read weaker than boss swings.** Because bosses sit on absolute `Overrides` rows their
-  spell power does not scale, so at Difficulty 2.5+ their authored spells fall behind their scaled
-  Strength — the analyzer says so out loud for the Warden and Mirefather. Either give
-  `EnemyStatOverride` its own spell-power field, or author boss spells at boss power.
-
-### 0f. Losability — the measurement now exists; the tuning is a level-design call
-
-**Shipped 2026-08-26: the floor simulation.** §5g's "63 of 63 encounters win 100%" turned out to have
-a structural cause rather than a content one. `EncounterSimulator.Run` clones a **fresh, full-health
-party with the whole potion belt for every room**, so a four-room floor was measured as four
-independent opening fights — it could never report the way runs actually end. `RunFloor` fights a
-floor: rooms in player order, boss last, off one pool of health, potions and charges, refuges spread
-through it, and `StartsWithFullCharges` only on floor 0 (charges are a run resource). `RunOne` split
-into `RunEncounter` + `ScoreEncounter` to make that possible; ten cases in `FloorSimulatorTests` pin
-the three things a per-room run gets wrong. Wired into the analyzer as `BalanceReport.Floors` +
-`EvaluateFloorSimulations`, with three new rules (`MaxFloorWipeRate` 0.35, `MinFinalFloorWipeRate`
-0.05, `TrivialFloorEndHealth` 0.85). Suite **701 passed / 0 failed**. Full write-up, table and the
-attrition↔wipe calibration: `docs/BALANCING.md` §5h.
-
-**What it measured, and it is the opposite of what the per-room numbers said.** Zero rooms in the game
-can wipe the party; chained into floors, three can. And the distribution is backwards:
-
-- **The only floor in the game that can kill the party is `Sunken Depths` — the last floor of
-  `The Threshold`, which is the *first* run** (12% wipe, 0.67 heroes lost, both potions spent, ends at
-  45% health). Cinder Gate and Emberfall manage 1%. Every other floor is 0%.
-- **4 of 5 runs have a final floor that cannot end the run** — The Mire Throne, The Counting Room,
-  Emberfall, The Hollow Vault. **Depth is currently inversely correlated with danger.**
-- Nothing is *too* lethal: no floor trips the 35% ceiling.
-- Useful dial: **death starts at roughly attrition 0.70.** Floors at 0.64 and below wipe 0% of the
-  time; Sunken Depths at 0.745 wipes 12%. Every other floor sits at 0.39–0.64.
-
-**The open work, and the constraint that shapes it.** Enemy *strength* is out of headroom:
-`FewestHitsToKillAHero` is already **3**, `MinHitsToKillHero` exactly, for Cinder Imp, Dragon and Hex
-Weaver across all of The Ashen Deep. Raising `Difficulty` from here buys losability by making heroes
-one-shottable. That leaves three levers, and the first two are decisions rather than solves:
-
-1. **Rooms per floor / enemies per room** (§1 Consequence 2). The honest lever, and level design — so
-   it is a deliberate call, not something to solve for. Note The Counting Room already runs **6 rooms
-   at attrition 0.626 and still cannot kill**, so this is not a small nudge.
-2. ~~**Sustain the floor hands back** — the 2-potion belt and the refuge quota.~~ **Retracted
-   2026-08-27.** The potion is **5 HP flat** against enemy hits of 6.8–14.7 — one potion heals less than
-   one swing, and the whole belt is 7–12% of the sustain pool. Emptying it moves a floor from 0.53 to
-   ~0.59 attrition, nowhere near the 0.70 death line. Refuges (35% of the bar) are the half of this
-   lever that actually moves. See `docs/BALANCING.md` §5h.
-3. **Hero HP** would raise the strength ceiling and give lever 1 room to breathe, at the cost of
-   longer fights.
-
-**Superseded by §0g.** The framing above asks "how do we make floors lethal", which turned out to be
-the wrong question — the right one is *lethal for whom*. See §0g.
-
-Whichever is chosen, the deepest floor of each run is the place to start, and the target is a wipe rate
-that clears `MinFinalFloorWipeRate` without passing `MaxFloorWipeRate` — a band the analyzer now
-reports per floor.
-
-**This is also the root cause behind the depth-gap findings**, not a separate problem: a fight whose
-outcome is never in doubt cannot contain a decision, which is why all 63 encounters read
-*attack-spam plays this as well as thinking does*. Expect those to start moving on their own once
-floors can be lost — and note the elemental reveal (§0b Phase 4c, unblocked) is the other half, since
-a ±50% damage swing the player cannot see is depth already paid for and not yet spendable.
-
-### 0g. Depth must mean danger — stage the investment gates
-
-**The design, in the user's words (2026-08-27):** *don't* make dying cost something — make dying
-**mandatory to progress the more challenging depths**. Death is the tuition, not the penalty. Deeper
-runs should be unclearable until the player has invested, so the loop is
-die → bank → upgrade → return.
-
-**Measured 2026-08-27 (`docs/BALANCING.md` §5i), and the headline is that the loop already exists.**
-`PartySlots.BaseCap` is **2**, so a fresh save fields two heroes — and at two heroes the deeper finales
-wipe **54–100%** of the time. The 300-gold third slot is genuinely load-bearing today. It was invisible
-because nothing measured it and because `RunCurveModel` grows the roster to `MaxCap` (4), making every
-number in §0f one hero more generous than a new save gets.
-
-**But it is a cliff, not a staircase**, and that is the actual bug:
-
-- ~~**Party width gates; XP does not.**~~ **Wrong — corrected 2026-08-27** (`BALANCING.md` §5j). The XP
-  axis had been swept only at 3 heroes, the saturated corner where nothing shows. Swept across width
-  *and* XP together, **both axes bite and they trade against each other**: Sunken Depths is beatable at
-  *(2 heroes, 200 XP)* **or** *(3 heroes, 0 XP)*, and the 200-XP route is the better one (4% vs 12%).
-  Exchange rate roughly **one hero ≈ 100–350 XP**, varying by floor.
-- **The substitutable "range of what the player should do" already exists in the mechanics.** It was
-  never measured, so it was never tuned.
-- **One purchase still unlocks too much.** Past 3 heroes nothing in the game is a threat, so the whole
-  surface saturates in that corner and every later decision is free.
-- **The frontiers barely differ across the campaign — this is the real bug.** Cheapest clearing mixes:
-  Sunken Depths (run 1) *(2, 200)*; Mire Throne (run 2) *(2, 100)*; Counting Room *(2, 100–200)*;
-  Emberfall (run 3) *(2, 350)*; **The Hollow Vault (secret endgame) *(2, 200)***. The secret endgame asks
-  for **less than the tutorial's finale**.
-- **A fresh save cannot beat run 1's finale, and that is arguably correct.** At *(2 heroes, 0 XP)* —
-  exactly what `BaseCap` gives — Sunken Depths wipes **100%**. Floors 0–2 are clearable, so the intended
-  path is: clear three floors, die on the fourth, bank the gold, upgrade, return. The loop is live on
-  the *first* run and has never been written down.
-- **Open question, and worth answering *before* the grid is expanded: a maxed grid under-delivers.**
-  The four grids author **+40–70% MaxHealth** each (Warrior +18 on a base of 26, Tank +24, Acolyte +17
-  on 24, Scout +12 on 30), but the measured party pool only runs **97 → 127 (+31%)** across 0–700 XP —
-  and stops moving at **~350 XP**, half a grid. So either `SphereGridOps`' greedy spend is not reaching
-  the health nodes, or reachability/cost is stranding them, or the seeded bank is not being fully spent.
-  Whatever the cause, **half of every grid currently buys no durability**, and expanding the grid on top
-  of that just adds more nodes nobody's power actually reflects. Diagnose first.
-- **Solo is nearly viable and nobody knew.** At 500 XP one hero clears Mire Throne 84% and Hollow Vault
-  89%. With `XpSplit` paying a solo hero 4× the share, "narrow but deep" is a real path that almost
-  works — worth finishing deliberately or closing deliberately.
-
-**The work, then:** stage the gates so each run demands the next increment of investment, and scale
-deep content hard enough that the increment is *required*. The headroom is large and now known — at
-3 heroes / 350 XP the deep floors still end at **83–90% health**, so deep danger can multiply several
-times before an invested party is threatened. §5g's "enemy strength is pinned at the 3-hit floor"
-binds on the **fresh** party, which is precisely the party that is supposed to die.
+**Superseded framing:** the original §0f asked *how do we make floors lethal*; the right question is
+*lethal for whom*.
 
 **The design, settled 2026-08-27:** *a bit in the middle* — neither one binary cliff nor a strict
-per-run checklist. Each tier should demand **more total investment** than the last while leaving the
-player a **range of ways to pay it**: buy the hero, or deepen the grid, or some mix. So a tier's
-requirement is a **frontier**, and the two properties to tune for are:
+per-run checklist. Each tier demands **more total investment** than the last while leaving a **range
+of ways to pay it**. A tier's requirement is a **frontier**, and the two properties to tune for are:
 
-1. **The frontier has at least two genuinely different points on it** — otherwise it is a checklist,
-   not a choice.
+1. **The frontier has at least two genuinely different points on it** — otherwise it is a checklist.
 2. **The frontier moves outward with depth.** This is "depth means danger" in the only currency that
    survives content edits.
 
-Concretely, in units where **1 hero ≈ 250 XP**, a tier budget roughly like: run 1 ≈ 200, run 2 ≈ 450,
-run 3 ≈ 700, secret ≈ 1000+ — each satisfiable by width, XP, or a blend. Numbers are the *target*; the
-campaign has to be re-tuned to hold them, and §5g's "enemy strength is pinned at the 3-hit floor" binds
-on the fresh party, which is the one that is supposed to die.
+`InvestmentFrontier` sweeps party width × sphere-grid XP × gold over a floor's rooms and returns the
+Pareto-minimal mixes inside the wipe band. Use **`BalanceAnalyzer.MeasureFrontiers(input)`** while
+tuning — 16 seconds for the whole campaign, because it never simulates a mix the frontier already
+dominates.
 
-**Tooling — ✅ shipped 2026-08-28.** `InvestmentFrontier` sweeps party width against sphere-grid XP
-over a floor's rooms and returns the Pareto-minimal mixes that bring it inside the wipe band, plus
-where it stops threatening anyone. `BalanceReport.Frontiers` holds one per run finale; `BalanceRulesSO`
-carries the tier budgets, the exchange rate and the sweep axes; `EvaluateFrontiers` reports *no real
-choice*, *asks no more than the tier before it*, *off its tier budget*, *unclearable by anyone* and
-*goes from lethal to harmless in one purchase*. The Simulation tab draws the table; 14 cases in
-`InvestmentFrontierTests`. Use **`BalanceAnalyzer.MeasureFrontiers(input)`** while tuning — 16 seconds
-for the whole campaign, because it never simulates a mix the frontier already dominates. This
-supersedes the older min/max-party-band follow-up in §5; that band is one slice of the frontier.
+**Standing constraints:**
 
-**The gates — ✅ raised 2026-08-28** (`docs/BALANCING.md` §5k). The ladder rises for the first time:
-
-| Finale | Tier | Budget | Was | Now | Ways to pay |
-|---|---|---|---|---|---|
-| Sunken Depths | 0 | 200 | 150 | 150 | 2 |
-| **The Mire Throne** | 1 | 450 | 150 | **475** | 1 |
-| **The Counting Room** | 1 | 450 | 150 | **400** | 2 |
-| **Emberfall** | 2 | 700 | 225 | **800** | 2 |
-| **The Hollow Vault** | 3 | 1000 | 150 | **1050** | 1 |
-
-Every finale is inside ±125 of its tier budget, and the ask rises with depth.
-
-Three things that pass turned up and are worth knowing before the next one:
-
-- **Enemies per room was the missing lever.** Every `RoomSO` had `EvaluationCount: 1`, so no room in
-  the game held more than about one enemy — which is why "add more rooms" saturated. Three dense
-  rooms now carry the deep floors (`MireCourtRoom`, `EmberCrucibleRoom`, `VaultReliquaryRoom`).
-- **Dense rooms cost you the boss.** `MinBossToTrashRatio` measures the boss against the *average*
-  room, and no legal solo boss can be 1.8× a three-enemy room. Mixing thin rooms back into each pool
-  is the workaround; **boss adds** is the real fix, and the game does not have them.
-- **The 250-XP-per-hero exchange rate only fits the shallow end.** At the endgame a fourth body is
-  worth 400+ XP, so the 3-hero and 4-hero routes drift apart and two tiers report a single way to
-  pay. A longer sphere grid is what would close it.
-
-**Two constraints from the grid being unfinished.** The sphere grid is going to be expanded a lot, with
-many branches and much more freedom in how each hero grows. So:
-
-- **Key the investment axis off XP *spent*, never off node identities.** A frontier stated as "200 XP"
-  survives the grid tripling; one stated as "has bought `warrior-spine-3`" does not. `SphereGridOps`
-  greedy-spends the best available nodes, so XP-spent stays meaningful as branches multiply.
+- **Key the investment axis off XP *spent*, never off node identities.** A frontier stated as "200
+  XP" survives the grid tripling; one stated as "has bought `warrior-spine-3`" does not.
 - **Every frontier number today is a best case.** The greedy spend approximates an *optimal* build; a
-  player taking a flavourful route through a wide grid will be weaker at the same XP. Once the grid is
-  wide the analyzer needs to sample several plausible builds per XP level and report the **spread**, and
-  the target becomes that the frontier holds for a *median* build. Until then, read the numbers as
-  optimistic. **Do not tune the frontiers tight** — the build-variance headroom is not measured yet.
+  player taking a flavourful route through a wide grid is weaker at the same XP. Once the grid is
+  wide the analyzer needs to sample several plausible builds per XP level and report the **spread**,
+  with the target being that the frontier holds for a *median* build. Until then read the numbers as
+  optimistic and **do not tune the frontiers tight**.
+- **Useful dial:** death starts at roughly **attrition 0.70**. Floors at 0.64 and below wipe 0% of
+  the time.
+- **Enemy strength has a hard floor.** `FewestHitsToKillAHero` is already 3 (`MinHitsToKillHero`
+  exactly) for Cinder Imp, Dragon and Hex Weaver across The Ashen Deep. Raising `Difficulty` from
+  there buys losability by making heroes one-shottable. That binds on the **fresh** party — which is
+  precisely the party that is supposed to die.
+- **Solo is nearly viable and nobody planned it.** At 500 XP (pre-§5s units) one hero clears Mire
+  Throne 84% and Hollow Vault 89%. With `XpSplit` paying a solo hero 4× the share, "narrow but deep"
+  is a real path that almost works — worth finishing deliberately or closing deliberately.
 
-### 1. Battle polish (feel & clarity)
+### 1. Battle polish — remaining follow-ups
 
-The combat *systems* are solid; the presentation is thin. Two structural gaps found in the original
-scan: **combat was completely silent** (zero `AudioSource`/`AudioClip`/`PlayOneShot` anywhere in
-`Assets/Scripts`, despite unused sound packs sitting in `Assets/Fantasy Interface Sounds/` — Tier 1
-below closed this), and **all motion is procedural**
-(lunge / flash / shake / floating text via `CombatFeedback` + `EffectPresenter`; no Animator, so
-sprites are otherwise frozen). Tiered by impact:
+Tiers 1–4 shipped (audio + music bed + volume options; turn indicator, idle motion, projectiles;
+crits, resistance popups, boss telegraphs, combo flourish; victory/defeat framing, zoom-punch,
+per-level backdrops). What is left:
 
-- **Tier 1 — Audio.** ✅ Shipped. SFX first (`CombatAudio` + `SoundBankSO` at
-  `Resources/CombatSoundBank`, mapping `CombatSound` events → clips from the
-  `Fantasy Interface Sounds` pack; hooked into attack swing/impact, cast, draw, heal, item use, boss
-  signature wind-up, enemy death, victory/defeat and command-menu cursor/confirm), then the **music
-  bed and the volume controls** on 2026-09-01.
-
-  **What landed with the music pass.** Audio moved out of `Combat/Audio` into its own subsystem,
-  **`Assets/Scripts/Audio/`** — the bed and the dials serve the hub as much as they serve a fight, so
-  a folder called *Combat* was the wrong home. Three pieces now live there, with their own
-  `CLAUDE.md`:
-  - **`MusicPlayer`** — auto-creating and `DontDestroyOnLoad` (the hub and the dungeon are separate
-    scenes; a bed that restarted on every load would stutter exactly where the game wants continuity).
-    Two `AudioSource`s with a weight each, so every change is a **crossfade** and nothing cuts.
-    Requesting the track already playing is a no-op, and it checks the *track* before picking a clip —
-    a multi-clip track picks at random, so comparing the freshly picked clip would restart the theme
-    on every call, and the call sites fire far more often than the music needs to change.
-  - **`MusicTrack`/`MusicBankSO`** (`Resources/MusicBank`) — `Hub`, `Exploration`, `Combat`,
-    `BossCombat`. No `Victory`/`Defeat` track: those are one-shot stingers and the bed fades out under
-    them, so a member for them would be the dead content this project keeps finding. Per-level
-    overrides via **`LevelDefinitionSO.ExplorationMusic` / `.CombatMusic`**, resolved by
-    **`Dungeon/LevelMusic.cs`** — the same seam `CombatStage` uses for the per-level backdrop, so
-    `MusicPlayer` never learns that a dungeon exists. A boss ignores the level's combat theme and
-    takes the bank's `BossCombat`, because the point of a boss theme is that it is *not* the floor's.
-  - **`AudioOptions`** — Master / Music / SFX + mute, snapped to 10% steps, persisted to
-    `savedata/Audio.json` the moment a dial moves. **Master drives `AudioListener.volume`** (so it
-    scales sounds no channel knows about) and the other two are applied *at the source*, because a
-    listener volume cannot tell a hit from the bed playing under it. Mute is a gate, not a stored
-    zero, so un-muting gives back the dials the player set.
-
-  Reachable from a new hub **Options** screen (`AudioOptionsUI`, `options-view`, tenth button on
-  home). Its dials are **stepped buttons rather than sliders** — the hub's keyboard cursor navigates
-  buttons, so a slider would be unreachable without a mouse. Verified in play mode: the screen opens,
-  the dials move `AudioListener.volume`, mute silences and un-mute restores, the file round-trips, and
-  home still fits (799.5 units against the 88% cap of 884.4 — room for about one more button, now
-  recorded in the USS and the MainMenu guide). Suite **798 passed / 0 failed** (+10:
-  `AudioOptionsTests`).
-
-  **The music itself landed the same day** — six loops from the *Ultimate Game Music Collection*
-  (John Leonard French): `Tavern LOOP SLOW` for the hub, `Ambient Dungeon LOOP` + `Murky Dungeon LOOP`
-  for floors, `Combat LOOP` + `Tense Combat LOOP` for fights, `Boss LOOP` for the climax — two clips
-  each on the two tracks the player hears most, since the bank picks at random per start and a 15-room
-  floor on one loop goes stale. Verified in play mode across every transition: floor → combat
-  crossfading with both beds live, boss swap, and the way back out picking the *other* exploration
-  clip.
-
-  **From play: "the tavern loop seems a bit quiet" — and the bank could not have fixed it.** The pack
-  does not master consistently. Measured with `ffmpeg ebur128`, the six loops span **−10.7 to −30.3
-  LUFS**: `Boss LOOP` is 5 dB hotter than the combat tracks and `Tavern LOOP SLOW` shipped **15 dB
-  quieter than everything else**, with 14.5 dB of true peak unused. Matching it needed ~6× gain and
-  `Entry.Volume` is `[Range(0f,1f)]`, so **1.0 would not have been enough** — the fix was gain on the
-  *source*, re-encoded from the original WAV at `volume=14dB` (peak −14.5 → −0.7 dBFS, nothing clips),
-  moving it −30.3 → −16.3 LUFS. With the bank retune that is **+16 dB** on where it started. All four
-  volumes were then set against measured loudness rather than intent, which flipped an assumption:
-  **`BossCombat` is now 0.35 against `Combat`'s 0.50 while remaining the loudest thing in the game**,
-  because the old 0.45 was doubling up on an already-hot master. The effective ladder is Exploration
-  −24.8 → Hub −23.2 → Combat −21.9 → Boss −19.8. Numbers and method in
-  `Assets/Scripts/Audio/CLAUDE.md`; the lesson is the same one `BALANCING.md` keeps re-learning —
-  **measure the asset before picking the lever.**
-
-  **Two things that pass came out of are worth keeping.** First, **the sources are OGG, not WAV, and
-  that is a repo decision, not an audio one**: Unity keeps source files in `Assets/` and compresses
-  only for the build, so WAV would have put **72 MB** into a 42 MB repo — transcoded to OGG q6 first
-  it is **8.4 MB**, and the build re-encodes to Vorbis either way. Only ~2% of the 4.7 GB pack is
-  imported; the archive stays in the machine-wide Asset Store cache, because *a download is not an
-  import* and Unity never moves it into the project. Second, driving the transitions live **found a
-  real bug in the crossfade**: `PlayInternal` swapped the two beds blindly, so two swaps inside one
-  fade handed the incoming clip the bed still audibly playing the *first* track and cut it dead —
-  reachable in play, because victory calls `Stop(0.6s)` and dismissing the summary calls
-  `PlayExploration()` well inside that window. It now takes the **quieter** bed
-  (`MusicPlayer.IncomingTakesBackBed`, pure and unit-tested), verified against the exact repro.
-
-  Also open: **a boss theme is game-wide**
-  (per-boss music would want a field on `RunLevelEntry` beside `BossAdds`), and **volume can only be
-  changed in the hub** — there is no in-dungeon pause menu, so a player mid-run cannot reach it. A
-  pause overlay is the natural home for it and for a quit-to-hub. Consider dedicated combat SFX later
-  — the current clips are repurposed interface foley.
-- **Tier 2 — On-field readability & life.** ✅ Shipped. `TurnIndicator` (bobbing arrow over the
-  acting unit), `CombatIdleMotion` (scale-based breathing; wounded units breathe harder), and a
-  magic **projectile** (`EffectPresenter.FlyProjectile`) so casts read as ranged strikes vs. the
-  melee lunge. *(Follow-up: a dedicated heal/buff flourish — heals still just show green rising
-  text — and richer per-element cast visuals.)*
-- **Tier 3 — Feedback depth.** ✅ Shipped. Basic-attack **crits** (gold `CRIT!` + bigger number +
-  punch); **resistance popups** (`Weak!`/`Resisted`/`Immune`/`Absorbed`) via
-  `DamageCalculator.Classify`, surfaced for both melee and magic; **boss AoE telegraph** (red `!`
-  over each targeted hero during the channel); **combo flourish** (camera punch + hit-stop on a
-  triggered combo). *(Follow-up: element-tinted damage numbers per `DamageType`; a bigger on-screen
-  combo banner beyond the floating name.)*
-- **Tier 4 — Framing.** ✅ Shipped. Victory **flash** + defeat **tint** (`ScreenFade`, full-viewport
-  overlay under the UI); a subtle **camera zoom-punch** on every impact (`MainCamera.ZoomPunch`,
-  zoom-in only so the battle background keeps covering); and **per-level combat backgrounds**
-  (`LevelDefinitionSO.CombatBackground`, used by `CombatStage`). *(Follow-up: true desaturate on
-  defeat needs post-processing; assign real per-biome background art.)*
+- **A dedicated heal/buff flourish.** Heals still just show green rising text.
+- **Element-tinted damage numbers** per `DamageType`, and richer per-element cast visuals. Pair with
+  the colourblind check in §19.
+- **A bigger on-screen combo banner** beyond the floating name.
+- **True desaturate on defeat** needs post-processing.
+- **Real per-biome background art** — `LevelDefinitionSO.CombatBackground` is wired and mostly unset.
+- **Per-boss music.** A boss theme is game-wide; per-boss would want a field on `RunLevelEntry`
+  beside `BossAdds`.
+- **Dedicated combat SFX.** The current clips are repurposed interface foley.
+- **All motion is procedural.** No Animator anywhere — lunge/flash/shake/floating text via
+  `CombatFeedback` + `EffectPresenter`. Sprites are otherwise frozen: **no hit reaction on the
+  receiving unit and no death animation.**
+- **Hub screens toggle instantly.** Every view swap in `MainMenuManager` is a `display` flip; the
+  theme stylesheet already drives the whole game's look from one file, so transitions belong there.
 
 Touch points: `Assets/Scripts/Combat/CombatFeedback.cs`, `Assets/Scripts/Cards/EffectPresenter.cs`,
 `Assets/Scripts/Rooms/CombatManager.cs`, `Assets/Scripts/Combat/UI/UnitHealthBar.cs`,
-`Assets/Scripts/Rooms/UI/RoomActionUI.cs`, `Assets/Scripts/Combat/CombatStage.cs`,
-`Assets/Scripts/Audio/` (+ its `CLAUDE.md`), `Assets/Scripts/Dungeon/LevelMusic.cs`,
-`Assets/Resources/MusicBank.asset`, `Assets/Fantasy Interface Sounds/`.
+`Assets/Scripts/Combat/CombatStage.cs`, `Assets/Scripts/Audio/`, `Assets/UI/Theme/CardDungeon.uss`.
 
-### 2. Room-type variety + in-run choice — ✅ kinds shipped 2026-08-25, branching has not
+### 2. Room variety — the branching half has not shipped
 
-Both halves of "a room is a decision" are now in: the room-*interaction* half (stat-check events,
-2026-08-21, below) and the room-*kind* half.
-
-**`RoomKind`** is what a room is: `Combat`, `Connector` (this absorbed `RoomSO.IsConnectorRoom`, now a
-property derived from the kind), `Treasure` (a one-shot cache) and `Rest` (a one-shot refuge). Members
+`RoomKind` (Combat / Connector / Treasure / Rest) and stat-driven room events both shipped. Members
 exist only when they *do* something — an enum entry no code acts on is the dead content this project
-keeps finding — so **Elite / Merchant / Boss are deliberately absent**; the boss room is already
-expressed by `RunLevelEntry.BossEnemy` claiming the exit.
-
-- **Placement is per instance on a level budget**, the same split room events use and for the same
-  reason: `LevelDefinitionSO.TreasureRooms` / `RestRooms` say how many, the pure `RoomKindPlanner`
-  says which, off the dungeon's seeded RNG so a resumed level reproduces its own caches.
-  `DungeonManager.PlaceRoomKinds` runs **before every other content pass**, because they all read the
-  kind: enemies skip a promoted room, and captives and events leave it alone, so a room offers exactly
-  one thing.
-- **A refuge** heals every hero **35% of their maximum** (a fraction, so it cannot go stale as bars
-  grow). Its button is **confirmed**, and the prompt names how much health the party is actually
-  missing — resting at full health wastes it, and that timing is the decision the room poses.
-- **A cache** pays `15 + 10 x (depth-1)` gold into the pending pool (forfeited on death, like a
-  kill's) plus at most **one** item through the ordinary `LootRoller` rarity/depth rules. Its button
-  is not confirmed: nothing is spent, so the only decision is whether to walk to it.
-- **Persisted** (`RoomSaveData.Kind` + `KindConsumed`, guarded against a shifted kind the way the
-  event key is) or the player re-loots the cache by leaving and coming back.
-- **Promoting a room costs the level a fight**, so the quotas are a difficulty lever wearing a
-  reward's clothes. `RunCurveModel` takes non-combat rooms off the combat-room count and adds a
-  refuge's healing to the sustain pool. The first quota rule I authored broke the run curve by +84%
-  between two levels; the measured version, and why, is in **`docs/BALANCING.md` §5d**. Shipped rule:
-  a cache from 6 rooms up, a refuge only from 9 (today: Upper Halls alone).
-- Suite **651 → 669, 0 failed**; analyzer still **0 critical / 3 warning**. Verified in play mode:
-  Collapsed Caverns promoted room 3 to a cache, it spawned no enemies, its marker drew, and the
-  **Search** button appeared there and nowhere else.
-
-**Still open on §2:**
+keeps finding. Open:
 
 - **Path/branch choice at generation** (`RoomManager`) so the player picks *which* rooms to enter,
-  trading safety for reward. Untouched — this is the half that makes a level a route rather than a
-  sweep.
+  trading safety for reward. Untouched — **this is the half that makes a level a route rather than a
+  sweep**, and it is the largest open item in §2. It also depends on §14's map: a fork the player
+  cannot see is not a choice.
 - **Elite, Merchant and Shrine kinds.** Elite wants a danger multiplier and a loot table to justify
   it; Merchant wants an in-run shop screen (the hub Merchant is not reusable as-is); a Shrine is a
   refuge with a cost, which `HealthCost` now makes authorable.
 - **Marker art.** Both markers are the exit-room sprite under a tint (gold / teal).
-- **No per-room kind in a manual layout.** `ManualRoomEntry` has no kind field, so a hand-authored
-  level takes the level's quotas at random like a generated one — the same gap the events pass left.
+- **No per-room kind or event in a manual layout.** `ManualRoomEntry` has neither field, so a
+  hand-authored level takes the level's quotas at random like a generated one.
 - **The refuge is nearly single-instance content.** Only Upper Halls is long enough to earn one under
-  the shipped rule, so `RoomKind.Rest` is reachable on one floor of one run. More long floors, or a
-  per-level authoring pass, would spread it.
+  the shipped rule, so `RoomKind.Rest` is reachable on one floor of one run.
+- **An event behind a fight is never a decision *before* the fight** — the main bar replaces the
+  Fight bar, so a room's event only appears once the room is won. Worth a look if events should ever
+  be a way to *avoid* a fight.
+- **Nothing stops the same event appearing twice in one level** since the per-level budget was
+  dropped for per-event odds. Uncommon at current numbers, but no longer impossible.
+- **Only `MustyTome` and `TreasuryHoard` have outcome weight modifiers authored.** The rest are 0 —
+  a balancing pass, not a code change.
 
-#### Examine / Action as stat-driven risk vs. reward — ✅ shipped
-
-Landed 2026-08-21. `Assets/Scripts/Rooms/Events/` is the whole feature: `RoomEventSO` (+
-`RoomEventOption` / `RoomEventOutcome`) is the data, `RoomEventResolver` is the pure, tested
-decision layer, `RoomEventRunner` applies an outcome, and `LevelAfflictionTracker` holds what
-outlives the room. Full reference in **`Assets/Scripts/Rooms/CLAUDE.md`** (placement and the
-restore ordering are in the Dungeon guide, the save fields in the IO guide).
-
-What it does, against the design below: the matching button's option list gains one real entry
-listed first; the event window shows the prompt, a qualitative odds line and one button per option;
-the result window shows the outcome's copy plus one line per concrete consequence. Outcomes reuse
-`IEffectExecutor` (with `flatPower`), `LootRoller`, `MetaProgressManager.AddPendingGold`,
-`InventoryManager.TryConsume` and `EnemyManager.SpawnSingle` — no parallel effect system. Consumed
-state persists into `DungeonSaveData` immediately, keyed on the event's `SaveKey`, and a consumed
-outcome's spawned enemies are re-created on resume.
-
-**The open questions, decided:**
-
-- **Whose stat: party-best.** Not the leader, not the party sum — party-best is the one rule that
-  makes bringing a specialist worth a slot, and the hero is *named* in the odds line so the
-  investment is visible. Every hero in the roster is the best reader of at least one authored event
-  (Warrior/Strength, Tank/Endurance, Scout/Luck and Agility, Acolyte/Intelligence and Spirit) - the
-  Tank had no non-combat moment before this.
-- **The band sharpens with the stat** (this was the "worth considering" note). Clarity comes off the
-  same stat: matching the difficulty reads the band exactly, half of it gets an impression, under
-  that the party is told it has no idea. Deterministic, so re-reading an event is not a way to farm
-  information.
-- **Where scarcity is authored: split.** `RoomSO.PossibleEvents` says what *kind* of event fits a
-  room; `LevelDefinitionSO.EventsPerLevel` says how *many* rooms in a level get one. Placement is
-  per-instance (on `Room`, not `RoomSO`), so a template used three times does not offer the same
-  event three times — and no event is placed twice in one level.
-- **Declining does not consume.** Walking away defers the choice rather than spending it; only a
-  resolved check or a `Guaranteed` option consumes.
-- **Failure cannot kill.** `KeepEveryoneStanding` clamps event damage to a floor of 1 HP. There is
-  no combat loop outside a fight to run a death through, so a wipe in a corridor would strand the
-  game rather than show a death screen.
-
-**Then the buttons themselves were fixed (2026-08-21, after play-testing).** Events are scarce by
-design, so most rooms still had two buttons and nothing behind them - the Treasury's "Loot the gold!"
-was text. The verbs are now split by cost:
-
-- **Action costs something, so it only exists when there is something to spend it on.** It is
-  *hidden* unless the room has an unresolved event. A button that answers "there is nothing here"
-  teaches the player to stop pressing it, and then they miss the rooms where it mattered. Every
-  button on the bar is conditional now, and the bar hides itself when none applies, so an ordinary
-  cleared room shows nothing at all.
-- **Examine is gone, and so is room flavour text.** `ExamineOptions`/`ActionOptions` went first,
-  along with the option-list window whose only real entry was the event. They were briefly replaced
-  by a generated `RoomSurvey`, which was then removed as well: it restated what the player was
-  looking at. `Room.Reveal()` shows every door of the current room and leaves unexplored neighbours
-  dark, so "which way leads somewhere new" - the one line I had argued earned its place - is already
-  on screen, and enemies, the exit marker and a captive's portrait are all sprites. A free,
-  repeatable button is never a decision. `RoomEventTrigger` went too: every event is an Action, which
-  is what they all were in fiction anyway.
-- **`RoomSO.GuaranteedEvent`** for rooms that *are* an interaction. The scarce pool is right for a
-  tome and wrong for a Treasury, so a guaranteed event is offered by every instance of its room type,
-  outside the level budget (and skipped in the exit room, where entering a cleared exit ends the
-  level before anything could be used). `TreasuryHoard` is the example: *gather the loose coin*
-  (guaranteed, 15 gold) **or** *throw the lid back on the gilded chest* (the old `GildedChest` Luck
-  gamble, folded in and its asset retired) **or** walk away. Taking the sure thing spends the event,
-  so the chest is the road not taken - the decision the room exists to pose.
-- **The odds line is now about the gamble, not the window** - hidden unless an option is a
-  `StatCheck`, and worded "anything you chance here turns on Luck". With a sure thing and a gamble in
-  one event, a bare "this looks dangerous" was claiming the safe option was risky.
-
-**Then descending became a choice (2026-08-21).** Entering a cleared exit room used to complete the
-level from `GameManager.EnterRoom`, so walking into the wrong room ended it with unexplored rooms and
-unspent events behind you. The exit room is now an ordinary room plus a **Descend** button, and
-`NotifyDungeonCleared` has exactly one caller (`RoomActionUI.OnDescend`), behind a confirm.
-`FinishVictory` no longer completes the level and lost its `levelCleared` parameter; doors re-enable
-unconditionally after a win, which also un-seals a boss room. Guaranteed events are allowed in the
-exit room again - the exclusion existed only because the level used to end first, so a
-Treasury-that-is-also-the-exit works now.
-
-That also exposed a flaw in the dialogs: `ShowDetail` only ever had an Ok, so "Free them?" and
-"Descend?" were questions the player could not decline. `ShowConfirm` adds a Cancel beside it, and
-both Rescue and Descend use it.
-
-**Then rarity moved onto the event (2026-08-22).** With Examine gone, an Action button was the only
-thing on the bar - and it was showing up nearly everywhere, because `TreasuryRoom` is about a quarter
-of every level pool and its hoard was guaranteed. `RoomEventSO` now carries its own odds:
-`SpawnChancePercent` plus an optional `SpawnModifierStat`/`SpawnModifierRate`, where
-`chance = base + base * (stat * rate / 100)` - relative to the base, so one rate scales a rare find
-and a common one alike. The stat is the party's best for the party as it enters the level - base stats plus the level-up
-gains its saved XP has bought plus equipped gear - re-derived through `HeroStatCalculator`, since
-placement runs before the party is instantiated and `Hero.GetEffectiveStat` needs a live scene. (It
-read *only* level-1 base stats at first, which silently ignored levelling: the live save's level-2
-Warrior is AGI 5->10 and STR 10->13, so `CeilingShaft` and `SealedTomb` were both rolling off the
-wrong number.) Stable across a save/resume because XP and gear are both committed only on level
-clear. `RoomEventSpawn` is pure and covered by
-`RoomEventSpawnTests`, including the worked example from the request.
-
-That collapsed two knobs into one: **`LevelDefinitionSO.EventsPerLevel` and `RoomSO.GuaranteedEvent`
-are both gone.** A per-level budget made every eligible room in a small level close to a certainty,
-and the guaranteed flag existed only to escape the budget - both were really "how likely is this
-event to be here". `TreasuryHoard` is now just an event with a high base chance. Placement is one
-pass: each of a room's candidates is rolled in authored order and the first to pass takes the room,
-so listing two events raises the odds of that room having *something*.
-
-**Stats now drive an event at three points (2026-08-22),** all optional, all per-asset:
-
-1. **Whether it appears** - `SpawnChancePercent` + `SpawnModifierStat`/`Rate`, plus a
-   **`SpawnRequirements`** gate: a list of `UnitStat` thresholds where an empty list means no
-   condition and otherwise **every threshold must be met, though not necessarily by the same hero**
-   (10 STR + 15 INT passes with an 11-STR Warrior and a 20-INT Acolyte; it fails if nobody reaches 15
-   INT). That is why the check reads party-best *per stat*. `MustyTome` now needs
-   Intelligence 6 and `DrownedOffering` Spirit 6, so a solo Warrior is gated out of both and
-   recruiting the Acolyte visibly opens them.
-2. **Whether a check passes** - `GoverningStat` + `Difficulty`. This part existed from the start.
-3. **Which outcome you get** - new. `RoomEventOutcome.WeightModifierStat` + `WeightModifierRate` bend
-   an outcome's weight by `Weight * (1 + stat * rate / 100)`, read off the *acting* hero (their hand
-   is in the chest; party-best would mean the Scout's charm helping while the Warrior forces a door).
-   Positive favours an outcome, negative steers away, and a steep negative can remove it entirely.
-   Started as a hardcoded `LuckBias` and was generalised - Luck is the obvious authoring answer, not
-   a rule worth baking into the resolver. Measured on `MustyTome`'s success pool: the clean outcome
-   goes 75% -> 78.3% -> 81.6% at Luck 0 / 5 / 12.
-
-Outcome **magnitude** is still flat (`flatPower`) - the numbers belong to the event, not the caster.
-Only `MustyTome` and `TreasuryHoard` have outcome modifiers authored so far; the rest are 0, i.e. a
-balancing pass rather than a code change.
-
-Authored: base 10 with rate 5 for the five stat finds (8 for `DrownedOffering`), and
-`TreasuryHoard` at **50 + Luck rate 2** - at 100 it was what made an Action feel universal. Measured
-expected Action rooms per level: `UpperHalls` ~2.0-2.4, `CollapsedCaverns` ~1.6-1.8, `SunkenDepths`
-~0.6-0.7, `DungeonEntrance` ~0.8-0.9. *(One consequence of dropping the budget: nothing stops the
-same event appearing in two rooms of one level any more. At these odds it is uncommon, and a room
-only ever offers one thing, but it is no longer impossible.)*
-
-*Balance note:* every Treasury that rolls its hoard pays at least 15 gold, against roughly 70-85 gold a
-level. Not modelled by the analyzer (it does not read events at all), so treat the curve as that much
-optimistic.
-
-**Authored content:** six events, one per stat —
-`MustyTome` (Intelligence), `GildedChest` (Luck), `SealedTomb` (Strength), `DrownedOffering`
-(Spirit), `ChokedPassage` (Endurance), `CeilingShaft` (Agility). Two per room template
-(BrownRoom and CavernRoom offer `ChokedPassage`, PinkRoom and TreasuryRoom offer `CeilingShaft`),
-except SwampRoom which has only `DrownedOffering` - a template needs two so a level whose generated
-rooms collapse onto one template can still fill a budget of 2. Budgets: `DungeonEntrance` 0 (it is a
-tutorial, and its only non-start/non-exit room holds the captive), `UpperHalls` 1,
-`CollapsedCaverns` 2, `SunkenDepths` 2.
-
-**Verified in-editor** via the Unity MCP against a real generated dungeon: placement (2 of 2 in
-`CollapsedCaverns`), the real Action button → the event entry in the list → the event window with
-its odds line → resolving an option → gold banked → the consumed flag in `Dungeon_{seed}.json`
-with option/outcome indices → the event gone from the list on re-open. Also the failure paths:
-damage + a level affliction recorded, two enemies spawned into the room with renderers enabled, and
-the affliction re-seeded into the next fight's `CombatBuffTracker` (Warrior Agility -2, Tank
-unaffected). Covered by `RoomEventResolverTests` and `LevelAfflictionTrackerTests` (run them in the
-Unity Test Runner — `dotnet` can only compile-check).
-
-**Found and fixed on the way:** `EffectResolver.ApplyPowerBonus` was dropping `ScalingStat` when it
-copied an effect to fold in an upgrade bonus, so **an upgraded magic silently lost its caster
-scaling** — see the bullet under §0b-2. The `isComboEffect` executor flag was also renamed
-`flatPower`, since events are now a second, non-combo caller of the same behaviour.
-
-**The EditMode suite was 46 tests red before this work, and is now 1.** See the *Test suite repair*
-entry in the Done section - the rot was refactoring fallout from §6, invisible because nobody could
-run the suite headlessly. It can be run headlessly now (`docs/GAMEPLAY_VALIDATION.md` gotcha 12).
-
-**Follow-ups:**
-
-- **No manual-layout override.** `ManualRoomEntry` has no per-room event field, so a hand-authored
-  level can only get events through its rooms' templates. Cheap to add if the tutorial should
-  guarantee a specific one.
-- ~~**The balance model does not know events exist.**~~ ✅ Fixed 2026-08-24.
-  `Assets/Scripts/Balance/RoomEventModel.cs` costs a level's events - placement odds
-  (`RoomEventSpawn`), check odds (`RoomEventResolver.SuccessChance`), weighted outcome pools
-  (`RoomEventResolver.EffectiveWeight`, made public for it), damage through `DamageCalculator`, loot
-  through `LootRoller.DropChance` - and `RunCurveModel` folds the result into
-  `ExpectedHealthCost` beside the fights, keeping the split visible as `ExpectedCombatHealthCost` /
-  `ExpectedEventHealthCost` / `EventAttritionShare`. Event gold reaches `ExpectedGold` and an
-  awakened fight's XP reaches `ExpectedXp`, so the economy and the XP loop see them too. New
-  `BalanceCategory.Event` findings: an event no room offers, one that can never be placed, a gate no
-  hero in the project can reach, an all-Decline option list, a gamble with no downside, plus a
-  per-level *too much of this level's attrition is events* warning. Covered by `RoomEventModelTests`
-  and three new `BalanceRegressionTests`; surfaced as an **Events** column in the analyzer window.
-
-  Measured on the real assets, the curve moves as expected: The Threshold `0.033 / 0.148 / 0.144 /
-  0.209` → `0.040 / 0.195 / 0.190 / 0.230`, The Drowned March `0.102 / 0.168 / 0.269 / 0.361` →
-  `0.139 / 0.198 / 0.293 / 0.350`, The Warrens `0.124 / 0.204` → `0.170 / 0.248`. Events are worth
-  0.4–3.1 HP and 6–45 gold per level. Findings went **8 warning / 11 info → 8 warning / 13 info** —
-  two new Infos, no new warnings and no criticals.
-
-  Three deliberate limits, documented on the class: it assumes the player **engages and takes the
-  dearest option** (declining is free, so the cautious reading is the zero the model already had —
-  `BalanceRulesSO.EventEngagementRate` scales it, and `RoomEventEncounter.Safest` carries the
-  cheapest engagement); it does **not** apply `RoomEventRunner`'s 1-HP floor, because that clamps
-  against *current* health, so an outcome above a hero's whole bar is costed at face value and
-  reported instead (`MaxEventDamageFraction`); and level afflictions are **counted, not priced**, so
-  a level that hands one out is flagged as harder than its attrition figure says.
-
-  *(One thing the new checks exposed: the run curves grow a roster only through
-  `RunLevelEntry.RescueHero`, so a **tavern recruit is invisible to the whole balance model**.
-  `MustyTome`'s Intelligence 6 gate therefore reads as never-met on the modelled path even though the
-  Acolyte opens it in play. Reported as an Info with that caveat rather than a warning; the
-  project-wide reachability check is the one that fails a test.)*
-- ~~**Mid-level hero HP is still not persisted at all.**~~ ✅ Fixed 2026-08-24.
-  `DungeonSaveData.HeroHealth` carries current HP per hero, written by `DungeonSaveManager.Save`
-  (whose three call sites — entering a room, finishing a fight, resolving an event — are exactly the
-  points where it changed) and applied in `RestoreSavedState` right after `Party.Initialize`. The
-  rules are pure and tested in `PartyHealthSnapshot` / `PartyHealthSnapshotTests`: a hero with no
-  record resumes **full** (the only way to be absent is to have joined after the write, and a rescue
-  arrives full anyway), a record is clamped into the hero's *effective* max, and a 0 stays down.
-  Verified in-editor: wounded to 5 / 0 / 17, healed to full in memory, resumed → 5 / 0 / 17.
-
-  **The potion half is fixed too** (same day). `DungeonSaveData.ConsumablesSpent` is a per-level
-  ledger of what the party drank, written from `InventoryManager.GetDungeonConsumption` and
-  reconciled onto the inventory in `RestoreSavedState`, so the whole sustain pool the attrition curve
-  divides by is now persisted rather than half of it.
-
-  Two design points worth keeping. It is a **delta, not a snapshot of quantities**: the hub is
-  reachable while a run is paused, so restoring absolute counts would silently undo a merchant
-  purchase or an equip. And the reconcile is **idempotent** (`InventoryOperations.SpendShortfall`
-  applies `target - current`), because `SingletonBehaviour.dontDestroyOnLoad` is a per-scene
-  serialized flag — if `InventoryManager` is destroyed with the scene the potions come back off disk
-  and the whole ledger must re-apply, and if it survives they are already gone and re-applying would
-  charge the player twice. Neither caller has to know which case it is in. Covered by
-  `ConsumableLedgerTests`; verified in-editor across **both** cases: carrying 2, drank 1, reloaded
-  from disk → 2, resumed → 1, resumed again → still 1.
-- **A room whose event sits behind a fight** only offers it after the fight is won (the main bar
-  replaces the Fight bar). That reads fine, but it means an event in a combat room is never a
-  decision *before* the fight — worth a look if events should ever be a way to *avoid* one.
-
-The design this was built to, kept for the reasoning:
-
-> *You see a musty old tome, thick with spider webs. Reaching in looks like a **slight risk**.*
-> → *Pick it up* / *Leave it.* Resolved against **Intelligence** — succeed and you keep the tome;
-> fail and something in the webs bites back (damage + Poison for the level).
-
-- **Options become data, not strings.** A `RoomEventSO` (or a serialisable `RoomOption` on `RoomSO`)
-  carrying: prompt text, the choice labels, and per-outcome effects with weights. Effects should
-  reuse what exists rather than inventing a parallel system — `IEffectExecutor` /
-  `EffectResolver` already apply damage, heals, buffs and debuffs, and `LootRoller` already rolls
-  rarity/depth-scaled drops. An event outcome is then just "run these effects on these targets"
-  plus an optional loot roll.
-- **A stat sets the odds, and *which* stat is part of the event's identity.** Each event names the
-  stat it is resolved against, so the fiction and the check match: **Agility** for acrobatics (jump
-  the lava pit, scale the collapsed stair), **Intelligence** for knowledge (decipher the ancient
-  runes, identify the tome), **Spirit** for anything consecrated or cursed, **Luck** as the
-  catch-all for blind risk, and the physical stats where force is the answer (**Attack** to force a
-  seized door, **Defense** to shoulder through a cave-in). See §6 for the stats themselves.
-  ~~Still to decide: **whose** value is used.~~ Decided: **party-best**, for the reason given —
-  it makes bringing a specialist worth a party slot and gives every hero in the roster a reason to
-  exist beyond combat throughput.
-- **Failure costs, it does not end the run — and the currency varies by event type.** The outcome
-  pool draws from: **damage** (lands on a level-scoped HP pool, so 30% of a bar is a real attrition
-  decision), a **debuff that lasts the level**, **spawning enemies** (the noise wakes something —
-  turns a safe room into a fight you did not choose), **losing a consumable**, and a **wasted turn**
-  equivalent. Which of those are eligible should depend on the event: a lava pit deals damage, a
-  disturbed tomb spawns something, a cursed idol applies the long debuff. Partial successes are worth
-  having too — "you get the tome *and* the spider bite" is a better outcome than a coin flip.
-- **Odds are shown qualitatively, never as a number.** A band — *"almost certain" / "very likely" /
-  "even odds" / "slight chance" / "near hopeless"* — driven by the resolved chance. Raw percentages
-  turn the game into arithmetic; a band keeps the decision a judgement call while still rewarding
-  stat investment visibly. Worth considering: the band **sharpens** as the governing stat rises, so a
-  high-Intelligence party reads the runes' difficulty accurately while a dull one only gets a vague
-  impression — the stat then buys *information* as well as odds.
-- **Most rooms have no event at all.** Events are opt-in per `RoomSO` (and per manual-layout room),
-  not a property of every room — scarcity is what makes finding one feel like something. Rooms
-  without one keep today's flavour-text Examine/Action.
-- **One-shot, and it must persist.** An event is marked consumed on the `Room` (like `CaptiveHero`)
-  **and** written into `DungeonSaveData`, or the player re-rolls a bad outcome by walking out and
-  back in, or by quitting to the menu and resuming. This is the one part that is a correctness
-  requirement rather than a design choice.
-
-Why it is worth doing early: it is the cheapest route to *decisions between fights*, the simulator's
-depth-gap findings say combat alone is not providing them, and it gives `Luck` — and therefore gear
-and buffs — a second axis to matter on beyond damage. It also gives the balance model something new
-to measure: expected HP cost per room stops being purely combat-driven, so `EncounterModel` would
-need an event term.
-
-Touch points for the **rest** of §2 (the room-*kind* work above, still open):
-`Assets/Scripts/Rooms/RoomSO.cs`, `Assets/Scripts/Rooms/UI/RoomActionUI.cs`,
-`Assets/Scripts/Rooms/RoomManager.cs` (path/branch choice), `Assets/Scripts/Items/LootRoller.cs`.
+Touch points: `Assets/Scripts/Rooms/RoomManager.cs` (branch choice), `Assets/Scripts/Rooms/RoomSO.cs`,
+`Assets/Scripts/Rooms/UI/RoomActionUI.cs`, `Assets/Scripts/Items/LootRoller.cs`.
 
 ### 3. Sharpen hub sinks
 
-- **Gold gear shop.** ✅ Shipped. The Merchant now **buys** gear from a rotating (persisted,
-  paid-restock) stock and **sells** spare gear back at a loss (`ShopPricing`, rarity+level priced;
-  selling removes only un-equipped copies so heroes can't be stripped). Validated live in-editor.
-  *(Follow-up: auto-restock on run completion; gate rarer stock behind meta-progress.)*
-- ~~**Magic slot-upgrade UI is still missing.**~~ ✅ Resolved by design (2026-08-22): slot growth
-  moved onto the **sphere grid** as per-hero `MagicSlot` nodes bought with XP (§4), so the Essence
-  upgrade — and the screen it never got — were retired. `TryUpgradeSlots` is deleted; saves that had
-  bought slots get the Essence refunded in full on next load.
-- **More Gold sinks to consider** (from the design chat): permanent **hero training** (base-stat
-  bumps), run **prep/consumables**, and a death **safety net** (revive / loot-insurance token).
+- **More Gold sinks:** permanent **hero training** (base-stat bumps), run **prep/consumables**, and a
+  death **safety net** (revive / loot-insurance token).
+- **Merchant follow-ups:** auto-restock on run completion; gate rarer stock behind meta-progress.
 
 > **Superseded in framing by §7.** The eventual home for every sink here is a **building** that has
-> to be placed and upgraded before it sells anything — the Merchant, the Tavern and the Forge all
-> become gated services rather than permanent buttons. Build sinks now, but prefer ones that a
-> building *level* can later scale (stock rarity, hero tier, upgrade cap) over one-shot purchases.
+> to be placed and upgraded before it sells anything. Build sinks now, but prefer ones a building
+> *level* can later scale (stock rarity, hero tier, upgrade cap) over one-shot purchases.
 
-Touch points: `Assets/Scripts/MainMenu/MerchantUI.cs`, `Assets/Scripts/Items/ShopPricing.cs`,
-`Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Cards/UI/MagicForgeUI.cs`.
-
-### 3b. The retry economy — death pays, and that is now deliberate
+### 3b. The retry economy — death pays, and that is deliberate
 
 > **Design decision, 2026-08-27: do NOT make dying cost more.** Death is **tuition, not a penalty**.
-> The player is *supposed* to fail a tier, bank what they earned, upgrade, and come back. This section
-> was originally written the other way round — as "failure is a farm, close the loophole" — and that
-> framing is **rejected**. The mechanics description below is still accurate and worth keeping; only the
-> verdict changed. The open question is no longer *how do we punish a wipe* but **how many failed
-> attempts should a tier cost**, which is a pacing number and a tunable one.
+> The player is *supposed* to fail a tier, bank what they earned, upgrade, and come back.
 
-**The intent:** a run should be able to *stop* the player, and the answer to being stopped is a hub
-decision — deepen a sphere grid, buy a party slot, upgrade a spell — funded by the very run that
-stopped them.
+**What the code does:** `AwardLevelClear` banks `GoldPerLevelCleared` (25) plus that level's whole
+pending kill-gold pool into permanent save the moment the exit room clears; `HandlePartyDeath` only
+calls `DiscardPendingGold`, which forfeits the *current* floor; `AwardRunProgressOnDeath` pays a
+further 10 gold per floor reached. So dying on floor 3 banks floors 1–2 in full and drops the player
+back at the hub strictly richer. At ~5 gold an enemy over ~12 enemies a floor plus the 25 flat, a
+cleared floor is ~85 gold and a run that dies on floor 3 pays roughly **190 gold**.
 
-**What the code actually does:** a wipe is not a loss. `AwardLevelClear` banks
-`GoldPerLevelCleared` (25) **plus that level's whole pending kill-gold pool** into permanent save the
-moment the exit room is cleared, and `HandlePartyDeath` only calls `DiscardPendingGold` — which
-forfeits the *current* floor. Everything earned on floors already cleared is already permanent, and
-`AwardRunProgressOnDeath` pays a further 10 gold per floor reached on top. So dying on floor 3 of a
-run banks floors 1–2 in full, deletes the run save, and drops the player back at the hub strictly
-richer than they started.
+**The open work:**
 
-At ~5 gold an enemy over ~12 enemies a floor plus the 25 flat, a cleared floor is **~85 gold**, so a
-run that dies on floor 3 pays roughly **190 gold**. The third party slot costs **300**
-(`PartySlots.CostForNext`), the fourth 600. **Two deliberate failures buy the third hero**, and party
-width is the single strongest lever on danger in the game — each hero roughly halves per-enemy
-danger. The intended pressure inverts: failing is the cheapest way to buy the thing that stops you
-failing, and it requires no skill improvement, no build decision, and no risk beyond the floor
-already in hand.
+- **Tune attempts-per-tier.** The number that matters: *given a tier's investment budget (§0g), how
+  many failed attempts does it take to afford it?* Two or three reads as learning; ten reads as
+  grinding. At today's numbers a failed run pays ~190 gold and the third party slot costs 300 — so
+  **two failures** buy it. Probably right for run 1 and much too cheap for the secret run.
+- **Price every Gold sink against run income.** `EvaluateEconomy` checks **Essence only**
+  (`ClearsToFirstUpgrade`). No Gold sink is priced against Gold income anywhere — not party slots,
+  not the Merchant, not the §3 sinks. The check to add is *attempts-to-afford* per sink, using
+  `LevelCurve.ExpectedGold` over the floors a stopped player can actually clear, flagged when it
+  falls outside the intended attempts-per-tier band.
+- **The analyzer models one attempt.** `RunCurve` walks a run from floor 0 with no notion of the
+  *n*-th attempt, so a level it calls unclearable is unclearable *once* — it cannot say that attempt
+  three clears it trivially.
 
-**The analyzer cannot see any of this**, in three separate ways:
+Touch points: `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Dungeon/DungeonManager.cs`,
+`Assets/Scripts/Heroes/PartySlots.cs`, `Assets/Scripts/Balance/RunCurveModel.cs`,
+`Assets/Scripts/Balance/BalanceAnalyzer.cs` (`EvaluateEconomy`), `docs/BALANCING.md` §6.
 
-1. **It models one attempt.** `RunCurve` walks a run from floor 0 to the end against a party that
-   grows only from `RescueHero` and banked XP. There is no notion of the *n*-th attempt at a run, so
-   a level the tool calls unclearable is unclearable *once* — and the tool has no way to say that
-   attempt three clears it trivially.
-2. **It already assumes the cap is bought.** `RunCurveModel` grows the roster up to
-   `PartySlots.MaxCap` (4), not to the save's `BonusPartySlots` (base 2). So the widest party the
-   curve reports is a party the player has to spend 900 gold to field, and the analyzer prices the
-   run as though that spend already happened. This is the same optimism as the min/max band follow-up
-   in §5, from the other end: the band's *low* edge is the player who fields fewer heroes than the
-   cap allows, and its real *high* edge only exists after a Gold purchase the model never checks for.
-3. **`EvaluateEconomy` prices Essence only.** The single economy check is
-   `ClearsToFirstUpgrade` — Essence against magic-upgrade cost. **No Gold sink is priced against Gold
-   income anywhere**: not party slots, not the Merchant's stock, not the §3 sinks still to come. So
-   "how many floor-clears does the difficulty-breaking upgrade cost, and can it be farmed off floors
-   the player has already beaten" is a question the tool has no check for.
+### 4. Sphere grid — follow-ups
 
-**What to do about it, under the corrected design:**
+The grid shipped 2026-08-22 and was doubled and repriced by depth in §5s. Open:
 
-- **Keep the payout.** ~190 gold for a run that dies on floor 3 is the tuition working. Do not add a
-  death penalty, do not reduce the consolation, do not make the commit point the run instead of the
-  floor. All three were proposed here before the decision and are now **out of scope**.
-- **Tune attempts-per-tier instead.** The number that matters is now: *given a tier's investment
-  budget (§0g), how many failed attempts does it take to afford it?* Two or three reads as learning;
-  ten reads as grinding. Worked example at today's numbers: a failed run pays ~190 gold, the third
-  slot costs 300 — so **two failures** buy it. That is probably about right for run 1 and much too
-  cheap for the secret run, which is the same "the price never rises" problem as §0g, seen from the
-  currency side.
-- **Price every Gold sink against run income.** `EvaluateEconomy` currently checks **Essence only**
-  (`ClearsToFirstUpgrade` against magic-upgrade cost). No Gold sink is priced against Gold income
-  anywhere — not party slots, not the Merchant, not the §3 sinks still to come. The check to add is
-  *attempts-to-afford* per sink, using `LevelCurve.ExpectedGold` over the floors a stopped player can
-  actually clear, flagged when it falls outside the intended attempts-per-tier band.
-- **Fix the model's party assumption.** `RunCurveModel` grows the roster to `PartySlots.MaxCap` (4),
-  not to the save's `BonusPartySlots` (base **2**), so every curve is priced as though 900 gold of
-  party slots were already spent. This is what hid the whole gate structure until §5i/§5j. Superseded
-  in scope by §0g's frontier work — the frontier *is* the fix — but noted here because it is the
-  reason this section's numbers were invisible for so long.
-
-Touch points: `Assets/Scripts/Progression/MetaProgressManager.cs` (`AwardLevelClear`,
-`AwardRunProgressOnDeath`, `DiscardPendingGold`), `Assets/Scripts/Dungeon/DungeonManager.cs`
-(`OnDungeonCleared`, `HandlePartyDeath`), `Assets/Scripts/Heroes/PartySlots.cs`,
-`Assets/Scripts/Balance/RunCurveModel.cs`, `Assets/Scripts/Balance/BalanceAnalyzer.cs`
-(`EvaluateEconomy`), `docs/BALANCING.md` §6.
-
-### 4. Hero progression → FFX-style sphere grid — ✅ shipped 2026-08-22
-
-Bare levelling is gone: `LevelConfiguration`, `Hero.Level` and the threshold loop are deleted, and
-**XP is a per-hero bank spent on grid nodes at the hub**. What landed:
-
-- **Data**: `SphereGridSO` per hero (`HeroSO.SphereGrid`) — nodes with stable string keys (save
-  data, write-once), per-node `XpCost`, kinds **Stat** (a `StatBlock` grant) / **Resistance**
-  (+X% to a `DamageType`, folded into `GetEffectiveResistances`) / **MagicSlot** (+1 draw slot,
-  per hero — the Essence slot upgrade is retired and refunded), authored 2D positions, undirected
-  neighbour lists. All rules in the pure `SphereGridOps` (`SphereGridOpsTests`, 22 cases):
-  adjacency-gated activation from a start node, no respec, validate→spend→append via
-  `HeroRoster.TryActivateNode` — **hub-only**, so `BestRosterStats` spawn gates stay stable mid-run.
-- **Save/migration**: `HeroSaveData` gained `ActivatedNodes`; `CurrentXp` is now the *unspent bank*.
-  A pre-grid save's lifetime XP arrives as a full refund with no nodes — zero migration code
-  (pinned by a `FromJsonOverwrite` test). Verified against the live save: the Warrior opened the
-  screen with 269 XP banked and bought its first node.
-- **Recruits arrive with a starter bank** — `SphereGridOps.StarterBank` (55% of the roster's
-  average lifetime XP), one function used by the tavern, the dungeon rescue *and* the balance model.
-- **UI**: one `SphereGridView` (UITK graph — pan/zoom, Painter2D edges) shared by the hub's
-  `grid-view` screen (`SphereGridUI`: hero tabs, bank line, detail panel, Activate) and the new
-  **Tools ▸ Heroes ▸ Sphere Grid Editor** window (drag with click-offset anchoring, connect mode
-  with ghost edge, add/delete/set-start, SerializedObject inspector pane so `StatBlockDrawer`
-  renders `Gains`, preview-at-N-XP running the game's own classifier). `SphereGridPresenter` is the
-  pure state/text layer both call (`SphereGridPresenterTests`).
-- **Content**: 4 starter grids (~15-17 nodes each) generated by **Tools ▸ Heroes ▸ Generate Starter
-  Sphere Grids** (`SphereGridSeeder`, idempotent, the tuning as code): a 5-node spine re-granting
-  the old level-2 gains for ~105 XP, then two themed branches per class with resistance + slot
-  leaves (Acolyte gets two slots — the caster grows the Draw kit). The two flagged **+5 AGI (+100%)
-  steps are split +2/+2/+1**, clearing both Agility warnings by construction. Full grid ≈ 650-750 XP.
-- **Balance model**: `PartyBaseline.Build` takes an **XP budget** (greedy-spent deterministically;
-  the save audit passes real node sets), `ReferenceHeroLevel` → `ReferenceHeroXp`, and
-  `RunCurveModel` **closes the XP loop** — each floor's expected income is banked and spent before
-  the next floor is measured, so hero power finally grows within a modelled run. Old level findings
-  became grid findings (*has no sphere grid*, *grid runs out*, per-node gain-shape, plus new
-  authoring checks: duplicate keys, dangling edges, orphaned nodes); the save audit reports
-  bank/nodes/next-cost; the analyzer window's level-curve table became an editable sphere-grid table.
-- **Tests: 435/0.** The suite's standing red (`EveryHeroHasSomewhereToLevelTo`, the Warrior's
-  level-2 cap) was re-pointed to the grid findings (`EveryHeroHasSomewhereToSpendXp`) and went
-  legitimately green when the grids shipped — along with both +100%-Agility warnings. Verified live
-  in-editor: the hub screen classifies/spends/persists correctly and the editor window renders the
-  same graph.
-
-*Follow-ups: the balance simulator's depth-gap metric doesn't model node choice; grid layouts are
-seeder-generated fans — worth an art pass in the editor window; XP has no in-run display of "you
-can afford a node when you get home"; per-hero XP display in the victory summary still shows the
-party total.*
-
-The original design notes follow, kept for the reasoning:
-
-Direction:
-
-- **XP becomes a currency, not a threshold.** No auto stat gains; XP is banked per hero and spent
-  to activate nodes. Decide whether XP stays per-hero or becomes a party-wide pool (party-wide
-  sidesteps the leader-only XP bug and lets the player choose who to invest in).
-- **Grid data model.** A `SphereGridSO` (nodes + edges) with `SphereNodeSO`-style entries: stat
-  nodes (+Strength/+Endurance/+Health/+Agility), and later ability/magic-slot/resistance nodes so the
-  grid can gate content, not just numbers. Nodes activate only when adjacent to an activated node,
-  which is what makes the layout meaningful.
-- **Shared vs. per-hero grid.** FFX uses one grid with per-character start positions. A single
-  shared grid with different entry points is cheaper to author and creates natural
-  "Warrior can eventually reach the Tank's branch" moments; per-hero grids are simpler but
-  multiply authoring.
-- **Persistence.** `HeroSaveData` currently stores only `HeroKey` + `CurrentXp`; it needs an
-  activated-node list (node keys, so renames don't wipe builds — same stable-`Key` problem noted
-  for `EnemySO` in §0b-2). Stats stay **derived** at runtime from `HeroSO` base + activated nodes,
-  matching the existing save-data design (nothing computed is persisted).
-- **UI.** A hub screen to view the grid and spend XP (UI Toolkit, editor-built refs). Pan/zoom over
-  a node graph is a real chunk of work — worth scoping a simple branch-list view as step 1 before
-  a true 2D grid.
-- **Interaction with the balance model.** The analyzer's party power currently comes from
-  `LevelConfiguration`; `RunCurveModel`/`EncounterSimulator` will need a way to model "party at
-  N spent XP" instead of "party at level N". Expect `BalanceRules` bands to need revisiting.
-
-Touch points: `Assets/Scripts/Heroes/LevelConfiguration.cs`, `Hero.cs`, `HeroSO.cs`,
-`HeroSaveData.cs`, `Party.cs` (`AddXpToLeader`), `Assets/Scripts/Balance/RunCurveModel.cs`.
+- **The balance simulator's depth-gap metric does not model node choice.**
+- **Grid layouts are seeder-generated fans** — worth an art pass in the editor window.
+- **XP has no in-run display** of "you can afford a node when you get home".
+- **The victory summary shows the party XP total**, not each hero's share.
+- **A maxed grid may under-deliver.** Measured pre-§5s: the grids author +40–70% MaxHealth each but
+  the party pool only ran 97 → 127 (+31%) across 0–700 XP and stopped moving at ~350 XP. Either
+  `GreedySpend` is not reaching the health nodes, reachability/cost is stranding them, or the seeded
+  bank is not fully spent. **Re-diagnose against the §5s grid before acting.**
 
 ### 4b. Summons — the capability the deep grid pays out, and a second difficulty dial
 
@@ -1686,19 +335,17 @@ now committing to one sphere-grid branch buys a bigger stat, which is the one th
 must *not* be. A summon is what "arriving somewhere early" is supposed to arrive at.
 
 **Two per grid, at the tips of two different branches.** §5s left each hero with four branches; a
-summon sits at the end of two of them. That is the whole design in one sentence: **the XP to reach
-both is far more than a campaign pays, so a player picks one and gets it early, or goes broad and
-gets neither for a long time.** Which one they picked is then a fact about their party that the rest
-of the game can be built against.
+summon sits at the end of two of them. The whole design in one sentence: **the XP to reach both is
+far more than a campaign pays, so a player picks one and gets it early, or goes broad and gets
+neither for a long time.** Which one they picked is then a fact about their party the rest of the
+game can be built against.
 
 #### Why this helps the balancing, which is the real reason to build it
 
 §5r found something the model could not act on: **a long floor's investment ask barely answers to its
-difficulty.** The Hollow Vault's attrition load went +73% and its ask moved +21% then stopped, because
-at a 17.8-room beeline survival is decided by whether the party's *sustain rate* beats the drain rate.
-Every lever the game has — HP, END, gear, party width — feeds that same sustain pool. So there is
-currently **one dial**, and both "can the party grind through fifteen rooms" and "can the party beat
-the thing at the end" read off it.
+difficulty.** Every lever the game has — HP, END, gear, party width — feeds the same sustain pool. So
+there is currently **one dial**, and both "can the party grind through fifteen rooms" and "can the
+party beat the thing at the end" read off it.
 
 A summon is a **bounded burst on a per-run charge**, not a rate. That splits the dial in two:
 
@@ -1707,36 +354,29 @@ A summon is a **bounded burst on a per-run charge**, not a rate. That splits the
 | **floor attrition** | sustain rate | rooms, enemies per room, HP/END, refuges, gear |
 | **boss / obstacle** | burst | summon charges, its power, its cooldown |
 
-That is what makes a hard boss authorable without breaking `MinHitsToKillHero` — §0f's standing
-complaint that enemy strength is *pinned* at the 3-hit floor. A climax tuned on the assumption the
-player brought *a* summon can be far harder than one that is not, and the difference is a resource the
-player spends rather than a stat they own.
-
-It is also the first **key-shaped gate** the game would have. The balance model measures walls
-(attrition, danger, investment); "the Cinder Tyrant's signature is survivable if someone can absorb
-one hit of it" is a different shape, and pricing it as *more investment* would flatten exactly the
-choice rule 3 creates.
+That is what makes a hard boss authorable without breaking `MinHitsToKillHero` — §0g's standing
+complaint that enemy strength is *pinned* at the 3-hit floor. It is also the first **key-shaped
+gate** the game would have: "the Cinder Tyrant's signature is survivable if someone can absorb one
+hit of it" is a different shape from a wall, and pricing it as *more investment* would flatten
+exactly the choice rule 3 creates.
 
 #### Shape: which FF model
 
 The turn system is already FFX CTB (`TurnManager`), so FFX's Aeons are the closest lineage — but they
-replace the party outright, which means the party leaves the turn order, becomes untargetable, and the
-summon needs its own HP bar and dismissal rules. **Recommended instead: a temporary extra
-combatant.** It is much less surgery, it reuses `ICombatUnit` and the existing scheduler wholesale,
-and it fits the stage: a summon takes a hero-side slot, and `MaxBodiesPerRoom` (6, §5s) already says
-what the enemy side can hold.
+replace the party outright, which means the party leaves the turn order, becomes untargetable, and
+the summon needs its own HP bar and dismissal rules. **Recommended instead: a temporary extra
+combatant.** Much less surgery, reuses `ICombatUnit` and the existing scheduler wholesale, and it
+fits the stage: a summon takes a hero-side slot, and `MaxBodiesPerRoom` (6, §5s) already says what
+the enemy side can hold.
 
-- **Summon** → a `SummonUnit : ICombatUnit` is spawned on the hero side, scheduled by `TurnManager`
-  on its own Agility like anything else, and acts for **N turns** before leaving.
+- **Summon** → a `SummonUnit : ICombatUnit` spawned on the hero side, scheduled by `TurnManager` on
+  its own Agility like anything else, acting for **N turns** before leaving.
 - **Its stats scale off the summoner**, so it grows with the grid rather than needing its own
   progression: read the caster's `Spirit` (and `Intelligence` for the arcane ones) the way
   `SpellPower` already does.
-- **Charges are a run resource**, exactly like Draw charges in `EquippedMagicState` — refilled between
-  runs, not between fights. That is what makes "save it for the boss" a decision.
+- **Charges are a run resource**, exactly like Draw charges in `EquippedMagicState` — refilled
+  between runs, not between fights. That is what makes "save it for the boss" a decision.
 - It occupies a slot, so **the party is not removed** and a summon turn is not a party turn lost.
-
-The alternative (full FFX replacement) is worth revisiting if summons ever want their own Overdrive
-equivalent; note it and move on.
 
 #### The eight
 
@@ -1761,657 +401,739 @@ roster of eight damage buttons is one summon with eight skins.
 
 1. **`SummonSO`** — display name, sprite, turns active, charges per run, stat scaling off the
    summoner, and its action list. Its repertoire should reuse **`EnemyBehaviorSO`**: that is already
-   "what a unit can do on a turn, when, and how often" as authored data, and a summon is a unit with a
-   repertoire. Do not invent a second behaviour vocabulary.
-2. **`SphereNodeKind.Summon`** + `GrantedSummon` on `SphereGridNode`. One new enum member and one
-   field, the same shape `MagicKnown` already uses — and remember node `Key`s are write-once, so the
-   two tips get *new* keys rather than repurposed ones.
+   "what a unit can do on a turn, when, and how often" as authored data. Do not invent a second
+   behaviour vocabulary.
+2. **`SphereNodeKind.Summon`** + `GrantedSummon` on `SphereGridNode`. One enum member and one field,
+   the same shape `MagicKnown` already uses — and node `Key`s are write-once, so the two tips get
+   *new* keys rather than repurposed ones.
 3. **Persistence** — unlocked summons follow from activated nodes, so nothing new is saved; charges
    are a run resource and belong with the run save, beside Draw charges.
 4. **Combat** — spawn, insert into `TurnManager`, act for N turns, leave. Plus a command-menu entry
    gated on charges, and `CombatStage` slotting it on the hero side.
-5. **Presentation** — this is the moment the game most wants to feel big: a full-screen banner, the
-   camera punch `MainCamera.ZoomPunch` already has, and a dedicated `MusicTrack`. `CombatAudio` and
-   `EffectPresenter` are the seams.
-6. **The balance model, last and non-negotiable** — a summon nobody measures is a summon that silently
-   invalidates every frontier number:
-   - `PartyBaseline` carries unlocked summons and their charges.
-   - `EncounterSimulator` spends them the way it spends potions and Draw charges; the Adaptive policy
-     should hold one for the hardest room it can see.
-   - `InvestmentFrontier` reports the ask **with and without** a summon. That comparison *is* the
-     key-versus-wall measurement, and it is the number rule 3 has been missing.
-   - New bands worth having: a boss should not be beatable *only* with a summon
-     (`MaxSummonShareOfBossDamage`), and a summon should not trivialise a floor either.
+5. **Presentation** — the moment the game most wants to feel big: a full-screen banner, the camera
+   punch `MainCamera.ZoomPunch` already has, and a dedicated `MusicTrack`.
+6. **The balance model, last and non-negotiably** — a summon nobody measures silently invalidates
+   every frontier number. `PartyBaseline` carries unlocked summons and charges; `EncounterSimulator`
+   spends them the way it spends potions (the Adaptive policy holds one for the hardest room it can
+   see); **`InvestmentFrontier` reports the ask with and without a summon** — that comparison *is*
+   the key-versus-wall measurement rule 3 has been missing. New bands worth having: a boss should not
+   be beatable *only* with a summon (`MaxSummonShareOfBossDamage`), and a summon should not
+   trivialise a floor.
 
 #### Two traps
 
 - **Do not price the deep branches against the frontier before this exists.** `GreedySpend` is a
   breadth build by construction (§5t), so until a summon is something the model can spend, a depth
   build reads as strictly weaker and the analyzer will call the whole design a mistake.
-- **Charges, not cooldowns, are the balance lever.** `DrawableMagicEntry.Charges` already learned this
-  once: the charge count is a magic's real power dial, more than its XP cost. A summon that recharges
-  inside a fight is a stat; one with two charges for a whole run is a decision.
+- **Charges, not cooldowns, are the balance lever.** `DrawableMagicEntry.Charges` already learned
+  this once: the charge count is a magic's real power dial, more than its XP cost. A summon that
+  recharges inside a fight is a stat; one with two charges for a whole run is a decision.
 
-Touch points (all new unless noted): `Assets/Scripts/Heroes/SphereGridSO.cs` (`SphereNodeKind`,
-`SphereGridNode`), `Assets/Scripts/Heroes/SphereGridOps.cs`, `Assets/Scripts/Combat/` (`SummonUnit`,
-`TurnManager`, `CombatStage`), `Assets/Scripts/Enemies/Behaviors/EnemyBehaviorSO.cs` (reused),
-`Assets/Scripts/Balance/PartyBaseline.cs`, `EncounterSimulator.cs`, `InvestmentFrontier.cs`,
-`BalanceRulesSO.cs`, `Assets/Scripts/Audio/`.
+Touch points (all new unless noted): `Assets/Scripts/Heroes/SphereGridSO.cs`, `SphereGridOps.cs`,
+`Assets/Scripts/Combat/` (`SummonUnit`, `TurnManager`, `CombatStage`),
+`Assets/Scripts/Enemies/Behaviors/EnemyBehaviorSO.cs` (reused), `Assets/Scripts/Balance/PartyBaseline.cs`,
+`EncounterSimulator.cs`, `InvestmentFrontier.cs`, `BalanceRulesSO.cs`, `Assets/Scripts/Audio/`.
 
-### 5. Roster progression — solo start, then recruit heroes — *acquisition* ✅ shipped
+### 5. Roster — open questions
 
-Implemented on 2026-08-20. `PartyRosterSO` is now the authored **catalog**; ownership lives in
-`PartySaveData.OwnedHeroKeys` behind **`HeroRoster`**, and a new save starts with
-`StartingHeroes` — the **Warrior alone**. Two acquisition routes, as designed below:
-**rescue** (`RunLevelEntry.RescueHero` → a captive in a non-start/non-exit room, freed via the
-room's Rescue action, joining the live party at once, ownership committed only on level clear so
-it is forfeited on death) and the **tavern** (`TavernUI`, a persisted paid-restock offer of
-unowned catalog heroes, priced by `ShopPricing.RecruitPrice`). `TutorialRun` level 0 rescues
-**The Tank**; **Scout** (8/3/10/9, 220g) and **Acolyte** (4/8/19/6, 260g) were added to the
-catalog as the tavern's opening stock. The hub inventory now lists owned heroes only.
-
-**It fixed two balance problems as a side effect.** With the analyzer measuring the *starting*
-party and growing the roster per level, findings went **0 critical / 12 warning / 9 info →
-0 / 5 / 11**, and `BalanceRegressionTests` from 7/9 to **8/9 green**. The three *no threat at
-all* enemies are gone (a solo party makes trash matter again) and `RunDifficultyEscalates` now
-passes, because Tutorial→1 is +27% solo→pair instead of the old +234%. Per-level attrition:
-Tutorial 0.56 (1 hero, sustain 23) → Test1/2 0.71 → Test3 0.93 (2 heroes, sustain 40).
-
-*(Follow-ups: Scout and Acolyte reuse the Warrior's and Tank's sprites and need their own art;
-there is still no party-select step, so every owned hero enters every run — see the open
-decisions below; and the Warrior capping at level 2 is the last regression red, which §4 replaces.)*
-
-The design reasoning that produced this, kept because the numbers still drive the tuning:
-
-#### Start solo, and start with the Warrior
-
-Measured on 2026-08-20 (closed-form model, post-HP-pass assets):
-
-| Start | HP / sustain | trash solo danger | boss danger | boss party-turns |
-|---|---|---|---|---|
-| Warrior + Tank (today) | 30 / 40 | 0.028–0.089 | 0.34 | 9.0 |
-| **Warrior solo** | 13 / 23 | **0.123–0.429** | **0.80** | 6.8 |
-| Tank solo | 17 / 27 | 0.106–0.471 | 1.23 | 13.5 |
-| *bands* | | *0.08 – 0.45* | *≤ 1.40* | *≤ 20* |
-
-The second party member is what makes the current trash trivial. **Solo Warrior puts every ordinary
-enemy back inside its danger band** — without touching a single `EnemySO` — and leaves the boss a
-real but winnable climax at 0.80. This is the cheapest available fix for the *no threat at all*
-findings in §0, and it comes free with a feature we want anyway.
-
-The Warrior is the right solo start over the Tank on three counts: the Tank's boss fight is a
-13.5-turn slog at danger 1.23 (nearly the 1.40 ceiling), its attrition is already 0.92 in the
-*tutorial* level, and the Warrior is already `Heroes[0]` — the `Leader`, and the only hero
-`Party.AddXpToLeader` ever pays. Starting solo makes that leader-only-XP bug *moot* instead of
-exposing it, which buys time for §4.
-
-**Roster size is therefore the game's real difficulty dial** — each hero added roughly halves
-per-enemy danger, since it adds both a health bar and a turn's worth of damage. Two consequences:
-level/enemy difficulty has to be authored against *expected roster size at that point*, not against
-a fixed party (this is the "hand-authored vs. scales-from-data" decision §0 flagged, and roster
-growth is the strongest argument for data-driven scaling); and the boss is the one enemy that
-partly self-corrects, because `BossBehavior`'s party-wide signature makes
-`AverageOffenseMultiplier` grow with party size (0.9 solo → 1.3 at two → 1.7 at three).
-
-**Blocked on the same thing as everything else:** a solo party's attrition is 2.09–2.46 against the
-current ~12.5 combat rooms per level. Room counts have to come down first (§0).
-
-#### Two unlock routes, doing different jobs
-
-Use both, but give each a distinct job rather than two doors to the same thing:
-
-- **Tavern = the reliable, paid route.** A rotating, persisted, paid-restock offer of recruitable
-  `HeroSO`s in the hub, priced by class/rarity — reuse the `ShopPricing` + persisted-stock pattern
-  the Merchant already established rather than inventing a second one. You *choose* who, and it is
-  always available if you banked the Gold. This is the headline Gold sink §3 is missing, and the
-  floor under roster growth: no run is ever a dead end.
-- **Dungeon rescue = the free, random route.** A caged/captive hero as the payload of a non-combat
-  room kind, which is exactly what §2 needs — non-combat rooms currently have no mechanical
-  consequence, and a *permanent* reward is the strongest reason to take a risky detour off the
-  critical path. You do not choose who; that is the point.
-
-Recommended split: **dungeon rescues are immediate and permanent** and draw from the common classes;
-**the tavern is where specific or rarer classes are bought.** That keeps luck from deciding builds
-while keeping Gold meaningful, and it stops the two routes competing.
-
-#### Party management + even-split XP — *the missing half* ✅ shipped 2026-08-22
-
-~~The catalog/owned split shipped; **selected** did not.~~ Both halves are in now. Every owned hero
-used to enter every run, so recruiting a third halved per-enemy danger again with no way to decline.
-The two changes only work as a pair — the party-size choice is meaningless without a cost attached to
-going wide — and they shipped together.
-
-**What landed.**
-
-- **`PartySaveData.SelectedHeroKeys`** is the fielded subset of `OwnedHeroKeys`, leader first, read
-  through `HeroRoster` (`GetSelectedKeys` / `GetSelectedHeroes` / `SetSelectedKeys` /
-  `TryFieldIfRoom`, plus a pure `ResolveSelection` the tests drive). An empty list means *not chosen
-  yet*, not *nobody*, so it falls back to the owned roster clamped to the cap — which is also how a
-  save written before selection existed migrates, with no migration code of its own.
-  `DungeonManager.RosterHeroes()` became **`FieldedHeroes()`** and is the only consumer;
-  `InventoryHubUI` still lists everyone owned, because a benched hero's gear still needs managing.
-- **The cap is bought, not given.** `PartySlots` holds the math (base **2**, ceiling **4**), and
-  `MetaProgressManager.TryBuyPartySlot` sells the next slot for **Gold** at **300 then 600**
-  (`MetaProgressSaveData.BonusPartySlots`). Gold rather than Essence because it buys roster width,
-  the axis the tavern already sells into. Priced against a recruitment (220-260g), not a restock: the
-  slot is permanent, and it is what makes the recruitment worth making.
-- **`Party.AddXpToLeader` → `Party.DistributeXp`**, an even split via the pure `XpSplit`. Two rules
-  settled from the open questions below: the **remainder goes to the leader** rather than being
-  dropped (silently losing up to `partySize - 1` XP per kill would make wide parties worse than the
-  table says, which is the one thing this change must not do), and **downed heroes are paid** — FFX
-  pays only who acted, but excluding them punishes the tank role for doing its job, so death's cost
-  stays HP and items.
-- **A newly acquired hero is fielded automatically if the cap has room**, benched with a message if
-  not. Both routes: `HeroRoster.TryFieldIfRoom` after a tavern purchase, and
-  `Party.MarkOwnedDeferred` → `MarkFieldedDeferred` for a rescue, deferred like the ownership it
-  accompanies. Without this a captive freed on level 1 fights the rest of that level and then
-  vanishes from the lineup, because the next level is built from the *selected* party — exactly what
-  the tutorial's Tank rescue would have hit.
-- **`PartySelectUI`** (`party-view`), reachable from **home** and from the **run-progress screen**
-  beside *Enter Dungeon*, which is when the choice actually matters; Back returns to whichever opened
-  it, and the progress screen now carries a `Party (2): Warrior, The Tank` line so *Enter Dungeon* is
-  never pressed blind. Two lists (*Marching out* / *Staying behind*), minimum one hero (the last
-  hero's button reads **Only hero** and is disabled), and the slot purchase sits on the same screen
-  as the XP-share line — the price of going wider next to the reason not to.
-
-**The share is stated, not implied.** The screen reads *"Each hero earns 50% of every kill's XP, and
-a bigger party spreads the damage thinner. Wide clears faster; narrow levels faster."* The trade only
-functions as a decision if it is on screen while the decision is being made.
-
-**Balance model.** `EvaluateRunXpSupply` now divides a run's expected XP by the **widest** party it
-ever fields (`XpSplit.ExpectedShare`) instead of reading the total, and the *only the party leader
-gains XP* warning is **deleted** — it was a bug report, and the bug is fixed. `RunCurveModel` caps
-modelled roster growth at `PartySlots.MaxCap`, since acquiring a fifth hero benches somebody rather
-than making the level easier (inert today: `TutorialRun` peaks at 2). Findings did **not** move —
-**0 critical / 4 warning / 9 info**, same four as before — because the leader-XP warning was
-*dormant*: it was guarded on `Party.Size > 1` and the starting party is solo. The new share check
-does not fire either: 206 expected XP split two ways is 103 per hero, above the Warrior's level-2
-cost.
-
-**Verified.** EditMode suite **406 passed / 1 failed**, the one red being the pre-existing
-`EveryHeroHasSomewhereToLevelTo` (the Warrior caps at level 2; §4 deletes `LevelConfiguration`
-outright). 16 new cases in `PartySelectionTests` cover the split (including that it always sums to
-the award), the slot cost curve, and every selection-resolution path — migration, truncation to the
-cap, unowned keys, duplicates, and a nonsense cap still fielding exactly one hero. Driven live in the
-editor via the Unity MCP against the real save: the panel populates (Warrior *(leads)* + Tank, cap
-2 of 2, 50% share), benching writes `SelectedHeroKeys` and flips the share to 100%, the last hero
-cannot be benched, both slot purchases charge 300 then 600 and the ceiling refuses a third, and the
-progress screen's lineup line and the Back-where-you-came-from routing both hold.
-
-*Not* driven live: entering an actual dungeon with a benched hero, because the live save sits
-mid-run at level 3 of `TutorialRun` and walking in would perturb it. `FieldedHeroes()` is a two-line
-wrapper over `HeroRoster.GetSelectedHeroes`, which *was* exercised against the real catalog with a
-benched selection and returned the Warrior alone.
-
-**Follow-ups this opened:**
+Acquisition (tavern + rescue), party selection, the bought party-slot cap and even-split XP all
+shipped. Open:
 
 - **The analyzer models the widest legal party, so it is optimistic for anyone narrower.** The honest
   model is a **range**: report each level at min (1) and max (cap) party size and treat a level as
   broken only if it fails across the whole band. That means `LevelCurve`'s metrics become ranges,
-  which touches the analyzer window's tables and `BalanceRegressionTests` — deliberately left for its
-  own change. A level tuned for 4 heroes is roughly 4x harder solo, so expect `BalanceRules` to need a
-  second look at the same time.
+  touching the analyzer tables and `BalanceRegressionTests`. Largely superseded by §0g's frontier
+  work — the frontier *is* the fix — but the band is still the cheaper reporting form.
+- **Do new hires arrive scaled?** With the grid in place a fresh recruit has no nodes spent, so
+  recruiting late costs XP as well as Gold. Either they arrive scaled to progress (recruiting stays
+  viable late) or truly from scratch (early recruits are strictly better). Leaning scaled-to-progress
+  — a hero you cannot afford to level is not a reward.
+- **What happens on hero death?** A solo start makes hero death run-ending. Decide whether death is
+  permanent (roster loss — harsh, pairs with the §3 safety-net token) or the hero returns downed.
+- **Does a mid-run rescue dilute the split?** A hero freed on level 1 joins the split immediately,
+  quietly slowing the starter. Probably correct — same trade as recruiting — but worth playing.
 - **The party cap has no in-game explanation.** The slot is bought on the party screen with no
-  fiction attached — fine as a hub button, thin as a reward. If §3's other Gold sinks land, the cap
-  probably wants to be one of them rather than a bare button.
+  fiction attached. If §3's other Gold sinks land, the cap probably wants to be one of them.
 - **Selection can change mid-run.** *Change Party* is reachable from the run-progress screen between
   levels, so a run's difficulty band can shift under it. Arguably correct (it is the hub, and gear
   can already be re-equipped there) but it is the reason the analyzer's band matters.
+- **A tavern recruit is invisible to the whole balance model** — run curves grow a roster only
+  through `RunLevelEntry.RescueHero`. `MustyTome`'s Intelligence 6 gate therefore reads as never-met
+  on the modelled path even though the Acolyte opens it in play.
+- **Scout and Acolyte reuse the Warrior's and Tank's sprites** and need their own art.
 
-The design this was built to, kept for the reasoning:
+### 6. Stats — one open note
 
-**1. Party size 1–4, chosen before the run.** ✅ *Shipped as described, with the cap earned.*
+The six-stat model, `StatCatalog`, generic `StatBlock` and spell scaling all shipped. One structural
+note remains:
 
-- A **party-select screen** between the hub and *Enter Dungeon*: pick from the owned roster, **min 1,
-  max 4**. Selection is save state (`PartySaveData`, alongside `OwnedHeroKeys`), so it persists
-  between runs and the hub can show who is currently fielded.
-- `DungeonManager.RosterHeroes()` returns the *selected* party rather than everything owned; the
-  owned-but-benched heroes still need their gear managed in the hub, so `InventoryHubUI` keeps
-  listing all owned heroes, not just the fielded ones.
-- The cap should be **earned, not given**: start the cap at 2–3 and sell the 4th slot as a
-  meta-progress unlock (a Gold sink in the spirit of §3's roster slots), so party width is itself a
-  progression axis.
-
-**2. XP splits evenly across the party.** ✅ *Shipped.*
-
-`Party.AddXpToLeader` used to hand the *entire* kill reward to `Heroes[0]` — the only XP path in the
-game (called once, from `CombatManager.HandleEnemyDeath`) — so followers never levelled at all. It is
-now an even split: **each hero in the party receives `xp / partySize`**, remainder to the leader.
-
-That single change is what makes party size a real decision instead of a straight upgrade:
-
-| Party | Per-enemy danger | XP per hero |
-|---|---|---|
-| 1 hero | ~4× a full party's | 100% of the kill |
-| 2 heroes | ~2× | 50% |
-| 4 heroes | baseline | 25% |
-
-Going wide buys safety and faster clears; going narrow buys **depth** — a solo hero levels four
-times as fast. Neither dominates, which is exactly what the current fixed party lacks. It also
-pairs directly with §4: once XP is a currency spent on sphere-grid nodes, a 4-hero party advances
-each hero's grid at a quarter rate, so "one deep build or four shallow ones" becomes the run's
-defining choice.
-
-Decisions settled while implementing (kept for the reasoning):
-
-- ~~**The remainder.**~~ ✅ To the **leader**. Integer division drops XP (7 xp across 4 heroes = 1
-  each, 3 lost); the alternatives were the killer or a party-level accumulator. Silently dropping it
-  was the one option to avoid — it makes wide parties worse than the table says — and a test asserts
-  the split always sums to the award.
-- ~~**Do downed heroes share?**~~ ✅ **Yes.** FFX pays only characters who acted, and excluding the
-  downed adds a nice pressure (keep everyone alive to keep everyone growing) but punishes the tank
-  role for doing its job. Everyone in the party is paid, alive or not; death's cost stays HP and
-  items.
-- **Does a mid-run rescue dilute the split?** A hero freed on level 1 joins the split immediately,
-  which quietly slows the starter. Probably correct — it is the same trade as recruiting — but worth
-  playing before committing.
-- ~~**Rename the API.**~~ ✅ `Party.AddXpToLeader` → **`DistributeXp`**, with `BalanceAnalyzer`,
-  `SaveAudit` and the Heroes/Enemies guides updated and the *only the party leader gains XP* finding
-  deleted.
-- **Balance bands will move.** ⚠️ **Still open** — promoted to a follow-up above. The analyzer models
-  roster growth per level and now caps it at the party ceiling, but it still assumes the party is as
-  wide as the cap allows. With selection, party size is a player choice of 1–4, so the honest model
-  is a **range**: report each level at min and max party size and treat a level as broken only if it
-  fails across the whole band. Expect `BalanceRules` to need a second look — a level tuned for 4
-  heroes is roughly 4× harder solo.
-
-#### Other open questions
-
-- **Do new hires arrive scaled?** With §4 in place a fresh recruit has no nodes spent, so recruiting
-  late costs XP as well as Gold. Either they arrive scaled to progress (recruiting stays viable
-  late) or truly from scratch (early recruits are strictly better). Leaning scaled-to-progress,
-  since a hero you cannot afford to level is not a reward. Even-split XP sharpens this: a late hire
-  starts from nothing *and* dilutes everyone else's share.
-- **What happens on death?** A solo start makes hero death run-ending. Decide whether death is
-  permanent (roster loss — harsh, and pairs with the §3 safety-net token) or the hero simply
-  returns downed.
-- ~~**Balance model measures the wrong party.**~~ ✅ Fixed with the roster rework: `BalanceInput.Heroes`
-  is the starting lineup and `RunCurve` grows the roster per level from each `RunLevelEntry.RescueHero`,
-  recording the `PartySize`/`SustainPool` each level was judged against.
-
-Touch points: `Assets/Scripts/Heroes/PartyRosterSO.cs`, `PartySaveData.cs`, `Party.cs`
-(`AddXpToLeader` → even split), `Assets/Scripts/Rooms/CombatManager.cs` (the single XP call site),
-`Assets/Scripts/Dungeon/DungeonManager.cs` (`RosterHeroes`), `Assets/Scripts/Balance/RunCurveModel.cs`,
-`Assets/Scripts/MainMenu/` (new `TavernUI` + `MainMenuUISetup`), `Assets/Scripts/Items/ShopPricing.cs`,
-`Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scripts/Rooms/RoomSO.cs` (rescue room
-kind, with §2), `Assets/Scripts/Balance/PartyBaseline.cs`.
-
-### 6. Three new stats: Intelligence, Spirit, Luck — *core* ✅ shipped
-
-Landed 2026-08-21. `Stats` carries **Intelligence / Spirit / Luck** (positional args for the four
-combat stats, optional named args for these three, so no existing call site changed);
-`ICombatUnit` exposes `GetEffectiveIntelligence/Spirit/Luck`; `StatType` gained entries so
-`ItemSO` bonuses reach them; `HeroSO` and `EnemySO` carry base values.
-`SpellEffect.ScalingStat` (a `SpellScalingStat`, resolved via `SpellScaling.CasterContribution`)
-scales damage/debuff effects on Intelligence and heals/buffs on Spirit — `Attack` is the enum's
-zero value so magic authored before the change keeps its exact numbers. Luck drives crit through
-`CombatManager.CritChanceFor` on a diminishing `luck/(luck+20)` curve capped at +30pp, honoured by
-the live loop, the simulator **and** `BalanceMath`. Authored spread: Acolyte 10 INT / 12 SPR
-(the caster), Scout 12 LCK (23.3% crit), Warrior 3/3/5, Tank 2/6/3; enemy Luck left at 0 so the
-balance pass was not disturbed.
-
-**Renamed with it (2026-08-21):** `Attack` → **`Strength`** and `Defense` → **`Endurance`** across `Stats`, `StatType`, `BuffType`, `SpellScalingStat`, `HeroSO`/`EnemySO`, `LevelConfiguration` and the asset YAML, so the six attributes read as one set. And the **basic Attack command now scales off a per-hero attribute**: `HeroSO.AttackStat` names it, `GetEffectiveAttackPower()` resolves it, making attack power derived rather than a stat — Scout swings off Agility, Acolyte off Intelligence, everyone else off Strength. Enemies always use Strength. The curve did not move (0.25 / 0.37 / 0.42 / 0.61, still 0 critical / 3 warning).
-
-**Then made generic (2026-08-21).** The eight parallel per-stat field lists are gone. `StatType` (with `None = 0`) is the one stat enum; `UnitStat` is one stat plus an amount; `StatBlock` is a sparse indexable set of them, and it is what `Stats`, `HeroSO.BaseStats`, `EnemySO.BaseStats`, `LevelConfiguration.Gains`, `SimUnit.Effective` and `HeroStatCalculator` all carry. `ICombatUnit` dropped six per-stat getters for `GetEffectiveStat(StatType)`. `SpellScalingStat` and the `EffectiveStats` struct were deleted; `SpellEffect.ScalingStat` is a `StatType`. The analyzer's hero and enemy stat columns are generated from the catalog, so a new stat shows up in the window without touching it.
-
-That also closed the gaps the old shape had caused: `BuffType` covers all six stats (and gained `None = 0`), with the stat handlers **generated** in `BuffHandlerRegistry` from the catalog — they were three hand-written entries, so an Intelligence buff threw `KeyNotFoundException` even though the enum offered it. `LevelConfiguration` can now grant any stat because its `Gains` is a block rather than four ints — the caster stats had no level gains purely because adding them meant a fourth parallel list. `BalanceRulesSO`'s power weights became a `List<StatWeight>` for the same reason.
-
-Two independent review passes ran over the result, and between them caught: the **`FreezeCombo` ordinal break** (a flat +1 `BuffType` remap pointed `Frozen` at a no-op resistance handler, silently disabling the combo), the **level-curve tab's stale `FindProperty` paths** (an NRE the moment a hero's curve was expanded), **regressed authoring defaults** (a fresh `EnemySO` had 0 MaxHealth and spawned dead), and a **Strength buff boosting an Agility-swinging attacker**. All fixed; `AttackStat` is now on `ICombatUnit` with the fallback rule in one place (`HeroSO.ResolvedAttackStat`).
-
-**Then given one mapping file (2026-08-21).** Making the *shape* generic was not enough: the stat
-list was still copied by hand into everything that needed a *fact* about a stat. `ShopPricing`
-enumerated four of them, so the Acolyte's 26 points of Intelligence and Spirit and the Scout's 12
-Luck were literally free to recruit; the hub and tavern stat lines hid the same three; `StatTypes`
-had grown a second helper's worth of labels beside it.
-
-**`StatCatalog`** replaces all of it — one row per stat holding short name, display name,
-description, recruit weight, power weight, authoring default and whether the stat is a pool. It is
-also the iteration order (`StatCatalog.Types`), so `StatTypes` was deleted rather than left as a
-second way to do the same thing. Recruit pricing, `StatBlock.Defaults()`, `StatWeight.Defaults()`,
-the inspector drawer, every analyzer table and `EvaluateLevelUpShape` all read from it.
-`StatCatalogTests` fails if a row is missing, unlabelled, unpriced or unweighted, so the mistake
-surfaces in a test rather than as a blank column or a free hero.
-
-**Adding a stat is one `StatType` member plus one `StatCatalog` row — with one exception.** That was
-verified rather than asserted: a throwaway `Willpower` stat was added to exactly those two files, and
-recruit price, power weight, spell scaling, authoring defaults and the inspector drawer all picked it
-up with no other edit, then it was removed again. The exception is **`BuffType`**, which is a second
-per-stat list: a stat that should be buffable needs a member there too, because
-`BuffHandlerRegistry` generates handlers from it and silently skips a stat with no match.
-`BuffHandlerRegistry.StatsWithNoBuffType()` now reports that gap and a test asserts it is empty.
-Collapsing `BuffType` into `Kind + StatType` would remove the exception, and rewrites every magic and
-combo asset, so it stays a separate change.
-
-`BalanceRulesSO.WeightFor` returned **0** for a stat absent from its serialized list, so the first
-saved rules asset would have frozen the stat list and scored any later stat as harmless. It now falls
-back to the catalog weight, with authored rows still winning as overrides — so a deliberate 0 is
-still expressible, and only a *deleted* row falls back.
-
-**An independent review pass then found four more, all fixed.**
-
-- **`StatBlockDrawer` repeated a bug this same change had already fixed elsewhere.** For a stat with
-  no entry it drew an int field that became a `PropertyField` as soon as the first keystroke created
-  the entry — which loses keyboard focus, so typing `12` into an empty Intelligence row stored `1`
-  and swallowed the `2`. Worse, a zeroed row is deliberately kept, so the stray `1` survived the
-  tidy-up button too. Authoring a caster was exactly the workflow that hit it. `BalanceGui` had
-  already solved this with a `+` button *and documented why*; the drawer now does the same.
-- **`IsPool` was documented but never enforced.** `HeroSO.ResolvedAttackStat` hand-listed `MaxHealth`
-  and `SpellScaling` checked nothing at all, so a magic authored against `MaxHealth` would silently
-  add the caster's entire health bar to its power — 45 free damage on a geared hero. Both now ask
-  `StatCatalog.CanScalePower`, which also means a second pool stat (Mana, Stamina) is covered
-  without touching either.
-- **The level-curve check was a false positive on every hero, and I had recorded it as a find.** The
-  previous entry here claimed generalising `EvaluateLevelUpShape` had exposed the Warrior's level 2
-  raising Health by 54%. It had not exposed anything: HP pools *are* meant to grow in large relative
-  steps, and all four heroes gain 50-54% of base MaxHealth at level 2 (7/13, 5/10, 9/17, 10/19). One
-  threshold for a health bar and for a damage stat is the wrong shape — the limit now comes from
-  `StatDefinition.IsPool` (100% for pools, 50% for outputs). The check also only ever ran on the
-  *starting party*, i.e. the Warrior alone, so it now runs over every hero asset: a level curve is
-  authored on the asset, and a hero who joins at depth 3 could carry a broken one all run. That
-  surfaced a real finding the narrow scope had hidden — **the Tank's level 2 raises Agility by 100%**
-  (+5 on a base of 5, doubling their turn rate in one level-up).
-- **Two of the new tests did not test what they claimed.** The ordering test compared `Types` against
-  `All`, both built from the same array, so it could not fail; the actual promise is *enum
-  declaration order*, which is now structural (both sequences are built by walking `StatType`) and
-  asserted against the enum. And `ExactlyOneStatIsAPool` pinned a content decision as a code
-  invariant — adding a second pool stat would have failed a test, contradicting the whole point. It
-  now pins the *rule* (no pool can be a power source) rather than the count.
-
-Also from the review: a missing catalog row makes a stat **disappear** rather than throw, since every
-loop iterates `Types` which is built from the rows. A test failing only helps whoever runs the tests,
-so `StatCatalogValidator` (`[InitializeOnLoadMethod]`) now logs an error naming the stat as soon as
-the code compiles. And `StatCatalog.Types` was a `readonly` array, which protects the reference but
-not the elements; it is an `IReadOnlyList` now.
-
-**Still open here:** the `EnemySO` inspector footer shows derived numbers only, so it never listed stats and needs nothing; `§4` still owns replacing `LevelProgression` with grid nodes.
-
-The original design notes follow.
-
-#### Original design notes
-
-`Stats` currently holds **Strength / Endurance / Health / MaxHealth / Agility** and nothing else, so
-every hero is differentiated on the same four axes and magic is flat — a `SpellEffect` has a
-`Power` int and no notion of who cast it. Three additions fix both, and give §2's events something
-to check against:
-
-| Stat | Drives |
-|---|---|
-| **Intelligence** | damage of Intelligence-scaled spells (the offensive elemental kit) |
-| **Spirit** | healing, shields and Holy — the restorative/protective kit |
-| **Luck** | crit chance across the board, plus blind-risk event checks |
-
-#### Spells scale off a stat
-
-Every `SpellEffect` names the stat (or stats) that modify it — add a `ScalingStat` to
-`SpellEffect` alongside `Power`, so `Power` becomes a base and the caster's stat scales it. Damage
-spells scale on Intelligence, heals and shields on Spirit; a hybrid effect can list more than one.
-This is what makes a caster build distinct from a weapon build, and it is what finally makes
-*which hero casts this* a real question — today any hero casting a given magic gets the identical
-number.
-
-**Design this together with `PowerMode`.** `docs/ELEMENTAL_PLAN.md` already plans a `PowerMode` on
-`SpellEffect` (base-power / flat / % of max health). `PowerMode` and `ScalingStat` are the same
-field's neighbours and will fight each other if added separately — a `% of max health` effect
-presumably ignores Intelligence. Settle both in one pass.
-
-#### Luck and crit
-
-`CombatManager.CritChance` is a `const float = 0.12f` read by `ExecuteAttack` **and** by
-`BalanceMath.ExpectedCritMultiplier()`. Making crit per-unit means the constant becomes a *base*
-and both readers need a unit passed in — `ExpectedCritMultiplier()` loses its zero-argument form,
-which touches `AverageDamage` and every metric downstream of it. Not hard, but it is the one change
-here that ripples through the balance model rather than sitting beside it. Decide the curve too:
-flat `+x% per point` runs away at high Luck, so a diminishing form (the same
-`stat / (stat + K)` shape `DamageCalculator` already uses for Defense) is probably right, and reuses
-a curve the player has already learned.
-
-#### The plumbing this touches
-
-`Stats` is shared by heroes **and** enemies, so this is wider than it looks:
-
-- **`Stats`** — three new fields. Its constructor is positional (`Stats(attack, defense, health, agility)`)
-  and called from `Hero.Initialize`, `SimUnit`, `PartyBaseline` and the tests; adding three more
-  positional args is a trap. Prefer optional named parameters or an init-style struct.
-- **`ICombatUnit`** — `GetEffectiveIntelligence/Spirit/Luck()` to sit beside the existing three, so
-  gear folds in the same way.
-- **`HeroSO`** — `BaseIntelligence/Spirit/Luck`. **`EnemySO`** needs them too (enemies cast and
-  crit); a sensible default keeps every existing enemy asset valid.
-- **`StatType`** (`Assets/Scripts/Items/StatType.cs`) — three new entries so `ItemSO` bonuses can
-  grant them, which immediately gives gear a second axis to matter on. **`BuffType`** likewise, so
-  buffs/debuffs can move them.
-- **`LevelConfiguration`** — would need three more `...Gain` fields, *but* §4 replaces the whole
-  table with the sphere grid. Do the grid first and author these as node types instead of adding
-  fields that are about to be deleted.
-- **Balance model** — `EffectiveStats`/`HeroStatCalculator`, `SimUnit`, `PowerScore`'s weights in
-  `BalanceRulesSO`, and the crit path above. `BalanceMath` deliberately models *basic attacks only*,
-  so Intelligence/Spirit change nothing there until the simulator's magic path reads them — worth
-  checking `EncounterSimulator` picks up spell scaling, or the closed-form and simulated numbers
-  will disagree in a new way.
-- **The `EnemySO` inspector footer** and the Balance Analyzer's tables show the four stats; both
-  want the new ones or the tool stops matching the data.
-
-*(Suggested order: `Stats` + `ICombatUnit` + `HeroSO`/`EnemySO` fields → `StatType`/`BuffType` so
-gear and buffs can move them → `SpellEffect.ScalingStat` together with `PowerMode` → Luck/crit →
-balance model. Events (§2) can be built against Agility/Attack/Defense before the three new stats
-land, and gain the rest for free.)*
-
-Touch points: `Assets/Scripts/Rooms/Stats.cs`, `Assets/Scripts/Combat/ICombatUnit.cs`,
-`Assets/Scripts/Heroes/HeroSO.cs`, `Assets/Scripts/Heroes/Hero.cs`,
-`Assets/Scripts/Enemies/EnemySO.cs`, `Assets/Scripts/Items/StatType.cs`,
-`Assets/Scripts/Cards/SpellEffect.cs`, `Assets/Scripts/Cards/Effects/`,
-`Assets/Scripts/Cards/EffectResolver.cs`, `Assets/Scripts/Rooms/CombatManager.cs` (crit),
-`Assets/Scripts/Balance/BalanceMath.cs`, `HeroStatCalculator.cs`, `SimUnit.cs`, `BalanceRulesSO.cs`,
-`docs/ELEMENTAL_PLAN.md` (`PowerMode`).
+- **`BuffType` is a second per-stat list.** Adding a stat is one `StatType` member plus one
+  `StatCatalog` row — *except* that a stat which should be buffable also needs a `BuffType` member,
+  because `BuffHandlerRegistry` generates handlers from it and silently skips a stat with no match.
+  `BuffHandlerRegistry.StatsWithNoBuffType()` reports the gap and a test asserts it is empty.
+  **Collapsing `BuffType` into `Kind + StatType` would remove the exception** and rewrites every
+  magic and combo asset, so it stays a separate change. §9 adds several non-stat `BuffType` members,
+  which makes this collapse *more* attractive, not less — read §9 before attempting it.
 
 ### 7. The hub becomes a place — buildings, materials, and a staged unlock of the game
 
-> **Status: outlined, not started (2026-09-01).** This is a direction, not a work item yet. The
-> phases below are ordered so the game is playable after every one of them; the open questions at the
-> end are the ones to settle before Phase 2, because they decide data shapes that are painful to
-> change later.
+> **Status: outlined, not started (2026-09-01).** A direction, not a work item yet. The phases below
+> are ordered so the game is playable after every one; the open questions at the end decide data
+> shapes that are painful to change later.
 
 **The vision.** The main menu stops being a menu and becomes **the hub** — a static, authored 2D
 layout the player looks at, not a column of buttons. You start with a **campfire and four spots
 around it** for heroes, and nothing else. As you go deeper you bring back **raw materials** (wood,
 iron, hide — enemy and room drops, not currency), and you spend them to **place buildings**; later
 you spend again to **upgrade** them. Every service the hub offers today is behind one of those
-buildings: the **Tavern**, the **Forge**, the **Merchant**, the **Inventory**, the **Bestiary**, the
-**sphere grid**. Buildings can also act as **gates on the sphere grid itself**, so a hero's grid is
-not merely expensive to walk but *blocked* until the hub can support it.
+buildings: the Tavern, the Forge, the Merchant, the Inventory, the Bestiary, the sphere grid.
+Buildings can also act as **gates on the sphere grid itself**.
 
-The purpose is **pacing control**. The first hours become a designed sequence — one system arrives at
-a time, each one introduced when the player has a reason to want it — and the late game deliberately
-**fans out**, with many buildings, many grid branches and many viable ways to be strong. That split
-is also the answer to a balance problem the tool already has (§5p): tight difficulty bands are the
-right target for a narrow early game and the *wrong* target for a wide late one.
+The purpose is **pacing control**. The first hours become a designed sequence — one system arriving
+at a time, each introduced when the player has a reason to want it — and the late game deliberately
+**fans out**. That split is also the answer to a balance problem the tool already has: tight
+difficulty bands are the right target for a narrow early game and the *wrong* target for a wide late
+one.
 
-#### Why this is worth doing (and what it fixes)
+#### Why this is worth doing
 
-- **Today every system is available in minute one.** `MainMenuManager` shows nine buttons at once —
-  so many that home had to become `cd-window--tall` (88%) to fit them (see the MainMenu guide). A new
-  player meets the Forge, the sphere grid, the Tavern, gear and the Bestiary simultaneously, and none
-  of them is *about* anything yet because there is no Essence, no XP, no roster and no gear.
+- **Today every system is available in minute one.** `MainMenuManager` shows ten buttons at once — so
+  many that home had to become `cd-window--tall` (88%) to fit them. A new player meets the Forge, the
+  sphere grid, the Tavern, gear and the Bestiary simultaneously, and none of them is *about* anything
+  yet because there is no Essence, no XP, no roster and no gear.
 - **It adds the one progression axis the game does not have: content unlock.** Gold, Essence, XP and
-  gear are all *power*. Buildings are **access**, which is the only thing that can make the designer's
-  "not yet" stick. §0g's investment gates say *you are not strong enough*; buildings can say *you do
-  not have this system yet*, which is a much cleaner teaching tool for the opening hours.
+  gear are all *power*. Buildings are **access**, which is the only thing that can make the
+  designer's "not yet" stick.
 - **It gives loot a second job.** `LootRoller` already scales drops by rarity and depth, and
-  `BestiaryEntry` already records **which loot each enemy has actually dropped** — so "the Cinder Imp
-  drops ember-iron and you need ember-iron for the Forge" is a knowledge loop the game can already
-  display, for free, the day materials exist.
-- **It makes the campfire readable as state.** The four spots are not decoration: they should *be*
-  `PartySlots`. Buying the third slot puts a third hero at the fire. The hub then shows the player's
-  progress at a glance instead of hiding it inside `PartySelectUI`.
+  `BestiaryEntry` already records which loot each enemy has dropped — so "the Cinder Imp drops
+  ember-iron and you need ember-iron for the Forge" is a knowledge loop the game can already display,
+  for free, the day materials exist.
+- **It makes the campfire readable as state.** The four spots should *be* `PartySlots`.
 
 #### The four pieces of new machinery
 
 **1. Materials — items, not a currency.** Resist adding `Wood`/`Iron` fields to
-`MetaProgressSaveData` beside `Gold`/`Essence`. Materials are open-ended and per-type, and the item
-system already models exactly this: add **`ItemCategory.Material`** next to `Equipment`/`Consumable`,
-and materials are `ItemSO`s that stack (`MaxStack` already exists), drop through `LootRoller`, live in
-`InventoryManager`, resolve without scene wiring through the Resources `ItemCatalog`, and appear in
-the Bestiary's drop record without a line of new code. `PartyResourceType` (one member,
-`HealingPotion`) is the wrong home — it is the *in-run* consumable belt, and materials are a
-between-runs bank.
+`MetaProgressSaveData`. Materials are open-ended and per-type, and the item system already models
+this: add **`ItemCategory.Material`**, and materials are `ItemSO`s that stack (`MaxStack` exists),
+drop through `LootRoller`, live in `InventoryManager`, resolve without scene wiring through the
+Resources `ItemCatalog`, and appear in the Bestiary's drop record without a line of new code.
+`PartyResourceType` is the wrong home — it is the *in-run* consumable belt.
 
-**2. `BuildingSO` + `HubSO` + `BuildingOps` — content, progress, rules, in three places.** Follow
-`CampaignSO` exactly, because it solved the same problem: one Resources-loaded asset holds every
-building, its authored position in the hub, its per-level material+gold cost, its unlock requirement
-and which view it opens; **progress lives in the save** (`MetaProgressSaveData.Buildings`, a
-key+level list, same shape as `CompletedRunKeys`) so the asset stays pure content and reads
-differently per save; and all rules live in a pure static `BuildingOps` — the established idiom
-(`CampaignOps`, `SphereGridOps`, `BestiaryOps`, `InventoryOperations`), which is also what makes the
-whole thing EditMode-testable without a MonoBehaviour.
+**2. `BuildingSO` + `HubSO` + `BuildingOps`.** Follow `CampaignSO` exactly, because it solved the
+same problem: one Resources-loaded asset holds every building, its authored position, its per-level
+material+gold cost, its unlock requirement and which view it opens; **progress lives in the save**
+(`MetaProgressSaveData.Buildings`, same shape as `CompletedRunKeys`); all rules in a pure static
+`BuildingOps` — the established idiom, and what makes it EditMode-testable.
 
-**3. The hub screen — a painted town that buildings phase into.** *(Decided 2026-09-01.)* The
-visual target is the **Heroes of Might & Magic town screen**: one painted backdrop, buildings drawn
-into it at authored positions, each **phasing in** when it is placed. That decides a question this
-section first left open, and it reverses the original recommendation — do **not** build this on
-`SphereGridView`. Two of that widget's three jobs (edges, pan/zoom) are wrong for a fixed town view,
-and the third is not really its own: **`DirectionalNav.PickInDirection`** is a standalone static
-already called by the sphere grid, the campaign map, `KeyboardNavigator` **and** the dungeon's door
-cursor. A new `HubView` calls it directly and owes the graph widget nothing. Keyboard reachability is
-still non-negotiable — `NavigatesCurrentView()` excludes the hub, as it does the map and the grid,
-and the hub drives its own cursor.
-
-What a painted town needs that a node canvas does not:
+**3. The hub screen — a painted town that buildings phase into.** *(Decided 2026-09-01.)* The visual
+target is the **Heroes of Might & Magic town screen**. Do **not** build this on `SphereGridView` —
+two of that widget's three jobs (edges, pan/zoom) are wrong for a fixed town view, and the third is
+not its own: **`DirectionalNav.PickInDirection`** is a standalone static a new `HubView` can call
+directly. What a painted town needs that a node canvas does not:
 
 - **A layered composite ordered by document order.** UI Toolkit has no `z-index` — siblings paint in
-  the order they were added. So `BuildingSO` needs an explicit draw order (or the standard 2D trick,
-  sort by `Position.y`) and `HubView` must add elements in *that* order, never in asset order.
-- **Per-state art on the building, not in the view.** `BuildingSO` carries a sprite per state:
-  **absent** (bare lot, or nothing at all), **available** (foundation/scaffold — the affordance that
-  says *this can be built now*, and the thing that makes a material worth wanting), and one **per
-  level**. `BuildingOps` decides the state, the view only picks the sprite; every rule stays testable
-  without a single asset existing.
-- **"Phase in" is a USS transition, not a new system.** `transition-property: opacity, scale` on the
-  building element plus a class toggled when the build confirms — the theme stylesheet already drives
-  the whole game's look from one file, so the animation is authored where every other visual decision
-  lives. This also means **the build must be confirmed in the hub**, not silently applied on load, or
-  the player never sees the thing the transition exists for.
-- **The town scales as one unit or the art desyncs from the hitboxes.** Positions are authored in the
-  backdrop's own reference space, so backdrop and buildings must live in one fixed-aspect container
-  that scales together — the same reason the map and grid screens are `cd-window--fixed` (a resizing
-  translate-centered window desyncs UITK's hit-testing from what is rendered).
-- **Hit-testing is rectangular.** UITK tests bounding boxes, so overlapping silhouettes steal each
-  other's clicks. Either keep footprints non-overlapping in the layout, or accept the box as the
-  clickable area and author the art to suit it.
+  add order. `BuildingSO` needs an explicit draw order (or sort by `Position.y`).
+- **Per-state art on the building, not in the view.** A sprite per state: **absent** (bare lot),
+  **available** (foundation/scaffold — the affordance that makes a material worth wanting), and one
+  **per level**. `BuildingOps` decides the state, the view only picks the sprite.
+- **"Phase in" is a USS transition, not a new system.** `transition-property: opacity, scale` plus a
+  class toggled when the build confirms. This also means **the build must be confirmed in the hub**,
+  not silently applied on load.
+- **The town scales as one unit or the art desyncs from the hitboxes** — one fixed-aspect container,
+  the same reason the map and grid screens are `cd-window--fixed`.
+- **Hit-testing is rectangular.** Overlapping silhouettes steal each other's clicks.
 
-**4. Building gates on the sphere grid — cheap in the grid, expensive in the balance model.** The
-node change is small: `RequiredBuildingKey` + `RequiredBuildingLevel` on `SphereGridNode`, and one
-extra clause in `SphereGridOps.CanActivate`, which today is just *reachable && bank >= cost*. **The
-cost is downstream.** `CanActivate` is pure and positional, and `Frontier`, `CheapestFrontierCost`
-and `GreedySpend` all sit on top of it — and `GreedySpend` **is the balance model's spender**
-(`InvestmentFrontier`). The moment the grid gates on buildings, the frontier reports budgets the
-player cannot actually buy unless it models hub state too. Plan for a small context object threaded
-through those five methods rather than a fifth positional argument.
+**4. Building gates on the sphere grid — cheap in the grid, expensive in the balance model.**
+`RequiredBuildingKey` + `RequiredBuildingLevel` on `SphereGridNode` and one clause in
+`SphereGridOps.CanActivate`. **The cost is downstream**: `Frontier`, `CheapestFrontierCost` and
+`GreedySpend` all sit on top of `CanActivate`, and `GreedySpend` **is** the balance model's spender.
+Plan for a small context object threaded through those five methods rather than a fifth positional
+argument.
 
 #### What this does to the balance tool (the deliberate part)
 
-This is the point the design is actually making, so state it in `BalanceRulesSO` rather than leaving
-it implicit: **the analyzer's tight bands are an early-game contract, not a whole-game one.**
+State it in `BalanceRulesSO` rather than leaving it implicit: **the analyzer's tight bands are an
+early-game contract, not a whole-game one.**
 
-- **Tiers 1–2 (few buildings, few reachable nodes, few known magics):** the current targets stand —
-  0 critical findings, wipe rates inside the clearable band, difficulty monotonically rising. The
-  possibility space is small enough to actually enumerate, which is what makes those numbers mean
-  something.
-- **Deep tiers (fan-out):** stop judging on wipe-rate bands and judge on **route count** — §5p's
-  finding that "every tier now offers at least two affordable ways to pay" is exactly the right
-  late-game metric, and gear was what turned a checklist into a choice. A deep floor being brutal for
-  one build and easy for another is the *goal*, and the current model reports that as a warning.
-- **The frontier gains a fourth axis.** Party width, grid XP and gold (§5p) become party width, grid
-  XP, gold and **hub state**. Note the danger: buildings are a *hard* axis — you cannot substitute XP
-  for a Forge you have not built — so unlike the other three it is a precondition on the frontier, not
-  a currency inside it.
-- **`RunCurveModel` will need to know which buildings a curve assumes**, the same way it now needs
-  `ReferencePartyGoldBudget`. Default it to "everything built" for general reporting (matching the
-  existing `MaxCap` optimism the user has accepted) and to explicit hub states for frontier work,
-  where the whole question is *which* player can pass.
+- **Tiers 1–2:** current targets stand — 0 criticals, wipe rates inside the clearable band,
+  difficulty monotonically rising.
+- **Deep tiers:** stop judging on wipe-rate bands and judge on **route count**. A deep floor being
+  brutal for one build and easy for another is the *goal*, and the current model reports it as a
+  warning.
+- **The frontier gains a fourth axis** — party width, grid XP, gold and **hub state**. Buildings are
+  a *hard* axis: you cannot substitute XP for a Forge you have not built, so it is a precondition on
+  the frontier, not a currency inside it.
+- **`RunCurveModel` needs to know which buildings a curve assumes.** Default to "everything built"
+  for general reporting and to explicit hub states for frontier work.
 
-#### Suggested phases (each one leaves the game playable)
+#### Suggested phases (each leaves the game playable)
 
 | # | Phase | What lands | Why here |
 |---|---|---|---|
-| 1 | **Materials drop** | `ItemCategory.Material`, a handful of authored materials, drop tables per enemy, Bestiary shows them | Pure addition; nothing gates yet; the drop rates can be measured before anything depends on them |
-| 2 | **Buildings exist, nothing is locked** | `BuildingSO`/`HubSO`/`BuildingOps` + save + tests, **every building pre-built at level 1** | The data model and its rules land under test while the game plays exactly as today |
-| 3 | **The hub replaces home** | `HubView`: painted backdrop, buildings at authored positions with per-state sprites and the phase-in transition; the nine buttons become buildings; campfire seats = `PartySlots` | Migration risk is isolated from gating risk; placeholder art is enough to ship it |
-| 4 | **Turn the gates on** | Campfire only at start; author the first-run unlock sequence (Tavern → Merchant → Forge → …) | The actual design work, done against a hub that already renders |
-| 5 | **Grid gates + frontier axis** | `RequiredBuildingKey` on nodes, hub state threaded through `SphereGridOps`, `InvestmentFrontier` | Needs 4 to be authored before it can be tuned |
-| 6 | **Upgrades** | Building levels change what a screen *offers* — merchant stock rarity, tavern hero tier, forge upgrade cap, campfire seat count — **and what it looks like**: a level is a sprite swap plus the same phase-in | The long tail; each level is a content dial, not new plumbing |
+| 1 | **Materials drop** | `ItemCategory.Material`, authored materials, per-enemy drop tables, Bestiary shows them | Pure addition; drop rates measurable before anything depends on them |
+| 2 | **Buildings exist, nothing is locked** | `BuildingSO`/`HubSO`/`BuildingOps` + save + tests, **every building pre-built at level 1** | The data model lands under test while the game plays exactly as today |
+| 3 | **The hub replaces home** | `HubView`: backdrop, per-state sprites, phase-in; the buttons become buildings; campfire seats = `PartySlots` | Migration risk isolated from gating risk; placeholder art is enough |
+| 4 | **Turn the gates on** | Campfire only at start; author the first-run unlock sequence | The actual design work, against a hub that already renders |
+| 5 | **Grid gates + frontier axis** | `RequiredBuildingKey`, hub state through `SphereGridOps`, `InvestmentFrontier` | Needs 4 authored before it can be tuned |
+| 6 | **Upgrades** | Building levels change what a screen *offers* and what it looks like | The long tail; each level is a content dial, not new plumbing |
 
 #### Open questions — settle these before Phase 2
 
-1. **Do materials survive a wipe?** They must, and by the same mechanism gold does. `AwardLevelClear`
-   banks a floor's gold the moment its exit room clears and `DiscardPendingGold` only forfeits the
-   current floor — materials should ride the identical path. Anything else turns buildings into the
-   death penalty §3b explicitly rejected.
-2. **Materials or gold — which pays for what?** Recommendation: **materials gate *whether*, gold gates
-   *when*.** Placing a building needs a material only found at a certain depth (so it is a
-   progression gate); upgrading it costs gold (so gold keeps the tuition role §3b gave it, and §3's
-   "more gold sinks" is answered by a sink that scales forever).
+1. **Do materials survive a wipe?** They must, by the same mechanism gold does — banked on floor
+   clear, only the current floor forfeited. Anything else turns buildings into the death penalty §3b
+   explicitly rejected.
+2. **Materials or gold — which pays for what?** Recommendation: **materials gate *whether*, gold
+   gates *when*.** Placing a building needs a material only found at a certain depth; upgrading it
+   costs gold (so gold keeps its §3b tuition role, and §3's "more gold sinks" is answered by a sink
+   that scales forever).
 3. **Are the campfire's four spots real?** Recommendation: yes — they are `PartySlots`, and buying
-   the next slot is done *at the campfire* rather than inside `PartySelectUI`.
+   the next slot happens *at the campfire*.
 4. **Does the campaign map become a building?** Recommendation: no. It is the way *out*, not a
-   service — it stays a permanent fixture of the hub (a road, a gate), always available, because
-   `CampaignAssetTests.Campaign_NeverStrandsASaveWithNothingToPlay` encodes the rule that a save must
-   always have something to play. **A building must never be able to lock the player out of running.**
-5. **One scene or two?** Recommendation: one — this is a view swap inside `MenuScene`, not a new
-   scene. Every hub screen already lives in a single `UIDocument` that toggles eleven views.
-6. **What happens to the Bestiary and Inventory?** They are *knowledge* and *your own bag* rather than
-   services someone provides — plausibly they should never be gated at all, and be reachable from the
-   campfire from minute one. Decide before Phase 4 authoring.
+   service. **A building must never be able to lock the player out of running** —
+   `CampaignAssetTests.Campaign_NeverStrandsASaveWithNothingToPlay` encodes that rule.
+5. **One scene or two?** Recommendation: one — a view swap inside `MenuScene`.
+6. **What happens to the Bestiary and Inventory?** They are *knowledge* and *your own bag* rather
+   than services someone provides — plausibly never gated. Decide before Phase 4 authoring.
 7. **What is the placeholder art plan?** The town is the first part of this game that cannot ship on
-   flat-color UITK panels, and art is the long pole. Recommendation: author the **sprite fields on
-   `BuildingSO` from Phase 2** and fill them with flat silhouettes (or generated pixel-art
-   placeholders) so Phases 3–5 are playable and testable before any real art exists — the same
-   discipline that keeps `BuildingOps` free of `Sprite` references. Decide the backdrop's reference
-   resolution at the same time, because every authored `Position` is expressed in it and changing it
-   later moves every building.
+   flat-colour UITK panels. Recommendation: author the sprite fields on `BuildingSO` from Phase 2 and
+   fill them with flat silhouettes so Phases 3–5 are playable before any real art exists. Decide the
+   backdrop's reference resolution at the same time — every authored `Position` is expressed in it.
 
-Touch points (anticipated): `Assets/Scripts/MainMenu/MainMenuManager.cs` + `Assets/UI/MainMenu/MainMenu.uxml`
-(+ its setup bootstrap), a new `Assets/Scripts/Hub/` (`BuildingSO`, `HubSO`, `BuildingOps`),
-`Assets/Scripts/Progression/MetaProgressSaveData.cs` + `MetaProgressManager.cs`,
-`Assets/Scripts/Items/ItemCategory.cs` / `ItemSO.cs` / `LootRoller.cs` / `InventoryManager.cs`,
-`Assets/Scripts/Enemies/EnemySO.cs` (material drop tables), `Assets/Scripts/Heroes/SphereGridSO.cs` +
-`SphereGridOps.cs`, `Assets/Scripts/Heroes/UI/SphereGridView.cs` (as the hub renderer),
-`Assets/Scripts/Heroes/PartySlots.cs`, `Assets/Scripts/Balance/InvestmentFrontier.cs` /
-`RunCurveModel.cs` / `BalanceRulesSO.cs`, `docs/BALANCING.md` (the early/late band split).
+Touch points (anticipated): `Assets/Scripts/MainMenu/MainMenuManager.cs` + `Assets/UI/MainMenu/MainMenu.uxml`,
+a new `Assets/Scripts/Hub/`, `Assets/Scripts/Progression/MetaProgressSaveData.cs`,
+`Assets/Scripts/Items/` (`ItemCategory`, `LootRoller`, `InventoryManager`),
+`Assets/Scripts/Enemies/EnemySO.cs`, `Assets/Scripts/Heroes/SphereGridSO.cs` + `SphereGridOps.cs`,
+`Assets/Scripts/Heroes/PartySlots.cs`, `Assets/Scripts/Balance/InvestmentFrontier.cs`,
+`RunCurveModel.cs`, `BalanceRulesSO.cs`, `docs/BALANCING.md`.
 
----
+### 8. Migrate to the new Input System — *nice to have*
 
-### 8. Migrate to the new Input System — *nice to have, not important*
+> **Status: considered and deferred (2026-09-01).** Nothing is broken by staying on legacy input, so
+> this earns its place only if gamepad support or rebindable controls become a goal (see §19, which
+> argues its value is understated).
 
-> **Status: considered and deferred (2026-09-01).** Raised while chasing a menu-click bug that
-> turned out to be unrelated. Nothing is broken by staying on legacy input, so this only earns its
-> place if gamepad support or rebindable controls become a goal. Recorded here so the investigation
-> does not have to be repeated.
+**Where the project is.** Entirely on the legacy Input Manager, uniformly. Both scenes carry
+identical EventSystem GameObjects with `StandaloneInputModule`, `com.unity.inputsystem` is absent
+from `Packages/manifest.json`, `ProjectSettings.asset` has `activeInputHandler: 0`, and no script
+references `UnityEngine.InputSystem`.
 
-**Where the project actually is.** Entirely on the legacy Input Manager, uniformly — the earlier
-belief that `MainGameScene` was already on the new system was wrong. Both `MainGameScene` and
-`MenuScene` carry identical EventSystem GameObjects with the same `StandaloneInputModule`,
-`com.unity.inputsystem` is absent from `Packages/manifest.json`, `ProjectSettings.asset` has
-`activeInputHandler: 0`, and no script references `UnityEngine.InputSystem`.
-
-**What it would take.** Small, four steps: add the package; set Active Input Handling (needs an
-editor restart); swap both scenes to `InputSystemUIInputModule` (Unity offers a one-click replace);
-rewrite five call sites — `MainCamera.cs:185-198` (WASD pan) and `MenuManager.cs:35` (Escape).
+**What it would take.** Four steps: add the package; set Active Input Handling (needs an editor
+restart); swap both scenes to `InputSystemUIInputModule`; rewrite five call sites —
+`MainCamera.cs:185-198` (WASD pan) and `MenuManager.cs:35` (Escape).
 
 **The one trap.** `Door.cs:76` uses `OnMouseDown()`, and Unity only sends `OnMouseXXX` under the
 legacy backend — switching to *New only* silently kills mouse navigation through dungeon doors, with
-no error to explain it. Either set Active Input Handling to **Both**, or convert `Door` to a
-`Physics2D.Raycast` from a pointer position. Prefer the conversion: the doors are the only
-world-space mouse input in the game, and "Both" leaves a hidden dependency on a backend nobody
-thinks is in use any more.
+no error. Either set Active Input Handling to **Both**, or convert `Door` to a `Physics2D.Raycast`.
+Prefer the conversion: the doors are the only world-space mouse input in the game, and "Both" leaves
+a hidden dependency on a backend nobody thinks is in use.
 
 **What is *not* at risk.** The keyboard cursor. UI Toolkit's key path does not go through the input
-module at all — `PanelEventHandler.Update()` reads keys straight off the IMGUI queue via
-`Event.PopEvent`, gated only on `isCurrentFocusedPanel`, which is exactly
-`eventSystem.currentSelectedGameObject == selectableGameObject`. That is precisely what
-`PanelKeyboard.Claim()` arranges, so `PanelKeyboard`, `KeyboardNavigator` and every screen built on
-them survive a module swap untouched. (Pointer events *do* go through the module plus
-`PanelRaycaster`; `InputSystemUIInputModule` supports UI Toolkit fine.)
+module at all — `PanelEventHandler.Update()` reads keys off the IMGUI queue via `Event.PopEvent`,
+gated only on `isCurrentFocusedPanel`, which is exactly what `PanelKeyboard.Claim()` arranges. So
+`PanelKeyboard`, `KeyboardNavigator` and every screen built on them survive a module swap untouched.
 
-Touch points (anticipated): `Packages/manifest.json`, `ProjectSettings/ProjectSettings.asset`,
-`Assets/Scenes/MainGameScene.unity` + `Assets/Scenes/MenuScene.unity` (EventSystem),
-`Assets/Scripts/ImmoralityGaming/Fundamentals/MainCamera.cs`,
+Touch points: `Packages/manifest.json`, `ProjectSettings/ProjectSettings.asset`, both scenes'
+EventSystem, `Assets/Scripts/ImmoralityGaming/Fundamentals/MainCamera.cs`,
 `Assets/Scripts/ImmoralityGaming/Menu/MenuManager.cs`, `Assets/Scripts/Rooms/Door.cs`.
+
+---
+
+## Combat depth (added 2026-09-03 from a broad scan)
+
+> The systems layer is markedly deeper than the *verbs* sitting on it. §9–§13 are the gap, roughly in
+> value order. They are independent of each other but they compound: DoT gives the Tank something to
+> survive, threat gives the party a reason to protect the caster, and a Limit gauge gives a losable
+> fight a comeback.
+
+### 9. Status effects — ✅ over-time, Silence and the cure shipped 2026-09-03
+
+**What landed.** `BuffType` gained `Burning` / `Poisoned` / `Bleeding` / `Regenerating` / `Silenced`
+(appended — the enum is serialized by ordinal into every magic and combo asset).
+
+- **`IOverTimeBuffHandler`** is a *second* interface alongside `IBuffHandler`, asked for by a cast, so
+  none of the five existing handlers changed. `OverTimeBuffHandler` is one parameterised class
+  registered four times — the shape `ResistanceBuffHandler` and `StatBuffHandler` already use.
+- **`CombatBuffTracker.ResolveOverTime`** owns the arithmetic and **applies** the health change,
+  returning `OverTimeTick`s for presentation. The live loop (`CombatManager.EndOfTurnUpkeep`) and
+  `EncounterSimulator` both call it — a second implementation is how the model would drift.
+- **The three damage effects are mechanically different, not reskins.** Poison **ignores Endurance**
+  (the answer to a target the defense curve has made immune to flat damage — the reason to cast
+  something other than the biggest number in the kit); burn honours defense, is dealt as **Fire** so
+  resistances and weaknesses apply, and is **doused by Ice**, mirroring Frozen/Fire; bleeding is
+  plain physical and nothing in the game resists it, so it is the reliable one.
+- **Ticks fire on the victim's own turn, before durations tick down.** Per-victim-turn rather than a
+  global clock because the turn *is* the unit of time in a CTB system — so Haste and Slow change how
+  often something burns for free. Resolve-then-decrement means a buff with one turn left deals its
+  last tick before expiring.
+- **Reapplying refreshes, it does not stack**: the stronger per-turn amount and the longer duration
+  both win. Stacking magnitude would make the closed-form model unable to price it.
+- **A tick can kill**, and routes through the same `HandleEnemyDeath` / `HandleHeroDeath` a killing
+  blow does — otherwise its XP, gold and loot vanish and `TurnManager` keeps scheduling a corpse.
+- **Silence** gates the hero **Magic** command (`RoomActionUI`) and every enemy `CastMagic` action
+  (`EnemyActionPlanner.HasSomewhereToLand`, so an all-cast enemy falls through to its default action
+  rather than winning a turn and doing nothing). **Draw is deliberately not gated** — Draw is how the
+  player *acquires*, and a magic taken is carried for the rest of the run, so blocking acquisition
+  costs far more than blocking casts.
+- **The cure loop:** `ConsumableEffectType.CureStatus` + `CombatBuffTracker.CureStatusEffects` +
+  the **Antidote Salve** item. `BuffHandlerRegistry.IsCurable` lists what a cure removes in one
+  place, because "harmful" is a design judgement — Haste and Regeneration are status effects too, and
+  a cure that stripped the party's own buffs would be a trap.
+- **The balance model prices it.** `EnemyMagicModel.OverTimeAgainst` folds a damaging over-time
+  effect into `DamageOfCast` over its full duration. Without it a poison would price as **nothing at
+  all** — the Damage filter skips it and the stat-shift collector skips it too, which is the exact
+  shape of the resistance-buff bug. Two documented approximations, both pushing the term *up*:
+  duration is charged in full, so a re-applied effect (which refreshes rather than stacks) and one
+  that outlives the fight are both over-counted.
+- **Presentation:** per-status icons on `UnitHealthBar` (three new 16×16 glyphs — `flame`, `droplet`,
+  `mute`; poison and bleed share the droplet and are told apart by tint, regeneration takes the
+  cross), tinted floating tick numbers, and a reduced-weight impact flash.
+- **Content:** `PoisonDart` now actually poisons (2/turn × 3, defense-ignoring); `Slash` leaves a
+  bleed (1/turn × 3); **`IgniteCombo` sets the target alight** (3/turn × 3) rather than only spiking
+  it, so Oil + Fire is the burn applicator instead of a parallel one; two new drawables — **`Hush`**
+  (Silence, off the Hex Weaver) and **`Renew`** (Regeneration, off the Bog Shaman).
+
+**Measured** (closed-form, before → after): findings **0 critical / 22 warning / 37 info → 0 / 22 /
+34**; attrition curves moved **+0.4% to +2.6%** on every floor. Suite **813 → 842 passed / 0 failed**
+(+29, `OverTimeEffectTests`).
+
+#### Still open
+
+- **Silence and Regeneration are not priced by the danger index**, so both new spells ship at
+  **`CastWeight: 0`** — drawable, never cast by their owner, the same rule the four cloaks use. That
+  is the honest position (letting an enemy spend turns on an unpriced effect would move the game
+  without moving any number the analyzer reports), but it means two of the three new statuses are
+  **player-only tools**. Pricing a command gate needs a *turn-denial* term the closed form does not
+  have — the nearest existing idiom is `EnemySupportModel`'s measured output-suppression.
+- **Stun, Blind and Shield/Absorb were scoped out, with reasons.** Stun is a harder `Frozen` and the
+  first question is whether `Frozen` should simply *become* it rather than shipping two; Blind needs
+  a **miss** concept the game does not have (or it degenerates into a large Strength debuff); an
+  absorb shield is a damage pool that soaks before HP, which needs its own field — the executors
+  clamp against effective max health, so it is not a heal.
+- **The numbers have had no tuning pass.** 2/turn poison, 1/turn bleed and a 3/turn Ignite burn were
+  picked to be visibly small; nothing has been played. The Ignite burn is the one to watch — a combo
+  the player controls, on top of an existing power-8 spike.
+- **No in-game explanation.** A player has no way to learn that poison bypasses armour or that Ice
+  puts out a burn — §16's compendium is where that belongs, and this section is the strongest
+  argument yet for it.
+- **The Antidote Salve's only supply is the Floating Eye's loot roll.** Enough to make the cure loop
+  real, not enough to plan around. Merchant consumable stock is the proper home — `GenerateStock`
+  filters `ItemCategory.Equipment`, so consumables cannot be sold at all today (§3, §18b).
+- **`Hush` and `Renew` reuse existing magic icons** (Poison Dart's and Heal's), so the slot list, the
+  Forge grid and the Draw picker each show two different magics with the same picture. Same
+  placeholder debt as the four cloaks.
+- **The three status glyphs are hand-authored 16×16 placeholders** matching the existing neutral
+  white-glyph set.
+
+#### Findings from the review pass (2026-09-03), all fixed
+
+Recorded because most of them are traps that will recur, not one-off slips:
+
+- **A tick-kill did not run the whole death path.** `HandleHeroDeath` only hides the sprite — the log
+  line and `_turnManager.RemoveUnit` live at its *call sites*, so copying the call was not enough.
+  `HandleEnemyDeath` is self-contained, which is exactly why the enemy branch looked fine and hid the
+  asymmetry. **Rule: when reusing a death path, check whether the method or the call site owns the
+  bookkeeping.**
+- **A `perTarget <= 0f` guard silently changed a pre-existing path.** `AverageAgainst` returns a
+  *negative* average when the party absorbs an element, and that reduction is the whole point of
+  building for absorption — the guard discarded it, quietly making enemies read more dangerous
+  against exactly the elementally-specialised builds the cloaks exist to enable.
+- **`EncounterSimulator` gated enemy Silence but not hero Silence**, which would have made the model
+  read a silenced party as still casting.
+- **`Renew` was authored `TargetType: Self`** while its description said "an ally's wounds"
+  (`SingleAlly` is 3, `Self` is 2).
+- **`ApplyStatusEffect` appended rather than refreshed**, so a unit Silenced twice carried two
+  records — two icons, and a cure reporting "clearing Silenced, Silenced". Pre-existing for
+  Frozen/Slow/Haste; Silence is just the first status an enemy would realistically re-apply.
+- **Room events could have authored a permanent poison.** `LevelAfflictionTracker` re-seeds at
+  duration 9999 and persists to the dungeon save, so an over-time `BuffType` there would have been an
+  uncurable level-long drain. `Add` now rejects them outright.
+- **The registry comment claimed poison and bleed were resisted differently.** Both are `Normal`;
+  only `IgnoresDefense` separates them.
+- **A `RawPower` doc comment asserted buff/debuff power takes no caster contribution.** True of the
+  upgrade bonus, false of `SpellScaling.BuffContribution`, which both executors apply
+  unconditionally — the model now reads the same magnitude the executors do.
+- Two review findings were **incorrect** and no action was taken: Hex Weaver and Bog Shaman are
+  `CastWeight 1,1,0,0`, not all-zero, so the new spells are never cast and no existing spell's cast
+  share was diluted.
+
+### 9b. Draw vs. the sphere grid — where magic should come from *(open decision, raised 2026-09-03)*
+
+> **Status: a question, not a plan.** Nothing here is decided. It is recorded now because it changes
+> what several other sections are *for*, and because both halves of the machinery already exist.
+
+**The question.** Today **Draw is the only route to new magic**: a hero learns a spell by spending a
+turn extracting it from an enemy, and `MagicKnown` sphere-grid nodes exist only so a fresh run does
+not start with an empty hand. The alternative is to invert that — make the **grid** the place magic
+is unlocked, and let Draw become something narrower (a top-up, a situational steal, or nothing at
+all). The attraction is that it gives the grid much more depth: a branch would grant *spells*, not
+just bigger numbers, which is exactly what `docs/BALANCING.md` §0 rule 3 says depth is supposed to buy.
+
+**What already exists on each side.** This is not a green field, which is why the decision is worth
+taking deliberately rather than drifting into:
+
+| | Draw | Sphere grid |
+|---|---|---|
+| acquisition | spend a turn on an enemy (`ExecuteDrawAction`) | `SphereNodeKind.MagicKnown`, bought with XP at the hub |
+| supply | `EnemySO.DrawableMagics` per enemy, per level | authored per hero grid |
+| refill | drawing again — charges are a **run** resource | `SeedGrantedMagic` at run start |
+| discovery | first draw reveals it (`???` until then) | the node names it up front |
+| modelled by | `ProgressionMap` (the whole Elements & Unlocks tab) | `InvestmentFrontier`, `PartyBaseline` |
+
+**What each choice costs.**
+
+- **Grid-primary** gives the grid the capability payload it lacks and makes "which branch did you
+  take" a statement about *what your party can do* rather than how big its numbers are — the same
+  argument §4b makes for summons, and it would arrive far sooner and far cheaper. It also fixes the
+  thing §17 calls out: 15 magics spread across five runs is thin partly because Draw has to place
+  every one of them on an enemy somewhere.
+- **But it guts the FFVIII shape the game is built on.** Draw is the reason a turn spent *not*
+  attacking is interesting, the reason `Charges` are a run resource, the reason the first pull off a
+  new enemy is a gamble, and the reason the Bestiary's masked Draw list means anything. Removing it
+  would leave combat with Attack / Magic / Item / Inspect and no acquisition verb at all — which
+  makes §10's Defend and §11's threat model *more* necessary, not less.
+- **The balance model would move to the other axis.** `ProgressionMap` — the unlock timeline, the
+  availability matrix, the reachable-combo analysis, every *unreachable magic* finding — is built
+  entirely on Draw tables. If the grid becomes the supply, that whole tab is measuring the wrong
+  thing, and the frontier gains magic as a fourth thing XP buys.
+
+**A middle reading worth considering before either extreme.** The two are not actually competing for
+the same job: **the grid is good at guaranteeing, Draw is good at surprising.** A split where the
+grid grants each hero a small, *authored, permanent* kit (their identity — the Acolyte always has
+Heal) and Draw remains the way to get anything *else* (the opportunistic, level-specific, elemental
+answer to the floor you are on) keeps both. That is close to what the code already does, and the real
+question then becomes a tuning one: **how many `MagicKnown` nodes should a grid have, and how deep?**
+Today every grid authors exactly one, at the shallow end, which is why the grid does not feel like a
+source of magic — not because the mechanism is missing.
+
+**Settle it before §4b.** Summons are specified as the payload at two branch tips. If magic moves
+onto the grid, summons and spells compete for the same real estate and the same XP, and the frontier
+has to price both. Deciding after building summons means re-authoring four grids.
+
+**Open sub-questions if grid-primary wins:**
+
+1. Does Draw survive at all, and if so as what — a charge top-up? A steal? Only for magic the hero
+   already knows?
+2. What happens to `EnemySO.DrawableMagics` and the Bestiary's masked Draw list, which is currently
+   one of the game's few discovery loops?
+3. Do the four defensive cloaks (authored as `CastWeight: 0` drawables, and the entire defensive half
+   of the elemental layer) move to grid nodes? They are the clearest case *for* the grid — a ward is
+   a preparation, not an opportunistic steal.
+4. What replaces `ProgressionMap`'s unlock timeline as the check that no magic is unreachable?
+
+Touch points (anticipated): `Assets/Scripts/Heroes/SphereGridSO.cs` (`MagicKnown` nodes),
+`SphereGridSeeder`, `Assets/Scripts/Cards/EquippedMagicState.cs` (`SeedGrantedMagic`,
+`RefillCharges`), `Assets/Scripts/Rooms/CombatManager.cs` (`ExecuteDrawAction`),
+`Assets/Scripts/Enemies/EnemySO.cs` (`DrawableMagics`), `Assets/Scripts/Balance/ProgressionMap.cs`,
+`InvestmentFrontier.cs`.
+
+### 10. Defend — the missing turn-economy verb
+
+The hero command menu is **Attack / Magic / Draw / Item / Inspect / Skip**. `Skip` throws the turn
+away. In a CTB system the *turn* is the currency, so a **Defend** that converts a turn into
+mitigation (halve incoming until your next turn, say) is the cheapest possible way to make turn
+economy a decision.
+
+It is also **the only sensible answer to a telegraphed boss AoE.** `BossBehavior` telegraphs its
+signature and the player is shown a red `!` over each targeted hero — and can do nothing with that
+information except heal afterwards. Defend turns a telegraph into a decision, which is the entire
+point of telegraphing it.
+
+Design notes: it should be a *stance* that expires on the defender's next turn (not a fixed
+duration), so Haste/Slow interact with it; it wants to be visible on `party-status`; and it needs a
+`BalanceMath` term or the analyzer will keep pricing a party that never defends. Consider whether
+Defend should also grant a small charge/HP tickback — otherwise an optimal player never presses it in
+a fight they are winning, which is fine, but worth deciding rather than discovering.
+
+Touch points: `Assets/Scripts/Rooms/CombatManager.cs`, `Assets/Scripts/Rooms/UI/RoomActionUI.cs`
+(command list), `Assets/Scripts/Cards/CombatBuffTracker.cs`, `Assets/Scripts/Combat/TurnManager.cs`,
+`Assets/Scripts/Balance/BalanceMath.cs`.
+
+### 11. Threat and cover — give the Tank a role
+
+**`EnemyActionPlanner` calls `EnemyTargeting.PickRandom(context.Heroes)` for Attack, HeavyAttack and
+most casts.** There is no threat, no aggro, no cover. So the Tank's 15 Endurance and its whole
+sphere-grid branch only pay off on the turns the RNG happens to point at it — a party's defensive
+investment is *diluted* by party width rather than *directed*.
+
+That is a real balance consequence, not just a role-fantasy one: it is part of why §0g finds party
+width to be the strongest lever in the game. Each extra body adds a health bar to the random pool, so
+width buys survivability that no build decision can substitute for.
+
+Two shapes, and they are not exclusive:
+
+- **A Taunt/Provoke hero command** (or a Tank-only command, see §13) that biases targeting for N
+  turns. Cheap: `EnemyTargeting` gains a weight lookup and `PickRandom` becomes `PickWeighted`.
+- **A passive Cover** — a hero with a shield equipped intercepts a share of hits aimed at the lowest
+  -HP ally. More automatic, less of a decision, but it makes `SlotType.OffHand` mean something.
+
+**The model has to follow.** `BalanceMath` currently spreads incoming damage across the party
+implicitly. A threat model concentrates it, which changes hits-to-kill for *every* hero in opposite
+directions — the Tank takes more, everyone else takes fewer. Expect `MinHitsToKillHero` to need
+re-deriving, and expect this to *unlock* enemy strength headroom (§0g's standing constraint), since
+the binding hero is currently whoever has the smallest bar.
+
+Touch points: `Assets/Scripts/Enemies/Behaviors/EnemyTargeting.cs`, `EnemyActionPlanner.cs`,
+`Assets/Scripts/Rooms/CombatManager.cs`, `Assets/Scripts/Cards/CombatBuffTracker.cs`,
+`Assets/Scripts/Balance/BalanceMath.cs` / `EncounterSimulator.cs`.
+
+### 12. Enemy action vocabulary — the four missing verbs
+
+`EnemyActionKind` is **Attack / HeavyAttack / AoeAttack / Heal / Debuff / CastMagic**, and it is a
+closed enum *on purpose*: `BalanceMath` has to price a behaviour in closed form. Four obvious verbs
+are absent, each of which would need a price:
+
+- **Summon / call for help** — adds a body mid-fight. Also the natural home for §5o's escort
+  mechanic, and the single strongest way to make a fight escalate rather than decay. Pricing is the
+  hard part: an enemy that adds bodies makes `PartyTurnsToKill` recursive.
+- **BuffAlly** — there is a Heal but no "haste the boss". The counterpart to `Debuff`, and the thing
+  that makes a support enemy a *priority target* rather than a formality.
+- **Guard / cover an ally** — the enemy-side mirror of §11, and what makes a healer actually need
+  focusing.
+- **Steal / Flee** — an enemy that takes gold or an item and leaves. A different kind of pressure
+  (act now or lose something) that no current enemy can express.
+
+Do these **after** §11, which establishes the targeting machinery two of them need, and after §9,
+since an enemy that applies a DoT is more interesting than most of these.
+
+Touch points: `Assets/Scripts/Enemies/Behaviors/EnemyActionEntry.cs` (the enum + per-kind fields),
+`EnemyActionPlanner.cs`, `Assets/Scripts/Enemies/Editor/EnemyBehaviorSOEditor.cs` (draws per-kind
+fields), `Assets/Scripts/Balance/` (`EnemyBehaviorModel`, `BalanceMath`).
+
+### 13. Hero identity — unique commands and a Limit gauge
+
+**`HeroSO` is `BaseStats` + `AttackStat` + `SphereGrid` + a sprite.** Every hero has the identical six
+commands. The heroes differ in *numbers* and in which grid they walk, and in nothing else.
+
+Given the FFX/FFVIII framing the rest of the design already uses, two additions:
+
+- **A per-hero unique command.** Steal (Scout), Provoke (Tank — see §11), Focus/charge (Warrior),
+  a free low-power cast (Acolyte). Authored as a field on `HeroSO`, resolved through the same command
+  list `RoomActionUI` already builds. This is the cheapest way to make "which hero is acting" a
+  question, and it pairs with §5's party-selection decision — a party is a set of *verbs*, not just
+  four stat blocks.
+- **A Limit / Overdrive gauge** that fills on damage taken and unlocks a big one-shot. Two reasons
+  beyond flavour: it is a **comeback mechanic**, which is what makes §0g's "the player is supposed to
+  die" feel like a near miss rather than a wall; and it is a second **burst** axis alongside §4b's
+  summons, so a boss can be tuned against burst without the sphere grid being the only source of it.
+
+Note the interaction with §4b: a summon at a branch tip and a Limit on every hero are both "big
+button you save for the boss". Decide whether they coexist (Limit is universal and small, summons are
+earned and large) or whether one replaces the other — **before** building either, because
+`InvestmentFrontier` has to price whichever exists.
+
+Touch points: `Assets/Scripts/Heroes/HeroSO.cs`, `Hero.cs`, `Assets/Scripts/Rooms/CombatManager.cs`,
+`Assets/Scripts/Rooms/UI/RoomActionUI.cs`, `Assets/Scripts/Combat/ICombatUnit.cs`,
+`Assets/Scripts/Balance/PartyBaseline.cs` / `InvestmentFrontier.cs`.
+
+---
+
+## Information the player never gets (added 2026-09-03)
+
+### 14. The dungeon map, the party bar, and the pause menu
+
+Three separate gaps, grouped because a pause overlay is the natural home for the first two.
+
+**14a. There is no dungeon map.** Rooms are a graph (`RoomNode`), doors are the only navigation, and
+nothing in `Assets/Scripts` draws an overview. The player cannot answer *where is the exit*, *have I
+searched everything*, or *is this branch a dead end*. Two consequences:
+
+- It is a prerequisite for **§2's branch choice** — a fork the player cannot see is not a fork.
+- It is the only place the run's *shape* is legible, which is what makes a 17-room beeline (§0g) read
+  as a decision rather than a corridor.
+
+`Room.Reveal()` already shows the current room's doors and leaves unexplored neighbours dark, so the
+knowledge model exists; what is missing is a view of it. `SphereGridView` is a node-graph renderer
+that already does pan/zoom and Painter2D edges over exactly this shape — unlike §7's painted town,
+**a dungeon map is genuinely the same widget**, so this is the one place reusing it is right.
+
+**14b. Party health is invisible while exploring.** `party-status` in `RoomAction.uxml` is shown by
+`ShowCombat` and hidden by `HideAll`, so the panel exists and is deliberately combat-only. But since
+the charge/health rework made health a **level-scoped** resource, the whole time the player is
+walking the floor — deciding whether to take a fight, spend the refuge, or drink a potion — they
+cannot see how hurt anyone is. **This is the single decision the game most wants informed, and it is
+made blind.** Small fix, disproportionate payoff; it is the cheapest item in this document.
+
+**14c. There is no in-dungeon pause menu.** Volume can only be changed in the hub, and there is no
+quit-to-hub mid-run. A pause overlay is the home for both, plus 14a and 14b, plus §19's
+motion-reduction toggle.
+
+Touch points: `Assets/UI/Rooms/RoomAction.uxml`, `Assets/Scripts/Rooms/UI/RoomActionUI.cs`,
+`Assets/Scripts/Rooms/RoomManager.cs` / `RoomNode.cs`, `Assets/Scripts/Heroes/UI/SphereGridView.cs`
+(reused as the map renderer), `Assets/Scripts/Audio/AudioOptions.cs`,
+`Assets/Scripts/ImmoralityGaming/Menu/`.
+
+### 15. Run summary and statistics
+
+`MetaProgressSaveData` records Gold, Essence, upgrades, the Bestiary and completed runs — **nothing
+about how a run went.** The death screen says *"Your Party Has Fallen..."* and stops.
+
+§3b's entire design bets on death being **tuition**, but the game teaches nothing at the moment of
+death. A summary that says *floor 3 of 4, killed by Mirefather, 47 enemies felled, you never drew
+Ward, you have 340 gold and 4 unspent XP* is what converts a wipe into a hub decision — which is the
+loop the whole balance thread is built around.
+
+It is also **free telemetry**. §0g's frontier numbers are all model predictions with no measured
+counterpart; a per-run record of *floors reached at what party width and what spent XP* is exactly
+the observation that would validate or falsify them. `SaveAudit` already reads live saves for the
+analyzer, so the consumer exists.
+
+Scope suggestion: a `RunHistorySaveData` (a bounded list — last N runs) written on death and on
+completion, surfaced as (a) an expanded death/victory screen and (b) a hub **Records** view. Keep it
+out of `MetaProgressSaveData`, which is already doing several jobs.
+
+Touch points: `Assets/Scripts/Progression/` (new save type + manager hook),
+`Assets/Scripts/Dungeon/DungeonManager.cs` (`HandlePartyDeath`, `OnDungeonCleared`),
+`Assets/Scripts/Rooms/UI/RoomActionUI.cs` (death/victory windows),
+`Assets/Scripts/MainMenu/MainMenuManager.cs`, `Assets/Scripts/Balance/SaveAudit.cs`.
+
+### 16. A compendium — explain the systems
+
+Seven stats, five damage types, resistances, fourteen magic tags, combos, charges, upgrade levels —
+and **no player-facing place that explains any of it.** `StatCatalog` already holds a `Description`
+per stat and nothing displays it. Nobody is told that Luck drives crit, that Spirit scales healing
+and protection, or that resistance applies *before* defense.
+
+The Bestiary proved the pattern (a hub collection screen fed by a pure presenter), so this is mostly
+authoring plus a screen. Consider folding it into the Bestiary as a second tab rather than an
+eleventh home button — home is already at 88% height with room for about one more button.
+
+Touch points: `Assets/Scripts/UnitStats/StatCatalog.cs` (descriptions exist, unused),
+`Assets/Scripts/Enemies/UI/BestiaryUI.cs` (pattern + plausible host),
+`Assets/UI/MainMenu/MainMenu.uxml`, `Assets/Scripts/Cards/MagicTag.cs`,
+`Assets/Scripts/Combat/DamageType.cs`.
+
+---
+
+## Content and production (added 2026-09-03)
+
+### 17. Content volume is the biggest single gap
+
+The content-to-systems ratio is the scan's headline finding. Current catalog:
+
+| | count | note |
+|---|---|---|
+| Magic | 15 + 4 combos | across a 5-run campaign |
+| Heroes | 4 | differing only in stats and grid (§13) |
+| Enemies | 11 + 2 filler | 8 non-boss enemies sit in a 4× danger band |
+| Items | 18 | one `SlotType` (`Hands`) only just filled |
+| **Room events** | **6** | **one per stat — they repeat inside a single run** |
+| Room templates | 18 | |
+
+**Room events are the worst of these.** They are the main flavour beat and the only non-combat
+decision in a floor, and a 4-floor run at ~2 event rooms per floor will show the player most of the
+catalog twice. `RoomEventSO` is fully data-driven and the authoring surface is mature (spawn odds,
+stat gates, checks, weighted outcomes, level afflictions) — this is pure content work with no code
+behind it.
+
+The Elements & Unlocks analyzer tab already flags *unreachable* content; the counterpart finding —
+**thin** content — has no check. Worth adding target counts per tier to `BalanceRulesSO` so the tool
+reports it, rather than adding content ad hoc.
+
+Also thin and worth naming: **no run declares its own room-event pool**, so every biome draws on the
+same six.
+
+### 18. Item and consumable depth
+
+**18a. Gear is a flat stat stick.** `ItemSO` is `Bonuses` (Raw or Percentage) + `Resistances`. No set
+bonuses, no on-hit procs, and — most importantly — **no trade-off items.**
+
+Now that §5p/§5q made gear a real balance axis (the frontier's third), *"+6 Strength, −3 Agility"* is
+the cheapest possible way to turn gear from a checklist into a choice: it needs no new field at all,
+just a negative `ItemBonus`, and it immediately interacts with the CTB turn order. Verify the
+frontier's `GearLoadout` greedy spend handles negative bonuses sensibly before authoring any — a
+greedy ranker that sums weighted stats will handle it correctly, but it has never been given one.
+
+Set bonuses and procs are larger and want their own decision; procs in particular need a hook point
+in `DamageCalculator`/`CombatManager` that does not exist.
+
+**18b. Consumables.** `CureStatus` shipped with §9; `RestoreToFull` and `Revive` are still missing and
+pair with §3's death safety-net sink.
+
+**The bigger gap is that consumables cannot be bought at all.** `MerchantUI.GenerateStock` filters
+`i.Category == ItemCategory.Equipment`, so every consumable in the game reaches the player only
+through a loot roll or a room event. That makes the potion belt and the new Antidote Salve pure luck
+rather than preparation — and preparation is exactly what §3 wants more Gold sinks for. A consumables
+tab on the Merchant is a small change with a direct line to the retry economy (§3b): restocking before
+a re-attempt is the most natural gold sink the game could have.
+
+Touch points: `Assets/Scripts/Items/ItemSO.cs` / `ItemBonus.cs` / `ConsumableEffectType.cs`,
+`Assets/Scripts/Items/LootRoller.cs`, `Assets/Scripts/Balance/GearLoadout.cs`,
+`Assets/Scripts/Rooms/CombatManager.cs` (consumable use path).
+
+### 19. Shipping surface
+
+Small individually; collectively this is what stands between the project and a build someone else can
+play.
+
+- **No quit and no credits.** No `Application.Quit` call anywhere and no quit button in
+  `MainMenu.uxml`. A Windows standalone build can currently only be closed with Alt+F4.
+- **No graphics or accessibility options.** Options is audio-only. Notably the game now has camera
+  shake, zoom-punch and hit-stop with **no way to turn them off** — that is an accessibility need,
+  not a preference. Pair the motion-reduction toggle with §1's element-tinted damage numbers, which
+  want a colourblind check at the same time. Resolution/fullscreen and text size belong here too.
+- **No save management.** One save, no slots, no reset-progress, no NG+. Starting over means
+  hand-deleting `savedata/`. `FileHandler` writes to a fixed directory, so slots would be a path
+  prefix.
+- **Gamepad is closer than §8 implies.** `DirectionalNav` + `KeyboardNavigator` already make every
+  screen cursor-navigable by design — that is the hard part, and it is done. §8 prices the migration
+  as "nice to have"; for gamepad specifically the remaining work is mostly a mapping job on top of
+  architecture that already exists, so **§8's value is understated.**
+- **No CI.** The EditMode suite is ~813 tests and runs headlessly in about a second
+  (`ExecutionSettings.runSynchronously`, `docs/GAMEPLAY_VALIDATION.md` gotcha 12). A pre-commit hook
+  or CI step is nearly free and would have caught the 46-failure rot described in the ledger before
+  it reached 46.
+- **Localization.** All strings are hardcoded in C# and UXML. Not urgent — but the cost grows
+  linearly with §17, so it is a *decide now, do later* note: if strings are ever going to move to a
+  table, the cheapest moment is before the content pass, not after.
+
+---
+
+## Shipped ledger
+
+One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
+per-subsystem `CLAUDE.md` files — not here.
+
+- **Boss encounters** (2026-08) — `EnemySO.IsBoss` + `BossBehavior` (telegraphed party-wide signature,
+  enrage under 30%), placed via `RunLevelEntry.BossEnemy`, alone in a sealed exit room. `BossAdds`
+  escorts added 2026-08-30; every boss now has one.
+- **Balance analyzer** — `Assets/Scripts/Balance/` + the `Tools ▸ Balance ▸ Balance Analyzer` window +
+  `BalanceRegressionTests`. *(No `BalanceRules.asset` is checked in; the window's "Create rules asset"
+  button writes one. Until then it runs on code defaults.)*
+- **Elements & Unlocks tab** — `ProgressionMap` models the Draw tables as a supply chain: unlock
+  timeline, magic availability matrix, per-level elemental coverage.
+- **Test suite repair + headless runner** (2026-08-21) — 46 red of 339 → 1, every one a stale *test*.
+  `ExecutionSettings.runSynchronously = true` runs the whole suite in-process in about a second.
+- **Room events** (2026-08-21) — `Assets/Scripts/Rooms/Events/`; stat-gated, weighted-outcome gambles
+  behind the room's Action button, priced by `RoomEventModel`.
+- **Sphere grid** (2026-08-22) — `SphereGridSO` + pure `SphereGridOps`; XP is a per-hero bank spent on
+  nodes at the hub. `LevelConfiguration` deleted. Doubled and repriced by depth in §5s (2026-09-02).
+- **Roster progression** (2026-08-20/22) — solo start, tavern + rescue acquisition, `PartySelectUI`,
+  bought party-slot cap (`PartySlots`, base 2 / max 4, 300 then 600 gold), even-split XP (`XpSplit`).
+- **Three new stats + the generic stat model** (2026-08-21) — Intelligence / Spirit / Luck;
+  `StatType` / `StatBlock` / `StatCatalog`; `Attack`→`Strength`, `Defense`→`Endurance`; per-hero
+  `AttackStat`; Luck-driven crit on a diminishing curve.
+- **Room kinds** (2026-08-25) — Combat / Connector / Treasure / Rest, placed per instance on a
+  per-level quota by the pure `RoomKindPlanner`.
+- **Elemental defence** (2026-08-25) — resistance buffs actually work; `PowerMode`,
+  `SpellEffectType.HealthCost` + two-pass benefits-then-costs resolution, four cloak cards.
+- **Enemy behaviour as authored data** (2026-08-25) — `EnemyBehaviorSO` replaced five hardcoded
+  `IEnemyBehavior` classes; provably behaviour-preserving.
+- **Enemies cast their drawable magic** (2026-08-25) — a `CastMagic` action gated by `ChanceGate`;
+  charges never spent; spell power scales with the level, not the asset.
+- **Run chaining / campaign graph** (2026-08-25) — `CampaignSO` + `CampaignOps` + `CampaignMapUI`;
+  five runs, one secret gated on both branches.
+- **Floor simulation** (2026-08-26) — `RunFloor` fights a whole floor off one pool of health, potions
+  and charges. Replaced the per-room measurement that reported 63/63 wins.
+- **Discovery-gated reveal** (2026-08-29) — `MetaProgressSaveData.Bestiary` + `BestiaryOps`,
+  in-combat **Inspect** (free, FFX-style Scan), hub **Bestiary**, masked undrawn magic in the Draw
+  picker.
+- **Investment frontier** (2026-08-28 → 2026-09-02) — party width × grid XP × gold, Pareto-minimal
+  mixes per floor; `GearLoadout`, `InvestmentPointsPerGold`, `IncomingDamageMix`.
+- **Audio** (2026-09-01) — `Assets/Scripts/Audio/`: SFX banks, crossfading music bed with per-level
+  overrides, Master/Music/SFX volume + mute persisted to `savedata/Audio.json`, reachable from a hub
+  Options screen.
+- **Battle polish tiers 1–4** — turn indicator, idle motion, projectiles, crits, resistance popups,
+  boss telegraphs, combo flourish, victory/defeat framing, camera zoom-punch, per-level backdrops.
+- **Deferred persistence** — mid-level hero HP (`PartyHealthSnapshot`), the consumable ledger
+  (`ConsumablesSpent`, a delta not a snapshot, idempotent), level afflictions, and cross-run magic
+  loadouts (`MagicLoadout.json`, merged per hero, committed on level clear only).

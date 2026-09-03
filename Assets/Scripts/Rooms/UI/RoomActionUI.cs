@@ -1009,6 +1009,17 @@ namespace Assets.Scripts.Rooms
             {
                 hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
             }
+
+            // Silence gates casting and nothing else. Draw stays open deliberately: it is how the
+            // player *acquires*, and a magic drawn is carried for the rest of the run, so blocking
+            // acquisition for three turns costs far more than blocking three casts.
+            bool silenced = CombatManager.Instance.BuffTracker != null
+                && CombatManager.Instance.BuffTracker.HasStatusEffect(hero, BuffType.Silenced);
+            if (silenced)
+            {
+                hasMagic = false;
+            }
+
             bool hasDrawable = CombatManager.Instance.GetDrawableEnemies().Count > 0;
             bool hasItem = InventoryManager.HasInstance && InventoryManager.Instance.HasAnyConsumable();
 

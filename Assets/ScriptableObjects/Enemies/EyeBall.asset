@@ -50,4 +50,4 @@ MonoBehaviour:
     Percent: -50
   - DamageType: 2
     Percent: 50
-  LootItem: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
+  LootItem: {fileID: 11400000, guid: c0de51110003a4b1c2d3e4f506172839, type: 2}

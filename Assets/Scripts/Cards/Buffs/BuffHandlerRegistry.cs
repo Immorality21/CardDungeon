@@ -28,7 +28,43 @@ namespace Assets.Scripts.Cards.Buffs
                 { BuffType.ShadowResistance, new ResistanceBuffHandler(DamageType.Shadow, "Shadow Res") },
                 { BuffType.Frozen, new FrozenBuffHandler() },
                 { BuffType.Slow, new SlowBuffHandler() },
-                { BuffType.Haste, new HasteBuffHandler() }
+                { BuffType.Haste, new HasteBuffHandler() },
+                { BuffType.Silenced, new SilencedBuffHandler() },
+
+                // Over-time effects. Their differences are the whole point, so they are stated here
+                // rather than buried per class:
+                //
+                //   Poison  - bypasses Endurance. The answer to a target the defense curve has made
+                //             immune to flat damage, and the reason to cast something other than the
+                //             biggest number in the kit.
+                //   Burn    - honours Endurance, is dealt as Fire so resistances, weaknesses and
+                //             absorption all apply, and is doused by Ice (mirroring Frozen/Fire).
+                //   Bleed   - honours Endurance, dealt as Normal. Today it is the plain one.
+                //
+                // Poison and bleed are both Normal, so they are resisted identically; only
+                // IgnoresDefense separates them. Nothing in the project authors a Normal resistance,
+                // so neither is resistable in practice - but if one is ever added it will apply to
+                // both, and this is the line to revisit (giving poison its own element is the fix).
+                {
+                    BuffType.Burning,
+                    new OverTimeBuffHandler(
+                        BuffType.Burning, "Burn", false, DamageType.Fire, false, DamageType.Ice)
+                },
+                {
+                    BuffType.Poisoned,
+                    new OverTimeBuffHandler(
+                        BuffType.Poisoned, "Poison", false, DamageType.Normal, true)
+                },
+                {
+                    BuffType.Bleeding,
+                    new OverTimeBuffHandler(
+                        BuffType.Bleeding, "Bleed", false, DamageType.Normal, false)
+                },
+                {
+                    BuffType.Regenerating,
+                    new OverTimeBuffHandler(
+                        BuffType.Regenerating, "Regen", true, DamageType.Normal, false)
+                }
             };
 
             // A stat is buffable when BuffType declares a member of the same name. Adding a stat
@@ -58,6 +94,28 @@ namespace Assets.Scripts.Cards.Buffs
         {
             IBuffHandler handler;
             return Handlers.TryGetValue(type, out handler) ? handler : null;
+        }
+
+        /// <summary>
+        /// The status effects a cure removes. Listed in one place rather than inferred, because
+        /// "harmful" is a design judgement and not a property of the handler: <see cref="BuffType.Haste"/>
+        /// and <see cref="BuffType.Regenerating"/> are status effects too, and a cure that stripped
+        /// the party's own buffs would be a trap rather than a tool.
+        /// </summary>
+        private static readonly HashSet<BuffType> Curable = new HashSet<BuffType>
+        {
+            BuffType.Frozen,
+            BuffType.Slow,
+            BuffType.Silenced,
+            BuffType.Burning,
+            BuffType.Poisoned,
+            BuffType.Bleeding
+        };
+
+        /// <summary>Whether a cure removes this status. See <see cref="Curable"/>.</summary>
+        public static bool IsCurable(BuffType type)
+        {
+            return Curable.Contains(type);
         }
 
         /// <summary>Buff types with no handler — surfaced so the balance analyzer can report them.</summary>

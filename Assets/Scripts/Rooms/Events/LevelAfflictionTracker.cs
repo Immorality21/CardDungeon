@@ -49,6 +49,20 @@ namespace Assets.Scripts.Rooms.Events
                 return;
             }
 
+            // An over-time effect must never become an affliction. Afflictions are re-seeded into
+            // every fight at CombatDuration (9999) and saved with the dungeon, so a poison here would
+            // be a permanent, level-long, per-turn drain that a cure clears only until the next room
+            // re-applies it - and health is already a level-scoped resource, so it would be a second,
+            // uncapped drain on the same pool. If a room event should hurt over time, author it as
+            // damage plus a stat debuff, or give the tracker a real per-room tick.
+            if (BuffHandlerRegistry.Get(buff) is IOverTimeBuffHandler)
+            {
+                UnityEngine.Debug.LogError(
+                    $"Room event tried to hang the over-time effect '{buff}' on {heroKey} as a level "
+                    + "affliction. Ignored - see LevelAfflictionTracker.Add.");
+                return;
+            }
+
             foreach (var entry in _entries)
             {
                 if (entry.HeroKey == heroKey && entry.Buff == buff)

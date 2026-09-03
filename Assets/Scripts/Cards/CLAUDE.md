@@ -53,6 +53,73 @@ The five resistance `BuffType`s were a **no-op** until 2026-08-25: `ResistanceBu
 - Every damage path passes it: `DamageEffectExecutor`, `CombatManager.ExecuteAttack` (and its `ShowEffectiveness` popup, or the popup would disagree with the number), and `EncounterSimulator` so the balance model does not drift.
 - Resistance buffs are authored **unscaled** (`ScalingStat = None`). The Power is a percentage; adding a quarter of the caster's Spirit would make how much a cloak defends unpredictable.
 
+## Status effects: over-time damage, regeneration and Silence
+
+`BuffType` carries three kinds of entry — stat changes, elemental resistances, and **status effects**.
+The status half grew on 2026-09-03 from `Frozen`/`Slow`/`Haste` to add `Burning`, `Poisoned`,
+`Bleeding`, `Regenerating` and `Silenced`.
+
+**An over-time effect is an ordinary status effect whose handler also implements
+`IOverTimeBuffHandler`.** That is a *second* interface asked for by a cast, not four more members on
+`IBuffHandler`, so none of the five pre-existing handlers changed. `OverTimeBuffHandler` is one
+parameterised class registered four times, the same shape `ResistanceBuffHandler` and `StatBuffHandler`
+already use. The per-turn amount rides in the existing `CombatBuff.Amount`, so `CombatBuff` gained no
+field — exactly how `IsResistance` reuses it for a percentage.
+
+**`CombatBuffTracker.ResolveOverTime` owns the arithmetic and applies the health change**, returning
+`OverTimeTick`s for presentation. Both `CombatManager.EndOfTurnUpkeep` and `EncounterSimulator` call
+it; a second implementation is how the balance model would drift from the game, which is the lesson
+the resistance bonus already taught.
+
+| | element | Endurance | doused by | notes |
+|---|---|---|---|---|
+| `Burning` | Fire | applies | Ice | mirrors Frozen/Fire; resistances and absorption apply |
+| `Poisoned` | Normal | **bypassed** | — | the answer to a target the defense curve has made immune to flat damage |
+| `Bleeding` | Normal | applies | — | nothing in the project resists Normal, so today it is the plain one |
+| `Regenerating` | — | — | — | heals, clamped to effective max health |
+
+Five rules worth not re-deriving:
+
+- **Ticks fire on the victim's own turn, before durations tick down.** Per-victim-turn rather than a
+  global clock because the turn *is* the unit of time in a CTB system — so Haste and Slow change how
+  often something burns for free, and a unit that never acts never takes a tick. Resolve-then-decrement
+  is what lets a buff with one turn left deal its last tick before expiring.
+- **Reapplying refreshes, it does not stack.** The stronger per-turn amount and the longer duration
+  both win. Stacking magnitude would turn every fight into a race the closed form cannot price —
+  `BalanceMath` needs an expected damage per application, and an unbounded stack has none.
+  `ApplyStatusEffect` refreshes for the same reason (it used to append, which drew two icons and made
+  a cure report the status twice).
+- **The power arrives signed and is used as a magnitude.** `DebuffEffectExecutor` negates before
+  calling, so a poison authored as a Debuff arrives negative and a regeneration authored as a Buff
+  arrives positive — both mean "this much per turn". Direction is the handler's `Heals`, never the
+  sign, so no authoring choice can produce a poison that heals.
+- **A tick can kill**, and `EndOfTurnUpkeep` runs the same death path a killing blow does. Note the
+  hero branch has to mirror `ResolveHeroDamaged` rather than just calling `HandleHeroDeath`: that
+  method only hides the sprite, and the log line and `_turnManager.RemoveUnit` live at its call sites.
+  `HandleEnemyDeath` is self-contained.
+- **An absorbed element heals through the tick path too** (`ApplyDamageTick` → `ApplyHealTick`), the
+  same rule a cast follows above 100% resistance.
+
+**Silence gates casting and nothing else.** A silenced hero's Magic command is disabled
+(`RoomActionUI.BuildCommandMenu`), a silenced enemy's `CastMagic` actions become ineligible
+(`EnemyActionPlanner.HasSomewhereToLand`, so an all-cast enemy falls through to its default rather than
+winning a turn and doing nothing), and `EncounterSimulator.TakeHeroTurn` honours it so the model does
+not read a silenced party as still casting. **Draw is deliberately not gated** — Draw is how the player
+*acquires*, and a magic taken is carried for the rest of the run, so blocking acquisition for three
+turns costs far more than blocking three casts.
+
+**The cure loop.** `ConsumableEffectType.CureStatus` + `CombatBuffTracker.CureStatusEffects` + the
+**Antidote Salve** (drops from the Floating Eye). `BuffHandlerRegistry.IsCurable` lists what a cure
+removes **in one place**, because "harmful" is a design judgement rather than a handler property —
+`Haste` and `Regenerating` are status effects too, and a cure that stripped the party's own buffs
+would be a trap. Without a cure an enemy's damage-over-time is a one-way ratchet, which reads as unfair
+rather than tactical.
+
+**An over-time effect must never become a level affliction.** `LevelAfflictionTracker.Add` rejects
+them outright and logs an error. Afflictions are re-seeded into every fight at `CombatDuration` (9999)
+and saved with the dungeon, so a poison there would be a permanent per-turn drain on the same
+level-scoped health pool, and a cure would clear it only until the next room re-applied it.
+
 ## Magic definitions & effects
 
 - **MagicSO** (ScriptableObject, `SO/Magic`): defines a magic with `Key`, `DisplayName`, `Description`, `Icon`, `TargetType` (`MagicTargetType`: Enemy/Ally/Self/AllEnemies/AllAllies), `Rarity` (`MagicRarity`), `Effects` (list of `SpellEffect`), `Tags` (list of `MagicTag`), `TagDuration`. Pure data — no acquisition/slot logic.

@@ -27,5 +27,13 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+  - EffectType: 3
+    Power: 2
+    PowerMode: 0
+    ScalingStat: 0
+    DamageType: 0
+    BuffType: 16
+    Duration: 3
+    UnlockLevel: 0
   Tags: 04000000
   TagDuration: 3

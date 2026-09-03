@@ -63,6 +63,16 @@ namespace Assets.Scripts.Rooms
         /// <summary>Crit chance at zero Luck. Luck adds to this - see <see cref="CritChanceFor"/>.</summary>
         public const float CritChance = 0.12f;
 
+        /// <summary>
+        /// Beat held after an over-time tick so the number can be read before the next turn starts.
+        /// Shorter than <c>_turnDelay</c> deliberately: a tick is upkeep, not an action, and pausing
+        /// a full turn's worth for it would make a three-stack poison feel like a cutscene.
+        /// </summary>
+        private const float OverTimeTickPause = 0.35f;
+
+        /// <summary>Impact weight of a tick — a fraction of a swing, so the camera barely moves.</summary>
+        private const float OverTimeTickPunch = 0.35f;
+
         /// <summary>Most crit chance Luck can add on top of <see cref="CritChance"/>.</summary>
         public const float MaxLuckCritBonus = 0.30f;
 
@@ -377,8 +387,7 @@ namespace Assets.Scripts.Rooms
                 if (skipMessage != null)
                 {
                     _lastTurnLog = skipMessage;
-                    BuffTracker.TickBuffs(unit);
-                    _tagTracker.TickTags(unit);
+                    yield return EndOfTurnUpkeep(unit, room);
                     fullLog += _lastTurnLog + "\n";
                     OnTurnExecuted?.Invoke(_lastTurnLog);
                     BroadcastTurnOrder();
@@ -429,8 +438,7 @@ namespace Assets.Scripts.Rooms
                     yield return ExecuteEnemyTurn(unit, party);
                 }
 
-                BuffTracker.TickBuffs(unit);
-                _tagTracker.TickTags(unit);
+                yield return EndOfTurnUpkeep(unit, room);
                 fullLog += _lastTurnLog + "\n";
                 OnTurnExecuted?.Invoke(_lastTurnLog);
                 BroadcastTurnOrder();
@@ -631,6 +639,26 @@ namespace Assets.Scripts.Rooms
                     CombatAudio.Play(CombatSound.Heal);
                     ShowDamageText(target.Transform.position, healed, Color.green);
                     _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, restoring {healed} HP.";
+                    break;
+                case ConsumableEffectType.CureStatus:
+                    var cured = BuffTracker.CureStatusEffects(target);
+                    CombatAudio.Play(CombatSound.ItemUse);
+                    if (cured.Count > 0)
+                    {
+                        // The item is spent either way — it was already consumed above, and a cure
+                        // that refunded itself on a clean target would be a free "is anyone
+                        // poisoned?" probe. The log says so rather than pretending nothing happened.
+                        ShowFloatingLabel(target.Transform.position, "Cured!", Color.green);
+                        _lastTurnLog =
+                            $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, "
+                            + $"clearing {string.Join(", ", cured)}.";
+                    }
+                    else
+                    {
+                        _lastTurnLog =
+                            $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, "
+                            + "but there was nothing to cure.";
+                    }
                     break;
                 default:
                     _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName}.";
@@ -1039,6 +1067,100 @@ namespace Assets.Scripts.Rooms
             }
 
             unit.position = startPos;
+        }
+
+        /// <summary>
+        /// End-of-turn upkeep for the unit that just acted: over-time effects fire, then every
+        /// duration ticks down.
+        ///
+        /// <para><b>The order is the point.</b> A burn with one turn left has to deal its last tick
+        /// before it expires, so <c>ResolveOverTime</c> runs before <c>TickBuffs</c>. And it runs on
+        /// the <i>victim's</i> turn rather than on a global clock, because the turn is the unit of
+        /// time in a CTB system — which is what makes Haste and Slow change how often something
+        /// burns, for free.</para>
+        /// </summary>
+        private IEnumerator EndOfTurnUpkeep(ICombatUnit unit, Room room)
+        {
+            var ticks = BuffTracker.ResolveOverTime(unit);
+
+            if (ticks.Count > 0)
+            {
+                foreach (var tick in ticks)
+                {
+                    ShowOverTimeTick(unit, tick);
+                }
+
+                // A unit killed by a tick has to run the same death path a killing blow does, or its
+                // XP, gold and loot are silently lost and TurnManager keeps scheduling a corpse.
+                //
+                // The hero branch mirrors ResolveHeroDamaged rather than calling HandleHeroDeath
+                // alone: that method only hides the sprite, and the log line and the turn-manager
+                // removal both live at its call sites. HandleEnemyDeath is self-contained.
+                if (!unit.IsAlive)
+                {
+                    var deadEnemy = unit as Enemy;
+                    if (deadEnemy != null)
+                    {
+                        _lastTurnLog += $" {deadEnemy.DisplayName} succumbs!";
+                        HandleEnemyDeath(deadEnemy, room);
+                    }
+                    else
+                    {
+                        _lastTurnLog += $" {unit.DisplayName} has fallen!";
+                        HandleHeroDeath(unit as Hero);
+                        _turnManager.RemoveUnit(unit);
+                    }
+                }
+
+                yield return new WaitForSeconds(OverTimeTickPause);
+            }
+
+            BuffTracker.TickBuffs(unit);
+            _tagTracker.TickTags(unit);
+        }
+
+        /// <summary>Floating number for one over-time tick, tinted by what fired it.</summary>
+        private void ShowOverTimeTick(ICombatUnit unit, OverTimeTick tick)
+        {
+            if (unit?.Transform == null || tick == null)
+            {
+                return;
+            }
+
+            // Healing is green whatever caused it. Colouring purely by BuffType showed an *absorbed*
+            // burn — a Fire-absorbing hero being healed by it — as an orange "+3", which reads as
+            // damage. Direction first, flavour second.
+            Color color;
+            if (tick.Heals)
+            {
+                color = new Color(0.4f, 0.95f, 0.5f);
+            }
+            else
+            {
+                switch (tick.BuffType)
+                {
+                    case BuffType.Burning:
+                        color = new Color(1f, 0.55f, 0.15f);
+                        break;
+                    case BuffType.Poisoned:
+                        color = new Color(0.65f, 0.9f, 0.3f);
+                        break;
+                    default:
+                        color = new Color(0.9f, 0.25f, 0.3f);
+                        break;
+                }
+            }
+
+            string text = tick.Heals ? $"+{tick.Amount}" : tick.Amount.ToString();
+            ShowFloatingLabel(
+                unit.Transform.position + new Vector3(0f, 0.3f, 0f), text, color, 0.15f);
+
+            if (!tick.Heals)
+            {
+                // Same flash a hit gets, at a lower weight — a tick should read as damage without
+                // shaking the camera as hard as a sword.
+                CombatFeedback.Instance.PlayImpact(unit, tick.Amount, OverTimeTickPunch);
+            }
         }
 
         private string GetTurnSkipMessage(ICombatUnit unit)

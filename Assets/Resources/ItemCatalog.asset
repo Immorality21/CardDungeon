@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: ItemCatalog
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemCatalogSO
   Items:
+  - {fileID: 11400000, guid: c0de51110003a4b1c2d3e4f506172839, type: 2}
   - {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
   - {fileID: 11400000, guid: 098bb76c9957858418ab9ec1d033fcd7, type: 2}
   - {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}

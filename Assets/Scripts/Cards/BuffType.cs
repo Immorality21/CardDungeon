@@ -29,6 +29,16 @@ namespace Assets.Scripts.Cards
         // Status effects.
         Frozen = 12,
         Slow = 13,
-        Haste = 14
+        Haste = 14,
+        // Over-time effects. These carry a per-turn amount in CombatBuff.Amount and are resolved by
+        // CombatBuffTracker.ResolveOverTime, which asks the registry whether a handler implements
+        // IOverTimeBuffHandler. Appended, because BuffType is serialized by ordinal into every magic
+        // and combo asset.
+        Burning = 15,
+        Poisoned = 16,
+        Bleeding = 17,
+        Regenerating = 18,
+        // Command gate: blocks casting for a hero and every CastMagic action for an enemy.
+        Silenced = 19
     }
 }

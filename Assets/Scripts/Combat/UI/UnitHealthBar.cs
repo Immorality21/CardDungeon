@@ -12,7 +12,8 @@ namespace Assets.Scripts.Combat
 {
     /// <summary>
     /// Above-unit combat readout: a procedurally-drawn HP bar, a row of status/buff icons
-    /// (Attack/Defense up-down, Frozen, Haste, Slow) below it, and — for enemies — a
+    /// (Attack/Defense up-down, Frozen, Haste, Slow, Burn, Poison, Bleed, Regen, Silence) below it,
+    /// and — for enemies — a
     /// predicted next-action "intent" icon above it. Attached to the unit's GameObject; needs
     /// no art assets (bars are 1px sprites; glyphs are tinted white icons from Resources).
     /// </summary>
@@ -34,6 +35,8 @@ namespace Assets.Scripts.Combat
         private static readonly Color IntentRed = new Color(0.95f, 0.4f, 0.35f);
         private static readonly Color Orange = new Color(1f, 0.6f, 0.15f);
         private static readonly Color Purple = new Color(0.78f, 0.45f, 0.95f);
+        private static readonly Color PoisonGreen = new Color(0.65f, 0.9f, 0.3f);
+        private static readonly Color BloodRed = new Color(0.9f, 0.25f, 0.3f);
 
         private static Sprite _centerSprite;
         private static Sprite _leftSprite;
@@ -232,6 +235,24 @@ namespace Assets.Scripts.Combat
                         break;
                     case BuffType.Slow:
                         list.Add(new IconDesc { Name = "chevrons", Tint = SlowBlue, FlipX = true });
+                        break;
+                    case BuffType.Burning:
+                        list.Add(new IconDesc { Name = "flame", Tint = Orange });
+                        break;
+                    // Poison and bleed share the droplet and are told apart by tint — they are the
+                    // same *kind* of thing (health draining every turn) and the colour is what says
+                    // which. Regeneration takes the cross, because a plus reads as healing.
+                    case BuffType.Poisoned:
+                        list.Add(new IconDesc { Name = "droplet", Tint = PoisonGreen });
+                        break;
+                    case BuffType.Bleeding:
+                        list.Add(new IconDesc { Name = "droplet", Tint = BloodRed });
+                        break;
+                    case BuffType.Regenerating:
+                        list.Add(new IconDesc { Name = "cross", Tint = Green });
+                        break;
+                    case BuffType.Silenced:
+                        list.Add(new IconDesc { Name = "mute", Tint = Purple });
                         break;
                 }
             }

@@ -3,6 +3,9 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.Rooms.Events;
 using Assets.Scripts.UnitStats;
 using NUnit.Framework;
+using System.Text.RegularExpressions;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Tests.EditMode
 {
@@ -167,6 +170,30 @@ namespace Tests.EditMode
             tracker.Clear();
 
             Assert.IsTrue(tracker.IsEmpty, "Afflictions are level-scoped, exactly like health.");
+        }
+
+        [Test]
+        public void Add_RejectsOverTimeEffects()
+        {
+            // Afflictions are re-seeded into every fight at CombatDuration (9999) and saved with the
+            // dungeon, so an over-time effect here would be a permanent per-turn drain on the same
+            // level-scoped health pool - and a cure would clear it only until the next room.
+            var tracker = new LevelAfflictionTracker();
+
+            LogAssert.Expect(LogType.Error, new Regex("over-time effect 'Poisoned'"));
+            tracker.Add("Warrior", BuffType.Poisoned, 3);
+
+            Assert.IsTrue(tracker.IsEmpty);
+        }
+
+        [Test]
+        public void Add_StillAcceptsOrdinaryStatusEffects()
+        {
+            var tracker = new LevelAfflictionTracker();
+
+            tracker.Add("Warrior", BuffType.Slow, 2);
+
+            Assert.IsFalse(tracker.IsEmpty, "A curse that slows the party for the level is the point.");
         }
     }
 }

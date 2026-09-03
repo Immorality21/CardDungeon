@@ -275,6 +275,7 @@ namespace Assets.Scripts.Balance
                 // Frozen and friends skip the turn but still tick, exactly as in the live loop.
                 if (SkipsTurn(unit, buffTracker))
                 {
+                    buffTracker.ResolveOverTime(unit);
                     buffTracker.TickBuffs(unit);
                     tagTracker.TickTags(unit);
                     continue;
@@ -296,6 +297,10 @@ namespace Assets.Scripts.Balance
                     TakeEnemyTurn(actor, heroes, enemies, buffTracker);
                 }
 
+                // Over-time effects fire before durations tick down, exactly as the live loop's
+                // CombatManager.EndOfTurnUpkeep does, and through the same resolver — a second
+                // implementation here is how the model would drift from the game.
+                buffTracker.ResolveOverTime(unit);
                 buffTracker.TickBuffs(unit);
                 tagTracker.TickTags(unit);
 
@@ -706,6 +711,13 @@ namespace Assets.Scripts.Balance
             ref int potionsLeft,
             TrialResult result)
         {
+            // Silence disables the Magic command outright in the live game
+            // (RoomActionUI.BuildCommandMenu). The enemy side of the same gate lives in
+            // EnemyActionPlanner; without this the model reads a silenced party as still casting, so
+            // it would over-rate the party against exactly the enemy Silence exists to make dangerous.
+            // A potion is still reachable — it is an item, not a cast.
+            bool silenced = buffTracker.HasStatusEffect(hero, BuffType.Silenced);
+
             if (settings.Policy == SimPolicy.Adaptive)
             {
                 var wounded = MostWounded(heroes);
@@ -721,7 +733,7 @@ namespace Assets.Scripts.Balance
                         return;
                     }
 
-                    var healSlot = FindSlot(hero, SpellEffectType.Heal);
+                    var healSlot = silenced ? null : FindSlot(hero, SpellEffectType.Heal);
                     if (healSlot != null)
                     {
                         Cast(hero, healSlot, heroes, enemies, buffTracker, tagTracker, comboDetector, resolver, result);
@@ -730,7 +742,7 @@ namespace Assets.Scripts.Balance
                 }
             }
 
-            if (settings.Policy != SimPolicy.AttackOnly)
+            if (settings.Policy != SimPolicy.AttackOnly && !silenced)
             {
                 var damageSlot = BestDamageSlot(hero, enemies, buffTracker);
                 if (damageSlot != null)

@@ -146,6 +146,15 @@ escape that budget. Both were really "how likely is this event to be here", so b
 > Expected Action rooms per level with that: `UpperHalls` ~2.0-2.4, `CollapsedCaverns` ~1.6-1.8,
 > `SunkenDepths` ~0.6-0.7. The balance analyzer does not model events, so these are hand figures.
 
+## Afflictions cannot be over-time effects
+
+`LevelAfflictionTracker.Add` **rejects** `Burning`/`Poisoned`/`Bleeding`/`Regenerating` outright and
+logs an error. Afflictions are re-seeded into every fight at `CombatDuration` (9999) and saved with the
+dungeon, so an over-time effect authored here would be a permanent, level-long, per-turn drain on the
+same level-scoped health pool health already is — and `CureStatusEffects` would clear it only until the
+next room re-seeded it. If a room event should hurt over time, author it as damage plus a stat debuff,
+or give the tracker a real per-room tick.
+
 ## Testing
 
 `RoomEventSpawnTests`, `RoomEventResolverTests` and `LevelAfflictionTrackerTests` cover every pure

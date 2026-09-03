@@ -373,6 +373,15 @@ namespace Assets.Scripts.Enemies.Behaviors
                         context.Heroes, context.BuffTracker, entry.TargetStat) != null;
 
                 case EnemyActionKind.CastMagic:
+                    // Silence is expressed here rather than as a condition on the authored entry:
+                    // it has to gate *every* CastMagic action on every enemy in the game, and an
+                    // enemy whose whole list is casts falls through to its default action instead of
+                    // winning a turn and doing nothing. Same reason a Heal with nobody wounded does.
+                    if (context.BuffTracker != null
+                        && context.BuffTracker.HasStatusEffect(self, BuffType.Silenced))
+                    {
+                        return false;
+                    }
                     return entry.Magic != null
                         ? entry.Magic.Effects != null && entry.Magic.Effects.Count > 0
                         : EnemyMagicPlan.HasCastable(context.DrawableMagics);

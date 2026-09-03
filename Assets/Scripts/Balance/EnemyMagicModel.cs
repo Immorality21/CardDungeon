@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.UnitStats;
@@ -59,10 +60,16 @@ namespace Assets.Scripts.Balance
     /// it.</description></item>
     /// </list>
     ///
-    /// <para>Buff and Debuff effects are counted as neither damage nor healing. They are real —
-    /// an enemy casting Shield Up genuinely lengthens the fight — but the closed form has nowhere to
-    /// put a stat delta, the same limitation the archetype multipliers already work around with a
-    /// flat factor for Healer and Debuffer.</para>
+    /// <para><b>Stat</b> buff and debuff effects are counted as neither damage nor healing. They are
+    /// real — an enemy casting Shield Up genuinely lengthens the fight — but the closed form has
+    /// nowhere to put a stat delta, the same limitation the archetype multipliers already work around
+    /// with a flat factor for Healer and Debuffer.</para>
+    ///
+    /// <para><b>Over-time</b> buffs and debuffs are the exception: a burn or a poison is damage
+    /// wearing a Debuff's clothes, so <see cref="OverTimeAgainst"/> prices it into
+    /// <see cref="DamageOfCast"/> over its full duration. Without that a poison cast would price as
+    /// nothing at all — the Damage filter skips it and the stat-shift collector skips it too, which
+    /// is precisely how the resistance buffs managed to be inert for months.</para>
     /// </summary>
     public static class EnemyMagicModel
     {
@@ -145,18 +152,97 @@ namespace Assets.Scripts.Balance
 
             foreach (var effect in magic.Effects)
             {
-                if (effect == null || effect.EffectType != SpellEffectType.Damage || effect.UnlockLevel > 0)
+                if (effect == null || effect.UnlockLevel > 0)
                 {
                     continue;
                 }
 
-                int raw = RawPower(effect, powerScale, caster);
-                float perTarget = AverageAgainst(effect, raw, heroes);
+                float perTarget;
+                if (effect.EffectType == SpellEffectType.Damage)
+                {
+                    // Not guarded on <= 0: AverageAgainst returns a *negative* average when the party
+                    // absorbs the element (stacked cloaks past 100%), and that reduction is the whole
+                    // point of building for it. Skipping it would price an absorbed cast as merely
+                    // harmless instead of helpful.
+                    perTarget = AverageAgainst(effect, RawPower(effect, powerScale, caster), heroes);
+                }
+                else
+                {
+                    perTarget = OverTimeAgainst(effect, caster, heroes);
+                    if (perTarget <= 0f)
+                    {
+                        continue;   // not an over-time effect at all, or one that heals
+                    }
+                }
 
                 total += everyone ? perTarget * CountAlive(heroes) : perTarget;
             }
 
             return total;
+        }
+
+        /// <summary>
+        /// Expected damage from an over-time effect (burn, poison, bleed) inside a cast, summed over
+        /// its whole duration. Returns 0 for anything that is not a damaging over-time effect —
+        /// which is every stat buff, resistance, Frozen, Silence and Regeneration.
+        ///
+        /// <para>Without this a poison would price as <b>nothing at all</b>: it is authored as a
+        /// Debuff, so <see cref="DamageOfCast"/>'s Damage filter skips it, and
+        /// <see cref="CollectStatShifts"/> skips it too because its <c>BuffType</c> has no matching
+        /// <c>StatType</c>. That is the exact shape of the resistance-buff bug — an effect that
+        /// looked handled by two systems and was handled by neither.</para>
+        ///
+        /// <para><b>Two deliberate approximations.</b> Duration is charged in full, so a re-applied
+        /// over-time effect is over-counted (the tracker refreshes rather than stacks, so a second
+        /// application on a still-burning target adds almost nothing) and one that outlives the fight
+        /// is over-counted too. Both push this term <i>up</i>, which makes an enemy caster read
+        /// slightly more dangerous than it plays — the opposite of the model's usual optimism, and
+        /// worth knowing when a poison enemy sits just outside a band.</para>
+        /// </summary>
+        private static float OverTimeAgainst(SpellEffect effect, SimUnit caster, IList<SimUnit> heroes)
+        {
+            if (effect.EffectType != SpellEffectType.Buff && effect.EffectType != SpellEffectType.Debuff)
+            {
+                return 0f;
+            }
+
+            var overTime = BuffHandlerRegistry.Get(effect.BuffType) as IOverTimeBuffHandler;
+            if (overTime == null || overTime.Heals)
+            {
+                return 0f;
+            }
+
+            // The magnitude both buff executors compute: authored Power plus a *fraction* of the
+            // caster's scaling stat. Every DoT authored today is ScalingStat.None so this is just
+            // Power — but reading the field is what stops the model silently under-counting the first
+            // time someone scales a poison off Intelligence.
+            int perTick = Mathf.Abs(
+                effect.Power + SpellScaling.BuffContribution(caster, effect.ScalingStat, null));
+            int turns = Mathf.Max(0, effect.Duration);
+            if (perTick <= 0 || turns <= 0)
+            {
+                return 0f;
+            }
+
+            float total = 0f;
+            int counted = 0;
+
+            foreach (var hero in heroes)
+            {
+                if (hero == null || !hero.IsAlive)
+                {
+                    continue;
+                }
+
+                // The tracker's arithmetic: defense applies unless the effect bypasses it, and the
+                // element is the handler's, not the SpellEffect's.
+                int defense = overTime.IgnoresDefense ? 0 : hero.GetEffectiveStat(StatType.Endurance);
+                total += DamageCalculator.Calculate(
+                    perTick, defense, overTime.TickDamageType, hero.Resistances) * turns;
+                counted++;
+            }
+
+            return counted > 0 ? total / counted : 0f;
         }
 
         /// <summary>
@@ -241,8 +327,15 @@ namespace Assets.Scripts.Balance
 
         /// <summary>
         /// One effect's raw power as the executors see it: authored Power through the level's spell
-        /// scale, plus the caster's scaling-stat contribution. Buff/Debuff power does not scale, for
-        /// the same reason the upgrade bonus leaves it alone.
+        /// scale, plus the caster's scaling-stat contribution.
+        ///
+        /// <para><b>Buff/Debuff power does not take the level's spell scale</b>, for the same reason
+        /// the upgrade bonus leaves it alone — `EffectResolver.ApplyPowerBonus` early-returns for
+        /// anything that is not Damage or Heal. It <i>does</i> take a caster contribution, though:
+        /// both buff executors add `SpellScaling.BuffContribution` unconditionally. Those are two
+        /// different rules and this method only implements the first — see
+        /// <see cref="OverTimeAgainst"/>, which applies the second for the effects where it matters.
+        /// A previous version of this comment claimed neither applied, which was half wrong.</para>
         /// </summary>
         private static int RawPower(SpellEffect effect, float powerScale, SimUnit caster)
         {
