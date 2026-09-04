@@ -12,9 +12,9 @@ namespace Assets.Scripts.Heroes
     public enum SphereNodeKind
     {
         Stat = 0,       // grants Gains (a StatBlock)
-        Resistance = 1, // grants +ResistPercent to ResistType
-        MagicSlot = 2,  // grants +1 empty equipped-magic slot
-        MagicKnown = 3  // grants +1 slot that starts each run holding GrantedMagicKey
+        Resistance = 1, // grants +1 resistance: +ResistPercent to ResistType
+        MagicSlot = 2,  // grants +1 slot, i.e. one more known spell the hero can carry at a time
+        MagicKnown = 3  // teaches GrantedMagicKey permanently - the only source of magic in the game
     }
 
     /// <summary>
@@ -49,15 +49,16 @@ namespace Assets.Scripts.Heroes
         [Tooltip("Kind == Resistance: percent granted. Sums with innate, gear and other nodes.")]
         public float ResistPercent = 10f;
 
-        [Tooltip("Kind == MagicKnown: MagicSO.Key of the magic this hero permanently knows. The " +
-                 "slot it grants is seeded with it at the start of every run, so a hero is never " +
-                 "empty-handed - charges are a run resource and drawing is the only other refill. " +
-                 "A key with no catalog entry grants an empty slot rather than failing.")]
+        [Tooltip("Kind == MagicKnown: MagicSO.Key of the magic this hero permanently learns. This " +
+                 "is the ONLY way a hero ever gets a spell - Draw was removed on 2026-09-04. " +
+                 "Learning is not carrying: a known spell still has to fit one of the hero's slots " +
+                 "(see MagicSlot), which is what makes a branch a kit rather than a collection. A " +
+                 "key with no catalog entry is skipped rather than failing.")]
         public string GrantedMagicKey;
 
-        [Tooltip("Kind == MagicKnown: charges the granted slot starts a run with. This is the run's " +
-                 "whole allowance of that magic, so it is the node's real power dial - more so than " +
-                 "XpCost.")]
+        [Tooltip("Kind == MagicKnown: charges this spell starts a run with when carried. It refills " +
+                 "at a refuge and nowhere else, so it is a run allowance, not a per-fight one - " +
+                 "which makes it the node's real power dial, more so than XpCost.")]
         [Range(1, 9)]
         public int GrantedCharges = 2;
 

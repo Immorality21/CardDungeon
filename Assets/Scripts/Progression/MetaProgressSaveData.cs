@@ -49,14 +49,16 @@ namespace Assets.Scripts.Progression
         // ShopStock: reopening the screen must not re-roll it for free.
         public List<string> TavernStock = new List<string>();
 
-        // Permanent discovery record (survives death). A magic is discovered when first drawn;
-        // a combo when first triggered in combat. Drives the Forge's collection grid.
+        // Permanent discovery record (survives death). A magic is discovered when some hero first
+        // learns it on their sphere grid; a combo when first triggered in combat. Drives the Forge's
+        // collection grid. (Pre-2026-09-04 a magic was discovered by drawing it from an enemy;
+        // what an enemy has been *seen to cast* is BestiaryEntry.ObservedSpellKeys now.)
         public List<string> DiscoveredMagicKeys = new List<string>();
         public List<string> DiscoveredComboKeys = new List<string>();
 
         // What the player has learned about each enemy type, keyed by EnemySO.SaveKey: kills,
-        // which elements have been tried on it, whether it has been seen to attack, and which loot
-        // it has actually dropped. Written from the damage path as things are observed, read by the
+        // which elements have been tried on it, whether it has been seen to attack, which spells it
+        // has been seen to cast, and which loot it has actually dropped. Written from the damage path as things are observed, read by the
         // in-combat Inspect window and the hub bestiary. See BestiaryEntry for why the resistance
         // *values* are deliberately not stored here.
         public List<BestiaryEntry> Bestiary = new List<BestiaryEntry>();

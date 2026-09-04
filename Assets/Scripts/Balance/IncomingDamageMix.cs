@@ -161,14 +161,14 @@ namespace Assets.Scripts.Balance
 
         /// <summary>
         /// Damage types this enemy's repertoire casts, as shares of its casting turns. Weighted by
-        /// <c>DrawableMagicEntry.CastWeight</c> the same way <c>EnemyMagicModel.Profile</c> weights
+        /// <c>EnemySpellEntry.CastWeight</c> the same way <c>EnemyMagicModel.Profile</c> weights
         /// it — all-zero weights (what assets authored before <c>CastWeight</c> deserialize to) mean
         /// a uniform pick, exactly as <c>EnemyMagicPlan.Select</c> reads them.
         /// </summary>
         private static Dictionary<DamageType, float> DamageTypesOfCasts(EnemySO enemy)
         {
             var byType = new Dictionary<DamageType, float>();
-            if (enemy == null || enemy.DrawableMagics == null)
+            if (enemy == null || enemy.Spells == null)
             {
                 return byType;
             }
@@ -177,7 +177,7 @@ namespace Assets.Scripts.Balance
             var weights = new List<float>();
             float totalWeight = 0f;
 
-            foreach (var entry in enemy.DrawableMagics)
+            foreach (var entry in enemy.Spells)
             {
                 if (entry == null || entry.Magic == null || entry.Magic.Effects == null)
                 {

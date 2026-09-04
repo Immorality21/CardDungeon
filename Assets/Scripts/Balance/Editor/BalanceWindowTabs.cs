@@ -915,25 +915,25 @@ namespace Assets.Scripts.Balance.Editor
             }
 
             BalanceGui.SectionHeader(
-                "Draw variety",
-                "Draw is the party's only route to new magic, so identical offerings collapse the reason to "
+                "Enemy spell variety",
+                "What an enemy throws is most of what makes it feel different, so identical repertoires collapse the reason to "
                 + "fight one enemy over another.");
 
-            var coverage = variety.DrawCoverage < 0.5f ? BalanceSeverity.Warning : BalanceSeverity.Ok;
+            var coverage = variety.EnemySpellCoverage < 0.5f ? BalanceSeverity.Warning : BalanceSeverity.Ok;
             EditorGUILayout.BeginHorizontal();
-            BalanceGui.Cell("Catalog reachable by Draw", 200f);
-            Bar(variety.DrawCoverage, 200f, BalanceGui.TextColorFor(coverage));
-            BalanceGui.Cell($"{variety.DistinctDrawableMagic}/{variety.CatalogMagicCount}", MetricWidth, coverage);
+            BalanceGui.Cell("Catalog cast by some enemy", 200f);
+            Bar(variety.EnemySpellCoverage, 200f, BalanceGui.TextColorFor(coverage));
+            BalanceGui.Cell($"{variety.DistinctEnemySpells}/{variety.CatalogMagicCount}", MetricWidth, coverage);
             EditorGUILayout.EndHorizontal();
 
-            if (variety.EnemiesWithoutDrawList > 0)
+            if (variety.EnemiesWithoutSpells > 0)
             {
                 BalanceGui.Paragraph(
-                    $"{variety.EnemiesWithoutDrawList} enemy definition(s) offer no Draw at all.",
+                    $"{variety.EnemiesWithoutSpells} enemy definition(s) know no spells at all.",
                     BalanceGui.WrapMiniStyle);
             }
 
-            foreach (var overlap in variety.DrawOverlaps)
+            foreach (var overlap in variety.SpellOverlaps)
             {
                 EditorGUILayout.BeginHorizontal();
                 BalanceGui.AssetCell(overlap.A, overlap.A.name, NameWidth, BalanceSeverity.Warning);

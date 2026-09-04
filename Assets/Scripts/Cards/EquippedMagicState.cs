@@ -5,7 +5,7 @@ using Assets.Scripts.Heroes;
 
 namespace Assets.Scripts.Cards
 {
-    /// <summary>A single equipped magic slot: the drawn magic plus its remaining/max charges.</summary>
+    /// <summary>A single equipped magic slot: the magic in it plus its remaining/max charges.</summary>
     public class MagicSlot
     {
         public MagicSO Magic;
@@ -17,23 +17,37 @@ namespace Assets.Scripts.Cards
     }
 
     /// <summary>
-    /// Per-run equipped-magic state, one fixed set of slots per hero. Drawing from an enemy
-    /// fills/overwrites a slot at full charges; casting spends a charge.
+    /// Per-run equipped-magic state, one fixed set of slots per hero. A run opens by filling those
+    /// slots from the hero's chosen loadout (<see cref="SeedFromLoadout"/>) at full charges;
+    /// casting spends a charge.
     ///
-    /// <para><b>Charges are a run resource.</b> They refill on the first floor of a run and never
-    /// again: spend them and the only way back is to draw the magic once more. They used to refill at
-    /// the start of every combat, which made magic effectively unlimited - a three-hero party walked
-    /// into every room with a dozen casts including free heals, so a floor's damage could never
+    /// <para><b>Charges are a run resource.</b> They fill on the first floor of a run and are then
+    /// only restored by resting in a refuge (<c>RoomKind.Rest</c>). They used to refill at the start
+    /// of every combat, which made magic effectively unlimited - a three-hero party walked into
+    /// every room with a dozen casts including free heals, so a floor's damage could never
     /// accumulate and a whole run could be cleared without the party's health trending down.</para>
     ///
-    /// <para>A hero is never left empty-handed by that: <c>MagicKnown</c> sphere-grid nodes grant a
-    /// slot that is <b>seeded</b> at the start of each run (<see cref="SeedGrantedMagic"/>).</para>
+    /// <para><b>Nothing acquires magic mid-run any more.</b> Until 2026-09-04 a slot could be
+    /// overwritten mid-combat by drawing from an enemy, which was also the only in-run refill of a
+    /// charge. Draw is gone: what a hero knows comes off their sphere grid and what they carry is
+    /// picked at the hub, so a run's slots are settled before it starts.</para>
     ///
     /// Persists via <see cref="MagicSlotSaveData"/> and survives the whole run (lost on death).
     /// </summary>
     public class EquippedMagicState
     {
-        public const int DefaultSlotCount = 4;
+        /// <summary>
+        /// Slots every hero has before their grid adds any.
+        ///
+        /// <para><b>Deliberately tight.</b> It was 4 while Draw existed, because four slots were the
+        /// bag a player filled from enemies. Now that known spells only ever accumulate on the
+        /// sphere grid, the slot count is the entire reason a kit is a choice: a hero who can carry
+        /// everything they know is not specialising, they are accruing. Two base plus one per
+        /// <c>MagicSlot</c> node keeps "which of these do I bring" a live question and makes those
+        /// nodes worth their XP. First-order balance lever - see docs/BALANCING.md.</para>
+        /// </summary>
+        public const int DefaultSlotCount = 2;
+
         public const int DefaultMaxCharges = 3;
 
         private readonly Dictionary<string, List<MagicSlot>> _heroSlots = new Dictionary<string, List<MagicSlot>>();
@@ -55,7 +69,7 @@ namespace Assets.Scripts.Cards
 
         /// <summary>
         /// Gives a hero who joined after <see cref="Initialize"/> their own empty slots - a captive
-        /// freed mid-dungeon has no entry yet, and without one they can neither draw nor cast.
+        /// freed mid-dungeon has no entry yet, and without one they have nowhere to carry a spell.
         /// No-op if they already have slots.
         /// </summary>
         public void AddHero(Hero hero)
@@ -72,17 +86,23 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
-        /// Puts each hero's permanently known magic (activated <c>MagicKnown</c> grid nodes) into their
-        /// slots. Called once at the <b>start of a run</b>, right before the charge refill.
+        /// Fills each hero's slots with the kit they are carrying: their chosen loadout resolved
+        /// against what their sphere grid says they know (<see cref="MagicLoadoutOps.Resolve"/>),
+        /// at the charges the granting node authored. Called once at the <b>start of a run</b>.
         ///
-        /// <para>Three rules. It never overwrites a slot that already holds something - a kit carried
-        /// out of a previous run keeps precedence, and the granted magic simply lands in the empty slot
-        /// its own node paid for. It skips a magic the hero is already holding, so a carried Fireball
-        /// does not become two Fireballs. And a key the catalog cannot resolve leaves the slot empty
-        /// rather than throwing: a renamed magic asset must not brick a run.</para>
+        /// <para>It never overwrites a slot that already holds something. That matters on the
+        /// rescue path, where a hero joins mid-run and this is called for them alone; on a run's
+        /// opening floor the slots are empty and the loadout simply lands in order.</para>
+        ///
+        /// <para>A key the catalog cannot resolve is skipped rather than throwing - a renamed magic
+        /// asset must not brick a run - and a duplicate never lands twice.</para>
         /// </summary>
-        /// <param name="resolve">Key → definition, i.e. <c>MagicCatalog.GetMagic</c>.</param>
-        public void SeedGrantedMagic(List<Hero> heroes, Func<string, MagicSO> resolve)
+        /// <param name="chosenFor">Hero key to the keys that hero chose to carry, i.e.
+        /// <c>MagicLoadoutSaveData.ChosenFor</c>. Null means nobody has chosen, which auto-fills
+        /// every hero from what they know.</param>
+        /// <param name="resolve">Key to definition, i.e. <c>MagicCatalog.GetMagic</c>.</param>
+        public void SeedFromLoadout(
+            List<Hero> heroes, Func<string, List<string>> chosenFor, Func<string, MagicSO> resolve)
         {
             if (heroes == null || resolve == null)
             {
@@ -100,10 +120,13 @@ namespace Assets.Scripts.Cards
                     continue;
                 }
 
-                foreach (var granted in hero.GrantedMagic)
+                var known = hero.KnownMagic;
+                var chosen = chosenFor != null ? chosenFor(hero.HeroKey) : null;
+
+                foreach (var key in MagicLoadoutOps.Resolve(known, chosen, slots.Count))
                 {
-                    var magic = resolve(granted.Key);
-                    if (magic == null || Holds(slots, granted.Key))
+                    var magic = resolve(key);
+                    if (magic == null || Holds(slots, key))
                     {
                         continue;
                     }
@@ -114,9 +137,10 @@ namespace Assets.Scripts.Cards
                         break;   // every slot is occupied by something carried in; nothing to seed into
                     }
 
+                    int charges = Math.Max(1, MagicLoadoutOps.ChargesFor(known, key));
                     slots[index].Magic = magic;
-                    slots[index].MaxCharges = granted.Value;
-                    slots[index].Charges = granted.Value;
+                    slots[index].MaxCharges = charges;
+                    slots[index].Charges = charges;
                 }
             }
         }
@@ -171,42 +195,6 @@ namespace Assets.Scripts.Cards
             return _heroSlots.TryGetValue(heroKey, out var slots) && slots.Any(s => s.CanCast);
         }
 
-        /// <summary>Index of the hero's first empty slot, or -1 if every slot is occupied.</summary>
-        public int FirstEmptySlot(string heroKey)
-        {
-            if (!_heroSlots.TryGetValue(heroKey, out var slots))
-            {
-                return -1;
-            }
-
-            for (int i = 0; i < slots.Count; i++)
-            {
-                if (slots[i].IsEmpty)
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        /// <summary>Places drawn magic into a slot at full charges, overwriting whatever was there.</summary>
-        public void DrawInto(string heroKey, int slotIndex, MagicSO magic, int maxCharges)
-        {
-            if (magic == null || !_heroSlots.TryGetValue(heroKey, out var slots))
-            {
-                return;
-            }
-
-            if (slotIndex < 0 || slotIndex >= slots.Count)
-            {
-                return;
-            }
-
-            slots[slotIndex].Magic = magic;
-            slots[slotIndex].MaxCharges = maxCharges > 0 ? maxCharges : DefaultMaxCharges;
-            slots[slotIndex].Charges = slots[slotIndex].MaxCharges;
-        }
-
         /// <summary>Spends one charge from a slot. Returns false if the slot is empty or out of charges.</summary>
         public bool TryCast(string heroKey, int slotIndex)
         {
@@ -236,8 +224,10 @@ namespace Assets.Scripts.Cards
         /// per level would hand it back before it ever ran out.
         ///
         /// <para>The rule lives here rather than inline at the call site because it is the whole
-        /// economy of the Draw system in one line: change this and magic goes from a resource the
-        /// player manages across a dungeon to a per-level allowance.</para>
+        /// magic economy in one line: change this and magic goes from a resource the player manages
+        /// across a dungeon to a per-level allowance. The one sanctioned exception is a refuge -
+        /// <c>RoomKind.Rest</c> calls <see cref="RefillCharges"/> directly, which is a place on the
+        /// floor the player has to find and spend, not a rule about levels.</para>
         /// </summary>
         public static bool RefillsOnLevelStart(int runLevelIndex)
         {
@@ -245,12 +235,14 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
-        /// Refills every occupied slot to its max charges. Called at the <b>start of a run</b> only.
+        /// Refills every occupied slot to its max charges. Called at the <b>start of a run</b>, and
+        /// again whenever the party rests in a refuge.
         ///
         /// <para>It used to run at the start of every combat, which quietly made magic infinite:
-        /// with three heroes at four slots each, the party walked into every room with a dozen casts
-        /// and two free Heals, so a floor's damage could never accumulate. Drawing is the refill
-        /// now - spend a charge and the only way to get it back is to take the magic again.</para>
+        /// the party walked into every room with a dozen casts and two free Heals, so a floor's
+        /// damage could never accumulate. A refuge is the deliberate opposite of that - there are a
+        /// fixed few per floor, resting is one-shot per room, and the same button is also the
+        /// party's healing, so topping up charges competes with topping up health.</para>
         /// </summary>
         public void RefillCharges()
         {
@@ -286,61 +278,6 @@ namespace Assets.Scripts.Cards
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Folds a run's finished loadout into the stored one, entry by entry: a hero present in
-        /// <paramref name="incoming"/> takes their new slots, and a hero who is only in
-        /// <paramref name="stored"/> keeps what they had.
-        ///
-        /// <para>The keeping half is the point. <see cref="GetSaveData"/> only emits the heroes this
-        /// run fielded, so writing it over the file wholesale would delete the kit of everyone left
-        /// at home - clear a level with the Warrior and the Acolyte and the benched Tank would come
-        /// back from the next run empty-handed.</para>
-        ///
-        /// <para>Pure and static so the merge rule is testable without a dungeon; neither argument is
-        /// mutated.</para>
-        /// </summary>
-        public static List<MagicSlotSaveData> Merge(
-            List<MagicSlotSaveData> stored, List<MagicSlotSaveData> incoming)
-        {
-            var merged = new List<MagicSlotSaveData>();
-
-            if (stored != null)
-            {
-                foreach (var entry in stored)
-                {
-                    if (entry != null && !string.IsNullOrEmpty(entry.HeroKey))
-                    {
-                        merged.Add(entry);
-                    }
-                }
-            }
-
-            if (incoming == null)
-            {
-                return merged;
-            }
-
-            foreach (var entry in incoming)
-            {
-                if (entry == null || string.IsNullOrEmpty(entry.HeroKey))
-                {
-                    continue;
-                }
-
-                int existing = merged.FindIndex(e => e.HeroKey == entry.HeroKey);
-                if (existing >= 0)
-                {
-                    merged[existing] = entry;
-                }
-                else
-                {
-                    merged.Add(entry);
-                }
-            }
-
-            return merged;
         }
 
         /// <summary>

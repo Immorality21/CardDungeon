@@ -37,7 +37,7 @@ namespace Assets.Scripts.Balance
     }
 
     /// <summary>
-    /// Prices an enemy's <see cref="EnemySO.DrawableMagics"/> as offense, so the danger index and the
+    /// Prices an enemy's <see cref="EnemySO.Spells"/> as offense, so the danger index and the
     /// attrition curve see the spells an enemy actually throws
     /// (its <c>CastMagic</c> actions) instead of measuring it as attack-only.
     ///
@@ -82,7 +82,7 @@ namespace Assets.Scripts.Balance
             EnemySO enemy, LevelEnemyTuning tuning, SimUnit caster, IList<SimUnit> heroes)
         {
             var profile = new EnemyCastProfile();
-            if (enemy == null || enemy.DrawableMagics == null)
+            if (enemy == null || enemy.Spells == null)
             {
                 return profile;
             }
@@ -94,9 +94,9 @@ namespace Assets.Scripts.Balance
 
             float totalWeight = 0f;
             var weights = new List<float>();
-            var entries = new List<DrawableMagicEntry>();
+            var entries = new List<EnemySpellEntry>();
 
-            foreach (var entry in enemy.DrawableMagics)
+            foreach (var entry in enemy.Spells)
             {
                 if (entry == null || entry.Magic == null || entry.Magic.Effects == null
                     || entry.Magic.Effects.Count == 0)

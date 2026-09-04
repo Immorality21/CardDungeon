@@ -201,7 +201,7 @@ namespace Assets.Scripts.Enemies
         }
 
         // ============================================================
-        //  STATS / TALLY / DRAW
+        //  STATS / TALLY / SPELLS
         // ============================================================
 
         /// <summary>
@@ -272,53 +272,42 @@ namespace Assets.Scripts.Enemies
         }
 
         /// <summary>
-        /// The magic drawable from this enemy, named only once the player has drawn it at least once
-        /// <b>from anywhere</b> - the same permanent record the Forge's collection grid reads
-        /// (<c>MetaProgressManager.IsMagicDiscovered</c>), passed in as
-        /// <paramref name="isMagicDiscovered"/> so this stays pure.
+        /// What this enemy can throw, named only once the player has actually <b>seen it cast</b>
+        /// (<see cref="BestiaryEntry.ObservedSpellKeys"/>).
         ///
-        /// <para>The <b>charge count is never hidden</b>. What a draw is worth is the decision the
-        /// player is making with their turn; what it is called is the reward for making it. An
-        /// unknown entry that hid its charges too would just read as a broken row.</para>
+        /// <para>Per enemy, not globally. Until 2026-09-04 this list was the enemy's Draw table and
+        /// an entry was named once the magic had been drawn from <i>anywhere</i>, because drawing was
+        /// the acquisition and one reveal was enough. With Draw gone the list is purely the
+        /// monster's own repertoire, and "the Cinder Imp throws Fireball" is a fact about the Cinder
+        /// Imp - learning it off a Dragon should not fill in the Imp's page.</para>
         ///
-        /// <para>The in-combat Draw picker masks the same entries the same way
-        /// (<c>MagicSelectionUI.PopulateDrawChoiceRows</c>). It has to: a gate here that the player
-        /// walks around by opening Draw and backing out is decoration.</para>
+        /// <para>Unobserved entries are listed but unnamed rather than hidden, so the page still says
+        /// <i>how many</i> spells the thing has. That is the same bargain the resistance rows make:
+        /// the shape of what you do not know is itself information, and a page that silently omitted
+        /// rows would read as complete when it is not.</para>
         /// </summary>
-        public static List<BestiaryLine> DrawLines(EnemySO definition, Func<string, bool> isMagicDiscovered)
+        public static List<BestiaryLine> SpellLines(EnemySO definition, BestiaryEntry known)
         {
             var lines = new List<BestiaryLine>();
-            if (definition == null || definition.DrawableMagics == null)
+            if (definition == null || definition.Spells == null)
             {
                 return lines;
             }
 
-            foreach (var entry in definition.DrawableMagics)
+            foreach (var entry in definition.Spells)
             {
                 if (entry == null || entry.Magic == null)
                 {
                     continue;
                 }
 
-                bool known = IsDrawKnown(entry.Magic.Key, isMagicDiscovered);
+                bool seen = BestiaryOps.KnowsSpell(known, entry.Magic.Key);
                 lines.Add(new BestiaryLine(
-                    known ? entry.Magic.DisplayName : Unknown,
-                    "x" + entry.Charges,
-                    known ? BestiaryTone.Neutral : BestiaryTone.Unknown));
+                    seen ? entry.Magic.DisplayName : Unknown,
+                    seen ? "seen" : "",
+                    seen ? BestiaryTone.Neutral : BestiaryTone.Unknown));
             }
             return lines;
-        }
-
-        /// <summary>
-        /// Whether a drawable magic may be named. A missing lookup means <b>not</b> discovered: if a
-        /// call site forgets to pass the record, the failure should be an over-hidden page, never a
-        /// leaked one.
-        /// </summary>
-        public static bool IsDrawKnown(string magicKey, Func<string, bool> isMagicDiscovered)
-        {
-            return isMagicDiscovered != null
-                && !string.IsNullOrEmpty(magicKey)
-                && isMagicDiscovered(magicKey);
         }
 
         // ============================================================

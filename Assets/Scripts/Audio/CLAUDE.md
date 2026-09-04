@@ -11,9 +11,9 @@ the hub as much as they serve a fight.
   random clip for the event and plays it 2D via `PlayOneShot`, so overlapping hits layer. Clips are
   mapped by a `SoundBankSO` at `Resources/CombatSoundBank` — a `CombatSound → {clips[], volume}` table
   authored against the `Assets/Fantasy Interface Sounds/` pack. Events (append-only; the ints are
-  serialized into the bank): `MeleeSwing`, `Impact`, `MagicCast`, `Draw`, `Heal`, `ItemUse`,
+  serialized into the bank): `MeleeSwing`, `Impact`, `MagicCast`, *(3 retired — was `Draw`)*, `Heal`, `ItemUse`,
   `BossSignature`, `EnemyDeath`, `Victory`, `Defeat`, `CursorMove`, `Confirm`. Called from
-  `CombatManager` (attacks / cast / draw / item / heal / boss wind-up / death / victory / defeat),
+  `CombatManager` (attacks / cast / item / heal / boss wind-up / death / victory / defeat),
   `RoomActionUI` (command-menu cursor + confirm) and `AudioOptionsUI` (so a dial you move is a dial
   you hear).
 - **`MusicPlayer`** + **`MusicTrack`** + **`MusicBankSO`** — the looping bed. Also auto-creating, and

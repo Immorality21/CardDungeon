@@ -8,9 +8,13 @@ namespace Assets.Scripts.Balance.Editor
 {
     /// <summary>
     /// The Elements &amp; Unlocks tab: the supply side of the elemental layer. Resistances and combos are
-    /// authored content that only becomes live if the Draw tables hand the player the pieces, so this tab
-    /// puts the two next to each other — what each level resists, and what the player can actually bring
-    /// to it by that point in the run order.
+    /// authored content that only becomes live if the <b>sphere grids</b> hand the player the pieces, so
+    /// this tab puts the two next to each other — what each level resists, and what the modelled party
+    /// can actually bring to it by that point in the run order.
+    ///
+    /// <para>The supply used to be the Draw tables, so the magic matrix was magic × run. Magic is bought
+    /// on the grid now (<c>docs/plans/SPECIALIZATION.md</c> §9b), so it is magic × <b>hero</b>: the
+    /// question is which hero to invest in and what the route costs, not which level to walk into.</para>
     /// </summary>
     public partial class BalanceWindow
     {
@@ -28,8 +32,9 @@ namespace Assets.Scripts.Balance.Editor
 
             BalanceGui.Paragraph(
                 "Resistances only create decisions if the player can bring the element to decide with. This tab "
-                + "reads the Draw tables as a supply chain: what each run unlocks, when each combo becomes "
-                + "possible, and whether a level's resistances are in elements the player already has.",
+                + "reads the sphere grids as a supply chain: which hero teaches what and for how much XP, when "
+                + "the modelled party first holds each combo's pieces, and whether a level's resistances are in "
+                + "elements it can already deal.",
                 BalanceGui.WrapMiniStyle);
 
             DrawFilterRow("Show only unreachable magic and combos.");
@@ -72,16 +77,16 @@ namespace Assets.Scripts.Balance.Editor
                 Commit(serialized, changed);
 
                 BalanceGui.AssetCell(run.Run, run.Name, NameWidth);
-                BalanceGui.Cell($"{run.NewlyDrawable.Count} new magic", MetricWidth + 20f,
-                    run.NewlyDrawable.Count == 0 ? BalanceSeverity.Info : BalanceSeverity.Ok);
+                BalanceGui.Cell($"{run.NewlyKnown.Count} new magic", MetricWidth + 20f,
+                    run.NewlyKnown.Count == 0 ? BalanceSeverity.Info : BalanceSeverity.Ok);
                 BalanceGui.Cell($"{run.NewlyEnabledCombos.Count} new combo(s)", MetricWidth + 30f);
                 EditorGUILayout.EndHorizontal();
 
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(16f);
                 BalanceGui.Paragraph(
-                    run.NewlyDrawable.Count > 0
-                        ? "unlocks: " + string.Join(", ", MagicNames(run.NewlyDrawable))
+                    run.NewlyKnown.Count > 0
+                        ? "learns: " + string.Join(", ", MagicNames(run.NewlyKnown))
                         : "unlocks nothing new",
                     BalanceGui.WrapMiniStyle);
                 EditorGUILayout.EndHorizontal();
@@ -176,7 +181,7 @@ namespace Assets.Scripts.Balance.Editor
                           + "change any decision here."
                         : null);
                 BalanceGui.Cell(
-                    level.NewlyDrawable.Count > 0 ? string.Join(", ", MagicNames(level.NewlyDrawable)) : "—",
+                    level.NewlyKnown.Count > 0 ? string.Join(", ", MagicNames(level.NewlyKnown)) : "—",
                     200f);
                 EditorGUILayout.EndHorizontal();
             }
@@ -188,18 +193,20 @@ namespace Assets.Scripts.Balance.Editor
         {
             BalanceGui.SectionHeader(
                 "Magic availability",
-                $"Draw coverage {map.ReachableMagicCount}/{map.CatalogMagicCount}. One column per run: the levels "
-                + "that offer the magic, with the enemies in the tooltip. Draw is the only route to new magic, so "
-                + "anything unreachable here is unreachable in play.");
+                $"Grid coverage {map.ReachableMagicCount}/{map.CatalogMagicCount}. One column per hero: the "
+                + "cheapest XP to own a MagicKnown node teaching it, with the node in the tooltip. A grid is "
+                + "the only route to magic, so anything unreachable here cannot be cast by anyone.");
+
+            var heroes = HeroColumns(map);
 
             EditorGUILayout.BeginHorizontal();
             BalanceGui.HeaderCell("Magic", ElementNameWidth);
             BalanceGui.HeaderCell("Element", 76f, "Damage types this magic deals.");
             BalanceGui.HeaderCell("Tags", 110f, "Combo tags it applies.");
-            BalanceGui.HeaderCell("First unlock", 150f, "Earliest point in the run order it can be drawn.");
-            foreach (var run in map.Runs)
+            BalanceGui.HeaderCell("Cheapest", 150f, "Cheapest hero and total XP to reach a node teaching it.");
+            foreach (var hero in heroes)
             {
-                BalanceGui.HeaderCell(run.Name, ElementCellWidth, run.Name);
+                BalanceGui.HeaderCell(hero, ElementCellWidth, hero);
             }
             EditorGUILayout.EndHorizontal();
 
@@ -214,9 +221,10 @@ namespace Assets.Scripts.Balance.Editor
                     continue;
                 }
 
+                // Unreachable is Critical now, not Warning: with Draw gone there is no second route.
                 var severity = availability.IsReachable
-                    ? (availability.BossGatedOnly ? BalanceSeverity.Info : BalanceSeverity.Ok)
-                    : BalanceSeverity.Warning;
+                    ? (availability.SingleHeroOnly ? BalanceSeverity.Info : BalanceSeverity.Ok)
+                    : BalanceSeverity.Critical;
 
                 EditorGUILayout.BeginHorizontal();
                 BalanceGui.AssetCell(availability.Magic, availability.DisplayName, ElementNameWidth, severity);
@@ -231,50 +239,74 @@ namespace Assets.Scripts.Balance.Editor
 
                 if (availability.FirstSource != null)
                 {
+                    var first = availability.FirstSource;
                     BalanceGui.Cell(
-                        $"{availability.FirstSource.RunName} / {availability.FirstSource.LevelReference}",
+                        $"{first.HeroName} — {first.PathCost} xp",
                         150f, severity,
-                        $"From {availability.FirstSource.EnemyName}"
-                        + (availability.BossGatedOnly ? " (boss only)" : ""));
+                        $"Node '{first.NodeKey}', depth {first.Depth}, {first.Charges} charges. "
+                        + $"The node itself costs {first.NodeCost}; {first.PathCost} is the whole chain from "
+                        + "the grid's start."
+                        + (availability.SingleHeroOnly
+                            ? "\nOnly this hero teaches it, so fielding them is a precondition."
+                            : ""));
                 }
                 else
                 {
-                    BalanceGui.Cell("never", 150f, BalanceSeverity.Warning,
-                        "No enemy offers this magic, so it cannot be drawn anywhere.");
+                    BalanceGui.Cell("never", 150f, BalanceSeverity.Critical,
+                        "No MagicKnown node on any grid teaches this, so no hero can ever cast it.");
                 }
 
-                foreach (var run in map.Runs)
+                foreach (var hero in heroes)
                 {
-                    DrawAvailabilityCell(availability, run);
+                    DrawAvailabilityCell(availability, hero);
                 }
                 EditorGUILayout.EndHorizontal();
             }
         }
 
-        private void DrawAvailabilityCell(MagicAvailability availability, RunProgression run)
+        /// <summary>Hero column order: every hero that teaches anything, first-seen order.</summary>
+        private static List<string> HeroColumns(ProgressionMap map)
         {
-            var levels = new List<string>();
+            var heroes = new List<string>();
+            foreach (var availability in map.Magic)
+            {
+                foreach (var source in availability.Sources)
+                {
+                    if (!heroes.Contains(source.HeroName))
+                    {
+                        heroes.Add(source.HeroName);
+                    }
+                }
+            }
+            return heroes;
+        }
+
+        private void DrawAvailabilityCell(MagicAvailability availability, string heroName)
+        {
+            int cheapest = int.MaxValue;
             var detail = new List<string>();
 
             foreach (var source in availability.Sources)
             {
-                if (source.Run != run.Run)
+                if (source.HeroName != heroName)
                 {
                     continue;
                 }
-                levels.Add("L" + source.LevelIndex);
-                detail.Add($"Levels[{source.LevelIndex}] {source.EnemyName} x{source.Charges} charges"
-                    + (source.BossOnly ? " (boss)" : "")
-                    + $" — {source.ExpectedEnemies:0.0} expected");
+                if (source.PathCost < cheapest)
+                {
+                    cheapest = source.PathCost;
+                }
+                detail.Add($"'{source.NodeKey}' — depth {source.Depth}, {source.PathCost} xp, "
+                    + $"{source.Charges} charges");
             }
 
-            if (levels.Count == 0)
+            if (detail.Count == 0)
             {
                 BalanceGui.Cell("—", ElementCellWidth);
                 return;
             }
 
-            BalanceGui.Cell(string.Join(",", levels), ElementCellWidth, BalanceSeverity.Ok,
+            BalanceGui.Cell($"{cheapest} xp", ElementCellWidth, BalanceSeverity.Ok,
                 string.Join("\n", detail));
         }
 
@@ -286,13 +318,14 @@ namespace Assets.Scripts.Balance.Editor
                 "Combo reachability",
                 $"{map.ReachableComboCount}/{map.Combos.Count} reachable. A combo needs one required tag already "
                 + "on the target and another arriving with the incoming cast, so every required tag has to be "
-                + "carried by magic the player can draw.");
+                + "carried by magic some hero's grid teaches.");
 
             EditorGUILayout.BeginHorizontal();
             BalanceGui.HeaderCell("Combo", ElementNameWidth);
             BalanceGui.HeaderCell("Requires", 140f);
             BalanceGui.HeaderCell("Reachable", 76f);
-            BalanceGui.HeaderCell("Unlocked at", 170f, "Where the last required piece becomes drawable.");
+            BalanceGui.HeaderCell("Held from", 170f,
+                "First level at which the modelled party owns a magic for every required tag at once.");
             BalanceGui.HeaderCell("Enabled by", 300f);
             EditorGUILayout.EndHorizontal();
 
@@ -337,9 +370,15 @@ namespace Assets.Scripts.Balance.Editor
                 return $"No magic in the catalog carries {string.Join(", ", combo.TagsWithNoMagic)} — "
                      + "the combo cannot fire by construction.";
             }
-            if (combo.TagsNotDrawable.Count > 0)
+            if (combo.TagsNotLearnable.Count > 0)
             {
-                return $"{string.Join(", ", combo.TagsNotDrawable)} exists only on magic no enemy offers.";
+                return $"{string.Join(", ", combo.TagsNotLearnable)} exists only on magic no sphere grid teaches.";
+            }
+            if (combo.UnlockedAt == null)
+            {
+                return $"Every piece is on a grid (about {combo.InvestmentToEnable} xp in total), but no "
+                     + "modelled party ever owns them all at once. GreedySpend is a breadth build, so read "
+                     + "this as under-buying rather than as proof the combo is unreachable.";
             }
             return null;
         }

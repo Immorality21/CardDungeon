@@ -8,16 +8,20 @@
 > because the numbers it would show belong to a level. Use `Tools > Balance > Balance Analyzer`,
 > whose Enemies tab is one row per enemy **per level**.
 
-- **EnemySO** (ScriptableObject, `SO/Enemy`, assets in `Assets/ScriptableObjects/Enemies/`): the **definition of an enemy type** — `Key`, `DisplayName`, `Sprite`, base stats (`Attack`/`Defense`/`Health`/`Agility`), **kill rewards** (`XpReward`, `GoldReward`), `Archetype`, `DrawableMagics` (the **Draw list**), `Resistances`, `LootItem`. This is the single source of truth for what an enemy *is*. On death (`CombatManager.HandleEnemyDeath`): loot drops, `XpReward` is split evenly across the fielded party immediately (`Party.DistributeXp`), and `GoldReward` accumulates into `MetaProgressManager` pending gold (banked only on level-clear — see the Progression guide).
+- **EnemySO** (ScriptableObject, `SO/Enemy`, assets in `Assets/ScriptableObjects/Enemies/`): the **definition of an enemy type** — `Key`, `DisplayName`, `Sprite`, base stats (`Attack`/`Defense`/`Health`/`Agility`), **kill rewards** (`XpReward`, `GoldReward`), `Archetype`, `Spells` (its **own** repertoire — see below), `Resistances`, `LootItem`. This is the single source of truth for what an enemy *is*. On death (`CombatManager.HandleEnemyDeath`): loot drops, `XpReward` is split evenly across the fielded party immediately (`Party.DistributeXp`), and `GoldReward` accumulates into `MetaProgressManager` pending gold (banked only on level-clear — see the Progression guide).
 - **Identity: `Key` is write-once, `DisplayName` is free.** `EnemySO.Key` is the identifier persistent knowledge about an enemy is filed under — what the player has learned of its resistances and weaknesses — and `SaveKey` falls back to `DisplayName`, then the asset name, so an enemy authored before the field existed still resolves. The same contract as `HeroSO.Key`: **always persist off `SaveKey`, never off `DisplayName`**, because a display name is meant to be renameable and keying off it orphans the record the moment someone retitles an enemy. Keys are authored as the **asset** name (`EyeBall`, not `Floating Eye`) for exactly that reason. `EnemyIdentityTests` fails on a blank or duplicated key, so the fallback stays a migration path rather than somewhere to leave a new enemy.
 - **`EnemySO.Label`** is the display name or the asset name — use it for anything on screen or in a report. It exists because that ternary had been copy-pasted into five places in the balance model; there is now one.
 - **One shared Enemy prefab** lives at `Assets/Resources/Enemy.prefab`. `EnemyManager` loads it once (`Resources.Load<GameObject>("Enemy")`) and stamps each instance with an `EnemySO` plus the level's tuning via `Enemy.Initialize(so, tuning)` — so there is exactly one prefab, and the SO drives the sprite/stats/name. (The old per-type `EyeBall.prefab` under `Assets/Prefabs/` is no longer referenced.)
 - **EnemySpawnEntry** (in `RoomSO.EnemySpawnTable`): now just `Enemy` (an `EnemySO`) + the per-room roll params `SpawnChance` and `EvaluationCount`. All identity/stats moved to the `EnemySO`.
-- **DrawableMagicEntry**: one offering on an enemy's Draw list — a `MagicSO` plus the `Charges` (1–9) a successful draw grants. It is also what a `CastMagic` action draws from when it names no specific magic: `CastWeight` biases which entry, and casting never touches `Charges` (those are the player's grant only). **`CastWeight: 0` means drawable but never cast** — a zero-weight entry is skipped by `EnemyMagicPlan.Select` while every other entry has a weight, which is how the defensive cloaks sit on an enemy's list: a cloak wards the element that enemy *deals*, never what threatens it, so casting one would spend its turn and a slice of its health on nothing. (Beware the edge: if *every* entry on an enemy is 0 the pick is uniform, so 0 only means "never" alongside non-zero siblings.)
+- **EnemySpellEntry**: one spell in an enemy's own repertoire — a `MagicSO` plus a `CastWeight`. A `CastMagic` action that names no specific magic picks from here, weighted; enemy casts spend nothing.
+
+  **This was `DrawableMagicEntry`, and it was the Draw list.** Until 2026-09-04 the same entries were what the player extracted with the Draw command, and a `Charges` field said how many casts a draw granted. Draw was removed (`docs/plans/SPECIALIZATION.md` §9b) and the list kept only the half that was always the monster's: what it can throw. `Charges` went with it — it was never read by the cast path.
+
+  **`CastWeight: 0` means "in the repertoire but never chosen"** — a zero-weight entry is skipped by `EnemyMagicPlan.Select` while every other entry has a weight. Under Draw that combination was load-bearing: it is how the defensive cloaks were placed on enemies (a cloak wards the element that enemy *deals*, so casting one would waste its turn) while still being obtainable. With Draw gone a zero-weight entry is inert content — the cloaks now live on sphere grids instead, and any remaining `CastWeight: 0` entry is worth a second look. (Beware the edge: if *every* entry on an enemy is 0 the pick is uniform, so 0 only means "never" alongside non-zero siblings.)
 - **EnemyMagicPlan**: the pure helpers a `CastMagic` action uses — which magic (weighted by `CastWeight`) and at whom. `MagicTargetType` is authored from the *player's* side, so for an enemy "enemy" means the hero side and "ally" means the other monsters (a single-ally cast picks the most wounded). Called by `EnemyActionPlanner`, covered by `EnemyCastingTests`.
 - **EnemyBehaviorSO** is an enemy's repertoire as data — see *Behaviors* below. `EnemySO.Behavior` points at one; `ResolvedBehavior` falls back to the built-in preset for `Archetype`, and `ArchetypeOf` reports the assigned behaviour's label so the two cannot drift.
 - **EnemyManager** spawns enemies into rooms (with optional manual-layout overrides) and tracks/cleans up live enemies. For each entry it instantiates the shared prefab and calls `Enemy.Initialize(entry.Enemy)`.
-- **Enemy** implements `ICombatUnit` (see the Combat guide). `Initialize(EnemySO)` applies the definition (sprite, `Stats`, archetype, Draw list, resistances, loot, and `gameObject.name`); `DisplayName` comes from `Definition.DisplayName` (so it's the SO's name, **not** "Prefab(Clone)"). `GetEffectiveAttackPower()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Runtime charge state (`ChargingEntryIndex`, `ChargeTarget`) is not persisted.
+- **Enemy** implements `ICombatUnit` (see the Combat guide). `Initialize(EnemySO)` applies the definition (sprite, `Stats`, archetype, spell list, resistances, loot, and `gameObject.name`); `DisplayName` comes from `Definition.DisplayName` (so it's the SO's name, **not** "Prefab(Clone)"). `GetEffectiveAttackPower()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Runtime charge state (`ChargingEntryIndex`, `ChargeTarget`) is not persisted.
 
 ## Per-level tuning (`LevelEnemyTuning`)
 
@@ -122,16 +126,16 @@ action. That is the "one per enemy, duplicated from a preset" workflow in practi
 ### Casting is an action, not a special case
 
 `EnemySO.MagicCastChance` is **gone**. Cast frequency is a `CastMagic` entry with a `ChanceGate`
-(`EnemyBehaviorSO.CastFromDrawList`), at a priority above the situational actions because that is what
+(`EnemyBehaviorSO.CastFromSpellList`), at a priority above the situational actions because that is what
 the old pre-roll did — it was consulted before the behaviour, so a 20% caster cast 20% of the time even
 with a wounded ally to mend.
 
-- **Leave `Magic` empty** to draw from this enemy's own `DrawableMagics`, weighted by each entry's
+- **Leave `Magic` empty** to pick from this enemy's own `Spells`, weighted by each entry's
   `CastWeight` — so what it throws is what you can steal from it. Name a magic for a signature the
   player cannot obtain.
-- **Charges are never spent.** `DrawableMagicEntry.Charges` is the player's Draw grant.
+- **Enemy casts spend nothing.** Charges are a hero-side resource on an equipped slot; a monster throws what it knows for free.
 - **`ChanceGate` 0 means "no gate", not "never"** — an enemy that should not cast simply has no
-  `CastMagic` action. `CastFromDrawList` throws on a 0 chance rather than authoring that trap.
+  `CastMagic` action. `CastFromSpellList` throws on a 0 chance rather than authoring that trap.
 - **Spell power is the level's**: `LevelEnemyTuning.MagicPowerScaleFor` returns the level's
   `Difficulty`, passed to `EffectResolver.Execute` as `powerScale`. An enemy with an absolute
   `Overrides` row is exempt, exactly as its stats are — which is why boss casts read weaker than boss
@@ -218,19 +222,22 @@ machinery that makes that playable rather than a memory test.
   (`StatCatalog.AuthoringDefault > 0` — today Strength/Endurance/Agility). "END 0" is a finding worth
   acting on; "INT 0 / SPR 0 / LCK 0" on every melee enemy is noise. Reading it off the catalog rather
   than a hard-coded list means a stat added later sorts itself.
-- **The Draw list is gated too, on `MetaProgressManager.IsMagicDiscovered`** — the same permanent
-  record the Forge's collection grid reads, which means "drawn at least once, from any enemy". An
-  undrawn offering reads `???`, but its **charge count still shows**: what a draw is worth is the
-  decision the player is making with their turn; what it is called is the reward for making it.
-  The lookup is passed in as a `Func<string, bool>` so the presenter stays pure, and
-  `BestiaryPresenter.IsDrawKnown` treats a missing lookup as *not* discovered — a call site that
-  forgets to pass the record should over-hide, never leak.
-  - **The in-combat Draw picker masks the same entries** (`MagicSelectionUI.PopulateDrawChoiceRows`,
-    name and icon both). It has to: a gate on the knowledge pages that the player walks around by
-    opening Draw and backing out is decoration. This *does* change play — the first pull off a new
-    enemy is a small blind gamble on a turn — which is the FFVIII shape: drawing is the discovery.
-    (An earlier version of this guide argued the opposite, that gating here would contradict the
-    picker. The resolution was to move the picker, not to drop the gate.)
+- **The spell list is gated too, on `BestiaryEntry.ObservedSpellKeys`** — an entry is named only once
+  the player has actually watched **this enemy** cast **that spell** (`BestiaryPresenter.SpellLines`,
+  recorded by `CombatManager.RecordEnemySpellObserved` on every enemy cast). Unobserved entries are
+  listed but unnamed rather than hidden, so the page still says *how many* spells the thing has: the
+  shape of what you do not know is itself information, and silently omitting rows would make an
+  incomplete page read as a complete one.
+
+  **This is what is left of the Draw discovery loop, and it is filed differently.** The list was the
+  enemy's Draw table until 2026-09-04, so an entry was named once the magic had been drawn from
+  *anywhere* — a single global record (`MetaProgressManager.IsMagicDiscovered`) shared with the
+  Forge's collection grid, because drawing it was both the acquisition and the reveal. Those two
+  questions came apart when Draw went. "Does the player own this spell" is still the global record
+  and still gates the Forge, but it is now written when a hero *learns* the spell on their sphere
+  grid. "Has the player seen this monster throw this" is a fact about the monster — knowing the
+  Cinder Imp has Fireball tells you nothing about the Dragon — so it is stored per enemy and earned
+  by being on the receiving end.
 
 ### `EnemyCatalogSO` — the bestiary's denominator
 

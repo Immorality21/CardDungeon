@@ -4,32 +4,77 @@ using Assets.Scripts.IO;
 
 namespace Assets.Scripts.Cards
 {
+    /// <summary>Which known spells one hero has chosen to carry, in slot order.</summary>
+    [Serializable]
+    public class HeroMagicLoadout
+    {
+        public string HeroKey;
+
+        /// <summary>
+        /// <c>MagicSO.Key</c> per slot. Keys the hero does not (or no longer) know are ignored when
+        /// the loadout is resolved rather than pruned on load, so re-authoring a grid cannot
+        /// silently erase a choice the player made about a node they still own.
+        /// </summary>
+        public List<string> EquippedKeys = new List<string>();
+    }
+
     /// <summary>
-    /// What each hero is carrying in their draw slots, kept <b>between</b> runs. Magic used to be
-    /// purely run-scoped — drawn from an enemy, carried level to level in <c>RunSaveData</c>, and
-    /// thrown away with the run save when the run ended — so a kit assembled over four floors
-    /// evaporated the moment the run was won. This is where it lives now, so a hero can walk into a
-    /// new dungeon still holding something they drew a few dungeons ago.
+    /// The kit each hero takes into a dungeon: a <b>choice</b>, made at the hub, over the spells
+    /// their sphere grid says they know.
     ///
-    /// <para><b>Committed on level clear, forfeited on death</b>, exactly like XP, loot, banked gold
-    /// and a rescued hero: <c>DungeonManager.OnDungeonCleared</c> writes it, and nothing writes it on
-    /// the way out of <c>HandlePartyDeath</c>. Magic drawn during the run that killed you is lost;
-    /// magic you got home with is not.</para>
+    /// <para><b>This file changed meaning on 2026-09-04.</b> It used to be a record of what the
+    /// party walked out of the last run holding — magic was acquired mid-combat by Draw, so a kit
+    /// was something you accumulated and had to be banked on level clear or it evaporated. Draw is
+    /// gone: what a hero knows is now derived from their activated <c>MagicKnown</c> grid nodes,
+    /// which nothing in a run can change. So there is nothing to bank, and the only thing worth
+    /// persisting is the part the player decides — which of the known spells fill the scarce slots.
+    /// See <see cref="MagicLoadoutOps"/>.</para>
+    ///
+    /// <para>Written straight from the hub loadout screen, not deferred to level clear: it is a
+    /// preference, not a gain, so dying must not cost the player their equipment layout. In-run
+    /// charge state is a different thing entirely and lives in <c>RunSaveData.EquippedMagic</c>.</para>
     ///
     /// <para>Its own file rather than a field on <c>PartySaveData</c> or <c>MetaProgressSaveData</c>:
-    /// both of those sit in namespaces this data's type (<see cref="MagicSlotSaveData"/>) would have
-    /// to be pulled backwards into. Cards already depends on Heroes and Progression, so the store
-    /// belongs on this side of that arrow.</para>
+    /// both of those sit in namespaces this data would have to be pulled backwards into. Cards
+    /// already depends on Heroes and Progression, so the store belongs on this side of that
+    /// arrow.</para>
     /// </summary>
     [Serializable]
     public class MagicLoadoutSaveData : IWriteable
     {
-        /// <summary>
-        /// One entry per hero who has ever finished a level, whether or not they are currently
-        /// fielded. Benched heroes keep their kit — see <c>EquippedMagicState.Merge</c>, which is
-        /// what stops a run with a different lineup from wiping everybody else's slots.
-        /// </summary>
-        public List<MagicSlotSaveData> Heroes = new List<MagicSlotSaveData>();
+        /// <summary>One entry per hero who has ever changed their kit. A hero with no entry simply
+        /// auto-fills from what they know (<see cref="MagicLoadoutOps.Resolve"/>).</summary>
+        public List<HeroMagicLoadout> Heroes = new List<HeroMagicLoadout>();
+
+        /// <summary>The hero's entry, created and appended if absent. Never returns null.</summary>
+        public HeroMagicLoadout For(string heroKey)
+        {
+            foreach (var entry in Heroes)
+            {
+                if (entry != null && entry.HeroKey == heroKey)
+                {
+                    return entry;
+                }
+            }
+
+            var created = new HeroMagicLoadout { HeroKey = heroKey };
+            Heroes.Add(created);
+            return created;
+        }
+
+        /// <summary>The hero's chosen keys, or an empty list when they have never chosen. Read-only
+        /// lookup — unlike <see cref="For"/> it does not create an entry.</summary>
+        public List<string> ChosenFor(string heroKey)
+        {
+            foreach (var entry in Heroes)
+            {
+                if (entry != null && entry.HeroKey == heroKey && entry.EquippedKeys != null)
+                {
+                    return entry.EquippedKeys;
+                }
+            }
+            return new List<string>();
+        }
 
         public string GetFileName()
         {

@@ -125,7 +125,8 @@ namespace Assets.Scripts.Balance
             BuildEnemyMetrics(input, rules, report, partyByEnemy);
 
             report.Variety = VarietyReport.Build(ProjectWideEnemySet(input.Enemies), input.Magic, rules);
-            report.Progression = ProgressionMap.Build(report.Runs, input.Magic, input.Combos, input.Items);
+            report.Progression = ProgressionMap.Build(
+                report.Runs, input.Magic, input.Combos, input.HeroesToAudit, input.Items);
 
             if (input.RunSimulation)
             {
@@ -363,7 +364,7 @@ namespace Assets.Scripts.Balance
         /// belong to a level, not to the asset.</para>
         ///
         /// <para>An enemy no run places still gets a single template-only row, so authoring checks
-        /// (no XP, no Draw table) keep working on content that is not wired up yet.</para>
+        /// (no XP, no spell list) keep working on content that is not wired up yet.</para>
         /// </summary>
         private static void BuildEnemyMetrics(
             BalanceInput input, BalanceRulesSO rules, BalanceReport report,
@@ -615,7 +616,7 @@ namespace Assets.Scripts.Balance
                     against = report.Party;
                 }
 
-                AssignDrawLoadout(against, simReport.Enemies, report.Save, input.Magic);
+                AssignMagicLoadout(against, report.Save, input.Magic);
                 simReport.Outcomes = EncounterSimulator.RunAllPolicies(against, simReport.Enemies, settings);
                 report.Simulations.Add(simReport);
             }
@@ -658,7 +659,7 @@ namespace Assets.Scripts.Balance
                     };
 
                     var levelParty = level.Party ?? report.Party;
-                    AssignDrawLoadout(levelParty, units, report.Save, input.Magic);
+                    AssignMagicLoadout(levelParty, report.Save, input.Magic);
                     simReport.Outcomes = EncounterSimulator.RunAllPolicies(levelParty, units, settings);
                     report.Simulations.Add(simReport);
                 }
@@ -666,59 +667,31 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// Gives every simulated hero the magic this encounter's enemies actually offer, which is how
-        /// the game's loop works: you fight with what the fight lets you Draw. Without this the
-        /// simulated party has empty slots, and the attack-spam comparison would only be measuring
-        /// potion use rather than whether magic changes the outcome.
+        /// Gives every simulated hero the kit they would actually walk in with: the spells their
+        /// activated <c>MagicKnown</c> sphere-grid nodes teach them, capped at their slot count.
+        /// Without this the simulated party has empty slots and the attack-spam comparison only
+        /// measures potion use rather than whether magic changes the outcome.
         ///
-        /// Charges and slot counts come from <see cref="EquippedMagicState"/>'s default plus each
-        /// hero's activated MagicSlot grid nodes, and upgrade levels from the save, so the simulated
-        /// loadout matches what a player at this point could really be holding. Note that the turn a
-        /// Draw costs is not modelled — the loadout is assumed already in hand.
+        /// <para><b>This used to read the enemies.</b> Until Draw was removed (2026-09-04) a
+        /// simulated hero was handed whatever the encounter offered, because that was how the loop
+        /// worked - you fought with what the fight let you take. Magic is now bought on the grid, so
+        /// the encounter has no say in it and the loadout is a function of investment alone. That is
+        /// the point: a magic kit is now something the frontier has to <i>pay for</i>, not something
+        /// the room hands over.</para>
+        ///
+        /// <para>Charges come from the granting node (the run's whole allowance of that spell) and
+        /// slot counts from <see cref="EquippedMagicState.DefaultSlotCount"/> plus each hero's
+        /// activated <c>MagicSlot</c> nodes. The auto-fill order is
+        /// <c>MagicLoadoutOps.Resolve</c>'s, so the model and the game agree on what an
+        /// unconfigured hero carries. A player who hand-picks a better loadout does strictly better
+        /// than this, which is the right direction for the model to be wrong in.</para>
         /// </summary>
-        private static void AssignDrawLoadout(
-            PartyBaseline party, IList<SimUnit> enemies, SaveAudit save, IList<MagicSO> allMagic)
+        private static void AssignMagicLoadout(
+            PartyBaseline party, SaveAudit save, IList<MagicSO> allMagic)
         {
             if (party == null)
             {
                 return;
-            }
-
-            // Slot counts are per hero now; collect up to the widest count anyone can hold and let
-            // each hero take their own prefix of the offer.
-            int widestSlotCount = EquippedMagicState.DefaultSlotCount;
-            foreach (var hero in party.Heroes)
-            {
-                int slots = EquippedMagicState.DefaultSlotCount + SphereGridOps.SlotBonusForNodes(
-                    hero.Definition != null ? hero.Definition.SphereGrid : null, hero.ActivatedNodes);
-                if (slots > widestSlotCount)
-                {
-                    widestSlotCount = slots;
-                }
-            }
-
-            var offered = new List<MagicSO>();
-            var seen = new HashSet<string>();
-            foreach (var enemy in enemies)
-            {
-                if (enemy == null || enemy.Definition == null || enemy.Definition.DrawableMagics == null)
-                {
-                    continue;
-                }
-
-                foreach (var draw in enemy.Definition.DrawableMagics)
-                {
-                    if (draw == null || draw.Magic == null)
-                    {
-                        continue;
-                    }
-
-                    string key = string.IsNullOrEmpty(draw.Magic.Key) ? draw.Magic.name : draw.Magic.Key;
-                    if (seen.Add(key) && offered.Count < widestSlotCount)
-                    {
-                        offered.Add(draw.Magic);
-                    }
-                }
             }
 
             foreach (var hero in party.Heroes)
@@ -728,50 +701,27 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                int slotCount = EquippedMagicState.DefaultSlotCount + SphereGridOps.SlotBonusForNodes(
-                    hero.Definition != null ? hero.Definition.SphereGrid : null, hero.ActivatedNodes);
+                var grid = hero.Definition != null ? hero.Definition.SphereGrid : null;
+                int slotCount = EquippedMagicState.DefaultSlotCount
+                    + SphereGridOps.SlotBonusForNodes(grid, hero.ActivatedNodes);
 
                 hero.Unit.MagicSlots.Clear();
 
-                // Permanently known magic first: a MagicKnown grid node seeds its slot at the start of
-                // every run, so this hero holds it whether or not the fight offers it. Its charge count
-                // is authored on the node, and unlike a drawn slot it is the run's whole allowance.
-                var known = SphereGridOps.GrantedMagicForNodes(
-                    hero.Definition != null ? hero.Definition.SphereGrid : null, hero.ActivatedNodes);
-                foreach (var granted in known)
+                var known = SphereGridOps.KnownMagicForNodes(grid, hero.ActivatedNodes);
+                foreach (var key in MagicLoadoutOps.Resolve(known, null, slotCount))
                 {
-                    if (hero.Unit.MagicSlots.Count >= slotCount)
-                    {
-                        break;
-                    }
-
-                    var magic = ResolveMagicByKey(allMagic, granted.Key);
+                    var magic = ResolveMagicByKey(allMagic, key);
                     if (magic == null)
                     {
                         continue;
                     }
 
+                    int charges = Mathf.Max(1, MagicLoadoutOps.ChargesFor(known, key));
                     hero.Unit.MagicSlots.Add(new SimMagicSlot
                     {
                         Magic = magic,
-                        Charges = granted.Value,
-                        MaxCharges = granted.Value,
-                        UpgradeLevel = UpgradeLevelFor(magic, save)
-                    });
-                }
-
-                foreach (var magic in offered)
-                {
-                    if (hero.Unit.MagicSlots.Count >= slotCount)
-                    {
-                        break;
-                    }
-
-                    hero.Unit.MagicSlots.Add(new SimMagicSlot
-                    {
-                        Magic = magic,
-                        Charges = EquippedMagicState.DefaultMaxCharges,
-                        MaxCharges = EquippedMagicState.DefaultMaxCharges,
+                        Charges = charges,
+                        MaxCharges = charges,
                         UpgradeLevel = UpgradeLevelFor(magic, save)
                     });
                 }
@@ -1326,7 +1276,7 @@ namespace Assets.Scripts.Balance
         private static void EvaluateEnemyCasting(
             EnemyMetrics metrics, BalanceReport report, BalanceRulesSO rules, HashSet<EnemySO> alreadyReported)
         {
-            if (metrics.DrawableCount == 0)
+            if (metrics.SpellCount == 0)
             {
                 return;
             }
@@ -1345,11 +1295,11 @@ namespace Assets.Scripts.Balance
                     $"{metrics.Name} never casts the magic it carries")
                 {
                     Asset = metrics.Definition,
-                    Detail = $"It offers {metrics.DrawableCount} magic(s) on its Draw list but its behaviour "
+                    Detail = $"It knows {metrics.SpellCount} magic(s) but its behaviour "
                            + "has no CastMagic action, so the spells are player supply only and the enemy "
                            + "itself does nothing with them.",
-                    Suggestion = "Add a CastMagic action to its EnemyBehavior (EnemyBehaviorSO.CastFromDrawList "
-                               + "is the shape), or leave it out deliberately if this enemy is a pure Draw source."
+                    Suggestion = "Add a CastMagic action to its EnemyBehavior (EnemyBehaviorSO.CastFromSpellList "
+                               + "is the shape), or clear the Spells list if it is not meant to cast."
                 });
                 return;
             }
@@ -2299,16 +2249,16 @@ namespace Assets.Scripts.Balance
                 });
             }
 
-            foreach (var overlap in variety.DrawOverlaps)
+            foreach (var overlap in variety.SpellOverlaps)
             {
                 string a = string.IsNullOrEmpty(overlap.A.DisplayName) ? overlap.A.name : overlap.A.DisplayName;
                 string b = string.IsNullOrEmpty(overlap.B.DisplayName) ? overlap.B.name : overlap.B.DisplayName;
 
                 report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Variety, $"{a} / {b}",
-                    $"{a} and {b} offer {overlap.Share:P0} the same Draw list")
+                    $"{a} and {b} know {overlap.Share:P0} the same spells")
                 {
                     Asset = overlap.A,
-                    Detail = $"Shared: {string.Join(", ", overlap.SharedMagic)}. Draw variety is what makes two "
+                    Detail = $"Shared: {string.Join(", ", overlap.SharedMagic)}. Spell variety is what makes two "
                            + "fights play differently; identical offerings collapse that.",
                     Suggestion = "Give each enemy a distinctive magic so the player has a reason to fight it."
                 });
@@ -2324,24 +2274,24 @@ namespace Assets.Scripts.Balance
                 });
             }
 
-            if (variety.EnemiesWithoutDrawList > 0)
+            if (variety.EnemiesWithoutSpells > 0)
             {
                 report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Variety, variety.Scope,
-                    $"{variety.EnemiesWithoutDrawList} enemy definition(s) offer no Draw")
+                    $"{variety.EnemiesWithoutSpells} enemy definition(s) know no spells")
                 {
-                    Detail = "Draw is the party's only route to new magic; an enemy with an empty DrawableMagics "
+                    Detail = "A spell list is what lets an enemy do anything but swing; one with an empty Spells "
                            + "list contributes nothing to it.",
-                    Suggestion = "Give every enemy at least one drawable magic."
+                    Suggestion = "Give every enemy at least one spell, or accept it as a pure bruiser."
                 });
             }
 
-            if (variety.CatalogMagicCount > 0 && variety.DrawCoverage < 0.5f)
+            if (variety.CatalogMagicCount > 0 && variety.EnemySpellCoverage < 0.5f)
             {
                 report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Variety, variety.Scope,
-                    $"Only {variety.DistinctDrawableMagic} of {variety.CatalogMagicCount} magics are drawable anywhere")
+                    $"Only {variety.DistinctEnemySpells} of {variety.CatalogMagicCount} magics are cast by any enemy")
                 {
-                    Detail = $"{variety.DrawCoverage:P0} coverage — the rest of the catalog is unreachable in play.",
-                    Suggestion = "Spread the catalog across enemy Draw lists."
+                    Detail = $"{variety.EnemySpellCoverage:P0} coverage — the rest of the catalog is unreachable in play.",
+                    Suggestion = "Spread the catalog across enemy spell lists so the party meets what it can learn."
                 });
             }
         }
@@ -2350,8 +2300,8 @@ namespace Assets.Scripts.Balance
 
         /// <summary>
         /// The supply side of the elemental layer. Resistances and combos are both authored content that
-        /// only becomes live if the Draw tables hand the player the pieces — so a combo whose required
-        /// tag lives on undrawable magic, or a level that resists an element the player cannot yet deal,
+        /// only becomes live if the sphere grids hand the player the pieces — so a combo whose required
+        /// tag lives on magic no grid teaches, or a level that resists an element the player cannot yet deal,
         /// is content that can never fire. Neither is visible in any inspector.
         /// </summary>
         private static void EvaluateProgression(BalanceReport report, BalanceRulesSO rules)
@@ -2387,21 +2337,38 @@ namespace Assets.Scripts.Balance
                         Suggestion = "Add the tag to a magic, or change the combo's RequiredTags."
                     });
                 }
-                else if (combo.TagsNotDrawable.Count > 0)
+                else if (combo.TagsNotLearnable.Count > 0)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, combo.Name,
-                        $"Combo '{combo.Name}' is unreachable — {string.Join(", ", combo.TagsNotDrawable)} only exists on undrawable magic")
+                        $"Combo '{combo.Name}' is unreachable — {string.Join(", ", combo.TagsNotLearnable)} only exists on magic no grid teaches")
                     {
                         Asset = combo.Combo,
                         Detail = $"Requires {string.Join(" + ", combo.RequiredTags)}. "
-                               + $"{string.Join("; ", combo.EnablingMagic)}. Draw is the only route to new magic, "
-                               + "so a tag that no enemy offers cannot be brought to a fight.",
-                        Suggestion = "Add the carrying magic to an enemy's DrawableMagics list."
+                               + $"{string.Join("; ", combo.EnablingMagic)}. A sphere grid is the only route to "
+                               + "magic, so a tag carried only by magic no MagicKnown node grants can never reach "
+                               + "a fight.",
+                        Suggestion = "Put the carrying magic on a MagicKnown node in some hero's sphere grid."
+                    });
+                }
+                else if (combo.UnlockedAt == null)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Progression, combo.Name,
+                        $"Combo '{combo.Name}' is affordable but the campaign never buys it")
+                    {
+                        Asset = combo.Combo,
+                        Detail = $"Every required tag is on a grid ({string.Join("; ", combo.EnablingMagic)}), "
+                               + $"roughly {combo.InvestmentToEnable} xp in total, but no modelled party owns all "
+                               + "of them at once on any floor. Note GreedySpend is a breadth build, so it "
+                               + "under-buys deliberately deep magic branches.",
+                        Suggestion = "Move a carrying magic shallower on its grid, or accept it as a reward for "
+                               + "a build the model does not play."
                     });
                 }
             }
 
-            // Name the unreachable magic outright — the variety tab only reports the count.
+            // Name the unreachable magic outright — the variety tab only reports the count. This is a
+            // Critical rather than the Warning it was under Draw: a spell on no grid has no second
+            // route to the player, so it is dead content rather than late content.
             var unreachable = new List<string>();
             foreach (var availability in map.Magic)
             {
@@ -2413,12 +2380,13 @@ namespace Assets.Scripts.Balance
 
             if (unreachable.Count > 0)
             {
-                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression, "Draw tables",
-                    $"{unreachable.Count} magic(s) cannot be drawn anywhere")
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Progression, "Sphere grids",
+                    $"{unreachable.Count} magic(s) are on no hero's sphere grid")
                 {
                     Detail = $"Unreachable: {string.Join(", ", unreachable)}. "
-                           + $"Draw coverage is {map.ReachableMagicCount}/{map.CatalogMagicCount}.",
-                    Suggestion = "Add each to an enemy's DrawableMagics, or accept it as Forge/merchant-only content."
+                           + $"Grid coverage is {map.ReachableMagicCount}/{map.CatalogMagicCount}. A MagicKnown "
+                           + "node is the only way a hero learns a spell, so these cannot be cast by anyone.",
+                    Suggestion = "Add each to a MagicKnown node on some hero's grid, or delete the asset."
                 });
             }
 
@@ -2426,23 +2394,25 @@ namespace Assets.Scripts.Balance
             {
                 foreach (var level in run.Levels)
                 {
-                    // Front-loading: if one level hands over most of the catalog, the rest of the run
-                    // has nothing left to reveal and Draw stops being a reason to fight anything.
-                    if (map.CatalogMagicCount > 0 && level.NewlyDrawable.Count > 0)
+                    // Front-loading: if the party's kit jumps by most of the catalog in one step, the
+                    // rest of the campaign has nothing left to reveal. The cause moved with the
+                    // mechanic — it used to be a room pool offering too many draws, and it is now a
+                    // grid handing over too many MagicKnown nodes for one floor's worth of XP.
+                    if (map.CatalogMagicCount > 0 && level.NewlyKnown.Count > 0)
                     {
-                        float share = (float)level.NewlyDrawable.Count / map.CatalogMagicCount;
+                        float share = (float)level.NewlyKnown.Count / map.CatalogMagicCount;
                         if (share > rules.MaxUnlockSharePerLevel)
                         {
                             report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Progression,
                                 $"{run.Name} / {level.Reference}",
-                                $"{level.Reference} unlocks {share:P0} of the magic catalog at once")
+                                $"{level.Reference} adds {share:P0} of the magic catalog to the party's kit at once")
                             {
                                 Asset = run.Run,
-                                Detail = $"{level.NewlyDrawable.Count} of {map.CatalogMagicCount} magics first "
-                                       + "become drawable here, because every enemy that offers them appears in "
-                                       + $"this level's room pool. Ceiling is {rules.MaxUnlockSharePerLevel:P0}.",
-                                Suggestion = "Hold some enemies back for later levels so Draw keeps paying out "
-                                       + "across the run."
+                                Detail = $"{level.NewlyKnown.Count} of {map.CatalogMagicCount} magics are first "
+                                       + "known by the modelled party here, because that floor's XP reaches a "
+                                       + $"cluster of MagicKnown nodes. Ceiling is {rules.MaxUnlockSharePerLevel:P0}.",
+                                Suggestion = "Spread the MagicKnown nodes across grid depths so spells arrive "
+                                       + "across the campaign rather than in one pass."
                             });
                         }
                     }
@@ -2475,10 +2445,11 @@ namespace Assets.Scripts.Balance
                             $"{level.Reference} resists elements the player cannot bring yet")
                         {
                             Asset = run.Run,
-                            Detail = "Its enemies carry resistances, but none are in an element drawable by this "
+                            Detail = "Its enemies carry resistances, but none are in an element the modelled party "
+                                   + "can deal by this "
                                    + $"point in the run order. Available so far: "
                                    + $"{(level.ElementsAvailable.Count > 0 ? string.Join(", ", level.ElementsAvailable) : "none")}.",
-                            Suggestion = "Either move the enabling magic earlier in the Draw tables, or retarget "
+                            Suggestion = "Either move the enabling magic shallower on a grid, or retarget "
                                    + "the resistances to an element the player already has."
                         });
                     }
@@ -2631,15 +2602,7 @@ namespace Assets.Scripts.Balance
                     };
 
                     // Same loadout rules as the per-room sims, so the two are comparable.
-                    var everyEnemy = new List<SimUnit>();
-                    foreach (var room in rooms)
-                    {
-                        foreach (var unit in room)
-                        {
-                            everyEnemy.Add(unit);
-                        }
-                    }
-                    AssignDrawLoadout(level.Party, everyEnemy, report.Save, input.Magic);
+                    AssignMagicLoadout(level.Party, report.Save, input.Magic);
 
                     var floorReport = new FloorSimReport
                     {
@@ -2951,15 +2914,6 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                var everyEnemy = new List<SimUnit>();
-                foreach (var room in rooms)
-                {
-                    foreach (var unit in room)
-                    {
-                        everyEnemy.Add(unit);
-                    }
-                }
-
                 int tier = -1;
                 if (run.Run != null && tiers.TryGetValue(CampaignOps.RunKeyOf(run.Run), out int depth))
                 {
@@ -2983,7 +2937,7 @@ namespace Assets.Scripts.Balance
                     EquivalentInvestmentTolerance = rules.EquivalentInvestmentTolerance,
                     PotionItem = level.Party.PotionItem,
                     PotionCount = level.Party.PotionCount,
-                    PrepareParty = party => AssignDrawLoadout(party, everyEnemy, report.Save, input.Magic),
+                    PrepareParty = party => AssignMagicLoadout(party, report.Save, input.Magic),
                     Sim = new EncounterSimulator.FloorSimSettings
                     {
                         Trials = rules.FrontierTrials,

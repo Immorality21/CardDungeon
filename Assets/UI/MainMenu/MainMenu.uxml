@@ -154,6 +154,7 @@
 
             <ui:VisualElement name="inventory-tabs" class="cd-tabs">
                 <ui:Button name="tab-equipment" text="Equipment" class="cd-tab cd-tab--active" />
+                <ui:Button name="tab-spells" text="Spells" class="cd-tab" />
                 <ui:Button name="tab-consumables" text="Consumables" class="cd-tab" />
             </ui:VisualElement>
 

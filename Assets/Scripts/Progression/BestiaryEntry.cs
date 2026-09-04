@@ -39,6 +39,20 @@ namespace Assets.Scripts.Progression
 
         /// <summary>Item keys this enemy has actually been seen to drop.</summary>
         public List<string> ObservedLootKeys = new List<string>();
+
+        /// <summary>
+        /// <c>MagicSO.Key</c>s this enemy has actually been seen to cast.
+        ///
+        /// <para>This is what is left of the Draw discovery loop. Until 2026-09-04 an enemy's spell
+        /// list was also its Draw list, and an entry was named once the player had drawn it from
+        /// anywhere - a permanent, cross-enemy record kept on <c>MetaProgressSaveData</c>. With Draw
+        /// gone that record belongs to the hero side (it now means "some hero has learned this on
+        /// their grid"), and what the Bestiary should mask is a different question: has this
+        /// player watched <i>this monster</i> throw <i>this spell</i>. Filed per enemy for exactly
+        /// that reason - knowing the Cinder Imp throws Fireball tells you nothing about the
+        /// Dragon.</para>
+        /// </summary>
+        public List<string> ObservedSpellKeys = new List<string>();
     }
 
     /// <summary>
@@ -162,6 +176,35 @@ namespace Assets.Scripts.Progression
             }
             entry.ObservedLootKeys.Add(itemKey);
             return true;
+        }
+
+        /// <summary>Records a spell this enemy was actually seen to cast.</summary>
+        public static bool MarkSpellObserved(List<BestiaryEntry> entries, string enemyKey, string magicKey)
+        {
+            if (entries == null || string.IsNullOrEmpty(enemyKey) || string.IsNullOrEmpty(magicKey))
+            {
+                return false;
+            }
+
+            var entry = GetOrCreate(entries, enemyKey);
+            if (entry.ObservedSpellKeys == null)
+            {
+                entry.ObservedSpellKeys = new List<string>();
+            }
+            if (entry.ObservedSpellKeys.Contains(magicKey))
+            {
+                return false;
+            }
+            entry.ObservedSpellKeys.Add(magicKey);
+            return true;
+        }
+
+        public static bool KnowsSpell(BestiaryEntry entry, string magicKey)
+        {
+            return entry != null
+                && !string.IsNullOrEmpty(magicKey)
+                && entry.ObservedSpellKeys != null
+                && entry.ObservedSpellKeys.Contains(magicKey);
         }
 
         public static bool KnowsDamageType(BestiaryEntry entry, DamageType type)

@@ -340,7 +340,12 @@ namespace Assets.Scripts.Progression
             return !string.IsNullOrEmpty(magicKey) && _saveData.DiscoveredMagicKeys.Contains(magicKey);
         }
 
-        /// <summary>Records a magic as discovered (first drawn). Idempotent; persists immediately.</summary>
+        /// <summary>
+        /// Records a magic as discovered - i.e. some hero has learned it on their sphere grid, which
+        /// is what unlocks it in the Forge. It used to mean "drawn from an enemy at least once"; with
+        /// Draw gone the trigger moved to node activation, and what the <i>Bestiary</i> masks moved
+        /// to <c>BestiaryEntry.ObservedSpellKeys</c> instead. Idempotent; persists immediately.
+        /// </summary>
         public void MarkMagicDiscovered(string magicKey)
         {
             if (string.IsNullOrEmpty(magicKey) || _saveData.DiscoveredMagicKeys.Contains(magicKey))
@@ -424,6 +429,12 @@ namespace Assets.Scripts.Progression
         public void MarkLootObserved(string enemyKey, string itemKey)
         {
             CommitBestiary(BestiaryOps.MarkLootObserved(GetBestiary(), enemyKey, itemKey));
+        }
+
+        /// <summary>Records a spell this enemy was actually seen to cast. Idempotent per spell.</summary>
+        public void MarkEnemySpellObserved(string enemyKey, string magicKey)
+        {
+            CommitBestiary(BestiaryOps.MarkSpellObserved(GetBestiary(), enemyKey, magicKey));
         }
 
         private void CommitBestiary(bool changed)

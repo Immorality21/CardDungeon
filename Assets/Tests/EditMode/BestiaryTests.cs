@@ -277,35 +277,48 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void DrawLines_HideTheNameUntilTheMagicHasBeenDrawnSomewhere()
+        public void SpellLines_HideTheNameUntilThisEnemyHasBeenSeenCastingIt()
         {
             var fireball = ScriptableObject.CreateInstance<Assets.Scripts.Cards.MagicSO>();
             fireball.Key = "Fireball";
             fireball.DisplayName = "Fireball";
 
             var enemy = MakeEnemy();
-            enemy.DrawableMagics = new List<DrawableMagicEntry>
-            {
-                new DrawableMagicEntry { Magic = fireball, Charges = 2 }
-            };
+            enemy.Spells = new List<EnemySpellEntry> { new EnemySpellEntry { Magic = fireball } };
 
-            var undiscovered = BestiaryPresenter.DrawLines(enemy, _ => false);
-            Assert.AreEqual(BestiaryPresenter.Unknown, undiscovered[0].Label);
-            Assert.AreEqual("x2", undiscovered[0].Value,
-                "The charge count is never hidden - what a draw is worth is the decision being made.");
-            Assert.AreEqual(BestiaryTone.Unknown, undiscovered[0].Tone);
+            var unseen = BestiaryPresenter.SpellLines(enemy, null);
+            Assert.AreEqual(1, unseen.Count,
+                "An unobserved spell is listed unnamed, not omitted - how many it has is itself information.");
+            Assert.AreEqual(BestiaryPresenter.Unknown, unseen[0].Label);
+            Assert.AreEqual(BestiaryTone.Unknown, unseen[0].Tone);
 
-            var discovered = BestiaryPresenter.DrawLines(enemy, key => key == "Fireball");
-            Assert.AreEqual("Fireball", discovered[0].Label);
-            Assert.AreEqual(BestiaryTone.Neutral, discovered[0].Tone);
+            BestiaryOps.MarkSpellObserved(_entries, enemy.SaveKey, "Fireball");
+            var seen = BestiaryPresenter.SpellLines(enemy, BestiaryOps.Find(_entries, enemy.SaveKey));
+            Assert.AreEqual("Fireball", seen[0].Label);
+            Assert.AreEqual(BestiaryTone.Neutral, seen[0].Tone);
         }
 
         [Test]
-        public void IsDrawKnown_WithNoRecord_HidesRatherThanLeaks()
+        public void SpellObservation_IsPerEnemy_NotGlobal()
         {
-            // A call site that forgets to pass the discovery record should over-hide, never leak.
-            Assert.IsFalse(BestiaryPresenter.IsDrawKnown("Fireball", null));
-            Assert.IsFalse(BestiaryPresenter.IsDrawKnown(null, _ => true));
+            // Seeing a Cinder Imp throw Fireball says nothing about what the Dragon has. Under Draw
+            // one reveal was enough anywhere, because drawing it was the acquisition; the reveal is
+            // an observation about a monster now.
+            BestiaryOps.MarkSpellObserved(_entries, "CinderImp", "Fireball");
+
+            Assert.IsTrue(BestiaryOps.KnowsSpell(BestiaryOps.Find(_entries, "CinderImp"), "Fireball"));
+            Assert.IsFalse(BestiaryOps.KnowsSpell(BestiaryOps.Find(_entries, "Dragon"), "Fireball"));
+        }
+
+        [Test]
+        public void MarkSpellObserved_IsIdempotent()
+        {
+            Assert.IsTrue(BestiaryOps.MarkSpellObserved(_entries, "Dragon", "Fireball"),
+                "The first sighting is a change worth persisting.");
+            Assert.IsFalse(BestiaryOps.MarkSpellObserved(_entries, "Dragon", "Fireball"),
+                "Seeing it again changes nothing, so the caller must not write the save.");
+            Assert.IsFalse(BestiaryOps.MarkSpellObserved(_entries, "Dragon", ""));
+            Assert.IsFalse(BestiaryOps.MarkSpellObserved(null, "Dragon", "Fireball"));
         }
 
         [Test]

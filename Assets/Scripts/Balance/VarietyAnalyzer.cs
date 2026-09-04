@@ -14,8 +14,8 @@ namespace Assets.Scripts.Balance
         public float Share;
     }
 
-    /// <summary>Two enemies offering substantially the same Draw list — the Draw system's variety leaking away.</summary>
-    public class DrawOverlap
+    /// <summary>Two enemies with substantially the same spell repertoire — encounter variety leaking away.</summary>
+    public class SpellOverlap
     {
         public EnemySO A;
         public EnemySO B;
@@ -25,7 +25,7 @@ namespace Assets.Scripts.Balance
 
     /// <summary>
     /// The "one-dimensional" axis. Stat balance can be perfect and the game still be boring: if every
-    /// enemy is an Aggressor with no resistances and the same Draw list, then every fight is the same
+    /// enemy is an Aggressor with no resistances and the same spell list, then every fight is the same
     /// fight and the elemental layer never comes into play. These are the metrics that catch that,
     /// none of which are visible anywhere in the inspector.
     /// </summary>
@@ -48,17 +48,17 @@ namespace Assets.Scripts.Balance
         /// <summary>Damage types no magic in the catalog uses at all.</summary>
         public List<DamageType> UnusedDamageTypes = new List<DamageType>();
 
-        public List<DrawOverlap> DrawOverlaps = new List<DrawOverlap>();
+        public List<SpellOverlap> SpellOverlaps = new List<SpellOverlap>();
 
         /// <summary>Enemy pairs handing out the same loot item.</summary>
         public List<string> DuplicateLootPairs = new List<string>();
 
-        public int DistinctDrawableMagic;
+        public int DistinctEnemySpells;
         public int CatalogMagicCount;
-        public int EnemiesWithoutDrawList;
+        public int EnemiesWithoutSpells;
 
-        public float DrawCoverage => CatalogMagicCount > 0
-            ? (float)DistinctDrawableMagic / CatalogMagicCount
+        public float EnemySpellCoverage => CatalogMagicCount > 0
+            ? (float)DistinctEnemySpells / CatalogMagicCount
             : 0f;
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Assets.Scripts.Balance
 
             var byArchetype = new Dictionary<EnemyArchetype, float>();
             var resistedTypes = new HashSet<DamageType>();
-            var drawKeys = new HashSet<string>();
+            var spellKeys = new HashSet<string>();
             var lootOwners = new Dictionary<string, List<string>>();
 
             foreach (var member in members)
@@ -118,17 +118,17 @@ namespace Assets.Scripts.Balance
                     report.ResistedWeight += weight;
                 }
 
-                if (enemy.DrawableMagics == null || enemy.DrawableMagics.Count == 0)
+                if (enemy.Spells == null || enemy.Spells.Count == 0)
                 {
-                    report.EnemiesWithoutDrawList++;
+                    report.EnemiesWithoutSpells++;
                 }
                 else
                 {
-                    foreach (var draw in enemy.DrawableMagics)
+                    foreach (var spell in enemy.Spells)
                     {
-                        if (draw != null && draw.Magic != null)
+                        if (spell != null && spell.Magic != null)
                         {
-                            drawKeys.Add(MagicKey(draw.Magic));
+                            spellKeys.Add(MagicKey(spell.Magic));
                         }
                     }
                 }
@@ -166,11 +166,11 @@ namespace Assets.Scripts.Balance
                 ? report.ResistedWeight / report.TotalWeight
                 : 0f;
 
-            report.DistinctDrawableMagic = drawKeys.Count;
+            report.DistinctEnemySpells = spellKeys.Count;
             report.CatalogMagicCount = magicCatalog != null ? magicCatalog.Count : 0;
 
             CollectDamageTypeUsage(magicCatalog, resistedTypes, report);
-            CollectDrawOverlaps(members, report, rules);
+            CollectSpellOverlaps(members, report, rules);
 
             foreach (var kvp in lootOwners)
             {
@@ -229,9 +229,9 @@ namespace Assets.Scripts.Balance
             }
         }
 
-        private static void CollectDrawOverlaps(IList<WeightedEnemy> members, VarietyReport report, BalanceRulesSO rules)
+        private static void CollectSpellOverlaps(IList<WeightedEnemy> members, VarietyReport report, BalanceRulesSO rules)
         {
-            float threshold = rules != null ? rules.MaxDrawTableOverlap : 0.6f;
+            float threshold = rules != null ? rules.MaxEnemySpellOverlap : 0.6f;
 
             for (int i = 0; i < members.Count; i++)
             {
@@ -244,8 +244,8 @@ namespace Assets.Scripts.Balance
                         continue;
                     }
 
-                    var keysA = DrawKeys(a);
-                    var keysB = DrawKeys(b);
+                    var keysA = SpellKeys(a);
+                    var keysB = SpellKeys(b);
                     if (keysA.Count == 0 || keysB.Count == 0)
                     {
                         continue;
@@ -272,7 +272,7 @@ namespace Assets.Scripts.Balance
 
                     if (share >= threshold)
                     {
-                        report.DrawOverlaps.Add(new DrawOverlap
+                        report.SpellOverlaps.Add(new SpellOverlap
                         {
                             A = a,
                             B = b,
@@ -283,21 +283,21 @@ namespace Assets.Scripts.Balance
                 }
             }
 
-            report.DrawOverlaps.Sort((x, y) => y.Share.CompareTo(x.Share));
+            report.SpellOverlaps.Sort((x, y) => y.Share.CompareTo(x.Share));
         }
 
-        private static HashSet<string> DrawKeys(EnemySO enemy)
+        private static HashSet<string> SpellKeys(EnemySO enemy)
         {
             var keys = new HashSet<string>();
-            if (enemy.DrawableMagics == null)
+            if (enemy.Spells == null)
             {
                 return keys;
             }
-            foreach (var draw in enemy.DrawableMagics)
+            foreach (var spell in enemy.Spells)
             {
-                if (draw != null && draw.Magic != null)
+                if (spell != null && spell.Magic != null)
                 {
-                    keys.Add(MagicKey(draw.Magic));
+                    keys.Add(MagicKey(spell.Magic));
                 }
             }
             return keys;

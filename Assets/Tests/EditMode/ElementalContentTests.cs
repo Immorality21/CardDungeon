@@ -34,20 +34,6 @@ namespace Tests.EditMode
             return magic;
         }
 
-        private static List<EnemySO> LoadAllEnemies()
-        {
-            var enemies = new List<EnemySO>();
-            foreach (var guid in AssetDatabase.FindAssets("t:EnemySO"))
-            {
-                var asset = AssetDatabase.LoadAssetAtPath<EnemySO>(AssetDatabase.GUIDToAssetPath(guid));
-                if (asset != null)
-                {
-                    enemies.Add(asset);
-                }
-            }
-            return enemies;
-        }
-
         [Test]
         public void EveryBuffTypeInUse_HasAHandler()
         {
@@ -148,7 +134,7 @@ namespace Tests.EditMode
         {
             // MagicCatalog is a prefab instance in both scenes, so the list has to be edited on the
             // prefab. Overriding the array *size* on the scene instance grows it with nulls instead —
-            // which is exactly how the cloaks first shipped unreachable: drawable in combat, but
+            // which is exactly how the cloaks first shipped unreachable: castable in combat, but
             // unresolvable when a save restored the slot and invisible in the hub Forge.
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/MagicCatalog.prefab");
             Assert.IsNotNull(prefab, "No MagicCatalog prefab at Assets/Prefabs/MagicCatalog.prefab.");
@@ -234,36 +220,57 @@ namespace Tests.EditMode
                 }
 
                 Assert.IsTrue(hasKnown,
-                    $"{hero.DisplayName}'s grid has no MagicKnown node, so they can only ever cast what "
-                    + "they draw - and charges do not refill between floors.");
+                    $"{hero.DisplayName}'s grid has no MagicKnown node, so they can never cast anything "
+                    + "at all - a grid is the only source of magic since Draw was removed.");
             }
         }
 
         [Test]
-        public void EveryCloak_IsDrawableFromSomeEnemy()
+        public void EveryCloak_IsTaughtBySomeSphereGrid()
         {
-            // Draw is the only way into the player's hands. A cloak on no enemy's list is content the
-            // player can never reach - which is what "the elemental layer is inert" meant the first time.
-            var offered = new List<string>();
-            foreach (var enemy in LoadAllEnemies())
+            // The defensive half of the elemental layer, and the content most at risk from the Draw
+            // removal: the cloaks ship at CastWeight 0, so they were *only* ever drawables. The
+            // moment Draw went they would have become unobtainable if no grid picked them up, which
+            // is precisely what "the elemental layer is inert" meant the first time round.
+            AssertTaughtBySomeGrid("FireCloak", "FrostCloak", "StormCloak", "Ward");
+        }
+
+        [Test]
+        public void EveryMagicInTheCatalog_IsTaughtBySomeSphereGrid()
+        {
+            // A grid is the only route to a spell now, so a magic on no MagicKnown node is not late
+            // content or shop-only content - it is content nobody can ever cast.
+            var keys = LoadAllMagic().Select(m => m.Key).ToArray();
+            AssertTaughtBySomeGrid(keys);
+        }
+
+        private static void AssertTaughtBySomeGrid(params string[] magicKeys)
+        {
+            var taught = new List<string>();
+            foreach (var guid in AssetDatabase.FindAssets("t:HeroSO"))
             {
-                if (enemy.DrawableMagics == null)
+                var hero = AssetDatabase.LoadAssetAtPath<Assets.Scripts.Heroes.HeroSO>(
+                    AssetDatabase.GUIDToAssetPath(guid));
+                if (hero == null || hero.SphereGrid == null)
                 {
                     continue;
                 }
-                foreach (var entry in enemy.DrawableMagics)
+
+                foreach (var node in hero.SphereGrid.Nodes)
                 {
-                    if (entry != null && entry.Magic != null)
+                    if (node != null
+                        && node.Kind == Assets.Scripts.Heroes.SphereNodeKind.MagicKnown
+                        && !string.IsNullOrEmpty(node.GrantedMagicKey))
                     {
-                        offered.Add(entry.Magic.Key);
+                        taught.Add(node.GrantedMagicKey);
                     }
                 }
             }
 
-            foreach (var key in new[] { "FireCloak", "FrostCloak", "StormCloak", "Ward" })
-            {
-                CollectionAssert.Contains(offered, key, $"{key} is not on any enemy's Draw list.");
-            }
+            var missing = magicKeys.Where(key => !taught.Contains(key)).ToList();
+            CollectionAssert.IsEmpty(missing,
+                "No sphere grid teaches: " + string.Join(", ", missing)
+                + ". A MagicKnown node is the only way a hero learns a spell.");
         }
     }
 }

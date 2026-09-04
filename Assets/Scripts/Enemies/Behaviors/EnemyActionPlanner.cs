@@ -384,7 +384,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                     }
                     return entry.Magic != null
                         ? entry.Magic.Effects != null && entry.Magic.Effects.Count > 0
-                        : EnemyMagicPlan.HasCastable(context.DrawableMagics);
+                        : EnemyMagicPlan.HasCastable(context.Spells);
 
                 default:
                     return HasLivingHero(context);
@@ -462,7 +462,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                 {
                     var magic = entry.Magic != null
                         ? entry.Magic
-                        : EnemyMagicPlan.Select(context.DrawableMagics, rolls.Magic);
+                        : EnemyMagicPlan.Select(context.Spells, rolls.Magic);
                     if (magic == null)
                     {
                         return Swing(self, context, rolls, 1f);

@@ -33,7 +33,7 @@ MonoBehaviour:
   AttackDamageType: 1
   Archetype: 0
   Behavior: {fileID: 11400000, guid: e39746458aa1a9349a14f391d883c636, type: 2}
-  DrawableMagics: []
+  Spells: []
   Resistances:
   - DamageType: 1
     Percent: 50

@@ -5,109 +5,178 @@ using NUnit.Framework;
 namespace Tests.EditMode
 {
     /// <summary>
-    /// The merge rule behind carrying draw slots between runs. A run only ever knows about the heroes
-    /// it fielded, so banking its loadout has to fold into what is already stored rather than replace
-    /// it - otherwise clearing a level with one lineup wipes the kit of everybody left at home.
+    /// The kit a hero walks into a dungeon with: their chosen loadout resolved against what their
+    /// sphere grid says they know, capped at their slot count.
+    ///
+    /// <para><b>This file used to test something else.</b> Until 2026-09-04 a loadout was a record
+    /// of what the party had <i>accumulated</i> by drawing, so the interesting rule was
+    /// <c>EquippedMagicState.Merge</c> — folding a finished run's slots into the stored file without
+    /// wiping the kit of a hero who had been left at home. Magic comes off the grid now and nothing
+    /// in a run changes it, so there is nothing to merge; the only thing worth persisting is the
+    /// player's choice, and the only rule worth pinning is how that choice becomes slots.</para>
     /// </summary>
     public class MagicLoadoutTests
     {
-        private static MagicSlotSaveData Loadout(string heroKey, params string[] magicKeys)
+        private static List<KeyValuePair<string, int>> Known(params string[] keys)
         {
-            var entry = new MagicSlotSaveData { HeroKey = heroKey };
-            foreach (var key in magicKeys)
+            var known = new List<KeyValuePair<string, int>>();
+            foreach (var key in keys)
             {
-                entry.Slots.Add(new MagicSlotEntry { MagicKey = key, Charges = 3, MaxCharges = 3 });
+                known.Add(new KeyValuePair<string, int>(key, 2));
             }
-            return entry;
+            return known;
         }
 
-        private static MagicSlotSaveData Find(List<MagicSlotSaveData> loadouts, string heroKey)
+        // ---------------------------------------------------------------- resolve
+
+        [Test]
+        public void Resolve_WithNoChoice_AutoFillsFromWhatTheHeroKnows()
         {
-            return loadouts.Find(l => l.HeroKey == heroKey);
+            // A hero who never opens the loadout screen must still walk in armed, and a node bought
+            // five minutes ago must be in hand without a second trip to another screen.
+            var kit = MagicLoadoutOps.Resolve(Known("Heal", "Fireball", "Ward"), null, 2);
+
+            CollectionAssert.AreEqual(new[] { "Heal", "Fireball" }, kit);
         }
 
         [Test]
-        public void Merge_HeroInBoth_TakesTheIncomingLoadout()
+        public void Resolve_TakesAStoredChoiceLiterally_EmptySlotsAndAll()
         {
-            var stored = new List<MagicSlotSaveData> { Loadout("Warrior", "Slash") };
-            var incoming = new List<MagicSlotSaveData> { Loadout("Warrior", "Fireball", "Heal") };
+            // The alternative - backfilling free slots from the known pool - cannot work: with two
+            // slots and two known spells, unequipping one would silently put it straight back.
+            var kit = MagicLoadoutOps.Resolve(
+                Known("Heal", "Fireball", "Ward"), new List<string> { "Ward" }, 2);
 
-            var merged = EquippedMagicState.Merge(stored, incoming);
-
-            Assert.AreEqual(1, merged.Count);
-            Assert.AreEqual(2, Find(merged, "Warrior").Slots.Count);
-            Assert.AreEqual("Fireball", Find(merged, "Warrior").Slots[0].MagicKey);
+            CollectionAssert.AreEqual(new[] { "Ward" }, kit,
+                "a deliberately empty slot stays empty");
         }
 
         [Test]
-        public void Merge_BenchedHero_KeepsTheirKit()
+        public void Resolve_FallsBackToAutoFillWhenTheChoiceResolvesToNothing()
         {
-            // The run fielded the Warrior and the Acolyte; the Tank stayed home and must still be
-            // holding IceShard when they are next fielded.
-            var stored = new List<MagicSlotSaveData>
+            // A re-authored grid can retire every node a stored choice named. Sending that hero into
+            // a dungeon with nothing is worse than ignoring a choice they can no longer honour.
+            var kit = MagicLoadoutOps.Resolve(
+                Known("Heal", "Fireball"), new List<string> { "Meteor", "Doom" }, 2);
+
+            CollectionAssert.AreEqual(new[] { "Heal", "Fireball" }, kit);
+        }
+
+        [Test]
+        public void Resolve_DropsAKeyTheHeroNoLongerKnows()
+        {
+            // A grid re-authoring can retire a node. The stored choice keeps the key rather than
+            // being pruned on load, so resolving is where it has to be ignored.
+            var kit = MagicLoadoutOps.Resolve(
+                Known("Heal"), new List<string> { "Meteor", "Heal" }, 2);
+
+            CollectionAssert.AreEqual(new[] { "Heal" }, kit);
+        }
+
+        [Test]
+        public void Resolve_NeverExceedsTheSlotCount()
+        {
+            var kit = MagicLoadoutOps.Resolve(
+                Known("A", "B", "C", "D"), new List<string> { "D", "C", "B", "A" }, 2);
+
+            Assert.AreEqual(2, kit.Count);
+            CollectionAssert.AreEqual(new[] { "D", "C" }, kit);
+        }
+
+        [Test]
+        public void Resolve_CollapsesADuplicatedChoice()
+        {
+            var kit = MagicLoadoutOps.Resolve(
+                Known("Heal", "Fireball"), new List<string> { "Heal", "Heal" }, 2);
+
+            CollectionAssert.AreEqual(new[] { "Heal" }, kit,
+                "the duplicate collapses, and the freed slot is not backfilled - the choice is exact");
+        }
+
+        [Test]
+        public void Resolve_IsEmptyWhenThereAreNoSlotsOrNothingIsKnown()
+        {
+            CollectionAssert.IsEmpty(MagicLoadoutOps.Resolve(Known("Heal"), null, 0));
+            CollectionAssert.IsEmpty(MagicLoadoutOps.Resolve(Known(), null, 4));
+            CollectionAssert.IsEmpty(MagicLoadoutOps.Resolve(null, new List<string> { "Heal" }, 4));
+        }
+
+        // ---------------------------------------------------------------- toggle
+
+        [Test]
+        public void Toggle_OnAnAutoFilledKit_CommitsWhatWasShowing()
+        {
+            // The player sees Heal and Fireball carried (auto-filled) and clicks Heal off. If the
+            // toggle worked from the raw empty choice it would produce "everything except Heal",
+            // which is not what the screen just said.
+            var chosen = MagicLoadoutOps.Toggle(Known("Heal", "Fireball", "Ward"), null, "Heal", 2);
+
+            CollectionAssert.AreEqual(new[] { "Fireball" }, chosen);
+        }
+
+        [Test]
+        public void Toggle_EquippingIntoAFullKitDropsTheOldestChoice()
+        {
+            // A loadout screen click means "bring this", not "tell me the slots are full".
+            var chosen = MagicLoadoutOps.Toggle(
+                Known("Heal", "Fireball", "Ward"), new List<string> { "Heal", "Fireball" }, "Ward", 2);
+
+            CollectionAssert.AreEqual(new[] { "Fireball", "Ward" }, chosen);
+        }
+
+        [Test]
+        public void Toggle_IgnoresAMagicTheHeroDoesNotKnow()
+        {
+            var chosen = MagicLoadoutOps.Toggle(
+                Known("Heal"), new List<string> { "Heal" }, "Meteor", 2);
+
+            CollectionAssert.AreEqual(new[] { "Heal" }, chosen);
+        }
+
+        [Test]
+        public void Toggle_RoundTripsBackToWhereItStarted()
+        {
+            var known = Known("Heal", "Fireball");
+            var off = MagicLoadoutOps.Toggle(known, null, "Heal", 2);
+            var on = MagicLoadoutOps.Toggle(known, off, "Heal", 2);
+
+            CollectionAssert.Contains(on, "Heal");
+            CollectionAssert.Contains(on, "Fireball");
+        }
+
+        // ---------------------------------------------------------------- charges
+
+        [Test]
+        public void ChargesFor_ReadsTheGrantingNodesAllowance()
+        {
+            var known = new List<KeyValuePair<string, int>>
             {
-                Loadout("Warrior", "Slash"),
-                Loadout("Tank", "IceShard")
-            };
-            var incoming = new List<MagicSlotSaveData>
-            {
-                Loadout("Warrior", "Fireball"),
-                Loadout("Acolyte", "Heal")
+                new KeyValuePair<string, int>("Heal", 3),
+                new KeyValuePair<string, int>("Cinderstorm", 1)
             };
 
-            var merged = EquippedMagicState.Merge(stored, incoming);
-
-            Assert.AreEqual(3, merged.Count);
-            Assert.AreEqual("IceShard", Find(merged, "Tank").Slots[0].MagicKey);
-            Assert.AreEqual("Fireball", Find(merged, "Warrior").Slots[0].MagicKey);
-            Assert.AreEqual("Heal", Find(merged, "Acolyte").Slots[0].MagicKey);
+            Assert.AreEqual(3, MagicLoadoutOps.ChargesFor(known, "Heal"));
+            Assert.AreEqual(1, MagicLoadoutOps.ChargesFor(known, "Cinderstorm"));
+            Assert.AreEqual(0, MagicLoadoutOps.ChargesFor(known, "Meteor"));
+            Assert.AreEqual(0, MagicLoadoutOps.ChargesFor(null, "Heal"));
         }
 
-        [Test]
-        public void Merge_NewHero_IsAppended()
-        {
-            var merged = EquippedMagicState.Merge(
-                new List<MagicSlotSaveData>(),
-                new List<MagicSlotSaveData> { Loadout("Scout", "PoisonDart") });
-
-            Assert.AreEqual(1, merged.Count);
-            Assert.AreEqual("Scout", merged[0].HeroKey);
-        }
+        // ---------------------------------------------------------------- the save file
 
         [Test]
-        public void Merge_NullArguments_AreTreatedAsEmpty()
+        public void SaveData_ForCreatesOneEntryPerHero_ChosenForDoesNot()
         {
-            Assert.AreEqual(0, EquippedMagicState.Merge(null, null).Count);
-            Assert.AreEqual(1, EquippedMagicState.Merge(null,
-                new List<MagicSlotSaveData> { Loadout("Warrior", "Slash") }).Count);
-            Assert.AreEqual(1, EquippedMagicState.Merge(
-                new List<MagicSlotSaveData> { Loadout("Warrior", "Slash") }, null).Count);
-        }
+            var save = new MagicLoadoutSaveData();
 
-        [Test]
-        public void Merge_EntriesWithNoHeroKey_AreDropped()
-        {
-            // An unkeyed entry cannot be resolved back to a hero, so keeping it would only grow the
-            // file forever.
-            var stored = new List<MagicSlotSaveData> { Loadout("", "Slash"), null };
-            var incoming = new List<MagicSlotSaveData> { Loadout(null, "Fireball"), Loadout("Tank", "Heal") };
+            CollectionAssert.IsEmpty(save.ChosenFor("Warrior"));
+            Assert.AreEqual(0, save.Heroes.Count, "a read must not create an entry");
 
-            var merged = EquippedMagicState.Merge(stored, incoming);
+            save.For("Warrior").EquippedKeys.Add("Slash");
+            save.For("Warrior").EquippedKeys.Add("WarCry");
 
-            Assert.AreEqual(1, merged.Count);
-            Assert.AreEqual("Tank", merged[0].HeroKey);
-        }
-
-        [Test]
-        public void Merge_DoesNotMutateEitherArgument()
-        {
-            var stored = new List<MagicSlotSaveData> { Loadout("Warrior", "Slash") };
-            var incoming = new List<MagicSlotSaveData> { Loadout("Tank", "Heal") };
-
-            EquippedMagicState.Merge(stored, incoming);
-
-            Assert.AreEqual(1, stored.Count);
-            Assert.AreEqual(1, incoming.Count);
+            Assert.AreEqual(1, save.Heroes.Count);
+            CollectionAssert.AreEqual(new[] { "Slash", "WarCry" }, save.ChosenFor("Warrior"));
+            CollectionAssert.IsEmpty(save.ChosenFor("Acolyte"), "one hero's choice is not another's");
         }
     }
 }

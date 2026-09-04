@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Card Dungeon is a 2D procedural dungeon generation game built with **Unity 6 (6000.5.8f1)** and **C#**. It generates grid-based dungeons with interconnected rooms, doors, and configurable room types via ScriptableObjects. Features a turn-based combat system inspired by Final Fantasy X's CTB (Conditional Turn-Based) system, with an FFVIII-style **Draw** ability system — extract magic from enemies mid-combat, equip it into charge-based slots, and cast it — featuring tag combos, buffs/debuffs, and elemental damage types, plus a persistent between-run hub economy (Gold/Essence).
+Card Dungeon is a 2D procedural dungeon generation game built with **Unity 6 (6000.5.8f1)** and **C#**. It generates grid-based dungeons with interconnected rooms, doors, and configurable room types via ScriptableObjects. Features a turn-based combat system inspired by Final Fantasy X's CTB (Conditional Turn-Based) system. Magic is learned on a per-hero **sphere grid** and carried into a run in a scarce set of charge-based slots chosen at the hub, with tag combos, buffs/debuffs, and elemental damage types, plus a persistent between-run hub economy (Gold/Essence). *(An FFVIII-style **Draw** — extracting magic from enemies mid-combat — filled that role until 2026-09-04; see `docs/plans/SPECIALIZATION.md` §9b.)*
 
 ## Roadmap
 
@@ -53,7 +53,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`, **the bestiary** (`EnemyCatalogSO` + the pure `BestiaryPresenter` and `UI/BestiaryLineView`/`UI/BestiaryUI` — what the player has *observed* about each enemy, shown by the in-combat Inspect page and the hub Bestiary screen)
 - `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`
 - `Audio/` — **everything the game plays and the dials that scale it**: combat SFX (`CombatAudio`, `CombatSound`, `SoundBankSO`), the crossfading music bed (`MusicPlayer`, `MusicTrack`, `MusicBankSO`) and the player's volume/mute settings (`AudioOptions`, `AudioChannel`, `AudioOptionsSaveData` → `savedata/Audio.json`). Music clips live in `Assets/Audio/Music/` as **OGG** (never WAV — the repo pays the source size, the build re-encodes anyway) and never in a `Resources/` folder.
-- `Cards/` — Magic/Draw system (namespace still `Cards`): `MagicSO`, `MagicTag` (enum), `MagicCatalog`, `EquippedMagicState` (draw slots + charges), `EffectResolver`, `ComboDetector`, `CombatBuffTracker`, `MagicTagTracker`, `MagicComboSO`
+- `Cards/` — Magic system (namespace still `Cards`): `MagicSO`, `MagicTag` (enum), `MagicCatalog`, `EquippedMagicState` (equipped slots + charges), **`MagicLoadoutOps`** (which known spells fill those slots), `EffectResolver`, `ComboDetector`, `CombatBuffTracker`, `MagicTagTracker`, `MagicComboSO`
 - `Cards/Effects/` — Effect executors: `IEffectExecutor`, `DamageEffectExecutor`, `HealEffectExecutor`, `BuffEffectExecutor`, `DebuffEffectExecutor`, `EffectExecutorFactory`
 - `Cards/UI/` — `MagicSelectionUI`, `MagicForgeUI`
 - `Items/` — `ItemSO` (equipment + consumables via `ItemCategory`/`ConsumableEffectType`), `InventoryManager` (+ pure `InventoryOperations`), `ItemCatalogSO` (Resources-loaded item DB so the hub resolves items without scene wiring), `LootRoller` (rarity/depth-scaled drops), `UI/InventoryHubUI` (hub equip + consumables screen)
@@ -72,14 +72,14 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Audio** (SFX banks, the music bed and its crossfade, volume/mute and where they are applied) → `Assets/Scripts/Audio/CLAUDE.md`
 - **Dungeon generation + combat flow + the room bar + runtime controls** → `Assets/Scripts/Rooms/CLAUDE.md`
 - **Room events** (spawn odds, stat gates, checks, outcome weighting, level afflictions) → `Assets/Scripts/Rooms/Events/CLAUDE.md`
-- **Magic/Draw system** (magic defs, draw slots + charges, effects, combos, buffs) → `Assets/Scripts/Cards/CLAUDE.md`
+- **Magic system** (magic defs, the known-pool/loadout split, charges, effects, combos, buffs) → `Assets/Scripts/Cards/CLAUDE.md`
 - **Run progression + deferred persistence** → `Assets/Scripts/Dungeon/CLAUDE.md`
 - **Meta-progression / hub** (Gold, Essence, card upgrades) → `Assets/Scripts/Progression/CLAUDE.md`
 - **Hero & stats** → `Assets/Scripts/Heroes/CLAUDE.md`
 - **Enemies** → `Assets/Scripts/Enemies/CLAUDE.md`
 - **Main menu & hub UI** (incl. editor-driven UI setup) → `Assets/Scripts/MainMenu/CLAUDE.md`
 - **Persistence / save files** → `Assets/Scripts/IO/CLAUDE.md`
-- **Balance analysis** (difficulty targets, danger index, attrition, the **investment frontier** — what each campaign tier demands and how many ways it can be paid, over party width, sphere-grid XP and gear — Draw/combo supply chain, the analyzer window) → `Assets/Scripts/Balance/CLAUDE.md`
+- **Balance analysis** (difficulty targets, danger index, attrition, the **investment frontier** — what each campaign tier demands and how many ways it can be paid, over party width, sphere-grid XP and gear — the sphere-grid magic/combo supply chain, the analyzer window) → `Assets/Scripts/Balance/CLAUDE.md`
 - **Balancing playbook** (how the levers interact, the measure-don't-guess workflow, what past tuning passes learned) → `docs/BALANCING.md` — read this *before* changing a `Difficulty`, a hero bar or a spawn table, and record what a pass learned there afterwards
 - **Elemental layer roadmap** (resistance buffs, defensive magic, the discovery-gated reveal) → `docs/ELEMENTAL_PLAN.md`
 - **Runtime/visual validation via the Unity MCP** (drive the running game, capture screenshots) → `docs/GAMEPLAY_VALIDATION.md`

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Heroes;
+using Assets.Scripts.IO;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,9 +10,9 @@ using UnityEngine.UIElements;
 namespace Assets.Scripts.Items.UI
 {
     /// <summary>
-    /// Hub inventory (UI Toolkit view-controller, mirrors <c>MagicForgeUI</c>). Manages equipment
-    /// per hero and shows carried consumables — the only place gear is managed, since it's between
-    /// runs. Operates on a VisualElement subtree owned by the menu's UIDocument (not a MonoBehaviour).
+    /// Hub inventory (UI Toolkit view-controller, mirrors <c>MagicForgeUI</c>). Three tabs:
+    /// equipment per hero, the spell loadout per hero, and the carried consumables. It is the only
+    /// place gear and kit are managed, since both are between-run decisions. Operates on a VisualElement subtree owned by the menu's UIDocument (not a MonoBehaviour).
     /// Reads the roster from a <see cref="PartyRosterSO"/> because the hub has no live Party, and all
     /// item/equip state from the (scene-independent) <see cref="InventoryManager"/>.
     ///
@@ -20,7 +22,7 @@ namespace Assets.Scripts.Items.UI
     /// </summary>
     public class InventoryHubUI
     {
-        private enum Tab { Equipment, Consumables }
+        private enum Tab { Equipment, Spells, Consumables }
 
         private readonly VisualElement _root;
         private readonly PartyRosterSO _roster;
@@ -30,6 +32,7 @@ namespace Assets.Scripts.Items.UI
         private readonly Label _statsLabel;
         private readonly VisualElement _tabsBar;
         private readonly Button _tabEquipment;
+        private readonly Button _tabSpells;
         private readonly Button _tabConsumables;
         private readonly ScrollView _scroll;
         private readonly Label _emptyLabel;
@@ -38,6 +41,12 @@ namespace Assets.Scripts.Items.UI
         private Tab _tab = Tab.Equipment;
         private string _selectedHeroKey;
         private bool _isShown;
+
+        // The chosen spell loadouts, loaded on Show and written straight back on every change. A
+        // loadout is a preference, not a gain, so it is not deferred to a level clear the way XP and
+        // loot are - dying must not cost the player their equipment layout.
+        private readonly FileHandler _files = new FileHandler();
+        private MagicLoadoutSaveData _loadout;
 
         // Cursor-driven keyboard navigation over the currently shown selectable rows.
         private readonly List<VisualElement> _navRows = new List<VisualElement>();
@@ -65,6 +74,7 @@ namespace Assets.Scripts.Items.UI
             _statsLabel = root.Q<Label>("inventory-stats");
             _tabsBar = root.Q<VisualElement>("inventory-tabs");
             _tabEquipment = root.Q<Button>("tab-equipment");
+            _tabSpells = root.Q<Button>("tab-spells");
             _tabConsumables = root.Q<Button>("tab-consumables");
             _scroll = root.Q<ScrollView>("inventory-scroll");
             _emptyLabel = root.Q<Label>("inventory-empty");
@@ -74,6 +84,11 @@ namespace Assets.Scripts.Items.UI
             {
                 _tabEquipment.clicked += () => SetTab(Tab.Equipment);
                 _tabEquipment.focusable = false;
+            }
+            if (_tabSpells != null)
+            {
+                _tabSpells.clicked += () => SetTab(Tab.Spells);
+                _tabSpells.focusable = false;
             }
             if (_tabConsumables != null)
             {
@@ -112,6 +127,8 @@ namespace Assets.Scripts.Items.UI
             // auto-creates and loads (in Awake) before we read equip/consumable state.
             _ = InventoryManager.Instance;
 
+            _loadout = _files.Load<MagicLoadoutSaveData>();
+
             // Default to the first owned hero. The catalog lists every hero in the game; only the
             // ones the player has actually acquired get gear slots here.
             _ownedHeroes = null;
@@ -147,6 +164,17 @@ namespace Assets.Scripts.Items.UI
             }
         }
 
+        /// <summary>Left/Right step through the tabs. Clamped rather than wrapping, so the ends
+        /// of the row feel like ends - the same behaviour two tabs had when they were a toggle.</summary>
+        private void CycleTab(int delta)
+        {
+            int next = Mathf.Clamp((int)_tab + delta, 0, (int)Tab.Consumables);
+            if (next != (int)_tab)
+            {
+                SetTab((Tab)next);
+            }
+        }
+
         private void SetTab(Tab tab)
         {
             _tab = tab;
@@ -158,10 +186,11 @@ namespace Assets.Scripts.Items.UI
         private void RefreshTabs()
         {
             _tabEquipment?.EnableInClassList("cd-tab--active", _tab == Tab.Equipment);
+            _tabSpells?.EnableInClassList("cd-tab--active", _tab == Tab.Spells);
             _tabConsumables?.EnableInClassList("cd-tab--active", _tab == Tab.Consumables);
-            // Stats + hero selector are only meaningful for equipment.
+            // Stats are an equipment readout; the hero selector serves both per-hero tabs.
             SetShown(_statsLabel, _tab == Tab.Equipment);
-            SetShown(_heroesRow, _tab == Tab.Equipment);
+            SetShown(_heroesRow, _tab != Tab.Consumables);
         }
 
         // ============================================================
@@ -294,6 +323,10 @@ namespace Assets.Scripts.Items.UI
             {
                 RefreshEquipment();
             }
+            else if (_tab == Tab.Spells)
+            {
+                RefreshSpells();
+            }
             else
             {
                 RefreshConsumables();
@@ -342,6 +375,95 @@ namespace Assets.Scripts.Items.UI
                 note.AddToClassList("cd-info-label");
                 _scroll.Add(note);
             }
+        }
+
+        /// <summary>
+        /// The spell loadout: every magic the selected hero's sphere grid has taught them, with the
+        /// ones they are carrying marked, and a header saying how many slots they have.
+        ///
+        /// <para>This screen exists because knowing and carrying stopped being the same thing.
+        /// Under Draw a hero's slots were filled in the field and a MagicKnown node brought its own
+        /// slot with it; now the grid only ever adds to what a hero <i>knows</i>, and slots stay
+        /// scarce (<c>EquippedMagicState.DefaultSlotCount</c> plus <c>MagicSlot</c> nodes), so which
+        /// of them to bring is a decision that has to be made somewhere. Here, between runs, beside
+        /// the other one.</para>
+        ///
+        /// <para>A hero who never opens this still walks in armed: an empty choice auto-fills from
+        /// what they know, in grid order (<see cref="MagicLoadoutOps.Resolve"/>). Toggling writes the
+        /// resolved list, so the first click also commits whatever the auto-fill had picked - which
+        /// is what makes "unequip one spell" behave the way it reads.</para>
+        /// </summary>
+        private void RefreshSpells()
+        {
+            var hero = FindHero(_selectedHeroKey);
+            if (hero == null)
+            {
+                ShowEmpty("No hero selected.");
+                return;
+            }
+
+            var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, ActivatedNodesOf(hero));
+            if (known.Count == 0)
+            {
+                ShowEmpty($"{hero.DisplayName} knows no magic yet. Learn a spell on the sphere grid.");
+                return;
+            }
+
+            SetShown(_emptyLabel, false);
+
+            int slots = EquippedMagicState.DefaultSlotCount
+                + SphereGridOps.SlotBonusForNodes(hero.SphereGrid, ActivatedNodesOf(hero));
+            var equipped = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), slots);
+
+            var header = new Label($"Carrying {equipped.Count} of {slots} slots — {known.Count} known.");
+            header.AddToClassList("cd-info-label");
+            _scroll.Add(header);
+
+            foreach (var entry in known)
+            {
+                var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(entry.Key) : null;
+                string name = magic != null ? magic.DisplayName : entry.Key;
+                bool carried = equipped.Contains(entry.Key);
+                string meta = carried ? $"carried · {entry.Value} charges" : "known";
+
+                var capturedKey = entry.Key;
+                _scroll.Add(BuildRow(
+                    magic != null ? magic.Icon : null,
+                    (carried ? "* " : "  ") + name,
+                    meta,
+                    true,
+                    () => ToggleSpell(capturedKey),
+                    null));
+            }
+        }
+
+        private void ToggleSpell(string magicKey)
+        {
+            var hero = FindHero(_selectedHeroKey);
+            if (hero == null)
+            {
+                return;
+            }
+
+            var nodes = ActivatedNodesOf(hero);
+            var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, nodes);
+            int slots = EquippedMagicState.DefaultSlotCount
+                + SphereGridOps.SlotBonusForNodes(hero.SphereGrid, nodes);
+
+            var entry = _loadout.For(_selectedHeroKey);
+            entry.EquippedKeys = MagicLoadoutOps.Toggle(known, entry.EquippedKeys, magicKey, slots);
+            _files.Save(_loadout);
+
+            RefreshList();
+        }
+
+        /// <summary>The selected hero's activated grid nodes, straight off the party save.</summary>
+        private static List<string> ActivatedNodesOf(HeroSO hero)
+        {
+            var save = HeroRoster.GetHeroSave(hero);
+            return save != null && save.ActivatedNodes != null
+                ? save.ActivatedNodes
+                : new List<string>();
         }
 
         private void RefreshConsumables()
@@ -520,22 +642,22 @@ namespace Assets.Scripts.Items.UI
                     evt.StopPropagation();
                     break;
                 case KeyCode.LeftArrow:
-                    SetTab(Tab.Equipment);
+                    CycleTab(-1);
                     evt.StopPropagation();
                     break;
                 case KeyCode.RightArrow:
-                    SetTab(Tab.Consumables);
+                    CycleTab(1);
                     evt.StopPropagation();
                     break;
                 case KeyCode.Q:
-                    if (_tab == Tab.Equipment)
+                    if (_tab != Tab.Consumables)
                     {
                         CycleHero(-1);
                     }
                     evt.StopPropagation();
                     break;
                 case KeyCode.E:
-                    if (_tab == Tab.Equipment)
+                    if (_tab != Tab.Consumables)
                     {
                         CycleHero(1);
                     }

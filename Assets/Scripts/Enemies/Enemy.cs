@@ -14,10 +14,9 @@ namespace Assets.Scripts.Enemies
         public Room Room;
         public ItemSO LootItem;
 
-        // The Draw list: magics the player can extract from this enemy mid-combat,
-        // each with the charges a successful draw grants (see EquippedMagicState). It is also the
-        // list a CastMagic action on its Behavior draws from.
-        public List<DrawableMagicEntry> DrawableMagics = new List<DrawableMagicEntry>();
+        // What this enemy can throw: the list a CastMagic action on its Behavior picks from when
+        // it names no specific magic. Enemy casts spend nothing.
+        public List<EnemySpellEntry> Spells = new List<EnemySpellEntry>();
 
         /// <summary>
         /// This enemy's repertoire, as data. Stamped from the definition (falling back to the
@@ -123,7 +122,7 @@ namespace Assets.Scripts.Enemies
             gameObject.name = definition.DisplayName;
             Stats = new Stats(LevelEnemyTuning.StatsFor(definition, tuning));
             Archetype = definition.ArchetypeOf;
-            DrawableMagics = new List<DrawableMagicEntry>(definition.DrawableMagics);
+            Spells = new List<EnemySpellEntry>(definition.Spells);
             Behavior = definition.ResolvedBehavior;
             Resistances = new List<Resistance>(definition.Resistances);
             LootItem = definition.LootItem;

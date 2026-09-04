@@ -1,9 +1,14 @@
-# Magic / Draw System (`Assets.Scripts.Cards`)
+# Magic System (`Assets.Scripts.Cards`)
 
-> The namespace and folder are still named `Cards` for historical reasons, but the
-> system is now an FFVIII-style **Draw**: the player extracts magic from enemies
-> mid-combat, equips it into charge-based slots, and casts it. There is no pre-run
-> deck building and no persistent card collection.
+> The namespace and folder are still named `Cards` for historical reasons. There has
+> never been deck building or a card collection; what the folder holds is spells,
+> their effects, and the slots a hero carries them in.
+
+> **Draw was removed on 2026-09-04** (`docs/plans/SPECIALIZATION.md` §9b). For about
+> two weeks this was an FFVIII-style system: the player extracted magic from enemies
+> mid-combat, and a kit was something a run accumulated. Every spell a hero can cast
+> now comes off that hero's **sphere grid**, and the kit is chosen at the hub. Sections
+> below say what each part used to do where it explains the shape it has.
 
 ## Spell power scales off a caster stat
 
@@ -104,9 +109,10 @@ Five rules worth not re-deriving:
 (`RoomActionUI.BuildCommandMenu`), a silenced enemy's `CastMagic` actions become ineligible
 (`EnemyActionPlanner.HasSomewhereToLand`, so an all-cast enemy falls through to its default rather than
 winning a turn and doing nothing), and `EncounterSimulator.TakeHeroTurn` honours it so the model does
-not read a silenced party as still casting. **Draw is deliberately not gated** — Draw is how the player
-*acquires*, and a magic taken is carried for the rest of the run, so blocking acquisition for three
-turns costs far more than blocking three casts.
+not read a silenced party as still casting. Attack, Item and Inspect stay open, so a silenced hero
+still has a turn worth taking rather than three turns of Skip. *(Draw used to be the deliberate
+exception here — blocking the player's only acquisition verb for three turns cost far more than
+blocking three casts. There is no acquisition verb any more.)*
 
 **The cure loop.** `ConsumableEffectType.CureStatus` + `CombatBuffTracker.CureStatusEffects` + the
 **Antidote Salve** (drops from the Floating Eye). `BuffHandlerRegistry.IsCurable` lists what a cure
@@ -124,53 +130,78 @@ level-scoped health pool, and a cure would clear it only until the next room re-
 
 - **MagicSO** (ScriptableObject, `SO/Magic`): defines a magic with `Key`, `DisplayName`, `Description`, `Icon`, `TargetType` (`MagicTargetType`: Enemy/Ally/Self/AllEnemies/AllAllies), `Rarity` (`MagicRarity`), `Effects` (list of `SpellEffect`), `Tags` (list of `MagicTag`), `TagDuration`. Pure data — no acquisition/slot logic.
 - **SpellEffect**: `EffectType` (`SpellEffectType`: Damage/Heal/Buff/Debuff/**HealthCost**), `Power`, **`PowerMode`**, `ScalingStat`, `DamageType`, `BuffType`, `Duration`, `UnlockLevel`.
-- **MagicCatalog** (singleton): scene-wired `List<MagicSO>` of every magic in the game, keyed by `Key`. Used to resolve saved magic keys when restoring equipped slots, and to list upgradeable magic in the hub Forge. **Edit `_allMagic` on `Assets/Prefabs/MagicCatalog.prefab`, not on the scene instance.** It is a prefab instance in *both* scenes, and overriding the array *size* on an instance grows it with **nulls** — which is how the cloaks first shipped drawable in combat but unresolvable from a save and invisible in the Forge. `ElementalContentTests.EveryMagicAsset_IsInTheCatalogPrefab` fails on both mistakes now.
+- **MagicCatalog** (singleton): scene-wired `List<MagicSO>` of every magic in the game, keyed by `Key`. Used to resolve saved magic keys when restoring equipped slots, and to list upgradeable magic in the hub Forge. **Edit `_allMagic` on `Assets/Prefabs/MagicCatalog.prefab`, not on the scene instance.** It is a prefab instance in *both* scenes, and overriding the array *size* on an instance grows it with **nulls** — which is how the cloaks first shipped castable in combat but unresolvable from a save and invisible in the Forge. `ElementalContentTests.EveryMagicAsset_IsInTheCatalogPrefab` fails on both mistakes now.
 
-## Charges are a *run* resource
+## Knowing, carrying, and charges
 
-**A charge spent is gone until the magic is drawn again.** `RefillCharges` runs on the **first floor of
-a run** and never again - not per level, not per fight.
+Three separate things, and keeping them separate is the whole of this system's shape.
 
-It used to run at the start of every combat, and that single line was the game's difficulty: with three
-heroes at four slots each, the party walked into every room with a dozen casts *including two free
-Heals*, so a floor's damage could never accumulate. A whole run could be cleared without the party's
-health trending downward - measured, after a full playthrough reported as "a breeze": 63 simulated
-encounters, win rate 1.00 on every one, worst room in the game ending at 70% health. See
+| | what it is | where it lives | who changes it |
+|---|---|---|---|
+| **known** | every spell this hero has learned | activated `MagicKnown` sphere-grid nodes | buying a node, at the hub |
+| **carried** | which of them fill their slots | `MagicLoadout.json`, resolved by `MagicLoadoutOps` | the player, on the hub Spells tab |
+| **charges** | how many casts are left this run | `EquippedMagicState`, saved in `Run.json` | casting spends; a refuge restores |
+
+**Knowing is not carrying.** A `MagicKnown` node used to bring its own slot, because under Draw the
+two *were* the same thing — magic went into a slot the moment you took it. Now the grid only grows
+what a hero knows, while slots stay scarce: `EquippedMagicState.DefaultSlotCount` is **2**, plus one
+per `MagicSlot` node. A hero who could carry everything they know is not specialising, they are
+accruing, and `MagicSlot` nodes would be buying nothing.
+
+**`MagicLoadoutOps.Resolve(known, chosen, slots)`** is the one rule that turns the first two into the
+third, and it has one wrinkle worth not re-deriving: **a stored choice is exact; no stored choice
+auto-fills.** A hero who has never opened the Spells tab still walks in armed, because a spell node
+the player paid for that does nothing until they visit another screen reads as a bug. But once they
+*have* chosen, the choice is taken literally, empty slots and all — the alternative (always
+backfilling free slots from the known pool) is incoherent: with two slots and two known spells,
+unequipping one would silently put it straight back, so the screen would refuse to do what it had
+just shown the player doing. If a choice resolves to nothing at all — every key it names retired by a
+grid re-authoring — the auto-fill takes over rather than sending someone in unarmed.
+
+**A charge spent is gone until the party rests.** `RefillCharges` runs on the **first floor of a run**
+(`RefillsOnLevelStart`) and in a **refuge** (`RoomKind.Rest`, via `RoomActionUI.ApplyRest`) — not per
+level, not per fight.
+
+It used to run at the start of every combat, and that single line was the game's difficulty: with
+three heroes at four slots each, the party walked into every room with a dozen casts *including two
+free Heals*, so a floor's damage could never accumulate. A whole run could be cleared without the
+party's health trending downward — measured, after a full playthrough reported as "a breeze": 63
+simulated encounters, win rate 1.00 on every one, worst room in the game ending at 70% health. See
 `docs/BALANCING.md` §5f.
 
-Three consequences worth holding on to:
+Two consequences worth holding on to:
 
-- **Draw is the refill**, which is what makes spending a turn on it a real decision rather than a
-  one-time setup cost. Drawing a magic the hero already holds tops that slot back up.
-- **A hero must have something they always carry**, or a fresh run starts with an empty hand. That is
-  what `MagicKnown` sphere-grid nodes are for (see the Heroes guide): each grants a slot *and* seeds it
-  at run start. Every hero's grid authors one, pinned by `ElementalContentTests`.
-- **The closed-form balance model got more accurate for free.** `BalanceMath` deliberately prices basic
-  attacks only; with magic finite, basic attacks really are the mainstay, so the run curve is no longer
-  measuring a different game. The simulator still grants full charges per fight, which now makes it an
-  *optimistic* read of any fight after the first - it says so in its own header.
+- **The refuge is the refill**, and it is deliberately the *same* one-shot room that heals the party.
+  Draw used to be the in-run refill, and removing it left magic a strictly finite run allowance with
+  no way back at all. Hanging the top-up on the refuge keeps it a place the player has to find and
+  spend rather than a rule about levels, and puts charges in direct competition with health.
+- **The closed-form balance model got more accurate for free.** `BalanceMath` deliberately prices
+  basic attacks only; with magic finite, basic attacks really are the mainstay, so the run curve is no
+  longer measuring a different game.
 
-## Equip / Draw / Cast
+## Equip / Cast
 
-- **EquippedMagicState**: per-hero fixed set of `MagicSlot { MagicSO Magic; int Charges; int MaxCharges }`. Owned by `DungeonManager.MagicState` (replaces the old `DungeonDeckState`). Slots survive **between** runs, not just within one — see below.
-  - `DrawInto(heroKey, slotIndex, magic, maxCharges)` — fills/overwrites a slot at full charges.
+- **EquippedMagicState**: per-hero fixed set of `MagicSlot { MagicSO Magic; int Charges; int MaxCharges }`. Owned by `DungeonManager.MagicState`.
+  - `SeedFromLoadout(heroes, chosenFor, resolve)` — fills each hero's slots from their chosen loadout resolved against what their grid teaches, at the charges the granting node authored. Called at **run start**, and for a single hero on the mid-run rescue path. Never overwrites a slot that already holds something, and skips a key the catalog cannot resolve rather than throwing.
   - `TryCast(heroKey, slotIndex)` — spends a charge (returns false if empty/no charges).
-  - `RefillCharges()` — refills all slots to max. Called **once per run**, on its first floor (`RefillsOnLevelStart`), and nowhere else.
-  - `SeedGrantedMagic(heroes, resolve)` — puts each hero's permanently known magic (their activated `MagicKnown` grid nodes) into empty slots at run start, at the charge count the node authors. Never overwrites a carried kit, never duplicates a magic the hero already holds, and leaves the slot empty if the key does not resolve.
-  - `FirstEmptySlot`, `HasAnyCastable`, `GetSlots`, `GetSaveData`/`Restore` (persisted via `MagicSlotSaveData`).
-  - Slot count is **per hero**: `DefaultSlotCount` + that hero's activated `MagicSlot` sphere-grid nodes (`Hero.BonusMagicSlots`); `Initialize(heroes)`/`AddHero(hero)` compute it themselves. The old global Essence-bought bonus is retired.
-- **Flow** (in `CombatManager`, see the Rooms guide): a hero turn offers Attack / **Magic** / **Draw** / Skip.
-  - **Draw** → pick an enemy → pick which magic from its Draw list (`Enemy.DrawableMagics`; skipped if it offers only one) → magic goes into the first empty slot (or the player picks a slot to overwrite) at full charges. Draw consumes the turn. **A magic never drawn before is offered as `???` with no icon** (its charge count still shows), so the first pull off a new enemy is a blind gamble on a turn - drawing *is* the discovery. Gated on `MetaProgressManager.IsMagicDiscovered`, the same permanent record the Forge's `?` tiles read, and the Inspect/Bestiary pages mask exactly the same entries - see the Enemies guide.
+  - `RefillCharges()` — refills all slots to max. Run start (`RefillsOnLevelStart`) and refuges, nowhere else.
+  - `HasAnyCastable`, `GetSlots`, `AddHero`, `GetSaveData`/`Restore` (in-run charge state, persisted via `MagicSlotSaveData`).
+  - Slot count is **per hero**: `DefaultSlotCount` (2) + that hero's activated `MagicSlot` nodes (`Hero.BonusMagicSlots`).
+  - **Gone with Draw:** `DrawInto` (nothing puts magic in a slot mid-run any more), `FirstEmptySlot` (it existed for the draw-placement picker), and `Merge` (the cross-run slot merge — see Persistence).
+- **Flow** (in `CombatManager`, see the Rooms guide): a hero turn offers Attack / **Magic** / Item / Inspect / Skip.
   - **Magic (cast)** → pick a charged slot → pick target(s) → resolves through the shared effect engine, then spends one charge.
-- **Enemies cast from their own Draw list too.** The same `MagicSO` the player can extract is what the enemy throws, via a `CastMagic` action on its `EnemyBehaviorSO`, resolved through this same `EffectResolver`. It spends **no** charges, applies **no** upgrade bonus or level (so `UnlockLevel > 0` effects are skipped), and passes **no** tag tracker or combo detector. See `Assets/Scripts/Enemies/CLAUDE.md`.
+  - There is **no acquisition verb left in combat**. That is the accepted bill of §9b, and it is why `docs/plans/COMBAT_DEPTH.md` §10 (Defend) is the most urgent backlog item: it is the turn-economy decision Draw used to supply.
+- **Enemies cast from their own spell list.** `EnemySO.Spells` (was `DrawableMagics`) is purely the monster's repertoire now, reached by a `CastMagic` action on its `EnemyBehaviorSO` and resolved through this same `EffectResolver`. It spends **no** charges, applies **no** upgrade bonus or level (so `UnlockLevel > 0` effects are skipped), and passes **no** tag tracker or combo detector. See `Assets/Scripts/Enemies/CLAUDE.md`.
 
 ## Discovery & upgrades
 
-- **Discovery** is permanent (stored in `Meta.json` via `MetaProgressManager`, survives death). A magic is discovered the first time it's **drawn** (`CombatManager.ExecuteDrawAction` → `MarkMagicDiscovered`); a combo the first time it **triggers** (`EffectResolver.ApplyCombo` records the key in `EffectResult.TriggeredComboKeys`, and `CombatManager` marks each discovered after a cast). Drives the Forge collection grid.
+- **Discovery** is permanent (stored in `Meta.json` via `MetaProgressManager`, survives death). A magic is discovered the first time **some hero learns it on their sphere grid** (`SphereGridUI.OnActivate` → `MarkMagicDiscovered`); a combo the first time it **triggers** (`EffectResolver.ApplyCombo` records the key in `EffectResult.TriggeredComboKeys`, and `CombatManager` marks each discovered after a cast). Drives the Forge collection grid.
+
+  The trigger used to be *drawing* the magic, and the record did double duty: it also masked entries on the Bestiary and in the Draw picker. Those two questions came apart when Draw went. This record means **"the player owns this spell"** and gates the Forge; what an enemy has been *seen to cast* is `BestiaryEntry.ObservedSpellKeys`, kept per enemy — see the Enemies guide. Keeping them separate is what stops the player spending Essence upgrading a spell they have no way to cast.
 - **`MagicComboCatalog`** (mirrors `MagicCatalog`): the single source of truth for the combo list, scene-wired in **both** scenes. `CombatManager` builds its `ComboDetector` from it (falling back to the serialized `_cardCombos`); the hub Forge lists combos from it. **Edit `_allCombos` on `Assets/Prefabs/MagicComboCatalog.prefab`, not on a scene instance** — same trap as `MagicCatalog`, and it bit the same way: the list shipped with **Freeze twice and Infection missing**, so the Forge showed a duplicate tile and *Infection could never fire in combat at all*. A missing combo is silent, because `ComboDetector` simply never matches it. `MagicComboCatalogTests` now fails on a duplicate, a gap, an empty slot or a key clash.
 - **Level-gated effects:** each `SpellEffect` has an `UnlockLevel` (0 = always). `EffectResolver.Execute` skips a magic's effects above the magic's upgrade level, and `ApplyCombo` skips a combo's bonus effects above the combo's upgrade level (level supplied via a `comboLevelLookup` delegate so the resolver stays unit-testable). Both also get the flat power bonus. Combo upgrades key off `MagicComboSO.Key` and reuse the magic upgrade curves — see the Progression guide.
 
-## Effect engine (unchanged by the Draw refactor — reused verbatim)
+## Effect engine (untouched by the Draw removal — reused verbatim)
 
 - **EffectResolver** (was `CardEffectCalculator`): executes a `SpellcastAction { MagicSO Magic; caster; targets }` via the strategy pattern (`IEffectExecutor` per `SpellEffectType`). Handles combo detection and combo bonus effects. `Execute(..., powerBonus)` folds the meta magic-upgrade bonus into a *copy* of each Damage/Heal effect (Buff/Debuff power unaffected; `MagicSO` never mutated). A trailing **`powerScale`** multiplies that same copy's Power, applied after the bonus: it is 1 for every hero cast and exists for **enemy** casts, whose spells scale with their level's `EnemyTuning.Difficulty` (see the Enemies guide). Buff/Debuff power is left alone by both, because it is a stat delta rather than a damage number.
 - **Combo system**: `MagicComboSO` (`RequiredTags` + `BonusEffects`), `ComboDetector`, `MagicTagTracker` (active tags on units with durations).
@@ -180,15 +211,29 @@ Three consequences worth holding on to:
 
 ## UI (`Cards/UI`)
 
-- **MagicSelectionUI** (was `CardSelectionUI`): the in-combat picker, and now also the enemy knowledge page. Three panels: one lists the hero's equipped slots (name + charges) for casting or draw-placement; one picks a combat unit (cast target, attack target, draw source, or Inspect subject); and `#inspect-panel` is the **Inspect** page itself, rendered through `BestiaryPresenter`/`BestiaryLineView` (see the Enemies guide). Attack targeting also routes through this component. Inspect is the odd one out in that it **submits nothing** — it hands the turn straight back (see the Rooms guide), and its page is read-and-dismissed rather than cursor-navigated, so every confirm/cancel key closes it. Rows are a **cursor-driven selection list** styled like the command menu (`.cd-sel-row` + `▸`), navigable by keyboard/controller (Up/Down/Enter/Esc) — its panel root is made `focusable` only while a picker is open (see the focus-ownership invariant in the Rooms guide). **Single-target bypass:** with only one valid target, Draw/Cast/Attack skip the target picker and act directly (fewer clicks).
+- **MagicSelectionUI** (was `CardSelectionUI`): the in-combat picker, and now also the enemy knowledge page. Three panels: one lists the hero's equipped slots (name + charges) for casting; one picks a combat unit (cast target, attack target, or Inspect subject); and `#inspect-panel` is the **Inspect** page itself, rendered through `BestiaryPresenter`/`BestiaryLineView` (see the Enemies guide). Attack targeting also routes through this component. Inspect is the odd one out in that it **submits nothing** — it hands the turn straight back (see the Rooms guide), and its page is read-and-dismissed rather than cursor-navigated, so every confirm/cancel key closes it. Rows are a **cursor-driven selection list** styled like the command menu (`.cd-sel-row` + `▸`), navigable by keyboard/controller (Up/Down/Enter/Esc) — its panel root is made `focusable` only while a picker is open (see the focus-ownership invariant in the Rooms guide). **Single-target bypass:** with only one valid target, Cast/Attack skip the target picker and act directly (fewer clicks). *(The three-mode Draw flow — `DrawTarget` → `DrawChoice` → `DrawPlacement` — was deleted with the mechanic.)*
 - **MagicForgeUI** (was `CardUpgradeUI`): the hub "Forge" — a collection grid with All Magic / Combos tabs, `?` for undiscovered, click-to-inspect-and-upgrade. See the Progression guide.
+- **The loadout screen is not here.** Which known spells a hero carries is chosen on the hub **Inventory** screen's **Spells** tab (`Items/UI/InventoryHubUI`), beside their gear — both are between-run equipment decisions, and the tab reuses the hero selector and cursor list that screen already had. The Forge is a *collection*; the loadout is a *kit*.
 - **MagicHandLayout** / **MagicHoverEffect**: layout/hover helpers for slot buttons.
 
 ## Persistence
 
-Equipped magic persists **between runs**. Within a run it is carried across levels in `RunSaveData.EquippedMagic` and snapshotted mid-level in `DungeonSaveData.EquippedMagic`; on every level clear it is also banked into **`MagicLoadout.json`**, which is what the first level of a *new* run seeds from — so a hero can walk into a dungeon still holding something they drew a few dungeons ago. It was purely run-scoped before, so a kit assembled over four floors evaporated the moment the run was won.
+Two files, and they hold different things.
 
-Two rules worth knowing. The bank is **merged** per hero (`EquippedMagicState.Merge`): a run only reports the heroes it fielded, so overwriting the file would strip a benched hero's slots. And it is committed on **level clear**, never on the death path, so magic drawn during a fatal run is **forfeited** like that run's XP and loot while anything banked earlier survives. A hero who buys a `MagicSlot` node between runs keeps everything and simply gains room — `Restore` walks `min(saved, current)` slots. See the Dungeon guide.
+- **`Run.json` / the dungeon save** hold the live slots **and their spent charges**, so a run carries
+  its magic across floors and a mid-level resume restores it exactly. Lost with the run on death.
+- **`MagicLoadout.json`** holds the player's **choice**: a `HeroMagicLoadout { HeroKey, EquippedKeys }`
+  per hero. Written straight from the Spells tab, not deferred to a level clear — a loadout is a
+  preference rather than a gain, so dying must not cost the player their equipment layout.
+
+**This changed on 2026-09-04.** `MagicLoadout.json` used to hold whole slot states, banked on level
+clear and **merged** per hero (`EquippedMagicState.Merge`), because Draw meant a kit was something a
+run accumulated: it had to survive to the hub or it evaporated, and a run only knew about the heroes
+it fielded, so overwriting would have stripped a benched hero. Magic comes off the grid now and
+nothing in a run changes what a hero knows, so there is nothing to bank — `Merge` and
+`DungeonManager.CommitMagicLoadout` are both gone. A hero who buys a `MagicSlot` node between runs
+keeps everything and simply gains room; `Restore` walks `min(saved, current)` slots. See the Dungeon
+guide.
 
 ## Enum ordinals: inserting a member is not a shift-by-one
 

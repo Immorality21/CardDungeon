@@ -13,7 +13,8 @@ changelog.
 > combat → win/death → persistent Gold/Essence → hub spend → stronger next run). The remaining work
 > is about making runs feel like *runs* — stakes, choice, and a climax — and about giving the
 > systems layer the content and the player-facing information it deserves. *(The Draw mechanic was
-> part of that loop until 2026-09-04; see §9b.)*
+> part of that loop until 2026-09-04, when it was removed and magic moved onto the sphere grid;
+> see §9b.)*
 
 > Balance/tuning work: read **`docs/BALANCING.md`** first — it holds the lever interactions, the
 > measurement workflow and what previous passes learned, so a pass does not re-derive them.
@@ -33,16 +34,24 @@ Three threads are live:
 1. **The specialization rebuild** (§9b, §4c, §5b, feeding §4b and §7) — added 2026-09-04. The
    largest of the three and the one the others now bend around. It removes a shipped mechanic
    (Draw), re-authors every sphere grid, deletes the tavern, and makes a hero a progression unlock
-   that the campaign can gate on. **Nothing here is built yet.**
+   that the campaign can gate on.
+
+   **§9b shipped the same day** — Draw is gone, magic is learned on the grid, and the kit is chosen
+   at the hub. **§4c and §5b are not started**, and §4c is now the bottleneck: the grids carry a
+   *stopgap* kit (a cheap signature plus one spell per branch tip) that keeps every magic obtainable
+   but prices most of it past what a campaign pays. §9b's "What the refactor actually left behind"
+   has the measured numbers and the three findings it produced — read it before starting §4c.
 2. **Balance / losability** (§0–§0g) — making the campaign losable and gating depth behind
    investment. The gate ladder exists and the frontier is measured per floor. Mature; mostly
-   decisions waiting on the user now. **Caveat added 2026-09-04:** §9b invalidates the magic half of
-   the model — `ProgressionMap` measures Draw supply, and Draw is going away.
+   decisions waiting on the user now. **Caveat updated 2026-09-04:** §9b's model rework landed with
+   it — `ProgressionMap` measures *grid* supply now and the whole suite is green — but every number
+   that involved magic moved, so re-measure before acting on anything written before that date.
+   Deliberately paused: no tuning until the rest of the specialization refactor is in.
 3. **Combat depth** (§9–§13) — added 2026-09-03 after a broad scan. The systems layer is far deeper
    than the *verbs* sitting on it. **§9 (status effects) shipped the same day**: damage-over-time,
-   Silence, regeneration and the cure loop. **§10 (Defend) is now the most urgent item in this
-   file**, not merely the cheapest — removing Draw removes a combat verb and Defend is what
-   replaces it. §11 shrank on 2026-09-04 (targeting stays random; a defensive branch grants a
+   Silence, regeneration and the cure loop. **§10 (Defend) is the most urgent item in this file** and
+   became more so on 2026-09-04: Draw is now actually gone, so combat is Attack / Magic / Item /
+   Inspect / Skip with **no acquisition verb at all**, and Defend is what replaces it. §11 shrank on 2026-09-04 (targeting stays random; a defensive branch grants a
    taunt) and can follow the grid authoring rather than precede it.
 
 **Reading order for the balance thread:** `docs/BALANCING.md` §5g → §5t, in order. The later ones
@@ -113,8 +122,8 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **9b** | Magic moves onto the sphere grid — Draw is scrapped | **decided** 2026-09-04, not built |
-| **4c** | Specialization — the grid is where a hero becomes an archetype | added 2026-09-04, the load-bearing item |
+| **9b** | Magic moves onto the sphere grid — Draw is scrapped | ✅ **shipped** 2026-09-04; findings feed §4c |
+| **4c** | Specialization — the grid is where a hero becomes an archetype | added 2026-09-04; **now the bottleneck** — §9b left a stopgap |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | added 2026-09-04 |
 | **5** | Roster — open questions | open |
 | **4b** | Summons — the capability the deep grid pays out | spec; **shape and effects reopened** 2026-09-04 |
@@ -170,14 +179,22 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Draw removed; magic moves onto the sphere grid** (2026-09-04) — `docs/plans/SPECIALIZATION.md`
+  §9b. Every spell is learned on a `MagicKnown` node; **knowing and carrying split** (slots are 2 +
+  `MagicSlot` nodes, the kit chosen on a new Inventory ▸ **Spells** tab via `MagicLoadoutOps`);
+  charges refill at run start and in a **refuge**; `EnemySO.DrawableMagics` → `Spells`, the monster's
+  own repertoire, with the Bestiary reveal repointed at per-enemy `ObservedSpellKeys`; `ProgressionMap`
+  rebuilt on grid `MagicSource`/`PathCost`. Coverage 17/17 magic, 4/4 combos; the balance suite stayed
+  green. §4c still owes the actual specializations.
 - **Boss encounters** (2026-08) — `EnemySO.IsBoss` + `BossBehavior` (telegraphed party-wide signature,
   enrage under 30%), placed via `RunLevelEntry.BossEnemy`, alone in a sealed exit room. `BossAdds`
   escorts added 2026-08-30; every boss now has one.
 - **Balance analyzer** — `Assets/Scripts/Balance/` + the `Tools ▸ Balance ▸ Balance Analyzer` window +
   `BalanceRegressionTests`. *(No `BalanceRules.asset` is checked in; the window's "Create rules asset"
   button writes one. Until then it runs on code defaults.)*
-- **Elements & Unlocks tab** — `ProgressionMap` models the Draw tables as a supply chain: unlock
-  timeline, magic availability matrix, per-level elemental coverage.
+- **Elements & Unlocks tab** — `ProgressionMap` models the **sphere grids** as a supply chain: unlock
+  timeline, magic × hero availability matrix with the cheapest XP route, per-level elemental coverage.
+  *(Modelled the Draw tables until 2026-09-04.)*
 - **Test suite repair + headless runner** (2026-08-21) — 46 red of 339 → 1, every one a stale *test*.
   `ExecutionSettings.runSynchronously = true` runs the whole suite in-process in about a second.
 - **Room events** (2026-08-21) — `Assets/Scripts/Rooms/Events/`; stat-gated, weighted-outcome gambles
@@ -202,8 +219,8 @@ per-subsystem `CLAUDE.md` files — not here.
 - **Floor simulation** (2026-08-26) — `RunFloor` fights a whole floor off one pool of health, potions
   and charges. Replaced the per-room measurement that reported 63/63 wins.
 - **Discovery-gated reveal** (2026-08-29) — `MetaProgressSaveData.Bestiary` + `BestiaryOps`,
-  in-combat **Inspect** (free, FFX-style Scan), hub **Bestiary**, masked undrawn magic in the Draw
-  picker.
+  in-combat **Inspect** (free, FFX-style Scan), hub **Bestiary**. *(The masked-magic half was
+  repointed on 2026-09-04: it now hides spells this enemy has not been seen to cast, per enemy.)*
 - **Investment frontier** (2026-08-28 → 2026-09-02) — party width × grid XP × gold, Pareto-minimal
   mixes per floor; `GearLoadout`, `InvestmentPointsPerGold`, `IncomingDamageMix`.
 - **Audio** (2026-09-01) — `Assets/Scripts/Audio/`: SFX banks, crossfading music bed with per-level
@@ -212,5 +229,6 @@ per-subsystem `CLAUDE.md` files — not here.
 - **Battle polish tiers 1–4** — turn indicator, idle motion, projectiles, crits, resistance popups,
   boss telegraphs, combo flourish, victory/defeat framing, camera zoom-punch, per-level backdrops.
 - **Deferred persistence** — mid-level hero HP (`PartyHealthSnapshot`), the consumable ledger
-  (`ConsumablesSpent`, a delta not a snapshot, idempotent), level afflictions, and cross-run magic
-  loadouts (`MagicLoadout.json`, merged per hero, committed on level clear only).
+  (`ConsumablesSpent`, a delta not a snapshot, idempotent) and level afflictions. *(Cross-run magic
+  loadouts were the fourth until 2026-09-04: with magic on the grid there is nothing to bank, so
+  `MagicLoadout.json` holds only the player's hub-side choice and is written immediately.)*

@@ -200,7 +200,7 @@ namespace Assets.Scripts.Enemies.Behaviors
         /// such an entry would cast every turn. An enemy that should not cast simply has no CastMagic
         /// action, so this throws rather than authoring that trap into an asset.</para>
         /// </summary>
-        public static EnemyActionEntry CastFromDrawList(float chance)
+        public static EnemyActionEntry CastFromSpellList(float chance)
         {
             if (chance <= 0f)
             {

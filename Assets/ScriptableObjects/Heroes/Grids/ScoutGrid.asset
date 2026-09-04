@@ -455,3 +455,55 @@ MonoBehaviour:
     GrantedCharges: 2
     Neighbors:
     - scout-trapper-4
+  - Key: scout-skirmisher-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 195
+    Position: {x: 585, y: -510}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Hush
+    GrantedCharges: 2
+    Neighbors:
+    - scout-skirmisher-5
+  - Key: scout-survivor-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 295
+    Position: {x: -585, y: -690}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: StormCloak
+    GrantedCharges: 2
+    Neighbors:
+    - scout-survivor-5
+  - Key: scout-pathfinder-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 410
+    Position: {x: 585, y: -870}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Renew
+    GrantedCharges: 2
+    Neighbors:
+    - scout-pathfinder-5
+  - Key: scout-trapper-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 540
+    Position: {x: -585, y: -1050}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: OilSlick
+    GrantedCharges: 2
+    Neighbors:
+    - scout-trapper-5

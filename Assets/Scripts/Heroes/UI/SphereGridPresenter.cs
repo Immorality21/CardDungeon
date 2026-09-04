@@ -141,14 +141,16 @@ namespace Assets.Scripts.Heroes.UI
             }
             if (node.Kind == SphereNodeKind.MagicSlot)
             {
-                return "+1 magic slot";
+                return "+1 magic slot (carry one more known spell)";
             }
             if (node.Kind == SphereNodeKind.MagicKnown)
             {
-                // The charge count is the payload as much as the magic is: it is the whole run's
-                // allowance of that spell, because charges never refill mid-run.
+                // Two things the player has to be able to read off this line. That the spell is
+                // *learned*, not automatically carried - it still has to win a slot on the Spells
+                // screen - and the charge count, which is the whole run's allowance of it and so is
+                // as much the payload as the spell name is.
                 string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
-                return $"Always carries {name} x{Mathf.Max(1, node.GrantedCharges)}";
+                return $"Learns {name} — {Mathf.Max(1, node.GrantedCharges)} charges per run";
             }
 
             var parts = new List<string>();

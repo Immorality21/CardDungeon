@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -307,6 +308,15 @@ namespace Assets.Scripts.Heroes.UI
 
             if (HeroRoster.TryActivateNode(_selectedHero, _selectedNodeKey))
             {
+                // Learning a spell is what "discovered" means now, so the Forge can be told here.
+                // Drawing it from an enemy used to be the trigger; with Draw gone this is the only
+                // moment a magic enters the player's possession, and gating Forge upgrades behind a
+                // spell nobody can obtain would leave the collection permanently half-locked.
+                if (node.Kind == SphereNodeKind.MagicKnown && !string.IsNullOrEmpty(node.GrantedMagicKey))
+                {
+                    MetaProgressManager.Instance.MarkMagicDiscovered(node.GrantedMagicKey);
+                }
+
                 SetFeedback($"{SphereGridPresenter.NodeName(node)} activated.");
             }
             else

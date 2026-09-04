@@ -66,7 +66,7 @@ namespace Assets.Scripts.Balance
         public float GoldPerDanger;
 
         public int ResistanceCount;
-        public int DrawableCount;
+        public int SpellCount;
 
         /// <summary>Share of turns this placement casts, from its behaviour's CastMagic actions.</summary>
         public float MagicCastChance;
@@ -78,7 +78,7 @@ namespace Assets.Scripts.Balance
         public float ExpectedCastHealing;
 
         /// <summary>True when this placement actually casts — it has a chance and something to cast.</summary>
-        public bool Casts => MagicCastChance > 0f && DrawableCount > 0;
+        public bool Casts => MagicCastChance > 0f && SpellCount > 0;
 
         /// <summary>Healing this enemy returns to its own side per turn, from Heal actions.</summary>
         public float ExpectedHealingPerTurn;
@@ -161,7 +161,7 @@ namespace Assets.Scripts.Balance
             metrics.Archetype = enemy.ArchetypeOf;
             metrics.PowerScore = BalanceMath.PowerScore(metrics.Stats, rules);
             metrics.ResistanceCount = enemy.Resistances != null ? enemy.Resistances.Count : 0;
-            metrics.DrawableCount = enemy.DrawableMagics != null ? enemy.DrawableMagics.Count : 0;
+            metrics.SpellCount = enemy.Spells != null ? enemy.Spells.Count : 0;
 
             var unit = SimUnit.FromEnemy(enemy, tuning);
             var group = new List<SimUnit> { unit };

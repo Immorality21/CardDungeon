@@ -84,7 +84,7 @@ namespace Assets.Scripts.Balance
                  "as hero power grows with it.")]
         [Min(1)] public int MaxBodiesPerRoom = 6;
 
-        [Header("Enemy casting — spells thrown from the enemy's own Draw list")]
+        [Header("Enemy casting — spells thrown from the enemy's own repertoire")]
         [Tooltip("Largest share of its turns an enemy should spend casting — the ChanceGate on its " +
                  "behaviour's CastMagic action. Above this the rest of its repertoire (charges, " +
                  "heavies, heals, the boss signature) is what the player stops seeing, and every " +
@@ -140,8 +140,8 @@ namespace Assets.Scripts.Balance
                  "whole DamageType/elemental layer is decorative.")]
         [Range(0f, 1f)] public float MinResistanceCoverage = 0.25f;
 
-        [Tooltip("Warn when two enemies' Draw offerings overlap by more than this share.")]
-        [Range(0f, 1f)] public float MaxDrawTableOverlap = 0.60f;
+        [Tooltip("Warn when two enemies' spell repertoires overlap by more than this share.")]
+        [Range(0f, 1f)] public float MaxEnemySpellOverlap = 0.60f;
 
         [Tooltip("Largest share of the magic catalog a single level should hand over. Above this the " +
                  "unlocks are front-loaded and the rest of the run has nothing left to reveal.")]

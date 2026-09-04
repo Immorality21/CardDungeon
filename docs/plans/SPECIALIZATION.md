@@ -30,30 +30,83 @@ branch's own payload (§4c), so it can follow the grids rather than precede them
 
 #### What has to happen, in order
 
-1. **Author the grids first, remove the code second.** A hero whose grid grants nothing has no spells
-   at all. §4c is the authoring job and it must land *before* `ExecuteDrawAction` is deleted, or the
-   game is unplayable in between.
-2. **Move the four defensive cloaks onto nodes.** They exist only as `CastWeight: 0` drawables, so
-   they become unreachable the moment Draw goes — and they are the entire defensive half of
-   `docs/ELEMENTAL_PLAN.md`. The old §9b reasoning stands: a ward is a preparation, not a steal.
-3. **Retire the Draw code.** `CombatManager.ExecuteDrawAction` (16 references), the Draw page of
-   `MagicSelectionUI` (8), `DrawableMagicEntry`, and the draw half of `EnemyMagicPlan`.
-4. **Decide what `EnemySO.DrawableMagics` becomes.** It is authored across **26 enemy assets** and it
-   is what the Bestiary masks. Three readings, unresolved: delete it; keep it as purely the *enemy's
-   own* castable list (`CastMagic` already reads it, so this is nearly free); or repoint the masked
-   Bestiary slot at **material drops** (§7) so the discovery loop survives, pointing at something the
-   player still wants. **The last two are not mutually exclusive, and together they cost very little.**
-5. **Replace `ProgressionMap`.** The whole Elements & Unlocks tab is built on `DrawSource` — enemy ×
-   level × run — and every *unreachable magic* finding with it. On the grid the question becomes *is
-   every magic on some node, at a price a campaign can actually pay*, which is a `SphereGridOps` +
-   `InvestmentFrontier` walk rather than a spawn-table walk. `BalanceRegressionTests` asserts the old
-   model and **will go red**; that is expected, not a regression.
-6. **The frontier gains magic as a fourth thing XP buys.** §4b already flags this as a trap and it is
-   now doubly true: `GreedySpend` is a breadth build by construction, so until it can value a *spell*
-   the way a player does, it will buy stat nodes and price the entire design as a mistake.
+> **Steps 1–6 are done as of 2026-09-04** — the mechanic is out, the code is re-pointed, and the
+> project builds green (860 EditMode cases, balance suite included). What is *not* done is §4c: the
+> grids carry a serviceable stopgap kit, not authored specializations. See **"What the refactor
+> actually left behind"** below before assuming this section is closed.
 
-**Still open — but they belong to §4c, not here:** how many spell nodes a grid carries, how deep they
+1. ~~**Author the grids first, remove the code second.**~~ **Done, in that order.** Every magic in the
+   catalog is on a `MagicKnown` node before `ExecuteDrawAction` was deleted, so the game was never
+   unplayable in between. `ElementalContentTests.EveryMagicInTheCatalog_IsTaughtBySomeSphereGrid`
+   pins it: with no Draw there is no second route, so an unplaced spell is uncastable by anyone.
+2. ~~**Move the four defensive cloaks onto nodes.**~~ **Done.** FireCloak (Acolyte), FrostCloak (Tank
+   + Acolyte), StormCloak (Scout), Ward (Warrior + Tank).
+   `ElementalContentTests.EveryCloak_IsTaughtBySomeSphereGrid` replaces the old
+   `EveryCloak_IsDrawableFromSomeEnemy`.
+3. ~~**Retire the Draw code.**~~ **Done.** `HeroAction.Draw`, `ExecuteDrawAction`, `SubmitDrawAction`,
+   `RequestDrawTargets`, `OnDrawTargetRequested`, `GetDrawableEnemies`, `EquippedMagicState.DrawInto`
+   / `FirstEmptySlot` / `Merge`, the three-mode Draw flow in `MagicSelectionUI`, the `Draw` command in
+   `RoomActionUI`, and `CombatSound.Draw` (slot 3 **retired, not reused** — the enum is serialized by
+   ordinal into `CombatSoundBank.asset`).
+4. ~~**Decide what `EnemySO.DrawableMagics` becomes.**~~ **Decided: the last two readings, together, as
+   the section predicted.** It is now `EnemySO.Spells` (`EnemySpellEntry`, `Charges` deleted — the cast
+   path never read it), purely the monster's own repertoire; 12 enemy assets rewritten. The masked
+   Bestiary slot survives, repointed at **`BestiaryEntry.ObservedSpellKeys`**: an entry is named once
+   the player has watched *that enemy* cast *that spell*. Filing it per enemy rather than globally is
+   the change that makes it mean something — knowing the Cinder Imp has Fireball says nothing about
+   the Dragon. Repointing it at material drops (§7) remains open and is not blocked by this.
+5. ~~**Replace `ProgressionMap`.**~~ **Done, and `BalanceRegressionTests` did *not* go red** — this
+   section expected it to, but re-pointing the model rather than deleting it kept all 13 cases green.
+   `DrawSource` became `MagicSource` (hero × node), ordered by **`PathCost`**: the cheapest chain of
+   activations from the grid's start, a Dijkstra weighted by each node's own `XpCost` rather than the
+   hop-shortest route, because depth pricing can make a longer chain of cheap nodes the real bargain.
+   Two new findings fall out: *unreachable magic* is now **Critical** rather than a Warning (no second
+   route), and a combo can be **reachable but never bought** — every piece on a grid, no modelled party
+   ever owning them at once.
+6. ~~**The frontier gains magic as a fourth thing XP buys.**~~ **Partly.** `AssignMagicLoadout` reads
+   the heroes' grids instead of the encounter's enemies, so a simulated kit is now a function of
+   investment. But `GreedySpend` still cannot *value* a spell, so it buys stat nodes and the model
+   reports the elemental layer as inert — see the findings below. The trap this section named is live.
+
+**Still open — and they belong to §4c, not here:** how many spell nodes a grid carries, how deep they
 sit, and whether a spell shares a branch tip with a summon or sits along the way to one.
+
+#### What the refactor actually left behind *(measured 2026-09-04, after the code landed)*
+
+The stopgap authoring is **one cheap signature spell per hero at ~65 xp** (Warrior/Slash,
+Tank/ShieldUp, Scout/PoisonDart, Acolyte/Heal) plus one spell at each branch tip, and — on the
+Acolyte only — a second, shallower spell mid-branch. Coverage is 17/17 and combos 4/4, so nothing is
+dead content. What the analyzer says about the *prices*:
+
+| | cheapest route |
+|---|---|
+| the four signatures | 65 xp |
+| Acolyte's mid-branch pair (IceShard, Fireball) | 265 / 540 xp |
+| the cloaks | 1,275 xp |
+| Ward, Cinderstorm | 2,035 xp |
+| Lightning Bolt, Oil Slick | 3,050 xp |
+
+The campaign pays roughly **1,423 xp per hero** (`Assets/Scripts/Heroes/CLAUDE.md`), so past the
+signatures most of this is out of reach in a single pass. Three consequences, all of them **findings
+for §4c rather than things to tune now** — the do-not-relitigate list is explicit that deep branches
+must not be priced against `GreedySpend`:
+
+- **The starter is thin.** The Warrior has Slash and then nothing until ~735 xp. Under Draw they
+  picked up Fireball and the rest off the enemies they met; now they do not. This is the clearest
+  argument in the file for §4c's "author the Warrior's grid first".
+- **"Resists elements the player cannot bring yet" now fires on every level in the campaign** — 15
+  Warnings where there were few. It is not noise: the modelled breadth-build party never buys a spell
+  node, so it can deal no elements at all, and the elemental layer really is inert for it. §4c is the
+  fix; do not chase it by re-pricing nodes.
+- **Three of four combos are "affordable but never bought"** (Conductor ~3,115 xp, Ignite ~3,590,
+  Freeze ~1,245) — the same cause, one level up. Only Infection (~130 xp, both tags on cheap
+  signatures) is actually held.
+
+One decision was taken during the refactor that §4c should know about rather than rediscover:
+**`EquippedMagicState.DefaultSlotCount` dropped 4 → 2.** A `MagicKnown` node no longer brings its own
+slot, so slots are the scarcity that makes a kit a choice; 2 base plus one per `MagicSlot` node keeps
+"which of these do I bring" live and gives those nodes something to buy. The choice itself is made on
+the hub Inventory screen's new **Spells** tab.
 
 Touch points: `Assets/Scripts/Heroes/SphereGridSO.cs` (`MagicKnown` nodes), `SphereGridSeeder`,
 `Assets/Scripts/Cards/EquippedMagicState.cs` (`SeedGrantedMagic`, `RefillCharges`),
@@ -126,10 +179,15 @@ acquisition mechanic for a stat tree and gained nothing.
    identity. Resist adding a `SphereNodeKind.Specialization` until a *rule* needs one — what a branch
    grants is its payload, and payloads already have kinds.
 3. **Author seven grids, and make them much bigger.** Only `WarriorGrid` survives, and it is
-   re-authored; the other three are deleted (task 1). Each grid today is ~30 nodes:
-   **21–25 `Stat`, 4–5 `Resistance`, 2–3 `MagicSlot`, and exactly one `MagicKnown`**
-   (Warrior/Slash, Tank/ShieldUp, Scout/PoisonDart, Acolyte/Heal). That ratio is precisely why the
-   grid does not read as a source of anything, and it is the thing being overturned.
+   re-authored; the other three are deleted (task 1).
+
+   **Updated 2026-09-04**, after §9b's code landed. The grids were ~30 nodes with **exactly one**
+   `MagicKnown` each, which was precisely why the grid did not read as a source of anything. They now
+   carry **5 (Warrior / Tank / Scout) and 9 (Acolyte)** — the signature plus one per branch tip, and
+   a second mid-branch spell per branch on the caster. That is a *stopgap* whose only job was keeping
+   every magic obtainable while Draw came out; the shape is still four seeder-generated fans and the
+   prices are still far past what a campaign pays (see §9b's findings table). Treat the current
+   `MagicKnown` placement as evidence about ratios, not as authoring to preserve.
 
    **Grids get materially larger** *(decided 2026-09-04)*. ~30 nodes cannot hold two or three
    branches that each end in a spell kit and a summon and still make the choice between them hurt.

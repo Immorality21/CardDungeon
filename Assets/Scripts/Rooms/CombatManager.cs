@@ -32,7 +32,6 @@ namespace Assets.Scripts.Rooms
         Attack,
         Skip,
         Cast,
-        Draw,
         UseItem
     }
 
@@ -105,7 +104,6 @@ namespace Assets.Scripts.Rooms
         public event Action<ICombatUnit> OnHeroTurnStarted;
         public event Action<ICombatUnit, List<MagicSlot>> OnMagicSlotsRequested;
         public event Action<ICombatUnit, List<ICombatUnit>> OnAttackTargetRequested;
-        public event Action<ICombatUnit, List<ICombatUnit>> OnDrawTargetRequested;
         public event Action<ICombatUnit, List<ItemSaveData>> OnItemListRequested;
         public event Action<ICombatUnit, List<ICombatUnit>> OnInspectTargetRequested;
         public event Action OnDungeonCleared;
@@ -119,10 +117,6 @@ namespace Assets.Scripts.Rooms
         private HeroAction _pendingAction = HeroAction.None;
         private SpellcastAction _pendingCastAction;
         private int _pendingCastSlot;
-        private Enemy _pendingDrawSource;
-        private MagicSO _pendingDrawMagic;
-        private int _pendingDrawCharges;
-        private int _pendingDrawSlot;
         private ItemSO _pendingUseItem;
         private ICombatUnit _pendingUseItemTarget;
         private ICombatUnit _pendingAttackTarget;
@@ -154,12 +148,6 @@ namespace Assets.Scripts.Rooms
         public void RequestAttackTargets(ICombatUnit hero, List<ICombatUnit> enemies)
         {
             OnAttackTargetRequested?.Invoke(hero, enemies);
-        }
-
-        /// <summary>Raises the draw target picker with the enemies that have magic to draw.</summary>
-        public void RequestDrawTargets(ICombatUnit hero, List<ICombatUnit> drawableEnemies)
-        {
-            OnDrawTargetRequested?.Invoke(hero, drawableEnemies);
         }
 
         /// <summary>Raises the consumable picker with the party's carried consumable stacks.</summary>
@@ -207,17 +195,9 @@ namespace Assets.Scripts.Rooms
                 BuffTracker = BuffTracker,
                 ChargingEntryIndex = enemy.ChargingEntryIndex,
                 SelfTurnCount = enemy.TurnsTaken,
-                DrawableMagics = enemy.DrawableMagics
+                Spells = enemy.Spells
             };
             return EnemyActionPlanner.PredictCertain(enemy, context, behavior);
-        }
-
-        /// <summary>Enemies in the current combat room that have a non-empty Draw list.</summary>
-        public List<ICombatUnit> GetDrawableEnemies()
-        {
-            return GetAliveEnemies()
-                .Where(u => u is Enemy e && e.DrawableMagics != null && e.DrawableMagics.Count > 0)
-                .ToList();
         }
 
         /// <summary>Submits a basic attack against the chosen target for the current hero turn.</summary>
@@ -238,16 +218,6 @@ namespace Assets.Scripts.Rooms
             };
             _pendingCastSlot = slotIndex;
             _pendingAction = HeroAction.Cast;
-        }
-
-        /// <summary>Submits drawing <paramref name="magic"/> from <paramref name="source"/> into the chosen slot.</summary>
-        public void SubmitDrawAction(Enemy source, MagicSO magic, int charges, int slotIndex)
-        {
-            _pendingDrawSource = source;
-            _pendingDrawMagic = magic;
-            _pendingDrawCharges = charges;
-            _pendingDrawSlot = slotIndex;
-            _pendingAction = HeroAction.Draw;
         }
 
         /// <summary>Submits using a consumable <paramref name="item"/> on <paramref name="target"/>.</summary>
@@ -307,11 +277,11 @@ namespace Assets.Scripts.Rooms
                 : _cardCombos;
             _comboDetector = new ComboDetector(combos);
 
-            // Charges are deliberately NOT refilled here. They are a run resource: drawn on one
-            // floor, spent across the next, and topped up only by drawing again. Refilling per fight
-            // made magic infinite - a dozen casts and two free Heals in every room, which is why a
-            // whole run could be cleared without the party's health ever trending down. See
-            // EquippedMagicState.RefillsOnLevelStart.
+            // Charges are deliberately NOT refilled here. They are a run resource: filled on the
+            // run's first floor, spent across the rest of it, and restored only by resting in a
+            // refuge. Refilling per fight made magic infinite - a dozen casts and two free Heals in
+            // every room, which is why a whole run could be cleared without the party's health ever
+            // trending down. See EquippedMagicState.RefillsOnLevelStart.
 
             // Seed the fresh buff tracker with anything room events hung on the party for this
             // level. The tracker is rebuilt per fight and ticks per turn, so a level-scoped curse
@@ -400,8 +370,6 @@ namespace Assets.Scripts.Rooms
                     _pendingAction = HeroAction.None;
                     _pendingCastAction = null;
                     _pendingAttackTarget = null;
-                    _pendingDrawSource = null;
-                    _pendingDrawMagic = null;
                     _pendingUseItem = null;
                     _pendingUseItemTarget = null;
                     OnHeroTurnStarted?.Invoke(unit);
@@ -418,10 +386,6 @@ namespace Assets.Scripts.Rooms
                     else if (_pendingAction == HeroAction.Cast && _pendingCastAction != null)
                     {
                         yield return ExecuteCastAction(_pendingCastAction, _pendingCastSlot, room);
-                    }
-                    else if (_pendingAction == HeroAction.Draw && _pendingDrawMagic != null)
-                    {
-                        yield return ExecuteDrawAction(unit, _pendingDrawSource, _pendingDrawMagic, _pendingDrawCharges, _pendingDrawSlot);
                     }
                     else if (_pendingAction == HeroAction.UseItem && _pendingUseItem != null)
                     {
@@ -582,31 +546,6 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        private IEnumerator ExecuteDrawAction(ICombatUnit heroUnit, Enemy source, MagicSO magic, int charges, int slotIndex)
-        {
-            var hero = heroUnit as Hero;
-            if (hero == null || magic == null)
-            {
-                _lastTurnLog = $"{heroUnit.DisplayName} finds no magic to draw.";
-                yield break;
-            }
-
-            if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
-            {
-                DungeonManager.Instance.MagicState.DrawInto(hero.HeroKey, slotIndex, magic, charges);
-            }
-
-            // Record the drawn magic as discovered (permanent, survives death). Use Instance
-            // (auto-creates + loads Meta.json) — the manager may not exist yet mid-combat.
-            MetaProgressManager.Instance.MarkMagicDiscovered(magic.Key);
-
-            string sourceName = source != null ? source.DisplayName : "the enemy";
-            CombatAudio.Play(CombatSound.Draw);
-            ShowFloatingLabel(heroUnit.Transform.position, $"Draw {magic.DisplayName}!", new Color(0.5f, 0.8f, 1f));
-            _lastTurnLog = $"{heroUnit.DisplayName} draws {magic.DisplayName} from {sourceName}!";
-            yield return new WaitForSeconds(_turnDelay);
-        }
-
         private IEnumerator ExecuteUseItemAction(ICombatUnit heroUnit, ItemSO item, ICombatUnit target)
         {
             if (item == null || item.Category != ItemCategory.Consumable)
@@ -707,7 +646,7 @@ namespace Assets.Scripts.Rooms
                 BuffTracker = BuffTracker,
                 ChargingEntryIndex = enemy != null ? enemy.ChargingEntryIndex : EnemyActionPlanner.NoCharge,
                 SelfTurnCount = enemy != null ? enemy.TurnsTaken : 0,
-                DrawableMagics = enemy != null ? enemy.DrawableMagics : null
+                Spells = enemy != null ? enemy.Spells : null
             };
 
             // One authored list decides everything: gate, then priority, then weight. Casting is an
@@ -757,8 +696,8 @@ namespace Assets.Scripts.Rooms
         /// the defense curve, healing clamps and floating text all behave identically.
         ///
         /// <para>Three deliberate differences from <see cref="ExecuteCastAction"/>. No charge is
-        /// spent - <see cref="DrawableMagicEntry.Charges"/> is the player's Draw grant, and enemies
-        /// cast freely. No upgrade bonus or upgrade level applies, so an enemy casts the base version
+        /// spent - charges are a hero-side resource on an equipped slot, and enemies cast freely
+        /// from what they know. No upgrade bonus or upgrade level applies, so an enemy casts the base version
         /// of the magic and any effect gated behind an <c>UnlockLevel</c> is skipped. And no tag
         /// tracker or combo detector is passed, so an enemy cast neither triggers combos nor leaves
         /// tags: combos carry player-facing discovery and upgrades, and crediting the player for a
@@ -796,6 +735,7 @@ namespace Assets.Scripts.Rooms
 
             _lastTurnLog = result.BuildLog(castAction);
             CombatAudio.Play(CombatSound.MagicCast);
+            RecordEnemySpellObserved(enemy, decision.Magic);
 
             yield return _presenter.Present(
                 result,
@@ -1243,6 +1183,24 @@ namespace Assets.Scripts.Rooms
             {
                 MetaProgressManager.Instance.MarkResistanceObserved(key, type);
             }
+        }
+
+        /// <summary>
+        /// Watching an enemy actually throw a spell is what names it on that enemy's Bestiary page.
+        ///
+        /// <para>This carries what Draw used to. The spell list was the Draw list, and pulling from
+        /// it was both the acquisition and the reveal; with Draw gone the list is purely the
+        /// monster's own repertoire, so the only honest way to learn it is to be on the receiving
+        /// end. Recorded per enemy, not globally - seeing a Cinder Imp throw Fireball says nothing
+        /// about what the Dragon has.</para>
+        /// </summary>
+        private static void RecordEnemySpellObserved(Enemy enemy, MagicSO magic)
+        {
+            if (enemy == null || enemy.Definition == null || magic == null)
+            {
+                return;
+            }
+            MetaProgressManager.Instance.MarkEnemySpellObserved(enemy.Definition.SaveKey, magic.Key);
         }
 
         /// <summary>Watching an enemy swing reveals the element it swings with.</summary>

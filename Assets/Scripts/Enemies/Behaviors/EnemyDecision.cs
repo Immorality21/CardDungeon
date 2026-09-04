@@ -14,7 +14,7 @@ namespace Assets.Scripts.Enemies.Behaviors
         Debuff,
         ChargeAoe,   // boss: telegraph a signature move that hits the whole party next turn
         AoeAttack,   // boss: deliver the telegraphed signature across all living heroes
-        CastMagic    // cast one of the enemy's DrawableMagics (see EnemyMagicPlan)
+        CastMagic    // cast one of the enemy's Spells (see EnemyMagicPlan)
     }
 
     /// <summary>

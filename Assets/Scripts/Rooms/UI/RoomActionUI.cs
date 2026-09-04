@@ -18,7 +18,7 @@ namespace Assets.Scripts.Rooms
     /// <summary>
     /// Room + combat action UI, built on UI Toolkit. Presents non-combat actions
     /// (Examine/Action), the combat start bar (Fight/Flee), the hero-turn command
-    /// window (Attack/Magic/Draw/Item/Inspect/Skip), and centered dialogs (options, results, death).
+    /// window (Attack/Magic/Item/Inspect/Skip), and centered dialogs (options, results, death).
     /// Driven by GameManager (Show) and CombatManager events.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
@@ -87,7 +87,7 @@ namespace Assets.Scripts.Rooms
         private float _eventChance;
 
         // Cursor-driven command menu (FFX-style selection list).
-        private enum HeroCommand { Attack, Magic, Draw, Item, Inspect, Skip }
+        private enum HeroCommand { Attack, Magic, Item, Inspect, Skip }
 
         private struct CommandEntry
         {
@@ -209,7 +209,7 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            // Keyboard hotkeys for the combat bars: F/R start-bar, A/M/D/S hero command bar.
+            // Keyboard hotkeys for the combat bars: the start bar and the hero command cursor.
             // Registered on the root so the panel routes key presses here; each hotkey runs the
             // same handler as its button, and only fires when the matching bar is visible.
             root.RegisterCallback<KeyDownEvent>(OnCombatHotkey);
@@ -791,7 +791,7 @@ namespace Assets.Scripts.Rooms
             ShowConfirm("A Refuge",
                 $"Dry ground, and nothing watching. {state}\n\n"
                 + $"Resting restores {Mathf.RoundToInt(RoomKindRewards.RestHealFraction * 100f)}% of "
-                + "each hero's health. It can only be done once.",
+                + "each hero's health and refills every spell charge. It can only be done once.",
                 "Rest",
                 ApplyRest);
         }
@@ -818,6 +818,18 @@ namespace Assets.Scripts.Rooms
                         ? $"{hero.DisplayName} recovers {healed} health."
                         : $"{hero.DisplayName} was already whole.");
                 }
+            }
+
+            // A refuge is the only in-run refill of a spell charge. Draw used to be that refill -
+            // spend a charge, take the magic again - and removing it (2026-09-04) left magic as a
+            // strictly finite run allowance with no way back. Hanging the top-up on the refuge keeps
+            // it a place the player has to find and spend rather than a rule about levels, and puts
+            // it in direct competition with the heal: the same one-shot room pays both, so resting
+            // early for charges is resting early for health too.
+            if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            {
+                DungeonManager.Instance.MagicState.RefillCharges();
+                lines.Add("Spell charges are restored.");
             }
 
             TakePayload();
@@ -918,20 +930,6 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.RequestMagicSlots(_currentHeroTurn, slots);
         }
 
-        private void OnHeroDraw()
-        {
-            SetShown(_heroBar, false);
-
-            var drawable = CombatManager.Instance.GetDrawableEnemies();
-            if (drawable.Count == 0)
-            {
-                SetShown(_heroBar, true);
-                return;
-            }
-
-            CombatManager.Instance.RequestDrawTargets(_currentHeroTurn, drawable);
-        }
-
         private void OnHeroItem()
         {
             SetShown(_heroBar, false);
@@ -972,7 +970,7 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.RequestInspectTargets(_currentHeroTurn, enemies);
         }
 
-        /// <summary>Called by the selection UI to return to the Attack/Magic/Draw/Item/Inspect/Skip window.</summary>
+        /// <summary>Called by the selection UI to return to the Attack/Magic/Item/Inspect/Skip window.</summary>
         public void ReturnToHeroActions()
         {
             if (EnsureRefs())
@@ -1010,9 +1008,8 @@ namespace Assets.Scripts.Rooms
                 hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
             }
 
-            // Silence gates casting and nothing else. Draw stays open deliberately: it is how the
-            // player *acquires*, and a magic drawn is carried for the rest of the run, so blocking
-            // acquisition for three turns costs far more than blocking three casts.
+            // Silence gates casting and nothing else - Attack, Item and Inspect stay open, so a
+            // silenced hero still has a turn worth taking rather than three turns of Skip.
             bool silenced = CombatManager.Instance.BuffTracker != null
                 && CombatManager.Instance.BuffTracker.HasStatusEffect(hero, BuffType.Silenced);
             if (silenced)
@@ -1020,12 +1017,10 @@ namespace Assets.Scripts.Rooms
                 hasMagic = false;
             }
 
-            bool hasDrawable = CombatManager.Instance.GetDrawableEnemies().Count > 0;
             bool hasItem = InventoryManager.HasInstance && InventoryManager.Instance.HasAnyConsumable();
 
             _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
             _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Magic", Enabled = hasMagic });
-            _commands.Add(new CommandEntry { Command = HeroCommand.Draw, Label = "Draw", Enabled = hasDrawable });
             _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem });
             // Inspect is free - it opens a page and hands the turn straight back - so it sits above
             // Skip rather than among the actions that spend the turn.
@@ -1150,9 +1145,6 @@ namespace Assets.Scripts.Rooms
                 case HeroCommand.Magic:
                     OnHeroMagic();
                     break;
-                case HeroCommand.Draw:
-                    OnHeroDraw();
-                    break;
                 case HeroCommand.Item:
                     OnHeroItem();
                     break;
@@ -1218,8 +1210,8 @@ namespace Assets.Scripts.Rooms
         /// The whole keyboard for this panel, dispatched by which bar is up: Fight/Flee on the combat
         /// bar, the hero command cursor and its letter shortcuts on the command bar, and otherwise the
         /// dungeon keys - arrows for doors, Tab for the room bar. A key only ever acts when its bar is
-        /// visible, and only invokes actions whose buttons are currently shown (Magic/Draw appear
-        /// conditionally), so a hotkey can never do something the on-screen menu cannot.
+        /// visible, and only invokes actions whose buttons are currently shown (Magic and Item
+        /// appear conditionally), so a hotkey can never do something the on-screen menu cannot.
         /// </summary>
         private void OnCombatHotkey(KeyDownEvent evt)
         {

@@ -15,10 +15,10 @@ using UnityEngine.UIElements;
 namespace Assets.Scripts.Cards.UI
 {
     /// <summary>
-    /// In-combat selection UI for the Draw/Magic system, built on UI Toolkit.
-    /// Three compact windows: a "list" window (equipped magic slots for casting, or an
-    /// enemy's draw list, or slot placement), a "target" window (pick a combat unit), and the
-    /// "inspect" page - everything the party has learned about one enemy.
+    /// In-combat selection UI for the magic/item commands, built on UI Toolkit.
+    /// Three compact windows: a "list" window (equipped magic slots, or the party's consumables),
+    /// a "target" window (pick a combat unit), and the "inspect" page - everything the party has
+    /// learned about one enemy.
     /// Driven entirely by CombatManager events. Rows are built as VisualElements.
     ///
     /// Inspect is the odd one out: every other flow here ends in a Submit that spends the hero's
@@ -32,9 +32,6 @@ namespace Assets.Scripts.Cards.UI
             Idle,
             Cast,
             AttackTarget,
-            DrawTarget,
-            DrawChoice,
-            DrawPlacement,
             ItemChoice,
             ItemTarget,
             InspectTarget,
@@ -66,9 +63,6 @@ namespace Assets.Scripts.Cards.UI
 
         private int _selectedSlotIndex;
         private MagicSO _selectedMagic;
-        private Enemy _drawSource;
-        private MagicSO _drawMagic;
-        private int _drawCharges;
         private ItemSO _selectedItem;
 
         // Enemies offered to the last Inspect, so closing a page can step back to the picker rather
@@ -86,7 +80,6 @@ namespace Assets.Scripts.Cards.UI
             EnsureRefs();
             CombatManager.Instance.OnMagicSlotsRequested += ShowSlotListForCast;
             CombatManager.Instance.OnAttackTargetRequested += ShowAttackTargets;
-            CombatManager.Instance.OnDrawTargetRequested += ShowDrawTargets;
             CombatManager.Instance.OnItemListRequested += ShowItemList;
             CombatManager.Instance.OnInspectTargetRequested += ShowInspectTargets;
             CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
@@ -99,7 +92,6 @@ namespace Assets.Scripts.Cards.UI
             {
                 CombatManager.Instance.OnMagicSlotsRequested -= ShowSlotListForCast;
                 CombatManager.Instance.OnAttackTargetRequested -= ShowAttackTargets;
-                CombatManager.Instance.OnDrawTargetRequested -= ShowDrawTargets;
                 CombatManager.Instance.OnItemListRequested -= ShowItemList;
                 CombatManager.Instance.OnInspectTargetRequested -= ShowInspectTargets;
                 CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
@@ -222,7 +214,7 @@ namespace Assets.Scripts.Cards.UI
             for (int i = 0; i < slots.Count; i++)
             {
                 var slot = slots[i];
-                bool selectable = _mode == SelectionMode.DrawPlacement || slot.CanCast;
+                bool selectable = slot.CanCast;
 
                 string name = slot.IsEmpty ? "(empty)" : slot.Magic.DisplayName;
                 string meta = slot.IsEmpty ? "" : $"{slot.Charges}/{slot.MaxCharges}";
@@ -258,12 +250,6 @@ namespace Assets.Scripts.Cards.UI
 
         private void OnSlotSelected(int slotIndex, MagicSlot slot)
         {
-            if (_mode == SelectionMode.DrawPlacement)
-            {
-                SubmitDraw(slotIndex);
-                return;
-            }
-
             _selectedSlotIndex = slotIndex;
             _selectedMagic = slot.Magic;
 
@@ -332,122 +318,6 @@ namespace Assets.Scripts.Cards.UI
             _currentHero = hero;
             _mode = SelectionMode.AttackTarget;
             PopulateTargetRows(enemies, "Select Attack Target");
-        }
-
-        // ============================================================
-        //  DRAW FLOW
-        // ============================================================
-
-        private void ShowDrawTargets(ICombatUnit hero, List<ICombatUnit> enemies)
-        {
-            if (!EnsureRefs())
-            {
-                return;
-            }
-
-            _currentHero = hero;
-            _mode = SelectionMode.DrawTarget;
-
-            // Only one enemy to draw from — skip the target picker.
-            if (enemies.Count == 1)
-            {
-                OnDrawSourceSelected(enemies[0]);
-                return;
-            }
-            PopulateTargetRows(enemies, "Draw Magic From");
-        }
-
-        private void OnDrawSourceSelected(ICombatUnit source)
-        {
-            _drawSource = source as Enemy;
-
-            var hero = _currentHero as Hero;
-            if (_drawSource == null || hero == null || _drawSource.DrawableMagics == null ||
-                _drawSource.DrawableMagics.Count == 0 || !DungeonManager.HasInstance || DungeonManager.Instance.MagicState == null)
-            {
-                ReturnToActions();
-                return;
-            }
-
-            // A single-magic enemy skips the choice step.
-            if (_drawSource.DrawableMagics.Count == 1)
-            {
-                SelectDrawMagic(_drawSource.DrawableMagics[0]);
-                return;
-            }
-
-            _mode = SelectionMode.DrawChoice;
-            _listTitle.text = $"Draw from {_drawSource.DisplayName}";
-            PopulateDrawChoiceRows(_drawSource.DrawableMagics);
-        }
-
-        private void PopulateDrawChoiceRows(List<DrawableMagicEntry> entries)
-        {
-            _listScroll.Clear();
-            ClearNav();
-
-            foreach (var entry in entries)
-            {
-                bool valid = entry != null && entry.Magic != null;
-
-                // Magic the player has never drawn anywhere is offered unnamed and unillustrated:
-                // drawing IS the discovery, so the first pull off a new enemy is a small blind
-                // gamble on a turn. The charge count still shows - what the draw is worth is the
-                // decision being made, and hiding that would make the row unreadable rather than
-                // mysterious. The knowledge pages mask exactly the same entries; if this picker
-                // named them, that gate would be walked around by opening Draw and backing out.
-                bool known = valid && BestiaryPresenter.IsDrawKnown(
-                    entry.Magic.Key, MetaProgressManager.Instance.IsMagicDiscovered);
-
-                string name = !valid ? "(none)"
-                    : known ? entry.Magic.DisplayName : BestiaryPresenter.Unknown;
-                string meta = valid ? $"x{entry.Charges}" : "";
-                Sprite icon = valid && known ? entry.Magic.Icon : null;
-
-                var captured = entry;
-                _listScroll.Add(CreateRow(icon, name, meta, valid, () => SelectDrawMagic(captured)));
-            }
-
-            ShowPanel(_listPanel);
-            HidePanel(_targetPanel);
-            HidePanel(_inspectPanel);
-            BeginNavigation();
-        }
-
-        private void SelectDrawMagic(DrawableMagicEntry entry)
-        {
-            _drawMagic = entry.Magic;
-            _drawCharges = entry.Charges;
-
-            var hero = _currentHero as Hero;
-            if (hero == null || !DungeonManager.HasInstance || DungeonManager.Instance.MagicState == null)
-            {
-                ReturnToActions();
-                return;
-            }
-
-            // Fill the first empty slot automatically; if the kit is full, let the player
-            // pick which slot to overwrite.
-            int emptySlot = DungeonManager.Instance.MagicState.FirstEmptySlot(hero.HeroKey);
-            if (emptySlot >= 0)
-            {
-                SubmitDraw(emptySlot);
-                return;
-            }
-
-            _mode = SelectionMode.DrawPlacement;
-            _listTitle.text = "Replace which slot?";
-            PopulateSlotRows(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
-        }
-
-        private void SubmitDraw(int slotIndex)
-        {
-            _mode = SelectionMode.Idle;
-            HidePanel(_listPanel);
-            HidePanel(_targetPanel);
-            HidePanel(_inspectPanel);
-            ReleaseFocus();
-            CombatManager.Instance.SubmitDrawAction(_drawSource, _drawMagic, _drawCharges, slotIndex);
         }
 
         // ============================================================
@@ -593,10 +463,7 @@ namespace Assets.Scripts.Cards.UI
             BestiaryLineView.AddSection(_inspectBody, "Stats", LiveStatLines(enemy));
             BestiaryLineView.AddSection(_inspectBody, "Condition", ConditionLines(enemy));
             BestiaryLineView.AddSection(
-                _inspectBody,
-                "Draw",
-                BestiaryPresenter.DrawLines(
-                    definition, MetaProgressManager.Instance.IsMagicDiscovered));
+                _inspectBody, "Spells", BestiaryPresenter.SpellLines(definition, known));
 
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
@@ -720,9 +587,6 @@ namespace Assets.Scripts.Cards.UI
                 case SelectionMode.InspectTarget:
                     ShowInspectDetail(target);
                     return;
-                case SelectionMode.DrawTarget:
-                    OnDrawSourceSelected(target);
-                    return;
                 case SelectionMode.ItemTarget:
                     SubmitUseItem(target);
                     return;
@@ -781,7 +645,7 @@ namespace Assets.Scripts.Cards.UI
 
         /// <summary>
         /// Safeguard: a new hero turn must never inherit a selection window left open by the
-        /// previous turn (e.g. an abandoned Draw/Cast pick). Force everything back to Idle so
+        /// previous turn (e.g. an abandoned Cast/Item pick). Force everything back to Idle so
         /// the RoomActionUI command bar is the only thing showing when a turn begins.
         /// </summary>
         private void OnHeroTurnStarted(ICombatUnit hero)

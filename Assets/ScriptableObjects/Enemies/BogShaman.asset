@@ -37,18 +37,14 @@ MonoBehaviour:
   AttackDamageType: 2
   Archetype: 2
   Behavior: {fileID: 11400000, guid: 5e0a671d94786834081b996183e0a893, type: 2}
-  DrawableMagics:
+  Spells:
   - Magic: {fileID: 11400000, guid: 41114d713b3e47f89593db976c59b551, type: 2}
-    Charges: 2
     CastWeight: 1
   - Magic: {fileID: 11400000, guid: 8b88a57198b74076a36370c4a8e2d243, type: 2}
-    Charges: 2
     CastWeight: 1
   - Magic: {fileID: 11400000, guid: 8623a20dff634b744b031b367a3b9828, type: 2}
-    Charges: 2
     CastWeight: 0
   - Magic: {fileID: 11400000, guid: c0de51110002a4b1c2d3e4f506172839, type: 2}
-    Charges: 2
     CastWeight: 0
   Resistances:
   - DamageType: 2

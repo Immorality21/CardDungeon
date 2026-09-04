@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Assets.Scripts.Enemies
 {
     /// <summary>
-    /// Whether an enemy casts this turn, which of its <see cref="DrawableMagicEntry"/> entries it
+    /// Whether an enemy casts this turn, which of its <see cref="EnemySpellEntry"/> spells it
     /// casts, and at whom. Pure and roll-injected, so the combat loop, the balance model and the
     /// tests all decide the same way.
     ///
@@ -17,9 +17,9 @@ namespace Assets.Scripts.Enemies
     /// consulted: hit and the enemy casts, miss and the archetype decides exactly as it always
     /// did. Nothing about the existing behaviours changed.</para>
     ///
-    /// <para>Enemy casts do not spend charges. <see cref="DrawableMagicEntry.Charges"/> is what a
-    /// successful Draw grants the player; an enemy casting from the same list is free, which is how
-    /// the FF games this system is modelled on treat it.</para>
+    /// <para>Enemy casts spend nothing. Charges are a hero-side resource on an equipped slot; an
+    /// enemy simply throws what it knows, which is how the FF games this system is modelled on
+    /// treat it.</para>
     /// </summary>
     public static class EnemyMagicPlan
     {
@@ -31,7 +31,7 @@ namespace Assets.Scripts.Enemies
         /// the player has been shown that, so swallowing it would make the telegraph a lie.</para>
         /// </summary>
         public static bool ShouldCast(
-            float castChance, IList<DrawableMagicEntry> magics, bool isCharging, float roll)
+            float castChance, IList<EnemySpellEntry> magics, bool isCharging, float roll)
         {
             if (isCharging || castChance <= 0f || !HasCastable(magics))
             {
@@ -41,7 +41,7 @@ namespace Assets.Scripts.Enemies
         }
 
         /// <summary>True when at least one entry carries a magic that can actually be cast.</summary>
-        public static bool HasCastable(IList<DrawableMagicEntry> magics)
+        public static bool HasCastable(IList<EnemySpellEntry> magics)
         {
             if (magics == null)
             {
@@ -58,7 +58,7 @@ namespace Assets.Scripts.Enemies
         }
 
         /// <summary>
-        /// Picks which magic to cast, weighted by <see cref="DrawableMagicEntry.CastWeight"/>.
+        /// Picks which magic to cast, weighted by <see cref="EnemySpellEntry.CastWeight"/>.
         /// <paramref name="roll"/> is a 0..1 sample.
         ///
         /// <para>Weights that sum to zero fall back to a uniform pick. That is not just defensive:
@@ -66,7 +66,7 @@ namespace Assets.Scripts.Enemies
         /// existing entries deserialize to 0 rather than to the C# initializer. Uniform is the
         /// behaviour those assets should have.</para>
         /// </summary>
-        public static MagicSO Select(IList<DrawableMagicEntry> magics, float roll)
+        public static MagicSO Select(IList<EnemySpellEntry> magics, float roll)
         {
             if (!HasCastable(magics))
             {
@@ -187,13 +187,13 @@ namespace Assets.Scripts.Enemies
             return Mathf.Max(1, Mathf.RoundToInt(power * scale));
         }
 
-        private static bool IsCastable(DrawableMagicEntry entry)
+        private static bool IsCastable(EnemySpellEntry entry)
         {
             return entry != null && entry.Magic != null
                 && entry.Magic.Effects != null && entry.Magic.Effects.Count > 0;
         }
 
-        private static MagicSO Uniform(IList<DrawableMagicEntry> magics, float roll)
+        private static MagicSO Uniform(IList<EnemySpellEntry> magics, float roll)
         {
             var castable = new List<MagicSO>();
             for (int i = 0; i < magics.Count; i++)

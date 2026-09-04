@@ -82,8 +82,8 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `EnemyMagicModel` | what an enemy's **own casts** are worth: cast share, expected damage and healing per cast |
 | `EnemyBehaviorModel` | what an enemy's **authored repertoire** is worth per turn: the offense multiplier, healing, idle share |
 | `LevelEnemyTuning` (in `Enemies/`) | the per-level enemy numbers every metric is measured against |
-| `VarietyAnalyzer` | the one-dimensionality axis: archetype share, resistance coverage, inert damage types, Draw overlap |
-| `ProgressionMap` | the **supply chain**: which magic is drawable where, when each combo becomes possible, and whether a level's resistances are in elements the player can bring yet |
+| `VarietyAnalyzer` | the one-dimensionality axis: archetype share, resistance coverage, inert damage types, enemy **spell-repertoire** overlap |
+| `ProgressionMap` | the **supply chain**: which hero's grid teaches each magic and what the cheapest route costs, when each combo becomes possible, and whether a level's resistances are in elements the modelled party can bring yet |
 | `EncounterSimulator` | headless battles under three policies (`AttackOnly` / `MagicFirst` / `Adaptive`) — **per room** via `Run`, and **per floor** via `RunFloor` |
 | `InvestmentFrontier` | the **frontier**: party width × sphere-grid XP swept over a floor, reduced to the Pareto-minimal mixes that clear it. `FloorFrontier` / `InvestmentPoint` |
 | `SaveAudit` | reads the live save files and rebuilds the real party + economy state |
@@ -91,15 +91,31 @@ Those constants were made `public` **for this purpose** — do not copy their va
 
 ## The supply-chain view (Elements & Unlocks tab)
 
-Resistances and combos are authored content that only becomes live if the Draw tables hand the player the
-pieces. `ProgressionMap` models that, and it is the reason the tab exists:
+Resistances and combos are authored content that only becomes live if the **sphere grids** hand the player
+the pieces. `ProgressionMap` models that, and it is the reason the tab exists.
 
-- **Magic availability** — every `MagicSO` against every run/level that offers it, and from which enemy.
-  Draw is the only route to new magic, so anything unreachable here is unreachable in play.
+**It was rebuilt on 2026-09-04.** It used to model the Draw tables — magic × enemy × level × run,
+answering *is this spell placed on something the player will meet*. Draw was removed, so the supply side
+is now **investment**: a `MagicSource` is a `MagicKnown` node on a hero's grid, ordered by the cheapest
+chain of activations that reaches it (`PathCost`, a Dijkstra over the grid where a node's weight is its
+own `XpCost` — not the hop-shortest route, because depth pricing makes a longer chain of cheap nodes
+genuinely cheaper sometimes). Two consequences before reading a finding off it:
+
+- **Unreachable is worse than it used to be**, and is reported as **Critical**. A magic on no grid has no
+  second route; under Draw it was one spawn-table edit from being live.
+- **Availability is a function of the modelled party.** Which spells are in hand at level 5 depends on
+  who is fielded and how `GreedySpend` spent their XP — and `GreedySpend` is a breadth build by
+  construction, so it under-buys a deliberately deep magic branch. Do not read a late unlock here as
+  proof a branch is mispriced.
+
+- **Magic availability** — every `MagicSO` against every hero whose grid teaches it, with the cheapest
+  hero and XP cost. `SingleHeroOnly` flags the ones where fielding a particular hero is a precondition
+  rather than a preference — the first *key-shaped* gate the model can see.
 - **Combo reachability** — a combo needs one required tag already on the target and another arriving with
-  the incoming cast (`ComboDetector`), so *every* required tag must be carried by drawable magic. A combo
-  unlocks at the **latest** of the earliest sources across its tags, since the player needs all of them
-  at once.
+  the incoming cast (`ComboDetector`), so *every* required tag must be carried by magic some grid
+  teaches. Two distinct failures now: `TagsNotLearnable` (on no grid at all — a Warning) and
+  `UnlockedAt == null` (on a grid, but no modelled party ever owns every piece at once — an Info, and
+  usually GreedySpend under-buying rather than a real dead end).
 - **Element relevance per level** — a resistance in an element the player cannot obtain yet cannot change
   a decision. `LevelElementProfile.ElementChoiceMatters` is false in that case, which is a finding.
 - **Front-loading** — one level handing over more than `MaxUnlockSharePerLevel` of the catalog leaves the
@@ -316,7 +332,7 @@ a **command gate** (`Silenced`). `BuffType` maps to `StatType` by name, the same
 `BuffHandlerRegistry` builds its stat handlers, and anything with no matching stat is **skipped rather
 than guessed at** — putting an invented number into the danger index would be worse than a known
 omission. Silence is the one that bites hardest: it removes a hero's entire magic verb and prices as
-zero, which is why `Hush` ships at `CastWeight: 0` (drawable, never cast) rather than on an enemy's
+zero, which is why `Hush` ships at `CastWeight: 0` (in the repertoire, never chosen) rather than on an enemy's
 rotation. Pricing it needs a turn-denial term the closed form does not have; the nearest existing idiom
 is `EnemySupportModel`'s *measured* output suppression.
 
@@ -337,9 +353,10 @@ Enemy decisions are **not** re-implemented: `TakeEnemyTurn` calls the same `Enem
 the combat loop calls, and `ResolveCast` goes through the real `EffectResolver` with the same arguments
 `CombatManager.ExecuteEnemyCast` uses. Only the turn loop and the player's choices are simulated.
 
-Deliberate simplifications: mid-fight **Draw is not modelled** (heroes start with the magic the
-encounter's enemies offer, via `BalanceAnalyzer.AssignDrawLoadout`, and never spend a turn drawing);
-and fleeing is never attempted.
+Deliberate simplifications: **a hero's slots are whatever they start the fight with** — exact now that
+nothing acquires magic mid-fight, but note the per-room sim does not model the refuge charge refill;
+the loadout comes from `BalanceAnalyzer.AssignMagicLoadout`, which reads the heroes' **grids** rather
+than the encounter (it read the enemies until Draw was removed); and fleeing is never attempted.
 
 ### Rooms vs floors — which entry point answers which question
 

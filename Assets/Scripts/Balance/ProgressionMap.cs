@@ -3,32 +3,50 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using UnityEngine;
 
 namespace Assets.Scripts.Balance
 {
-    /// <summary>One place a magic can be drawn: a specific enemy, in a specific level of a specific run.</summary>
-    public class DrawSource
+    /// <summary>
+    /// One place a magic can be learned: a <c>MagicKnown</c> node on a specific hero's sphere grid.
+    ///
+    /// <para><b>This replaced <c>DrawSource</c> on 2026-09-04.</b> A source used to be an enemy in a
+    /// level of a run, and the question the map answered was "has the player walked past something
+    /// carrying this yet". Magic is bought on the grid now, so a source is a <i>price</i> instead of
+    /// a place, and the question is "can a campaign afford this". That is why the ordering key is XP
+    /// rather than run sequence.</para>
+    /// </summary>
+    public class MagicSource
     {
-        public RunDefinitionSO Run;
-        public string RunName = "";
-        public int RunSequence;
-        public int LevelIndex;
-        public string LevelReference = "";
-        public EnemySO Enemy;
-        public string EnemyName = "";
-        public bool BossOnly;
+        public HeroSO Hero;
+        public string HeroName = "";
+        public string HeroKey = "";
+        public string NodeKey = "";
+
+        /// <summary>Edges from the grid's start node — how far into a branch the spell sits.</summary>
+        public int Depth;
+
+        /// <summary>The node's own price.</summary>
+        public int NodeCost;
+
+        /// <summary>
+        /// Total XP to <b>own</b> the node: the cheapest chain of activations from the start node to
+        /// it, inclusive. This, not <see cref="NodeCost"/>, is what a player actually pays — nodes
+        /// are priced by depth (<c>SphereGridOps.CostForDepth</c>), so a deep spell's real cost is
+        /// dominated by the branch leading to it.
+        /// </summary>
+        public int PathCost;
+
+        /// <summary>Charges the node grants — the run's whole allowance of the spell.</summary>
         public int Charges;
 
-        /// <summary>Expected number of this enemy across the level — how reliably the draw is offered.</summary>
-        public float ExpectedEnemies;
-
-        /// <summary>Play-order key: run sequence first, then level index.</summary>
-        public long Order => (long)RunSequence * 10000L + LevelIndex;
+        /// <summary>Cheapest-first ordering key. The grid analogue of "earliest in play order".</summary>
+        public long Order => PathCost;
     }
 
-    /// <summary>Where in the run order a magic becomes obtainable, and from whom.</summary>
+    /// <summary>Which heroes can learn a magic, and what the cheapest route to it costs.</summary>
     public class MagicAvailability
     {
         public MagicSO Magic;
@@ -36,15 +54,18 @@ namespace Assets.Scripts.Balance
         public string DisplayName = "";
         public List<DamageType> DamageTypes = new List<DamageType>();
         public List<MagicTag> Tags = new List<MagicTag>();
-        public List<DrawSource> Sources = new List<DrawSource>();
+        public List<MagicSource> Sources = new List<MagicSource>();
 
+        /// <summary>False means <b>no hero can ever cast this</b> — with Draw gone, a magic on no
+        /// grid is dead content, not merely late content.</summary>
         public bool IsReachable => Sources.Count > 0;
 
-        /// <summary>Earliest source in play order — where the player first gets this magic.</summary>
-        public DrawSource FirstSource;
+        /// <summary>The cheapest way in — which hero to invest in, and what it costs.</summary>
+        public MagicSource FirstSource;
 
-        /// <summary>True when every source is a boss, so the magic is gated behind a run climax.</summary>
-        public bool BossGatedOnly
+        /// <summary>True when only one hero's grid teaches it, so fielding that hero is a
+        /// precondition rather than a preference.</summary>
+        public bool SingleHeroOnly
         {
             get
             {
@@ -52,9 +73,9 @@ namespace Assets.Scripts.Balance
                 {
                     return false;
                 }
-                foreach (var source in Sources)
+                for (int i = 1; i < Sources.Count; i++)
                 {
-                    if (!source.BossOnly)
+                    if (Sources[i].HeroKey != Sources[0].HeroKey)
                     {
                         return false;
                     }
@@ -64,11 +85,24 @@ namespace Assets.Scripts.Balance
         }
     }
 
+    /// <summary>Where in the run order the modelled party first holds every piece of a combo.</summary>
+    public class ProgressionPoint
+    {
+        public RunDefinitionSO Run;
+        public string RunName = "";
+        public int RunSequence;
+        public int LevelIndex;
+        public string LevelReference = "";
+
+        /// <summary>Play-order key: run sequence first, then level index.</summary>
+        public long Order => (long)RunSequence * 10000L + LevelIndex;
+    }
+
     /// <summary>
     /// Whether a combo can ever fire, and when. A combo needs one required tag already on the target and
     /// another arriving with the incoming cast (see <see cref="ComboDetector"/>), so every required tag
-    /// has to be carried by magic the player can actually draw — a combo whose tags live only on
-    /// undrawable magic is dead content no stat tuning will reveal.
+    /// has to be carried by magic some hero can actually learn — a combo whose tags live only on
+    /// unlearnable magic is dead content no stat tuning will reveal.
     /// </summary>
     public class ComboAvailability
     {
@@ -80,19 +114,27 @@ namespace Assets.Scripts.Balance
         /// <summary>Required tags no magic in the catalog carries at all.</summary>
         public List<MagicTag> TagsWithNoMagic = new List<MagicTag>();
 
-        /// <summary>Required tags carried only by magic that cannot be drawn anywhere.</summary>
-        public List<MagicTag> TagsNotDrawable = new List<MagicTag>();
+        /// <summary>Required tags carried only by magic no sphere grid teaches.</summary>
+        public List<MagicTag> TagsNotLearnable = new List<MagicTag>();
 
         /// <summary>Magic that satisfies the requirement, one entry per required tag.</summary>
         public List<string> EnablingMagic = new List<string>();
 
-        public bool IsReachable => TagsWithNoMagic.Count == 0 && TagsNotDrawable.Count == 0;
+        public bool IsReachable => TagsWithNoMagic.Count == 0 && TagsNotLearnable.Count == 0;
 
         /// <summary>
-        /// Where the combo becomes possible: the *latest* of the earliest sources across its required
-        /// tags, since the player needs all of them in hand at once.
+        /// XP to buy every piece: the sum, over the required tags, of the cheapest route to a magic
+        /// carrying that tag. Approximate on purpose — two tags on one branch share most of their
+        /// path, so this is an upper bound rather than a quote.
         /// </summary>
-        public DrawSource UnlockedAt;
+        public int InvestmentToEnable;
+
+        /// <summary>
+        /// Where the combo actually becomes possible in play: the first level at which the modelled
+        /// party holds a magic for every required tag. Null when no modelled party ever does, which
+        /// is a stronger finding than "it costs a lot" — it means the campaign never pays for it.
+        /// </summary>
+        public ProgressionPoint UnlockedAt;
     }
 
     /// <summary>The elemental picture for one level: what it resists, and what the player can bring to it.</summary>
@@ -110,8 +152,8 @@ namespace Assets.Scripts.Balance
         public Dictionary<DamageType, float> ResistWeightByType = new Dictionary<DamageType, float>();
         public Dictionary<DamageType, float> WeakWeightByType = new Dictionary<DamageType, float>();
 
-        /// <summary>Magic first drawable in this level.</summary>
-        public List<MagicSO> NewlyDrawable = new List<MagicSO>();
+        /// <summary>Magic the modelled party first knows by this level.</summary>
+        public List<MagicSO> NewlyKnown = new List<MagicSO>();
 
         /// <summary>
         /// What the level's enemies attack *with*, weighted by expected count. The defensive mirror of
@@ -126,7 +168,7 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public List<DamageType> UndefendableIncoming = new List<DamageType>();
 
-        /// <summary>Elements (excluding Normal) the player can deal by the time they reach this level.</summary>
+        /// <summary>Elements (excluding Normal) the modelled party can deal at this level.</summary>
         public List<DamageType> ElementsAvailable = new List<DamageType>();
 
         /// <summary>
@@ -148,18 +190,35 @@ namespace Assets.Scripts.Balance
         public int Sequence;
         public List<LevelElementProfile> Levels = new List<LevelElementProfile>();
 
-        /// <summary>Magic first drawable anywhere in this run — the run's "unlocks" list.</summary>
-        public List<MagicSO> NewlyDrawable = new List<MagicSO>();
+        /// <summary>Magic the modelled party first knows during this run — its "unlocks" list.</summary>
+        public List<MagicSO> NewlyKnown = new List<MagicSO>();
 
         /// <summary>Combos that become possible for the first time during this run.</summary>
         public List<MagicComboSO> NewlyEnabledCombos = new List<MagicComboSO>();
     }
 
     /// <summary>
-    /// Maps the player's toolkit against the run order: which magic is drawable where, which combos that
-    /// makes possible and when, and whether each level's resistances are in elements the player can bring
-    /// yet. This is the supply side of the elemental layer — resistances only create decisions if the
-    /// Draw tables hand out the elements to decide between.
+    /// Maps the player's magic toolkit against the run order: which spells the sphere grids teach and at
+    /// what price, which of them the modelled party actually owns by each level, which combos that makes
+    /// possible, and whether each level's resistances are in elements the player can bring yet.
+    ///
+    /// <para><b>Rebuilt on 2026-09-04.</b> This was a supply-chain model of the Draw tables: magic ×
+    /// enemy × level × run, answering "is this spell placed on something the player will meet". Draw
+    /// was removed and magic moved onto the sphere grid (<c>docs/plans/SPECIALIZATION.md</c> §9b), so
+    /// the supply side is now <i>investment</i>: a spell exists for a player if some hero's grid
+    /// teaches it and the campaign pays enough XP to reach the node. Two consequences worth knowing
+    /// before reading a finding off this:</para>
+    ///
+    /// <list type="bullet">
+    /// <item><description><b>Unreachable is worse than it used to be.</b> A magic on no grid cannot be
+    /// obtained at all — there is no second route. Under Draw an "unreachable" magic was still
+    /// authored content sitting one spawn-table edit away.</description></item>
+    /// <item><description><b>Availability is now a function of the modelled party.</b> Which spells are
+    /// in hand at level 5 depends on which heroes are fielded and how <c>GreedySpend</c> spent their
+    /// XP — and <c>GreedySpend</c> is a breadth build by construction, so it will under-report a
+    /// deliberately deep magic branch. Do not read a late unlock here as proof a branch is
+    /// mispriced.</description></item>
+    /// </list>
     /// </summary>
     public class ProgressionMap
     {
@@ -192,13 +251,14 @@ namespace Assets.Scripts.Balance
             IList<RunCurve> runCurves,
             IList<MagicSO> catalog,
             IList<MagicComboSO> combos,
+            IList<HeroSO> heroes = null,
             IList<ItemSO> items = null)
         {
             var map = new ProgressionMap();
             map.CatalogMagicCount = catalog != null ? catalog.Count : 0;
             map.DefendableTypes = CollectDefendableTypes(catalog, items);
 
-            var byMagic = new Dictionary<MagicSO, MagicAvailability>();
+            var byKey = new Dictionary<string, MagicAvailability>();
             if (catalog != null)
             {
                 foreach (var magic in catalog)
@@ -229,14 +289,19 @@ namespace Assets.Scripts.Balance
                         }
                     }
 
-                    byMagic[magic] = availability;
+                    if (!byKey.ContainsKey(availability.Key))
+                    {
+                        byKey[availability.Key] = availability;
+                    }
                     map.Magic.Add(availability);
                 }
             }
 
+            CollectGridSources(map, byKey, heroes);
+
             var ordered = OrderRuns(runCurves, map);
-            BuildRunProgressions(map, ordered, byMagic);
-            BuildComboAvailability(map, combos, byMagic);
+            BuildRunProgressions(map, ordered, byKey);
+            BuildComboAvailability(map, combos, ordered);
 
             foreach (var availability in map.Magic)
             {
@@ -255,6 +320,153 @@ namespace Assets.Scripts.Balance
 
             AssignComboUnlockRuns(map);
             return map;
+        }
+
+        // ============================================================
+        //  THE GRIDS: WHO TEACHES WHAT, AND FOR HOW MUCH
+        // ============================================================
+
+        /// <summary>
+        /// Every <c>MagicKnown</c> node on every hero's grid, recorded against the magic it teaches.
+        /// This is the whole supply side now.
+        /// </summary>
+        private static void CollectGridSources(
+            ProgressionMap map, Dictionary<string, MagicAvailability> byKey, IList<HeroSO> heroes)
+        {
+            if (heroes == null)
+            {
+                return;
+            }
+
+            foreach (var hero in heroes)
+            {
+                var grid = hero != null ? hero.SphereGrid : null;
+                if (grid == null || grid.Nodes == null)
+                {
+                    continue;
+                }
+
+                var depths = SphereGridOps.DepthsFrom(grid);
+                var pathCosts = CheapestPathCosts(grid);
+
+                foreach (var node in grid.Nodes)
+                {
+                    if (node == null
+                        || node.Kind != SphereNodeKind.MagicKnown
+                        || string.IsNullOrEmpty(node.GrantedMagicKey))
+                    {
+                        continue;
+                    }
+
+                    MagicAvailability availability;
+                    if (!byKey.TryGetValue(node.GrantedMagicKey, out availability))
+                    {
+                        // A node naming a magic the catalog does not have. BalanceAnalyzer reports
+                        // that separately; here it simply is not a source of anything.
+                        continue;
+                    }
+
+                    int depth;
+                    if (!depths.TryGetValue(node.Key, out depth))
+                    {
+                        depth = 0;
+                    }
+
+                    int pathCost;
+                    if (!pathCosts.TryGetValue(node.Key, out pathCost))
+                    {
+                        // Unreachable from the start node — no chain of activations reaches it, so
+                        // it teaches nothing however it is priced.
+                        continue;
+                    }
+
+                    var source = new MagicSource
+                    {
+                        Hero = hero,
+                        HeroName = hero.DisplayName,
+                        HeroKey = hero.SaveKey,
+                        NodeKey = node.Key,
+                        Depth = depth,
+                        NodeCost = node.XpCost,
+                        PathCost = pathCost,
+                        Charges = Mathf.Max(1, node.GrantedCharges)
+                    };
+
+                    availability.Sources.Add(source);
+                    if (availability.FirstSource == null || source.Order < availability.FirstSource.Order)
+                    {
+                        availability.FirstSource = source;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Cheapest total XP to own each node: a Dijkstra from the start node over undirected edges,
+        /// where a node's weight is its own <c>XpCost</c>.
+        ///
+        /// <para>Not the same as summing costs along the shortest <i>hop</i> path. Depth pricing is
+        /// superlinear but node costs are authored per node, so a longer detour through cheap nodes
+        /// can genuinely be the cheaper way in — and pricing a spell at the hop-shortest route would
+        /// quote a number no player would pay.</para>
+        /// </summary>
+        private static Dictionary<string, int> CheapestPathCosts(SphereGridSO grid)
+        {
+            var costs = new Dictionary<string, int>();
+            string start = SphereGridOps.StartKey(grid);
+            if (string.IsNullOrEmpty(start))
+            {
+                return costs;
+            }
+
+            var adjacency = SphereGridOps.BuildAdjacency(grid);
+            var startNode = SphereGridOps.FindNode(grid, start);
+            costs[start] = startNode != null ? startNode.XpCost : 0;
+
+            var settled = new List<string>();
+            while (true)
+            {
+                string pick = null;
+                foreach (var pair in costs)
+                {
+                    if (settled.Contains(pair.Key))
+                    {
+                        continue;
+                    }
+                    if (pick == null || pair.Value < costs[pick])
+                    {
+                        pick = pair.Key;
+                    }
+                }
+
+                if (pick == null)
+                {
+                    return costs;
+                }
+                settled.Add(pick);
+
+                List<string> neighbors;
+                if (!adjacency.TryGetValue(pick, out neighbors))
+                {
+                    continue;
+                }
+
+                foreach (var neighbor in neighbors)
+                {
+                    var node = SphereGridOps.FindNode(grid, neighbor);
+                    if (node == null)
+                    {
+                        continue;
+                    }
+
+                    int candidate = costs[pick] + node.XpCost;
+                    int existing;
+                    if (!costs.TryGetValue(neighbor, out existing) || candidate < existing)
+                    {
+                        costs[neighbor] = candidate;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -364,11 +576,11 @@ namespace Assets.Scripts.Balance
         private static void BuildRunProgressions(
             ProgressionMap map,
             List<RunCurve> ordered,
-            Dictionary<MagicSO, MagicAvailability> byMagic)
+            Dictionary<string, MagicAvailability> byKey)
         {
-            // Elements accumulate across the whole play order, not per run: magic drawn in run 1 is
-            // still equipped in run 2 (subject to the run save being wiped on death).
-            var seenMagic = new HashSet<MagicSO>();
+            // Elements accumulate across the whole play order: a spell bought on the grid before run 1
+            // is still known in run 5, and grid nodes are never un-bought.
+            var seenMagic = new List<string>();
             var elements = new List<DamageType>();
 
             foreach (var curve in ordered)
@@ -400,8 +612,9 @@ namespace Assets.Scripts.Balance
                         {
                             Add(profile.IncomingWeightByType, enemy.AttackDamageType, weight);
                         }
-                        RecordDrawSources(map, byMagic, curve, level, enemy, kvp.Value, seenMagic, profile, runProgression, elements);
                     }
+
+                    RecordKnownMagic(byKey, level, seenMagic, profile, runProgression, elements);
 
                     profile.ElementsAvailable = new List<DamageType>(elements);
                     profile.ElementChoiceMatters = ChoiceMatters(profile, elements);
@@ -417,6 +630,60 @@ namespace Assets.Scripts.Balance
                 }
 
                 map.Runs.Add(runProgression);
+            }
+        }
+
+        /// <summary>
+        /// What the modelled party actually knows by this level — the activated <c>MagicKnown</c> nodes
+        /// of the heroes the level curve fields, at the XP the curve says they have spent.
+        ///
+        /// <para>This is where the model became honest about a thing Draw let it skip. A drawable magic
+        /// was available to anyone who walked into the room; a learned one is available only to the
+        /// hero who paid for it, and only if that hero is fielded. So a level's element coverage now
+        /// depends on party composition, which is exactly the coupling <c>docs/BALANCING.md</c> §5b
+        /// wanted the model to see.</para>
+        /// </summary>
+        private static void RecordKnownMagic(
+            Dictionary<string, MagicAvailability> byKey,
+            LevelCurve level,
+            List<string> seenMagic,
+            LevelElementProfile profile,
+            RunProgression runProgression,
+            List<DamageType> elements)
+        {
+            if (level.Party == null || level.Party.Heroes == null)
+            {
+                return;
+            }
+
+            foreach (var hero in level.Party.Heroes)
+            {
+                var grid = hero.Definition != null ? hero.Definition.SphereGrid : null;
+                if (grid == null)
+                {
+                    continue;
+                }
+
+                foreach (var known in SphereGridOps.KnownMagicForNodes(grid, hero.ActivatedNodes))
+                {
+                    MagicAvailability availability;
+                    if (!byKey.TryGetValue(known.Key, out availability) || seenMagic.Contains(known.Key))
+                    {
+                        continue;
+                    }
+
+                    seenMagic.Add(known.Key);
+                    profile.NewlyKnown.Add(availability.Magic);
+                    runProgression.NewlyKnown.Add(availability.Magic);
+
+                    foreach (var type in availability.DamageTypes)
+                    {
+                        if (type != DamageType.Normal && !elements.Contains(type))
+                        {
+                            elements.Add(type);
+                        }
+                    }
+                }
             }
         }
 
@@ -509,66 +776,6 @@ namespace Assets.Scripts.Balance
             target[type] += weight;
         }
 
-        private static void RecordDrawSources(
-            ProgressionMap map,
-            Dictionary<MagicSO, MagicAvailability> byMagic,
-            RunCurve curve,
-            LevelCurve level,
-            EnemySO enemy,
-            EnemyPresence presence,
-            HashSet<MagicSO> seenMagic,
-            LevelElementProfile profile,
-            RunProgression runProgression,
-            List<DamageType> elements)
-        {
-            if (enemy.DrawableMagics == null)
-            {
-                return;
-            }
-
-            foreach (var draw in enemy.DrawableMagics)
-            {
-                if (draw == null || draw.Magic == null || !byMagic.TryGetValue(draw.Magic, out var availability))
-                {
-                    continue;
-                }
-
-                var source = new DrawSource
-                {
-                    Run = curve.Run,
-                    RunName = curve.Name,
-                    RunSequence = curve.Run.SequenceIndex,
-                    LevelIndex = level.Index,
-                    LevelReference = level.Reference,
-                    Enemy = enemy,
-                    EnemyName = enemy.Label,
-                    BossOnly = presence.BossOnly,
-                    Charges = draw.Charges,
-                    ExpectedEnemies = presence.Weight
-                };
-
-                availability.Sources.Add(source);
-                if (availability.FirstSource == null || source.Order < availability.FirstSource.Order)
-                {
-                    availability.FirstSource = source;
-                }
-
-                if (seenMagic.Add(draw.Magic))
-                {
-                    profile.NewlyDrawable.Add(draw.Magic);
-                    runProgression.NewlyDrawable.Add(draw.Magic);
-
-                    foreach (var type in availability.DamageTypes)
-                    {
-                        if (type != DamageType.Normal && !elements.Contains(type))
-                        {
-                            elements.Add(type);
-                        }
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// A level's resistances only create a decision if at least one of them is in an element the
         /// player can already deal. Resistance in an element they cannot yet obtain is dead weight.
@@ -595,11 +802,20 @@ namespace Assets.Scripts.Balance
         private static void BuildComboAvailability(
             ProgressionMap map,
             IList<MagicComboSO> combos,
-            Dictionary<MagicSO, MagicAvailability> byMagic)
+            List<RunCurve> ordered)
         {
             if (combos == null)
             {
                 return;
+            }
+
+            var tagsByKey = new Dictionary<string, List<MagicTag>>();
+            foreach (var availability in map.Magic)
+            {
+                if (!tagsByKey.ContainsKey(availability.Key))
+                {
+                    tagsByKey[availability.Key] = availability.Tags;
+                }
             }
 
             foreach (var combo in combos)
@@ -619,13 +835,12 @@ namespace Assets.Scripts.Balance
                         : new List<MagicTag>()
                 };
 
-                DrawSource latest = null;
                 bool blocked = false;
 
                 foreach (var tag in availability.RequiredTags)
                 {
                     MagicAvailability carrier = null;      // any catalog magic with the tag
-                    MagicAvailability reachable = null;    // one that is also drawable, earliest first
+                    MagicAvailability learnable = null;    // one that is also on a grid, cheapest first
 
                     foreach (var candidate in map.Magic)
                     {
@@ -639,10 +854,10 @@ namespace Assets.Scripts.Balance
                         {
                             continue;
                         }
-                        if (reachable == null
-                            || candidate.FirstSource.Order < reachable.FirstSource.Order)
+                        if (learnable == null
+                            || candidate.FirstSource.Order < learnable.FirstSource.Order)
                         {
-                            reachable = candidate;
+                            learnable = candidate;
                         }
                     }
 
@@ -653,25 +868,108 @@ namespace Assets.Scripts.Balance
                         continue;
                     }
 
-                    if (reachable == null)
+                    if (learnable == null)
                     {
-                        availability.TagsNotDrawable.Add(tag);
-                        availability.EnablingMagic.Add($"{tag}: {carrier.DisplayName} (not drawable)");
+                        availability.TagsNotLearnable.Add(tag);
+                        availability.EnablingMagic.Add($"{tag}: {carrier.DisplayName} (on no grid)");
                         blocked = true;
                         continue;
                     }
 
-                    availability.EnablingMagic.Add($"{tag}: {reachable.DisplayName}");
-
-                    // The combo needs every tag at once, so it unlocks at the last of the earliest.
-                    if (latest == null || reachable.FirstSource.Order > latest.Order)
-                    {
-                        latest = reachable.FirstSource;
-                    }
+                    availability.EnablingMagic.Add(
+                        $"{tag}: {learnable.DisplayName} ({learnable.FirstSource.HeroName}, {learnable.FirstSource.PathCost} xp)");
+                    availability.InvestmentToEnable += learnable.FirstSource.PathCost;
                 }
 
-                availability.UnlockedAt = blocked ? null : latest;
+                if (!blocked)
+                {
+                    availability.UnlockedAt = FirstLevelHoldingEveryTag(
+                        availability.RequiredTags, ordered, tagsByKey);
+                }
                 map.Combos.Add(availability);
+            }
+        }
+
+        /// <summary>
+        /// The first level at which the modelled party holds a magic for every one of
+        /// <paramref name="tags"/> at once — a combo needs them together, not eventually.
+        /// Null when no level in the campaign ever does.
+        /// </summary>
+        private static ProgressionPoint FirstLevelHoldingEveryTag(
+            List<MagicTag> tags, List<RunCurve> ordered, Dictionary<string, List<MagicTag>> tagsByKey)
+        {
+            if (tags == null || tags.Count == 0 || ordered == null)
+            {
+                return null;
+            }
+
+            var held = new List<MagicTag>();
+
+            foreach (var curve in ordered)
+            {
+                foreach (var level in curve.Levels)
+                {
+                    if (level.Party == null || level.Party.Heroes == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var hero in level.Party.Heroes)
+                    {
+                        var grid = hero.Definition != null ? hero.Definition.SphereGrid : null;
+                        if (grid == null)
+                        {
+                            continue;
+                        }
+
+                        foreach (var known in SphereGridOps.KnownMagicForNodes(grid, hero.ActivatedNodes))
+                        {
+                            AddTagsOf(known.Key, held, tagsByKey);
+                        }
+                    }
+
+                    bool all = true;
+                    foreach (var tag in tags)
+                    {
+                        if (!held.Contains(tag))
+                        {
+                            all = false;
+                            break;
+                        }
+                    }
+
+                    if (all)
+                    {
+                        return new ProgressionPoint
+                        {
+                            Run = curve.Run,
+                            RunName = curve.Name,
+                            RunSequence = curve.Run != null ? curve.Run.SequenceIndex : 0,
+                            LevelIndex = level.Index,
+                            LevelReference = level.Reference
+                        };
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>Tags carried by the magic with this key, appended to <paramref name="into"/>.</summary>
+        private static void AddTagsOf(
+            string magicKey, List<MagicTag> into, Dictionary<string, List<MagicTag>> tagsByKey)
+        {
+            List<MagicTag> tags;
+            if (tagsByKey == null || magicKey == null || !tagsByKey.TryGetValue(magicKey, out tags))
+            {
+                return;
+            }
+            foreach (var tag in tags)
+            {
+                if (!into.Contains(tag))
+                {
+                    into.Add(tag);
+                }
             }
         }
 

@@ -244,11 +244,11 @@ namespace Tests.EditMode
                 }
             };
 
-            var behavior = Behavior(EnemyBehaviorSO.CastFromDrawList(0.5f), Swing());
+            var behavior = Behavior(EnemyBehaviorSO.CastFromSpellList(0.5f), Swing());
             var enemy = Enemy(behavior);
-            enemy.DrawableMagics = new List<DrawableMagicEntry>
+            enemy.Spells = new List<EnemySpellEntry>
             {
-                new DrawableMagicEntry { Magic = shieldUp, Charges = 3, CastWeight = 1f }
+                new EnemySpellEntry { Magic = shieldUp, CastWeight = 1f }
             };
 
             var unit = SimUnit.FromEnemy(enemy, null);

@@ -483,3 +483,55 @@ MonoBehaviour:
     GrantedCharges: 2
     Neighbors:
     - warrior-reaver-4
+  - Key: warrior-berserk-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    Position: {x: 680, y: -565}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: WarCry
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-berserk-6
+  - Key: warrior-bulwark-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    Position: {x: -680, y: -745}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: ShieldUp
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-bulwark-6
+  - Key: warrior-warlord-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 410
+    Position: {x: 585, y: -870}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Ward
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-warlord-5
+  - Key: warrior-reaver-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 540
+    Position: {x: -585, y: -1050}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Hush
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-reaver-5

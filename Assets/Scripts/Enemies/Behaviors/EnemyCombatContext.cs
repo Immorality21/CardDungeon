@@ -20,8 +20,8 @@ namespace Assets.Scripts.Enemies.Behaviors
         /// </summary>
         public int ChargingEntryIndex = EnemyActionPlanner.NoCharge;
 
-        /// <summary>What this enemy can cast (its own Draw list) — see EnemyMagicPlan.</summary>
-        public List<DrawableMagicEntry> DrawableMagics;
+        /// <summary>What this enemy can cast (its own spell list) — see EnemyMagicPlan.</summary>
+        public List<EnemySpellEntry> Spells;
 
         /// <summary>True while a telegraphed action is in flight.</summary>
         public bool SelfIsCharging => ChargingEntryIndex >= 0;

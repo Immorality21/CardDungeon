@@ -54,7 +54,7 @@ namespace Tests.EditMode
             return magic;
         }
 
-        private EnemySO Enemy(float castChance, params DrawableMagicEntry[] entries)
+        private EnemySO Enemy(float castChance, params EnemySpellEntry[] entries)
         {
             var enemy = ScriptableObject.CreateInstance<EnemySO>();
             _created.Add(enemy);
@@ -63,7 +63,7 @@ namespace Tests.EditMode
             enemy.BaseStats[StatType.MaxHealth] = 30;
             enemy.BaseStats[StatType.Endurance] = 2;
             enemy.BaseStats[StatType.Agility] = 5;
-            enemy.DrawableMagics = new List<DrawableMagicEntry>(entries);
+            enemy.Spells = new List<EnemySpellEntry>(entries);
             enemy.Behavior = Caster(castChance);
             return enemy;
         }
@@ -81,15 +81,15 @@ namespace Tests.EditMode
             {
                 // ChanceGate 0 means "no gate", not "never" - a 0% caster is a behaviour with no cast
                 // action at all, which is also how the presets express it.
-                behavior.Actions.Add(EnemyBehaviorSO.CastFromDrawList(castChance));
+                behavior.Actions.Add(EnemyBehaviorSO.CastFromSpellList(castChance));
             }
             behavior.Actions.Add(new EnemyActionEntry { Kind = EnemyActionKind.Attack });
             return behavior;
         }
 
-        private DrawableMagicEntry Entry(MagicSO magic, int charges = 3, float weight = 1f)
+        private EnemySpellEntry Entry(MagicSO magic, float weight = 1f)
         {
-            return new DrawableMagicEntry { Magic = magic, Charges = charges, CastWeight = weight };
+            return new EnemySpellEntry { Magic = magic, CastWeight = weight };
         }
 
         // ------------------------------------------------------------------ the cast roll
@@ -97,21 +97,21 @@ namespace Tests.EditMode
         [Test]
         public void ShouldCast_RollUnderChance_Casts()
         {
-            var magics = new List<DrawableMagicEntry> { Entry(Magic("Fireball", 8)) };
+            var magics = new List<EnemySpellEntry> { Entry(Magic("Fireball", 8)) };
             Assert.IsTrue(EnemyMagicPlan.ShouldCast(0.30f, magics, false, 0.29f));
         }
 
         [Test]
         public void ShouldCast_RollAtOrOverChance_DoesNotCast()
         {
-            var magics = new List<DrawableMagicEntry> { Entry(Magic("Fireball", 8)) };
+            var magics = new List<EnemySpellEntry> { Entry(Magic("Fireball", 8)) };
             Assert.IsFalse(EnemyMagicPlan.ShouldCast(0.30f, magics, false, 0.30f));
         }
 
         [Test]
         public void ShouldCast_ZeroChance_NeverCasts()
         {
-            var magics = new List<DrawableMagicEntry> { Entry(Magic("Fireball", 8)) };
+            var magics = new List<EnemySpellEntry> { Entry(Magic("Fireball", 8)) };
             Assert.IsFalse(EnemyMagicPlan.ShouldCast(0f, magics, false, 0f));
         }
 
@@ -120,7 +120,7 @@ namespace Tests.EditMode
         {
             // The charge has already been telegraphed to the player; swallowing it would make the
             // telegraph a lie, so a charging enemy never casts however high its chance is.
-            var magics = new List<DrawableMagicEntry> { Entry(Magic("Fireball", 8)) };
+            var magics = new List<EnemySpellEntry> { Entry(Magic("Fireball", 8)) };
             Assert.IsFalse(EnemyMagicPlan.ShouldCast(1f, magics, true, 0f));
         }
 
@@ -128,7 +128,7 @@ namespace Tests.EditMode
         public void ShouldCast_NoMagicToCast_DoesNotCast()
         {
             Assert.IsFalse(EnemyMagicPlan.ShouldCast(1f, null, false, 0f));
-            Assert.IsFalse(EnemyMagicPlan.ShouldCast(1f, new List<DrawableMagicEntry>(), false, 0f));
+            Assert.IsFalse(EnemyMagicPlan.ShouldCast(1f, new List<EnemySpellEntry>(), false, 0f));
         }
 
         [Test]
@@ -138,7 +138,7 @@ namespace Tests.EditMode
             _created.Add(empty);
             empty.Effects = new List<SpellEffect>();
 
-            var magics = new List<DrawableMagicEntry> { Entry(empty) };
+            var magics = new List<EnemySpellEntry> { Entry(empty) };
             Assert.IsFalse(EnemyMagicPlan.ShouldCast(1f, magics, false, 0f));
         }
 
@@ -149,7 +149,7 @@ namespace Tests.EditMode
         {
             var rare = Magic("Rare", 5);
             var common = Magic("Common", 5);
-            var magics = new List<DrawableMagicEntry> { Entry(rare, weight: 1f), Entry(common, weight: 9f) };
+            var magics = new List<EnemySpellEntry> { Entry(rare, weight: 1f), Entry(common, weight: 9f) };
 
             // Total weight 10: the first tenth picks the rare entry, the rest the common one.
             Assert.AreEqual(rare, EnemyMagicPlan.Select(magics, 0.05f));
@@ -165,7 +165,7 @@ namespace Tests.EditMode
             // those assets have to get.
             var first = Magic("First", 5);
             var second = Magic("Second", 5);
-            var magics = new List<DrawableMagicEntry> { Entry(first, weight: 0f), Entry(second, weight: 0f) };
+            var magics = new List<EnemySpellEntry> { Entry(first, weight: 0f), Entry(second, weight: 0f) };
 
             Assert.AreEqual(first, EnemyMagicPlan.Select(magics, 0.1f));
             Assert.AreEqual(second, EnemyMagicPlan.Select(magics, 0.9f));
@@ -174,7 +174,7 @@ namespace Tests.EditMode
         [Test]
         public void Select_RollAtOne_StillReturnsAMagic()
         {
-            var magics = new List<DrawableMagicEntry> { Entry(Magic("A", 5)), Entry(Magic("B", 5)) };
+            var magics = new List<EnemySpellEntry> { Entry(Magic("A", 5)), Entry(Magic("B", 5)) };
             Assert.IsNotNull(EnemyMagicPlan.Select(magics, 1f));
         }
 
@@ -326,26 +326,6 @@ namespace Tests.EditMode
                 tracker, null, null, 0, 0, null, 3f);
 
             Assert.AreEqual(4, tracker.GetBuffAmount(caster, StatType.Endurance));
-        }
-
-        // ------------------------------------------------------------------ charges are never spent
-
-        [Test]
-        public void Casting_DoesNotTouchTheDrawCharges()
-        {
-            // Charges are the player's Draw grant. An enemy casting from the same list is free, the
-            // way the FF games this system is modelled on treat it - so nothing in the cast path may
-            // read or write them.
-            var entry = Entry(Magic("Fireball", 8), charges: 3);
-            var magics = new List<DrawableMagicEntry> { entry };
-
-            for (int i = 0; i < 10; i++)
-            {
-                Assert.IsTrue(EnemyMagicPlan.ShouldCast(1f, magics, false, 0f));
-                Assert.IsNotNull(EnemyMagicPlan.Select(magics, 0.5f));
-            }
-
-            Assert.AreEqual(3, entry.Charges);
         }
 
         // ------------------------------------------------------------------ the balance model

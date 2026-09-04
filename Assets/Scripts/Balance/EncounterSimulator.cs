@@ -85,8 +85,10 @@ namespace Assets.Scripts.Balance
     ///
     /// Known simplifications, all deliberate:
     /// <list type="bullet">
-    /// <item>Drawing magic mid-fight is not modelled — a hero's slots are whatever they start with,
-    /// so the simulator never spends a turn on Draw.</item>
+    /// <item>A hero's slots are whatever they start the fight with. Nothing acquires magic mid-fight
+    /// any more (Draw was removed 2026-09-04), so this is now exact rather than a simplification —
+    /// but note charges are only restored by resting in a refuge, which the floor sim models and the
+    /// per-room sim does not.</item>
     /// <item>Fleeing is never attempted.</item>
     /// <item>Every simulated fight starts on <b>full</b> charges. The game no longer does that -
     /// charges are a run resource, refilled only on the first floor - so a per-encounter simulation
@@ -960,7 +962,7 @@ namespace Assets.Scripts.Balance
                 BuffTracker = buffTracker,
                 ChargingEntryIndex = enemy.ChargingEntryIndex,
                 SelfTurnCount = enemy.TurnsTaken,
-                DrawableMagics = enemy.Definition != null ? enemy.Definition.DrawableMagics : null
+                Spells = enemy.Definition != null ? enemy.Definition.Spells : null
             };
 
             // The same planner call CombatManager.ExecuteEnemyTurn makes, so there is no second

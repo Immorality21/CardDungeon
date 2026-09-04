@@ -125,9 +125,8 @@ namespace Assets.Scripts.Enemies.Behaviors
         [Tooltip("Which stat a Debuff reduces.")]
         public StatType TargetStat = StatType.Strength;
 
-        [Tooltip("CastMagic only. Leave empty to pick from this enemy's own DrawableMagics — which " +
-                 "keeps the promise that what it throws is what you can steal from it. Name a magic " +
-                 "for a signature the player cannot obtain.")]
+        [Tooltip("CastMagic only. Leave empty to pick from this enemy's own Spells, weighted by " +
+                 "CastWeight. Name a magic here for a signature that is not on that list.")]
         public MagicSO Magic;
 
         [Tooltip("Every one of these must hold for the action to be available.")]

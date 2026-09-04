@@ -366,32 +366,41 @@ namespace Assets.Scripts.Dungeon
             }
             startRoom.Reveal();
 
-            // Initialize equipped-magic state, then carry a loadout into it. Two sources, in
-            // precedence order: the run save holds what was drawn on earlier levels of *this* run,
-            // and the magic-loadout file holds what the heroes walked out of previous runs with.
-            // The run save wins while a run is in flight because it is the more recent of the two;
-            // on level 1 it is empty, and that is when a hero picks their old kit back up.
+            // Initialize equipped-magic state, then fill it. Two sources, and which one applies is
+            // decided by where in the run this level sits rather than by precedence:
+            //
+            //   mid-run  - restore Run.json, which holds the slots *and the spent charges* from the
+            //              earlier floors of this run. Nothing else may touch them; re-seeding here
+            //              would hand the party a free refill every time they took a staircase.
+            //   run start - build the kit from scratch: each hero's chosen loadout (MagicLoadout.json)
+            //              resolved against what their sphere grid says they know, at full charges.
+            //
+            // Before 2026-09-04 the loadout file held slots rather than choices, because Draw meant a
+            // kit was something a run *accumulated* and had to be carried forward. Magic comes off
+            // the grid now, so there is nothing to carry - only a choice to re-apply.
             MagicState = new EquippedMagicState();
             MagicState.Initialize(Party.Heroes);
+
             if (MagicCatalog.HasInstance)
             {
                 var carried = ActiveRun != null ? _fileHandler.Load<RunSaveData>().EquippedMagic : null;
-                if (carried == null || carried.Count == 0)
+                if (carried != null && carried.Count > 0)
                 {
-                    carried = _fileHandler.Load<MagicLoadoutSaveData>().Heroes;
+                    MagicState.Restore(carried, MagicCatalog.Instance.GetMagic);
                 }
-                MagicState.Restore(carried, MagicCatalog.Instance.GetMagic);
             }
 
-            // Charges are a *run* resource: spent across floors and topped up only by drawing again.
-            // So the run's opening floor seeds each hero's permanently known magic and fills every
-            // slot; after that nothing refills. A per-level refill would hand the resource back before
-            // it ran out, and a per-fight one (what this used to do) made magic effectively infinite.
+            // Charges are a *run* resource: spent across floors, restored only by resting in a
+            // refuge. So the run's opening floor fills every slot; after that nothing here refills.
+            // A per-level refill would hand the resource back before it ran out, and a per-fight one
+            // (what this used to do) made magic effectively infinite.
             if (EquippedMagicState.RefillsOnLevelStart(RunLevelIndex))
             {
                 if (MagicCatalog.HasInstance)
                 {
-                    MagicState.SeedGrantedMagic(Party.Heroes, MagicCatalog.Instance.GetMagic);
+                    var chosen = _fileHandler.Load<MagicLoadoutSaveData>();
+                    MagicState.SeedFromLoadout(
+                        Party.Heroes, chosen.ChosenFor, MagicCatalog.Instance.GetMagic);
                 }
                 MagicState.RefillCharges();
             }
@@ -1011,14 +1020,16 @@ namespace Assets.Scripts.Dungeon
             RemoveCaptiveMarker(room);
 
             // Give the newcomer their own magic slots, or they cannot cast anything this run - and
-            // seed whatever they permanently know, since charges no longer refill and a hero who
-            // joined on floor three would otherwise be unarmed for the rest of the run.
+            // fill them from their loadout, since the run-start seeding already happened and a hero
+            // who joined on floor three would otherwise be unarmed for the rest of it.
             if (MagicState != null)
             {
                 MagicState.AddHero(hero);
                 if (MagicCatalog.HasInstance)
                 {
-                    MagicState.SeedGrantedMagic(new List<Hero> { hero }, MagicCatalog.Instance.GetMagic);
+                    var chosen = _fileHandler.Load<MagicLoadoutSaveData>();
+                    MagicState.SeedFromLoadout(
+                        new List<Hero> { hero }, chosen.ChosenFor, MagicCatalog.Instance.GetMagic);
                 }
             }
 
@@ -1065,8 +1076,6 @@ namespace Assets.Scripts.Dungeon
                 Party.CommitProgress();
             }
 
-            CommitMagicLoadout();
-
             // Award persistent meta-currency for clearing the level
             MetaProgressManager.Instance.AwardLevelClear();
 
@@ -1111,27 +1120,6 @@ namespace Assets.Scripts.Dungeon
             }
 
             SceneManager.LoadScene("MenuScene");
-        }
-
-        /// <summary>
-        /// Banks what the party is carrying in its draw slots, so it is there at the start of the
-        /// next run. Deferred to level clear like every other in-run gain - XP, loot, banked gold, a
-        /// rescued hero - which is what makes magic drawn during a fatal run forfeit: nothing on the
-        /// death path writes this file, so the last committed loadout is what survives.
-        ///
-        /// <para>Merged rather than overwritten, because <c>GetSaveData</c> only knows about the
-        /// heroes this run fielded and a benched hero must not lose their kit.</para>
-        /// </summary>
-        private void CommitMagicLoadout()
-        {
-            if (MagicState == null)
-            {
-                return;
-            }
-
-            var loadout = _fileHandler.Load<MagicLoadoutSaveData>();
-            loadout.Heroes = EquippedMagicState.Merge(loadout.Heroes, MagicState.GetSaveData());
-            _fileHandler.Save(loadout);
         }
 
         public void HandlePartyDeath()

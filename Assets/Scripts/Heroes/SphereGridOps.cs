@@ -284,9 +284,15 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
-        /// How many extra equipped-magic slots the activated nodes grant: +1 per MagicSlot node and
-        /// +1 per MagicKnown node. A known magic needs somewhere to live, so it brings its own slot
-        /// rather than consuming one the hero already bought.
+        /// How many extra equipped-magic slots the activated nodes grant: +1 per MagicSlot node,
+        /// and nothing else.
+        ///
+        /// <para>A MagicKnown node used to bring its own slot, because under Draw the two were the
+        /// same thing - magic went straight into a slot, and a spell you knew was a spell you had.
+        /// With Draw gone (2026-09-04) knowing and carrying separate: a grid teaches more spells
+        /// than a hero can take in, and the gap between the two is the whole reason a kit is a
+        /// decision. If MagicKnown still paid for its own slot there would be no gap and no
+        /// decision, and MagicSlot nodes would be buying nothing.</para>
         /// </summary>
         public static int SlotBonusForNodes(SphereGridSO grid, IEnumerable<string> activated)
         {
@@ -299,8 +305,7 @@ namespace Assets.Scripts.Heroes
             foreach (var key in activated)
             {
                 var node = FindNode(grid, key);
-                if (node != null
-                    && (node.Kind == SphereNodeKind.MagicSlot || node.Kind == SphereNodeKind.MagicKnown))
+                if (node != null && node.Kind == SphereNodeKind.MagicSlot)
                 {
                     bonus += 1;
                 }
@@ -309,29 +314,39 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
-        /// Magic this hero permanently knows, as (key, charges) pairs in node order - what their slots
-        /// are seeded with at the start of a run.
+        /// Magic this hero permanently knows, as (key, charges) pairs in node order - the pool their
+        /// hub loadout picks from, and the <b>only</b> source of magic in the game since Draw was
+        /// removed on 2026-09-04.
+        ///
+        /// <para>Node order, not activation order, so a hero's known list reads the same however
+        /// they bought it - which is what makes the auto-fill in <c>MagicLoadoutOps.Resolve</c>
+        /// deterministic rather than dependent on click history.</para>
         ///
         /// <para>Keys rather than <c>MagicSO</c> references on purpose: the Heroes layer does not know
         /// about Cards (the dependency runs the other way, and the saves reference magic by key too),
-        /// so resolution happens where the catalog lives. Duplicate keys collapse - buying two nodes
-        /// for the same magic grants two slots but seeds it once, with the higher charge count.</para>
+        /// so resolution happens where the catalog lives. Duplicate keys collapse - two nodes teaching
+        /// the same spell teach it once, at the higher charge count.</para>
         /// </summary>
-        public static List<KeyValuePair<string, int>> GrantedMagicForNodes(
+        public static List<KeyValuePair<string, int>> KnownMagicForNodes(
             SphereGridSO grid, IEnumerable<string> activated)
         {
             var granted = new List<KeyValuePair<string, int>>();
-            if (activated == null)
+            if (grid == null || grid.Nodes == null || activated == null)
             {
                 return granted;
             }
 
-            foreach (var key in activated)
+            var owned = new List<string>(activated);
+
+            // Walk the grid, not the save: activation order is click history, and the loadout's
+            // auto-fill reads this list positionally.
+            foreach (var node in grid.Nodes)
             {
-                var node = FindNode(grid, key);
                 if (node == null
                     || node.Kind != SphereNodeKind.MagicKnown
-                    || string.IsNullOrEmpty(node.GrantedMagicKey))
+                    || string.IsNullOrEmpty(node.Key)
+                    || string.IsNullOrEmpty(node.GrantedMagicKey)
+                    || !owned.Contains(node.Key))
                 {
                     continue;
                 }

@@ -451,3 +451,55 @@ MonoBehaviour:
     GrantedCharges: 2
     Neighbors:
     - tank-aegis-4
+  - Key: tank-immovable-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 295
+    Position: {x: -585, y: -690}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: FrostCloak
+    GrantedCharges: 2
+    Neighbors:
+    - tank-immovable-5
+  - Key: tank-vanguard-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 195
+    Position: {x: 585, y: -510}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: WarCry
+    GrantedCharges: 2
+    Neighbors:
+    - tank-vanguard-5
+  - Key: tank-sentinel-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 410
+    Position: {x: 585, y: -870}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Ward
+    GrantedCharges: 2
+    Neighbors:
+    - tank-sentinel-5
+  - Key: tank-aegis-magic
+    DisplayName: 
+    Kind: 3
+    XpCost: 540
+    Position: {x: -585, y: -1050}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Renew
+    GrantedCharges: 2
+    Neighbors:
+    - tank-aegis-5

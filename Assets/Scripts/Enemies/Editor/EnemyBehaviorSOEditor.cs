@@ -253,7 +253,7 @@ namespace Assets.Scripts.Enemies.Editor
                     if (entry.FindPropertyRelative("Magic").objectReferenceValue == null)
                     {
                         EditorGUILayout.HelpBox(
-                            "Picks from the enemy's DrawableMagics, weighted by each entry's CastWeight — "
+                            "Picks from the enemy's Spells, weighted by each entry's CastWeight - "
                             + "so what it throws is what you can steal from it.",
                             MessageType.None);
                     }

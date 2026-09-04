@@ -451,3 +451,107 @@ MonoBehaviour:
     GrantedCharges: 2
     Neighbors:
     - acolyte-warden-4
+  - Key: acolyte-arcanist-magic-1
+    DisplayName: 
+    Kind: 3
+    XpCost: 90
+    Position: {x: 300, y: -345}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: IceShard
+    GrantedCharges: 2
+    Neighbors:
+    - acolyte-arcanist-2
+  - Key: acolyte-arcanist-magic-2
+    DisplayName: 
+    Kind: 3
+    XpCost: 155
+    Position: {x: 490, y: -455}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Fireball
+    GrantedCharges: 2
+    Neighbors:
+    - acolyte-arcanist-4
+  - Key: acolyte-devout-magic-1
+    DisplayName: 
+    Kind: 3
+    XpCost: 155
+    Position: {x: -300, y: -525}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Renew
+    GrantedCharges: 2
+    Neighbors:
+    - acolyte-devout-2
+  - Key: acolyte-devout-magic-2
+    DisplayName: 
+    Kind: 3
+    XpCost: 295
+    Position: {x: -585, y: -690}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: FireCloak
+    GrantedCharges: 2
+    Neighbors:
+    - acolyte-devout-5
+  - Key: acolyte-oracle-magic-1
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    Position: {x: 300, y: -705}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: WaterSplash
+    GrantedCharges: 2
+    Neighbors:
+    - acolyte-oracle-2
+  - Key: acolyte-oracle-magic-2
+    DisplayName: 
+    Kind: 3
+    XpCost: 410
+    Position: {x: 585, y: -870}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Cinderstorm
+    GrantedCharges: 1
+    Neighbors:
+    - acolyte-oracle-5
+  - Key: acolyte-warden-magic-1
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    Position: {x: -300, y: -885}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: FrostCloak
+    GrantedCharges: 2
+    Neighbors:
+    - acolyte-warden-2
+  - Key: acolyte-warden-magic-2
+    DisplayName: 
+    Kind: 3
+    XpCost: 540
+    Position: {x: -585, y: -1050}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: LightningBolt
+    GrantedCharges: 2
+    Neighbors:
+    - acolyte-warden-5

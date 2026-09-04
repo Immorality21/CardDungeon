@@ -91,15 +91,16 @@ namespace Assets.Scripts.Heroes
 
         /// <summary>
         /// Magic this hero permanently knows, as (key, charges): the payload of activated MagicKnown
-        /// nodes. Seeded into their slots at the start of each run by <c>EquippedMagicState</c>, which
-        /// is also where the keys are resolved against the catalog - keeping Cards → Heroes the
-        /// dependency direction, same as <see cref="BonusMagicSlots"/>.
+        /// nodes, and the only source of magic in the game since Draw was removed. Knowing is not
+        /// carrying - the hub loadout picks which of these fit the hero's slots, and
+        /// <c>EquippedMagicState.SeedFromLoadout</c> resolves the keys against the catalog, keeping
+        /// Cards → Heroes the dependency direction, same as <see cref="BonusMagicSlots"/>.
         /// </summary>
-        public List<KeyValuePair<string, int>> GrantedMagic
+        public List<KeyValuePair<string, int>> KnownMagic
         {
             get
             {
-                return SphereGridOps.GrantedMagicForNodes(
+                return SphereGridOps.KnownMagicForNodes(
                     HeroSO != null ? HeroSO.SphereGrid : null, ActivatedNodes);
             }
         }

@@ -8,7 +8,7 @@ namespace Assets.Scripts.Enemies
 {
     /// <summary>
     /// Definition of an enemy type: its display name, sprite, base stats, behaviour archetype,
-    /// Draw offerings, resistances and loot. A room's spawn table references one of these; the
+    /// spell repertoire, resistances and loot. A room's spawn table references one of these; the
     /// shared Enemy prefab is stamped with it at spawn time via <see cref="Enemy.Initialize"/>.
     /// </summary>
     [CreateAssetMenu(fileName = "Enemy", menuName = "SO/Enemy")]
@@ -56,10 +56,11 @@ namespace Assets.Scripts.Enemies
                  "which is the original hard-coded behaviour minus casting.")]
         public Behaviors.EnemyBehaviorSO Behavior;
 
-        // The Draw list: magics the player can extract from this enemy, each with charges. It is
-        // also what a CastMagic action draws from when it names no specific magic - so what the enemy
-        // throws is what you can steal from it.
-        public List<DrawableMagicEntry> DrawableMagics = new List<DrawableMagicEntry>();
+        // What this enemy can throw: a CastMagic action that names no specific magic picks from
+        // here, weighted by CastWeight. Enemy casts spend nothing. Named in the Bestiary only once
+        // the player has actually seen it cast (BestiaryEntry.ObservedSpellKeys) - this list carries
+        // the discovery loop that used to hang off Draw.
+        public List<EnemySpellEntry> Spells = new List<EnemySpellEntry>();
 
         public List<Resistance> Resistances = new List<Resistance>();
 

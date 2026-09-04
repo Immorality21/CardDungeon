@@ -109,7 +109,7 @@ namespace Tests.EditMode
             enemy.XpReward = xp;
             enemy.GoldReward = gold;
             enemy.Archetype = EnemyArchetype.Aggressor;
-            enemy.DrawableMagics = new List<DrawableMagicEntry>();
+            enemy.Spells = new List<EnemySpellEntry>();
             return enemy;
         }
 

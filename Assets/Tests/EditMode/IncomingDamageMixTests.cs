@@ -152,9 +152,9 @@ namespace Tests.EditMode
         {
             var fire = Spell("Fire", DamageType.Fire);
             var definition = Make<EnemySO>();
-            definition.DrawableMagics = new List<DrawableMagicEntry>
+            definition.Spells = new List<EnemySpellEntry>
             {
-                new DrawableMagicEntry { Magic = fire, CastWeight = 1f }
+                new EnemySpellEntry { Magic = fire, CastWeight = 1f }
             };
 
             var behavior = Make<Assets.Scripts.Enemies.Behaviors.EnemyBehaviorSO>();
@@ -203,9 +203,9 @@ namespace Tests.EditMode
             };
 
             var definition = Make<EnemySO>();
-            definition.DrawableMagics = new List<DrawableMagicEntry>
+            definition.Spells = new List<EnemySpellEntry>
             {
-                new DrawableMagicEntry { Magic = cure, CastWeight = 1f }
+                new EnemySpellEntry { Magic = cure, CastWeight = 1f }
             };
 
             var behavior = Make<Assets.Scripts.Enemies.Behaviors.EnemyBehaviorSO>();
