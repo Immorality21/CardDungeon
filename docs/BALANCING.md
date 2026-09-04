@@ -8,8 +8,76 @@ a tuning pass starts from what was already measured rather than re-deriving it.
 
 - **What the numbers mean** (danger index, attrition, the model's own caveats) →
   `Assets/Scripts/Balance/CLAUDE.md`
-- **What is still open** → the `§0` section of `docs/NEXT_STEPS.md`
+- **What is still open** → `docs/plans/BALANCE_OPEN.md` (indexed from `docs/NEXT_STEPS.md`)
 - **This file** is the *how*: the relationships between levers, and the mistakes already made.
+
+---
+
+## What is true now — read this before the history
+
+**This file is a chronological log and later entries correct earlier ones.** Read this section, then
+jump to what you need. Do **not** read §5g–§5t front-to-back unless you are reconstructing how a
+number was arrived at.
+
+### Live warnings
+
+| | |
+|---|---|
+| ⚠️ **The magic half of the model is about to be wrong** *(2026-09-04)* | `docs/plans/SPECIALIZATION.md` §9b **scraps Draw**. `ProgressionMap` — the unlock timeline, the availability matrix, every *unreachable magic* finding — is built entirely on Draw tables (enemy × level × run) and will be measuring a route that no longer exists. `BalanceRegressionTests` asserts the old model and **will go red**. Do not act on an Elements & Unlocks finding until that section lands. |
+| ⚠️ **Grids are about to get much bigger** *(2026-09-04)* | §4c re-authors all seven grids and grows them well past ~30 nodes. `MinGridShareForLastFloor` is a **share**, so it re-derives itself when the denominator moves; and §5s priced nodes *by depth*, so a bigger grid is not simply more nodes at the same cost. |
+| ⚠️ **§5i's headline is wrong** | "Party width gates, XP does not." **§5j corrects it** — both axes work and the right unit is a *frontier*. §5k is what shipped. |
+
+### Two repricings that make older numbers incomparable
+
+- **Beeline pricing (§5m, 2026-08-29).** Every floor number since is priced at the beeline. Anything
+  written before it is not comparable.
+- **Grid depth-pricing (§5s, 2026-09-02).** One XP now buys **1/7.6** of the power it did. Every
+  budget, tolerance and exchange rate was converted **×7.5**, which preserves the measured
+  relationships but is coarse. **Every *investment point* number written before 2026-09-02 is
+  incomparable**, and the five "under budget" findings that appeared after the conversion **are the
+  conversion, not five new problems**.
+
+### Current constants
+
+| constant | value | set by |
+|---|---|---|
+| `MinGridShareForLastFloor` | floor **15%**, currently **37%** | §0 rule 5 |
+| `MaxBodiesPerRoom` | **6** | §5s |
+| `InvestmentPointsPerGold` | **1.4**, charged **per hero** | §5q |
+| `ChainBias` | **0.90 / 0.95** (was 0.667) | §5m, applied §5r |
+
+### Where the campaign sits (post-§5s conversion, 2026-09-02)
+
+| tier | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|
+| **ask** | 350 | 1200 | 1894 | 2744 | 3444 |
+| **budget** | 1500 | 3400 | 3400 | 5250 | 7500 |
+| **cushion** | 1.00× | 1.10× | 1.70× | 1.48× | 1.88× |
+
+The cushion was deliberately **not** cut (§5r): every frontier number is measured against an *optimal*
+greedy spend, so slack on deep floors is plausibly the build-variance margin. That flips the reading
+— **the suspicious rows are the shallow gates at 1.00× and 1.10×**, where an imperfect build has no
+slack at all. **Sampling a median build rather than an optimal one is the prerequisite for touching
+either.**
+
+### The one structural finding still unanswered
+
+**A long floor's investment ask barely answers to its difficulty** (§5r). Every lever feeds the same
+sustain pool, so there is **one dial**. The Hollow Vault's attrition went 4.37 → 7.57 (+73%) while its
+ask went 506 → 615 → 611 and then stopped. A second, *burst*-shaped dial is what §4b's summons are
+for — but note that as of 2026-09-04 both the **shape** and the **effects** of summons are reopened
+and reserved for the user, so do not model against the old spec.
+
+### Section map
+
+§0 rules · §1 arithmetic · §2 levers · §3 workflow · §6 standing traps — these are **reference** and stay
+true. §4–§5t are **history**, newest last; §5t holds the reasoning behind §0.
+
+**A note on links.** The historical entries below cite `NEXT_STEPS.md §X`. The backlog was split into
+`docs/plans/` on 2026-09-04, so those § numbers now resolve through the index in
+`docs/NEXT_STEPS.md` rather than sitting in that file directly. The § numbers themselves did not
+change; the old citations are left as written because they are a record of what was true at the
+time.
 
 ---
 
@@ -27,9 +95,11 @@ optimising the wrong thing.
 3. **Committing to one branch pays off by arriving somewhere early** — not with a bigger stat, but by
    reaching a capability sooner than a breadth build could: an **Ability** or **Summon** (neither
    exists yet) that answers a specific boss or obstacle. Breadth pays as even competence; depth pays
-   as one key, held early. **The spec is `docs/NEXT_STEPS.md` §4b** — two summons per grid at the tips
-   of two branches, on per-run charges. Read it before tuning anything deep: it is also **the second
-   difficulty dial this playbook keeps wanting** (see the note under §5r below).
+   as one key, held early. **The spec is `docs/plans/SPECIALIZATION.md` §4b** — two summons per
+   grid as the target, one for the MVP. Read it before tuning anything deep: it is also **the second
+   difficulty dial this playbook keeps wanting** (see the note under §5r below). **As of 2026-09-04
+   the summon's *shape* and *effects* are reopened** — only the charge economy is settled, which is
+   the part this rule depends on.
 4. **Breadth and depth are never balanced 1:1, and must not be.** There is no exchange rate between
    "broad and steady" and "narrow and early". This is configured **loosely** on purpose: both routes
    viable and *different*, not equal. Equalising them turns two playstyles back into one.
@@ -1908,7 +1978,7 @@ width, refuges — feeds the *same sustain pool*, so there is only one difficult
 "can the party grind through fifteen rooms" and "can the party beat the thing at the end" with one
 number. A **bounded burst on a per-run charge** is a second dial: floors stay tuned against sustain,
 climaxes get tuned against burst, and a hard boss becomes authorable without breaking
-`MinHitsToKillHero` (§0f's standing complaint). Spec: `docs/NEXT_STEPS.md` **§4b**.
+`MinHitsToKillHero` (§0f's standing complaint). Spec: `docs/plans/SPECIALIZATION.md` **§4b**.
 
 The practical consequence: **tier 3's budget of 1000 is not reachable by this floor's content.** The
 coherent answers are a design call, not a measurement:
@@ -2167,7 +2237,7 @@ Three consequences to hold onto:
    stats-at-equal-XP comparison; they are supposed to win a specific fight the breadth build has to
    grind past. Until the capability payload exists, deep-branch numbers are placeholders and the
    analyzer's opinion of them is not evidence.
-2. **When Abilities/Summons land (spec: `docs/NEXT_STEPS.md` §4b), some content has to be gated by a
+2. **When Abilities/Summons land (spec: `docs/plans/SPECIALIZATION.md` §4b), some content has to be gated by a
    *key*, not by a wall.** The whole
    model measures walls — attrition, danger, investment. A boss that a Summon answers is a different
    shape of gate, and pricing it as "more investment" would flatten exactly the choice rule 3

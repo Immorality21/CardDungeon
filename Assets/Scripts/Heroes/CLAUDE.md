@@ -49,7 +49,7 @@ Two consequences when authoring:
 
 - **A deep node's payload should eventually be a capability, not a bigger stat.** The deep nodes added
   in §5s are stat nodes wearing thematic names, standing in until summons exist — **two per grid at
-  the tips of two branches**, spec in `docs/NEXT_STEPS.md` §4b. It adds `SphereNodeKind.Summon` and a
+  the tips of two branches**, spec in `docs/plans/SPECIALIZATION.md` §4b. It adds `SphereNodeKind.Summon` and a
   `GrantedSummon` field, the same shape `MagicKnown` already uses, so the two tips will want *new*
   node keys rather than repurposed ones.
 - **Do not price a deep branch against the balance analyzer.** `SphereGridOps.GreedySpend` buys best

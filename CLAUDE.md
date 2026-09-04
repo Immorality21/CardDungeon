@@ -8,7 +8,20 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 6 (60
 
 ## Roadmap
 
-Planned gameplay work and the running TODO backlog live in **`docs/NEXT_STEPS.md`**. Check it for what's in progress and what's queued before starting new feature work.
+**`docs/NEXT_STEPS.md` is the index** — live threads, the **decisions that must not be relitigated**,
+a one-line pointer to every backlog item, and the shipped ledger. Read it before starting new feature
+work, then open only the plan file your work touches:
+
+| plan | holds |
+|---|---|
+| `docs/plans/SPECIALIZATION.md` | **the live thread** — Draw scrapped, magic and specialization on the sphere grid, heroes as unlocks, summons (§4, §4b, §4c, §5, §5b, §9b) |
+| `docs/plans/COMBAT_DEPTH.md` | status effects, Defend, threat/taunt, enemy verbs, hero identity (§9–§13) |
+| `docs/plans/HUB.md` | campfire, materials, buildings, gold sinks (§3, §7) |
+| `docs/plans/BALANCE_OPEN.md` | open balance steps and findings, losability, the retry economy (§0–§0g, §3b) |
+| `docs/plans/POLISH_CONTENT.md` | battle/room polish, player-facing information, content volume (§1, §2, §6, §8, §14–§19) |
+
+Don't read the whole backlog to answer one question — the index says which file to open. The
+**do-not-relitigate** list lives in the index and applies to every plan.
 
 Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCING.md`** — the arithmetic that couples the levers, the workflow that measures instead of guessing, and the ceilings already found. Read it before a balance pass and add to it after one.
 
