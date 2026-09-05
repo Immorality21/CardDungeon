@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
+  m_Name: Cleric
+  m_EditorClassIdentifier:
+  Key: Cleric
+  Label: Cleric
+  Blurb: Keeps everyone else standing, and is quietly dangerous to the wrong things.
+  RecruitCost: 0
+  Sprite: {fileID: -7638688258575627, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}
+  AnimationFrames:
+  - {fileID: -7638688258575627, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}
+  - {fileID: -3464631348977564, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}
+  - {fileID: -7848032403509558, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}
+  AnimationFps: 4
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 3
+    - Type: 2
+      Amount: 6
+    - Type: 3
+      Amount: 5
+    - Type: 4
+      Amount: 6
+    - Type: 5
+      Amount: 12
+    - Type: 6
+      Amount: 5
+    - Type: 7
+      Amount: 22
+  AttackStat: 5
+  SphereGrid: {fileID: 11400000, guid: a628a23676be4669a64a34bac1f7fbb4, type: 2}

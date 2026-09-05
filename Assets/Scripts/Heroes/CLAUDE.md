@@ -17,10 +17,30 @@
 
   Every hero's grid authors a cheap **signature** node near the start (Warrior/Slash, Tank/ShieldUp, Acolyte/Heal, Scout/PoisonDart) plus spells further out on each branch. `ElementalContentTests` fails if a grid has no `MagicKnown` node, if a node names a magic that does not exist, **or if any magic in the catalog is on no grid at all** — with no Draw there is no second route, so an unplaced spell is uncastable by anyone.
 
-## The Warrior's grid is the authored one; the other three are still the stopgap
+## The roster is seven, and every grid is authored
 
-**Only `WarriorGrid` has been through §4c** (2026-09-04). It is the reference for the rest, and the
-one to read before authoring another.
+**Warrior, Paladin, Cleric, Ranger, Cultist, Tinkerer, Rogue** *(2026-09-05)*. The Tank, the Acolyte
+and the Scout are gone — the Tank was a *destination* mistaken for a hero, and the Cleric and Ranger
+are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-generated any more.
+
+| hero | attack stat | branches (payload only — never named in data) |
+|---|---|---|
+| Warrior | Strength | health/END + ShieldUp→Bulwark→Ward · STR/AGI/LCK + Sunder→Cleave→WarCry |
+| Paladin | Strength | shield + Ward · Sunder→Consecrate · Heal→Renew — **three**, per §4c |
+| Cleric | Spirit | Renew→Benediction · Smite→Ward |
+| Ranger | Agility | PoisonDart→Volley · Snare→Hush |
+| Cultist | Intelligence | Sacrifice→Cinderstorm (health as currency) · OilSlick→Hush |
+| Tinkerer | Intelligence | the three cloaks as a field kit · IceShard→WaterSplash→Fireball |
+| Rogue | Agility | PoisonDart→AimedShot · SmokeBomb→Hush |
+
+**Put a spell on a grid only if the hero's stats scale it.** This is the mistake the old roster made
+and the single easiest one to repeat: the retired Scout's grid granted `OilSlick`, which scales off
+**Intelligence**, and the Scout had 4 — a node that bought nothing. `SpellEffect.ScalingStat` is the
+field to check, and `StatType.None` means flat (the cloaks, Ward, Renew, Hush, SmokeBomb), which is
+the only kind that suits any hero.
+
+**The Warrior's grid is the shape the others copy.** It is the reference; read it before authoring
+another.
 
 **Two destinations, neither of them named.** A four-node trunk everyone walks — health, Strength,
 and **Slash at 30 xp** so nobody is ever empty-handed — then a fork into two branches that are
@@ -49,7 +69,7 @@ Three things about the shape that are deliberate and easy to undo by accident:
 - **Each branch ends in a fork, not a point.** Two tips per branch, so §4b has four places to hang a
   summon and does not have to re-cut the graph to find one.
 
-**Its stat totals are close to the grid it replaced on purpose** (STR 20 vs 21, END 7 vs 7, AGI 6 vs
+**The Warrior's stat totals are close to the grid he replaced on purpose** (STR 20 vs 21, END 7 vs 7, AGI 6 vs
 7, LCK 6 vs 7, HP 44 vs 44, whole grid 5,305 vs 7,095 xp over 31 nodes vs 36). Balance work is
 paused until the rest of the specialization refactor lands, so the re-author moved the *shape* and
 held the numbers still. What did move is spell access, and that is the intended direction: Draw used
@@ -59,7 +79,7 @@ It also fixes a standing analyzer warning — the old `warrior-reaver-4` granted
 base of 5, which is 60% and over the node-gain-shape ceiling. Per-node caps for the Warrior are
 **STR ≤5, END ≤2, AGI ≤2, LCK ≤2, HP ≤26** (outputs 50% of base, pools 100%).
 - **Spending is hub-only.** `HeroRoster.TryActivateNode(hero, nodeKey)` is the one spend path (the grid screen calls it; `HeroRoster.GetHeroSave` is the screen's read contract). The dungeon only banks XP, which is what keeps `DungeonManager.BestRosterStats` (room-event spawn thresholds) stable across a run. No respec.
-- **The grid UI** is `Assets/Scripts/Heroes/UI/`: `SphereGridView` (the shared UITK graph renderer — pan/zoom, Painter2D edges — used by the hub screen *and* the editor window), `SphereGridPresenter` (pure state classification + payload text, `SphereGridPresenterTests`), `SphereGridUI` (the hub view-controller, `grid-view` in MainMenu.uxml). Authoring: **Tools ▸ Heroes ▸ Sphere Grid Editor** (drag nodes, connect edges, payload inspector, preview-at-N-XP) and **Tools ▸ Heroes ▸ Generate Starter Sphere Grids** (`SphereGridSeeder`, idempotent, encodes the tuning).
+- **The grid UI** is `Assets/Scripts/Heroes/UI/`: `SphereGridView` (the shared UITK graph renderer — pan/zoom, Painter2D edges — used by the hub screen *and* the editor window), `SphereGridPresenter` (pure state classification + payload text, `SphereGridPresenterTests`), `SphereGridUI` (the hub view-controller, `grid-view` in MainMenu.uxml). Authoring: **Tools ▸ Heroes ▸ Sphere Grid Editor** (drag nodes, connect edges, payload inspector, preview-at-N-XP). *(`SphereGridSeeder` — the "Generate Starter Sphere Grids" menu item — was **deleted** on 2026-09-05: it emitted the four pre-§5s fan grids, so running it would have overwritten all seven hand-authored ones. Grids are authored in the editor window now, not generated.)*
 - **`Key` is the save identifier; `Label` is the display name — never mix them up.** Persistence keys off `HeroSO.SaveKey` (party XP in `Party.json`, `EquippedHeroKey` in `ItemCollection.json`, `EquippedMagic` in `Run.json`); anything on screen uses `HeroSO.DisplayName` / `Hero.DisplayName`. `SaveKey` falls back to `Label` then the asset name, so heroes authored before `Key` existed keep resolving to the save entries they already wrote. **Changing an existing `Key` orphans every save that references the old value** — the keys are `Warrior` and `Tank`; the latter was migrated from a typo'd `Tankj` by renaming the field *and* rewriting every save file that referenced it (`Party.json`, `ItemCollection.json`, `Run.json` and every `Dungeon_*.json`), which is the only safe way to change one.
 - **Save data is minimal:** `HeroKey` + `CurrentXp` (the **unspent XP bank**) + `ActivatedNodes` (grid node keys) per hero, plus `OwnedHeroKeys` and `SelectedHeroKeys`, in `Party.json`. `SaveParty()` updates entries **in place** rather than rebuilding the list, because a hero can be owned without being in the current party and a rebuild would discard their record. On load, stats are rebuilt from the ScriptableObject base values + activated node grants (`Hero.InitializeFromSave`, at full health). Pre-grid saves stored lifetime XP in `CurrentXp`; that rename-in-meaning **is** the migration — old XP arrives as a fully-refunded bank with no nodes, no migration code.
 - **Effective stats:** `Hero.GetEffectiveStat(StatType)` layers `InventoryManager` raw + percentage item bonuses on top of node-granted base stats, for *every* stat through one method — `GetEffectiveMaxHealth()` is the only named convenience left, because it is read alongside `Health` constantly. `GetEffectiveStat` is the accessor on `ICombatUnit`, and `TurnManager` schedules on `GetEffectiveStat(StatType.Agility)`, so item Agility affects turn order (Enemy returns its raw value).

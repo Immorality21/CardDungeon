@@ -41,6 +41,8 @@ MonoBehaviour:
   - Magic: {fileID: 11400000, guid: 5a6c46af09324a6f933b7c6b755f387a, type: 2}
     CastWeight: 1
   Resistances:
+  - DamageType: 4
+    Percent: 40
   - DamageType: 2
     Percent: 50
   - DamageType: 3

@@ -123,8 +123,8 @@ backlog.**
 | § | | state |
 |---|---|---|
 | **9b** | Magic moves onto the sphere grid — Draw is scrapped | ✅ **shipped** 2026-09-04; findings feed §4c |
-| **4c** | Specialization — the grid is where a hero becomes an archetype | added 2026-09-04; **now the bottleneck** — §9b left a stopgap |
-| **5b** | Heroes are unlocked, not bought — the tavern is removed | added 2026-09-04 |
+| **4c** | Specialization — the grid is where a hero becomes an archetype | grids ✅ **all seven authored** 2026-09-05; branch *readability* (item 5) still open |
+| **5b** | Heroes are unlocked, not bought — the tavern is removed | roster ✅ done 2026-09-05; **the tavern and the unlock record are what is left** |
 | **5** | Roster — open questions | open |
 | **4b** | Summons — the capability the deep grid pays out | spec; **shape and effects reopened** 2026-09-04 |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
@@ -179,6 +179,12 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The seven-hero roster** (2026-09-05) — `docs/plans/SPECIALIZATION.md` §5b/§4c. Tank, Acolyte and
+  Scout deleted; **Paladin, Cleric, Ranger, Cultist, Tinkerer, Rogue** authored with grids, sprites
+  and ten new spells (the holy line, the Ranger/Rogue Agility line, the Cultist's blood magic). Every
+  grid is two branches — three for the Paladin — off a short trunk, spells laddered ~385/980 xp, no
+  branch named anywhere in the data. `SphereGridSeeder` deleted. **The tavern still sells heroes**;
+  the unlock half of §5b is not done.
 - **Draw removed; magic moves onto the sphere grid** (2026-09-04) — `docs/plans/SPECIALIZATION.md`
   §9b. Every spell is learned on a `MagicKnown` node; **knowing and carrying split** (slots are 2 +
   `MagicSlot` nodes, the kit chosen on a new Inventory ▸ **Spells** tab via `MagicLoadoutOps`);

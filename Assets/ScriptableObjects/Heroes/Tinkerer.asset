@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
+  m_Name: Tinkerer
+  m_EditorClassIdentifier:
+  Key: Tinkerer
+  Label: Tinkerer
+  Blurb: Solves most problems with something she brought, and the rest with something she makes.
+  RecruitCost: 0
+  Sprite: {fileID: -5779569602528658, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
+  AnimationFrames:
+  - {fileID: -5779569602528658, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
+  - {fileID: -1420325704527083, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
+  - {fileID: -4346296731830717, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
+  AnimationFps: 4
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 6
+    - Type: 2
+      Amount: 7
+    - Type: 3
+      Amount: 6
+    - Type: 4
+      Amount: 9
+    - Type: 5
+      Amount: 3
+    - Type: 6
+      Amount: 8
+    - Type: 7
+      Amount: 24
+  AttackStat: 4
+  SphereGrid: {fileID: 11400000, guid: f5e0e1234a3842d2a8ec47803fb71950, type: 2}

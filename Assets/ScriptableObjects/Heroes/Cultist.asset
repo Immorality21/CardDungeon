@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
+  m_Name: Cultist
+  m_EditorClassIdentifier:
+  Key: Cultist
+  Label: Cultist
+  Blurb: Has found that the shortest route to power runs straight through himself.
+  RecruitCost: 0
+  Sprite: {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  AnimationFrames:
+  - {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  - {fileID: -6369361678509686, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  - {fileID: -5271396423488739, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  AnimationFps: 4
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 5
+    - Type: 2
+      Amount: 5
+    - Type: 3
+      Amount: 5
+    - Type: 4
+      Amount: 11
+    - Type: 5
+      Amount: 4
+    - Type: 6
+      Amount: 7
+    - Type: 7
+      Amount: 20
+  AttackStat: 4
+  SphereGrid: {fileID: 11400000, guid: cba493db680944de88c95fa4395e04e9, type: 2}

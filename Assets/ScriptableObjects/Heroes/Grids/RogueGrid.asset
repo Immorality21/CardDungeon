@@ -1,0 +1,359 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
+  m_Name: RogueGrid
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
+  StartNodeKey: rogue-start
+  Nodes:
+  - Key: rogue-start
+    DisplayName: 
+    Kind: 0
+    XpCost: 15
+    Position: {x: 0, y: 0}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors: []
+  - Key: rogue-trunk-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -90}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-start
+  - Key: rogue-sig
+    DisplayName: 
+    Kind: 3
+    XpCost: 30
+    Position: {x: 0, y: -180}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Backstab
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-trunk-1
+  - Key: rogue-trunk-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: 0, y: -270}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 1
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-sig
+  - Key: rogue-trunk-slot
+    DisplayName: 
+    Kind: 2
+    XpCost: 65
+    Position: {x: 0, y: -360}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-trunk-2
+  - Key: rogue-a-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    Position: {x: -107, y: -325}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-trunk-2
+  - Key: rogue-a-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    Position: {x: -200, y: -380}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-a-1
+  - Key: rogue-a-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    Position: {x: -292, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: PoisonDart
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-a-2
+  - Key: rogue-a-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    Position: {x: -385, y: -490}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-a-3
+  - Key: rogue-a-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    Position: {x: -478, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-a-4
+  - Key: rogue-a-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    Position: {x: -570, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: AimedShot
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-a-5
+  - Key: rogue-a-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    Position: {x: -663, y: -655}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-a-6
+  - Key: rogue-a-tip-a
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    Position: {x: -758, y: -710}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-a-7
+  - Key: rogue-a-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    Position: {x: -723, y: -585}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-a-7
+  - Key: rogue-b-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    Position: {x: 107, y: -325}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-trunk-2
+  - Key: rogue-b-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    Position: {x: 200, y: -380}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-b-1
+  - Key: rogue-b-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    Position: {x: 292, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: SmokeBomb
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-b-2
+  - Key: rogue-b-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    Position: {x: 385, y: -490}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-b-3
+  - Key: rogue-b-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    Position: {x: 478, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-b-4
+  - Key: rogue-b-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    Position: {x: 570, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Hush
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-b-5
+  - Key: rogue-b-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    Position: {x: 663, y: -655}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-b-6
+  - Key: rogue-b-res
+    DisplayName: 
+    Kind: 1
+    XpCost: 155
+    Position: {x: 352, y: -360}
+    Gains:
+      Values: []
+    ResistType: 5
+    ResistPercent: 12
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-b-3
+  - Key: rogue-b-tip-a
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    Position: {x: 758, y: -710}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-b-7
+  - Key: rogue-b-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    Position: {x: 723, y: -585}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - rogue-b-7

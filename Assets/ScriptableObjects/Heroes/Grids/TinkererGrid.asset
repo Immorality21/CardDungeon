@@ -1,0 +1,385 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
+  m_Name: TinkererGrid
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
+  StartNodeKey: tinkerer-start
+  Nodes:
+  - Key: tinkerer-start
+    DisplayName: 
+    Kind: 0
+    XpCost: 15
+    Position: {x: 0, y: 0}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors: []
+  - Key: tinkerer-trunk-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -90}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-start
+  - Key: tinkerer-sig
+    DisplayName: 
+    Kind: 3
+    XpCost: 30
+    Position: {x: 0, y: -180}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: LightningBolt
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-trunk-1
+  - Key: tinkerer-trunk-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: 0, y: -270}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 1
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-sig
+  - Key: tinkerer-trunk-slot
+    DisplayName: 
+    Kind: 2
+    XpCost: 65
+    Position: {x: 0, y: -360}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-trunk-2
+  - Key: tinkerer-a-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    Position: {x: -107, y: -325}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-trunk-2
+  - Key: tinkerer-a-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    Position: {x: -200, y: -380}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-1
+  - Key: tinkerer-a-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    Position: {x: -292, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: StormCloak
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-2
+  - Key: tinkerer-a-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    Position: {x: -385, y: -490}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-3
+  - Key: tinkerer-a-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    Position: {x: -478, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-4
+  - Key: tinkerer-a-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    Position: {x: -570, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: FireCloak
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-5
+  - Key: tinkerer-a-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    Position: {x: -663, y: -655}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-6
+  - Key: tinkerer-a-8
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    Position: {x: -756, y: -710}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: FrostCloak
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-7
+  - Key: tinkerer-a-res
+    DisplayName: 
+    Kind: 1
+    XpCost: 155
+    Position: {x: -352, y: -360}
+    Gains:
+      Values: []
+    ResistType: 3
+    ResistPercent: 12
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-3
+  - Key: tinkerer-a-tip-a
+    DisplayName: 
+    Kind: 0
+    XpCost: 410
+    Position: {x: -851, y: -765}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-8
+  - Key: tinkerer-a-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 410
+    Position: {x: -816, y: -640}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-a-8
+  - Key: tinkerer-b-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    Position: {x: 107, y: -325}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-trunk-2
+  - Key: tinkerer-b-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    Position: {x: 200, y: -380}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-b-1
+  - Key: tinkerer-b-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    Position: {x: 292, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: IceShard
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-b-2
+  - Key: tinkerer-b-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    Position: {x: 385, y: -490}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-b-3
+  - Key: tinkerer-b-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    Position: {x: 478, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-b-4
+  - Key: tinkerer-b-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    Position: {x: 570, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: WaterSplash
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-b-5
+  - Key: tinkerer-b-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    Position: {x: 663, y: -655}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-b-6
+  - Key: tinkerer-b-8
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    Position: {x: 756, y: -710}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Fireball
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-b-7
+  - Key: tinkerer-b-tip-a
+    DisplayName: 
+    Kind: 0
+    XpCost: 410
+    Position: {x: 851, y: -765}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-b-8
+  - Key: tinkerer-b-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 410
+    Position: {x: 816, y: -640}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - tinkerer-b-8

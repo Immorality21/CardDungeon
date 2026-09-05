@@ -1,0 +1,372 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
+  m_Name: CultistGrid
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
+  StartNodeKey: cultist-start
+  Nodes:
+  - Key: cultist-start
+    DisplayName: 
+    Kind: 0
+    XpCost: 15
+    Position: {x: 0, y: 0}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors: []
+  - Key: cultist-trunk-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    Position: {x: 0, y: -90}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-start
+  - Key: cultist-sig
+    DisplayName: 
+    Kind: 3
+    XpCost: 30
+    Position: {x: 0, y: -180}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Bloodbolt
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-trunk-1
+  - Key: cultist-trunk-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: 0, y: -270}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 1
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-sig
+  - Key: cultist-trunk-slot
+    DisplayName: 
+    Kind: 2
+    XpCost: 65
+    Position: {x: 0, y: -360}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-trunk-2
+  - Key: cultist-a-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    Position: {x: -107, y: -325}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 8
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-trunk-2
+  - Key: cultist-a-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    Position: {x: -200, y: -380}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-a-1
+  - Key: cultist-a-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    Position: {x: -292, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Sacrifice
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-a-2
+  - Key: cultist-a-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    Position: {x: -385, y: -490}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 8
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-a-3
+  - Key: cultist-a-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    Position: {x: -478, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-a-4
+  - Key: cultist-a-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    Position: {x: -570, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Cinderstorm
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-a-5
+  - Key: cultist-a-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    Position: {x: -663, y: -655}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-a-6
+  - Key: cultist-a-res
+    DisplayName: 
+    Kind: 1
+    XpCost: 155
+    Position: {x: -352, y: -360}
+    Gains:
+      Values: []
+    ResistType: 5
+    ResistPercent: 12
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-a-3
+  - Key: cultist-a-tip-a
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    Position: {x: -758, y: -710}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-a-7
+  - Key: cultist-a-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    Position: {x: -723, y: -585}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-a-7
+  - Key: cultist-b-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    Position: {x: 107, y: -325}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-trunk-2
+  - Key: cultist-b-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    Position: {x: 200, y: -380}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-b-1
+  - Key: cultist-b-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    Position: {x: 292, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: OilSlick
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-b-2
+  - Key: cultist-b-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    Position: {x: 385, y: -490}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-b-3
+  - Key: cultist-b-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    Position: {x: 478, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-b-4
+  - Key: cultist-b-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    Position: {x: 570, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Hush
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-b-5
+  - Key: cultist-b-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    Position: {x: 663, y: -655}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-b-6
+  - Key: cultist-b-res
+    DisplayName: 
+    Kind: 1
+    XpCost: 155
+    Position: {x: 352, y: -360}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 12
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-b-3
+  - Key: cultist-b-tip-a
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    Position: {x: 758, y: -710}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-b-7
+  - Key: cultist-b-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    Position: {x: 723, y: -585}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - cultist-b-7

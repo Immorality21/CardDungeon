@@ -47,6 +47,16 @@ MonoBehaviour:
   dontDestroyOnLoad: 0
   DetachFromRoot: 0
   _allMagic:
+  - {fileID: 11400000, guid: 95c7bea2bb8441bfb1673598aff27cb9, type: 2}
+  - {fileID: 11400000, guid: 5b106eb02aeb436ba268493141f780d8, type: 2}
+  - {fileID: 11400000, guid: 5a52699bb6504331b2e223dc962c66b5, type: 2}
+  - {fileID: 11400000, guid: 4ff642ce8a6e4fc2b9d84d92f6089fb1, type: 2}
+  - {fileID: 11400000, guid: 6c8b4ab3d358457fba4f969ceeb5d95d, type: 2}
+  - {fileID: 11400000, guid: 972fe853e51e4133abcbc4e84764fb40, type: 2}
+  - {fileID: 11400000, guid: 54c5490d734046b583898443c146d06f, type: 2}
+  - {fileID: 11400000, guid: 5bdf61aeb5b94419944f70d874de989e, type: 2}
+  - {fileID: 11400000, guid: 6440180576694f71998c6373180da643, type: 2}
+  - {fileID: 11400000, guid: 29879b04df4d47e398ac9ceabb392e09, type: 2}
   - {fileID: 11400000, guid: 7eb83123e11d47b3ae4da91e88d37cb0, type: 2}
   - {fileID: 11400000, guid: 41114d713b3e47f89593db976c59b551, type: 2}
   - {fileID: 11400000, guid: deb21fb233d948bd9cc682419cb51afd, type: 2}

@@ -162,7 +162,7 @@ MonoBehaviour:
   _partyRoster: {fileID: 11400000, guid: f7d5a49e9b1c4d38e4f5a6b7c8d9e0f1, type: 2}
   _heroDefinitions:
   - {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
-  - {fileID: 11400000, guid: d0d0529f46172044d9494619917b8364, type: 2}
+  - {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
   _healingPotion: {fileID: 11400000, guid: b1e7c0a94f6d4a2b8c3d5e6f70819a2b, type: 2}
   _randomGenerateOn: 1
   _customSeed: 0

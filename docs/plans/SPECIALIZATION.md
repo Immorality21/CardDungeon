@@ -39,8 +39,9 @@ branch's own payload (§4c), so it can follow the grids rather than precede them
    catalog is on a `MagicKnown` node before `ExecuteDrawAction` was deleted, so the game was never
    unplayable in between. `ElementalContentTests.EveryMagicInTheCatalog_IsTaughtBySomeSphereGrid`
    pins it: with no Draw there is no second route, so an unplaced spell is uncastable by anyone.
-2. ~~**Move the four defensive cloaks onto nodes.**~~ **Done.** FireCloak (Acolyte), FrostCloak (Tank
-   + Acolyte), StormCloak (Scout), Ward (Warrior + Tank).
+2. ~~**Move the four defensive cloaks onto nodes.**~~ **Done.** All three cloaks now sit together on
+   the **Tinkerer's** ward branch (a portable field kit), and Ward is taught by the Warrior, the
+   Paladin and the Cleric.
    `ElementalContentTests.EveryCloak_IsTaughtBySomeSphereGrid` replaces the old
    `EveryCloak_IsDrawableFromSomeEnemy`.
 3. ~~**Retire the Draw code.**~~ **Done.** `HeroAction.Draw`, `ExecuteDrawAction`, `SubmitDrawAction`,
@@ -167,13 +168,17 @@ acquisition mechanic for a stat tree and gained nothing.
 
 #### What it needs
 
-1. ~~**Split the two lists.**~~ **Answered 2026-09-04.** Seven base heroes, listed above; everything
-   else is a branch destination and gets no name. **Cleric and Ranger are new heroes, not renames**
-   — so the Acolyte and the Scout are retired alongside the Tank. The asset work is therefore:
-   **keep** the Warrior; **delete** `The Tank.asset`, `Acolyte.asset`, `Scout.asset` and their three
-   grids (`TankGrid`, `AcolyteGrid`, `ScoutGrid`), plus `Assets/Sprites/Tank.png` and the
-   `tank-idle-sheet` files; **author six new heroes** (Paladin, Cleric, Ranger, Cultist, Tinkerer,
-   Rogue). Saves are disposable, so none of this needs a migration.
+1. ~~**Split the two lists.**~~ ~~**Answered 2026-09-04.**~~ **Done 2026-09-05.** The Tank, the
+   Acolyte and the Scout are deleted — assets, grids, sprites and every reference — and **Paladin,
+   Cleric, Ranger, Cultist, Tinkerer and Rogue** are authored, each with a `HeroSO`, a sphere grid
+   and a 96×32 three-frame idle sheet in the Warrior's DB32 palette. `PartyRoster.asset` lists all
+   seven; `Managers.prefab`'s fallback pair and the tutorial's `RescueHero` (was the Tank) now point
+   at the Paladin. `SphereGridSeeder` is **deleted** rather than updated: it generated the four old
+   fans at pre-§5s prices, so re-running it would have destroyed all seven hand-authored grids.
+
+   **Still open from §5b:** the tavern. Heroes are still *bought*, not unlocked — removing the
+   tavern needs the unlock record and `RequiresHeroes` to exist first, or there is no way to obtain
+   anybody. That is the remaining half of §5b.
 2. **A specialization is a node cluster, not a new node kind.** It is the existing `Stat` /
    `Resistance` / `MagicSlot` / `MagicKnown` vocabulary plus §4b's `Summon`, arranged into an
    identity. Resist adding a `SphereNodeKind.Specialization` until a *rule* needs one — what a branch

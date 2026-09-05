@@ -13,11 +13,14 @@ MonoBehaviour:
   m_Name: PartyRoster
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.PartyRosterSO
   Heroes:
-  - {fileID: 11400000, guid: d0d0529f46172044d9494619917b8364, type: 2}
   - {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
-  - {fileID: 11400000, guid: 427c5938ff3042e0a967eab1299471c1, type: 2}
-  - {fileID: 11400000, guid: 848afc53d09f45a8ae00f0278f5bfcd7, type: 2}
+  - {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
+  - {fileID: 11400000, guid: 417d412fa1fe407cb763056439898d1d, type: 2}
+  - {fileID: 11400000, guid: 77ccb730251741f08e684dabd9144b76, type: 2}
+  - {fileID: 11400000, guid: 77ae12aafb9d437f8cc8149bd1cccb2b, type: 2}
+  - {fileID: 11400000, guid: 8572c8c8edc04a8ea398ee885ba38e88, type: 2}
+  - {fileID: 11400000, guid: 09b6a3424e4546719cda1391729e96cc, type: 2}
   StartingHeroes:
   - {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
-  - {fileID: 11400000, guid: d0d0529f46172044d9494619917b8364, type: 2}
-  - {fileID: 11400000, guid: 427c5938ff3042e0a967eab1299471c1, type: 2}
+  - {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
+  - {fileID: 11400000, guid: 77ccb730251741f08e684dabd9144b76, type: 2}

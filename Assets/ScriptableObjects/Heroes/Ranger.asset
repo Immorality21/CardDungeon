@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
+  m_Name: Ranger
+  m_EditorClassIdentifier:
+  Key: Ranger
+  Label: Ranger
+  Blurb: Reads the room before anyone else has finished walking into it.
+  RecruitCost: 0
+  Sprite: {fileID: -976294606316473, guid: 0c844200eddb44309e8049ef00b58d16, type: 3}
+  AnimationFrames:
+  - {fileID: -976294606316473, guid: 0c844200eddb44309e8049ef00b58d16, type: 3}
+  - {fileID: -2127025001236718, guid: 0c844200eddb44309e8049ef00b58d16, type: 3}
+  - {fileID: -7201053973933084, guid: 0c844200eddb44309e8049ef00b58d16, type: 3}
+  AnimationFps: 4
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 7
+    - Type: 2
+      Amount: 6
+    - Type: 3
+      Amount: 11
+    - Type: 4
+      Amount: 5
+    - Type: 5
+      Amount: 4
+    - Type: 6
+      Amount: 7
+    - Type: 7
+      Amount: 29
+  AttackStat: 3
+  SphereGrid: {fileID: 11400000, guid: 740829dbed29482194bf0a96222e37d1, type: 2}

@@ -31,7 +31,7 @@ MonoBehaviour:
       XpMultiplier: 2
       GoldMultiplier: 1
       Overrides: []
-    RescueHero: {fileID: 11400000, guid: d0d0529f46172044d9494619917b8364, type: 2}
+    RescueHero: {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
   - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
     LevelName: Upper Halls
     ManualLayout: {fileID: 0}

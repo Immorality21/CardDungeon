@@ -1,5 +1,11 @@
 # Balancing playbook
 
+> **Roster caveat (2026-09-05).** Everything below written before this date was measured against a
+> roster of **Warrior / Tank / Acolyte / Scout**. Three of those four heroes no longer exist — see
+> `docs/plans/SPECIALIZATION.md` §5b — and the seven that replaced them have different stats, grids
+> and spells. Per-hero numbers in the older passes are a record of *how the levers behaved*, not of
+> the current content; re-measure before acting on any of them.
+
 Accumulated **learnings** from tuning passes — the arithmetic that constrains the dials, which
 lever does what, the workflow that measures instead of guessing, and the ceilings already hit.
 
