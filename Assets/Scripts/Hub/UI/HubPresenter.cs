@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Assets.Scripts.Progression;
 
 namespace Assets.Scripts.Hub.UI
 {
@@ -32,9 +31,9 @@ namespace Assets.Scripts.Hub.UI
         };
 
         /// <summary>
-        /// The single character drawn on a lot. Placeholder art's whole job is to be *distinguishable*
-        /// — with flat rectangles the glyph plus the label is all that tells the Forge from the
-        /// Bestiary, so this exists until real sprites do.
+        /// The single character drawn on a lot that has no art. Placeholder art's whole job is to be
+        /// *distinguishable* — with flat rectangles the glyph plus the label is all that tells the
+        /// Forge from the Bestiary. A lot with a real sprite hides it.
         /// </summary>
         public static string Glyph(BuildingSO building)
         {
@@ -67,24 +66,38 @@ namespace Assets.Scripts.Hub.UI
         /// <see cref="BuildingState.Available"/> lot has to say what it would cost, or the bare
         /// foundation is a mystery rather than an invitation.
         /// </summary>
-        public static string DescribeState(BuildingSO building, IEnumerable<BuildingProgress> saved)
+        public static string DescribeState(BuildingSO building, HubProgress progress)
         {
             if (building == null)
             {
                 return "";
             }
 
-            switch (BuildingOps.StateOf(building, saved))
+            switch (BuildingOps.StateOf(building, progress))
             {
                 case BuildingState.Built:
-                    int level = BuildingOps.LevelOf(building, saved);
-                    return building.MaxLevel > 1 ? $"Level {level} of {building.MaxLevel}" : "";
+                    int level = BuildingOps.LevelOf(building, progress);
+                    if (BuildingOps.CanUpgrade(building, progress))
+                    {
+                        return $"Level {level} · upgrade {building.GoldPerUpgrade}g";
+                    }
+                    return building.MaxLevel > 1 ? $"Level {level}" : "";
                 case BuildingState.Available:
                     string price = DescribePlacementCost(building);
                     return string.IsNullOrEmpty(price) ? "Ready to build" : "Needs " + price;
                 default:
-                    return "Not yet";
+                    return DescribeLock(building);
             }
+        }
+
+        /// <summary>Why an Absent lot is absent — which run has to fall first.</summary>
+        public static string DescribeLock(BuildingSO building)
+        {
+            if (building == null || building.RequiredRunKeys == null || building.RequiredRunKeys.Count == 0)
+            {
+                return "Not yet";
+            }
+            return "Locked";
         }
 
         /// <summary>A lot's placement price as one line ("2 Ember Iron · 1 Void Shard"), or empty
@@ -111,10 +124,39 @@ namespace Assets.Scripts.Hub.UI
             return string.Join(" · ", parts);
         }
 
-        /// <summary>Whether clicking this lot should open its service. An unbuilt lot is scenery.</summary>
-        public static bool IsOpenable(BuildingSO building, IEnumerable<BuildingProgress> saved)
+        /// <summary>
+        /// What the lot's action button should say, given what the player can do with it right now.
+        /// Empty means there is no action to offer.
+        /// </summary>
+        public static string ActionLabel(BuildingSO building, HubProgress progress)
         {
-            return BuildingOps.IsBuilt(building, saved);
+            if (BuildingOps.CanPlace(building, progress))
+            {
+                string price = DescribePlacementCost(building);
+                return string.IsNullOrEmpty(price) ? "Build" : "Build — " + price;
+            }
+            if (BuildingOps.CanUpgrade(building, progress))
+            {
+                return $"Upgrade — {building.GoldPerUpgrade} gold";
+            }
+            return "";
+        }
+
+        /// <summary>Whether clicking this lot should open its service. An unbuilt lot is scenery.</summary>
+        public static bool IsOpenable(BuildingSO building, HubProgress progress)
+        {
+            return BuildingOps.IsBuilt(building, progress);
+        }
+
+        /// <summary>
+        /// Whether a click should stop at the lot panel rather than going straight into the service.
+        /// A lot that is finished — built and at its ceiling — opens immediately, because making the
+        /// player pass through a panel on every merchant visit is a tax on the common case. Anything
+        /// with a decision attached shows the panel first.
+        /// </summary>
+        public static bool NeedsPanel(BuildingSO building, HubProgress progress)
+        {
+            return !BuildingOps.IsBuilt(building, progress) || BuildingOps.CanUpgrade(building, progress);
         }
 
         /// <summary>
@@ -122,8 +164,7 @@ namespace Assets.Scripts.Hub.UI
         /// order. Shared by the hub screen and (later) any authoring window, so the two cannot render
         /// different towns from one asset.
         /// </summary>
-        public static void BuildViewModel(
-            HubSO hub, IEnumerable<BuildingProgress> saved, List<HubView.LotInfo> lots)
+        public static void BuildViewModel(HubSO hub, HubProgress progress, List<HubView.LotInfo> lots)
         {
             lots.Clear();
             if (hub == null)
@@ -136,10 +177,11 @@ namespace Assets.Scripts.Hub.UI
                 lots.Add(new HubView.LotInfo
                 {
                     Key = building.SaveKey,
-                    Rect = BuildingOps.LotRect(building),
+                    HitRect = BuildingOps.LotRect(building),
+                    DrawRect = BuildingOps.DrawRect(building),
                     Label = building.Label,
                     Glyph = Glyph(building),
-                    Sprite = BuildingOps.SpriteFor(building, saved),
+                    Sprite = BuildingOps.SpriteFor(building, progress),
                     Tooltip = building.Blurb
                 });
             }

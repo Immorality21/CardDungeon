@@ -11,11 +11,11 @@ namespace Assets.Scripts.Hub
     /// (<c>MetaProgressSaveData.Buildings</c>), the same split <see cref="Dungeon.CampaignSO"/> uses,
     /// so one authored town reads differently per save.
     ///
-    /// <para><b>The cost and unlock fields are authored now and read by nothing yet.</b> That is
-    /// deliberate: <c>docs/plans/HUB.md</c> §7 phase 2 lands the data model with every building
-    /// pre-placed so the game plays exactly as it did, and phase 4 turns the gates on against a town
-    /// that already renders. Authoring the fields from the start is open question 7's recommendation
-    /// — it means phase 4 is a pricing pass rather than a schema change.</para>
+    /// <para><b>Two rectangles, on purpose.</b> <see cref="Position"/> + <see cref="HitSize"/> is
+    /// the box you can click; <see cref="DrawOffset"/> + <see cref="DrawSize"/> is where the sprite
+    /// actually paints. A painted town needs silhouettes that overlap — a tower behind a roof, a
+    /// banner hanging past a wall — while UI Toolkit hit-testing stays stubbornly rectangular. Keep
+    /// the two apart and the art can overlap freely while no lot ever steals another's clicks.</para>
     /// </summary>
     [CreateAssetMenu(menuName = "SO/Hub Building")]
     public class BuildingSO : ScriptableObject
@@ -43,10 +43,20 @@ namespace Assets.Scripts.Hub
         public Vector2 Position;
 
         [Tooltip("Clickable size of the lot, in the same reference-rect pixels. UI Toolkit " +
-                 "hit-testing is RECTANGULAR - an overlapping silhouette steals its neighbour's " +
-                 "clicks, so lots must not overlap however the art is drawn. HubContentTests fails " +
-                 "on an overlap.")]
+                 "hit-testing is RECTANGULAR - an overlapping hit box steals its neighbour's " +
+                 "clicks, so these must not overlap however the ART is drawn. HubContentTests " +
+                 "fails on an overlap of these boxes, and deliberately says nothing about the " +
+                 "draw rects, which are free to overlap.")]
         public Vector2 HitSize = new Vector2(150f, 110f);
+
+        [Tooltip("Where the sprite paints, relative to Position. Sprites may overlap each other " +
+                 "and spill outside the hit box - that is what makes a town look painted rather " +
+                 "than tiled.")]
+        public Vector2 DrawOffset;
+
+        [Tooltip("Size the sprite paints at. Zero on either axis falls back to HitSize, so a lot " +
+                 "authored before the split still draws exactly where it is clicked.")]
+        public Vector2 DrawSize;
 
         [Tooltip("Paint order. UI Toolkit has no z-index: siblings paint in the order they are " +
                  "added, so this is the only way a building in front stays in front. Ties break on " +
@@ -77,16 +87,19 @@ namespace Assets.Scripts.Hub
         [Tooltip("How far this building can be upgraded. 1 means placement is the whole of it.")]
         public int MaxLevel = 1;
 
-        [Tooltip("PHASE 4. Materials to place the lot. Materials gate WHETHER - they only come out " +
-                 "of runs, so they make a building depend on where the player has been.")]
+        [Tooltip("Materials to place the lot. Materials gate WHETHER: they only come out of runs, " +
+                 "so they make a building depend on where the player has BEEN rather than on how " +
+                 "long they ground. Empty means placing it is free.")]
         public List<MaterialCost> PlacementCost = new List<MaterialCost>();
 
-        [Tooltip("PHASE 6. Gold for each upgrade past level 1. Gold gates WHEN - it keeps its " +
-                 "tuition role and gives the hub a sink that scales forever.")]
+        [Tooltip("Gold for each upgrade past level 1. Gold gates WHEN: it keeps its tuition role " +
+                 "and gives the hub a sink that scales forever. 0 with MaxLevel > 1 means the " +
+                 "upgrade is free, which is almost certainly an authoring slip.")]
         public int GoldPerUpgrade;
 
-        [Tooltip("PHASE 4. Run keys that must be cleared before the lot is even offered. Empty " +
-                 "means it is offered from the start.")]
+        [Tooltip("Run keys that must ALL be cleared before the lot is even offered - the pacing " +
+                 "dial. Empty means it is offered from the first visit. A lot nobody can reach is " +
+                 "content nobody sees, so keep this shallow.")]
         public List<string> RequiredRunKeys = new List<string>();
 
         /// <summary>The save identifier: authored <see cref="Key"/>, falling back to the asset name
@@ -96,5 +109,8 @@ namespace Assets.Scripts.Hub
         /// <summary>The name to put on screen: authored <see cref="DisplayName"/>, falling back to
         /// the save key. Never mix the two up — one is data, the other is a label.</summary>
         public string Label => string.IsNullOrEmpty(DisplayName) ? SaveKey : DisplayName;
+
+        /// <summary>Whether this lot can ever be raised past level 1.</summary>
+        public bool IsUpgradable => MaxLevel > 1;
     }
 }

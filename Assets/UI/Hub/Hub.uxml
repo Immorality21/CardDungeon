@@ -26,6 +26,22 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- ONE LOT. Shown when a lot has something to decide - it is not built yet, or it can
+             be raised a level. A finished building opens its service directly instead, because a
+             panel on every merchant visit would be a tax on the common case.
+
+             The build is confirmed HERE rather than applied on load, which is what gives the sprite
+             swap something to animate (HUB.md section 7, machinery 3). -->
+        <ui:VisualElement name="lot-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label name="lot-name" text="" class="cd-title" />
+            <ui:Label name="lot-blurb" text="" class="cd-info-label" />
+            <ui:Label name="lot-status" text="" class="cd-subtitle" />
+            <ui:Button name="lot-action" text="" class="cd-menu-button" />
+            <ui:Button name="lot-enter" text="Enter" class="cd-menu-button" />
+            <ui:Label name="lot-feedback" text="" class="cd-feedback" />
+            <ui:Button name="lot-close" text="Back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
         <!-- RUN PROGRESS -->
         <ui:VisualElement name="progress-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
             <ui:Label name="level-indicator" text="Level 1 of 1" class="cd-info-label" />

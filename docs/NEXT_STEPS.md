@@ -149,7 +149,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **7** | Buildings, materials, and a staged unlock of the game | phases 1-3 ✅ 2026-09-05 (materials, the building model, **the hub replaces home**); **phase 4 (turn the gates on) is next** |
+| **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05 (materials, the building model, the painted town, **the gates are on**); **phase 6's open question — what a building level grants — is the next decision** |
 | **3** | Sharpen hub sinks | open |
 
 ### [Open balance work](plans/BALANCE_OPEN.md)
@@ -185,6 +185,18 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The town is painted, and the gates are on** (2026-09-05) — `docs/plans/HUB.md` §7 phase 4 plus
+  the art. A lot is **Absent** until its `RequiredRunKeys` clear, **Available** (a foundation and a
+  material price) once offered, then **Built**; clicking an unbuilt lot opens a panel that names the
+  price or the run in the way, and confirming it spends the materials and **phases the new sprite
+  in over the backdrop**. Materials gate *whether*, gold gates *when*. `BuildingSO` gained a
+  **draw rect separate from its hit box**, so silhouettes overlap freely while UITK's rectangular
+  hit-testing stays unambiguous — `HubView` is backdrop / sprites / buttons in three layers.
+  Placeholder pixel art ships for all of it (`tools/hub-art/`, disposable). Opening sequence:
+  campfire and storehouse free; Sphere Hall (1 timber), Bestiary and Merchant offered at once; only
+  the Forge behind the tutorial. **What a building *level* grants is deliberately undecided** — the upgrade logic is
+  complete and tested, but every lot is `MaxLevel 1` so nothing is on sale that buys nothing, and
+  `HubState.LevelOf` is the seam waiting for that call.
 - **The hub becomes a place, and the menu splits in two** (2026-09-05) —
   `docs/plans/HUB.md` §7 phases 2-3, plus §5b's tavern removal. **Three scenes now**: `MenuScene`
   is a dependency-free title screen (Continue / Options / Quit, reads no save, room for the
@@ -193,9 +205,8 @@ per-subsystem `CLAUDE.md` files — not here.
   ~85 units of headroom left, i.e. one more button) became a **painted town**: `HubSO` +
   `BuildingSO` + the pure `BuildingOps`, progress in `MetaProgressSaveData.Buildings`, rendered by
   `HubView`/`HubPresenter` as one letterboxed 1280x720 canvas — six lots and a road, flat
-  placeholders, no art required. **Every lot ships built**: `BuildingOps.EverythingIsPlaced` is the
-  single constant phase 4 flips, and the gated path is already under test through an explicit
-  overload. The **story is not a building** (a lot must never be able to lock the player out of
+  placeholders, no art required. **Every lot shipped built** at that point, behind a single constant
+  with the gated path already under test — phase 4 removed the constant hours later. The **story is not a building** (a lot must never be able to lock the player out of
   running) and the **campfire** is the one lot placed by default. The **tavern is deleted** —
   `TavernUI`, `TavernStock`, `ShopPricing.RecruitPrice`, `HeroSO.RecruitCost`,
   `HeroRoster.RemoveOwned`; `GetRecruitable` became `GetUnownedHeroes`. Heroes come from rescue and

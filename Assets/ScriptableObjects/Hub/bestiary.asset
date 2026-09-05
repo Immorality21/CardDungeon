@@ -16,14 +16,19 @@ MonoBehaviour:
   DisplayName: Bestiary
   Blurb: Everything the party has survived, written down.
   Service: 4
-  Position: {x: 250, y: 320}
+  Position: {x: 215, y: 420}
   HitSize: {x: 150, y: 110}
+  DrawOffset: {x: -25, y: -70}
+  DrawSize: {x: 200, y: 190}
   DrawOrder: 20
   AbsentSprite: {fileID: 0}
-  AvailableSprite: {fileID: 0}
-  LevelSprites: []
+  AvailableSprite: {fileID: 21300000, guid: e2ab04e90dc34fe68147e4a7f02d3b2c, type: 3}
+  LevelSprites:
+  - {fileID: 21300000, guid: 0abe49b270804fda8cd48caf3afb010b, type: 3}
   PlacedByDefault: 0
   MaxLevel: 1
-  PlacementCost: []
+  PlacementCost:
+  - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
+    Amount: 4
   GoldPerUpgrade: 0
   RequiredRunKeys: []

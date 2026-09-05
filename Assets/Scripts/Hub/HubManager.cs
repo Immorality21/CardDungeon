@@ -7,6 +7,7 @@ using Assets.Scripts.Heroes;
 using Assets.Scripts.Heroes.UI;
 using Assets.Scripts.Hub.UI;
 using Assets.Scripts.IO;
+using Assets.Scripts.Items;
 using Assets.Scripts.Items.UI;
 using Assets.Scripts.Progression;
 using ImmoralityGaming.Menu;
@@ -55,9 +56,13 @@ namespace Assets.Scripts.Hub
         private VisualElement _forgeView;
         private VisualElement _bestiaryView;
         private VisualElement _inventoryView;
+        private VisualElement _lotView;
 
         private Button _roadButton;
         private Button _menuButton;
+        private Button _lotActionButton;
+        private Button _lotEnterButton;
+        private Button _lotCloseButton;
         private Button _progressPartyButton;
         private Button _backButton;
         private Button _enterButton;
@@ -66,6 +71,10 @@ namespace Assets.Scripts.Hub
         private Label _goldLabel;
         private Label _essenceLabel;
         private Label _hubFeedback;
+        private Label _lotName;
+        private Label _lotBlurb;
+        private Label _lotStatus;
+        private Label _lotFeedback;
         private Label _levelIndicator;
         private Label _levelName;
         private Label _progressParty;
@@ -97,6 +106,9 @@ namespace Assets.Scripts.Hub
 
         // Which view the party screen was opened from, so Back goes where the player came from.
         private bool _partyOpenedFromProgress;
+
+        // The lot whose panel is open, so Build/Upgrade knows what it is acting on.
+        private BuildingSO _selectedLot;
 
         public static void MarkRunCompleted()
         {
@@ -134,6 +146,7 @@ namespace Assets.Scripts.Hub
             _forgeView = root.Q<VisualElement>("forge-view");
             _bestiaryView = root.Q<VisualElement>("bestiary-view");
             _inventoryView = root.Q<VisualElement>("inventory-view");
+            _lotView = root.Q<VisualElement>("lot-view");
 
             _roadButton = root.Q<Button>("road-btn");
             _menuButton = root.Q<Button>("hub-menu-btn");
@@ -141,6 +154,9 @@ namespace Assets.Scripts.Hub
             _backButton = root.Q<Button>("back-btn");
             _enterButton = root.Q<Button>("enter-btn");
             _returnButton = root.Q<Button>("return-btn");
+            _lotActionButton = root.Q<Button>("lot-action");
+            _lotEnterButton = root.Q<Button>("lot-enter");
+            _lotCloseButton = root.Q<Button>("lot-close");
 
             _goldLabel = root.Q<Label>("hub-gold");
             _essenceLabel = root.Q<Label>("hub-essence");
@@ -148,6 +164,10 @@ namespace Assets.Scripts.Hub
             _levelIndicator = root.Q<Label>("level-indicator");
             _levelName = root.Q<Label>("level-name");
             _progressParty = root.Q<Label>("progress-party");
+            _lotName = root.Q<Label>("lot-name");
+            _lotBlurb = root.Q<Label>("lot-blurb");
+            _lotStatus = root.Q<Label>("lot-status");
+            _lotFeedback = root.Q<Label>("lot-feedback");
 
             _roadButton.clicked += OnTakeTheRoad;
             _menuButton.clicked += OnLeaveToMainMenu;
@@ -155,6 +175,9 @@ namespace Assets.Scripts.Hub
             _backButton.clicked += OnBack;
             _returnButton.clicked += OnRunCompleteReturn;
             _progressPartyButton.clicked += OnChangePartyFromProgress;
+            _lotActionButton.clicked += OnLotAction;
+            _lotEnterButton.clicked += OnLotEnter;
+            _lotCloseButton.clicked += ShowTown;
 
             BuildTown();
 
@@ -227,16 +250,19 @@ namespace Assets.Scripts.Hub
             }
 
             var lots = new List<HubView.LotInfo>();
-            HubPresenter.BuildViewModel(_hub, SavedBuildings(), lots);
+            HubPresenter.BuildViewModel(_hub, Progress(), lots);
             _town.SetTown(_hub.ReferenceSize, _hub.Backdrop, lots);
             RefreshTown();
         }
 
-        private static List<BuildingProgress> SavedBuildings()
+        /// <summary>
+        /// The save as the hub rules see it. Read fresh every time rather than cached, because a
+        /// build, an upgrade and a cleared run all change it and a stale copy would render a town
+        /// that disagrees with the save.
+        /// </summary>
+        private static HubProgress Progress()
         {
-            return MetaProgressManager.HasInstance
-                ? MetaProgressManager.Instance.GetBuildings()
-                : new List<BuildingProgress>();
+            return HubState.Progress();
         }
 
         /// <summary>Repaints each lot's state. Cheap, and run on every return to the town so a
@@ -248,18 +274,23 @@ namespace Assets.Scripts.Hub
                 return;
             }
 
-            var saved = SavedBuildings();
+            var progress = Progress();
             foreach (var building in BuildingOps.InDrawOrder(_hub))
             {
-                var state = BuildingOps.StateOf(building, saved);
+                var state = BuildingOps.StateOf(building, progress);
                 _town.SetLotState(building.SaveKey, HubPresenter.StateClass(state));
-                _town.SetLotNote(building.SaveKey, HubPresenter.DescribeState(building, saved));
+                _town.SetLotNote(building.SaveKey, HubPresenter.DescribeState(building, progress));
             }
         }
 
         /// <summary>
-        /// A lot was clicked. An unbuilt lot is scenery — it says what it is waiting for rather than
-        /// opening a screen the player has not earned.
+        /// A lot was clicked.
+        ///
+        /// <para>A lot with nothing to decide — built, and at its ceiling — opens its service
+        /// immediately. Anything else stops at the lot panel first, because there is a choice to
+        /// make: build it, or pay to raise it. Making the player pass through a panel on every
+        /// merchant visit would be a tax on the common case, so the panel only appears when it has
+        /// something to say.</para>
         /// </summary>
         private void OnLotClicked(string buildingKey)
         {
@@ -269,15 +300,181 @@ namespace Assets.Scripts.Hub
                 return;
             }
 
-            var saved = SavedBuildings();
-            if (!HubPresenter.IsOpenable(building, saved))
+            SetFeedback(string.Empty);
+            if (HubPresenter.NeedsPanel(building, Progress()))
             {
-                SetFeedback($"{building.Label} — {HubPresenter.DescribeState(building, saved)}");
+                ShowLotPanel(building);
+                return;
+            }
+            OpenService(building.Service);
+        }
+
+        // ============================================================
+        //  BUILDING AND UPGRADING
+        // ============================================================
+
+        /// <summary>The lot's own screen: what it is, what state it is in, and what can be done
+        /// about that.</summary>
+        private void ShowLotPanel(BuildingSO building)
+        {
+            _selectedLot = building;
+            SetShown(_hubView, false);
+            SetShown(_lotView, true);
+            SetLotFeedback(string.Empty);
+            RefreshLotPanel();
+            ResetKeyboardNavigation();
+        }
+
+        private void RefreshLotPanel()
+        {
+            if (_selectedLot == null)
+            {
                 return;
             }
 
-            SetFeedback(string.Empty);
-            OpenService(building.Service);
+            var progress = Progress();
+            _lotName.text = _selectedLot.Label;
+            _lotBlurb.text = _selectedLot.Blurb ?? string.Empty;
+            _lotStatus.text = DescribeLotStatus(_selectedLot, progress);
+
+            string action = HubPresenter.ActionLabel(_selectedLot, progress);
+            SetShown(_lotActionButton, !string.IsNullOrEmpty(action));
+            _lotActionButton.text = action;
+            _lotActionButton.SetEnabled(CanPayFor(_selectedLot, progress));
+
+            bool built = BuildingOps.IsBuilt(_selectedLot, progress);
+            SetShown(_lotEnterButton, built);
+            _lotEnterButton.text = "Enter";
+        }
+
+        /// <summary>
+        /// The status line. A locked lot names the run standing in its way rather than saying
+        /// "Locked" — a gate the player cannot see the far side of is just a dead button.
+        /// </summary>
+        private string DescribeLotStatus(BuildingSO building, HubProgress progress)
+        {
+            if (BuildingOps.StateOf(building, progress) != BuildingState.Absent)
+            {
+                return HubPresenter.DescribeState(building, progress);
+            }
+
+            var missing = new List<string>();
+            foreach (var runKey in building.RequiredRunKeys)
+            {
+                if (string.IsNullOrEmpty(runKey) || progress.HasCleared(runKey))
+                {
+                    continue;
+                }
+                var node = _campaign != null ? _campaign.FindNode(runKey) : null;
+                missing.Add(node?.Run != null && !string.IsNullOrEmpty(node.Run.DisplayName)
+                    ? node.Run.DisplayName
+                    : runKey);
+            }
+            return missing.Count == 0 ? "Not yet" : "Clear " + string.Join(" and ", missing) + " first";
+        }
+
+        /// <summary>
+        /// Whether the player can pay for the lot's next step right now. Money lives in singletons,
+        /// so this is deliberately here rather than in <c>BuildingOps</c> — the same split
+        /// <c>SphereGridOps.CanActivate</c> makes about material costs, and what lets the balance
+        /// model reason about a hub state it has no wallet for.
+        /// </summary>
+        private static bool CanPayFor(BuildingSO building, HubProgress progress)
+        {
+            if (BuildingOps.CanPlace(building, progress))
+            {
+                if (building.PlacementCost == null || building.PlacementCost.Count == 0)
+                {
+                    return true;
+                }
+                return InventoryManager.HasInstance
+                    && InventoryManager.Instance.CanAfford(building.PlacementCost);
+            }
+            if (BuildingOps.CanUpgrade(building, progress))
+            {
+                return MetaProgressManager.HasInstance
+                    && MetaProgressManager.Instance.Gold >= building.GoldPerUpgrade;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Pays for the lot's next step and raises it. Placement spends materials, an upgrade spends
+        /// gold — materials gate <i>whether</i>, gold gates <i>when</i>.
+        ///
+        /// <para>The level is recorded only after the payment succeeds, so a failed spend cannot
+        /// leave a building standing for free.</para>
+        /// </summary>
+        private void OnLotAction()
+        {
+            if (_selectedLot == null)
+            {
+                return;
+            }
+
+            var progress = Progress();
+            int nextLevel = BuildingOps.NextLevel(_selectedLot, progress);
+            if (nextLevel <= 0)
+            {
+                return;
+            }
+
+            bool placing = BuildingOps.CanPlace(_selectedLot, progress);
+            if (!CanPayFor(_selectedLot, progress))
+            {
+                SetLotFeedback(placing
+                    ? "Not enough materials — needs " + HubPresenter.DescribePlacementCost(_selectedLot) + "."
+                    : $"Not enough gold — needs {_selectedLot.GoldPerUpgrade}.");
+                return;
+            }
+
+            if (placing)
+            {
+                if (_selectedLot.PlacementCost != null && _selectedLot.PlacementCost.Count > 0
+                    && !InventoryManager.Instance.SpendMaterials(_selectedLot.PlacementCost))
+                {
+                    SetLotFeedback("The materials went missing between checking and paying.");
+                    return;
+                }
+            }
+            else if (!MetaProgressManager.Instance.TrySpendGold(_selectedLot.GoldPerUpgrade))
+            {
+                SetLotFeedback("The gold went missing between checking and paying.");
+                return;
+            }
+
+            MetaProgressManager.Instance.SetBuildingLevel(_selectedLot.SaveKey, nextLevel);
+
+            // The sprite swap is the payoff, so it phases in rather than popping - and it happens
+            // here, on a confirmed build, which is why a build is confirmed in the hub at all.
+            var after = Progress();
+            _town.SetLotSprite(_selectedLot.SaveKey, BuildingOps.SpriteFor(_selectedLot, after), phaseIn: true);
+            _town.SetLotState(_selectedLot.SaveKey,
+                HubPresenter.StateClass(BuildingOps.StateOf(_selectedLot, after)));
+            _town.SetLotNote(_selectedLot.SaveKey, HubPresenter.DescribeState(_selectedLot, after));
+
+            SetLotFeedback(placing
+                ? $"{_selectedLot.Label} built."
+                : $"{_selectedLot.Label} raised to level {nextLevel}.");
+            RefreshLotPanel();
+        }
+
+        private void OnLotEnter()
+        {
+            if (_selectedLot == null)
+            {
+                return;
+            }
+            SetShown(_lotView, false);
+            OpenService(_selectedLot.Service);
+        }
+
+        private void SetLotFeedback(string message)
+        {
+            if (_lotFeedback != null)
+            {
+                _lotFeedback.text = message ?? string.Empty;
+            }
         }
 
         private void OpenService(HubService service)
@@ -354,8 +551,9 @@ namespace Assets.Scripts.Hub
         /// <summary>The views whose buttons the shared cursor drives - see <see cref="SetUpKeyboardNavigation"/>.</summary>
         private bool NavigatesCurrentView()
         {
-            return IsShown(_hubView) || IsShown(_progressView) || IsShown(_completeView)
-                || IsShown(_merchantView) || IsShown(_partyView) || IsShown(_forgeView);
+            return IsShown(_hubView) || IsShown(_lotView) || IsShown(_progressView)
+                || IsShown(_completeView) || IsShown(_merchantView) || IsShown(_partyView)
+                || IsShown(_forgeView);
         }
 
         /// <summary>
@@ -370,6 +568,10 @@ namespace Assets.Scripts.Hub
 
         private Button CancelButtonForCurrentView()
         {
+            if (IsShown(_lotView))
+            {
+                return _lotCloseButton;
+            }
             if (IsShown(_merchantView))
             {
                 return _root.Q<Button>("merchant-close");
@@ -444,6 +646,8 @@ namespace Assets.Scripts.Hub
             SetShown(_forgeView, false);
             SetShown(_bestiaryView, false);
             SetShown(_inventoryView, false);
+            SetShown(_lotView, false);
+            _selectedLot = null;
             ResetKeyboardNavigation();
 
             RefreshTown();
@@ -490,6 +694,7 @@ namespace Assets.Scripts.Hub
         private void ShowRunProgressPanel()
         {
             SetShown(_hubView, false);
+            SetShown(_lotView, false);
             SetShown(_campaignView, false);
             SetShown(_progressView, true);
             SetShown(_completeView, false);
@@ -541,6 +746,7 @@ namespace Assets.Scripts.Hub
             if (_campaignMap != null)
             {
                 SetShown(_hubView, false);
+                SetShown(_lotView, false);
                 _campaignMap.Show(_runSaveData.RunKey);
                 return;
             }
@@ -626,6 +832,7 @@ namespace Assets.Scripts.Hub
         private void OnVisitMerchant()
         {
             SetShown(_hubView, false);
+            SetShown(_lotView, false);
             _merchant.Show();
             ResetKeyboardNavigation();
         }
@@ -633,6 +840,7 @@ namespace Assets.Scripts.Hub
         private void OnVisitSphereGrid()
         {
             SetShown(_hubView, false);
+            SetShown(_lotView, false);
             _sphereGrid.Show();
         }
 
@@ -640,6 +848,7 @@ namespace Assets.Scripts.Hub
         {
             _partyOpenedFromProgress = false;
             SetShown(_hubView, false);
+            SetShown(_lotView, false);
             _partySelect.Show();
             ResetKeyboardNavigation();
         }
@@ -669,6 +878,7 @@ namespace Assets.Scripts.Hub
         private void OnVisitForge()
         {
             SetShown(_hubView, false);
+            SetShown(_lotView, false);
             _forge.Show();
             ResetKeyboardNavigation();
         }
@@ -676,12 +886,14 @@ namespace Assets.Scripts.Hub
         private void OnVisitBestiary()
         {
             SetShown(_hubView, false);
+            SetShown(_lotView, false);
             _bestiary.Show();
         }
 
         private void OnVisitInventory()
         {
             SetShown(_hubView, false);
+            SetShown(_lotView, false);
             _inventory.Show();
         }
 

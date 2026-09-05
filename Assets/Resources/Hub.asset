@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.HubSO
   DisplayName: Camp
   ReferenceSize: {x: 1280, y: 720}
-  Backdrop: {fileID: 0}
+  Backdrop: {fileID: 21300000, guid: b83480fb5872489a9fbaaf4ac7657fc7, type: 3}
   Buildings:
   - {fileID: 11400000, guid: 46d36611b76987e4992a9229428d457e, type: 2}
   - {fileID: 11400000, guid: 414b75d33d3e803459329127c6704f01, type: 2}

@@ -5,58 +5,68 @@ using UnityEngine;
 namespace Assets.Scripts.Hub
 {
     /// <summary>
-    /// Every hub-building rule, as pure static functions of the authored <see cref="HubSO"/> plus the
-    /// saved <see cref="BuildingProgress"/> list. Nothing here touches disk, singletons or scenes —
-    /// the same shape as <see cref="Dungeon.CampaignOps"/> and <c>SphereGridOps</c>, and what makes
-    /// the town EditMode-testable with no scene.
+    /// Every hub-building rule, as pure static functions of the authored <see cref="HubSO"/> plus a
+    /// <see cref="HubProgress"/>. Nothing here touches disk, singletons or scenes — the same shape as
+    /// <see cref="Dungeon.CampaignOps"/> and <c>SphereGridOps</c>, and what makes the town
+    /// EditMode-testable with no scene.
+    ///
+    /// <para>Money is deliberately <b>not</b> here. Whether the player can afford a lot depends on the
+    /// inventory and the purse, which are singletons; <c>HubManager.CanAffordPlacement</c> asks them.
+    /// Keeping the two apart is what lets the balance model reason about a hub state it has no wallet
+    /// for — the same split <c>SphereGridOps.CanActivate</c> makes about material costs.</para>
     ///
     /// <para>Towns are treated as untrusted data: a null building, an empty key or a duplicate
-    /// degrades rather than throwing, and the authoring validators at the bottom report the faults
-    /// so a test can fail on them instead of the game rendering them.</para>
+    /// degrades rather than throwing, and the authoring validators at the bottom report the faults so
+    /// a test can fail on them instead of the game rendering them.</para>
     /// </summary>
     public static class BuildingOps
     {
         /// <summary>
-        /// <b>The phase switch.</b> While true every lot reads as placed at level 1 whatever the save
-        /// says, so <see cref="BuildingSO.RequiredRunKeys"/> and <see cref="BuildingSO.PlacementCost"/>
-        /// are authored and not yet consulted.
+        /// How this lot reads right now.
         ///
-        /// <para><c>docs/plans/HUB.md</c> §7 splits this on purpose: phase 2/3 land the data model and
-        /// the town renderer while the game plays exactly as it did, and phase 4 turns the gates on
-        /// against a hub that already works — migration risk kept apart from design risk. Flipping
-        /// this to false is most of phase 4, and it is one constant because every reader below goes
-        /// through <see cref="StateOf"/> and <see cref="LevelOf"/>.</para>
+        /// <para>Three states, and <see cref="BuildingState.Available"/> is the load-bearing one: a
+        /// bare lot the player *could* build on is the affordance that makes a material worth wanting.
+        /// Without it an unbuilt hub is indistinguishable from empty ground and nothing on screen ever
+        /// explains why the player is carrying ember iron.</para>
         /// </summary>
-        public const bool EverythingIsPlaced = true;
-
-        /// <summary>How this lot reads right now. See <see cref="EverythingIsPlaced"/>.</summary>
-        public static BuildingState StateOf(BuildingSO building, IEnumerable<BuildingProgress> saved)
-        {
-            return StateOf(building, saved, EverythingIsPlaced);
-        }
-
-        /// <summary>
-        /// <see cref="StateOf(BuildingSO, IEnumerable{BuildingProgress})"/> with the phase switch
-        /// passed in, so the gated behaviour phase 4 will turn on is testable *now* rather than
-        /// arriving untested on the day the constant flips.
-        /// </summary>
-        public static BuildingState StateOf(
-            BuildingSO building, IEnumerable<BuildingProgress> saved, bool everythingIsPlaced)
+        public static BuildingState StateOf(BuildingSO building, HubProgress progress)
         {
             if (building == null)
             {
                 return BuildingState.Absent;
             }
-            if (LevelOf(building, saved, everythingIsPlaced) > 0)
+            if (LevelOf(building, progress) > 0)
             {
                 return BuildingState.Built;
             }
-            // Offered once the runs behind it are cleared; a bare lot until then. The unlock record
-            // is not threaded in yet, so an unbuilt lot with no requirement reads as Available and
-            // one with a requirement reads as Absent.
-            return building.RequiredRunKeys == null || building.RequiredRunKeys.Count == 0
-                ? BuildingState.Available
-                : BuildingState.Absent;
+            return IsOffered(building, progress) ? BuildingState.Available : BuildingState.Absent;
+        }
+
+        /// <summary>
+        /// Whether the campaign has opened this lot for building yet — every key in
+        /// <see cref="BuildingSO.RequiredRunKeys"/> cleared. This is the pacing dial: one system
+        /// arriving at a time, each introduced when the player has a reason to want it.
+        /// </summary>
+        public static bool IsOffered(BuildingSO building, HubProgress progress)
+        {
+            if (building == null)
+            {
+                return false;
+            }
+            if (building.RequiredRunKeys == null || building.RequiredRunKeys.Count == 0)
+            {
+                return true;
+            }
+
+            progress = progress ?? HubProgress.Fresh;
+            foreach (var runKey in building.RequiredRunKeys)
+            {
+                if (!string.IsNullOrEmpty(runKey) && !progress.HasCleared(runKey))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -65,18 +75,7 @@ namespace Assets.Scripts.Hub
         /// level 1 with nothing in the save, which is why owning a working campfire needs no save
         /// write on a fresh profile.
         /// </summary>
-        public static int LevelOf(BuildingSO building, IEnumerable<BuildingProgress> saved)
-        {
-            return LevelOf(building, saved, EverythingIsPlaced);
-        }
-
-        /// <summary>
-        /// <see cref="LevelOf(BuildingSO, IEnumerable{BuildingProgress})"/> with the phase switch
-        /// passed in. A saved level always wins over the switch, so a save written after phase 4 keeps
-        /// meaning what it says.
-        /// </summary>
-        public static int LevelOf(
-            BuildingSO building, IEnumerable<BuildingProgress> saved, bool everythingIsPlaced)
+        public static int LevelOf(BuildingSO building, HubProgress progress)
         {
             if (building == null)
             {
@@ -84,18 +83,16 @@ namespace Assets.Scripts.Hub
             }
 
             int level = 0;
-            if (saved != null)
+            var saved = (progress ?? HubProgress.Fresh).Buildings;
+            foreach (var entry in saved)
             {
-                foreach (var entry in saved)
+                if (entry != null && entry.Key == building.SaveKey)
                 {
-                    if (entry != null && entry.Key == building.SaveKey)
-                    {
-                        level = Mathf.Max(level, entry.Level);
-                    }
+                    level = Mathf.Max(level, entry.Level);
                 }
             }
 
-            if (level <= 0 && (building.PlacedByDefault || everythingIsPlaced))
+            if (level <= 0 && building.PlacedByDefault)
             {
                 level = 1;
             }
@@ -103,9 +100,36 @@ namespace Assets.Scripts.Hub
         }
 
         /// <summary>Whether the lot is standing at all.</summary>
-        public static bool IsBuilt(BuildingSO building, IEnumerable<BuildingProgress> saved)
+        public static bool IsBuilt(BuildingSO building, HubProgress progress)
         {
-            return StateOf(building, saved) == BuildingState.Built;
+            return LevelOf(building, progress) > 0;
+        }
+
+        /// <summary>Whether this lot is waiting to be placed — offered, and not yet standing.</summary>
+        public static bool CanPlace(BuildingSO building, HubProgress progress)
+        {
+            return StateOf(building, progress) == BuildingState.Available;
+        }
+
+        /// <summary>Whether this lot is standing and has a level left to buy.</summary>
+        public static bool CanUpgrade(BuildingSO building, HubProgress progress)
+        {
+            if (building == null)
+            {
+                return false;
+            }
+            int level = LevelOf(building, progress);
+            return level > 0 && level < building.MaxLevel;
+        }
+
+        /// <summary>The level a build or upgrade would take this lot to, or 0 when neither applies.</summary>
+        public static int NextLevel(BuildingSO building, HubProgress progress)
+        {
+            if (CanPlace(building, progress))
+            {
+                return 1;
+            }
+            return CanUpgrade(building, progress) ? LevelOf(building, progress) + 1 : 0;
         }
 
         /// <summary>
@@ -148,8 +172,10 @@ namespace Assets.Scripts.Hub
             return result;
         }
 
-        /// <summary>The screen-space rect a lot occupies, in the hub's reference pixels. The
-        /// clickable box — see <see cref="BuildingSO.HitSize"/> on why it is rectangular.</summary>
+        /// <summary>
+        /// The box a lot can be clicked in, in the hub's reference pixels. Rectangular, and the thing
+        /// <c>HubContentTests</c> refuses to let two lots share — see <see cref="BuildingSO.HitSize"/>.
+        /// </summary>
         public static Rect LotRect(BuildingSO building)
         {
             if (building == null)
@@ -161,18 +187,38 @@ namespace Assets.Scripts.Hub
         }
 
         /// <summary>
+        /// Where the sprite paints, in the hub's reference pixels: <see cref="BuildingSO.DrawOffset"/>
+        /// from the lot's corner at <see cref="BuildingSO.DrawSize"/>, falling back to the hit box when
+        /// the draw size is unauthored. <b>Draw rects may overlap freely</b> — that is what makes a
+        /// town look painted rather than tiled, and it is why this is a different rectangle from
+        /// <see cref="LotRect"/>.
+        /// </summary>
+        public static Rect DrawRect(BuildingSO building)
+        {
+            if (building == null)
+            {
+                return new Rect();
+            }
+
+            var hit = LotRect(building);
+            float width = building.DrawSize.x > 0f ? building.DrawSize.x : hit.width;
+            float height = building.DrawSize.y > 0f ? building.DrawSize.y : hit.height;
+            return new Rect(building.Position + building.DrawOffset, new Vector2(width, height));
+        }
+
+        /// <summary>
         /// The sprite for a lot's current state, or null to render the flat placeholder. The view
         /// calls this and does not otherwise know what a state means, which is what keeps the town
         /// renderer free of rules.
         /// </summary>
-        public static Sprite SpriteFor(BuildingSO building, IEnumerable<BuildingProgress> saved)
+        public static Sprite SpriteFor(BuildingSO building, HubProgress progress)
         {
             if (building == null)
             {
                 return null;
             }
 
-            switch (StateOf(building, saved))
+            switch (StateOf(building, progress))
             {
                 case BuildingState.Available:
                     return building.AvailableSprite;
@@ -182,7 +228,7 @@ namespace Assets.Scripts.Hub
                     {
                         return null;
                     }
-                    int level = Mathf.Max(1, LevelOf(building, saved));
+                    int level = Mathf.Max(1, LevelOf(building, progress));
                     return sprites[Mathf.Clamp(level - 1, 0, sprites.Length - 1)];
                 default:
                     return building.AbsentSprite;
@@ -258,9 +304,10 @@ namespace Assets.Scripts.Hub
         }
 
         /// <summary>
-        /// Pairs of lots whose hit rects intersect. UI Toolkit hit-testing is rectangular, so an
+        /// Pairs of lots whose <b>hit</b> rects intersect. UI Toolkit hit-testing is rectangular, so an
         /// overlap means one lot silently swallows the other's clicks — the failure looks like a dead
-        /// building rather than like a layout mistake, which is exactly why it needs a test.
+        /// building rather than like a layout mistake, which is exactly why it needs a test. Draw rects
+        /// are not checked and are meant to overlap.
         /// </summary>
         public static List<string> GetOverlappingLots(HubSO hub)
         {
@@ -279,8 +326,8 @@ namespace Assets.Scripts.Hub
             return overlaps;
         }
 
-        /// <summary>Lots that sit even partly outside the hub's reference rect — content off-screen
-        /// however the town is letterboxed.</summary>
+        /// <summary>Lots whose hit box sits even partly outside the hub's reference rect — a lot the
+        /// player cannot fully click, however the town is letterboxed.</summary>
         public static List<string> GetLotsOutsideTheRect(HubSO hub)
         {
             var outside = new List<string>();
@@ -300,6 +347,49 @@ namespace Assets.Scripts.Hub
                 }
             }
             return outside;
+        }
+
+        /// <summary>
+        /// Lots that can never be placed on a fresh save because nothing offers them and nothing
+        /// places them — a building the player would watch forever. Reported per building key.
+        /// </summary>
+        public static List<string> GetUnreachableLots(HubSO hub, ICollection<string> everyRunKey)
+        {
+            var stuck = new List<string>();
+            foreach (var building in InDrawOrder(hub))
+            {
+                if (building.PlacedByDefault || building.RequiredRunKeys == null)
+                {
+                    continue;
+                }
+                foreach (var required in building.RequiredRunKeys)
+                {
+                    if (string.IsNullOrEmpty(required))
+                    {
+                        continue;
+                    }
+                    if (everyRunKey == null || !everyRunKey.Contains(required))
+                    {
+                        stuck.Add($"{building.SaveKey} requires run '{required}', which no run has");
+                    }
+                }
+            }
+            return stuck;
+        }
+
+        /// <summary>Lots authored as upgradable but with no price on the upgrade — free content that
+        /// almost certainly meant to cost something.</summary>
+        public static List<string> GetFreeUpgrades(HubSO hub)
+        {
+            var free = new List<string>();
+            foreach (var building in InDrawOrder(hub))
+            {
+                if (building.IsUpgradable && building.GoldPerUpgrade <= 0)
+                {
+                    free.Add(building.SaveKey);
+                }
+            }
+            return free;
         }
     }
 }

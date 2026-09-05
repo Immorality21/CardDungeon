@@ -16,14 +16,19 @@ MonoBehaviour:
   DisplayName: Sphere Hall
   Blurb: Where a hero decides what they are becoming.
   Service: 5
-  Position: {x: 650, y: 120}
+  Position: {x: 680, y: 250}
   HitSize: {x: 150, y: 110}
+  DrawOffset: {x: -25, y: -70}
+  DrawSize: {x: 200, y: 190}
   DrawOrder: 10
   AbsentSprite: {fileID: 0}
-  AvailableSprite: {fileID: 0}
-  LevelSprites: []
+  AvailableSprite: {fileID: 21300000, guid: e2ab04e90dc34fe68147e4a7f02d3b2c, type: 3}
+  LevelSprites:
+  - {fileID: 21300000, guid: 18935513ff954d299230d2cd60cb5749, type: 3}
   PlacedByDefault: 0
   MaxLevel: 1
-  PlacementCost: []
+  PlacementCost:
+  - Material: {fileID: 11400000, guid: c0de5211aa010000000000000000ab01, type: 2}
+    Amount: 1
   GoldPerUpgrade: 0
   RequiredRunKeys: []

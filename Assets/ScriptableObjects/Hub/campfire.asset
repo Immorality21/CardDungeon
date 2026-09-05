@@ -16,12 +16,15 @@ MonoBehaviour:
   DisplayName: Campfire
   Blurb: Four seats and a low fire. Who marches out is decided here.
   Service: 0
-  Position: {x: 390, y: 480}
+  Position: {x: 360, y: 545}
   HitSize: {x: 240, y: 150}
+  DrawOffset: {x: -25, y: -70}
+  DrawSize: {x: 290, y: 230}
   DrawOrder: 40
   AbsentSprite: {fileID: 0}
-  AvailableSprite: {fileID: 0}
-  LevelSprites: []
+  AvailableSprite: {fileID: 21300000, guid: e2ab04e90dc34fe68147e4a7f02d3b2c, type: 3}
+  LevelSprites:
+  - {fileID: 21300000, guid: d80dc6650bd04bd9b76cf95d092e5c96, type: 3}
   PlacedByDefault: 1
   MaxLevel: 1
   PlacementCost: []

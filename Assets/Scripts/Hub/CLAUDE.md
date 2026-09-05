@@ -55,16 +55,28 @@ without a layout budget.
 - **`HubSO`** (`Assets/Resources/Hub.asset`, Resources-loaded exactly like `CampaignSO` and
   `ItemCatalogSO`) holds every `BuildingSO`, the backdrop, and **`ReferenceSize`** — the pixel rect
   every authored `Position` is expressed in. Changing that rect invalidates every position.
-- **`BuildingSO`** is pure content: `Key` (save id), `Service`, `Position` + `HitSize`, `DrawOrder`,
-  per-state sprites, `PlacedByDefault`, and the phase-4 fields (`PlacementCost`, `RequiredRunKeys`,
-  `GoldPerUpgrade`) that are **authored now and read by nothing yet**.
+- **`BuildingSO`** is pure content: `Key` (save id), `Service`, the two rectangles
+  (`Position` + `HitSize`, `DrawOffset` + `DrawSize`), `DrawOrder`, per-state sprites,
+  `PlacedByDefault`, and the progression fields — `PlacementCost`, `RequiredRunKeys`,
+  `MaxLevel`, `GoldPerUpgrade`.
 - **Progress lives in the save** — `MetaProgressSaveData.Buildings`, the same split `CampaignSO`
   makes with `CompletedRunKeys`, so one authored town reads differently per save.
 - **All rules are in `BuildingOps`** (pure, static, scene-free): `StateOf`, `LevelOf`, `InDrawOrder`,
   `LotRect`, `SpriteFor`, plus authoring validators. `HubPresenter` turns those into classes and
   text; `HubView` only draws. `BuildingOpsTests` and `HubContentTests` drive them with no scene.
 
-### Three constraints the renderer exists to satisfy
+### Two rectangles per lot, and why
+
+`Position` + `HitSize` is **the box you can click**. `DrawOffset` + `DrawSize` is **where the sprite
+paints**. They are separate fields because a painted town needs silhouettes that overlap — a tower
+behind a roof, a banner past a wall — while UI Toolkit's hit-testing stays stubbornly rectangular.
+
+`HubView` renders them as three layers: backdrop, then a **sprite layer** on draw rects, then the
+**buttons** on hit rects. A button with art behind it goes transparent and drops its glyph — the
+sprite is doing the identifying. `HubContentTests.NoTwoLots_HitBoxesOverlap` polices the hit boxes
+and says nothing about the art, which is free to overlap as much as it likes.
+
+### Three more constraints the renderer exists to satisfy
 
 - **The town scales as one unit.** Everything is absolutely positioned inside one fixed-size canvas
   that is uniformly scaled and centred (`HubView.Relayout`). Scaling lots individually desyncs the
@@ -73,20 +85,66 @@ without a layout budget.
 - **UI Toolkit has no z-index.** Siblings paint in the order they are added, so `BuildingOps.InDrawOrder`
   (DrawOrder, then `Position.y` as a painter's algorithm, then list order) is the *only* thing
   deciding which building is in front. Nothing may re-sort the lots after `SetTown`.
-- **Hit-testing is rectangular.** A lot's button is its authored `HitSize`, whatever the sprite looks
-  like. Overlapping rects steal each other's clicks and the symptom is a building that looks fine and
-  does nothing — `HubContentTests.NoTwoLots_Overlap` is what catches it.
+- **A USS transition only runs on a change.** `hub-art--phasing` is therefore the *starting* state —
+  `HubView.SetLotSprite` adds it, lets a frame lay out, then removes it, and the sprite animates from
+  there back to its resting opacity and scale. A class that set the *end* state would animate nothing,
+  because the end state is already the default.
 
-### The phase switch
+### Building and upgrading
 
-**`BuildingOps.EverythingIsPlaced` is `true`**, so every lot reads as built at level 1 whatever the
-save says, and `PlacementCost` / `RequiredRunKeys` are inert. That is `docs/plans/HUB.md` §7 phases
-2–3: the data model and the town renderer land while the game plays exactly as it did, and phase 4
-turns the gates on against a hub that already works — migration risk kept apart from design risk.
+The gates are **on**. A lot is `Absent` until every key in its `RequiredRunKeys` is cleared, then
+`Available` (a foundation, and a price), then `Built`.
 
-**Flipping that constant to false is most of phase 4.** Both `StateOf` and `LevelOf` take an explicit
-overload with the switch passed in, and `BuildingOpsTests` covers the gated behaviour *now*, so it
-does not arrive untested on the day the constant flips.
+- **Materials gate *whether*, gold gates *when*.** Placement spends `PlacementCost` out of the
+  inventory — materials only come out of runs, so a lot depends on **where the player has been**.
+  Upgrades spend `GoldPerUpgrade`, which keeps gold's tuition role and gives the hub a sink that
+  scales forever.
+- **Money is not in `BuildingOps`.** Affordability needs the inventory and the purse, which are
+  singletons; `HubManager.CanPayFor` asks them. Every rule in `BuildingOps` stays a pure function of
+  a `HubProgress`, which is what lets the tests and the balance model reason about hub states no save
+  ever held. Same split `SphereGridOps.CanActivate` makes about material costs.
+- **The level is recorded only after the payment succeeds**, so a failed spend can never leave a
+  building standing for free.
+- **A click stops at the lot panel only when there is a decision to make** — unbuilt, or upgradable.
+  A finished lot opens its service directly, because a panel on every merchant visit is a tax on the
+  common case (`HubPresenter.NeedsPanel`).
+- **A locked lot names the run in its way** rather than saying "Locked" — a gate you cannot see the
+  far side of is just a dead button (`HubManager.DescribeLotStatus`).
+
+#### What a level *does* is undecided — and deliberately not guessed
+
+The upgrade machinery is complete and tested, but **every lot ships `MaxLevel 1`**, so nothing is on
+sale that buys nothing. `HubState.LevelOf(service)` is the seam a screen reads when that changes —
+the merchant would size its stock off it, the forge its discount. Turning one on is two authored
+fields (`MaxLevel`, `GoldPerUpgrade`) plus whatever the screen does with the number.
+`HubContentTests.NoLot_OffersAFreeUpgrade` fails on a level with no price.
+
+#### The opening sequence (provisional)
+
+Priced against the measured yields in `docs/plans/HUB.md` §7 — Scrap Iron is an order of magnitude
+the most plentiful (≈31.7 a campaign), which makes it the right currency for a cheap frequent cost
+and the wrong one for a gate.
+
+| lot | offered | costs |
+|---|---|---|
+| Campfire | placed by default | — |
+| Storehouse | placed by default | — (your own bag, never gated) |
+| Sphere Hall | from the start | 1 Rotted Timber |
+| Bestiary | from the start | 4 Scrap Iron |
+| Merchant | from the start | 8 Scrap Iron · 2 Rotted Timber |
+| Magic Forge | after `TutorialRun` | 3 Ember Iron · 2 Slag Coal |
+
+The Sphere Hall is deliberately the cheapest thing in town and is **not** gated on a run: the grid
+is where banked XP goes, and making a player finish a run before they can spend any of what they
+earned reads as a lock rather than as pacing. Note Rotted Timber is **cache-only** (§7 phase 1's
+table: ~3.1 a campaign, none from kills), so the one timber is an errand — find a treasure room —
+rather than something a few fights hand you.
+
+**These numbers are a first pass, not a balance pass.** They exist so the flow is exercisable; the
+yields they are priced against were measured before anything spent materials.
+`HubContentTests` guards the shape rather than the values: every gate names a real run, every lot is
+reachable by clearing the campaign, no line asks for more than a campaign yields, and a fresh save
+always has something standing *and* something offered.
 
 ### The road is not a building
 
@@ -99,12 +157,28 @@ to lock the player out of running** — `docs/plans/HUB.md` §7 open question 4,
 There is also **no separate "Continue Run" affordance**: `CampaignMapUI` already renders the active
 run as continuable, so the road is one door with two meanings, decided by the save.
 
-### The campfire
+### The campfire, and the storehouse
 
-The one lot with `PlacedByDefault`, so a fresh profile owns a working hub without the save writing
-anything (`BuildingOps.LevelOf` reads a default-placed lot as level 1 with an empty save). It opens
-`PartySelectUI`, which is also where the next party slot is bought — `docs/plans/HUB.md` §7 open
-question 3.
+The two `PlacedByDefault` lots, so a fresh profile owns a working hub without the save writing
+anything (`BuildingOps.LevelOf` reads a default-placed lot as level 1 on an empty save). The
+campfire opens `PartySelectUI`, which is also where the next party slot is bought —
+`docs/plans/HUB.md` §7 open question 3. The storehouse is free for a different reason: it is the
+player's **own bag**, not a service someone provides, and gating it would mean the loot from run one
+cannot be equipped (§7 open question 6).
+
+### Art
+
+`Assets/Sprites/Hub/` holds a 320×180 backdrop — exactly ¼ of `ReferenceSize`, so a lot position
+maps to a whole backdrop pixel — plus one sprite per lot and a shared `lot_foundation` for the
+Available state. All of it is **placeholder**, regenerated by `tools/hub-art/`; read that folder's
+README before running anything there, especially the note about `.meta` GUIDs, which orphan every
+sprite reference if they are rewritten (that happened once during authoring, and the symptom is a
+town silently rendering flat slabs again).
+
+`AbsentSprite` is left **null** on purpose: a locked lot falls back to the flat slab and its glyph,
+which reads as "something is coming here". `HubView` degrades to that slab wherever a sprite is
+missing, so the town stays playable with no art at all. The `hub-*` classes live at the end of
+`Assets/UI/Theme/CardDungeon.uss` — but **before** `.cd-nav--selected`, which must stay last.
 
 ## UI Toolkit (this is how all game UI works)
 

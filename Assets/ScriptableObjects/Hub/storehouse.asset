@@ -16,13 +16,16 @@ MonoBehaviour:
   DisplayName: Storehouse
   Blurb: Gear, spells, potions and the raw stuff you dragged home.
   Service: 3
-  Position: {x: 520, y: 320}
+  Position: {x: 560, y: 420}
   HitSize: {x: 150, y: 110}
+  DrawOffset: {x: -25, y: -70}
+  DrawSize: {x: 200, y: 190}
   DrawOrder: 20
   AbsentSprite: {fileID: 0}
-  AvailableSprite: {fileID: 0}
-  LevelSprites: []
-  PlacedByDefault: 0
+  AvailableSprite: {fileID: 21300000, guid: e2ab04e90dc34fe68147e4a7f02d3b2c, type: 3}
+  LevelSprites:
+  - {fileID: 21300000, guid: c2b154729820444a85d42e6e33ae5592, type: 3}
+  PlacedByDefault: 1
   MaxLevel: 1
   PlacementCost: []
   GoldPerUpgrade: 0

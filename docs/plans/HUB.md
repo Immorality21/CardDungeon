@@ -8,8 +8,9 @@ Campfire, materials, buildings and a staged unlock of the game — plus the gold
 
 ### 7. The hub becomes a place — buildings, materials, and a staged unlock of the game
 
-> **Status: phases 1-3 shipped 2026-09-05; phases 4-7 not started** (outlined 2026-09-01,
-> extended 2026-09-04). The phases below are ordered so the game is playable after every one; the open
+> **Status: phases 1-4 shipped 2026-09-05; phases 5-7 not started** (outlined 2026-09-01,
+> extended 2026-09-04). **Phase 6's open question — what a building *level* grants — is the next
+> decision, and is deliberately unanswered.** The phases below are ordered so the game is playable after every one; the open
 > questions at the end decide data shapes that are painful to change later.
 >
 > **2026-09-04 — confirmed and extended.** The whiteboard session endorsed this section as written
@@ -23,11 +24,20 @@ Campfire, materials, buildings and a staged unlock of the game — plus the gold
 >
 > **2026-09-05 — phases 2 and 3, plus a scene split.** `BuildingSO`/`HubSO`/`BuildingOps` +
 > `MetaProgressSaveData.Buildings` + 23 tests landed, and the town replaced the ten-button home
-> screen. **Every lot ships built** — `BuildingOps.EverythingIsPlaced` is the one constant phase 4
-> flips, and both `StateOf` and `LevelOf` take an overload with it passed in so the gated
-> behaviour is already under test. Two things were added that this section did not plan: the hub
+> screen. **Every lot shipped built** at this point, behind a single constant, with the gated path
+> already under test — phase 4 removed that constant the same day. Two things were added that this section did not plan: the hub
 > is its **own scene** (see open question 5, now overturned) and the **tavern retired** with it.
 > Open questions 3, 4 and 6 are settled below. See `Assets/Scripts/Hub/CLAUDE.md`.
+>
+> **2026-09-05 — phase 4, and the town gets painted.** The gates are on: a lot is Absent until its
+> `RequiredRunKeys` clear, then Available with a material price, then Built. Placement spends
+> materials and an upgrade spends gold, exactly as machinery piece 2 proposed. `BuildingSO` grew a
+> **second rectangle** the outline did not anticipate — a draw rect separate from the hit box — so
+> silhouettes can overlap while hit-testing stays rectangular, and `HubView` renders backdrop /
+> sprites / buttons as three layers. Placeholder art ships (`tools/hub-art/`), the phase-in is the
+> USS transition this section specified, and the build is confirmed in the hub as required.
+> **What a level *grants* is not decided** — every lot is `MaxLevel 1`, so nothing is on sale that
+> buys nothing; `HubState.LevelOf` is the seam waiting for phase 6.
 
 **The vision.** The main menu stops being a menu and becomes **the hub** — a static, authored 2D
 layout the player looks at, not a column of buttons. You start with a **campfire and four spots
@@ -137,9 +147,9 @@ early-game contract, not a whole-game one.**
 | 1 | ✅ **Materials drop** *(2026-09-05)* | `ItemCategory.Material`, ten authored materials, per-enemy `LootTable` **and** per-level `MaterialTable`, Bestiary shows them a row at a time, hub Materials tab, `MaterialYieldModel` + two reachability findings | Pure addition; drop rates measurable before anything depends on them |
 | 2 | ✅ **Buildings exist, nothing is locked** *(2026-09-05)* | `BuildingSO`/`HubSO`/`BuildingOps` + `MetaProgressSaveData.Buildings` + `BuildingOpsTests`/`HubContentTests`, **every building pre-built at level 1** | The data model lands under test while the game plays exactly as today |
 | 3 | ✅ **The hub replaces home** *(2026-09-05)* | `HubView` + `HubPresenter` in a new **HubScene**; the ten buttons became six lots plus a road; flat placeholder lots, no art needed | Migration risk isolated from gating risk; placeholder art was enough |
-| 4 | **Turn the gates on** | Campfire only at start; author the first-run unlock sequence | The actual design work, against a hub that already renders |
+| 4 | ✅ **Turn the gates on** *(2026-09-05)* | `RequiredRunKeys` + `PlacementCost` live; campfire **and storehouse** free, Sphere Hall/Bestiary/Merchant offered at once, **only the Forge** behind the tutorial; prices set against the phase-1 yield table | The actual design work, against a hub that already renders |
 | 5 | **Grid gates + frontier axis** | `RequiredBuildingKey`, hub state through `SphereGridOps`, `InvestmentFrontier` | Needs 4 authored before it can be tuned |
-| 6 | **Upgrades** | Building levels change what a screen *offers* and what it looks like | The long tail; each level is a content dial, not new plumbing |
+| 6 | **Upgrades** — *the plumbing is in; the design is not* | The build/upgrade flow, the gold price, the level record and the sprite swap all work and are tested. **What a level grants is undecided**: every lot ships `MaxLevel 1` so no level is on sale that buys nothing. `HubState.LevelOf(service)` is the seam a screen reads. | The long tail; each level is a content dial, not new plumbing — and the dial is the part still to author |
 | 7 | **Crafting** | Materials spend into items, not only into buildings and nodes | *(2026-09-04)* Deliberately last. Crafting is a **second drain** on the same drops; a sink is only tunable once the taps (drop rates, phase 1) and the first drain (buildings and grid nodes) are measured. Building it early makes both of those unmeasurable |
 
 #### Open questions — settle these before Phase 2
@@ -168,10 +178,11 @@ early-game contract, not a whole-game one.**
    read) and everything else lives in `HubScene`. The cost was one extra `LoadScene` and repointing
    the two dungeon exits; nothing is `DontDestroyOnLoad` but `MusicPlayer`, so the transition is
    cheap by construction.
-6. **What happens to the Bestiary and Inventory?** They are *knowledge* and *your own bag* rather
-   than services someone provides — plausibly never gated. **Partly settled 2026-09-05:** both are
-   lots (`bestiary`, `storehouse`) so the town reads as one place, but whether either ever gets a
-   `PlacementCost` is still a phase 4 decision. Being a lot does not commit them to being gated.
+6. ~~**What happens to the Bestiary and Inventory?**~~ **Settled 2026-09-05, and they split.** Both
+   are lots so the town reads as one place, but the **Inventory is `PlacedByDefault`** — it is the
+   player's own bag, and gating it means the loot from run one cannot be equipped. The **Bestiary
+   is priced** (4 Scrap Iron, offered from the start): knowledge is a service someone keeps, and it
+   makes a good first thing to ever build.
 7. **What is the placeholder art plan?** The town is the first part of this game that cannot ship on
    flat-colour UITK panels. Recommendation: author the sprite fields on `BuildingSO` from Phase 2 and
    fill them with flat silhouettes so Phases 3–5 are playable before any real art exists. Decide the

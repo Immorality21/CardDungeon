@@ -1489,6 +1489,41 @@
     -unity-background-scale-mode: scale-and-crop;
 }
 
+/* One building's sprite. Its own layer beneath the hit boxes, so silhouettes may overlap
+   each other and spill past the box you click - which is what makes a town look painted
+   rather than tiled. Never picks: input belongs to .hub-lot above it. */
+.hub-art {
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: opacity, scale;
+    transition-duration: 0.28s, 0.28s;
+    transition-timing-function: ease-out, ease-out;
+}
+
+/* An unbuilt lot's foundation still has to be seen - it is the affordance that makes a
+   material worth wanting, so it is dimmed only enough to read as unfinished. */
+.hub-art.hub-lot--available {
+    opacity: 0.92;
+}
+
+.hub-art.hub-lot--absent {
+    opacity: 0.28;
+}
+
+/* Nothing authored yet: draw no ghost box, let the flat .hub-lot slab do the work. */
+.hub-art--empty {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* The build animation, and it works the way round you might not expect: this is the
+   STARTING state. HubView adds it, lets a frame lay out, then removes it - the sprite
+   then transitions from here back to its resting opacity and scale. Done the other way
+   (a class that sets the end state) nothing moves, because the end state is the default
+   and a USS transition only runs on a change. */
+.hub-art--phasing {
+    opacity: 0;
+    scale: 0.82 0.82;
+}
+
 .hub-lot {
     background-color: var(--cd-stone);
     border-width: 2px;
@@ -1498,7 +1533,7 @@
     margin: 0;
     color: var(--cd-text-light);
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     -unity-background-scale-mode: scale-to-fit;
 }
 
@@ -1524,6 +1559,9 @@
     color: var(--cd-text-light);
     -unity-text-align: middle-center;
     white-space: normal;
+    background-color: rgba(9, 5, 18, 0.8);
+    padding: 0 6px;
+    border-radius: 3px;
 }
 
 .hub-lot__note {
@@ -1531,6 +1569,9 @@
     color: var(--cd-gold);
     -unity-text-align: middle-center;
     white-space: normal;
+    background-color: rgba(9, 5, 18, 0.8);
+    padding: 0 5px;
+    border-radius: 3px;
 }
 
 /* Built is the ordinary state. Available is a bare foundation — it has to read
