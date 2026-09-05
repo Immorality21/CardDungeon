@@ -53,8 +53,8 @@ namespace Tests.EditMode
 
         /// <summary>
         /// Gold folds into the same cost as the other two axes, at
-        /// <c>InvestmentPointsPerGold</c>. The rate is measured, not read off a price tag: the tavern
-        /// and the merchant say what things *cost*, and the frontier needs what they are *worth*.
+        /// <c>InvestmentPointsPerGold</c>. The rate is measured, not read off a price tag: the
+        /// merchant says what things *cost*, and the frontier needs what they are *worth*.
         /// See <c>docs/BALANCING.md</c> §5q.
         /// </summary>
         [Test]

@@ -44,7 +44,7 @@ namespace Assets.Scripts.Balance
 
         /// <summary>
         /// Every hero the player can end up fielding, in <c>PartyRosterSO.Heroes</c> order — the
-        /// starting lineup plus everyone recruitable at the tavern.
+        /// starting lineup plus everyone still to be unlocked.
         ///
         /// <para>This is not the same list as <see cref="AllHeroes"/> conceptually, even where the
         /// project makes them equal: recruiting is a <b>gold purchase</b>, which makes party width an
@@ -2009,7 +2009,7 @@ namespace Assets.Scripts.Balance
         /// whole sphere grid bought. A spawn gate above this is unreachable by construction, which is
         /// an authoring error; a gate the *modelled* run path never reaches is a much weaker claim,
         /// because the model grows a roster only through <c>RunLevelEntry.RescueHero</c> and cannot
-        /// see a hero bought at the tavern.
+        /// see a hero acquired any other way.
         /// </summary>
         private static StatBlock ProjectStatCeiling(BalanceInput input)
         {
@@ -2081,11 +2081,11 @@ namespace Assets.Scripts.Balance
                     {
                         Asset = definition,
                         Detail = $"Needs {string.Join(" + ", parts)}. A hero in the project reaches it, but the "
-                               + "run curves only grow a roster through RunLevelEntry.RescueHero - a hero "
-                               + "bought at the tavern is invisible to the model - so this may be a modelling "
-                               + "gap rather than unreachable content.",
-                        Suggestion = "If the stat is meant to come from a tavern recruit, this is working as "
-                                   + "designed; if not, the gate never opens on the rescue-only path."
+                               + "run curves only grow a roster through RunLevelEntry.RescueHero - a hero the "
+                               + "player unlocks any other way is invisible to the model - so this may be a "
+                               + "modelling gap rather than unreachable content.",
+                        Suggestion = "If the stat is meant to come from a hero the player unlocks later, this "
+                                   + "is working as designed; if not, the gate never opens on the rescue-only path."
                     });
                 }
             }
@@ -2966,10 +2966,19 @@ namespace Assets.Scripts.Balance
                     }
                 }
 
-                // Then everyone still recruitable, up to the widest party the game can field. A
-                // tavern hero is bought with gold exactly as a party slot is, so leaving them out
-                // would hide half the width axis - and with it the endgame's "buy another body"
-                // route, which is the alternative that keeps a deep tier from being a checklist.
+                // Then everyone still unowned, up to the widest party the game can field. Leaving
+                // them out would hide half the width axis - and with it the endgame's "bring
+                // another body" route, the alternative that keeps a deep tier from being a
+                // checklist.
+                //
+                // NOTE (2026-09-05): this used to be justified by the tavern - a hero was bought
+                // with gold exactly as a party slot is, so it belonged inside the same currency.
+                // With the tavern retired a hero is a progression *unlock*: a hard precondition
+                // on the frontier rather than a currency inside it (SPECIALIZATION.md section 5b,
+                // item 5). The behaviour is left as-is deliberately - balance work is paused
+                // until the specialization refactor lands - but this is the assumption to revisit
+                // when it resumes, because the model now assumes a roster the player may not be
+                // able to reach at that tier.
                 if (input.Roster != null)
                 {
                     foreach (var hero in input.Roster)

@@ -12,8 +12,8 @@ namespace Assets.Scripts.Heroes
     /// Being in <see cref="Heroes"/> means a hero *exists*, not that the player has them. Ownership
     /// lives in the save and is read through <see cref="HeroRoster"/>: a run begins with
     /// <see cref="StartingHeroes"/> and grows by rescuing captives mid-dungeon or recruiting at the
-    /// tavern. Anything in the catalog but not owned is the tavern's recruitment pool, so adding a
-    /// hero here is all it takes to put them up for hire.
+    /// progression. Anything in the catalog but not owned is still to be unlocked, so adding a
+    /// hero here is all it takes to put them in the game.
     /// </summary>
     [CreateAssetMenu(menuName = "SO/Party Roster")]
     public class PartyRosterSO : ScriptableObject

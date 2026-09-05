@@ -1,71 +1,62 @@
-# Main Menu & Hub UI (`MainMenu`)
+# Title screen (`MainMenu`)
 
-`MainMenuManager` and `MerchantUI` live here (global namespace / `Assets.Scripts.MainMenu`). The magic Forge (`MagicForgeUI`) lives under `Cards/UI` but is driven from here.
+`MainMenuManager` (global namespace) and `AudioOptionsUI` (`Assets.Scripts.MainMenu`). That is the
+whole folder.
 
-## Flow
+**Everything else moved to `Assets/Scripts/Hub/` on 2026-09-05** — read
+[the Hub guide](../Hub/CLAUDE.md) for the town, the run flow, the panels and the keyboard rules. This
+file covers only what is left in `MenuScene`.
 
-- **Run-based flow:** Home (The Story / Continue Run / Visit Merchant / The Tavern / Magic Forge / Inventory / Party) → Run Progress (level info + the fielded lineup + Change Party + Enter Dungeon) → game scene → level complete → back to menu. Run Complete shown after the final level. (Magic is learned on the sphere grid and the kit is chosen on the Inventory screen's **Spells** tab — see the Magic guide.)
-- `MainMenuManager` loads `RunSaveData` to determine state (active run, current level, run complete) and shows a Gold/Essence header on the home view.
-- **The home button never gates on run completion while a campaign exists.** `new-btn` is now "The Story" and simply opens the map; per-node startability is `CampaignOps`' decision. The old gate (hide the button when the single serialized run is completed and non-repeatable) survives **only** on the no-campaign fallback path, where the one offerable run really is the one-shot tutorial. Leaving that gate on the campaign path is what once left a save that had cleared the tutorial with no way into any dungeon at all — `CampaignAssetTests.Campaign_NeverStrandsASaveWithNothingToPlay` walks the graph one clear at a time and asserts `CampaignOps.HasSomethingToPlay` never goes false.
-- **Home is `cd-window--tall` (88%), not the shared 62% cap.** Ten stacked menu buttons plus the purse do not fit in 62%; the flex layout squeezed the last child to **zero height** and Gold/Essence rendered outside the frame. `.cd-currency-row` is `flex-shrink: 0` so the purse is never the row that gives way. **Measured 2026-09-01** (play mode, `ScaleWithScreenSize` off a 1920×1080 reference): home is **799.5** units tall against the 88% cap of **884.4** — ~85 units of headroom, i.e. **one more button**. Past that, raise the cap or start folding screens into `§7`'s hub. (The cap cannot go much past 88% either: `.cd-window` also carries `margin-bottom: 8%`, so 92% would put the frame against the top edge.)
-- **Which run plays is resolved from the campaign, not from a serialized reference.** `MainMenuManager` loads `CampaignSO` from Resources and looks the active run up by the key in `Run.json` (`ActiveRunDefinition()`), so the progress screen and `OnEnterDungeon` follow whichever branch the player chose. The `_runDefinition` serialized field is now only a **fallback** for a scene with no campaign authored — the old `guids[0]` pick in the bootstrap was already arbitrary the moment a second run existed.
+## What this scene is for
 
-## UI Toolkit (important — this is how all game UI works now)
+```
+[ Continue ]  -> SceneManager.LoadScene("HubScene")
+[ Options  ]  -> options-view (AudioOptionsUI)
+[ Quit     ]
+```
 
-All UI is **UI Toolkit** (UXML + USS), not uGUI. The pattern, used identically by every screen:
+**It reads no save file, and that is the point.** MenuScene is build index 0 — the landing scene —
+and it is deliberately dependency-free: no managers, no catalogs, no `Run.json`. That is what makes
+room for the **save-slot picker** it is meant to grow, because a picker cannot share a document with
+screens that read the save it has not chosen yet. With one slot today, **Continue *is* that choice**:
+pressing it opens the save file and walks into town.
 
-- A **UXML** file defines the view tree (`Assets/UI/MainMenu/MainMenu.uxml` here; also `Assets/UI/Combat/MagicSelection.uxml`, `Assets/UI/Rooms/RoomAction.uxml`).
-- A shared **theme stylesheet** `Assets/UI/Theme/CardDungeon.uss` styles everything (flat-color, flexbox — colors are custom properties at the top; change them once and every screen updates). Each UXML links it via a `<Style src=…>`.
-- A **controller MonoBehaviour** on a `UIDocument` queries elements by name (`root.Q<Button>("new-btn")`), registers `clicked` callbacks, and toggles views via `style.display`. Dynamic lists (magic slots, forge rows, targets) are built as `VisualElement`s in code — no prefabs.
-- An **editor bootstrap** (menu: **Tools → MainMenu → Setup Main Menu UI**) creates the shared `PanelSettings` asset (`Assets/UI/CardDungeonPanelSettings.asset`, sorting order 100 so UITK renders above any world/uGUI), drops a `UIDocument` into the open scene wired to the UXML, and wires the controller's serialized refs. Re-run after editing structure, then save the scene. The combat scene has its own bootstraps (**Tools → Rooms → Setup Room Action UI**, **Tools → Cards → Setup Magic Selection UI**).
+The scene holds three GameObjects — `Main Camera`, `EventSystem`, `MainMenuUITK`. The
+`MetaProgressManager`, `MagicCatalog`, `MagicComboCatalog` and `PartyResourceManager` instances that
+used to sit here left with the screens that needed them.
 
-`MainMenuManager` owns one `UIDocument` holding all twelve views (home / **campaign** (the story map) / progress / complete / merchant / tavern / party / **grid** (sphere grid) / forge / **bestiary** / inventory / **options**) and toggles them.
-
-## Keyboard navigation
-
-Every hub screen is reachable without the mouse. `MainMenuManager` owns **one**
-`ImmoralityGaming.Menu.KeyboardNavigator` on the document root (`SetUpKeyboardNavigation`), and it
-navigates *whatever buttons are currently visible* rather than a list wired per screen — which works
-because only one view is displayed at a time. Arrows move (spatially, falling back to document order
-for up/down so a plain column wraps), Tab steps, Enter/Space presses, Escape backs out.
-
-- **There is no cursor until the first arrow key.** A highlight painted the moment a screen opens
-  would sit on a mouse player's screen forever, and it also sidesteps the question of whether layout
-  has run yet — by the time a key is pressed, it has.
-- **`NavigatesCurrentView()` is the gate**, and it deliberately excludes the campaign map, the sphere
-  grid, the bestiary and the inventory. Those build their own cursors, and they are children of this
-  same root — without the gate a key they chose not to handle would bubble up here and be acted on
-  twice.
-- **Escape presses the screen's own Back button** (`CancelButtonForCurrentView`) rather than calling
-  the panel's `Hide` — the panels raise `OnClosed` from there and this class depends on that to get
-  home again. The forge stacks an inspect page over its grid, so Escape backs out one layer at a time.
-- **`PanelKeyboard.Claim()` runs every frame from `Update`.** A UITK panel receives the OS keyboard
-  only while its `PanelEventHandler` is the EventSystem's *selected* GameObject; clicking a UITK
-  element selects it as a side effect, which is why the hub appeared not to need this, and clicking
-  the background clears it again, which is why it did. See gotcha 15 in `docs/GAMEPLAY_VALIDATION.md`.
-- **Every panel switch calls `ResetKeyboardNavigation()`**: the cursor pointed at a button on the
-  screen that just went away, and focus may have been taken by a panel that focuses its own subtree.
-- Screens with their own cursors: **CampaignMapUI** and **SphereGridUI** walk their node graphs with
-  the arrows (`SphereGridView.NodeInDirection` + `EnsureNodeVisible` — the widget answers the
-  "which node is that way" question because it is what holds the geometry, and it pans to keep the
-  cursor on screen since a keyboard player cannot drag the graph back), Enter starts the run /
-  activates the node; **BestiaryUI** walks its list with up/down (moving the cursor reads the entry —
-  there is nothing to confirm, so a separate Enter would do nothing); **InventoryHubUI** was already
-  keyboard-driven.
-- The highlight class is `cd-nav--selected`, defined **last** in `CardDungeon.uss` on purpose: every
-  button class there is a single-class selector of equal specificity, so source order is what makes
-  the cursor win over the button's own background. Its border width matches theirs (2px) so
-  highlighting never nudges a layout.
+**The game does not come back here on its own.** Both ways out of a dungeon load HubScene, so the
+loop is hub → dungeon → hub; the only routes to this screen are launching the game and the town's
+deliberate **Main Menu** button.
 
 ## Panels
 
-- **MerchantUI** / **MagicForgeUI** are **plain view-controllers** (not MonoBehaviours): each takes the `VisualElement` subtree for its view, queries its controls, and exposes `Show()`/`Hide()` + an `OnClosed` event. `MainMenuManager` constructs them from the queried `merchant-view` / `forge-view` subtrees.
-  - **CampaignMapUI** — the story map, and the only way to start a run. Draws `CampaignSO` as a node graph: cleared runs behind you, open ones ahead, locked ones greyed with a "Requires ..." line, secret branches absent entirely until they unlock. All progression decisions come from `CampaignOps`; all styling from `CampaignPresenter`. It does **not** write `Run.json` — it raises `OnRunChosen` and the manager does, so there is still exactly one writer. Reuses `SphereGridView` as the renderer with its own `cm-node--*` state classes (the widget's `StateClassNames` / `EdgeStrongStateClass` / `EdgeOpenStateClass` were made settable for this, so the two graphs cannot clear each other's state). Like the sphere grid it is `cd-window--fixed cd-window--wide` — the pannable graph must never resize the dock-centered window (the hit-test trap). No new serialized ref (the campaign comes from Resources), so the setup bootstrap does **not** need re-running — but the UXML gained `campaign-view` and its `campaign-*` children and `new-btn` was relabelled "The Story", so an older scene simply won't show the screen until the UXML is picked up.
-  - **MerchantUI** — Gold sink (enlarge potion belt = the healing-potion carry cap). See the Progression guide.
-  - **InventoryHubUI** (`Items/UI/InventoryHubUI.cs`) — the between-runs gear screen (equipment is managed **only** here now; the old in-dungeon `InventoryUI` is retired). Equipment / Consumables tabs; a hero selector listing **only owned heroes** (via `HeroRoster`, cached per `Show()`), equip keyed by `HeroSO.SaveKey`; click-to-equip un-equipped gear, click-to-unequip a slot; a base+bonus stat preview. Reads the roster from a `PartyRosterSO` (the hub has no live `Party`) and all item state from `InventoryManager` (scene-independent via the Resources `ItemCatalog`). Wired in `MainMenuManager` exactly like the Merchant/Forge; `_partyRoster` is wired by the setup bootstrap (`AssetDatabase.FindAssets("t:PartyRosterSO")`).
-  - **TavernUI** — the Gold sink for **roster growth**: a rotating, persisted, paid-restock offer of heroes the player does not own yet (`MetaProgressSaveData.TavernStock`, same no-free-rerolls rule as the merchant's `ShopStock`). Stock is drawn from `HeroRoster.GetRecruitable` — the catalog minus what you own — so a hero rescued in a dungeon silently drops out of the offer. Priced by `ShopPricing.RecruitPrice` (`HeroSO.RecruitCost`, or derived from the stat line when unset). Constructed in `MainMenuManager` from the `tavern-view` subtree with the same `_partyRoster` the inventory uses; no new serialized ref, so the setup bootstrap does **not** need re-running for it.
-  - **SphereGridUI** (`Heroes/UI/SphereGridUI.cs`) — the sphere-grid screen: per-hero tabs, banked-XP line, the shared `SphereGridView` graph (pan/zoom, click a node), a detail panel and an Activate button that spends the bank through `HeroRoster.TryActivateNode`. Constructed from the `grid-view` subtree with the same `_partyRoster`, so the bootstrap does **not** need re-running — but the UXML gained `grid-view` and `grid-btn`, so an older scene simply won't show it until the UXML is picked up. The view is `cd-window--fixed cd-window--wide`: the pannable graph and the always-present detail panel must never resize the dock-centered window (the hit-test trap). Q/E cycles heroes, the arrows walk the node graph and Enter activates, Esc closes.
-  - **PartySelectUI** — which of the owned heroes actually march out. Writes `PartySaveData.SelectedHeroKeys` through `HeroRoster.SetSelectedKeys`; `DungeonManager.FieldedHeroes()` reads it. Two lists (*Marching out* / *Staying behind*) with a Field/Bench button per row, a minimum of one hero, and the party cap from `MetaProgressManager.GetPartyCap()`. It also **sells the next party slot for Gold** (`TryBuyPartySlot`, `PartySlots`) — the price of going wider sits next to the reason not to, since the screen states the XP share (`Each hero earns N% of every kill's XP`) as the standing cost of width. Reachable from **home** and from the **run-progress screen** next to *Enter Dungeon*, which is when the choice actually matters; `MainMenuManager._partyOpenedFromProgress` sends Back where the player came from. Constructed from the `party-view` subtree with the same `_partyRoster`, so the setup bootstrap does **not** need re-running — but the UXML gained `party-view`, `party-btn`, `progress-party` and `progress-party-btn`, so an older scene will simply not show the screen until the UXML is picked up.
-  - **BestiaryUI** (`Enemies/UI/BestiaryUI.cs`) — the enemy knowledge collection, reachable from home. A left list of **every** enemy in `Resources/EnemyCatalog.asset` (unmet ones listed but nameless, so the collection has a visible shape) with an "N of M discovered" header, and a right detail column. All wording and colour come from `BestiaryPresenter`/`BestiaryLineView`, which the in-combat Inspect page uses too — see the Enemies guide. Constructed from the `bestiary-view` subtree with no new serialized ref, so the setup bootstrap does **not** need re-running; but the UXML gained `bestiary-view` and `bestiary-btn`, so an older scene simply won't show the screen until the UXML is picked up. `cd-window--fixed` for the usual reason: the detail column changes size as enemies are selected, and a resizing translate-centered window desyncs UITK's hit-testing from the render.
-  - **AudioOptionsUI** (`MainMenu/AudioOptionsUI.cs`) — the **Options** screen, reachable from home. Master / Music / Sound Effects plus a mute toggle, written straight through `AudioOptions` so every change is applied and saved to `savedata/Audio.json` before the player leaves the screen. **Each dial is a pair of stepped buttons around a readout, not a UITK `Slider`** — the hub's keyboard cursor navigates *buttons*, so a slider would be a hole in a screen that is meant to be reachable without a mouse, and left/right on the cursor already reads as "nudge this dial". Nudging Master or SFX plays the cursor blip, so you hear what you just set. Constructed from the `options-view` subtree with no new serialized ref, so the setup bootstrap does **not** need re-running — but the UXML gained `options-view`, its `*-value`/`*-up`/`*-down` children and `options-btn`, so an older scene simply won't show the screen until the UXML is picked up. Styling: `.cd-option-row` / `.cd-option-label` / `.cd-option-value` / `.cd-button--step`. See `Assets/Scripts/Audio/CLAUDE.md` for what the dials actually scale — and note there is **no in-dungeon pause menu**, so this is the only place volume can be changed today.
-  - **MagicForgeUI** — Essence sink + collection grid with All Magic / Combos tabs and click-to-inspect/upgrade; `?` for undiscovered. **Requires a `MagicCatalog` in the scene** (and a `MagicComboCatalog` for the Combos tab) or it logs a warning / shows empty. See the Progression guide.
+- **AudioOptionsUI** — the **Options** screen. Master / Music / Sound Effects plus a mute toggle,
+  written straight through the static `AudioOptions` so every change is applied and saved to
+  `savedata/Audio.json` before the player leaves the screen. It depends on nothing else, which is why
+  it could stay behind when the rest of the hub moved.
+
+  **Each dial is a pair of stepped buttons around a readout, not a UITK `Slider`** — the keyboard
+  cursor navigates *buttons*, so a slider would be a hole in a screen meant to be reachable without a
+  mouse, and left/right on the cursor already reads as "nudge this dial". Nudging Master or SFX plays
+  the cursor blip, so you hear what you just set. Styling: `.cd-option-row` / `.cd-option-label` /
+  `.cd-option-value` / `.cd-button--step`. See `Assets/Scripts/Audio/CLAUDE.md` for what the dials
+  actually scale.
+
+  **This is still the only place volume can be changed** — there is no in-dungeon pause menu, and
+  Options did not follow the other screens into the hub. Reaching it from the town is two clicks
+  (Main Menu → Options). If that proves annoying, duplicating `options-view` into `Hub.uxml` is ~25
+  lines of UXML and one extra `AudioOptionsUI` construction, precisely because it has no
+  dependencies.
+
+## Setup
+
+**Tools → MainMenu → Setup Main Menu UI** creates the shared `PanelSettings`
+(`Assets/UI/CardDungeonPanelSettings.asset`, sorting order 100 so UITK renders above any world/uGUI),
+drops a `UIDocument` into the open scene wired to `Assets/UI/MainMenu/MainMenu.uxml`, and wires the
+controller's serialized refs. It now wires **only `_document`** — `_runDefinition` and `_partyRoster`
+went to `HubUISetup` with the screens that used them. Re-run after editing structure, then save the
+scene.
+
+`MusicPlayer.Play(MusicTrack.Hub)` runs here as well as in the hub. Requesting the track already
+playing is a no-op, so the walk from title screen into town is seamless and costs nothing.

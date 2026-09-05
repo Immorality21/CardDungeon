@@ -3,7 +3,7 @@ using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes.UI;
 using UnityEngine;
 
-namespace Assets.Scripts.MainMenu
+namespace Assets.Scripts.Hub
 {
     /// <summary>
     /// Turns campaign state into things a graph view can draw: a USS class per node, a glyph, a

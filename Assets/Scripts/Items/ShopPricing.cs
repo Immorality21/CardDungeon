@@ -39,35 +39,6 @@ namespace Assets.Scripts.Items
         }
 
         /// <summary>
-        /// Gold the tavern charges for <paramref name="hero"/>. Uses the authored
-        /// <c>HeroSO.RecruitCost</c> when set; otherwise derives one from the stat line so a hero
-        /// added to the catalog is immediately hireable without also needing a price. The weights
-        /// mirror the balance model's view that a point of Attack or Agility is worth more than a
-        /// point of HP.
-        /// </summary>
-        public static int RecruitPrice(Assets.Scripts.Heroes.HeroSO hero)
-        {
-            if (hero == null)
-            {
-                return 0;
-            }
-            if (hero.RecruitCost > 0)
-            {
-                return hero.RecruitCost;
-            }
-
-            // Weights come from StatCatalog, so a stat added to the enum is priced by its own row
-            // rather than being silently worth nothing here - which is how Intelligence, Spirit and
-            // Luck ended up contributing zero to a caster's price.
-            float score = 0f;
-            foreach (var stat in StatCatalog.Types)
-            {
-                score += hero.BaseStats[stat] * StatCatalog.Of(stat).RecruitWeight;
-            }
-            return Mathf.Max(25, Mathf.RoundToInt(score / 5f) * 5);
-        }
-
-        /// <summary>
         /// Base gold for a rarity, before <see cref="LevelStep"/> scales it by item level.
         ///
         /// <para><b>Raised ~10% on 2026-09-02</b>, from 20/45/90/180/350. Gear measured as roughly

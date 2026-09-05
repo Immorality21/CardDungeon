@@ -1,14 +1,17 @@
 using System.IO;
-using Assets.Scripts.Dungeon;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Bootstraps the UI Toolkit main menu: ensures the shared PanelSettings asset exists,
-/// then drops a UIDocument into the open MenuScene wired to MainMenu.uxml and the
-/// MainMenuManager controller (with its RunDefinition). Replaces any prior menu instance.
+/// Bootstraps the title screen: ensures the shared PanelSettings asset exists, then drops a
+/// UIDocument into the open MenuScene wired to MainMenu.uxml and the MainMenuManager controller.
+/// Replaces any prior menu instance.
+///
+/// <para>It wires <b>one</b> serialized ref now - the document. The run definition and the party
+/// roster went to <c>HubUISetup</c> with the screens that needed them, which is the whole point of
+/// the split: this scene can be shown before a save file is chosen.</para>
 /// </summary>
 public class MainMenuUISetup : Editor
 {
@@ -33,21 +36,6 @@ public class MainMenuUISetup : Editor
             return;
         }
 
-        RunDefinitionSO runDef = null;
-        var runDefGuids = AssetDatabase.FindAssets("t:RunDefinitionSO");
-        if (runDefGuids.Length > 0)
-        {
-            runDef = AssetDatabase.LoadAssetAtPath<RunDefinitionSO>(AssetDatabase.GUIDToAssetPath(runDefGuids[0]));
-        }
-
-        Assets.Scripts.Heroes.PartyRosterSO partyRoster = null;
-        var rosterGuids = AssetDatabase.FindAssets("t:PartyRosterSO");
-        if (rosterGuids.Length > 0)
-        {
-            partyRoster = AssetDatabase.LoadAssetAtPath<Assets.Scripts.Heroes.PartyRosterSO>(
-                AssetDatabase.GUIDToAssetPath(rosterGuids[0]));
-        }
-
         // Remove the prior menu (old uGUI canvas hosting MainMenuManager, or a previous bootstrap).
         var existing = Object.FindAnyObjectByType<MainMenuManager>(FindObjectsInactive.Include);
         if (existing != null)
@@ -65,20 +53,12 @@ public class MainMenuUISetup : Editor
         var manager = go.AddComponent<MainMenuManager>();
         var so = new SerializedObject(manager);
         so.FindProperty("_document").objectReferenceValue = doc;
-        if (runDef != null)
-        {
-            so.FindProperty("_runDefinition").objectReferenceValue = runDef;
-        }
-        if (partyRoster != null)
-        {
-            so.FindProperty("_partyRoster").objectReferenceValue = partyRoster;
-        }
         so.ApplyModifiedProperties();
 
         EditorUtility.SetDirty(go);
         EditorSceneManager.MarkSceneDirty(go.scene);
 
-        Debug.Log("Main Menu (UI Toolkit) created in the open scene. Save the scene to persist.");
+        Debug.Log("Title screen (UI Toolkit) created in the open scene. Save the scene to persist.");
     }
 
     private static PanelSettings EnsurePanelSettings()

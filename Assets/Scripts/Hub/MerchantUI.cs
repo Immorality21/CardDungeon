@@ -7,7 +7,7 @@ using Assets.Scripts.Resources;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Assets.Scripts.MainMenu
+namespace Assets.Scripts.Hub
 {
     /// <summary>
     /// Hub merchant (UI Toolkit view-controller). A Gold sink: enlarge the potion belt, buy gear

@@ -284,7 +284,7 @@ namespace Tests.EditMode
         public void Campaign_LaidOutPositions_DoNotOverlap()
         {
             var campaign = LoadCampaign();
-            var positions = Assets.Scripts.MainMenu.CampaignPresenter.ResolvePositions(campaign);
+            var positions = Assets.Scripts.Hub.CampaignPresenter.ResolvePositions(campaign);
 
             var seen = new Dictionary<Vector2, string>();
             foreach (var pair in positions)

@@ -130,7 +130,7 @@ backlog.**
 |---|---|---|
 | **9b** | Magic moves onto the sphere grid — Draw is scrapped | ✅ **shipped** 2026-09-04; findings feed §4c |
 | **4c** | Specialization — the grid is where a hero becomes an archetype | grids ✅ **all seven authored** 2026-09-05; branch *readability* (item 5) still open |
-| **5b** | Heroes are unlocked, not bought — the tavern is removed | roster ✅ done 2026-09-05; **the tavern and the unlock record are what is left** |
+| **5b** | Heroes are unlocked, not bought — the tavern is removed | roster ✅ 2026-09-05, **tavern deleted** ✅ 2026-09-05; **the unlock record is what is left** |
 | **5** | Roster — open questions | open |
 | **4b** | Summons — the capability the deep grid pays out | spec; **shape and effects reopened** 2026-09-04 |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
@@ -149,7 +149,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **7** | Buildings, materials, and a staged unlock of the game | phase 1 (**materials drop**) ✅ 2026-09-05; **first sink** (a sphere-grid node) ✅ 2026-09-05; phases 2-7 open |
+| **7** | Buildings, materials, and a staged unlock of the game | phases 1-3 ✅ 2026-09-05 (materials, the building model, **the hub replaces home**); **phase 4 (turn the gates on) is next** |
 | **3** | Sharpen hub sinks | open |
 
 ### [Open balance work](plans/BALANCE_OPEN.md)
@@ -185,6 +185,21 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The hub becomes a place, and the menu splits in two** (2026-09-05) —
+  `docs/plans/HUB.md` §7 phases 2-3, plus §5b's tavern removal. **Three scenes now**: `MenuScene`
+  is a dependency-free title screen (Continue / Options / Quit, reads no save, room for the
+  save-slot picker), `HubScene` is the town, and the loop is **hub → dungeon → hub** — both ways
+  out of a run return to the hub, never to the menu. The ten-button home screen (which had
+  ~85 units of headroom left, i.e. one more button) became a **painted town**: `HubSO` +
+  `BuildingSO` + the pure `BuildingOps`, progress in `MetaProgressSaveData.Buildings`, rendered by
+  `HubView`/`HubPresenter` as one letterboxed 1280x720 canvas — six lots and a road, flat
+  placeholders, no art required. **Every lot ships built**: `BuildingOps.EverythingIsPlaced` is the
+  single constant phase 4 flips, and the gated path is already under test through an explicit
+  overload. The **story is not a building** (a lot must never be able to lock the player out of
+  running) and the **campfire** is the one lot placed by default. The **tavern is deleted** —
+  `TavernUI`, `TavernStock`, `ShopPricing.RecruitPrice`, `HeroSO.RecruitCost`,
+  `HeroRoster.RemoveOwned`; `GetRecruitable` became `GetUnownedHeroes`. Heroes come from rescue and
+  `StartingHeroes` until §5b's unlock record lands.
 - **Default-unlocked grid nodes, and the first thing materials buy** (2026-09-05) —
   `docs/plans/SPECIALIZATION.md` §4c, `docs/plans/HUB.md` §7. Two fields on `SphereGridNode`.
   `UnlockedByDefault` makes a node active from the moment the hero exists — the **Warrior starts

@@ -29,8 +29,10 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 
 - **Unity version:** 6000.5.8f1 (Unity 6; must match exactly)
 - **Solution file:** `Card Dungeon.sln` (Visual Studio or Rider)
-- **Menu scene:** `Assets/Scenes/MenuScene.unity`
+- **Title scene:** `Assets/Scenes/MenuScene.unity` (build index 0 — Continue / Options / Quit, reads no save)
+- **Hub scene:** `Assets/Scenes/HubScene.unity` (the town, and every screen between runs)
 - **Game scene:** `Assets/Scenes/MainGameScene.unity`
+- **The loop is** MenuScene → *(open the save file)* → **HubScene → MainGameScene → HubScene**. Both ways out of a dungeon return to the hub; nothing returns to MenuScene on its own.
 - **Target platform:** Windows 64-bit Standalone
 - No custom build scripts — use Unity Editor build pipeline or IDE compilation
 - **Tests:** Unity Test Framework (**1.7.0**) — EditMode tests in `Assets/Tests/EditMode/`. Run via Unity Test Runner (Window → General → Test Runner), or **headlessly through the Unity MCP** with `ExecutionSettings.runSynchronously = true` — see gotcha 12 in `docs/GAMEPLAY_VALIDATION.md` for a copy-paste harness. `dotnet test` cannot run these (no test SDK/adapter in the Unity csproj); use it only to compile-check.
@@ -61,7 +63,8 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 - `Resources/` — `PartyResourceManager`, `PartyResourceType`
 - `IO/` — `FileHandler`, `IWriteable`
 - `Progression/` — `MetaProgressManager` (persistent Gold/Essence + per-card upgrade levels), `MetaProgressSaveData`, `BestiaryEntry`/`BestiaryOps` (the permanent enemy-knowledge record)
-- `MainMenu/` — `MainMenuManager`, `MerchantUI`, `CampaignMapUI` (the story map / run selection); the Bestiary screen lives in `Enemies/UI` but is driven from here, like the Forge
+- `Hub/` — **the town between runs**: `HubManager` (the hub scene's controller), the building model (`HubSO` + `BuildingSO` + the pure `BuildingOps`), `UI/HubView` + `UI/HubPresenter` (the painted town), and the screens that hang off it — `MerchantUI`, `PartySelectUI` (the campfire), `CampaignMapUI` (the story map / run selection). The Forge, Bestiary, Inventory and Sphere Grid live with their subsystems but are driven from here
+- `MainMenu/` — the **title screen** only: `MainMenuManager` (Continue / Options / Quit) and `AudioOptionsUI`
 - `Balance/` — Balance analysis model (`BalanceRulesSO` targets, `BalanceMath`, `EncounterModel`, `RunCurveModel`, `RoomEventModel`, `VarietyAnalyzer`, `ProgressionMap`, `EncounterSimulator`, `GearLoadout`, `InvestmentFrontier`, `SaveAudit`, `BalanceAnalyzer`) + the `Tools ▸ Balance ▸ Balance Analyzer` editor window
 
 ### Subsystem Guides
@@ -77,7 +80,8 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Meta-progression / hub** (Gold, Essence, card upgrades) → `Assets/Scripts/Progression/CLAUDE.md`
 - **Hero & stats** → `Assets/Scripts/Heroes/CLAUDE.md`
 - **Enemies** → `Assets/Scripts/Enemies/CLAUDE.md`
-- **Main menu & hub UI** (incl. editor-driven UI setup) → `Assets/Scripts/MainMenu/CLAUDE.md`
+- **The hub** (the town, buildings, the run flow, every between-runs screen, keyboard rules) → `Assets/Scripts/Hub/CLAUDE.md`
+- **Title screen** (Continue / Options, and why it reads no save) → `Assets/Scripts/MainMenu/CLAUDE.md`
 - **Persistence / save files** → `Assets/Scripts/IO/CLAUDE.md`
 - **Balance analysis** (difficulty targets, danger index, attrition, the **investment frontier** — what each campaign tier demands and how many ways it can be paid, over party width, sphere-grid XP and gear — the sphere-grid magic/combo supply chain, the analyzer window) → `Assets/Scripts/Balance/CLAUDE.md`
 - **Balancing playbook** (how the levers interact, the measure-don't-guess workflow, what past tuning passes learned) → `docs/BALANCING.md` — read this *before* changing a `Difficulty`, a hero bar or a spawn table, and record what a pass learned there afterwards

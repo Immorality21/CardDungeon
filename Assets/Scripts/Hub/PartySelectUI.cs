@@ -6,7 +6,7 @@ using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Assets.Scripts.MainMenu
+namespace Assets.Scripts.Hub
 {
     /// <summary>
     /// Party select (UI Toolkit view-controller): which of the owned heroes actually march out.
@@ -20,7 +20,7 @@ namespace Assets.Scripts.MainMenu
     ///
     /// <para>The cap itself (<see cref="PartySlots"/>) is a Gold sink bought here, so the price of
     /// going wider is visible next to the reason not to. Operates on a VisualElement subtree owned by
-    /// the menu's UIDocument - not a MonoBehaviour, same as the merchant and the tavern.</para>
+    /// the menu's UIDocument - not a MonoBehaviour, same as the merchant.</para>
     /// </summary>
     public class PartySelectUI
     {
@@ -105,7 +105,7 @@ namespace Assets.Scripts.MainMenu
             var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, cap);
 
             // The screen sells a slot, so it has to show the purse — a price with no purse beside it
-            // is the merchant's and the tavern's mistake not to repeat.
+            // is the merchant's mistake not to repeat.
             if (_goldLabel != null)
             {
                 _goldLabel.text = $"Gold: {MetaProgressManager.Instance.Gold}";
@@ -190,7 +190,7 @@ namespace Assets.Scripts.MainMenu
             {
                 _benchList.Add(MakeEmptyLabel(owned.Count >= PartySlots.MaxCap
                     ? "Everyone you own is marching out."
-                    : "Nobody in reserve — the tavern is hiring."));
+                    : "Nobody in reserve — rescue a captive to grow the roster."));
             }
         }
 

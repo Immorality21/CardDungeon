@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a4519a3aa6b0c24cb7d26a9fff62bc2, type: 3}
+  m_Name: Hub
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.HubSO
+  DisplayName: Camp
+  ReferenceSize: {x: 1280, y: 720}
+  Backdrop: {fileID: 0}
+  Buildings:
+  - {fileID: 11400000, guid: 46d36611b76987e4992a9229428d457e, type: 2}
+  - {fileID: 11400000, guid: 414b75d33d3e803459329127c6704f01, type: 2}
+  - {fileID: 11400000, guid: 85814297997cda24ca59f5fd654e8093, type: 2}
+  - {fileID: 11400000, guid: 0b79b8fc86f3cd545886f4ad1c4946f8, type: 2}
+  - {fileID: 11400000, guid: 78d245d26cc1f5e4f89622c846ba11bd, type: 2}
+  - {fileID: 11400000, guid: a673f988ebe4582439972c1d6e851519, type: 2}

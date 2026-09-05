@@ -263,9 +263,10 @@ namespace Assets.Scripts.Balance
     {
         /// <summary>
         /// The investment a mix costs, in XP-per-hero units. Heroes inside the base cap are free,
-        /// and gold converts at <paramref name="goldPerInvestmentPoint"/> — 1:1 by default, because
-        /// the tavern prices a hero at 220-260 gold and <c>HeroXpEquivalent</c> prices the same hero
-        /// at 250, so the game's own numbers already equate them.
+        /// and gold converts at <paramref name="goldPerInvestmentPoint"/> — 1:1 by default. The
+        /// rate was set when the tavern priced a hero at 220-260 gold against <c>HeroXpEquivalent</c>
+        /// 250, so the game's own numbers equated them; gold no longer buys a hero (section 5b), so
+        /// the default is now an inherited calibration rather than a derived one.
         /// </summary>
         public static int CostOf(
             int partySize, int xpPerHero, int goldOnGear,

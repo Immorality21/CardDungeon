@@ -39,7 +39,7 @@ namespace Assets.Scripts.Dungeon
         /// <summary>
         /// The heroes that actually enter the dungeon: the party the player *selected* in the hub, not
         /// every hero they own and not every hero authored. A fresh save starts with
-        /// <c>PartyRosterSO.StartingHeroes</c>, grows by rescuing captives or recruiting at the tavern,
+        /// <c>PartyRosterSO.StartingHeroes</c> and grows by rescuing captives,
         /// and is narrowed to a fielded lineup of at most <c>MetaProgressManager.GetPartyCap()</c> by
         /// the party-select screen. Falls back to the inline definitions when no roster is wired
         /// (free-play in the scene).
@@ -626,7 +626,7 @@ namespace Assets.Scripts.Dungeon
                 return;
             }
 
-            // Already recruited (rescued before, or bought at the tavern) - nothing to find.
+            // Already owned (a starting hero, or rescued on an earlier level) - nothing to find.
             if (_partyRoster != null && HeroRoster.Owns(_partyRoster, captive))
             {
                 return;
@@ -1115,11 +1115,13 @@ namespace Assets.Scripts.Dungeon
                     MetaProgressManager.Instance.MarkRunCompleted(runSave.RunKey);
                     _fileHandler.Delete(runSave);
                     ActiveRun = null;
-                    MainMenuManager.MarkRunCompleted();
+                    Assets.Scripts.Hub.HubManager.MarkRunCompleted();
                 }
             }
 
-            SceneManager.LoadScene("MenuScene");
+            // Back to the hub, never to the title screen: the loop is hub -> dungeon -> hub, and
+            // MenuScene is only where a save file is chosen.
+            SceneManager.LoadScene("HubScene");
         }
 
         public void HandlePartyDeath()

@@ -1721,7 +1721,9 @@ namespace Assets.Scripts.Rooms
                 {
                     DungeonManager.Instance.HandlePartyDeath();
                 }
-                SceneManager.LoadScene("MenuScene");
+                // A wipe returns to the hub like any other way out of a run - death costs the
+                // floor's gains, not your place in the game.
+                SceneManager.LoadScene("HubScene");
             };
             SetShown(_detailWindow, true);
         }

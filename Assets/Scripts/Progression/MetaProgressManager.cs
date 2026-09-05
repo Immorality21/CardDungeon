@@ -483,6 +483,47 @@ namespace Assets.Scripts.Progression
             OnChanged?.Invoke();
         }
 
+        // --- Hub buildings (which lots are placed, and at what level) ---
+
+        /// <summary>Every lot the player has placed. Never null.</summary>
+        public List<BuildingProgress> GetBuildings()
+        {
+            return _saveData.Buildings ?? (_saveData.Buildings = new List<BuildingProgress>());
+        }
+
+        /// <summary>
+        /// Records a lot as built at <paramref name="level"/>, or raises an existing entry to it.
+        /// Never lowers a level - there is no un-building - and persists immediately, the same
+        /// rule every other meta award follows so hub progress survives whatever happens next.
+        /// Returns whether anything actually changed.
+        /// </summary>
+        public bool SetBuildingLevel(string buildingKey, int level)
+        {
+            if (string.IsNullOrEmpty(buildingKey) || level <= 0)
+            {
+                return false;
+            }
+
+            var buildings = GetBuildings();
+            var entry = buildings.Find(b => b != null && b.Key == buildingKey);
+            if (entry == null)
+            {
+                buildings.Add(new BuildingProgress { Key = buildingKey, Level = level });
+            }
+            else if (entry.Level < level)
+            {
+                entry.Level = level;
+            }
+            else
+            {
+                return false;
+            }
+
+            Save();
+            OnChanged?.Invoke();
+            return true;
+        }
+
         // --- Party slots (how many heroes can be fielded at once) ---
 
         /// <summary>
@@ -525,31 +566,6 @@ namespace Assets.Scripts.Progression
         // --- Merchant gear stock (item keys) ---
 
         /// <summary>The merchant's current gear stock (item keys). Never null.</summary>
-        // --- Tavern stock (hero save keys) ------------------------------------
-
-        public List<string> GetTavernStock()
-        {
-            return _saveData.TavernStock ?? (_saveData.TavernStock = new List<string>());
-        }
-
-        public void SetTavernStock(List<string> heroKeys)
-        {
-            _saveData.TavernStock = heroKeys ?? new List<string>();
-            Save();
-        }
-
-        public void RemoveFromTavernStock(string heroKey)
-        {
-            if (_saveData.TavernStock == null || string.IsNullOrEmpty(heroKey))
-            {
-                return;
-            }
-            if (_saveData.TavernStock.Remove(heroKey))
-            {
-                Save();
-            }
-        }
-
         public List<string> GetShopStock()
         {
             return _saveData.ShopStock ?? (_saveData.ShopStock = new List<string>());

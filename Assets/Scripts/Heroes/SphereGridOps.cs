@@ -699,8 +699,8 @@ namespace Assets.Scripts.Heroes
 
         /// <summary>
         /// Starter bank for a new recruit: <see cref="RecruitSeedRate"/> × the average lifetime XP
-        /// of the heroes already owned, floored. One pure function so the tavern, the dungeon
-        /// rescue and the balance model cannot drift. Zero for an empty roster.
+        /// of the heroes already owned, floored. One pure function so every acquisition route -
+        /// the dungeon rescue and the balance model - cannot drift. Zero for an empty roster.
         /// </summary>
         public static int StarterBank(IReadOnlyList<int> ownedLifetimeXp)
         {

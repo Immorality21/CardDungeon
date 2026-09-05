@@ -1443,6 +1443,161 @@
 }
 
 /* ============================================================
+   The hub town (HubView). One authored pixel rect, letterboxed
+   as a single unit — the scale lives on .hub-canvas, never on a
+   lot, because UITK applies a transform to hit-testing as well
+   as to paint, and scaling lots individually is what desyncs a
+   click from the pixel it landed on.
+
+   Every lot is a flat rectangle until BuildingSO carries real
+   sprites: that is the placeholder-art bargain HUB.md §7 phase 3
+   assumed, and it is why the glyph and label matter — they are
+   the only thing telling the Forge from the Bestiary.
+   ============================================================ */
+
+/* The town is the screen, not a window on it: full-bleed, with every service docking over it.
+   That is also why home no longer has to fit ten buttons inside a 62%-tall frame. */
+.hub-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 16px;
+    flex-direction: column;
+}
+
+.hub-town {
+    flex-grow: 1;
+}
+
+.hub-view__viewport {
+    flex-grow: 1;
+    overflow: hidden;
+    background-color: rgb(9, 5, 18);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 6px;
+}
+
+.hub-canvas {
+    overflow: visible;
+}
+
+.hub-backdrop {
+    background-color: rgb(18, 10, 34);
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.hub-lot {
+    background-color: var(--cd-stone);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 6px;
+    padding: 6px;
+    margin: 0;
+    color: var(--cd-text-light);
+    align-items: center;
+    justify-content: center;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.hub-lot:hover {
+    background-color: var(--cd-stone-hover);
+}
+
+/* A lot carrying real art keeps the sprite, not the slab. */
+.hub-lot--art {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.hub-lot__glyph {
+    font-size: 34px;
+    color: var(--cd-accent);
+    -unity-text-align: middle-center;
+}
+
+.hub-lot__label {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.hub-lot__note {
+    font-size: 12px;
+    color: var(--cd-gold);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* Built is the ordinary state. Available is a bare foundation — it has to read
+   as an invitation, which is the whole reason a material is worth wanting. */
+.hub-lot--available {
+    background-color: rgba(35, 18, 58, 0.45);
+    border-color: rgb(70, 52, 96);
+}
+
+.hub-lot--available .hub-lot__glyph {
+    color: rgb(96, 78, 122);
+}
+
+.hub-lot--absent {
+    background-color: rgba(20, 12, 32, 0.35);
+    border-color: rgb(44, 32, 62);
+    opacity: 0.55;
+}
+
+/* The road out of town. Not a lot: the story is the way out, not a service, and
+   a building must never be able to lock the player out of running. */
+.hub-road {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    translate: 0 -50%;
+    width: 150px;
+    height: 190px;
+    margin: 0;
+    background-color: var(--cd-stone);
+    border-width: 3px;
+    border-color: var(--cd-gold);
+    border-radius: 6px;
+    color: var(--cd-gold);
+    font-size: 18px;
+    -unity-font-style: bold;
+    padding: 8px;
+    white-space: normal;
+}
+
+.hub-road:hover {
+    background-color: var(--cd-stone-hover);
+}
+
+.hub-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    margin-top: 8px;
+}
+
+/* .cd-button--narrow is 45% of its parent, which is the whole screen width down here.
+   The bar is a row, so its buttons size to their content instead. */
+.hub-bar .cd-button {
+    width: auto;
+    align-self: center;
+    margin-top: 0;
+}
+
+.hub-bar .cd-feedback {
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+    margin: 0 12px;
+}
+
+/* ============================================================
    Keyboard cursor — the arrow-key highlight painted by
    ImmoralityGaming.Menu.KeyboardNavigator on whichever button
    the cursor is on. Deliberately the last rule in the file:

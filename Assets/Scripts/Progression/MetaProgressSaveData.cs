@@ -11,6 +11,18 @@ namespace Assets.Scripts.Progression
         public int Level;
     }
 
+    /// <summary>
+    /// One hub lot the player has placed, and how far it is upgraded. Progress lives here rather
+    /// than on <c>BuildingSO</c> for the same reason <c>CompletedRunKeys</c> does: the authored
+    /// town stays pure content and one town reads differently per save.
+    /// </summary>
+    [Serializable]
+    public class BuildingProgress
+    {
+        public string Key;
+        public int Level;
+    }
+
     [Serializable]
     public class ComboUpgradeEntry
     {
@@ -37,17 +49,14 @@ namespace Assets.Scripts.Progression
         public int BonusSlots;
 
         // Party slots bought on top of PartySlots.BaseCap - how many heroes can be fielded at once.
-        // A Gold sink rather than an Essence one: it buys roster width, which is the same axis the
-        // tavern sells into, and Essence is reserved for magic.
+        // A Gold sink rather than an Essence one: it buys roster width, and Essence is reserved
+        // for magic. With the tavern retired this is the only thing gold buys about the roster:
+        // a hero is unlocked through progression, never bought (NEXT_STEPS.md, section 5b).
         public int BonusPartySlots;
 
         // The merchant's current gear stock (item keys). Persisted so the shop is stable across
         // sessions and can't be free-rerolled by reopening; refilled when empty or on paid restock.
         public List<string> ShopStock = new List<string>();
-
-        // The tavern's current recruitment offer (hero save keys), persisted for the same reason as
-        // ShopStock: reopening the screen must not re-roll it for free.
-        public List<string> TavernStock = new List<string>();
 
         // Permanent discovery record (survives death). A magic is discovered when some hero first
         // learns it on their sphere grid; a combo when first triggered in combat. Drives the Forge's
@@ -62,6 +71,11 @@ namespace Assets.Scripts.Progression
         // in-combat Inspect window and the hub bestiary. See BestiaryEntry for why the resistance
         // *values* are deliberately not stored here.
         public List<BestiaryEntry> Bestiary = new List<BestiaryEntry>();
+
+        // Hub lots the player has placed, and their level. A building the town marks
+        // PlacedByDefault (the campfire) needs no entry - BuildingOps.LevelOf reads it as level 1
+        // with nothing here, so a fresh save writes nothing to own a working hub.
+        public List<BuildingProgress> Buildings = new List<BuildingProgress>();
 
         // Run keys the player has cleared to the end (survives death, like all meta progress).
         // Gates the main menu: a non-repeatable run - the tutorial - cannot be started again.

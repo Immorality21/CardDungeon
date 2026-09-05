@@ -8,8 +8,8 @@ Campfire, materials, buildings and a staged unlock of the game — plus the gold
 
 ### 7. The hub becomes a place — buildings, materials, and a staged unlock of the game
 
-> **Status: phase 1 shipped 2026-09-05; phases 2-7 not started** (outlined 2026-09-01, extended
-> 2026-09-04). The phases below are ordered so the game is playable after every one; the open
+> **Status: phases 1-3 shipped 2026-09-05; phases 4-7 not started** (outlined 2026-09-01,
+> extended 2026-09-04). The phases below are ordered so the game is playable after every one; the open
 > questions at the end decide data shapes that are painful to change later.
 >
 > **2026-09-04 — confirmed and extended.** The whiteboard session endorsed this section as written
@@ -18,9 +18,16 @@ Campfire, materials, buildings and a staged unlock of the game — plus the gold
 > **crafting** joins as a deliberately-last phase 7.
 >
 > **2026-09-05 — materials drop.** Phase 1 is in: ten materials, per-enemy and per-level drop
-> tables, a hub Materials tab, and `MaterialYieldModel` measuring the tap. **Nothing spends them
-> yet** — that is phase 2 onward, and deliberately so. See "What phase 1 actually landed" below for
-> the measured yields and the two things it settled.
+> tables, a hub Materials tab, and `MaterialYieldModel` measuring the tap. See "What phase 1
+> actually landed" below for the measured yields and the two things it settled.
+>
+> **2026-09-05 — phases 2 and 3, plus a scene split.** `BuildingSO`/`HubSO`/`BuildingOps` +
+> `MetaProgressSaveData.Buildings` + 23 tests landed, and the town replaced the ten-button home
+> screen. **Every lot ships built** — `BuildingOps.EverythingIsPlaced` is the one constant phase 4
+> flips, and both `StateOf` and `LevelOf` take an overload with it passed in so the gated
+> behaviour is already under test. Two things were added that this section did not plan: the hub
+> is its **own scene** (see open question 5, now overturned) and the **tavern retired** with it.
+> Open questions 3, 4 and 6 are settled below. See `Assets/Scripts/Hub/CLAUDE.md`.
 
 **The vision.** The main menu stops being a menu and becomes **the hub** — a static, authored 2D
 layout the player looks at, not a column of buttons. You start with a **campfire and four spots
@@ -128,8 +135,8 @@ early-game contract, not a whole-game one.**
 | # | Phase | What lands | Why here |
 |---|---|---|---|
 | 1 | ✅ **Materials drop** *(2026-09-05)* | `ItemCategory.Material`, ten authored materials, per-enemy `LootTable` **and** per-level `MaterialTable`, Bestiary shows them a row at a time, hub Materials tab, `MaterialYieldModel` + two reachability findings | Pure addition; drop rates measurable before anything depends on them |
-| 2 | **Buildings exist, nothing is locked** | `BuildingSO`/`HubSO`/`BuildingOps` + save + tests, **every building pre-built at level 1** | The data model lands under test while the game plays exactly as today |
-| 3 | **The hub replaces home** | `HubView`: backdrop, per-state sprites, phase-in; the buttons become buildings; campfire seats = `PartySlots` | Migration risk isolated from gating risk; placeholder art is enough |
+| 2 | ✅ **Buildings exist, nothing is locked** *(2026-09-05)* | `BuildingSO`/`HubSO`/`BuildingOps` + `MetaProgressSaveData.Buildings` + `BuildingOpsTests`/`HubContentTests`, **every building pre-built at level 1** | The data model lands under test while the game plays exactly as today |
+| 3 | ✅ **The hub replaces home** *(2026-09-05)* | `HubView` + `HubPresenter` in a new **HubScene**; the ten buttons became six lots plus a road; flat placeholder lots, no art needed | Migration risk isolated from gating risk; placeholder art was enough |
 | 4 | **Turn the gates on** | Campfire only at start; author the first-run unlock sequence | The actual design work, against a hub that already renders |
 | 5 | **Grid gates + frontier axis** | `RequiredBuildingKey`, hub state through `SphereGridOps`, `InvestmentFrontier` | Needs 4 authored before it can be tuned |
 | 6 | **Upgrades** | Building levels change what a screen *offers* and what it looks like | The long tail; each level is a content dial, not new plumbing |
@@ -147,12 +154,24 @@ early-game contract, not a whole-game one.**
    that scales forever).
 3. **Are the campfire's four spots real?** Recommendation: yes — they are `PartySlots`, and buying
    the next slot happens *at the campfire*.
-4. **Does the campaign map become a building?** Recommendation: no. It is the way *out*, not a
-   service. **A building must never be able to lock the player out of running** —
-   `CampaignAssetTests.Campaign_NeverStrandsASaveWithNothingToPlay` encodes that rule.
-5. **One scene or two?** Recommendation: one — a view swap inside `MenuScene`.
+4. ~~**Does the campaign map become a building?**~~ **Settled 2026-09-05: no.** It is the way
+   *out*, not a service. **A building must never be able to lock the player out of running** —
+   `CampaignAssetTests.Campaign_NeverStrandsASaveWithNothingToPlay` encodes that rule, and
+   `HubContentTests.TheStory_IsNotABuilding` now guards the structural half: `HubService` has no
+   `Story` member and the road is authored in `Hub.uxml`, not in `Hub.asset`. There is no separate
+   "Continue Run" door either — the map already renders the active run as continuable.
+5. ~~**One scene or two?**~~ **Settled 2026-09-05: two, overturning this recommendation.** The
+   argument for one scene was that a view swap is cheaper, and it was right about that. What it
+   missed is the **save-slot picker**: `MenuScene` has to be showable *before* a save file is
+   chosen, and it cannot share a document with screens that read the save it has not chosen yet.
+   `MenuScene` is now a dependency-free title screen (three GameObjects, no managers, no save
+   read) and everything else lives in `HubScene`. The cost was one extra `LoadScene` and repointing
+   the two dungeon exits; nothing is `DontDestroyOnLoad` but `MusicPlayer`, so the transition is
+   cheap by construction.
 6. **What happens to the Bestiary and Inventory?** They are *knowledge* and *your own bag* rather
-   than services someone provides — plausibly never gated. Decide before Phase 4 authoring.
+   than services someone provides — plausibly never gated. **Partly settled 2026-09-05:** both are
+   lots (`bestiary`, `storehouse`) so the town reads as one place, but whether either ever gets a
+   `PlacementCost` is still a phase 4 decision. Being a lot does not commit them to being gated.
 7. **What is the placeholder art plan?** The town is the first part of this game that cannot ship on
    flat-colour UITK panels. Recommendation: author the sprite fields on `BuildingSO` from Phase 2 and
    fill them with flat silhouettes so Phases 3–5 are playable before any real art exists. Decide the

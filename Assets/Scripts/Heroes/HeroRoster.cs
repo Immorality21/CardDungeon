@@ -12,7 +12,8 @@ namespace Assets.Scripts.Heroes
     ///
     /// A run starts with <see cref="PartyRosterSO.StartingHeroes"/> only; the rest are acquired by
     /// rescuing a captive mid-dungeon (<c>RunLevelEntry.RescueHero</c>) or recruiting at the hub
-    /// tavern. Legacy saves written before ownership existed are migrated on first read: whoever
+    /// progression. Legacy saves written before ownership existed are migrated on first read:
+    /// whoever
     /// already had a <see cref="HeroSaveData"/> entry is treated as owned, so nobody loses a hero.
     ///
     /// <para>Owning is not the same as <em>fielding</em>. The party the player takes into a dungeon is
@@ -74,8 +75,8 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
-        /// Records <paramref name="hero"/> as owned and writes it to disk immediately. Used by the
-        /// tavern, where a purchase must survive whatever happens next. In-dungeon rescues go
+        /// Records <paramref name="hero"/> as owned and writes it to disk immediately - the
+        /// hub-side route, where an unlock must survive whatever happens next. In-dungeon rescues go
         /// through <c>DungeonManager</c> instead, so they follow the run's deferred-commit rule and
         /// are forfeited on death.
         ///
@@ -111,36 +112,6 @@ namespace Assets.Scripts.Heroes
             save.OwnedHeroKeys = keys;
             handler.Save(save);
             return true;
-        }
-
-        /// <summary>
-        /// Un-records ownership. Only for rolling back a recruitment whose payment failed - there is
-        /// no in-game way to lose a hero you have paid for.
-        /// </summary>
-        public static void RemoveOwned(PartyRosterSO catalog, HeroSO hero)
-        {
-            if (hero == null)
-            {
-                return;
-            }
-
-            var handler = new FileHandler();
-            var save = handler.Load<PartySaveData>();
-            if (save.OwnedHeroKeys == null || !save.OwnedHeroKeys.Remove(hero.SaveKey))
-            {
-                return;
-            }
-            // Un-field them too: a selection entry for a hero you do not own would be filtered out on
-            // the next read anyway, but leaving it there means the party silently shrinks by one.
-            save.SelectedHeroKeys?.Remove(hero.SaveKey);
-            // And take back the seeded starter bank — but only while it is untouched. A hero who has
-            // activated a node has a real record, and a paid-for hero never loses one.
-            var entry = save.Heroes.Find(h => h != null && h.HeroKey == hero.SaveKey);
-            if (entry != null && (entry.ActivatedNodes == null || entry.ActivatedNodes.Count == 0))
-            {
-                save.Heroes.Remove(entry);
-            }
-            handler.Save(save);
         }
 
         /// <summary>Lifetime XP (bank + spent node cost) per owned hero — the base a recruit's
@@ -281,8 +252,12 @@ namespace Assets.Scripts.Heroes
             }
         }
 
-        /// <summary>Catalog heroes the player does not own yet — the tavern's recruitment pool.</summary>
-        public static List<HeroSO> GetRecruitable(PartyRosterSO catalog)
+        /// <summary>
+        /// Catalog heroes the player does not own yet — everything still to be unlocked. This was
+        /// the tavern's stock; with gold no longer able to buy a hero it is the set a progression
+        /// unlock draws from instead (<c>NEXT_STEPS.md</c>, section 5b).
+        /// </summary>
+        public static List<HeroSO> GetUnownedHeroes(PartyRosterSO catalog)
         {
             var result = new List<HeroSO>();
             if (catalog == null)

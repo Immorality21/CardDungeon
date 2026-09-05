@@ -6,7 +6,7 @@ using Assets.Scripts.Progression;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Assets.Scripts.MainMenu
+namespace Assets.Scripts.Hub
 {
     /// <summary>
     /// The story line: every run in the campaign drawn as a graph, with the ones this save has cleared
