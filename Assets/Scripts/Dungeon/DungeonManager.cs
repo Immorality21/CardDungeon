@@ -1068,6 +1068,32 @@ namespace Assets.Scripts.Dungeon
             sr.sortingOrder = 3;
         }
 
+        /// <summary>
+        /// Pays out <see cref="LevelDefinitionSO.GuaranteedMaterials"/> — the one drop a floor
+        /// promises. Rolled through <see cref="LootRoller"/> like any other table so the quantity
+        /// range still applies; the guarantee lives in the fact that this is called unconditionally
+        /// on clear, not in a special meaning for <c>LootDrop.Chance</c> (which must be 1 here, and
+        /// <c>MaterialContentTests</c> says so).
+        /// </summary>
+        private void AwardGuaranteedMaterials()
+        {
+            var level = CurrentLevel;
+            if (level == null || level.GuaranteedMaterials == null || level.GuaranteedMaterials.Count == 0)
+            {
+                return;
+            }
+
+            var awards = LootRoller.Roll(
+                level.GuaranteedMaterials, RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
+            foreach (var award in awards)
+            {
+                if (!award.IsEmpty)
+                {
+                    InventoryManager.Instance.AddItem(award);
+                }
+            }
+        }
+
         private void OnDungeonCleared()
         {
             // Commit all deferred progress to persistent save files
@@ -1081,6 +1107,10 @@ namespace Assets.Scripts.Dungeon
 
             if (InventoryManager.HasInstance)
             {
+                // Before the commit, so the promised materials ride the same write as everything
+                // else the floor produced - and are forfeited by the same rule if the party wipes
+                // instead of clearing.
+                AwardGuaranteedMaterials();
                 InventoryManager.Instance.CommitInventory();
                 InventoryManager.Instance.SetDeferSaves(false);
             }

@@ -73,6 +73,26 @@ the intended behaviour, not a bug to design around.
   balance analyzer reports it as an Economy finding. Materials ride the ordinary loot path, so they
   are **banked on level clear and forfeited on a wipe** exactly like gold and gear, which is what
   keeps buildings from becoming the death penalty `docs/plans/BALANCE_OPEN.md` §3b rejected.
+- **`LevelDefinitionSO.GuaranteedMaterials` is the one drop a floor promises** *(2026-09-05)*.
+  Awarded by `DungeonManager.AwardGuaranteedMaterials` on clear, before `CommitInventory`, so it
+  rides the same write as everything else the floor produced and is forfeited by the same rule.
+
+  **Every other tap is a roll on top of a roll.** `MaterialTable` needs the level to have rolled a
+  cache — and a level with `TreasureRooms: 0` yields none of it, silently. An `EnemySO.LootTable`
+  needs that enemy to have spawned *and* died. Neither can carry a promise, which is what anything
+  that **teaches** the player needs: *Dungeon Entrance* has `TreasureRooms: 0` and an 80% Rotted
+  Timber table, so before this it produced no materials at all — while the hub's Sphere Hall was
+  priced at one timber and a tutorial was going to point at it.
+
+  The guarantee is **where the table is rolled** (unconditionally, on clear), *not* a new meaning
+  for `LootDrop.Chance`. Entries must be authored at `Chance 1` and
+  `MaterialContentTests.EveryGuaranteedDrop_IsActuallyGuaranteed` fails on anything less — a
+  promise the game silently does not keep is the worst possible failure for this table. Quantity
+  ranges still apply, so "1-2 timber, always" is authorable.
+
+  `MaterialContentTests.EveryOpeningHubCost_IsObtainableOnTheOpeningRun` closes the loop from the
+  other end: anything a hub lot asks for on a fresh save must be reachable on the opening run,
+  counting guarantees, caches **that actually roll**, and enemy drops.
 - **RunSaveData** (`Run.json`) tracks which level the player is on (`CurrentLevelIndex`), `ActiveDungeonSeed` for resuming mid-dungeon, and `EquippedMagic` (the equipped slots **and their spent charges**, carried across levels of the run).
 - **Flow:** Menu → The Story (campaign map) → pick a run → enter level 1 → clear exit room → **Descend** → level complete → menu shows next level → ... → all levels cleared → run complete (the run key is banked in `CompletedRunKeys`, opening whatever it gated on the map).
 - **Win condition:** Each dungeon level is complete when the player **takes the stairs** in a cleared **exit room** (farthest room from start, designated via BFS). `Room.IsExit` marks it; `RoomActionUI`'s **Descend** button is the only caller of `CombatManager.NotifyDungeonCleared()`, so finishing a level is always a decision - the player can sweep rooms they skipped or spend an event they walked past first. Clearing the exit room does *not* end the level by itself.

@@ -187,6 +187,47 @@ namespace Tests.EditMode
             Assert.AreEqual("Iron", awards[0].Item.Key);
         }
 
+        /// <summary>
+        /// A chance of 1 has to drop on <b>every</b> roll, including 1.0 itself.
+        ///
+        /// <para>Unity's <c>Random.Range(float, float)</c> is inclusive of its maximum, so 1.0 is a
+        /// value the live game really produces — and a bare <c>roll >= chance</c> skipped the entry
+        /// when it did. That is a guaranteed drop silently not dropping, occasionally, which is the
+        /// one failure <c>LevelDefinitionSO.GuaranteedMaterials</c> cannot survive: the Sphere Hall's
+        /// timber, and the tutorial that will point at it, are built on this being exact.</para>
+        /// </summary>
+        [Test]
+        public void Roll_ChanceOfOne_DropsOnEveryRollIncludingTheTopOfTheRange()
+        {
+            var guaranteed = new LootDrop { Item = MakeMaterial("Timber"), Chance = 1f };
+
+            foreach (var roll in new[] { 0f, 0.25f, 0.5f, 0.999f, 1f })
+            {
+                var awards = LootRoller.Roll(new List<LootDrop> { guaranteed }, 0, Rolls(roll));
+
+                Assert.AreEqual(1, awards.Count, $"A guaranteed drop missed on a roll of {roll}.");
+                Assert.AreEqual("Timber", awards[0].Item.Key);
+                Assert.GreaterOrEqual(awards[0].Quantity, 1);
+            }
+        }
+
+        [Test]
+        public void Roll_ChanceOfOne_StillConsumesItsRoll()
+        {
+            // How many randoms a table draws is part of the sequence a deterministic caller sees, so
+            // the fix above must not skip the roll it no longer needs - or every result downstream of
+            // a guaranteed entry shifts.
+            int calls = 0;
+            var table = new List<LootDrop>
+            {
+                new LootDrop { Item = MakeMaterial("Timber"), Chance = 1f }
+            };
+
+            LootRoller.Roll(table, 0, () => { calls++; return 0.5f; });
+
+            Assert.AreEqual(2, calls, "One roll decides the hit, a second sizes it - as for any entry.");
+        }
+
         [Test]
         public void Roll_NullTableOrEntries_YieldsNothing()
         {

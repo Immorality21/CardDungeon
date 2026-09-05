@@ -180,6 +180,47 @@ Touch points: `Assets/Scripts/UnitStats/StatCatalog.cs` (descriptions exist, unu
 `Assets/UI/MainMenu/MainMenu.uxml`, `Assets/Scripts/Cards/MagicTag.cs`,
 `Assets/Scripts/Combat/DamageType.cs`.
 
+### 20. A tutorial — guide the player through the first hour *(added 2026-09-05)*
+
+**The game teaches nothing.** A new player lands in a town with two buildings standing, two plots
+waiting and a road, and is told none of it: not that the road is how you leave, not that the
+foundations are things you build, not that the timber they will come home with is what builds the
+first one. §16's compendium is *reference* — a place to look things up. This is different: a
+**directed first hour** that points at the next thing to do.
+
+The hub is what makes this newly tractable, and newly necessary. Its whole purpose is pacing —
+one system arriving at a time (`docs/plans/HUB.md` §7) — and a staged reveal that nobody explains
+is just a game with things missing from it.
+
+**The opening beat is already built and priced for this**: clearing *Dungeon Entrance* guarantees
+1 Rotted Timber (`LevelDefinitionSO.GuaranteedMaterials`), and the Sphere Hall costs exactly that.
+So the first loop the tutorial can point at is closed and cannot fail: *take the road → clear the
+floor → come home → build the Sphere Hall → spend the XP you banked*. That guarantee exists
+**because** a tutorial needs a promise it can make; see the note under it in the Dungeon guide.
+
+Open questions, roughly in the order they bite:
+
+- **What shape is it?** Contextual prompts on the screen you are on ("this plot can be built —
+  you have the timber") are cheaper and less intrusive than a scripted takeover, and fit a hub
+  that already knows every lot's state through `BuildingOps.StateOf`. A modal sequence is easier to
+  author and easier to resent.
+- **Where does progress live?** It is meta, survives death, and reads like `CompletedRunKeys` — so
+  `MetaProgressSaveData` with a list of completed steps, and pure rules beside `BuildingOps`.
+  **Do not make it a per-run flag**: the first hour spans several runs and a wipe.
+- **Can it be skipped, and can it be replayed?** Both, ideally, and the second is what makes it
+  testable by hand.
+- **What is the step list?** The hub's own unlock order is the spine — campfire and storehouse are
+  already yours, the road is the way out, the Sphere Hall is the first thing you build, the Forge
+  is behind the tutorial run. Authoring the steps is most of the work; the machinery is small.
+
+**It should be authored content, not code.** A `TutorialStepSO` list — trigger, target, one line of
+text — read by a pure `TutorialOps`, is the same shape as `CampaignSO`/`CampaignOps` and
+`HubSO`/`BuildingOps`, and it is what keeps the steps re-orderable without a recompile.
+
+Touch points: a new `Assets/Scripts/Tutorial/`, `Assets/Scripts/Progression/MetaProgressSaveData.cs`,
+`Assets/Scripts/Hub/HubManager.cs` (the screen most steps point at), `Assets/UI/Hub/Hub.uxml`,
+`Assets/Scripts/Dungeon/LevelDefinitionSO.cs` (`GuaranteedMaterials` — the promises a step can make).
+
 ---
 
 ## Content and production *(added 2026-09-03)*

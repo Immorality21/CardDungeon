@@ -143,7 +143,18 @@ namespace Assets.Scripts.Items
                 {
                     continue;
                 }
-                if (roll() >= DropChance(drop, runLevelIndex))
+
+                // A chance of 1 means ALWAYS. Unity's Random.Range(float, float) is inclusive of its
+                // maximum, so a roll of exactly 1.0 is reachable and a bare `roll >= chance` would
+                // skip a guaranteed entry - a drop that silently does not drop, occasionally. That is
+                // the one failure LevelDefinitionSO.GuaranteedMaterials cannot survive.
+                //
+                // The roll is still consumed either way: how many randoms a table draws is part of
+                // the sequence a deterministic caller sees, and changing it would move every result
+                // downstream of a guaranteed entry.
+                float chance = DropChance(drop, runLevelIndex);
+                bool missed = roll() >= chance;
+                if (missed && chance < 1f)
                 {
                     continue;
                 }

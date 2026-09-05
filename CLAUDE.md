@@ -18,7 +18,7 @@ work, then open only the plan file your work touches:
 | `docs/plans/COMBAT_DEPTH.md` | status effects, Defend, threat/taunt, enemy verbs, hero identity (§9–§13) |
 | `docs/plans/HUB.md` | campfire, materials, buildings, gold sinks (§3, §7) |
 | `docs/plans/BALANCE_OPEN.md` | open balance steps and findings, losability, the retry economy (§0–§0g, §3b) |
-| `docs/plans/POLISH_CONTENT.md` | battle/room polish, player-facing information, content volume (§1, §2, §6, §8, §14–§19) |
+| `docs/plans/POLISH_CONTENT.md` | battle/room polish, player-facing information, content volume, **the tutorial** (§1, §2, §6, §8, §14–§20) |
 
 Don't read the whole backlog to answer one question — the index says which file to open. The
 **do-not-relitigate** list lives in the index and applies to every plan.

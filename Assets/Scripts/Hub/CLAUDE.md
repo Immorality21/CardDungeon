@@ -136,9 +136,17 @@ and the wrong one for a gate.
 
 The Sphere Hall is deliberately the cheapest thing in town and is **not** gated on a run: the grid
 is where banked XP goes, and making a player finish a run before they can spend any of what they
-earned reads as a lock rather than as pacing. Note Rotted Timber is **cache-only** (§7 phase 1's
-table: ~3.1 a campaign, none from kills), so the one timber is an errand — find a treasure room —
-rather than something a few fights hand you.
+earned reads as a lock rather than as pacing.
+
+**Its one timber is a guarantee, not a roll.** Clearing *Dungeon Entrance* — the campaign's first
+floor — always yields exactly it (`LevelDefinitionSO.GuaranteedMaterials`; see the Dungeon guide).
+That is deliberate and it is the reason the field exists: the first loop a tutorial can point at
+(**take the road → clear the floor → come home → build the Sphere Hall → spend your banked XP**) has
+to be a promise the game keeps, and every other tap is a roll on a roll. Rotted Timber is otherwise
+**cache-only** (§7 phase 1's table: ~3.1 a campaign, none from kills), and that first floor has
+`TreasureRooms: 0` — so without the guarantee it produced no materials at all.
+`MaterialContentTests.EveryOpeningHubCost_IsObtainableOnTheOpeningRun` is what keeps this true if
+the prices or the floors move. The tutorial itself is `docs/plans/POLISH_CONTENT.md` §20.
 
 **These numbers are a first pass, not a balance pass.** They exist so the flow is exercisable; the
 yields they are priced against were measured before anything spent materials.

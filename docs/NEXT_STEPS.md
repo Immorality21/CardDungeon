@@ -174,6 +174,7 @@ backlog.**
 | **14** | The dungeon map, the party bar, and the pause menu | not started |
 | **15** | Run summary and statistics | not started |
 | **16** | A compendium — explain the systems | not started |
+| **20** | **A tutorial — guide the player through the first hour** | not started; the opening beat is already built and priced for it |
 | **17** | Content volume is the biggest single gap | not started |
 | **18** | Item and consumable depth | not started |
 | **19** | Shipping surface | not started |

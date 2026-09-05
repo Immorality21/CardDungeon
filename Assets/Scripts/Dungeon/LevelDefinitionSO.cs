@@ -28,8 +28,23 @@ namespace Assets.Scripts.Dungeon
         [Tooltip("Raw materials this place is made of, found in its caches. Enemies drop what they " +
                  "are made of (EnemySO.LootTable); this is what the *floor* is made of, which is how " +
                  "a material ends up gating on where the player has been rather than on how long " +
-                 "they have ground. Every entry rolls on its own when a cache is opened.")]
+                 "they have ground. Every entry rolls on its own when a cache is opened. " +
+                 "NOTE this table only ever rolls if the level actually HAS a cache - a level with " +
+                 "TreasureRooms 0 never yields any of it. Use GuaranteedMaterials for anything the " +
+                 "player must come home with.")]
         public List<LootDrop> MaterialTable = new List<LootDrop>();
+
+        [Tooltip("Materials awarded for CLEARING this level, every time, regardless of how the floor " +
+                 "generated or which enemies spawned. The one drop the player is promised. " +
+                 "Every other tap is a roll on top of a roll: MaterialTable needs the level to have " +
+                 "rolled a cache, and an EnemySO.LootTable needs that enemy to have spawned and died. " +
+                 "Neither can carry a promise, which is what anything that TEACHES the player - a " +
+                 "tutorial pointing at a building they should go construct - actually needs. " +
+                 "Entries must be authored at Chance 1: the guarantee is that this table is always " +
+                 "rolled, not a new meaning for the chance field, and MaterialContentTests enforces " +
+                 "it. Quantity ranges still apply, so '1-2 timber, always' is authorable. " +
+                 "Forfeited on a wipe like every other gain - you have to CLEAR the floor.")]
+        public List<LootDrop> GuaranteedMaterials = new List<LootDrop>();
 
         [Tooltip("Optional per-level combat backdrop. When set, the battle stage uses this instead " +
                  "of the default Resources background — lets each level/biome look distinct.")]

@@ -5,6 +5,7 @@ using Assets.Scripts.Enemies;
 using Assets.Scripts.Items;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEngine;
 
 namespace Tests.EditMode
 {
@@ -56,8 +57,134 @@ namespace Tests.EditMode
                 {
                     drops.Add(($"{level.name}.MaterialTable", drop));
                 }
+                foreach (var drop in level.GuaranteedMaterials)
+                {
+                    drops.Add(($"{level.name}.GuaranteedMaterials", drop));
+                }
             }
             return drops;
+        }
+
+        /// <summary>
+        /// A guaranteed drop has to actually be guaranteed. The guarantee comes from <i>where</i>
+        /// the table is rolled — unconditionally, on level clear — rather than from a new meaning
+        /// for <c>Chance</c>, so an entry authored below 1 is a promise the game silently does not
+        /// keep. That is the worst possible failure for the one table a tutorial can point at.
+        /// </summary>
+        [Test]
+        public void EveryGuaranteedDrop_IsActuallyGuaranteed()
+        {
+            var broken = new List<string>();
+            foreach (var level in LoadAll<LevelDefinitionSO>())
+            {
+                foreach (var drop in level.GuaranteedMaterials)
+                {
+                    if (drop == null || drop.Item == null)
+                    {
+                        broken.Add($"{level.name}.GuaranteedMaterials has an entry with no item.");
+                        continue;
+                    }
+                    if (!Mathf.Approximately(drop.Chance, 1f))
+                    {
+                        broken.Add($"{level.name}.GuaranteedMaterials/{drop.Item.name} is at "
+                                   + $"Chance {drop.Chance}, so it is not guaranteed at all.");
+                    }
+                    if (drop.Item.Category != ItemCategory.Material)
+                    {
+                        broken.Add($"{level.name}.GuaranteedMaterials/{drop.Item.name} is not a "
+                                   + "material.");
+                    }
+                }
+            }
+            CollectionAssert.IsEmpty(broken, string.Join(System.Environment.NewLine, broken));
+        }
+
+        /// <summary>
+        /// Anything a hub lot asks for on a fresh save has to be <b>obtainable</b> on the campaign's
+        /// opening run — otherwise the first thing the player is invited to build is one they cannot.
+        ///
+        /// <para>The trap this exists for is the <b>cacheless floor</b>: a `MaterialTable` never rolls
+        /// on a level with `TreasureRooms: 0`, so a cache-only material can look perfectly authored on
+        /// a floor that will never yield a single unit of it. That is exactly how the Sphere Hall came
+        /// to cost timber the tutorial's first floor could not produce.</para>
+        ///
+        /// <para>Deliberately loose about enemy drops: it counts a material as obtainable if
+        /// <i>any</i> enemy drops it, rather than walking each level's room pool to its spawn tables.
+        /// Being precise there would test the level's room templates, not the hub's prices, and the
+        /// failure it would add — "this material only drops from a monster that does not live here" —
+        /// is a different check that belongs with the spawn tables.</para>
+        /// </summary>
+        [Test]
+        public void EveryOpeningHubCost_IsObtainableOnTheOpeningRun()
+        {
+            var hub = UnityEngine.Resources.Load<Assets.Scripts.Hub.HubSO>(
+                Assets.Scripts.Hub.HubSO.ResourcePath);
+            var campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
+            var roots = CampaignOps.GetRootNodes(campaign);
+            Assert.IsNotEmpty(roots, "No opening run to check against.");
+
+            var obtainable = new List<string>();
+
+            void Offer(LootDrop drop)
+            {
+                if (drop?.Item != null && !obtainable.Contains(drop.Item.Key))
+                {
+                    obtainable.Add(drop.Item.Key);
+                }
+            }
+
+            foreach (var index in roots)
+            {
+                foreach (var entry in campaign.Nodes[index].Run.Levels)
+                {
+                    var level = entry?.LevelTemplate;
+                    if (level == null)
+                    {
+                        continue;
+                    }
+                    foreach (var drop in level.GuaranteedMaterials)
+                    {
+                        Offer(drop);
+                    }
+                    // Only when the floor can actually roll a cache.
+                    if (level.TreasureRooms > 0)
+                    {
+                        foreach (var drop in level.MaterialTable)
+                        {
+                            Offer(drop);
+                        }
+                    }
+                }
+            }
+
+            foreach (var enemy in LoadAll<EnemySO>())
+            {
+                foreach (var drop in enemy.LootTable)
+                {
+                    Offer(drop);
+                }
+            }
+
+            var unreachable = new List<string>();
+            foreach (var building in Assets.Scripts.Hub.BuildingOps.InDrawOrder(hub))
+            {
+                bool offeredAtOnce = building.RequiredRunKeys == null
+                                     || building.RequiredRunKeys.Count == 0;
+                if (!offeredAtOnce || building.PlacedByDefault || building.PlacementCost == null)
+                {
+                    continue;
+                }
+                foreach (var line in building.PlacementCost)
+                {
+                    if (line?.Material != null && !obtainable.Contains(line.Material.Key))
+                    {
+                        unreachable.Add($"{building.SaveKey} is offered on a fresh save and needs "
+                                        + $"{line.Material.Key}, which the opening run cannot yield "
+                                        + "(no guarantee, no cache that rolls it, no enemy drops it).");
+                    }
+                }
+            }
+            CollectionAssert.IsEmpty(unreachable, string.Join(System.Environment.NewLine, unreachable));
         }
 
         [Test]
