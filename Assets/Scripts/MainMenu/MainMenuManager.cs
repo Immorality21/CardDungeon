@@ -103,6 +103,10 @@ public class MainMenuManager : MonoBehaviour
         // graph without a scene reference - and without AssetDatabase, which does not exist in a build.
         _campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
 
+        // A spell a hero starts with is never "bought", so nothing else would ever record it as
+        // discovered and the Forge would refuse to upgrade the one spell everyone owns.
+        HeroRoster.MarkDefaultUnlocksDiscovered(_partyRoster);
+
         if (_document == null)
         {
             _document = GetComponent<UIDocument>();

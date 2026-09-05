@@ -18,6 +18,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 15
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 0, y: 0}
     Gains:
       Values:
@@ -32,6 +34,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 20
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -46,7 +50,9 @@ MonoBehaviour:
   - Key: warrior-slash
     DisplayName: 
     Kind: 3
-    XpCost: 30
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
     Position: {x: 0, y: -180}
     Gains:
       Values: []
@@ -60,6 +66,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 45
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -77,6 +85,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 2
     XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 0, y: -360}
     Gains:
       Values: []
@@ -90,6 +100,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -110, y: -325}
     Gains:
       Values:
@@ -105,6 +117,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -205, y: -380}
     Gains:
       Values:
@@ -120,6 +134,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 3
     XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -300, y: -435}
     Gains:
       Values: []
@@ -133,6 +149,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -395, y: -490}
     Gains:
       Values:
@@ -148,6 +166,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 2
     XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -490, y: -545}
     Gains:
       Values: []
@@ -161,6 +181,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 3
     XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -585, y: -600}
     Gains:
       Values: []
@@ -174,6 +196,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -680, y: -655}
     Gains:
       Values:
@@ -191,6 +215,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 1
     XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -185, y: -250}
     Gains:
       Values: []
@@ -204,6 +230,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -280, y: -305}
     Gains:
       Values:
@@ -219,6 +247,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -470, y: -415}
     Gains:
       Values:
@@ -234,6 +264,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 1
     XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -660, y: -525}
     Gains:
       Values: []
@@ -247,6 +279,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 3
     XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -775, y: -710}
     Gains:
       Values: []
@@ -260,6 +294,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: -755, y: -580}
     Gains:
       Values:
@@ -275,6 +311,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 110, y: -325}
     Gains:
       Values:
@@ -290,6 +328,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 205, y: -380}
     Gains:
       Values:
@@ -305,6 +345,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 3
     XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 300, y: -435}
     Gains:
       Values: []
@@ -318,6 +360,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 395, y: -490}
     Gains:
       Values:
@@ -333,6 +377,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 2
     XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 490, y: -545}
     Gains:
       Values: []
@@ -346,6 +392,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 3
     XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 585, y: -600}
     Gains:
       Values: []
@@ -359,6 +407,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 680, y: -655}
     Gains:
       Values:
@@ -374,6 +424,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 185, y: -250}
     Gains:
       Values:
@@ -389,6 +441,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 280, y: -305}
     Gains:
       Values:
@@ -404,6 +458,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 470, y: -415}
     Gains:
       Values:
@@ -419,6 +475,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 660, y: -525}
     Gains:
       Values:
@@ -434,6 +492,12 @@ MonoBehaviour:
     DisplayName: 
     Kind: 3
     XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
     Position: {x: 775, y: -710}
     Gains:
       Values: []
@@ -447,6 +511,8 @@ MonoBehaviour:
     DisplayName: 
     Kind: 0
     XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
     Position: {x: 755, y: -580}
     Gains:
       Values:

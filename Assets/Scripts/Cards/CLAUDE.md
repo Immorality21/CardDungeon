@@ -130,12 +130,12 @@ level-scoped health pool, and a cure would clear it only until the next room re-
 
 - **MagicSO** (ScriptableObject, `SO/Magic`): defines a magic with `Key`, `DisplayName`, `Description`, `Icon`, `TargetType` (`MagicTargetType`: Enemy/Ally/Self/AllEnemies/AllAllies), `Rarity` (`MagicRarity`), `Effects` (list of `SpellEffect`), `Tags` (list of `MagicTag`), `TagDuration`. Pure data — no acquisition/slot logic.
 - **SpellEffect**: `EffectType` (`SpellEffectType`: Damage/Heal/Buff/Debuff/**HealthCost**), `Power`, **`PowerMode`**, `ScalingStat`, `DamageType`, `BuffType`, `Duration`, `UnlockLevel`.
-- **The catalog is 30 magics, and 13 of them exist because a hero needed them.** A spell is only worth a grid node if the hero's stats scale it — `SpellEffect.ScalingStat` — so each new hero came with the spells its stat line could actually use. **Check the scaling stat before putting a spell on a grid**: the retired Scout's Intelligence-scaled `OilSlick` on a hero with INT 4 was a node that bought nothing.
+- **The catalog is 31 magics, and 14 of them exist because a hero needed them.** A spell is only worth a grid node if the hero's stats scale it — `SpellEffect.ScalingStat` — so each new hero came with the spells its stat line could actually use. **Check the scaling stat before putting a spell on a grid**: the retired Scout's Intelligence-scaled `OilSlick` on a hero with INT 4 was a node that bought nothing.
 
   | added for | spells |
   |---|---|
   | Warrior (2026-09-04) | **Cleave** (STR, AllEnemies, Physical) · **Sunder** (STR, damage + Endurance debuff, Metal) · **Bulwark** (STR, AllAllies Endurance — the mirror of War Cry) |
-  | Paladin / Cleric (2026-09-05) | **Smite** (SPR, Holy, single) · **Consecrate** (SPR, Holy, AllEnemies) · **Benediction** (SPR, AllAllies heal) |
+  | Paladin / Cleric (2026-09-05) | **Smite** (SPR, Holy, single) · **Consecrate** (SPR, Holy, AllEnemies) · **Benediction** (SPR, AllAllies heal) · **HolyTouch** (SPR, SingleAlly heal — the Paladin's free starting signature, so it is deliberately the weakest heal in the game) |
   | Ranger / Rogue | **AimedShot** (AGI, single) · **Volley** (AGI, AllEnemies) · **Snare** (AGI, Agility debuff) · **Backstab** (AGI, damage + Bleeding) · **SmokeBomb** (flat, party Agility) |
   | Cultist | **Bloodbolt** (INT, Shadow, costs 8% max health) · **Sacrifice** (INT+STR buff for 15% max health) |
 

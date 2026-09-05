@@ -60,6 +60,18 @@ namespace Tests.EditMode
                     {
                         continue;
                     }
+                    // A default unlock is handed over rather than sold, so the curve has nothing to
+                    // say about it - but it must be priced at 0, or every published "grid costs N
+                    // XP" figure counts a node no one is ever charged for.
+                    if (SphereGridOps.IsDefaultUnlocked(node))
+                    {
+                        if (node.XpCost != 0)
+                        {
+                            offCurve.Add($"{grid.name}/{node.Key} is unlocked by default but costs "
+                                         + $"{node.XpCost} XP; a default unlock must be priced at 0.");
+                        }
+                        continue;
+                    }
                     int expected = SphereGridOps.CostForDepth(depth);
                     if (node.XpCost != expected)
                     {
@@ -93,6 +105,72 @@ namespace Tests.EditMode
             }
             CollectionAssert.IsEmpty(unreachable,
                 "Unreachable node(s): " + string.Join(", ", unreachable));
+        }
+
+        /// <summary>
+        /// The signatures a hero is meant to arrive holding. <c>UnlockedByDefault</c> is a bool in
+        /// hand-edited YAML, so this pins both halves of the wiring at once: that the flag survived
+        /// serialization, and that the spell behind it actually resolves off an <i>empty</i> save —
+        /// which is the only state a brand-new hero is ever in.
+        /// </summary>
+        [Test]
+        public void DefaultUnlockedSpells_AreKnownBeforeAnyXpIsSpent()
+        {
+            var armed = new List<string>();
+            foreach (var grid in LoadEveryGrid())
+            {
+                var known = SphereGridOps.KnownMagicForNodes(grid, new List<string>());
+                foreach (var node in grid.Nodes)
+                {
+                    if (!SphereGridOps.IsDefaultUnlocked(node)
+                        || node.Kind != SphereNodeKind.MagicKnown
+                        || string.IsNullOrEmpty(node.GrantedMagicKey))
+                    {
+                        continue;
+                    }
+
+                    armed.Add(grid.name + "/" + node.GrantedMagicKey);
+                    Assert.IsTrue(known.Exists(pair => pair.Key == node.GrantedMagicKey),
+                        $"{grid.name} marks {node.Key} unlocked by default but a fresh save does "
+                        + "not know " + node.GrantedMagicKey + ".");
+                }
+            }
+
+            CollectionAssert.IsNotEmpty(armed,
+                "No grid hands a hero a spell for free, so no hero starts able to cast anything and "
+                + "the default-unlock flag is dead content.");
+        }
+
+        /// <summary>
+        /// A material price is authored by dragging an <c>ItemSO</c> into a list, which makes an
+        /// empty line, a zero amount or a non-material item all one slip away — and every one of
+        /// them fails <i>open</i>: <c>MaterialCost.IsValid</c> drops the line, so the node quietly
+        /// becomes free rather than refusing to be bought.
+        /// </summary>
+        [Test]
+        public void EveryMaterialPrice_NamesARealMaterial()
+        {
+            var broken = new List<string>();
+            foreach (var grid in LoadEveryGrid())
+            {
+                foreach (var node in grid.Nodes)
+                {
+                    if (node?.MaterialCosts == null)
+                    {
+                        continue;
+                    }
+                    for (int i = 0; i < node.MaterialCosts.Count; i++)
+                    {
+                        var line = node.MaterialCosts[i];
+                        if (line == null || !line.IsValid)
+                        {
+                            broken.Add($"{grid.name}/{node.Key} material line {i} is not a valid "
+                                       + "price (no item, a non-material item, or amount 0).");
+                        }
+                    }
+                }
+            }
+            CollectionAssert.IsEmpty(broken, string.Join("\n", broken));
         }
 
         /// <summary>

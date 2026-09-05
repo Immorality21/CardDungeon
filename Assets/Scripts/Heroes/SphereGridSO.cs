@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
+using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 
@@ -36,6 +37,19 @@ namespace Assets.Scripts.Heroes
 
         [Tooltip("XP spent from the hero's bank to activate this node.")]
         public int XpCost = 25;
+
+        [Tooltip("Active from the moment the hero exists: never bought, never priced, and its " +
+                 "neighbours are open from the start. This is how a hero arrives with a signature " +
+                 "already in hand (Warrior/Slash, Paladin/Holy Touch) rather than as a blank slate " +
+                 "who cannot cast anything until their first spend. Price a default node at 0 - it " +
+                 "is never charged, and a non-zero cost only misreports what the grid costs.")]
+        public bool UnlockedByDefault;
+
+        [Tooltip("A second price, in raw stuff, on top of XpCost. Both must be payable and both " +
+                 "are spent together. Materials come only out of runs, so this is the one gate a " +
+                 "player cannot grind past at the hub - which is what makes it the right lock for " +
+                 "the far end of a branch. Empty (the default) means XP alone.")]
+        public List<MaterialCost> MaterialCosts = new List<MaterialCost>();
 
         [Tooltip("Authored 2D layout position, consumed only by the grid UI and editor window.")]
         public Vector2 Position;

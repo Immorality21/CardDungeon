@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 
@@ -22,9 +24,19 @@ namespace Assets.Scripts.Heroes.UI
     /// </summary>
     public static class SphereGridPresenter
     {
-        public static NodeUiState Classify(SphereGridSO grid, ICollection<string> activated, int bank, string key)
+        /// <param name="canPayMaterials">Whether the material half of a node's price is covered.
+        /// Null means "assume yes" - the editor window previews a grid with no inventory behind it,
+        /// and a preview that painted every material node unaffordable would say nothing useful.</param>
+        public static NodeUiState Classify(
+            SphereGridSO grid,
+            ICollection<string> activated,
+            int bank,
+            string key,
+            Func<SphereGridNode, bool> canPayMaterials = null)
         {
-            if (activated != null && activated.Contains(key))
+            // The active set, not the saved one: a default unlock reads as bought without ever
+            // having been recorded as such.
+            if (SphereGridOps.ActiveNodes(grid, activated).Contains(key))
             {
                 return NodeUiState.Activated;
             }
@@ -34,11 +46,24 @@ namespace Assets.Scripts.Heroes.UI
             }
 
             var node = SphereGridOps.FindNode(grid, key);
-            return node != null && bank >= node.XpCost ? NodeUiState.Available : NodeUiState.Adjacent;
+            if (node == null || bank < node.XpCost)
+            {
+                return NodeUiState.Adjacent;
+            }
+            // Materials are the second half of the price, so failing them reads exactly like failing
+            // the XP half: reachable, wanted, not yet payable.
+            if (canPayMaterials != null && !canPayMaterials(node))
+            {
+                return NodeUiState.Adjacent;
+            }
+            return NodeUiState.Available;
         }
 
         public static Dictionary<string, NodeUiState> ClassifyAll(
-            SphereGridSO grid, ICollection<string> activated, int bank)
+            SphereGridSO grid,
+            ICollection<string> activated,
+            int bank,
+            Func<SphereGridNode, bool> canPayMaterials = null)
         {
             var states = new Dictionary<string, NodeUiState>();
             if (grid == null || grid.Nodes == null)
@@ -50,10 +75,63 @@ namespace Assets.Scripts.Heroes.UI
             {
                 if (node != null && !string.IsNullOrEmpty(node.Key) && !states.ContainsKey(node.Key))
                 {
-                    states[node.Key] = Classify(grid, activated, bank, node.Key);
+                    states[node.Key] = Classify(grid, activated, bank, node.Key, canPayMaterials);
                 }
             }
             return states;
+        }
+
+        /// <summary>
+        /// A node's material price as one line ("2 Ember Iron - 1 Void Shard"), or empty when it
+        /// charges XP alone.
+        /// </summary>
+        public static string DescribeMaterialCost(SphereGridNode node)
+        {
+            if (!SphereGridOps.HasMaterialCost(node))
+            {
+                return "";
+            }
+
+            var parts = new List<string>();
+            foreach (var line in node.MaterialCosts)
+            {
+                if (line == null || !line.IsValid)
+                {
+                    continue;
+                }
+                string name = string.IsNullOrEmpty(line.Material.DisplayName)
+                    ? line.Material.Key
+                    : line.Material.DisplayName;
+                parts.Add($"{Mathf.Max(1, line.Amount)} {name}");
+            }
+            return string.Join(" · ", parts);
+        }
+
+        /// <summary>
+        /// The cost line under a node's payload: what it costs, or that it was never for sale.
+        /// One function so the hub screen and the authoring preview cannot describe the same node
+        /// differently.
+        /// </summary>
+        public static string DescribeCost(SphereGridNode node, bool isActive)
+        {
+            if (node == null)
+            {
+                return "";
+            }
+
+            if (SphereGridOps.IsDefaultUnlocked(node))
+            {
+                return "Known from the start — costs nothing";
+            }
+            if (isActive)
+            {
+                return "Activated";
+            }
+
+            string materials = DescribeMaterialCost(node);
+            return string.IsNullOrEmpty(materials)
+                ? $"Costs {node.XpCost} XP"
+                : $"Costs {node.XpCost} XP + {materials}";
         }
 
         /// <summary>The sg-node--* USS class for a state (see CardDungeon.uss).</summary>

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
+  m_Name: HolyTouch
+  m_EditorClassIdentifier:
+  Key: HolyTouch
+  DisplayName: Holy Touch
+  Description: A steadying hand. Restores health to one ally, or to yourself.
+  Icon: {fileID: 2291012834914130869, guid: f75b4f2ca4ebefc4c938f40515ffba65, type: 3}
+  TargetType: 3
+  Rarity: 0
+  Effects:
+  - EffectType: 1
+    Power: 4
+    PowerMode: 0
+    ScalingStat: 5
+    DamageType: 0
+    BuffType: 0
+    Duration: 3
+    UnlockLevel: 0
+  Tags:
+  TagDuration: 3

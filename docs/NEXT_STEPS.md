@@ -149,7 +149,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **7** | Buildings, materials, and a staged unlock of the game | phase 1 (**materials drop**) ✅ 2026-09-05; phases 2-7 open |
+| **7** | Buildings, materials, and a staged unlock of the game | phase 1 (**materials drop**) ✅ 2026-09-05; **first sink** (a sphere-grid node) ✅ 2026-09-05; phases 2-7 open |
 | **3** | Sharpen hub sinks | open |
 
 ### [Open balance work](plans/BALANCE_OPEN.md)
@@ -185,6 +185,19 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Default-unlocked grid nodes, and the first thing materials buy** (2026-09-05) —
+  `docs/plans/SPECIALIZATION.md` §4c, `docs/plans/HUB.md` §7. Two fields on `SphereGridNode`.
+  `UnlockedByDefault` makes a node active from the moment the hero exists — the **Warrior starts
+  knowing Slash and the Paladin Holy Touch** (a new single-ally heal), so nobody is ever
+  empty-handed on their first fight. `MaterialCosts` puts a second, un-grindable price on a node:
+  `warrior-b-cry` (War Cry) now costs 350 XP **and** 2 Ember Iron + 1 Void Shard, the first drain
+  materials have. Both fold through one new function, `SphereGridOps.ActiveNodes` (saved ∪ default),
+  which every rule reads — so a default unlock grants, opens and refuses re-purchase with no
+  migration and nothing recorded in the save. **Fixes a standing reachability bug**: adjacency to the
+  *start node* used to open a node whether or not the start had been bought, so a new hero's second
+  node was purchasable while the first still read as unbought. The frontier now only grows out of
+  something the hero actually holds. The other five heroes still buy their signature — arming them is
+  one checkbox each.
 - **Materials drop** (2026-09-05) — `docs/plans/HUB.md` §7 phase 1. `ItemCategory.Material` + ten
   authored materials; `EnemySO.LootItem` → a rolled-per-entry `List<LootDrop>` (flat `Chance`,
   quantity range) and a new `LevelDefinitionSO.MaterialTable` rolled by caches — **enemies drop what

@@ -68,6 +68,87 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
+        /// Whether this node is active from the moment the hero exists - never bought, never
+        /// charged, and open on a save with no activations at all.
+        /// </summary>
+        public static bool IsDefaultUnlocked(SphereGridNode node)
+        {
+            return node != null && node.UnlockedByDefault && !string.IsNullOrEmpty(node.Key);
+        }
+
+        /// <summary>Keys of every <see cref="SphereGridNode.UnlockedByDefault"/> node, in grid
+        /// order.</summary>
+        public static List<string> DefaultUnlockedKeys(SphereGridSO grid)
+        {
+            var keys = new List<string>();
+            if (grid == null || grid.Nodes == null)
+            {
+                return keys;
+            }
+
+            foreach (var node in grid.Nodes)
+            {
+                if (IsDefaultUnlocked(node) && !keys.Contains(node.Key))
+                {
+                    keys.Add(node.Key);
+                }
+            }
+            return keys;
+        }
+
+        /// <summary>
+        /// Every node that currently counts as active: what the save paid for, plus what the grid
+        /// hands over for free. <b>Every rule below reads this rather than the saved list</b>, so a
+        /// default-unlocked node grants its payload, opens its neighbours and refuses to be bought
+        /// twice without any of those three being remembered separately - and so a save written
+        /// before the node was marked default needs no migration.
+        ///
+        /// <para>Saved keys come first, so the list still reads as the player's own history, and
+        /// the result is deduped: a node bought before it was marked default appears once.</para>
+        /// </summary>
+        public static List<string> ActiveNodes(SphereGridSO grid, IEnumerable<string> activated)
+        {
+            var result = new List<string>();
+            if (activated != null)
+            {
+                foreach (var key in activated)
+                {
+                    if (!string.IsNullOrEmpty(key) && !result.Contains(key))
+                    {
+                        result.Add(key);
+                    }
+                }
+            }
+
+            foreach (var key in DefaultUnlockedKeys(grid))
+            {
+                if (!result.Contains(key))
+                {
+                    result.Add(key);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>Whether this node charges materials on top of XP.</summary>
+        public static bool HasMaterialCost(SphereGridNode node)
+        {
+            if (node == null || node.MaterialCosts == null)
+            {
+                return false;
+            }
+
+            foreach (var line in node.MaterialCosts)
+            {
+                if (line != null && line.IsValid)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Symmetric adjacency over the authored <see cref="SphereGridNode.Neighbors"/> lists:
         /// listing B on A links both directions, duplicates collapse, and neighbour keys that match
         /// no node are dropped. Every node with a key gets an entry, even if isolated.
@@ -118,20 +199,26 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
-        /// Whether a node can be bought next, ignoring cost: it is the start node, or adjacent to
-        /// the start node, or adjacent to any activated node. The start node itself never needs a
-        /// neighbour, so a fresh hero always has somewhere to begin.
+        /// Whether a node can be bought next, ignoring cost: it is the start node, or adjacent to a
+        /// node that is already active - bought, or <see cref="SphereGridNode.UnlockedByDefault"/>.
+        /// The start node itself never needs a neighbour, so a fresh hero always has somewhere to
+        /// begin.
+        ///
+        /// <para>Adjacency to the start node used to count on its own, bought or not, so a new
+        /// hero's <i>second</i> node was purchasable while the first still read as unbought - and
+        /// the entry node could be skipped outright. The frontier now only ever grows out of
+        /// something the hero actually holds.</para>
         /// </summary>
         public static bool IsReachable(SphereGridSO grid, ICollection<string> activated, string key)
         {
             var adjacency = BuildAdjacency(grid);
-            return IsReachable(grid, adjacency, activated, key);
+            return IsReachable(grid, adjacency, ActiveNodes(grid, activated), key);
         }
 
         private static bool IsReachable(
             SphereGridSO grid,
             Dictionary<string, List<string>> adjacency,
-            ICollection<string> activated,
+            ICollection<string> active,
             string key)
         {
             if (string.IsNullOrEmpty(key) || !adjacency.ContainsKey(key))
@@ -139,15 +226,14 @@ namespace Assets.Scripts.Heroes
                 return false;
             }
 
-            string start = StartKey(grid);
-            if (key == start)
+            if (key == StartKey(grid))
             {
                 return true;
             }
 
             foreach (var neighbor in adjacency[key])
             {
-                if (neighbor == start || (activated != null && activated.Contains(neighbor)))
+                if (active != null && active.Contains(neighbor))
                 {
                     return true;
                 }
@@ -155,8 +241,12 @@ namespace Assets.Scripts.Heroes
             return false;
         }
 
-        /// <summary>Full activation gate: the node exists, is not already activated, is reachable,
-        /// and the bank covers its cost.</summary>
+        /// <summary>
+        /// Full XP-side activation gate: the node exists, is not already active, is reachable, and
+        /// the bank covers its cost. Deliberately says nothing about <see cref="HasMaterialCost"/> -
+        /// that half is checked where the inventory lives (<c>HeroRoster.TryActivateNode</c>), so
+        /// the balance model can keep spending a grid with no inventory to spend from.
+        /// </summary>
         public static bool CanActivate(SphereGridSO grid, ICollection<string> activated, int bank, string key)
         {
             var node = FindNode(grid, key);
@@ -165,12 +255,13 @@ namespace Assets.Scripts.Heroes
                 return false;
             }
 
-            if (activated != null && activated.Contains(key))
+            var active = ActiveNodes(grid, activated);
+            if (active.Contains(key))
             {
                 return false;
             }
 
-            if (!IsReachable(grid, activated, key))
+            if (!IsReachable(grid, BuildAdjacency(grid), active, key))
             {
                 return false;
             }
@@ -233,12 +324,7 @@ namespace Assets.Scripts.Heroes
         public static StatBlock StatsForNodes(SphereGridSO grid, IEnumerable<string> activated)
         {
             var block = new StatBlock();
-            if (activated == null)
-            {
-                return block;
-            }
-
-            foreach (var key in activated)
+            foreach (var key in ActiveNodes(grid, activated))
             {
                 var node = FindNode(grid, key);
                 if (node != null && node.Kind == SphereNodeKind.Stat && node.Gains != null)
@@ -254,24 +340,21 @@ namespace Assets.Scripts.Heroes
         public static List<Resistance> ResistancesForNodes(SphereGridSO grid, IEnumerable<string> activated)
         {
             var totals = new Dictionary<DamageType, float>();
-            if (activated != null)
+            foreach (var key in ActiveNodes(grid, activated))
             {
-                foreach (var key in activated)
+                var node = FindNode(grid, key);
+                if (node == null || node.Kind != SphereNodeKind.Resistance)
                 {
-                    var node = FindNode(grid, key);
-                    if (node == null || node.Kind != SphereNodeKind.Resistance)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if (totals.ContainsKey(node.ResistType))
-                    {
-                        totals[node.ResistType] += node.ResistPercent;
-                    }
-                    else
-                    {
-                        totals[node.ResistType] = node.ResistPercent;
-                    }
+                if (totals.ContainsKey(node.ResistType))
+                {
+                    totals[node.ResistType] += node.ResistPercent;
+                }
+                else
+                {
+                    totals[node.ResistType] = node.ResistPercent;
                 }
             }
 
@@ -297,12 +380,7 @@ namespace Assets.Scripts.Heroes
         public static int SlotBonusForNodes(SphereGridSO grid, IEnumerable<string> activated)
         {
             int bonus = 0;
-            if (activated == null)
-            {
-                return bonus;
-            }
-
-            foreach (var key in activated)
+            foreach (var key in ActiveNodes(grid, activated))
             {
                 var node = FindNode(grid, key);
                 if (node != null && node.Kind == SphereNodeKind.MagicSlot)
@@ -331,12 +409,12 @@ namespace Assets.Scripts.Heroes
             SphereGridSO grid, IEnumerable<string> activated)
         {
             var granted = new List<KeyValuePair<string, int>>();
-            if (grid == null || grid.Nodes == null || activated == null)
+            if (grid == null || grid.Nodes == null)
             {
                 return granted;
             }
 
-            var owned = new List<string>(activated);
+            var owned = ActiveNodes(grid, activated);
 
             // Walk the grid, not the save: activation order is click history, and the loadout's
             // auto-fill reads this list positionally.
@@ -495,7 +573,10 @@ namespace Assets.Scripts.Heroes
             var counted = new List<string>();
             foreach (var node in grid.Nodes)
             {
-                if (node != null && !string.IsNullOrEmpty(node.Key) && !counted.Contains(node.Key))
+                // Default unlocks are handed over, not bought, so they are not part of what the
+                // grid costs to complete.
+                if (node != null && !string.IsNullOrEmpty(node.Key) && !counted.Contains(node.Key)
+                    && !IsDefaultUnlocked(node))
                 {
                     counted.Add(node.Key);
                     total += node.XpCost;
@@ -515,6 +596,7 @@ namespace Assets.Scripts.Heroes
             }
 
             var adjacency = BuildAdjacency(grid);
+            var active = ActiveNodes(grid, activated);
             var seen = new List<string>();
             foreach (var node in grid.Nodes)
             {
@@ -524,12 +606,12 @@ namespace Assets.Scripts.Heroes
                 }
                 seen.Add(node.Key);
 
-                if (activated != null && activated.Contains(node.Key))
+                if (active.Contains(node.Key))
                 {
                     continue;
                 }
 
-                if (IsReachable(grid, adjacency, activated, node.Key))
+                if (IsReachable(grid, adjacency, active, node.Key))
                 {
                     result.Add(node);
                 }

@@ -36,8 +36,76 @@ namespace Tests.EditMode
             var states = SphereGridPresenter.ClassifyAll(Chain(), new List<string>(), 15);
 
             Assert.AreEqual(NodeUiState.Available, states["start"], "Reachable and affordable.");
-            Assert.AreEqual(NodeUiState.Adjacent, states["a"], "Reachable (start's neighbour) but 20 > 15.");
+            Assert.AreEqual(NodeUiState.Locked, states["a"],
+                "The start node is not bought yet, so nothing has opened behind it.");
             Assert.AreEqual(NodeUiState.Locked, states["b"], "No activated neighbour yet.");
+        }
+
+        [Test]
+        public void ClassifyAll_DefaultUnlock_ReadsActivatedAndOpensItsNeighbours()
+        {
+            var grid = Chain();
+            SphereGridOps.FindNode(grid, "a").UnlockedByDefault = true;
+            SphereGridOps.FindNode(grid, "a").XpCost = 0;
+
+            var states = SphereGridPresenter.ClassifyAll(grid, new List<string>(), 30);
+
+            Assert.AreEqual(NodeUiState.Activated, states["a"],
+                "A default unlock is held, not offered - even with nothing in the save.");
+            Assert.AreEqual(NodeUiState.Available, states["b"], "30 covers b, and a is active.");
+        }
+
+        [Test]
+        public void Classify_UnpayableMaterials_ReadsAdjacentNotAvailable()
+        {
+            var grid = Chain();
+
+            // Materials are the second half of the price, so failing them has to read exactly like
+            // failing the XP half - wanted and reachable, but not yet payable.
+            var affordable = SphereGridPresenter.Classify(
+                grid, new List<string>(), 10, "start", _ => true);
+            var unpayable = SphereGridPresenter.Classify(
+                grid, new List<string>(), 10, "start", _ => false);
+
+            Assert.AreEqual(NodeUiState.Available, affordable);
+            Assert.AreEqual(NodeUiState.Adjacent, unpayable);
+        }
+
+        [Test]
+        public void DescribeCost_SaysWhatEachKindOfNodeCosts()
+        {
+            var grid = Chain();
+            var start = SphereGridOps.FindNode(grid, "start");
+            var a = SphereGridOps.FindNode(grid, "a");
+
+            Assert.AreEqual("Costs 10 XP", SphereGridPresenter.DescribeCost(start, false));
+            Assert.AreEqual("Activated", SphereGridPresenter.DescribeCost(start, true));
+
+            a.UnlockedByDefault = true;
+            a.XpCost = 0;
+            Assert.AreEqual("Known from the start — costs nothing",
+                SphereGridPresenter.DescribeCost(a, true),
+                "A node that was never for sale must not read as a purchase.");
+        }
+
+        [Test]
+        public void DescribeMaterialCost_ListsEachLine_AndIsEmptyWithoutOne()
+        {
+            var node = new SphereGridNode { Key = "tip", XpCost = 350 };
+            Assert.AreEqual("", SphereGridPresenter.DescribeMaterialCost(node));
+
+            var iron = ScriptableObject.CreateInstance<Assets.Scripts.Items.ItemSO>();
+            iron.Key = "EmberIron";
+            iron.DisplayName = "Ember Iron";
+            iron.Category = Assets.Scripts.Items.ItemCategory.Material;
+            node.MaterialCosts = new List<Assets.Scripts.Items.MaterialCost>
+            {
+                new Assets.Scripts.Items.MaterialCost { Material = iron, Amount = 2 }
+            };
+
+            Assert.AreEqual("2 Ember Iron", SphereGridPresenter.DescribeMaterialCost(node));
+            Assert.AreEqual("Costs 350 XP + 2 Ember Iron",
+                SphereGridPresenter.DescribeCost(node, false));
         }
 
         [Test]

@@ -231,7 +231,8 @@ namespace Assets.Scripts.Heroes.UI
 
             if (grid != null)
             {
-                foreach (var pair in SphereGridPresenter.ClassifyAll(grid, activated, save.CurrentXp))
+                foreach (var pair in SphereGridPresenter.ClassifyAll(
+                    grid, activated, save.CurrentXp, HeroRoster.CanPayMaterials))
                 {
                     _view.SetNodeState(pair.Key, SphereGridPresenter.StateClass(pair.Value));
                 }
@@ -252,19 +253,20 @@ namespace Assets.Scripts.Heroes.UI
             }
 
             var activated = save.ActivatedNodes ?? new List<string>();
-            bool isActivated = activated.Contains(node.Key);
+            bool isActive = SphereGridOps.ActiveNodes(grid, activated).Contains(node.Key);
 
             SetDetail(
                 SphereGridPresenter.NodeName(node),
                 SphereGridPresenter.KindLabel(node),
                 SphereGridPresenter.DescribePayload(node),
-                isActivated ? "Activated" : $"Costs {node.XpCost} XP");
+                SphereGridPresenter.DescribeCost(node, isActive));
 
             if (_activateButton != null)
             {
-                _activateButton.text = isActivated ? "Activated" : "Activate";
+                _activateButton.text = isActive ? "Activated" : "Activate";
                 _activateButton.SetEnabled(
-                    SphereGridOps.CanActivate(grid, activated, save.CurrentXp, node.Key));
+                    SphereGridOps.CanActivate(grid, activated, save.CurrentXp, node.Key)
+                    && HeroRoster.CanPayMaterials(node));
             }
         }
 
@@ -318,6 +320,13 @@ namespace Assets.Scripts.Heroes.UI
                 }
 
                 SetFeedback($"{SphereGridPresenter.NodeName(node)} activated.");
+            }
+            else if (!HeroRoster.CanPayMaterials(node))
+            {
+                // The one failure the player cannot fix at the hub, so it is worth naming: XP is
+                // banked from kills, materials only drop in a run.
+                SetFeedback("Not enough materials — needs "
+                            + SphereGridPresenter.DescribeMaterialCost(node) + ".");
             }
             else
             {

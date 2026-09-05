@@ -538,10 +538,14 @@ namespace Assets.Scripts.Heroes.Editor
             AddField(element, "DisplayName");
             AddField(element, "Kind");
             AddField(element, "XpCost");
+            AddField(element, "UnlockedByDefault");
+            AddField(element, "MaterialCosts");
             AddField(element, "Position");
             AddField(element, "Gains");
             AddField(element, "ResistType");
             AddField(element, "ResistPercent");
+            AddField(element, "GrantedMagicKey");
+            AddField(element, "GrantedCharges");
 
             // Edge list with per-edge disconnect, the reliable disconnect UI (painted lines are
             // not hit-testable) — mirrors the manual layout editor's door list.

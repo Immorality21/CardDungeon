@@ -67,15 +67,24 @@ namespace Tests.EditMode
         // --- reachability ----------------------------------------------------
 
         [Test]
-        public void IsReachable_StartAndStartNeighbors_AlwaysReachable()
+        public void IsReachable_StartNode_NeedsNoNeighbour()
         {
-            var grid = Chain();
-            var none = new List<string>();
+            Assert.IsTrue(SphereGridOps.IsReachable(Chain(), new List<string>(), "start"),
+                "A fresh hero has to have somewhere to begin.");
+        }
 
-            Assert.IsTrue(SphereGridOps.IsReachable(grid, none, "start"),
-                "The start node needs no neighbour.");
-            Assert.IsTrue(SphereGridOps.IsReachable(grid, none, "a"),
-                "A neighbour of the start node is buyable before anything is activated.");
+        [Test]
+        public void IsReachable_NeighbourOfAnUnboughtStart_False()
+        {
+            // The bug this pins: adjacency to the *start node* used to grant reachability whether or
+            // not the start had been bought, so a new hero's second node was purchasable while the
+            // first still read as unbought - and the entry node could be skipped entirely.
+            var grid = Chain();
+
+            Assert.IsFalse(SphereGridOps.IsReachable(grid, new List<string>(), "a"),
+                "The start node is not bought yet, so nothing grows out of it.");
+            Assert.IsTrue(SphereGridOps.IsReachable(grid, new List<string> { "start" }, "a"),
+                "Buying the start node opens its neighbours.");
         }
 
         [Test]
@@ -115,7 +124,93 @@ namespace Tests.EditMode
         [Test]
         public void CanActivate_ExactBank_True()
         {
-            Assert.IsTrue(SphereGridOps.CanActivate(Chain(), new List<string>(), 20, "a"));
+            Assert.IsTrue(SphereGridOps.CanActivate(Chain(), new List<string> { "start" }, 20, "a"));
+        }
+
+        // --- default unlocks ---------------------------------------------------
+
+        /// <summary>start(10) — free(20) — b(30): "free" is handed over, never bought.</summary>
+        private static SphereGridSO ChainWithDefault()
+        {
+            var free = Node("free", 20, "b");
+            free.UnlockedByDefault = true;
+            free.Gains = new StatBlock(new UnitStat(StatType.Strength, 4));
+            return Grid("start", Node("start", 10, "free"), free, Node("b", 30));
+        }
+
+        [Test]
+        public void ActiveNodes_FoldsDefaultsIntoTheSavedList_WithoutDuplicating()
+        {
+            var grid = ChainWithDefault();
+
+            Assert.AreEqual(new List<string> { "free" }, SphereGridOps.ActiveNodes(grid, null),
+                "A save with no activations still holds what the grid gives away.");
+            Assert.AreEqual(new List<string> { "start", "free" },
+                SphereGridOps.ActiveNodes(grid, new List<string> { "start" }));
+            Assert.AreEqual(new List<string> { "free" },
+                SphereGridOps.ActiveNodes(grid, new List<string> { "free" }),
+                "A node bought before it was marked default must not appear twice.");
+        }
+
+        [Test]
+        public void DefaultUnlockedNode_GrantsItsPayloadOnAnEmptySave()
+        {
+            var stats = SphereGridOps.StatsForNodes(ChainWithDefault(), new List<string>());
+
+            Assert.AreEqual(4, stats[StatType.Strength]);
+        }
+
+        [Test]
+        public void DefaultUnlockedNode_OpensItsNeighbours_AndIsNeverForSale()
+        {
+            var grid = ChainWithDefault();
+            var none = new List<string>();
+
+            Assert.IsTrue(SphereGridOps.IsReachable(grid, none, "b"),
+                "The default unlock is active, so what it touches is on the frontier.");
+            Assert.IsFalse(SphereGridOps.CanActivate(grid, none, 999, "free"),
+                "Already active - buying it again would charge for nothing.");
+        }
+
+        [Test]
+        public void DefaultUnlockedMagic_IsKnownWithNothingActivated()
+        {
+            var known = Node("known", 20);
+            known.Kind = SphereNodeKind.MagicKnown;
+            known.GrantedMagicKey = "Slash";
+            known.GrantedCharges = 2;
+            known.UnlockedByDefault = true;
+            var grid = Grid("start", Node("start", 10, "known"), known);
+
+            var granted = SphereGridOps.KnownMagicForNodes(grid, new List<string>());
+
+            Assert.AreEqual(1, granted.Count);
+            Assert.AreEqual("Slash", granted[0].Key);
+            Assert.AreEqual(2, granted[0].Value);
+        }
+
+        [Test]
+        public void TotalGridCost_ExcludesDefaultUnlocks()
+        {
+            // start(10) + b(30); free(20) is given away, so it is not part of the price.
+            Assert.AreEqual(40, SphereGridOps.TotalGridCost(ChainWithDefault()));
+        }
+
+        // --- material prices ---------------------------------------------------
+
+        [Test]
+        public void HasMaterialCost_IgnoresEmptyAndUnauthoredLines()
+        {
+            var node = Node("node", 10);
+            Assert.IsFalse(SphereGridOps.HasMaterialCost(node), "No lines at all.");
+
+            node.MaterialCosts = new List<Assets.Scripts.Items.MaterialCost>
+            {
+                null,
+                new Assets.Scripts.Items.MaterialCost { Material = null, Amount = 3 }
+            };
+            Assert.IsFalse(SphereGridOps.HasMaterialCost(node),
+                "A line with no material authored is a half-edited price, not a price.");
         }
 
         // --- TryActivate (save-entry spend) -------------------------------------
@@ -123,13 +218,18 @@ namespace Tests.EditMode
         [Test]
         public void TryActivate_SpendsBankAndAppends()
         {
-            var entry = new HeroSaveData { HeroKey = "hero", CurrentXp = 25 };
+            var entry = new HeroSaveData
+            {
+                HeroKey = "hero",
+                CurrentXp = 25,
+                ActivatedNodes = new List<string> { "start" }
+            };
 
             bool activated = SphereGridOps.TryActivate(Chain(), entry, "a");
 
             Assert.IsTrue(activated);
             Assert.AreEqual(5, entry.CurrentXp);
-            Assert.AreEqual(new List<string> { "a" }, entry.ActivatedNodes);
+            Assert.AreEqual(new List<string> { "start", "a" }, entry.ActivatedNodes);
         }
 
         [Test]

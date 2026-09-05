@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.IO;
+using Assets.Scripts.Items;
+using Assets.Scripts.Progression;
 
 namespace Assets.Scripts.Heroes
 {
@@ -178,13 +180,31 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
-        /// Spends banked XP to activate one sphere-grid node, validate → spend → save. Hub-only:
-        /// the dungeon never calls this, which is what keeps room-event spawn thresholds
-        /// (<c>DungeonManager.BestRosterStats</c>) stable across a run.
+        /// Spends banked XP - and, on a node that asks for them, materials - to activate one
+        /// sphere-grid node: validate → spend → save. Hub-only: the dungeon never calls this, which
+        /// is what keeps room-event spawn thresholds (<c>DungeonManager.BestRosterStats</c>) stable
+        /// across a run.
+        ///
+        /// <para>The two prices are checked together and paid together. XP lives in
+        /// <c>Party.json</c> and materials in the inventory, so a node that charges both has two
+        /// stores to keep consistent; both are verified before either moves, and a failed material
+        /// spend puts the XP straight back rather than leaving a node bought for free.</para>
         /// </summary>
         public static bool TryActivateNode(HeroSO hero, string nodeKey)
         {
             if (hero == null || string.IsNullOrEmpty(hero.SaveKey) || hero.SphereGrid == null)
+            {
+                return false;
+            }
+
+            var node = SphereGridOps.FindNode(hero.SphereGrid, nodeKey);
+            if (node == null)
+            {
+                return false;
+            }
+
+            bool chargesMaterials = SphereGridOps.HasMaterialCost(node);
+            if (chargesMaterials && !CanPayMaterials(node))
             {
                 return false;
             }
@@ -203,8 +223,62 @@ namespace Assets.Scripts.Heroes
                 return false;
             }
 
+            if (chargesMaterials && !InventoryManager.Instance.SpendMaterials(node.MaterialCosts))
+            {
+                entry.CurrentXp += node.XpCost;
+                entry.ActivatedNodes.Remove(nodeKey);
+                return false;
+            }
+
             handler.Save(save);
             return true;
+        }
+
+        /// <summary>
+        /// Whether the material half of a node's price is covered right now. False with no
+        /// inventory in the scene, so a material-gated node is never bought for free by a screen
+        /// that came up without one.
+        /// </summary>
+        public static bool CanPayMaterials(SphereGridNode node)
+        {
+            if (!SphereGridOps.HasMaterialCost(node))
+            {
+                return true;
+            }
+
+            return InventoryManager.HasInstance && InventoryManager.Instance.CanAfford(node.MaterialCosts);
+        }
+
+        /// <summary>
+        /// Records every spell a hero's grid hands over for free as discovered, so the Forge can
+        /// upgrade it. The grid screen marks a spell discovered when its node is <i>bought</i>, and
+        /// a default unlock is never bought - without this the starting signatures would sit
+        /// permanently unupgradeable in the Forge. Idempotent; safe to call on every hub load.
+        /// </summary>
+        public static void MarkDefaultUnlocksDiscovered(PartyRosterSO catalog)
+        {
+            if (catalog == null || !MetaProgressManager.HasInstance)
+            {
+                return;
+            }
+
+            foreach (var hero in GetOwnedHeroes(catalog))
+            {
+                if (hero == null || hero.SphereGrid == null || hero.SphereGrid.Nodes == null)
+                {
+                    continue;
+                }
+
+                foreach (var node in hero.SphereGrid.Nodes)
+                {
+                    if (SphereGridOps.IsDefaultUnlocked(node)
+                        && node.Kind == SphereNodeKind.MagicKnown
+                        && !string.IsNullOrEmpty(node.GrantedMagicKey))
+                    {
+                        MetaProgressManager.Instance.MarkMagicDiscovered(node.GrantedMagicKey);
+                    }
+                }
+            }
         }
 
         /// <summary>Catalog heroes the player does not own yet — the tavern's recruitment pool.</summary>
