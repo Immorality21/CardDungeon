@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: HexSilk
   DisplayName: Hex Silk
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: c0de5211aa0f0000000000000000ab0f, type: 3}
   Rarity: 1
   ItemLevel: 2
   Description: 'Spun on a loom that was not a loom, by something that was not a spider.'

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: SlagCoal
   DisplayName: Slag Coal
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: c0de5211aa0f0000000000000000ab0f, type: 3}
   Rarity: 1
   ItemLevel: 2
   Description: 'Burns hotter than it has any right to, and longer than you would like.'

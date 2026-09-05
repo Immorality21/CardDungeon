@@ -194,7 +194,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             // Build dungeon from manual layout
-            var rooms = _roomManager.BuildManualDungeon(layout);
+            var rooms = _roomManager.BuildManualDungeon(layout, _level);
 
             // Assign stable room indices
             for (int i = 0; i < rooms.Count; i++)

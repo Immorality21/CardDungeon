@@ -119,5 +119,41 @@ namespace Tests.EditMode
             var upper = MakeRoom(3, 3, 3, 3);
             Assert.IsFalse(ManualLevelLayoutSO.AreRoomsAdjacent(lower, upper));
         }
+
+        /// <summary>
+        /// A manual layout replaces a floor's room <i>graph</i>, not the level it belongs to: the wall
+        /// texture, the treasure/rest quotas, the material table, the backdrop and the music all still
+        /// come from <c>RunLevelEntry.LevelTemplate</c>. An entry that authors a layout and no template
+        /// looks complete in the inspector and silently loses all of it - and until 2026-09-05 it also
+        /// threw a NullReferenceException in <c>RoomManager.BuildManualDungeon</c>, which is how the
+        /// tutorial's first floor became unenterable.
+        /// </summary>
+        [Test]
+        public void EveryManualLayoutEntry_AlsoNamesALevelTemplate()
+        {
+            var broken = new List<string>();
+            foreach (var guid in AssetDatabase.FindAssets("t:RunDefinitionSO"))
+            {
+                var run = AssetDatabase.LoadAssetAtPath<RunDefinitionSO>(AssetDatabase.GUIDToAssetPath(guid));
+                if (run == null || run.Levels == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < run.Levels.Count; i++)
+                {
+                    var entry = run.Levels[i];
+                    if (entry != null && entry.ManualLayout != null && entry.LevelTemplate == null)
+                    {
+                        broken.Add($"{run.name} Levels[{i}] ({entry.LevelName})");
+                    }
+                }
+            }
+
+            CollectionAssert.IsEmpty(broken,
+                $"Run level entr(ies) {string.Join(", ", broken)} author a ManualLayout with no "
+                + "LevelTemplate. The layout supplies the room graph; everything else about the floor "
+                + "still comes from the template.");
+        }
     }
 }

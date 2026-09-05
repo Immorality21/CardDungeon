@@ -21,8 +21,18 @@ namespace Assets.Scripts.Rooms
         private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
         private List<(RoomNode, RoomNode)> _placementPairs = new List<(RoomNode, RoomNode)>();
 
-        public List<Room> BuildManualDungeon(ManualLevelLayoutSO layout)
+        /// <summary>
+        /// Builds an authored level. <paramref name="level"/> is the run entry's template - a manual
+        /// layout replaces the room *graph*, not the level it belongs to, and the template still
+        /// supplies the wall texture and everything downstream reads off <c>CurrentLevel</c>.
+        /// Optional, so a layout can still be built standalone from the editor window.
+        /// </summary>
+        public List<Room> BuildManualDungeon(ManualLevelLayoutSO layout, LevelDefinitionSO level = null)
         {
+            // Set before anything reads it: the wall pass below used to dereference whatever
+            // GenerateDungeon had left here, which on the manual path is null.
+            _currentLevel = level;
+
             SpawnedRooms.DestroyAndClear(true);
             _spawnedDoors.DestroyAndClear(true);
             _occupiedTiles.Clear();
@@ -67,10 +77,14 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            // Place walls
+            // Walls come off the level template, exactly as they do on the procedural path: a manual
+            // layout replaces a floor's room *graph*, not the biome it belongs to, and floor 1 of a
+            // run should not be a different colour from floor 2 because one is authored. The
+            // layout's own WallColor is the fallback for building a layout with no template (the
+            // Manual Level Layout Editor's preview), which is the only place it was ever reachable.
             var wallGen = new WallGenerator(
-                _currentLevel.WallTexture,
-                _currentLevel.WallColor
+                _currentLevel != null ? _currentLevel.WallTexture : null,
+                _currentLevel != null ? _currentLevel.WallColor : layout.WallColor
             );
             wallGen.PlaceWalls(SpawnedRooms);
 

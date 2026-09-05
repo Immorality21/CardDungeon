@@ -2264,3 +2264,86 @@ early equals five stat nodes held broadly — the value depends entirely on whet
 of you is the one the key opens. So the right posture is floors and shapes: keep a minimum
 (rule 5), keep both routes reachable, check that they *differ*, and resist the urge to make them
 equal. Tight tuning here would be measuring a quantity that does not exist.
+
+---
+
+## §5u — The tutorial was measured against a party the game will not give you (2026-09-05)
+
+Triggered by a play report, not by a finding: "the tutorial is a bit too difficult." Every analyzer
+number said otherwise — The Threshold sat at 0 wipes across all four floors, well inside every band.
+Both were true, and the gap between them is the whole lesson.
+
+### The finding: the model fields three heroes, the game fields two
+
+`BalanceAssetCollector` builds the reference party from `PartyRosterSO.StartingLineup()`, which is
+**Warrior, Paladin, Ranger** — three heroes. But `PartySlots.BaseCap` is **2**, and the extra slot
+costs 300 gold a fresh save does not have. So the tutorial — the one run the player is guaranteed to
+reach with an unbought cap — was being measured with **50% more bodies than it can ever be played
+with**. Party width is the strongest lever on danger there is (`§5l`: danger is superlinear in body
+count), so this is not a rounding error; it is the dominant term.
+
+Re-running the floor simulation at both widths, at the difficulty that was shipped (1.80 / 2.05 / 2.46):
+
+| floor | wipes at party 3 | wipes at party 2 | attrition at party 2 |
+|---|---|---|---|
+| Dungeon Entrance | 0/200 | 0/200 | 0.23 |
+| Upper Halls | 0/200 | **118/200** | 1.18 |
+| Collapsed Caverns | 0/200 | **33/200** | 1.27 |
+| Sunken Depths | 0/200 | **193/200** | 1.71 |
+
+The tutorial's last floor was a **97% wipe** for the party the game actually hands you, and its
+second floor a coin flip. An attrition above 1 means the floor costs more than the party's entire
+health-plus-potion pool, and three of the four floors were above it.
+
+### What shipped
+
+`TutorialRun` levels 1–3 only, via `RunLevelEntry.EnemyTuning.Difficulty` — the per-run, per-level
+dial, so no shared `EnemySO` and no other run moved:
+
+| level | was | now |
+|---|---|---|
+| Upper Halls | 1.80 | **1.20** |
+| Collapsed Caverns | 2.05 | **1.50** |
+| Sunken Depths | 2.46 | **1.60** |
+
+At party 2 that is **0 wipes on every floor**, ending the boss floor at 48% health — a finale that
+still costs something. At party 3 the escalation jump from Collapsed Caverns to Sunken Depths is 59%,
+inside `MaxDifficultyJump`. The whole suite stays green.
+
+**Level 0 was left alone** (Difficulty 1, already 0.23 attrition at party 2), and so was the Abyssal
+Warden's `Overrides` block: absolute stat overrides are applied *after* `Difficulty` in
+`LevelEnemyTuning.StatsFor`, so the boss keeps its authored 50 HP / 9 STR while the trash around it
+eases. That is the right split — the climax should not soften just because the floor leading to it
+did. `XpMultiplier` and `GoldMultiplier` were not touched either, so the state the player enters
+The Drowned March in is unchanged and nothing downstream needs re-measuring.
+
+### Three things this pass learned
+
+1. **The optimistic party-width assumption is fine everywhere except the tutorial.** The
+   do-not-relitigate list says modelling at the bought-out cap is acceptable "for general difficulty
+   reporting — the user prefers the game to run harder than the model says". That holds for runs the
+   player reaches *after* buying slots. It is guaranteed wrong for the first run, where the cap
+   cannot have been bought yet, and there the model is not conservative — it is simply measuring a
+   party that does not exist. **Measure the first run at `PartySlots.BaseCap`.**
+
+2. **A wipe rate is the reading; attrition is only the explanation.** Attrition above 1 said all
+   three floors were unclearable, but it took the floor simulation to say *how* unclearable —
+   17% versus 97% is the difference between "tense" and "broken", and the closed-form number does
+   not distinguish them.
+
+3. **Lowering a floor can break the floor after it.** `MinAttritionForJumpCheck` (0.10) exempts a
+   level too light to be a meaningful base for a ratio. The first attempt (1.05 / 1.25 / 1.45) put
+   Collapsed Caverns at 0.15 — *just above* the exemption — which made the boss floor read as a
+   115% spike and failed `RunDifficultyEscalates`. The fix was to raise the middle floor rather than
+   drop the last one: a boss floor's attrition is carried by an absolute stat override that
+   `Difficulty` cannot reach, so the ratio has to be closed from below.
+
+### Still open
+
+- **The analyzer reports the tutorial at a party it cannot be played with.** This pass worked around
+  it by measuring by hand. The durable fix is for `RunCurveModel` to cap the modelled party at
+  `PartySlots.CapForBonus(0)` for a run with no prerequisites, or for `BalanceRulesSO` to carry the
+  assumed bought-slot count per tier. Until then, **any first-run number in this file is optimistic
+  by one whole hero.**
+- The same question applies to `The Drowned March` and `The Warrens`, which a player may also reach
+  before buying a slot. Neither was re-measured here.

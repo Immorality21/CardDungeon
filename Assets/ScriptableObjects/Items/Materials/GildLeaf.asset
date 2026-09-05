@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: GildLeaf
   DisplayName: Gild Leaf
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: c0de5211aa0f0000000000000000ab0f, type: 3}
   Rarity: 2
   ItemLevel: 3
   Description: 'Gold hammered thin enough to read through. The vault is papered in the stuff.'

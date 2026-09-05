@@ -37,6 +37,14 @@ absent for now (the boss room is already expressed by `RunLevelEntry.BossEnemy` 
 
 **Placement is per instance, on a level budget** - the same split as room events, for the same
 reason: a template used three times in one level must not become three caches.
+**A manual layout still needs its level template.** `RoomManager.BuildManualDungeon(layout, level)`
+takes both: the layout supplies the room *graph*, the `LevelDefinitionSO` supplies everything else a
+floor is — wall texture and colour, the treasure/rest quotas, the material table, the backdrop and
+the music. It sets `_currentLevel` before anything reads it; until 2026-09-05 it did not, and the
+wall pass dereferenced whatever `GenerateDungeon` had left there, which on the manual path is
+**null** — so the tutorial's first floor threw on entry.
+`ManualLayoutValidationTests.EveryManualLayoutEntry_AlsoNamesALevelTemplate` guards the data half.
+
 `LevelDefinitionSO.TreasureRooms` / `RestRooms` say how *many*; the pure `RoomKindPlanner` says
 *which*, drawing on the dungeon's seeded RNG so a resumed level reproduces its own caches.
 `DungeonManager.PlaceRoomKinds` runs **before every other content pass**, because they all read the

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: MireReed
   DisplayName: Mire Reed
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: c0de5211aa0f0000000000000000ab0f, type: 3}
   Rarity: 0
   ItemLevel: 1
   Description: 'Tough, wet, and unpleasantly warm. Dries into something you can lash a roof with.'

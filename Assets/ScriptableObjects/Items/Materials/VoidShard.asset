@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: VoidShard
   DisplayName: Void Shard
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: c0de5211aa0f0000000000000000ab0f, type: 3}
   Rarity: 2
   ItemLevel: 4
   Description: 'A splinter of the dark that holds the deep together. Only the things set to guard it carry any.'
