@@ -189,6 +189,14 @@ namespace Assets.Scripts.Balance
         public List<RunCurve> Runs = new List<RunCurve>();
         public VarietyReport Variety;
         public ProgressionMap Progression;
+
+        /// <summary>
+        /// Expected raw-material yield across the whole campaign - the tap buildings and
+        /// material-priced grid nodes will be drained against (<c>docs/plans/HUB.md</c> §7).
+        /// Measured before anything depends on it, deliberately: a sink is only tunable against a
+        /// source that has been counted.
+        /// </summary>
+        public List<MaterialYield> Materials = new List<MaterialYield>();
         /// <summary>
         /// The party each enemy is first met with, so enemy metrics *and* the simulator judge it
         /// against the roster the player actually brings. Filled by the analyzer.

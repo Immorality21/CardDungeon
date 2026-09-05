@@ -58,20 +58,33 @@ namespace Assets.Scripts.Items
             Save();
         }
 
-        public void AddItem(ItemSO item)
+        /// <summary>
+        /// Adds <paramref name="count"/> of an item. Stacking items (consumables, materials) pile
+        /// into one entry; equipment becomes <paramref name="count"/> separate ones.
+        /// </summary>
+        public void AddItem(ItemSO item, int count = 1)
         {
-            if (item == null)
+            if (item == null || count <= 0)
             {
                 return;
             }
 
-            InventoryOperations.AddItem(_saveData.Items, item);
+            InventoryOperations.AddItem(_saveData.Items, item, count);
 
             if (!_deferSaves)
             {
                 Save();
             }
             OnInventoryChanged?.Invoke();
+        }
+
+        /// <summary>Adds a rolled drop-table award (see <see cref="LootRoller.Roll"/>).</summary>
+        public void AddItem(LootAward award)
+        {
+            if (!award.IsEmpty)
+            {
+                AddItem(award.Item, award.Quantity);
+            }
         }
 
         public void RemoveItem(string itemKey)
@@ -136,6 +149,43 @@ namespace Assets.Scripts.Items
         public List<ItemSaveData> GetConsumables()
         {
             return _saveData.Items.Where(i => IsCategory(i, ItemCategory.Consumable)).ToList();
+        }
+
+        /// <summary>Every material stack the player has brought home.</summary>
+        public List<ItemSaveData> GetMaterials()
+        {
+            return _saveData.Items.Where(i => IsCategory(i, ItemCategory.Material)).ToList();
+        }
+
+        /// <summary>Total carried quantity of one material across stacks (0 if none).</summary>
+        public int GetMaterialQuantity(string itemKey)
+        {
+            return InventoryOperations.GetMaterialQuantity(_saveData.Items, itemKey, GetItemSO);
+        }
+
+        /// <summary>Whether a whole material price is covered by what is carried. Never spends.</summary>
+        public bool CanAfford(IList<MaterialCost> cost)
+        {
+            return InventoryOperations.CanAfford(_saveData.Items, cost, GetItemSO);
+        }
+
+        /// <summary>
+        /// Pays a material price, all or nothing. Saves immediately unless a dungeon has deferred
+        /// saves — spending happens at the hub, where nothing is deferred.
+        /// </summary>
+        public bool SpendMaterials(IList<MaterialCost> cost)
+        {
+            if (!InventoryOperations.SpendMaterials(_saveData.Items, cost, GetItemSO))
+            {
+                return false;
+            }
+
+            if (!_deferSaves)
+            {
+                Save();
+            }
+            OnInventoryChanged?.Invoke();
+            return true;
         }
 
         /// <summary>Total carried quantity of a consumable across stacks (0 if none).</summary>

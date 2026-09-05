@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Card Dungeon is a 2D procedural dungeon generation game built with **Unity 6 (6000.5.8f1)** and **C#**. It generates grid-based dungeons with interconnected rooms, doors, and configurable room types via ScriptableObjects. Features a turn-based combat system inspired by Final Fantasy X's CTB (Conditional Turn-Based) system. Magic is learned on a per-hero **sphere grid** and carried into a run in a scarce set of charge-based slots chosen at the hub, with tag combos, buffs/debuffs, and elemental damage types, plus a persistent between-run hub economy (Gold/Essence). *(An FFVIII-style **Draw** — extracting magic from enemies mid-combat — filled that role until 2026-09-04; see `docs/plans/SPECIALIZATION.md` §9b.)*
+Card Dungeon is a 2D procedural dungeon generation game built with **Unity 6 (6000.5.8f1)** and **C#**. It generates grid-based dungeons with interconnected rooms, doors, and configurable room types via ScriptableObjects. Features a turn-based combat system inspired by Final Fantasy X's CTB (Conditional Turn-Based) system. Magic is learned on a per-hero **sphere grid** and carried into a run in a scarce set of charge-based slots chosen at the hub, with tag combos, buffs/debuffs, and elemental damage types, plus a persistent between-run hub economy (Gold/Essence/**materials**). *(An FFVIII-style **Draw** — extracting magic from enemies mid-combat — filled that role until 2026-09-04; see `docs/plans/SPECIALIZATION.md` §9b.)*
 
 ## Roadmap
 
@@ -56,7 +56,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 - `Cards/` — Magic system (namespace still `Cards`): `MagicSO`, `MagicTag` (enum), `MagicCatalog`, `EquippedMagicState` (equipped slots + charges), **`MagicLoadoutOps`** (which known spells fill those slots), `EffectResolver`, `ComboDetector`, `CombatBuffTracker`, `MagicTagTracker`, `MagicComboSO`
 - `Cards/Effects/` — Effect executors: `IEffectExecutor`, `DamageEffectExecutor`, `HealEffectExecutor`, `BuffEffectExecutor`, `DebuffEffectExecutor`, `EffectExecutorFactory`
 - `Cards/UI/` — `MagicSelectionUI`, `MagicForgeUI`
-- `Items/` — `ItemSO` (equipment + consumables via `ItemCategory`/`ConsumableEffectType`), `InventoryManager` (+ pure `InventoryOperations`), `ItemCatalogSO` (Resources-loaded item DB so the hub resolves items without scene wiring), `LootRoller` (rarity/depth-scaled drops), `UI/InventoryHubUI` (hub equip + consumables screen)
+- `Items/` — `ItemSO` (equipment, consumables and **materials** via `ItemCategory`/`ConsumableEffectType`), `InventoryManager` (+ pure `InventoryOperations`), `ItemCatalogSO` (Resources-loaded item DB so the hub resolves items without scene wiring), `LootRoller` + `LootDrop` (rarity/depth-scaled drops and per-enemy/per-level **drop tables**), `MaterialCost` (a price in raw stuff, for the hub buildings and grid nodes to come), `UI/InventoryHubUI` (hub equip / spells / consumables / materials screen)
 - `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`, `RunDefinitionSO`, `RunLevelEntry`, `RunSaveData`, and **the campaign graph** (`CampaignSO` + `CampaignOps` — which runs exist, what unlocks them, and which branches are optional/secret)
 - `Resources/` — `PartyResourceManager`, `PartyResourceType`
 - `IO/` — `FileHandler`, `IWriteable`

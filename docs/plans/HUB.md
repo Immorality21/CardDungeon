@@ -8,14 +8,19 @@ Campfire, materials, buildings and a staged unlock of the game — plus the gold
 
 ### 7. The hub becomes a place — buildings, materials, and a staged unlock of the game
 
-> **Status: outlined, not started (2026-09-01; extended 2026-09-04).** A direction, not a work item
-> yet. The phases below are ordered so the game is playable after every one; the open questions at
-> the end decide data shapes that are painful to change later.
+> **Status: phase 1 shipped 2026-09-05; phases 2-7 not started** (outlined 2026-09-01, extended
+> 2026-09-04). The phases below are ordered so the game is playable after every one; the open
+> questions at the end decide data shapes that are painful to change later.
 >
 > **2026-09-04 — confirmed and extended.** The whiteboard session endorsed this section as written
 > (campfire first, buildings arriving with progression). Two additions: materials also pay for
 > **sphere-grid nodes** (§4c), not only for buildings — see the note under machinery piece 4 — and
 > **crafting** joins as a deliberately-last phase 7.
+>
+> **2026-09-05 — materials drop.** Phase 1 is in: ten materials, per-enemy and per-level drop
+> tables, a hub Materials tab, and `MaterialYieldModel` measuring the tap. **Nothing spends them
+> yet** — that is phase 2 onward, and deliberately so. See "What phase 1 actually landed" below for
+> the measured yields and the two things it settled.
 
 **The vision.** The main menu stops being a menu and becomes **the hub** — a static, authored 2D
 layout the player looks at, not a column of buttons. You start with a **campfire and four spots
@@ -48,12 +53,17 @@ one.
 
 #### The four pieces of new machinery
 
-**1. Materials — items, not a currency.** Resist adding `Wood`/`Iron` fields to
-`MetaProgressSaveData`. Materials are open-ended and per-type, and the item system already models
-this: add **`ItemCategory.Material`**, and materials are `ItemSO`s that stack (`MaxStack` exists),
-drop through `LootRoller`, live in `InventoryManager`, resolve without scene wiring through the
-Resources `ItemCatalog`, and appear in the Bestiary's drop record without a line of new code.
-`PartyResourceType` is the wrong home — it is the *in-run* consumable belt.
+**1. Materials — items, not a currency.** ✅ **Shipped 2026-09-05, as written.** Materials are
+`ItemSO`s with `ItemCategory.Material`: they stack (`MaxStack` 999), drop through `LootRoller`, live
+in `InventoryManager`, resolve without scene wiring through the Resources `ItemCatalog`, and appear
+in the Bestiary's drop record. `MetaProgressSaveData` was left alone and `PartyResourceType` was not
+touched — it is the *in-run* consumable belt.
+
+One thing the outline did not anticipate: `EnemySO.LootItem` was a **single** item, which cannot
+carry both a signature weapon and the scrap a monster is made of. It became
+`List<LootDrop>` — item, an optional flat `Chance` (0 = the old rarity + depth math), and a quantity
+range — rolled entry by entry. That is also what lets a boss guarantee its material and a material
+opt out of depth suppression entirely.
 
 **2. `BuildingSO` + `HubSO` + `BuildingOps`.** Follow `CampaignSO` exactly, because it solved the
 same problem: one Resources-loaded asset holds every building, its authored position, its per-level
@@ -117,7 +127,7 @@ early-game contract, not a whole-game one.**
 
 | # | Phase | What lands | Why here |
 |---|---|---|---|
-| 1 | **Materials drop** | `ItemCategory.Material`, authored materials, per-enemy drop tables, Bestiary shows them | Pure addition; drop rates measurable before anything depends on them |
+| 1 | ✅ **Materials drop** *(2026-09-05)* | `ItemCategory.Material`, ten authored materials, per-enemy `LootTable` **and** per-level `MaterialTable`, Bestiary shows them a row at a time, hub Materials tab, `MaterialYieldModel` + two reachability findings | Pure addition; drop rates measurable before anything depends on them |
 | 2 | **Buildings exist, nothing is locked** | `BuildingSO`/`HubSO`/`BuildingOps` + save + tests, **every building pre-built at level 1** | The data model lands under test while the game plays exactly as today |
 | 3 | **The hub replaces home** | `HubView`: backdrop, per-state sprites, phase-in; the buttons become buildings; campfire seats = `PartySlots` | Migration risk isolated from gating risk; placeholder art is enough |
 | 4 | **Turn the gates on** | Campfire only at start; author the first-run unlock sequence | The actual design work, against a hub that already renders |
@@ -127,9 +137,10 @@ early-game contract, not a whole-game one.**
 
 #### Open questions — settle these before Phase 2
 
-1. **Do materials survive a wipe?** They must, by the same mechanism gold does — banked on floor
-   clear, only the current floor forfeited. Anything else turns buildings into the death penalty §3b
-   explicitly rejected.
+1. ~~**Do materials survive a wipe?**~~ **Settled 2026-09-05, for free.** Materials ride the ordinary
+   loot path, and that path *already* banks on floor clear and forfeits the current floor
+   (`InventoryManager.SetDeferSaves` / `CommitInventory`, discarded by `HandlePartyDeath`). No new
+   mechanism was needed, and buildings therefore cannot become the death penalty §3b rejected.
 2. **Materials or gold — which pays for what?** Recommendation: **materials gate *whether*, gold
    gates *when*.** Placing a building needs a material only found at a certain depth; upgrading it
    costs gold (so gold keeps its §3b tuition role, and §3's "more gold sinks" is answered by a sink
@@ -146,6 +157,52 @@ early-game contract, not a whole-game one.**
    flat-colour UITK panels. Recommendation: author the sprite fields on `BuildingSO` from Phase 2 and
    fill them with flat silhouettes so Phases 3–5 are playable before any real art exists. Decide the
    backdrop's reference resolution at the same time — every authored `Position` is expressed in it.
+
+#### What phase 1 actually landed (2026-09-05) — and the two things it settled
+
+**The two taps, and why they are separate.** Enemies drop **what they are made of**
+(`EnemySO.LootTable`); a floor's caches yield **what the place is made of**
+(`LevelDefinitionSO.MaterialTable`, via `RoomKindRewards.TreasureMaterials`). That split was not in
+the outline and is the most useful thing here: it is what makes a material gate on *where the player
+has been* rather than on how long they ground, which is the property machinery piece 4b wants and
+the one XP can never express. Materials are excluded from the cache's single **item** slot
+(`PickTreasureItem`) — a material is common by design, so leaving them in that one-winner walk meant
+the first shuffled material almost always took the slot and a cache stopped producing gear.
+
+**Ten materials.** Five from places — Rotted Timber, Cut Stone, Mire Reed, Slag Coal, Gild Leaf —
+and five from creatures — Scrap Iron, Ember Iron, Mire Hide, Hex Silk, Void Shard. Every boss
+guarantees its run's signature material plus Void Shard, which is deliberately the only material
+that is *only* ever a boss drop. No icons yet; the rows render with an empty icon box, which is the
+placeholder-art bargain phase 3 already assumed.
+
+**Measured yield** (`MaterialYieldModel`, expected units per campaign at the modelled traversal):
+
+| | total | from kills | from caches |
+|---|---|---|---|
+| Scrap Iron | 31.7 | 30.5 | 1.2 |
+| Gild Leaf | 17.5 | 16.5 | 1.0 |
+| Ember Iron | 12.3 | 11.8 | 0.5 |
+| Cut Stone | 9.0 | 5.1 | 3.9 |
+| Void Shard | 8.5 | 8.5 | 0.0 |
+| Hex Silk | 8.1 | 8.1 | 0.0 |
+| Mire Hide | 6.5 | 6.5 | 0.0 |
+| Slag Coal | 4.2 | 0.0 | 4.2 |
+| Mire Reed | 3.8 | 0.0 | 3.8 |
+| Rotted Timber | 3.1 | 0.0 | 3.1 |
+
+**Read that table before pricing anything in phase 2.** Two shapes in it are load-bearing. Scrap
+Iron is an order of magnitude more plentiful than Rotted Timber because it hangs off the Floating Eye
+and the Dragon, the two enemies in nearly every room — so it is the right currency for a *cheap,
+frequent* cost and the wrong one for a gate. And the three cache-only materials are thin for a
+reason that is **an authoring gap, not a tuning choice**: six of the fourteen level templates have
+`TreasureRooms: 0`, so their `MaterialTable` never rolls. The analyzer now reports each one as an
+Economy finding. Raising `TreasureRooms` is the fix, but it is *also* a difficulty lever — a promoted
+room comes off the combat count — so it belongs to a balance pass, not to this one.
+
+**A material's odds are authored, not derived.** An entry with `Chance: 0` falls back on
+`LootRoller`'s rarity + run-depth math, which suppresses an over-level item — the right rule for
+gear and the wrong one for a material that is meant to be found at exactly the depth it is authored
+for. `MaterialContentTests` fails if a material drop leaves `Chance` at 0.
 
 Touch points (anticipated): `Assets/Scripts/MainMenu/MainMenuManager.cs` + `Assets/UI/MainMenu/MainMenu.uxml`,
 a new `Assets/Scripts/Hub/`, `Assets/Scripts/Progression/MetaProgressSaveData.cs`,

@@ -49,6 +49,17 @@ maximum** (a fraction, not a flat number, so it keeps its meaning as bars grow);
 **one** item rolled through the ordinary `LootRoller` rarity/depth rules. One item, because rolling
 the whole catalog would empty it into the party's bags.
 
+A cache also yields the floor's **raw materials**, from `LevelDefinitionSO.MaterialTable`, through
+`RoomKindRewards.TreasureMaterials`. That is a *separate* roll from the single item slot above, and
+materials are excluded from `PickTreasureItem`: a material is common by design, so leaving them in
+that one-winner walk would mean the first shuffled material almost always took the slot and a cache
+stopped producing gear entirely. The split is also the design - **enemies drop what they are made of,
+a cache yields what the *place* is made of** - which is what lets a material gate on where the player
+has been rather than on how long they have ground (`docs/plans/HUB.md` section 7).
+
+**A level with `TreasureRooms: 0` never rolls its `MaterialTable`.** Nothing warns you in the
+inspector; the balance analyzer does, as an Economy finding.
+
 **Promoting a room costs the level a fight**, so the quotas are a difficulty lever as much as a
 reward: `RunCurveModel` takes non-combat rooms off the expected-combat-room count and adds a
 refuge's healing to the sustain pool. Getting that wrong is not theoretical - see the measured

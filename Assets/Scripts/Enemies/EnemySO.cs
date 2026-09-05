@@ -8,7 +8,7 @@ namespace Assets.Scripts.Enemies
 {
     /// <summary>
     /// Definition of an enemy type: its display name, sprite, base stats, behaviour archetype,
-    /// spell repertoire, resistances and loot. A room's spawn table references one of these; the
+    /// spell repertoire, resistances and drop table. A room's spawn table references one of these; the
     /// shared Enemy prefab is stamped with it at spawn time via <see cref="Enemy.Initialize"/>.
     /// </summary>
     [CreateAssetMenu(fileName = "Enemy", menuName = "SO/Enemy")]
@@ -64,7 +64,12 @@ namespace Assets.Scripts.Enemies
 
         public List<Resistance> Resistances = new List<Resistance>();
 
-        public ItemSO LootItem;
+        [Tooltip("What this kill can yield. Every entry rolls on its own, so a monster can drop both " +
+                 "a signature piece of gear and the raw stuff it is made of. An entry with Chance 0 " +
+                 "uses the rarity + run-depth math (how gear has always dropped); an entry with an " +
+                 "explicit Chance is that flat probability, which is what materials use so a drop is " +
+                 "gated by *which* monster rather than by depth.")]
+        public List<LootDrop> LootTable = new List<LootDrop>();
 
         /// <summary>
         /// The behaviour to fight with: the assigned asset, or the built-in preset for

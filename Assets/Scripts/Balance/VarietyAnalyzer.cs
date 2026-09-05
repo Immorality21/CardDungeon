@@ -133,14 +133,29 @@ namespace Assets.Scripts.Balance
                     }
                 }
 
-                if (enemy.LootItem != null)
+                // Materials are excluded: two enemies dropping the same iron is the *point* of a
+                // material - it is the shared stuff a hub cost can be priced in - and counting it
+                // as lost variety would flag every drop table in the game.
+                if (enemy.LootTable != null)
                 {
-                    string lootKey = enemy.LootItem.name;
-                    if (!lootOwners.ContainsKey(lootKey))
+                    foreach (var drop in enemy.LootTable)
                     {
-                        lootOwners[lootKey] = new List<string>();
+                        if (drop == null || drop.Item == null
+                            || drop.Item.Category == Items.ItemCategory.Material)
+                        {
+                            continue;
+                        }
+
+                        string lootKey = drop.Item.name;
+                        if (!lootOwners.ContainsKey(lootKey))
+                        {
+                            lootOwners[lootKey] = new List<string>();
+                        }
+                        if (!lootOwners[lootKey].Contains(enemy.Label))
+                        {
+                            lootOwners[lootKey].Add(enemy.Label);
+                        }
                     }
-                    lootOwners[lootKey].Add(enemy.Label);
                 }
             }
 

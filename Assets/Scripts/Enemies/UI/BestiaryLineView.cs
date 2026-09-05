@@ -41,6 +41,22 @@ namespace Assets.Scripts.Enemies.UI
             return row;
         }
 
+        /// <summary>
+        /// Appends rows with no section heading - for a group that already carries its label on its
+        /// first row, the way a drop table does.
+        /// </summary>
+        public static void AddRows(VisualElement parent, List<BestiaryLine> lines)
+        {
+            if (parent == null || lines == null)
+            {
+                return;
+            }
+            foreach (var line in lines)
+            {
+                parent.Add(Row(line));
+            }
+        }
+
         /// <summary>Appends a section heading plus its rows; skips the section entirely when empty.</summary>
         public static void AddSection(VisualElement parent, string title, List<BestiaryLine> lines)
         {

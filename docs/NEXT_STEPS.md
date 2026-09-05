@@ -110,6 +110,12 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
 - **Crafting is one of the last features, not one of the next** *(2026-09-04, §7 phase 7)*. Materials
   land first as a building and sphere-grid cost; crafting is a second drain and is only tunable once
   the taps and the first drain are measured.
+- **Materials are items, and a material's drop odds are authored** *(2026-09-05, §7 phase 1)*. Not a
+  currency on `MetaProgressSaveData`, not a `PartyResourceType` — `ItemSO`s with
+  `ItemCategory.Material`, which is what gives them stacking, the Bestiary drop record, wipe
+  forfeiture and hub resolution for free. And a material drop states its own flat `Chance` rather
+  than inheriting `LootRoller`'s rarity + depth curve, which is the *gear* regime and would suppress
+  a deep material at the depth it was authored for. Do not fold materials back into a currency.
 
 ---
 
@@ -143,7 +149,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **7** | Buildings, materials, and a staged unlock of the game | outlined 2026-09-01, extended 2026-09-04 |
+| **7** | Buildings, materials, and a staged unlock of the game | phase 1 (**materials drop**) ✅ 2026-09-05; phases 2-7 open |
 | **3** | Sharpen hub sinks | open |
 
 ### [Open balance work](plans/BALANCE_OPEN.md)
@@ -179,6 +185,14 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Materials drop** (2026-09-05) — `docs/plans/HUB.md` §7 phase 1. `ItemCategory.Material` + ten
+  authored materials; `EnemySO.LootItem` → a rolled-per-entry `List<LootDrop>` (flat `Chance`,
+  quantity range) and a new `LevelDefinitionSO.MaterialTable` rolled by caches — **enemies drop what
+  they are made of, a floor yields what the place is made of**. Bestiary shows one loot row per
+  entry, each `???` until seen; a hub Inventory ▸ **Materials** tab; `MaterialCost` +
+  `InventoryOperations.SpendMaterials` (all-or-nothing) ready for the drains. `MaterialYieldModel`
+  measures the tap per floor/run and the analyzer reports an unobtainable material and a
+  `MaterialTable` on a level with no cache. **Nothing spends materials yet** — that is phase 2.
 - **The seven-hero roster** (2026-09-05) — `docs/plans/SPECIALIZATION.md` §5b/§4c. Tank, Acolyte and
   Scout deleted; **Paladin, Cleric, Ranger, Cultist, Tinkerer, Rogue** authored with grids, sprites
   and ten new spells (the holy line, the Ranger/Rogue Agility line, the Cultist's blood magic). Every

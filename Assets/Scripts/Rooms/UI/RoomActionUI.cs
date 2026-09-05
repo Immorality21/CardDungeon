@@ -712,7 +712,17 @@ namespace Assets.Scripts.Rooms
                 InventoryManager.Instance.AddItem(item);
                 lines.Add($"Found: {item.DisplayName}.");
             }
-            else
+
+            // The floor's own raw stuff, rolled separately from the gear slot above - see
+            // RoomKindRewards.TreasureMaterials.
+            var materials = RollTreasureMaterials();
+            foreach (var award in materials)
+            {
+                InventoryManager.Instance.AddItem(award);
+                lines.Add($"Salvaged: {award.Item.DisplayName} x{award.Quantity}.");
+            }
+
+            if (item == null && materials.Count == 0)
             {
                 lines.Add("Nothing else worth carrying.");
             }
@@ -753,6 +763,22 @@ namespace Assets.Scripts.Rooms
 
             return RoomKindRewards.PickTreasureItem(
                 candidates, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
+        }
+
+        /// <summary>
+        /// The raw materials this floor's caches yield, off <c>LevelDefinitionSO.MaterialTable</c>.
+        /// Empty when the level authors no table, which is the same as it authoring no materials.
+        /// </summary>
+        private List<LootAward> RollTreasureMaterials()
+        {
+            var level = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentLevel : null;
+            if (level == null || !InventoryManager.HasInstance)
+            {
+                return new List<LootAward>();
+            }
+
+            return RoomKindRewards.TreasureMaterials(
+                level.MaterialTable, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
         }
 
         /// <summary>
@@ -1778,9 +1804,9 @@ namespace Assets.Scripts.Rooms
             if (result.Loot != null && result.Loot.Count > 0)
             {
                 _victoryRewards.Add(MakeVictoryRow("Loot", result.Loot.Count > 1 ? $"x{result.Loot.Count}" : string.Empty));
-                foreach (var item in result.Loot)
+                foreach (var award in result.Loot)
                 {
-                    if (item == null)
+                    if (award.IsEmpty)
                     {
                         continue;
                     }
@@ -1788,11 +1814,13 @@ namespace Assets.Scripts.Rooms
                     loot.AddToClassList("cd-victory-loot");
                     var icon = new VisualElement();
                     icon.AddToClassList("cd-victory-loot__icon");
-                    if (item.Icon != null)
+                    if (award.Item.Icon != null)
                     {
-                        icon.style.backgroundImage = new StyleBackground(item.Icon);
+                        icon.style.backgroundImage = new StyleBackground(award.Item.Icon);
                     }
-                    var name = new Label(item.DisplayName);
+                    var name = new Label(award.Quantity > 1
+                        ? $"{award.Item.DisplayName} x{award.Quantity}"
+                        : award.Item.DisplayName);
                     name.AddToClassList("cd-victory-loot__name");
                     loot.Add(icon);
                     loot.Add(name);

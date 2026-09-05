@@ -156,6 +156,7 @@
                 <ui:Button name="tab-equipment" text="Equipment" class="cd-tab cd-tab--active" />
                 <ui:Button name="tab-spells" text="Spells" class="cd-tab" />
                 <ui:Button name="tab-consumables" text="Consumables" class="cd-tab" />
+                <ui:Button name="tab-materials" text="Materials" class="cd-tab" />
             </ui:VisualElement>
 
             <ui:ScrollView name="inventory-scroll" class="cd-inv-scroll" mode="Vertical" />

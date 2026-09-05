@@ -274,7 +274,7 @@ namespace Assets.Scripts.Enemies.UI
                 BestiaryTone.Neutral)));
             _detail.Add(BestiaryLineView.Row(BestiaryPresenter.AttackLine(definition, known)));
             _detail.Add(BestiaryLineView.Row(BestiaryPresenter.KillsLine(known)));
-            _detail.Add(BestiaryLineView.Row(BestiaryPresenter.LootLine(definition, known)));
+            BestiaryLineView.AddRows(_detail, BestiaryPresenter.LootLines(definition, known));
 
             BestiaryLineView.AddSection(
                 _detail, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));

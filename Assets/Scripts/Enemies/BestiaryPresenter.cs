@@ -175,29 +175,49 @@ namespace Assets.Scripts.Enemies
         // ============================================================
 
         /// <summary>
-        /// What this enemy drops, but only once it has actually been seen to drop it - a drop is
-        /// rolled per kill, so knowing the table is genuinely earned. An enemy that carries no loot
-        /// at all reads "Nothing" once met, rather than staying <see cref="Unknown"/> forever.
+        /// What this enemy drops - one row per line of its table, named only once that line has
+        /// actually been seen to drop. A drop is rolled per kill, so knowing a table is genuinely
+        /// earned, and the rows of it are earned one at a time.
+        ///
+        /// <para>Unseen lines are listed but unnamed rather than hidden, the same bargain
+        /// <see cref="SpellLines"/> makes: the count of what you have not seen is itself worth
+        /// knowing, and it is what tells a player farming a material that there is more here. An
+        /// enemy that carries nothing at all gets a single "Nothing" row once met, rather than
+        /// staying <see cref="Unknown"/> forever.</para>
         /// </summary>
-        public static BestiaryLine LootLine(EnemySO definition, BestiaryEntry known)
+        public static List<BestiaryLine> LootLines(EnemySO definition, BestiaryEntry known)
         {
+            var lines = new List<BestiaryLine>();
             if (definition == null || known == null)
             {
-                return new BestiaryLine("Drops", Unknown, BestiaryTone.Unknown);
+                lines.Add(new BestiaryLine("Drops", Unknown, BestiaryTone.Unknown));
+                return lines;
             }
 
-            var loot = definition.LootItem;
-            if (loot == null)
+            bool any = false;
+            if (definition.LootTable != null)
             {
-                return new BestiaryLine("Drops", "Nothing", BestiaryTone.Neutral);
+                foreach (var drop in definition.LootTable)
+                {
+                    if (drop == null || drop.Item == null)
+                    {
+                        continue;
+                    }
+
+                    any = true;
+                    bool seen = BestiaryOps.KnowsLoot(known, drop.Item.Key);
+                    lines.Add(new BestiaryLine(
+                        lines.Count == 0 ? "Drops" : "",
+                        seen ? drop.Item.DisplayName : Unknown,
+                        seen ? BestiaryTone.Good : BestiaryTone.Unknown));
+                }
             }
 
-            if (!BestiaryOps.KnowsLoot(known, loot.Key))
+            if (!any)
             {
-                return new BestiaryLine("Drops", Unknown, BestiaryTone.Unknown);
+                lines.Add(new BestiaryLine("Drops", "Nothing", BestiaryTone.Neutral));
             }
-
-            return new BestiaryLine("Drops", loot.DisplayName, BestiaryTone.Good);
+            return lines;
         }
 
         // ============================================================

@@ -41,8 +41,10 @@ namespace Assets.Scripts.Rooms
         public string Log;
         public int RemainingEnemies;
 
-        // Rewards earned this combat (for the victory summary).
-        public List<ItemSO> Loot = new List<ItemSO>();
+        // Rewards earned this combat (for the victory summary). Awards, not items: a drop table
+        // can pay out several of a material, and "Ember Iron" and "Ember Iron x3" are different
+        // pieces of news.
+        public List<LootAward> Loot = new List<LootAward>();
         public int XpGained;
         public int GoldGained;
         public bool LevelCleared;  // this victory cleared the exit room → level complete
@@ -125,7 +127,7 @@ namespace Assets.Scripts.Rooms
         private Party _currentParty;
 
         // Rewards accumulated during the current combat (surfaced in the victory summary).
-        private readonly List<ItemSO> _combatLoot = new List<ItemSO>();
+        private readonly List<LootAward> _combatLoot = new List<LootAward>();
         private int _combatXp;
         private int _combatGold;
         private Room _lastVictoryRoom;
@@ -463,7 +465,7 @@ namespace Assets.Scripts.Rooms
                 Outcome = outcome,
                 Log = fullLog,
                 RemainingEnemies = room.Enemies.Count(e => e != null && e.IsAlive),
-                Loot = new List<ItemSO>(_combatLoot),
+                Loot = new List<LootAward>(_combatLoot),
                 XpGained = _combatXp,
                 GoldGained = _combatGold,
                 LevelCleared = levelCleared,
@@ -1325,16 +1327,16 @@ namespace Assets.Scripts.Rooms
                 MetaProgressManager.Instance.AddPendingGold(gold);
             }
 
-            // Loot: roll once (rarity + run-depth scaled) and only surface it in the victory
-            // summary if it actually dropped into the bag.
-            var loot = enemy.LootItem;
-            if (loot != null &&
-                LootRoller.ShouldDrop(loot, DungeonManager.RunLevelIndex, UnityEngine.Random.Range(0f, 1f)))
+            // Loot: every line of the drop table rolls on its own, so one kill can yield a piece of
+            // gear and the raw material the thing was made of. Only what actually landed in the bag
+            // reaches the victory summary and the bestiary.
+            foreach (var award in LootRoller.Roll(
+                         enemy.LootTable, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f)))
             {
-                InventoryManager.Instance.AddItem(loot);
-                Debug.Log($"Item dropped: {loot.DisplayName} ({loot.Key})");
-                _combatLoot.Add(loot);
-                RecordLootObserved(enemy, loot);
+                InventoryManager.Instance.AddItem(award);
+                Debug.Log($"Item dropped: {award.Item.DisplayName} ({award.Item.Key}) x{award.Quantity}");
+                _combatLoot.Add(award);
+                RecordLootObserved(enemy, award.Item);
             }
 
             RecordEnemyKilled(enemy);

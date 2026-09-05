@@ -30,29 +30,37 @@ namespace Assets.Scripts.Items
         }
 
         /// <summary>
-        /// Adds an item: consumables stack into an existing un-equipped pile of the same key
-        /// (clamped to <see cref="ItemSO.MaxStack"/>); equipment is a distinct one-per-entry item.
+        /// Adds <paramref name="count"/> of an item: anything that <see cref="ItemSO.Stacks"/>
+        /// (consumables and materials) piles into an existing un-equipped stack of the same key,
+        /// clamped to <see cref="ItemSO.MaxStack"/>; equipment is a distinct one-per-entry item and
+        /// gets <paramref name="count"/> separate entries, since an entry carries an equipped slot.
         /// </summary>
-        public static void AddItem(List<ItemSaveData> items, ItemSO item)
+        public static void AddItem(List<ItemSaveData> items, ItemSO item, int count = 1)
         {
-            if (items == null || item == null)
+            if (items == null || item == null || count <= 0)
             {
                 return;
             }
 
-            if (item.Category == ItemCategory.Consumable)
+            if (item.Stacks)
             {
+                int max = item.MaxStack > 0 ? item.MaxStack : int.MaxValue;
                 var stack = items.Find(
                     i => i.ItemKey == item.Key && string.IsNullOrEmpty(i.EquippedSlot));
                 if (stack != null)
                 {
-                    int max = item.MaxStack > 0 ? item.MaxStack : int.MaxValue;
-                    stack.Quantity = Mathf.Min(stack.Quantity + 1, max);
+                    stack.Quantity = Mathf.Min(stack.Quantity + count, max);
                     return;
                 }
+
+                items.Add(new ItemSaveData { ItemKey = item.Key, Quantity = Mathf.Min(count, max) });
+                return;
             }
 
-            items.Add(new ItemSaveData { ItemKey = item.Key, Quantity = 1 });
+            for (int i = 0; i < count; i++)
+            {
+                items.Add(new ItemSaveData { ItemKey = item.Key, Quantity = 1 });
+            }
         }
 
         /// <summary>Spends one unit of a consumable, removing the stack at zero. False if none carried.</summary>
@@ -217,6 +225,119 @@ namespace Assets.Scripts.Items
                 }
             }
             return total;
+        }
+
+        // ============================================================
+        //  MATERIALS
+        // ============================================================
+
+        /// <summary>Total carried quantity of one material across stacks.</summary>
+        public static int GetMaterialQuantity(List<ItemSaveData> items, string itemKey, Func<string, ItemSO> resolve)
+        {
+            if (items == null || string.IsNullOrEmpty(itemKey))
+            {
+                return 0;
+            }
+
+            int total = 0;
+            foreach (var item in items)
+            {
+                if (item.ItemKey == itemKey && IsCategory(item, ItemCategory.Material, resolve))
+                {
+                    total += Mathf.Max(0, item.Quantity);
+                }
+            }
+            return total;
+        }
+
+        /// <summary>
+        /// Whether every line of a material cost is covered by what is carried. Separate from
+        /// <see cref="SpendMaterials"/> so a price can be shown as affordable-or-not without a
+        /// transaction — which is what a building lot and a sphere-grid node both need.
+        /// </summary>
+        public static bool CanAfford(List<ItemSaveData> items, IList<MaterialCost> cost, Func<string, ItemSO> resolve)
+        {
+            if (cost == null || cost.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (var line in cost)
+            {
+                if (line == null || line.Material == null)
+                {
+                    continue;
+                }
+                if (GetMaterialQuantity(items, line.Material.Key, resolve) < Mathf.Max(1, line.Amount))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Spends <paramref name="count"/> units of one material, removing the stack at zero. False —
+        /// and <b>nothing spent</b> — if the player does not carry that many, so a partially-paid
+        /// price can never leave the inventory short.
+        /// </summary>
+        public static bool SpendMaterial(List<ItemSaveData> items, string itemKey, int count, Func<string, ItemSO> resolve)
+        {
+            if (items == null || string.IsNullOrEmpty(itemKey) || count <= 0)
+            {
+                return false;
+            }
+            if (GetMaterialQuantity(items, itemKey, resolve) < count)
+            {
+                return false;
+            }
+
+            int owed = count;
+            for (int i = items.Count - 1; i >= 0 && owed > 0; i--)
+            {
+                var stack = items[i];
+                if (stack.ItemKey != itemKey || !IsCategory(stack, ItemCategory.Material, resolve))
+                {
+                    continue;
+                }
+
+                int taken = Mathf.Min(owed, stack.Quantity);
+                stack.Quantity -= taken;
+                owed -= taken;
+                if (stack.Quantity <= 0)
+                {
+                    items.RemoveAt(i);
+                }
+            }
+
+            return owed == 0;
+        }
+
+        /// <summary>
+        /// Pays a whole material price. All or nothing: the cost is checked in full with
+        /// <see cref="CanAfford"/> before a single unit is taken, so a half-paid building can never
+        /// exist. Returns whether it was paid.
+        /// </summary>
+        public static bool SpendMaterials(List<ItemSaveData> items, IList<MaterialCost> cost, Func<string, ItemSO> resolve)
+        {
+            if (!CanAfford(items, cost, resolve))
+            {
+                return false;
+            }
+            if (cost == null)
+            {
+                return true;
+            }
+
+            foreach (var line in cost)
+            {
+                if (line == null || line.Material == null)
+                {
+                    continue;
+                }
+                SpendMaterial(items, line.Material.Key, Mathf.Max(1, line.Amount), resolve);
+            }
+            return true;
         }
 
         /// <summary>Refills a consumable up to a total <paramref name="cap"/>; never reduces a surplus.</summary>

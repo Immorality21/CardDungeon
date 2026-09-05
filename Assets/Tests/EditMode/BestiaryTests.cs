@@ -131,6 +131,14 @@ namespace Tests.EditMode
             return enemy;
         }
 
+        private static ItemSO MakeItem(string key, string displayName)
+        {
+            var item = ScriptableObject.CreateInstance<ItemSO>();
+            item.Key = key;
+            item.DisplayName = displayName;
+            return item;
+        }
+
         private static Resistance Resist(DamageType type, float percent)
         {
             return new Resistance { DamageType = type, Percent = percent };
@@ -234,33 +242,44 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void LootLine_IsHiddenUntilTheDropHasBeenSeen()
+        public void LootLines_AreHiddenUntilEachDropHasBeenSeen()
         {
-            var loot = ScriptableObject.CreateInstance<ItemSO>();
-            loot.Key = "IronSword";
-            loot.DisplayName = "Iron Sword";
-
             var enemy = MakeEnemy();
-            enemy.LootItem = loot;
+            enemy.LootTable.Add(new LootDrop { Item = MakeItem("IronSword", "Iron Sword") });
+            enemy.LootTable.Add(new LootDrop { Item = MakeItem("ScrapIron", "Scrap Iron"), Chance = 0.4f });
+
             BestiaryOps.MarkSeen(_entries, enemy.SaveKey);
             var known = BestiaryOps.Find(_entries, enemy.SaveKey);
 
-            Assert.AreEqual(BestiaryPresenter.Unknown, BestiaryPresenter.LootLine(enemy, known).Value);
+            var lines = BestiaryPresenter.LootLines(enemy, known);
+            Assert.AreEqual(2, lines.Count, "one row per table entry, so the page says how many there are");
+            Assert.AreEqual(BestiaryPresenter.Unknown, lines[0].Value);
+            Assert.AreEqual(BestiaryPresenter.Unknown, lines[1].Value);
 
-            BestiaryOps.MarkLootObserved(_entries, enemy.SaveKey, loot.Key);
-            Assert.AreEqual("Iron Sword", BestiaryPresenter.LootLine(enemy, known).Value);
+            // Seeing one drop names that row and leaves the other earned-but-unknown.
+            BestiaryOps.MarkLootObserved(_entries, enemy.SaveKey, "ScrapIron");
+            lines = BestiaryPresenter.LootLines(enemy, known);
+            Assert.AreEqual(BestiaryPresenter.Unknown, lines[0].Value);
+            Assert.AreEqual("Scrap Iron", lines[1].Value);
+
+            BestiaryOps.MarkLootObserved(_entries, enemy.SaveKey, "IronSword");
+            lines = BestiaryPresenter.LootLines(enemy, known);
+            Assert.AreEqual("Iron Sword", lines[0].Value);
         }
 
         [Test]
-        public void LootLine_ForAnEnemyThatCarriesNothing_SaysSoOnceMet()
+        public void LootLines_ForAnEnemyThatCarriesNothing_SaysSoOnceMet()
         {
             var enemy = MakeEnemy();
             BestiaryOps.MarkSeen(_entries, enemy.SaveKey);
 
-            Assert.AreEqual("Nothing",
-                BestiaryPresenter.LootLine(enemy, BestiaryOps.Find(_entries, enemy.SaveKey)).Value);
-            Assert.AreEqual(BestiaryPresenter.Unknown,
-                BestiaryPresenter.LootLine(enemy, null).Value,
+            var met = BestiaryPresenter.LootLines(enemy, BestiaryOps.Find(_entries, enemy.SaveKey));
+            Assert.AreEqual(1, met.Count);
+            Assert.AreEqual("Nothing", met[0].Value);
+
+            var unmet = BestiaryPresenter.LootLines(enemy, null);
+            Assert.AreEqual(1, unmet.Count);
+            Assert.AreEqual(BestiaryPresenter.Unknown, unmet[0].Value,
                 "An enemy never met reveals nothing at all, not even that it is empty-handed.");
         }
 

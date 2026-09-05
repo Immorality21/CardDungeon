@@ -604,6 +604,23 @@
     padding: 4px 2px;
 }
 
+/* Hub inventory: a material and its one line of flavour, as one block. The block stretches to the
+   list width, which is what gives the flavour label a width to wrap inside - a bare Label in the
+   content-sized ScrollView sizes to its text instead and spills out of both sides of the window. */
+.cd-inv-material {
+    flex-direction: column;
+    align-self: stretch;
+}
+
+.cd-inv-material__flavour {
+    font-size: 13px;
+    color: var(--cd-text-dark);
+    opacity: 0.6;
+    white-space: normal;
+    -unity-text-align: middle-left;
+    margin: -4px 8px 6px 54px;
+}
+
 /* Tall stacked menu button (full window width). */
 .cd-menu-button {
     height: 54px;

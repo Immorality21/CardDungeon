@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
 using UnityEngine;
 
@@ -23,6 +24,12 @@ namespace Assets.Scripts.Dungeon
         [Tooltip("Rooms of this level promoted to a one-shot refuge, healing every hero a share of " +
                  "their bar. Also a room that no longer holds a fight - the two levers move together.")]
         [Min(0)] public int RestRooms;
+
+        [Tooltip("Raw materials this place is made of, found in its caches. Enemies drop what they " +
+                 "are made of (EnemySO.LootTable); this is what the *floor* is made of, which is how " +
+                 "a material ends up gating on where the player has been rather than on how long " +
+                 "they have ground. Every entry rolls on its own when a cache is opened.")]
+        public List<LootDrop> MaterialTable = new List<LootDrop>();
 
         [Tooltip("Optional per-level combat backdrop. When set, the battle stage uses this instead " +
                  "of the default Resources background — lets each level/biome look distinct.")]

@@ -12,7 +12,8 @@ namespace Assets.Scripts.Enemies
     {
         public Stats Stats;
         public Room Room;
-        public ItemSO LootItem;
+        /// <summary>What this kill can yield, stamped from the definition. See <see cref="LootDrop"/>.</summary>
+        public List<LootDrop> LootTable = new List<LootDrop>();
 
         // What this enemy can throw: the list a CastMagic action on its Behavior picks from when
         // it names no specific magic. Enemy casts spend nothing.
@@ -125,7 +126,7 @@ namespace Assets.Scripts.Enemies
             Spells = new List<EnemySpellEntry>(definition.Spells);
             Behavior = definition.ResolvedBehavior;
             Resistances = new List<Resistance>(definition.Resistances);
-            LootItem = definition.LootItem;
+            LootTable = new List<LootDrop>(definition.LootTable);
 
             var sr = GetComponent<SpriteRenderer>();
             if (sr != null && definition.Sprite != null)

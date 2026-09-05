@@ -10,9 +10,10 @@ using UnityEngine.UIElements;
 namespace Assets.Scripts.Items.UI
 {
     /// <summary>
-    /// Hub inventory (UI Toolkit view-controller, mirrors <c>MagicForgeUI</c>). Three tabs:
-    /// equipment per hero, the spell loadout per hero, and the carried consumables. It is the only
-    /// place gear and kit are managed, since both are between-run decisions. Operates on a VisualElement subtree owned by the menu's UIDocument (not a MonoBehaviour).
+    /// Hub inventory (UI Toolkit view-controller, mirrors <c>MagicForgeUI</c>). Four tabs:
+    /// equipment per hero, the spell loadout per hero, the carried consumables, and the raw
+    /// materials hauled home. It is the only place gear and kit are managed, since both are
+    /// between-run decisions. Operates on a VisualElement subtree owned by the menu's UIDocument (not a MonoBehaviour).
     /// Reads the roster from a <see cref="PartyRosterSO"/> because the hub has no live Party, and all
     /// item/equip state from the (scene-independent) <see cref="InventoryManager"/>.
     ///
@@ -22,7 +23,7 @@ namespace Assets.Scripts.Items.UI
     /// </summary>
     public class InventoryHubUI
     {
-        private enum Tab { Equipment, Spells, Consumables }
+        private enum Tab { Equipment, Spells, Consumables, Materials }
 
         private readonly VisualElement _root;
         private readonly PartyRosterSO _roster;
@@ -34,6 +35,7 @@ namespace Assets.Scripts.Items.UI
         private readonly Button _tabEquipment;
         private readonly Button _tabSpells;
         private readonly Button _tabConsumables;
+        private readonly Button _tabMaterials;
         private readonly ScrollView _scroll;
         private readonly Label _emptyLabel;
         private readonly Button _closeButton;
@@ -76,6 +78,7 @@ namespace Assets.Scripts.Items.UI
             _tabEquipment = root.Q<Button>("tab-equipment");
             _tabSpells = root.Q<Button>("tab-spells");
             _tabConsumables = root.Q<Button>("tab-consumables");
+            _tabMaterials = root.Q<Button>("tab-materials");
             _scroll = root.Q<ScrollView>("inventory-scroll");
             _emptyLabel = root.Q<Label>("inventory-empty");
             _closeButton = root.Q<Button>("inventory-close");
@@ -94,6 +97,11 @@ namespace Assets.Scripts.Items.UI
             {
                 _tabConsumables.clicked += () => SetTab(Tab.Consumables);
                 _tabConsumables.focusable = false;
+            }
+            if (_tabMaterials != null)
+            {
+                _tabMaterials.clicked += () => SetTab(Tab.Materials);
+                _tabMaterials.focusable = false;
             }
             if (_closeButton != null)
             {
@@ -168,7 +176,7 @@ namespace Assets.Scripts.Items.UI
         /// of the row feel like ends - the same behaviour two tabs had when they were a toggle.</summary>
         private void CycleTab(int delta)
         {
-            int next = Mathf.Clamp((int)_tab + delta, 0, (int)Tab.Consumables);
+            int next = Mathf.Clamp((int)_tab + delta, 0, (int)Tab.Materials);
             if (next != (int)_tab)
             {
                 SetTab((Tab)next);
@@ -188,9 +196,11 @@ namespace Assets.Scripts.Items.UI
             _tabEquipment?.EnableInClassList("cd-tab--active", _tab == Tab.Equipment);
             _tabSpells?.EnableInClassList("cd-tab--active", _tab == Tab.Spells);
             _tabConsumables?.EnableInClassList("cd-tab--active", _tab == Tab.Consumables);
-            // Stats are an equipment readout; the hero selector serves both per-hero tabs.
+            _tabMaterials?.EnableInClassList("cd-tab--active", _tab == Tab.Materials);
+            // Stats are an equipment readout; the hero selector serves both per-hero tabs and
+            // nothing on the two party-wide ones.
             SetShown(_statsLabel, _tab == Tab.Equipment);
-            SetShown(_heroesRow, _tab != Tab.Consumables);
+            SetShown(_heroesRow, _tab == Tab.Equipment || _tab == Tab.Spells);
         }
 
         // ============================================================
@@ -326,6 +336,10 @@ namespace Assets.Scripts.Items.UI
             else if (_tab == Tab.Spells)
             {
                 RefreshSpells();
+            }
+            else if (_tab == Tab.Materials)
+            {
+                RefreshMaterials();
             }
             else
             {
@@ -482,6 +496,68 @@ namespace Assets.Scripts.Items.UI
                 string name = so != null ? so.DisplayName : item.ItemKey;
                 // Display-only (used in combat, not the hub) → not selectable.
                 _scroll.Add(BuildRow(so != null ? so.Icon : null, name, $"x{item.Quantity}", false, null, so));
+            }
+        }
+
+        /// <summary>
+        /// The raw stuff the party has hauled home, biggest pile first. Read-only for now: materials
+        /// have taps (kills and caches) but no drain until buildings and grid costs land
+        /// (<c>docs/plans/HUB.md</c> §7), and a screen that shows a growing number the player cannot
+        /// spend is still the honest state of the game.
+        /// </summary>
+        private void RefreshMaterials()
+        {
+            var materials = InventoryManager.Instance.GetMaterials();
+            if (materials.Count == 0)
+            {
+                ShowEmpty("No materials gathered. Kill things and open caches - what they are made of "
+                    + "and what the floor is made of both come home with you.");
+                return;
+            }
+
+            SetShown(_emptyLabel, false);
+
+            // One row per material key: several stacks of the same thing read as one pile.
+            var totals = new Dictionary<string, int>();
+            var order = new List<string>();
+            foreach (var stack in materials)
+            {
+                if (!totals.ContainsKey(stack.ItemKey))
+                {
+                    totals[stack.ItemKey] = 0;
+                    order.Add(stack.ItemKey);
+                }
+                totals[stack.ItemKey] += Mathf.Max(0, stack.Quantity);
+            }
+
+            order.Sort((a, b) =>
+            {
+                int byCount = totals[b].CompareTo(totals[a]);
+                return byCount != 0 ? byCount : string.CompareOrdinal(a, b);
+            });
+
+            foreach (var key in order)
+            {
+                var so = InventoryManager.Instance.GetItemSO(key);
+                string name = so != null ? so.DisplayName : key;
+
+                // One block per material: the row, plus the flavour line under it. The block is what
+                // gives the wrapped label a width - see .cd-inv-material in the theme.
+                var block = new VisualElement();
+                block.AddToClassList("cd-inv-material");
+
+                // Display-only (nothing spends materials yet) → not selectable.
+                block.Add(BuildRow(so != null ? so.Icon : null, name, $"x{totals[key]}", false, null, so));
+
+                if (so != null && !string.IsNullOrEmpty(so.Description))
+                {
+                    var flavour = new Label(so.Description);
+                    flavour.AddToClassList("cd-inv-material__flavour");
+                    flavour.pickingMode = PickingMode.Ignore;
+                    block.Add(flavour);
+                }
+
+                _scroll.Add(block);
             }
         }
 

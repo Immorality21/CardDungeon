@@ -456,7 +456,7 @@ namespace Assets.Scripts.Cards.UI
 
             _inspectBody.Add(BestiaryLineView.Row(BestiaryPresenter.AttackLine(definition, known)));
             _inspectBody.Add(BestiaryLineView.Row(BestiaryPresenter.KillsLine(known)));
-            _inspectBody.Add(BestiaryLineView.Row(BestiaryPresenter.LootLine(definition, known)));
+            BestiaryLineView.AddRows(_inspectBody, BestiaryPresenter.LootLines(definition, known));
 
             BestiaryLineView.AddSection(
                 _inspectBody, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));

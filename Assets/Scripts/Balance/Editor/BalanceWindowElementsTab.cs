@@ -46,8 +46,82 @@ namespace Assets.Scripts.Balance.Editor
             DrawMagicMatrix(map);
             EditorGUILayout.Space(8f);
             DrawComboReachability(map);
+            EditorGUILayout.Space(8f);
+            DrawMaterialYield();
 
             EndScroll();
+        }
+
+        // ---------------------------------------------------------------- material yield
+
+        /// <summary>
+        /// The raw-material tap, per run and campaign-wide. Magic is the supply chain this tab was
+        /// built for; materials are the second one, and they are here rather than on their own tab
+        /// because the question is identical - is the thing the player needs actually obtainable, and
+        /// by the time they need it.
+        ///
+        /// <para>Measured before anything spends materials, which is the point: buildings and
+        /// material-priced grid nodes (<c>docs/plans/HUB.md</c> §7) are drains, and a drain can only
+        /// be priced against a counted source.</para>
+        /// </summary>
+        private void DrawMaterialYield()
+        {
+            BalanceGui.SectionHeader(
+                "Material yield",
+                "Expected units per run at the modelled traversal — kills plus caches. Nothing spends "
+                + "these yet; this is the tap, measured before the drains are authored.");
+
+            if (_report == null || _report.Materials.Count == 0)
+            {
+                EditorGUILayout.HelpBox(
+                    "No material drops are authored. Materials are ItemSOs with Category = Material, "
+                    + "listed on EnemySO.LootTable (what a monster is made of) and "
+                    + "LevelDefinitionSO.MaterialTable (what the floor is made of, found in caches).",
+                    MessageType.Info);
+                return;
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            BalanceGui.HeaderCell("Material", ElementNameWidth);
+            BalanceGui.HeaderCell("Campaign", ElementCellWidth, "Expected units across every run.");
+            BalanceGui.HeaderCell("Kills", ElementCellWidth, "Units from enemy drop tables.");
+            BalanceGui.HeaderCell("Caches", ElementCellWidth, "Units from the levels' own material tables.");
+            foreach (var run in _report.Runs)
+            {
+                BalanceGui.HeaderCell(run.Name, ElementCellWidth);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            // Per-run columns, so "which run pays for this material" is readable off one line.
+            var perRun = new List<Dictionary<string, float>>();
+            foreach (var run in _report.Runs)
+            {
+                var totals = new Dictionary<string, float>();
+                foreach (var yield in MaterialYieldModel.ForRun(run))
+                {
+                    totals[yield.Key] = yield.Total;
+                }
+                perRun.Add(totals);
+            }
+
+            foreach (var material in _report.Materials)
+            {
+                EditorGUILayout.BeginHorizontal();
+                BalanceGui.AssetCell(material.Material, material.Name, ElementNameWidth);
+                BalanceGui.Cell($"{material.Total:0.0}", ElementCellWidth,
+                    material.Total > 0f ? BalanceSeverity.Ok : BalanceSeverity.Warning);
+                BalanceGui.Cell($"{material.FromKills:0.0}", ElementCellWidth);
+                BalanceGui.Cell($"{material.FromCaches:0.0}", ElementCellWidth);
+
+                foreach (var totals in perRun)
+                {
+                    float units = totals.TryGetValue(material.Key, out var value) ? value : 0f;
+                    BalanceGui.Cell(units > 0f ? $"{units:0.0}" : "-", ElementCellWidth,
+                        BalanceSeverity.Ok,
+                        units > 0f ? null : "This run never yields it.");
+                }
+                EditorGUILayout.EndHorizontal();
+            }
         }
 
         // ---------------------------------------------------------------- unlock timeline

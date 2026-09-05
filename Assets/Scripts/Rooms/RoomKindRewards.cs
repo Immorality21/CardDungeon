@@ -53,6 +53,11 @@ namespace Assets.Scripts.Rooms
         ///
         /// <para><b>At most one item</b>, deliberately: rolling the whole catalog would empty it into
         /// the party's bags. The caller shuffles, which is what makes *which* item vary.</para>
+        ///
+        /// <para>Materials are skipped here and rolled separately by
+        /// <see cref="TreasureMaterials"/>. A material is common by design, so leaving them in this
+        /// walk would mean the first shuffled material almost always won the single slot and a cache
+        /// stopped producing gear entirely.</para>
         /// </summary>
         public static ItemSO PickTreasureItem(
             IList<ItemSO> candidates, int runLevelIndex, Func<float> roll)
@@ -64,7 +69,7 @@ namespace Assets.Scripts.Rooms
 
             foreach (var item in candidates)
             {
-                if (item == null)
+                if (item == null || item.Category == ItemCategory.Material)
                 {
                     continue;
                 }
@@ -76,6 +81,21 @@ namespace Assets.Scripts.Rooms
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// The raw stuff a cache yields, from the level's own <c>MaterialTable</c>. Every entry rolls
+        /// separately, so a floor can be authored to reliably hand over its common material and
+        /// occasionally its rare one.
+        ///
+        /// <para>Separate from <see cref="PickTreasureItem"/>'s single slot on purpose: gear from a
+        /// cache is a find, materials from a cache are the floor's yield, and the two should not
+        /// compete for the same roll. This is the room-side tap the enemy drop tables pair with.</para>
+        /// </summary>
+        public static List<LootAward> TreasureMaterials(
+            IList<LootDrop> materialTable, int runLevelIndex, Func<float> roll)
+        {
+            return LootRoller.Roll(materialTable, runLevelIndex, roll);
         }
 
         /// <summary>

@@ -25,3 +25,12 @@ MonoBehaviour:
   TreasureRooms: 1
   RestRooms: 0
   CombatBackground: {fileID: 0}
+  MaterialTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
+    Chance: 0.7
+    MinQuantity: 2
+    MaxQuantity: 3
+  - Item: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
+    Chance: 0.35
+    MinQuantity: 1
+    MaxQuantity: 2

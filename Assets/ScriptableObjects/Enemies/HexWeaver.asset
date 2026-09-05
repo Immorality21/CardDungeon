@@ -51,4 +51,12 @@ MonoBehaviour:
     Percent: 50
   - DamageType: 2
     Percent: -50
-  LootItem: {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
+  LootTable:
+  - Item: {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
+    Chance: 0
+    MinQuantity: 1
+    MaxQuantity: 1
+  - Item: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
+    Chance: 0.4
+    MinQuantity: 1
+    MaxQuantity: 2

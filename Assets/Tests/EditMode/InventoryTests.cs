@@ -9,8 +9,9 @@ namespace Tests.EditMode
 {
     /// <summary>
     /// Covers the pure inventory logic in <see cref="InventoryOperations"/> — stacking, consuming,
-    /// quantity migration, belt top-up, and equipment bonus totals — without touching the
-    /// disk-backed <see cref="InventoryManager"/> singleton.
+    /// quantity migration, belt top-up, materials (the hub's raw stuff, and paying a price in it),
+    /// and equipment bonus totals — without touching the disk-backed
+    /// <see cref="InventoryManager"/> singleton.
     /// </summary>
     public class InventoryTests
     {
@@ -49,6 +50,22 @@ namespace Tests.EditMode
             so.Bonuses = bonuses.ToList();
             _created.Add(so);
             return so;
+        }
+
+        private ItemSO MakeMaterial(string key, int maxStack = 999)
+        {
+            var so = ScriptableObject.CreateInstance<ItemSO>();
+            so.Key = key;
+            so.DisplayName = key;
+            so.Category = ItemCategory.Material;
+            so.MaxStack = maxStack;
+            _created.Add(so);
+            return so;
+        }
+
+        private static MaterialCost Cost(ItemSO material, int amount)
+        {
+            return new MaterialCost { Material = material, Amount = amount };
         }
 
         private System.Func<string, ItemSO> Resolver()
@@ -182,6 +199,112 @@ namespace Tests.EditMode
             InventoryOperations.TopUpConsumableToCap(items, potion, 3, Resolver());
 
             Assert.AreEqual(3, InventoryOperations.GetConsumableQuantity(items, "Potion", Resolver()));
+        }
+
+        // --- Materials ----------------------------------------------------------------
+
+        [Test]
+        public void AddItem_Material_StacksAndTakesACount()
+        {
+            var iron = MakeMaterial("ScrapIron");
+            var items = new List<ItemSaveData>();
+
+            InventoryOperations.AddItem(items, iron, 3);
+            InventoryOperations.AddItem(items, iron, 2);
+
+            Assert.AreEqual(1, items.Count, "materials pile into one entry, like consumables");
+            Assert.AreEqual(5, InventoryOperations.GetMaterialQuantity(items, "ScrapIron", Resolver()));
+        }
+
+        [Test]
+        public void AddItem_Material_ClampsToMaxStack()
+        {
+            var iron = MakeMaterial("ScrapIron", maxStack: 4);
+            var items = new List<ItemSaveData>();
+
+            InventoryOperations.AddItem(items, iron, 10);
+
+            Assert.AreEqual(4, InventoryOperations.GetMaterialQuantity(items, "ScrapIron", Resolver()));
+        }
+
+        [Test]
+        public void AddItem_Equipment_WithACount_MakesSeparateEntries()
+        {
+            // An entry carries which hero has it equipped, so two swords can never be one pile.
+            var sword = MakeEquipment("Sword", SlotType.MainHand);
+            var items = new List<ItemSaveData>();
+
+            InventoryOperations.AddItem(items, sword, 3);
+
+            Assert.AreEqual(3, items.Count);
+            Assert.IsTrue(items.All(i => i.Quantity == 1));
+        }
+
+        [Test]
+        public void GetMaterialQuantity_IgnoresAConsumableOfTheSameKey()
+        {
+            var potion = MakeConsumable("Overlap");
+            var items = new List<ItemSaveData>();
+            InventoryOperations.AddItem(items, potion, 5);
+
+            Assert.AreEqual(0, InventoryOperations.GetMaterialQuantity(items, "Overlap", Resolver()));
+        }
+
+        [Test]
+        public void SpendMaterial_TakesFromThePileAndRemovesItAtZero()
+        {
+            var iron = MakeMaterial("ScrapIron");
+            var items = new List<ItemSaveData>();
+            InventoryOperations.AddItem(items, iron, 3);
+
+            Assert.IsTrue(InventoryOperations.SpendMaterial(items, "ScrapIron", 2, Resolver()));
+            Assert.AreEqual(1, InventoryOperations.GetMaterialQuantity(items, "ScrapIron", Resolver()));
+
+            Assert.IsTrue(InventoryOperations.SpendMaterial(items, "ScrapIron", 1, Resolver()));
+            Assert.IsEmpty(items);
+        }
+
+        [Test]
+        public void SpendMaterial_ShortOfTheAsking_SpendsNothing()
+        {
+            var iron = MakeMaterial("ScrapIron");
+            var items = new List<ItemSaveData>();
+            InventoryOperations.AddItem(items, iron, 2);
+
+            Assert.IsFalse(InventoryOperations.SpendMaterial(items, "ScrapIron", 3, Resolver()));
+            Assert.AreEqual(2, InventoryOperations.GetMaterialQuantity(items, "ScrapIron", Resolver()),
+                "a refused price must leave the pile untouched");
+        }
+
+        [Test]
+        public void SpendMaterials_IsAllOrNothingAcrossTheWholePrice()
+        {
+            // The half-paid building is the failure mode this guards: one affordable line and one
+            // that is not must take nothing at all.
+            var iron = MakeMaterial("ScrapIron");
+            var timber = MakeMaterial("RottedTimber");
+            var items = new List<ItemSaveData>();
+            InventoryOperations.AddItem(items, iron, 5);
+            InventoryOperations.AddItem(items, timber, 1);
+
+            var price = new List<MaterialCost> { Cost(iron, 2), Cost(timber, 4) };
+
+            Assert.IsFalse(InventoryOperations.CanAfford(items, price, Resolver()));
+            Assert.IsFalse(InventoryOperations.SpendMaterials(items, price, Resolver()));
+            Assert.AreEqual(5, InventoryOperations.GetMaterialQuantity(items, "ScrapIron", Resolver()));
+            Assert.AreEqual(1, InventoryOperations.GetMaterialQuantity(items, "RottedTimber", Resolver()));
+
+            InventoryOperations.AddItem(items, timber, 3);
+            Assert.IsTrue(InventoryOperations.SpendMaterials(items, price, Resolver()));
+            Assert.AreEqual(3, InventoryOperations.GetMaterialQuantity(items, "ScrapIron", Resolver()));
+            Assert.AreEqual(0, InventoryOperations.GetMaterialQuantity(items, "RottedTimber", Resolver()));
+        }
+
+        [Test]
+        public void CanAfford_AnEmptyPrice_IsAlwaysAffordable()
+        {
+            Assert.IsTrue(InventoryOperations.CanAfford(new List<ItemSaveData>(), null, Resolver()));
+            Assert.IsTrue(InventoryOperations.CanAfford(new List<ItemSaveData>(), new List<MaterialCost>(), Resolver()));
         }
 
         // --- Equipment bonuses --------------------------------------------------------

@@ -127,6 +127,7 @@ namespace Assets.Scripts.Balance
             report.Variety = VarietyReport.Build(ProjectWideEnemySet(input.Enemies), input.Magic, rules);
             report.Progression = ProgressionMap.Build(
                 report.Runs, input.Magic, input.Combos, input.HeroesToAudit, input.Items);
+            report.Materials = BuildMaterialYield(report);
 
             if (input.RunSimulation)
             {
@@ -145,6 +146,7 @@ namespace Assets.Scripts.Balance
             EvaluateVariety(report, rules);
             EvaluateProgression(report, rules);
             EvaluateEconomy(report, rules);
+            EvaluateMaterials(report, input);
             EvaluateSimulations(report, rules);
             EvaluateFloorSimulations(report, rules);
             EvaluateFrontiers(report, rules);
@@ -2270,7 +2272,7 @@ namespace Assets.Scripts.Balance
                     "Several enemies drop the same item")
                 {
                     Detail = duplicate,
-                    Suggestion = "Vary LootItem so kills feel distinct."
+                    Suggestion = "Vary the enemies' LootTable gear so kills feel distinct. (Shared materials are not counted here.)"
                 });
             }
 
@@ -2458,6 +2460,76 @@ namespace Assets.Scripts.Balance
         }
 
         // ------------------------------------------------------------------ economy
+
+        /// <summary>Campaign-wide material yield: every run's, summed per material.</summary>
+        private static List<MaterialYield> BuildMaterialYield(BalanceReport report)
+        {
+            var totals = new Dictionary<string, MaterialYield>();
+            foreach (var run in report.Runs)
+            {
+                foreach (var yield in MaterialYieldModel.ForRun(run))
+                {
+                    if (!totals.TryGetValue(yield.Key, out var entry))
+                    {
+                        entry = new MaterialYield
+                        {
+                            Material = yield.Material,
+                            Key = yield.Key,
+                            Name = yield.Name
+                        };
+                        totals[yield.Key] = entry;
+                    }
+                    entry.FromKills += yield.FromKills;
+                    entry.FromCaches += yield.FromCaches;
+                }
+            }
+
+            var list = new List<MaterialYield>(totals.Values);
+            list.Sort((a, b) =>
+            {
+                int byTotal = b.Total.CompareTo(a.Total);
+                return byTotal != 0 ? byTotal : string.CompareOrdinal(a.Name, b.Name);
+            });
+            return list;
+        }
+
+        /// <summary>
+        /// The two ways a material can be authored and never reach a player: nothing drops it at all,
+        /// and a level authoring a MaterialTable with no cache to roll it in. Both are silent in the
+        /// inspector, and both get much more expensive to find once buildings are priced in materials
+        /// (<c>docs/plans/HUB.md</c> §7), which is why the check lands with the drops rather than after.
+        /// </summary>
+        private static void EvaluateMaterials(BalanceReport report, BalanceInput input)
+        {
+            foreach (var material in MaterialYieldModel.Unobtainable(input.Items, report.Runs))
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Economy,
+                    material.DisplayName, "No enemy or level yields this material")
+                {
+                    Asset = material,
+                    Detail = "It is in the item catalog but appears in no EnemySO.LootTable and no "
+                           + "LevelDefinitionSO.MaterialTable that a cache can roll, so no run can produce it.",
+                    Suggestion = "Add it to a drop table, or delete it."
+                });
+            }
+
+            foreach (var run in report.Runs)
+            {
+                foreach (var level in MaterialYieldModel.LevelsWithUnreachableMaterialTable(run))
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Economy,
+                        $"{run.Name} {level.Reference}", "Material table never rolls - the level has no cache")
+                    {
+                        Asset = level.Template,
+                        Detail = $"{level.Name} authors {level.Template.MaterialTable.Count} material entr(ies) "
+                               + "but TreasureRooms is 0, and a level's MaterialTable is only rolled when a "
+                               + "cache is opened. Its enemies still drop theirs.",
+                        Suggestion = "Raise TreasureRooms (which also lowers the floor's attrition by taking a "
+                                   + "room off the combat count), or clear the MaterialTable."
+                    });
+                }
+            }
+        }
 
         private static void EvaluateEconomy(BalanceReport report, BalanceRulesSO rules)
         {
