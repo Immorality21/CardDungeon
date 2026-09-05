@@ -28,7 +28,7 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors: []
-  - Key: warrior-spine-1
+  - Key: warrior-trunk-1
     DisplayName: 
     Kind: 0
     XpCost: 20
@@ -36,33 +36,104 @@ MonoBehaviour:
     Gains:
       Values:
       - Type: 1
-        Amount: 2
+        Amount: 3
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
     - warrior-start
-  - Key: warrior-spine-2
+  - Key: warrior-slash
     DisplayName: 
-    Kind: 0
+    Kind: 3
     XpCost: 30
     Position: {x: 0, y: -180}
     Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Slash
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-trunk-1
+  - Key: warrior-trunk-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    Position: {x: 0, y: -270}
+    Gains:
       Values:
-      - Type: 3
+      - Type: 2
+        Amount: 1
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-slash
+  - Key: warrior-trunk-slot
+    DisplayName: 
+    Kind: 2
+    XpCost: 65
+    Position: {x: 0, y: -360}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-trunk-2
+  - Key: warrior-a-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    Position: {x: -110, y: -325}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 10
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-trunk-2
+  - Key: warrior-a-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    Position: {x: -205, y: -380}
+    Gains:
+      Values:
+      - Type: 2
         Amount: 2
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-spine-1
-  - Key: warrior-spine-3
+    - warrior-a-1
+  - Key: warrior-a-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    Position: {x: -300, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: ShieldUp
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-a-2
+  - Key: warrior-a-4
     DisplayName: 
     Kind: 0
-    XpCost: 45
-    Position: {x: 0, y: -270}
+    XpCost: 155
+    Position: {x: -395, y: -490}
     Gains:
       Values:
       - Type: 7
@@ -72,102 +143,12 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-spine-2
-  - Key: warrior-spine-4
-    DisplayName: 
-    Kind: 0
-    XpCost: 65
-    Position: {x: 0, y: -360}
-    Gains:
-      Values:
-      - Type: 1
-        Amount: 1
-      - Type: 2
-        Amount: 1
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-spine-3
-  - Key: warrior-berserk-1
-    DisplayName: 
-    Kind: 0
-    XpCost: 45
-    Position: {x: 110, y: -235}
-    Gains:
-      Values:
-      - Type: 3
-        Amount: 2
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-spine-2
-  - Key: warrior-berserk-2
-    DisplayName: 
-    Kind: 0
-    XpCost: 65
-    Position: {x: 205, y: -290}
-    Gains:
-      Values:
-      - Type: 1
-        Amount: 2
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-berserk-1
-  - Key: warrior-berserk-3
-    DisplayName: 
-    Kind: 0
-    XpCost: 90
-    Position: {x: 300, y: -345}
-    Gains:
-      Values:
-      - Type: 6
-        Amount: 2
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-berserk-2
-  - Key: warrior-berserk-4
-    DisplayName: 
-    Kind: 0
-    XpCost: 120
-    Position: {x: 395, y: -400}
-    Gains:
-      Values:
-      - Type: 1
-        Amount: 3
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-berserk-3
-  - Key: warrior-berserk-5
-    DisplayName: 
-    Kind: 1
-    XpCost: 155
-    Position: {x: 490, y: -455}
-    Gains:
-      Values: []
-    ResistType: 1
-    ResistPercent: 15
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-berserk-4
-  - Key: warrior-berserk-6
+    - warrior-a-3
+  - Key: warrior-a-5
     DisplayName: 
     Kind: 2
     XpCost: 195
-    Position: {x: 585, y: -510}
+    Position: {x: -490, y: -545}
     Gains:
       Values: []
     ResistType: 0
@@ -175,74 +156,29 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-berserk-5
-  - Key: warrior-bulwark-1
+    - warrior-a-4
+  - Key: warrior-a-6
     DisplayName: 
-    Kind: 0
-    XpCost: 90
-    Position: {x: -110, y: -415}
-    Gains:
-      Values:
-      - Type: 2
-        Amount: 2
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-spine-4
-  - Key: warrior-bulwark-2
-    DisplayName: 
-    Kind: 0
-    XpCost: 120
-    Position: {x: -205, y: -470}
-    Gains:
-      Values:
-      - Type: 7
-        Amount: 5
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-bulwark-1
-  - Key: warrior-bulwark-3
-    DisplayName: 
-    Kind: 0
-    XpCost: 155
-    Position: {x: -300, y: -525}
-    Gains:
-      Values:
-      - Type: 3
-        Amount: 1
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-bulwark-2
-  - Key: warrior-bulwark-4
-    DisplayName: 
-    Kind: 0
-    XpCost: 195
-    Position: {x: -395, y: -580}
-    Gains:
-      Values:
-      - Type: 2
-        Amount: 2
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-bulwark-3
-  - Key: warrior-bulwark-5
-    DisplayName: 
-    Kind: 0
+    Kind: 3
     XpCost: 245
-    Position: {x: -490, y: -635}
+    Position: {x: -585, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Bulwark
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-a-5
+  - Key: warrior-a-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    Position: {x: -680, y: -655}
     Gains:
       Values:
+      - Type: 2
+        Amount: 2
       - Type: 7
         Amount: 6
     ResistType: 0
@@ -250,100 +186,81 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-bulwark-4
-  - Key: warrior-bulwark-6
+    - warrior-a-6
+  - Key: warrior-a-fire
+    DisplayName: 
+    Kind: 1
+    XpCost: 90
+    Position: {x: -185, y: -250}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 12
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-a-1
+  - Key: warrior-a-plate
+    DisplayName: 
+    Kind: 0
+    XpCost: 120
+    Position: {x: -280, y: -305}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 8
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-a-2
+  - Key: warrior-a-brace
+    DisplayName: 
+    Kind: 0
+    XpCost: 195
+    Position: {x: -470, y: -415}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-a-4
+  - Key: warrior-a-shadow
     DisplayName: 
     Kind: 1
     XpCost: 295
-    Position: {x: -585, y: -690}
+    Position: {x: -660, y: -525}
     Gains:
       Values: []
     ResistType: 5
-    ResistPercent: 15
+    ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-bulwark-5
-  - Key: warrior-signature
-    DisplayName: Warrior's Cut
+    - warrior-a-6
+  - Key: warrior-a-ward
+    DisplayName: 
     Kind: 3
-    XpCost: 30
-    Position: {x: -110, y: -145}
+    XpCost: 350
+    Position: {x: -775, y: -710}
     Gains:
       Values: []
-    ResistType: 1
-    ResistPercent: 10
-    GrantedMagicKey: Slash
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-spine-1
-  - Key: warrior-spine-5
-    DisplayName: Hardened
-    Kind: 0
-    XpCost: 90
-    Position: {x: 0, y: -450}
-    Gains:
-      Values:
-      - Type: 7
-        Amount: 5
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
+    GrantedMagicKey: Ward
+    GrantedCharges: 1
     Neighbors:
-    - warrior-spine-4
-  - Key: warrior-spine-6
-    DisplayName: Killing Edge
+    - warrior-a-7
+  - Key: warrior-a-hold
+    DisplayName: 
     Kind: 0
-    XpCost: 120
-    Position: {x: 0, y: -540}
-    Gains:
-      Values:
-      - Type: 1
-        Amount: 2
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-spine-5
-  - Key: warrior-spine-7
-    DisplayName: Deep Wind
-    Kind: 0
-    XpCost: 155
-    Position: {x: 0, y: -630}
-    Gains:
-      Values:
-      - Type: 7
-        Amount: 6
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-spine-6
-  - Key: warrior-spine-8
-    DisplayName: Veteran
-    Kind: 0
-    XpCost: 195
-    Position: {x: 0, y: -720}
-    Gains:
-      Values:
-      - Type: 1
-        Amount: 1
-      - Type: 2
-        Amount: 2
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-spine-7
-  - Key: warrior-warlord-1
-    DisplayName: Warlord's Reach
-    Kind: 0
-    XpCost: 155
-    Position: {x: 110, y: -595}
+    XpCost: 350
+    Position: {x: -755, y: -580}
     Gains:
       Values:
       - Type: 1
@@ -353,27 +270,70 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-spine-6
-  - Key: warrior-warlord-2
-    DisplayName: Opening
+    - warrior-a-7
+  - Key: warrior-b-1
+    DisplayName: 
     Kind: 0
-    XpCost: 195
-    Position: {x: 205, y: -650}
+    XpCost: 65
+    Position: {x: 110, y: -325}
     Gains:
       Values:
-      - Type: 6
+      - Type: 1
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-trunk-2
+  - Key: warrior-b-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    Position: {x: 205, y: -380}
+    Gains:
+      Values:
+      - Type: 3
         Amount: 2
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-warlord-1
-  - Key: warrior-warlord-3
-    DisplayName: Battle Focus
+    - warrior-b-1
+  - Key: warrior-b-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    Position: {x: 300, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Sunder
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-b-2
+  - Key: warrior-b-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    Position: {x: 395, y: -490}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-b-3
+  - Key: warrior-b-5
+    DisplayName: 
     Kind: 2
-    XpCost: 245
-    Position: {x: 300, y: -705}
+    XpCost: 195
+    Position: {x: 490, y: -545}
     Gains:
       Values: []
     ResistType: 0
@@ -381,12 +341,25 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-warlord-2
-  - Key: warrior-warlord-4
-    DisplayName: Executioner
+    - warrior-b-4
+  - Key: warrior-b-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    Position: {x: 585, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Cleave
+    GrantedCharges: 2
+    Neighbors:
+    - warrior-b-5
+  - Key: warrior-b-7
+    DisplayName: 
     Kind: 0
     XpCost: 295
-    Position: {x: 395, y: -760}
+    Position: {x: 680, y: -655}
     Gains:
       Values:
       - Type: 1
@@ -396,25 +369,27 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-warlord-3
-  - Key: warrior-warlord-5
-    DisplayName: Consecrated Steel
-    Kind: 1
-    XpCost: 350
-    Position: {x: 490, y: -815}
+    - warrior-b-6
+  - Key: warrior-b-luck
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    Position: {x: 185, y: -250}
     Gains:
-      Values: []
-    ResistType: 4
-    ResistPercent: 15
+      Values:
+      - Type: 6
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-warlord-4
-  - Key: warrior-reaver-1
-    DisplayName: Reaver's Step
+    - warrior-b-1
+  - Key: warrior-b-quick
+    DisplayName: 
     Kind: 0
-    XpCost: 245
-    Position: {x: -110, y: -775}
+    XpCost: 120
+    Position: {x: 280, y: -305}
     Gains:
       Values:
       - Type: 3
@@ -424,70 +399,42 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-spine-8
-  - Key: warrior-reaver-2
-    DisplayName: Bloodlust
+    - warrior-b-2
+  - Key: warrior-b-hone
+    DisplayName: 
     Kind: 0
-    XpCost: 295
-    Position: {x: -205, y: -830}
+    XpCost: 195
+    Position: {x: 470, y: -415}
     Gains:
       Values:
       - Type: 1
-        Amount: 3
+        Amount: 4
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-reaver-1
-  - Key: warrior-reaver-3
-    DisplayName: Scar Tissue
+    - warrior-b-4
+  - Key: warrior-b-fortune
+    DisplayName: 
     Kind: 0
-    XpCost: 350
-    Position: {x: -300, y: -885}
-    Gains:
-      Values:
-      - Type: 7
-        Amount: 8
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-reaver-2
-  - Key: warrior-reaver-4
-    DisplayName: Butcher's Luck
-    Kind: 0
-    XpCost: 410
-    Position: {x: -395, y: -940}
+    XpCost: 295
+    Position: {x: 660, y: -525}
     Gains:
       Values:
       - Type: 6
-        Amount: 3
+        Amount: 2
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-reaver-3
-  - Key: warrior-reaver-5
-    DisplayName: Stormhide
-    Kind: 1
-    XpCost: 475
-    Position: {x: -490, y: -995}
-    Gains:
-      Values: []
-    ResistType: 3
-    ResistPercent: 15
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-reaver-4
-  - Key: warrior-berserk-magic
+    - warrior-b-6
+  - Key: warrior-b-cry
     DisplayName: 
     Kind: 3
-    XpCost: 245
-    Position: {x: 680, y: -565}
+    XpCost: 350
+    Position: {x: 775, y: -710}
     Gains:
       Values: []
     ResistType: 0
@@ -495,43 +442,21 @@ MonoBehaviour:
     GrantedMagicKey: WarCry
     GrantedCharges: 2
     Neighbors:
-    - warrior-berserk-6
-  - Key: warrior-bulwark-magic
+    - warrior-b-7
+  - Key: warrior-b-edge
     DisplayName: 
-    Kind: 3
+    Kind: 0
     XpCost: 350
-    Position: {x: -680, y: -745}
+    Position: {x: 755, y: -580}
     Gains:
-      Values: []
+      Values:
+      - Type: 3
+        Amount: 2
+      - Type: 6
+        Amount: 2
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: ShieldUp
+    GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - warrior-bulwark-6
-  - Key: warrior-warlord-magic
-    DisplayName: 
-    Kind: 3
-    XpCost: 410
-    Position: {x: 585, y: -870}
-    Gains:
-      Values: []
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: Ward
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-warlord-5
-  - Key: warrior-reaver-magic
-    DisplayName: 
-    Kind: 3
-    XpCost: 540
-    Position: {x: -585, y: -1050}
-    Gains:
-      Values: []
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: Hush
-    GrantedCharges: 2
-    Neighbors:
-    - warrior-reaver-5
+    - warrior-b-7

@@ -15,7 +15,49 @@
 
   Three details that matter. The magic is named by **key, not reference**, because Heroes does not depend on Cards (the dependency runs the other way, and saves reference magic by key too) — resolution happens in `EquippedMagicState.SeedFromLoadout` where the catalog lives. `KnownMagicForNodes` walks the **grid**, not the save, so a hero's known list reads the same however they clicked, which is what makes the loadout auto-fill deterministic. And `GrantedCharges` is the real power dial, not `XpCost`: it is the whole run's allowance of that spell, restored only by resting in a refuge.
 
-  Every hero's grid authors a cheap **signature** node near the start (Warrior/Slash, Tank/ShieldUp, Acolyte/Heal, Scout/PoisonDart, all ~65 xp) plus spells further out on each branch. `ElementalContentTests` fails if a grid has no `MagicKnown` node, if a node names a magic that does not exist, **or if any magic in the catalog is on no grid at all** — with no Draw there is no second route, so an unplaced spell is uncastable by anyone.
+  Every hero's grid authors a cheap **signature** node near the start (Warrior/Slash, Tank/ShieldUp, Acolyte/Heal, Scout/PoisonDart) plus spells further out on each branch. `ElementalContentTests` fails if a grid has no `MagicKnown` node, if a node names a magic that does not exist, **or if any magic in the catalog is on no grid at all** — with no Draw there is no second route, so an unplaced spell is uncastable by anyone.
+
+## The Warrior's grid is the authored one; the other three are still the stopgap
+
+**Only `WarriorGrid` has been through §4c** (2026-09-04). It is the reference for the rest, and the
+one to read before authoring another.
+
+**Two destinations, neither of them named.** A four-node trunk everyone walks — health, Strength,
+and **Slash at 30 xp** so nobody is ever empty-handed — then a fork into two branches that are
+identical in *price* and different in *payload*, which is the whole point: the choice is what you
+become, not how much you spend.
+
+| | stats | spells |
+|---|---|---|
+| branch A (`warrior-a-*`) | MaxHealth, Endurance, Fire + Shadow resistance | ShieldUp → Bulwark → Ward |
+| branch B (`warrior-b-*`) | Strength, Agility, Luck | Sunder → Cleave → War Cry |
+
+Read A's payload list and you are looking at a tank; read B's and you are looking at a damage
+dealer. **Neither word appears anywhere in the data**, per §4c.
+
+Three things about the shape that are deliberate and easy to undo by accident:
+
+- **The trunk is short and the branches fork early.** `CostForDepth` is superlinear, so every step
+  of shared trunk is paid twice over by a player who only ever walks one branch. A first draft ran
+  each branch as one long chain from a deeper fork and every destination came out at **3,665 xp** —
+  five times the old grid's cheapest tip, against a campaign that pays ~1,423 xp per hero. Forking
+  at depth 3 instead brings the ladder to **385 / 980 / 1,625 xp** for a branch's first, second and
+  third spell.
+- **Width comes from stubs at the same depth, not from longer chains.** `warrior-a-fire`,
+  `warrior-b-hone` and the rest hang off the spine as optional single nodes. They add content and
+  choice without pushing the destination further out of reach — which a longer chain always does.
+- **Each branch ends in a fork, not a point.** Two tips per branch, so §4b has four places to hang a
+  summon and does not have to re-cut the graph to find one.
+
+**Its stat totals are close to the grid it replaced on purpose** (STR 20 vs 21, END 7 vs 7, AGI 6 vs
+7, LCK 6 vs 7, HP 44 vs 44, whole grid 5,305 vs 7,095 xp over 31 nodes vs 36). Balance work is
+paused until the rest of the specialization refactor lands, so the re-author moved the *shape* and
+held the numbers still. What did move is spell access, and that is the intended direction: Draw used
+to hand out spells for free and the grid now has to.
+
+It also fixes a standing analyzer warning — the old `warrior-reaver-4` granted Luck +3 against a
+base of 5, which is 60% and over the node-gain-shape ceiling. Per-node caps for the Warrior are
+**STR ≤5, END ≤2, AGI ≤2, LCK ≤2, HP ≤26** (outputs 50% of base, pools 100%).
 - **Spending is hub-only.** `HeroRoster.TryActivateNode(hero, nodeKey)` is the one spend path (the grid screen calls it; `HeroRoster.GetHeroSave` is the screen's read contract). The dungeon only banks XP, which is what keeps `DungeonManager.BestRosterStats` (room-event spawn thresholds) stable across a run. No respec.
 - **The grid UI** is `Assets/Scripts/Heroes/UI/`: `SphereGridView` (the shared UITK graph renderer — pan/zoom, Painter2D edges — used by the hub screen *and* the editor window), `SphereGridPresenter` (pure state classification + payload text, `SphereGridPresenterTests`), `SphereGridUI` (the hub view-controller, `grid-view` in MainMenu.uxml). Authoring: **Tools ▸ Heroes ▸ Sphere Grid Editor** (drag nodes, connect edges, payload inspector, preview-at-N-XP) and **Tools ▸ Heroes ▸ Generate Starter Sphere Grids** (`SphereGridSeeder`, idempotent, encodes the tuning).
 - **`Key` is the save identifier; `Label` is the display name — never mix them up.** Persistence keys off `HeroSO.SaveKey` (party XP in `Party.json`, `EquippedHeroKey` in `ItemCollection.json`, `EquippedMagic` in `Run.json`); anything on screen uses `HeroSO.DisplayName` / `Hero.DisplayName`. `SaveKey` falls back to `Label` then the asset name, so heroes authored before `Key` existed keep resolving to the save entries they already wrote. **Changing an existing `Key` orphans every save that references the old value** — the keys are `Warrior` and `Tank`; the latter was migrated from a typo'd `Tankj` by renaming the field *and* rewriting every save file that referenced it (`Party.json`, `ItemCollection.json`, `Run.json` and every `Dungeon_*.json`), which is the only safe way to change one.

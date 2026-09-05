@@ -181,13 +181,37 @@ acquisition mechanic for a stat tree and gained nothing.
 3. **Author seven grids, and make them much bigger.** Only `WarriorGrid` survives, and it is
    re-authored; the other three are deleted (task 1).
 
-   **Updated 2026-09-04**, after §9b's code landed. The grids were ~30 nodes with **exactly one**
-   `MagicKnown` each, which was precisely why the grid did not read as a source of anything. They now
-   carry **5 (Warrior / Tank / Scout) and 9 (Acolyte)** — the signature plus one per branch tip, and
-   a second mid-branch spell per branch on the caster. That is a *stopgap* whose only job was keeping
-   every magic obtainable while Draw came out; the shape is still four seeder-generated fans and the
-   prices are still far past what a campaign pays (see §9b's findings table). Treat the current
-   `MagicKnown` placement as evidence about ratios, not as authoring to preserve.
+   **The Warrior's grid is done** *(2026-09-04)* — it is the first real §4c authoring and the
+   reference for the rest. **Tank / Scout / Acolyte are still the §9b stopgap** (four
+   seeder-generated fans with spells bolted onto the branch tips) and should be replaced, not
+   extended.
+
+   What the Warrior's shape settled, and what the other six should copy:
+
+   - **A short trunk, then two branches identical in price and different in payload.** Four shared
+     nodes (health, Strength, and **Slash at 30 xp** so nobody is ever empty-handed), forking at
+     depth 3. Branch A stacks MaxHealth / Endurance / resistances and grants ShieldUp → Bulwark →
+     Ward; branch B stacks Strength / Agility / Luck and grants Sunder → Cleave → War Cry. The words
+     "tank" and "attacker" appear nowhere in the data — only the payloads say it.
+   - **Fork early; superlinear cost punishes a long trunk *and* a long chain.** A first draft used a
+     deeper fork and one long chain per branch: every destination priced at **3,665 xp** against a
+     campaign that pays ~1,423 per hero. Forking at depth 3 gives a **385 / 980 / 1,625 xp** ladder
+     for a branch's three spells — reachable, and progressive.
+   - **Add width with same-depth stubs, not with more chain.** Optional single nodes hanging off the
+     spine add choice without pushing the destination out of reach.
+   - **End each branch in a fork.** Two tips per branch, so §4b has four summon sites per hero
+     without re-cutting the graph.
+
+   **It needed new content to be possible at all**, which is the finding worth carrying to the other
+   six: the catalog had exactly **three** spells a Warrior could cast well (Slash, ShieldUp, War
+   Cry), because everything else scales off Intelligence, Spirit or Agility. **Cleave**, **Sunder**
+   and **Bulwark** were authored for him. Expect the same for the Cultist, Tinkerer and Rogue —
+   *check the scaling stat before you plan a branch around a spell.*
+
+   Stat totals were deliberately held near the grid it replaced (STR 20 vs 21, END 7 vs 7, AGI 6 vs
+   7, LCK 6 vs 7, HP 44 vs 44; 31 nodes / 5,305 xp vs 36 / 7,095), because balance work is paused
+   until the refactor lands. So this grid is **not** "materially larger" the way this section asks
+   for — that part is still open, and should be decided once the spell and summon budgets are.
 
    **Grids get materially larger** *(decided 2026-09-04)*. ~30 nodes cannot hold two or three
    branches that each end in a spell kit and a summon and still make the choice between them hurt.
