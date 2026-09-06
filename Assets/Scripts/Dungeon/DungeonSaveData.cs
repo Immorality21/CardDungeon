@@ -12,6 +12,30 @@ namespace Assets.Scripts.Dungeon
         public int Seed;
         public string LevelKey;
         public int CurrentRoomIndex;
+
+        /// <summary>
+        /// Where this floor's entrance is, so a restart knows where to put the party back. Written
+        /// every save rather than derived, because the start room is a fact about how the floor was
+        /// built and nothing in the rebuilt layout marks it (only the exit is flagged).
+        /// </summary>
+        public int StartRoomIndex;
+
+        /// <summary>
+        /// Set when the player left from the pause menu: the floor is spent, so on the way back in
+        /// the enemies stand up again and the party starts at the entrance.
+        ///
+        /// <para><b>What deliberately does not reset is the party</b> - health, ability charges,
+        /// afflictions and the potions this floor has already drunk all still restore, so walking
+        /// out of a fight you are losing and walking back in is not a heal, and a hero who went
+        /// down stays down. That is the whole point of the flag: leaving costs you the floor, never
+        /// your wounds.</para>
+        ///
+        /// <para><b>Nor does anything the floor already paid out</b> - a looted cache stays looted, a
+        /// spent refuge stays spent, and a resolved room event stays resolved. Without that, a
+        /// restart would put the refuge back and the loop "heal, quit, heal again" would be exactly
+        /// the free healing the health carry-over exists to prevent.</para>
+        /// </summary>
+        public bool RestartAtEntrance;
         public List<RoomSaveData> Rooms = new List<RoomSaveData>();
         public List<MagicSlotSaveData> EquippedMagic = new List<MagicSlotSaveData>();
 

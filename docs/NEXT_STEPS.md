@@ -183,7 +183,7 @@ backlog.**
 | **2** | Room variety — the branching half has not shipped | open |
 | **6** | Stats — one open note (`BuffType` is a second per-stat list) | structural |
 | **8** | Migrate to the new Input System | *nice to have* |
-| **14** | The dungeon map, the party bar, and the pause menu | not started |
+| **14** | The dungeon map, the party bar, and the pause menu | 14b + 14c ✅ 2026-09-06; **14a (the map) is what is left** |
 | **15** | Run summary and statistics | not started |
 | **16** | A compendium — explain the systems | not started |
 | **20** | **A tutorial — guide the player through the first hour** | not started; the opening beat is already built and priced for it |
@@ -198,6 +198,36 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The party bar while exploring, and a pause menu** (2026-09-06) —
+  `docs/plans/POLISH_CONTENT.md` §14b, §14c. The party window is no longer combat-only: it is up
+  while walking the floor, rebuilt per room (`ShowPartyStatusOutOfCombat`, so a hero rescued
+  mid-level appears) and kept through the end of a fight rather than torn down. Health is
+  *level*-scoped — it refills on a fresh floor or in a refuge — so every walking decision needs it,
+  and all of them were made blind. New **`pause-window`** in `RoomAction.uxml`, opened with Escape,
+  checked before everything else in `OnCombatHotkey` and the only thing the keyboard reaches while
+  up. It carries the hub's audio dials **by reuse, not by copy**: `AudioOptionsUI` queries its root
+  by element name, so the UXML repeats the `master-*`/`music-*`/`sfx-*`/`options-mute` names and
+  hands it the pause window. It opens only from the three states the room panel owns the keyboard in
+  (walking, Fight/Flee, a hero's command menu) — which are also the states where nothing is ticking,
+  so "Paused" is honest without stopping a clock, and pause never fights a dialog or the ability
+  picker for Escape. **Leaving mid-run** (`DungeonManager.HandleQuitToHub`) leaves the *run*
+  standing — the map offers it as continuable — but **restarts the floor**
+  (`DungeonSaveData.RestartAtEntrance`): every enemy stands back up and the party begins at the
+  entrance, having forfeited the floor's un-banked XP, kill-gold and loot. **The party is what does
+  not reset** — health, charges, afflictions and spent potions all restore, so a hero who went down
+  stays down and a wounded party walks back in wounded. Leaving can never buy back a death or a
+  heal, which is what keeps it "I want to stop playing" rather than a tactic; it is still not a
+  cheaper death (dying deletes the run save) because it buys nothing — the same enemies, in the same
+  places, met exactly as hurt. **The hole that rule opens is closed in the same change**: a floor
+  that resets would put the *refuge* back, and refuge + carried-over health is an unbounded heal
+  loop, so a restart keeps everything the floor already paid out (looted cache, spent refuge,
+  resolved event). The rule is *the restart puts the enemies back; it does not put back anything the
+  floor already gave you.* `HandleQuitToHub` also discards pending gold, a plain field on a
+  `DontDestroyOnLoad` singleton that would otherwise be banked by the next run's first clear.
+  Verified end-to-end in play mode on two real floors — wounds and a downed hero carried, enemies
+  restored, party back at the door, map dark again, and a spent cache still spent — plus panel
+  states, dial readouts and the arm/close/disarm cycle. **The keys were driven synthetically, so the
+  handler is proven and the real key path is not.**
 - **Heroes are unlocked, not handed out; and "Magic" becomes "Ability"** (2026-09-06) —
   `docs/plans/SPECIALIZATION.md` §5b. The unlock *record* already existed
   (`PartySaveData.OwnedHeroKeys`, written deferred by `Party.MarkOwnedDeferred` so a rescue is

@@ -71,6 +71,42 @@
             <ui:Button name="victory-continue" text="Continue" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
+        <!-- Pause overlay. Last in the document so it paints over everything else, and the only
+             window that can come up on top of a fight. Holds what the hub owns between runs but
+             the dungeon had no way to reach: the audio dials, and the way out.
+
+             The audio rows carry the same element names as MainMenu.uxml's options-view, because
+             AudioOptionsUI is a plain view-controller that queries its root by name - so the dungeon
+             gets the hub's dials with no second implementation to drift. -->
+        <ui:VisualElement name="pause-window" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label text="Paused" class="cd-title" />
+
+            <ui:Label text="Audio" class="cd-subtitle" />
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="Master" class="cd-option-label" />
+                <ui:Button name="master-down" text="-" class="cd-button cd-button--step" />
+                <ui:Label name="master-value" text="" class="cd-option-value" />
+                <ui:Button name="master-up" text="+" class="cd-button cd-button--step" />
+            </ui:VisualElement>
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="Music" class="cd-option-label" />
+                <ui:Button name="music-down" text="-" class="cd-button cd-button--step" />
+                <ui:Label name="music-value" text="" class="cd-option-value" />
+                <ui:Button name="music-up" text="+" class="cd-button cd-button--step" />
+            </ui:VisualElement>
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="Sound Effects" class="cd-option-label" />
+                <ui:Button name="sfx-down" text="-" class="cd-button cd-button--step" />
+                <ui:Label name="sfx-value" text="" class="cd-option-value" />
+                <ui:Button name="sfx-up" text="+" class="cd-button cd-button--step" />
+            </ui:VisualElement>
+            <ui:Button name="options-mute" text="" class="cd-menu-button" />
+
+            <ui:Button name="pause-resume" text="Resume" class="cd-button cd-button--wide" />
+            <ui:Button name="pause-quit" text="Leave the Dungeon" class="cd-button cd-button--wide" />
+            <ui:Label name="pause-note" text="" class="cd-info-label cd-hint" />
+        </ui:VisualElement>
+
         <!-- Keyboard hint. Shown only while the arrows actually mean "pick a door". -->
         <ui:Label name="nav-hint" text="Arrows pick a door &#183; Enter walk through &#183; Tab room actions" class="cd-nav-hint cd-hidden" picking-mode="Ignore" />
 

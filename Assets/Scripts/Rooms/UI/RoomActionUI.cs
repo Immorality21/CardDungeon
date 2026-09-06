@@ -34,6 +34,13 @@ namespace Assets.Scripts.Rooms
         private VisualElement _eventWindow;
         private VisualElement _partyStatus;
         private VisualElement _partyStatusRows;
+        private VisualElement _pauseWindow;
+        private Button _pauseResume;
+        private Button _pauseQuit;
+        private Label _pauseNote;
+        private MainMenu.AudioOptionsUI _pauseAudio;
+        private KeyboardNavigator _pauseNav;
+        private bool _quitArmed;
 
         private readonly Dictionary<Heroes.Hero, VisualElement> _partyRows = new Dictionary<Heroes.Hero, VisualElement>();
         private readonly Dictionary<Heroes.Hero, Label> _partyHpLabels = new Dictionary<Heroes.Hero, Label>();
@@ -136,6 +143,10 @@ namespace Assets.Scripts.Rooms
             _eventWindow = root.Q<VisualElement>("event-window");
             _partyStatus = root.Q<VisualElement>("party-status");
             _partyStatusRows = root.Q<VisualElement>("party-status-rows");
+            _pauseWindow = root.Q<VisualElement>("pause-window");
+            _pauseResume = root.Q<Button>("pause-resume");
+            _pauseQuit = root.Q<Button>("pause-quit");
+            _pauseNote = root.Q<Label>("pause-note");
             _commandList = root.Q<VisualElement>("command-list");
             _turnOrder = root.Q<VisualElement>("turn-order");
             _turnOrderList = root.Q<VisualElement>("turn-order-list");
@@ -228,6 +239,24 @@ namespace Assets.Scripts.Rooms
             // The event window builds its options at runtime, so its cursor navigates whatever is on
             // it rather than a fixed list. Escape leaves by its own Back button, so the keyboard route
             // out runs the same teardown a click does.
+            // The pause overlay reuses the hub's audio dials wholesale: AudioOptionsUI queries its
+            // root by element name, and the UXML gives it the same names, so there is one
+            // implementation of "what does the Master dial do" rather than two that can disagree.
+            if (_pauseWindow != null)
+            {
+                _pauseAudio = new MainMenu.AudioOptionsUI(_pauseWindow);
+                _pauseNav = new KeyboardNavigator(_pauseWindow);
+                _pauseNav.Cancelled += ClosePause;
+            }
+            if (_pauseResume != null)
+            {
+                _pauseResume.clicked += ClosePause;
+            }
+            if (_pauseQuit != null)
+            {
+                _pauseQuit.clicked += OnQuitToHub;
+            }
+
             _eventNav = new KeyboardNavigator(_eventWindow);
             _eventNav.Cancelled += () =>
             {
@@ -261,6 +290,13 @@ namespace Assets.Scripts.Rooms
             _entryDoor = entryDoor;
             SetShown(_detailWindow, false);
             SetShown(_eventWindow, false);
+
+            // Health is a *level*-scoped resource - it only refills on a fresh floor or in a refuge -
+            // so the decisions the player makes while walking (take this fight? spend the refuge?
+            // drink now?) are exactly the ones that need it, and until 2026-09-06 every one of them
+            // was made blind. Rebuilt per room rather than once, because a rescued hero joins
+            // mid-level.
+            ShowPartyStatusOutOfCombat();
 
             bool hasEnemy = room.Enemies.Any(e => e != null && e.IsAlive);
             SetShown(_combatBar, hasEnemy);
@@ -337,6 +373,26 @@ namespace Assets.Scripts.Rooms
             SetShown(_partyStatus, false);
             SetShown(_turnOrder, false);
             SetShown(_victoryWindow, false);
+            ClosePause();
+        }
+
+        /// <summary>
+        /// Puts the party window up outside combat, rebuilt from the live party. Safe to call when
+        /// there is no party yet - the room is shown before combat exists, and a window with no rows
+        /// is worse than no window.
+        /// </summary>
+        private void ShowPartyStatusOutOfCombat()
+        {
+            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
+            if (party == null || party.Heroes == null || party.Heroes.Count == 0)
+            {
+                SetShown(_partyStatus, false);
+                return;
+            }
+
+            BuildPartyStatus(party);
+            HighlightActiveHero(null);
+            SetShown(_partyStatus, true);
         }
 
         // ============================================================
@@ -1241,6 +1297,29 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void OnCombatHotkey(KeyDownEvent evt)
         {
+            // Pause is above everything, including a dialog it can never be opened over: while it
+            // is up it is the only thing the keyboard reaches.
+            if (IsShown(_pauseWindow))
+            {
+                if (evt.keyCode == KeyCode.Escape || evt.keyCode == KeyCode.Backspace)
+                {
+                    ClosePause();
+                }
+                else
+                {
+                    _pauseNav?.HandleKey(evt);
+                }
+                evt.StopPropagation();
+                return;
+            }
+
+            if (evt.keyCode == KeyCode.Escape && CanOpenPause())
+            {
+                OpenPause();
+                evt.StopPropagation();
+                return;
+            }
+
             // Dialogs first: whatever is stacked over the room owns the keyboard while it is up.
             if (HandleDialogKey(evt))
             {
@@ -1291,6 +1370,102 @@ namespace Assets.Scripts.Rooms
             {
                 evt.StopPropagation();
             }
+        }
+
+        // ============================================================
+        //  PAUSE OVERLAY
+        // ============================================================
+
+        /// <summary>
+        /// Whether Escape should open the pause menu right now. Only from the three places the room
+        /// panel actually owns the keyboard - walking the floor, the Fight/Flee prompt, and a hero's
+        /// command menu. Anything stacked over the room (an event, a dialog, the spoils screen) uses
+        /// Escape for its own way out, and the ability and target pickers live on their own panel and
+        /// take focus while they are up, so pause never has to fight another window for the key.
+        ///
+        /// <para>Those three states are also the ones in which nothing is ticking - the floor waits
+        /// for a door, and a CTB turn waits for the command - which is what makes the word "Paused"
+        /// honest without stopping any clocks. There is deliberately no way in during an enemy's
+        /// turn; it resolves in under a second.</para>
+        /// </summary>
+        private bool CanOpenPause()
+        {
+            if (_pauseWindow == null || IsShown(_pauseWindow) || IsDialogUp())
+            {
+                return false;
+            }
+            return DoorNavActive() || IsShown(_combatBar) || IsShown(_heroBar);
+        }
+
+        private void OpenPause()
+        {
+            if (_pauseWindow == null)
+            {
+                return;
+            }
+
+            // Arming is per-visit: a player who opened the menu, thought better of quitting and
+            // resumed must not find the button still primed the next time they pause.
+            _quitArmed = false;
+            RefreshQuitButton();
+
+            // AudioOptionsUI owns this element's display and refreshes the readouts as it shows, so
+            // the dials always read the live values rather than whatever they said last time.
+            _pauseAudio?.Show();
+            SetShown(_pauseWindow, true);
+            _pauseNav?.Reset();
+            FocusRoot();
+        }
+
+        private void ClosePause()
+        {
+            if (_pauseWindow == null || !IsShown(_pauseWindow))
+            {
+                return;
+            }
+
+            _quitArmed = false;
+            _pauseAudio?.Hide();
+            SetShown(_pauseWindow, false);
+            _pauseNav?.Reset();
+            FocusRoot();
+        }
+
+        /// <summary>
+        /// Leaving mid-run, in two presses. The first arms the button and says what it costs, because
+        /// the cost is real and none of it is on screen: the floor restarts from its entrance with
+        /// every enemy back on its feet, and this floor's un-banked XP and kill-gold are forfeited
+        /// exactly as a wipe forfeits them - while the party's health, charges and wounds come back
+        /// untouched, so it can never be used to undo a bad fight.
+        /// </summary>
+        private void OnQuitToHub()
+        {
+            if (!_quitArmed)
+            {
+                _quitArmed = true;
+                RefreshQuitButton();
+                return;
+            }
+
+            if (DungeonManager.HasInstance)
+            {
+                DungeonManager.Instance.HandleQuitToHub();
+            }
+            // The hub, never the title screen - the loop is hub -> dungeon -> hub, and the campaign
+            // map is where the run is picked back up.
+            SceneManager.LoadScene("HubScene");
+        }
+
+        private void RefreshQuitButton()
+        {
+            if (_pauseQuit != null)
+            {
+                _pauseQuit.text = _quitArmed ? "Leave - are you sure?" : "Leave the Dungeon";
+            }
+            SetText(_pauseNote, _quitArmed
+                ? "You will start this floor again, from the entrance, with every enemy back - and "
+                  + "just as hurt as you are now. Anything you have not banked yet is lost."
+                : "The run waits for you on the story map.");
         }
 
         /// <summary>Whether a window is stacked over the room, dialog-style.</summary>
@@ -1431,7 +1606,8 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private bool OwnsNavigationKeys()
         {
-            return IsShown(_heroBar) || IsShown(_combatBar) || IsDialogUp() || DoorNavActive();
+            return IsShown(_pauseWindow) || IsShown(_heroBar) || IsShown(_combatBar)
+                || IsDialogUp() || DoorNavActive();
         }
 
         /// <summary>
@@ -1443,7 +1619,7 @@ namespace Assets.Scripts.Rooms
         private bool DoorNavActive()
         {
             return _doorsLive
-                && !IsShown(_combatBar) && !IsShown(_heroBar)
+                && !IsShown(_combatBar) && !IsShown(_heroBar) && !IsShown(_pauseWindow)
                 && !IsShown(_detailWindow) && !IsShown(_eventWindow) && !IsShown(_victoryWindow);
         }
 
@@ -1690,11 +1866,11 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.OnTurnExecuted -= OnTurnExecuted;
             CombatManager.Instance.OnTurnOrderChanged -= OnTurnOrderChanged;
             SetShown(_heroBar, false);
-            SetShown(_partyStatus, false);
             SetShown(_turnOrder, false);
-            _partyStatusRows?.Clear();
-            _partyRows.Clear();
-            _partyHpLabels.Clear();
+            // The party window survives the fight - it is the exploring HUD now, not a combat-only
+            // panel - so it keeps its rows and only drops the whose-turn-is-it highlight.
+            HighlightActiveHero(null);
+            RefreshPartyStatus();
             _turnOrderList?.Clear();
             _commandList?.Clear();
 
@@ -1868,6 +2044,7 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_victoryWindow, false);
             CombatManager.Instance.FinishVictory();
+            ShowPartyStatusOutOfCombat();
             // Always back to the room, even after clearing the exit: the level completes when the
             // player takes the stairs, which ShowMainBar surfaces as the Descend button.
             ShowMainBar();
@@ -2010,6 +2187,14 @@ namespace Assets.Scripts.Rooms
             if (element != null)
             {
                 element.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+        }
+
+        private static void SetText(Label label, string text)
+        {
+            if (label != null)
+            {
+                label.text = text;
             }
         }
     }

@@ -111,6 +111,34 @@ EventSystem, `Assets/Scripts/ImmoralityGaming/Fundamentals/MainCamera.cs`,
 
 Three separate gaps, grouped because a pause overlay is the natural home for the first two.
 
+> **14b and 14c shipped 2026-09-06. 14a is what is left**, and it is now the only thing this
+> section is still asking for — the overlay it wants to live in exists and has a slot for it.
+>
+> - **14b:** the party window is up while exploring, rebuilt per room (`ShowPartyStatusOutOfCombat`)
+>   and kept alive through the end of a fight instead of torn down. It was the cheapest item in this
+>   document and it read exactly as advertised.
+> - **14c:** `pause-window` in `RoomAction.uxml`, opened with Escape from the three states the room
+>   panel owns the keyboard in. Carries the audio dials — the hub's own `AudioOptionsUI`, reused by
+>   element name rather than reimplemented — and a two-press **Leave the Dungeon**.
+> - **What quitting mid-run means** *(user decision, 2026-09-06)*. The **run** is left standing —
+>   the campaign map offers it as continuable — but the **floor restarts**: every enemy stands back
+>   up and the party begins at the entrance, having forfeited the floor's un-banked XP, kill-gold and
+>   loot. **The party is what does not reset**: health, charges, afflictions and spent potions all
+>   restore, so a hero who went down stays down and a wounded party walks back in wounded. Leaving
+>   can never buy back a death or a heal, which is what keeps it "I want to stop playing" rather than
+>   a tactic; it is still not a cheaper death (dying deletes the run save) because it buys nothing.
+> - **The hole that rule opens, and how it is closed.** A floor that resets puts the *refuge* back,
+>   and a refuge plus carried-over health is an unbounded heal loop: heal, quit, heal again. So a
+>   restart deliberately keeps everything the floor already paid out — a looted cache stays looted, a
+>   spent refuge stays spent, a resolved event stays resolved. The statable rule is **the restart
+>   puts the enemies back; it does not put back anything the floor already gave you.** That kills the
+>   heal loop and the event re-roll in one. Re-killing respawned enemies is not an XP farm either,
+>   because un-banked XP dies with the quit and banking it requires clearing the floor.
+> - `HandleQuitToHub` also has to discard pending gold, which is a plain field on a
+>   `DontDestroyOnLoad` singleton and would otherwise be banked by the next run's first clear.
+> - **Still open here:** §19's motion-reduction toggle has an obvious home now, and the overlay
+>   cannot be opened during an enemy's turn (nothing waits for input there).
+
 **14a. There is no dungeon map.** Rooms are a graph (`RoomNode`), doors are the only navigation, and
 nothing in `Assets/Scripts` draws an overview. The player cannot answer *where is the exit*, *have I
 searched everything*, or *is this branch a dead end*. Two consequences:
@@ -124,14 +152,14 @@ knowledge model exists; what is missing is a view of it. `SphereGridView` is a n
 that already does pan/zoom and Painter2D edges over exactly this shape — unlike §7's painted town,
 **a dungeon map is genuinely the same widget**, so this is the one place reusing it is right.
 
-**14b. Party health is invisible while exploring.** `party-status` in `RoomAction.uxml` is shown by
+**14b. ~~Party health is invisible while exploring.~~ ✅ Shipped 2026-09-06.** `party-status` in `RoomAction.uxml` is shown by
 `ShowCombat` and hidden by `HideAll`, so the panel exists and is deliberately combat-only. But since
 the charge/health rework made health a **level-scoped** resource, the whole time the player is
 walking the floor — deciding whether to take a fight, spend the refuge, or drink a potion — they
 cannot see how hurt anyone is. **This is the single decision the game most wants informed, and it is
 made blind.** Small fix, disproportionate payoff; it is the cheapest item in this document.
 
-**14c. There is no in-dungeon pause menu.** Volume can only be changed in the hub, and there is no
+**14c. ~~There is no in-dungeon pause menu.~~ ✅ Shipped 2026-09-06.** Volume can only be changed in the hub, and there is no
 quit-to-hub mid-run. A pause overlay is the home for both, plus 14a and 14b, plus §19's
 motion-reduction toggle.
 

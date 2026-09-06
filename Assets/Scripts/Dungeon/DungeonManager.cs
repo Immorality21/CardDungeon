@@ -415,7 +415,7 @@ namespace Assets.Scripts.Dungeon
 
             // Initialize save manager and persist initial state
             var levelKey = LevelKeyForSave();
-            DungeonSaveManager.Instance.Initialize(seed, levelKey, rooms);
+            DungeonSaveManager.Instance.Initialize(seed, levelKey, rooms, startRoom.RoomIndex);
             DungeonSaveManager.Instance.Save(startRoom);
 
             // Store active dungeon seed in run save so we can resume
@@ -431,6 +431,12 @@ namespace Assets.Scripts.Dungeon
 
         private void RestoreSavedState(DungeonSaveData saveData, List<Room> rooms)
         {
+            // Two shapes of resume, and the difference is one flag. An ordinary one puts the floor
+            // back exactly as it was left. A *restart* (the player walked out through the pause menu)
+            // stands the enemies back up and starts them at the door - but still restores everything
+            // below, because the party is not what resets.
+            bool restart = saveData.RestartAtEntrance;
+
             foreach (var roomData in saveData.Rooms)
             {
                 if (roomData.RoomIndex < 0 || roomData.RoomIndex >= rooms.Count)
@@ -442,9 +448,20 @@ namespace Assets.Scripts.Dungeon
 
                 // Re-apply the room's event state *before* trimming enemies: a consumed event may
                 // have woken something, and those spawns have to exist again before the saved
-                // enemy count decides how many of them the player has since killed.
-                RestoreRoomEvent(room, roomData);
+                // enemy count decides how many of them the player has since killed. On a restart
+                // the room already holds its full complement, so the wake-ups would be spawned on
+                // top of them - the event is only marked resolved, so it cannot be re-rolled.
+                RestoreRoomEvent(room, roomData, respawnAwakened: !restart);
+
+                // A looted cache stays looted and a spent refuge stays spent, restart or not.
+                // Otherwise "use the refuge, quit, use it again" would be a healing loop, which is
+                // the exact thing carrying health across the quit is there to prevent.
                 RestoreRoomKind(room, roomData);
+
+                if (restart)
+                {
+                    continue;
+                }
 
                 // Remove killed enemies based on saved counts.
                 while (room.Enemies.Count > roomData.EnemyCount)
@@ -489,11 +506,16 @@ namespace Assets.Scripts.Dungeon
                 room.Hide();
             }
 
-            foreach (var roomData in saveData.Rooms)
+            // A restart re-walks the floor, so it re-explores it too - the map going dark again is
+            // the readable half of "you are back at the start".
+            if (!restart)
             {
-                if (roomData.IsExplored && roomData.RoomIndex >= 0 && roomData.RoomIndex < rooms.Count)
+                foreach (var roomData in saveData.Rooms)
                 {
-                    rooms[roomData.RoomIndex].Reveal();
+                    if (roomData.IsExplored && roomData.RoomIndex >= 0 && roomData.RoomIndex < rooms.Count)
+                    {
+                        rooms[roomData.RoomIndex].Reveal();
+                    }
                 }
             }
 
@@ -517,7 +539,8 @@ namespace Assets.Scripts.Dungeon
                 InventoryManager.Instance.ReconcileDungeonConsumption(saveData.ConsumablesSpent);
             }
 
-            DungeonSaveManager.Instance.Initialize(saveData.Seed, LevelKeyForSave(), rooms);
+            DungeonSaveManager.Instance.Initialize(
+                saveData.Seed, LevelKeyForSave(), rooms, saveData.StartRoomIndex);
             GameManager.Instance.EnterRoom(currentRoom);
         }
 
@@ -657,7 +680,7 @@ namespace Assets.Scripts.Dungeon
         /// land in the same room - but if the pools have been re-authored since the save, a stale
         /// consumed flag would silently eat a different event, so a mismatch is left alone.</para>
         /// </summary>
-        private void RestoreRoomEvent(Room room, RoomSaveData roomData)
+        private void RestoreRoomEvent(Room room, RoomSaveData roomData, bool respawnAwakened = true)
         {
             if (!roomData.EventConsumed || room.RoomEvent == null)
             {
@@ -672,6 +695,11 @@ namespace Assets.Scripts.Dungeon
             }
 
             room.MarkEventResolved(roomData.EventOptionIndex, roomData.EventOutcomeIndex, roomData.EventSucceeded);
+
+            if (!respawnAwakened)
+            {
+                return;
+            }
 
             var outcome = ResolvedOutcome(room.RoomEvent, roomData);
             if (outcome == null || outcome.AwakenedEnemies == null)
@@ -1181,6 +1209,54 @@ namespace Assets.Scripts.Dungeon
             }
 
             // Reload inventory from disk to discard in-memory changes
+            if (InventoryManager.HasInstance)
+            {
+                InventoryManager.Instance.Load();
+                InventoryManager.Instance.SetDeferSaves(false);
+            }
+        }
+
+        /// <summary>
+        /// Leaves a run in progress from the pause menu. The run is left standing, so the campaign
+        /// map offers it as continuable - but <b>the floor is not</b>: it is written with
+        /// <see cref="DungeonSaveData.RestartAtEntrance"/>, so on the way back in the enemies stand
+        /// up again and the party starts at the door.
+        ///
+        /// <para><b>What does not reset is the party.</b> Health, ability charges, level afflictions
+        /// and the potions this floor has already drunk are all captured and restored, so a hero who
+        /// went down is still down and a party at a sliver of health walks back in at a sliver of
+        /// health. That asymmetry is the whole design: leaving costs you the floor, and it can never
+        /// buy back a death, a heal, a cure or a refill.</para>
+        ///
+        /// <para><b>Nor does anything the floor already paid out.</b> A looted cache stays looted, a
+        /// spent refuge stays spent and a resolved room event stays resolved
+        /// (<c>RestoreSavedState</c>). Without that the restart would put the refuge back and
+        /// "heal, quit, heal again" would be an unbounded healing loop - the very thing carrying
+        /// health across the quit exists to close.</para>
+        ///
+        /// <para><b>It is still not a cheaper death.</b> Dying deletes the run save and ends the run;
+        /// this does not. What stops it being the obvious move in a fight you are losing is that it
+        /// buys nothing: the same enemies are waiting, in the same places, and you meet them exactly
+        /// as hurt as you left - having thrown away the floor's un-banked XP, kill-gold and loot to
+        /// do it.</para>
+        /// </summary>
+        public void HandleQuitToHub()
+        {
+            // Order matters: the save reads the inventory's per-level consumption, so it has to be
+            // written before the in-memory inventory is thrown away.
+            if (DungeonSaveManager.HasInstance && Party != null && Party.CurrentRoom != null)
+            {
+                DungeonSaveManager.Instance.SaveForRestart(Party.CurrentRoom);
+            }
+
+            // Un-banked kill-gold is a plain field on a DontDestroyOnLoad singleton, so without this
+            // it would ride into the hub and get banked by the *next* run's first level clear.
+            if (MetaProgressManager.HasInstance)
+            {
+                MetaProgressManager.Instance.DiscardPendingGold();
+            }
+
+            // Reload from disk to discard this level's un-committed loot, as HandlePartyDeath does.
             if (InventoryManager.HasInstance)
             {
                 InventoryManager.Instance.Load();

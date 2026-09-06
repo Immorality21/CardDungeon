@@ -14,6 +14,7 @@ namespace Assets.Scripts.Dungeon
         private int _seed;
         private string _levelKey;
         private List<Room> _rooms;
+        private int _startRoomIndex;
 
         protected override void Awake()
         {
@@ -21,20 +22,43 @@ namespace Assets.Scripts.Dungeon
             _fileHandler = new FileHandler();
         }
 
-        public void Initialize(int seed, string levelKey, List<Room> rooms)
+        public void Initialize(int seed, string levelKey, List<Room> rooms, int startRoomIndex)
         {
             _seed = seed;
             _levelKey = levelKey;
             _rooms = rooms;
+            _startRoomIndex = startRoomIndex;
+        }
+
+        /// <summary>
+        /// Writes the floor as it stands, then marks it to be <b>restarted</b> on the way back in:
+        /// the party is put back at the entrance and the enemies stand up again. Used by the pause
+        /// menu's way out, which is why the two are one call - leaving is meant to cost the floor.
+        ///
+        /// <para>Everything party-scoped is captured exactly as an ordinary save captures it, so
+        /// health, charges, afflictions and spent potions all survive the trip. See
+        /// <see cref="DungeonSaveData.RestartAtEntrance"/> for why that asymmetry is the point.</para>
+        /// </summary>
+        public void SaveForRestart(Room currentRoom)
+        {
+            Save(currentRoom, restartAtEntrance: true);
         }
 
         public void Save(Room currentRoom)
         {
+            Save(currentRoom, restartAtEntrance: false);
+        }
+
+        private void Save(Room currentRoom, bool restartAtEntrance)
+        {
             var data = new DungeonSaveData
             {
+                RestartAtEntrance = restartAtEntrance,
+                StartRoomIndex = _startRoomIndex,
                 Seed = _seed,
                 LevelKey = _levelKey,
-                CurrentRoomIndex = currentRoom.RoomIndex
+                // A restart puts the party back at the door, so that is where "current" is.
+                CurrentRoomIndex = restartAtEntrance ? _startRoomIndex : currentRoom.RoomIndex
             };
 
             foreach (var room in _rooms)
