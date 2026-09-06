@@ -182,7 +182,7 @@ namespace Assets.Scripts.Hub
             BuildTown();
 
             _campaignMap = _campaignView != null && _campaign != null
-                ? new CampaignMapUI(_campaignView, _campaign)
+                ? new CampaignMapUI(_campaignView, _campaign, _partyRoster)
                 : null;
             _merchant = new MerchantUI(_merchantView);
             _partySelect = new PartySelectUI(_partyView, _partyRoster);

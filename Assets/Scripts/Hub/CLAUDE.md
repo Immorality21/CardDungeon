@@ -283,9 +283,16 @@ through progression only. Gold never buys a hero again."*). `TavernUI`, `tavern-
 `HeroRoster.RemoveOwned` are all deleted. `HeroRoster.GetRecruitable` became **`GetUnownedHeroes`** —
 it is the "not yet unlocked" set an unlock system wants.
 
-**Heroes are obtained by rescue only right now** (`RunLevelEntry.RescueHero`) plus
-`PartyRosterSO.StartingHeroes`. The §5b unlock record — clearing a run grants a hero — is still open,
-and *"the roster screen needs a home that is not a shop"* is answered: it is the campfire.
+**Heroes are obtained by rescue only** (`RunLevelEntry.RescueHero`), on top of a starting lineup of
+exactly one. §5b's unlock half **shipped 2026-09-06**: the record was already there
+(`PartySaveData.OwnedHeroKeys`) and the missing piece was that `StartingHeroes` was handing out three
+heroes, which made the authored rescues no-ops. `CampaignNodeEntry.RequiresHeroes` now lets a run gate
+on owning a hero — `CampaignMapUI` reads the roster and renders the shortfall as a *"Needs in your
+roster: …"* line. *"The roster screen needs a home that is not a shop"* is answered: it is the campfire.
+
+What is still open is **where unlocks come from**: rescue is the only source, so four of the seven
+heroes are unreachable content. Clearing a run, a room event, a secret node and a boss are all
+unbuilt.
 
 One consequence recorded rather than fixed: `BalanceAnalyzer` still models the widest party from the
 whole catalog, which the tavern used to justify (a hero was bought with gold exactly as a party slot

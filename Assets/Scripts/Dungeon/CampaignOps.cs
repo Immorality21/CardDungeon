@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Heroes;
 
 namespace Assets.Scripts.Dungeon
 {
@@ -24,12 +25,28 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
-        /// Whether a node's prerequisites are satisfied. A node with no prerequisites is a starting
-        /// point and is always unlocked.
+        /// Whether a node's prerequisites are satisfied. A node with no prerequisites of either kind
+        /// is a starting point and is always unlocked.
+        ///
+        /// <para>There are two kinds of prerequisite and they compose as an AND: the runs in
+        /// <c>Requires</c> (softened by <c>UnlockMode</c>), and the heroes in <c>RequiresHeroes</c>,
+        /// which are always all-of. <paramref name="ownedHeroKeys"/> is
+        /// <c>PartySaveData.OwnedHeroKeys</c> - null means the caller knows of no owned heroes, so a
+        /// hero gate closes rather than opens. Failing shut is deliberate: a caller that forgets to
+        /// pass the roster locks a run, which shows up immediately, instead of quietly handing the
+        /// player a run the gate exists to withhold.</para>
         /// </summary>
-        public static bool IsUnlocked(CampaignNodeEntry node, ICollection<string> completedRunKeys)
+        public static bool IsUnlocked(
+            CampaignNodeEntry node,
+            ICollection<string> completedRunKeys,
+            ICollection<string> ownedHeroKeys = null)
         {
             if (node == null)
+            {
+                return false;
+            }
+
+            if (!HeroGateSatisfied(node, ownedHeroKeys))
             {
                 return false;
             }
@@ -73,7 +90,8 @@ namespace Assets.Scripts.Dungeon
         public static CampaignNodeState GetState(
             CampaignNodeEntry node,
             ICollection<string> completedRunKeys,
-            string activeRunKey)
+            string activeRunKey,
+            ICollection<string> ownedHeroKeys = null)
         {
             var state = new CampaignNodeState { Node = node };
             if (node?.Run == null)
@@ -84,7 +102,7 @@ namespace Assets.Scripts.Dungeon
 
             string key = RunKeyOf(node.Run);
             bool completed = completedRunKeys != null && completedRunKeys.Contains(key);
-            bool unlocked = IsUnlocked(node, completedRunKeys);
+            bool unlocked = IsUnlocked(node, completedRunKeys, ownedHeroKeys);
             bool isActive = !string.IsNullOrEmpty(activeRunKey) && activeRunKey == key;
             bool runInProgressElsewhere = !string.IsNullOrEmpty(activeRunKey) && !isActive;
 
@@ -105,6 +123,7 @@ namespace Assets.Scripts.Dungeon
                 if (state.Status == CampaignNodeStatus.Locked)
                 {
                     state.MissingRequirements = GetMissingRequirementNames(node, completedRunKeys);
+                    state.MissingHeroes = GetMissingHeroNames(node, ownedHeroKeys);
                 }
                 return state;
             }
@@ -130,9 +149,10 @@ namespace Assets.Scripts.Dungeon
         public static bool HasSomethingToPlay(
             CampaignSO campaign,
             ICollection<string> completedRunKeys,
-            string activeRunKey)
+            string activeRunKey,
+            ICollection<string> ownedHeroKeys = null)
         {
-            foreach (var state in GetStates(campaign, completedRunKeys, activeRunKey))
+            foreach (var state in GetStates(campaign, completedRunKeys, activeRunKey, ownedHeroKeys))
             {
                 if (state.CanStart || state.CanContinue)
                 {
@@ -146,7 +166,8 @@ namespace Assets.Scripts.Dungeon
         public static List<CampaignNodeState> GetStates(
             CampaignSO campaign,
             ICollection<string> completedRunKeys,
-            string activeRunKey)
+            string activeRunKey,
+            ICollection<string> ownedHeroKeys = null)
         {
             var states = new List<CampaignNodeState>();
             if (campaign == null)
@@ -159,7 +180,7 @@ namespace Assets.Scripts.Dungeon
                 {
                     continue;
                 }
-                states.Add(GetState(node, completedRunKeys, activeRunKey));
+                states.Add(GetState(node, completedRunKeys, activeRunKey, ownedHeroKeys));
             }
             return states;
         }
@@ -186,6 +207,228 @@ namespace Assets.Scripts.Dungeon
                 }
             }
             return missing;
+        }
+
+        // --- Hero gates ------------------------------------------------------------------------
+        //
+        // A hero is the only *key-shaped* gate the campaign has: every other requirement is more of
+        // something the player can go and get, so it can only ever delay a branch. See
+        // NEXT_STEPS.md section 5b.
+
+        /// <summary>
+        /// Passed as the owned set by callers doing *authoring* analysis rather than resolving a
+        /// save: they have no roster, and a hero gate fails shut without one, so a gated node would
+        /// read as unreachable content. Reference equality, so no real save can collide with it.
+        /// </summary>
+        public static readonly ICollection<string> IgnoreHeroGate = new List<string>();
+
+        /// <summary>
+        /// The save key for a hero. Mirrors <c>HeroSO.SaveKey</c>, which is what
+        /// <c>PartySaveData.OwnedHeroKeys</c> stores.
+        /// </summary>
+        public static string HeroKeyOf(HeroSO hero)
+        {
+            return hero != null ? hero.SaveKey : string.Empty;
+        }
+
+        /// <summary>
+        /// Whether the player owns every hero this node asks for. Always all-of - a node needing two
+        /// heroes needs both, whatever <c>UnlockMode</c> says about its runs. A null owned set counts
+        /// as owning nobody, so an ungated node is unaffected and a gated one stays shut.
+        /// </summary>
+        public static bool HeroGateSatisfied(CampaignNodeEntry node, ICollection<string> ownedHeroKeys)
+        {
+            if (node?.RequiresHeroes == null || node.RequiresHeroes.Count == 0)
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(ownedHeroKeys, IgnoreHeroGate))
+            {
+                return true;
+            }
+
+            foreach (var hero in node.RequiresHeroes)
+            {
+                string key = HeroKeyOf(hero);
+                if (string.IsNullOrEmpty(key))
+                {
+                    // An empty row is an authoring slip, not a gate. Ignoring it keeps a
+                    // half-authored asset playable; GetNodesWithBrokenHeroGates reports it.
+                    continue;
+                }
+                if (ownedHeroKeys == null || !ownedHeroKeys.Contains(key))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>Display names of the heroes this save is still missing, for the locked-node line.</summary>
+        public static List<string> GetMissingHeroNames(
+            CampaignNodeEntry node,
+            ICollection<string> ownedHeroKeys)
+        {
+            var missing = new List<string>();
+            if (node?.RequiresHeroes == null)
+            {
+                return missing;
+            }
+
+            foreach (var hero in node.RequiresHeroes)
+            {
+                string key = HeroKeyOf(hero);
+                if (string.IsNullOrEmpty(key))
+                {
+                    continue;
+                }
+                if (ownedHeroKeys == null || !ownedHeroKeys.Contains(key))
+                {
+                    missing.Add(!string.IsNullOrEmpty(hero.DisplayName) ? hero.DisplayName : key);
+                }
+            }
+            return missing;
+        }
+
+        /// <summary>
+        /// Every hero key a save is guaranteed to hold by the time it reaches
+        /// <paramref name="node"/>: the roster's starting lineup, plus the captive on every level of
+        /// every run the player *must* clear to get here.
+        ///
+        /// <para>Deliberately walks only the runs on the required path, not every run in the
+        /// campaign. A hero found down an optional branch is not a hero the player is guaranteed to
+        /// have, and gating on one is how a save gets stranded - which is the whole reason this
+        /// exists. An <c>Any</c>-mode node contributes nothing for the same reason: the player may
+        /// have taken either branch, so neither is guaranteed.</para>
+        ///
+        /// <para>A node inside a prerequisite cycle simply resolves to the starting lineup;
+        /// <see cref="GetUnreachableNodes"/> is what reports the cycle itself.</para>
+        /// </summary>
+        public static HashSet<string> GetGuaranteedHeroKeys(
+            CampaignSO campaign,
+            CampaignNodeEntry node,
+            PartyRosterSO roster)
+        {
+            var keys = new HashSet<string>();
+            if (roster != null)
+            {
+                foreach (var hero in roster.StartingLineup())
+                {
+                    string key = HeroKeyOf(hero);
+                    if (!string.IsNullOrEmpty(key))
+                    {
+                        keys.Add(key);
+                    }
+                }
+            }
+
+            if (campaign == null || node == null)
+            {
+                return keys;
+            }
+
+            var seen = new HashSet<CampaignNodeEntry> { node };
+            var pending = new Queue<CampaignNodeEntry>();
+            pending.Enqueue(node);
+
+            while (pending.Count > 0)
+            {
+                var current = pending.Dequeue();
+                if (current.Requires == null || current.UnlockMode != CampaignUnlockMode.All)
+                {
+                    continue;
+                }
+
+                foreach (var prerequisite in current.Requires)
+                {
+                    if (prerequisite == null)
+                    {
+                        continue;
+                    }
+
+                    AddRescuedHeroKeys(prerequisite, keys);
+
+                    var prerequisiteNode = FindNode(campaign, prerequisite);
+                    if (prerequisiteNode != null && seen.Add(prerequisiteNode))
+                    {
+                        pending.Enqueue(prerequisiteNode);
+                    }
+                }
+            }
+
+            return keys;
+        }
+
+        /// <summary>Every hero a run can hand over, one captive per level.</summary>
+        public static void AddRescuedHeroKeys(RunDefinitionSO run, HashSet<string> into)
+        {
+            if (run?.Levels == null || into == null)
+            {
+                return;
+            }
+            foreach (var level in run.Levels)
+            {
+                string key = HeroKeyOf(level?.RescueHero);
+                if (!string.IsNullOrEmpty(key))
+                {
+                    into.Add(key);
+                }
+            }
+        }
+
+        /// <summary>The node holding <paramref name="run"/>, or null when it is not on the map.</summary>
+        public static CampaignNodeEntry FindNode(CampaignSO campaign, RunDefinitionSO run)
+        {
+            if (campaign?.Nodes == null || run == null)
+            {
+                return null;
+            }
+            string key = RunKeyOf(run);
+            foreach (var candidate in campaign.Nodes)
+            {
+                if (candidate?.Run != null && RunKeyOf(candidate.Run) == key)
+                {
+                    return candidate;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Indices of nodes whose hero gate can never open: an empty row, or a hero the player is not
+        /// guaranteed to hold by the time they arrive. The second is the one that matters - a gate on
+        /// a hero found down an optional branch, or on a captive the player was never forced past, is
+        /// a run some perfectly reasonable save can never start.
+        /// </summary>
+        public static List<int> GetNodesWithBrokenHeroGates(CampaignSO campaign, PartyRosterSO roster)
+        {
+            var broken = new List<int>();
+            if (campaign?.Nodes == null)
+            {
+                return broken;
+            }
+
+            for (int i = 0; i < campaign.Nodes.Count; i++)
+            {
+                var node = campaign.Nodes[i];
+                if (node?.RequiresHeroes == null || node.RequiresHeroes.Count == 0)
+                {
+                    continue;
+                }
+
+                var guaranteed = GetGuaranteedHeroKeys(campaign, node, roster);
+                foreach (var hero in node.RequiresHeroes)
+                {
+                    string key = HeroKeyOf(hero);
+                    if (string.IsNullOrEmpty(key) || !guaranteed.Contains(key))
+                    {
+                        broken.Add(i);
+                        break;
+                    }
+                }
+            }
+            return broken;
         }
 
         /// <summary>What to call a run on screen: its DisplayName when authored, else its key.</summary>
@@ -480,7 +723,11 @@ namespace Assets.Scripts.Dungeon
                     {
                         continue;
                     }
-                    if (IsUnlocked(node, completed))
+                    // Run gates only. This walk has no roster, and a hero gate fails shut without
+                    // one - so applying it here would report every hero-gated node as a
+                    // prerequisite cycle. GetNodesWithBrokenHeroGates is the hero half of this
+                    // check, and it is the one that can actually answer the question.
+                    if (IsUnlocked(node, completed, IgnoreHeroGate))
                     {
                         resolved.Add(i);
                         completed.Add(RunKeyOf(node.Run));

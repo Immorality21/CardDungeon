@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.Heroes.UI;
 using Assets.Scripts.Progression;
 using UnityEngine;
@@ -22,6 +23,7 @@ namespace Assets.Scripts.Hub
     {
         private readonly VisualElement _root;
         private readonly CampaignSO _campaign;
+        private readonly PartyRosterSO _roster;
         private readonly SphereGridView _view;
 
         private readonly Label _titleLabel;
@@ -46,10 +48,11 @@ namespace Assets.Scripts.Hub
 
         public event Action OnClosed;
 
-        public CampaignMapUI(VisualElement root, CampaignSO campaign)
+        public CampaignMapUI(VisualElement root, CampaignSO campaign, PartyRosterSO roster = null)
         {
             _root = root;
             _campaign = campaign;
+            _roster = roster;
 
             _titleLabel = root.Q<Label>("campaign-title");
             _detailName = root.Q<Label>("campaign-detail-name");
@@ -196,9 +199,18 @@ namespace Assets.Scripts.Hub
             SetText(_detailStatus, $"{CampaignPresenter.StatusLabel(selected)} · {run.Levels.Count} levels");
             SetText(_detailBlurb, run.Blurb);
 
-            if (selected.Status == CampaignNodeStatus.Locked && selected.MissingRequirements.Count > 0)
+            if (selected.Status == CampaignNodeStatus.Locked)
             {
-                SetText(_detailRequires, "Requires: " + string.Join(", ", selected.MissingRequirements));
+                var lines = new List<string>();
+                if (selected.MissingRequirements.Count > 0)
+                {
+                    lines.Add("Requires: " + string.Join(", ", selected.MissingRequirements));
+                }
+                if (selected.MissingHeroes.Count > 0)
+                {
+                    lines.Add("Needs in your roster: " + string.Join(", ", selected.MissingHeroes));
+                }
+                SetText(_detailRequires, string.Join("\n", lines));
             }
             else
             {
@@ -316,7 +328,12 @@ namespace Assets.Scripts.Hub
         private List<CampaignNodeState> BuildStates()
         {
             var completed = MetaProgressManager.Instance.GetCompletedRunKeys();
-            return CampaignOps.GetStates(_campaign, completed, _activeRunKey);
+
+            // A run can also be gated on *owning a hero* (NEXT_STEPS.md section 5b), and ownership
+            // lives in Party.json rather than in meta-progress - so the roster has to be read here
+            // and handed to the rules, which stay pure.
+            var owned = _roster != null ? HeroRoster.GetOwnedKeys(_roster) : null;
+            return CampaignOps.GetStates(_campaign, completed, _activeRunKey, owned);
         }
 
         private CampaignNodeState FindState(string runKey)

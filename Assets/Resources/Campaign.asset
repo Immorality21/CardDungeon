@@ -16,6 +16,7 @@ MonoBehaviour:
   Nodes:
   - Run: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
     Requires: []
+    RequiresHeroes: []
     UnlockMode: 0
     Secret: 0
     Optional: 0
@@ -23,6 +24,7 @@ MonoBehaviour:
   - Run: {fileID: 11400000, guid: ba50ce57125c4584b8d454bd13545f36, type: 2}
     Requires:
     - {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
+    RequiresHeroes: []
     UnlockMode: 0
     Secret: 0
     Optional: 0
@@ -30,6 +32,7 @@ MonoBehaviour:
   - Run: {fileID: 11400000, guid: e90ff9758e2770148a54d188a5913394, type: 2}
     Requires:
     - {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
+    RequiresHeroes: []
     UnlockMode: 0
     Secret: 0
     Optional: 1
@@ -37,6 +40,7 @@ MonoBehaviour:
   - Run: {fileID: 11400000, guid: 148f9f9eaa0cd7345bb2e4703723ac85, type: 2}
     Requires:
     - {fileID: 11400000, guid: ba50ce57125c4584b8d454bd13545f36, type: 2}
+    RequiresHeroes: []
     UnlockMode: 0
     Secret: 0
     Optional: 0
@@ -45,6 +49,8 @@ MonoBehaviour:
     Requires:
     - {fileID: 11400000, guid: 148f9f9eaa0cd7345bb2e4703723ac85, type: 2}
     - {fileID: 11400000, guid: e90ff9758e2770148a54d188a5913394, type: 2}
+    RequiresHeroes:
+    - {fileID: 11400000, guid: 77ccb730251741f08e684dabd9144b76, type: 2}
     UnlockMode: 0
     Secret: 1
     Optional: 1

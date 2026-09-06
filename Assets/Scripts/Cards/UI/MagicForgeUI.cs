@@ -212,7 +212,7 @@ namespace Assets.Scripts.Cards.UI
 
             if (!MetaProgressManager.Instance.IsMagicDiscovered(magic.Key))
             {
-                PopulateLocked("Draw this magic from an enemy to learn it.");
+                PopulateLocked("Learn this on a hero's sphere grid to upgrade it here.");
                 return;
             }
 

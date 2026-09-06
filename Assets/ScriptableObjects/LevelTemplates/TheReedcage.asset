@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97814ecae76f824da768a0e914775eb, type: 3}
+  m_Name: TheReedcage
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.LevelDefinitionSO
+  Key: TheReedcage
+  RoomPool:
+  - {fileID: 11400000, guid: 2746458f24f978b4eb0fa89fa0f4a04f, type: 2}
+  - {fileID: 11400000, guid: b2d5f8c31a6e5d0f9b4c7e2a3f8d5b01, type: 2}
+  - {fileID: 11400000, guid: fb04f7b71dcc6e945a5967851bfcdf09, type: 2}
+  RoomsToGenerate: 6
+  ChainBias: 0.9
+  MomentumBias: 0.498
+  WallColor: {r: 0.2, g: 0.28, b: 0.16, a: 1}
+  WallTexture: {fileID: 2800000, guid: ff0bc926681e4304e8e378a75971a2bf, type: 3}
+  TreasureRooms: 0
+  RestRooms: 0
+  MaterialTable: []
+  GuaranteedMaterials:
+  - Item: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+    Chance: 1
+    MinQuantity: 1
+    MaxQuantity: 2
+  CombatBackground: {fileID: 0}
+  ExplorationMusic: {fileID: 0}
+  CombatMusic: {fileID: 0}

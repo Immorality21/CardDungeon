@@ -281,7 +281,7 @@ namespace Assets.Scripts.Enemies.UI
             BestiaryLineView.AddSection(
                 _detail, "Base stats", BestiaryPresenter.StatLines(definition, known));
             BestiaryLineView.AddSection(
-                _detail, "Spells", BestiaryPresenter.SpellLines(definition, known));
+                _detail, "Abilities", BestiaryPresenter.SpellLines(definition, known));
         }
     }
 }

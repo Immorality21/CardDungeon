@@ -41,6 +41,9 @@ Three threads are live:
    *stopgap* kit (a cheap signature plus one spell per branch tip) that keeps every magic obtainable
    but prices most of it past what a campaign pays. §9b's "What the refactor actually left behind"
    has the measured numbers and the three findings it produced — read it before starting §4c.
+   **§5b's unlock half shipped 2026-09-06** — the solo start is back, heroes arrive by rescue, and
+   `CampaignNodeEntry.RequiresHeroes` makes a hero a key the campaign can gate on. Four of the seven
+   (Cleric, Cultist, Tinkerer, Rogue) still have no unlock source; placing them is authoring, not code.
 2. **Balance / losability** (§0–§0g) — making the campaign losable and gating depth behind
    investment. The gate ladder exists and the frontier is measured per floor. Mature; mostly
    decisions waiting on the user now. **Caveat updated 2026-09-04:** §9b's model rework landed with
@@ -49,10 +52,11 @@ Three threads are live:
    Deliberately paused: no tuning until the rest of the specialization refactor is in.
 3. **Combat depth** (§9–§13) — added 2026-09-03 after a broad scan. The systems layer is far deeper
    than the *verbs* sitting on it. **§9 (status effects) shipped the same day**: damage-over-time,
-   Silence, regeneration and the cure loop. **§10 (Defend) is the most urgent item in this file** and
-   became more so on 2026-09-04: Draw is now actually gone, so combat is Attack / Magic / Item /
-   Inspect / Skip with **no acquisition verb at all**, and Defend is what replaces it. §11 shrank on 2026-09-04 (targeting stays random; a defensive branch grants a
-   taunt) and can follow the grid authoring rather than precede it.
+   Silence, regeneration and the cure loop. **§10 (Defend) was deleted on 2026-09-06** — not
+   dropped, *relocated*: Defend is an **ability**, granted by a grid branch like every other command
+   (§13), so it is authored content rather than a sixth hard-coded verb. The combat menu now reads
+   Attack / **Ability** / Item / Inspect / Skip. §11 shrank on 2026-09-04 (targeting stays random; a
+   defensive branch grants a taunt) and can follow the grid authoring rather than precede it.
 
 **Reading order for the balance thread:** `docs/BALANCING.md` §5g → §5t, in order. The later ones
 **correct** the earlier ones — §5i's headline ("party width gates, XP does not") is **wrong**, §5j
@@ -94,6 +98,15 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   A branch is a destination described by what it grants, not a label the game prints: health +
   Endurance + a shield spell *is* a tank, and the game never says the word. Do not add
   archetype names, titles or class labels to branches.
+- **Every combat verb past the basics is an ability, and abilities come from the grid**
+  *(2026-09-06)*. The command menu is Attack / Ability / Item / Inspect / Skip and does not grow.
+  **Defend was the test case** and is why §10 is gone: a defensive stance is a thing a hero *learns*,
+  not a button everyone always has, so it belongs on a branch beside Provoke and the shield spells
+  (§13). Do not add a sixth hard-coded command; add a node.
+- **"Magic" is called "Ability" on screen** *(2026-09-06)*. Some heroes cast and some do not — the
+  Tinkerer's field kit and the Rogue's tricks are not spells — so the player-facing noun is the
+  general one. The code keeps `MagicSO` / `MagicCatalog` / the `Cards` namespace; this is a display
+  rename only, and re-splitting it into two player-facing categories is not wanted.
 - **Enemy targeting stays random unless taunted** *(2026-09-04, §11)*. No standing aggro model, no
   threat table. Random is the default; a **taunt/provoke ability granted by a defensive branch**
   overrides it for a few turns. Do not build a general threat system.
@@ -130,7 +143,7 @@ backlog.**
 |---|---|---|
 | **9b** | Magic moves onto the sphere grid — Draw is scrapped | ✅ **shipped** 2026-09-04; findings feed §4c |
 | **4c** | Specialization — the grid is where a hero becomes an archetype | grids ✅ **all seven authored** 2026-09-05; branch *readability* (item 5) still open |
-| **5b** | Heroes are unlocked, not bought — the tavern is removed | roster ✅ 2026-09-05, **tavern deleted** ✅ 2026-09-05; **the unlock record is what is left** |
+| **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **shipped** 2026-09-06 — solo start, rescue unlocks, `RequiresHeroes` gates. **Four heroes still need an unlock source** |
 | **5** | Roster — open questions | open |
 | **4b** | Summons — the capability the deep grid pays out | spec; **shape and effects reopened** 2026-09-04 |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
@@ -140,7 +153,6 @@ backlog.**
 | § | | state |
 |---|---|---|
 | **9** | Status effects — over-time, Silence, the cure loop | ✅ shipped 2026-09-03; follow-ups open |
-| **10** | Defend — the missing turn-economy verb | **most urgent item in the file** |
 | **11** | Threat and cover — a reason for a defensive build | shrank 2026-09-04; follows the grids |
 | **12** | Enemy action vocabulary — the four missing verbs | not started |
 | **13** | Hero identity — unique commands and a Limit gauge | commands resolved to the grid 2026-09-04 |
@@ -186,6 +198,33 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Heroes are unlocked, not handed out; and "Magic" becomes "Ability"** (2026-09-06) —
+  `docs/plans/SPECIALIZATION.md` §5b. The unlock *record* already existed
+  (`PartySaveData.OwnedHeroKeys`, written deferred by `Party.MarkOwnedDeferred` so a rescue is
+  forfeited on a wipe) — what was missing was that **nothing used it**: `StartingHeroes` handed the
+  player Warrior + Paladin + Ranger, which made the tutorial's Paladin rescue a silent no-op
+  (`PlaceCaptiveIfConfigured` skips a captive you already own) and left four of the seven heroes
+  unreachable. The start is **one hero** again, so both rescues are real. New:
+  `CampaignNodeEntry.RequiresHeroes` + `CampaignOps.HeroGateSatisfied` — the first **key-shaped**
+  gate in the game, always all-of, ANDed with the run gate, and **failing shut** when a caller
+  passes no roster (a run wrongly locked is visible; a run wrongly offered is not). The Hollow
+  Vault now asks for the Ranger. Two static-analysis walks opt out via `CampaignOps.IgnoreHeroGate`,
+  because `GetUnreachableNodes` has no roster and would otherwise report every gated node as a
+  prerequisite cycle. The guard rail is `GetNodesWithBrokenHeroGates`: a gate is only sound if the
+  hero is on the **required** path — a captive down an optional branch or behind an `Any` fork is
+  not guaranteed, and gating on one strands the save. `Campaign_NeverStrandsASaveWithNothingToPlay`
+  now walks a roster forward alongside the completed-run set. **The Reedcage** (`DrownedMarch_2`) is
+  a hand-authored six-room layout at Drowned March floor 2 — a deliberately linear stair into the
+  mire, so the only captive-eligible rooms are on the only route and the Ranger cannot be walked
+  past. **Display rename**: the combat command, both pickers, the Forge tab, the Inventory tab and
+  the enemy Inspect heading say **Ability**, not Magic or Spells (the code keeps `MagicSO`); the
+  Forge also stopped telling the player to *Draw* a spell it has not been able to since 2026-09-04.
+  **Measured cost, and it is real**: taking two heroes out of the starting lineup drops the second
+  tier from three bodies to two, and three floors (Silt Shallows, The Reedcage, Warren Tunnels) go
+  **critical** on `EveryRunLevelIsClearableOnOneHealthBar`. Isolated by re-running the balance suite
+  with the old three-hero start, where it is **13/13 green with The Reedcage already in place** — so
+  this is the solo start's bill, not the new content's. Left standing deliberately (balance is
+  paused until the specialization refactor lands); see `docs/plans/BALANCE_OPEN.md` §0.
 - **The town is painted, and the gates are on** (2026-09-05) — `docs/plans/HUB.md` §7 phase 4 plus
   the art. A lot is **Absent** until its `RequiredRunKeys` clear, **Available** (a foundation and a
   material price) once offered, then **Built**; clicking an unbuilt lot opens a panel that names the

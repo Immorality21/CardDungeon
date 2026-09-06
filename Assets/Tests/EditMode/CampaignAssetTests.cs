@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
+using Assets.Scripts.Heroes;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -122,6 +123,13 @@ namespace Tests.EditMode
         /// it must never reach a state with no run to start and none to continue. Clearing the
         /// tutorial did exactly that once - the run existed, the menu just refused to offer it - so
         /// this asserts the property rather than any one screen's wiring.
+        ///
+        /// <para>The walk carries a roster as well as a completed-run set, because a node can also
+        /// be gated on <i>owning a hero</i> (<c>RequiresHeroes</c>, NEXT_STEPS.md §5b). The player
+        /// modelled here is the diligent one: they start with the roster's lineup and free every
+        /// captive on every floor they clear. If even that player can be stranded, the campaign is
+        /// mis-authored - and a hero gate is the easiest way to do it, since a hero can sit behind
+        /// an optional branch that this walk is free to skip.</para>
         /// </summary>
         [Test]
         public void Campaign_NeverStrandsASaveWithNothingToPlay()
@@ -130,33 +138,69 @@ namespace Tests.EditMode
             Assert.IsNotNull(campaign);
 
             var completed = new HashSet<string>();
+            var owned = StartingHeroKeys();
             var guard = campaign.Nodes.Count + 1;
 
             for (int step = 0; step <= guard; step++)
             {
-                Assert.IsTrue(CampaignOps.HasSomethingToPlay(campaign, completed, string.Empty),
-                    $"After clearing [{string.Join(", ", completed)}] the campaign offers no run to "
-                    + "start and none to continue - the save is stuck at the hub forever.");
+                Assert.IsTrue(CampaignOps.HasSomethingToPlay(campaign, completed, string.Empty, owned),
+                    $"After clearing [{string.Join(", ", completed)}] with heroes "
+                    + $"[{string.Join(", ", owned)}] the campaign offers no run to start and none to "
+                    + "continue - the save is stuck at the hub forever.");
 
-                string next = null;
-                foreach (var state in CampaignOps.GetStates(campaign, completed, string.Empty))
+                CampaignNodeEntry chosen = null;
+                foreach (var state in CampaignOps.GetStates(campaign, completed, string.Empty, owned))
                 {
                     if (state.CanStart && !completed.Contains(CampaignOps.RunKeyOf(state.Node.Run)))
                     {
-                        next = CampaignOps.RunKeyOf(state.Node.Run);
+                        chosen = state.Node;
                         break;
                     }
                 }
-                if (next == null)
+                if (chosen == null)
                 {
                     // Everything clearable is cleared, and the check above proved a repeatable run
                     // is still on offer. That is a finished campaign, not a stranded one.
                     return;
                 }
-                completed.Add(next);
+
+                completed.Add(CampaignOps.RunKeyOf(chosen.Run));
+                CampaignOps.AddRescuedHeroKeys(chosen.Run, owned);
             }
 
             Assert.Fail("Walking the campaign did not terminate.");
+        }
+
+        /// <summary>The project's party roster catalog, or null when none is authored.</summary>
+        private static PartyRosterSO LoadRoster()
+        {
+            foreach (var guid in AssetDatabase.FindAssets("t:PartyRosterSO"))
+            {
+                var roster = AssetDatabase.LoadAssetAtPath<PartyRosterSO>(AssetDatabase.GUIDToAssetPath(guid));
+                if (roster != null)
+                {
+                    return roster;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>The heroes a fresh save begins with, read from the project's real roster.</summary>
+        private static HashSet<string> StartingHeroKeys()
+        {
+            var keys = new HashSet<string>();
+            var roster = LoadRoster();
+            if (roster != null)
+            {
+                foreach (var hero in roster.StartingLineup())
+                {
+                    if (hero != null)
+                    {
+                        keys.Add(hero.SaveKey);
+                    }
+                }
+            }
+            return keys;
         }
 
         [Test]
@@ -246,7 +290,11 @@ namespace Tests.EditMode
                     cleared.Add(CampaignOps.RunKeyOf(prerequisite));
                 }
 
-                var state = CampaignOps.GetState(node, cleared, null);
+                // The player who cleared the way here also has the heroes that path hands out - a
+                // secret behind a hero gate is still reachable, and asserting otherwise would only
+                // measure that this test forgot the roster.
+                var owned = CampaignOps.GetGuaranteedHeroKeys(campaign, node, LoadRoster());
+                var state = CampaignOps.GetState(node, cleared, null, owned);
                 Assert.AreNotEqual(CampaignNodeStatus.Hidden, state.Status,
                     $"Secret node '{CampaignOps.DisplayNameOf(node.Run)}' stays hidden even with every " +
                     "prerequisite cleared, so it is unreachable content.");

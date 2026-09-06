@@ -31,6 +31,18 @@ MonoBehaviour:
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 0}
+  - LevelTemplate: {fileID: 11400000, guid: d70c17ed7e1c4a02b9f3c8a15e6d4b70, type: 2}
+    LevelName: The Reedcage
+    ManualLayout: {fileID: 11400000, guid: 4f2b91a6c05d4e7d8a13b62ef9c07d15, type: 2}
+    BossEnemy: {fileID: 0}
+    BossAdds: []
+    EnemyTuning:
+      Difficulty: 2.4
+      StatScales: []
+      XpMultiplier: 2
+      GoldMultiplier: 1
+      Overrides: []
+    RescueHero: {fileID: 11400000, guid: 77ccb730251741f08e684dabd9144b76, type: 2}
   - LevelTemplate: {fileID: 11400000, guid: e5eb9c2b5c392894fb55360a188283b2, type: 2}
     LevelName: The Weeping Causeway
     ManualLayout: {fileID: 0}

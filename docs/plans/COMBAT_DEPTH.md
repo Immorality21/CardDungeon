@@ -1,6 +1,6 @@
 # Combat depth
 
-The systems layer is deeper than the *verbs* sitting on it. §9 shipped; §10 is the urgent one since scrapping Draw removed a combat verb.
+The systems layer is deeper than the *verbs* sitting on it. §9 shipped; §10 is gone — Defend turned out to be an ability, not a command (2026-09-06), which is the rule the rest of this file now follows.
 
 > **Reads with:** [NEXT_STEPS.md](../NEXT_STEPS.md) (the index, and the **do-not-relitigate** list — check it before reopening anything here) · [Specialization](SPECIALIZATION.md) · [Combat Depth](COMBAT_DEPTH.md) · [Hub](HUB.md) · [Balance Open](BALANCE_OPEN.md) · [Polish Content](POLISH_CONTENT.md)
 
@@ -122,27 +122,33 @@ Recorded because most of them are traps that will recur, not one-off slips:
   `CastWeight 1,1,0,0`, not all-zero, so the new spells are never cast and no existing spell's cast
   share was diluted.
 
-### 10. Defend — the missing turn-economy verb
+### 10. ~~Defend~~ — resolved into an ability *(2026-09-06)*
 
-The hero command menu is **Attack / Magic / Draw / Item / Inspect / Skip**. `Skip` throws the turn
-away. In a CTB system the *turn* is the currency, so a **Defend** that converts a turn into
-mitigation (halve incoming until your next turn, say) is the cheapest possible way to make turn
-economy a decision.
+**Deleted, not dropped.** Defend was the most urgent item in this file for two days: Draw's removal
+left combat with Attack / Magic / Item / Inspect / Skip and no turn-economy decision, and a
+telegraphed boss AoE the player could read but not answer.
 
-It is also **the only sensible answer to a telegraphed boss AoE.** `BossBehavior` telegraphs its
-signature and the player is shown a red `!` over each targeted hero — and can do nothing with that
-information except heal afterwards. Defend turns a telegraph into a decision, which is the entire
-point of telegraphing it.
+It is still all of that — it just is not a *command*. **Defend is an ability**, learned on a grid
+branch like Provoke and the shield spells (§13), which settles the question §13 left open about
+where a verb comes from: the command menu is **Attack / Ability / Item / Inspect / Skip** and does
+not grow. A hero who can brace for a telegraph is a hero who was *built* to, and a party with no
+defensive investment genuinely cannot answer the AoE — which is the decision, rather than a button
+everyone presses for free.
 
-Design notes: it should be a *stance* that expires on the defender's next turn (not a fixed
-duration), so Haste/Slow interact with it; it wants to be visible on `party-status`; and it needs a
-`BalanceMath` term or the analyzer will keep pricing a party that never defends. Consider whether
-Defend should also grant a small charge/HP tickback — otherwise an optimal player never presses it in
-a fight they are winning, which is fine, but worth deciding rather than discovering.
+What that leaves for whoever authors it, unchanged from the original design notes:
 
-Touch points: `Assets/Scripts/Rooms/CombatManager.cs`, `Assets/Scripts/Rooms/UI/RoomActionUI.cs`
-(command list), `Assets/Scripts/Cards/CombatBuffTracker.cs`, `Assets/Scripts/Combat/TurnManager.cs`,
-`Assets/Scripts/Balance/BalanceMath.cs`.
+- **A stance, not a fixed duration** — it expires on the defender's next turn, so Haste and Slow
+  change what it is worth.
+- **It wants to be visible on `party-status`.**
+- **It needs a `BalanceMath` term**, or the analyzer keeps pricing a party that never defends.
+- **Decide the tickback deliberately.** Without a small charge/HP return an optimal player never
+  presses it in a fight they are winning. That is defensible; discovering it later is not.
+- **It is an ability, so it also has to be worth a slot.** Charges are scarce and the kit is chosen
+  at the hub, which the original command-shaped design never had to answer.
+
+Touch points: the grid assets, `Assets/Scripts/Heroes/SphereGridSO.cs` (the command payload §13
+describes), `Assets/Scripts/Rooms/UI/RoomActionUI.cs`, `Assets/Scripts/Cards/CombatBuffTracker.cs`,
+`Assets/Scripts/Combat/TurnManager.cs`, `Assets/Scripts/Balance/BalanceMath.cs`.
 
 ### 11. Threat and cover — give a defensive build a reason to exist
 

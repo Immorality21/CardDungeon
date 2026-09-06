@@ -219,7 +219,7 @@ namespace Assets.Scripts.Heroes.UI
             }
             if (node.Kind == SphereNodeKind.MagicSlot)
             {
-                return "+1 magic slot (carry one more known spell)";
+                return "+1 ability slot (carry one more of what you know)";
             }
             if (node.Kind == SphereNodeKind.MagicKnown)
             {
@@ -301,9 +301,9 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.Resistance:
                     return "Resistance";
                 case SphereNodeKind.MagicSlot:
-                    return "Magic slot";
+                    return "Ability slot";
                 case SphereNodeKind.MagicKnown:
-                    return "Known magic";
+                    return "Known ability";
                 default:
                     return "Stat";
             }

@@ -105,7 +105,7 @@
             <ui:Label name="forge-essence" text="Essence: 0" class="cd-info-label" />
 
             <ui:VisualElement name="forge-tabs" class="cd-tabs">
-                <ui:Button name="tab-magic" text="Magic" class="cd-tab cd-tab--active" />
+                <ui:Button name="tab-magic" text="Abilities" class="cd-tab cd-tab--active" />
                 <ui:Button name="tab-combos" text="Combos" class="cd-tab" />
             </ui:VisualElement>
 
@@ -159,7 +159,7 @@
 
             <ui:VisualElement name="inventory-tabs" class="cd-tabs">
                 <ui:Button name="tab-equipment" text="Equipment" class="cd-tab cd-tab--active" />
-                <ui:Button name="tab-spells" text="Spells" class="cd-tab" />
+                <ui:Button name="tab-spells" text="Abilities" class="cd-tab" />
                 <ui:Button name="tab-consumables" text="Consumables" class="cd-tab" />
                 <ui:Button name="tab-materials" text="Materials" class="cd-tab" />
             </ui:VisualElement>

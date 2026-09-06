@@ -24,6 +24,14 @@ namespace Assets.Scripts.Dungeon
         /// </summary>
         public List<string> MissingRequirements = new List<string>();
 
+        /// <summary>
+        /// Display names of the heroes still missing, for the "Needs ..." line on a node held shut
+        /// by a hero gate. Kept apart from <see cref="MissingRequirements"/> because the two read
+        /// differently to a player: a missing run is somewhere to go, a missing hero is someone to
+        /// find. Empty unless <see cref="Status"/> is <see cref="CampaignNodeStatus.Locked"/>.
+        /// </summary>
+        public List<string> MissingHeroes = new List<string>();
+
         public bool IsVisible => Status != CampaignNodeStatus.Hidden;
     }
 }

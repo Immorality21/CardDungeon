@@ -817,7 +817,7 @@ namespace Assets.Scripts.Rooms
             ShowConfirm("A Refuge",
                 $"Dry ground, and nothing watching. {state}\n\n"
                 + $"Resting restores {Mathf.RoundToInt(RoomKindRewards.RestHealFraction * 100f)}% of "
-                + "each hero's health and refills every spell charge. It can only be done once.",
+                + "each hero's health and refills every ability charge. It can only be done once.",
                 "Rest",
                 ApplyRest);
         }
@@ -855,7 +855,7 @@ namespace Assets.Scripts.Rooms
             if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 DungeonManager.Instance.MagicState.RefillCharges();
-                lines.Add("Spell charges are restored.");
+                lines.Add("Ability charges are restored.");
             }
 
             TakePayload();
@@ -1046,7 +1046,7 @@ namespace Assets.Scripts.Rooms
             bool hasItem = InventoryManager.HasInstance && InventoryManager.Instance.HasAnyConsumable();
 
             _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
-            _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Magic", Enabled = hasMagic });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Ability", Enabled = hasMagic });
             _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem });
             // Inspect is free - it opens a page and hands the turn straight back - so it sits above
             // Skip rather than among the actions that spend the turn.

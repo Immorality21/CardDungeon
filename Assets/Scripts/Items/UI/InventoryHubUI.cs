@@ -419,7 +419,7 @@ namespace Assets.Scripts.Items.UI
             var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, ActivatedNodesOf(hero));
             if (known.Count == 0)
             {
-                ShowEmpty($"{hero.DisplayName} knows no magic yet. Learn a spell on the sphere grid.");
+                ShowEmpty($"{hero.DisplayName} knows no abilities yet. Learn one on the sphere grid.");
                 return;
             }
 

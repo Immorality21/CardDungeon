@@ -155,7 +155,7 @@ namespace Tests.EditMode
             var slot = new SphereGridNode { Key = "m", Kind = SphereNodeKind.MagicSlot };
 
             Assert.AreEqual("Fire resistance +15%", SphereGridPresenter.DescribePayload(resist));
-            Assert.AreEqual("+1 magic slot (carry one more known spell)", SphereGridPresenter.DescribePayload(slot));
+            Assert.AreEqual("+1 ability slot (carry one more of what you know)", SphereGridPresenter.DescribePayload(slot));
         }
 
         [Test]
@@ -165,7 +165,7 @@ namespace Tests.EditMode
             var unnamed = new SphereGridNode { Key = "m", Kind = SphereNodeKind.MagicSlot };
 
             Assert.AreEqual("Iron Skin", SphereGridPresenter.NodeName(named));
-            Assert.AreEqual("+1 magic slot (carry one more known spell)", SphereGridPresenter.NodeName(unnamed));
+            Assert.AreEqual("+1 ability slot (carry one more of what you know)", SphereGridPresenter.NodeName(unnamed));
         }
 
         [Test]

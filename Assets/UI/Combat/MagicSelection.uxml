@@ -3,14 +3,14 @@
 
     <ui:VisualElement name="root" class="cd-root" picking-mode="Ignore">
 
-        <!-- Magic / slot list window (docked bottom-left, styled like the command menu) -->
+        <!-- Ability / slot list window (docked bottom-left, styled like the command menu) -->
         <ui:VisualElement name="magic-list-panel" class="cd-window cd-window--combat cd-dock-bottom-left cd-hidden">
-            <ui:Label name="list-title" text="Magic" class="cd-command-window__header" />
+            <ui:Label name="list-title" text="Ability" class="cd-command-window__header" />
             <ui:ScrollView name="list-scroll" class="cd-select-scroll" mode="Vertical" />
             <ui:Button name="list-back" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
-        <!-- Target picker window (cast target / attack target / draw source) -->
+        <!-- Target picker window (cast target / attack target) -->
         <ui:VisualElement name="target-panel" class="cd-window cd-window--combat cd-dock-bottom-left cd-hidden">
             <ui:Label name="target-prompt" text="Select Target" class="cd-command-window__header" />
             <ui:ScrollView name="target-scroll" class="cd-select-scroll" mode="Vertical" />

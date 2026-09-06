@@ -266,6 +266,26 @@ Touch points: `Assets/ScriptableObjects/Heroes/Grids/*.asset` (all four, re-auth
 
 ### 5b. Heroes are unlocked, not bought — the tavern is removed *(added 2026-09-04)*
 
+> **✅ Shipped 2026-09-06.** Items 1-3 and 5 are done; item 4 (**where unlocks come from**) is
+> half-authored and is the only part left. What landed, and the two things it turned up:
+>
+> - **The record already existed.** `PartySaveData.OwnedHeroKeys`, written deferred through
+>   `Party.MarkOwnedDeferred` so a rescue is forfeited on a wipe exactly like XP. This section asked
+>   for a fresh list on `MetaProgressSaveData` following `CompletedRunKeys`; that was **not built**,
+>   deliberately — a second owned-hero list would have been two sources of truth for the same fact,
+>   and the existing one already had the deferred-commit semantics a rescue needs.
+> - **Nothing was using it.** `StartingHeroes` handed out Warrior + Paladin + Ranger, which made the
+>   tutorial's Paladin rescue a silent no-op (`PlaceCaptiveIfConfigured` skips a captive you already
+>   own) and left four heroes unreachable. **The one-line fix was most of the feature.**
+> - **`RequiresHeroes` is in** (`CampaignNodeEntry` + `CampaignOps.HeroGateSatisfied`): always
+>   all-of, ANDed with the run gate, failing shut with no roster. The Hollow Vault asks for the
+>   Ranger. `GetNodesWithBrokenHeroGates` is the guard rail — a gate is sound only if the hero is on
+>   the **required** path, so a captive down an optional branch or behind an `Any` fork is refused.
+> - **The Reedcage** (Drowned March floor 2) is the Ranger's source: a hand-authored linear layout,
+>   so every captive-eligible room is on the only route.
+> - **The bill, measured:** two fewer starting bodies puts three second-tier floors over the
+>   one-health-bar ceiling. See the ledger entry in `NEXT_STEPS.md`.
+
 **Decided.** Gold never buys a hero again. The tavern is deleted. Every hero after the starter
 arrives through **progression** — a rescue, a run cleared, a place reached — so the roster becomes a
 record of where the player has been rather than of what they could afford.
@@ -298,9 +318,17 @@ candidate for.
    existing rule holds:** `CampaignAssetTests.Campaign_NeverStrandsASaveWithNothingToPlay` must still
    pass — a hero gate must never be able to lock a save out of every run, which is easier to violate
    with heroes than with runs because a hero can sit behind an *optional* branch.
-4. **Where unlocks come from.** Rescue is built. The open list: clearing a run, a room event, a secret
-   node, a boss. Author at least two genuinely different sources, or the roster reads as a linear
-   drip with extra steps.
+4. **Where unlocks come from.** *(The one item still open.)* Rescue is built and is now the **only**
+   source: the Paladin in the tutorial, the Ranger in The Reedcage. **Cleric, Cultist, Tinkerer and
+   Rogue have no source at all** and are unreachable content until they get one. The open list is
+   unchanged — clearing a run, a room event, a secret node, a boss — and the original warning now
+   has teeth: with two rescues authored and five to go, the roster currently *is* the linear drip
+   this bullet was written to prevent. Author the next two as genuinely different sources.
+
+   **Two rules the shipped code imposes on where you put them.** A captive is skipped if already
+   owned, so a hero must not also be in `StartingHeroes`. And if any campaign node gates on that
+   hero, the captive has to sit on the **required** path — `HeroUnlockTests` fails the build
+   otherwise, which is the check that stops a hero gate stranding a save.
 5. **The balance model gains a hard axis.** §5's standing complaint was that a tavern recruit was
    invisible to the model, because run curves only grow a roster through `RescueHero`. Removing the
    tavern **resolves that finding**. In exchange `InvestmentFrontier` gains a precondition it cannot

@@ -202,7 +202,7 @@ namespace Assets.Scripts.Cards.UI
             _currentHero = hero;
             _mode = SelectionMode.Cast;
             _selectedMagic = null;
-            _listTitle.text = "Magic";
+            _listTitle.text = "Ability";
             PopulateSlotRows(slots);
         }
 
@@ -463,7 +463,7 @@ namespace Assets.Scripts.Cards.UI
             BestiaryLineView.AddSection(_inspectBody, "Stats", LiveStatLines(enemy));
             BestiaryLineView.AddSection(_inspectBody, "Condition", ConditionLines(enemy));
             BestiaryLineView.AddSection(
-                _inspectBody, "Spells", BestiaryPresenter.SpellLines(definition, known));
+                _inspectBody, "Abilities", BestiaryPresenter.SpellLines(definition, known));
 
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
@@ -614,7 +614,7 @@ namespace Assets.Scripts.Cards.UI
             if (_mode == SelectionMode.Cast && _currentHero is Hero hero &&
                 DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
-                _listTitle.text = "Magic";
+                _listTitle.text = "Ability";
                 PopulateSlotRows(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
                 return;
             }

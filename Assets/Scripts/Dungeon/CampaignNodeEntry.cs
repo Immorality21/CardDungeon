@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Heroes;
 using UnityEngine;
 
 namespace Assets.Scripts.Dungeon
@@ -21,8 +22,19 @@ namespace Assets.Scripts.Dungeon
                  "point, available on a fresh save.")]
         public List<RunDefinitionSO> Requires = new List<RunDefinitionSO>();
 
+        [Tooltip("Heroes the player must own before this run opens - a *key*, not more of a " +
+                 "general thing. Unlike Requires, this is never softened by UnlockMode: every hero " +
+                 "listed is required. Empty means no hero gate. See NEXT_STEPS.md section 5b: a " +
+                 "hero is access rather than power, which is the one axis the game has for saying " +
+                 "'not yet'. " +
+                 "The trap is that a hero can sit behind an optional branch or an un-taken captive, " +
+                 "so a hero gate can strand a save in a way a run gate cannot. Only gate on a hero " +
+                 "the player must pass to get here - CampaignAssetTests enforces exactly that.")]
+        public List<HeroSO> RequiresHeroes = new List<HeroSO>();
+
         [Tooltip("All = every prerequisite must be cleared (a chain). Any = one is enough, which is " +
-                 "how two branches rejoin the main line.")]
+                 "how two branches rejoin the main line. Applies to Requires only - RequiresHeroes " +
+                 "is always an All.")]
         public CampaignUnlockMode UnlockMode = CampaignUnlockMode.All;
 
         [Tooltip("Not shown on the map at all until it unlocks - for secret side branches. A locked " +

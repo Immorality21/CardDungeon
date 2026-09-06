@@ -57,6 +57,27 @@ surface) lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606
 
 ### 0. Open balance findings
 
+> **Standing red, and it is deliberate (2026-09-06).** `BalanceRegressionTests`'
+> `EveryRunLevelIsClearableOnOneHealthBar` and `NothingIsCriticallyOutOfBand` **fail**. Cause is
+> measured, not guessed: §5b restored the **solo start**, so the second tier is fought with two
+> bodies where it used to have three, and three floors go critical —
+>
+> | floor | expected cost | sustain pool | combat rooms |
+> |---|---|---|---|
+> | The Drowned March / Silt Shallows | 158 HP | 99 (2 heroes + potions) | 3.7 |
+> | The Drowned March / The Reedcage | 180 HP | 99 | 3.0 |
+> | The Warrens / Warren Tunnels | 140 HP | 99 | 3.0 |
+>
+> Isolated by re-running the balance suite with the old three-hero start: **13/13 green, with The
+> Reedcage already in place.** So this is the price of the solo start, not of the new floor, and
+> "add a refuge to the Reedcage" is not the fix — the whole second tier was tuned for three bodies.
+>
+> Not repaired here because balance is paused until the specialization refactor lands, and because
+> the direction is arguably *right*: §0g has been asking for a losable campaign, and §3b says death
+> is how the player pays tuition. Decide in the balance pass whether this is the losability the
+> thread wanted or simply too much, but decide it against these numbers rather than re-deriving them.
+
+
 Current analyzer state: **0 critical / 77 warning**; suite **813 passed / 0 failed**.
 
 - **Room count is coupled to enemy Attack and hero HP** — raising one forces the others. Recorded
