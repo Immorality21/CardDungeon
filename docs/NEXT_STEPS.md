@@ -101,12 +101,23 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
 - **Every combat verb past the basics is an ability, and abilities come from the grid**
   *(2026-09-06)*. The command menu is Attack / Ability / Item / Inspect / Skip and does not grow.
   **Defend was the test case** and is why §10 is gone: a defensive stance is a thing a hero *learns*,
-  not a button everyone always has, so it belongs on a branch beside Provoke and the shield spells
-  (§13). Do not add a sixth hard-coded command; add a node.
-- **"Magic" is called "Ability" on screen** *(2026-09-06)*. Some heroes cast and some do not — the
-  Tinkerer's field kit and the Rogue's tricks are not spells — so the player-facing noun is the
-  general one. The code keeps `MagicSO` / `MagicCatalog` / the `Cards` namespace; this is a display
-  rename only, and re-splitting it into two player-facing categories is not wanted.
+  not a button everyone always has, so it belongs on a branch beside Provoke and the shield spells.
+  Do not add a sixth hard-coded command; add a node.
+- **An ability needs no machinery beyond `MagicSO`** *(2026-09-08)*. This is what deleted §13's
+  "unique command" item: Provoke, Steal, Focus and a Tinkerer gadget are `MagicSO` assets on
+  `MagicKnown` nodes, resolved by `EffectResolver` and listed by the Ability picker that already
+  exists. A new verb costs an **effect type** plus authoring — not a command payload on
+  `SphereGridNode`, not a second list in `RoomActionUI`.
+- **"Magic" is called "Ability" on screen, and only on screen** *(2026-09-06, reaffirmed
+  2026-09-08)*. Some heroes cast and some do not — the Tinkerer's field kit and the Rogue's tricks
+  are not spells — so the player-facing noun is the general one. The code keeps `MagicSO` /
+  `MagicCatalog` / `MagicTag` / the `Cards` namespace. A full code rename was **considered and
+  declined on 2026-09-08**: the developer-facing names cost the player nothing, and the churn
+  (~2,600 identifiers, 231 serialized asset keys, every `.asset` and prefab) buys only tidiness.
+  What *is* enforced is that **nothing the player reads says "Magic" or "Spell"** — audited
+  2026-09-08 across every `.uxml`, every runtime string literal and every authored `DisplayName` /
+  `Description` / `Blurb`; see the ledger entry. Re-splitting it into two player-facing categories
+  is not wanted.
 - **Enemy targeting stays random unless taunted** *(2026-09-04, §11)*. No standing aggro model, no
   threat table. Random is the default; a **taunt/provoke ability granted by a defensive branch**
   overrides it for a few turns. Do not build a general threat system.
@@ -142,7 +153,7 @@ backlog.**
 | § | | state |
 |---|---|---|
 | **9b** | Magic moves onto the sphere grid — Draw is scrapped | ✅ **shipped** 2026-09-04; findings feed §4c |
-| **4c** | Specialization — the grid is where a hero becomes an archetype | grids ✅ **all seven authored** 2026-09-05; branch *readability* (item 5) still open |
+| **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **shipped** 2026-09-06 — solo start, rescue unlocks, `RequiresHeroes` gates. **Four heroes still need an unlock source** |
 | **5** | Roster — open questions | open |
 | **4b** | Summons — the capability the deep grid pays out | spec; **shape and effects reopened** 2026-09-04 |
@@ -155,7 +166,7 @@ backlog.**
 | **9** | Status effects — over-time, Silence, the cure loop | ✅ shipped 2026-09-03; follow-ups open |
 | **11** | Threat and cover — a reason for a defensive build | shrank 2026-09-04; follows the grids |
 | **12** | Enemy action vocabulary — the four missing verbs | not started |
-| **13** | Hero identity — unique commands and a Limit gauge | commands resolved to the grid 2026-09-04 |
+| **13** | Hero identity — a Limit gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the Limit gauge is what is left |
 
 ### [The hub becomes a place](plans/HUB.md)
 
@@ -180,10 +191,10 @@ backlog.**
 | § | | state |
 |---|---|---|
 | **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped |
-| **2** | Room variety — the branching half has not shipped | open |
+| **2** | Room variety — the branching half has not shipped | open; **unblocked** by the map (§14a) |
 | **6** | Stats — one open note (`BuffType` is a second per-stat list) | structural |
 | **8** | Migrate to the new Input System | *nice to have* |
-| **14** | The dungeon map, the party bar, and the pause menu | 14b + 14c ✅ 2026-09-06; **14a (the map) is what is left** |
+| **14** | The dungeon map, the party bar, and the pause menu | ✅ **complete** — 14b + 14c 2026-09-06, **14a (the map) 2026-09-08** |
 | **15** | Run summary and statistics | not started |
 | **16** | A compendium — explain the systems | not started |
 | **20** | **A tutorial — guide the player through the first hour** | not started; the opening beat is already built and priced for it |
@@ -198,6 +209,67 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The floor map** (2026-09-08) — `docs/plans/POLISH_CONTENT.md` §14a, the last piece of §14.
+  **M** while walking, or the pause overlay's new **Map** button; the two are never up together and
+  Back from the map puts the overlay back. Rooms drawn **to scale** from `Room.GridPosition` plus the
+  template's size, doors as trimmed connectors, one glyph per room — and three *independent* channels
+  so nothing competes: contents in the centre (enemies → captive → event → cache → refuge), a gold
+  box for where the party stands, and the exit's `▼` in the corner (a boss room is both at once, and
+  had to stay both). **The knowledge rules are pure and tested** (`DungeonMapOps` +
+  `DungeonMapTests`, 18 cases) because they are the half that can leak a floor, and they **mirror
+  what the dungeon already shows** rather than inventing a second model: a room is drawn if it has
+  been entered or a door from an entered room leads to it — the same rule `Room.Hide` uses for door
+  renderers — so the reveal is **one step deep, not a flood fill**, and content is reported for
+  explored rooms only. An unvisited neighbour is an outline that says a room is there and nothing
+  about what is in it. The status line names the **frontier** and never the floor's room count:
+  *have I searched everything* is answered by "2 ways not yet taken" reaching zero, while a total
+  would hand the player the size of the floor before they walked it.
+  **The plan's "just reuse `SphereGridView`" was wrong and is now recorded as wrong** — a sphere grid
+  places an authored graph in its own space and needs pan/zoom; a dungeon already *has* real 2D
+  coordinates, so this fits the rects to the panel and the floor's shape becomes the information.
+  A map you have to pan is a map you cannot read at a glance. The idiom was reused (Painter2D on a
+  host element authored in UXML), the widget was not. `DungeonManager.CurrentRooms` is new — the map
+  is the first caller that needs the whole graph rather than the room the party is in. Verified in
+  play mode on a real floor: rooms explored and frontier counts matching the walk, the cache and
+  enemy glyphs in the right boxes, door lines trimmed, and the full window dance
+  (M → back to room, Escape → pause → Map → Back → pause → Escape). Two rendering faults were found
+  and fixed *by looking at it*, which is the argument for the screenshot pass: centre-to-centre door
+  lines drew straight through the unfilled outlines, and `--cd-stone` as the explored fill was
+  indistinguishable from the panel's own ground. **The keys were driven synthetically, so the
+  handlers are proven and the real key path is not** — M in particular wants a human press.
+- **Fast travel on the map** (2026-09-08, user request) — clicking an explored room, or arrows +
+  Enter, puts the party there instantly. **The design is entirely in what it refuses**, and the two
+  refusals are the load-bearing part: travel is **off completely while live enemies hold the party's
+  room** — those doors are already disabled and combat offers Flee, so stepping out through the map
+  would be a free Flee with none of its cost — and **no route passes *through*** an enemy-held room,
+  because a walk cannot (the room seals on entry). Such a room is still a legal *destination*; going
+  back to finish a fight is a real choice. Only explored rooms, so travel can never skip a floor.
+  **Arrival reuses the ordinary door-walk** through the route's **last** door, which is what leaves
+  the entry door, `Party.PreviousRoom` and therefore the **Flee route** exactly as a walk would have
+  — via a two-step placement (`PlaceInRoom` to the second-to-last room, then `PlaceAtDoor`) so the
+  party is not recorded as having come from the far side of the floor. The rules are re-derived at
+  travel time rather than trusted from the open model, so a stale click cannot outrun a room's state.
+  Camera snaps on arrival, because a lerp across a floor reads as a sweep rather than as arriving.
+  Input is a transparent `Button` per travellable room (`SphereGridView`'s choice for nodes) and the
+  keyboard cursor is a **parchment-light ring drawn inside** the box — the first attempt used a gold
+  wash, which over the dark room fill blends to mud, and gold is already spoken for by the party's
+  own room. 8 more pure tests (26 total); verified in play mode both ways round: travel by click and
+  by Enter, `PreviousRoom` landing adjacent, and a fight correctly refusing to let the party leave.
+- **The last five things the player read as "Magic"** (2026-09-08) — the display rename of
+  2026-09-06 was audited rather than extended. A **full code rename was considered and declined**:
+  ~2,600 `Magic*` identifiers, 231 serialized keys in `.asset` files (189 `GrantedMagicKey`, 42
+  `Magic`) and three prefabs, all of it developer-facing and none of it visible to a player. What was
+  actually still leaking: the **Forge** called itself "Magic Forge" in two places (the screen title
+  in `Hub.uxml` and `forge.asset`'s `DisplayName` — now **Ability Forge**, so lot and screen agree
+  the way Bestiary and Merchant already do), the forge and storehouse **blurbs** sold "a spell" and
+  "spells", **Hush** sealed a foe's "magic", and three `StatCatalog` descriptions scaled "spell
+  power" (authored player text, unused until §16's compendium, wrong for a Tinkerer's gadget either
+  way). Everything else that greps as Magic or Spell is a field name, an `m_EditorClassIdentifier`,
+  a `Debug.LogWarning`, an XML doc comment or a Balance-window column. **Two warts recorded, not
+  fixed:** `Assets/Prefabs/UI/Combat/MagicRow.prefab` is unreferenced legacy uGUI carrying a visible
+  `m_text: Magic` (dead, so invisible — delete it when the uGUI leftovers are swept), and
+  `EffectResult` says a hero **casts** every ability, which is the same category error one level
+  down — a Tinkerer does not cast a gadget.
 - **The party bar while exploring, and a pause menu** (2026-09-06) —
   `docs/plans/POLISH_CONTENT.md` §14b, §14c. The party window is no longer combat-only: it is up
   while walking the floor, rebuilt per room (`ShowPartyStatusOutOfCombat`, so a hero rescued

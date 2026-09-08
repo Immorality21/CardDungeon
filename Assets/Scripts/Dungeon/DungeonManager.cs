@@ -114,6 +114,15 @@ namespace Assets.Scripts.Dungeon
         public LevelDefinitionSO CurrentLevel => _level;
 
         /// <summary>
+        /// Every room on the floor, in generation order - so a room's index into this list is its
+        /// <c>Room.RoomIndex</c>, the same key the dungeon save uses. Read-only on purpose: the
+        /// floor's shape is generation's business, and the only caller so far is the map, which needs
+        /// the whole graph rather than the room the party is standing in.
+        /// </summary>
+        public IReadOnlyList<Room> CurrentRooms =>
+            _roomManager != null ? _roomManager.SpawnedRooms : null;
+
+        /// <summary>
         /// The run entry for the level being played, or null in free-play. The entry is where a
         /// level's authored content that is not the room template lives - its boss, its rescue, and
         /// its enemy tuning.

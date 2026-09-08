@@ -215,29 +215,26 @@ Touch points: `Assets/Scripts/Enemies/Behaviors/EnemyActionEntry.cs` (the enum +
 `EnemyActionPlanner.cs`, `Assets/Scripts/Enemies/Editor/EnemyBehaviorSOEditor.cs` (draws per-kind
 fields), `Assets/Scripts/Balance/` (`EnemyBehaviorModel`, `BalanceMath`).
 
-### 13. Hero identity — unique commands and a Limit gauge
+### 13. Hero identity — a Limit gauge
 
-**`HeroSO` is `BaseStats` + `AttackStat` + `SphereGrid` + a sprite.** Every hero has the identical six
-commands. The heroes differ in *numbers* and in which grid they walk, and in nothing else.
+> **The "unique command" half of this section was deleted 2026-09-08 — it was asking for machinery
+> that already exists.** A command *is* an ability: Provoke, Steal, Focus, a gadget, a self-damaging
+> channel are all `MagicSO`s taught by a `MagicKnown` node, resolved by `EffectResolver`, and
+> already shown by the Ability picker the command menu opens. There is no command payload to add to
+> `SphereGridNode` and no list for `RoomActionUI` to build differently. What a new verb actually
+> needs is an **effect type** (a taunt needs one; Steal needs one) plus an authored asset and a node
+> to hang it on — which is §11's and §12's work, not a structural item.
 
-Given the FFX/FFVIII framing the rest of the design already uses, two additions:
+**`HeroSO` is `BaseStats` + `AttackStat` + `SphereGrid` + a sprite**, and that is now the intended
+shape: heroes differ in base stats, in grid *shape*, and in the abilities their branches teach.
 
-- **A unique command.** Steal (Rogue), Provoke (whoever went defensive — see §11),
-  Focus/charge (Warrior), a free low-power cast (Cleric), a gadget (Tinkerer), a self-damaging
-  channel (Cultist). Resolved through the same command list `RoomActionUI` already builds. This is
-  the cheapest way to make "which hero is acting" a question, and it pairs with §5's
-  party-selection decision — a party is a set of *verbs*, not just four stat blocks.
+**The residual, worth a look but not a blocker:** at hour zero the seven bases differ only in base
+stats and grid shape — exactly when a new player is choosing between them and has spent no XP. That
+may well be fine (grid shape is a real difference, and the first branch is cheap), but it is worth
+playing before assuming it.
 
-  **Resolved 2026-09-04: commands are granted by the grid, not authored on `HeroSO`.** §11's taunt
-  settled it — Provoke arrives because you *built* a front-liner, which is the same rule §4c
-  applies to spells and summons. A command is one more thing a branch can grant, so
-  `SphereGridNode` gains a command payload alongside `MagicKnown` and `Summon`, and `RoomActionUI`
-  builds the list from activated nodes rather than from the hero asset.
+What is left here is one addition:
 
-  **The residual, worth a look but not a blocker:** if everything comes from the grid, the seven
-  bases differ at hour zero only in base stats and in grid *shape* — which is exactly when a new
-  player is choosing between them and has spent no XP. That may well be fine (grid shape is a real
-  difference, and the first branch is cheap), but it is worth playing before assuming it.
 - **A Limit / Overdrive gauge** that fills on damage taken and unlocks a big one-shot. Two reasons
   beyond flavour: it is a **comeback mechanic**, which is what makes §0g's "the player is supposed to
   die" feel like a near miss rather than a wall; and it is a second **burst** axis alongside §4b's

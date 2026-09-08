@@ -111,8 +111,18 @@ EventSystem, `Assets/Scripts/ImmoralityGaming/Fundamentals/MainCamera.cs`,
 
 Three separate gaps, grouped because a pause overlay is the natural home for the first two.
 
-> **14b and 14c shipped 2026-09-06. 14a is what is left**, and it is now the only thing this
-> section is still asking for — the overlay it wants to live in exists and has a slot for it.
+> **Section 14 is complete. 14b and 14c shipped 2026-09-06; 14a shipped 2026-09-08.**
+>
+> - **14a:** the floor map, `map-window` in `RoomAction.uxml`, opened with **M** while walking or
+>   from the pause overlay's **Map** button. Pure rules in `DungeonMapOps` (+ `DungeonMapTests`),
+>   painting in `Rooms/UI/DungeonMapView.cs`. It did **not** reuse `SphereGridView` — see the note
+>   at the end of this section for why, and the Rooms guide for the rules.
+> - **Fast travel** (user request, same day): clicking an explored room — or arrows + Enter — puts
+>   the party there instantly. It deletes the walk back through rooms already dealt with and buys
+>   nothing a walk could not: **travel is off entirely while live enemies hold the party's room**
+>   (that would be a free Flee) and **no route passes through** an enemy-held room, though one is a
+>   legal destination. The arrival runs the ordinary door-walk steps through the route's last door,
+>   so the entry door, `PreviousRoom` and the Flee route all end up as if walked.
 >
 > - **14b:** the party window is up while exploring, rebuilt per room (`ShowPartyStatusOutOfCombat`)
 >   and kept alive through the end of a fight instead of torn down. It was the cheapest item in this
@@ -139,18 +149,26 @@ Three separate gaps, grouped because a pause overlay is the natural home for the
 > - **Still open here:** §19's motion-reduction toggle has an obvious home now, and the overlay
 >   cannot be opened during an enemy's turn (nothing waits for input there).
 
-**14a. There is no dungeon map.** Rooms are a graph (`RoomNode`), doors are the only navigation, and
-nothing in `Assets/Scripts` draws an overview. The player cannot answer *where is the exit*, *have I
-searched everything*, or *is this branch a dead end*. Two consequences:
+**14a. ~~There is no dungeon map.~~ ✅ Shipped 2026-09-08.** The three questions it existed to answer
+— *where is the exit*, *have I searched everything*, *is this branch a dead end* — are now on screen:
+the exit as a `▼` once its room has been entered, the second as a frontier count ("2 ways not yet
+taken") that reaches zero, and the third as the shape of the floor drawn to scale. **§2's branch
+choice is unblocked** — a fork the player cannot see is not a fork — and the run's *shape* is legible,
+which is what makes a 17-room beeline (§0g) read as a decision rather than a corridor.
 
-- It is a prerequisite for **§2's branch choice** — a fork the player cannot see is not a fork.
-- It is the only place the run's *shape* is legible, which is what makes a 17-room beeline (§0g) read
-  as a decision rather than a corridor.
+**The knowledge model was already in the scene and was reused rather than re-derived.** `Room.Reveal`
+sets `IsExplored`, and `Room.Hide` keeps a door renderer lit when the room on the *other* side has
+been explored; `DungeonMapOps` mirrors both, so the map is exactly as informed as standing in the
+room and no more. The reveal is one step deep, content is reported for explored rooms only, and the
+status line never names the floor's total room count.
 
-`Room.Reveal()` already shows the current room's doors and leaves unexplored neighbours dark, so the
-knowledge model exists; what is missing is a view of it. `SphereGridView` is a node-graph renderer
-that already does pan/zoom and Painter2D edges over exactly this shape — unlike §7's painted town,
-**a dungeon map is genuinely the same widget**, so this is the one place reusing it is right.
+**It did not reuse `SphereGridView`, and this section's claim that "a dungeon map is genuinely the
+same widget" turned out to be wrong** — worth recording, because it was stated confidently. A sphere
+grid places an *authored* graph in its own coordinate space, which is why it needs pan/zoom to walk;
+a dungeon already has real 2D coordinates and every room is a rectangle at a grid position. So the
+map fits the room rects to the panel and the floor's shape becomes the information, with no pan/zoom
+at all — a map you have to pan is a map you cannot read at a glance. What *was* reused is the idiom:
+Painter2D on an authored host element, added into the UXML the same way the hub hosts the grid.
 
 **14b. ~~Party health is invisible while exploring.~~ ✅ Shipped 2026-09-06.** `party-status` in `RoomAction.uxml` is shown by
 `ShowCombat` and hidden by `HideAll`, so the panel exists and is deliberately combat-only. But since

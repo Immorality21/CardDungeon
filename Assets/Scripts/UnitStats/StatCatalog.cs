@@ -74,7 +74,7 @@ namespace Assets.Scripts.UnitStats
         private static readonly StatDefinition[] Definitions =
         {
             new StatDefinition(StatType.Strength, "STR", "Strength",
-                "Physical power. Scales melee-flavoured attacks and spells.",
+                "Physical power. Scales melee-flavoured attacks and abilities.",
                 recruitWeight: 6f, powerWeight: 6f, authoringDefault: 5),
 
             new StatDefinition(StatType.Endurance, "END", "Endurance",
@@ -86,11 +86,11 @@ namespace Assets.Scripts.UnitStats
                 recruitWeight: 5f, powerWeight: 3f, authoringDefault: 5),
 
             new StatDefinition(StatType.Intelligence, "INT", "Intelligence",
-                "Scales offensive and arcane spell power - a caster's Strength.",
+                "Scales offensive and arcane ability power - a caster's Strength.",
                 recruitWeight: 5f, powerWeight: 2f, authoringDefault: 0),
 
             new StatDefinition(StatType.Spirit, "SPR", "Spirit",
-                "Scales restorative and protective spell power - healing, shields, Holy.",
+                "Scales restorative and protective ability power - healing, shields, Holy.",
                 recruitWeight: 5f, powerWeight: 2f, authoringDefault: 0),
 
             new StatDefinition(StatType.Luck, "LCK", "Luck",

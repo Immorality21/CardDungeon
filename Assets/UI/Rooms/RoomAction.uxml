@@ -71,6 +71,29 @@
             <ui:Button name="victory-continue" text="Continue" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
+        <!-- The floor map. Its own window rather than a panel inside the pause overlay: a map is
+             glanced at often, so it is one key (M) away from walking, and pause offers it as a
+             button for anyone who has not found the key.
+
+             The canvas is an authored host; DungeonMapView paints into it (rooms to scale, doors,
+             one glyph per room) exactly the way the hub hosts the sphere grid. The legend is
+             static markup, and its glyphs are the ones DungeonMapOps.GlyphFor returns. -->
+        <ui:VisualElement name="map-window" class="cd-window cd-window--map cd-window--flush cd-dock-center cd-hidden">
+            <ui:Label name="map-title" text="Map" class="cd-title" />
+            <ui:VisualElement name="map-canvas" class="dm-host" />
+            <ui:Label name="map-status" text="" class="cd-info-label" />
+            <ui:VisualElement class="dm-legend">
+                <ui:Label text="✖ enemies" class="dm-legend__item dm-glyph--enemies" />
+                <ui:Label text="✦ captive" class="dm-legend__item dm-glyph--captive" />
+                <ui:Label text="? event" class="dm-legend__item dm-glyph--event" />
+                <ui:Label text="◆ cache" class="dm-legend__item dm-glyph--cache" />
+                <ui:Label text="✚ refuge" class="dm-legend__item dm-glyph--refuge" />
+                <ui:Label text="▼ exit" class="dm-legend__item dm-glyph--exit" />
+            </ui:VisualElement>
+            <ui:Label name="map-hint" text="Gold room is where you stand &#183; an empty outline is a room you have not entered" class="cd-info-label cd-hint" />
+            <ui:Button name="map-back" text="Back" class="cd-button cd-button--wide" />
+        </ui:VisualElement>
+
         <!-- Pause overlay. Last in the document so it paints over everything else, and the only
              window that can come up on top of a fight. Holds what the hub owns between runs but
              the dungeon had no way to reach: the audio dials, and the way out.
@@ -102,6 +125,7 @@
             </ui:VisualElement>
             <ui:Button name="options-mute" text="" class="cd-menu-button" />
 
+            <ui:Button name="pause-map" text="Map" class="cd-button cd-button--wide" />
             <ui:Button name="pause-resume" text="Resume" class="cd-button cd-button--wide" />
             <ui:Button name="pause-quit" text="Leave the Dungeon" class="cd-button cd-button--wide" />
             <ui:Label name="pause-note" text="" class="cd-info-label cd-hint" />

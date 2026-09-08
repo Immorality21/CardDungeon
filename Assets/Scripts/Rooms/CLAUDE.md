@@ -119,6 +119,8 @@ already had. If a room needs to *say* something, that is what an event's `Prompt
 - **G** — Generate new dungeon
 - **WASD** — Move camera. **The arrow keys no longer pan** — they drive selection everywhere in the game now, and `MainCamera.Drag` reads raw `Input`, which no amount of `StopPropagation` in UI Toolkit can hold back, so every door the player picked also nudged the camera.
 - **Escape** — opens the **pause overlay** (`pause-window`), or backs out of whatever window is up.
+- **M** — opens the **floor map** (`map-window`), from the same states Escape opens pause from.
+  Clicking an explored room on it, or arrows + Enter, **fast travels** the party there.
 - **The pause overlay** (`RoomActionUI.OpenPause` / `ClosePause`) is the dungeon's only screen-level
   menu: the audio dials and the way out. It is checked **before** everything else in
   `OnCombatHotkey` and, while up, is the only thing the keyboard reaches (it is also added to
@@ -155,6 +157,82 @@ already had. If a room needs to *say* something, that is what an event's `Prompt
   - `HandleQuitToHub` also has to `DiscardPendingGold` — that counter is a plain field on a
     `DontDestroyOnLoad` singleton, so otherwise it rides into the hub and gets banked by the *next*
     run's first level clear.
+- **The floor map** (`map-window`, `DungeonMapOps` + `Rooms/UI/DungeonMapView.cs`) — **M** while
+  walking, or the pause overlay's **Map** button; Escape/Backspace/M/Enter or **Back** leaves. The
+  two are never up together: opening the map from pause closes the overlay, and Back puts it back,
+  so "Back means back" holds. It opens from the same three states pause does (`CanOpenMap` mirrors
+  `CanOpenPause`) and is added to `OwnsNavigationKeys` / excluded from `DoorNavActive` for the same
+  reason — an arrow key must not walk the party out from under it.
+  - **The knowledge rules are pure and tested** (`DungeonMapOps`, `DungeonMapTests`), because they
+    are the half that can leak a floor. They **mirror what the dungeon itself shows** rather than
+    inventing a second model: a room is drawn if it has been entered *or* a door from an entered
+    room leads to it (`Room.IsExplored`, the same rule `Room.Hide` uses to decide whether a door
+    renderer stays lit), and a door is drawn if either of its rooms has been entered. Everything
+    else is `MapRoomState.Hidden` and simply absent — the reveal is **one step deep, not a flood
+    fill**, so the map can never answer a question standing in the room would not.
+  - **Content is reported for explored rooms only.** An unvisited neighbour is an outline saying a
+    room is there and nothing about what is in it — `MarkerFor` is not even consulted. One glyph per
+    room, by a documented priority (enemies → captive → event → cache → refuge), because a box that
+    small has room for one character and "what is still in there" is one answer.
+  - **Three independent channels, so nothing competes**: the centre glyph is contents, a **gold
+    border and fill** is where the party stands, and the exit's `▼` sits in the room's **top-right
+    corner**. Without that split, a boss room (enemies *and* the exit) would have to drop one of the
+    two facts.
+  - **The status line names the frontier, never the floor size** — "3 rooms explored · 2 ways not yet
+    taken". *Have I searched everything* is answered by the frontier reaching zero; the total room
+    count would tell the player how big the floor is before they have walked it.
+  - **It is drawn to scale, not as a graph, and that is a deliberate divergence** from the plan's
+    "reuse `SphereGridView`" note. A sphere grid lays an authored graph out in its own coordinate
+    space and needs pan/zoom to walk it; a dungeon already *has* real 2D coordinates, so
+    `DungeonMapView` fits the room rectangles to the panel and the shape of the floor becomes the
+    information. A map you have to pan is a map you cannot read at a glance. The Painter2D idiom is
+    the same, and so is the authored-host pattern (the UXML owns `map-canvas`; the view is added
+    into it exactly as the hub hosts the sphere grid).
+  - **Door lines are trimmed to the two rooms' edges**, not drawn centre to centre: an unexplored
+    room is an *unfilled* outline, so an untrimmed line shows straight through it and reads as
+    something reaching into a room nobody has been in.
+  - **Clicking an explored room travels the party there** (`DungeonMapOps.TravellableRooms` /
+    `RouteTo`, `RoomActionUI.TravelTo`). What it deletes is the trudge back through rooms already
+    dealt with; what it must never do is buy something a walk could not, which is the whole of the
+    rule set:
+    - **Live enemies holding the party's room turn travel off completely.** That room's doors are
+      already disabled and combat offers **Flee** for leaving it, so a map that let the party step
+      out would be a free Flee with none of its cost. The hint says so in as many words rather than
+      going quiet.
+    - **A route may not pass *through* an enemy-held room**, because walking cannot - the room seals
+      as the party enters. Such a room is still a legal *destination*: going back to finish a fight
+      is a real choice.
+    - **Only explored rooms**, so travel can never skip a floor - the frontier is an outline, not a
+      place.
+    - **The route is the shortest one, and the arrival runs the ordinary `OnDoorSelected` steps
+      through its last door.** That is what leaves the party in exactly the state a walk would have:
+      just inside the doorway, that door recorded as the entry door, and `Party.PreviousRoom` naming
+      the room behind it - which is what **Flee** reads. The two-step placement is what buys the last
+      part: `PlaceInRoom` moves the party to the second-to-last room first, so `PlaceAtDoor` then
+      records *that* as where they came from rather than the far side of the floor.
+    - **The rules are re-derived at travel time, not trusted from the open model**, so a click on a
+      stale hit box cannot outrun a room's state changing under it.
+    - The camera is **snapped** (`MainCamera.SetPosition`) on arrival: `GameManager` follows the party
+      by lerp, which across a floor reads as a long sweep rather than as arriving.
+  - **Input is a transparent `Button` per travellable room**, laid over the painted box - the same
+    choice `SphereGridView` makes for nodes, so hover and the click route come free and USS owns the
+    feedback. They carry **no border of their own** (the painted rectangle already draws the room's
+    state; a second frame read as a doubled outline) and they are `focusable = false`, or they would
+    fight the panel root for focus the way the combat screens can. **Only travellable rooms get
+    one**: a dead button on an unreachable room still invites the click.
+  - **Keyboard: arrows move a cursor over the travellable rooms, Enter travels.** `DirectionalNav`
+    again, so "up" means the same thing here as on the door cursor and the sphere grid, and the first
+    arrow is measured from the party's own room so the cursor lands where the player is looking. The
+    cursor is a **parchment-light ring drawn inside** the room's border (matching
+    `.sg-node--selected`), *not* a fill wash: gold is already spoken for by the party's own room, and
+    a gold wash at any readable alpha over the dark room fill blends to mud - which is exactly what
+    the first version did. With nothing selected, Enter closes the map rather than doing nothing.
+  - **`Painter2D` draws no text**, so each glyph is an absolutely-positioned `Label` child rebuilt by
+    `BuildGlyphs` — the same "marks built from data" pattern as the turn-order and party rows. It
+    needs a laid-out panel: `RefreshMap` runs while the window is still hidden, so the first fit
+    comes from the `GeometryChangedEvent` that showing it raises. Adjacency comes off `Room.Doors`,
+    **not** the generator's `RoomNode.connections` — a connection with no door placed is not a route
+    the player can walk, and drawing it would put a corridor on the map that does not exist.
 - **Walking the dungeon from the keyboard** (`RoomActionUI.HandleDungeonKey`): **arrows** point at a door, **Enter/Space** walks through it, **Tab** moves a cursor along the room bar instead (Action/Search/Rest/Rescue/Descend) and Enter presses what it is on. Two cursors share Enter and the last key decides: an arrow always hands Enter back to the doors. Door picking is spatial (`DirectionalNav`, world space, so "up" is +y); with no door chosen yet the arrow is measured from **where the party is standing**, and if nothing lies that way the nearest door is taken so a first press always shows the cursor. The selected door is drawn by `Door.SetHighlighted` (warm tint + 1.3× scale, original look captured on first use and restored). The whole thing is gated by `DoorNavActive()` — doors subscribed, no combat bar, no window stacked over the room — and the `nav-hint` label mirrors that gate. The hint is **context-aware** (`NavHintText`) — it names the combat bar's keys, the command cursor's, or the door cursor's depending on which is up, says nothing under a dialog, and drops "R flee" when there is no Flee button. It is refreshed from `Update` rather than from the dozen places a bar is swapped or a window opened: the line is derived from what is on screen, and re-deriving it each frame cannot fall out of sync the way a dozen call sites can.
 - **The windows stacked over the room** are keyboard-complete too (`HandleDialogKey`, checked *before* the bars so a dialog owns the keyboard while it is up): the victory screen takes any confirm/cancel key, the detail window takes **Enter** for OK and **Escape** for Cancel (or OK when there is no Cancel — a one-button statement must not trap the player), and the event window gets its own `KeyboardNavigator` over its runtime-built options, with Escape pressing its Back button so the keyboard route out runs the same teardown a click does.
 - **Combat input** (`RoomActionUI.OnCombatHotkey`): **cursor-driven, no letter hotkeys.** The start bar has a `KeyboardNavigator` scoped to `combat-bar` — **Left/Right** (or Tab) choose, **Enter/Space** press. Flee is absent in a boss room, so the cursor cannot reach a way out the fight does not offer. The hero command menu is a cursor selection list — **Up/Down** move the cursor (skipping greyed commands), **Enter/Space** confirm. There used to be **F**/**R** on the start bar and **A/M/D/T/I/S** on the command menu; they were dropped once the arrows covered both, because a second way in earns its keep only while the first one is missing. Both bars therefore carry their cursor from the moment they appear (the command menu always did; the start bar opts in via `KeyboardNavigator.SelectFirst`, armed from `Update` because on the frame a bar is shown its resolved style is still stale) — with no letters left, Enter must never need an arrow press to wake it up. Camera panning is disabled during combat (`MainCamera.AllowManualPan`, set by `CombatStage`) so the arrow/WASD keys drive the cursor, not the camera. UI Toolkit routes key events to the focused element, so `RoomActionUI` focuses its panel root (`FocusRoot()`) whenever a combat bar appears. **Focus is only half of it:** at runtime the OS keyboard reaches a UITK panel only while its `PanelEventHandler` is the EventSystem's *selected* GameObject, and clicking a door — a world-space collider, not UI — clears that selection. `FocusRoot` and `Update` both call `PanelKeyboard.Claim()` for this; without it the room clicks perfectly and ignores every key. See gotcha 15 in `docs/GAMEPLAY_VALIDATION.md`. **Focus-ownership invariant:** the combat scene has two UITK documents (`RoomActionUI` and `MagicSelectionUI`) and only **one panel root may be `focusable` at a time**, or arrow-nav hops focus to the other (idle) panel and dies after one key. Each panel makes its root focusable only while actively driving nav; scrolls/rows/back-buttons are `focusable = false`. See `docs/GAMEPLAY_VALIDATION.md` → "UI Toolkit keyboard focus" for the full rationale + how to test it.

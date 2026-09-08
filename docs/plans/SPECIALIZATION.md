@@ -131,9 +131,11 @@ tank; the game never prints the word. Two consequences, and the second is the ha
 - **"Tank" and "Paladin" are not heroes and not titles** — they are shorthand *we* use in this
   document for recognisable places a grid can end up. Nothing in the data model should carry them.
 - **The payload is the only explanation the player gets.** With no name on the branch, the entire
-  burden of "what am I committing to" falls on how the grid displays what lies ahead. That makes
-  item 5 below the crux of this section rather than a polish task — an unnamed branch that cannot
-  be read forward is a run's worth of XP spent blind.
+  burden of "what am I committing to" falls on how the grid displays what lies ahead. A forward
+  look-ahead was queued for this and **dropped 2026-09-08** (user call): the per-node payload text
+  `SphereGridView` already renders is judged enough — a branch that stacks health and grants a
+  shield spell reads as what it is, node by node, without a summary of where it ends. Do not
+  re-propose a branch preview unless play shows the commitment actually being made blind.
 
 The seven base heroes (§5b) and the kind of destination each should be able to reach:
 
@@ -231,13 +233,12 @@ acquisition mechanic for a stat tree and gained nothing.
 4. **Decide the spell budget per grid.** Open, and it is a three-way split against a fixed XP pool:
    spells, summons and stats. §4b's rule generalises to all of it — **scarcity, not size**, is what
    makes a branch a decision.
-5. **A branch must be readable forward before it is bought** — *the crux of this section.* The
-   player commits a run's worth of XP to a destination that, by decision, has no name. `SphereGridView`
-   renders per-node payload text and nothing about where a branch leads. It needs some way to answer
-   "what does this direction turn me into" from the payloads alone: a look-ahead on the hovered
-   branch, a running total of what committing to it grants, or the branch's spells and summon shown
-   at its tip from the start. Pick one deliberately — without it, unnamed specializations are
-   indistinguishable from a stat tree with the labels torn off.
+5. ~~**A branch must be readable forward before it is bought.**~~ **Dropped 2026-09-08** (user
+   call). The queued work was a look-ahead on the hovered branch — a running total of what
+   committing to it grants, or its spells and summon shown at the tip. The judgement is that
+   per-node payload text is sufficient: the player reads the branch by reading the next two or three
+   nodes, which is also the granularity they buy at. Recorded here so it is not re-proposed; revisit
+   only if play shows a branch being committed to blind.
 6. **Material costs on nodes** — see §7. A node can cost materials as well as XP, which makes some
    specializations gate on *where the player has been* rather than on how much they have ground.
 

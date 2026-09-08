@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Key: Hush
   DisplayName: Hush
-  Description: Smothers a foe's voice, sealing its magic for a few turns.
+  Description: Smothers a foe's voice, sealing its abilities for a few turns.
   Icon: {fileID: 3051856151345990285, guid: 94e7b8b322f3cb0448fb8457fe320ded, type: 3}
   TargetType: 0
   Rarity: 2

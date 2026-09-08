@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.BuildingSO
   Key: storehouse
   DisplayName: Storehouse
-  Blurb: Gear, spells, potions and the raw stuff you dragged home.
+  Blurb: Gear, abilities, potions and the raw stuff you dragged home.
   Service: 3
   Position: {x: 560, y: 420}
   HitSize: {x: 150, y: 110}

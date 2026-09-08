@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: forge
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.BuildingSO
   Key: forge
-  DisplayName: Magic Forge
-  Blurb: Essence goes in. What comes out is a spell that hits harder.
+  DisplayName: Ability Forge
+  Blurb: Essence goes in. What comes out is an ability that hits harder.
   Service: 2
   Position: {x: 120, y: 250}
   HitSize: {x: 150, y: 110}

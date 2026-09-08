@@ -1677,3 +1677,108 @@
     color: var(--cd-text-dark);
     opacity: 0.7;
 }
+
+/* ============================================================
+   Dungeon map (.dm-*) — the floor overlay in RoomAction.uxml.
+   Drawn by DungeonMapView with Painter2D; the colours it strokes
+   mirror the --cd-* tokens above, so change the two together.
+   ============================================================ */
+
+/* Wider than a command window and taller than a dialog: the map IS the content, and a floor
+   drawn small enough to fit a 620px frame is a floor nobody can read. */
+.cd-window--map {
+    width: 900px;
+    max-width: 94%;
+    max-height: 86%;
+}
+
+/* The host authored in UXML. DungeonMapView is added into it and fills it. */
+.dm-host {
+    flex-grow: 1;
+    min-height: 340px;
+    margin-bottom: 8px;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.dm-viewport {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/* One room's marker. Absolutely positioned over the painted box by the view, so the glyph and the
+   rectangle can never drift apart. */
+.dm-glyph {
+    position: absolute;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    font-size: 15px;
+    color: var(--cd-text-dark);
+}
+
+.dm-glyph--enemies {
+    color: rgb(232, 96, 96);
+}
+
+.dm-glyph--captive {
+    color: rgb(120, 220, 255);
+}
+
+.dm-glyph--event {
+    color: var(--cd-accent);
+}
+
+.dm-glyph--cache {
+    color: var(--cd-gold);
+}
+
+.dm-glyph--refuge {
+    color: rgb(120, 226, 140);
+}
+
+.dm-glyph--exit {
+    color: var(--cd-gold);
+}
+
+/* The legend: one line, wrapping if the window is narrow, sharing the glyph colours above so the
+   key and the map cannot disagree. */
+.dm-legend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 2px;
+}
+
+.dm-legend__item {
+    font-size: 13px;
+    -unity-font-style: bold;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+/* One travellable room's click target, laid over the painted box. Deliberately frameless and
+   transparent: the Painter2D rectangle underneath already says what the room is, and a button
+   border on top of it read as a doubled outline. Feedback is a wash instead. */
+.dm-room {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0);
+    border-width: 0;
+    border-radius: 2px;
+    margin: 0;
+    padding: 0;
+}
+
+.dm-room:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+/* The keyboard cursor's wash. Light rather than gold: gold is what marks the party's own room,
+   and a gold wash at any readable alpha over the dark room fill blends to mud rather than to a
+   highlight. The cursor's identity is the light ring DungeonMapView strokes inside the box - same
+   parchment-light as .sg-node--selected on the sphere grid - and this only backs it up. */
+.dm-room--selected {
+    background-color: rgba(245, 240, 255, 0.16);
+}

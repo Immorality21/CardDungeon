@@ -101,7 +101,7 @@
 
         <!-- FORGE -->
         <ui:VisualElement name="forge-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
-            <ui:Label text="Magic Forge" class="cd-title" />
+            <ui:Label text="Ability Forge" class="cd-title" />
             <ui:Label name="forge-essence" text="Essence: 0" class="cd-info-label" />
 
             <ui:VisualElement name="forge-tabs" class="cd-tabs">

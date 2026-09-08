@@ -38,9 +38,19 @@ namespace Assets.Scripts.Rooms
         private Button _pauseResume;
         private Button _pauseQuit;
         private Label _pauseNote;
+        private Button _pauseMap;
         private MainMenu.AudioOptionsUI _pauseAudio;
         private KeyboardNavigator _pauseNav;
         private bool _quitArmed;
+
+        private VisualElement _mapWindow;
+        private Label _mapTitle;
+        private Label _mapStatus;
+        private Button _mapBack;
+        private Label _mapHint;
+        private UI.DungeonMapView _mapView;
+        /// <summary>Whether the map was opened from the pause overlay, so Back goes back there.</summary>
+        private bool _mapFromPause;
 
         private readonly Dictionary<Heroes.Hero, VisualElement> _partyRows = new Dictionary<Heroes.Hero, VisualElement>();
         private readonly Dictionary<Heroes.Hero, Label> _partyHpLabels = new Dictionary<Heroes.Hero, Label>();
@@ -147,6 +157,12 @@ namespace Assets.Scripts.Rooms
             _pauseResume = root.Q<Button>("pause-resume");
             _pauseQuit = root.Q<Button>("pause-quit");
             _pauseNote = root.Q<Label>("pause-note");
+            _pauseMap = root.Q<Button>("pause-map");
+            _mapWindow = root.Q<VisualElement>("map-window");
+            _mapTitle = root.Q<Label>("map-title");
+            _mapStatus = root.Q<Label>("map-status");
+            _mapBack = root.Q<Button>("map-back");
+            _mapHint = root.Q<Label>("map-hint");
             _commandList = root.Q<VisualElement>("command-list");
             _turnOrder = root.Q<VisualElement>("turn-order");
             _turnOrderList = root.Q<VisualElement>("turn-order-list");
@@ -255,6 +271,25 @@ namespace Assets.Scripts.Rooms
             if (_pauseQuit != null)
             {
                 _pauseQuit.clicked += OnQuitToHub;
+            }
+            if (_pauseMap != null)
+            {
+                _pauseMap.clicked += () => OpenMap(fromPause: true);
+            }
+
+            // The map canvas is authored in the UXML; the painter is added into it the same way the
+            // hub hosts the sphere grid. Nav is a single Back button, so the window needs no cursor -
+            // Escape, Backspace and M all leave through CloseMap.
+            var mapHost = root.Q<VisualElement>("map-canvas");
+            if (mapHost != null)
+            {
+                _mapView = new UI.DungeonMapView();
+                _mapView.RoomChosen += TravelTo;
+                mapHost.Add(_mapView);
+            }
+            if (_mapBack != null)
+            {
+                _mapBack.clicked += CloseMap;
             }
 
             _eventNav = new KeyboardNavigator(_eventWindow);
@@ -373,6 +408,9 @@ namespace Assets.Scripts.Rooms
             SetShown(_partyStatus, false);
             SetShown(_turnOrder, false);
             SetShown(_victoryWindow, false);
+            // Cleared first: CloseMap would otherwise put the pause overlay back up on its way out.
+            _mapFromPause = false;
+            CloseMap();
             ClosePause();
         }
 
@@ -1297,8 +1335,17 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void OnCombatHotkey(KeyDownEvent evt)
         {
-            // Pause is above everything, including a dialog it can never be opened over: while it
-            // is up it is the only thing the keyboard reaches.
+            // The map is checked before pause because it can be opened *from* pause, and the two are
+            // never up together - opening the map closes the overlay and Back puts it back.
+            if (IsShown(_mapWindow))
+            {
+                HandleMapKey(evt);
+                evt.StopPropagation();
+                return;
+            }
+
+            // Pause is above everything else, including a dialog it can never be opened over: while
+            // it is up it is the only thing the keyboard reaches.
             if (IsShown(_pauseWindow))
             {
                 if (evt.keyCode == KeyCode.Escape || evt.keyCode == KeyCode.Backspace)
@@ -1309,6 +1356,13 @@ namespace Assets.Scripts.Rooms
                 {
                     _pauseNav?.HandleKey(evt);
                 }
+                evt.StopPropagation();
+                return;
+            }
+
+            if (evt.keyCode == KeyCode.M && CanOpenMap())
+            {
+                OpenMap(fromPause: false);
                 evt.StopPropagation();
                 return;
             }
@@ -1390,7 +1444,7 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private bool CanOpenPause()
         {
-            if (_pauseWindow == null || IsShown(_pauseWindow) || IsDialogUp())
+            if (_pauseWindow == null || IsShown(_pauseWindow) || IsShown(_mapWindow) || IsDialogUp())
             {
                 return false;
             }
@@ -1429,6 +1483,290 @@ namespace Assets.Scripts.Rooms
             SetShown(_pauseWindow, false);
             _pauseNav?.Reset();
             FocusRoot();
+        }
+
+        /// <summary>
+        /// Whether M should open the map right now - the same three states pause opens from
+        /// (<see cref="CanOpenPause"/>), for the same reason: those are the moments the room panel
+        /// owns the keyboard, so M cannot be stolen from a window that needs it. The pause overlay's
+        /// own Map button bypasses this, because pause being up is already one of those states.
+        /// </summary>
+        private bool CanOpenMap()
+        {
+            if (_mapWindow == null || IsShown(_mapWindow) || IsDialogUp())
+            {
+                return false;
+            }
+            return DoorNavActive() || IsShown(_combatBar) || IsShown(_heroBar);
+        }
+
+        /// <summary>
+        /// Shows the floor as the party knows it. Rebuilt on every open rather than kept in sync:
+        /// the map is a snapshot of a graph that only changes while it is closed.
+        /// </summary>
+        private void OpenMap(bool fromPause)
+        {
+            if (_mapWindow == null)
+            {
+                return;
+            }
+
+            _mapFromPause = fromPause;
+            if (fromPause)
+            {
+                ClosePause();
+            }
+
+            RefreshMap();
+            SetShown(_mapWindow, true);
+            FocusRoot();
+        }
+
+        private void CloseMap()
+        {
+            if (_mapWindow == null || !IsShown(_mapWindow))
+            {
+                return;
+            }
+
+            SetShown(_mapWindow, false);
+            bool backToPause = _mapFromPause;
+            _mapFromPause = false;
+
+            // Back means back: a map reached through the overlay returns to it rather than dropping
+            // the player into the room two menus deep.
+            if (backToPause)
+            {
+                OpenPause();
+                return;
+            }
+            FocusRoot();
+        }
+
+        private void RefreshMap()
+        {
+            var rooms = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentRooms : null;
+            var model = DungeonMapOps.Build(
+                BuildMapInputs(rooms),
+                _currentRoom != null ? _currentRoom.RoomIndex : -1);
+
+            _mapView?.SetModel(model);
+            SetText(_mapStatus, DungeonMapOps.StatusLine(model));
+            SetText(_mapHint, DungeonMapOps.TravelHint(model));
+
+            var entry = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentLevelEntry : null;
+            SetText(_mapTitle, entry != null && !string.IsNullOrEmpty(entry.LevelName)
+                ? entry.LevelName
+                : "Map");
+        }
+
+        /// <summary>
+        /// The map's keyboard. Arrows move a cursor over the rooms travel can reach - the same
+        /// <c>DirectionalNav</c> maths the doors and the sphere grid use - and Enter travels to it.
+        /// Escape, Backspace and M all leave, so the key that opened it also closes it.
+        /// </summary>
+        private void HandleMapKey(KeyDownEvent evt)
+        {
+            switch (evt.keyCode)
+            {
+                case KeyCode.Escape:
+                case KeyCode.Backspace:
+                case KeyCode.M:
+                    CloseMap();
+                    return;
+
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Space:
+                    // With no room picked yet, Enter is the way out rather than a no-op: the map is
+                    // read far more often than it is travelled with.
+                    if (_mapView != null && _mapView.SelectedRoom >= 0)
+                    {
+                        TravelTo(_mapView.SelectedRoom);
+                        return;
+                    }
+                    CloseMap();
+                    return;
+            }
+
+            var direction = ArrowDirection(evt.keyCode);
+            if (direction == Vector2.zero || _mapView == null)
+            {
+                return;
+            }
+
+            // Nothing selected yet: the first arrow is measured from the party's own room, so the
+            // cursor lands where the player is looking rather than at whichever room was authored
+            // first. Same rule as the door cursor.
+            int next = _mapView.RoomInDirection(direction);
+            if (next < 0 && _mapView.SelectedRoom < 0)
+            {
+                next = _mapView.FirstTravellableRoom();
+            }
+            if (next >= 0)
+            {
+                _mapView.SelectRoom(next);
+            }
+        }
+
+        /// <summary>Screen-space direction for an arrow key. UI space is y-down.</summary>
+        private static Vector2 ArrowDirection(KeyCode key)
+        {
+            switch (key)
+            {
+                case KeyCode.UpArrow:
+                    return new Vector2(0f, -1f);
+                case KeyCode.DownArrow:
+                    return new Vector2(0f, 1f);
+                case KeyCode.LeftArrow:
+                    return new Vector2(-1f, 0f);
+                case KeyCode.RightArrow:
+                    return new Vector2(1f, 0f);
+                default:
+                    return Vector2.zero;
+            }
+        }
+
+        /// <summary>
+        /// Fast travel: puts the party in an already-explored room without walking the rooms in
+        /// between. What it saves is the trudge back through rooms already dealt with; what it must
+        /// never do is buy something a walk could not, which is why
+        /// <see cref="DungeonMapOps.TravellableRooms"/> refuses to leave a room live enemies hold
+        /// (that would be a free Flee) and refuses to route *through* one (walking cannot - the room
+        /// seals as the party enters it).
+        ///
+        /// <para>The arrival runs the ordinary <see cref="OnDoorSelected"/> steps, through the
+        /// <b>last door on the route</b>, so the party ends up in exactly the state a walk would have
+        /// left: placed just inside the door, that door recorded as the entry door, and
+        /// <c>Party.PreviousRoom</c> pointing at the room behind it - which is what Flee reads. The
+        /// two-step placement is what buys that last part: <c>PlaceInRoom</c> moves the party to the
+        /// second-to-last room first, so <c>PlaceAtDoor</c> then records *that* as where they came
+        /// from rather than the far side of the floor.</para>
+        /// </summary>
+        private void TravelTo(int roomIndex)
+        {
+            var rooms = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentRooms : null;
+            if (rooms == null || _currentRoom == null || roomIndex == _currentRoom.RoomIndex)
+            {
+                return;
+            }
+
+            var route = DungeonMapOps.RouteTo(BuildMapInputs(rooms), _currentRoom.RoomIndex, roomIndex);
+            if (route.Count < 2)
+            {
+                return;
+            }
+
+            Room Lookup(int index)
+            {
+                foreach (var room in rooms)
+                {
+                    if (room != null && room.RoomIndex == index)
+                    {
+                        return room;
+                    }
+                }
+                return null;
+            }
+
+            var penultimate = Lookup(route[route.Count - 2]);
+            var destination = Lookup(route[route.Count - 1]);
+            if (penultimate == null || destination == null)
+            {
+                return;
+            }
+
+            Door lastDoor = null;
+            foreach (var door in penultimate.Doors)
+            {
+                if (door != null && door.GetOtherRoom(penultimate) == destination)
+                {
+                    lastDoor = door;
+                    break;
+                }
+            }
+            if (lastDoor == null)
+            {
+                return;
+            }
+
+            // Travel is not a way back into the pause overlay.
+            _mapFromPause = false;
+            CloseMap();
+
+            UnsubscribeDoors();
+
+            var party = GameManager.Instance.Party;
+            var leaving = _currentRoom;
+            leaving.EnableAllDoors();
+
+            party.PlaceInRoom(penultimate);
+            party.PlaceAtDoor(lastDoor, penultimate);
+
+            // The camera follows the party by lerp, which across a floor would read as a long sweep
+            // rather than as arriving. Snap it so the map closes onto the destination.
+            if (MainCamera.HasInstance)
+            {
+                MainCamera.Instance.SetPosition(party.transform.position);
+            }
+
+            GameManager.Instance.EnterRoom(destination, lastDoor);
+        }
+
+        /// <summary>
+        /// Reads the live rooms into the plain inputs <see cref="DungeonMapOps"/> works on. The
+        /// adjacency comes off the doors rather than the generator's <c>RoomNode.connections</c>,
+        /// because a door is what the player can actually walk through - a connection with no door
+        /// placed is not a route, and drawing it would put a corridor on the map that does not exist.
+        /// </summary>
+        private static List<MapRoomInput> BuildMapInputs(IReadOnlyList<Room> rooms)
+        {
+            var inputs = new List<MapRoomInput>();
+            if (rooms == null)
+            {
+                return inputs;
+            }
+
+            foreach (var room in rooms)
+            {
+                if (room == null || room.RoomSO == null)
+                {
+                    continue;
+                }
+
+                var neighbours = new List<int>();
+                foreach (var door in room.Doors)
+                {
+                    if (door == null)
+                    {
+                        continue;
+                    }
+
+                    var other = door.GetOtherRoom(room);
+                    if (other != null && other != room)
+                    {
+                        neighbours.Add(other.RoomIndex);
+                    }
+                }
+
+                bool pending = room.HasPendingPayload;
+                inputs.Add(new MapRoomInput
+                {
+                    Index = room.RoomIndex,
+                    Bounds = new RectInt(
+                        room.GridPosition.x, room.GridPosition.y, room.RoomSO.Width, room.RoomSO.Height),
+                    IsExplored = room.IsExplored,
+                    IsExit = room.IsExit,
+                    HasEnemies = room.Enemies.Any(e => e != null && e.IsAlive),
+                    HasCaptive = room.CaptiveHero != null,
+                    HasPendingEvent = room.HasPendingEvent,
+                    HasPendingCache = pending && room.Kind == RoomKind.Treasure,
+                    HasPendingRefuge = pending && room.Kind == RoomKind.Rest,
+                    Neighbours = neighbours,
+                });
+            }
+
+            return inputs;
         }
 
         /// <summary>
@@ -1606,8 +1944,8 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private bool OwnsNavigationKeys()
         {
-            return IsShown(_pauseWindow) || IsShown(_heroBar) || IsShown(_combatBar)
-                || IsDialogUp() || DoorNavActive();
+            return IsShown(_pauseWindow) || IsShown(_mapWindow) || IsShown(_heroBar)
+                || IsShown(_combatBar) || IsDialogUp() || DoorNavActive();
         }
 
         /// <summary>
@@ -1620,7 +1958,8 @@ namespace Assets.Scripts.Rooms
         {
             return _doorsLive
                 && !IsShown(_combatBar) && !IsShown(_heroBar) && !IsShown(_pauseWindow)
-                && !IsShown(_detailWindow) && !IsShown(_eventWindow) && !IsShown(_victoryWindow);
+                && !IsShown(_mapWindow) && !IsShown(_detailWindow) && !IsShown(_eventWindow)
+                && !IsShown(_victoryWindow);
         }
 
         /// <summary>
