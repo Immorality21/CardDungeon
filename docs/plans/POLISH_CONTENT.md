@@ -314,6 +314,22 @@ in `DamageCalculator`/`CombatManager` that does not exist.
 **18b. Consumables.** `CureStatus` shipped with §9; `RestoreToFull` and `Revive` are still missing and
 pair with §3's death safety-net sink.
 
+> **Healing was repaired 2026-09-17** — see `docs/BALANCING.md` §5v. The potion was not weak, it was
+> **never correct to use**: 5 HP flat against an average ordinary hit of 8.9, spent as a *whole
+> combat action*, so drinking one lost the party health on net. `ItemSO` gained `ConsumablePercent`
+> so a heal scales with the bar it is poured into, the belt potion is now 2 + 30% (10 HP on the
+> measured 26 HP bar) and a **Greater Healing Potion** (3 + 45%) was authored above it. The analyzer
+> gained the missing **floor** check — it guarded only `MaxSingleHealFraction`, so it read a useless
+> potion as healthy restraint.
+>
+> **Two follow-ups this leaves.** A full-restore **Elixir** conflicts with `MaxSingleHealFraction` by
+> design (its texture is scarcity, which the rule does not model), so the better third rung is
+> probably **party-wide healing** — modest per hero, clearly worth a turn at four bodies, never near
+> the single-hero ceiling. That needs a new `ConsumableEffectType` plus targeting. And the
+> availability half below is now the *binding* constraint on how often potions get used: the basic
+> one is free and auto-topped every dungeon, but the Greater tier is loot-only until the Merchant
+> can sell consumables.
+
 **The bigger gap is that consumables cannot be bought at all.** `MerchantUI.GenerateStock` filters
 `i.Category == ItemCategory.Equipment`, so every consumable in the game reaches the player only
 through a loot roll or a room event. That makes the potion belt and the new Antidote Salve pure luck

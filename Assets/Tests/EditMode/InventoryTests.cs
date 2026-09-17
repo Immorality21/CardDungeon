@@ -325,5 +325,65 @@ namespace Tests.EditMode
             Assert.AreEqual(10f, pct[StatType.Strength]);
             Assert.AreEqual(0f, raw[StatType.Endurance]);
         }
+
+        // --- what a healing consumable actually restores --------------------------
+
+        private ItemSO MakePotion(int flat, float percent)
+        {
+            var so = MakeConsumable("potion");
+            so.ConsumableAmount = flat;
+            so.ConsumablePercent = percent;
+            return so;
+        }
+
+        [Test]
+        public void HealAmountFor_AddsTheFlatPartToTheScalingPart()
+        {
+            var potion = MakePotion(2, 0.30f);
+
+            // The measured opening bar is 26 HP against an average ordinary hit of 8.9, so this is
+            // the case that decides whether drinking one is worth the turn it costs.
+            Assert.AreEqual(10, potion.HealAmountFor(26));
+            Assert.AreEqual(2, potion.HealAmountFor(0), "With no bar to scale against, only the flat part is left.");
+        }
+
+        [Test]
+        public void HealAmountFor_GrowsWithTheBarItIsPouredInto()
+        {
+            // The whole point of the percentage: a flat potion is a fifth of an opening hero and a
+            // rounding error by the endgame, which is how the original 5 HP went stale.
+            var potion = MakePotion(2, 0.30f);
+
+            Assert.Greater(potion.HealAmountFor(60), potion.HealAmountFor(26));
+            Assert.AreEqual(20, potion.HealAmountFor(60));
+        }
+
+        [Test]
+        public void HealAmountFor_RoundsUp_SoASmallPercentIsNeverNothing()
+        {
+            var potion = MakePotion(0, 0.05f);
+
+            Assert.AreEqual(1, potion.HealAmountFor(10), "0.5 HP rounds up rather than vanishing.");
+        }
+
+        [Test]
+        public void HealAmountFor_AnItemThatDoesNotHeal_RestoresNothing()
+        {
+            var cure = MakeConsumable("antidote");
+            cure.ConsumableEffect = ConsumableEffectType.CureStatus;
+            cure.ConsumableAmount = 5;
+            cure.ConsumablePercent = 0.5f;
+
+            Assert.AreEqual(0, cure.HealAmountFor(26),
+                "A cure is not a heal, however its healing fields happen to be authored.");
+        }
+
+        [Test]
+        public void HealAmountFor_NeverGoesNegativeOnNonsenseAuthoring()
+        {
+            var potion = MakePotion(-5, 0f);
+
+            Assert.AreEqual(0, potion.HealAmountFor(26));
+        }
     }
 }

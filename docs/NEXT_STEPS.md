@@ -72,7 +72,12 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
 - **A range, not a checklist.** Each tier asks for more *total* investment than the last, and the
   player chooses how to pay — a party slot, grid XP, gear, or a blend. Roughly **1 hero ≈ 250 XP**
   in pre-§5s units (§0g).
-- **The potion belt is not a lever.** 5 HP flat, 7–12% of the sustain pool. Retracted (§5h).
+- **The potion belt is not a lever.** Belt *size* is not an attrition dial — retracted (§5h).
+  **This was never a rule about potion *potency*, and 2026-09-17 acted on its own evidence:** "5 HP
+  flat, less than one enemy swing" was the finding, and a potion spent as a whole combat action that
+  restores less than one swing is a net loss of health. Potions now scale with the bar
+  (`ConsumablePercent`) and the analyzer checks the floor as well as the ceiling. See
+  `BALANCING.md` §5v. Belt size is still not the lever.
 - **How the grid is spent matters more than how much of it is owned** (`BALANCING.md` §0 + §5t).
   Committing to one branch is meant to pay off by reaching a **capability** — an Ability or a
   **Summon** (§4b), neither of which exists yet — *earlier* than a breadth build could. Breadth pays
@@ -211,7 +216,7 @@ backlog.**
 | **16** | A compendium — explain the systems | not started |
 | **20** | **A tutorial — guide the player through the first hour** | not started; the opening beat is already built and priced for it |
 | **17** | Content volume is the biggest single gap | not started |
-| **18** | Item and consumable depth | not started |
+| **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open |
 | **19** | Shipping surface | not started |
 
 ---
@@ -221,6 +226,30 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Healing potions stop being a net loss** (2026-09-17) — `docs/BALANCING.md` §5v,
+  `POLISH_CONTENT.md` §18b. Reported as "stale"; measurement said something sharper. A potion is
+  spent as a **whole combat action**, so it competes against the *turn*, not against the health bar:
+  5 HP flat against a measured average ordinary hit of **8.9** (139 hero×enemy samples, 26 HP bar)
+  meant the party took a swing to gain less than a swing. **Not a weak item — a never-correct one.**
+  It survived every prior pass because `EvaluateHealing` guarded only the *ceiling*
+  (`MaxSingleHealFraction`), which reads 5-on-26 as healthy restraint: **a one-sided band reports
+  the wrong half as fine.** Fixed in three parts. `ItemSO` gained **`ConsumablePercent`** beside the
+  flat amount, with one shared `HealAmountFor` that combat, the balance model and the tooltip all
+  read — a healing number derived twice is one that disagrees with itself — and the percentage is
+  what stops a potion going stale as heroes buy health on the grid. The belt potion is **2 + 30%**
+  (10 HP, 1.1 swings) and a **Greater Healing Potion** (3 + 45%, 15 HP) sits above it; both stay
+  inside `MaxSingleHealFraction`, so a dead item was not traded for a new finding. And the analyzer
+  gained the missing **floor** check, verified by feeding it a throwaway copy of the old potion and
+  watching it fire. **Authoring the second tier immediately found a bug**: `FindHealingPotion` took
+  the first healing consumable in catalog order, so the model sized the *free belt* off the rare
+  tier — it now picks the weakest, because the belt is the free top-up and better tiers are things
+  the player went and got. `SustainPool` 36 → 46 solo, tier-2 party pool **99 → 121 (+22%)**; the
+  three standing-red floors still fail but the gap closed (advice moved from "cut to 1.8/1.3/1.7
+  combat rooms" to "2.3/1.6/2.1"), so **re-measure attrition before trusting an older number**.
+  5 new pure tests. Left open and stated: a full-restore Elixir conflicts with
+  `MaxSingleHealFraction` by design, and **consumables still cannot be bought at all**
+  (`MerchantUI.GenerateStock` filters to Equipment), which is now the binding constraint on how
+  often the better tiers get used.
 - **The party stops being bought, and the campfire starts selling the XP split** (2026-09-17) —
   `docs/plans/HUB.md` §7 phase 6 and `SPECIALIZATION.md` §5. The plan was to make the campfire's
   level *be* the bought party slot. **The purchase turned out to be the thing to delete**, not

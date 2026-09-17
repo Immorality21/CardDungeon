@@ -574,7 +574,10 @@ namespace Assets.Scripts.Rooms
                 case ConsumableEffectType.RestoreHealth:
                     int max = target.GetEffectiveStat(StatType.MaxHealth);
                     int before = target.Stats.Health;
-                    target.Stats.Health = Mathf.Min(target.Stats.Health + item.ConsumableAmount, max);
+                    // Scales off the TARGET's bar, not the user's - a potion is worth what it is
+                    // worth to whoever drinks it. ItemSO owns the arithmetic so the balance model
+                    // and this agree by construction.
+                    target.Stats.Health = Mathf.Min(target.Stats.Health + item.HealAmountFor(max), max);
                     int healed = target.Stats.Health - before;
                     CombatAudio.Play(CombatSound.ItemUse);
                     CombatAudio.Play(CombatSound.Heal);

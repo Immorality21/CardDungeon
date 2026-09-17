@@ -2347,3 +2347,77 @@ The Drowned March in is unchanged and nothing downstream needs re-measuring.
   by one whole hero.**
 - The same question applies to `The Drowned March` and `The Warrens`, which a player may also reach
   before buying a slot. Neither was re-measured here.
+
+## §5v — A potion competes against the turn it costs, not against the health bar (2026-09-17)
+
+The player said healing potions felt stale. They were not mis-tuned — **they were never correct to
+use**, and the reason is a yardstick nobody had written down.
+
+**Measured, on the real assets, with the solo start:**
+
+| | |
+|---|---|
+| Hero bar | **26 HP** |
+| Ordinary (non-boss) hit | **avg 8.9**, range 3.2–17.2 (139 hero×enemy samples) |
+| `HealingPotion.ConsumableAmount` | **5 HP, flat** |
+
+Drinking a potion is a **whole combat action**. So the party eats a full extra round of enemy output
+to take it: 5 HP gained against 8.9 expected, before counting the damage that turn did not deal.
+**A potion was a net loss of health.** That is not a weak item, it is a dead one, and no belt size,
+drop rate or shop price could have fixed it.
+
+### Why it survived every previous pass
+
+`EvaluateHealing` guarded only the **ceiling** — `MaxSingleHealFraction` (0.6), "healing with no
+texture means no resource decisions". Against a 26 HP bar, 5 HP is 19%: the analyzer read a useless
+potion as *healthy restraint*. **A one-sided band reports the wrong half as fine.** The floor is now
+checked too (`EvaluatePotionAgainstTheTurnItCosts`), against the measured average ordinary hit.
+
+§5h's *"the potion belt is not a sustain lever"* is still true and is **not** what this contradicts:
+that retraction was about **belt size** as an attrition dial, and its own evidence was that 5 HP is
+less than one swing. This is that evidence finally being acted on.
+
+### The squeeze, which is the part worth remembering
+
+On a 26 HP bar the usable window for a single-target heal is **narrow by construction**:
+
+- **floor** — must beat one average hit to be worth a turn: **≥ 8.9**
+- **ceiling** — must stay under `MaxSingleHealFraction`: **≤ 15.6**
+
+That window exists only because the bar is 26. `BalanceRules` wants a hero to survive
+`TargetHitsToKillHero` = **6** ordinary hits; at 8.9 a hit, 26 HP is **2.9**. The game is running at
+its own `MinHitsToKillHero` floor, so **potion potency and hero HP are one decision, not two** — a
+shallower bar shrinks the window from both ends at once, and at a 3-hit bar there is barely a window
+at all. This is §5h's lever 3 ("hero HP would let levers 1-2 breathe") arriving from a new direction.
+
+### What was changed, and what it did
+
+`ItemSO` gained **`ConsumablePercent`** beside `ConsumableAmount`, and one shared accessor
+(`HealAmountFor`) that combat, the balance model and the tooltip all read — a healing number derived
+twice is a healing number that disagrees with itself. The percentage is the half that stops a potion
+going stale: a flat 5 was a fifth of an opening hero and a rounding error by the endgame.
+
+| | flat | percent | on a 26 bar | vs 8.9 hit |
+|---|---|---|---|---|
+| Healing Potion (belt, free) | 2 | 30% | **10** | 1.1 swings |
+| Greater Healing Potion (loot/shop) | 3 | 45% | **15** | 1.7 swings |
+
+Both sit inside `MaxSingleHealFraction` (38% and 58%), so neither trades a dead item for a new
+finding. **`SustainPool` moved 36 → 46 solo, and the tier-2 party pool 99 → 121 (+22%).** The three
+standing-red floors still fail, but the gap closed — the analyzer's advice went from "cut to
+1.8/1.3/1.7 combat rooms" to "2.3/1.6/2.1". **Re-measure attrition before acting on any number
+written before this date.**
+
+**One bug this authoring found immediately.** `BalanceAssetCollector.FindHealingPotion` took the
+*first* healing consumable in catalog order. The moment a second tier existed, the model sized the
+**free belt** off the rare potion and reported a sustain pool the player does not have. It now picks
+the **weakest** (lowest `ItemLevel`, then rarity, then heal), because the belt is the free top-up and
+the better tiers are things the player had to go and get.
+
+### The third tier, and why it was not authored
+
+A full-restore Elixir is the obvious next rung and it **conflicts with `MaxSingleHealFraction` by
+design** — its texture is *scarcity*, which the rule does not model. Rather than ship a permanent
+report warning, the better third item is probably **party-wide** healing: modest per hero, clearly
+worth a turn at four bodies, and it never touches the single-hero ceiling. That needs a new
+`ConsumableEffectType` and targeting work — `POLISH_CONTENT.md` §18.

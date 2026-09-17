@@ -1041,33 +1041,126 @@ namespace Assets.Scripts.Balance
             }
         }
 
+        /// <summary>
+        /// The floor nobody was checking: <b>a potion competes against the turn it costs, not
+        /// against the health bar.</b>
+        ///
+        /// <para>Drinking one is a whole combat action, so the party eats an extra round of enemy
+        /// output to take it. A potion restoring less than one average hit is therefore a net loss
+        /// of health before counting the damage it did not deal - not merely weak but never
+        /// correct, and no amount of belt space makes it worth carrying.</para>
+        ///
+        /// <para>This is what let <c>HealingPotion</c> sit at a flat 5 HP against hits of 6.8-14.7
+        /// for the whole project: the check above guards only the <i>ceiling</i>
+        /// (<c>MaxSingleHealFraction</c>), which reads a uselessly small potion as healthy
+        /// restraint. See <c>docs/BALANCING.md</c>.</para>
+        /// </summary>
+        private static void EvaluatePotionAgainstTheTurnItCosts(
+            BalanceReport report, ItemSO potion, PartyBaseline party)
+        {
+            if (party == null || party.Heroes == null || party.Heroes.Count == 0)
+            {
+                return;
+            }
+
+            float averageHit = AverageOrdinaryHit(report);
+            if (averageHit <= 0f)
+            {
+                return;
+            }
+
+            // Measured on the average bar: the potion has one authored value and the party has
+            // several bars, so the average is the honest single number to judge it against.
+            int totalBar = 0;
+            foreach (var hero in party.Heroes)
+            {
+                totalBar += hero.Effective[StatType.MaxHealth];
+            }
+            int averageBar = totalBar / party.Heroes.Count;
+
+            int healed = potion.HealAmountFor(averageBar);
+            if (healed <= 0 || healed >= averageHit)
+            {
+                return;
+            }
+
+            report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Party,
+                potion.DisplayName,
+                $"{potion.DisplayName} restores less than one enemy hit, so drinking it loses health")
+            {
+                Asset = potion,
+                Detail = $"{healed} HP restored against an average hit of {averageHit:F1}, on a "
+                       + $"{averageBar} HP bar. Using it costs a full turn, so the party takes a "
+                       + "swing to gain less than a swing.",
+                Suggestion = "Raise ConsumablePercent so the heal scales with the bar, or raise hero "
+                           + "max HP toward TargetHitsToKillHero so a partial heal is worth a turn."
+            });
+        }
+
+        /// <summary>
+        /// What one ordinary (non-boss) enemy hit costs a hero, averaged over every enemy and every
+        /// hero the campaign fields. The yardstick a healing item has to beat to be worth a turn.
+        /// </summary>
+        private static float AverageOrdinaryHit(BalanceReport report)
+        {
+            float total = 0f;
+            int counted = 0;
+            foreach (var metrics in report.Enemies)
+            {
+                if (metrics.IsBoss)
+                {
+                    continue;
+                }
+                foreach (var record in metrics.PerHero)
+                {
+                    if (record.DamagePerHit > 0f)
+                    {
+                        total += record.DamagePerHit;
+                        counted++;
+                    }
+                }
+            }
+            return counted == 0 ? 0f : total / counted;
+        }
+
         private static void EvaluateHealing(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
         {
             var party = report.Party;
 
             // Potions and heal spells that top a hero straight off have no decision in them.
-            if (input.HealingPotion != null && input.HealingPotion.ConsumableAmount > 0)
+            var potion = input.HealingPotion;
+            if (potion != null)
             {
                 foreach (var hero in party.Heroes)
                 {
-                    if (hero.Effective[StatType.MaxHealth] <= 0)
+                    int bar = hero.Effective[StatType.MaxHealth];
+                    if (bar <= 0)
                     {
                         continue;
                     }
 
-                    float fraction = (float)input.HealingPotion.ConsumableAmount / hero.Effective[StatType.MaxHealth];
+                    int healed = potion.HealAmountFor(bar);
+                    if (healed <= 0)
+                    {
+                        continue;
+                    }
+
+                    float fraction = (float)healed / bar;
                     if (fraction >= rules.MaxSingleHealFraction)
                     {
                         var severity = fraction >= 1f ? BalanceSeverity.Warning : BalanceSeverity.Info;
                         report.Issues.Add(new BalanceIssue(severity, BalanceCategory.Party, hero.Name,
                             $"One potion restores {fraction:P0} of {hero.Name}'s health")
                         {
-                            Asset = input.HealingPotion,
-                            Detail = $"{input.HealingPotion.ConsumableAmount} HP against a {hero.Effective[StatType.MaxHealth]} HP bar.",
-                            Suggestion = "Either raise hero max HP or lower ConsumableAmount so healing is a partial recovery."
+                            Asset = potion,
+                            Detail = $"{healed} HP against a {bar} HP bar.",
+                            Suggestion = "Either raise hero max HP or lower the potion's amount/percent "
+                                       + "so healing is a partial recovery."
                         });
                     }
                 }
+
+                EvaluatePotionAgainstTheTurnItCosts(report, potion, party);
             }
 
             foreach (var magic in input.Magic)

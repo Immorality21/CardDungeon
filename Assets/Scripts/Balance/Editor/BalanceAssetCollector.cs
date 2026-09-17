@@ -112,21 +112,54 @@ namespace Assets.Scripts.Balance.Editor
         /// <summary>
         /// The consumable the dungeon tops the belt up with. DungeonManager holds the reference in the
         /// scene, so it is identified here by category and effect instead of by scene wiring.
+        ///
+        /// <para><b>The weakest one, deliberately.</b> The belt is the <i>free</i> top-up every run
+        /// starts with, so it is the basic potion - the better tiers are loot and shop stock the
+        /// player had to go and get. This used to take the first match in catalog order, which
+        /// silently became "whichever healing item happens to be listed first": the moment a Greater
+        /// Healing Potion was authored, the model sized the free belt off the rare tier and reported
+        /// a sustain pool the player does not have. Lowest <c>ItemLevel</c>, then lowest rarity, then
+        /// the smallest heal on a nominal bar, so the answer is stable however the catalog is
+        /// ordered.</para>
         /// </summary>
         private static ItemSO FindHealingPotion(List<ItemSO> items)
         {
+            const int NominalBar = 26;
+
+            ItemSO best = null;
             foreach (var item in items)
             {
                 if (item == null || item.Category != ItemCategory.Consumable)
                 {
                     continue;
                 }
-                if (item.ConsumableEffect == ConsumableEffectType.RestoreHealth && item.ConsumableAmount > 0)
+                // Percent-only potions are legal and are the point of the scaling half, so this
+                // must not go on testing ConsumableAmount alone or it would skip them entirely.
+                if (item.ConsumableEffect != ConsumableEffectType.RestoreHealth
+                    || (item.ConsumableAmount <= 0 && item.ConsumablePercent <= 0f))
                 {
-                    return item;
+                    continue;
+                }
+
+                if (best == null || IsWeaker(item, best, NominalBar))
+                {
+                    best = item;
                 }
             }
-            return null;
+            return best;
+        }
+
+        private static bool IsWeaker(ItemSO candidate, ItemSO incumbent, int nominalBar)
+        {
+            if (candidate.ItemLevel != incumbent.ItemLevel)
+            {
+                return candidate.ItemLevel < incumbent.ItemLevel;
+            }
+            if (candidate.Rarity != incumbent.Rarity)
+            {
+                return candidate.Rarity < incumbent.Rarity;
+            }
+            return candidate.HealAmountFor(nominalBar) < incumbent.HealAmountFor(nominalBar);
         }
 
         /// <summary>Loads the rules asset, or an unsaved default so the window works before one exists.</summary>

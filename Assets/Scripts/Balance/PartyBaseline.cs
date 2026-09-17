@@ -221,7 +221,6 @@ namespace Assets.Scripts.Balance
             if (potionItem != null)
             {
                 baseline.PotionItem = potionItem;
-                baseline.PotionHealAmount = potionItem.ConsumableAmount;
             }
             if (potionCount >= 0)
             {
@@ -296,7 +295,29 @@ namespace Assets.Scripts.Balance
                 baseline.Heroes.Add(hero);
             }
 
+            // Resolved AFTER the heroes, because a potion's heal now scales with the bar it is
+            // poured into (ItemSO.HealAmountFor) and there is no bar to scale against until the
+            // party exists. Averaged over the party for the same reason the analyzer does: one
+            // authored potion, several bars.
+            baseline.PotionHealAmount = ResolvePotionHeal(potionItem, baseline.Heroes);
             return baseline;
+        }
+
+        /// <summary>What one potion restores to this party on average, or 0 when there is no
+        /// healing consumable at all.</summary>
+        private static int ResolvePotionHeal(ItemSO potionItem, List<HeroBaseline> heroes)
+        {
+            if (potionItem == null || heroes == null || heroes.Count == 0)
+            {
+                return 0;
+            }
+
+            int totalBar = 0;
+            foreach (var hero in heroes)
+            {
+                totalBar += hero.Effective[StatType.MaxHealth];
+            }
+            return potionItem.HealAmountFor(totalBar / heroes.Count);
         }
 
         /// <summary>
