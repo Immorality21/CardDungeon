@@ -92,10 +92,21 @@ namespace Assets.Scripts.Hub
                  "long they ground. Empty means placing it is free.")]
         public List<MaterialCost> PlacementCost = new List<MaterialCost>();
 
-        [Tooltip("Gold for each upgrade past level 1. Gold gates WHEN: it keeps its tuition role " +
-                 "and gives the hub a sink that scales forever. 0 with MaxLevel > 1 means the " +
-                 "upgrade is free, which is almost certainly an authoring slip.")]
+        [Tooltip("Gold for the FIRST upgrade (level 1 to 2). Later rungs cost a multiple of it - " +
+                 "see BuildingOps.UpgradeCostForLevel - so a tall lot is a sink that scales, which " +
+                 "is the whole point of gold gating WHEN. Gold keeps its tuition role. 0 with " +
+                 "MaxLevel > 1 means the upgrade is free, which is almost certainly an authoring " +
+                 "slip.")]
         public int GoldPerUpgrade;
+
+        [TextArea(1, 3)]
+        [Tooltip("What each level GRANTS, in the player's words: element 0 describes level 1, " +
+                 "element 1 level 2, and so on. This is the one thing a hub upgrade must always " +
+                 "say - a level on sale that does not name what it buys is the failure phase 6 " +
+                 "exists to avoid - so HubContentTests fails on an upgradable lot that leaves a " +
+                 "rung undescribed. Authored per lot because the VIEW must not know what a forge " +
+                 "level means.")]
+        public string[] LevelGrants = new string[0];
 
         [Tooltip("Run keys that must ALL be cleared before the lot is even offered - the pacing " +
                  "dial. Empty means it is offered from the first visit. A lot nobody can reach is " +

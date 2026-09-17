@@ -26,12 +26,16 @@ MonoBehaviour:
   LevelSprites:
   - {fileID: 21300000, guid: a82555602d954851b835fd3929d1877c, type: 3}
   PlacedByDefault: 0
-  MaxLevel: 1
+  MaxLevel: 3
   PlacementCost:
   - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
     Amount: 3
   - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
     Amount: 2
-  GoldPerUpgrade: 0
+  GoldPerUpgrade: 250
+  LevelGrants:
+  - Forge abilities and combos up to Lv 1.
+  - Forge abilities and combos up to Lv 3.
+  - Forge abilities and combos up to Lv 5, as far as the craft goes.
   RequiredRunKeys:
   - TutorialRun

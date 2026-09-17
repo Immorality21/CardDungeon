@@ -309,5 +309,91 @@ namespace Tests.EditMode
 
             Assert.AreEqual(new List<string> { "merchant" }, BuildingOps.GetFreeUpgrades(Town(free, priced)));
         }
+
+        // --- upgrade pricing ------------------------------------------------------
+
+        [Test]
+        public void UpgradeCostForLevel_EscalatesPerRung()
+        {
+            Assert.AreEqual(250, BuildingOps.UpgradeCostForLevel(250, 1), "The authored price buys the first rung.");
+            Assert.AreEqual(500, BuildingOps.UpgradeCostForLevel(250, 2), "The second costs twice as much.");
+            Assert.AreEqual(750, BuildingOps.UpgradeCostForLevel(250, 3));
+        }
+
+        [Test]
+        public void UpgradeCostForLevel_FreeOrUnbuilt_CostsNothing()
+        {
+            Assert.AreEqual(0, BuildingOps.UpgradeCostForLevel(0, 2), "No authored price, no cost.");
+            Assert.AreEqual(0, BuildingOps.UpgradeCostForLevel(250, 0), "An unbuilt lot is placed, not upgraded.");
+        }
+
+        [Test]
+        public void UpgradeCost_ChargesForTheRungBeingBought()
+        {
+            var forge = Lot("forge", maxLevel: 3);
+            forge.GoldPerUpgrade = 250;
+
+            Assert.AreEqual(250, BuildingOps.UpgradeCost(forge, Built("forge", 1)));
+            Assert.AreEqual(500, BuildingOps.UpgradeCost(forge, Built("forge", 2)));
+        }
+
+        [Test]
+        public void UpgradeCost_IsZeroWhenThereIsNothingToRaise()
+        {
+            var forge = Lot("forge", maxLevel: 2);
+            forge.GoldPerUpgrade = 250;
+
+            Assert.AreEqual(0, BuildingOps.UpgradeCost(forge, HubProgress.Fresh), "Unbuilt: this is a placement.");
+            Assert.AreEqual(0, BuildingOps.UpgradeCost(forge, Built("forge", 2)), "Already at the ceiling.");
+        }
+
+        // --- what a level grants --------------------------------------------------
+
+        [Test]
+        public void GrantFor_ReadsTheAuthoredLine_AndIsEmptyOffTheEnd()
+        {
+            var forge = Lot("forge", maxLevel: 3);
+            forge.LevelGrants = new[] { "one", "three", "five" };
+
+            Assert.AreEqual("one", BuildingOps.GrantFor(forge, 1));
+            Assert.AreEqual("five", BuildingOps.GrantFor(forge, 3));
+            Assert.AreEqual("", BuildingOps.GrantFor(forge, 0), "There is no level zero to sell.");
+            Assert.AreEqual("", BuildingOps.GrantFor(forge, 4));
+        }
+
+        [Test]
+        public void GrantForNext_DescribesThePlacementThenEachUpgrade()
+        {
+            var forge = Lot("forge", maxLevel: 3);
+            forge.LevelGrants = new[] { "one", "three", "five" };
+
+            Assert.AreEqual("one", BuildingOps.GrantForNext(forge, Cleared()), "Unbuilt: placing it grants level 1.");
+            Assert.AreEqual("three", BuildingOps.GrantForNext(forge, Built("forge", 1)));
+            Assert.AreEqual("", BuildingOps.GrantForNext(forge, Built("forge", 3)), "Nothing left to buy.");
+        }
+
+        [Test]
+        public void GetLevelsWithNoGrant_FindsARungThatNeverSaysWhatItBuys()
+        {
+            var silent = Lot("merchant", maxLevel: 2);
+            silent.GoldPerUpgrade = 100;
+            silent.LevelGrants = new[] { "stock of four", "   " };
+
+            var told = Lot("forge", maxLevel: 2);
+            told.GoldPerUpgrade = 100;
+            told.LevelGrants = new[] { "upgrades to Lv 1", "upgrades to Lv 3" };
+
+            Assert.AreEqual(new List<string> { "merchant level 2" },
+                BuildingOps.GetLevelsWithNoGrant(Town(silent, told)));
+        }
+
+        [Test]
+        public void GetLevelsWithNoGrant_IgnoresALotThatNeverUpgrades()
+        {
+            var flat = Lot("storehouse", maxLevel: 1);
+
+            CollectionAssert.IsEmpty(BuildingOps.GetLevelsWithNoGrant(Town(flat)),
+                "A lot with no ladder has no rung to describe - placement speaks for itself.");
+        }
     }
 }

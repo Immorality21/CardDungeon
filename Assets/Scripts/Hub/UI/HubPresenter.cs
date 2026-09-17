@@ -79,9 +79,9 @@ namespace Assets.Scripts.Hub.UI
                     int level = BuildingOps.LevelOf(building, progress);
                     if (BuildingOps.CanUpgrade(building, progress))
                     {
-                        return $"Level {level} · upgrade {building.GoldPerUpgrade}g";
+                        return $"Level {level} · upgrade {BuildingOps.UpgradeCost(building, progress)}g";
                     }
-                    return building.MaxLevel > 1 ? $"Level {level}" : "";
+                    return building.MaxLevel > 1 ? $"Level {level} (max)" : "";
                 case BuildingState.Available:
                     string price = DescribePlacementCost(building);
                     return string.IsNullOrEmpty(price) ? "Ready to build" : "Needs " + price;
@@ -125,6 +125,25 @@ namespace Assets.Scripts.Hub.UI
         }
 
         /// <summary>
+        /// The promise beside the price: what building or upgrading this lot would actually grant,
+        /// as the lot itself words it. Empty when there is nothing to buy.
+        ///
+        /// <para>A hub upgrade must always answer "what do I get" <i>before</i> the player pays -
+        /// that is the whole of <c>docs/plans/HUB.md</c> §7 phase 6, and
+        /// <c>BuildingOps.GetLevelsWithNoGrant</c> is the test that keeps it true.</para>
+        /// </summary>
+        public static string DescribeNextGrant(BuildingSO building, HubProgress progress)
+        {
+            string grant = BuildingOps.GrantForNext(building, progress);
+            if (string.IsNullOrWhiteSpace(grant))
+            {
+                return "";
+            }
+            int next = BuildingOps.NextLevel(building, progress);
+            return next <= 1 ? grant : $"Level {next}: {grant}";
+        }
+
+        /// <summary>
         /// What the lot's action button should say, given what the player can do with it right now.
         /// Empty means there is no action to offer.
         /// </summary>
@@ -137,7 +156,7 @@ namespace Assets.Scripts.Hub.UI
             }
             if (BuildingOps.CanUpgrade(building, progress))
             {
-                return $"Upgrade — {building.GoldPerUpgrade} gold";
+                return $"Upgrade — {BuildingOps.UpgradeCost(building, progress)} gold";
             }
             return "";
         }

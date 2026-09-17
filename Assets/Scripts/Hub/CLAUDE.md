@@ -58,11 +58,12 @@ without a layout budget.
 - **`BuildingSO`** is pure content: `Key` (save id), `Service`, the two rectangles
   (`Position` + `HitSize`, `DrawOffset` + `DrawSize`), `DrawOrder`, per-state sprites,
   `PlacedByDefault`, and the progression fields — `PlacementCost`, `RequiredRunKeys`,
-  `MaxLevel`, `GoldPerUpgrade`.
+  `MaxLevel`, `GoldPerUpgrade` (the *first* rung's price — see `BuildingOps.UpgradeCost`) and
+  `LevelGrants` (what each level buys, in the player's words).
 - **Progress lives in the save** — `MetaProgressSaveData.Buildings`, the same split `CampaignSO`
   makes with `CompletedRunKeys`, so one authored town reads differently per save.
 - **All rules are in `BuildingOps`** (pure, static, scene-free): `StateOf`, `LevelOf`, `InDrawOrder`,
-  `LotRect`, `SpriteFor`, plus authoring validators. `HubPresenter` turns those into classes and
+  `LotRect`, `SpriteFor`, `UpgradeCost`, `GrantFor`, plus authoring validators. `HubPresenter` turns those into classes and
   text; `HubView` only draws. `BuildingOpsTests` and `HubContentTests` drive them with no scene.
 
 ### Two rectangles per lot, and why
@@ -111,13 +112,54 @@ The gates are **on**. A lot is `Absent` until every key in its `RequiredRunKeys`
 - **A locked lot names the run in its way** rather than saying "Locked" — a gate you cannot see the
   far side of is just a dead button (`HubManager.DescribeLotStatus`).
 
-#### What a level *does* is undecided — and deliberately not guessed
+#### What a level grants — the rule, and the first lot to use it
 
-The upgrade machinery is complete and tested, but **every lot ships `MaxLevel 1`**, so nothing is on
-sale that buys nothing. `HubState.LevelOf(service)` is the seam a screen reads when that changes —
-the merchant would size its stock off it, the forge its discount. Turning one on is two authored
-fields (`MaxLevel`, `GoldPerUpgrade`) plus whatever the screen does with the number.
-`HubContentTests.NoLot_OffersAFreeUpgrade` fails on a level with no price.
+**A level grants access, capacity or information — never a raw stat.** This is not taste. `HUB.md`
+§7 makes buildings a *hard* axis on the investment frontier — you cannot substitute XP for a Forge
+you have not built — so a building is a **precondition the model tests**, not a currency it prices.
+The moment a level grants power, gold reaches power by a second route and `InvestmentPointsPerGold`
+(repriced in `BALANCING.md` §5q) is measuring the wrong world. Author capacity, ceilings, choice and
+knowledge; leave stats to gear and the grid.
+
+**The Ability Forge is the first lot with a ladder** (2026-09-17). `MaxLevel 3`, `GoldPerUpgrade`
+250, and what each level buys is the **upgrade ceiling** for abilities and combos: 1 → 3 → 5.
+`MetaProgressManager.UpgradeCeilingForForgeLevel` is the pure mapping, `MagicUpgradeCeiling` the
+save-aware read, and every Can/Cost/Try path for both magic and combos consults it instead of the
+old flat constant.
+
+Three properties make it safe, and they are the template for the next lot:
+
+- **It gates buying, not what has been bought.** A level already paid for keeps its power forever —
+  `GetMagicPowerBonus` deliberately does not consult the ceiling. No hub change can reach back into
+  a spell the player is carrying.
+- **A full Forge lands exactly on `MaxMagicUpgradeLevel`**, where the flat constant used to sit, so
+  the *endgame* power ceiling is unchanged and only the ramp is gated.
+  `HubContentTests.TheForge_CanBeRaisedToTheGamesUpgradeCeiling` fails if the authored ladder and the
+  code ceiling ever drift apart — authored short and the deep ability levels become unsellable;
+  authored tall and a level of the lot buys nothing.
+- **It says so on screen before the player pays.** The Forge header carries `Forge ceiling: Lv N`,
+  a capped ability reads *"raise the Forge to go further"* rather than showing a dead button, and
+  the lot panel carries the promise beside the price.
+
+**Two pieces of shared machinery landed with it**, and every later lot inherits them:
+
+- **`BuildingOps.UpgradeCost`** — the authored `GoldPerUpgrade` buys the *first* rung, and each one
+  after costs a multiple (`UpgradeCostForLevel`: 250 / 500 / 750). Flat pricing makes a ladder stop
+  mattering the moment the player can afford one rung; the curve is the one `PartySlots.CostForNext`
+  and `MagicUpgradeCostForNextLevel` already use, so the three ladders escalate alike. Read the cost
+  through this, never off `GoldPerUpgrade` directly.
+- **`BuildingSO.LevelGrants` + `HubPresenter.DescribeNextGrant`** — one authored line per level,
+  shown in the lot panel as *"Level 2: …"*. Authored on the building because what a level means is
+  different for every service and the town renderer must not know any of it.
+  `BuildingOps.GetLevelsWithNoGrant` + `HubContentTests.EveryLevelOnSale_SaysWhatItBuys` fail on a
+  priced rung that never says what it buys — the same rule `NoLot_OffersAFreeUpgrade` enforces from
+  the other side.
+
+The other five lots are still `MaxLevel 1`. `HubState.LevelOf(service)` is the seam each one reads
+when its turn comes — the merchant would size its stock off it, the Sphere Hall gate grid depth
+(that one is `HUB.md` phase **5**, and it changes `GreedySpend`). The **Storehouse deliberately has
+no ladder**: `InventoryManager` has no capacity cap and inventing one to have something to sell
+would be a nerf dressed as content. It gets its rungs when crafting lands (phase 7).
 
 #### The opening sequence (provisional)
 

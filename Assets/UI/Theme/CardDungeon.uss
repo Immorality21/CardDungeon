@@ -1574,6 +1574,19 @@
     border-radius: 3px;
 }
 
+/* The promise beside the price in the lot panel: what the next level actually
+   grants. Wraps, because .cd-info-label does not — a UITK label defaults to
+   nowrap and a sales line long enough to be worth reading walks straight out
+   through the window's border. Gold, the same colour the lot's own note uses
+   for "here is what this costs you". */
+.hub-lot-grant {
+    white-space: normal;
+    color: var(--cd-gold);
+    font-size: 16px;
+    max-width: 100%;
+    margin: 2px 4px 10px 4px;
+}
+
 /* Built is the ordinary state. Available is a bare foundation — it has to read
    as an invitation, which is the whole reason a material is worth wanting. */
 .hub-lot--available {

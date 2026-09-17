@@ -18,9 +18,22 @@ namespace Assets.Scripts.Progression
     {
         // --- Magic upgrade tuning ---
         public const int PowerPerUpgradeLevel = 2;
+
+        /// <summary>
+        /// The highest an ability or combo can ever be upgraded, at a fully raised Forge. Nothing
+        /// past this is buyable at any hub state, so the <i>endgame</i> power ceiling is this
+        /// constant and the Forge's level decides only how soon it is reached.
+        /// </summary>
         public const int MaxMagicUpgradeLevel = 5;
+
         private const int BaseMagicUpgradeCost = 15;
         private const int MagicUpgradeCostIncrement = 15;
+
+        /// <summary>
+        /// Upgrade ceiling per Forge building level: no Forge buys nothing, and levels 1-3 open 1,
+        /// 3 and 5. Indexed by level, so element 0 is "no Forge standing".
+        /// </summary>
+        private static readonly int[] CeilingPerForgeLevel = { 0, 1, 3, 5 };
 
         // --- Award tuning ---
         public const int GoldPerLevelCleared = 25;
@@ -85,6 +98,54 @@ namespace Assets.Scripts.Progression
                 currentLevel = 0;
             }
             return BaseMagicUpgradeCost + (currentLevel * MagicUpgradeCostIncrement);
+        }
+
+        /// <summary>
+        /// How far an ability or combo can be upgraded at a Forge of this building level — the first
+        /// thing a hub building level ever <i>granted</i> (<c>docs/plans/HUB.md</c> §7 phase 6).
+        ///
+        /// <para><b>It gates buying, not what has been bought.</b> A level already paid for keeps
+        /// its power forever; raising the ceiling only puts more rungs on sale. That is what makes
+        /// the dial safe to author — no hub change can ever reach back into a spell the player is
+        /// already carrying — and it is why <see cref="GetMagicPowerBonus"/> does not consult it.</para>
+        ///
+        /// <para><b>It is access, not power.</b> A fully raised Forge lands on
+        /// <see cref="MaxMagicUpgradeLevel"/>, exactly where a flat constant used to sit, so the
+        /// power available at the end of the game is unchanged and only the <i>ramp</i> is gated.
+        /// That keeps a building a hard precondition on the investment frontier rather than a second
+        /// route from gold to power, which is the rule <c>docs/plans/HUB.md</c> sets for every
+        /// building level.</para>
+        /// </summary>
+        public static int UpgradeCeilingForForgeLevel(int forgeLevel)
+        {
+            if (forgeLevel < 0)
+            {
+                forgeLevel = 0;
+            }
+            if (forgeLevel >= CeilingPerForgeLevel.Length)
+            {
+                forgeLevel = CeilingPerForgeLevel.Length - 1;
+            }
+            return CeilingPerForgeLevel[forgeLevel];
+        }
+
+        /// <summary>
+        /// The upgrade ceiling this save is playing under, read from the Forge lot it has built.
+        ///
+        /// <para>Falls back to <see cref="MaxMagicUpgradeLevel"/> when there is no authored town at
+        /// all, matching <c>HubState.LevelOf</c>'s rule: a scene with no hub asset degrades to the
+        /// old fixed behaviour rather than to a screen that offers nothing.</para>
+        /// </summary>
+        public int MagicUpgradeCeiling
+        {
+            get
+            {
+                if (Hub.HubState.Town() == null)
+                {
+                    return MaxMagicUpgradeLevel;
+                }
+                return UpgradeCeilingForForgeLevel(Hub.HubState.LevelOf(Hub.HubService.Forge));
+            }
         }
 
         // --- Currency ---
@@ -205,11 +266,12 @@ namespace Assets.Scripts.Progression
             return MagicPowerBonusForLevel(GetMagicUpgradeLevel(magicKey));
         }
 
-        /// <summary>Essence cost of the next upgrade, or 0 if already at max level.</summary>
+        /// <summary>Essence cost of the next upgrade, or 0 when the Forge offers no rung above
+        /// the current level.</summary>
         public int GetMagicUpgradeCost(string magicKey)
         {
             int level = GetMagicUpgradeLevel(magicKey);
-            if (level >= MaxMagicUpgradeLevel)
+            if (level >= MagicUpgradeCeiling)
             {
                 return 0;
             }
@@ -224,7 +286,7 @@ namespace Assets.Scripts.Progression
             }
 
             int level = GetMagicUpgradeLevel(magicKey);
-            if (level >= MaxMagicUpgradeLevel)
+            if (level >= MagicUpgradeCeiling)
             {
                 return false;
             }
@@ -282,11 +344,12 @@ namespace Assets.Scripts.Progression
             return MagicPowerBonusForLevel(GetComboUpgradeLevel(comboKey));
         }
 
-        /// <summary>Essence cost of the next combo upgrade, or 0 if already at max level.</summary>
+        /// <summary>Essence cost of the next combo upgrade, or 0 when the Forge offers no rung
+        /// above the current level.</summary>
         public int GetComboUpgradeCost(string comboKey)
         {
             int level = GetComboUpgradeLevel(comboKey);
-            if (level >= MaxMagicUpgradeLevel)
+            if (level >= MagicUpgradeCeiling)
             {
                 return 0;
             }
@@ -301,7 +364,7 @@ namespace Assets.Scripts.Progression
             }
 
             int level = GetComboUpgradeLevel(comboKey);
-            if (level >= MaxMagicUpgradeLevel)
+            if (level >= MagicUpgradeCeiling)
             {
                 return false;
             }

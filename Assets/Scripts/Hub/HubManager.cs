@@ -74,6 +74,7 @@ namespace Assets.Scripts.Hub
         private Label _lotName;
         private Label _lotBlurb;
         private Label _lotStatus;
+        private Label _lotGrant;
         private Label _lotFeedback;
         private Label _levelIndicator;
         private Label _levelName;
@@ -167,6 +168,7 @@ namespace Assets.Scripts.Hub
             _lotName = root.Q<Label>("lot-name");
             _lotBlurb = root.Q<Label>("lot-blurb");
             _lotStatus = root.Q<Label>("lot-status");
+            _lotGrant = root.Q<Label>("lot-grant");
             _lotFeedback = root.Q<Label>("lot-feedback");
 
             _roadButton.clicked += OnTakeTheRoad;
@@ -337,6 +339,12 @@ namespace Assets.Scripts.Hub
             _lotBlurb.text = _selectedLot.Blurb ?? string.Empty;
             _lotStatus.text = DescribeLotStatus(_selectedLot, progress);
 
+            // The promise beside the price. Hidden rather than blanked, so a lot with nothing on
+            // sale does not leave a gap where a sales pitch used to be.
+            string grant = HubPresenter.DescribeNextGrant(_selectedLot, progress);
+            SetShown(_lotGrant, !string.IsNullOrEmpty(grant));
+            _lotGrant.text = grant;
+
             string action = HubPresenter.ActionLabel(_selectedLot, progress);
             SetShown(_lotActionButton, !string.IsNullOrEmpty(action));
             _lotActionButton.text = action;
@@ -393,7 +401,7 @@ namespace Assets.Scripts.Hub
             if (BuildingOps.CanUpgrade(building, progress))
             {
                 return MetaProgressManager.HasInstance
-                    && MetaProgressManager.Instance.Gold >= building.GoldPerUpgrade;
+                    && MetaProgressManager.Instance.Gold >= BuildingOps.UpgradeCost(building, progress);
             }
             return false;
         }
@@ -424,7 +432,7 @@ namespace Assets.Scripts.Hub
             {
                 SetLotFeedback(placing
                     ? "Not enough materials — needs " + HubPresenter.DescribePlacementCost(_selectedLot) + "."
-                    : $"Not enough gold — needs {_selectedLot.GoldPerUpgrade}.");
+                    : $"Not enough gold — needs {BuildingOps.UpgradeCost(_selectedLot, progress)}.");
                 return;
             }
 
@@ -437,7 +445,7 @@ namespace Assets.Scripts.Hub
                     return;
                 }
             }
-            else if (!MetaProgressManager.Instance.TrySpendGold(_selectedLot.GoldPerUpgrade))
+            else if (!MetaProgressManager.Instance.TrySpendGold(BuildingOps.UpgradeCost(_selectedLot, progress)))
             {
                 SetLotFeedback("The gold went missing between checking and paying.");
                 return;

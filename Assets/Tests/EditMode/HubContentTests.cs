@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Hub;
+using Assets.Scripts.Progression;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -238,6 +239,39 @@ namespace Tests.EditMode
                     building.SaveKey + " has no display name, so its lot renders unlabelled - and "
                     + "with placeholder art the label is the only thing identifying it.");
             }
+        }
+
+        [Test]
+        public void EveryLevelOnSale_SaysWhatItBuys()
+        {
+            // The phase-6 rule. Every lot shipped MaxLevel 1 precisely so that no level was ever on
+            // sale that bought nothing; once a ladder exists, the same failure wearing different
+            // clothes is a priced rung the player cannot find out about before paying for it.
+            CollectionAssert.IsEmpty(BuildingOps.GetLevelsWithNoGrant(LoadHub()),
+                "A lot is selling a level without telling the player what it grants.");
+        }
+
+        [Test]
+        public void TheForge_CanBeRaisedToTheGamesUpgradeCeiling()
+        {
+            var forge = LoadHub().Find(HubService.Forge);
+            Assert.IsNotNull(forge, "No lot opens the Forge.");
+
+            Assert.AreEqual(MetaProgressManager.MaxMagicUpgradeLevel,
+                MetaProgressManager.UpgradeCeilingForForgeLevel(forge.MaxLevel),
+                "A fully raised Forge must reach the game's own upgrade ceiling. Authored short, "
+                + "the deepest ability levels exist but nothing in the game can ever sell them; "
+                + "authored tall, a level of the lot buys nothing.");
+        }
+
+        [Test]
+        public void TheForge_StartsBelowTheCeiling()
+        {
+            var forge = LoadHub().Find(HubService.Forge);
+
+            Assert.Less(MetaProgressManager.UpgradeCeilingForForgeLevel(1),
+                MetaProgressManager.MaxMagicUpgradeLevel,
+                "A freshly placed Forge that already offers everything makes its own ladder scenery.");
         }
     }
 }

@@ -122,6 +122,62 @@ namespace Assets.Scripts.Hub
             return level > 0 && level < building.MaxLevel;
         }
 
+        /// <summary>
+        /// Gold for the rung above <paramref name="currentLevel"/>, from a lot's
+        /// <see cref="BuildingSO.GoldPerUpgrade"/>: the authored price for the first upgrade, then a
+        /// multiple of it for each one after.
+        ///
+        /// <para><b>Flat would not do.</b> A tall lot priced the same at every rung is a sink that
+        /// stops mattering the moment the player can afford one, and <c>docs/plans/HUB.md</c> §3
+        /// wants the opposite - a gold drain that scales forever. The curve is deliberately the one
+        /// already in <c>PartySlots.CostForNext</c> and
+        /// <c>MetaProgressManager.MagicUpgradeCostForNextLevel</c> (linear, base per step), so the
+        /// three places the player spends on a ladder all escalate the same way.</para>
+        /// </summary>
+        public static int UpgradeCostForLevel(int goldPerUpgrade, int currentLevel)
+        {
+            if (goldPerUpgrade <= 0 || currentLevel < 1)
+            {
+                return 0;
+            }
+            return goldPerUpgrade * currentLevel;
+        }
+
+        /// <summary>
+        /// Gold to raise this lot one level right now, or 0 when there is nothing to raise. Money is
+        /// still not checked here - see the note at the top of this class - this is only the price.
+        /// </summary>
+        public static int UpgradeCost(BuildingSO building, HubProgress progress)
+        {
+            if (!CanUpgrade(building, progress))
+            {
+                return 0;
+            }
+            return UpgradeCostForLevel(building.GoldPerUpgrade, LevelOf(building, progress));
+        }
+
+        /// <summary>
+        /// What <paramref name="level"/> grants, in the player's words, or empty when the lot does
+        /// not say. Authored on the building (<see cref="BuildingSO.LevelGrants"/>) rather than
+        /// derived, because what a level means is different for every service and the town renderer
+        /// must not know any of it.
+        /// </summary>
+        public static string GrantFor(BuildingSO building, int level)
+        {
+            if (building == null || building.LevelGrants == null || level < 1
+                || level > building.LevelGrants.Length)
+            {
+                return "";
+            }
+            return building.LevelGrants[level - 1] ?? "";
+        }
+
+        /// <summary>What the next build or upgrade would grant, or empty when there is no next.</summary>
+        public static string GrantForNext(BuildingSO building, HubProgress progress)
+        {
+            return GrantFor(building, NextLevel(building, progress));
+        }
+
         /// <summary>The level a build or upgrade would take this lot to, or 0 when neither applies.</summary>
         public static int NextLevel(BuildingSO building, HubProgress progress)
         {
@@ -390,6 +446,35 @@ namespace Assets.Scripts.Hub
                 }
             }
             return free;
+        }
+
+        /// <summary>
+        /// Rungs on an upgradable lot that never say what they grant — reported as "key level N".
+        ///
+        /// <para>This is the phase-6 rule with a test behind it. Every lot shipped
+        /// <c>MaxLevel 1</c> precisely so that no level was ever on sale that bought nothing; the
+        /// moment a ladder exists, the equivalent failure is a level that buys something the player
+        /// cannot find out about before paying. A price with no promise beside it is a button
+        /// nobody can make a decision about.</para>
+        /// </summary>
+        public static List<string> GetLevelsWithNoGrant(HubSO hub)
+        {
+            var silent = new List<string>();
+            foreach (var building in InDrawOrder(hub))
+            {
+                if (!building.IsUpgradable)
+                {
+                    continue;
+                }
+                for (int level = 1; level <= building.MaxLevel; level++)
+                {
+                    if (string.IsNullOrWhiteSpace(GrantFor(building, level)))
+                    {
+                        silent.Add($"{building.SaveKey} level {level}");
+                    }
+                }
+            }
+            return silent;
         }
     }
 }

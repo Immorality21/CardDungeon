@@ -36,6 +36,7 @@
             <ui:Label name="lot-name" text="" class="cd-title" />
             <ui:Label name="lot-blurb" text="" class="cd-info-label" />
             <ui:Label name="lot-status" text="" class="cd-subtitle" />
+            <ui:Label name="lot-grant" text="" class="cd-info-label hub-lot-grant" />
             <ui:Button name="lot-action" text="" class="cd-menu-button" />
             <ui:Button name="lot-enter" text="Enter" class="cd-menu-button" />
             <ui:Label name="lot-feedback" text="" class="cd-feedback" />

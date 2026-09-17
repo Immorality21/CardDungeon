@@ -131,6 +131,14 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
 - **The tavern is gone; heroes are unlocked through progression only** *(2026-09-04, §5b)*. Gold
   never buys a hero again. A hero is *access* — a grid of new builds, and a key the campaign can
   gate a branch on.
+- **A hub building level grants access, capacity or information — never a raw stat**
+  *(2026-09-17, §7 phase 6)*. Buildings are a **hard** axis on the investment frontier: a
+  precondition the model tests, not a currency it prices. A level that grants power gives gold a
+  second route to power and makes `InvestmentPointsPerGold` measure the wrong world. The Forge is
+  the worked example — its levels raise the *upgrade ceiling* (1 → 3 → 5), a full Forge lands
+  exactly on the old flat `MaxMagicUpgradeLevel`, so the endgame ceiling is unchanged and only the
+  ramp is gated. Do not author a level that adds a stat, and do not let a ladder move what a
+  finished save can reach.
 - **Crafting is one of the last features, not one of the next** *(2026-09-04, §7 phase 7)*. Materials
   land first as a building and sphere-grid cost; crafting is a second drain and is only tunable once
   the taps and the first drain are measured.
@@ -172,7 +180,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05 (materials, the building model, the painted town, **the gates are on**); **phase 6's open question — what a building level grants — is the next decision** |
+| **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05; **phase 6 started 2026-09-17** — the rule is set (*a level grants access, capacity or information, never a raw stat*) and the **Forge** is the first ladder. Campfire / Bestiary / Merchant next, in that order; Sphere Hall is phase 5 |
 | **3** | Sharpen hub sinks | open |
 
 ### [Open balance work](plans/BALANCE_OPEN.md)
@@ -208,6 +216,33 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **Hub upgrades, and the Ability Forge as the first ladder** (2026-09-17) — `docs/plans/HUB.md` §7
+  phase 6. The question the plan left open was *what a building level grants*, and the answer that
+  unblocked it is a **rule** rather than a list: **access, capacity or information, never a raw
+  stat**, because §7 already made buildings a *hard* axis on the frontier and a stat-granting level
+  quietly turns them into a second gold-to-power route. The **Forge** is the worked example —
+  `MaxLevel 3`, 250/500 gold, granting an ability/combo upgrade ceiling of **1 → 3 → 5** — and three
+  properties are the part worth copying. It **gates buying, not what has been bought**
+  (`GetMagicPowerBonus` deliberately never consults the ceiling, so no hub change can reach back
+  into a spell the player is carrying); a full Forge lands **exactly** on the old flat
+  `MaxMagicUpgradeLevel`, so *what a finished save can reach is unchanged and only the ramp is
+  gated* — which is why `RunCurveModel`'s "everything built" default still reports what it always
+  did; and the player is told **before** paying rather than meeting a dead button. Two pieces of
+  shared machinery landed with it and every later lot inherits them: `BuildingOps.UpgradeCost`
+  (`GoldPerUpgrade` buys the *first* rung, each one after costs a multiple — flat pricing makes a
+  ladder stop mattering the moment one rung is affordable, and this is `PartySlots.CostForNext`'s
+  own curve) and `BuildingSO.LevelGrants` + `GetLevelsWithNoGrant`, which fails the build on a
+  priced rung that never says what it buys — the mirror of the existing free-upgrade check. 13 new
+  pure tests (62 green across the three hub/forge classes; the suite's only 2 reds are the
+  documented solo-start balance failures in `BALANCE_OPEN.md` §0). Verified in play mode through the
+  real click path: 2215 → 1965 gold, lot level 1 → 2, ceiling 1 → 3, next price 500, then Slash
+  climbing to Lv 3 and refusing to go further with **425 essence still in the purse** — the case
+  that would read as a bug without the "raise the Forge" line. **One fault was found by looking at
+  it**: the grant line did not wrap (UITK labels default to `nowrap`) and walked straight out
+  through both window borders, which is why `.hub-lot-grant` exists rather than reusing
+  `.cd-info-label`. The 250/500 prices are **authored, not measured** — a new gold sink competing
+  with gear, on an axis the frontier has not been taught yet.
 
 - **The floor map** (2026-09-08) — `docs/plans/POLISH_CONTENT.md` §14a, the last piece of §14.
   **M** while walking, or the pause overlay's new **Map** button; the two are never up together and

@@ -204,5 +204,59 @@ namespace Tests.EditMode
             // Constant increment between levels
             Assert.AreEqual(cost1 - cost0, cost2 - cost1);
         }
+
+        // --- the Forge's upgrade ceiling (HUB.md §7 phase 6) -----------------------
+
+        [Test]
+        public void UpgradeCeiling_RisesWithTheForge()
+        {
+            Assert.AreEqual(0, MetaProgressManager.UpgradeCeilingForForgeLevel(0),
+                "No Forge standing, nothing on sale.");
+            Assert.AreEqual(1, MetaProgressManager.UpgradeCeilingForForgeLevel(1));
+            Assert.AreEqual(3, MetaProgressManager.UpgradeCeilingForForgeLevel(2));
+            Assert.AreEqual(5, MetaProgressManager.UpgradeCeilingForForgeLevel(3));
+        }
+
+        [Test]
+        public void UpgradeCeiling_AtAFullForge_IsTheAbsoluteMaximum()
+        {
+            // The dial is ACCESS, not power: a fully raised Forge lands exactly where the flat
+            // constant used to sit, so what a finished save can reach is unchanged and only the
+            // ramp is gated. If this ever drifts, a building level has quietly become a power
+            // source and the investment frontier is pricing the wrong thing.
+            Assert.AreEqual(MetaProgressManager.MaxMagicUpgradeLevel,
+                MetaProgressManager.UpgradeCeilingForForgeLevel(3));
+        }
+
+        [Test]
+        public void UpgradeCeiling_ClampsOutsideTheLadder()
+        {
+            Assert.AreEqual(0, MetaProgressManager.UpgradeCeilingForForgeLevel(-1));
+            Assert.AreEqual(MetaProgressManager.MaxMagicUpgradeLevel,
+                MetaProgressManager.UpgradeCeilingForForgeLevel(99),
+                "A lot authored taller than the ladder must not read as no Forge at all.");
+        }
+
+        [Test]
+        public void UpgradeCeiling_NeverExceedsTheAbsoluteMaximum()
+        {
+            for (int forgeLevel = 0; forgeLevel <= 10; forgeLevel++)
+            {
+                Assert.LessOrEqual(MetaProgressManager.UpgradeCeilingForForgeLevel(forgeLevel),
+                    MetaProgressManager.MaxMagicUpgradeLevel,
+                    $"Forge level {forgeLevel} offers a rung past the game's own ceiling.");
+            }
+        }
+
+        [Test]
+        public void UpgradeCeiling_IsMonotonic()
+        {
+            for (int forgeLevel = 1; forgeLevel <= 10; forgeLevel++)
+            {
+                Assert.GreaterOrEqual(MetaProgressManager.UpgradeCeilingForForgeLevel(forgeLevel),
+                    MetaProgressManager.UpgradeCeilingForForgeLevel(forgeLevel - 1),
+                    "Raising a building must never take something off the shelf.");
+            }
+        }
     }
 }

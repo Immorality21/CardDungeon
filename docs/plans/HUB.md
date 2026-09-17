@@ -8,10 +8,11 @@ Campfire, materials, buildings and a staged unlock of the game — plus the gold
 
 ### 7. The hub becomes a place — buildings, materials, and a staged unlock of the game
 
-> **Status: phases 1-4 shipped 2026-09-05; phases 5-7 not started** (outlined 2026-09-01,
-> extended 2026-09-04). **Phase 6's open question — what a building *level* grants — is the next
-> decision, and is deliberately unanswered.** The phases below are ordered so the game is playable after every one; the open
-> questions at the end decide data shapes that are painful to change later.
+> **Status: phases 1-4 shipped 2026-09-05; phase 6 started 2026-09-17; phases 5 and 7 not started**
+> (outlined 2026-09-01, extended 2026-09-04). **Phase 6's open question — what a building *level*
+> grants — was answered on 2026-09-17: see "What phase 6 decided" below.** The phases are ordered so
+> the game is playable after every one; the open questions at the end decide data shapes that are
+> painful to change later.
 >
 > **2026-09-04 — confirmed and extended.** The whiteboard session endorsed this section as written
 > (campfire first, buildings arriving with progression). Two additions: materials also pay for
@@ -149,7 +150,7 @@ early-game contract, not a whole-game one.**
 | 3 | ✅ **The hub replaces home** *(2026-09-05)* | `HubView` + `HubPresenter` in a new **HubScene**; the ten buttons became six lots plus a road; flat placeholder lots, no art needed | Migration risk isolated from gating risk; placeholder art was enough |
 | 4 | ✅ **Turn the gates on** *(2026-09-05)* | `RequiredRunKeys` + `PlacementCost` live; campfire **and storehouse** free, Sphere Hall/Bestiary/Merchant offered at once, **only the Forge** behind the tutorial; prices set against the phase-1 yield table | The actual design work, against a hub that already renders |
 | 5 | **Grid gates + frontier axis** | `RequiredBuildingKey`, hub state through `SphereGridOps`, `InvestmentFrontier` | Needs 4 authored before it can be tuned |
-| 6 | **Upgrades** — *the plumbing is in; the design is not* | The build/upgrade flow, the gold price, the level record and the sprite swap all work and are tested. **What a level grants is undecided**: every lot ships `MaxLevel 1` so no level is on sale that buys nothing. `HubState.LevelOf(service)` is the seam a screen reads. | The long tail; each level is a content dial, not new plumbing — and the dial is the part still to author |
+| 6 | **Upgrades** — *started 2026-09-17: the rule is set and the Forge is the first lot* | The governing rule (**a level grants access, capacity or information, never a raw stat**), the two shared pieces every later lot uses (`BuildingOps.UpgradeCost`'s escalating price, `BuildingSO.LevelGrants`' promise beside it), and the **Ability Forge ladder**: `MaxLevel 3`, 250/500 gold, granting an ability/combo upgrade ceiling of 1 → 3 → 5. Five lots still `MaxLevel 1`. | The long tail; each level is a content dial, not new plumbing — and the dial is the part still to author |
 | 7 | **Crafting** | Materials spend into items, not only into buildings and nodes | *(2026-09-04)* Deliberately last. Crafting is a **second drain** on the same drops; a sink is only tunable once the taps (drop rates, phase 1) and the first drain (buildings and grid nodes) are measured. Building it early makes both of those unmeasurable |
 
 #### Open questions — settle these before Phase 2
@@ -187,6 +188,50 @@ early-game contract, not a whole-game one.**
    flat-colour UITK panels. Recommendation: author the sprite fields on `BuildingSO` from Phase 2 and
    fill them with flat silhouettes so Phases 3–5 are playable before any real art exists. Decide the
    backdrop's reference resolution at the same time — every authored `Position` is expressed in it.
+
+#### What phase 6 decided (2026-09-17) — the rule, and the Forge as the first lot
+
+**The rule: a level grants access, capacity or information — never a raw stat.** It follows from
+what this section already committed to. The frontier gains buildings as a **hard** axis — you cannot
+substitute XP for a Forge you have not built — so a building is a *precondition the model tests*,
+not a currency inside it. A level that grants power turns gold into power by a second route and
+makes `InvestmentPointsPerGold` (repriced in `BALANCING.md` §5q, and on the do-not-relitigate list)
+measure the wrong world. Capacity, ceilings, choice and knowledge are all authorable without that.
+
+**The Ability Forge is the first ladder.** `MaxLevel 3`, `GoldPerUpgrade` 250, and a level grants
+the **upgrade ceiling** for abilities and combos: **1 → 3 → 5**. Three properties make it the
+template rather than a one-off:
+
+- **It gates buying, not what has been bought.** A level already paid for keeps its power forever;
+  `GetMagicPowerBonus` does not consult the ceiling. No hub change can reach back into a spell the
+  player is already carrying, which is what makes the dial safe to retune later.
+- **A full Forge lands exactly on `MaxMagicUpgradeLevel`.** The power a finished save can reach is
+  *unchanged* — only the ramp is gated — so `RunCurveModel`'s "everything built" default reports
+  what it always did, and only partial hub states move. That is precisely what the hard axis is for.
+  A test fails if the authored ladder and the code ceiling ever drift apart.
+- **The player is told before paying.** Forge header carries the ceiling; a capped ability says
+  *"raise the Forge to go further"* instead of showing a dead button.
+
+**Two pieces of shared machinery landed with it.** `BuildingOps.UpgradeCost` makes `GoldPerUpgrade`
+the price of the *first* rung and charges a multiple for each one after (250 / 500 / 750) — flat
+pricing makes a ladder stop mattering the moment one rung is affordable, and this is the curve
+`PartySlots.CostForNext` already uses. `BuildingSO.LevelGrants` carries one authored line per level,
+shown beside the price, with `GetLevelsWithNoGrant` failing a build on a rung that never says what
+it buys — the mirror of the free-upgrade check.
+
+**Still open, in the order they should be picked up.** *Campfire* (levels **are** `PartySlots`; make
+the campfire level the source of truth and drop `MetaProgressSaveData.BonusPartySlots`, keeping
+300/600 so the balance delta is zero). *Bestiary* (show an enemy's full drop table — information
+only, and it serves the material-farming loop this section wants). *Merchant* (stock 4→6→8; leave
+the rarity weights alone or gold reaches power again). *Sphere Hall* (**phase 5**, not 6 — it
+threads hub state through `SphereGridOps.CanActivate` and `GreedySpend`). The **Storehouse is
+deliberately left flat**: `InventoryManager` has no capacity cap, inventing one to have something to
+sell would be a nerf dressed as content, and it gets its rungs with crafting in phase 7.
+
+**One thing for the balance pass, stated rather than assumed.** The 250/500 gold prices are
+*authored, not measured*. They are a new gold sink competing with gear, and the frontier has not
+been taught the hub axis yet, so treat them as a starting point to verify against
+`InvestmentPointsPerGold` rather than as a tuned number.
 
 #### What phase 1 actually landed (2026-09-05) — and the two things it settled
 

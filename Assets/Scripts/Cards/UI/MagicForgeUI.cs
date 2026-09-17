@@ -222,14 +222,14 @@ namespace Assets.Scripts.Cards.UI
 
             int level = MetaProgressManager.Instance.GetMagicUpgradeLevel(magic.Key);
             int cost = MetaProgressManager.Instance.GetMagicUpgradeCost(magic.Key);
-            bool maxed = level >= MetaProgressManager.MaxMagicUpgradeLevel;
-            _inspectLevel.text = LevelText(level, maxed, cost);
+            int ceiling = MetaProgressManager.Instance.MagicUpgradeCeiling;
+            _inspectLevel.text = LevelText(level, ceiling, cost);
 
             BuildEffectRows(magic.Effects, level);
 
             SetShown(_inspectUpgrade, true);
-            _inspectUpgrade.text = maxed ? "MAX" : "Upgrade";
-            _inspectUpgrade.SetEnabled(!maxed && MetaProgressManager.Instance.CanUpgradeMagic(magic.Key));
+            _inspectUpgrade.text = UpgradeButtonText(level, ceiling);
+            _inspectUpgrade.SetEnabled(MetaProgressManager.Instance.CanUpgradeMagic(magic.Key));
         }
 
         private void InspectCombo(MagicComboSO combo)
@@ -252,14 +252,14 @@ namespace Assets.Scripts.Cards.UI
 
             int level = MetaProgressManager.Instance.GetComboUpgradeLevel(combo.Key);
             int cost = MetaProgressManager.Instance.GetComboUpgradeCost(combo.Key);
-            bool maxed = level >= MetaProgressManager.MaxMagicUpgradeLevel;
-            _inspectLevel.text = LevelText(level, maxed, cost);
+            int ceiling = MetaProgressManager.Instance.MagicUpgradeCeiling;
+            _inspectLevel.text = LevelText(level, ceiling, cost);
 
             BuildEffectRows(combo.BonusEffects, level);
 
             SetShown(_inspectUpgrade, true);
-            _inspectUpgrade.text = maxed ? "MAX" : "Upgrade";
-            _inspectUpgrade.SetEnabled(!maxed && MetaProgressManager.Instance.CanUpgradeCombo(combo.Key));
+            _inspectUpgrade.text = UpgradeButtonText(level, ceiling);
+            _inspectUpgrade.SetEnabled(MetaProgressManager.Instance.CanUpgradeCombo(combo.Key));
         }
 
         private void PopulateLocked(string teaser)
@@ -333,7 +333,10 @@ namespace Assets.Scripts.Cards.UI
 
         private void UpdateEssence()
         {
-            _essenceLabel.text = $"Essence: {MetaProgressManager.Instance.Essence}";
+            int ceiling = MetaProgressManager.Instance.MagicUpgradeCeiling;
+            _essenceLabel.text = ceiling < MetaProgressManager.MaxMagicUpgradeLevel
+                ? $"Essence: {MetaProgressManager.Instance.Essence}   ·   Forge ceiling: Lv {ceiling}"
+                : $"Essence: {MetaProgressManager.Instance.Essence}";
         }
 
         private void SetIcon(Sprite icon)
@@ -348,11 +351,32 @@ namespace Assets.Scripts.Cards.UI
             }
         }
 
-        private static string LevelText(int level, bool maxed, int cost)
+        /// <summary>
+        /// The level line. Three cases, and the middle one is the one worth having: a spell stopped
+        /// by the <i>Forge</i> rather than by its own ceiling has to say so, or the player reads a
+        /// dead Upgrade button as a bug in the spell.
+        /// </summary>
+        private static string LevelText(int level, int ceiling, int cost)
         {
-            return maxed
-                ? $"Lv {level} (MAX)"
-                : $"Lv {level}/{MetaProgressManager.MaxMagicUpgradeLevel}  —  next: {cost} essence";
+            if (level >= MetaProgressManager.MaxMagicUpgradeLevel)
+            {
+                return $"Lv {level} (MAX)";
+            }
+            if (level >= ceiling)
+            {
+                return $"Lv {level}/{ceiling}  —  raise the Forge to go further";
+            }
+            return $"Lv {level}/{ceiling}  —  next: {cost} essence";
+        }
+
+        /// <summary>What the upgrade button says: maxed out for good, held by the Forge, or ready.</summary>
+        private static string UpgradeButtonText(int level, int ceiling)
+        {
+            if (level >= MetaProgressManager.MaxMagicUpgradeLevel)
+            {
+                return "MAX";
+            }
+            return level >= ceiling ? "Forge too small" : "Upgrade";
         }
 
         private static string Initial(string name)
