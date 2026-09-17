@@ -155,7 +155,9 @@ Three properties make it safe, and they are the template for the next lot:
   priced rung that never says what it buys — the same rule `NoLot_OffersAFreeUpgrade` enforces from
   the other side.
 
-The other five lots are still `MaxLevel 1`. `HubState.LevelOf(service)` is the seam each one reads
+**The Campfire is the second lot with a ladder** (2026-09-17), and it is the one that shows the rule is not just about the Forge. `MaxLevel 3`, `GoldPerUpgrade` 300, and a level grants **ways to divide the run's XP** — Even, then Mentor, then Catch Up (`CampfireOps`). Every mode hands out the same total, so the fire grants *control over a fixed pool* and can never make a run pay more. It landed alongside the removal of the party-slot purchase: the party is four wide from the start, because buying the right to field a hero was gold buying a hero, which §5b had already ruled out. See the Heroes guide for the split itself.
+
+The other four lots are still `MaxLevel 1`. `HubState.LevelOf(service)` is the seam each one reads
 when its turn comes — the merchant would size its stock off it, the Sphere Hall gate grid depth
 (that one is `HUB.md` phase **5**, and it changes `GreedySpend`). The **Storehouse deliberately has
 no ladder**: `InventoryManager` has no capacity cap and inventing one to have something to sell

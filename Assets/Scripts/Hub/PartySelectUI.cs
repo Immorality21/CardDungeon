@@ -11,16 +11,18 @@ namespace Assets.Scripts.Hub
     /// <summary>
     /// Party select (UI Toolkit view-controller): which of the owned heroes actually march out.
     ///
-    /// <para>This screen exists because party width stopped being free. Every hero added roughly
-    /// halves per-enemy danger, and since XP splits evenly (<see cref="XpSplit"/>) every hero added
-    /// also cuts each one's share - so going wide buys safety and faster clears while going narrow
-    /// buys depth. Neither dominates, which is the whole point, and it only works if the player can
-    /// choose. The share line is shown as a percentage precisely so the trade is on screen while the
-    /// choice is being made.</para>
+    /// <para>This screen exists because party width is a trade, not an upgrade. Every hero added
+    /// roughly halves per-enemy danger, and since XP splits across the lineup
+    /// (<see cref="XpSplit"/>) every hero added also cuts each one's share - so going wide buys
+    /// safety and faster clears while going narrow buys depth. Neither dominates, which is the whole
+    /// point, and it only works if the player can choose. The share line is shown as a percentage
+    /// precisely so the trade is on screen while the choice is being made.</para>
     ///
-    /// <para>The cap itself (<see cref="PartySlots"/>) is a Gold sink bought here, so the price of
-    /// going wider is visible next to the reason not to. Operates on a VisualElement subtree owned by
-    /// the menu's UIDocument - not a MonoBehaviour, same as the merchant.</para>
+    /// <para><b>The slot purchase was removed on 2026-09-17</b> - the party is four wide from the
+    /// start and what paces it is the roster, not gold (see <see cref="PartySlots"/>). What the fire
+    /// sells instead is <b>how the XP is divided</b>: the same question one step further on, and the
+    /// one thing a campfire level grants (<see cref="CampfireOps"/>). Operates on a VisualElement
+    /// subtree owned by the menu's UIDocument - not a MonoBehaviour, same as the merchant.</para>
     /// </summary>
     public class PartySelectUI
     {
@@ -32,7 +34,11 @@ namespace Assets.Scripts.Hub
         private readonly Label _feedbackLabel;
         private readonly ScrollView _fieldedList;
         private readonly ScrollView _benchList;
-        private readonly Button _buySlotButton;
+        private readonly Button _splitEvenButton;
+        private readonly Button _splitMentorButton;
+        private readonly Button _splitCatchUpButton;
+        private readonly Button _splitFocusButton;
+        private readonly Label _splitDescLabel;
         private readonly Button _closeButton;
 
         public event Action OnClosed;
@@ -48,12 +54,28 @@ namespace Assets.Scripts.Hub
             _feedbackLabel = root.Q<Label>("party-feedback");
             _fieldedList = root.Q<ScrollView>("party-fielded");
             _benchList = root.Q<ScrollView>("party-bench");
-            _buySlotButton = root.Q<Button>("party-buy-slot");
+            _splitEvenButton = root.Q<Button>("party-split-even");
+            _splitMentorButton = root.Q<Button>("party-split-mentor");
+            _splitCatchUpButton = root.Q<Button>("party-split-catchup");
+            _splitFocusButton = root.Q<Button>("party-split-focus");
+            _splitDescLabel = root.Q<Label>("party-split-desc");
             _closeButton = root.Q<Button>("party-close");
 
-            if (_buySlotButton != null)
+            if (_splitEvenButton != null)
             {
-                _buySlotButton.clicked += OnBuySlot;
+                _splitEvenButton.clicked += () => ChooseMode(XpSplitMode.Even);
+            }
+            if (_splitMentorButton != null)
+            {
+                _splitMentorButton.clicked += () => ChooseMode(XpSplitMode.Mentor);
+            }
+            if (_splitCatchUpButton != null)
+            {
+                _splitCatchUpButton.clicked += () => ChooseMode(XpSplitMode.CatchUp);
+            }
+            if (_splitFocusButton != null)
+            {
+                _splitFocusButton.clicked += CycleFocusHero;
             }
             if (_closeButton != null)
             {
@@ -104,8 +126,6 @@ namespace Assets.Scripts.Hub
             var owned = HeroRoster.GetOwnedHeroes(_catalog);
             var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, cap);
 
-            // The screen sells a slot, so it has to show the purse — a price with no purse beside it
-            // is the merchant's mistake not to repeat.
             if (_goldLabel != null)
             {
                 _goldLabel.text = $"Gold: {MetaProgressManager.Instance.Gold}";
@@ -119,26 +139,130 @@ namespace Assets.Scripts.Hub
                              + "spreads the damage thinner. Wide clears faster; narrow levels faster.";
 
             BuildLists(owned, fieldedKeys, cap);
-            RefreshBuySlotButton(cap);
+            RefreshSplitControls(fieldedKeys);
         }
 
-        private void RefreshBuySlotButton(int cap)
+        /// <summary>
+        /// The campfire's XP split: three modes side by side, the chosen one filled in.
+        ///
+        /// <para>A mode the fire cannot grant yet is shown <b>dimmed, naming the level that would
+        /// buy it</b> rather than hidden - the same bargain the Ability Forge makes, and the reason
+        /// a disabled button here never reads as a bug.</para>
+        /// </summary>
+        private void RefreshSplitControls(List<string> fieldedKeys)
         {
-            if (_buySlotButton == null)
+            int campfireLevel = HubState.LevelOf(HubService.Party);
+            var chosen = MetaProgressManager.Instance.GetXpSplitMode();
+
+            PaintModeButton(_splitEvenButton, XpSplitMode.Even, chosen, campfireLevel, 1);
+            PaintModeButton(_splitMentorButton, XpSplitMode.Mentor, chosen, campfireLevel, 2);
+            PaintModeButton(_splitCatchUpButton, XpSplitMode.CatchUp, chosen, campfireLevel, 3);
+
+            // Only Mentor needs a name attached to it; CatchUp picks its own, fresh, every award.
+            bool needsFocus = chosen == XpSplitMode.Mentor;
+            SetShown(_splitFocusButton, needsFocus);
+            if (needsFocus && _splitFocusButton != null)
+            {
+                var focus = FocusHero(fieldedKeys);
+                _splitFocusButton.text = focus == null
+                    ? "Tap to choose who is mentored"
+                    : $"Mentoring {focus.DisplayName} — tap to change";
+                _splitFocusButton.SetEnabled(fieldedKeys.Count > 0);
+            }
+
+            if (_splitDescLabel != null)
+            {
+                _splitDescLabel.text = CampfireOps.Describe(chosen);
+            }
+        }
+
+        private static void PaintModeButton(Button button, XpSplitMode mode, XpSplitMode chosen,
+                                            int campfireLevel, int levelNeeded)
+        {
+            if (button == null)
             {
                 return;
             }
 
-            int cost = MetaProgressManager.Instance.GetPartySlotCost();
-            if (cost <= 0)
+            // A locked mode names the campfire level that would buy it rather than hiding - the
+            // Ability Forge's bargain, and the reason a disabled button here never reads as a bug.
+            bool offered = CampfireOps.Offers(campfireLevel, mode);
+            button.text = offered
+                ? CampfireOps.Label(mode)
+                : $"{CampfireOps.Label(mode)} · Lv {levelNeeded}";
+            button.SetEnabled(offered && chosen != mode);
+            button.EnableInClassList("cd-split-option--chosen", chosen == mode);
+        }
+
+        /// <summary>The fielded hero the Mentor mode is pointed at, or null when nobody is named or
+        /// the named one is no longer marching.</summary>
+        private HeroSO FocusHero(List<string> fieldedKeys)
+        {
+            string key = MetaProgressManager.Instance.GetXpFocusHeroKey();
+            if (string.IsNullOrEmpty(key) || !fieldedKeys.Contains(key))
             {
-                _buySlotButton.text = $"Party is as wide as it gets ({PartySlots.MaxCap})";
-                _buySlotButton.SetEnabled(false);
+                return null;
+            }
+            foreach (var hero in HeroRoster.GetOwnedHeroes(_catalog))
+            {
+                if (hero != null && hero.SaveKey == key)
+                {
+                    return hero;
+                }
+            }
+            return null;
+        }
+
+        private void ChooseMode(XpSplitMode mode)
+        {
+            int campfireLevel = HubState.LevelOf(HubService.Party);
+            if (!CampfireOps.Offers(campfireLevel, mode))
+            {
+                SetFeedback("The campfire is not big enough for that yet.");
                 return;
             }
 
-            _buySlotButton.text = $"Field a {Ordinal(cap + 1)} hero — {cost} gold";
-            _buySlotButton.SetEnabled(MetaProgressManager.Instance.CanBuyPartySlot());
+            var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, Cap());
+            string focus = MetaProgressManager.Instance.GetXpFocusHeroKey();
+
+            // Switching to Mentor with nobody named would silently fall back to an even split, so
+            // name the leader - the choice is then visible, and one tap from being changed.
+            if (mode == XpSplitMode.Mentor && (string.IsNullOrEmpty(focus) || !fieldedKeys.Contains(focus)))
+            {
+                focus = fieldedKeys.Count > 0 ? fieldedKeys[0] : "";
+            }
+
+            MetaProgressManager.Instance.SetXpSplit(mode, focus);
+            // Just what changed - the rule itself is already on screen under the buttons, and
+            // printing it twice makes the panel look like it is arguing with itself.
+            SetFeedback($"XP is now shared: {CampfireOps.Label(mode)}.");
+            Refresh();
+        }
+
+        /// <summary>Steps the mentored hero to the next one marching out, wrapping at the end. A
+        /// cycle rather than a second button per row: the lineup is at most four, and a row that
+        /// grows a second action is a row that gets misclicked.</summary>
+        private void CycleFocusHero()
+        {
+            var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, Cap());
+            if (fieldedKeys.Count == 0)
+            {
+                SetFeedback("Nobody is marching out to mentor.");
+                return;
+            }
+
+            int current = fieldedKeys.IndexOf(MetaProgressManager.Instance.GetXpFocusHeroKey());
+            string next = fieldedKeys[(current + 1) % fieldedKeys.Count];
+            MetaProgressManager.Instance.SetXpSplit(XpSplitMode.Mentor, next);
+            Refresh();
+        }
+
+        private static void SetShown(VisualElement element, bool shown)
+        {
+            if (element != null)
+            {
+                element.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
 
         private void BuildLists(List<HeroSO> owned, List<string> fieldedKeys, int cap)
@@ -225,20 +349,6 @@ namespace Assets.Scripts.Hub
             keys.Remove(hero.SaveKey);
             HeroRoster.SetSelectedKeys(_catalog, keys, cap);
             SetFeedback($"{hero.DisplayName} stays behind.");
-            Refresh();
-        }
-
-        private void OnBuySlot()
-        {
-            if (!MetaProgressManager.Instance.TryBuyPartySlot())
-            {
-                SetFeedback(MetaProgressManager.Instance.GetPartySlotCost() <= 0
-                    ? "The party is already as wide as it gets."
-                    : "Not enough gold.");
-                return;
-            }
-
-            SetFeedback($"Room for {Cap()} in the marching order now.");
             Refresh();
         }
 

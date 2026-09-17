@@ -13,11 +13,23 @@ namespace Assets.Scripts.Balance
     ///
     /// <para><see cref="Cost"/> is the three axes reduced to one number so tiers can be compared, in
     /// the exchange rate the design is stated in — <c>BalanceRulesSO.HeroXpEquivalent</c> XP per
-    /// hero bought past <see cref="PartySlots.BaseCap"/>, and
-    /// <c>BalanceRulesSO.InvestmentPointsPerGold</c> points per gold. Heroes below the base cap are
-    /// free (a fresh save can already field two), so a narrow party is never *cheaper* than the full
-    /// base party — only different, which is why the frontier keeps the axes rather than only the
-    /// cost.</para>
+    /// hero past <see cref="PartySlots.FreeWidth"/>, and
+    /// <c>BalanceRulesSO.InvestmentPointsPerGold</c> points per gold.</para>
+    ///
+    /// <para><b>Width is charged from the solo start, not from a bought cap</b> (2026-09-17). The
+    /// slot purchase is gone — the party is four wide from the first run and the roster paces it
+    /// — so "heroes bought past the base cap" would price every width at zero. What a body
+    /// actually costs did not vanish with the shop: a second hero is a rescue, a campaign gate and a
+    /// run's worth of play, and once fielded they dilute the XP split for everyone. Charging from
+    /// <see cref="PartySlots.FreeWidth"/> keeps that priced in the units every tier budget is
+    /// already written in.</para>
+    ///
+    /// <para><b>A more principled model exists and is deliberately not used here.</b> The honest
+    /// price of width is the XP the split dilutes — four heroes at X XP each is a run that had to
+    /// earn 4X (<see cref="XpSplit"/>) — which would make the cost a party total rather than a
+    /// per-hero figure. That is a better model, and it rescales every authored budget in
+    /// <c>BalanceRulesSO</c> by the party width, so it belongs to a measured balance pass and not to
+    /// a change that came in behind a hub screen. See <c>docs/plans/BALANCE_OPEN.md</c>.</para>
     ///
     /// <para><b>The gold axis is not the same kind of axis as the other two.</b> Width and XP both
     /// grow *within* a run — a rescue widens the party, kills bank XP — while equipping happens only
@@ -219,7 +231,9 @@ namespace Assets.Scripts.Balance
 
         public int HeroXpEquivalent = 1875;
         public float InvestmentPointsPerGold = 10.5f;
-        public int BaseWidth = PartySlots.BaseCap;
+        /// <summary>The width that costs nothing. The solo start, not the cap - see
+        /// <see cref="PartySlots.FreeWidth"/>.</summary>
+        public int BaseWidth = PartySlots.FreeWidth;
 
         /// <summary>At or below this wipe rate the floor counts as cleared by the mix.</summary>
         public float ClearWipeRate = 0.35f;
@@ -262,11 +276,12 @@ namespace Assets.Scripts.Balance
     public static class InvestmentFrontier
     {
         /// <summary>
-        /// The investment a mix costs, in XP-per-hero units. Heroes inside the base cap are free,
-        /// and gold converts at <paramref name="goldPerInvestmentPoint"/> — 1:1 by default. The
-        /// rate was set when the tavern priced a hero at 220-260 gold against <c>HeroXpEquivalent</c>
-        /// 250, so the game's own numbers equated them; gold no longer buys a hero (section 5b), so
-        /// the default is now an inherited calibration rather than a derived one.
+        /// The investment a mix costs, in XP-per-hero units. Heroes inside
+        /// <paramref name="baseWidth"/> are free — a fresh save already fields them — and gold
+        /// converts at <paramref name="goldPerInvestmentPoint"/>. The rate was set when the tavern
+        /// priced a hero at 220-260 gold against <c>HeroXpEquivalent</c> 250, so the game's own
+        /// numbers equated them; gold no longer buys a hero (section 5b), so the default is now an
+        /// inherited calibration rather than a derived one.
         /// </summary>
         public static int CostOf(
             int partySize, int xpPerHero, int goldOnGear,

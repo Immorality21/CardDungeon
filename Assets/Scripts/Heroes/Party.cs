@@ -372,8 +372,10 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
-        /// Splits <paramref name="amount"/> XP evenly across the whole party, the leader taking the
-        /// remainder. See <see cref="XpSplit"/> for why it is even and why the downed are paid.
+        /// Splits <paramref name="amount"/> XP across the whole party the way the campfire says to,
+        /// the leader taking the remainder. See <see cref="XpSplit"/> for why the default is even
+        /// and why the downed are paid, and <see cref="XpSplitMode"/> for why no mode can change the
+        /// total.
         ///
         /// <para>This is the only XP path in the game: <c>CombatManager.HandleEnemyDeath</c> calls it
         /// per kill, in memory, and <see cref="CommitProgress"/> writes it on level clear - so a wipe
@@ -381,7 +383,7 @@ namespace Assets.Scripts.Heroes
         /// </summary>
         public void DistributeXp(int amount)
         {
-            var shares = XpSplit.Split(amount, Heroes.Count);
+            var shares = XpSplit.Split(amount, Heroes.Count, FavouredHeroIndex());
             for (int i = 0; i < shares.Length; i++)
             {
                 // Unity-aware null check rather than ?., which reads a destroyed hero as non-null.
@@ -390,6 +392,41 @@ namespace Assets.Scripts.Heroes
                     Heroes[i].AddXp(shares[i]);
                 }
             }
+        }
+
+        /// <summary>
+        /// Which hero the campfire's split favours right now, or -1 for an even share.
+        ///
+        /// <para>Resolved <b>per award</b> rather than cached, because <c>CatchUp</c> names whoever
+        /// is furthest behind and that changes as the run pays out - which is the point of it. With
+        /// no meta save around (tests, a scene opened on its own) this is -1 and the split is the
+        /// even one it has always been.</para>
+        /// </summary>
+        private int FavouredHeroIndex()
+        {
+            if (!MetaProgressManager.HasInstance)
+            {
+                return -1;
+            }
+
+            var mode = MetaProgressManager.Instance.GetXpSplitMode();
+            if (mode == XpSplitMode.Even)
+            {
+                return -1;
+            }
+
+            int nominated = -1;
+            var banked = new List<int>(Heroes.Count);
+            string focusKey = MetaProgressManager.Instance.GetXpFocusHeroKey();
+            for (int i = 0; i < Heroes.Count; i++)
+            {
+                banked.Add(Heroes[i] != null ? Heroes[i].CurrentXp : int.MaxValue);
+                if (Heroes[i] != null && nominated < 0 && Heroes[i].HeroKey == focusKey)
+                {
+                    nominated = i;
+                }
+            }
+            return XpSplit.FavouredIndex(mode, nominated, banked);
         }
     }
 }

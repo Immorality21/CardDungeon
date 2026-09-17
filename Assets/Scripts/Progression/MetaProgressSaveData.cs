@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
 
 namespace Assets.Scripts.Progression
@@ -48,11 +49,11 @@ namespace Assets.Scripts.Progression
         // refunds the Essence on load and zeroes it. Never read anywhere else.
         public int BonusSlots;
 
-        // Party slots bought on top of PartySlots.BaseCap - how many heroes can be fielded at once.
-        // A Gold sink rather than an Essence one: it buys roster width, and Essence is reserved
-        // for magic. With the tavern retired this is the only thing gold buys about the roster:
-        // a hero is unlocked through progression, never bought (NEXT_STEPS.md, section 5b).
-        public int BonusPartySlots;
+        // How the campfire divides a run's XP, and who the Mentor mode favours. A redistribution,
+        // never a bonus - see XpSplitMode. Which modes are legal is the campfire's building level,
+        // so this is only the player's choice; CampfireOps.EffectiveMode decides what it means.
+        public XpSplitMode XpSplitMode = XpSplitMode.Even;
+        public string XpFocusHeroKey = "";
 
         // The merchant's current gear stock (item keys). Persisted so the shop is stable across
         // sessions and can't be free-rerolled by reopening; refilled when empty or on paid restock.

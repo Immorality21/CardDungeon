@@ -1574,6 +1574,49 @@
     border-radius: 3px;
 }
 
+/* The campfire's three split buttons, side by side so the choice reads as one
+   decision rather than three unrelated toggles. The chosen one is filled in;
+   a mode the campfire cannot grant yet is dimmed rather than hidden, so the
+   player can see what raising the fire would buy before paying for it. */
+.cd-split-row {
+    flex-direction: row;
+    justify-content: center;
+    margin: 2px 0 4px 0;
+}
+
+/* .cd-button--narrow is width:45%, which three abreast overflows the window by
+   a third. In a row they share the width instead: flex-basis 0 so they size off
+   the row rather than the text, and min-width 0 so a long locked label ("Mentor
+   - Lv 2") shrinks rather than pushing its neighbours out through the border. */
+.cd-split-row > .cd-button {
+    width: auto;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    margin: 0 4px;
+    font-size: 15px;
+}
+
+/* The "who is mentored" cycle button. Wider than .cd-button--narrow and allowed
+   to wrap, because it carries a hero NAME - an unwrapped 45% button spills its
+   text over the rows either side of it, which is how this was found. */
+.cd-split-focus {
+    width: 80%;
+    align-self: center;
+    white-space: normal;
+    height: auto;
+    min-height: 34px;
+    padding: 4px 10px;
+    font-size: 15px;
+    margin-top: 4px;
+}
+
+.cd-split-option--chosen {
+    background-color: rgb(94, 58, 150);
+    border-color: var(--cd-gold);
+}
+
 /* The promise beside the price in the lot panel: what the next level actually
    grants. Wraps, because .cd-info-label does not — a UITK label defaults to
    nowrap and a sales line long enough to be worth reading walks straight out

@@ -48,7 +48,6 @@ namespace Assets.Scripts.Progression
 
         public int Gold => _saveData.Gold;
         public int Essence => _saveData.Essence;
-        public int BonusPartySlots => _saveData.BonusPartySlots;
 
         protected override void Awake()
         {
@@ -587,43 +586,57 @@ namespace Assets.Scripts.Progression
             return true;
         }
 
-        // --- Party slots (how many heroes can be fielded at once) ---
+        // --- Party width (how many heroes can be fielded at once) ---
 
         /// <summary>
-        /// Heroes this save can take into a dungeon at once. Starts at <see cref="PartySlots.BaseCap"/>
-        /// and is bought up to <see cref="PartySlots.MaxCap"/> with Gold - party width is a
-        /// progression axis, not a consequence of how many heroes you happen to have recruited.
+        /// Heroes this save can take into a dungeon at once: always <see cref="PartySlots.MaxCap"/>.
+        ///
+        /// <para><b>No longer a purchase</b> (2026-09-17). Width is paced by the <i>roster</i> - a
+        /// hero is rescued and unlocked, never bought - and the cost of going wide is paid every run
+        /// in diluted XP (<see cref="XpSplit"/>) rather than once at a shop. Kept as a method rather
+        /// than inlined because the fielded cap is a rule, and a rule the whole game reads from one
+        /// place is one that can change again without a hunt.</para>
         /// </summary>
         public int GetPartyCap()
         {
-            return PartySlots.CapForBonus(_saveData.BonusPartySlots);
+            return PartySlots.MaxCap;
         }
 
-        /// <summary>Gold cost of the next party slot, or 0 when already at the ceiling.</summary>
-        public int GetPartySlotCost()
+        // --- The campfire's XP split (what a campfire level grants) ---
+
+        /// <summary>
+        /// The split the player has chosen, filtered through what their campfire actually offers.
+        /// Always read this rather than the raw save field — a save can name a mode the town cannot
+        /// grant, and the wrong failure is a party quietly running a mode it never unlocked.
+        /// </summary>
+        public XpSplitMode GetXpSplitMode()
         {
-            return PartySlots.CostForNext(_saveData.BonusPartySlots);
+            return Hub.CampfireOps.EffectiveMode(
+                Hub.HubState.LevelOf(Hub.HubService.Party), _saveData.XpSplitMode);
         }
 
-        public bool CanBuyPartySlot()
+        /// <summary>The raw stored choice, for the campfire screen that is about to change it.</summary>
+        public XpSplitMode GetStoredXpSplitMode()
         {
-            int cost = GetPartySlotCost();
-            return cost > 0 && _saveData.Gold >= cost;
+            return _saveData.XpSplitMode;
         }
 
-        /// <summary>Spends Gold to field one more hero. Returns false if unaffordable or maxed.</summary>
-        public bool TryBuyPartySlot()
+        /// <summary>The <c>HeroSO.Key</c> the Mentor mode favours, or empty when nobody is named.</summary>
+        public string GetXpFocusHeroKey()
         {
-            if (!CanBuyPartySlot())
-            {
-                return false;
-            }
+            return _saveData.XpFocusHeroKey ?? "";
+        }
 
-            _saveData.Gold -= GetPartySlotCost();
-            _saveData.BonusPartySlots += 1;
+        /// <summary>
+        /// Records how the party wants its XP divided. Persisted immediately, like every other hub
+        /// choice, so it survives a wipe the way the rest of the meta save does.
+        /// </summary>
+        public void SetXpSplit(XpSplitMode mode, string focusHeroKey)
+        {
+            _saveData.XpSplitMode = mode;
+            _saveData.XpFocusHeroKey = focusHeroKey ?? "";
             Save();
             OnChanged?.Invoke();
-            return true;
         }
 
         // --- Merchant gear stock (item keys) ---

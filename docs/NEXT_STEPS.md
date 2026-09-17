@@ -130,7 +130,11 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   the tooltips in the code still state it.
 - **The tavern is gone; heroes are unlocked through progression only** *(2026-09-04, §5b)*. Gold
   never buys a hero again. A hero is *access* — a grid of new builds, and a key the campaign can
-  gate a branch on.
+  gate a branch on. **Extended 2026-09-17: the party-slot purchase is gone too.** Buying the right
+  to *field* one more hero was the same trade wearing a different hat — the last surviving piece of
+  the tavern. The party is **four wide from the first run**; what paces width is the roster, and
+  what prices it is the even XP split, which is paid every run rather than once at a shop. Do not
+  re-add a width purchase.
 - **A hub building level grants access, capacity or information — never a raw stat**
   *(2026-09-17, §7 phase 6)*. Buildings are a **hard** axis on the investment frontier: a
   precondition the model tests, not a currency it prices. A level that grants power gives gold a
@@ -163,7 +167,7 @@ backlog.**
 | **9b** | Magic moves onto the sphere grid — Draw is scrapped | ✅ **shipped** 2026-09-04; findings feed §4c |
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **shipped** 2026-09-06 — solo start, rescue unlocks, `RequiresHeroes` gates. **Four heroes still need an unlock source** |
-| **5** | Roster — open questions | open |
+| **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
 | **4b** | Summons — the capability the deep grid pays out | spec; **shape and effects reopened** 2026-09-04 |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
 
@@ -180,7 +184,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05; **phase 6 started 2026-09-17** — the rule is set (*a level grants access, capacity or information, never a raw stat*) and the **Forge** is the first ladder. Campfire / Bestiary / Merchant next, in that order; Sphere Hall is phase 5 |
+| **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05; **phase 6 started 2026-09-17** — the rule is set (*a level grants access, capacity or information, never a raw stat*), and the **Forge** and **Campfire** both have ladders. Bestiary / Merchant next; Sphere Hall is phase 5 |
 | **3** | Sharpen hub sinks | open |
 
 ### [Open balance work](plans/BALANCE_OPEN.md)
@@ -217,6 +221,34 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The party stops being bought, and the campfire starts selling the XP split** (2026-09-17) —
+  `docs/plans/HUB.md` §7 phase 6 and `SPECIALIZATION.md` §5. The plan was to make the campfire's
+  level *be* the bought party slot. **The purchase turned out to be the thing to delete**, not
+  relocate: §5b had already ruled that gold never buys a hero, and buying the right to *field* one
+  more hero is that trade wearing a different hat — the last piece of the tavern, and exactly the
+  "no in-game explanation" §5 had been complaining about. The party is now **four wide from the
+  first run** (`PartySlots` is one constant; `BonusPartySlots` deleted). **That did not flatten the
+  decision**, because the toll was never what made it one: `XpSplit` divides a kill across the
+  lineup, so going wide is paid every run in diluted XP rather than once at a shop — the code had
+  been saying so in its own doc comment the whole time. What the fire sells instead is **how the XP
+  is divided**: Even → **Mentor** (a named hero takes a double share) → **Catch Up** (the double
+  share goes to whoever is furthest behind, re-chosen every award). The two are one mechanic
+  differing only in who is picked, so there is one code path and one number (`FavouredShares`, 2),
+  and **every mode hands out the identical total** — the property that keeps a campfire level legal
+  under phase 6's rule and leaves the balance model's XP accounting untouched. The remainder follows
+  the *favoured* hero rather than the leader, which a play-mode check turned up: on a small award
+  the extra part is a real slice and giving it to index 0 could tie the leader with the hero the
+  player deliberately chose. One model correction came with it — `InvestmentFrontier` charged width
+  as *heroes bought past the base cap*, which with nothing bought prices every width at zero, so it
+  now charges from **`PartySlots.FreeWidth`** (1, the solo start; the old base of 2 predated §5b
+  restoring it). 14 new pure tests. **The balance consequence was measured, not assumed**: the
+  regression failures after the change are byte-identical to before it — still "2 hero(es)", still
+  158/180/140 against 99 — because the **roster**, not the cap, was what limited width there. That
+  makes the four heroes with no unlock source a balance blocker, and means the analyzer wants to
+  model roster size rather than cap. Two layout faults found by screenshot, both the same shape as
+  the Forge's: three `--narrow` buttons abreast overflow a window by a third, and an unwrapped
+  button carrying a hero *name* spills over the rows either side of it. ~900 gold of sinks left with
+  the purchase; the Forge ladder replaced 750 of it.
 - **Hub upgrades, and the Ability Forge as the first ladder** (2026-09-17) — `docs/plans/HUB.md` §7
   phase 6. The question the plan left open was *what a building level grants*, and the answer that
   unblocked it is a **rule** rather than a list: **access, capacity or information, never a raw

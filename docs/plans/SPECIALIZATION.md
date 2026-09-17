@@ -392,8 +392,12 @@ replaced — the tavern is removed and heroes become progression unlocks; see §
   tavern changes the terms of each.
 - **Does a mid-run rescue dilute the split?** A hero freed on level 1 joins the split immediately,
   quietly slowing the starter. Probably correct — same trade as recruiting — but worth playing.
-- **The party cap has no in-game explanation.** The slot is bought on the party screen with no
-  fiction attached. If §3's other Gold sinks land, the cap probably wants to be one of them.
+- ~~**The party cap has no in-game explanation.**~~ **Resolved 2026-09-17 by deleting it.** The
+  fix was not a fiction for the purchase, it was noticing the purchase contradicted §5b: *gold never
+  buys a hero again*, and buying the right to **field** one more hero is that trade wearing a
+  different hat — the last surviving piece of the tavern. The party is now **four wide from the
+  first run**, paced by the roster, and priced (as it always really was) by the even XP split. The
+  campfire sells **how the XP is divided** instead: `HUB.md` §7 phase 6.
 - **Selection can change mid-run.** *Change Party* is reachable from the run-progress screen between
   levels, so a run's difficulty band can shift under it. Arguably correct (it is the hub, and gear
   can already be re-equipped there) but it is the reason the analyzer's band matters.

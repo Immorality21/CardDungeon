@@ -26,7 +26,11 @@ MonoBehaviour:
   LevelSprites:
   - {fileID: 21300000, guid: d80dc6650bd04bd9b76cf95d092e5c96, type: 3}
   PlacedByDefault: 1
-  MaxLevel: 1
+  MaxLevel: 3
   PlacementCost: []
-  GoldPerUpgrade: 0
+  GoldPerUpgrade: 300
+  LevelGrants:
+  - The run's XP is split evenly between everyone who marches out.
+  - 'Mentor: name a hero and they take a double share of every kill.'
+  - 'Catch Up: the double share goes to whoever is furthest behind.'
   RequiredRunKeys: []

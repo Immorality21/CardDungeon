@@ -28,12 +28,12 @@ namespace Tests.EditMode
         // --- the cost arithmetic --------------------------------------------------------
 
         /// <summary>
-        /// Heroes inside <c>PartySlots.BaseCap</c> are free — a fresh save already fields them — so a
-        /// narrow party is never *cheaper* than the full base party, only different. Getting this
-        /// wrong would make "play solo" read as the discount route through the whole campaign.
+        /// Heroes inside the free width are free — a fresh save already fields them. The game's own
+        /// free width is <c>PartySlots.FreeWidth</c> (the solo start); this fixture passes 2
+        /// explicitly because it is testing the arithmetic, not the game's current value.
         /// </summary>
         [Test]
-        public void CostOf_HeroesInsideTheBaseCapAreFree()
+        public void CostOf_HeroesInsideTheFreeWidthAreFree()
         {
             Assert.AreEqual(0, InvestmentFrontier.CostOf(1, 0, HeroXpEquivalent, BaseWidth));
             Assert.AreEqual(0, InvestmentFrontier.CostOf(2, 0, HeroXpEquivalent, BaseWidth));
@@ -42,7 +42,7 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void CostOf_BoughtSlotsCostTheExchangeRateEach()
+        public void CostOf_HeroesPastTheFreeWidthCostTheExchangeRateEach()
         {
             Assert.AreEqual(250, InvestmentFrontier.CostOf(3, 0, HeroXpEquivalent, BaseWidth));
             Assert.AreEqual(500, InvestmentFrontier.CostOf(4, 0, HeroXpEquivalent, BaseWidth));

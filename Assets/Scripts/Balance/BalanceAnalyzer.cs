@@ -3012,7 +3012,7 @@ namespace Assets.Scripts.Balance
                     StatWeightFor = rules.WeightFor,
                     HeroXpEquivalent = rules.HeroXpEquivalent,
                     InvestmentPointsPerGold = rules.InvestmentPointsPerGold,
-                    BaseWidth = PartySlots.BaseCap,
+                    BaseWidth = PartySlots.FreeWidth,
                     ClearWipeRate = rules.MaxFloorWipeRate,
                     SafeWipeRate = rules.MinFinalFloorWipeRate,
                     EquivalentInvestmentTolerance = rules.EquivalentInvestmentTolerance,

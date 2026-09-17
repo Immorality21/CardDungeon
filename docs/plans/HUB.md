@@ -150,7 +150,7 @@ early-game contract, not a whole-game one.**
 | 3 | ✅ **The hub replaces home** *(2026-09-05)* | `HubView` + `HubPresenter` in a new **HubScene**; the ten buttons became six lots plus a road; flat placeholder lots, no art needed | Migration risk isolated from gating risk; placeholder art was enough |
 | 4 | ✅ **Turn the gates on** *(2026-09-05)* | `RequiredRunKeys` + `PlacementCost` live; campfire **and storehouse** free, Sphere Hall/Bestiary/Merchant offered at once, **only the Forge** behind the tutorial; prices set against the phase-1 yield table | The actual design work, against a hub that already renders |
 | 5 | **Grid gates + frontier axis** | `RequiredBuildingKey`, hub state through `SphereGridOps`, `InvestmentFrontier` | Needs 4 authored before it can be tuned |
-| 6 | **Upgrades** — *started 2026-09-17: the rule is set and the Forge is the first lot* | The governing rule (**a level grants access, capacity or information, never a raw stat**), the two shared pieces every later lot uses (`BuildingOps.UpgradeCost`'s escalating price, `BuildingSO.LevelGrants`' promise beside it), and the **Ability Forge ladder**: `MaxLevel 3`, 250/500 gold, granting an ability/combo upgrade ceiling of 1 → 3 → 5. Five lots still `MaxLevel 1`. | The long tail; each level is a content dial, not new plumbing — and the dial is the part still to author |
+| 6 | **Upgrades** — *started 2026-09-17: two lots done* | The governing rule (**a level grants access, capacity or information, never a raw stat**), the two shared pieces every later lot uses (`BuildingOps.UpgradeCost`'s escalating price, `BuildingSO.LevelGrants`' promise beside it), the **Ability Forge ladder** (`MaxLevel 3`, 250/500 gold, upgrade ceiling 1 → 3 → 5) and the **Campfire ladder** (`MaxLevel 3`, 300/600 gold, granting XP-split modes Even → Mentor → Catch Up) — which arrived with the **party-slot purchase removed**. Four lots still `MaxLevel 1`. | The long tail; each level is a content dial, not new plumbing — and the dial is the part still to author |
 | 7 | **Crafting** | Materials spend into items, not only into buildings and nodes | *(2026-09-04)* Deliberately last. Crafting is a **second drain** on the same drops; a sink is only tunable once the taps (drop rates, phase 1) and the first drain (buildings and grid nodes) are measured. Building it early makes both of those unmeasurable |
 
 #### Open questions — settle these before Phase 2
@@ -219,9 +219,42 @@ pricing makes a ladder stop mattering the moment one rung is affordable, and thi
 shown beside the price, with `GetLevelsWithNoGrant` failing a build on a rung that never says what
 it buys — the mirror of the free-upgrade check.
 
-**Still open, in the order they should be picked up.** *Campfire* (levels **are** `PartySlots`; make
-the campfire level the source of truth and drop `MetaProgressSaveData.BonusPartySlots`, keeping
-300/600 so the balance delta is zero). *Bestiary* (show an enemy's full drop table — information
+**The Campfire went differently, and better** *(2026-09-17)*. The plan above was to make the
+campfire's level **be** the bought party slot. Playing the idea back found that the purchase itself
+was the problem: §5b had already decided *gold never buys a hero*, and buying the right to **field**
+one more hero is the same trade wearing a different hat — the last surviving piece of the tavern,
+with no fiction attached, which is exactly what §5 of `SPECIALIZATION.md` had been complaining about.
+So the purchase was **deleted** rather than relocated: the party is four wide from the first run,
+paced by the roster.
+
+That did not flatten the width decision, because the toll was never what made it one — `XpSplit`
+divides a kill across the lineup, so a solo hero levels four times as fast as one of four, and that
+is paid every run rather than once at a shop. What the fire sells instead is **how the XP is
+divided**: level 1 Even, level 2 **Mentor** (a named hero takes a double share), level 3 **Catch Up**
+(the double share goes to whoever is furthest behind). Every mode hands out the identical total, so
+the fire grants control over a fixed pool and the balance model's XP accounting is untouched — which
+is what makes it a legal thing for a building level to grant.
+
+**Two balance consequences, both stated rather than assumed.** Roughly **900 gold of sinks
+disappeared** with the purchase (the Forge ladder replaced 750 of it; the Merchant and Bestiary
+ladders should cover the rest — §3). And **losability now rides entirely on hero-unlock pacing**:
+the standing red in `BALANCE_OPEN.md` §0 is *"sustain pool of 99 (2 heroes + potions)"*, and with a
+free cap of 4 the only thing deciding whether tier 2 is survivable is how many heroes have been
+rescued by then. Measured, not guessed: the regression failures after the change are **byte-identical**
+to before it — still "2 hero(es)", still 158/180/140 against 99 — because the roster, not the cap,
+was what limited width there. That makes the four heroes with no unlock source (§5b) a balance
+blocker rather than authoring backlog, and it means the analyzer should be modelling **roster size,
+not cap**, or it will assume four bodies on floor one.
+
+**One model correction came with it.** `InvestmentFrontier` priced width as *heroes bought past the
+base cap*; with nothing bought, that term is zero and every width would cost the same. It now charges
+from `PartySlots.FreeWidth` (1, the solo start) rather than the cap — which also fixes a staleness,
+since the old base of 2 predated §5b restoring the solo start. The *more* principled model is to
+charge width as the XP the split dilutes (four heroes at X XP each is a run that earned 4X), but that
+makes the cost a party total and rescales every authored budget in `BalanceRulesSO`, so it belongs to
+a measured pass and not to a change that came in behind a hub screen.
+
+**Still open, in the order they should be picked up.** *Bestiary* (show an enemy's full drop table — information
 only, and it serves the material-farming loop this section wants). *Merchant* (stock 4→6→8; leave
 the rarity weights alone or gold reaches power again). *Sphere Hall* (**phase 5**, not 6 — it
 threads hub state through `SphereGridOps.CanActivate` and `GreedySpend`). The **Storehouse is

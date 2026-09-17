@@ -95,7 +95,14 @@
             <ui:Label text="Staying behind" class="cd-subtitle" />
             <ui:ScrollView name="party-bench" class="cd-shop-list" mode="Vertical" />
 
-            <ui:Button name="party-buy-slot" text="" class="cd-button cd-button--narrow" />
+            <ui:Label name="party-split-title" text="How the run's XP is shared" class="cd-info-label" />
+            <ui:VisualElement name="party-split-row" class="cd-split-row">
+                <ui:Button name="party-split-even" text="Even" class="cd-button cd-button--narrow" />
+                <ui:Button name="party-split-mentor" text="Mentor" class="cd-button cd-button--narrow" />
+                <ui:Button name="party-split-catchup" text="Catch Up" class="cd-button cd-button--narrow" />
+            </ui:VisualElement>
+            <ui:Button name="party-split-focus" text="" class="cd-button cd-split-focus" />
+            <ui:Label name="party-split-desc" text="" class="cd-shop-empty" />
             <ui:Label name="party-feedback" text="" class="cd-feedback" />
             <ui:Button name="party-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
