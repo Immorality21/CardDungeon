@@ -1799,8 +1799,8 @@ namespace Assets.Scripts.Balance
                 });
             }
 
-            // Bodies on screen, not difficulty: past MaxBodiesPerRoom the battle stage overlaps its
-            // own sprites (CombatStage.BuildColumn), so this fires however winnable the room is.
+            // Bodies on screen, not difficulty: MaxBodiesPerRoom is the formation the battle stage is
+            // designed for (EnemyFormation), so this fires however winnable the room is.
             foreach (var room in level.Rooms)
             {
                 float bodies = room.WorstCase != null ? room.WorstCase.TotalCount : 0f;
@@ -1813,9 +1813,9 @@ namespace Assets.Scripts.Balance
                     $"{room.RoomName} can field {bodies:0.#} enemies at once")
                 {
                     Asset = room.Room != null ? (UnityEngine.Object)room.Room : run.Run,
-                    Detail = $"The battle stage fits {rules.MaxBodiesPerRoom}. Above that "
-                           + "CombatStage spaces the column tighter than one sprite height and the "
-                           + "enemies overlap, whatever the room's danger says.",
+                    Detail = $"The battle stage is designed for {rules.MaxBodiesPerRoom} (EnemyFormation: "
+                           + "two in front, three behind, or a boss with four escorts). Above that the "
+                           + "ranks crowd, whatever the room's danger says.",
                     Suggestion = "Drop an EvaluationCount, or a boss escort, until the worst-case "
                                + $"roll is {rules.MaxBodiesPerRoom} or fewer."
                 });

@@ -32,6 +32,12 @@ namespace Assets.Scripts.Enemies
                  "the intro banner, and the run-complete fanfare. Placement is via RunLevelEntry.BossEnemy.")]
         public bool IsBoss;
 
+        [Tooltip("Multiplier on this enemy's size on the battle stage (1 = a normal enemy). Lets a boss " +
+                 "take more screen space without re-importing its sprite. A boss stands alone at the " +
+                 "back of the formation (EnemyFormation), so it has room to be large; keep a non-boss at 1, " +
+                 "because a normal enemy shares its column and a bigger one overlaps its neighbours.")]
+        [Min(0.1f)] public float CombatScale = 1f;
+
         [Header("Base stats")]
         [Tooltip("This enemy's stats, MaxHealth included. Absent entries read as 0.")]
         public StatBlock BaseStats = StatBlock.Defaults();

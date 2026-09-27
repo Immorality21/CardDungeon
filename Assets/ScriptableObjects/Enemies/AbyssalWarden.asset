@@ -21,6 +21,7 @@ MonoBehaviour:
   - {fileID: 2849594284854724589, guid: 502cd7287c8c13e63d27fa99e7f6ae87, type: 3}
   AnimationFps: 4
   IsBoss: 1
+  CombatScale: 1.8
   BaseStats:
     Values:
     - Type: 1

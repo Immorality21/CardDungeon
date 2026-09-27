@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Rooms;
 using ImmoralityGaming.Fundamentals;
@@ -23,6 +24,7 @@ namespace Assets.Scripts.Combat
         // sortingOrder 5, i.e. *below* the background, and would otherwise be hidden.
         private const int BackgroundSortOrder = 400;
         private const int UnitSortOrder = 600;
+        private const int MaxRanks = 2; // EnemyFormation ranks 0..2 sort at 602..600
         private const float CombatUnitScale = 1.5f;
 
         // Battle backdrop loaded from Resources (drop a sprite here to replace the solid fill).
@@ -123,17 +125,48 @@ namespace Assets.Scripts.Combat
 
             float centerY = anchor.y + halfH * 0.15f;
             var heroSlots = BuildColumn(anchor.x - halfW * 0.55f, centerY, heroes.Count, halfH);
-            var enemySlots = BuildColumn(anchor.x + halfW * 0.55f, centerY, enemies.Count, halfH);
+
+            // Enemies rank up FF-style: one column up to three, front 2 / back 3 beyond that, and a
+            // boss alone at the back with its escort in front (see EnemyFormation).
+            int bossIndex = enemies.FindIndex(u => u is Enemy e && e.IsBoss);
+            float bossHalfWidth = bossIndex >= 0
+                ? StageHalfWidth(enemies[bossIndex])
+                : EnemyFormation.DefaultBossHalfWidth;
+            var enemySlots = EnemyFormation.Layout(enemies.Count, bossIndex, halfW, halfH, bossHalfWidth);
 
             party.HidePartyForCombat();
             for (int i = 0; i < heroes.Count; i++)
             {
-                PlaceUnit(heroes[i], heroSlots[i], faceRight: true, isHero: true);
+                PlaceUnit(heroes[i], heroSlots[i], faceRight: true, isHero: true, scale: 1.5f, sortingOrder: UnitSortOrder);
             }
             for (int i = 0; i < enemies.Count; i++)
             {
-                PlaceUnit(enemies[i], enemySlots[i], faceRight: false, isHero: false);
+                var slot = enemySlots[i];
+                var position = new Vector3(anchor.x + slot.Offset.x, centerY + slot.Offset.y, -1f);
+                // A nearer rank draws over the one behind it, where a large boss overlaps its escort.
+                PlaceUnit(enemies[i], position, faceRight: false, isHero: false,
+                    scale: EnemyStageScale(enemies[i]), sortingOrder: UnitSortOrder + MaxRanks - slot.Rank);
             }
+        }
+
+        /// <summary>Enemies double their out-of-combat scale on the stage, times their CombatScale.</summary>
+        private static float EnemyStageScale(ICombatUnit unit)
+        {
+            float combatScale = unit is Enemy enemy && enemy.Definition != null
+                ? enemy.Definition.CombatScale
+                : 1f;
+            return 2f * combatScale;
+        }
+
+        /// <summary>Half the width an enemy will have once placed — read before it is rescaled.</summary>
+        private static float StageHalfWidth(ICombatUnit unit)
+        {
+            var sr = unit.Transform != null ? unit.Transform.GetComponent<SpriteRenderer>() : null;
+            if (sr == null || sr.sprite == null)
+            {
+                return EnemyFormation.DefaultBossHalfWidth;
+            }
+            return sr.bounds.extents.x * EnemyStageScale(unit);
         }
 
         /// <summary>
@@ -204,21 +237,15 @@ namespace Assets.Scripts.Combat
         private static List<Vector3> BuildColumn(float x, float centerY, int count, float halfH)
         {
             var slots = new List<Vector3>();
-            if (count <= 0)
+            foreach (float y in EnemyFormation.ColumnYs(count, halfH))
             {
-                return slots;
-            }
-            float spacing = Mathf.Min(halfH * 0.5f, (halfH * 1.3f) / count);
-            float topOffset = (count - 1) / 2f;
-            for (int i = 0; i < count; i++)
-            {
-                float y = centerY + (topOffset - i) * spacing;
-                slots.Add(new Vector3(x, y, -1f));
+                slots.Add(new Vector3(x, centerY + y, -1f));
             }
             return slots;
         }
 
-        private void PlaceUnit(ICombatUnit unit, Vector3 slot, bool faceRight, bool isHero)
+        /// <param name="scale">Multiplier on the unit's out-of-combat scale.</param>
+        private void PlaceUnit(ICombatUnit unit, Vector3 slot, bool faceRight, bool isHero, float scale, int sortingOrder)
         {
             var tr = unit.Transform;
             var sr = tr.GetComponent<SpriteRenderer>();
@@ -242,9 +269,7 @@ namespace Assets.Scripts.Combat
             tr.position = slot;
 
             // Make unit larger during combat
-            tr.localScale = isHero
-                ? rec.OrigScale * 1.5f
-                : rec.OrigScale * 2f;
+            tr.localScale = rec.OrigScale * scale;
 
             if (sr != null)
             {
@@ -253,7 +278,7 @@ namespace Assets.Scripts.Combat
                     sr.enabled = true;
                 }
 
-                sr.sortingOrder = UnitSortOrder;
+                sr.sortingOrder = sortingOrder;
                 sr.flipX = !faceRight;
             }
         }

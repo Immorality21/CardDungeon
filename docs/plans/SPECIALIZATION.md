@@ -455,7 +455,7 @@ amounts to build here:
 | model | lineage | what it is | cost against this codebase |
 |---|---|---|---|
 | **A special attack** | FF7—FF9 | Cast it, a big scripted effect resolves, it is over. No unit, no turn order, no HP bar. | **Cheapest by a wide margin.** Close to a `MagicSO` with a large effect plus presentation. Almost no combat surgery. |
-| **A temporary extra combatant** | loosely FFX-adjacent | A `SummonUnit : ICombatUnit` on the hero side, scheduled by `TurnManager` on its own Agility, acting N turns then leaving. | Moderate. Reuses `ICombatUnit` and the scheduler, but needs stage slotting, `MaxBodiesPerRoom` (6, §5s) headroom, and dismissal rules. |
+| **A temporary extra combatant** | loosely FFX-adjacent | A `SummonUnit : ICombatUnit` on the hero side, scheduled by `TurnManager` on its own Agility, acting N turns then leaving. | Moderate. Reuses `ICombatUnit` and the scheduler, but needs stage slotting, `MaxBodiesPerRoom` (5, §5s) headroom, and dismissal rules. |
 | **A replacement** | FFX Aeons | The party leaves the turn order and becomes untargetable; the summon fights alone with its own HP bar. | **Most surgery.** Turn order, targeting, HP, dismissal and defeat all become special cases. |
 
 **Two things are worth knowing before picking, and neither settles it.**

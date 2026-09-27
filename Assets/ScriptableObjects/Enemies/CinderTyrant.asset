@@ -14,10 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: CinderTyrant
   DisplayName: Cinder Tyrant
-  Sprite: {fileID: 21300000, guid: c63e0d29d5d04db3b133f261668e6868, type: 3}
-  AnimationFrames: []
-  AnimationFps: 8
+  Sprite: {fileID: 21300000, guid: 4640b138664a46cd7c066aeaed793ae9, type: 3}
+  AnimationFrames:
+  - {fileID: -4302498115785199938, guid: d1eb56a02aa3e322ca362e71ef8fdf0e, type: 3}
+  - {fileID: -2601255704998053450, guid: d1eb56a02aa3e322ca362e71ef8fdf0e, type: 3}
+  - {fileID: 765798236893243309, guid: d1eb56a02aa3e322ca362e71ef8fdf0e, type: 3}
+  AnimationFps: 4
   IsBoss: 1
+  CombatScale: 1.8
   BaseStats:
     Values:
     - Type: 1

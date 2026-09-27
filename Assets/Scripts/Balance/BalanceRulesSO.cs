@@ -76,13 +76,12 @@ namespace Assets.Scripts.Balance
         public float MinMeaningfulDanger = 0.08f;
 
         [Tooltip("Most enemies a room may put on screen at once, counting a worst-case spawn roll " +
-                 "and a boss's escort. Six is not a difficulty number - it is what the battle stage " +
-                 "fits. CombatStage.BuildColumn spaces enemies at min(halfH*0.5, halfH*1.3/count), " +
-                 "so at the default orthographic size of 5 that is 1.08 units at six bodies against " +
-                 "1-unit sprites; at seven it is 0.93 and they overlap. Difficulty rides on the " +
-                 "strength ratio instead (see docs/BALANCING.md §5s), which has no ceiling as long " +
-                 "as hero power grows with it.")]
-        [Min(1)] public int MaxBodiesPerRoom = 6;
+                 "and a boss's escort. Five is not a difficulty number - it is the formation the battle " +
+                 "stage is designed for (EnemyFormation): Final-Fantasy ranks of two in front and three " +
+                 "behind, or a boss at the back with up to four escorts ranked in front of it. Difficulty " +
+                 "rides on the strength ratio instead (see docs/BALANCING.md §5s), which has no ceiling " +
+                 "as long as hero power grows with it.")]
+        [Min(1)] public int MaxBodiesPerRoom = 5;
 
         [Header("Enemy casting — spells thrown from the enemy's own repertoire")]
         [Tooltip("Largest share of its turns an enemy should spend casting — the ChanceGate on its " +

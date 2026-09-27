@@ -15,8 +15,11 @@ MonoBehaviour:
   Key: SlagHound
   DisplayName: Slag Hound
   Sprite: {fileID: 21300000, guid: 17fe0225aca8418485ad47a1cda56a63, type: 3}
-  AnimationFrames: []
-  AnimationFps: 8
+  AnimationFrames:
+  - {fileID: -38479400772845821, guid: 3fc8f2c7719b7b6a958f1bb626bdb25c, type: 3}
+  - {fileID: -4122340623584472579, guid: 3fc8f2c7719b7b6a958f1bb626bdb25c, type: 3}
+  - {fileID: 3776541782682343308, guid: 3fc8f2c7719b7b6a958f1bb626bdb25c, type: 3}
+  AnimationFps: 4
   IsBoss: 0
   BaseStats:
     Values:

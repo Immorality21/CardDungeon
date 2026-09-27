@@ -25,7 +25,17 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
   raises a full-viewport **background** (sortingOrder 400, parented to the camera; solid fill or
   a `_backgroundArt` sprite) that hides the dungeon, and relocates alive units into columns:
   **heroes left (facing right), enemies right (facing left)**, bumping their sprite sortingOrder
-  to **600** (mandatory — enemies default to 5, *below* the background). It moves the existing
+  to **600+** (mandatory — enemies default to 5, *below* the background).
+  **Enemy formation** is `EnemyFormation.Layout` (pure, `EnemyFormationTests`): up to 3 enemies in
+  one column; 4–5 in FF ranks — a **front** rank of 2 nearest the party and a **back** rank of the
+  rest, filled in `room.Enemies` order; a **boss** (`EnemySO.IsBoss`) alone at the back, centred,
+  with its escort ranked in front (one column up to 3, 2 + 2 for four). The escort is placed
+  **relative to the boss's measured width** (`EscortGap` 0.4 from its edge), not at a fixed screen
+  column, so a lone add stands beside the boss instead of floating mid-stage. The boss sits at 62%
+  of the half-width, clear of the default background's right-hand pillar. Nearer ranks sort higher
+  (602/601/600) so they draw over a large boss. Enemies are scaled ×2 × **`EnemySO.CombatScale`**
+  (1 by default; the Abyssal Warden is 1.8 ≈ 3 units tall). Five bodies is the design size —
+  `BalanceRulesSO.MaxBodiesPerRoom`. It moves the existing
   unit Transforms rather than making new sprites, so `UnitHealthBar`, `CombatFeedback`,
   `FloatingText`, and the lunge all keep working at the new positions. `End(restoreEnemyPositions)`
   restores sorting/facing, lowers the background, unfreezes the camera, and returns heroes to the

@@ -32,12 +32,33 @@ costs one.
 | unit | canvas | PPU | combat size | notes |
 |---|---|---|---|---|
 | **Heroes** | **32×32** | 32 | 1.5 units (the party scales heroes ×1.5) | all heroes, 3-frame 96×32 strips |
-| Most enemies | 32×32 | 32 | 1 unit | |
-| Abyssal Warden, Dark Jailor | 64×64 | **38** | 1.68 units | PixelLab leaves padding round the figure; at PPU 64 they rendered at half hero height |
+| **Normal enemies** | **32×32** | 32 | 1 unit | the rule (user, 2026-09-27): regular enemies are 32×32 |
+| **Bosses / complex enemies** | **64×64** allowed | **38** | 1.68 units (×1.8 `CombatScale` ≈ 3 on the stage) | Abyssal Warden, Cinder Tyrant. PixelLab leaves padding round the figure; at PPU 64 it rendered at half hero height. Bosses are *meant* to take more screen space than that — see §2b |
+
+The **Dark Jailor** (a normal, non-boss enemy) was made at 64×64 before this rule was stated, so
+it is currently the exception.
 
 **Before generating a replacement, read the size of the sprite it replaces and of its siblings,
 and generate at that size.** A 64×64 Paladin was nearly generated on the assumption heroes matched
 the new enemies; they do not.
+
+### 2b. How combat sizes and places units (`Combat/CombatStage.cs`)
+
+- `PlaceUnit` rescales every unit for the fight: heroes ×1.5 and enemies ×2 of their scale outside
+  combat (the shared enemy prefab is 0.5, so enemies land at 1.0).
+- Enemies are **mirrored** (`flipX = true`) so they face the heroes. **Author enemies facing right
+  (or dead front).** A "front view" prompt often comes back turned slightly left; after the flip
+  that enemy looks away from the party (the Bog Shaman did — fixed by mirroring each frame of its
+  PNGs in place, which keeps the meta and slicing). `Capture2DScene` **does** render `flipX` (tested),
+  so the combat capture is the truth — but a 32 px quadruped is easy to misread at capture scale:
+  crop and upscale the unit before judging which end is the head (the old Slag Hound was wrongly
+  reported as facing away). To predict it from the PNG alone: combat shows it **mirrored**.
+- Heroes stand in one column. Enemies use `EnemyFormation`: one column up to three, FF ranks of
+  2 front / 3 back for four or five, and a **boss alone at the back** with its escort in front.
+  Column slots are `min(halfH × 0.5, halfH × 1.3 / count)` apart (2.17 units for three).
+- **Boss size is `EnemySO.CombatScale`**, not PPU: the Warden is 1.8 × its 1.68 units ≈ 3 units,
+  twice a hero. Keep normal enemies at 1 — they share a column and a bigger one overlaps.
+- The health bar anchors on `SpriteRenderer.bounds`, so it follows a bigger sprite automatically.
 
 Combat size = `canvas px / PPU × transform scale`. If a new enemy looks small next to the heroes,
 lower its PPU (all of its sprite files, static and strip) rather than touching the shared
@@ -144,6 +165,12 @@ walk the doors, `StartCombat`):
 
 - To see a specific enemy, clear the target room and `EnemyManager.SpawnSingle(so, room)` before
   walking in.
+- **A test fight writes the bestiary.** `CombatManager.RecordEnemySeen` marks every enemy in the
+  fight as seen and saves `savedata/Meta.json` immediately, so spawning an enemy for a visual check
+  reveals it in the player's bestiary. Tell the user which enemies a test fight exposed.
+- To see a hero who is not in the default party (Warrior + Paladin), call
+  `GameManager.Instance.Party.AddHero(heroSO)` before walking in. It is in memory only — the party
+  is written to disk only by `CommitProgress` on a level clear — so the test does not touch the save.
 - **Size:** `Capture2DScene` over the whole encounter and compare against the heroes, plus read
   `SpriteRenderer.bounds.size`. This is what caught the half-height Warden.
 - **Animation — don't sample from separate commands.** Commands are roughly a whole number of

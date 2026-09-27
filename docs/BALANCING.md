@@ -48,7 +48,7 @@ number was arrived at.
 | constant | value | set by |
 |---|---|---|
 | `MinGridShareForLastFloor` | floor **15%**, currently **37%** | §0 rule 5 |
-| `MaxBodiesPerRoom` | **6** | §5s |
+| `MaxBodiesPerRoom` | **5** (was 6) | §5s, formation 2026-09-27 |
 | `InvestmentPointsPerGold` | **1.4**, charged **per hero** | §5q |
 | `ChainBias` | **0.90 / 0.95** (was 0.667) | §5m, applied §5r |
 
@@ -2068,18 +2068,21 @@ strength as *pinned* at the 3-hit floor today, and the reason is that hero HP to
 **A much larger sphere grid is precisely what buys the headroom to keep raising enemy numbers.** The
 two things the user asked for in the same breath are the same mechanism.
 
-### Bodies are capped at 6, and it is a presentation rule
+### Bodies are capped at 5, and it is a presentation rule
 
-`BalanceRulesSO.MaxBodiesPerRoom = 6`, with an `EvaluateLevel` finding when a worst-case roll (or a
-boss escort) exceeds it. It is deliberately **not** a difficulty number:
+`BalanceRulesSO.MaxBodiesPerRoom = 5`, with an `EvaluateLevel` finding when a worst-case roll (or a
+boss escort) exceeds it. It is deliberately **not** a difficulty number.
 
-`CombatStage.BuildColumn` spaces enemies at `min(halfH*0.5, halfH*1.3/count)`. At the default
-orthographic size of 5 that is **1.08 units at six bodies** against 1-unit-tall sprites — 8%
-clearance. At seven it is 0.93 and the sprites overlap. So six is what the battle stage fits, and
-the rule records a constraint that already existed rather than inventing one.
+It was 6 while `CombatStage` stood every enemy in one column (`min(halfH*0.5, halfH*1.3/count)`
+apart: 1.08 units at six bodies against 1-unit sprites, 0.93 and overlapping at seven). On
+2026-09-27 the user set the stage to **Final-Fantasy ranks with a maximum of five**
+(`Combat/EnemyFormation.cs`): up to three in one column, four or five as a front rank of two and a
+back rank of the rest, and a boss alone at the back with up to four escorts ranked in front of it.
+Five is the formation's design size, so it is the cap. A sixth body still gets a slot (3 + 3) — the
+cap is a warning, not a crash.
 
 It also happens to be where the danger arithmetic lands: six *regular* enemies would score ~2.0,
-twice past the unwinnable ceiling. Six can only ever mean **two or three real enemies plus filler**,
+twice past the unwinnable ceiling. Five or six can only ever mean **two or three real enemies plus filler**,
 which is exactly the shape §5r shipped (Ledger Hall: 2 real + 3 Motes at 0.82). Read the cap as
 "at most three enemies that matter, plus texture".
 

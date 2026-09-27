@@ -1,19 +1,16 @@
 fileFormatVersion: 2
-guid: f77c465981940954fbc186b265760637
+guid: 7420d29ae99a5dec9bc9ed1d9ddd5c11
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5994531514436782396
-    second: green-slime_0
+      213: -4488529334945799317
+    second: bog-shaman-idle_0
   - first:
-      213: 4311501733960627359
-    second: green-slime_1
+      213: 3355644420452708576
+    second: bog-shaman-idle_1
   - first:
-      213: 9106924797852624728
-    second: green-slime_2
-  - first:
-      213: -8396540761149796143
-    second: green-slime_3
+      213: -565822255482498384
+    second: bog-shaman-idle_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -92,143 +89,94 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Standalone
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: green-slime_0
+      name: bog-shaman-idle_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 30
-        height: 26
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4c67c1719552fcca0800000000000000
-      internalID: -5994531514436782396
+      spriteID: 5c8765cfbc1c9b6e8421fd150cb705af
+      internalID: -4488529334945799317
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: green-slime_1
-      rect:
-        serializedVersion: 2
-        x: 2
-        y: 18
-        width: 14
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f943435dbf785db30800000000000000
-      internalID: 4311501733960627359
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: green-slime_2
+      name: bog-shaman-idle_1
       rect:
         serializedVersion: 2
         x: 32
-        y: 1
-        width: 31
-        height: 31
+        y: 0
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 857a3346adb426e70800000000000000
-      internalID: 9106924797852624728
+      spriteID: 12a8346c4e48ab3c7b02347c0348065c
+      internalID: 3355644420452708576
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: green-slime_3
+      name: bog-shaman-idle_2
       rect:
         serializedVersion: 2
-        x: 66
+        x: 64
         y: 0
-        width: 29
-        height: 30
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1d0149d1aae797b80800000000000000
-      internalID: -8396540761149796143
+      spriteID: 10339ab3cb2b410a2a5f5bf925d473b9
+      internalID: -565822255482498384
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     outline: []
-    customData: 
+    customData:
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID:
     internalID: 0
     vertices: []
-    indices: 
+    indices:
     edges: []
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      green-slime_0: -5994531514436782396
-      green-slime_1: 4311501733960627359
-      green-slime_2: 9106924797852624728
-      green-slime_3: -8396540761149796143
-  mipmapLimitGroupName: 
+      bog-shaman-idle_0: -4488529334945799317
+      bog-shaman-idle_1: 3355644420452708576
+      bog-shaman-idle_2: -565822255482498384
+  mipmapLimitGroupName:
   pSDRemoveMatte: 0
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
+  userData:
+  assetBundleName:
+  assetBundleVariant:
