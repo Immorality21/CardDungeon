@@ -87,6 +87,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Balancing playbook** (how the levers interact, the measure-don't-guess workflow, what past tuning passes learned) → `docs/BALANCING.md` — read this *before* changing a `Difficulty`, a hero bar or a spawn table, and record what a pass learned there afterwards
 - **Elemental layer roadmap** (resistance buffs, defensive magic, the discovery-gated reveal) → `docs/ELEMENTAL_PLAN.md`
 - **Runtime/visual validation via the Unity MCP** (drive the running game, capture screenshots) → `docs/GAMEPLAY_VALIDATION.md`
+- **Sprites and pixel art** (PixelLab MCP generation, sizes per unit type, idle strips, importing, verifying in combat, the no-generations fallback) → `docs/PIXEL_ART.md` — read it before generating or replacing any sprite
 
 ### Key Patterns
 
