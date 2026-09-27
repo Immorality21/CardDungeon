@@ -114,6 +114,7 @@ the intended behaviour, not a bug to design around.
   before generation, which covers ordinary spawns, the boss, and anything a room event wakes. A
   freshly authored level is `Difficulty 1` with nothing else set, i.e. exactly the template. See
   `Assets/Scripts/Enemies/CLAUDE.md`.
+- **Tooling hand-offs** (used by the sandbox, `docs/SANDBOX.md`): `PartyOverride` fields a given hero list instead of the save's selection (so a hero outside `PartyRosterSO` can play), `SeedOverride` fixes a fresh free-play seed, and the static `FreshDungeonSpawned(rooms, startRoom)` event fires once a fresh floor is built and the party placed, just before it enters the start room — the one moment rooms can be restocked unseen. Not raised on a resume. Null/unset in normal play.
 - **Procedural levels:** `RunLevelEntry.ManualLayout` left null — generates a dungeon from `LevelTemplate` using the procedural pipeline (see the Rooms guide).
 
 ## Deferred Persistence

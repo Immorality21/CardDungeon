@@ -50,6 +50,10 @@ namespace Assets.Scripts.Dungeon
         /// </summary>
         private List<HeroSO> FieldedHeroes()
         {
+            if (PartyOverride != null && PartyOverride.Count > 0)
+            {
+                return PartyOverride;
+            }
             if (_partyRoster != null && _partyRoster.Heroes.Count > 0)
             {
                 var selected = HeroRoster.GetSelectedHeroes(_partyRoster, PartyCap());
@@ -95,6 +99,24 @@ namespace Assets.Scripts.Dungeon
         public static LevelDefinitionSO LevelToLoad;
         public static RunDefinitionSO ActiveRun;
         public static int RunLevelIndex;
+
+        /// <summary>
+        /// Tooling hand-off (the sandbox): when non-empty, these heroes enter the dungeon instead of
+        /// the save's selected party — including heroes not in the roster catalog yet. Their XP and
+        /// nodes still come from <c>Party.json</c> as usual. Null in normal play.
+        /// </summary>
+        public static List<HeroSO> PartyOverride;
+
+        /// <summary>Tooling hand-off: the seed a freshly generated free-play dungeon uses, when set.
+        /// Ignored when resuming a saved dungeon.</summary>
+        public static int? SeedOverride;
+
+        /// <summary>
+        /// Raised once a fresh dungeon is fully built and the party placed, just before the party
+        /// enters the start room — the last moment rooms can be restocked unseen. Hands over the
+        /// rooms (index order) and the start room. Not raised on a resume.
+        /// </summary>
+        public static event System.Action<List<Room>, Room> FreshDungeonSpawned;
 
         /// <summary>True when the active run is on its last level (drives the run-complete fanfare).</summary>
         public static bool IsFinalRunLevel =>
@@ -274,6 +296,10 @@ namespace Assets.Scripts.Dungeon
             {
                 seed = saveData.Seed;
             }
+            else if (SeedOverride.HasValue && SeedOverride.Value != 0)
+            {
+                seed = SeedOverride.Value;
+            }
             else if (seed == 0)
             {
                 seed = System.Guid.NewGuid().GetHashCode();
@@ -434,6 +460,8 @@ namespace Assets.Scripts.Dungeon
                 runSave.ActiveDungeonSeed = seed;
                 _fileHandler.Save(runSave);
             }
+
+            FreshDungeonSpawned?.Invoke(rooms, startRoom);
 
             GameManager.Instance.EnterRoom(startRoom);
         }

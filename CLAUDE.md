@@ -65,6 +65,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 - `Progression/` — `MetaProgressManager` (persistent Gold/Essence + per-card upgrade levels), `MetaProgressSaveData`, `BestiaryEntry`/`BestiaryOps` (the permanent enemy-knowledge record)
 - `Hub/` — **the town between runs**: `HubManager` (the hub scene's controller), the building model (`HubSO` + `BuildingSO` + the pure `BuildingOps`), `UI/HubView` + `UI/HubPresenter` (the painted town), and the screens that hang off it — `MerchantUI`, `PartySelectUI` (the campfire), `CampaignMapUI` (the story map / run selection). The Forge, Bestiary, Inventory and Sphere Grid live with their subsystems but are driven from here
 - `MainMenu/` — the **title screen** only: `MainMenuManager` (Continue / Options / Quit) and `AudioOptionsUI`
+- `Sandbox/` — **quick-test sessions**: `SandboxConfigSO` (party, grid unlocks, abilities, floor, encounter), the pure `SandboxSetup`, `SandboxSession` (throwaway save folder + encounter placement), `SandboxBootstrap`, and `Editor/` (`Tools ▸ Sandbox`, `SandboxLauncher`). See `docs/SANDBOX.md`
 - `Balance/` — Balance analysis model (`BalanceRulesSO` targets, `BalanceMath`, `EncounterModel`, `RunCurveModel`, `RoomEventModel`, `VarietyAnalyzer`, `ProgressionMap`, `EncounterSimulator`, `GearLoadout`, `InvestmentFrontier`, `SaveAudit`, `BalanceAnalyzer`) + the `Tools ▸ Balance ▸ Balance Analyzer` editor window
 
 ### Subsystem Guides
@@ -87,6 +88,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Balancing playbook** (how the levers interact, the measure-don't-guess workflow, what past tuning passes learned) → `docs/BALANCING.md` — read this *before* changing a `Difficulty`, a hero bar or a spawn table, and record what a pass learned there afterwards
 - **Elemental layer roadmap** (resistance buffs, defensive magic, the discovery-gated reveal) → `docs/ELEMENTAL_PLAN.md`
 - **Runtime/visual validation via the Unity MCP** (drive the running game, capture screenshots) → `docs/GAMEPLAY_VALIDATION.md`
+- **Sandbox — quick-test a party against an encounter** (`Tools ▸ Sandbox`: chosen heroes with XP/grid unlocks/abilities, a floor, up to five enemies next door, against a throwaway save folder; `SandboxLauncher.Launch` from a script or the MCP) → `docs/SANDBOX.md` — use it instead of hand-spawning enemies when validating heroes, abilities, enemies or formations
 - **Sprites and pixel art** (PixelLab MCP generation, sizes per unit type, idle strips, importing, verifying in combat, the no-generations fallback) → `docs/PIXEL_ART.md` — read it before generating or replacing any sprite
 
 ### Key Patterns
@@ -116,4 +118,6 @@ loading a scene + entering play mode, BFS-ing the door graph and walking it via 
 starting combat, applying feedback, and capturing screenshots with `Capture2DScene` (plus the
 `RunCommand` sandbox gotchas: no `System.Reflection`, `HashSet`→`List`, `GetInstanceID`
 obsolete) — is documented in **`docs/GAMEPLAY_VALIDATION.md`**. Read it before driving the
-editor.
+editor. **To test a specific party, hero build, ability or enemy, launch the sandbox**
+(`SandboxLauncher.Launch(configPath)`, `docs/SANDBOX.md`) instead of hand-spawning enemies: it is
+repeatable, logs a setup report, and runs against a throwaway save folder.

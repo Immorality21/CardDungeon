@@ -9,9 +9,29 @@ namespace Assets.Scripts.IO
 
         private readonly string _directoryPath;
 
+        /// <summary>
+        /// When set, every <see cref="FileHandler"/> created afterwards reads and writes here instead
+        /// of <see cref="DefaultDirectory"/>. The sandbox points it at a throwaway folder so a test
+        /// session can never touch the player's save. Null means the real save folder.
+        /// </summary>
+        public static string DirectoryOverride { get; set; }
+
+        /// <summary>The player's real save folder.</summary>
+        public static string DefaultDirectory => $"{Application.persistentDataPath}/savedata";
+
+        /// <summary>The folder a handler created now would use.</summary>
+        public static string CurrentDirectory =>
+            string.IsNullOrEmpty(DirectoryOverride) ? DefaultDirectory : DirectoryOverride;
+
         public FileHandler()
         {
-            _directoryPath = $"{Application.persistentDataPath}/savedata";
+            _directoryPath = CurrentDirectory;
+        }
+
+        /// <summary>A handler bound to one folder, whatever the override says.</summary>
+        public FileHandler(string directoryPath)
+        {
+            _directoryPath = directoryPath;
         }
 
         public void Save(IWriteable writeable)

@@ -159,7 +159,10 @@ for k, f in enumerate([f0, dip, other_frame]):
 
 ## 7. Verifying — in a fight, not in the importer
 
-Import checks prove the references resolve; they do not prove it looks right. Do the combat run in
+Import checks prove the references resolve; they do not prove it looks right. **Use the sandbox**
+(`docs/SANDBOX.md`): put the unit in a config, `SandboxLauncher.Launch`, press Fight — it is
+repeatable and writes to a throwaway save, so it does not reveal the enemy in the player's bestiary
+(the side effect noted below applies to the hand-spawned route only). Otherwise do the combat run in
 `docs/GAMEPLAY_VALIDATION.md` (open `MainGameScene`, play, `runInBackground`, BFS to an enemy room,
 walk the doors, `StartCombat`):
 

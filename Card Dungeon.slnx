@@ -7,6 +7,7 @@
   <Project Path="CardDungeon.Cards.Editor.csproj" />
   <Project Path="CardDungeon.Rooms.Editor.csproj" />
   <Project Path="CardDungeon.MainMenu.Editor.csproj" />
+  <Project Path="CardDungeon.Sandbox.Editor.csproj" />
   <Project Path="CardDungeon.Items.Editor.csproj" />
   <Project Path="CardDungeon.UnitStats.Editor.csproj" />
   <Project Path="CardDungeon.ImmoralityGaming.Editor.csproj" />

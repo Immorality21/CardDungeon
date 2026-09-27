@@ -8,9 +8,27 @@ Everything not on a live thread: battle and room polish, the information the pla
 
 ### 1. Battle polish — remaining follow-ups
 
-Tiers 1–4 shipped (audio + music bed + volume options; turn indicator, idle motion, projectiles;
+Tiers 1–4 shipped (audio + music bed + volume options; turn indicator, projectiles;
 crits, resistance popups, boss telegraphs, combo flourish; victory/defeat framing, zoom-punch,
-per-level backdrops). What is left:
+per-level backdrops). The procedural "breathing" idle (`CombatIdleMotion`) was **removed 2026-09-27**
+in favour of per-unit sprite idles, and the stage gained FF ranks and large bosses
+(`EnemyFormation`, `EnemySO.CombatScale`). What is left:
+
+- **The art pass is half done** *(2026-09-27, `docs/PIXEL_ART.md`)*. New PixelLab sprites with
+  3-frame idles: Paladin, Rogue; Abyssal Warden, Cinder Tyrant, Dark Jailor, Dragon, Cinder Imp,
+  Bog Shaman, Slag Hound. Still to do:
+  - **Five enemies have no idle frames and now stand completely still** — Gilded Hoarder,
+    Mirefather, Gilded Mote, Hex Weaver, Stone Sentinel. The breathing pulse used to hide this.
+  - **Mirefather and Gilded Hoarder are bosses at 64 px @ 64 PPU with `CombatScale` 1**, so they
+    render at 1 unit — smaller than the Warden and Tyrant (≈3). Re-import at 38 PPU + `CombatScale`
+    1.8, or redraw.
+  - **Warrior, Cleric, Ranger, Cultist and Tinkerer keep the original flat style** (~10 colours
+    against PixelLab's ~40), so the party is visibly two styles until they are redone. The user is
+    doing these one by one.
+  - **The Dark Jailor is 64 px although it is not a boss** — made before the size rule; a 32 px
+    redraw would match the convention.
+  - PixelLab can also animate attacks and hits (`animate_image` with an action), which would answer
+    the "no hit reaction, no death animation" item below without an Animator.
 
 - **A dedicated heal/buff flourish.** Heals still just show green rising text.
 - **Element-tinted damage numbers** per `DamageType`, and richer per-element cast visuals. Pair with

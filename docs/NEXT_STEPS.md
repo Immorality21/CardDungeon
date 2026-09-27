@@ -207,7 +207,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped |
+| **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped; **art pass half done** (2026-09-27) — five enemies still have no idle, two bosses still small |
 | **2** | Room variety — the branching half has not shipped | open; **unblocked** by the map (§14a) |
 | **6** | Stats — one open note (`BuffType` is a second per-stat list) | structural |
 | **8** | Migrate to the new Input System | *nice to have* |
@@ -226,6 +226,28 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **A sandbox for quick tests** (2026-09-27) — `docs/SANDBOX.md`. `Tools ▸ Sandbox` (or
+  `SandboxLauncher.Launch` from a script / the Unity MCP) runs `MainGameScene` with a configured
+  party — any hero, XP bank, a greedy grid spend, "unlock the path to node X", abilities, gear — a
+  chosen floor and up to five enemies one door from the start, and logs a setup report of what the
+  party actually has. **Isolation is the save folder** (`FileHandler.DirectoryOverride` →
+  `savedata_sandbox`), so nothing has to remember not to save; verified by hashing all 25 real save
+  files before and after a run. The config is turned into ordinary save files, so the dungeon boots
+  exactly as after the hub. New hooks: `DungeonManager.PartyOverride` / `SeedOverride` /
+  `FreshDungeonSpawned`, `SphereGridOps.PathTo`. 16 tests (`SandboxSetupTests`).
+- **FF ranks and large bosses on the battle stage** (2026-09-27) — Combat guide, `BALANCING.md` §5s.
+  `EnemyFormation` (pure, 15 tests): one column up to three, **front 2 / back 3** for four or five,
+  and a **boss alone at the back** with its escort placed just clear of its measured width.
+  `EnemySO.CombatScale` sizes a boss on the stage (Warden and Tyrant 1.8 ≈ 3 units, twice a hero)
+  without re-importing its sprite. `MaxBodiesPerRoom` **6 → 5**, the formation's design size; no
+  room in the campaign exceeds it.
+- **PixelLab art pass, part one** (2026-09-27) — `docs/PIXEL_ART.md`. The PixelLab MCP replaces
+  hand-placed pixel grids (the `pixel-art` skill falls back to those, with a warning, when out of
+  generations). New sprites and 3-frame idles for the Paladin, Rogue, Abyssal Warden, Cinder Tyrant,
+  Dragon (which had been drawn as a green slime), Cinder Imp, Bog Shaman, Slag Hound, and a new enemy,
+  the **Dark Jailor** (not yet placed in any spawn table). `CombatIdleMotion`'s scale pulse was
+  removed — it stretched the new art — so a unit without idle frames now stands still; the
+  leftovers are listed in `POLISH_CONTENT.md` §1.
 - **Healing potions stop being a net loss** (2026-09-17) — `docs/BALANCING.md` §5v,
   `POLISH_CONTENT.md` §18b. Reported as "stale"; measurement said something sharper. A potion is
   spent as a **whole combat action**, so it competes against the *turn*, not against the health bar:

@@ -276,6 +276,11 @@ cluster within ~1.5 units of each other. Good frames:
 
 ## End-to-end recipe: reach an enemy and validate combat
 
+> **To test a specific party or enemy, use the sandbox instead** (`docs/SANDBOX.md`):
+> `SandboxLauncher.Launch(configPath)` builds the party (XP, grid unlocks, abilities), puts the
+> encounter one door from the start, walks the party in and logs a setup report — against a
+> throwaway save folder. The recipe below is still how to reach a *randomly generated* fight.
+
 This is the exact flow that was validated. Each step is one `RunCommand` unless noted.
 
 ### 1. Load the scene and enter play mode

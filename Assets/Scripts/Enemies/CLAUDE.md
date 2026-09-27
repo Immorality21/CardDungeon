@@ -197,7 +197,7 @@ Two other things a new enemy owes:
 
 ## Sprites
 
-Every `EnemySO` now has its **own** sprite. They did not: `AbyssalWarden`/`StoneSentinel` shared one, `BogShaman`/`EyeBall`/`HexWeaver` a second, and `CinderImp`/`Dragon` a third, which made three pairs of enemies visually indistinguishable in combat. `CinderImp`, `BogShaman` and `StoneSentinel` were drawn fresh (32×32 @ 32 PPU, matching the other trash), the two new bosses at 64×64 @ 64 PPU (matching `AbyssalWarden`), and `HexWeaver` took the already-shipped but unused `evil_wizard.png`. Convention: **trash 32px, bosses 64px, both one world unit**, `filterMode: 0`, `alphaIsTransparency: 1`.
+Every `EnemySO` now has its **own** sprite. They did not: `AbyssalWarden`/`StoneSentinel` shared one, `BogShaman`/`EyeBall`/`HexWeaver` a second, and `CinderImp`/`Dragon` a third, which made three pairs of enemies visually indistinguishable in combat. `CinderImp`, `BogShaman` and `StoneSentinel` were drawn fresh (32×32 @ 32 PPU, matching the other trash), the two new bosses at 64×64 @ 64 PPU (matching `AbyssalWarden`), and `HexWeaver` took the already-shipped but unused `evil_wizard.png`. Convention (updated 2026-09-27): **normal enemies 32px @ 32 PPU; bosses may be 64px @ 38 PPU with `CombatScale` 1.8** (≈3 units on the battle stage, where a boss stands alone at the back — see the Combat guide's formation notes), `filterMode: 0`, `alphaIsTransparency: 1`. PixelLab art and its workflow: `docs/PIXEL_ART.md`.
 
 ## The bestiary — what the player has learned (`BestiaryPresenter`, `UI/`)
 

@@ -520,6 +520,57 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
+        /// The shortest chain of nodes from the start node to <paramref name="targetKey"/>, both
+        /// ends included, in walking order — so activating the keys in order is always legal. Ties
+        /// between equally short routes break on authored <see cref="SphereGridNode.Neighbors"/>
+        /// order, which keeps the answer stable. Empty when the target is missing or unreachable.
+        ///
+        /// <para>For tooling that needs "a hero who has walked to X" (the sandbox), not for the
+        /// spend path: it ignores prices entirely.</para>
+        /// </summary>
+        public static List<string> PathTo(SphereGridSO grid, string targetKey)
+        {
+            var path = new List<string>();
+            string start = StartKey(grid);
+            if (string.IsNullOrEmpty(start) || FindNode(grid, targetKey) == null)
+            {
+                return path;
+            }
+
+            var adjacency = BuildAdjacency(grid);
+            var previous = new Dictionary<string, string> { { start, null } };
+            var queue = new Queue<string>();
+            queue.Enqueue(start);
+            while (queue.Count > 0 && !previous.ContainsKey(targetKey))
+            {
+                var key = queue.Dequeue();
+                if (!adjacency.TryGetValue(key, out var neighbors))
+                {
+                    continue;
+                }
+                foreach (var neighbor in neighbors)
+                {
+                    if (!previous.ContainsKey(neighbor))
+                    {
+                        previous[neighbor] = key;
+                        queue.Enqueue(neighbor);
+                    }
+                }
+            }
+
+            if (!previous.ContainsKey(targetKey))
+            {
+                return path;
+            }
+            for (var key = targetKey; key != null; key = previous[key])
+            {
+                path.Add(key);
+            }
+            path.Reverse();
+            return path;
+        }
+
+        /// <summary>
         /// The authored price of a node <paramref name="depth"/> edges from the start.
         ///
         /// <para><b>Superlinear on purpose.</b> Before 2026-09-02 the whole spread was 15..80 — 5x
