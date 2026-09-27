@@ -1142,10 +1142,6 @@ namespace Assets.Scripts.Rooms
                 {
                     go.AddComponent<UnitHealthBar>();
                 }
-                if (go.GetComponent<CombatIdleMotion>() == null)
-                {
-                    go.AddComponent<CombatIdleMotion>();
-                }
             }
         }
 

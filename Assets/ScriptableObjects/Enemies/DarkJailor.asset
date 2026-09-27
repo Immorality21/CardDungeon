@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: DarkJailor
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: DarkJailor
+  DisplayName: Dark Jailor
+  Sprite: {fileID: 21300000, guid: d3c98afb59eae3bd22201a0801cea1e7, type: 3}
+  AnimationFrames:
+  - {fileID: -1983608949610995998, guid: a30405df323f28f49d795e71a095f4aa, type: 3}
+  - {fileID: -3319215666556881101, guid: a30405df323f28f49d795e71a095f4aa, type: 3}
+  - {fileID: -838176528892576004, guid: a30405df323f28f49d795e71a095f4aa, type: 3}
+  AnimationFps: 4
+  IsBoss: 0
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 5
+    - Type: 2
+      Amount: 7
+    - Type: 3
+      Amount: 3
+    - Type: 5
+      Amount: 2
+    - Type: 7
+      Amount: 24
+  XpReward: 18
+  GoldReward: 10
+  AttackDamageType: 1
+  Archetype: 1
+  Behavior: {fileID: 11400000, guid: e602d2dd20b3ca2d0987fa54679c2971, type: 2}
+  Spells:
+  - Magic: {fileID: 11400000, guid: 36201a51cb01429fbed42d98c1e23162, type: 2}
+    CastWeight: 1
+  - Magic: {fileID: 11400000, guid: 5a6c46af09324a6f933b7c6b755f387a, type: 2}
+    CastWeight: 1
+  Resistances:
+  - DamageType: 1
+    Percent: 50
+  - DamageType: 5
+    Percent: 30
+  - DamageType: 4
+    Percent: -40
+  LootTable:
+  - Item: {fileID: 11400000, guid: d584e10d49b161a4ebb6040a496455d6, type: 2}
+    Chance: 0
+    MinQuantity: 1
+    MaxQuantity: 1
+  - Item: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+    Chance: 0.4
+    MinQuantity: 1
+    MaxQuantity: 2
