@@ -387,64 +387,72 @@ CombatFeedback.Instance.PlayImpact(enemy, dmg, 1f);   // (ICombatUnit target, in
 > turn — the flow is `RoomActionUI` → `CombatManager.RequestAttackTargets` /
 > `SubmitAttackAction` → `ExecuteHeroTurn`/`ExecuteAttack` (see the Rooms + Combat guides).
 
-### 6. Drive the *real* combat UI (Fight → Attack → Draw → Cast)
+### 6. Drive the *real* combat UI (Fight → command menu → pickers)
 
-To exercise the genuine turn flow (not `StartCombat` directly), drive the RoomActionUI the way
-a player does. Two mechanisms, because the UI has two kinds of control:
+To exercise the genuine turn flow (not `StartCombat` directly), drive the combat UI the way a
+player does. *Rewritten 2026-09-28:* the letter hotkeys this section used to document (F/R on the
+start bar, A/M/D/S on the hero bar) were removed from `RoomActionUI`, and Draw no longer exists
+(scrapped 2026-09-04, `docs/plans/SPECIALIZATION.md` §9b). The only letter key left in a dungeon
+is **M** (the floor map); everything else is a cursor.
 
-**Fixed command buttons → keyboard hotkeys.** The command bars are UI Toolkit `Button`s. There
-is **no clean way to fire a `Button.clicked` from code** — `Button` reacts only through its
-`Clickable` pointer manipulator (a full pointer-down/up capture sequence); dispatching a
-`NavigationSubmitEvent` or a bare `ClickEvent` does **nothing**. So the project has **keyboard
-hotkeys** on `RoomActionUI` (added for exactly this, and a real player feature):
-
-| Key | Action | Bar |
-|-----|--------|-----|
-| `F` | Fight  | combat start bar |
-| `R` | Flee   | combat start bar |
-| `A` | Attack | hero command bar |
-| `M` | Magic (cast) | hero command bar (only if a spell is charged) |
-| `D` | Draw   | hero command bar (only if an enemy has drawable magic) |
-| `S` | Skip   | hero command bar |
-
-Two things make hotkeys work — **both are required**:
-
-1. **Focus.** UI Toolkit routes `KeyDownEvent` to the panel's **focused** element, *not* to
-   whatever element you call `SendEvent` on. With nothing focused, key events vanish. The
-   RoomActionUI root is `focusable` and calls `Focus()` whenever a combat bar appears
-   (`FocusRoot()` in `Show`/`OnHeroTurnStarted`). To drive from MCP, focus it yourself first.
-2. **Dispatch the key on a later frame than the one that showed the bar.** Hotkey guards read
-   `resolvedStyle.display`, which only updates after a layout pass — so a bar shown *this* frame
-   still reads `None` until *next* frame. Split "navigate/advance" and "press key" into separate
-   `RunCommand`s.
+**The Fight / Flee bar → press the button.** Send a `NavigationSubmitEvent` to `fight-btn` (or
+`flee-btn`) - gotcha 14. That is the same path Enter takes through the bar's `KeyboardNavigator`.
 
 ```csharp
-var root = Object.FindAnyObjectByType<RoomActionUI>(FindObjectsInactive.Include)
-                 .GetComponent<UIDocument>().rootVisualElement;
-root.Focus();                                   // keyboard now routes here
-using (var e = KeyDownEvent.GetPooled('f', KeyCode.F, EventModifiers.None))
+foreach (var doc in Object.FindObjectsByType<UIDocument>(FindObjectsInactive.Exclude))
 {
-    root.SendEvent(e);                          // fires OnCombatHotkey → OnFight → StartCombat
+    var b = doc.rootVisualElement?.Q<Button>("fight-btn");
+    if (b != null)
+    {
+        using (var e = NavigationSubmitEvent.GetPooled()) { e.target = b; b.SendEvent(e); }
+    }
 }
 ```
 
-Verified chain: press **F** → `InCombat` False→True (fan-out begins). Wait for the hero bar
-(`hero-title` = "…'s Turn", `hero-bar` display Flex). Press **A** → with a single enemy,
-`OnHeroAttack` auto-targets and runs the real `ExecuteAttack` — damage lands via
-`DamageCalculator` (observed EyeBall 15 → 6). The turn then advances to the next hero.
+**The hero command menu → ↑/↓ + Enter.** The menu is a cursor over rows built per hero
+(Attack / Ability / Summon / Item / Inspect / Skip; unavailable ones greyed). `OnCombatHotkey`
+handles **↑/↓** (`MoveCommandCursor`) and **Enter / Keypad Enter / Space** (`ConfirmCommand`) while
+`hero-bar` is shown. Send a `KeyDownEvent` to the `RoomActionUI` root; two things are required:
 
-**Dynamic selection sub-panels → `Submit*` methods.** Attack-target / magic-slot / draw pickers
-(`MagicSelectionUI`) are *dynamically generated lists*, not fixed buttons — hotkeys don't map to
-them. Press the command hotkey to open the picker (real UI), then finish the choice by calling
-the exact method the panel calls:
+1. **Focus.** UI Toolkit routes `KeyDownEvent` to the panel's **focused** element. The root is
+   `focusable` and focuses itself when a bar appears; from the MCP, `root.Focus()` first.
+2. **A later frame than the one that showed the bar.** The guards read `resolvedStyle.display`,
+   which only updates after a layout pass, so split "advance" and "press" into separate commands.
 
-- **Draw:** press `D` (opens the picker via `RequestDrawTargets`), then
-  `CombatManager.SubmitDrawAction(enemy, magic, charges, slotIndex)` — `magic` from
-  `enemy.DrawableMagics`, `slotIndex` from `DungeonManager.Instance.MagicState` (first empty
-  slot). Runs the real `ExecuteDrawAction` (+ marks the magic **discovered** in `Meta.json`).
-- **Cast:** press `M` (opens the slot picker via `RequestMagicSlots`), then
-  `CombatManager.SubmitCastAction(magic, slotIndex, caster, targets)` — resolves through
-  `EffectResolver` (combos, buffs, elemental damage) and spends a charge.
+The pickers that follow (attack target, ability slot, item, inspect target - `MagicSelectionUI`)
+are dynamic lists. Finish them by calling the method the row calls, below.
+
+**Or skip the menu and submit directly** - the right call for anything that is not *about* the
+menu. These are what the pickers call, so the resolution is the real one:
+
+| action | call |
+|---|---|
+| Attack | `CombatManager.SubmitAttackAction(target)` |
+| Ability | `CombatManager.SubmitCastAction(magic, slotIndex, caster, targets)` - resolves through `EffectResolver` (combos, buffs, elements) and spends a charge |
+| Item | `CombatManager.SubmitUseItemAction(item, target)` |
+| Summon | `CombatManager.SubmitSummonAction(slot)` |
+| Skip | `CombatManager.SubmitHeroAction(HeroAction.Skip)` |
+| Inspect | `CombatManager.RequestInspectTargets(hero, enemies)` - free, opens the page; hide `hero-bar` yourself first or the menu draws over it (the real command does) |
+
+**An auto-player for a whole fight.** Subscribe to `CombatManager.OnHeroTurnStarted` and submit
+from the handler; `OnTurnExecuted` hands you each turn's log line. Static handlers in the command
+survive until play mode ends. `Time.timeScale` speeds the fight up (hit-flashes run on unscaled time,
+so a very high scale can outrun them). This is how the threat system was checked - one hero attacking,
+one skipping, logging `CombatManager.ThreatOf(hero)` and who each enemy hit:
+
+```csharp
+internal static class Driver
+{
+    public static void OnHero(ICombatUnit unit)
+    {
+        var cm = CombatManager.Instance;
+        if (unit.DisplayName == "Warrior") { cm.SubmitAttackAction(cm.GetAliveEnemies().First()); }
+        else { cm.SubmitHeroAction(HeroAction.Skip); }
+    }
+    public static void OnTurn(string log) { Debug.Log("[Drive] " + log); }
+}
+// Execute: cm.OnHeroTurnStarted += Driver.OnHero; cm.OnTurnExecuted += Driver.OnTurn; then press Fight.
+```
 
 > ### ⚠️ `worldBound` is NOT `panel.Pick`'s coordinate space
 > Clicking `element.worldBound.center` works *sometimes*, which is worse than never. Measured on the
@@ -465,17 +473,14 @@ the exact method the panel calls:
 > that is the real dead-click bug, and it looks identical to this coordinate mismatch, so always
 > report which one you measured.
 
-> **Gotcha — don't leave the picker open.** `MagicSelectionUI` only closes its list/target
-> panels when *its own* rows are clicked. Opening it with `D`/`M` and then finishing via
-> `Submit*` (instead of clicking a row) leaves it open, and a stale panel carried into the next
-> turn jams input. `MagicSelectionUI` now force-closes its panels on `OnHeroTurnStarted` (and
-> `OnCombatEnded`) as a safeguard — but the clean way to drive is to call the `Submit*` method
-> **without** pressing `D`/`M` at all (no panel is opened, nothing to close). The hotkey press
-> is only worth including when you specifically want to exercise the picker opening.
+> **Gotcha — don't leave the picker open.** `MagicSelectionUI` closes its list/target panels when
+> *its own* rows are clicked. Opening a picker through the menu and then finishing with a `Submit*`
+> call leaves it open; it force-closes on `OnHeroTurnStarted` and `OnCombatEnded` as a safeguard,
+> but the clean way is to call `Submit*` **without** opening the picker at all.
 
-> **Magic is unavailable until you Draw.** On a fresh run the equipped slots are empty, so the
-> `M`/Magic button is hidden (`magic-btn` display `None`). To finish an enemy with a *skill*:
-> Draw a spell from it on one hero turn, then Cast on a later turn.
+> **An empty loadout greys Ability out.** Abilities come from the sphere grid and the hub loadout,
+> so a hero with no charged slot shows **Ability** disabled. The sandbox (`docs/SANDBOX.md`) is the
+> quick way to a hero with abilities in their slots.
 
 ---
 
@@ -538,10 +543,13 @@ the region coordinates are wrong (or you used `Camera_Capture`) — not a render
 - `Room.Doors`, `Room.Enemies`, `Room.RoomIndex`, `Room.GetCenter()`
 - `Door.GetOtherRoom(Room current)`, `Door.OnMouseDown()` (via `SendMessage`)
 - `CombatManager.StartCombat(Party, Room)`, `.InCombat`, `.PredictIntent(Enemy)`
-- `CombatManager.SubmitAttackAction(target)`, `.SubmitDrawAction(enemy, magic, charges, slot)`,
-  `.SubmitCastAction(magic, slot, caster, targets)`, `.GetDrawableEnemies()`, `.GetAliveEnemies()`
-- Combat hotkeys (`RoomActionUI.OnCombatHotkey`): F/R (start bar), A/M/D/S (hero bar) — drive via
-  `root.Focus()` then `root.SendEvent(KeyDownEvent.GetPooled(char, KeyCode, EventModifiers))`
+- `CombatManager.SubmitAttackAction(target)`, `.SubmitCastAction(magic, slot, caster, targets)`,
+  `.SubmitUseItemAction(item, target)`, `.SubmitSummonAction(slot)`,
+  `.SubmitHeroAction(HeroAction.Skip)`, `.RequestInspectTargets(hero, enemies)`, `.GetAliveEnemies()`,
+  `.ThreatOf(unit)`; events `OnHeroTurnStarted`, `OnTurnExecuted`
+- Combat keys (`RoomActionUI.OnCombatHotkey`): Fight/Flee bar and hero command menu are cursors -
+  ↑/↓ + Enter/Space, sent as `KeyDownEvent` to the focused root; **M** opens the floor map. No letter
+  hotkeys for commands any more (removed); press `fight-btn` with a `NavigationSubmitEvent`
 - `DungeonManager.Instance.MagicState` — equipped slots; `FirstEmptySlot`, `GetSlots(heroKey)`
 - `CombatFeedback.Instance.PlayImpact(ICombatUnit, int, float)`, `.KillWithEffect(GameObject)`
 - `UnitHealthBar` (namespace `Assets.Scripts.Combat`) — auto-added by `EnsureHealthBars`

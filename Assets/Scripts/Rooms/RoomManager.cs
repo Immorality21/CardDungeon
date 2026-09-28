@@ -20,6 +20,7 @@ namespace Assets.Scripts.Rooms
         private List<Door> _spawnedDoors = new List<Door>();
         private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
         private List<(RoomNode, RoomNode)> _placementPairs = new List<(RoomNode, RoomNode)>();
+        private GameObject _backdrop;
 
         /// <summary>
         /// Builds an authored level. <paramref name="level"/> is the run entry's template - a manual
@@ -87,6 +88,7 @@ namespace Assets.Scripts.Rooms
                 _currentLevel != null ? _currentLevel.WallColor : layout.WallColor
             );
             wallGen.PlaceWalls(SpawnedRooms);
+            PlaceBackdrop();
 
             return SpawnedRooms.ToList();
         }
@@ -122,8 +124,19 @@ namespace Assets.Scripts.Rooms
                 _currentLevel.WallColor
             );
             wallGen.PlaceWalls(SpawnedRooms);
+            PlaceBackdrop();
 
             return SpawnedRooms;
+        }
+
+        /// <summary>Replaces the previous floor's backdrop with one sized to this floor.</summary>
+        private void PlaceBackdrop()
+        {
+            if (_backdrop != null)
+            {
+                Destroy(_backdrop);
+            }
+            _backdrop = DungeonBackdrop.Place(SpawnedRooms, transform, _currentLevel);
         }
 
         private List<RoomNode> GenerateGraph(int count)

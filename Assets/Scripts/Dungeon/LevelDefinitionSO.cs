@@ -50,6 +50,11 @@ namespace Assets.Scripts.Dungeon
                  "of the default Resources background — lets each level/biome look distinct.")]
         public Sprite CombatBackground;
 
+        [Tooltip("Optional per-level rock drawn under the whole floor while walking it. Must be " +
+                 "imported with Mesh Type Full Rect and Wrap Mode Repeat, since it is tiled. When " +
+                 "empty the default Resources/DungeonBackdrops/bedrock is used.")]
+        public Sprite MapBackdrop;
+
         [Tooltip("Optional per-level music while walking the floor. When set it wins over the " +
                  "MusicBank's Exploration track, so a biome can sound distinct as well as look it.")]
         public AudioClip ExplorationMusic;

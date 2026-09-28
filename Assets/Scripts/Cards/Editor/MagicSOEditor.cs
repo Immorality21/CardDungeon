@@ -150,6 +150,11 @@ public class MagicSOEditor : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Tags"), true);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("TagDuration"));
 
+        EditorGUILayout.Space(8);
+        EditorGUILayout.LabelField("Threat", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("ThreatMultiplier"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("BonusThreat"));
+
         serializedObject.ApplyModifiedProperties();
     }
 }

@@ -44,11 +44,12 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
   with no "Level cleared" screen. Gold went 0 → 50 and Essence 0 → 5, but only +5 (fight) and +15
   (event) gold were ever shown — the other +30 gold and all Essence were never explained. Add a
   level-complete summary (gold, essence, XP, materials, items, who joined).
-- [ ] **7. No dungeon HUD.** In a level there is no gold counter, no level name ("Upper Halls"), no
+- [x] **7. No dungeon HUD.** In a level there is no gold counter, no level name ("Upper Halls"), no
   "Level 2 of 4", no minimap/room count. The room floats in a black screen. Gold earned from events
   has nowhere to show up.
   - *HUD done 2026-09-28* (level name, run + level N of M, gold found this floor, explored line + M map).
-    **Still open: the black backdrop around the room.**
+    *Backdrop done 2026-09-28*: a dark tiled bedrock under the whole floor (`DungeonBackdrop`,
+    PixelLab tile cropped and made seamless by hand), overridable per level via `MapBackdrop`.
 - [x] **8. Abilities have no description.** The Ability picker shows "Slash 2/2" and nothing else —
   no damage, no effect (it applied a bleed), no hint of how it differs from Attack.
 - [x] **9. Enemy HP is unreadable.** Enemies get only a thin bar: no name, no number. At 1 HP the bar
@@ -110,11 +111,17 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
 - [ ] **19. Level 2 of the tutorial run puts a Dragon on both paths from the start** (rooms 1 and 2).
   It has 22 HP and died in two rounds, so it's not dangerous, but the name oversells it and it pays
   exactly what a Floating Eye pays (+20 XP, +5 gold).
-- [ ] **20. Enemies always hit the Warrior, never the Paladin.** Across four fights the Paladin
+- [x] **20. Enemies always hit the Warrior, never the Paladin.** Across four fights the Paladin
   took 3 damage total; the Warrior went 26 → 13. The Paladin is written as the one who "holds a
   line" — consider threat/taunt so it draws hits (`docs/plans/COMBAT_DEPTH.md`).
-- [ ] **21. Same room event two levels running.** The Treasury (`TreasuryHoard`) appeared in level 1
+  - *Fixed 2026-09-28*: a threat system (`ThreatTable`, `COMBAT_DEPTH.md` §11) - damage and healing
+    bias enemy targeting, never decide it (25-75% with two heroes); per-ability `ThreatMultiplier` /
+    `BonusThreat`. The old targeting was plain `Random.Range`, reseeded only at floor generation, so
+    the playtest's four fights were most likely a small sample, not a bug.
+- [x] **21. Same room event two levels running.** The Treasury (`TreasuryHoard`) appeared in level 1
   and again in level 2.
+  - *Fixed 2026-09-28*: tutorial level 1 has no room events at all (`RunLevelEntry.AllowRoomEvents`
+    off), so the first floor is only the controls. Level 2 keeps the Treasury.
 - [ ] **22. Balance regression suite is red.** `BalanceRegressionTests` fails 2 tests on current
   assets (found when setting up CI, so it's excluded there with `-testCategory !Balance`):
   - Unclearable on one health bar: The Drowned March L0 Silt Shallows (158 HP vs 121),
@@ -124,15 +131,21 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
 
 ## Tooling / docs
 
-- [ ] **23. `docs/GAMEPLAY_VALIDATION.md` §6 documents combat hotkeys that no longer exist.** A/M/D/S
+- [x] **23. `docs/GAMEPLAY_VALIDATION.md` §6 documents combat hotkeys that no longer exist.** A/M/D/S
   (and F/R) were removed from `RoomActionUI`; only `M` (map) remains. The command menu is driven by
   ↑/↓ + Enter now. Update the section and the quick-reference list at the bottom.
-- [ ] **24. CI logs the local Unity editor out.** The GitHub Actions workflow
+  - *Fixed 2026-09-28*: §6 rewritten (Fight via `NavigationSubmitEvent`, the ↑/↓ + Enter menu, the
+    `Submit*` table, an auto-player recipe); Draw references removed; quick reference updated.
+- [x] **24. CI logs the local Unity editor out.** The GitHub Actions workflow
   (`.github/workflows/playtest.yml`) activates Unity with the owner's account and returns the
   license at the end of every job; with the entitlement-based Personal license this appears to
   remove the license on the owner's PC ("License removed" in the editor console at 16:52, lining up with
   a CI job ending — not proven). Fix: a separate free Unity account for CI, its credentials in the
   `UNITY_EMAIL` / `UNITY_PASSWORD` secrets.
+  - *Resolved 2026-09-28, not CI*: `%LOCALAPPDATA%/Unity/Unity.Licensing.Client.log` (UTC) shows one
+    event - at 16:52 local the **local Unity Hub** returned the ULF and signed out ("User token
+    expired"), during the licence setup for CI (ULF activated 15:32). Five later CI runs removed
+    nothing; the pipeline and the Unity MCP both work. If it recurs, read that log first.
 
 ## What worked well (keep)
 

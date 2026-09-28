@@ -57,8 +57,8 @@ Three threads are live:
    Silence, regeneration and the cure loop. **§10 (Defend) was deleted on 2026-09-06** — not
    dropped, *relocated*: Defend is an **ability**, granted by a grid branch like every other command
    (§13), so it is authored content rather than a sixth hard-coded verb. The combat menu now reads
-   Attack / **Ability** / Item / Inspect / Skip. §11 shrank on 2026-09-04 (targeting stays random; a
-   defensive branch grants a taunt) and can follow the grid authoring rather than precede it.
+   Attack / **Ability** / Item / Inspect / Skip. §11's threat model **shipped 2026-09-28** (biased,
+   never certain); the balance model still assumes even targeting, which is its open follow-up.
 
 **Reading order for the balance thread:** `docs/BALANCING.md` §5g → §5t, in order. The later ones
 **correct** the earlier ones — §5i's headline ("party width gates, XP does not") is **wrong**, §5j
@@ -129,9 +129,13 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   2026-09-08 across every `.uxml`, every runtime string literal and every authored `DisplayName` /
   `Description` / `Blurb`; see the ledger entry. Re-splitting it into two player-facing categories
   is not wanted.
-- **Enemy targeting stays random unless taunted** *(2026-09-04, §11)*. No standing aggro model, no
-  threat table. Random is the default; a **taunt/provoke ability granted by a defensive branch**
-  overrides it for a few turns. Do not build a general threat system.
+- **Enemy targeting follows threat, but never deterministically** *(2026-09-28, §11 — replaces the
+  2026-09-04 "stays random unless taunted" entry, by the owner's call after playtest finding 20)*.
+  WoW-style: damage and healing earn threat and every single-target enemy pick is **biased** toward it,
+  but half of each pick stays plain random, so no hero is ever certain to be hit or safe
+  (`ThreatTable`: 25-75% with two heroes). Never "pick the first hero", never "pick the top of the
+  table". Per-ability tuning lives on the ability (`MagicSO.ThreatMultiplier` / `BonusThreat`), which
+  is also how a taunt is authored — no separate taunt mechanic.
 - **Two summons per grid is the target; one per grid is the MVP** *(2026-09-04, §4b)*. And grids get
   **much larger** than today's ~30 nodes to hold them. **Refined 2026-09-28:** the aim is a
   different summon at the end of **every** branch, so each way a player builds a hero reaches its
@@ -193,7 +197,7 @@ backlog.**
 | § | | state |
 |---|---|---|
 | **9** | Status effects — over-time, Silence, the cure loop | ✅ shipped 2026-09-03; follow-ups open |
-| **11** | Threat and cover — a reason for a defensive build | shrank 2026-09-04; follows the grids |
+| **11** | Threat — a reason for a defensive build | ✅ threat shipped 2026-09-28; balance model + threat UI open |
 | **12** | Enemy action vocabulary — the four missing verbs | not started |
 | **13** | Hero identity — a Limit gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the Limit gauge is what is left |
 
@@ -237,6 +241,12 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **Threat** (2026-09-28) — `plans/COMBAT_DEPTH.md` §11, `Assets/Scripts/Combat/CLAUDE.md`.
+  `ThreatTable` (pure, `ThreatTableTests`): damage ×1, healing ×0.5, base 10, half of every pick flat
+  random. Credited per hero-side action from an HP snapshot in `CombatManager`, read by every
+  single-hero pick in `EnemyActionPlanner` / `EnemyMagicPlan` and the retarget fallback; wiped when a
+  hero falls. Per ability: `MagicSO.ThreatMultiplier` + `BonusThreat`.
 
 - **Summons, the party-replacing kind: the Warrior's Cairn Golem** (2026-09-28) —
   `plans/SPECIALIZATION.md` §4b ("The party-replacing kind", now marked built). Learned past

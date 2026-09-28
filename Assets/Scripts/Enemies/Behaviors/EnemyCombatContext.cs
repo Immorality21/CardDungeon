@@ -20,6 +20,12 @@ namespace Assets.Scripts.Enemies.Behaviors
         /// </summary>
         public int ChargingEntryIndex = EnemyActionPlanner.NoCharge;
 
+        /// <summary>
+        /// This fight's threat, which biases every single-hero pick toward whoever has dealt the most
+        /// damage and healing. Null is even odds - what the balance simulator uses.
+        /// </summary>
+        public ThreatTable Threat;
+
         /// <summary>What this enemy can cast (its own spell list) — see EnemyMagicPlan.</summary>
         public List<EnemySpellEntry> Spells;
 

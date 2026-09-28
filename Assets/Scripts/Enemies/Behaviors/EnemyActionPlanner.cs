@@ -15,7 +15,7 @@ namespace Assets.Scripts.Enemies.Behaviors
         /// <summary>Weighted pick within the winning priority tier.</summary>
         public float Tier;
 
-        /// <summary>Target selection (random hero, which magic).</summary>
+        /// <summary>Target selection: which hero, weighted by threat (see <c>ThreatTable</c>).</summary>
         public float Target;
 
         /// <summary>Which magic to cast, when the entry draws from the Draw list.</summary>
@@ -406,7 +406,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                         : EnemyActionType.ChargeHeavy,
                     Target = entry.Kind == EnemyActionKind.AoeAttack
                         ? null
-                        : EnemyTargeting.PickRandom(context.Heroes),
+                        : EnemyTargeting.PickByThreat(context.Heroes, context.Threat, rolls.Target),
                     Multiplier = entry.Multiplier,
                     EntryIndex = index
                 };
@@ -425,7 +425,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                     {
                         Type = EnemyActionType.HeavyAttack,
                         Multiplier = entry.Multiplier,
-                        Target = EnemyTargeting.PickRandom(context.Heroes),
+                        Target = EnemyTargeting.PickByThreat(context.Heroes, context.Threat, rolls.Target),
                         EntryIndex = index
                     };
 
@@ -469,7 +469,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                     }
 
                     var targets = EnemyMagicPlan.ResolveTargets(
-                        magic, self, context.Heroes, context.Allies, rolls.Target);
+                        magic, self, context.Heroes, context.Allies, rolls.Target, context.Threat);
                     if (targets.Count == 0)
                     {
                         return Swing(self, context, rolls, 1f);
@@ -496,7 +496,7 @@ namespace Assets.Scripts.Enemies.Behaviors
             return new EnemyDecision
             {
                 Type = EnemyActionType.Attack,
-                Target = EnemyTargeting.PickRandom(context.Heroes),
+                Target = EnemyTargeting.PickByThreat(context.Heroes, context.Threat, rolls.Target),
                 Multiplier = multiplier,
                 EntryIndex = index
             };

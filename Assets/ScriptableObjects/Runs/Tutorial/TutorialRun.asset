@@ -17,6 +17,7 @@ MonoBehaviour:
   Blurb: 'Where every hero starts: four floors down, and a prisoner worth freeing.'
   SequenceIndex: 0
   Repeatable: 0
+  Challenge: 0
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: b2a362ec7000ace46ad22ed1b533bf55, type: 2}
     LevelName: Dungeon Entrance
@@ -32,6 +33,7 @@ MonoBehaviour:
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
+    AllowRoomEvents: 0
   - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
     LevelName: Upper Halls
     ManualLayout: {fileID: 0}
@@ -44,6 +46,7 @@ MonoBehaviour:
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 0}
+    AllowRoomEvents: 1
   - LevelTemplate: {fileID: 11400000, guid: eac98a3da612d49499a92d78cd394b7f, type: 2}
     LevelName: Collapsed Caverns
     ManualLayout: {fileID: 0}
@@ -56,6 +59,7 @@ MonoBehaviour:
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 0}
+    AllowRoomEvents: 1
   - LevelTemplate: {fileID: 11400000, guid: 6517393ec276405b8c88463d92983e27, type: 2}
     LevelName: Sunken Depths
     ManualLayout: {fileID: 0}
@@ -79,3 +83,4 @@ MonoBehaviour:
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}
+    AllowRoomEvents: 1

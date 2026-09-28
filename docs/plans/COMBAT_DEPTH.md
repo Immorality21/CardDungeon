@@ -150,39 +150,53 @@ Touch points: the grid assets, `Assets/Scripts/Heroes/SphereGridSO.cs` (the comm
 describes), `Assets/Scripts/Rooms/UI/RoomActionUI.cs`, `Assets/Scripts/Cards/CombatBuffTracker.cs`,
 `Assets/Scripts/Combat/TurnManager.cs`, `Assets/Scripts/Balance/BalanceMath.cs`.
 
-### 11. Threat and cover — give a defensive build a reason to exist
+### 11. Threat — give a defensive build a reason to exist
 
-> **Shape decided 2026-09-04, timing deliberately not urgent.** **Enemy targeting stays random.**
-> There is no threat table, no aggro model and no standing weight per hero — random is correct as
-> the default and is not a gap to be closed. What changes it is a **taunt/provoke ability granted by
-> a defensive branch** (§4c), which biases targeting for a few turns and then expires.
->
-> That makes this section *smaller* than it was written: the "passive Cover" shape below and the
-> general threat model are **not** the plan. It also means it **can come after** the grids are
-> authored rather than before — a defensive branch is not worthless without it, because the taunt
-> is the branch's own payload and arrives with it.
+> **Shipped 2026-09-28** — this reverses the 2026-09-04 shape ("targeting stays random; only a taunt
+> changes it"), by the owner's call after playtest finding 20 (four fights, the Paladin written to
+> "hold a line" took 3 damage, the Warrior 13). Enemy targeting now follows a **WoW-style threat
+> table**, with one hard rule from the owner: it is **biased, never certain**. Never "pick the first
+> hero", never "pick whoever tops the table".
 
-**`EnemyActionPlanner` calls `EnemyTargeting.PickRandom(context.Heroes)` for Attack, HeavyAttack and
-most casts.** There is no threat, no aggro, no cover. So 15 Endurance and an entire defensive
-sphere-grid branch only pay off on the turns the RNG happens to point at that hero — a party's
-defensive investment is *diluted* by party width rather than *directed*.
+**The formula** (`Assets/Scripts/Combat/ThreatTable.cs`, pinned by `ThreatTableTests`). With `n`
+living candidates each holding threat `T`:
 
-That is a real balance consequence, not just a role-fantasy one: it is part of why §0g finds party
-width to be the strongest lever in the game. Each extra body adds a health bar to the random pool, so
-width buys survivability that no build decision can substitute for.
+```
+weight_i = T_i + 10                                 (BaseThreat: the fight opens even)
+chance_i = 0.5 / n  +  0.5 * weight_i / sum(weight)  (FlatShare 0.5: half of every pick is plain random)
+```
 
-Two shapes, and they are not exclusive:
+- **Floor and ceiling.** Two heroes: nobody ever under 25% or over 75%. Four: 12.5% floor, 62.5%
+  ceiling. However lopsided the table gets, the quiet hero can still be hit and the loud one can
+  still be spared.
+- **What earns it.** Damage dealt ×1, healing landed ×0.5 (the WoW split). Only what *landed*: a kill
+  is worth the health the enemy had left, an overheal nothing past full. Measured as an HP snapshot
+  around each hero-side action in `CombatManager` (`SnapshotHealth` / `CreditThreat`), so attacks,
+  abilities, items and summons all count the same way with no executor changes. Damage-over-time
+  ticks land in upkeep, outside the snapshot, and earn nothing.
+- **Per ability** (`MagicSO`, drawn in its inspector under *Threat*): `ThreatMultiplier` (default 1)
+  scales what its damage and healing earn — 0 lands unnoticed, 3 draws hard — and `BonusThreat`
+  (default 0) adds a flat amount per cast. **That is the taunt**: an ability with no damage and a big
+  `BonusThreat`. No separate taunt mechanic or buff exists or is needed.
+- **Per fight.** Reset at the start of every combat; a hero who falls has their threat wiped.
+- **Where it is read.** Every single-hero pick: the planner's Attack, HeavyAttack and telegraph target
+  (`EnemyTargeting.PickByThreat` with the injected `rolls.Target`), a single-target enemy spell
+  (`EnemyMagicPlan.ResolveTargets(..., threat)`), and `CombatManager.GetRandomAliveHero`, the
+  retarget when a chosen hero fell before the blow landed. **Not** read by AoE, heals on allies or
+  `FirstWithoutDebuff` (a debuff still goes to whoever lacks it).
+- Live check (sandbox, 2026-09-28): Warrior attacking, Rogue skipping, three Stone Sentinels — the
+  Warrior drew 3 of the first 4 blows, and their threat went to 0 when they fell.
 
-- **A Taunt/Provoke ability, granted by a defensive branch** *(this is the plan)*. Biases targeting
-  for N turns, then expires. Cheap: `EnemyTargeting` gains a weight lookup and `PickRandom` becomes
-  `PickWeighted`, with the weight coming from an active buff rather than from a hero's stats.
-- ~~**A passive Cover**~~ — a hero with a shield intercepting a share of hits aimed at the
-  lowest-HP ally. **Not the plan** (2026-09-04): it is automatic rather than a decision, and it
-  reintroduces the standing threat model the taunt approach deliberately avoids. Recorded only so it
-  is not re-proposed.
+**Not yet:** no threat display for the player (`CombatManager.ThreatOf(unit)` exists for one), and no
+authored ability uses the multiplier or bonus yet — every current ability is at the defaults.
 
-**The model has to follow.** `BalanceMath` currently spreads incoming damage across the party
-implicitly. A threat model concentrates it, which changes hits-to-kill for *every* hero in opposite
+~~**A passive Cover**~~ — a hero with a shield intercepting a share of hits aimed at the lowest-HP
+ally. **Not the plan** (2026-09-04): automatic rather than a decision. Recorded only so it is not
+re-proposed.
+
+**The model has to follow — still open.** `BalanceMath` and `EncounterSimulator` still spread
+incoming damage evenly (the simulator passes no threat table, which `ThreatTable` treats as even odds),
+so they now read slightly optimistic for the hero who deals the most damage. A threat model concentrates it, which changes hits-to-kill for *every* hero in opposite
 directions — the defensive hero takes more, everyone else takes fewer. Expect `MinHitsToKillHero`
 to need
 re-deriving, and expect this to *unlock* enemy strength headroom (§0g's standing constraint), since

@@ -137,6 +137,12 @@ namespace Assets.Scripts.Rooms
         public CombatBuffTracker BuffTracker { get; private set; }
 
         private TurnManager _turnManager = new TurnManager();
+
+        /// <summary>
+        /// This fight's threat: who the enemies are angry at. Fed by every hero-side action (see
+        /// <see cref="CreditThreat"/>) and read by every single-target enemy pick.
+        /// </summary>
+        private readonly ThreatTable _threat = new ThreatTable();
         private HeroAction _pendingAction = HeroAction.None;
         private SpellcastAction _pendingCastAction;
         private int _pendingCastSlot;
@@ -296,7 +302,8 @@ namespace Assets.Scripts.Rooms
                 BuffTracker = BuffTracker,
                 ChargingEntryIndex = enemy.ChargingEntryIndex,
                 SelfTurnCount = enemy.TurnsTaken,
-                Spells = enemy.Spells
+                Spells = enemy.Spells,
+                Threat = _threat
             };
             return EnemyActionPlanner.PredictCertain(enemy, context, behavior);
         }
@@ -337,6 +344,12 @@ namespace Assets.Scripts.Rooms
             _pendingUseItem = item;
             _pendingUseItemTarget = target;
             _pendingAction = HeroAction.UseItem;
+        }
+
+        /// <summary>How much threat <paramref name="unit"/> holds in the current fight (0 outside one).</summary>
+        public float ThreatOf(ICombatUnit unit)
+        {
+            return _threat.Get(unit);
         }
 
         public List<ICombatUnit> GetAliveEnemies()
@@ -387,6 +400,7 @@ namespace Assets.Scripts.Rooms
             _combatGold = 0;
             _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
             _summon = null;
+            _threat.Reset();
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
             _tagTracker = new MagicTagTracker();
@@ -506,6 +520,11 @@ namespace Assets.Scripts.Rooms
                         yield return null;
                     }
 
+                    // Threat is what the action changed: health taken off enemies, health put back
+                    // on the hero side. Measured around the whole action rather than inside each
+                    // executor, so attacks, abilities, items and summons all count the same way.
+                    var threatSnapshot = SnapshotHealth();
+
                     if (_pendingAction == HeroAction.Attack)
                     {
                         yield return ExecuteHeroTurn(unit, room);
@@ -536,6 +555,8 @@ namespace Assets.Scripts.Rooms
                     {
                         _lastTurnLog = $"{unit.DisplayName} skips their turn.";
                     }
+
+                    CreditThreat(unit, threatSnapshot, ThreatSourceFor(_pendingAction));
                 }
                 else
                 {
@@ -1055,7 +1076,8 @@ namespace Assets.Scripts.Rooms
                 BuffTracker = BuffTracker,
                 ChargingEntryIndex = enemy != null ? enemy.ChargingEntryIndex : EnemyActionPlanner.NoCharge,
                 SelfTurnCount = enemy != null ? enemy.TurnsTaken : 0,
-                Spells = enemy != null ? enemy.Spells : null
+                Spells = enemy != null ? enemy.Spells : null,
+                Threat = _threat
             };
 
             // One authored list decides everything: gate, then priority, then weight. Casting is an
@@ -1314,6 +1336,8 @@ namespace Assets.Scripts.Rooms
             if (!target.IsAlive)
             {
                 _lastTurnLog += $" {target.DisplayName} has fallen!";
+                // A fallen hero's threat goes with them: back on their feet, they start clean.
+                _threat.Clear(target);
                 HandleHeroDeath(target as Hero);
                 _turnManager.RemoveUnit(target);
             }
@@ -1784,14 +1808,68 @@ namespace Assets.Scripts.Rooms
             return alive[UnityEngine.Random.Range(0, alive.Count)];
         }
 
+        /// <summary>
+        /// A fresh hero for an enemy whose chosen target fell before the blow landed - by threat,
+        /// like the original pick, not by list order.
+        /// </summary>
         private ICombatUnit GetRandomAliveHero(Party party)
         {
-            var alive = HeroSideUnits();
-            if (alive.Count == 0)
+            return ThreatTable.Pick(HeroSideUnits(), _threat, UnityEngine.Random.Range(0f, 1f));
+        }
+
+        // ------------------------------------------------------------------ threat
+
+        /// <summary>Health of every living unit on both sides, taken just before an action.</summary>
+        private Dictionary<ICombatUnit, int> SnapshotHealth()
+        {
+            var health = new Dictionary<ICombatUnit, int>();
+            foreach (var unit in GetAliveEnemies().Concat(HeroSideUnits()))
             {
-                return null;
+                health[unit] = unit.Stats.Health;
             }
-            return alive[UnityEngine.Random.Range(0, alive.Count)];
+            return health;
+        }
+
+        /// <summary>
+        /// Credits <paramref name="actor"/> with the damage its action dealt to enemies and the
+        /// healing it landed on its own side. Only what landed counts: a kill is worth the health the
+        /// enemy had left, an overheal nothing past full.
+        /// </summary>
+        private void CreditThreat(ICombatUnit actor, Dictionary<ICombatUnit, int> before, MagicSO source)
+        {
+            int damage = 0;
+            int healing = 0;
+            foreach (var entry in before)
+            {
+                int now = entry.Key.IsAlive ? entry.Key.Stats.Health : 0;
+                int delta = now - entry.Value;
+                if (entry.Key.IsHero)
+                {
+                    healing += Mathf.Max(0, delta);
+                }
+                else
+                {
+                    damage += Mathf.Max(0, -delta);
+                }
+            }
+
+            float multiplier = source != null ? source.ThreatMultiplier : 1f;
+            int bonus = source != null ? source.BonusThreat : 0;
+            _threat.Credit(actor, damage, healing, multiplier, bonus);
+        }
+
+        /// <summary>The ability behind this turn's action, whose threat settings apply - or null.</summary>
+        private MagicSO ThreatSourceFor(HeroAction action)
+        {
+            switch (action)
+            {
+                case HeroAction.Cast:
+                    return _pendingCastAction != null ? _pendingCastAction.Magic : null;
+                case HeroAction.SummonAbility:
+                    return _pendingSummonAbility;
+                default:
+                    return null;
+            }
         }
 
         /// <summary>Whether the hero side still stands. Always true while a summon is out: a wipe is

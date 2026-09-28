@@ -522,6 +522,13 @@ namespace Assets.Scripts.Balance
         /// </summary>
         private static void BuildEvents(LevelCurve level, RunLevelEntry entry, PartyBaseline party, BalanceRulesSO rules)
         {
+            // Mirrors DungeonManager.PlaceRoomEvents: a level that opts out places none.
+            if (!entry.AllowRoomEvents)
+            {
+                level.Events = new List<RoomEventEncounter>();
+                return;
+            }
+
             float eligibleRooms = 0f;
             foreach (var room in level.Rooms)
             {

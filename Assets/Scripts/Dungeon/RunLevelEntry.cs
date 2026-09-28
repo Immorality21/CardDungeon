@@ -52,6 +52,12 @@ namespace Assets.Scripts.Dungeon
                  "level clear: die first and they are lost with the run.")]
         public HeroSO RescueHero;
 
+        [Tooltip("Whether room events (the Action-button gambles) can appear on this level at all. " +
+                 "On by default. Turn it off for a level whose job is teaching - the first floor of " +
+                 "the tutorial run - so the only things in it are the ones it means to teach. The " +
+                 "rooms keep their PossibleEvents; this only stops them being placed here.")]
+        public bool AllowRoomEvents = true;
+
         /// <summary>
         /// The boss's escort, flattened to one <see cref="EnemySO"/> per body, skipping null and
         /// non-positive rows. Empty when this level has no boss - an add without a boss is an

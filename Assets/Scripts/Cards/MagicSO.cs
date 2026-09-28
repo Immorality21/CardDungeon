@@ -20,6 +20,18 @@ namespace Assets.Scripts.Cards
         public List<MagicTag> Tags = new List<MagicTag>();
         public int TagDuration = 3;
 
+        [Tooltip("Scales the threat this ability earns from the damage and healing it lands " +
+                 "(1 = the default: a point of damage is a point of threat, a point of healing half " +
+                 "a point). Above 1 makes enemies turn on the caster faster; 0 lets it land unnoticed.")]
+        [Min(0f)]
+        public float ThreatMultiplier = 1f;
+
+        [Tooltip("Flat threat added every time this is cast, on top of what its damage and healing " +
+                 "earn. How an ability that deals nothing - a taunt, a provoking shout - still draws " +
+                 "the enemy's eye.")]
+        [Min(0)]
+        public int BonusThreat;
+
         public bool HasEffectType(SpellEffectType type)
         {
             return Effects.Any(e => e.EffectType == type);

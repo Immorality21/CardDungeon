@@ -18,6 +18,19 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
 - **Defense formula**: diminishing returns via `defense / (defense + K)` where K=20. At 20 defense, 50% reduction.
 - **ICombatUnit** provides a `Resistances` list for per-unit elemental resistances.
 
+## Threat (who the enemies go for)
+
+`ThreatTable` (pure, `ThreatTableTests`) — WoW-style, and **biased, never certain** (the owner's rule):
+`chance = 0.5/n + 0.5 * (T + 10) / sum(T + 10)`, so with two heroes nobody is ever under 25% or over
+75%. Damage dealt earns ×1, healing ×0.5, only what landed. `CombatManager` owns one table per fight
+(reset in `RunCombat`), credits each hero-side action from an HP snapshot around it
+(`SnapshotHealth` / `CreditThreat`), wipes a fallen hero's threat in `ResolveHeroDamaged`, and passes
+it to enemies through `EnemyCombatContext.Threat`. Abilities tune their own draw with
+`MagicSO.ThreatMultiplier` / `BonusThreat` (a taunt is just a big `BonusThreat`). **Any new
+single-hero enemy pick must go through `ThreatTable.Pick`** — a bare `Random.Range` over the heroes
+quietly opts that action out. A null table is even odds, which is what the balance simulator still
+passes. Full rationale: `docs/plans/COMBAT_DEPTH.md` §11.
+
 ## Battle stage (FF side-view)
 
 - **CombatStage** (singleton, `Combat/CombatStage.cs`): presents combat as a Final-Fantasy

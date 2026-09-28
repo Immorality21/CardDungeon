@@ -10,13 +10,13 @@ namespace Assets.Scripts.Enemies.Behaviors
     /// <summary>Shared target-selection helpers for enemy behaviors.</summary>
     public static class EnemyTargeting
     {
-        public static ICombatUnit PickRandom(List<ICombatUnit> units)
+        /// <summary>
+        /// A living hero, biased toward whoever has drawn the most threat but never certain - see
+        /// <see cref="ThreatTable"/> for the formula. A null table is even odds.
+        /// </summary>
+        public static ICombatUnit PickByThreat(List<ICombatUnit> units, ThreatTable threat, float roll)
         {
-            if (units == null || units.Count == 0)
-            {
-                return null;
-            }
-            return units[Random.Range(0, units.Count)];
+            return ThreatTable.Pick(units, threat, roll);
         }
 
         /// <summary>Living unit with the lowest health fraction, or null if all are at full health.</summary>

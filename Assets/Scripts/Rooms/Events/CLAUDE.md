@@ -127,6 +127,11 @@ event.
 no player will feel. The authored events use base 8-10 with rate 5, which turns ~10% into ~15% in the
 right specialist's hands.
 
+**A level can opt out entirely**: `RunLevelEntry.AllowRoomEvents` (default on). The tutorial's
+first floor has it off (2026-09-28, playtest finding 21) so the floor that teaches the controls holds
+nothing it is not teaching. It is per *level entry*, not per room, because room templates such as
+`TreasuryRoom` are shared across the whole campaign. `RunCurveModel.BuildEvents` honours it too.
+
 **Placement** (`DungeonManager.PlaceRoomEvents`) is one pass: for every eligible room, each of its
 `RoomSO.PossibleEvents` is rolled in authored order and the first to pass takes the room. A room only
 ever offers one event, so listing two raises the odds of the room having *something* - that is the

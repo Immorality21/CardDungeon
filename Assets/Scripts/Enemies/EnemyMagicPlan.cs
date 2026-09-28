@@ -121,7 +121,8 @@ namespace Assets.Scripts.Enemies
             ICombatUnit self,
             IList<ICombatUnit> heroes,
             IList<ICombatUnit> allies,
-            float roll)
+            float roll,
+            ThreatTable threat = null)
         {
             var targets = new List<ICombatUnit>();
             if (magic == null)
@@ -133,7 +134,7 @@ namespace Assets.Scripts.Enemies
             {
                 case MagicTargetType.SingleEnemy:
                 {
-                    var pick = PickAlive(heroes, roll);
+                    var pick = threat != null ? ThreatTable.Pick(heroes, threat, roll) : PickAlive(heroes, roll);
                     if (pick != null)
                     {
                         targets.Add(pick);

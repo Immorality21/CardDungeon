@@ -987,6 +987,14 @@ namespace Assets.Scripts.Dungeon
                 return;
             }
 
+            // A teaching floor opts out entirely (RunLevelEntry.AllowRoomEvents): its rooms are
+            // shared templates whose PossibleEvents serve every other level.
+            var entry = CurrentLevelEntry;
+            if (entry != null && !entry.AllowRoomEvents)
+            {
+                return;
+            }
+
             // Read once, not per roll: this loads the party save.
             var partyStats = BestRosterStats();
 

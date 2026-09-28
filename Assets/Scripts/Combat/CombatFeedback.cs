@@ -71,11 +71,21 @@ namespace Assets.Scripts.Combat
             float t = 0f;
             while (t < FlashDuration)
             {
+                // The unit can die and be destroyed mid-flash (the flash runs on unscaled time).
+                if (sr == null)
+                {
+                    _flashes.Remove(sr);
+                    _originalColors.Remove(sr);
+                    yield break;
+                }
                 t += Time.unscaledDeltaTime;
                 sr.color = Color.Lerp(FlashColor, original, t / FlashDuration);
                 yield return null;
             }
-            sr.color = original;
+            if (sr != null)
+            {
+                sr.color = original;
+            }
             _flashes.Remove(sr);
             _originalColors.Remove(sr);
         }
