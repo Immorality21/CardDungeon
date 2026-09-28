@@ -2087,6 +2087,30 @@ namespace Assets.Scripts.Rooms
         /// is on screen, and re-deriving it each frame cannot fall out of sync the way a dozen call
         /// sites can.
         /// </summary>
+        /// <summary>
+        /// Tells the world-space HP bars where the turn-order panel is, so a boss's bar can step
+        /// out from under it (<see cref="Combat.CombatHudLayout"/>).
+        /// </summary>
+        private void PublishHudLayout()
+        {
+            var screen = _turnOrder != null && _turnOrder.panel != null
+                ? _turnOrder.panel.visualTree.worldBound
+                : Rect.zero;
+            if (!IsShown(_turnOrder) || screen.width <= 0f || screen.height <= 0f)
+            {
+                Combat.CombatHudLayout.TurnOrderViewport = Rect.zero;
+                return;
+            }
+
+            // UI Toolkit's origin is top-left, the viewport's bottom-left.
+            var box = _turnOrder.worldBound;
+            Combat.CombatHudLayout.TurnOrderViewport = Rect.MinMaxRect(
+                box.xMin / screen.width,
+                1f - box.yMax / screen.height,
+                box.xMax / screen.width,
+                1f - box.yMin / screen.height);
+        }
+
         private void Update()
         {
             if (!_refsReady)
@@ -2096,6 +2120,7 @@ namespace Assets.Scripts.Rooms
 
             _nameplates?.Tick(Camera.main);
             TickHud();
+            PublishHudLayout();
 
             // Clicking anything that is not UI - a door, a wall, the floor - clears the EventSystem's
             // selection and with it the keyboard. Re-claiming here costs a null check and means the

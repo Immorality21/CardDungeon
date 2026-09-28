@@ -223,7 +223,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped; **art pass half done** (2026-09-27) — five enemies still have no idle, two bosses still small |
+| **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped; the art pass moved to §21 |
 | **2** | Room variety — the branching half has not shipped | open; **unblocked** by the map (§14a) |
 | **6** | Stats — one open note (`BuffType` is a second per-stat list) | structural |
 | **8** | Migrate to the new Input System | *nice to have* |
@@ -234,6 +234,7 @@ backlog.**
 | **17** | Content volume is the biggest single gap | not started |
 | **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28) |
 | **19** | Shipping surface | not started |
+| **21** | **Art pass** — menu backdrops (title, level entry, story map) + every outdated sprite (five still enemies, two small bosses, the flat-style heroes) | open (2026-09-28); the `productName` / save-folder rename is parked here too |
 
 ---
 
@@ -241,6 +242,16 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **First fresh-save playtest** (2026-09-28) — 24 findings, worked through the same day and the
+  to-do file deleted once clear; code comments cite them as "playtest finding N". What remains lives
+  on: 14 → `plans/POLISH_CONTENT.md` §21, 19 and 22 → `plans/BALANCE_OPEN.md` §0, 5 and 10 → the
+  tutorial (§20). Shipped from it: party panel on rescue (1), automatic rescue (2), room spot
+  placement (3), turn marker (4), level-clear window (6), dungeon HUD + bedrock backdrop (7), ability
+  descriptions (8), enemy nameplates (9), story-map labels (11), UI scale + boss bar clear of the
+  turn order (12), hub captions and building hover (13), two-column Inspect (15), campfire / spent
+  markers (16), room seams (17), one exit per event (18), threat (20), a quiet tutorial floor (21),
+  validation doc (23); the CI licence scare (24) was the local Hub, not CI.
 
 - **Threat** (2026-09-28) — `plans/COMBAT_DEPTH.md` §11, `Assets/Scripts/Combat/CLAUDE.md`.
   `ThreatTable` (pure, `ThreatTableTests`): damage ×1, healing ×0.5, base 10, half of every pick flat

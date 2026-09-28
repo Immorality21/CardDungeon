@@ -45,6 +45,7 @@ namespace Assets.Scripts.Combat
         private ICombatUnit _unit;
         private Enemy _enemy;
         private Transform _barRoot;
+        private float _barTopY;
         private SpriteRenderer _fill;
         private Transform _statusRoot;
         private SpriteRenderer _intent;
@@ -87,6 +88,7 @@ namespace Assets.Scripts.Combat
 
             _barRoot = new GameObject("HealthBar").transform;
             _barRoot.SetParent(transform, false);
+            _barTopY = topY;
             _barRoot.localPosition = new Vector3(0f, topY, -1f);
 
             // Boss bars get a crimson backdrop so they read as the climax fight.
@@ -121,6 +123,45 @@ namespace Assets.Scripts.Combat
         /// <summary>Hides the readout while the unit is off the stage (a hero while a party-replacing
         /// summon fights). Set by <c>CombatStage.HideParty</c>.</summary>
         public bool Hidden { get; set; }
+
+        // Gap kept between a bar and the turn-order panel, as a fraction of the screen width.
+        private const float HudClearance = 0.01f;
+
+        /// <summary>
+        /// Slides the bar left when it would run under the turn-order panel - a boss at the right of
+        /// the stage is tall enough to put its bar right there. Only sideways, and only as far as the
+        /// overlap: the bar stays over its own unit whenever it can.
+        /// </summary>
+        private void KeepClearOfHud()
+        {
+            float offset = 0f;
+            var hud = CombatHudLayout.TurnOrderViewport;
+            var cam = Camera.main;
+            float scaleX = Mathf.Abs(transform.lossyScale.x);
+            if (hud.width > 0f && cam != null && cam.orthographic && scaleX > 0f)
+            {
+                Vector3 centre = transform.TransformPoint(new Vector3(0f, _barTopY, -1f));
+                float halfWorld = _barWidth * 0.5f * scaleX;
+                float halfHeightWorld = _barHeight * 0.5f * Mathf.Abs(transform.lossyScale.y);
+                Vector3 right = cam.WorldToViewportPoint(centre + new Vector3(halfWorld, 0f, 0f));
+                Vector3 top = cam.WorldToViewportPoint(centre + new Vector3(0f, halfHeightWorld, 0f));
+                Vector3 bottom = cam.WorldToViewportPoint(centre - new Vector3(0f, halfHeightWorld, 0f));
+
+                bool sameBand = top.y > hud.yMin && bottom.y < hud.yMax;
+                float overlap = right.x - (hud.xMin - HudClearance);
+                if (sameBand && overlap > 0f)
+                {
+                    float viewportWidthWorld = cam.orthographicSize * 2f * cam.aspect;
+                    offset = -overlap * viewportWidthWorld / scaleX;
+                }
+            }
+
+            var wanted = new Vector3(offset, _barTopY, -1f);
+            if (_barRoot.localPosition != wanted)
+            {
+                _barRoot.localPosition = wanted;
+            }
+        }
 
         public Vector3 EffectPopupPosition
         {
@@ -168,6 +209,8 @@ namespace Assets.Scripts.Combat
             {
                 return;
             }
+
+            KeepClearOfHud();
 
             // HP fill — every frame (cheap).
             float max = Mathf.Max(1, _unit.GetEffectiveStat(StatType.MaxHealth));

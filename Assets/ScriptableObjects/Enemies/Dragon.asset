@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Dragon
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: Dragon
-  DisplayName: Dragon
+  DisplayName: Drakeling
   Sprite: {fileID: 23289088660071545, guid: c01bb44fcbf2008858ca0ffe207016ba, type: 3}
   AnimationFrames:
   - {fileID: 23289088660071545, guid: c01bb44fcbf2008858ca0ffe207016ba, type: 3}

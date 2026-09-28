@@ -76,6 +76,21 @@ surface) lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606
 > the direction is arguably *right*: §0g has been asking for a losable campaign, and §3b says death
 > is how the player pays tuition. Decide in the balance pass whether this is the losability the
 > thread wanted or simply too much, but decide it against these numbers rather than re-deriving them.
+>
+> **Still red on 2026-09-28** (the first playtest's finding 22), with the pool now at **121** and two
+> boss rooms added to the list: **The Warrens / The Counting Room** (Gilded Hoarder + 4 adds, danger
+> 1.54 against the 1.40 climax ceiling) and **The Hollow Vault** (Gilded Hoarder + 3 adds, **3.25**).
+> CI runs the suite with `-testCategory !Balance` until this pass.
+
+- **The Drakeling (was "Dragon") oversold itself** *(playtest 2026-09-28, finding 19)*. Tutorial level
+  2 put one on both paths from the start; 22 HP, dead in two rounds, paying what a Floating Eye pays.
+  **Quick fix only:** renamed to *Drakeling* (`DisplayName`; the `Key` is still `Dragon`, so saves and
+  the bestiary are untouched). Its stats, rewards and spawn tables were deliberately left for the
+  balance pass - it sits in eight room templates and two BloodStair floors.
+- **The threat model is not in the balance model yet** (`plans/COMBAT_DEPTH.md` §11, 2026-09-28).
+  Enemies now bias their targeting toward whoever deals and heals the most; `BalanceMath` and
+  `EncounterSimulator` still assume an even spread, so they read slightly optimistic for the party's
+  top damage dealer.
 
 
 Current analyzer state: **0 critical / 77 warning**; suite **813 passed / 0 failed**.

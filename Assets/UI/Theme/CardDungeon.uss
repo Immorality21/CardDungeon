@@ -1837,10 +1837,28 @@
     background-color: var(--cd-stone-hover);
 }
 
-/* A lot carrying real art keeps the sprite, not the slab. */
-.hub-lot--art {
+/* A lot carrying real art keeps the sprite, not the slab. Doubled class so it also beats
+   .hub-lot--available / --absent further down, whose faint slab otherwise sat over the art. */
+.hub-lot.hub-lot--art {
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
+}
+
+/* Hover and the keyboard cursor OUTLINE a building rather than fill its hitbox. The sprite
+   is a separate layer beneath the lot, so the shared fills (.hub-lot:hover, .cd-nav--selected)
+   painted an opaque purple slab straight over the art - a hovered Merchant read as a purple
+   box (playtest, 2026-09-28). The extra .hub-lot in each selector is for specificity:
+   .cd-nav--selected:hover is later in this file and would otherwise win. */
+.hub-lot.hub-lot--art:hover,
+.hub-lot.hub-lot--art.cd-nav--selected,
+.hub-lot.hub-lot--art.cd-nav--selected:hover {
+    background-color: rgba(205, 110, 255, 0.08);
+    border-width: 2px;
+    border-color: var(--cd-accent);
+}
+
+.hub-lot.hub-lot--art.cd-nav--selected {
+    border-color: var(--cd-gold);
 }
 
 .hub-lot__glyph {

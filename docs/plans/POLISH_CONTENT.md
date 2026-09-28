@@ -14,21 +14,8 @@ per-level backdrops). The procedural "breathing" idle (`CombatIdleMotion`) was *
 in favour of per-unit sprite idles, and the stage gained FF ranks and large bosses
 (`EnemyFormation`, `EnemySO.CombatScale`). What is left:
 
-- **The art pass is half done** *(2026-09-27, `docs/PIXEL_ART.md`)*. New PixelLab sprites with
-  3-frame idles: Paladin, Rogue; Abyssal Warden, Cinder Tyrant, Dark Jailor, Dragon, Cinder Imp,
-  Bog Shaman, Slag Hound. Still to do:
-  - **Five enemies have no idle frames and now stand completely still** — Gilded Hoarder,
-    Mirefather, Gilded Mote, Hex Weaver, Stone Sentinel. The breathing pulse used to hide this.
-  - **Mirefather and Gilded Hoarder are bosses at 64 px @ 64 PPU with `CombatScale` 1**, so they
-    render at 1 unit — smaller than the Warden and Tyrant (≈3). Re-import at 38 PPU + `CombatScale`
-    1.8, or redraw.
-  - **Warrior, Cleric, Ranger, Cultist and Tinkerer keep the original flat style** (~10 colours
-    against PixelLab's ~40), so the party is visibly two styles until they are redone. The user is
-    doing these one by one.
-  - **The Dark Jailor is 64 px although it is not a boss** — made before the size rule; a 32 px
-    redraw would match the convention.
-  - PixelLab can also animate attacks and hits (`animate_image` with an action), which would answer
-    the "no hit reaction, no death animation" item below without an Animator.
+- **The art pass** moved to **§21** (2026-09-28), which now holds every outdated sprite together
+  with the menu backdrops.
 
 - **A dedicated heal/buff flourish.** Heals still just show green rising text.
 - **Element-tinted damage numbers** per `DamageType`, and richer per-element cast visuals. Pair with
@@ -256,7 +243,7 @@ The hub is what makes this newly tractable, and newly necessary. Its whole purpo
 one system arriving at a time (`docs/plans/HUB.md` §7) — and a staged reveal that nobody explains
 is just a game with things missing from it.
 
-> **Playtest 2026-09-28 confirmed it** (`docs/PLAYTEST_FINDINGS.md` item 5, folded in here): a
+> **Playtest 2026-09-28 confirmed it** (the first fresh-save playtest's finding 5, folded in here): a
 > brand-new save lands in the hub with nothing saying what to do, and the only way forward — **The
 > Story** — is a small box on the far right edge. The first beat of the tutorial has to be pointing at
 > it.
@@ -293,7 +280,7 @@ Open questions, roughly in the order they bite:
 
 - **A step must send the player to spend their XP** *(requested 2026-09-28)*. XP is earned from the
   first fight but cannot be spent until the Sphere Hall stands, and nothing says so
-  (`docs/PLAYTEST_FINDINGS.md` item 10, the rest of which was dropped). After a **fixed number of
+  (the 2026-09-28 playtest's finding 10, the rest of which was dropped). After a **fixed number of
   cleared levels** the tutorial tells the player to upgrade their hero and then **walks them through
   it by the hand**: to the Sphere Hall, onto the hero's grid, to the first node they can afford, and
   through buying it. This one is a guided sequence, not a hint, because it is the game's core
@@ -341,6 +328,43 @@ reports it, rather than adding content ad hoc.
 
 Also thin and worth naming: **no run declares its own room-event pool**, so every biome draws on the
 same six.
+
+### 21. Art pass — menu backdrops and every outdated sprite *(added 2026-09-28)*
+
+One pass, because it is one budget (PixelLab generations) and one style to keep consistent.
+
+**Menu backdrops** *(first fresh-save playtest, finding 14)*. The **title screen**, the
+**level-entry screen** ("Dungeon Entrance" / "Upper Halls") and the **story map** are small panels
+floating on a flat colour. Each wants a painted backdrop, the way the hub has its town and a floor now
+has its bedrock (`Rooms/DungeonBackdrop`, `LevelDefinitionSO.MapBackdrop`).
+
+**Sprites** *(moved here from §1)*. New PixelLab sprites with 3-frame idles so far: Paladin, Rogue;
+Abyssal Warden, Cinder Tyrant, Dark Jailor, Drakeling (was Dragon), Cinder Imp, Bog Shaman, Slag
+Hound; plus the summons (Bloodfang Boar, Cairn Golem) and the room markers (campfire, open chest).
+Still to do:
+
+- **Five enemies have no idle frames and stand completely still** (`AnimationFrames` empty) —
+  Gilded Hoarder *(boss)*, Mirefather *(boss)*, Gilded Mote, Hex Weaver, Stone Sentinel. Checked
+  2026-09-28: every hero, both summons and every other enemy has a strip.
+- **Mirefather and Gilded Hoarder are bosses at 64 px @ 64 PPU with `CombatScale` 1**, so they
+  render at 1 unit — smaller than the Warden and Tyrant (≈3). Re-import at 38 PPU + `CombatScale`
+  1.8, or redraw.
+- **Warrior, Cleric, Ranger, Cultist and Tinkerer keep the original flat style** (~10 colours
+  against PixelLab's ~40), so the party is visibly two styles until they are redone. The owner is
+  doing these one by one.
+- **The Dark Jailor is 64 px although it is not a boss** — made before the size rule; a 32 px
+  redraw would match the convention.
+- PixelLab can also animate attacks and hits (`animate_image` with an action), which would answer
+  §1's "no hit reaction, no death animation" without an Animator.
+
+Workflow, sizes and the three-frame loop: `docs/PIXEL_ART.md`. **Budget:** the PixelLab account was on
+its free trial with **3 generations left** after 2026-09-28; a pass this size needs the daily allowance
+or a subscription (that doc's §8 has the free fallback).
+
+**Also parked here, not art:** the window/exe name. Project Settings `productName` is still
+"Untitled Roguelike dungeon" while the title reads *Immoral Dungeon*. The name is not final, and
+`productName` also decides `persistentDataPath` — changing it moves the save folder, so it needs a
+migration that carries `savedata/` across. Do it once, when the name is settled.
 
 ### 18. Item and consumable depth
 
