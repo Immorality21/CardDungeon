@@ -8,6 +8,14 @@ namespace Assets.Scripts.Hub.UI
     /// drive it directly — the same split <c>SphereGridPresenter</c> makes, and the reason the town
     /// renderer holds no rules of its own.
     /// </summary>
+    /// <summary>The mark a lot carries in the town - see <see cref="HubPresenter.BadgeFor"/>.</summary>
+    public enum LotBadge
+    {
+        None,
+        Build,
+        Locked,
+    }
+
     public static class HubPresenter
     {
         /// <summary>The hub-* USS class for a lot's state (see CardDungeon.uss).</summary>
@@ -87,6 +95,45 @@ namespace Assets.Scripts.Hub.UI
                     return string.IsNullOrEmpty(price) ? "Ready to build" : "Needs " + price;
                 default:
                     return DescribeLock(building);
+            }
+        }
+
+        /// <summary>
+        /// The one mark a lot carries in the town, in place of a line of text: a hammer when there is
+        /// something to build or raise there, a padlock while it is not on offer yet, nothing when it is
+        /// finished. The details - the price, what it grants, what unlocks it - live on the lot panel a
+        /// click away (the owner's call, 2026-09-28: a town where every building printed its costs
+        /// read like a spreadsheet).
+        /// </summary>
+        public static LotBadge BadgeFor(BuildingSO building, HubProgress progress)
+        {
+            if (building == null)
+            {
+                return LotBadge.None;
+            }
+
+            switch (BuildingOps.StateOf(building, progress))
+            {
+                case BuildingState.Built:
+                    return BuildingOps.CanUpgrade(building, progress) ? LotBadge.Build : LotBadge.None;
+                case BuildingState.Available:
+                    return LotBadge.Build;
+                default:
+                    return LotBadge.Locked;
+            }
+        }
+
+        /// <summary>The USS class that draws a badge, or null for none.</summary>
+        public static string BadgeClass(LotBadge badge)
+        {
+            switch (badge)
+            {
+                case LotBadge.Build:
+                    return "hub-lot__badge--build";
+                case LotBadge.Locked:
+                    return "hub-lot__badge--locked";
+                default:
+                    return null;
             }
         }
 

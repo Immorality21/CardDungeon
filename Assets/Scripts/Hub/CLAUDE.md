@@ -77,13 +77,21 @@ behind a roof, a banner past a wall — while UI Toolkit's hit-testing stays stu
 sprite is doing the identifying. `HubContentTests.NoTwoLots_HitBoxesOverlap` polices the hit boxes
 and says nothing about the art, which is free to overlap as much as it likes.
 
-**A lot's name and note hang below it, never on it** (`.hub-lot__caption`, 2026-09-28). Inside the
-hitbox they sat on the building's own art — the Storehouse's name over its door, a requirement over
-the Merchant's fence — and wrapped to the lot's width mid-phrase. The caption is a child of the
-button (it moves with the lot, never picks), does not wrap, and puts **one requirement per line**
-(`SetLotNote` turns `" · "` into line breaks; town only, since the same text is a sentence on the lot
-screen). A lot within `CaptionRoom` of the town's bottom edge (the campfire) takes its caption
+**A lot's name and badge hang below it, never on it** (`.hub-lot__caption`, 2026-09-28). Inside the
+hitbox they sat on the building's own art (the Storehouse's name over its door) and wrapped to the
+lot's width mid-phrase. The caption is a child of the button: it moves with the lot, never picks and
+does not wrap. A lot within `CaptionRoom` of the town's bottom edge (the campfire) takes its caption
 **above** instead, or it runs off the frame.
+
+**The town prints no costs or requirements** (the owner's call, 2026-09-28). A town where every
+building printed its costs read like a spreadsheet. Beside each name there is one badge instead:
+- a **hammer** when there is something to build or raise (`LotBadge.Build`);
+- a **padlock** when the lot is not on offer yet (`LotBadge.Locked`);
+- nothing when the lot is finished.
+
+`HubPresenter.BadgeFor` picks the badge and `HubView.SetLotBadge` draws it (icons in
+`Assets/UI/Icons/hub_hammer.png` / `hub_lock.png`). The price, what the lot grants and what unlocks it
+(`DescribeState`) live on the lot panel, one click away. Do not bring a text note back to the town.
 
 ### Three more constraints the renderer exists to satisfy
 

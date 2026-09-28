@@ -31,6 +31,7 @@ MonoBehaviour:
     Chance: 1
     MinQuantity: 1
     MaxQuantity: 2
-  CombatBackground: {fileID: 0}
+  CombatBackground: {fileID: 21300000, guid: a108f2f87beb42b5ad60f419e7e8284d, type: 3}
+  MapBackdrop: {fileID: 21300000, guid: 4badd25672254d23a244105cbc936cd2, type: 3}
   ExplorationMusic: {fileID: 0}
   CombatMusic: {fileID: 0}

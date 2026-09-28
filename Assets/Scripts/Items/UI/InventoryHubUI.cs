@@ -1149,6 +1149,7 @@ namespace Assets.Scripts.Items.UI
             _detailBody?.Add(BestiaryLineView.Section("Resistances"));
             var resistGrid = new VisualElement();
             resistGrid.AddToClassList("cd-inv-stats");
+            resistGrid.AddToClassList("cd-inv-stats--wide");
             foreach (var type in types)
             {
                 resistNow.TryGetValue(type, out float now);

@@ -58,6 +58,39 @@ namespace Tests.EditMode
             return new HubProgress(null, new List<string>(runs));
         }
 
+        // --- the town's badge (hammer / padlock / none) ------------------------------
+
+        [Test]
+        public void BadgeFor_AnOfferedLot_ShowsTheHammer()
+        {
+            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Build,
+                Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(Lot("merchant"), HubProgress.Fresh));
+        }
+
+        [Test]
+        public void BadgeFor_ABuiltLotThatCanRise_ShowsTheHammer()
+        {
+            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Build,
+                Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(
+                    Lot("campfire", placedByDefault: true, maxLevel: 3), HubProgress.Fresh));
+        }
+
+        [Test]
+        public void BadgeFor_AFinishedLot_ShowsNothing()
+        {
+            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.None,
+                Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(Lot("storehouse", placedByDefault: true), HubProgress.Fresh));
+        }
+
+        [Test]
+        public void BadgeFor_ALotStillLockedBehindARun_ShowsThePadlock()
+        {
+            var forge = Lot("forge", HubService.Merchant, false, default, default, 0, 1, "SomeRun");
+
+            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Locked,
+                Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(forge, HubProgress.Fresh));
+        }
+
         // --- level + state ---------------------------------------------------------
 
         [Test]

@@ -37,6 +37,18 @@ namespace Assets.Scripts.Sandbox.Editor
                 return false;
             }
 
+            // Read the path BEFORE opening the game scene. A Single-mode OpenScene unloads unused
+            // assets, which frees the config just loaded from its path; GetAssetPath on it afterwards
+            // returned "", the bootstrap found no pending config, and play started as an ORDINARY
+            // session against the real save folder - whenever the launch had to switch scenes
+            // (found 2026-09-28, three stray dungeon files written into the player's savedata).
+            string configPath = AssetDatabase.GetAssetPath(config);
+            if (string.IsNullOrEmpty(configPath))
+            {
+                Debug.LogError("[Sandbox] The config is not a saved asset; save it before launching.");
+                return false;
+            }
+
             var active = EditorSceneManager.GetActiveScene();
             if (active.path != GameScenePath)
             {
@@ -48,7 +60,7 @@ namespace Assets.Scripts.Sandbox.Editor
                 EditorSceneManager.OpenScene(GameScenePath, OpenSceneMode.Single);
             }
 
-            SessionState.SetString(SandboxBootstrap.PendingConfigKey, AssetDatabase.GetAssetPath(config));
+            SessionState.SetString(SandboxBootstrap.PendingConfigKey, configPath);
             EditorApplication.EnterPlaymode();
             return true;
         }

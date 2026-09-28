@@ -60,6 +60,16 @@ write to the player's bestiary.
   sees the sandbox folder. It clears the override again on `EnteredEditMode`, because domain reload
   happens on entering play mode, not leaving it. All of it is `UNITY_EDITOR`-only, so it cannot ship.
 
+## The launch bug that wrote to the real save (fixed 2026-09-28)
+
+`Launch` used to read the config's asset path **after** opening MainGameScene. A Single-mode
+`OpenScene` unloads unused assets, which freed the config it had just loaded, so `GetAssetPath`
+returned `""`, the bootstrap found no pending config, and play started as an **ordinary** session
+against the real `savedata` - every time the launch had to switch scenes (from HubScene, say). It
+still returned true. The path is now read first. If you ever see Warrior + Paladin, no enemy and no
+`[Sandbox] Setup report`, stop at once and look for a stray `Dungeon_<seed>.json` in the real folder
+(only `Run.json`'s `ActiveDungeonSeed` file belongs to the player).
+
 ## Limits
 
 - Clearing the floor or dying goes to the hub as usual — which then shows the sandbox save, not

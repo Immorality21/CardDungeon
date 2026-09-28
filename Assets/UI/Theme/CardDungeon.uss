@@ -665,6 +665,25 @@
     right: 0;
     bottom: 0;
     background-color: rgb(20, 16, 40);
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+/* Painted backdrops behind the menus that used to float on flat colour (playtest finding 14,
+   POLISH_CONTENT 21). Dimmed by the tint so the panel in front stays the thing you read. The title
+   sets its class in MainMenu.uxml; the hub switches between the other two in HubManager. */
+.cd-bg--title {
+    background-image: url("project://database/Assets/UI/Backdrops/title.png");
+    -unity-background-image-tint-color: rgb(190, 180, 210);
+}
+
+.cd-bg--level-entry {
+    background-image: url("project://database/Assets/UI/Backdrops/level_entry.png");
+    -unity-background-image-tint-color: rgb(170, 160, 190);
+}
+
+.cd-bg--story-map {
+    background-image: url("project://database/Assets/UI/Backdrops/story_map.png");
+    -unity-background-image-tint-color: rgb(170, 160, 190);
 }
 
 /* A window that centers cleanly (no lower-bias margin). */
@@ -1239,17 +1258,19 @@
     margin: 2px 0 8px 0;
 }
 
+/* Three to a row: with an item's flavour line above, two columns ran the resistances off the
+   bottom of a pane that does not scroll. */
 .cd-inv-stat {
-    width: 50%;
-    height: 28px;
+    width: 33.33%;
+    height: 26px;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 0 10px 0 4px;
+    padding: 0 8px 0 4px;
 }
 
 .cd-inv-stat__label {
-    font-size: 17px;
+    font-size: 16px;
     color: var(--cd-text-light);
     opacity: 0.8;
     padding: 0;
@@ -1257,11 +1278,16 @@
 }
 
 .cd-inv-stat__value {
-    font-size: 17px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: var(--cd-text-light);
     padding: 0;
     margin: 0;
+}
+
+/* Resistances read "+20% -> +35%", too long for a third: two to a row. */
+.cd-inv-stats--wide .cd-inv-stat {
+    width: 50%;
 }
 
 /* Up/down on a stat value - doubled selector, because .cd-inv-stat__value above sets the plain colour
@@ -2457,6 +2483,29 @@
     background-color: rgba(9, 5, 18, 0.8);
     padding: 0 6px;
     border-radius: 3px;
+}
+
+/* The caption is one line now: the name and, beside it, a badge in place of the old cost line. */
+.hub-lot__caption {
+    flex-direction: row;
+}
+
+.hub-lot__badge {
+    width: 30px;
+    height: 30px;
+    margin-left: 4px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Something to build or raise here. */
+.hub-lot__badge--build {
+    background-image: url("project://database/Assets/UI/Icons/hub_hammer.png");
+}
+
+/* Not on offer yet. */
+.hub-lot__badge--locked {
+    background-image: url("project://database/Assets/UI/Icons/hub_lock.png");
+    opacity: 0.85;
 }
 
 .hub-lot__note {

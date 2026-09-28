@@ -232,10 +232,10 @@ backlog.**
 | **16** | A compendium — explain the systems | not started |
 | **20** | **A tutorial — guide the player through the first hour** | not started; the opening beat is already built and priced for it |
 | **17** | Content volume is the biggest single gap | not started |
-| **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28) |
+| **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses to come** — the 4-piece Shadowweave set is authored, no set logic yet (§18a-sets) |
 | **19** | Shipping surface | not started |
 | — | **Menu improvements** — a whole-game UI review, one section per screen, ranked "do these first" | open (2026-09-28): [`MENU_IMPROVEMENTS.md`](MENU_IMPROVEMENTS.md), a to-do file like the playtest one |
-| **21** | **Art pass** — menu backdrops (title, level entry, story map) + every outdated sprite (five still enemies, two small bosses, the flat-style heroes) | open (2026-09-28); the `productName` / save-folder rename is parked here too |
+| **21** | **Art pass** — every outdated sprite (five still enemies, two small bosses, the flat-style heroes) | open; menu backdrops, per-biome combat backgrounds, floor rock and all 30 item icons **done 2026-09-28**; the `productName` / save-folder rename is parked here too |
 
 ---
 

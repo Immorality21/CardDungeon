@@ -17,6 +17,7 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: 8236202a4cf64b2eb85a88461145bb1d, type: 3}
   Rarity: 2
   ItemLevel: 4
+  Description: Cloth that drinks the light. One of four Shadowweave pieces.
   Category: 0
   SlotType: 3
   Bonuses:
@@ -34,4 +35,5 @@ MonoBehaviour:
     Percent: 25
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumablePercent: 0
   MaxStack: 99

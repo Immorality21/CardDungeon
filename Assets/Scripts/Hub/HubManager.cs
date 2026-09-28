@@ -48,6 +48,7 @@ namespace Assets.Scripts.Hub
 
         private VisualElement _hubView;
         private VisualElement _campaignView;
+        private VisualElement _backdrop;
         private VisualElement _progressView;
         private VisualElement _completeView;
         private VisualElement _merchantView;
@@ -139,6 +140,7 @@ namespace Assets.Scripts.Hub
 
             _hubView = root.Q<VisualElement>("hub-view");
             _campaignView = root.Q<VisualElement>("campaign-view");
+            _backdrop = root.Q<VisualElement>("bg");
             _progressView = root.Q<VisualElement>("progress-view");
             _completeView = root.Q<VisualElement>("complete-view");
             _merchantView = root.Q<VisualElement>("merchant-view");
@@ -281,7 +283,7 @@ namespace Assets.Scripts.Hub
             {
                 var state = BuildingOps.StateOf(building, progress);
                 _town.SetLotState(building.SaveKey, HubPresenter.StateClass(state));
-                _town.SetLotNote(building.SaveKey, HubPresenter.DescribeState(building, progress));
+                _town.SetLotBadge(building.SaveKey, HubPresenter.BadgeFor(building, progress));
             }
         }
 
@@ -459,7 +461,7 @@ namespace Assets.Scripts.Hub
             _town.SetLotSprite(_selectedLot.SaveKey, BuildingOps.SpriteFor(_selectedLot, after), phaseIn: true);
             _town.SetLotState(_selectedLot.SaveKey,
                 HubPresenter.StateClass(BuildingOps.StateOf(_selectedLot, after)));
-            _town.SetLotNote(_selectedLot.SaveKey, HubPresenter.DescribeState(_selectedLot, after));
+            _town.SetLotBadge(_selectedLot.SaveKey, HubPresenter.BadgeFor(_selectedLot, after));
 
             SetLotFeedback(placing
                 ? $"{_selectedLot.Label} built."
@@ -636,6 +638,30 @@ namespace Assets.Scripts.Hub
         private void Update()
         {
             PanelKeyboard.Claim();
+            RefreshBackdrop();
+        }
+
+        /// <summary>
+        /// The painted backdrop behind the views that have no town behind them: the level entry and
+        /// the story map (POLISH_CONTENT 21). Read off which view is up rather than set at each of
+        /// the many places a view is shown, so no path can leave a stale backdrop behind.
+        /// </summary>
+        private void RefreshBackdrop()
+        {
+            if (_backdrop == null)
+            {
+                return;
+            }
+            SetClass(_backdrop, "cd-bg--level-entry", IsShown(_progressView));
+            SetClass(_backdrop, "cd-bg--story-map", IsShown(_campaignView));
+        }
+
+        private static void SetClass(VisualElement element, string className, bool on)
+        {
+            if (element.ClassListContains(className) != on)
+            {
+                element.EnableInClassList(className, on);
+            }
         }
 
         // ============================================================

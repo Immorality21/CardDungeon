@@ -22,7 +22,11 @@ in favour of per-unit sprite idles, and the stage gained FF ranks and large boss
   the colourblind check in §19.
 - **A bigger on-screen combo banner** beyond the floating name.
 - **True desaturate on defeat** needs post-processing.
-- **Real per-biome background art** — `LevelDefinitionSO.CombatBackground` is wired and mostly unset.
+- ~~**Real per-biome background art**~~ *Done 2026-09-28*: one PixelLab battle background per run
+  (`Assets/Sprites/Backgrounds/combat_<biome>.png` — marsh, warrens, vault, ashen, blood) set on every
+  level's `CombatBackground`; The Threshold keeps the original hall (`Resources/CombatBackgrounds/battle`).
+  Each floor also got a biome-tinted `MapBackdrop` (`Resources/DungeonBackdrops/<biome>.png`, recoloured
+  from the seamless bedrock tile rather than generated - generated tiles came back framed).
 - **Per-boss music.** A boss theme is game-wide; per-boss would want a field on `RunLevelEntry`
   beside `BossAdds`.
 - **Dedicated combat SFX.** The current clips are repurposed interface foley.
@@ -333,10 +337,10 @@ same six.
 
 One pass, because it is one budget (PixelLab generations) and one style to keep consistent.
 
-**Menu backdrops** *(first fresh-save playtest, finding 14)*. The **title screen**, the
-**level-entry screen** ("Dungeon Entrance" / "Upper Halls") and the **story map** are small panels
-floating on a flat colour. Each wants a painted backdrop, the way the hub has its town and a floor now
-has its bedrock (`Rooms/DungeonBackdrop`, `LevelDefinitionSO.MapBackdrop`).
+~~**Menu backdrops**~~ *Done 2026-09-28*: the title screen, the level-entry screen and the story map
+now sit on PixelLab paintings (`Assets/UI/Backdrops/`), set as `.cd-bg--title` / `--level-entry` /
+`--story-map` on the `bg` element — the title in `MainMenu.uxml`, the other two by
+`HubManager.RefreshBackdrop` off which view is up.
 
 **Sprites** *(moved here from §1)*. New PixelLab sprites with 3-frame idles so far: Paladin, Rogue;
 Abyssal Warden, Cinder Tyrant, Dark Jailor, Drakeling (was Dragon), Cinder Imp, Bog Shaman, Slag
@@ -382,6 +386,33 @@ greedy ranker that sums weighted stats will handle it correctly, but it has neve
 
 Set bonuses and procs are larger and want their own decision; procs in particular need a hook point
 in `DamageCalculator`/`CombatManager` that does not exist.
+
+**18a-sets. Set bonuses — introduce later (owner's request, 2026-09-28).** The first set exists, but
+only as authored items. **Shadowweave** is four Rare, ItemLevel-4 pieces:
+
+| piece | slot | grants |
+|---|---|---|
+| Shadowweave Cloak | Chest | *(the original piece)* |
+| Shadowweave Hood | Head | +4 AGI, +1 LCK, +12 HP, Shadow 15% |
+| Shadowweave Gloves | Hands | +3 AGI, +2 LCK, +8 HP, Shadow 10% |
+| Shadowweave Treads | Legs | +4 AGI, +10 HP, Shadow 10% |
+
+They share one look: black cloth with magenta trim, all four icons from PixelLab. The original
+"cloak" sprite was really a hooded cowl, so it moved to the Hood, and the Cloak got a new draped
+mantle with a gem clasp (2026-09-28). Each description
+ends "One of four Shadowweave pieces." **Nothing in code knows they belong together yet.**
+
+To make the set real:
+- **Model.** Add a `SetKey` to `ItemSO`, or better a `ItemSetSO`. The `ItemSetSO` would list its
+  pieces plus bonus tiers such as 2-piece and 4-piece, each tier a `StatBlock` and/or resistances.
+- **Rules.** A pure `ItemSetOps.ActiveBonuses(equipped)` folded into the hero's derived stats. Keep
+  it where `HeroSnapshotUnit` and the frontier's `GearLoadout` can both see it, so the "if equipped"
+  preview and the balance analyzer stay honest.
+- **Inventory UI.** The Storehouse detail pane gets a "Set: 2/4" block listing the tiers, lit when
+  active. The equip preview must include a tier gained or lost by the swap.
+- **Balance.** A tier bonus is a gear-axis multiplier. Measure it through the investment frontier
+  (`BALANCING.md`) before picking numbers, and consider trimming the pieces' own stats to pay for it.
+- **Procs** (see above) are the natural 4-piece reward once the hook point exists.
 
 **18b. Consumables.** `CureStatus` shipped with §9; `RestoreToFull` and `Revive` are still missing and
 pair with §3's death safety-net sink.

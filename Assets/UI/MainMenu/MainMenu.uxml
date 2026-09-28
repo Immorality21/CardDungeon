@@ -6,7 +6,7 @@
          file has been chosen - which is what makes room for the save-slot picker that will land
          here later. Continue is that choice today, with one slot. -->
     <ui:VisualElement name="root" class="cd-root">
-        <ui:VisualElement name="bg" class="cd-bg" picking-mode="Ignore" />
+        <ui:VisualElement name="bg" class="cd-bg cd-bg--title" picking-mode="Ignore" />
 
         <!-- TITLE -->
         <ui:VisualElement name="title-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">

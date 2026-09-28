@@ -193,7 +193,7 @@
                             <ui:Label name="inv-detail-sub" text="" class="cd-inv-detail__sub" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:ScrollView name="inv-detail-body" class="cd-inv-detail__body" mode="Vertical" vertical-scroller-visibility="Hidden" />
+                    <ui:ScrollView name="inv-detail-body" class="cd-inv-detail__body" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
                 </ui:VisualElement>
             </ui:VisualElement>
 

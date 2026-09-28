@@ -52,8 +52,8 @@ namespace Assets.Scripts.Hub.UI
 
         private readonly VisualElement _canvas;
 
-        /// <summary>Design-space height a caption needs below its lot: a name and two note lines.</summary>
-        private const float CaptionRoom = 80f;
+        /// <summary>Design-space height a caption needs below its lot: one line, the name and its badge.</summary>
+        private const float CaptionRoom = 44f;
         private readonly VisualElement _backdrop;
         private readonly VisualElement _spriteLayer;
         private readonly VisualElement _lotLayer;
@@ -201,9 +201,12 @@ namespace Assets.Scripts.Hub.UI
             label.AddToClassList("hub-lot__label");
             caption.Add(label);
 
-            var note = new Label(string.Empty) { name = "hub-lot-note-" + lot.Key, pickingMode = PickingMode.Ignore };
-            note.AddToClassList("hub-lot__note");
-            caption.Add(note);
+            // A hammer or a padlock beside the name, never a line of costs: the details are one click
+            // away on the lot panel (the owner's call, 2026-09-28).
+            var badge = new VisualElement { name = "hub-lot-badge-" + lot.Key, pickingMode = PickingMode.Ignore };
+            badge.AddToClassList("hub-lot__badge");
+            badge.AddToClassList("cd-hidden");
+            caption.Add(badge);
 
             ApplyArtMode(button, glyph, lot.Sprite != null);
 
@@ -280,22 +283,21 @@ namespace Assets.Scripts.Hub.UI
             art.schedule.Execute(() => art.RemoveFromClassList("hub-art--phasing")).ExecuteLater(16);
         }
 
-        /// <summary>Sets the small line under a lot's name (its level, or what it is waiting for).</summary>
-        public void SetLotNote(string key, string note)
+        /// <summary>Sets the badge beside a lot's name: a hammer, a padlock, or none.</summary>
+        public void SetLotBadge(string key, LotBadge badge)
         {
             if (!_buttons.TryGetValue(key, out var button))
             {
                 return;
             }
-            var label = button.Q<Label>("hub-lot-note-" + key);
-            if (label != null)
+            var element = button.Q<VisualElement>("hub-lot-badge-" + key);
+            if (element == null)
             {
-                // One requirement per line ("Needs 8 Scrap Iron" / "2 Rotted Timber") rather than one
-                // line wrapped wherever the width ran out. Town-only: the same text is a sentence on
-                // the lot screen.
-                label.text = (note ?? "").Replace(" · ", "\n");
-                label.EnableInClassList("cd-hidden", string.IsNullOrEmpty(note));
+                return;
             }
+            element.EnableInClassList("hub-lot__badge--build", badge == LotBadge.Build);
+            element.EnableInClassList("hub-lot__badge--locked", badge == LotBadge.Locked);
+            element.EnableInClassList("cd-hidden", badge == LotBadge.None);
         }
 
         /// <summary>The lot keys currently drawn, in paint order.</summary>
