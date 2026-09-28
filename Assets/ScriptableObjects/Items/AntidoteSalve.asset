@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: AntidoteSalve
   DisplayName: Antidote Salve
-  Icon: {fileID: 21300000, guid: 64265e59b4da49ae842d6c083b334cce, type: 3}
+  Icon: {fileID: 21300000, guid: cdeebf67b54d4252b172ed072970eeb0, type: 3}
   Rarity: 0
   ItemLevel: 1
   Category: 1

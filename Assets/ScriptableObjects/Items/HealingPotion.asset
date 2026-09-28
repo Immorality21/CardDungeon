@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: HealingPotion
   DisplayName: Healing Potion
-  Icon: {fileID: 21300000, guid: 64265e59b4da49ae842d6c083b334cce, type: 3}
+  Icon: {fileID: 21300000, guid: ad16d9d0dea44b71aed1ec4f15defac1, type: 3}
   Rarity: 0
   ItemLevel: 1
   Category: 1

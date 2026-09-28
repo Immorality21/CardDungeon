@@ -22,9 +22,9 @@ the captive-joins dialog, the boss and summon banners, the multi-target target p
 the fixture).
 
 **Already on the roadmap, not re-listed:** painted backdrops for the title, level-entry and story
-map (§21), the placeholder item icons (every material is the same log, every potion the same flask
-— §21), un-animated enemies (§21), and the death screen's missing run summary (§15). Where
-materials come from stays a mystery on purpose; nothing here suggests a source hint.
+map (§21), un-animated enemies (§21), and the death screen's missing run summary (§15). Where
+materials come from stays a mystery on purpose; nothing here suggests a source hint. (The placeholder
+item icons this review saw were replaced the same day: every item now has its own icon.)
 
 ---
 

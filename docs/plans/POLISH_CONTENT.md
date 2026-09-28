@@ -352,9 +352,9 @@ Still to do:
 - **Warrior, Cleric, Ranger, Cultist and Tinkerer keep the original flat style** (~10 colours
   against PixelLab's ~40), so the party is visibly two styles until they are redone. The owner is
   doing these one by one.
-- **Item icons are placeholders in bulk** *(found 2026-09-28 in the inventory redesign)*: all ten
-  materials share one log sprite, and both healing potions and the antidote share one flask. The
-  redesigned inventory shows icons at 2x in framed tiles, which makes the repetition obvious.
+- ~~**Item icons are placeholders in bulk**~~ *Done 2026-09-28*: all 30 items have their own PixelLab
+  icon (the ten materials had shared one log, the potions a spell icon). Recipe in
+  `docs/PIXEL_ART.md` §3; `ItemPresenterTests` guards against a shared icon creeping back.
 - **The Dark Jailor is 64 px although it is not a boss** — made before the size rule; a 32 px
   redraw would match the convention.
 - PixelLab can also animate attacks and hits (`animate_image` with an action), which would answer

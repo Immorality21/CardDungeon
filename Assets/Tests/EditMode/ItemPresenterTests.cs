@@ -42,6 +42,64 @@ namespace Tests.EditMode
             return new ItemBonus { StatType = stat, BonusType = BonusType.Raw, Value = value };
         }
 
+        private static List<ItemSO> LoadEveryItem()
+        {
+            var items = new List<ItemSO>();
+            foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:ItemSO"))
+            {
+                var item = UnityEditor.AssetDatabase.LoadAssetAtPath<ItemSO>(
+                    UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+                if (item != null)
+                {
+                    items.Add(item);
+                }
+            }
+            return items;
+        }
+
+        /// <summary>
+        /// Every item shows its icon in the inventory, the merchant and the combat item picker. All
+        /// ten materials once shared one placeholder log and every potion a spell icon; each item got
+        /// its own PixelLab icon on 2026-09-28, and these two keep it that way.
+        /// </summary>
+        [Test]
+        public void EveryItem_HasAnIcon()
+        {
+            var missing = new List<string>();
+            foreach (var item in LoadEveryItem())
+            {
+                if (item.Icon == null)
+                {
+                    missing.Add(item.name);
+                }
+            }
+            CollectionAssert.IsEmpty(missing, "Item(s) with no icon: " + string.Join(", ", missing));
+        }
+
+        [Test]
+        public void NoTwoItems_ShareAnIcon()
+        {
+            var byIcon = new Dictionary<Sprite, string>();
+            var shared = new List<string>();
+            foreach (var item in LoadEveryItem())
+            {
+                if (item.Icon == null)
+                {
+                    continue;
+                }
+                if (byIcon.TryGetValue(item.Icon, out var other))
+                {
+                    shared.Add($"{item.name} and {other}");
+                }
+                else
+                {
+                    byIcon[item.Icon] = item.name;
+                }
+            }
+            CollectionAssert.IsEmpty(shared, "Items sharing one icon (a placeholder crept back?): "
+                + string.Join("; ", shared));
+        }
+
         [Test]
         public void SlotLabel_ReadsLikeWords_NotLikeTheEnum()
         {

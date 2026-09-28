@@ -25,7 +25,11 @@ it. Tools appear as `mcp__pixellab__*`.
 **Check the budget first — every time:** `mcp__pixellab__get_balance` (free). The account started
 on the **free trial: 40 generations**, after which it is ~5 slow generations/day unless subscribed
 (Tier 1 ≈ $12/month). A generation is spent the moment a job is queued, so a rejected prompt still
-costs one.
+costs one. **Subscribed 2026-09-28** (Tier 1, 2,000 generations a month).
+
+**At most 8 jobs run at once.** A 9th request fails with `rate limit exceeded (8/8 jobs)` and is not
+queued (nor charged), so feed a large batch in waves: queue 8, `wait_for_jobs`, queue as many as
+finished. Keep the name → job id list in a scratchpad file between waves.
 
 ## 2. Sizes — the rule that bit
 
@@ -90,6 +94,18 @@ Jobs are async: queue them in parallel, then `wait_for_jobs` (free) instead of p
 - **Heroes (pixen, 32×32):** *"cute chibi …, big head, …, thick dark outline, simple readable
   shapes, full body, facing right, retro JRPG party sprite"*. Without "chibi / big head" pixflux
   produced realistic, thin, outline-less knights that clashed with the party.
+- **Item icons (pixen, 32×32, all 30 redone 2026-09-28):** *"<name>, <what it looks like>, dark
+  fantasy RPG inventory item icon, single object centered, clean readable silhouette"* (weapons
+  add "diagonal", shields/armour "front view", materials say "crafting material inventory icon"),
+  `no_background`, `single color black outline`, `medium detail`, **seed 9001 for the whole set** -
+  one seed across a set keeps the palette and shading consistent. Wearables need **"empty item, no
+  person"** or the model dresses a figure in them (the first cloak had a face in its hood; the
+  first greaves and gauntlets came back as a whole armoured body). Review a batch as a contact
+  sheet at 4x on the inventory's tile colour, not one by one: the misses and the near-duplicates
+  (a "simple sword" that was the iron sword again) only show side by side.
+  Import: equipment icons overwrite their own PNG in `Assets/Sprites/Items/` (GUID kept); a new
+  icon copies `iron_sword.png.meta` with a fresh GUID and the item's `Icon` is re-pointed.
+  `ItemPresenterTests` fails if an item has no icon or two items share one.
 
 ## 4. Style consistency — know what you are mixing
 

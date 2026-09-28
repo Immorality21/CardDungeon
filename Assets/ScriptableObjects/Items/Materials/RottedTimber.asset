@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: RottedTimber
   DisplayName: Rotted Timber
-  Icon: {fileID: 21300000, guid: c0de5211aa0f0000000000000000ab0f, type: 3}
+  Icon: {fileID: 21300000, guid: a346391db14a42689436d26cf63e073e, type: 3}
   Rarity: 0
   ItemLevel: 1
   Description: 'Damp beams prised out of a frame that had already given up. Still holds a nail.'

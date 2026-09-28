@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: GreaterHealingPotion
   DisplayName: Greater Healing Potion
   Description: Thicker, darker, and worth the turn it takes to drink.
-  Icon: {fileID: 21300000, guid: 64265e59b4da49ae842d6c083b334cce, type: 3}
+  Icon: {fileID: 21300000, guid: 634656ed13f448a3ac76255b53b35a66, type: 3}
   Rarity: 1
   ItemLevel: 4
   Category: 1
