@@ -91,6 +91,13 @@ namespace Assets.Scripts.Rooms
         private VisualElement _victoryRewards;
         private Button _victoryContinue;
 
+        private VisualElement _hud;
+        private Label _hudLevel;
+        private Label _hudRun;
+        private Label _hudGold;
+        private Label _hudExplore;
+        private int _hudGoldShown = -1;
+
         private VisualElement _levelWindow;
         private Label _levelTitle;
         private Label _levelSubtitle;
@@ -185,6 +192,11 @@ namespace Assets.Scripts.Rooms
             _victoryTitle = root.Q<Label>("victory-title");
             _victoryRewards = root.Q<VisualElement>("victory-rewards");
             _victoryContinue = root.Q<Button>("victory-continue");
+            _hud = root.Q<VisualElement>("dungeon-hud");
+            _hudLevel = root.Q<Label>("hud-level");
+            _hudRun = root.Q<Label>("hud-run");
+            _hudGold = root.Q<Label>("hud-gold");
+            _hudExplore = root.Q<Label>("hud-explore");
             _levelWindow = root.Q<VisualElement>("level-clear-window");
             _levelTitle = root.Q<Label>("level-clear-title");
             _levelSubtitle = root.Q<Label>("level-clear-subtitle");
@@ -363,6 +375,7 @@ namespace Assets.Scripts.Rooms
             // was made blind. Rebuilt per room rather than once, because a rescued hero joins
             // mid-level.
             ShowPartyStatusOutOfCombat();
+            RefreshHud();
 
             bool hasEnemy = room.Enemies.Any(e => e != null && e.IsAlive);
             SetShown(_combatBar, hasEnemy);
@@ -2064,6 +2077,7 @@ namespace Assets.Scripts.Rooms
             }
 
             _nameplates?.Tick(Camera.main);
+            TickHud();
 
             // Clicking anything that is not UI - a door, a wall, the floor - clears the EventSystem's
             // selection and with it the keyboard. Re-claiming here costs a null check and means the
@@ -2546,6 +2560,115 @@ namespace Assets.Scripts.Rooms
             }
 
             SetShown(_victoryWindow, true);
+        }
+
+        // ============================================================
+        //  DUNGEON HUD (top-left, while walking the floor)
+        // ============================================================
+
+        /// <summary>
+        /// Where the party is and what the floor has paid so far: the level's name, the run and
+        /// "level N of M", the gold found on this floor, and the map's explored/frontier line.
+        ///
+        /// <para>Added 2026-09-28 (playtest finding 7): the room floated in a black screen with no
+        /// level name and no counter, so gold from an event had nowhere to show up. The gold shown is
+        /// the floor's <b>pending</b> pool and says so - it is only banked on the stairs and a wipe
+        /// forfeits it, which is the thing the player needs to know about it. The exploration line is
+        /// <see cref="DungeonMapOps.StatusLine"/>, the floor map's own, so the HUD can never reveal
+        /// more than the map (no total room count).</para>
+        ///
+        /// <para>Names and the exploration line change only when the party changes room, so they are
+        /// rebuilt from <see cref="Show"/>; gold can change on any click (a cache, an event), so
+        /// <see cref="TickHud"/> polls it and rewrites the label only when it moved.</para>
+        /// </summary>
+        private void RefreshHud()
+        {
+            if (_hud == null)
+            {
+                return;
+            }
+
+            var dungeon = DungeonManager.HasInstance ? DungeonManager.Instance : null;
+            var entry = dungeon != null ? dungeon.CurrentLevelEntry : null;
+            var run = DungeonManager.ActiveRun;
+
+            string levelName = entry != null && !string.IsNullOrEmpty(entry.LevelName)
+                ? entry.LevelName
+                : dungeon != null && dungeon.CurrentLevel != null ? SpacedName(dungeon.CurrentLevel.name) : "The Dungeon";
+            SetText(_hudLevel, levelName);
+
+            string runLine = string.Empty;
+            if (run != null && run.Levels.Count > 0)
+            {
+                string runName = !string.IsNullOrEmpty(run.DisplayName) ? run.DisplayName : run.name;
+                runLine = $"{runName} · Level {DungeonManager.RunLevelIndex + 1} of {run.Levels.Count}";
+            }
+            SetText(_hudRun, runLine);
+            SetShown(_hudRun, !string.IsNullOrEmpty(runLine));
+
+            var rooms = dungeon != null ? dungeon.CurrentRooms : null;
+            var model = DungeonMapOps.Build(BuildMapInputs(rooms), _currentRoom != null ? _currentRoom.RoomIndex : -1);
+            string explore = DungeonMapOps.StatusLine(model);
+            SetText(_hudExplore, string.IsNullOrEmpty(explore) ? "M  map" : $"{explore}  ·  M  map");
+
+            _hudGoldShown = -1; // force the gold label to redraw
+            TickHud();
+        }
+
+        /// <summary>
+        /// "CollapsedCaverns" -> "Collapsed Caverns": a level with no run entry (a sandbox, a test
+        /// floor) has only its asset name to show.
+        /// </summary>
+        private static string SpacedName(string assetName)
+        {
+            if (string.IsNullOrEmpty(assetName))
+            {
+                return string.Empty;
+            }
+            var sb = new System.Text.StringBuilder(assetName.Length + 4);
+            for (int i = 0; i < assetName.Length; i++)
+            {
+                char c = assetName[i];
+                if (c == '_')
+                {
+                    sb.Append(' ');
+                    continue;
+                }
+                if (i > 0 && char.IsUpper(c) && char.IsLower(assetName[i - 1]))
+                {
+                    sb.Append(' ');
+                }
+                sb.Append(c);
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>Per frame: the HUD is up only while walking, and its gold follows the pending pool.</summary>
+        private void TickHud()
+        {
+            if (_hud == null)
+            {
+                return;
+            }
+
+            bool inCombat = CombatManager.HasInstance && CombatManager.Instance.InCombat;
+            bool visible = _currentRoom != null && !inCombat
+                && !IsShown(_victoryWindow) && !IsShown(_levelWindow);
+            if (IsShown(_hud) != visible)
+            {
+                SetShown(_hud, visible);
+            }
+            if (!visible)
+            {
+                return;
+            }
+
+            int gold = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.PendingRunGold : 0;
+            if (gold != _hudGoldShown)
+            {
+                _hudGoldShown = gold;
+                SetText(_hudGold, $"Gold found  +{gold}   (banked when you take the stairs)");
+            }
         }
 
         // ============================================================

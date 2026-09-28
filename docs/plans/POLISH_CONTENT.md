@@ -256,6 +256,11 @@ The hub is what makes this newly tractable, and newly necessary. Its whole purpo
 one system arriving at a time (`docs/plans/HUB.md` §7) — and a staged reveal that nobody explains
 is just a game with things missing from it.
 
+> **Playtest 2026-09-28 confirmed it** (`docs/PLAYTEST_FINDINGS.md` item 5, folded in here): a
+> brand-new save lands in the hub with nothing saying what to do, and the only way forward — **The
+> Story** — is a small box on the far right edge. The first beat of the tutorial has to be pointing at
+> it.
+
 **The opening beat is already built and priced for this**: clearing *Dungeon Entrance* guarantees
 1 Rotted Timber (`LevelDefinitionSO.GuaranteedMaterials`), and the Sphere Hall costs exactly that.
 So the first loop the tutorial can point at is closed and cannot fail: *take the road → clear the
@@ -285,6 +290,19 @@ Open questions, roughly in the order they bite:
   should say roughly *"You can choose your own path now — but beware: some roads are far beyond
   you yet. Turning back is no shame."* and it must not read as a bug report ("this run is
   broken-hard").
+
+- **A step must send the player to spend their XP** *(requested 2026-09-28)*. XP is earned from the
+  first fight but cannot be spent until the Sphere Hall stands, and nothing says so
+  (`docs/PLAYTEST_FINDINGS.md` item 10, the rest of which was dropped). After a **fixed number of
+  cleared levels** the tutorial tells the player to upgrade their hero and then **walks them through
+  it by the hand**: to the Sphere Hall, onto the hero's grid, to the first node they can afford, and
+  through buying it. This one is a guided sequence, not a hint, because it is the game's core
+  progression and the first time the player meets the grid.
+- **Leave the rest a mystery** *(owner's call, 2026-09-28)*. The tutorial covers the few things the
+  player cannot progress without — the way out, the XP spend, the fork warning — and deliberately
+  **not** everything. Where a material drops, what a building will turn into, what lies down an
+  unexplored road: those are for the player to find out. When a new step is proposed, ask whether the
+  player is *stuck* without it or merely *uninformed*; only the first earns a step.
 
 **It should be authored content, not code.** A `TutorialStepSO` list — trigger, target, one line of
 text — read by a pure `TutorialOps`, is the same shape as `CampaignSO`/`CampaignOps` and
@@ -367,6 +385,24 @@ a re-attempt is the most natural gold sink the game could have.
 Touch points: `Assets/Scripts/Items/ItemSO.cs` / `ItemBonus.cs` / `ConsumableEffectType.cs`,
 `Assets/Scripts/Items/LootRoller.cs`, `Assets/Scripts/Balance/GearLoadout.cs`,
 `Assets/Scripts/Rooms/CombatManager.cs` (consumable use path).
+
+**18c. The potion belt — overhaul or re-evaluate** *(opened 2026-09-28, owner's call)*. The belt is
+a free top-up: `DungeonManager.SpawnFreshDungeon` calls `InventoryManager.TopUpConsumableToCap` to
+fill the basic potion to the cap `PartyResourceManager` holds (which the Merchant raises). It is
+awkward in three ways, and the owner wants it looked at as a whole rather than patched:
+
+- **The refill is invisible and unsaved.** It runs while inventory saves are deferred, so it lives in
+  memory until the level is cleared. The level-clear summary had to special-case it
+  (`DungeonManager._levelStartGrants`), or every floor listed its own refill as potions *found*.
+- **It probably does not survive leaving the floor.** Only a *fresh* spawn tops up; a resumed or
+  restarted floor does not, and `HandleQuitToHub` reloads the inventory from disk — which never held
+  the refill. **Unverified**: confirm before designing around it.
+- **Free, topped-up and auto-sized sits awkwardly beside everything else**: the Greater tier is
+  loot-only, the Merchant sells no consumables (above), and §5h already retracted belt *size* as an
+  attrition lever. Options range from "the belt is a real stock you restock at the Merchant" (a gold
+  sink, §3/§3b) to "a fixed per-run allowance, saved like charges".
+
+Decide what the belt *is* before touching the numbers.
 
 ### 19. Shipping surface
 

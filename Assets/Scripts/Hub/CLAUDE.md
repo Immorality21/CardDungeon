@@ -302,7 +302,10 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   secret branches absent until they unlock. All progression decisions come from `CampaignOps`, all
   styling from `CampaignPresenter`. It does **not** write `Run.json` — it raises `OnRunChosen` and
   the manager does, so there is exactly one writer. Reuses `SphereGridView` as its renderer with its
-  own `cm-node--*` state classes.
+  own `cm-node--*` state classes. **Every visible run is named under its node** (2026-09-28,
+  playtest finding 11) through `SphereGridView.NodeInfo.Caption`, which is **opt-in**: only
+  `CampaignPresenter` sets it, so sphere grid nodes stay caption-free. `NodeCaptionTests` pins both
+  halves — change one and the other will tell you.
 - **PartySelectUI** (the campfire) — which owned heroes actually march out. Writes
   `PartySaveData.SelectedHeroKeys` through `HeroRoster.SetSelectedKeys`; `DungeonManager.FieldedHeroes()`
   reads it. Two lists with a Field/Bench button per row, a minimum of one hero, and the cap from

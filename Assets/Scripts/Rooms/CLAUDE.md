@@ -134,6 +134,13 @@ already had. If a room needs to *say* something, that is what an event's `Prompt
 > how it persists - lives in `Assets/Scripts/Rooms/Events/CLAUDE.md`.** It loads automatically when
 > you work in that folder.
 
+## The dungeon HUD (`dungeon-hud`, top-left)
+
+Up while walking the floor, hidden in combat and under the victory / level-clear windows (`RoomActionUI.RefreshHud` / `TickHud`, added 2026-09-28 for playtest finding 7). Four lines: the level's name (`RunLevelEntry.LevelName`, or the level asset's name spaced out when there is no run), the run and **Level N of M**, **the gold found on this floor** and the map's explored line.
+
+- **The gold is the pending pool** (`MetaProgressManager.PendingRunGold`), labelled as banked on the stairs, because that is what the player needs to know about it: a wipe or leaving the floor forfeits it. It is polled per frame and redrawn only when it moves, since a cache, an event or a kill can change it.
+- **The explored line is `DungeonMapOps.StatusLine`, the floor map's own**, so the HUD can never say more than the map does — no total room count, by the same rule. It and the names are rebuilt on `Show` (every room change, including fast travel).
+
 ## Runtime Controls
 
 - **G** — Generate new dungeon

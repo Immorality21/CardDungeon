@@ -7,6 +7,15 @@
              First child, so every window below draws over them. -->
         <ui:VisualElement name="nameplate-layer" class="cd-nameplate-layer" picking-mode="Ignore" />
 
+        <!-- Dungeon HUD (top-left while walking): level, run + level N of M, gold found on this floor,
+             and the map's explored line. Filled by RoomActionUI.RefreshHud / TickHud. -->
+        <ui:VisualElement name="dungeon-hud" class="cd-hud cd-dock-top-left cd-hidden" picking-mode="Ignore">
+            <ui:Label name="hud-level" text="" class="cd-hud__level" picking-mode="Ignore" />
+            <ui:Label name="hud-run" text="" class="cd-hud__run" picking-mode="Ignore" />
+            <ui:Label name="hud-gold" text="" class="cd-hud__gold" picking-mode="Ignore" />
+            <ui:Label name="hud-explore" text="" class="cd-hud__explore" picking-mode="Ignore" />
+        </ui:VisualElement>
+
         <!-- Non-combat room actions -->
         <ui:VisualElement name="main-bar" class="cd-bar cd-dock-bottom cd-hidden">
             <ui:Button name="action-btn" text="Action" class="cd-cmd" />

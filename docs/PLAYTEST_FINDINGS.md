@@ -37,7 +37,7 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
 
 ## Missing information / feedback
 
-- [ ] **5. No first-time guidance.** A brand-new save drops the player into the hub with nothing
+- [x] ~~**5. No first-time guidance.**~~ *Dropped 2026-09-28: folded into the tutorial, `docs/plans/POLISH_CONTENT.md` §20.* A brand-new save drops the player into the hub with nothing
   telling them what to do. The only way forward is **The Story** — a small box on the far right edge.
   At minimum, point at The Story on a new save (ties into the tutorial, `docs/plans/POLISH_CONTENT.md`).
 - [x] **6. Clearing a level has no moment.** Descending on level 1 of 4 goes straight back to the hub
@@ -47,15 +47,17 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
 - [ ] **7. No dungeon HUD.** In a level there is no gold counter, no level name ("Upper Halls"), no
   "Level 2 of 4", no minimap/room count. The room floats in a black screen. Gold earned from events
   has nowhere to show up.
+  - *HUD done 2026-09-28* (level name, run + level N of M, gold found this floor, explored line + M map).
+    **Still open: the black backdrop around the room.**
 - [x] **8. Abilities have no description.** The Ability picker shows "Slash 2/2" and nothing else —
   no damage, no effect (it applied a bleed), no hint of how it differs from Attack.
 - [x] **9. Enemy HP is unreadable.** Enemies get only a thin bar: no name, no number. At 1 HP the bar
   is practically invisible (no dark background track).
-- [ ] **10. Hub requirements don't say where materials come from.** "Needs 8 Scrap Iron · 2 Rotted
+- [x] ~~**10. Hub requirements don't say where materials come from.**~~ *Dropped 2026-09-28 (owner's call): where materials come from stays a mystery on purpose. The spend-XP half moved to the tutorial, `docs/plans/POLISH_CONTENT.md` §20.* "Needs 8 Scrap Iron · 2 Rotted
   Timber", "Needs 1 Rotted Timber", "Needs 4 Scrap Iron" — nothing tells the player these drop in
   the dungeon. Also: XP is earned from the first fight, but it cannot be spent until the Sphere Hall
   is built, and nothing says so.
-- [ ] **11. Story map nodes are anonymous.** Run nodes have no labels (the name only appears in the
+- [x] **11. Story map nodes are anonymous.** Run nodes have no labels (the name only appears in the
   side panel after selecting), and the locked nodes don't say what unlocks them.
 
 ## Readability at 1280×720

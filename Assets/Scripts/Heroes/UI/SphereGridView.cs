@@ -32,6 +32,15 @@ namespace Assets.Scripts.Heroes.UI
             public string KindClass;
             public string Glyph;
             public bool IsStart;
+
+            /// <summary>
+            /// Optional text drawn under the node. <b>Opt-in, and only the campaign map sets it</b>
+            /// (the run's name - playtest 2026-09-28, finding 11): a sphere grid node is identified
+            /// by its glyph and the detail panel, and a caption under every one of dozens of nodes
+            /// would bury the graph. Null or empty draws nothing, so graphs that never set it render
+            /// exactly as before.
+            /// </summary>
+            public string Caption;
         }
 
         public const float NodeRadius = 22f;
@@ -178,6 +187,15 @@ namespace Assets.Scripts.Heroes.UI
             var glyph = new Label(node.Glyph) { pickingMode = PickingMode.Ignore };
             glyph.AddToClassList("sg-node__glyph");
             button.Add(glyph);
+
+            if (!string.IsNullOrEmpty(node.Caption))
+            {
+                // A child of the button so it pans, zooms, dims and scales with its node; ignored by
+                // picking so it never widens the node's click target.
+                var caption = new Label(node.Caption) { pickingMode = PickingMode.Ignore };
+                caption.AddToClassList("sg-node__caption");
+                button.Add(caption);
+            }
 
             PositionButton(button, node.Position, node.IsStart);
 

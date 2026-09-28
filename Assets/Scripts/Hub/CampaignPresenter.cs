@@ -135,6 +135,10 @@ namespace Assets.Scripts.Hub
                     Position = positions.TryGetValue(key, out var p) ? p : Vector2.zero,
                     KindClass = KindClass(state.Node),
                     Glyph = Glyph(state),
+                    // Every visible run is named on the map itself, not only in the side panel
+                    // after it is clicked. Secret runs are not visible at all, so a name here never
+                    // spoils one.
+                    Caption = CampaignOps.DisplayNameOf(state.Node.Run),
                     IsStart = state.Node.Requires == null || state.Node.Requires.Count == 0
                 });
             }
