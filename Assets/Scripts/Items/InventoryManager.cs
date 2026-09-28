@@ -59,6 +59,16 @@ namespace Assets.Scripts.Items
         }
 
         /// <summary>
+        /// The inventory as it stands on disk - during a level, where saves are deferred, that is
+        /// the bags as the level found them. Read by the level-clear summary before it commits.
+        /// </summary>
+        public List<ItemSaveData> GetCommittedItems()
+        {
+            var onDisk = _fileHandler.Load<ItemCollectionSaveData>();
+            return onDisk != null && onDisk.Items != null ? onDisk.Items : new List<ItemSaveData>();
+        }
+
+        /// <summary>
         /// Adds <paramref name="count"/> of an item. Stacking items (consumables, materials) pile
         /// into one entry; equipment becomes <paramref name="count"/> separate ones.
         /// </summary>

@@ -962,6 +962,87 @@
     color: var(--cd-text-dark);
 }
 
+/* ---- Scrollbars: every ScrollView under a themed root ----
+   Unity's default is a wide light-grey bar with arrow buttons, which read as a stray OS control on
+   the dark panels (playtest findings 6 and 15). A slim dark track with a frame-coloured thumb. */
+.cd-root .unity-scroller--vertical {
+    width: 10px;
+    margin-left: 4px;
+}
+
+.cd-root .unity-scroller--vertical .unity-scroller__low-button,
+.cd-root .unity-scroller--vertical .unity-scroller__high-button {
+    display: none;
+}
+
+.cd-root .unity-scroller--vertical .unity-base-slider__tracker {
+    background-color: rgba(6, 3, 14, 0.6);
+    border-width: 0;
+    border-radius: 5px;
+}
+
+.cd-root .unity-scroller--vertical .unity-base-slider__dragger {
+    background-color: var(--cd-frame);
+    border-width: 0;
+    border-radius: 5px;
+    width: 10px;
+    left: 0;
+}
+
+.cd-root .unity-scroller--vertical .unity-base-slider__dragger:hover {
+    background-color: var(--cd-accent);
+}
+
+/* ---- Level cleared window: reuses the victory frame, rows and title ---- */
+.cd-level-clear {
+    width: 680px;
+    max-height: 88%;
+}
+
+.cd-level-clear__subtitle {
+    font-size: 19px;
+    color: var(--cd-gold);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin: 10px 24px 4px 24px;
+}
+
+.cd-level-clear__body {
+    flex-shrink: 1;
+    max-height: 520px;
+}
+
+/* An indented line under a section row: where a total came from. */
+.cd-level-detail {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 6px 3px 24px;
+}
+
+.cd-level-detail__label {
+    font-size: 18px;
+    color: var(--cd-text-light);
+    white-space: normal;
+    flex-shrink: 1;
+}
+
+.cd-level-detail__value {
+    font-size: 18px;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-right;
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+.cd-level-clear__next {
+    font-size: 18px;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin: 0 24px 14px 24px;
+}
+
 /* Boss encounter banner — top-center, announces the climax fight. */
 .cd-boss-banner {
     position: absolute;

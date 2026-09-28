@@ -109,6 +109,7 @@ empty frame docked at the bottom:
   health the party is actually missing, because resting at full health throws the refuge away - that
   timing is the decision the room exists to pose.
 - **Descend** - a cleared **exit** room; taking it is the *only* way a level completes (see below).
+  What follows is the **level-clear window** (`level-clear-window`, `ShowLevelCleared`): a scrolling summary of what the floor banked, then **Back to Town**. It counts as a dialog for every gate (`IsDialogUp`, `DoorNavActive`) and unsubscribes the doors, because the floor is over. Enter/Space continue; Escape deliberately does not, since the next thing is a scene load. See the Dungeon guide for what it reports and where each number comes from.
 
 **Anything irreversible asks first.** `ShowConfirm(title, message, confirmLabel, onConfirm)` puts a
 **Cancel** beside the Ok, and `ShowDetail` hides it again for plain statements. Descend goes

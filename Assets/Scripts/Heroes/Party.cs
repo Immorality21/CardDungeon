@@ -399,9 +399,18 @@ namespace Assets.Scripts.Heroes
                 if (Heroes[i] != null)
                 {
                     Heroes[i].AddXp(shares[i]);
+                    XpEarnedThisLevel.TryGetValue(Heroes[i], out int earned);
+                    XpEarnedThisLevel[Heroes[i]] = earned + shares[i];
                 }
             }
         }
+
+        /// <summary>
+        /// XP each hero has been paid on this floor, for the level-clear summary. In memory only,
+        /// like the XP itself: a Party lives for one dungeon scene, and a resumed floor starts it
+        /// over because the XP it would count was not saved either.
+        /// </summary>
+        public readonly Dictionary<Hero, int> XpEarnedThisLevel = new Dictionary<Hero, int>();
 
         /// <summary>
         /// Which hero the campfire's split favours right now, or -1 for an even share.

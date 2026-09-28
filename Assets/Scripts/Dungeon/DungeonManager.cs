@@ -474,7 +474,15 @@ namespace Assets.Scripts.Dungeon
             if (_healingPotion != null && InventoryManager.HasInstance && PartyResourceManager.Instance != null)
             {
                 int cap = PartyResourceManager.Instance.GetMax(PartyResourceType.HealingPotion);
+                int before = InventoryManager.Instance.GetConsumableQuantity(_healingPotion.Key);
                 InventoryManager.Instance.TopUpConsumableToCap(_healingPotion, cap);
+                int refilled = InventoryManager.Instance.GetConsumableQuantity(_healingPotion.Key) - before;
+                if (refilled > 0)
+                {
+                    // Saves are deferred, so the refill is not on disk: without this the level-clear
+                    // summary would list the belt's own refill as potions found on the floor.
+                    _levelStartGrants.Add(new ItemSaveData { ItemKey = _healingPotion.Key, Quantity = refilled });
+                }
             }
 
             // Initialize save manager and persist initial state
@@ -1144,6 +1152,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             Party.MarkOwnedDeferred(captive);
+            _joinedThisLevel.Add(captive.DisplayName);
             room.CaptiveHero = null;
             RemoveCaptiveMarker(room);
 
@@ -1181,6 +1190,13 @@ namespace Assets.Scripts.Dungeon
         }
 
         private readonly Dictionary<Room, GameObject> _captiveMarkers = new Dictionary<Room, GameObject>();
+
+        // Heroes freed on this floor, for the level-clear summary. Per scene, like the Party.
+        private readonly List<string> _joinedThisLevel = new List<string>();
+
+        // What the floor handed out before play began (the potion-belt refill), held in memory like
+        // everything else while saves are deferred. The summary counts it as already owned.
+        private readonly List<ItemSaveData> _levelStartGrants = new List<ItemSaveData>();
 
         private void PlaceExitMarker(Room room)
         {
@@ -1231,6 +1247,14 @@ namespace Assets.Scripts.Dungeon
                 Party.CommitProgress();
             }
 
+            // Read before the award banks it: the pending pool is what the floor paid out.
+            var summary = new LevelClearSummary
+            {
+                GoldFound = MetaProgressManager.Instance.PendingRunGold,
+                GoldBonus = MetaProgressManager.GoldPerLevelCleared,
+                Essence = MetaProgressManager.EssencePerLevelCleared,
+            };
+
             // Award persistent meta-currency for clearing the level
             MetaProgressManager.Instance.AwardLevelClear();
 
@@ -1240,9 +1264,14 @@ namespace Assets.Scripts.Dungeon
                 // else the floor produced - and are forfeited by the same rule if the party wipes
                 // instead of clearing.
                 AwardGuaranteedMaterials();
+                // Diffed against disk *before* the commit: with saves deferred, disk still holds the
+                // bags as the level found them.
+                FillItemGains(summary);
                 InventoryManager.Instance.CommitInventory();
                 InventoryManager.Instance.SetDeferSaves(false);
             }
+
+            FillRunAndXp(summary);
 
             // Delete dungeon save
             if (DungeonSaveManager.HasInstance)
@@ -1289,9 +1318,74 @@ namespace Assets.Scripts.Dungeon
                 }
             }
 
-            // Back to the hub, never to the title screen: the loop is hub -> dungeon -> hub, and
-            // MenuScene is only where a save file is chosen.
-            SceneManager.LoadScene("HubScene");
+            // Everything is banked by now, so the summary is a statement, not a choice: quitting the
+            // game while it is up loses nothing. Continue goes back to the hub, never to the title
+            // screen - the loop is hub -> dungeon -> hub, and MenuScene is only where a save is chosen.
+            var ui = GetRoomActionUI();
+            if (ui != null)
+            {
+                ui.ShowLevelCleared(summary, () => SceneManager.LoadScene("HubScene"));
+            }
+            else
+            {
+                SceneManager.LoadScene("HubScene");
+            }
+        }
+
+        /// <summary>
+        /// The run/level naming and per-hero XP half of the summary. Called before the run save is
+        /// advanced, so <see cref="RunLevelIndex"/> is still the level just cleared.
+        /// </summary>
+        private void FillRunAndXp(LevelClearSummary summary)
+        {
+            if (ActiveRun != null && RunLevelIndex >= 0 && RunLevelIndex < ActiveRun.Levels.Count)
+            {
+                summary.RunName = !string.IsNullOrEmpty(ActiveRun.DisplayName) ? ActiveRun.DisplayName : ActiveRun.name;
+                summary.LevelName = ActiveRun.Levels[RunLevelIndex].LevelName;
+                summary.LevelNumber = RunLevelIndex + 1;
+                summary.LevelCount = ActiveRun.Levels.Count;
+                summary.RunCompleted = RunLevelIndex + 1 >= ActiveRun.Levels.Count;
+                summary.NextLevelName = summary.RunCompleted ? null : ActiveRun.Levels[RunLevelIndex + 1].LevelName;
+            }
+
+            if (Party != null)
+            {
+                foreach (var hero in Party.Heroes)
+                {
+                    if (hero != null && Party.XpEarnedThisLevel.TryGetValue(hero, out int xp) && xp > 0)
+                    {
+                        summary.Xp.Add(new LevelClearSummary.Line(hero.DisplayName, xp));
+                    }
+                }
+            }
+
+            summary.Joined.AddRange(_joinedThisLevel);
+        }
+
+        /// <summary>What the floor added to the bags, split into materials and everything else.</summary>
+        private void FillItemGains(LevelClearSummary summary)
+        {
+            var inventory = InventoryManager.Instance;
+            var before = new List<ItemSaveData>(inventory.GetCommittedItems());
+            before.AddRange(_levelStartGrants);
+            var gains = LevelClearSummary.ItemGains(before, inventory.GetItems(), inventory.GetDungeonConsumption());
+            foreach (var gain in gains)
+            {
+                var item = inventory.GetItemSO(gain.Key);
+                if (item == null)
+                {
+                    continue;
+                }
+                var line = new LevelClearSummary.Line(item.DisplayName, gain.Value);
+                if (item.Category == ItemCategory.Material)
+                {
+                    summary.Materials.Add(line);
+                }
+                else
+                {
+                    summary.Items.Add(line);
+                }
+            }
         }
 
         public void HandlePartyDeath()

@@ -91,6 +91,14 @@ namespace Assets.Scripts.Rooms
         private VisualElement _victoryRewards;
         private Button _victoryContinue;
 
+        private VisualElement _levelWindow;
+        private Label _levelTitle;
+        private Label _levelSubtitle;
+        private ScrollView _levelBody;
+        private Label _levelNext;
+        private Button _levelContinue;
+        private Action _levelContinueAction;
+
         private bool _refsReady;
         private Action _detailOkAction;
         private Action _detailCancelAction;
@@ -177,6 +185,12 @@ namespace Assets.Scripts.Rooms
             _victoryTitle = root.Q<Label>("victory-title");
             _victoryRewards = root.Q<VisualElement>("victory-rewards");
             _victoryContinue = root.Q<Button>("victory-continue");
+            _levelWindow = root.Q<VisualElement>("level-clear-window");
+            _levelTitle = root.Q<Label>("level-clear-title");
+            _levelSubtitle = root.Q<Label>("level-clear-subtitle");
+            _levelBody = root.Q<ScrollView>("level-clear-body");
+            _levelNext = root.Q<Label>("level-clear-next");
+            _levelContinue = root.Q<Button>("level-clear-continue");
             _navHint = root.Q<Label>("nav-hint");
 
             _heroTitle = root.Q<Label>("hero-title");
@@ -228,11 +242,15 @@ namespace Assets.Scripts.Rooms
                 _detailCancel.clicked += () => _detailCancelAction?.Invoke();
             }
             _victoryContinue.clicked += OnVictoryContinue;
+            if (_levelContinue != null)
+            {
+                _levelContinue.clicked += OnLevelClearContinue;
+            }
 
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _eventBack, _eventOptions })
+            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelBody, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -420,6 +438,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_partyStatus, false);
             SetShown(_turnOrder, false);
             SetShown(_victoryWindow, false);
+            SetShown(_levelWindow, false);
             // Cleared first: CloseMap would otherwise put the pause overlay back up on its way out.
             _mapFromPause = false;
             CloseMap();
@@ -1951,7 +1970,7 @@ namespace Assets.Scripts.Rooms
         /// <summary>Whether a window is stacked over the room, dialog-style.</summary>
         private bool IsDialogUp()
         {
-            return IsShown(_victoryWindow) || IsShown(_eventWindow) || IsShown(_detailWindow);
+            return IsShown(_victoryWindow) || IsShown(_levelWindow) || IsShown(_eventWindow) || IsShown(_detailWindow);
         }
 
         /// <summary>
@@ -1961,6 +1980,22 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private bool HandleDialogKey(KeyDownEvent evt)
         {
+            if (IsShown(_levelWindow))
+            {
+                // A statement like the spoils screen: confirm leaves. Escape is not accepted here -
+                // the next thing is a scene load, and a player backing out of a menu should not
+                // find themselves in the hub by accident.
+                switch (evt.keyCode)
+                {
+                    case KeyCode.Return:
+                    case KeyCode.KeypadEnter:
+                    case KeyCode.Space:
+                        OnLevelClearContinue();
+                        return true;
+                }
+                return false;
+            }
+
             if (IsShown(_victoryWindow))
             {
                 // Nothing to choose on a spoils screen, so every confirm or cancel key dismisses it.
@@ -2103,7 +2138,7 @@ namespace Assets.Scripts.Rooms
             return _doorsLive
                 && !IsShown(_combatBar) && !IsShown(_heroBar) && !IsShown(_pauseWindow)
                 && !IsShown(_mapWindow) && !IsShown(_detailWindow) && !IsShown(_eventWindow)
-                && !IsShown(_victoryWindow);
+                && !IsShown(_victoryWindow) && !IsShown(_levelWindow);
         }
 
         /// <summary>
@@ -2511,6 +2546,140 @@ namespace Assets.Scripts.Rooms
             }
 
             SetShown(_victoryWindow, true);
+        }
+
+        // ============================================================
+        //  LEVEL CLEARED
+        // ============================================================
+
+        /// <summary>
+        /// The moment a level ends: what the floor banked, shown before the hub loads. Everything in
+        /// it is already committed by <c>DungeonManager.OnDungeonCleared</c>, so it is a statement -
+        /// one button, and <paramref name="onContinue"/> is the scene change.
+        ///
+        /// <para>Built to make every number the hub is about to show traceable (playtest finding 6):
+        /// gold is split into what the floor paid and the clear bonus, because the bonus was the
+        /// +30 nobody could account for, and Essence says where it is spent.</para>
+        /// </summary>
+        public void ShowLevelCleared(LevelClearSummary summary, Action onContinue)
+        {
+            if (!EnsureRefs() || _levelWindow == null || summary == null)
+            {
+                onContinue?.Invoke();
+                return;
+            }
+
+            // Nothing else is live now: the level is over, and a door clicked behind the window
+            // would walk a party that no longer has a floor.
+            UnsubscribeDoors();
+            SetShown(_mainBar, false);
+            SetShown(_combatBar, false);
+            SetShown(_detailWindow, false);
+            SetShown(_eventWindow, false);
+            SetShown(_victoryWindow, false);
+            SetShown(_bossBanner, false);
+
+            _levelContinueAction = onContinue;
+            _levelTitle.text = summary.RunCompleted ? "Run Complete!" : "Level Cleared!";
+            SetText(_levelSubtitle, LevelClearSubtitle(summary));
+
+            _levelBody.Clear();
+            AddLevelSection("Gold", $"+{summary.GoldTotal}");
+            AddLevelDetail("Found on this level", $"+{summary.GoldFound}");
+            AddLevelDetail("Level cleared", $"+{summary.GoldBonus}");
+
+            AddLevelSection("Essence", $"+{summary.Essence}");
+            AddLevelDetail("Spend it at the Forge to upgrade abilities", string.Empty);
+
+            if (summary.Xp.Count > 0)
+            {
+                int total = 0;
+                foreach (var line in summary.Xp)
+                {
+                    total += line.Amount;
+                }
+                AddLevelSection("XP", $"+{total}");
+                foreach (var line in summary.Xp)
+                {
+                    AddLevelDetail(line.Label, $"+{line.Amount}");
+                }
+            }
+
+            AddLevelLines("Materials", summary.Materials);
+            AddLevelLines("Items", summary.Items);
+
+            if (summary.Joined.Count > 0)
+            {
+                AddLevelSection("Joined the party", string.Empty);
+                foreach (var name in summary.Joined)
+                {
+                    AddLevelDetail(name, "yours for good");
+                }
+            }
+
+            SetText(_levelNext, summary.RunCompleted
+                ? "The run is complete."
+                : string.IsNullOrEmpty(summary.NextLevelName)
+                    ? "The run continues from the story map."
+                    : $"Next: {summary.NextLevelName} - continue it from the story map.");
+
+            _levelBody.scrollOffset = Vector2.zero;
+            SetShown(_levelWindow, true);
+            FocusRoot();
+        }
+
+        private static string LevelClearSubtitle(LevelClearSummary summary)
+        {
+            if (summary.LevelCount <= 0)
+            {
+                return summary.LevelName ?? string.Empty;
+            }
+            string level = string.IsNullOrEmpty(summary.LevelName)
+                ? $"Level {summary.LevelNumber} of {summary.LevelCount}"
+                : $"{summary.LevelName} - level {summary.LevelNumber} of {summary.LevelCount}";
+            return string.IsNullOrEmpty(summary.RunName) ? level : $"{summary.RunName} · {level}";
+        }
+
+        private void AddLevelSection(string label, string value)
+        {
+            _levelBody.Add(MakeVictoryRow(label, value));
+        }
+
+        private void AddLevelDetail(string label, string value)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("cd-level-detail");
+            var l = new Label(label);
+            l.AddToClassList("cd-level-detail__label");
+            row.Add(l);
+            if (!string.IsNullOrEmpty(value))
+            {
+                var v = new Label(value);
+                v.AddToClassList("cd-level-detail__value");
+                row.Add(v);
+            }
+            _levelBody.Add(row);
+        }
+
+        private void AddLevelLines(string section, List<LevelClearSummary.Line> lines)
+        {
+            if (lines == null || lines.Count == 0)
+            {
+                return;
+            }
+            AddLevelSection(section, string.Empty);
+            foreach (var line in lines)
+            {
+                AddLevelDetail(line.Label, $"x{line.Amount}");
+            }
+        }
+
+        private void OnLevelClearContinue()
+        {
+            var action = _levelContinueAction;
+            _levelContinueAction = null;
+            SetShown(_levelWindow, false);
+            action?.Invoke();
         }
 
         private VisualElement MakeVictoryRow(string label, string value)

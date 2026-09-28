@@ -3,9 +3,7 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.Rooms.Events;
 using Assets.Scripts.UnitStats;
 using NUnit.Framework;
-using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace Tests.EditMode
 {
@@ -178,12 +176,14 @@ namespace Tests.EditMode
             // Afflictions are re-seeded into every fight at CombatDuration (9999) and saved with the
             // dungeon, so an over-time effect here would be a permanent per-turn drain on the same
             // level-scoped health pool - and a cure would clear it only until the next room.
-            var tracker = new LevelAfflictionTracker();
-
-            LogAssert.Expect(LogType.Error, new Regex("over-time effect 'Poisoned'"));
-            tracker.Add("Warrior", BuffType.Poisoned, 3);
-
-            Assert.IsTrue(tracker.IsEmpty);
+            // Checked through the rule rather than by calling Add: Add logs an error for this
+            // authoring mistake, and an expected error still lands in the console on every test run,
+            // where it reads as a real one.
+            Assert.IsFalse(LevelAfflictionTracker.CanBeAffliction(BuffType.Poisoned));
+            Assert.IsFalse(LevelAfflictionTracker.CanBeAffliction(BuffType.Burning));
+            Assert.IsFalse(LevelAfflictionTracker.CanBeAffliction(BuffType.Bleeding));
+            Assert.IsFalse(LevelAfflictionTracker.CanBeAffliction(BuffType.Regenerating));
+            Assert.IsTrue(LevelAfflictionTracker.CanBeAffliction(BuffType.Slow));
         }
 
         [Test]

@@ -73,6 +73,16 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- Level cleared: everything the floor banked, before the hub loads. The body is filled by
+             RoomActionUI.ShowLevelCleared; it scrolls because a long floor can drop a lot. -->
+        <ui:VisualElement name="level-clear-window" class="cd-victory cd-level-clear cd-dock-center cd-hidden">
+            <ui:Label name="level-clear-title" text="Level Cleared!" class="cd-victory__title" />
+            <ui:Label name="level-clear-subtitle" text="" class="cd-level-clear__subtitle" />
+            <ui:ScrollView name="level-clear-body" class="cd-victory__rewards cd-level-clear__body" mode="Vertical" />
+            <ui:Label name="level-clear-next" text="" class="cd-level-clear__next" />
+            <ui:Button name="level-clear-continue" text="Back to Town" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
         <!-- Victory summary (shown over the battle stage) -->
         <ui:VisualElement name="victory-window" class="cd-victory cd-dock-center cd-hidden">
             <ui:Label name="victory-title" text="Victory!" class="cd-victory__title" />

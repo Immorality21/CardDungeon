@@ -40,7 +40,7 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
 - [ ] **5. No first-time guidance.** A brand-new save drops the player into the hub with nothing
   telling them what to do. The only way forward is **The Story** — a small box on the far right edge.
   At minimum, point at The Story on a new save (ties into the tutorial, `docs/plans/POLISH_CONTENT.md`).
-- [ ] **6. Clearing a level has no moment.** Descending on level 1 of 4 goes straight back to the hub
+- [x] **6. Clearing a level has no moment.** Descending on level 1 of 4 goes straight back to the hub
   with no "Level cleared" screen. Gold went 0 → 50 and Essence 0 → 5, but only +5 (fight) and +15
   (event) gold were ever shown — the other +30 gold and all Essence were never explained. Add a
   level-complete summary (gold, essence, XP, materials, items, who joined).

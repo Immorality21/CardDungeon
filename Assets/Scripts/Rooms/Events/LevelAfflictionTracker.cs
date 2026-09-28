@@ -42,6 +42,16 @@ namespace Assets.Scripts.Rooms.Events
         /// matching how <c>StatBlock</c> and duplicate resistances behave - two cursed idols are
         /// worse than one.
         /// </summary>
+        /// <summary>
+        /// Whether <paramref name="buff"/> may be hung on a hero for the rest of the level. False for
+        /// every over-time effect - see <see cref="Add"/>. Public so the rule is testable without
+        /// provoking the error <see cref="Add"/> logs for authoring mistakes.
+        /// </summary>
+        public static bool CanBeAffliction(BuffType buff)
+        {
+            return !(BuffHandlerRegistry.Get(buff) is IOverTimeBuffHandler);
+        }
+
         public void Add(string heroKey, BuffType buff, int amount)
         {
             if (string.IsNullOrEmpty(heroKey) || buff == BuffType.None || amount == 0)
@@ -55,7 +65,7 @@ namespace Assets.Scripts.Rooms.Events
             // re-applies it - and health is already a level-scoped resource, so it would be a second,
             // uncapped drain on the same pool. If a room event should hurt over time, author it as
             // damage plus a stat debuff, or give the tracker a real per-room tick.
-            if (BuffHandlerRegistry.Get(buff) is IOverTimeBuffHandler)
+            if (!CanBeAffliction(buff))
             {
                 UnityEngine.Debug.LogError(
                     $"Room event tried to hang the over-time effect '{buff}' on {heroKey} as a level "
