@@ -11,7 +11,13 @@ namespace Assets.Scripts.Rooms
     public class WallGenerator
     {
         private const int TexSize = 32;
-        private const int WallThickness = 4;
+        private const int WallThickness = 6;
+
+        // The outermost pixels of every wall are a near-black seam. Two rooms side by side each draw
+        // their own wall, so between them the seams meet as one dark channel with a wall band either
+        // side - without it, neighbours in the same stone read as one big room (playtest finding 17).
+        private const int SeamThickness = 2;
+        private static readonly Color SeamColor = new Color(0.03f, 0.02f, 0.05f, 1f);
 
         // Edge bitmask flags
         private const int Top = 1;
@@ -130,12 +136,41 @@ namespace Assets.Scripts.Rooms
                 if ((mask & Right) != 0)
                     FillRect(pixels, TexSize - WallThickness, 0, WallThickness, TexSize);
 
+                // Seams last, so a corner's seam is not painted over by the other edge's wall.
+                if ((mask & Top) != 0)
+                {
+                    FillSeam(pixels, 0, TexSize - SeamThickness, TexSize, SeamThickness);
+                }
+                if ((mask & Bottom) != 0)
+                {
+                    FillSeam(pixels, 0, 0, TexSize, SeamThickness);
+                }
+                if ((mask & Left) != 0)
+                {
+                    FillSeam(pixels, 0, 0, SeamThickness, TexSize);
+                }
+                if ((mask & Right) != 0)
+                {
+                    FillSeam(pixels, TexSize - SeamThickness, 0, SeamThickness, TexSize);
+                }
+
                 tex.SetPixels(pixels);
                 tex.Apply();
 
                 var sprite = Sprite.Create(tex, new Rect(0, 0, TexSize, TexSize), new Vector2(0.5f, 0.5f), TexSize);
                 sprite.name = $"Wall_{mask}";
                 _wallSprites[mask] = sprite;
+            }
+        }
+
+        private static void FillSeam(Color[] pixels, int startX, int startY, int width, int height)
+        {
+            for (int x = startX; x < startX + width && x < TexSize; x++)
+            {
+                for (int y = startY; y < startY + height && y < TexSize; y++)
+                {
+                    pixels[y * TexSize + x] = SeamColor;
+                }
             }
         }
 

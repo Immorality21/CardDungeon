@@ -1346,6 +1346,46 @@
     border-radius: 4px;
 }
 
+/* The in-combat Inspect page: a page to read, so wider and taller than the pickers it shares
+   .cd-window--combat with, and split in two columns (playtest finding 15 - it was a 380px box
+   that scrolled through five sections). */
+.cd-scan-window {
+    width: 760px;
+    max-width: 72%;
+    max-height: 82%;
+}
+
+.cd-scan-window .cd-scan__body {
+    max-height: none;
+    flex-shrink: 1;
+}
+
+.cd-scan__cols {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.cd-scan__col {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.cd-scan__col--right {
+    margin-left: 18px;
+    padding-left: 18px;
+    border-left-width: 1px;
+    border-left-color: rgba(205, 110, 255, 0.25);
+}
+
+/* Rows that carry their own label on the first row (the drop table), set off from the section
+   above them without a heading of their own. */
+.cd-scan__group {
+    margin-top: 8px;
+    padding-top: 4px;
+    border-top-width: 1px;
+    border-top-color: rgba(205, 110, 255, 0.35);
+}
+
 /* A section heading inside the page ("Resistances", "Draw", ...). */
 .cd-scan__section {
     font-size: 16px;

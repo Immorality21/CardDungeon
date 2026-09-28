@@ -32,8 +32,14 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         public RoomKind Kind = RoomKind.Combat;
 
-        /// <summary>The marker sprite drawn for a payload room, so it can be dimmed once taken.</summary>
+        /// <summary>The marker sprite drawn for a payload room, so it can be swapped once taken.</summary>
         public SpriteRenderer KindMarker;
+
+        /// <summary>
+        /// What <see cref="KindMarker"/> shows once the payload is gone - an opened chest, a dead
+        /// fire. Null leaves the full marker up, which is still better than a greyed-out ghost.
+        /// </summary>
+        public Sprite KindMarkerSpent;
 
         public int RoomIndex { get; set; }
         public bool IsExplored { get; private set; }
@@ -67,19 +73,23 @@ namespace Assets.Scripts.Rooms
             get { return Kind.HasPayload() && !KindConsumed; }
         }
 
-        /// <summary>Records the payload as taken and dims its marker.</summary>
+        /// <summary>Records the payload as taken and shows its spent marker.</summary>
         public void MarkPayloadTaken()
         {
             KindConsumed = true;
-            DimKindMarker();
+            ShowSpentKindMarker();
         }
 
-        /// <summary>Greys out the payload marker - the room still reads as a cache, just an emptied one.</summary>
-        public void DimKindMarker()
+        /// <summary>
+        /// Swaps the payload marker for its spent state - the room still reads as a cache, just an
+        /// emptied one. A spent <i>sprite</i> rather than a tint: the first version greyed the
+        /// marker out, and a grey silhouette read as a ghost of something still there.
+        /// </summary>
+        public void ShowSpentKindMarker()
         {
-            if (KindMarker != null)
+            if (KindMarker != null && KindMarkerSpent != null)
             {
-                KindMarker.color = new Color(0.42f, 0.42f, 0.45f, 0.65f);
+                KindMarker.sprite = KindMarkerSpent;
             }
         }
 

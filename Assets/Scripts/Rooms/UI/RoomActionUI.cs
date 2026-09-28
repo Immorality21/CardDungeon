@@ -65,6 +65,8 @@ namespace Assets.Scripts.Rooms
         private Label _eventOdds;
         private ScrollView _eventOptions;
         private Button _eventBack;
+        /// <summary>The open event's own walk-away option, if it has one - what Escape presses.</summary>
+        private Button _eventDecline;
 
         private Button _actionBtn;
         private Button _searchBtn;
@@ -338,7 +340,11 @@ namespace Assets.Scripts.Rooms
             _eventNav = new KeyboardNavigator(_eventWindow);
             _eventNav.Cancelled += () =>
             {
-                if (IsShown(_eventBack))
+                if (_eventDecline != null)
+                {
+                    KeyboardNavigator.Press(_eventDecline);
+                }
+                else if (IsShown(_eventBack))
                 {
                     KeyboardNavigator.Press(_eventBack);
                 }
@@ -560,6 +566,7 @@ namespace Assets.Scripts.Rooms
             _eventOdds.text = hasCheck ? BuildOddsLine(roomEvent, band, clarity) : string.Empty;
 
             _eventOptions.Clear();
+            _eventDecline = null;
             for (int i = 0; i < roomEvent.Options.Count; i++)
             {
                 var option = roomEvent.Options[i];
@@ -573,7 +580,16 @@ namespace Assets.Scripts.Rooms
                 btn.AddToClassList("cd-list-button");
                 btn.focusable = false;
                 _eventOptions.Add(btn);
+                if (option.Kind == Events.RoomEventOptionKind.Decline && _eventDecline == null)
+                {
+                    _eventDecline = btn;
+                }
             }
+
+            // An event's own Decline already walks away, in the event's words - a Back beside it is
+            // the same exit twice. Back stays only for an event authored without one, so no event
+            // window can trap the player.
+            SetShown(_eventBack, _eventDecline == null);
 
             _eventNav?.Reset();
             SetShown(_eventWindow, true);
@@ -610,6 +626,7 @@ namespace Assets.Scripts.Rooms
 
             var option = _currentEvent.Options[optionIndex];
             SetShown(_eventWindow, false);
+            _eventDecline = null;
 
             if (option.Kind == Events.RoomEventOptionKind.Decline)
             {
@@ -719,6 +736,7 @@ namespace Assets.Scripts.Rooms
             _eventNav?.Reset();
             SetShown(_eventWindow, false);
             _eventOptions.Clear();
+            _eventDecline = null;
             _currentEvent = null;
             _eventActingHero = null;
             ShowMainBar();

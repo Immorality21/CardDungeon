@@ -963,7 +963,8 @@ namespace Assets.Scripts.Dungeon
                 return;
             }
 
-            var sprite = Combat.CombatIcons.Get(room.Kind == RoomKind.Treasure ? "chest" : "cross");
+            bool treasure = room.Kind == RoomKind.Treasure;
+            var sprite = Combat.CombatIcons.Get(treasure ? "chest" : "campfire");
             if (sprite == null)
             {
                 return;
@@ -975,10 +976,8 @@ namespace Assets.Scripts.Dungeon
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = sprite;
             sr.sortingOrder = 3;
-            sr.color = room.Kind == RoomKind.Treasure
-                ? new Color(1f, 0.85f, 0.25f)
-                : new Color(0.45f, 0.95f, 0.8f);
             room.KindMarker = sr;
+            room.KindMarkerSpent = Combat.CombatIcons.Get(treasure ? "chest_open" : "campfire_out");
         }
 
         private void PlaceRoomEvents(List<Room> rooms, Room startRoom)

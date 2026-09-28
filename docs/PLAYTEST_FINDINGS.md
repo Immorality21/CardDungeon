@@ -88,15 +88,22 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
 
 ## Old / rough controls
 
-- [ ] **15. Inspect panel is cramped.** Small scroll box with Unity's default grey scrollbar;
+- [x] **15. Inspect panel is cramped.** Small scroll box with Unity's default grey scrollbar;
   resistances show "Physical: -" with no legend for what "-" means.
-- [ ] **16. Rest room marker** (big flat green "+") looks like placeholder art; the cleared treasure
+  - *Fixed 2026-09-28*: a 760px two-column page (how to hurt it on the left, what it is doing and
+    drops on the right) that fits at 720p without scrolling; a neutral resistance reads **Normal**.
+- [x] **16. Rest room marker** (big flat green "+") looks like placeholder art; the cleared treasure
   room leaves a grey "+" ghost too.
-- [ ] **17. Adjacent rooms with the same tiles read as one room.** Level 2's rest room (7) and
+  - *Fixed 2026-09-28*: a campfire (PixelLab), and a taken payload swaps to a spent sprite
+    (`chest_open`, `campfire_out`) instead of a grey tint.
+- [x] **17. Adjacent rooms with the same tiles read as one room.** Level 2's rest room (7) and
   treasure room (9) are stacked vertically with identical stone; only a tiny door separates them.
   Room borders need to be more distinct.
-- [ ] **18. Room events have a redundant exit.** The Treasury offers "Take nothing and move on" *and*
+  - *Fixed 2026-09-28*: walls are 6px with a near-black 2px outer seam, so neighbours are split by a
+    dark channel (`WallGenerator`).
+- [x] **18. Room events have a redundant exit.** The Treasury offers "Take nothing and move on" *and*
   a **Back** button that do the same thing.
+  - *Fixed 2026-09-28*: Back only shows for an event with no Decline option; Escape picks the Decline.
 
 ## Gameplay / balance impressions
 

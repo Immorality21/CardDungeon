@@ -127,7 +127,8 @@ namespace Assets.Scripts.Enemies
                 case DamageEffectiveness.Weak:
                     return "Weak " + Percent(percent);
                 default:
-                    return "-";
+                    // A word, not a dash: "Physical: -" read as a missing value (playtest finding 15).
+                    return "Normal";
             }
         }
 

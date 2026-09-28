@@ -58,6 +58,8 @@ namespace Assets.Scripts.Cards.UI
         private Label _inspectName;
         private Label _inspectHealth;
         private ScrollView _inspectBody;
+        private VisualElement _inspectLeft;
+        private VisualElement _inspectRight;
         private Button _inspectClose;
         private bool _refsReady;
 
@@ -156,6 +158,8 @@ namespace Assets.Scripts.Cards.UI
             _inspectName = root.Q<Label>("inspect-name");
             _inspectHealth = root.Q<Label>("inspect-health");
             _inspectBody = root.Q<ScrollView>("inspect-body");
+            _inspectLeft = root.Q<VisualElement>("inspect-col-left");
+            _inspectRight = root.Q<VisualElement>("inspect-col-right");
             _inspectClose = root.Q<Button>("inspect-close");
             if (_inspectBody != null)
             {
@@ -525,19 +529,28 @@ namespace Assets.Scripts.Cards.UI
             _inspectHealth.text =
                 $"HP {enemy.Stats.Health} / {enemy.GetEffectiveStat(StatType.MaxHealth)}";
 
-            _inspectBody.Clear();
+            _inspectLeft.Clear();
+            _inspectRight.Clear();
+            _inspectBody.scrollOffset = Vector2.zero;
             ClearNav();
 
-            _inspectBody.Add(BestiaryLineView.Row(BestiaryPresenter.AttackLine(definition, known)));
-            _inspectBody.Add(BestiaryLineView.Row(BestiaryPresenter.KillsLine(known)));
-            BestiaryLineView.AddRows(_inspectBody, BestiaryPresenter.LootLines(definition, known));
+            // Left: how to hurt it and how it hurts you - the questions a turn is decided on.
+            _inspectLeft.Add(BestiaryLineView.Row(BestiaryPresenter.AttackLine(definition, known)));
+            _inspectLeft.Add(BestiaryLineView.Row(BestiaryPresenter.KillsLine(known)));
+            BestiaryLineView.AddSection(
+                _inspectLeft, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
 
+            // Right: what it is doing in this fight, then what it drops. Drops sit here rather than
+            // under "Attacks with" because the resistance list is the long one - with both on the
+            // left the page needed a scrollbar at 720p.
+            BestiaryLineView.AddSection(_inspectRight, "Stats", LiveStatLines(enemy));
+            BestiaryLineView.AddSection(_inspectRight, "Condition", ConditionLines(enemy));
             BestiaryLineView.AddSection(
-                _inspectBody, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
-            BestiaryLineView.AddSection(_inspectBody, "Stats", LiveStatLines(enemy));
-            BestiaryLineView.AddSection(_inspectBody, "Condition", ConditionLines(enemy));
-            BestiaryLineView.AddSection(
-                _inspectBody, "Abilities", BestiaryPresenter.SpellLines(definition, known));
+                _inspectRight, "Abilities", BestiaryPresenter.SpellLines(definition, known));
+            var drops = new VisualElement();
+            drops.AddToClassList("cd-scan__group");
+            BestiaryLineView.AddRows(drops, BestiaryPresenter.LootLines(definition, known));
+            _inspectRight.Add(drops);
 
             HidePanel(_listPanel);
             HidePanel(_targetPanel);

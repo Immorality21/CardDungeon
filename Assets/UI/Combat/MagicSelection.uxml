@@ -22,7 +22,7 @@
         <!-- Inspect ("Scan") window: everything the party has learned about one enemy. Docked
              center rather than bottom-left like the pickers - it is a page to read, not a list to
              cursor through, and it closes back to the command menu without spending the turn. -->
-        <ui:VisualElement name="inspect-panel" class="cd-window cd-window--combat cd-dock-center cd-hidden">
+        <ui:VisualElement name="inspect-panel" class="cd-window cd-window--combat cd-scan-window cd-dock-center cd-hidden">
             <ui:VisualElement class="cd-scan__header">
                 <ui:VisualElement name="inspect-portrait" class="cd-scan__portrait" />
                 <ui:VisualElement class="cd-scan__titlecol">
@@ -30,7 +30,14 @@
                     <ui:Label name="inspect-health" text="" class="cd-scan__health" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:ScrollView name="inspect-body" class="cd-scan__body" mode="Vertical" />
+            <!-- Two columns so the page reads at a glance instead of scrolling: what it is and what
+                 hurts it on the left, what it is doing right now on the right. -->
+            <ui:ScrollView name="inspect-body" class="cd-scan__body" mode="Vertical">
+                <ui:VisualElement class="cd-scan__cols">
+                    <ui:VisualElement name="inspect-col-left" class="cd-scan__col" />
+                    <ui:VisualElement name="inspect-col-right" class="cd-scan__col cd-scan__col--right" />
+                </ui:VisualElement>
+            </ui:ScrollView>
             <ui:Button name="inspect-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
