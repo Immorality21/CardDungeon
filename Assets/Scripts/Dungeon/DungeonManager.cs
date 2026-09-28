@@ -124,6 +124,10 @@ namespace Assets.Scripts.Dungeon
         public Party Party { get; private set; }
         public EquippedMagicState MagicState { get; private set; }
 
+        /// <summary>The party's summons and their charges this run — on the same economy as
+        /// <see cref="MagicState"/> (full at run start, restored at refuges, carried in Run.json).</summary>
+        public SummonState Summons { get; private set; }
+
         /// <summary>
         /// Buffs and debuffs room events hung on the party, standing until the level is cleared.
         /// Level-scoped like health: <c>CombatManager</c> seeds each fight's buff tracker from here,
@@ -440,6 +444,15 @@ namespace Assets.Scripts.Dungeon
                 MagicState.RefillCharges();
             }
 
+            // Summons ride the same economy: full on a run's first floor, otherwise whatever the
+            // earlier floors left (Run.json). Every summon a hero knows is carried - no loadout.
+            Summons = new SummonState();
+            Summons.Initialize(Party.Heroes, SummonCatalogSO.Resolve);
+            if (ActiveRun != null && !EquippedMagicState.RefillsOnLevelStart(RunLevelIndex))
+            {
+                Summons.Restore(_fileHandler.Load<RunSaveData>().SummonCharges);
+            }
+
             // Top the healing-potion belt back up to its cap for the new dungeon. Consumables
             // now live in the item inventory; the "belt" is just the carry cap the Merchant raises.
             if (_healingPotion != null && InventoryManager.HasInstance && PartyResourceManager.Instance != null)
@@ -563,6 +576,10 @@ namespace Assets.Scripts.Dungeon
             {
                 MagicState.Restore(saveData.EquippedMagic, MagicCatalog.Instance.GetMagic);
             }
+
+            Summons = new SummonState();
+            Summons.Initialize(Party.Heroes, SummonCatalogSO.Resolve);
+            Summons.Restore(saveData.SummonCharges);
 
             Afflictions.Restore(saveData.Afflictions);
 
@@ -1098,6 +1115,8 @@ namespace Assets.Scripts.Dungeon
                 }
             }
 
+            Summons?.AddHero(hero, SummonCatalogSO.Resolve);
+
             Debug.Log($"Rescued {captive.DisplayName}; party is now {Party.Heroes.Count} strong.");
             return true;
         }
@@ -1198,6 +1217,10 @@ namespace Assets.Scripts.Dungeon
                 if (MagicState != null)
                 {
                     runSave.EquippedMagic = MagicState.GetSaveData();
+                }
+                if (Summons != null)
+                {
+                    runSave.SummonCharges = Summons.GetSaveData();
                 }
 
                 _fileHandler.Save(runSave);

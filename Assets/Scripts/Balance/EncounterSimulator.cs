@@ -45,6 +45,12 @@ namespace Assets.Scripts.Balance
 
         /// <summary>Fraction of max HP below which the Adaptive policy reaches for a heal.</summary>
         public float HealThreshold = 0.45f;
+
+        /// <summary>
+        /// Whether heroes may summon (section 4b). On a floor the charge is held for the hardest
+        /// room; in a single encounter it may be spent at once. Off gives the "without summons" reading.
+        /// </summary>
+        public bool UseSummons = true;
     }
 
     /// <summary>Aggregated results over a simulation batch.</summary>
@@ -60,6 +66,7 @@ namespace Assets.Scripts.Balance
         public float AverageHeroDeaths;
         public float AveragePotionsUsed;
         public float AverageCastsUsed;
+        public float AverageSummonsUsed;
 
         public float WinRate => Trials > 0 ? (float)Wins / Trials : 0f;
 
@@ -126,12 +133,14 @@ namespace Assets.Scripts.Balance
             float deathTotal = 0f;
             float potionTotal = 0f;
             float castTotal = 0f;
+            float summonTotal = 0f;
 
             try
             {
                 for (int trial = 0; trial < settings.Trials; trial++)
                 {
                     var result = RunOne(party, enemyTemplates, settings);
+                    summonTotal += result.Summons;
 
                     outcome.Trials++;
                     turnTotal += result.Turns;
@@ -161,6 +170,7 @@ namespace Assets.Scripts.Balance
                 outcome.AverageHeroDeaths = deathTotal / outcome.Trials;
                 outcome.AveragePotionsUsed = potionTotal / outcome.Trials;
                 outcome.AverageCastsUsed = castTotal / outcome.Trials;
+                outcome.AverageSummonsUsed = summonTotal / outcome.Trials;
             }
             outcome.AverageEndHealthFraction = outcome.Wins > 0 ? endHealthTotal / outcome.Wins : 0f;
 
@@ -185,7 +195,8 @@ namespace Assets.Scripts.Balance
                     PotionCount = settings.PotionCount,
                     PotionHealAmount = settings.PotionHealAmount,
                     Combos = settings.Combos,
-                    HealThreshold = settings.HealThreshold
+                    HealThreshold = settings.HealThreshold,
+                    UseSummons = settings.UseSummons
                 };
                 results[policy] = Run(party, enemyTemplates, perPolicy);
             }
@@ -200,6 +211,7 @@ namespace Assets.Scripts.Balance
             public int HeroDeaths;
             public int PotionsUsed;
             public int Casts;
+            public int Summons;
             public float EndHealthFraction;
 
             /// <summary>Set by the encounter loop so scoring does not have to re-walk the enemies.</summary>
@@ -211,7 +223,7 @@ namespace Assets.Scripts.Balance
             var heroes = party.CloneUnits();
             int potionsLeft = settings.PotionCount;
             var result = new TrialResult();
-            RunEncounter(heroes, enemyTemplates, settings, ref potionsLeft, result);
+            RunEncounter(heroes, enemyTemplates, settings, ref potionsLeft, result, settings.UseSummons);
             ScoreEncounter(heroes, result);
             return result;
         }
@@ -227,8 +239,12 @@ namespace Assets.Scripts.Balance
             IList<SimUnit> enemyTemplates,
             SimSettings settings,
             ref int potionsLeft,
-            TrialResult result)
+            TrialResult result,
+            bool summonsAllowed)
         {
+            // Room-local: when each summoner last summoned, so a buff is waited out before re-casting.
+            var lastSummonTurn = new Dictionary<SimUnit, int>();
+
             var enemies = new List<SimUnit>();
             foreach (var template in enemyTemplates)
             {
@@ -292,7 +308,7 @@ namespace Assets.Scripts.Balance
                 if (actor.IsHero)
                 {
                     TakeHeroTurn(actor, heroes, enemies, buffTracker, tagTracker, comboDetector, resolver,
-                        settings, ref potionsLeft, result);
+                        settings, ref potionsLeft, result, summonsAllowed, lastSummonTurn);
                 }
                 else
                 {
@@ -407,6 +423,7 @@ namespace Assets.Scripts.Balance
             public float AverageHeroDeaths;
             public float AveragePotionsUsed;
             public float AverageCastsUsed;
+            public float AverageSummonsUsed;
             public float AverageTurns;
 
             /// <summary>Over surviving trials only - a wipe has no end health worth averaging.</summary>
@@ -461,6 +478,7 @@ namespace Assets.Scripts.Balance
             float potionTotal = 0f;
             float castTotal = 0f;
             float clearedTotal = 0f;
+            float summonTotal = 0f;
             int survived = 0;
 
             try
@@ -473,6 +491,7 @@ namespace Assets.Scripts.Balance
                     turnTotal += floor.Turns;
                     potionTotal += floor.PotionsUsed;
                     castTotal += floor.Casts;
+                    summonTotal += floor.Summons;
                     clearedTotal += floor.RoomsCleared;
                     deathTotal += floor.HeroDeaths;
 
@@ -502,6 +521,7 @@ namespace Assets.Scripts.Balance
                 outcome.AveragePotionsUsed = potionTotal / outcome.Trials;
                 outcome.AverageCastsUsed = castTotal / outcome.Trials;
                 outcome.AverageRoomsCleared = clearedTotal / outcome.Trials;
+                outcome.AverageSummonsUsed = summonTotal / outcome.Trials;
                 outcome.AverageHeroDeaths = deathTotal / outcome.Trials;
             }
             outcome.AverageEndHealthFraction = survived > 0 ? endHealthTotal / survived : 0f;
@@ -535,7 +555,8 @@ namespace Assets.Scripts.Balance
                     HealThreshold = settings.HealThreshold,
                     RestRooms = settings.RestRooms,
                     RestHealFraction = settings.RestHealFraction,
-                    StartsWithFullCharges = settings.StartsWithFullCharges
+                    StartsWithFullCharges = settings.StartsWithFullCharges,
+                    UseSummons = settings.UseSummons
                 };
                 results[policy] = RunFloor(party, rooms, perPolicy);
             }
@@ -550,6 +571,7 @@ namespace Assets.Scripts.Balance
             public int Turns;
             public int PotionsUsed;
             public int Casts;
+            public int Summons;
             public int HeroDeaths;
             public float EndHealthFraction;
         }
@@ -571,6 +593,10 @@ namespace Assets.Scripts.Balance
 
             int potionsLeft = settings.PotionCount;
 
+            // A summon's charge is held for the floor's hardest room (section 4b) - the boss room
+            // when there is one. Competent play saves the one big button for the fight that needs it.
+            int summonRoom = settings.UseSummons ? PickSummonRoom(rooms) : -1;
+
             // Refuges spread evenly, and never before the first fight - resting at full health is a
             // wasted room, the same reading RoomKindRewards takes.
             var restAfter = RestPoints(rooms.Count, settings.RestRooms);
@@ -585,11 +611,12 @@ namespace Assets.Scripts.Balance
                 }
 
                 var step = new TrialResult();
-                RunEncounter(heroes, room, settings, ref potionsLeft, step);
+                RunEncounter(heroes, room, settings, ref potionsLeft, step, i == summonRoom);
 
                 trial.Turns += step.Turns;
                 trial.PotionsUsed += step.PotionsUsed;
                 trial.Casts += step.Casts;
+                trial.Summons += step.Summons;
 
                 if (!AnyAlive(heroes))
                 {
@@ -609,6 +636,10 @@ namespace Assets.Scripts.Balance
                 if (restAfter.Contains(i))
                 {
                     Rest(heroes, settings.RestHealFraction);
+                    // A refuge restores summon charges, as it does in the game (RoomActionUI.ApplyRest).
+                    // NOTE: ability charges are NOT refilled here, though the game refills them too -
+                    // a pre-existing gap, left as-is so this change does not move the ability numbers.
+                    RefillSummons(heroes);
                 }
             }
 
@@ -631,23 +662,98 @@ namespace Assets.Scripts.Balance
             return trial;
         }
 
-        /// <summary>Empties every hero's charges, for a floor that is not the run's first.</summary>
+        /// <summary>Empties every hero's charges - abilities and summons - for a floor that is not
+        /// the run's first. Both are run resources.</summary>
         private static void DrainCharges(List<SimUnit> heroes)
         {
             foreach (var hero in heroes)
             {
-                if (hero == null || hero.MagicSlots == null)
+                if (hero == null)
                 {
                     continue;
                 }
-                foreach (var slot in hero.MagicSlots)
+                if (hero.MagicSlots != null)
                 {
-                    if (slot != null)
+                    foreach (var slot in hero.MagicSlots)
                     {
-                        slot.Charges = 0;
+                        if (slot != null)
+                        {
+                            slot.Charges = 0;
+                        }
+                    }
+                }
+                if (hero.Summons != null)
+                {
+                    foreach (var summon in hero.Summons)
+                    {
+                        if (summon != null)
+                        {
+                            summon.Charges = 0;
+                        }
                     }
                 }
             }
+        }
+
+        private static void RefillSummons(List<SimUnit> heroes)
+        {
+            foreach (var hero in heroes)
+            {
+                if (hero == null || hero.Summons == null)
+                {
+                    continue;
+                }
+                foreach (var summon in hero.Summons)
+                {
+                    if (summon != null)
+                    {
+                        summon.Charges = summon.MaxCharges;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The room a summon's charge is held for: the one with a boss in it (the last such room),
+        /// otherwise the one whose enemies bring the most health times attack. -1 for no rooms.
+        /// </summary>
+        public static int PickSummonRoom(IList<IList<SimUnit>> rooms)
+        {
+            if (rooms == null || rooms.Count == 0)
+            {
+                return -1;
+            }
+
+            int boss = -1;
+            int heaviest = -1;
+            float heaviestWeight = -1f;
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                var room = rooms[i];
+                if (room == null)
+                {
+                    continue;
+                }
+                float weight = 0f;
+                foreach (var enemy in room)
+                {
+                    if (enemy == null)
+                    {
+                        continue;
+                    }
+                    if (enemy.IsBoss)
+                    {
+                        boss = i;
+                    }
+                    weight += enemy.Effective[StatType.MaxHealth] * Mathf.Max(1, enemy.GetEffectiveAttackPower());
+                }
+                if (weight > heaviestWeight)
+                {
+                    heaviestWeight = weight;
+                    heaviest = i;
+                }
+            }
+            return boss >= 0 ? boss : heaviest;
         }
 
         /// <summary>
@@ -711,7 +817,9 @@ namespace Assets.Scripts.Balance
             EffectResolver resolver,
             SimSettings settings,
             ref int potionsLeft,
-            TrialResult result)
+            TrialResult result,
+            bool summonsAllowed,
+            Dictionary<SimUnit, int> summonTurnsLeft)
         {
             // Silence disables the Magic command outright in the live game
             // (RoomActionUI.BuildCommandMenu). The enemy side of the same gate lives in
@@ -742,6 +850,22 @@ namespace Assets.Scripts.Balance
                         return;
                     }
                 }
+            }
+
+            // Summon (section 4b): in the room the charge is held for, at the summoner's first turn,
+            // and again only once the last one has run its course - counted in the summoner's own
+            // turns, the same clock a buff's duration ticks on. Silence blocks it, as it blocks casting.
+            if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null)
+            {
+                summonTurnsLeft.TryGetValue(hero, out int waiting);
+                var summon = hero.Summons.Find(s => s.CanUse);
+                if (summon != null && waiting <= 0)
+                {
+                    Summon(hero, summon, heroes, enemies, buffTracker, resolver, result);
+                    summonTurnsLeft[hero] = Mathf.Max(1, summon.LongestDuration);
+                    return;
+                }
+                summonTurnsLeft[hero] = waiting - 1;
             }
 
             if (settings.Policy != SimPolicy.AttackOnly && !silenced)
@@ -801,6 +925,23 @@ namespace Assets.Scripts.Balance
                 MetaProgressManager.MagicPowerBonusForLevel(slot.UpgradeLevel),
                 slot.UpgradeLevel,
                 null);
+        }
+
+        /// <summary>A summon resolves through the same resolver an ability does, with no tags, no
+        /// combo and no Forge bonus - exactly <c>CombatManager.ExecuteSummonAction</c>.</summary>
+        private static void Summon(
+            SimUnit caster,
+            SimSummonSlot slot,
+            List<SimUnit> heroes,
+            List<SimUnit> enemies,
+            CombatBuffTracker buffTracker,
+            EffectResolver resolver,
+            TrialResult result)
+        {
+            slot.Charges--;
+            result.Summons++;
+            var targets = ResolveTargets(slot.Castable, caster, heroes, enemies);
+            resolver.Execute(new SpellcastAction { Magic = slot.Castable, Caster = caster, Targets = targets }, buffTracker);
         }
 
         private static List<ICombatUnit> ResolveTargets(

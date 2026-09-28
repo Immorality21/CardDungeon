@@ -937,6 +937,35 @@
     -unity-text-align: middle-center;
 }
 
+/* Summon banner: top-center, names the summon while it is on the stage. Gold, not the boss's crimson. */
+.cd-summon-banner {
+    position: absolute;
+    top: 48px;
+    left: 50%;
+    translate: -50% 0;
+    align-items: center;
+    padding: 10px 34px;
+    background-color: rgba(36, 24, 6, 0.92);
+    border-width: 2px;
+    border-color: rgb(214, 168, 64);
+    border-radius: 6px;
+}
+
+.cd-summon-banner__sub {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(236, 196, 110);
+    -unity-text-align: middle-center;
+    margin-bottom: 2px;
+}
+
+.cd-summon-banner__name {
+    font-size: 28px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+}
+
 /* Merchant gear shop (buy/sell rows). */
 .cd-subtitle {
     -unity-font-style: bold;

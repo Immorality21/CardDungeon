@@ -164,6 +164,10 @@ namespace Assets.Scripts.Heroes.UI
                     return "sg-node--resist";
                 case SphereNodeKind.MagicSlot:
                 case SphereNodeKind.MagicKnown:
+                case SphereNodeKind.Summon:
+                case SphereNodeKind.SummonPower:
+                case SphereNodeKind.SummonDuration:
+                case SphereNodeKind.SummonCharge:
                     return "sg-node--slot";
                 default:
                     return "sg-node--stat";
@@ -190,6 +194,12 @@ namespace Assets.Scripts.Heroes.UI
                     return "M";
                 case SphereNodeKind.MagicKnown:
                     return "✦";
+                case SphereNodeKind.Summon:
+                    return "◆";
+                case SphereNodeKind.SummonPower:
+                case SphereNodeKind.SummonDuration:
+                case SphereNodeKind.SummonCharge:
+                    return "+";
                 default:
                     return "S";
             }
@@ -229,6 +239,24 @@ namespace Assets.Scripts.Heroes.UI
                 // as much the payload as the spell name is.
                 string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
                 return $"Learns {name} — {Mathf.Max(1, node.GrantedCharges)} charges per run";
+            }
+            string summon = string.IsNullOrEmpty(node.GrantedSummonKey) ? "(unset)" : node.GrantedSummonKey;
+            if (node.Kind == SphereNodeKind.Summon)
+            {
+                // Always carried - a summon takes no ability slot - and cast from its own command.
+                return $"Learns the summon {summon} — always carried, cast with Summon";
+            }
+            if (node.Kind == SphereNodeKind.SummonPower)
+            {
+                return $"{summon}: +{node.SummonAmount} to its effect";
+            }
+            if (node.Kind == SphereNodeKind.SummonDuration)
+            {
+                return $"{summon}: lasts +{node.SummonAmount} turn{(node.SummonAmount == 1 ? "" : "s")}";
+            }
+            if (node.Kind == SphereNodeKind.SummonCharge)
+            {
+                return $"{summon}: +{node.SummonAmount} charge{(node.SummonAmount == 1 ? "" : "s")} per run";
             }
 
             var parts = new List<string>();
@@ -304,6 +332,12 @@ namespace Assets.Scripts.Heroes.UI
                     return "Ability slot";
                 case SphereNodeKind.MagicKnown:
                     return "Known ability";
+                case SphereNodeKind.Summon:
+                    return "Summon";
+                case SphereNodeKind.SummonPower:
+                case SphereNodeKind.SummonDuration:
+                case SphereNodeKind.SummonCharge:
+                    return "Summon upgrade";
                 default:
                     return "Stat";
             }

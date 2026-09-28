@@ -15,6 +15,9 @@ namespace Assets.Scripts.Dungeon
         // Equipped magic carried across levels of the run (lost on party death when this file is wiped).
         public List<MagicSlotSaveData> EquippedMagic = new List<MagicSlotSaveData>();
 
+        // Summon charges left, carried across levels of the run beside the ability charges.
+        public List<SummonChargeSaveData> SummonCharges = new List<SummonChargeSaveData>();
+
         public string GetFileName()
         {
             return "Run";

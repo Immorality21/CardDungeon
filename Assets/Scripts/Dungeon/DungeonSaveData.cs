@@ -39,6 +39,9 @@ namespace Assets.Scripts.Dungeon
         public List<RoomSaveData> Rooms = new List<RoomSaveData>();
         public List<MagicSlotSaveData> EquippedMagic = new List<MagicSlotSaveData>();
 
+        /// <summary>Summon charges left on this level, for a mid-level resume.</summary>
+        public List<SummonChargeSaveData> SummonCharges = new List<SummonChargeSaveData>();
+
         /// <summary>
         /// Buffs and debuffs room events hung on the party for the rest of the level. Saved so that
         /// quitting to the menu is not a cure for a curse.

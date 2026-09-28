@@ -15,7 +15,13 @@ namespace Assets.Scripts.Heroes
         Stat = 0,       // grants Gains (a StatBlock)
         Resistance = 1, // grants +1 resistance: +ResistPercent to ResistType
         MagicSlot = 2,  // grants +1 slot, i.e. one more known spell the hero can carry at a time
-        MagicKnown = 3  // teaches GrantedMagicKey permanently - the only source of magic in the game
+        MagicKnown = 3, // teaches GrantedMagicKey permanently - the only source of magic in the game
+
+        // Summons (docs/plans/SPECIALIZATION.md §4b). Appended: this enum is serialized by ordinal.
+        Summon = 4,         // teaches GrantedSummonKey: always carried, cast from the Summon command
+        SummonPower = 5,    // +SummonAmount to every effect's Power of GrantedSummonKey (% points for a % buff)
+        SummonDuration = 6, // +SummonAmount turns on GrantedSummonKey's timed effects
+        SummonCharge = 7    // +SummonAmount charges per run for GrantedSummonKey
     }
 
     /// <summary>
@@ -75,6 +81,15 @@ namespace Assets.Scripts.Heroes
                  "which makes it the node's real power dial, more so than XpCost.")]
         [Range(1, 9)]
         public int GrantedCharges = 2;
+
+        [Tooltip("Kind == Summon: SummonSO.Key of the summon this hero learns. Kind == SummonPower / " +
+                 "SummonDuration / SummonCharge: the summon this node upgrades. An upgrade for a summon " +
+                 "the hero does not know does nothing.")]
+        public string GrantedSummonKey;
+
+        [Tooltip("Kind == SummonPower / SummonDuration / SummonCharge: how much this node adds - " +
+                 "Power points, turns, or charges.")]
+        public int SummonAmount = 1;
 
         [Tooltip("Keys of neighbouring nodes. Edges are undirected: listing B on A is enough.")]
         public List<string> Neighbors = new List<string>();

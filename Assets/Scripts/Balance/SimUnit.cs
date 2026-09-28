@@ -32,6 +32,73 @@ namespace Assets.Scripts.Balance
     }
 
     /// <summary>
+    /// One summon a simulated hero carries (§4b), with its charges. <see cref="Castable"/> is the
+    /// transient magic the effect engine resolves — built once per (summon, upgrades) and shared,
+    /// because a frontier sweep builds thousands of parties and a ScriptableObject per party would
+    /// be thousands of allocations for the same effects.
+    /// </summary>
+    public class SimSummonSlot
+    {
+        public SummonSO Summon;
+        public Heroes.SummonGrant Grant;
+        public MagicSO Castable;
+        public int Charges;
+        public int MaxCharges;
+
+        public bool CanUse => Castable != null && Charges > 0;
+
+        /// <summary>The longest timed effect, so the policy can wait out a buff before re-summoning.</summary>
+        public int LongestDuration
+        {
+            get
+            {
+                int longest = 0;
+                if (Castable != null && Castable.Effects != null)
+                {
+                    foreach (var effect in Castable.Effects)
+                    {
+                        if (effect != null && effect.Duration > longest)
+                        {
+                            longest = effect.Duration;
+                        }
+                    }
+                }
+                return longest;
+            }
+        }
+
+        public SimSummonSlot Clone()
+        {
+            return new SimSummonSlot
+            {
+                Summon = Summon,
+                Grant = Grant,
+                Castable = Castable,
+                Charges = Charges,
+                MaxCharges = MaxCharges
+            };
+        }
+
+        private static readonly Dictionary<string, MagicSO> CastableCache = new Dictionary<string, MagicSO>();
+
+        /// <summary>A shared castable for this summon at these upgrades.</summary>
+        public static MagicSO CastableFor(SummonSO summon, Heroes.SummonGrant grant)
+        {
+            if (summon == null)
+            {
+                return null;
+            }
+            string key = summon.Key + "/" + (grant != null ? grant.PowerBonus : 0) + "/" + (grant != null ? grant.DurationBonus : 0);
+            if (!CastableCache.TryGetValue(key, out var castable) || castable == null)
+            {
+                castable = SummonOps.BuildCastable(summon, grant);
+                CastableCache[key] = castable;
+            }
+            return castable;
+        }
+    }
+
+    /// <summary>
     /// A headless <see cref="ICombatUnit"/> for the balance model and simulator. Gear and level
     /// bonuses are folded into the effective stats at build time (they never change mid-fight), so
     /// no <see cref="Assets.Scripts.Items.InventoryManager"/> is needed; combat buffs still stack on
@@ -84,6 +151,7 @@ namespace Assets.Scripts.Balance
         // ---- Hero-side ----
         public string HeroKey = "";
         public List<SimMagicSlot> MagicSlots = new List<SimMagicSlot>();
+        public List<SimSummonSlot> Summons = new List<SimSummonSlot>();
 
         // ---- Enemy-side (mirrors the per-fight state CombatManager keeps on Enemy) ----
         public EnemySO Definition;
@@ -129,6 +197,10 @@ namespace Assets.Scripts.Balance
             foreach (var slot in MagicSlots)
             {
                 clone.MagicSlots.Add(slot.Clone());
+            }
+            foreach (var summon in Summons)
+            {
+                clone.Summons.Add(summon.Clone());
             }
 
             return clone;

@@ -279,6 +279,12 @@ namespace Assets.Scripts.Sandbox
                         sb.AppendLine("    slots  " + string.Join(", ", slots.Select(s =>
                             s.Magic != null ? $"{s.Magic.Key} {s.Charges}/{s.MaxCharges}" : "(empty)")));
                     }
+                    var summons = dungeon.Summons != null ? dungeon.Summons.GetSummons(hero.HeroKey) : null;
+                    if (summons != null && summons.Count > 0)
+                    {
+                        sb.AppendLine("    summon " + string.Join(", ", summons.Select(s =>
+                            $"{s.Summon.Label} {s.Charges}/{s.MaxCharges} ({Cards.SummonOps.Describe(s.Summon, s.Grant)})")));
+                    }
                     var gear = InventoryManager.HasInstance ? InventoryManager.Instance.GetEquippedItems(hero.HeroKey) : null;
                     if (gear != null && gear.Count > 0)
                     {

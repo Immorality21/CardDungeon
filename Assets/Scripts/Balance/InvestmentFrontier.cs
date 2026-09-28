@@ -187,6 +187,14 @@ namespace Assets.Scripts.Balance
         /// <summary>No mix on the swept surface brings this floor inside the band.</summary>
         public bool Unclearable => Frontier.Count == 0;
 
+        /// <summary>
+        /// The same floor swept with every summoner <b>beelining</b> to their summon instead of
+        /// spending greedily (<c>SphereGridOps.BeelineThenGreedy</c>) - what committing to the
+        /// summon branch buys (section 4b, BALANCING.md section 0 rule 3). Null when nobody on the roster
+        /// has a summon on their grid. Materials on the summon node are not priced.
+        /// </summary>
+        public FloorFrontier WithSummons;
+
         /// <summary>At least two affordable mixes, i.e. the player picks how to pay rather than being told.</summary>
         public bool OffersChoice => AffordableChoices.Count >= 2;
 
@@ -255,6 +263,13 @@ namespace Assets.Scripts.Balance
         /// assignment here, so a swept party holds the same magic a measured one does.
         /// </summary>
         public System.Action<PartyBaseline> PrepareParty;
+
+        /// <summary>
+        /// Build each hero who has a summon on their grid by walking to it first
+        /// (<c>SphereGridOps.BeelineThenGreedy</c>) rather than by <c>GreedySpend</c>, which never
+        /// goes that deep. The "with summons" reading of the frontier.
+        /// </summary>
+        public bool SummonBuild;
     }
 
     /// <summary>
@@ -446,7 +461,7 @@ namespace Assets.Scripts.Balance
             FrontierSweepSettings settings, int width, int xp, int gold,
             Dictionary<string, InvestmentPoint> cache, IncomingDamageMix incoming)
         {
-            string key = width + "/" + xp + "/" + gold;
+            string key = width + "/" + xp + "/" + gold + (settings.SummonBuild ? "/summon" : "");
             if (cache.TryGetValue(key, out var cached))
             {
                 return cached;
@@ -490,7 +505,10 @@ namespace Assets.Scripts.Balance
                     gearLookup = spend.Lookup;
                 }
 
-                var party = PartyBaseline.Build(roster, xp, gearLookup, settings.PotionItem, settings.PotionCount);
+                var party = settings.SummonBuild
+                    ? PartyBaseline.Build(roster, _ => xp, gearLookup, settings.PotionItem, settings.PotionCount,
+                        hero => SummonBuildNodes(hero, xp))
+                    : PartyBaseline.Build(roster, xp, gearLookup, settings.PotionItem, settings.PotionCount);
                 if (settings.PrepareParty != null)
                 {
                     settings.PrepareParty(party);
@@ -511,6 +529,40 @@ namespace Assets.Scripts.Balance
             return point;
         }
 
+        /// <summary>
+        /// A hero's nodes for the summon build: beeline to the first summon node on their grid,
+        /// then greedy; a hero with no summon (or who cannot afford the path) spends greedily.
+        /// </summary>
+        public static List<string> SummonBuildNodes(HeroSO hero, int xp)
+        {
+            var grid = hero != null ? hero.SphereGrid : null;
+            var summonNode = grid != null && grid.Nodes != null
+                ? grid.Nodes.Find(n => n != null && n.Kind == Heroes.SphereNodeKind.Summon)
+                : null;
+            return summonNode != null
+                ? Heroes.SphereGridOps.BeelineThenGreedy(grid, summonNode.Key, xp)
+                : Heroes.SphereGridOps.GreedySpend(grid, null, xp, out _);
+        }
+
+        /// <summary>Whether any hero on the roster can learn a summon at all.</summary>
+        public static bool AnyoneCanSummon(IList<HeroSO> roster)
+        {
+            if (roster == null)
+            {
+                return false;
+            }
+            foreach (var hero in roster)
+            {
+                var grid = hero != null ? hero.SphereGrid : null;
+                if (grid != null && grid.Nodes != null
+                    && grid.Nodes.Exists(n => n != null && n.Kind == Heroes.SphereNodeKind.Summon))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private static EncounterSimulator.FloorSimSettings CloneSettings(
             EncounterSimulator.FloorSimSettings source)
         {
@@ -526,7 +578,8 @@ namespace Assets.Scripts.Balance
                 HealThreshold = source.HealThreshold,
                 RestRooms = source.RestRooms,
                 RestHealFraction = source.RestHealFraction,
-                StartsWithFullCharges = source.StartsWithFullCharges
+                StartsWithFullCharges = source.StartsWithFullCharges,
+                UseSummons = source.UseSummons
             };
         }
 

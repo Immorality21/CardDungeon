@@ -32,7 +32,8 @@ namespace Assets.Scripts.Rooms
         Attack,
         Skip,
         Cast,
-        UseItem
+        UseItem,
+        Summon
     }
 
     public class CombatResult
@@ -110,6 +111,10 @@ namespace Assets.Scripts.Rooms
         public event Action<ICombatUnit, List<ICombatUnit>> OnInspectTargetRequested;
         public event Action OnDungeonCleared;
 
+        /// <summary>A hero has summoned: the UI shows the name banner until <see cref="OnSummonEnded"/>.</summary>
+        public event Action<ICombatUnit, SummonSO> OnSummonStarted;
+        public event Action OnSummonEnded;
+
         [SerializeField] private List<MagicComboSO> _cardCombos;
 
         public bool InCombat { get; private set; }
@@ -122,6 +127,7 @@ namespace Assets.Scripts.Rooms
         private ItemSO _pendingUseItem;
         private ICombatUnit _pendingUseItemTarget;
         private ICombatUnit _pendingAttackTarget;
+        private SummonSlot _pendingSummon;
         private string _lastTurnLog;
         private Room _currentCombatRoom;
         private Party _currentParty;
@@ -220,6 +226,16 @@ namespace Assets.Scripts.Rooms
             };
             _pendingCastSlot = slotIndex;
             _pendingAction = HeroAction.Cast;
+        }
+
+        /// <summary>
+        /// Submits summoning <paramref name="slot"/>'s summon for the current hero turn. It uses the
+        /// turn, like casting (§4b); the charge is spent when it resolves.
+        /// </summary>
+        public void SubmitSummonAction(SummonSlot slot)
+        {
+            _pendingSummon = slot;
+            _pendingAction = HeroAction.Summon;
         }
 
         /// <summary>Submits using a consumable <paramref name="item"/> on <paramref name="target"/>.</summary>
@@ -374,6 +390,7 @@ namespace Assets.Scripts.Rooms
                     _pendingAttackTarget = null;
                     _pendingUseItem = null;
                     _pendingUseItemTarget = null;
+                    _pendingSummon = null;
                     OnHeroTurnStarted?.Invoke(unit);
 
                     while (_pendingAction == HeroAction.None)
@@ -392,6 +409,10 @@ namespace Assets.Scripts.Rooms
                     else if (_pendingAction == HeroAction.UseItem && _pendingUseItem != null)
                     {
                         yield return ExecuteUseItemAction(unit, _pendingUseItem, _pendingUseItemTarget);
+                    }
+                    else if (_pendingAction == HeroAction.Summon && _pendingSummon != null)
+                    {
+                        yield return ExecuteSummonAction(unit, _pendingSummon, room);
                     }
                     else
                     {
@@ -545,6 +566,72 @@ namespace Assets.Scripts.Rooms
             {
                 _lastTurnLog += $" {dead.DisplayName} defeated!";
                 HandleEnemyDeath(dead, room);
+            }
+        }
+
+        /// <summary>
+        /// A special-attack summon (§4b): spend the charge, bring the creature onto the stage, then
+        /// resolve its effects through the same <c>EffectResolver</c> an ability uses. The upgrades
+        /// its grid nodes add are folded into a throwaway castable (<see cref="SummonOps.BuildCastable"/>),
+        /// which takes no Forge bonus and triggers no combo.
+        /// </summary>
+        private IEnumerator ExecuteSummonAction(ICombatUnit caster, SummonSlot slot, Room room)
+        {
+            var hero = caster as Hero;
+            var summon = slot != null ? slot.Summon : null;
+            var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
+            if (hero == null || summon == null || summons == null || !summons.TryUse(hero.HeroKey, summon.Key))
+            {
+                _lastTurnLog = $"{caster.DisplayName} tries to summon, but nothing answers.";
+                yield break;
+            }
+
+            if (summon.Kind != SummonKind.SpecialAttack)
+            {
+                // The party-replacing kind is not built yet; refuse loudly rather than half-running it.
+                Debug.LogWarning($"[Summon] {summon.Key} is {summon.Kind}, which is not implemented yet.");
+                _lastTurnLog = $"{caster.DisplayName} calls {summon.Label}, but it does not come.";
+                yield break;
+            }
+
+            OnSummonStarted?.Invoke(caster, summon);
+            yield return SummonPresenter.Present(summon);
+
+            var castable = SummonOps.BuildCastable(summon, slot.Grant);
+            var action = new SpellcastAction
+            {
+                Magic = castable,
+                Caster = caster,
+                Targets = SummonTargets(castable.TargetType, caster)
+            };
+            var result = _calculator.Execute(action, BuffTracker);
+            _lastTurnLog = $"{caster.DisplayName} summons {summon.Label}!";
+            yield return _presenter.Present(result, caster, castable);
+            OnSummonEnded?.Invoke();
+            Destroy(castable);
+
+            // A damaging summon can kill; the Bloodfang Boar does not, but the next one will.
+            var deadEnemies = room.Enemies.Where(e => e != null && !e.IsAlive).ToList();
+            foreach (var dead in deadEnemies)
+            {
+                _lastTurnLog += $" {dead.DisplayName} defeated!";
+                HandleEnemyDeath(dead, room);
+            }
+        }
+
+        /// <summary>Who a summon's effects land on. A summon has no target picker: its target type
+        /// is always a whole side or the summoner.</summary>
+        private List<ICombatUnit> SummonTargets(MagicTargetType type, ICombatUnit caster)
+        {
+            switch (type)
+            {
+                case MagicTargetType.AllEnemies:
+                case MagicTargetType.SingleEnemy:
+                    return GetAliveEnemies();
+                case MagicTargetType.Self:
+                    return new List<ICombatUnit> { caster };
+                default:
+                    return GetAliveHeroes(_currentParty);
             }
         }
 

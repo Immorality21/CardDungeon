@@ -25,5 +25,12 @@ namespace Assets.Scripts.Cards
         public bool IsResistance;
 
         public DamageType ResistanceType;
+
+        /// <summary>
+        /// True for a stat change authored as a percentage (<see cref="PowerMode.PercentOfTargetStat"/>).
+        /// <see cref="Amount"/> is already the resolved delta; the flag only decides that a newer
+        /// percentage buff on the same stat replaces this one instead of stacking with it.
+        /// </summary>
+        public bool IsPercent;
     }
 }

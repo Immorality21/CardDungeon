@@ -77,6 +77,8 @@ namespace Assets.Scripts.Rooms
 
         private VisualElement _bossBanner;
         private Label _bossBannerName;
+        private VisualElement _summonBanner;
+        private Label _summonBannerName;
 
         private VisualElement _commandList;
         private VisualElement _turnOrder;
@@ -104,7 +106,7 @@ namespace Assets.Scripts.Rooms
         private float _eventChance;
 
         // Cursor-driven command menu (FFX-style selection list).
-        private enum HeroCommand { Attack, Magic, Item, Inspect, Skip }
+        private enum HeroCommand { Attack, Magic, Summon, Item, Inspect, Skip }
 
         private struct CommandEntry
         {
@@ -194,6 +196,8 @@ namespace Assets.Scripts.Rooms
 
             _bossBanner = root.Q<VisualElement>("boss-banner");
             _bossBannerName = root.Q<Label>("boss-banner-name");
+            _summonBanner = root.Q<VisualElement>("summon-banner");
+            _summonBannerName = root.Q<Label>("summon-banner-name");
 
             _actionBtn.clicked += OnAction;
             if (_searchBtn != null)
@@ -951,6 +955,12 @@ namespace Assets.Scripts.Rooms
                 DungeonManager.Instance.MagicState.RefillCharges();
                 lines.Add("Ability charges are restored.");
             }
+            if (DungeonManager.HasInstance && DungeonManager.Instance.Summons != null
+                && DungeonManager.Instance.Summons.GetSaveData().Count > 0)
+            {
+                DungeonManager.Instance.Summons.RefillCharges();
+                lines.Add("Summon charges are restored.");
+            }
 
             TakePayload();
 
@@ -998,6 +1008,8 @@ namespace Assets.Scripts.Rooms
 
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
             CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
+            CombatManager.Instance.OnSummonStarted += OnSummonStarted;
+            CombatManager.Instance.OnSummonEnded += OnSummonEnded;
             CombatManager.Instance.OnTurnExecuted += OnTurnExecuted;
             CombatManager.Instance.OnTurnOrderChanged += OnTurnOrderChanged;
 
@@ -1048,6 +1060,40 @@ namespace Assets.Scripts.Rooms
 
             var slots = DungeonManager.Instance.MagicState.GetSlots(heroComponent.HeroKey);
             CombatManager.Instance.RequestMagicSlots(_currentHeroTurn, slots);
+        }
+
+        /// <summary>
+        /// Summons with the first of the hero's summons that has a charge. Summons have no target
+        /// picker - they land on a whole side - and today a hero knows at most one; when a second
+        /// arrives this is where a picker goes.
+        /// </summary>
+        private void OnHeroSummon()
+        {
+            var heroComponent = _currentHeroTurn as Heroes.Hero;
+            var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
+            var slot = heroComponent != null && summons != null
+                ? summons.GetSummons(heroComponent.HeroKey).Find(s => s.CanUse)
+                : null;
+            if (slot == null)
+            {
+                return;
+            }
+            SetShown(_heroBar, false);
+            CombatManager.Instance.SubmitSummonAction(slot);
+        }
+
+        private void OnSummonStarted(ICombatUnit caster, Cards.SummonSO summon)
+        {
+            if (_summonBannerName != null)
+            {
+                _summonBannerName.text = summon != null ? summon.Label : "";
+            }
+            SetShown(_summonBanner, true);
+        }
+
+        private void OnSummonEnded()
+        {
+            SetShown(_summonBanner, false);
         }
 
         private void OnHeroItem()
@@ -1139,8 +1185,18 @@ namespace Assets.Scripts.Rooms
 
             bool hasItem = InventoryManager.HasInstance && InventoryManager.Instance.HasAnyConsumable();
 
+            // Summon is the one command the menu grew by (§4b, 2026-09-28): shown only to a hero
+            // who knows a summon, greyed when every charge is spent - and, like casting, by Silence.
+            var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
+            bool knowsSummon = heroComponent != null && summons != null && summons.Knows(heroComponent.HeroKey);
+            bool canSummon = knowsSummon && !silenced && summons.HasAnyUsable(heroComponent.HeroKey);
+
             _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
             _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Ability", Enabled = hasMagic });
+            if (knowsSummon)
+            {
+                _commands.Add(new CommandEntry { Command = HeroCommand.Summon, Label = "Summon", Enabled = canSummon });
+            }
             _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem });
             // Inspect is free - it opens a page and hands the turn straight back - so it sits above
             // Skip rather than among the actions that spend the turn.
@@ -1264,6 +1320,9 @@ namespace Assets.Scripts.Rooms
                     break;
                 case HeroCommand.Magic:
                     OnHeroMagic();
+                    break;
+                case HeroCommand.Summon:
+                    OnHeroSummon();
                     break;
                 case HeroCommand.Item:
                     OnHeroItem();
@@ -2202,6 +2261,9 @@ namespace Assets.Scripts.Rooms
         {
             CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
+            CombatManager.Instance.OnSummonStarted -= OnSummonStarted;
+            CombatManager.Instance.OnSummonEnded -= OnSummonEnded;
+            SetShown(_summonBanner, false);
             CombatManager.Instance.OnTurnExecuted -= OnTurnExecuted;
             CombatManager.Instance.OnTurnOrderChanged -= OnTurnOrderChanged;
             SetShown(_heroBar, false);

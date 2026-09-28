@@ -31,13 +31,14 @@ Consequence worth knowing: a damage spell in the Warrior's hands is now much wea
 | `BasePower` (0, default) | `Power` + the caster's `ScalingStat` | — |
 | `Flat` (1) | exactly `Power` | exactly `Power` |
 | `PercentOfMaxHealth` (2) | `floor(target.MaxHealth × Power/100)`, floor of 1 | `floor(caster.MaxHealth × Power/100)`, floor of 1 |
+| `PercentOfTargetStat` (3) | **Buff only**: `floor(target's own effective stat × Power/100)`, floor of 1 (`SpellPower.PercentOfStat`). A newer percentage buff on the same stat **replaces** the older one (`CombatBuffTracker.ApplyPercentBuff`); flat buffs still stack on top | — |
 
 Four rules worth knowing:
 
 - **`BasePower` is 0**, so every asset authored before the field existed keeps its exact numbers. The mode is purely additive.
 - **The percentage always applies to the unit the effect lands on** — the target for Damage/Heal, the caster for HealthCost. It reads `GetEffectiveStat(MaxHealth)`, so +MaxHealth gear counts.
 - **`PercentOfMaxHealth` takes no upgrade bonus.** `EffectResolver.ApplyPowerBonus` returns the effect untouched: `+2` per upgrade level on a percentage would read as percentage *points* and double a 10% spell at max upgrade.
-- **Buff and Debuff magnitudes ignore the mode entirely.** Their `Power` is a stat delta, not a health number; the inspector does not draw the field for them.
+- **Buff and Debuff magnitudes ignore the mode — except `PercentOfTargetStat` on a Buff** (2026-09-28, for summons), which reads `Power` as a percentage of each target's own stat. Otherwise their `Power` is a stat delta, not a health number; the ability inspector does not draw the field for them.
 
 The `flatPower` argument the executors already took (a combo's bonus effect, a room event's outcome) means the same thing as `Flat`, and deliberately does **not** override a percentage — a percentage effect has no caster contribution to suppress in the first place.
 
@@ -188,6 +189,32 @@ Two consequences worth holding on to:
 - **The closed-form balance model got more accurate for free.** `BalanceMath` deliberately prices
   basic attacks only; with magic finite, basic attacks really are the mainstay, so the run curve is no
   longer measuring a different game.
+
+## Summons (`Cards/Summons/`) — docs/plans/SPECIALIZATION.md §4b
+
+- **`SummonSO`** (`SO/Summon`): key, name, creature `Sprite` + optional `AnimationFrames`, `Kind`
+  (`SpecialAttack` built; `ReplaceParty` refused with a warning until it exists), `TargetType`,
+  `Effects` (ordinary `SpellEffect`s), `BaseCharges` and `Facing` — art is drawn facing right (the
+  enemies); `Party` mirrors it and turns the lurch toward the heroes, for a summon that buffs or heals
+  (the Bloodfang Boar). **`Resources/SummonCatalog.asset`** resolves
+  keys; `SummonContentTests` fails on an unlisted asset, a node naming an unknown summon, an upgrade
+  for a summon its grid never teaches, or a summon no grid teaches.
+- **Learned from the grid, never from a loadout.** `SphereNodeKind.Summon` teaches `GrantedSummonKey`;
+  `SummonPower` / `SummonDuration` / `SummonCharge` add `SummonAmount` to it
+  (`SphereGridOps.SummonsForNodes` → `SummonGrant`). **Always carried** — no ability slot.
+- **`SummonOps`** folds the grant into copies of the effects and builds a throwaway, tagless,
+  `summon:`-keyed `MagicSO` so it resolves through the same `EffectResolver` with no combo and no
+  Forge bonus. **`SummonState`** (`DungeonManager.Summons`) holds charges on the ability economy: full
+  at run start, refilled at refuges, carried in `Run.json` / the dungeon save.
+- **Combat:** the **Summon** command (the one exception to "the menu does not grow") appears only for a
+  hero who knows a summon, greys out when spent or **Silenced**, and uses the turn.
+  `CombatManager.ExecuteSummonAction` → `SummonPresenter` (creature on stage ~3.5 s, animation,
+  lurch + roar) + the `summon-banner` UI → effects. One summon per hero today; a picker goes in
+  `RoomActionUI.OnHeroSummon` when a hero has two.
+- **Balance model:** simulated heroes carry summons (`SimSummonSlot`), the Adaptive/MagicFirst policy
+  holds the charge for the floor's hardest room (`EncounterSimulator.PickSummonRoom`), and each
+  finale's frontier also has a `WithSummons` sweep in which summoners beeline to their summon
+  (`SphereGridOps.BeelineThenGreedy`). Materials are not priced there.
 
 ## Equip / Cast
 

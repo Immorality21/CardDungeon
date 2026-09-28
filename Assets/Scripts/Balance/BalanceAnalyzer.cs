@@ -727,6 +727,26 @@ namespace Assets.Scripts.Balance
                         UpgradeLevel = UpgradeLevelFor(magic, save)
                     });
                 }
+
+                // Summons ride with the kit: every one the grid teaches, always carried (§4b).
+                hero.Unit.Summons.Clear();
+                foreach (var grant in SphereGridOps.SummonsForNodes(grid, hero.ActivatedNodes))
+                {
+                    var summon = SummonCatalogSO.Resolve(grant.Key);
+                    if (summon == null || summon.Kind != SummonKind.SpecialAttack)
+                    {
+                        continue;   // the party-replacing kind is not modelled until it exists
+                    }
+                    int max = SummonOps.MaxCharges(summon, grant);
+                    hero.Unit.Summons.Add(new SimSummonSlot
+                    {
+                        Summon = summon,
+                        Grant = grant,
+                        Castable = SimSummonSlot.CastableFor(summon, grant),
+                        Charges = max,
+                        MaxCharges = max
+                    });
+                }
             }
         }
 
@@ -3129,6 +3149,17 @@ namespace Assets.Scripts.Balance
                 };
 
                 var frontier = InvestmentFrontier.Measure(settings);
+
+                // The same sweep with the summoners committing to their summon branch: the
+                // with-and-without comparison section 4b asks for. Only when someone can summon, since
+                // it doubles the cost of the sweep.
+                if (InvestmentFrontier.AnyoneCanSummon(roster))
+                {
+                    settings.SummonBuild = true;
+                    frontier.WithSummons = InvestmentFrontier.Measure(settings);
+                    settings.SummonBuild = false;
+                }
+
                 frontier.Label = $"{run.Name} / {level.Reference}";
                 frontier.Asset = run.Run;
                 frontier.Run = run.Run;
@@ -3137,6 +3168,48 @@ namespace Assets.Scripts.Balance
                 frontier.Budget = rules.InvestmentBudgetForTier(tier);
                 report.Frontiers.Add(frontier);
             }
+        }
+
+        /// <summary>
+        /// Section 4b's guard rail and its measurement. The measurement is an Info on every finale a summoner
+        /// can reach: the ask with the summoners beelining to their summon, beside the ask without.
+        /// The guard rail is a Warning: a floor that <b>only</b> clears with a summon has turned the
+        /// summon from a key into a requirement, and every party without that branch is walled.
+        /// </summary>
+        private static void EvaluateSummonFrontier(BalanceReport report, FloorFrontier frontier)
+        {
+            var with = frontier.WithSummons;
+            if (with == null)
+            {
+                return;
+            }
+
+            if (frontier.Unclearable && !with.Unclearable)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Frontier,
+                    frontier.Label, "This floor can only be cleared with a summon")
+                {
+                    Asset = frontier.Asset,
+                    Detail = $"No swept mix clears it by spending XP broadly, but a party whose summoner "
+                           + $"walks to their summon clears it at {with.AskedInvestment} investment "
+                           + $"({with.FrontierText}). A summon is meant to be a key that opens a "
+                           + "fight early, not the only way through it (section 4b).",
+                    Suggestion = "Soften the floor until a breadth build can also clear it, so the "
+                           + "summon stays a choice."
+                });
+                return;
+            }
+
+            string without = frontier.Unclearable ? "nothing clears it" : $"{frontier.AskedInvestment}";
+            string withText = with.Unclearable ? "nothing clears it" : $"{with.AskedInvestment}";
+            report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Frontier,
+                frontier.Label, $"Summons: asks {withText} with the summon branch, {without} without")
+            {
+                Asset = frontier.Asset,
+                Detail = "With summons: every hero whose grid teaches a summon beelines to it before "
+                       + "spending the rest greedily, and holds its charge for the floor's hardest room. "
+                       + "The summon node's material price is not included."
+            });
         }
 
         private static LevelCurve FinalLevelOf(RunCurve run)
@@ -3180,6 +3253,8 @@ namespace Assets.Scripts.Balance
 
             foreach (var frontier in report.Frontiers)
             {
+                EvaluateSummonFrontier(report, frontier);
+
                 if (frontier.Unclearable)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Frontier,

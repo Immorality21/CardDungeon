@@ -443,11 +443,41 @@ gate** the game would have: "the Cinder Tyrant's signature is survivable if some
 hit of it" is a different shape from a wall, and pricing it as *more investment* would flatten
 exactly the choice rule 3 creates.
 
-#### Shape: which FF model — *open, not decided (reopened 2026-09-04)*
+#### Decided 2026-09-28 — the user's walkthrough
 
-> **No shape is chosen.** An earlier pass recommended the temporary-extra-combatant model; that is
-> **one candidate among three**, not the plan. Reserved for the user's input, alongside what a summon
-> actually does.
+**Two kinds, one foundation.** A summon is either a **special attack** (FF7–9: a big effect lands and
+it is over — a Carbuncle-style party buff, a Doomtrain-style debuff on every enemy, raw damage to
+all) or a **party replacement** (FFX Bahamut: the party steps out and the summon fights alone). Both
+share the grid node, the charges, the command and the presentation; only what happens after the
+summon differs. **Special attack first**; the replacement kind is the next step, and `SummonSO`
+carries a kind field from day one so it does not reshape anything.
+
+| decision | value |
+|---|---|
+| where the player finds it | a **Summon** command, shown only to a hero who knows one (amends the "menu does not grow" rule — see `NEXT_STEPS.md`) |
+| loadout | **always carried** — not in the ability slots |
+| turn cost | **uses the summoner's turn** |
+| charges | refill **like abilities** — run start and refuges |
+| Silence | **blocks** summoning |
+| grid shape | **every branch eventually ends in its own summon**, so each way a player builds a hero reaches a different one |
+| scope | **one hero first** to prove the pipeline, then the rest |
+| balance model | **in the first version** (the simulator summons; the frontier reports with and without) |
+
+**The first summon — the Warrior's Bloodfang Boar** (branch B, the damage branch):
+
+- **Node:** one step past the `warrior-b-edge` tip, depth 12 — **410 XP + 2 Void Shard + 3 Ember
+  Iron** (~2,005 XP from a fresh Warrior).
+- **Effect:** every living hero gets **+50% of their own Strength** (effective, gear included;
+  floor of +1, rounded down, computed when summoned) **for 3 turns**. Stacks with flat Strength
+  buffs such as War Cry; re-summoning while it is active refreshes rather than doubling.
+- **Charges:** 1, and the count is a property of the summon so it can be upgraded.
+- **Upgrades** — a chain past the summon node, each priced by depth: **+10% Strength** (d13) →
+  **+1 turn** (d14) → **+1 charge** (d15, **+ 1 Void Shard + 2 Ember Iron**). Only the charge node
+  has a material price besides the summon itself.
+- **Presentation:** name banner, camera punch, the boar appears large on the stage, then the buff
+  lands. No dedicated music track yet.
+
+#### The three FF models, for reference
 
 The FF series does not have *a* summon model, it has at least three, and they cost wildly different
 amounts to build here:

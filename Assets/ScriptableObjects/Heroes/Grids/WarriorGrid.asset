@@ -29,6 +29,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors: []
   - Key: warrior-trunk-1
     DisplayName: 
@@ -45,6 +47,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-start
   - Key: warrior-slash
@@ -60,6 +64,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Slash
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-trunk-1
   - Key: warrior-trunk-2
@@ -79,6 +85,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-slash
   - Key: warrior-trunk-slot
@@ -94,6 +102,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-a-1
@@ -111,6 +121,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-a-2
@@ -128,6 +140,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-1
   - Key: warrior-a-3
@@ -143,6 +157,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: ShieldUp
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-2
   - Key: warrior-a-4
@@ -160,6 +176,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-3
   - Key: warrior-a-5
@@ -175,6 +193,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-4
   - Key: warrior-a-6
@@ -190,6 +210,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Bulwark
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-5
   - Key: warrior-a-7
@@ -209,6 +231,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-6
   - Key: warrior-a-fire
@@ -224,6 +248,8 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-1
   - Key: warrior-a-plate
@@ -241,6 +267,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-2
   - Key: warrior-a-brace
@@ -258,6 +286,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-4
   - Key: warrior-a-shadow
@@ -273,6 +303,8 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-6
   - Key: warrior-a-ward
@@ -288,6 +320,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Ward
     GrantedCharges: 1
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-7
   - Key: warrior-a-hold
@@ -305,6 +339,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-a-7
   - Key: warrior-b-1
@@ -322,6 +358,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-b-2
@@ -339,6 +377,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-1
   - Key: warrior-b-3
@@ -354,6 +394,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Sunder
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-2
   - Key: warrior-b-4
@@ -371,6 +413,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-3
   - Key: warrior-b-5
@@ -386,6 +430,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-4
   - Key: warrior-b-6
@@ -401,6 +447,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Cleave
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-5
   - Key: warrior-b-7
@@ -418,6 +466,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-6
   - Key: warrior-b-luck
@@ -435,6 +485,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-1
   - Key: warrior-b-quick
@@ -452,6 +504,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-2
   - Key: warrior-b-hone
@@ -469,6 +523,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-4
   - Key: warrior-b-fortune
@@ -486,6 +542,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-6
   - Key: warrior-b-cry
@@ -505,6 +563,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: WarCry
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-7
   - Key: warrior-b-edge
@@ -524,5 +584,83 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warrior-b-7
+  - Key: warrior-boar
+    DisplayName: Bloodfang Boar
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
+      Amount: 3
+    Position: {x: 850, y: -635}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: BloodfangBoar
+    SummonAmount: 1
+    Neighbors:
+    - warrior-b-edge
+  - Key: warrior-boar-fury
+    DisplayName: Boar's Fury
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 945, y: -690}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: BloodfangBoar
+    SummonAmount: 10
+    Neighbors:
+    - warrior-boar
+  - Key: warrior-boar-endurance
+    DisplayName: Boar's Endurance
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 1040, y: -745}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: BloodfangBoar
+    SummonAmount: 1
+    Neighbors:
+    - warrior-boar-fury
+  - Key: warrior-boar-charge
+    DisplayName: Boar's Second Wind
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
+      Amount: 2
+    Position: {x: 1135, y: -800}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: BloodfangBoar
+    SummonAmount: 1
+    Neighbors:
+    - warrior-boar-endurance

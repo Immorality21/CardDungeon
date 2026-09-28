@@ -448,6 +448,58 @@ namespace Assets.Scripts.Heroes
 
         /// <summary>XP spent to activate the given keys, at current node prices. Unknown keys count 0.</summary>
         /// <summary>
+        /// Every summon the activated nodes teach, each with the bonuses its activated upgrade nodes
+        /// add, in grid order. An upgrade node counts only for a summon the hero actually knows —
+        /// the grid's shape normally guarantees that (upgrades hang past the summon), and this makes
+        /// it a rule rather than a layout accident. Two nodes teaching the same summon teach it once.
+        /// </summary>
+        public static List<SummonGrant> SummonsForNodes(SphereGridSO grid, IEnumerable<string> activated)
+        {
+            var grants = new List<SummonGrant>();
+            if (grid == null || grid.Nodes == null)
+            {
+                return grants;
+            }
+
+            var owned = ActiveNodes(grid, activated);
+            foreach (var node in grid.Nodes)
+            {
+                if (node != null && node.Kind == SphereNodeKind.Summon && owned.Contains(node.Key)
+                    && !string.IsNullOrEmpty(node.GrantedSummonKey)
+                    && grants.Find(g => g.Key == node.GrantedSummonKey) == null)
+                {
+                    grants.Add(new SummonGrant { Key = node.GrantedSummonKey });
+                }
+            }
+
+            foreach (var node in grid.Nodes)
+            {
+                if (node == null || !owned.Contains(node.Key) || string.IsNullOrEmpty(node.GrantedSummonKey))
+                {
+                    continue;
+                }
+                var grant = grants.Find(g => g.Key == node.GrantedSummonKey);
+                if (grant == null)
+                {
+                    continue;
+                }
+                switch (node.Kind)
+                {
+                    case SphereNodeKind.SummonPower:
+                        grant.PowerBonus += node.SummonAmount;
+                        break;
+                    case SphereNodeKind.SummonDuration:
+                        grant.DurationBonus += node.SummonAmount;
+                        break;
+                    case SphereNodeKind.SummonCharge:
+                        grant.ChargeBonus += node.SummonAmount;
+                        break;
+                }
+            }
+            return grants;
+        }
+
+        /// <summary>
         /// Edge distance from <c>StartNodeKey</c> to every node, so pricing and reporting share one
         /// notion of "how far in is this". Edges are undirected; unreachable nodes are absent.
         /// </summary>
@@ -734,6 +786,29 @@ namespace Assets.Scripts.Heroes
                 spent += pick.XpCost;
                 activated.Add(pick.Key);
             }
+        }
+
+        /// <summary>
+        /// A <b>depth</b> build: walk the shortest path to <paramref name="targetKey"/> first, then
+        /// spend what is left with <see cref="GreedySpend"/>. When the path costs more than
+        /// <paramref name="budget"/> the target is out of reach and this is exactly
+        /// <see cref="GreedySpend"/> — a player saving for a node they cannot yet afford is modelled
+        /// as spending broadly, which is the conservative reading.
+        ///
+        /// <para>Exists because <see cref="GreedySpend"/> is a breadth build by construction and
+        /// never walks twelve nodes deep to a summon, so a balance model that only spends greedily
+        /// cannot see what committing to a branch buys (docs/BALANCING.md §0 rule 3). Prices only
+        /// XP; a node's material cost is not modelled here.</para>
+        /// </summary>
+        public static List<string> BeelineThenGreedy(SphereGridSO grid, string targetKey, int budget)
+        {
+            var path = PathTo(grid, targetKey);
+            int pathCost = TotalCostOf(grid, path);
+            if (path.Count == 0 || pathCost > budget)
+            {
+                return GreedySpend(grid, null, budget, out _);
+            }
+            return GreedySpend(grid, path, budget - pathCost, out _);
         }
 
         /// <summary>Lifetime XP a save entry represents: the unspent bank plus the cost of

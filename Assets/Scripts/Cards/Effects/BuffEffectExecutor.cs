@@ -26,6 +26,30 @@ namespace Assets.Scripts.Cards.Effects
                 return;
             }
 
+            // A percentage buff is sized per target, off that target's own stat, and replaces an
+            // older percentage buff on the same stat instead of stacking (PowerMode.PercentOfTargetStat).
+            if (effect.PowerMode == PowerMode.PercentOfTargetStat && handler is StatBuffHandler statHandler)
+            {
+                foreach (var target in targets)
+                {
+                    if (!target.IsAlive)
+                    {
+                        continue;
+                    }
+
+                    int amount = SpellPower.PercentOfStat(effect.Power, target, statHandler.Stat);
+                    buffTracker.ApplyPercentBuff(target, statHandler.Stat, amount, effect.Duration);
+                    result.Entries.Add(new EffectEntry
+                    {
+                        Target = target,
+                        Text = handler.GetDisplayText(amount),
+                        Color = BuffColor,
+                        Delay = EffectDelay
+                    });
+                }
+                return;
+            }
+
             // Flat-power buffs stay as authored; a cast one adds a fraction of the caster's stat, so a
             // high-Spirit caster's shields are better without dwarfing the stat being changed.
             int magnitude = flatPower

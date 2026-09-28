@@ -9,6 +9,9 @@ namespace Assets.Scripts.Cards.Buffs
         private readonly StatType _stat;
         private readonly string _displayName;
 
+        /// <summary>The stat this handler changes — read by percentage buffs to size themselves.</summary>
+        public StatType Stat => _stat;
+
         public StatBuffHandler(StatType stat, string displayName)
         {
             _stat = stat;

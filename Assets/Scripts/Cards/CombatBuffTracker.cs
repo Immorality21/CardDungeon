@@ -27,6 +27,34 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
+        /// Applies a stat change that was authored as a percentage of the target's own stat. The
+        /// <paramref name="amount"/> is the already-resolved delta. <b>A newer percentage buff on the
+        /// same stat replaces the older one</b> — re-summoning the Bloodfang Boar refreshes its +50%
+        /// rather than doubling it — while flat buffs (<see cref="ApplyBuff"/>) keep stacking.
+        /// </summary>
+        public void ApplyPercentBuff(ICombatUnit unit, StatType stat, int amount, int duration)
+        {
+            if (unit == null || duration <= 0)
+            {
+                return;
+            }
+            if (!_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                buffs = new List<CombatBuff>();
+                _activeBuffs[unit] = buffs;
+            }
+
+            buffs.RemoveAll(b => b.IsPercent && !b.IsStatusEffect && !b.IsResistance && b.Stat == stat);
+            buffs.Add(new CombatBuff
+            {
+                Stat = stat,
+                Amount = amount,
+                TurnsRemaining = duration,
+                IsPercent = true
+            });
+        }
+
+        /// <summary>
         /// Applies a plain status effect — Frozen, Slow, Haste, Silenced.
         ///
         /// <para><b>Reapplying refreshes rather than duplicating</b>, matching

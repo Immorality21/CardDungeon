@@ -25,6 +25,12 @@
             <ui:Label name="boss-banner-name" text="" class="cd-boss-banner__name" />
         </ui:VisualElement>
 
+        <!-- Summon banner (top-center): names the summon while it appears on the stage. -->
+        <ui:VisualElement name="summon-banner" class="cd-summon-banner cd-hidden" picking-mode="Ignore">
+            <ui:Label name="summon-banner-sub" text="SUMMON" class="cd-summon-banner__sub" />
+            <ui:Label name="summon-banner-name" text="" class="cd-summon-banner__name" />
+        </ui:VisualElement>
+
         <!-- Turn-order list (FFX-style, top-right): upcoming turns, current on top -->
         <ui:VisualElement name="turn-order" class="cd-turn-order cd-dock-top-right cd-hidden">
             <ui:Label name="turn-order-title" text="Turn Order" class="cd-turn-order__header" />

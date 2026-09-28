@@ -96,6 +96,20 @@ namespace Assets.Scripts.Heroes
         /// <c>EquippedMagicState.SeedFromLoadout</c> resolves the keys against the catalog, keeping
         /// Cards → Heroes the dependency direction, same as <see cref="BonusMagicSlots"/>.
         /// </summary>
+        /// <summary>
+        /// The summons this hero's grid teaches, with their upgrades folded in. Always carried —
+        /// summons take no ability slot. Resolved to <c>SummonSO</c>s where the catalog lives
+        /// (<c>SummonState</c>), keeping Cards → Heroes the dependency direction.
+        /// </summary>
+        public List<SummonGrant> KnownSummons
+        {
+            get
+            {
+                return SphereGridOps.SummonsForNodes(
+                    HeroSO != null ? HeroSO.SphereGrid : null, ActivatedNodes);
+            }
+        }
+
         public List<KeyValuePair<string, int>> KnownMagic
         {
             get

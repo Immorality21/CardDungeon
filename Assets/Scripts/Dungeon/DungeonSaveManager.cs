@@ -82,6 +82,10 @@ namespace Assets.Scripts.Dungeon
             {
                 data.EquippedMagic = DungeonManager.Instance.MagicState.GetSaveData();
             }
+            if (DungeonManager.HasInstance && DungeonManager.Instance.Summons != null)
+            {
+                data.SummonCharges = DungeonManager.Instance.Summons.GetSaveData();
+            }
 
             if (DungeonManager.HasInstance && DungeonManager.Instance.Afflictions != null)
             {

@@ -20,6 +20,17 @@ namespace Assets.Scripts.Cards
         /// for Damage/Heal, the caster for HealthCost. Rounds down, floor of 1, so a percentage effect
         /// scales with the party for the rest of the game's life instead of going stale.
         /// </summary>
-        PercentOfMaxHealth = 2
+        PercentOfMaxHealth = 2,
+
+        /// <summary>
+        /// <b>Buff effects only.</b> <c>Power</c> is a percentage of the stat being buffed, read off
+        /// each target's <i>own</i> effective value (base + sphere grid + gear, not other buffs) at
+        /// the moment it lands — rounded down, floor of 1. Added for summons (the Bloodfang Boar's
+        /// +50% Strength), so a party-wide buff means as much to a weak hero as to a strong one.
+        /// A second percentage buff on the same stat <b>replaces</b> the first rather than stacking
+        /// (<c>CombatBuffTracker.ApplyPercentBuff</c>); flat buffs still stack on top. Read as
+        /// <see cref="BasePower"/> by every other effect type.
+        /// </summary>
+        PercentOfTargetStat = 3
     }
 }

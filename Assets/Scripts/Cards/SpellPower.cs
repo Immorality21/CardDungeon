@@ -70,6 +70,23 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
+        /// <paramref name="percent"/> of <paramref name="unit"/>'s own effective
+        /// <paramref name="stat"/> (base + grid + gear — buffs are not part of
+        /// <c>GetEffectiveStat</c>), rounded <b>down</b> with a floor of 1. What a
+        /// <see cref="PowerMode.PercentOfTargetStat"/> buff adds.
+        /// </summary>
+        public static int PercentOfStat(int percent, ICombatUnit unit, StatType stat)
+        {
+            if (unit == null || percent <= 0)
+            {
+                return 0;
+            }
+
+            int value = unit.GetEffectiveStat(stat);
+            return Mathf.Max(1, Mathf.FloorToInt(value * percent / 100f));
+        }
+
+        /// <summary>
         /// What one <see cref="SpellEffectType.HealthCost"/> effect charges its caster. The cost is
         /// paid in raw health: no defense, no resistance, no upgrade bonus — upgrading a spell must
         /// never raise its price.

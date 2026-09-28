@@ -104,7 +104,10 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   Endurance + a shield spell *is* a tank, and the game never says the word. Do not add
   archetype names, titles or class labels to branches.
 - **Every combat verb past the basics is an ability, and abilities come from the grid**
-  *(2026-09-06)*. The command menu is Attack / Ability / Item / Inspect / Skip and does not grow.
+  *(2026-09-06)*. The command menu is Attack / Ability / Item / Inspect / Skip and does not grow —
+  **with one exception, decided 2026-09-28: Summon.** A hero who knows a summon gets a **Summon**
+  command (and only then); summons are always carried, outside the ability slots. See
+  `plans/SPECIALIZATION.md` §4b.
   **Defend was the test case** and is why §10 is gone: a defensive stance is a thing a hero *learns*,
   not a button everyone always has, so it belongs on a branch beside Provoke and the shield spells.
   Do not add a sixth hard-coded command; add a node.
@@ -127,7 +130,10 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   threat table. Random is the default; a **taunt/provoke ability granted by a defensive branch**
   overrides it for a few turns. Do not build a general threat system.
 - **Two summons per grid is the target; one per grid is the MVP** *(2026-09-04, §4b)*. And grids get
-  **much larger** than today's ~30 nodes to hold them.
+  **much larger** than today's ~30 nodes to hold them. **Refined 2026-09-28:** the aim is a
+  different summon at the end of **every** branch, so each way a player builds a hero reaches its
+  own. Summons come in two kinds — a special attack and a party replacement — built special attack
+  first, on the Warrior (the Bloodfang Boar).
 - **Saves are disposable until release** *(2026-09-04)*. No migrations, no compatibility shims —
   the fix for a changed save shape is to delete the save. This suspends the **write-once key**
   contract (`HeroSO.Key`, `SphereGridNode.Key`, `EnemySO.Key`) *for the rebuild only*: keys may be
@@ -173,7 +179,7 @@ backlog.**
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **shipped** 2026-09-06 — solo start, rescue unlocks, `RequiresHeroes` gates. **Four heroes still need an unlock source** |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | spec; **shape and effects reopened** 2026-09-04 |
+| **4b** | Summons — the capability the deep grid pays out | **first shipped 2026-09-28** — the Warrior's Bloodfang Boar (special attack); party-replacing kind and the other heroes' summons next |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
@@ -226,6 +232,12 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Summons, first one: the Warrior's Bloodfang Boar** (2026-09-28) — `plans/SPECIALIZATION.md` §4b
+  (decisions table), Cards guide. Special-attack kind: +50% of each hero's own Strength for 3 turns,
+  1 charge, learned past `warrior-b-edge` (410 XP + 2 Void Shard + 3 Ember Iron) with a +10% / +1 turn /
+  +1 charge upgrade chain. New Summon command, percentage stat buffs (`PowerMode.PercentOfTargetStat`),
+  animated PixelLab creature on stage, and the balance model can summon and report finales with and
+  without it. Not yet: the party-replacing kind, summons for the other six heroes, a picker for two.
 - **A sandbox for quick tests** (2026-09-27) — `docs/SANDBOX.md`. `Tools ▸ Sandbox` (or
   `SandboxLauncher.Launch` from a script / the Unity MCP) runs `MainGameScene` with a configured
   party — any hero, XP bank, a greedy grid spend, "unlock the path to node X", abilities, gear — a
