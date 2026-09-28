@@ -200,7 +200,7 @@ Two consequences worth holding on to:
 ## Summons (`Cards/Summons/`) — docs/plans/SPECIALIZATION.md §4b
 
 - **`SummonSO`** (`SO/Summon`): key, name, creature `Sprite` + optional `AnimationFrames`, `Kind`
-  (`SpecialAttack` built; `ReplaceParty` refused with a warning until it exists), `TargetType`,
+  (`SpecialAttack` and `ReplaceParty`, both built), `TargetType`,
   `Effects` (ordinary `SpellEffect`s), `BaseCharges` and `Facing` — art is drawn facing right (the
   enemies); `Party` mirrors it and turns the lurch toward the heroes, for a summon that buffs or heals
   (the Bloodfang Boar). **`Resources/SummonCatalog.asset`** resolves
@@ -215,17 +215,38 @@ Two consequences worth holding on to:
   at run start, refilled at refuges, carried in `Run.json` / the dungeon save. **`Run.json` is merged
   per hero after the opening floor** (`SummonState.MergeSaveData`): overwriting it dropped a benched
   hero's entry, and `Restore` starts a hero it cannot find at full, so sitting one floor out refilled
-  the summon. **`SummonSlot.CanUse` is false for an unbuilt kind** (`IsImplemented`), so a
-  `ReplaceParty` summon greys the command instead of spending a charge on nothing; drop that gate
-  when the kind is built.
+  the summon. `SummonSlot.IsImplemented` still gates on the kind, so a kind added later greys the
+  command rather than spending a charge on nothing.
 - **Combat:** the **Summon** command (the one exception to "the menu does not grow") appears only for a
   hero who knows a summon, greys out when spent or **Silenced**, and uses the turn.
   `CombatManager.ExecuteSummonAction` → `SummonPresenter` (creature on stage ~3.5 s, animation,
-  lurch + roar) + the `summon-banner` UI → effects. One summon per hero today; a picker goes in
-  `RoomActionUI.OnHeroSummon` when a hero has two.
+  lurch + roar) + the `summon-banner` UI → effects. A hero who knows two gets the **summon picker**
+  (`MagicSelectionUI.ShowSummonList`).
+- **The party-replacing kind (`ReplaceParty`, the Cairn Golem).** Extra `SummonSO` fields:
+  `StatPercents` (a `StatBlock` of percentages of the summoner's base + gear stats), `TurnsActive`,
+  `Actions` + one `Signature` (ordinary `MagicSO`s), `CopySummonerResistances`. `SummonOps.StatsFor`
+  builds the snapshot (no combat buffs, no afflictions, `SummonPower` adds **HP-ratio points**),
+  `TurnsFor` the stay; `SummonStay` counts its own turns (the immediate arrival turn is turn 1, a
+  Frozen turn counts), the once-per-summoning Signature and why it left. Live: `Combat/SummonUnit`
+  (a MonoBehaviour so the HP bar, flash and lunge work unchanged), and in `CombatManager` —
+  `HeroSideUnits()` is **the one** answer to "who are the heroes" (enemy planning, AoE, random
+  targets, telegraph markers, the defeat check); arrival suspends the party on the `TurnManager`,
+  inserts the summon to act next and **re-aims every stored `ChargeTarget`** at it; its death, turns
+  running out, Dismiss or victory call `EndSummon`, which resumes the party at its frozen counters.
+  **Overkill is swallowed** by construction — nothing can target the party while it is out. No Flee
+  (`CanFlee`). Its abilities resolve on the Boar's path: no Forge bonus, no tags, no combos.
+  Presentation: the party is **hidden** (`CombatStage.HideParty`, `UnitHealthBar.Hidden`), the
+  summon gets the Boar's intro then strides into the hero column (`SummonPresenter.Arrive`), and
+  `SummonSO.ArrivalSound` is an optional clip. The sim mirrors it with `SimUnit.FromSummon` +
+  `SimReplacement`, summoning when an enemy winds up (or at once when nothing in the room
+  telegraphs), Signature first then Attack. `SummonReplacementTests` covers both halves.
+- **A summon's abilities are not a hero's magic.** They are `MagicSO` assets, so every "is this
+  learnable?" check must leave them out through `SummonOps.AbilityKeys`: the balance collector, the
+  catalog/grid tests, and `SummonContentTests.SummonAbilities_AreNeverAHerosMagic` (never on a grid,
+  never in `MagicCatalog`, so never in the Forge). They live in `ScriptableObjects/Summons/Abilities/`.
 - **Balance model:** simulated heroes carry summons (`SimSummonSlot`), the Adaptive/MagicFirst policy
   holds the charge for the floor's hardest room (`EncounterSimulator.PickSummonRoom`), and each
-  finale's frontier also has a `WithSummons` sweep in which summoners beeline to their summon
+  finale's frontier also has one sweep **per summon** (`FloorFrontier.BySummon`) in which that summon's learners beeline to it
   (`SphereGridOps.BeelineThenGreedy`). Materials are not priced there.
 
 ## Equip / Cast

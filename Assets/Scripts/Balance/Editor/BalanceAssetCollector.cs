@@ -35,6 +35,8 @@ namespace Assets.Scripts.Balance.Editor
                 startingParty = heroes;
             }
 
+            var summonAbilityKeys = SummonOps.AbilityKeys(FindAll<SummonSO>());
+
             var input = new BalanceInput
             {
                 Rules = rules,
@@ -49,7 +51,10 @@ namespace Assets.Scripts.Balance.Editor
                 Enemies = FindAll<EnemySO>(),
                 Runs = FindAll<RunDefinitionSO>(),
                 Campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath),
-                Magic = FindAll<MagicSO>(),
+                // A summon's own abilities (the Cairn Golem's Brace and Quake) are MagicSO assets, but
+                // no hero ever learns or carries them - they are reached through the summon. Left in,
+                // every supply-chain check would report them as magic no grid teaches.
+                Magic = FindAll<MagicSO>().FindAll(m => !summonAbilityKeys.Contains(m.Key)),
                 Combos = FindAll<MagicComboSO>(),
                 Items = items,
                 // Reached through the room pools by the run curves; collected here as well so the

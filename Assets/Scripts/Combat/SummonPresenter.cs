@@ -61,6 +61,11 @@ namespace Assets.Scripts.Combat
                 sr.color = new Color(1f, 1f, 1f, 0f);
             }
 
+            if (summon != null && summon.ArrivalSound != null)
+            {
+                CombatAudio.PlayClip(summon.ArrivalSound, summon.ArrivalSoundVolume);
+            }
+
             float clock = 0f;   // drives the animation frames across all three phases
 
             // Rise in.
@@ -133,6 +138,169 @@ namespace Assets.Scripts.Combat
             if (go != null)
             {
                 Object.Destroy(go);
+            }
+        }
+
+        // A party-replacing summon's intro: the special attack's moment (rise at the centre, roar,
+        // lurch), then a stride across into the party's place. Shorter hold than the Boar's, because
+        // the creature is not leaving - the fight continues with it.
+        private const float IntroHold = 1.5f;
+        private const float StrideTime = 0.55f;
+        private const float StrideHop = 0.35f;
+        private const float DepartTime = 0.6f;
+
+        /// <summary>
+        /// A party-replacing summon's entrance. It rises large at the centre of the stage exactly as a
+        /// special attack's creature does, roars, then strides into the hero column - where
+        /// <c>CombatStage.PlaceSummon</c> has already put it, which is read here as the destination -
+        /// shrinking to its standing size, and lands with a stomp. The object is the summon itself.
+        /// </summary>
+        public static IEnumerator Arrive(SummonUnit unit)
+        {
+            if (unit == null)
+            {
+                yield break;
+            }
+            var summon = unit.Summon;
+            var sr = unit.GetComponent<SpriteRenderer>();
+            var tr = unit.transform;
+            Vector3 rest = tr.position;
+            Vector3 restScale = tr.localScale;
+
+            // The same centre and size the special attack uses (Present), so both kinds open alike.
+            var cam = Camera.main;
+            Vector3 camPos = cam != null ? cam.transform.position : Vector3.zero;
+            float halfH = cam != null ? cam.orthographicSize : 5f;
+            Vector3 centre = new Vector3(camPos.x, camPos.y + halfH * 0.15f, rest.z);
+            float spriteHeight = sr != null && sr.sprite != null ? sr.sprite.bounds.size.y : 1f;
+            Vector3 bigScale = Vector3.one * (StageHeight / Mathf.Max(0.01f, spriteHeight));
+            Vector3 forward = summon != null && summon.Facing == SummonFacing.Party ? Vector3.left : Vector3.right;
+
+            // Over everything during the intro, as the special attack's creature is; back to a unit's
+            // band once it stands in the column.
+            int standingOrder = sr != null ? sr.sortingOrder : 0;
+            if (sr != null)
+            {
+                sr.sortingOrder = SortOrder;
+            }
+
+            if (summon != null && summon.ArrivalSound != null)
+            {
+                CombatAudio.PlayClip(summon.ArrivalSound, summon.ArrivalSoundVolume);
+            }
+
+            // Rise in at the centre.
+            float t = 0f;
+            while (t < FadeIn)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Clamp01(t / FadeIn);
+                tr.position = centre + Vector3.down * (1f - k) * 0.6f;
+                tr.localScale = bigScale * Mathf.Lerp(0.85f, 1f, k);
+                if (sr != null)
+                {
+                    sr.color = new Color(1f, 1f, 1f, k);
+                }
+                yield return null;
+            }
+            if (sr != null)
+            {
+                sr.color = Color.white;
+            }
+
+            // Hold: roar and lurch toward the enemies.
+            bool roared = false;
+            t = 0f;
+            while (t < IntroHold)
+            {
+                t += Time.deltaTime;
+                if (!roared && t >= RoarAt)
+                {
+                    roared = true;
+                    CombatAudio.Play(CombatSound.BossSignature);
+                    if (MainCamera.HasInstance)
+                    {
+                        MainCamera.Instance.ZoomPunch(0.35f, 0.35f);
+                    }
+                    if (CombatFeedback.HasInstance)
+                    {
+                        CombatFeedback.Instance.Shake(0.18f, 0.3f);
+                    }
+                }
+                float since = t - RoarAt;
+                float lurch = since >= 0f && since < LurchTime
+                    ? Mathf.Sin(since / LurchTime * Mathf.PI) * LurchDistance
+                    : 0f;
+                tr.position = centre + forward * lurch;
+                yield return null;
+            }
+
+            // Stride into the party's place, shrinking to standing size, with a small hop.
+            t = 0f;
+            while (t < StrideTime)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Clamp01(t / StrideTime);
+                float eased = k * k * (3f - 2f * k);
+                tr.position = Vector3.Lerp(centre, rest, eased) + Vector3.up * Mathf.Sin(k * Mathf.PI) * StrideHop;
+                tr.localScale = Vector3.Lerp(bigScale, restScale, eased);
+                yield return null;
+            }
+            tr.position = rest;
+            tr.localScale = restScale;
+            if (sr != null)
+            {
+                sr.sortingOrder = standingOrder;
+            }
+
+            // Land.
+            CombatAudio.Play(CombatSound.Impact);
+            if (CombatFeedback.HasInstance)
+            {
+                CombatFeedback.Instance.Shake(0.22f, 0.3f);
+            }
+            yield return new WaitForSeconds(0.25f);
+        }
+
+        /// <summary>
+        /// The summon leaves the stage and is destroyed: it sinks back into the ground when it was
+        /// sent home or its time ran out, and flashes and crumbles when it <paramref name="fell"/>.
+        /// </summary>
+        public static IEnumerator Depart(SummonUnit unit, bool fell)
+        {
+            if (unit == null)
+            {
+                yield break;
+            }
+            var sr = unit.GetComponent<SpriteRenderer>();
+            var tr = unit.transform;
+            Vector3 start = tr.position;
+            Vector3 startScale = tr.localScale;
+            if (fell && CombatFeedback.HasInstance)
+            {
+                CombatFeedback.Instance.Shake(0.15f, 0.25f);
+            }
+
+            float t = 0f;
+            while (t < DepartTime && unit != null)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Clamp01(t / DepartTime);
+                tr.position = start + Vector3.down * k * (fell ? 0.3f : 0.7f);
+                tr.localScale = fell
+                    ? new Vector3(startScale.x * (1f + 0.15f * k), startScale.y * (1f - 0.25f * k), startScale.z)
+                    : startScale;
+                if (sr != null)
+                {
+                    sr.color = fell
+                        ? new Color(1f, 1f - 0.5f * k, 1f - 0.5f * k, 1f - k)
+                        : new Color(1f, 1f, 1f, 1f - k);
+                }
+                yield return null;
+            }
+            if (unit != null)
+            {
+                Object.Destroy(unit.gameObject);
             }
         }
 

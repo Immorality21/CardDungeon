@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8167baed5bc052409b86b3942399fa5, type: 3}
+  m_Name: CairnGolem
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
+  Key: CairnGolem
+  DisplayName: Cairn Golem
+  Description: The stones of an old cairn rise and take the party's place. It takes every blow meant
+    for them, and the one that breaks it goes no further.
+  Sprite: {fileID: 21300000, guid: d8f8e3267b2a429aa436b59860060def, type: 3}
+  AnimationFrames:
+  - {fileID: 21300000, guid: 7b65cfc351fd40e7b4923f372b3cd392, type: 3}
+  - {fileID: 21300000, guid: 27d66acebe9e4aaaad62b1180906002f, type: 3}
+  - {fileID: 21300000, guid: b47ffe9fc322434fbc36bf5be3147dbb, type: 3}
+  - {fileID: 21300000, guid: 8b75ea77159541b4acb5777b04e78a94, type: 3}
+  - {fileID: 21300000, guid: b47ffe9fc322434fbc36bf5be3147dbb, type: 3}
+  - {fileID: 21300000, guid: 27d66acebe9e4aaaad62b1180906002f, type: 3}
+  AnimationFps: 6
+  Facing: 0
+  ArrivalSound: {fileID: 8300000, guid: 8d576645f5dd2bf46931e96a473666d6, type: 3}
+  ArrivalSoundVolume: 0.9
+  Kind: 1
+  TargetType: 1
+  Effects: []
+  BaseCharges: 1
+  StatPercents:
+    Values:
+    - Type: 7
+      Amount: 250
+    - Type: 2
+      Amount: 150
+    - Type: 1
+      Amount: 60
+    - Type: 3
+      Amount: 80
+    - Type: 4
+      Amount: 100
+    - Type: 5
+      Amount: 100
+  CopySummonerResistances: 1
+  TurnsActive: 3
+  Actions:
+  - {fileID: 11400000, guid: 0dc0c6840a7f460588d925902ff5de15, type: 2}
+  Signature: {fileID: 11400000, guid: e149434aff57485495c6c53587aa1c1a, type: 2}

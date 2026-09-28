@@ -45,7 +45,10 @@ namespace Assets.Scripts.Balance
         public int Charges;
         public int MaxCharges;
 
-        public bool CanUse => Castable != null && Charges > 0;
+        /// <summary>A party-replacing summon (§4b): it has no castable, it builds a unit.</summary>
+        public bool IsReplacement => Summon != null && Summon.Kind == SummonKind.ReplaceParty;
+
+        public bool CanUse => Charges > 0 && (IsReplacement || Castable != null);
 
         /// <summary>The longest timed effect, so the policy can wait out a buff before re-summoning.</summary>
         public int LongestDuration
@@ -204,6 +207,31 @@ namespace Assets.Scripts.Balance
             }
 
             return clone;
+        }
+
+        /// <summary>
+        /// The simulated stand-in for a party-replacing summon, built by the same
+        /// <see cref="SummonOps.StatsFor"/> the live <c>SummonUnit</c> uses: the summoner's
+        /// <see cref="Effective"/> stats (base + grid + gear - never a combat buff) scaled by the
+        /// summon's percentages, at full health, with the summoner's resistances when the asset copies
+        /// them. On the hero side, swinging off Strength.
+        /// </summary>
+        public static SimUnit FromSummon(SummonSO summon, Heroes.SummonGrant grant, SimUnit summoner)
+        {
+            var block = SummonOps.StatsFor(summon, grant,
+                stat => summoner != null ? summoner.GetEffectiveStat(stat) : 0);
+            return new SimUnit
+            {
+                DisplayName = summon != null ? summon.Label : "Summon",
+                IsHero = true,
+                Stats = new Stats(block),
+                Effective = block.Clone(),
+                Resistances = summon != null && summon.CopySummonerResistances && summoner != null
+                    ? new List<Resistance>(summoner.Resistances)
+                    : new List<Resistance>(),
+                AttackStat = StatType.Strength,
+                EffectiveAttackPower = block[StatType.Strength]
+            };
         }
 
         /// <summary>

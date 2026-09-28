@@ -273,8 +273,12 @@ namespace Assets.Scripts.Balance
             turnManager.SetBuffTracker(buffTracker);
             turnManager.Initialize(units);
 
+            // A party-replacing summon on the field (section 4b), or null. While it is out it is the
+            // whole hero side - the one rule CombatManager.HeroSideUnits states for the live game.
+            SimReplacement replacement = null;
+
             int turns = 0;
-            while (AnyAlive(heroes) && AnyAlive(enemies) && turns < settings.MaxTurns)
+            while (AnyAlive(HeroSide(heroes, replacement)) && AnyAlive(enemies) && turns < settings.MaxTurns)
             {
                 var unit = turnManager.GetNextUnit();
                 if (unit == null)
@@ -300,6 +304,7 @@ namespace Assets.Scripts.Balance
                     buffTracker.ResolveOverTime(unit);
                     buffTracker.TickBuffs(unit);
                     tagTracker.TickTags(unit);
+                    replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
                     continue;
                 }
 
@@ -309,14 +314,22 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                if (actor.IsHero)
+                if (replacement != null && ReferenceEquals(actor, replacement.Unit))
+                {
+                    TakeReplacementTurn(replacement, enemies, buffTracker, resolver);
+                }
+                else if (actor.IsHero)
                 {
                     TakeHeroTurn(actor, heroes, enemies, buffTracker, tagTracker, comboDetector, resolver,
-                        settings, ref potionsLeft, result, summonsAllowed, lastSummonTurn);
+                        settings, ref potionsLeft, result, summonsAllowed, lastSummonTurn, out var called);
+                    if (called != null)
+                    {
+                        replacement = ArriveReplacement(actor, called, heroes, enemies, turnManager);
+                    }
                 }
                 else
                 {
-                    TakeEnemyTurn(actor, heroes, enemies, buffTracker);
+                    TakeEnemyTurn(actor, HeroSide(heroes, replacement), enemies, buffTracker);
                 }
 
                 // Over-time effects fire before durations tick down, exactly as the live loop's
@@ -325,6 +338,8 @@ namespace Assets.Scripts.Balance
                 buffTracker.ResolveOverTime(unit);
                 buffTracker.TickBuffs(unit);
                 tagTracker.TickTags(unit);
+
+                replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
 
                 // Dead units leave the tick queue, as HandleEnemyDeath / ResolveHeroDamaged do.
                 foreach (var enemy in enemies)
@@ -344,6 +359,146 @@ namespace Assets.Scripts.Balance
             }
 
             result.EnemiesAlive = AnyAlive(enemies);
+        }
+
+        // ---------------------------------------------------------------- party replacement
+
+        /// <summary>A party-replacing summon on the simulated field: its unit and its stay.</summary>
+        private class SimReplacement
+        {
+            public SimUnit Unit;
+            public SummonStay Stay;
+        }
+
+        /// <summary>The hero side: the summon alone while one is out, the party otherwise.</summary>
+        private static List<SimUnit> HeroSide(List<SimUnit> heroes, SimReplacement replacement)
+        {
+            return replacement != null && replacement.Unit.IsAlive
+                ? new List<SimUnit> { replacement.Unit }
+                : heroes;
+        }
+
+        /// <summary>
+        /// Whether a party-replacing summon should answer now (the decided policy, §4b): when an
+        /// enemy is winding up a telegraphed blow - the use the kind exists for - or at the first
+        /// chance when nothing in the room telegraphs at all.
+        /// </summary>
+        public static bool ReplacementWanted(IList<SimUnit> enemies)
+        {
+            bool anyTelegraphs = false;
+            foreach (var enemy in enemies)
+            {
+                if (enemy == null || !enemy.IsAlive)
+                {
+                    continue;
+                }
+                if (enemy.IsCharging)
+                {
+                    return true;
+                }
+                var behavior = enemy.Behavior != null ? enemy.Behavior : EnemyBehaviorSO.BuiltInPreset(enemy.Archetype);
+                if (behavior != null && behavior.Actions != null && behavior.Actions.Exists(a => a != null && a.IsTelegraphed))
+                {
+                    anyTelegraphs = true;
+                }
+            }
+            return !anyTelegraphs;
+        }
+
+        /// <summary>
+        /// The summon arrives, as <c>CombatManager.SummonReplacement</c> does it: the party is
+        /// suspended with its counters frozen, the summon is inserted to act next, and every stored
+        /// wind-up is re-aimed at it. The summoner's own upkeep runs after this, in the loop.
+        /// </summary>
+        private static SimReplacement ArriveReplacement(
+            SimUnit summoner, SimSummonSlot slot, List<SimUnit> heroes, List<SimUnit> enemies, TurnManager turnManager)
+        {
+            var unit = SimUnit.FromSummon(slot.Summon, slot.Grant, summoner);
+            var suspended = new List<ICombatUnit>();
+            foreach (var hero in heroes)
+            {
+                suspended.Add(hero);
+            }
+            turnManager.Suspend(suspended);
+            turnManager.AddUnit(unit, actsNext: true);
+            foreach (var enemy in enemies)
+            {
+                if (enemy.IsAlive && enemy.ChargeTarget != null)
+                {
+                    enemy.ChargeTarget = unit;
+                }
+            }
+            return new SimReplacement
+            {
+                Unit = unit,
+                Stay = new SummonStay(slot.Summon, SummonOps.TurnsFor(slot.Summon, slot.Grant))
+            };
+        }
+
+        /// <summary>
+        /// The summon's deterministic play (decided 2026-09-28): its Signature on its first action,
+        /// then Attack the weakest enemy. Never an action, never Dismiss. Silence closes the
+        /// Signature and leaves Attack, as it does in the live menu.
+        /// </summary>
+        private static void TakeReplacementTurn(
+            SimReplacement replacement, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver)
+        {
+            var unit = replacement.Unit;
+            bool silenced = buffTracker.HasStatusEffect(unit, BuffType.Silenced);
+            if (!silenced && replacement.Stay.CanUseSignature)
+            {
+                var signature = replacement.Stay.Summon.Signature;
+                var targets = ResolveTargets(signature, unit, new List<SimUnit> { unit }, enemies);
+                if (targets.Count > 0)
+                {
+                    replacement.Stay.MarkSignatureUsed();
+                    resolver.Execute(new SpellcastAction { Magic = signature, Caster = unit, Targets = targets }, buffTracker);
+                    return;
+                }
+            }
+
+            var target = WeakestAlive(enemies);
+            if (target != null)
+            {
+                ResolveAttack(unit, target, buffTracker);
+            }
+        }
+
+        /// <summary>
+        /// After any turn: a summon whose health ran out leaves (the blow went no further - the
+        /// party was never a target), and after the summon's own turn it counts one of its stay and
+        /// leaves when that was the last. Leaving resumes the party at its frozen counters and lets
+        /// go of anything aimed at the summon. Returns the replacement still on the field, or null.
+        /// </summary>
+        private static SimReplacement AfterReplacementTurn(
+            ICombatUnit unit, SimReplacement replacement, TurnManager turnManager, List<SimUnit> enemies)
+        {
+            if (replacement == null)
+            {
+                return null;
+            }
+
+            bool leaves = !replacement.Unit.IsAlive;
+            if (!leaves && ReferenceEquals(unit, replacement.Unit))
+            {
+                leaves = replacement.Stay.EndTurn();
+            }
+            if (!leaves)
+            {
+                return replacement;
+            }
+
+            replacement.Stay.Leave(replacement.Unit.IsAlive ? SummonExit.TurnsSpent : SummonExit.Fell);
+            turnManager.RemoveUnit(replacement.Unit);
+            turnManager.Resume();
+            foreach (var enemy in enemies)
+            {
+                if (ReferenceEquals(enemy.ChargeTarget, replacement.Unit))
+                {
+                    enemy.ChargeTarget = null;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -823,8 +978,11 @@ namespace Assets.Scripts.Balance
             ref int potionsLeft,
             TrialResult result,
             bool summonsAllowed,
-            Dictionary<SimUnit, int> summonTurnsLeft)
+            Dictionary<SimUnit, int> summonTurnsLeft,
+            out SimSummonSlot replacementCalled)
         {
+            replacementCalled = null;
+
             // Silence disables the Magic command outright in the live game
             // (RoomActionUI.BuildCommandMenu). The enemy side of the same gate lives in
             // EnemyActionPlanner; without this the model reads a silenced party as still casting, so
@@ -865,9 +1023,25 @@ namespace Assets.Scripts.Balance
             // turns, the same clock a buff's duration ticks on. A buff cast on the summoner's own
             // turn skips that turn's tick (CombatBuffTracker.BeginTurn), so it lasts exactly
             // LongestDuration more of their turns. Silence blocks it, as it blocks casting.
+            // A party-replacing summon answers a wind-up (or opens a room nothing in telegraphs).
+            // Checked first, because the moment it waits for is the one worth a whole charge; the
+            // caller builds the unit and freezes the party.
+            if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null
+                && ReplacementWanted(enemies))
+            {
+                var replacement = hero.Summons.Find(s => s.CanUse && s.IsReplacement);
+                if (replacement != null)
+                {
+                    replacement.Charges--;
+                    result.Summons++;
+                    replacementCalled = replacement;
+                    return;
+                }
+            }
+
             if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null && summonReady)
             {
-                var summon = hero.Summons.Find(s => s.CanUse);
+                var summon = hero.Summons.Find(s => s.CanUse && !s.IsReplacement);
                 if (summon != null)
                 {
                     Summon(hero, summon, heroes, enemies, buffTracker, resolver, result);

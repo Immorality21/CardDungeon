@@ -34,6 +34,18 @@ namespace Tests.EditMode
             return magic;
         }
 
+        /// <summary>
+        /// Every magic a hero can learn: all of it, minus the abilities a summon casts. Those are
+        /// reached through the summon, never a grid node, the Forge or a loadout (SummonOps.AbilityKeys).
+        /// </summary>
+        private static List<MagicSO> LoadHeroMagic()
+        {
+            var summons = AssetDatabase.FindAssets("t:SummonSO")
+                .Select(g => AssetDatabase.LoadAssetAtPath<SummonSO>(AssetDatabase.GUIDToAssetPath(g)));
+            var summonOnly = SummonOps.AbilityKeys(summons);
+            return LoadAllMagic().Where(m => !summonOnly.Contains(m.Key)).ToList();
+        }
+
         [Test]
         public void EveryBuffTypeInUse_HasAHandler()
         {
@@ -146,7 +158,8 @@ namespace Tests.EditMode
             CollectionAssert.DoesNotContain(catalog.AllMagic, null,
                 "The catalog has an empty slot — usually an array-size override on a scene instance.");
 
-            var missing = LoadAllMagic().Select(m => m.Key).Where(key => !listed.Contains(key)).ToList();
+            // A summon's own ability is not a hero's: it must stay out of the Forge (no Forge bonus).
+            var missing = LoadHeroMagic().Select(m => m.Key).Where(key => !listed.Contains(key)).ToList();
             CollectionAssert.IsEmpty(missing,
                 "Magic asset(s) missing from the catalog prefab: " + string.Join(", ", missing));
         }
@@ -240,7 +253,7 @@ namespace Tests.EditMode
         {
             // A grid is the only route to a spell now, so a magic on no MagicKnown node is not late
             // content or shop-only content - it is content nobody can ever cast.
-            var keys = LoadAllMagic().Select(m => m.Key).ToArray();
+            var keys = LoadHeroMagic().Select(m => m.Key).ToArray();
             AssertTaughtBySomeGrid(keys);
         }
 

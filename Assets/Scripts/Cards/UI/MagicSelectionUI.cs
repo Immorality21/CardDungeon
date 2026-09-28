@@ -35,7 +35,9 @@ namespace Assets.Scripts.Cards.UI
             ItemChoice,
             ItemTarget,
             InspectTarget,
-            InspectDetail
+            InspectDetail,
+            SummonChoice,
+            SummonAbilityTarget
         }
 
         [SerializeField] private UIDocument _document;
@@ -64,6 +66,7 @@ namespace Assets.Scripts.Cards.UI
         private int _selectedSlotIndex;
         private MagicSO _selectedMagic;
         private ItemSO _selectedItem;
+        private MagicSO _selectedSummonAbility;
 
         // Enemies offered to the last Inspect, so closing a page can step back to the picker rather
         // than all the way out - comparing two enemies is the main reason to open it twice.
@@ -82,6 +85,8 @@ namespace Assets.Scripts.Cards.UI
             CombatManager.Instance.OnAttackTargetRequested += ShowAttackTargets;
             CombatManager.Instance.OnItemListRequested += ShowItemList;
             CombatManager.Instance.OnInspectTargetRequested += ShowInspectTargets;
+            CombatManager.Instance.OnSummonListRequested += ShowSummonList;
+            CombatManager.Instance.OnSummonAbilityTargetRequested += ShowSummonAbilityTargets;
             CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
         }
@@ -94,6 +99,8 @@ namespace Assets.Scripts.Cards.UI
                 CombatManager.Instance.OnAttackTargetRequested -= ShowAttackTargets;
                 CombatManager.Instance.OnItemListRequested -= ShowItemList;
                 CombatManager.Instance.OnInspectTargetRequested -= ShowInspectTargets;
+                CombatManager.Instance.OnSummonListRequested -= ShowSummonList;
+                CombatManager.Instance.OnSummonAbilityTargetRequested -= ShowSummonAbilityTargets;
                 CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
                 CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             }
@@ -318,6 +325,68 @@ namespace Assets.Scripts.Cards.UI
             _currentHero = hero;
             _mode = SelectionMode.AttackTarget;
             PopulateTargetRows(enemies, "Select Attack Target");
+        }
+
+        // ============================================================
+        //  SUMMONS
+        // ============================================================
+
+        /// <summary>
+        /// The summon picker, for a hero who knows more than one (a Warrior with both tips). Every
+        /// summon they know is listed with its charges, spent ones greyed, so the choice is made with
+        /// the whole kit in view.
+        /// </summary>
+        private void ShowSummonList(ICombatUnit hero, List<SummonSlot> summons)
+        {
+            if (!EnsureRefs())
+            {
+                return;
+            }
+
+            _currentHero = hero;
+            _mode = SelectionMode.SummonChoice;
+            _listTitle.text = "Summon";
+            _listScroll.Clear();
+            ClearNav();
+
+            foreach (var slot in summons)
+            {
+                if (slot == null || slot.Summon == null)
+                {
+                    continue;
+                }
+                var captured = slot;
+                string meta = $"{slot.Charges}/{slot.MaxCharges}";
+                _listScroll.Add(CreateRow(slot.Summon.Sprite, slot.Summon.Label, meta, slot.CanUse,
+                    () => SubmitSummon(captured)));
+            }
+
+            ShowPanel(_listPanel);
+            HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
+            BeginNavigation();
+        }
+
+        private void SubmitSummon(SummonSlot slot)
+        {
+            _mode = SelectionMode.Idle;
+            HidePanel(_listPanel);
+            ReleaseFocus();
+            CombatManager.Instance.SubmitSummonAction(slot);
+        }
+
+        /// <summary>A party-replacing summon's single-enemy ability, with more than one enemy up.</summary>
+        private void ShowSummonAbilityTargets(ICombatUnit summon, MagicSO ability, List<ICombatUnit> enemies)
+        {
+            if (!EnsureRefs())
+            {
+                return;
+            }
+
+            _currentHero = summon;
+            _selectedSummonAbility = ability;
+            _mode = SelectionMode.SummonAbilityTarget;
+            PopulateTargetRows(enemies, "Select Enemy Target");
         }
 
         // ============================================================
@@ -589,6 +658,12 @@ namespace Assets.Scripts.Cards.UI
                     return;
                 case SelectionMode.ItemTarget:
                     SubmitUseItem(target);
+                    return;
+                case SelectionMode.SummonAbilityTarget:
+                    _mode = SelectionMode.Idle;
+                    HidePanel(_targetPanel);
+                    ReleaseFocus();
+                    CombatManager.Instance.SubmitSummonAbility(_selectedSummonAbility, new List<ICombatUnit> { target });
                     return;
                 default:
                     SubmitCast(new List<ICombatUnit> { target });

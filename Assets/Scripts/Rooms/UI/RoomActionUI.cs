@@ -106,13 +106,18 @@ namespace Assets.Scripts.Rooms
         private float _eventChance;
 
         // Cursor-driven command menu (FFX-style selection list).
-        private enum HeroCommand { Attack, Magic, Summon, Item, Inspect, Skip }
+        // SummonAbility and Dismiss belong to a party-replacing summon's own menu (§4b), which is the
+        // summon's, not a hero's - the hero menu still does not grow past Summon.
+        private enum HeroCommand { Attack, Magic, Summon, Item, Inspect, Skip, SummonAbility, Dismiss }
 
         private struct CommandEntry
         {
             public HeroCommand Command;
             public string Label;
             public bool Enabled;
+
+            /// <summary>SummonAbility only: the ability this row uses.</summary>
+            public Cards.MagicSO Ability;
         }
 
         private readonly List<CommandEntry> _commands = new List<CommandEntry>();
@@ -1063,23 +1068,56 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Summons with the first of the hero's summons that has a charge. Summons have no target
-        /// picker - they land on a whole side - and today a hero knows at most one; when a second
-        /// arrives this is where a picker goes.
+        /// Summons have no target picker - they land on a whole side, or replace the party. A hero
+        /// who knows one summons it at once; a hero who knows two (both tips of the Warrior's grid)
+        /// gets the summon picker, which shows every one they know, spent ones greyed.
         /// </summary>
         private void OnHeroSummon()
         {
             var heroComponent = _currentHeroTurn as Heroes.Hero;
             var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
-            var slot = heroComponent != null && summons != null
-                ? summons.GetSummons(heroComponent.HeroKey).Find(s => s.CanUse)
-                : null;
-            if (slot == null)
+            var known = heroComponent != null && summons != null
+                ? summons.GetSummons(heroComponent.HeroKey)
+                : new List<Cards.SummonSlot>();
+            var usable = known.FindAll(s => s.CanUse);
+            if (usable.Count == 0)
             {
                 return;
             }
             SetShown(_heroBar, false);
-            CombatManager.Instance.SubmitSummonAction(slot);
+            if (known.Count == 1)
+            {
+                CombatManager.Instance.SubmitSummonAction(usable[0]);
+                return;
+            }
+            CombatManager.Instance.RequestSummonList(_currentHeroTurn, known);
+        }
+
+        /// <summary>
+        /// One of a party-replacing summon's abilities. A single-enemy ability with more than one
+        /// enemy standing goes through the target picker; everything else knows its targets.
+        /// </summary>
+        private void OnSummonAbility(Cards.MagicSO ability)
+        {
+            var summon = _currentHeroTurn as SummonUnit;
+            if (summon == null || ability == null)
+            {
+                return;
+            }
+            SetShown(_heroBar, false);
+            var targets = CombatManager.Instance.SummonAbilityTargets(ability, summon);
+            if (ability.TargetType == Cards.MagicTargetType.SingleEnemy && targets.Count > 1)
+            {
+                CombatManager.Instance.RequestSummonAbilityTarget(summon, ability, targets);
+                return;
+            }
+            CombatManager.Instance.SubmitSummonAbility(ability, targets);
+        }
+
+        private void OnSummonDismiss()
+        {
+            SetShown(_heroBar, false);
+            CombatManager.Instance.SubmitDismiss();
         }
 
         private void OnSummonStarted(ICombatUnit caster, Cards.SummonSO summon)
@@ -1167,41 +1205,14 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
-            bool hasMagic = false;
-            var heroComponent = hero as Heroes.Hero;
-            if (heroComponent != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            if (hero is SummonUnit summonUnit)
             {
-                hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
+                AddSummonCommands(summonUnit);
             }
-
-            // Silence gates casting and nothing else - Attack, Item and Inspect stay open, so a
-            // silenced hero still has a turn worth taking rather than three turns of Skip.
-            bool silenced = CombatManager.Instance.BuffTracker != null
-                && CombatManager.Instance.BuffTracker.HasStatusEffect(hero, BuffType.Silenced);
-            if (silenced)
+            else
             {
-                hasMagic = false;
+                AddHeroCommands(hero);
             }
-
-            bool hasItem = InventoryManager.HasInstance && InventoryManager.Instance.HasAnyConsumable();
-
-            // Summon is the one command the menu grew by (§4b, 2026-09-28): shown only to a hero
-            // who knows a summon, greyed when every charge is spent - and, like casting, by Silence.
-            var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
-            bool knowsSummon = heroComponent != null && summons != null && summons.Knows(heroComponent.HeroKey);
-            bool canSummon = knowsSummon && !silenced && summons.HasAnyUsable(heroComponent.HeroKey);
-
-            _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
-            _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Ability", Enabled = hasMagic });
-            if (knowsSummon)
-            {
-                _commands.Add(new CommandEntry { Command = HeroCommand.Summon, Label = "Summon", Enabled = canSummon });
-            }
-            _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem });
-            // Inspect is free - it opens a page and hands the turn straight back - so it sits above
-            // Skip rather than among the actions that spend the turn.
-            _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
-            _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
 
             for (int i = 0; i < _commands.Count; i++)
             {
@@ -1237,6 +1248,86 @@ namespace Assets.Scripts.Rooms
 
             _selectedCommand = FirstEnabledCommand();
             RenderCommandCursor();
+        }
+
+        /// <summary>
+        /// A party-replacing summon's own menu (§4b): Attack, its actions, its Signature once per
+        /// summoning, Dismiss, and the free Inspect. No Item - the belt is the party's - and no Skip,
+        /// because Dismiss covers what Skip was for. Silence closes its abilities and nothing else,
+        /// the same rule a hero lives under.
+        /// </summary>
+        private void AddSummonCommands(SummonUnit summon)
+        {
+            bool silenced = CombatManager.Instance.BuffTracker != null
+                && CombatManager.Instance.BuffTracker.HasStatusEffect(summon, BuffType.Silenced);
+
+            _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
+            if (summon.Summon != null && summon.Summon.Actions != null)
+            {
+                foreach (var action in summon.Summon.Actions)
+                {
+                    if (action == null)
+                    {
+                        continue;
+                    }
+                    _commands.Add(new CommandEntry
+                    {
+                        Command = HeroCommand.SummonAbility, Label = action.DisplayName,
+                        Enabled = !silenced, Ability = action
+                    });
+                }
+            }
+            if (summon.Summon != null && summon.Summon.Signature != null)
+            {
+                // The star says "once": after it is spent the row stays, greyed, so the player can
+                // see what they have already used rather than wondering where it went.
+                _commands.Add(new CommandEntry
+                {
+                    Command = HeroCommand.SummonAbility, Label = "★ " + summon.Summon.Signature.DisplayName,
+                    Enabled = !silenced && summon.Stay.CanUseSignature, Ability = summon.Summon.Signature
+                });
+            }
+            _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Dismiss, Label = "Dismiss", Enabled = true });
+        }
+
+        private void AddHeroCommands(ICombatUnit hero)
+        {
+            bool hasMagic = false;
+            var heroComponent = hero as Heroes.Hero;
+            if (heroComponent != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            {
+                hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
+            }
+
+            // Silence gates casting and nothing else - Attack, Item and Inspect stay open, so a
+            // silenced hero still has a turn worth taking rather than three turns of Skip.
+            bool silenced = CombatManager.Instance.BuffTracker != null
+                && CombatManager.Instance.BuffTracker.HasStatusEffect(hero, BuffType.Silenced);
+            if (silenced)
+            {
+                hasMagic = false;
+            }
+
+            bool hasItem = InventoryManager.HasInstance && InventoryManager.Instance.HasAnyConsumable();
+
+            // Summon is the one command the menu grew by (§4b, 2026-09-28): shown only to a hero
+            // who knows a summon, greyed when every charge is spent - and, like casting, by Silence.
+            var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
+            bool knowsSummon = heroComponent != null && summons != null && summons.Knows(heroComponent.HeroKey);
+            bool canSummon = knowsSummon && !silenced && summons.HasAnyUsable(heroComponent.HeroKey);
+
+            _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Ability", Enabled = hasMagic });
+            if (knowsSummon)
+            {
+                _commands.Add(new CommandEntry { Command = HeroCommand.Summon, Label = "Summon", Enabled = canSummon });
+            }
+            _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem });
+            // Inspect is free - it opens a page and hands the turn straight back - so it sits above
+            // Skip rather than among the actions that spend the turn.
+            _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
         }
 
         private int FirstEnabledCommand()
@@ -1297,7 +1388,7 @@ namespace Assets.Scripts.Rooms
                 return;
             }
             CombatAudio.Play(CombatSound.Confirm);
-            InvokeCommand(_commands[_selectedCommand].Command);
+            InvokeCommand(_commands[_selectedCommand]);
         }
 
         private void OnCommandClicked(int index)
@@ -1310,11 +1401,17 @@ namespace Assets.Scripts.Rooms
             ConfirmCommand();
         }
 
-        /// <summary>Direct letter-key shortcut: acts only if that command is currently enabled.</summary>
-        private void InvokeCommand(HeroCommand command)
+        /// <summary>Runs one row of the command menu. Callers check it is enabled first.</summary>
+        private void InvokeCommand(CommandEntry entry)
         {
-            switch (command)
+            switch (entry.Command)
             {
+                case HeroCommand.SummonAbility:
+                    OnSummonAbility(entry.Ability);
+                    break;
+                case HeroCommand.Dismiss:
+                    OnSummonDismiss();
+                    break;
                 case HeroCommand.Attack:
                     OnHeroAttack();
                     break;

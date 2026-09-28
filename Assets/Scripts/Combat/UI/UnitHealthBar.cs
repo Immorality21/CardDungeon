@@ -111,6 +111,10 @@ namespace Assets.Scripts.Combat
             _built = true;
         }
 
+        /// <summary>Hides the readout while the unit is off the stage (a hero while a party-replacing
+        /// summon fights). Set by <c>CombatStage.HideParty</c>.</summary>
+        public bool Hidden { get; set; }
+
         public Vector3 EffectPopupPosition
         {
             get
@@ -147,7 +151,8 @@ namespace Assets.Scripts.Combat
                 return;
             }
 
-            bool alive = _unit != null && _unit.IsAlive;
+            // Hidden counts as gone: a hero the summon has taken the place of is off the stage.
+            bool alive = _unit != null && _unit.IsAlive && !Hidden;
             if (_barRoot.gameObject.activeSelf != alive)
             {
                 _barRoot.gameObject.SetActive(alive);

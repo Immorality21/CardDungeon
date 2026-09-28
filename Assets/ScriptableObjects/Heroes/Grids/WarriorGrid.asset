@@ -664,3 +664,79 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - warrior-boar-endurance
+  - Key: warrior-golem
+    DisplayName: Cairn Golem
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
+      Amount: 3
+    Position: {x: -850, y: -635}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: CairnGolem
+    SummonAmount: 1
+    Neighbors:
+    - warrior-a-hold
+  - Key: warrior-golem-bulk
+    DisplayName: Golem's Bulk
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -945, y: -690}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: CairnGolem
+    SummonAmount: 50
+    Neighbors:
+    - warrior-golem
+  - Key: warrior-golem-stay
+    DisplayName: Golem's Vigil
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -1040, y: -745}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: CairnGolem
+    SummonAmount: 1
+    Neighbors:
+    - warrior-golem-bulk
+  - Key: warrior-golem-charge
+    DisplayName: Golem's Return
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
+      Amount: 2
+    Position: {x: -1135, y: -800}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: CairnGolem
+    SummonAmount: 1
+    Neighbors:
+    - warrior-golem-stay

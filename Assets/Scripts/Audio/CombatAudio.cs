@@ -50,6 +50,23 @@ namespace Assets.Scripts.Audio
             Instance.PlayInternal(sound, volumeScale);
         }
 
+        /// <summary>
+        /// Play one specific clip through the same source and SFX dial - for a sound that belongs to
+        /// an asset rather than to an event (a summon's arrival). A null clip is silently nothing.
+        /// </summary>
+        public static void PlayClip(AudioClip clip, float volume = 1f)
+        {
+            if (clip == null)
+            {
+                return;
+            }
+            Instance.EnsureReady();
+            if (Instance._source != null)
+            {
+                Instance._source.PlayOneShot(clip, Mathf.Clamp01(volume * AudioOptions.SfxVolume));
+            }
+        }
+
         private void PlayInternal(CombatSound sound, float volumeScale)
         {
             EnsureReady();

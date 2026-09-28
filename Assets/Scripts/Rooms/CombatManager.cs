@@ -33,7 +33,11 @@ namespace Assets.Scripts.Rooms
         Skip,
         Cast,
         UseItem,
-        Summon
+        Summon,
+
+        // A party-replacing summon's own commands (§4b). Attack is shared with the heroes.
+        SummonAbility,
+        Dismiss
     }
 
     public class CombatResult
@@ -115,6 +119,18 @@ namespace Assets.Scripts.Rooms
         public event Action<ICombatUnit, SummonSO> OnSummonStarted;
         public event Action OnSummonEnded;
 
+        /// <summary>A party-replacing summon wants a single enemy for an ability: the selection UI
+        /// picks one and answers with <see cref="SubmitSummonAbility"/>.</summary>
+        public event Action<ICombatUnit, MagicSO, List<ICombatUnit>> OnSummonAbilityTargetRequested;
+
+        /// <summary>A hero who knows more than one summon picks which to call.</summary>
+        public event Action<ICombatUnit, List<SummonSlot>> OnSummonListRequested;
+
+        public void RequestSummonList(ICombatUnit hero, List<SummonSlot> summons)
+        {
+            OnSummonListRequested?.Invoke(hero, summons);
+        }
+
         [SerializeField] private List<MagicComboSO> _cardCombos;
 
         public bool InCombat { get; private set; }
@@ -128,6 +144,12 @@ namespace Assets.Scripts.Rooms
         private ICombatUnit _pendingUseItemTarget;
         private ICombatUnit _pendingAttackTarget;
         private SummonSlot _pendingSummon;
+        private MagicSO _pendingSummonAbility;
+        private List<ICombatUnit> _pendingSummonTargets;
+
+        // The party-replacing summon on the field, or null. While it is out it is the whole hero
+        // side: see HeroSideUnits.
+        private SummonUnit _summon;
         private string _lastTurnLog;
         private Room _currentCombatRoom;
         private Party _currentParty;
@@ -146,6 +168,77 @@ namespace Assets.Scripts.Rooms
         public void SubmitHeroAction(HeroAction action)
         {
             _pendingAction = action;
+        }
+
+        /// <summary>The party-replacing summon on the field, or null when the party is fighting.</summary>
+        public SummonUnit ActiveSummon => _summon;
+
+        /// <summary>
+        /// <b>The</b> hero side of the fight, and the one place that answers it: the summon alone
+        /// while one has taken the party's place (§4b), the living heroes otherwise. Every read of
+        /// "the heroes" in combat - enemy planning, area attacks, random targeting, the telegraph
+        /// markers, the intent icon and the loop's own defeat check - goes through this, because a
+        /// single leftover <c>party.Heroes</c> lets an enemy hit someone who is not there.
+        /// </summary>
+        public List<ICombatUnit> HeroSideUnits()
+        {
+            if (_summon != null && _summon.IsAlive)
+            {
+                return new List<ICombatUnit> { _summon };
+            }
+            if (_currentParty == null)
+            {
+                return new List<ICombatUnit>();
+            }
+            return _currentParty.Heroes
+                .Where(h => h != null && h.IsAlive)
+                .Cast<ICombatUnit>()
+                .ToList();
+        }
+
+        /// <summary>
+        /// Submits one of a party-replacing summon's abilities (an action, or its Signature) at the
+        /// given targets. Cast with the summon as the caster, through the Boar's path: no Forge
+        /// bonus, no tags, no combos, no charge (§4b).
+        /// </summary>
+        public void SubmitSummonAbility(MagicSO magic, List<ICombatUnit> targets)
+        {
+            _pendingSummonAbility = magic;
+            _pendingSummonTargets = targets;
+            _pendingAction = HeroAction.SummonAbility;
+        }
+
+        /// <summary>Sends the summon home. Uses its turn, like any other command it has.</summary>
+        public void SubmitDismiss()
+        {
+            _pendingAction = HeroAction.Dismiss;
+        }
+
+        /// <summary>Asks the selection UI for a single-enemy target for a summon's ability.</summary>
+        public void RequestSummonAbilityTarget(ICombatUnit summon, MagicSO magic, List<ICombatUnit> enemies)
+        {
+            OnSummonAbilityTargetRequested?.Invoke(summon, magic, enemies);
+        }
+
+        /// <summary>
+        /// Who a summon's ability lands on when it needs no picker: the summon itself for anything
+        /// aimed at the hero side (it <i>is</i> the hero side), every living enemy for an area
+        /// attack. A single-enemy ability returns every candidate and the caller picks.
+        /// </summary>
+        public List<ICombatUnit> SummonAbilityTargets(MagicSO magic, ICombatUnit summon)
+        {
+            if (magic == null)
+            {
+                return new List<ICombatUnit>();
+            }
+            switch (magic.TargetType)
+            {
+                case MagicTargetType.SingleEnemy:
+                case MagicTargetType.AllEnemies:
+                    return GetAliveEnemies();
+                default:
+                    return new List<ICombatUnit> { summon };
+            }
         }
 
         public void RequestMagicSlots(ICombatUnit hero, List<MagicSlot> slots)
@@ -198,7 +291,7 @@ namespace Assets.Scripts.Rooms
 
             var context = new EnemyCombatContext
             {
-                Heroes = GetAliveHeroes(_currentParty),
+                Heroes = HeroSideUnits(),
                 Allies = GetAliveEnemies().Where(u => !ReferenceEquals(u, enemy)).ToList(),
                 BuffTracker = BuffTracker,
                 ChargingEntryIndex = enemy.ChargingEntryIndex,
@@ -258,8 +351,16 @@ namespace Assets.Scripts.Rooms
                 .ToList();
         }
 
+        /// <summary>
+        /// The living hero side - the summon alone while one has taken the party's place, so every
+        /// caller (the selection UI's ally targets included) is right by construction.
+        /// </summary>
         public List<ICombatUnit> GetAliveHeroes(Party party)
         {
+            if (party == null || ReferenceEquals(party, _currentParty) || (_summon != null && _summon.IsAlive))
+            {
+                return HeroSideUnits();
+            }
             return party.Heroes
                 .Where(h => h != null && h.IsAlive)
                 .Cast<ICombatUnit>()
@@ -285,6 +386,7 @@ namespace Assets.Scripts.Rooms
             _combatXp = 0;
             _combatGold = 0;
             _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
+            _summon = null;
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
             _tagTracker = new MagicTagTracker();
@@ -379,6 +481,7 @@ namespace Assets.Scripts.Rooms
                 {
                     _lastTurnLog = skipMessage;
                     yield return EndOfTurnUpkeep(unit, room);
+                    AfterSummonTurn(unit, dismissed: false);
                     fullLog += _lastTurnLog + "\n";
                     OnTurnExecuted?.Invoke(_lastTurnLog);
                     BroadcastTurnOrder();
@@ -394,6 +497,8 @@ namespace Assets.Scripts.Rooms
                     _pendingUseItem = null;
                     _pendingUseItemTarget = null;
                     _pendingSummon = null;
+                    _pendingSummonAbility = null;
+                    _pendingSummonTargets = null;
                     OnHeroTurnStarted?.Invoke(unit);
 
                     while (_pendingAction == HeroAction.None)
@@ -417,6 +522,16 @@ namespace Assets.Scripts.Rooms
                     {
                         yield return ExecuteSummonAction(unit, _pendingSummon, room);
                     }
+                    else if (_pendingAction == HeroAction.SummonAbility && _pendingSummonAbility != null
+                             && unit is SummonUnit abilityCaster)
+                    {
+                        yield return ExecuteSummonAbility(abilityCaster, _pendingSummonAbility, _pendingSummonTargets, room);
+                    }
+                    else if (_pendingAction == HeroAction.Dismiss && unit is SummonUnit dismissing)
+                    {
+                        _lastTurnLog = $"{dismissing.DisplayName} is dismissed, and the party steps back in.";
+                        yield return new WaitForSeconds(_turnDelay * 0.5f);
+                    }
                     else
                     {
                         _lastTurnLog = $"{unit.DisplayName} skips their turn.";
@@ -429,9 +544,17 @@ namespace Assets.Scripts.Rooms
                 }
 
                 yield return EndOfTurnUpkeep(unit, room);
+                AfterSummonTurn(unit, dismissed: _pendingAction == HeroAction.Dismiss && unit is SummonUnit);
                 fullLog += _lastTurnLog + "\n";
                 OnTurnExecuted?.Invoke(_lastTurnLog);
                 BroadcastTurnOrder();
+            }
+
+            // The last enemy fell while a summon was out: the party comes back for an ordinary
+            // victory, and XP splits across them as usual (it was already awarded per kill).
+            if (_summon != null)
+            {
+                EndSummon(SummonExit.Victory);
             }
 
             // Clear turn order display + the on-field turn marker
@@ -585,18 +708,30 @@ namespace Assets.Scripts.Rooms
             var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
 
             // Checked before the charge is spent. SummonSlot.CanUse already keeps the command greyed
-            // for this kind; this is the backstop, and it must not cost the player anything.
-            if (summon != null && summon.Kind != SummonKind.SpecialAttack)
+            // for a kind combat cannot run; this is the backstop, and it must not cost the player anything.
+            if (summon != null && !slot.IsImplemented)
             {
-                // The party-replacing kind is not built yet; refuse loudly rather than half-running it.
-                Debug.LogWarning($"[Summon] {summon.Key} is {summon.Kind}, which is not implemented yet.");
+                Debug.LogWarning($"[Summon] {summon.Key} is {summon.Kind}, which is not implemented.");
                 _lastTurnLog = $"{caster.DisplayName} calls {summon.Label}, but it does not come.";
+                yield break;
+            }
+
+            // One at a time: nobody is left to summon a second, but a stale submit must not try.
+            if (_summon != null)
+            {
+                _lastTurnLog = $"{caster.DisplayName} tries to summon, but {_summon.DisplayName} is already here.";
                 yield break;
             }
 
             if (hero == null || summon == null || summons == null || !summons.TryUse(hero.HeroKey, summon.Key))
             {
                 _lastTurnLog = $"{caster.DisplayName} tries to summon, but nothing answers.";
+                yield break;
+            }
+
+            if (summon.Kind == SummonKind.ReplaceParty)
+            {
+                yield return SummonReplacement(hero, slot);
                 yield break;
             }
 
@@ -623,6 +758,182 @@ namespace Assets.Scripts.Rooms
                 _lastTurnLog += $" {dead.DisplayName} defeated!";
                 HandleEnemyDeath(dead, room);
             }
+        }
+
+        /// <summary>
+        /// A party-replacing summon arrives (§4b). The summoner's turn is spent on the summoning and
+        /// closes with the summoner's own upkeep (the loop runs it when this returns); the party then
+        /// stands frozen - off the clock with their counters kept, untargetable, dimmed - and the
+        /// summon takes an immediate turn of its own ahead of the clock, which is turn 1 of its stay.
+        /// </summary>
+        private IEnumerator SummonReplacement(Hero summoner, SummonSlot slot)
+        {
+            var summon = slot.Summon;
+            OnSummonStarted?.Invoke(summoner, summon);
+
+            var unit = SummonUnit.Create(summon, slot.Grant, summoner);
+            CombatStage.Instance.HideParty();
+            CombatStage.Instance.PlaceSummon(unit);
+            yield return SummonPresenter.Arrive(unit);
+            OnSummonEnded?.Invoke();
+
+            // The whole hero side swaps in one step, so nothing can ever see both or neither.
+            _turnManager.Suspend(_currentParty.Heroes.Cast<ICombatUnit>());
+            _summon = unit;
+            _turnManager.AddUnit(unit, actsNext: true);
+            EnsureHealthBars(new List<ICombatUnit> { unit });
+
+            // A heavy locks onto its victim at wind-up and only re-aims at a *dead* one, so a blow
+            // already aimed at a frozen hero would land on them. Every stored aim moves to the
+            // summon - which is exactly the moment the summon exists for.
+            foreach (var enemy in AliveEnemyComponents())
+            {
+                if (enemy.ChargeTarget != null)
+                {
+                    enemy.ChargeTarget = unit;
+                }
+            }
+
+            _lastTurnLog = $"{summoner.DisplayName} summons {unit.DisplayName}! The party steps back.";
+        }
+
+        /// <summary>
+        /// A party-replacing summon's turn is over: count it, and send it home when that was its
+        /// last or it was dismissed. Runs after the turn's upkeep, so the summon's own poison ticks
+        /// on its own final turn. A no-op for any other unit.
+        /// </summary>
+        private void AfterSummonTurn(ICombatUnit unit, bool dismissed)
+        {
+            var summon = unit as SummonUnit;
+            if (summon == null || !ReferenceEquals(summon, _summon))
+            {
+                return;
+            }
+            bool last = summon.Stay.EndTurn();
+            if (dismissed)
+            {
+                EndSummon(SummonExit.Dismissed);
+            }
+            else if (last)
+            {
+                _lastTurnLog += $" {summon.DisplayName}'s time is up, and the party steps back in.";
+                EndSummon(SummonExit.TurnsSpent);
+            }
+        }
+
+        /// <summary>
+        /// The summon leaves and the party returns exactly as it left: back on the clock at its
+        /// frozen counters, statuses resuming (they only ever tick on a unit's own turn), the dead
+        /// still dead. Anything an enemy has aimed at the summon lets go, and re-picks from the
+        /// party when it lands.
+        /// </summary>
+        private void EndSummon(SummonExit exit)
+        {
+            var summon = _summon;
+            if (summon == null)
+            {
+                return;
+            }
+            summon.Stay.Leave(exit);
+            _summon = null;
+
+            _turnManager.RemoveUnit(summon);
+            _turnManager.Resume();
+            if (CombatStage.HasInstance)
+            {
+                CombatStage.Instance.RestoreParty();
+            }
+
+            foreach (var enemy in AliveEnemyComponents())
+            {
+                if (ReferenceEquals(enemy.ChargeTarget, summon))
+                {
+                    enemy.ChargeTarget = null;
+                }
+            }
+
+            StartCoroutine(SummonPresenter.Depart(summon, exit == SummonExit.Fell));
+        }
+
+        /// <summary>
+        /// The summon's health has run out. <b>The blow that did it is swallowed</b>: it hit the
+        /// summon and nothing else, and whatever was left over goes nowhere - which is what makes a
+        /// summon out when a boss signature lands a guarantee that the party survives it.
+        /// </summary>
+        private void ResolveSummonDamaged(SummonUnit summon)
+        {
+            if (summon == null || !ReferenceEquals(summon, _summon) || summon.Stats.Health > 0)
+            {
+                return;
+            }
+            summon.Stats.Health = 0;
+            _lastTurnLog += $" {summon.DisplayName} crumbles, and the party steps back in!";
+            EndSummon(SummonExit.Fell);
+        }
+
+        /// <summary>
+        /// One of a party-replacing summon's abilities. The Boar's resolution path, not a hero cast:
+        /// no Forge bonus, no tag tracker, no combo detector, no charge - the ratios and the upgrade
+        /// nodes are the summon's one progression (§4b). Silence stops it, as it stops any cast.
+        /// </summary>
+        private IEnumerator ExecuteSummonAbility(SummonUnit caster, MagicSO magic, List<ICombatUnit> targets, Room room)
+        {
+            bool isSignature = caster.Summon != null && ReferenceEquals(magic, caster.Summon.Signature);
+            if (BuffTracker.HasStatusEffect(caster, BuffType.Silenced))
+            {
+                _lastTurnLog = $"{caster.DisplayName} is silenced and cannot use {magic.DisplayName}.";
+                yield break;
+            }
+            if (isSignature && !caster.Stay.CanUseSignature)
+            {
+                _lastTurnLog = $"{caster.DisplayName} has already used {magic.DisplayName}.";
+                yield break;
+            }
+
+            var live = targets != null ? targets.Where(t => t != null && t.IsAlive).ToList() : new List<ICombatUnit>();
+            if (live.Count == 0)
+            {
+                live = SummonAbilityTargets(magic, caster).Where(t => t != null && t.IsAlive).ToList();
+                if (magic.TargetType == MagicTargetType.SingleEnemy && live.Count > 1)
+                {
+                    live = new List<ICombatUnit> { live[UnityEngine.Random.Range(0, live.Count)] };
+                }
+            }
+            if (live.Count == 0)
+            {
+                _lastTurnLog = $"{caster.DisplayName} has no target.";
+                yield break;
+            }
+
+            if (isSignature)
+            {
+                caster.Stay.MarkSignatureUsed();
+                CombatFeedback.Instance.Shake(0.22f, 0.35f);
+            }
+
+            var action = new SpellcastAction { Magic = magic, Caster = caster, Targets = live };
+            var result = _calculator.Execute(action, BuffTracker);
+            _lastTurnLog = result.BuildLog(action);
+            CombatAudio.Play(isSignature ? CombatSound.BossSignature : CombatSound.MagicCast);
+            RecordCastDamageObserved(action, 0);
+            yield return _presenter.Present(result, caster, magic);
+
+            var deadEnemies = room.Enemies.Where(e => e != null && !e.IsAlive).ToList();
+            foreach (var dead in deadEnemies)
+            {
+                _lastTurnLog += $" {dead.DisplayName} defeated!";
+                HandleEnemyDeath(dead, room);
+            }
+            ResolveSummonDamaged(caster);   // an ability with a health cost could, in principle
+        }
+
+        private List<Enemy> AliveEnemyComponents()
+        {
+            if (_currentCombatRoom == null)
+            {
+                return new List<Enemy>();
+            }
+            return _currentCombatRoom.Enemies.Where(e => e != null && e.IsAlive).ToList();
         }
 
         /// <summary>Who a summon's effects land on. A summon has no target picker: its target type
@@ -739,7 +1050,7 @@ namespace Assets.Scripts.Rooms
 
             var context = new EnemyCombatContext
             {
-                Heroes = GetAliveHeroes(party),
+                Heroes = HeroSideUnits(),
                 Allies = GetAliveEnemies().Where(u => u != enemyUnit).ToList(),
                 BuffTracker = BuffTracker,
                 ChargingEntryIndex = enemy != null ? enemy.ChargingEntryIndex : EnemyActionPlanner.NoCharge,
@@ -843,7 +1154,7 @@ namespace Assets.Scripts.Rooms
 
             foreach (var target in targets)
             {
-                if (target is Hero)
+                if (target.IsHero)
                 {
                     ResolveHeroDamaged(target);
                 }
@@ -995,6 +1306,11 @@ namespace Assets.Scripts.Rooms
 
         private void ResolveHeroDamaged(ICombatUnit target)
         {
+            if (target is SummonUnit summon)
+            {
+                ResolveSummonDamaged(summon);
+                return;
+            }
             if (!target.IsAlive)
             {
                 _lastTurnLog += $" {target.DisplayName} has fallen!";
@@ -1134,7 +1450,11 @@ namespace Assets.Scripts.Rooms
                 // The hero branch mirrors ResolveHeroDamaged rather than calling HandleHeroDeath
                 // alone: that method only hides the sprite, and the log line and the turn-manager
                 // removal both live at its call sites. HandleEnemyDeath is self-contained.
-                if (!unit.IsAlive)
+                if (unit is SummonUnit tickedSummon)
+                {
+                    ResolveSummonDamaged(tickedSummon);
+                }
+                else if (!unit.IsAlive)
                 {
                     var deadEnemy = unit as Enemy;
                     if (deadEnemy != null)
@@ -1464,9 +1784,9 @@ namespace Assets.Scripts.Rooms
             return alive[UnityEngine.Random.Range(0, alive.Count)];
         }
 
-        private Hero GetRandomAliveHero(Party party)
+        private ICombatUnit GetRandomAliveHero(Party party)
         {
-            var alive = party.Heroes.Where(h => h != null && h.IsAlive).ToList();
+            var alive = HeroSideUnits();
             if (alive.Count == 0)
             {
                 return null;
@@ -1474,9 +1794,11 @@ namespace Assets.Scripts.Rooms
             return alive[UnityEngine.Random.Range(0, alive.Count)];
         }
 
+        /// <summary>Whether the hero side still stands. Always true while a summon is out: a wipe is
+        /// impossible then, because nothing can reach the party.</summary>
         private bool HasAliveHeroes(Party party)
         {
-            return party.Heroes.Any(h => h != null && h.IsAlive);
+            return (_summon != null && _summon.IsAlive) || party.Heroes.Any(h => h != null && h.IsAlive);
         }
 
         private bool HasAliveEnemies(Room room)
@@ -1493,9 +1815,11 @@ namespace Assets.Scripts.Rooms
             OnDungeonCleared?.Invoke();
         }
 
+        /// <summary>Fleeing is a party action, and while a summon has taken the party's place there is
+        /// no party to flee: Dismiss it, then flee on a hero's turn (§4b).</summary>
         public bool CanFlee(Party party)
         {
-            return party.PreviousRoom != null;
+            return _summon == null && party.PreviousRoom != null;
         }
 
         public void Flee(Party party, Door entryDoor, Room currentRoom)

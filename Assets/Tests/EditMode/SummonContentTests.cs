@@ -52,9 +52,44 @@ namespace Tests.EditMode
             foreach (var summon in AllSummonAssets())
             {
                 Assert.IsNotNull(summon.Sprite, $"{summon.name} has no creature sprite - the summoning moment would show nothing.");
-                Assert.IsNotEmpty(summon.Effects, $"{summon.name} does nothing.");
                 Assert.GreaterOrEqual(summon.BaseCharges, 1, $"{summon.name} has no charges.");
+                if (summon.Kind == SummonKind.SpecialAttack)
+                {
+                    Assert.IsNotEmpty(summon.Effects, $"{summon.name} does nothing.");
+                    continue;
+                }
+
+                // A party replacement is a unit: it needs a body, a stay, and something to do.
+                Assert.Greater(summon.StatPercents[Assets.Scripts.UnitStats.StatType.MaxHealth], 0,
+                    $"{summon.name} brings no health - it would fall to the first blow, or arrive dead.");
+                Assert.Greater(summon.StatPercents[Assets.Scripts.UnitStats.StatType.Strength], 0,
+                    $"{summon.name} has no Strength, so its Attack does nothing.");
+                Assert.GreaterOrEqual(summon.TurnsActive, 1, $"{summon.name} never stays.");
+                Assert.IsNotNull(summon.Signature, $"{summon.name} has no Signature.");
+                Assert.That(summon.Actions.All(a => a != null), $"{summon.name} has an empty action slot.");
+                Assert.That(summon.AnimationFrames.All(f => f != null), $"{summon.name} has an empty animation frame.");
             }
+        }
+
+        [Test]
+        public void SummonAbilities_AreNeverAHerosMagic()
+        {
+            // A summon's abilities cast through the Boar's path - no Forge bonus, no tags, no combos.
+            // On a grid they would be learnable and carried; in the catalog they would be upgradeable
+            // in the Forge and resolvable into a hero's slot. Both would quietly break that rule.
+            var abilityKeys = SummonOps.AbilityKeys(AllSummonAssets());
+            Assert.IsNotEmpty(abilityKeys, "No summon has abilities, so this guards nothing.");
+
+            var onGrids = AllGrids().SelectMany(g => g.Nodes)
+                .Where(n => n != null && n.Kind == SphereNodeKind.MagicKnown && abilityKeys.Contains(n.GrantedMagicKey))
+                .Select(n => n.Key).ToList();
+            Assert.IsEmpty(onGrids, "Grid nodes teach a summon's own ability: " + string.Join(", ", onGrids));
+
+            var prefab = AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>("Assets/Prefabs/MagicCatalog.prefab");
+            var catalog = prefab != null ? prefab.GetComponent<MagicCatalog>() : null;
+            Assert.IsNotNull(catalog, "No MagicCatalog prefab.");
+            var inCatalog = catalog.AllMagic.Where(m => m != null && abilityKeys.Contains(m.Key)).Select(m => m.Key).ToList();
+            Assert.IsEmpty(inCatalog, "The hero magic catalog lists a summon's own ability: " + string.Join(", ", inCatalog));
         }
 
         [Test]

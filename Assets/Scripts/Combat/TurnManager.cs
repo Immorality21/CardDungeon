@@ -16,6 +16,12 @@ namespace Assets.Scripts.Combat
         private Dictionary<ICombatUnit, float> _ticksUntilTurn = new Dictionary<ICombatUnit, float>();
         private CombatBuffTracker _buffTracker;
 
+        // Units taken off the clock with their counters frozen (the party while a summon replaces it).
+        private readonly Dictionary<ICombatUnit, float> _suspended = new Dictionary<ICombatUnit, float>();
+
+        // A unit that takes the very next turn, ahead of the clock (a summon's arrival turn).
+        private ICombatUnit _actsNext;
+
         public void SetBuffTracker(CombatBuffTracker buffTracker)
         {
             _buffTracker = buffTracker;
@@ -24,6 +30,8 @@ namespace Assets.Scripts.Combat
         public void Initialize(List<ICombatUnit> units)
         {
             _ticksUntilTurn.Clear();
+            _suspended.Clear();
+            _actsNext = null;
 
             foreach (var unit in units)
             {
@@ -34,6 +42,19 @@ namespace Assets.Scripts.Combat
 
         public ICombatUnit GetNextUnit()
         {
+            // A unit inserted to act next goes first and costs the clock nothing: no time passes for
+            // anyone else. It then joins the clock as if it had just acted.
+            if (_actsNext != null)
+            {
+                var inserted = _actsNext;
+                _actsNext = null;
+                if (inserted.IsAlive && _ticksUntilTurn.ContainsKey(inserted))
+                {
+                    _ticksUntilTurn[inserted] = BASE_TICKS / Mathf.Max(1, GetEffectiveAgility(inserted));
+                    return inserted;
+                }
+            }
+
             // Find the alive unit with the lowest ticks (soonest to act)
             ICombatUnit next = null;
             float lowest = float.MaxValue;
@@ -69,6 +90,65 @@ namespace Assets.Scripts.Combat
         public void RemoveUnit(ICombatUnit unit)
         {
             _ticksUntilTurn.Remove(unit);
+            _suspended.Remove(unit);
+            if (ReferenceEquals(_actsNext, unit))
+            {
+                _actsNext = null;
+            }
+        }
+
+        /// <summary>
+        /// Adds a unit to a fight already under way. With <paramref name="actsNext"/> it takes the
+        /// very next turn ahead of the clock (a party-replacing summon arriving, §4b); otherwise it
+        /// waits a full turn at its own Agility, like a unit that has just acted.
+        /// </summary>
+        public void AddUnit(ICombatUnit unit, bool actsNext)
+        {
+            if (unit == null)
+            {
+                return;
+            }
+            _ticksUntilTurn[unit] = BASE_TICKS / Mathf.Max(1, GetEffectiveAgility(unit));
+            if (actsNext)
+            {
+                _actsNext = unit;
+            }
+        }
+
+        /// <summary>
+        /// Takes units off the clock with their counters frozen: time passes for everyone else and
+        /// not for them, they are out of the turn-order preview, and <see cref="Resume"/> puts them
+        /// back exactly where they left. What a party-replacing summon does to the party (§4b).
+        /// </summary>
+        public void Suspend(IEnumerable<ICombatUnit> units)
+        {
+            if (units == null)
+            {
+                return;
+            }
+            foreach (var unit in units)
+            {
+                if (unit != null && _ticksUntilTurn.TryGetValue(unit, out float ticks))
+                {
+                    _suspended[unit] = ticks;
+                    _ticksUntilTurn.Remove(unit);
+                }
+            }
+        }
+
+        /// <summary>Every suspended unit back on the clock, at the counter it was frozen with.</summary>
+        public void Resume()
+        {
+            foreach (var pair in _suspended)
+            {
+                _ticksUntilTurn[pair.Key] = pair.Value;
+            }
+            _suspended.Clear();
+        }
+
+        public bool IsSuspended(ICombatUnit unit)
+        {
+            return unit != null && _suspended.ContainsKey(unit);
         }
 
         public List<ICombatUnit> GetTurnOrder(int count)
@@ -77,7 +157,14 @@ namespace Assets.Scripts.Combat
             var snapshot = new Dictionary<ICombatUnit, float>(_ticksUntilTurn);
             var order = new List<ICombatUnit>();
 
-            for (int i = 0; i < count; i++)
+            // The inserted unit leads the preview, exactly as GetNextUnit will take it.
+            if (_actsNext != null && _actsNext.IsAlive && snapshot.ContainsKey(_actsNext) && count > 0)
+            {
+                order.Add(_actsNext);
+                snapshot[_actsNext] = BASE_TICKS / Mathf.Max(1, GetEffectiveAgility(_actsNext));
+            }
+
+            for (int i = order.Count; i < count; i++)
             {
                 ICombatUnit next = null;
                 float lowest = float.MaxValue;

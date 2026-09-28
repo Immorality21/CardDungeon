@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Cards
@@ -13,8 +14,9 @@ namespace Assets.Scripts.Cards
         /// <summary>FF7–9: a big effect lands and it is over. No unit, no change to the turn order.</summary>
         SpecialAttack = 0,
 
-        /// <summary>FFX: the party steps out and the summon fights alone. <b>Not built yet</b> — the
-        /// field exists so the second kind does not reshape the first.</summary>
+        /// <summary>FFX: the party steps out and the summon fights alone, a player-driven unit whose
+        /// stats are ratios of the summoner's. It leaves when its health or its turns run out, or on
+        /// Dismiss, and the blow that ends it never reaches the party.</summary>
         ReplaceParty = 1
     }
 
@@ -61,6 +63,12 @@ namespace Assets.Scripts.Cards
                  "Party mirrors it, and its lurch moves toward the heroes instead.")]
         public SummonFacing Facing = SummonFacing.Enemies;
 
+        [Tooltip("Optional: played as the creature rises on the stage, before the shared roar. Empty " +
+                 "plays only the roar.")]
+        public AudioClip ArrivalSound;
+
+        [Range(0f, 1f)] public float ArrivalSoundVolume = 0.9f;
+
         public SummonKind Kind = SummonKind.SpecialAttack;
 
         [Tooltip("Who the effects land on. The Bloodfang Boar is AllAllies.")]
@@ -73,6 +81,28 @@ namespace Assets.Scripts.Cards
         [Tooltip("Charges per run before any upgrade node. Refilled with ability charges: at run " +
                  "start and when resting in a refuge.")]
         [Min(1)] public int BaseCharges = 1;
+
+        // ---- ReplaceParty only. A special attack ignores everything below, and a replacement
+        // ---- ignores TargetType and Effects above.
+
+        [Header("Party replacement")]
+        [Tooltip("ReplaceParty: each stat as a PERCENTAGE of the summoner's own (base + gear, no combat " +
+                 "buffs), snapshotted on arrival. MaxHealth 250 brings a body two and a half times the " +
+                 "summoner's bar. A stat with no entry is 0.")]
+        public StatBlock StatPercents = new StatBlock();
+
+        [Tooltip("ReplaceParty: copy the summoner's resistances (innate + grid + gear) onto the summon.")]
+        public bool CopySummonerResistances = true;
+
+        [Tooltip("ReplaceParty: how many of its own turns it stays, the immediate first one included.")]
+        [Min(1)] public int TurnsActive = 3;
+
+        [Tooltip("ReplaceParty: abilities it may use on any of its turns, cast with the summon as the " +
+                 "caster. No charges, no Forge bonus, no tags. Attack and Dismiss are always offered.")]
+        public List<MagicSO> Actions = new List<MagicSO>();
+
+        [Tooltip("ReplaceParty: the one big move, usable once per summoning.")]
+        public MagicSO Signature;
 
         public string Label => string.IsNullOrEmpty(DisplayName) ? name : DisplayName;
     }

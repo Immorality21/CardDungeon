@@ -183,7 +183,7 @@ backlog.**
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **shipped** 2026-09-06 — solo start, rescue unlocks, `RequiresHeroes` gates. **Four heroes still need an unlock source** |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | **first shipped 2026-09-28** — the Warrior's Bloodfang Boar (special attack); **party-replacing kind designed 2026-09-28** — the Warrior's Cairn Golem (branch A wall), not built; then the other heroes' summons |
+| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** — the Warrior's Bloodfang Boar (special attack, branch B) and Cairn Golem (party replacement, branch A); **next: the other six heroes' summons**, then measure the per-summon frontier |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
@@ -236,6 +236,19 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Summons, the party-replacing kind: the Warrior's Cairn Golem** (2026-09-28) —
+  `plans/SPECIALIZATION.md` §4b ("The party-replacing kind", now marked built). Learned past
+  `warrior-a-hold` (410 XP + 2 Void Shard + 3 Mire Hide) with a +50 HP-ratio / +1 turn / +1 charge
+  chain. The party leaves the stage (invisible, frozen on the clock), the Golem — 250% of the
+  summoner's health, a stat snapshot with no buffs — fights for three of its own turns from its own
+  menu (Attack · Brace · ★ Quake · Inspect · Dismiss), every enemy blow lands on it and the one that
+  breaks it goes no further. `CombatManager.HeroSideUnits()` is the one source of "the heroes";
+  `TurnManager` gained suspend/resume and an inserted turn; the sim runs the same rules
+  (`SummonStay`, `SummonOps.StatsFor`) and summons on a telegraphed wind-up. Boar-style intro, PixelLab
+  sprite with a 4-frame idle, `SummonSO.ArrivalSound`, and the summon picker for a hero with two.
+  **Fixed on the way:** Slow cast as a Debuff *raised* Agility (double negation in `SlowBuffHandler`).
+  Frontier now sweeps per summon (`FloorFrontier.BySummon`) — not measured yet. 20+ new tests; the
+  suite's only reds are the two pre-existing balance failures, byte-identical to the baseline.
 - **Summons, first one: the Warrior's Bloodfang Boar** (2026-09-28) — `plans/SPECIALIZATION.md` §4b
   (decisions table), Cards guide. Special-attack kind: +50% of each hero's own Strength for 3 turns,
   1 charge, learned past `warrior-b-edge` (410 XP + 2 Void Shard + 3 Ember Iron) with a +10% / +1 turn /

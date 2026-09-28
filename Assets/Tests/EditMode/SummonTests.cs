@@ -339,7 +339,7 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void SummonState_ReplacePartyKind_IsKnownButNeverUsable()
+        public void SummonState_ReplacePartyKind_IsUsable_AndSpendsItsCharge()
         {
             var golem = Boar();
             golem.Key = "Golem";
@@ -347,10 +347,135 @@ namespace Tests.EditMode
             var state = new SummonState();
             state.SetHero("Warrior", new List<SummonGrant> { new SummonGrant { Key = "Golem" } }, key => golem);
 
-            Assert.IsTrue(state.Knows("Warrior"));
-            Assert.IsFalse(state.HasAnyUsable("Warrior"), "Greyed, not a charge spent on nothing.");
-            Assert.IsFalse(state.TryUse("Warrior", "Golem"));
-            Assert.AreEqual(1, state.GetSummons("Warrior")[0].Charges, "The charge is untouched.");
+            Assert.IsTrue(state.HasAnyUsable("Warrior"));
+            Assert.IsTrue(state.TryUse("Warrior", "Golem"));
+            Assert.AreEqual(0, state.GetSummons("Warrior")[0].Charges);
+        }
+
+        // --- the party-replacing kind -----------------------------------------
+
+        private static SummonSO Golem()
+        {
+            var summon = ScriptableObject.CreateInstance<SummonSO>();
+            summon.Key = "Golem";
+            summon.DisplayName = "Cairn Golem";
+            summon.Kind = SummonKind.ReplaceParty;
+            summon.TurnsActive = 3;
+            summon.StatPercents = new StatBlock(
+                new UnitStat(StatType.MaxHealth, 250),
+                new UnitStat(StatType.Endurance, 150),
+                new UnitStat(StatType.Strength, 60),
+                new UnitStat(StatType.Agility, 80));
+            return summon;
+        }
+
+        private static int WarriorStat(StatType stat)
+        {
+            switch (stat)
+            {
+                case StatType.MaxHealth: return 60;
+                case StatType.Endurance: return 7;
+                case StatType.Strength: return 21;
+                case StatType.Agility: return 7;
+                case StatType.Luck: return 6;
+                default: return 0;
+            }
+        }
+
+        [Test]
+        public void StatsFor_ScalesEachStatByItsPercentage_RoundingDown()
+        {
+            var block = SummonOps.StatsFor(Golem(), null, WarriorStat);
+
+            Assert.AreEqual(150, block[StatType.MaxHealth], "A ~60 HP Warrior brings a ~150 HP body.");
+            Assert.AreEqual(10, block[StatType.Endurance], "7 x 150% = 10.5, rounded down.");
+            Assert.AreEqual(12, block[StatType.Strength], "21 x 60% = 12.6, rounded down.");
+            Assert.AreEqual(5, block[StatType.Agility], "7 x 80% = 5.6, rounded down.");
+            Assert.AreEqual(0, block[StatType.Luck], "A stat with no percentage is 0, not copied.");
+        }
+
+        [Test]
+        public void StatsFor_SummonPowerAddsHealthRatioPoints()
+        {
+            var block = SummonOps.StatsFor(Golem(), new SummonGrant { Key = "Golem", PowerBonus = 50 }, WarriorStat);
+
+            Assert.AreEqual(180, block[StatType.MaxHealth], "250% + 50 points = 300% of 60.");
+            Assert.AreEqual(12, block[StatType.Strength], "Power touches health only.");
+        }
+
+        [Test]
+        public void StatsFor_NeverArrivesDead()
+        {
+            var block = SummonOps.StatsFor(Golem(), null, _ => 0);
+
+            Assert.AreEqual(1, block[StatType.MaxHealth]);
+        }
+
+        [Test]
+        public void TurnsFor_IsItsOwnPlusDurationUpgrades_AtLeastOne()
+        {
+            Assert.AreEqual(3, SummonOps.TurnsFor(Golem(), null));
+            Assert.AreEqual(4, SummonOps.TurnsFor(Golem(), new SummonGrant { DurationBonus = 1 }));
+            var brief = Golem();
+            brief.TurnsActive = 0;
+            Assert.AreEqual(1, SummonOps.TurnsFor(brief, null));
+        }
+
+        [Test]
+        public void Describe_ReplacementReadsAsAPlaceTaken()
+        {
+            Assert.AreEqual("Takes the party's place · 250% of the summoner's health · 3 turns · 1 charge per run",
+                SummonOps.Describe(Golem(), null));
+        }
+
+        [Test]
+        public void AbilityKeys_AreTheActionsAndTheSignature()
+        {
+            var golem = Golem();
+            var brace = ScriptableObject.CreateInstance<MagicSO>();
+            brace.Key = "Brace";
+            var quake = ScriptableObject.CreateInstance<MagicSO>();
+            quake.Key = "Quake";
+            golem.Actions = new List<MagicSO> { brace, null };
+            golem.Signature = quake;
+
+            CollectionAssert.AreEquivalent(new[] { "Brace", "Quake" },
+                SummonOps.AbilityKeys(new[] { golem, Boar(), null }).ToList());
+        }
+
+        [Test]
+        public void SummonStay_ImmediateTurnIsTurnOne_AndTheLastTurnSendsItHome()
+        {
+            var stay = new SummonStay(Golem(), 3);
+
+            Assert.IsFalse(stay.EndTurn(), "The immediate turn: 1 of 3.");
+            Assert.IsFalse(stay.EndTurn());
+            Assert.IsTrue(stay.EndTurn(), "Its third turn is its last.");
+            Assert.AreEqual(0, stay.TurnsLeft);
+        }
+
+        [Test]
+        public void SummonStay_SignatureIsOncePerSummoning()
+        {
+            var golem = Golem();
+            golem.Signature = ScriptableObject.CreateInstance<MagicSO>();
+            var stay = new SummonStay(golem, 3);
+
+            Assert.IsTrue(stay.CanUseSignature);
+            stay.MarkSignatureUsed();
+            Assert.IsFalse(stay.CanUseSignature);
+            Assert.IsTrue(new SummonStay(golem, 3).CanUseSignature, "A new summoning brings it back.");
+        }
+
+        [Test]
+        public void SummonStay_FirstReasonToLeaveWins()
+        {
+            var stay = new SummonStay(Golem(), 3);
+            stay.Leave(SummonExit.Fell);
+            stay.Leave(SummonExit.Dismissed);
+
+            Assert.AreEqual(SummonExit.Fell, stay.Exit);
+            Assert.IsFalse(stay.EndTurn(), "A summon that has left takes no more turns.");
         }
 
         [Test]

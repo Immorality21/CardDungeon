@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonCatalogSO
   Summons:
   - {fileID: 11400000, guid: 4ba27700bb921a94687c0dcbda121653, type: 2}
+  - {fileID: 11400000, guid: b2d1f8d95e384ecabb3d8c7de0746c2d, type: 2}

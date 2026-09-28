@@ -188,12 +188,14 @@ namespace Assets.Scripts.Balance
         public bool Unclearable => Frontier.Count == 0;
 
         /// <summary>
-        /// The same floor swept with every summoner <b>beelining</b> to their summon instead of
-        /// spending greedily (<c>SphereGridOps.BeelineThenGreedy</c>) - what committing to the
-        /// summon branch buys (section 4b, BALANCING.md section 0 rule 3). Null when nobody on the roster
-        /// has a summon on their grid. Materials on the summon node are not priced.
+        /// The same floor swept once <b>per summon</b> on the roster's grids, each sweep with every
+        /// hero who can learn that summon <b>beelining</b> to it instead of spending greedily
+        /// (<c>SphereGridOps.BeelineThenGreedy</c>) - what committing to that branch buys (section
+        /// 4b, BALANCING.md section 0 rule 3). One sweep per summon rather than one for all of them
+        /// is what makes it a key-versus-wall comparison: which summon opens which finale. Empty when
+        /// nobody on the roster has a summon on their grid. Materials on the summon node are not priced.
         /// </summary>
-        public FloorFrontier WithSummons;
+        public List<SummonSweep> BySummon = new List<SummonSweep>();
 
         /// <summary>At least two affordable mixes, i.e. the player picks how to pay rather than being told.</summary>
         public bool OffersChoice => AffordableChoices.Count >= 2;
@@ -270,6 +272,19 @@ namespace Assets.Scripts.Balance
         /// goes that deep. The "with summons" reading of the frontier.
         /// </summary>
         public bool SummonBuild;
+
+        /// <summary>
+        /// With <see cref="SummonBuild"/>: the one summon every hero beelines to (a hero whose grid
+        /// does not teach it spends greedily). Null walks to the first summon node on each grid.
+        /// </summary>
+        public string SummonKey;
+    }
+
+    /// <summary>One summon's frontier sweep: the floor re-measured with its learners beelining to it.</summary>
+    public class SummonSweep
+    {
+        public string SummonKey;
+        public FloorFrontier Frontier;
     }
 
     /// <summary>
@@ -461,7 +476,8 @@ namespace Assets.Scripts.Balance
             FrontierSweepSettings settings, int width, int xp, int gold,
             Dictionary<string, InvestmentPoint> cache, IncomingDamageMix incoming)
         {
-            string key = width + "/" + xp + "/" + gold + (settings.SummonBuild ? "/summon" : "");
+            string key = width + "/" + xp + "/" + gold
+                + (settings.SummonBuild ? "/summon:" + (settings.SummonKey ?? "") : "");
             if (cache.TryGetValue(key, out var cached))
             {
                 return cached;
@@ -507,7 +523,7 @@ namespace Assets.Scripts.Balance
 
                 var party = settings.SummonBuild
                     ? PartyBaseline.Build(roster, _ => xp, gearLookup, settings.PotionItem, settings.PotionCount,
-                        hero => SummonBuildNodes(hero, xp))
+                        hero => SummonBuildNodes(hero, xp, settings.SummonKey))
                     : PartyBaseline.Build(roster, xp, gearLookup, settings.PotionItem, settings.PotionCount);
                 if (settings.PrepareParty != null)
                 {
@@ -530,18 +546,47 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// A hero's nodes for the summon build: beeline to the first summon node on their grid,
-        /// then greedy; a hero with no summon (or who cannot afford the path) spends greedily.
+        /// A hero's nodes for the summon build: beeline to the node teaching
+        /// <paramref name="summonKey"/> (the first summon node on their grid when null), then greedy;
+        /// a hero without it (or who cannot afford the path) spends greedily.
         /// </summary>
-        public static List<string> SummonBuildNodes(HeroSO hero, int xp)
+        public static List<string> SummonBuildNodes(HeroSO hero, int xp, string summonKey = null)
         {
             var grid = hero != null ? hero.SphereGrid : null;
             var summonNode = grid != null && grid.Nodes != null
-                ? grid.Nodes.Find(n => n != null && n.Kind == Heroes.SphereNodeKind.Summon)
+                ? grid.Nodes.Find(n => n != null && n.Kind == Heroes.SphereNodeKind.Summon
+                    && (summonKey == null || n.GrantedSummonKey == summonKey))
                 : null;
             return summonNode != null
                 ? Heroes.SphereGridOps.BeelineThenGreedy(grid, summonNode.Key, xp)
                 : Heroes.SphereGridOps.GreedySpend(grid, null, xp, out _);
+        }
+
+        /// <summary>Every summon some hero on the roster can learn, in grid order, each once.</summary>
+        public static List<string> SummonKeys(IList<HeroSO> roster)
+        {
+            var keys = new List<string>();
+            if (roster == null)
+            {
+                return keys;
+            }
+            foreach (var hero in roster)
+            {
+                var grid = hero != null ? hero.SphereGrid : null;
+                if (grid == null || grid.Nodes == null)
+                {
+                    continue;
+                }
+                foreach (var node in grid.Nodes)
+                {
+                    if (node != null && node.Kind == Heroes.SphereNodeKind.Summon
+                        && !string.IsNullOrEmpty(node.GrantedSummonKey) && !keys.Contains(node.GrantedSummonKey))
+                    {
+                        keys.Add(node.GrantedSummonKey);
+                    }
+                }
+            }
+            return keys;
         }
 
         /// <summary>Whether any hero on the roster can learn a summon at all.</summary>

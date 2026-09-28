@@ -53,6 +53,17 @@ namespace Assets.Scripts.Combat
         private GameObject _leftCombatLight;
         private GameObject _rightCombatLight;
 
+        // Where the hero column stands, kept from Begin so a party-replacing summon can take it.
+        private float _heroColumnX;
+        private float _centerY;
+
+        // Hero sprites hidden while a summon has taken the party's place, shown again when it leaves.
+        private readonly List<SpriteRenderer> _hidden = new List<SpriteRenderer>();
+
+        /// <summary>A summon's scale on the stage. The Cairn Golem (64 px at PPU 38) comes out about
+        /// three units tall, the size of a boss - it is a wall, and should read as one.</summary>
+        private const float SummonScale = 1.8f;
+
         /// <summary>
         /// Freezes the camera, raises the background, and forms alive heroes (left) and enemies
         /// (right) into columns centred on the current view. Call once when combat starts,
@@ -124,7 +135,9 @@ namespace Assets.Scripts.Combat
             var enemies = room.Enemies.Where(e => e != null && e.IsAlive).Cast<ICombatUnit>().ToList();
 
             float centerY = anchor.y + halfH * 0.15f;
-            var heroSlots = BuildColumn(anchor.x - halfW * 0.55f, centerY, heroes.Count, halfH);
+            _heroColumnX = anchor.x - halfW * 0.55f;
+            _centerY = centerY;
+            var heroSlots = BuildColumn(_heroColumnX, centerY, heroes.Count, halfH);
 
             // Enemies rank up FF-style: one column up to three, front 2 / back 3 beyond that, and a
             // boss alone at the back with its escort in front (see EnemyFormation).
@@ -177,6 +190,8 @@ namespace Assets.Scripts.Combat
         /// </summary>
         public void End(bool restoreEnemyPositions)
         {
+            RestoreParty();
+
             foreach (var rec in _restores)
             {
                 if (rec.Sr == null)
@@ -216,6 +231,80 @@ namespace Assets.Scripts.Combat
             }
             SetLightEnabled(_leftCombatLight, false);
             SetLightEnabled(_rightCombatLight, false);
+        }
+
+        /// <summary>
+        /// Puts a party-replacing summon where the hero column stands, facing the enemies. The party
+        /// is off the stage entirely while it fights (<see cref="HideParty"/>) - the turn order and the
+        /// party window still say who is waiting to come back.
+        /// </summary>
+        public void PlaceSummon(SummonUnit summon)
+        {
+            if (summon == null)
+            {
+                return;
+            }
+            var tr = summon.transform;
+            tr.position = new Vector3(_heroColumnX, _centerY, -1f);
+            tr.localScale = Vector3.one * SummonScale;
+            var sr = summon.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.sortingOrder = UnitSortOrder + MaxRanks + 1;
+                // Art faces right, toward the enemies.
+                sr.flipX = summon.Summon != null && summon.Summon.Facing == Cards.SummonFacing.Party;
+            }
+        }
+
+        /// <summary>
+        /// Takes every hero off the stage while a summon fights: sprite and HP bar both hidden.
+        /// A hero who was already down stays hidden on return, because only the ones this call
+        /// actually hid are brought back.
+        /// </summary>
+        public void HideParty()
+        {
+            if (_party == null)
+            {
+                return;
+            }
+            foreach (var hero in _party.Heroes)
+            {
+                var sr = hero != null ? hero.GetComponent<SpriteRenderer>() : null;
+                if (sr != null && sr.enabled && !_hidden.Contains(sr))
+                {
+                    sr.enabled = false;
+                    _hidden.Add(sr);
+                }
+                var bar = hero != null ? hero.GetComponent<UnitHealthBar>() : null;
+                if (bar != null)
+                {
+                    bar.Hidden = true;
+                }
+            }
+        }
+
+        /// <summary>The party back on the stage. Safe to call when nothing is hidden.</summary>
+        public void RestoreParty()
+        {
+            foreach (var sr in _hidden)
+            {
+                if (sr != null)
+                {
+                    sr.enabled = true;
+                }
+            }
+            _hidden.Clear();
+            if (_party != null)
+            {
+                foreach (var hero in _party.Heroes)
+                {
+                    var bar = hero != null ? hero.GetComponent<UnitHealthBar>() : null;
+                    if (bar != null)
+                    {
+                        bar.Hidden = false;
+                    }
+                }
+            }
         }
 
         private static void SetLightEnabled(GameObject lightObject, bool enabled)

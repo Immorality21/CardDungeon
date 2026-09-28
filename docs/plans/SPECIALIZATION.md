@@ -479,8 +479,35 @@ carries a kind field from day one so it does not reshape anything.
 
 #### The party-replacing kind — decided 2026-09-28, the user's second walkthrough
 
-**Not built.** `SummonKind.ReplaceParty` exists and `CombatManager.ExecuteSummonAction` still refuses
-it with a warning. Everything the special-attack kind already decided (node, charges, command,
+**✅ Built 2026-09-28** — the Cairn Golem is in the game, the live combat loop and the balance model
+both run it, and a play-mode run in the sandbox (`Sandbox/SummonGolem.asset`, Warrior + Rogue vs the
+Abyssal Warden) went through the whole cycle: summon, Quake (damage + Slow), Brace, Attack, the stay
+running out after three turns, and the party coming back at the HP it left with. What shipped, and
+where it differs from the table below:
+
+- **The party is invisible, not dimmed** *(user call in play, 2026-09-28)*. Sprites and HP bars are
+  hidden while the summon is out (`CombatStage.HideParty` / `RestoreParty`, `UnitHealthBar.Hidden`);
+  dimmed ghosts overlapped the summon and their bars stacked on its own. The turn order and the party
+  window are what say who is waiting to come back.
+- **It has the Boar's intro** *(user request)*: it rises large at the stage centre, roars and lurches,
+  then strides into the hero column shrinking to standing size, and lands with a stomp
+  (`SummonPresenter.Arrive`). `SummonSO.ArrivalSound` is new and optional; the Golem plays
+  `Stone 15` from the local Fantasy Interface Sounds pack — a placeholder, swap freely.
+- **Quake keeps plain Slow** (the open question below). It also exposed a real bug: `SlowBuffHandler`
+  negated an already-negative power, so **Slow cast as a Debuff raised Agility**. Nothing authored Slow
+  before, and level afflictions passing `-1` had the same inversion. Fixed; `SummonReplacementTests`
+  pins it.
+- **One source of "the heroes"** is `CombatManager.HeroSideUnits()`, and `GetAliveHeroes(party)`
+  delegates to it, so the selection UI is right by construction too.
+- **Rules are shared, not duplicated**: `SummonOps.StatsFor` / `TurnsFor` and the pure `SummonStay`
+  (turns taken, Signature used, why it left) are what both `SummonUnit` and the sim's
+  `SimUnit.FromSummon` + `SimReplacement` read. `TurnManager` gained `Suspend` / `Resume` / `AddUnit(actsNext)`.
+- **A summon's own abilities are not a hero's magic**: `SummonOps.AbilityKeys` keeps Brace and Quake
+  out of the balance input, the grid/catalog content tests, and (a new test) the Forge and every grid.
+- **Frontier**: `FloorFrontier.WithSummons` became `BySummon`, one sweep per summon key. **Not yet
+  measured** — balance is paused; the next analyzer run reports each finale with none / the Boar / the Golem.
+
+Everything the special-attack kind already decided (node, charges, command,
 Silence, turn cost, banner) holds unchanged; this block decides only what happens after the summon
 answers.
 
@@ -490,7 +517,7 @@ answers.
 | decision | value | why |
 |---|---|---|
 | control | **the player**, through the summon's own command menu (`RoomActionUI` with a different list) | the game's biggest moment should not be one you watch |
-| the party | **fully out**: off the turn order, untargetable, dimmed or off stage | the cleanest rule, and what makes a wall a wall |
+| the party | **fully out**: off the turn order, untargetable, **invisible** (sprite and HP bar hidden; decided in play 2026-09-28 over dimming) | the cleanest rule, and what makes a wall a wall |
 | party statuses | **frozen**, resume on return | falls out of "ticks fire on the victim's own turn" (`Cards/CLAUDE.md`), so no special case |
 | party turn order | **exactly where they left**: CTB counters frozen with them | predictable, and the turn-order preview stays honest |
 | enemy attacks | **all land on the summon**, and a party-wide attack lands **once** | a four-hero signature hits one body |
@@ -532,13 +559,13 @@ answers.
   effect type *(raised in review 2026-09-28)*.
 - **Upgrades:** d13 **+50 HP-ratio points** → d14 **+1 turn** → d15 **+1 charge** (+ 1 Void Shard +
   2 Mire Hide).
-- **Art:** a stone guardian / golem, PixelLab, drawn large like the Boar (`docs/PIXEL_ART.md`).
-  Faces the enemies.
+- **Art:** ✅ PixelLab 64×64 at PPU 38, stage scale 1.8 (≈ a boss's height), a 4-frame chest-rune
+  pulse played ping-pong (0-1-2-3-2-1) at 6 fps — `Assets/Sprites/Summons/CairnGolem*.png`. Front-facing.
 - **Every number here is a starting number.** The user accepted the draft on the understanding that
   the balance model will move it.
 
-A Warrior who buys both tips knows **two summons**, so the **summon picker** that
-`RoomActionUI.OnHeroSummon` defers is in scope for this build.
+A Warrior who buys both tips knows **two summons**, so the **summon picker** is built: a hero who
+knows more than one gets a list (charges shown, spent ones greyed) in `MagicSelectionUI`.
 
 **Balance model, decided:**
 

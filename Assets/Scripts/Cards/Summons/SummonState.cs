@@ -14,11 +14,11 @@ namespace Assets.Scripts.Cards
         public int MaxCharges;
 
         /// <summary>
-        /// Whether combat can run this summon's kind at all. Only <see cref="SummonKind.SpecialAttack"/>
-        /// can today; a <see cref="SummonKind.ReplaceParty"/> summon is never usable, so the command
-        /// greys out instead of spending a charge on nothing. Drop the gate when that kind is built.
+        /// Whether combat can run this summon's kind at all. Both kinds are built; the gate stays so
+        /// a kind added later greys the command out instead of spending a charge on nothing.
         /// </summary>
-        public bool IsImplemented => Summon != null && Summon.Kind == SummonKind.SpecialAttack;
+        public bool IsImplemented => Summon != null
+            && (Summon.Kind == SummonKind.SpecialAttack || Summon.Kind == SummonKind.ReplaceParty);
 
         public bool CanUse => IsImplemented && Charges > 0;
     }
