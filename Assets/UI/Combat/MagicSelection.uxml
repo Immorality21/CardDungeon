@@ -7,6 +7,8 @@
         <ui:VisualElement name="magic-list-panel" class="cd-window cd-window--combat cd-dock-bottom-left cd-hidden">
             <ui:Label name="list-title" text="Ability" class="cd-command-window__header" />
             <ui:ScrollView name="list-scroll" class="cd-select-scroll" mode="Vertical" />
+            <!-- What the selected row does: flavour plus the generated mechanics line. -->
+            <ui:Label name="list-desc" text="" class="cd-sel-desc cd-hidden" />
             <ui:Button name="list-back" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 

@@ -413,6 +413,60 @@
     margin-left: 10px;
 }
 
+/* ---- Enemy nameplates (combat): name + HP number under each enemy ---- */
+.cd-nameplate-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.cd-nameplate {
+    align-items: center;
+    padding: 1px 6px;
+    background-color: rgba(6, 3, 14, 0.72);
+    border-radius: 3px;
+}
+
+.cd-nameplate__name {
+    font-size: 16px;
+    color: var(--cd-text-light);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
+}
+
+.cd-nameplate__hp {
+    font-size: 16px;
+    color: rgb(150, 230, 150);
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
+}
+
+.cd-nameplate__hp--low {
+    color: rgb(255, 110, 100);
+}
+
+.cd-nameplate--boss .cd-nameplate__name {
+    font-size: 19px;
+    color: var(--cd-gold);
+}
+
+/* Footer under a picker list: what the selected ability/item does. Wraps, because the mechanics
+   line ("One enemy: 9 damage (Attack 7) · Bleeding 1/turn, 3 turns") is longer than the window. */
+.cd-sel-desc {
+    white-space: normal;
+    font-size: 16px;
+    color: var(--cd-text-light);
+    margin: 2px 12px 8px 12px;
+    padding: 6px 8px;
+    border-top-width: 1px;
+    border-top-color: var(--cd-frame);
+}
+
 /* ---- Simple bottom command bar (Examine/Action, Fight/Flee) ---- */
 .cd-bar {
     flex-direction: row;

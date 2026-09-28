@@ -23,6 +23,7 @@ namespace Assets.Scripts.Combat
         private const float Height = 0.12f;
         private const float BossBarScale = 1.7f;   // bosses get a wider, taller bar
         private const int BgSortOrder = 900;
+        private const float FrameThickness = 0.025f;
         private const float IconSize = 0.34f;
         private const float IconGap = 0.30f;
         private const float RefreshInterval = 0.2f;
@@ -89,7 +90,13 @@ namespace Assets.Scripts.Combat
             _barRoot.localPosition = new Vector3(0f, topY, -1f);
 
             // Boss bars get a crimson backdrop so they read as the climax fight.
-            Color bgColor = isBoss ? new Color(0.18f, 0.04f, 0.05f, 0.9f) : new Color(0.08f, 0.08f, 0.10f, 0.85f);
+            // A light frame behind the dark track: the track alone is dark-on-dark against the stage,
+            // so a bar at 1 HP used to vanish entirely (playtest 2026-09-28). The frame keeps the
+            // empty length visible, which is what says "nearly dead".
+            var frame = MakeRenderer(_barRoot, CenterSprite(), new Color(0.85f, 0.80f, 0.95f, 0.75f), BgSortOrder - 1);
+            frame.transform.localScale = new Vector3(_barWidth + FrameThickness * 2f, _barHeight + FrameThickness * 2f, 1f);
+
+            Color bgColor = isBoss ? new Color(0.18f, 0.04f, 0.05f, 1f) : new Color(0.06f, 0.05f, 0.09f, 1f);
             var bg = MakeRenderer(_barRoot, CenterSprite(), bgColor, BgSortOrder);
             bg.transform.localScale = new Vector3(_barWidth, _barHeight, 1f);
 

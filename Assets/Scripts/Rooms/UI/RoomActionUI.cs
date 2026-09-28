@@ -49,6 +49,7 @@ namespace Assets.Scripts.Rooms
         private Button _mapBack;
         private Label _mapHint;
         private UI.DungeonMapView _mapView;
+        private UI.EnemyNameplates _nameplates;
         /// <summary>Whether the map was opened from the pause overlay, so Back goes back there.</summary>
         private bool _mapFromPause;
 
@@ -283,6 +284,15 @@ namespace Assets.Scripts.Rooms
             // The map canvas is authored in the UXML; the painter is added into it the same way the
             // hub hosts the sphere grid. Nav is a single Back button, so the window needs no cursor -
             // Escape, Backspace and M all leave through CloseMap.
+            // Enemy names + HP numbers on the battle stage. The host is authored first in the root,
+            // so every window draws over the plates.
+            var nameplateHost = root.Q<VisualElement>("nameplate-layer");
+            if (nameplateHost != null)
+            {
+                _nameplates = new UI.EnemyNameplates();
+                nameplateHost.Add(_nameplates);
+            }
+
             var mapHost = root.Q<VisualElement>("map-canvas");
             if (mapHost != null)
             {
@@ -2017,6 +2027,8 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
+
+            _nameplates?.Tick(Camera.main);
 
             // Clicking anything that is not UI - a door, a wall, the floor - clears the EventSystem's
             // selection and with it the keyboard. Re-claiming here costs a null check and means the

@@ -47,9 +47,9 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
 - [ ] **7. No dungeon HUD.** In a level there is no gold counter, no level name ("Upper Halls"), no
   "Level 2 of 4", no minimap/room count. The room floats in a black screen. Gold earned from events
   has nowhere to show up.
-- [ ] **8. Abilities have no description.** The Ability picker shows "Slash 2/2" and nothing else —
+- [x] **8. Abilities have no description.** The Ability picker shows "Slash 2/2" and nothing else —
   no damage, no effect (it applied a bleed), no hint of how it differs from Attack.
-- [ ] **9. Enemy HP is unreadable.** Enemies get only a thin bar: no name, no number. At 1 HP the bar
+- [x] **9. Enemy HP is unreadable.** Enemies get only a thin bar: no name, no number. At 1 HP the bar
   is practically invisible (no dark background track).
 - [ ] **10. Hub requirements don't say where materials come from.** "Needs 8 Scrap Iron · 2 Rotted
   Timber", "Needs 1 Rotted Timber", "Needs 4 Scrap Iron" — nothing tells the player these drop in

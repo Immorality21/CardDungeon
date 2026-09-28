@@ -3,6 +3,10 @@
 
     <ui:VisualElement name="root" class="cd-root" picking-mode="Ignore">
 
+        <!-- Enemy nameplates (name + HP under each enemy in combat), filled by EnemyNameplates.
+             First child, so every window below draws over them. -->
+        <ui:VisualElement name="nameplate-layer" class="cd-nameplate-layer" picking-mode="Ignore" />
+
         <!-- Non-combat room actions -->
         <ui:VisualElement name="main-bar" class="cd-bar cd-dock-bottom cd-hidden">
             <ui:Button name="action-btn" text="Action" class="cd-cmd" />

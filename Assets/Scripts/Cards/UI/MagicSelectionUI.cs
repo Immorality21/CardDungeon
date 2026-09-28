@@ -47,6 +47,7 @@ namespace Assets.Scripts.Cards.UI
         private VisualElement _listPanel;
         private VisualElement _targetPanel;
         private Label _listTitle;
+        private Label _listDesc;
         private Label _targetPrompt;
         private ScrollView _listScroll;
         private ScrollView _targetScroll;
@@ -76,6 +77,7 @@ namespace Assets.Scripts.Cards.UI
         private readonly List<Button> _navRows = new List<Button>();
         private readonly List<Label> _navCursors = new List<Label>();
         private readonly List<Action> _navActions = new List<Action>();
+        private readonly List<string> _navDescriptions = new List<string>();
         private int _navSelected = -1;
 
         private void OnEnable()
@@ -142,6 +144,7 @@ namespace Assets.Scripts.Cards.UI
             _listPanel = root.Q<VisualElement>("magic-list-panel");
             _targetPanel = root.Q<VisualElement>("target-panel");
             _listTitle = root.Q<Label>("list-title");
+            _listDesc = root.Q<Label>("list-desc");
             _targetPrompt = root.Q<Label>("target-prompt");
             _listScroll = root.Q<ScrollView>("list-scroll");
             _targetScroll = root.Q<ScrollView>("target-scroll");
@@ -246,7 +249,8 @@ namespace Assets.Scripts.Cards.UI
 
                 int captured = i;
                 var slotRef = slot;
-                _listScroll.Add(CreateRow(icon, name, meta, selectable, () => OnSlotSelected(captured, slotRef)));
+                _listScroll.Add(CreateRow(icon, name, meta, selectable, () => OnSlotSelected(captured, slotRef),
+                    DescribeSlot(slot)));
             }
 
             ShowPanel(_listPanel);
@@ -358,7 +362,7 @@ namespace Assets.Scripts.Cards.UI
                 var captured = slot;
                 string meta = $"{slot.Charges}/{slot.MaxCharges}";
                 _listScroll.Add(CreateRow(slot.Summon.Sprite, slot.Summon.Label, meta, slot.CanUse,
-                    () => SubmitSummon(captured)));
+                    () => SubmitSummon(captured), SummonOps.Describe(slot.Summon, slot.Grant)));
             }
 
             ShowPanel(_listPanel);
@@ -421,7 +425,8 @@ namespace Assets.Scripts.Cards.UI
                 Sprite icon = valid ? so.Icon : null;
 
                 var captured = so;
-                _listScroll.Add(CreateRow(icon, name, meta, valid, () => OnItemSelected(captured)));
+                _listScroll.Add(CreateRow(icon, name, meta, valid, () => OnItemSelected(captured),
+                    valid ? so.Description : null));
             }
 
             ShowPanel(_listPanel);
@@ -764,8 +769,27 @@ namespace Assets.Scripts.Cards.UI
             return Progression.MetaProgressManager.Instance.GetMagicUpgradeLevel(magic.Key);
         }
 
+        /// <summary>
+        /// The footer text for one ability slot: flavour plus what it does in this hero's hands
+        /// (<see cref="AbilityDescriber"/>), with the Forge bonus and upgrade gates the cast will use.
+        /// </summary>
+        private string DescribeSlot(MagicSlot slot)
+        {
+            if (slot == null || slot.IsEmpty)
+            {
+                return null;
+            }
+
+            var meta = Progression.MetaProgressManager.HasInstance ? Progression.MetaProgressManager.Instance : null;
+            int powerBonus = meta != null ? meta.GetMagicPowerBonus(slot.Magic.Key) : 0;
+            int upgradeLevel = meta != null ? MagicUpgradeLevelOf(slot.Magic) : 0;
+            var tracker = CombatManager.HasInstance ? CombatManager.Instance.BuffTracker : null;
+            return AbilityDescriber.Full(slot.Magic, _currentHero, tracker, powerBonus, upgradeLevel);
+        }
+
         // Rows mirror the command menu: a ▸ cursor on the selected row, icon, dark name, meta.
-        private Button CreateRow(Sprite icon, string name, string meta, bool enabled, Action onClick)
+        // The description (if any) is shown in the list's footer while the row is selected.
+        private Button CreateRow(Sprite icon, string name, string meta, bool enabled, Action onClick, string description = null)
         {
             var row = new Button(onClick);
             row.text = string.Empty;
@@ -804,6 +828,7 @@ namespace Assets.Scripts.Cards.UI
                 _navRows.Add(row);
                 _navCursors.Add(cursor);
                 _navActions.Add(onClick);
+                _navDescriptions.Add(description);
                 row.RegisterCallback<MouseEnterEvent>(_ => SetNavSelected(idx));
             }
 
@@ -820,6 +845,7 @@ namespace Assets.Scripts.Cards.UI
             _navRows.Clear();
             _navCursors.Clear();
             _navActions.Clear();
+            _navDescriptions.Clear();
             _navSelected = -1;
         }
 
@@ -852,6 +878,25 @@ namespace Assets.Scripts.Cards.UI
                 _navCursors[i].text = selected ? "▸" : string.Empty;
                 _navRows[i].EnableInClassList("cd-sel-row--selected", selected);
             }
+            RenderDescription();
+        }
+
+        /// <summary>
+        /// Shows the selected row's description under the list, or hides the footer when it has
+        /// none - an empty box would read as missing text.
+        /// </summary>
+        private void RenderDescription()
+        {
+            if (_listDesc == null)
+            {
+                return;
+            }
+
+            string text = _navSelected >= 0 && _navSelected < _navDescriptions.Count
+                ? _navDescriptions[_navSelected]
+                : null;
+            _listDesc.text = text ?? string.Empty;
+            _listDesc.EnableInClassList("cd-hidden", string.IsNullOrEmpty(text));
         }
 
         private void SetNavSelected(int index)
