@@ -234,6 +234,7 @@ backlog.**
 | **17** | Content volume is the biggest single gap | not started |
 | **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28) |
 | **19** | Shipping surface | not started |
+| — | **Menu improvements** — a whole-game UI review, one section per screen, ranked "do these first" | open (2026-09-28): [`MENU_IMPROVEMENTS.md`](MENU_IMPROVEMENTS.md), a to-do file like the playtest one |
 | **21** | **Art pass** — menu backdrops (title, level entry, story map) + every outdated sprite (five still enemies, two small bosses, the flat-style heroes) | open (2026-09-28); the `productName` / save-folder rename is parked here too |
 
 ---

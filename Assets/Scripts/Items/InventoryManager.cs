@@ -155,6 +155,17 @@ namespace Assets.Scripts.Items
                 .ToList();
         }
 
+        /// <summary>
+        /// Every piece of equipment the party owns, worn or not - what the equipment screen offers
+        /// for a slot, so a sword on the Paladin can be handed to the Warrior without a detour.
+        /// </summary>
+        public List<ItemSaveData> GetAllEquipment()
+        {
+            return _saveData.Items
+                .Where(i => IsCategory(i, ItemCategory.Equipment))
+                .ToList();
+        }
+
         /// <summary>All consumable stacks the party is carrying.</summary>
         public List<ItemSaveData> GetConsumables()
         {

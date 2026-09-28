@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Combat;
+using Assets.Scripts.Enemies;
+using Assets.Scripts.Enemies.UI;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
+using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,39 +15,68 @@ using UnityEngine.UIElements;
 namespace Assets.Scripts.Items.UI
 {
     /// <summary>
-    /// Hub inventory (UI Toolkit view-controller, mirrors <c>MagicForgeUI</c>). Four tabs:
-    /// equipment per hero, the spell loadout per hero, the carried consumables, and the raw
-    /// materials hauled home. It is the only place gear and kit are managed, since both are
-    /// between-run decisions. Operates on a VisualElement subtree owned by the menu's UIDocument (not a MonoBehaviour).
+    /// Hub inventory (UI Toolkit view-controller). Four tabs - equipment and the ability loadout per
+    /// hero, the carried consumables and the hauled materials party-wide - in one fixed frame:
+    /// a header band with the tabs, a hero strip, three columns (what is worn or carried, the list to
+    /// choose from, and a detail pane for whatever the cursor is on) and a hint line. The frame is
+    /// authored in <c>Hub.uxml</c>; this class only fills its regions with rows.
+    ///
+    /// <para><b>Equipment works the FF way.</b> The cursor starts on the hero's slots. Moving it
+    /// lists what fits that slot beside it - the party's bag <i>and</i> what other heroes wear - and
+    /// Enter moves into that list, where every item shows its effect on the hero's stats before it
+    /// is put on. Enter equips and returns to the slots; Esc backs out a layer at a time.</para>
+    ///
+    /// <para>Stats here are the ones the hero fights with: base, plus the sphere-grid nodes they
+    /// have bought, plus gear (<see cref="HeroStatCalculator"/>) - this screen used to leave the
+    /// grid out and understate every hero who had spent XP.</para>
+    ///
     /// Reads the roster from a <see cref="PartyRosterSO"/> because the hub has no live Party, and all
     /// item/equip state from the (scene-independent) <see cref="InventoryManager"/>.
-    ///
-    /// Interaction mirrors the battle scene's cursor selection list (see MagicSelectionUI): a ▸
-    /// cursor over the rows, driven by keyboard (Up/Down/Enter, Left/Right tabs, Q/E hero, Esc back)
-    /// while staying fully mouse-usable.
     /// </summary>
     public class InventoryHubUI
     {
         private enum Tab { Equipment, Spells, Consumables, Materials }
+
+        private enum Focus { Slots, List }
+
+        /// <summary>One selectable row: what it previews in the detail pane, and what Enter does.</summary>
+        private class Entry
+        {
+            public VisualElement Row;
+            public Label Cursor;
+            public Action Preview;
+            public Action Confirm;
+
+            /// <summary>The loadout this entry would leave the hero in (equipment list only).</summary>
+            public List<ItemSO> Gear;
+        }
 
         private readonly VisualElement _root;
         private readonly PartyRosterSO _roster;
         private List<HeroSO> _ownedHeroes;
 
         private readonly VisualElement _heroesRow;
-        private readonly Label _statsLabel;
-        private readonly VisualElement _tabsBar;
         private readonly Button _tabEquipment;
         private readonly Button _tabSpells;
         private readonly Button _tabConsumables;
         private readonly Button _tabMaterials;
-        private readonly ScrollView _scroll;
+        private readonly Label _leftTitle;
+        private readonly VisualElement _left;
+        private readonly Label _listTitle;
+        private readonly ScrollView _list;
         private readonly Label _emptyLabel;
+        private readonly VisualElement _detailIcon;
+        private readonly Label _detailName;
+        private readonly Label _detailSub;
+        private readonly ScrollView _detailBody;
+        private readonly Label _hint;
         private readonly Button _closeButton;
 
         private Tab _tab = Tab.Equipment;
+        private Focus _focus = Focus.Slots;
         private string _selectedHeroKey;
         private bool _isShown;
+        private int _slotIndex;
 
         // The chosen spell loadouts, loaded on Show and written straight back on every change. A
         // loadout is a preference, not a gain, so it is not deferred to a level clear the way XP and
@@ -50,22 +84,11 @@ namespace Assets.Scripts.Items.UI
         private readonly FileHandler _files = new FileHandler();
         private MagicLoadoutSaveData _loadout;
 
-        // Cursor-driven keyboard navigation over the currently shown selectable rows.
-        private readonly List<VisualElement> _navRows = new List<VisualElement>();
-        private readonly List<Label> _navCursors = new List<Label>();
-        private readonly List<Action> _navActions = new List<Action>();
-        private int _navSelected = -1;
+        private readonly List<Entry> _slotEntries = new List<Entry>();
+        private readonly List<Entry> _listEntries = new List<Entry>();
+        private int _listIndex = -1;
 
         public event Action OnClosed;
-
-        private static readonly Dictionary<ItemRarity, Color> RarityColors = new Dictionary<ItemRarity, Color>
-        {
-            { ItemRarity.Common, new Color(0.78f, 0.78f, 0.78f) },
-            { ItemRarity.Uncommon, new Color(0.30f, 0.85f, 0.30f) },
-            { ItemRarity.Rare, new Color(0.30f, 0.50f, 1.00f) },
-            { ItemRarity.Epic, new Color(0.70f, 0.30f, 0.90f) },
-            { ItemRarity.Legendary, new Color(1.00f, 0.65f, 0.00f) }
-        };
 
         public InventoryHubUI(VisualElement root, PartyRosterSO roster)
         {
@@ -73,46 +96,41 @@ namespace Assets.Scripts.Items.UI
             _roster = roster;
 
             _heroesRow = root.Q<VisualElement>("inventory-heroes");
-            _statsLabel = root.Q<Label>("inventory-stats");
-            _tabsBar = root.Q<VisualElement>("inventory-tabs");
             _tabEquipment = root.Q<Button>("tab-equipment");
             _tabSpells = root.Q<Button>("tab-spells");
             _tabConsumables = root.Q<Button>("tab-consumables");
             _tabMaterials = root.Q<Button>("tab-materials");
-            _scroll = root.Q<ScrollView>("inventory-scroll");
+            _leftTitle = root.Q<Label>("inv-left-title");
+            _left = root.Q<VisualElement>("inv-left");
+            _listTitle = root.Q<Label>("inv-list-title");
+            _list = root.Q<ScrollView>("inventory-scroll");
             _emptyLabel = root.Q<Label>("inventory-empty");
+            _detailIcon = root.Q<VisualElement>("inv-detail-icon");
+            _detailName = root.Q<Label>("inv-detail-name");
+            _detailSub = root.Q<Label>("inv-detail-sub");
+            _detailBody = root.Q<ScrollView>("inv-detail-body");
+            _hint = root.Q<Label>("inventory-hint");
             _closeButton = root.Q<Button>("inventory-close");
 
-            if (_tabEquipment != null)
-            {
-                _tabEquipment.clicked += () => SetTab(Tab.Equipment);
-                _tabEquipment.focusable = false;
-            }
-            if (_tabSpells != null)
-            {
-                _tabSpells.clicked += () => SetTab(Tab.Spells);
-                _tabSpells.focusable = false;
-            }
-            if (_tabConsumables != null)
-            {
-                _tabConsumables.clicked += () => SetTab(Tab.Consumables);
-                _tabConsumables.focusable = false;
-            }
-            if (_tabMaterials != null)
-            {
-                _tabMaterials.clicked += () => SetTab(Tab.Materials);
-                _tabMaterials.focusable = false;
-            }
+            WireTab(_tabEquipment, Tab.Equipment);
+            WireTab(_tabSpells, Tab.Spells);
+            WireTab(_tabConsumables, Tab.Consumables);
+            WireTab(_tabMaterials, Tab.Materials);
             if (_closeButton != null)
             {
                 _closeButton.clicked += Hide;
                 _closeButton.focusable = false;
             }
-            if (_scroll != null)
+
+            // Keep keyboard focus on the view root, not the ScrollViews, so the cursor owns the
+            // arrows (UITK's default focus navigation would otherwise steal them).
+            if (_list != null)
             {
-                // Keep keyboard focus on the view root, not the ScrollView, so our cursor nav owns
-                // the arrows (UITK's default focus navigation would otherwise steal them).
-                _scroll.focusable = false;
+                _list.focusable = false;
+            }
+            if (_detailBody != null)
+            {
+                _detailBody.focusable = false;
             }
 
             // The view root owns keyboard input while open; swallow UITK's built-in navigation so
@@ -125,20 +143,32 @@ namespace Assets.Scripts.Items.UI
             _root.style.display = DisplayStyle.None;
         }
 
+        private void WireTab(Button tab, Tab which)
+        {
+            if (tab == null)
+            {
+                return;
+            }
+            tab.clicked += () => SetTab(which);
+            tab.focusable = false;
+        }
+
         public void Show()
         {
             _root.style.display = DisplayStyle.Flex;
             _isShown = true;
             _tab = Tab.Equipment;
+            _focus = Focus.Slots;
+            _slotIndex = 0;
 
-            // The hub MenuScene has no wired Managers prefab; touch Instance so the manager
-            // auto-creates and loads (in Awake) before we read equip/consumable state.
+            // The hub has no wired Managers prefab; touch Instance so the manager auto-creates and
+            // loads (in Awake) before we read equip/consumable state.
             _ = InventoryManager.Instance;
 
             _loadout = _files.Load<MagicLoadoutSaveData>();
 
-            // Default to the first owned hero. The catalog lists every hero in the game; only the
-            // ones the player has actually acquired get gear slots here.
+            // The catalog lists every hero in the game; only the ones the player has actually
+            // acquired get a card here.
             _ownedHeroes = null;
             _selectedHeroKey = null;
             var owned = RosterHeroes();
@@ -147,11 +177,7 @@ namespace Assets.Scripts.Items.UI
                 _selectedHeroKey = owned[0].SaveKey;
             }
 
-            RefreshTabs();
-            RefreshHeroes();
-            RefreshStats();
-            RefreshList();
-
+            Refresh();
             FocusRoot();
         }
 
@@ -172,8 +198,13 @@ namespace Assets.Scripts.Items.UI
             }
         }
 
-        /// <summary>Left/Right step through the tabs. Clamped rather than wrapping, so the ends
-        /// of the row feel like ends - the same behaviour two tabs had when they were a toggle.</summary>
+        // ============================================================
+        //  TABS AND HEROES
+        // ============================================================
+
+        private bool IsPerHeroTab => _tab == Tab.Equipment || _tab == Tab.Spells;
+
+        /// <summary>Left/Right step through the tabs, clamped so the ends of the row feel like ends.</summary>
         private void CycleTab(int delta)
         {
             int next = Mathf.Clamp((int)_tab + delta, 0, (int)Tab.Materials);
@@ -186,26 +217,24 @@ namespace Assets.Scripts.Items.UI
         private void SetTab(Tab tab)
         {
             _tab = tab;
+            _focus = tab == Tab.Equipment ? Focus.Slots : Focus.List;
+            Refresh();
+        }
+
+        private void Refresh()
+        {
             RefreshTabs();
-            RefreshStats();
-            RefreshList();
+            RefreshHeroes();
+            RefreshBody();
         }
 
         private void RefreshTabs()
         {
-            _tabEquipment?.EnableInClassList("cd-tab--active", _tab == Tab.Equipment);
-            _tabSpells?.EnableInClassList("cd-tab--active", _tab == Tab.Spells);
-            _tabConsumables?.EnableInClassList("cd-tab--active", _tab == Tab.Consumables);
-            _tabMaterials?.EnableInClassList("cd-tab--active", _tab == Tab.Materials);
-            // Stats are an equipment readout; the hero selector serves both per-hero tabs and
-            // nothing on the two party-wide ones.
-            SetShown(_statsLabel, _tab == Tab.Equipment);
-            SetShown(_heroesRow, _tab == Tab.Equipment || _tab == Tab.Spells);
+            _tabEquipment?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Equipment);
+            _tabSpells?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Spells);
+            _tabConsumables?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Consumables);
+            _tabMaterials?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Materials);
         }
-
-        // ============================================================
-        //  HERO SELECTOR
-        // ============================================================
 
         private void RefreshHeroes()
         {
@@ -214,10 +243,10 @@ namespace Assets.Scripts.Items.UI
                 return;
             }
             _heroesRow.Clear();
-            if (_roster == null)
-            {
-                return;
-            }
+
+            // Muted, never hidden: the strip keeps its height on every tab so nothing below moves.
+            bool perHero = IsPerHeroTab;
+            _heroesRow.EnableInClassList("cd-inv-heroes--muted", !perHero);
 
             foreach (var hero in RosterHeroes())
             {
@@ -225,19 +254,67 @@ namespace Assets.Scripts.Items.UI
                 {
                     continue;
                 }
+
                 var key = hero.SaveKey;
-                var btn = new Button(() => SelectHero(key)) { text = hero.DisplayName };
-                btn.AddToClassList("cd-tab");
-                btn.EnableInClassList("cd-tab--active", key == _selectedHeroKey);
-                btn.focusable = false;
-                _heroesRow.Add(btn);
+                var card = new VisualElement();
+                card.AddToClassList("cd-inv-hero");
+                card.EnableInClassList("cd-inv-hero--active", perHero && key == _selectedHeroKey);
+                card.pickingMode = perHero ? PickingMode.Position : PickingMode.Ignore;
+                card.tooltip = hero.DisplayName;
+
+                var sprite = new VisualElement { pickingMode = PickingMode.Ignore };
+                sprite.AddToClassList("cd-inv-hero__sprite");
+                if (hero.Sprite != null)
+                {
+                    sprite.style.backgroundImage = new StyleBackground(hero.Sprite);
+                }
+                card.Add(sprite);
+
+                var name = new Label(hero.DisplayName) { pickingMode = PickingMode.Ignore };
+                name.AddToClassList("cd-inv-hero__name");
+                card.Add(name);
+
+                if (perHero)
+                {
+                    card.RegisterCallback<ClickEvent>(_ => SelectHero(key));
+                }
+                _heroesRow.Add(card);
             }
+
+            // The strip's right end: the selected hero at a glance on the per-hero tabs, the purse on
+            // the party-wide ones.
+            var summary = new VisualElement { pickingMode = PickingMode.Ignore };
+            summary.AddToClassList("cd-inv-heroes__summary");
+            var selected = FindHero(_selectedHeroKey);
+            if (perHero && selected != null)
+            {
+                var stats = StatsWith(CurrentGear());
+                var save = HeroRoster.GetHeroSave(selected);
+                int xp = save != null ? save.CurrentXp : 0;
+                AddSummaryLine(summary, selected.DisplayName, "cd-inv-heroes__summary-name");
+                AddSummaryLine(summary, $"HP {stats[StatType.MaxHealth]} \u00b7 {xp} XP to spend", null);
+            }
+            else if (MetaProgressManager.HasInstance)
+            {
+                AddSummaryLine(summary, $"{MetaProgressManager.Instance.Gold} gold", "cd-inv-heroes__summary-name");
+            }
+            _heroesRow.Add(summary);
+        }
+
+        private static void AddSummaryLine(VisualElement parent, string text, string extraClass)
+        {
+            var label = new Label(text) { pickingMode = PickingMode.Ignore };
+            label.AddToClassList("cd-inv-heroes__summary-line");
+            if (extraClass != null)
+            {
+                label.AddToClassList(extraClass);
+            }
+            parent.Add(label);
         }
 
         /// <summary>
         /// The heroes this screen manages: the *owned* subset of the catalog, via
-        /// <see cref="HeroRoster"/>. Cached per Show() because it reads the party save off disk and
-        /// the list is queried on every refresh.
+        /// <see cref="HeroRoster"/>. Cached per Show() because it reads the party save off disk.
         /// </summary>
         private List<HeroSO> RosterHeroes()
         {
@@ -252,10 +329,17 @@ namespace Assets.Scripts.Items.UI
 
         private void SelectHero(string heroKey)
         {
+            if (heroKey == _selectedHeroKey)
+            {
+                return;
+            }
             _selectedHeroKey = heroKey;
+            if (_tab == Tab.Equipment)
+            {
+                _focus = Focus.Slots;
+            }
             RefreshHeroes();
-            RefreshStats();
-            RefreshList();
+            RefreshBody();
         }
 
         private void CycleHero(int delta)
@@ -271,8 +355,7 @@ namespace Assets.Scripts.Items.UI
                 current = 0;
             }
             int count = heroes.Count;
-            int next = ((current + delta) % count + count) % count;
-            var hero = heroes[next];
+            var hero = heroes[((current + delta) % count + count) % count];
             if (hero != null)
             {
                 SelectHero(hero.SaveKey);
@@ -280,174 +363,394 @@ namespace Assets.Scripts.Items.UI
         }
 
         // ============================================================
-        //  STATS PREVIEW (base HeroSO stats + equipment bonuses)
+        //  BODY
         // ============================================================
 
-        private void RefreshStats()
+        private void RefreshBody()
         {
-            if (_statsLabel == null)
-            {
-                return;
-            }
-
-            var hero = FindHero(_selectedHeroKey);
-            if (hero == null)
-            {
-                _statsLabel.text = string.Empty;
-                return;
-            }
-
-            var raw = InventoryManager.Instance.ComputeRawBonuses(_selectedHeroKey);
-            var pct = InventoryManager.Instance.ComputePercentageBonuses(_selectedHeroKey);
-
-            // Every stat, generated: the four hand-written ones used to hide Intelligence, Spirit
-            // and Luck entirely, which are exactly the stats that distinguish a caster.
-            var parts = new List<string>();
-            foreach (var stat in StatCatalog.Types)
-            {
-                parts.Add(StatCatalog.ShortName(stat) + " "
-                    + Effective(hero.BaseStats[stat], raw[stat], pct[stat]));
-            }
-            _statsLabel.text = string.Join("   ", parts);
-        }
-
-        private static int Effective(int baseVal, float raw, float pct)
-        {
-            return Mathf.RoundToInt((baseVal + raw) * (1f + pct / 100f));
-        }
-
-        // ============================================================
-        //  LIST (equipment slots + bag, or consumables)
-        // ============================================================
-
-        private void RefreshList()
-        {
-            if (_scroll == null)
-            {
-                return;
-            }
-            _scroll.Clear();
-            ClearNav();
-
-            if (_tab == Tab.Equipment)
-            {
-                RefreshEquipment();
-            }
-            else if (_tab == Tab.Spells)
-            {
-                RefreshSpells();
-            }
-            else if (_tab == Tab.Materials)
-            {
-                RefreshMaterials();
-            }
-            else
-            {
-                RefreshConsumables();
-            }
-
-            BeginNavigation();
-        }
-
-        private void RefreshEquipment()
-        {
+            _left?.Clear();
+            _list?.Clear();
+            _slotEntries.Clear();
+            _listEntries.Clear();
+            _listIndex = -1;
             SetShown(_emptyLabel, false);
 
-            // Equipped slots (click / Enter a filled slot to unequip).
-            foreach (SlotType slot in Enum.GetValues(typeof(SlotType)))
+            switch (_tab)
             {
-                var equipped = InventoryManager.Instance.GetEquipped(slot, _selectedHeroKey);
-                if (equipped != null)
-                {
-                    var so = InventoryManager.Instance.GetItemSO(equipped.ItemKey);
-                    string name = so != null ? so.DisplayName : equipped.ItemKey;
-                    var capturedSlot = slot;
-                    _scroll.Add(BuildRow(so != null ? so.Icon : null, $"[{slot}] {name}", "Unequip", true,
-                        () => Unequip(capturedSlot), so));
-                }
-                else
-                {
-                    _scroll.Add(BuildRow(null, $"[{slot}] Empty", string.Empty, false, null, null));
-                }
+                case Tab.Equipment:
+                    BuildEquipment();
+                    break;
+                case Tab.Spells:
+                    BuildSpells();
+                    break;
+                case Tab.Consumables:
+                    BuildConsumables();
+                    break;
+                default:
+                    BuildMaterials();
+                    break;
             }
 
-            // Un-equipped equipment in the bag (click / Enter to equip on the selected hero).
-            var bag = InventoryManager.Instance.GetBagEquipment();
-            foreach (var item in bag)
+            RenderCursor();
+            RefreshHint();
+        }
+
+        private void RefreshHint()
+        {
+            if (_hint == null)
             {
-                var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
-                string name = so != null ? so.DisplayName : item.ItemKey;
-                var capturedItem = item;
-                var capturedSo = so;
-                _scroll.Add(BuildRow(so != null ? so.Icon : null, name, "Equip", capturedSo != null,
-                    () => Equip(capturedItem, capturedSo), so));
+                return;
             }
 
-            if (bag.Count == 0)
+            switch (_tab)
             {
-                var note = new Label("Bag has no equipment.");
-                note.AddToClassList("cd-info-label");
-                _scroll.Add(note);
+                case Tab.Equipment:
+                    _hint.text = _focus == Focus.Slots
+                        ? "↑↓ slot · Enter choose an item · Q/E hero · ←→ tab · Esc back"
+                        : "↑↓ item · Enter equip · Esc back to the slots";
+                    break;
+                case Tab.Spells:
+                    _hint.text = "↑↓ ability · Enter carry or put away · Q/E hero · ←→ tab · Esc back";
+                    break;
+                default:
+                    _hint.text = "↑↓ browse · ←→ tab · Esc back";
+                    break;
             }
+        }
+
+        // ------------------------------------------------------------ equipment
+
+        private void BuildEquipment()
+        {
+            var hero = FindHero(_selectedHeroKey);
+            SetText(_leftTitle, "Equipped");
+            if (hero == null)
+            {
+                SetText(_listTitle, string.Empty);
+                ShowEmpty("No hero to equip yet.");
+                ClearDetail();
+                return;
+            }
+
+            var slots = ItemPresenter.SlotOrder;
+            _slotIndex = Mathf.Clamp(_slotIndex, 0, slots.Length - 1);
+
+            for (int i = 0; i < slots.Length; i++)
+            {
+                var slot = slots[i];
+                var worn = WornItem(slot);
+                int index = i;
+
+                var entry = new Entry
+                {
+                    Preview = () => ShowSlotDetail(slot),
+                    Confirm = () => EnterList(),
+                };
+                // An empty slot leads with the slot's name: a column of "Empty Empty Empty" says
+                // nothing at a glance.
+                entry.Row = BuildRow(
+                    worn != null ? worn.Icon : null,
+                    worn != null ? worn.DisplayName : ItemPresenter.SlotLabel(slot),
+                    worn != null ? ItemPresenter.SlotLabel(slot) : "Empty",
+                    string.Empty,
+                    worn,
+                    out entry.Cursor);
+                entry.Row.EnableInClassList("cd-inv-row--empty", worn == null);
+                entry.Row.RegisterCallback<MouseEnterEvent>(_ =>
+                {
+                    // Hovering a slot takes the cursor back from the list, so the mouse is never stuck
+                    // on one side after brushing past the other.
+                    if (_focus == Focus.List)
+                    {
+                        _focus = Focus.Slots;
+                        _listIndex = -1;
+                        RefreshHint();
+                    }
+                    else if (_slotIndex == index)
+                    {
+                        return;
+                    }
+                    MoveSlotTo(index);
+                });
+                entry.Row.RegisterCallback<ClickEvent>(_ =>
+                {
+                    _focus = Focus.Slots;
+                    MoveSlotTo(index);
+                    EnterList();
+                });
+                _slotEntries.Add(entry);
+                _left?.Add(entry.Row);
+            }
+
+            BuildCandidates(slots[_slotIndex]);
         }
 
         /// <summary>
-        /// The spell loadout: every magic the selected hero's sphere grid has taught them, with the
-        /// ones they are carrying marked, and a header saying how many slots they have.
-        ///
-        /// <para>This screen exists because knowing and carrying stopped being the same thing.
-        /// Under Draw a hero's slots were filled in the field and a MagicKnown node brought its own
-        /// slot with it; now the grid only ever adds to what a hero <i>knows</i>, and slots stay
-        /// scarce (<c>EquippedMagicState.DefaultSlotCount</c> plus <c>MagicSlot</c> nodes), so which
-        /// of them to bring is a decision that has to be made somewhere. Here, between runs, beside
-        /// the other one.</para>
-        ///
-        /// <para>A hero who never opens this still walks in armed: an empty choice auto-fills from
-        /// what they know, in grid order (<see cref="MagicLoadoutOps.Resolve"/>). Toggling writes the
-        /// resolved list, so the first click also commits whatever the auto-fill had picked - which
-        /// is what makes "unequip one spell" behave the way it reads.</para>
+        /// What can go in <paramref name="slot"/>: a "take it off" row when something is worn, then
+        /// every item of that slot the party owns - the bag first, then what other heroes wear.
         /// </summary>
-        private void RefreshSpells()
+        private void BuildCandidates(SlotType slot)
+        {
+            _list?.Clear();
+            _listEntries.Clear();
+            SetShown(_emptyLabel, false);
+            SetText(_listTitle, "Fits " + ItemPresenter.SlotLabel(slot));
+
+            var worn = WornItem(slot);
+            if (worn != null)
+            {
+                var remove = new Entry
+                {
+                    Gear = ItemPresenter.SwapOut(CurrentGear(), slot),
+                    Preview = () => ShowItemDetail(worn, SlotRemovalPreview(slot),
+                        $"Taking it off leaves the {ItemPresenter.SlotLabel(slot).ToLowerInvariant()} slot empty.",
+                        removing: true),
+                    Confirm = () => Unequip(slot),
+                };
+                remove.Row = BuildRow(null, "Take off " + worn.DisplayName, "Leave the slot empty",
+                    string.Empty, null, out remove.Cursor);
+                var glyph = new Label("✕") { pickingMode = PickingMode.Ignore };
+                glyph.AddToClassList("cd-inv-row__glyph");
+                remove.Row.Q(className: "cd-inv-row__icon").Add(glyph);
+                AddListEntry(remove);
+            }
+
+            var bag = new List<ItemSaveData>();
+            var others = new List<ItemSaveData>();
+            foreach (var item in InventoryManager.Instance.GetAllEquipment())
+            {
+                var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
+                if (so == null || so.SlotType != slot)
+                {
+                    continue;
+                }
+                if (string.IsNullOrEmpty(item.EquippedSlot))
+                {
+                    bag.Add(item);
+                }
+                else if (item.EquippedHeroKey != _selectedHeroKey)
+                {
+                    others.Add(item);
+                }
+            }
+
+            foreach (var item in bag)
+            {
+                AddCandidate(item, null);
+            }
+            foreach (var item in others)
+            {
+                var wearer = FindHero(item.EquippedHeroKey);
+                AddCandidate(item, wearer != null
+                    ? wearer.DisplayName
+                    : (string.IsNullOrEmpty(item.EquippedHeroKey) ? "someone" : item.EquippedHeroKey));
+            }
+
+            if (_listEntries.Count == 0)
+            {
+                ShowEmpty($"Nothing the party owns fits the {ItemPresenter.SlotLabel(slot).ToLowerInvariant()} slot.");
+            }
+        }
+
+        private void AddCandidate(ItemSaveData item, string wornBy)
+        {
+            var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
+            var gear = ItemPresenter.SwapIn(CurrentGear(), so);
+            var preview = StatsWith(gear);
+            var current = StatsWith(CurrentGear());
+
+            var entry = new Entry
+            {
+                Gear = gear,
+                Preview = () => ShowItemDetail(so, preview,
+                    wornBy != null ? $"Worn by {wornBy} - equipping it takes it from them." : null),
+                Confirm = () => Equip(item, so),
+            };
+
+            string caption = wornBy != null
+                ? $"Worn by {wornBy}"
+                : ItemPresenter.RarityLabel(so.Rarity);
+            entry.Row = BuildRow(so.Icon, so.DisplayName, caption, string.Empty, so, out entry.Cursor);
+
+            // The two biggest changes it makes, each in its own colour: one number alone lied - a
+            // staff read "+5 INT" while costing 4 Strength.
+            var meta = entry.Row.Q<Label>(className: "cd-inv-row__meta");
+            var chips = new VisualElement { pickingMode = PickingMode.Ignore };
+            chips.AddToClassList("cd-inv-row__chips");
+            foreach (var change in BiggestChanges(current, preview, 2))
+            {
+                string sign = change.Amount > 0 ? "+" : "\u2212";
+                var chip = new Label($"{sign}{Mathf.Abs(change.Amount)} {StatCatalog.ShortName(change.Stat)}")
+                {
+                    pickingMode = PickingMode.Ignore,
+                };
+                chip.AddToClassList("cd-inv-row__chip");
+                chip.AddToClassList(change.Amount > 0 ? "cd-inv-delta--up" : "cd-inv-delta--down");
+                chips.Add(chip);
+            }
+            meta.parent.Insert(meta.parent.IndexOf(meta), chips);
+            meta.RemoveFromHierarchy();
+
+            AddListEntry(entry);
+        }
+
+        private void MoveSlotTo(int index)
+        {
+            _slotIndex = Mathf.Clamp(index, 0, ItemPresenter.SlotOrder.Length - 1);
+            BuildCandidates(ItemPresenter.SlotOrder[_slotIndex]);
+            RenderCursor();
+        }
+
+        private void EnterList()
+        {
+            if (_tab != Tab.Equipment || _listEntries.Count == 0)
+            {
+                return;
+            }
+            _focus = Focus.List;
+            _listIndex = 0;
+            RenderCursor();
+            RefreshHint();
+        }
+
+        private void LeaveList()
+        {
+            _focus = Focus.Slots;
+            _listIndex = -1;
+            RenderCursor();
+            RefreshHint();
+        }
+
+        private void Equip(ItemSaveData item, ItemSO so)
+        {
+            if (so == null || string.IsNullOrEmpty(_selectedHeroKey))
+            {
+                return;
+            }
+
+            // Worn by someone else: take it off them first. Equip only clears the target hero's slot.
+            // Keyed on the slot rather than the wearer, so an old save's item marked equipped with no
+            // hero key is still lifted out of the cache before it moves.
+            if (!string.IsNullOrEmpty(item.EquippedSlot) && item.EquippedHeroKey != _selectedHeroKey)
+            {
+                InventoryManager.Instance.Unequip(so.SlotType, item.EquippedHeroKey ?? string.Empty);
+            }
+            InventoryManager.Instance.Equip(item, so.SlotType, _selectedHeroKey);
+            _focus = Focus.Slots;
+            RefreshHeroes();
+            RefreshBody();
+        }
+
+        private void Unequip(SlotType slot)
+        {
+            InventoryManager.Instance.Unequip(slot, _selectedHeroKey);
+            _focus = Focus.Slots;
+            RefreshHeroes();
+            RefreshBody();
+        }
+
+        private ItemSO WornItem(SlotType slot)
+        {
+            var saved = InventoryManager.Instance.GetEquipped(slot, _selectedHeroKey);
+            return saved != null ? InventoryManager.Instance.GetItemSO(saved.ItemKey) : null;
+        }
+
+        private List<ItemSO> CurrentGear()
+        {
+            return InventoryManager.Instance.GetEquippedItems(_selectedHeroKey);
+        }
+
+        private StatBlock SlotRemovalPreview(SlotType slot)
+        {
+            return StatsWith(ItemPresenter.SwapOut(CurrentGear(), slot));
+        }
+
+        // ------------------------------------------------------------ abilities
+
+        /// <summary>
+        /// The loadout: every ability the hero's sphere grid has taught them, with the ones they carry
+        /// into a run marked, against a scarce number of slots. An empty choice auto-fills from what
+        /// they know (<see cref="MagicLoadoutOps.Resolve"/>), and toggling writes the resolved list,
+        /// so the first click also commits whatever the auto-fill had picked.
+        /// </summary>
+        private void BuildSpells()
         {
             var hero = FindHero(_selectedHeroKey);
+            SetText(_leftTitle, "Carried");
+            SetText(_listTitle, "Known abilities");
             if (hero == null)
             {
                 ShowEmpty("No hero selected.");
+                ClearDetail();
                 return;
             }
 
-            var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, ActivatedNodesOf(hero));
+            var nodes = ActivatedNodesOf(hero);
+            var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, nodes);
+            int slots = SlotCount(hero, nodes);
+            var carried = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), slots);
+
+            // Left: the slots as pips, then what fills them.
+            var pips = new VisualElement();
+            pips.AddToClassList("cd-inv-pips");
+            var pipsLabel = new Label("Slots");
+            pipsLabel.AddToClassList("cd-inv-pips__label");
+            pips.Add(pipsLabel);
+            for (int i = 0; i < slots; i++)
+            {
+                var pip = new VisualElement();
+                pip.AddToClassList("cd-inv-pip");
+                pip.EnableInClassList("cd-inv-pip--filled", i < carried.Count);
+                pips.Add(pip);
+            }
+            _left?.Add(pips);
+
+            foreach (var key in carried)
+            {
+                var magic = Magic(key);
+                var row = BuildRow(magic != null ? magic.Icon : null, magic != null ? magic.DisplayName : key,
+                    $"{ChargesOf(known, key)} charges a run", string.Empty, null, out _);
+                row.AddToClassList("cd-inv-row--static");
+                _left?.Add(row);
+            }
+            if (carried.Count == 0)
+            {
+                var none = new Label("Nothing carried.");
+                none.AddToClassList("cd-inv-empty");
+                _left?.Add(none);
+            }
+
             if (known.Count == 0)
             {
                 ShowEmpty($"{hero.DisplayName} knows no abilities yet. Learn one on the sphere grid.");
+                ClearDetail();
                 return;
             }
 
-            SetShown(_emptyLabel, false);
-
-            int slots = EquippedMagicState.DefaultSlotCount
-                + SphereGridOps.SlotBonusForNodes(hero.SphereGrid, ActivatedNodesOf(hero));
-            var equipped = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), slots);
-
-            var header = new Label($"Carrying {equipped.Count} of {slots} slots — {known.Count} known.");
-            header.AddToClassList("cd-info-label");
-            _scroll.Add(header);
-
+            var unit = SnapshotOf(hero);
             foreach (var entry in known)
             {
-                var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(entry.Key) : null;
-                string name = magic != null ? magic.DisplayName : entry.Key;
-                bool carried = equipped.Contains(entry.Key);
-                string meta = carried ? $"carried · {entry.Value} charges" : "known";
+                var key = entry.Key;
+                var magic = Magic(key);
+                bool isCarried = carried.Contains(key);
 
-                var capturedKey = entry.Key;
-                _scroll.Add(BuildRow(
+                var listEntry = new Entry
+                {
+                    Preview = () => ShowAbilityDetail(hero, magic, key, isCarried, entry.Value, unit, known, slots),
+                    Confirm = () => ToggleSpell(key),
+                };
+                listEntry.Row = BuildRow(
                     magic != null ? magic.Icon : null,
-                    (carried ? "* " : "  ") + name,
-                    meta,
-                    true,
-                    () => ToggleSpell(capturedKey),
-                    null));
+                    magic != null ? magic.DisplayName : key,
+                    isCarried ? "Carried" : "Not carried",
+                    isCarried ? "✓" : string.Empty,
+                    null,
+                    out listEntry.Cursor);
+                if (isCarried)
+                {
+                    listEntry.Row.Q<Label>(className: "cd-inv-row__meta").AddToClassList("cd-inv-delta--up");
+                }
+                AddListEntry(listEntry);
             }
         }
 
@@ -461,61 +764,91 @@ namespace Assets.Scripts.Items.UI
 
             var nodes = ActivatedNodesOf(hero);
             var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, nodes);
-            int slots = EquippedMagicState.DefaultSlotCount
-                + SphereGridOps.SlotBonusForNodes(hero.SphereGrid, nodes);
 
+            // A hero never goes in with nothing: an empty choice means "never chosen" and auto-fills
+            // (MagicLoadoutOps.Resolve, by design), so putting away the last one would quietly carry
+            // something else instead. Refuse it; the detail pane already says why.
+            var carriedNow = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), SlotCount(hero, nodes));
+            if (carriedNow.Count == 1 && carriedNow[0] == magicKey)
+            {
+                return;
+            }
             var entry = _loadout.For(_selectedHeroKey);
-            entry.EquippedKeys = MagicLoadoutOps.Toggle(known, entry.EquippedKeys, magicKey, slots);
+            entry.EquippedKeys = MagicLoadoutOps.Toggle(known, entry.EquippedKeys, magicKey, SlotCount(hero, nodes));
             _files.Save(_loadout);
 
-            RefreshList();
+            int keep = _listIndex;
+            RefreshBody();
+            SetListIndex(keep);
         }
 
-        /// <summary>The selected hero's activated grid nodes, straight off the party save.</summary>
-        private static List<string> ActivatedNodesOf(HeroSO hero)
+        private static int SlotCount(HeroSO hero, List<string> nodes)
         {
-            var save = HeroRoster.GetHeroSave(hero);
-            return save != null && save.ActivatedNodes != null
-                ? save.ActivatedNodes
-                : new List<string>();
+            return EquippedMagicState.DefaultSlotCount + SphereGridOps.SlotBonusForNodes(hero.SphereGrid, nodes);
         }
 
-        private void RefreshConsumables()
+        private static int ChargesOf(List<KeyValuePair<string, int>> known, string key)
         {
+            return known != null ? MagicLoadoutOps.ChargesFor(known, key) : 0;
+        }
+
+        private static MagicSO Magic(string key)
+        {
+            return MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(key) : null;
+        }
+
+        // ------------------------------------------------------------ consumables and materials
+
+        private void BuildConsumables()
+        {
+            SetText(_leftTitle, "Party pouch");
+            SetText(_listTitle, "Consumables");
+
             var consumables = InventoryManager.Instance.GetConsumables();
+            int total = 0;
+            foreach (var item in consumables)
+            {
+                total += Mathf.Max(0, item.Quantity);
+            }
+            AddSummary($"{consumables.Count} kinds · {total} in all",
+                "Shared by the whole party, and used from the Item command in a fight.");
+
             if (consumables.Count == 0)
             {
                 ShowEmpty("No consumables carried.");
+                ClearDetail();
                 return;
             }
 
-            SetShown(_emptyLabel, false);
             foreach (var item in consumables)
             {
                 var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
-                string name = so != null ? so.DisplayName : item.ItemKey;
-                // Display-only (used in combat, not the hub) → not selectable.
-                _scroll.Add(BuildRow(so != null ? so.Icon : null, name, $"x{item.Quantity}", false, null, so));
+                if (so == null)
+                {
+                    continue;
+                }
+                int quantity = item.Quantity;
+                var entry = new Entry
+                {
+                    Preview = () => ShowStackDetail(so, quantity, ItemPresenter.ConsumableEffectLine(so)),
+                };
+                entry.Row = BuildRow(so.Icon, so.DisplayName, ItemPresenter.RarityLabel(so.Rarity),
+                    "x" + quantity, so, out entry.Cursor);
+                AddListEntry(entry);
             }
         }
 
         /// <summary>
-        /// The raw stuff the party has hauled home, biggest pile first. Read-only for now: materials
-        /// have taps (kills and caches) but no drain until buildings and grid costs land
-        /// (<c>docs/plans/HUB.md</c> §7), and a screen that shows a growing number the player cannot
-        /// spend is still the honest state of the game.
+        /// The raw stuff the party has hauled home, biggest pile first. Spent by sphere-grid nodes and
+        /// buildings; this screen only shows the piles. Where a material comes from is deliberately
+        /// not said anywhere (the owner's rule: discovery stays a discovery).
         /// </summary>
-        private void RefreshMaterials()
+        private void BuildMaterials()
         {
-            var materials = InventoryManager.Instance.GetMaterials();
-            if (materials.Count == 0)
-            {
-                ShowEmpty("No materials gathered. Kill things and open caches - what they are made of "
-                    + "and what the floor is made of both come home with you.");
-                return;
-            }
+            SetText(_leftTitle, "Stores");
+            SetText(_listTitle, "Materials");
 
-            SetShown(_emptyLabel, false);
+            var materials = InventoryManager.Instance.GetMaterials();
 
             // One row per material key: several stacks of the same thing read as one pile.
             var totals = new Dictionary<string, int>();
@@ -530,6 +863,20 @@ namespace Assets.Scripts.Items.UI
                 totals[stack.ItemKey] += Mathf.Max(0, stack.Quantity);
             }
 
+            int all = 0;
+            foreach (var entry in totals)
+            {
+                all += entry.Value;
+            }
+            AddSummary($"{order.Count} kinds · {all} in all", "Kept in the Storehouse between runs.");
+
+            if (order.Count == 0)
+            {
+                ShowEmpty("No materials yet.");
+                ClearDetail();
+                return;
+            }
+
             order.Sort((a, b) =>
             {
                 int byCount = totals[b].CompareTo(totals[a]);
@@ -539,160 +886,597 @@ namespace Assets.Scripts.Items.UI
             foreach (var key in order)
             {
                 var so = InventoryManager.Instance.GetItemSO(key);
-                string name = so != null ? so.DisplayName : key;
-
-                // One block per material: the row, plus the flavour line under it. The block is what
-                // gives the wrapped label a width - see .cd-inv-material in the theme.
-                var block = new VisualElement();
-                block.AddToClassList("cd-inv-material");
-
-                // Display-only (nothing spends materials yet) → not selectable.
-                block.Add(BuildRow(so != null ? so.Icon : null, name, $"x{totals[key]}", false, null, so));
-
-                if (so != null && !string.IsNullOrEmpty(so.Description))
+                if (so == null)
                 {
-                    var flavour = new Label(so.Description);
-                    flavour.AddToClassList("cd-inv-material__flavour");
-                    flavour.pickingMode = PickingMode.Ignore;
-                    block.Add(flavour);
+                    continue;
                 }
-
-                _scroll.Add(block);
+                int count = totals[key];
+                var entry = new Entry
+                {
+                    Preview = () => ShowStackDetail(so, count, null),
+                };
+                entry.Row = BuildRow(so.Icon, so.DisplayName, ItemPresenter.RarityLabel(so.Rarity),
+                    "x" + count, so, out entry.Cursor);
+                AddListEntry(entry);
             }
         }
 
-        private void Equip(ItemSaveData item, ItemSO so)
+        private void AddSummary(string headline, string note)
         {
-            if (so == null || string.IsNullOrEmpty(_selectedHeroKey))
+            var head = new Label(headline);
+            head.AddToClassList("cd-inv-summary__head");
+            _left?.Add(head);
+
+            var body = new Label(note);
+            body.AddToClassList("cd-inv-summary__note");
+            _left?.Add(body);
+        }
+
+        // ============================================================
+        //  DETAIL PANE
+        // ============================================================
+
+        private void ClearDetail()
+        {
+            SetIcon(_detailIcon, null, null);
+            SetText(_detailName, string.Empty);
+            SetText(_detailSub, string.Empty);
+            _detailBody?.Clear();
+        }
+
+        private void SetDetailHead(Sprite icon, string name, string sub, ItemSO rarityOf)
+        {
+            SetIcon(_detailIcon, icon, rarityOf);
+            SetText(_detailName, name);
+            SetText(_detailSub, sub);
+            ApplyRarity(_detailName, rarityOf);
+            _detailBody?.Clear();
+            if (_detailBody != null)
+            {
+                _detailBody.scrollOffset = Vector2.zero;
+            }
+        }
+
+        /// <summary>A slot on the doll: what is in it, and the hero's stats as they stand.</summary>
+        private void ShowSlotDetail(SlotType slot)
+        {
+            var worn = WornItem(slot);
+            // Counted from the list itself, so a spare copy of the worn item counts - comparing item
+            // definitions used to hide it.
+            int fits = CandidatesFor(slot).Count;
+
+            if (worn != null)
+            {
+                SetDetailHead(worn.Icon, worn.DisplayName,
+                    $"{ItemPresenter.SlotLabel(slot)} · {ItemPresenter.RarityLabel(worn.Rarity)}", worn);
+                AddItemLines(worn);
+            }
+            else
+            {
+                SetDetailHead(null, "Empty", ItemPresenter.SlotLabel(slot), null);
+            }
+
+            AddNote(fits > 0
+                ? $"{fits} other item{(fits == 1 ? "" : "s")} fit{(fits == 1 ? "s" : "")} here - press Enter to choose."
+                : "Nothing else the party owns fits here.");
+            AddStatSection(StatsWith(CurrentGear()), null);
+        }
+
+        /// <summary>
+        /// An item to put on (or the slot to empty): its description and bonuses, then every stat
+        /// as it is now against what it would be.
+        /// </summary>
+        private void ShowItemDetail(ItemSO item, StatBlock preview, string note, bool removing = false)
+        {
+            if (item == null)
+            {
+                ClearDetail();
+                return;
+            }
+
+            SetDetailHead(item.Icon, item.DisplayName,
+                $"{ItemPresenter.SlotLabel(item.SlotType)} · {ItemPresenter.RarityLabel(item.Rarity)}", item);
+            AddItemLines(item);
+            if (!string.IsNullOrEmpty(note))
+            {
+                AddNote(note);
+            }
+            AddStatSection(StatsWith(CurrentGear()), preview, removing ? "Stats without it" : "Stats if equipped");
+        }
+
+        private void ShowStackDetail(ItemSO item, int count, string effect)
+        {
+            SetDetailHead(item.Icon, item.DisplayName, $"{ItemPresenter.RarityLabel(item.Rarity)} · x{count}", item);
+            if (!string.IsNullOrEmpty(effect))
+            {
+                AddLine(effect);
+            }
+            if (!string.IsNullOrEmpty(item.Description))
+            {
+                AddDescription(item.Description);
+            }
+        }
+
+        private void ShowAbilityDetail(HeroSO hero, MagicSO magic, string key, bool isCarried, int charges,
+            ICombatUnit unit, List<KeyValuePair<string, int>> known, int slots)
+        {
+            if (magic == null)
+            {
+                SetDetailHead(null, key, isCarried ? "Carried" : "Not carried", null);
+                return;
+            }
+
+            SetDetailHead(magic.Icon, magic.DisplayName,
+                $"{AbilityDescriber.TargetLabel(magic.TargetType)} · {charges} charges a run", null);
+
+            int level = 0;
+            int bonus = 0;
+            if (MetaProgressManager.HasInstance)
+            {
+                level = MetaProgressManager.Instance.GetMagicUpgradeLevel(key);
+                bonus = MetaProgressManager.Instance.GetMagicPowerBonus(key);
+            }
+
+            // Described through the hero's own stats (grid + gear), so the numbers are the ones this
+            // hero will hit for - a null caster would read them as base values. Flavour in italics,
+            // the mechanics upright under their own heading.
+            if (!string.IsNullOrEmpty(magic.Description))
+            {
+                AddDescription(magic.Description.Trim());
+            }
+            var effects = AbilityDescriber.EffectLines(magic, unit, null, bonus, level);
+            _detailBody?.Add(BestiaryLineView.Section("Effect"));
+            if (effects.Count == 0)
+            {
+                AddLine(AbilityDescriber.TargetLabel(magic.TargetType));
+            }
+            foreach (var effect in effects)
+            {
+                AddLine(effect);
+            }
+            if (level > 0)
+            {
+                AddLine($"Forge level {level}.");
+            }
+
+            if (isCarried)
+            {
+                var carriedNow = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), slots);
+                AddNote(carriedNow.Count == 1
+                    ? "Carried. A hero always takes at least one ability - carry another to swap this one out."
+                    : "Carried. Enter puts it away.");
+                return;
+            }
+
+            // A full loadout drops its oldest pick to make room - say which before it happens.
+            var chosen = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), slots);
+            var after = MagicLoadoutOps.Toggle(known, new List<string>(chosen), key, slots);
+            string displaced = null;
+            foreach (var carriedKey in chosen)
+            {
+                if (!after.Contains(carriedKey))
+                {
+                    var m = Magic(carriedKey);
+                    displaced = m != null ? m.DisplayName : carriedKey;
+                    break;
+                }
+            }
+            AddNote(displaced != null
+                ? $"Slots are full: carrying this puts {displaced} away."
+                : "Enter to carry it into the next run.");
+        }
+
+        private void AddItemLines(ItemSO item)
+        {
+            if (!string.IsNullOrEmpty(item.Description))
+            {
+                AddDescription(item.Description);
+            }
+
+            // A wrapping row of short chips, not a list: four bonuses as lines pushed the stats and
+            // resistances below the bottom of a pane that does not scroll.
+            var chips = ItemPresenter.BonusChips(item);
+            chips.AddRange(ItemPresenter.ResistanceLines(item));
+            if (chips.Count == 0)
             {
                 return;
             }
-            InventoryManager.Instance.Equip(item, so.SlotType, _selectedHeroKey);
-            RefreshStats();
-            RefreshList();
-        }
-
-        private void Unequip(SlotType slot)
-        {
-            InventoryManager.Instance.Unequip(slot, _selectedHeroKey);
-            RefreshStats();
-            RefreshList();
-        }
-
-        // ============================================================
-        //  ROW BUILDER (battle cd-sel-row style + rarity edge accent)
-        // ============================================================
-
-        private VisualElement BuildRow(Sprite icon, string name, string meta, bool enabled, Action onClick, ItemSO so)
-        {
-            // Plain VisualElement (not a Button) so it never grabs focus; the cursor nav + mouse
-            // clicks drive it, exactly like the battle selection rows.
+            _detailBody?.Add(BestiaryLineView.Section("Grants"));
             var row = new VisualElement();
-            row.AddToClassList("cd-sel-row");
-            row.SetEnabled(enabled);
-
-            // Rarity as a left-edge accent — keeps the info without tinting (and washing out) text.
-            if (so != null && RarityColors.TryGetValue(so.Rarity, out var rarityColor))
+            row.AddToClassList("cd-inv-grants");
+            foreach (var text in chips)
             {
-                row.style.borderLeftColor = rarityColor;
-                row.style.borderLeftWidth = 4;
+                var chip = new Label(text);
+                chip.AddToClassList("cd-inv-grant");
+                row.Add(chip);
+            }
+            _detailBody?.Add(row);
+        }
+
+        /// <summary>
+        /// Every stat, now and - when an item is being considered - after, as a two-column grid of
+        /// short names. A one-per-row list ran past the bottom of the pane and hid Health.
+        /// </summary>
+        private void AddStatSection(StatBlock current, StatBlock preview, string previewTitle = "Stats if equipped")
+        {
+            _detailBody?.Add(BestiaryLineView.Section(preview != null ? previewTitle : "Stats"));
+            var grid = new VisualElement();
+            grid.AddToClassList("cd-inv-stats");
+            foreach (var stat in StatCatalog.Types)
+            {
+                int now = current[stat];
+                bool changes = preview != null && preview[stat] != now;
+                int then = changes ? preview[stat] : now;
+
+                grid.Add(StatCell(StatCatalog.ShortName(stat),
+                    changes ? $"{now} \u2192 {then}" : now.ToString(),
+                    changes ? (then > now ? 1 : -1) : 0,
+                    StatCatalog.DisplayName(stat)));
+            }
+            _detailBody?.Add(grid);
+
+            // Resistance only when there is any to speak of - an all-zero section is noise. Gear and
+            // grid nodes only: a hero's innate resistances are authored on the dungeon's Hero
+            // component, which does not exist in the hub, and no hero authors any today.
+            var hero = FindHero(_selectedHeroKey);
+            var nodeResist = hero != null
+                ? SphereGridOps.ResistancesForNodes(hero.SphereGrid, ActivatedNodesOf(hero))
+                : null;
+            var resistNow = ItemPresenter.SumResistances(CurrentGear(), nodeResist);
+            Dictionary<DamageType, float> resistThen = null;
+            if (preview != null && _listIndex >= 0 && _listIndex < _listEntries.Count)
+            {
+                resistThen = ItemPresenter.SumResistances(PreviewGear(), nodeResist);
             }
 
-            var cursor = new Label(string.Empty);
-            cursor.AddToClassList("cd-sel-row__cursor");
-            cursor.pickingMode = PickingMode.Ignore;
+            var types = new List<DamageType>(resistNow.Keys);
+            if (resistThen != null)
+            {
+                foreach (var type in resistThen.Keys)
+                {
+                    if (!types.Contains(type))
+                    {
+                        types.Add(type);
+                    }
+                }
+            }
+            if (types.Count == 0)
+            {
+                return;
+            }
+
+            // The same two-column grid as the stats, so the pane fits without scrolling.
+            _detailBody?.Add(BestiaryLineView.Section("Resistances"));
+            var resistGrid = new VisualElement();
+            resistGrid.AddToClassList("cd-inv-stats");
+            foreach (var type in types)
+            {
+                resistNow.TryGetValue(type, out float now);
+                float then = now;
+                if (resistThen != null)
+                {
+                    resistThen.TryGetValue(type, out then);
+                }
+                bool changes = !Mathf.Approximately(now, then);
+                string name = ItemPresenter.DamageTypeName(type);
+                resistGrid.Add(StatCell(name,
+                    changes ? $"{Percent(now)} → {Percent(then)}" : Percent(now),
+                    changes ? (then > now ? 1 : -1) : 0,
+                    name + " resistance"));
+            }
+            _detailBody?.Add(resistGrid);
+        }
+
+        /// <summary>One cell of a stat grid; <paramref name="direction"/> is +1 up, -1 down, 0 unchanged.</summary>
+        private static VisualElement StatCell(string label, string value, int direction, string tooltip)
+        {
+            var cell = new VisualElement();
+            cell.AddToClassList("cd-inv-stat");
+            cell.tooltip = tooltip;
+            var labelElement = new Label(label);
+            labelElement.AddToClassList("cd-inv-stat__label");
+            cell.Add(labelElement);
+            var valueElement = new Label(value);
+            valueElement.AddToClassList("cd-inv-stat__value");
+            if (direction != 0)
+            {
+                valueElement.AddToClassList(direction > 0 ? "cd-inv-delta--up" : "cd-inv-delta--down");
+            }
+            cell.Add(valueElement);
+            return cell;
+        }
+
+        /// <summary>
+        /// The gear the highlighted list entry would leave the hero in - carried on the entry itself,
+        /// so it cannot drift from the order the list was built in.
+        /// </summary>
+        private List<ItemSO> PreviewGear()
+        {
+            if (_tab == Tab.Equipment && _listIndex >= 0 && _listIndex < _listEntries.Count
+                && _listEntries[_listIndex].Gear != null)
+            {
+                return _listEntries[_listIndex].Gear;
+            }
+            return CurrentGear();
+        }
+
+        /// <summary>The candidate items for a slot, in the order the list shows them.</summary>
+        private List<ItemSO> CandidatesFor(SlotType slot)
+        {
+            var bag = new List<ItemSO>();
+            var others = new List<ItemSO>();
+            foreach (var item in InventoryManager.Instance.GetAllEquipment())
+            {
+                var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
+                if (so == null || so.SlotType != slot)
+                {
+                    continue;
+                }
+                if (string.IsNullOrEmpty(item.EquippedSlot))
+                {
+                    bag.Add(so);
+                }
+                else if (item.EquippedHeroKey != _selectedHeroKey)
+                {
+                    others.Add(so);
+                }
+            }
+            bag.AddRange(others);
+            return bag;
+        }
+
+        private void AddDescription(string text)
+        {
+            var label = new Label(text);
+            label.AddToClassList("cd-inv-detail__desc");
+            _detailBody?.Add(label);
+        }
+
+        private void AddLine(string text)
+        {
+            var label = new Label(text);
+            label.AddToClassList("cd-inv-detail__line");
+            _detailBody?.Add(label);
+        }
+
+        private void AddNote(string text)
+        {
+            var label = new Label(text);
+            label.AddToClassList("cd-inv-detail__note");
+            _detailBody?.Add(label);
+        }
+
+        private static string Percent(float value)
+        {
+            return (value > 0f ? "+" : string.Empty) + Mathf.RoundToInt(value) + "%";
+        }
+
+        // ============================================================
+        //  STATS
+        // ============================================================
+
+        /// <summary>
+        /// The selected hero's effective stats with <paramref name="gear"/> worn: base + bought grid
+        /// nodes + gear, exactly as a fight computes them.
+        /// </summary>
+        private StatBlock StatsWith(IEnumerable<ItemSO> gear)
+        {
+            var hero = FindHero(_selectedHeroKey);
+            if (hero == null)
+            {
+                return new StatBlock();
+            }
+            var baseStats = HeroStatCalculator.BaseStatsForNodes(hero, ActivatedNodesOf(hero));
+            return HeroStatCalculator.WithGear(baseStats, gear);
+        }
+
+        private HeroSnapshotUnit SnapshotOf(HeroSO hero)
+        {
+            var gear = InventoryManager.Instance.GetEquippedItems(hero.SaveKey);
+            var baseStats = HeroStatCalculator.BaseStatsForNodes(hero, ActivatedNodesOf(hero));
+            return new HeroSnapshotUnit(hero, HeroStatCalculator.WithGear(baseStats, gear));
+        }
+
+        private struct StatChange
+        {
+            public StatType Stat;
+            public int Amount;
+        }
+
+        /// <summary>The <paramref name="count"/> largest stat changes, biggest first.</summary>
+        private static List<StatChange> BiggestChanges(StatBlock before, StatBlock after, int count)
+        {
+            var changes = new List<StatChange>();
+            foreach (var stat in StatCatalog.Types)
+            {
+                int delta = after[stat] - before[stat];
+                if (delta != 0)
+                {
+                    changes.Add(new StatChange { Stat = stat, Amount = delta });
+                }
+            }
+            changes.Sort((a, b) => Mathf.Abs(b.Amount).CompareTo(Mathf.Abs(a.Amount)));
+            if (changes.Count > count)
+            {
+                changes.RemoveRange(count, changes.Count - count);
+            }
+            return changes;
+        }
+
+        /// <summary>The selected hero's activated grid nodes, straight off the party save.</summary>
+        private static List<string> ActivatedNodesOf(HeroSO hero)
+        {
+            var save = HeroRoster.GetHeroSave(hero);
+            return save != null && save.ActivatedNodes != null
+                ? save.ActivatedNodes
+                : new List<string>();
+        }
+
+        // ============================================================
+        //  ROWS AND THE CURSOR
+        // ============================================================
+
+        /// <summary>
+        /// A row: cursor, icon tile, a name with a caption under it, and a right-hand note. A plain
+        /// VisualElement (not a Button) so it never takes focus - the cursor and the mouse drive it.
+        /// </summary>
+        private VisualElement BuildRow(Sprite icon, string name, string caption, string meta, ItemSO rarityOf,
+            out Label cursor)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("cd-inv-row");
+
+            cursor = new Label(string.Empty) { pickingMode = PickingMode.Ignore };
+            cursor.AddToClassList("cd-inv-row__cursor");
             row.Add(cursor);
 
-            var iconElement = new VisualElement();
-            iconElement.AddToClassList("cd-sel-row__icon");
-            iconElement.pickingMode = PickingMode.Ignore;
-            if (icon != null)
+            var tile = new VisualElement { pickingMode = PickingMode.Ignore };
+            tile.AddToClassList("cd-inv-row__icon");
+            SetIcon(tile, icon, rarityOf);
+            row.Add(tile);
+
+            var text = new VisualElement { pickingMode = PickingMode.Ignore };
+            text.AddToClassList("cd-inv-row__text");
+            var nameLabel = new Label(name) { pickingMode = PickingMode.Ignore };
+            nameLabel.AddToClassList("cd-inv-row__name");
+            ApplyRarity(nameLabel, rarityOf);
+            text.Add(nameLabel);
+            if (!string.IsNullOrEmpty(caption))
             {
-                iconElement.style.backgroundImage = new StyleBackground(icon);
+                var captionLabel = new Label(caption) { pickingMode = PickingMode.Ignore };
+                captionLabel.AddToClassList("cd-inv-row__caption");
+                text.Add(captionLabel);
             }
-            row.Add(iconElement);
+            row.Add(text);
 
-            var nameLabel = new Label(name);
-            nameLabel.AddToClassList("cd-sel-row__name");
-            nameLabel.pickingMode = PickingMode.Ignore;
-            row.Add(nameLabel);
-
-            var metaLabel = new Label(meta ?? string.Empty);
-            metaLabel.AddToClassList("cd-sel-row__meta");
-            metaLabel.pickingMode = PickingMode.Ignore;
+            var metaLabel = new Label(meta ?? string.Empty) { pickingMode = PickingMode.Ignore };
+            metaLabel.AddToClassList("cd-inv-row__meta");
             row.Add(metaLabel);
-
-            if (enabled && onClick != null)
-            {
-                int idx = _navRows.Count;
-                _navRows.Add(row);
-                _navCursors.Add(cursor);
-                _navActions.Add(onClick);
-                row.RegisterCallback<ClickEvent>(_ => { SetNavSelected(idx); onClick(); });
-                row.RegisterCallback<MouseEnterEvent>(_ => SetNavSelected(idx));
-            }
 
             return row;
         }
 
-        // ============================================================
-        //  CURSOR NAVIGATION (keyboard / mouse), mirrors MagicSelectionUI
-        // ============================================================
-
-        private void ClearNav()
+        private void AddListEntry(Entry entry)
         {
-            _navRows.Clear();
-            _navCursors.Clear();
-            _navActions.Clear();
-            _navSelected = -1;
-        }
-
-        private void BeginNavigation()
-        {
-            _navSelected = _navRows.Count > 0 ? 0 : -1;
-            RenderNavCursor();
-        }
-
-        private void RenderNavCursor()
-        {
-            for (int i = 0; i < _navRows.Count; i++)
+            int index = _listEntries.Count;
+            _listEntries.Add(entry);
+            entry.Row.RegisterCallback<MouseEnterEvent>(_ =>
             {
-                bool selected = i == _navSelected;
-                _navCursors[i].text = selected ? "▸" : string.Empty;
-                _navRows[i].EnableInClassList("cd-sel-row--selected", selected);
-            }
-            if (_navSelected >= 0 && _navSelected < _navRows.Count && _scroll != null)
+                if (_tab == Tab.Equipment)
+                {
+                    _focus = Focus.List;
+                    RefreshHint();
+                }
+                SetListIndex(index);
+            });
+            entry.Row.RegisterCallback<ClickEvent>(_ =>
             {
-                _scroll.ScrollTo(_navRows[_navSelected]);
+                SetListIndex(index);
+                entry.Confirm?.Invoke();
+            });
+            _list?.Add(entry.Row);
+        }
+
+        private void SetListIndex(int index)
+        {
+            if (_listEntries.Count == 0)
+            {
+                _listIndex = -1;
+            }
+            else
+            {
+                _listIndex = Mathf.Clamp(index, 0, _listEntries.Count - 1);
+            }
+            RenderCursor();
+        }
+
+        /// <summary>
+        /// Draws the cursor and refreshes the detail pane. On Equipment the slot column holds it
+        /// until Enter moves it into the list, where the chosen slot stays marked.
+        /// </summary>
+        private void RenderCursor()
+        {
+            bool listActive = _tab != Tab.Equipment || _focus == Focus.List;
+            if (listActive && _listIndex < 0 && _listEntries.Count > 0 && _tab != Tab.Equipment)
+            {
+                _listIndex = 0;
+            }
+
+            for (int i = 0; i < _slotEntries.Count; i++)
+            {
+                bool here = i == _slotIndex;
+                bool cursorHere = here && _focus == Focus.Slots;
+                _slotEntries[i].Row.EnableInClassList("cd-inv-row--selected", cursorHere);
+                _slotEntries[i].Row.EnableInClassList("cd-inv-row--held", here && _focus == Focus.List);
+                SetText(_slotEntries[i].Cursor, cursorHere ? "▸" : string.Empty);
+            }
+
+            for (int i = 0; i < _listEntries.Count; i++)
+            {
+                bool cursorHere = listActive && i == _listIndex;
+                _listEntries[i].Row.EnableInClassList("cd-inv-row--selected", cursorHere);
+                SetText(_listEntries[i].Cursor, cursorHere ? "▸" : string.Empty);
+            }
+
+            if (_tab == Tab.Equipment && _focus == Focus.Slots)
+            {
+                if (_slotIndex >= 0 && _slotIndex < _slotEntries.Count)
+                {
+                    _slotEntries[_slotIndex].Preview?.Invoke();
+                }
+            }
+            else if (_listIndex >= 0 && _listIndex < _listEntries.Count)
+            {
+                _listEntries[_listIndex].Preview?.Invoke();
+                // A freshly rebuilt row has no layout yet, and ScrollTo on it does nothing - wait a frame.
+                var row = _listEntries[_listIndex].Row;
+                _list?.schedule.Execute(() =>
+                {
+                    if (row.panel != null)
+                    {
+                        _list.ScrollTo(row);
+                    }
+                });
             }
         }
 
-        private void SetNavSelected(int index)
+        private void MoveCursor(int delta)
         {
-            if (index < 0 || index >= _navRows.Count)
+            if (_tab == Tab.Equipment && _focus == Focus.Slots)
+            {
+                int count = ItemPresenter.SlotOrder.Length;
+                MoveSlotTo(((_slotIndex + delta) % count + count) % count);
+                return;
+            }
+            if (_listEntries.Count == 0)
             {
                 return;
             }
-            _navSelected = index;
-            RenderNavCursor();
+            int n = _listEntries.Count;
+            SetListIndex(((_listIndex + delta) % n + n) % n);
         }
 
-        private void MoveNav(int delta)
+        private void Confirm()
         {
-            if (_navRows.Count == 0)
+            if (_tab == Tab.Equipment && _focus == Focus.Slots)
             {
+                EnterList();
                 return;
             }
-            _navSelected = (_navSelected + delta + _navRows.Count) % _navRows.Count;
-            RenderNavCursor();
+            if (_listIndex >= 0 && _listIndex < _listEntries.Count)
+            {
+                _listEntries[_listIndex].Confirm?.Invoke();
+            }
         }
 
-        private void ConfirmNav()
+        private void Back()
         {
-            if (_navSelected >= 0 && _navSelected < _navActions.Count)
+            if (_tab == Tab.Equipment && _focus == Focus.List)
             {
-                _navActions[_navSelected]?.Invoke();
+                LeaveList();
+                return;
             }
+            Hide();
         }
 
         private void OnKeyDown(KeyDownEvent evt)
@@ -704,17 +1488,17 @@ namespace Assets.Scripts.Items.UI
             switch (evt.keyCode)
             {
                 case KeyCode.UpArrow:
-                    MoveNav(-1);
+                    MoveCursor(-1);
                     evt.StopPropagation();
                     break;
                 case KeyCode.DownArrow:
-                    MoveNav(1);
+                    MoveCursor(1);
                     evt.StopPropagation();
                     break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
                 case KeyCode.Space:
-                    ConfirmNav();
+                    Confirm();
                     evt.StopPropagation();
                     break;
                 case KeyCode.LeftArrow:
@@ -726,14 +1510,14 @@ namespace Assets.Scripts.Items.UI
                     evt.StopPropagation();
                     break;
                 case KeyCode.Q:
-                    if (_tab != Tab.Consumables)
+                    if (IsPerHeroTab)
                     {
                         CycleHero(-1);
                     }
                     evt.StopPropagation();
                     break;
                 case KeyCode.E:
-                    if (_tab != Tab.Consumables)
+                    if (IsPerHeroTab)
                     {
                         CycleHero(1);
                     }
@@ -741,7 +1525,7 @@ namespace Assets.Scripts.Items.UI
                     break;
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
-                    Hide();
+                    Back();
                     evt.StopPropagation();
                     break;
             }
@@ -762,11 +1546,46 @@ namespace Assets.Scripts.Items.UI
 
         private void ShowEmpty(string message)
         {
-            if (_emptyLabel != null)
-            {
-                _emptyLabel.text = message;
-            }
+            SetText(_emptyLabel, message);
             SetShown(_emptyLabel, true);
+        }
+
+        private static void SetIcon(VisualElement tile, Sprite icon, ItemSO rarityOf)
+        {
+            if (tile == null)
+            {
+                return;
+            }
+            tile.style.backgroundImage = icon != null
+                ? new StyleBackground(icon)
+                : new StyleBackground((Texture2D)null);
+            tile.AddToClassList("cd-inv-tile");
+            ApplyRarity(tile, rarityOf);
+        }
+
+        /// <summary>Rarity colour via the theme's classes, so the palette lives in one file.</summary>
+        private static void ApplyRarity(VisualElement element, ItemSO item)
+        {
+            if (element == null)
+            {
+                return;
+            }
+            foreach (ItemRarity rarity in Enum.GetValues(typeof(ItemRarity)))
+            {
+                element.RemoveFromClassList(ItemPresenter.RarityClass(rarity));
+            }
+            if (item != null)
+            {
+                element.AddToClassList(ItemPresenter.RarityClass(item.Rarity));
+            }
+        }
+
+        private static void SetText(Label label, string text)
+        {
+            if (label != null)
+            {
+                label.text = text ?? string.Empty;
+            }
         }
 
         private static void SetShown(VisualElement element, bool shown)

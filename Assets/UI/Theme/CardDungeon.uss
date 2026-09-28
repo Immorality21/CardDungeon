@@ -709,33 +709,597 @@
     margin-bottom: 2px;
 }
 
-/* Hub inventory list. Unlike the combat picker (cd-select-scroll), this lives in a NON-clipping
-   menu window, so it must NOT flex-grow: a stretched ScrollView content container would spill over
-   and swallow clicks meant for the Back button below it. Content-sized, capped, transparent so the
-   dark row text stays readable on parchment. */
-.cd-inv-scroll {
-    flex-grow: 0;
-    flex-shrink: 0;
-    min-height: 40px;
-    max-height: 320px;
-    padding: 4px 2px;
-}
+/* ============================================================
+   Hub inventory - one fixed frame for all four tabs (redesigned 2026-09-28)
+   Header band with the tabs, a hero strip, three fixed columns and a hint line.
+   Every region is sized in px and present on every tab, so the dock-centred
+   window never changes size: it used to shrink its tab rows to 12px and move
+   them 45px between tabs, and a resized centred window desyncs hit-testing.
+   ============================================================ */
 
-/* Hub inventory: a material and its one line of flavour, as one block. The block stretches to the
-   list width, which is what gives the flavour label a width to wrap inside - a bare Label in the
-   content-sized ScrollView sizes to its text instead and spills out of both sides of the window. */
-.cd-inv-material {
+.cd-inv-window {
+    width: 1180px;
+    height: 720px;
+    max-width: 98%;
+    max-height: none;
+    padding: 0;
+    overflow: hidden;
     flex-direction: column;
-    align-self: stretch;
 }
 
-.cd-inv-material__flavour {
-    font-size: 16px;
-    color: var(--cd-text-dark);
-    opacity: 0.6;
-    white-space: normal;
+.cd-inv-header {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    height: 58px;
+    padding: 0 14px 0 20px;
+    background-color: rgb(67, 30, 108);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--cd-accent);
+}
+
+.cd-inv-header__title {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    margin-right: 28px;
+}
+
+.cd-inv-tabs {
+    flex-direction: row;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.cd-inv-tab,
+.cd-inv-close {
+    height: 38px;
+    margin: 0 6px 0 0;
+    padding: 0 18px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    background-color: rgba(14, 7, 28, 0.6);
+    border-width: 2px;
+    border-color: var(--cd-frame);
+    border-radius: 8px;
+}
+
+.cd-inv-tab:hover,
+.cd-inv-close:hover {
+    background-color: rgb(71, 34, 110);
+    border-color: rgb(156, 82, 210);
+}
+
+.cd-inv-tab--active,
+.cd-inv-tab--active:hover {
+    background-color: rgb(102, 48, 158);
+    border-color: var(--cd-accent);
+}
+
+.cd-inv-close {
+    margin: 0;
+}
+
+/* The hero strip: a portrait card per owned hero. Muted, not hidden, on the party-wide tabs -
+   hiding it is what used to make the window jump between tabs. */
+.cd-inv-heroes {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    height: 116px;
+    padding: 0 20px;
+    background-color: rgba(0, 0, 0, 0.28);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(205, 110, 255, 0.18);
+}
+
+.cd-inv-heroes--muted .cd-inv-hero {
+    opacity: 0.45;
+    border-color: rgba(0, 0, 0, 0);
+}
+
+/* The right end of the strip: the selected hero at a glance, or the purse. */
+.cd-inv-heroes__summary {
+    margin-left: auto;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.cd-inv-heroes__summary-line {
+    font-size: 18px;
+    color: var(--cd-text-light);
+    opacity: 0.8;
+    -unity-text-align: middle-right;
+    padding: 0;
+    margin: 1px 0;
+}
+
+.cd-inv-heroes__summary-name {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    opacity: 1;
+}
+
+.cd-inv-hero {
+    width: 124px;
+    height: 96px;
+    margin-right: 12px;
+    padding: 4px 4px 6px 4px;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: rgba(35, 18, 58, 0.6);
+    border-width: 2px;
+    border-color: rgba(91, 42, 145, 0.7);
+    border-radius: 8px;
+}
+
+.cd-inv-hero:hover {
+    border-color: rgb(156, 82, 210);
+}
+
+.cd-inv-hero--active,
+.cd-inv-hero--active:hover {
+    background-color: rgb(67, 30, 108);
+    border-color: var(--cd-accent);
+}
+
+/* 32px hero art at exactly 2x, so the pixels stay square. */
+.cd-inv-hero__sprite {
+    width: 64px;
+    height: 64px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-inv-hero__name {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+}
+
+.cd-inv-hero--active .cd-inv-hero__name {
+    color: var(--cd-gold);
+}
+
+.cd-inv-body {
+    flex-direction: row;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    padding: 14px 16px 8px 16px;
+}
+
+.cd-inv-col {
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 10px 12px;
+    background-color: rgba(0, 0, 0, 0.32);
+    border-width: 1px;
+    border-color: rgba(205, 110, 255, 0.22);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cd-inv-col--left {
+    width: 340px;
+}
+
+.cd-inv-col--list {
+    width: 360px;
+    margin: 0 14px;
+}
+
+.cd-inv-col--detail {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.cd-inv-col__title {
+    flex-shrink: 0;
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-accent);
     -unity-text-align: middle-left;
-    margin: -4px 8px 6px 54px;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(205, 110, 255, 0.35);
+}
+
+.cd-inv-col__content {
+    flex-grow: 1;
+}
+
+.cd-inv-list {
+    flex-grow: 1;
+}
+
+.cd-inv-empty {
+    font-size: 17px;
+    color: var(--cd-text-light);
+    opacity: 0.7;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin: 24px 12px 0 12px;
+}
+
+/* One row: icon tile, a name with a caption under it, and a right-hand note. */
+.cd-inv-row {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    height: 56px;
+    margin-bottom: 3px;
+    padding: 0 10px 0 4px;
+    background-color: rgba(35, 18, 58, 0.55);
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 6px;
+}
+
+.cd-inv-row:hover {
+    background-color: rgb(71, 34, 110);
+    border-color: rgb(156, 82, 210);
+}
+
+.cd-inv-row--selected,
+.cd-inv-row--selected:hover {
+    background-color: rgb(102, 48, 158);
+    border-color: var(--cd-accent);
+}
+
+/* The slot you are choosing for, while the cursor is in the item list beside it. */
+.cd-inv-row--held,
+.cd-inv-row--held:hover {
+    background-color: rgba(102, 48, 158, 0.4);
+    border-color: var(--cd-gold);
+}
+
+/* Display-only rows (the loadout summary) never light up under the mouse. */
+.cd-inv-row--static:hover {
+    background-color: rgba(35, 18, 58, 0.55);
+    border-color: rgba(0, 0, 0, 0);
+}
+
+.cd-inv-row__cursor {
+    width: 14px;
+    flex-shrink: 0;
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+}
+
+/* 32px inner so 16px and 32px item art both scale by a whole number. */
+.cd-inv-row__icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    background-color: rgba(14, 7, 28, 0.85);
+    border-width: 2px;
+    border-color: rgba(205, 110, 255, 0.22);
+    border-radius: 6px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-inv-row__text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    justify-content: center;
+}
+
+.cd-inv-row__name {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cd-inv-row__caption {
+    font-size: 16px;
+    color: var(--cd-text-light);
+    opacity: 0.6;
+}
+
+/* Two stacked labels in a 56px row: UITK's default label padding pushed them into the row's
+   top and bottom edges, so it is taken out here. */
+.cd-inv-row__name,
+.cd-inv-row__caption {
+    padding: 0;
+    margin: 0;
+}
+
+/* A glyph standing in for an icon - the "take it off" row. */
+.cd-inv-row__glyph {
+    flex-grow: 1;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--cd-accent);
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
+}
+
+/* The up/down chips on a candidate row: its two biggest stat changes. */
+.cd-inv-row__chips {
+    flex-shrink: 0;
+    margin-left: 8px;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.cd-inv-row__chip {
+    font-size: 16px;
+    -unity-font-style: bold;
+    padding: 0;
+    margin: 0;
+    -unity-text-align: middle-right;
+}
+
+.cd-inv-row__meta {
+    flex-shrink: 0;
+    margin-left: 8px;
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    opacity: 0.85;
+    -unity-text-align: middle-right;
+}
+
+.cd-inv-row--empty .cd-inv-row__name {
+    opacity: 0.45;
+    -unity-font-style: italic;
+}
+
+.cd-inv-row--empty .cd-inv-row__icon {
+    border-color: rgba(205, 110, 255, 0.12);
+    background-color: rgba(14, 7, 28, 0.4);
+}
+
+/* Up / down against what is worn now - the Inspect page's colour language. */
+.cd-inv-delta--up {
+    color: rgb(255, 217, 102);
+    opacity: 1;
+}
+
+.cd-inv-delta--down {
+    color: rgb(154, 178, 217);
+    opacity: 1;
+}
+
+/* Rarity: the name and the icon frame, never the whole row (that fights the purple selection). */
+.cd-rarity--common {
+    color: var(--cd-text-light);
+}
+
+.cd-rarity--uncommon {
+    color: rgb(120, 220, 120);
+}
+
+.cd-rarity--rare {
+    color: rgb(110, 160, 255);
+}
+
+.cd-rarity--epic {
+    color: rgb(225, 130, 255);
+}
+
+.cd-rarity--legendary {
+    color: var(--cd-gold);
+}
+
+.cd-inv-tile.cd-rarity--uncommon {
+    border-color: rgb(120, 220, 120);
+}
+
+.cd-inv-tile.cd-rarity--rare {
+    border-color: rgb(110, 160, 255);
+}
+
+.cd-inv-tile.cd-rarity--epic {
+    border-color: rgb(225, 130, 255);
+    background-color: rgba(225, 130, 255, 0.14);
+}
+
+.cd-inv-tile.cd-rarity--legendary {
+    border-color: var(--cd-gold);
+    background-color: rgba(236, 190, 72, 0.14);
+}
+
+/* Ability slots as pips: filled for each one carried. */
+.cd-inv-pips {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin: 2px 0 12px 2px;
+}
+
+.cd-inv-pips__label {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    margin-right: 10px;
+}
+
+.cd-inv-pip {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    border-width: 2px;
+    border-color: var(--cd-accent);
+    border-radius: 10px;
+}
+
+.cd-inv-pip--filled {
+    background-color: var(--cd-accent);
+}
+
+/* The detail column: what the cursor is on. */
+.cd-inv-detail__head {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(205, 110, 255, 0.35);
+}
+
+/* 32px art at 2x inside the 2px frame. */
+.cd-inv-detail__icon {
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+    margin-right: 14px;
+    background-color: rgba(14, 7, 28, 0.85);
+    border-width: 2px;
+    border-color: rgba(205, 110, 255, 0.25);
+    border-radius: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-inv-detail__titles {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.cd-inv-detail__name {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    white-space: normal;
+}
+
+.cd-inv-detail__sub {
+    font-size: 16px;
+    color: var(--cd-text-light);
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+.cd-inv-detail__body {
+    flex-grow: 1;
+}
+
+.cd-inv-detail__desc {
+    font-size: 17px;
+    -unity-font-style: italic;
+    color: var(--cd-text-light);
+    opacity: 0.8;
+    white-space: normal;
+    margin: 0 2px 8px 2px;
+}
+
+.cd-inv-detail__line {
+    font-size: 17px;
+    color: var(--cd-text-light);
+    white-space: normal;
+    margin: 2px 4px;
+}
+
+/* Instructions and context, not information: quiet, so they never read as a stat change. */
+.cd-inv-detail__note {
+    font-size: 16px;
+    -unity-font-style: italic;
+    color: var(--cd-text-light);
+    opacity: 0.55;
+    white-space: normal;
+    margin: 8px 4px 4px 4px;
+}
+
+/* What an item grants, as a wrapping row of chips. */
+.cd-inv-grants {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 2px 0 6px 0;
+}
+
+.cd-inv-grant {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    background-color: rgba(102, 48, 158, 0.35);
+    border-width: 1px;
+    border-color: rgba(205, 110, 255, 0.35);
+    border-radius: 5px;
+    padding: 1px 8px;
+    margin: 0 6px 6px 0;
+}
+
+/* Stats as a two-column grid of short names, so all of them fit without scrolling. */
+.cd-inv-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 2px 0 8px 0;
+}
+
+.cd-inv-stat {
+    width: 50%;
+    height: 28px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px 0 4px;
+}
+
+.cd-inv-stat__label {
+    font-size: 17px;
+    color: var(--cd-text-light);
+    opacity: 0.8;
+    padding: 0;
+    margin: 0;
+}
+
+.cd-inv-stat__value {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    padding: 0;
+    margin: 0;
+}
+
+/* Up/down on a stat value - doubled selector, because .cd-inv-stat__value above sets the plain colour
+   at the same specificity and would otherwise win. */
+.cd-inv-stat__value.cd-inv-delta--up {
+    color: rgb(255, 217, 102);
+}
+
+.cd-inv-stat__value.cd-inv-delta--down {
+    color: rgb(154, 178, 217);
+}
+
+/* The party-wide tabs' summary in the left column. */
+.cd-inv-summary__head {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    white-space: normal;
+    margin: 4px 4px 8px 4px;
+}
+
+.cd-inv-summary__note {
+    font-size: 18px;
+    color: var(--cd-text-light);
+    opacity: 0.7;
+    white-space: normal;
+    margin: 0 4px;
+}
+
+.cd-inv-hint {
+    flex-shrink: 0;
+    height: 36px;
+    font-size: 16px;
+    color: var(--cd-text-light);
+    opacity: 0.7;
+    -unity-text-align: middle-center;
+    border-top-width: 1px;
+    border-top-color: rgba(205, 110, 255, 0.15);
 }
 
 /* Tall stacked menu button (full window width). */

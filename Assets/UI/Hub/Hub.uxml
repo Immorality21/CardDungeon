@@ -155,28 +155,49 @@
         </ui:VisualElement>
 
         <!-- INVENTORY -->
-        <!-- Fixed height: this view changes content between tabs (hero row / stats hide on the
-             Consumables tab). With the translate-centered cd-dock-center, a size change re-centers
-             the render but leaves UITK's input hit-testing on the old transform, offsetting every
-             click. A constant height keeps render and hit-testing aligned. -->
-        <ui:VisualElement name="inventory-view" class="cd-window cd-window--flush cd-window--fixed cd-dock-center cd-hidden">
-            <ui:Label text="Inventory" class="cd-title" />
-
-            <ui:VisualElement name="inventory-heroes" class="cd-tabs" />
-            <ui:Label name="inventory-stats" text="" class="cd-info-label" />
-
-            <ui:VisualElement name="inventory-tabs" class="cd-tabs">
-                <ui:Button name="tab-equipment" text="Equipment" class="cd-tab cd-tab--active" />
-                <ui:Button name="tab-spells" text="Abilities" class="cd-tab" />
-                <ui:Button name="tab-consumables" text="Consumables" class="cd-tab" />
-                <ui:Button name="tab-materials" text="Materials" class="cd-tab" />
+        <!-- One fixed frame for all four tabs: header band with the tabs, the hero strip, three
+             columns and a hint line. Every region is present on every tab and sized in px, so the
+             dock-centred window never changes size (hit-testing follows the first layout only).
+             Rows inside the columns are built by InventoryHubUI; the regions themselves live here. -->
+        <ui:VisualElement name="inventory-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
+            <ui:VisualElement class="cd-inv-header">
+                <ui:Label text="Inventory" class="cd-inv-header__title" />
+                <ui:VisualElement name="inventory-tabs" class="cd-inv-tabs">
+                    <ui:Button name="tab-equipment" text="Equipment" class="cd-inv-tab cd-inv-tab--active" />
+                    <ui:Button name="tab-spells" text="Abilities" class="cd-inv-tab" />
+                    <ui:Button name="tab-consumables" text="Consumables" class="cd-inv-tab" />
+                    <ui:Button name="tab-materials" text="Materials" class="cd-inv-tab" />
+                </ui:VisualElement>
+                <ui:Button name="inventory-close" text="Back" class="cd-inv-close" />
             </ui:VisualElement>
 
-            <ui:ScrollView name="inventory-scroll" class="cd-inv-scroll" mode="Vertical" />
-            <ui:Label name="inventory-empty" text="" class="cd-info-label cd-hidden" />
+            <ui:VisualElement name="inventory-heroes" class="cd-inv-heroes" />
 
-            <ui:Label name="inventory-hint" text="↑↓ select · Enter equip/unequip · ←→ tab · Q/E hero · Esc back" class="cd-info-label cd-hint" />
-            <ui:Button name="inventory-close" text="Back" class="cd-button cd-button--narrow" />
+            <ui:VisualElement class="cd-inv-body">
+                <ui:VisualElement class="cd-inv-col cd-inv-col--left">
+                    <ui:Label name="inv-left-title" text="" class="cd-inv-col__title" />
+                    <ui:VisualElement name="inv-left" class="cd-inv-col__content" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="cd-inv-col cd-inv-col--list">
+                    <ui:Label name="inv-list-title" text="" class="cd-inv-col__title" />
+                    <ui:ScrollView name="inventory-scroll" class="cd-inv-list" mode="Vertical" />
+                    <ui:Label name="inventory-empty" text="" class="cd-inv-empty cd-hidden" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="cd-inv-col cd-inv-col--detail">
+                    <ui:VisualElement class="cd-inv-detail__head">
+                        <ui:VisualElement name="inv-detail-icon" class="cd-inv-detail__icon" />
+                        <ui:VisualElement class="cd-inv-detail__titles">
+                            <ui:Label name="inv-detail-name" text="" class="cd-inv-detail__name" />
+                            <ui:Label name="inv-detail-sub" text="" class="cd-inv-detail__sub" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:ScrollView name="inv-detail-body" class="cd-inv-detail__body" mode="Vertical" vertical-scroller-visibility="Hidden" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Label name="inventory-hint" text="" class="cd-inv-hint" />
         </ui:VisualElement>
 
 

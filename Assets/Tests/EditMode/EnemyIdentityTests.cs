@@ -47,6 +47,39 @@ namespace Tests.EditMode
                 "place to leave a new enemy.");
         }
 
+        /// <summary>
+        /// <see cref="EnemySO.Sprite"/> is the static portrait every UI screen draws (the bestiary
+        /// row, the Inspect page). Combat animates from <c>AnimationFrames</c> instead, so a sprite
+        /// reference left dangling by a replaced texture shows up nowhere in a fight - the Floating
+        /// Eye went portrait-less in the bestiary that way (2026-09-28). Use frame 0 of the idle strip.
+        /// </summary>
+        [Test]
+        public void EveryEnemy_HasAPortraitSpriteAndNoMissingFrames()
+        {
+            var broken = new List<string>();
+            foreach (var enemy in LoadEveryEnemy())
+            {
+                if (enemy.Sprite == null)
+                {
+                    broken.Add(enemy.name + ".Sprite");
+                }
+                if (enemy.AnimationFrames == null)
+                {
+                    continue;
+                }
+                for (int i = 0; i < enemy.AnimationFrames.Length; i++)
+                {
+                    if (enemy.AnimationFrames[i] == null)
+                    {
+                        broken.Add($"{enemy.name}.AnimationFrames[{i}]");
+                    }
+                }
+            }
+            CollectionAssert.IsEmpty(broken,
+                $"Missing or dangling sprite reference(s): {string.Join(", ", broken)}. Point Sprite at " +
+                "frame 0 of the enemy's idle strip.");
+        }
+
         [Test]
         public void EveryEnemy_HasAUniqueKey()
         {

@@ -264,8 +264,9 @@ split working.
 
 **The hit-test trap** is the most load-bearing UI rule here: a `cd-dock-center` window that *changes
 size* leaves UITK's input hit-testing on the old transform, offsetting every click. That is why
-`bestiary-view`, `inventory-view`, `grid-view` and `campaign-view` are `cd-window--fixed`, and why
-the town is one fixed canvas.
+`bestiary-view`, `grid-view` and `campaign-view` are `cd-window--fixed`, `inventory-view` is a
+px-sized `cd-inv-window` (1180x720) whose every region exists on every tab, and why the town is one
+fixed canvas.
 
 ## Keyboard navigation
 
@@ -325,8 +326,17 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
 - **MerchantUI** — the Gold sink (gear, and the healing-potion carry cap). See the Progression guide.
 - **MagicForgeUI** (`Cards/UI`) — Essence sink + collection grid, All Magic / Combos tabs, `?` for
   undiscovered. **Requires a `MagicCatalog` in the scene** or it logs a warning and shows empty.
-- **InventoryHubUI** (`Items/UI`) — the between-runs bag: Equipment / Spells / Consumables /
-  Materials. Equipment is managed *only* here.
+- **InventoryHubUI** (`Items/UI`) — the between-runs bag: Equipment / Abilities / Consumables /
+  Materials. Equipment is managed *only* here. **Redesigned 2026-09-28** into one fixed frame: a header
+  band with the tabs, a portrait hero strip (muted, never hidden, on the party-wide tabs), three
+  px-wide columns and a per-state hint line. Equipment is **FF-style**: the cursor walks the hero's
+  slots, the middle column lists what fits the slot under it — the bag *and* what other heroes wear
+  (equipping takes it off them) — and Enter moves into that list, where the detail column shows every
+  stat now → after. Esc backs out one layer. Stats are **base + bought grid nodes + gear**
+  (`HeroStatCalculator`); the old screen and the campfire used `HeroSO.BaseStats` and understated
+  every hero who had spent XP. Abilities are described through `HeroSnapshotUnit`, so the numbers
+  are the hero's own. Item wording (slot names, bonus lines, rarity classes, the swap maths) is
+  `Items/ItemPresenter` (`ItemPresenterTests`).
 - **BestiaryUI** (`Enemies/UI`) — the enemy knowledge collection.
 - **SphereGridUI** (`Heroes/UI`) — the one place XP is ever spent.
 

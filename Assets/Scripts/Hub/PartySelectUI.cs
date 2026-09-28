@@ -371,10 +371,18 @@ namespace Assets.Scripts.Hub
             var textCol = new VisualElement();
             textCol.style.flexGrow = 1f;
 
+            // The stats the hero fights with - base, bought grid nodes, gear - not the bare HeroSO
+            // block, which understated every hero who had spent XP (the inventory had the same bug).
+            var save = HeroRoster.GetHeroSave(hero);
+            var nodes = save != null && save.ActivatedNodes != null ? save.ActivatedNodes : new List<string>();
+            var effective = Balance.HeroStatCalculator.WithGear(
+                Balance.HeroStatCalculator.BaseStatsForNodes(hero, nodes),
+                Items.InventoryManager.Instance.GetEquippedItems(hero.SaveKey));
+
             var statParts = new List<string>();
             foreach (var stat in StatCatalog.Types)
             {
-                int value = hero.BaseStats[stat];
+                int value = effective[stat];
                 if (value != 0)
                 {
                     statParts.Add(StatCatalog.ShortName(stat) + " " + value);
