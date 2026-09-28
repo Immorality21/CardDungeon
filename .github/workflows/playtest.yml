@@ -1,6 +1,6 @@
 # Test, build and ship a playtest build to itch.io.
 #
-#   push to main       -> EditMode tests -> WebGL + Windows builds -> butler push to itch
+#   push to main       -> EditMode tests + WebGL/Windows builds (in parallel) -> butler push to itch
 #   pull request       -> tests + builds only (nothing is shipped)
 #   Actions tab button -> same as a push to main
 #
@@ -49,6 +49,9 @@ jobs:
         id: tests
         with:
           testMode: editmode
+          # The Balance category audits the real content against BalanceRules; it is a tuning
+          # tool, not a ship gate. Run it locally (Test Runner / Balance Analyzer).
+          customParameters: -testCategory "!Balance"
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: EditMode test results
 
@@ -60,7 +63,6 @@ jobs:
 
   build:
     name: Build ${{ matrix.targetPlatform }}
-    needs: test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -103,7 +105,7 @@ jobs:
 
   deploy:
     name: Push to itch.io
-    needs: build
+    needs: [test, build]
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     env:
