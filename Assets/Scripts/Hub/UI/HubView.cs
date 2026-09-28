@@ -51,6 +51,9 @@ namespace Assets.Scripts.Hub.UI
         }
 
         private readonly VisualElement _canvas;
+
+        /// <summary>Design-space height a caption needs below its lot: a name and two note lines.</summary>
+        private const float CaptionRoom = 80f;
         private readonly VisualElement _backdrop;
         private readonly VisualElement _spriteLayer;
         private readonly VisualElement _lotLayer;
@@ -182,13 +185,25 @@ namespace Assets.Scripts.Hub.UI
             glyph.AddToClassList("hub-lot__glyph");
             button.Add(glyph);
 
+            // Name and note hang BELOW the lot, not on it: inside the hitbox they sat on the building's
+            // own art - the Storehouse's name over its door, a requirement over the Merchant's fence -
+            // and wrapped to the lot's width mid-phrase (playtest 2026-09-28, finding 13). A child of
+            // the button, so it moves with the lot; ignored by picking, so the hitbox stays the art.
+            var caption = new VisualElement { pickingMode = PickingMode.Ignore };
+            caption.AddToClassList("hub-lot__caption");
+            // A lot at the foot of the town (the campfire) has no room below it inside the frame, so
+            // its caption goes above instead.
+            caption.EnableInClassList("hub-lot__caption--above",
+                lot.HitRect.yMax + CaptionRoom > _referenceSize.y);
+            button.Add(caption);
+
             var label = new Label(lot.Label) { pickingMode = PickingMode.Ignore };
             label.AddToClassList("hub-lot__label");
-            button.Add(label);
+            caption.Add(label);
 
             var note = new Label(string.Empty) { name = "hub-lot-note-" + lot.Key, pickingMode = PickingMode.Ignore };
             note.AddToClassList("hub-lot__note");
-            button.Add(note);
+            caption.Add(note);
 
             ApplyArtMode(button, glyph, lot.Sprite != null);
 
@@ -275,7 +290,11 @@ namespace Assets.Scripts.Hub.UI
             var label = button.Q<Label>("hub-lot-note-" + key);
             if (label != null)
             {
-                label.text = note ?? "";
+                // One requirement per line ("Needs 8 Scrap Iron" / "2 Rotted Timber") rather than one
+                // line wrapped wherever the width ran out. Town-only: the same text is a sentence on
+                // the lot screen.
+                label.text = (note ?? "").Replace(" · ", "\n");
+                label.EnableInClassList("cd-hidden", string.IsNullOrEmpty(note));
             }
         }
 

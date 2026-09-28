@@ -57,6 +57,9 @@ namespace Assets.Scripts.Combat
         private float _heroColumnX;
         private float _centerY;
 
+        /// <summary>How far above the camera's centre the formation is centred, as a share of the half-height.</summary>
+        private const float StageCenterLift = 0.26f;
+
         // Hero sprites hidden while a summon has taken the party's place, shown again when it leaves.
         private readonly List<SpriteRenderer> _hidden = new List<SpriteRenderer>();
 
@@ -134,10 +137,19 @@ namespace Assets.Scripts.Combat
             var heroes = party.Heroes.Where(h => h != null && h.IsAlive).Cast<ICombatUnit>().ToList();
             var enemies = room.Enemies.Where(e => e != null && e.IsAlive).Cast<ICombatUnit>().ToList();
 
-            float centerY = anchor.y + halfH * 0.15f;
-            _heroColumnX = anchor.x - halfW * 0.55f;
+            // Above the middle, because the bottom of the screen belongs to the UI: the command menu
+            // and the ability pickers dock bottom-left, right under the hero column, and the party
+            // window bottom-right. At 0.15 the lowest hero stood inside that band and a picker covered
+            // the very hero whose turn it was (playtest 2026-09-28, raised with the UI scale).
+            float centerY = anchor.y + halfH * StageCenterLift;
+            // Where a party-replacing summon stands: the single column's spot, whatever the party's shape.
+            _heroColumnX = anchor.x + halfW * HeroFormation.SingleColumnX;
             _centerY = centerY;
-            var heroSlots = BuildColumn(_heroColumnX, centerY, heroes.Count, halfH);
+            var heroSlots = new List<Vector3>(heroes.Count);
+            foreach (var offset in HeroFormation.Layout(heroes.Count, halfW, halfH))
+            {
+                heroSlots.Add(new Vector3(anchor.x + offset.x, centerY + offset.y, -1f));
+            }
 
             // Enemies rank up FF-style: one column up to three, front 2 / back 3 beyond that, and a
             // boss alone at the back with its escort in front (see EnemyFormation).
@@ -320,17 +332,6 @@ namespace Assets.Scripts.Combat
                     return;
                 }
             }
-        }
-
-        /// <summary>Evenly spaced vertical slots centred on <paramref name="centerY"/>, top-first.</summary>
-        private static List<Vector3> BuildColumn(float x, float centerY, int count, float halfH)
-        {
-            var slots = new List<Vector3>();
-            foreach (float y in EnemyFormation.ColumnYs(count, halfH))
-            {
-                slots.Add(new Vector3(x, centerY + y, -1f));
-            }
-            return slots;
         }
 
         /// <param name="scale">Multiplier on the unit's out-of-combat scale.</param>

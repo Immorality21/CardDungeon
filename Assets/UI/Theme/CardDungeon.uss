@@ -5,6 +5,10 @@
    and every screen updates.
    ============================================================ */
 
+/* Readability floor (playtest 2026-09-28, finding 12): no text in this sheet is set below 16px.
+   Every panel scales from its reference resolution, so at 1280x720 a size here renders at about
+   two thirds - 16px is roughly the smallest that still reads there. Hint lines and "meta" text were
+   12-15px and came out at 8-10. Exempt: .dm-glyph, sized to fit the floor map's room boxes. */
 :root, .sg-scope {
     --cd-overlay: rgba(6, 3, 14, 0.92);
     --cd-parchment: rgb(14, 7, 28);
@@ -25,6 +29,10 @@
     flex-grow: 1;
     align-items: center;
     justify-content: flex-end;
+    /* The base every label inherits. UI Toolkit's own default is 12px, which the 1920x1080
+       reference scale turns into 8px at 1280x720 - any label without a class of its own used to
+       land there (playtest 2026-09-28, finding 12). */
+    font-size: 18px;
 }
 
 /* Compact command window, anchored toward the bottom (FFVIII-style). */
@@ -99,7 +107,7 @@
 .cd-row__meta {
     flex-shrink: 0;
     width: 96px;
-    font-size: 15px;
+    font-size: 16px;
     -unity-text-align: middle-right;
     color: var(--cd-text-light);
 }
@@ -173,6 +181,14 @@
     margin-bottom: 0;
     padding: 0 0 8px 0;
     overflow: hidden;
+}
+
+/* The ability / item / target pickers: wider than the command menu, so an ability's description
+   wraps to fewer lines and the window stays low. Its height is what matters - the heroes stand
+   in a column right above the bottom-left dock, and a tall picker covers the one whose turn it is. */
+.cd-window--picker {
+    width: 560px;
+    max-width: 46%;
 }
 
 /* ---- Party status window (hero names + HP) ---- */
@@ -385,7 +401,7 @@
 
 .cd-turn-row__name {
     flex-grow: 1;
-    font-size: 15px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: var(--cd-text-light);
     -unity-text-align: middle-left;
@@ -454,7 +470,7 @@
 
 .cd-sel-row__meta {
     flex-shrink: 0;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--cd-text-dark);
     -unity-text-align: middle-right;
     margin-left: 10px;
@@ -677,7 +693,7 @@
 
 .cd-feedback {
     color: var(--cd-text-dark);
-    font-size: 15px;
+    font-size: 16px;
     -unity-text-align: middle-center;
     min-height: 20px;
     margin-top: 6px;
@@ -687,7 +703,7 @@
    margin-top: auto absorbs the fixed-height window's free space, anchoring the hint + the Back
    button beneath it to the bottom so they don't jump as the list content changes size. */
 .cd-hint {
-    font-size: 12px;
+    font-size: 16px;
     opacity: 0.7;
     margin-top: auto;
     margin-bottom: 2px;
@@ -714,7 +730,7 @@
 }
 
 .cd-inv-material__flavour {
-    font-size: 13px;
+    font-size: 16px;
     color: var(--cd-text-dark);
     opacity: 0.6;
     white-space: normal;
@@ -758,6 +774,13 @@
     color: var(--cd-text-dark);
     font-size: 16px;
     -unity-font-style: bold;
+}
+
+/* The town's purse: the one place the player checks what they can afford, so it is not tucked
+   away in body text (playtest 2026-09-28, finding 13). */
+.hub-bar .cd-currency-row > Label {
+    font-size: 22px;
+    color: var(--cd-gold);
 }
 
 .cd-button-row {
@@ -873,13 +896,13 @@
 }
 
 .cd-inspect__level {
-    font-size: 14px;
+    font-size: 16px;
     color: var(--cd-text-dark);
 }
 
 .cd-inspect__desc {
     white-space: normal;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--cd-text-dark);
     margin-bottom: 8px;
 }
@@ -902,12 +925,12 @@
 }
 
 .cd-effect-row__text {
-    font-size: 13px;
+    font-size: 16px;
     color: var(--cd-text-dark);
 }
 
 .cd-effect-row__lock {
-    font-size: 12px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: var(--cd-text-dark);
 }
@@ -1105,7 +1128,7 @@
 }
 
 .cd-boss-banner__sub {
-    font-size: 14px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: rgb(224, 120, 110);
     -unity-text-align: middle-center;
@@ -1134,7 +1157,7 @@
 }
 
 .cd-summon-banner__sub {
-    font-size: 14px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: rgb(236, 196, 110);
     -unity-text-align: middle-center;
@@ -1151,7 +1174,7 @@
 /* Merchant gear shop (buy/sell rows). */
 .cd-subtitle {
     -unity-font-style: bold;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--cd-text-dark);
     margin-top: 10px;
     margin-bottom: 2px;
@@ -1181,12 +1204,12 @@
 
 .cd-shop-row__name {
     flex-grow: 1;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--cd-text-dark);
 }
 
 .cd-shop-row__sub {
-    font-size: 11px;
+    font-size: 16px;
     -unity-font-style: italic;
     color: var(--cd-text-dark);
     opacity: 0.75;
@@ -1211,7 +1234,7 @@
 }
 
 .cd-shop-empty {
-    font-size: 13px;
+    font-size: 16px;
     -unity-font-style: italic;
     color: var(--cd-text-dark);
     padding: 6px 4px;
@@ -1309,7 +1332,7 @@
 }
 
 .cd-scan__health {
-    font-size: 15px;
+    font-size: 16px;
     color: var(--cd-text-light);
 }
 
@@ -1325,7 +1348,7 @@
 
 /* A section heading inside the page ("Resistances", "Draw", ...). */
 .cd-scan__section {
-    font-size: 13px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: var(--cd-accent);
     margin-top: 8px;
@@ -1342,12 +1365,12 @@
 }
 
 .cd-scan__label {
-    font-size: 15px;
+    font-size: 16px;
     color: var(--cd-text-light);
 }
 
 .cd-scan__value {
-    font-size: 15px;
+    font-size: 16px;
     -unity-font-style: bold;
     -unity-text-align: middle-right;
 }
@@ -1438,7 +1461,7 @@
 }
 
 .cd-bestiary-row__kills {
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(180, 164, 204);
 }
 
@@ -1786,22 +1809,40 @@
     -unity-text-align: middle-center;
 }
 
+/* Name + note, hung below the lot so they never sit on its art (see HubView.MakeLot). */
+.hub-lot__caption {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    translate: -50% 0;
+    margin-top: 4px;
+    align-items: center;
+}
+
+.hub-lot__caption--above {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 4px;
+}
+
 .hub-lot__label {
-    font-size: 15px;
+    font-size: 18px;
+    white-space: nowrap;
     -unity-font-style: bold;
     color: var(--cd-text-light);
     -unity-text-align: middle-center;
-    white-space: normal;
     background-color: rgba(9, 5, 18, 0.8);
     padding: 0 6px;
     border-radius: 3px;
 }
 
 .hub-lot__note {
-    font-size: 12px;
+    font-size: 17px;
+    white-space: nowrap;
+    margin-top: 2px;
     color: var(--cd-gold);
     -unity-text-align: middle-center;
-    white-space: normal;
     background-color: rgba(9, 5, 18, 0.8);
     padding: 0 5px;
     border-radius: 3px;
@@ -1828,7 +1869,7 @@
     flex-basis: 0;
     min-width: 0;
     margin: 0 4px;
-    font-size: 15px;
+    font-size: 16px;
 }
 
 /* The "who is mentored" cycle button. Wider than .cd-button--narrow and allowed
@@ -1841,7 +1882,7 @@
     height: auto;
     min-height: 34px;
     padding: 4px 10px;
-    font-size: 15px;
+    font-size: 16px;
     margin-top: 4px;
 }
 
@@ -1962,7 +2003,7 @@
     bottom: 12px;
     left: 50%;
     translate: -50% 0;
-    font-size: 12px;
+    font-size: 16px;
     color: var(--cd-text-dark);
     opacity: 0.7;
 }
@@ -2042,7 +2083,7 @@
 }
 
 .dm-legend__item {
-    font-size: 13px;
+    font-size: 16px;
     -unity-font-style: bold;
     margin-left: 8px;
     margin-right: 8px;

@@ -720,7 +720,9 @@ namespace Assets.Scripts.Hub
             var levelIndex = Mathf.Clamp(_runSaveData.CurrentLevelIndex, 0, run.Levels.Count - 1);
             var levelEntry = run.Levels[levelIndex];
 
-            _levelIndicator.text = $"Level {levelIndex + 1} of {run.Levels.Count}";
+            // The run's name too - the screen used to name the floor and not the run it belongs to
+            // (playtest 2026-09-28, finding 14).
+            _levelIndicator.text = $"{CampaignOps.DisplayNameOf(run)} · Level {levelIndex + 1} of {run.Levels.Count}";
             _levelName.text = levelEntry.LevelName;
 
             if (_progressParty != null)

@@ -26,6 +26,13 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
   a `_backgroundArt` sprite) that hides the dungeon, and relocates alive units into columns:
   **heroes left (facing right), enemies right (facing left)**, bumping their sprite sortingOrder
   to **600+** (mandatory — enemies default to 5, *below* the background).
+  **Hero formation** is `HeroFormation.Layout` (pure, `HeroFormationTests`, 2026-09-28): up to 3
+  heroes in one column; **4 in two ranks of two**, the party's first two in front, nearest the
+  enemies — the mirror of the enemy side. A single column of four packed every HP bar onto the hero
+  above it and put the lowest hero inside the bottom-left band where the command menu and the ability
+  pickers dock, so the picker hid the hero choosing from it. The whole formation is centred
+  `StageCenterLift` (0.26) of the half-height above the camera centre for the same reason: the bottom
+  of the screen belongs to the UI. A party-replacing summon still stands on the single column's spot.
   **Enemy formation** is `EnemyFormation.Layout` (pure, `EnemyFormationTests`): up to 3 enemies in
   one column; 4–5 in FF ranks — a **front** rank of 2 nearest the party and a **back** rank of the
   rest, filled in `room.Enemies` order; a **boss** (`EnemySO.IsBoss`) alone at the back, centred,

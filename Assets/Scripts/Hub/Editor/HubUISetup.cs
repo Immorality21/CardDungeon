@@ -169,7 +169,7 @@ public class HubUISetup : Editor
         var settings = ScriptableObject.CreateInstance<PanelSettings>();
         settings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
         settings.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
-        settings.referenceResolution = new Vector2Int(1920, 1080);
+        settings.referenceResolution = new Vector2Int(1600, 900); // see the readability note at the top of CardDungeon.uss
         settings.match = 0.5f;
         settings.sortingOrder = 100;
 

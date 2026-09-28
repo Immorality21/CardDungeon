@@ -10,7 +10,7 @@ file covers only what is left in `MenuScene`.
 ## What this scene is for
 
 ```
-[ Continue ]  -> SceneManager.LoadScene("HubScene")
+[ Continue ]  -> SceneManager.LoadScene("HubScene")   ("New Game" on an empty save folder)
 [ Options  ]  -> options-view (AudioOptionsUI)
 [ Quit     ]
 ```
@@ -20,6 +20,12 @@ and it is deliberately dependency-free: no managers, no catalogs, no `Run.json`.
 room for the **save-slot picker** it is meant to grow, because a picker cannot share a document with
 screens that read the save it has not chosen yet. With one slot today, **Continue *is* that choice**:
 pressing it opens the save file and walks into town.
+
+**The button says "New Game" when there is no game yet** (2026-09-28). `HasSaveGame` checks whether
+`Meta.json` or `Party.json` *exists* — a file-existence check, not a read, so the scene still loads
+nothing. `Audio.json` does not count: Options writes it before any game has been played. The title
+reads **Immoral Dungeon**, matching the itch page; the project, namespaces and `productName` are
+unchanged — `productName` also decides `persistentDataPath`, so renaming it moves the save folder.
 
 The scene holds three GameObjects — `Main Camera`, `EventSystem`, `MainMenuUITK`. The
 `MetaProgressManager`, `MagicCatalog`, `MagicComboCatalog` and `PartyResourceManager` instances that

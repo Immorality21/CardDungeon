@@ -77,6 +77,14 @@ behind a roof, a banner past a wall — while UI Toolkit's hit-testing stays stu
 sprite is doing the identifying. `HubContentTests.NoTwoLots_HitBoxesOverlap` polices the hit boxes
 and says nothing about the art, which is free to overlap as much as it likes.
 
+**A lot's name and note hang below it, never on it** (`.hub-lot__caption`, 2026-09-28). Inside the
+hitbox they sat on the building's own art — the Storehouse's name over its door, a requirement over
+the Merchant's fence — and wrapped to the lot's width mid-phrase. The caption is a child of the
+button (it moves with the lot, never picks), does not wrap, and puts **one requirement per line**
+(`SetLotNote` turns `" · "` into line breaks; town only, since the same text is a sentence on the lot
+screen). A lot within `CaptionRoom` of the town's bottom edge (the campfire) takes its caption
+**above** instead, or it runs off the frame.
+
 ### Three more constraints the renderer exists to satisfy
 
 - **The town scales as one unit.** Everything is absolutely positioned inside one fixed-size canvas

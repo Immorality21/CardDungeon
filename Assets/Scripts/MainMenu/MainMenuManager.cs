@@ -51,6 +51,9 @@ public class MainMenuManager : MonoBehaviour
         _quitButton = _root.Q<Button>("quit-btn");
 
         _continueButton.clicked += OnContinue;
+        // Same button, same destination - only the word changes. A brand-new save used to be greeted
+        // with "Continue" (playtest 2026-09-28, finding 14).
+        _continueButton.text = HasSaveGame() ? "Continue" : "New Game";
         _optionsButton.clicked += OnOptions;
         if (_quitButton != null)
         {
@@ -136,6 +139,17 @@ public class MainMenuManager : MonoBehaviour
 
     /// <summary>Opens the save file. With one slot that is unconditional; the picker that lands here
     /// later chooses <i>which</i> file first and then does exactly this.</summary>
+    /// <summary>
+    /// Whether the save folder holds a game - the meta record or the party. A <b>file-existence check
+    /// only</b>: this scene still reads no save (see the MainMenu guide), and <c>Audio.json</c> does not
+    /// count, since the Options screen writes it before any game has been played.
+    /// </summary>
+    private static bool HasSaveGame()
+    {
+        var files = new Assets.Scripts.IO.FileHandler();
+        return files.FindFiles("Meta").Length > 0 || files.FindFiles("Party").Length > 0;
+    }
+
     private void OnContinue()
     {
         SceneManager.LoadScene("HubScene");

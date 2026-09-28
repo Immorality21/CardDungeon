@@ -10,7 +10,7 @@
 
         <!-- TITLE -->
         <ui:VisualElement name="title-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
-            <ui:Label text="Card Dungeon" class="cd-title cd-title--large" />
+            <ui:Label text="Immoral Dungeon" class="cd-title cd-title--large" />
             <ui:Button name="continue-btn" text="Continue" class="cd-menu-button" />
             <ui:Button name="options-btn" text="Options" class="cd-menu-button" />
             <ui:Button name="quit-btn" text="Quit" class="cd-menu-button" />

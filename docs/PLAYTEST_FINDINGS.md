@@ -62,11 +62,16 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
 
 ## Readability at 1280×720
 
-- [ ] **12. Lots of text is ~8–11px.** Worst offenders: the input hint lines ("Arrows pick a door ·
+- [x] **12. Lots of text is ~8–11px.** Worst offenders: the input hint lines ("Arrows pick a door ·
   Enter walk through · Tab room actions", "↑↓ choose · Enter confirm", "Drag pan · Scroll zoom ·
   Click a run · Esc back"), the building requirement lines in the hub, "Level 1 of 4" / "Party (1):
   Warrior" on the level-entry screen, "Open · 4 levels" on the story map, and dialog body text.
-- [ ] **13. Hub labels overlap the art and wrap badly.** "Needs 8 Scrap Iron · 2 / Rotted Timber"
+  - *Fixed 2026-09-28*: the UI's reference resolution went 1920×1080 → **1600×900** (everything 20%
+    larger at every screen size), a **16px floor** on every font in `CardDungeon.uss`, and an 18px base on
+    `.cd-root` for labels with no size of their own. It exposed a four-hero battle layout that hid the
+    bottom hero behind the menus, now two ranks of two (`HeroFormation`). **Left over:** the wider
+    turn-order panel covers the right end of a boss's HP bar (its nameplate still shows the number).
+- [x] **13. Hub labels overlap the art and wrap badly.** "Needs 8 Scrap Iron · 2 / Rotted Timber"
   wraps mid-phrase and sits on top of the fence sprite; the Storehouse label covers the building's
   door. Gold/Essence are tiny in the bottom-right corner.
 - [ ] **14. Menus are small boxes on an empty background.** The title screen, the level-entry screen
@@ -75,6 +80,11 @@ Screenshots from the session are not kept; re-capture with `ScreenCapture.Captur
   - The title still reads **"Card Dungeon"**; the itch page is *Immoral Dungeon*. Pick one name.
   - On a brand-new save the first button says **"Continue"**; it should say "New Game" (or similar).
   - The level-entry screen names the level but not the run ("The Threshold").
+  - *Done 2026-09-28*: the title reads **Immoral Dungeon**; the first button says **New Game** on an empty
+    save; the level-entry screen reads "The Threshold · Level 2 of 4". **Still open: the small panels on
+    flat backgrounds** (title, level entry, story map) - that is art. Also note: Project Settings
+    `productName` is still "Untitled Roguelike dungeon" - it names the window and the exe, but it also
+    decides `persistentDataPath`, so changing it moves the save folder and needs a migration.
 
 ## Old / rough controls
 

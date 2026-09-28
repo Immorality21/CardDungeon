@@ -4,7 +4,7 @@
     <ui:VisualElement name="root" class="cd-root" picking-mode="Ignore">
 
         <!-- Ability / slot list window (docked bottom-left, styled like the command menu) -->
-        <ui:VisualElement name="magic-list-panel" class="cd-window cd-window--combat cd-dock-bottom-left cd-hidden">
+        <ui:VisualElement name="magic-list-panel" class="cd-window cd-window--combat cd-window--picker cd-dock-bottom-left cd-hidden">
             <ui:Label name="list-title" text="Ability" class="cd-command-window__header" />
             <ui:ScrollView name="list-scroll" class="cd-select-scroll" mode="Vertical" />
             <!-- What the selected row does: flavour plus the generated mechanics line. -->
@@ -13,7 +13,7 @@
         </ui:VisualElement>
 
         <!-- Target picker window (cast target / attack target) -->
-        <ui:VisualElement name="target-panel" class="cd-window cd-window--combat cd-dock-bottom-left cd-hidden">
+        <ui:VisualElement name="target-panel" class="cd-window cd-window--combat cd-window--picker cd-dock-bottom-left cd-hidden">
             <ui:Label name="target-prompt" text="Select Target" class="cd-command-window__header" />
             <ui:ScrollView name="target-scroll" class="cd-select-scroll" mode="Vertical" />
             <ui:Button name="target-back" text="Back" class="cd-button cd-button--narrow" />

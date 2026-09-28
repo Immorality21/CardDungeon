@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -44,6 +45,10 @@ namespace Assets.Scripts.Heroes.UI
         }
 
         public const float NodeRadius = 22f;
+
+        /// <summary>Extra room <see cref="FrameAll"/> leaves when nodes carry captions: half a long name
+        /// either side, and one caption's height below.</summary>
+        private static readonly Vector2 CaptionFramePad = new Vector2(70f, 30f);
         private const float MinZoom = 0.2f;
         private const float MaxZoom = 2.5f;
 
@@ -410,6 +415,16 @@ namespace Assets.Scripts.Heroes.UI
             }
             min -= new Vector2(NodeRadius * 2f, NodeRadius * 2f);
             max += new Vector2(NodeRadius * 2f, NodeRadius * 2f);
+
+            // Captions hang below their nodes and are wider than them, so a graph that has any needs
+            // the extra room or the lowest and outermost names are cut off. Only graphs with captions
+            // (the campaign map) pay for it; the sphere grid frames exactly as before.
+            if (_nodes.Values.Any(n => !string.IsNullOrEmpty(n.Caption)))
+            {
+                min.x -= CaptionFramePad.x;
+                max.x += CaptionFramePad.x;
+                max.y += CaptionFramePad.y;
+            }
 
             float width = resolvedStyle.width;
             float height = resolvedStyle.height;
