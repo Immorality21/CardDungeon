@@ -2426,3 +2426,31 @@ design** — its texture is *scarcity*, which the rule does not model. Rather th
 report warning, the better third item is probably **party-wide** healing: modest per hero, clearly
 worth a turn at four bodies, and it never touches the single-hero ceiling. That needs a new
 `ConsumableEffectType` and targeting work — `POLISH_CONTENT.md` §18.
+
+## §5w — A challenge run: open early, balanced late (2026-09-28)
+
+**The Blood Stair** (5 hand-drawn floors, Cultist captive on floor 5) opens right after the tutorial
+and is meant to be borderline impossible there. Two things made that authorable:
+
+- **`RunDefinitionSO.Challenge`** — the analyzer measures the run against the *strongest* end state
+  (Ashen Deep's: 3 heroes, ~900 XP each) at the deepest tier instead of the tutorial graduate. Without
+  it every floor reads *unclearable* and the suite has nothing useful to say about the run.
+- **Authored room kinds** (`ManualRoomEntry.Kind`) — the random cache/refuge draw had promoted the
+  floor's centre fight into a cache.
+
+Final dials: Difficulty `1.8 / 2.6 / 2.9 / 3.6 / 5.0`, XP ×`3 / 3.5 / 4 / 4 / 4.5`; Warden 200 HP /
+19 Str + 2 Hex Weavers; Tyrant 280 HP / 21 Str + 2 Cinder Imps.
+
+| party walking in | closed-form attrition, floors 1–5 | floor sim (Adaptive) |
+|---|---|---|
+| tutorial graduate (2 heroes) | 1.37 / 3.77 / 3.27 / 6.31 / 6.80 | floor 1 clears 95% (47% HP left); floor 2+ wipes 100% |
+| after Drowned March (3 heroes) | 0.21 / 0.50 / 0.87 / 1.69 / 1.23 | — |
+| after Ashen Deep (strongest) | 0.19 / 0.31 / 0.54 / 0.77 / 1.05 (gate) | all five clear 100%, finale ends at 73% HP |
+
+**What it learned.** The closed form is what bounds a challenge run, and it bounds it well *below*
+what an endgame party finds hard. Floors 1–4 sit near the attrition ceiling (floor 4's margin is
+23% against the 20% floor) and the 75% step ceiling, yet the simulated late party loses nobody. The
+finale is a gate, so attrition is Info only, but `MaxBossDanger` (1.40) still caps the boss room:
+at Difficulty 5.4 the room scores 1.49 and trips it, while the simulator still wipes only 0–4%. The
+same §5k pessimism about dense rooms, seen from the other side: **if the late game should find this
+run hard too, the ceiling to question is the closed form's, not the content's.**

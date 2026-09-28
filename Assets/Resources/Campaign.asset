@@ -55,3 +55,11 @@ MonoBehaviour:
     Secret: 1
     Optional: 1
     MapPosition: {x: 570, y: 20}
+  - Run: {fileID: 11400000, guid: 9a02abfb854ae1345bf877fe6306d847, type: 2}
+    Requires:
+    - {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
+    RequiresHeroes: []
+    UnlockMode: 0
+    Secret: 0
+    Optional: 1
+    MapPosition: {x: 170, y: 190}

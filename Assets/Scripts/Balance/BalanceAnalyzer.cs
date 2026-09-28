@@ -194,6 +194,7 @@ namespace Assets.Scripts.Balance
 
             var byKey = new Dictionary<string, RunCurve>();
             var remaining = new List<RunDefinitionSO>(input.Runs);
+            var challenges = new List<RunDefinitionSO>();
 
             foreach (var node in CampaignOps.GetNodesInPlayOrder(input.Campaign))
             {
@@ -203,6 +204,14 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
                 remaining.Remove(run);
+
+                // A challenge run opens early but is meant for a party that has seen the rest of
+                // the campaign, so it waits until every ordinary run has an end state to inherit.
+                if (run.Challenge)
+                {
+                    challenges.Add(run);
+                    continue;
+                }
 
                 List<HeroSO> seedRoster = null;
                 Dictionary<HeroSO, int> seedXp = null;
@@ -231,6 +240,24 @@ namespace Assets.Scripts.Balance
                 byKey[CampaignOps.RunKeyOf(run)] = curve;
             }
 
+            // The *strongest* end state, where an ordinary run takes the weakest: the question a
+            // challenge run answers is "can anyone clear this", and the answer that keeps it honest
+            // is the most-invested party the campaign can hand it.
+            RunCurve strongest = null;
+            foreach (var prior in byKey.Values)
+            {
+                if (strongest == null || TotalBankedXp(prior) > TotalBankedXp(strongest))
+                {
+                    strongest = prior;
+                }
+            }
+            foreach (var run in challenges)
+            {
+                report.Runs.Add(strongest != null
+                    ? RunCurve.Build(run, report.Party, rules, strongest.EndRoster, strongest.EndLifetimeXp)
+                    : RunCurve.Build(run, report.Party, rules));
+            }
+
             // Runs that exist as assets but are not on the map still get measured, as a fresh start -
             // CampaignAssetTests is what actually objects to them being unreachable.
             foreach (var run in remaining)
@@ -240,6 +267,38 @@ namespace Assets.Scripts.Balance
                     report.Runs.Add(RunCurve.Build(run, report.Party, rules));
                 }
             }
+        }
+
+        /// <summary>
+        /// <see cref="CampaignOps.ComputeTiers"/> with every <see cref="RunDefinitionSO.Challenge"/>
+        /// run moved to the deepest tier the rest of the campaign reaches. Its graph position is when
+        /// it opens; this is who it is for, which is what the tier budgets are about.
+        /// </summary>
+        private static Dictionary<string, int> EffectiveTiers(CampaignSO campaign)
+        {
+            var tiers = CampaignOps.ComputeTiers(campaign);
+            if (campaign == null || campaign.Nodes == null)
+            {
+                return tiers;
+            }
+
+            int deepest = 0;
+            foreach (var node in campaign.Nodes)
+            {
+                if (node != null && node.Run != null && !node.Run.Challenge &&
+                    tiers.TryGetValue(CampaignOps.RunKeyOf(node.Run), out int tier))
+                {
+                    deepest = Mathf.Max(deepest, tier);
+                }
+            }
+            foreach (var node in campaign.Nodes)
+            {
+                if (node != null && node.Run != null && node.Run.Challenge)
+                {
+                    tiers[CampaignOps.RunKeyOf(node.Run)] = deepest;
+                }
+            }
+            return tiers;
         }
 
         private static int TotalBankedXp(RunCurve curve)
@@ -1643,7 +1702,7 @@ namespace Assets.Scripts.Balance
 
         private static void EvaluateRuns(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
         {
-            var tiers = CampaignOps.ComputeTiers(input != null ? input.Campaign : null);
+            var tiers = EffectiveTiers(input != null ? input.Campaign : null);
 
             foreach (var run in report.Runs)
             {
@@ -3053,7 +3112,7 @@ namespace Assets.Scripts.Balance
         /// </summary>
         private static void RunFrontierSweeps(BalanceInput input, BalanceRulesSO rules, BalanceReport report)
         {
-            var tiers = CampaignOps.ComputeTiers(input.Campaign);
+            var tiers = EffectiveTiers(input.Campaign);
 
             foreach (var run in report.Runs)
             {

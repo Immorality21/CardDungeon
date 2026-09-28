@@ -588,6 +588,93 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void RunCurve_ManualLayout_AuthoredKindsAreNotFoughtAndCountAsTheirKind()
+        {
+            var combat = Room(Goblin(), 1f, 1);
+
+            var layout = Make<ManualLevelLayoutSO>();
+            layout.Rooms = new List<ManualRoomEntry>
+            {
+                new ManualRoomEntry { RoomTemplate = combat },
+                new ManualRoomEntry { RoomTemplate = combat },
+                new ManualRoomEntry { RoomTemplate = combat, Kind = RoomKind.Treasure },
+                new ManualRoomEntry { RoomTemplate = combat, Kind = RoomKind.Rest },
+                new ManualRoomEntry { RoomTemplate = combat }
+            };
+            layout.StartRoomIndex = 0;
+            layout.ExitRoomIndex = 4;
+
+            // A quota of one cache is spent on the authored one, not added to it.
+            var template = Make<LevelDefinitionSO>();
+            template.TreasureRooms = 1;
+
+            var run = Make<RunDefinitionSO>();
+            run.Levels = new List<RunLevelEntry>
+            {
+                new RunLevelEntry { ManualLayout = layout, LevelTemplate = template, LevelName = "Manual" }
+            };
+
+            var level = RunCurve.Build(run, SturdyParty(), Rules()).Levels[0];
+
+            Assert.AreEqual(2f, level.ExpectedCombatRooms, 0.0001f,
+                "Five rooms, less the start room and the two authored non-combat rooms.");
+            Assert.AreEqual(1, level.TreasureRooms);
+            Assert.AreEqual(1, level.RestRooms);
+        }
+
+        [Test]
+        public void ManualLayout_AuthoredKind_IsIgnoredOnTheStartAndExitRooms()
+        {
+            var layout = Make<ManualLevelLayoutSO>();
+            layout.Rooms = new List<ManualRoomEntry>
+            {
+                new ManualRoomEntry { Kind = RoomKind.Rest },
+                new ManualRoomEntry { Kind = RoomKind.Treasure },
+                new ManualRoomEntry { Kind = RoomKind.Rest }
+            };
+            layout.StartRoomIndex = 0;
+            layout.ExitRoomIndex = 2;
+
+            Assert.AreEqual(RoomKind.Combat, layout.AuthoredKindAt(0));
+            Assert.AreEqual(RoomKind.Treasure, layout.AuthoredKindAt(1));
+            Assert.AreEqual(RoomKind.Combat, layout.AuthoredKindAt(2));
+            Assert.AreEqual(0, layout.CountAuthored(RoomKind.Rest));
+        }
+
+        [Test]
+        public void RunCurve_ManualBossLevel_DisplacesExactlyTheAuthoredExitRoom()
+        {
+            var guard = Goblin(strength: 6, health: 40);
+            var exitTenant = Goblin(strength: 20, health: 200);
+            var boss = Goblin(strength: 8, health: 80);
+
+            var layout = Make<ManualLevelLayoutSO>();
+            layout.Rooms = new List<ManualRoomEntry>
+            {
+                new ManualRoomEntry { RoomTemplate = Room(null, 0f, 1) },
+                new ManualRoomEntry { RoomTemplate = Room(guard, 1f, 1), GuaranteeAllSpawns = true },
+                new ManualRoomEntry { RoomTemplate = Room(exitTenant, 1f, 1), GuaranteeAllSpawns = true }
+            };
+            layout.StartRoomIndex = 0;
+            layout.ExitRoomIndex = 2;
+
+            var run = Make<RunDefinitionSO>();
+            run.Levels = new List<RunLevelEntry>
+            {
+                new RunLevelEntry { ManualLayout = layout, LevelName = "Manual", BossEnemy = boss }
+            };
+
+            var level = RunCurve.Build(run, SturdyParty(), Rules()).Levels[0];
+
+            // The guard room is fought in full; the exit room's own tenant is wiped for the boss.
+            // Spreading the displacement (the generated-level rule) would have halved the guard and
+            // left half of the exit tenant standing.
+            Assert.AreEqual(1f, level.Rooms[0].Occurrences, 0.0001f);
+            Assert.AreEqual(0f, level.Rooms[1].Occurrences, 0.0001f);
+            Assert.IsTrue(level.Rooms.Exists(r => r.IsBossRoom));
+        }
+
+        [Test]
         public void RunCurve_RewardTotals_AccumulateAcrossLevels()
         {
             var combat = Room(Goblin(xp: 10, gold: 5), 1f, 1);

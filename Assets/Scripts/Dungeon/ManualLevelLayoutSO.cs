@@ -19,6 +19,35 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
+        /// The kind room <paramref name="index"/> is authored as, or Combat when it is not authored
+        /// as anything else. The start and exit rooms are always Combat here, because a kind never
+        /// applies to either (the party spawns in one, the stairs are in the other).
+        /// </summary>
+        public Assets.Scripts.Rooms.RoomKind AuthoredKindAt(int index)
+        {
+            if (index < 0 || index >= Rooms.Count || index == StartRoomIndex || index == ExitRoomIndex
+                || Rooms[index] == null)
+            {
+                return Assets.Scripts.Rooms.RoomKind.Combat;
+            }
+            return Rooms[index].Kind;
+        }
+
+        /// <summary>How many rooms are authored as <paramref name="kind"/>.</summary>
+        public int CountAuthored(Assets.Scripts.Rooms.RoomKind kind)
+        {
+            int count = 0;
+            for (int i = 0; i < Rooms.Count; i++)
+            {
+                if (AuthoredKindAt(i) == kind)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        /// <summary>
         /// Whether two authored rooms share an edge with at least one overlapping tile - the same
         /// adjacency <c>RoomManager.CreateDoor</c> requires to actually place a door. Authored door
         /// pairs that fail this are silently dropped at build time, so validation has to mirror it

@@ -20,6 +20,19 @@
 | The Warrens | `TheWarrens` | 2 | **yes** | The Threshold | **Gilded Hoarder** |
 | The Ashen Deep | `AshenDeep` | 3 | no | The Drowned March | **Cinder Tyrant** |
 | The Hollow Vault | `HollowVault` | 1 | no | Ashen Deep **and** The Warrens (`All`) | Gilded Hoarder (120 HP override) |
+| The Blood Stair | `BloodStair` | 5, all hand-drawn | no | The Threshold (optional, **`Challenge`**) | Abyssal Warden (floor 4), **Cinder Tyrant** (floor 5) |
+
+**The Blood Stair is a challenge run** *(2026-09-28)*. `RunDefinitionSO.Challenge` means *opens early,
+meant late*: it sits on the map right after the tutorial so a new player sees that far bigger fights
+exist, but it is balanced for the party the rest of the campaign produces — the analyzer measures it
+against the strongest end state at the deepest tier (see the Balance guide). Floor simulation on
+2026-09-28: the two-hero tutorial graduate clears floor 1 95% of the time and wipes on floor 2 every
+time; the Ashen Deep party walks all five. Every floor is a `ManualLevelLayoutSO`
+(`Runs/BloodStair/BloodStair_1..5`) with guaranteed spawns and pinned caches/refuges, so it plays the
+same every time. The **Cultist** is chained in floor 5's antechamber — the only room there a captive
+can take, one door from the altar — and like every rescue he is kept only if the floor is cleared,
+which on the final floor means killing the Tyrant. `CampaignAssetTests.Campaign_EveryChallengeRunIsOptional`
+keeps challenge runs off the main line.
 
 **The Hollow Vault is the campaign's only `Secret` node**, and the only one whose prerequisites span
 both branches - which is what gives the optional repeatable run a reason to exist beyond gold. Secret
@@ -107,6 +120,7 @@ the intended behaviour, not a bug to design around.
   placement — which is what lets the save record only *that* an event was consumed and trust
   regeneration to put it back in the same room. See `Assets/Scripts/Rooms/CLAUDE.md`.
 - **Manual levels:** `RunLevelEntry.ManualLayout` references a `ManualLevelLayoutSO` (room positions, door connections, start/exit rooms, optional enemy overrides). Edited via Tools → Dungeon → Manual Level Layout Editor. Used for tutorial levels.
+  - **A room's kind can be authored** *(2026-09-28)*. `ManualRoomEntry.Kind` pins a cache or a refuge to that room. `DungeonManager.PlaceRoomKinds` applies authored kinds first and counts them against the level's `TreasureRooms`/`RestRooms`; only the remainder is promoted at random. Without it the quota's random draw can land on the fight a hand-drawn floor was built around — on the first build of The Blood Stair it took The Red Cloister's three-enemy centre room. The model agrees (`RunCurveModel.KindCount`; `BuildManualRooms` skips authored non-combat rooms). Ignored on the start and exit rooms (`ManualLevelLayoutSO.AuthoredKindAt`).
   - **A door is only placed when its two rooms share an edge.** Authored door pairs are room-index pairs, but `RoomManager.CreateDoor` needs real adjacency — so resizing a room template after a layout was authored silently severs the connection and can orphan the exit room, making the level uncompletable. (This shipped: the tutorial's room 1 went from a 3-wide to a 2-wide template and the exit became unreachable.) `RoomManager.BuildManualDungeon` now logs an **error** for any dropped authored door, the layout editor draws it red and refuses to stay quiet, and `ManualLayoutValidationTests` sweeps every layout asset for unplaceable doors and unreachable rooms. Validation lives on the SO itself: `IsDoorPlaceable`, `GetUnplaceableDoorIndices`, `GetUnreachableRoomIndices`.
 - **Enemy numbers are per level.** `RunLevelEntry.EnemyTuning` (a `LevelEnemyTuning`) is where an
   enemy's real stats come from: an `EnemySO` is a template reused across the whole campaign, so the

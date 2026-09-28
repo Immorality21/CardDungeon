@@ -28,6 +28,29 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Campaign_EveryChallengeRunIsOptional()
+        {
+            // A challenge run opens long before the player can survive it - that is the point of it.
+            // On the main line it would be a wall across the story instead of a glimpse of what lies
+            // ahead, and nothing downstream may require it either.
+            var campaign = LoadCampaign();
+            foreach (var node in campaign.Nodes)
+            {
+                if (node == null || node.Run == null || !node.Run.Challenge)
+                {
+                    continue;
+                }
+
+                Assert.IsTrue(node.Optional, $"{node.Run.name} is a challenge run but not marked Optional.");
+                foreach (var other in campaign.Nodes)
+                {
+                    Assert.IsFalse(other != null && other.Requires != null && other.Requires.Contains(node.Run),
+                        $"{other?.Run?.name} requires the challenge run {node.Run.name}.");
+                }
+            }
+        }
+
+        [Test]
         public void Campaign_HasSomewhereToBegin()
         {
             var campaign = LoadCampaign();

@@ -245,7 +245,7 @@ namespace Assets.Scripts.Dungeon
 
             // Room kinds first, for the same reason as the generated path: a promoted room holds no
             // guards, and EnemyManager has to see the kind before it populates anything.
-            PlaceRoomKinds(rooms, startRoom);
+            PlaceRoomKinds(rooms, startRoom, layout);
 
             // Spawn enemies with manual overrides
             EnemyManager.Instance.SpawnEnemies(rooms, startRoom, layout.Rooms);
@@ -848,8 +848,13 @@ namespace Assets.Scripts.Dungeon
         ///
         /// <para>Drawn from the same seeded RNG stream as the rest of generation, so a resumed level
         /// reproduces its own caches and refuges.</para>
+        ///
+        /// <para>A hand-drawn <paramref name="layout"/> can pin kinds to rooms
+        /// (<see cref="ManualRoomEntry.Kind"/>). Those are applied first and count against the
+        /// quotas, so the random draw only places what is left - and never lands on the fight a
+        /// layout was drawn around.</para>
         /// </summary>
-        private void PlaceRoomKinds(List<Room> rooms, Room startRoom)
+        private void PlaceRoomKinds(List<Room> rooms, Room startRoom, ManualLevelLayoutSO layout = null)
         {
             if (rooms == null)
             {
@@ -866,7 +871,35 @@ namespace Assets.Scripts.Dungeon
                 }
             }
 
-            if (_level == null || (_level.TreasureRooms <= 0 && _level.RestRooms <= 0))
+            int authoredTreasure = 0;
+            int authoredRest = 0;
+            if (layout != null)
+            {
+                // Manual rooms are built in layout order, so the indices line up.
+                for (int i = 0; i < rooms.Count; i++)
+                {
+                    var kind = layout.AuthoredKindAt(i);
+                    if (kind == RoomKind.Combat || rooms[i] == null || rooms[i] == startRoom || rooms[i].IsExit)
+                    {
+                        continue;
+                    }
+
+                    rooms[i].Kind = kind;
+                    PlaceKindMarker(rooms[i]);
+                    if (kind == RoomKind.Treasure)
+                    {
+                        authoredTreasure++;
+                    }
+                    else if (kind == RoomKind.Rest)
+                    {
+                        authoredRest++;
+                    }
+                }
+            }
+
+            int treasureQuota = _level != null ? Mathf.Max(0, _level.TreasureRooms - authoredTreasure) : 0;
+            int restQuota = _level != null ? Mathf.Max(0, _level.RestRooms - authoredRest) : 0;
+            if (treasureQuota <= 0 && restQuota <= 0)
             {
                 return;
             }
@@ -881,7 +914,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             var plan = RoomKindPlanner.Plan(
-                eligible, _level.TreasureRooms, _level.RestRooms, count => Random.Range(0, count));
+                eligible, treasureQuota, restQuota, count => Random.Range(0, count));
 
             foreach (var entry in plan)
             {
@@ -903,7 +936,8 @@ namespace Assets.Scripts.Dungeon
                    && room != startRoom
                    && !room.IsExit
                    && room.RoomSO != null
-                   && room.RoomSO.Kind == RoomKind.Combat;
+                   && room.RoomSO.Kind == RoomKind.Combat
+                   && room.Kind == RoomKind.Combat;
         }
 
         /// <summary>

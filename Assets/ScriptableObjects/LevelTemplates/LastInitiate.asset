@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97814ecae76f824da768a0e914775eb, type: 3}
+  m_Name: LastInitiate
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.LevelDefinitionSO
+  Key: LastInitiate
+  RoomPool:
+  - {fileID: 11400000, guid: 7a40b3590a49a88429da204fea73306d, type: 2}
+  - {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
+  - {fileID: 11400000, guid: c3e6a9d42b7f6e1a0c5d8f3b4a9e6c12, type: 2}
+  - {fileID: 11400000, guid: 308b3529595cc0748bf6096e45c416d5, type: 2}
+  RoomsToGenerate: 5
+  ChainBias: 0.6
+  MomentumBias: 0.5
+  WallColor: {r: 0.3, g: 0.07, b: 0.08, a: 1}
+  WallTexture: {fileID: 2800000, guid: ff0bc926681e4304e8e378a75971a2bf, type: 3}
+  TreasureRooms: 0
+  RestRooms: 0
+  MaterialTable: []
+  GuaranteedMaterials:
+  - Item: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+    Chance: 1
+    MinQuantity: 1
+    MaxQuantity: 2
+  CombatBackground: {fileID: 0}
+  ExplorationMusic: {fileID: 0}
+  CombatMusic: {fileID: 0}

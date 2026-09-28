@@ -34,6 +34,12 @@ namespace Assets.Scripts.Balance
         public List<RoomEncounter> Rooms = new List<RoomEncounter>();
 
         /// <summary>
+        /// On a hand-drawn level, the encounter built for the authored exit room - the one a boss
+        /// displaces. Null on a generated level, where which room is the exit is a roll.
+        /// </summary>
+        public RoomEncounter ManualExitRoom;
+
+        /// <summary>
         /// Every room event this level's rooms can offer, with how often it turns up and what
         /// engaging with it costs. See <see cref="RoomEventModel"/> — events are gambles that spend
         /// HP, potions and the occasional woken enemy, so they belong in the attrition curve.
@@ -369,9 +375,10 @@ namespace Assets.Scripts.Balance
                 Tuning = entry.EnemyTuning,
 
                 // Room kinds are a level-template quota, and they cut both ways: each one is a fight
-                // the level does not have, and a cache or a refuge it does.
-                TreasureRooms = entry.LevelTemplate != null ? Mathf.Max(0, entry.LevelTemplate.TreasureRooms) : 0,
-                RestRooms = entry.LevelTemplate != null ? Mathf.Max(0, entry.LevelTemplate.RestRooms) : 0
+                // the level does not have, and a cache or a refuge it does. A hand-drawn layout's
+                // authored kinds count toward the quota, so the level has whichever is larger.
+                TreasureRooms = KindCount(entry, RoomKind.Treasure),
+                RestRooms = KindCount(entry, RoomKind.Rest)
             };
 
             if (entry.ManualLayout != null)
@@ -400,6 +407,22 @@ namespace Assets.Scripts.Balance
             return level;
         }
 
+        /// <summary>
+        /// How many rooms of <paramref name="kind"/> a level ends up with: its template's quota, or
+        /// its layout's authored count when that is higher (authored kinds are spent from the quota
+        /// first, so the two never add up - see <c>DungeonManager.PlaceRoomKinds</c>).
+        /// </summary>
+        private static int KindCount(RunLevelEntry entry, RoomKind kind)
+        {
+            int quota = 0;
+            if (entry.LevelTemplate != null)
+            {
+                quota = Mathf.Max(0, kind == RoomKind.Treasure ? entry.LevelTemplate.TreasureRooms : entry.LevelTemplate.RestRooms);
+            }
+            int authored = entry.ManualLayout != null ? entry.ManualLayout.CountAuthored(kind) : 0;
+            return Mathf.Max(quota, authored);
+        }
+
         private static void BuildManualRooms(LevelCurve level, ManualLevelLayoutSO layout, PartyBaseline party, BalanceRulesSO rules)
         {
             if (layout.Rooms == null)
@@ -422,6 +445,13 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
+                // An authored cache or refuge holds no guards (EnemyManager skips it) and takes no
+                // event, so it is not a room the model fights or gambles in.
+                if (layout.AuthoredKindAt(i) != RoomKind.Combat)
+                {
+                    continue;
+                }
+
                 var encounter = RoomEncounter.Build(
                     room.RoomTemplate,
                     room.EnemySpawnOverride,
@@ -431,6 +461,10 @@ namespace Assets.Scripts.Balance
                     level.Tuning);
                 encounter.Occurrences = 1f;
                 level.Rooms.Add(encounter);
+                if (i == layout.ExitRoomIndex)
+                {
+                    level.ManualExitRoom = encounter;
+                }
             }
         }
 
@@ -514,6 +548,9 @@ namespace Assets.Scripts.Balance
             // than deleting one outright -- which room the exit lands on is random, and removing a
             // whole pool entry can erase an enemy from the level entirely (it once made Bog Shaman,
             // and therefore Heal, unreachable on the only level that offered it).
+            //
+            // A hand-drawn level is the exception: its exit room is authored, so it is exactly that
+            // room's spawns that go, and nothing else loses a share.
             float combatEntries = 0f;
             foreach (var room in level.Rooms)
             {
@@ -523,7 +560,11 @@ namespace Assets.Scripts.Balance
                 }
             }
 
-            if (combatEntries > 0f)
+            if (level.ManualExitRoom != null)
+            {
+                level.ManualExitRoom.Occurrences = 0f;
+            }
+            else if (combatEntries > 0f)
             {
                 float share = 1f / combatEntries;
                 foreach (var room in level.Rooms)

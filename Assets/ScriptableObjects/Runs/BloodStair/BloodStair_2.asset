@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b753c97801c16b845bbda14aa6ecb352, type: 3}
+  m_Name: BloodStair_2
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.ManualLevelLayoutSO
+  Key: BloodStair_2
+  WallColor: {r: 0.3, g: 0.07, b: 0.08, a: 1}
+  Rooms:
+  - RoomTemplate: {fileID: 11400000, guid: 3eb0f9f0d8481fc4cb32d83a3cbc2448, type: 2}
+    GridPosition: {x: 0, y: 0}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+    Kind: 0
+  - RoomTemplate: {fileID: 11400000, guid: b2d5f8c31a6e5d0f9b4c7e2a3f8d5b01, type: 2}
+    GridPosition: {x: 3, y: 0}
+    EnemySpawnOverride:
+    - Enemy: {fileID: 11400000, guid: 96912e3cdfce0d24792157ecadc855fd, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    GuaranteeAllSpawns: 1
+    Kind: 0
+  - RoomTemplate: {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
+    GridPosition: {x: 7, y: 1}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+    Kind: 0
+  - RoomTemplate: {fileID: 11400000, guid: 756b496e009e8b7408cba58804696935, type: 2}
+    GridPosition: {x: 12, y: 0}
+    EnemySpawnOverride:
+    - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    - Enemy: {fileID: 11400000, guid: ff5b77fa3ce957149bdcb9bdd40a5d9c, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    GuaranteeAllSpawns: 1
+    Kind: 0
+  - RoomTemplate: {fileID: 11400000, guid: cf0984e512aff7f4bac932cd4de8645a, type: 2}
+    GridPosition: {x: 12, y: 4}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 0
+    Kind: 2
+  - RoomTemplate: {fileID: 11400000, guid: 8a98a175962275c4f84e7b71e66db482, type: 2}
+    GridPosition: {x: 17, y: 0}
+    EnemySpawnOverride:
+    - Enemy: {fileID: 11400000, guid: 96912e3cdfce0d24792157ecadc855fd, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    - Enemy: {fileID: 11400000, guid: 51073c099b1582cb424fd8eafe23f134, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    GuaranteeAllSpawns: 1
+    Kind: 0
+  - RoomTemplate: {fileID: 11400000, guid: c3e6a9d42b7f6e1a0c5d8f3b4a9e6c12, type: 2}
+    GridPosition: {x: 21, y: 0}
+    EnemySpawnOverride:
+    - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    - Enemy: {fileID: 11400000, guid: 96912e3cdfce0d24792157ecadc855fd, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    GuaranteeAllSpawns: 1
+    Kind: 0
+  - RoomTemplate: {fileID: 11400000, guid: 3eb0f9f0d8481fc4cb32d83a3cbc2448, type: 2}
+    GridPosition: {x: 12, y: -4}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 0
+    Kind: 3
+  Doors:
+  - RoomIndexA: 0
+    RoomIndexB: 1
+  - RoomIndexA: 1
+    RoomIndexB: 2
+  - RoomIndexA: 2
+    RoomIndexB: 3
+  - RoomIndexA: 3
+    RoomIndexB: 4
+  - RoomIndexA: 3
+    RoomIndexB: 5
+  - RoomIndexA: 5
+    RoomIndexB: 6
+  - RoomIndexA: 3
+    RoomIndexB: 7
+  StartRoomIndex: 0
+  ExitRoomIndex: 6

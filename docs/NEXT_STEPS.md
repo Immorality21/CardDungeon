@@ -42,8 +42,10 @@ Three threads are live:
    but prices most of it past what a campaign pays. §9b's "What the refactor actually left behind"
    has the measured numbers and the three findings it produced — read it before starting §4c.
    **§5b's unlock half shipped 2026-09-06** — the solo start is back, heroes arrive by rescue, and
-   `CampaignNodeEntry.RequiresHeroes` makes a hero a key the campaign can gate on. Four of the seven
-   (Cleric, Cultist, Tinkerer, Rogue) still have no unlock source; placing them is authoring, not code.
+   `CampaignNodeEntry.RequiresHeroes` makes a hero a key the campaign can gate on. Three of the seven
+   (Cleric, Tinkerer, Rogue) still have no unlock source; placing them is authoring, not code. The
+   **Cultist** is the captive at the bottom of **The Blood Stair** *(2026-09-28)*, a challenge run that
+   opens after the tutorial and is meant for late parties (`RunDefinitionSO.Challenge`).
 2. **Balance / losability** (§0–§0g) — making the campaign losable and gating depth behind
    investment. The gate ladder exists and the frontier is measured per floor. Mature; mostly
    decisions waiting on the user now. **Caveat updated 2026-09-04:** §9b's model rework landed with

@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b753c97801c16b845bbda14aa6ecb352, type: 3}
+  m_Name: BloodStair_5
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.ManualLevelLayoutSO
+  Key: BloodStair_5
+  WallColor: {r: 0.3, g: 0.07, b: 0.08, a: 1}
+  Rooms:
+  - RoomTemplate: {fileID: 11400000, guid: 7a40b3590a49a88429da204fea73306d, type: 2}
+    GridPosition: {x: 0, y: 0}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+  - RoomTemplate: {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
+    GridPosition: {x: 4, y: 1}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+  - RoomTemplate: {fileID: 11400000, guid: c3e6a9d42b7f6e1a0c5d8f3b4a9e6c12, type: 2}
+    GridPosition: {x: 9, y: 0}
+    EnemySpawnOverride:
+    - Enemy: {fileID: 11400000, guid: 51073c099b1582cb424fd8eafe23f134, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    - Enemy: {fileID: 11400000, guid: 96912e3cdfce0d24792157ecadc855fd, type: 2}
+      SpawnChance: 1
+      EvaluationCount: 1
+    GuaranteeAllSpawns: 1
+  - RoomTemplate: {fileID: 11400000, guid: 06c3045173e389d4cbec2618ad0a95dd, type: 2}
+    GridPosition: {x: 14, y: 1}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+  - RoomTemplate: {fileID: 11400000, guid: 308b3529595cc0748bf6096e45c416d5, type: 2}
+    GridPosition: {x: 19, y: 0}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+  Doors:
+  - RoomIndexA: 0
+    RoomIndexB: 1
+  - RoomIndexA: 1
+    RoomIndexB: 2
+  - RoomIndexA: 2
+    RoomIndexB: 3
+  - RoomIndexA: 3
+    RoomIndexB: 4
+  StartRoomIndex: 0
+  ExitRoomIndex: 4

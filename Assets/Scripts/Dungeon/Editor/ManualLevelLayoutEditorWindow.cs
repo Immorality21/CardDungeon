@@ -170,6 +170,7 @@ namespace Assets.Scripts.Dungeon.Editor
                 EditorGUILayout.PropertyField(roomProp.FindPropertyRelative("RoomTemplate"));
                 EditorGUILayout.PropertyField(roomProp.FindPropertyRelative("GridPosition"));
                 EditorGUILayout.PropertyField(roomProp.FindPropertyRelative("GuaranteeAllSpawns"));
+                EditorGUILayout.PropertyField(roomProp.FindPropertyRelative("Kind"));
                 EditorGUILayout.PropertyField(roomProp.FindPropertyRelative("EnemySpawnOverride"), true);
 
                 // Show doors connected to this room

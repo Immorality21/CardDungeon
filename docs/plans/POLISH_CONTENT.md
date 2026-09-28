@@ -276,6 +276,15 @@ Open questions, roughly in the order they bite:
 - **What is the step list?** The hub's own unlock order is the spine — campfire and storehouse are
   already yours, the road is the way out, the Sphere Hall is the first thing you build, the Forge
   is behind the tutorial run. Authoring the steps is most of the work; the machinery is small.
+- **A step must warn about the fork after The Threshold** *(requested 2026-09-28)*. Clearing the
+  tutorial opens several runs on the campaign map at once, and they are **not** all meant to be
+  cleared in that order. At least one of them (the Blood Stair, a hand-drawn gauntlet with the
+  Cultist as its captive) is borderline impossible for a fresh party, on purpose: it shows early on
+  that there are big challenges ahead, and that a strong enough combination of heroes can already
+  get surprisingly far. The step goes on the campaign map the first time it offers a choice. It
+  should say roughly *"You can choose your own path now — but beware: some roads are far beyond
+  you yet. Turning back is no shame."* and it must not read as a bug report ("this run is
+  broken-hard").
 
 **It should be authored content, not code.** A `TutorialStepSO` list — trigger, target, one line of
 text — read by a pure `TutorialOps`, is the same shape as `CampaignSO`/`CampaignOps` and

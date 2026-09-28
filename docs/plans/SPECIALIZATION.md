@@ -320,7 +320,9 @@ candidate for.
    pass — a hero gate must never be able to lock a save out of every run, which is easier to violate
    with heroes than with runs because a hero can sit behind an *optional* branch.
 4. **Where unlocks come from.** *(The one item still open.)* Rescue is built and is now the **only**
-   source: the Paladin in the tutorial, the Ranger in The Reedcage. **Cleric, Cultist, Tinkerer and
+   source: the Paladin in the tutorial, the Ranger in The Reedcage, the **Cultist** on the last floor
+   of **The Blood Stair** *(2026-09-28)* - still a rescue, but the first hero priced as a *challenge*:
+   the run opens after the tutorial and is balanced for a late party. **Cleric, Tinkerer and
    Rogue have no source at all** and are unreachable content until they get one. The open list is
    unchanged — clearing a run, a room event, a secret node, a boss — and the original warning now
    has teeth: with two rescues authored and five to go, the roster currently *is* the linear drip

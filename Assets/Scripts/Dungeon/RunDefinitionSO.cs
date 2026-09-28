@@ -22,6 +22,14 @@ namespace Assets.Scripts.Dungeon
                  "one-shot content like the tutorial; on for farmable runs.")]
         public bool Repeatable;
 
+        [Tooltip("Opens early, meant late. A challenge run is placed where the player can see it long " +
+                 "before they can survive it - its campaign position says when it *opens*, not who it " +
+                 "is for. The balance analyzer measures it against the strongest party the rest of " +
+                 "the campaign produces, at the deepest tier, instead of the party that first reaches " +
+                 "it; that is what keeps it honest (it must still be clearable by someone) without " +
+                 "reporting the design as broken.")]
+        public bool Challenge;
+
         public List<RunLevelEntry> Levels = new List<RunLevelEntry>();
     }
 }
