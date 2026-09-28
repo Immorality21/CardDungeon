@@ -281,6 +281,35 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
+        /// What <c>Run.json</c> should hold after a floor: this floor's heroes as they are now, plus
+        /// every entry of <paramref name="previous"/> for a hero <paramref name="current"/> does not
+        /// name. Overwriting the list dropped a <b>benched</b> hero's slots, so a hero who sat one
+        /// floor out came back to the next one unarmed. Same rule as <c>SummonState.MergeSaveData</c>.
+        /// </summary>
+        public static List<MagicSlotSaveData> MergeSaveData(
+            List<MagicSlotSaveData> previous, List<MagicSlotSaveData> current)
+        {
+            var merged = new List<MagicSlotSaveData>();
+            var fielded = new HashSet<string>();
+            if (current != null)
+            {
+                foreach (var entry in current.Where(e => e != null))
+                {
+                    merged.Add(entry);
+                    fielded.Add(entry.HeroKey);
+                }
+            }
+            if (previous != null)
+            {
+                foreach (var entry in previous.Where(e => e != null && !fielded.Contains(e.HeroKey)))
+                {
+                    merged.Add(entry);
+                }
+            }
+            return merged;
+        }
+
+        /// <summary>
         /// Restores equipped magic from save, resolving each stored key back to a definition via
         /// <paramref name="resolveMagic"/>. Slots must already exist (call <see cref="Initialize"/> first).
         ///

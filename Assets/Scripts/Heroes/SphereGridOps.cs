@@ -446,7 +446,6 @@ namespace Assets.Scripts.Heroes
             return granted;
         }
 
-        /// <summary>XP spent to activate the given keys, at current node prices. Unknown keys count 0.</summary>
         /// <summary>
         /// Every summon the activated nodes teach, each with the bonuses its activated upgrade nodes
         /// add, in grid order. An upgrade node counts only for a summon the hero actually knows —
@@ -643,6 +642,7 @@ namespace Assets.Scripts.Heroes
         public const float CostFactor = 3.5f;
         public const float CostExponent = 1.9f;
 
+        /// <summary>XP spent to activate the given keys, at current node prices. Unknown keys count 0.</summary>
         public static int TotalCostOf(SphereGridSO grid, IEnumerable<string> activated)
         {
             int total = 0;

@@ -121,6 +121,11 @@ the intended behaviour, not a bug to design around.
 
 - **Equipped magic** (`DungeonManager.MagicState`, an `EquippedMagicState`). Two stores, and which applies is decided by *where in the run the level sits* rather than by precedence:
   - **mid-run** — `DungeonSaveData.EquippedMagic` (snapshotted each save, for a mid-level resume) and `RunSaveData.EquippedMagic` (committed at `OnDungeonCleared`, carrying to the next floor). These hold the slots **and their spent charges**; nothing else may touch them, or taking a staircase would hand the party a free refill.
+  - **across a bench** *(2026-09-28)* — `Run.json`'s `EquippedMagic` and `SummonCharges` are **merged
+    per hero** after the opening floor (`EquippedMagicState.MergeSaveData` / `SummonState.MergeSaveData`),
+    because the party can change on the run screen between floors. Overwriting them dropped a benched
+    hero: they came back unarmed, and their spent summon came back **full**. A hero fielded for the
+    first time mid-run has no entry and is seeded from their loadout at full charges, like a rescue.
   - **run start** — the kit is rebuilt from scratch: each hero's chosen loadout (`MagicLoadout.json`) resolved against what their sphere grid teaches, at full charges (`EquippedMagicState.SeedFromLoadout`).
 
   **This was three stores until 2026-09-04.** `MagicLoadout.json` used to hold whole slot states, banked on level clear and **merged** per hero, because Draw meant a kit was something a run *accumulated* and could lose. Magic comes off the grid now and nothing in a run changes what a hero knows, so there is nothing to bank: `CommitMagicLoadout` and `EquippedMagicState.Merge` are both gone, and the file holds only the player's hub-side choice. See the Magic guide.

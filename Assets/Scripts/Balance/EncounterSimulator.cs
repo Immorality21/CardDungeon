@@ -290,9 +290,13 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
+                // As CombatManager does: a buff a unit lands on itself this turn skips this upkeep.
+                buffTracker.BeginTurn(unit);
+
                 // Frozen and friends skip the turn but still tick, exactly as in the live loop.
                 if (SkipsTurn(unit, buffTracker))
                 {
+                    CountDownSummonWait(unit, lastSummonTurn);
                     buffTracker.ResolveOverTime(unit);
                     buffTracker.TickBuffs(unit);
                     tagTracker.TickTags(unit);
@@ -828,6 +832,10 @@ namespace Assets.Scripts.Balance
             // A potion is still reachable — it is an item, not a cast.
             bool silenced = buffTracker.HasStatusEffect(hero, BuffType.Silenced);
 
+            // Counted down on every turn the summoner takes - a potion turn and a silenced turn
+            // included - because the buff it is waiting out ticks on all of them.
+            bool summonReady = CountDownSummonWait(hero, summonTurnsLeft) <= 0;
+
             if (settings.Policy == SimPolicy.Adaptive)
             {
                 var wounded = MostWounded(heroes);
@@ -854,18 +862,18 @@ namespace Assets.Scripts.Balance
 
             // Summon (section 4b): in the room the charge is held for, at the summoner's first turn,
             // and again only once the last one has run its course - counted in the summoner's own
-            // turns, the same clock a buff's duration ticks on. Silence blocks it, as it blocks casting.
-            if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null)
+            // turns, the same clock a buff's duration ticks on. A buff cast on the summoner's own
+            // turn skips that turn's tick (CombatBuffTracker.BeginTurn), so it lasts exactly
+            // LongestDuration more of their turns. Silence blocks it, as it blocks casting.
+            if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null && summonReady)
             {
-                summonTurnsLeft.TryGetValue(hero, out int waiting);
                 var summon = hero.Summons.Find(s => s.CanUse);
-                if (summon != null && waiting <= 0)
+                if (summon != null)
                 {
                     Summon(hero, summon, heroes, enemies, buffTracker, resolver, result);
                     summonTurnsLeft[hero] = Mathf.Max(1, summon.LongestDuration);
                     return;
                 }
-                summonTurnsLeft[hero] = waiting - 1;
             }
 
             if (settings.Policy != SimPolicy.AttackOnly && !silenced)
@@ -925,6 +933,25 @@ namespace Assets.Scripts.Balance
                 MetaProgressManager.MagicPowerBonusForLevel(slot.UpgradeLevel),
                 slot.UpgradeLevel,
                 null);
+        }
+
+        /// <summary>
+        /// One of <paramref name="unit"/>'s turns passes for its summon wait. Returns the wait as it
+        /// stood <i>before</i> this turn: 0 means the last summon has run its course. Called on every
+        /// turn the unit gets, skipped (Frozen) turns included, because buffs tick on those too.
+        /// </summary>
+        private static int CountDownSummonWait(ICombatUnit unit, Dictionary<SimUnit, int> waits)
+        {
+            var sim = unit as SimUnit;
+            if (sim == null || waits == null || !waits.TryGetValue(sim, out int waiting))
+            {
+                return 0;
+            }
+            if (waiting > 0)
+            {
+                waits[sim] = waiting - 1;
+            }
+            return waiting;
         }
 
         /// <summary>A summon resolves through the same resolver an ability does, with no tags, no

@@ -147,6 +147,51 @@ namespace Tests.EditMode
             Assert.IsTrue(state.HasAnyCastable("Warrior"), "resting is the refill");
         }
 
+        // ---------------------------------------------------------------- across floors
+
+        [Test]
+        public void MergeSaveData_BenchedHero_ComesBackWithWhatTheyHadLeft()
+        {
+            // Floor 1: the Acolyte casts once. Floor 2: benched, so that floor's save does not name
+            // them. Overwriting Run.json used to drop them, and floor 3 handed back empty slots.
+            var heal = Magic("Heal");
+            var hero = HeroWithNodes("Acolyte", KnownNode("acolyte-heal", "Heal", 3));
+            var floor1 = new EquippedMagicState();
+            floor1.Initialize(new List<Hero> { hero });
+            floor1.SeedFromLoadout(new List<Hero> { hero }, null, Catalog(heal));
+            floor1.TryCast("Acolyte", 0);
+            var afterFloor1 = floor1.GetSaveData();
+
+            var afterFloor2 = EquippedMagicState.MergeSaveData(afterFloor1, new List<MagicSlotSaveData>());
+
+            var floor3 = new EquippedMagicState();
+            floor3.Initialize(new List<Hero> { hero });
+            floor3.Restore(afterFloor2, Catalog(heal));
+            Assert.AreEqual(heal, floor3.GetSlots("Acolyte")[0].Magic, "still armed");
+            Assert.AreEqual(2, floor3.GetSlots("Acolyte")[0].Charges, "and not refilled");
+        }
+
+        [Test]
+        public void MergeSaveData_FieldedHero_ReplacesTheirOlderEntry()
+        {
+            var previous = new List<MagicSlotSaveData>
+            {
+                new MagicSlotSaveData { HeroKey = "Acolyte", Slots = { new MagicSlotEntry { MagicKey = "Heal", Charges = 3, MaxCharges = 3 } } },
+                new MagicSlotSaveData { HeroKey = "Warrior", Slots = { new MagicSlotEntry { MagicKey = "Slash", Charges = 1, MaxCharges = 2 } } }
+            };
+            var current = new List<MagicSlotSaveData>
+            {
+                new MagicSlotSaveData { HeroKey = "Acolyte", Slots = { new MagicSlotEntry { MagicKey = "Heal", Charges = 0, MaxCharges = 3 } } }
+            };
+
+            var merged = EquippedMagicState.MergeSaveData(previous, current);
+
+            Assert.AreEqual(2, merged.Count);
+            Assert.AreEqual(0, merged.Find(e => e.HeroKey == "Acolyte").Slots[0].Charges);
+            Assert.AreEqual(1, merged.Find(e => e.HeroKey == "Warrior").Slots[0].Charges);
+            CollectionAssert.IsEmpty(EquippedMagicState.MergeSaveData(null, null));
+        }
+
         // ---------------------------------------------------------------- known magic
 
         [Test]

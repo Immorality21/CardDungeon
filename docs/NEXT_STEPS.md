@@ -107,7 +107,8 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   *(2026-09-06)*. The command menu is Attack / Ability / Item / Inspect / Skip and does not grow —
   **with one exception, decided 2026-09-28: Summon.** A hero who knows a summon gets a **Summon**
   command (and only then); summons are always carried, outside the ability slots. See
-  `plans/SPECIALIZATION.md` §4b.
+  `plans/SPECIALIZATION.md` §4b. A party-replacing summon has **its own** menu while it is out (its
+  actions, Signature, Dismiss, Inspect); that is the summon's, not a hero's, and does not reopen this rule.
   **Defend was the test case** and is why §10 is gone: a defensive stance is a thing a hero *learns*,
   not a button everyone always has, so it belongs on a branch beside Provoke and the shield spells.
   Do not add a sixth hard-coded command; add a node.
@@ -133,7 +134,10 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   **much larger** than today's ~30 nodes to hold them. **Refined 2026-09-28:** the aim is a
   different summon at the end of **every** branch, so each way a player builds a hero reaches its
   own. Summons come in two kinds — a special attack and a party replacement — built special attack
-  first, on the Warrior (the Bloodfang Boar).
+  first, on the Warrior (the Bloodfang Boar). **The party-replacing kind was designed the same day**
+  (§4b, "The party-replacing kind"): the party fully leaves and freezes, the summon is a
+  player-driven unit whose stats are ratios of the summoner's, and **the blow that ends it is
+  swallowed whole**. Do not reopen those three without new evidence from play.
 - **Saves are disposable until release** *(2026-09-04)*. No migrations, no compatibility shims —
   the fix for a changed save shape is to delete the save. This suspends the **write-once key**
   contract (`HeroSO.Key`, `SphereGridNode.Key`, `EnemySO.Key`) *for the rebuild only*: keys may be
@@ -179,7 +183,7 @@ backlog.**
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **shipped** 2026-09-06 — solo start, rescue unlocks, `RequiresHeroes` gates. **Four heroes still need an unlock source** |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | **first shipped 2026-09-28** — the Warrior's Bloodfang Boar (special attack); party-replacing kind and the other heroes' summons next |
+| **4b** | Summons — the capability the deep grid pays out | **first shipped 2026-09-28** — the Warrior's Bloodfang Boar (special attack); **party-replacing kind designed 2026-09-28** — the Warrior's Cairn Golem (branch A wall), not built; then the other heroes' summons |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)

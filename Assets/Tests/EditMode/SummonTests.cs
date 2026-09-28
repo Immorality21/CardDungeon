@@ -272,6 +272,88 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Summon_OnTheSummonersOwnTurn_LastsThreeOfTheirTurns_LikeEveryoneElses()
+        {
+            var warrior = new MockCombatUnit("Warrior", strength: 10, endurance: 5, health: 30);
+            var rogue = new MockCombatUnit("Rogue", strength: 8, endurance: 5, health: 30);
+            var tracker = new CombatBuffTracker();
+
+            tracker.BeginTurn(warrior);
+            Cast(Boar(), warrior, new List<ICombatUnit> { warrior, rogue }, tracker);
+            tracker.TickBuffs(warrior);   // the upkeep of the turn it was summoned on
+
+            for (int turn = 1; turn <= 3; turn++)
+            {
+                Assert.AreEqual(5, tracker.GetBuffAmount(warrior, StatType.Strength), $"Warrior, turn {turn}");
+                Assert.AreEqual(4, tracker.GetBuffAmount(rogue, StatType.Strength), $"Rogue, turn {turn}");
+                tracker.BeginTurn(warrior);
+                tracker.TickBuffs(warrior);
+                tracker.BeginTurn(rogue);
+                tracker.TickBuffs(rogue);
+            }
+
+            Assert.AreEqual(0, tracker.GetBuffAmount(warrior, StatType.Strength));
+            Assert.AreEqual(0, tracker.GetBuffAmount(rogue, StatType.Strength));
+        }
+
+        [Test]
+        public void MergeSaveData_BenchedHero_KeepsTheirSpentCharge()
+        {
+            // Floor 1: the Warrior summoned. Floor 2: benched, so this floor's save does not name him.
+            var afterFloor1 = new List<SummonChargeSaveData>
+            {
+                new SummonChargeSaveData { HeroKey = "Warrior", SummonKey = "Boar", Charges = 0 }
+            };
+            var afterFloor2 = SummonState.MergeSaveData(afterFloor1, new List<SummonChargeSaveData>());
+
+            var floor3 = StateWith(0);
+            floor3.Restore(afterFloor2);
+
+            Assert.AreEqual(0, floor3.GetSummons("Warrior")[0].Charges, "Sitting a floor out is not a refill.");
+        }
+
+        [Test]
+        public void MergeSaveData_FieldedHero_ReplacesTheirOlderEntries()
+        {
+            var previous = new List<SummonChargeSaveData>
+            {
+                new SummonChargeSaveData { HeroKey = "Warrior", SummonKey = "Boar", Charges = 2 },
+                new SummonChargeSaveData { HeroKey = "Paladin", SummonKey = "Other", Charges = 1 }
+            };
+            var current = new List<SummonChargeSaveData>
+            {
+                new SummonChargeSaveData { HeroKey = "Warrior", SummonKey = "Boar", Charges = 1 }
+            };
+
+            var merged = SummonState.MergeSaveData(previous, current);
+
+            Assert.AreEqual(2, merged.Count);
+            Assert.AreEqual(1, merged.Single(e => e.HeroKey == "Warrior").Charges);
+            Assert.AreEqual(1, merged.Single(e => e.HeroKey == "Paladin").Charges);
+        }
+
+        [Test]
+        public void MergeSaveData_NullInputs_AreEmpty()
+        {
+            Assert.IsEmpty(SummonState.MergeSaveData(null, null));
+        }
+
+        [Test]
+        public void SummonState_ReplacePartyKind_IsKnownButNeverUsable()
+        {
+            var golem = Boar();
+            golem.Key = "Golem";
+            golem.Kind = SummonKind.ReplaceParty;
+            var state = new SummonState();
+            state.SetHero("Warrior", new List<SummonGrant> { new SummonGrant { Key = "Golem" } }, key => golem);
+
+            Assert.IsTrue(state.Knows("Warrior"));
+            Assert.IsFalse(state.HasAnyUsable("Warrior"), "Greyed, not a charge spent on nothing.");
+            Assert.IsFalse(state.TryUse("Warrior", "Golem"));
+            Assert.AreEqual(1, state.GetSummons("Warrior")[0].Charges, "The charge is untouched.");
+        }
+
+        [Test]
         public void SummonState_UnknownSummonKey_IsSkipped()
         {
             var state = new SummonState();

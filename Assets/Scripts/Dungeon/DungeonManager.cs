@@ -427,6 +427,22 @@ namespace Assets.Scripts.Dungeon
                 {
                     MagicState.Restore(carried, MagicCatalog.Instance.GetMagic);
                 }
+
+                // A hero fielded mid-run for the first time (swapped in on the run screen) has no
+                // entry to restore. They arrive armed at full charges, exactly as a rescued hero
+                // does - they spent nothing on the earlier floors. Anyone Run.json does name keeps
+                // what they had, benched floors in between included (see MergeSaveData).
+                if (!EquippedMagicState.RefillsOnLevelStart(RunLevelIndex))
+                {
+                    var newcomers = Party.Heroes
+                        .Where(h => h != null && (carried == null || !carried.Any(e => e != null && e.HeroKey == h.HeroKey)))
+                        .ToList();
+                    if (newcomers.Count > 0)
+                    {
+                        var chosen = _fileHandler.Load<MagicLoadoutSaveData>();
+                        MagicState.SeedFromLoadout(newcomers, chosen.ChosenFor, MagicCatalog.Instance.GetMagic);
+                    }
+                }
             }
 
             // Charges are a *run* resource: spent across floors, restored only by resting in a
@@ -1213,14 +1229,21 @@ namespace Assets.Scripts.Dungeon
                 runSave.CurrentLevelIndex = RunLevelIndex + 1;
                 runSave.ActiveDungeonSeed = 0;
 
-                // Carry equipped magic to the next level of the run.
+                // Carry equipped magic to the next level of the run - merged, like summons, so a
+                // hero benched for this floor keeps their slots. The opening floor replaces.
                 if (MagicState != null)
                 {
-                    runSave.EquippedMagic = MagicState.GetSaveData();
+                    runSave.EquippedMagic = EquippedMagicState.RefillsOnLevelStart(RunLevelIndex)
+                        ? MagicState.GetSaveData()
+                        : EquippedMagicState.MergeSaveData(runSave.EquippedMagic, MagicState.GetSaveData());
                 }
                 if (Summons != null)
                 {
-                    runSave.SummonCharges = Summons.GetSaveData();
+                    // Merged, so a hero benched for this floor keeps what they had spent. The run's
+                    // opening floor replaces instead: anything older in Run.json is a previous run's.
+                    runSave.SummonCharges = EquippedMagicState.RefillsOnLevelStart(RunLevelIndex)
+                        ? Summons.GetSaveData()
+                        : SummonState.MergeSaveData(runSave.SummonCharges, Summons.GetSaveData());
                 }
 
                 _fileHandler.Save(runSave);

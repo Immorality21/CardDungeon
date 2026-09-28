@@ -477,6 +477,126 @@ carries a kind field from day one so it does not reshape anything.
 - **Presentation:** name banner, camera punch, the boar appears large on the stage, then the buff
   lands. No dedicated music track yet.
 
+#### The party-replacing kind — decided 2026-09-28, the user's second walkthrough
+
+**Not built.** `SummonKind.ReplaceParty` exists and `CombatManager.ExecuteSummonAction` still refuses
+it with a warning. Everything the special-attack kind already decided (node, charges, command,
+Silence, turn cost, banner) holds unchanged; this block decides only what happens after the summon
+answers.
+
+**The kind is a shape, not a role.** Each replacement summon is authored somewhere between a **wall**
+(big HP, modest damage) and a **hitter** (small HP, big damage). Nothing in the code knows which it is.
+
+| decision | value | why |
+|---|---|---|
+| control | **the player**, through the summon's own command menu (`RoomActionUI` with a different list) | the game's biggest moment should not be one you watch |
+| the party | **fully out**: off the turn order, untargetable, dimmed or off stage | the cleanest rule, and what makes a wall a wall |
+| party statuses | **frozen**, resume on return | falls out of "ticks fire on the victim's own turn" (`Cards/CLAUDE.md`), so no special case |
+| party turn order | **exactly where they left**: CTB counters frozen with them | predictable, and the turn-order preview stays honest |
+| enemy attacks | **all land on the summon**, and a party-wide attack lands **once** | a four-hero signature hits one body |
+| wind-ups already aimed | **re-aimed at the summon when it arrives**: every enemy's stored `ChargeTarget` | a heavy locks onto a hero at wind-up (`ExecuteEnemyCharge`) and only re-targets a *dead* one, so without this it lands on a frozen hero; this is exactly the moment the sim summons in *(found in review 2026-09-28)* |
+| stats | **ratios of the summoner's base + gear stats** (e.g. HP 250%), snapshotted on arrival. **No combat buffs, no level afflictions** | grows with the grid for free; no buff-then-summon stacking loop to price |
+| HP between summonings | **fresh every time** | the charge is the cost; nothing new to save |
+| its actions | ordinary **`MagicSO`s cast with the summon as caster**, unlimited, plus **one Signature, once per summoning** | "an ability needs no machinery beyond `MagicSO`" |
+| how they cast | **no Forge bonus, no tags, no combos**: the Boar's path (`ExecuteSummonAction`), not `ExecuteCastAction` | one progression to price: the ratios and the upgrade nodes *(decided 2026-09-28)* |
+| its menu | **its own**: its actions · Signature · **Dismiss** · **Inspect** (free, as for a hero). **No Skip, no Item** | the do-not-relitigate menu rule is about a *hero's* commands; this is the summon's. Dismiss covers what Skip was for *(decided 2026-09-28)* |
+| flee | **not while it is out** | fleeing is a party action and the party is gone; Dismiss, then flee on a hero's turn *(decided 2026-09-28)* |
+| items | **none**; the belt belongs to the party | a wall topped up by potions makes belt size a lever, which is ruled out |
+| entry | **acts immediately**: the summoner's turn is spent summoning and closes with the summoner's own upkeep; the party then freezes and the summon takes **an immediate turn of its own**, ahead of the CTB clock, with its own upkeep. That first turn is **turn 1 of its N** | *(the user's call over the recommended "joins on its own Agility")*. Two upkeeps, one per unit that acted, so nobody's poison or buffs tick for someone else's turn *(clarified after review 2026-09-28)* |
+| statuses on it | **land normally**: a Silenced summon can still Attack and Dismiss, and Poison ticks on its turns | enemy control kits stay relevant |
+| ends | **HP runs out, or N of its own turns, whichever first**, or **Dismiss** (a command that uses its turn) | no cap would let a wall clear weak fights alone |
+| **overkill** | **swallowed**: the blow that finishes it does not carry through to the party | **this is the key-shaped gate**: a summon out when the signature lands guarantees the party survives it. Note the analyzer does **not** gate boss signatures today (`MinHitsToKillHero` skips bosses and prices ordinary hits), so pricing "survivable only with a summon" needs a new band, measured through the floor sim's with/without-summon frontier |
+| last enemy dies while it is out | the party returns for a **normal victory**; XP splits as usual | |
+| wipe | **impossible while it is out**; heroes dead when it was summoned return dead | |
+| concurrency | **one at a time**; nobody is left to summon a second | |
+| turn-order preview | shows the summon **in the heroes' place** | |
+| the hero side | **one source**: a `HeroSideUnits()` that returns the summon while it is out, the living heroes otherwise. Every read of "the heroes" goes through it | `CombatManager` reads `party.Heroes` directly in about eight places, not just the planner: `GetAliveHeroes` (planner context, AoE, the ChargeAoe markers, `PredictIntent`), `GetRandomAliveHero`, `HasAliveHeroes` (the loop condition and the defeat check), and `target is Hero` after an enemy cast. The loop must test "hero side alive" *(found in review 2026-09-28)* |
+| upgrade nodes | same three kinds, reinterpreted: `SummonPower` → **HP-ratio points**, `SummonDuration` → **+turns**, `SummonCharge` → **+charges** | no new node kind |
+
+**The first one: the Warrior's Cairn Golem** (branch A, the defensive branch). The name is a placeholder.
+
+- **Node:** one step past the `warrior-a-hold` tip, depth 12: **410 XP + 2 Void Shard + 3 Mire Hide**.
+  It mirrors the Boar past `warrior-b-edge`, so both Warrior branches now end in a summon.
+- **Stats:** HP **250%** · Endurance **150%** · Strength **60%** · Agility **80%** · Intelligence and
+  Spirit **100%** (so its abilities scale sensibly) · resistances copied from the summoner. For a
+  sense of size: a ~60 HP Warrior brings a ~150 HP body.
+- **Stays:** **3 of its own turns**, the immediate first one included. **Charges:** 1.
+- **Menu:** **Attack** (Strength) · **Brace** (Endurance on itself, 2 of its turns, free) · **Quake**,
+  the Signature: moderate damage to all enemies plus **Slow**, both existing effects · **Dismiss** ·
+  **Inspect**.
+- **What Slow actually buys — smaller than it sounds.** `SlowBuffHandler` is an Agility debuff, and
+  `TurnManager` reads Agility only when it resets the timer of the unit that just acted. So a Slowed
+  enemy's **next** turn arrives on schedule; only the intervals after it stretch. Over a 3-turn stay
+  that is little. **Open:** keep Quake as is (damage plus a Slow the party inherits when it returns),
+  or give it a true **turn-delay** effect that pushes enemy CTB counters back, which would be a new
+  effect type *(raised in review 2026-09-28)*.
+- **Upgrades:** d13 **+50 HP-ratio points** → d14 **+1 turn** → d15 **+1 charge** (+ 1 Void Shard +
+  2 Mire Hide).
+- **Art:** a stone guardian / golem, PixelLab, drawn large like the Boar (`docs/PIXEL_ART.md`).
+  Faces the enemies.
+- **Every number here is a starting number.** The user accepted the draft on the understanding that
+  the balance model will move it.
+
+A Warrior who buys both tips knows **two summons**, so the **summon picker** that
+`RoomActionUI.OnHeroSummon` defers is in scope for this build.
+
+**Balance model, decided:**
+
+- **When:** the charge is held for the floor's hardest room (`PickSummonRoom`, unchanged). Inside it,
+  the sim summons **when an enemy winds up a telegraphed heavy**, and on the summoner's first turn if
+  nothing telegraphs. That measures the use the kind exists for.
+- **What the golem does:** **Quake on its first (immediate) action, then Attack.** Never Brace, never
+  Dismiss. Deterministic; make it smarter only if the numbers disagree with play.
+- **Frontier:** **one sweep per summon**. Each finale reports the ask with none, with the Boar, and
+  with the Golem, each sweep beelining to that one tip. That is the key-versus-wall comparison
+  rule 3 wanted: which summon is the key for which finale.
+
+**Build order, party-replacing kind:**
+
+1. **`SummonSO` fields** for `ReplaceParty`: per-stat **ratios**, **turns active**, an **actions** list
+   (`MagicSO`), one **Signature** (`MagicSO`). The special-attack fields stay; each kind ignores the
+   other's.
+2. **`SummonUnit : ICombatUnit`**: the stat snapshot, its own `CombatBuffTracker` entries, turn count
+   and Signature-used flag.
+3. **`TurnManager`**: **suspend / resume** a set of units with their counters frozen, and **insert a
+   unit that acts next** (the summon's immediate turn). Today it has `Initialize` / `GetNextUnit` /
+   `RemoveUnit` / `GetTurnOrder` / `SetBuffTracker`; the preview reads `GetTurnOrder`, so taking the
+   party out of the timer dictionary swaps them out of the preview for free.
+4. **`CombatManager`**: **`HeroSideUnits()`** as the one source of "the heroes" (see the table), with
+   the loop and defeat check on "hero side alive"; the summon as the only target; **re-aim every
+   stored `ChargeTarget`** on arrival; **overkill swallowed**; the summon's own death path
+   (`HandleHeroDeath` takes a `Hero`, and `target is Hero` misses it); the end conditions; victory
+   while it is out; **Flee refused**; the return. Its turns open with `BuffTracker.BeginTurn(summon)`
+   like any unit's.
+5. **`RoomActionUI`**: the summon's command menu (its actions, Signature once, Dismiss, Inspect) and
+   the **summon picker** for a hero with two.
+6. **Presentation**: the party steps out and dims, the golem stands on the hero side with a
+   `UnitHealthBar`, the turn-order preview swaps it in, then the return.
+7. **Balance model**, not optional: `SimUnit` summon, the replacement branch in `EncounterSimulator`'s
+   turn loop (freeze, act immediately, swallow overkill), the wind-up timing and Quake-first policy,
+   per-summon frontier sweeps, and **`EncounterSimulatorTests` parity** for the new path.
+8. **Content**: the Cairn Golem asset, Brace and Quake `MagicSO`s, four grid nodes, art, and a
+   sandbox config (`docs/SANDBOX.md`) against a boss with a telegraphed signature.
+
+**Traps specific to this kind:**
+
+- **Overkill-swallow must be implemented in both paths**, live and simulated. If only one has it,
+  the frontier will misprice exactly the gate the kind exists for.
+- **The frozen-status rule depends on per-victim-turn ticking.** If over-time effects ever move to a
+  global clock, the party's poison starts ticking while they are "gone", and nothing here will fail.
+- **The snapshot ignores level afflictions**, so a summon sidesteps them for its duration by design.
+  If that ever reads as an exploit, the fix is to include afflictions in the snapshot, not to
+  special-case the affliction tracker.
+- **"The heroes" is read in many places, not one.** Anything that enumerates the hero side (the
+  planner context, AoE, `PredictIntent`, random targeting, the loop condition, the defeat check, the
+  death check after a cast) must see the summon alone. One leftover `party.Heroes` lets an enemy hit
+  someone who isn't there, or ends the fight as a wipe while the summon is standing.
+- **Wind-ups are aimed before the summon exists.** A stored `ChargeTarget` survives the summon's
+  arrival unless it is re-aimed, in the live game and the sim alike.
+- **A buff cast on a unit's own turn skips that turn's upkeep** (`CombatBuffTracker.BeginTurn`,
+  2026-09-28). The summon's turns must open with `BeginTurn` too, or its Brace lasts one turn short —
+  the bug the Boar's summoner had until the same day.
+
 #### The three FF models, for reference
 
 The FF series does not have *a* summon model, it has at least three, and they cost wildly different

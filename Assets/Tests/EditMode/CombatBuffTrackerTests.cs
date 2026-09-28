@@ -215,5 +215,88 @@ namespace Tests.EditMode
 
             Assert.IsEmpty(effects);
         }
+
+        // --- a buff cast on the caster's own turn --------------------------------
+
+        /// <summary>Opens <paramref name="unit"/>'s turn, runs <paramref name="during"/>, then its upkeep.</summary>
+        private void Turn(ICombatUnit unit, System.Action during = null)
+        {
+            _tracker.BeginTurn(unit);
+            during?.Invoke();
+            _tracker.ResolveOverTime(unit);
+            _tracker.TickBuffs(unit);
+        }
+
+        [Test]
+        public void SelfBuff_OnOwnTurn_LastsItsFullDurationInTheCastersTurns()
+        {
+            Turn(_hero, () => _tracker.ApplyBuff(_hero, StatType.Strength, 3, 3));
+            Assert.AreEqual(3, _tracker.GetBuffAmount(_hero, StatType.Strength), "The cast turn does not count.");
+
+            Turn(_hero);
+            Turn(_hero);
+            Assert.AreEqual(3, _tracker.GetBuffAmount(_hero, StatType.Strength), "Two of three turns used.");
+
+            Turn(_hero);
+            Assert.AreEqual(0, _tracker.GetBuffAmount(_hero, StatType.Strength), "Gone after the third.");
+        }
+
+        [Test]
+        public void BuffOnAnotherUnit_DuringATurn_TicksOnThatUnitsTurnsAsBefore()
+        {
+            var ally = new MockCombatUnit("Ally", strength: 10, endurance: 5, health: 100);
+            Turn(_hero, () => _tracker.ApplyBuff(ally, StatType.Strength, 3, 1));
+
+            Turn(ally);
+
+            Assert.AreEqual(0, _tracker.GetBuffAmount(ally, StatType.Strength),
+                "Only the acting unit's own entries skip an upkeep.");
+        }
+
+        [Test]
+        public void TickBuffs_WithNoTurnOpened_BehavesAsItAlwaysDid()
+        {
+            _tracker.ApplyBuff(_hero, StatType.Strength, 3, 1);
+
+            _tracker.TickBuffs(_hero);
+
+            Assert.AreEqual(0, _tracker.GetBuffAmount(_hero, StatType.Strength));
+        }
+
+        [Test]
+        public void SelfOverTime_OnOwnTurn_DoesNotTickThatTurn_ButStillTicksDurationTimes()
+        {
+            _hero.Stats.Health = 50;
+            int ticks = 0;
+
+            _tracker.BeginTurn(_hero);
+            _tracker.ApplyOverTime(_hero, BuffType.Regenerating, 5, 3);
+            ticks += _tracker.ResolveOverTime(_hero).Count;
+            _tracker.TickBuffs(_hero);
+            Assert.AreEqual(0, ticks, "No tick on the turn it was cast.");
+
+            for (int i = 0; i < 5; i++)
+            {
+                _tracker.BeginTurn(_hero);
+                ticks += _tracker.ResolveOverTime(_hero).Count;
+                _tracker.TickBuffs(_hero);
+            }
+            Assert.AreEqual(3, ticks, "Three turns of regeneration, as authored - not four.");
+        }
+
+        [Test]
+        public void SelfRefresh_OnOwnTurn_AlsoSkipsThatTurnsTick()
+        {
+            _tracker.ApplyStatusEffect(_hero, BuffType.Haste, 1);
+
+            Turn(_hero, () => _tracker.ApplyStatusEffect(_hero, BuffType.Haste, 2));
+            Assert.IsTrue(_tracker.HasStatusEffect(_hero, BuffType.Haste));
+
+            Turn(_hero);
+            Assert.IsTrue(_tracker.HasStatusEffect(_hero, BuffType.Haste));
+
+            Turn(_hero);
+            Assert.IsFalse(_tracker.HasStatusEffect(_hero, BuffType.Haste));
+        }
     }
 }

@@ -13,7 +13,14 @@ namespace Assets.Scripts.Cards
         public int Charges;
         public int MaxCharges;
 
-        public bool CanUse => Summon != null && Charges > 0;
+        /// <summary>
+        /// Whether combat can run this summon's kind at all. Only <see cref="SummonKind.SpecialAttack"/>
+        /// can today; a <see cref="SummonKind.ReplaceParty"/> summon is never usable, so the command
+        /// greys out instead of spending a charge on nothing. Drop the gate when that kind is built.
+        /// </summary>
+        public bool IsImplemented => Summon != null && Summon.Kind == SummonKind.SpecialAttack;
+
+        public bool CanUse => IsImplemented && Charges > 0;
     }
 
     /// <summary>Charges left per hero per summon, for <c>Run.json</c> and the dungeon save.</summary>
@@ -137,6 +144,37 @@ namespace Assets.Scripts.Cards
                 }
             }
             return data;
+        }
+
+        /// <summary>
+        /// What <c>Run.json</c> should hold after a floor: this floor's heroes as they are now, plus
+        /// every entry of <paramref name="previous"/> for a hero <paramref name="current"/> does not
+        /// mention. Replacing the list outright dropped a <b>benched</b> hero's entry, and
+        /// <see cref="Restore"/> leaves a hero it cannot find at full - so sitting a floor out
+        /// handed the summoner a free refill. Merged per hero, not per summon: any hero
+        /// <paramref name="current"/> names replaces all of their older entries.
+        /// </summary>
+        public static List<SummonChargeSaveData> MergeSaveData(
+            List<SummonChargeSaveData> previous, List<SummonChargeSaveData> current)
+        {
+            var merged = new List<SummonChargeSaveData>();
+            var fielded = new HashSet<string>();
+            if (current != null)
+            {
+                foreach (var entry in current.Where(e => e != null))
+                {
+                    merged.Add(entry);
+                    fielded.Add(entry.HeroKey);
+                }
+            }
+            if (previous != null)
+            {
+                foreach (var entry in previous.Where(e => e != null && !fielded.Contains(e.HeroKey)))
+                {
+                    merged.Add(entry);
+                }
+            }
+            return merged;
         }
 
         /// <summary>

@@ -90,13 +90,6 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
-        /// Magic this hero permanently knows, as (key, charges): the payload of activated MagicKnown
-        /// nodes, and the only source of magic in the game since Draw was removed. Knowing is not
-        /// carrying - the hub loadout picks which of these fit the hero's slots, and
-        /// <c>EquippedMagicState.SeedFromLoadout</c> resolves the keys against the catalog, keeping
-        /// Cards → Heroes the dependency direction, same as <see cref="BonusMagicSlots"/>.
-        /// </summary>
-        /// <summary>
         /// The summons this hero's grid teaches, with their upgrades folded in. Always carried —
         /// summons take no ability slot. Resolved to <c>SummonSO</c>s where the catalog lives
         /// (<c>SummonState</c>), keeping Cards → Heroes the dependency direction.
@@ -110,6 +103,13 @@ namespace Assets.Scripts.Heroes
             }
         }
 
+        /// <summary>
+        /// Magic this hero permanently knows, as (key, charges): the payload of activated MagicKnown
+        /// nodes, and the only source of magic in the game since Draw was removed. Knowing is not
+        /// carrying - the hub loadout picks which of these fit the hero's slots, and
+        /// <c>EquippedMagicState.SeedFromLoadout</c> resolves the keys against the catalog, keeping
+        /// Cards → Heroes the dependency direction, same as <see cref="BonusMagicSlots"/>.
+        /// </summary>
         public List<KeyValuePair<string, int>> KnownMagic
         {
             get

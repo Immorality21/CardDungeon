@@ -90,6 +90,13 @@ Five rules worth not re-deriving:
   global clock because the turn *is* the unit of time in a CTB system — so Haste and Slow change how
   often something burns for free, and a unit that never acts never takes a tick. Resolve-then-decrement
   is what lets a buff with one turn left deal its last tick before expiring.
+- **Anything a unit lands on itself during its own turn skips that turn's upkeep** (2026-09-28).
+  `CombatBuffTracker.BeginTurn(unit)` opens the turn, and every apply or refresh on that same unit
+  marks the entry `SkipNextUpkeep`: no over-time tick and no duration tick at the end of the turn it
+  was cast. Without it a 3-turn self-buff (War Cry, the Bloodfang Boar on its own summoner) lasted
+  two of the caster's turns and three of everyone else's. `CombatManager` and `EncounterSimulator`
+  both call `BeginTurn`; a caller that never does (tests, `RoomEventRunner`'s scratch tracker) gets
+  the old behaviour. Entries on *other* units tick as before.
 - **Reapplying refreshes, it does not stack.** The stronger per-turn amount and the longer duration
   both win. Stacking magnitude would turn every fight into a race the closed form cannot price —
   `BalanceMath` needs an expected damage per application, and an unbounded stack has none.
@@ -205,7 +212,12 @@ Two consequences worth holding on to:
 - **`SummonOps`** folds the grant into copies of the effects and builds a throwaway, tagless,
   `summon:`-keyed `MagicSO` so it resolves through the same `EffectResolver` with no combo and no
   Forge bonus. **`SummonState`** (`DungeonManager.Summons`) holds charges on the ability economy: full
-  at run start, refilled at refuges, carried in `Run.json` / the dungeon save.
+  at run start, refilled at refuges, carried in `Run.json` / the dungeon save. **`Run.json` is merged
+  per hero after the opening floor** (`SummonState.MergeSaveData`): overwriting it dropped a benched
+  hero's entry, and `Restore` starts a hero it cannot find at full, so sitting one floor out refilled
+  the summon. **`SummonSlot.CanUse` is false for an unbuilt kind** (`IsImplemented`), so a
+  `ReplaceParty` summon greys the command instead of spending a charge on nothing; drop that gate
+  when the kind is built.
 - **Combat:** the **Summon** command (the one exception to "the menu does not grow") appears only for a
   hero who knows a summon, greys out when spent or **Silenced**, and uses the turn.
   `CombatManager.ExecuteSummonAction` → `SummonPresenter` (creature on stage ~3.5 s, animation,

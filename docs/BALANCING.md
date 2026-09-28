@@ -71,8 +71,10 @@ either.**
 **A long floor's investment ask barely answers to its difficulty** (§5r). Every lever feeds the same
 sustain pool, so there is **one dial**. The Hollow Vault's attrition went 4.37 → 7.57 (+73%) while its
 ask went 506 → 615 → 611 and then stopped. A second, *burst*-shaped dial is what §4b's summons are
-for — but note that as of 2026-09-04 both the **shape** and the **effects** of summons are reopened
-and reserved for the user, so do not model against the old spec.
+for. **Decided 2026-09-28** (`plans/SPECIALIZATION.md` §4b): two kinds — a special attack
+(shipped: the Warrior's Bloodfang Boar, which the simulator already summons and the frontier reports
+with and without) and a party replacement (designed, not built: the Cairn Golem, whose swallowed
+overkill is the key-shaped gate). Model against §4b, not the older 2026-09-04 sketch.
 
 ### Section map
 

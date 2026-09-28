@@ -368,6 +368,9 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
 
+                // A buff this unit lands on itself this turn is not ticked by this turn's upkeep.
+                BuffTracker.BeginTurn(unit);
+
                 // Point the on-field turn marker at whoever is acting.
                 TurnIndicator.Instance.SetTarget(unit);
 
@@ -580,17 +583,20 @@ namespace Assets.Scripts.Rooms
             var hero = caster as Hero;
             var summon = slot != null ? slot.Summon : null;
             var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
-            if (hero == null || summon == null || summons == null || !summons.TryUse(hero.HeroKey, summon.Key))
-            {
-                _lastTurnLog = $"{caster.DisplayName} tries to summon, but nothing answers.";
-                yield break;
-            }
 
-            if (summon.Kind != SummonKind.SpecialAttack)
+            // Checked before the charge is spent. SummonSlot.CanUse already keeps the command greyed
+            // for this kind; this is the backstop, and it must not cost the player anything.
+            if (summon != null && summon.Kind != SummonKind.SpecialAttack)
             {
                 // The party-replacing kind is not built yet; refuse loudly rather than half-running it.
                 Debug.LogWarning($"[Summon] {summon.Key} is {summon.Kind}, which is not implemented yet.");
                 _lastTurnLog = $"{caster.DisplayName} calls {summon.Label}, but it does not come.";
+                yield break;
+            }
+
+            if (hero == null || summon == null || summons == null || !summons.TryUse(hero.HeroKey, summon.Key))
+            {
+                _lastTurnLog = $"{caster.DisplayName} tries to summon, but nothing answers.";
                 yield break;
             }
 

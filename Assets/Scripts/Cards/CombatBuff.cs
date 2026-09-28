@@ -32,5 +32,14 @@ namespace Assets.Scripts.Cards
         /// percentage buff on the same stat replaces this one instead of stacking with it.
         /// </summary>
         public bool IsPercent;
+
+        /// <summary>
+        /// True when this entry was applied to (or refreshed on) a unit during that unit's own turn.
+        /// That turn's upkeep then leaves it alone - no over-time tick, no duration tick - so a
+        /// 3-turn self-buff lasts three of the caster's turns, the same as it lasts everyone else's.
+        /// Set by <see cref="CombatBuffTracker"/> while a turn is open, cleared by the next
+        /// <see cref="CombatBuffTracker.TickBuffs"/> on that unit.
+        /// </summary>
+        public bool SkipNextUpkeep;
     }
 }

@@ -11,6 +11,31 @@ namespace Assets.Scripts.Cards
     {
         private Dictionary<ICombatUnit, List<CombatBuff>> _activeBuffs = new Dictionary<ICombatUnit, List<CombatBuff>>();
 
+        /// <summary>The unit whose turn is open, or null between turns. See <see cref="BeginTurn"/>.</summary>
+        private ICombatUnit _actingUnit;
+
+        /// <summary>
+        /// Opens <paramref name="unit"/>'s turn. Anything applied to that same unit before its
+        /// <see cref="TickBuffs"/> is marked <see cref="CombatBuff.SkipNextUpkeep"/>, so the upkeep at
+        /// the end of the turn it was cast in does not eat one of its turns. Without this a 3-turn
+        /// self-buff (War Cry, the Bloodfang Boar on its own summoner) lasted only two of the caster's
+        /// turns while lasting three of everyone else's. Both the live loop and
+        /// <c>EncounterSimulator</c> call this; a caller that never does gets the old behaviour.
+        /// </summary>
+        public void BeginTurn(ICombatUnit unit)
+        {
+            _actingUnit = unit;
+        }
+
+        /// <summary>Marks an entry that was just applied or refreshed, if it landed on the acting unit.</summary>
+        private void MarkIfOwnTurn(ICombatUnit unit, CombatBuff buff)
+        {
+            if (buff != null && unit != null && ReferenceEquals(unit, _actingUnit))
+            {
+                buff.SkipNextUpkeep = true;
+            }
+        }
+
         public void ApplyBuff(ICombatUnit unit, StatType stat, int amount, int duration)
         {
             if (!_activeBuffs.ContainsKey(unit))
@@ -18,12 +43,14 @@ namespace Assets.Scripts.Cards
                 _activeBuffs[unit] = new List<CombatBuff>();
             }
 
-            _activeBuffs[unit].Add(new CombatBuff
+            var buff = new CombatBuff
             {
                 Stat = stat,
                 Amount = amount,
                 TurnsRemaining = duration
-            });
+            };
+            _activeBuffs[unit].Add(buff);
+            MarkIfOwnTurn(unit, buff);
         }
 
         /// <summary>
@@ -45,13 +72,15 @@ namespace Assets.Scripts.Cards
             }
 
             buffs.RemoveAll(b => b.IsPercent && !b.IsStatusEffect && !b.IsResistance && b.Stat == stat);
-            buffs.Add(new CombatBuff
+            var buff = new CombatBuff
             {
                 Stat = stat,
                 Amount = amount,
                 TurnsRemaining = duration,
                 IsPercent = true
-            });
+            };
+            buffs.Add(buff);
+            MarkIfOwnTurn(unit, buff);
         }
 
         /// <summary>
@@ -82,15 +111,18 @@ namespace Assets.Scripts.Cards
             if (existing != null)
             {
                 existing.TurnsRemaining = Mathf.Max(existing.TurnsRemaining, duration);
+                MarkIfOwnTurn(unit, existing);
                 return;
             }
 
-            _activeBuffs[unit].Add(new CombatBuff
+            var buff = new CombatBuff
             {
                 BuffType = type,
                 IsStatusEffect = true,
                 TurnsRemaining = duration
-            });
+            };
+            _activeBuffs[unit].Add(buff);
+            MarkIfOwnTurn(unit, buff);
         }
 
         /// <summary>
@@ -125,16 +157,19 @@ namespace Assets.Scripts.Cards
             {
                 existing.Amount = Mathf.Max(existing.Amount, amountPerTurn);
                 existing.TurnsRemaining = Mathf.Max(existing.TurnsRemaining, duration);
+                MarkIfOwnTurn(unit, existing);
                 return;
             }
 
-            _activeBuffs[unit].Add(new CombatBuff
+            var buff = new CombatBuff
             {
                 BuffType = type,
                 IsStatusEffect = true,
                 Amount = amountPerTurn,
                 TurnsRemaining = duration
-            });
+            };
+            _activeBuffs[unit].Add(buff);
+            MarkIfOwnTurn(unit, buff);
         }
 
         /// <summary>
@@ -167,8 +202,9 @@ namespace Assets.Scripts.Cards
             // Copied, because a tick can kill the unit and a killing blow may prune the list.
             foreach (var buff in buffs.ToList())
             {
-                if (!buff.IsStatusEffect || buff.Amount <= 0)
+                if (!buff.IsStatusEffect || buff.Amount <= 0 || buff.SkipNextUpkeep)
                 {
+                    // SkipNextUpkeep: applied this very turn, so its first tick is the next turn's.
                     continue;
                 }
 
@@ -257,13 +293,15 @@ namespace Assets.Scripts.Cards
                 _activeBuffs[unit] = new List<CombatBuff>();
             }
 
-            _activeBuffs[unit].Add(new CombatBuff
+            var buff = new CombatBuff
             {
                 IsResistance = true,
                 ResistanceType = type,
                 Amount = percent,
                 TurnsRemaining = duration
-            });
+            };
+            _activeBuffs[unit].Add(buff);
+            MarkIfOwnTurn(unit, buff);
         }
 
         /// <summary>
@@ -351,6 +389,11 @@ namespace Assets.Scripts.Cards
 
         public void TickBuffs(ICombatUnit unit)
         {
+            if (ReferenceEquals(unit, _actingUnit))
+            {
+                _actingUnit = null;   // the turn is over
+            }
+
             if (!_activeBuffs.TryGetValue(unit, out var buffs))
             {
                 return;
@@ -358,6 +401,11 @@ namespace Assets.Scripts.Cards
 
             foreach (var buff in buffs)
             {
+                if (buff.SkipNextUpkeep)
+                {
+                    buff.SkipNextUpkeep = false;
+                    continue;
+                }
                 buff.TurnsRemaining--;
             }
 
@@ -396,6 +444,7 @@ namespace Assets.Scripts.Cards
         public void Clear()
         {
             _activeBuffs.Clear();
+            _actingUnit = null;
         }
     }
 }
