@@ -55,6 +55,10 @@ public class MainMenuManager : MonoBehaviour
         if (_quitButton != null)
         {
             _quitButton.clicked += OnQuit;
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // A browser tab cannot be quit from inside the page; Application.Quit is a no-op there.
+            _quitButton.style.display = DisplayStyle.None;
+#endif
         }
 
         _options = _optionsView != null ? new AudioOptionsUI(_optionsView) : null;

@@ -1,0 +1,128 @@
+# Test, build and ship a playtest build to itch.io.
+#
+#   push to main       -> EditMode tests -> WebGL + Windows builds -> butler push to itch
+#   pull request       -> tests + builds only (nothing is shipped)
+#   Actions tab button -> same as a push to main
+#
+# Secrets (repo -> Settings -> Secrets and variables -> Actions):
+#   UNITY_LICENSE   contents of C:\ProgramData\Unity\Unity_lic.ulf
+#   UNITY_EMAIL     Unity account email
+#   UNITY_PASSWORD  Unity account password
+#   BUTLER_API_KEY  https://itch.io/user/settings/api-keys
+
+name: Playtest build
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: playtest-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+  ITCH_TARGET: immorality21/immoral-dungeon
+
+jobs:
+  test:
+    name: EditMode tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-test-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-test-
+
+      - uses: game-ci/unity-test-runner@v4
+        id: tests
+        with:
+          testMode: editmode
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: EditMode test results
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ${{ steps.tests.outputs.artifactsPath }}
+
+  build:
+    name: Build ${{ matrix.targetPlatform }}
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform: [WebGL, StandaloneWindows64]
+    outputs:
+      buildVersion: ${{ steps.build.outputs.buildVersion }}
+    steps:
+      # The Unity editor images are large; the stock runner runs out of disk without this.
+      - uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          android: true
+          dotnet: false
+          haskell: true
+          large-packages: false
+          swap-storage: false
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # versioning: Semantic reads the git history
+
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-${{ matrix.targetPlatform }}-
+
+      - uses: game-ci/unity-builder@v4
+        id: build
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: CardDungeon
+          versioning: Semantic
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
+          retention-days: 14
+
+  deploy:
+    name: Push to itch.io
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      VERSION: ${{ needs.build.outputs.buildVersion }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Install butler
+        run: |
+          curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler
+          chmod +x butler/butler
+          ./butler/butler -V
+
+      - name: Push WebGL
+        run: ./butler/butler push build/build-WebGL/CardDungeon "$ITCH_TARGET:webgl" --userversion "$VERSION"
+
+      - name: Push Windows
+        run: ./butler/butler push build/build-StandaloneWindows64 "$ITCH_TARGET:windows" --userversion "$VERSION" --ignore "*_DoNotShip*"
