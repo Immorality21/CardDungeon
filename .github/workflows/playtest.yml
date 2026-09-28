@@ -22,6 +22,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# checks: write lets unity-test-runner publish its "EditMode test results" check.
+permissions:
+  contents: read
+  checks: write
+
 concurrency:
   group: playtest-${{ github.ref }}
   cancel-in-progress: true
