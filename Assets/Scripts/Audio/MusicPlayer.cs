@@ -201,6 +201,12 @@ namespace Assets.Scripts.Audio
 
         private static void Advance(Bed bed, float step, float channelVolume)
         {
+            // Leaving play mode destroys the bed children before this object's last Update runs.
+            if (bed == null || bed.Source == null)
+            {
+                return;
+            }
+
             bed.Weight = Mathf.MoveTowards(bed.Weight, bed.TargetWeight, step);
             bed.Source.volume = bed.Weight * bed.Scale * channelVolume;
 

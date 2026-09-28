@@ -8,7 +8,6 @@
             <ui:Button name="action-btn" text="Action" class="cd-cmd" />
             <ui:Button name="search-btn" text="Search" class="cd-cmd cd-hidden" />
             <ui:Button name="rest-btn" text="Rest" class="cd-cmd cd-hidden" />
-            <ui:Button name="rescue-btn" text="Rescue" class="cd-cmd cd-hidden" />
             <ui:Button name="descend-btn" text="Descend" class="cd-cmd cd-hidden" />
         </ui:VisualElement>
 

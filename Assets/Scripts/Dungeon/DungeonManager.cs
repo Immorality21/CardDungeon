@@ -687,7 +687,7 @@ namespace Assets.Scripts.Dungeon
             EnemyManager.Instance.ClearRoomEnemies(exitRoom);
 
             // The boss lands first so it takes the room's preferred position and the adds arrange
-            // themselves around it (GetRandomWalkablePosition avoids what is already placed).
+            // themselves around it (Room.ClaimSpot keeps clear of what is already placed).
             EnemyManager.Instance.SpawnSingle(boss, exitRoom);
 
             foreach (var add in entry.EnumerateBossAdds())
@@ -963,9 +963,7 @@ namespace Assets.Scripts.Dungeon
 
             var markerObj = new GameObject(room.Kind + "Marker");
             markerObj.transform.SetParent(room.transform, false);
-            var center = room.GetCenter();
-            center.z = -0.5f;
-            markerObj.transform.position = center;
+            markerObj.transform.position = room.ClaimSpot(markerObj, -0.5f);
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = sprite;
             sr.sortingOrder = 3;
@@ -1113,9 +1111,7 @@ namespace Assets.Scripts.Dungeon
 
             var markerObj = new GameObject("Captive");
             markerObj.transform.SetParent(room.transform, false);
-            var center = room.GetCenter();
-            center.z = -0.5f;
-            markerObj.transform.position = center;
+            markerObj.transform.position = room.ClaimSpot(markerObj, -0.5f);
 
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = captive.Sprite;
@@ -1175,6 +1171,7 @@ namespace Assets.Scripts.Dungeon
         {
             if (_captiveMarkers.TryGetValue(room, out var marker))
             {
+                room.ReleaseSpot(marker);
                 if (marker != null)
                 {
                     Destroy(marker);
@@ -1194,9 +1191,7 @@ namespace Assets.Scripts.Dungeon
 
             var markerObj = new GameObject("ExitMarker");
             markerObj.transform.SetParent(room.transform, false);
-            var center = room.GetCenter();
-            center.z = -0.5f;
-            markerObj.transform.position = center;
+            markerObj.transform.position = room.ClaimSpot(markerObj, -0.5f);
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = _exitRoomMarkerSprite;
             sr.sortingOrder = 3;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.IO;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Rooms;
@@ -182,11 +183,21 @@ namespace Assets.Scripts.Heroes
             return hero;
         }
 
-        public void PlaceInRoom(Room room)
+        /// <summary>
+        /// Puts the party in <paramref name="room"/> without walking through a door (the start of a
+        /// floor, a resume, a flee). With <paramref name="viaDoor"/> it stands just inside that door,
+        /// as if it had walked in; otherwise in the centre of an empty room, or inside the room's
+        /// first door when something already stands in the middle.
+        /// </summary>
+        public void PlaceInRoom(Room room, Door viaDoor = null)
         {
             PreviousRoom = CurrentRoom;
             CurrentRoom = room;
-            transform.position = room.GetCenter();
+
+            var door = viaDoor != null && room.Doors.Contains(viaDoor)
+                ? viaDoor
+                : (room.HasClaimedSpots ? room.Doors.FirstOrDefault(d => d != null) : null);
+            transform.position = door != null ? EntryPosition(door, room) : room.GetCenter();
         }
 
         public void PlaceAtDoor(Door door, Room fromRoom)
@@ -194,16 +205,14 @@ namespace Assets.Scripts.Heroes
             PreviousRoom = CurrentRoom;
             var destRoom = door.GetOtherRoom(fromRoom);
             CurrentRoom = destRoom;
-            var doorPos = door.GetPositionInRoom(destRoom);
-            var position = new Vector3(doorPos.x, doorPos.y, -1f);
+            transform.position = EntryPosition(door, destRoom);
+        }
 
-            var center = destRoom.GetCenter();
-
-            Vector3 inward = (center - position).normalized;
-
-            position += inward * 0.75f;
-
-            transform.position = position;
+        /// <summary>Just inside <paramref name="door"/> - the same point <c>Room.ClaimSpot</c> keeps contents clear of.</summary>
+        private static Vector3 EntryPosition(Door door, Room room)
+        {
+            var spot = RoomSpotOps.EntrySpot(door.GetPositionInRoom(room), room.GetCenter());
+            return new Vector3(spot.x, spot.y, -1f);
         }
 
         /// <summary>

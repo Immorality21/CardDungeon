@@ -68,7 +68,6 @@ namespace Assets.Scripts.Rooms
         private Button _actionBtn;
         private Button _searchBtn;
         private Button _restBtn;
-        private Button _rescueBtn;
         private Button _descendBtn;
         private Button _fightBtn;
         private Button _fleeBtn;
@@ -192,7 +191,6 @@ namespace Assets.Scripts.Rooms
             _actionBtn = root.Q<Button>("action-btn");
             _searchBtn = root.Q<Button>("search-btn");
             _restBtn = root.Q<Button>("rest-btn");
-            _rescueBtn = root.Q<Button>("rescue-btn");
             _descendBtn = root.Q<Button>("descend-btn");
             _fightBtn = root.Q<Button>("fight-btn");
             _fleeBtn = root.Q<Button>("flee-btn");
@@ -212,10 +210,6 @@ namespace Assets.Scripts.Rooms
             if (_restBtn != null)
             {
                 _restBtn.clicked += OnRest;
-            }
-            if (_rescueBtn != null)
-            {
-                _rescueBtn.clicked += OnRescue;
             }
             if (_descendBtn != null)
             {
@@ -237,7 +231,7 @@ namespace Assets.Scripts.Rooms
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _rescueBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _eventBack, _eventOptions })
+            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -251,7 +245,7 @@ namespace Assets.Scripts.Rooms
             root.RegisterCallback<KeyDownEvent>(OnCombatHotkey);
             root.focusable = true;
 
-            // Tab-driven cursor for the room bar, so Search/Rest/Rescue/Descend are reachable without
+            // Tab-driven cursor for the room bar, so Search/Rest/Descend are reachable without
             // the mouse while the arrow keys stay free for the doors. Scoped to the bar itself: it
             // must never wander onto a combat button.
             _barNav = new KeyboardNavigator(_mainBar);
@@ -352,7 +346,6 @@ namespace Assets.Scripts.Rooms
             if (hasEnemy)
             {
                 SetShown(_mainBar, false);
-                RefreshRescueButton();
                 RefreshActionButton();
                 RefreshPayloadButtons();
                 RefreshDescendButton();
@@ -730,57 +723,40 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Frees the captive in this room. Two beats on purpose: the first panel introduces who they
-        /// are (the player has only seen a tinted portrait), the second confirms they have joined -
-        /// so a permanent reward is not a single unread popup.
+        /// Frees the captive in a cleared room - automatically, because leaving them bound was never
+        /// a real choice (playtest 2026-09-28): the only decision the old Rescue button posed was
+        /// whether to press it. One statement says who joined, and the party window is rebuilt at
+        /// once so the newcomer's row is there before the player walks on. Returns false when there
+        /// was nobody to free, so the caller can show the ordinary room bar instead.
         /// </summary>
-        private void OnRescue()
+        private bool TryAutoRescue()
         {
             var captive = _currentRoom != null ? _currentRoom.CaptiveHero : null;
-            if (captive == null)
+            if (captive == null || _currentRoom.Enemies.Any(e => e != null && e.IsAlive)
+                || !DungeonManager.HasInstance || !DungeonManager.Instance.TryRescueCaptive(_currentRoom))
             {
-                SetShown(_rescueBtn, false);
-                return;
+                return false;
             }
 
             SetShown(_mainBar, false);
+            // Rebuilt, not refreshed: RefreshPartyStatus only updates the rows that already exist,
+            // which is why the newcomer used to be missing until the next room.
+            ShowPartyStatusOutOfCombat();
 
-            string blurb = string.IsNullOrEmpty(captive.Blurb)
-                ? "They look ready to fight."
-                : captive.Blurb;
-
-            ShowConfirm("A Prisoner",
-                $"{captive.DisplayName} is bound here. {blurb}",
-                "Free them",
-                () =>
+            if (FloatingTextHandler.HasInstance)
             {
-                if (!DungeonManager.Instance.TryRescueCaptive(_currentRoom))
-                {
-                    ShowMainBar();
-                    SetShown(_rescueBtn, false);
-                    return;
-                }
+                FloatingTextHandler.Instance.CreateFloatingText(
+                    GameManager.Instance.Party.transform.position,
+                    $"{captive.DisplayName} joined!",
+                    Color.cyan);
+            }
 
-                SetShown(_rescueBtn, false);
-                if (FloatingTextHandler.HasInstance)
-                {
-                    FloatingTextHandler.Instance.CreateFloatingText(
-                        GameManager.Instance.Party.transform.position,
-                        $"{captive.DisplayName} joined!",
-                        Color.cyan);
-                }
-
-                ShowDetail($"{captive.DisplayName} joins you",
-                    $"{captive.DisplayName} takes up arms alongside the party.\n\n"
-                    + "They are yours for good once this level is cleared - fall here and they are "
-                    + "lost with the rest of the run.");
-                _detailOkAction = () =>
-                {
-                    SetShown(_detailWindow, false);
-                    ShowMainBar();
-                    RefreshPartyStatus();
-                };
-            });
+            string blurb = string.IsNullOrEmpty(captive.Blurb) ? "" : captive.Blurb + "\n\n";
+            ShowDetail($"{captive.DisplayName} joins you",
+                $"{captive.DisplayName} was held captive here. {blurb}"
+                + "They are yours for good once this level is cleared - fall here and they are "
+                + "lost with the rest of the run.");
+            return true;
         }
 
         /// <summary>
@@ -2610,22 +2586,23 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Shows the non-combat action bar and re-evaluates what it can offer. Always use this rather
-        /// than showing <c>_mainBar</c> directly: whether a Rescue is available depends on room state
-        /// that changes *after* <see cref="Show"/> ran - clearing the room's guards is exactly what
-        /// makes a captive reachable - so a bare SetShown would leave Rescue hidden for good in any
-        /// room that had enemies in it.
-        /// </summary>
-        /// <summary>
-        /// Shows the room bar, or nothing at all. Every button on it is conditional now, so an
-        /// ordinary cleared room has no bar rather than an empty frame docked at the bottom.
+        /// Shows the room bar, or nothing at all, re-evaluating what it can offer. Every button on it
+        /// is conditional, so an ordinary cleared room has no bar rather than an empty frame docked
+        /// at the bottom. Always use this rather than showing <c>_mainBar</c> directly: what the room
+        /// offers changes *after* <see cref="Show"/> ran - clearing the room's guards is exactly what
+        /// frees a captive and unlocks a cache - so a bare SetShown would miss it.
         /// </summary>
         private void ShowMainBar()
         {
             // The bar is rebuilt button-by-button below; whatever the Tab cursor was on may be about
             // to be hidden, so it starts over.
             _barNav?.Reset();
-            RefreshRescueButton();
+            // A captive in a clear room is freed on the spot; its notice dismisses back through
+            // here, by which time there is nobody left to free.
+            if (TryAutoRescue())
+            {
+                return;
+            }
             RefreshActionButton();
             RefreshPayloadButtons();
             RefreshDescendButton();
@@ -2635,12 +2612,12 @@ namespace Assets.Scripts.Rooms
         private bool HasRoomActions()
         {
             return IsShown(_actionBtn) || IsShown(_searchBtn) || IsShown(_restBtn)
-                || IsShown(_rescueBtn) || IsShown(_descendBtn);
+                || IsShown(_descendBtn);
         }
 
         /// <summary>
         /// Search and Rest exist only in a room of that kind whose payload is still unspent, and only
-        /// once the room is clear - same rule as Rescue. Conditional like every other button on the
+        /// once the room is clear. Conditional like every other button on the
         /// bar: a Search that reports "nothing here" teaches the player to stop pressing it.
         /// </summary>
         private void RefreshPayloadButtons()
@@ -2650,13 +2627,6 @@ namespace Assets.Scripts.Rooms
 
             SetShown(_searchBtn, pending && _currentRoom.Kind == RoomKind.Treasure);
             SetShown(_restBtn, pending && _currentRoom.Kind == RoomKind.Rest);
-        }
-
-        /// <summary>Rescue is offered only in a room that still holds a captive and has no living enemies.</summary>
-        private void RefreshRescueButton()
-        {
-            bool clear = _currentRoom != null && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive);
-            SetShown(_rescueBtn, clear && _currentRoom.CaptiveHero != null);
         }
 
         /// <summary>

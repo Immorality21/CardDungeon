@@ -14,8 +14,8 @@ namespace Assets.Scripts.Rooms
 
         /// <summary>
         /// A captive hero waiting in this room, placed by <c>DungeonManager</c> from
-        /// <c>RunLevelEntry.RescueHero</c>. Non-null means the room offers a Rescue action once the
-        /// room is clear of enemies; cleared back to null the moment they are freed.
+        /// <c>RunLevelEntry.RescueHero</c>. Non-null means they are freed automatically the moment
+        /// the room is clear of enemies (<c>RoomActionUI.TryAutoRescue</c>), then cleared back to null.
         /// </summary>
         public Assets.Scripts.Heroes.HeroSO CaptiveHero;
         /// <summary>
@@ -206,46 +206,52 @@ namespace Assets.Scripts.Rooms
                 -1f);
         }
 
-        public Vector3 GetRandomWalkablePosition(List<Vector3> avoidWorldPositions, float minDistance)
+        /// <summary>
+        /// Claims a floor tile for <paramref name="owner"/> (an enemy, a marker) and returns it at
+        /// depth <paramref name="z"/>. The tile keeps clear of the doors, of where the party stands
+        /// when it walks in, and of everything claimed before - see <see cref="RoomSpotOps"/>.
+        /// Claiming again for the same owner returns its existing spot.
+        /// </summary>
+        public Vector3 ClaimSpot(object owner, float z)
         {
-            float minX = GridPosition.x + 1;
-            float maxX = GridPosition.x + RoomSO.Width - 2;
-            float minY = GridPosition.y + 1;
-            float maxY = GridPosition.y + RoomSO.Height - 2;
-
-            if (minX > maxX || minY > maxY)
+            if (owner != null && _spots.TryGetValue(owner, out var existing))
             {
-                return GetCenter();
+                return new Vector3(existing.x, existing.y, z);
             }
 
-            Vector3 bestPos = Vector3.zero;
-            for (int attempt = 0; attempt < 10; attempt++)
+            var center = (Vector2)GetCenter();
+            var avoid = new List<Vector2>(_spots.Values);
+            foreach (var door in Doors)
             {
-                bestPos = new Vector3(
-                    Random.Range(minX, maxX + 1),
-                    Random.Range(minY, maxY + 1),
-                    -1f);
-
-                bool overlaps = false;
-                if (avoidWorldPositions != null)
+                if (door == null)
                 {
-                    foreach (var existing in avoidWorldPositions)
-                    {
-                        if (Vector3.Distance(existing, bestPos) < minDistance)
-                        {
-                            overlaps = true;
-                            break;
-                        }
-                    }
+                    continue;
                 }
-
-                if (!overlaps)
-                {
-                    return bestPos;
-                }
+                var doorTile = door.GetPositionInRoom(this);
+                avoid.Add(doorTile);
+                avoid.Add(RoomSpotOps.EntrySpot(doorTile, center));
             }
 
-            return bestPos;
+            var spot = RoomSpotOps.Choose(RoomSpotOps.Tiles(GridPosition, RoomSO.Width, RoomSO.Height), avoid, center);
+            if (owner != null)
+            {
+                _spots[owner] = spot;
+            }
+            return new Vector3(spot.x, spot.y, z);
         }
+
+        /// <summary>Frees the tile <paramref name="owner"/> claimed, so later occupants may use it.</summary>
+        public void ReleaseSpot(object owner)
+        {
+            if (owner != null)
+            {
+                _spots.Remove(owner);
+            }
+        }
+
+        /// <summary>Whether anything has claimed a tile in this room.</summary>
+        public bool HasClaimedSpots => _spots.Count > 0;
+
+        private readonly Dictionary<object, Vector2> _spots = new Dictionary<object, Vector2>();
     }
 }

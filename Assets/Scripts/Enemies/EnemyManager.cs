@@ -111,17 +111,11 @@ namespace Assets.Scripts.Enemies
                             continue;
                         }
 
-                        var occupied = room.Enemies
-                            .Where(e => e != null)
-                            .Select(e => e.transform.position)
-                            .ToList();
-                        var position = room.GetRandomWalkablePosition(occupied, 0.5f);
-
                         // One shared prefab, stamped with the spawn entry's EnemySO definition.
                         var enemyObj = Instantiate(prefab, transform);
                         var enemy = enemyObj.GetComponent<Enemy>();
                         enemy.Initialize(entry.Enemy, LevelTuning);
-                        enemy.PlaceInRoom(room, position);
+                        enemy.PlaceInRoom(room, room.ClaimSpot(enemy, -1f));
 
                         room.Enemies.Add(enemy);
                         _spawnedEnemies.Add(enemy);
@@ -143,6 +137,7 @@ namespace Assets.Scripts.Enemies
 
             foreach (var enemy in room.Enemies.Where(e => e != null).ToList())
             {
+                room.ReleaseSpot(enemy);
                 _spawnedEnemies.Remove(enemy);
                 Destroy(enemy.gameObject);
             }
@@ -166,16 +161,10 @@ namespace Assets.Scripts.Enemies
                 return null;
             }
 
-            var occupied = room.Enemies
-                .Where(e => e != null)
-                .Select(e => e.transform.position)
-                .ToList();
-            var position = room.GetRandomWalkablePosition(occupied, 0.5f);
-
             var enemyObj = Instantiate(prefab, transform);
             var enemy = enemyObj.GetComponent<Enemy>();
             enemy.Initialize(definition, LevelTuning);
-            enemy.PlaceInRoom(room, position);
+            enemy.PlaceInRoom(room, room.ClaimSpot(enemy, -1f));
 
             room.Enemies.Add(enemy);
             _spawnedEnemies.Add(enemy);

@@ -56,7 +56,7 @@ jobs:
           testMode: editmode
           # The Balance category audits the real content against BalanceRules; it is a tuning
           # tool, not a ship gate. Run it locally (Test Runner / Balance Analyzer).
-          customParameters: -testCategory "!Balance"
+          customParameters: -testCategory !Balance
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: EditMode test results
 
@@ -119,7 +119,11 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
+          pattern: build-*
           path: build
+
+      - name: Show build layout
+        run: find build -maxdepth 3 | sort
 
       - name: Install butler
         run: |

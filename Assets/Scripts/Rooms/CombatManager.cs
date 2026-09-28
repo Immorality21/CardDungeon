@@ -1825,7 +1825,7 @@ namespace Assets.Scripts.Rooms
         public void Flee(Party party, Door entryDoor, Room currentRoom)
         {
             currentRoom.EnableAllDoors();
-            party.PlaceInRoom(party.PreviousRoom);
+            party.PlaceInRoom(party.PreviousRoom, entryDoor);
             GameManager.Instance.EnterRoom(party.CurrentRoom, entryDoor);
         }
     }

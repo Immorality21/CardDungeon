@@ -7,7 +7,7 @@
 1. **Graph generation** — Creates a tree of `RoomNode` connections
 2. **Room layout** — BFS placement on a 2D grid, resolving overlaps
 3. **Door placement** — Random door positions between connected adjacent rooms
-4. **Exit room** — BFS from start room, farthest room is designated `IsExit = true`; an exit marker sprite is placed at the room center
+4. **Exit room** — BFS from start room, farthest room is designated `IsExit = true`; an exit marker sprite is placed in the room (see *Where things stand* below)
 5. **Contents, in this order** (all in `DungeonManager`, all drawing on the same seeded RNG stream, which is what lets a resumed dungeon reproduce them): `PlaceRoomKinds` → `EnemyManager.SpawnEnemies` → `PlaceBossIfConfigured` → `PlaceCaptiveIfConfigured` → `PlaceRoomEvents`. The order matters — events skip rooms that already hold a captive, and the boss has already claimed the exit room. Each pass is documented where it belongs: bosses and captives in `Assets/Scripts/Dungeon/CLAUDE.md`, events in `Assets/Scripts/Rooms/Events/CLAUDE.md`.
 6. **Seeding** — Supports custom seed for reproducible generation. Everything above is a pure function of the seed, so the same seed regenerates the same level; the dungeon save stores only what the player *changed* (rooms explored, enemies killed, events resolved), not the layout.
 
@@ -73,13 +73,28 @@ reward: `RunCurveModel` takes non-combat rooms off the expected-combat-room coun
 refuge's healing to the sustain pool. Getting that wrong is not theoretical - see the measured
 coupling in `docs/BALANCING.md`.
 
-A marker is drawn at the room centre - a **chest** for a cache, a **cross** for a refuge - loaded
+A marker is drawn in the room - a **chest** for a cache, a **cross** for a refuge - loaded
 through `CombatIcons` from `Resources/CombatIcons`, so a payload room needs no scene wiring. It must
 have its **own silhouette**: the first version tinted the *exit-door* sprite gold and read as a second
 staircase in play, which is worse than no marker at all. If the glyph is missing the marker is skipped
 rather than falling back to something that means "the way down". `Room.MarkPayloadTaken` dims it, and
 `RoomSaveData.KindConsumed` persists it: without that the player re-loots the cache by walking out and
 back in.
+
+## Where things stand in a room
+
+Every occupant - each enemy, the stairs, a chest/cross, a captive - **claims a whole floor tile**
+through `Room.ClaimSpot(owner, z)` (and `ReleaseSpot` when it goes: `ClearRoomEnemies`, a freed
+captive). The pure `RoomSpotOps.Choose` picks the free tile **farthest from the doors, from the
+point just inside each door where the party stands** (`RoomSpotOps.EntrySpot`, shared with
+`Party.PlaceAtDoor`), **and from everything already claimed**; ties go to the tile nearest the centre,
+then lowest row/column. It draws nothing from the seeded RNG, so it cannot shift the other passes.
+
+It replaced `GetRandomWalkablePosition`, which inset one tile from every edge: most rooms are 2-5
+tiles across, so a 2-tall room had *no* legal tile and everything fell back to the centre - four
+enemies, the stairs and a captive on one point, with the party on top (playtest 2026-09-28).
+`Party.PlaceInRoom(room, viaDoor)` stands the party inside `viaDoor` (Flee passes the door it fled
+through), or in the centre of a room nothing has claimed.
 
 ## The Room Bar (`Rooms/UI/RoomActionUI.cs`)
 
@@ -93,13 +108,17 @@ empty frame docked at the bottom:
 - **Rest** - an unspent **Rest** room, once it is clear. *Confirmed*, and the prompt names how much
   health the party is actually missing, because resting at full health throws the refuge away - that
   timing is the decision the room exists to pose.
-- **Rescue** - a captive, once the room is clear.
 - **Descend** - a cleared **exit** room; taking it is the *only* way a level completes (see below).
 
 **Anything irreversible asks first.** `ShowConfirm(title, message, confirmLabel, onConfirm)` puts a
-**Cancel** beside the Ok, and `ShowDetail` hides it again for plain statements. Both Descend and
-Rescue go through it - they used to be questions ("Free them?", "Descend?") whose only button was
-consent.
+**Cancel** beside the Ok, and `ShowDetail` hides it again for plain statements. Descend goes
+through it - it used to be a question ("Descend?") whose only button was consent.
+
+**A captive is not a button.** Once the room is clear, `ShowMainBar` frees them on the spot
+(`TryAutoRescue`) and shows one "X joins you" statement; the party window is *rebuilt*
+(`ShowPartyStatusOutOfCombat`), not refreshed, since `RefreshPartyStatus` only updates rows that
+already exist. There was a Rescue button with a Free them / Cancel confirm until 2026-09-28; the
+playtest found the only decision it posed was whether to press it, and the stale party panel with it.
 
 **There is no Examine button, and `RoomSO` has no flavour text.** `ExamineOptions`/`ActionOptions`
 were `List<string>` piped straight to a dialog, which is why most rooms had two buttons and no
@@ -233,7 +252,7 @@ already had. If a room needs to *say* something, that is what an event's `Prompt
     comes from the `GeometryChangedEvent` that showing it raises. Adjacency comes off `Room.Doors`,
     **not** the generator's `RoomNode.connections` — a connection with no door placed is not a route
     the player can walk, and drawing it would put a corridor on the map that does not exist.
-- **Walking the dungeon from the keyboard** (`RoomActionUI.HandleDungeonKey`): **arrows** point at a door, **Enter/Space** walks through it, **Tab** moves a cursor along the room bar instead (Action/Search/Rest/Rescue/Descend) and Enter presses what it is on. Two cursors share Enter and the last key decides: an arrow always hands Enter back to the doors. Door picking is spatial (`DirectionalNav`, world space, so "up" is +y); with no door chosen yet the arrow is measured from **where the party is standing**, and if nothing lies that way the nearest door is taken so a first press always shows the cursor. The selected door is drawn by `Door.SetHighlighted` (warm tint + 1.3× scale, original look captured on first use and restored). The whole thing is gated by `DoorNavActive()` — doors subscribed, no combat bar, no window stacked over the room — and the `nav-hint` label mirrors that gate. The hint is **context-aware** (`NavHintText`) — it names the combat bar's keys, the command cursor's, or the door cursor's depending on which is up, says nothing under a dialog, and drops "R flee" when there is no Flee button. It is refreshed from `Update` rather than from the dozen places a bar is swapped or a window opened: the line is derived from what is on screen, and re-deriving it each frame cannot fall out of sync the way a dozen call sites can.
+- **Walking the dungeon from the keyboard** (`RoomActionUI.HandleDungeonKey`): **arrows** point at a door, **Enter/Space** walks through it, **Tab** moves a cursor along the room bar instead (Action/Search/Rest/Descend) and Enter presses what it is on. Two cursors share Enter and the last key decides: an arrow always hands Enter back to the doors. Door picking is spatial (`DirectionalNav`, world space, so "up" is +y); with no door chosen yet the arrow is measured from **where the party is standing**, and if nothing lies that way the nearest door is taken so a first press always shows the cursor. The selected door is drawn by `Door.SetHighlighted` (warm tint + 1.3× scale, original look captured on first use and restored). The whole thing is gated by `DoorNavActive()` — doors subscribed, no combat bar, no window stacked over the room — and the `nav-hint` label mirrors that gate. The hint is **context-aware** (`NavHintText`) — it names the combat bar's keys, the command cursor's, or the door cursor's depending on which is up, says nothing under a dialog, and drops "R flee" when there is no Flee button. It is refreshed from `Update` rather than from the dozen places a bar is swapped or a window opened: the line is derived from what is on screen, and re-deriving it each frame cannot fall out of sync the way a dozen call sites can.
 - **The windows stacked over the room** are keyboard-complete too (`HandleDialogKey`, checked *before* the bars so a dialog owns the keyboard while it is up): the victory screen takes any confirm/cancel key, the detail window takes **Enter** for OK and **Escape** for Cancel (or OK when there is no Cancel — a one-button statement must not trap the player), and the event window gets its own `KeyboardNavigator` over its runtime-built options, with Escape pressing its Back button so the keyboard route out runs the same teardown a click does.
 - **Combat input** (`RoomActionUI.OnCombatHotkey`): **cursor-driven, no letter hotkeys.** The start bar has a `KeyboardNavigator` scoped to `combat-bar` — **Left/Right** (or Tab) choose, **Enter/Space** press. Flee is absent in a boss room, so the cursor cannot reach a way out the fight does not offer. The hero command menu is a cursor selection list — **Up/Down** move the cursor (skipping greyed commands), **Enter/Space** confirm. There used to be **F**/**R** on the start bar and **A/M/D/T/I/S** on the command menu; they were dropped once the arrows covered both, because a second way in earns its keep only while the first one is missing. Both bars therefore carry their cursor from the moment they appear (the command menu always did; the start bar opts in via `KeyboardNavigator.SelectFirst`, armed from `Update` because on the frame a bar is shown its resolved style is still stale) — with no letters left, Enter must never need an arrow press to wake it up. Camera panning is disabled during combat (`MainCamera.AllowManualPan`, set by `CombatStage`) so the arrow/WASD keys drive the cursor, not the camera. UI Toolkit routes key events to the focused element, so `RoomActionUI` focuses its panel root (`FocusRoot()`) whenever a combat bar appears. **Focus is only half of it:** at runtime the OS keyboard reaches a UITK panel only while its `PanelEventHandler` is the EventSystem's *selected* GameObject, and clicking a door — a world-space collider, not UI — clears that selection. `FocusRoot` and `Update` both call `PanelKeyboard.Claim()` for this; without it the room clicks perfectly and ignores every key. See gotcha 15 in `docs/GAMEPLAY_VALIDATION.md`. **Focus-ownership invariant:** the combat scene has two UITK documents (`RoomActionUI` and `MagicSelectionUI`) and only **one panel root may be `focusable` at a time**, or arrow-nav hops focus to the other (idle) panel and dies after one key. Each panel makes its root focusable only while actively driving nav; scrolls/rows/back-buttons are `focusable = false`. See `docs/GAMEPLAY_VALIDATION.md` → "UI Toolkit keyboard focus" for the full rationale + how to test it.
 - `[ContextMenu("Spawn Dungeon")]` on RoomManager for editor-time generation
