@@ -237,6 +237,12 @@ Touch points: `Assets/Scripts/UnitStats/StatCatalog.cs` (descriptions exist, unu
 
 ### 20. A tutorial — guide the player through the first hour *(added 2026-09-05)*
 
+> **The first loop shipped 2026-09-29** — New Game goes straight into floor 1, and home again the
+> town is locked to the Hall of Progression, then its Build button, then one grid node, then the
+> road. What is built, the learnings and the remaining todos (skip/replay, the fork warning, the
+> later XP nudge, the in-dungeon half) are in **`docs/TUTORIAL.md`**. Read that first; the open
+> questions below are answered there where they have been.
+
 **The game teaches nothing.** A new player lands in a town with two buildings standing, two plots
 waiting and a road, and is told none of it: not that the road is how you leave, not that the
 foundations are things you build, not that the timber they will come home with is what builds the

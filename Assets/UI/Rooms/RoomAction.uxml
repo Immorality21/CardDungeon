@@ -89,7 +89,12 @@
             <ui:Label name="level-clear-subtitle" text="" class="cd-level-clear__subtitle" />
             <ui:ScrollView name="level-clear-body" class="cd-victory__rewards cd-level-clear__body" mode="Vertical" />
             <ui:Label name="level-clear-next" text="" class="cd-level-clear__next" />
-            <ui:Button name="level-clear-continue" text="Back to Town" class="cd-button cd-button--narrow" />
+            <!-- Continue goes straight down to the run's next level; hidden on the last level and
+                 while the tutorial runs. Left/Right pick, Enter confirms (RoomActionUI). -->
+            <ui:VisualElement class="cd-button-row cd-level-clear__choices">
+                <ui:Button name="level-clear-continue" text="Back to Town" class="cd-button" />
+                <ui:Button name="level-clear-next-level" text="Continue" class="cd-button" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Victory summary (shown over the battle stage) -->

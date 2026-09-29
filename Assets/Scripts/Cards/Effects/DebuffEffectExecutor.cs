@@ -39,6 +39,19 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
+                // Said on screen, or an immune target reads as a cast that silently did nothing.
+                if (StatusImmunity.IsImmune(target, effect.BuffType))
+                {
+                    result.Entries.Add(new EffectEntry
+                    {
+                        Target = target,
+                        Text = "Immune",
+                        Color = Color.gray,
+                        Delay = EffectDelay
+                    });
+                    continue;
+                }
+
                 handler.Apply(target, -magnitude, effect.Duration, buffTracker);
 
                 result.Entries.Add(new EffectEntry

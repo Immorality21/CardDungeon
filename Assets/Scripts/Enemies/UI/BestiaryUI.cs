@@ -279,6 +279,8 @@ namespace Assets.Scripts.Enemies.UI
             BestiaryLineView.AddSection(
                 _detail, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
             BestiaryLineView.AddSection(
+                _detail, "Immune to", BestiaryPresenter.ImmunityLines(definition, known));
+            BestiaryLineView.AddSection(
                 _detail, "Base stats", BestiaryPresenter.StatLines(definition, known));
             BestiaryLineView.AddSection(
                 _detail, "Abilities", BestiaryPresenter.SpellLines(definition, known));

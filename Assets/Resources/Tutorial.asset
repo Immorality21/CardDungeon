@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0dadc5ca18a4ea4a5afb001dad2a95f, type: 3}
+  m_Name: Tutorial
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Tutorial.TutorialSO
+  FirstRun: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
+  GuideBuildingKey: sphere-hall
+  Lines:
+  - Cue: 1
+    Text: The dungeon is still waiting. Take The Story to go back down.
+  - Cue: 2
+    Text: You came home with timber. Click the Hall of Progression's foundation to raise it.
+  - Cue: 3
+    Text: Build the Hall of Progression. It costs the timber you just brought home.
+  - Cue: 4
+    Text: The hall stands. Step inside to spend the XP your hero banked.
+  - Cue: 5
+    Text: The hall stands. Enter it to spend the XP your hero banked.
+  - Cue: 6
+    Text: Every fight banked XP for your hero. Click the glowing node - you can afford it.
+  - Cue: 7
+    Text: Now press Activate to spend the XP.
+  - Cue: 8
+    Text: Your hero grew stronger. Head back to town - the road down is open again.
+  - Cue: 9
+    Text: The town is yours now. When you are ready, take The Story to continue The Threshold.

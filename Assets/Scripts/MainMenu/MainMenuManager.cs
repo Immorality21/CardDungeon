@@ -35,6 +35,10 @@ public class MainMenuManager : MonoBehaviour
     private AudioOptionsUI _options;
     private KeyboardNavigator _nav;
 
+    // Whether the button reads New Game. Decided once, on arrival, from the same file check that
+    // chose the word - so the tutorial starts exactly when the player was told it would.
+    private bool _isNewGame;
+
     private void Start()
     {
         if (_document == null)
@@ -53,7 +57,8 @@ public class MainMenuManager : MonoBehaviour
         _continueButton.clicked += OnContinue;
         // Same button, same destination - only the word changes. A brand-new save used to be greeted
         // with "Continue" (playtest 2026-09-28, finding 14).
-        _continueButton.text = HasSaveGame() ? "Continue" : "New Game";
+        _isNewGame = !HasSaveGame();
+        _continueButton.text = _isNewGame ? "New Game" : "Continue";
         _optionsButton.clicked += OnOptions;
         if (_quitButton != null)
         {
@@ -152,6 +157,12 @@ public class MainMenuManager : MonoBehaviour
 
     private void OnContinue()
     {
+        // A new game goes straight into the tutorial's first floor; the hub decides that, since it
+        // is the scene that reads the save (see HubManager.RequestNewGame).
+        if (_isNewGame)
+        {
+            Assets.Scripts.Hub.HubManager.RequestNewGame();
+        }
         SceneManager.LoadScene("HubScene");
     }
 

@@ -545,6 +545,35 @@ namespace Assets.Scripts.Progression
             OnChanged?.Invoke();
         }
 
+        // --- The tutorial (only its two ends; the step is derived, see TutorialOps) ---
+
+        public bool TutorialStarted => _saveData.TutorialStarted;
+        public bool TutorialFinished => _saveData.TutorialFinished;
+
+        /// <summary>Begins the guided first hour. Called once, by a New Game. Persists immediately.</summary>
+        public void StartTutorial()
+        {
+            if (_saveData.TutorialStarted)
+            {
+                return;
+            }
+            _saveData.TutorialStarted = true;
+            Save();
+            OnChanged?.Invoke();
+        }
+
+        /// <summary>Ends it for good — the loop was walked, or it was skipped. Persists immediately.</summary>
+        public void FinishTutorial()
+        {
+            if (_saveData.TutorialFinished)
+            {
+                return;
+            }
+            _saveData.TutorialFinished = true;
+            Save();
+            OnChanged?.Invoke();
+        }
+
         // --- Hub buildings (which lots are placed, and at what level) ---
 
         /// <summary>Every lot the player has placed. Never null.</summary>

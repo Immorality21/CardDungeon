@@ -189,7 +189,7 @@ and the wrong one for a gate.
 |---|---|---|
 | Campfire | placed by default | — |
 | Storehouse | placed by default | — (your own bag, never gated) |
-| Sphere Hall | from the start | 1 Rotted Timber |
+| Hall of Progression (`sphere-hall`) | from the start | 1 Rotted Timber |
 | Bestiary | from the start | 4 Scrap Iron |
 | Merchant | from the start | 8 Scrap Iron · 2 Rotted Timber |
 | Magic Forge | after `TutorialRun` | 3 Ember Iron · 2 Slag Coal |
@@ -347,6 +347,16 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   `Items/ItemPresenter` (`ItemPresenterTests`).
 - **BestiaryUI** (`Enemies/UI`) — the enemy knowledge collection.
 - **SphereGridUI** (`Heroes/UI`) — the one place XP is ever spent.
+
+## The tutorial
+
+`HubManager`'s "THE TUTORIAL" region applies `Assets/Scripts/Tutorial/TutorialOps` to the town: a
+**New Game** (`HubManager.RequestNewGame`, set by the title screen) skips the town and goes straight
+into floor 1; home again, every lot but the Hall of Progression, the road and Main Menu are
+**disabled**, the hall's panel is locked to Build then Enter, and the grid to one node
+(`SphereGridUI.SetGuide`). Only `TutorialStarted`/`TutorialFinished` are saved; the step is derived.
+Read **`docs/TUTORIAL.md`** before changing any of it — including why `CanPayFor` must use
+`InventoryManager.Instance`, not `HasInstance`.
 
 ## The tavern is gone
 

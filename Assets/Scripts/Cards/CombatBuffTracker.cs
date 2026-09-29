@@ -95,7 +95,8 @@ namespace Assets.Scripts.Cards
         /// </summary>
         public void ApplyStatusEffect(ICombatUnit unit, BuffType type, int duration)
         {
-            if (unit == null || duration <= 0)
+            // An immune unit never carries the status at all - no icon, no turn skipped, no tick.
+            if (unit == null || duration <= 0 || StatusImmunity.IsImmune(unit, type))
             {
                 return;
             }
@@ -140,7 +141,7 @@ namespace Assets.Scripts.Cards
         /// </summary>
         public void ApplyOverTime(ICombatUnit unit, BuffType type, int amountPerTurn, int duration)
         {
-            if (unit == null || amountPerTurn <= 0 || duration <= 0)
+            if (unit == null || amountPerTurn <= 0 || duration <= 0 || StatusImmunity.IsImmune(unit, type))
             {
                 return;
             }

@@ -230,7 +230,7 @@ backlog.**
 | **14** | The dungeon map, the party bar, and the pause menu | ✅ **complete** — 14b + 14c 2026-09-06, **14a (the map) 2026-09-08** |
 | **15** | Run summary and statistics | not started |
 | **16** | A compendium — explain the systems | not started |
-| **20** | **A tutorial — guide the player through the first hour** | not started; the opening beat is already built and priced for it |
+| **20** | **A tutorial — guide the player through the first hour** | **first loop shipped 2026-09-29** (New Game → floor 1 → build the Hall of Progression → first grid node → the road); learnings + todos in `docs/TUTORIAL.md` |
 | **17** | Content volume is the biggest single gap | not started |
 | **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses to come** — the 4-piece Shadowweave set is authored, no set logic yet (§18a-sets) |
 | **19** | Shipping surface | not started |

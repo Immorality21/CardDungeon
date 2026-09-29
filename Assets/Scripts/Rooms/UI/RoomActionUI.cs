@@ -107,6 +107,11 @@ namespace Assets.Scripts.Rooms
         private Label _levelNext;
         private Button _levelContinue;
         private Action _levelContinueAction;
+        // Straight to the run's next level. Null when the summary offers only the town.
+        private Button _levelNextLevel;
+        private Action _levelNextLevelAction;
+        // Which of the two the keyboard is on: true = Continue.
+        private bool _levelChoiceIsNext;
 
         private bool _refsReady;
         private Action _detailOkAction;
@@ -205,6 +210,7 @@ namespace Assets.Scripts.Rooms
             _levelBody = root.Q<ScrollView>("level-clear-body");
             _levelNext = root.Q<Label>("level-clear-next");
             _levelContinue = root.Q<Button>("level-clear-continue");
+            _levelNextLevel = root.Q<Button>("level-clear-next-level");
             _navHint = root.Q<Label>("nav-hint");
 
             _heroTitle = root.Q<Label>("hero-title");
@@ -260,11 +266,15 @@ namespace Assets.Scripts.Rooms
             {
                 _levelContinue.clicked += OnLevelClearContinue;
             }
+            if (_levelNextLevel != null)
+            {
+                _levelNextLevel.clicked += OnLevelClearNextLevel;
+            }
 
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelBody, _eventBack, _eventOptions })
+            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelNextLevel, _levelBody, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -2018,10 +2028,25 @@ namespace Assets.Scripts.Rooms
                 // find themselves in the hub by accident.
                 switch (evt.keyCode)
                 {
+                    case KeyCode.LeftArrow:
+                    case KeyCode.RightArrow:
+                    case KeyCode.Tab:
+                        if (_levelNextLevelAction != null)
+                        {
+                            SetLevelChoice(!_levelChoiceIsNext);
+                        }
+                        return true;
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
                     case KeyCode.Space:
-                        OnLevelClearContinue();
+                        if (_levelChoiceIsNext && _levelNextLevelAction != null)
+                        {
+                            OnLevelClearNextLevel();
+                        }
+                        else
+                        {
+                            OnLevelClearContinue();
+                        }
                         return true;
                 }
                 return false;
@@ -2727,7 +2752,9 @@ namespace Assets.Scripts.Rooms
         /// gold is split into what the floor paid and the clear bonus, because the bonus was the
         /// +30 nobody could account for, and Essence says where it is spent.</para>
         /// </summary>
-        public void ShowLevelCleared(LevelClearSummary summary, Action onContinue)
+        /// <param name="onNextLevel">Continue: straight down to the next level. Null hides the button,
+        /// leaving the town as the only way on (the run's last level, the tutorial).</param>
+        public void ShowLevelCleared(LevelClearSummary summary, Action onContinue, Action onNextLevel = null)
         {
             if (!EnsureRefs() || _levelWindow == null || summary == null)
             {
@@ -2746,6 +2773,11 @@ namespace Assets.Scripts.Rooms
             SetShown(_bossBanner, false);
 
             _levelContinueAction = onContinue;
+            _levelNextLevelAction = onNextLevel;
+            SetShown(_levelNextLevel, onNextLevel != null);
+            // Continue is the default when it is offered: a player clearing a run level by level
+            // should not have to reach for the arrows every time.
+            SetLevelChoice(onNextLevel != null);
             _levelTitle.text = summary.RunCompleted ? "Run Complete!" : "Level Cleared!";
             SetText(_levelSubtitle, LevelClearSubtitle(summary));
 
@@ -2787,7 +2819,9 @@ namespace Assets.Scripts.Rooms
                 ? "The run is complete."
                 : string.IsNullOrEmpty(summary.NextLevelName)
                     ? "The run continues from the story map."
-                    : $"Next: {summary.NextLevelName} - continue it from the story map.");
+                    : onNextLevel != null
+                        ? $"Next: {summary.NextLevelName} - continue now, or rest in town first."
+                        : $"Next: {summary.NextLevelName} - continue it from the story map.");
 
             _levelBody.scrollOffset = Vector2.zero;
             SetShown(_levelWindow, true);
@@ -2844,8 +2878,30 @@ namespace Assets.Scripts.Rooms
         {
             var action = _levelContinueAction;
             _levelContinueAction = null;
+            _levelNextLevelAction = null;
             SetShown(_levelWindow, false);
             action?.Invoke();
+        }
+
+        private void OnLevelClearNextLevel()
+        {
+            var action = _levelNextLevelAction;
+            if (action == null)
+            {
+                return;
+            }
+            _levelContinueAction = null;
+            _levelNextLevelAction = null;
+            SetShown(_levelWindow, false);
+            action.Invoke();
+        }
+
+        /// <summary>Moves the keyboard highlight between Back to Town and Continue.</summary>
+        private void SetLevelChoice(bool next)
+        {
+            _levelChoiceIsNext = next;
+            _levelNextLevel?.EnableInClassList("cd-nav--selected", next);
+            _levelContinue?.EnableInClassList("cd-nav--selected", !next);
         }
 
         private VisualElement MakeVictoryRow(string label, string value)

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: sphere-hall
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.BuildingSO
   Key: sphere-hall
-  DisplayName: Sphere Hall
+  DisplayName: Hall of Progression
   Blurb: Where a hero decides what they are becoming.
   Service: 5
   Position: {x: 680, y: 250}

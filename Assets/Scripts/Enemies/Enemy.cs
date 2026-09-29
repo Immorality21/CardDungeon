@@ -8,8 +8,13 @@ using UnityEngine;
 
 namespace Assets.Scripts.Enemies
 {
-    public class Enemy : MonoBehaviour, ICombatUnit
+    public class Enemy : MonoBehaviour, ICombatUnit, IStatusImmune
     {
+        public bool IsImmuneTo(BuffType type)
+        {
+            return Definition != null && StatusImmunity.ListContains(Definition.StatusImmunities, type);
+        }
+
         public Stats Stats;
         public Room Room;
         /// <summary>What this kill can yield, stamped from the definition. See <see cref="LootDrop"/>.</summary>

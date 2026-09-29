@@ -208,6 +208,13 @@ namespace Assets.Scripts.Hub.UI
             badge.AddToClassList("cd-hidden");
             caption.Add(badge);
 
+            // The tutorial's pointer, hidden until SetLotGuided turns it on. Authored with the lot
+            // rather than added later, the same way the badge is.
+            var pointer = new Label("▼") { name = "hub-lot-pointer-" + lot.Key, pickingMode = PickingMode.Ignore };
+            pointer.AddToClassList("hub-lot__pointer");
+            pointer.AddToClassList("cd-hidden");
+            button.Add(pointer);
+
             ApplyArtMode(button, glyph, lot.Sprite != null);
 
             var captured = lot.Key;
@@ -299,6 +306,33 @@ namespace Assets.Scripts.Hub.UI
             element.EnableInClassList("hub-lot__badge--locked", badge == LotBadge.Locked);
             element.EnableInClassList("cd-hidden", badge == LotBadge.None);
         }
+
+        /// <summary>
+        /// Whether a lot can be clicked. The tutorial locks every lot but the one it is walking the
+        /// player to; a disabled Button also drops out of the keyboard cursor, so the arrows cannot
+        /// reach what the mouse cannot.
+        /// </summary>
+        public void SetLotEnabled(string key, bool enabled)
+        {
+            if (_buttons.TryGetValue(key, out var button) && button.enabledSelf != enabled)
+            {
+                button.SetEnabled(enabled);
+            }
+        }
+
+        /// <summary>Puts the tutorial's pulsing outline and pointer on a lot, or takes them off.</summary>
+        public void SetLotGuided(string key, bool guided)
+        {
+            if (!_buttons.TryGetValue(key, out var button))
+            {
+                return;
+            }
+            button.EnableInClassList(TutorialTargetClass, guided);
+            button.Q<VisualElement>("hub-lot-pointer-" + key)?.EnableInClassList("cd-hidden", !guided);
+        }
+
+        /// <summary>The class every tutorial target carries, on every screen (see CardDungeon.uss).</summary>
+        public const string TutorialTargetClass = "cd-tutorial-target";
 
         /// <summary>The lot keys currently drawn, in paint order.</summary>
         public IReadOnlyList<string> Lots => _order;

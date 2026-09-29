@@ -539,6 +539,8 @@ namespace Assets.Scripts.Cards.UI
             _inspectLeft.Add(BestiaryLineView.Row(BestiaryPresenter.KillsLine(known)));
             BestiaryLineView.AddSection(
                 _inspectLeft, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
+            BestiaryLineView.AddSection(
+                _inspectLeft, "Immune to", BestiaryPresenter.ImmunityLines(definition, known));
 
             // Right: what it is doing in this fight, then what it drops. Drops sit here rather than
             // under "Attacks with" because the resistance list is the long one - with both on the

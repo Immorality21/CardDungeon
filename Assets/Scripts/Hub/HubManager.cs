@@ -10,6 +10,7 @@ using Assets.Scripts.IO;
 using Assets.Scripts.Items;
 using Assets.Scripts.Items.UI;
 using Assets.Scripts.Progression;
+using Assets.Scripts.Tutorial;
 using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -106,6 +107,22 @@ namespace Assets.Scripts.Hub
         /// </summary>
         private static bool _justCompletedRun;
 
+        /// <summary>
+        /// Set by the title screen when its button said <b>New Game</b>. Read once here: a new game
+        /// starts the tutorial and goes straight into its first floor. A static for the same reason
+        /// <see cref="_justCompletedRun"/> is — MenuScene reads no save, so it cannot start anything
+        /// itself, only say what the player asked for.
+        /// </summary>
+        private static bool _newGameRequested;
+
+        // The guided first hour (docs/TUTORIAL.md). The step is recomputed from the save on every
+        // state change (RefreshTutorial) and cached here, so the per-frame banner read never touches
+        // Party.json.
+        private TutorialSO _tutorial;
+        private TutorialStep _tutorialStep;
+        private VisualElement _tutorialBanner;
+        private Label _tutorialText;
+
         // Which view the party screen was opened from, so Back goes where the player came from.
         private bool _partyOpenedFromProgress;
 
@@ -117,6 +134,12 @@ namespace Assets.Scripts.Hub
             _justCompletedRun = true;
         }
 
+        /// <summary>The title screen's New Game: start the tutorial on arrival.</summary>
+        public static void RequestNewGame()
+        {
+            _newGameRequested = true;
+        }
+
         private void Start()
         {
             _fileHandler = new FileHandler();
@@ -126,6 +149,7 @@ namespace Assets.Scripts.Hub
             // town without scene wiring - and without AssetDatabase, which does not exist in a build.
             _campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
             _hub = UnityEngine.Resources.Load<HubSO>(HubSO.ResourcePath);
+            _tutorial = UnityEngine.Resources.Load<TutorialSO>(TutorialSO.ResourcePath);
 
             // A spell a hero starts with is never "bought", so nothing else would ever record it as
             // discovered and the Forge would refuse to upgrade the one spell everyone owns.
@@ -172,6 +196,8 @@ namespace Assets.Scripts.Hub
             _lotStatus = root.Q<Label>("lot-status");
             _lotGrant = root.Q<Label>("lot-grant");
             _lotFeedback = root.Q<Label>("lot-feedback");
+            _tutorialBanner = root.Q<VisualElement>("tutorial-banner");
+            _tutorialText = root.Q<Label>("tutorial-text");
 
             _roadButton.clicked += OnTakeTheRoad;
             _menuButton.clicked += OnLeaveToMainMenu;
@@ -203,6 +229,8 @@ namespace Assets.Scripts.Hub
             _merchant.OnClosed += ShowTown;
             _partySelect.OnClosed += OnPartyClosed;
             _sphereGrid.OnClosed += ShowTown;
+            _sphereGrid.NodeActivated += OnGridNodeActivated;
+            _sphereGrid.SelectionChanged += RefreshTutorial;
             _forge.OnClosed += ShowTown;
             _bestiary.OnClosed += ShowTown;
             _inventory.OnClosed += ShowTown;
@@ -212,6 +240,22 @@ namespace Assets.Scripts.Hub
             // The hub's own bed. Requesting the track already playing is a no-op, so arriving from
             // MenuScene does not restart it - the walk from the title screen into town is seamless.
             MusicPlayer.Play(MusicTrack.Hub);
+
+            // The tutorial's pointers pulse by toggling one class on the root; the USS transitions
+            // do the easing. One scheduler for every screen, and it costs nothing when nothing is
+            // pointed at.
+            _root.schedule.Execute(() => _root.ToggleInClassList(TutorialPulseClass)).Every(600);
+
+            // A New Game is taken by the hand from the first second: straight into the opening floor,
+            // with no town to wonder about first.
+            if (_newGameRequested)
+            {
+                _newGameRequested = false;
+                if (TryBeginTutorial())
+                {
+                    return;
+                }
+            }
 
             // Run complete only when we arrived from clearing the final level.
             if (DungeonManager.ActiveRun == null && string.IsNullOrEmpty(_runSaveData.RunKey) && _justCompletedRun)
@@ -305,6 +349,10 @@ namespace Assets.Scripts.Hub
             }
 
             SetFeedback(string.Empty);
+            if (!TutorialOps.AllowsLot(_tutorialStep, building.SaveKey, GuideKey()))
+            {
+                return;
+            }
             if (HubPresenter.NeedsPanel(building, Progress()))
             {
                 ShowLotPanel(building);
@@ -355,6 +403,8 @@ namespace Assets.Scripts.Hub
             bool built = BuildingOps.IsBuilt(_selectedLot, progress);
             SetShown(_lotEnterButton, built);
             _lotEnterButton.text = "Enter";
+
+            RefreshTutorial();
         }
 
         /// <summary>
@@ -397,8 +447,10 @@ namespace Assets.Scripts.Hub
                 {
                     return true;
                 }
-                return InventoryManager.HasInstance
-                    && InventoryManager.Instance.CanAfford(building.PlacementCost);
+                // Instance, not HasInstance: the hub scene places no inventory, and on the first
+                // frame nothing has created it yet - which read the timber in the bag as missing and
+                // made the tutorial skip its build step. It auto-creates and loads from disk in Awake.
+                return InventoryManager.Instance.CanAfford(building.PlacementCost);
             }
             if (BuildingOps.CanUpgrade(building, progress))
             {
@@ -578,6 +630,11 @@ namespace Assets.Scripts.Hub
 
         private Button CancelButtonForCurrentView()
         {
+            if (!TutorialOps.AllowsLeaving(_tutorialStep))
+            {
+                // A guided screen has no way out but forward - Escape included.
+                return null;
+            }
             if (IsShown(_lotView))
             {
                 return _lotCloseButton;
@@ -639,6 +696,7 @@ namespace Assets.Scripts.Hub
         {
             PanelKeyboard.Claim();
             RefreshBackdrop();
+            RefreshTutorialBanner();
         }
 
         /// <summary>
@@ -658,7 +716,7 @@ namespace Assets.Scripts.Hub
 
         private static void SetClass(VisualElement element, string className, bool on)
         {
-            if (element.ClassListContains(className) != on)
+            if (element != null && element.ClassListContains(className) != on)
             {
                 element.EnableInClassList(className, on);
             }
@@ -686,6 +744,7 @@ namespace Assets.Scripts.Hub
 
             RefreshTown();
             RefreshCurrencyHeader();
+            RefreshTutorial();
         }
 
         private static string RunKeyOf(RunDefinitionSO run)
@@ -779,6 +838,15 @@ namespace Assets.Scripts.Hub
         /// </summary>
         private void OnTakeTheRoad()
         {
+            // Still on the opening floor (a wipe, or a quit to town): straight back down, no map.
+            if (_tutorialStep == TutorialStep.ClearFirstFloor && TryEnterTutorialRun())
+            {
+                return;
+            }
+            if (!TutorialOps.AllowsRoad(_tutorialStep))
+            {
+                return;
+            }
             if (_campaignMap != null)
             {
                 SetShown(_hubView, false);
@@ -858,7 +926,220 @@ namespace Assets.Scripts.Hub
                 ? _runSaveData.ActiveDungeonSeed
                 : (int?)null;
 
+            // The tutorial's last step is "take the road"; going down is how it is finished.
+            if (_tutorialStep == TutorialStep.TakeTheRoad && MetaProgressManager.HasInstance)
+            {
+                MetaProgressManager.Instance.FinishTutorial();
+            }
+
             SceneManager.LoadScene("MainGameScene");
+        }
+
+        // ============================================================
+        //  THE TUTORIAL
+        // ============================================================
+        //
+        // The rules are TutorialOps (pure); this is where they meet the screens. Nothing here is
+        // written down but the tutorial's two ends - the step is read off the save on every change.
+
+        public const string TutorialPulseClass = "cd-tutorial--pulse";
+
+        private string GuideKey()
+        {
+            return _tutorial != null ? _tutorial.GuideBuildingKey : null;
+        }
+
+        /// <summary>The hero the tutorial walks through the grid: the first starting hero the save owns.</summary>
+        private HeroSO TutorialHero()
+        {
+            if (_partyRoster == null || _partyRoster.StartingHeroes == null)
+            {
+                return null;
+            }
+            foreach (var hero in _partyRoster.StartingHeroes)
+            {
+                if (hero != null && hero.SphereGrid != null && HeroRoster.Owns(_partyRoster, hero))
+                {
+                    return hero;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// The save as the tutorial rules see it. Reads Party.json for the hero's bank, so it runs on
+        /// state changes only, never per frame.
+        /// </summary>
+        private TutorialProgress ReadTutorialProgress()
+        {
+            var progress = new TutorialProgress();
+            if (_tutorial == null || !MetaProgressManager.HasInstance)
+            {
+                return progress;
+            }
+
+            var meta = MetaProgressManager.Instance;
+            progress.Started = meta.TutorialStarted;
+            progress.Finished = meta.TutorialFinished;
+            if (!progress.Started || progress.Finished)
+            {
+                return progress;
+            }
+
+            var hub = Progress();
+            var guide = _hub != null ? _hub.Find(GuideKey()) : null;
+            bool guideStands = guide != null && BuildingOps.IsBuilt(guide, hub);
+            // A missing guide lot reads as built, so its steps are skipped rather than waited on.
+            progress.GuideBuilt = guide == null || guideStands;
+            progress.CanAffordGuide = guide != null && BuildingOps.CanPlace(guide, hub) && CanPayFor(guide, hub);
+            progress.FirstFloorCleared = guideStands || TutorialOps.FirstFloorCleared(
+                RunKeyOf(_tutorial.FirstRun), hub.CompletedRunKeys,
+                _runSaveData.RunKey, _runSaveData.CurrentLevelIndex);
+
+            var hero = TutorialHero();
+            if (hero != null)
+            {
+                var save = HeroRoster.GetHeroSave(hero);
+                progress.HeroHasSpent = save.ActivatedNodes != null && save.ActivatedNodes.Count > 0;
+                progress.HeroCanAffordNode = TutorialOps.GuidedNodeKey(
+                    hero.SphereGrid, save.ActivatedNodes, save.CurrentXp) != null;
+            }
+            return progress;
+        }
+
+        /// <summary>
+        /// A New Game: start the tutorial and go straight into its first floor. False — and the town
+        /// shows as usual — when there is no tutorial asset or the save already had one.
+        /// </summary>
+        private bool TryBeginTutorial()
+        {
+            if (_tutorial == null || _tutorial.FirstRun == null || !MetaProgressManager.HasInstance)
+            {
+                return false;
+            }
+            var meta = MetaProgressManager.Instance;
+            if (meta.TutorialStarted || meta.TutorialFinished)
+            {
+                return false;
+            }
+
+            meta.StartTutorial();
+            RefreshTutorial();
+            return _tutorialStep == TutorialStep.ClearFirstFloor && TryEnterTutorialRun();
+        }
+
+        /// <summary>Points the run save at the tutorial run (resuming it if it is already underway) and goes down.</summary>
+        private bool TryEnterTutorialRun()
+        {
+            var run = _tutorial != null ? _tutorial.FirstRun : null;
+            if (run == null || run.Levels.Count == 0)
+            {
+                return false;
+            }
+
+            var runKey = RunKeyOf(run);
+            if (_runSaveData.RunKey != runKey)
+            {
+                _runSaveData = new RunSaveData { RunKey = runKey, CurrentLevelIndex = 0 };
+                _fileHandler.Save(_runSaveData);
+            }
+            OnEnterDungeon();
+            return true;
+        }
+
+        /// <summary>
+        /// Re-reads the step and repaints everything it locks or points at. Run on every state change:
+        /// arriving in town, opening a lot, a build, a grid selection, a node bought.
+        /// </summary>
+        private void RefreshTutorial()
+        {
+            _tutorialStep = TutorialOps.CurrentStep(ReadTutorialProgress());
+            var step = _tutorialStep;
+            var guideKey = GuideKey();
+
+            if (_town != null && _hub != null)
+            {
+                foreach (var building in _hub.Buildings)
+                {
+                    if (building == null)
+                    {
+                        continue;
+                    }
+                    _town.SetLotEnabled(building.SaveKey, TutorialOps.AllowsLot(step, building.SaveKey, guideKey));
+                    _town.SetLotGuided(building.SaveKey, TutorialOps.GuidesLot(step, building.SaveKey, guideKey));
+                }
+            }
+
+            SetEnabled(_roadButton, TutorialOps.AllowsRoad(step));
+            SetClass(_roadButton, HubView.TutorialTargetClass, TutorialOps.GuidesRoad(step));
+            SetEnabled(_menuButton, !TutorialOps.LocksTown(step));
+
+            bool onGuideLot = _selectedLot != null && _selectedLot.SaveKey == guideKey;
+            SetEnabled(_lotCloseButton, !onGuideLot || TutorialOps.AllowsLeaving(step));
+            SetClass(_lotActionButton, HubView.TutorialTargetClass, onGuideLot && step == TutorialStep.BuildHall);
+            SetClass(_lotEnterButton, HubView.TutorialTargetClass, onGuideLot && step == TutorialStep.SpendXp);
+
+            // Once the node is bought the only way on is back to town, so the grid's Back is what gets
+            // pointed at. Keyed on the step alone: the class only shows while the grid does.
+            SetClass(_root.Q<Button>("grid-close"), HubView.TutorialTargetClass, step == TutorialStep.TakeTheRoad);
+
+            RefreshTutorialBanner();
+        }
+
+        /// <summary>The one line the tutorial is saying on the screen that is up, if any. Cheap: runs per frame.</summary>
+        private void RefreshTutorialBanner()
+        {
+            if (_tutorialBanner == null || _tutorialText == null)
+            {
+                return;
+            }
+
+            var cue = TutorialOps.CueFor(_tutorialStep, CurrentTutorialScreen(),
+                _sphereGrid != null && _sphereGrid.IsGuidedNodeSelected);
+            string text = _tutorial != null ? _tutorial.TextFor(cue) : string.Empty;
+            if (_tutorialText.text != text)
+            {
+                _tutorialText.text = text;
+            }
+            bool shown = !string.IsNullOrEmpty(text);
+            if (IsShown(_tutorialBanner) != shown)
+            {
+                SetShown(_tutorialBanner, shown);
+            }
+        }
+
+        private TutorialScreen CurrentTutorialScreen()
+        {
+            if (IsShown(_gridView))
+            {
+                return TutorialScreen.Grid;
+            }
+            if (IsShown(_lotView))
+            {
+                return _selectedLot != null && _selectedLot.SaveKey == GuideKey()
+                    ? TutorialScreen.GuideLot
+                    : TutorialScreen.Other;
+            }
+            return IsShown(_hubView) ? TutorialScreen.Town : TutorialScreen.Other;
+        }
+
+        /// <summary>A node was bought on the grid. If that closed the guided step, the screen is handed back.</summary>
+        private void OnGridNodeActivated(string nodeKey)
+        {
+            RefreshTutorial();
+            if (_tutorialStep != TutorialStep.SpendXp && _sphereGrid.IsGuiding)
+            {
+                _sphereGrid.ClearGuide();
+                RefreshTutorial();
+            }
+        }
+
+        private static void SetEnabled(VisualElement element, bool enabled)
+        {
+            if (element != null && element.enabledSelf != enabled)
+            {
+                element.SetEnabled(enabled);
+            }
         }
 
         // ============================================================
@@ -877,7 +1158,20 @@ namespace Assets.Scripts.Hub
         {
             SetShown(_hubView, false);
             SetShown(_lotView, false);
+
+            RefreshTutorial();
+            var hero = _tutorialStep == TutorialStep.SpendXp ? TutorialHero() : null;
+            if (hero != null)
+            {
+                var save = HeroRoster.GetHeroSave(hero);
+                _sphereGrid.SetGuide(hero, TutorialOps.GuidedNodeKey(hero.SphereGrid, save.ActivatedNodes, save.CurrentXp));
+            }
+            else
+            {
+                _sphereGrid.ClearGuide();
+            }
             _sphereGrid.Show();
+            RefreshTutorial();
         }
 
         private void OnVisitParty()

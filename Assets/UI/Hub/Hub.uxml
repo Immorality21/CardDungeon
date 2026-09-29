@@ -241,5 +241,12 @@
             <ui:Button name="campaign-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
+        <!-- THE TUTORIAL's one line (docs/TUTORIAL.md). Last in the document on purpose: UI
+             Toolkit has no z-index, so being the final sibling is what paints it over every view.
+             Never picks - the screens under it stay exactly as clickable as the tutorial says. -->
+        <ui:VisualElement name="tutorial-banner" class="cd-tutorial-banner cd-hidden" picking-mode="Ignore">
+            <ui:Label name="tutorial-text" text="" class="cd-tutorial-banner__text" picking-mode="Ignore" />
+        </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>

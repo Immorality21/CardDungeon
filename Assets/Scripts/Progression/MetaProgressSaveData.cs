@@ -82,6 +82,13 @@ namespace Assets.Scripts.Progression
         // Gates the main menu: a non-repeatable run - the tutorial - cannot be started again.
         public List<string> CompletedRunKeys = new List<string>();
 
+        // The guided first hour (docs/TUTORIAL.md). Only its two ends are stored - which step the
+        // save is on is read off the save itself (TutorialOps.CurrentStep), so it can never drift.
+        // A save written before the tutorial existed has neither, and is never dragged into it:
+        // only a New Game sets TutorialStarted.
+        public bool TutorialStarted;
+        public bool TutorialFinished;
+
         public string GetFileName()
         {
             return "Meta";

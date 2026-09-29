@@ -38,7 +38,27 @@ namespace Assets.Scripts.Heroes.UI
         private string _selectedNodeKey;
         private bool _isShown;
 
+        // The tutorial's guide: while set, this is the only hero and the only node the screen will
+        // act on, and it cannot be backed out of. See SetGuide.
+        private HeroSO _guideHero;
+        private string _guideNodeKey;
+
+        /// <summary>The class the tutorial puts on whatever it is pointing at (CardDungeon.uss).</summary>
+        public const string TutorialTargetClass = "cd-tutorial-target";
+
         public event Action OnClosed;
+
+        /// <summary>Raised after a node is bought, with its key.</summary>
+        public event Action<string> NodeActivated;
+
+        /// <summary>Raised whenever the selected node or hero changes.</summary>
+        public event Action SelectionChanged;
+
+        /// <summary>Whether the tutorial is walking the player to one node.</summary>
+        public bool IsGuiding => _guideHero != null && !string.IsNullOrEmpty(_guideNodeKey);
+
+        /// <summary>Whether that node is the one selected — the cue for "now press Activate".</summary>
+        public bool IsGuidedNodeSelected => IsGuiding && _selectedNodeKey == _guideNodeKey;
 
         public SphereGridUI(VisualElement root, PartyRosterSO catalog)
         {
@@ -89,14 +109,24 @@ namespace Assets.Scripts.Heroes.UI
 
             _heroes.Clear();
             _heroes.AddRange(HeroRoster.GetOwnedHeroes(_catalog));
-            if (_selectedHero == null || !_heroes.Contains(_selectedHero))
+            if (IsGuiding && _heroes.Contains(_guideHero))
+            {
+                _selectedHero = _guideHero;
+            }
+            else if (_selectedHero == null || !_heroes.Contains(_selectedHero))
             {
                 _selectedHero = FirstHeroWithGrid();
             }
 
             BuildHeroTabs();
             RebuildGraph();
+            if (IsGuiding)
+            {
+                // Close in on the one node that matters rather than fitting the whole grid.
+                _view.FrameNode(_guideNodeKey);
+            }
             Refresh();
+            RefreshGuide();
 
             _root.focusable = true;
             if (_root.panel != null)
@@ -107,6 +137,11 @@ namespace Assets.Scripts.Heroes.UI
 
         public void Hide()
         {
+            // The guided step cannot be walked away from - Escape lands here too.
+            if (IsGuiding)
+            {
+                return;
+            }
             _isShown = false;
             _root.focusable = false;
             _root.style.display = DisplayStyle.None;
@@ -123,6 +158,58 @@ namespace Assets.Scripts.Heroes.UI
                 }
             }
             return _heroes.Count > 0 ? _heroes[0] : null;
+        }
+
+        // --- the tutorial's guide ------------------------------------------------
+
+        /// <summary>
+        /// Walks the player to one node: the screen opens on <paramref name="hero"/>, every other
+        /// hero tab and node is inert, Back is disabled, and the node and then the Activate button
+        /// carry the tutorial's outline. Set it before <see cref="Show"/>; <see cref="ClearGuide"/>
+        /// hands the screen back.
+        /// </summary>
+        public void SetGuide(HeroSO hero, string nodeKey)
+        {
+            ClearGuideMarks();
+            _guideHero = hero;
+            _guideNodeKey = nodeKey;
+            if (_isShown)
+            {
+                RefreshGuide();
+            }
+        }
+
+        public void ClearGuide()
+        {
+            ClearGuideMarks();
+            _guideHero = null;
+            _guideNodeKey = null;
+            if (_isShown)
+            {
+                BuildHeroTabs();
+                RefreshGuide();
+            }
+        }
+
+        private void ClearGuideMarks()
+        {
+            if (!string.IsNullOrEmpty(_guideNodeKey))
+            {
+                _view.SetNodeFlag(_guideNodeKey, TutorialTargetClass, false);
+            }
+            _activateButton?.EnableInClassList(TutorialTargetClass, false);
+        }
+
+        private void RefreshGuide()
+        {
+            _closeButton?.SetEnabled(!IsGuiding);
+            if (!IsGuiding)
+            {
+                return;
+            }
+            // Only while the node is still to be bought: once it is, the outline has done its job.
+            _view.SetNodeFlag(_guideNodeKey, TutorialTargetClass, !IsGuidedNodeSelected);
+            _activateButton?.EnableInClassList(TutorialTargetClass, IsGuidedNodeSelected);
         }
 
         // --- hero switching -----------------------------------------------------
@@ -153,6 +240,10 @@ namespace Assets.Scripts.Heroes.UI
                     tab.SetEnabled(false);
                     tab.tooltip = "No grid authored for this hero yet.";
                 }
+                else if (IsGuiding && hero != _guideHero)
+                {
+                    tab.SetEnabled(false);
+                }
 
                 var captured = hero;
                 tab.clicked += () => SelectHero(captured);
@@ -162,7 +253,7 @@ namespace Assets.Scripts.Heroes.UI
 
         private void SelectHero(HeroSO hero)
         {
-            if (hero == null || hero == _selectedHero)
+            if (hero == null || hero == _selectedHero || (IsGuiding && hero != _guideHero))
             {
                 return;
             }
@@ -173,6 +264,7 @@ namespace Assets.Scripts.Heroes.UI
             BuildHeroTabs();
             RebuildGraph();
             Refresh();
+            SelectionChanged?.Invoke();
         }
 
         private void CycleHero(int direction)
@@ -294,16 +386,22 @@ namespace Assets.Scripts.Heroes.UI
 
         private void OnNodeClicked(string key)
         {
+            if (IsGuiding && key != _guideNodeKey)
+            {
+                return;
+            }
             _selectedNodeKey = key;
             SetFeedback(string.Empty);
             Refresh();
+            RefreshGuide();
+            SelectionChanged?.Invoke();
         }
 
         private void OnActivate()
         {
             var node = SphereGridOps.FindNode(
                 _selectedHero != null ? _selectedHero.SphereGrid : null, _selectedNodeKey);
-            if (node == null)
+            if (node == null || (IsGuiding && node.Key != _guideNodeKey))
             {
                 return;
             }
@@ -320,6 +418,9 @@ namespace Assets.Scripts.Heroes.UI
                 }
 
                 SetFeedback($"{SphereGridPresenter.NodeName(node)} activated.");
+                Refresh();
+                NodeActivated?.Invoke(node.Key);
+                return;
             }
             else if (!HeroRoster.CanPayMaterials(node))
             {
@@ -394,7 +495,8 @@ namespace Assets.Scripts.Heroes.UI
                 return;
             }
 
-            var key = _view.NodeInDirection(_selectedNodeKey, direction);
+            // While guided there is one node worth moving to, so any arrow goes there.
+            var key = IsGuiding ? _guideNodeKey : _view.NodeInDirection(_selectedNodeKey, direction);
             if (string.IsNullOrEmpty(key))
             {
                 return;

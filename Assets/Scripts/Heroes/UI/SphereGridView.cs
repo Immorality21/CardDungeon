@@ -396,6 +396,31 @@ namespace Assets.Scripts.Heroes.UI
             Pan = pan;
         }
 
+        /// <summary>
+        /// Centres one node at <paramref name="zoom"/>. The tutorial uses it: a whole grid framed to
+        /// fit shrinks every node to a speck, which is no way to point at one of them. Waits for
+        /// layout the way <see cref="FrameAll"/> does.
+        /// </summary>
+        public void FrameNode(string key, float zoom = 1f)
+        {
+            if (string.IsNullOrEmpty(key) || !_nodes.TryGetValue(key, out var node))
+            {
+                return;
+            }
+
+            float width = resolvedStyle.width;
+            float height = resolvedStyle.height;
+            if (width <= 0f || height <= 0f || float.IsNaN(width) || float.IsNaN(height))
+            {
+                RegisterCallbackOnce<GeometryChangedEvent>(_ => FrameNode(key, zoom));
+                return;
+            }
+
+            _zoom = Mathf.Clamp(zoom, MinZoom, MaxZoom);
+            _pan = new Vector2(width * 0.5f, height * 0.5f) - node.Position * _zoom;
+            ApplyTransform();
+        }
+
         /// <summary>Fits every node inside the viewport (call after Show/SetGraph, once laid out).</summary>
         public void FrameAll()
         {

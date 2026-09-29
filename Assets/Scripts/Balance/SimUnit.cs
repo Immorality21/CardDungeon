@@ -112,8 +112,14 @@ namespace Assets.Scripts.Balance
     /// <c>GetEffectiveStat(MaxHealth)</c>. It did not always, which is why this note exists: the
     /// model was right and the game was short by exactly the gear bonus.
     /// </summary>
-    public class SimUnit : ICombatUnit
+    public class SimUnit : ICombatUnit, IStatusImmune
     {
+        /// <summary>Mirrors <c>Enemy.IsImmuneTo</c> off the same definition, so the model refuses what the game refuses.</summary>
+        public bool IsImmuneTo(BuffType type)
+        {
+            return Definition != null && StatusImmunity.ListContains(Definition.StatusImmunities, type);
+        }
+
         public string DisplayName { get; set; }
         public Sprite Icon => null;
         public Stats Stats { get; set; }

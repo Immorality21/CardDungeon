@@ -21,7 +21,9 @@ room for the **save-slot picker** it is meant to grow, because a picker cannot s
 screens that read the save it has not chosen yet. With one slot today, **Continue *is* that choice**:
 pressing it opens the save file and walks into town.
 
-**The button says "New Game" when there is no game yet** (2026-09-28). `HasSaveGame` checks whether
+**The button says "New Game" when there is no game yet** (2026-09-28), and pressing it then calls
+`HubManager.RequestNewGame()` so the hub starts the tutorial and drops the player straight into
+floor 1 (2026-09-29, `docs/TUTORIAL.md`) — this scene still starts nothing itself. `HasSaveGame` checks whether
 `Meta.json` or `Party.json` *exists* — a file-existence check, not a read, so the scene still loads
 nothing. `Audio.json` does not count: Options writes it before any game has been played. The title
 reads **Immoral Dungeon**, matching the itch page; the project, namespaces and `productName` are

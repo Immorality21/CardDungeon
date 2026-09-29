@@ -1331,12 +1331,49 @@ namespace Assets.Scripts.Dungeon
             var ui = GetRoomActionUI();
             if (ui != null)
             {
-                ui.ShowLevelCleared(summary, () => SceneManager.LoadScene("HubScene"));
+                ui.ShowLevelCleared(summary, () => SceneManager.LoadScene("HubScene"), NextLevelAction(summary));
             }
             else
             {
                 SceneManager.LoadScene("HubScene");
             }
+        }
+
+        /// <summary>
+        /// The summary's <b>Continue</b>: straight down to the run's next level, skipping the town.
+        /// Null — and the button hidden — on the run's last level, and while the tutorial is running,
+        /// whose remaining steps all happen in town (docs/TUTORIAL.md).
+        ///
+        /// <para>Everything the hub would have done is already on disk: the run save was advanced
+        /// above and carries the equipped magic and summons, so this hands the next level over exactly
+        /// as <c>HubManager.OnEnterDungeon</c> does. What the player gives up is the hub visit itself —
+        /// the grid, the shop, a change of party.</para>
+        /// </summary>
+        private System.Action NextLevelAction(LevelClearSummary summary)
+        {
+            if (summary.RunCompleted || ActiveRun == null)
+            {
+                return null;
+            }
+            if (MetaProgressManager.Instance.TutorialStarted && !MetaProgressManager.Instance.TutorialFinished)
+            {
+                return null;
+            }
+
+            int next = RunLevelIndex + 1;
+            if (next >= ActiveRun.Levels.Count || ActiveRun.Levels[next].LevelTemplate == null)
+            {
+                return null;
+            }
+
+            var run = ActiveRun;
+            return () =>
+            {
+                RunLevelIndex = next;
+                LevelToLoad = run.Levels[next].LevelTemplate;
+                SeedToLoad = null;
+                SceneManager.LoadScene("MainGameScene");
+            };
         }
 
         /// <summary>

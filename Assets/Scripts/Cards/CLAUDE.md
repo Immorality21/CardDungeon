@@ -113,6 +113,19 @@ Five rules worth not re-deriving:
 - **An absorbed element heals through the tick path too** (`ApplyDamageTick` → `ApplyHealTick`), the
   same rule a cast follows above 100% resistance.
 
+**Status immunities** *(2026-09-29)*. `EnemySO.StatusImmunities` lists status effects that never take
+hold — the Stone Sentinel does not bleed. The check is **one line in `CombatBuffTracker`**
+(`ApplyStatusEffect` / `ApplyOverTime` return early through `StatusImmunity.IsImmune`), so casts,
+summons, items and `EncounterSimulator` all honour it; `Enemy` and `SimUnit` both implement
+`IStatusImmune` off the same definition. The Buff/Debuff executors check it too, only to float
+**"Immune"** instead of a status label — otherwise an immune target reads as a cast that did nothing.
+The damage part of a cast still lands. Only status types can be named (`StatusImmunity.IsStatus`);
+stat changes are answered by stats, and `StatusImmunityTests` fails on an asset that lists one.
+**Shown once one has been defeated**: the Inspect page and the hub Bestiary list them under
+"Immune to" (`BestiaryPresenter.ImmunityLines`). Before the first kill *every* enemy shows one
+`???` row, immune or not, so the row itself leaks nothing; after it, an enemy with no immunities
+has no section. The Stone Sentinel is immune to Bleed and Poison.
+
 **Silence gates casting and nothing else.** A silenced hero's Magic command is disabled
 (`RoomActionUI.BuildCommandMenu`), a silenced enemy's `CastMagic` actions become ineligible
 (`EnemyActionPlanner.HasSomewhereToLand`, so an all-cast enemy falls through to its default rather than

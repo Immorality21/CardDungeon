@@ -70,6 +70,11 @@ namespace Assets.Scripts.Enemies
 
         public List<Resistance> Resistances = new List<Resistance>();
 
+        [Tooltip("Status effects that simply do not take hold - a golem does not bleed. Casts still " +
+                 "land their damage; only the listed status is refused, and the target shows " +
+                 "\"Immune\". Stat changes are never blocked here: answer those with stats.")]
+        public List<Cards.BuffType> StatusImmunities = new List<Cards.BuffType>();
+
         [Tooltip("What this kill can yield. Every entry rolls on its own, so a monster can drop both " +
                  "a signature piece of gear and the raw stuff it is made of. An entry with Chance 0 " +
                  "uses the rarity + run-depth math (how gear has always dropped); an entry with an " +

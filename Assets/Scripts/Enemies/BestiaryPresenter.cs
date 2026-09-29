@@ -282,6 +282,65 @@ namespace Assets.Scripts.Enemies
             return lines;
         }
 
+        /// <summary>
+        /// Status effects this enemy shrugs off (<see cref="EnemySO.StatusImmunities"/>), learned by
+        /// <b>defeating one</b> — seeing it and fighting it is not enough.
+        ///
+        /// <para>Before the first kill <i>every</i> enemy gets one <see cref="Unknown"/> row, immune
+        /// or not, so the row's presence tells the player nothing. After it the real list is shown,
+        /// and an enemy with no immunities gets no section at all: "nothing special here" is the
+        /// common case and a "None" line on every page would be noise.</para>
+        /// </summary>
+        public static List<BestiaryLine> ImmunityLines(EnemySO definition, BestiaryEntry known)
+        {
+            var lines = new List<BestiaryLine>();
+            if (definition == null)
+            {
+                return lines;
+            }
+            if (known == null || known.Kills <= 0)
+            {
+                lines.Add(new BestiaryLine(Unknown, "", BestiaryTone.Unknown));
+                return lines;
+            }
+
+            if (definition.StatusImmunities == null)
+            {
+                return lines;
+            }
+            var listed = new List<Cards.BuffType>();
+            foreach (var type in definition.StatusImmunities)
+            {
+                if (!Cards.StatusImmunity.IsStatus(type) || listed.Contains(type))
+                {
+                    continue;
+                }
+                listed.Add(type);
+                lines.Add(new BestiaryLine(StatusLabel(type), "immune", BestiaryTone.Bad));
+            }
+            return lines;
+        }
+
+        /// <summary>A status effect's name as the player meets it on the HP bar and in combat text.</summary>
+        public static string StatusLabel(Cards.BuffType type)
+        {
+            switch (type)
+            {
+                case Cards.BuffType.Bleeding:
+                    return "Bleed";
+                case Cards.BuffType.Poisoned:
+                    return "Poison";
+                case Cards.BuffType.Burning:
+                    return "Burn";
+                case Cards.BuffType.Regenerating:
+                    return "Regen";
+                case Cards.BuffType.Silenced:
+                    return "Silence";
+                default:
+                    return type.ToString();
+            }
+        }
+
         /// <summary>Kill tally. Zero is a real answer once met - fled from, or survived.</summary>
         public static BestiaryLine KillsLine(BestiaryEntry known)
         {
