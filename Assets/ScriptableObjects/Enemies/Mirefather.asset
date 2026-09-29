@@ -15,9 +15,13 @@ MonoBehaviour:
   Key: Mirefather
   DisplayName: Mirefather
   Sprite: {fileID: 21300000, guid: c673c9ac64ec400c85f9775bd2da86dd, type: 3}
-  AnimationFrames: []
-  AnimationFps: 8
+  AnimationFrames:
+  - {fileID: -2649459748262607568, guid: 7dd51864b7514e18a939c0af18017467, type: 3}
+  - {fileID: 679947255025222970, guid: 7dd51864b7514e18a939c0af18017467, type: 3}
+  - {fileID: -3757466968381125525, guid: 7dd51864b7514e18a939c0af18017467, type: 3}
+  AnimationFps: 4
   IsBoss: 1
+  CombatScale: 1.8
   BaseStats:
     Values:
     - Type: 1

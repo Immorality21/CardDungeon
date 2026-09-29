@@ -15,8 +15,11 @@ MonoBehaviour:
   Key: HexWeaver
   DisplayName: Hex Weaver
   Sprite: {fileID: 21300000, guid: f2b95770cf1142329b2cdbc9b529b13f, type: 3}
-  AnimationFrames: []
-  AnimationFps: 8
+  AnimationFrames:
+  - {fileID: 1988092049575683357, guid: feab1de815f64d27bb97a07c45f64085, type: 3}
+  - {fileID: 1806350758855815168, guid: feab1de815f64d27bb97a07c45f64085, type: 3}
+  - {fileID: 3035634797430316690, guid: feab1de815f64d27bb97a07c45f64085, type: 3}
+  AnimationFps: 4
   IsBoss: 0
   BaseStats:
     Values:

@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 3e1d1e6f294b9b84db352a1806ddc276
+guid: d0c88a722fa0401f8fe36f5ba76fd956
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3944610533857416082
-    second: warrior_0
+      213: 1631190830270368308
+    second: stone-sentinel-idle_0
   - first:
-      213: -8250692648091073042
-    second: warrior_1
+      213: -1906541606131161870
+    second: stone-sentinel-idle_1
   - first:
-      213: 6082431078867552424
-    second: warrior_2
+      213: 243748549531115787
+    second: stone-sentinel-idle_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -89,37 +89,11 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Standalone
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: warrior_0
+      name: stone-sentinel-idle_0
       rect:
         serializedVersion: 2
         x: 0
@@ -129,19 +103,19 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 293d5df81621eb630800000000000000
-      internalID: 3944610533857416082
+      spriteID: df2ed04682604ad6b8b1e3644d0efabc
+      internalID: 1631190830270368308
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: warrior_1
+      name: stone-sentinel-idle_1
       rect:
         serializedVersion: 2
         x: 32
@@ -151,19 +125,19 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ee5ca9720c6af7d80800000000000000
-      internalID: -8250692648091073042
+      spriteID: 3df8d248cee140acb01d48536a088b63
+      internalID: -1906541606131161870
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: warrior_2
+      name: stone-sentinel-idle_2
       rect:
         serializedVersion: 2
         x: 64
@@ -173,36 +147,36 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a842b217d2296450800000000000000
-      internalID: 6082431078867552424
+      spriteID: abfdafb67e47414cac47a83dffa1a096
+      internalID: 243748549531115787
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     outline: []
-    customData: 
+    customData:
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID:
     internalID: 0
     vertices: []
-    indices: 
+    indices:
     edges: []
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      warrior_0: 3944610533857416082
-      warrior_1: -8250692648091073042
-      warrior_2: 6082431078867552424
-  mipmapLimitGroupName: 
+      stone-sentinel-idle_0: 1631190830270368308
+      stone-sentinel-idle_1: -1906541606131161870
+      stone-sentinel-idle_2: 243748549531115787
+  mipmapLimitGroupName:
   pSDRemoveMatte: 0
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
+  userData:
+  assetBundleName:
+  assetBundleVariant:

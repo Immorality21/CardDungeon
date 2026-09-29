@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 3e1d1e6f294b9b84db352a1806ddc276
+guid: feab1de815f64d27bb97a07c45f64085
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3944610533857416082
-    second: warrior_0
+      213: 1988092049575683357
+    second: hex-weaver-idle_0
   - first:
-      213: -8250692648091073042
-    second: warrior_1
+      213: 1806350758855815168
+    second: hex-weaver-idle_1
   - first:
-      213: 6082431078867552424
-    second: warrior_2
+      213: 3035634797430316690
+    second: hex-weaver-idle_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -89,37 +89,11 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Standalone
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: warrior_0
+      name: hex-weaver-idle_0
       rect:
         serializedVersion: 2
         x: 0
@@ -129,19 +103,19 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 293d5df81621eb630800000000000000
-      internalID: 3944610533857416082
+      spriteID: 86ffc73dc1b5485eaa861116f7fab991
+      internalID: 1988092049575683357
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: warrior_1
+      name: hex-weaver-idle_1
       rect:
         serializedVersion: 2
         x: 32
@@ -151,19 +125,19 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ee5ca9720c6af7d80800000000000000
-      internalID: -8250692648091073042
+      spriteID: bc61000805b64230b8ba79eea37d5e5d
+      internalID: 1806350758855815168
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: warrior_2
+      name: hex-weaver-idle_2
       rect:
         serializedVersion: 2
         x: 64
@@ -173,36 +147,36 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a842b217d2296450800000000000000
-      internalID: 6082431078867552424
+      spriteID: 33bee5deef2440b489beaa2895effba8
+      internalID: 3035634797430316690
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     outline: []
-    customData: 
+    customData:
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID:
     internalID: 0
     vertices: []
-    indices: 
+    indices:
     edges: []
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      warrior_0: 3944610533857416082
-      warrior_1: -8250692648091073042
-      warrior_2: 6082431078867552424
-  mipmapLimitGroupName: 
+      hex-weaver-idle_0: 1988092049575683357
+      hex-weaver-idle_1: 1806350758855815168
+      hex-weaver-idle_2: 3035634797430316690
+  mipmapLimitGroupName:
   pSDRemoveMatte: 0
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
+  userData:
+  assetBundleName:
+  assetBundleVariant:

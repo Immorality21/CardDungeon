@@ -353,20 +353,26 @@ Abyssal Warden, Cinder Tyrant, Dark Jailor, Drakeling (was Dragon), Cinder Imp, 
 Hound; plus the summons (Bloodfang Boar, Cairn Golem) and the room markers (campfire, open chest).
 Still to do:
 
-- **Five enemies have no idle frames and stand completely still** (`AnimationFrames` empty) —
-  Gilded Hoarder *(boss)*, Mirefather *(boss)*, Gilded Mote, Hex Weaver, Stone Sentinel. Checked
-  2026-09-28: every hero, both summons and every other enemy has a strip.
-- **Mirefather and Gilded Hoarder are bosses at 64 px @ 64 PPU with `CombatScale` 1**, so they
-  render at 1 unit — smaller than the Warden and Tyrant (≈3). Re-import at 38 PPU + `CombatScale`
-  1.8, or redraw.
-- **Warrior, Cleric, Ranger, Cultist and Tinkerer keep the original flat style** (~10 colours
-  against PixelLab's ~40), so the party is visibly two styles until they are redone. The owner is
-  doing these one by one.
+- ~~**Five enemies have no idle frames and stand completely still**~~ *Done 2026-09-29*: Gilded
+  Hoarder, Mirefather, Gilded Mote, Hex Weaver and Stone Sentinel were **redrawn** in the PixelLab
+  style (they were the old flat hand-drawn art, so animating them as they were would have kept them
+  off-style) and each has a 3-frame idle at 4 fps. Every enemy in the game now animates.
+- ~~**Mirefather and Gilded Hoarder render at 1 unit**~~ *Done 2026-09-29*: both are 64 px at
+  **38 PPU + `CombatScale` 1.8**, measured at 3.03 units in combat — the Warden's size, twice a hero.
+- **Cleric, Ranger and Tinkerer keep the original flat style** (~10 colours against
+  PixelLab's ~40), so the party is visibly two styles until they are redone — one by one, the owner
+  choosing from candidates. **The Warrior and the Cultist were redone 2026-09-29** (Warrior: candidate #8
+  of 12; Cultist: #1 of 6, a hooded blood mage with a dagger and a flame of his own blood - its idle
+  is the hand-built rest / 1 px breath / flame-flicker loop, because every generated frame after the
+  first turned the face). Heroes have **big heads** — the recipe is in `docs/PIXEL_ART.md`
+  §3. Ranked worst first on 2026-09-29: Cultist (done), Cleric, Ranger, Tinkerer — and the four share one
+  silhouette recoloured, so they read as palette swaps before the style gap even registers.
 - ~~**Item icons are placeholders in bulk**~~ *Done 2026-09-28*: all 30 items have their own PixelLab
   icon (the ten materials had shared one log, the potions a spell icon). Recipe in
   `docs/PIXEL_ART.md` §3; `ItemPresenterTests` guards against a shared icon creeping back.
-- **The Dark Jailor is 64 px although it is not a boss** — made before the size rule; a 32 px
-  redraw would match the convention.
+- ~~**The Dark Jailor is 64 px although it is not a boss**~~ *Done 2026-09-29*: redrawn at 32 px /
+  32 PPU with a new idle (same file GUIDs and slice IDs). Its palette moved from violet to black
+  plate with molten orange cracks, which suits its Fire attack — say if you want the violet back.
 - PixelLab can also animate attacks and hits (`animate_image` with an action), which would answer
   §1's "no hit reaction, no death animation" without an Animator.
 

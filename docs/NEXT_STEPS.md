@@ -235,7 +235,7 @@ backlog.**
 | **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses to come** — the 4-piece Shadowweave set is authored, no set logic yet (§18a-sets) |
 | **19** | Shipping surface | not started |
 | — | **Menu improvements** — a whole-game UI review, one section per screen, ranked "do these first" | open (2026-09-28): [`MENU_IMPROVEMENTS.md`](MENU_IMPROVEMENTS.md), a to-do file like the playtest one |
-| **21** | **Art pass** — every outdated sprite (five still enemies, two small bosses, the flat-style heroes) | open; menu backdrops, per-biome combat backgrounds, floor rock and all 30 item icons **done 2026-09-28**; the `productName` / save-folder rename is parked here too |
+| **21** | **Art pass** — every outdated sprite | **enemies done 2026-09-29** (the five still enemies redrawn + animated, both bosses at Warden size, a 32 px Dark Jailor); menu backdrops, combat backgrounds, floor rock and item icons done 2026-09-28. **Warrior and Cultist redone 2026-09-29. Left: three flat-style heroes (Cleric, Ranger, Tinkerer — worst first)**, optional attack/hit animations, and the parked `productName` / save-folder rename |
 
 ---
 

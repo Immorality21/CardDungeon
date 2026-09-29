@@ -15,8 +15,11 @@ MonoBehaviour:
   Key: GildedMote
   DisplayName: Gilded Mote
   Sprite: {fileID: 21300000, guid: c4dfeaef741b43deace3f63c94ce296b, type: 3}
-  AnimationFrames: []
-  AnimationFps: 8
+  AnimationFrames:
+  - {fileID: 523498931943948735, guid: c295439c960a4015a9ca929c9d75d5f2, type: 3}
+  - {fileID: 2551795952124036636, guid: c295439c960a4015a9ca929c9d75d5f2, type: 3}
+  - {fileID: 3614987737062014534, guid: c295439c960a4015a9ca929c9d75d5f2, type: 3}
+  AnimationFps: 4
   IsBoss: 0
   BaseStats:
     Values:

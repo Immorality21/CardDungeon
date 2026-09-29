@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 3e1d1e6f294b9b84db352a1806ddc276
+guid: c295439c960a4015a9ca929c9d75d5f2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3944610533857416082
-    second: warrior_0
+      213: 523498931943948735
+    second: gilded-mote-idle_0
   - first:
-      213: -8250692648091073042
-    second: warrior_1
+      213: 2551795952124036636
+    second: gilded-mote-idle_1
   - first:
-      213: 6082431078867552424
-    second: warrior_2
+      213: 3614987737062014534
+    second: gilded-mote-idle_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -89,37 +89,11 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Standalone
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: warrior_0
+      name: gilded-mote-idle_0
       rect:
         serializedVersion: 2
         x: 0
@@ -129,19 +103,19 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 293d5df81621eb630800000000000000
-      internalID: 3944610533857416082
+      spriteID: 369371606f044013ad876bf9d8d50254
+      internalID: 523498931943948735
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: warrior_1
+      name: gilded-mote-idle_1
       rect:
         serializedVersion: 2
         x: 32
@@ -151,19 +125,19 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ee5ca9720c6af7d80800000000000000
-      internalID: -8250692648091073042
+      spriteID: 30481fb1738e4f69816b57caefc0611f
+      internalID: 2551795952124036636
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: warrior_2
+      name: gilded-mote-idle_2
       rect:
         serializedVersion: 2
         x: 64
@@ -173,36 +147,36 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a842b217d2296450800000000000000
-      internalID: 6082431078867552424
+      spriteID: 54632024b35b4b5bbc480746ba8da469
+      internalID: 3614987737062014534
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     outline: []
-    customData: 
+    customData:
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID:
     internalID: 0
     vertices: []
-    indices: 
+    indices:
     edges: []
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      warrior_0: 3944610533857416082
-      warrior_1: -8250692648091073042
-      warrior_2: 6082431078867552424
-  mipmapLimitGroupName: 
+      gilded-mote-idle_0: 523498931943948735
+      gilded-mote-idle_1: 2551795952124036636
+      gilded-mote-idle_2: 3614987737062014534
+  mipmapLimitGroupName:
   pSDRemoveMatte: 0
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
+  userData:
+  assetBundleName:
+  assetBundleVariant:

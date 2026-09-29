@@ -91,9 +91,20 @@ Jobs are async: queue them in parallel, then `wait_for_jobs` (free) instead of p
 
 - **Enemies (pixflux, 64×64):** subject + materials + silhouette props + "full body front view,
   boss monster for a dark fantasy dungeon RPG". Two seeds per enemy gave a real choice.
-- **Heroes (pixen, 32×32):** *"cute chibi …, big head, …, thick dark outline, simple readable
-  shapes, full body, facing right, retro JRPG party sprite"*. Without "chibi / big head" pixflux
-  produced realistic, thin, outline-less knights that clashed with the party.
+- **Heroes (pixen, 32×32): heroes have BIG heads** (owner's rule, 2026-09-29). The reference is
+  the **Rogue**: its hood/head fills rows 0–19 of 32 — about **60% of the sprite's height**, ~26 px
+  wide — over a small body, and that head is where the detail (the face) lives. "Cute chibi, big
+  head" is not enough on its own: the first Warrior round (2026-09-29) came back with heads a third
+  of the height. The prompt that hit it:
+  *"super deformed chibi <hero>, oversized head taking up two thirds of the sprite, tiny body,
+  detailed face with big eyes, <outfit and props>, muted desaturated dark colours, thick dark
+  outline, full body, facing right, retro JRPG party sprite"*, `detail: "highly detailed"`,
+  `single color black outline`, `direction: "east"`. Keep the muted-colour words — the Rogue sits at
+  ~0.2 average saturation and a bright hero stands out next to it. A forced palette
+  (`color_image_base64` of the Rogue, pixflux) made worse sprites at 32 px, not closer ones. Without
+  "chibi" at all, pixflux produces realistic, thin, outline-less knights.
+  Measure before choosing: count the head's rows, and compare colour count / saturation with the
+  Rogue (53 colours, 0.19 lightness, 0.21 saturation).
 - **Item icons (pixen, 32×32, all 30 redone 2026-09-28):** *"<name>, <what it looks like>, dark
   fantasy RPG inventory item icon, single object centered, clean readable silhouette"* (weapons
   add "diagonal", shields/armour "front view", materials say "crafting material inventory icon"),
@@ -219,6 +230,32 @@ skill falls back to **hand-authoring the sprite as a Python pixel grid**. It wor
 is noticeably weaker — fine for icons and placeholders, not for heroes, enemies or anything
 animated. Say so to the user before using it, and prefer waiting for the daily slow generations
 for character art. `pixelart_workbench` stays free and is the better tool for touch-ups either way.
+
+## 8b. The 2026-09-29 enemy pass — what it learned
+
+Six enemies redone in one sitting (Gilded Hoarder, Mirefather, Gilded Mote, Hex Weaver, Stone
+Sentinel, Dark Jailor): **2 candidates each + 1 `animate_image` each = 18 generations.**
+
+- **Redraw, don't animate, the old flat art.** The five "still" enemies were original hand-drawn
+  sprites (~10 colours). Animating them would have kept two styles on one stage; a PixelLab redraw
+  of the same subject costs one generation more and matches the Warden and Bog Shaman.
+- **Candidates side by side, old art in the first column.** One contact sheet (`old | A | B`, 4x, on
+  the combat purple) made every pick in one look — including that both Jailor candidates had drifted
+  from violet to molten orange.
+- **A frame picker in code, identity checks by eye.** Choose three frames with `f0` fixed and the
+  smallest worst cyclic difference, but only among frames that keep the subject's identity: the
+  Hoarder's gem went dark on frames 3-4, the Sentinel's head shifted on 3, the Mote smeared into a
+  double coin on 3, the Jailor's outline thickened on 1. Losing the lightning on some of the Hex
+  Weaver's frames was kept — it reads as flicker.
+- **Facing still bites on asymmetric subjects.** A "front view" chest came back with its mouth to the
+  left, so after the combat flip it faced away from the party. Mirroring every frame of the static
+  PNG and the strip in place fixed it (GUIDs and slices untouched). Check a combat screenshot, not
+  the PNG, for anything with a mouth, a weapon or a face.
+- **The import is scriptable end to end.** Static PNG overwritten in place (GUID kept, PPU set), the
+  strip's meta generated from `bog-shaman-idle.png.meta` with a fresh GUID, fresh slice
+  `internalID`s and rects, then `AnimationFrames` / `AnimationFps: 4` / `CombatScale: 1.8` written
+  into the `EnemySO` YAML. Reusing an existing strip's GUID and slice IDs (the Jailor) means its
+  `EnemySO` needs no edit at all, even when the frame size changes.
 
 ## 9. Unused designs
 
