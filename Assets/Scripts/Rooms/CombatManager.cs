@@ -490,6 +490,21 @@ namespace Assets.Scripts.Rooms
                 // Point the on-field turn marker at whoever is acting.
                 TurnIndicator.Instance.SetTarget(unit);
 
+                // Harm at the start of the turn (TickTiming): bleed, poison and burn fire before the
+                // unit acts - and before a freeze is checked, so freezing something does not shelter
+                // it. A tick that kills ends the turn right here: the whole point of the split is
+                // that a lethal damage-over-time denies the action.
+                _lastTurnLog = string.Empty;
+                yield return ResolveOverTimeTicks(unit, room, TickTiming.StartOfTurn);
+                if (!unit.IsAlive)
+                {
+                    _lastTurnLog = _lastTurnLog.Trim();
+                    fullLog += _lastTurnLog + "\n";
+                    OnTurnExecuted?.Invoke(_lastTurnLog);
+                    BroadcastTurnOrder();
+                    continue;
+                }
+
                 string skipMessage = GetTurnSkipMessage(unit);
                 if (skipMessage != null)
                 {
@@ -1448,18 +1463,32 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// End-of-turn upkeep for the unit that just acted: over-time effects fire, then every
-        /// duration ticks down.
+        /// End-of-turn upkeep for the unit that just acted: end-of-turn over-time effects
+        /// (regeneration) fire, then every duration ticks down. Damage-over-time fired at the start
+        /// of the turn already (see the turn loop and <see cref="TickTiming"/>).
         ///
-        /// <para><b>The order is the point.</b> A burn with one turn left has to deal its last tick
-        /// before it expires, so <c>ResolveOverTime</c> runs before <c>TickBuffs</c>. And it runs on
-        /// the <i>victim's</i> turn rather than on a global clock, because the turn is the unit of
+        /// <para><b>The order is the point.</b> A buff with one turn left has to deal its last tick
+        /// before it expires, so every tick runs before <c>TickBuffs</c>. And ticks run on the
+        /// <i>victim's</i> turn rather than on a global clock, because the turn is the unit of
         /// time in a CTB system — which is what makes Haste and Slow change how often something
         /// burns, for free.</para>
         /// </summary>
         private IEnumerator EndOfTurnUpkeep(ICombatUnit unit, Room room)
         {
-            var ticks = BuffTracker.ResolveOverTime(unit);
+            yield return ResolveOverTimeTicks(unit, room, TickTiming.EndOfTurn);
+
+            BuffTracker.TickBuffs(unit);
+            _tagTracker.TickTags(unit);
+        }
+
+        /// <summary>
+        /// Fires <paramref name="unit"/>'s over-time effects for one <see cref="TickTiming"/>, shows
+        /// them, and runs the death path if one of them killed it. Shared by the start and the end of
+        /// the turn so a tick kills the same way whenever it lands.
+        /// </summary>
+        private IEnumerator ResolveOverTimeTicks(ICombatUnit unit, Room room, TickTiming timing)
+        {
+            var ticks = BuffTracker.ResolveOverTime(unit, timing);
 
             if (ticks.Count > 0)
             {
@@ -1496,9 +1525,6 @@ namespace Assets.Scripts.Rooms
 
                 yield return new WaitForSeconds(OverTimeTickPause);
             }
-
-            BuffTracker.TickBuffs(unit);
-            _tagTracker.TickTags(unit);
         }
 
         /// <summary>Floating number for one over-time tick, tinted by what fired it.</summary>

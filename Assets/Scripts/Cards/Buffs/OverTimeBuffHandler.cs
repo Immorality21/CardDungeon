@@ -50,6 +50,13 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string TickLabel { get; private set; }
 
+        /// <summary>
+        /// Derived from <see cref="Heals"/> rather than registered per effect: the rule is "harm at
+        /// the start, help at the end", so a new damage-over-time lands on the right side of it
+        /// without anyone having to remember the rule exists.
+        /// </summary>
+        public TickTiming Timing => Heals ? TickTiming.EndOfTurn : TickTiming.StartOfTurn;
+
         public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker)
         {
             if (target == null || buffTracker == null)

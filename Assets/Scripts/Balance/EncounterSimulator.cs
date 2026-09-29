@@ -297,11 +297,22 @@ namespace Assets.Scripts.Balance
                 // As CombatManager does: a buff a unit lands on itself this turn skips this upkeep.
                 buffTracker.BeginTurn(unit);
 
+                // Harm at the start of the turn, before the unit acts or a freeze is checked -
+                // exactly as CombatManager's turn loop does. A lethal tick ends the turn here, so
+                // the model prices the action a damage-over-time denies.
+                buffTracker.ResolveOverTime(unit, TickTiming.StartOfTurn);
+                if (!unit.IsAlive)
+                {
+                    replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
+                    turnManager.RemoveUnit(unit);
+                    continue;
+                }
+
                 // Frozen and friends skip the turn but still tick, exactly as in the live loop.
                 if (SkipsTurn(unit, buffTracker))
                 {
                     CountDownSummonWait(unit, lastSummonTurn);
-                    buffTracker.ResolveOverTime(unit);
+                    buffTracker.ResolveOverTime(unit, TickTiming.EndOfTurn);
                     buffTracker.TickBuffs(unit);
                     tagTracker.TickTags(unit);
                     replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
@@ -332,10 +343,10 @@ namespace Assets.Scripts.Balance
                     TakeEnemyTurn(actor, HeroSide(heroes, replacement), enemies, buffTracker);
                 }
 
-                // Over-time effects fire before durations tick down, exactly as the live loop's
-                // CombatManager.EndOfTurnUpkeep does, and through the same resolver — a second
-                // implementation here is how the model would drift from the game.
-                buffTracker.ResolveOverTime(unit);
+                // End-of-turn over-time effects (regeneration) fire before durations tick down,
+                // exactly as the live loop's CombatManager.EndOfTurnUpkeep does, and through the
+                // same resolver — a second implementation here is how the model would drift.
+                buffTracker.ResolveOverTime(unit, TickTiming.EndOfTurn);
                 buffTracker.TickBuffs(unit);
                 tagTracker.TickTags(unit);
 

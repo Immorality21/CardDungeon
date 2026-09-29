@@ -73,7 +73,7 @@ already use. The per-turn amount rides in the existing `CombatBuff.Amount`, so `
 field — exactly how `IsResistance` reuses it for a percentage.
 
 **`CombatBuffTracker.ResolveOverTime` owns the arithmetic and applies the health change**, returning
-`OverTimeTick`s for presentation. Both `CombatManager.EndOfTurnUpkeep` and `EncounterSimulator` call
+`OverTimeTick`s for presentation. Both `CombatManager` (turn start and `EndOfTurnUpkeep`) and `EncounterSimulator` call
 it; a second implementation is how the balance model would drift from the game, which is the lesson
 the resistance bonus already taught.
 
@@ -86,10 +86,18 @@ the resistance bonus already taught.
 
 Five rules worth not re-deriving:
 
-- **Ticks fire on the victim's own turn, before durations tick down.** Per-victim-turn rather than a
-  global clock because the turn *is* the unit of time in a CTB system — so Haste and Slow change how
-  often something burns for free, and a unit that never acts never takes a tick. Resolve-then-decrement
-  is what lets a buff with one turn left deal its last tick before expiring.
+- **Ticks fire on the victim's own turn — harm at the start, help at the end** *(2026-09-29)*.
+  `IOverTimeBuffHandler.Timing` (`TickTiming`) is derived from the direction: Bleed, Poison and Burn
+  fire at the **start** of the victim's turn, before it acts and before a freeze is checked, so a
+  lethal tick **denies the action** (the turn ends there — `CombatManager`'s loop and
+  `EncounterSimulator` both `continue`). Regeneration fires at the **end**, so it restores what the
+  turn cost. Durations still count down at the end, after every tick, so "3 turns" is three ticks
+  and a buff with one turn left still gets its last one. The same split as Slay the Spire, Darkest
+  Dungeon and D&D 5e; FFX (which this used to follow) ticks everything at the end.
+  `ResolveOverTime(unit, timing)` is what the game calls; the one-argument overload resolves both,
+  start then end, and exists for arithmetic tests. `OverTimeTimingTests` pins it.
+  Per-victim-turn rather than a global clock because the turn *is* the unit of time in a CTB
+  system — Haste and Slow change how often something burns for free.
 - **Anything a unit lands on itself during its own turn skips that turn's upkeep** (2026-09-28).
   `CombatBuffTracker.BeginTurn(unit)` opens the turn, and every apply or refresh on that same unit
   marks the entry `SkipNextUpkeep`: no over-time tick and no duration tick at the end of the turn it

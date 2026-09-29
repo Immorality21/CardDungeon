@@ -20,14 +20,14 @@ The systems layer is deeper than the *verbs* sitting on it. §9 shipped; §10 is
   none of the five existing handlers changed. `OverTimeBuffHandler` is one parameterised class
   registered four times — the shape `ResistanceBuffHandler` and `StatBuffHandler` already use.
 - **`CombatBuffTracker.ResolveOverTime`** owns the arithmetic and **applies** the health change,
-  returning `OverTimeTick`s for presentation. The live loop (`CombatManager.EndOfTurnUpkeep`) and
+  returning `OverTimeTick`s for presentation. The live loop (turn start + `CombatManager.EndOfTurnUpkeep`) and
   `EncounterSimulator` both call it — a second implementation is how the model would drift.
 - **The three damage effects are mechanically different, not reskins.** Poison **ignores Endurance**
   (the answer to a target the defense curve has made immune to flat damage — the reason to cast
   something other than the biggest number in the kit); burn honours defense, is dealt as **Fire** so
   resistances and weaknesses apply, and is **doused by Ice**, mirroring Frozen/Fire; bleeding is
-  plain physical and nothing in the game resists it, so it is the reliable one.
-- **Ticks fire on the victim's own turn, before durations tick down.** Per-victim-turn rather than a
+  plain physical and the reliable one — though an enemy can now be flatly immune (`EnemySO.StatusImmunities`; the Stone Sentinel shrugs off bleed and poison).
+- **Ticks fire on the victim's own turn, before durations tick down** — damage at the start of the turn, regeneration at the end since 2026-09-29 (see the Cards guide, `TickTiming`). Per-victim-turn rather than a
   global clock because the turn *is* the unit of time in a CTB system — so Haste and Slow change how
   often something burns for free. Resolve-then-decrement means a buff with one turn left deals its
   last tick before expiring.

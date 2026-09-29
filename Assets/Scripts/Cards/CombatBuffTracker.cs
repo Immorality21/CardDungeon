@@ -177,9 +177,9 @@ namespace Assets.Scripts.Cards
         /// Fires every over-time effect on <paramref name="unit"/> and <b>applies the result to its
         /// health</b>, returning one entry per tick that actually moved the bar.
         ///
-        /// <para>Call it at the end of the unit's own turn, immediately before
-        /// <see cref="TickBuffs"/>: a buff with one turn left has to tick once more before it
-        /// expires. Per-victim-turn rather than on a global clock is deliberate — the turn <i>is</i>
+        /// <para>Ticks fire on the unit's own turn — damage at its start, healing at its end (see
+        /// <see cref="TickTiming"/>) — and always before <see cref="TickBuffs"/>, so a buff with one
+        /// turn left ticks once more before it expires. Per-victim-turn rather than on a global clock is deliberate — the turn <i>is</i>
         /// the unit of time in a CTB system, so Haste and Slow change how often a target burns for
         /// free, and a unit that never gets a turn never takes a tick.</para>
         ///
@@ -193,6 +193,21 @@ namespace Assets.Scripts.Cards
         /// re-deriving a tick, so the balance model cannot drift from the game.</para>
         /// </summary>
         public List<OverTimeTick> ResolveOverTime(ICombatUnit unit)
+        {
+            var ticks = ResolveOverTime(unit, TickTiming.StartOfTurn);
+            ticks.AddRange(ResolveOverTime(unit, TickTiming.EndOfTurn));
+            return ticks;
+        }
+
+        /// <summary>
+        /// Fires only the over-time effects that tick at <paramref name="timing"/> — the entry point
+        /// the live loop and <c>EncounterSimulator</c> use: <see cref="TickTiming.StartOfTurn"/> right
+        /// after the turn opens, before the unit acts or a skip is checked, and
+        /// <see cref="TickTiming.EndOfTurn"/> just before <see cref="TickBuffs"/>. The overload without
+        /// a timing resolves both, in that order, and exists for callers that only want the
+        /// arithmetic.
+        /// </summary>
+        public List<OverTimeTick> ResolveOverTime(ICombatUnit unit, TickTiming timing)
         {
             var ticks = new List<OverTimeTick>();
             if (unit == null || !unit.IsAlive || !_activeBuffs.TryGetValue(unit, out var buffs))
@@ -210,7 +225,7 @@ namespace Assets.Scripts.Cards
                 }
 
                 var overTime = BuffHandlerRegistry.Get(buff.BuffType) as IOverTimeBuffHandler;
-                if (overTime == null)
+                if (overTime == null || overTime.Timing != timing)
                 {
                     continue;
                 }

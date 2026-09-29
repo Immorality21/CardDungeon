@@ -3,6 +3,19 @@ using Assets.Scripts.Combat;
 namespace Assets.Scripts.Cards.Buffs
 {
     /// <summary>
+    /// When in the victim's own turn an over-time effect fires (2026-09-29; the rule is written up in the Cards guide).
+    /// <b>Harm at the start, help at the end</b> — the split Slay the Spire, Darkest Dungeon and
+    /// D&amp;D 5e all make. A lethal damage tick denies the action it would otherwise have got; a
+    /// regeneration restores what this turn cost, so the unit starts its next turn topped up.
+    /// Durations tick down at the end either way, so "3 turns" is still three ticks.
+    /// </summary>
+    public enum TickTiming
+    {
+        StartOfTurn = 0,
+        EndOfTurn = 1,
+    }
+
+    /// <summary>
     /// A status effect that <i>acts on its own</i> each turn rather than only changing a stat or
     /// gating a command — a damage-over-time, or a regeneration.
     ///
@@ -39,5 +52,8 @@ namespace Assets.Scripts.Cards.Buffs
 
         /// <summary>Short label for the floating tick number, e.g. "Burn".</summary>
         string TickLabel { get; }
+
+        /// <summary>When in the victim's turn this fires. See <see cref="TickTiming"/>.</summary>
+        TickTiming Timing { get; }
     }
 }
