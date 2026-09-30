@@ -1321,7 +1321,7 @@ namespace Assets.Scripts.Dungeon
                     MetaProgressManager.Instance.MarkRunCompleted(runSave.RunKey);
                     _fileHandler.Delete(runSave);
                     ActiveRun = null;
-                    Assets.Scripts.Hub.HubManager.MarkRunCompleted();
+                    Assets.Scripts.Hub.HubManager.MarkRunCompleted(runSave.RunKey);
                 }
             }
 

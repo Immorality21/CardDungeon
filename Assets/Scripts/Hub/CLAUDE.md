@@ -29,8 +29,9 @@ question 5 recommended keeping it that way, and that recommendation was delibera
 - **Scene names are string literals in exactly three places**: `HubManager.OnEnterDungeon`
   (`MainGameScene`), `HubManager.OnLeaveToMainMenu` (`MenuScene`), and the two dungeon exits
   (`HubScene`). There is no quit-to-menu or pause path from a dungeon.
-- **`HubManager.MarkRunCompleted()` is a static** written by `DungeonManager` on the way out of a
-  finished run — the victory screen is owed across a scene load, and statics are the only thing that
+- **`HubManager.MarkRunCompleted(runKey)` is a static** written by `DungeonManager` on the way out of a
+  finished run — the victory screen is owed across a scene load (and names the run, with a "Now open"
+  row per run the clear made startable, `CampaignOps.OpenedBy`), and statics are the only thing that
   crosses it besides `DungeonManager`'s own. It moved here with `complete-view`; leaving it on
   `MainMenuManager` would have meant the victory screen never showed.
 - **Nothing is `DontDestroyOnLoad` except `MusicPlayer`.** Every manager is re-created and

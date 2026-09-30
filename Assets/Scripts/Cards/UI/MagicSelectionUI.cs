@@ -420,6 +420,21 @@ namespace Assets.Scripts.Cards.UI
             PopulateItemRows(consumables);
         }
 
+        /// <summary>
+        /// What the item does, then its flavour. The flavour alone ("Thicker, darker, and worth the
+        /// turn it takes to drink") left a Healing Potion and a Greater one with the same icon and no
+        /// number between them. The formula, not a hero's number: the drinker is picked next.
+        /// </summary>
+        private static string DescribeItem(ItemSO item)
+        {
+            string effect = ItemPresenter.ConsumableEffectLine(item);
+            if (string.IsNullOrEmpty(item.Description))
+            {
+                return effect;
+            }
+            return string.IsNullOrEmpty(effect) ? item.Description : effect + "\n" + item.Description;
+        }
+
         private void PopulateItemRows(List<ItemSaveData> consumables)
         {
             _listScroll.Clear();
@@ -435,7 +450,7 @@ namespace Assets.Scripts.Cards.UI
 
                 var captured = so;
                 _listScroll.Add(CreateRow(icon, name, meta, valid, () => OnItemSelected(captured),
-                    valid ? so.Description : null));
+                    valid ? DescribeItem(so) : null));
             }
 
             ShowPanel(_listPanel);
@@ -553,10 +568,10 @@ namespace Assets.Scripts.Cards.UI
             BestiaryLineView.AddSection(_inspectRight, "Stats", LiveStatLines(enemy));
             BestiaryLineView.AddSection(_inspectRight, "Condition", ConditionLines(enemy));
             BestiaryLineView.AddSection(
-                _inspectRight, "Abilities", BestiaryPresenter.SpellLines(definition, known));
+                _inspectRight, "Abilities", BestiaryPresenter.CompactSpellLines(definition, known));
             var drops = new VisualElement();
             drops.AddToClassList("cd-scan__group");
-            BestiaryLineView.AddRows(drops, BestiaryPresenter.LootLines(definition, known));
+            drops.Add(BestiaryLineView.Row(BestiaryPresenter.LootSummary(definition, known)));
             _inspectRight.Add(drops);
 
             HidePanel(_listPanel);
@@ -1040,6 +1055,16 @@ namespace Assets.Scripts.Cards.UI
         private static bool IsShown(VisualElement element)
         {
             return element != null && element.style.display.value == DisplayStyle.Flex;
+        }
+
+        /// <summary>
+        /// Whether the Inspect page is up. <c>RoomActionUI</c> hides the unit nameplates under it:
+        /// they live in that document, which draws over this one, and the page is docked on the
+        /// heroes' side of the stage.
+        /// </summary>
+        public bool IsInspectOpen
+        {
+            get { return _inspectPanel != null && _inspectPanel.style.display == DisplayStyle.Flex; }
         }
 
         private static void ShowPanel(VisualElement panel)

@@ -123,15 +123,44 @@
             <ui:Label name="map-title" text="Map" class="cd-title" />
             <ui:VisualElement name="map-canvas" class="dm-host" />
             <ui:Label name="map-status" text="" class="cd-info-label" />
+            <!-- The key, glyphs at 20px (the 15px room-box size is for the boxes, not the key), and the
+                 two room looks as swatches: where the party stands, and a room not yet entered. They
+                 used to be explained only in the hint line. -->
             <ui:VisualElement class="dm-legend">
-                <ui:Label text="✖ enemies" class="dm-legend__item dm-glyph--enemies" />
-                <ui:Label text="✦ captive" class="dm-legend__item dm-glyph--captive" />
-                <ui:Label text="? event" class="dm-legend__item dm-glyph--event" />
-                <ui:Label text="◆ cache" class="dm-legend__item dm-glyph--cache" />
-                <ui:Label text="✚ refuge" class="dm-legend__item dm-glyph--refuge" />
-                <ui:Label text="▼ exit" class="dm-legend__item dm-glyph--exit" />
+                <ui:VisualElement class="dm-legend__item">
+                    <ui:VisualElement class="dm-legend__swatch dm-legend__swatch--here" />
+                    <ui:Label text="you are here" class="dm-legend__text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="dm-legend__item">
+                    <ui:VisualElement class="dm-legend__swatch dm-legend__swatch--unentered" />
+                    <ui:Label text="not entered" class="dm-legend__text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="dm-legend__item">
+                    <ui:Label text="✖" class="dm-legend__glyph dm-glyph--enemies" />
+                    <ui:Label text="enemies" class="dm-legend__text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="dm-legend__item">
+                    <ui:Label text="✦" class="dm-legend__glyph dm-glyph--captive" />
+                    <ui:Label text="captive" class="dm-legend__text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="dm-legend__item">
+                    <ui:Label text="?" class="dm-legend__glyph dm-glyph--event" />
+                    <ui:Label text="event" class="dm-legend__text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="dm-legend__item">
+                    <ui:Label text="◆" class="dm-legend__glyph dm-glyph--cache" />
+                    <ui:Label text="cache" class="dm-legend__text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="dm-legend__item">
+                    <ui:Label text="✚" class="dm-legend__glyph dm-glyph--refuge" />
+                    <ui:Label text="refuge" class="dm-legend__text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="dm-legend__item">
+                    <ui:Label text="▼" class="dm-legend__glyph dm-glyph--exit" />
+                    <ui:Label text="exit" class="dm-legend__text" />
+                </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="map-hint" text="Gold room is where you stand &#183; an empty outline is a room you have not entered" class="cd-info-label cd-hint" />
+            <ui:Label name="map-hint" text="Arrows pick a room &#183; Enter travel &#183; Esc back" class="cd-info-label cd-hint" />
             <ui:Button name="map-back" text="Back" class="cd-button cd-button--wide" />
         </ui:VisualElement>
 
@@ -150,25 +179,67 @@
             <ui:Button name="pause-resume" text="Resume" class="cd-button cd-button--wide" />
             <ui:Button name="pause-map" text="Map" class="cd-button cd-button--wide" />
             <ui:Label text="Audio" class="cd-section-head" />
+            <!-- Each dial: a fixed label column, the nudge buttons either side of a 10-segment bar (one
+                 segment per AudioOptions.Step, lit by AudioOptionsUI), the percentage after. Mute is a
+                 row like the dials, so it no longer outweighs them. 2026-09-30. -->
             <ui:VisualElement class="cd-option-row">
                 <ui:Label text="Master" class="cd-option-label" />
                 <ui:Button name="master-down" text="-" class="cd-button cd-button--step" />
-                <ui:Label name="master-value" text="" class="cd-option-value" />
+                <ui:VisualElement name="master-bar" class="cd-option-bar" picking-mode="Ignore">
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                </ui:VisualElement>
                 <ui:Button name="master-up" text="+" class="cd-button cd-button--step" />
+                <ui:Label name="master-value" text="" class="cd-option-value" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-option-row">
                 <ui:Label text="Music" class="cd-option-label" />
                 <ui:Button name="music-down" text="-" class="cd-button cd-button--step" />
-                <ui:Label name="music-value" text="" class="cd-option-value" />
+                <ui:VisualElement name="music-bar" class="cd-option-bar" picking-mode="Ignore">
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                </ui:VisualElement>
                 <ui:Button name="music-up" text="+" class="cd-button cd-button--step" />
+                <ui:Label name="music-value" text="" class="cd-option-value" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-option-row">
                 <ui:Label text="Sound Effects" class="cd-option-label" />
                 <ui:Button name="sfx-down" text="-" class="cd-button cd-button--step" />
-                <ui:Label name="sfx-value" text="" class="cd-option-value" />
+                <ui:VisualElement name="sfx-bar" class="cd-option-bar" picking-mode="Ignore">
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                    <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
+                </ui:VisualElement>
                 <ui:Button name="sfx-up" text="+" class="cd-button cd-button--step" />
+                <ui:Label name="sfx-value" text="" class="cd-option-value" />
             </ui:VisualElement>
-            <ui:Button name="options-mute" text="" class="cd-menu-button" />
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="Mute" class="cd-option-label" />
+                <ui:Button name="options-mute" text="" class="cd-button cd-option-toggle" />
+            </ui:VisualElement>
 
             <ui:Button name="pause-quit" text="Leave the Dungeon" class="cd-button cd-button--wide" />
             <ui:Label name="pause-note" text="" class="cd-info-label cd-hint" />

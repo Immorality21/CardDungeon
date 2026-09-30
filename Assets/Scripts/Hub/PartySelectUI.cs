@@ -31,7 +31,7 @@ namespace Assets.Scripts.Hub
     /// one thing a campfire level grants (<see cref="CampfireOps"/>). Operates on a VisualElement
     /// subtree owned by the menu's UIDocument - not a MonoBehaviour, same as the merchant.</para>
     ///
-    /// <para><b>Laid out on the inventory's frame since 2026-09-30</b> (docs/MENU_IMPROVEMENTS.md):
+    /// <para><b>Laid out on the inventory's frame since 2026-09-30</b> (menu review):
     /// four seats across the top, the roster, the chosen hero's detail and the XP split. Choosing a
     /// hero and acting on them are separate on purpose - a roster row selects, the detail column's
     /// buttons field, bench or crown - so a row is never a misclick that sends someone home.</para>

@@ -16,7 +16,7 @@ namespace Assets.Scripts.Rooms.UI
     /// no name, no number, and at 1 HP a sliver the eye could not find (playtest finding 9). Since
     /// 2026-09-30 the bar lives here too, between the name and the number: the floating bar above
     /// the head sat nearer the enemy above it than its own and doubled the number
-    /// (docs/MENU_IMPROVEMENTS.md, Combat). <see cref="UnitHealthBar"/> still draws an enemy's
+    /// (menu review, 2026-09-28). <see cref="UnitHealthBar"/> still draws an enemy's
     /// intent and status icons over its head; it no longer draws any bar. Heroes joined the same
     /// day, for the same reason: their world bar floated above the head, nearer the hero above in
     /// the column than its own. (Named <c>EnemyNameplates</c> until then.)</para>

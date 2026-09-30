@@ -116,6 +116,9 @@ namespace Assets.Scripts.Hub
         /// </summary>
         private static bool _justCompletedRun;
 
+        /// <summary>Which run it was, so the run-complete screen can name it and what it opened.</summary>
+        private static string _completedRunKey;
+
         /// <summary>
         /// Set by the title screen when its button said <b>New Game</b>. Read once here: a new game
         /// starts the tutorial and goes straight into its first floor. A static for the same reason
@@ -138,9 +141,10 @@ namespace Assets.Scripts.Hub
         // The lot whose panel is open, so Build/Upgrade knows what it is acting on.
         private BuildingSO _selectedLot;
 
-        public static void MarkRunCompleted()
+        public static void MarkRunCompleted(string runKey)
         {
             _justCompletedRun = true;
+            _completedRunKey = runKey;
         }
 
         /// <summary>The title screen's New Game: start the tutorial on arrival.</summary>
@@ -1045,8 +1049,9 @@ namespace Assets.Scripts.Hub
 
         private void RefreshCurrencyHeader()
         {
-            _goldLabel.text = $"Gold: {MetaProgressManager.Instance.Gold}";
-            _essenceLabel.text = $"Essence: {MetaProgressManager.Instance.Essence}";
+            // The chips carry the currency's name beneath the number (Hub.uxml, hub-purse).
+            _goldLabel.text = MetaProgressManager.Instance.Gold.ToString();
+            _essenceLabel.text = MetaProgressManager.Instance.Essence.ToString();
         }
 
         private void SetFeedback(string message)
@@ -1157,9 +1162,56 @@ namespace Assets.Scripts.Hub
         {
             HideTown();
             SetShown(_progressView, false);
+            FillRunComplete();
             SetShown(_completeView, true);
             ResetKeyboardNavigation();
             _justCompletedRun = false;
+            _completedRunKey = null;
+        }
+
+        /// <summary>
+        /// Names the run that fell and lists what clearing it opened on the story map
+        /// (<see cref="CampaignOps.OpenedBy"/>) - the one thing the player wants to know next.
+        /// </summary>
+        private void FillRunComplete()
+        {
+            var node = _campaign != null && !string.IsNullOrEmpty(_completedRunKey) ? _campaign.FindNode(_completedRunKey) : null;
+            var run = node != null ? node.Run : null;
+
+            var runLabel = _completeView.Q<Label>("complete-run");
+            var message = _completeView.Q<Label>("complete-message");
+            var rewards = _completeView.Q<VisualElement>("complete-rewards");
+            if (runLabel != null)
+            {
+                runLabel.text = run != null ? CampaignOps.DisplayNameOf(run) : "The dungeon";
+            }
+            if (rewards == null)
+            {
+                return;
+            }
+            rewards.Clear();
+
+            var owned = _partyRoster != null ? HeroRoster.GetOwnedKeys(_partyRoster) : null;
+            var opened = CampaignOps.OpenedBy(_campaign, run, MetaProgressManager.Instance.GetCompletedRunKeys(), owned);
+            if (message != null)
+            {
+                message.text = opened.Count > 0
+                    ? "Every floor cleared. The story map has new roads."
+                    : "Every floor cleared. Your heroes stand victorious.";
+            }
+            foreach (var next in opened)
+            {
+                var row = new VisualElement { pickingMode = PickingMode.Ignore };
+                row.AddToClassList("cd-victory-row");
+                var label = new Label("Now open") { pickingMode = PickingMode.Ignore };
+                label.AddToClassList("cd-victory-row__label");
+                var value = new Label(CampaignOps.DisplayNameOf(next)) { pickingMode = PickingMode.Ignore };
+                value.AddToClassList("cd-victory-row__value");
+                row.Add(label);
+                row.Add(value);
+                rewards.Add(row);
+            }
+            SetShown(rewards, opened.Count > 0);
         }
 
         // ============================================================

@@ -218,6 +218,7 @@ machinery that makes that playable rather than a memory test.
   colour, so the two cannot diverge there either.
 - **The classification word comes from `DamageCalculator.Classify`**, not a second set of thresholds
   here, so the bestiary always says what the combat popup will say.
+- **Two compact forms for pages that must fit** (2026-09-30): `LootSummary` is the drop table as one row ("Scrap Iron  ·  1 not yet seen") and `CompactSpellLines` folds unseen spells into one "N not yet seen" row. Both are built on the per-entry lists, so the knowledge rules stay in one place; both screens use them. A line can carry `LabelElement` / `ValueElement`, which `BestiaryLineView` draws as `cd-element--<type>` so element names are in their colours.
 - **`BestiaryTone` is written from the player's side**: `Good` means a weakness to exploit, `Bad`
   means resisted/immune/absorbed or an element aimed at the party.
 - **A zero stat earns a row only when the stat is one every unit is authored with**

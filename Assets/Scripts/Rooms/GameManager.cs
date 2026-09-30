@@ -54,6 +54,16 @@ namespace Assets.Scripts.Rooms
             }
         }
 
+        /// <summary>Puts the camera straight onto its follow target (fast travel), rather than lerping there.</summary>
+        public void SnapCamera()
+        {
+            if (Party == null || !MainCamera.HasInstance)
+            {
+                return;
+            }
+            MainCamera.Instance.SetPosition(CameraTarget());
+        }
+
         private void Update()
         {
             if (!_followParty || Party == null)
@@ -61,12 +71,37 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
-            var target = Party.transform.position;
+            Vector3 target = CameraTarget();
             target.z = MainCamera.Instance.transform.position.z;
             MainCamera.Instance.transform.position = Vector3.Lerp(
                 MainCamera.Instance.transform.position,
                 target,
                 _cameraFollowSpeed * Time.deltaTime);
         }
+
+        /// <summary>
+        /// The party, nudged so the room it stands in is not drawn under the dungeon HUD
+        /// (<see cref="CameraSafeArea"/>). While the HUD is hidden - combat, the level-clear window -
+        /// it is the party's own position.
+        /// </summary>
+        private Vector2 CameraTarget()
+        {
+            Vector2 target = Party.transform.position;
+            var room = Party.CurrentRoom;
+            var cam = MainCamera.Camera;
+            if (room == null || room.RoomSO == null || cam == null || _roomActionUI == null
+                || !_roomActionUI.TryGetHudViewportRect(out Rect hud))
+            {
+                return target;
+            }
+
+            // Tiles are centred on integer coordinates, so a room's floor runs half a tile past them.
+            var bounds = new Rect(room.GridPosition.x - 0.5f, room.GridPosition.y - 0.5f, room.RoomSO.Width, room.RoomSO.Height);
+            var half = new Vector2(cam.orthographicSize * cam.aspect, cam.orthographicSize);
+            return CameraSafeArea.Nudge(bounds, target, half, hud, RoomSafeMargin);
+        }
+
+        /// <summary>World space kept between the room's floor and the HUD: the wall band and a breath.</summary>
+        private const float RoomSafeMargin = 0.4f;
     }
 }

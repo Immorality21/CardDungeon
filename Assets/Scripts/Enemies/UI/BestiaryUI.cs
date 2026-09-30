@@ -343,14 +343,10 @@ namespace Assets.Scripts.Enemies.UI
             BestiaryLineView.AddSection(left, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
             BestiaryLineView.AddSection(left, "Immune to", BestiaryPresenter.ImmunityLines(definition, known));
             BestiaryLineView.AddSection(right, "Base stats", BestiaryPresenter.StatLines(definition, known));
-            BestiaryLineView.AddSection(right, "Abilities", BestiaryPresenter.SpellLines(definition, known));
+            BestiaryLineView.AddSection(right, "Abilities", BestiaryPresenter.CompactSpellLines(definition, known));
 
-            var drops = BestiaryPresenter.LootLines(definition, known);
-            if (drops != null && drops.Count > 0)
-            {
-                // The loot lines carry their own "Drops" label, so no section header over them.
-                BestiaryLineView.AddRows(_detail, drops);
-            }
+            // One row, the same as the combat Inspect page: the names seen, then how many are left.
+            _detail.Add(BestiaryLineView.Row(BestiaryPresenter.LootSummary(definition, known)));
         }
     }
 }

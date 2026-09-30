@@ -504,5 +504,51 @@ namespace Assets.Scripts.Rooms
             string exit = model.ExitFound ? " · exit found" : "";
             return string.Format("{0} · {1}{2}", rooms, frontier, exit);
         }
+
+        /// <summary>
+        /// The map window's own line, for what the HUD does not already say (the HUD carries
+        /// <see cref="StatusLine"/>, so repeating it under the map said it twice on one screen). It
+        /// answers "have I found the way down" and "what did I walk past": the exit, then what is
+        /// still waiting in rooms already entered - "Exit found · still waiting: 1 fight · 2 caches".
+        ///
+        /// <para>Counted off the rooms' markers, so it knows exactly what the map draws and nothing
+        /// more: only explored rooms, one thing per room by the marker priority.</para>
+        /// </summary>
+        public static string WaitingLine(DungeonMapModel model)
+        {
+            if (model == null || model.Rooms.Count == 0)
+            {
+                return "";
+            }
+
+            var counts = new int[6];
+            foreach (var room in model.Rooms)
+            {
+                if (room.State == MapRoomState.Explored && room.Marker != MapMarker.None)
+                {
+                    counts[(int)room.Marker]++;
+                }
+            }
+
+            var parts = new List<string>();
+            AddCount(parts, counts[(int)MapMarker.Enemies], "fight", "fights");
+            AddCount(parts, counts[(int)MapMarker.Captive], "captive", "captives");
+            AddCount(parts, counts[(int)MapMarker.Event], "event", "events");
+            AddCount(parts, counts[(int)MapMarker.Cache], "cache", "caches");
+            AddCount(parts, counts[(int)MapMarker.Refuge], "refuge", "refuges");
+
+            string exit = model.ExitFound ? "Exit found" : "Exit not found yet";
+            return parts.Count == 0
+                ? exit + " · nothing left waiting"
+                : exit + " · still waiting: " + string.Join(" · ", parts);
+        }
+
+        private static void AddCount(List<string> parts, int count, string one, string many)
+        {
+            if (count > 0)
+            {
+                parts.Add(count == 1 ? "1 " + one : count + " " + many);
+            }
+        }
     }
 }

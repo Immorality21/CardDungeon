@@ -278,6 +278,34 @@ namespace Tests.EditMode
             Assert.That(line, Does.Contain("exit found"));
         }
 
+        [Test]
+        public void WaitingLine_CountsWhatExploredRoomsStillHold()
+        {
+            var model = DungeonMapOps.Build(new List<MapRoomInput>
+            {
+                Room(0, explored: true, neighbours: new[] { 1, 2, 3 }),
+                Room(1, explored: true, cache: true, neighbours: new[] { 0 }),
+                Room(2, explored: true, enemies: true, cache: true, neighbours: new[] { 0 }),
+                Room(3, refuge: true, neighbours: new[] { 0 }),
+            }, 0);
+
+            string line = DungeonMapOps.WaitingLine(model);
+            Assert.AreEqual("Exit not found yet · still waiting: 1 fight · 1 cache", line,
+                "one thing per room by the marker priority, and nothing from a room not entered");
+        }
+
+        [Test]
+        public void WaitingLine_WithNothingWaiting_SaysSo()
+        {
+            var done = DungeonMapOps.Build(new List<MapRoomInput>
+            {
+                Room(0, explored: true, neighbours: new[] { 1 }),
+                Room(1, explored: true, isExit: true, neighbours: new[] { 0 }),
+            }, 1);
+
+            Assert.AreEqual("Exit found · nothing left waiting", DungeonMapOps.WaitingLine(done));
+        }
+
         // --- fast travel --------------------------------------------------------------
 
         /// <summary>

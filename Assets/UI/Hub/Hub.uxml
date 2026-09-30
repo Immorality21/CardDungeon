@@ -16,12 +16,20 @@
             <ui:VisualElement name="hub-town" class="hub-town">
                 <ui:Button name="road-btn" text="The Story &#9654;" class="hub-road hub-road--art" />
             </ui:VisualElement>
+            <!-- The town frame's bottom band, not a strip under it: it closes the frame, and the purse
+                 is two chips (the number large, the currency small beneath) like a header's. -->
             <ui:VisualElement class="hub-bar">
                 <ui:Button name="hub-menu-btn" text="Main Menu" class="cd-button cd-button--narrow" />
                 <ui:Label name="hub-feedback" text="" class="cd-feedback" />
-                <ui:VisualElement class="cd-currency-row">
-                    <ui:Label name="hub-gold" text="Gold: 0" />
-                    <ui:Label name="hub-essence" text="Essence: 0" />
+                <ui:VisualElement class="hub-purse">
+                    <ui:VisualElement class="hub-purse__chip">
+                        <ui:Label name="hub-gold" text="0" class="hub-purse__value" />
+                        <ui:Label text="GOLD" class="hub-purse__label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="hub-purse__chip hub-purse__chip--essence">
+                        <ui:Label name="hub-essence" text="0" class="hub-purse__value" />
+                        <ui:Label text="ESSENCE" class="hub-purse__label" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -91,10 +99,15 @@
         </ui:VisualElement>
 
         <!-- RUN COMPLETE -->
-        <ui:VisualElement name="complete-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
-            <ui:Label text="Victory!" class="cd-title cd-title--large" />
-            <ui:Label text="You have conquered the dungeon. Your heroes stand victorious." class="cd-info-label" />
-            <ui:Button name="return-btn" text="Return" class="cd-menu-button" />
+        <!-- RUN COMPLETE. The victory window's frame and header band, naming the run that fell and
+             what clearing it opened on the story map (HubManager.ShowRunCompletePanel fills the
+             rows). It used to be the same two lines whatever run it was. -->
+        <ui:VisualElement name="complete-view" class="cd-victory cd-run-complete cd-dock-center cd-hidden">
+            <ui:Label text="Run Complete!" class="cd-victory__title" />
+            <ui:Label name="complete-run" text="" class="cd-run-complete__run" />
+            <ui:Label name="complete-message" text="" class="cd-run-complete__message" />
+            <ui:VisualElement name="complete-rewards" class="cd-victory__rewards" />
+            <ui:Button name="return-btn" text="Return to town" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- MERCHANT -->

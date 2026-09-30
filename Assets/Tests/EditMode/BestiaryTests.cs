@@ -318,6 +318,72 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void LootSummary_NamesWhatWasSeen_ThenCountsWhatWasNot()
+        {
+            var enemy = MakeEnemy();
+            enemy.LootTable.Add(new LootDrop { Item = MakeItem("IronSword", "Iron Sword") });
+            enemy.LootTable.Add(new LootDrop { Item = MakeItem("ScrapIron", "Scrap Iron"), Chance = 0.4f });
+            Assert.AreEqual(BestiaryPresenter.Unknown, BestiaryPresenter.LootSummary(enemy, null).Value);
+
+            BestiaryOps.MarkSeen(_entries, enemy.SaveKey);
+            var known = BestiaryOps.Find(_entries, enemy.SaveKey);
+            var none = BestiaryPresenter.LootSummary(enemy, known);
+            Assert.AreEqual("2 not yet seen", none.Value);
+            Assert.AreEqual(BestiaryTone.Unknown, none.Tone);
+
+            BestiaryOps.MarkLootObserved(_entries, enemy.SaveKey, "ScrapIron");
+            var some = BestiaryPresenter.LootSummary(enemy, known);
+            Assert.AreEqual("Drops", some.Label);
+            Assert.AreEqual("Scrap Iron  ·  1 not yet seen", some.Value);
+            Assert.AreEqual(BestiaryTone.Good, some.Tone);
+        }
+
+        [Test]
+        public void LootSummary_ForAnEnemyThatCarriesNothing_SaysNothing()
+        {
+            var enemy = MakeEnemy();
+            BestiaryOps.MarkSeen(_entries, enemy.SaveKey);
+
+            Assert.AreEqual("Nothing", BestiaryPresenter.LootSummary(enemy, BestiaryOps.Find(_entries, enemy.SaveKey)).Value);
+        }
+
+        [Test]
+        public void CompactSpellLines_FoldTheUnseenIntoOneCountedRow()
+        {
+            var enemy = MakeEnemy();
+            enemy.Spells = new List<EnemySpellEntry>();
+            foreach (var key in new[] { "Fireball", "Frost", "Spark" })
+            {
+                var magic = ScriptableObject.CreateInstance<Assets.Scripts.Cards.MagicSO>();
+                magic.Key = key;
+                magic.DisplayName = key;
+                enemy.Spells.Add(new EnemySpellEntry { Magic = magic });
+            }
+
+            var unseen = BestiaryPresenter.CompactSpellLines(enemy, null);
+            Assert.AreEqual(1, unseen.Count);
+            Assert.AreEqual("3 not yet seen", unseen[0].Label);
+            Assert.AreEqual(BestiaryTone.Unknown, unseen[0].Tone);
+
+            BestiaryOps.MarkSpellObserved(_entries, enemy.SaveKey, "Frost");
+            var lines = BestiaryPresenter.CompactSpellLines(enemy, BestiaryOps.Find(_entries, enemy.SaveKey));
+            Assert.AreEqual(2, lines.Count);
+            Assert.AreEqual("Frost", lines[0].Label);
+            Assert.AreEqual("2 not yet seen", lines[1].Label);
+        }
+
+        [Test]
+        public void ElementRows_CarryTheirElement_SoTheViewCanColourThem()
+        {
+            var enemy = MakeEnemy();
+
+            Assert.AreEqual(DamageType.Fire, BestiaryPresenter.ResistanceLine(enemy, null, DamageType.Fire).LabelElement,
+                "even an unknown resistance row names its element, in the element's colour");
+            Assert.IsNull(BestiaryPresenter.KillsLine(null).LabelElement);
+            Assert.AreEqual("cd-element--lightning", Assets.Scripts.Enemies.UI.BestiaryLineView.ElementClass(DamageType.Lightning));
+        }
+
+        [Test]
         public void SpellObservation_IsPerEnemy_NotGlobal()
         {
             // Seeing a Cinder Imp throw Fireball says nothing about what the Dragon has. Under Draw

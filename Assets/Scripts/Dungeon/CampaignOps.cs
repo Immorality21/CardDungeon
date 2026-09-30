@@ -185,6 +185,33 @@ namespace Assets.Scripts.Dungeon
             return states;
         }
 
+        /// <summary>
+        /// The runs that <paramref name="run"/> leads to and that this save can now start - what the
+        /// run-complete screen announces. A run it leads to that is still shut (another prerequisite,
+        /// a hero gate) is left out: it has not opened, and a secret one would be spoiled.
+        /// </summary>
+        public static List<RunDefinitionSO> OpenedBy(
+            CampaignSO campaign,
+            RunDefinitionSO run,
+            ICollection<string> completedRunKeys,
+            ICollection<string> ownedHeroKeys = null)
+        {
+            var opened = new List<RunDefinitionSO>();
+            if (campaign == null || run == null)
+            {
+                return opened;
+            }
+            foreach (var state in GetStates(campaign, completedRunKeys, null, ownedHeroKeys))
+            {
+                if (state.Node.Requires != null && state.Node.Requires.Contains(run)
+                    && state.Status == CampaignNodeStatus.Available)
+                {
+                    opened.Add(state.Node.Run);
+                }
+            }
+            return opened;
+        }
+
         /// <summary>Display names of the prerequisites this save has not cleared yet.</summary>
         public static List<string> GetMissingRequirementNames(
             CampaignNodeEntry node,

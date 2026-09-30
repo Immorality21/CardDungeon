@@ -13,7 +13,7 @@ namespace Assets.Scripts.Cards.UI
     /// which raises power and unlocks level-gated effects. Two tabs (Abilities / Combos). Operates on
     /// a VisualElement subtree; not a MonoBehaviour.
     ///
-    /// <para><b>On the inventory frame since 2026-09-30</b> (docs/MENU_IMPROVEMENTS.md): the
+    /// <para><b>On the inventory frame since 2026-09-30</b> (menu review): the
     /// <i>known</i> entries as a list (icon, name, level, next price), everything undiscovered folded
     /// into one row at the end - the old grid of 31 identical "?" tiles said only "you know one thing" -
     /// and the chosen entry's detail always beside the list, with Upgrade and the reason it is dimmed.

@@ -22,6 +22,12 @@
     --cd-text-light: rgb(245, 240, 255);
 
     --cd-stone-disabled: rgb(26, 17, 38);
+
+    /* A recessed panel inside a window: a list, a detail page, a scroll body. The inventory
+       column's look, so every screen's wells match the bar the Storehouse set. */
+    --cd-well: rgba(0, 0, 0, 0.30);
+    --cd-well-soft: rgba(0, 0, 0, 0.20);
+    --cd-well-border: rgba(205, 110, 255, 0.22);
 }
 
 /* Full-screen transparent host; children position themselves. */
@@ -60,7 +66,9 @@
 .cd-list {
     flex-grow: 1;
     min-height: 120px;
-    background-color: rgba(41, 31, 20, 0.35);
+    background-color: var(--cd-well);
+    border-width: 1px;
+    border-color: var(--cd-well-border);
     border-radius: 4px;
     padding: 6px;
 }
@@ -1044,8 +1052,13 @@
     border-bottom-color: rgba(205, 110, 255, 0.18);
 }
 
-.cd-inv-heroes--muted .cd-inv-hero {
-    opacity: 0.45;
+/* A party-wide tab (Materials, Consumables): the strip keeps its height so nothing below moves,
+   but the cards read as "not applicable" - faint, frameless, no card behind them - rather than as
+   four disabled buttons. The doubled selector beats .cd-inv-hero:hover further down. */
+.cd-inv-heroes--muted .cd-inv-hero,
+.cd-inv-heroes--muted .cd-inv-hero:hover {
+    opacity: 0.35;
+    background-color: rgba(0, 0, 0, 0);
     border-color: rgba(0, 0, 0, 0);
 }
 
@@ -1850,12 +1863,6 @@
     -unity-font-style: bold;
 }
 
-/* The town's purse: the one place the player checks what they can afford, so it is not tucked
-   away in body text (playtest 2026-09-28, finding 13). */
-.hub-bar .cd-currency-row > Label {
-    font-size: 22px;
-    color: var(--cd-gold);
-}
 
 .cd-button-row {
     flex-direction: row;
@@ -1895,7 +1902,9 @@
 .cd-grid-scroll {
     flex-grow: 1;
     min-height: 220px;
-    background-color: rgba(41, 31, 20, 0.35);
+    background-color: var(--cd-well);
+    border-width: 1px;
+    border-color: var(--cd-well-border);
     border-radius: 4px;
     padding: 6px;
 }
@@ -1990,7 +1999,7 @@
     justify-content: space-between;
     padding: 3px 6px;
     margin: 2px 0;
-    background-color: rgba(41, 31, 20, 0.22);
+    background-color: var(--cd-well-soft);
     border-radius: 3px;
 }
 
@@ -2051,6 +2060,22 @@
     margin-bottom: 18px;
 }
 
+.cd-run-complete__run {
+    font-size: 30px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    -unity-text-align: middle-center;
+    margin: 0 0 4px 0;
+}
+
+.cd-run-complete__message {
+    font-size: 18px;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin: 0 34px 12px 34px;
+}
+
 .cd-victory__rewards {
     width: 100%;
 
@@ -2104,6 +2129,48 @@
 .cd-victory-loot__name {
     font-size: 18px;
     color: var(--cd-text-dark);
+}
+
+/* Rarity on a reward name: doubled for the same reason as .cd-inv-detail__name's - the plain colour
+   above sits later in the file at equal specificity, so the dialog rows (a cache's finds) read white. */
+.cd-victory-loot__name.cd-rarity--uncommon {
+    color: rgb(120, 220, 120);
+}
+
+.cd-victory-loot__name.cd-rarity--rare {
+    color: rgb(110, 160, 255);
+}
+
+.cd-victory-loot__name.cd-rarity--epic {
+    color: rgb(225, 130, 255);
+}
+
+.cd-victory-loot__name.cd-rarity--legendary {
+    color: var(--cd-gold);
+}
+
+/* The victory window's loot, last in the list and the thing worth reading: the icon at 2x. */
+.cd-victory-loot--large .cd-victory-loot__icon {
+    width: 64px;
+    height: 64px;
+}
+
+.cd-victory-loot--large .cd-victory-loot__name {
+    font-size: 21px;
+    -unity-font-style: bold;
+}
+
+/* One hero's share of the fight's XP, indented under the shared total. */
+.cd-victory-row--sub {
+    padding: 4px 6px 4px 24px;
+    margin: 0;
+    border-bottom-width: 0;
+}
+
+.cd-victory-row--sub .cd-victory-row__label,
+.cd-victory-row--sub .cd-victory-row__value {
+    font-size: 18px;
+    -unity-font-style: normal;
 }
 
 /* ---- Scrollbars: every ScrollView under a themed root ----
@@ -2465,7 +2532,9 @@
     max-height: 320px;
     margin: 8px 12px;
     padding: 6px 8px;
-    background-color: rgba(41, 31, 20, 0.35);
+    background-color: var(--cd-well);
+    border-width: 1px;
+    border-color: var(--cd-well-border);
     border-radius: 4px;
 }
 
@@ -2476,6 +2545,15 @@
     width: 760px;
     max-width: 72%;
     max-height: 82%;
+}
+
+/* Docked left, not centred: the enemies stand in the right half of the stage, and a centred page
+   covered the one being read about (menu review, 2026-09-28). Top-anchored in px rather than
+   translated by a percentage, so a taller page grows downward instead of re-centring. */
+.cd-dock-inspect {
+    position: absolute;
+    left: 16px;
+    top: 72px;
 }
 
 .cd-scan-window .cd-scan__body {
@@ -2536,6 +2614,14 @@
     font-size: 16px;
     -unity-font-style: bold;
     -unity-text-align: middle-right;
+    /* A one-row drop list ("Scrap Iron  ·  1 not yet seen") wraps rather than running off the page. */
+    flex-shrink: 1;
+    white-space: normal;
+    margin-left: 12px;
+}
+
+.cd-scan__label {
+    flex-shrink: 0;
 }
 
 /* In the player's favour — a weakness to exploit, loot they have seen drop. */
@@ -2556,6 +2642,37 @@
    not as a value. */
 .cd-scan__value--unknown {
     color: rgb(122, 106, 146);
+}
+
+/* An element's name in its own colour (BestiaryLineView.ElementClass), on a resistance row's label
+   and the "Attacks with" value. After the tone classes so the element wins on the one row that
+   carries both: the name is the element, the tone is already in the resistance word beside it. */
+.cd-element {
+    -unity-font-style: bold;
+}
+
+.cd-element--normal {
+    color: rgb(214, 204, 192);
+}
+
+.cd-element--fire {
+    color: rgb(255, 140, 64);
+}
+
+.cd-element--ice {
+    color: rgb(128, 204, 255);
+}
+
+.cd-element--lightning {
+    color: rgb(250, 226, 92);
+}
+
+.cd-element--holy {
+    color: rgb(255, 242, 196);
+}
+
+.cd-element--shadow {
+    color: rgb(178, 128, 255);
 }
 
 /* ---- Hub bestiary ---- */
@@ -2603,14 +2720,18 @@
 .cd-bestiary__list {
     width: 40%;
     margin-right: 10px;
-    background-color: rgba(41, 31, 20, 0.35);
+    background-color: var(--cd-well);
+    border-width: 1px;
+    border-color: var(--cd-well-border);
     border-radius: 4px;
     padding: 6px;
 }
 
 .cd-bestiary__detail {
     flex-grow: 1;
-    background-color: rgba(41, 31, 20, 0.35);
+    background-color: var(--cd-well);
+    border-width: 1px;
+    border-color: var(--cd-well-border);
     border-radius: 4px;
     padding: 6px 10px;
 }
@@ -3119,23 +3240,60 @@
 .cd-option-row {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
     margin-top: 6px;
 }
 
+/* A fixed column, so the dials line up under each other instead of the label hugging the left
+   edge and the buttons the right with nothing between. */
 .cd-option-label {
-    flex-grow: 1;
+    width: 180px;
+    flex-shrink: 0;
     color: var(--cd-text-dark);
     font-size: 18px;
     -unity-font-style: bold;
 }
 
+/* The level as ten segments between the nudge buttons (one per AudioOptions.Step), so it reads
+   at a glance; the percentage follows, dimmer, for whoever wants the number. */
+.cd-option-bar {
+    flex-grow: 1;
+    flex-direction: row;
+    height: 22px;
+    margin: 0 8px;
+}
+
+.cd-option-seg {
+    flex-grow: 1;
+    margin: 0 2px;
+    border-radius: 2px;
+    background-color: var(--cd-well);
+    border-width: 1px;
+    border-color: var(--cd-well-border);
+}
+
+.cd-option-seg--on {
+    background-color: var(--cd-accent);
+    border-color: var(--cd-accent);
+}
+
+/* Muted: the dials keep their setting, but nothing is playing, so the lit segments go dim. */
+.cd-option-bar--muted .cd-option-seg--on {
+    opacity: 0.35;
+}
+
 .cd-option-value {
-    width: 70px;
-    color: var(--cd-text-dark);
-    font-size: 18px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
+    width: 64px;
+    flex-shrink: 0;
+    color: rgb(200, 190, 225);
+    font-size: 16px;
+    -unity-text-align: middle-right;
+}
+
+/* The mute toggle, sized like the dial row it sits in rather than like a menu choice. */
+.cd-option-toggle {
+    width: 120px;
+    height: 40px;
+    margin-top: 0;
 }
 
 /* A square nudge button. Fixed width so the two sit either side of the readout without the row
@@ -3603,7 +3761,61 @@
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
-    margin-top: 8px;
+    height: 60px;
+    padding: 0 14px;
+    /* The town frame's closing band: the viewport's border carried on round the bottom, in the
+       inventory header's purple, so the bar reads as part of the frame rather than loose under it. */
+    background-color: rgb(67, 30, 108);
+    border-width: 0 2px 2px 2px;
+    border-color: var(--cd-frame);
+    border-top-width: 1px;
+    border-top-color: var(--cd-accent);
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.hub-town .hub-view__viewport {
+    border-bottom-width: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.hub-purse {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.hub-purse__chip {
+    align-items: flex-end;
+    min-width: 96px;
+    padding: 3px 12px;
+    margin-left: 8px;
+    background-color: var(--cd-well);
+    border-width: 1px;
+    border-color: var(--cd-well-border);
+    border-radius: 6px;
+}
+
+.hub-purse__value {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    margin: 0;
+    padding: 0;
+}
+
+.hub-purse__chip--essence .hub-purse__value {
+    color: var(--cd-accent);
+}
+
+.hub-purse__label {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: rgb(200, 190, 225);
+    letter-spacing: 1px;
+    margin: 0;
+    padding: 0;
 }
 
 /* .cd-button--narrow is 45% of its parent, which is the whole screen width down here.
@@ -3844,10 +4056,49 @@
 }
 
 .dm-legend__item {
-    font-size: 16px;
+    flex-direction: row;
+    align-items: center;
+    margin: 2px 8px;
+}
+
+.dm-legend__glyph {
+    font-size: 20px;
     -unity-font-style: bold;
-    margin-left: 8px;
-    margin-right: 8px;
+    -unity-text-align: middle-center;
+    margin-right: 4px;
+    padding: 0;
+}
+
+/* The diamond sits small in this font's em box, so at the others' size it read as a dot. */
+.dm-legend__glyph.dm-glyph--cache {
+    font-size: 26px;
+}
+
+.dm-legend__text {
+    font-size: 16px;
+    color: var(--cd-text-light);
+    margin: 0;
+    padding: 0;
+}
+
+/* A little room box in the two looks DungeonMapView paints: the party's room (gold border on the
+   hover-stone fill) and a room not yet entered (the frame colour, unfilled). */
+.dm-legend__swatch {
+    width: 22px;
+    height: 16px;
+    margin-right: 6px;
+    border-width: 2px;
+    border-radius: 2px;
+}
+
+.dm-legend__swatch--here {
+    background-color: var(--cd-stone-hover);
+    border-color: var(--cd-gold);
+}
+
+.dm-legend__swatch--unentered {
+    background-color: rgba(0, 0, 0, 0);
+    border-color: var(--cd-frame);
 }
 
 /* One travellable room's click target, laid over the painted box. Deliberately frameless and

@@ -50,6 +50,8 @@ namespace Assets.Scripts.Rooms
         private Label _mapHint;
         private UI.DungeonMapView _mapView;
         private UI.UnitNameplates _nameplates;
+        private VisualElement _nameplateLayer;
+        private Cards.UI.MagicSelectionUI _magicSelection;
         /// <summary>Whether the map was opened from the pause overlay, so Back goes back there.</summary>
         private bool _mapFromPause;
 
@@ -343,6 +345,7 @@ namespace Assets.Scripts.Rooms
             // Enemy names + HP numbers on the battle stage. The host is authored first in the root,
             // so every window draws over the plates.
             var nameplateHost = root.Q<VisualElement>("nameplate-layer");
+            _nameplateLayer = nameplateHost;
             if (nameplateHost != null)
             {
                 _nameplates = new UI.UnitNameplates();
@@ -535,15 +538,13 @@ namespace Assets.Scripts.Rooms
 
 
         /// <summary>
-        /// Who is in the room, as the Fight / Flee bar's heading: bestiary names grouped with a count
-        /// ("Slag Hound x2 + Cinder Imp"), "???" for an enemy the party has never met, and no stats -
-        /// the decision is informed without the bar becoming the Inspect page.
+        /// Who is in the room, as the Fight / Flee bar's heading (<see cref="FoeLine"/>): met enemies
+        /// by name, grouped by kind, and the unmet folded into one count - no stats, so the decision
+        /// is informed without the bar becoming the Inspect page.
         /// </summary>
         private static string DescribeFoes(Room room)
         {
-            var order = new List<string>();
-            var counts = new Dictionary<string, int>();
-            var names = new Dictionary<string, string>();
+            var foes = new List<FoeEntry>();
             foreach (var enemy in room.Enemies)
             {
                 if (enemy == null || !enemy.IsAlive)
@@ -552,23 +553,10 @@ namespace Assets.Scripts.Rooms
                 }
                 bool seen = enemy.Definition != null && MetaProgressManager.HasInstance
                     && MetaProgressManager.Instance.IsEnemySeen(enemy.Definition.SaveKey);
-                // Grouped by kind, not by what is shown: two different unmet enemies are "??? + ???",
-                // never "??? x2", which would claim they are the same thing.
                 string kind = enemy.Definition != null ? enemy.Definition.SaveKey : enemy.DisplayName;
-                if (!counts.ContainsKey(kind))
-                {
-                    counts[kind] = 0;
-                    order.Add(kind);
-                    names[kind] = seen ? enemy.DisplayName : "???";
-                }
-                counts[kind]++;
+                foes.Add(new FoeEntry(kind, enemy.DisplayName, seen));
             }
-            var parts = new List<string>();
-            foreach (var kind in order)
-            {
-                parts.Add(counts[kind] > 1 ? $"{names[kind]} x{counts[kind]}" : names[kind]);
-            }
-            return string.Join(" + ", parts);
+            return FoeLine.Describe(foes);
         }
 
         // ============================================================
@@ -1944,7 +1932,8 @@ namespace Assets.Scripts.Rooms
                 _currentRoom != null ? _currentRoom.RoomIndex : -1);
 
             _mapView?.SetModel(model);
-            SetText(_mapStatus, DungeonMapOps.StatusLine(model));
+            // Not StatusLine: the HUD beside the map already says it.
+            SetText(_mapStatus, DungeonMapOps.WaitingLine(model));
             SetText(_mapHint, DungeonMapOps.TravelHint(model));
 
             var entry = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentLevelEntry : null;
@@ -2098,10 +2087,7 @@ namespace Assets.Scripts.Rooms
 
             // The camera follows the party by lerp, which across a floor would read as a long sweep
             // rather than as arriving. Snap it so the map closes onto the destination.
-            if (MainCamera.HasInstance)
-            {
-                MainCamera.Instance.SetPosition(party.transform.position);
-            }
+            GameManager.Instance.SnapCamera();
 
             GameManager.Instance.EnterRoom(destination, lastDoor);
         }
@@ -2307,24 +2293,32 @@ namespace Assets.Scripts.Rooms
         /// Tells the world-space HP bars where the turn-order panel is, so a boss's bar can step
         /// out from under it (<see cref="Combat.CombatHudLayout"/>).
         /// </summary>
-        private void PublishHudLayout()
+        /// <summary>
+        /// The nameplates are hidden under the combat Inspect page. They are in this document, which
+        /// draws over the picker's, and the page is docked left - over the heroes' plates - so that
+        /// it leaves the enemy it describes in view. Visibility, not display, so layout is kept.
+        /// </summary>
+        private void TickNameplateLayer()
         {
-            var screen = _turnOrder != null && _turnOrder.panel != null
-                ? _turnOrder.panel.visualTree.worldBound
-                : Rect.zero;
-            if (!IsShown(_turnOrder) || screen.width <= 0f || screen.height <= 0f)
+            if (_nameplateLayer == null)
             {
-                Combat.CombatHudLayout.TurnOrderViewport = Rect.zero;
                 return;
             }
+            if (_magicSelection == null)
+            {
+                _magicSelection = FindFirstObjectByType<Cards.UI.MagicSelectionUI>();
+            }
+            bool covered = _magicSelection != null && _magicSelection.IsInspectOpen;
+            var wanted = covered ? Visibility.Hidden : Visibility.Visible;
+            if (_nameplateLayer.style.visibility != wanted)
+            {
+                _nameplateLayer.style.visibility = wanted;
+            }
+        }
 
-            // UI Toolkit's origin is top-left, the viewport's bottom-left.
-            var box = _turnOrder.worldBound;
-            Combat.CombatHudLayout.TurnOrderViewport = Rect.MinMaxRect(
-                box.xMin / screen.width,
-                1f - box.yMax / screen.height,
-                box.xMax / screen.width,
-                1f - box.yMin / screen.height);
+        private void PublishHudLayout()
+        {
+            Combat.CombatHudLayout.TurnOrderViewport = TryGetViewportRect(_turnOrder, out Rect box) ? box : Rect.zero;
         }
 
         private void Update()
@@ -2335,6 +2329,7 @@ namespace Assets.Scripts.Rooms
             }
 
             _nameplates?.Tick(Camera.main);
+            TickNameplateLayer();
             TickHud();
             PublishHudLayout();
 
@@ -2879,18 +2874,48 @@ namespace Assets.Scripts.Rooms
             }
             _victoryRewards.Clear();
 
-            // Loot — a header row, then an icon+name line per item.
-            if (result.Loot != null && result.Loot.Count > 0)
+            // Gold, then XP per hero, then the loot (menu review, 2026-09-28): the two numbers every
+            // fight pays first, and the drops - the part worth reading - last and at full size,
+            // instead of a "Loot" header above everything with the currencies trailing under it.
+            string gold = "+" + result.GoldGained;
+            if (result.LevelCleared)
             {
-                _victoryRewards.Add(MakeVictoryRow("Loot", result.Loot.Count > 1 ? $"x{result.Loot.Count}" : string.Empty));
+                gold += "  (banked)";
+            }
+            _victoryRewards.Add(MakeVictoryRow("Gold", gold));
+
+            if (result.XpByHero != null && result.XpByHero.Count > 0)
+            {
+                _victoryRewards.Add(MakeVictoryRow("XP", "+" + result.XpGained + " shared"));
+                foreach (var share in result.XpByHero)
+                {
+                    var row = MakeVictoryRow(share.Key, "+" + share.Value);
+                    row.AddToClassList("cd-victory-row--sub");
+                    _victoryRewards.Add(row);
+                }
+            }
+            else
+            {
+                _victoryRewards.Add(MakeVictoryRow("XP", "+" + result.XpGained));
+            }
+
+            bool anyLoot = false;
+            if (result.Loot != null)
+            {
                 foreach (var award in result.Loot)
                 {
                     if (award.IsEmpty)
                     {
                         continue;
                     }
+                    if (!anyLoot)
+                    {
+                        _victoryRewards.Add(MakeVictoryRow("Loot", string.Empty));
+                        anyLoot = true;
+                    }
                     var loot = new VisualElement();
                     loot.AddToClassList("cd-victory-loot");
+                    loot.AddToClassList("cd-victory-loot--large");
                     var icon = new VisualElement();
                     icon.AddToClassList("cd-victory-loot__icon");
                     if (award.Item.Icon != null)
@@ -2901,24 +2926,16 @@ namespace Assets.Scripts.Rooms
                         ? $"{award.Item.DisplayName} x{award.Quantity}"
                         : award.Item.DisplayName);
                     name.AddToClassList("cd-victory-loot__name");
+                    name.AddToClassList(ItemPresenter.RarityClass(award.Item.Rarity));
                     loot.Add(icon);
                     loot.Add(name);
                     _victoryRewards.Add(loot);
                 }
             }
-            else
+            if (!anyLoot)
             {
                 _victoryRewards.Add(MakeVictoryRow("Loot", "None"));
             }
-
-            _victoryRewards.Add(MakeVictoryRow("XP", "+" + result.XpGained));
-
-            string gold = "+" + result.GoldGained;
-            if (result.LevelCleared)
-            {
-                gold += "  (banked)";
-            }
-            _victoryRewards.Add(MakeVictoryRow("Gold", gold));
 
             if (result.LevelCleared)
             {
@@ -3007,6 +3024,43 @@ namespace Assets.Scripts.Rooms
                 sb.Append(c);
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Where the HUD sits on screen, in viewport space (0..1, origin bottom-left), so the camera
+        /// follow can keep the party's room out from under it (<see cref="CameraSafeArea"/>). False
+        /// while the HUD is hidden or not laid out yet.
+        /// </summary>
+        public bool TryGetHudViewportRect(out Rect rect)
+        {
+            return TryGetViewportRect(_hud, out rect);
+        }
+
+        /// <summary>
+        /// An element's screen rectangle in viewport space. UI Toolkit's origin is top-left, the
+        /// viewport's bottom-left. False while it is hidden or not laid out yet.
+        /// </summary>
+        private static bool TryGetViewportRect(VisualElement element, out Rect rect)
+        {
+            rect = default;
+            if (element == null || element.panel == null || !IsShown(element))
+            {
+                return false;
+            }
+
+            Rect screen = element.panel.visualTree.worldBound;
+            Rect box = element.worldBound;
+            if (screen.width <= 0f || screen.height <= 0f || box.width <= 0f || float.IsNaN(box.width))
+            {
+                return false;
+            }
+
+            rect = Rect.MinMaxRect(
+                box.xMin / screen.width,
+                1f - box.yMax / screen.height,
+                box.xMax / screen.width,
+                1f - box.yMin / screen.height);
+            return true;
         }
 
         /// <summary>Per frame: the HUD is up only while walking, and its gold follows the pending pool.</summary>

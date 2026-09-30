@@ -234,7 +234,6 @@ backlog.**
 | **17** | Content volume is the biggest single gap | not started |
 | **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses to come** — the 4-piece Shadowweave set is authored, no set logic yet (§18a-sets) |
 | **19** | Shipping surface | not started |
-| — | **Menu improvements** — a whole-game UI review, one section per screen, ranked "do these first" | **all eight "do these first" shipped 2026-09-30** (Campfire, Merchant, Sphere Grid and Forge on the inventory frame; one HP plate under every unit with the number in the bar; the town behind services; `cd-reason`; pause/hint fixes). The per-screen remainder is open: [`MENU_IMPROVEMENTS.md`](MENU_IMPROVEMENTS.md) |
 | **21** | **Art pass** — every outdated sprite | **enemies done 2026-09-29** (the five still enemies redrawn + animated, both bosses at Warden size, a 32 px Dark Jailor); menu backdrops, combat backgrounds, floor rock and item icons done 2026-09-28. **all seven heroes in one style 2026-09-29** (Warrior, Cultist, Cleric, Ranger, Tinkerer redone). Left: optional attack/hit animations, optional attack/hit animations, and the parked `productName` / save-folder rename |
 
 ---
@@ -243,6 +242,16 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **Menu review** (2026-09-28, worked through 2026-09-30) — a whole-game UI review, one section per
+  screen, judged at 1280x720 against the Storehouse inventory; the to-do file was deleted once clear,
+  and code comments cite it as "menu review". Shipped from it: every hub service on the inventory's
+  fixed frame (Campfire, Merchant, Forge, Sphere Hall, Bestiary, story map, level entry, lot panel),
+  the town dimmed behind services, one HP plate under every unit, `cd-reason` on every dimmed action,
+  the room bar naming its thing, Fight/Flee naming the foes (`FoeLine`), event odds tags, dialog scrims,
+  the pause order, the HUD's camera safe area (`CameraSafeArea`), Options dial bars, the hub purse,
+  element colours, the map legend and `WaitingLine`, a left-docked Inspect with one-row drops, the
+  victory order with XP per hero, and a run-complete screen that names the run and what it opened.
 
 - **First fresh-save playtest** (2026-09-28) — 24 findings, worked through the same day and the
   to-do file deleted once clear; code comments cite them as "playtest finding N". What remains lives

@@ -51,6 +51,10 @@ namespace Assets.Scripts.Rooms
         // pieces of news.
         public List<LootAward> Loot = new List<LootAward>();
         public int XpGained;
+        /// <summary>What each fielded hero was paid out of <see cref="XpGained"/>, by display name -
+        /// the split is not always even (the campfire can favour one), so "XP +10" alone could not
+        /// say whether it was each or shared.</summary>
+        public List<KeyValuePair<string, int>> XpByHero = new List<KeyValuePair<string, int>>();
         public int GoldGained;
         public bool LevelCleared;  // this victory cleared the exit room → level complete
         public bool BossDefeated;  // this victory felled a boss (drives the boss victory copy)
@@ -163,6 +167,7 @@ namespace Assets.Scripts.Rooms
         // Rewards accumulated during the current combat (surfaced in the victory summary).
         private readonly List<LootAward> _combatLoot = new List<LootAward>();
         private int _combatXp;
+        private readonly Dictionary<Hero, int> _xpAtCombatStart = new Dictionary<Hero, int>();
         private int _combatGold;
         private Room _lastVictoryRoom;
         private bool _currentCombatHadBoss;
@@ -397,6 +402,11 @@ namespace Assets.Scripts.Rooms
             _currentParty = party;
             _combatLoot.Clear();
             _combatXp = 0;
+            _xpAtCombatStart.Clear();
+            foreach (var pair in party.XpEarnedThisLevel)
+            {
+                _xpAtCombatStart[pair.Key] = pair.Value;
+            }
             _combatGold = 0;
             _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
             _summon = null;
@@ -650,6 +660,7 @@ namespace Assets.Scripts.Rooms
                 RemainingEnemies = room.Enemies.Count(e => e != null && e.IsAlive),
                 Loot = new List<LootAward>(_combatLoot),
                 XpGained = _combatXp,
+                XpByHero = XpPaidThisCombat(party),
                 GoldGained = _combatGold,
                 LevelCleared = levelCleared,
                 BossDefeated = bossDefeated,
@@ -1765,6 +1776,29 @@ namespace Assets.Scripts.Rooms
                     scale,
                     TextFadeMode.FadeUp);
             }
+        }
+
+        /// <summary>Each hero's share of this fight's XP: the level's running tally now, less what it was when the fight began.</summary>
+        private List<KeyValuePair<string, int>> XpPaidThisCombat(Party party)
+        {
+            var paid = new List<KeyValuePair<string, int>>();
+            if (party == null)
+            {
+                return paid;
+            }
+            foreach (var hero in party.Heroes)
+            {
+                if (hero == null || !party.XpEarnedThisLevel.TryGetValue(hero, out int now))
+                {
+                    continue;
+                }
+                _xpAtCombatStart.TryGetValue(hero, out int before);
+                if (now - before > 0)
+                {
+                    paid.Add(new KeyValuePair<string, int>(hero.DisplayName, now - before));
+                }
+            }
+            return paid;
         }
 
         private void HandleEnemyDeath(Enemy enemy, Room room)

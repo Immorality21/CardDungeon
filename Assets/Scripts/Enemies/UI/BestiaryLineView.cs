@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Combat;
 using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Enemies.UI
@@ -29,12 +30,20 @@ namespace Assets.Scripts.Enemies.UI
 
             var label = new Label(line.Label);
             label.AddToClassList("cd-scan__label");
+            // A row that is all label and no value ("???", "3 not yet seen") is itself the gap in
+            // the record, so the label takes the dim unknown tone.
+            if (line.Tone == BestiaryTone.Unknown && string.IsNullOrEmpty(line.Value))
+            {
+                label.AddToClassList(ToneClass(BestiaryTone.Unknown));
+            }
+            AddElementClass(label, line.LabelElement);
             label.pickingMode = PickingMode.Ignore;
             row.Add(label);
 
             var value = new Label(line.Value);
             value.AddToClassList("cd-scan__value");
             value.AddToClassList(ToneClass(line.Tone));
+            AddElementClass(value, line.ValueElement);
             value.pickingMode = PickingMode.Ignore;
             row.Add(value);
 
@@ -69,6 +78,24 @@ namespace Assets.Scripts.Enemies.UI
             foreach (var line in lines)
             {
                 parent.Add(Row(line));
+            }
+        }
+
+        /// <summary>
+        /// "cd-element--fire" and so on: an element's name is drawn in the element's colour, so a
+        /// resistance table reads by colour before it is read by word.
+        /// </summary>
+        public static string ElementClass(DamageType type)
+        {
+            return "cd-element--" + type.ToString().ToLowerInvariant();
+        }
+
+        private static void AddElementClass(VisualElement element, DamageType? type)
+        {
+            if (type.HasValue)
+            {
+                element.AddToClassList("cd-element");
+                element.AddToClassList(ElementClass(type.Value));
             }
         }
 

@@ -28,11 +28,20 @@ namespace Assets.Scripts.Enemies
         public readonly string Value;
         public readonly BestiaryTone Tone;
 
-        public BestiaryLine(string label, string value, BestiaryTone tone)
+        /// <summary>The element the label names, if it names one (a resistance row), so the view can colour it.</summary>
+        public readonly DamageType? LabelElement;
+
+        /// <summary>The element the value names, if it names one ("Attacks with Fire").</summary>
+        public readonly DamageType? ValueElement;
+
+        public BestiaryLine(string label, string value, BestiaryTone tone,
+            DamageType? labelElement = null, DamageType? valueElement = null)
         {
             Label = label;
             Value = value;
             Tone = tone;
+            LabelElement = labelElement;
+            ValueElement = valueElement;
         }
 
         public bool IsKnown
@@ -101,12 +110,12 @@ namespace Assets.Scripts.Enemies
             string label = DamageTypeLabel(type);
             if (definition == null || !BestiaryOps.KnowsDamageType(known, type))
             {
-                return new BestiaryLine(label, Unknown, BestiaryTone.Unknown);
+                return new BestiaryLine(label, Unknown, BestiaryTone.Unknown, type);
             }
 
             float percent = DamageCalculator.GetResistance(type, definition.Resistances);
             var effectiveness = DamageCalculator.Classify(type, definition.Resistances);
-            return new BestiaryLine(label, ResistanceText(effectiveness, percent), ToneOf(effectiveness));
+            return new BestiaryLine(label, ResistanceText(effectiveness, percent), ToneOf(effectiveness), type);
         }
 
         /// <summary>
@@ -168,7 +177,8 @@ namespace Assets.Scripts.Enemies
             return new BestiaryLine(
                 "Attacks with",
                 DamageTypeLabel(type),
-                type == DamageType.Normal ? BestiaryTone.Neutral : BestiaryTone.Bad);
+                type == DamageType.Normal ? BestiaryTone.Neutral : BestiaryTone.Bad,
+                valueElement: type);
         }
 
         // ============================================================
@@ -219,6 +229,53 @@ namespace Assets.Scripts.Enemies
                 lines.Add(new BestiaryLine("Drops", "Nothing", BestiaryTone.Neutral));
             }
             return lines;
+        }
+
+        /// <summary>
+        /// The drop table as <b>one</b> row for a page that has to fit: every drop seen so far by
+        /// name, then how many are left ("Drops: Scrap Iron · 1 not yet seen"). Built on
+        /// <see cref="LootLines"/>, so it keeps the same rules - an unmet enemy reveals nothing, an
+        /// empty-handed one says "Nothing" once met - and only changes the shape. One row per entry
+        /// read as a broken list on the Inspect page: "Drops ???" and then a name alone on the next
+        /// line (menu review, 2026-09-28).
+        /// </summary>
+        public static BestiaryLine LootSummary(EnemySO definition, BestiaryEntry known)
+        {
+            var lines = LootLines(definition, known);
+            if (definition == null || known == null)
+            {
+                return new BestiaryLine("Drops", Unknown, BestiaryTone.Unknown);
+            }
+            if (lines.Count == 1 && lines[0].Tone == BestiaryTone.Neutral)
+            {
+                return lines[0]; // "Nothing"
+            }
+
+            var names = new List<string>();
+            int unseen = 0;
+            foreach (var line in lines)
+            {
+                if (line.IsKnown)
+                {
+                    names.Add(line.Value);
+                }
+                else
+                {
+                    unseen++;
+                }
+            }
+            if (unseen > 0)
+            {
+                names.Add(NotYetSeen(unseen));
+            }
+            return new BestiaryLine("Drops", string.Join("  ·  ", names),
+                unseen == lines.Count ? BestiaryTone.Unknown : BestiaryTone.Good);
+        }
+
+        /// <summary>"1 not yet seen" / "3 not yet seen": the size of what is still hidden, as one phrase.</summary>
+        public static string NotYetSeen(int count)
+        {
+            return count + " not yet seen";
         }
 
         // ============================================================
@@ -386,6 +443,33 @@ namespace Assets.Scripts.Enemies
                     seen ? entry.Magic.DisplayName : Unknown,
                     seen ? "seen" : "",
                     seen ? BestiaryTone.Neutral : BestiaryTone.Unknown));
+            }
+            return lines;
+        }
+
+        /// <summary>
+        /// <see cref="SpellLines"/> with the unobserved entries folded into one "N not yet seen" row
+        /// at the end, instead of a "???" row each. The count is the information; four identical
+        /// rows of "???" were the same fact said four times.
+        /// </summary>
+        public static List<BestiaryLine> CompactSpellLines(EnemySO definition, BestiaryEntry known)
+        {
+            var lines = new List<BestiaryLine>();
+            int unseen = 0;
+            foreach (var line in SpellLines(definition, known))
+            {
+                if (line.IsKnown)
+                {
+                    lines.Add(line);
+                }
+                else
+                {
+                    unseen++;
+                }
+            }
+            if (unseen > 0)
+            {
+                lines.Add(new BestiaryLine(NotYetSeen(unseen), "", BestiaryTone.Unknown));
             }
             return lines;
         }

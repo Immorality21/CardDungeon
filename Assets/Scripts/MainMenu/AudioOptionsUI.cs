@@ -20,6 +20,9 @@ namespace Assets.Scripts.MainMenu
         private readonly Label _masterValue;
         private readonly Label _musicValue;
         private readonly Label _sfxValue;
+        private readonly VisualElement _masterBar;
+        private readonly VisualElement _musicBar;
+        private readonly VisualElement _sfxBar;
         private readonly Button _muteButton;
         private readonly Label _note;
         private readonly Button _closeButton;
@@ -32,6 +35,9 @@ namespace Assets.Scripts.MainMenu
             _masterValue = root.Q<Label>("master-value");
             _musicValue = root.Q<Label>("music-value");
             _sfxValue = root.Q<Label>("sfx-value");
+            _masterBar = root.Q<VisualElement>("master-bar");
+            _musicBar = root.Q<VisualElement>("music-bar");
+            _sfxBar = root.Q<VisualElement>("sfx-bar");
             _muteButton = root.Q<Button>("options-mute");
             _note = root.Q<Label>("options-note");
             _closeButton = root.Q<Button>("options-close");
@@ -97,13 +103,35 @@ namespace Assets.Scripts.MainMenu
             SetText(_sfxValue, AudioOptions.Percent(AudioOptions.Get(AudioChannel.Sfx)));
 
             bool muted = AudioOptions.Muted;
+            SetBar(_masterBar, AudioOptions.Get(AudioChannel.Master), muted);
+            SetBar(_musicBar, AudioOptions.Get(AudioChannel.Music), muted);
+            SetBar(_sfxBar, AudioOptions.Get(AudioChannel.Sfx), muted);
+
             if (_muteButton != null)
             {
-                _muteButton.text = muted ? "Sound: Muted" : "Sound: On";
+                _muteButton.text = muted ? "On" : "Off";
             }
             SetText(_note, muted
                 ? "Everything is silenced. The dials keep their settings."
                 : "Master scales everything; the other two scale their own kind on top of it.");
+        }
+
+        /// <summary>
+        /// Lights one segment per <see cref="AudioOptions.Step"/> of <paramref name="value"/>. The
+        /// segments are authored in the UXML; this only toggles their class.
+        /// </summary>
+        private static void SetBar(VisualElement bar, float value, bool muted)
+        {
+            if (bar == null)
+            {
+                return;
+            }
+            int lit = UnityEngine.Mathf.RoundToInt(AudioOptions.Snap(value) / AudioOptions.Step);
+            for (int i = 0; i < bar.childCount; i++)
+            {
+                bar[i].EnableInClassList("cd-option-seg--on", i < lit);
+            }
+            bar.EnableInClassList("cd-option-bar--muted", muted);
         }
 
         private static void SetText(Label label, string text)

@@ -108,6 +108,27 @@ namespace Tests.EditMode
                 "must match how MainMenuManager writes RunSaveData.RunKey");
         }
 
+        [Test]
+        public void OpenedBy_ListsOnlyTheRunsThisClearMadeStartable()
+        {
+            var tutorial = MakeRun("Tutorial");
+            var other = MakeRun("Other");
+            var next = MakeRun("Next");
+            var needsBoth = MakeRun("NeedsBoth");
+            var unrelated = MakeRun("Unrelated");
+            var campaign = MakeCampaign(
+                Node(tutorial),
+                Node(other),
+                Node(next, CampaignUnlockMode.All, false, tutorial),
+                Node(needsBoth, CampaignUnlockMode.All, false, tutorial, other),
+                Node(unrelated, CampaignUnlockMode.All, false, other));
+
+            var opened = CampaignOps.OpenedBy(campaign, tutorial, Completed("Tutorial"));
+
+            CollectionAssert.AreEqual(new[] { next }, opened,
+                "a run still waiting on another prerequisite has not opened, and one that does not follow this run is not news");
+        }
+
         // --- Node state ----------------------------------------------------------------------
 
         [Test]

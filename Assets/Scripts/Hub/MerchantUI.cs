@@ -19,7 +19,7 @@ namespace Assets.Scripts.Hub
     /// paid-restock) stock, sell un-equipped gear back at a loss, and enlarge the potion belt.
     /// Operates on a VisualElement subtree owned by the menu's UIDocument — not a MonoBehaviour.
     ///
-    /// <para><b>On the inventory frame since 2026-09-30</b> (docs/MENU_IMPROVEMENTS.md): Buy / Sell /
+    /// <para><b>On the inventory frame since 2026-09-30</b> (menu review): Buy / Sell /
     /// Potion Belt tabs, a hero strip that picks who an item is compared against, the list, and a
     /// detail column with the item's grants, every stat now → if worn, the price and the action.
     /// It used to be two 70px scrollers of "Simple Sword (Common)" with nothing to judge a purchase by.

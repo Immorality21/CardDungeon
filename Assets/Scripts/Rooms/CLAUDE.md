@@ -141,7 +141,8 @@ already had. If a room needs to *say* something, that is what an event's `Prompt
 Up while walking the floor, hidden in combat and under the victory / level-clear windows (`RoomActionUI.RefreshHud` / `TickHud`, added 2026-09-28 for playtest finding 7). Four lines: the level's name (`RunLevelEntry.LevelName`, or the level asset's name spaced out when there is no run), the run and **Level N of M**, **the gold found on this floor** and the map's explored line.
 
 - **The gold is the pending pool** (`MetaProgressManager.PendingRunGold`), labelled as banked on the stairs, because that is what the player needs to know about it: a wipe or leaving the floor forfeits it. It is polled per frame and redrawn only when it moves, since a cache, an event or a kill can change it.
-- **The explored line is `DungeonMapOps.StatusLine`, the floor map's own**, so the HUD can never say more than the map does — no total room count, by the same rule. It and the names are rebuilt on `Show` (every room change, including fast travel).
+- **The explored line is `DungeonMapOps.StatusLine`**, so the HUD can never say more than the map does — no total room count, by the same rule. It and the names are rebuilt on `Show` (every room change, including fast travel). The map window itself shows `DungeonMapOps.WaitingLine` instead (the exit, and what explored rooms still hold), so one screen does not say the same thing twice.
+- **The camera keeps the party's room out from under it** (2026-09-30). `GameManager`'s follow target is `CameraSafeArea.Nudge` of the party's position: the smallest shift left or up that clears the room (plus 0.4 of wall) from the HUD's viewport rect (`RoomActionUI.TryGetHudViewportRect`), taken only if the room stays on screen. It is a function of the target, never of the camera's current position, so the lerp converges. Fast travel snaps through the same target (`GameManager.SnapCamera`). Only the current room is protected; a neighbour can still sit under the HUD.
 
 ## Runtime Controls
 
@@ -271,8 +272,9 @@ Up while walking the floor, hidden in combat and under the victory / level-clear
 
 - **The room bar names the thing**: the event button is the event's title, and Search / Rest /
   Descend read "Open the cache" / "Rest at the refuge" / "Take the stairs".
-- **Fight / Flee is headed by who is in the room** (`fight-foes`, `DescribeFoes`): bestiary names
-  grouped by *kind*, "???" for an unmet kind, no stats.
+- **Fight / Flee is headed by who is in the room** (`fight-foes`, the pure `FoeLine`): met enemies
+  by name, grouped by *kind* ("Slag Hound x2 + Cinder Imp"), every unmet one folded into one count
+  ("+ 2 unknown", or "4 unknown foes"), no stats. A "???" per unmet kind read as "??? + ??? + ??? x2".
 - **The party window** has a portrait, a slim HP bar and a chip per level affliction
   (`LevelAfflictionTracker.For`, worded through the buff handler), and is refreshed the moment an
   event outcome is applied.
