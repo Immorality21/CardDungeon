@@ -87,6 +87,10 @@ does not wrap. A lot within `CaptionRoom` of the town's bottom edge (the campfir
 building printed its costs read like a spreadsheet. Beside each name there is one badge instead:
 - a **hammer** when there is something to build or raise (`LotBadge.Build`);
 - a **padlock** when the lot is not on offer yet (`LotBadge.Locked`);
+- a **gold pip** on a *built* lot with something waiting inside (`LotBadge.New`, 2026-09-30): a grid
+  node some owned hero can buy now, a Forge upgrade the purse covers, or a Bestiary with more enemies
+  met than when it was last opened (`BestiaryViewedCount`). It wins over the hammer. `HubManager.BadgeWithNews`
+  decides it, since it needs the roster and the save; the presenter stays pure;
 - nothing when the lot is finished.
 
 `HubPresenter.BadgeFor` picks the badge and `HubView.SetLotBadge` draws it (icons in

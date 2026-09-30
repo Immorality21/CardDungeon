@@ -145,7 +145,11 @@
         <ui:VisualElement name="pause-window" class="cd-window cd-window--flush cd-dock-center cd-hidden">
             <ui:Label text="Paused" class="cd-title" />
 
-            <ui:Label text="Audio" class="cd-subtitle" />
+            <!-- Resume first - the default cursor and the common case - then Map, the audio dials
+                 under their own heading, and Leave last (it is already two-press). 2026-09-30. -->
+            <ui:Button name="pause-resume" text="Resume" class="cd-button cd-button--wide" />
+            <ui:Button name="pause-map" text="Map" class="cd-button cd-button--wide" />
+            <ui:Label text="Audio" class="cd-section-head" />
             <ui:VisualElement class="cd-option-row">
                 <ui:Label text="Master" class="cd-option-label" />
                 <ui:Button name="master-down" text="-" class="cd-button cd-button--step" />
@@ -166,8 +170,6 @@
             </ui:VisualElement>
             <ui:Button name="options-mute" text="" class="cd-menu-button" />
 
-            <ui:Button name="pause-map" text="Map" class="cd-button cd-button--wide" />
-            <ui:Button name="pause-resume" text="Resume" class="cd-button cd-button--wide" />
             <ui:Button name="pause-quit" text="Leave the Dungeon" class="cd-button cd-button--wide" />
             <ui:Label name="pause-note" text="" class="cd-info-label cd-hint" />
         </ui:VisualElement>

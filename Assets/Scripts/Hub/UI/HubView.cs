@@ -304,6 +304,7 @@ namespace Assets.Scripts.Hub.UI
             }
             element.EnableInClassList("hub-lot__badge--build", badge == LotBadge.Build);
             element.EnableInClassList("hub-lot__badge--locked", badge == LotBadge.Locked);
+            element.EnableInClassList("hub-lot__badge--new", badge == LotBadge.New);
             element.EnableInClassList("cd-hidden", badge == LotBadge.None);
         }
 

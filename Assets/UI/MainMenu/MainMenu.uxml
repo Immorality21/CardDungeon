@@ -21,7 +21,7 @@
         <ui:VisualElement name="options-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
             <ui:Label text="Options" class="cd-title" />
 
-            <ui:Label text="Audio" class="cd-subtitle" />
+            <ui:Label text="Audio" class="cd-section-head" />
             <ui:VisualElement class="cd-option-row">
                 <ui:Label text="Master" class="cd-option-label" />
                 <ui:Button name="master-down" text="-" class="cd-button cd-button--step" />

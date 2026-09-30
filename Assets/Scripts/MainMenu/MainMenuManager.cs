@@ -121,6 +121,13 @@ public class MainMenuManager : MonoBehaviour
     private void Update()
     {
         PanelKeyboard.Claim();
+        // A cursor from the first frame (2026-09-30), so the title has a focal point and Enter works
+        // before any arrow. Every frame because the layout is stale on the frame a view is shown;
+        // SelectFirst does nothing once something is selected.
+        if (_nav != null && IsShown(_titleView))
+        {
+            _nav.SelectFirst();
+        }
     }
 
     private void ResetKeyboardNavigation()

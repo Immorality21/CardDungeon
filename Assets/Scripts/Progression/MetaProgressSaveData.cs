@@ -89,6 +89,10 @@ namespace Assets.Scripts.Progression
         public bool TutorialStarted;
         public bool TutorialFinished;
 
+        /// <summary>How many enemies the bestiary had recorded when it was last opened - the hub's
+        /// "something new here" badge shows on the Bestiary while more have been met since.</summary>
+        public int BestiaryViewedCount;
+
         public string GetFileName()
         {
             return "Meta";

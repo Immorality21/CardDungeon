@@ -443,6 +443,19 @@ namespace Assets.Scripts.Progression
         // teaches nothing new must not write Meta.json.
 
         /// <summary>Every enemy the player has met. Never null; the live list, so do not mutate it.</summary>
+        public int BestiaryViewedCount => _saveData.BestiaryViewedCount;
+
+        /// <summary>The bestiary was opened with <paramref name="seenCount"/> enemies recorded.</summary>
+        public void MarkBestiaryViewed(int seenCount)
+        {
+            if (_saveData.BestiaryViewedCount == seenCount)
+            {
+                return;
+            }
+            _saveData.BestiaryViewedCount = seenCount;
+            Save();
+        }
+
         public List<BestiaryEntry> GetBestiary()
         {
             return _saveData.Bestiary ?? (_saveData.Bestiary = new List<BestiaryEntry>());

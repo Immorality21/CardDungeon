@@ -228,6 +228,11 @@ namespace Assets.Scripts.Cards.UI
             for (int i = 0; i < slots.Count; i++)
             {
                 var slot = slots[i];
+                // An empty slot is not a choice: listing "(empty)" only made the picker taller.
+                if (slot.IsEmpty)
+                {
+                    continue;
+                }
                 bool selectable = slot.CanCast;
 
                 string name = slot.IsEmpty ? "(empty)" : slot.Magic.DisplayName;

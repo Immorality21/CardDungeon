@@ -18,7 +18,7 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void EffectLines_ScaledDamage_AddsTheCasterStatAndNamesAttack()
+        public void EffectLines_ScaledDamage_AddsTheCasterStatAndNamesIt()
         {
             // Slash: 3 + Strength damage and a bleed.
             var caster = new MockCombatUnit("Warrior", strength: 6, endurance: 2, health: 20);
@@ -29,7 +29,7 @@ namespace Tests.EditMode
             var lines = AbilityDescriber.EffectLines(slash, caster, null);
 
             Assert.AreEqual(2, lines.Count);
-            Assert.AreEqual("9 damage (Attack 6)", lines[0]);
+            Assert.AreEqual("9 damage (STR 6)", lines[0]);
             Assert.AreEqual("Bleed 1/turn, 3 turns", lines[1]);
         }
 
@@ -42,7 +42,7 @@ namespace Tests.EditMode
 
             var lines = AbilityDescriber.EffectLines(slash, caster, null, powerBonus: 2);
 
-            Assert.AreEqual("11 damage (Attack 6)", lines[0]);
+            Assert.AreEqual("11 damage (STR 6)", lines[0]);
         }
 
         [Test]

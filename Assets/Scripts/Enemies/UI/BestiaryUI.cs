@@ -200,9 +200,12 @@ namespace Assets.Scripts.Enemies.UI
             _rowEntries.Clear();
 
             var knowledge = MetaProgressManager.Instance.GetBestiary();
+            int seenCount = BestiaryPresenter.SeenCount(_catalog, knowledge);
             _progress.text = _catalog.Count == 0
                 ? "No enemy catalog found."
-                : $"{BestiaryPresenter.SeenCount(_catalog, knowledge)} of {_catalog.Count} discovered";
+                : $"{seenCount} of {_catalog.Count} discovered";
+            // Read: the town stops flagging the Bestiary until someone new is met.
+            MetaProgressManager.Instance.MarkBestiaryViewed(seenCount);
 
             int unknown = 0;
             for (int i = 0; i < _catalog.Count; i++)

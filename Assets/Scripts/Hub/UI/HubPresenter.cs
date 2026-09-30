@@ -14,6 +14,8 @@ namespace Assets.Scripts.Hub.UI
         None,
         Build,
         Locked,
+        // Something waits inside a built lot: XP to spend, an upgrade to afford, a new entry to read.
+        New,
     }
 
     public static class HubPresenter
@@ -132,6 +134,8 @@ namespace Assets.Scripts.Hub.UI
                     return "hub-lot__badge--build";
                 case LotBadge.Locked:
                     return "hub-lot__badge--locked";
+                case LotBadge.New:
+                    return "hub-lot__badge--new";
                 default:
                     return null;
             }

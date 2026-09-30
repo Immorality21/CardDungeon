@@ -189,8 +189,33 @@
    wraps to fewer lines and the window stays low. Its height is what matters - the heroes stand
    in a column right above the bottom-left dock, and a tall picker covers the one whose turn it is. */
 .cd-window--picker {
-    width: 560px;
-    max-width: 46%;
+    width: 640px;
+    max-width: 52%;
+    max-height: 40%;
+}
+
+/* List and description side by side, so the picker stays as low as the command menu. */
+.cd-picker-body {
+    flex-direction: row;
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+/* Doubled so it beats .cd-select-scroll's flex-grow, which otherwise hands the list the width. */
+.cd-select-scroll.cd-picker-list {
+    width: 280px;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.cd-sel-desc.cd-picker-desc {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    margin: 4px 10px 4px 4px;
+    border-top-width: 0;
+    border-left-width: 1px;
+    border-left-color: var(--cd-frame);
 }
 
 /* ---- Party status window (hero names + HP) ----
@@ -1292,8 +1317,9 @@
     opacity: 1;
 }
 
+/* A loss is red (2026-09-30): pale blue read as "different", not "worse". */
 .cd-inv-delta--down {
-    color: rgb(154, 178, 217);
+    color: rgb(255, 130, 120);
     opacity: 1;
 }
 
@@ -1521,7 +1547,7 @@
 }
 
 .cd-inv-stat__value.cd-inv-delta--down {
-    color: rgb(154, 178, 217);
+    color: rgb(255, 130, 120);
 }
 
 /* The party-wide tabs' summary in the left column. */
@@ -2233,6 +2259,21 @@
 }
 
 /* Merchant gear shop (buy/sell rows). */
+/* A section head inside a window (Options, Pause): the inventory column title's accent and rule,
+   at row-label size so it reads as a heading, not a lesser label. */
+.cd-section-head {
+    flex-shrink: 0;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--cd-accent);
+    -unity-text-align: middle-left;
+    padding-bottom: 4px;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(205, 110, 255, 0.35);
+}
+
 .cd-subtitle {
     -unity-font-style: bold;
     font-size: 16px;
@@ -3297,6 +3338,18 @@
     -unity-background-scale-mode: scale-to-fit;
 }
 
+/* Something waits inside: a gold pip, drawn rather than an icon. */
+.hub-lot__badge--new {
+    width: 16px;
+    height: 16px;
+    margin: 0 0 0 6px;
+    align-self: center;
+    background-color: var(--cd-gold);
+    border-width: 2px;
+    border-color: rgb(60, 36, 10);
+    border-radius: 8px;
+}
+
 /* Something to build or raise here. */
 .hub-lot__badge--build {
     background-image: url("project://database/Assets/UI/Icons/hub_hammer.png");
@@ -3670,11 +3723,14 @@
    so highlighting never nudges a layout.
    ============================================================ */
 
+/* One cursor look for buttons, the Storehouse's: purple fill, WHITE text (gold on this purple was
+   the lowest-contrast text in the game, 2026-09-30). World objects - lots, the signpost - keep their
+   gold outline instead (.hub-lot--art / .hub-road--art). */
 .cd-nav--selected {
     background-color: rgb(102, 48, 158);
     border-width: 2px;
     border-color: var(--cd-accent);
-    color: var(--cd-gold);
+    color: var(--cd-text-light);
 }
 
 .cd-nav--selected:hover {

@@ -23,7 +23,7 @@ namespace Assets.Scripts.Cards
     public static class AbilityDescriber
     {
         /// <summary>
-        /// One line per active effect, e.g. "9 damage (Attack 7)" or "Bleeding 1/turn, 3 turns".
+        /// One line per active effect, e.g. "9 damage (STR 7)" or "Bleeding 1/turn, 3 turns".
         /// Effects locked behind a higher upgrade level are left out, as the resolver skips them.
         /// Health costs are left out too - the picker row already shows the price.
         /// </summary>
@@ -172,7 +172,8 @@ namespace Assets.Scripts.Cards
             {
                 int attack = caster.GetEffectiveAttackPower()
                     + (buffTracker != null ? buffTracker.GetBuffAmount(caster, caster.AttackStat) : 0);
-                line += $" (Attack {attack})";
+                // The stat grid's name for it ("STR 7"), not a second word for the same number.
+                line += $" ({StatCatalog.ShortName(caster.AttackStat)} {attack})";
             }
             return line;
         }

@@ -345,8 +345,114 @@ namespace Assets.Scripts.Hub
             {
                 var state = BuildingOps.StateOf(building, progress);
                 _town.SetLotState(building.SaveKey, HubPresenter.StateClass(state));
-                _town.SetLotBadge(building.SaveKey, HubPresenter.BadgeFor(building, progress));
+                _town.SetLotBadge(building.SaveKey, BadgeWithNews(building, progress));
             }
+        }
+
+        /// <summary>
+        /// The presenter's badge, except that a built lot with something waiting inside shows the
+        /// gold "new" pip instead (2026-09-30): the town looked identical whether or not the Hall had XP
+        /// to spend or the Bestiary a new entry. Information, not hand-holding - it says there is
+        /// something to do, not what to do. It beats the hammer: an upgrade can wait a visit.
+        /// </summary>
+        private LotBadge BadgeWithNews(BuildingSO building, HubProgress progress)
+        {
+            var badge = HubPresenter.BadgeFor(building, progress);
+            if (BuildingOps.StateOf(building, progress) == BuildingState.Built && HasNews(building.Service))
+            {
+                return LotBadge.New;
+            }
+            return badge;
+        }
+
+        private bool HasNews(HubService service)
+        {
+            switch (service)
+            {
+                case HubService.SphereGrid:
+                    return AnyGridNodeAffordable();
+                case HubService.Forge:
+                    return AnyForgeUpgradeAffordable();
+                case HubService.Bestiary:
+                    return BestiaryHasNewEntries();
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>Some owned hero can buy some node on their grid right now.</summary>
+        private bool AnyGridNodeAffordable()
+        {
+            if (_partyRoster == null)
+            {
+                return false;
+            }
+            foreach (var hero in HeroRoster.GetOwnedHeroes(_partyRoster))
+            {
+                if (hero == null || hero.SphereGrid == null || hero.SphereGrid.Nodes == null)
+                {
+                    continue;
+                }
+                var save = HeroRoster.GetHeroSave(hero);
+                if (save == null || save.CurrentXp <= 0)
+                {
+                    continue;
+                }
+                var activated = save.ActivatedNodes ?? new List<string>();
+                foreach (var node in hero.SphereGrid.Nodes)
+                {
+                    if (node != null && SphereGridOps.CanActivate(hero.SphereGrid, activated, save.CurrentXp, node.Key)
+                        && HeroRoster.CanPayMaterials(node))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>A discovered ability or combo whose next upgrade the purse covers.</summary>
+        private static bool AnyForgeUpgradeAffordable()
+        {
+            if (!MetaProgressManager.HasInstance)
+            {
+                return false;
+            }
+            var meta = MetaProgressManager.Instance;
+            if (Cards.MagicCatalog.HasInstance)
+            {
+                foreach (var magic in Cards.MagicCatalog.Instance.AllMagic)
+                {
+                    if (magic != null && meta.IsMagicDiscovered(magic.Key) && meta.CanUpgradeMagic(magic.Key))
+                    {
+                        return true;
+                    }
+                }
+            }
+            if (Cards.MagicComboCatalog.HasInstance)
+            {
+                foreach (var combo in Cards.MagicComboCatalog.Instance.AllCombos)
+                {
+                    if (combo != null && meta.IsComboDiscovered(combo.Key) && meta.CanUpgradeCombo(combo.Key))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>More enemies met than the bestiary had recorded when it was last opened.</summary>
+        private static bool BestiaryHasNewEntries()
+        {
+            var catalog = Enemies.EnemyCatalogSO.Load();
+            if (catalog == null || catalog.Enemies == null || !MetaProgressManager.HasInstance)
+            {
+                return false;
+            }
+            var meta = MetaProgressManager.Instance;
+            int seen = Enemies.BestiaryPresenter.SeenCount(catalog.Enemies, meta.GetBestiary());
+            return seen > meta.BestiaryViewedCount;
         }
 
         /// <summary>
@@ -654,7 +760,7 @@ namespace Assets.Scripts.Hub
             _town.SetLotSprite(_selectedLot.SaveKey, BuildingOps.SpriteFor(_selectedLot, after), phaseIn: true);
             _town.SetLotState(_selectedLot.SaveKey,
                 HubPresenter.StateClass(BuildingOps.StateOf(_selectedLot, after)));
-            _town.SetLotBadge(_selectedLot.SaveKey, HubPresenter.BadgeFor(_selectedLot, after));
+            _town.SetLotBadge(_selectedLot.SaveKey, BadgeWithNews(_selectedLot, after));
 
             SetLotFeedback(placing
                 ? $"{_selectedLot.Label} built."

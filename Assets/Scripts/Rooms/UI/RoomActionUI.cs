@@ -2668,7 +2668,8 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
                 int max = Mathf.Max(1, hero.GetEffectiveMaxHealth());
-                hp.text = $"{hero.Stats.Health}/{max}";
+                // Overkill leaves Health below zero; the row reads 0, as the plate above the hero does.
+                hp.text = $"{Mathf.Max(0, hero.Stats.Health)}/{max}";
                 if (_partyRows.TryGetValue(hero, out var row) && row != null)
                 {
                     row.EnableInClassList("cd-party-row--dead", !hero.IsAlive);
@@ -2714,6 +2715,9 @@ namespace Assets.Scripts.Rooms
 
         private void OnTurnExecuted(string log)
         {
+            // The turn is over: the row stops claiming it, or the hero stayed lit through the
+            // enemy's turn that follows. The next hero turn lights its own row.
+            HighlightActiveHero(null);
             RefreshPartyStatus();
         }
 
@@ -2750,8 +2754,11 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_mainBar, false);
             SetShown(_combatBar, false);
-            _detailTitle.text = "Your Party Has Fallen...";
-            _detailMessage.text = log;
+            // What dying costs and what it keeps, as rows (2026-09-30) - it used to be the generic
+            // detail dialog with the raw combat log dumped in it.
+            ShowDetail("The Party Has Fallen", DefeatSummary());
+            _detailOk.text = "Return to town";
+            AddDefeatRows();
             _detailOkAction = () =>
             {
                 if (DungeonManager.HasInstance)
@@ -2763,6 +2770,39 @@ namespace Assets.Scripts.Rooms
                 SceneManager.LoadScene("HubScene");
             };
             SetShown(_detailWindow, true);
+        }
+
+        private static string DefeatSummary()
+        {
+            var entry = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentLevelEntry : null;
+            string where = entry != null && !string.IsNullOrEmpty(entry.LevelName) ? entry.LevelName : "the dungeon";
+            return DungeonManager.ActiveRun != null
+                ? $"Somewhere in {where}, the last of them goes down. The run ends here."
+                : $"Somewhere in {where}, the last of them goes down.";
+        }
+
+        /// <summary>Kept and lost, in the same rows the victory window uses.</summary>
+        private void AddDefeatRows()
+        {
+            if (_detailRows == null)
+            {
+                return;
+            }
+            _detailRows.Clear();
+            if (DungeonManager.ActiveRun != null)
+            {
+                int levels = DungeonManager.RunLevelIndex + 1;
+                _detailRows.Add(MakeVictoryRow($"Gold for reaching level {levels}",
+                    "+" + MetaProgressManager.GoldPerLevelOnDeath * levels));
+            }
+            _detailRows.Add(MakeVictoryRow("Everything banked before this floor", "kept"));
+            int pending = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.PendingRunGold : 0;
+            if (pending > 0)
+            {
+                _detailRows.Add(MakeVictoryRow("Gold found on this floor", "lost"));
+            }
+            _detailRows.Add(MakeVictoryRow("XP, items and materials from this floor", "lost"));
+            SetShown(_detailRows, true);
         }
 
         private void OnFlee()
@@ -2998,7 +3038,7 @@ namespace Assets.Scripts.Rooms
                 bool teaching = MetaProgressManager.HasInstance && !MetaProgressManager.Instance.TutorialFinished;
                 SetText(_hudGold, teaching
                     ? $"Gold found  +{gold}   (banked when you take the stairs)"
-                    : $"Gold found  +{gold}");
+                    : $"+{gold} gold");
             }
         }
 
@@ -3045,12 +3085,15 @@ namespace Assets.Scripts.Rooms
             SetText(_levelSubtitle, LevelClearSubtitle(summary));
 
             _levelBody.Clear();
+            // What the floor gave that is rare comes first (2026-09-30): the materials and items
+            // gate buildings and gear, and below gold, essence and XP they sat under the fold.
+            AddLevelLines("Materials", summary.Materials);
+            AddLevelLines("Items", summary.Items);
+
             AddLevelSection("Gold", $"+{summary.GoldTotal}");
-            AddLevelDetail("Found on this level", $"+{summary.GoldFound}");
-            AddLevelDetail("Level cleared", $"+{summary.GoldBonus}");
+            AddLevelDetail($"{summary.GoldFound} found  ·  {summary.GoldBonus} for the clear", string.Empty);
 
             AddLevelSection("Essence", $"+{summary.Essence}");
-            AddLevelDetail("Spend it at the Forge to upgrade abilities", string.Empty);
 
             if (summary.Xp.Count > 0)
             {
@@ -3065,9 +3108,6 @@ namespace Assets.Scripts.Rooms
                     AddLevelDetail(line.Label, $"+{line.Amount}");
                 }
             }
-
-            AddLevelLines("Materials", summary.Materials);
-            AddLevelLines("Items", summary.Items);
 
             if (summary.Joined.Count > 0)
             {

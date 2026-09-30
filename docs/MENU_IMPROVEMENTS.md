@@ -45,7 +45,7 @@ item icons this review saw were replaced the same day: every item now has its ow
   shown and put a scrim between: a `hub-scrim` element (absolute, full-bleed, `background-color:
   rgba(6,3,14,0.72)`) shown with any service. It also gives the lot panel's *Build* the sprite swap
   it was built to animate (the UXML comment says so — today the swap happens behind the panel).
-- [ ] **Window size jumps between states and tabs** (severity: medium) — the recipe the inventory
+- [x] **Window size jumps between states and tabs** — *done 2026-09-30*: every hub screen is now a fixed frame — the Forge, Campfire, Merchant, Sphere Hall and Bestiary share the inventory's 1180×720 `cd-inv-window`, and the lot panel is a fixed 760×420 `hub-lotpanel` built or not. (severity: medium) — the recipe the inventory
   fixed (`cd-window--fixed` + px regions) has not reached: the Forge is 445px tall on Abilities, 355px on
   Combos and 310px on an inspected ability (`21_forge.png`, `23_forge_combos.png`, `22_forge_inspect.png`);
   the lot panel is 250px unbuilt, 335px built (`13_…`, `14_campfire_lot.png`). Besides looking loose,
@@ -55,7 +55,7 @@ item icons this review saw were replaced the same day: every item now has its ow
   `.cd-scan__body` and `rgba(41,31,20,0.22)` on `.cd-effect-row` (parchment-era tokens). They read as
   muddy grey-brown boxes (`21_forge.png`, `26_bestiary.png`, `47_inspect_step.png`). Replace with a
   `--cd-well: rgba(0,0,0,0.30)` token plus the inventory column border (`.cd-inv-col`).
-- [ ] **Two different "selected" looks, and a permanent gold border that reads as one** (severity: medium)
+- [x] **Two different "selected" looks, and a permanent gold border that reads as one** — *done 2026-09-30*: `.cd-nav--selected` is purple fill with **white** text; world objects (lots, the signpost) keep the gold outline; the road is now signpost art with no standing border. (severity: medium)
   — the title/hub cursor (`.cd-nav--selected`) is a filled purple button with **gold text on
   `rgb(102,48,158)`**, which is the lowest-contrast text in the game (`02_title_cursor.png`); art lots get
   a gold outline instead; and `.hub-road` is *always* drawn with a 3px gold border, so "The Story"
@@ -74,7 +74,7 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Title screen and Options (`MainMenu.uxml`)
 
-- [ ] **No cursor until the first key press** (severity: low) — `01_title.png` shows three identical buttons;
+- [x] **No cursor until the first key press** — *done 2026-09-30*: Continue is selected on arrival (`MainMenuManager.Update` → `SelectFirst`). (severity: low) — `01_title.png` shows three identical buttons;
   the cursor only appears after an arrow (`02_title_cursor.png`). Pre-select `continue-btn` in
   `MainMenuManager` on show so Enter works and the screen has a focal point.
 - [ ] **Options rows float apart** (severity: low) — labels hug the left edge and the − value + cluster
@@ -82,7 +82,7 @@ item icons this review saw were replaced the same day: every item now has its ow
   `.cd-option-row` a fixed-width label column (200px) and put a 10-segment bar between − and +
   (`cd-option-bar`, a row of 10 small `VisualElement`s filled by `AudioOptionsUI`), so the level reads
   without parsing "70%".
-- [ ] **"Audio" subtitle is the same size as body copy** (severity: low) — `cd-subtitle` at 16px bold vs
+- [x] **"Audio" subtitle is the same size as body copy** — *done 2026-09-30*: `cd-section-head` (18px, accent, underline rule) on Options and Pause. (severity: low) — `cd-subtitle` at 16px bold vs
   18px row labels reads as a smaller, lesser label. Use the inventory's `cd-inv-col__title` treatment
   (accent colour + underline rule) for section heads here and in the pause window.
 - [ ] **"Sound: On" is the loudest thing on the screen** (severity: low) — a full-width
@@ -103,7 +103,7 @@ item icons this review saw were replaced the same day: every item now has its ow
 - [x] **Locked lot says "Locked"** — *done*: the town shows a padlock badge, and the lot panel names the run in the way (*"Clear The Threshold first."*). (severity: low) — `11_hub_cursor.png`, Ability Forge: the Hub guide's own
   rule is that a locked lot names the run in its way. The caption should read *"After The Threshold"*;
   "Locked" in grey also sits at the lowest contrast in the town.
-- [ ] **No "something new here" signal on lots** (severity: medium) — after a floor the Sphere Hall has XP to
+- [x] **No "something new here" signal on lots** — *done 2026-09-30*: a gold pip (`hub-lot__badge--new`, `HubManager.BadgeWithNews`) on a *built* lot when the Sphere Hall has a node some owned hero can buy now, the Forge an upgrade the purse covers, or the Bestiary more enemies met than when it was last opened (`MetaProgressSaveData.BestiaryViewedCount`, written by `BestiaryUI.Show`). It takes the place of the hammer. (severity: medium) — after a floor the Sphere Hall has XP to
   spend and the Bestiary new entries, but the town looks identical (`58_back_in_hub.png`). Add a small
   gold pip (`hub-lot__badge`) on a lot when its service has something actionable (unspent XP on any
   fielded hero, unseen bestiary entry, affordable upgrade). This is information, not hand-holding.
@@ -301,7 +301,7 @@ item icons this review saw were replaced the same day: every item now has its ow
   its highlighted *Fight* button visible beneath the pause window (`49_pause.png`). Hide `combat-bar`,
   `main-bar` and `nav-hint` while paused (and restore on Resume), or at least drop their
   `cd-nav--selected`.
-- [ ] **Resume is third** (severity: medium) — order is audio dials, Sound, Map, **Resume**, Leave. Put
+- [x] **Resume is third** — *done 2026-09-30*: Resume, Map, the audio block under "Audio", Leave; the first arrow lands on Resume. (severity: medium) — order is audio dials, Sound, Map, **Resume**, Leave. Put
   Resume first with the default cursor, then Map, then the audio block under a subtitle, then Leave
   last (it is already two-press).
 - [ ] **Same Options layout issues as the title** (severity: low) — shared rows; the fixes above apply.
@@ -322,7 +322,7 @@ item icons this review saw were replaced the same day: every item now has its ow
   unit, a UITK plate under its feet (`UnitNameplates`); the world bar above the head is gone, and with
   it the top-edge clip. The HP number sits **inside** the bar (the owner's call).
 - [x] **Enemy HP shown twice** — *done 2026-09-30*: the nameplate carries the bar, the number is in it.
-- [ ] **The ability picker covers the acting hero** (severity: medium) — `61_ability_picker.png`: the picker
+- [x] **The ability picker covers the acting hero** — *done 2026-09-30*: empty slots are not listed, the description sits right of a 280px list (`cd-picker-body`), and the picker is capped at 40% height, so it stays below the party. (severity: medium) — `61_ability_picker.png`: the picker
   (desc + an "(empty)" row + Back) is taller than the command menu and cuts the Rogue's sprite off at the
   shoulders; `.cd-window--picker`'s own comment names this risk. Hide "(empty)" slots, put the description
   to the right of the list instead of under it, and cap the picker at the command window's height.
@@ -330,7 +330,7 @@ item icons this review saw were replaced the same day: every item now has its ow
   window for "Attack / Ability / Item / Inspect / Skip" with *Ability* greyed and no explanation. Narrow it
   to ~300px, and put the charge count on the row ("Ability 2/2") or the reason ("Ability — none
   carried") in the row's meta slot.
-- [ ] **Turn highlight lags into the enemy's turn** (severity: low) — during the Floating Eye's action the
+- [x] **Turn highlight lags into the enemy's turn** — *done 2026-09-30*: the party row drops its highlight when a turn ends (`OnTurnExecuted`). The field arrow was never wrong: it is the turn marker and follows whoever acts. (severity: low) — during the Floating Eye's action the
   party panel still highlights *Warrior* and the target arrow stays on the enemy (`62_target_picker.png`,
   turn order shows Floating Eye current). Clear `cd-party-row--active` and the target arrow on
   `OnTurnExecuted` / when an enemy turn starts.
@@ -350,16 +350,16 @@ item icons this review saw were replaced the same day: every item now has its ow
   with an item under it, then XP and Gold rows. Order: Gold, XP (per hero, as the level clear does),
   then Loot with rarity colours and the item's icon at 2x. "XP +10" alone does not say whether it is
   each or shared.
-- [ ] **Level clear hides the materials below the fold** (severity: medium) — `57_level_clear.png`: Gold (3
+- [x] **Level clear hides the materials below the fold** — *done 2026-09-30*: Materials and Items come first; Gold is one section with one line ("43 found · 25 for the clear"); the Forge hint is gone. (severity: medium) — `57_level_clear.png`: Gold (3
   rows), Essence (2 rows) and XP (4 rows) fill the scroller and *Materials* starts at the bottom edge, so
   what the player went down for needs a scroll. Two columns (currencies left, loot + materials right),
   or collapse the Gold breakdown into one line ("+68 · 43 found, 25 clear bonus").
-- [ ] **"Spend it at the Forge to upgrade abilities"** (severity: low) — permanent teaching line under Essence;
+- [x] **"Spend it at the Forge to upgrade abilities"** — *done 2026-09-30 with the level-clear reorder*: the line is gone. (severity: low) — permanent teaching line under Essence;
   fine for the first clear, noise after. Gate it like the HUD's banking note.
 
 ## Defeat and run complete (source only)
 
-- [ ] **Defeat is the generic detail dialog with the raw combat log** (severity: medium) —
+- [x] **Defeat is the generic detail dialog with the raw combat log** — *done 2026-09-30*: "The Party Has Fallen", one line of where, then kept/lost rows (gold for the levels reached, what was banked, the floor's gold, XP, items and materials) and "Return to town". The victory-style red frame and the fuller run summary stay with §15. (severity: medium) —
   `ShowDeathScreen` puts `result.Log` (the turn-by-turn log) into `detail-message` under "Your Party Has
   Fallen..." with an "Ok" button. Give it the victory window's frame (`cd-victory`, red header) with
   what was lost — the floor's un-banked gold and XP, as the level-clear shows what was gained — and a
@@ -370,12 +370,12 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Storehouse inventory (the bar) — small notes
 
-- [ ] **Stat losses are not red** (severity: low) — `16_inventory_equipment.png`: in "Fits Main Hand",
+- [x] **Stat losses are not red** — *done 2026-09-30*: `cd-inv-delta--down` is red in the list chips and the stat grid (Storehouse, Merchant, Campfire). (severity: low) — `16_inventory_equipment.png`: in "Fits Main Hand",
   Oak Staff shows "+5 INT" gold and "−4 STR" pale blue; a loss should read as a loss (`--cd-bad`, red).
 - [ ] **Hero strip greyed but present on Materials** (severity: low) — `18_inventory_materials.png`: four
   disabled hero tiles take a band that means nothing on that tab. Fine for the fixed frame; draw them at
   `opacity: .35` without borders so they read as "not applicable" rather than "broken".
-- [ ] **"Attack 15" vs "STR 15"** (severity: low) — the ability line "18 damage (Attack 15)" names a stat the
+- [x] **"Attack 15" vs "STR 15"** — *done 2026-09-30*: the damage line names the caster's attack stat by its `StatCatalog` short name ("29 damage (AGI 26)" for the Rogue, who attacks with Agility). (severity: low) — the ability line "18 damage (Attack 15)" names a stat the
   stat grid calls STR. Use the `StatCatalog` label.
 
 ---
