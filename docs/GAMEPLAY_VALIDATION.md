@@ -229,6 +229,22 @@ Hard-won gotchas (each cost a failed compile until learned):
 
 ---
 
+17. **A keyboard-reachability probe for the shared cursor, and three traps met building it**
+    (2026-09-30). Collect every `Button` the `KeyboardNavigator` would consider (not `cd-nav-skip`,
+    `enabledInHierarchy`, no ancestor with resolved `display: none` / `visibility: hidden`), then send
+    ~300 seeded random arrow `KeyDownEvent`s to the document's `root` and record which element carries
+    `cd-nav--selected` after each; report the ones never reached. A miss is a *lead*, not a verdict —
+    confirm it with a deterministic walk (Down, Down, …) before calling it a bug: the Merchant's lower
+    Sell rows were "missed" by the random walk and reached fine by Down.
+    - **`Unity_GetConsoleLogs` can come back empty** even after `Debug.Log` from an
+      `EditorApplication.update` hook. Write a multi-frame run's results to a file in the scratchpad
+      with `System.IO.File.AppendAllText` and read it with the shell instead.
+    - **Opening a view and measuring it in the same frame reads stale layout** (gotcha above), so a
+      multi-screen pass is a list of steps run from `EditorApplication.update`, a few frames apart.
+    - **Editing a USS or UXML while in play mode hot-reloads the document and orphans its
+      controllers** — the next screenshot is an empty or dead UI. Reload the scene (or re-enter play
+      mode) after every stylesheet edit before judging anything.
+
 ## Screenshotting a **UI Toolkit** screen — `ScreenCapture.CaptureScreenshot` + the Read tool
 
 `Capture2DScene` renders its own orthographic view of a **world-space** rectangle, so it cannot see

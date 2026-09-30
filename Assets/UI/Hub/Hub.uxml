@@ -38,15 +38,33 @@
 
              The build is confirmed HERE rather than applied on load, which is what gives the sprite
              swap something to animate (HUB.md section 7, machinery 3). -->
-        <ui:VisualElement name="lot-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
-            <ui:Label name="lot-name" text="" class="cd-title" />
-            <ui:Label name="lot-blurb" text="" class="cd-info-label" />
-            <ui:Label name="lot-status" text="" class="cd-subtitle" />
-            <ui:Label name="lot-grant" text="" class="cd-info-label hub-lot-grant" />
-            <ui:Button name="lot-action" text="" class="cd-menu-button" />
-            <ui:Button name="lot-enter" text="Enter" class="cd-menu-button" />
-            <ui:Label name="lot-feedback" text="" class="cd-feedback" />
-            <ui:Button name="lot-close" text="Back" class="cd-button cd-button--narrow" />
+        <!-- One fixed px size in every state (2026-09-30): it used to be 250px unbuilt and 335px built,
+             and a resized dock-centred window desyncs hit-testing. The building's picture, what it
+             is, a have / need cost table, what the next level buys, then Enter / Build or Upgrade /
+             Back in that order - Enter first, because it is the common action on a built lot and the
+             first arrow key lands on the first button. -->
+        <ui:VisualElement name="lot-view" class="cd-window cd-window--flush hub-lotpanel cd-dock-center cd-hidden">
+            <ui:VisualElement class="cd-inv-header">
+                <ui:Label name="lot-name" text="" class="cd-inv-header__title" />
+                <ui:Label name="lot-status" text="" class="cd-camp-header__cap" />
+            </ui:VisualElement>
+            <ui:VisualElement class="hub-lotpanel__body">
+                <ui:VisualElement name="lot-art" class="hub-lotpanel__art" />
+                <ui:VisualElement class="hub-lotpanel__info">
+                    <ui:Label name="lot-blurb" text="" class="cd-inv-detail__desc" />
+                    <ui:Label name="lot-costs-title" text="Costs" class="cd-inv-col__title" />
+                    <ui:VisualElement name="lot-costs" class="hub-lotpanel__costs" />
+                    <ui:Label name="lot-grant-title" text="Next level" class="cd-inv-col__title" />
+                    <ui:Label name="lot-grant" text="" class="cd-inv-detail__line hub-lotpanel__grant" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="hub-lotpanel__actions">
+                <ui:Button name="lot-enter" text="Enter" class="cd-inv-tab cd-camp-action" />
+                <ui:Button name="lot-action" text="" class="cd-inv-tab cd-camp-action" />
+                <ui:Button name="lot-close" text="Back" class="cd-inv-close hub-lotpanel__back" />
+            </ui:VisualElement>
+            <ui:Label name="lot-reason" text="" class="cd-reason hub-lotpanel__reason" />
+            <ui:Label name="lot-feedback" text="" class="cd-camp-feedback hub-lotpanel__feedback" />
         </ui:VisualElement>
 
         <!-- RUN PROGRESS -->
@@ -221,15 +239,32 @@
         <!-- Fixed height for the same reason the inventory is: the detail column changes size as
              enemies are selected, and a translate-centered window that resizes leaves UITK's input
              hit-testing on the old transform, offsetting every click. -->
-        <ui:VisualElement name="bestiary-view" class="cd-window cd-window--flush cd-window--fixed cd-dock-center cd-hidden">
-            <ui:Label text="Bestiary" class="cd-title" />
-            <ui:Label name="bestiary-progress" text="" class="cd-info-label" />
-            <ui:VisualElement class="cd-bestiary__cols">
-                <ui:ScrollView name="bestiary-list" class="cd-bestiary__list" mode="Vertical" />
-                <ui:ScrollView name="bestiary-detail" class="cd-bestiary__detail" mode="Vertical" />
+        <!-- On the inventory frame (2026-09-30): met enemies as rows, the unmet folded into compact
+             rows at the bottom, and the chosen one's page beside the list - portrait and name on top,
+             then two columns so a normal entry never scrolls. Keeps its own Up/Down cursor. -->
+        <ui:VisualElement name="bestiary-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
+            <ui:VisualElement class="cd-inv-header">
+                <ui:Label text="Bestiary" class="cd-inv-header__title" />
+                <ui:Label name="bestiary-progress" text="" class="cd-camp-header__cap" />
+                <ui:Button name="bestiary-close" text="Back" class="cd-inv-close" />
             </ui:VisualElement>
-            <ui:Label name="bestiary-hint" text="&#8593;&#8595; select &#183; Esc back" class="cd-info-label cd-hint" />
-            <ui:Button name="bestiary-close" text="Back" class="cd-button cd-button--narrow" />
+            <ui:VisualElement class="cd-inv-body">
+                <ui:VisualElement class="cd-inv-col cd-shop-col--list">
+                    <ui:Label text="Enemies met" class="cd-inv-col__title" />
+                    <ui:ScrollView name="bestiary-list" class="cd-inv-list" mode="Vertical" />
+                </ui:VisualElement>
+                <ui:VisualElement class="cd-inv-col cd-inv-col--detail">
+                    <ui:VisualElement class="cd-inv-detail__head">
+                        <ui:VisualElement name="bestiary-portrait" class="cd-inv-detail__icon cd-bestiary__portrait" />
+                        <ui:VisualElement class="cd-inv-detail__titles">
+                            <ui:Label name="bestiary-name" text="" class="cd-inv-detail__name" />
+                            <ui:Label name="bestiary-sub" text="" class="cd-inv-detail__sub" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:ScrollView name="bestiary-detail" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label name="bestiary-hint" text="&#8593;&#8595; select  &#183;  Esc back" class="cd-inv-hint" />
         </ui:VisualElement>
 
         <!-- INVENTORY -->

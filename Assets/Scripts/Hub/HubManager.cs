@@ -79,6 +79,11 @@ namespace Assets.Scripts.Hub
         private Label _lotStatus;
         private Label _lotGrant;
         private Label _lotFeedback;
+        private Label _lotReason;
+        private VisualElement _lotArt;
+        private VisualElement _lotCosts;
+        private Label _lotCostsTitle;
+        private Label _lotGrantTitle;
         private Label _levelIndicator;
         private Label _levelName;
         private Label _progressParty;
@@ -198,6 +203,11 @@ namespace Assets.Scripts.Hub
             _lotStatus = root.Q<Label>("lot-status");
             _lotGrant = root.Q<Label>("lot-grant");
             _lotFeedback = root.Q<Label>("lot-feedback");
+            _lotReason = root.Q<Label>("lot-reason");
+            _lotArt = root.Q<VisualElement>("lot-art");
+            _lotCosts = root.Q<VisualElement>("lot-costs");
+            _lotCostsTitle = root.Q<Label>("lot-costs-title");
+            _lotGrantTitle = root.Q<Label>("lot-grant-title");
             _tutorialBanner = root.Q<VisualElement>("tutorial-banner");
             _tutorialText = root.Q<Label>("tutorial-text");
 
@@ -387,26 +397,149 @@ namespace Assets.Scripts.Hub
             }
 
             var progress = Progress();
+            var state = BuildingOps.StateOf(_selectedLot, progress);
+            bool built = state == BuildingState.Built;
             _lotName.text = _selectedLot.Label;
             _lotBlurb.text = _selectedLot.Blurb ?? string.Empty;
-            _lotStatus.text = DescribeLotStatus(_selectedLot, progress);
+            _lotStatus.text = LotStateLine(_selectedLot, progress);
+            RefreshLotArt(state, progress);
 
-            // The promise beside the price. Hidden rather than blanked, so a lot with nothing on
-            // sale does not leave a gap where a sales pitch used to be.
-            string grant = HubPresenter.DescribeNextGrant(_selectedLot, progress);
-            SetShown(_lotGrant, !string.IsNullOrEmpty(grant));
-            _lotGrant.text = grant;
+            // What it costs, as have / need rows - the button no longer repeats it.
+            bool canPlace = BuildingOps.CanPlace(_selectedLot, progress);
+            bool canUpgrade = BuildingOps.CanUpgrade(_selectedLot, progress);
+            string shortfall = BuildLotCosts(canPlace, canUpgrade, progress);
+
+            // The promise beside the price, labelled rather than told apart by colour alone.
+            string grant = BuildingOps.GrantForNext(_selectedLot, progress);
+            bool hasGrant = !string.IsNullOrWhiteSpace(grant) && (canPlace || canUpgrade);
+            SetShown(_lotGrantTitle, hasGrant);
+            SetShown(_lotGrant, hasGrant);
+            if (_lotGrantTitle != null)
+            {
+                _lotGrantTitle.text = canPlace ? "Once built" : $"Level {BuildingOps.NextLevel(_selectedLot, progress)}";
+            }
+            _lotGrant.text = hasGrant ? grant : string.Empty;
 
             string action = HubPresenter.ActionLabel(_selectedLot, progress);
+            bool canPay = CanPayFor(_selectedLot, progress);
             SetShown(_lotActionButton, !string.IsNullOrEmpty(action));
             _lotActionButton.text = action;
-            _lotActionButton.SetEnabled(CanPayFor(_selectedLot, progress));
-
-            bool built = BuildingOps.IsBuilt(_selectedLot, progress);
+            _lotActionButton.SetEnabled(canPay);
             SetShown(_lotEnterButton, built);
             _lotEnterButton.text = "Enter";
 
+            if (_lotReason != null)
+            {
+                _lotReason.text = state == BuildingState.Absent
+                    ? DescribeLotStatus(_selectedLot, progress) + "."
+                    : !string.IsNullOrEmpty(action) && !canPay ? shortfall : string.Empty;
+            }
+
             RefreshTutorial();
+        }
+
+        /// <summary>The header's state line: the level for a built lot, "Not built yet", or the lock.</summary>
+        private string LotStateLine(BuildingSO building, HubProgress progress)
+        {
+            switch (BuildingOps.StateOf(building, progress))
+            {
+                case BuildingState.Built:
+                    int level = BuildingOps.LevelOf(building, progress);
+                    return building.MaxLevel > 1 ? $"Level {level} of {building.MaxLevel}" : "Built";
+                case BuildingState.Available:
+                    return "Not built yet";
+                default:
+                    return "Locked";
+            }
+        }
+
+        /// <summary>
+        /// The building itself: what stands there now, or - before it is built - what it will be,
+        /// dimmed, so the player sees what the materials buy.
+        /// </summary>
+        private void RefreshLotArt(BuildingState state, HubProgress progress)
+        {
+            if (_lotArt == null)
+            {
+                return;
+            }
+            Sprite sprite = BuildingOps.SpriteFor(_selectedLot, progress);
+            bool preview = state != BuildingState.Built;
+            if (preview && _selectedLot.LevelSprites != null && _selectedLot.LevelSprites.Length > 0)
+            {
+                sprite = _selectedLot.LevelSprites[0];
+            }
+            _lotArt.style.backgroundImage = sprite != null ? new StyleBackground(sprite) : StyleKeyword.None;
+            _lotArt.EnableInClassList("hub-lotpanel__art--preview", preview);
+        }
+
+        /// <summary>
+        /// Fills the cost table and returns the shortfall as a sentence ("Need 2 more Rotted Timber"),
+        /// or empty when everything is covered.
+        /// </summary>
+        private string BuildLotCosts(bool canPlace, bool canUpgrade, HubProgress progress)
+        {
+            _lotCosts?.Clear();
+            var missing = new List<string>();
+
+            if (canPlace && _selectedLot.PlacementCost != null)
+            {
+                foreach (var line in _selectedLot.PlacementCost)
+                {
+                    if (line == null || !line.IsValid)
+                    {
+                        continue;
+                    }
+                    int need = Mathf.Max(1, line.Amount);
+                    int have = InventoryManager.Instance.GetMaterialQuantity(line.Material.Key);
+                    string name = string.IsNullOrEmpty(line.Material.DisplayName) ? line.Material.Key : line.Material.DisplayName;
+                    AddLotCostRow(line.Material.Icon, name, have, need);
+                    if (have < need)
+                    {
+                        missing.Add($"{need - have} more {name}");
+                    }
+                }
+            }
+            else if (canUpgrade)
+            {
+                int need = BuildingOps.UpgradeCost(_selectedLot, progress);
+                int have = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.Gold : 0;
+                AddLotCostRow(null, "Gold", have, need);
+                if (have < need)
+                {
+                    missing.Add($"{need - have} more gold");
+                }
+            }
+
+            bool any = _lotCosts != null && _lotCosts.childCount > 0;
+            SetShown(_lotCostsTitle, any);
+            SetShown(_lotCosts, any);
+            return missing.Count == 0 ? string.Empty : "Need " + string.Join(" and ", missing) + ".";
+        }
+
+        private void AddLotCostRow(Sprite icon, string name, int have, int need)
+        {
+            if (_lotCosts == null)
+            {
+                return;
+            }
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("hub-lotpanel__cost");
+            var tile = new VisualElement { pickingMode = PickingMode.Ignore };
+            tile.AddToClassList("hub-lotpanel__cost-icon");
+            if (icon != null)
+            {
+                tile.style.backgroundImage = new StyleBackground(icon);
+            }
+            row.Add(tile);
+            var label = new Label(name) { pickingMode = PickingMode.Ignore };
+            label.AddToClassList("hub-lotpanel__cost-name");
+            row.Add(label);
+            var count = new Label($"{have} / {need}") { pickingMode = PickingMode.Ignore };
+            count.AddToClassList("hub-lotpanel__cost-count");
+            count.EnableInClassList("hub-lotpanel__cost-count--short", have < need);
+            row.Add(count);
+            _lotCosts.Add(row);
         }
 
         /// <summary>

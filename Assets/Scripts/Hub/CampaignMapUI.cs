@@ -105,6 +105,10 @@ namespace Assets.Scripts.Hub
             _root.focusable = true;
             SetFeedback(string.Empty);
 
+            // Always open on the default pick - the run in progress, else the first one open - so
+            // Enter does the obvious thing. Remembering the last node meant the map could reopen
+            // on a locked run, where Enter only says "That way is still closed." (2026-09-30).
+            _selectedKey = null;
             RebuildGraph();
             Refresh();
 

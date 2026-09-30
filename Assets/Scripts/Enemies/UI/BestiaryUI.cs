@@ -30,8 +30,13 @@ namespace Assets.Scripts.Enemies.UI
         private readonly ScrollView _list;
         private readonly ScrollView _detail;
         private readonly Button _closeButton;
+        private readonly VisualElement _portrait;
+        private readonly Label _name;
+        private readonly Label _sub;
 
+        // Only the met enemies are rows the cursor walks; _rowEntries maps a row to its catalog index.
         private readonly List<VisualElement> _rows = new List<VisualElement>();
+        private readonly List<int> _rowEntries = new List<int>();
         private List<EnemySO> _catalog = new List<EnemySO>();
         private int _selected = -1;
         private bool _isShown;
@@ -45,6 +50,9 @@ namespace Assets.Scripts.Enemies.UI
             _list = root.Q<ScrollView>("bestiary-list");
             _detail = root.Q<ScrollView>("bestiary-detail");
             _closeButton = root.Q<Button>("bestiary-close");
+            _portrait = root.Q<VisualElement>("bestiary-portrait");
+            _name = root.Q<Label>("bestiary-name");
+            _sub = root.Q<Label>("bestiary-sub");
 
             if (_closeButton != null)
             {
@@ -74,7 +82,15 @@ namespace Assets.Scripts.Enemies.UI
             _catalog = LoadCatalog();
             _selected = -1;
             RefreshList();
-            ShowEmptyDetail();
+            // Open on the first enemy met rather than a "Select an enemy." page beside a live list.
+            if (_rows.Count > 0)
+            {
+                Select(0);
+            }
+            else
+            {
+                ShowEmptyDetail();
+            }
 
             _root.focusable = true;
             if (_root.panel != null)
@@ -91,6 +107,7 @@ namespace Assets.Scripts.Enemies.UI
             _list?.Clear();
             _detail?.Clear();
             _rows.Clear();
+            _rowEntries.Clear();
             OnClosed?.Invoke();
         }
 
@@ -171,69 +188,93 @@ namespace Assets.Scripts.Enemies.UI
         //  LIST
         // ============================================================
 
+        /// <summary>
+        /// Met enemies as full rows the cursor walks, then every enemy not yet met as a compact
+        /// "? ? ?" row at the bottom - the collection still shows its gaps (a collection with invisible
+        /// gaps is not a collection) without the unknowns being four fifths of the list.
+        /// </summary>
         private void RefreshList()
         {
             _list.Clear();
             _rows.Clear();
+            _rowEntries.Clear();
 
             var knowledge = MetaProgressManager.Instance.GetBestiary();
             _progress.text = _catalog.Count == 0
                 ? "No enemy catalog found."
                 : $"{BestiaryPresenter.SeenCount(_catalog, knowledge)} of {_catalog.Count} discovered";
 
+            int unknown = 0;
             for (int i = 0; i < _catalog.Count; i++)
             {
                 var definition = _catalog[i];
                 var known = BestiaryOps.Find(knowledge, definition.SaveKey);
-                int index = i;
-
-                var row = new VisualElement();
-                row.AddToClassList("cd-bestiary-row");
                 if (known == null)
                 {
-                    row.AddToClassList("cd-bestiary-row--locked");
+                    unknown++;
+                    continue;
                 }
 
-                var icon = new VisualElement();
-                icon.AddToClassList("cd-bestiary-row__icon");
-                icon.pickingMode = PickingMode.Ignore;
-                if (known != null && definition.Sprite != null)
-                {
-                    icon.style.backgroundImage = new StyleBackground(definition.Sprite);
-                }
-                row.Add(icon);
-
-                var name = new Label(known != null ? definition.Label : UnknownName);
-                name.AddToClassList("cd-bestiary-row__name");
-                name.pickingMode = PickingMode.Ignore;
-                row.Add(name);
-
-                var kills = new Label(known != null && known.Kills > 0 ? "x" + known.Kills : string.Empty);
-                kills.AddToClassList("cd-bestiary-row__kills");
-                kills.pickingMode = PickingMode.Ignore;
-                row.Add(kills);
-
-                row.RegisterCallback<ClickEvent>(_ => Select(index));
-
+                int rowIndex = _rows.Count;
+                var row = MakeRow(definition.Sprite, definition.Label,
+                    known.Kills > 0 ? $"Slain x{known.Kills}" : "Seen, not yet slain");
+                row.RegisterCallback<ClickEvent>(_ => Select(rowIndex));
                 _list.Add(row);
                 _rows.Add(row);
+                _rowEntries.Add(i);
+            }
+
+            for (int i = 0; i < unknown; i++)
+            {
+                var row = MakeRow(null, UnknownName, null);
+                row.AddToClassList("cd-inv-row--static");
+                row.AddToClassList("cd-bestiary-row--unknown");
+                _list.Add(row);
             }
 
             RenderSelection();
         }
 
-        private void Select(int index)
+        private static VisualElement MakeRow(Sprite sprite, string name, string caption)
         {
-            _selected = index;
+            var row = new VisualElement();
+            row.AddToClassList("cd-inv-row");
+
+            var icon = new VisualElement { pickingMode = PickingMode.Ignore };
+            icon.AddToClassList("cd-inv-row__icon");
+            if (sprite != null)
+            {
+                icon.style.backgroundImage = new StyleBackground(sprite);
+            }
+            row.Add(icon);
+
+            var text = new VisualElement { pickingMode = PickingMode.Ignore };
+            text.AddToClassList("cd-inv-row__text");
+            var nameLabel = new Label(name) { pickingMode = PickingMode.Ignore };
+            nameLabel.AddToClassList("cd-inv-row__name");
+            text.Add(nameLabel);
+            if (!string.IsNullOrEmpty(caption))
+            {
+                var captionLabel = new Label(caption) { pickingMode = PickingMode.Ignore };
+                captionLabel.AddToClassList("cd-inv-row__caption");
+                text.Add(captionLabel);
+            }
+            row.Add(text);
+            return row;
+        }
+
+        private void Select(int rowIndex)
+        {
+            _selected = rowIndex;
             RenderSelection();
-            ShowDetail(_catalog[index]);
+            ShowDetail(_catalog[_rowEntries[rowIndex]]);
         }
 
         private void RenderSelection()
         {
             for (int i = 0; i < _rows.Count; i++)
             {
-                _rows[i].EnableInClassList("cd-bestiary-row--selected", i == _selected);
+                _rows[i].EnableInClassList("cd-inv-row--selected", i == _selected);
             }
         }
 
@@ -244,46 +285,69 @@ namespace Assets.Scripts.Enemies.UI
         private void ShowEmptyDetail()
         {
             _detail.Clear();
-            var hint = new Label("Select an enemy.");
-            hint.AddToClassList("cd-info-label");
-            _detail.Add(hint);
+            SetHead(null, "No enemies met yet", "Everything the party survives is written down here.");
         }
 
+        private void SetHead(Sprite portrait, string name, string sub)
+        {
+            if (_portrait != null)
+            {
+                _portrait.style.backgroundImage = portrait != null ? new StyleBackground(portrait) : StyleKeyword.None;
+            }
+            if (_name != null)
+            {
+                _name.text = name;
+            }
+            if (_sub != null)
+            {
+                _sub.text = sub;
+            }
+        }
+
+        /// <summary>
+        /// One enemy's page: portrait, name and health on top, then two columns - what hurts it
+        /// (resistances, immunities) and what it is (stats, abilities) - with kills and drops under
+        /// them, so a normal entry fits without scrolling.
+        /// </summary>
         private void ShowDetail(EnemySO definition)
         {
             _detail.Clear();
+            _detail.scrollOffset = Vector2.zero;
             var known = MetaProgressManager.Instance.GetBestiaryEntry(definition.SaveKey);
-
-            var title = new Label(known != null ? definition.Label : UnknownName);
-            title.AddToClassList("cd-scan__name");
-            _detail.Add(title);
-
             if (known == null)
             {
-                var hint = new Label("Not yet encountered.");
-                hint.AddToClassList("cd-info-label");
-                _detail.Add(hint);
+                SetHead(null, UnknownName, "Not yet encountered.");
                 return;
             }
 
             // Health comes from the definition's base stats here, not from a live unit: the hub has
             // no fight in progress, and a level's enemy tuning scales this per floor anyway.
-            _detail.Add(BestiaryLineView.Row(new BestiaryLine(
-                "Health",
-                definition.BaseStats[UnitStats.StatType.MaxHealth].ToString(),
-                BestiaryTone.Neutral)));
-            _detail.Add(BestiaryLineView.Row(BestiaryPresenter.AttackLine(definition, known)));
-            _detail.Add(BestiaryLineView.Row(BestiaryPresenter.KillsLine(known)));
-            BestiaryLineView.AddRows(_detail, BestiaryPresenter.LootLines(definition, known));
+            SetHead(definition.Sprite, definition.Label,
+                $"Health {definition.BaseStats[UnitStats.StatType.MaxHealth]}  ·  Slain x{known.Kills}");
 
-            BestiaryLineView.AddSection(
-                _detail, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
-            BestiaryLineView.AddSection(
-                _detail, "Immune to", BestiaryPresenter.ImmunityLines(definition, known));
-            BestiaryLineView.AddSection(
-                _detail, "Base stats", BestiaryPresenter.StatLines(definition, known));
-            BestiaryLineView.AddSection(
-                _detail, "Abilities", BestiaryPresenter.SpellLines(definition, known));
+            _detail.Add(BestiaryLineView.Row(BestiaryPresenter.AttackLine(definition, known)));
+
+            var page = new VisualElement();
+            page.AddToClassList("cd-bestiary__page");
+            var left = new VisualElement();
+            left.AddToClassList("cd-bestiary__page-col");
+            var right = new VisualElement();
+            right.AddToClassList("cd-bestiary__page-col");
+            page.Add(left);
+            page.Add(right);
+            _detail.Add(page);
+
+            BestiaryLineView.AddSection(left, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
+            BestiaryLineView.AddSection(left, "Immune to", BestiaryPresenter.ImmunityLines(definition, known));
+            BestiaryLineView.AddSection(right, "Base stats", BestiaryPresenter.StatLines(definition, known));
+            BestiaryLineView.AddSection(right, "Abilities", BestiaryPresenter.SpellLines(definition, known));
+
+            var drops = BestiaryPresenter.LootLines(definition, known);
+            if (drops != null && drops.Count > 0)
+            {
+                // The loot lines carry their own "Drops" label, so no section header over them.
+                BestiaryLineView.AddRows(_detail, drops);
+            }
         }
     }
 }

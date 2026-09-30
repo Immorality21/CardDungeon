@@ -2372,6 +2372,40 @@
 
 /* ---- Hub bestiary ---- */
 
+/* ---- Bestiary on the inventory frame (2026-09-30) ---- */
+.cd-bestiary__portrait {
+    width: 96px;
+    height: 96px;
+}
+
+/* The page's two columns: what hurts it | what it is. */
+.cd-bestiary__page {
+    flex-direction: row;
+}
+
+.cd-bestiary__page-col {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    margin-right: 14px;
+}
+
+/* An enemy not yet met: a compact row, never selected, so the gaps show without owning the list. */
+.cd-bestiary-row--unknown {
+    height: 26px;
+    padding-left: 14px;
+    opacity: 0.5;
+}
+
+.cd-bestiary-row--unknown .cd-inv-row__icon {
+    display: none;
+}
+
+.cd-bestiary-row--unknown .cd-inv-row__name {
+    font-size: 16px;
+    -unity-font-style: italic;
+}
+
 .cd-bestiary__cols {
     flex-direction: row;
     flex-grow: 1;
@@ -2996,6 +3030,109 @@
 .cd-split-option--chosen {
     background-color: rgb(94, 58, 150);
     border-color: var(--cd-gold);
+}
+
+/* ---- The lot panel (lot-view), one fixed size in every state (2026-09-30) ---- */
+.hub-lotpanel {
+    width: 760px;
+    height: 420px;
+    max-height: none;
+    padding: 0;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.hub-lotpanel__body {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+    padding: 16px 18px 6px 18px;
+}
+
+/* The building at 3x its 64px art, on the town's own night ground colour. */
+.hub-lotpanel__art {
+    width: 200px;
+    height: 200px;
+    flex-shrink: 0;
+    margin-right: 18px;
+    background-color: rgba(0, 0, 0, 0.32);
+    border-width: 1px;
+    border-color: rgba(205, 110, 255, 0.22);
+    border-radius: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Not built yet: what it will become, dimmed. */
+.hub-lotpanel__art--preview {
+    opacity: 0.5;
+}
+
+.hub-lotpanel__info {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.hub-lotpanel__costs {
+    flex-shrink: 0;
+    margin-bottom: 10px;
+}
+
+.hub-lotpanel__cost {
+    flex-direction: row;
+    align-items: center;
+    height: 30px;
+}
+
+.hub-lotpanel__cost-icon {
+    width: 26px;
+    height: 26px;
+    margin-right: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.hub-lotpanel__cost-name {
+    flex-grow: 1;
+    font-size: 17px;
+    color: var(--cd-text-light);
+    padding: 0;
+    margin: 0;
+}
+
+.hub-lotpanel__cost-count {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    padding: 0;
+    margin: 0;
+}
+
+.hub-lotpanel__cost-count--short {
+    color: rgb(255, 130, 120);
+}
+
+.hub-lotpanel__grant {
+    color: var(--cd-gold);
+}
+
+.hub-lotpanel__actions {
+    flex-direction: row;
+    flex-shrink: 0;
+    padding: 0 18px;
+}
+
+.hub-lotpanel__back {
+    margin-left: 6px;
+}
+
+.hub-lotpanel__reason {
+    padding: 0 20px;
+    margin: 4px 0 0 0;
+}
+
+.hub-lotpanel__feedback {
+    margin-top: 0;
+    min-height: 26px;
 }
 
 /* The promise beside the price in the lot panel: what the next level actually

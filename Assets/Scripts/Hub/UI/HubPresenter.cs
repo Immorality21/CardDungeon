@@ -196,14 +196,15 @@ namespace Assets.Scripts.Hub.UI
         /// </summary>
         public static string ActionLabel(BuildingSO building, HubProgress progress)
         {
+            // The price is in the lot panel's cost table beside it (2026-09-30); the button only
+            // says what it does. It used to repeat the status line word for word.
             if (BuildingOps.CanPlace(building, progress))
             {
-                string price = DescribePlacementCost(building);
-                return string.IsNullOrEmpty(price) ? "Build" : "Build — " + price;
+                return "Build";
             }
             if (BuildingOps.CanUpgrade(building, progress))
             {
-                return $"Upgrade — {BuildingOps.UpgradeCost(building, progress)} gold";
+                return $"Upgrade to Lv {BuildingOps.NextLevel(building, progress)}";
             }
             return "";
         }

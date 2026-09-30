@@ -91,23 +91,23 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Hub town (`hub-view`, `HubView`)
 
-- [ ] **Forge caption collides with the Bestiary roof** (severity: medium) — once the Forge is built, its
+- [x] **Forge caption collides with the Bestiary roof** — *moot*: captions are one line (name + badge) since 2026-09-28, and the new art (2026-09-30) clears it. (severity: medium) — once the Forge is built, its
   two-line caption ("Level 1 / upgrade 250g") hangs over the Bestiary sprite below it
   (`24_hub_built.png`, y≈370–405). `CaptionRoom` only checks the town's bottom edge. Either check the
   caption rect against every lot below (flip to `--above` or `--right` on overlap) or collapse built
   lots' captions to one line ("Lv 1 · 250g").
-- [ ] **Unaffordable prices are painted the same gold as affordable ones** (severity: medium) —
+- [x] **Unaffordable prices are painted the same gold as affordable ones** — *moot since 2026-09-28*: the town prints no prices, only a hammer/lock badge; the lot panel's cost table is red when short. (severity: medium) —
   "upgrade 250g" / "upgrade 300g" are gold while the player has 50–118 gold (`24_hub_built.png`,
   `58_back_in_hub.png`), so the town advertises actions the lot panel then refuses. In `SetLotNote`, add
   `hub-lot__note--short` (dim, `opacity: .6`) when the cost is not met, keep gold for "you can do this now".
-- [ ] **Locked lot says "Locked"** (severity: low) — `11_hub_cursor.png`, Ability Forge: the Hub guide's own
+- [x] **Locked lot says "Locked"** — *done*: the town shows a padlock badge, and the lot panel names the run in the way (*"Clear The Threshold first."*). (severity: low) — `11_hub_cursor.png`, Ability Forge: the Hub guide's own
   rule is that a locked lot names the run in its way. The caption should read *"After The Threshold"*;
   "Locked" in grey also sits at the lowest contrast in the town.
 - [ ] **No "something new here" signal on lots** (severity: medium) — after a floor the Sphere Hall has XP to
   spend and the Bestiary new entries, but the town looks identical (`58_back_in_hub.png`). Add a small
   gold pip (`hub-lot__badge`) on a lot when its service has something actionable (unspent XP on any
   fielded hero, unseen bestiary entry, affordable upgrade). This is information, not hand-holding.
-- [ ] **The road button is an empty card** (severity: low) — `.hub-road` is a 150x190 box with two words in
+- [x] **The road button is an empty card** — *done 2026-09-30*: it is a signpost sprite beside the road (`.hub-road--art`). (severity: low) — `.hub-road` is a 150x190 box with two words in
   it, detached from the painted road it stands for (`10_hub.png`). Drop the box: a label + `▶` sitting *on*
   the road's end (transparent background, gold text with the `hub-lot__caption` chip), cursor draws the
   gold outline around the road's end. If it stays a card, show the active run in it
@@ -118,18 +118,16 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Lot panel (`lot-view`)
 
-- [ ] **The status line repeats the button** (severity: medium) — unbuilt: "Needs 8 Scrap Iron · 2 Rotted
-  Timber" and then "Build — 8 Scrap Iron · 2 Rotted Timber" (`13_lot_merchant.png`). Replace `lot-status`
-  with a cost table — one row per material with **have / need** (`11 / 8` in white, `1 / 2` in red) and an
-  icon — and shorten the button to "Build".
-- [ ] **Mixed alignment** (severity: low) — title and blurb are centred, `lot-status` is left-aligned bold,
-  `lot-grant` centred gold (`14_campfire_lot.png`). Left-align the body under a centred title or centre
-  everything; label the grant ("Next level:") instead of relying on gold alone.
-- [ ] **Enter is below Upgrade** (severity: medium) — for a built lot the common action is Enter, but it
-  sits second, under a disabled Upgrade (`14_campfire_lot.png`, `19b_after_build.png`). Order: Enter
-  (default cursor), Upgrade, Back. Upgrade's label should match the town caption ("300g" vs "300 gold").
-- [ ] **No picture of the thing being built** (severity: low) — the panel is text only; show the lot's
-  sprite (or its `AbsentSprite` silhouette) at 2x in a framed tile like `cd-inv-detail__icon`.
+> **Done 2026-09-30** — one fixed px size (`.hub-lotpanel`, 760×420) in every state; header band with
+> the name and a state line (*"Level 1 of 3"*, *"Not built yet"*, *"Locked"*); the building's sprite in a
+> framed tile (an unbuilt lot shows what it will become, at 50%); a **have / need** cost table
+> (`11 / 8`, red when short, material icons); the grant labelled (*"Once built"* / *"Level 2"*); buttons
+> **Enter, Build / Upgrade to Lv N, Back** in that order with a `cd-reason` line (*"Need 179 more gold."*).
+
+- [x] **The status line repeats the button** — cost table; the button says only what it does.
+- [x] **Mixed alignment** — left-aligned body under a header band; the grant has a label.
+- [x] **Enter is below Upgrade** — Enter first; the first arrow key lands on it.
+- [x] **No picture of the thing being built** — see above.
 
 ## Campfire / party select (`party-view`, `PartySelectUI`)
 
@@ -183,19 +181,16 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Bestiary (`bestiary-view`, `BestiaryUI`)
 
-- [ ] **A narrow window with a scrolling detail column** (severity: medium) — at 620px the detail column is
-  ~270px wide and has to scroll to reach Resistances (`27_bestiary_entry.png`), while half the screen is
-  empty. Move to `cd-inv-window`: list left, **portrait** + name + HP band at the top of the detail (the
-  in-combat Inspect page already has `cd-scan__portrait`), Resistances and Abilities as two columns
-  below — no scroll for a normal entry.
-- [ ] **Nothing is selected on open** (severity: low) — "Select an enemy." with a live list beside it
-  (`26_bestiary.png`). `Show()` sets `_selected = -1`; select the first discovered entry.
-- [ ] **Undiscovered rows are 4/5 of the list** (severity: low) — eleven "? ? ?" rows each as tall as a
-  real one. Keep the count ("2 of 13 discovered" is good) and render unknowns as a compact 24px row or
-  group them at the bottom.
-- [ ] **Element names are not in element colours** (severity: low) — "Attacks with Ice" is pale blue
-  here and "Attacks with **Fire**" is the same pale blue on the Inspect page (`47_inspect_step.png`).
-  Add `cd-element--fire/ice/lightning/holy/shadow` classes and use them in both presenters.
+> **Done 2026-09-30** — on the inventory frame: *"4 of 13 discovered"* in the header, met enemies as
+> rows (*"Slain x2"*), the unmet as compact unselectable `? ? ?` rows at the bottom, and the page with a
+> 96px portrait, *"Health 20 · Slain x2"*, then two columns (Resistances + Immune to | Base stats +
+> Abilities) and the drops. Opens on the first enemy met.
+
+- [x] **A narrow window with a scrolling detail column** — see above; a normal entry fits.
+- [x] **Nothing is selected on open** — the first met enemy is.
+- [x] **Undiscovered rows are 4/5 of the list** — compact rows, grouped at the bottom.
+- [ ] **Element names are not in element colours** (severity: low) — still open (needs
+  `cd-element--*` classes in `BestiaryLineView` and the combat Inspect page).
 
 ## Sphere Grid (`grid-view`, `SphereGridUI`)
 
@@ -382,6 +377,21 @@ item icons this review saw were replaced the same day: every item now has its ow
   stat grid calls STR. Use the `StatCatalog` label.
 
 ---
+
+## Keyboard pass — 2026-09-30
+
+Every hub screen driven with **synthetic** key events (not the real OS keyboard: say so, and have a
+human press through it once). Shared-cursor screens get a seeded 300-press random walk and a list of
+visible, enabled buttons it never reached; own-cursor screens get scripted Up/Down/Left/Right/Enter/
+Q/E/Esc. Result: every button reachable on the town (8), lot panel, Merchant Buy (15) / Sell / Belt,
+Campfire (15), Forge Abilities (8) / Combos; the Bestiary cursor wraps; the Storehouse Left/Right
+changes tab; the Sphere Grid Q/E changes hero and arrows walk nodes; the story map walks runs and
+Enter opens the level-entry screen, whose cursor reaches Change Party / Enter Dungeon; **Esc closes
+every screen and leaves the town interactive** (scrim gone, lots enabled). One fix came out of it:
+**the story map reopened on the last node visited**, so Enter could land on a locked run and only say
+*"That way is still closed."* — it now always opens on the default pick (the run in progress, else the
+first open one). The probe code is in the session log; the recipe is `docs/GAMEPLAY_VALIDATION.md`
+gotcha 17.
 
 ## Do these first
 

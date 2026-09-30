@@ -127,6 +127,12 @@ The gates are **on**. A lot is `Absent` until every key in its `RequiredRunKeys`
   common case (`HubPresenter.NeedsPanel`).
 - **A locked lot names the run in its way** rather than saying "Locked" — a gate you cannot see the
   far side of is just a dead button (`HubManager.DescribeLotStatus`).
+- **The lot panel (2026-09-30)** is one fixed size (`.hub-lotpanel`): the building's sprite (an unbuilt
+  lot previews what it will become), a have / need cost table built by `HubManager.BuildLotCosts`
+  (which also returns the shortfall sentence for `lot-reason`), the labelled grant, and the buttons
+  **Enter, Build / Upgrade, Back** in document order — the shared cursor's first arrow lands on the
+  first, and Enter is the common action on a built lot. `HubPresenter.ActionLabel` says only what the
+  button does ("Build", "Upgrade to Lv 2"); the price is the table's.
 
 #### What a level grants — the rule, and the first lot to use it
 
@@ -334,7 +340,8 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   secret branches absent until they unlock. All progression decisions come from `CampaignOps`, all
   styling from `CampaignPresenter`. It does **not** write `Run.json` — it raises `OnRunChosen` and
   the manager does, so there is exactly one writer. Reuses `SphereGridView` as its renderer with its
-  own `cm-node--*` state classes. **Every visible run is named under its node** (2026-09-28,
+  own `cm-node--*` state classes. **It always opens on `DefaultSelection()`** (the run in progress, else
+  the first open one) — it used to remember the last node, so Enter could reopen on a locked run. **Every visible run is named under its node** (2026-09-28,
   playtest finding 11) through `SphereGridView.NodeInfo.Caption`, which is **opt-in**: only
   `CampaignPresenter` sets it, so sphere grid nodes stay caption-free. `NodeCaptionTests` pins both
   halves — change one and the other will tell you.
@@ -367,7 +374,9 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   every hero who had spent XP. Abilities are described through `HeroSnapshotUnit`, so the numbers
   are the hero's own. Item wording (slot names, bonus lines, rarity classes, the swap maths) is
   `Items/ItemPresenter` (`ItemPresenterTests`).
-- **BestiaryUI** (`Enemies/UI`) — the enemy knowledge collection.
+- **BestiaryUI** (`Enemies/UI`) — the enemy knowledge collection. On the inventory frame since
+  2026-09-30: met enemies as rows, the unmet as compact unselectable rows at the bottom, a portrait
+  page in two columns; opens on the first enemy met. Keeps its own Up/Down cursor.
 - **SphereGridUI** (`Heroes/UI`) — the one place XP is ever spent. On the inventory frame since
   2026-09-30 (portrait strip with banked XP, frontier framing via `SphereGridView.FrameNodes`, a
   detail column with a `grid-reason` line). Keeps its own cursor (it pans content the shared
