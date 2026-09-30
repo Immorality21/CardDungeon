@@ -49,7 +49,7 @@ namespace Assets.Scripts.Rooms
         private Button _mapBack;
         private Label _mapHint;
         private UI.DungeonMapView _mapView;
-        private UI.EnemyNameplates _nameplates;
+        private UI.UnitNameplates _nameplates;
         /// <summary>Whether the map was opened from the pause overlay, so Back goes back there.</summary>
         private bool _mapFromPause;
 
@@ -137,6 +137,10 @@ namespace Assets.Scripts.Rooms
             public HeroCommand Command;
             public string Label;
             public bool Enabled;
+
+            /// <summary>Why a disabled row is disabled, shown dim on its right ("No charges",
+            /// "Silenced"). Empty on an enabled row.</summary>
+            public string Reason;
 
             /// <summary>SummonAbility only: the ability this row uses.</summary>
             public Cards.MagicSO Ability;
@@ -331,7 +335,7 @@ namespace Assets.Scripts.Rooms
             var nameplateHost = root.Q<VisualElement>("nameplate-layer");
             if (nameplateHost != null)
             {
-                _nameplates = new UI.EnemyNameplates();
+                _nameplates = new UI.UnitNameplates();
                 nameplateHost.Add(_nameplates);
             }
 
@@ -1276,6 +1280,12 @@ namespace Assets.Scripts.Rooms
                 label.AddToClassList("cd-cmd-row__label");
                 row.Add(cursor);
                 row.Add(label);
+                if (!entry.Enabled && !string.IsNullOrEmpty(entry.Reason))
+                {
+                    var reason = new Label(entry.Reason);
+                    reason.AddToClassList("cd-cmd-row__reason");
+                    row.Add(reason);
+                }
 
                 int idx = i;
                 row.RegisterCallback<ClickEvent>(_ => OnCommandClicked(idx));
@@ -1340,10 +1350,18 @@ namespace Assets.Scripts.Rooms
         private void AddHeroCommands(ICombatUnit hero)
         {
             bool hasMagic = false;
+            bool carriesAny = false;
             var heroComponent = hero as Heroes.Hero;
             if (heroComponent != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 hasMagic = DungeonManager.Instance.MagicState.HasAnyCastable(heroComponent.HeroKey);
+                foreach (var slot in DungeonManager.Instance.MagicState.GetSlots(heroComponent.HeroKey))
+                {
+                    if (slot != null && slot.Magic != null)
+                    {
+                        carriesAny = true;
+                    }
+                }
             }
 
             // Silence gates casting and nothing else - Attack, Item and Inspect stay open, so a
@@ -1364,12 +1382,21 @@ namespace Assets.Scripts.Rooms
             bool canSummon = knowsSummon && !silenced && summons.HasAnyUsable(heroComponent.HeroKey);
 
             _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
-            _commands.Add(new CommandEntry { Command = HeroCommand.Magic, Label = "Ability", Enabled = hasMagic });
+            // A greyed command says why on its own row - "Ability" alone, dimmed, read as a bug.
+            _commands.Add(new CommandEntry
+            {
+                Command = HeroCommand.Magic, Label = "Ability", Enabled = hasMagic,
+                Reason = silenced ? "Silenced" : carriesAny ? "No charges" : "None carried"
+            });
             if (knowsSummon)
             {
-                _commands.Add(new CommandEntry { Command = HeroCommand.Summon, Label = "Summon", Enabled = canSummon });
+                _commands.Add(new CommandEntry
+                {
+                    Command = HeroCommand.Summon, Label = "Summon", Enabled = canSummon,
+                    Reason = silenced ? "Silenced" : "Spent"
+                });
             }
-            _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem, Reason = "None" });
             // Inspect is free - it opens a page and hands the turn straight back - so it sits above
             // Skip rather than among the actions that spend the turn.
             _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
@@ -1483,6 +1510,9 @@ namespace Assets.Scripts.Rooms
         //  TURN-ORDER LIST (FFX-style, right side)
         // ============================================================
 
+        /// <summary>How many upcoming turns the portrait column shows.</summary>
+        private const int TurnOrderShown = 10;
+
         private void OnTurnOrderChanged(List<ICombatUnit> order)
         {
             if (_turnOrderList == null)
@@ -1495,8 +1525,10 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
+            // Portraits only, FFX-style (2026-09-30): the names were cut off ("Abyssal Warde") and made
+            // the panel wide enough to sit on a boss. Side is the frame colour, the actor is the big one.
             int shown = 0;
-            for (int i = 0; i < order.Count && shown < 8; i++)
+            for (int i = 0; i < order.Count && shown < TurnOrderShown; i++)
             {
                 var unit = order[i];
                 if (unit == null)
@@ -1510,19 +1542,17 @@ namespace Assets.Scripts.Rooms
                 {
                     row.AddToClassList("cd-turn-row--current");
                 }
+                row.EnableInClassList("cd-turn-row--enemy", unit is Enemies.Enemy);
+                row.tooltip = unit.DisplayName;
 
-                var icon = new VisualElement();
+                var icon = new VisualElement { pickingMode = PickingMode.Ignore };
                 icon.AddToClassList("cd-turn-row__icon");
                 if (unit.Icon != null)
                 {
                     icon.style.backgroundImage = new StyleBackground(unit.Icon);
                 }
 
-                var name = new Label(unit.DisplayName);
-                name.AddToClassList("cd-turn-row__name");
-
                 row.Add(icon);
-                row.Add(name);
                 _turnOrderList.Add(row);
                 shown++;
             }
@@ -1669,6 +1699,7 @@ namespace Assets.Scripts.Rooms
             // the dials always read the live values rather than whatever they said last time.
             _pauseAudio?.Show();
             SetShown(_pauseWindow, true);
+            _pauseWindow.parent?.AddToClassList("cd-root--paused");
             _pauseNav?.Reset();
             FocusRoot();
         }
@@ -1683,6 +1714,7 @@ namespace Assets.Scripts.Rooms
             _quitArmed = false;
             _pauseAudio?.Hide();
             SetShown(_pauseWindow, false);
+            _pauseWindow.parent?.RemoveFromClassList("cd-root--paused");
             _pauseNav?.Reset();
             FocusRoot();
         }

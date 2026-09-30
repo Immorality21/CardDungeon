@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Balance;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
@@ -28,6 +30,8 @@ namespace Assets.Scripts.Heroes.UI
         private readonly Label _detailKind;
         private readonly Label _detailPayload;
         private readonly Label _detailCost;
+        private readonly VisualElement _detailBody;
+        private readonly Label _reasonLabel;
         private readonly Button _activateButton;
         private readonly Label _feedbackLabel;
         private readonly Button _closeButton;
@@ -45,6 +49,9 @@ namespace Assets.Scripts.Heroes.UI
 
         /// <summary>The class the tutorial puts on whatever it is pointing at (CardDungeon.uss).</summary>
         public const string TutorialTargetClass = "cd-tutorial-target";
+
+        private const float FrontierMinZoom = 0.7f;
+        private const float FrontierMaxZoom = 1.1f;
 
         public event Action OnClosed;
 
@@ -71,6 +78,8 @@ namespace Assets.Scripts.Heroes.UI
             _detailKind = root.Q<Label>("grid-detail-kind");
             _detailPayload = root.Q<Label>("grid-detail-payload");
             _detailCost = root.Q<Label>("grid-detail-cost");
+            _detailBody = root.Q<VisualElement>("grid-detail-body");
+            _reasonLabel = root.Q<Label>("grid-reason");
             _activateButton = root.Q<Button>("grid-activate");
             _feedbackLabel = root.Q<Label>("grid-feedback");
             _closeButton = root.Q<Button>("grid-close");
@@ -214,6 +223,10 @@ namespace Assets.Scripts.Heroes.UI
 
         // --- hero switching -----------------------------------------------------
 
+        /// <summary>
+        /// The house hero picker (the Storehouse's portrait strip), with each hero's banked XP as a
+        /// tab on the card - so the player sees who has points to spend without Q/E-ing through them.
+        /// </summary>
         private void BuildHeroTabs()
         {
             if (_heroTabs == null)
@@ -229,25 +242,43 @@ namespace Assets.Scripts.Heroes.UI
                     continue;
                 }
 
-                var tab = new Button { text = hero.DisplayName, focusable = false };
-                tab.AddToClassList("cd-tab");
-                if (hero == _selectedHero)
-                {
-                    tab.AddToClassList("cd-tab--active");
-                }
+                var card = new Button { text = string.Empty, focusable = false, tooltip = hero.DisplayName };
+                card.AddToClassList("cd-inv-hero");
+                card.EnableInClassList("cd-inv-hero--active", hero == _selectedHero);
                 if (hero.SphereGrid == null)
                 {
-                    tab.SetEnabled(false);
-                    tab.tooltip = "No grid authored for this hero yet.";
+                    card.SetEnabled(false);
+                    card.tooltip = "No grid authored for this hero yet.";
                 }
                 else if (IsGuiding && hero != _guideHero)
                 {
-                    tab.SetEnabled(false);
+                    card.SetEnabled(false);
+                }
+
+                var sprite = new VisualElement { pickingMode = PickingMode.Ignore };
+                sprite.AddToClassList("cd-inv-hero__sprite");
+                if (hero.Sprite != null)
+                {
+                    sprite.style.backgroundImage = new StyleBackground(hero.Sprite);
+                }
+                card.Add(sprite);
+
+                var name = new Label(hero.DisplayName) { pickingMode = PickingMode.Ignore };
+                name.AddToClassList("cd-inv-hero__name");
+                card.Add(name);
+
+                var save = HeroRoster.GetHeroSave(hero);
+                int xp = save != null ? save.CurrentXp : 0;
+                if (xp > 0)
+                {
+                    var badge = new Label($"{xp} XP") { pickingMode = PickingMode.Ignore };
+                    badge.AddToClassList("sg-hero-xp");
+                    card.Add(badge);
                 }
 
                 var captured = hero;
-                tab.clicked += () => SelectHero(captured);
-                _heroTabs.Add(tab);
+                card.clicked += () => SelectHero(captured);
+                _heroTabs.Add(card);
             }
         }
 
@@ -303,7 +334,21 @@ namespace Assets.Scripts.Heroes.UI
             SphereGridPresenter.BuildViewModel(grid, nodes, edges);
 
             _view.SetGraph(nodes, edges);
-            _view.FrameAll();
+
+            // Frame the frontier - what is owned and what can be reached - rather than the whole
+            // grid, which fitted to the viewport made every node a speck. The floor keeps a node
+            // about 30px across; the rest of a large grid is a drag away.
+            var save = HeroRoster.GetHeroSave(_selectedHero) ?? new HeroSaveData();
+            var frontier = new List<string>();
+            foreach (var pair in SphereGridPresenter.ClassifyAll(grid, save.ActivatedNodes ?? new List<string>(),
+                         save.CurrentXp, HeroRoster.CanPayMaterials))
+            {
+                if (pair.Value != NodeUiState.Locked)
+                {
+                    frontier.Add(pair.Key);
+                }
+            }
+            _view.FrameNodes(frontier, FrontierMinZoom, FrontierMaxZoom);
         }
 
         // --- refresh ------------------------------------------------------------------
@@ -317,9 +362,10 @@ namespace Assets.Scripts.Heroes.UI
             if (_xpLabel != null)
             {
                 _xpLabel.text = _selectedHero != null
-                    ? $"{_selectedHero.DisplayName} — {save.CurrentXp} XP banked"
+                    ? $"{_selectedHero.DisplayName}: {save.CurrentXp} XP to spend"
                     : "No heroes owned.";
             }
+            BuildHeroTabs();
 
             if (grid != null)
             {
@@ -334,12 +380,20 @@ namespace Assets.Scripts.Heroes.UI
             RefreshDetail(grid, save);
         }
 
+        /// <summary>
+        /// The chosen node: the thing it grants as the title, its kind as a chip, what it changes for
+        /// this hero, the price, and - when Activate is dimmed - why. The title, kind and payload
+        /// used to say the same thing three times ("+10 HP / Stat / +10 HP").
+        /// </summary>
         private void RefreshDetail(SphereGridSO grid, HeroSaveData save)
         {
+            _detailBody?.Clear();
             var node = SphereGridOps.FindNode(grid, _selectedNodeKey);
             if (node == null)
             {
-                SetDetail("Select a node.", "", "", "");
+                SetDetail("Select a node.", "", "Click a node, or move to one with the arrow keys.", "");
+                SetShown(_detailKind, false);
+                SetReason(string.Empty);
                 _activateButton?.SetEnabled(false);
                 return;
             }
@@ -347,18 +401,140 @@ namespace Assets.Scripts.Heroes.UI
             var activated = save.ActivatedNodes ?? new List<string>();
             bool isActive = SphereGridOps.ActiveNodes(grid, activated).Contains(node.Key);
 
-            SetDetail(
-                SphereGridPresenter.NodeName(node),
-                SphereGridPresenter.KindLabel(node),
-                SphereGridPresenter.DescribePayload(node),
+            SetDetail(Title(node), SphereGridPresenter.KindLabel(node), Payload(node),
                 SphereGridPresenter.DescribeCost(node, isActive));
+            SetShown(_detailKind, true);
+            AddChanges(node, activated, isActive);
 
+            bool canActivate = SphereGridOps.CanActivate(grid, activated, save.CurrentXp, node.Key)
+                               && HeroRoster.CanPayMaterials(node);
             if (_activateButton != null)
             {
                 _activateButton.text = isActive ? "Activated" : "Activate";
-                _activateButton.SetEnabled(
-                    SphereGridOps.CanActivate(grid, activated, save.CurrentXp, node.Key)
-                    && HeroRoster.CanPayMaterials(node));
+                _activateButton.SetEnabled(canActivate);
+            }
+
+            if (isActive || canActivate)
+            {
+                SetReason(string.Empty);
+            }
+            else if (!SphereGridOps.IsReachable(grid, activated, node.Key))
+            {
+                SetReason("Activate a node next to it first.");
+            }
+            else if (save.CurrentXp < node.XpCost)
+            {
+                SetReason($"Need {node.XpCost} XP — {save.CurrentXp} banked.");
+            }
+            else
+            {
+                SetReason($"Needs {SphereGridPresenter.DescribeMaterialCost(node)}.");
+            }
+        }
+
+        /// <summary>The thing itself: an authored name, else the ability, summon or stat it grants.</summary>
+        private static string Title(SphereGridNode node)
+        {
+            if (!string.IsNullOrEmpty(node.DisplayName))
+            {
+                return node.DisplayName;
+            }
+            switch (node.Kind)
+            {
+                case SphereNodeKind.MagicKnown:
+                    return MagicName(node.GrantedMagicKey);
+                case SphereNodeKind.Summon:
+                    return SummonName(node.GrantedSummonKey);
+                case SphereNodeKind.MagicSlot:
+                    return "+1 ability slot";
+                default:
+                    return SphereGridPresenter.DescribePayload(node);
+            }
+        }
+
+        /// <summary>One line under the title that says what the node does, not what it is.</summary>
+        private static string Payload(SphereGridNode node)
+        {
+            switch (node.Kind)
+            {
+                case SphereNodeKind.MagicKnown:
+                {
+                    // Learned is not carried: it still has to win a slot in the Storehouse, and the
+                    // charge count is the whole run's allowance of it.
+                    var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(node.GrantedMagicKey) : null;
+                    string line = $"Learns {MagicName(node.GrantedMagicKey)}, {Mathf.Max(1, node.GrantedCharges)} charges a run. "
+                                  + "Carry it by giving it a slot in the Storehouse.";
+                    return magic != null && !string.IsNullOrEmpty(magic.Description)
+                        ? magic.Description + "\n\n" + line
+                        : line;
+                }
+                case SphereNodeKind.MagicSlot:
+                    return "Carry one more of the abilities this hero knows into every run.";
+                case SphereNodeKind.Summon:
+                    return $"Learns the summon {SummonName(node.GrantedSummonKey)}. Always carried and cast with Summon; it takes no ability slot.";
+                case SphereNodeKind.Stat:
+                    return "Raises this hero's stats for good.";
+                case SphereNodeKind.Resistance:
+                    return SphereGridPresenter.DescribePayload(node);
+                default:
+                {
+                    // Summon upgrades name the summon by its key; show its name instead.
+                    string text = SphereGridPresenter.DescribePayload(node);
+                    return string.IsNullOrEmpty(node.GrantedSummonKey)
+                        ? text
+                        : text.Replace(node.GrantedSummonKey, SummonName(node.GrantedSummonKey));
+                }
+            }
+        }
+
+        /// <summary>For a stat node, each stat it raises as "HP 26 → 36" on this hero.</summary>
+        private void AddChanges(SphereGridNode node, List<string> activated, bool isActive)
+        {
+            if (_detailBody == null || node.Kind != SphereNodeKind.Stat || node.Gains == null || _selectedHero == null)
+            {
+                return;
+            }
+
+            var without = new List<string>(activated);
+            without.Remove(node.Key);
+            var with = new List<string>(without) { node.Key };
+            var before = HeroStatCalculator.BaseStatsForNodes(_selectedHero, without);
+            var after = HeroStatCalculator.BaseStatsForNodes(_selectedHero, with);
+
+            foreach (var entry in node.Gains.NonZero())
+            {
+                var cell = Items.UI.InventoryHubUI.StatCell(StatCatalog.DisplayName(entry.Type),
+                    $"{before[entry.Type]} → {after[entry.Type]}", 1, StatCatalog.DisplayName(entry.Type));
+                cell.style.width = new Length(100f, LengthUnit.Percent);
+                _detailBody.Add(cell);
+            }
+        }
+
+        private static string MagicName(string key)
+        {
+            var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(key) : null;
+            return magic != null && !string.IsNullOrEmpty(magic.DisplayName) ? magic.DisplayName : key;
+        }
+
+        private static string SummonName(string key)
+        {
+            var summon = string.IsNullOrEmpty(key) ? null : SummonCatalogSO.Resolve(key);
+            return summon != null ? summon.Label : key;
+        }
+
+        private void SetReason(string text)
+        {
+            if (_reasonLabel != null)
+            {
+                _reasonLabel.text = text;
+            }
+        }
+
+        private static void SetShown(VisualElement element, bool shown)
+        {
+            if (element != null)
+            {
+                element.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
             }
         }
 

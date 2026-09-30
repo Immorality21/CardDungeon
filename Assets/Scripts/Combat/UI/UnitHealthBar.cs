@@ -84,6 +84,9 @@ namespace Assets.Scripts.Combat
             _barHeight = isBoss ? Height * BossBarScale : Height;
 
             var unitSprite = GetComponent<SpriteRenderer>();
+            // Every unit's bar and HP number live in its UITK plate under its feet (UnitNameplates,
+            // 2026-09-30). This root stays over the head for the status icons and an enemy's intent;
+            // the bar renderers below are built but never drawn.
             float topY = unitSprite != null ? unitSprite.bounds.extents.y + 0.18f : 0.6f;
 
             _barRoot = new GameObject("HealthBar").transform;
@@ -116,6 +119,13 @@ namespace Assets.Scripts.Combat
             _intent.transform.localPosition = new Vector3(0f, 0.30f, 0f);
             _intent.transform.localScale = new Vector3(IconSize, IconSize, 1f);
             _intent.enabled = false;
+
+            frame.enabled = false;
+            bg.enabled = false;
+            _fill.enabled = false;
+            // Intent sits where the bar was, status icons just under it.
+            _intent.transform.localPosition = new Vector3(0f, 0.18f, 0f);
+            _statusRoot.localPosition = new Vector3(0f, -0.08f, 0f);
 
             _built = true;
         }

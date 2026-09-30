@@ -351,64 +351,66 @@
     -unity-text-align: middle-left;
 }
 
+/* Why a greyed command is greyed ("No charges", "Silenced"). The row is already at 40%, so this
+   is italic rather than dimmer again. */
+.cd-cmd-row__reason {
+    flex-shrink: 0;
+    margin-left: 10px;
+    font-size: 16px;
+    -unity-font-style: italic;
+    color: var(--cd-text-dark);
+    -unity-text-align: middle-right;
+}
+
 /* ---- Turn-order list (FFX-style vertical column, top-right) ---- */
+/* The turn order is a column of portraits, FFX-style (2026-09-30): no names and no header.
+   Names were cut off at 180px ("Abyssal Warde") and the width put the panel over a boss.
+   Frame colour says the side (purple = party, red = enemy), and the actor's tile is the big one. */
 .cd-turn-order {
-    width: 180px;
+    width: 64px;
     background-color: var(--cd-parchment);
     border-width: 4px;
     border-color: var(--cd-frame);
     border-radius: 8px;
-    overflow: hidden;
+    /* Visible, so the acting unit's tile can pop out of the column to the left (FFX's offset). */
+    overflow: visible;
 }
 
-.cd-turn-order__header {
-    -unity-font-style: bold;
-    color: var(--cd-gold);
-    background-color: var(--cd-frame);
-    -unity-text-align: middle-center;
-    font-size: 16px;
-    padding: 7px 10px;
+/* Tucked 8px from the right edge, like the party panel below it. */
+.cd-party-status.cd-dock-bottom-right {
+    right: 8px;
+}
+
+.cd-turn-order.cd-dock-top-right {
+    right: 8px;
 }
 
 .cd-turn-order__list {
-    padding: 6px;
+    padding: 5px 4px;
+    align-items: center;
 }
 
 .cd-turn-row {
-    flex-direction: row;
-    align-items: center;
-    height: 42px;
-    padding: 0 8px;
+    width: 46px;
+    height: 46px;
     margin: 2px 0;
+    align-items: center;
+    justify-content: center;
     background-color: var(--cd-stone);
     border-width: 2px;
-    border-color: rgba(0, 0, 0, 0);
-    border-radius: 4px;
+    border-color: rgb(120, 70, 180);
+    border-radius: 6px;
 }
 
-.cd-turn-row--current {
-    background-color: var(--cd-stone-hover);
-    border-color: var(--cd-accent);
+.cd-turn-row--enemy {
+    border-color: rgb(200, 70, 70);
+    background-color: rgb(48, 18, 26);
 }
 
 .cd-turn-row__icon {
-    width: 32px;
-    height: 32px;
-    margin-right: 8px;
-    flex-shrink: 0;
-    background-color: var(--cd-frame);
-    border-radius: 3px;
+    width: 36px;
+    height: 36px;
     -unity-background-scale-mode: scale-to-fit;
-}
-
-.cd-turn-row__name {
-    flex-grow: 1;
-    font-size: 16px;
-    -unity-font-style: bold;
-    color: var(--cd-text-light);
-    -unity-text-align: middle-left;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 /* ---- Combat selection lists (magic slots / targets) — matches the command menu ---- */
@@ -503,16 +505,69 @@
     margin: 0;
 }
 
+/* The HP number, drawn over the bar's fill. White with a dark outline so it reads on green,
+   yellow, red and the empty track alike. */
 .cd-nameplate__hp {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
     font-size: 16px;
-    color: rgb(150, 230, 150);
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(10, 6, 18);
+    text-shadow: 1px 1px 0 rgb(0, 0, 0);
     -unity-text-align: middle-center;
     padding: 0;
     margin: 0;
 }
 
 .cd-nameplate__hp--low {
-    color: rgb(255, 110, 100);
+    color: rgb(255, 200, 195);
+}
+
+/* The enemy's HP bar lives in its plate (2026-09-30): one readout per unit, under its feet. The
+   floating world bar above the head sat nearer the unit above it than its own, and doubled the
+   plate's number. The low colour matches the number's. */
+.cd-nameplate__bar {
+    width: 88px;
+    height: 21px;
+    margin: 2px 0 2px 0;
+    background-color: rgb(16, 12, 24);
+    border-width: 1px;
+    border-color: rgba(217, 204, 242, 0.75);
+    border-radius: 2px;
+}
+
+/* Deep fills, so the white number on top stays readable at every level. */
+.cd-nameplate__fill {
+    height: 100%;
+    background-color: rgb(38, 140, 62);
+}
+
+.cd-nameplate__fill--mid {
+    background-color: rgb(166, 124, 20);
+}
+
+.cd-nameplate__fill--low {
+    background-color: rgb(170, 40, 40);
+}
+
+.cd-nameplate--boss .cd-nameplate__bar {
+    width: 170px;
+    height: 24px;
+    background-color: rgb(46, 10, 13);
+}
+
+/* A hero's plate is the bar alone - the party panel already names them. */
+.cd-nameplate--hero .cd-nameplate__name {
+    display: none;
+}
+
+.cd-nameplate--hero {
+    padding: 2px 3px;
 }
 
 .cd-nameplate--boss .cd-nameplate__name {
@@ -1199,6 +1254,24 @@
     white-space: normal;
 }
 
+/* A rarity class on the detail title: doubled, because .cd-inv-detail__name sets the plain colour
+   at the same specificity further down the file and used to win (every name read white). */
+.cd-inv-detail__name.cd-rarity--uncommon {
+    color: rgb(120, 220, 120);
+}
+
+.cd-inv-detail__name.cd-rarity--rare {
+    color: rgb(110, 160, 255);
+}
+
+.cd-inv-detail__name.cd-rarity--epic {
+    color: rgb(225, 130, 255);
+}
+
+.cd-inv-detail__name.cd-rarity--legendary {
+    color: var(--cd-gold);
+}
+
 .cd-inv-detail__sub {
     font-size: 16px;
     color: var(--cd-text-light);
@@ -1330,6 +1403,240 @@
     -unity-text-align: middle-center;
     border-top-width: 1px;
     border-top-color: rgba(205, 110, 255, 0.15);
+}
+
+/* ============================================================
+   Campfire - the party screen on the inventory frame (rebuilt 2026-09-30)
+   Seats across the top, the roster, the chosen hero, and the XP split.
+   Every region is px-sized and present in every state, for the same
+   hit-testing reason as the inventory above. Seats and roster rows are
+   Buttons so the hub's shared keyboard cursor reaches them.
+   ============================================================ */
+
+.cd-camp-header__cap {
+    flex-grow: 1;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-left;
+}
+
+.cd-camp-header__gold {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    margin-right: 16px;
+}
+
+/* A seat: the inventory's hero card as a Button. Seat 0 leads. */
+.cd-camp-seat {
+    width: 124px;
+    height: 96px;
+    margin: 0 12px 0 0;
+    padding: 4px 4px 6px 4px;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: rgba(35, 18, 58, 0.6);
+    border-width: 2px;
+    border-color: rgba(91, 42, 145, 0.7);
+    border-radius: 8px;
+}
+
+.cd-camp-seat:hover {
+    background-color: rgb(71, 34, 110);
+    border-color: rgb(156, 82, 210);
+}
+
+.cd-camp-seat--active,
+.cd-camp-seat--active:hover {
+    background-color: rgb(67, 30, 108);
+    border-color: var(--cd-accent);
+}
+
+/* An empty seat: a frame and nothing in it (UITK has no dashed border). */
+.cd-camp-seat--empty,
+.cd-camp-seat--empty:hover {
+    background-color: rgba(0, 0, 0, 0.18);
+    border-color: rgba(205, 110, 255, 0.16);
+    justify-content: center;
+}
+
+.cd-camp-seat__sprite {
+    width: 64px;
+    height: 64px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-camp-seat__name {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
+}
+
+.cd-camp-seat--active .cd-camp-seat__name {
+    color: var(--cd-gold);
+}
+
+.cd-camp-seat--empty .cd-camp-seat__name {
+    -unity-font-style: italic;
+    opacity: 0.45;
+}
+
+/* The leader's mark: a tab sitting on the seat's top border, clear of the portrait. */
+.cd-camp-seat__lead {
+    position: absolute;
+    top: -12px;
+    align-self: center;
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    background-color: rgb(67, 30, 108);
+    border-width: 1px;
+    border-color: var(--cd-gold);
+    border-radius: 5px;
+    padding: 0 6px;
+    margin: 0;
+}
+
+.cd-camp-seat--lead {
+    border-color: var(--cd-gold);
+}
+
+.cd-camp-col--roster {
+    width: 330px;
+}
+
+.cd-camp-col--detail {
+    margin: 0 14px;
+}
+
+.cd-camp-col--split {
+    width: 300px;
+}
+
+/* A roster row is the inventory row as a Button: marching heroes carry a gold accent bar. */
+.cd-camp-row {
+    -unity-text-align: middle-left;
+    margin: 0 0 3px 0;
+}
+
+.cd-camp-row--fielded,
+.cd-camp-row--fielded:hover {
+    border-left-color: var(--cd-gold);
+    border-left-width: 4px;
+}
+
+/* The caption gives way to the right-hand tag rather than running under it. */
+.cd-camp-row .cd-inv-row__caption {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cd-camp-row--benched .cd-inv-row__icon,
+.cd-camp-row--benched .cd-inv-row__name {
+    opacity: 0.6;
+}
+
+.cd-camp-row--fielded .cd-inv-row__meta {
+    color: var(--cd-gold);
+}
+
+.cd-camp-actions {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin: 2px 0 4px 0;
+}
+
+.cd-camp-action {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin: 0 6px 0 0;
+}
+
+/* Why the action above is dimmed: always present, so the column never moves. */
+.cd-reason {
+    flex-shrink: 0;
+    height: 24px;
+    font-size: 16px;
+    -unity-font-style: italic;
+    color: rgb(255, 150, 140);
+    padding: 0 2px;
+    margin: 0 0 6px 0;
+}
+
+/* XP modes: the inventory tab, full-width, stacked. Chosen = filled; locked = dimmed + the level. */
+.cd-camp-mode {
+    flex-shrink: 0;
+    margin: 0 0 8px 0;
+    -unity-text-align: middle-left;
+}
+
+.cd-camp-mode--chosen,
+.cd-camp-mode--chosen:hover {
+    background-color: rgb(102, 48, 158);
+    border-color: var(--cd-gold);
+    color: var(--cd-gold);
+}
+
+.cd-camp-focus {
+    flex-shrink: 0;
+    height: auto;
+    min-height: 38px;
+    padding: 4px 12px;
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    white-space: normal;
+}
+
+.cd-camp-split-desc {
+    font-size: 16px;
+    color: var(--cd-text-light);
+    opacity: 0.75;
+    white-space: normal;
+    margin: 4px 2px 0 2px;
+}
+
+.cd-camp-feedback {
+    margin-top: auto;
+    font-size: 16px;
+    -unity-font-style: italic;
+    color: var(--cd-gold);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    min-height: 44px;
+}
+
+/* ============================================================
+   Merchant - on the inventory frame too (rebuilt 2026-09-30).
+   The list, and a detail column carrying the price and the action.
+   ============================================================ */
+
+.cd-shop-col--list {
+    width: 440px;
+    margin-right: 14px;
+}
+
+.cd-shop-restock {
+    flex-shrink: 0;
+    margin: 8px 0 0 0;
+}
+
+/* The hero strip's cards are Buttons here (pick who to compare against). */
+.cd-inv-hero.unity-button {
+    margin: 0 12px 0 0;
+}
+
+.cd-shop-price {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+}
+
+.cd-shop-price--short {
+    color: rgb(255, 150, 140);
 }
 
 /* Tall stacked menu button (full window width). */
@@ -1875,12 +2182,34 @@
 
 .cd-cmd-row--selected,
 .cd-sel-row--selected,
-.cd-party-row--active,
-.cd-turn-row--current {
+.cd-party-row--active {
     background-color: rgb(102, 48, 158);
     border-width: 2px;
     border-color: var(--cd-accent);
     border-radius: 8px;
+}
+
+/* The unit acting now pops out of the column: a bigger gold-framed tile pushed left past the
+   panel's edge, FFX-style, so "who acts" never needs finding (2026-09-30). */
+.cd-turn-row--current,
+.cd-turn-row--current.cd-turn-row--enemy {
+    width: 64px;
+    height: 64px;
+    margin: 0 0 6px 0;
+    translate: -22px 0;
+    background-color: rgb(102, 48, 158);
+    border-width: 3px;
+    border-color: var(--cd-gold);
+    border-radius: 8px;
+}
+
+.cd-turn-row--current.cd-turn-row--enemy {
+    background-color: rgb(96, 28, 40);
+}
+
+.cd-turn-row--current .cd-turn-row__icon {
+    width: 54px;
+    height: 54px;
 }
 
 /* Hover */
@@ -1894,7 +2223,6 @@
 /* Brighter glossy-looking headers */
 
 .cd-party-status__header,
-.cd-turn-order__header,
 .cd-command-window__header {
     background-color: rgb(67, 30, 108);
     color: var(--cd-gold);
@@ -2170,9 +2498,15 @@
     background-color: var(--cd-accent);
 }
 
+/* Affordable now: an open ring in the accent colour, against the solid fill of an owned node
+   and the plain frame of a reachable node the bank cannot pay for yet. */
 .sg-node--available {
-    background-color: var(--cd-stone-hover);
+    background-color: rgb(24, 12, 40);
     border-color: var(--cd-accent);
+}
+
+.sg-node--available .sg-node__glyph {
+    color: var(--cd-accent);
 }
 
 .sg-node--adjacent {
@@ -2184,9 +2518,12 @@
     opacity: 0.45;
 }
 
+/* The cursor: a thick gold ring and a lift, readable at any zoom (a 1px white ring was not). */
 .sg-node--selected {
-    border-color: var(--cd-text-light);
-    scale: 1.15;
+    border-color: var(--cd-gold);
+    border-width: 5px;
+    scale: 1.25;
+    opacity: 1;
 }
 
 /* Editor connect-mode source highlight. Gold rather than the theme's parchment, which is
@@ -2236,6 +2573,68 @@
     border-width: 2px;
     border-color: var(--cd-frame);
     border-radius: 6px;
+}
+
+/* ---- Sphere grid screen on the inventory frame (2026-09-30) ---- */
+.sg-graph-host {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    margin-right: 14px;
+}
+
+.sg-detail-col {
+    width: 330px;
+}
+
+.sg-detail__chips {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin: 6px 0 4px 0;
+}
+
+.sg-detail__payload {
+    flex-shrink: 0;
+    -unity-font-style: normal;
+}
+
+.sg-detail__body {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.sg-detail__cost {
+    flex-shrink: 0;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+}
+
+.sg-activate {
+    flex-shrink: 0;
+    margin: 6px 0 4px 0;
+}
+
+.sg-feedback {
+    min-height: 24px;
+    margin-top: 0;
+}
+
+/* Banked XP, as a tab on the portrait card's top edge - the leader tab's shape. */
+.sg-hero-xp {
+    position: absolute;
+    top: -12px;
+    align-self: center;
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    background-color: rgb(67, 30, 108);
+    border-width: 1px;
+    border-color: var(--cd-gold);
+    border-radius: 5px;
+    padding: 0 6px;
+    margin: 0;
 }
 
 /* ---- Campaign map ---- */
@@ -2345,6 +2744,17 @@
     -unity-text-align: middle-center;
 }
 
+/* The dimmed town behind a service window (HubManager.CoverTown). It takes the clicks, so the
+   inert town under it cannot be reached by the mouse either. */
+.hub-scrim {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(6, 3, 14, 0.5);
+}
+
 /* ============================================================
    The hub town (HubView). One authored pixel rect, letterboxed
    as a single unit — the scale lives on .hub-canvas, never on a
@@ -2404,6 +2814,15 @@
 
 /* An unbuilt lot's foundation still has to be seen - it is the affordance that makes a
    material worth wanting, so it is dimmed only enough to read as unfinished. */
+/* The art layer shares the lot's state classes, and .hub-lot--available / --absent paint a faint
+   slab for a lot with no art - which drew a dark box behind the foundation sprite. The art never
+   takes the slab. */
+.hub-art.hub-lot--available,
+.hub-art.hub-lot--absent,
+.hub-art.hub-lot--built {
+    background-color: rgba(0, 0, 0, 0);
+}
+
 .hub-art.hub-lot--available {
     opacity: 0.92;
 }
@@ -2634,6 +3053,31 @@
     background-color: var(--cd-stone-hover);
 }
 
+/* The road is a signpost on the painted road (2026-09-30), not a panel: the sprite fills the top
+   of the button and the caption sits under it. Hover and the keyboard cursor outline it, as a lot
+   is outlined, rather than filling it (the doubled class beats .cd-nav--selected). */
+.hub-road.hub-road--art {
+    width: 192px;
+    height: 226px;
+    right: 8px;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Sprites/Hub/hub_signpost.png");
+    -unity-background-scale-mode: scale-to-fit;
+    background-position-y: top;
+    border-width: 0;
+    -unity-text-align: lower-center;
+    padding: 0 0 2px 0;
+    text-shadow: 1px 1px 0 rgb(0, 0, 0);
+}
+
+.hub-road.hub-road--art:hover,
+.hub-road.hub-road--art.cd-nav--selected,
+.hub-road.hub-road--art.cd-nav--selected:hover {
+    background-color: rgba(236, 190, 72, 0.08);
+    border-width: 2px;
+    border-color: var(--cd-gold);
+}
+
 .hub-bar {
     flex-direction: row;
     align-items: center;
@@ -2778,14 +3222,28 @@
 
 /* Keyboard hint line, bottom-centre under the room bar. Deliberately quiet:
    it is there to be found once, not read every room. */
+/* Full-width and text-centred rather than left 50% + translate -50%: the percentage translate was
+   not recomputed when the text changed width, so the hint drifted ~85px left of the bar it belongs
+   to after the first Fight bar (2026-09-30). */
 .cd-nav-hint {
     position: absolute;
     bottom: 12px;
-    left: 50%;
-    translate: -50% 0;
+    left: 0;
+    right: 0;
+    -unity-text-align: middle-center;
     font-size: 16px;
     color: var(--cd-text-dark);
     opacity: 0.7;
+}
+
+/* While the pause overlay is up, the room bar, the command menu and the hint under them are hidden
+   (visibility, not display, so every "which bar is up" check in RoomActionUI still reads true and the
+   shared cursor skips them). A highlighted Fight button under the pause window was a second cursor. */
+.cd-root--paused > #main-bar,
+.cd-root--paused > #combat-bar,
+.cd-root--paused > #hero-bar,
+.cd-root--paused > #nav-hint {
+    visibility: hidden;
 }
 
 /* ============================================================

@@ -1,5 +1,9 @@
 # Hub placeholder art
 
+> **Retired 2026-09-30.** Every sprite these scripts wrote has been replaced by PixelLab art (see
+> `docs/PIXEL_ART.md` §8c and the Hub guide's Art section). **Do not run them** — they would
+> overwrite the real art. Kept only as a record of the layout constraints below.
+
 Two standalone Python scripts (stdlib only — no Pillow) that regenerate the hub town's
 **placeholder** sprites into `Assets/Sprites/Hub/`. Run from the repo root:
 

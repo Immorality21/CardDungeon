@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 
 namespace Assets.Scripts.Cards
@@ -53,6 +54,32 @@ namespace Assets.Scripts.Cards
                 }
             }
             return lines;
+        }
+
+        /// <summary>
+        /// The Forge's line for one effect: the same wording as the picker and the Storehouse, with no
+        /// caster (the Forge belongs to the party, not a hero), the stat it scales with named instead
+        /// of added, and - when the next upgrade changes the number - the preview
+        /// ("3 damage → 5 damage + STR"). Locked effects are described too; the caller marks them.
+        /// </summary>
+        public static string ForgeLine(SpellEffect effect, int powerBonus, int nextPowerBonus)
+        {
+            if (effect == null)
+            {
+                return string.Empty;
+            }
+            string now = Describe(effect, null, null, powerBonus);
+            if (string.IsNullOrEmpty(now))
+            {
+                return effect.EffectType.ToString();
+            }
+            string next = nextPowerBonus != powerBonus ? Describe(effect, null, null, nextPowerBonus) : now;
+            string line = next != now ? $"{now} → {next}" : now;
+
+            bool scales = (effect.EffectType == SpellEffectType.Damage || effect.EffectType == SpellEffectType.Heal)
+                          && effect.PowerMode != PowerMode.Flat && effect.PowerMode != PowerMode.PercentOfMaxHealth
+                          && StatCatalog.CanScalePower(effect.ScalingStat);
+            return scales ? $"{line} + {StatCatalog.ShortName(effect.ScalingStat)}" : line;
         }
 
         /// <summary>Who the ability lands on, as a player would say it.</summary>

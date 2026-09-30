@@ -1068,9 +1068,20 @@ namespace Assets.Scripts.Items.UI
 
         private void AddItemLines(ItemSO item)
         {
+            if (_detailBody != null)
+            {
+                AddItemLines(_detailBody, item);
+            }
+        }
+
+        /// <summary>An item's description and what it grants, as chips. Shared with the merchant.</summary>
+        internal static void AddItemLines(VisualElement body, ItemSO item)
+        {
             if (!string.IsNullOrEmpty(item.Description))
             {
-                AddDescription(item.Description);
+                var desc = new Label(item.Description);
+                desc.AddToClassList("cd-inv-detail__desc");
+                body.Add(desc);
             }
 
             // A wrapping row of short chips, not a list: four bonuses as lines pushed the stats and
@@ -1081,7 +1092,7 @@ namespace Assets.Scripts.Items.UI
             {
                 return;
             }
-            _detailBody?.Add(BestiaryLineView.Section("Grants"));
+            body.Add(BestiaryLineView.Section("Grants"));
             var row = new VisualElement();
             row.AddToClassList("cd-inv-grants");
             foreach (var text in chips)
@@ -1090,7 +1101,7 @@ namespace Assets.Scripts.Items.UI
                 chip.AddToClassList("cd-inv-grant");
                 row.Add(chip);
             }
-            _detailBody?.Add(row);
+            body.Add(row);
         }
 
         /// <summary>
@@ -1169,7 +1180,7 @@ namespace Assets.Scripts.Items.UI
         }
 
         /// <summary>One cell of a stat grid; <paramref name="direction"/> is +1 up, -1 down, 0 unchanged.</summary>
-        private static VisualElement StatCell(string label, string value, int direction, string tooltip)
+        internal static VisualElement StatCell(string label, string value, int direction, string tooltip)
         {
             var cell = new VisualElement();
             cell.AddToClassList("cd-inv-stat");
@@ -1551,7 +1562,7 @@ namespace Assets.Scripts.Items.UI
             SetShown(_emptyLabel, true);
         }
 
-        private static void SetIcon(VisualElement tile, Sprite icon, ItemSO rarityOf)
+        internal static void SetIcon(VisualElement tile, Sprite icon, ItemSO rarityOf)
         {
             if (tile == null)
             {
@@ -1565,7 +1576,7 @@ namespace Assets.Scripts.Items.UI
         }
 
         /// <summary>Rarity colour via the theme's classes, so the palette lives in one file.</summary>
-        private static void ApplyRarity(VisualElement element, ItemSO item)
+        internal static void ApplyRarity(VisualElement element, ItemSO item)
         {
             if (element == null)
             {

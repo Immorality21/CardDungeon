@@ -371,6 +371,11 @@ Still to do:
 - ~~**The Dark Jailor is 64 px although it is not a boss**~~ *Done 2026-09-29*: redrawn at 32 px /
   32 PPU with a new idle (same file GUIDs and slice IDs). Its palette moved from violet to black
   plate with molten orange cracks, which suits its Fire attack — say if you want the violet back.
+- ~~**The hub town was still the September placeholders**~~ *Done 2026-09-30* (owner: "the visuals
+  for the hub buildings are not in line with the rest of the game"): the six buildings, the unbuilt
+  plot, the backdrop and a new signpost for the road are PixelLab art in the 3/4 view, drawn at an
+  exact 3× (`docs/PIXEL_ART.md` §8c). Not animated yet — the forge fire, the orb and the campfire
+  are the obvious candidates for a 3-frame loop.
 - PixelLab can also animate attacks and hits (`animate_image` with an action), which would answer
   §1's "no hit reaction, no death animation" without an Animator.
 

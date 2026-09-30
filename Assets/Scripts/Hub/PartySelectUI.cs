@@ -1,8 +1,15 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Balance;
+using Assets.Scripts.Cards;
+using Assets.Scripts.Enemies.UI;
 using Assets.Scripts.Heroes;
+using Assets.Scripts.IO;
+using Assets.Scripts.Items;
+using Assets.Scripts.Items.UI;
 using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
+using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -23,23 +30,45 @@ namespace Assets.Scripts.Hub
     /// sells instead is <b>how the XP is divided</b>: the same question one step further on, and the
     /// one thing a campfire level grants (<see cref="CampfireOps"/>). Operates on a VisualElement
     /// subtree owned by the menu's UIDocument - not a MonoBehaviour, same as the merchant.</para>
+    ///
+    /// <para><b>Laid out on the inventory's frame since 2026-09-30</b> (docs/MENU_IMPROVEMENTS.md):
+    /// four seats across the top, the roster, the chosen hero's detail and the XP split. Choosing a
+    /// hero and acting on them are separate on purpose - a roster row selects, the detail column's
+    /// buttons field, bench or crown - so a row is never a misclick that sends someone home.</para>
     /// </summary>
     public class PartySelectUI
     {
+        private const int SeatCount = 4;
+
         private readonly VisualElement _root;
         private readonly PartyRosterSO _catalog;
+        private readonly FileHandler _files = new FileHandler();
+
         private readonly Label _goldLabel;
         private readonly Label _capLabel;
         private readonly Label _shareLabel;
         private readonly Label _feedbackLabel;
-        private readonly ScrollView _fieldedList;
-        private readonly ScrollView _benchList;
+        private readonly Button[] _seats = new Button[SeatCount];
+        private readonly ScrollView _rosterList;
+
+        private readonly VisualElement _detailIcon;
+        private readonly Label _detailName;
+        private readonly Label _detailSub;
+        private readonly Button _toggleButton;
+        private readonly Button _leadButton;
+        private readonly Label _reasonLabel;
+        private readonly ScrollView _detailBody;
+
         private readonly Button _splitEvenButton;
         private readonly Button _splitMentorButton;
         private readonly Button _splitCatchUpButton;
         private readonly Button _splitFocusButton;
         private readonly Label _splitDescLabel;
         private readonly Button _closeButton;
+
+        private readonly Dictionary<string, Button> _rosterRows = new Dictionary<string, Button>();
+        private MagicLoadoutSaveData _loadout;
+        private string _selectedKey;
 
         public event Action OnClosed;
 
@@ -52,8 +81,16 @@ namespace Assets.Scripts.Hub
             _capLabel = root.Q<Label>("party-cap");
             _shareLabel = root.Q<Label>("party-share");
             _feedbackLabel = root.Q<Label>("party-feedback");
-            _fieldedList = root.Q<ScrollView>("party-fielded");
-            _benchList = root.Q<ScrollView>("party-bench");
+            _rosterList = root.Q<ScrollView>("party-roster");
+
+            _detailIcon = root.Q<VisualElement>("party-detail-icon");
+            _detailName = root.Q<Label>("party-detail-name");
+            _detailSub = root.Q<Label>("party-detail-sub");
+            _toggleButton = root.Q<Button>("party-toggle");
+            _leadButton = root.Q<Button>("party-lead");
+            _reasonLabel = root.Q<Label>("party-reason");
+            _detailBody = root.Q<ScrollView>("party-detail-body");
+
             _splitEvenButton = root.Q<Button>("party-split-even");
             _splitMentorButton = root.Q<Button>("party-split-mentor");
             _splitCatchUpButton = root.Q<Button>("party-split-catchup");
@@ -61,6 +98,24 @@ namespace Assets.Scripts.Hub
             _splitDescLabel = root.Q<Label>("party-split-desc");
             _closeButton = root.Q<Button>("party-close");
 
+            for (int i = 0; i < SeatCount; i++)
+            {
+                _seats[i] = root.Q<Button>("party-seat-" + i);
+                int seat = i;
+                if (_seats[i] != null)
+                {
+                    _seats[i].clicked += () => OnSeatClicked(seat);
+                }
+            }
+
+            if (_toggleButton != null)
+            {
+                _toggleButton.clicked += OnToggleSelected;
+            }
+            if (_leadButton != null)
+            {
+                _leadButton.clicked += OnLeadSelected;
+            }
             if (_splitEvenButton != null)
             {
                 _splitEvenButton.clicked += () => ChooseMode(XpSplitMode.Even);
@@ -88,6 +143,8 @@ namespace Assets.Scripts.Hub
         public void Show()
         {
             _root.style.display = DisplayStyle.Flex;
+            _loadout = _files.Load<MagicLoadoutSaveData>();
+            _selectedKey = null;
             SetFeedback(string.Empty);
             Refresh();
         }
@@ -126,28 +183,277 @@ namespace Assets.Scripts.Hub
             var owned = HeroRoster.GetOwnedHeroes(_catalog);
             var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, cap);
 
-            if (_goldLabel != null)
+            // Nobody chosen yet (or the chosen one is gone): start on the leader.
+            if (FindOwned(owned, _selectedKey) == null)
             {
-                _goldLabel.text = $"Gold: {MetaProgressManager.Instance.Gold}";
+                _selectedKey = fieldedKeys.Count > 0 ? fieldedKeys[0] : (owned.Count > 0 ? owned[0].SaveKey : null);
             }
 
-            _capLabel.text = $"Marching out: {fieldedKeys.Count} of {cap}"
-                           + (owned.Count > fieldedKeys.Count ? $"   ·   {owned.Count} in the roster" : string.Empty);
+            SetText(_goldLabel, $"{MetaProgressManager.Instance.Gold} gold");
+            SetText(_capLabel, $"Marching out: {fieldedKeys.Count} of {cap}"
+                             + (owned.Count > fieldedKeys.Count ? $"   ·   {owned.Count} in the roster" : string.Empty));
 
             int size = Mathf.Max(1, fieldedKeys.Count);
-            _shareLabel.text = $"Each hero earns {100 / size}% of every kill's XP, and a bigger party "
-                             + "spreads the damage thinner. Wide clears faster; narrow levels faster.";
+            var mode = MetaProgressManager.Instance.GetXpSplitMode();
+            SetText(_shareLabel, mode == XpSplitMode.Even
+                ? $"Each hero earns {100 / size}% of the XP"
+                : $"{size} {(size == 1 ? "hero shares" : "heroes share")} the XP ({CampfireOps.Label(mode)})");
 
-            BuildLists(owned, fieldedKeys, cap);
+            RefreshSeats(fieldedKeys);
+            BuildRoster(owned, fieldedKeys);
+            RefreshDetail(owned, fieldedKeys, cap);
             RefreshSplitControls(fieldedKeys);
         }
 
+        /// <summary>The four seats, leader first. An empty seat is a frame the cursor skips.</summary>
+        private void RefreshSeats(List<string> fieldedKeys)
+        {
+            for (int i = 0; i < SeatCount; i++)
+            {
+                var seat = _seats[i];
+                if (seat == null)
+                {
+                    continue;
+                }
+                seat.Clear();
+                seat.text = string.Empty;
+
+                var hero = i < fieldedKeys.Count && _catalog != null ? _catalog.Find(fieldedKeys[i]) : null;
+                bool empty = hero == null;
+                seat.EnableInClassList("cd-camp-seat--empty", empty);
+                seat.EnableInClassList(KeyboardNavigator.SkipClass, empty);
+                seat.EnableInClassList("cd-camp-seat--active", !empty && hero.SaveKey == _selectedKey);
+                seat.EnableInClassList("cd-camp-seat--lead", !empty && i == 0);
+                seat.pickingMode = empty ? PickingMode.Ignore : PickingMode.Position;
+                seat.tooltip = empty ? string.Empty : hero.DisplayName;
+
+                if (empty)
+                {
+                    seat.Add(MakeLabel("Empty seat", "cd-camp-seat__name"));
+                    continue;
+                }
+
+                var sprite = new VisualElement { pickingMode = PickingMode.Ignore };
+                sprite.AddToClassList("cd-camp-seat__sprite");
+                if (hero.Sprite != null)
+                {
+                    sprite.style.backgroundImage = new StyleBackground(hero.Sprite);
+                }
+                seat.Add(sprite);
+                seat.Add(MakeLabel(hero.DisplayName, "cd-camp-seat__name"));
+                if (i == 0)
+                {
+                    seat.Add(MakeLabel("Leads", "cd-camp-seat__lead"));
+                }
+            }
+        }
+
         /// <summary>
-        /// The campfire's XP split: three modes side by side, the chosen one filled in.
+        /// Everyone owned, marching heroes first in seat order. A row only <i>selects</i>; what to do
+        /// with the hero is the detail column's, so a stray click never benches anybody.
+        /// </summary>
+        private void BuildRoster(List<HeroSO> owned, List<string> fieldedKeys)
+        {
+            if (_rosterList == null)
+            {
+                return;
+            }
+            _rosterList.Clear();
+            _rosterRows.Clear();
+
+            var ordered = new List<HeroSO>();
+            foreach (var key in fieldedKeys)
+            {
+                var hero = FindOwned(owned, key);
+                if (hero != null)
+                {
+                    ordered.Add(hero);
+                }
+            }
+            foreach (var hero in owned)
+            {
+                if (hero != null && !ordered.Contains(hero))
+                {
+                    ordered.Add(hero);
+                }
+            }
+
+            foreach (var hero in ordered)
+            {
+                int seat = fieldedKeys.IndexOf(hero.SaveKey);
+                string key = hero.SaveKey;
+                var row = new Button(() => SelectHero(key)) { text = string.Empty };
+                row.AddToClassList("cd-inv-row");
+                row.AddToClassList("cd-camp-row");
+                row.AddToClassList(seat >= 0 ? "cd-camp-row--fielded" : "cd-camp-row--benched");
+                row.EnableInClassList("cd-inv-row--selected", key == _selectedKey);
+
+                var icon = new VisualElement { pickingMode = PickingMode.Ignore };
+                icon.AddToClassList("cd-inv-row__icon");
+                if (hero.Sprite != null)
+                {
+                    icon.style.backgroundImage = new StyleBackground(hero.Sprite);
+                }
+                row.Add(icon);
+
+                var text = new VisualElement { pickingMode = PickingMode.Ignore };
+                text.AddToClassList("cd-inv-row__text");
+                text.Add(MakeLabel(hero.DisplayName, "cd-inv-row__name"));
+                text.Add(MakeLabel(RoleLine(StatsOf(hero)), "cd-inv-row__caption"));
+                row.Add(text);
+
+                // The gold bar already says "marching"; the tag only names the leader and the benched.
+                if (seat <= 0)
+                {
+                    row.Add(MakeLabel(seat == 0 ? "Leads" : "Resting", "cd-inv-row__meta"));
+                }
+
+                _rosterList.Add(row);
+                _rosterRows[key] = row;
+            }
+        }
+
+        /// <summary>HP and the two stats the hero leans on most - the full grid is in the detail.</summary>
+        private static string RoleLine(StatBlock stats)
+        {
+            var best = new List<StatType>();
+            foreach (var stat in StatCatalog.Types)
+            {
+                if (stat != StatType.MaxHealth && stats[stat] > 0)
+                {
+                    best.Add(stat);
+                }
+            }
+            best.Sort((a, b) => stats[b].CompareTo(stats[a]));
+
+            var parts = new List<string> { $"HP {stats[StatType.MaxHealth]}" };
+            for (int i = 0; i < best.Count && i < 2; i++)
+            {
+                parts.Add($"{StatCatalog.ShortName(best[i])} {stats[best[i]]}");
+            }
+            return string.Join(" · ", parts);
+        }
+
+        /// <summary>
+        /// The chosen hero: who they are, the two things the fire can do with them, why either is
+        /// dimmed, and then what they would march out with - stats and carried abilities.
+        /// </summary>
+        private void RefreshDetail(List<HeroSO> owned, List<string> fieldedKeys, int cap)
+        {
+            _detailBody?.Clear();
+            var hero = FindOwned(owned, _selectedKey);
+            if (hero == null)
+            {
+                SetText(_detailName, "Nobody here");
+                SetText(_detailSub, string.Empty);
+                SetText(_reasonLabel, string.Empty);
+                _toggleButton?.SetEnabled(false);
+                _leadButton?.SetEnabled(false);
+                return;
+            }
+
+            int seat = fieldedKeys.IndexOf(hero.SaveKey);
+            bool fielded = seat >= 0;
+
+            if (_detailIcon != null)
+            {
+                _detailIcon.style.backgroundImage = hero.Sprite != null ? new StyleBackground(hero.Sprite) : null;
+            }
+            SetText(_detailName, hero.DisplayName);
+            SetText(_detailSub, seat == 0 ? "Leads the party"
+                              : fielded ? $"Marching out · seat {seat + 1}"
+                              : "Staying behind");
+
+            // The one action, and - when it is dimmed - the reason, always in the same place.
+            string reason = string.Empty;
+            if (_toggleButton != null)
+            {
+                bool canToggle;
+                if (fielded)
+                {
+                    _toggleButton.text = "Stay behind";
+                    canToggle = fieldedKeys.Count > 1;
+                    if (!canToggle)
+                    {
+                        reason = "Somebody has to go.";
+                    }
+                }
+                else
+                {
+                    _toggleButton.text = "March out";
+                    canToggle = fieldedKeys.Count < cap;
+                    if (!canToggle)
+                    {
+                        reason = $"All {cap} seats are taken. Bench someone first.";
+                    }
+                }
+                _toggleButton.SetEnabled(canToggle);
+            }
+            if (_leadButton != null)
+            {
+                _leadButton.text = seat == 0 ? "Leads the party" : "Lead the party";
+                _leadButton.SetEnabled(fielded && seat > 0);
+            }
+            SetText(_reasonLabel, reason);
+
+            if (_detailBody == null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(hero.Blurb))
+            {
+                _detailBody.Add(MakeLabel(hero.Blurb, "cd-inv-detail__desc"));
+            }
+
+            var stats = StatsOf(hero);
+            _detailBody.Add(BestiaryLineView.Section("Stats"));
+            var grid = new VisualElement();
+            grid.AddToClassList("cd-inv-stats");
+            foreach (var stat in StatCatalog.Types)
+            {
+                grid.Add(InventoryHubUI.StatCell(StatCatalog.ShortName(stat), stats[stat].ToString(), 0,
+                    StatCatalog.DisplayName(stat)));
+            }
+            _detailBody.Add(grid);
+
+            var save = HeroRoster.GetHeroSave(hero);
+            int xp = save != null ? save.CurrentXp : 0;
+            _detailBody.Add(MakeLabel($"{xp} XP to spend on the sphere grid", "cd-inv-detail__line"));
+
+            _detailBody.Add(BestiaryLineView.Section("Carried abilities"));
+            var nodes = NodesOf(hero);
+            var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, nodes);
+            int slots = EquippedMagicState.DefaultSlotCount + SphereGridOps.SlotBonusForNodes(hero.SphereGrid, nodes);
+            var carried = _loadout != null
+                ? MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(hero.SaveKey), slots)
+                : new List<string>();
+            if (carried.Count == 0)
+            {
+                _detailBody.Add(MakeLabel("Nothing carried.", "cd-inv-detail__line"));
+            }
+            foreach (var key in carried)
+            {
+                var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(key) : null;
+                string name = magic != null ? magic.DisplayName : key;
+                _detailBody.Add(MakeLabel($"{name}  ·  {MagicLoadoutOps.ChargesFor(known, key)} charges",
+                    "cd-inv-detail__line"));
+            }
+
+            if (seat == 0)
+            {
+                _detailBody.Add(MakeLabel("The leader walks at the front and takes any XP an even split leaves over.",
+                    "cd-inv-detail__note"));
+            }
+        }
+
+        /// <summary>
+        /// The campfire's XP split: three modes stacked, the chosen one filled in.
         ///
         /// <para>A mode the fire cannot grant yet is shown <b>dimmed, naming the level that would
         /// buy it</b> rather than hidden - the same bargain the Ability Forge makes, and the reason
-        /// a disabled button here never reads as a bug.</para>
+        /// a disabled button here never reads as a bug. The chosen mode stays enabled so the
+        /// keyboard cursor can land on it.</para>
         /// </summary>
         private void RefreshSplitControls(List<string> fieldedKeys)
         {
@@ -165,15 +471,12 @@ namespace Assets.Scripts.Hub
             {
                 var focus = FocusHero(fieldedKeys);
                 _splitFocusButton.text = focus == null
-                    ? "Tap to choose who is mentored"
-                    : $"Mentoring {focus.DisplayName} — tap to change";
+                    ? "Choose who is mentored"
+                    : $"Mentoring {focus.DisplayName} (change)";
                 _splitFocusButton.SetEnabled(fieldedKeys.Count > 0);
             }
 
-            if (_splitDescLabel != null)
-            {
-                _splitDescLabel.text = CampfireOps.Describe(chosen);
-            }
+            SetText(_splitDescLabel, CampfireOps.Describe(chosen));
         }
 
         private static void PaintModeButton(Button button, XpSplitMode mode, XpSplitMode chosen,
@@ -184,14 +487,12 @@ namespace Assets.Scripts.Hub
                 return;
             }
 
-            // A locked mode names the campfire level that would buy it rather than hiding - the
-            // Ability Forge's bargain, and the reason a disabled button here never reads as a bug.
             bool offered = CampfireOps.Offers(campfireLevel, mode);
-            button.text = offered
-                ? CampfireOps.Label(mode)
-                : $"{CampfireOps.Label(mode)} · Lv {levelNeeded}";
-            button.SetEnabled(offered && chosen != mode);
-            button.EnableInClassList("cd-split-option--chosen", chosen == mode);
+            button.text = !offered
+                ? $"{CampfireOps.Label(mode)} · Campfire Lv {levelNeeded}"
+                : chosen == mode ? $"✓ {CampfireOps.Label(mode)}" : CampfireOps.Label(mode);
+            button.SetEnabled(offered);
+            button.EnableInClassList("cd-camp-mode--chosen", chosen == mode);
         }
 
         /// <summary>The fielded hero the Mentor mode is pointed at, or null when nobody is named or
@@ -203,14 +504,88 @@ namespace Assets.Scripts.Hub
             {
                 return null;
             }
-            foreach (var hero in HeroRoster.GetOwnedHeroes(_catalog))
+            return FindOwned(HeroRoster.GetOwnedHeroes(_catalog), key);
+        }
+
+        // --- Actions -----------------------------------------------------------
+
+        /// <summary>Selecting is cheap: repaint the highlight and the detail, leave the rows alone,
+        /// so the keyboard cursor stays on the row it just pressed.</summary>
+        private void SelectHero(string key)
+        {
+            _selectedKey = key;
+            foreach (var pair in _rosterRows)
             {
-                if (hero != null && hero.SaveKey == key)
-                {
-                    return hero;
-                }
+                pair.Value.EnableInClassList("cd-inv-row--selected", pair.Key == key);
             }
-            return null;
+            int cap = Cap();
+            var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, cap);
+            RefreshSeats(fieldedKeys);
+            RefreshDetail(HeroRoster.GetOwnedHeroes(_catalog), fieldedKeys, cap);
+        }
+
+        private void OnSeatClicked(int seat)
+        {
+            var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, Cap());
+            if (seat < fieldedKeys.Count)
+            {
+                SelectHero(fieldedKeys[seat]);
+            }
+        }
+
+        private void OnToggleSelected()
+        {
+            var hero = FindOwned(HeroRoster.GetOwnedHeroes(_catalog), _selectedKey);
+            if (hero == null)
+            {
+                return;
+            }
+
+            int cap = Cap();
+            var keys = new List<string>(HeroRoster.GetSelectedKeys(_catalog, cap));
+            if (keys.Contains(hero.SaveKey))
+            {
+                if (keys.Count <= 1)
+                {
+                    SetFeedback("Somebody has to go.");
+                    return;
+                }
+                keys.Remove(hero.SaveKey);
+                SetFeedback($"{hero.DisplayName} stays behind.");
+            }
+            else
+            {
+                if (keys.Count >= cap)
+                {
+                    SetFeedback($"Only {cap} can march out. Bench someone first.");
+                    return;
+                }
+                keys.Add(hero.SaveKey);
+                SetFeedback($"{hero.DisplayName} marches out.");
+            }
+
+            HeroRoster.SetSelectedKeys(_catalog, keys, cap);
+            Refresh();
+        }
+
+        /// <summary>Moves the chosen hero to seat 1. The leader walks in front and carries the
+        /// XP remainder, which used to be settable only by benching everyone ahead of them.</summary>
+        private void OnLeadSelected()
+        {
+            int cap = Cap();
+            var keys = new List<string>(HeroRoster.GetSelectedKeys(_catalog, cap));
+            int index = keys.IndexOf(_selectedKey);
+            if (index <= 0)
+            {
+                return;
+            }
+
+            keys.RemoveAt(index);
+            keys.Insert(0, _selectedKey);
+            HeroRoster.SetSelectedKeys(_catalog, keys, cap);
+            var hero = FindOwned(HeroRoster.GetOwnedHeroes(_catalog), _selectedKey);
+            SetFeedback($"{(hero != null ? hero.DisplayName : "They")} leads the party.");
+            Refresh();
         }
 
         private void ChooseMode(XpSplitMode mode)
@@ -219,6 +594,10 @@ namespace Assets.Scripts.Hub
             if (!CampfireOps.Offers(campfireLevel, mode))
             {
                 SetFeedback("The campfire is not big enough for that yet.");
+                return;
+            }
+            if (MetaProgressManager.Instance.GetXpSplitMode() == mode)
+            {
                 return;
             }
 
@@ -257,6 +636,48 @@ namespace Assets.Scripts.Hub
             Refresh();
         }
 
+        // --- Helpers -----------------------------------------------------------
+
+        /// <summary>
+        /// The stats the hero fights with - base, bought grid nodes, gear - not the bare HeroSO
+        /// block, which understated every hero who had spent XP (the inventory had the same bug).
+        /// </summary>
+        private static StatBlock StatsOf(HeroSO hero)
+        {
+            return HeroStatCalculator.WithGear(
+                HeroStatCalculator.BaseStatsForNodes(hero, NodesOf(hero)),
+                InventoryManager.Instance.GetEquippedItems(hero.SaveKey));
+        }
+
+        private static List<string> NodesOf(HeroSO hero)
+        {
+            var save = HeroRoster.GetHeroSave(hero);
+            return save != null && save.ActivatedNodes != null ? save.ActivatedNodes : new List<string>();
+        }
+
+        private static HeroSO FindOwned(List<HeroSO> owned, string key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return null;
+            }
+            foreach (var hero in owned)
+            {
+                if (hero != null && hero.SaveKey == key)
+                {
+                    return hero;
+                }
+            }
+            return null;
+        }
+
+        private static Label MakeLabel(string text, string className)
+        {
+            var label = new Label(text) { pickingMode = PickingMode.Ignore };
+            label.AddToClassList(className);
+            return label;
+        }
+
         private static void SetShown(VisualElement element, bool shown)
         {
             if (element != null)
@@ -265,158 +686,12 @@ namespace Assets.Scripts.Hub
             }
         }
 
-        private void BuildLists(List<HeroSO> owned, List<string> fieldedKeys, int cap)
+        private static void SetText(Label label, string text)
         {
-            if (_fieldedList == null || _benchList == null)
+            if (label != null)
             {
-                return;
+                label.text = text;
             }
-            _fieldedList.Clear();
-            _benchList.Clear();
-
-            // Fielded in selection order — index 0 is the leader, and the leader carries the XP
-            // remainder and lends the party its sprite, so the order is worth showing.
-            int fieldedCount = 0;
-            foreach (var key in fieldedKeys)
-            {
-                var hero = _catalog != null ? _catalog.Find(key) : null;
-                if (hero == null)
-                {
-                    continue;
-                }
-                bool isOnly = fieldedKeys.Count == 1;
-                var captured = hero;
-                _fieldedList.Add(MakeRow(hero, true, fieldedCount == 0, !isOnly,
-                    isOnly ? "Only hero" : "Bench", () => OnBench(captured)));
-                fieldedCount++;
-            }
-
-            if (fieldedCount == 0)
-            {
-                _fieldedList.Add(MakeEmptyLabel("Nobody is marching out."));
-            }
-
-            int benched = 0;
-            foreach (var hero in owned)
-            {
-                if (fieldedKeys.Contains(hero.SaveKey))
-                {
-                    continue;
-                }
-                bool room = fieldedKeys.Count < cap;
-                var captured = hero;
-                _benchList.Add(MakeRow(hero, false, false, room,
-                    room ? "Field" : "Party full", () => OnField(captured)));
-                benched++;
-            }
-
-            if (benched == 0)
-            {
-                _benchList.Add(MakeEmptyLabel(owned.Count >= PartySlots.MaxCap
-                    ? "Everyone you own is marching out."
-                    : "Nobody in reserve — rescue a captive to grow the roster."));
-            }
-        }
-
-        // --- Actions -----------------------------------------------------------
-
-        private void OnField(HeroSO hero)
-        {
-            int cap = Cap();
-            var keys = new List<string>(HeroRoster.GetSelectedKeys(_catalog, cap));
-            if (keys.Count >= cap)
-            {
-                SetFeedback($"Only {cap} can march out — bench someone first, or buy a slot.");
-                return;
-            }
-
-            keys.Add(hero.SaveKey);
-            HeroRoster.SetSelectedKeys(_catalog, keys, cap);
-            SetFeedback($"{hero.DisplayName} marches out.");
-            Refresh();
-        }
-
-        private void OnBench(HeroSO hero)
-        {
-            int cap = Cap();
-            var keys = new List<string>(HeroRoster.GetSelectedKeys(_catalog, cap));
-            if (keys.Count <= 1)
-            {
-                SetFeedback("Somebody has to go.");
-                return;
-            }
-
-            keys.Remove(hero.SaveKey);
-            HeroRoster.SetSelectedKeys(_catalog, keys, cap);
-            SetFeedback($"{hero.DisplayName} stays behind.");
-            Refresh();
-        }
-
-        // --- Rows --------------------------------------------------------------
-
-        private static VisualElement MakeRow(HeroSO hero, bool fielded, bool isLeader, bool actionEnabled,
-                                             string actionText, Action onClick)
-        {
-            var row = new VisualElement();
-            row.AddToClassList("cd-shop-row");
-            row.AddToClassList(fielded ? "cd-party-row--fielded" : "cd-party-row--benched");
-
-            var icon = new VisualElement();
-            icon.AddToClassList("cd-shop-row__icon");
-            if (hero.Sprite != null)
-            {
-                icon.style.backgroundImage = new StyleBackground(hero.Sprite);
-            }
-
-            var textCol = new VisualElement();
-            textCol.style.flexGrow = 1f;
-
-            // The stats the hero fights with - base, bought grid nodes, gear - not the bare HeroSO
-            // block, which understated every hero who had spent XP (the inventory had the same bug).
-            var save = HeroRoster.GetHeroSave(hero);
-            var nodes = save != null && save.ActivatedNodes != null ? save.ActivatedNodes : new List<string>();
-            var effective = Balance.HeroStatCalculator.WithGear(
-                Balance.HeroStatCalculator.BaseStatsForNodes(hero, nodes),
-                Items.InventoryManager.Instance.GetEquippedItems(hero.SaveKey));
-
-            var statParts = new List<string>();
-            foreach (var stat in StatCatalog.Types)
-            {
-                int value = effective[stat];
-                if (value != 0)
-                {
-                    statParts.Add(StatCatalog.ShortName(stat) + " " + value);
-                }
-            }
-
-            var title = hero.DisplayName + (isLeader ? " (leads)" : string.Empty);
-            var name = new Label(title + "   " + string.Join(" · ", statParts));
-            name.AddToClassList("cd-shop-row__name");
-            textCol.Add(name);
-
-            if (!string.IsNullOrEmpty(hero.Blurb))
-            {
-                var blurb = new Label(hero.Blurb);
-                blurb.AddToClassList("cd-shop-row__sub");
-                textCol.Add(blurb);
-            }
-
-            var button = new Button(() => onClick()) { text = actionText };
-            button.AddToClassList("cd-button");
-            button.AddToClassList("cd-shop-row__btn");
-            button.SetEnabled(actionEnabled);
-
-            row.Add(icon);
-            row.Add(textCol);
-            row.Add(button);
-            return row;
-        }
-
-        private static Label MakeEmptyLabel(string text)
-        {
-            var label = new Label(text);
-            label.AddToClassList("cd-shop-empty");
-            return label;
         }
 
         private static int Cap()
@@ -424,23 +699,9 @@ namespace Assets.Scripts.Hub
             return MetaProgressManager.Instance.GetPartyCap();
         }
 
-        private static string Ordinal(int value)
-        {
-            switch (value)
-            {
-                case 2: return "second";
-                case 3: return "third";
-                case 4: return "fourth";
-                default: return value.ToString();
-            }
-        }
-
         private void SetFeedback(string message)
         {
-            if (_feedbackLabel != null)
-            {
-                _feedbackLabel.text = message;
-            }
+            SetText(_feedbackLabel, message);
         }
     }
 }

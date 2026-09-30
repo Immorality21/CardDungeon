@@ -424,7 +424,29 @@ namespace Assets.Scripts.Heroes.UI
         /// <summary>Fits every node inside the viewport (call after Show/SetGraph, once laid out).</summary>
         public void FrameAll()
         {
-            if (_nodes.Count == 0)
+            Frame(_nodes.Keys.ToList(), 0.05f, MaxZoom);
+        }
+
+        /// <summary>
+        /// Fits just <paramref name="keys"/> - the sphere grid frames the player's frontier, since a
+        /// whole grid fitted to the viewport shrinks every node to a speck. The zoom is held between
+        /// <paramref name="minZoom"/> and <paramref name="maxZoom"/>, so a sprawling frontier stays
+        /// legible (the rest is a drag away) and a tiny one does not fill the screen.
+        /// </summary>
+        public void FrameNodes(IEnumerable<string> keys, float minZoom, float maxZoom)
+        {
+            var list = keys != null ? keys.Where(k => k != null && _nodes.ContainsKey(k)).ToList() : new List<string>();
+            if (list.Count == 0)
+            {
+                FrameAll();
+                return;
+            }
+            Frame(list, minZoom, maxZoom);
+        }
+
+        private void Frame(List<string> keys, float minZoom, float maxZoom)
+        {
+            if (keys.Count == 0)
             {
                 _pan = Vector2.zero;
                 Zoom = 1f;
@@ -433,7 +455,7 @@ namespace Assets.Scripts.Heroes.UI
 
             var min = new Vector2(float.MaxValue, float.MaxValue);
             var max = new Vector2(float.MinValue, float.MinValue);
-            foreach (var node in _nodes.Values)
+            foreach (var node in keys.Select(k => _nodes[k]))
             {
                 min = Vector2.Min(min, node.Position);
                 max = Vector2.Max(max, node.Position);
@@ -444,7 +466,7 @@ namespace Assets.Scripts.Heroes.UI
             // Captions hang below their nodes and are wider than them, so a graph that has any needs
             // the extra room or the lowest and outermost names are cut off. Only graphs with captions
             // (the campaign map) pay for it; the sphere grid frames exactly as before.
-            if (_nodes.Values.Any(n => !string.IsNullOrEmpty(n.Caption)))
+            if (keys.Any(k => !string.IsNullOrEmpty(_nodes[k].Caption)))
             {
                 min.x -= CaptionFramePad.x;
                 max.x += CaptionFramePad.x;
@@ -456,7 +478,7 @@ namespace Assets.Scripts.Heroes.UI
             if (width <= 0f || height <= 0f || float.IsNaN(width) || float.IsNaN(height))
             {
                 // Not laid out yet — try again once geometry exists.
-                RegisterCallbackOnce<GeometryChangedEvent>(_ => FrameAll());
+                RegisterCallbackOnce<GeometryChangedEvent>(_ => Frame(keys, minZoom, maxZoom));
                 return;
             }
 
@@ -468,7 +490,7 @@ namespace Assets.Scripts.Heroes.UI
             }
             // Framing may zoom out past the wheel's floor — a big grid must fit whole; the floor
             // only stops the *user* zooming into oblivion.
-            _zoom = Mathf.Clamp(zoom, 0.05f, MaxZoom);
+            _zoom = Mathf.Clamp(zoom, minZoom, maxZoom);
 
             var center = (min + max) * 0.5f;
             _pan = new Vector2(width * 0.5f, height * 0.5f) - center * _zoom;

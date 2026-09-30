@@ -18,8 +18,8 @@ MonoBehaviour:
   Service: 3
   Position: {x: 560, y: 420}
   HitSize: {x: 150, y: 110}
-  DrawOffset: {x: -25, y: -70}
-  DrawSize: {x: 200, y: 190}
+  DrawOffset: {x: -21, y: -72}
+  DrawSize: {x: 192, y: 192}
   DrawOrder: 20
   AbsentSprite: {fileID: 0}
   AvailableSprite: {fileID: 21300000, guid: e2ab04e90dc34fe68147e4a7f02d3b2c, type: 3}

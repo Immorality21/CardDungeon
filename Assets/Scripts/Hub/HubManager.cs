@@ -48,6 +48,7 @@ namespace Assets.Scripts.Hub
         [SerializeField] private UIDocument _document;
 
         private VisualElement _hubView;
+        private VisualElement _hubScrim;
         private VisualElement _campaignView;
         private VisualElement _backdrop;
         private VisualElement _progressView;
@@ -163,6 +164,7 @@ namespace Assets.Scripts.Hub
             _root = root;
 
             _hubView = root.Q<VisualElement>("hub-view");
+            _hubScrim = root.Q<VisualElement>("hub-scrim");
             _campaignView = root.Q<VisualElement>("campaign-view");
             _backdrop = root.Q<VisualElement>("bg");
             _progressView = root.Q<VisualElement>("progress-view");
@@ -214,7 +216,7 @@ namespace Assets.Scripts.Hub
             _campaignMap = _campaignView != null && _campaign != null
                 ? new CampaignMapUI(_campaignView, _campaign, _partyRoster)
                 : null;
-            _merchant = new MerchantUI(_merchantView);
+            _merchant = new MerchantUI(_merchantView, _partyRoster);
             _partySelect = new PartySelectUI(_partyView, _partyRoster);
             _sphereGrid = new SphereGridUI(_gridView, _partyRoster);
             _forge = new MagicForgeUI(_forgeView);
@@ -370,7 +372,7 @@ namespace Assets.Scripts.Hub
         private void ShowLotPanel(BuildingSO building)
         {
             _selectedLot = building;
-            SetShown(_hubView, false);
+            CoverTown();
             SetShown(_lotView, true);
             SetLotFeedback(string.Empty);
             RefreshLotPanel();
@@ -613,7 +615,7 @@ namespace Assets.Scripts.Hub
         /// <summary>The views whose buttons the shared cursor drives - see <see cref="SetUpKeyboardNavigation"/>.</summary>
         private bool NavigatesCurrentView()
         {
-            return IsShown(_hubView) || IsShown(_lotView) || IsShown(_progressView)
+            return IsTownActive() || IsShown(_lotView) || IsShown(_progressView)
                 || IsShown(_completeView) || IsShown(_merchantView) || IsShown(_partyView)
                 || IsShown(_forgeView);
         }
@@ -649,9 +651,7 @@ namespace Assets.Scripts.Hub
             }
             if (IsShown(_forgeView))
             {
-                // The forge stacks an inspect page over its grid; Escape backs out one layer at a time.
-                var inspect = _root.Q<VisualElement>("forge-inspect");
-                return IsShown(inspect) ? _root.Q<Button>("inspect-back") : _root.Q<Button>("forge-close");
+                return _root.Q<Button>("forge-close");
             }
             if (IsShown(_progressView))
             {
@@ -726,9 +726,37 @@ namespace Assets.Scripts.Hub
         //  VIEW SWITCHING
         // ============================================================
 
+        /// <summary>
+        /// The town stays up, dimmed and inert, behind the lot panel and every service. Disabled
+        /// rather than hidden, so the shared keyboard cursor (which walks enabled, visible buttons)
+        /// cannot wander onto a lot behind the window; the scrim takes the mouse.
+        /// </summary>
+        private void CoverTown()
+        {
+            SetShown(_hubView, true);
+            SetShown(_hubScrim, true);
+            _hubView.SetEnabled(false);
+        }
+
+        /// <summary>The screens with a painted backdrop of their own (the story map, the level entry,
+        /// the run summary) have no town behind them.</summary>
+        private void HideTown()
+        {
+            SetShown(_hubView, false);
+            SetShown(_hubScrim, false);
+        }
+
+        /// <summary>The town is the screen - shown and not covered by a service.</summary>
+        private bool IsTownActive()
+        {
+            return IsShown(_hubView) && !IsShown(_hubScrim);
+        }
+
         private void ShowTown()
         {
             SetShown(_hubView, true);
+            SetShown(_hubScrim, false);
+            _hubView.SetEnabled(true);
             SetShown(_campaignView, false);
             SetShown(_progressView, false);
             SetShown(_completeView, false);
@@ -786,7 +814,7 @@ namespace Assets.Scripts.Hub
 
         private void ShowRunProgressPanel()
         {
-            SetShown(_hubView, false);
+            HideTown();
             SetShown(_lotView, false);
             SetShown(_campaignView, false);
             SetShown(_progressView, true);
@@ -818,7 +846,7 @@ namespace Assets.Scripts.Hub
 
         private void ShowRunCompletePanel()
         {
-            SetShown(_hubView, false);
+            HideTown();
             SetShown(_progressView, false);
             SetShown(_completeView, true);
             ResetKeyboardNavigation();
@@ -849,7 +877,7 @@ namespace Assets.Scripts.Hub
             }
             if (_campaignMap != null)
             {
-                SetShown(_hubView, false);
+                HideTown();
                 SetShown(_lotView, false);
                 _campaignMap.Show(_runSaveData.RunKey);
                 return;
@@ -1120,7 +1148,7 @@ namespace Assets.Scripts.Hub
                     ? TutorialScreen.GuideLot
                     : TutorialScreen.Other;
             }
-            return IsShown(_hubView) ? TutorialScreen.Town : TutorialScreen.Other;
+            return IsTownActive() ? TutorialScreen.Town : TutorialScreen.Other;
         }
 
         /// <summary>A node was bought on the grid. If that closed the guided step, the screen is handed back.</summary>
@@ -1148,7 +1176,7 @@ namespace Assets.Scripts.Hub
 
         private void OnVisitMerchant()
         {
-            SetShown(_hubView, false);
+            CoverTown();
             SetShown(_lotView, false);
             _merchant.Show();
             ResetKeyboardNavigation();
@@ -1156,7 +1184,7 @@ namespace Assets.Scripts.Hub
 
         private void OnVisitSphereGrid()
         {
-            SetShown(_hubView, false);
+            CoverTown();
             SetShown(_lotView, false);
 
             RefreshTutorial();
@@ -1177,7 +1205,7 @@ namespace Assets.Scripts.Hub
         private void OnVisitParty()
         {
             _partyOpenedFromProgress = false;
-            SetShown(_hubView, false);
+            CoverTown();
             SetShown(_lotView, false);
             _partySelect.Show();
             ResetKeyboardNavigation();
@@ -1207,7 +1235,7 @@ namespace Assets.Scripts.Hub
 
         private void OnVisitForge()
         {
-            SetShown(_hubView, false);
+            CoverTown();
             SetShown(_lotView, false);
             _forge.Show();
             ResetKeyboardNavigation();
@@ -1215,14 +1243,14 @@ namespace Assets.Scripts.Hub
 
         private void OnVisitBestiary()
         {
-            SetShown(_hubView, false);
+            CoverTown();
             SetShown(_lotView, false);
             _bestiary.Show();
         }
 
         private void OnVisitInventory()
         {
-            SetShown(_hubView, false);
+            CoverTown();
             SetShown(_lotView, false);
             _inventory.Show();
         }

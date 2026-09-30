@@ -262,6 +262,30 @@ Sentinel, Dark Jailor): **2 candidates each + 1 `animate_image` each = 18 genera
   into the `EnemySO` YAML. Reusing an existing strip's GUID and slice IDs (the Jailor) means its
   `EnemySO` needs no edit at all, even when the frame size changes.
 
+## 8c. The 2026-09-30 hub town pass — what it learned
+
+The town (six buildings, the unbuilt plot, a signpost for the road, the backdrop) redone in one
+sitting: **2 candidates each with `create_image_pixflux` (64×64, the campfire 96×64,
+`no_background`, `view: "low top-down"`, `single color black outline`, `highly detailed`, seeds 5101 /
+5202) + 4 failed backdrops + 1 `create_image_pro` backdrop ≈ 45 generations.**
+
+- **Buildings: one prompt shape for the whole set** — *"<building> for a dark fantasy RPG town,
+  <materials and two identifying props>, muted purples and greys with warm <fire/lantern/violet>
+  light, night"*. "low top-down" came back as a consistent 3/4 isometric set with its own little
+  ground tile. Pick for the identifying prop: the Bestiary's candidate A buried its skull.
+- **A backdrop that buildings stand on is not a landscape.** Text-only pixflux backdrops came back
+  as side-on scenes with the horizon at 70% and cottages of their own — unusable under isometric
+  buildings. **img2img from a hand-made flat-colour composition guide** (8 colours, 931 bytes, small
+  enough to pass as `init_image_base64`) kept the layout but came back flat and bland at strength 60
+  and 90. What worked: **`create_image_pro` (25 generations, one candidate at 320×180) with the chosen
+  forge's download URL as `style_image_url`** (`style_copy`: palette, outline, shading) and a prompt
+  that states the composition in words and says *"no buildings - leave the ground open"*.
+- **Pro backdrops can come back with a baked white border** (here 5 px left, 2 top, 3 bottom, fully
+  opaque). Fill it by repeating the nearest real edge pixel rather than cropping and rescaling, which
+  would break the pixel grid. Check the edges of any pro scene before importing.
+- **Draw at a whole multiple.** The placeholders drew 64 px art at 200×190 (3.1×, uneven pixels);
+  the new rects are exactly 3×. The backdrop is 4×, which is close enough to read as one world.
+
 ## 9. Unused designs
 
 Every generation is kept in the PixelLab gallery. The armoured-guardian Warden candidate became the

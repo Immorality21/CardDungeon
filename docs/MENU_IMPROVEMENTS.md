@@ -30,7 +30,7 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Cross-cutting (fix once, every screen benefits)
 
-- [ ] **`.cd-window { max-height: 62% }` crushes list screens into one-row scrollers** (severity: high)
+- [x] **`.cd-window { max-height: 62% }` crushes list screens into one-row scrollers** — *done 2026-09-30*: the Campfire and the Merchant moved to the fixed inventory frame. (severity: high)
   — the Campfire and the Merchant stack two or three `cd-shop-list` ScrollViews, a subtitle each and a
   block of buttons in one column. At 62% of 900 the window caps at 558px, so flexbox shrinks the
   ScrollViews: Merchant's *Wares* (4 rows) and *Sell Gear* (10 rows) render **70px tall — one row each,
@@ -38,7 +38,7 @@ item icons this review saw were replaced the same day: every item now has its ow
   only the Warrior (`15_campfire_party.png`). Fix per screen below (move both to the `cd-inv-window`
   frame); as a stopgap give `.cd-shop-list` `flex-shrink: 0; min-height: 120px` and let the window
   grow to `max-height: 88%` like `.cd-window--tall`.
-- [ ] **Every hub service opens on a flat void, the town disappears** (severity: high) —
+- [x] **Every hub service opens on a flat void, the town disappears** — *done 2026-09-30*: `hub-scrim` (50%) over a disabled town, via `HubManager.CoverTown` / `HideTown` / `IsTownActive`. (severity: high) —
   `HubManager.ShowLotPanel` / every `OnVisit*` does `SetShown(_hubView, false)`, so the lot panel,
   Merchant, Forge etc. float on `.cd-bg` (`13_lot_merchant.png`, `25_merchant.png`). The town is the
   best-looking thing in the game and the player loses it the moment they click it. Keep `hub-view`
@@ -62,7 +62,7 @@ item icons this review saw were replaced the same day: every item now has its ow
   looks selected at all times (`11_hub_cursor.png`, `12_hub_cursor_merchant.png`). Pick the inventory's
   cursor (purple fill, **white** text, gold `▸`) for buttons, gold outline for world objects, and give
   `.hub-road` the normal `--cd-frame` border until the cursor is on it.
-- [ ] **A disabled action never says why** (severity: medium) — Upgrade — 300 gold (Campfire), Upgrade (Forge),
+- [x] **A disabled action never says why** — *done 2026-09-30*: one `cd-reason` line under the Campfire, Merchant, Sphere Grid and Forge actions, and a reason on greyed combat commands. (severity: medium) — Upgrade — 300 gold (Campfire), Upgrade (Forge),
   Activate (Sphere Grid), greyed Ability (combat command menu), Buy on a 75g item: each is dimmed with
   no "you have 50" or "no charges left". Standardise a `cd-reason` label under / beside the button
   (`lot-feedback`, `grid-detail-cost`, the command row's meta slot) that turns red with the shortfall:
@@ -133,66 +133,53 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Campfire / party select (`party-view`, `PartySelectUI`)
 
-> `PartySelectUI.cs` is modified in the working tree, so some of this may be mid-edit — but the
-> screenshot is the current state.
+> **Done 2026-09-30** — rebuilt on the inventory frame (`cd-inv-window` + `cd-camp-*`): four seat
+> tiles (leader tabbed), the roster as rows with a gold accent bar for the marching, a detail column
+> (stats grid, XP to spend, carried abilities) with **March out / Stay behind** and a new **Lead the
+> party** button, and the XP split as stacked tabs in the right column. A row only selects; acting is
+> the detail column's, and a dimmed action says why underneath it. Verified in play mode at 1280x720
+> (screenshot + synthetic arrow/Enter/Esc through the hub navigator).
 
-- [ ] **The screen is broken at 1280x720** (severity: high) — `15_campfire_party.png`: `party-share`
-  (italic "Each hero earns 33%…") does not wrap and runs **~250px outside the window's right edge**;
-  the fielded list is 54px for three heroes so only the Warrior shows; the *Bench* button overlaps the
-  Warrior's stat line (which is cut mid-number: "SPR 3 · … 3"); the bench list's buttons are clipped
-  in half; "How the run's XP is shared" sits on top of the bench row. Immediate fixes: `.cd-shop-empty
-  { white-space: normal; }`, and the list/window height issue above.
-- [ ] **Rebuild it on the inventory frame** (severity: high) — this is the screen that decides who goes into
-  the dungeon and it is a text column. Proposal: `cd-inv-window` with the header band ("Campfire" + Back),
-  **four seat tiles** across the top (portrait, name, HP, Lv; empty seat dashed), the roster as a
-  portrait list in the middle column (fielded rows marked with the existing left accent bar), and a
-  detail column for the selected hero (stats grid as in the inventory, carried abilities). The XP split
-  becomes a row of three `cd-inv-tab`-style toggles in the bottom band with its one-line description.
-- [ ] **Stats as a run-on sentence** (severity: medium) — "Warrior (leads) STR 15 · END 11 · AGI 5 · INT 3 ·
-  SPR 3 · …" is unscannable and duplicates the inventory's stat grid. Show HP + two role stats on the
-  row; the full grid lives in the detail column.
-- [ ] **XP split buttons: the chosen mode is a gold outline only** (severity: low) — "Even" has a gold border,
-  locked modes read "Mentor · Lv 2" in the same grey as the chosen one. Chosen = filled
-  `cd-inv-tab--active`; locked = lock glyph + dim.
+- [x] **The screen is broken at 1280x720** — fixed by the rebuild; no ScrollView is flex-shrunk any more.
+- [x] **Rebuild it on the inventory frame** — as proposed, with the XP split in the right column rather
+  than the bottom band (three stacked tabs fit there without truncating the locked labels).
+- [x] **Stats as a run-on sentence** — rows show HP + the two highest stats; the full grid is in the detail.
+- [x] **XP split buttons** — chosen = filled with a gold border and a ✓; locked = dimmed and names the
+  Campfire level. The chosen mode stays enabled so the keyboard cursor can land on it.
 
 ## Merchant (`merchant-view`, `MerchantUI`)
 
-- [ ] **Wares and Sell Gear show one row each** (severity: high) — see cross-cutting;
-  `25_merchant.png`: 4 wares and 10 sellable items live in two 70px scrollers.
-- [ ] **No way to judge an item before buying** (severity: high) — rows are "Simple Sword (Common)" +
-  price. No stats, no comparison with what the heroes wear, rarity as a parenthetical instead of colour.
-  Move to the inventory frame: tabs **Buy / Sell / Potions** in the header, the item list in the middle
-  column with rarity-coloured names (`ItemPresenter` already has the classes), the detail column
-  reusing the inventory's "Grants" + delta-vs-equipped block, and Buy/Sell as the detail column's action.
-- [ ] **"Enlarge Potion Belt (2 → 3) — 50 gold" is the biggest button** (severity: low) — a rare upgrade sits
-  above the shop as a full-width primary. Put it in the Potions tab (or the detail column of the belt)
-  and let the wares be the first thing seen.
-- [ ] **Essence shown in a shop that never takes it** (severity: low) — `merchant-essence`. Show only the
-  currency the screen spends, as the inventory's materials tab does with gold.
+> **Done 2026-09-30** — on the inventory frame: **Buy / Sell / Potion Belt** tabs in the header, a hero
+> strip that picks who gear is compared against (defaults to the leader; muted on the belt tab), the
+> list with rarity-coloured names and the price on the right (red when out of reach), and a detail
+> column with the item's grants, what the hero wears in that slot now, every stat now → if worn, and
+> the one action with a `cd-reason` line (*"Need 175 gold — you have 90."*). Only gold is shown.
+> Verified in play mode: buy, sell, the dimmed buy, the belt, the compare switch.
+
+- [x] **Wares and Sell Gear show one row each** — each tab has the full-height list.
+- [x] **No way to judge an item before buying** — the detail column, as proposed.
+- [x] **"Enlarge Potion Belt" is the biggest button** — moved to its own tab.
+- [x] **Essence shown in a shop that never takes it** — gone.
+- Found on the way: **rarity never coloured a detail title** (inventory too) — `.cd-inv-detail__name`
+  set the plain colour at equal specificity after the rarity classes; doubled selectors fix it.
 
 ## Ability Forge (`forge-view`, `MagicForgeUI`)
 
-- [ ] **A wall of "?"** (severity: high) — `21_forge.png`: 31 identical `?` tiles and one known icon; no
-  names, no levels, no cursor, so the only readable fact is "you know one thing". Show the grid as a
-  list/grid of **known** abilities first (icon, name, `Lv 0/1` badge on the tile corner), then undiscovered
-  ones collapsed into a single "27 undiscovered" row or dim silhouettes at the end. The `?` tiles
-  cost the screen its information density and give no mystery that a count does not.
-- [ ] **Inspect replaces the grid** (severity: medium) — selecting a tile swaps the grid for
-  `forge-inspect` and shrinks the window (`22_forge_inspect.png`); the player loses their place and the
-  tabs. Use the inventory's three columns: grid/list left, detail right (always present, "Select an
-  ability" when empty), Upgrade in the detail footer.
-- [ ] **Effect rows are debug text and disagree with the Storehouse** (severity: high) — the Forge says
-  **"Damage 3"** and **"-Bleeding 1 (3t)"**; the Storehouse and the combat picker say **"18 damage
-  (Attack 15)"** and **"Bleed 1/turn, 3 turns"** for the same Slash (`22_forge_inspect.png` vs
-  `17_inventory_abilities.png`, `61_ability_picker.png`). The leading hyphen, the "(3t)" and the raw base
-  number read like a `ToString()`. Route the Forge's `cd-effect-row` text through the same describer the
-  inventory detail uses, and show upgrade previews as *"18 → 22 damage"*.
-- [ ] **Back and Upgrade are mismatched** (severity: medium) — `inspect-back` is a 200px `cd-button--narrow`,
-  `inspect-upgrade` a smaller `cd-cmd` that sits 3px higher (`22_forge_inspect.png`). Same height, same
-  class, Upgrade on the right as the primary.
-- [ ] **Combos tab centres its tiles, Abilities left-aligns them** (severity: low) — `23_forge_combos.png`
-  vs `21_forge.png` (`justify-content: center` on `.cd-grid-scroll` content with a partial last row).
-  Use `flex-start` and a fixed column count.
+> **Done 2026-09-30** — on the inventory frame: Abilities / Combos tabs and the essence (with the
+> Forge's level cap) in the header; the **known** entries as a list (icon, name, *"Lv 0 of 1"*, the next
+> price on the right, red when short, *"Forge"* when the Forge holds it, *"MAX"*), everything
+> undiscovered folded into one *"26 undiscovered"* row; the detail column always beside it, with
+> *"Upgrade to Lv 1 — 15 essence"* / *"Held at Lv 1 by the Forge"* and a `cd-reason` line under it.
+> Effect lines come from the new `AbilityDescriber.ForgeLine` — the picker's and the Storehouse's
+> wording, previewing the next level (*"3 damage → 5 damage + STR"*, *"Bleed 1/turn, 3 turns"*);
+> effects a higher level unlocks are listed dimmed with their level.
+
+- [x] **A wall of "?"** — known list + one undiscovered-count row.
+- [x] **Inspect replaces the grid** — the detail column is always present; the inspect page is gone.
+- [x] **Effect rows are debug text** — `AbilityDescriber.ForgeLine`. The Forge has no caster, so it
+  names the scaling stat (*"+ STR"*) instead of adding a hero's number.
+- [x] **Back and Upgrade are mismatched** — Back is in the header; Upgrade is the detail column's one action.
+- [x] **Combos tab centres its tiles** — no tiles any more.
 
 ## Bestiary (`bestiary-view`, `BestiaryUI`)
 
@@ -212,26 +199,24 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Sphere Grid (`grid-view`, `SphereGridUI`)
 
-- [ ] **Detail text overflows its panel** (severity: high) — `29_sphere_grid_node.png`: the node title
-  "Learns Slash — 2 charges per run" runs ~45px past `sg-detail`'s right border and "Known from the
-  start — costs nothing" spills past its left border. `grid-detail-name`/`-cost` need
-  `white-space: normal` (the `cd-inspect__name` class does not wrap).
-- [ ] **Name, kind and payload say the same thing** (severity: medium) — "+10 HP / Stat / +10 HP"
-  (`30_sphere_grid_node2.png`), "Learns Slash — 2 charges per run / Known ability / Learns Slash — 2
-  charges per run". Title = the thing ("+10 HP", "Slash"), kind = a coloured chip ("Stat", "Ability"),
-  payload = what it changes ("HP 38 → 48", the ability's effect lines).
-- [ ] **Nodes are 8px dots and the cursor is a hairline** (severity: high) — at 1280x720 you cannot tell a
-  stat node from an ability node, or where the cursor is (a 1px white ring, `30_…` at x≈491). Nodes need
-  a glyph per kind (stat letter, ability icon), ~24px at default zoom, and the cursor needs the
-  inventory's treatment: filled accent + gold ring. Unlocked / affordable / locked should be three
-  clearly different fills.
-- [ ] **The graph gets a third of the window** (severity: medium) — the pannable area is ~630x210px while
-  ~45px of dead band sits between the hint and Back (`28_sphere_grid.png`); the top branches are clipped at
-  the viewport edge. Put Back in a header band (inventory style) and let `grid-graph` take the freed
-  height; start zoomed to fit the unlocked frontier.
-- [ ] **Hero switcher is plain tabs** (severity: low) — the inventory's portrait strip (`cd-inv-heroes`)
-  is the house hero picker; reuse it here, with the banked XP under each name so the player sees which
-  hero has points to spend without Q/E-ing through them.
+> **Done 2026-09-30** — on the inventory frame: Back and the hero's XP in the header band, the
+> portrait strip with a gold **"N XP"** tab on every hero who has points to spend, and the graph given
+> the freed height (~800x475 at 1280x720, was ~630x210). The screen opens **framed on the frontier**
+> (owned + reachable nodes, `SphereGridView.FrameNodes`, zoom held to 0.7-1.1) instead of fitting the
+> whole grid. Three node looks: owned = solid accent, affordable = open accent ring, reachable but
+> unaffordable = plain frame; locked stays at 45%. The cursor is a 5px gold ring (full opacity even on
+> a locked node). Verified in play mode with synthetic arrows / Enter.
+
+- [x] **Detail text overflows its panel** — every detail label wraps (`cd-inv-detail__*` classes).
+- [x] **Name, kind and payload say the same thing** — title = the thing (*"+6 HP"*, *"Slash"*, *"+1
+  ability slot"*), kind = a chip, payload = what it does (an ability's own description plus its
+  charges), and for a stat node a **"Health 26 → 32"** row per stat on this hero. A dimmed Activate
+  says why: *"Activate a node next to it first."* / *"Need 65 XP — 30 banked."* / *"Needs 2 Ember Iron."*
+- [x] **Nodes are 8px dots and the cursor is a hairline** — see above. Glyphs per kind already existed;
+  they were invisible at the fit-everything zoom.
+- [x] **The graph gets a third of the window** — see above.
+- [x] **Hero switcher is plain tabs** — portrait strip with banked XP.
+- [x] **Hint line** — keyboard first: *"Arrows move · Enter activate · Q/E hero · Esc back · drag to pan, scroll to zoom"*.
 
 ## Story map (`campaign-view`, `CampaignMapUI`)
 
@@ -259,7 +244,7 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Dungeon HUD and room bar (`dungeon-hud`, `main-bar`, `combat-bar`, `nav-hint`)
 
-- [ ] **The keyboard hint drifts off-centre** (severity: medium) — after the first Fight bar, `nav-hint`
+- [x] **The keyboard hint drifts off-centre** — *done 2026-09-30*: full-width and text-centred. (severity: medium) — after the first Fight bar, `nav-hint`
   ("← → choose · Enter confirm") sits ~85px left of the bar it belongs to (`44_fight_bar.png` is centred,
   `49_pause.png` and `51_event_room.png` are not; measured x 592–798 ref vs bar centre 800).
   `.cd-nav-hint` centres with `left: 50%; translate: -50% 0`, and the percentage translate is not
@@ -315,7 +300,7 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Pause overlay (`pause-window`)
 
-- [ ] **Two cursors on screen** (severity: medium) — pausing in a fight room leaves the Fight/Flee bar and
+- [x] **Two cursors on screen** — *done 2026-09-30*: `cd-root--paused` hides `main-bar`, `combat-bar`, `hero-bar` and `nav-hint` (visibility, so every "is the bar up" check still holds). (severity: medium) — pausing in a fight room leaves the Fight/Flee bar and
   its highlighted *Fight* button visible beneath the pause window (`49_pause.png`). Hide `combat-bar`,
   `main-bar` and `nav-hint` while paused (and restore on Resume), or at least drop their
   `cd-nav--selected`.
@@ -336,19 +321,15 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Combat
 
-- [ ] **HP bars sit between heroes and the top one is clipped** (severity: high) — each hero has a bar above
-  the head and one under the feet; with the column spacing, Paladin's head bar sits right under the
-  Warrior's feet, so the eye assigns every bar to the wrong hero, and the Warrior's head bar is cut by the
-  top of the screen at y≈0–15 (`45_combat_menu.png`, `61_ability_picker.png`; measured bar anchors at
-  y 110 / 266 / 422 for three heroes). One bar per unit, directly under the sprite, and push the hero
-  column down (or the camera up) so nothing is within 24px of the top edge.
-- [ ] **Enemy HP shown twice** (severity: low) — Drakeling has a bar above and a "Drakeling 18/18"
-  nameplate below. Keep the nameplate with a thin bar inside it; drop the floating bar for enemies.
+- [x] **HP bars sit between heroes and the top one is clipped** — *done 2026-09-30.* One readout per
+  unit, a UITK plate under its feet (`UnitNameplates`); the world bar above the head is gone, and with
+  it the top-edge clip. The HP number sits **inside** the bar (the owner's call).
+- [x] **Enemy HP shown twice** — *done 2026-09-30*: the nameplate carries the bar, the number is in it.
 - [ ] **The ability picker covers the acting hero** (severity: medium) — `61_ability_picker.png`: the picker
   (desc + an "(empty)" row + Back) is taller than the command menu and cuts the Rogue's sprite off at the
   shoulders; `.cd-window--picker`'s own comment names this risk. Hide "(empty)" slots, put the description
   to the right of the list instead of under it, and cap the picker at the command window's height.
-- [ ] **Command menu: wide box, short words, no reasons** (severity: low) — `45_combat_menu.png`: a 445px
+- [x] **Command menu: no reasons** — *done 2026-09-30*: a greyed row says why on its right (*"No charges"*, *"None carried"*, *"Silenced"*, *"Spent"*, *"None"*). The width was already fixed. (severity: low) — `45_combat_menu.png`: a 445px
   window for "Attack / Ability / Item / Inspect / Skip" with *Ability* greyed and no explanation. Narrow it
   to ~300px, and put the charge count on the row ("Ability 2/2") or the reason ("Ability — none
   carried") in the row's meta slot.
@@ -404,16 +385,15 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Do these first
 
-1. **Fix the Campfire** — `party-share` wraps, lists stop shrinking; then rebuild it on the inventory
-   frame with seat tiles (`15_campfire_party.png`). It is the screen before every run and it is broken.
-2. **Merchant onto the inventory frame** — full-height Buy/Sell lists, rarity colours, the Storehouse's
-   stat/delta detail column (`25_merchant.png`).
-3. **Sphere Grid readability** — wrap the detail labels, kind glyphs on 24px nodes, a visible cursor,
-   give the graph the window's height (`29_…`, `30_…`).
-4. **Combat HP bars** — one bar under each unit, nothing clipped at the top edge (`45_combat_menu.png`).
-5. **Keep the town behind hub services** with a scrim, instead of `SetShown(_hubView, false)` (`13_…`).
-6. **Forge: list the known abilities, detail beside the grid, one effect describer** — fixes the "?"
-   wall, the jumping window and "Damage 3 / -Bleeding 1 (3t)" in one pass (`21_…`, `22_…`).
-7. **Say why a button is disabled** — one `cd-reason` pattern for Upgrade / Activate / Buy / Ability.
-8. **Recentre `nav-hint` and hide the room bar under pause** — two small bugs that make the dungeon UI
-   look unfinished on every screen (`49_pause.png`, `51_event_room.png`).
+1. ~~**Fix the Campfire**~~ — **done 2026-09-30**, rebuilt on the inventory frame with seat tiles.
+2. ~~**Merchant onto the inventory frame**~~ — **done 2026-09-30**.
+3. ~~**Sphere Grid readability**~~ — **done 2026-09-30**.
+4. ~~**Combat HP bars**~~ — **done 2026-09-30**: one plate under each unit, the number inside the bar.
+5. ~~**Keep the town behind hub services**~~ — **done 2026-09-30**.
+6. ~~**Forge**~~ — **done 2026-09-30**.
+7. ~~**Say why a button is disabled**~~ — **done 2026-09-30**.
+8. ~~**Recentre `nav-hint` and hide the room bar under pause**~~ — **done 2026-09-30**.
+
+All eight shipped on 2026-09-30. What is left in this file is the per-screen detail above that the
+list did not cover (title/Options, lot panel, Bestiary, story map, level entry, HUD, dialogs, the
+rest of combat, victory screens).
