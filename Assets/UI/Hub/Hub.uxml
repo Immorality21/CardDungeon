@@ -68,14 +68,25 @@
         </ui:VisualElement>
 
         <!-- RUN PROGRESS -->
-        <ui:VisualElement name="progress-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
-            <ui:Label name="level-indicator" text="Level 1 of 1" class="cd-info-label" />
-            <ui:Label name="level-name" text="" class="cd-title cd-title--large" />
-            <ui:Label name="progress-party" text="" class="cd-info-label" />
-            <ui:Button name="progress-party-btn" text="Change Party" class="cd-menu-button" />
-            <ui:VisualElement class="cd-button-row">
-                <ui:Button name="back-btn" text="Back" class="cd-menu-button" style="flex-grow: 1; margin-right: 6px;" />
-                <ui:Button name="enter-btn" text="Enter Dungeon" class="cd-menu-button" style="flex-grow: 1; margin-left: 6px;" />
+        <!-- The "you are about to go in" moment (2026-09-30): one fixed size, the run and the floor in
+             the header, a pip per floor, the party as portrait tiles, and Enter Dungeon first and
+             primary - the shared cursor's first arrow lands on it. -->
+        <ui:VisualElement name="progress-view" class="cd-window cd-window--flush hub-entry cd-dock-center cd-hidden">
+            <ui:VisualElement class="cd-inv-header">
+                <ui:Label name="level-indicator" text="" class="cd-inv-header__title" />
+                <ui:Label name="level-count" text="" class="cd-camp-header__cap" />
+            </ui:VisualElement>
+            <ui:VisualElement class="hub-entry__body">
+                <ui:Label name="level-name" text="" class="hub-entry__name" />
+                <ui:VisualElement name="level-pips" class="hub-entry__pips" />
+                <ui:Label text="Marching out" class="cd-inv-col__title hub-entry__party-title" />
+                <ui:VisualElement name="progress-party-tiles" class="hub-entry__party" />
+                <ui:Label name="progress-party" text="" class="cd-inv-detail__note" />
+            </ui:VisualElement>
+            <ui:VisualElement class="hub-lotpanel__actions hub-entry__actions">
+                <ui:Button name="enter-btn" text="Enter Dungeon" class="cd-inv-tab cd-camp-action hub-entry__enter" />
+                <ui:Button name="progress-party-btn" text="Change Party" class="cd-inv-tab cd-camp-action" />
+                <ui:Button name="back-btn" text="Back" class="cd-inv-close hub-lotpanel__back" />
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -349,21 +360,31 @@
 
         <!-- CAMPAIGN MAP (fixed size on both axes, same reason as the sphere grid: a pannable
              graph inside a dock-centered window must never change the window's size) -->
-        <ui:VisualElement name="campaign-view" class="cd-window cd-window--flush cd-window--fixed cd-window--wide cd-dock-center cd-hidden">
-            <ui:Label name="campaign-title" text="The Story" class="cd-title" />
-            <ui:VisualElement class="sg-body">
-                <ui:VisualElement name="campaign-graph" style="flex-grow: 1;" />
-                <ui:VisualElement name="campaign-detail" class="sg-detail">
-                    <ui:Label name="campaign-detail-name" text="Pick a place on the map." class="cd-inspect__name" />
-                    <ui:Label name="campaign-detail-status" text="" class="cd-inspect__level" />
-                    <ui:Label name="campaign-detail-blurb" text="" class="cd-inspect__desc" />
-                    <ui:Label name="campaign-detail-requires" text="" class="cd-shop-empty" />
-                    <ui:Button name="campaign-start" text="Begin" class="cd-cmd" />
+        <!-- On the inventory frame (2026-09-30): Back in the header, the graph with a legend under it,
+             and a detail column that says where you are in a run, every floor of it, and what
+             clearing it opens. Keeps its own cursor (it pans content the shared one cannot see). -->
+        <ui:VisualElement name="campaign-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
+            <ui:VisualElement class="cd-inv-header">
+                <ui:Label name="campaign-title" text="The Story" class="cd-inv-header__title" />
+                <ui:Label text="" class="cd-camp-header__cap" />
+                <ui:Button name="campaign-close" text="Back" class="cd-inv-close" />
+            </ui:VisualElement>
+            <ui:VisualElement class="cd-inv-body">
+                <ui:VisualElement class="cm-graph-col">
+                    <ui:VisualElement name="campaign-graph" class="cm-graph-host" />
+                    <ui:Label name="campaign-legend" text="&#9654; in progress  &#183;  &#9733; open  &#183;  ? side road  &#183;  &#10003; cleared  &#183;  &#128274; locked" class="cm-legend" />
+                </ui:VisualElement>
+                <ui:VisualElement name="campaign-detail" class="cd-inv-col cm-detail-col">
+                    <ui:Label name="campaign-detail-name" text="Pick a place on the map." class="cd-inv-detail__name" />
+                    <ui:Label name="campaign-detail-status" text="" class="cd-inv-detail__sub cm-detail__status" />
+                    <ui:Label name="campaign-detail-blurb" text="" class="cd-inv-detail__desc" />
+                    <ui:Label name="campaign-detail-requires" text="" class="cd-reason cm-detail__requires" />
+                    <ui:VisualElement name="campaign-detail-body" class="cm-detail__body" />
+                    <ui:Label name="campaign-feedback" text="" class="cd-camp-feedback sg-feedback" />
+                    <ui:Button name="campaign-start" text="Begin" class="cd-inv-tab cm-start" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="campaign-hint" text="Drag pan · Scroll zoom · Click a run · Esc back" class="cd-info-label cd-hint" />
-            <ui:Label name="campaign-feedback" text="" class="cd-feedback" />
-            <ui:Button name="campaign-close" text="Back" class="cd-button cd-button--narrow" />
+            <ui:Label name="campaign-hint" text="Arrows move  &#183;  Enter begin  &#183;  Esc back  &#183;  drag to pan, scroll to zoom" class="cd-inv-hint" />
         </ui:VisualElement>
 
         <!-- THE TUTORIAL's one line (docs/TUTORIAL.md). Last in the document on purpose: UI

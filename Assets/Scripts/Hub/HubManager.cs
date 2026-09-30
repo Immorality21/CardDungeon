@@ -87,6 +87,9 @@ namespace Assets.Scripts.Hub
         private Label _levelIndicator;
         private Label _levelName;
         private Label _progressParty;
+        private Label _levelCount;
+        private VisualElement _levelPips;
+        private VisualElement _progressPartyTiles;
 
         private VisualElement _root;
         private KeyboardNavigator _nav;
@@ -198,6 +201,9 @@ namespace Assets.Scripts.Hub
             _levelIndicator = root.Q<Label>("level-indicator");
             _levelName = root.Q<Label>("level-name");
             _progressParty = root.Q<Label>("progress-party");
+            _levelCount = root.Q<Label>("level-count");
+            _levelPips = root.Q<VisualElement>("level-pips");
+            _progressPartyTiles = root.Q<VisualElement>("progress-party-tiles");
             _lotName = root.Q<Label>("lot-name");
             _lotBlurb = root.Q<Label>("lot-blurb");
             _lotStatus = root.Q<Label>("lot-status");
@@ -968,12 +974,76 @@ namespace Assets.Scripts.Hub
 
             // The run's name too - the screen used to name the floor and not the run it belongs to
             // (playtest 2026-09-28, finding 14).
-            _levelIndicator.text = $"{CampaignOps.DisplayNameOf(run)} · Level {levelIndex + 1} of {run.Levels.Count}";
+            _levelIndicator.text = CampaignOps.DisplayNameOf(run);
+            if (_levelCount != null)
+            {
+                _levelCount.text = $"Level {levelIndex + 1} of {run.Levels.Count}";
+            }
             _levelName.text = levelEntry.LevelName;
+            BuildLevelPips(run.Levels.Count, levelIndex);
+            BuildPartyTiles();
+        }
 
+        /// <summary>One pip per floor of the run: cleared, the one about to be entered, the rest ahead.</summary>
+        private void BuildLevelPips(int count, int current)
+        {
+            if (_levelPips == null)
+            {
+                return;
+            }
+            _levelPips.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                var pip = new VisualElement { pickingMode = PickingMode.Ignore };
+                pip.AddToClassList("hub-entry__pip");
+                pip.AddToClassList(i < current ? "hub-entry__pip--done" : i == current ? "hub-entry__pip--current" : "hub-entry__pip--ahead");
+                _levelPips.Add(pip);
+            }
+        }
+
+        /// <summary>
+        /// Who is going in, as portrait tiles with their health - "Enter Dungeon" is never pressed
+        /// without seeing the party. Health is the hero's full bar (base + grid + gear): a run starts
+        /// every floor at full.
+        /// </summary>
+        private void BuildPartyTiles()
+        {
+            if (_progressPartyTiles == null)
+            {
+                return;
+            }
+            _progressPartyTiles.Clear();
+            var heroes = _partyRoster != null
+                ? HeroRoster.GetSelectedHeroes(_partyRoster, MetaProgressManager.Instance.GetPartyCap())
+                : new List<HeroSO>();
+            foreach (var hero in heroes)
+            {
+                var tile = new VisualElement { pickingMode = PickingMode.Ignore };
+                tile.AddToClassList("hub-entry__hero");
+                var sprite = new VisualElement { pickingMode = PickingMode.Ignore };
+                sprite.AddToClassList("hub-entry__hero-sprite");
+                if (hero.Sprite != null)
+                {
+                    sprite.style.backgroundImage = new StyleBackground(hero.Sprite);
+                }
+                tile.Add(sprite);
+                var name = new Label(hero.DisplayName) { pickingMode = PickingMode.Ignore };
+                name.AddToClassList("hub-entry__hero-name");
+                tile.Add(name);
+
+                var save = HeroRoster.GetHeroSave(hero);
+                var nodes = save != null && save.ActivatedNodes != null ? save.ActivatedNodes : new List<string>();
+                var stats = Balance.HeroStatCalculator.WithGear(
+                    Balance.HeroStatCalculator.BaseStatsForNodes(hero, nodes),
+                    InventoryManager.Instance.GetEquippedItems(hero.SaveKey));
+                var hp = new Label($"HP {stats[UnitStats.StatType.MaxHealth]}") { pickingMode = PickingMode.Ignore };
+                hp.AddToClassList("hub-entry__hero-hp");
+                tile.Add(hp);
+                _progressPartyTiles.Add(tile);
+            }
             if (_progressParty != null)
             {
-                _progressParty.text = _partySelect != null ? _partySelect.FieldedSummary() : string.Empty;
+                _progressParty.text = heroes.Count == 0 ? "No party selected." : string.Empty;
             }
         }
 
@@ -1012,7 +1082,7 @@ namespace Assets.Scripts.Hub
             {
                 HideTown();
                 SetShown(_lotView, false);
-                _campaignMap.Show(_runSaveData.RunKey);
+                _campaignMap.Show(_runSaveData.RunKey, _runSaveData.CurrentLevelIndex);
                 return;
             }
 

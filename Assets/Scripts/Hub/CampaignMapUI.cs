@@ -31,6 +31,8 @@ namespace Assets.Scripts.Hub
         private readonly Label _detailStatus;
         private readonly Label _detailBlurb;
         private readonly Label _detailRequires;
+        private readonly VisualElement _detailBody;
+        private int _activeLevelIndex;
         private readonly Button _startButton;
         private readonly Label _feedback;
         private readonly Button _closeButton;
@@ -59,6 +61,7 @@ namespace Assets.Scripts.Hub
             _detailStatus = root.Q<Label>("campaign-detail-status");
             _detailBlurb = root.Q<Label>("campaign-detail-blurb");
             _detailRequires = root.Q<Label>("campaign-detail-requires");
+            _detailBody = root.Q<VisualElement>("campaign-detail-body");
             _startButton = root.Q<Button>("campaign-start");
             _feedback = root.Q<Label>("campaign-feedback");
             _closeButton = root.Q<Button>("campaign-close");
@@ -97,9 +100,10 @@ namespace Assets.Scripts.Hub
         /// Opens the map. <paramref name="activeRunKey"/> is <c>RunSaveData.RunKey</c> - the manager
         /// already holds the run save, so the screen is told rather than re-reading it from disk.
         /// </summary>
-        public void Show(string activeRunKey)
+        public void Show(string activeRunKey, int activeLevelIndex = 0)
         {
             _activeRunKey = activeRunKey ?? string.Empty;
+            _activeLevelIndex = activeLevelIndex;
             _isShown = true;
             _root.style.display = DisplayStyle.Flex;
             _root.focusable = true;
@@ -195,13 +199,21 @@ namespace Assets.Scripts.Hub
                     : "Pick a place on the map.");
                 SetText(_detailRequires, string.Empty);
                 SetShown(_startButton, false);
+                _detailBody?.Clear();
                 return;
             }
 
             var run = selected.Node.Run;
+            int floors = run.Levels.Count;
+            bool inProgress = selected.Status == CampaignNodeStatus.InProgress;
+            int current = Mathf.Clamp(_activeLevelIndex, 0, Mathf.Max(0, floors - 1));
             SetText(_detailName, CampaignOps.DisplayNameOf(run));
-            SetText(_detailStatus, $"{CampaignPresenter.StatusLabel(selected)} · {run.Levels.Count} levels");
+            // Where you are, not how long it is: "Level 2 of 4" for the run underway.
+            SetText(_detailStatus, inProgress
+                ? $"In progress · Level {current + 1} of {floors}"
+                : $"{CampaignPresenter.StatusLabel(selected)} · {floors} {(floors == 1 ? "floor" : "floors")}");
             SetText(_detailBlurb, run.Blurb);
+            BuildDetailBody(selected, inProgress, current);
 
             if (selected.Status == CampaignNodeStatus.Locked)
             {
@@ -229,6 +241,66 @@ namespace Assets.Scripts.Hub
                     ? "Continue"
                     : selected.Status == CampaignNodeStatus.Completed ? "Run again" : "Begin";
             }
+        }
+
+        /// <summary>
+        /// The room the old panel left empty: every floor of the run (cleared, the one you are on, the
+        /// rest ahead) and which runs clearing it opens - the map is where a run is chosen, so it
+        /// should say what the choice leads to.
+        /// </summary>
+        private void BuildDetailBody(CampaignNodeState selected, bool inProgress, int current)
+        {
+            if (_detailBody == null)
+            {
+                return;
+            }
+            _detailBody.Clear();
+            var run = selected.Node.Run;
+            bool cleared = selected.Status == CampaignNodeStatus.Completed;
+
+            _detailBody.Add(MakeLabel("Floors", "cd-inv-col__title"));
+            for (int i = 0; i < run.Levels.Count; i++)
+            {
+                var level = run.Levels[i];
+                string name = level != null && !string.IsNullOrEmpty(level.LevelName) ? level.LevelName : $"Floor {i + 1}";
+                bool done = cleared || (inProgress && i < current);
+                bool here = inProgress && i == current;
+                string mark = done ? "✓" : here ? "▸" : "·";
+                _detailBody.Add(MakeLabel($"{mark}  {name}", "cm-floor",
+                    done ? "cm-floor--done" : here ? "cm-floor--current" : "cm-floor--ahead"));
+            }
+
+            var opens = new List<string>();
+            foreach (var state in _states)
+            {
+                if (state?.Node?.Run == null || !state.IsVisible || state.Node.Requires == null)
+                {
+                    continue;
+                }
+                if (state.Node.Requires.Contains(run))
+                {
+                    opens.Add(CampaignOps.DisplayNameOf(state.Node.Run));
+                }
+            }
+            if (opens.Count > 0)
+            {
+                _detailBody.Add(MakeLabel(cleared ? "Opened" : "Clearing it opens", "cd-inv-col__title"));
+                foreach (var name in opens)
+                {
+                    _detailBody.Add(MakeLabel("→  " + name, "cm-floor", "cm-floor--ahead"));
+                }
+            }
+        }
+
+        private static Label MakeLabel(string text, string className, string extraClass = null)
+        {
+            var label = new Label(text) { pickingMode = PickingMode.Ignore };
+            label.AddToClassList(className);
+            if (extraClass != null)
+            {
+                label.AddToClassList(extraClass);
+            }
+            return label;
         }
 
         // --- Actions -----------------------------------------------------------------------

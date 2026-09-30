@@ -55,6 +55,12 @@ namespace Assets.Scripts.Rooms
 
         private readonly Dictionary<Heroes.Hero, VisualElement> _partyRows = new Dictionary<Heroes.Hero, VisualElement>();
         private readonly Dictionary<Heroes.Hero, Label> _partyHpLabels = new Dictionary<Heroes.Hero, Label>();
+        private readonly Dictionary<Heroes.Hero, VisualElement> _partyHpFills = new Dictionary<Heroes.Hero, VisualElement>();
+        private readonly Dictionary<Heroes.Hero, VisualElement> _partyAfflictions = new Dictionary<Heroes.Hero, VisualElement>();
+        private Label _fightFoes;
+        private VisualElement _dialogScrim;
+        private Label _detailChip;
+        private VisualElement _detailRows;
 
         private Label _heroTitle;
         private Label _detailTitle;
@@ -181,6 +187,10 @@ namespace Assets.Scripts.Rooms
 
             _mainBar = root.Q<VisualElement>("main-bar");
             _combatBar = root.Q<VisualElement>("combat-bar");
+            _fightFoes = root.Q<Label>("fight-foes");
+            _dialogScrim = root.Q<VisualElement>("dialog-scrim");
+            _detailChip = root.Q<Label>("detail-chip");
+            _detailRows = root.Q<VisualElement>("detail-rows");
             _heroBar = root.Q<VisualElement>("hero-bar");
             _detailWindow = root.Q<VisualElement>("detail-window");
             _eventWindow = root.Q<VisualElement>("event-window");
@@ -399,6 +409,10 @@ namespace Assets.Scripts.Rooms
 
             bool hasEnemy = room.Enemies.Any(e => e != null && e.IsAlive);
             SetShown(_combatBar, hasEnemy);
+            if (_fightFoes != null)
+            {
+                _fightFoes.text = hasEnemy ? DescribeFoes(room) : string.Empty;
+            }
             _combatNav?.Reset();
 
             // A captive is only reachable once the room is clear - guards first. With enemies up the
@@ -520,6 +534,43 @@ namespace Assets.Scripts.Rooms
         }
 
 
+        /// <summary>
+        /// Who is in the room, as the Fight / Flee bar's heading: bestiary names grouped with a count
+        /// ("Slag Hound x2 + Cinder Imp"), "???" for an enemy the party has never met, and no stats -
+        /// the decision is informed without the bar becoming the Inspect page.
+        /// </summary>
+        private static string DescribeFoes(Room room)
+        {
+            var order = new List<string>();
+            var counts = new Dictionary<string, int>();
+            var names = new Dictionary<string, string>();
+            foreach (var enemy in room.Enemies)
+            {
+                if (enemy == null || !enemy.IsAlive)
+                {
+                    continue;
+                }
+                bool seen = enemy.Definition != null && MetaProgressManager.HasInstance
+                    && MetaProgressManager.Instance.IsEnemySeen(enemy.Definition.SaveKey);
+                // Grouped by kind, not by what is shown: two different unmet enemies are "??? + ???",
+                // never "??? x2", which would claim they are the same thing.
+                string kind = enemy.Definition != null ? enemy.Definition.SaveKey : enemy.DisplayName;
+                if (!counts.ContainsKey(kind))
+                {
+                    counts[kind] = 0;
+                    order.Add(kind);
+                    names[kind] = seen ? enemy.DisplayName : "???";
+                }
+                counts[kind]++;
+            }
+            var parts = new List<string>();
+            foreach (var kind in order)
+            {
+                parts.Add(counts[kind] > 1 ? $"{names[kind]} x{counts[kind]}" : names[kind]);
+            }
+            return string.Join(" + ", parts);
+        }
+
         // ============================================================
         //  ROOM EVENTS
         // ============================================================
@@ -593,6 +644,11 @@ namespace Assets.Scripts.Rooms
                 var btn = new Button(() => OnEventOptionChosen(captured)) { text = option.Label };
                 btn.AddToClassList("cd-list-button");
                 btn.focusable = false;
+                // Which choices are gambles, on the row itself rather than in prose above the list.
+                var tag = new Label(OptionTag(option, roomEvent, band, clarity, out string tone)) { pickingMode = PickingMode.Ignore };
+                tag.AddToClassList("cd-event-tag");
+                tag.AddToClassList("cd-event-tag--" + tone);
+                btn.Add(tag);
                 _eventOptions.Add(btn);
                 if (option.Kind == Events.RoomEventOptionKind.Decline && _eventDecline == null)
                 {
@@ -607,6 +663,47 @@ namespace Assets.Scripts.Rooms
 
             _eventNav?.Reset();
             SetShown(_eventWindow, true);
+        }
+
+        /// <summary>
+        /// A choice's right-hand tag: "safe" for a sure thing or walking away, otherwise the stat it
+        /// turns on and the odds as far as the party can read them ("LCK · even", "INT · risky",
+        /// "WIS · ?"). <paramref name="tone"/> is the colour class suffix.
+        /// </summary>
+        private static string OptionTag(Events.RoomEventOption option, Events.RoomEventSO roomEvent,
+            Events.OddsBand band, Events.OddsClarity clarity, out string tone)
+        {
+            if (option.Kind != Events.RoomEventOptionKind.StatCheck)
+            {
+                tone = "safe";
+                return option.Kind == Events.RoomEventOptionKind.Decline ? "leave" : "safe";
+            }
+            string stat = StatCatalog.ShortName(roomEvent.GoverningStat);
+            if (clarity == Events.OddsClarity.Unknown)
+            {
+                tone = "unknown";
+                return stat + " · ?";
+            }
+            bool good = band >= Events.OddsBand.VeryLikely;
+            bool even = band == Events.OddsBand.EvenOdds;
+            tone = good ? "good" : even ? "even" : "bad";
+            if (clarity == Events.OddsClarity.Vague)
+            {
+                return stat + (good ? " · safe-ish" : even ? " · risky" : " · dangerous");
+            }
+            switch (band)
+            {
+                case Events.OddsBand.AlmostCertain:
+                    return stat + " · certain";
+                case Events.OddsBand.VeryLikely:
+                    return stat + " · likely";
+                case Events.OddsBand.EvenOdds:
+                    return stat + " · even";
+                case Events.OddsBand.SlightChance:
+                    return stat + " · slim";
+                default:
+                    return stat + " · hopeless";
+            }
         }
 
         private string BuildOddsLine(
@@ -672,16 +769,18 @@ namespace Assets.Scripts.Rooms
                 _eventActingHero,
                 DungeonManager.HasInstance ? DungeonManager.Instance.Afflictions : null);
 
+            // The party window reports what the outcome did at once, not after the dialog is dismissed.
+            RefreshPartyStatus();
             _currentRoom.MarkEventResolved(optionIndex, outcomeIndex, succeeded);
             if (DungeonSaveManager.HasInstance)
             {
                 DungeonSaveManager.Instance.Save(_currentRoom);
             }
 
-            ShowEventResult(report);
+            ShowEventResult(report, option.Kind == Events.RoomEventOptionKind.StatCheck ? (bool?)succeeded : null);
         }
 
-        private void ShowEventResult(Events.RoomEventOutcomeReport report)
+        private void ShowEventResult(Events.RoomEventOutcomeReport report, bool? checkPassed = null)
         {
             string message = string.IsNullOrEmpty(report.Text) ? "Nothing comes of it." : report.Text;
             if (report.Lines.Count > 0)
@@ -690,6 +789,12 @@ namespace Assets.Scripts.Rooms
             }
 
             ShowDetail(_currentEvent.Title, message);
+            // Whether the gamble came off, before the flavour text: a result read as fiction alone
+            // left the player to infer it from the consequences.
+            if (checkPassed.HasValue)
+            {
+                SetDetailChip(checkPassed.Value ? "Success" : "Failed", checkPassed.Value);
+            }
 
             // A woken room is a different room: re-show it so the Fight/Flee bar replaces the
             // Examine/Action one, rather than leaving the player among live enemies with
@@ -766,6 +871,9 @@ namespace Assets.Scripts.Rooms
             _detailCancelAction = null;
             _detailTitle.text = title;
             _detailMessage.text = message;
+            SetShown(_detailChip, false);
+            _detailRows?.Clear();
+            SetShown(_detailRows, false);
             // Default: dismissing returns to the room. Callers that need a second beat (the rescue
             // flow, an event outcome) overwrite _detailOkAction after calling this.
             _detailOkAction = () =>
@@ -774,6 +882,46 @@ namespace Assets.Scripts.Rooms
                 ShowMainBar();
             };
             SetShown(_detailWindow, true);
+        }
+
+        private void SetDetailChip(string text, bool good)
+        {
+            if (_detailChip == null)
+            {
+                return;
+            }
+            _detailChip.text = text;
+            _detailChip.EnableInClassList("cd-detail-chip--good", good);
+            _detailChip.EnableInClassList("cd-detail-chip--bad", !good);
+            SetShown(_detailChip, true);
+        }
+
+        /// <summary>One reward row in a dialog, in the victory window's style: icon, rarity-coloured
+        /// name, count on the right.</summary>
+        private void AddDetailRow(Sprite icon, string name, int quantity, ItemSO rarityOf)
+        {
+            if (_detailRows == null)
+            {
+                return;
+            }
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("cd-victory-loot");
+            var tile = new VisualElement { pickingMode = PickingMode.Ignore };
+            tile.AddToClassList("cd-victory-loot__icon");
+            if (icon != null)
+            {
+                tile.style.backgroundImage = new StyleBackground(icon);
+            }
+            row.Add(tile);
+            var label = new Label(quantity > 1 ? $"{name} x{quantity}" : name) { pickingMode = PickingMode.Ignore };
+            label.AddToClassList("cd-victory-loot__name");
+            if (rarityOf != null)
+            {
+                label.AddToClassList(ItemPresenter.RarityClass(rarityOf.Rarity));
+            }
+            row.Add(label);
+            _detailRows.Add(row);
+            SetShown(_detailRows, true);
         }
 
         /// <summary>
@@ -789,9 +937,16 @@ namespace Assets.Scripts.Rooms
             }
 
             SetShown(_mainBar, false);
+            // Warn only about what is really left, and say what - "anything still unfound stays here"
+            // on a floor with nothing left read as a trap.
+            var dungeon = DungeonManager.HasInstance ? DungeonManager.Instance : null;
+            var model = DungeonMapOps.Build(BuildMapInputs(dungeon != null ? dungeon.CurrentRooms : null),
+                _currentRoom.RoomIndex);
+            string left = model.FrontierCount > 0
+                ? $"\n\n{model.FrontierCount} {(model.FrontierCount == 1 ? "way" : "ways")} not yet taken will stay unexplored."
+                : string.Empty;
             ShowConfirm("The Way Down",
-                "The stairs drop away into the dark below.\n\nAnything still unfound on this level "
-                + "stays here.",
+                "The stairs drop away into the dark below." + left,
                 "Descend",
                 () => CombatManager.Instance.NotifyDungeonCleared());
         }
@@ -848,22 +1003,18 @@ namespace Assets.Scripts.Rooms
 
             SetShown(_mainBar, false);
 
-            var lines = new List<string>();
-
             int gold = RoomKindRewards.TreasureGold(DungeonManager.RunLevelIndex);
             if (gold > 0)
             {
                 // Pending, not banked: cache gold is forfeited on death exactly like a kill's, so
                 // carrying it out of the level is the reward.
                 MetaProgressManager.Instance.AddPendingGold(gold);
-                lines.Add($"+{gold} gold.");
             }
 
             var item = RollTreasureItem();
             if (item != null && InventoryManager.HasInstance)
             {
                 InventoryManager.Instance.AddItem(item);
-                lines.Add($"Found: {item.DisplayName}.");
             }
 
             // The floor's own raw stuff, rolled separately from the gear slot above - see
@@ -872,12 +1023,6 @@ namespace Assets.Scripts.Rooms
             foreach (var award in materials)
             {
                 InventoryManager.Instance.AddItem(award);
-                lines.Add($"Salvaged: {award.Item.DisplayName} x{award.Quantity}.");
-            }
-
-            if (item == null && materials.Count == 0)
-            {
-                lines.Add("Nothing else worth carrying.");
             }
 
             TakePayload();
@@ -888,8 +1033,22 @@ namespace Assets.Scripts.Rooms
                     GameManager.Instance.Party.transform.position, $"+{gold} gold", new Color(1f, 0.85f, 0.25f));
             }
 
-            ShowDetail("A Cache", "Coin and oddments, stashed here and forgotten.\n\n"
-                + string.Join("\n", lines));
+            ShowDetail("A Cache", gold > 0
+                ? $"Coin and oddments, stashed here and forgotten. +{gold} gold."
+                : "Coin and oddments, stashed here and forgotten.");
+            // What was found, as reward rows (the victory window's style) rather than sentences.
+            if (item != null)
+            {
+                AddDetailRow(item.Icon, item.DisplayName, 1, item);
+            }
+            foreach (var award in materials)
+            {
+                AddDetailRow(award.Item.Icon, award.Item.DisplayName, award.Quantity, award.Item);
+            }
+            if (item == null && materials.Count == 0)
+            {
+                _detailMessage.text += "\n\nNothing else worth carrying.";
+            }
             _detailOkAction = ClosePayloadResult;
         }
 
@@ -2179,6 +2338,14 @@ namespace Assets.Scripts.Rooms
             TickHud();
             PublishHudLayout();
 
+            // The scrim follows the dialogs rather than being set at each of the many places one
+            // opens, so no path can leave the room dimmed or a dialog undimmed.
+            bool dialogUp = IsShown(_eventWindow) || IsShown(_detailWindow) || IsShown(_mapWindow) || IsShown(_pauseWindow);
+            if (IsShown(_dialogScrim) != dialogUp)
+            {
+                SetShown(_dialogScrim, dialogUp);
+            }
+
             // Clicking anything that is not UI - a door, a wall, the floor - clears the EventSystem's
             // selection and with it the keyboard. Re-claiming here costs a null check and means the
             // arrows cannot go dead halfway across a floor the player is walking with the mouse.
@@ -2421,11 +2588,17 @@ namespace Assets.Scripts.Rooms
         //  PARTY STATUS WINDOW (FF-style, bottom-left)
         // ============================================================
 
+        /// <summary>
+        /// One row per hero: portrait, name, HP as a number and a slim bar, and any level affliction
+        /// as a chip ("STR -2") - an event's lasting penalty used to vanish with its dialog.
+        /// </summary>
         private void BuildPartyStatus(Heroes.Party party)
         {
             _partyStatusRows?.Clear();
             _partyRows.Clear();
             _partyHpLabels.Clear();
+            _partyHpFills.Clear();
+            _partyAfflictions.Clear();
             if (party == null || _partyStatusRows == null)
             {
                 return;
@@ -2441,16 +2614,43 @@ namespace Assets.Scripts.Rooms
                 var row = new VisualElement();
                 row.AddToClassList("cd-party-row");
 
+                var portrait = new VisualElement { pickingMode = PickingMode.Ignore };
+                portrait.AddToClassList("cd-party-row__portrait");
+                if (hero.Icon != null)
+                {
+                    portrait.style.backgroundImage = new StyleBackground(hero.Icon);
+                }
+                row.Add(portrait);
+
+                var main = new VisualElement { pickingMode = PickingMode.Ignore };
+                main.AddToClassList("cd-party-row__main");
+                var top = new VisualElement { pickingMode = PickingMode.Ignore };
+                top.AddToClassList("cd-party-row__top");
                 var name = new Label(hero.DisplayName);
                 name.AddToClassList("cd-party-row__name");
                 var hp = new Label();
                 hp.AddToClassList("cd-party-row__hp");
+                top.Add(name);
+                top.Add(hp);
+                main.Add(top);
 
-                row.Add(name);
-                row.Add(hp);
+                var bar = new VisualElement { pickingMode = PickingMode.Ignore };
+                bar.AddToClassList("cd-party-row__bar");
+                var fill = new VisualElement { pickingMode = PickingMode.Ignore };
+                fill.AddToClassList("cd-party-row__fill");
+                bar.Add(fill);
+                main.Add(bar);
+
+                var afflictions = new VisualElement { pickingMode = PickingMode.Ignore };
+                afflictions.AddToClassList("cd-party-row__afflictions");
+                main.Add(afflictions);
+                row.Add(main);
+
                 _partyStatusRows.Add(row);
                 _partyRows[hero] = row;
                 _partyHpLabels[hero] = hp;
+                _partyHpFills[hero] = fill;
+                _partyAfflictions[hero] = afflictions;
             }
 
             RefreshPartyStatus();
@@ -2458,6 +2658,7 @@ namespace Assets.Scripts.Rooms
 
         private void RefreshPartyStatus()
         {
+            var tracker = DungeonManager.HasInstance ? DungeonManager.Instance.Afflictions : null;
             foreach (var pair in _partyHpLabels)
             {
                 var hero = pair.Key;
@@ -2466,10 +2667,35 @@ namespace Assets.Scripts.Rooms
                 {
                     continue;
                 }
-                hp.text = $"HP {hero.Stats.Health}/{hero.GetEffectiveMaxHealth()}";
+                int max = Mathf.Max(1, hero.GetEffectiveMaxHealth());
+                hp.text = $"{hero.Stats.Health}/{max}";
                 if (_partyRows.TryGetValue(hero, out var row) && row != null)
                 {
                     row.EnableInClassList("cd-party-row--dead", !hero.IsAlive);
+                }
+                if (_partyHpFills.TryGetValue(hero, out var fill) && fill != null)
+                {
+                    float ratio = Mathf.Clamp01((float)hero.Stats.Health / max);
+                    fill.style.width = Length.Percent(ratio * 100f);
+                    fill.EnableInClassList("cd-party-row__fill--mid", ratio <= 0.5f && ratio > 0.25f);
+                    fill.EnableInClassList("cd-party-row__fill--low", ratio <= 0.25f);
+                }
+                if (_partyAfflictions.TryGetValue(hero, out var chips) && chips != null)
+                {
+                    chips.Clear();
+                    if (tracker != null)
+                    {
+                        foreach (var affliction in tracker.For(hero.HeroKey))
+                        {
+                            var handler = Cards.Buffs.BuffHandlerRegistry.Get(affliction.Buff);
+                            string text = handler != null
+                                ? handler.GetDisplayText(affliction.Amount).TrimEnd('!')
+                                : affliction.Buff.ToString();
+                            var chip = new Label(text) { pickingMode = PickingMode.Ignore, tooltip = text + " until the stairs" };
+                            chip.AddToClassList("cd-party-row__affliction");
+                            chips.Add(chip);
+                        }
+                    }
                 }
             }
         }
@@ -2767,7 +2993,12 @@ namespace Assets.Scripts.Rooms
             if (gold != _hudGoldShown)
             {
                 _hudGoldShown = gold;
-                SetText(_hudGold, $"Gold found  +{gold}   (banked when you take the stairs)");
+                // The "banked when you take the stairs" lesson only while the tutorial runs: on every
+                // frame of every floor it was teaching text that never went away.
+                bool teaching = MetaProgressManager.HasInstance && !MetaProgressManager.Instance.TutorialFinished;
+                SetText(_hudGold, teaching
+                    ? $"Gold found  +{gold}   (banked when you take the stairs)"
+                    : $"Gold found  +{gold}");
             }
         }
 
@@ -3082,7 +3313,13 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void RefreshActionButton()
         {
-            SetShown(_actionBtn, PendingEvent() != null);
+            var roomEvent = PendingEvent();
+            SetShown(_actionBtn, roomEvent != null);
+            // The button names the thing ("The Treasury"), not a generic verb.
+            if (roomEvent != null && _actionBtn != null)
+            {
+                _actionBtn.text = string.IsNullOrEmpty(roomEvent.Title) ? "Investigate" : roomEvent.Title;
+            }
         }
 
         private static void SetShown(VisualElement element, bool shown)

@@ -340,7 +340,9 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   secret branches absent until they unlock. All progression decisions come from `CampaignOps`, all
   styling from `CampaignPresenter`. It does **not** write `Run.json` — it raises `OnRunChosen` and
   the manager does, so there is exactly one writer. Reuses `SphereGridView` as its renderer with its
-  own `cm-node--*` state classes. **It always opens on `DefaultSelection()`** (the run in progress, else
+  own `cm-node--*` state classes. On the inventory frame since 2026-09-30 with a legend and a detail
+  column (floors of the run, what a clear opens); `Show(runKey, activeLevelIndex)` needs the level
+  for the "Level 2 of 4" line. **It always opens on `DefaultSelection()`** (the run in progress, else
   the first open one) — it used to remember the last node, so Enter could reopen on a locked run. **Every visible run is named under its node** (2026-09-28,
   playtest finding 11) through `SphereGridView.NodeInfo.Caption`, which is **opt-in**: only
   `CampaignPresenter` sets it, so sphere grid nodes stay caption-free. `NodeCaptionTests` pins both
@@ -356,6 +358,9 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   (four; the slot purchase is gone). The screen states the XP share as the standing cost of width.
   Reachable from the campfire and from the run-progress screen next to *Enter Dungeon*;
   `_partyOpenedFromProgress` sends Back where the player came from.
+- **The level-entry screen** (`progress-view`, `HubManager.ShowRunProgressPanel`) — one fixed size
+  (`.hub-entry`): run name + "Level N of M", a pip per floor (`BuildLevelPips`), the fielded party as
+  portrait tiles with HP (`BuildPartyTiles`), and Enter Dungeon / Change Party / Back in that order.
 - **MerchantUI** — the Gold sink (gear, and the healing-potion carry cap). See the Progression guide.
   **On the inventory frame since 2026-09-30**: Buy / Sell / Potion Belt tabs, a hero strip choosing
   who gear is compared against, and a detail column reusing the inventory's grants block

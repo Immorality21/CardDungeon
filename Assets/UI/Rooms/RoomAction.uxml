@@ -19,13 +19,16 @@
         <!-- Non-combat room actions -->
         <ui:VisualElement name="main-bar" class="cd-bar cd-dock-bottom cd-hidden">
             <ui:Button name="action-btn" text="Action" class="cd-cmd" />
-            <ui:Button name="search-btn" text="Search" class="cd-cmd cd-hidden" />
-            <ui:Button name="rest-btn" text="Rest" class="cd-cmd cd-hidden" />
-            <ui:Button name="descend-btn" text="Descend" class="cd-cmd cd-hidden" />
+            <ui:Button name="search-btn" text="Open the cache" class="cd-cmd cd-hidden" />
+            <ui:Button name="rest-btn" text="Rest at the refuge" class="cd-cmd cd-hidden" />
+            <ui:Button name="descend-btn" text="Take the stairs" class="cd-cmd cd-hidden" />
         </ui:VisualElement>
 
         <!-- Enemies present: start or flee -->
         <ui:VisualElement name="combat-bar" class="cd-bar cd-dock-bottom cd-hidden">
+            <!-- Who is in the room, above the choice it asks for (2026-09-30): bestiary names, "???"
+                 for an enemy never met, no stats. -->
+            <ui:Label name="fight-foes" text="" class="cd-bar__foes" picking-mode="Ignore" />
             <ui:Button name="fight-btn" text="Fight" class="cd-cmd" />
             <ui:Button name="flee-btn" text="Flee" class="cd-cmd" />
         </ui:VisualElement>
@@ -60,6 +63,9 @@
             <ui:VisualElement name="command-list" class="cd-command-list" />
         </ui:VisualElement>
 
+        <!-- Behind every dialog (event, detail, map, pause): "the game is waiting for you" reads apart
+             from "you are walking". Shown by RoomActionUI.Update whenever one of them is up. -->
+        <ui:VisualElement name="dialog-scrim" class="cd-dialog-scrim cd-hidden" />
         <!-- Room event: the prompt, how well the party can read its odds, and the choices -->
         <ui:VisualElement name="event-window" class="cd-window cd-dock-center cd-hidden">
             <ui:Label name="event-title" text="" class="cd-title" />
@@ -74,7 +80,10 @@
         <!-- Detail / result / death dialog -->
         <ui:VisualElement name="detail-window" class="cd-window cd-dock-center cd-hidden">
             <ui:Label name="detail-title" text="" class="cd-title" />
+            <ui:Label name="detail-chip" text="" class="cd-detail-chip cd-hidden" />
             <ui:Label name="detail-message" text="" class="cd-message" />
+            <!-- Loot as rows (icon, rarity-coloured name, count) rather than sentences. -->
+            <ui:VisualElement name="detail-rows" class="cd-detail-rows cd-hidden" />
             <ui:VisualElement name="detail-buttons" class="cd-detail-buttons">
                 <ui:Button name="detail-ok" text="Ok" class="cd-button cd-button--wide" />
                 <ui:Button name="detail-cancel" text="Cancel" class="cd-button cd-button--wide cd-hidden" />

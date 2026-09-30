@@ -215,27 +215,29 @@ item icons this review saw were replaced the same day: every item now has its ow
 
 ## Story map (`campaign-view`, `CampaignMapUI`)
 
-- [ ] **Map crammed into the left half of its canvas** (severity: medium) — `31_campaign.png`: the five
-  nodes occupy x≈330–715 of a 200–830 canvas; the right third is empty. Fit-to-bounds on open (the
-  floor map already does this), with padding.
-- [ ] **"In progress · 5 levels" instead of where you are** (severity: medium) — `59_campaign_active.png`.
-  The status line should say *"Level 2 of 5 · Silt Shallows next"*; for an open run *"5 levels"* is fine.
-- [ ] **No legend for ✓ ★ ? 🔒** (severity: low) — "?" reads as "unknown" but those runs are open and
-  startable. Add a one-line legend like the floor map's `dm-legend`, or use distinct shapes (open = ring,
-  optional = dashed ring).
-- [ ] **Detail panel has room it does not use** (severity: low) — a blurb and a button in a 300x280 panel.
-  Add what the choice costs: party size limit / recommended level, and what a clear unlocks
-  (the node's children), since the map is the run-selection screen.
+> **Done 2026-09-30** — on the inventory frame: Back in the header, the graph given the freed room,
+> a legend under it (*"▶ in progress · ★ open · ? side road · ✓ cleared · 🔒 locked"*), and a detail
+> column with *"In progress · Level 2 of 4"*, every floor (✓ cleared, ▸ current in gold, · ahead),
+> *"Clearing it opens"* with the runs it unlocks, and Begin / Continue at the bottom.
+> `CampaignMapUI.Show` takes the active level index for that line.
+
+- [x] **Map crammed into the left half of its canvas** — the graph was already fitted; it had a
+  shorter canvas than it has now. It fills the new, taller graph area.
+- [x] **"In progress · 5 levels" instead of where you are** — *"In progress · Level 2 of 4"* and the floor list.
+- [x] **No legend for ✓ ★ ? 🔒** — one line under the graph.
+- [x] **Detail panel has room it does not use** — floors and what a clear opens. (No party-size
+  or recommended-level line: the campaign authors neither.)
 
 ## Run progress / level entry (`progress-view`)
 
-- [ ] **A 490x260 box for the "you are about to go in" moment** (severity: medium) — `32_run_progress.png`.
-  Party is a text list "Party (3): Warrior, Paladin, Rogue". Show the party as portrait tiles with HP, a
-  **5-pip level strip** for "Level 1 of 5" (filled / current / ahead), and make *Enter Dungeon* the
-  visibly primary button (default cursor, accent fill). Backdrop itself is §21.
-- [ ] **Back and Enter Dungeon are unequal** (severity: low) — flex-grow on content-sized buttons gives
-  186 vs 266px. Set both to `width: 50%` (minus the gap), or Enter full width and Back as `cd-button--narrow`
-  underneath.
+> **Done 2026-09-30** — one fixed size (`.hub-entry`, 760×440): the run's name and *"Level 2 of 4"* in
+> the header, the floor's name large, **a pip per floor** (filled = cleared, gold ring = this one,
+> dim = ahead), *"Marching out"* as portrait tiles with each hero's HP (base + grid + gear), and
+> **Enter Dungeon, Change Party, Back** in that order — Enter filled and gold-framed as the primary,
+> and where the first arrow key lands.
+
+- [x] **A 490x260 box for the "you are about to go in" moment** — see above.
+- [x] **Back and Enter Dungeon are unequal** — one row, Enter the widest, Back a header-style button.
 
 ## Dungeon HUD and room bar (`dungeon-hud`, `main-bar`, `combat-bar`, `nav-hint`)
 
@@ -245,50 +247,50 @@ item icons this review saw were replaced the same day: every item now has its ow
   `.cd-nav-hint` centres with `left: 50%; translate: -50% 0`, and the percentage translate is not
   recomputed when the text changes width. Make it `left: 0; right: 0; -unity-text-align: middle-center`
   and drop the translate.
-- [ ] **The HUD covers the map** (severity: medium) — `44_fight_bar.png`: the top-left HUD sits on top of
+- [~] **The HUD covers the map** — *partly, 2026-09-30*: one fixed width (360px), and the teaching suffix is gone once the tutorial is done, so it no longer grows and shrinks; the camera still has no top-left safe area. (severity: medium) — `44_fight_bar.png`: the top-left HUD sits on top of
   the room above (and a door behind it). It also grows and shrinks with its text (`55_exit_room.png` is
   wider). Give `.cd-hud` a fixed width, and have the room camera keep a top-left safe area, or collapse
   the HUD to one line while walking ("Collapsed Caverns · 43g · 1 way left · M").
-- [ ] **"(banked when you take the stairs)" on every frame** (severity: low) — teaching text that never
+- [x] **"(banked when you take the stairs)" on every frame** — *done 2026-09-30*: only while the tutorial is unfinished. (severity: low) — teaching text that never
   goes away. Show it for the first floor only, or move it into the level-clear breakdown where it is
   already explained.
-- [ ] **Room bar verbs are generic** (severity: medium) — a lone "Action" in an event room
+- [x] **Room bar verbs are generic** — *done 2026-09-30*: the event button is the event's title ("A Sealed Tomb"); "Open the cache", "Rest at the refuge", "Take the stairs". The one-button frame stays. (severity: medium) — a lone "Action" in an event room
   (`52_event_bar.png`) and "Search" in front of a visible chest (`42_cache_room.png`). Label the button
   with the thing: the event's title ("The Treasury"), "Open the cache", "Rest at the refuge". The
   single button in a framed box also looks like a dialog stub; drop the `cd-bar` frame for a one-button
   bar.
-- [ ] **Fight / Flee says nothing about the fight** (severity: medium) — `44_fight_bar.png`: the only
+- [x] **Fight / Flee says nothing about the fight** — *done 2026-09-30*: `fight-foes` above the bar, grouped by kind ("Slag Hound x2 + Cinder Imp"), "???" per unmet kind ("??? + ???", never "??? x2"). (severity: medium) — `44_fight_bar.png`: the only
   sign of the enemy is a 16px sprite in the room's corner. Add a line above the bar: *"Drakeling"* /
   *"Stone Sentinel + Floating Eye"* (names from the bestiary, "???" if unseen — no stats), so the
   decision the bar asks for is informed.
-- [ ] **Party panel is a list of numbers** (severity: low) — "Warrior HP 38/38" in 60px-tall rows with no
+- [x] **Party panel is a list of numbers** — *done 2026-09-30*: portrait, name, HP and a slim bar per row. (severity: low) — "Warrior HP 38/38" in 60px-tall rows with no
   bar (`40_dungeon_start.png`). The inventory already draws a hero portrait; add a portrait and an HP
   bar per row, tighten rows to ~40px, and show level afflictions (below).
-- [ ] **Level afflictions are invisible after the dialog** (severity: medium) — the Treasury event gave
+- [x] **Level afflictions are invisible after the dialog** — *done 2026-09-30*: a chip per affliction on the hero's row ("-2 Strength", tooltip "until the stairs"). (severity: medium) — the Treasury event gave
   "Rogue: Strength -2 for the rest of the level" (`54_event_result.png`) and nothing on screen remembers
   it. Show a small debuff glyph on the Rogue's party row (tooltip / inspect text "STR -2 until the
   stairs").
-- [ ] **Party panel lags the event it reports** (severity: low) — the result says "Rogue takes 3 damage"
+- [x] **Party panel lags the event it reports** — *done 2026-09-30*: refreshed as the outcome is applied. (severity: low) — the result says "Rogue takes 3 damage"
   while the panel still shows 18/21 (`54_event_result.png`); it updates only after OK (`55_exit_room.png`
   15/21). Call `RefreshPartyStatus()` when the outcome is applied, not when the dialog closes.
 
 ## Room dialogs (`event-window`, `detail-window`)
 
-- [ ] **Event choices don't say which ones are gambles** (severity: medium) — `53_event_window.png`: the
+- [x] **Event choices don't say which ones are gambles** — *done 2026-09-30*: a tag per row ("STR · likely", "LCK · risky" when the read is vague, "WIS · ?" when unknown, "safe", "leave"), coloured by band. (severity: medium) — `53_event_window.png`: the
   odds line is prose above the list ("turns on Luck — Rogue has the best of it — an even bet") and the
   three options look identical, although "Take nothing and move on" is safe. Put a right-aligned tag
   on each row (`cd-row__meta`: "Luck · even", "safe"), and colour the odds word by band.
-- [ ] **Results don't say whether the check passed** (severity: low) — `54_event_result.png` is flavour text
+- [x] **Results don't say whether the check passed** — *done 2026-09-30*: a Success / Failed chip under the title for a stat check. (severity: low) — `54_event_result.png` is flavour text
   then consequences. Add a one-word outcome header chip ("Failed" in red / "Success" in green) above
   the message.
-- [ ] **Loot as plain text lines** (severity: low) — the cache (`43_cache_dialog.png`) lists "+15 gold. Found:
+- [x] **Loot as plain text lines** — *done 2026-09-30*: the cache lists its finds as the victory window's reward rows. (severity: low) — the cache (`43_cache_dialog.png`) lists "+15 gold. Found:
   Leather Cap. Salvaged: Cut Stone x3." as sentences. Reuse the victory window's reward rows (icon,
   rarity-coloured name, count right-aligned).
-- [ ] **"The Way Down" warns about unfound things when there are none** (severity: low) —
+- [x] **"The Way Down" warns about unfound things when there are none** — *done 2026-09-30, compile-verified only* (the test floor's exit was guarded): the line appears only when the map's frontier is non-zero, as "N ways not yet taken will stay unexplored." (severity: low) —
   `56_descend.png`: the HUD says "nothing left unopened", the dialog still says "Anything still unfound on
   this level stays here". Only add that line when the map's frontier/payload count is non-zero, and say
   what ("1 room not entered").
-- [ ] **Dialogs have no scrim** (severity: low) — every `cd-dock-center` dialog sits on the live room with
+- [x] **Dialogs have no scrim** — *done 2026-09-30*: `dialog-scrim` (55%) under the event, detail, map and pause windows, driven from `RoomActionUI.Update`. (severity: low) — every `cd-dock-center` dialog sits on the live room with
   full-brightness tiles around it (`43_…`, `53_…`, `56_…`). A `rgba(6,3,14,0.55)` scrim behind
   `event-window` / `detail-window` / `map-window` / `pause-window` separates "the game is waiting for you"
   from "you are walking".

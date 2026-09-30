@@ -481,6 +481,153 @@
 }
 
 /* ---- Enemy nameplates (combat): name + HP number under each enemy ---- */
+/* ---- Dungeon walking HUD and room dialogs, 2026-09-30 ---- */
+/* The HUD keeps one width, so it no longer grows and shrinks with its text over the room. */
+.cd-hud {
+    width: 360px;
+}
+
+/* Who is in the room, hung above the Fight / Flee bar. */
+.cd-bar__foes {
+    position: absolute;
+    bottom: 100%;
+    left: -200px;
+    right: -200px;
+    margin-bottom: 8px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+    text-shadow: 1px 1px 0 rgb(0, 0, 0);
+}
+
+.cd-dialog-scrim {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(6, 3, 14, 0.55);
+}
+
+/* An event choice's tag on the right: what governs it and how the odds read, or "safe". */
+.cd-event-tag {
+    position: absolute;
+    right: 12px;
+    top: 0;
+    bottom: 0;
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-right;
+    padding: 0;
+    margin: 0;
+}
+
+.cd-event-tag--safe {
+    color: rgb(150, 230, 150);
+}
+
+.cd-event-tag--good {
+    color: rgb(150, 230, 150);
+}
+
+.cd-event-tag--even {
+    color: var(--cd-gold);
+}
+
+.cd-event-tag--bad {
+    color: rgb(255, 130, 120);
+}
+
+.cd-event-tag--unknown {
+    color: var(--cd-text-light);
+    opacity: 0.6;
+}
+
+/* Success / Failed over an event result. */
+.cd-detail-chip {
+    align-self: center;
+    font-size: 16px;
+    -unity-font-style: bold;
+    padding: 2px 12px;
+    margin: 0 0 8px 0;
+    border-radius: 5px;
+    border-width: 1px;
+}
+
+.cd-detail-chip--good {
+    color: rgb(150, 230, 150);
+    border-color: rgb(90, 170, 90);
+    background-color: rgba(40, 110, 50, 0.35);
+}
+
+.cd-detail-chip--bad {
+    color: rgb(255, 140, 130);
+    border-color: rgb(180, 70, 70);
+    background-color: rgba(120, 30, 30, 0.35);
+}
+
+.cd-detail-rows {
+    margin: 4px 0 10px 0;
+}
+
+/* The party window: portrait, name, a slim HP bar, and any level affliction as a chip. */
+.cd-party-row__portrait {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-right: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-party-row__main {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.cd-party-row__top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cd-party-row__bar {
+    height: 5px;
+    margin-top: 2px;
+    background-color: rgb(16, 12, 24);
+    border-radius: 2px;
+}
+
+.cd-party-row__fill {
+    height: 100%;
+    background-color: rgb(60, 175, 80);
+    border-radius: 2px;
+}
+
+.cd-party-row__fill--mid {
+    background-color: rgb(200, 160, 40);
+}
+
+.cd-party-row__fill--low {
+    background-color: rgb(200, 60, 60);
+}
+
+.cd-party-row__afflictions {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.cd-party-row__affliction {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(255, 150, 140);
+    padding: 0 4px;
+    margin: 2px 4px 0 0;
+    border-width: 1px;
+    border-color: rgba(200, 80, 80, 0.7);
+    border-radius: 3px;
+}
+
 .cd-nameplate-layer {
     position: absolute;
     left: 0;
@@ -2669,6 +2816,189 @@
     border-radius: 5px;
     padding: 0 6px;
     margin: 0;
+}
+
+/* ---- Story map screen on the inventory frame (2026-09-30) ---- */
+.cm-graph-col {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    margin-right: 14px;
+}
+
+.cm-graph-host {
+    flex-grow: 1;
+}
+
+.cm-legend {
+    flex-shrink: 0;
+    font-size: 16px;
+    color: var(--cd-text-light);
+    opacity: 0.7;
+    -unity-text-align: middle-center;
+    margin-top: 6px;
+}
+
+.cm-detail-col {
+    width: 330px;
+}
+
+.cm-detail__status {
+    color: var(--cd-gold);
+    opacity: 1;
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+.cm-detail__requires {
+    height: auto;
+    white-space: normal;
+}
+
+.cm-detail__body {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* A floor of the run: cleared, the one you are on, or still ahead. */
+.cm-floor {
+    font-size: 17px;
+    color: var(--cd-text-light);
+    padding: 1px 4px;
+    margin: 0;
+}
+
+.cm-floor--done {
+    opacity: 0.55;
+}
+
+.cm-floor--current {
+    color: var(--cd-gold);
+    -unity-font-style: bold;
+}
+
+.cm-floor--ahead {
+    opacity: 0.85;
+}
+
+.cm-start {
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+/* ---- Level entry (progress-view), one fixed size (2026-09-30) ---- */
+.hub-entry {
+    width: 760px;
+    height: 440px;
+    max-height: none;
+    padding: 0;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.hub-entry__body {
+    flex-grow: 1;
+    min-height: 0;
+    padding: 18px 22px 6px 22px;
+    align-items: center;
+}
+
+.hub-entry__name {
+    font-size: 34px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+    margin-bottom: 10px;
+}
+
+.hub-entry__pips {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+
+.hub-entry__pip {
+    width: 22px;
+    height: 22px;
+    margin: 0 5px;
+    border-width: 2px;
+    border-color: var(--cd-accent);
+    border-radius: 11px;
+}
+
+.hub-entry__pip--done {
+    background-color: var(--cd-accent);
+}
+
+.hub-entry__pip--current {
+    border-color: var(--cd-gold);
+    border-width: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+}
+
+.hub-entry__pip--ahead {
+    opacity: 0.55;
+}
+
+.hub-entry__party-title {
+    align-self: stretch;
+}
+
+.hub-entry__party {
+    flex-direction: row;
+    justify-content: center;
+    align-self: stretch;
+}
+
+.hub-entry__hero {
+    width: 124px;
+    height: 118px;
+    margin: 0 6px;
+    padding: 4px;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: rgba(35, 18, 58, 0.6);
+    border-width: 2px;
+    border-color: rgba(91, 42, 145, 0.7);
+    border-radius: 8px;
+}
+
+.hub-entry__hero-sprite {
+    width: 64px;
+    height: 64px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.hub-entry__hero-name {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    padding: 0;
+    margin: 0;
+}
+
+.hub-entry__hero-hp {
+    font-size: 16px;
+    color: rgb(150, 230, 150);
+    padding: 0;
+    margin: 0;
+}
+
+/* Doubled: .hub-lotpanel__actions' padding shorthand sits later in the file and would win. */
+.hub-lotpanel__actions.hub-entry__actions {
+    padding: 0 18px 18px 18px;
+}
+
+/* The primary action: filled, so it reads as the way forward before the cursor is on it. */
+.hub-entry__enter {
+    background-color: rgb(102, 48, 158);
+    border-color: var(--cd-gold);
+    color: var(--cd-gold);
+    flex-grow: 1.4;
 }
 
 /* ---- Campaign map ---- */
