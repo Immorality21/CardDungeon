@@ -2181,8 +2181,8 @@ namespace Assets.Scripts.Balance
         /// The highest each stat can reach anywhere in the project: every authored hero with their
         /// whole sphere grid bought. A spawn gate above this is unreachable by construction, which is
         /// an authoring error; a gate the *modelled* run path never reaches is a much weaker claim,
-        /// because the model grows a roster only through <c>RunLevelEntry.RescueHero</c> and cannot
-        /// see a hero acquired any other way.
+        /// because the model grows a roster only through guaranteed sources (a captive, a run's
+        /// <c>JoinsOnClear</c>) and cannot see a hero met by chance in a room event.
         /// </summary>
         private static StatBlock ProjectStatCeiling(BalanceInput input)
         {
@@ -2254,9 +2254,9 @@ namespace Assets.Scripts.Balance
                     {
                         Asset = definition,
                         Detail = $"Needs {string.Join(" + ", parts)}. A hero in the project reaches it, but the "
-                               + "run curves only grow a roster through RunLevelEntry.RescueHero - a hero the "
-                               + "player unlocks any other way is invisible to the model - so this may be a "
-                               + "modelling gap rather than unreachable content.",
+                               + "run curves only grow a roster through guaranteed sources (a captive, a run's "
+                               + "JoinsOnClear) - a hero met in a room event is invisible to the model - so this "
+                               + "may be a modelling gap rather than unreachable content.",
                         Suggestion = "If the stat is meant to come from a hero the player unlocks later, this "
                                    + "is working as designed; if not, the gate never opens on the rescue-only path."
                     });

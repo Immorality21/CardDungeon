@@ -47,7 +47,7 @@ namespace Assets.Scripts.Dungeon
         public List<Line> Materials = new List<Line>();
         /// <summary>Equipment and consumables gained, by display name.</summary>
         public List<Line> Items = new List<Line>();
-        /// <summary>Heroes freed on this floor - theirs for good now.</summary>
+        /// <summary>Heroes who joined on this floor - freed, met, or earned by the run clear - theirs for good now.</summary>
         public List<string> Joined = new List<string>();
 
         public int GoldTotal => GoldFound + GoldBonus;

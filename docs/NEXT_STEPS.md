@@ -42,10 +42,11 @@ Three threads are live:
    but prices most of it past what a campaign pays. §9b's "What the refactor actually left behind"
    has the measured numbers and the three findings it produced — read it before starting §4c.
    **§5b's unlock half shipped 2026-09-06** — the solo start is back, heroes arrive by rescue, and
-   `CampaignNodeEntry.RequiresHeroes` makes a hero a key the campaign can gate on. Three of the seven
-   (Cleric, Tinkerer, Rogue) still have no unlock source; placing them is authoring, not code. The
-   **Cultist** is the captive at the bottom of **The Blood Stair** *(2026-09-28)*, a challenge run that
-   opens after the tutorial and is meant for late parties (`RunDefinitionSO.Challenge`).
+   `CampaignNodeEntry.RequiresHeroes` makes a hero a key the campaign can gate on. **All seven have
+   an unlock source since 2026-09-30**: the Tinkerer joins on clearing the Drowned March, the Rogue is
+   a room-event gamble in The Warrens, and the Cleric is the captive of a new secret run, **The Drowned
+   Chapel**, the first node keyed on a hero. The **Cultist** is the captive at the bottom of **The
+   Blood Stair** *(2026-09-28)*, a challenge run meant for late parties (`RunDefinitionSO.Challenge`).
 2. **Balance / losability** (§0–§0g) — making the campaign losable and gating depth behind
    investment. The gate ladder exists and the frontier is measured per floor. Mature; mostly
    decisions waiting on the user now. **Caveat updated 2026-09-04:** §9b's model rework landed with
@@ -187,9 +188,9 @@ backlog.**
 |---|---|---|
 | **9b** | Magic moves onto the sphere grid — Draw is scrapped | ✅ **shipped** 2026-09-04; findings feed §4c |
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
-| **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **shipped** 2026-09-06 — solo start, rescue unlocks, `RequiresHeroes` gates. **Four heroes still need an unlock source** |
+| **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **done** — shipped 2026-09-06; **every hero has a source since 2026-09-30** (run clear, room event, secret run) |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** — the Warrior's Bloodfang Boar (special attack, branch B) and Cairn Golem (party replacement, branch A); **next: the other six heroes' summons**, then measure the per-summon frontier |
+| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch. **Next, in unlock order: Ranger and Tinkerer**, then Cleric, Rogue, Cultist; then measure the per-summon frontier |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
@@ -242,6 +243,23 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **The Paladin's summons** (2026-09-30) — `plans/SPECIALIZATION.md` §4b ("The Paladin's three"),
+  the Magic guide. One per branch: the **Aegis Lion** (special attack: +50% own Endurance and +60
+  threat — a taunt), the **Judgement Seraph** (party replacement, a hitter: 120% HP / 180% STR, Holy
+  Radiant Cut + Judgement) and the **Dawn Stag** (40% heal to all + regeneration). PixelLab art with
+  idle loops. Code: `SummonSO.BonusThreat`/`ThreatMultiplier`, and a power upgrade now raises only a
+  summon's first effect. All three verified live in `Sandbox/PaladinSummons.asset`.
+- **Every hero has a way in** (2026-09-30) — `plans/SPECIALIZATION.md` §5b item 4, the Dungeon and
+  Room Events guides, `BALANCING.md` §5x. Three new sources for the last three heroes: the
+  **Tinkerer** joins on clearing the Drowned March (`RunDefinitionSO.JoinsOnClear`, guaranteed, in the
+  balance model), the **Rogue** is the Cutpurse gamble in The Warrens' new Thieves' Den
+  (`RoomEventOutcome.JoinsHero`, not placed once owned), the **Cleric** is the captive of **The Drowned
+  Chapel** — a new two-floor secret run off the March, keyed on the Tinkerer, home at last of the Dark
+  Jailor. One join path (`DungeonManager.JoinParty`); `HeroUnlockTests.EveryHeroInTheRoster_HasAWayIn`
+  guards the roster. The Blood Stair's floors 2–3 softened (2.6/2.9 → 2.3/2.55) to keep its step
+  ceiling against a wider endgame party. Suite: same two pre-existing balance reds, one finding
+  fewer (Warren Tunnels no longer over one health bar).
 
 - **Menu review** (2026-09-28, worked through 2026-09-30) — a whole-game UI review, one section per
   screen, judged at 1280x720 against the Storehouse inventory; the to-do file was deleted once clear,

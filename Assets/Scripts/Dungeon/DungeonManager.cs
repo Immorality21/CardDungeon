@@ -995,8 +995,10 @@ namespace Assets.Scripts.Dungeon
                 return;
             }
 
-            // Read once, not per roll: this loads the party save.
+            // Read once, not per roll: these load the party save. Ownership is the committed roster,
+            // so a hero met earlier on this floor does not move placement between a save and resume.
             var partyStats = BestRosterStats();
+            var ownedHeroKeys = _fileHandler.Load<PartySaveData>()?.OwnedHeroKeys;
 
             foreach (var room in rooms)
             {
@@ -1012,6 +1014,12 @@ namespace Assets.Scripts.Dungeon
                 foreach (var candidate in room.RoomSO.PossibleEvents)
                 {
                     if (candidate == null)
+                    {
+                        continue;
+                    }
+
+                    // Someone to meet who has already joined is nobody to meet.
+                    if (Rooms.Events.RoomEventSpawn.GrantsOnlyOwnedHeroes(candidate, ownedHeroKeys))
                     {
                         continue;
                     }
@@ -1149,19 +1157,41 @@ namespace Assets.Scripts.Dungeon
             }
 
             var captive = room.CaptiveHero;
-            var hero = Party.AddHero(captive);
+            // Cleared either way, so an already-present hero cannot re-trigger the marker.
+            room.CaptiveHero = null;
+            RemoveCaptiveMarker(room);
+
+            var hero = JoinParty(captive);
             if (hero == null)
             {
-                // Already in the party somehow - clear the marker so it cannot be re-triggered.
-                room.CaptiveHero = null;
-                RemoveCaptiveMarker(room);
                 return false;
             }
 
-            Party.MarkOwnedDeferred(captive);
-            _joinedThisLevel.Add(captive.DisplayName);
-            room.CaptiveHero = null;
-            RemoveCaptiveMarker(room);
+            Debug.Log($"Rescued {captive.DisplayName}; party is now {Party.Heroes.Count} strong.");
+            return true;
+        }
+
+        /// <summary>
+        /// Adds <paramref name="heroSO"/> to the live party at once and records ownership
+        /// <i>deferred</i> - written on level clear, forfeited on a wipe like XP and loot. The one
+        /// path every mid-level hero source goes through: a freed captive and a room event's
+        /// <c>JoinsHero</c> outcome. Returns null when there is no party or they are already in it.
+        /// </summary>
+        public Hero JoinParty(HeroSO heroSO)
+        {
+            if (heroSO == null || Party == null)
+            {
+                return null;
+            }
+
+            var hero = Party.AddHero(heroSO);
+            if (hero == null)
+            {
+                return null;
+            }
+
+            Party.MarkOwnedDeferred(heroSO);
+            _joinedThisLevel.Add(heroSO.DisplayName);
 
             // Give the newcomer their own magic slots, or they cannot cast anything this run - and
             // fill them from their loadout, since the run-start seeding already happened and a hero
@@ -1178,9 +1208,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             Summons?.AddHero(hero, SummonCatalogSO.Resolve);
-
-            Debug.Log($"Rescued {captive.DisplayName}; party is now {Party.Heroes.Count} strong.");
-            return true;
+            return hero;
         }
 
         private void RemoveCaptiveMarker(Room room)
@@ -1248,6 +1276,8 @@ namespace Assets.Scripts.Dungeon
 
         private void OnDungeonCleared()
         {
+            GrantRunClearHero();
+
             // Commit all deferred progress to persistent save files
             if (Party != null)
             {
@@ -1337,6 +1367,32 @@ namespace Assets.Scripts.Dungeon
             {
                 SceneManager.LoadScene("HubScene");
             }
+        }
+
+        /// <summary>
+        /// The run's <see cref="RunDefinitionSO.JoinsOnClear"/> hero, on its final level only. Called
+        /// before <c>Party.CommitProgress</c> so ownership rides the same write as the floor's XP -
+        /// the level is already won, so nothing can forfeit it. They do not join the live party: there
+        /// is nothing left to fight. <c>MarkOwnedDeferred</c> fields them for the next run if the
+        /// party has room, and the level-clear window names them.
+        /// </summary>
+        private void GrantRunClearHero()
+        {
+            if (Party == null || ActiveRun == null || ActiveRun.JoinsOnClear == null
+                || RunLevelIndex + 1 < ActiveRun.Levels.Count)
+            {
+                return;
+            }
+
+            var joiner = ActiveRun.JoinsOnClear;
+            if (Party.IsOwned(joiner))
+            {
+                return;
+            }
+
+            Party.MarkOwnedDeferred(joiner);
+            _joinedThisLevel.Add(joiner.DisplayName);
+            Debug.Log($"{joiner.DisplayName} joins for clearing {ActiveRun.DisplayName}.");
         }
 
         /// <summary>

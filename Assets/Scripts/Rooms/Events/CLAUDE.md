@@ -39,8 +39,16 @@ does still carry an unused `ScalingStat` if that ever needs revisiting.
   (`SpawnChancePercent` + `SpawnModifierStat`/`SpawnModifierRate`, see below), and `Options`. Each `RoomEventOption` is a
   `StatCheck` (rolled), `Guaranteed` (a known trade, no roll) or `Decline` (walk away), and carries
   weighted `Success` / `Failure` pools of `RoomEventOutcome`. An outcome can hold **any mix** of
-  `SpellEffect`s, a `LootTable`, `Gold`, `LoseAConsumable` and `AwakenedEnemies` — so a partial
-  success ("you get the tome *and* the spider bite") is one outcome, not a third branch.
+  `SpellEffect`s, a `LootTable`, `Gold`, `LoseAConsumable`, `AwakenedEnemies` and `JoinsHero` — so a
+  partial success ("you get the tome *and* the spider bite") is one outcome, not a third branch.
+- **Someone to meet** *(2026-09-30)*. `RoomEventOutcome.JoinsHero` adds a hero through
+  `DungeonManager.JoinParty` - the same path a freed captive takes, so they fight the rest of the
+  level and are owned only once it is cleared. `RoomEventSpawn.GrantsOnlyOwnedHeroes` keeps such an
+  event from being placed once every hero it can grant is owned (read off the *committed* roster, so
+  placement is stable across a save and resume). A failed attempt therefore leaves the meeting for a
+  later run, which is why the one authored so far - **the Cutpurse** (Agility 8, Rogue on a pass, a
+  lost consumable on a miss) - lives in a room only **The Warrens**, a repeatable run, builds (the
+  Thieves' Den). A hero met this way is a chance, not a guarantee: never gate a campaign node on one.
 - **Nothing here is a parallel effect system.** Damage/heal run through the same `IEffectExecutor`s
   magic uses (with `flatPower: true` — an event's numbers are the event's, and there is no caster),
   loot rolls through `LootRoller`, gold goes through `MetaProgressManager.AddPendingGold` (so it is

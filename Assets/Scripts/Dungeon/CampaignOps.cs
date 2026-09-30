@@ -387,10 +387,25 @@ namespace Assets.Scripts.Dungeon
             return keys;
         }
 
-        /// <summary>Every hero a run can hand over, one captive per level.</summary>
+        /// <summary>
+        /// Every hero a run hands over to a party that clears it: one captive per level, plus the
+        /// hero who joins on the clear itself (<see cref="RunDefinitionSO.JoinsOnClear"/>). A hero
+        /// met by chance - a room event's outcome - is deliberately not here: nothing guarantees it.
+        /// </summary>
         public static void AddRescuedHeroKeys(RunDefinitionSO run, HashSet<string> into)
         {
-            if (run?.Levels == null || into == null)
+            if (run == null || into == null)
+            {
+                return;
+            }
+
+            string onClear = HeroKeyOf(run.JoinsOnClear);
+            if (!string.IsNullOrEmpty(onClear))
+            {
+                into.Add(onClear);
+            }
+
+            if (run.Levels == null)
             {
                 return;
             }

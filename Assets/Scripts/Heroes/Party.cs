@@ -290,6 +290,14 @@ namespace Assets.Scripts.Heroes
         /// the write happens in <see cref="CommitProgress"/> on level clear, so a rescue is
         /// forfeited on death exactly like XP and loot.
         /// </summary>
+        /// <summary>Whether <paramref name="heroSO"/> is owned, counting joins not yet committed.</summary>
+        public bool IsOwned(HeroSO heroSO)
+        {
+            return heroSO != null
+                   && _saveData.OwnedHeroKeys != null
+                   && _saveData.OwnedHeroKeys.Contains(heroSO.SaveKey);
+        }
+
         public void MarkOwnedDeferred(HeroSO heroSO)
         {
             if (heroSO == null || string.IsNullOrEmpty(heroSO.SaveKey))

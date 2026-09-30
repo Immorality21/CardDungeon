@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
@@ -72,5 +73,11 @@ namespace Assets.Scripts.Rooms.Events
         [Tooltip("The noise woke something. These spawn into the room, turning a safe room into a " +
                  "fight the player did not choose.")]
         public List<EnemySO> AwakenedEnemies = new List<EnemySO>();
+
+        [Tooltip("Optional hero who joins the party - at once, for the rest of the level, and owned " +
+                 "only once it is cleared, exactly like a freed captive. An event that grants a hero " +
+                 "the party already owns is never placed (RoomEventSpawn.GrantsOnlyOwnedHeroes), so " +
+                 "a failed attempt leaves the door open for a later run and a success closes it.")]
+        public HeroSO JoinsHero;
     }
 }

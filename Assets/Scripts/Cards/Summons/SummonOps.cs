@@ -30,8 +30,13 @@ namespace Assets.Scripts.Cards
 
         /// <summary>
         /// The summon's effects with its upgrades applied: <see cref="SummonGrant.PowerBonus"/>
-        /// added to every effect's Power, <see cref="SummonGrant.DurationBonus"/> to every timed
-        /// effect's Duration. Returns copies — the asset is never modified.
+        /// added to the <b>first</b> effect's Power - the headline, which is what a power node is
+        /// priced against - and <see cref="SummonGrant.DurationBonus"/> to every timed effect's
+        /// Duration. Returns copies — the asset is never modified.
+        ///
+        /// <para>First only, because effects read Power in different units: on the Paladin's Dawn
+        /// Stag a +10 meant for its 40% heal would also have turned a 3-a-turn regeneration into
+        /// 13 (2026-09-30).</para>
         /// </summary>
         public static List<SpellEffect> EffectsFor(SummonSO summon, SummonGrant grant)
         {
@@ -48,7 +53,7 @@ namespace Assets.Scripts.Cards
                 effects.Add(new SpellEffect
                 {
                     EffectType = effect.EffectType,
-                    Power = effect.Power + power,
+                    Power = effect.Power + (effects.Count == 0 ? power : 0),
                     PowerMode = effect.PowerMode,
                     ScalingStat = effect.ScalingStat,
                     DamageType = effect.DamageType,
@@ -193,6 +198,10 @@ namespace Assets.Scripts.Cards
             {
                 parts.Add(DescribeEffect(effect));
             }
+            if (summon.BonusThreat > 0)
+            {
+                parts.Add("draws the enemies' attention");
+            }
             int charges = MaxCharges(summon, grant);
             parts.Add(charges == 1 ? "1 charge per run" : $"{charges} charges per run");
             return string.Join(" · ", parts);
@@ -220,6 +229,10 @@ namespace Assets.Scripts.Cards
             switch (effect.EffectType)
             {
                 case SpellEffectType.Buff:
+                    if (effect.BuffType == BuffType.Regenerating)
+                    {
+                        return $"regenerates {effect.Power} a turn{turns}";
+                    }
                     return effect.PowerMode == PowerMode.PercentOfTargetStat
                         ? $"+{effect.Power}% {effect.BuffType}{turns}"
                         : $"+{effect.Power} {effect.BuffType}{turns}";
@@ -228,7 +241,9 @@ namespace Assets.Scripts.Cards
                 case SpellEffectType.Damage:
                     return $"{effect.Power} {effect.DamageType} damage";
                 case SpellEffectType.Heal:
-                    return $"heals {effect.Power}";
+                    return effect.PowerMode == PowerMode.PercentOfMaxHealth
+                        ? $"heals {effect.Power}% of health"
+                        : $"heals {effect.Power}";
                 default:
                     return effect.EffectType.ToString();
             }

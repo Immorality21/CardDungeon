@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Heroes;
 using UnityEngine;
 
 namespace Assets.Scripts.Dungeon
@@ -29,6 +30,13 @@ namespace Assets.Scripts.Dungeon
                  "it; that is what keeps it honest (it must still be clearable by someone) without " +
                  "reporting the design as broken.")]
         public bool Challenge;
+
+        [Tooltip("Optional hero who joins when this run is cleared - a reward for finishing it, not a " +
+                 "captive found along the way. Granted on the final level's clear, in the same commit " +
+                 "as its XP and loot, so it cannot be lost afterwards. Skipped when already owned. " +
+                 "Counts as guaranteed for every node that requires this run (CampaignOps), so a " +
+                 "campaign node may gate on this hero.")]
+        public HeroSO JoinsOnClear;
 
         public List<RunLevelEntry> Levels = new List<RunLevelEntry>();
     }

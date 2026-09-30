@@ -16,11 +16,12 @@
 | Run | Key | Levels | Repeatable | Opens after | Boss |
 |---|---|---|---|---|---|
 | The Threshold | `TutorialRun` | 4 | no | — | Abyssal Warden |
-| The Drowned March | `DrownedMarch` | 4 | no | The Threshold | **Mirefather** |
+| The Drowned March | `DrownedMarch` | 5 | no | The Threshold | **Mirefather** — the **Tinkerer** joins on the clear |
 | The Warrens | `TheWarrens` | 2 | **yes** | The Threshold | **Gilded Hoarder** |
 | The Ashen Deep | `AshenDeep` | 3 | no | The Drowned March | **Cinder Tyrant** |
 | The Hollow Vault | `HollowVault` | 1 | no | Ashen Deep **and** The Warrens (`All`) | Gilded Hoarder (120 HP override) |
 | The Blood Stair | `BloodStair` | 5, all hand-drawn | no | The Threshold (optional, **`Challenge`**) | Abyssal Warden (floor 4), **Cinder Tyrant** (floor 5) |
+| The Drowned Chapel | `DrownedChapel` | 2 | no | The Drowned March **+ the Tinkerer** (optional, **`Secret`**) | Abyssal Warden (120 HP override) + 2 Bog Shamans |
 
 **The Blood Stair is a challenge run** *(2026-09-28)*. `RunDefinitionSO.Challenge` means *opens early,
 meant late*: it sits on the map right after the tutorial so a new player sees that far bigger fights
@@ -34,11 +35,15 @@ can take, one door from the altar — and like every rescue he is kept only if t
 which on the final floor means killing the Tyrant. `CampaignAssetTests.Campaign_EveryChallengeRunIsOptional`
 keeps challenge runs off the main line.
 
-**The Hollow Vault is the campaign's only `Secret` node**, and the only one whose prerequisites span
-both branches - which is what gives the optional repeatable run a reason to exist beyond gold. Secret
+**The Hollow Vault is one of two `Secret` nodes**, and the only one whose prerequisites span
+both branches - which is what gives the optional repeatable run a reason to exist beyond gold. The
+other is **The Drowned Chapel** *(2026-09-30)*: it opens off the Drowned March and gates on the
+**Tinkerer** (`RequiresHeroes`) - "the Tinkerer can pump the nave out" - which is sound because the
+Tinkerer joins on that same clear. The **Cleric** is its captive, on floor 1 so she fights the boss floor
+with you; the Chapel Cell rooms are where the **Dark Jailor** finally has a home. Secret
 means hidden on the map until it unlocks, so it fails silently in two directions (unreachable, or
 never hidden); `CampaignAssetTests` asserts both. **The Ashen Deep is a fire biome on purpose**: its
-boss attacks as Fire and resists it, so the Fire Cloak learned on the Acolyte's grid is
+boss attacks as Fire and resists it, so the Fire Cloak learned on the Tinkerer's grid is
 the answer to it - see `docs/BALANCING.md` §5e for the four tuning passes that shape took.
 
 The tutorial forks: `DrownedMarch` is the main line (one-shot, escalating), `TheWarrens` is an optional repeatable dead end whose job is to fund the hub's Gold sinks - party slots cost 300/600, and before it there was nowhere to farm them. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
@@ -146,7 +151,21 @@ the intended behaviour, not a bug to design around.
 - **Hero health is level-scoped and now persisted.** `DungeonSaveData.HeroHealth` carries current HP per hero across a quit and resume, applied in `RestoreSavedState` right after `Party.Initialize` (which derives every hero full - right for a fresh level, wrong for a resume). The rules are pure and tested in `PartyHealthSnapshot`. Without it, quitting to the menu healed the party and silently refunded every room event's damage. The potion half of the sustain pool is covered too: `DungeonSaveData.ConsumablesSpent` is a per-level ledger of what was drunk, reconciled onto the inventory in the same place. It is a delta rather than a snapshot because the hub is reachable while a run is paused, and the reconcile is idempotent so it is correct whether or not `InventoryManager` survived the scene change with the potions already gone (`InventoryOperations.SpendShortfall`, `ConsumableLedgerTests`).
 - **XP and inventory are NOT saved during dungeon play.** (XP is a bank spent only at the hub's sphere-grid screen — `Hero.AddXp` moves no stats — so `BestRosterStats()` derives spawn-gate stats from committed `ActivatedNodes`, provably stable mid-run.) Changes accumulate in memory only. This now includes **consumables**: potions are `ItemSO`s in the item collection (spent via the in-combat Item command), so they follow the same deferred commit/discard lifecycle as gear. On fresh dungeon entry the healing-potion stack is topped up to the belt cap (`InventoryManager.TopUpConsumableToCap`, cap from `PartyResourceManager.GetMax(HealingPotion)`), replacing the old `PartyResourceManager.ReplenishAll`. `PartyResourceManager` is now a **carry-cap store only** (its per-dungeon current-count save — `DungeonSaveData.Resources` — is retired).
 - **The party that enters is the party the player picked.** `DungeonManager.FieldedHeroes()` returns `PartySaveData.SelectedHeroKeys` resolved through `HeroRoster` and clamped to `MetaProgressManager.GetPartyCap()` — not every hero owned. It feeds `Party.Initialize` on both the fresh and the resumed path, and `BestRosterStats()` (the room-event stat gates), so a benched hero's Intelligence cannot open a tome they are not there to read. Falls back to the inline `_heroDefinitions` when no `PartyRosterSO` is wired, which is what keeps free-play in the scene working.
-- **A rescued hero is deferred too.** `RunLevelEntry.RescueHero` places a captive in a non-start / non-exit room (`DungeonManager.PlaceCaptiveIfConfigured`, skipped when the hero is already owned); they are **freed automatically once the room is clear** (`RoomActionUI.TryAutoRescue`, run from `ShowMainBar`; there is no Rescue button since 2026-09-28 — leaving them bound was never a real choice), which calls `TryRescueCaptive`, which adds them to the live `Party` immediately — so they fight in the level's remaining rooms — and records ownership through `Party.MarkOwnedDeferred`, i.e. in memory only — which also **fields them for the next level** if the party cap has room, or a captive freed on level 1 would fight the rest of that level and then vanish from the lineup. Die before the level is cleared and they are lost with the run's XP and loot — rescue is the game's only hero source, so that forfeiture is the whole risk. **A captive already owned is skipped**, which is why a hero must never appear in both `RunLevelEntry.RescueHero` and `PartyRosterSO.StartingHeroes`; and when a campaign node gates on that hero (`CampaignNodeEntry.RequiresHeroes`) the captive has to sit on the **required** path, which `HeroUnlockTests` enforces. A hand-authored `ManualLayout` is the reliable way to guarantee that: make the level linear and every captive-eligible room is on the only route (`DrownedMarch_2`, The Reedcage, is the worked example). The newcomer also gets their own magic slots via `EquippedMagicState.AddHero` and is seeded from their loadout at once — the run-start seeding has already happened, so without it a hero freed on floor three would be unarmed for the rest of the run.
+- **Where heroes come from** *(2026-09-30)* - three sources, and `HeroUnlockTests.EveryHeroInTheRoster_HasAWayIn`
+  fails the build if a roster hero has none:
+  - **a captive** - `RunLevelEntry.RescueHero` (Paladin, Ranger, Cultist, Cleric), below;
+  - **a run's clear** - `RunDefinitionSO.JoinsOnClear` (the **Tinkerer**, Drowned March). Granted by
+    `DungeonManager.GrantRunClearHero` on the final level, before `Party.CommitProgress`, so it rides
+    the clear's own write and cannot be forfeited. Counted as guaranteed by
+    `CampaignOps.AddRescuedHeroKeys`, so a node may gate on it, and grown into `RunCurve.EndRoster` so
+    the runs it opens are measured with them;
+  - **a room event** - `RoomEventOutcome.JoinsHero` (the **Rogue**, the Cutpurse in The Warrens'
+    Thieves' Den). A chance, not a promise: **not** counted as guaranteed and invisible to the balance
+    model, so never gate a node on a hero met this way. See the Room Events guide.
+
+  Every mid-level join goes through `DungeonManager.JoinParty` (live party, magic slots, summons,
+  deferred ownership, the level-clear window's *Joined* list).
+- **A rescued hero is deferred too.** `RunLevelEntry.RescueHero` places a captive in a non-start / non-exit room (`DungeonManager.PlaceCaptiveIfConfigured`, skipped when the hero is already owned); they are **freed automatically once the room is clear** (`RoomActionUI.TryAutoRescue`, run from `ShowMainBar`; there is no Rescue button since 2026-09-28 — leaving them bound was never a real choice), which calls `TryRescueCaptive`, which adds them to the live `Party` immediately — so they fight in the level's remaining rooms — and records ownership through `Party.MarkOwnedDeferred`, i.e. in memory only — which also **fields them for the next level** if the party cap has room, or a captive freed on level 1 would fight the rest of that level and then vanish from the lineup. Die before the level is cleared and they are lost with the run's XP and loot — gold never buys a hero, so that forfeiture is the whole risk. **A captive already owned is skipped**, which is why a hero must never appear in both `RunLevelEntry.RescueHero` and `PartyRosterSO.StartingHeroes`; and when a campaign node gates on that hero (`CampaignNodeEntry.RequiresHeroes`) the captive has to sit on the **required** path, which `HeroUnlockTests` enforces. A hand-authored `ManualLayout` is the reliable way to guarantee that: make the level linear and every captive-eligible room is on the only route (`DrownedMarch_2`, The Reedcage, is the worked example). The newcomer also gets their own magic slots via `EquippedMagicState.AddHero` and is seeded from their loadout at once — the run-start seeding has already happened, so without it a hero freed on floor three would be unarmed for the rest of the run.
 - **Room-event state is deferred differently: it is saved at once.** Consumed events and level
   afflictions go into `DungeonSaveData` the moment they happen (`RoomActionUI` calls
   `DungeonSaveManager.Save`), because their whole purpose is to be one-shot — deferring them would

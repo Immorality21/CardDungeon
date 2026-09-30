@@ -57,6 +57,7 @@ namespace Assets.Scripts.Rooms.Events
             ApplyLoot(outcome, report);
             ApplyConsumableLoss(outcome, report);
             ApplyAwakenedEnemies(outcome, room, report);
+            ApplyJoin(outcome, report);
 
             return report;
         }
@@ -291,6 +292,19 @@ namespace Assets.Scripts.Rooms.Events
             }
 
             report.Lines.Add("You had nothing left to lose.");
+        }
+
+        private void ApplyJoin(RoomEventOutcome outcome, RoomEventOutcomeReport report)
+        {
+            if (outcome.JoinsHero == null || !DungeonManager.HasInstance)
+            {
+                return;
+            }
+
+            if (DungeonManager.Instance.JoinParty(outcome.JoinsHero) != null)
+            {
+                report.Lines.Add($"{outcome.JoinsHero.DisplayName} joins the party.");
+            }
         }
 
         private void ApplyAwakenedEnemies(RoomEventOutcome outcome, Room room, RoomEventOutcomeReport report)

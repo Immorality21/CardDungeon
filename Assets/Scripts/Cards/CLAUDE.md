@@ -261,6 +261,28 @@ Two consequences worth holding on to:
   `SummonSO.ArrivalSound` is an optional clip. The sim mirrors it with `SimUnit.FromSummon` +
   `SimReplacement`, summoning when an enemy winds up (or at once when nothing in the room
   telegraphs), Signature first then Attack. `SummonReplacementTests` covers both halves.
+- **A power upgrade raises the first effect only** *(2026-09-30)*. `SummonOps.EffectsFor` adds
+  `SummonGrant.PowerBonus` to `Effects[0]` - the headline a power node is priced against - and a
+  duration upgrade to every timed effect. Effects read `Power` in different units: before this the
+  Dawn Stag's +10 for its 40% heal would also have turned a 3-a-turn regeneration into 13. **Author
+  the effect the power node is meant to raise first.**
+- **Threat** *(2026-09-30)*. `SummonSO.ThreatMultiplier` / `BonusThreat` are an ability's threat
+  settings for the summoning itself, credited by `CombatManager` around the Summon action like any
+  other (damage and healing it caused, plus the bonus). That is how the **Aegis Lion** taunts: 60 flat
+  threat to the summoner, which biases the rest of the fight toward them and never guarantees it
+  (`ThreatTable`). A party-replacing summon's own abilities carry their own `MagicSO` settings.
+  **The balance model still targets evenly** (§11's open follow-up), so a taunt's value is invisible
+  to it: the model sees only the Lion's Endurance.
+- **The authored summons** (all learned one step past a branch tip, 410 / 475 / 540 / 615 XP like the
+  Warrior's, a Void Shard price on the summon and the charge node):
+
+  | hero | branch | summon | kind | does |
+  |---|---|---|---|---|
+  | Warrior | B (damage) | **Bloodfang Boar** | special attack | +50% own Strength, whole party, 3 turns |
+  | Warrior | A (defence) | **Cairn Golem** | replaces the party | a wall: 250% HP, Quake (damage + Slow) |
+  | Paladin | A (Shield Up, Ward) | **Aegis Lion** | special attack | the Paladin: +50% own Endurance for 3 turns, and **+60 threat** |
+  | Paladin | B (Sunder, Consecrate) | **Judgement Seraph** | replaces the party | a **hitter**: 120% HP, 180% STR, 70% END; Radiant Cut (Holy, one enemy) + Judgement (Holy, all) |
+  | Paladin | C (Heal, Renew) | **Dawn Stag** | special attack | every hero healed 40% of their health, then regenerates 3 a turn for 3 turns |
 - **A summon's abilities are not a hero's magic.** They are `MagicSO` assets, so every "is this
   learnable?" check must leave them out through `SummonOps.AbilityKeys`: the balance collector, the
   catalog/grid tests, and `SummonContentTests.SummonAbilities_AreNeverAHerosMagic` (never on a grid,

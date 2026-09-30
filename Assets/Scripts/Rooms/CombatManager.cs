@@ -581,7 +581,15 @@ namespace Assets.Scripts.Rooms
                         _lastTurnLog = $"{unit.DisplayName} skips their turn.";
                     }
 
-                    CreditThreat(unit, threatSnapshot, ThreatSourceFor(_pendingAction));
+                    if (_pendingAction == HeroAction.Summon && _pendingSummon?.Summon != null)
+                    {
+                        CreditThreat(unit, threatSnapshot,
+                            _pendingSummon.Summon.ThreatMultiplier, _pendingSummon.Summon.BonusThreat);
+                    }
+                    else
+                    {
+                        CreditThreat(unit, threatSnapshot, ThreatSourceFor(_pendingAction));
+                    }
                 }
                 else
                 {
@@ -1897,6 +1905,15 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void CreditThreat(ICombatUnit actor, Dictionary<ICombatUnit, int> before, MagicSO source)
         {
+            CreditThreat(actor, before,
+                source != null ? source.ThreatMultiplier : 1f,
+                source != null ? source.BonusThreat : 0);
+        }
+
+        /// <summary>The same credit with the threat settings given directly - a summoning's come
+        /// from its <c>SummonSO</c>, not from an ability.</summary>
+        private void CreditThreat(ICombatUnit actor, Dictionary<ICombatUnit, int> before, float multiplier, int bonus)
+        {
             int damage = 0;
             int healing = 0;
             foreach (var entry in before)
@@ -1913,8 +1930,6 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            float multiplier = source != null ? source.ThreatMultiplier : 1f;
-            int bonus = source != null ? source.BonusThreat : 0;
             _threat.Credit(actor, damage, healing, multiplier, bonus);
         }
 

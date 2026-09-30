@@ -267,8 +267,9 @@ Touch points: `Assets/ScriptableObjects/Heroes/Grids/*.asset` (all four, re-auth
 
 ### 5b. Heroes are unlocked, not bought — the tavern is removed *(added 2026-09-04)*
 
-> **✅ Shipped 2026-09-06.** Items 1-3 and 5 are done; item 4 (**where unlocks come from**) is
-> half-authored and is the only part left. What landed, and the two things it turned up:
+> **✅ Shipped 2026-09-06; item 4 finished 2026-09-30** — every one of the seven now has a way in,
+> and `HeroUnlockTests.EveryHeroInTheRoster_HasAWayIn` keeps it that way. What landed, and the two
+> things it turned up:
 >
 > - **The record already existed.** `PartySaveData.OwnedHeroKeys`, written deferred through
 >   `Party.MarkOwnedDeferred` so a rescue is forfeited on a wipe exactly like XP. This section asked
@@ -319,14 +320,20 @@ candidate for.
    existing rule holds:** `CampaignAssetTests.Campaign_NeverStrandsASaveWithNothingToPlay` must still
    pass — a hero gate must never be able to lock a save out of every run, which is easier to violate
    with heroes than with runs because a hero can sit behind an *optional* branch.
-4. **Where unlocks come from.** *(The one item still open.)* Rescue is built and is now the **only**
-   source: the Paladin in the tutorial, the Ranger in The Reedcage, the **Cultist** on the last floor
-   of **The Blood Stair** *(2026-09-28)* - still a rescue, but the first hero priced as a *challenge*:
-   the run opens after the tutorial and is balanced for a late party. **Cleric, Tinkerer and
-   Rogue have no source at all** and are unreachable content until they get one. The open list is
-   unchanged — clearing a run, a room event, a secret node, a boss — and the original warning now
-   has teeth: with two rescues authored and five to go, the roster currently *is* the linear drip
-   this bullet was written to prevent. Author the next two as genuinely different sources.
+4. **Where unlocks come from.** *(Done 2026-09-30.)* Rescue: the Paladin in the tutorial, the
+   Ranger in The Reedcage, the **Cultist** on the last floor of **The Blood Stair** *(2026-09-28)* -
+   the first hero priced as a *challenge*. The last three were authored as genuinely different
+   sources, as this bullet asked:
+
+   | hero | source | where | why there |
+   |---|---|---|---|
+   | **Tinkerer** | **clearing a run** (`RunDefinitionSO.JoinsOnClear`) | The Drowned March | the Ashen Deep's answer, the **Fire Cloak**, is on the Tinkerer's grid - so the Tinkerer has to arrive *before* the fire biome, not after it |
+   | **Rogue** | **a room event** (`RoomEventOutcome.JoinsHero`) | the Cutpurse, in The Warrens' Thieves' Den | a chance, in a repeatable run: miss the Agility check and they escape with a potion, and turn up again another night |
+   | **Cleric** | **a secret node** (a captive in it) | **The Drowned Chapel**, new, off the Drowned March | the first **hero-keyed** node: it gates on the Tinkerer, the first gate whose answer is a *specific* thing |
+
+   The roster now arrives Warrior → Paladin (tutorial) → Ranger + Tinkerer (Drowned March) → Cleric
+   (secret) / Rogue (chance) / Cultist (challenge). Still open: a **boss** as a source, and whether a
+   *second* hero-keyed gate should name a hero met by chance - it cannot today, by rule.
 
    **Two rules the shipped code imposes on where you put them.** A captive is skipped if already
    owned, so a hero must not also be in `StartingHeroes`. And if any campaign node gates on that
@@ -478,6 +485,35 @@ carries a kind field from day one so it does not reshape anything.
   has a material price besides the summon itself.
 - **Presentation:** name banner, camera punch, the boar appears large on the stage, then the buff
   lands. No dedicated music track yet.
+
+#### The Paladin's three — decided and built 2026-09-30
+
+The first hero past the Warrior, in unlock order (the tutorial rescue), and the first grid where
+**every branch ends in a summon** - three branches, three summons, each a different shape from the
+Warrior's two. The user picked the shapes; the numbers are starting numbers.
+
+| branch | summon | kind | does | upgrades (d13 → d14 → d15) | material |
+|---|---|---|---|---|---|
+| A — Shield Up, Ward | **Aegis Lion** | special attack, on the Paladin | +50% own Endurance for 3 turns and **+60 threat** | +25% END → +1 turn → +1 charge | Cut Stone |
+| B — Sunder, Consecrate | **Judgement Seraph** | replaces the party — the **hitter** the Golem left open | HP 120% · STR 180% · END 70% · AGI 120%; **Radiant Cut** (Holy, one enemy), Signature **Judgement** (Holy, all enemies) | +30 HP-ratio → +1 turn → +1 charge | Gild Leaf |
+| C — Heal, Renew | **Dawn Stag** | special attack, whole party | heals 40% of each hero's health, then Regenerating 3 a turn for 3 turns | +10% heal → +1 turn → +1 charge | Mire Reed |
+
+Two small code changes came with them: **`SummonSO.BonusThreat` / `ThreatMultiplier`** (a summoning
+credits threat like an ability; that is the taunt), and **a power upgrade raises only the first
+effect** (the Stag's regeneration would otherwise have gone 3 → 13 a turn). Verified in the sandbox
+(`Sandbox/PaladinSummons.asset`, Paladin + Warrior vs the Abyssal Warden and a Bog Shaman): the Lion
+took the Paladin's threat from 0 to 60 against the Warrior's 8 and the Warden's next swing went to the
+Paladin; the Stag healed 39 → 47 and ticked 3 a turn on the Warrior; the Seraph arrived at 56 HP /
+46 STR, Judgement killed the Shaman, it took the Warden's channelled heavy (16, a crit) in the party's
+place, and Radiant Cut finished the Warden.
+
+**Open, for the balance pass:**
+- **The Seraph is probably strong.** 180% Strength on a Strength hero is ~46 at a modest grid, and
+  it is the one summon here whose power is not capped by a turn count alone - it kills things. The
+  per-summon frontier (`FloorFrontier.BySummon`) will say how strong; balance is paused.
+- **The Lion's taunt is invisible to the model** until the simulator targets by threat (§11).
+- **Threat does not decay**, so the Lion's pull lasts the rest of the fight while its Endurance lasts
+  3 turns. Fine for now; a threat-decay rule would make the "few turns" literal.
 
 #### The party-replacing kind — decided 2026-09-28, the user's second walkthrough
 

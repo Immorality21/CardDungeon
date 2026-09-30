@@ -304,20 +304,12 @@ namespace Assets.Scripts.Balance
                 // acquiring a fifth hero does not make level 5 easier, it benches somebody. This
                 // models the *widest* legal party, so a player who fields fewer sees a harder run
                 // than the curve reports — see the min/max band follow-up in docs/NEXT_STEPS.md.
-                if (entry.RescueHero != null && !roster.Contains(entry.RescueHero) &&
-                    roster.Count < PartySlots.MaxCap)
-                {
-                    roster.Add(entry.RescueHero);
-                    // Recruits join with the same starter bank the game grants — one rule, one
-                    // function (SphereGridOps.StarterBank over the roster's lifetimes).
-                    var lifetimes = new List<int>();
-                    foreach (var pair in lifetime)
-                    {
-                        lifetimes.Add(Mathf.FloorToInt(pair.Value));
-                    }
-                    lifetime[entry.RescueHero] = SphereGridOps.StarterBank(lifetimes);
-                }
+                AddRecruit(roster, lifetime, entry.RescueHero);
             }
+
+            // A hero who joins on the clear fights none of this run, only the ones it opens - so
+            // they reach EndRoster, which is what a downstream run inherits.
+            AddRecruit(roster, lifetime, run.JoinsOnClear);
 
             foreach (var level in curve.Levels)
             {
@@ -342,6 +334,29 @@ namespace Assets.Scripts.Balance
             }
 
             return curve;
+        }
+
+        /// <summary>
+        /// Adds a hero the run hands over, unless already present or the party is at
+        /// <see cref="PartySlots.MaxCap"/> - the widest party the game can field, so a fifth hero
+        /// benches somebody rather than making the next floor easier. Recruits join with the same
+        /// starter bank the game grants — one rule, one function (SphereGridOps.StarterBank over the
+        /// roster's lifetimes).
+        /// </summary>
+        private static void AddRecruit(List<HeroSO> roster, Dictionary<HeroSO, float> lifetime, HeroSO recruit)
+        {
+            if (recruit == null || roster.Contains(recruit) || roster.Count >= PartySlots.MaxCap)
+            {
+                return;
+            }
+
+            roster.Add(recruit);
+            var lifetimes = new List<int>();
+            foreach (var pair in lifetime)
+            {
+                lifetimes.Add(Mathf.FloorToInt(pair.Value));
+            }
+            lifetime[recruit] = SphereGridOps.StarterBank(lifetimes);
         }
 
         private static float RosterAverage(Dictionary<HeroSO, float> lifetime, List<HeroSO> roster)

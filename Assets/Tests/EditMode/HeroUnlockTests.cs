@@ -206,6 +206,23 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void GetGuaranteedHeroKeys_CountsAHeroWhoJoinsOnAPrerequisitesClear()
+        {
+            var warrior = MakeHero("Warrior");
+            var tinkerer = MakeHero("Tinkerer");
+
+            var march = MakeRun("March");
+            march.JoinsOnClear = tinkerer;
+            var chapelNode = Node(MakeRun("Chapel"), requires: new[] { march }, requiresHeroes: new[] { tinkerer });
+            var campaign = MakeCampaign(Node(march), chapelNode);
+
+            CollectionAssert.Contains(
+                CampaignOps.GetGuaranteedHeroKeys(campaign, chapelNode, MakeRoster(warrior)), "Tinkerer",
+                "Clearing the prerequisite is what hands the Tinkerer over, so a gate on them is sound.");
+            CollectionAssert.IsEmpty(CampaignOps.GetNodesWithBrokenHeroGates(campaign, MakeRoster(warrior)));
+        }
+
+        [Test]
         public void GetGuaranteedHeroKeys_IgnoresAHeroDownAnOptionalBranch()
         {
             var warrior = MakeHero("Warrior");
@@ -338,6 +355,100 @@ namespace Tests.EditMode
                 + "own by the time they arrive - the hero is in the catalog but not on the required "
                 + "path, so that run can never be started. Gate only on a captive the player must "
                 + "pass, or move the captive onto the path.");
+        }
+
+        /// <summary>
+        /// Every hero a room event can hand over, across every level of every run on the map - the
+        /// rooms a level can build, and each room's possible events.
+        /// </summary>
+        private static HashSet<HeroSO> HeroesMetInRoomEvents(CampaignSO campaign)
+        {
+            var met = new HashSet<HeroSO>();
+            foreach (var node in campaign.Nodes)
+            {
+                if (node?.Run?.Levels == null)
+                {
+                    continue;
+                }
+                foreach (var level in node.Run.Levels)
+                {
+                    if (level?.LevelTemplate?.RoomPool == null || !level.AllowRoomEvents)
+                    {
+                        continue;
+                    }
+                    foreach (var room in level.LevelTemplate.RoomPool)
+                    {
+                        if (room?.PossibleEvents == null)
+                        {
+                            continue;
+                        }
+                        foreach (var definition in room.PossibleEvents)
+                        {
+                            if (definition?.Options == null)
+                            {
+                                continue;
+                            }
+                            foreach (var option in definition.Options)
+                            {
+                                foreach (var pool in new[] { option?.Success, option?.Failure })
+                                {
+                                    if (pool == null)
+                                    {
+                                        continue;
+                                    }
+                                    foreach (var outcome in pool)
+                                    {
+                                        if (outcome?.JoinsHero != null)
+                                        {
+                                            met.Add(outcome.JoinsHero);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return met;
+        }
+
+        [Test]
+        public void EveryHeroInTheRoster_HasAWayIn()
+        {
+            // Gold never buys a hero (NEXT_STEPS.md §5b), so a hero with no source is content the
+            // player can never see - which is how three of the seven sat until 2026-09-30, unnoticed,
+            // because nothing asked.
+            var campaign = LoadCampaign();
+            var roster = LoadRoster();
+            Assert.IsNotNull(campaign);
+            Assert.IsNotNull(roster);
+
+            var reachable = new HashSet<string>();
+            foreach (var hero in roster.StartingLineup())
+            {
+                reachable.Add(hero.SaveKey);
+            }
+            foreach (var node in campaign.Nodes)
+            {
+                CampaignOps.AddRescuedHeroKeys(node?.Run, reachable);
+            }
+            foreach (var hero in HeroesMetInRoomEvents(campaign))
+            {
+                reachable.Add(hero.SaveKey);
+            }
+
+            var missing = new List<string>();
+            foreach (var hero in roster.Heroes)
+            {
+                if (hero != null && !reachable.Contains(hero.SaveKey))
+                {
+                    missing.Add(hero.DisplayName);
+                }
+            }
+
+            CollectionAssert.IsEmpty(missing,
+                $"Hero(es) {string.Join(", ", missing)} are in the roster but nothing hands them over: not "
+                + "the starting lineup, no captive, no run's JoinsOnClear and no room event's JoinsHero.");
         }
 
         [Test]

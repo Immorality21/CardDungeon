@@ -78,6 +78,16 @@ namespace Assets.Scripts.Cards
                  "Power as a percentage of each target's own stat.")]
         public List<SpellEffect> Effects = new List<SpellEffect>();
 
+        [Tooltip("Scales the threat the summoning's damage and healing earn the summoner, like " +
+                 "MagicSO.ThreatMultiplier. 1 = ordinary.")]
+        [Min(0f)] public float ThreatMultiplier = 1f;
+
+        [Tooltip("Flat threat the summoner earns per summoning, like MagicSO.BonusThreat. This is how a " +
+                 "taunt is authored: enemies bias toward the summoner for the rest of the fight - biased, " +
+                 "never certain (ThreatTable). Ignored by a party-replacing summon, whose own abilities " +
+                 "carry their own threat settings.")]
+        [Min(0)] public int BonusThreat;
+
         [Tooltip("Charges per run before any upgrade node. Refilled with ability charges: at run " +
                  "start and when resting in a refuge.")]
         [Min(1)] public int BaseCharges = 1;

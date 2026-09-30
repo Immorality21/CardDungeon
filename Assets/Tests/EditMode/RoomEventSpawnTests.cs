@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.Rooms.Events;
 using Assets.Scripts.UnitStats;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Tests.EditMode
 {
@@ -198,6 +200,69 @@ namespace Tests.EditMode
         public void Spawns_Certainty_AlwaysSpawns()
         {
             Assert.IsTrue(RoomEventSpawn.Spawns(100f, 99.999f));
+        }
+
+        // --- An event that is someone to meet --------------------------------------------------
+
+        private static RoomEventSO MeetingWith(HeroSO hero)
+        {
+            var definition = ScriptableObject.CreateInstance<RoomEventSO>();
+            definition.Options = new List<RoomEventOption>
+            {
+                new RoomEventOption
+                {
+                    Kind = RoomEventOptionKind.StatCheck,
+                    Success = new List<RoomEventOutcome> { new RoomEventOutcome { JoinsHero = hero } },
+                    Failure = new List<RoomEventOutcome> { new RoomEventOutcome { LoseAConsumable = true } }
+                },
+                new RoomEventOption { Kind = RoomEventOptionKind.Decline }
+            };
+            return definition;
+        }
+
+        private static HeroSO Hero(string key)
+        {
+            var hero = ScriptableObject.CreateInstance<HeroSO>();
+            hero.Key = key;
+            return hero;
+        }
+
+        [Test]
+        public void GrantsOnlyOwnedHeroes_HeroNotOwned_IsPlaced()
+        {
+            var rogue = Hero("Rogue");
+            var definition = MeetingWith(rogue);
+
+            Assert.IsFalse(RoomEventSpawn.GrantsOnlyOwnedHeroes(definition, new List<string> { "Warrior" }));
+            Assert.IsFalse(RoomEventSpawn.GrantsOnlyOwnedHeroes(definition, null),
+                "No roster read means nobody is owned yet - the meeting stays on offer.");
+
+            Object.DestroyImmediate(definition);
+            Object.DestroyImmediate(rogue);
+        }
+
+        [Test]
+        public void GrantsOnlyOwnedHeroes_HeroAlreadyOwned_IsSkipped()
+        {
+            var rogue = Hero("Rogue");
+            var definition = MeetingWith(rogue);
+
+            Assert.IsTrue(RoomEventSpawn.GrantsOnlyOwnedHeroes(definition, new List<string> { "Warrior", rogue.SaveKey }),
+                "Someone who has already joined is nobody to meet - rolling for them again would be a dead event.");
+
+            Object.DestroyImmediate(definition);
+            Object.DestroyImmediate(rogue);
+        }
+
+        [Test]
+        public void GrantsOnlyOwnedHeroes_EventGrantingNobody_IsNeverSkipped()
+        {
+            var definition = MeetingWith(null);
+
+            Assert.IsFalse(RoomEventSpawn.GrantsOnlyOwnedHeroes(definition, new List<string> { "Warrior" }),
+                "An ordinary event must not vanish because of who the party owns.");
+
+            Object.DestroyImmediate(definition);
         }
     }
 }

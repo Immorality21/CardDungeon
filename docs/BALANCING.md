@@ -2454,3 +2454,29 @@ finale is a gate, so attrition is Info only, but `MaxBossDanger` (1.40) still ca
 at Difficulty 5.4 the room scores 1.49 and trips it, while the simulator still wipes only 0–4%. The
 same §5k pessimism about dense rooms, seen from the other side: **if the late game should find this
 run hard too, the ceiling to question is the closed form's, not the content's.**
+
+## §5x — New heroes move the runs *after* them, and a challenge run's shape (2026-09-30)
+
+Three heroes gained unlock sources (`plans/SPECIALIZATION.md` §5b). Measured A/B, closed form:
+
+| run | before | after |
+|---|---|---|
+| Ashen Deep (Tinkerer makes it 4 wide) | 0.29 / 0.44 / 1.51 | 0.23 / 0.32 / 1.19 |
+| Blood Stair, strongest party (untuned) | 0.19 / 0.31 / 0.54 / 0.77 / 1.42 | 0.15 / 0.30 / 0.56 / 0.63 / 1.23 |
+| The Drowned Chapel (new) | — | 0.21 / 0.47 |
+
+- **A hero who joins on a run's clear costs that run nothing** and lands whole on the next one. The
+  Ashen Deep got ~20% cheaper per floor. That was welcome - its finale sat at 1.51 - but it is a lever:
+  a `JoinsOnClear` is a party-width change to *every* downstream run, not a reward.
+- **A challenge run is measured against the strongest end state, so it drifts whenever that moves.**
+  A wider endgame party dropped the Blood Stair's floor 1 most (small loads move most in ratio), which
+  made the 1→2 step read 105% against a 75% ceiling. The obvious fix - harden floor 1 (1.8 → 2.2) -
+  would have taken the **tutorial graduate's** floor-1 load from 1.37 to 2.01 and broken the teaser
+  §5w built the run around. **Soften the later floors instead** (2.6/2.9 → 2.3/2.55): the graduate's
+  floor 1 is unchanged, their floor 2 is still 3.05 (a wipe), and the steps read 74%/70%. Check the
+  graduate's curve too - `RunCurve.Build(run, party, rules, tutorial.EndRoster, tutorial.EndLifetimeXp)`
+  - because the suite only sees the strongest one.
+- **Difficulty barely moves a floor the widest party walks into.** The Chapel went 2.6 → 4.2 for
+  0.10 → 0.26; the boss room was the only real dial (a second add took the finale 0.35 → 0.47). The
+  body count, not the multiplier, is where a four-wide party feels anything.
+

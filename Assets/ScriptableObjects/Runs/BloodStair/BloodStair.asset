@@ -20,6 +20,7 @@ MonoBehaviour:
   SequenceIndex: 1
   Repeatable: 0
   Challenge: 1
+  JoinsOnClear: {fileID: 0}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: 7b0867e47fab1e44f90da83c57d0e609, type: 2}
     LevelName: The Bleeding Steps
@@ -33,30 +34,33 @@ MonoBehaviour:
       GoldMultiplier: 1.5
       Overrides: []
     RescueHero: {fileID: 0}
+    AllowRoomEvents: 1
   - LevelTemplate: {fileID: 11400000, guid: ddb14b0d38fd9924ea955f7398fabae0, type: 2}
     LevelName: The Chapel of Knives
     ManualLayout: {fileID: 11400000, guid: fc582ba9597ea244999debfec36a58e8, type: 2}
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 2.6
+      Difficulty: 2.3
       StatScales: []
       XpMultiplier: 3.5
       GoldMultiplier: 1.5
       Overrides: []
     RescueHero: {fileID: 0}
+    AllowRoomEvents: 1
   - LevelTemplate: {fileID: 11400000, guid: faeaa1ea1ea4a8f408cef907619b1d6a, type: 2}
     LevelName: The Ossuary Gate
     ManualLayout: {fileID: 11400000, guid: 476f338b5878db848bf49efce5969fcc, type: 2}
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 2.9
+      Difficulty: 2.55
       StatScales: []
       XpMultiplier: 4
       GoldMultiplier: 1.5
       Overrides: []
     RescueHero: {fileID: 0}
+    AllowRoomEvents: 1
   - LevelTemplate: {fileID: 11400000, guid: 60caa03b7f18bfc4eacb115544597fd6, type: 2}
     LevelName: The Red Cloister
     ManualLayout: {fileID: 11400000, guid: 2ef590897fff7af4b8651ce4b30fe706, type: 2}
@@ -80,6 +84,7 @@ MonoBehaviour:
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}
+    AllowRoomEvents: 1
   - LevelTemplate: {fileID: 11400000, guid: 2fb7407607c807c4793ccc7d74dd4879, type: 2}
     LevelName: The Altar of the Last Initiate
     ManualLayout: {fileID: 11400000, guid: 199d7513d686edd4b9b0bfac476e1dbb, type: 2}
@@ -103,3 +108,4 @@ MonoBehaviour:
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 11400000, guid: 77ae12aafb9d437f8cc8149bd1cccb2b, type: 2}
+    AllowRoomEvents: 1

@@ -90,6 +90,58 @@ namespace Assets.Scripts.Rooms.Events
         }
 
         /// <summary>
+        /// Whether every hero <paramref name="definition"/> can hand over is already owned - in which
+        /// case it is not placed at all. An event whose point is meeting someone has nothing left to
+        /// offer once they have joined, and leaving it in would let the party roll for a hero it
+        /// already has. An event that grants nobody is never skipped by this.
+        ///
+        /// <para><paramref name="ownedHeroKeys"/> is the committed roster, read off disk at placement:
+        /// a hero met earlier in the same level is not committed yet, which keeps placement stable
+        /// across a save and resume.</para>
+        /// </summary>
+        public static bool GrantsOnlyOwnedHeroes(RoomEventSO definition, ICollection<string> ownedHeroKeys)
+        {
+            if (definition?.Options == null)
+            {
+                return false;
+            }
+
+            bool grantsAny = false;
+            foreach (var option in definition.Options)
+            {
+                if (option == null)
+                {
+                    continue;
+                }
+
+                foreach (var pool in new[] { option.Success, option.Failure })
+                {
+                    if (pool == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var outcome in pool)
+                    {
+                        var hero = outcome?.JoinsHero;
+                        if (hero == null)
+                        {
+                            continue;
+                        }
+
+                        grantsAny = true;
+                        if (ownedHeroKeys == null || !ownedHeroKeys.Contains(hero.SaveKey))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return grantsAny;
+        }
+
+        /// <summary>
         /// Whether the event appears, given a caller-supplied <paramref name="roll"/> in [0,100)
         /// (e.g. <c>Random.Range(0f, 100f)</c>). Explicit so placement is deterministic under test
         /// and reproducible from a dungeon seed.

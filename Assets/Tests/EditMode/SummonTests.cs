@@ -115,6 +115,28 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void EffectsFor_PowerUpgradeRaisesOnlyTheHeadlineEffect_DurationRaisesEveryTimedOne()
+        {
+            // The Dawn Stag's shape: a percentage heal, then a flat regeneration. A power node priced
+            // as "+10% heal" must not also turn 3 regeneration a turn into 13.
+            var stag = ScriptableObject.CreateInstance<SummonSO>();
+            stag.Effects = new List<SpellEffect>
+            {
+                new SpellEffect { EffectType = SpellEffectType.Heal, Power = 40, PowerMode = PowerMode.PercentOfMaxHealth, Duration = 0 },
+                new SpellEffect { EffectType = SpellEffectType.Buff, Power = 3, BuffType = BuffType.Regenerating, Duration = 3 }
+            };
+            var grant = new SummonGrant { Key = "Stag", PowerBonus = 10, DurationBonus = 1 };
+
+            var effects = SummonOps.EffectsFor(stag, grant);
+
+            Assert.AreEqual(50, effects[0].Power, "The headline effect takes the power upgrade.");
+            Assert.AreEqual(3, effects[1].Power, "Every later effect keeps its authored power.");
+            Assert.AreEqual(0, effects[0].Duration, "An instant effect stays instant.");
+            Assert.AreEqual(4, effects[1].Duration, "A duration upgrade still lengthens every timed effect.");
+            Object.DestroyImmediate(stag);
+        }
+
+        [Test]
         public void MaxCharges_IsBasePlusUpgrades_AndNeverBelowOne()
         {
             var boar = Boar();

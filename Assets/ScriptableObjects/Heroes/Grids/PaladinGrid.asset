@@ -29,6 +29,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors: []
   - Key: paladin-trunk-1
     DisplayName: 
@@ -45,6 +47,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-start
   - Key: paladin-sig
@@ -60,6 +64,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: HolyTouch
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-trunk-1
   - Key: paladin-trunk-2
@@ -79,6 +85,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-sig
   - Key: paladin-trunk-slot
@@ -94,6 +102,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-a-1
@@ -111,6 +121,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-a-2
@@ -128,6 +140,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-a-1
   - Key: paladin-a-3
@@ -143,6 +157,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: ShieldUp
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-a-2
   - Key: paladin-a-4
@@ -160,6 +176,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-a-3
   - Key: paladin-a-5
@@ -175,6 +193,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-a-4
   - Key: paladin-a-6
@@ -190,6 +210,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Ward
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-a-5
   - Key: paladin-a-7
@@ -207,6 +229,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-a-6
   - Key: paladin-a-res
@@ -222,6 +246,8 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-a-3
   - Key: paladin-a-tip-a
@@ -239,6 +265,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-a-7
   - Key: paladin-a-tip-b
@@ -256,6 +284,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-a-7
   - Key: paladin-b-1
@@ -273,6 +303,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-b-2
@@ -290,6 +322,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-b-1
   - Key: paladin-b-3
@@ -305,6 +339,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Sunder
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-b-2
   - Key: paladin-b-4
@@ -322,6 +358,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-b-3
   - Key: paladin-b-5
@@ -337,6 +375,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-b-4
   - Key: paladin-b-6
@@ -352,6 +392,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Consecrate
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-b-5
   - Key: paladin-b-7
@@ -369,6 +411,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-b-6
   - Key: paladin-b-tip-a
@@ -386,6 +430,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-b-7
   - Key: paladin-b-tip-b
@@ -403,6 +449,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-b-7
   - Key: paladin-c-1
@@ -420,6 +468,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-c-2
@@ -437,6 +487,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-c-1
   - Key: paladin-c-3
@@ -452,6 +504,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Heal
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-c-2
   - Key: paladin-c-4
@@ -469,6 +523,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-c-3
   - Key: paladin-c-5
@@ -484,6 +540,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-c-4
   - Key: paladin-c-6
@@ -499,6 +557,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Renew
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-c-5
   - Key: paladin-c-7
@@ -516,6 +576,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-c-6
   - Key: paladin-c-res
@@ -531,6 +593,8 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-c-3
   - Key: paladin-c-tip-a
@@ -548,6 +612,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-c-7
   - Key: paladin-c-tip-b
@@ -565,5 +631,235 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - paladin-c-7
+  - Key: paladin-lion
+    DisplayName: Aegis Lion
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
+      Amount: 3
+    Position: {x: -1006, y: -765}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: AegisLion
+    SummonAmount: 1
+    Neighbors:
+    - paladin-a-tip-a
+  - Key: paladin-lion-power
+    DisplayName: 'Aegis Lion: Iron Mane'
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -1101, y: -820}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: AegisLion
+    SummonAmount: 25
+    Neighbors:
+    - paladin-lion
+  - Key: paladin-lion-stay
+    DisplayName: 'Aegis Lion: Long Watch'
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -1196, y: -875}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: AegisLion
+    SummonAmount: 1
+    Neighbors:
+    - paladin-lion-power
+  - Key: paladin-lion-charge
+    DisplayName: 'Aegis Lion: Second Roar'
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
+      Amount: 2
+    Position: {x: -1291, y: -930}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: AegisLion
+    SummonAmount: 1
+    Neighbors:
+    - paladin-lion-stay
+  - Key: paladin-seraph
+    DisplayName: Judgement Seraph
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
+      Amount: 3
+    Position: {x: 190, y: -1100}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: JudgementSeraph
+    SummonAmount: 1
+    Neighbors:
+    - paladin-b-tip-a
+  - Key: paladin-seraph-power
+    DisplayName: 'Judgement Seraph: Tempered'
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 285, y: -1155}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: JudgementSeraph
+    SummonAmount: 30
+    Neighbors:
+    - paladin-seraph
+  - Key: paladin-seraph-stay
+    DisplayName: 'Judgement Seraph: Vigil'
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 380, y: -1210}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: JudgementSeraph
+    SummonAmount: 1
+    Neighbors:
+    - paladin-seraph-power
+  - Key: paladin-seraph-charge
+    DisplayName: 'Judgement Seraph: Second Descent'
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
+      Amount: 2
+    Position: {x: 475, y: -1265}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: JudgementSeraph
+    SummonAmount: 1
+    Neighbors:
+    - paladin-seraph-stay
+  - Key: paladin-stag
+    DisplayName: Dawn Stag
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+      Amount: 3
+    Position: {x: 1006, y: -765}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: DawnStag
+    SummonAmount: 1
+    Neighbors:
+    - paladin-c-tip-a
+  - Key: paladin-stag-power
+    DisplayName: 'Dawn Stag: Brighter Dawn'
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 1101, y: -820}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: DawnStag
+    SummonAmount: 10
+    Neighbors:
+    - paladin-stag
+  - Key: paladin-stag-stay
+    DisplayName: 'Dawn Stag: Long Morning'
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 1196, y: -875}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: DawnStag
+    SummonAmount: 1
+    Neighbors:
+    - paladin-stag-power
+  - Key: paladin-stag-charge
+    DisplayName: 'Dawn Stag: Second Light'
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+      Amount: 2
+    Position: {x: 1291, y: -930}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: DawnStag
+    SummonAmount: 1
+    Neighbors:
+    - paladin-stag-stay

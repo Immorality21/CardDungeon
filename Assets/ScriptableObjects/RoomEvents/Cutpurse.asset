@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: Cutpurse
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: Cutpurse
+  Title: A Cutpurse on the Rope
+  Prompt: 'Every lock in these tunnels was picked before you reached it. Now you
+    know by whom: someone hangs from a frayed rope over the counting-pit, one hand
+    on the line and the other still holding a purse that is not theirs. ''Evening,''
+    they say. ''I don''t suppose you''d pull?'''
+  GoverningStat: 3
+  SpawnChancePercent: 40
+  SpawnModifierStat: 6
+  SpawnModifierRate: 5
+  SpawnRequirements: []
+  Difficulty: 8
+  Options:
+  - Label: Catch the rope
+    Kind: 0
+    DeclineText: 
+    Success:
+    - Text: You get a hand on the line as it parts and haul them over the lip. They
+        look at you, then at the tunnel, then hand the purse back. 'Fine. You'll
+        want someone who can open things.'
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      Gold: 0
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 11400000, guid: 09b6a3424e4546719cda1391729e96cc, type: 2}
+    Failure:
+    - Text: The rope goes. So does the cutpurse - not down, but sideways into a crawlway
+        you never saw, and a little heavier than before.
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      Gold: 0
+      LoseAConsumable: 1
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+  - Label: Leave them hanging
+    Kind: 2
+    DeclineText: '''Suit yourselves,'' they call after you. ''I''ll be around.'''
+    Success: []
+    Failure: []
