@@ -39,8 +39,9 @@ passes. Full rationale: `docs/plans/COMBAT_DEPTH.md` §11.
   a `_backgroundArt` sprite) that hides the dungeon, and relocates alive units into columns:
   **heroes left (facing right), enemies right (facing left)**, bumping their sprite sortingOrder
   to **600+** (mandatory — enemies default to 5, *below* the background).
-  **Hero formation** is `HeroFormation.Layout` (pure, `HeroFormationTests`, 2026-09-28): up to 3
-  heroes in one column; **4 in two ranks of two**, the party's first two in front, nearest the
+  **Hero formation** is `HeroFormation.Layout` (pure, `HeroFormationTests`, 2026-09-28): up to 2
+  heroes in one column; **3 or 4 in two ranks** (2 + 1, 2 + 2 — since 2026-09-29, when a column of
+  three put the third hero on the command menu), the party's first two in front, nearest the
   enemies — the mirror of the enemy side. A single column of four packed every HP bar onto the hero
   above it and put the lowest hero inside the bottom-left band where the command menu and the ability
   pickers dock, so the picker hid the hero choosing from it. The whole formation is centred

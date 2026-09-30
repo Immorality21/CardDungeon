@@ -159,17 +159,19 @@
     translate: -50% -50%;
 }
 
-/* FF-style two-corner combat HUD: status bottom-left, command box bottom-right. */
+/* FF-style two-corner combat HUD: the command menu (and the pickers that replace it) in the
+   bottom-left corner, party status bottom-right. Tight to the corner, so the menu covers as
+   little of the stage above it as possible - the heroes stand just over it. */
 .cd-dock-bottom-left {
     position: absolute;
-    bottom: 42px;
-    left: 24px;
+    bottom: 16px;
+    left: 16px;
 }
 
 .cd-dock-bottom-right {
     position: absolute;
-    bottom: 42px;
-    right: 24px;
+    bottom: 16px;
+    right: 16px;
 }
 
 /* Compact target/slot picker docked into the command-box corner during combat.
@@ -191,9 +193,10 @@
     max-width: 46%;
 }
 
-/* ---- Party status window (hero names + HP) ---- */
+/* ---- Party status window (hero names + HP) ----
+   Sized like the command menu opposite it (2026-09-29): compact rows, tight to its corner. */
 .cd-party-status {
-    min-width: 300px;
+    min-width: 200px;
     background-color: var(--cd-parchment);
     border-width: 4px;
     border-color: var(--cd-frame);
@@ -203,40 +206,39 @@
 
 .cd-party-status__header {
     -unity-font-style: bold;
-    font-size: 19px;
-    padding: 9px 12px;
+    font-size: 16px;
     color: var(--cd-gold);
     background-color: var(--cd-frame);
     -unity-text-align: middle-center;
-    padding: 7px 10px;
+    padding: 6px 10px;
 }
 
 .cd-party-status__rows {
-    padding: 10px 12px;
+    padding: 4px 6px 6px 6px;
 }
 
 .cd-party-row {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 7px 10px;
-    margin: 2px 0;
+    padding: 4px 8px;
+    margin: 1px 0;
     border-width: 2px;
     border-color: rgba(0, 0, 0, 0);
     border-radius: 4px;
 }
 
 .cd-party-row__name {
-    font-size: 18px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: var(--cd-text-dark);
 }
 
 .cd-party-row__hp {
-    font-size: 18px;
+    font-size: 16px;
     color: var(--cd-text-dark);
     -unity-text-align: middle-right;
-    margin-left: 18px;
+    margin-left: 14px;
 }
 
 .cd-party-row--active {
@@ -303,14 +305,14 @@
 
 /* ---- Command menu: cursor-driven vertical selection list (FFX-style) ---- */
 .cd-command-list {
-    padding: 8px 10px 10px 8px;
-    min-width: 200px;
+    padding: 4px 6px 6px 4px;
+    min-width: 170px;
 }
 
 .cd-cmd-row {
     flex-direction: row;
     align-items: center;
-    height: 40px;
+    height: 30px;
     padding: 0 10px 0 4px;
     background-color: rgba(0, 0, 0, 0);
     border-width: 2px;
@@ -333,9 +335,9 @@
 }
 
 .cd-cmd-row__cursor {
-    width: 22px;
+    width: 18px;
     flex-shrink: 0;
-    font-size: 20px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: var(--cd-text-dark);
     -unity-text-align: middle-center;
@@ -343,7 +345,7 @@
 
 .cd-cmd-row__label {
     flex-grow: 1;
-    font-size: 19px;
+    font-size: 16px;
     -unity-font-style: bold;
     color: var(--cd-text-dark);
     -unity-text-align: middle-left;
@@ -566,8 +568,10 @@
 }
 
 /* ---- Hero command window (turn header + action row) ---- */
+/* Sized by its rows, not a fixed width: it is a vertical list since the command row became a
+   cursor menu, and the 560px it kept from the old horizontal button row was mostly empty frame. */
 .cd-command-window {
-    min-width: 560px;
+    min-width: 190px;
     background-color: var(--cd-parchment);
     border-width: 4px;
     border-color: var(--cd-frame);
@@ -577,11 +581,11 @@
 
 .cd-command-window__header {
     -unity-font-style: bold;
-    font-size: 18px;
+    font-size: 16px;
     color: var(--cd-gold);
     background-color: var(--cd-frame);
     -unity-text-align: middle-center;
-    padding: 9px 12px;
+    padding: 6px 10px;
 }
 
 .cd-command-window__row {

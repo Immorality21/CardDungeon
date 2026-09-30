@@ -57,7 +57,7 @@ the new enemies; they do not.
   so the combat capture is the truth — but a 32 px quadruped is easy to misread at capture scale:
   crop and upscale the unit before judging which end is the head (the old Slag Hound was wrongly
   reported as facing away). To predict it from the PNG alone: combat shows it **mirrored**.
-- Heroes stand in one column. Enemies use `EnemyFormation`: one column up to three, FF ranks of
+- Heroes stand in one column up to two, two ranks from three (`HeroFormation`). Enemies use `EnemyFormation`: one column up to three, FF ranks of
   2 front / 3 back for four or five, and a **boss alone at the back** with its escort in front.
   Column slots are `min(halfH × 0.5, halfH × 1.3 / count)` apart (2.17 units for three).
 - **Boss size is `EnemySO.CombatScale`**, not PPU: the Warden is 1.8 × its 1.68 units ≈ 3 units,
@@ -149,7 +149,12 @@ without frames stands still.
    a pop. Enemies: Warden used frames `0,1,4`, Jailor `0,1,2`.
 3. **Reject frames that change identity.** On the 32 px Paladin, frames 1–3 turned the face to
    profile — they would flicker. Only frame 4 (≈ frame 0 plus cape/plume sway) was usable.
-4. When the generated frames are unusable, build the loop the way the original heroes do:
+4. **At 32 px with a big-head hero, expect the generated frames to change the face** — on the
+   2026-09-29 pass every frame after the first turned the Cultist's, Cleric's and Ranger's face, a
+   blink or a new expression, and the Tinkerer kept only one. The loop that always works is
+   **rest → rest with the upper body dropped 1 px → one generated frame that only moves a prop**
+   (a flame, a glow, a blinking gadget), or the rest frame again when there is none.
+   When the generated frames are unusable, build the loop the way the original heroes do:
    **rest → upper body dropped 1 px (feet planted) → rest variant.** All original hero strips follow
    that pattern (frame 1's top edge is at y = 1).
 

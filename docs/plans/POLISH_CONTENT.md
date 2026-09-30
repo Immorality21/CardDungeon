@@ -359,14 +359,12 @@ Still to do:
   off-style) and each has a 3-frame idle at 4 fps. Every enemy in the game now animates.
 - ~~**Mirefather and Gilded Hoarder render at 1 unit**~~ *Done 2026-09-29*: both are 64 px at
   **38 PPU + `CombatScale` 1.8**, measured at 3.03 units in combat — the Warden's size, twice a hero.
-- **Cleric, Ranger and Tinkerer keep the original flat style** (~10 colours against
-  PixelLab's ~40), so the party is visibly two styles until they are redone — one by one, the owner
-  choosing from candidates. **The Warrior and the Cultist were redone 2026-09-29** (Warrior: candidate #8
-  of 12; Cultist: #1 of 6, a hooded blood mage with a dagger and a flame of his own blood - its idle
-  is the hand-built rest / 1 px breath / flame-flicker loop, because every generated frame after the
-  first turned the face). Heroes have **big heads** — the recipe is in `docs/PIXEL_ART.md`
-  §3. Ranked worst first on 2026-09-29: Cultist (done), Cleric, Ranger, Tinkerer — and the four share one
-  silhouette recoloured, so they read as palette swaps before the style gap even registers.
+- ~~**Five heroes kept the original flat style**~~ *Done 2026-09-29*: Warrior (#8 of 12), Cultist
+  (#1 of 6), Cleric (#3 of 3, cream-and-gold hood, mace and holy light), Ranger (#2 of 3, open face
+  and a readable longbow) and Tinkerer (#1 of 3, goggles, ponytail, wrench and gadget) were redone
+  in the PixelLab style, matched to the Rogue: **big heads**, muted palette. All seven heroes are now
+  one style. Every generated idle past the first frame changed the face on the four latest, so their
+  loops are rest / 1 px breath / one safe frame (the recipe and why in `docs/PIXEL_ART.md` §3, §5).
 - ~~**Item icons are placeholders in bulk**~~ *Done 2026-09-28*: all 30 items have their own PixelLab
   icon (the ten materials had shared one log, the potions a spell icon). Recipe in
   `docs/PIXEL_ART.md` §3; `ItemPresenterTests` guards against a shared icon creeping back.

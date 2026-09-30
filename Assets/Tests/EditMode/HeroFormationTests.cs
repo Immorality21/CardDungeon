@@ -10,7 +10,7 @@ namespace Tests.EditMode
         private const float HalfH = 5f;
 
         [Test]
-        public void Layout_UpToThree_OneColumn()
+        public void Layout_UpToTwo_OneColumn()
         {
             for (int count = 1; count <= HeroFormation.SingleColumnMax; count++)
             {
@@ -31,6 +31,19 @@ namespace Tests.EditMode
             // The point of the ranks: the lowest hero stands no lower than in a party of two, clear
             // of the menus docked at the bottom of the screen.
             Assert.AreEqual(two.Min(s => s.y), four.Min(s => s.y), 0.0001f);
+        }
+
+        /// <summary>Three heroes: two in front, one behind - never a column of three reaching the menus.</summary>
+        [Test]
+        public void Layout_Three_IsTwoRanks_NoTallerThanAPartyOfTwo()
+        {
+            var three = HeroFormation.Layout(3, HalfW, HalfH);
+            var two = HeroFormation.Layout(2, HalfW, HalfH);
+
+            Assert.AreEqual(2, three.Count(s => s.x == HalfW * HeroFormation.FrontColumnX));
+            Assert.AreEqual(1, three.Count(s => s.x == HalfW * HeroFormation.BackColumnX));
+            Assert.AreEqual(HalfW * HeroFormation.FrontColumnX, three[0].x, "the leader stands in front");
+            Assert.GreaterOrEqual(three.Min(s => s.y), two.Min(s => s.y) - 0.0001f);
         }
 
         [Test]

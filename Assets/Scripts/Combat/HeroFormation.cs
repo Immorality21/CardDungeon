@@ -7,12 +7,13 @@ namespace Assets.Scripts.Combat
     /// Where each hero stands on the battle stage - the party's half of what
     /// <see cref="EnemyFormation"/> does for the enemies, and pure for the same reason.
     ///
-    /// <para>Up to three heroes stand in one column. <b>Four or more form two ranks</b>, mirroring the
+    /// <para>Up to two heroes stand in one column. <b>Three or more form two ranks</b>, mirroring the
     /// enemy side: a front column nearest the enemies and a back column behind it, the party's
     /// order filling the front first. A single column of four was packed so tight that every HP bar
     /// sat on the hero above it, and the lowest hero stood inside the bottom band where the command
     /// menu and the ability pickers dock - so the picker hid the very hero choosing from it
-    /// (playtest 2026-09-28). Two ranks of two keep the column as short as a party of two.</para>
+    /// (playtest 2026-09-28). A column of three had the same problem one hero later (2026-09-29):
+    /// the third stood right on the menu. Two ranks keep the column as short as a party of two.</para>
     ///
     /// <para>Offsets are relative to the stage centre: <c>x</c> is world units from the camera centre
     /// (negative, the party side), <c>y</c> world units above the formation's centre line.</para>
@@ -20,7 +21,7 @@ namespace Assets.Scripts.Combat
     public static class HeroFormation
     {
         /// <summary>Most heroes that still stand in a single column.</summary>
-        public const int SingleColumnMax = 3;
+        public const int SingleColumnMax = 2;
 
         // Column positions as a fraction of the half view width - the mirror of the enemy side's.
         public const float SingleColumnX = -0.55f;
