@@ -12,7 +12,19 @@ namespace Assets.Scripts.Cards
         private static readonly Color ComboNameColor = new Color(1f, 0.6f, 0f);
         private const float ComboDelay = 0.3f;
 
-        private readonly EffectExecutorFactory _factory = new EffectExecutorFactory();
+        private readonly EffectExecutorFactory _factory;
+
+        /// <summary>
+        /// The fight's turn clock, which a <see cref="SpellEffectType.TurnDelay"/> pushes units back
+        /// on. Set by whoever owns the fight - <c>CombatManager</c> and the simulator's encounter
+        /// loop - and left null everywhere else, where a delay is inert.
+        /// </summary>
+        public TurnManager Clock { get; set; }
+
+        public EffectResolver()
+        {
+            _factory = new EffectExecutorFactory(() => Clock);
+        }
 
         /// <param name="powerBonus">Flat power added to the magic's Damage/Heal effects (from its upgrade level).</param>
         /// <param name="magicUpgradeLevel">The magic's upgrade level — effects with a higher UnlockLevel are skipped.</param>

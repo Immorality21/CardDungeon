@@ -190,7 +190,7 @@ backlog.**
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **done** — shipped 2026-09-06; **every hero has a source since 2026-09-30** (run clear, room event, secret run) |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch. **Next, in unlock order: Ranger and Tinkerer**, then Cleric, Rogue, Cultist; then measure the per-summon frontier |
+| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **Next, in unlock order: Tinkerer**, then Cleric, Rogue, Cultist; then measure the per-summon frontier |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
@@ -244,6 +244,13 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The Ranger's summons** (2026-10-01) — `plans/SPECIALIZATION.md` §4b ("The Ranger's two"), the
+  Magic and Combat guides. **Galewing** (branch A, special attack: 2 × Agility to every enemy, then
+  -3 Endurance for 2 turns) and **Exatrix** (branch B, party replacement: 150% HP / 130% AGI; her
+  Attack, **Rend**, delays its target 50% of a turn; Signature **Nightfall**, damage + Agility cut to
+  all). Code: `SpellEffectType.TurnDelay` + `TurnManager.Delay` (capped at one extra turn),
+  `EffectResolver.Clock`, `SummonSO.AttackAbility`. PixelLab art with idle loops; `TurnDelayTests`;
+  verified live in `Sandbox/RangerSummons.asset`. Suite: the same two pre-existing balance reds.
 - **The Paladin's summons** (2026-09-30) — `plans/SPECIALIZATION.md` §4b ("The Paladin's three"),
   the Magic guide. One per branch: the **Aegis Lion** (special attack: +50% own Endurance and +60
   threat — a taunt), the **Judgement Seraph** (party replacement, a hitter: 120% HP / 180% STR, Holy

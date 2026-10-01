@@ -81,6 +81,9 @@ namespace Assets.Scripts.Cards
                     case SpellEffectType.HealthCost:
                         sb.Append($"Costs {power} HP");
                         break;
+                    case SpellEffectType.TurnDelay:
+                        sb.Append($"Delay {effect.Power}%");
+                        break;
                 }
             }
 

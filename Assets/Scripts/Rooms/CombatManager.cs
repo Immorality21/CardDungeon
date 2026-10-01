@@ -413,6 +413,8 @@ namespace Assets.Scripts.Rooms
             _threat.Reset();
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
+            // A TurnDelay effect (Exatrix's claws) pushes units back on this fight's clock.
+            _calculator.Clock = _turnManager;
             _tagTracker = new MagicTagTracker();
             // Prefer the shared combo catalog (single source of truth, also used by the hub
             // Forge); fall back to the scene-serialized list if no catalog is present.
@@ -934,7 +936,9 @@ namespace Assets.Scripts.Rooms
         private IEnumerator ExecuteSummonAbility(SummonUnit caster, MagicSO magic, List<ICombatUnit> targets, Room room)
         {
             bool isSignature = caster.Summon != null && ReferenceEquals(magic, caster.Summon.Signature);
-            if (BuffTracker.HasStatusEffect(caster, BuffType.Silenced))
+            // Its own Attack (SummonSO.AttackAbility) is the basic attack: Silence never stops it.
+            bool isAttack = caster.Summon != null && ReferenceEquals(magic, caster.Summon.AttackAbility);
+            if (!isAttack && BuffTracker.HasStatusEffect(caster, BuffType.Silenced))
             {
                 _lastTurnLog = $"{caster.DisplayName} is silenced and cannot use {magic.DisplayName}.";
                 yield break;

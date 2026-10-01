@@ -154,6 +154,8 @@ namespace Assets.Scripts.Cards
                     return StatusLine(effect, caster, buffTracker, +1);
                 case SpellEffectType.Debuff:
                     return StatusLine(effect, caster, buffTracker, -1);
+                case SpellEffectType.TurnDelay:
+                    return $"pushes its next turn back {effect.Power}% of a turn";
                 default:
                     return null;
             }

@@ -29,6 +29,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors: []
   - Key: ranger-trunk-1
     DisplayName: 
@@ -45,6 +47,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-start
   - Key: ranger-sig
@@ -60,6 +64,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: AimedShot
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-trunk-1
   - Key: ranger-trunk-2
@@ -79,6 +85,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-sig
   - Key: ranger-trunk-slot
@@ -94,6 +102,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-trunk-2
   - Key: ranger-a-1
@@ -111,6 +121,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-trunk-2
   - Key: ranger-a-2
@@ -128,6 +140,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-a-1
   - Key: ranger-a-3
@@ -143,6 +157,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: PoisonDart
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-a-2
   - Key: ranger-a-4
@@ -160,6 +176,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-a-3
   - Key: ranger-a-5
@@ -175,6 +193,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-a-4
   - Key: ranger-a-6
@@ -190,6 +210,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Volley
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-a-5
   - Key: ranger-a-7
@@ -207,6 +229,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-a-6
   - Key: ranger-a-tip-a
@@ -224,6 +248,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-a-7
   - Key: ranger-a-tip-b
@@ -241,6 +267,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-a-7
   - Key: ranger-b-1
@@ -258,6 +286,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-trunk-2
   - Key: ranger-b-2
@@ -275,6 +305,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-b-1
   - Key: ranger-b-3
@@ -290,6 +322,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Snare
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-b-2
   - Key: ranger-b-4
@@ -307,6 +341,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-b-3
   - Key: ranger-b-5
@@ -322,6 +358,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-b-4
   - Key: ranger-b-6
@@ -337,6 +375,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Hush
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-b-5
   - Key: ranger-b-7
@@ -354,6 +394,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-b-6
   - Key: ranger-b-res
@@ -369,6 +411,8 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-b-3
   - Key: ranger-b-tip-a
@@ -386,6 +430,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-b-7
   - Key: ranger-b-tip-b
@@ -403,5 +449,159 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - ranger-b-7
+  - Key: ranger-galewing
+    DisplayName: 
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+      Amount: 3
+    Position: {x: -853, y: -765}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Galewing
+    SummonAmount: 1
+    Neighbors:
+    - ranger-a-tip-a
+  - Key: ranger-galewing-power
+    DisplayName: 
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -948, y: -820}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Galewing
+    SummonAmount: 4
+    Neighbors:
+    - ranger-galewing
+  - Key: ranger-galewing-stay
+    DisplayName: 
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -1043, y: -875}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Galewing
+    SummonAmount: 1
+    Neighbors:
+    - ranger-galewing-power
+  - Key: ranger-galewing-charge
+    DisplayName: 
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+      Amount: 2
+    Position: {x: -1138, y: -930}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Galewing
+    SummonAmount: 1
+    Neighbors:
+    - ranger-galewing-stay
+  - Key: ranger-exatrix
+    DisplayName: 
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
+      Amount: 3
+    Position: {x: 853, y: -765}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Exatrix
+    SummonAmount: 1
+    Neighbors:
+    - ranger-b-tip-a
+  - Key: ranger-exatrix-power
+    DisplayName: 
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 948, y: -820}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Exatrix
+    SummonAmount: 30
+    Neighbors:
+    - ranger-exatrix
+  - Key: ranger-exatrix-stay
+    DisplayName: 
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 1043, y: -875}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Exatrix
+    SummonAmount: 1
+    Neighbors:
+    - ranger-exatrix-power
+  - Key: ranger-exatrix-charge
+    DisplayName: 
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
+      Amount: 2
+    Position: {x: 1138, y: -930}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Exatrix
+    SummonAmount: 1
+    Neighbors:
+    - ranger-exatrix-stay

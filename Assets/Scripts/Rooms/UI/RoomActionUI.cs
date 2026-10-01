@@ -1464,7 +1464,20 @@ namespace Assets.Scripts.Rooms
             bool silenced = CombatManager.Instance.BuffTracker != null
                 && CombatManager.Instance.BuffTracker.HasStatusEffect(summon, BuffType.Silenced);
 
-            _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
+            // A summon with its own Attack (Exatrix's Rend) still offers it as "Attack": it is the
+            // basic attack, so Silence leaves it open like a hero's.
+            if (summon.Summon != null && summon.Summon.AttackAbility != null)
+            {
+                _commands.Add(new CommandEntry
+                {
+                    Command = HeroCommand.SummonAbility, Label = "Attack", Enabled = true,
+                    Ability = summon.Summon.AttackAbility
+                });
+            }
+            else
+            {
+                _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
+            }
             if (summon.Summon != null && summon.Summon.Actions != null)
             {
                 foreach (var action in summon.Summon.Actions)

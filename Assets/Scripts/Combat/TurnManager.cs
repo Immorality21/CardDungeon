@@ -146,6 +146,35 @@ namespace Assets.Scripts.Combat
             _suspended.Clear();
         }
 
+        /// <summary>
+        /// The most a unit's counter may hold, as a multiple of its own full turn: one turn plus one
+        /// extra. A unit that has just acted sits at 1, so delay can buy at most one whole turn of
+        /// tempo against it and never a lock.
+        /// </summary>
+        public const float MaxDelayedTurns = 2f;
+
+        /// <summary>
+        /// Pushes <paramref name="unit"/>'s next turn back by <paramref name="fractionOfTurn"/> of its
+        /// own full turn at its current Agility (0.5 = half a turn), capped at
+        /// <see cref="MaxDelayedTurns"/>. Returns how far it actually moved, as a fraction of a turn:
+        /// 0 when it was already at the cap, or is not on the clock at all (suspended, gone).
+        /// </summary>
+        public float Delay(ICombatUnit unit, float fractionOfTurn)
+        {
+            if (unit == null || fractionOfTurn <= 0f || !_ticksUntilTurn.TryGetValue(unit, out float ticks))
+            {
+                return 0f;
+            }
+            float turn = BASE_TICKS / Mathf.Max(1, GetEffectiveAgility(unit));
+            float delayed = Mathf.Min(ticks + fractionOfTurn * turn, MaxDelayedTurns * turn);
+            if (delayed <= ticks)
+            {
+                return 0f;
+            }
+            _ticksUntilTurn[unit] = delayed;
+            return (delayed - ticks) / turn;
+        }
+
         public bool IsSuspended(ICombatUnit unit)
         {
             return unit != null && _suspended.ContainsKey(unit);

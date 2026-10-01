@@ -114,6 +114,12 @@ namespace Assets.Scripts.Cards
         [Tooltip("ReplaceParty: the one big move, usable once per summoning.")]
         public MagicSO Signature;
 
+        [Tooltip("ReplaceParty, optional: what its Attack command does, in place of the plain " +
+                 "Strength swing - a single-enemy ability cast with the summon as the caster, unlimited " +
+                 "and, being its basic attack, never blocked by Silence. Exatrix's Rend (damage + a turn " +
+                 "delay) is the first. Empty keeps the plain Attack.")]
+        public MagicSO AttackAbility;
+
         public string Label => string.IsNullOrEmpty(DisplayName) ? name : DisplayName;
     }
 }

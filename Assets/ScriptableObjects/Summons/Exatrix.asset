@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8167baed5bc052409b86b3942399fa5, type: 3}
+  m_Name: Exatrix
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
+  Key: Exatrix
+  DisplayName: Exatrix
+  Description: A shade of something that hunted before there were names takes the
+    party's place. Every wound she opens costs the enemy time.
+  Sprite: {fileID: 21300000, guid: 60558b8c1c46482ab47645e0b78bae14, type: 3}
+  AnimationFrames:
+  - {fileID: 21300000, guid: c2086986ef094807bd78588b059780b5, type: 3}
+  - {fileID: 21300000, guid: 892de7c74d6440428d80469e827a9c8d, type: 3}
+  - {fileID: 21300000, guid: c3fa44c9f07d493ca52093df2c8ea819, type: 3}
+  - {fileID: 21300000, guid: 23b857c7fbf94b4093ad4feaa7a0e904, type: 3}
+  - {fileID: 21300000, guid: 6bacd7f151234fb090848cdd5b473617, type: 3}
+  AnimationFps: 6
+  Facing: 0
+  ArrivalSound: {fileID: 0}
+  ArrivalSoundVolume: 0.9
+  Kind: 1
+  TargetType: 1
+  Effects: []
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  BaseCharges: 1
+  StatPercents:
+    Values:
+    - Type: 7
+      Amount: 150
+    - Type: 1
+      Amount: 100
+    - Type: 2
+      Amount: 100
+    - Type: 3
+      Amount: 130
+    - Type: 4
+      Amount: 100
+    - Type: 5
+      Amount: 100
+  CopySummonerResistances: 1
+  TurnsActive: 3
+  Actions: []
+  Signature: {fileID: 11400000, guid: 36de5ae6706b7de42aa3623dccfb0284, type: 2}
+  AttackAbility: {fileID: 11400000, guid: 44faba0621c17ed4295423a631eaad26, type: 2}

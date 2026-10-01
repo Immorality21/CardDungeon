@@ -272,6 +272,8 @@ namespace Assets.Scripts.Balance
             var turnManager = new TurnManager();
             turnManager.SetBuffTracker(buffTracker);
             turnManager.Initialize(units);
+            // A TurnDelay effect pushes units back on this clock, as CombatManager's does live.
+            resolver.Clock = turnManager;
 
             // A party-replacing summon on the field (section 4b), or null. While it is out it is the
             // whole hero side - the one rule CombatManager.HeroSideUnits states for the live game.
@@ -469,10 +471,22 @@ namespace Assets.Scripts.Balance
             }
 
             var target = WeakestAlive(enemies);
-            if (target != null)
+            if (target == null)
             {
-                ResolveAttack(unit, target, buffTracker);
+                return;
             }
+            // Its own Attack (Exatrix's Rend) resolves like any ability - which is how its turn delay
+            // reaches this fight's clock - and, being the basic attack, Silence does not stop it.
+            var attack = replacement.Stay.Summon.AttackAbility;
+            if (attack != null)
+            {
+                resolver.Execute(new SpellcastAction
+                {
+                    Magic = attack, Caster = unit, Targets = new List<ICombatUnit> { target }
+                }, buffTracker);
+                return;
+            }
+            ResolveAttack(unit, target, buffTracker);
         }
 
         /// <summary>

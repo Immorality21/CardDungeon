@@ -50,6 +50,17 @@ The `flatPower` argument the executors already took (a combo's bonus effect, a r
 - **The cast is gated, not survivable.** `SpellPower.CanAfford` refuses a magic whose total cost is `>=` the caster's current health, and `MagicSelectionUI` greys the row out and shows the price beside the charges. This is why there is no death-mid-cast problem: `ExecuteCastAction` has no death handling, so a caster who killed themselves would stop acting with no log and no visual. `HealthCostEffectExecutor` keeps a **1 HP floor** as a safety net for the same reason.
 - **The price is deterministic** — `max(1, floor(MaxHealth × Power/100))`, no randomness — so the number the UI quotes is the number the executor charges. `SpellPower.TotalHealthCost` reads the same `UnlockLevel` gate the resolver does.
 
+## `TurnDelay`: pushing a unit back on the clock *(2026-10-01, Exatrix)*
+
+`SpellEffectType.TurnDelay` moves each target's CTB counter back **at once** by `Power`% of **its own**
+full turn (`TurnManager.Delay`) - a real delay, where Slow only stretches the turns after the next.
+**Capped**: a counter never holds more than `TurnManager.MaxDelayedTurns` (2) of the unit's turns, so
+delay buys at most one whole turn and never a lock; at the cap the hit floats "Can't delay further".
+It needs the fight's clock: **`EffectResolver.Clock`**, set by `CombatManager` (combat start) and the
+simulator's encounter loop. A resolver without one (room events, the sim's shared enemy-cast
+resolver) leaves it inert and silent. No caster stat and no upgrade bonus go into it; the inspector
+hides Scaling Stat for it.
+
 ## Resistance buffs
 
 The five resistance `BuffType`s were a **no-op** until 2026-08-25: `ResistanceBuffHandler.Apply` was an empty method, so a cloak showed "+40 FireResistance" and changed nothing. They now go through `CombatBuffTracker.ApplyResistance` / `GetResistanceBonus`.
@@ -158,7 +169,7 @@ level-scoped health pool, and a cure would clear it only until the next room re-
 ## Magic definitions & effects
 
 - **MagicSO** (ScriptableObject, `SO/Magic`): defines a magic with `Key`, `DisplayName`, `Description`, `Icon`, `TargetType` (`MagicTargetType`: Enemy/Ally/Self/AllEnemies/AllAllies), `Rarity` (`MagicRarity`), `Effects` (list of `SpellEffect`), `Tags` (list of `MagicTag`), `TagDuration`. Pure data — no acquisition/slot logic.
-- **SpellEffect**: `EffectType` (`SpellEffectType`: Damage/Heal/Buff/Debuff/**HealthCost**), `Power`, **`PowerMode`**, `ScalingStat`, `DamageType`, `BuffType`, `Duration`, `UnlockLevel`.
+- **SpellEffect**: `EffectType` (`SpellEffectType`: Damage/Heal/Buff/Debuff/**HealthCost**/**TurnDelay**), `Power`, **`PowerMode`**, `ScalingStat`, `DamageType`, `BuffType`, `Duration`, `UnlockLevel`.
 - **The catalog is 31 magics, and 14 of them exist because a hero needed them.** A spell is only worth a grid node if the hero's stats scale it — `SpellEffect.ScalingStat` — so each new hero came with the spells its stat line could actually use. **Check the scaling stat before putting a spell on a grid**: the retired Scout's Intelligence-scaled `OilSlick` on a hero with INT 4 was a node that bought nothing.
 
   | added for | spells |
@@ -283,6 +294,12 @@ Two consequences worth holding on to:
   | Paladin | A (Shield Up, Ward) | **Aegis Lion** | special attack | the Paladin: +50% own Endurance for 3 turns, and **+60 threat** |
   | Paladin | B (Sunder, Consecrate) | **Judgement Seraph** | replaces the party | a **hitter**: 120% HP, 180% STR, 70% END; Radiant Cut (Holy, one enemy) + Judgement (Holy, all) |
   | Paladin | C (Heal, Renew) | **Dawn Stag** | special attack | every hero healed 40% of their health, then regenerates 3 a turn for 3 turns |
+  | Ranger | A (Poison Dart, Volley) | **Galewing** | special attack | a hawk: 2 hits of the Ranger's Agility on every enemy, then -3 Endurance for 2 turns |
+  | Ranger | B (Snare, Hush) | **Exatrix** | replaces the party | a shade, medium: 150% HP, 130% AGI; her Attack is **Rend** (damage + turn delay), Signature **Nightfall** (damage + Agility cut, all) |
+- **A replacement's own Attack** *(2026-10-01)*: `SummonSO.AttackAbility` (optional, a single-enemy
+  `MagicSO`) is what its Attack command does instead of the plain Strength swing. The row still says
+  *Attack*, **Silence never closes it** (`ExecuteSummonAbility` exempts it), the sim swings it, and
+  `SummonOps.AbilityKeys` lists it with the other summon abilities.
 - **A summon's abilities are not a hero's magic.** They are `MagicSO` assets, so every "is this
   learnable?" check must leave them out through `SummonOps.AbilityKeys`: the balance collector, the
   catalog/grid tests, and `SummonContentTests.SummonAbilities_AreNeverAHerosMagic` (never on a grid,

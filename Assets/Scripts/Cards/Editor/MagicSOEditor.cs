@@ -39,6 +39,10 @@ public class MagicSOEditor : Editor
             {
                 lines = 4; // EffectType + Power + PowerMode + UnlockLevel (no scaling stat)
             }
+            else if (effectType == SpellEffectType.TurnDelay)
+            {
+                lines = 3; // EffectType + Power (percent of a turn) + UnlockLevel
+            }
             return lines * (EditorGUIUtility.singleLineHeight + 2) + 4;
         };
 
@@ -82,7 +86,8 @@ public class MagicSOEditor : Editor
             // Which caster stat is added to Power. Sits next to Power because the two are read
             // together: Power is the floor, the stat is what a good caster brings. A health cost has
             // no caster contribution at all, so the field would be a lie there.
-            if (effectType != SpellEffectType.HealthCost)
+            // A turn delay is a percentage of the target's own turn: no caster stat goes into it.
+            if (effectType != SpellEffectType.HealthCost && effectType != SpellEffectType.TurnDelay)
             {
                 EditorGUI.PropertyField(
                     new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
@@ -178,6 +179,10 @@ namespace Assets.Scripts.Cards
                 {
                     keys.Add(summon.Signature.Key);
                 }
+                if (summon.AttackAbility != null && !string.IsNullOrEmpty(summon.AttackAbility.Key))
+                {
+                    keys.Add(summon.AttackAbility.Key);
+                }
             }
             return keys;
         }
@@ -198,6 +203,7 @@ namespace Assets.Scripts.Cards
             {
                 parts.Add(DescribeEffect(effect));
             }
+            parts = CollapseRepeats(parts);
             if (summon.BonusThreat > 0)
             {
                 parts.Add("draws the enemies' attention");
@@ -223,6 +229,25 @@ namespace Assets.Scripts.Cards
             return string.Join(" · ", parts);
         }
 
+        /// <summary>Repeated identical lines read as one with a count: two equal hits are "AGI damage ×2",
+        /// not the same phrase twice.</summary>
+        private static List<string> CollapseRepeats(List<string> parts)
+        {
+            var collapsed = new List<string>();
+            int i = 0;
+            while (i < parts.Count)
+            {
+                int run = 1;
+                while (i + run < parts.Count && parts[i + run] == parts[i])
+                {
+                    run++;
+                }
+                collapsed.Add(run > 1 ? $"{parts[i]} ×{run}" : parts[i]);
+                i += run;
+            }
+            return collapsed;
+        }
+
         private static string DescribeEffect(SpellEffect effect)
         {
             string turns = effect.Duration > 0 ? $" for {effect.Duration} turns" : "";
@@ -239,7 +264,17 @@ namespace Assets.Scripts.Cards
                 case SpellEffectType.Debuff:
                     return $"-{effect.Power} {effect.BuffType}{turns}";
                 case SpellEffectType.Damage:
-                    return $"{effect.Power} {effect.DamageType} damage";
+                {
+                    string element = effect.DamageType != DamageType.Normal ? $" {effect.DamageType}" : "";
+                    if (!StatCatalog.CanScalePower(effect.ScalingStat) || effect.PowerMode != PowerMode.BasePower)
+                    {
+                        return $"{effect.Power}{element} damage";
+                    }
+                    string stat = StatCatalog.ShortName(effect.ScalingStat);
+                    return effect.Power > 0 ? $"{effect.Power} + {stat}{element} damage" : $"{stat}{element} damage";
+                }
+                case SpellEffectType.TurnDelay:
+                    return $"delays by {effect.Power}% of a turn";
                 case SpellEffectType.Heal:
                     return effect.PowerMode == PowerMode.PercentOfMaxHealth
                         ? $"heals {effect.Power}% of health"

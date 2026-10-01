@@ -5,6 +5,7 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
 ## Turn System (FFX CTB-style)
 
 - **Turn order** is determined by the Agility stat. Higher agility = more frequent turns. `TurnManager` uses tick-based scheduling (`100 / Agility` ticks per turn).
+- **Delay** (`TurnManager.Delay`, 2026-10-01) pushes a unit's counter back by a fraction of its *own* turn, at once, capped at `MaxDelayedTurns` (2) of its turns - one extra turn at most, never a lock. A suspended unit is off the clock and cannot be delayed. Reached by the `TurnDelay` effect through `EffectResolver.Clock` (see the Magic guide); Slow is the other tempo lever and only stretches the turns after the next.
 
 ## ICombatUnit
 

@@ -515,6 +515,43 @@ place, and Radiant Cut finished the Warden.
 - **Threat does not decay**, so the Lion's pull lasts the rest of the fight while its Endurance lasts
   3 turns. Fine for now; a threat-decay rule would make the "few turns" literal.
 
+#### The Ranger's two — decided and built 2026-10-01
+
+Two branches, two summons, one past each `*-tip-a`. The user picked the shapes (and named and
+described Exatrix); the numbers are starting numbers.
+
+| branch | summon | kind | does | upgrades (d13 → d14 → d15) | material |
+|---|---|---|---|---|---|
+| A — Poison Dart, Volley | **Galewing**, a great hawk | special attack, all enemies | **2 hits** of the Ranger's Agility on every enemy, then **-3 Endurance for 2 turns** ("finds the gaps") | +4 to the first hit → +1 turn on the Endurance cut → +1 charge | Mire Reed |
+| B — Snare, Hush | **Exatrix**, a shadow were-shade (not a werewolf: an evil animal shade) | replaces the party, medium on both axes | HP 150% · END 100% · AGI 130% · INT/SPR 100%; her **Attack is Rend** (Agility + 2 damage, **delays the target 50% of its own turn**), Signature **Nightfall** (Agility + 4 to all enemies, -4 Agility for 3 turns) | +30 HP-ratio → +1 turn → +1 charge | Hex Silk |
+
+**The turn delay is a new effect type, `SpellEffectType.TurnDelay`** (decided with the user): it pushes
+the target's CTB counter back at once by `Power`% of **its own** full turn, unlike Slow, which only
+stretches the turns after the next. **Capped at one extra full turn** (`TurnManager.MaxDelayedTurns`
+= 2: a counter never holds more than two of the unit's turns), so delay always buys tempo and never a
+lock. The executor needs the fight's clock (`EffectResolver.Clock`, set by `CombatManager` and the
+simulator's encounter loop); without one it is inert and says nothing. **Her Attack is an ability**
+(`SummonSO.AttackAbility`): the menu still reads *Attack*, Silence never closes it, and the sim swings
+it instead of the plain Strength attack.
+
+Verified: unit tests (`TurnDelayTests`: the delay, the cap, a suspended unit untouched, the resolver
+with and without a clock, the sim swinging the attack override), and a sandbox run
+(`Sandbox/RangerSummons.asset`, Ranger + Warrior vs the Abyssal Warden and a Bog Shaman): Galewing
+took the Warden 116 → 56 and killed the Shaman, Exatrix arrived at 64 HP, Rend hit for 46, Nightfall
+for 48, and the party came back after her third turn.
+
+**Open, for the balance pass:**
+- **The Ranger outruns the delay's window.** On that grid path the Ranger has ~36 Agility and Exatrix
+  46 against the Warden's 4, so a Warden turn is ~11 of hers - the 3-turn stay ends long before a
+  50% delay matters, and the *party* inherits it. Against slow bosses Rend is mostly damage; against
+  fast packs it is the tempo tool it was meant to be. The live turn-order preview (10 slots) could
+  not show the delay in that fight for the same reason.
+- **A flat Agility cut on a slow boss is huge.** Nightfall's -4 takes the Warden from 4 to the floor
+  of 1 - a quarter of its speed for 3 turns. Snare's -3 has the same shape. Worth a percentage mode
+  for Agility debuffs if the frontier says so.
+- **Galewing on a pack is strong** - 2 × Agility to everything is close to the Seraph's Judgement and
+  needs no stay. The per-summon frontier will say.
+
 #### The party-replacing kind — decided 2026-09-28, the user's second walkthrough
 
 **✅ Built 2026-09-28** — the Cairn Golem is in the game, the live combat loop and the balance model
