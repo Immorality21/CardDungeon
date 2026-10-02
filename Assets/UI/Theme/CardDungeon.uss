@@ -543,12 +543,30 @@
     background-color: rgba(6, 3, 14, 0.55);
 }
 
+/* An event choice: its words on the left (wrapping), its tag on the right, never overlapping. */
+.cd-list-button.cd-event-option {
+    flex-direction: row;
+    align-items: center;
+    height: auto;
+    min-height: 44px;
+    padding: 6px 12px;
+}
+
+.cd-event-option__text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+    -unity-text-align: middle-left;
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    padding: 0;
+    margin: 0 12px 0 0;
+}
+
 /* An event choice's tag on the right: what governs it and how the odds read, or "safe". */
 .cd-event-tag {
-    position: absolute;
-    right: 12px;
-    top: 0;
-    bottom: 0;
+    flex-shrink: 0;
     font-size: 16px;
     -unity-font-style: bold;
     -unity-text-align: middle-right;
@@ -1721,6 +1739,24 @@
     text-overflow: ellipsis;
 }
 
+/* The name and its Leads / Resting tag on one line, so the caption under them has the full width. */
+.cd-camp-row__top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cd-camp-row__top .cd-inv-row__name {
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cd-camp-row__top .cd-inv-row__meta {
+    font-size: 15px;
+    padding: 0;
+}
+
 .cd-camp-row--benched .cd-inv-row__icon,
 .cd-camp-row--benched .cd-inv-row__name {
     opacity: 0.6;
@@ -1751,6 +1787,12 @@
     color: rgb(255, 150, 140);
     padding: 0 2px;
     margin: 0 0 6px 0;
+}
+
+/* A reason that is a rule rather than a fault (the party locked for the run): neutral ink. */
+.cd-reason.cd-reason--info {
+    color: var(--cd-text-light);
+    opacity: 0.7;
 }
 
 /* XP modes: the inventory tab, full-width, stacked. Chosen = filled; locked = dimmed + the level. */
@@ -2033,7 +2075,10 @@
 .cd-victory {
     width: 600px;
     max-width: 90%;
-    padding: 0 0 24px 0;
+    /* Never taller than the screen: a boss's spoils list pushed the title off the top edge
+       (playtest 2 finding 6). The list scrolls; the title and the buttons keep their size. */
+    max-height: 88%;
+    padding: 0 0 20px 0;
 
     background-color: var(--cd-parchment);
 
@@ -2056,8 +2101,24 @@
 
     -unity-text-align: middle-center;
 
-    padding: 16px 0;
-    margin-bottom: 18px;
+    padding: 12px 0;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.cd-victory > .cd-button {
+    flex-shrink: 0;
+}
+
+/* The spoils list scrolls inside the frame instead of stretching it. Bottom padding on the content
+   so the last row clears the scroll edge instead of sitting half under it. */
+.cd-victory__scroll {
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.cd-victory__scroll > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    padding-bottom: 10px;
 }
 
 .cd-run-complete__run {
@@ -2088,8 +2149,8 @@
     align-items: center;
     justify-content: space-between;
 
-    padding: 13px 6px;
-    margin: 3px 0;
+    padding: 9px 6px;
+    margin: 2px 0;
 
     border-bottom-width: 1px;
     border-bottom-color: rgba(58, 42, 22, 0.22);
@@ -2220,7 +2281,18 @@
 
 .cd-level-clear__body {
     flex-shrink: 1;
+    min-height: 0;
     max-height: 520px;
+}
+
+.cd-level-clear__body > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    padding-bottom: 10px;
+}
+
+.cd-level-clear__subtitle,
+.cd-level-clear__next,
+.cd-level-clear__choices {
+    flex-shrink: 0;
 }
 
 /* An indented line under a section row: where a total came from. */
@@ -2890,6 +2962,11 @@
     -unity-text-align: middle-center;
     margin: 0;
     padding: 0;
+}
+
+/* A stat node's short name ("STR", "HP") inside the same 44px circle. */
+.sg-node__glyph--word {
+    font-size: 12px;
 }
 
 /* Filled nodes are the theme's brightest surfaces, so their glyph flips to dark ink —
@@ -3857,6 +3934,21 @@
     color: var(--cd-text-light);
     white-space: normal;
     -unity-text-align: middle-center;
+}
+
+/* Over a tall window (the sphere grid's 720px frame) - one line in the strip above it. That strip is
+   only ~59px on a 16:9-ish game view (measured 2026-10-02), so every pixel here is counted. */
+.cd-tutorial-banner--compact {
+    top: 4px;
+    padding: 4px 16px;
+    border-width: 2px;
+    max-width: 1100px;
+}
+
+.cd-tutorial-banner--compact .cd-tutorial-banner__text {
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
 }
 
 .cd-tutorial-target {

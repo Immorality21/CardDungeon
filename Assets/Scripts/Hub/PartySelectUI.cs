@@ -306,15 +306,19 @@ namespace Assets.Scripts.Hub
 
                 var text = new VisualElement { pickingMode = PickingMode.Ignore };
                 text.AddToClassList("cd-inv-row__text");
-                text.Add(MakeLabel(hero.DisplayName, "cd-inv-row__name"));
-                text.Add(MakeLabel(RoleLine(StatsOf(hero)), "cd-inv-row__caption"));
-                row.Add(text);
-
+                // The tag shares the name's line, so the stat caption gets the row's full width - beside
+                // the tag it was cut off at "STR 10 · EN…" (playtest 2 finding 9).
+                var top = new VisualElement { pickingMode = PickingMode.Ignore };
+                top.AddToClassList("cd-camp-row__top");
+                top.Add(MakeLabel(hero.DisplayName, "cd-inv-row__name"));
                 // The gold bar already says "marching"; the tag only names the leader and the benched.
                 if (seat <= 0)
                 {
-                    row.Add(MakeLabel(seat == 0 ? "Leads" : "Resting", "cd-inv-row__meta"));
+                    top.Add(MakeLabel(seat == 0 ? "Leads" : "Resting", "cd-inv-row__meta"));
                 }
+                text.Add(top);
+                text.Add(MakeLabel(RoleLine(StatsOf(hero)), "cd-inv-row__caption"));
+                row.Add(text);
 
                 _rosterList.Add(row);
                 _rosterRows[key] = row;
@@ -409,6 +413,9 @@ namespace Assets.Scripts.Hub
                 _leadButton.SetEnabled(fielded && seat > 0);
             }
             SetText(_reasonLabel, reason);
+            // The run's lock is a rule, not a mistake: neutral ink, not the error red a full party gets
+            // (playtest 2 finding 11).
+            _reasonLabel?.EnableInClassList("cd-reason--info", _lockedReason != null);
 
             if (_detailBody == null)
             {

@@ -108,7 +108,7 @@
         <!-- Victory summary (shown over the battle stage) -->
         <ui:VisualElement name="victory-window" class="cd-victory cd-dock-center cd-hidden">
             <ui:Label name="victory-title" text="Victory!" class="cd-victory__title" />
-            <ui:VisualElement name="victory-rewards" class="cd-victory__rewards" />
+            <ui:ScrollView name="victory-rewards" class="cd-victory__rewards cd-victory__scroll" mode="Vertical" />
             <ui:Button name="victory-continue" text="Continue" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 

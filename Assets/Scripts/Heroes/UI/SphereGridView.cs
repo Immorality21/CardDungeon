@@ -191,6 +191,11 @@ namespace Assets.Scripts.Heroes.UI
 
             var glyph = new Label(node.Glyph) { pickingMode = PickingMode.Ignore };
             glyph.AddToClassList("sg-node__glyph");
+            if (node.Glyph != null && node.Glyph.Length > 1)
+            {
+                // A stat's short name ("STR") rather than a symbol: smaller, to fit the circle.
+                glyph.AddToClassList("sg-node__glyph--word");
+            }
             button.Add(glyph);
 
             if (!string.IsNullOrEmpty(node.Caption))

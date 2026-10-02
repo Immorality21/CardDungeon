@@ -290,7 +290,7 @@ namespace Assets.Scripts.Rooms
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelNextLevel, _levelBody, _eventBack, _eventOptions })
+            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelNextLevel, _levelBody, _victoryRewards, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -632,9 +632,15 @@ namespace Assets.Scripts.Rooms
                 }
 
                 int captured = i;
-                var btn = new Button(() => OnEventOptionChosen(captured)) { text = option.Label };
+                var btn = new Button(() => OnEventOptionChosen(captured));
                 btn.AddToClassList("cd-list-button");
+                btn.AddToClassList("cd-event-option");
                 btn.focusable = false;
+                // The label and its tag share a row, so a long choice wraps instead of running
+                // under the tag (playtest 2 finding 5).
+                var text = new Label(option.Label) { pickingMode = PickingMode.Ignore };
+                text.AddToClassList("cd-event-option__text");
+                btn.Add(text);
                 // Which choices are gambles, on the row itself rather than in prose above the list.
                 var tag = new Label(OptionTag(option, roomEvent, band, clarity, out string tone)) { pickingMode = PickingMode.Ignore };
                 tag.AddToClassList("cd-event-tag");
@@ -2871,7 +2877,9 @@ namespace Assets.Scripts.Rooms
             SetShown(_combatBar, false);
             SetShown(_detailWindow, false);
 
-            // Escalate the copy toward the climax: run complete > boss slain > level cleared > victory.
+            // Escalate the copy toward the climax: run complete > boss slain > victory. Clearing the
+            // exit room is not "Level Cleared!" - the level ends on the stairs, and the level-clear
+            // window says so then (playtest 2 finding 6).
             if (result.RunCompleted)
             {
                 _victoryTitle.text = "Dungeon Conquered!";
@@ -2879,10 +2887,6 @@ namespace Assets.Scripts.Rooms
             else if (result.BossDefeated)
             {
                 _victoryTitle.text = "Boss Slain!";
-            }
-            else if (result.LevelCleared)
-            {
-                _victoryTitle.text = "Level Cleared!";
             }
             else
             {
@@ -2893,14 +2897,13 @@ namespace Assets.Scripts.Rooms
             // Gold, then XP per hero, then the loot (menu review, 2026-09-28): the two numbers every
             // fight pays first, and the drops - the part worth reading - last and at full size,
             // instead of a "Loot" header above everything with the currencies trailing under it.
-            string gold = "+" + result.GoldGained;
-            if (result.LevelCleared)
-            {
-                gold += "  (banked)";
-            }
-            _victoryRewards.Add(MakeVictoryRow("Gold", gold));
+            // No "(banked)" on the exit fight: its gold joins the floor's pending pool like any
+            // other, banked on the stairs, which is what the HUD says (playtest 2 finding 6).
+            _victoryRewards.Add(MakeVictoryRow("Gold", "+" + result.GoldGained));
 
-            if (result.XpByHero != null && result.XpByHero.Count > 0)
+            // The per-hero split only when there is something to split: "shared" over a party of
+            // one reads as a mistake.
+            if (result.XpByHero != null && result.XpByHero.Count > 1)
             {
                 _victoryRewards.Add(MakeVictoryRow("XP", "+" + result.XpGained + " shared"));
                 foreach (var share in result.XpByHero)
@@ -2955,9 +2958,14 @@ namespace Assets.Scripts.Rooms
 
             if (result.LevelCleared)
             {
-                _victoryRewards.Add(MakeVictoryRow("The way down", "open"));
+                // After the run's last boss there is no further floor - the stairs lead out.
+                _victoryRewards.Add(MakeVictoryRow(result.RunCompleted ? "The way out" : "The way down", "open"));
             }
 
+            if (_victoryRewards is ScrollView rewardsScroll)
+            {
+                rewardsScroll.scrollOffset = Vector2.zero;
+            }
             SetShown(_victoryWindow, true);
         }
 
@@ -3043,13 +3051,20 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Where the HUD sits on screen, in viewport space (0..1, origin bottom-left), so the camera
-        /// follow can keep the party's room out from under it (<see cref="CameraSafeArea"/>). False
-        /// while the HUD is hidden or not laid out yet.
+        /// Every panel the camera should keep the party's room out from under, most important first,
+        /// in viewport space: the Fight/Flee bar, the room bar, the HUD and the party window - only
+        /// the ones that are up (playtest 2 finding 8: the bars covered a door and an enemy).
         /// </summary>
-        public bool TryGetHudViewportRect(out Rect rect)
+        public void GetCameraSafePanels(List<Rect> panels)
         {
-            return TryGetViewportRect(_hud, out rect);
+            panels.Clear();
+            foreach (var element in new[] { _combatBar, _mainBar, _hud, _partyStatus })
+            {
+                if (TryGetViewportRect(element, out Rect rect))
+                {
+                    panels.Add(rect);
+                }
+            }
         }
 
         /// <summary>

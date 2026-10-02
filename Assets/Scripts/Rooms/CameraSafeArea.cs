@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms
@@ -27,35 +28,107 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         public static Vector2 Nudge(Rect room, Vector2 target, Vector2 halfExtents, Rect panel, float margin = 0f)
         {
-            if (panel.width <= 0f || panel.height <= 0f || halfExtents.x <= 0f || halfExtents.y <= 0f)
+            return Nudge(room, target, halfExtents, new[] { panel }, margin);
+        }
+
+        /// <summary>
+        /// The same for several panels, most important first. Since playtest 2 finding 8 the room bar
+        /// and the Fight/Flee bar (bottom centre) and the party window (bottom right) are protected as
+        /// well as the HUD: an enemy on a room's bottom row stood under the Fight/Flee bar, and in one
+        /// room the bar covered a door.
+        ///
+        /// <para>Of every shift that clears all the panels and keeps the room on screen, the shortest
+        /// wins. When no shift clears them all, the least important panel is given up and the rest
+        /// tried again, so a big room still keeps the important ones clear.</para>
+        /// </summary>
+        public static Vector2 Nudge(Rect room, Vector2 target, Vector2 halfExtents, IReadOnlyList<Rect> panels, float margin = 0f)
+        {
+            if (panels == null || halfExtents.x <= 0f || halfExtents.y <= 0f)
             {
                 return target;
             }
 
             var padded = Rect.MinMaxRect(room.xMin - margin, room.yMin - margin, room.xMax + margin, room.yMax + margin);
-            Rect panelWorld = PanelInWorld(target, halfExtents, panel);
-            if (!padded.Overlaps(panelWorld))
+            var world = new List<Rect>();
+            foreach (var panel in panels)
             {
-                return target;
+                if (panel.width > 0f && panel.height > 0f)
+                {
+                    world.Add(PanelInWorld(target, halfExtents, panel));
+                }
             }
 
-            // Camera left moves the room right on screen, clear of the panel's right edge; camera up
-            // moves it down, clear of the panel's bottom edge. Each is taken only if the far side of
-            // the room is still on screen afterwards.
-            float left = panelWorld.xMax - padded.xMin;
-            float up = padded.yMax - panelWorld.yMin;
-            bool leftFits = padded.xMax <= target.x - left + halfExtents.x;
-            bool upFits = padded.yMin >= target.y + up - halfExtents.y;
-
-            if (leftFits && (!upFits || left <= up))
+            for (int count = world.Count; count > 0; count--)
             {
-                return new Vector2(target.x - left, target.y);
-            }
-            if (upFits)
-            {
-                return new Vector2(target.x, target.y + up);
+                if (TryClear(padded, target, halfExtents, world, count, out Vector2 shift))
+                {
+                    return target + shift;
+                }
             }
             return target;
+        }
+
+        /// <summary>
+        /// The shortest camera shift that moves the first <paramref name="count"/> panels off the room
+        /// while the room stays on screen. Each panel can be cleared four ways (camera left, right, up or
+        /// down by just enough), so the answer is among those offsets per axis, or zero.
+        /// </summary>
+        private static bool TryClear(Rect room, Vector2 target, Vector2 halfExtents, List<Rect> panels, int count, out Vector2 shift)
+        {
+            var xs = new List<float> { 0f };
+            var ys = new List<float> { 0f };
+            for (int i = 0; i < count; i++)
+            {
+                // Camera left moves the panel left on the world: its right edge to the room's left.
+                xs.Add(room.xMin - panels[i].xMax);
+                xs.Add(room.xMax - panels[i].xMin);
+                ys.Add(room.yMin - panels[i].yMax);
+                ys.Add(room.yMax - panels[i].yMin);
+            }
+
+            shift = Vector2.zero;
+            float best = float.MaxValue;
+            foreach (float dx in xs)
+            {
+                foreach (float dy in ys)
+                {
+                    float cost = Mathf.Abs(dx) + Mathf.Abs(dy);
+                    if (cost >= best || !Clears(room, target, halfExtents, panels, count, dx, dy))
+                    {
+                        continue;
+                    }
+                    best = cost;
+                    shift = new Vector2(dx, dy);
+                }
+            }
+            return best < float.MaxValue;
+        }
+
+        private static bool Clears(Rect room, Vector2 target, Vector2 halfExtents, List<Rect> panels, int count, float dx, float dy)
+        {
+            const float Epsilon = 1e-4f;
+            var cam = new Vector2(target.x + dx, target.y + dy);
+            if (room.xMin < cam.x - halfExtents.x - Epsilon || room.xMax > cam.x + halfExtents.x + Epsilon
+                || room.yMin < cam.y - halfExtents.y - Epsilon || room.yMax > cam.y + halfExtents.y + Epsilon)
+            {
+                return false;
+            }
+            for (int i = 0; i < count; i++)
+            {
+                var moved = new Rect(panels[i].x + dx, panels[i].y + dy, panels[i].width, panels[i].height);
+                if (Overlaps(room, moved, Epsilon))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>Strict overlap with a little slack, so a shift computed to touch an edge counts as clear.</summary>
+        private static bool Overlaps(Rect a, Rect b, float epsilon)
+        {
+            return a.xMin < b.xMax - epsilon && a.xMax > b.xMin + epsilon
+                && a.yMin < b.yMax - epsilon && a.yMax > b.yMin + epsilon;
         }
 
         /// <summary>A viewport-space rectangle as world space, for a camera centred on <paramref name="cameraPos"/>.</summary>

@@ -76,6 +76,18 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void BadgeFor_ABuiltLotWhoseUpgradeIsUnaffordable_ShowsNothing()
+        {
+            var campfire = Lot("campfire", placedByDefault: true, maxLevel: 3);
+            campfire.GoldPerUpgrade = 300;
+
+            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.None,
+                Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(campfire, HubProgress.Fresh, 35));
+            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Build,
+                Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(campfire, HubProgress.Fresh, 300));
+        }
+
+        [Test]
         public void BadgeFor_AFinishedLot_ShowsNothing()
         {
             Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.None,

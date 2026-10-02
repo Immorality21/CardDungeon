@@ -32,26 +32,15 @@ the run.
 
 ## Polish — clarity and layout
 
-5. **Event option text runs into its tag.** "Throw the lid back on the gilded chest" overlaps "LCK ·
-   dangerous". Wrap the text or reserve width for the tag.
-6. **Victory and level-clear windows:**
-   - The "Dungeon Conquered!" window is too tall, and its header touches or clips the top edge.
-   - It still shows "The way down: open" after the final boss.
-   - The exit-room fight's summary says "Level Cleared!" before the stairs are taken.
-   - Its Gold row says "+5 (banked)" while the HUD says gold is banked at the stairs.
-   - "XP +20 shared" shows for a one-hero party.
-   - The last row of the list is half clipped under the scroll area.
-7. **Sphere grid stat nodes all show "S".** HP, STR, AGI and SPR nodes look the same, so you have to
-   click each one. Give each stat its own glyph. Separately, the tutorial banner overlaps the top edge
-   of the grid window.
-8. **Room layout:** an enemy at a room's bottom edge sits under the Fight/Flee bar and its name label,
-   and in one room the bar covers a door.
-9. **Campfire roster rows truncate stats** ("STR 10 · EN…").
-10. **The campfire shows its "something to build" hammer** even when the upgrade is 265 gold out of
-    reach.
-11. **Party-lock wording:**
-    - The campfire's lock line uses error red, so it reads like a fault. Use a neutral colour.
-    - The run screen just hides Change Party. Add a line such as "Party locked until the run ends".
+*5–11 fixed 2026-10-02.*
+- **5:** an event choice's words and its odds tag share a row, so long choices wrap instead of running under the tag.
+- **6:** the spoils window is capped at 88% height and scrolls; the exit fight is "Victory!" (the level ends on the stairs), its gold has no "(banked)", the final boss says "The way out", one-hero XP has no "shared", and both lists pad their last row.
+- **7:** stat nodes show their largest gain's short name ("STR", "HP"); the tutorial banner goes compact over the grid.
+- **8:** the room camera keeps the room clear of the Fight/Flee bar, the room bar and the party window, not only the HUD (`CameraSafeArea`).
+- **9:** a roster row's Leads/Resting tag moved onto the name line, so the stat caption has the full width.
+- **10:** a built lot's hammer only shows when its upgrade is affordable.
+- **11:** the campfire's lock line is neutral, and the run screen says "Party locked until the run ends."
+
 ## Balance and content
 
 13. **The Threshold is far too easy.**

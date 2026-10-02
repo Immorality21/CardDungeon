@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
 using ImmoralityGaming.Fundamentals;
@@ -80,17 +81,22 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// The party, nudged so the room it stands in is not drawn under the dungeon HUD
-        /// (<see cref="CameraSafeArea"/>). While the HUD is hidden - combat, the level-clear window -
-        /// it is the party's own position.
+        /// The party, nudged so the room it stands in is not drawn under the dungeon HUD, the room
+        /// and Fight/Flee bars or the party window (<see cref="CameraSafeArea"/>). With none of them
+        /// up - the level-clear window - it is the party's own position.
         /// </summary>
         private Vector2 CameraTarget()
         {
             Vector2 target = Party.transform.position;
             var room = Party.CurrentRoom;
             var cam = MainCamera.Camera;
-            if (room == null || room.RoomSO == null || cam == null || _roomActionUI == null
-                || !_roomActionUI.TryGetHudViewportRect(out Rect hud))
+            if (room == null || room.RoomSO == null || cam == null || _roomActionUI == null)
+            {
+                return target;
+            }
+
+            _roomActionUI.GetCameraSafePanels(_safePanels);
+            if (_safePanels.Count == 0)
             {
                 return target;
             }
@@ -98,8 +104,10 @@ namespace Assets.Scripts.Rooms
             // Tiles are centred on integer coordinates, so a room's floor runs half a tile past them.
             var bounds = new Rect(room.GridPosition.x - 0.5f, room.GridPosition.y - 0.5f, room.RoomSO.Width, room.RoomSO.Height);
             var half = new Vector2(cam.orthographicSize * cam.aspect, cam.orthographicSize);
-            return CameraSafeArea.Nudge(bounds, target, half, hud, RoomSafeMargin);
+            return CameraSafeArea.Nudge(bounds, target, half, _safePanels, RoomSafeMargin);
         }
+
+        private readonly List<Rect> _safePanels = new List<Rect>();
 
         /// <summary>World space kept between the room's floor and the HUD: the wall band and a breath.</summary>
         private const float RoomSafeMargin = 0.4f;

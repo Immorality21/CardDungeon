@@ -174,7 +174,11 @@ namespace Assets.Scripts.Heroes.UI
             }
         }
 
-        /// <summary>The single character drawn inside a node.</summary>
+        /// <summary>
+        /// What is drawn inside a node: one character for the special kinds, and for a stat node the
+        /// short name of the stat it grows most ("STR", "HP") - every stat node used to read "S", so
+        /// HP, STR, AGI and SPR looked the same until clicked (playtest 2 finding 7).
+        /// </summary>
         public static string Glyph(SphereGridNode node, bool isStart)
         {
             if (isStart)
@@ -201,8 +205,25 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.SummonCharge:
                     return "+";
                 default:
-                    return "S";
+                    return StatGlyph(node.Gains);
             }
+        }
+
+        /// <summary>The short name of a stat node's largest gain; "S" for a node that grants nothing.</summary>
+        private static string StatGlyph(StatBlock gains)
+        {
+            UnitStat largest = null;
+            if (gains != null)
+            {
+                foreach (var gain in gains.NonZero())
+                {
+                    if (largest == null || gain.Amount > largest.Amount)
+                    {
+                        largest = gain;
+                    }
+                }
+            }
+            return largest == null ? "S" : StatCatalog.ShortName(largest.Type);
         }
 
         /// <summary>The player-facing name: authored DisplayName, falling back to the payload.</summary>

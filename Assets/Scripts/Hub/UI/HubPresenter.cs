@@ -106,8 +106,12 @@ namespace Assets.Scripts.Hub.UI
         /// finished. The details - the price, what it grants, what unlocks it - live on the lot panel a
         /// click away (the owner's call, 2026-09-28: a town where every building printed its costs
         /// read like a spreadsheet).
+        ///
+        /// <para>A standing lot's next level only earns the hammer once <paramref name="gold"/> covers
+        /// it: the campfire showed one with its upgrade 265 gold out of reach, which read as a job
+        /// waiting (playtest 2 finding 10). Leave it out to ignore money.</para>
         /// </summary>
-        public static LotBadge BadgeFor(BuildingSO building, HubProgress progress)
+        public static LotBadge BadgeFor(BuildingSO building, HubProgress progress, int gold = int.MaxValue)
         {
             if (building == null)
             {
@@ -117,7 +121,9 @@ namespace Assets.Scripts.Hub.UI
             switch (BuildingOps.StateOf(building, progress))
             {
                 case BuildingState.Built:
-                    return BuildingOps.CanUpgrade(building, progress) ? LotBadge.Build : LotBadge.None;
+                    return BuildingOps.CanUpgrade(building, progress) && gold >= BuildingOps.UpgradeCost(building, progress)
+                        ? LotBadge.Build
+                        : LotBadge.None;
                 case BuildingState.Available:
                     return LotBadge.Build;
                 default:

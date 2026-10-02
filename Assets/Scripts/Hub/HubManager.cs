@@ -361,7 +361,8 @@ namespace Assets.Scripts.Hub
         /// </summary>
         private LotBadge BadgeWithNews(BuildingSO building, HubProgress progress)
         {
-            var badge = HubPresenter.BadgeFor(building, progress);
+            int gold = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.Gold : 0;
+            var badge = HubPresenter.BadgeFor(building, progress, gold);
             if (BuildingOps.StateOf(building, progress) == BuildingState.Built && HasNews(building.Service))
             {
                 return LotBadge.New;
@@ -1093,8 +1094,14 @@ namespace Assets.Scripts.Hub
             _levelName.text = levelEntry.LevelName;
             BuildLevelPips(run.Levels.Count, levelIndex);
             BuildPartyTiles();
-            // Locked from the first floor on - the tiles still say who is going.
-            SetShown(_progressPartyButton, PartyLockedReason() == null);
+            // Locked from the first floor on - the tiles still say who is going, and a line says why
+            // Change Party is gone rather than leaving the player to look for it (playtest 2 finding 11).
+            bool locked = PartyLockedReason() != null;
+            SetShown(_progressPartyButton, !locked);
+            if (locked && _progressParty != null && string.IsNullOrEmpty(_progressParty.text))
+            {
+                _progressParty.text = "Party locked until the run ends.";
+            }
         }
 
         /// <summary>One pip per floor of the run: cleared, the one about to be entered, the rest ahead.</summary>
@@ -1335,6 +1342,9 @@ namespace Assets.Scripts.Hub
 
         public const string TutorialPulseClass = "cd-tutorial--pulse";
 
+        /// <summary>The tutorial banner's smaller form, for screens that leave little room above them.</summary>
+        private const string TutorialCompactClass = "cd-tutorial-banner--compact";
+
         private string GuideKey()
         {
             return _tutorial != null ? _tutorial.GuideBuildingKey : null;
@@ -1485,8 +1495,16 @@ namespace Assets.Scripts.Hub
                 return;
             }
 
-            var cue = TutorialOps.CueFor(_tutorialStep, CurrentTutorialScreen(),
+            var screen = CurrentTutorialScreen();
+            var cue = TutorialOps.CueFor(_tutorialStep, screen,
                 _sphereGrid != null && _sphereGrid.IsGuidedNodeSelected);
+            // The grid window leaves only ~90px above it, and the full-size banner ran over its top
+            // edge (playtest 2 finding 7): over the grid the banner is set smaller and tighter.
+            bool compact = screen == TutorialScreen.Grid;
+            if (_tutorialBanner.ClassListContains(TutorialCompactClass) != compact)
+            {
+                SetClass(_tutorialBanner, TutorialCompactClass, compact);
+            }
             string text = _tutorial != null ? _tutorial.TextFor(cue) : string.Empty;
             if (_tutorialText.text != text)
             {

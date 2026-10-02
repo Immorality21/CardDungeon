@@ -176,5 +176,20 @@ namespace Tests.EditMode
             Assert.AreEqual("★", SphereGridPresenter.Glyph(node, true));
             Assert.AreEqual("R", SphereGridPresenter.Glyph(node, false));
         }
+
+        [Test]
+        public void Glyph_StatNode_ShowsItsLargestGain()
+        {
+            var hp = new SphereGridNode { Key = "a", Kind = SphereNodeKind.Stat };
+            hp.Gains.Add(StatType.MaxHealth, 10);
+            var mixed = new SphereGridNode { Key = "b", Kind = SphereNodeKind.Stat };
+            mixed.Gains.Add(StatType.Endurance, 1);
+            mixed.Gains.Add(StatType.Agility, 2);
+            var empty = new SphereGridNode { Key = "c", Kind = SphereNodeKind.Stat };
+
+            Assert.AreEqual("HP", SphereGridPresenter.Glyph(hp, false));
+            Assert.AreEqual("AGI", SphereGridPresenter.Glyph(mixed, false));
+            Assert.AreEqual("S", SphereGridPresenter.Glyph(empty, false));
+        }
     }
 }
