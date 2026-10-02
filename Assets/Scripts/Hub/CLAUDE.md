@@ -363,9 +363,17 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   (four; the slot purchase is gone). The screen states the XP share as the standing cost of width.
   Reachable from the campfire and from the run-progress screen next to *Enter Dungeon*;
   `_partyOpenedFromProgress` sends Back where the player came from.
+  **The lineup locks for the rest of a run** *(2026-10-02)* once its first floor is entered
+  (`CampaignOps.LocksParty`: `RunKey` set and a floor generated or cleared) until it is cleared or lost.
+  The screen still opens, since the leader and the XP split can still change, but March out / Stay behind dim
+  with the reason in `party-reason`, and the run screen hides *Change Party*. A run only picked on
+  the map is still open. Swapping mid-run was a cheese: charges are run-scoped, so a fresh hero
+  replaced a spent one, and after a mid-floor quit a newcomer resumed at full HP in place of a downed hero.
+  Rescues still join mid-run (`TryFieldIfRoom`). They were earned inside the run.
 - **The level-entry screen** (`progress-view`, `HubManager.ShowRunProgressPanel`) — one fixed size
   (`.hub-entry`): run name + "Level N of M", a pip per floor (`BuildLevelPips`), the fielded party as
-  portrait tiles with HP (`BuildPartyTiles`), and Enter Dungeon / Change Party / Back in that order.
+  portrait tiles with HP (`BuildPartyTiles`), and Enter Dungeon / Change Party / Back in that order (Change Party hidden once the run is
+  underway).
 - **MerchantUI** — the Gold sink (gear, and the healing-potion carry cap). See the Progression guide.
   **On the inventory frame since 2026-09-30**: Buy / Sell / Potion Belt tabs, a hero strip choosing
   who gear is compared against, and a detail column reusing the inventory's grants block

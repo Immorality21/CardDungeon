@@ -1093,6 +1093,8 @@ namespace Assets.Scripts.Hub
             _levelName.text = levelEntry.LevelName;
             BuildLevelPips(run.Levels.Count, levelIndex);
             BuildPartyTiles();
+            // Locked from the first floor on - the tiles still say who is going.
+            SetShown(_progressPartyButton, PartyLockedReason() == null);
         }
 
         /// <summary>One pip per floor of the run: cleared, the one about to be entered, the rest ahead.</summary>
@@ -1568,7 +1570,7 @@ namespace Assets.Scripts.Hub
             _partyOpenedFromProgress = false;
             CoverTown();
             SetShown(_lotView, false);
-            _partySelect.Show();
+            _partySelect.Show(PartyLockedReason());
             ResetKeyboardNavigation();
         }
 
@@ -1576,8 +1578,21 @@ namespace Assets.Scripts.Hub
         {
             _partyOpenedFromProgress = true;
             SetShown(_progressView, false);
-            _partySelect.Show();
+            _partySelect.Show(PartyLockedReason());
             ResetKeyboardNavigation();
+        }
+
+        /// <summary>
+        /// Why the lineup cannot change, or null when it can: once a run's first floor is entered the
+        /// party is set until the run is cleared or lost (<see cref="CampaignOps.LocksParty"/>).
+        /// </summary>
+        private string PartyLockedReason()
+        {
+            if (!CampaignOps.LocksParty(_runSaveData))
+            {
+                return null;
+            }
+            return $"The party is set until {CampaignOps.DisplayNameOf(ActiveRunDefinition())} is cleared.";
         }
 
         /// <summary>

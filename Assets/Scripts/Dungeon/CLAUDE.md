@@ -142,7 +142,8 @@ the intended behaviour, not a bug to design around.
   - **mid-run** — `DungeonSaveData.EquippedMagic` (snapshotted each save, for a mid-level resume) and `RunSaveData.EquippedMagic` (committed at `OnDungeonCleared`, carrying to the next floor). These hold the slots **and their spent charges**; nothing else may touch them, or taking a staircase would hand the party a free refill.
   - **across a bench** *(2026-09-28)* — `Run.json`'s `EquippedMagic` and `SummonCharges` are **merged
     per hero** after the opening floor (`EquippedMagicState.MergeSaveData` / `SummonState.MergeSaveData`),
-    because the party can change on the run screen between floors. Overwriting them dropped a benched
+    because the party could change on the run screen between floors (locked once a run starts since
+    2026-10-02, `CampaignOps.LocksParty`; a mid-run rescue still adds a hero, so the merge stays). Overwriting them dropped a benched
     hero: they came back unarmed, and their spent summon came back **full**. A hero fielded for the
     first time mid-run has no entry and is seeded from their loadout at full charges, like a rescue.
   - **run start** — the kit is rebuilt from scratch: each hero's chosen loadout (`MagicLoadout.json`) resolved against what their sphere grid teaches, at full charges (`EquippedMagicState.SeedFromLoadout`).

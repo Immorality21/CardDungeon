@@ -407,9 +407,11 @@ replaced — the tavern is removed and heroes become progression unlocks; see §
   different hat — the last surviving piece of the tavern. The party is now **four wide from the
   first run**, paced by the roster, and priced (as it always really was) by the even XP split. The
   campfire sells **how the XP is divided** instead: `HUB.md` §7 phase 6.
-- **Selection can change mid-run.** *Change Party* is reachable from the run-progress screen between
-  levels, so a run's difficulty band can shift under it. Arguably correct (it is the hub, and gear
-  can already be re-equipped there) but it is the reason the analyzer's band matters.
+- ~~**Selection can change mid-run.**~~ **Resolved 2026-10-02: the party locks once a run's first
+  floor is entered** (`CampaignOps.LocksParty`) until the run is cleared or lost. Swapping was a
+  cheese, not a hub convenience: ability and summon charges are run-scoped, so a fresh hero replaced
+  a spent one, and after a mid-floor quit a newcomer resumed at full HP in place of a downed hero.
+  Gear, the grid and the loadout stay open between floors. A rescue still joins mid-run.
 - ~~**A tavern recruit is invisible to the whole balance model.**~~ **Resolved by §5b** (2026-09-04):
   with the tavern gone, every hero arrives on the modelled path. `MustyTome`'s Intelligence 6 gate
   reading as never-met was a symptom of this and should re-measure correctly once §5b lands.

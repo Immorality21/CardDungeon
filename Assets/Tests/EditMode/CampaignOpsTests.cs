@@ -330,5 +330,30 @@ namespace Tests.EditMode
 
             CollectionAssert.AreEqual(new[] { 1 }, CampaignOps.GetNodesWithOutsidePrerequisites(campaign));
         }
+
+        [Test]
+        public void LocksParty_NoRun_IsOpen()
+        {
+            Assert.IsFalse(CampaignOps.LocksParty(null));
+            Assert.IsFalse(CampaignOps.LocksParty(new RunSaveData()));
+        }
+
+        [Test]
+        public void LocksParty_RunPickedButNotEntered_IsOpen()
+        {
+            Assert.IsFalse(CampaignOps.LocksParty(new RunSaveData { RunKey = "Threshold" }));
+        }
+
+        [Test]
+        public void LocksParty_FirstFloorEntered_IsLocked()
+        {
+            Assert.IsTrue(CampaignOps.LocksParty(new RunSaveData { RunKey = "Threshold", ActiveDungeonSeed = 1234 }));
+        }
+
+        [Test]
+        public void LocksParty_BetweenFloors_IsLocked()
+        {
+            Assert.IsTrue(CampaignOps.LocksParty(new RunSaveData { RunKey = "Threshold", CurrentLevelIndex = 1 }));
+        }
     }
 }

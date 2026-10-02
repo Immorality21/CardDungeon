@@ -70,6 +70,10 @@ namespace Assets.Scripts.Hub
         private MagicLoadoutSaveData _loadout;
         private string _selectedKey;
 
+        // Why the lineup cannot change right now, or null when it can. Set while a run is underway:
+        // who marches out is fixed from the first floor until the run is cleared or lost.
+        private string _lockedReason;
+
         public event Action OnClosed;
 
         public PartySelectUI(VisualElement root, PartyRosterSO catalog)
@@ -140,8 +144,11 @@ namespace Assets.Scripts.Hub
             _root.style.display = DisplayStyle.None;
         }
 
-        public void Show()
+        /// <param name="lockedReason">Non-null while a run is underway: who marches out cannot
+        /// change, and this says why. The leader and the XP split still can.</param>
+        public void Show(string lockedReason = null)
         {
+            _lockedReason = lockedReason;
             _root.style.display = DisplayStyle.Flex;
             _loadout = _files.Load<MagicLoadoutSaveData>();
             _selectedKey = null;
@@ -369,7 +376,13 @@ namespace Assets.Scripts.Hub
             if (_toggleButton != null)
             {
                 bool canToggle;
-                if (fielded)
+                if (_lockedReason != null)
+                {
+                    _toggleButton.text = fielded ? "Stay behind" : "March out";
+                    canToggle = false;
+                    reason = _lockedReason;
+                }
+                else if (fielded)
                 {
                     _toggleButton.text = "Stay behind";
                     canToggle = fieldedKeys.Count > 1;
@@ -538,6 +551,11 @@ namespace Assets.Scripts.Hub
             var hero = FindOwned(HeroRoster.GetOwnedHeroes(_catalog), _selectedKey);
             if (hero == null)
             {
+                return;
+            }
+            if (_lockedReason != null)
+            {
+                SetFeedback(_lockedReason);
                 return;
             }
 

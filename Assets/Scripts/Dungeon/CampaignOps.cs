@@ -483,6 +483,26 @@ namespace Assets.Scripts.Dungeon
             return !string.IsNullOrEmpty(run.DisplayName) ? run.DisplayName : RunKeyOf(run);
         }
 
+        /// <summary>
+        /// Whether the party is locked in for the rest of the run: true once the run's first floor
+        /// has been entered (a floor was generated, or one was cleared), until the run ends by clear
+        /// or death and <c>Run.json</c> goes. A run that has only been picked on the map is still open
+        /// to a change of heart.
+        ///
+        /// <para>Swapping heroes mid-run was a cheese (user decision 2026-10-02): ability and summon
+        /// charges are run-scoped, so benching a hero who spent theirs for one at full traded charge
+        /// scarcity for roster width - and after a mid-floor quit, a hero absent from the floor save
+        /// resumed at full health in place of a downed one.</para>
+        /// </summary>
+        public static bool LocksParty(RunSaveData run)
+        {
+            if (run == null || string.IsNullOrEmpty(run.RunKey))
+            {
+                return false;
+            }
+            return run.CurrentLevelIndex > 0 || run.ActiveDungeonSeed != 0;
+        }
+
         // --- Play order ------------------------------------------------------------------------
 
         /// <summary>
