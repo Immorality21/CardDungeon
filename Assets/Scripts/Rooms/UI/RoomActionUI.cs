@@ -545,14 +545,17 @@ namespace Assets.Scripts.Rooms
         private static string DescribeFoes(Room room)
         {
             var foes = new List<FoeEntry>();
-            foreach (var enemy in room.Enemies)
+            // The boss leads the line and is always named: its banner already says who it is, so
+            // "Floating Eye + 1 unknown" under "Abyssal Warden" hid nothing and read as a mistake
+            // (playtest 2 finding 3).
+            foreach (var enemy in room.Enemies.Where(e => e != null).OrderBy(e => e.IsBoss ? 0 : 1))
             {
-                if (enemy == null || !enemy.IsAlive)
+                if (!enemy.IsAlive)
                 {
                     continue;
                 }
-                bool seen = enemy.Definition != null && MetaProgressManager.HasInstance
-                    && MetaProgressManager.Instance.IsEnemySeen(enemy.Definition.SaveKey);
+                bool seen = enemy.IsBoss || (enemy.Definition != null && MetaProgressManager.HasInstance
+                    && MetaProgressManager.Instance.IsEnemySeen(enemy.Definition.SaveKey));
                 string kind = enemy.Definition != null ? enemy.Definition.SaveKey : enemy.DisplayName;
                 foes.Add(new FoeEntry(kind, enemy.DisplayName, seen));
             }

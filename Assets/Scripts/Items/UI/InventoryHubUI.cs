@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Enemies.UI;
 using Assets.Scripts.Heroes;
@@ -570,6 +571,14 @@ namespace Assets.Scripts.Items.UI
             string caption = wornBy != null
                 ? $"Worn by {wornBy}"
                 : ItemPresenter.RarityLabel(so.Rarity);
+            // The chips are the change from what this hero wears, not what the item grants - say so,
+            // or "+2 STR" here reads as a contradiction of the detail's "Grants +4 STR" (playtest 2
+            // finding 4).
+            var worn = WornItem(so.SlotType);
+            if (worn != null && worn != so)
+            {
+                caption += $" · vs {worn.DisplayName}";
+            }
             entry.Row = BuildRow(so.Icon, so.DisplayName, caption, string.Empty, so, out entry.Cursor);
 
             // The two biggest changes it makes, each in its own colour: one number alone lied - a
@@ -688,7 +697,15 @@ namespace Assets.Scripts.Items.UI
             var nodes = ActivatedNodesOf(hero);
             var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, nodes);
             int slots = SlotCount(hero, nodes);
-            var carried = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), slots);
+            // Mid-run the run's own slots stand (spent charges and all) and the loadout only fills
+            // what is still empty - the kit the next floor will field, not the one the hub wishes.
+            var runEntry = RunEntryFor(_selectedHeroKey);
+            var kit = MagicLoadoutOps.RunKit(runEntry, known, _loadout.ChosenFor(_selectedHeroKey), slots);
+            var carried = new List<string>();
+            foreach (var slot in kit)
+            {
+                carried.Add(slot.Key);
+            }
 
             // Left: the slots as pips, then what fills them.
             var pips = new VisualElement();
@@ -705,11 +722,14 @@ namespace Assets.Scripts.Items.UI
             }
             _left?.Add(pips);
 
-            foreach (var key in carried)
+            foreach (var slot in kit)
             {
-                var magic = Magic(key);
-                var row = BuildRow(magic != null ? magic.Icon : null, magic != null ? magic.DisplayName : key,
-                    $"{ChargesOf(known, key)} charges a run", string.Empty, null, out _);
+                var magic = Magic(slot.Key);
+                string caption = slot.InRun ? $"{slot.Charges} of {slot.MaxCharges} charges left this run"
+                               : runEntry != null ? $"{slot.MaxCharges} charges · joins on the next floor"
+                               : $"{slot.MaxCharges} charges a run";
+                var row = BuildRow(magic != null ? magic.Icon : null, magic != null ? magic.DisplayName : slot.Key,
+                    caption, string.Empty, null, out _);
                 row.AddToClassList("cd-inv-row--static");
                 _left?.Add(row);
             }
@@ -733,16 +753,17 @@ namespace Assets.Scripts.Items.UI
                 var key = entry.Key;
                 var magic = Magic(key);
                 bool isCarried = carried.Contains(key);
+                bool inRun = InRun(kit, key);
 
                 var listEntry = new Entry
                 {
-                    Preview = () => ShowAbilityDetail(hero, magic, key, isCarried, entry.Value, unit, known, slots),
+                    Preview = () => ShowAbilityDetail(hero, magic, key, isCarried, inRun, entry.Value, unit, known, slots, runEntry),
                     Confirm = () => ToggleSpell(key),
                 };
                 listEntry.Row = BuildRow(
                     magic != null ? magic.Icon : null,
                     magic != null ? magic.DisplayName : key,
-                    isCarried ? "Carried" : "Not carried",
+                    inRun ? "In this run" : isCarried ? "Carried" : "Not carried",
                     isCarried ? "✓" : string.Empty,
                     null,
                     out listEntry.Cursor);
@@ -768,18 +789,46 @@ namespace Assets.Scripts.Items.UI
             // A hero never goes in with nothing: an empty choice means "never chosen" and auto-fills
             // (MagicLoadoutOps.Resolve, by design), so putting away the last one would quietly carry
             // something else instead. Refuse it; the detail pane already says why.
-            var carriedNow = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), SlotCount(hero, nodes));
-            if (carriedNow.Count == 1 && carriedNow[0] == magicKey)
+            int slots = SlotCount(hero, nodes);
+            var runEntry = RunEntryFor(_selectedHeroKey);
+            var kit = MagicLoadoutOps.RunKit(runEntry, known, _loadout.ChosenFor(_selectedHeroKey), slots);
+            if (kit.Count == 1 && kit[0].Key == magicKey)
+            {
+                return;
+            }
+            // A spell the run already holds stays until the run ends - the detail pane says so.
+            if (InRun(kit, magicKey))
             {
                 return;
             }
             var entry = _loadout.For(_selectedHeroKey);
-            entry.EquippedKeys = MagicLoadoutOps.Toggle(known, entry.EquippedKeys, magicKey, SlotCount(hero, nodes));
+            entry.EquippedKeys = runEntry != null
+                ? MagicLoadoutOps.ToggleMidRun(known, runEntry, entry.EquippedKeys, magicKey, slots)
+                : MagicLoadoutOps.Toggle(known, entry.EquippedKeys, magicKey, slots);
             _files.Save(_loadout);
 
             int keep = _listIndex;
             RefreshBody();
             SetListIndex(keep);
+        }
+
+        /// <summary>The hero's slots in the run underway, or null between runs (and for a hero the
+        /// run does not name). See <see cref="RunKitSource"/>.</summary>
+        private MagicSlotSaveData RunEntryFor(string heroKey)
+        {
+            return RunKitSource.EntryFor(RunKitSource.Load(_files), heroKey);
+        }
+
+        private static bool InRun(List<MagicLoadoutOps.RunKitSlot> kit, string key)
+        {
+            foreach (var slot in kit)
+            {
+                if (slot.InRun && slot.Key == key)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static int SlotCount(HeroSO hero, List<string> nodes)
@@ -997,8 +1046,8 @@ namespace Assets.Scripts.Items.UI
             }
         }
 
-        private void ShowAbilityDetail(HeroSO hero, MagicSO magic, string key, bool isCarried, int charges,
-            ICombatUnit unit, List<KeyValuePair<string, int>> known, int slots)
+        private void ShowAbilityDetail(HeroSO hero, MagicSO magic, string key, bool isCarried, bool inRun, int charges,
+            ICombatUnit unit, List<KeyValuePair<string, int>> known, int slots, MagicSlotSaveData runEntry)
         {
             if (magic == null)
             {
@@ -1039,9 +1088,14 @@ namespace Assets.Scripts.Items.UI
                 AddLine($"Forge level {level}.");
             }
 
+            if (inRun)
+            {
+                AddNote("In this run's slots until the run ends. Its charges come back at a refuge.");
+                return;
+            }
             if (isCarried)
             {
-                var carriedNow = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), slots);
+                var carriedNow = MagicLoadoutOps.RunKit(runEntry, known, _loadout.ChosenFor(_selectedHeroKey), slots);
                 AddNote(carriedNow.Count == 1
                     ? "Carried. A hero always takes at least one ability - carry another to swap this one out."
                     : "Carried. Enter puts it away.");
@@ -1049,8 +1103,11 @@ namespace Assets.Scripts.Items.UI
             }
 
             // A full loadout drops its oldest pick to make room - say which before it happens.
+            // Mid-run only the free slots move, so a spell the run holds is never the one displaced.
             var chosen = MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(_selectedHeroKey), slots);
-            var after = MagicLoadoutOps.Toggle(known, new List<string>(chosen), key, slots);
+            var after = runEntry != null
+                ? MagicLoadoutOps.ToggleMidRun(known, runEntry, chosen, key, slots)
+                : MagicLoadoutOps.Toggle(known, new List<string>(chosen), key, slots);
             string displaced = null;
             foreach (var carriedKey in chosen)
             {
@@ -1061,8 +1118,14 @@ namespace Assets.Scripts.Items.UI
                     break;
                 }
             }
+            if (runEntry != null && !after.Contains(key))
+            {
+                AddNote("Every slot is in use this run. It can be carried from the next run on.");
+                return;
+            }
             AddNote(displaced != null
                 ? $"Slots are full: carrying this puts {displaced} away."
+                : runEntry != null ? "Enter to carry it from the next floor, at full charges."
                 : "Enter to carry it into the next run.");
         }
 

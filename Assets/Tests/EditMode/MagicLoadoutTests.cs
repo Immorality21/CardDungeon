@@ -178,5 +178,72 @@ namespace Tests.EditMode
             CollectionAssert.AreEqual(new[] { "Slash", "WarCry" }, save.ChosenFor("Warrior"));
             CollectionAssert.IsEmpty(save.ChosenFor("Acolyte"), "one hero's choice is not another's");
         }
+
+        // ---------------------------------------------------------------- mid-run
+
+        private static MagicSlotSaveData RunEntry(params (string key, int charges)[] slots)
+        {
+            var entry = new MagicSlotSaveData { HeroKey = "Warrior" };
+            foreach (var (key, charges) in slots)
+            {
+                entry.Slots.Add(new MagicSlotEntry { MagicKey = key, Charges = charges, MaxCharges = 2 });
+            }
+            return entry;
+        }
+
+        [Test]
+        public void RunKit_NoRunEntry_IsTheLoadoutAtFullCharges()
+        {
+            var kit = MagicLoadoutOps.RunKit(null, Known("Slash", "Sunder"), null, 2);
+
+            Assert.AreEqual(2, kit.Count);
+            Assert.IsFalse(kit[0].InRun);
+            Assert.AreEqual(2, kit[0].Charges);
+        }
+
+        [Test]
+        public void RunKit_MidRun_ShowsSpentChargesAndFillsTheEmptySlot()
+        {
+            // Playtest 2 findings 1 and 2: the hub said "2 charges" for a spent spell, and "Carried"
+            // for one the dungeon never put in a slot.
+            var kit = MagicLoadoutOps.RunKit(RunEntry(("Slash", 0), ("", 0)), Known("Slash", "Sunder"),
+                new List<string> { "Slash", "Sunder" }, 2);
+
+            Assert.AreEqual("Slash", kit[0].Key);
+            Assert.IsTrue(kit[0].InRun);
+            Assert.AreEqual(0, kit[0].Charges, "what the run has left, not the node's authored charges");
+            Assert.AreEqual("Sunder", kit[1].Key);
+            Assert.IsFalse(kit[1].InRun);
+            Assert.AreEqual(2, kit[1].Charges, "lands at full on the next floor");
+        }
+
+        [Test]
+        public void ToggleMidRun_SpellInTheRun_CannotBePutAway()
+        {
+            var chosen = MagicLoadoutOps.ToggleMidRun(Known("Slash", "Sunder"), RunEntry(("Slash", 0), ("", 0)),
+                new List<string> { "Slash" }, "Slash", 2);
+
+            CollectionAssert.AreEqual(new[] { "Slash" }, chosen);
+        }
+
+        [Test]
+        public void ToggleMidRun_FullFreeSlots_SwapsOnlyTheFreeOne()
+        {
+            var run = RunEntry(("Slash", 1), ("", 0));
+            var chosen = MagicLoadoutOps.ToggleMidRun(Known("Slash", "Sunder", "Cleave"), run,
+                new List<string> { "Slash", "Sunder" }, "Cleave", 2);
+
+            CollectionAssert.AreEqual(new[] { "Slash", "Cleave" }, chosen, "the spent Slash is never the one dropped");
+        }
+
+        [Test]
+        public void ToggleMidRun_NoFreeSlot_ChangesNothing()
+        {
+            var run = RunEntry(("Slash", 0), ("Sunder", 1));
+            var chosen = MagicLoadoutOps.ToggleMidRun(Known("Slash", "Sunder", "Cleave"), run,
+                new List<string> { "Slash", "Sunder" }, "Cleave", 2);
+
+            CollectionAssert.AreEqual(new[] { "Slash", "Sunder" }, chosen);
+        }
     }
 }

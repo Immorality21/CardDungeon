@@ -182,6 +182,9 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
 Every item, one line each, grouped by the plan file that holds it. **Open the plan, not the whole
 backlog.**
 
+- **Second fresh-save playtest (2026-10-02)** → [`PLAYTEST_FINDINGS.md`](PLAYTEST_FINDINGS.md): 13
+  open (the 4 bugs are fixed), 7 polish and 6 balance and content, deleted from that file as they ship.
+
 ### [The specialization rebuild](plans/SPECIALIZATION.md) — the live thread
 
 | § | | state |

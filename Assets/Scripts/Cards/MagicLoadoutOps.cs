@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Assets.Scripts.Cards
@@ -110,6 +111,116 @@ namespace Assets.Scripts.Cards
             }
             current.Add(key);
             return current;
+        }
+
+        /// <summary>One filled slot of a run's kit, as the hub shows it mid-run.</summary>
+        public struct RunKitSlot
+        {
+            public string Key;
+            public int Charges;
+            public int MaxCharges;
+
+            /// <summary>True when the run already holds it: its spent charges stand and it cannot
+            /// be put away until the run ends. False for a loadout pick that would fill an empty
+            /// slot, at full charges, on the next floor.</summary>
+            public bool InRun;
+        }
+
+        /// <summary>
+        /// What the hero's next floor will field, filled slots in slot order: the run's slots as
+        /// saved (<paramref name="runEntry"/>, spent charges and all), then the loadout's picks in
+        /// whatever slots are still empty, at full charges. The same two steps as
+        /// <c>EquippedMagicState.Restore</c> + <c>SeedFromLoadout</c> on a later floor, so the hub
+        /// never promises a kit the dungeon does not deliver (playtest 2 findings 1 and 2). A null
+        /// entry, which means no run underway or a hero the run does not name, is just the loadout.
+        /// </summary>
+        public static List<RunKitSlot> RunKit(
+            MagicSlotSaveData runEntry, IList<KeyValuePair<string, int>> known, IList<string> chosen, int slotCount)
+        {
+            var slots = new RunKitSlot?[Math.Max(0, slotCount)];
+            if (runEntry?.Slots != null)
+            {
+                for (int i = 0; i < runEntry.Slots.Count && i < slots.Length; i++)
+                {
+                    var stored = runEntry.Slots[i];
+                    if (stored == null || string.IsNullOrEmpty(stored.MagicKey))
+                    {
+                        continue;
+                    }
+                    int max = stored.MaxCharges > 0 ? stored.MaxCharges : EquippedMagicState.DefaultMaxCharges;
+                    slots[i] = new RunKitSlot
+                    {
+                        Key = stored.MagicKey,
+                        Charges = Math.Min(stored.Charges, max),
+                        MaxCharges = max,
+                        InRun = true
+                    };
+                }
+            }
+
+            foreach (var key in Resolve(known, chosen, slotCount))
+            {
+                if (Array.Exists(slots, s => s.HasValue && s.Value.Key == key))
+                {
+                    continue;
+                }
+                int index = Array.FindIndex(slots, s => !s.HasValue);
+                if (index < 0)
+                {
+                    break;
+                }
+                int charges = Math.Max(1, ChargesFor(known, key));
+                slots[index] = new RunKitSlot { Key = key, Charges = charges, MaxCharges = charges, InRun = false };
+            }
+
+            var result = new List<RunKitSlot>();
+            foreach (var slot in slots)
+            {
+                if (slot.HasValue)
+                {
+                    result.Add(slot.Value);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// <see cref="Toggle"/> while a run is underway: the spells already in the run's slots stay
+        /// put, and the toggle only moves the slots still free. The returned choice lists the run's
+        /// spells first, so the hub's loadout and the run's kit agree. A key the run holds comes back
+        /// unchanged, and the caller says why.
+        /// </summary>
+        public static List<string> ToggleMidRun(
+            IList<KeyValuePair<string, int>> known, MagicSlotSaveData runEntry, IList<string> chosen,
+            string key, int slotCount)
+        {
+            var kit = RunKit(runEntry, known, chosen, slotCount);
+            var locked = new List<string>();
+            var free = new List<string>();
+            foreach (var slot in kit)
+            {
+                (slot.InRun ? locked : free).Add(slot.Key);
+            }
+
+            if (!locked.Contains(key) && Knows(known, key))
+            {
+                int freeSlots = slotCount - locked.Count;
+                if (free.Contains(key))
+                {
+                    free.Remove(key);
+                }
+                else if (freeSlots > 0)
+                {
+                    while (free.Count >= freeSlots)
+                    {
+                        free.RemoveAt(0);
+                    }
+                    free.Add(key);
+                }
+            }
+
+            locked.AddRange(free);
+            return locked;
         }
 
         /// <summary>Charges the hero's known-magic entry carries for <paramref name="key"/>, or 0

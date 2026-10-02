@@ -265,6 +265,61 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void SeedFromLoadout_SpellLearnedBetweenFloors_FillsTheEmptySlotAtFullCharges()
+        {
+            // Playtest 2 finding 1: the Warrior learned Sunder between floors, the Storehouse said
+            // "Carried", and the dungeon slot was 0/0 - only heroes Run.json did not name were seeded.
+            var heal = Magic("Heal");
+            var fireball = Magic("Fireball");
+            var floor1Hero = HeroWithNodes("Acolyte", KnownNode("n-heal", "Heal", 2));
+            var floor1 = new EquippedMagicState();
+            floor1.Initialize(new List<Hero> { floor1Hero });
+            floor1.SeedFromLoadout(new List<Hero> { floor1Hero }, null, Catalog(heal));
+            floor1.TryCast("Acolyte", 0);
+            var runSave = floor1.GetSaveData();
+
+            // Between floors the hub teaches Fireball, and the player now carries only Fireball.
+            var floor2Hero = HeroWithNodes("Acolyte", KnownNode("n-heal", "Heal", 2), KnownNode("n-fire", "Fireball", 3));
+            var floor2 = new EquippedMagicState();
+            floor2.Initialize(new List<Hero> { floor2Hero });
+            floor2.Restore(runSave, Catalog(heal, fireball));
+            floor2.SeedFromLoadout(new List<Hero> { floor2Hero }, _ => new List<string> { "Fireball" }, Catalog(heal, fireball));
+
+            var slots = floor2.GetSlots("Acolyte");
+            Assert.AreEqual(heal, slots[0].Magic, "a carried spell cannot be swapped out mid-run");
+            Assert.AreEqual(1, slots[0].Charges, "and keeps what it spent");
+            Assert.AreEqual(fireball, slots[1].Magic, "the new spell lands in the empty slot");
+            Assert.AreEqual(3, slots[1].Charges, "at full charges");
+        }
+
+        [Test]
+        public void SeedFromLoadout_SpellLearnedBetweenFloors_NoEmptySlot_DoesNotLand()
+        {
+            var heal = Magic("Heal");
+            var ward = Magic("Ward");
+            var fireball = Magic("Fireball");
+            var floor1Hero = HeroWithNodes("Acolyte", KnownNode("n-heal", "Heal", 2), KnownNode("n-ward", "Ward", 2));
+            var floor1 = new EquippedMagicState();
+            floor1.Initialize(new List<Hero> { floor1Hero });
+            floor1.SeedFromLoadout(new List<Hero> { floor1Hero }, null, Catalog(heal, ward));
+            floor1.TryCast("Acolyte", 0);
+            floor1.TryCast("Acolyte", 0);
+
+            var floor2Hero = HeroWithNodes("Acolyte",
+                KnownNode("n-heal", "Heal", 2), KnownNode("n-ward", "Ward", 2), KnownNode("n-fire", "Fireball", 3));
+            var floor2 = new EquippedMagicState();
+            floor2.Initialize(new List<Hero> { floor2Hero });
+            floor2.Restore(floor1.GetSaveData(), Catalog(heal, ward, fireball));
+            floor2.SeedFromLoadout(new List<Hero> { floor2Hero }, _ => new List<string> { "Fireball", "Ward" },
+                Catalog(heal, ward, fireball));
+
+            var slots = floor2.GetSlots("Acolyte");
+            Assert.AreEqual(heal, slots[0].Magic, "the spent spell is not traded for a fresh one");
+            Assert.AreEqual(0, slots[0].Charges);
+            Assert.AreEqual(ward, slots[1].Magic);
+        }
+
+        [Test]
         public void SeedFromLoadout_UnresolvableKeyLeavesTheSlotEmpty()
         {
             // A renamed magic asset must not brick a run.

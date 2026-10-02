@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies.UI;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
@@ -438,19 +439,21 @@ namespace Assets.Scripts.Hub
             var nodes = NodesOf(hero);
             var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, nodes);
             int slots = EquippedMagicState.DefaultSlotCount + SphereGridOps.SlotBonusForNodes(hero.SphereGrid, nodes);
-            var carried = _loadout != null
-                ? MagicLoadoutOps.Resolve(known, _loadout.ChosenFor(hero.SaveKey), slots)
-                : new List<string>();
+            // Mid-run, what the run holds with what it has left - not the hub loadout at full
+            // (playtest 2 finding 2).
+            var runEntry = RunKitSource.EntryFor(RunKitSource.Load(_files), hero.SaveKey);
+            var carried = MagicLoadoutOps.RunKit(runEntry, known, _loadout?.ChosenFor(hero.SaveKey), slots);
             if (carried.Count == 0)
             {
                 _detailBody.Add(MakeLabel("Nothing carried.", "cd-inv-detail__line"));
             }
-            foreach (var key in carried)
+            foreach (var slot in carried)
             {
-                var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(key) : null;
-                string name = magic != null ? magic.DisplayName : key;
-                _detailBody.Add(MakeLabel($"{name}  ·  {MagicLoadoutOps.ChargesFor(known, key)} charges",
-                    "cd-inv-detail__line"));
+                var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(slot.Key) : null;
+                string name = magic != null ? magic.DisplayName : slot.Key;
+                string charges = slot.InRun ? $"{slot.Charges} of {slot.MaxCharges} charges left"
+                               : $"{slot.MaxCharges} charges";
+                _detailBody.Add(MakeLabel($"{name}  ·  {charges}", "cd-inv-detail__line"));
             }
 
             if (seat == 0)

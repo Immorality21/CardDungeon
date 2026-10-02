@@ -146,6 +146,9 @@ the intended behaviour, not a bug to design around.
     2026-10-02, `CampaignOps.LocksParty`; a mid-run rescue still adds a hero, so the merge stays). Overwriting them dropped a benched
     hero: they came back unarmed, and their spent summon came back **full**. A hero fielded for the
     first time mid-run has no entry and is seeded from their loadout at full charges, like a rescue.
+    Since 2026-10-02 every fielded hero is seeded the same way after the restore, on fresh floors and
+    resumes alike: seeding never overwrites, so it only fills slots still empty, which means a spell
+    learned or a slot bought between floors.
   - **run start** — the kit is rebuilt from scratch: each hero's chosen loadout (`MagicLoadout.json`) resolved against what their sphere grid teaches, at full charges (`EquippedMagicState.SeedFromLoadout`).
 
   **This was three stores until 2026-09-04.** `MagicLoadout.json` used to hold whole slot states, banked on level clear and **merged** per hero, because Draw meant a kit was something a run *accumulated* and could lose. Magic comes off the grid now and nothing in a run changes what a hero knows, so there is nothing to bank: `CommitMagicLoadout` and `EquippedMagicState.Merge` are both gone, and the file holds only the player's hub-side choice. See the Magic guide.

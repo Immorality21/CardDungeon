@@ -428,20 +428,15 @@ namespace Assets.Scripts.Dungeon
                     MagicState.Restore(carried, MagicCatalog.Instance.GetMagic);
                 }
 
-                // A hero fielded mid-run for the first time (swapped in on the run screen) has no
-                // entry to restore. They arrive armed at full charges, exactly as a rescued hero
-                // does - they spent nothing on the earlier floors. Anyone Run.json does name keeps
-                // what they had, benched floors in between included (see MergeSaveData).
+                // Then the hub's loadout fills whatever slot is still empty, at full charges: a
+                // hero with no entry (fielded for the first time) arrives fully armed like a
+                // rescue, and a spell learned or a slot bought between floors lands in the space
+                // it was paid for (playtest 2 finding 1). Seeding never overwrites, so a carried
+                // spell keeps its spent charges and cannot be swapped for a fresh one mid-run.
                 if (!EquippedMagicState.RefillsOnLevelStart(RunLevelIndex))
                 {
-                    var newcomers = Party.Heroes
-                        .Where(h => h != null && (carried == null || !carried.Any(e => e != null && e.HeroKey == h.HeroKey)))
-                        .ToList();
-                    if (newcomers.Count > 0)
-                    {
-                        var chosen = _fileHandler.Load<MagicLoadoutSaveData>();
-                        MagicState.SeedFromLoadout(newcomers, chosen.ChosenFor, MagicCatalog.Instance.GetMagic);
-                    }
+                    var chosen = _fileHandler.Load<MagicLoadoutSaveData>();
+                    MagicState.SeedFromLoadout(Party.Heroes, chosen.ChosenFor, MagicCatalog.Instance.GetMagic);
                 }
             }
 
@@ -599,6 +594,10 @@ namespace Assets.Scripts.Dungeon
             if (MagicCatalog.HasInstance)
             {
                 MagicState.Restore(saveData.EquippedMagic, MagicCatalog.Instance.GetMagic);
+                // Same rule as a fresh floor: an empty slot takes from the hub's loadout, so a
+                // spell learned while the floor was paused is not lost until the next run.
+                var chosen = _fileHandler.Load<MagicLoadoutSaveData>();
+                MagicState.SeedFromLoadout(Party.Heroes, chosen.ChosenFor, MagicCatalog.Instance.GetMagic);
             }
 
             Summons = new SummonState();
