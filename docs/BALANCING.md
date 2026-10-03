@@ -2483,7 +2483,7 @@ Three heroes gained unlock sources (`plans/SPECIALIZATION.md` §5b). Measured A/
 
 ## §5y — The tutorial got its fights back, and events became once per floor (2026-10-02)
 
-Triggered by the second playtest (`PLAYTEST_FINDINGS.md` 13–17): The Threshold's floors 1–3 were "one
+Triggered by the second playtest (findings 13–17, ledgered in `NEXT_STEPS.md`): The Threshold's floors 1–3 were "one
 or two enemies a fight, mostly a lone Floating Eye", no potion was needed, and the Warden (50 HP) died
 in 3 rounds. **The floor simulator agreed with the player, not the closed form.** Closed form read
 floor 4 at load 0.80; the Adaptive sim ended it at 60% HP, 1.4 potions, 0 wipes - so on these shallow
@@ -2527,3 +2527,10 @@ Asked for a clean starting point, not a balance pass. Smallest levers only:
   The Hollow Vault's boss danger barely answers to its boss's stats (112 HP/16 STR → 80/10 only took it
   3.25 → 2.39) or to its Difficulty, because the room is dominated by its adds and the floor's load is
   ~14. That is a real problem for the balance pass, not one to paper over with a stat tweak.
+- **Follow-up, 2026-10-03: every hero now starts on their first ability** (`Heroes/CLAUDE.md`). That
+  reshuffled each grid's opening (signature free at depth 0, the old +HP start node moved to depth 2 at
+  30 XP), which changes what `GreedySpend` buys early and nudged two steps past the 75% ceiling again.
+  Same smallest-lever rule: Threshold **Upper Halls 1.2 → 1.15** (0.43 → 0.72, a 67% step) and Blood
+  Stair **Ossuary Gate back to 2.55, Red Cloister 3.6 → 3.2** (loads 0.14/0.22/0.32/0.54/1.23). The
+  Red Cloister answers to Difficulty weakly (its boss carries flat overrides), which is why floor 3
+  went back up rather than floor 4 further down.

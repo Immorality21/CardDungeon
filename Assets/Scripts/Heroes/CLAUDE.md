@@ -16,9 +16,14 @@
   default needs **no save migration**: nothing about it is ever written down. `TotalGridCost` is the
   one place that deliberately excludes them, because a node nobody is charged for is not part of what
   the grid costs.
-- **`UnlockedByDefault` is how a hero arrives holding something.** The **Warrior starts knowing
-  Slash** and the **Paladin Holy Touch** (`warrior-slash`, `paladin-sig` — both priced at 0), so a
-  brand-new hero can cast on their first turn rather than after their first spend. Three rules:
+- **`UnlockedByDefault` is how a hero arrives holding something.** **Every hero starts on their first
+  ability** *(2026-10-03)*: each grid's signature `MagicKnown` node (`warrior-slash`, `<hero>-sig`) is
+  its **`StartNodeKey`**, at the bottom of the spine, free and default — so a brand-new hero can cast on
+  their first turn rather than after their first spend. It used to sit third on the spine
+  (start → trunk-1 → signature), and being default made it active with the node below it unbought: the
+  grid read as if a node had been skipped. Starting *on* the default removes the gap; the old
+  `<hero>-start` stat node took the signature's slot (depth 2, priced 30), keys unchanged, so saves
+  carry over. The grid shows a magic start as ✦ inside the start ring rather than ★. Three rules:
   **price it 0** (`SphereGridCostCurveTests` fails otherwise, and a non-zero price only misreports
   what the grid costs); it **opens its neighbours**, so the trunk behind it is on the frontier from
   the start; and a `MagicKnown` default has to be marked discovered somewhere other than the buy
@@ -43,7 +48,7 @@
 
   Three details that matter. The magic is named by **key, not reference**, because Heroes does not depend on Cards (the dependency runs the other way, and saves reference magic by key too) — resolution happens in `EquippedMagicState.SeedFromLoadout` where the catalog lives. `KnownMagicForNodes` walks the **grid**, not the save, so a hero's known list reads the same however they clicked, which is what makes the loadout auto-fill deterministic. And `GrantedCharges` is the real power dial, not `XpCost`: it is the whole run's allowance of that spell, restored only by resting in a refuge.
 
-  Every hero's grid authors a cheap **signature** node near the start plus spells further out on each branch. Two of those signatures are now free rather than cheap — `warrior-slash` (Slash) and `paladin-sig` (Holy Touch) are `UnlockedByDefault`, so those heroes arrive able to cast; the other five still buy theirs. `ElementalContentTests` fails if a grid has no `MagicKnown` node, if a node names a magic that does not exist, **or if any magic in the catalog is on no grid at all** — with no Draw there is no second route, so an unplaced spell is uncastable by anyone.
+  Every hero's grid authors a cheap **signature** node near the start plus spells further out on each branch. All seven signatures are free and the grid's start node (see `UnlockedByDefault` above), so every hero arrives able to cast. `ElementalContentTests` fails if a grid has no `MagicKnown` node, if a node names a magic that does not exist, **or if any magic in the catalog is on no grid at all** — with no Draw there is no second route, so an unplaced spell is uncastable by anyone.
 
 ## The roster is seven, and every grid is authored
 

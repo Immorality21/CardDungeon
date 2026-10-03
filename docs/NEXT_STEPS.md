@@ -182,9 +182,6 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
 Every item, one line each, grouped by the plan file that holds it. **Open the plan, not the whole
 backlog.**
 
-- **Second fresh-save playtest (2026-10-02)** → [`PLAYTEST_FINDINGS.md`](PLAYTEST_FINDINGS.md): 13
-  open (the 4 bugs are fixed), 7 polish and 6 balance and content, deleted from that file as they ship.
-
 ### [The specialization rebuild](plans/SPECIALIZATION.md) — the live thread
 
 | § | | state |
@@ -280,6 +277,20 @@ per-subsystem `CLAUDE.md` files — not here.
   the pause order, the HUD's camera safe area (`CameraSafeArea`), Options dial bars, the hub purse,
   element colours, the map legend and `WaitingLine`, a left-docked Inspect with one-row drops, the
   victory order with XP per hero, and a run-complete screen that names the run and what it opened.
+
+- **Second fresh-save playtest** (2026-10-02) — 18 findings, worked through by 2026-10-03 and the
+  to-do file deleted once clear; comments cite them as "playtest 2 finding N". Shipped: an ability
+  learned mid-run fills a slot (1), real run slots/charges in the Storehouse and campfire (2), the boss
+  leads the foe line (3), inventory chips name their comparison (4), event choices wrap beside their
+  tag (5), victory / level-clear window fixes (6), stat-node glyphs and a compact tutorial banner over
+  the grid (7), the camera clears the room bars too (8), campfire roster captions (9), an affordable-only
+  upgrade hammer (10), neutral party-lock wording (11), Threshold rooms with 2-3 enemies and a 65 HP
+  Warden (13), a Merchant priced in scrap rather than timber (14), events once per floor (15), a Treasury
+  gamble that pays more than the safe choice (16), no level-long afflictions in the exit room (17), and
+  every hero starting on their first ability (18). The balance side is a clean baseline, not a tuned
+  one — see `BALANCING.md` §5y. Not covered by that playtest: death and retry, Leave the Dungeon, the
+  Merchant/Bestiary/Forge screens, summons, The Warrens, The Blood Stair, Drowned March floors 3-5,
+  mid-run hero swaps.
 
 - **First fresh-save playtest** (2026-09-28) — 24 findings, worked through the same day and the
   to-do file deleted once clear; code comments cite them as "playtest finding N". What remains lives

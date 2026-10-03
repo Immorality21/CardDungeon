@@ -181,7 +181,9 @@ namespace Assets.Scripts.Heroes.UI
         /// </summary>
         public static string Glyph(SphereGridNode node, bool isStart)
         {
-            if (isStart)
+            // Every grid starts on the hero's first ability since 2026-10-03, and a star would hide
+            // what it teaches - the start ring (sg-node--start) already says where the grid begins.
+            if (isStart && (node == null || node.Kind != SphereNodeKind.MagicKnown))
             {
                 return "★";
             }

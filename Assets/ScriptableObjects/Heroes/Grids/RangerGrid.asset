@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
   m_Name: RangerGrid
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
-  StartNodeKey: ranger-start
+  StartNodeKey: ranger-sig
   Nodes:
   - Key: ranger-start
     DisplayName: 
     Kind: 0
-    XpCost: 15
+    XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 0, y: 0}
+    Position: {x: 0, y: -180}
     Gains:
       Values:
       - Type: 7
@@ -31,7 +31,8 @@ MonoBehaviour:
     GrantedCharges: 2
     GrantedSummonKey: 
     SummonAmount: 1
-    Neighbors: []
+    Neighbors:
+    - ranger-trunk-1
   - Key: ranger-trunk-1
     DisplayName: 
     Kind: 0
@@ -50,14 +51,14 @@ MonoBehaviour:
     GrantedSummonKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-start
+    - ranger-sig
   - Key: ranger-sig
     DisplayName: 
     Kind: 3
-    XpCost: 30
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
-    Position: {x: 0, y: -180}
+    Position: {x: 0, y: 0}
     Gains:
       Values: []
     ResistType: 0
@@ -66,8 +67,7 @@ MonoBehaviour:
     GrantedCharges: 2
     GrantedSummonKey: 
     SummonAmount: 1
-    Neighbors:
-    - ranger-trunk-1
+    Neighbors: []
   - Key: ranger-trunk-2
     DisplayName: 
     Kind: 0
@@ -88,7 +88,7 @@ MonoBehaviour:
     GrantedSummonKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-sig
+    - ranger-start
   - Key: ranger-trunk-slot
     DisplayName: 
     Kind: 2

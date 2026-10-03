@@ -178,6 +178,14 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Glyph_AnAbilityStart_ShowsTheAbility()
+        {
+            var node = new SphereGridNode { Key = "n", Kind = SphereNodeKind.MagicKnown };
+
+            Assert.AreEqual("✦", SphereGridPresenter.Glyph(node, true));
+        }
+
+        [Test]
         public void Glyph_StatNode_ShowsItsLargestGain()
         {
             var hp = new SphereGridNode { Key = "a", Kind = SphereNodeKind.Stat };

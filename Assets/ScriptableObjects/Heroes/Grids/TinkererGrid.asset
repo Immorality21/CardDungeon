@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
   m_Name: TinkererGrid
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
-  StartNodeKey: tinkerer-start
+  StartNodeKey: tinkerer-sig
   Nodes:
   - Key: tinkerer-start
     DisplayName: 
     Kind: 0
-    XpCost: 15
+    XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 0, y: 0}
+    Position: {x: 0, y: -180}
     Gains:
       Values:
       - Type: 7
@@ -29,7 +29,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
-    Neighbors: []
+    Neighbors:
+    - tinkerer-trunk-1
   - Key: tinkerer-trunk-1
     DisplayName: 
     Kind: 0
@@ -46,22 +47,21 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - tinkerer-start
+    - tinkerer-sig
   - Key: tinkerer-sig
     DisplayName: 
     Kind: 3
-    XpCost: 30
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
-    Position: {x: 0, y: -180}
+    Position: {x: 0, y: 0}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: LightningBolt
     GrantedCharges: 2
-    Neighbors:
-    - tinkerer-trunk-1
+    Neighbors: []
   - Key: tinkerer-trunk-2
     DisplayName: 
     Kind: 0
@@ -80,7 +80,7 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - tinkerer-sig
+    - tinkerer-start
   - Key: tinkerer-trunk-slot
     DisplayName: 
     Kind: 2
