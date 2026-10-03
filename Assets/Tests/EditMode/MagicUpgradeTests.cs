@@ -150,7 +150,8 @@ namespace Tests.EditMode
 
             _calculator.Execute(action, _buffTracker, powerBonus: 4);
 
-            int expected = ExpectedDamage(5 + 4 + 12, 3);
+            // An Intelligence-scaled spell is magic: the target's Spirit (0) defends, not its Endurance.
+            int expected = ExpectedDamage(5 + 4 + 12, 0);
             Assert.AreEqual(50 - expected, _enemy.Stats.Health,
                 "An upgraded magic must still scale off its caster.");
         }

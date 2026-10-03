@@ -78,7 +78,7 @@ namespace Assets.Scripts.UnitStats
                 recruitWeight: 6f, powerWeight: 6f, authoringDefault: 5),
 
             new StatDefinition(StatType.Endurance, "END", "Endurance",
-                "Damage reduction, through the diminishing curve in DamageCalculator.",
+                "Reduces physical damage (basic attacks, Strength/Agility abilities), through the diminishing curve in DamageCalculator.",
                 recruitWeight: 4f, powerWeight: 4f, authoringDefault: 5),
 
             new StatDefinition(StatType.Agility, "AGI", "Agility",
@@ -90,11 +90,11 @@ namespace Assets.Scripts.UnitStats
                 recruitWeight: 5f, powerWeight: 2f, authoringDefault: 0),
 
             new StatDefinition(StatType.Spirit, "SPR", "Spirit",
-                "Scales restorative and protective ability power - healing, shields, Holy.",
+                "Scales restorative and protective ability power - healing, shields, Holy - and reduces magic damage (Intelligence/Spirit abilities) the way Endurance reduces physical.",
                 recruitWeight: 5f, powerWeight: 2f, authoringDefault: 0),
 
             new StatDefinition(StatType.Luck, "LCK", "Luck",
-                "Raises crit chance, and improves stat checks on room events.",
+                "Raises crit chance, gives a chance to dodge physical hits, and improves stat checks on room events.",
                 recruitWeight: 4f, powerWeight: 3f, authoringDefault: 0),
 
             new StatDefinition(StatType.MaxHealth, "HP", "Health",

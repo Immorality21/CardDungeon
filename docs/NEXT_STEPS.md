@@ -174,6 +174,9 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   forfeiture and hub resolution for free. And a material drop states its own flat `Chance` rather
   than inheriting `LootRoller`'s rarity + depth curve, which is the *gear* regime and would suppress
   a deep material at the depth it was authored for. Do not fold materials back into a currency.
+- **The seven stats stay seven; Spirit and Luck got second jobs** *(2026-10-03)*. Spirit is the
+  defence against magic (Intelligence/Spirit-scaled effects) in a clean split with Endurance, and
+  Luck dodges physical hits only, on both sides. Do not add Magic Defense, Evasion or Accuracy stats.
 
 ---
 
@@ -243,6 +246,15 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **Spirit defends against magic, Luck dodges** (2026-10-03) — `BALANCING.md` §5z, the Combat guide.
+  `DefenseRules`: Intelligence/Spirit-scaled damage is met by Spirit, the rest by Endurance; Luck
+  gives a dodge chance against physical hits only (basic attacks and Strength/Agility abilities — a
+  dodge voids the whole ability on that target). Three nimble enemies got Luck. `DefenseRulesTests`;
+  suite green.
+- **Hero visions** (2026-10-03) — the Heroes guide. `HeroSO.Vision` + `Tools ▸ Heroes ▸ Hero Vision`:
+  each hero's intended fantasy, role, signature and branches beside what the grid grants today.
+  Warrior/Paladin/Ranger pre-filled; the other four are the owner's to write.
 
 - **The Ranger's summons** (2026-10-01) — `plans/SPECIALIZATION.md` §4b ("The Ranger's two"), the
   Magic and Combat guides. **Galewing** (branch A, special attack: 2 × Agility to every enemy, then

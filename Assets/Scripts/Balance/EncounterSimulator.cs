@@ -1268,7 +1268,7 @@ namespace Assets.Scripts.Balance
             float total = 0f;
             int powerBonus = MetaProgressManager.MagicPowerBonusForLevel(slot.UpgradeLevel);
             int attackBonus = buffTracker.GetBuffAmount(caster, caster.AttackStat);
-            int defense = target.GetEffectiveStat(StatType.Endurance) + buffTracker.GetBuffAmount(target, StatType.Endurance);
+            float dodge = slot.Magic.IsPhysicalAttack() ? DefenseRules.DodgeChanceFor(target) : 0f;
 
             foreach (var effect in slot.Magic.Effects)
             {
@@ -1293,12 +1293,14 @@ namespace Assets.Scripts.Balance
                     raw = caster.GetEffectiveAttackPower() + attackBonus + effect.Power + powerBonus;
                 }
 
+                var defenseStat = DefenseRules.DefenseStatFor(effect.ScalingStat);
+                int defense = target.GetEffectiveStat(defenseStat) + buffTracker.GetBuffAmount(target, defenseStat);
                 total += DamageCalculator.Calculate(
                     raw, defense, effect.DamageType, target.Resistances,
                     buffTracker.GetResistanceBonus(target, effect.DamageType));
             }
 
-            return total;
+            return total * (1f - dodge);
         }
 
         private static float BasicAttackDamage(SimUnit attacker, SimUnit target, CombatBuffTracker buffTracker)
@@ -1307,7 +1309,8 @@ namespace Assets.Scripts.Balance
             int defense = target.GetEffectiveStat(StatType.Endurance) + buffTracker.GetBuffAmount(target, StatType.Endurance);
             return DamageCalculator.Calculate(
                 attacker.GetEffectiveAttackPower() + attackBonus, defense, attacker.AttackDamageType,
-                target.Resistances, buffTracker.GetResistanceBonus(target, attacker.AttackDamageType));
+                target.Resistances, buffTracker.GetResistanceBonus(target, attacker.AttackDamageType))
+                * (1f - DefenseRules.DodgeChanceFor(target));
         }
 
         // ---------------------------------------------------------------- enemy turns
@@ -1460,6 +1463,11 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static int ResolveAttack(SimUnit attacker, SimUnit target, CombatBuffTracker buffTracker, float multiplier = 1f)
         {
+            if (DefenseRules.RollDodge(target))
+            {
+                return 0;
+            }
+
             int attackBonus = buffTracker.GetBuffAmount(attacker, attacker.AttackStat);
             int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Endurance);
             int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * multiplier);

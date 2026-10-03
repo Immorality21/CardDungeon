@@ -52,7 +52,8 @@ namespace Assets.Scripts.Balance
 
             int raw = Mathf.RoundToInt(rawAttack * multiplier);
             int flat = DamageCalculator.Calculate(raw, target.GetEffectiveStat(StatType.Endurance), type, target.Resistances);
-            return flat * ExpectedCritMultiplier(attacker);
+            // A basic attack is physical, so the target's Luck dodges a share of them.
+            return flat * ExpectedCritMultiplier(attacker) * (1f - DefenseRules.DodgeChanceFor(target));
         }
 
         /// <summary>Average damage against a group, over a uniformly random living target.</summary>

@@ -11,27 +11,30 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
   m_Name: Ranger
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Ranger
   Label: Ranger
   Blurb: Reads the room before anyone else has finished walking into it.
-  Description: 
   Vision:
-    Fantasy: "A hunter who reads the room before anyone else has finished walking into it. Fights from range, picks targets, controls the pace."
-    Role: "Tempo and precision. Attack and abilities scale off Agility."
-    SignatureMechanic: "Turn delay: the Ranger's control pushes enemies back on the turn order (Exatrix's Rend, Snare's Agility cut)."
+    Fantasy: A hunter who reads the room before anyone else has finished walking
+      into it. Fights from range, picks targets, controls the pace.
+    Role: Tempo and precision. Attack and abilities scale off Agility.
+    SignatureMechanic: 'Turn delay: the Ranger''s control pushes enemies back on
+      the turn order (Exatrix''s Rend, Snare''s Agility cut).'
     Branches:
     - GridBranch: a
-      Becomes: "Precision and attrition: poison and volleys of arrows."
-      IntendedKit: "Aimed Shot (start) -> Poison Dart -> Volley"
-      Summon: "Galewing - special attack: a great hawk, 2 hits of Agility on every enemy, then -3 Endurance for 2 turns."
+      Becomes: 'Precision and attrition: poison and volleys of arrows.'
+      IntendedKit: Aimed Shot (start) -> Poison Dart -> Volley
+      Summon: 'Galewing - special attack: a great hawk, 2 hits of Agility on every
+        enemy, then -3 Endurance for 2 turns.'
     - GridBranch: b
-      Becomes: "Control: slows, silences and delays."
-      IntendedKit: "Snare -> Hush"
-      Summon: "Exatrix - party replacement: a shadow were-shade whose Attack (Rend) delays its target; Signature Nightfall."
-    Overlaps: "Rogue currently shares Poison Dart, Aimed Shot and Hush - that needs resolving from the Rogue's side."
+      Becomes: 'Control: slows, silences and delays.'
+      IntendedKit: Snare -> Hush
+      Summon: 'Exatrix - party replacement: a shadow were-shade whose Attack (Rend)
+        delays its target; Signature Nightfall.'
+    Overlaps: Rogue currently shares Poison Dart, Aimed Shot and Hush - that needs
+      resolving from the Rogue's side.
     OpenQuestions: 
-  RecruitCost: 0
   Sprite: {fileID: -976294606316473, guid: 0c844200eddb44309e8049ef00b58d16, type: 3}
   AnimationFrames:
   - {fileID: -976294606316473, guid: 0c844200eddb44309e8049ef00b58d16, type: 3}

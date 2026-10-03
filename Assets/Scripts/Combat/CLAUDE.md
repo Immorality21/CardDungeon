@@ -17,6 +17,22 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
 - **DamageCalculator** (static): pipeline is raw damage → resistance modifier → defense with diminishing returns → minimum 1 damage.
 - **Resistance**: per-`DamageType` percentage. 0% = full damage, 100% = immune, >100% = absorb (heal), negative = weakness. Sources **sum**: innate + gear (`ICombatUnit.Resistances`) plus the temporary buff total passed as `resistanceBonusPercent`, clamped to −100..200 once at the end. Temporary resistance lives in `CombatBuffTracker.GetResistanceBonus` rather than in the unit's list, because that list outlives the fight — see the Cards guide. Every call site has to pass the bonus (`CombatManager.ExecuteAttack` **and** its `ShowEffectiveness` popup, `DamageEffectExecutor`, `EncounterSimulator`), or the popup contradicts the number.
 - **Defense formula**: diminishing returns via `defense / (defense + K)` where K=20. At 20 defense, 50% reduction.
+- **Physical vs magic — which stat defends** *(2026-10-03, `DefenseRules`)*. An effect scaled by
+  **Intelligence or Spirit is magic and Spirit defends**; everything else — basic attacks, Strength/
+  Agility abilities, flat damage, room-event damage — is physical and **Endurance defends**. A clean
+  split, not a blend: a high-Endurance front-liner is soft against casters, a Spirit-less construct
+  is weak to magic. Classified by `SpellEffect.ScalingStat`, not by element, so a Fire-coloured basic
+  swing is still physical. Damage-over-time ticks still read Endurance (open: they do not know their
+  source). Every damage site asks `DefenseRules.DefenseStatFor` — `DamageEffectExecutor`, the
+  simulator's `EstimateMagicDamage`, `EnemyMagicModel`, `RoomEventModel`.
+- **Luck dodges physical hits, never magic** *(2026-10-03)*. `DefenseRules.DodgeChanceFor` = 30% ×
+  Luck/(Luck+20) — the crit curve, base 0, so Luck 10 ≈ 10%. Rolled once per target: in
+  `CombatManager.ExecuteAttack` (basic attacks and enemy heavy blows) and in `EffectResolver`, where a
+  dodge drops the target from **every** effect, tag and combo of a physical ability
+  (`MagicSO.IsPhysicalAttack` / `SpellEffect.IsPhysicalHit`) — a dodged Sunder lands no debuff either.
+  Shows a grey "Dodge" popup. The sim rolls it in `ResolveAttack`; the closed form multiplies by
+  `1 − dodge` in `BalanceMath.AverageDamage`. Enemies default to Luck 0 and never dodge; the Cinder
+  Imp (8), Slag Hound (6) and Hex Weaver (5) are authored to. Tests swap `DefenseRules.Roll`.
 - **ICombatUnit** provides a `Resistances` list for per-unit elemental resistances.
 
 ## Threat (who the enemies go for)

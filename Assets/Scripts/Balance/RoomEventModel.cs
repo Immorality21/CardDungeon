@@ -612,7 +612,7 @@ namespace Assets.Scripts.Balance
 
             int damage = DamageCalculator.Calculate(
                 effect.Power,
-                hero.Unit.GetEffectiveStat(StatType.Endurance),
+                hero.Unit.GetEffectiveStat(DefenseRules.DefenseStatFor(effect.ScalingStat)),
                 effect.DamageType,
                 hero.Unit.Resistances);
 

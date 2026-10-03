@@ -227,7 +227,9 @@ per stat and nothing displays it. Nobody is told that Luck drives crit, that Spi
 and protection, or that resistance applies *before* defense.
 
 The Bestiary proved the pattern (a hub collection screen fed by a pure presenter), so this is mostly
-authoring plus a screen. Consider folding it into the Bestiary as a second tab rather than an
+authoring plus a screen. **Systems only, not heroes** *(2026-10-03)*: a hero's player-facing text is
+the one-line `HeroSO.Blurb`, and a longer hero description was considered and dropped — do not add one
+for this screen. Consider folding it into the Bestiary as a second tab rather than an
 eleventh home button — home is already at 88% height with room for about one more button.
 
 Touch points: `Assets/Scripts/UnitStats/StatCatalog.cs` (descriptions exist, unused),

@@ -33,8 +33,11 @@ namespace Assets.Scripts.Cards.Effects
                 // room event's outcome) rather than from whoever happened to trigger it.
                 int rawAttack = SpellPower.Resolve(effect, caster, target, buffTracker, flatPower);
 
-                int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Endurance);
-                int defense = target.GetEffectiveStat(StatType.Endurance) + defenseBonus;
+                // Magic (an Intelligence- or Spirit-scaled effect) is met by Spirit, everything else
+                // by Endurance — DefenseRules owns the split.
+                var defenseStat = DefenseRules.DefenseStatFor(effect.ScalingStat);
+                int defenseBonus = buffTracker.GetBuffAmount(target, defenseStat);
+                int defense = target.GetEffectiveStat(defenseStat) + defenseBonus;
                 float resistanceBonus = buffTracker.GetResistanceBonus(target, effect.DamageType);
                 int damage = DamageCalculator.Calculate(
                     rawAttack, defense, effect.DamageType, target.Resistances, resistanceBonus);

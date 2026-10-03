@@ -33,6 +33,8 @@ MonoBehaviour:
       Amount: 7
     - Type: 5
       Amount: 2
+    - Type: 6
+      Amount: 5
     - Type: 7
       Amount: 16
   XpReward: 15

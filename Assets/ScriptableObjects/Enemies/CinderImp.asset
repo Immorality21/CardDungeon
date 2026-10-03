@@ -29,6 +29,8 @@ MonoBehaviour:
       Amount: 8
     - Type: 4
       Amount: 4
+    - Type: 6
+      Amount: 8
     - Type: 7
       Amount: 14
   XpReward: 14

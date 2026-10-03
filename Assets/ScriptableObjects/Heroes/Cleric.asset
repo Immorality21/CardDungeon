@@ -11,11 +11,34 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
   m_Name: Cleric
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Cleric
   Label: Cleric
   Blurb: Keeps everyone else standing, and is quietly dangerous to the wrong things.
-  RecruitCost: 0
+  Vision:
+    Fantasy: A devout healer. Will prioritise others over herself, with the strongest
+      focus being on healing and support.
+    Role: 'The strongest backline healer. Almost everything scales of spirit, perhaps
+      a few offensive spells off int AND spirit. '
+    SignatureMechanic: "Is the main source for reviving, although most likely not
+      the only one. However, should be the only one with access to mass-revive. \t"
+    Branches:
+    - GridBranch: a
+      Becomes: "A pure healer with ensuring others stay topped off. \t"
+      IntendedKit: A direct heal => a magic shield => regen => Revive
+      Summon: Phoenix, Mass revive and heal (both start out at low %)
+    - GridBranch: b
+      Becomes: A more supportive role with aim on tempo improvements
+      IntendedKit: Endurance +x% to all => restore 1 ability charge for 1 hero =>
+        ???
+      Summon: '[name], Protective shield for X% of total health to all + endurance
+        buff '
+    - GridBranch: c
+      Becomes: 'Holy damage dealer with extra damage to undead type of enemies '
+      IntendedKit: Divine bolt => ???
+      Summon: '[name], A replacement summon, oriented around holy damage'
+    Overlaps: Paladin on healing
+    OpenQuestions: 
   Sprite: {fileID: -7638688258575627, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}
   AnimationFrames:
   - {fileID: -7638688258575627, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}

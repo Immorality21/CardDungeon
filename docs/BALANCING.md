@@ -2534,3 +2534,19 @@ Asked for a clean starting point, not a balance pass. Smallest levers only:
   Stair **Ossuary Gate back to 2.55, Red Cloister 3.6 → 3.2** (loads 0.14/0.22/0.32/0.54/1.23). The
   Red Cloister answers to Difficulty weakly (its boss carries flat overrides), which is why floor 3
   went back up rather than floor 4 further down.
+
+## §5z — Spirit defends against magic, Luck dodges (2026-10-03)
+
+A mechanics change, not a tuning pass; the owner's call after a stat review (no stat was missing, two
+had thin jobs). Rules in `Assets/Scripts/Combat/CLAUDE.md` ("Physical vs magic", "Luck dodges").
+
+- **Magic = Intelligence/Spirit-scaled effects, defended by Spirit**; everything else by Endurance. A
+  clean split. Enemy Spirit runs 0-8 against Endurance 0-8, so hero casters hit most enemies harder
+  now (a Stone Sentinel, END 8 / SPR 2, is the clearest case) and the Bog Shaman (SPR 8) resists them.
+- **Luck dodges physical hits**: 30% × Luck/(Luck+20), base 0. Heroes 4-10 Luck → 5.5-10%. Enemies
+  are Luck 0 except the Cinder Imp 8, Slag Hound 6 and Hex Weaver 5 - which also raises their crit.
+- **Measured: the suite stayed green** (13/13 balance, 1,259 unit). The closed form models basic
+  attacks only, so it sees the dodge but not the spell-defence shift; the simulator sees both.
+- **Not re-tuned**, and two levers were left alone on purpose: `StatCatalog` power weights (Spirit
+  is still weighted 2 though it now defends) and damage-over-time, which still reads Endurance.
+  Re-measure both when the balance pause lifts.

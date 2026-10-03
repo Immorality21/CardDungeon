@@ -1396,6 +1396,16 @@ namespace Assets.Scripts.Rooms
             CombatAudio.Play(CombatSound.MeleeSwing);
             yield return LungeAnimation(attacker.Transform, lungeDirection);
 
+            // A basic attack is always physical, so the target's Luck may dodge it (DefenseRules).
+            if (DefenseRules.RollDodge(target))
+            {
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Dodge", new Color(0.8f, 0.8f, 0.85f), 0.16f);
+                RecordAttackTypeObserved(attacker);
+                yield return new WaitForSecondsRealtime(0.045f);
+                _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName}, who dodges!";
+                yield break;
+            }
+
             // Buff the stat this attacker actually swings with, not Strength unconditionally.
             int attackBonus = BuffTracker.GetBuffAmount(attacker, attacker.AttackStat);
             int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Endurance);

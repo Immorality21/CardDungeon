@@ -37,6 +37,17 @@ namespace Assets.Scripts.Cards
             return Effects.Any(e => e.EffectType == type);
         }
 
+        /// <summary>
+        /// True when this ability is a physical attack, and so can be dodged: it deals damage scaled
+        /// off a physical stat (Strength, Agility). A dodge makes the whole ability miss that target,
+        /// not just its damage — a dodged Sunder lands no Endurance cut either. Magic, flat and
+        /// percentage damage cannot be dodged. See <see cref="DefenseRules"/>.
+        /// </summary>
+        public bool IsPhysicalAttack()
+        {
+            return Effects.Any(e => e.IsPhysicalHit);
+        }
+
         public string GetEffectsSummary()
         {
             if (Effects == null || Effects.Count == 0)

@@ -12,7 +12,7 @@ namespace Assets.Scripts.Heroes.Editor
 {
     /// <summary>
     /// One place to define what each hero <i>is</i>: the player-facing text (<see cref="HeroSO.Label"/>,
-    /// <see cref="HeroSO.Blurb"/>, <see cref="HeroSO.Description"/>) and the developer-facing
+    /// <see cref="HeroSO.Blurb"/>) and the developer-facing
     /// <see cref="HeroVision"/>, edited on the hero asset itself so the intent lives beside the stats
     /// and the grid it is meant to explain.
     ///
@@ -158,7 +158,7 @@ namespace Assets.Scripts.Heroes.Editor
             var vision = hero.Vision ?? new HeroVision();
             var fields = new[]
             {
-                hero.Blurb, hero.Description, vision.Fantasy, vision.Role, vision.SignatureMechanic,
+                hero.Blurb, vision.Fantasy, vision.Role, vision.SignatureMechanic,
                 vision.Overlaps
             };
             total = fields.Length + 1;
@@ -195,7 +195,6 @@ namespace Assets.Scripts.Heroes.Editor
             var player = Section("Player-facing");
             player.Add(Field("Label"));
             player.Add(Field("Blurb"));
-            player.Add(Field("Description"));
             _detail.Add(player);
 
             var vision = Section("Vision — developer-facing, never shown");

@@ -28,7 +28,7 @@ namespace Assets.Scripts.UnitStats
         /// <summary>Physical power. Scales melee-flavoured attacks and spells.</summary>
         Strength = 1,
 
-        /// <summary>Damage reduction, through the diminishing curve in <c>DamageCalculator</c>.</summary>
+        /// <summary>Physical damage reduction, through the diminishing curve in <c>DamageCalculator</c>. See <c>DefenseRules</c>.</summary>
         Endurance = 2,
 
         /// <summary>Turn frequency — <c>TurnManager</c> schedules on it.</summary>
@@ -37,10 +37,10 @@ namespace Assets.Scripts.UnitStats
         /// <summary>Scales offensive/arcane spell power.</summary>
         Intelligence = 4,
 
-        /// <summary>Scales restorative and protective spell power.</summary>
+        /// <summary>Scales restorative and protective spell power, and reduces magic damage. See <c>DefenseRules</c>.</summary>
         Spirit = 5,
 
-        /// <summary>Raises crit chance, and improves stat checks on room events.</summary>
+        /// <summary>Raises crit chance, dodges physical hits, and improves stat checks on room events.</summary>
         Luck = 6,
 
         /// <summary>Size of the health bar. Current health is a resource, not a stat.</summary>

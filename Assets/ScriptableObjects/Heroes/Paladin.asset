@@ -15,7 +15,6 @@ MonoBehaviour:
   Key: Paladin
   Label: Paladin
   Blurb: Armoured, patient, and certain. Holds a line, or breaks one, or mends it.
-  Description: 
   Vision:
     Fantasy: "An armoured believer. Holy power in service of the line: holds it, breaks it, or mends it."
     Role: "Front line with holy damage and healing. Attacks with Strength; heals scale off Spirit."

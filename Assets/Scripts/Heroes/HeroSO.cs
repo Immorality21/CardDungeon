@@ -20,11 +20,6 @@ namespace Assets.Scripts.Heroes
                  "hint at the stat line, since the player is choosing a role.")]
         public string Blurb;
 
-        [Tooltip("A longer player-facing paragraph about this hero, for the campfire or a compendium. " +
-                 "Not shown anywhere yet.")]
-        [TextArea(3, 8)]
-        public string Description;
-
         [Tooltip("Design intent — developer-facing, never shown. Edit it in Tools ▸ Heroes ▸ Hero Vision.")]
         public HeroVision Vision = new HeroVision();
 

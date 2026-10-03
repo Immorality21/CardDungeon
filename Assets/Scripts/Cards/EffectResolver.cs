@@ -10,6 +10,8 @@ namespace Assets.Scripts.Cards
     public class EffectResolver
     {
         private static readonly Color ComboNameColor = new Color(1f, 0.6f, 0f);
+        private static readonly Color DodgeColor = new Color(0.8f, 0.8f, 0.85f);
+        private const string DodgeText = "Dodge";
         private const float ComboDelay = 0.3f;
 
         private readonly EffectExecutorFactory _factory;
@@ -48,6 +50,7 @@ namespace Assets.Scripts.Cards
             float powerScale = 1f)
         {
             var result = new EffectResult();
+            var targets = DodgeFilter(action, result);
 
             // Two passes, benefits before costs. A HealthCost authored first would take the caster
             // down before the buff it paid for was applied, and BuffEffectExecutor skips dead targets
@@ -61,7 +64,7 @@ namespace Assets.Scripts.Cards
                 }
                 var effectToUse = ApplyPowerBonus(effect, powerBonus, powerScale);
                 var executor = _factory.GetExecutor(effectToUse.EffectType);
-                executor.Execute(effectToUse, action.Caster, action.Targets, buffTracker, result);
+                executor.Execute(effectToUse, action.Caster, targets, buffTracker, result);
             }
 
             foreach (var effect in action.Magic.Effects)
@@ -78,7 +81,7 @@ namespace Assets.Scripts.Cards
 
             if (tagTracker != null && comboDetector != null && action.Magic.Tags.Count > 0)
             {
-                foreach (var target in action.Targets)
+                foreach (var target in targets)
                 {
                     if (!target.IsAlive)
                     {
@@ -92,13 +95,44 @@ namespace Assets.Scripts.Cards
                     }
                 }
 
-                foreach (var target in action.Targets)
+                foreach (var target in targets)
                 {
                     tagTracker.ApplyTags(target, action.Magic.Tags, action.Magic.TagDuration);
                 }
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// The targets a physical attack actually reaches: each living target other than the caster
+        /// rolls its Luck-based dodge once, and one that dodges is dropped for every effect, tag and
+        /// combo of the cast (and gets a "Dodge" popup). Magic and non-attacks pass through untouched.
+        /// The health-cost pass still reads <c>action.Targets</c> — a dodge does not refund the price.
+        /// </summary>
+        private static List<ICombatUnit> DodgeFilter(SpellcastAction action, EffectResult result)
+        {
+            if (action.Magic == null || action.Targets == null || !action.Magic.IsPhysicalAttack())
+            {
+                return action.Targets;
+            }
+
+            var reached = new List<ICombatUnit>(action.Targets.Count);
+            foreach (var target in action.Targets)
+            {
+                if (target != action.Caster && target.IsAlive && DefenseRules.RollDodge(target))
+                {
+                    result.Entries.Add(new EffectEntry
+                    {
+                        Target = target,
+                        Text = DodgeText,
+                        Color = DodgeColor
+                    });
+                    continue;
+                }
+                reached.Add(target);
+            }
+            return reached;
         }
 
         /// <summary>

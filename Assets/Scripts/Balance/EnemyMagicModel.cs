@@ -381,8 +381,14 @@ namespace Assets.Scripts.Balance
                     ? SpellPower.PercentOfMaxHealth(effect.Power, hero)
                     : rawPower;
 
-                total += DamageCalculator.Calculate(
-                    raw, hero.GetEffectiveStat(StatType.Endurance), effect.DamageType, hero.Resistances);
+                float landed = DamageCalculator.Calculate(
+                    raw, hero.GetEffectiveStat(DefenseRules.DefenseStatFor(effect.ScalingStat)),
+                    effect.DamageType, hero.Resistances);
+                if (effect.IsPhysicalHit)
+                {
+                    landed *= 1f - DefenseRules.DodgeChanceFor(hero);
+                }
+                total += landed;
                 counted++;
             }
 

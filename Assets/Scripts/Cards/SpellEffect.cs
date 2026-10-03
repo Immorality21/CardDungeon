@@ -39,5 +39,16 @@ namespace Assets.Scripts.Cards
         // combo gate extra functionality behind upgrade levels - e.g. a combo that only
         // debuffs Speed once its upgrade reaches level 5.
         public int UnlockLevel = 0;
+
+        /// <summary>
+        /// A physical hit: damage scaled off a physical stat (Strength, Agility), which Endurance
+        /// defends and Luck can dodge. Magic (Intelligence/Spirit), flat and percentage damage are
+        /// not. See <see cref="DefenseRules"/>.
+        /// </summary>
+        public bool IsPhysicalHit =>
+            EffectType == SpellEffectType.Damage
+            && PowerMode == PowerMode.BasePower
+            && StatCatalog.CanScalePower(ScalingStat)
+            && !DefenseRules.IsMagic(ScalingStat);
     }
 }
