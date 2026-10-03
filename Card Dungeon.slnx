@@ -12,6 +12,6 @@
   <Project Path="CardDungeon.UnitStats.Editor.csproj" />
   <Project Path="CardDungeon.ImmoralityGaming.Editor.csproj" />
   <Project Path="CardDungeon.Enemies.Editor.csproj" />
-  <Project Path="CardDungeon.Combat.Editor.csproj" />
   <Project Path="CardDungeon.Heroes.Editor.csproj" />
+  <Project Path="CardDungeon.Combat.Editor.csproj" />
 </Solution>

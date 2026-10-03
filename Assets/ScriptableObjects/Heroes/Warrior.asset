@@ -15,6 +15,22 @@ MonoBehaviour:
   Key: Warrior
   Label: Warrior
   Blurb: 
+  Description: 
+  Vision:
+    Fantasy: "The first sword through the door. Plain steel, plain courage: no magic, no tricks, just someone who stands in front and hits hard."
+    Role: "Front line. Attack and abilities scale off Strength. Takes the hits or deals them - the grid decides which."
+    SignatureMechanic: 
+    Branches:
+    - GridBranch: a
+      Becomes: "A heavy front-liner: stacks health, Endurance and resistances, and learns to protect."
+      IntendedKit: "Shield Up -> Bulwark -> Ward"
+      Summon: "Cairn Golem - party replacement: a stone wall at 250% of the Warrior's health that takes every blow for three turns."
+    - GridBranch: b
+      Becomes: "A pure attacker: stacks Strength, Agility and Luck, and learns to hit harder and wider."
+      IntendedKit: "Sunder -> Cleave -> War Cry"
+      Summon: "Bloodfang Boar - special attack: every hero gains +50% of their own Strength for 3 turns."
+    Overlaps: "Paladin also reaches a front-liner (branch A) and a damage dealer (branch B)."
+    OpenQuestions: "No signature mechanic yet - everything he has, the Paladin can also have. Blurb is empty."
   RecruitCost: 0
   Sprite: {fileID: 3944610533857416082, guid: 3e1d1e6f294b9b84db352a1806ddc276, type: 3}
   AnimationFrames:
