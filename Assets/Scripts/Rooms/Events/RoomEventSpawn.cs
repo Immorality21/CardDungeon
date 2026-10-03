@@ -142,6 +142,56 @@ namespace Assets.Scripts.Rooms.Events
         }
 
         /// <summary>
+        /// Whether any outcome of <paramref name="definition"/> hands out a buff or debuff that lasts
+        /// the rest of the level (<see cref="LevelAfflictionTracker"/>). Such an event is kept out of
+        /// the exit room: a curse "for the rest of the level" picked up beside the stairs costs nothing,
+        /// and a blessing there is worth as little (playtest 2 finding 17).
+        /// </summary>
+        public static bool HasLevelLongEffects(RoomEventSO definition)
+        {
+            if (definition?.Options == null)
+            {
+                return false;
+            }
+
+            foreach (var option in definition.Options)
+            {
+                if (option == null)
+                {
+                    continue;
+                }
+
+                foreach (var pool in new[] { option.Success, option.Failure })
+                {
+                    if (pool == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var outcome in pool)
+                    {
+                        if (outcome?.Effects == null)
+                        {
+                            continue;
+                        }
+
+                        foreach (var effect in outcome.Effects)
+                        {
+                            if (effect != null
+                                && (effect.EffectType == Cards.SpellEffectType.Buff || effect.EffectType == Cards.SpellEffectType.Debuff)
+                                && effect.BuffType != Cards.BuffType.None)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Whether the event appears, given a caller-supplied <paramref name="roll"/> in [0,100)
         /// (e.g. <c>Random.Range(0f, 100f)</c>). Explicit so placement is deterministic under test
         /// and reproducible from a dungeon seed.

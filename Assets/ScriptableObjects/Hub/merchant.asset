@@ -29,8 +29,8 @@ MonoBehaviour:
   MaxLevel: 1
   PlacementCost:
   - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
-    Amount: 8
+    Amount: 10
   - Material: {fileID: 11400000, guid: c0de5211aa010000000000000000ab01, type: 2}
-    Amount: 2
+    Amount: 1
   GoldPerUpgrade: 0
   RequiredRunKeys: []

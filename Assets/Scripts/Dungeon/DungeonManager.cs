@@ -999,6 +999,11 @@ namespace Assets.Scripts.Dungeon
             var partyStats = BestRosterStats();
             var ownedHeroKeys = _fileHandler.Load<PartySaveData>()?.OwnedHeroKeys;
 
+            // One of each event per floor: the Treasury room is a quarter of some pools, and its
+            // hoard came up three times on one floor (playtest 2 finding 15). A room whose only
+            // event is already placed simply offers nothing.
+            var placed = new List<Rooms.Events.RoomEventSO>();
+
             foreach (var room in rooms)
             {
                 if (!IsEventEligible(room, startRoom))
@@ -1012,7 +1017,13 @@ namespace Assets.Scripts.Dungeon
                 // find and a once-a-run find can share a room pool.
                 foreach (var candidate in room.RoomSO.PossibleEvents)
                 {
-                    if (candidate == null)
+                    if (candidate == null || placed.Contains(candidate))
+                    {
+                        continue;
+                    }
+
+                    // A level-long buff or curse beside the stairs lasts for nothing.
+                    if (room.IsExit && Rooms.Events.RoomEventSpawn.HasLevelLongEffects(candidate))
                     {
                         continue;
                     }
@@ -1037,6 +1048,7 @@ namespace Assets.Scripts.Dungeon
                     if (Rooms.Events.RoomEventSpawn.Spawns(chance, Random.Range(0f, 100f)))
                     {
                         room.RoomEvent = candidate;
+                        placed.Add(candidate);
                         break;
                     }
                 }

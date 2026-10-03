@@ -77,7 +77,7 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 50
+            Amount: 65
           - Type: 1
             Amount: 9
         XpReward: 0

@@ -1907,9 +1907,13 @@ namespace Assets.Scripts.Balance
                 // check the rolled rooms answer to (see RunCurveModel.Aggregate) and is judged here
                 // against the boss ceiling instead - the rule that already says a climax is allowed
                 // to read as lost on paper, because the closed form never sees a party focus-firing.
+                // A tier gate is exempt for the reason its attrition is (see gateBudget above): it is
+                // *supposed* to beat the party that walks in, so a boss past the ceiling there is an
+                // Info, judged by the investment frontier rather than the closed form.
                 if (level.BossDanger > rules.MaxBossDanger)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Level, subject,
+                    var severity = gateBudget >= 0 ? BalanceSeverity.Info : BalanceSeverity.Critical;
+                    report.Issues.Add(new BalanceIssue(severity, BalanceCategory.Level, subject,
                         $"{level.Reference}'s boss room is past the climax ceiling (danger {level.BossDanger:0.00})")
                     {
                         Asset = level.Boss,

@@ -2480,3 +2480,50 @@ Three heroes gained unlock sources (`plans/SPECIALIZATION.md` §5b). Measured A/
   0.10 → 0.26; the boss room was the only real dial (a second add took the finale 0.35 → 0.47). The
   body count, not the multiplier, is where a four-wide party feels anything.
 
+
+## §5y — The tutorial got its fights back, and events became once per floor (2026-10-02)
+
+Triggered by the second playtest (`PLAYTEST_FINDINGS.md` 13–17): The Threshold's floors 1–3 were "one
+or two enemies a fight, mostly a lone Floating Eye", no potion was needed, and the Warden (50 HP) died
+in 3 rounds. **The floor simulator agreed with the player, not the closed form.** Closed form read
+floor 4 at load 0.80; the Adaptive sim ended it at 60% HP, 1.4 potions, 0 wipes - so on these shallow
+floors a load of ~0.8 is still comfortable, and a load near 1.0 is not "just survivable" but a real
+wipe risk (rooms + a 90 HP Warden read 1.17 closed form and **8% Adaptive / 38% attack-only wipes**).
+
+- **The tutorial stays easy - it is the tutorial** (owner, 2026-10-02). The target was fights with
+  more than one body, not a hard finale.
+- **Rooms are shared across runs, so the fix is new rooms, not edited ones.** `PinkRoom`, `BrownRoom`
+  and `TreasuryRoom` sit in five to ten templates each. Two Threshold-only rooms instead:
+  `WatchpostRoom` (2 Floating Eyes + 40% Drakeling) replaces the Pink room in Upper Halls, and
+  `SentryHallRoom` (Stone Sentinel + 70% Drakeling + 60% Eye) replaces the Brown Room in Collapsed
+  Caverns. Floor 4's pool is unchanged.
+- **Warden 50 → 65 HP**, not 90: one more round, load 0.89.
+
+| Threshold floor | enemies | load before | load after |
+|---|---|---|---|
+| Dungeon Entrance | 2.0 | 0.43 | 0.43 |
+| Upper Halls | 5.0 → 6.3 | 0.41 | 0.67 |
+| Collapsed Caverns | 3.9 → 4.7 | 0.56 | 0.75 |
+| Sunken Depths | 4.0 | 0.80 | 0.89 |
+
+- **Events are placed once per floor now**, and `RoomEventModel` caps an event at `1 - Π(1 - p)`
+  instead of the sum. That lowered every level's event cost a little, and it moved the **Blood
+  Stair's** floor 1 the most in ratio (small loads move most): its 1→2 step reads **78% against the
+  75% ceiling**, which turns `RunDifficultyEscalates` red. Left on purpose for the next pass (both
+  floors are easy, 0.14 → 0.25). If it is fixed, mind §5x: soften the later floor rather than harden
+  floor 1, which the tutorial graduate also walks into.
+- **A full simulated `Analyze` takes ~5 minutes and blocks the editor.** Two in one command took ten.
+  Use the closed form to search and simulate once, at the end.
+
+### Addendum — the suite made green, deliberately shallow (2026-10-02)
+
+Asked for a clean starting point, not a balance pass. Smallest levers only:
+
+- **Drowned March** floors 1–2: Difficulty 2.35 → 2.0 and 2.4 → 1.85 (loads 1.31/1.49 → 0.95/0.88).
+- **Blood Stair** floors 2–3: 2.3 → 2.2 and 2.55 → 2.4. Softening floor 2 alone moved the spike to the
+  2→3 step (89%), so floor 3 came down with it (§5x's rule: soften later floors, never floor 1).
+- **Tier gates are exempt from the boss ceiling** (`BalanceAnalyzer.EvaluateLevel`), the way they already
+  were from the attrition ceiling. The Counting Room (1.44) and the Hollow Vault (3.25) are both gates.
+  The Hollow Vault's boss danger barely answers to its boss's stats (112 HP/16 STR → 80/10 only took it
+  3.25 → 2.39) or to its Difficulty, because the room is dominated by its adds and the floor's load is
+  ~14. That is a real problem for the balance pass, not one to paper over with a stat tweak.

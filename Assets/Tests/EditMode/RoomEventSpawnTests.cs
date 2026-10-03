@@ -264,5 +264,57 @@ namespace Tests.EditMode
 
             Object.DestroyImmediate(definition);
         }
+
+        private static RoomEventSO WithFailureEffect(Assets.Scripts.Cards.SpellEffect effect)
+        {
+            var definition = ScriptableObject.CreateInstance<RoomEventSO>();
+            definition.Options = new List<RoomEventOption>
+            {
+                new RoomEventOption
+                {
+                    Kind = RoomEventOptionKind.StatCheck,
+                    Success = new List<RoomEventOutcome> { new RoomEventOutcome { Gold = 10 } },
+                    Failure = new List<RoomEventOutcome>
+                    {
+                        new RoomEventOutcome { Effects = new List<Assets.Scripts.Cards.SpellEffect> { effect } }
+                    }
+                }
+            };
+            return definition;
+        }
+
+        [Test]
+        public void HasLevelLongEffects_ADebuffOutcome_IsTrue()
+        {
+            var definition = WithFailureEffect(new Assets.Scripts.Cards.SpellEffect
+            {
+                EffectType = Assets.Scripts.Cards.SpellEffectType.Debuff,
+                BuffType = Assets.Scripts.Cards.BuffType.Strength,
+                Power = 2
+            });
+
+            Assert.IsTrue(RoomEventSpawn.HasLevelLongEffects(definition),
+                "A curse for the rest of the level must never be placed beside the stairs.");
+
+            Object.DestroyImmediate(definition);
+        }
+
+        [Test]
+        public void HasLevelLongEffects_DamageOnly_IsFalse()
+        {
+            var definition = WithFailureEffect(new Assets.Scripts.Cards.SpellEffect
+            {
+                EffectType = Assets.Scripts.Cards.SpellEffectType.Damage,
+                Power = 4
+            });
+
+            var meeting = MeetingWith(null);
+
+            Assert.IsFalse(RoomEventSpawn.HasLevelLongEffects(definition));
+            Assert.IsFalse(RoomEventSpawn.HasLevelLongEffects(meeting));
+
+            Object.DestroyImmediate(definition);
+            Object.DestroyImmediate(meeting);
+        }
     }
 }

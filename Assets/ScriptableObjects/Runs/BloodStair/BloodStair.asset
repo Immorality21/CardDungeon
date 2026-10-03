@@ -41,7 +41,7 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 2.3
+      Difficulty: 2.2
       StatScales: []
       XpMultiplier: 3.5
       GoldMultiplier: 1.5
@@ -54,7 +54,7 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 2.55
+      Difficulty: 2.4
       StatScales: []
       XpMultiplier: 4
       GoldMultiplier: 1.5

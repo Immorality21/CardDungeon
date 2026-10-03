@@ -52,15 +52,15 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 48143a77cb3b71041a7cbf5a38862834, type: 2}
       - {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
       - {fileID: 11400000, guid: 49f583fd473ca6144819051f4d6a6f7d, type: 2}
-      Gold: 30
+      Gold: 40
       LoseAConsumable: 0
       AwakenedEnemies: []
-    - Text: 'Empty, but for a purse wedged under the lining.'
+    - Text: 'Empty, but for a fat purse wedged under the lining.'
       Weight: 1
       Effects: []
       Targets: 0
       LootTable: []
-      Gold: 15
+      Gold: 30
       LoseAConsumable: 0
       AwakenedEnemies: []
     Failure:

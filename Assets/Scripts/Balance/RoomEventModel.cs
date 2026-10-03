@@ -252,7 +252,66 @@ namespace Assets.Scripts.Balance
                 }
             }
 
+            CapAtOncePerLevel(encounters);
             return encounters;
+        }
+
+        /// <summary>
+        /// The game places each event at most once per floor (<c>DungeonManager.PlaceRoomEvents</c>,
+        /// since playtest 2 finding 15), so an event's expected count is the chance it turns up at
+        /// all - <c>1 - Π (1 - p)</c> over every room that could offer it - not the sum over those
+        /// rooms. Each of its encounters is scaled down by the same factor. The second-order effect
+        /// (a room whose first candidate is already placed rolls its second) is ignored.
+        /// </summary>
+        private static void CapAtOncePerLevel(List<RoomEventEncounter> encounters)
+        {
+            var byEvent = new Dictionary<RoomEventSO, List<RoomEventEncounter>>();
+            foreach (var encounter in encounters)
+            {
+                if (encounter.Event == null)
+                {
+                    continue;
+                }
+                if (!byEvent.TryGetValue(encounter.Event, out var list))
+                {
+                    list = new List<RoomEventEncounter>();
+                    byEvent[encounter.Event] = list;
+                }
+                list.Add(encounter);
+            }
+
+            foreach (var list in byEvent.Values)
+            {
+                float expected = 0f;
+                float logMiss = 0f;
+                bool certain = false;
+                foreach (var encounter in list)
+                {
+                    expected += encounter.Occurrences;
+                    float p = encounter.AppearChancePerRoom;
+                    float rooms = p > 0f ? encounter.Occurrences / p : 0f;
+                    if (p >= 1f && rooms > 0f)
+                    {
+                        certain = true;
+                    }
+                    else if (p > 0f)
+                    {
+                        logMiss += rooms * Mathf.Log(1f - p);
+                    }
+                }
+
+                if (expected <= 0f)
+                {
+                    continue;
+                }
+
+                float atLeastOnce = certain ? 1f : 1f - Mathf.Exp(logMiss);
+                float scale = Mathf.Min(1f, atLeastOnce / expected);
+                foreach (var encounter in list)
+                {
+                    encounter.Occurrences *= scale;
+                }
+            }
         }
 
         /// <summary>

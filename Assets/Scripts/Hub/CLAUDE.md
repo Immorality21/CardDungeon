@@ -202,7 +202,7 @@ and the wrong one for a gate.
 | Storehouse | placed by default | — (your own bag, never gated) |
 | Hall of Progression (`sphere-hall`) | from the start | 1 Rotted Timber |
 | Bestiary | from the start | 4 Scrap Iron |
-| Merchant | from the start | 8 Scrap Iron · 2 Rotted Timber |
+| Merchant | from the start | 10 Scrap Iron · 1 Rotted Timber (was 8 + 2 until playtest 2 finding 14: timber only drops from caches) |
 | Magic Forge | after `TutorialRun` | 3 Ember Iron · 2 Slag Coal |
 
 The Sphere Hall is deliberately the cheapest thing in town and is **not** gated on a run: the grid

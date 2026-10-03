@@ -43,23 +43,13 @@ the run.
 
 ## Balance and content
 
-13. **The Threshold is far too easy.**
-    - Floors 1–3 were one or two enemies a fight, mostly a lone Floating Eye beaten by pressing
-      Attack.
-    - No potion was needed all run.
-    - The Abyssal Warden has 50 HP and died in 3 rounds while the party had no abilities left.
+*13–17 done 2026-10-02 (`BALANCING.md` §5y).*
+- **13:** Threshold floors 2–3 get two new Threshold-only rooms with 2–3 enemies (Watchpost, Sentry Hall); the Warden goes 50 → 65 HP. Kept easy on purpose - it is the tutorial.
+- **14:** the Merchant costs 10 Scrap Iron + 1 Rotted Timber (was 8 + 2).
+- **15:** each room event is placed at most once per floor.
+- **16:** the Treasury chest's two success outcomes pay 40 gold + loot and 30 gold (were 30 + loot and 15 - the same as the safe option).
+- **17:** events that hand out level-long buffs or curses are never placed in the exit room.
 
-    Add 2–3-enemy rooms by floor 2, and make the Warden survive a round without abilities. Measure
-    first: see `docs/BALANCING.md` and `plans/BALANCE_OPEN.md`.
-14. **The Merchant is blocked by timber.** After 6 floors the party had 544 gold and 13 Scrap Iron but
-    only 1 of the 2 Rotted Timber it needs. Timber only comes from caches, so the only gold sink was the
-    300-gold campfire upgrade. Drop the second timber, or guarantee one on Threshold floor 2–3.
-15. **The same event repeats on one floor.** The Treasury event came up 4 times across Threshold floors
-    2 and 3, 3 of them on floor 2.
-16. **Risky event options don't pay more.** The "dangerous" Treasury choice paid the same +15 gold as
-    the safe one. 3 of 4 stat-check gambles were lost.
-17. **A level affliction landed in the exit room.** STR −2 "for the rest of the level" cost nothing
-    there. Keep afflicting outcomes out of the exit room, or carry them to the next floor.
 18. **The rescued hero arrives with nothing to use.** The Ranger joined with no abilities and 198–240
     banked XP that can't be spent until town. This works as designed but feels flat.
 

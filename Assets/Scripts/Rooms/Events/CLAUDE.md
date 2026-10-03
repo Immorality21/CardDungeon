@@ -147,6 +147,15 @@ intended lever, letting a common find and a once-a-run find share a room pool. `
 skips the start room (an event on turn one is not a discovery), connectors, and rooms already holding
 a captive; the exit room **is** eligible, since descending is a button.
 
+Two rules on top (2026-10-02, playtest 2):
+- **Each event at most once per floor** (finding 15 - the Treasury hoard came up three times on one
+  floor). A room whose only candidate is already placed offers nothing. `RoomEventModel` mirrors it:
+  an event's expected count is `1 - Π(1 - p)` over the rooms that could offer it, not the sum.
+- **No level-long buffs or curses in the exit room** (finding 17): `RoomEventSpawn.HasLevelLongEffects`
+  keeps any event whose outcomes can add a `LevelAffliction` out of it, since "for the rest of the
+  level" beside the stairs costs nothing. The model does not mirror this one (it does not know which
+  room is the exit); the effect on its figures is small.
+
 This replaced two earlier knobs. `LevelDefinitionSO.EventsPerLevel` handed a level a budget, which in
 a small level made every eligible room close to a certainty; `RoomSO.GuaranteedEvent` existed only to
 escape that budget. Both were really "how likely is this event to be here", so both are gone and

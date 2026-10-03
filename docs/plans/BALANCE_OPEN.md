@@ -57,6 +57,13 @@ surface) lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606
 
 ### 0. Open balance findings
 
+> **Suite green again, 2026-10-02 (`BALANCING.md` §5y) - a clean baseline, not a tuned one.** The
+> standing reds below were cleared with the smallest levers, to give the real balance pass a green
+> starting point: Drowned March floors 1–2 Difficulty 2.35/2.4 → **2.0/1.85**; Blood Stair floors 2–3
+> 2.3/2.55 → **2.2/2.4** (the 1→2 step); and the boss-ceiling check now treats a **tier gate** like its
+> attrition check already did (Info, judged by the frontier), which is what cleared the Counting Room
+> and Hollow Vault bosses - their content is untouched. Re-judge all of these in the pass.
+
 > **Standing red, and it is deliberate (2026-09-06).** `BalanceRegressionTests`'
 > `EveryRunLevelIsClearableOnOneHealthBar` and `NothingIsCriticallyOutOfBand` **fail**. Cause is
 > measured, not guessed: §5b restored the **solo start**, so the second tier is fought with two

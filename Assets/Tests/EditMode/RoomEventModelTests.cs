@@ -422,8 +422,9 @@ namespace Tests.EditMode
         // ------------------------------------------------------------------
 
         [Test]
-        public void BuildForLevel_Occurrences_AreEligibleRoomsTimesTheSpawnChance()
+        public void BuildForLevel_Occurrences_AreTheChanceItTurnsUpAtAll()
         {
+            // Once per floor (playtest 2 finding 15): four rooms at 50% each is 1 - 0.5^4, not 2.
             var party = Party(Hero("A"));
             var outcome = Outcome();
             outcome.Effects.Add(Damage(10));
@@ -435,8 +436,23 @@ namespace Tests.EditMode
 
             Assert.AreEqual(1, events.Count);
             Assert.AreEqual(0.5f, events[0].AppearChancePerRoom, 0.001f);
-            Assert.AreEqual(2f, events[0].Occurrences, 0.001f);
-            Assert.AreEqual(20f, events[0].ExpectedSustainCost, 0.001f);
+            Assert.AreEqual(0.9375f, events[0].Occurrences, 0.001f);
+            Assert.AreEqual(9.375f, events[0].ExpectedSustainCost, 0.001f);
+        }
+
+        [Test]
+        public void BuildForLevel_OneRareRoom_IsUnchangedByTheCap()
+        {
+            var party = Party(Hero("A"));
+            var outcome = Outcome();
+            outcome.Effects.Add(Damage(10));
+
+            var definition = GuaranteedEvent("Trap", 10f, outcome);
+            var rooms = Encounters(party, 1f, RoomOffering(definition));
+
+            var events = RoomEventModel.BuildForLevel(rooms, party, Rules(), 0);
+
+            Assert.AreEqual(0.1f, events[0].Occurrences, 0.001f);
         }
 
         [Test]
@@ -565,10 +581,10 @@ namespace Tests.EditMode
             var curve = RunCurve.Build(RunWith(room, 5), party, Rules());
             var level = curve.Levels[0];
 
-            // 5 generated rooms less the party's start room = 4 eligible, every one taking the event.
-            Assert.AreEqual(4f, level.ExpectedEventRooms, 0.001f);
-            Assert.AreEqual(40f, level.ExpectedEventHealthCost, 0.001f);
-            Assert.AreEqual(80f, level.ExpectedEventGold, 0.001f);
+            // 4 eligible rooms that would all take the event - but an event is placed once per floor.
+            Assert.AreEqual(1f, level.ExpectedEventRooms, 0.001f);
+            Assert.AreEqual(10f, level.ExpectedEventHealthCost, 0.001f);
+            Assert.AreEqual(20f, level.ExpectedEventGold, 0.001f);
             Assert.AreEqual(level.ExpectedCombatHealthCost + level.ExpectedEventHealthCost,
                 level.ExpectedHealthCost, 0.001f);
             Assert.Greater(level.EventAttritionShare, 0f);
@@ -637,8 +653,9 @@ namespace Tests.EditMode
         {
             // The captive's room cannot also hold an event (DungeonManager.IsEventEligible), so a
             // level with a rescue has one fewer eligible room.
+            // A 50% event, so the room count still shows through the once-per-floor cap.
             var party = Party(Hero("A"));
-            var room = RoomOffering(GuaranteedEvent("Trap", 100f, Outcome()));
+            var room = RoomOffering(GuaranteedEvent("Trap", 50f, Outcome()));
 
             var withoutRescue = RunWith(room, 5);
             var withRescue = RunWith(room, 5);
@@ -647,8 +664,8 @@ namespace Tests.EditMode
             float plain = RunCurve.Build(withoutRescue, party, Rules()).Levels[0].ExpectedEventRooms;
             float rescued = RunCurve.Build(withRescue, party, Rules()).Levels[0].ExpectedEventRooms;
 
-            Assert.AreEqual(4f, plain, 0.001f);
-            Assert.AreEqual(3f, rescued, 0.001f);
+            Assert.AreEqual(1f - 0.0625f, plain, 0.001f);   // 1 - 0.5^4
+            Assert.AreEqual(1f - 0.125f, rescued, 0.001f);  // 1 - 0.5^3
         }
     }
 }
