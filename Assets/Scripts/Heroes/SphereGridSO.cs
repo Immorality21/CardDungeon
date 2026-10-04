@@ -21,7 +21,14 @@ namespace Assets.Scripts.Heroes
         Summon = 4,         // teaches GrantedSummonKey: always carried, cast from the Summon command
         SummonPower = 5,    // +SummonAmount to every effect's Power of GrantedSummonKey (% points for a % buff)
         SummonDuration = 6, // +SummonAmount turns on GrantedSummonKey's timed effects
-        SummonCharge = 7    // +SummonAmount charges per run for GrantedSummonKey
+        SummonCharge = 7,   // +SummonAmount charges per run for GrantedSummonKey
+
+        // A squad summon (SummonSO.SquadTiers, the Warlock's Demon Army). Appended, as above.
+        SummonSize = 8,     // +SummonAmount troops, up to SummonSO.MaxSquadSize
+        SummonPromote = 9,  // +SummonAmount promotions: each raises the weakest troop one tier
+
+        // Ultras (docs/plans/COMBAT_DEPTH.md §13). Appended, as above.
+        Ultra = 10          // teaches GrantedUltraKey: used from the Ultra command once the gauge is full
     }
 
     /// <summary>
@@ -86,6 +93,9 @@ namespace Assets.Scripts.Heroes
                  "SummonDuration / SummonCharge: the summon this node upgrades. An upgrade for a summon " +
                  "the hero does not know does nothing.")]
         public string GrantedSummonKey;
+
+        [Tooltip("Ultra: the key of the UltraSO this node teaches.")]
+        public string GrantedUltraKey;
 
         [Tooltip("Kind == SummonPower / SummonDuration / SummonCharge: how much this node adds - " +
                  "Power points, turns, or charges.")]

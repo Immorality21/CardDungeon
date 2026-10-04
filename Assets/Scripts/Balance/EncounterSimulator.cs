@@ -277,7 +277,7 @@ namespace Assets.Scripts.Balance
 
             // A party-replacing summon on the field (section 4b), or null. While it is out it is the
             // whole hero side - the one rule CombatManager.HeroSideUnits states for the live game.
-            SimReplacement replacement = null;
+            SimSquad replacement = null;
 
             // Summons fighting beside the party (SummonKind.JoinParty), one per summoner. They join
             // the side the enemies pick from, but never keep a fight going on their own: the loop
@@ -336,9 +336,10 @@ namespace Assets.Scripts.Balance
                 }
 
                 var actingAlly = allies.Of(actor);
-                if (replacement != null && ReferenceEquals(actor, replacement.Unit))
+                var troop = replacement != null ? replacement.Of(actor) : null;
+                if (troop != null)
                 {
-                    TakeReplacementTurn(replacement, enemies, buffTracker, resolver);
+                    TakeReplacementTurn(troop, enemies, buffTracker, resolver);
                 }
                 else if (actingAlly != null)
                 {
@@ -399,27 +400,55 @@ namespace Assets.Scripts.Balance
 
         // ---------------------------------------------------------------- party replacement
 
-        /// <summary>A party-replacing summon on the simulated field: its unit and its stay.</summary>
+        /// <summary>One unit of a party-replacing summon on the simulated field: its unit and its stay.</summary>
         private class SimReplacement
         {
             public SimUnit Unit;
             public SummonStay Stay;
         }
 
-        /// <summary>The hero side: the summon alone while one is out, the party otherwise.</summary>
-        private static List<SimUnit> HeroSide(List<SimUnit> heroes, SimReplacement replacement)
+        /// <summary>
+        /// A party-replacing summon on the simulated field: one unit for the Golem, several troops
+        /// for a squad (the Demon Army, <see cref="SummonOps.SquadFor"/>). The party comes back when
+        /// the last of them leaves - the live <c>CombatManager._squad</c>.
+        /// </summary>
+        private class SimSquad
         {
-            return replacement != null && replacement.Unit.IsAlive
-                ? new List<SimUnit> { replacement.Unit }
-                : heroes;
+            public readonly List<SimReplacement> Members = new List<SimReplacement>();
+
+            public SimReplacement Of(ICombatUnit unit)
+            {
+                return Members.Find(m => ReferenceEquals(m.Unit, unit) && !m.Stay.HasLeft);
+            }
+
+            public List<SimUnit> Standing()
+            {
+                var standing = new List<SimUnit>();
+                foreach (var member in Members)
+                {
+                    if (!member.Stay.HasLeft && member.Unit.IsAlive)
+                    {
+                        standing.Add(member.Unit);
+                    }
+                }
+                return standing;
+            }
+        }
+
+        /// <summary>The hero side: the summon's units alone while any stand, the party otherwise.</summary>
+        private static List<SimUnit> HeroSide(List<SimUnit> heroes, SimSquad replacement)
+        {
+            var standing = replacement != null ? replacement.Standing() : null;
+            return standing != null && standing.Count > 0 ? standing : heroes;
         }
 
         /// <summary>Who the enemies pick from: the hero side plus any living allies - the live
         /// <c>CombatManager.HeroSideUnits</c>. Allies are never part of the defeat check.</summary>
-        private static List<SimUnit> EnemyTargets(List<SimUnit> heroes, SimReplacement replacement, SimAllies allies)
+        private static List<SimUnit> EnemyTargets(List<SimUnit> heroes, SimSquad replacement, SimAllies allies)
         {
+            bool out_ = replacement != null && replacement.Standing().Count > 0;
             var side = HeroSide(heroes, replacement);
-            return replacement != null && replacement.Unit.IsAlive ? side : allies.With(side);
+            return out_ ? side : allies.With(side);
         }
 
         // ---------------------------------------------------------------- allies
@@ -460,32 +489,36 @@ namespace Assets.Scripts.Balance
 
         /// <summary>
         /// The summon arrives, as <c>CombatManager.SummonReplacement</c> does it: the party is
-        /// suspended with its counters frozen, the summon is inserted to act next, and every stored
-        /// wind-up is re-aimed at it. The summoner's own upkeep runs after this, in the loop.
+        /// suspended with its counters frozen, the summon (or its front troop) is inserted to act
+        /// next, the rest of a squad joins the clock, and every stored wind-up is re-aimed at it. The
+        /// summoner's own upkeep runs after this, in the loop.
         /// </summary>
-        private static SimReplacement ArriveReplacement(
+        private static SimSquad ArriveReplacement(
             SimUnit summoner, SimSummonSlot slot, List<SimUnit> heroes, List<SimUnit> enemies, TurnManager turnManager)
         {
-            var unit = SimUnit.FromSummon(slot.Summon, slot.Grant, summoner);
             var suspended = new List<ICombatUnit>();
             foreach (var hero in heroes)
             {
                 suspended.Add(hero);
             }
             turnManager.Suspend(suspended);
-            turnManager.AddUnit(unit, actsNext: true);
+
+            var squad = new SimSquad();
+            int turns = SummonOps.TurnsFor(slot.Summon, slot.Grant);
+            foreach (var troop in SummonOps.SquadFor(slot.Summon, slot.Grant))
+            {
+                var unit = SimUnit.FromSummon(troop, slot.Grant, summoner);
+                turnManager.AddUnit(unit, actsNext: squad.Members.Count == 0);
+                squad.Members.Add(new SimReplacement { Unit = unit, Stay = new SummonStay(troop, turns) });
+            }
             foreach (var enemy in enemies)
             {
                 if (enemy.IsAlive && enemy.ChargeTarget != null)
                 {
-                    enemy.ChargeTarget = unit;
+                    enemy.ChargeTarget = squad.Members[0].Unit;
                 }
             }
-            return new SimReplacement
-            {
-                Unit = unit,
-                Stay = new SummonStay(slot.Summon, SummonOps.TurnsFor(slot.Summon, slot.Grant))
-            };
+            return squad;
         }
 
         /// <summary>
@@ -533,36 +566,48 @@ namespace Assets.Scripts.Balance
         /// After any turn: a summon whose health ran out leaves (the blow went no further - the
         /// party was never a target), and after the summon's own turn it counts one of its stay and
         /// leaves when that was the last. Leaving resumes the party at its frozen counters and lets
-        /// go of anything aimed at the summon. Returns the replacement still on the field, or null.
+        /// go of anything aimed at the summon. A squad loses troops one by one and brings the party
+        /// back only when the last has gone. Returns the replacement still on the field, or null.
         /// </summary>
-        private static SimReplacement AfterReplacementTurn(
-            ICombatUnit unit, SimReplacement replacement, TurnManager turnManager, List<SimUnit> enemies)
+        private static SimSquad AfterReplacementTurn(
+            ICombatUnit unit, SimSquad replacement, TurnManager turnManager, List<SimUnit> enemies)
         {
             if (replacement == null)
             {
                 return null;
             }
 
-            bool leaves = !replacement.Unit.IsAlive;
-            if (!leaves && ReferenceEquals(unit, replacement.Unit))
+            foreach (var member in replacement.Members)
             {
-                leaves = replacement.Stay.EndTurn();
+                if (member.Stay.HasLeft)
+                {
+                    continue;
+                }
+                bool leaves = !member.Unit.IsAlive;
+                if (!leaves && ReferenceEquals(unit, member.Unit))
+                {
+                    leaves = member.Stay.EndTurn();
+                }
+                if (!leaves)
+                {
+                    continue;
+                }
+                member.Stay.Leave(member.Unit.IsAlive ? SummonExit.TurnsSpent : SummonExit.Fell);
+                turnManager.RemoveUnit(member.Unit);
+                foreach (var enemy in enemies)
+                {
+                    if (ReferenceEquals(enemy.ChargeTarget, member.Unit))
+                    {
+                        enemy.ChargeTarget = null;
+                    }
+                }
             }
-            if (!leaves)
+
+            if (replacement.Members.Exists(m => !m.Stay.HasLeft))
             {
                 return replacement;
             }
-
-            replacement.Stay.Leave(replacement.Unit.IsAlive ? SummonExit.TurnsSpent : SummonExit.Fell);
-            turnManager.RemoveUnit(replacement.Unit);
             turnManager.Resume();
-            foreach (var enemy in enemies)
-            {
-                if (ReferenceEquals(enemy.ChargeTarget, replacement.Unit))
-                {
-                    enemy.ChargeTarget = null;
-                }
-            }
             return null;
         }
 

@@ -663,6 +663,29 @@
     background-color: rgb(200, 60, 60);
 }
 
+/* The Ultra gauge (COMBAT_DEPTH §13), under the health bar for a hero who knows an Ultra. */
+.cd-party-row__gauge {
+    height: 3px;
+    margin-top: 2px;
+    background-color: rgb(16, 12, 24);
+    border-radius: 1px;
+}
+
+.cd-party-row__gauge-fill {
+    height: 100%;
+    width: 0%;
+    background-color: rgb(150, 90, 210);
+    border-radius: 1px;
+}
+
+.cd-party-row__gauge-fill--full {
+    background-color: rgb(245, 200, 80);
+}
+
+.cd-party-row__gauge-fill--active {
+    background-color: rgb(220, 60, 90);
+}
+
 .cd-party-row__afflictions {
     flex-direction: row;
     flex-wrap: wrap;

@@ -43,6 +43,11 @@
   moving either and puts the XP back if the material spend fails, since the two live in different
   save files. `SphereGridCostCurveTests` fails on a half-authored price line, which would otherwise
   fail *open* and make the node free.
+- **Node kinds added 2026-10-04:** `SummonSize` / `SummonPromote` (a squad summon's troop count and
+  promotions, `SummonGrant.SizeBonus` / `Promotions`) and **`Ultra`** (teaches `GrantedUltraKey`,
+  read by `SphereGridOps.UltrasForNodes` → `Hero.KnownUltras`). An Ultra's transform rides on
+  `Hero.FormMaxHealthPercent` / `FormAttackDamageType` (primitives, since Cards depends on Heroes),
+  set and cleared by `CombatManager`.
 - **`MagicKnown` nodes are the *only* source of magic in the game** *(since 2026-09-04, when Draw was removed — see `docs/plans/SPECIALIZATION.md` §9b)*. A node teaches `GrantedMagicKey` permanently, at `GrantedCharges` per run.
 
   **Learning is not carrying.** A `MagicKnown` node used to bring its own slot, because under Draw the two were the same thing. Now the grid only grows what a hero *knows*, while slots stay scarce (`EquippedMagicState.DefaultSlotCount`, **2**, plus one per `MagicSlot` node), and the gap between the two is the whole reason a kit is a decision. `SphereGridOps.SlotBonusForNodes` therefore counts **MagicSlot only**; the choice of which known spells fill the slots is made on the hub Inventory screen's **Abilities** tab and resolved by `MagicLoadoutOps.Resolve`.
@@ -63,7 +68,7 @@ are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-gene
 | Paladin | Strength | shield + Ward · Sunder→Consecrate · Heal→Renew — **three**, per §4c |
 | Cleric | Spirit | Renew→Benediction · Smite→Ward |
 | Ranger | Agility | PoisonDart→Volley · Snare→Hush |
-| Warlock | Intelligence | BloodPact→LifeTap (+Cinderstorm) · DrainLife→SiphonSoul (+OilSlick) · **Imp→Succubus** (summons that fight beside the party) — three, re-authored 2026-10-04 |
+| Warlock | Intelligence | BloodPact→LifeTap (+Cinderstorm) · DrainLife→SiphonSoul (+OilSlick) · demons — three, re-authored 2026-10-04. **One summon, the Demon Army, on the trunk; every branch improves it** (C: more troops, Succubi). **Demon Form** (Ultra) on the trunk behind 3 Void Shards |
 | Tinkerer | Intelligence | the three cloaks as a field kit · IceShard→WaterSplash→Fireball |
 | Rogue | Agility | PoisonDart→AimedShot · SmokeBomb→Hush |
 

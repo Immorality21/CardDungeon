@@ -36,6 +36,8 @@ namespace Assets.Scripts.Balance.Editor
             }
 
             var summonAbilityKeys = SummonOps.AbilityKeys(FindAll<SummonSO>());
+            // An Ultra's form abilities (Demon Form's Chaos Bolt) are the same: never learned, never carried.
+            summonAbilityKeys.UnionWith(UltraOps.AbilityKeys(FindAll<UltraSO>()));
 
             var input = new BalanceInput
             {

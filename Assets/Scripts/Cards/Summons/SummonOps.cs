@@ -142,6 +142,56 @@ namespace Assets.Scripts.Cards
             return block;
         }
 
+        /// <summary>
+        /// The units a party-replacing summon brings, front rank first. A single-unit summon (the
+        /// Golem) brings itself. A squad (<see cref="SummonSO.IsSquad"/>, the Demon Army) brings
+        /// <see cref="SummonSO.SquadSize"/> troops plus <see cref="SummonGrant.SizeBonus"/>, capped at
+        /// <see cref="SummonSO.MaxSquadSize"/>, all of the weakest tier; then each of
+        /// <see cref="SummonGrant.Promotions"/> raises the weakest troop one tier - the front rank
+        /// first - until every troop is at the top tier. Three Imps and two promotions is two
+        /// Succubi and an Imp.
+        /// </summary>
+        public static List<SummonSO> SquadFor(SummonSO summon, SummonGrant grant)
+        {
+            var units = new List<SummonSO>();
+            if (summon == null)
+            {
+                return units;
+            }
+            if (!summon.IsSquad)
+            {
+                units.Add(summon);
+                return units;
+            }
+
+            var tiers = summon.SquadTiers.Where(t => t != null).ToList();
+            int max = Mathf.Max(1, summon.MaxSquadSize);
+            int size = Mathf.Clamp(summon.SquadSize + (grant != null ? grant.SizeBonus : 0), 1, max);
+            var levels = new int[size];
+            int promotions = grant != null ? Mathf.Max(0, grant.Promotions) : 0;
+            for (int p = 0; p < promotions; p++)
+            {
+                int weakest = -1;
+                for (int i = 0; i < size; i++)
+                {
+                    if (levels[i] < tiers.Count - 1 && (weakest < 0 || levels[i] < levels[weakest]))
+                    {
+                        weakest = i;
+                    }
+                }
+                if (weakest < 0)
+                {
+                    break;   // every troop is at the top tier
+                }
+                levels[weakest]++;
+            }
+            foreach (int level in levels)
+            {
+                units.Add(tiers[level]);
+            }
+            return units;
+        }
+
         /// <summary>How many of its own turns a party-replacing summon stays: its own count plus
         /// <c>SummonDuration</c> upgrades, at least 1.</summary>
         public static int TurnsFor(SummonSO summon, SummonGrant grant)
@@ -214,23 +264,61 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>"Takes the party's place · 250% of the summoner's health · 3 turns · 1 charge per run",
-        /// or "Fights beside the party · ..." for an ally.</summary>
+        /// "Fights beside the party · ..." for an ally, "Takes the party's place · 2 Imps and a Succubus · ..."
+        /// for a squad.</summary>
         private static string DescribeReplacement(SummonSO summon, SummonGrant grant)
         {
             var parts = new List<string>
             {
                 summon.Kind == SummonKind.JoinParty ? "Fights beside the party" : "Takes the party's place"
             };
-            int health = PercentFor(summon, grant, StatType.MaxHealth);
-            if (health > 0)
+            if (summon.IsSquad)
             {
-                parts.Add($"{health}% of the summoner's health");
+                parts.Add(DescribeSquad(SquadFor(summon, grant)));
+            }
+            else
+            {
+                int health = PercentFor(summon, grant, StatType.MaxHealth);
+                if (health > 0)
+                {
+                    parts.Add($"{health}% of the summoner's health");
+                }
             }
             int turns = TurnsFor(summon, grant);
             parts.Add(turns == 1 ? "1 turn" : $"{turns} turns");
             int charges = MaxCharges(summon, grant);
             parts.Add(charges == 1 ? "1 charge per run" : $"{charges} charges per run");
             return string.Join(" · ", parts);
+        }
+
+        /// <summary>"3 Imps", "2 Succubi and an Imp": the troops by kind, strongest first.</summary>
+        public static string DescribeSquad(List<SummonSO> troops)
+        {
+            var groups = troops.Where(t => t != null)
+                .GroupBy(t => t.Label)
+                .Select(g => new { Name = g.Key, Count = g.Count(), Index = troops.IndexOf(g.First()) })
+                .OrderBy(g => g.Index)
+                .Select(g => g.Count == 1 ? Article(g.Name) + " " + g.Name : g.Count + " " + Plural(g.Name))
+                .ToList();
+            if (groups.Count <= 1)
+            {
+                return groups.Count == 1 ? groups[0] : "";
+            }
+            return string.Join(", ", groups.Take(groups.Count - 1)) + " and " + groups[groups.Count - 1];
+        }
+
+        private static string Article(string name)
+        {
+            return name.Length > 0 && "AEIOUaeiou".IndexOf(name[0]) >= 0 ? "an" : "a";
+        }
+
+        private static string Plural(string name)
+        {
+            if (name.EndsWith("us"))
+            {
+                return name.Substring(0, name.Length - 2) + "i";   // Succubus -> Succubi
+            }
+            return name.EndsWith("s") ? name + "es" : name + "s";
         }
 
         /// <summary>Repeated identical lines read as one with a count: two equal hits are "AGI damage ×2",

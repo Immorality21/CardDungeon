@@ -155,7 +155,7 @@ namespace Assets.Scripts.Combat
         /// <c>CombatStage.PlaceSummon</c> has already put it, which is read here as the destination -
         /// shrinking to its standing size, and lands with a stomp. The object is the summon itself.
         /// </summary>
-        public static IEnumerator Arrive(SummonUnit unit)
+        public static IEnumerator Arrive(SummonUnit unit, bool quiet = false)
         {
             if (unit == null)
             {
@@ -184,7 +184,8 @@ namespace Assets.Scripts.Combat
                 sr.sortingOrder = SortOrder;
             }
 
-            if (summon != null && summon.ArrivalSound != null)
+            // A squad rises together; only its first troop makes the noise.
+            if (!quiet && summon != null && summon.ArrivalSound != null)
             {
                 CombatAudio.PlayClip(summon.ArrivalSound, summon.ArrivalSoundVolume);
             }
@@ -214,7 +215,7 @@ namespace Assets.Scripts.Combat
             while (t < IntroHold)
             {
                 t += Time.deltaTime;
-                if (!roared && t >= RoarAt)
+                if (!roared && !quiet && t >= RoarAt)
                 {
                     roared = true;
                     CombatAudio.Play(CombatSound.BossSignature);

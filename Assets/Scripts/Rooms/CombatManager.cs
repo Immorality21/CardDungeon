@@ -37,7 +37,10 @@ namespace Assets.Scripts.Rooms
 
         // A party-replacing summon's own commands (§4b). Attack is shared with the heroes.
         SummonAbility,
-        Dismiss
+        Dismiss,
+
+        // A hero's Ultra, once their gauge is full (COMBAT_DEPTH §13).
+        Ultra
     }
 
     public class CombatResult
@@ -127,7 +130,16 @@ namespace Assets.Scripts.Rooms
         /// picks one and answers with <see cref="SubmitSummonAbility"/>.</summary>
         public event Action<ICombatUnit, MagicSO, List<ICombatUnit>> OnSummonAbilityTargetRequested;
 
-        /// <summary>A hero who knows more than one summon picks which to call.</summary>
+        /// <summary>A hero opens their Ultras. Always a list, even of one - the FFX Overdrive menu:
+        /// what the move is and what it will do are read before it is spent.</summary>
+        public event Action<ICombatUnit, List<UltraSO>> OnUltraListRequested;
+
+        public void RequestUltraList(ICombatUnit hero, List<UltraSO> ultras)
+        {
+            OnUltraListRequested?.Invoke(hero, ultras);
+        }
+
+        /// <summary>A hero opens their summons - always a list, even of one, as the Ultra command does.</summary>
         public event Action<ICombatUnit, List<SummonSlot>> OnSummonListRequested;
 
         public void RequestSummonList(ICombatUnit hero, List<SummonSlot> summons)
@@ -156,10 +168,29 @@ namespace Assets.Scripts.Rooms
         private SummonSlot _pendingSummon;
         private MagicSO _pendingSummonAbility;
         private List<ICombatUnit> _pendingSummonTargets;
+        private UltraSO _pendingUltra;
 
-        // The party-replacing summon on the field, or null. While it is out it is the whole hero
-        // side: see HeroSideUnits.
-        private SummonUnit _summon;
+        // ---- Ultras (COMBAT_DEPTH §13): each hero's gauge this fight, the health it was last read
+        // ---- at, and the form a hero is in while a Transform Ultra lasts.
+        private readonly Dictionary<Hero, int> _ultraGauge = new Dictionary<Hero, int>();
+        private readonly Dictionary<Hero, int> _gaugeHealth = new Dictionary<Hero, int>();
+        private readonly Dictionary<Hero, ActiveForm> _forms = new Dictionary<Hero, ActiveForm>();
+
+        /// <summary>A hero's Transform Ultra while it lasts.</summary>
+        private class ActiveForm
+        {
+            public UltraSO Ultra;
+            public int TurnsLeft;
+            public bool TakenThisTurn;
+        }
+
+        // The party-replacing summon on the field: one unit for the Golem, several troops for a squad
+        // (the Demon Army), empty while the party fights. While any of it stands it is the whole hero
+        // side: see HeroSideUnits. The party comes back when the last of it leaves.
+        private readonly List<SummonUnit> _squad = new List<SummonUnit>();
+
+        /// <summary>Whether a party-replacing summon (or what is left of its squad) is on the field.</summary>
+        private bool ReplacementOut => _squad.Any(u => u != null && u.IsAlive);
 
         // Summons fighting beside the party (SummonKind.JoinParty), at most one per summoner, in the
         // order they arrived. Part of the hero side while the party is: see HeroSideUnits.
@@ -186,7 +217,7 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>The party-replacing summon on the field, or null when the party is fighting.</summary>
-        public SummonUnit ActiveSummon => _summon;
+        public SummonUnit ActiveSummon => _squad.FirstOrDefault(u => u != null && u.IsAlive);
 
         /// <summary>The summons fighting beside the party right now, in the order they arrived.</summary>
         public IReadOnlyList<SummonUnit> ActiveAllies => _allies;
@@ -201,9 +232,9 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         public List<ICombatUnit> HeroSideUnits()
         {
-            if (_summon != null && _summon.IsAlive)
+            if (ReplacementOut)
             {
-                return new List<ICombatUnit> { _summon };
+                return _squad.Where(u => u != null && u.IsAlive).Cast<ICombatUnit>().ToList();
             }
             if (_currentParty == null)
             {
@@ -226,6 +257,52 @@ namespace Assets.Scripts.Rooms
             _pendingSummonAbility = magic;
             _pendingSummonTargets = targets;
             _pendingAction = HeroAction.SummonAbility;
+        }
+
+        /// <summary>Uses <paramref name="ultra"/> for the current hero turn. Uses the turn.</summary>
+        public void SubmitUltra(UltraSO ultra)
+        {
+            _pendingUltra = ultra;
+            _pendingAction = HeroAction.Ultra;
+        }
+
+        /// <summary>The Ultras <paramref name="hero"/> knows, resolved; empty for anything but a hero.</summary>
+        public List<UltraSO> KnownUltras(ICombatUnit hero)
+        {
+            var component = hero as Hero;
+            if (component == null)
+            {
+                return new List<UltraSO>();
+            }
+            return component.KnownUltras.Select(UltraCatalogSO.Resolve).Where(u => u != null).ToList();
+        }
+
+        /// <summary>How full <paramref name="hero"/>'s Ultra gauge is this fight, 0..<see cref="UltraOps.Max"/>.</summary>
+        public int UltraGauge(ICombatUnit hero)
+        {
+            return hero is Hero component && _ultraGauge.TryGetValue(component, out int gauge) ? gauge : 0;
+        }
+
+        /// <summary>Whether <paramref name="hero"/> is in an Ultra's form right now.</summary>
+        public bool IsTransformed(ICombatUnit hero)
+        {
+            return hero is Hero component && _forms.ContainsKey(component);
+        }
+
+        /// <summary>Whether the Ultra command is open: a full gauge, an Ultra known, not already transformed.</summary>
+        public bool CanUseUltra(ICombatUnit hero)
+        {
+            return InCombat && UltraOps.IsFull(UltraGauge(hero)) && !IsTransformed(hero) && KnownUltras(hero).Count > 0;
+        }
+
+        /// <summary>The abilities <paramref name="hero"/>'s current form grants - free to use while it lasts.</summary>
+        public List<MagicSO> FormAbilities(ICombatUnit hero)
+        {
+            if (hero is Hero component && _forms.TryGetValue(component, out var form) && form.Ultra.Abilities != null)
+            {
+                return form.Ultra.Abilities.Where(a => a != null).ToList();
+            }
+            return new List<MagicSO>();
         }
 
         /// <summary>Sends the summon home. Uses its turn, like any other command it has.</summary>
@@ -391,7 +468,7 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         public List<ICombatUnit> GetAliveHeroes(Party party)
         {
-            if (party == null || ReferenceEquals(party, _currentParty) || (_summon != null && _summon.IsAlive))
+            if (party == null || ReferenceEquals(party, _currentParty) || ReplacementOut)
             {
                 return HeroSideUnits();
             }
@@ -425,8 +502,17 @@ namespace Assets.Scripts.Rooms
             }
             _combatGold = 0;
             _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
-            _summon = null;
+            _squad.Clear();
             _allies.Clear();
+            // Every gauge starts the fight empty (UltraOps: per fight, not per run).
+            _ultraGauge.Clear();
+            _gaugeHealth.Clear();
+            _forms.Clear();
+            foreach (var hero in party.Heroes.Where(h => h != null))
+            {
+                _ultraGauge[hero] = 0;
+                _gaugeHealth[hero] = hero.Stats.Health;
+            }
             _threat.Reset();
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
@@ -533,6 +619,7 @@ namespace Assets.Scripts.Rooms
                 {
                     _lastTurnLog = _lastTurnLog.Trim();
                     fullLog += _lastTurnLog + "\n";
+                    UpdateUltraGauges();
                     OnTurnExecuted?.Invoke(_lastTurnLog);
                     BroadcastTurnOrder();
                     continue;
@@ -544,7 +631,9 @@ namespace Assets.Scripts.Rooms
                     _lastTurnLog = skipMessage;
                     yield return EndOfTurnUpkeep(unit, room);
                     AfterSummonTurn(unit, dismissed: false);
+                    AfterFormTurn(unit);
                     fullLog += _lastTurnLog + "\n";
+                    UpdateUltraGauges();
                     OnTurnExecuted?.Invoke(_lastTurnLog);
                     BroadcastTurnOrder();
                     continue;
@@ -561,6 +650,7 @@ namespace Assets.Scripts.Rooms
                     _pendingSummon = null;
                     _pendingSummonAbility = null;
                     _pendingSummonTargets = null;
+                    _pendingUltra = null;
                     OnHeroTurnStarted?.Invoke(unit);
 
                     while (_pendingAction == HeroAction.None)
@@ -594,6 +684,10 @@ namespace Assets.Scripts.Rooms
                     {
                         yield return ExecuteSummonAbility(abilityCaster, _pendingSummonAbility, _pendingSummonTargets, room);
                     }
+                    else if (_pendingAction == HeroAction.Ultra && _pendingUltra != null && unit is Hero ultraHero)
+                    {
+                        yield return ExecuteUltra(ultraHero, _pendingUltra);
+                    }
                     else if (_pendingAction == HeroAction.Dismiss && unit is SummonUnit dismissing)
                     {
                         _lastTurnLog = IsAlly(dismissing)
@@ -624,19 +718,26 @@ namespace Assets.Scripts.Rooms
 
                 yield return EndOfTurnUpkeep(unit, room);
                 AfterSummonTurn(unit, dismissed: _pendingAction == HeroAction.Dismiss && unit is SummonUnit);
+                AfterFormTurn(unit);
                 fullLog += _lastTurnLog + "\n";
+                UpdateUltraGauges();
                 OnTurnExecuted?.Invoke(_lastTurnLog);
                 BroadcastTurnOrder();
             }
 
             // The last enemy fell while a summon was out: the party comes back for an ordinary
             // victory, and XP splits across them as usual (it was already awarded per kill).
-            if (_summon != null)
+            if (_squad.Count > 0)
             {
                 EndSummon(SummonExit.Victory);
             }
             // Allies go home with the fight, won or lost.
             EndAllAllies(SummonExit.Victory);
+            // ...and every form comes off, the health bar keeping its share.
+            foreach (var transformed in _forms.Keys.ToList())
+            {
+                EndForm(transformed, log: false);
+            }
 
             // Clear turn order display + the on-field turn marker
             OnTurnOrderChanged?.Invoke(new List<ICombatUnit>());
@@ -799,9 +900,9 @@ namespace Assets.Scripts.Rooms
             }
 
             // One at a time: nobody is left to summon a second, but a stale submit must not try.
-            if (_summon != null)
+            if (ReplacementOut)
             {
-                _lastTurnLog = $"{caster.DisplayName} tries to summon, but {_summon.DisplayName} is already here.";
+                _lastTurnLog = $"{caster.DisplayName} tries to summon, but {ActiveSummon.DisplayName} is already here.";
                 yield break;
             }
 
@@ -862,17 +963,39 @@ namespace Assets.Scripts.Rooms
             bool alliesLeft = _allies.Count > 0;
             EndAllAllies(SummonExit.Dismissed);
 
-            var unit = SummonUnit.Create(summon, slot.Grant, summoner);
+            // A squad (the Demon Army) is several troops sharing the summon's stay; anything else is
+            // the one unit it always was.
+            int turns = SummonOps.TurnsFor(summon, slot.Grant);
+            var units = SummonOps.SquadFor(summon, slot.Grant)
+                .Select(troop => SummonUnit.Create(troop, slot.Grant, summoner, turns))
+                .ToList();
             CombatStage.Instance.HideParty();
-            CombatStage.Instance.PlaceSummon(unit);
-            yield return SummonPresenter.Arrive(unit);
+            if (summon.IsSquad)
+            {
+                CombatStage.Instance.PlaceSquad(units);
+                // They pour out together; only the first roars.
+                for (int i = 1; i < units.Count; i++)
+                {
+                    StartCoroutine(SummonPresenter.Arrive(units[i], quiet: true));
+                }
+            }
+            else
+            {
+                CombatStage.Instance.PlaceSummon(units[0]);
+            }
+            yield return SummonPresenter.Arrive(units[0]);
             OnSummonEnded?.Invoke();
 
             // The whole hero side swaps in one step, so nothing can ever see both or neither.
             _turnManager.Suspend(_currentParty.Heroes.Cast<ICombatUnit>());
-            _summon = unit;
-            _turnManager.AddUnit(unit, actsNext: true);
-            EnsureHealthBars(new List<ICombatUnit> { unit });
+            _squad.Clear();
+            _squad.AddRange(units);
+            for (int i = 0; i < units.Count; i++)
+            {
+                // The front troop takes the immediate turn; the rest join the clock at their own pace.
+                _turnManager.AddUnit(units[i], actsNext: i == 0);
+            }
+            EnsureHealthBars(units.Cast<ICombatUnit>().ToList());
 
             // A heavy locks onto its victim at wind-up and only re-aims at a *dead* one, so a blow
             // already aimed at a frozen hero would land on them. Every stored aim moves to the
@@ -881,11 +1004,14 @@ namespace Assets.Scripts.Rooms
             {
                 if (enemy.ChargeTarget != null)
                 {
-                    enemy.ChargeTarget = unit;
+                    enemy.ChargeTarget = units[UnityEngine.Random.Range(0, units.Count)];
                 }
             }
 
-            _lastTurnLog = $"{summoner.DisplayName} summons {unit.DisplayName}! The party steps back"
+            string arrived = summon.IsSquad
+                ? $"{summon.Label} ({SummonOps.DescribeSquad(SummonOps.SquadFor(summon, slot.Grant))})"
+                : units[0].DisplayName;
+            _lastTurnLog = $"{summoner.DisplayName} summons {arrived}! The party steps back"
                 + (alliesLeft ? ", and their allies are sent away." : ".");
         }
 
@@ -919,6 +1045,139 @@ namespace Assets.Scripts.Rooms
             _lastTurnLog = previous != null
                 ? $"{summoner.DisplayName} sends {previous.DisplayName} away and summons {unit.DisplayName}!"
                 : $"{summoner.DisplayName} summons {unit.DisplayName} to fight beside the party!";
+        }
+
+        // ------------------------------------------------------------------ Ultras
+
+        /// <summary>
+        /// Credits every hero's gauge with the health they have lost since it was last read, and
+        /// re-reads it. Run once per turn, just before the turn is reported, so a blow, a tick and a
+        /// blood price all count the same way and the party window shows the gauge it is about to
+        /// offer. Healing moves nothing.
+        /// </summary>
+        private void UpdateUltraGauges()
+        {
+            foreach (var hero in _gaugeHealth.Keys.ToList())
+            {
+                if (hero == null)
+                {
+                    continue;
+                }
+                int now = Mathf.Max(0, hero.Stats.Health);
+                int lost = _gaugeHealth[hero] - now;
+                if (lost > 0 && hero.IsAlive)
+                {
+                    _ultraGauge.TryGetValue(hero, out int gauge);
+                    _ultraGauge[hero] = UltraOps.Add(gauge, UltraOps.GainFor(lost, hero.GetEffectiveMaxHealth()));
+                }
+                _gaugeHealth[hero] = now;
+            }
+        }
+
+        /// <summary>
+        /// A hero uses an Ultra (COMBAT_DEPTH §13). The gauge empties, and a Transform Ultra puts the
+        /// hero in its form: a bigger bar with the same share filled, the form's attack element and
+        /// art, and its abilities on the Ability list. The form lasts the Ultra's turns, counted from
+        /// the hero's next one.
+        /// </summary>
+        private IEnumerator ExecuteUltra(Hero hero, UltraSO ultra)
+        {
+            if (!CanUseUltra(hero) || !KnownUltras(hero).Contains(ultra))
+            {
+                _lastTurnLog = $"{hero.DisplayName} reaches for something that is not there yet.";
+                yield break;
+            }
+            _ultraGauge[hero] = 0;
+
+            int oldMax = hero.GetEffectiveMaxHealth();
+            hero.FormMaxHealthPercent = ultra.MaxHealthPercent;
+            hero.FormAttackDamageType = ultra.AttackDamageType;
+            hero.Stats.Health = UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth());
+            _gaugeHealth[hero] = hero.Stats.Health;   // the form's new bar is not damage taken
+            SetHeroFrames(hero, ultra.FormFrames, ultra.FormFps);
+            _forms[hero] = new ActiveForm { Ultra = ultra, TurnsLeft = ultra.Turns, TakenThisTurn = true };
+
+            CombatAudio.Play(CombatSound.BossSignature);
+            CombatFeedback.Instance.Shake(0.25f, 0.4f);
+            if (MainCamera.HasInstance)
+            {
+                MainCamera.Instance.ZoomPunch(0.35f, 0.35f);
+            }
+            ScreenFade.Instance.Flash(new Color(0.55f, 0.1f, 0.25f), 0.45f, 0.05f, 0.35f);
+            ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(1f, 0.35f, 0.45f), 0.2f);
+            _lastTurnLog = $"{hero.DisplayName} unleashes {ultra.Label}!";
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
+        /// <summary>One of a transformed hero's turns is over: the form counts it down and comes off
+        /// after the last. The turn the Ultra was used on does not count.</summary>
+        private void AfterFormTurn(ICombatUnit unit)
+        {
+            var hero = unit as Hero;
+            if (hero == null || !_forms.TryGetValue(hero, out var form))
+            {
+                return;
+            }
+            if (form.TakenThisTurn)
+            {
+                form.TakenThisTurn = false;
+                return;
+            }
+            form.TurnsLeft--;
+            if (form.TurnsLeft <= 0)
+            {
+                EndForm(hero, log: true);
+            }
+        }
+
+        /// <summary>The form comes off: the bonus health goes with the bar keeping its share, and the
+        /// hero's own attack and art come back. Safe to call on a hero with no form.</summary>
+        private void EndForm(Hero hero, bool log)
+        {
+            if (hero == null || !_forms.TryGetValue(hero, out var form))
+            {
+                return;
+            }
+            _forms.Remove(hero);
+            int oldMax = hero.GetEffectiveMaxHealth();
+            hero.FormMaxHealthPercent = 0;
+            hero.FormAttackDamageType = DamageType.Normal;
+            if (hero.IsAlive)
+            {
+                hero.Stats.Health = UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth());
+            }
+            _gaugeHealth[hero] = Mathf.Max(0, hero.Stats.Health);
+            SetHeroFrames(hero, hero.HeroSO != null ? hero.HeroSO.AnimationFrames : null,
+                hero.HeroSO != null ? hero.HeroSO.AnimationFps : 4f);
+            if (hero.HeroSO != null && (hero.HeroSO.AnimationFrames == null || hero.HeroSO.AnimationFrames.Length == 0))
+            {
+                var sr = hero.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.sprite = hero.HeroSO.Sprite;
+                }
+            }
+            if (log)
+            {
+                _lastTurnLog += $" {hero.DisplayName}'s {form.Ultra.Label} fades.";
+            }
+        }
+
+        /// <summary>Puts <paramref name="frames"/> on the hero's sprite (animated when there are
+        /// several). Nothing to show keeps what is there.</summary>
+        private static void SetHeroFrames(Hero hero, Sprite[] frames, float fps)
+        {
+            var valid = frames != null ? frames.Where(f => f != null).ToArray() : new Sprite[0];
+            if (hero == null || valid.Length == 0)
+            {
+                return;
+            }
+            var animator = hero.GetComponent<SpriteAnimator>();
+            if (animator == null)
+            {
+                animator = hero.gameObject.AddComponent<SpriteAnimator>();
+            }
+            animator.Initialize(valid, Mathf.Max(1f, fps));
         }
 
         /// <summary>Whether <paramref name="unit"/> is one of the summons fighting beside the party.</summary>
@@ -1006,20 +1265,46 @@ namespace Assets.Scripts.Rooms
                 }
                 return;
             }
-            if (summon == null || !ReferenceEquals(summon, _summon))
+            if (summon == null || !_squad.Contains(summon))
             {
                 return;
             }
             bool last = summon.Stay.EndTurn();
             if (dismissed)
             {
+                // Dismiss is how the player brings the party back, so it sends the whole squad home.
                 EndSummon(SummonExit.Dismissed);
             }
             else if (last)
             {
-                _lastTurnLog += $" {summon.DisplayName}'s time is up, and the party steps back in.";
-                EndSummon(SummonExit.TurnsSpent);
+                LeaveSquad(summon, SummonExit.TurnsSpent, $" {summon.DisplayName}'s time is up");
             }
+        }
+
+        /// <summary>
+        /// One unit of the replacement leaves. While others stand the fight goes on with them; the
+        /// last one out brings the party back (<see cref="EndSummon"/>).
+        /// </summary>
+        private void LeaveSquad(SummonUnit unit, SummonExit exit, string why)
+        {
+            bool othersStand = _squad.Any(u => u != null && u != unit && u.IsAlive);
+            if (!othersStand)
+            {
+                _lastTurnLog += why + ", and the party steps back in.";
+                EndSummon(exit);
+                return;
+            }
+            _lastTurnLog += why + ".";
+            unit.Stay.Leave(exit);
+            _turnManager.RemoveUnit(unit);
+            foreach (var enemy in AliveEnemyComponents())
+            {
+                if (ReferenceEquals(enemy.ChargeTarget, unit))
+                {
+                    enemy.ChargeTarget = null;
+                }
+            }
+            StartCoroutine(SummonPresenter.Depart(unit, exit == SummonExit.Fell));
         }
 
         /// <summary>
@@ -1030,30 +1315,37 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void EndSummon(SummonExit exit)
         {
-            var summon = _summon;
-            if (summon == null)
+            if (_squad.Count == 0)
             {
                 return;
             }
-            summon.Stay.Leave(exit);
-            _summon = null;
+            var leaving = _squad.ToList();
+            _squad.Clear();
 
-            _turnManager.RemoveUnit(summon);
+            foreach (var unit in leaving)
+            {
+                // A troop that already went home (fell, or its time ran out) left the stage then.
+                bool stillHere = !unit.Stay.HasLeft;
+                unit.Stay.Leave(exit);
+                _turnManager.RemoveUnit(unit);
+                foreach (var enemy in AliveEnemyComponents())
+                {
+                    if (ReferenceEquals(enemy.ChargeTarget, unit))
+                    {
+                        enemy.ChargeTarget = null;
+                    }
+                }
+                if (stillHere)
+                {
+                    StartCoroutine(SummonPresenter.Depart(unit, exit == SummonExit.Fell));
+                }
+            }
+
             _turnManager.Resume();
             if (CombatStage.HasInstance)
             {
                 CombatStage.Instance.RestoreParty();
             }
-
-            foreach (var enemy in AliveEnemyComponents())
-            {
-                if (ReferenceEquals(enemy.ChargeTarget, summon))
-                {
-                    enemy.ChargeTarget = null;
-                }
-            }
-
-            StartCoroutine(SummonPresenter.Depart(summon, exit == SummonExit.Fell));
         }
 
         /// <summary>
@@ -1075,13 +1367,12 @@ namespace Assets.Scripts.Rooms
                 EndAlly(summon, SummonExit.Fell);
                 return;
             }
-            if (!ReferenceEquals(summon, _summon))
+            if (!_squad.Contains(summon) || summon.Stay.HasLeft)
             {
                 return;
             }
             summon.Stats.Health = 0;
-            _lastTurnLog += $" {summon.DisplayName} crumbles, and the party steps back in!";
-            EndSummon(SummonExit.Fell);
+            LeaveSquad(summon, SummonExit.Fell, $" {summon.DisplayName} crumbles");
         }
 
         /// <summary>
@@ -2029,6 +2320,7 @@ namespace Assets.Scripts.Rooms
             }
 
             EndAlliesOf(hero);
+            EndForm(hero, log: false);
 
             // Disable the hero's sprite to show they've fallen
             var sr = hero.GetComponent<SpriteRenderer>();
@@ -2123,7 +2415,7 @@ namespace Assets.Scripts.Rooms
         /// impossible then, because nothing can reach the party.</summary>
         private bool HasAliveHeroes(Party party)
         {
-            return (_summon != null && _summon.IsAlive) || party.Heroes.Any(h => h != null && h.IsAlive);
+            return ReplacementOut || party.Heroes.Any(h => h != null && h.IsAlive);
         }
 
         private bool HasAliveEnemies(Room room)
@@ -2145,7 +2437,7 @@ namespace Assets.Scripts.Rooms
         /// they go home with the fight.</summary>
         public bool CanFlee(Party party)
         {
-            return _summon == null && party.PreviousRoom != null;
+            return !ReplacementOut && party.PreviousRoom != null;
         }
 
         public void Flee(Party party, Door entryDoor, Room currentRoom)

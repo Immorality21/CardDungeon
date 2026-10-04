@@ -18,5 +18,11 @@ namespace Assets.Scripts.Heroes
 
         /// <summary>Added to the summon's charges per run.</summary>
         public int ChargeBonus;
+
+        /// <summary>A squad summon: troops added to its base size (capped by the summon).</summary>
+        public int SizeBonus;
+
+        /// <summary>A squad summon: troop promotions, each raising the weakest troop one tier.</summary>
+        public int Promotions;
     }
 }

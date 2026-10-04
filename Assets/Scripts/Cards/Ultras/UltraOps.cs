@@ -1,0 +1,119 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Assets.Scripts.Cards
+{
+    /// <summary>
+    /// The pure rules of the Ultra gauge and the transform (docs/plans/COMBAT_DEPTH.md §13). Covered
+    /// by <c>UltraTests</c>.
+    ///
+    /// <para><b>The gauge fills on health lost, in this fight.</b> Losing <see cref="FillShare"/> of
+    /// the hero's max health fills it from empty - a blow, a burn or a blood price all count, which is
+    /// what makes the Warlock's own health costs feed his Demon Form. It starts every fight empty and
+    /// is spent whole on use. Per fight rather than per run because a gauge carried between rooms would
+    /// be charged in an easy room and spent in the next, which is not a comeback.</para>
+    /// </summary>
+    public static class UltraOps
+    {
+        /// <summary>A full gauge.</summary>
+        public const int Max = 100;
+
+        /// <summary>The share of a hero's max health they must lose in one fight to fill the gauge
+        /// from empty. First-draft number.</summary>
+        public const float FillShare = 0.6f;
+
+        /// <summary>Gauge points for losing <paramref name="healthLost"/> of a <paramref name="maxHealth"/>
+        /// bar. Rounded up, so any real loss moves it.</summary>
+        public static int GainFor(int healthLost, int maxHealth)
+        {
+            if (healthLost <= 0 || maxHealth <= 0)
+            {
+                return 0;
+            }
+            return Mathf.CeilToInt(healthLost * Max / (maxHealth * FillShare));
+        }
+
+        /// <summary>The gauge after a gain, clamped to <see cref="Max"/>.</summary>
+        public static int Add(int gauge, int gain)
+        {
+            return Mathf.Clamp(gauge + Mathf.Max(0, gain), 0, Max);
+        }
+
+        public static bool IsFull(int gauge)
+        {
+            return gauge >= Max;
+        }
+
+        /// <summary>
+        /// Health after a max-health change that keeps the same share of the bar filled - half health
+        /// before is half health after, both into the form and back out of it. A living unit never
+        /// rounds down to 0.
+        /// </summary>
+        public static int KeepShare(int health, int oldMax, int newMax)
+        {
+            if (health <= 0 || oldMax <= 0 || newMax <= 0)
+            {
+                return Mathf.Max(0, health);
+            }
+            return Mathf.Clamp(Mathf.RoundToInt((float)health / oldMax * newMax), 1, newMax);
+        }
+
+        /// <summary>
+        /// Every ability an Ultra grants, by key. Like a summon's, they are <see cref="MagicSO"/>
+        /// assets reached through the Ultra and never through a grid, the Forge or a loadout, so every
+        /// "can a hero learn this?" check must leave them out.
+        /// </summary>
+        public static HashSet<string> AbilityKeys(IEnumerable<UltraSO> ultras)
+        {
+            var keys = new HashSet<string>();
+            if (ultras == null)
+            {
+                return keys;
+            }
+            foreach (var ultra in ultras)
+            {
+                if (ultra == null || ultra.Abilities == null)
+                {
+                    continue;
+                }
+                foreach (var ability in ultra.Abilities)
+                {
+                    if (ability != null && !string.IsNullOrEmpty(ability.Key))
+                    {
+                        keys.Add(ability.Key);
+                    }
+                }
+            }
+            return keys;
+        }
+
+        /// <summary>"Becomes a demon for 3 turns · +50% health · Shadow attack · Chaos Bolt".</summary>
+        public static string Describe(UltraSO ultra)
+        {
+            if (ultra == null)
+            {
+                return "";
+            }
+            var parts = new List<string> { ultra.Turns == 1 ? "Transforms for 1 turn" : $"Transforms for {ultra.Turns} turns" };
+            if (ultra.MaxHealthPercent > 0)
+            {
+                parts.Add($"+{ultra.MaxHealthPercent}% health");
+            }
+            if (ultra.AttackDamageType != Combat.DamageType.Normal)
+            {
+                parts.Add($"{ultra.AttackDamageType} attack");
+            }
+            if (ultra.Abilities != null)
+            {
+                foreach (var ability in ultra.Abilities)
+                {
+                    if (ability != null)
+                    {
+                        parts.Add(ability.DisplayName);
+                    }
+                }
+            }
+            return string.Join(" · ", parts);
+        }
+    }
+}

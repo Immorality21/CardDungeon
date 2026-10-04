@@ -277,8 +277,9 @@ Two consequences worth holding on to:
 - **Combat:** the **Summon** command (the one exception to "the menu does not grow") appears only for a
   hero who knows a summon, greys out when spent or **Silenced**, and uses the turn.
   `CombatManager.ExecuteSummonAction` → `SummonPresenter` (creature on stage ~3.5 s, animation,
-  lurch + roar) + the `summon-banner` UI → effects. A hero who knows two gets the **summon picker**
-  (`MagicSelectionUI.ShowSummonList`).
+  lurch + roar) + the `summon-banner` UI → effects. **The command always opens the summon picker**
+  (`MagicSelectionUI.ShowSummonList`), **even for one summon** *(owner, 2026-10-04, like FFX — the
+  same rule as the Ultra list)*: the footer says what it does before a run's charge is spent.
 - **The party-replacing kind (`ReplaceParty`, the Cairn Golem).** Extra `SummonSO` fields:
   `StatPercents` (a `StatBlock` of percentages of the summoner's base + gear stats), `TurnsActive`,
   `Actions` + one `Signature` (ordinary `MagicSO`s), `CopySummonerResistances`. `SummonOps.StatsFor`
@@ -336,6 +337,35 @@ Two consequences worth holding on to:
   directly): called whenever its summoner has none out, plays Signature then Attack, enemies pick from
   heroes + allies, party-wide heals and buffs reach them, and `AfterTurn` runs on **every** turn path —
   a summoner killed by a start-of-turn tick takes their ally that same turn.
+- **Squads (the Demon Army — 2026-10-04).** A `ReplaceParty` summon with `SquadTiers` brings
+  several troops instead of being the unit: `SummonOps.SquadFor` = `SquadSize` + `SummonSize` nodes
+  (capped at `MaxSquadSize`, 4 — the hero side has four slots), all of the weakest tier, then each
+  `SummonPromote` raises the weakest troop one tier, front rank first. Each troop is its own `SummonSO`
+  (stats as ratios of the summoner's, Attack, Signature once per troop) on the **squad's** stay
+  (`SummonUnit.Create(troop, grant, summoner, turns)`); a `SummonPower` node adds HP-ratio points to
+  every troop. `CombatManager._squad` replaced the single `_summon` — a Golem is a squad of one. Troops
+  stand in the hero formation (`CombatStage.PlaceSquad`, hero scale), rise together (only the first
+  roars), the front troop acts at once and the rest join the clock; one that falls or runs out of
+  turns leaves alone (`LeaveSquad`), the last one out brings the party back (`EndSummon`), and
+  **Dismiss sends the whole squad home**. The sim's `SimSquad` mirrors it. Troops are in the summon
+  catalog; `SummonContentTests` counts them as taught through their squad.
+- **Ultras (`Cards/Ultras/`, COMBAT_DEPTH §13 — 2026-10-04).** `UltraSO` (`Resources/UltraCatalog`),
+  taught by `SphereNodeKind.Ultra`, used from the **Ultra** command once the hero's gauge is full.
+  **The command always opens the Ultra list** (`MagicSelectionUI.ShowUltraList`, via
+  `CombatManager.RequestUltraList`) **even for one** — the owner's call, like FFX's Overdrive menu:
+  the footer says what it does before the gauge is spent.
+  **The gauge** (`UltraOps`): per hero, **per fight**, credited with health lost
+  (`CombatManager.UpdateUltraGauges`, once per turn before the turn is reported, against the health
+  last read — so blows, ticks and health costs all count and healing never does); losing
+  `FillShare` (60%) of the bar fills it; using an Ultra empties it. One kind, **`Transform`**
+  (Demon Form): for `Turns` of the hero's turns after the one it is used on, `MaxHealthPercent` more
+  health **keeping the share filled** both ways (`UltraOps.KeepShare`), basic Attack in
+  `AttackDamageType`, the form's `Abilities` **appended after the real slots** on the Ability list
+  (`MagicSlot.Unlimited`, "∞" — an index past the hero's slots, so `TryCast` spends nothing), and its
+  `FormFrames` on the hero. It ends early when the hero falls and at the end of the fight. Ultra
+  abilities are like summon abilities — never on a grid or in `MagicCatalog`
+  (`UltraOps.AbilityKeys`, excluded by the content tests and the balance collector). **The balance
+  sim does not model Ultras yet.**
 - **A replacement's own Attack** *(2026-10-01)*: `SummonSO.AttackAbility` (optional, a single-enemy
   `MagicSO`) is what its Attack command does instead of the plain Strength swing. The row still says
   *Attack*, **Silence never closes it** (`ExecuteSummonAbility` exempts it), the sim swings it, and

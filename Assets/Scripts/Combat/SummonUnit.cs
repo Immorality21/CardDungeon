@@ -61,6 +61,15 @@ namespace Assets.Scripts.Combat
         /// </summary>
         public static SummonUnit Create(SummonSO summon, SummonGrant grant, Hero summoner)
         {
+            return Create(summon, grant, summoner, SummonOps.TurnsFor(summon, grant));
+        }
+
+        /// <summary>
+        /// One troop of a squad (<see cref="SummonSO.IsSquad"/>): its own stats, Attack and Signature
+        /// from <paramref name="summon"/> (the troop), but the stay of the squad it marches with.
+        /// </summary>
+        public static SummonUnit Create(SummonSO summon, SummonGrant grant, Hero summoner, int turns)
+        {
             var go = new GameObject("Summon_" + (summon != null ? summon.Key : "unknown"));
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = summon != null ? summon.Sprite : null;
@@ -77,7 +86,7 @@ namespace Assets.Scripts.Combat
             var unit = go.AddComponent<SummonUnit>();
             unit.Summon = summon;
             unit.Summoner = summoner;
-            unit.Stay = new SummonStay(summon, SummonOps.TurnsFor(summon, grant));
+            unit.Stay = new SummonStay(summon, turns);
 
             // Base + gear, never the buff tracker: that is what "no buff-then-summon loop" means.
             var block = SummonOps.StatsFor(summon, grant,

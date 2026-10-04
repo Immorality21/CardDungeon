@@ -231,6 +231,13 @@ fields), `Assets/Scripts/Balance/` (`EnemyBehaviorModel`, `BalanceMath`).
 
 ### 13. Hero identity — the Ultra gauge
 
+> **A minimal gauge shipped 2026-10-04** with the Warlock's Demon Form — see
+> `plans/WARLOCK_CULTIST.md` §1c and the Magic guide. Decided by the owner: Ultras **coexist** with
+> summons, **small and universal**. Built: per-hero, per-fight gauge filled by health lost
+> (`UltraOps`), the **Ultra** command (a second menu exception after Summon), `UltraSO` +
+> `SphereNodeKind.Ultra`, one kind (`Transform`). The command always opens a list (owner, like FFX's Overdrive menu), even
+> for one Ultra. Still open: Ultras for the other heroes, more kinds than Transform, and pricing in the balance model.
+
 > **The "unique command" half of this section was deleted 2026-09-08 — it was asking for machinery
 > that already exists.** A command *is* an ability: Provoke, Steal, Focus, a gadget, a self-damaging
 > channel are all `MagicSO`s taught by a `MagicKnown` node, resolved by `EffectResolver`, and

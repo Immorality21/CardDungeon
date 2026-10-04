@@ -59,6 +59,17 @@ namespace Tests.EditMode
                     continue;
                 }
 
+                // A squad is its troops: each is a summon asset of its own and checked as a unit here.
+                if (summon.IsSquad)
+                {
+                    Assert.That(summon.SquadTiers.All(t => t != null), $"{summon.name} has an empty troop tier.");
+                    Assert.That(summon.SquadTiers.All(t => !t.IsSquad), $"{summon.name} nests a squad in a squad.");
+                    Assert.LessOrEqual(summon.SquadSize, summon.MaxSquadSize, $"{summon.name} starts above its own cap.");
+                    Assert.LessOrEqual(summon.MaxSquadSize, 4, $"{summon.name} can field more troops than the hero side has slots.");
+                    Assert.GreaterOrEqual(summon.TurnsActive, 1, $"{summon.name} never stays.");
+                    continue;
+                }
+
                 // A party replacement is a unit: it needs a body, a stay, and something to do.
                 Assert.Greater(summon.StatPercents[Assets.Scripts.UnitStats.StatType.MaxHealth], 0,
                     $"{summon.name} brings no health - it would fall to the first blow, or arrive dead.");
@@ -128,6 +139,16 @@ namespace Tests.EditMode
             var taught = AllGrids().SelectMany(g => g.Nodes)
                 .Where(n => n != null && n.Kind == SphereNodeKind.Summon)
                 .Select(n => n.GrantedSummonKey).ToList();
+            // A squad's troops are reached through the squad (the Demon Army's Imps and Succubi).
+            var catalog = SummonCatalogSO.Load();
+            foreach (var key in taught.ToList())
+            {
+                var squad = catalog.Find(key);
+                if (squad != null && squad.IsSquad)
+                {
+                    taught.AddRange(squad.SquadTiers.Where(t => t != null).Select(t => t.Key));
+                }
+            }
             var orphans = SummonCatalogSO.Load().Summons.Where(s => !taught.Contains(s.Key)).Select(s => s.Key).ToList();
             Assert.IsEmpty(orphans, "Summons no grid teaches (unreachable): " + string.Join(", ", orphans));
         }
@@ -140,7 +161,8 @@ namespace Tests.EditMode
         private static bool IsUpgradeKind(SphereNodeKind kind)
         {
             return kind == SphereNodeKind.SummonPower || kind == SphereNodeKind.SummonDuration
-                   || kind == SphereNodeKind.SummonCharge;
+                   || kind == SphereNodeKind.SummonCharge || kind == SphereNodeKind.SummonSize
+                   || kind == SphereNodeKind.SummonPromote;
         }
     }
 }

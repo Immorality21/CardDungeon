@@ -59,6 +59,7 @@ namespace Assets.Scripts.Rooms
         private readonly Dictionary<Heroes.Hero, Label> _partyHpLabels = new Dictionary<Heroes.Hero, Label>();
         private readonly Dictionary<Heroes.Hero, VisualElement> _partyHpFills = new Dictionary<Heroes.Hero, VisualElement>();
         private readonly Dictionary<Heroes.Hero, VisualElement> _partyAfflictions = new Dictionary<Heroes.Hero, VisualElement>();
+        private readonly Dictionary<Heroes.Hero, VisualElement> _partyGaugeFills = new Dictionary<Heroes.Hero, VisualElement>();
         private Label _fightFoes;
         private VisualElement _dialogScrim;
         private Label _detailChip;
@@ -138,7 +139,7 @@ namespace Assets.Scripts.Rooms
         // Cursor-driven command menu (FFX-style selection list).
         // SummonAbility and Dismiss belong to a party-replacing summon's own menu (§4b), which is the
         // summon's, not a hero's - the hero menu still does not grow past Summon.
-        private enum HeroCommand { Attack, Magic, Summon, Item, Inspect, Skip, SummonAbility, Dismiss }
+        private enum HeroCommand { Attack, Magic, Summon, Item, Inspect, Skip, SummonAbility, Dismiss, Ultra }
 
         private struct CommandEntry
         {
@@ -1269,14 +1270,35 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
-            var slots = DungeonManager.Instance.MagicState.GetSlots(heroComponent.HeroKey);
+            var slots = new List<Cards.MagicSlot>(DungeonManager.Instance.MagicState.GetSlots(heroComponent.HeroKey));
+            // An Ultra's form adds its abilities after the real slots - appended, so a real slot's
+            // index (what a cast spends a charge from) never moves. Casting one spends nothing:
+            // EquippedMagicState.TryCast refuses an index past the hero's slots.
+            foreach (var ability in CombatManager.Instance.FormAbilities(_currentHeroTurn))
+            {
+                slots.Add(new Cards.MagicSlot { Magic = ability, Charges = 1, MaxCharges = 1, Unlimited = true });
+            }
             CombatManager.Instance.RequestMagicSlots(_currentHeroTurn, slots);
         }
 
+        /// <summary>The hero's Ultras, always as a list - even one - as FFX's Overdrive menu does, so
+        /// the player reads what it does before spending a full gauge on it.</summary>
+        private void OnHeroUltra()
+        {
+            var ultras = CombatManager.Instance.KnownUltras(_currentHeroTurn);
+            if (ultras.Count == 0 || !CombatManager.Instance.CanUseUltra(_currentHeroTurn))
+            {
+                return;
+            }
+            SetShown(_heroBar, false);
+            CombatManager.Instance.RequestUltraList(_currentHeroTurn, ultras);
+        }
+
         /// <summary>
-        /// Summons have no target picker - they land on a whole side, or replace the party. A hero
-        /// who knows one summons it at once; a hero who knows two (both tips of the Warrior's grid)
-        /// gets the summon picker, which shows every one they know, spent ones greyed.
+        /// Summons have no target picker - they land on a whole side, or replace the party. The
+        /// command always opens the summon list, even for one (the owner's call, like FFX): it shows
+        /// every summon the hero knows, spent ones greyed, and the footer says what it does before a
+        /// run's charge is spent.
         /// </summary>
         private void OnHeroSummon()
         {
@@ -1291,11 +1313,6 @@ namespace Assets.Scripts.Rooms
                 return;
             }
             SetShown(_heroBar, false);
-            if (known.Count == 1)
-            {
-                CombatManager.Instance.SubmitSummonAction(usable[0]);
-                return;
-            }
             CombatManager.Instance.RequestSummonList(_currentHeroTurn, known);
         }
 
@@ -1542,6 +1559,12 @@ namespace Assets.Scripts.Rooms
                 hasMagic = false;
             }
 
+            // An Ultra's form brings abilities of its own, so a hero with no charges left still has some.
+            if (!silenced && CombatManager.Instance.FormAbilities(hero).Count > 0)
+            {
+                hasMagic = true;
+            }
+
             bool hasItem = InventoryManager.HasInstance && InventoryManager.Instance.HasAnyConsumable();
 
             // Summon is the one command the menu grew by (§4b, 2026-09-28): shown only to a hero
@@ -1563,6 +1586,16 @@ namespace Assets.Scripts.Rooms
                 {
                     Command = HeroCommand.Summon, Label = "Summon", Enabled = canSummon,
                     Reason = silenced ? "Silenced" : "Spent"
+                });
+            }
+            // Ultra (COMBAT_DEPTH §13): shown to a hero who knows one, open once the gauge is full.
+            if (CombatManager.Instance.KnownUltras(hero).Count > 0)
+            {
+                bool transformed = CombatManager.Instance.IsTransformed(hero);
+                _commands.Add(new CommandEntry
+                {
+                    Command = HeroCommand.Ultra, Label = "Ultra", Enabled = CombatManager.Instance.CanUseUltra(hero),
+                    Reason = transformed ? "Active" : CombatManager.Instance.UltraGauge(hero) + "%"
                 });
             }
             _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem, Reason = "None" });
@@ -1662,6 +1695,9 @@ namespace Assets.Scripts.Rooms
                     break;
                 case HeroCommand.Summon:
                     OnHeroSummon();
+                    break;
+                case HeroCommand.Ultra:
+                    OnHeroUltra();
                     break;
                 case HeroCommand.Item:
                     OnHeroItem();
@@ -2616,6 +2652,7 @@ namespace Assets.Scripts.Rooms
             _partyHpLabels.Clear();
             _partyHpFills.Clear();
             _partyAfflictions.Clear();
+            _partyGaugeFills.Clear();
             if (party == null || _partyStatusRows == null)
             {
                 return;
@@ -2658,6 +2695,18 @@ namespace Assets.Scripts.Rooms
                 bar.Add(fill);
                 main.Add(bar);
 
+                // The Ultra gauge, under the health bar, only for a hero who knows an Ultra.
+                if (hero.KnownUltras.Count > 0)
+                {
+                    var gauge = new VisualElement { pickingMode = PickingMode.Ignore };
+                    gauge.AddToClassList("cd-party-row__gauge");
+                    var gaugeFill = new VisualElement { pickingMode = PickingMode.Ignore };
+                    gaugeFill.AddToClassList("cd-party-row__gauge-fill");
+                    gauge.Add(gaugeFill);
+                    main.Add(gauge);
+                    _partyGaugeFills[hero] = gaugeFill;
+                }
+
                 var afflictions = new VisualElement { pickingMode = PickingMode.Ignore };
                 afflictions.AddToClassList("cd-party-row__afflictions");
                 main.Add(afflictions);
@@ -2697,6 +2746,16 @@ namespace Assets.Scripts.Rooms
                     fill.style.width = Length.Percent(ratio * 100f);
                     fill.EnableInClassList("cd-party-row__fill--mid", ratio <= 0.5f && ratio > 0.25f);
                     fill.EnableInClassList("cd-party-row__fill--low", ratio <= 0.25f);
+                }
+                if (_partyGaugeFills.TryGetValue(hero, out var gaugeFill) && gaugeFill != null)
+                {
+                    // Outside a fight there is no gauge (it starts every fight empty), so it reads empty.
+                    var combat = CombatManager.HasInstance ? CombatManager.Instance : null;
+                    int gauge = combat != null && combat.InCombat ? combat.UltraGauge(hero) : 0;
+                    gaugeFill.style.width = Length.Percent(gauge * 100f / Cards.UltraOps.Max);
+                    gaugeFill.EnableInClassList("cd-party-row__gauge-fill--full", Cards.UltraOps.IsFull(gauge));
+                    gaugeFill.EnableInClassList("cd-party-row__gauge-fill--active",
+                        combat != null && combat.InCombat && combat.IsTransformed(hero));
                 }
                 if (_partyAfflictions.TryGetValue(hero, out var chips) && chips != null)
                 {

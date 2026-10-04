@@ -452,6 +452,26 @@ namespace Assets.Scripts.Heroes
         /// the grid's shape normally guarantees that (upgrades hang past the summon), and this makes
         /// it a rule rather than a layout accident. Two nodes teaching the same summon teach it once.
         /// </summary>
+        /// <summary>The Ultras an activated set of nodes teaches, by key, in grid order, each once.</summary>
+        public static List<string> UltrasForNodes(SphereGridSO grid, IEnumerable<string> activated)
+        {
+            var keys = new List<string>();
+            if (grid == null || grid.Nodes == null)
+            {
+                return keys;
+            }
+            var owned = ActiveNodes(grid, activated);
+            foreach (var node in grid.Nodes)
+            {
+                if (node != null && node.Kind == SphereNodeKind.Ultra && owned.Contains(node.Key)
+                    && !string.IsNullOrEmpty(node.GrantedUltraKey) && !keys.Contains(node.GrantedUltraKey))
+                {
+                    keys.Add(node.GrantedUltraKey);
+                }
+            }
+            return keys;
+        }
+
         public static List<SummonGrant> SummonsForNodes(SphereGridSO grid, IEnumerable<string> activated)
         {
             var grants = new List<SummonGrant>();
@@ -492,6 +512,12 @@ namespace Assets.Scripts.Heroes
                         break;
                     case SphereNodeKind.SummonCharge:
                         grant.ChargeBonus += node.SummonAmount;
+                        break;
+                    case SphereNodeKind.SummonSize:
+                        grant.SizeBonus += node.SummonAmount;
+                        break;
+                    case SphereNodeKind.SummonPromote:
+                        grant.Promotions += node.SummonAmount;
                         break;
                 }
             }

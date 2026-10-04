@@ -12,6 +12,10 @@ namespace Assets.Scripts.Cards
         public int Charges;
         public int MaxCharges;
 
+        /// <summary>A slot that is not really a slot: an ability an Ultra's form grants while it
+        /// lasts, offered on the Ability list beside the real ones and never spent.</summary>
+        public bool Unlimited;
+
         public bool IsEmpty => Magic == null;
         public bool CanCast => Magic != null && Charges > 0;
     }

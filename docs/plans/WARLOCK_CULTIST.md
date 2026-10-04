@@ -66,8 +66,45 @@ deferred until §13's gauge is designed.
   Hush left his grid (Ranger and Rogue still teach it). Sprites: `Assets/Sprites/Summons/imp-idle.png`,
   `succubus-idle.png` (PixelLab, 32×32, 3-frame idle). All numbers are first drafts — balance is paused.
 
-**Still open from this file:** the demon army (a party replacement with several units), Demon Form
-and the Ultras, the replace-one-hero mechanic (the Cultist's Sacrifice), the Cultist himself, and the
+### 1c. The Demon Army and Demon Form (2026-10-04, later the same day)
+
+The owner's calls: **the Warlock has one summon, the Demon Army, and every branch improves it**
+("a better signature"). It starts as **3 Imps**; the grid takes it to **4**, and promotes Imps to
+**Succubi** (Felguards and bigger later). **Demon Form ships on a minimal Ultra gauge**, and Ultras
+**coexist with summons: small and universal**, where a summon is the earned, charge-limited payoff.
+
+- **Squads** — `SummonSO.SquadTiers` (troops weakest-first: Imp, Succubus), `SquadSize` 3,
+  `MaxSquadSize` 4. A squad is a `ReplaceParty` summon that brings several units, each its own
+  `SummonSO` (stats, Attack, Signature) on the squad's stay. New node kinds **`SummonSize`** (+troops)
+  and **`SummonPromote`** (each raises the weakest troop one tier, front rank first);
+  `SummonOps.SquadFor` is the rule. Live: `CombatManager._squad` (the single replacement became a
+  squad of one), troops stand in the hero formation (`CombatStage.PlaceSquad`), pour out together, act
+  on their own clocks, leave one by one, and the party comes back with the last; **Dismiss sends the
+  whole squad home**. The sim mirrors it (`SimSquad`).
+- **The Warlock's grid** (39 nodes, 6,790 xp): `warlock-army` (the Demon Army) hangs off the trunk
+  slot at 90 xp, so every branch's upgrades count. **C** (demons): +1 troop, +1 turn, two promotions
+  (Imp → Succubus; the first costs a Void Shard), +20 HP%, +1 charge (Void Shard). **A** (blood):
+  +15 HP% (`warlock-a-army`). **B** (drain): +1 turn (`warlock-b-army`). The standalone Imp and
+  Succubus summon nodes are gone; the assets are the army's troops. Full grid: 2 Succubi and 2 Imps
+  for 5 turns, 2 charges — in the sandbox that won a two-enemy fight without the party (**watch it
+  in the balance pass**).
+- **The Ultra gauge** (COMBAT_DEPTH §13, minimal): per hero, **per fight**, fills on **health lost**
+  (`UltraOps.FillShare` — losing 60% of the bar fills it; blows, ticks *and blood prices* count, so the
+  Warlock's own costs feed his form), spent whole on use. An **Ultra** command appears for a hero who
+  knows one (open when full, "Active" while transformed, the % otherwise) and a gauge line sits under
+  the hero's HP in the party window. Ultras are `UltraSO` (`Resources/UltraCatalog`), taught by
+  `SphereNodeKind.Ultra` nodes. **The command always opens a list, even of one** (owner, like FFX's
+  Overdrive menu): the player reads what it does in the footer before spending a full gauge.
+- **Demon Form** (`UltraKind.Transform`): 3 of his turns after the one it is used on; +50% max
+  health with the **same share filled** both ways (`UltraOps.KeepShare`); basic Attack becomes
+  **Shadow**; **Chaos Bolt** (INT + 8 Shadow, free, appended after his real ability slots); the demon
+  sprite (`warlock-demon-idle.png`). Ends early if he falls, and at the end of the fight. **Unlock:**
+  `warlock-demon-form` on the trunk, 90 xp + **3 Void Shards** (the deep guardians' material).
+- **Not modelled by the balance sim**: Ultras (the gauge needs a policy) — the frontier does not
+  price Demon Form yet. Materials are not priced there either, as before.
+
+**Still open from this file:** Felguards and bigger troops, more Warlock Ultras, Ultras for the other
+heroes, pricing Ultras in the balance model, the replace-one-hero mechanic (the Cultist's Sacrifice), the Cultist himself, and the
 answered items still listed in the Warlock vision's Open Questions (health pool, Drain Life, the
 rename, the grid - all done in §1b).
 
@@ -219,9 +256,8 @@ From the do-not-relitigate list and the subsystem guides — not to be re-argued
 
 1. ~~Screen-fit check~~, ~~add a party member~~, ~~Drain and restore-a-charge~~, ~~re-author the
    Warlock~~ — **done 2026-10-04**, see §1b.
-2. **Replace one party member** (the Cultist's Sacrifice) — `JoinParty` is most of it: an ally that
-   takes a downed/sacrificed hero's slot instead of standing in the vanguard.
-3. **The demon army** — a party replacement that brings several units.
+2. ~~The demon army~~, ~~a minimal Ultra gauge + Demon Form~~ — **done 2026-10-04**, see §1c.
+3. **Replace one party member** (the Cultist's Sacrifice, an Ultra now that the gauge exists) —
+   `JoinParty` is most of it: an ally that takes a downed/sacrificed hero's slot.
 4. Cultist: eldritch-horror summons, stats, grid, an unlock source.
-5. Ultras once §13's gauge is designed (Demon Form, Sacrifice).
-6. A balance pass over the Warlock once the specialization rebuild is in.
+5. A balance pass over the Warlock once the specialization rebuild is in — the army first.

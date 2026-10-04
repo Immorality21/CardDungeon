@@ -684,7 +684,8 @@ answers.
   the balance model will move it.
 
 A Warrior who buys both tips knows **two summons**, so the **summon picker** is built: a hero who
-knows more than one gets a list (charges shown, spent ones greyed) in `MagicSelectionUI`.
+knows more than one gets a list (charges shown, spent ones greyed) in `MagicSelectionUI`. *(Since
+2026-10-04 the list always opens, even for one summon — owner's call, like FFX.)*
 
 **Balance model, decided:**
 

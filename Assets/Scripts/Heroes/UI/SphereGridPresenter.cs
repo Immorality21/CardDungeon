@@ -168,6 +168,9 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.SummonPower:
                 case SphereNodeKind.SummonDuration:
                 case SphereNodeKind.SummonCharge:
+                case SphereNodeKind.SummonSize:
+                case SphereNodeKind.SummonPromote:
+                case SphereNodeKind.Ultra:
                     return "sg-node--slot";
                 default:
                     return "sg-node--stat";
@@ -202,9 +205,13 @@ namespace Assets.Scripts.Heroes.UI
                     return "✦";
                 case SphereNodeKind.Summon:
                     return "◆";
+                case SphereNodeKind.Ultra:
+                    return "✸";
                 case SphereNodeKind.SummonPower:
                 case SphereNodeKind.SummonDuration:
                 case SphereNodeKind.SummonCharge:
+                case SphereNodeKind.SummonSize:
+                case SphereNodeKind.SummonPromote:
                     return "+";
                 default:
                     return StatGlyph(node.Gains);
@@ -263,6 +270,11 @@ namespace Assets.Scripts.Heroes.UI
                 string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
                 return $"Learns {name} — {Mathf.Max(1, node.GrantedCharges)} charges per run";
             }
+            if (node.Kind == SphereNodeKind.Ultra)
+            {
+                string ultra = string.IsNullOrEmpty(node.GrantedUltraKey) ? "(unset)" : node.GrantedUltraKey;
+                return $"Learns the Ultra {ultra} — used once the Ultra gauge is full";
+            }
             string summon = string.IsNullOrEmpty(node.GrantedSummonKey) ? "(unset)" : node.GrantedSummonKey;
             if (node.Kind == SphereNodeKind.Summon)
             {
@@ -280,6 +292,16 @@ namespace Assets.Scripts.Heroes.UI
             if (node.Kind == SphereNodeKind.SummonCharge)
             {
                 return $"{summon}: +{node.SummonAmount} charge{(node.SummonAmount == 1 ? "" : "s")} per run";
+            }
+            if (node.Kind == SphereNodeKind.SummonSize)
+            {
+                return $"{summon}: +{node.SummonAmount} troop{(node.SummonAmount == 1 ? "" : "s")}";
+            }
+            if (node.Kind == SphereNodeKind.SummonPromote)
+            {
+                return node.SummonAmount == 1
+                    ? $"{summon}: its weakest troop becomes a stronger one"
+                    : $"{summon}: its {node.SummonAmount} weakest troops become stronger ones";
             }
 
             var parts = new List<string>();
@@ -357,9 +379,13 @@ namespace Assets.Scripts.Heroes.UI
                     return "Known ability";
                 case SphereNodeKind.Summon:
                     return "Summon";
+                case SphereNodeKind.Ultra:
+                    return "Ultra";
                 case SphereNodeKind.SummonPower:
                 case SphereNodeKind.SummonDuration:
                 case SphereNodeKind.SummonCharge:
+                case SphereNodeKind.SummonSize:
+                case SphereNodeKind.SummonPromote:
                     return "Summon upgrade";
                 default:
                     return "Stat";

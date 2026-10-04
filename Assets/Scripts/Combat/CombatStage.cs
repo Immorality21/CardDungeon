@@ -278,6 +278,36 @@ namespace Assets.Scripts.Combat
         }
 
         /// <summary>
+        /// Stands a squad (the Demon Army) where the party stood - the hero formation, one troop per
+        /// hero slot, at a hero's size (troops are hero-sized art). The party is off the stage while
+        /// it fights, exactly as for a single replacement.
+        /// </summary>
+        public void PlaceSquad(IList<SummonUnit> troops)
+        {
+            if (troops == null)
+            {
+                return;
+            }
+            var slots = HeroFormation.Layout(troops.Count, _halfW, _halfH);
+            for (int i = 0; i < troops.Count; i++)
+            {
+                var troop = troops[i];
+                if (troop == null)
+                {
+                    continue;
+                }
+                troop.transform.position = new Vector3(_anchorX + slots[i].x, _centerY + slots[i].y, -1f);
+                troop.transform.localScale = Vector3.one * CombatUnitScale;
+                var sr = troop.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.sortingOrder = UnitSortOrder + MaxRanks + 1;
+                    sr.flipX = troop.Summon != null && troop.Summon.Facing == Cards.SummonFacing.Party;
+                }
+            }
+        }
+
+        /// <summary>
         /// Stands the summoned allies (<c>SummonKind.JoinParty</c>) in the vanguard column in front
         /// of the party (<see cref="HeroFormation.AllyLayout"/>), facing the enemies at a hero's
         /// size. Re-lays out every ally given, so call it with the whole living set whenever one

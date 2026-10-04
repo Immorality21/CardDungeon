@@ -128,6 +128,23 @@ namespace Assets.Scripts.Cards
                  "delay) is the first. Empty keeps the plain Attack.")]
         public MagicSO AttackAbility;
 
+        [Header("Squad (ReplaceParty only)")]
+        [Tooltip("ReplaceParty, optional: the troops this summon brings instead of being one unit itself, " +
+                 "weakest tier first (the Demon Army: Imp, Succubus). Each troop is its own SummonSO - " +
+                 "stats, Attack, Signature - and fights as its own unit; the stay and the charges are this " +
+                 "summon's. Empty: the summon is the single unit, as the Golem is.")]
+        public List<SummonSO> SquadTiers = new List<SummonSO>();
+
+        [Tooltip("Squad: how many troops it brings before any SummonSize node.")]
+        [Min(1)] public int SquadSize = 3;
+
+        [Tooltip("Squad: the most troops SummonSize nodes can raise it to. The hero side lays out four " +
+                 "in two ranks, so more than four would need a new formation.")]
+        [Min(1)] public int MaxSquadSize = 4;
+
+        /// <summary>A summon that brings troops (<see cref="SquadTiers"/>) rather than being the unit itself.</summary>
+        public bool IsSquad => SquadTiers != null && SquadTiers.Exists(t => t != null);
+
         public string Label => string.IsNullOrEmpty(DisplayName) ? name : DisplayName;
     }
 }

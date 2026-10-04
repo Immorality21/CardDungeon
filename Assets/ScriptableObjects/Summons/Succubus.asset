@@ -25,7 +25,7 @@ MonoBehaviour:
   Facing: 0
   ArrivalSound: {fileID: 0}
   ArrivalSoundVolume: 0.9
-  Kind: 2
+  Kind: 1
   TargetType: 0
   Effects: []
   ThreatMultiplier: 1
@@ -52,3 +52,6 @@ MonoBehaviour:
   Actions: []
   Signature: {fileID: 11400000, guid: 90c85d0690cf1264b87964bb6bfd3ee5, type: 2}
   AttackAbility: {fileID: 11400000, guid: d3227b1ee0787aa49bcd501047f983d9, type: 2}
+  SquadTiers: []
+  SquadSize: 3
+  MaxSquadSize: 4

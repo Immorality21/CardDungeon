@@ -40,8 +40,18 @@ namespace Assets.Scripts.Heroes
         // folded in — exactly like GetEffectiveAttackPower() and friends.
         List<Resistance> ICombatUnit.Resistances => GetEffectiveResistances();
 
-        /// <summary>Heroes deal physical damage; elemental output comes from magic, not basic attacks.</summary>
-        public DamageType AttackDamageType => DamageType.Normal;
+        /// <summary>Heroes deal physical damage; elemental output comes from magic, not basic attacks -
+        /// unless an Ultra's form says otherwise (Demon Form swings Shadow).</summary>
+        public DamageType AttackDamageType => FormAttackDamageType;
+
+        // ---- an Ultra's transform, while it lasts (set and cleared by CombatManager). Primitive
+        // ---- fields because the Ultra itself is a Cards type, and Cards depends on Heroes.
+
+        /// <summary>Max health the hero's current form adds, as a percentage. 0 outside a form.</summary>
+        public int FormMaxHealthPercent { get; set; }
+
+        /// <summary>The element the basic Attack deals in the current form; Normal outside one.</summary>
+        public DamageType FormAttackDamageType { get; set; } = DamageType.Normal;
 
         public void Initialize(HeroSO heroSO)
         {
@@ -94,6 +104,15 @@ namespace Assets.Scripts.Heroes
         /// summons take no ability slot. Resolved to <c>SummonSO</c>s where the catalog lives
         /// (<c>SummonState</c>), keeping Cards → Heroes the dependency direction.
         /// </summary>
+        /// <summary>The Ultras this hero's grid teaches, by key (resolved by <c>UltraCatalogSO</c>).</summary>
+        public List<string> KnownUltras
+        {
+            get
+            {
+                return SphereGridOps.UltrasForNodes(HeroSO != null ? HeroSO.SphereGrid : null, ActivatedNodes);
+            }
+        }
+
         public List<SummonGrant> KnownSummons
         {
             get
@@ -148,7 +167,8 @@ namespace Assets.Scripts.Heroes
             var raw = InventoryManager.Instance.ComputeRawBonuses(HeroKey);
             var pct = InventoryManager.Instance.ComputePercentageBonuses(HeroKey);
             float value = Stats[stat] + raw[stat];
-            return Mathf.RoundToInt(value * (1f + pct[stat] / 100f));
+            float percent = pct[stat] + (stat == StatType.MaxHealth ? FormMaxHealthPercent : 0);
+            return Mathf.RoundToInt(value * (1f + percent / 100f));
         }
 
         /// <summary>Convenience for the HP bar and heal clamps; MaxHealth is just another stat.</summary>

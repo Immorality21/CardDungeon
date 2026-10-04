@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a8167baed5bc052409b86b3942399fa5, type: 3}
-  m_Name: Imp
+  m_Name: DemonArmy
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
-  Key: Imp
-  DisplayName: Imp
-  Description: A cackling scrap of the pit, bound to the Warlock's blood. It fights
-    beside the party, spitting fire.
+  Key: DemonArmy
+  DisplayName: Demon Army
+  Description: The Warlock opens the way and his demons pour through, taking the
+    party's place until the bargain runs out.
   Sprite: {fileID: 21300000, guid: af051833294a4c03bb7aabe5b57f9f60, type: 3}
   AnimationFrames:
   - {fileID: -1086942912245843823, guid: fb32350fac8446beabaf792e182c4a5c, type: 3}
@@ -26,32 +26,20 @@ MonoBehaviour:
   ArrivalSound: {fileID: 0}
   ArrivalSoundVolume: 0.9
   Kind: 1
-  TargetType: 0
+  TargetType: 1
   Effects: []
   ThreatMultiplier: 1
   BonusThreat: 0
-  BaseCharges: 2
+  BaseCharges: 1
   StatPercents:
-    Values:
-    - Type: 7
-      Amount: 40
-    - Type: 1
-      Amount: 50
-    - Type: 2
-      Amount: 60
-    - Type: 3
-      Amount: 140
-    - Type: 4
-      Amount: 70
-    - Type: 5
-      Amount: 60
-    - Type: 6
-      Amount: 100
-  CopySummonerResistances: 0
+    Values: []
+  CopySummonerResistances: 1
   TurnsActive: 3
   Actions: []
-  Signature: {fileID: 11400000, guid: 53c19e14585d4f74aad1bd0acc88aa6a, type: 2}
-  AttackAbility: {fileID: 11400000, guid: 95a0809823d2b424a933ee9773136b4b, type: 2}
-  SquadTiers: []
+  Signature: {fileID: 0}
+  AttackAbility: {fileID: 0}
+  SquadTiers:
+  - {fileID: 11400000, guid: 9f6714e40c3870542a043ec90ae9baa0, type: 2}
+  - {fileID: 11400000, guid: 4c54c4fc7749c764f96d41d343bef178, type: 2}
   SquadSize: 3
   MaxSquadSize: 4

@@ -548,6 +548,7 @@ namespace Assets.Scripts.Heroes.Editor
             AddField(element, "GrantedCharges");
             AddField(element, "GrantedSummonKey");
             AddField(element, "SummonAmount");
+            AddField(element, "GrantedUltraKey");
 
             // Edge list with per-edge disconnect, the reliable disconnect UI (painted lines are
             // not hit-testable) — mirrors the manual layout editor's door list.

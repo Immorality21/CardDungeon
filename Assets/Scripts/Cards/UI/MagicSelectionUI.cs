@@ -40,7 +40,10 @@ namespace Assets.Scripts.Cards.UI
             SummonAbilityTarget,
 
             // Life Tap (a RestoreCharge ability): which of the target's abilities gets charges back.
-            ChargeChoice
+            ChargeChoice,
+
+            // The Ultra command: which Ultra to use (always a list, even of one).
+            UltraChoice
         }
 
         [SerializeField] private UIDocument _document;
@@ -99,6 +102,7 @@ namespace Assets.Scripts.Cards.UI
             CombatManager.Instance.OnItemListRequested += ShowItemList;
             CombatManager.Instance.OnInspectTargetRequested += ShowInspectTargets;
             CombatManager.Instance.OnSummonListRequested += ShowSummonList;
+            CombatManager.Instance.OnUltraListRequested += ShowUltraList;
             CombatManager.Instance.OnSummonAbilityTargetRequested += ShowSummonAbilityTargets;
             CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
@@ -113,6 +117,7 @@ namespace Assets.Scripts.Cards.UI
                 CombatManager.Instance.OnItemListRequested -= ShowItemList;
                 CombatManager.Instance.OnInspectTargetRequested -= ShowInspectTargets;
                 CombatManager.Instance.OnSummonListRequested -= ShowSummonList;
+                CombatManager.Instance.OnUltraListRequested -= ShowUltraList;
                 CombatManager.Instance.OnSummonAbilityTargetRequested -= ShowSummonAbilityTargets;
                 CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
                 CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
@@ -245,7 +250,7 @@ namespace Assets.Scripts.Cards.UI
                 bool selectable = slot.CanCast;
 
                 string name = slot.IsEmpty ? "(empty)" : slot.Magic.DisplayName;
-                string meta = slot.IsEmpty ? "" : $"{slot.Charges}/{slot.MaxCharges}";
+                string meta = slot.IsEmpty ? "" : slot.Unlimited ? "∞" : $"{slot.Charges}/{slot.MaxCharges}";
                 Sprite icon = slot.IsEmpty ? null : slot.Magic.Icon;
 
                 // A spell with a health cost shows its price and is refused when the caster cannot
@@ -445,9 +450,9 @@ namespace Assets.Scripts.Cards.UI
         // ============================================================
 
         /// <summary>
-        /// The summon picker, for a hero who knows more than one (a Warrior with both tips). Every
-        /// summon they know is listed with its charges, spent ones greyed, so the choice is made with
-        /// the whole kit in view.
+        /// The summon picker. The Summon command always opens it, even for a hero who knows one
+        /// (owner's call, like FFX): every summon they know is listed with its charges, spent ones
+        /// greyed, and the footer says what it does before a run's charge is spent.
         /// </summary>
         private void ShowSummonList(ICombatUnit hero, List<SummonSlot> summons)
         {
@@ -478,6 +483,51 @@ namespace Assets.Scripts.Cards.UI
             HidePanel(_targetPanel);
             HidePanel(_inspectPanel);
             BeginNavigation();
+        }
+
+        /// <summary>
+        /// The Ultra list. Opened only with a full gauge, so every row is usable; it is a list even
+        /// for one Ultra so the player reads what it does - the footer - before the gauge is spent.
+        /// </summary>
+        private void ShowUltraList(ICombatUnit hero, List<UltraSO> ultras)
+        {
+            if (!EnsureRefs())
+            {
+                return;
+            }
+
+            _currentHero = hero;
+            _mode = SelectionMode.UltraChoice;
+            _listTitle.text = "Ultra";
+            _listScroll.Clear();
+            ClearNav();
+
+            foreach (var ultra in ultras)
+            {
+                if (ultra == null)
+                {
+                    continue;
+                }
+                var captured = ultra;
+                Sprite icon = ultra.FormFrames != null && ultra.FormFrames.Length > 0 ? ultra.FormFrames[0] : null;
+                string description = string.IsNullOrEmpty(ultra.Description)
+                    ? UltraOps.Describe(ultra)
+                    : ultra.Description.Trim() + "\n" + UltraOps.Describe(ultra);
+                _listScroll.Add(CreateRow(icon, ultra.Label, "Ready", true, () => SubmitUltra(captured), description));
+            }
+
+            ShowPanel(_listPanel);
+            HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
+            BeginNavigation();
+        }
+
+        private void SubmitUltra(UltraSO ultra)
+        {
+            _mode = SelectionMode.Idle;
+            HidePanel(_listPanel);
+            ReleaseFocus();
+            CombatManager.Instance.SubmitUltra(ultra);
         }
 
         private void SubmitSummon(SummonSlot slot)

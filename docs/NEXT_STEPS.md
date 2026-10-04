@@ -110,7 +110,8 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   archetype names, titles or class labels to branches.
 - **Every combat verb past the basics is an ability, and abilities come from the grid**
   *(2026-09-06)*. The command menu is Attack / Ability / Item / Inspect / Skip and does not grow —
-  **with one exception, decided 2026-09-28: Summon.** A hero who knows a summon gets a **Summon**
+  **with two exceptions: Summon (decided 2026-09-28) and Ultra (2026-10-04, shown only to a hero who
+  knows one).** A hero who knows a summon gets a **Summon**
   command (and only then); summons are always carried, outside the ability slots. See
   `plans/SPECIALIZATION.md` §4b. A party-replacing summon has **its own** menu while it is out (its
   actions, Signature, Dismiss, Inspect); that is the summon's, not a hero's, and does not reopen this rule.
@@ -251,6 +252,12 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The Demon Army + the Ultra gauge + Demon Form** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §1c, the
+  Magic guide, `COMBAT_DEPTH.md` §13. Squad summons (`SummonSO.SquadTiers`, `SummonSize` /
+  `SummonPromote` nodes); the Warlock's one summon is the Demon Army (3 Imps → 4, promoted to
+  Succubi), improved from every branch. A minimal per-fight Ultra gauge filled by health lost, the
+  **Ultra** command, `UltraSO`; Demon Form (+50% HP keeping the share, Shadow attack, Chaos Bolt).
+  `UltraTests`; suite green (1,301); checked in the sandbox.
 - **The Warlock rebuilt + allies that join mid-fight** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §7, the
   Magic guide. `SummonKind.JoinParty` (a summon that fights *beside* the party, one per summoner, in a
   vanguard column), `SpellEffectType.Drain` and `RestoreCharge` (Life Tap, with a picker). The Warlock:

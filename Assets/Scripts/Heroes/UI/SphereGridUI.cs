@@ -445,6 +445,8 @@ namespace Assets.Scripts.Heroes.UI
                     return MagicName(node.GrantedMagicKey);
                 case SphereNodeKind.Summon:
                     return SummonName(node.GrantedSummonKey);
+                case SphereNodeKind.Ultra:
+                    return UltraName(node.GrantedUltraKey);
                 case SphereNodeKind.MagicSlot:
                     return "+1 ability slot";
                 default:
@@ -472,6 +474,13 @@ namespace Assets.Scripts.Heroes.UI
                     return "Carry one more of the abilities this hero knows into every run.";
                 case SphereNodeKind.Summon:
                     return $"Learns the summon {SummonName(node.GrantedSummonKey)}. Always carried and cast with Summon; it takes no ability slot.";
+                case SphereNodeKind.Ultra:
+                {
+                    var ultra = string.IsNullOrEmpty(node.GrantedUltraKey) ? null : UltraCatalogSO.Resolve(node.GrantedUltraKey);
+                    string what = ultra != null ? UltraOps.Describe(ultra) + ". " : "";
+                    return $"Learns the Ultra {UltraName(node.GrantedUltraKey)}. {what}"
+                           + "Use it from the Ultra command once the gauge is full - losing health in a fight fills it.";
+                }
                 case SphereNodeKind.Stat:
                     return "Raises this hero's stats for good.";
                 case SphereNodeKind.Resistance:
@@ -514,6 +523,12 @@ namespace Assets.Scripts.Heroes.UI
         {
             var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(key) : null;
             return magic != null && !string.IsNullOrEmpty(magic.DisplayName) ? magic.DisplayName : key;
+        }
+
+        private static string UltraName(string key)
+        {
+            var ultra = string.IsNullOrEmpty(key) ? null : UltraCatalogSO.Resolve(key);
+            return ultra != null ? ultra.Label : key;
         }
 
         private static string SummonName(string key)
