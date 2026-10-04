@@ -10,7 +10,11 @@ namespace Assets.Scripts.Cards.Effects
 
         /// <param name="clock">The fight's turn clock, read when a <see cref="SpellEffectType.TurnDelay"/>
         /// lands. Null (a room event, a resolver with no fight) leaves that effect inert.</param>
-        public EffectExecutorFactory(Func<TurnManager> clock = null)
+        /// <param name="charges">Where the fight keeps ability charges, read when a
+        /// <see cref="SpellEffectType.RestoreCharge"/> lands. Null leaves it inert the same way.</param>
+        public EffectExecutorFactory(
+            Func<TurnManager> clock = null,
+            Func<IChargeBank> charges = null)
         {
             _executors = new Dictionary<SpellEffectType, IEffectExecutor>
             {
@@ -19,7 +23,9 @@ namespace Assets.Scripts.Cards.Effects
                 { SpellEffectType.Buff, new BuffEffectExecutor() },
                 { SpellEffectType.Debuff, new DebuffEffectExecutor() },
                 { SpellEffectType.HealthCost, new HealthCostEffectExecutor() },
-                { SpellEffectType.TurnDelay, new TurnDelayEffectExecutor(clock) }
+                { SpellEffectType.TurnDelay, new TurnDelayEffectExecutor(clock) },
+                { SpellEffectType.Drain, new DrainEffectExecutor() },
+                { SpellEffectType.RestoreCharge, new RestoreChargeEffectExecutor(charges) }
             };
         }
 

@@ -63,7 +63,7 @@ are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-gene
 | Paladin | Strength | shield + Ward · Sunder→Consecrate · Heal→Renew — **three**, per §4c |
 | Cleric | Spirit | Renew→Benediction · Smite→Ward |
 | Ranger | Agility | PoisonDart→Volley · Snare→Hush |
-| Warlock | Intelligence | Sacrifice→Cinderstorm (health as currency) · OilSlick→Hush — to be re-authored |
+| Warlock | Intelligence | BloodPact→LifeTap (+Cinderstorm) · DrainLife→SiphonSoul (+OilSlick) · **Imp→Succubus** (summons that fight beside the party) — three, re-authored 2026-10-04 |
 | Tinkerer | Intelligence | the three cloaks as a field kit · IceShard→WaterSplash→Fireball |
 | Rogue | Agility | PoisonDart→AimedShot · SmokeBomb→Hush |
 

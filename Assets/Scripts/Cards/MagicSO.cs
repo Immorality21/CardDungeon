@@ -95,6 +95,12 @@ namespace Assets.Scripts.Cards
                     case SpellEffectType.TurnDelay:
                         sb.Append($"Delay {effect.Power}%");
                         break;
+                    case SpellEffectType.Drain:
+                        sb.Append($"Drain {effect.Power}%");
+                        break;
+                    case SpellEffectType.RestoreCharge:
+                        sb.Append($"+{effect.Power} charge");
+                        break;
                 }
             }
 

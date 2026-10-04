@@ -21,6 +21,24 @@ namespace Assets.Scripts.Cards
         /// (<see cref="Combat.TurnManager.Delay"/>). Needs a clock: inert through a resolver that has
         /// none (<see cref="EffectResolver.Clock"/>). Appended, for the reason above.
         /// </summary>
-        TurnDelay = 5
+        TurnDelay = 5,
+
+        /// <summary>
+        /// Heals the <b>caster</b> <c>Power</c> percent of the damage the rest of this cast dealt -
+        /// the Warlock's Drain Life is a Damage effect plus this one. Resolved after every other
+        /// benefit, so it reads the cast's damage whatever order the effects are authored in, and
+        /// before the costs. No caster stat and no upgrade bonus go into the percentage.
+        /// Appended, for the reason above.
+        /// </summary>
+        Drain = 6,
+
+        /// <summary>
+        /// Gives <c>Power</c> charges back to one ability the target carries, capped at its maximum:
+        /// the Warlock's Life Tap. The player picks which (<see cref="SpellcastAction.ChargeSlot"/>);
+        /// with no pick the most-spent slot is chosen. Needs a charge bank
+        /// (<see cref="EffectResolver.Charges"/>): inert through a resolver that has none.
+        /// Appended, for the reason above.
+        /// </summary>
+        RestoreCharge = 7
     }
 }

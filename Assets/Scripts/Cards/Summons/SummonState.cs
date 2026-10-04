@@ -14,11 +14,12 @@ namespace Assets.Scripts.Cards
         public int MaxCharges;
 
         /// <summary>
-        /// Whether combat can run this summon's kind at all. Both kinds are built; the gate stays so
+        /// Whether combat can run this summon's kind at all. Every kind is built; the gate stays so
         /// a kind added later greys the command out instead of spending a charge on nothing.
         /// </summary>
         public bool IsImplemented => Summon != null
-            && (Summon.Kind == SummonKind.SpecialAttack || Summon.Kind == SummonKind.ReplaceParty);
+            && (Summon.Kind == SummonKind.SpecialAttack || Summon.Kind == SummonKind.ReplaceParty
+                || Summon.Kind == SummonKind.JoinParty);
 
         public bool CanUse => IsImplemented && Charges > 0;
     }

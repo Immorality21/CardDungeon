@@ -37,7 +37,10 @@ namespace Assets.Scripts.Cards.UI
             InspectTarget,
             InspectDetail,
             SummonChoice,
-            SummonAbilityTarget
+            SummonAbilityTarget,
+
+            // Life Tap (a RestoreCharge ability): which of the target's abilities gets charges back.
+            ChargeChoice
         }
 
         [SerializeField] private UIDocument _document;
@@ -70,6 +73,12 @@ namespace Assets.Scripts.Cards.UI
         private MagicSO _selectedMagic;
         private ItemSO _selectedItem;
         private MagicSO _selectedSummonAbility;
+
+        // The unit a RestoreCharge ability is refilling, while the player picks which ability.
+        private ICombatUnit _chargeTarget;
+
+        // Whether the charge picker was reached through the ally picker, so Back steps to it.
+        private bool _chargeFromAllyPicker;
 
         // Enemies offered to the last Inspect, so closing a page can step back to the picker rather
         // than all the way out - comparing two enemies is the main reason to open it twice.
@@ -254,6 +263,14 @@ namespace Assets.Scripts.Cards.UI
                             selectable = false;
                         }
                     }
+
+                    // A Life Tap with nothing spent to refill would charge its price for nothing.
+                    if (slot.Magic.HasEffectType(SpellEffectType.RestoreCharge)
+                        && ChargeTargets(slot.Magic, i).Count == 0)
+                    {
+                        selectable = false;
+                        meta = $"{meta}  nothing spent";
+                    }
                 }
 
                 int captured = i;
@@ -272,6 +289,25 @@ namespace Assets.Scripts.Cards.UI
         {
             _selectedSlotIndex = slotIndex;
             _selectedMagic = slot.Magic;
+
+            // A restore aimed at one unit asks which ability gets the charges back.
+            bool restores = slot.Magic.HasEffectType(SpellEffectType.RestoreCharge);
+            if (restores && slot.Magic.TargetType == MagicTargetType.Self)
+            {
+                ShowChargeChoice(_currentHero, fromAllyPicker: false);
+                return;
+            }
+            if (restores && slot.Magic.TargetType == MagicTargetType.SingleAlly)
+            {
+                var allies = ChargeTargets(slot.Magic, slotIndex);
+                if (allies.Count == 1)
+                {
+                    ShowChargeChoice(allies[0], fromAllyPicker: false);
+                    return;
+                }
+                PopulateTargetRows(allies, "Select Ally Target");
+                return;
+            }
 
             switch (slot.Magic.TargetType)
             {
@@ -314,14 +350,78 @@ namespace Assets.Scripts.Cards.UI
             PopulateTargetRows(targets, prompt);
         }
 
-        private void SubmitCast(List<ICombatUnit> targets)
+        private void SubmitCast(List<ICombatUnit> targets, int chargeSlot = SpellcastAction.AnyChargeSlot)
         {
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
             HidePanel(_inspectPanel);
             ReleaseFocus();
-            CombatManager.Instance.SubmitCastAction(_selectedMagic, _selectedSlotIndex, _currentHero, targets);
+            CombatManager.Instance.SubmitCastAction(_selectedMagic, _selectedSlotIndex, _currentHero, targets, chargeSlot);
+        }
+
+        // ============================================================
+        //  LIFE TAP (which ability gets its charges back)
+        // ============================================================
+
+        /// <summary>The run's slots for a hero, or none for anything that carries no abilities.</summary>
+        private static List<MagicSlot> SlotsOf(ICombatUnit unit)
+        {
+            var hero = unit as Hero;
+            if (hero == null || !DungeonManager.HasInstance || DungeonManager.Instance.MagicState == null)
+            {
+                return new List<MagicSlot>();
+            }
+            return DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey);
+        }
+
+        /// <summary>The slot of <paramref name="target"/>'s that the cast itself comes out of, which a
+        /// restore must not offer - a Life Tap refilling itself is a free cast.</summary>
+        private int ExcludedSlotFor(ICombatUnit target, int castSlot)
+        {
+            return ReferenceEquals(target, _currentHero) ? castSlot : -1;
+        }
+
+        /// <summary>Who a restore cast from <paramref name="castSlot"/> could actually help: the
+        /// caster or the living allies, depending on its target type, with something spent.</summary>
+        private List<ICombatUnit> ChargeTargets(MagicSO magic, int castSlot)
+        {
+            var candidates = magic.TargetType == MagicTargetType.Self
+                ? new List<ICombatUnit> { _currentHero }
+                : CombatManager.Instance.GetAliveHeroes(GameManager.Instance.Party);
+            return candidates.FindAll(unit =>
+                EquippedMagicState.RestorableSlots(SlotsOf(unit), ExcludedSlotFor(unit, castSlot)).Count > 0);
+        }
+
+        private void ShowChargeChoice(ICombatUnit target, bool fromAllyPicker)
+        {
+            _chargeFromAllyPicker = fromAllyPicker;
+            var slots = SlotsOf(target);
+            var restorable = EquippedMagicState.RestorableSlots(slots, ExcludedSlotFor(target, _selectedSlotIndex));
+            if (restorable.Count == 1)
+            {
+                SubmitCast(new List<ICombatUnit> { target }, restorable[0]);
+                return;
+            }
+
+            _chargeTarget = target;
+            _mode = SelectionMode.ChargeChoice;
+            _listTitle.text = ReferenceEquals(target, _currentHero)
+                ? "Restore which?"
+                : "Restore " + target.DisplayName + "'s";
+            _listScroll.Clear();
+            ClearNav();
+            foreach (int index in restorable)
+            {
+                var slot = slots[index];
+                int captured = index;
+                _listScroll.Add(CreateRow(slot.Magic.Icon, slot.Magic.DisplayName, $"{slot.Charges}/{slot.MaxCharges}",
+                    true, () => SubmitCast(new List<ICombatUnit> { _chargeTarget }, captured), DescribeSlot(slot)));
+            }
+            ShowPanel(_listPanel);
+            HidePanel(_targetPanel);
+            HidePanel(_inspectPanel);
+            BeginNavigation();
         }
 
         // ============================================================
@@ -705,6 +805,10 @@ namespace Assets.Scripts.Cards.UI
                     ReleaseFocus();
                     CombatManager.Instance.SubmitSummonAbility(_selectedSummonAbility, new List<ICombatUnit> { target });
                     return;
+                case SelectionMode.Cast when _selectedMagic != null
+                                             && _selectedMagic.HasEffectType(SpellEffectType.RestoreCharge):
+                    ShowChargeChoice(target, fromAllyPicker: true);
+                    return;
                 default:
                     SubmitCast(new List<ICombatUnit> { target });
                     return;
@@ -717,6 +821,21 @@ namespace Assets.Scripts.Cards.UI
 
         private void OnListBack()
         {
+            // The charge picker steps back to the ability list it came from.
+            if (_mode == SelectionMode.ChargeChoice && _chargeFromAllyPicker)
+            {
+                _mode = SelectionMode.Cast;
+                PopulateTargetRows(ChargeTargets(_selectedMagic, _selectedSlotIndex), "Select Ally Target");
+                return;
+            }
+            if (_mode == SelectionMode.ChargeChoice && _currentHero is Hero hero &&
+                DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            {
+                _mode = SelectionMode.Cast;
+                _listTitle.text = "Ability";
+                PopulateSlotRows(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
+                return;
+            }
             ReturnToActions();
         }
 

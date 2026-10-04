@@ -48,7 +48,14 @@ namespace Assets.Scripts.Balance
         /// <summary>A party-replacing summon (§4b): it has no castable, it builds a unit.</summary>
         public bool IsReplacement => Summon != null && Summon.Kind == SummonKind.ReplaceParty;
 
-        public bool CanUse => Charges > 0 && (IsReplacement || Castable != null);
+        /// <summary>A summon that fights beside the party: no castable either, it builds a unit that
+        /// joins the hero side.</summary>
+        public bool IsAlly => Summon != null && Summon.Kind == SummonKind.JoinParty;
+
+        /// <summary>A special attack: one castable that lands and is over.</summary>
+        public bool IsSpecialAttack => !IsReplacement && !IsAlly;
+
+        public bool CanUse => Charges > 0 && (IsReplacement || IsAlly || Castable != null);
 
         /// <summary>The longest timed effect, so the policy can wait out a buff before re-summoning.</summary>
         public int LongestDuration
@@ -216,7 +223,7 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// The simulated stand-in for a party-replacing summon, built by the same
+        /// The simulated stand-in for a party-replacing summon or an ally, built by the same
         /// <see cref="SummonOps.StatsFor"/> the live <c>SummonUnit</c> uses: the summoner's
         /// <see cref="Effective"/> stats (base + grid + gear - never a combat buff) scaled by the
         /// summon's percentages, at full health, with the summoner's resistances when the asset copies

@@ -14,23 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
   StartNodeKey: warlock-sig
   Nodes:
-  - Key: warlock-start
+  - Key: warlock-sig
     DisplayName: 
-    Kind: 0
-    XpCost: 30
-    UnlockedByDefault: 0
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
-    Position: {x: 0, y: -180}
+    Position: {x: 0, y: 0}
     Gains:
-      Values:
-      - Type: 7
-        Amount: 4
+      Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: 
+    GrantedMagicKey: Bloodbolt
     GrantedCharges: 2
-    Neighbors:
-    - warlock-trunk-1
+    GrantedSummonKey: 
+    SummonAmount: 1
+    Neighbors: []
   - Key: warlock-trunk-1
     DisplayName: 
     Kind: 0
@@ -46,22 +45,29 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-sig
-  - Key: warlock-sig
+  - Key: warlock-start
     DisplayName: 
-    Kind: 3
-    XpCost: 0
-    UnlockedByDefault: 1
+    Kind: 0
+    XpCost: 30
+    UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 0, y: 0}
+    Position: {x: 0, y: -180}
     Gains:
-      Values: []
+      Values:
+      - Type: 7
+        Amount: 6
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: Bloodbolt
+    GrantedMagicKey: 
     GrantedCharges: 2
-    Neighbors: []
+    GrantedSummonKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-trunk-1
   - Key: warlock-trunk-2
     DisplayName: 
     Kind: 0
@@ -71,14 +77,14 @@ MonoBehaviour:
     Position: {x: 0, y: -270}
     Gains:
       Values:
-      - Type: 2
-        Amount: 1
       - Type: 7
-        Amount: 4
+        Amount: 6
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-start
   - Key: warlock-trunk-slot
@@ -94,6 +100,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-trunk-2
   - Key: warlock-a-1
@@ -102,7 +110,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -107, y: -325}
+    Position: {x: -132, y: -325}
     Gains:
       Values:
       - Type: 7
@@ -111,6 +119,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-trunk-2
   - Key: warlock-a-2
@@ -119,15 +129,17 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -200, y: -380}
+    Position: {x: -246, y: -380}
     Gains:
       Values:
       - Type: 4
-        Amount: 5
+        Amount: 4
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-a-1
   - Key: warlock-a-3
@@ -136,13 +148,15 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -292, y: -435}
+    Position: {x: -360, y: -435}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: Sacrifice
+    GrantedMagicKey: BloodPact
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-a-2
   - Key: warlock-a-4
@@ -151,7 +165,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -385, y: -490}
+    Position: {x: -474, y: -490}
     Gains:
       Values:
       - Type: 7
@@ -160,6 +174,8 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-a-3
   - Key: warlock-a-5
@@ -168,13 +184,15 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -478, y: -545}
+    Position: {x: -588, y: -545}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-a-4
   - Key: warlock-a-6
@@ -183,13 +201,15 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -570, y: -600}
+    Position: {x: -702, y: -600}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: Cinderstorm
+    GrantedMagicKey: LifeTap
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-a-5
   - Key: warlock-a-7
@@ -198,15 +218,17 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -663, y: -655}
+    Position: {x: -816, y: -655}
     Gains:
       Values:
       - Type: 4
-        Amount: 5
+        Amount: 4
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-a-6
   - Key: warlock-a-res
@@ -215,30 +237,32 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -352, y: -360}
+    Position: {x: -420, y: -360}
     Gains:
       Values: []
     ResistType: 5
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-a-3
   - Key: warlock-a-tip-a
     DisplayName: 
-    Kind: 0
+    Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -758, y: -710}
+    Position: {x: -911, y: -710}
     Gains:
-      Values:
-      - Type: 4
-        Amount: 3
+      Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: 
+    GrantedMagicKey: Cinderstorm
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-a-7
   - Key: warlock-a-tip-b
@@ -247,15 +271,17 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -723, y: -585}
+    Position: {x: -876, y: -585}
     Gains:
       Values:
       - Type: 7
-        Amount: 5
+        Amount: 8
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-a-7
   - Key: warlock-b-1
@@ -264,15 +290,17 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 107, y: -325}
+    Position: {x: 0, y: -450}
     Gains:
       Values:
       - Type: 4
-        Amount: 5
+        Amount: 4
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-trunk-2
   - Key: warlock-b-2
@@ -281,15 +309,17 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 200, y: -380}
+    Position: {x: 0, y: -540}
     Gains:
       Values:
-      - Type: 6
-        Amount: 3
+      - Type: 7
+        Amount: 8
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-b-1
   - Key: warlock-b-3
@@ -298,13 +328,15 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 292, y: -435}
+    Position: {x: 0, y: -630}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: OilSlick
+    GrantedMagicKey: DrainLife
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-b-2
   - Key: warlock-b-4
@@ -313,15 +345,17 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 385, y: -490}
+    Position: {x: 0, y: -720}
     Gains:
       Values:
       - Type: 4
-        Amount: 5
+        Amount: 4
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-b-3
   - Key: warlock-b-5
@@ -330,13 +364,15 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 478, y: -545}
+    Position: {x: 0, y: -810}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-b-4
   - Key: warlock-b-6
@@ -345,13 +381,15 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 570, y: -600}
+    Position: {x: 0, y: -900}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: Hush
+    GrantedMagicKey: SiphonSoul
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-b-5
   - Key: warlock-b-7
@@ -360,15 +398,17 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 663, y: -655}
+    Position: {x: 0, y: -990}
     Gains:
       Values:
-      - Type: 6
-        Amount: 3
+      - Type: 7
+        Amount: 8
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-b-6
   - Key: warlock-b-res
@@ -377,30 +417,32 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 352, y: -360}
+    Position: {x: 60, y: -690}
     Gains:
       Values: []
-    ResistType: 1
+    ResistType: 4
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-b-3
   - Key: warlock-b-tip-a
     DisplayName: 
-    Kind: 0
+    Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 758, y: -710}
+    Position: {x: 95, y: -1045}
     Gains:
-      Values:
-      - Type: 4
-        Amount: 3
+      Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: 
+    GrantedMagicKey: OilSlick
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-b-7
   - Key: warlock-b-tip-b
@@ -409,14 +451,198 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 723, y: -585}
+    Position: {x: -95, y: -1045}
     Gains:
       Values:
-      - Type: 7
-        Amount: 5
+      - Type: 5
+        Amount: 2
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
     Neighbors:
     - warlock-b-7
+  - Key: warlock-c-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 132, y: -325}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-trunk-2
+  - Key: warlock-c-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 246, y: -380}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-c-1
+  - Key: warlock-c-3
+    DisplayName: 
+    Kind: 4
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 360, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Imp
+    SummonAmount: 1
+    Neighbors:
+    - warlock-c-2
+  - Key: warlock-c-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 474, y: -490}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-c-3
+  - Key: warlock-c-5
+    DisplayName: 
+    Kind: 6
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 588, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Imp
+    SummonAmount: 1
+    Neighbors:
+    - warlock-c-4
+  - Key: warlock-c-6
+    DisplayName: 
+    Kind: 4
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    Position: {x: 702, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Succubus
+    SummonAmount: 1
+    Neighbors:
+    - warlock-c-5
+  - Key: warlock-c-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 816, y: -655}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 8
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-c-6
+  - Key: warlock-c-res
+    DisplayName: 
+    Kind: 5
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 420, y: -360}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Imp
+    SummonAmount: 20
+    Neighbors:
+    - warlock-c-3
+  - Key: warlock-c-tip-a
+    DisplayName: 
+    Kind: 5
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 911, y: -710}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Succubus
+    SummonAmount: 25
+    Neighbors:
+    - warlock-c-7
+  - Key: warlock-c-tip-b
+    DisplayName: 
+    Kind: 7
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    Position: {x: 876, y: -585}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Succubus
+    SummonAmount: 1
+    Neighbors:
+    - warlock-c-7

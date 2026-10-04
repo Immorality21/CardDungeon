@@ -156,6 +156,12 @@ namespace Assets.Scripts.Cards
                     return StatusLine(effect, caster, buffTracker, -1);
                 case SpellEffectType.TurnDelay:
                     return $"pushes its next turn back {effect.Power}% of a turn";
+                case SpellEffectType.Drain:
+                    return $"heals the caster {effect.Power}% of the damage dealt";
+                case SpellEffectType.RestoreCharge:
+                    return effect.Power == 1
+                        ? "restores 1 charge to an ability"
+                        : $"restores {effect.Power} charges to an ability";
                 default:
                     return null;
             }

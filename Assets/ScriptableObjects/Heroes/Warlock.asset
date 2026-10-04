@@ -66,18 +66,18 @@ MonoBehaviour:
   BaseStats:
     Values:
     - Type: 1
-      Amount: 5
+      Amount: 4
     - Type: 2
-      Amount: 5
+      Amount: 3
     - Type: 3
       Amount: 5
     - Type: 4
       Amount: 11
     - Type: 5
-      Amount: 4
+      Amount: 3
     - Type: 6
-      Amount: 7
+      Amount: 6
     - Type: 7
-      Amount: 20
+      Amount: 34
   AttackStat: 4
   SphereGrid: {fileID: 11400000, guid: cba493db680944de88c95fa4395e04e9, type: 2}

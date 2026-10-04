@@ -219,6 +219,92 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
+        /// Gives a hero's slot <paramref name="amount"/> charges back, capped at its maximum - what
+        /// Life Tap does (<see cref="SpellEffectType.RestoreCharge"/>). <paramref name="slotIndex"/>
+        /// <see cref="SpellcastAction.AnyChargeSlot"/> picks the most-spent slot.
+        /// <paramref name="excludeSlot"/> (the slot the restore is being cast from) is never refilled.
+        /// </summary>
+        public ChargeRestore RestoreCharges(string heroKey, int slotIndex, int amount, int excludeSlot = -1)
+        {
+            if (string.IsNullOrEmpty(heroKey) || !_heroSlots.TryGetValue(heroKey, out var slots))
+            {
+                return ChargeRestore.None;
+            }
+            return RestoreCharges(slots, slotIndex, amount, excludeSlot);
+        }
+
+        /// <summary>The rule behind <see cref="RestoreCharges(string,int,int,int)"/>, over any slot
+        /// list.</summary>
+        public static ChargeRestore RestoreCharges(IList<MagicSlot> slots, int slotIndex, int amount, int excludeSlot = -1)
+        {
+            if (slots == null || amount <= 0)
+            {
+                return ChargeRestore.None;
+            }
+            int index = slotIndex == SpellcastAction.AnyChargeSlot ? MostSpentSlot(slots, excludeSlot) : slotIndex;
+            if (index < 0 || index == excludeSlot || index >= slots.Count || slots[index] == null || slots[index].IsEmpty)
+            {
+                return ChargeRestore.None;
+            }
+            var slot = slots[index];
+            int added = Math.Min(amount, Math.Max(0, slot.MaxCharges - slot.Charges));
+            slot.Charges += added;
+            return new ChargeRestore { Magic = slot.Magic, Added = added };
+        }
+
+        /// <summary>
+        /// The slot missing the most charges, skipping <paramref name="excludeSlot"/> (the slot a
+        /// Life Tap is being cast from), or -1 when nothing is missing any. Ties go to the first.
+        /// </summary>
+        public static int MostSpentSlot(IList<MagicSlot> slots, int excludeSlot)
+        {
+            int best = -1;
+            int bestMissing = 0;
+            if (slots == null)
+            {
+                return best;
+            }
+            for (int i = 0; i < slots.Count; i++)
+            {
+                var slot = slots[i];
+                if (i == excludeSlot || slot == null || slot.IsEmpty)
+                {
+                    continue;
+                }
+                int missing = slot.MaxCharges - slot.Charges;
+                if (missing > bestMissing)
+                {
+                    best = i;
+                    bestMissing = missing;
+                }
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// Indices of the slots a restore could refill - filled and below their maximum - skipping
+        /// <paramref name="excludeSlot"/>. Empty means a Life Tap aimed here would buy nothing,
+        /// which is what greys it out in the picker.
+        /// </summary>
+        public static List<int> RestorableSlots(IList<MagicSlot> slots, int excludeSlot)
+        {
+            var restorable = new List<int>();
+            if (slots == null)
+            {
+                return restorable;
+            }
+            for (int i = 0; i < slots.Count; i++)
+            {
+                var slot = slots[i];
+                if (i != excludeSlot && slot != null && !slot.IsEmpty && slot.Charges < slot.MaxCharges)
+                {
+                    restorable.Add(i);
+                }
+            }
+            return restorable;
+        }
+
+        /// <summary>
         /// Whether a fresh level should top charges back up. <b>Only the first level of a run</b>
         /// (and free play, which is a single level) - a charge is a <i>run</i> resource, so refilling
         /// per level would hand it back before it ever ran out.

@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8167baed5bc052409b86b3942399fa5, type: 3}
+  m_Name: Imp
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
+  Key: Imp
+  DisplayName: Imp
+  Description: A cackling scrap of the pit, bound to the Warlock's blood. It fights
+    beside the party, spitting fire.
+  Sprite: {fileID: 21300000, guid: af051833294a4c03bb7aabe5b57f9f60, type: 3}
+  AnimationFrames:
+  - {fileID: -1086942912245843823, guid: fb32350fac8446beabaf792e182c4a5c, type: 3}
+  - {fileID: -2010785737500418598, guid: fb32350fac8446beabaf792e182c4a5c, type: 3}
+  - {fileID: -384649794750452746, guid: fb32350fac8446beabaf792e182c4a5c, type: 3}
+  AnimationFps: 4
+  Facing: 0
+  ArrivalSound: {fileID: 0}
+  ArrivalSoundVolume: 0.9
+  Kind: 2
+  TargetType: 0
+  Effects: []
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  BaseCharges: 2
+  StatPercents:
+    Values:
+    - Type: 7
+      Amount: 40
+    - Type: 1
+      Amount: 50
+    - Type: 2
+      Amount: 60
+    - Type: 3
+      Amount: 140
+    - Type: 4
+      Amount: 70
+    - Type: 5
+      Amount: 60
+    - Type: 6
+      Amount: 100
+  CopySummonerResistances: 0
+  TurnsActive: 3
+  Actions: []
+  Signature: {fileID: 11400000, guid: 53c19e14585d4f74aad1bd0acc88aa6a, type: 2}
+  AttackAbility: {fileID: 11400000, guid: 95a0809823d2b424a933ee9773136b4b, type: 2}

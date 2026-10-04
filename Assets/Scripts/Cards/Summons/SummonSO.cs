@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Assets.Scripts.Cards
 {
     /// <summary>
-    /// What a summon does once it answers. Two kinds share one foundation — the grid node that
+    /// What a summon does once it answers. Three kinds share one foundation — the grid node that
     /// teaches it, its per-run charges, the Summon command and the presentation — and differ only in
     /// what happens after (docs/plans/SPECIALIZATION.md §4b).
     /// </summary>
@@ -17,7 +17,15 @@ namespace Assets.Scripts.Cards
         /// <summary>FFX: the party steps out and the summon fights alone, a player-driven unit whose
         /// stats are ratios of the summoner's. It leaves when its health or its turns run out, or on
         /// Dismiss, and the blow that ends it never reaches the party.</summary>
-        ReplaceParty = 1
+        ReplaceParty = 1,
+
+        /// <summary>The Warlock's demons: a player-driven unit that fights <b>beside</b> the party,
+        /// standing in the vanguard in front of the heroes. Built like a replacement - stats as
+        /// ratios of the summoner's, its own menu, a stay in turns - but the party keeps fighting and
+        /// enemies can hit either. One per summoner: calling again sends the first home. It leaves
+        /// when its health or its turns run out, on Dismiss, when its summoner falls, and when a
+        /// party-replacing summon takes the field (docs/plans/WARLOCK_CULTIST.md).</summary>
+        JoinParty = 2
     }
 
     /// <summary>Which way the creature looks while it is on the stage.</summary>
@@ -92,11 +100,11 @@ namespace Assets.Scripts.Cards
                  "start and when resting in a refuge.")]
         [Min(1)] public int BaseCharges = 1;
 
-        // ---- ReplaceParty only. A special attack ignores everything below, and a replacement
-        // ---- ignores TargetType and Effects above.
+        // ---- ReplaceParty and JoinParty: everything below builds the unit. A special attack
+        // ---- ignores it, and a unit-building summon ignores TargetType and Effects above.
 
-        [Header("Party replacement")]
-        [Tooltip("ReplaceParty: each stat as a PERCENTAGE of the summoner's own (base + gear, no combat " +
+        [Header("Party replacement / ally")]
+        [Tooltip("ReplaceParty / JoinParty: each stat as a PERCENTAGE of the summoner's own (base + gear, no combat " +
                  "buffs), snapshotted on arrival. MaxHealth 250 brings a body two and a half times the " +
                  "summoner's bar. A stat with no entry is 0.")]
         public StatBlock StatPercents = new StatBlock();

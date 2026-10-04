@@ -57,6 +57,7 @@ namespace Assets.Scripts.Cards.Effects
                 }
                 else
                 {
+                    int landed = Mathf.Min(damage, Mathf.Max(0, target.Stats.Health));
                     target.Stats.Health -= damage;
 
                     foreach (var statusEffect in buffTracker.GetActiveStatusEffects(target))
@@ -75,6 +76,7 @@ namespace Assets.Scripts.Cards.Effects
                         Color = DamageColor,
                         Delay = EffectDelay,
                         Impact = damage,
+                        Landed = landed,
                         Effectiveness = DamageCalculator.Classify(
                             effect.DamageType, target.Resistances, resistanceBonus)
                     });

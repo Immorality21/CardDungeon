@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d03ef8fb4f65d04aacc66749b7be8c3, type: 3}
+  m_Name: WarlockDemons
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Sandbox.SandboxConfigSO
+  Heroes:
+  - Hero: {fileID: 11400000, guid: 77ae12aafb9d437f8cc8149bd1cccb2b, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 1
+    Abilities:
+    - {fileID: 11400000, guid: d1909c00ad664e548bba403ccfc72192, type: 2}
+    - {fileID: 11400000, guid: 5cac7c6eade7bb8449af099a1e055faa, type: 2}
+    - {fileID: 11400000, guid: 791d04801c202a243abfa1fb37458db7, type: 2}
+  - Hero: {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  - Hero: {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  - Hero: {fileID: 11400000, guid: 77ccb730251741f08e684dabd9144b76, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  Level: {fileID: 0}
+  Seed: 12
+  Enemies:
+  - {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
+  - {fileID: 11400000, guid: 96912e3cdfce0d24792157ecadc855fd, type: 2}
+  EnemyDifficulty: 2
+  ClearOtherRooms: 1
+  WalkIntoEncounter: 1
+  CopyInventory: 0
+  CopyMetaProgress: 0
+  Items: []

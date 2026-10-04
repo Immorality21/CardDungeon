@@ -24,11 +24,52 @@ Read with it: `NEXT_STEPS.md` (the do-not-relitigate list), `plans/SPECIALIZATIO
 - **The demons went to the Cultist, then came back.** On 10-04 the demon branch first moved to the
   new Cultist; the owner's later edit put **demons on the Warlock** (branch C, the Demonology Ultra
   style) and left the Cultist as a summoner of *something else* plus the sacrifice Ultra. This file
-  follows the latest edit. The Warlock vision's Open Questions still says the demon branch moved to
-  the Cultist — **stale, fix it** next time the window is open.
+  follows the latest edit.
 - Also from these two days: **Spirit defends against magic and Luck dodges physical hits**
   (`DefenseRules`, Combat guide). Both heroes cast off Intelligence, so their abilities are magic: met
   by the target's Spirit, never dodged.
+
+---
+
+## 1b. What shipped on 2026-10-04 (read this first)
+
+The owner's calls, taken at the start of the build: **an ally stays N of its own turns, one per
+summoner** (calling again sends the first home); **Life Tap lets the player pick the ability** it
+refills; **the Cultist summons eldritch horrors**; scope was **the mechanics + the Warlock**, Ultras
+deferred until §13's gauge is designed.
+
+- **`SummonKind.JoinParty`** — a summon that fights **beside** the party. Built like a replacement
+  (stats as ratios of the summoner's, its own menu, a stay in turns, `AttackAbility` + `Signature`) but
+  the party keeps fighting. It stands in a **vanguard column in front of the heroes**
+  (`HeroFormation.AllyColumnX` = -0.22 of the half width — the screen-fit answer: at 1280×720 a party
+  of four plus an ally fits with room to spare, see the sandbox screenshot). It is part of
+  `CombatManager.HeroSideUnits()` (enemies target it, AoE hits it, heals reach it) but **not** of the
+  defeat check. It leaves when its health or turns run out, on Dismiss, **when its summoner falls**,
+  when a party-replacing summon arrives, and at the end of the fight. The balance model mirrors it
+  (`EncounterSimulator`: called whenever its summoner has none out, plays Signature then Attack).
+- **`SpellEffectType.Drain`** (6) — heals the caster `Power`% of the damage the rest of the cast
+  dealt; resolved after every other benefit, before costs. **`SpellEffectType.RestoreCharge`** (7) —
+  `Power` charges back to one ability (`SpellcastAction.ChargeSlot`, the player's pick; the most-spent
+  slot when nobody picked), through `EffectResolver.Charges` (`IChargeBank`). The Life Tap picker
+  greys the ability when nothing is spent and never offers the slot it is cast from. **The Cleric's
+  charge restore is the same effect** — author it `SingleAlly` and the picker asks for the ally first.
+  The balance model has no charge bank, so a restore is inert there (it never casts one anyway).
+- **The Warlock**: STR 4 · END 3 · AGI 5 · INT 11 · SPR 3 · LCK 6 · **HP 34** (the roster's biggest).
+  Grid re-authored in the Paladin's shape, 35 nodes / 6,220 xp:
+
+  | branch | spine abilities (120 / 245 xp nodes) | tip / stubs |
+  |---|---|---|
+  | A (left) blood as currency | **Blood Pact** (the old Sacrifice, renamed) → **Life Tap** (15% HP → +1 charge) | **Cinderstorm** at a tip, Shadow resist stub |
+  | B (down) what he takes back | **Drain Life** (INT Shadow + Drain 50%) → **Siphon Soul** (all enemies, Drain 35%) | **Oil Slick** at a tip, Holy resist stub |
+  | C (right) demons | **Summon Imp** (2 charges, 3 turns, Firebolt / ★Hellfire) → **Summon Succubus** (1 Void Shard; 4 turns, Lash / ★Mesmerize) | Imp +1 turn, Imp +20 HP%, Succubus +25 HP%, Succubus +1 charge |
+
+  Hush left his grid (Ranger and Rogue still teach it). Sprites: `Assets/Sprites/Summons/imp-idle.png`,
+  `succubus-idle.png` (PixelLab, 32×32, 3-frame idle). All numbers are first drafts — balance is paused.
+
+**Still open from this file:** the demon army (a party replacement with several units), Demon Form
+and the Ultras, the replace-one-hero mechanic (the Cultist's Sacrifice), the Cultist himself, and the
+answered items still listed in the Warlock vision's Open Questions (health pool, Drain Life, the
+rename, the grid - all done in §1b).
 
 ---
 
@@ -107,12 +148,12 @@ Ordered by how much of the two heroes they unblock. "Exists" means in the code t
 
 | mechanic | needed by | exists? | notes |
 |---|---|---|---|
-| **Add a party member mid-fight** (an ally unit on the hero side) | Warlock C (Imp, Succubus), Cultist signature | **no** | Summons today either land one effect (*special attack*) or replace the **whole** party (*party replacement*). An ally fighting beside the party is a third kind. **The owner wants this built first.** Step one is a **screen-fit check**: combat is laid out for four heroes (`HeroFormation`: one column up to two, two ranks from three) — where does a fifth unit go at 1280×720? |
+| **Add a party member mid-fight** (an ally unit on the hero side) | Warlock C (Imp, Succubus), Cultist signature | **yes** (2026-10-04, `SummonKind.JoinParty`, §1b) | Summons today either land one effect (*special attack*) or replace the **whole** party (*party replacement*). An ally fighting beside the party is a third kind. **The owner wants this built first.** Step one is a **screen-fit check**: combat is laid out for four heroes (`HeroFormation`: one column up to two, two ranks from three) — where does a fifth unit go at 1280×720? |
 | **Replace one party member** | Cultist's Sacrifice Ultra | **no** | Close to the above: an ally takes one hero's slot. Build once, use for both. |
 | **Party replacement with several units** | Warlock C's demon army | partly | `SummonKind.ReplaceParty` brings **one** unit (stats as ratios of the summoner's, its own menu, a stay in turns, the blow that ends it is swallowed). Several units means the summon side needs more than one actor. |
 | **Health as a cost** | Blood Bolt, the old Sacrifice, all of branch A | **yes** | `SpellEffectType.HealthCost` with `PowerMode.PercentOfMaxHealth`. Paid after the benefits; the UI greys out what the caster cannot pay. |
-| **Drain** (damage that heals the caster) | Warlock B's Drain Life | **no** | A new effect type or a flag on Damage. Per the do-not-relitigate list, a new verb is **an effect type plus authoring**, not new command machinery. |
-| **Restore an ability charge** | Warlock A's Life Tap | **no** | Charges are a **run** resource (refill only at refuges), so this is a strong effect — price it accordingly. The **Cleric's** vision wants the same effect ("restore 1 ability charge for 1 hero") — build it once for both. |
+| **Drain** (damage that heals the caster) | Warlock B's Drain Life | **yes** (`SpellEffectType.Drain`) | A new effect type or a flag on Damage. Per the do-not-relitigate list, a new verb is **an effect type plus authoring**, not new command machinery. |
+| **Restore an ability charge** | Warlock A's Life Tap | **yes** (`SpellEffectType.RestoreCharge`) | Charges are a **run** resource (refill only at refuges), so this is a strong effect — price it accordingly. The **Cleric's** vision wants the same effect ("restore 1 ability charge for 1 hero") — build it once for both. |
 | **The Ultra gauge** | Demon Form, Sacrifice | **no** | `COMBAT_DEPTH.md` §13: fills on damage taken, unlocks a per-hero special. Undecided: how it coexists with summons (both are "the big button you save for the boss"). |
 | **Transformation** | Demon Form | **no** | The hero becomes a different unit for 3 turns: health ratio preserved, Attack swapped to melee Shadow, a new ability (Chaos Bolt). The party-replacing summon already has much of this (stat ratios, `SummonSO.AttackAbility`, a menu of its own, a stay in turns) — but it is the *hero* changing, and the rest of the party stays. |
 | **A material found late** | Demon Form's unlock | **yes** | `SphereGridNode.MaterialCosts` — a price in materials on top of XP; materials only drop in runs. |
@@ -160,7 +201,7 @@ From the do-not-relitigate list and the subsystem guides — not to be re-argued
 9. More Ultras under Demonology?
 
 **Cultist**
-1. **What does he summon**, now that demons are the Warlock's?
+1. ~~What does he summon?~~ **Eldritch horrors** (owner, 2026-10-04).
 2. Sacrifice: what happens to the sacrificed hero (dead for the fight? revivable? back when the
    creature leaves)? How long does the replacement stay? Can he sacrifice himself?
 3. Branch count and the other branches.
@@ -176,9 +217,11 @@ From the do-not-relitigate list and the subsystem guides — not to be re-argued
 
 ## 7. Suggested order
 
-1. **Screen-fit check** for extra hero-side units (measure, sketch options — no code).
-2. **Add / replace a party member** — the mechanic both heroes depend on.
-3. **Drain** and **restore-a-charge** effect types (small; unblock Warlock A and B, and the Cleric).
-4. Warlock: settle §6's questions, then **re-author `WarlockGrid`** (three branches) and the stats.
-5. Cultist: decide what he summons, then the same.
-6. Ultras once §13's gauge is designed.
+1. ~~Screen-fit check~~, ~~add a party member~~, ~~Drain and restore-a-charge~~, ~~re-author the
+   Warlock~~ — **done 2026-10-04**, see §1b.
+2. **Replace one party member** (the Cultist's Sacrifice) — `JoinParty` is most of it: an ally that
+   takes a downed/sacrificed hero's slot instead of standing in the vanguard.
+3. **The demon army** — a party replacement that brings several units.
+4. Cultist: eldritch-horror summons, stats, grid, an unlock source.
+5. Ultras once §13's gauge is designed (Demon Form, Sacrifice).
+6. A balance pass over the Warlock once the specialization rebuild is in.

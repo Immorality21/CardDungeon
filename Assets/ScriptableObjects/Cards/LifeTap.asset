@@ -10,29 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
-  m_Name: Sacrifice
-  m_EditorClassIdentifier:
-  Key: Sacrifice
-  DisplayName: Sacrifice
-  Description: Give enough away and what is left burns very brightly.
+  m_Name: LifeTap
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
+  Key: LifeTap
+  DisplayName: Life Tap
+  Description: Blood spent is power regained.
   Icon: {fileID: 21300000, guid: 6cd9a4cead7747c6b1be1203b6ddf7af, type: 3}
-  TargetType: 3
-  Rarity: 3
+  TargetType: 2
+  Rarity: 2
   Effects:
-  - EffectType: 2
-    Power: 4
+  - EffectType: 7
+    Power: 1
     PowerMode: 0
     ScalingStat: 0
     DamageType: 0
-    BuffType: 4
-    Duration: 3
-    UnlockLevel: 0
-  - EffectType: 2
-    Power: 3
-    PowerMode: 0
-    ScalingStat: 0
-    DamageType: 0
-    BuffType: 1
+    BuffType: 0
     Duration: 3
     UnlockLevel: 0
   - EffectType: 4
@@ -45,3 +37,5 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 09000000
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0

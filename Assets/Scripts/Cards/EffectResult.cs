@@ -16,6 +16,10 @@ namespace Assets.Scripts.Cards
         // in the presenter without coupling the (unit-tested) executors to the feedback layer.
         public int Impact;
 
+        // Health this entry actually took off its target: Impact less any overkill. What a Drain
+        // reads, so finishing a 2 HP enemy with a 30 damage hit drains off 2, not 30.
+        public int Landed;
+
         // How resistance affected this hit (Weak/Resisted/Immune/…) — the presenter turns a
         // non-Normal value into a coloured popup. Default Normal for non-damage entries.
         public DamageEffectiveness Effectiveness = DamageEffectiveness.Normal;

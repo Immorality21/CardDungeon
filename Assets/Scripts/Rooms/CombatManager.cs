@@ -160,6 +160,10 @@ namespace Assets.Scripts.Rooms
         // The party-replacing summon on the field, or null. While it is out it is the whole hero
         // side: see HeroSideUnits.
         private SummonUnit _summon;
+
+        // Summons fighting beside the party (SummonKind.JoinParty), at most one per summoner, in the
+        // order they arrived. Part of the hero side while the party is: see HeroSideUnits.
+        private readonly List<SummonUnit> _allies = new List<SummonUnit>();
         private string _lastTurnLog;
         private Room _currentCombatRoom;
         private Party _currentParty;
@@ -184,12 +188,16 @@ namespace Assets.Scripts.Rooms
         /// <summary>The party-replacing summon on the field, or null when the party is fighting.</summary>
         public SummonUnit ActiveSummon => _summon;
 
+        /// <summary>The summons fighting beside the party right now, in the order they arrived.</summary>
+        public IReadOnlyList<SummonUnit> ActiveAllies => _allies;
+
         /// <summary>
         /// <b>The</b> hero side of the fight, and the one place that answers it: the summon alone
-        /// while one has taken the party's place (§4b), the living heroes otherwise. Every read of
-        /// "the heroes" in combat - enemy planning, area attacks, random targeting, the telegraph
-        /// markers, the intent icon and the loop's own defeat check - goes through this, because a
-        /// single leftover <c>party.Heroes</c> lets an enemy hit someone who is not there.
+        /// while one has taken the party's place (§4b), the living heroes and any allies they have
+        /// summoned otherwise. Every read of "the heroes" in combat - enemy planning, area attacks,
+        /// random targeting, the telegraph markers and the intent icon - goes through this, because a
+        /// single leftover <c>party.Heroes</c> lets an enemy hit someone who is not there. The defeat
+        /// check does not: an ally alone is not a party (<see cref="HasAliveHeroes"/>).
         /// </summary>
         public List<ICombatUnit> HeroSideUnits()
         {
@@ -204,6 +212,7 @@ namespace Assets.Scripts.Rooms
             return _currentParty.Heroes
                 .Where(h => h != null && h.IsAlive)
                 .Cast<ICombatUnit>()
+                .Concat(_allies.Where(a => a != null && a.IsAlive))
                 .ToList();
         }
 
@@ -232,9 +241,10 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Who a summon's ability lands on when it needs no picker: the summon itself for anything
-        /// aimed at the hero side (it <i>is</i> the hero side), every living enemy for an area
-        /// attack. A single-enemy ability returns every candidate and the caller picks.
+        /// Who a summon's ability lands on when it needs no picker: the whole hero side for a
+        /// party-wide ability (just the summon, while it has taken the party's place), the summon
+        /// itself for anything else aimed at its own side, every living enemy for an area attack. A
+        /// single-enemy ability returns every candidate and the caller picks.
         /// </summary>
         public List<ICombatUnit> SummonAbilityTargets(MagicSO magic, ICombatUnit summon)
         {
@@ -247,6 +257,8 @@ namespace Assets.Scripts.Rooms
                 case MagicTargetType.SingleEnemy:
                 case MagicTargetType.AllEnemies:
                     return GetAliveEnemies();
+                case MagicTargetType.AllAllies:
+                    return HeroSideUnits();
                 default:
                     return new List<ICombatUnit> { summon };
             }
@@ -320,14 +332,18 @@ namespace Assets.Scripts.Rooms
             _pendingAction = HeroAction.Attack;
         }
 
-        /// <summary>Submits casting the magic in <paramref name="slotIndex"/> at the chosen targets.</summary>
-        public void SubmitCastAction(MagicSO magic, int slotIndex, ICombatUnit caster, List<ICombatUnit> targets)
+        /// <summary>Submits casting the magic in <paramref name="slotIndex"/> at the chosen targets.
+        /// <paramref name="chargeSlot"/> is the ability a Life Tap refills, when the player picked one.</summary>
+        public void SubmitCastAction(MagicSO magic, int slotIndex, ICombatUnit caster, List<ICombatUnit> targets,
+            int chargeSlot = SpellcastAction.AnyChargeSlot)
         {
             _pendingCastAction = new SpellcastAction
             {
                 Magic = magic,
                 Caster = caster,
-                Targets = targets
+                Targets = targets,
+                ChargeSlot = chargeSlot,
+                CastSlot = slotIndex
             };
             _pendingCastSlot = slotIndex;
             _pendingAction = HeroAction.Cast;
@@ -410,11 +426,16 @@ namespace Assets.Scripts.Rooms
             _combatGold = 0;
             _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
             _summon = null;
+            _allies.Clear();
             _threat.Reset();
             BuffTracker = new CombatBuffTracker();
             _turnManager.SetBuffTracker(BuffTracker);
             // A TurnDelay effect (Exatrix's claws) pushes units back on this fight's clock.
             _calculator.Clock = _turnManager;
+            // A RestoreCharge effect (Life Tap) gives charges back to the run's ability slots.
+            _calculator.Charges = DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null
+                ? new EquippedChargeBank(DungeonManager.Instance.MagicState)
+                : null;
             _tagTracker = new MagicTagTracker();
             // Prefer the shared combo catalog (single source of truth, also used by the hub
             // Forge); fall back to the scene-serialized list if no catalog is present.
@@ -575,7 +596,9 @@ namespace Assets.Scripts.Rooms
                     }
                     else if (_pendingAction == HeroAction.Dismiss && unit is SummonUnit dismissing)
                     {
-                        _lastTurnLog = $"{dismissing.DisplayName} is dismissed, and the party steps back in.";
+                        _lastTurnLog = IsAlly(dismissing)
+                            ? $"{dismissing.DisplayName} is dismissed."
+                            : $"{dismissing.DisplayName} is dismissed, and the party steps back in.";
                         yield return new WaitForSeconds(_turnDelay * 0.5f);
                     }
                     else
@@ -612,6 +635,8 @@ namespace Assets.Scripts.Rooms
             {
                 EndSummon(SummonExit.Victory);
             }
+            // Allies go home with the fight, won or lost.
+            EndAllAllies(SummonExit.Victory);
 
             // Clear turn order display + the on-field turn marker
             OnTurnOrderChanged?.Invoke(new List<ICombatUnit>());
@@ -791,6 +816,11 @@ namespace Assets.Scripts.Rooms
                 yield return SummonReplacement(hero, slot);
                 yield break;
             }
+            if (summon.Kind == SummonKind.JoinParty)
+            {
+                yield return SummonAlly(hero, slot);
+                yield break;
+            }
 
             OnSummonStarted?.Invoke(caster, summon);
             yield return SummonPresenter.Present(summon);
@@ -828,6 +858,10 @@ namespace Assets.Scripts.Rooms
             var summon = slot.Summon;
             OnSummonStarted?.Invoke(summoner, summon);
 
+            // A replacement fights alone: anything fighting beside the party goes home first.
+            bool alliesLeft = _allies.Count > 0;
+            EndAllAllies(SummonExit.Dismissed);
+
             var unit = SummonUnit.Create(summon, slot.Grant, summoner);
             CombatStage.Instance.HideParty();
             CombatStage.Instance.PlaceSummon(unit);
@@ -851,7 +885,103 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            _lastTurnLog = $"{summoner.DisplayName} summons {unit.DisplayName}! The party steps back.";
+            _lastTurnLog = $"{summoner.DisplayName} summons {unit.DisplayName}! The party steps back"
+                + (alliesLeft ? ", and their allies are sent away." : ".");
+        }
+
+        /// <summary>
+        /// A summon that fights beside the party arrives (<see cref="SummonKind.JoinParty"/>). One per
+        /// summoner: calling again sends the first home before the new one comes. It rises at the
+        /// centre, strides into the vanguard column in front of the party, and takes an immediate
+        /// turn of its own ahead of the clock - turn 1 of its stay, as a replacement's is. The party
+        /// stays on the field, and the enemies may now hit either.
+        /// </summary>
+        private IEnumerator SummonAlly(Hero summoner, SummonSlot slot)
+        {
+            var summon = slot.Summon;
+            OnSummonStarted?.Invoke(summoner, summon);
+
+            var previous = AllyOf(summoner);
+            if (previous != null)
+            {
+                EndAlly(previous, SummonExit.Dismissed);
+            }
+
+            var unit = SummonUnit.Create(summon, slot.Grant, summoner);
+            _allies.Add(unit);
+            CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive).ToList(), arriving: unit);
+            yield return SummonPresenter.Arrive(unit);
+            OnSummonEnded?.Invoke();
+
+            _turnManager.AddUnit(unit, actsNext: true);
+            EnsureHealthBars(new List<ICombatUnit> { unit });
+
+            _lastTurnLog = previous != null
+                ? $"{summoner.DisplayName} sends {previous.DisplayName} away and summons {unit.DisplayName}!"
+                : $"{summoner.DisplayName} summons {unit.DisplayName} to fight beside the party!";
+        }
+
+        /// <summary>Whether <paramref name="unit"/> is one of the summons fighting beside the party.</summary>
+        private bool IsAlly(SummonUnit unit)
+        {
+            return unit != null && _allies.Contains(unit);
+        }
+
+        /// <summary>The ally <paramref name="summoner"/> has on the field, or null.</summary>
+        private SummonUnit AllyOf(Hero summoner)
+        {
+            return _allies.FirstOrDefault(a => a != null && ReferenceEquals(a.Summoner, summoner));
+        }
+
+        /// <summary>
+        /// An ally leaves the field: off the clock, its threat forgotten, anything an enemy had aimed
+        /// at it let go (the blow re-picks from the hero side when it lands), and off the stage -
+        /// crumbling when it <see cref="SummonExit.Fell"/>, sinking away otherwise. The party is not
+        /// touched: it never left.
+        /// </summary>
+        private void EndAlly(SummonUnit ally, SummonExit exit)
+        {
+            if (ally == null || !_allies.Remove(ally))
+            {
+                return;
+            }
+            ally.Stay.Leave(exit);
+            _turnManager.RemoveUnit(ally);
+            _threat.Clear(ally);
+            foreach (var enemy in AliveEnemyComponents())
+            {
+                if (ReferenceEquals(enemy.ChargeTarget, ally))
+                {
+                    enemy.ChargeTarget = null;
+                }
+            }
+            StartCoroutine(SummonPresenter.Depart(ally, exit == SummonExit.Fell));
+
+            // Close the gap it left in the column. Not at the end of the fight: the stage is coming down.
+            if (exit != SummonExit.Victory && CombatStage.HasInstance)
+            {
+                CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive).ToList());
+            }
+        }
+
+        private void EndAllAllies(SummonExit exit)
+        {
+            foreach (var ally in _allies.ToList())
+            {
+                EndAlly(ally, exit);
+            }
+        }
+
+        /// <summary>A summoner who falls takes their ally with them: what bound it is gone.</summary>
+        private void EndAlliesOf(Hero summoner)
+        {
+            var ally = summoner != null ? AllyOf(summoner) : null;
+            if (ally == null)
+            {
+                return;
+            }
+            _lastTurnLog += $" {ally.DisplayName} vanishes with its summoner.";
+            EndAlly(ally, SummonExit.Dismissed);
         }
 
         /// <summary>
@@ -862,6 +992,20 @@ namespace Assets.Scripts.Rooms
         private void AfterSummonTurn(ICombatUnit unit, bool dismissed)
         {
             var summon = unit as SummonUnit;
+            if (IsAlly(summon))
+            {
+                bool lastTurn = summon.Stay.EndTurn();
+                if (dismissed)
+                {
+                    EndAlly(summon, SummonExit.Dismissed);
+                }
+                else if (lastTurn)
+                {
+                    _lastTurnLog += $" {summon.DisplayName}'s time is up, and it fades away.";
+                    EndAlly(summon, SummonExit.TurnsSpent);
+                }
+                return;
+            }
             if (summon == null || !ReferenceEquals(summon, _summon))
             {
                 return;
@@ -919,7 +1063,19 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void ResolveSummonDamaged(SummonUnit summon)
         {
-            if (summon == null || !ReferenceEquals(summon, _summon) || summon.Stats.Health > 0)
+            if (summon == null || summon.Stats.Health > 0)
+            {
+                return;
+            }
+            // An ally simply falls; the party fighting beside it is untouched.
+            if (IsAlly(summon))
+            {
+                summon.Stats.Health = 0;
+                _lastTurnLog += $" {summon.DisplayName} falls!";
+                EndAlly(summon, SummonExit.Fell);
+                return;
+            }
+            if (!ReferenceEquals(summon, _summon))
             {
                 return;
             }
@@ -1872,6 +2028,8 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
+            EndAlliesOf(hero);
+
             // Disable the hero's sprite to show they've fallen
             var sr = hero.GetComponent<SpriteRenderer>();
             if (sr != null)
@@ -1983,7 +2141,8 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>Fleeing is a party action, and while a summon has taken the party's place there is
-        /// no party to flee: Dismiss it, then flee on a hero's turn (§4b).</summary>
+        /// no party to flee: Dismiss it, then flee on a hero's turn (§4b). Allies need no such step:
+        /// they go home with the fight.</summary>
         public bool CanFlee(Party party)
         {
             return _summon == null && party.PreviousRoom != null;

@@ -28,6 +28,15 @@ namespace Assets.Scripts.Combat
         public const float FrontColumnX = -0.42f;
         public const float BackColumnX = -0.66f;
 
+        /// <summary>
+        /// The vanguard: where a summon that fights beside the party stands
+        /// (<c>SummonKind.JoinParty</c>) - a column of its own in front of the heroes, so it never
+        /// shares a spot with one whatever the party's shape, and stands between them and the enemies
+        /// as a creature called to fight for them should. At 16:9 it is about two units clear of the
+        /// front rank and five of the enemies' front column (+0.40).
+        /// </summary>
+        public const float AllyColumnX = -0.22f;
+
         /// <summary>One offset per hero, in party order.</summary>
         public static List<Vector2> Layout(int count, float halfW, float halfH)
         {
@@ -51,6 +60,18 @@ namespace Assets.Scripts.Combat
             int front = (count + 1) / 2;
             AddColumn(slots, front, halfW * FrontColumnX, halfH);
             AddColumn(slots, count - front, halfW * BackColumnX, halfH);
+            return slots;
+        }
+
+        /// <summary>One offset per summoned ally, in the order they are given - the vanguard column,
+        /// spaced as an enemy column of the same size.</summary>
+        public static List<Vector2> AllyLayout(int count, float halfW, float halfH)
+        {
+            var slots = new List<Vector2>(Mathf.Max(0, count));
+            if (count > 0)
+            {
+                AddColumn(slots, count, halfW * AllyColumnX, halfH);
+            }
             return slots;
         }
 

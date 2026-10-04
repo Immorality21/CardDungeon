@@ -279,6 +279,11 @@ namespace Assets.Scripts.Balance
             // whole hero side - the one rule CombatManager.HeroSideUnits states for the live game.
             SimReplacement replacement = null;
 
+            // Summons fighting beside the party (SummonKind.JoinParty), one per summoner. They join
+            // the side the enemies pick from, but never keep a fight going on their own: the loop
+            // ends when the party is down, as CombatManager.HasAliveHeroes does.
+            var allies = new SimAllies(turnManager, enemies);
+
             int turns = 0;
             while (AnyAlive(HeroSide(heroes, replacement)) && AnyAlive(enemies) && turns < settings.MaxTurns)
             {
@@ -307,6 +312,8 @@ namespace Assets.Scripts.Balance
                 {
                     replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
                     turnManager.RemoveUnit(unit);
+                    // A summoner killed by a tick takes their ally with them here, not a turn later.
+                    allies.AfterTurn(unit);
                     continue;
                 }
 
@@ -318,6 +325,7 @@ namespace Assets.Scripts.Balance
                     buffTracker.TickBuffs(unit);
                     tagTracker.TickTags(unit);
                     replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
+                    allies.AfterTurn(unit);
                     continue;
                 }
 
@@ -327,22 +335,35 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
+                var actingAlly = allies.Of(actor);
                 if (replacement != null && ReferenceEquals(actor, replacement.Unit))
                 {
                     TakeReplacementTurn(replacement, enemies, buffTracker, resolver);
                 }
+                else if (actingAlly != null)
+                {
+                    TakeAllyTurn(actingAlly, enemies, buffTracker, resolver);
+                }
                 else if (actor.IsHero)
                 {
-                    TakeHeroTurn(actor, heroes, enemies, buffTracker, tagTracker, comboDetector, resolver,
-                        settings, ref potionsLeft, result, summonsAllowed, lastSummonTurn, out var called);
-                    if (called != null)
+                    // Party-wide heals and buffs reach allies, as GetAliveHeroes does in the live fight.
+                    TakeHeroTurn(actor, heroes, allies.With(heroes), enemies, buffTracker, tagTracker, comboDetector,
+                        resolver, settings, ref potionsLeft, result, summonsAllowed, lastSummonTurn,
+                        allies.HasOut(actor), out var called);
+                    if (called != null && called.IsAlly)
                     {
+                        // A replacement out sends allies home, so one can only be called beside the party.
+                        allies.Arrive(actor, called.Summon, called.Grant);
+                    }
+                    else if (called != null)
+                    {
+                        allies.DismissAll();
                         replacement = ArriveReplacement(actor, called, heroes, enemies, turnManager);
                     }
                 }
                 else
                 {
-                    TakeEnemyTurn(actor, HeroSide(heroes, replacement), enemies, buffTracker);
+                    TakeEnemyTurn(actor, EnemyTargets(heroes, replacement, allies), enemies, buffTracker);
                 }
 
                 // End-of-turn over-time effects (regeneration) fire before durations tick down,
@@ -369,6 +390,8 @@ namespace Assets.Scripts.Balance
                         turnManager.RemoveUnit(hero);
                     }
                 }
+                // After the sweep, so a summoner who fell this turn takes their ally with them.
+                allies.AfterTurn(unit);
             }
 
             result.EnemiesAlive = AnyAlive(enemies);
@@ -389,6 +412,23 @@ namespace Assets.Scripts.Balance
             return replacement != null && replacement.Unit.IsAlive
                 ? new List<SimUnit> { replacement.Unit }
                 : heroes;
+        }
+
+        /// <summary>Who the enemies pick from: the hero side plus any living allies - the live
+        /// <c>CombatManager.HeroSideUnits</c>. Allies are never part of the defeat check.</summary>
+        private static List<SimUnit> EnemyTargets(List<SimUnit> heroes, SimReplacement replacement, SimAllies allies)
+        {
+            var side = HeroSide(heroes, replacement);
+            return replacement != null && replacement.Unit.IsAlive ? side : allies.With(side);
+        }
+
+        // ---------------------------------------------------------------- allies
+
+        /// <summary>An ally plays as a replacement does: its Signature first, then its Attack on the
+        /// weakest enemy. The rest of the bookkeeping is <see cref="SimAllies"/>.</summary>
+        private static void TakeAllyTurn(SimAlly ally, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver)
+        {
+            TakeReplacementTurn(new SimReplacement { Unit = ally.Unit, Stay = ally.Stay }, enemies, buffTracker, resolver);
         }
 
         /// <summary>
@@ -994,6 +1034,7 @@ namespace Assets.Scripts.Balance
         private static void TakeHeroTurn(
             SimUnit hero,
             List<SimUnit> heroes,
+            List<SimUnit> side,
             List<SimUnit> enemies,
             CombatBuffTracker buffTracker,
             MagicTagTracker tagTracker,
@@ -1004,9 +1045,10 @@ namespace Assets.Scripts.Balance
             TrialResult result,
             bool summonsAllowed,
             Dictionary<SimUnit, int> summonTurnsLeft,
-            out SimSummonSlot replacementCalled)
+            bool allyOut,
+            out SimSummonSlot unitCalled)
         {
-            replacementCalled = null;
+            unitCalled = null;
 
             // Silence disables the Magic command outright in the live game
             // (RoomActionUI.BuildCommandMenu). The enemy side of the same gate lives in
@@ -1037,7 +1079,7 @@ namespace Assets.Scripts.Balance
                     var healSlot = silenced ? null : FindSlot(hero, SpellEffectType.Heal);
                     if (healSlot != null)
                     {
-                        Cast(hero, healSlot, heroes, enemies, buffTracker, tagTracker, comboDetector, resolver, result);
+                        Cast(hero, healSlot, side, enemies, buffTracker, tagTracker, comboDetector, resolver, result);
                         return;
                     }
                 }
@@ -1059,17 +1101,31 @@ namespace Assets.Scripts.Balance
                 {
                     replacement.Charges--;
                     result.Summons++;
-                    replacementCalled = replacement;
+                    unitCalled = replacement;
+                    return;
+                }
+            }
+
+            // An ally (SummonKind.JoinParty) is called whenever this hero has none out: it is a body
+            // on the field for its whole stay, so holding it back buys nothing. The caller builds it.
+            if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null && !allyOut)
+            {
+                var ally = hero.Summons.Find(s => s.CanUse && s.IsAlly);
+                if (ally != null)
+                {
+                    ally.Charges--;
+                    result.Summons++;
+                    unitCalled = ally;
                     return;
                 }
             }
 
             if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null && summonReady)
             {
-                var summon = hero.Summons.Find(s => s.CanUse && !s.IsReplacement);
+                var summon = hero.Summons.Find(s => s.CanUse && s.IsSpecialAttack);
                 if (summon != null)
                 {
-                    Summon(hero, summon, heroes, enemies, buffTracker, resolver, result);
+                    Summon(hero, summon, side, enemies, buffTracker, resolver, result);
                     summonTurnsLeft[hero] = Mathf.Max(1, summon.LongestDuration);
                     return;
                 }
@@ -1080,7 +1136,7 @@ namespace Assets.Scripts.Balance
                 var damageSlot = BestDamageSlot(hero, enemies, buffTracker);
                 if (damageSlot != null)
                 {
-                    Cast(hero, damageSlot, heroes, enemies, buffTracker, tagTracker, comboDetector, resolver, result);
+                    Cast(hero, damageSlot, side, enemies, buffTracker, tagTracker, comboDetector, resolver, result);
                     return;
                 }
             }

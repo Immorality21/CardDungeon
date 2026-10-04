@@ -23,9 +23,16 @@ namespace Assets.Scripts.Cards
         /// </summary>
         public TurnManager Clock { get; set; }
 
+        /// <summary>
+        /// Where the fight keeps ability charges, which a <see cref="SpellEffectType.RestoreCharge"/>
+        /// refills. Set by <c>CombatManager</c> at combat start; null everywhere else - the balance
+        /// model included - where a restore is inert.
+        /// </summary>
+        public IChargeBank Charges { get; set; }
+
         public EffectResolver()
         {
-            _factory = new EffectExecutorFactory(() => Clock);
+            _factory = new EffectExecutorFactory(() => Clock, () => Charges);
         }
 
         /// <param name="powerBonus">Flat power added to the magic's Damage/Heal effects (from its upgrade level).</param>
@@ -52,19 +59,41 @@ namespace Assets.Scripts.Cards
             var result = new EffectResult();
             var targets = DodgeFilter(action, result);
 
-            // Two passes, benefits before costs. A HealthCost authored first would take the caster
-            // down before the buff it paid for was applied, and BuffEffectExecutor skips dead targets
-            // — so the card would silently charge for nothing. Ordering it here rather than
+            // Three passes: benefits, then drains, then costs. A HealthCost authored first would take
+            // the caster down before the buff it paid for was applied, and BuffEffectExecutor skips
+            // dead targets — so the card would silently charge for nothing. A Drain reads the damage
+            // the cast has dealt, so it has to wait for all of it. Ordering it here rather than
             // documenting an authoring rule means the card works however it is written.
             foreach (var effect in action.Magic.Effects)
             {
-                if (effect.UnlockLevel > magicUpgradeLevel || effect.EffectType == SpellEffectType.HealthCost)
+                if (effect.UnlockLevel > magicUpgradeLevel
+                    || effect.EffectType == SpellEffectType.HealthCost
+                    || effect.EffectType == SpellEffectType.Drain)
                 {
                     continue;
                 }
                 var effectToUse = ApplyPowerBonus(effect, powerBonus, powerScale);
                 var executor = _factory.GetExecutor(effectToUse.EffectType);
-                executor.Execute(effectToUse, action.Caster, targets, buffTracker, result);
+                if (executor is ICastAwareEffectExecutor castAware)
+                {
+                    castAware.Execute(effectToUse, action, targets, buffTracker, result);
+                }
+                else
+                {
+                    executor.Execute(effectToUse, action.Caster, targets, buffTracker, result);
+                }
+            }
+
+            foreach (var effect in action.Magic.Effects)
+            {
+                if (effect.UnlockLevel > magicUpgradeLevel || effect.EffectType != SpellEffectType.Drain)
+                {
+                    continue;
+                }
+                // A percentage of what landed: no upgrade bonus (it would read as percentage points)
+                // and no level scale (the damage it reads was already scaled).
+                _factory.GetExecutor(SpellEffectType.Drain)
+                    .Execute(effect, action.Caster, targets, buffTracker, result);
             }
 
             foreach (var effect in action.Magic.Effects)

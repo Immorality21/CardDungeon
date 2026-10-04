@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Enemies;
@@ -56,6 +57,11 @@ namespace Assets.Scripts.Combat
         // Where the hero column stands, kept from Begin so a party-replacing summon can take it.
         private float _heroColumnX;
         private float _centerY;
+
+        // The stage's frame, kept from Begin so a summoned ally can be placed in the vanguard.
+        private float _anchorX;
+        private float _halfW;
+        private float _halfH;
 
         /// <summary>How far above the camera's centre the formation is centred, as a share of the half-height.</summary>
         private const float StageCenterLift = 0.26f;
@@ -145,6 +151,9 @@ namespace Assets.Scripts.Combat
             // Where a party-replacing summon stands: the single column's spot, whatever the party's shape.
             _heroColumnX = anchor.x + halfW * HeroFormation.SingleColumnX;
             _centerY = centerY;
+            _anchorX = anchor.x;
+            _halfW = halfW;
+            _halfH = halfH;
             var heroSlots = new List<Vector3>(heroes.Count);
             foreach (var offset in HeroFormation.Layout(heroes.Count, halfW, halfH))
             {
@@ -265,6 +274,70 @@ namespace Assets.Scripts.Combat
                 sr.sortingOrder = UnitSortOrder + MaxRanks + 1;
                 // Art faces right, toward the enemies.
                 sr.flipX = summon.Summon != null && summon.Summon.Facing == Cards.SummonFacing.Party;
+            }
+        }
+
+        /// <summary>
+        /// Stands the summoned allies (<c>SummonKind.JoinParty</c>) in the vanguard column in front
+        /// of the party (<see cref="HeroFormation.AllyLayout"/>), facing the enemies at a hero's
+        /// size. Re-lays out every ally given, so call it with the whole living set whenever one
+        /// joins or leaves: the ones already standing glide to their new spots, and
+        /// <paramref name="arriving"/> is set down at once - <c>SummonPresenter.Arrive</c> reads its
+        /// spot as where to stride to.
+        /// </summary>
+        public void PlaceAllies(IList<SummonUnit> allies, SummonUnit arriving = null)
+        {
+            if (allies == null)
+            {
+                return;
+            }
+            var slots = HeroFormation.AllyLayout(allies.Count, _halfW, _halfH);
+            for (int i = 0; i < allies.Count; i++)
+            {
+                var ally = allies[i];
+                if (ally == null)
+                {
+                    continue;
+                }
+                var tr = ally.transform;
+                var spot = new Vector3(_anchorX + slots[i].x, _centerY + slots[i].y, -1f);
+                if (ReferenceEquals(ally, arriving))
+                {
+                    tr.position = spot;
+                    tr.localScale = Vector3.one * CombatUnitScale;
+                }
+                else if ((tr.position - spot).sqrMagnitude > 0.0001f)
+                {
+                    StartCoroutine(Glide(tr, spot));
+                }
+                var sr = ally.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    // In front of the hero ranks, so an ally that overlaps a hero's edge reads as nearer.
+                    sr.sortingOrder = UnitSortOrder + MaxRanks + 1;
+                    sr.flipX = ally.Summon != null && ally.Summon.Facing == Cards.SummonFacing.Party;
+                }
+            }
+        }
+
+        private const float AllyGlideTime = 0.3f;
+
+        /// <summary>An ally stepping to its new place in the column, eased so the shuffle reads as a
+        /// step rather than a jump.</summary>
+        private static IEnumerator Glide(Transform tr, Vector3 to)
+        {
+            Vector3 from = tr.position;
+            float t = 0f;
+            while (t < AllyGlideTime && tr != null)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Clamp01(t / AllyGlideTime);
+                tr.position = Vector3.Lerp(from, to, k * k * (3f - 2f * k));
+                yield return null;
+            }
+            if (tr != null)
+            {
+                tr.position = to;
             }
         }
 

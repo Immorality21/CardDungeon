@@ -109,7 +109,7 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
-        /// A party-replacing summon's stat block: each stat of the summoner's, scaled by its
+        /// A unit-building summon's stat block (a party replacement or an ally): each stat of the summoner's, scaled by its
         /// percentage and rounded down, with a health floor of 1. <paramref name="summonerStat"/>
         /// is the summoner's base + gear stat and must <b>not</b> include combat buffs or level
         /// afflictions — the snapshot is what makes the summon one progression to price, with no
@@ -194,7 +194,7 @@ namespace Assets.Scripts.Cards
             {
                 return "";
             }
-            if (summon.Kind == SummonKind.ReplaceParty)
+            if (summon.Kind == SummonKind.ReplaceParty || summon.Kind == SummonKind.JoinParty)
             {
                 return DescribeReplacement(summon, grant);
             }
@@ -213,10 +213,14 @@ namespace Assets.Scripts.Cards
             return string.Join(" · ", parts);
         }
 
-        /// <summary>"Takes the party's place · 250% of the summoner's health · 3 turns · 1 charge per run".</summary>
+        /// <summary>"Takes the party's place · 250% of the summoner's health · 3 turns · 1 charge per run",
+        /// or "Fights beside the party · ..." for an ally.</summary>
         private static string DescribeReplacement(SummonSO summon, SummonGrant grant)
         {
-            var parts = new List<string> { "Takes the party's place" };
+            var parts = new List<string>
+            {
+                summon.Kind == SummonKind.JoinParty ? "Fights beside the party" : "Takes the party's place"
+            };
             int health = PercentFor(summon, grant, StatType.MaxHealth);
             if (health > 0)
             {
@@ -275,6 +279,8 @@ namespace Assets.Scripts.Cards
                 }
                 case SpellEffectType.TurnDelay:
                     return $"delays by {effect.Power}% of a turn";
+                case SpellEffectType.Drain:
+                    return $"drains {effect.Power}% of the damage";
                 case SpellEffectType.Heal:
                     return effect.PowerMode == PowerMode.PercentOfMaxHealth
                         ? $"heals {effect.Power}% of health"

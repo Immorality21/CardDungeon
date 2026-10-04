@@ -395,7 +395,9 @@ namespace Assets.Scripts.Heroes.Editor
                     if (_summonByKey.TryGetValue(node.GrantedSummonKey, out var summon))
                     {
                         name = summon.Label;
-                        kind = summon.Kind == SummonKind.ReplaceParty ? " · party replacement" : " · special attack";
+                        kind = summon.Kind == SummonKind.ReplaceParty ? " · party replacement"
+                            : summon.Kind == SummonKind.JoinParty ? " · fights beside the party"
+                            : " · special attack";
                     }
                     else
                     {

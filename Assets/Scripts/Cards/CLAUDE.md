@@ -61,6 +61,31 @@ simulator's encounter loop. A resolver without one (room events, the sim's share
 resolver) leaves it inert and silent. No caster stat and no upgrade bonus go into it; the inspector
 hides Scaling Stat for it.
 
+## `Drain` and `RestoreCharge`: the Warlock's verbs *(2026-10-04)*
+
+- **`SpellEffectType.Drain`** heals the **caster** `Power`% of the health the cast took — summed off
+  the result's damage entries (`EffectEntry.Landed`, the hit less any overkill: finishing a 2 HP enemy
+  with a 30 damage bolt drains off 2), so it composes with any Damage effect: Drain Life is Damage +
+  Drain 50. A drain that heals nothing (caster at full) floats nothing. `EffectResolver.Execute` runs **three** passes now: benefits, then drains (so a
+  drain reads the whole cast's damage whatever the authoring order), then costs. No upgrade bonus, no
+  caster stat; floor of 1 when anything landed, clamped at max health.
+- **`SpellEffectType.RestoreCharge`** gives `Power` charges back to one of the target's ability
+  slots (Life Tap). Which slot is `SpellcastAction.ChargeSlot` — the player's pick from the picker
+  `MagicSelectionUI.ShowChargeChoice` opens — or `AnyChargeSlot` (-1): the most-spent one. A pick only
+  counts for a single target; a party-wide restore takes each target's most-spent slot and passes
+  quietly over full heroes and anything with no slots (`IChargeBank.Carries`). **`SpellcastAction.CastSlot`
+  is never refilled**, picked or not — its charge is spent after the effects resolve, so refilling it
+  would make the cast free. The executor reads the action through **`ICastAwareEffectExecutor`**, which
+  the resolver prefers when an executor implements it, rather than parking per-cast state on the
+  shared resolver. Charges live
+  behind **`EffectResolver.Charges`** (`IChargeBank`; `EquippedChargeBank` over the run's
+  `EquippedMagicState`, set by `CombatManager` at combat start), the same shape as `Clock`. With no bank
+  it is inert and silent — room events and the balance model. The rules are pure statics on
+  `EquippedMagicState` (`RestoreCharges`, `MostSpentSlot`, `RestorableSlots`). **The picker never
+  offers the slot the cast comes out of** (a Life Tap refilling itself is a free cast) and greys the
+  ability with "nothing spent" when there is nothing to refill, rather than charging its price for
+  nothing. Charges are a run resource that only a refuge restores, so price a restore in health.
+
 ## Resistance buffs
 
 The five resistance `BuffType`s were a **no-op** until 2026-08-25: `ResistanceBuffHandler.Apply` was an empty method, so a cloak showed "+40 FireResistance" and changed nothing. They now go through `CombatBuffTracker.ApplyResistance` / `GetResistanceBonus`.
@@ -169,7 +194,7 @@ level-scoped health pool, and a cure would clear it only until the next room re-
 ## Magic definitions & effects
 
 - **MagicSO** (ScriptableObject, `SO/Magic`): defines a magic with `Key`, `DisplayName`, `Description`, `Icon`, `TargetType` (`MagicTargetType`: Enemy/Ally/Self/AllEnemies/AllAllies), `Rarity` (`MagicRarity`), `Effects` (list of `SpellEffect`), `Tags` (list of `MagicTag`), `TagDuration`. Pure data — no acquisition/slot logic.
-- **SpellEffect**: `EffectType` (`SpellEffectType`: Damage/Heal/Buff/Debuff/**HealthCost**/**TurnDelay**), `Power`, **`PowerMode`**, `ScalingStat`, `DamageType`, `BuffType`, `Duration`, `UnlockLevel`.
+- **SpellEffect**: `EffectType` (`SpellEffectType`: Damage/Heal/Buff/Debuff/**HealthCost**/**TurnDelay**/**Drain**/**RestoreCharge**), `Power`, **`PowerMode`**, `ScalingStat`, `DamageType`, `BuffType`, `Duration`, `UnlockLevel`.
 - **The catalog is 31 magics, and 14 of them exist because a hero needed them.** A spell is only worth a grid node if the hero's stats scale it — `SpellEffect.ScalingStat` — so each new hero came with the spells its stat line could actually use. **Check the scaling stat before putting a spell on a grid**: the retired Scout's Intelligence-scaled `OilSlick` on a hero with INT 4 was a node that bought nothing.
 
   | added for | spells |
@@ -177,7 +202,7 @@ level-scoped health pool, and a cure would clear it only until the next room re-
   | Warrior (2026-09-04) | **Cleave** (STR, AllEnemies, Physical) · **Sunder** (STR, damage + Endurance debuff, Metal) · **Bulwark** (STR, AllAllies Endurance — the mirror of War Cry) |
   | Paladin / Cleric (2026-09-05) | **Smite** (SPR, Holy, single) · **Consecrate** (SPR, Holy, AllEnemies) · **Benediction** (SPR, AllAllies heal) · **HolyTouch** (SPR, SingleAlly heal — the Paladin's free starting signature, so it is deliberately the weakest heal in the game) |
   | Ranger / Rogue | **AimedShot** (AGI, single) · **Volley** (AGI, AllEnemies) · **Snare** (AGI, Agility debuff) · **Backstab** (AGI, damage + Bleeding) · **SmokeBomb** (flat, party Agility) |
-  | Warlock | **Bloodbolt** (INT, Shadow, costs 8% max health) · **Sacrifice** (INT+STR buff for 15% max health) |
+  | Warlock | **Bloodbolt** (INT, Shadow, costs 8% max health) · **Blood Pact** (was Sacrifice: INT+STR on an ally for 15% max health) · **Drain Life** · **Life Tap** · **Siphon Soul** (2026-10-04) |
 
   Several carry combo tags deliberately: Cleave is Physical (Infection) and lays it on the *whole room*, Sunder and Smite are Metal (Conductor). And the holy line is why the Mirefather and the Abyssal Warden are now **weak to Holy** while the Stone Sentinel resists it — a damage type nothing reacts to is arithmetically inert, which `ElementalContentTests` fails on.
 - **MagicCatalog** (singleton): scene-wired `List<MagicSO>` of every magic in the game, keyed by `Key`. Used to resolve saved magic keys when restoring equipped slots, and to list upgradeable magic in the hub Forge. **Edit `_allMagic` on `Assets/Prefabs/MagicCatalog.prefab`, not on the scene instance.** It is a prefab instance in *both* scenes, and overriding the array *size* on an instance grows it with **nulls** — which is how the cloaks first shipped castable in combat but unresolvable from a save and invisible in the Forge. `ElementalContentTests.EveryMagicAsset_IsInTheCatalogPrefab` fails on both mistakes now.
@@ -232,7 +257,7 @@ Two consequences worth holding on to:
 ## Summons (`Cards/Summons/`) — docs/plans/SPECIALIZATION.md §4b
 
 - **`SummonSO`** (`SO/Summon`): key, name, creature `Sprite` + optional `AnimationFrames`, `Kind`
-  (`SpecialAttack` and `ReplaceParty`, both built), `TargetType`,
+  (`SpecialAttack`, `ReplaceParty` and **`JoinParty`**, all built), `TargetType`,
   `Effects` (ordinary `SpellEffect`s), `BaseCharges` and `Facing` — art is drawn facing right (the
   enemies); `Party` mirrors it and turns the lurch toward the heroes, for a summon that buffs or heals
   (the Bloodfang Boar). **`Resources/SummonCatalog.asset`** resolves
@@ -296,6 +321,21 @@ Two consequences worth holding on to:
   | Paladin | C (Heal, Renew) | **Dawn Stag** | special attack | every hero healed 40% of their health, then regenerates 3 a turn for 3 turns |
   | Ranger | A (Poison Dart, Volley) | **Galewing** | special attack | a hawk: 2 hits of the Ranger's Agility on every enemy, then -3 Endurance for 2 turns |
   | Ranger | B (Snare, Hush) | **Exatrix** | replaces the party | a shade, medium: 150% HP, 130% AGI; her Attack is **Rend** (damage + turn delay), Signature **Nightfall** (damage + Agility cut, all) |
+- **The ally kind (`JoinParty`, the Warlock's Imp and Succubus — 2026-10-04).** The same unit as a
+  replacement (`SummonUnit`, `StatPercents`, `TurnsActive`, `AttackAbility`, `Signature`, its own menu),
+  but it fights **beside** the party: `CombatManager._allies`, placed by `CombatStage.PlaceAllies` in a
+  vanguard column in front of the heroes (`HeroFormation.AllyLayout`, at a hero's 1.5 scale — its art
+  is hero-sized, 32 px at PPU 32). It joins `HeroSideUnits()` — enemy planning, AoE, heals, threat —
+  but **not** `HasAliveHeroes`: an ally alone is not a party. **One per summoner**: calling again sends
+  the first home. It arrives with the replacement's animation and acts next (turn 1 of its stay). It
+  leaves (`EndAlly`) when its health or turns run out, on Dismiss, **when its summoner falls**
+  (`HandleHeroDeath` → `EndAlliesOf`), when a `ReplaceParty` summon arrives (a replacement fights
+  alone), and at the end of the fight. A summon ability aimed at `AllAllies` now reaches the whole hero
+  side (`SummonAbilityTargets`). When one leaves, the rest glide to close the column
+  (`PlaceAllies(..., arriving)`). The sim mirrors it in **`Balance/SimAllies`** (pure, tested
+  directly): called whenever its summoner has none out, plays Signature then Attack, enemies pick from
+  heroes + allies, party-wide heals and buffs reach them, and `AfterTurn` runs on **every** turn path —
+  a summoner killed by a start-of-turn tick takes their ally that same turn.
 - **A replacement's own Attack** *(2026-10-01)*: `SummonSO.AttackAbility` (optional, a single-enemy
   `MagicSO`) is what its Attack command does instead of the plain Strength swing. The row still says
   *Attack*, **Silence never closes it** (`ExecuteSummonAbility` exempts it), the sim swings it, and

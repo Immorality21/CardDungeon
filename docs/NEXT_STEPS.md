@@ -101,7 +101,7 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   than one base. The Tank hero, its grid and its sprites are deleted. The player starts with **one**
   hero and unlocks the rest; the party is 4 drawn from the roster. **The roster's size is not
   fixed**: it is seven today (Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue), with an eighth — a new
-  demon-summoning **Cultist** — planned (`plans/SPECIALIZATION.md`, "The Cultist"), but the
+  eldritch-horror-summoning **Cultist** — planned (`plans/SPECIALIZATION.md`, "The Cultist"), but the
   whiteboard's "start with 6" was a *scope* target, and "seven, closed" was a misreading — corrected
   by the owner 2026-10-04. Adding, splitting or pivoting a hero is open.
 - **The grid is where a hero specializes, and specializations are not named** *(2026-09-04, §4c)*.
@@ -197,7 +197,7 @@ backlog.**
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
 | **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **Next, in unlock order: Tinkerer**, then Cleric, Rogue, Warlock; then measure the per-summon frontier. **Blocked on hero visions (2026-10-03):** the Cleric, Warlock, Tinkerer and Rogue have no defined identity yet — their grids borrow catalog spells (the Tinkerer's is an elemental mage). Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
-| — | **The Warlock and the Cultist** → [`plans/WARLOCK_CULTIST.md`](plans/WARLOCK_CULTIST.md) | the old Cultist is the **Warlock** (blood magic + demons); a new **Cultist** (a summoner, of what is open) exists as a bare minimum. Both need the add/replace-a-party-member mechanic first |
+| — | **The Warlock and the Cultist** → [`plans/WARLOCK_CULTIST.md`](plans/WARLOCK_CULTIST.md) | **The Warlock shipped 2026-10-04** (three branches, Imp + Succubus fighting beside the party, Drain Life, Life Tap). Next: the **Cultist** (summons **eldritch horrors**, decided 2026-10-04), the replace-one-hero mechanic for his Sacrifice, the demon army, and the Ultras (§13) |
 | — | **The Mage — an elemental caster** | planned 2026-10-04; takes over the elemental spells when the Tinkerer becomes gadgets; bare-minimum asset + sprite exist (no grid, not on the roster) |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
@@ -251,6 +251,12 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The Warlock rebuilt + allies that join mid-fight** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §7, the
+  Magic guide. `SummonKind.JoinParty` (a summon that fights *beside* the party, one per summoner, in a
+  vanguard column), `SpellEffectType.Drain` and `RestoreCharge` (Life Tap, with a picker). The Warlock:
+  HP 34 (the roster's biggest), a three-branch grid (blood / drain / demons), Imp + Succubus,
+  Sacrifice renamed **Blood Pact**. `WarlockMechanicsTests`; suite green (1,283); checked in the
+  sandbox (`Sandbox/WarlockDemons.asset`).
 - **Spirit defends against magic, Luck dodges** (2026-10-03) — `BALANCING.md` §5z, the Combat guide.
   `DefenseRules`: Intelligence/Spirit-scaled damage is met by Spirit, the rest by Endurance; Luck
   gives a dodge chance against physical hits only (basic attacks and Strength/Agility abilities — a
