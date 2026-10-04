@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Imp
   DisplayName: Imp
-  Description: A cackling scrap of the pit, bound to the Warlock's blood. It fights
-    beside the party, spitting fire.
+  Description: 'A cackling scrap of the pit, bound to the Warlock''s blood. The Demon
+    Army''s rank and file: frail, fast, and full of fire.'
   Sprite: {fileID: 21300000, guid: af051833294a4c03bb7aabe5b57f9f60, type: 3}
   AnimationFrames:
   - {fileID: -1086942912245843823, guid: fb32350fac8446beabaf792e182c4a5c, type: 3}
@@ -34,7 +34,7 @@ MonoBehaviour:
   StatPercents:
     Values:
     - Type: 7
-      Amount: 40
+      Amount: 20
     - Type: 1
       Amount: 50
     - Type: 2
@@ -42,7 +42,7 @@ MonoBehaviour:
     - Type: 3
       Amount: 140
     - Type: 4
-      Amount: 70
+      Amount: 45
     - Type: 5
       Amount: 60
     - Type: 6

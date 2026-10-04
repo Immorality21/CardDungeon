@@ -284,6 +284,9 @@ namespace Assets.Scripts.Balance
             // ends when the party is down, as CombatManager.HasAliveHeroes does.
             var allies = new SimAllies(turnManager, enemies);
 
+            // Ultras (COMBAT_DEPTH §13): every gauge starts the fight empty, read once per turn.
+            var ultras = new SimUltras(heroes);
+
             int turns = 0;
             while (AnyAlive(HeroSide(heroes, replacement)) && AnyAlive(enemies) && turns < settings.MaxTurns)
             {
@@ -314,6 +317,8 @@ namespace Assets.Scripts.Balance
                     turnManager.RemoveUnit(unit);
                     // A summoner killed by a tick takes their ally with them here, not a turn later.
                     allies.AfterTurn(unit);
+                    ultras.Read();
+                    ultras.AfterTurn(unit);
                     continue;
                 }
 
@@ -326,6 +331,8 @@ namespace Assets.Scripts.Balance
                     tagTracker.TickTags(unit);
                     replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
                     allies.AfterTurn(unit);
+                    ultras.Read();
+                    ultras.AfterTurn(unit);
                     continue;
                 }
 
@@ -350,7 +357,7 @@ namespace Assets.Scripts.Balance
                     // Party-wide heals and buffs reach allies, as GetAliveHeroes does in the live fight.
                     TakeHeroTurn(actor, heroes, allies.With(heroes), enemies, buffTracker, tagTracker, comboDetector,
                         resolver, settings, ref potionsLeft, result, summonsAllowed, lastSummonTurn,
-                        allies.HasOut(actor), out var called);
+                        allies.HasOut(actor), ultras, out var called);
                     if (called != null && called.IsAlly)
                     {
                         // A replacement out sends allies home, so one can only be called beside the party.
@@ -393,7 +400,12 @@ namespace Assets.Scripts.Balance
                 }
                 // After the sweep, so a summoner who fell this turn takes their ally with them.
                 allies.AfterTurn(unit);
+                ultras.Read();
+                ultras.AfterTurn(unit);
             }
+
+            // Forms come off with the fight: the party carries its health into the next room.
+            ultras.EndAll();
 
             result.EnemiesAlive = AnyAlive(enemies);
         }
@@ -1091,6 +1103,7 @@ namespace Assets.Scripts.Balance
             bool summonsAllowed,
             Dictionary<SimUnit, int> summonTurnsLeft,
             bool allyOut,
+            SimUltras ultras,
             out SimSummonSlot unitCalled)
         {
             unitCalled = null;
@@ -1127,6 +1140,30 @@ namespace Assets.Scripts.Balance
                         Cast(hero, healSlot, side, enemies, buffTracker, tagTracker, comboDetector, resolver, result);
                         return;
                     }
+                }
+            }
+
+            // Ultra (COMBAT_DEPTH §13): the turn the gauge is full - a comeback move, held for
+            // nothing because the gauge starts every fight empty. Then, while a form lasts, its
+            // ability is free and is the turn. Both are commands, not casts, so Silence leaves the
+            // Ultra open; the form's ability is a cast and Silence closes it.
+            if (settings.Policy != SimPolicy.AttackOnly && ultras != null)
+            {
+                var ready = ultras.Ready(hero);
+                if (ready != null)
+                {
+                    ultras.Use(hero, ready, side, enemies, buffTracker, resolver);
+                    return;
+                }
+                var formAttack = silenced ? null : ultras.FormAttack(hero);
+                var formTarget = formAttack != null ? WeakestAlive(enemies) : null;
+                if (formTarget != null)
+                {
+                    resolver.Execute(new SpellcastAction
+                    {
+                        Magic = formAttack, Caster = hero, Targets = new List<ICombatUnit> { formTarget }
+                    }, buffTracker);
+                    return;
                 }
             }
 

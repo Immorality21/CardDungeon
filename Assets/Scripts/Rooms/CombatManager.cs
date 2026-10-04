@@ -1089,6 +1089,12 @@ namespace Assets.Scripts.Rooms
             }
             _ultraGauge[hero] = 0;
 
+            if (ultra.Kind == UltraKind.Strike)
+            {
+                yield return ExecuteUltraStrike(hero, ultra);
+                yield break;
+            }
+
             int oldMax = hero.GetEffectiveMaxHealth();
             hero.FormMaxHealthPercent = ultra.MaxHealthPercent;
             hero.FormAttackDamageType = ultra.AttackDamageType;
@@ -1107,6 +1113,52 @@ namespace Assets.Scripts.Rooms
             ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(1f, 0.35f, 0.45f), 0.2f);
             _lastTurnLog = $"{hero.DisplayName} unleashes {ultra.Label}!";
             yield return new WaitForSeconds(_turnDelay);
+        }
+
+        /// <summary>
+        /// A Strike Ultra: the big blow lands and it is over. Resolved like a summon's special attack -
+        /// the throwaway castable carries no tags and no Forge bonus - with the hero's own stats.
+        /// </summary>
+        private IEnumerator ExecuteUltraStrike(Hero hero, UltraSO ultra)
+        {
+            var castable = UltraOps.CastableFor(ultra);
+            List<ICombatUnit> targets;
+            switch (ultra.TargetType)
+            {
+                case MagicTargetType.AllEnemies:
+                    targets = GetAliveEnemies();
+                    break;
+                case MagicTargetType.SingleEnemy:
+                    // No target picker on the Ultra list: the weakest enemy standing.
+                    targets = GetAliveEnemies().OrderBy(e => e.Stats.Health).Take(1).ToList();
+                    break;
+                case MagicTargetType.Self:
+                    targets = new List<ICombatUnit> { hero };
+                    break;
+                default:
+                    targets = HeroSideUnits();
+                    break;
+            }
+
+            CombatAudio.Play(CombatSound.BossSignature);
+            CombatFeedback.Instance.Shake(0.25f, 0.4f);
+            ScreenFade.Instance.Flash(new Color(0.55f, 0.1f, 0.25f), 0.45f, 0.05f, 0.35f);
+            ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(1f, 0.35f, 0.45f), 0.2f);
+
+            var action = new SpellcastAction { Magic = castable, Caster = hero, Targets = targets, CastSlot = -1 };
+            var result = _calculator.Execute(action, BuffTracker);
+            _lastTurnLog = $"{hero.DisplayName} unleashes {ultra.Label}!";
+            RecordCastDamageObserved(action, 0);
+            yield return _presenter.Present(result, hero, castable);
+
+            if (_currentCombatRoom != null)
+            {
+                foreach (var dead in _currentCombatRoom.Enemies.Where(e => e != null && !e.IsAlive).ToList())
+                {
+                    _lastTurnLog += $" {dead.DisplayName} defeated!";
+                    HandleEnemyDeath(dead, _currentCombatRoom);
+                }
+            }
         }
 
         /// <summary>One of a transformed hero's turns is over: the form counts it down and comes off

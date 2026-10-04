@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraCatalogSO
   Ultras:
   - {fileID: 11400000, guid: ae30356f4d6cf25459d66c038dccc350, type: 2}
+  - {fileID: 11400000, guid: dd4509da75b39cc4dbb71fec0fe0f9ea, type: 2}
+  - {fileID: 11400000, guid: 7502909fc0f501b4c83273d7ab23adf4, type: 2}

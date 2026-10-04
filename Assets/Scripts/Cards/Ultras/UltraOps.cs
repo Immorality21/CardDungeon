@@ -87,12 +87,49 @@ namespace Assets.Scripts.Cards
             return keys;
         }
 
-        /// <summary>"Becomes a demon for 3 turns · +50% health · Shadow attack · Chaos Bolt".</summary>
-        public static string Describe(UltraSO ultra)
+        private static readonly Dictionary<string, MagicSO> CastableCache = new Dictionary<string, MagicSO>();
+
+        /// <summary>
+        /// The throwaway <see cref="MagicSO"/> a Strike resolves through - the same engine an ability
+        /// uses, with no tags (no combo) and an <c>ultra:</c> key (no Forge bonus). Cached per Ultra,
+        /// since the live fight and the balance model both cast it many times; never saved.
+        /// </summary>
+        public static MagicSO CastableFor(UltraSO ultra)
+        {
+            if (ultra == null)
+            {
+                return null;
+            }
+            string key = "ultra:" + ultra.Key;
+            if (!CastableCache.TryGetValue(key, out var castable) || castable == null)
+            {
+                castable = ScriptableObject.CreateInstance<MagicSO>();
+                castable.hideFlags = HideFlags.DontSave;
+                castable.name = key;
+                castable.Key = key;
+                castable.DisplayName = ultra.Label;
+                castable.Description = ultra.Description;
+                castable.TargetType = ultra.TargetType;
+                castable.Effects = new List<SpellEffect>(ultra.Effects ?? new List<SpellEffect>());
+                castable.Tags = new List<MagicTag>();
+                CastableCache[key] = castable;
+            }
+            return castable;
+        }
+
+        /// <summary>"Transforms for 3 turns · +50% health · Shadow attack · Chaos Bolt", or for a
+        /// Strike its effects: "All enemies: 12 Fire damage · Burning 3/turn". With a
+        /// <paramref name="caster"/> the numbers include their stats, as the ability picker's do.</summary>
+        public static string Describe(UltraSO ultra, Combat.ICombatUnit caster = null)
         {
             if (ultra == null)
             {
                 return "";
+            }
+            if (ultra.Kind == UltraKind.Strike)
+            {
+                var lines = AbilityDescriber.EffectLines(CastableFor(ultra), caster, null);
+                return AbilityDescriber.TargetLabel(ultra.TargetType) + ": " + string.Join(" · ", lines);
             }
             var parts = new List<string> { ultra.Turns == 1 ? "Transforms for 1 turn" : $"Transforms for {ultra.Turns} turns" };
             if (ultra.MaxHealthPercent > 0)

@@ -439,7 +439,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 60, y: -690}
+    Position: {x: 105, y: -605}
     Gains:
       Values: []
     ResistType: 4
@@ -640,7 +640,7 @@ MonoBehaviour:
     GrantedCharges: 2
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
-    SummonAmount: 20
+    SummonAmount: 10
     Neighbors:
     - warlock-c-3
   - Key: warlock-c-tip-a
@@ -686,7 +686,9 @@ MonoBehaviour:
     Kind: 4
     XpCost: 90
     UnlockedByDefault: 0
-    MaterialCosts: []
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
     Position: {x: 95, y: -420}
     Gains:
       Values: []
@@ -734,16 +736,16 @@ MonoBehaviour:
     GrantedCharges: 2
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
-    SummonAmount: 15
+    SummonAmount: 5
     Neighbors:
     - warlock-a-4
   - Key: warlock-b-army
     DisplayName: 
-    Kind: 6
+    Kind: 5
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -65, y: -690}
+    Position: {x: -105, y: -745}
     Gains:
       Values: []
     ResistType: 0
@@ -752,6 +754,42 @@ MonoBehaviour:
     GrantedCharges: 2
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 5
     Neighbors:
     - warlock-b-4
+  - Key: warlock-rain-of-fire
+    DisplayName: 
+    Kind: 10
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -1006, y: -765}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: RainOfFire
+    SummonAmount: 1
+    Neighbors:
+    - warlock-a-tip-a
+  - Key: warlock-soul-harvest
+    DisplayName: 
+    Kind: 10
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 95, y: -960}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: SoulHarvest
+    SummonAmount: 1
+    Neighbors:
+    - warlock-b-6

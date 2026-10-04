@@ -2535,6 +2535,40 @@ Asked for a clean starting point, not a balance pass. Smallest levers only:
   Red Cloister answers to Difficulty weakly (its boss carries flat overrides), which is why floor 3
   went back up rather than floor 4 further down.
 
+## §5aa — The Demon Army against the other replacements (2026-10-04)
+
+The Warlock's one summon is a **squad** (`SummonSO.SquadTiers`), so it does not compare to a
+single-body summon on any one stat. Two measurements were tried; only the second was useful.
+
+- **`MeasureFrontiers` + `BySummon` is blind here.** Every finale's per-summon ask came back
+  *identical* to the baseline ask (the cheapest mix is set by party width), and the Demon Army was
+  absent from the sweep entirely (the Warlock is not in the sweep's roster). Six minutes, no signal.
+- **A solo summoner vs a boss room in the floor sim is blind too**: the outcome is whether that hero
+  can solo the room at all (the Paladin never can, the Ranger always does), and the summon moves it
+  by a few points either way.
+- **What worked: the summon's own budget.** Build each summoner at a node set (`PathTo` the summon,
+  `BeelineThenGreedy` 3,500, whole grid), take `SummonOps.SquadFor` + `StatsFor`, and add up **total
+  HP on the field** and **raw damage over the stay** (signature once per unit, area attacks × 3
+  targets, then Attack each remaining turn). Crude - no defence, no Agility, no utility (Mesmerize's
+  delay counts for nothing) - but it compares like with like in seconds.
+
+| | reached at | HP (reach / mid / full) | stay damage (reach / mid / full) |
+|---|---|---|---|
+| Cairn Golem | 2,020 | 155 / 175 / 210 | 60 / 80 / 123 |
+| Judgement Seraph | 2,020 | 42 / 56 / 97 | 213 / 213 / 294 |
+| Exatrix | 2,020 | 64 / 64 / 99 | 146 / 226 / 294 |
+| Demon Army **before** | **250** | 54 / – / **360** | 180 / – / **472** |
+| Demon Army **after** | 250 + Void Shard | 27 / 120 / 200 | 120 / 300 / 210 |
+
+Two things worth keeping:
+
+- **A squad multiplies every per-troop number by the troop count**, and an **area signature** by the
+  target count as well - four Imps each opening with an INT-scaled AoE was the whole mid-grid spike.
+  A squad troop's signature should be **flat**, so the count is the only multiplier.
+- **Upgrade nodes stack across the squad.** A `SummonPower` node is HP points on *every* troop, so a
+  +20 on a four-troop squad is worth four times a +20 on the Golem. Price squad power nodes at a
+  quarter of a single summon's.
+
 ## §5z — Spirit defends against magic, Luck dodges (2026-10-03)
 
 A mechanics change, not a tuning pass; the owner's call after a stat review (no stat was missing, two

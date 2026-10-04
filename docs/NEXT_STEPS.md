@@ -252,6 +252,11 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Warlock round 3** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §1d–§1e, `BALANCING.md` §5aa. The
+  Demon Army balanced against the other replacements (Void Shard price, weaker troops, flat Hellfire,
+  stay capped at 4); Ultras in the balance sim (`SimUltras`); a second Ultra kind, `Strike`, and two
+  first-draft Demonology Ultras (Rain of Fire, Soul Harvest); Demon Form sprite redone; Void Shard
+  supply vs the Blood Stair checked. Suite green (1,304).
 - **The Demon Army + the Ultra gauge + Demon Form** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §1c, the
   Magic guide, `COMBAT_DEPTH.md` §13. Squad summons (`SummonSO.SquadTiers`, `SummonSize` /
   `SummonPromote` nodes); the Warlock's one summon is the Demon Army (3 Imps → 4, promoted to

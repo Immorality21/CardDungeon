@@ -100,8 +100,43 @@ The owner's calls: **the Warlock has one summon, the Demon Army, and every branc
   **Shadow**; **Chaos Bolt** (INT + 8 Shadow, free, appended after his real ability slots); the demon
   sprite (`warlock-demon-idle.png`). Ends early if he falls, and at the end of the fight. **Unlock:**
   `warlock-demon-form` on the trunk, 90 xp + **3 Void Shards** (the deep guardians' material).
-- **Not modelled by the balance sim**: Ultras (the gauge needs a policy) — the frontier does not
-  price Demon Form yet. Materials are not priced there either, as before.
+- **The balance sim models Ultras** since later on 2026-10-04 (`SimUltras`: use the first Ultra
+  the turn the gauge fills; Chaos Bolt every turn of a form). Materials are still not priced there.
+
+### 1d. The round after (2026-10-04, owner away - "implement all other points")
+
+- **Two more Demonology Ultras, first drafts (Claude's - review them):** a new kind **`Strike`**
+  (one big blow, effects on a target type). **Rain of Fire** (all enemies, INT + 6 Fire, Burning 3 a
+  turn for 3) on `warlock-rain-of-fire` off the A tip that teaches Cinderstorm; **Soul Harvest** (all
+  enemies, INT + 4 Shadow, drains 50%) on `warlock-soul-harvest` off Siphon Soul. The vision's Ultras
+  list is the owner's and was **not** edited; its Open Questions were trimmed to what is still open.
+- **Demon Form sprite, second pass** - real bat wings, lighter face and highlights so it reads on the
+  combat background; same GUID and slices.
+- **Void Shards vs the Blood Stair** - checked: shards drop 1-3 per kill from the campaign's bosses
+  (the Blood Stair's own Abyssal Warden and Cinder Tyrant included) and from Ossuary Gate / Red
+  Cloister caches, so by the time the Warlock is freed at the bottom of the Blood Stair shards exist.
+  Demon Form (3) + the army's two shard nodes = 2-3 boss kills. Left as is.
+- **Balance pass** - see §1e.
+- **Felguards / bigger troops** - deferred by the owner (the grid has no room). **Decided
+  2026-10-04: when they come, they are material-gated** - a late node with a deep-material price, so
+  a third troop tier cannot arrive early and spike the army. Note for whoever builds it:
+  `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier only appears once every
+  troop is a Succubus; a Felguard node should either add promotions on top of that or be a
+  dedicated "promote one troop to the top tier" kind.
+
+### 1e. Demon Army balance pass (2026-10-04) - see `docs/BALANCING.md` §5aa
+
+Measured against the other party-replacing summons (the Golem, the Seraph, Exatrix), each built off
+its summoner's stats at three points: just reached, ~3,400 xp beelined, whole grid. Before: the army
+was as strong as the others at **250 xp** (theirs at 2,020) and at full grid brought **360 HP and
+~470 damage** against 97-210 HP and ~120-294. Changed: the army node costs **1 Void Shard** (as every
+other summon node does); **Imp** health 40 → 20%, Intelligence 70 → 45%; **Succubus** health 70 →
+40%, Strength 200 → 160%; **Hellfire** flat 8 Fire + Burn 2 for 2 (was INT-scaled - four Imps casting
+an INT-scaled area attack was the mid-grid spike); the drain branch's army node +1 turn → **+5 HP%**
+(the stay now maxes at 4, like the others); demon-branch power 20 → **10**, blood-branch 15 → **5**.
+After: just reached 3 Imps / 27 HP / ~120 dmg; mid 4 Imps / 120 HP / ~300 dmg (30% above the next
+summon on damage, on four fragile bodies - accepted, it is his one signature summon); full grid
+2 Succubi + 2 Imps / 200 HP / ~210 dmg. Suite green (1,304).
 
 **Still open from this file:** Felguards and bigger troops, more Warlock Ultras, Ultras for the other
 heroes, pricing Ultras in the balance model, the replace-one-hero mechanic (the Cultist's Sacrifice), the Cultist himself, and the

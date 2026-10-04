@@ -364,8 +364,14 @@ Two consequences worth holding on to:
   (`MagicSlot.Unlimited`, "∞" — an index past the hero's slots, so `TryCast` spends nothing), and its
   `FormFrames` on the hero. It ends early when the hero falls and at the end of the fight. Ultra
   abilities are like summon abilities — never on a grid or in `MagicCatalog`
-  (`UltraOps.AbilityKeys`, excluded by the content tests and the balance collector). **The balance
-  sim does not model Ultras yet.**
+  (`UltraOps.AbilityKeys`, excluded by the content tests and the balance collector).
+  **A second kind, `Strike`** (2026-10-04): `Effects` on `TargetType`, resolved once through a
+  cached tagless `ultra:`-keyed castable (`UltraOps.CastableFor`) - a summon's special attack in
+  Ultra form. The Ultra list has no target picker, so a single-enemy Strike hits the weakest enemy.
+  The Warlock's **Rain of Fire** and **Soul Harvest** are Strikes. **The balance sim models Ultras**
+  (`Balance/SimUltras`, same `UltraOps` rules): policy = use the first Ultra the turn the gauge is
+  full; while transformed, cast the form's damaging ability every turn; forms come off between
+  rooms.
 - **A replacement's own Attack** *(2026-10-01)*: `SummonSO.AttackAbility` (optional, a single-enemy
   `MagicSO`) is what its Attack command does instead of the plain Strength swing. The row still says
   *Attack*, **Silence never closes it** (`ExecuteSummonAbility` exempts it), the sim swings it, and

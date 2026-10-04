@@ -510,9 +510,11 @@ namespace Assets.Scripts.Cards.UI
                 }
                 var captured = ultra;
                 Sprite icon = ultra.FormFrames != null && ultra.FormFrames.Length > 0 ? ultra.FormFrames[0] : null;
+                // With the hero as the caster, so a Strike's numbers include their stats.
+                string what = UltraOps.Describe(ultra, hero);
                 string description = string.IsNullOrEmpty(ultra.Description)
-                    ? UltraOps.Describe(ultra)
-                    : ultra.Description.Trim() + "\n" + UltraOps.Describe(ultra);
+                    ? what
+                    : ultra.Description.Trim() + "\n" + what;
                 _listScroll.Add(CreateRow(icon, ultra.Label, "Ready", true, () => SubmitUltra(captured), description));
             }
 

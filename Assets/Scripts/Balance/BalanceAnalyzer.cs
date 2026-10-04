@@ -807,6 +807,17 @@ namespace Assets.Scripts.Balance
                         MaxCharges = max
                     });
                 }
+
+                // ...and Ultras (COMBAT_DEPTH §13), resolved through the Resources catalog as the game does.
+                hero.Unit.Ultras.Clear();
+                foreach (var key in SphereGridOps.UltrasForNodes(grid, hero.ActivatedNodes))
+                {
+                    var ultra = UltraCatalogSO.Resolve(key);
+                    if (ultra != null)
+                    {
+                        hero.Unit.Ultras.Add(ultra);
+                    }
+                }
             }
         }
 

@@ -9,34 +9,34 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
-  m_Name: ImpHellfire
-  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
-  Key: ImpHellfire
-  DisplayName: Hellfire
-  Description: The imp empties itself over the room. Four of them at once is a lot
-    of fire.
-  Icon: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 42952da8f06ee0b43b5f4b74ce4865ae, type: 3}
+  m_Name: RainOfFire
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
+  Key: RainOfFire
+  DisplayName: Rain of Fire
+  Description: The sky opens on the Warlock's word and the room burns.
+  Kind: 1
   TargetType: 1
-  Rarity: 0
   Effects:
   - EffectType: 0
-    Power: 8
-    PowerMode: 1
-    ScalingStat: 0
+    Power: 6
+    PowerMode: 0
+    ScalingStat: 4
     DamageType: 1
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
   - EffectType: 3
-    Power: 2
+    Power: 3
     PowerMode: 0
     ScalingStat: 0
     DamageType: 0
     BuffType: 15
-    Duration: 2
+    Duration: 3
     UnlockLevel: 0
-  Tags: 
-  TagDuration: 3
-  ThreatMultiplier: 1
-  BonusThreat: 0
+  Turns: 3
+  MaxHealthPercent: 50
+  AttackDamageType: 0
+  Abilities: []
+  FormFrames: []
+  FormFps: 4

@@ -51,12 +51,12 @@ MonoBehaviour:
         multiple demons)
     Overlaps: Tinkerer is the other Intelligence caster - to settle once the Tinkerer
       is redefined.
-    OpenQuestions: 'Health is his mana, so he should have the biggest health pool
-      in the roster with low Endurance/Spirit (today: 20 HP, the lowest). Drain life
-      needs a new effect type (damage that heals the caster). The existing Sacrifice
-      ability (party buff, 15% health) needs a new name. Grid is to be redone completely.
-      Ultras still to design. The sacrifice-a-party-member Ultra moved to the future
-      Cultist (2026-10-04).'
+    OpenQuestions: 'Felguards and bigger troops for the Demon Army - deferred until
+      the grid has room, and material-gated when they come (no early spike). Rain
+      of Fire and Soul Harvest are first-draft Demonology Ultras (Claude, 2026-10-04)
+      - keep, change or replace? Balance: every Warlock number is a first draft (see
+      docs/plans/WARLOCK_CULTIST.md). The sacrifice-a-party-member Ultra moved to
+      the Cultist (2026-10-04).'
   Sprite: {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
   AnimationFrames:
   - {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}

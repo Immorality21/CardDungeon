@@ -169,6 +169,9 @@ namespace Assets.Scripts.Balance
         public List<SimMagicSlot> MagicSlots = new List<SimMagicSlot>();
         public List<SimSummonSlot> Summons = new List<SimSummonSlot>();
 
+        /// <summary>The Ultras this hero's grid teaches (COMBAT_DEPTH §13), used by <see cref="SimUltras"/>.</summary>
+        public List<UltraSO> Ultras = new List<UltraSO>();
+
         // ---- Enemy-side (mirrors the per-fight state CombatManager keeps on Enemy) ----
         public EnemySO Definition;
         public EnemyArchetype Archetype = EnemyArchetype.Aggressor;
@@ -218,6 +221,7 @@ namespace Assets.Scripts.Balance
             {
                 clone.Summons.Add(summon.Clone());
             }
+            clone.Ultras.AddRange(Ultras);
 
             return clone;
         }

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.UnitStats;
 using NUnit.Framework;
@@ -177,6 +179,102 @@ namespace Tests.EditMode
             var catalog = prefab.GetComponent<MagicCatalog>();
             var listed = catalog.AllMagic.Where(m => m != null && keys.Contains(m.Key)).Select(m => m.Key).ToList();
             Assert.IsEmpty(listed, "The hero magic catalog lists an Ultra's ability: " + string.Join(", ", listed));
+        }
+        // --- the balance model's Ultras (SimUltras) ---------------------------------------------
+
+        private static UltraSO DemonForm()
+        {
+            var ultra = ScriptableObject.CreateInstance<UltraSO>();
+            ultra.Key = "TestForm";
+            ultra.Kind = UltraKind.Transform;
+            ultra.Turns = 2;
+            ultra.MaxHealthPercent = 50;
+            ultra.AttackDamageType = DamageType.Shadow;
+            ultra.Abilities = new List<MagicSO>();
+            return ultra;
+        }
+
+        private static SimUnit SimHero(int health, UltraSO ultra)
+        {
+            var hero = new SimUnit
+            {
+                DisplayName = "warlock",
+                IsHero = true,
+                Stats = TestStats.Make(5, 0, health, 10),
+                Effective = TestStats.Block(5, 0, health, 10),
+                AttackStat = StatType.Strength,
+                EffectiveAttackPower = 5
+            };
+            hero.Ultras.Add(ultra);
+            return hero;
+        }
+
+        [Test]
+        public void SimUltras_FillOnLoss_TransformKeepsTheShare_AndComesOff()
+        {
+            var form = DemonForm();
+            var hero = SimHero(100, form);
+            var ultras = new SimUltras(new[] { hero });
+
+            hero.Stats.Health = 40;          // lost 60 of 100: the fill share
+            ultras.Read();
+            Assert.AreSame(form, ultras.Ready(hero));
+
+            ultras.Use(hero, form, new List<SimUnit> { hero }, new List<SimUnit>(), new CombatBuffTracker(), new EffectResolver());
+            Assert.AreEqual(0, ultras.Gauge(hero));
+            Assert.AreEqual(150, hero.GetEffectiveStat(StatType.MaxHealth));
+            Assert.AreEqual(60, hero.Stats.Health, "40% of the bar before, 40% after.");
+            Assert.AreEqual(DamageType.Shadow, hero.AttackDamageType);
+            ultras.Read();
+            Assert.AreEqual(0, ultras.Gauge(hero), "A bigger bar is not damage taken.");
+
+            ultras.AfterTurn(hero);          // the turn it was taken on does not count
+            ultras.AfterTurn(hero);
+            Assert.IsTrue(ultras.IsTransformed(hero));
+            ultras.AfterTurn(hero);          // the second of its two turns
+            Assert.IsFalse(ultras.IsTransformed(hero));
+            Assert.AreEqual(100, hero.GetEffectiveStat(StatType.MaxHealth));
+            Assert.AreEqual(40, hero.Stats.Health);
+            Assert.AreEqual(DamageType.Normal, hero.AttackDamageType);
+        }
+
+        [Test]
+        public void SimUltras_EndAll_TakesTheFormOffBetweenRooms()
+        {
+            var form = DemonForm();
+            var hero = SimHero(100, form);
+            var ultras = new SimUltras(new[] { hero });
+            ultras.Use(hero, form, new List<SimUnit> { hero }, new List<SimUnit>(), new CombatBuffTracker(), new EffectResolver());
+
+            ultras.EndAll();
+
+            Assert.AreEqual(100, hero.GetEffectiveStat(StatType.MaxHealth));
+            Assert.AreEqual(100, hero.Stats.Health);
+        }
+
+        [Test]
+        public void Strike_LandsOnEveryEnemy_ThroughTheResolver()
+        {
+            var strike = ScriptableObject.CreateInstance<UltraSO>();
+            strike.Key = "TestStrike";
+            strike.Kind = UltraKind.Strike;
+            strike.TargetType = MagicTargetType.AllEnemies;
+            strike.Effects = new List<SpellEffect>
+            {
+                new SpellEffect { EffectType = SpellEffectType.Damage, Power = 10, PowerMode = PowerMode.Flat }
+            };
+            var hero = SimHero(100, strike);
+            var enemies = new List<SimUnit>
+            {
+                new SimUnit { DisplayName = "a", Stats = TestStats.Make(1, 0, 50, 5), Effective = TestStats.Block(1, 0, 50, 5) },
+                new SimUnit { DisplayName = "b", Stats = TestStats.Make(1, 0, 50, 5), Effective = TestStats.Block(1, 0, 50, 5) }
+            };
+            var ultras = new SimUltras(new[] { hero });
+
+            ultras.Use(hero, strike, new List<SimUnit> { hero }, enemies, new CombatBuffTracker(), new EffectResolver());
+
+            Assert.That(enemies.All(e => e.Stats.Health < 50), "Both enemies were hit.");
+            StringAssert.StartsWith("All enemies:", UltraOps.Describe(strike));
         }
     }
 }

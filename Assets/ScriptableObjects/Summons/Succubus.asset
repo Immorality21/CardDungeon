@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Succubus
   DisplayName: Succubus
-  Description: A demoness of the deep circles answers the Warlock's call, and fights
-    beside the party with whip and glamour.
+  Description: A demoness of the deep circles, an Imp the Warlock's bargains have
+    raised. She holds the line with whip and glamour.
   Sprite: {fileID: 21300000, guid: 58b68432a9144ab99cc214454e92c47c, type: 3}
   AnimationFrames:
   - {fileID: -1170223534432093050, guid: 71dc192fa3f7412798e47b06aec267db, type: 3}
@@ -34,9 +34,9 @@ MonoBehaviour:
   StatPercents:
     Values:
     - Type: 7
-      Amount: 70
+      Amount: 40
     - Type: 1
-      Amount: 200
+      Amount: 160
     - Type: 2
       Amount: 100
     - Type: 3
