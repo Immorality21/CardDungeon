@@ -8,7 +8,7 @@ The systems layer is deeper than the *verbs* sitting on it. §9 shipped; §10 is
 
 > The systems layer is markedly deeper than the *verbs* sitting on it. §9–§13 are the gap, roughly
 > in value order. They are independent of each other but they compound: DoT gives a defensive
-> build something to survive, threat gives the party a reason to protect the caster, and a Limit
+> build something to survive, threat gives the party a reason to protect the caster, and an Ultra
 > gauge gives a losable fight a comeback.
 
 ### 9. Status effects — ✅ over-time, Silence and the cure shipped 2026-09-03
@@ -229,7 +229,7 @@ Touch points: `Assets/Scripts/Enemies/Behaviors/EnemyActionEntry.cs` (the enum +
 `EnemyActionPlanner.cs`, `Assets/Scripts/Enemies/Editor/EnemyBehaviorSOEditor.cs` (draws per-kind
 fields), `Assets/Scripts/Balance/` (`EnemyBehaviorModel`, `BalanceMath`).
 
-### 13. Hero identity — a Limit gauge
+### 13. Hero identity — the Ultra gauge
 
 > **The "unique command" half of this section was deleted 2026-09-08 — it was asking for machinery
 > that already exists.** A command *is* an ability: Provoke, Steal, Focus, a gadget, a self-damaging
@@ -249,13 +249,20 @@ playing before assuming it.
 
 What is left here is one addition:
 
-- **A Limit / Overdrive gauge** that fills on damage taken and unlocks a big one-shot. Two reasons
+- **An Ultra gauge** (working name, 2026-10-04 — chosen to stay clear of FF's Limit Break / Overdrive) that fills on damage taken and unlocks a big one-shot. Two reasons
   beyond flavour: it is a **comeback mechanic**, which is what makes §0g's "the player is supposed to
   die" feel like a near miss rather than a wall; and it is a second **burst** axis alongside §4b's
   summons, so a boss can be tuned against burst without the sphere grid being the only source of it.
 
-Note the interaction with §4b: a summon at a branch tip and a Limit on every hero are both "big
-button you save for the boss". Decide whether they coexist (Limit is universal and small, summons are
+**The Ultra *style* is per hero** *(2026-10-04)* — like FFX's Overdrives (Swordplay, Mix, Slots): the kind
+of special attack is a large part of a hero's identity, e.g. a Tinkerer who combines two consumables.
+**A hero can have several Ultras, and they are not tied to a grid branch** — a style shared by all of
+them, then individual Ultras each with its own unlock (from the start, any grid node, a run, a boss).
+Each hero's ideas are collected in `HeroSO.Vision.UltraStyle` / `Vision.Ultras` (`Tools ▸ Heroes ▸
+Hero Vision`); read those before designing the gauge.
+
+Note the interaction with §4b: a summon at a branch tip and an Ultra on every hero are both "big
+button you save for the boss". Decide whether they coexist (Ultra is universal and small, summons are
 earned and large) or whether one replaces the other — **before** building either, because
 `InvestmentFrontier` has to price whichever exists.
 

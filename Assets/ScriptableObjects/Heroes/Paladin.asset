@@ -11,30 +11,43 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
   m_Name: Paladin
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Paladin
   Label: Paladin
   Blurb: Armoured, patient, and certain. Holds a line, or breaks one, or mends it.
   Vision:
-    Fantasy: "An armoured believer. Holy power in service of the line: holds it, breaks it, or mends it."
-    Role: "Front line with holy damage and healing. Attacks with Strength; heals scale off Spirit."
-    SignatureMechanic: 
+    Fantasy: 'An armoured believer. Holy power in service of the line: holds it,
+      breaks it, or mends it.'
+    Role: Front line with holy damage and healing. Attacks with Strength; heals scale
+      off Spirit.
+    SignatureMechanic: Some way of granting temporary invulnerability later on?
+    UltraStyle: Divine aid
+    Ultras:
+    - Name: Divine Intervention
+      Effect: Prime yourself and prevent the next physical (non magical) damage dealt
+        from hitting the target, taking it instead at an extra 50% damage reduction.
+        Afterwards retaliate with holy damage.
+      Unlock: Tank branch early.
     Branches:
     - GridBranch: a
-      Becomes: "A front-liner who protects by drawing the enemy's attention."
-      IntendedKit: "Shield Up -> Ward"
-      Summon: "Aegis Lion - special attack: +50% own Endurance for 3 turns and +60 threat (a taunt)."
+      Becomes: A front-liner who protects by drawing the enemy's attention.
+      IntendedKit: Shield Up -> Ward
+      Summon: 'Aegis Lion - special attack: +50% own Endurance for 3 turns and +60
+        threat (a taunt).'
     - GridBranch: b
-      Becomes: "A holy damage dealer."
-      IntendedKit: "Sunder -> Consecrate"
-      Summon: "Judgement Seraph - party replacement, a hitter: 120% HP / 180% STR, Radiant Cut and Judgement (Holy)."
+      Becomes: A holy damage dealer.
+      IntendedKit: Sunder -> Consecrate
+      Summon: 'Judgement Seraph - party replacement, a hitter: 120% HP / 180% STR,
+        Radiant Cut and Judgement (Holy).'
     - GridBranch: c
-      Becomes: "A healer."
-      IntendedKit: "Heal -> Renew"
-      Summon: "Dawn Stag - special attack: heals 40% of each hero's health, then regeneration for 3 turns."
-    Overlaps: "Warrior (front-liner, damage) and Cleric (healer). Three branches against their two: broader, never the best at any one."
-    OpenQuestions: "What does a Paladin do that the Warrior and the Cleric cannot? Holy damage only so far."
-  RecruitCost: 0
+      Becomes: A healer.
+      IntendedKit: Heal -> Renew
+      Summon: 'Dawn Stag - special attack: heals 40% of each hero''s health, then
+        regeneration for 3 turns.'
+    Overlaps: 'Warrior (front-liner, damage) and Cleric (healer). Three branches
+      against their two: broader, never the best at any one.'
+    OpenQuestions: What does a Paladin do that the Warrior and the Cleric cannot?
+      Holy damage only so far.
   Sprite: {fileID: -4830569828500545, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}
   AnimationFrames:
   - {fileID: -4830569828500545, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}

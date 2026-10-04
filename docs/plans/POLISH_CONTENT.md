@@ -283,7 +283,7 @@ Open questions, roughly in the order they bite:
 - **A step must warn about the fork after The Threshold** *(requested 2026-09-28)*. Clearing the
   tutorial opens several runs on the campaign map at once, and they are **not** all meant to be
   cleared in that order. At least one of them (the Blood Stair, a hand-drawn gauntlet with the
-  Cultist as its captive) is borderline impossible for a fresh party, on purpose: it shows early on
+  Warlock as its captive) is borderline impossible for a fresh party, on purpose: it shows early on
   that there are big challenges ahead, and that a strong enough combination of heroes can already
   get surprisingly far. The step goes on the campaign map the first time it offers a choice. It
   should say roughly *"You can choose your own path now — but beware: some roads are far beyond

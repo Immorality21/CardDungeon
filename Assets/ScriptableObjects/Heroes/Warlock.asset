@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
+  m_Name: Warlock
+  m_EditorClassIdentifier: 
+  Key: Warlock
+  Label: Warlock
+  Blurb: Has found that the shortest route to power runs straight through himself.
+  Vision:
+    Fantasy: "Dark-caster type of hero. Somewhat evil, and looks for opportunities
+      to gain power at the cost of others.\t"
+    Role: Blood-magic caster. can sacrifice HP to cast, should have a kit that allows
+      draining health from enemies and spending his own health for certain skills.
+      He is best played mixing branches together.
+    SignatureMechanic: 'Blood magic: pays with his own health for stronger attacks.
+      Does not need to be exclusive to him.'
+    UltraStyle: Demonology
+    Ultras:
+    - Name: Demon Form
+      Effect: Transform the Warlock into a powerful demon, with signature attacks.
+        Health/maxhealth increases by X%, but current health stays the same relatively
+        (so if warlock had 50% total health before transform he will also have it
+        after, and viceversa when transforming back, attack becomes a melee attack
+        that deals shadow damage. Has s special Chaos bolt (similar artwork to blood
+        bolt, but deals shadow damage). Lasts 3 turns
+      Unlock: It is on the Trunk, but requires a special material that is only found
+        later in the game
+    Branches:
+    - GridBranch: a
+      Becomes: Blood magic user, sacrifice health for damage.
+      IntendedKit: Blood bolt => Life Tap (health for an ability charge, WoW-style)
+        => ?
+      Summon: '?'
+    - GridBranch: b
+      Becomes: Self-heal focussed
+      IntendedKit: Drain life => ?
+      Summon: '?'
+    - GridBranch: c
+      Becomes: Demon summoner
+      IntendedKit: Summon imp => Summon succubus => Summon ??
+      Summon: Summon demon army (replacemenet summon, but instead of 1 it summons
+        multiple demons)
+    Overlaps: Tinkerer is the other Intelligence caster - to settle once the Tinkerer
+      is redefined.
+    OpenQuestions: 'Health is his mana, so he should have the biggest health pool
+      in the roster with low Endurance/Spirit (today: 20 HP, the lowest). Drain life
+      needs a new effect type (damage that heals the caster). The existing Sacrifice
+      ability (party buff, 15% health) needs a new name. Grid is to be redone completely.
+      Ultras still to design. The sacrifice-a-party-member Ultra moved to the future
+      Cultist (2026-10-04).'
+  Sprite: {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  AnimationFrames:
+  - {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  - {fileID: -6369361678509686, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  - {fileID: -5271396423488739, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  AnimationFps: 4
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 5
+    - Type: 2
+      Amount: 5
+    - Type: 3
+      Amount: 5
+    - Type: 4
+      Amount: 11
+    - Type: 5
+      Amount: 4
+    - Type: 6
+      Amount: 7
+    - Type: 7
+      Amount: 20
+  AttackStat: 4
+  SphereGrid: {fileID: 11400000, guid: cba493db680944de88c95fa4395e04e9, type: 2}

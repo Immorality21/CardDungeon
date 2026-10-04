@@ -145,7 +145,7 @@ The seven base heroes (§5b) and the kind of destination each should be able to 
 | **Paladin** | **3** | a front-liner built differently to the Warrior's — a damage dealer — a healer |
 | **Cleric** | ? | a dedicated healer — or a holy fighter who trades throughput for sustain |
 | **Ranger** | ? | tempo and single-target precision — or control and traps |
-| **Cultist** | ? | *to be worked* — the obvious pull is self-damage-for-power (§9's `HealthCost` exists) |
+| **Warlock** | ? | blood magic: pays health for stronger attacks, drains it back (was the Cultist until 2026-10-04) |
 | **Tinkerer** | ? | *to be worked* — the obvious pull is items, gadgets and summons |
 | **Rogue** | ? | *to be worked* — the obvious pull is burst, evasion and Steal (§13) |
 
@@ -321,7 +321,7 @@ candidate for.
    pass — a hero gate must never be able to lock a save out of every run, which is easier to violate
    with heroes than with runs because a hero can sit behind an *optional* branch.
 4. **Where unlocks come from.** *(Done 2026-09-30.)* Rescue: the Paladin in the tutorial, the
-   Ranger in The Reedcage, the **Cultist** on the last floor of **The Blood Stair** *(2026-09-28)* -
+   Ranger in The Reedcage, the **Warlock** (then the Cultist) on the last floor of **The Blood Stair** *(2026-09-28)* -
    the first hero priced as a *challenge*. The last three were authored as genuinely different
    sources, as this bullet asked:
 
@@ -332,7 +332,7 @@ candidate for.
    | **Cleric** | **a secret node** (a captive in it) | **The Drowned Chapel**, new, off the Drowned March | the first **hero-keyed** node: it gates on the Tinkerer, the first gate whose answer is a *specific* thing |
 
    The roster now arrives Warrior → Paladin (tutorial) → Ranger + Tinkerer (Drowned March) → Cleric
-   (secret) / Rogue (chance) / Cultist (challenge). Still open: a **boss** as a source, and whether a
+   (secret) / Rogue (chance) / Warlock (challenge). Still open: a **boss** as a source, and whether a
    *second* hero-keyed gate should name a hero met by chance - it cannot today, by rule.
 
    **Two rules the shipped code imposes on where you put them.** A captive is skipped if already
@@ -347,7 +347,7 @@ candidate for.
 
 #### The seven
 
-**Warrior, Paladin, Cleric, Ranger, Cultist, Tinkerer, Rogue** — party of 4 drawn from them, all
+**Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue** — party of 4 drawn from them, all
 unlocked through progression, the starter free. **Tank is not on this list**: it was a destination
 mistaken for a hero on the whiteboard, and §4c resolves it into an unnamed branch end reachable
 from both the Warrior and the Paladin.
@@ -358,6 +358,48 @@ the Scout are retired along with their grids. That leaves **six heroes to author
 Paladin, Cleric, Ranger, Cultist, Tinkerer, Rogue — each a `HeroSO` + a grid + art + an unlock
 source. The Paladin in particular is *not* the Tank rebadged: it is a three-branch hero (§4c) whose
 defensive end is one of three.
+
+**Seven is the current roster, not a cap** *(owner, 2026-10-04)* — a hero can be added, split or
+pivoted. The first case, 2026-10-04: the **Cultist was renamed the Warlock** (his blood-magic kit is
+a warlock's), and a **new Cultist** is planned as an eighth hero — see below.
+
+#### The Cultist — a new summoning hero *(planned 2026-10-04)*
+
+> **Superseded by [`WARLOCK_CULTIST.md`](WARLOCK_CULTIST.md)**, the working file for both heroes. The
+> owner later moved the demons back to the **Warlock**; the Cultist is a summoner of something not yet
+> decided. The text below is what was written first.
+
+What moved here from the old Cultist's vision when he became the Warlock:
+
+- **A demon summoner.** The demon branch should be a bit stronger on its own than a normal branch, to
+  justify committing to it (owner).
+- **Summon Imp** — an ability that **adds a party member** mid-fight: a demon fighting beside the party.
+- **Ultra style "Rituals"**, and the first Ultra: **sacrifice a party member**, who is replaced by a
+  demon scaled off their stats, always at full health — best used on a hero about to fall. Open: what
+  happens to the sacrificed hero (dead for the fight? revivable? back when the demon leaves?), how long
+  the demon stays, and whether he can sacrifice himself.
+
+**Prerequisite: adding and replacing party members**, which does not exist — today's summons either
+land one effect or replace the *whole* party. The owner wants it built first, and it starts with a
+screen-fit check: combat is laid out for four heroes, so where does a fifth unit go at 1280x720?
+
+**Exists as a bare minimum** *(2026-10-04)*: `Heroes/Cultist.asset` — key, blurb, placeholder stats,
+the vision above, and a PixelLab sprite (`Sprites/Animation/cultist-idle.png`, bone mask under a
+horned red hood, green demon flame). **No grid, not on `PartyRoster`, no unlock source** — it is in
+the game's data and the Hero Vision window only. The old Cultist's art moved with him as
+`warlock-idle.png` (its slices still carry `cultist-idle_*` names).
+
+#### The Mage — an elemental caster *(planned 2026-10-04)*
+
+The owner's call: once the Tinkerer is redefined (gadgets, not an elemental mage), **no hero teaches
+the elemental spells**, and `ElementalContentTests.EveryMagicInTheCatalog_IsTaughtBySomeSphereGrid`
+would fail. The Mage inherits them: Lightning Bolt, Ice Shard, Water Splash, Fireball, and possibly
+the Storm/Fire/Frost Cloaks (open: those may stay with the Tinkerer as field kit). Move the spells
+in the same change that re-authors the Tinkerer's grid, or the test goes red.
+
+Same bare minimum as the Cultist: `Heroes/Mage.asset` (working name), placeholder stats (INT 12),
+a PixelLab sprite (`mage-idle.png`, blue hat, fire orb, crystal staff), a stub vision — no grid, not
+on the roster, no unlock source.
 
 **"Start with 6" was a scope target, not a starting roster** *(clarified 2026-09-04)*. It means
 *build six or seven heroes*. **The player starts with one** and unlocks every other through

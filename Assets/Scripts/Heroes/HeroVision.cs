@@ -34,6 +34,15 @@ namespace Assets.Scripts.Heroes
         [TextArea(2, 6)]
         public string SignatureMechanic;
 
+        [Tooltip("The theme every Ultra of this hero shares — what the Ultra gauge unlocks for them. " +
+                 "Like FFX's Overdrives, the style is per hero and is part of their identity. A working " +
+                 "name. Not built yet - docs/plans/COMBAT_DEPTH.md §13.")]
+        [TextArea(2, 6)]
+        public string UltraStyle;
+
+        [Tooltip("The Ultras this hero can have. Several per hero, and not tied to a grid branch.")]
+        public List<UltraVision> Ultras = new List<UltraVision>();
+
         [Tooltip("One entry per grid branch: what committing to it makes of the hero.")]
         public List<BranchVision> Branches = new List<BranchVision>();
 
@@ -45,6 +54,23 @@ namespace Assets.Scripts.Heroes
         [Tooltip("Scratchpad: undecided questions about this hero.")]
         [TextArea(2, 8)]
         public string OpenQuestions;
+    }
+
+    /// <summary>One Ultra a hero can have, as intended. See <see cref="HeroVision.Ultras"/>.</summary>
+    [Serializable]
+    public class UltraVision
+    {
+        [Tooltip("Working name of this Ultra.")]
+        public string Name;
+
+        [Tooltip("What it does when the gauge is spent on it.")]
+        [TextArea(2, 6)]
+        public string Effect;
+
+        [Tooltip("How the hero gets it: known from the start, a grid node (any branch), a run, a boss... " +
+                 "Ultras are deliberately not tied to a branch.")]
+        [TextArea(1, 4)]
+        public string Unlock;
     }
 
     /// <summary>One branch of a hero's grid, as intended. See <see cref="HeroVision"/>.</summary>

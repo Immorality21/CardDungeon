@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 94899f063264494d8a3b0281963bdcca
+guid: ff471b3be2e44c929e7c2002d67e925c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1450838193074190
-    second: cultist-idle_0
+      213: -3489762990729566
+    second: mage-idle_0
   - first:
-      213: -2548749006624582
-    second: cultist-idle_1
+      213: -5963465782880156
+    second: mage-idle_1
   - first:
-      213: -1350191870919165
-    second: cultist-idle_2
+      213: -4682416728303873
+    second: mage-idle_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -93,7 +93,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cultist-idle_0
+      name: mage-idle_0
       rect:
         serializedVersion: 2
         x: 0
@@ -108,14 +108,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: dfbc247aa106453994aef31c035abdc5
-      internalID: -1450838193074190
+      spriteID: 419c3a95a7f34afcb12db05ea7b0d9ba
+      internalID: -3489762990729566
       vertices: []
       indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cultist-idle_1
+      name: mage-idle_1
       rect:
         serializedVersion: 2
         x: 32
@@ -130,14 +130,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7ca14c0500194719812b332f0ce73fb1
-      internalID: -2548749006624582
+      spriteID: 528864070363436287a7c78a8f1873a7
+      internalID: -5963465782880156
       vertices: []
       indices:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cultist-idle_2
+      name: mage-idle_2
       rect:
         serializedVersion: 2
         x: 64
@@ -152,8 +152,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f91d9083a71144e49aa39a4cafae00e3
-      internalID: -1350191870919165
+      spriteID: c1ac3fe58931462b9d406fb6b46933a1
+      internalID: -4682416728303873
       vertices: []
       indices:
       edges: []
@@ -172,9 +172,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cultist-idle_0: -1450838193074190
-      cultist-idle_1: -2548749006624582
-      cultist-idle_2: -1350191870919165
+      mage-idle_0: -3489762990729566
+      mage-idle_1: -5963465782880156
+      mage-idle_2: -4682416728303873
   mipmapLimitGroupName:
   pSDRemoveMatte: 0
   userData:

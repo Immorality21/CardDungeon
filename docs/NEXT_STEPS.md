@@ -45,7 +45,7 @@ Three threads are live:
    `CampaignNodeEntry.RequiresHeroes` makes a hero a key the campaign can gate on. **All seven have
    an unlock source since 2026-09-30**: the Tinkerer joins on clearing the Drowned March, the Rogue is
    a room-event gamble in The Warrens, and the Cleric is the captive of a new secret run, **The Drowned
-   Chapel**, the first node keyed on a hero. The **Cultist** is the captive at the bottom of **The
+   Chapel**, the first node keyed on a hero. The **Warlock** (the Cultist until 2026-10-04) is the captive at the bottom of **The
    Blood Stair** *(2026-09-28)*, a challenge run meant for late parties (`RunDefinitionSO.Challenge`).
 2. **Balance / losability** (§0–§0g) — making the campaign losable and gating depth behind
    investment. The gate ladder exists and the frontier is measured per floor. Mature; mostly
@@ -97,11 +97,13 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
 - **Draw is scrapped; magic comes from the sphere grid** *(2026-09-04, §9b)*. The middle option §9b
   itself recommended — the grid grants an authored kit, Draw survives for opportunistic extras — was
   considered and **rejected**. Do not reintroduce Draw as a top-up, a steal, or a charge refill.
-- **The roster is seven base heroes** *(2026-09-04, §5b)*: **Warrior, Paladin, Cleric, Ranger,
-  Cultist, Tinkerer, Rogue.** Party of 4 drawn from them. **Tank is not a hero** — it is a place a
-  grid can end up, reachable from more than one base. The Tank hero, its grid and its sprites are
-  deleted. *(The whiteboard's "start with 6" was a **scope** target — build six or seven — not a
-  starting roster: the player starts with **one** and unlocks the rest.)*
+- **Tank is not a hero** *(2026-09-04, §5b)* — it is a place a grid can end up, reachable from more
+  than one base. The Tank hero, its grid and its sprites are deleted. The player starts with **one**
+  hero and unlocks the rest; the party is 4 drawn from the roster. **The roster's size is not
+  fixed**: it is seven today (Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue), with an eighth — a new
+  demon-summoning **Cultist** — planned (`plans/SPECIALIZATION.md`, "The Cultist"), but the
+  whiteboard's "start with 6" was a *scope* target, and "seven, closed" was a misreading — corrected
+  by the owner 2026-10-04. Adding, splitting or pivoting a hero is open.
 - **The grid is where a hero specializes, and specializations are not named** *(2026-09-04, §4c)*.
   A branch is a destination described by what it grants, not a label the game prints: health +
   Endurance + a shield spell *is* a tank, and the game never says the word. Do not add
@@ -193,8 +195,10 @@ backlog.**
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **done** — shipped 2026-09-06; **every hero has a source since 2026-09-30** (run clear, room event, secret run) |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **Next, in unlock order: Tinkerer**, then Cleric, Rogue, Cultist; then measure the per-summon frontier. **Blocked on hero visions (2026-10-03):** the Cleric, Cultist, Tinkerer and Rogue have no defined identity yet — their grids borrow catalog spells (the Tinkerer's is an elemental mage). Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
+| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **Next, in unlock order: Tinkerer**, then Cleric, Rogue, Warlock; then measure the per-summon frontier. **Blocked on hero visions (2026-10-03):** the Cleric, Warlock, Tinkerer and Rogue have no defined identity yet — their grids borrow catalog spells (the Tinkerer's is an elemental mage). Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
+| — | **The Warlock and the Cultist** → [`plans/WARLOCK_CULTIST.md`](plans/WARLOCK_CULTIST.md) | the old Cultist is the **Warlock** (blood magic + demons); a new **Cultist** (a summoner, of what is open) exists as a bare minimum. Both need the add/replace-a-party-member mechanic first |
+| — | **The Mage — an elemental caster** | planned 2026-10-04; takes over the elemental spells when the Tinkerer becomes gadgets; bare-minimum asset + sprite exist (no grid, not on the roster) |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
 
@@ -203,7 +207,7 @@ backlog.**
 | **9** | Status effects — over-time, Silence, the cure loop | ✅ shipped 2026-09-03; follow-ups open |
 | **11** | Threat — a reason for a defensive build | ✅ threat shipped 2026-09-28; balance model + threat UI open |
 | **12** | Enemy action vocabulary — the four missing verbs | not started |
-| **13** | Hero identity — a Limit gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the Limit gauge is what is left |
+| **13** | Hero identity — the Ultra gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the **Ultra** gauge (working name for a Limit/Overdrive, 2026-10-04) is what is left; per-hero styles collected in Hero Vision |
 
 ### [The hub becomes a place](plans/HUB.md)
 

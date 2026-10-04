@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
-  m_Name: CultistGrid
+  m_Name: WarlockGrid
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
-  StartNodeKey: cultist-sig
+  StartNodeKey: warlock-sig
   Nodes:
-  - Key: cultist-start
+  - Key: warlock-start
     DisplayName: 
     Kind: 0
     XpCost: 30
@@ -30,8 +30,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-trunk-1
-  - Key: cultist-trunk-1
+    - warlock-trunk-1
+  - Key: warlock-trunk-1
     DisplayName: 
     Kind: 0
     XpCost: 20
@@ -47,8 +47,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-sig
-  - Key: cultist-sig
+    - warlock-sig
+  - Key: warlock-sig
     DisplayName: 
     Kind: 3
     XpCost: 0
@@ -62,7 +62,7 @@ MonoBehaviour:
     GrantedMagicKey: Bloodbolt
     GrantedCharges: 2
     Neighbors: []
-  - Key: cultist-trunk-2
+  - Key: warlock-trunk-2
     DisplayName: 
     Kind: 0
     XpCost: 45
@@ -80,8 +80,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-start
-  - Key: cultist-trunk-slot
+    - warlock-start
+  - Key: warlock-trunk-slot
     DisplayName: 
     Kind: 2
     XpCost: 65
@@ -95,8 +95,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-trunk-2
-  - Key: cultist-a-1
+    - warlock-trunk-2
+  - Key: warlock-a-1
     DisplayName: 
     Kind: 0
     XpCost: 65
@@ -112,8 +112,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-trunk-2
-  - Key: cultist-a-2
+    - warlock-trunk-2
+  - Key: warlock-a-2
     DisplayName: 
     Kind: 0
     XpCost: 90
@@ -129,8 +129,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-a-1
-  - Key: cultist-a-3
+    - warlock-a-1
+  - Key: warlock-a-3
     DisplayName: 
     Kind: 3
     XpCost: 120
@@ -144,8 +144,8 @@ MonoBehaviour:
     GrantedMagicKey: Sacrifice
     GrantedCharges: 2
     Neighbors:
-    - cultist-a-2
-  - Key: cultist-a-4
+    - warlock-a-2
+  - Key: warlock-a-4
     DisplayName: 
     Kind: 0
     XpCost: 155
@@ -161,8 +161,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-a-3
-  - Key: cultist-a-5
+    - warlock-a-3
+  - Key: warlock-a-5
     DisplayName: 
     Kind: 2
     XpCost: 195
@@ -176,8 +176,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-a-4
-  - Key: cultist-a-6
+    - warlock-a-4
+  - Key: warlock-a-6
     DisplayName: 
     Kind: 3
     XpCost: 245
@@ -191,8 +191,8 @@ MonoBehaviour:
     GrantedMagicKey: Cinderstorm
     GrantedCharges: 2
     Neighbors:
-    - cultist-a-5
-  - Key: cultist-a-7
+    - warlock-a-5
+  - Key: warlock-a-7
     DisplayName: 
     Kind: 0
     XpCost: 295
@@ -208,8 +208,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-a-6
-  - Key: cultist-a-res
+    - warlock-a-6
+  - Key: warlock-a-res
     DisplayName: 
     Kind: 1
     XpCost: 155
@@ -223,8 +223,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-a-3
-  - Key: cultist-a-tip-a
+    - warlock-a-3
+  - Key: warlock-a-tip-a
     DisplayName: 
     Kind: 0
     XpCost: 350
@@ -240,8 +240,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-a-7
-  - Key: cultist-a-tip-b
+    - warlock-a-7
+  - Key: warlock-a-tip-b
     DisplayName: 
     Kind: 0
     XpCost: 350
@@ -257,8 +257,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-a-7
-  - Key: cultist-b-1
+    - warlock-a-7
+  - Key: warlock-b-1
     DisplayName: 
     Kind: 0
     XpCost: 65
@@ -274,8 +274,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-trunk-2
-  - Key: cultist-b-2
+    - warlock-trunk-2
+  - Key: warlock-b-2
     DisplayName: 
     Kind: 0
     XpCost: 90
@@ -291,8 +291,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-b-1
-  - Key: cultist-b-3
+    - warlock-b-1
+  - Key: warlock-b-3
     DisplayName: 
     Kind: 3
     XpCost: 120
@@ -306,8 +306,8 @@ MonoBehaviour:
     GrantedMagicKey: OilSlick
     GrantedCharges: 2
     Neighbors:
-    - cultist-b-2
-  - Key: cultist-b-4
+    - warlock-b-2
+  - Key: warlock-b-4
     DisplayName: 
     Kind: 0
     XpCost: 155
@@ -323,8 +323,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-b-3
-  - Key: cultist-b-5
+    - warlock-b-3
+  - Key: warlock-b-5
     DisplayName: 
     Kind: 2
     XpCost: 195
@@ -338,8 +338,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-b-4
-  - Key: cultist-b-6
+    - warlock-b-4
+  - Key: warlock-b-6
     DisplayName: 
     Kind: 3
     XpCost: 245
@@ -353,8 +353,8 @@ MonoBehaviour:
     GrantedMagicKey: Hush
     GrantedCharges: 2
     Neighbors:
-    - cultist-b-5
-  - Key: cultist-b-7
+    - warlock-b-5
+  - Key: warlock-b-7
     DisplayName: 
     Kind: 0
     XpCost: 295
@@ -370,8 +370,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-b-6
-  - Key: cultist-b-res
+    - warlock-b-6
+  - Key: warlock-b-res
     DisplayName: 
     Kind: 1
     XpCost: 155
@@ -385,8 +385,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-b-3
-  - Key: cultist-b-tip-a
+    - warlock-b-3
+  - Key: warlock-b-tip-a
     DisplayName: 
     Kind: 0
     XpCost: 350
@@ -402,8 +402,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-b-7
-  - Key: cultist-b-tip-b
+    - warlock-b-7
+  - Key: warlock-b-tip-b
     DisplayName: 
     Kind: 0
     XpCost: 350
@@ -419,4 +419,4 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     Neighbors:
-    - cultist-b-7
+    - warlock-b-7

@@ -1,15 +1,15 @@
 fileFormatVersion: 2
-guid: 94899f063264494d8a3b0281963bdcca
+guid: 385e32a42ff240a4ac5e53b41c5ec3df
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1450838193074190
+      213: -1295332705813320
     second: cultist-idle_0
   - first:
-      213: -2548749006624582
+      213: -6369361678509686
     second: cultist-idle_1
   - first:
-      213: -1350191870919165
+      213: -5271396423488739
     second: cultist-idle_2
   externalObjects: {}
   serializedVersion: 13
@@ -108,8 +108,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: dfbc247aa106453994aef31c035abdc5
-      internalID: -1450838193074190
+      spriteID: 5a1fc4cfa49a4e150800000000000000
+      internalID: -1295332705813320
       vertices: []
       indices:
       edges: []
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7ca14c0500194719812b332f0ce73fb1
-      internalID: -2548749006624582
+      spriteID: 3553402ca6714fd20800000000000000
+      internalID: -6369361678509686
       vertices: []
       indices:
       edges: []
@@ -152,8 +152,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f91d9083a71144e49aa39a4cafae00e3
-      internalID: -1350191870919165
+      spriteID: 1af51ba091d441e30800000000000000
+      internalID: -5271396423488739
       vertices: []
       indices:
       edges: []
@@ -172,9 +172,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cultist-idle_0: -1450838193074190
-      cultist-idle_1: -2548749006624582
-      cultist-idle_2: -1350191870919165
+      cultist-idle_0: -1295332705813320
+      cultist-idle_1: -6369361678509686
+      cultist-idle_2: -5271396423488739
   mipmapLimitGroupName:
   pSDRemoveMatte: 0
   userData:

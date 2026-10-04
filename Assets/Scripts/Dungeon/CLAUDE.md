@@ -30,7 +30,7 @@ against the strongest end state at the deepest tier (see the Balance guide). Flo
 2026-09-28: the two-hero tutorial graduate clears floor 1 95% of the time and wipes on floor 2 every
 time; the Ashen Deep party walks all five. Every floor is a `ManualLevelLayoutSO`
 (`Runs/BloodStair/BloodStair_1..5`) with guaranteed spawns and pinned caches/refuges, so it plays the
-same every time. The **Cultist** is chained in floor 5's antechamber — the only room there a captive
+same every time. The **Warlock** (the Cultist until 2026-10-04) is chained in floor 5's antechamber — the only room there a captive
 can take, one door from the altar — and like every rescue he is kept only if the floor is cleared,
 which on the final floor means killing the Tyrant. `CampaignAssetTests.Campaign_EveryChallengeRunIsOptional`
 keeps challenge runs off the main line.
@@ -157,7 +157,7 @@ the intended behaviour, not a bug to design around.
 - **The party that enters is the party the player picked.** `DungeonManager.FieldedHeroes()` returns `PartySaveData.SelectedHeroKeys` resolved through `HeroRoster` and clamped to `MetaProgressManager.GetPartyCap()` — not every hero owned. It feeds `Party.Initialize` on both the fresh and the resumed path, and `BestRosterStats()` (the room-event stat gates), so a benched hero's Intelligence cannot open a tome they are not there to read. Falls back to the inline `_heroDefinitions` when no `PartyRosterSO` is wired, which is what keeps free-play in the scene working.
 - **Where heroes come from** *(2026-09-30)* - three sources, and `HeroUnlockTests.EveryHeroInTheRoster_HasAWayIn`
   fails the build if a roster hero has none:
-  - **a captive** - `RunLevelEntry.RescueHero` (Paladin, Ranger, Cultist, Cleric), below;
+  - **a captive** - `RunLevelEntry.RescueHero` (Paladin, Ranger, Warlock, Cleric), below;
   - **a run's clear** - `RunDefinitionSO.JoinsOnClear` (the **Tinkerer**, Drowned March). Granted by
     `DungeonManager.GrantRunClearHero` on the final level, before `Party.CommitProgress`, so it rides
     the clear's own write and cannot be forfeited. Counted as guaranteed by

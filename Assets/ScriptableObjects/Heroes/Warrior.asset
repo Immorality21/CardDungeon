@@ -21,6 +21,15 @@ MonoBehaviour:
     Role: Front line. Attack and abilities scale off Strength. Takes the hits or
       deals them - the grid decides which.
     SignatureMechanic: 
+    UltraStyle: Rage
+    Ultras:
+    - Name: Flurry
+      Effect: Multiple slashes to random enemies
+      Unlock: Damage branch
+    - Name: Take Cover
+      Effect: 'Brace for impact, reducing damage for the whole team by 30% for 1
+        turn. '
+      Unlock: Tank branch
     Branches:
     - GridBranch: a
       Becomes: 'A heavy front-liner: stacks health, Endurance and resistances, and

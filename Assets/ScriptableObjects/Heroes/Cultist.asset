@@ -11,32 +11,56 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
   m_Name: Cultist
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.HeroSO
   Key: Cultist
   Label: Cultist
-  Blurb: Has found that the shortest route to power runs straight through himself.
-  RecruitCost: 0
-  Sprite: {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  Blurb: Speaks to things that should not answer. They answer.
+  Vision:
+    Fantasy: A demon summoner. Planned 2026-10-04 when the old Cultist became the
+      Warlock; this is what moved over.
+    Role: 'Summoner - brings demons onto the field to fight beside the party. Placeholder:
+      Intelligence caster.'
+    SignatureMechanic: Adding party members mid-fight (demons). Needs the add/replace-a-party-member
+      mechanic, which does not exist yet.
+    UltraStyle: Rituals
+    Ultras:
+    - Name: Sacrifice
+      Effect: Sacrifice a target party member, replacing him/her with a demon (demon
+        scaled off of the sacrificed party member's stats). Always summoned with
+        full health, so a good idea to use when a party member is about to die.
+      Unlock: In the demon summoner branch
+    Branches:
+    - GridBranch: a
+      Becomes: A ?? summoner - a bit stronger on its own than a normal branch, to
+        justify committing to it.
+      IntendedKit: Summon ?? => ?
+      Summon: '?'
+    Overlaps: 
+    OpenQuestions: 'Bare minimum: no grid, not on the party roster, no unlock source
+      - it exists only in this window. What happens to a sacrificed hero (dead for
+      the fight? revivable? back when the demon leaves)? How long does a demon stay?
+      Can he sacrifice himself? Other branches? Stats are placeholders.'
+  Sprite: {fileID: -1450838193074190, guid: 94899f063264494d8a3b0281963bdcca, type: 3}
   AnimationFrames:
-  - {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
-  - {fileID: -6369361678509686, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
-  - {fileID: -5271396423488739, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
+  - {fileID: -1450838193074190, guid: 94899f063264494d8a3b0281963bdcca, type: 3}
+  - {fileID: -2548749006624582, guid: 94899f063264494d8a3b0281963bdcca, type: 3}
+  - {fileID: -1350191870919165, guid: 94899f063264494d8a3b0281963bdcca, type: 3}
   AnimationFps: 4
   BaseStats:
     Values:
     - Type: 1
-      Amount: 5
+      Amount: 3
     - Type: 2
       Amount: 5
     - Type: 3
       Amount: 5
     - Type: 4
-      Amount: 11
+      Amount: 9
     - Type: 5
-      Amount: 4
+      Amount: 8
     - Type: 6
-      Amount: 7
+      Amount: 5
     - Type: 7
-      Amount: 20
+      Amount: 22
   AttackStat: 4
-  SphereGrid: {fileID: 11400000, guid: cba493db680944de88c95fa4395e04e9, type: 2}
+  SphereGrid: {fileID: 0}

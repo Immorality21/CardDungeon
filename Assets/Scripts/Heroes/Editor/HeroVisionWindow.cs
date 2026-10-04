@@ -158,7 +158,7 @@ namespace Assets.Scripts.Heroes.Editor
             var vision = hero.Vision ?? new HeroVision();
             var fields = new[]
             {
-                hero.Blurb, vision.Fantasy, vision.Role, vision.SignatureMechanic,
+                hero.Blurb, vision.Fantasy, vision.Role, vision.SignatureMechanic, vision.UltraStyle,
                 vision.Overlaps
             };
             total = fields.Length + 1;
@@ -201,6 +201,8 @@ namespace Assets.Scripts.Heroes.Editor
             vision.Add(Field("Vision.Fantasy"));
             vision.Add(Field("Vision.Role"));
             vision.Add(Field("Vision.SignatureMechanic"));
+            vision.Add(Field("Vision.UltraStyle"));
+            vision.Add(Field("Vision.Ultras"));
             vision.Add(Field("Vision.Branches"));
             vision.Add(Field("Vision.Overlaps"));
             vision.Add(Field("Vision.OpenQuestions"));

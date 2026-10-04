@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
+  m_Name: Mage
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.HeroSO
+  Key: Mage
+  Label: Mage
+  Blurb: Commands fire, frost and storm, and is rarely careful about which.
+  Vision:
+    Fantasy: 'An elemental mage. Added 2026-10-04: once the Tinkerer is redefined
+      as gadgets, nobody else teaches the elemental spells.'
+    Role: Intelligence caster dealing elemental damage (fire, ice, lightning) and
+      exploiting weaknesses.
+    SignatureMechanic: 
+    UltraStyle: 
+    Ultras: []
+    Branches: []
+    Overlaps: 
+    OpenQuestions: 'Bare minimum: no grid, not on the party roster, no unlock source.
+      Inherits the elemental spells the Tinkerer''s grid teaches today: Lightning
+      Bolt, Ice Shard, Water Splash, Fireball - and the Storm/Fire/Frost Cloaks (or
+      do those stay with the Tinkerer as field kit?). Working name ''Mage''. Stats
+      are placeholders.'
+  Sprite: {fileID: -3489762990729566, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
+  AnimationFrames:
+  - {fileID: -3489762990729566, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
+  - {fileID: -5963465782880156, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
+  - {fileID: -4682416728303873, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
+  AnimationFps: 4
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 3
+    - Type: 2
+      Amount: 4
+    - Type: 3
+      Amount: 6
+    - Type: 4
+      Amount: 12
+    - Type: 5
+      Amount: 5
+    - Type: 6
+      Amount: 5
+    - Type: 7
+      Amount: 20
+  AttackStat: 4
+  SphereGrid: {fileID: 0}
