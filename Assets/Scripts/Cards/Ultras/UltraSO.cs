@@ -15,7 +15,22 @@ namespace Assets.Scripts.Cards
         /// <summary>One big blow and it is over: <see cref="UltraSO.Effects"/> land on
         /// <see cref="UltraSO.TargetType"/>, resolved like a summon's special attack (no Forge bonus,
         /// no tags, no combo). The Warlock's Rain of Fire and Soul Harvest.</summary>
-        Strike = 1
+        Strike = 1,
+
+        /// <summary>The Cultist's rite: a living ally - himself included - falls for the rest of the
+        /// floor, and <see cref="UltraSO.Creature"/> rises in their place, built off <b>their</b> stats,
+        /// at full health, for the rest of the fight. Its Attack is picked by the fallen hero's highest
+        /// stat (<see cref="UltraSO.StatAbilities"/>).</summary>
+        Sacrifice = 2
+    }
+
+    /// <summary>Sacrifice: the Attack a horror rises with when <see cref="Stat"/> is the sacrificed
+    /// hero's highest.</summary>
+    [System.Serializable]
+    public class UltraStatAbility
+    {
+        public Assets.Scripts.UnitStats.StatType Stat;
+        public MagicSO Ability;
     }
 
     /// <summary>
@@ -46,6 +61,16 @@ namespace Assets.Scripts.Cards
 
         [Tooltip("Strike: what lands, scaled off the hero's stats like an ability's effects.")]
         public List<SpellEffect> Effects = new List<SpellEffect>();
+
+        [Header("Sacrifice")]
+        [Tooltip("Sacrifice: the creature that rises. Its StatPercents read the SACRIFICED hero's stats " +
+                 "(base + gear), so every stat they had carries over; it arrives at full health and stays " +
+                 "until it falls or the fight ends.")]
+        public SummonSO Creature;
+
+        [Tooltip("Sacrifice: its Attack by the sacrificed hero's highest stat - a Warrior makes something " +
+                 "that tears, a Cleric something that whispers. Ties go to the first listed.")]
+        public List<UltraStatAbility> StatAbilities = new List<UltraStatAbility>();
 
         [Header("Transform")]
         [Tooltip("How many of the hero's own turns the form lasts, not counting the turn it is taken on.")]

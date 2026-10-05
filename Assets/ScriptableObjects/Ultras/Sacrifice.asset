@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42952da8f06ee0b43b5f4b74ce4865ae, type: 3}
+  m_Name: Sacrifice
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
+  Key: Sacrifice
+  DisplayName: Sacrifice
+  Description: The Cultist gives an ally to what he serves. What comes back is still
+    on your side - mostly.
+  Kind: 2
+  TargetType: 3
+  Effects: []
+  Creature: {fileID: 11400000, guid: f8ead745a8f8f3344a1fd9d1ffe6e507, type: 2}
+  StatAbilities:
+  - Stat: 1
+    Ability: {fileID: 11400000, guid: 8da4030883507c34ba4680b3a49072c6, type: 2}
+  - Stat: 2
+    Ability: {fileID: 11400000, guid: c652bba7e3c325a45b82714aaabf4e2f, type: 2}
+  - Stat: 3
+    Ability: {fileID: 11400000, guid: 0c80b0868ae25914e9d3cfee9e79ffc0, type: 2}
+  - Stat: 4
+    Ability: {fileID: 11400000, guid: 9282a07e2b749984c929e70e4564a2f9, type: 2}
+  - Stat: 5
+    Ability: {fileID: 11400000, guid: 3a150496f83b86940a4a46f885946aa7, type: 2}
+  - Stat: 6
+    Ability: {fileID: 11400000, guid: fe18e38c77ab69c41bd0d080d438adc4, type: 2}
+  Turns: 3
+  MaxHealthPercent: 50
+  AttackDamageType: 0
+  Abilities: []
+  FormFrames: []
+  FormFps: 4

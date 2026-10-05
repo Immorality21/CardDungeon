@@ -25,6 +25,23 @@ namespace Assets.Scripts.Combat
         public Hero Summoner { get; private set; }
         public SummonStay Stay { get; private set; }
 
+        /// <summary>
+        /// A Sacrifice horror (<c>UltraKind.Sacrifice</c>): it stands in a fallen hero's place rather
+        /// than fighting for a summoner, so it does not leave when <see cref="Summoner"/> (the hero it
+        /// was made from) is down, counts toward the party standing, and stays for the fight.
+        /// </summary>
+        public bool IsSacrifice { get; set; }
+
+        /// <summary>This unit's Attack: its own (a horror's is picked per sacrifice), else the summon's.</summary>
+        public MagicSO AttackAbility => _attackOverride != null ? _attackOverride : (Summon != null ? Summon.AttackAbility : null);
+
+        private MagicSO _attackOverride;
+
+        public void OverrideAttack(MagicSO ability)
+        {
+            _attackOverride = ability;
+        }
+
         private Stats _stats;
         private List<Resistance> _resistances = new List<Resistance>();
 

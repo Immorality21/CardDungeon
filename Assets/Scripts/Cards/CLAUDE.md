@@ -372,6 +372,16 @@ Two consequences worth holding on to:
   (`Balance/SimUltras`, same `UltraOps` rules): policy = use the first Ultra the turn the gauge is
   full; while transformed, cast the form's damaging ability every turn; forms come off between
   rooms.
+  **A third kind, `Sacrifice`** (the Cultist): the Ultra takes a target (`UltraOps.NeedsTarget` - the
+  list opens a "Sacrifice whom?" picker, `CombatManager.SacrificeTargets`, never offering the last
+  hero standing). The hero falls for the floor and `UltraSO.Creature` rises in their spot, built off
+  *their* stats (`SummonUnit.Create(creature, null, victim, ...)`), its Attack picked from
+  `UltraSO.StatAbilities` by their highest stat (`UltraOps.PickStatAbility`, held on the unit via
+  `SummonUnit.OverrideAttack` / `AttackAbility`). `SummonUnit.IsSacrifice` marks it: not bound to a
+  summoner, not re-laid-out with the ally column, Skip instead of Dismiss, and it steps out *with* the
+  party when a replacement summon arrives (`CombatStage.HideUnits`). The defeat check stays
+  heroes-only. Sim: `SimAllies.ArriveHorror`, policy in `SimUltras.SacrificeVictim`. See
+  `docs/plans/WARLOCK_CULTIST.md` §1f.
 - **A replacement's own Attack** *(2026-10-01)*: `SummonSO.AttackAbility` (optional, a single-enemy
   `MagicSO`) is what its Attack command does instead of the plain Strength swing. The row still says
   *Attack*, **Silence never closes it** (`ExecuteSummonAbility` exempts it), the sim swings it, and

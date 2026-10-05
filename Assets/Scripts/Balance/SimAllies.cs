@@ -11,6 +11,13 @@ namespace Assets.Scripts.Balance
         public SimUnit Unit;
         public SummonStay Stay;
         public SimUnit Summoner;
+
+        /// <summary>A Sacrifice horror: stands in its fallen hero's place, so it is not bound to them
+        /// and stays for the fight.</summary>
+        public bool Unbound;
+
+        /// <summary>Its own Attack when it has one (a horror's, picked by its hero's highest stat).</summary>
+        public MagicSO Attack;
     }
 
     /// <summary>
@@ -71,6 +78,26 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
+        /// A Sacrifice horror rises in <paramref name="victim"/>'s place (<c>UltraKind.Sacrifice</c>):
+        /// built off the victim's stats, its Attack picked by their highest stat, unbound, for the rest
+        /// of the fight. The victim is already down; the caller took them off the clock.
+        /// </summary>
+        public SimAlly ArriveHorror(SimUnit victim, SummonSO creature, MagicSO attack)
+        {
+            var ally = new SimAlly
+            {
+                Unit = SimUnit.FromSummon(creature, null, victim),
+                Summoner = victim,
+                Unbound = true,
+                Attack = attack,
+                Stay = new SummonStay(creature, int.MaxValue / 2)
+            };
+            _clock.AddUnit(ally.Unit, actsNext: true);
+            _allies.Add(ally);
+            return ally;
+        }
+
+        /// <summary>
         /// After any turn - acted, skipped or cut short by a tick. The acting ally counts one turn of
         /// its stay; then every ally whose health ran out, or whose summoner is down, leaves.
         /// </summary>
@@ -83,19 +110,24 @@ namespace Assets.Scripts.Balance
             }
             foreach (var ally in _allies.ToArray())
             {
-                if (!ally.Unit.IsAlive || (ally.Summoner != null && !ally.Summoner.IsAlive))
+                if (!ally.Unit.IsAlive || (!ally.Unbound && ally.Summoner != null && !ally.Summoner.IsAlive))
                 {
                     End(ally);
                 }
             }
         }
 
-        /// <summary>A party-replacing summon fights alone: every ally goes home as it arrives.</summary>
+        /// <summary>A party-replacing summon fights alone: every ally goes home as it arrives. A horror
+        /// stays (in the live fight it steps out with the party and comes back; the model keeps it on
+        /// the clock - a small optimism, and no hero carries both today).</summary>
         public void DismissAll()
         {
             foreach (var ally in _allies.ToArray())
             {
-                End(ally);
+                if (!ally.Unbound)
+                {
+                    End(ally);
+                }
             }
         }
 

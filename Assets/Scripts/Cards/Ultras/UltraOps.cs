@@ -72,19 +72,66 @@ namespace Assets.Scripts.Cards
             }
             foreach (var ultra in ultras)
             {
-                if (ultra == null || ultra.Abilities == null)
+                if (ultra == null)
                 {
                     continue;
                 }
-                foreach (var ability in ultra.Abilities)
+                if (ultra.Abilities != null)
                 {
-                    if (ability != null && !string.IsNullOrEmpty(ability.Key))
+                    foreach (var ability in ultra.Abilities)
                     {
-                        keys.Add(ability.Key);
+                        if (ability != null && !string.IsNullOrEmpty(ability.Key))
+                        {
+                            keys.Add(ability.Key);
+                        }
+                    }
+                }
+                if (ultra.StatAbilities != null)
+                {
+                    foreach (var entry in ultra.StatAbilities)
+                    {
+                        if (entry != null && entry.Ability != null && !string.IsNullOrEmpty(entry.Ability.Key))
+                        {
+                            keys.Add(entry.Ability.Key);
+                        }
                     }
                 }
             }
             return keys;
+        }
+
+        /// <summary>Whether using <paramref name="ultra"/> asks for a target first (a Sacrifice does).</summary>
+        public static bool NeedsTarget(UltraSO ultra)
+        {
+            return ultra != null && ultra.Kind == UltraKind.Sacrifice;
+        }
+
+        /// <summary>
+        /// A Sacrifice horror's Attack: the <see cref="UltraSO.StatAbilities"/> entry for the sacrificed
+        /// hero's highest stat among those listed (ties to the first listed). Null when nothing is listed.
+        /// </summary>
+        public static MagicSO PickStatAbility(UltraSO ultra, System.Func<Assets.Scripts.UnitStats.StatType, int> stat)
+        {
+            if (ultra == null || ultra.StatAbilities == null || stat == null)
+            {
+                return null;
+            }
+            UltraStatAbility best = null;
+            int bestValue = int.MinValue;
+            foreach (var entry in ultra.StatAbilities)
+            {
+                if (entry == null || entry.Ability == null)
+                {
+                    continue;
+                }
+                int value = stat(entry.Stat);
+                if (value > bestValue)
+                {
+                    best = entry;
+                    bestValue = value;
+                }
+            }
+            return best != null ? best.Ability : null;
         }
 
         private static readonly Dictionary<string, MagicSO> CastableCache = new Dictionary<string, MagicSO>();
@@ -125,6 +172,12 @@ namespace Assets.Scripts.Cards
             if (ultra == null)
             {
                 return "";
+            }
+            if (ultra.Kind == UltraKind.Sacrifice)
+            {
+                string creature = ultra.Creature != null ? ultra.Creature.Label : "a horror";
+                return $"An ally falls for the rest of the floor; {creature} rises in their place, built off their stats, "
+                       + "for the rest of the fight. Its attack follows their highest stat";
             }
             if (ultra.Kind == UltraKind.Strike)
             {

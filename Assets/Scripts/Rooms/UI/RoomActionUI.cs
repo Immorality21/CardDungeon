@@ -1482,8 +1482,8 @@ namespace Assets.Scripts.Rooms
         /// <summary>
         /// A party-replacing summon's own menu (§4b): Attack, its actions, its Signature once per
         /// summoning, Dismiss, and the free Inspect. No Item - the belt is the party's - and no Skip,
-        /// because Dismiss covers what Skip was for. Silence closes its abilities and nothing else,
-        /// the same rule a hero lives under.
+        /// because Dismiss covers what Skip was for (a Sacrifice horror gets Skip instead of Dismiss).
+        /// Silence closes its abilities and nothing else, the same rule a hero lives under.
         /// </summary>
         private void AddSummonCommands(SummonUnit summon)
         {
@@ -1492,12 +1492,12 @@ namespace Assets.Scripts.Rooms
 
             // A summon with its own Attack (Exatrix's Rend) still offers it as "Attack": it is the
             // basic attack, so Silence leaves it open like a hero's.
-            if (summon.Summon != null && summon.Summon.AttackAbility != null)
+            if (summon.AttackAbility != null)
             {
                 _commands.Add(new CommandEntry
                 {
                     Command = HeroCommand.SummonAbility, Label = "Attack", Enabled = true,
-                    Ability = summon.Summon.AttackAbility
+                    Ability = summon.AttackAbility
                 });
             }
             else
@@ -1530,7 +1530,16 @@ namespace Assets.Scripts.Rooms
                 });
             }
             _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
-            _commands.Add(new CommandEntry { Command = HeroCommand.Dismiss, Label = "Dismiss", Enabled = true });
+            // A Sacrifice horror is what is left of a hero, not a guest: there is nothing to send it home
+            // to, so it gets Skip where a summon gets Dismiss.
+            if (summon.IsSacrifice)
+            {
+                _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
+            }
+            else
+            {
+                _commands.Add(new CommandEntry { Command = HeroCommand.Dismiss, Label = "Dismiss", Enabled = true });
+            }
         }
 
         private void AddHeroCommands(ICombatUnit hero)

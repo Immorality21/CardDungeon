@@ -68,6 +68,7 @@ namespace Assets.Scripts.Combat
 
         // Hero sprites hidden while a summon has taken the party's place, shown again when it leaves.
         private readonly List<SpriteRenderer> _hidden = new List<SpriteRenderer>();
+        private readonly List<UnitHealthBar> _hiddenBars = new List<UnitHealthBar>();
 
         /// <summary>A summon's scale on the stage. The Cairn Golem (64 px at PPU 38) comes out about
         /// three units tall, the size of a boss - it is a wall, and should read as one.</summary>
@@ -398,9 +399,63 @@ namespace Assets.Scripts.Combat
             }
         }
 
+        /// <summary>
+        /// Takes other hero-side units off the stage with the party - a Sacrifice horror stands in a
+        /// hero's place, so it steps out with them while a party-replacing summon fights.
+        /// <see cref="RestoreParty"/> brings them back.
+        /// </summary>
+        public void HideUnits(IEnumerable<Component> units)
+        {
+            if (units == null)
+            {
+                return;
+            }
+            foreach (var unit in units)
+            {
+                var sr = unit != null ? unit.GetComponent<SpriteRenderer>() : null;
+                if (sr != null && sr.enabled && !_hidden.Contains(sr))
+                {
+                    sr.enabled = false;
+                    _hidden.Add(sr);
+                }
+                var bar = unit != null ? unit.GetComponent<UnitHealthBar>() : null;
+                if (bar != null)
+                {
+                    bar.Hidden = true;
+                    _hiddenBars.Add(bar);
+                }
+            }
+        }
+
+        /// <summary>Stands <paramref name="unit"/> on <paramref name="spot"/> at a hero's size, facing the
+        /// enemies - a Sacrifice horror rising where its hero stood.</summary>
+        public void PlaceAt(SummonUnit unit, Vector3 spot)
+        {
+            if (unit == null)
+            {
+                return;
+            }
+            unit.transform.position = spot;
+            unit.transform.localScale = Vector3.one * CombatUnitScale;
+            var sr = unit.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.sortingOrder = UnitSortOrder + MaxRanks + 1;
+                sr.flipX = unit.Summon != null && unit.Summon.Facing == Cards.SummonFacing.Party;
+            }
+        }
+
         /// <summary>The party back on the stage. Safe to call when nothing is hidden.</summary>
         public void RestoreParty()
         {
+            foreach (var bar in _hiddenBars)
+            {
+                if (bar != null)
+                {
+                    bar.Hidden = false;
+                }
+            }
+            _hiddenBars.Clear();
             foreach (var sr in _hidden)
             {
                 if (sr != null)

@@ -169,6 +169,7 @@ namespace Assets.Scripts.Rooms
         private MagicSO _pendingSummonAbility;
         private List<ICombatUnit> _pendingSummonTargets;
         private UltraSO _pendingUltra;
+        private ICombatUnit _pendingUltraTarget;
 
         // ---- Ultras (COMBAT_DEPTH §13): each hero's gauge this fight, the health it was last read
         // ---- at, and the form a hero is in while a Transform Ultra lasts.
@@ -259,11 +260,29 @@ namespace Assets.Scripts.Rooms
             _pendingAction = HeroAction.SummonAbility;
         }
 
-        /// <summary>Uses <paramref name="ultra"/> for the current hero turn. Uses the turn.</summary>
-        public void SubmitUltra(UltraSO ultra)
+        /// <summary>Uses <paramref name="ultra"/> for the current hero turn, at <paramref name="target"/> when it
+        /// takes one (a Sacrifice names the ally). Uses the turn.</summary>
+        public void SubmitUltra(UltraSO ultra, ICombatUnit target = null)
         {
             _pendingUltra = ultra;
+            _pendingUltraTarget = target;
             _pendingAction = HeroAction.Ultra;
+        }
+
+        /// <summary>
+        /// Who a Sacrifice may take: every living hero of the party, the user included - but never the
+        /// last one standing. A fallen hero stays down for the floor, so a party whose last hero became
+        /// a horror would have no one left when the fight ended: the horror is a hero's replacement in
+        /// the fight, not a way to carry a party of the dead out of it.
+        /// </summary>
+        public List<ICombatUnit> SacrificeTargets()
+        {
+            if (_currentParty == null || ReplacementOut)
+            {
+                return new List<ICombatUnit>();
+            }
+            var living = _currentParty.Heroes.Where(h => h != null && h.IsAlive).Cast<ICombatUnit>().ToList();
+            return living.Count > 1 ? living : new List<ICombatUnit>();
         }
 
         /// <summary>The Ultras <paramref name="hero"/> knows, resolved; empty for anything but a hero.</summary>
@@ -292,7 +311,14 @@ namespace Assets.Scripts.Rooms
         /// <summary>Whether the Ultra command is open: a full gauge, an Ultra known, not already transformed.</summary>
         public bool CanUseUltra(ICombatUnit hero)
         {
-            return InCombat && UltraOps.IsFull(UltraGauge(hero)) && !IsTransformed(hero) && KnownUltras(hero).Count > 0;
+            return InCombat && UltraOps.IsFull(UltraGauge(hero)) && !IsTransformed(hero)
+                   && KnownUltras(hero).Any(u => CanUseUltra(hero, u));
+        }
+
+        /// <summary>Whether this one Ultra can be used now - a Sacrifice needs someone to give.</summary>
+        public bool CanUseUltra(ICombatUnit hero, UltraSO ultra)
+        {
+            return ultra != null && (ultra.Kind != UltraKind.Sacrifice || SacrificeTargets().Count > 0);
         }
 
         /// <summary>The abilities <paramref name="hero"/>'s current form grants - free to use while it lasts.</summary>
@@ -651,6 +677,7 @@ namespace Assets.Scripts.Rooms
                     _pendingSummonAbility = null;
                     _pendingSummonTargets = null;
                     _pendingUltra = null;
+                    _pendingUltraTarget = null;
                     OnHeroTurnStarted?.Invoke(unit);
 
                     while (_pendingAction == HeroAction.None)
@@ -686,7 +713,7 @@ namespace Assets.Scripts.Rooms
                     }
                     else if (_pendingAction == HeroAction.Ultra && _pendingUltra != null && unit is Hero ultraHero)
                     {
-                        yield return ExecuteUltra(ultraHero, _pendingUltra);
+                        yield return ExecuteUltra(ultraHero, _pendingUltra, _pendingUltraTarget);
                     }
                     else if (_pendingAction == HeroAction.Dismiss && unit is SummonUnit dismissing)
                     {
@@ -959,9 +986,15 @@ namespace Assets.Scripts.Rooms
             var summon = slot.Summon;
             OnSummonStarted?.Invoke(summoner, summon);
 
-            // A replacement fights alone: anything fighting beside the party goes home first.
-            bool alliesLeft = _allies.Count > 0;
-            EndAllAllies(SummonExit.Dismissed);
+            // A replacement fights alone: anything fighting beside the party goes home first. A
+            // Sacrifice horror is not a guest - it stands in a hero's place - so it steps out with the
+            // party instead, frozen and hidden, and comes back with them.
+            var horrors = _allies.Where(a => a != null && a.IsAlive && a.IsSacrifice).ToList();
+            bool alliesLeft = _allies.Count > horrors.Count;
+            foreach (var guest in _allies.Where(a => !horrors.Contains(a)).ToList())
+            {
+                EndAlly(guest, SummonExit.Dismissed);
+            }
 
             // A squad (the Demon Army) is several troops sharing the summon's stay; anything else is
             // the one unit it always was.
@@ -970,6 +1003,7 @@ namespace Assets.Scripts.Rooms
                 .Select(troop => SummonUnit.Create(troop, slot.Grant, summoner, turns))
                 .ToList();
             CombatStage.Instance.HideParty();
+            CombatStage.Instance.HideUnits(horrors.Cast<Component>());
             if (summon.IsSquad)
             {
                 CombatStage.Instance.PlaceSquad(units);
@@ -987,7 +1021,7 @@ namespace Assets.Scripts.Rooms
             OnSummonEnded?.Invoke();
 
             // The whole hero side swaps in one step, so nothing can ever see both or neither.
-            _turnManager.Suspend(_currentParty.Heroes.Cast<ICombatUnit>());
+            _turnManager.Suspend(_currentParty.Heroes.Cast<ICombatUnit>().Concat(horrors.Cast<ICombatUnit>()));
             _squad.Clear();
             _squad.AddRange(units);
             for (int i = 0; i < units.Count; i++)
@@ -1035,7 +1069,7 @@ namespace Assets.Scripts.Rooms
 
             var unit = SummonUnit.Create(summon, slot.Grant, summoner);
             _allies.Add(unit);
-            CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive).ToList(), arriving: unit);
+            CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive && !a.IsSacrifice).ToList(), arriving: unit);
             yield return SummonPresenter.Arrive(unit);
             OnSummonEnded?.Invoke();
 
@@ -1080,7 +1114,7 @@ namespace Assets.Scripts.Rooms
         /// art, and its abilities on the Ability list. The form lasts the Ultra's turns, counted from
         /// the hero's next one.
         /// </summary>
-        private IEnumerator ExecuteUltra(Hero hero, UltraSO ultra)
+        private IEnumerator ExecuteUltra(Hero hero, UltraSO ultra, ICombatUnit target)
         {
             if (!CanUseUltra(hero) || !KnownUltras(hero).Contains(ultra))
             {
@@ -1092,6 +1126,11 @@ namespace Assets.Scripts.Rooms
             if (ultra.Kind == UltraKind.Strike)
             {
                 yield return ExecuteUltraStrike(hero, ultra);
+                yield break;
+            }
+            if (ultra.Kind == UltraKind.Sacrifice)
+            {
+                yield return ExecuteSacrifice(hero, ultra, target as Hero);
                 yield break;
             }
 
@@ -1159,6 +1198,60 @@ namespace Assets.Scripts.Rooms
                     HandleEnemyDeath(dead, _currentCombatRoom);
                 }
             }
+        }
+
+        /// <summary>
+        /// The Cultist's Sacrifice (<see cref="UltraKind.Sacrifice"/>). <paramref name="victim"/> - any
+        /// living hero, the Cultist included - falls, and stays down for the floor like any fallen
+        /// hero. <see cref="UltraSO.Creature"/> rises where they stood: built off <b>their</b> stats
+        /// (base + gear), at full health, its Attack picked by their highest stat, for the rest of the
+        /// fight. It is the hero side's (enemies may hit it, area attacks reach it) but not part of the
+        /// defeat check: the last hero cannot be given (<see cref="SacrificeTargets"/>), and if the
+        /// rest fall the party is down whatever still stands in their places.
+        /// </summary>
+        private IEnumerator ExecuteSacrifice(Hero cultist, UltraSO ultra, Hero victim)
+        {
+            if (victim == null || ultra.Creature == null || !SacrificeTargets().Contains(victim))
+            {
+                _lastTurnLog = $"{cultist.DisplayName} begins the rite, but there is no one to give.";
+                yield break;
+            }
+
+            var attack = UltraOps.PickStatAbility(ultra, victim.GetEffectiveStat);
+            var spot = victim.transform.position;
+            var aimedAtVictim = AliveEnemyComponents().Where(e => ReferenceEquals(e.ChargeTarget, victim)).ToList();
+
+            CombatAudio.Play(CombatSound.BossSignature);
+            ScreenFade.Instance.Flash(new Color(0.15f, 0.55f, 0.25f), 0.5f, 0.05f, 0.4f);
+            ShowFloatingLabel(victim.Transform.position + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(0.5f, 1f, 0.55f), 0.2f);
+
+            // The hero falls - for the floor, exactly as a killing blow leaves them.
+            victim.Stats.Health = 0;
+            _threat.Clear(victim);
+            HandleHeroDeath(victim);
+            _turnManager.RemoveUnit(victim);
+
+            // Built off the fallen hero (a living unit's stats, so the snapshot has their gear), and
+            // never bound to them: it is what is left of them.
+            var horror = SummonUnit.Create(ultra.Creature, null, victim, int.MaxValue / 2);
+            horror.IsSacrifice = true;
+            horror.OverrideAttack(attack);
+            _allies.Add(horror);
+            CombatStage.Instance.PlaceAt(horror, spot);
+            yield return SummonPresenter.Arrive(horror);
+
+            _turnManager.AddUnit(horror, actsNext: true);
+            EnsureHealthBars(new List<ICombatUnit> { horror });
+            // A blow wound up at the hero lands on what replaced them.
+            foreach (var enemy in aimedAtVictim)
+            {
+                enemy.ChargeTarget = horror;
+            }
+
+            string how = attack != null ? $" It lashes out with {attack.DisplayName}." : "";
+            _lastTurnLog = ReferenceEquals(cultist, victim)
+                ? $"{cultist.DisplayName} gives himself to the rite, and {horror.DisplayName} rises in his place!{how}"
+                : $"{cultist.DisplayName} sacrifices {victim.DisplayName}, and {horror.DisplayName} rises in their place!{how}";
         }
 
         /// <summary>One of a transformed hero's turns is over: the form counts it down and comes off
@@ -1241,7 +1334,7 @@ namespace Assets.Scripts.Rooms
         /// <summary>The ally <paramref name="summoner"/> has on the field, or null.</summary>
         private SummonUnit AllyOf(Hero summoner)
         {
-            return _allies.FirstOrDefault(a => a != null && ReferenceEquals(a.Summoner, summoner));
+            return _allies.FirstOrDefault(a => a != null && !a.IsSacrifice && ReferenceEquals(a.Summoner, summoner));
         }
 
         /// <summary>
@@ -1271,7 +1364,7 @@ namespace Assets.Scripts.Rooms
             // Close the gap it left in the column. Not at the end of the fight: the stage is coming down.
             if (exit != SummonExit.Victory && CombatStage.HasInstance)
             {
-                CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive).ToList());
+                CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive && !a.IsSacrifice).ToList());
             }
         }
 
@@ -1436,7 +1529,7 @@ namespace Assets.Scripts.Rooms
         {
             bool isSignature = caster.Summon != null && ReferenceEquals(magic, caster.Summon.Signature);
             // Its own Attack (SummonSO.AttackAbility) is the basic attack: Silence never stops it.
-            bool isAttack = caster.Summon != null && ReferenceEquals(magic, caster.Summon.AttackAbility);
+            bool isAttack = ReferenceEquals(magic, caster.AttackAbility);
             if (!isAttack && BuffTracker.HasStatusEffect(caster, BuffType.Silenced))
             {
                 _lastTurnLog = $"{caster.DisplayName} is silenced and cannot use {magic.DisplayName}.";

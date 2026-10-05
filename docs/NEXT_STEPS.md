@@ -252,6 +252,10 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The Cultist's Sacrifice** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §1f. `UltraKind.Sacrifice`:
+  any living hero but the last falls for the floor and a Horror rises in their place off their stats,
+  its Attack chosen by their highest stat, for the rest of the fight. Target picker, sim policy,
+  horror sprite, placeholder Cultist grid. Suite green (1,306); checked in the sandbox.
 - **Warlock round 3** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §1d–§1e, `BALANCING.md` §5aa. The
   Demon Army balanced against the other replacements (Void Shard price, weaker troops, flat Hellfire,
   stay capped at 4); Ultras in the balance sim (`SimUltras`); a second Ultra kind, `Strike`, and two

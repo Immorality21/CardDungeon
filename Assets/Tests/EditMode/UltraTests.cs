@@ -276,5 +276,73 @@ namespace Tests.EditMode
             Assert.That(enemies.All(e => e.Stats.Health < 50), "Both enemies were hit.");
             StringAssert.StartsWith("All enemies:", UltraOps.Describe(strike));
         }
+        // --- Sacrifice ---------------------------------------------------------------------------
+
+        private static UltraSO Rite(out MagicSO strike, out MagicSO whisper)
+        {
+            strike = ScriptableObject.CreateInstance<MagicSO>();
+            strike.Key = "TestMaw";
+            whisper = ScriptableObject.CreateInstance<MagicSO>();
+            whisper.Key = "TestWhisper";
+            var creature = ScriptableObject.CreateInstance<SummonSO>();
+            creature.Key = "TestHorror";
+            creature.Kind = SummonKind.JoinParty;
+            creature.StatPercents = new StatBlock(
+                new UnitStat(StatType.MaxHealth, 200),
+                new UnitStat(StatType.Strength, 130),
+                new UnitStat(StatType.Agility, 130));
+            var rite = ScriptableObject.CreateInstance<UltraSO>();
+            rite.Key = "TestRite";
+            rite.Kind = UltraKind.Sacrifice;
+            rite.Creature = creature;
+            rite.StatAbilities = new List<UltraStatAbility>
+            {
+                new UltraStatAbility { Stat = StatType.Strength, Ability = strike },
+                new UltraStatAbility { Stat = StatType.Spirit, Ability = whisper }
+            };
+            return rite;
+        }
+
+        [Test]
+        public void Sacrifice_PicksTheAttackByTheHeroesHighestStat_TiesToTheFirst()
+        {
+            var rite = Rite(out var strike, out var whisper);
+
+            Assert.AreSame(strike, UltraOps.PickStatAbility(rite, s => s == StatType.Strength ? 12 : 4));
+            Assert.AreSame(whisper, UltraOps.PickStatAbility(rite, s => s == StatType.Spirit ? 12 : 4));
+            Assert.AreSame(strike, UltraOps.PickStatAbility(rite, s => 7), "A tie goes to the first listed.");
+            Assert.IsTrue(UltraOps.NeedsTarget(rite));
+        }
+
+        [Test]
+        public void SimSacrifice_TakesTheMostWoundedHero_NeverTheLast_AndTheHorrorOutlastsThem()
+        {
+            var rite = Rite(out var strike, out _);
+            var cultist = SimHero(100, rite);
+            var warrior = SimHero(100, DemonForm());
+            warrior.Stats.Health = 20;                       // 20%: under the threshold
+            var heroes = new List<SimUnit> { cultist, warrior };
+
+            Assert.AreSame(warrior, SimUltras.SacrificeVictim(heroes));
+            Assert.IsNull(SimUltras.SacrificeVictim(new List<SimUnit> { warrior }), "Never the last hero standing.");
+
+            var clock = new TurnManager();
+            clock.Initialize(new List<ICombatUnit> { cultist, warrior });
+            var allies = new SimAllies(clock, new List<SimUnit>());
+            var ultras = new SimUltras(heroes);
+            cultist.Stats.Health = 40;
+            ultras.Read();                                   // 60 lost: the gauge is full
+            Assert.AreSame(rite, ultras.Ready(cultist, heroes));
+
+            ultras.Use(cultist, rite, heroes, new List<SimUnit>(), new CombatBuffTracker(), new EffectResolver(), heroes, allies, clock);
+
+            Assert.IsFalse(warrior.IsAlive, "The sacrificed hero is down.");
+            var horror = allies.All.Single();
+            Assert.AreEqual(200, horror.Unit.GetEffectiveStat(StatType.MaxHealth), "Built off the hero: 200% of their 100.");
+            Assert.AreEqual(200, horror.Unit.Stats.Health, "At full health, whatever the hero had left (20).");
+            Assert.AreSame(strike, horror.Attack);
+            allies.AfterTurn(cultist);
+            Assert.AreEqual(1, allies.All.Count, "Its hero being down does not send it home.");
+        }
     }
 }

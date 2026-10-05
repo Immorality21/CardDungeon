@@ -75,22 +75,82 @@ namespace Assets.Scripts.Balance
             }
         }
 
-        /// <summary>The Ultra the policy would use now, or null.</summary>
-        public UltraSO Ready(SimUnit hero)
+        /// <summary>A Sacrifice is held until a hero is this far down - the rite is for a hero about to fall.</summary>
+        public const float SacrificeBelow = 0.3f;
+
+        /// <summary>The Ultra the policy would use now, or null. A Sacrifice waits for a hero below
+        /// <see cref="SacrificeBelow"/> and never takes the last one standing.</summary>
+        public UltraSO Ready(SimUnit hero, List<SimUnit> heroes = null)
         {
             if (hero == null || !UltraOps.IsFull(Gauge(hero)) || IsTransformed(hero) || hero.Ultras == null)
             {
                 return null;
             }
-            return hero.Ultras.Find(u => u != null);
+            foreach (var ultra in hero.Ultras)
+            {
+                if (ultra == null)
+                {
+                    continue;
+                }
+                if (ultra.Kind != UltraKind.Sacrifice || SacrificeVictim(heroes) != null)
+                {
+                    return ultra;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>Who the policy gives: the most wounded living hero under <see cref="SacrificeBelow"/>,
+        /// as long as someone else is still standing; null otherwise.</summary>
+        public static SimUnit SacrificeVictim(List<SimUnit> heroes)
+        {
+            if (heroes == null)
+            {
+                return null;
+            }
+            var living = heroes.FindAll(h => h != null && h.IsAlive);
+            if (living.Count < 2)
+            {
+                return null;
+            }
+            SimUnit worst = null;
+            float worstShare = SacrificeBelow;
+            foreach (var hero in living)
+            {
+                float share = (float)hero.Stats.Health / Mathf.Max(1, hero.GetEffectiveStat(StatType.MaxHealth));
+                if (share < worstShare)
+                {
+                    worst = hero;
+                    worstShare = share;
+                }
+            }
+            return worst;
         }
 
         /// <summary>Uses <paramref name="ultra"/>: the gauge empties, then the form starts or the
         /// Strike lands through <paramref name="resolver"/>.</summary>
         public void Use(SimUnit hero, UltraSO ultra, List<SimUnit> side, List<SimUnit> enemies,
-            CombatBuffTracker buffTracker, EffectResolver resolver)
+            CombatBuffTracker buffTracker, EffectResolver resolver,
+            List<SimUnit> heroes = null, SimAllies allies = null, TurnManager clock = null)
         {
             _gauge[hero] = 0;
+            if (ultra.Kind == UltraKind.Sacrifice)
+            {
+                var victim = SacrificeVictim(heroes);
+                if (victim == null || allies == null || clock == null || ultra.Creature == null)
+                {
+                    return;
+                }
+                var attack = UltraOps.PickStatAbility(ultra, victim.GetEffectiveStat);
+                victim.Stats.Health = 0;        // down for the floor, as in the live fight
+                clock.RemoveUnit(victim);
+                if (_forms.ContainsKey(victim))
+                {
+                    End(victim);
+                }
+                allies.ArriveHorror(victim, ultra.Creature, attack);
+                return;
+            }
             if (ultra.Kind == UltraKind.Strike)
             {
                 var targets = new List<ICombatUnit>();

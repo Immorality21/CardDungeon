@@ -43,7 +43,10 @@ namespace Assets.Scripts.Cards.UI
             ChargeChoice,
 
             // The Ultra command: which Ultra to use (always a list, even of one).
-            UltraChoice
+            UltraChoice,
+
+            // A Sacrifice Ultra: which ally is given.
+            UltraTarget
         }
 
         [SerializeField] private UIDocument _document;
@@ -76,6 +79,11 @@ namespace Assets.Scripts.Cards.UI
         private MagicSO _selectedMagic;
         private ItemSO _selectedItem;
         private MagicSO _selectedSummonAbility;
+
+        // The Ultra list as it was opened, and the Ultra whose target is being picked, so Back from the
+        // target list returns to the list.
+        private List<UltraSO> _ultraList;
+        private UltraSO _selectedUltra;
 
         // The unit a RestoreCharge ability is refilling, while the player picks which ability.
         private ICombatUnit _chargeTarget;
@@ -497,6 +505,7 @@ namespace Assets.Scripts.Cards.UI
             }
 
             _currentHero = hero;
+            _ultraList = ultras;
             _mode = SelectionMode.UltraChoice;
             _listTitle.text = "Ultra";
             _listScroll.Clear();
@@ -515,7 +524,10 @@ namespace Assets.Scripts.Cards.UI
                 string description = string.IsNullOrEmpty(ultra.Description)
                     ? what
                     : ultra.Description.Trim() + "\n" + what;
-                _listScroll.Add(CreateRow(icon, ultra.Label, "Ready", true, () => SubmitUltra(captured), description));
+                // A Sacrifice with no one it may take (the last hero cannot be given) is listed, dimmed.
+                bool usable = CombatManager.Instance.CanUseUltra(hero, ultra);
+                _listScroll.Add(CreateRow(icon, ultra.Label, usable ? "Ready" : "No one to give", usable,
+                    () => OnUltraChosen(captured), description));
             }
 
             ShowPanel(_listPanel);
@@ -524,12 +536,26 @@ namespace Assets.Scripts.Cards.UI
             BeginNavigation();
         }
 
-        private void SubmitUltra(UltraSO ultra)
+        /// <summary>An Ultra that takes a target (a Sacrifice) asks for it; anything else is used at once.</summary>
+        private void OnUltraChosen(UltraSO ultra)
+        {
+            if (!UltraOps.NeedsTarget(ultra))
+            {
+                SubmitUltra(ultra);
+                return;
+            }
+            _selectedUltra = ultra;
+            _mode = SelectionMode.UltraTarget;
+            PopulateTargetRows(CombatManager.Instance.SacrificeTargets(), "Sacrifice whom?");
+        }
+
+        private void SubmitUltra(UltraSO ultra, ICombatUnit target = null)
         {
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
             ReleaseFocus();
-            CombatManager.Instance.SubmitUltra(ultra);
+            HidePanel(_targetPanel);
+            CombatManager.Instance.SubmitUltra(ultra, target);
         }
 
         private void SubmitSummon(SummonSlot slot)
@@ -851,6 +877,9 @@ namespace Assets.Scripts.Cards.UI
                 case SelectionMode.ItemTarget:
                     SubmitUseItem(target);
                     return;
+                case SelectionMode.UltraTarget:
+                    SubmitUltra(_selectedUltra, target);
+                    return;
                 case SelectionMode.SummonAbilityTarget:
                     _mode = SelectionMode.Idle;
                     HidePanel(_targetPanel);
@@ -894,6 +923,13 @@ namespace Assets.Scripts.Cards.UI
         private void OnTargetBack()
         {
             HidePanel(_targetPanel);
+
+            // A Sacrifice's target list steps back to the Ultra list.
+            if (_mode == SelectionMode.UltraTarget && _ultraList != null)
+            {
+                ShowUltraList(_currentHero, _ultraList);
+                return;
+            }
 
             // Cast targeting steps back to the slot list; item targeting steps back to the item
             // list; everything else returns to actions.

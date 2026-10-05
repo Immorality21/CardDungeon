@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
+  m_Name: CultistGrid
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
+  StartNodeKey: cultist-sig
+  Nodes:
+  - Key: cultist-sig
+    DisplayName: 
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
+    Position: {x: 0, y: 0}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: Hush
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors: []
+  - Key: cultist-trunk-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -90}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-sig
+  - Key: cultist-sacrifice
+    DisplayName: 
+    Kind: 10
+    XpCost: 30
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 3
+    Position: {x: 0, y: -180}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: Sacrifice
+    SummonAmount: 1
+    Neighbors:
+    - cultist-trunk-1

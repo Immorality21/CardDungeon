@@ -139,6 +139,15 @@ namespace Tests.EditMode
             var taught = AllGrids().SelectMany(g => g.Nodes)
                 .Where(n => n != null && n.Kind == SphereNodeKind.Summon)
                 .Select(n => n.GrantedSummonKey).ToList();
+            // A Sacrifice Ultra's creature is reached through the Ultra (the Cultist's Horror).
+            foreach (var guid in AssetDatabase.FindAssets("t:UltraSO"))
+            {
+                var ultra = AssetDatabase.LoadAssetAtPath<UltraSO>(AssetDatabase.GUIDToAssetPath(guid));
+                if (ultra != null && ultra.Creature != null)
+                {
+                    taught.Add(ultra.Creature.Key);
+                }
+            }
             // A squad's troops are reached through the squad (the Demon Army's Imps and Succubi).
             var catalog = SummonCatalogSO.Load();
             foreach (var key in taught.ToList())

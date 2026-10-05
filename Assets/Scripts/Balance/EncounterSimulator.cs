@@ -357,7 +357,7 @@ namespace Assets.Scripts.Balance
                     // Party-wide heals and buffs reach allies, as GetAliveHeroes does in the live fight.
                     TakeHeroTurn(actor, heroes, allies.With(heroes), enemies, buffTracker, tagTracker, comboDetector,
                         resolver, settings, ref potionsLeft, result, summonsAllowed, lastSummonTurn,
-                        allies.HasOut(actor), ultras, out var called);
+                        allies.HasOut(actor), ultras, allies, turnManager, out var called);
                     if (called != null && called.IsAlly)
                     {
                         // A replacement out sends allies home, so one can only be called beside the party.
@@ -417,6 +417,9 @@ namespace Assets.Scripts.Balance
         {
             public SimUnit Unit;
             public SummonStay Stay;
+
+            /// <summary>An Attack of its own, in place of the summon's (a horror's).</summary>
+            public MagicSO Attack;
         }
 
         /// <summary>
@@ -469,7 +472,7 @@ namespace Assets.Scripts.Balance
         /// weakest enemy. The rest of the bookkeeping is <see cref="SimAllies"/>.</summary>
         private static void TakeAllyTurn(SimAlly ally, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver)
         {
-            TakeReplacementTurn(new SimReplacement { Unit = ally.Unit, Stay = ally.Stay }, enemies, buffTracker, resolver);
+            TakeReplacementTurn(new SimReplacement { Unit = ally.Unit, Stay = ally.Stay, Attack = ally.Attack }, enemies, buffTracker, resolver);
         }
 
         /// <summary>
@@ -562,7 +565,7 @@ namespace Assets.Scripts.Balance
             }
             // Its own Attack (Exatrix's Rend) resolves like any ability - which is how its turn delay
             // reaches this fight's clock - and, being the basic attack, Silence does not stop it.
-            var attack = replacement.Stay.Summon.AttackAbility;
+            var attack = replacement.Attack != null ? replacement.Attack : replacement.Stay.Summon.AttackAbility;
             if (attack != null)
             {
                 resolver.Execute(new SpellcastAction
@@ -1104,6 +1107,8 @@ namespace Assets.Scripts.Balance
             Dictionary<SimUnit, int> summonTurnsLeft,
             bool allyOut,
             SimUltras ultras,
+            SimAllies allies,
+            TurnManager turnManager,
             out SimSummonSlot unitCalled)
         {
             unitCalled = null;
@@ -1149,10 +1154,10 @@ namespace Assets.Scripts.Balance
             // Ultra open; the form's ability is a cast and Silence closes it.
             if (settings.Policy != SimPolicy.AttackOnly && ultras != null)
             {
-                var ready = ultras.Ready(hero);
+                var ready = ultras.Ready(hero, heroes);
                 if (ready != null)
                 {
-                    ultras.Use(hero, ready, side, enemies, buffTracker, resolver);
+                    ultras.Use(hero, ready, side, enemies, buffTracker, resolver, heroes, allies, turnManager);
                     return;
                 }
                 var formAttack = silenced ? null : ultras.FormAttack(hero);

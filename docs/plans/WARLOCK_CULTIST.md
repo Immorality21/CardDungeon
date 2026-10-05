@@ -143,6 +143,40 @@ heroes, pricing Ultras in the balance model, the replace-one-hero mechanic (the 
 answered items still listed in the Warlock vision's Open Questions (health pool, Drain Life, the
 rename, the grid - all done in §1b).
 
+### 1f. The Cultist's Sacrifice (2026-10-04)
+
+The owner's answers: the sacrificed hero is **dead for the floor** (like any fallen hero); the
+creature stays **until it dies or the fight ends**; **any ally, the Cultist included**; it is built off
+**the sacrificed hero's stats** - every stat carries over - and **its Attack follows their highest
+stat**. Two rules added while building it: **the last hero standing cannot be given** (fallen heroes
+stay down for the floor, so a horror winning a fight would leave a party of nobody), and the defeat
+check stays heroes-only.
+
+- **`UltraKind.Sacrifice`** - an Ultra with a target: after picking it from the Ultra list, a
+  "Sacrifice whom?" list of the living heroes (`CombatManager.SacrificeTargets`, empty when only one
+  stands - the row then reads "No one to give"). The hero falls exactly as a killing blow leaves them;
+  `UltraSO.Creature` (the **Horror**) rises in their spot (`CombatStage.PlaceAt`) with 200% of their
+  health and 130% of every other stat (base + gear, at full health), resistances copied, and its
+  Attack from `UltraSO.StatAbilities` by the hero's highest stat (`UltraOps.PickStatAbility`, ties to
+  the first listed). A blow wound up at the hero lands on the horror.
+- **The six Attacks** (first drafts): Strength **Crushing Maw** (damage + Bleed) · Endurance **Engulf**
+  (damage + 30 threat - it holds the line) · Agility **Lashing Tendrils** (all enemies) · Intelligence
+  **Unmaking** (Shadow magic) · Spirit **Whispers** (Shadow + Silence) · Luck **Wrong Angles** (damage +
+  turn delay). Signature **Madness** (all enemies: delay + Spirit down). Its menu has **Skip, not
+  Dismiss** - there is nothing to send it home to.
+- **A horror is not a guest** (`SummonUnit.IsSacrifice`): never bound to the hero it came from (who is
+  down), never moved by the ally column's re-layout, and when a party-replacing summon arrives it steps
+  out **with** the party (hidden and frozen) instead of being sent away. It leaves at the end of the
+  fight; the hero stays down.
+- **The balance model** (`SimUltras` + `SimAllies.ArriveHorror`): the Cultist sacrifices the most
+  wounded hero once one is under 30% and someone else still stands.
+- **Placeholder Cultist grid** (`CultistGrid`): Hush (his free signature) → INT +2 → **Sacrifice**
+  (30 xp + 3 Void Shards). Just enough to field and test him; his real grid is still to design.
+- **Art:** `Assets/Sprites/Summons/horror-idle.png` (PixelLab: a hunched mass in the Cultist's red hood,
+  violet ghoul face, green-glowing eyes, tentacles). Checked in a sandbox fight
+  (`Sandbox/CultistRite.asset`): Warrior given at 26 HP / STR 10 → a 52 HP / STR 13 horror with Crushing
+  Maw, standing where he stood.
+
 ---
 
 ## 2. The Warlock
