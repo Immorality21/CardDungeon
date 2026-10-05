@@ -50,17 +50,19 @@ namespace Assets.Scripts.Balance
             return _allies.Find(a => ReferenceEquals(a.Unit, unit));
         }
 
-        /// <summary>Whether <paramref name="summoner"/> already has an ally out.</summary>
-        public bool HasOut(SimUnit summoner)
+        /// <summary>Whether <paramref name="summoner"/> already has <paramref name="summon"/> out (any
+        /// ally of theirs when none is named) - one of each kind per summoner.</summary>
+        public bool HasOut(SimUnit summoner, SummonSO summon = null)
         {
-            return _allies.Exists(a => ReferenceEquals(a.Summoner, summoner));
+            return _allies.Exists(a => !a.Unbound && ReferenceEquals(a.Summoner, summoner)
+                                       && (summon == null || ReferenceEquals(a.Stay.Summon, summon)));
         }
 
         /// <summary>The ally arrives, as <c>CombatManager.SummonAlly</c> does it: built off the
         /// summoner's stats and inserted to act next. Replaces the summoner's previous ally.</summary>
         public SimAlly Arrive(SimUnit summoner, SummonSO summon, SummonGrant grant)
         {
-            var previous = _allies.Find(a => ReferenceEquals(a.Summoner, summoner));
+            var previous = _allies.Find(a => !a.Unbound && ReferenceEquals(a.Summoner, summoner) && ReferenceEquals(a.Stay.Summon, summon));
             if (previous != null)
             {
                 End(previous);
@@ -70,7 +72,8 @@ namespace Assets.Scripts.Balance
             {
                 Unit = SimUnit.FromSummon(summon, grant, summoner),
                 Summoner = summoner,
-                Stay = new SummonStay(summon, SummonOps.TurnsFor(summon, grant))
+                Stay = new SummonStay(summon, SummonOps.TurnsFor(summon, grant)),
+                Attack = SummonOps.RotatingAbility(summon, 0)
             };
             _clock.AddUnit(ally.Unit, actsNext: true);
             _allies.Add(ally);
@@ -107,6 +110,14 @@ namespace Assets.Scripts.Balance
             if (acting != null && acting.Unit.IsAlive && acting.Stay.EndTurn())
             {
                 End(acting);
+            }
+            else if (acting != null && !acting.Unbound)
+            {
+                var nextRite = SummonOps.RotatingAbility(acting.Stay.Summon, acting.Stay.TurnsTaken);
+                if (nextRite != null)
+                {
+                    acting.Attack = nextRite;
+                }
             }
             foreach (var ally in _allies.ToArray())
             {

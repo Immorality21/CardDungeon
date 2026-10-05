@@ -327,8 +327,13 @@ Two consequences worth holding on to:
   but it fights **beside** the party: `CombatManager._allies`, placed by `CombatStage.PlaceAllies` in a
   vanguard column in front of the heroes (`HeroFormation.AllyLayout`, at a hero's 1.5 scale — its art
   is hero-sized, 32 px at PPU 32). It joins `HeroSideUnits()` — enemy planning, AoE, heals, threat —
-  but **not** `HasAliveHeroes`: an ally alone is not a party. **One per summoner**: calling again sends
-  the first home. It arrives with the replacement's animation and acts next (turn 1 of its stay). It
+  but **not** `HasAliveHeroes`: an ally alone is not a party. **One of each kind per summoner** (since 2026-10-05,
+  `AllyOf(summoner, summon)`): calling the same summon again sends the first home, a different one joins
+  beside it. Three optional fields extend a summon: `RandomTargetEffects` (a special attack's extra half
+  that lands on one random target - the Abyssal Nightmare's Silence), `RotateActions` (the Attack row
+  cycles through `Actions`, one per turn, labelled by the ability's name - the Blood Idol's rites) and
+  `SummonerHealthCostPercent` (a blood price, paid as it answers, refused when it would kill -
+  `SummonOps.HealthCost`/`CanAfford`, shown in the summon list). It arrives with the replacement's animation and acts next (turn 1 of its stay). It
   leaves (`EndAlly`) when its health or turns run out, on Dismiss, **when its summoner falls**
   (`HandleHeroDeath` → `EndAlliesOf`), when a `ReplaceParty` summon arrives (a replacement fights
   alone), and at the end of the fight. A summon ability aimed at `AllAllies` now reaches the whole hero

@@ -86,6 +86,14 @@ namespace Assets.Scripts.Cards
                  "Power as a percentage of each target's own stat.")]
         public List<SpellEffect> Effects = new List<SpellEffect>();
 
+        [Tooltip("SpecialAttack, optional: effects that land on ONE random target of the summon's " +
+                 "targets, after Effects - the Abyssal Nightmare Silences one enemy at random.")]
+        public List<SpellEffect> RandomTargetEffects = new List<SpellEffect>();
+
+        [Tooltip("Health the summoner pays to call it, as a percentage of their max health (floor 1). " +
+                 "Refused when it would leave them at 0. The Blood Idol costs the Cultist blood. 0 = free.")]
+        [Min(0)] public int SummonerHealthCostPercent;
+
         [Tooltip("Scales the threat the summoning's damage and healing earn the summoner, like " +
                  "MagicSO.ThreatMultiplier. 1 = ordinary.")]
         [Min(0f)] public float ThreatMultiplier = 1f;
@@ -127,6 +135,11 @@ namespace Assets.Scripts.Cards
                  "and, being its basic attack, never blocked by Silence. Exatrix's Rend (damage + a turn " +
                  "delay) is the first. Empty keeps the plain Attack.")]
         public MagicSO AttackAbility;
+
+        [Tooltip("JoinParty / ReplaceParty, optional: its Attack command cycles through Actions, one " +
+                 "per turn (turn 1 = Actions[0]), and the row is labelled with the ability's name. For a " +
+                 "summon that never attacks - the Blood Idol's rotating party rites.")]
+        public bool RotateActions;
 
         [Header("Squad (ReplaceParty only)")]
         [Tooltip("ReplaceParty, optional: the troops this summon brings instead of being one unit itself, " +

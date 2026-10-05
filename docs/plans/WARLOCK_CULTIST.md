@@ -177,6 +177,61 @@ check stays heroes-only.
   (`Sandbox/CultistRite.asset`): Warrior given at 26 HP / STR 10 → a 52 HP / STR 13 horror with Crushing
   Maw, standing where he stood.
 
+### 1g. The Cultist, built (2026-10-05)
+
+The owner's calls: his summons are **horrors that fight beside the party** (`JoinParty`, the kind
+the Warlock no longer uses); **three branches - summoner, madness, rites**; rescued as the **captive
+in The Hollow Vault**; a **frail Intelligence/Spirit caster**. All numbers are first drafts.
+
+- **Stats:** STR 3 · END 3 · AGI 5 · **INT 11 · SPR 10** · LCK 5 · HP 20. Attacks with Intelligence.
+- **Grid** (`CultistGrid`, 35 nodes / 6,220 xp, the Paladin's shape). Signature **Eldritch Lash**
+  (INT + 4 Shadow, free). Trunk: INT, HP, SPR/HP, an ability slot.
+  - **A, summoner** (stronger than a normal branch): **Writhing Spawn** (120 xp, 2 charges, 3 turns -
+    Grasp: INT Shadow + a 20% turn delay; ★Shriek: all enemies Spirit −2 and a 25% delay) → +1 turn →
+    **The Watcher** (245 xp + 1 Void Shard, 4 turns - Unblinking Gaze: SPR Shadow; ★Revelation: 8 Shadow to
+    all + 1 turn of Silence); stubs Spawn +20 HP%, Watcher +1 charge (Void Shard); **Sacrifice** at the
+    tip (350 xp + 3 Void Shards).
+  - **B, madness:** **Whisper of Madness** (40% delay + Spirit −3) → **Dread** (all enemies STR −2,
+    AGI −2) → **Mind Rot** (INT Shadow + Poison 3/turn) at a tip; Shadow resist stub.
+  - **C, rites** (paid in his blood): **Blood Rite** (party STR +2, costs 10% HP) → **Rite of Warding**
+    (party END +2, SPR +2, 15% HP) → **Dark Communion** (party Regeneration 3/turn, 12% HP) at a tip;
+    Holy resist stub.
+- **Unlock:** `PartyRoster` lists him; `HollowVault.Levels[0].RescueHero` is the Cultist (a generated
+  floor, so the captive room is the usual non-start, non-exit pick).
+- **Measured** (same budget harness as §1e): Spawn at 370 xp brings 25 HP and ~28 damage over its stay,
+  2 charges - a cheap extra body whose value is its delays; the Watcher at 965 xp ~75, at full grid
+  ~123. Below the party-replacing summons on purpose: these fight *beside* the party, which keeps
+  acting. Suite green with him on the roster (1,306).
+- **Vision updated** to the decisions (fantasy, role, three branches); open there: summons for B and C,
+  more Rituals Ultras.
+
+### 1h. A summon for each branch (2026-10-05)
+
+The owner's calls: madness gets the **Abyssal Nightmare** ("an eye-less blob with a big mouth and teeth
+everywhere"); rites get the **Blood Idol**; **no more Rituals Ultras for now**; and the ally cap
+becomes **one of each kind** - the Cultist can have the Spawn, the Watcher and the Idol out together,
+and calling one he already has out replaces it.
+
+- **Abyssal Nightmare** (`SpecialAttack`, past the madness tips: `cultist-b-nightmare`, 410 xp + 2 Void
+  Shards, then +1 turn at 475): all enemies 40% turn delay, Spirit -3 and Strength -3 for 3 turns, then
+  **one enemy at random Silenced** for 2. The random half is a new field, `SummonSO.RandomTargetEffects`
+  (`SummonOps.BuildRandomCastable`, resolved after `Effects` on one living target, live and in the sim).
+- **Blood Idol** (`JoinParty`, past the rites tips: `cultist-c-idol`, 410 xp + 2 Void Shards, then +1
+  turn): **never attacks.** Its command cycles one party rite per turn - Crimson Vigor (STR +3),
+  Blood Ward (END +3), Lifeblood (Regeneration 3) - each for 2 turns and with 8 bonus threat, so the
+  enemy goes for it; the Signature, The Offering, heals the party 20% of max health. 160% HP / 150% END
+  of the Cultist, 4 turns. **Costs 20% of the Cultist's max health** to call (floor 1; refused when it
+  would leave him at 0; the list shows the price and greys out). New fields: `SummonSO.RotateActions`
+  (`SummonOps.RotatingAbility`; the menu row is labelled with the rite's name, not "Attack") and
+  `SummonSO.SummonerHealthCostPercent` (`SummonOps.HealthCost` / `CanAfford`).
+- **One of each kind:** `CombatManager.AllyOf(summoner, summon)` and `SimAllies.HasOut(summoner, summon)`;
+  a falling summoner takes all of his allies with him. The sim calls any ally summon not already out
+  that he can pay for, and a rite aimed at the party lands on the hero side.
+- **Checked live** in the `CultistRite` sandbox (full grid, synthetic submits through `CombatManager`):
+  the Idol cost him 9 of 45 HP, cast Crimson Vigor then Blood Ward on the whole side and drew the
+  Warden's blows; the Nightmare left both enemies STR/SPR -3 and the Warden Silenced; Idol, Spawn and
+  Watcher stood on the field at once. Numbers are first drafts, not yet put through the budget harness.
+
 ---
 
 ## 2. The Warlock

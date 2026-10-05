@@ -17,6 +17,8 @@ MonoBehaviour:
   Blurb: The Hoarder was counting for someone. There is a door behind the ledger.
   SequenceIndex: 3
   Repeatable: 0
+  Challenge: 0
+  JoinsOnClear: {fileID: 0}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: 2b6cbd409987e0f4daa9c617dfa404e1, type: 2}
     LevelName: The Hollow Vault
@@ -44,4 +46,5 @@ MonoBehaviour:
             Amount: 3
         XpReward: 0
         GoldReward: 260
-    RescueHero: {fileID: 0}
+    RescueHero: {fileID: 11400000, guid: d930ce0ffd89cf4408229b730a560cdf, type: 2}
+    AllowRoomEvents: 1

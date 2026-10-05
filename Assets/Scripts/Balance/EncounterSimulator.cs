@@ -346,11 +346,11 @@ namespace Assets.Scripts.Balance
                 var troop = replacement != null ? replacement.Of(actor) : null;
                 if (troop != null)
                 {
-                    TakeReplacementTurn(troop, enemies, buffTracker, resolver);
+                    TakeReplacementTurn(troop, enemies, buffTracker, resolver, null);
                 }
                 else if (actingAlly != null)
                 {
-                    TakeAllyTurn(actingAlly, enemies, buffTracker, resolver);
+                    TakeAllyTurn(actingAlly, enemies, buffTracker, resolver, allies.With(heroes));
                 }
                 else if (actor.IsHero)
                 {
@@ -470,9 +470,10 @@ namespace Assets.Scripts.Balance
 
         /// <summary>An ally plays as a replacement does: its Signature first, then its Attack on the
         /// weakest enemy. The rest of the bookkeeping is <see cref="SimAllies"/>.</summary>
-        private static void TakeAllyTurn(SimAlly ally, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver)
+        private static void TakeAllyTurn(SimAlly ally, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver,
+            List<SimUnit> side)
         {
-            TakeReplacementTurn(new SimReplacement { Unit = ally.Unit, Stay = ally.Stay, Attack = ally.Attack }, enemies, buffTracker, resolver);
+            TakeReplacementTurn(new SimReplacement { Unit = ally.Unit, Stay = ally.Stay, Attack = ally.Attack }, enemies, buffTracker, resolver, side);
         }
 
         /// <summary>
@@ -542,14 +543,16 @@ namespace Assets.Scripts.Balance
         /// Signature and leaves Attack, as it does in the live menu.
         /// </summary>
         private static void TakeReplacementTurn(
-            SimReplacement replacement, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver)
+            SimReplacement replacement, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver,
+            List<SimUnit> side)
         {
             var unit = replacement.Unit;
+            side = side ?? new List<SimUnit> { unit };
             bool silenced = buffTracker.HasStatusEffect(unit, BuffType.Silenced);
             if (!silenced && replacement.Stay.CanUseSignature)
             {
                 var signature = replacement.Stay.Summon.Signature;
-                var targets = ResolveTargets(signature, unit, new List<SimUnit> { unit }, enemies);
+                var targets = ResolveTargets(signature, unit, side, enemies);
                 if (targets.Count > 0)
                 {
                     replacement.Stay.MarkSignatureUsed();
@@ -558,14 +561,20 @@ namespace Assets.Scripts.Balance
                 }
             }
 
+            // Its own Attack (Exatrix's Rend) resolves like any ability - which is how its turn delay
+            // reaches this fight's clock - and, being the basic attack, Silence does not stop it.
+            var attack = replacement.Attack != null ? replacement.Attack : replacement.Stay.Summon.AttackAbility;
+            // A rite aimed at the party (the Blood Idol's) lands on the side, not on an enemy.
+            if (attack != null && attack.TargetType != MagicTargetType.SingleEnemy && attack.TargetType != MagicTargetType.AllEnemies)
+            {
+                resolver.Execute(new SpellcastAction { Magic = attack, Caster = unit, Targets = ResolveTargets(attack, unit, side, enemies) }, buffTracker);
+                return;
+            }
             var target = WeakestAlive(enemies);
             if (target == null)
             {
                 return;
             }
-            // Its own Attack (Exatrix's Rend) resolves like any ability - which is how its turn delay
-            // reaches this fight's clock - and, being the basic attack, Silence does not stop it.
-            var attack = replacement.Attack != null ? replacement.Attack : replacement.Stay.Summon.AttackAbility;
             if (attack != null)
             {
                 resolver.Execute(new SpellcastAction
@@ -1195,11 +1204,14 @@ namespace Assets.Scripts.Balance
 
             // An ally (SummonKind.JoinParty) is called whenever this hero has none out: it is a body
             // on the field for its whole stay, so holding it back buys nothing. The caller builds it.
-            if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null && !allyOut)
+            if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null)
             {
-                var ally = hero.Summons.Find(s => s.CanUse && s.IsAlly);
+                // One of each kind: any ally summon this hero has not got out, and can pay for.
+                var ally = hero.Summons.Find(s => s.CanUse && s.IsAlly && (allies == null || !allies.HasOut(hero, s.Summon))
+                                                  && SummonOps.CanAfford(s.Summon, hero));
                 if (ally != null)
                 {
+                    PayBlood(hero, ally.Summon);
                     ally.Charges--;
                     result.Summons++;
                     unitCalled = ally;
@@ -1307,10 +1319,36 @@ namespace Assets.Scripts.Balance
             EffectResolver resolver,
             TrialResult result)
         {
+            PayBlood(caster, slot.Summon);
             slot.Charges--;
             result.Summons++;
             var targets = ResolveTargets(slot.Castable, caster, heroes, enemies);
             resolver.Execute(new SpellcastAction { Magic = slot.Castable, Caster = caster, Targets = targets }, buffTracker);
+
+            // The part that lands on one target at random (the Abyssal Nightmare's Silence).
+            var random = SummonOps.BuildRandomCastable(slot.Summon, slot.Grant);
+            if (random != null)
+            {
+                var pool = targets.FindAll(t => t != null && t.IsAlive);
+                if (pool.Count > 0)
+                {
+                    resolver.Execute(new SpellcastAction
+                    {
+                        Magic = random, Caster = caster, Targets = new List<ICombatUnit> { pool[Random.Range(0, pool.Count)] }
+                    }, buffTracker);
+                }
+                Object.DestroyImmediate(random);
+            }
+        }
+
+        /// <summary>A summon's blood price (the Blood Idol), floor 1 - as <c>CombatManager</c> takes it.</summary>
+        private static void PayBlood(SimUnit summoner, SummonSO summon)
+        {
+            int cost = SummonOps.HealthCost(summon, summoner);
+            if (cost > 0)
+            {
+                summoner.Stats.Health -= Mathf.Min(cost, Mathf.Max(0, summoner.Stats.Health - 1));
+            }
         }
 
         private static List<ICombatUnit> ResolveTargets(

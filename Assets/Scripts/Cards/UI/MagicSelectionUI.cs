@@ -483,7 +483,13 @@ namespace Assets.Scripts.Cards.UI
                 }
                 var captured = slot;
                 string meta = $"{slot.Charges}/{slot.MaxCharges}";
-                _listScroll.Add(CreateRow(slot.Summon.Sprite, slot.Summon.Label, meta, slot.CanUse,
+                int bloodPrice = SummonOps.HealthCost(slot.Summon, hero);
+                bool affordable = SummonOps.CanAfford(slot.Summon, hero);
+                if (bloodPrice > 0)
+                {
+                    meta += $"  {bloodPrice} HP";
+                }
+                _listScroll.Add(CreateRow(slot.Summon.Sprite, slot.Summon.Label, meta, slot.CanUse && affordable,
                     () => SubmitSummon(captured), SummonOps.Describe(slot.Summon, slot.Grant)));
             }
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
@@ -410,11 +411,12 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void SimAllies_CallingAgain_SendsTheFirstHome_AndAReplacementSendsEveryoneHome()
+        public void SimAllies_CallingTheSameAgain_SendsTheFirstHome_AndAReplacementSendsEveryoneHome()
         {
             var (allies, clock, summoner, enemies) = Field();
-            var first = allies.Arrive(summoner, AllySummon(turns: 5), new SummonGrant { Key = "TestImp" });
-            var second = allies.Arrive(summoner, AllySummon(turns: 5), new SummonGrant { Key = "TestImp" });
+            var imp = AllySummon(turns: 5);
+            var first = allies.Arrive(summoner, imp, new SummonGrant { Key = "TestImp" });
+            var second = allies.Arrive(summoner, imp, new SummonGrant { Key = "TestImp" });
 
             Assert.AreEqual(1, allies.All.Count);
             Assert.AreSame(second, allies.All[0]);
@@ -422,6 +424,96 @@ namespace Tests.EditMode
 
             allies.DismissAll();
             Assert.IsEmpty(allies.All);
+        }
+
+        [Test]
+        public void SimAllies_OneOfEachKind_ADifferentSummonJoinsBesideTheFirst()
+        {
+            var (allies, clock, summoner, enemies) = Field();
+            var spawn = AllySummon(turns: 5);
+            var watcher = AllySummon(turns: 5);
+            allies.Arrive(summoner, spawn, new SummonGrant { Key = "TestImp" });
+            allies.Arrive(summoner, watcher, new SummonGrant { Key = "TestImp" });
+
+            Assert.AreEqual(2, allies.All.Count, "The Spawn and the Watcher stand together.");
+            Assert.IsTrue(allies.HasOut(summoner, spawn));
+            Assert.IsTrue(allies.HasOut(summoner, watcher));
+            Assert.IsFalse(allies.HasOut(summoner, AllySummon(turns: 5)), "A third kind is not out yet.");
+        }
+
+        // --- The Blood Idol and the Abyssal Nightmare ------------------------------------------------
+
+        private static SummonSO RotatingIdol(params MagicSO[] rites)
+        {
+            var idol = AllySummon(turns: 4);
+            idol.RotateActions = true;
+            idol.Actions = new List<MagicSO>(rites);
+            return idol;
+        }
+
+        [Test]
+        public void RotatingAbility_CyclesThroughTheActions_OnePerTurn()
+        {
+            var a = Magic(MagicTargetType.AllAllies, Flat(SpellEffectType.Heal, 1));
+            var b = Magic(MagicTargetType.AllAllies, Flat(SpellEffectType.Heal, 2));
+            var idol = RotatingIdol(a, b);
+
+            Assert.AreSame(a, SummonOps.RotatingAbility(idol, 0));
+            Assert.AreSame(b, SummonOps.RotatingAbility(idol, 1));
+            Assert.AreSame(a, SummonOps.RotatingAbility(idol, 2));
+            idol.RotateActions = false;
+            Assert.IsNull(SummonOps.RotatingAbility(idol, 0), "Only a rotating summon rotates.");
+        }
+
+        [Test]
+        public void SimAllies_ARotatingAlly_MovesToItsNextRiteEachTurn()
+        {
+            var (allies, clock, summoner, enemies) = Field();
+            var a = Magic(MagicTargetType.AllAllies, Flat(SpellEffectType.Heal, 1));
+            var b = Magic(MagicTargetType.AllAllies, Flat(SpellEffectType.Heal, 2));
+            var ally = allies.Arrive(summoner, RotatingIdol(a, b), new SummonGrant { Key = "TestImp" });
+
+            Assert.AreSame(a, ally.Attack);
+            allies.AfterTurn(ally.Unit);
+            Assert.AreSame(b, ally.Attack);
+            allies.AfterTurn(ally.Unit);
+            Assert.AreSame(a, ally.Attack);
+        }
+
+        [Test]
+        public void HealthCost_IsAShareOfMaxHealth_AndRefusedWhenItWouldKill()
+        {
+            var idol = AllySummon(turns: 4);
+            idol.SummonerHealthCostPercent = 20;
+            var cultist = new MockCombatUnit("Cultist", 1, 0, 50);
+
+            Assert.AreEqual(10, SummonOps.HealthCost(idol, cultist));
+            Assert.IsTrue(SummonOps.CanAfford(idol, cultist));
+            cultist.Stats.Health = 10;
+            Assert.IsFalse(SummonOps.CanAfford(idol, cultist), "Paying 10 of 10 would leave him at 0.");
+            idol.SummonerHealthCostPercent = 0;
+            Assert.AreEqual(0, SummonOps.HealthCost(idol, cultist));
+            Assert.IsTrue(SummonOps.CanAfford(idol, cultist), "A free summon is always affordable.");
+        }
+
+        [Test]
+        public void BuildRandomCastable_CarriesTheRandomEffects_LengthenedByDuration()
+        {
+            var nightmare = ScriptableObject.CreateInstance<SummonSO>();
+            nightmare.Key = "TestNightmare";
+            nightmare.Kind = SummonKind.SpecialAttack;
+            nightmare.RandomTargetEffects = new List<SpellEffect>
+            {
+                new SpellEffect { EffectType = SpellEffectType.Debuff, BuffType = BuffType.Silenced, Power = 1, Duration = 2 }
+            };
+
+            var castable = SummonOps.BuildRandomCastable(nightmare, new SummonGrant { Key = "TestNightmare", DurationBonus = 1 });
+
+            Assert.AreEqual(MagicTargetType.SingleEnemy, castable.TargetType);
+            Assert.AreEqual(BuffType.Silenced, castable.Effects.Single().BuffType);
+            Assert.AreEqual(3, castable.Effects.Single().Duration);
+            nightmare.RandomTargetEffects.Clear();
+            Assert.IsNull(SummonOps.BuildRandomCastable(nightmare, null));
         }
     }
 }

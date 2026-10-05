@@ -100,8 +100,8 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
 - **Tank is not a hero** *(2026-09-04, §5b)* — it is a place a grid can end up, reachable from more
   than one base. The Tank hero, its grid and its sprites are deleted. The player starts with **one**
   hero and unlocks the rest; the party is 4 drawn from the roster. **The roster's size is not
-  fixed**: it is seven today (Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue), with an eighth — a new
-  eldritch-horror-summoning **Cultist** — planned (`plans/SPECIALIZATION.md`, "The Cultist"), but the
+  fixed**: it is eight today (Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue, and the
+  eldritch-horror-summoning **Cultist**, rescued in The Hollow Vault since 2026-10-05) (`plans/SPECIALIZATION.md`, "The Cultist"), but the
   whiteboard's "start with 6" was a *scope* target, and "seven, closed" was a misreading — corrected
   by the owner 2026-10-04. Adding, splitting or pivoting a hero is open.
 - **The grid is where a hero specializes, and specializations are not named** *(2026-09-04, §4c)*.
@@ -252,6 +252,14 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The Cultist's branch summons** (2026-10-05) - `plans/WARLOCK_CULTIST.md` section 1h. Abyssal Nightmare
+  (madness: all-enemy delay + STR/SPR down, one random Silence) and Blood Idol (rites: a non-attacking
+  ally that rotates party buffs, draws threat, costs 20% of his health); allies are now one of each
+  kind per summoner. New `SummonSO` fields `RandomTargetEffects`, `RotateActions`,
+  `SummonerHealthCostPercent`. Checked in the sandbox.
+- **The Cultist, built** (2026-10-05) — `plans/WARLOCK_CULTIST.md` §1g. Eighth hero: frail INT/SPR
+  caster, three-branch grid (summoner with Writhing Spawn + The Watcher + Sacrifice, madness curses,
+  blood-paid party rites), seven new abilities, rescued in The Hollow Vault. Suite green (1,306).
 - **The Cultist's Sacrifice** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §1f. `UltraKind.Sacrifice`:
   any living hero but the last falls for the floor and a Horror rises in their place off their stats,
   its Attack chosen by their highest stat, for the rest of the fight. Target picker, sim policy,

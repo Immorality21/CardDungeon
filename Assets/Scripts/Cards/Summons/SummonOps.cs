@@ -86,6 +86,59 @@ namespace Assets.Scripts.Cards
             return magic;
         }
 
+        /// <summary>The random-target half of a special attack (<see cref="SummonSO.RandomTargetEffects"/>)
+        /// as a throwaway castable, its timed effects lengthened by duration upgrades. Null when it has none.</summary>
+        public static MagicSO BuildRandomCastable(SummonSO summon, SummonGrant grant)
+        {
+            if (summon == null || summon.RandomTargetEffects == null || summon.RandomTargetEffects.Count == 0)
+            {
+                return null;
+            }
+            int turns = grant != null ? grant.DurationBonus : 0;
+            var magic = ScriptableObject.CreateInstance<MagicSO>();
+            magic.hideFlags = HideFlags.DontSave;
+            magic.name = CastKeyPrefix + summon.Key + ":random";
+            magic.Key = magic.name;
+            magic.DisplayName = summon.Label;
+            magic.TargetType = MagicTargetType.SingleEnemy;
+            magic.Tags = new List<MagicTag>();
+            magic.Effects = summon.RandomTargetEffects.Where(e => e != null).Select(e => new SpellEffect
+            {
+                EffectType = e.EffectType, Power = e.Power, PowerMode = e.PowerMode, ScalingStat = e.ScalingStat,
+                DamageType = e.DamageType, BuffType = e.BuffType,
+                Duration = e.Duration > 0 ? e.Duration + turns : e.Duration, UnlockLevel = 0
+            }).ToList();
+            return magic;
+        }
+
+        /// <summary>What calling <paramref name="summon"/> costs <paramref name="summoner"/> in health (0 when free).</summary>
+        public static int HealthCost(SummonSO summon, ICombatUnit summoner)
+        {
+            if (summon == null || summon.SummonerHealthCostPercent <= 0)
+            {
+                return 0;
+            }
+            return SpellPower.PercentOfMaxHealth(summon.SummonerHealthCostPercent, summoner);
+        }
+
+        /// <summary>Whether <paramref name="summoner"/> can pay to call it and stay standing.</summary>
+        public static bool CanAfford(SummonSO summon, ICombatUnit summoner)
+        {
+            int cost = HealthCost(summon, summoner);
+            return cost <= 0 || (summoner != null && summoner.Stats.Health > cost);
+        }
+
+        /// <summary>A rotating summon's ability for its <paramref name="turn"/>th turn (0-based), or null.</summary>
+        public static MagicSO RotatingAbility(SummonSO summon, int turn)
+        {
+            if (summon == null || !summon.RotateActions || summon.Actions == null)
+            {
+                return null;
+            }
+            var actions = summon.Actions.Where(a => a != null).ToList();
+            return actions.Count > 0 ? actions[((turn % actions.Count) + actions.Count) % actions.Count] : null;
+        }
+
         // ---------------------------------------------------------------- party replacement
 
         /// <summary>
@@ -254,6 +307,19 @@ namespace Assets.Scripts.Cards
                 parts.Add(DescribeEffect(effect));
             }
             parts = CollapseRepeats(parts);
+            if (summon.RandomTargetEffects != null && summon.RandomTargetEffects.Count > 0)
+            {
+                var random = new List<string>();
+                foreach (var effect in summon.RandomTargetEffects.Where(e => e != null))
+                {
+                    random.Add(DescribeEffect(effect));
+                }
+                parts.Add("one at random: " + string.Join(", ", random));
+            }
+            if (summon.SummonerHealthCostPercent > 0)
+            {
+                parts.Add($"costs {summon.SummonerHealthCostPercent}% of the summoner's health");
+            }
             if (summon.BonusThreat > 0)
             {
                 parts.Add("draws the enemies' attention");
@@ -270,8 +336,14 @@ namespace Assets.Scripts.Cards
         {
             var parts = new List<string>
             {
-                summon.Kind == SummonKind.JoinParty ? "Fights beside the party" : "Takes the party's place"
+                summon.Kind == SummonKind.JoinParty
+                    ? (summon.RotateActions ? "Stands beside the party" : "Fights beside the party")
+                    : "Takes the party's place"
             };
+            if (summon.SummonerHealthCostPercent > 0)
+            {
+                parts.Add($"costs {summon.SummonerHealthCostPercent}% of the summoner's health");
+            }
             if (summon.IsSquad)
             {
                 parts.Add(DescribeSquad(SquadFor(summon, grant)));

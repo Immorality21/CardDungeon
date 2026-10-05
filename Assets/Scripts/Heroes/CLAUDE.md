@@ -56,9 +56,9 @@
 
   Every hero's grid authors a cheap **signature** node near the start plus spells further out on each branch. All seven signatures are free and the grid's start node (see `UnlockedByDefault` above), so every hero arrives able to cast. `ElementalContentTests` fails if a grid has no `MagicKnown` node, if a node names a magic that does not exist, **or if any magic in the catalog is on no grid at all** — with no Draw there is no second route, so an unplaced spell is uncastable by anyone.
 
-## The roster is seven, and every grid is authored
+## The roster is eight, and every grid is authored
 
-**Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue** *(2026-09-05; the Cultist was renamed the Warlock 2026-10-04 — `Key`, asset, grid and node keys `warlock-*` — and a new demon-summoning Cultist is planned)*. **Two more `HeroSO`s exist off the roster** *(2026-10-04)*: `Cultist` (a summoner — see `docs/plans/WARLOCK_CULTIST.md`) and `Mage` (elemental caster) — bare minimums with a sprite and a vision but no grid, no `PartyRoster` entry and no unlock source, so nothing in the game reaches them yet. The Tank, the Acolyte
+**Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue, Cultist** *(2026-09-05; the old Cultist was renamed the Warlock 2026-10-04 — `Key`, asset, grid and node keys `warlock-*` — and the new eldritch-horror **Cultist** joined the roster 2026-10-05, rescued in The Hollow Vault; see `docs/plans/WARLOCK_CULTIST.md`)*. **One more `HeroSO` exists off the roster**: `Mage` (elemental caster) — a bare minimum with a sprite and a vision but no grid, no `PartyRoster` entry and no unlock source, so nothing in the game reaches it yet. The Tank, the Acolyte
 and the Scout are gone — the Tank was a *destination* mistaken for a hero, and the Cleric and Ranger
 are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-generated any more.
 
@@ -71,6 +71,7 @@ are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-gene
 | Warlock | Intelligence | BloodPact→LifeTap (+Cinderstorm) · DrainLife→SiphonSoul (+OilSlick) · demons — three, re-authored 2026-10-04. **One summon, the Demon Army, on the trunk; every branch improves it** (C: more troops, Succubi). **Demon Form** (Ultra) on the trunk behind 3 Void Shards |
 | Tinkerer | Intelligence | the three cloaks as a field kit · IceShard→WaterSplash→Fireball |
 | Rogue | Agility | PoisonDart→AimedShot · SmokeBomb→Hush |
+| Cultist | Intelligence | **Writhing Spawn→The Watcher** (horrors beside the party) + Sacrifice · WhisperOfMadness→Dread (+MindRot) → **Abyssal Nightmare** · BloodRite→RiteOfWarding (+DarkCommunion) → **Blood Idol** — added 2026-10-05, rescued in The Hollow Vault |
 
 **Put a spell on a grid only if the hero's stats scale it.** This is the mistake the old roster made
 and the single easiest one to repeat: the retired Scout's grid granted `OilSlick`, which scales off

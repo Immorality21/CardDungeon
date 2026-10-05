@@ -933,10 +933,25 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
+            if (summon != null && !SummonOps.CanAfford(summon, caster))
+            {
+                _lastTurnLog = $"{caster.DisplayName} has too little blood left to call {summon.Label}.";
+                yield break;
+            }
+
             if (hero == null || summon == null || summons == null || !summons.TryUse(hero.HeroKey, summon.Key))
             {
                 _lastTurnLog = $"{caster.DisplayName} tries to summon, but nothing answers.";
                 yield break;
+            }
+
+            // A summon with a blood price (the Blood Idol) takes it as it answers, floor 1.
+            int bloodPrice = SummonOps.HealthCost(summon, hero);
+            if (bloodPrice > 0)
+            {
+                int paid = Mathf.Min(bloodPrice, Mathf.Max(0, hero.Stats.Health - 1));
+                hero.Stats.Health -= paid;
+                ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.3f, 0f), $"-{paid} HP", new Color(0.9f, 0.35f, 0.35f), 0.15f);
             }
 
             if (summon.Kind == SummonKind.ReplaceParty)
@@ -963,6 +978,20 @@ namespace Assets.Scripts.Rooms
             var result = _calculator.Execute(action, BuffTracker);
             _lastTurnLog = $"{caster.DisplayName} summons {summon.Label}!";
             yield return _presenter.Present(result, caster, castable);
+
+            // ...then the part that lands on one target at random (the Nightmare's Silence).
+            var randomCastable = SummonOps.BuildRandomCastable(summon, slot.Grant);
+            if (randomCastable != null)
+            {
+                var pool = action.Targets.Where(t => t != null && t.IsAlive).ToList();
+                if (pool.Count > 0)
+                {
+                    var pick = pool[UnityEngine.Random.Range(0, pool.Count)];
+                    var randomAction = new SpellcastAction { Magic = randomCastable, Caster = caster, Targets = new List<ICombatUnit> { pick } };
+                    yield return _presenter.Present(_calculator.Execute(randomAction, BuffTracker), caster, randomCastable);
+                }
+                Destroy(randomCastable);
+            }
             OnSummonEnded?.Invoke();
             Destroy(castable);
 
@@ -1061,13 +1090,20 @@ namespace Assets.Scripts.Rooms
             var summon = slot.Summon;
             OnSummonStarted?.Invoke(summoner, summon);
 
-            var previous = AllyOf(summoner);
+            // One of each kind per summoner: calling the same horror again replaces it; a different
+            // one joins beside it (the Cultist's Spawn and Watcher together).
+            var previous = AllyOf(summoner, summon);
             if (previous != null)
             {
                 EndAlly(previous, SummonExit.Dismissed);
             }
 
             var unit = SummonUnit.Create(summon, slot.Grant, summoner);
+            var firstRite = SummonOps.RotatingAbility(summon, 0);
+            if (firstRite != null)
+            {
+                unit.OverrideAttack(firstRite);
+            }
             _allies.Add(unit);
             CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive && !a.IsSacrifice).ToList(), arriving: unit);
             yield return SummonPresenter.Arrive(unit);
@@ -1331,10 +1367,12 @@ namespace Assets.Scripts.Rooms
             return unit != null && _allies.Contains(unit);
         }
 
-        /// <summary>The ally <paramref name="summoner"/> has on the field, or null.</summary>
-        private SummonUnit AllyOf(Hero summoner)
+        /// <summary>The <paramref name="summon"/> <paramref name="summoner"/> has on the field (any of
+        /// theirs when no summon is named), or null.</summary>
+        private SummonUnit AllyOf(Hero summoner, SummonSO summon = null)
         {
-            return _allies.FirstOrDefault(a => a != null && !a.IsSacrifice && ReferenceEquals(a.Summoner, summoner));
+            return _allies.FirstOrDefault(a => a != null && !a.IsSacrifice && ReferenceEquals(a.Summoner, summoner)
+                                               && (summon == null || ReferenceEquals(a.Summon, summon)));
         }
 
         /// <summary>
@@ -1376,16 +1414,18 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        /// <summary>A summoner who falls takes their ally with them: what bound it is gone.</summary>
+        /// <summary>A summoner who falls takes their allies with them: what bound them is gone.</summary>
         private void EndAlliesOf(Hero summoner)
         {
-            var ally = summoner != null ? AllyOf(summoner) : null;
-            if (ally == null)
+            if (summoner == null)
             {
                 return;
             }
-            _lastTurnLog += $" {ally.DisplayName} vanishes with its summoner.";
-            EndAlly(ally, SummonExit.Dismissed);
+            foreach (var ally in _allies.Where(a => a != null && !a.IsSacrifice && ReferenceEquals(a.Summoner, summoner)).ToList())
+            {
+                _lastTurnLog += $" {ally.DisplayName} vanishes with its summoner.";
+                EndAlly(ally, SummonExit.Dismissed);
+            }
         }
 
         /// <summary>
@@ -1399,6 +1439,12 @@ namespace Assets.Scripts.Rooms
             if (IsAlly(summon))
             {
                 bool lastTurn = summon.Stay.EndTurn();
+                // A rotating summon (the Blood Idol) moves on to its next rite.
+                var nextRite = SummonOps.RotatingAbility(summon.Summon, summon.Stay.TurnsTaken);
+                if (nextRite != null)
+                {
+                    summon.OverrideAttack(nextRite);
+                }
                 if (dismissed)
                 {
                     EndAlly(summon, SummonExit.Dismissed);

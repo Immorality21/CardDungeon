@@ -1496,7 +1496,10 @@ namespace Assets.Scripts.Rooms
             {
                 _commands.Add(new CommandEntry
                 {
-                    Command = HeroCommand.SummonAbility, Label = "Attack", Enabled = true,
+                    // A rotating summon's row is this turn's rite, by name - "Attack" would be a lie.
+                    Command = HeroCommand.SummonAbility,
+                    Label = summon.Summon != null && summon.Summon.RotateActions ? summon.AttackAbility.DisplayName : "Attack",
+                    Enabled = true,
                     Ability = summon.AttackAbility
                 });
             }

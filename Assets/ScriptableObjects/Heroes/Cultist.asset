@@ -16,12 +16,12 @@ MonoBehaviour:
   Label: Cultist
   Blurb: Speaks to things that should not answer. They answer.
   Vision:
-    Fantasy: A demon summoner. Planned 2026-10-04 when the old Cultist became the
-      Warlock; this is what moved over.
-    Role: 'Summoner - brings demons onto the field to fight beside the party. Placeholder:
-      Intelligence caster.'
-    SignatureMechanic: Adding party members mid-fight (demons). Needs the add/replace-a-party-member
-      mechanic, which does not exist yet.
+    Fantasy: 'An eldritch-horror summoner: he calls things from below the deep to
+      fight beside the party, and pays for his rites in his own blood (decided 2026-10-04/05).'
+    Role: Summoner and curse-caster. Frail Intelligence/Spirit caster who wants his
+      horrors in front of him.
+    SignatureMechanic: 'Adding party members mid-fight: horrors that fight beside
+      the party (SummonKind.JoinParty).'
     UltraStyle: Rituals
     Ultras:
     - Name: Sacrifice
@@ -31,15 +31,24 @@ MonoBehaviour:
       Unlock: In the demon summoner branch
     Branches:
     - GridBranch: a
-      Becomes: A ?? summoner - a bit stronger on its own than a normal branch, to
-        justify committing to it.
-      IntendedKit: Summon ?? => ?
-      Summon: '?'
+      Becomes: Eldritch summoner - a bit stronger on its own than a normal branch,
+        to justify committing to it.
+      IntendedKit: Summon Writhing Spawn => Summon The Watcher => Sacrifice (Ultra,
+        Void Shards)
+      Summon: Writhing Spawn, The Watcher
+    - GridBranch: b
+      Becomes: 'Madness: curses that slow, weaken and rot.'
+      IntendedKit: Whisper of Madness => Dread => Mind Rot
+      Summon: 
+    - GridBranch: c
+      Becomes: 'Dark rites: the party grows stronger and he pays for it in blood.'
+      IntendedKit: Blood Rite => Rite of Warding => Dark Communion
+      Summon: 
     Overlaps: 
-    OpenQuestions: 'Bare minimum: no grid, not on the party roster, no unlock source
-      - it exists only in this window. What happens to a sacrificed hero (dead for
-      the fight? revivable? back when the demon leaves)? How long does a demon stay?
-      Can he sacrifice himself? Other branches? Stats are placeholders.'
+    OpenQuestions: 'All numbers are first drafts (Claude, 2026-10-05) - stats, abilities,
+      summons. Do branches B and C want summons of their own (every branch eventually
+      ends in a summon)? More Rituals Ultras? Sacrifice sits at the summoner branch''s
+      tip behind 3 Void Shards. Unlock: captive in The Hollow Vault.'
   Sprite: {fileID: -1450838193074190, guid: 94899f063264494d8a3b0281963bdcca, type: 3}
   AnimationFrames:
   - {fileID: -1450838193074190, guid: 94899f063264494d8a3b0281963bdcca, type: 3}
@@ -51,16 +60,16 @@ MonoBehaviour:
     - Type: 1
       Amount: 3
     - Type: 2
-      Amount: 5
+      Amount: 3
     - Type: 3
       Amount: 5
     - Type: 4
-      Amount: 9
+      Amount: 11
     - Type: 5
-      Amount: 8
+      Amount: 10
     - Type: 6
       Amount: 5
     - Type: 7
-      Amount: 22
+      Amount: 20
   AttackStat: 4
   SphereGrid: {fileID: 11400000, guid: cc0ad32d3adb3884fbdc1c5ed1fc708f, type: 2}

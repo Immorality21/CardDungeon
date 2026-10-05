@@ -25,7 +25,7 @@ MonoBehaviour:
       Values: []
     ResistType: 0
     ResistPercent: 10
-    GrantedMagicKey: Hush
+    GrantedMagicKey: EldritchLash
     GrantedCharges: 2
     GrantedSummonKey: 
     GrantedUltraKey: 
@@ -51,15 +51,229 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - cultist-sig
-  - Key: cultist-sacrifice
+  - Key: cultist-start
+    DisplayName: 
+    Kind: 0
+    XpCost: 30
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -180}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-trunk-1
+  - Key: cultist-trunk-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -270}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 2
+      - Type: 7
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-start
+  - Key: cultist-trunk-slot
+    DisplayName: 
+    Kind: 2
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -360}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-trunk-2
+  - Key: cultist-a-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -132, y: -325}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-trunk-2
+  - Key: cultist-a-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -246, y: -380}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-a-1
+  - Key: cultist-a-3
+    DisplayName: 
+    Kind: 4
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -360, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: WrithingSpawn
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-a-2
+  - Key: cultist-a-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -474, y: -490}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-a-3
+  - Key: cultist-a-5
+    DisplayName: 
+    Kind: 6
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -588, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: WrithingSpawn
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-a-4
+  - Key: cultist-a-6
+    DisplayName: 
+    Kind: 4
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    Position: {x: -702, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Watcher
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-a-5
+  - Key: cultist-a-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -816, y: -655}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-a-6
+  - Key: cultist-a-res
+    DisplayName: 
+    Kind: 5
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -420, y: -360}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: WrithingSpawn
+    GrantedUltraKey: 
+    SummonAmount: 20
+    Neighbors:
+    - cultist-a-3
+  - Key: cultist-a-tip-a
     DisplayName: 
     Kind: 10
-    XpCost: 30
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 3
-    Position: {x: 0, y: -180}
+    Position: {x: -911, y: -710}
     Gains:
       Values: []
     ResistType: 0
@@ -70,4 +284,484 @@ MonoBehaviour:
     GrantedUltraKey: Sacrifice
     SummonAmount: 1
     Neighbors:
-    - cultist-trunk-1
+    - cultist-a-7
+  - Key: cultist-a-tip-b
+    DisplayName: 
+    Kind: 7
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    Position: {x: -876, y: -585}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: Watcher
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-a-7
+  - Key: cultist-b-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -450}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-trunk-2
+  - Key: cultist-b-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -540}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-1
+  - Key: cultist-b-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -630}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: WhisperOfMadness
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-2
+  - Key: cultist-b-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -720}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-3
+  - Key: cultist-b-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -810}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-4
+  - Key: cultist-b-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -900}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: Dread
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-5
+  - Key: cultist-b-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -990}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-6
+  - Key: cultist-b-res
+    DisplayName: 
+    Kind: 1
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 105, y: -605}
+    Gains:
+      Values: []
+    ResistType: 5
+    ResistPercent: 12
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-3
+  - Key: cultist-b-tip-a
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 95, y: -1045}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: MindRot
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-7
+  - Key: cultist-b-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: -95, y: -1045}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-7
+  - Key: cultist-c-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 132, y: -325}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-trunk-2
+  - Key: cultist-c-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 246, y: -380}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-1
+  - Key: cultist-c-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 360, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: BloodRite
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-2
+  - Key: cultist-c-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 474, y: -490}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 1
+      - Type: 7
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-3
+  - Key: cultist-c-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 588, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-4
+  - Key: cultist-c-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 702, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: RiteOfWarding
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-5
+  - Key: cultist-c-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 816, y: -655}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-6
+  - Key: cultist-c-res
+    DisplayName: 
+    Kind: 1
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 420, y: -360}
+    Gains:
+      Values: []
+    ResistType: 4
+    ResistPercent: 12
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-3
+  - Key: cultist-c-tip-a
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 911, y: -710}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: DarkCommunion
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-7
+  - Key: cultist-c-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 876, y: -585}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-7
+  - Key: cultist-b-nightmare
+    DisplayName:
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    Position: {x: 0, y: -1135}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey:
+    GrantedCharges: 2
+    GrantedSummonKey: AbyssalNightmare
+    GrantedUltraKey:
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-tip-a
+    - cultist-b-tip-b
+  - Key: cultist-b-nightmare-up
+    DisplayName:
+    Kind: 6
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 0, y: -1225}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey:
+    GrantedCharges: 2
+    GrantedSummonKey: AbyssalNightmare
+    GrantedUltraKey:
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-nightmare
+  - Key: cultist-c-idol
+    DisplayName:
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    Position: {x: 1000, y: -650}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey:
+    GrantedCharges: 2
+    GrantedSummonKey: BloodIdol
+    GrantedUltraKey:
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-tip-a
+    - cultist-c-tip-b
+  - Key: cultist-c-idol-up
+    DisplayName:
+    Kind: 6
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    Position: {x: 1095, y: -700}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 10
+    GrantedMagicKey:
+    GrantedCharges: 2
+    GrantedSummonKey: BloodIdol
+    GrantedUltraKey:
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-idol
