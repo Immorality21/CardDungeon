@@ -21,6 +21,12 @@ namespace Assets.Scripts.Combat
         /// <summary>Most enemies that still stand in a single column.</summary>
         public const int SingleColumnMax = 3;
 
+        /// <summary>
+        /// The most bodies the stage is laid out for (front 2 + back 3). Mirrors
+        /// <c>BalanceRulesSO.MaxBodiesPerRoom</c>; runtime code that adds enemies caps at this.
+        /// </summary>
+        public const int DesignMax = 5;
+
         // Column positions as a fraction of the half view width. Heroes stand at -0.55.
         public const float SingleColumnX = 0.55f;
         public const float FrontColumnX = 0.40f;

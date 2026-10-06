@@ -3150,6 +3150,71 @@
     margin-top: 4px;
 }
 
+/* ---- Revisit conditions (docs/plans/REVISITS.md) ---- */
+/* One condition: a button so the mouse can cycle its rank; the map's own cursor walks them. */
+.cm-heat-row {
+    flex-direction: column;
+    align-items: stretch;
+    margin: 2px 0;
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-width: 1px;
+    border-color: rgba(236, 190, 72, 0.25);
+    border-radius: 3px;
+    -unity-text-align: upper-left;
+}
+
+.cm-heat-row--on {
+    border-color: var(--cd-gold);
+    background-color: rgba(236, 190, 72, 0.10);
+}
+
+.cm-heat-row--cursor {
+    border-color: var(--cd-text-light);
+    border-width: 2px;
+}
+
+.cm-heat-row__head {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.cm-heat-row__name {
+    font-size: 17px;
+    color: var(--cd-text-light);
+    padding: 0;
+    margin: 0;
+}
+
+.cm-heat-row--on .cm-heat-row__name {
+    color: var(--cd-gold);
+    -unity-font-style: bold;
+}
+
+.cm-heat-row__rank {
+    font-size: 15px;
+    color: var(--cd-gold);
+    padding: 0;
+    margin: 0;
+}
+
+.cm-heat-row__desc {
+    font-size: 14px;
+    color: var(--cd-text-light);
+    opacity: 0.8;
+    white-space: normal;
+    padding: 0;
+    margin: 0;
+}
+
+.cm-heat-summary {
+    font-size: 16px;
+    color: var(--cd-gold);
+    white-space: normal;
+    padding: 2px 4px;
+    margin: 2px 0 0 0;
+}
+
 /* ---- Level entry (progress-view), one fixed size (2026-09-30) ---- */
 .hub-entry {
     width: 760px;

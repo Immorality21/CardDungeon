@@ -17,7 +17,7 @@ MonoBehaviour:
   Blurb: The water gave out and the rock began to weep heat. Something under the
     March has been burning for a long time.
   SequenceIndex: 2
-  Repeatable: 0
+  Repeatable: 1
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: aa42e7f1e085de54abd6c8682009b174, type: 2}
     LevelName: Cinder Gate

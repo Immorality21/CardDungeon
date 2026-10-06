@@ -16,9 +16,9 @@
 | Run | Key | Levels | Repeatable | Opens after | Boss |
 |---|---|---|---|---|---|
 | The Threshold | `TutorialRun` | 4 | no | — | Abyssal Warden |
-| The Drowned March | `DrownedMarch` | 5 | no | The Threshold | **Mirefather** — the **Tinkerer** joins on the clear |
+| The Drowned March | `DrownedMarch` | 5 | **yes** (revisit) | The Threshold | **Mirefather** — the **Tinkerer** joins on the clear |
 | The Warrens | `TheWarrens` | 2 | **yes** | The Threshold | **Gilded Hoarder** |
-| The Ashen Deep | `AshenDeep` | 3 | no | The Drowned March | **Cinder Tyrant** |
+| The Ashen Deep | `AshenDeep` | 3 | **yes** (revisit) | The Drowned March | **Cinder Tyrant** |
 | The Hollow Vault | `HollowVault` | 1 | no | Ashen Deep **and** The Warrens (`All`) | Gilded Hoarder (120 HP override) |
 | The Blood Stair | `BloodStair` | 5, all hand-drawn | no | The Threshold (optional, **`Challenge`**) | Abyssal Warden (floor 4), **Cinder Tyrant** (floor 5) |
 | The Drowned Chapel | `DrownedChapel` | 2 | no | The Drowned March **+ the Tinkerer** (optional, **`Secret`**) | Abyssal Warden (120 HP override) + 2 Bog Shamans |
@@ -46,7 +46,19 @@ never hidden); `CampaignAssetTests` asserts both. **The Ashen Deep is a fire bio
 boss attacks as Fire and resists it, so the Fire Cloak learned on the Tinkerer's grid is
 the answer to it - see `docs/BALANCING.md` §5e for the four tuning passes that shape took.
 
-The tutorial forks: `DrownedMarch` is the main line (one-shot, escalating), `TheWarrens` is an optional repeatable dead end whose job is to fund the hub's Gold sinks - party slots cost 300/600, and before it there was nowhere to farm them. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
+The tutorial forks: `DrownedMarch` is the main line (one-shot, escalating), `TheWarrens` is an optional repeatable dead end whose job is to fund the hub's Gold sinks (it predates the removal of the party-slot purchase). Its boss **does not drop Void Shard** (2026-10-06): a guaranteed scarce drop on a repeatable run is an infinite tap. Re-clearable runs in general are `docs/plans/REVISITS.md`. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
+
+## Revisits — a cleared run played again, at a heat the player picks
+
+A completed `Repeatable` run is a **revisit** (`docs/plans/REVISITS.md`). The story map's
+**Revisit…** opens a condition picker. The choice goes into `RunSaveData.IsRevisit` + `Modifiers`,
+and `DungeonManager.ApplyRunHeat` resolves it into `Combat.RunHeat.Current` on every level build.
+That static is what enemy spawning, damage, healing and rewards read. With no active run it is
+`RunHeat.None`, so free play and the sandbox are never affected. Story pays once: captives and
+`JoinsOnClear` already skip an owned hero, and completion is already recorded. Scarce materials
+(`RevisitRulesSO.NewBestHeatOnly`) drop only when a revisit beats the run's best heat
+(`MetaProgressSaveData.RevisitRecords`). **A boss on a repeatable run must not guarantee a scarce
+material any other way.** Conditions live in `Resources/Revisits.asset`.
 
 ## A dungeon save is only valid while its level is unchanged
 

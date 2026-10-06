@@ -12,7 +12,7 @@ using UnityEngine;
 namespace Tests.EditMode
 {
     /// <summary>
-    /// The mechanics the Warlock needed (docs/plans/WARLOCK_CULTIST.md §4): <see cref="SpellEffectType.Drain"/>
+    /// The mechanics the Warlock needed:<see cref="SpellEffectType.Drain"/>
     /// (Drain Life), <see cref="SpellEffectType.RestoreCharge"/> (Life Tap), and the summon that fights
     /// beside the party (<see cref="SummonKind.JoinParty"/>, the Imp and the Succubus) - its stage
     /// layout and its balance-model mirror.

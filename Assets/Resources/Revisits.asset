@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 262185ac98f6453ca6809d8b254c2e8d, type: 3}
+  m_Name: Revisits
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RevisitRulesSO
+  BaseEnemyHealthPercent: 50
+  BaseEnemyDamagePercent: 50
+  BaseRewardPercent: 25
+  RewardPercentPerHeat: 10
+  NewBestHeatOnly:
+  - {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+  Modifiers:
+  - Key: hardened-foes
+    DisplayName: Hardened Foes
+    Description: Enemies have +{0}% more health.
+    MaxRank: 3
+    HeatPerRank: 1
+    Effects:
+    - Kind: 0
+      AmountPerRank: 25
+  - Key: sharpened-blades
+    DisplayName: Sharpened Blades
+    Description: Enemies deal +{0}% more damage.
+    MaxRank: 3
+    HeatPerRank: 1
+    Effects:
+    - Kind: 1
+      AmountPerRank: 25
+  - Key: swarming-halls
+    DisplayName: Swarming Halls
+    Description: Every fight brings {0} more foe(s), up to five.
+    MaxRank: 2
+    HeatPerRank: 2
+    Effects:
+    - Kind: 2
+      AmountPerRank: 1
+  - Key: no-respite
+    DisplayName: No Respite
+    Description: Heroes receive {0}% less healing - spells, potions and refuges alike.
+    MaxRank: 2
+    HeatPerRank: 2
+    Effects:
+    - Kind: 3
+      AmountPerRank: -50

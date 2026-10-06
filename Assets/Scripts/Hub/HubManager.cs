@@ -1090,6 +1090,11 @@ namespace Assets.Scripts.Hub
             if (_levelCount != null)
             {
                 _levelCount.text = $"Level {levelIndex + 1} of {run.Levels.Count}";
+                if (_runSaveData.IsRevisit)
+                {
+                    var heat = RevisitOps.Resolve(RevisitRulesSO.Load(), true, _runSaveData.Modifiers);
+                    _levelCount.text += $" · Revisit, heat {heat.Heat}";
+                }
             }
             _levelName.text = levelEntry.LevelName;
             BuildLevelPips(run.Levels.Count, levelIndex);
@@ -1282,7 +1287,7 @@ namespace Assets.Scripts.Hub
         /// that writes <c>Run.json</c>, so the map cannot overwrite a run in progress by accident -
         /// <c>CampaignOps</c> has already refused to mark another node startable while one is underway.
         /// </summary>
-        private void OnRunChosen(RunDefinitionSO run)
+        private void OnRunChosen(RunDefinitionSO run, List<RunModifierSelection> revisitConditions)
         {
             if (run == null)
             {
@@ -1292,10 +1297,15 @@ namespace Assets.Scripts.Hub
             var runKey = RunKeyOf(run);
             if (_runSaveData.RunKey != runKey)
             {
+                // A revisit carries its conditions from here: they are fixed for the whole run, and
+                // DungeonManager reads them back on every floor (docs/plans/REVISITS.md).
+                bool isRevisit = revisitConditions != null;
                 _runSaveData = new RunSaveData
                 {
                     RunKey = runKey,
-                    CurrentLevelIndex = 0
+                    CurrentLevelIndex = 0,
+                    IsRevisit = isRevisit,
+                    Modifiers = isRevisit ? revisitConditions : new List<RunModifierSelection>()
                 };
                 _fileHandler.Save(_runSaveData);
             }

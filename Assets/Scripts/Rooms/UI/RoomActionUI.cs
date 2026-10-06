@@ -1087,8 +1087,11 @@ namespace Assets.Scripts.Rooms
                 return new List<LootAward>();
             }
 
-            return RoomKindRewards.TreasureMaterials(
+            var materials = RoomKindRewards.TreasureMaterials(
                 level.MaterialTable, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
+            // A revisit below its best heat does not pay the scarce materials (docs/plans/REVISITS.md).
+            materials.RemoveAll(a => a.Item != null && RunHeat.Current.Withholds(a.Item.Key));
+            return materials;
         }
 
         /// <summary>
@@ -1148,7 +1151,8 @@ namespace Assets.Scripts.Rooms
 
                     int max = hero.GetEffectiveMaxHealth();
                     int healed = Mathf.Min(
-                        RoomKindRewards.RestHealAmount(max), Mathf.Max(0, max - hero.Stats.Health));
+                        RunHeat.Current.ScaleHeroHealing(RoomKindRewards.RestHealAmount(max)),
+                        Mathf.Max(0, max - hero.Stats.Health));
                     hero.Stats.Health += healed;
                     lines.Add(healed > 0
                         ? $"{hero.DisplayName} recovers {healed} health."

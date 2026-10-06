@@ -263,7 +263,7 @@ namespace Assets.Scripts.Cards
         private int ApplyHealTick(ICombatUnit unit, int amount)
         {
             int room = unit.GetEffectiveStat(StatType.MaxHealth) - unit.Stats.Health;
-            int healed = Mathf.Clamp(amount, 0, Mathf.Max(0, room));
+            int healed = Mathf.Clamp(RunHeat.Current.ScaleHealing(unit, amount), 0, Mathf.Max(0, room));
             unit.Stats.Health += healed;
             return healed;
         }

@@ -18,6 +18,11 @@ namespace Assets.Scripts.Dungeon
         // Summon charges left, carried across levels of the run beside the ability charges.
         public List<SummonChargeSaveData> SummonCharges = new List<SummonChargeSaveData>();
 
+        // A re-clear of a run already completed, and the conditions chosen for it (docs/plans/REVISITS.md).
+        // Fixed when the run is picked; DungeonManager resolves them into RunHeat on every level build.
+        public bool IsRevisit;
+        public List<RunModifierSelection> Modifiers = new List<RunModifierSelection>();
+
         public string GetFileName()
         {
             return "Run";

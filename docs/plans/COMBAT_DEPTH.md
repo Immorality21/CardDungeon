@@ -232,7 +232,7 @@ fields), `Assets/Scripts/Balance/` (`EnemyBehaviorModel`, `BalanceMath`).
 ### 13. Hero identity — the Ultra gauge
 
 > **A minimal gauge shipped 2026-10-04** with the Warlock's Demon Form — see
-> `plans/WARLOCK_CULTIST.md` §1c and the Magic guide. Decided by the owner: Ultras **coexist** with
+> the Magic guide. Decided by the owner: Ultras **coexist** with
 > summons, **small and universal**. Built: per-hero, per-fight gauge filled by health lost
 > (`UltraOps`), the **Ultra** command (a second menu exception after Summon), `UltraSO` +
 > `SphereNodeKind.Ultra`, one kind (`Transform`). The command always opens a list (owner, like FFX's Overdrive menu), even

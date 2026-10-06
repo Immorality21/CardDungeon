@@ -9,6 +9,10 @@ recorded as one line in the ledger at the bottom — the *reasoning* behind it l
 `docs/BALANCING.md` and the per-subsystem `CLAUDE.md` files, not here. This is a backlog, not a
 changelog.
 
+> **The campaign is not finished** *(owner, 2026-10-06)*. The runs that exist are mostly
+> **playtest content**, and the real campaign will be far longer. Do not read today's run count,
+> XP-per-campaign or material yields as the shipped game's; judge the loop's *shape*, not its length.
+
 > Context: the core gameplay loop is mechanically **closed** (run start → multi-level dungeon → CTB
 > combat → win/death → persistent Gold/Essence → hub spend → stronger next run). The remaining work
 > is about making runs feel like *runs* — stakes, choice, and a climax — and about giving the
@@ -198,7 +202,7 @@ backlog.**
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
 | **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **Next, in unlock order: Tinkerer**, then Cleric, Rogue, Warlock; then measure the per-summon frontier. **Blocked on hero visions (2026-10-03):** the Cleric, Warlock, Tinkerer and Rogue have no defined identity yet — their grids borrow catalog spells (the Tinkerer's is an elemental mage). Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
-| — | **The Warlock and the Cultist** → [`plans/WARLOCK_CULTIST.md`](plans/WARLOCK_CULTIST.md) | **The Warlock shipped 2026-10-04** (three branches, Imp + Succubus fighting beside the party, Drain Life, Life Tap). Next: the **Cultist** (summons **eldritch horrors**, decided 2026-10-04), the replace-one-hero mechanic for his Sacrifice, the demon army, and the Ultras (§13) |
+| — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) **Ultras for the other six heroes** - the gauge is universal but only the Warlock and the Cultist can spend it (§13 below) |
 | — | **The Mage — an elemental caster** | planned 2026-10-04; takes over the elemental spells when the Tinkerer becomes gadgets; bare-minimum asset + sprite exist (no grid, not on the roster) |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
@@ -216,6 +220,14 @@ backlog.**
 |---|---|---|
 | **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05; **phase 6 started 2026-09-17** — the rule is set (*a level grants access, capacity or information, never a raw stat*), and the **Forge** and **Campfire** both have ladders. Bestiary / Merchant next; Sphere Hall is phase 5 |
 | **3** | Sharpen hub sinks | open |
+| **3c** | **Essence needs rethinking** — one flat tap, one sink (Forge upgrades); four directions listed | opened 2026-10-06 |
+| **3d** | **Bounties** — rotating contracts on cleared runs paying named materials | opened 2026-10-06; depends on Revisits |
+
+### [Revisits](plans/REVISITS.md)
+
+| § | | state |
+|---|---|---|
+| — | **Re-clearable runs at a player-selected difficulty** — composable heat (Hades), +50% enemy health/damage base, rewards in Essence + XP + gold | ✅ **first version built 2026-10-06**: the picker on the story map, four conditions, Void Shard only on a new best heat. Next: the Essence guide, more conditions, the balance model |
 
 ### [Open balance work](plans/BALANCE_OPEN.md)
 
@@ -252,30 +264,37 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
-- **The Cultist's branch summons** (2026-10-05) - `plans/WARLOCK_CULTIST.md` section 1h. Abyssal Nightmare
+- **Revisits, first version** (2026-10-06) — `plans/REVISITS.md`. A cleared run (Drowned March,
+  Warrens, Ashen Deep) can be revisited at heat built from composable conditions: +50% enemy health
+  and damage as the base, plus Hardened Foes, Sharpened Blades, Swarming Halls and No Respite. Rewards
+  (XP, gold, Essence) scale with heat; Void Shard drops only on a new best heat; the Warrens boss no
+  longer drops it at all. `RunHeat`, `RevisitOps`, `Resources/Revisits.asset`; `RevisitTests`; suite
+  1,329 / 0; checked in play mode.
+
+- **The Cultist's branch summons** (2026-10-05) — Abyssal Nightmare
   (madness: all-enemy delay + STR/SPR down, one random Silence) and Blood Idol (rites: a non-attacking
   ally that rotates party buffs, draws threat, costs 20% of his health); allies are now one of each
   kind per summoner. New `SummonSO` fields `RandomTargetEffects`, `RotateActions`,
   `SummonerHealthCostPercent`. Checked in the sandbox.
-- **The Cultist, built** (2026-10-05) — `plans/WARLOCK_CULTIST.md` §1g. Eighth hero: frail INT/SPR
+- **The Cultist, built** (2026-10-05) — Eighth hero: frail INT/SPR
   caster, three-branch grid (summoner with Writhing Spawn + The Watcher + Sacrifice, madness curses,
   blood-paid party rites), seven new abilities, rescued in The Hollow Vault. Suite green (1,306).
-- **The Cultist's Sacrifice** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §1f. `UltraKind.Sacrifice`:
+- **The Cultist's Sacrifice** (2026-10-04) — `UltraKind.Sacrifice`:
   any living hero but the last falls for the floor and a Horror rises in their place off their stats,
   its Attack chosen by their highest stat, for the rest of the fight. Target picker, sim policy,
   horror sprite, placeholder Cultist grid. Suite green (1,306); checked in the sandbox.
-- **Warlock round 3** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §1d–§1e, `BALANCING.md` §5aa. The
+- **Warlock round 3** (2026-10-04) — `BALANCING.md` §5aa. The
   Demon Army balanced against the other replacements (Void Shard price, weaker troops, flat Hellfire,
   stay capped at 4); Ultras in the balance sim (`SimUltras`); a second Ultra kind, `Strike`, and two
   first-draft Demonology Ultras (Rain of Fire, Soul Harvest); Demon Form sprite redone; Void Shard
   supply vs the Blood Stair checked. Suite green (1,304).
-- **The Demon Army + the Ultra gauge + Demon Form** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §1c, the
+- **The Demon Army + the Ultra gauge + Demon Form** (2026-10-04) — the
   Magic guide, `COMBAT_DEPTH.md` §13. Squad summons (`SummonSO.SquadTiers`, `SummonSize` /
   `SummonPromote` nodes); the Warlock's one summon is the Demon Army (3 Imps → 4, promoted to
   Succubi), improved from every branch. A minimal per-fight Ultra gauge filled by health lost, the
   **Ultra** command, `UltraSO`; Demon Form (+50% HP keeping the share, Shadow attack, Chaos Bolt).
   `UltraTests`; suite green (1,301); checked in the sandbox.
-- **The Warlock rebuilt + allies that join mid-fight** (2026-10-04) — `plans/WARLOCK_CULTIST.md` §7, the
+- **The Warlock rebuilt + allies that join mid-fight** (2026-10-04) — the
   Magic guide. `SummonKind.JoinParty` (a summon that fights *beside* the party, one per summoner, in a
   vanguard column), `SpellEffectType.Drain` and `RestoreCharge` (Life Tap, with a picker). The Warlock:
   HP 34 (the roster's biggest), a three-branch grid (blood / drain / demons), Imp + Succubus,

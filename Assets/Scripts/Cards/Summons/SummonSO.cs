@@ -22,9 +22,9 @@ namespace Assets.Scripts.Cards
         /// <summary>The Warlock's demons: a player-driven unit that fights <b>beside</b> the party,
         /// standing in the vanguard in front of the heroes. Built like a replacement - stats as
         /// ratios of the summoner's, its own menu, a stay in turns - but the party keeps fighting and
-        /// enemies can hit either. One per summoner: calling again sends the first home. It leaves
-        /// when its health or its turns run out, on Dismiss, when its summoner falls, and when a
-        /// party-replacing summon takes the field (docs/plans/WARLOCK_CULTIST.md).</summary>
+        /// enemies can hit either. One of each kind per summoner: calling the same one again sends the
+        /// first home. It leaves when its health or its turns run out, on Dismiss, when its summoner
+        /// falls, and when a party-replacing summon takes the field.</summary>
         JoinParty = 2
     }
 

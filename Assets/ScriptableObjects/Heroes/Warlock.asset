@@ -55,7 +55,7 @@ MonoBehaviour:
       the grid has room, and material-gated when they come (no early spike). Rain
       of Fire and Soul Harvest are first-draft Demonology Ultras (Claude, 2026-10-04)
       - keep, change or replace? Balance: every Warlock number is a first draft (see
-      docs/plans/WARLOCK_CULTIST.md). The sacrifice-a-party-member Ultra moved to
+      docs/BALANCING.md §5aa). The sacrifice-a-party-member Ultra moved to
       the Cultist (2026-10-04).'
   Sprite: {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
   AnimationFrames:

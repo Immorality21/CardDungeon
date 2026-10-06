@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Rooms;
 using ImmoralityGaming.Fundamentals;
@@ -121,6 +122,43 @@ namespace Assets.Scripts.Enemies
                         _spawnedEnemies.Add(enemy);
                     }
                 }
+
+                AddRevisitExtras(room, spawnTable, prefab);
+            }
+        }
+
+        /// <summary>
+        /// A revisit's "more enemies" condition (<see cref="RunHeat.ExtraEnemiesPerRoom"/>): extra
+        /// bodies drawn from the room's own spawn table, only in a room that already rolled a fight
+        /// (an empty room stays a breather) and never past the stage's design size. Drawn from the
+        /// dungeon's seeded stream, and a run's heat is fixed, so a resumed floor regenerates the
+        /// same extras.
+        /// </summary>
+        private void AddRevisitExtras(Room room, List<EnemySpawnEntry> spawnTable, GameObject prefab)
+        {
+            int extra = RunHeat.Current.ExtraEnemiesPerRoom;
+            if (extra <= 0 || room.Enemies.Count == 0)
+            {
+                return;
+            }
+
+            var candidates = spawnTable.Where(e => e != null && e.Enemy != null).ToList();
+            if (candidates.Count == 0)
+            {
+                return;
+            }
+
+            int toAdd = Mathf.Min(extra, EnemyFormation.DesignMax - room.Enemies.Count);
+            for (int i = 0; i < toAdd; i++)
+            {
+                var definition = candidates[Random.Range(0, candidates.Count)].Enemy;
+                var enemyObj = Instantiate(prefab, transform);
+                var enemy = enemyObj.GetComponent<Enemy>();
+                enemy.Initialize(definition, LevelTuning);
+                enemy.PlaceInRoom(room, room.ClaimSpot(enemy, -1f));
+
+                room.Enemies.Add(enemy);
+                _spawnedEnemies.Add(enemy);
             }
         }
 

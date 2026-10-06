@@ -14,11 +14,11 @@ work, then open only the plan file your work touches:
 
 | plan | holds |
 |---|---|
-| `docs/plans/WARLOCK_CULTIST.md` | the Warlock (blood magic + demons) and the new Cultist (a summoner): visions, current state, the mechanics they need, open questions |
 | `docs/plans/SPECIALIZATION.md` | **the live thread** — Draw scrapped, magic and specialization on the sphere grid, heroes as unlocks, summons (§4, §4b, §4c, §5, §5b, §9b) |
 | `docs/plans/COMBAT_DEPTH.md` | status effects, Defend, threat/taunt, enemy verbs, hero identity (§9–§13) |
 | `docs/plans/HUB.md` | campfire, materials, buildings, gold sinks (§3, §7) |
 | `docs/plans/BALANCE_OPEN.md` | open balance steps and findings, losability, the retry economy (§0–§0g, §3b) |
+| `docs/plans/REVISITS.md` | re-clearing runs at a player-selected difficulty (conditions and limits) |
 | `docs/plans/POLISH_CONTENT.md` | battle/room polish, player-facing information, content volume, **the tutorial** (§1, §2, §6, §8, §14–§20) |
 
 Don't read the whole backlog to answer one question — the index says which file to open. The

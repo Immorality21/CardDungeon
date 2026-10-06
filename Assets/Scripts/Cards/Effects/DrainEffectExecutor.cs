@@ -34,7 +34,7 @@ namespace Assets.Scripts.Cards.Effects
                 return;
             }
 
-            int heal = Amount(effect.Power, DamageDealt(result, caster));
+            int heal = RunHeat.Current.ScaleHealing(caster, Amount(effect.Power, DamageDealt(result, caster)));
             if (heal <= 0)
             {
                 return;

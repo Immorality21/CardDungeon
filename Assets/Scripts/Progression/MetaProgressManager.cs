@@ -221,9 +221,53 @@ namespace Assets.Scripts.Progression
         /// accumulated kill-gold plus the flat level-clear bonus.</summary>
         public void AwardLevelClear()
         {
-            _saveData.Gold += GoldPerLevelCleared + _pendingRunGold;
-            _saveData.Essence += EssencePerLevelCleared;
+            AwardLevelClear(GoldPerLevelCleared, EssencePerLevelCleared);
+        }
+
+        /// <summary>
+        /// <see cref="AwardLevelClear()"/> with the flat bonus and Essence already decided by the
+        /// caller - a revisit scales both by its reward multiplier (docs/plans/REVISITS.md).
+        /// </summary>
+        public void AwardLevelClear(int goldBonus, int essence)
+        {
+            _saveData.Gold += Mathf.Max(0, goldBonus) + _pendingRunGold;
+            _saveData.Essence += Mathf.Max(0, essence);
             _pendingRunGold = 0;
+            Save();
+            OnChanged?.Invoke();
+        }
+
+        // --- Revisits ---
+
+        /// <summary>The highest heat this save has cleared <paramref name="runKey"/> at as a revisit, or -1 if never.</summary>
+        public int GetBestRevisitHeat(string runKey)
+        {
+            var record = _saveData.RevisitRecords?.Find(r => r != null && r.RunKey == runKey);
+            return record != null ? record.BestHeat : -1;
+        }
+
+        /// <summary>Records a cleared revisit; keeps the best heat. Persists immediately.</summary>
+        public void RecordRevisitHeat(string runKey, int heat)
+        {
+            if (string.IsNullOrEmpty(runKey))
+            {
+                return;
+            }
+            if (_saveData.RevisitRecords == null)
+            {
+                _saveData.RevisitRecords = new List<RevisitRecord>();
+            }
+
+            var record = _saveData.RevisitRecords.Find(r => r != null && r.RunKey == runKey);
+            if (record == null)
+            {
+                _saveData.RevisitRecords.Add(new RevisitRecord { RunKey = runKey, BestHeat = Mathf.Max(0, heat), Clears = 1 });
+            }
+            else
+            {
+                record.BestHeat = Mathf.Max(record.BestHeat, heat);
+                record.Clears++;
+            }
             Save();
             OnChanged?.Invoke();
         }

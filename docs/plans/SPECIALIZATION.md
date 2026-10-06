@@ -365,9 +365,9 @@ a warlock's), and a **new Cultist** is planned as an eighth hero — see below.
 
 #### The Cultist — a new summoning hero *(planned 2026-10-04)*
 
-> **Superseded by [`WARLOCK_CULTIST.md`](WARLOCK_CULTIST.md)**, the working file for both heroes. The
-> owner later moved the demons back to the **Warlock**; the Cultist is a summoner of something not yet
-> decided. The text below is what was written first.
+> **Superseded:** both heroes are built (Warlock 2026-10-04, Cultist 2026-10-05). The demons went to
+> the **Warlock**; the Cultist summons eldritch horrors. See the Heroes and Magic guides, and
+> `NEXT_STEPS.md` for the follow-ups. The text below is what was written first.
 
 What moved here from the old Cultist's vision when he became the Warlock:
 

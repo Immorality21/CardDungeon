@@ -34,7 +34,11 @@ MonoBehaviour:
     Chance: 0.25
     MinQuantity: 1
     MaxQuantity: 1
-  GuaranteedMaterials: []
+  GuaranteedMaterials:
+  - Item: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+    Chance: 1
+    MinQuantity: 1
+    MaxQuantity: 2
   CombatBackground: {fileID: 21300000, guid: e057c47383404ab98d22fc33ff199859, type: 3}
   MapBackdrop: {fileID: 21300000, guid: f93e52c9fe844e0bb4bea4651303f610, type: 3}
   ExplorationMusic: {fileID: 0}

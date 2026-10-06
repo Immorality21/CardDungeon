@@ -58,7 +58,7 @@
 
 ## The roster is eight, and every grid is authored
 
-**Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue, Cultist** *(2026-09-05; the old Cultist was renamed the Warlock 2026-10-04 — `Key`, asset, grid and node keys `warlock-*` — and the new eldritch-horror **Cultist** joined the roster 2026-10-05, rescued in The Hollow Vault; see `docs/plans/WARLOCK_CULTIST.md`)*. **One more `HeroSO` exists off the roster**: `Mage` (elemental caster) — a bare minimum with a sprite and a vision but no grid, no `PartyRoster` entry and no unlock source, so nothing in the game reaches it yet. The Tank, the Acolyte
+**Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue, Cultist** *(2026-09-05; the old Cultist was renamed the Warlock 2026-10-04 — `Key`, asset, grid and node keys `warlock-*` — and the new eldritch-horror **Cultist** joined the roster 2026-10-05, rescued in The Hollow Vault)*. **One more `HeroSO` exists off the roster**: `Mage` (elemental caster) — a bare minimum with a sprite and a vision but no grid, no `PartyRoster` entry and no unlock source, so nothing in the game reaches it yet. The Tank, the Acolyte
 and the Scout are gone — the Tank was a *destination* mistaken for a hero, and the Cleric and Ranger
 are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-generated any more.
 

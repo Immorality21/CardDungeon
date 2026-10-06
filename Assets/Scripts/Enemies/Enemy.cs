@@ -74,11 +74,11 @@ namespace Assets.Scripts.Enemies
         /// </summary>
         public LevelEnemyTuning Tuning { get; private set; }
 
-        /// <summary>XP this kill pays, after the level's tuning.</summary>
-        public int XpReward => LevelEnemyTuning.XpFor(Definition, Tuning);
+        /// <summary>XP this kill pays, after the level's tuning and a revisit's reward multiplier.</summary>
+        public int XpReward => RunHeat.Current.ScaleReward(LevelEnemyTuning.XpFor(Definition, Tuning));
 
-        /// <summary>Gold this kill pays, after the level's tuning.</summary>
-        public int GoldReward => LevelEnemyTuning.GoldFor(Definition, Tuning);
+        /// <summary>Gold this kill pays, after the level's tuning and a revisit's reward multiplier.</summary>
+        public int GoldReward => RunHeat.Current.ScaleReward(LevelEnemyTuning.GoldFor(Definition, Tuning));
 
         /// <summary>
         /// Multiplier on the base Power of anything this enemy casts, so its magic escalates across
@@ -126,7 +126,11 @@ namespace Assets.Scripts.Enemies
 
             Tuning = tuning;
             gameObject.name = definition.DisplayName;
-            Stats = new Stats(LevelEnemyTuning.StatsFor(definition, tuning));
+            // A revisit scales health on top of everything the level decided, absolute boss overrides
+            // included - "+50% health" has to mean the boss too (docs/plans/REVISITS.md).
+            var stats = LevelEnemyTuning.StatsFor(definition, tuning);
+            stats[StatType.MaxHealth] = RunHeat.Current.ScaleEnemyMaxHealth(stats[StatType.MaxHealth]);
+            Stats = new Stats(stats);
             Archetype = definition.ArchetypeOf;
             Spells = new List<EnemySpellEntry>(definition.Spells);
             Behavior = definition.ResolvedBehavior;

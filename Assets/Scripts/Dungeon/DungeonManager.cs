@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
@@ -220,6 +221,7 @@ namespace Assets.Scripts.Dungeon
             // and it covers SpawnSingle too - the boss, and whatever a room event wakes up.
             var levelEntry = CurrentLevelEntry;
             EnemyManager.Instance.SetLevelTuning(levelEntry != null ? levelEntry.EnemyTuning : null);
+            ApplyRunHeat();
 
             EnemyManager.Instance.CleanupEnemies();
 
@@ -317,6 +319,7 @@ namespace Assets.Scripts.Dungeon
             // and it covers SpawnSingle too - the boss, and whatever a room event wakes up.
             var levelEntry = CurrentLevelEntry;
             EnemyManager.Instance.SetLevelTuning(levelEntry != null ? levelEntry.EnemyTuning : null);
+            ApplyRunHeat();
 
             EnemyManager.Instance.CleanupEnemies();
 
@@ -1278,10 +1281,39 @@ namespace Assets.Scripts.Dungeon
                 level.GuaranteedMaterials, RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
             foreach (var award in awards)
             {
-                if (!award.IsEmpty)
+                if (!award.IsEmpty && !RunHeat.Current.Withholds(award.Item.Key))
                 {
                     InventoryManager.Instance.AddItem(award);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Resolves the run's revisit conditions into <see cref="RunHeat.Current"/> before anything
+        /// spawns. Set on every level build rather than once per run, so a resume, a Continue straight
+        /// to the next floor and a fresh scene all read the same thing, and free play or the sandbox
+        /// (no active run) can never inherit a previous run's heat.
+        /// </summary>
+        private void ApplyRunHeat()
+        {
+            if (ActiveRun == null)
+            {
+                RunHeat.Current = RunHeat.None;
+                return;
+            }
+
+            var runSave = _fileHandler.Load<RunSaveData>();
+            var rules = RevisitRulesSO.Load();
+            var heat = RevisitOps.Resolve(rules, runSave.IsRevisit, runSave.Modifiers);
+            RevisitOps.ApplyScarcity(heat, rules,
+                MetaProgressManager.Instance.GetBestRevisitHeat(CampaignOps.RunKeyOf(ActiveRun)));
+            RunHeat.Current = heat;
+            if (RunHeat.Current.IsRevisit)
+            {
+                Debug.Log($"Revisit of {ActiveRun.DisplayName}: heat {RunHeat.Current.Heat}, "
+                          + $"enemy health x{RunHeat.Current.EnemyHealthMultiplier:0.##}, "
+                          + $"damage x{RunHeat.Current.EnemyDamageMultiplier:0.##}, "
+                          + $"rewards x{RunHeat.Current.RewardMultiplier:0.##}.");
             }
         }
 
@@ -1299,12 +1331,13 @@ namespace Assets.Scripts.Dungeon
             var summary = new LevelClearSummary
             {
                 GoldFound = MetaProgressManager.Instance.PendingRunGold,
-                GoldBonus = MetaProgressManager.GoldPerLevelCleared,
-                Essence = MetaProgressManager.EssencePerLevelCleared,
+                GoldBonus = RunHeat.Current.ScaleReward(MetaProgressManager.GoldPerLevelCleared),
+                Essence = RunHeat.Current.ScaleReward(MetaProgressManager.EssencePerLevelCleared),
             };
 
-            // Award persistent meta-currency for clearing the level
-            MetaProgressManager.Instance.AwardLevelClear();
+            // Award persistent meta-currency for clearing the level. A revisit pays the flat clear
+            // bonus and the Essence at its reward multiplier; kill-gold was already scaled per kill.
+            MetaProgressManager.Instance.AwardLevelClear(summary.GoldBonus, summary.Essence);
 
             if (InventoryManager.HasInstance)
             {
@@ -1360,6 +1393,10 @@ namespace Assets.Scripts.Dungeon
                     // Run complete — record it permanently (gates non-repeatable runs like the
                     // tutorial out of the New Run button), then clear the run save.
                     MetaProgressManager.Instance.MarkRunCompleted(runSave.RunKey);
+                    if (runSave.IsRevisit)
+                    {
+                        MetaProgressManager.Instance.RecordRevisitHeat(runSave.RunKey, RunHeat.Current.Heat);
+                    }
                     _fileHandler.Delete(runSave);
                     ActiveRun = null;
                     Assets.Scripts.Hub.HubManager.MarkRunCompleted(runSave.RunKey);

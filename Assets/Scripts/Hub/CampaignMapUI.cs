@@ -45,8 +45,20 @@ namespace Assets.Scripts.Hub
         private string _activeRunKey = string.Empty;
         private bool _isShown;
 
-        /// <summary>Raised with the chosen run when the player commits to starting or continuing it.</summary>
-        public event Action<RunDefinitionSO> OnRunChosen;
+        // The revisit picker (docs/plans/REVISITS.md): a second step on a cleared run, shown in the
+        // detail column. Selections are kept for the session, Hades-style, so a second revisit starts
+        // where the last one was set.
+        private readonly RevisitRulesSO _revisitRules;
+        private readonly List<RunModifierSelection> _selections = new List<RunModifierSelection>();
+        private readonly List<Button> _heatRows = new List<Button>();
+        private bool _picking;
+        private int _heatCursor;
+
+        /// <summary>
+        /// Raised when the player commits to starting or continuing a run. The list is the revisit's
+        /// chosen conditions - null when the run is not a revisit (a first clear, or Continue).
+        /// </summary>
+        public event Action<RunDefinitionSO, List<RunModifierSelection>> OnRunChosen;
 
         public event Action OnClosed;
 
@@ -55,6 +67,7 @@ namespace Assets.Scripts.Hub
             _root = root;
             _campaign = campaign;
             _roster = roster;
+            _revisitRules = RevisitRulesSO.Load();
 
             _titleLabel = root.Q<Label>("campaign-title");
             _detailName = root.Q<Label>("campaign-detail-name");
@@ -105,6 +118,7 @@ namespace Assets.Scripts.Hub
             _activeRunKey = activeRunKey ?? string.Empty;
             _activeLevelIndex = activeLevelIndex;
             _isShown = true;
+            _picking = false;
             _root.style.display = DisplayStyle.Flex;
             _root.focusable = true;
             SetFeedback(string.Empty);
@@ -212,6 +226,20 @@ namespace Assets.Scripts.Hub
             SetText(_detailStatus, inProgress
                 ? $"In progress · Level {current + 1} of {floors}"
                 : $"{CampaignPresenter.StatusLabel(selected)} · {floors} {(floors == 1 ? "floor" : "floors")}");
+            if (_picking)
+            {
+                SetText(_detailStatus, "Revisit · choose the conditions");
+                SetText(_detailBlurb, string.Empty);
+                SetText(_detailRequires, string.Empty);
+                BuildHeatPicker(run);
+                SetShown(_startButton, true);
+                if (_startButton != null)
+                {
+                    _startButton.text = "Begin revisit";
+                }
+                return;
+            }
+
             SetText(_detailBlurb, run.Blurb);
             BuildDetailBody(selected, inProgress, current);
 
@@ -239,7 +267,7 @@ namespace Assets.Scripts.Hub
             {
                 _startButton.text = selected.CanContinue
                     ? "Continue"
-                    : selected.Status == CampaignNodeStatus.Completed ? "Run again" : "Begin";
+                    : IsRevisitChoice(selected) ? "Revisit…" : "Begin";
             }
         }
 
@@ -307,6 +335,7 @@ namespace Assets.Scripts.Hub
 
         private void OnNodeClicked(string key)
         {
+            _picking = false;
             _selectedKey = key;
             SetFeedback(string.Empty);
             if (_view != null)
@@ -334,13 +363,34 @@ namespace Assets.Scripts.Hub
                 return;
             }
 
-            OnRunChosen?.Invoke(selected.Node.Run);
+            if (IsRevisitChoice(selected))
+            {
+                if (!_picking)
+                {
+                    // A cleared run asks for its conditions before it starts.
+                    _picking = true;
+                    _heatCursor = 0;
+                    RefreshDetail();
+                    return;
+                }
+
+                OnRunChosen?.Invoke(selected.Node.Run, new List<RunModifierSelection>(_selections));
+                return;
+            }
+
+            OnRunChosen?.Invoke(selected.Node.Run, null);
         }
 
         private void OnKeyDown(KeyDownEvent evt)
         {
             if (!_isShown)
             {
+                return;
+            }
+
+            if (_picking && OnPickerKey(evt.keyCode))
+            {
+                evt.StopPropagation();
                 return;
             }
 
@@ -397,6 +447,171 @@ namespace Assets.Scripts.Hub
 
             OnNodeClicked(key);
             _view.EnsureNodeVisible(key);
+        }
+
+        // --- The revisit picker -----------------------------------------------------------
+
+        /// <summary>A cleared run the player may start again: it opens the conditions first.</summary>
+        private static bool IsRevisitChoice(CampaignNodeState state)
+        {
+            return state != null
+                && state.CanStart
+                && state.Status == CampaignNodeStatus.Completed
+                && RevisitOps.IsRevisitable(state.Node.Run);
+        }
+
+        /// <summary>
+        /// The conditions as rows, then what they add up to. Everything is re-derived from
+        /// <see cref="RevisitOps"/> on every change, so the numbers shown are the ones the run uses.
+        /// </summary>
+        private void BuildHeatPicker(RunDefinitionSO run)
+        {
+            if (_detailBody == null)
+            {
+                return;
+            }
+            _detailBody.Clear();
+            _heatRows.Clear();
+
+            var rules = _revisitRules;
+            if (rules == null)
+            {
+                _detailBody.Add(MakeLabel("No revisit rules are authored (Resources/Revisits).", "cm-floor"));
+                return;
+            }
+
+            _detailBody.Add(MakeLabel(
+                $"Every revisit: enemies +{rules.BaseEnemyHealthPercent}% health, +{rules.BaseEnemyDamagePercent}% damage.",
+                "cm-heat-summary"));
+            _detailBody.Add(MakeLabel("Conditions", "cd-inv-col__title"));
+
+            var modifiers = rules.Modifiers ?? new List<RunModifier>();
+            foreach (var modifier in modifiers)
+            {
+                if (modifier == null || string.IsNullOrEmpty(modifier.Key))
+                {
+                    continue;
+                }
+                _heatRows.Add(MakeHeatRow(modifier, _heatRows.Count));
+            }
+            foreach (var row in _heatRows)
+            {
+                _detailBody.Add(row);
+            }
+            _heatCursor = Mathf.Clamp(_heatCursor, 0, Mathf.Max(0, _heatRows.Count - 1));
+            MarkHeatCursor();
+
+            var heat = RevisitOps.Resolve(rules, true, _selections);
+            int rewardPercent = Mathf.RoundToInt((heat.RewardMultiplier - 1f) * 100f);
+            _detailBody.Add(MakeLabel(
+                $"Heat {heat.Heat} · rewards +{rewardPercent}% XP, gold and Essence", "cm-heat-summary"));
+
+            int best = MetaProgressManager.HasInstance
+                ? MetaProgressManager.Instance.GetBestRevisitHeat(CampaignOps.RunKeyOf(run))
+                : -1;
+            if (best >= 0)
+            {
+                _detailBody.Add(MakeLabel($"Best cleared: heat {best}", "cm-floor", "cm-floor--done"));
+            }
+        }
+
+        private Button MakeHeatRow(RunModifier modifier, int index)
+        {
+            int rank = RevisitOps.RankOf(_selections, modifier.Key);
+            var row = new Button { focusable = false };
+            row.AddToClassList("cm-heat-row");
+            if (rank > 0)
+            {
+                row.AddToClassList("cm-heat-row--on");
+            }
+
+            var head = new VisualElement { pickingMode = PickingMode.Ignore };
+            head.AddToClassList("cm-heat-row__head");
+            head.Add(MakeLabel(modifier.DisplayName, "cm-heat-row__name"));
+            string pips = new string('●', rank) + new string('○', Mathf.Max(0, modifier.MaxRank - rank));
+            head.Add(MakeLabel($"{pips}  +{modifier.HeatPerRank * Mathf.Max(1, rank)}", "cm-heat-row__rank"));
+            row.Add(head);
+            row.Add(MakeLabel(RevisitOps.Describe(modifier, rank), "cm-heat-row__desc"));
+
+            string key = modifier.Key;
+            row.clicked += () =>
+            {
+                _heatCursor = index;
+                RevisitOps.CycleRank(_revisitRules, _selections, key);
+                RefreshDetail();
+            };
+            return row;
+        }
+
+        private void MarkHeatCursor()
+        {
+            for (int i = 0; i < _heatRows.Count; i++)
+            {
+                _heatRows[i].EnableInClassList("cm-heat-row--cursor", i == _heatCursor);
+            }
+        }
+
+        /// <summary>
+        /// The picker's keys: Up/Down walk the conditions, Left/Right lower and raise a rank, Enter
+        /// begins, Escape steps back to the map. Returns false for keys it leaves to the map.
+        /// </summary>
+        private bool OnPickerKey(KeyCode key)
+        {
+            switch (key)
+            {
+                case KeyCode.Escape:
+                case KeyCode.Backspace:
+                    _picking = false;
+                    RefreshDetail();
+                    return true;
+                case KeyCode.UpArrow:
+                case KeyCode.DownArrow:
+                    if (_heatRows.Count > 0)
+                    {
+                        int step = key == KeyCode.UpArrow ? -1 : 1;
+                        _heatCursor = (_heatCursor + step + _heatRows.Count) % _heatRows.Count;
+                        MarkHeatCursor();
+                    }
+                    return true;
+                case KeyCode.LeftArrow:
+                case KeyCode.RightArrow:
+                    var modifier = ModifierAtCursor();
+                    if (modifier != null)
+                    {
+                        int rank = RevisitOps.RankOf(_selections, modifier.Key) + (key == KeyCode.RightArrow ? 1 : -1);
+                        RevisitOps.SetRank(_revisitRules, _selections, modifier.Key, rank);
+                        RefreshDetail();
+                    }
+                    return true;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Space:
+                    OnStart();
+                    return true;
+            }
+            return false;
+        }
+
+        private RunModifier ModifierAtCursor()
+        {
+            if (_revisitRules == null || _revisitRules.Modifiers == null)
+            {
+                return null;
+            }
+            int index = 0;
+            foreach (var modifier in _revisitRules.Modifiers)
+            {
+                if (modifier == null || string.IsNullOrEmpty(modifier.Key))
+                {
+                    continue;
+                }
+                if (index == _heatCursor)
+                {
+                    return modifier;
+                }
+                index++;
+            }
+            return null;
         }
 
         // --- Helpers -----------------------------------------------------------------------
