@@ -743,7 +743,9 @@ namespace Assets.Scripts.Rooms
                 string declineText = string.IsNullOrEmpty(option.DeclineText)
                     ? "You leave it be."
                     : option.DeclineText;
-                ShowDetail(_currentEvent.Title, declineText);
+                // Say so, or the Action button that stays on the bar reads as a bug rather than an
+                // offer still open (revisit playtest finding 11).
+                ShowDetail(_currentEvent.Title, declineText + "\n\nIt will still be here if you change your mind.");
                 _detailOkAction = CloseEventResult;
                 return;
             }
@@ -943,9 +945,15 @@ namespace Assets.Scripts.Rooms
             string left = model.FrontierCount > 0
                 ? $"\n\n{model.FrontierCount} {(model.FrontierCount == 1 ? "way" : "ways")} not yet taken will stay unexplored."
                 : string.Empty;
-            ShowConfirm("The Way Down",
-                "The stairs drop away into the dark below." + left,
-                "Descend",
+            // The last floor has nothing below it: there the stairs lead home (revisit playtest
+            // finding 11).
+            bool lastFloor = dungeon != null && DungeonManager.ActiveRun != null
+                && DungeonManager.RunLevelIndex >= DungeonManager.ActiveRun.Levels.Count - 1;
+            ShowConfirm(lastFloor ? "The Way Out" : "The Way Down",
+                (lastFloor
+                    ? "The way is clear. Nothing lies deeper - this is the end of the run."
+                    : "The stairs drop away into the dark below.") + left,
+                lastFloor ? "Leave" : "Descend",
                 () => CombatManager.Instance.NotifyDungeonCleared());
         }
 
@@ -1089,8 +1097,8 @@ namespace Assets.Scripts.Rooms
 
             var materials = RoomKindRewards.TreasureMaterials(
                 level.MaterialTable, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
-            // A revisit below its best heat does not pay the scarce materials (docs/plans/REVISITS.md).
-            materials.RemoveAll(a => a.Item != null && RunHeat.Current.Withholds(a.Item.Key));
+            // A revisit below its best fear does not pay the scarce materials (docs/plans/REVISITS.md).
+            materials.RemoveAll(a => a.Item != null && RunFear.Current.Withholds(a.Item.Key));
             return materials;
         }
 
@@ -1151,7 +1159,7 @@ namespace Assets.Scripts.Rooms
 
                     int max = hero.GetEffectiveMaxHealth();
                     int healed = Mathf.Min(
-                        RunHeat.Current.ScaleHeroHealing(RoomKindRewards.RestHealAmount(max)),
+                        RunFear.Current.ScaleHeroHealing(RoomKindRewards.RestHealAmount(max)),
                         Mathf.Max(0, max - hero.Stats.Health));
                     hero.Stats.Health += healed;
                     lines.Add(healed > 0
@@ -2894,7 +2902,35 @@ namespace Assets.Scripts.Rooms
                 _detailRows.Add(MakeVictoryRow("Gold found on this floor", "lost"));
             }
             _detailRows.Add(MakeVictoryRow("XP, items and materials from this floor", "lost"));
+
+            // Point at the way to get stronger. Nothing after a wipe used to link losing to the
+            // sphere grid (revisit playtest finding 5). Banked XP is read off disk: saves are
+            // deferred, so disk holds what survives this wipe.
+            int banked = BankedPartyXp();
+            _detailRows.Add(MakeVictoryRow("Grow stronger",
+                banked > 0
+                    ? $"{banked} XP banked - spend it in the Hall of Progression"
+                    : "Spend banked XP in the Hall of Progression"));
             SetShown(_detailRows, true);
+        }
+
+        /// <summary>The fielded heroes' unspent XP as it stands on disk - what a wipe leaves them.</summary>
+        private static int BankedPartyXp()
+        {
+            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
+            if (party == null)
+            {
+                return 0;
+            }
+            int total = 0;
+            foreach (var hero in party.Heroes)
+            {
+                if (hero != null && hero.HeroSO != null)
+                {
+                    total += Heroes.HeroRoster.GetHeroSave(hero.HeroSO).CurrentXp;
+                }
+            }
+            return total;
         }
 
         private void OnFlee()

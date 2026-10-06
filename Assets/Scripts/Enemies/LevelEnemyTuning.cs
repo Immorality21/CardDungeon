@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Combat;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 
@@ -75,12 +76,37 @@ namespace Assets.Scripts.Enemies
                  "above. For the one enemy a curve does not suit.")]
         public List<EnemyStatOverride> Overrides = new List<EnemyStatOverride>();
 
+        /// <summary>
+        /// A revisit's Fear level, layered on top of everything above (docs/plans/REVISITS.md). Never
+        /// authored and never saved: <see cref="WithFear"/> puts it on a copy, which the live game
+        /// (<c>DungeonManager</c>) and the balance model (<c>RunCurve.Build</c>) both build, so a
+        /// revisit's enemies are priced by exactly the rule that spawns them.
+        /// </summary>
+        [NonSerialized] public RunFear Fear;
+
+        /// <summary>
+        /// <paramref name="tuning"/> with a Fear level on it: a copy, so the authored asset never
+        /// carries one. No Fear (null, or not a revisit) returns the tuning unchanged; no tuning with
+        /// a Fear is a fresh identity tuning, so an untuned floor still answers to the revisit.
+        /// </summary>
+        public static LevelEnemyTuning WithFear(LevelEnemyTuning tuning, RunFear fear)
+        {
+            if (fear == null || !fear.IsRevisit)
+            {
+                return tuning;
+            }
+            var copy = tuning != null ? (LevelEnemyTuning)tuning.MemberwiseClone() : new LevelEnemyTuning();
+            copy.Fear = fear;
+            return copy;
+        }
+
         /// <summary>True when this tuning changes nothing, so callers can skip the work entirely.</summary>
         public bool IsIdentity
         {
             get
             {
-                return Mathf.Approximately(Difficulty, 1f)
+                return (Fear == null || !Fear.IsRevisit)
+                    && Mathf.Approximately(Difficulty, 1f)
                     && Mathf.Approximately(XpMultiplier, 1f)
                     && Mathf.Approximately(GoldMultiplier, 1f)
                     && (StatScales == null || StatScales.Count == 0)
@@ -227,8 +253,12 @@ namespace Assets.Scripts.Enemies
         //  Static helpers, so callers never have to null-check a tuning
         // ------------------------------------------------------------------
 
-        /// <summary>Stats for an enemy under an optional tuning; null means the template's own.</summary>
-        public static StatBlock StatsFor(EnemySO enemy, LevelEnemyTuning tuning)
+        /// <summary>
+        /// Stats for an enemy under an optional tuning; null means the template's own. A tuning with
+        /// a <see cref="Fear"/> level scales the result (every stat, then the conditions) - pass
+        /// <paramref name="includeFear"/> false for the floor's own numbers.
+        /// </summary>
+        public static StatBlock StatsFor(EnemySO enemy, LevelEnemyTuning tuning, bool includeFear = true)
         {
             if (enemy == null)
             {
@@ -238,35 +268,48 @@ namespace Assets.Scripts.Enemies
             {
                 return enemy.BaseStats != null ? enemy.BaseStats.Clone() : new StatBlock();
             }
-            return tuning.StatsFor(enemy);
+            var stats = tuning.StatsFor(enemy);
+            if (includeFear && tuning.Fear != null)
+            {
+                tuning.Fear.ScaleEnemyStats(stats);
+            }
+            return stats;
         }
 
+        /// <summary>XP the kill pays: the level's, then a revisit's reward multiplier.</summary>
         public static int XpFor(EnemySO enemy, LevelEnemyTuning tuning)
         {
             if (enemy == null)
             {
                 return 0;
             }
-            return tuning != null ? tuning.XpFor(enemy) : enemy.XpReward;
+            int xp = tuning != null ? tuning.XpFor(enemy) : enemy.XpReward;
+            return tuning?.Fear != null ? tuning.Fear.ScaleReward(xp) : xp;
         }
 
+        /// <summary>Gold the kill pays: the level's, then a revisit's reward multiplier.</summary>
         public static int GoldFor(EnemySO enemy, LevelEnemyTuning tuning)
         {
             if (enemy == null)
             {
                 return 0;
             }
-            return tuning != null ? tuning.GoldFor(enemy) : enemy.GoldReward;
+            int gold = tuning != null ? tuning.GoldFor(enemy) : enemy.GoldReward;
+            return tuning?.Fear != null ? tuning.Fear.ScaleReward(gold) : gold;
         }
 
-        /// <summary>Spell power multiplier for an enemy under an optional tuning; 1 for none.</summary>
+        /// <summary>
+        /// Spell power multiplier for an enemy under an optional tuning; 1 for none. A Fear level
+        /// scales it like the enemy's stats, so a caster keeps pace with a hitter.
+        /// </summary>
         public static float MagicPowerScaleFor(EnemySO enemy, LevelEnemyTuning tuning)
         {
             if (enemy == null || tuning == null)
             {
                 return 1f;
             }
-            return tuning.MagicPowerScaleFor(enemy);
+            float scale = tuning.MagicPowerScaleFor(enemy);
+            return tuning.Fear != null ? scale * tuning.Fear.EnemySpellPowerScale : scale;
         }
     }
 }

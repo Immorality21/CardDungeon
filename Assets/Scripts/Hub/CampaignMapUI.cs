@@ -50,9 +50,10 @@ namespace Assets.Scripts.Hub
         // where the last one was set.
         private readonly RevisitRulesSO _revisitRules;
         private readonly List<RunModifierSelection> _selections = new List<RunModifierSelection>();
-        private readonly List<Button> _heatRows = new List<Button>();
+        private readonly List<Button> _fearRows = new List<Button>();
+        private ScrollView _fearScroll;
         private bool _picking;
-        private int _heatCursor;
+        private int _fearCursor;
 
         /// <summary>
         /// Raised when the player commits to starting or continuing a run. The list is the revisit's
@@ -229,9 +230,11 @@ namespace Assets.Scripts.Hub
             if (_picking)
             {
                 SetText(_detailStatus, "Revisit · choose the conditions");
-                SetText(_detailBlurb, string.Empty);
+                // Fear was never defined, and the empty blurb left a gap (revisit playtest finding 2).
+                SetText(_detailBlurb, "Each condition raises the Fear level by its +number: a harder run, bigger rewards. "
+                    + "Stronger heroes come from the Hall of Progression.");
                 SetText(_detailRequires, string.Empty);
-                BuildHeatPicker(run);
+                BuildFearPicker(run);
                 SetShown(_startButton, true);
                 if (_startButton != null)
                 {
@@ -255,6 +258,18 @@ namespace Assets.Scripts.Hub
                     lines.Add("Needs in your roster: " + string.Join(", ", selected.MissingHeroes));
                 }
                 SetText(_detailRequires, string.Join("\n", lines));
+            }
+            else if (selected.Status == CampaignNodeStatus.Completed)
+            {
+                // Say why a cleared run can or cannot be played again, and how far it has been
+                // pushed - revisits were invisible until the button appeared (revisit playtest
+                // finding 4).
+                int best = MetaProgressManager.HasInstance
+                    ? MetaProgressManager.Instance.GetBestRevisitFear(CampaignOps.RunKeyOf(run))
+                    : -1;
+                SetText(_detailRequires, !RevisitOps.IsRevisitable(run)
+                    ? "This place cannot be revisited."
+                    : best >= 0 ? $"Revisited · highest Fear level cleared: {best}" : string.Empty);
             }
             else
             {
@@ -369,7 +384,7 @@ namespace Assets.Scripts.Hub
                 {
                     // A cleared run asks for its conditions before it starts.
                     _picking = true;
-                    _heatCursor = 0;
+                    _fearCursor = 0;
                     RefreshDetail();
                     return;
                 }
@@ -464,14 +479,14 @@ namespace Assets.Scripts.Hub
         /// The conditions as rows, then what they add up to. Everything is re-derived from
         /// <see cref="RevisitOps"/> on every change, so the numbers shown are the ones the run uses.
         /// </summary>
-        private void BuildHeatPicker(RunDefinitionSO run)
+        private void BuildFearPicker(RunDefinitionSO run)
         {
             if (_detailBody == null)
             {
                 return;
             }
             _detailBody.Clear();
-            _heatRows.Clear();
+            _fearRows.Clear();
 
             var rules = _revisitRules;
             if (rules == null)
@@ -481,8 +496,8 @@ namespace Assets.Scripts.Hub
             }
 
             _detailBody.Add(MakeLabel(
-                $"Every revisit: enemies +{rules.BaseEnemyHealthPercent}% health, +{rules.BaseEnemyDamagePercent}% damage.",
-                "cm-heat-summary"));
+                $"Every revisit: enemies +{rules.BaseEnemyStatPercent}% to every stat - health, damage, speed, defences.",
+                "cm-fear-summary"));
             _detailBody.Add(MakeLabel("Conditions", "cd-inv-col__title"));
 
             var modifiers = rules.Modifiers ?? new List<RunModifier>();
@@ -492,62 +507,74 @@ namespace Assets.Scripts.Hub
                 {
                     continue;
                 }
-                _heatRows.Add(MakeHeatRow(modifier, _heatRows.Count));
+                _fearRows.Add(MakeFearRow(modifier, _fearRows.Count));
             }
-            foreach (var row in _heatRows)
+            // The rows scroll and the summary below them stays put: five conditions already outgrew
+            // the column, and the fear line is the one thing that must always be on screen.
+            _fearScroll = new ScrollView(ScrollViewMode.Vertical);
+            _fearScroll.AddToClassList("cm-fear-scroll");
+            _fearScroll.focusable = false;
+            foreach (var row in _fearRows)
             {
-                _detailBody.Add(row);
+                _fearScroll.Add(row);
             }
-            _heatCursor = Mathf.Clamp(_heatCursor, 0, Mathf.Max(0, _heatRows.Count - 1));
-            MarkHeatCursor();
+            _detailBody.Add(_fearScroll);
+            _fearCursor = Mathf.Clamp(_fearCursor, 0, Mathf.Max(0, _fearRows.Count - 1));
+            MarkFearCursor();
 
-            var heat = RevisitOps.Resolve(rules, true, _selections);
-            int rewardPercent = Mathf.RoundToInt((heat.RewardMultiplier - 1f) * 100f);
+            var fear = RevisitOps.Resolve(rules, true, _selections);
+            int rewardPercent = Mathf.RoundToInt((fear.RewardMultiplier - 1f) * 100f);
             _detailBody.Add(MakeLabel(
-                $"Heat {heat.Heat} · rewards +{rewardPercent}% XP, gold and Essence", "cm-heat-summary"));
+                $"Fear level {fear.Level} · rewards +{rewardPercent}% XP, gold and Essence", "cm-fear-summary"));
 
             int best = MetaProgressManager.HasInstance
-                ? MetaProgressManager.Instance.GetBestRevisitHeat(CampaignOps.RunKeyOf(run))
+                ? MetaProgressManager.Instance.GetBestRevisitFear(CampaignOps.RunKeyOf(run))
                 : -1;
             if (best >= 0)
             {
-                _detailBody.Add(MakeLabel($"Best cleared: heat {best}", "cm-floor", "cm-floor--done"));
+                _detailBody.Add(MakeLabel($"Highest cleared: Fear level {best}", "cm-floor", "cm-floor--done"));
             }
         }
 
-        private Button MakeHeatRow(RunModifier modifier, int index)
+        private Button MakeFearRow(RunModifier modifier, int index)
         {
             int rank = RevisitOps.RankOf(_selections, modifier.Key);
             var row = new Button { focusable = false };
-            row.AddToClassList("cm-heat-row");
+            row.AddToClassList("cm-fear-row");
             if (rank > 0)
             {
-                row.AddToClassList("cm-heat-row--on");
+                row.AddToClassList("cm-fear-row--on");
             }
 
             var head = new VisualElement { pickingMode = PickingMode.Ignore };
-            head.AddToClassList("cm-heat-row__head");
-            head.Add(MakeLabel(modifier.DisplayName, "cm-heat-row__name"));
+            head.AddToClassList("cm-fear-row__head");
+            head.Add(MakeLabel(modifier.DisplayName, "cm-fear-row__name"));
             string pips = new string('●', rank) + new string('○', Mathf.Max(0, modifier.MaxRank - rank));
-            head.Add(MakeLabel($"{pips}  +{modifier.HeatPerRank * Mathf.Max(1, rank)}", "cm-heat-row__rank"));
+            head.Add(MakeLabel($"{pips}  +{modifier.FearPerRank * Mathf.Max(1, rank)}", "cm-fear-row__rank"));
             row.Add(head);
-            row.Add(MakeLabel(RevisitOps.Describe(modifier, rank), "cm-heat-row__desc"));
+            row.Add(MakeLabel(RevisitOps.Describe(modifier, rank), "cm-fear-row__desc"));
 
             string key = modifier.Key;
             row.clicked += () =>
             {
-                _heatCursor = index;
+                _fearCursor = index;
                 RevisitOps.CycleRank(_revisitRules, _selections, key);
                 RefreshDetail();
             };
             return row;
         }
 
-        private void MarkHeatCursor()
+        private void MarkFearCursor()
         {
-            for (int i = 0; i < _heatRows.Count; i++)
+            for (int i = 0; i < _fearRows.Count; i++)
             {
-                _heatRows[i].EnableInClassList("cm-heat-row--cursor", i == _heatCursor);
+                _fearRows[i].EnableInClassList("cm-fear-row--cursor", i == _fearCursor);
+            }
+            if (_fearScroll != null && _fearCursor >= 0 && _fearCursor < _fearRows.Count)
+            {
+                var row = _fearRows[_fearCursor];
+                // Layout lands a frame late on a freshly built list, so scroll once it has.
+                _fearScroll.schedule.Execute(() => _fearScroll.ScrollTo(row));
             }
         }
 
@@ -566,11 +593,11 @@ namespace Assets.Scripts.Hub
                     return true;
                 case KeyCode.UpArrow:
                 case KeyCode.DownArrow:
-                    if (_heatRows.Count > 0)
+                    if (_fearRows.Count > 0)
                     {
                         int step = key == KeyCode.UpArrow ? -1 : 1;
-                        _heatCursor = (_heatCursor + step + _heatRows.Count) % _heatRows.Count;
-                        MarkHeatCursor();
+                        _fearCursor = (_fearCursor + step + _fearRows.Count) % _fearRows.Count;
+                        MarkFearCursor();
                     }
                     return true;
                 case KeyCode.LeftArrow:
@@ -605,7 +632,7 @@ namespace Assets.Scripts.Hub
                 {
                     continue;
                 }
-                if (index == _heatCursor)
+                if (index == _fearCursor)
                 {
                     return modifier;
                 }

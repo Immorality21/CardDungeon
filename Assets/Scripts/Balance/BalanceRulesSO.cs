@@ -242,6 +242,19 @@ namespace Assets.Scripts.Balance
                  "trusting them. See docs/BALANCING.md 5s.")]
         [Min(1)] public int HeroXpEquivalent = 1875;
 
+        [Header("Revisits pace the campaign (docs/BALANCING.md)")]
+        [Tooltip("Once a run can be replayed, the run it opens should push the straight-line party: " +
+                 "its worst floor should reach at least this attrition without a revisit. 0.70 is " +
+                 "where death starts (BALANCING.md 5h). Below it, the revisit is optional.")]
+        [Range(0f, 1.5f)] public float RevisitNudgeMinAttrition = 0.70f;
+
+        [Tooltip("...and a few Fear level 0 revisits of the run behind it should bring every floor " +
+                 "under this attrition. 0.64 and below wipe 0% of the time (BALANCING.md 0g).")]
+        [Range(0f, 1.5f)] public float RevisitCatchUpMaxAttrition = 0.64f;
+
+        [Tooltip("How many revisits the catch-up may take. More than this reads as grinding.")]
+        [Min(1)] public int RevisitCatchUpMaxRevisits = 3;
+
         [Tooltip("Investment each campaign tier should demand, indexed by CampaignOps.ComputeTiers " +
                  "depth. In the same units as HeroXpEquivalent: a fresh save sits at 0. The list " +
                  "rising is what 'depth means danger' means; the last entry covers anything deeper.")]

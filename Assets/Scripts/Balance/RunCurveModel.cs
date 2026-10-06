@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
@@ -30,6 +31,13 @@ namespace Assets.Scripts.Balance
         /// so this is where the numbers a fight here actually uses come from.
         /// </summary>
         public LevelEnemyTuning Tuning;
+
+        /// <summary>
+        /// The revisit this level was measured under, or null for a first clear. Already folded
+        /// into <see cref="Tuning"/> (enemy stats, rewards, spell power); held here for what the
+        /// tuning cannot carry - the healing the party gets back (docs/plans/REVISITS.md).
+        /// </summary>
+        public RunFear Fear;
 
         public List<RoomEncounter> Rooms = new List<RoomEncounter>();
 
@@ -200,6 +208,19 @@ namespace Assets.Scripts.Balance
         public static RunCurve Build(RunDefinitionSO run, PartyBaseline party, BalanceRulesSO rules,
             IReadOnlyList<HeroSO> seedRoster, IReadOnlyDictionary<HeroSO, int> seedLifetimeXp)
         {
+            return Build(run, party, rules, seedRoster, seedLifetimeXp, null);
+        }
+
+        /// <summary>
+        /// Models a run played as a revisit at <paramref name="fear"/> (null = a first clear). The
+        /// Fear level reaches every floor through <see cref="LevelEnemyTuning.WithFear"/> - the same
+        /// call the live game makes - so enemy stats, rewards and spell power are priced by the rule
+        /// that spawns them; the party's healing is scaled in <see cref="Aggregate"/>. Not modelled:
+        /// extra foes per fight (Swarming Halls), which the room model takes from spawn tables.
+        /// </summary>
+        public static RunCurve Build(RunDefinitionSO run, PartyBaseline party, BalanceRulesSO rules,
+            IReadOnlyList<HeroSO> seedRoster, IReadOnlyDictionary<HeroSO, int> seedLifetimeXp, RunFear fear)
+        {
             var curve = new RunCurve { Run = run };
             if (run == null || party == null || rules == null)
             {
@@ -277,7 +298,7 @@ namespace Assets.Scripts.Balance
                         h => Mathf.FloorToInt(lifetime.TryGetValue(h, out var xp) ? xp : 0f),
                         party.GearLookup, party.PotionItem, party.PotionCount, null);
 
-                var level = BuildLevel(i, entry, levelParty, rules);
+                var level = BuildLevel(i, entry, levelParty, rules, fear);
                 level.RescuedHere = entry.RescueHero;
                 // Mirror levelParty exactly: the only level measured at the bare ReferenceHeroXp is
                 // level 0 of a run nothing feeds into. A run reached along a campaign edge is fought
@@ -323,8 +344,10 @@ namespace Assets.Scripts.Balance
                 curve.EndLifetimeXp[hero] = Mathf.FloorToInt(lifetime.TryGetValue(hero, out var xp) ? xp : 0f);
             }
 
-            curve.ClearGold = MetaProgressManager.GoldPerLevelCleared * curve.Levels.Count;
-            curve.ClearEssence = MetaProgressManager.EssencePerLevelCleared * curve.Levels.Count;
+            // A revisit pays its clear bonus and Essence at its reward multiplier, as AwardLevelClear does.
+            var rewardFear = fear != null && fear.IsRevisit ? fear : RunFear.None;
+            curve.ClearGold = rewardFear.ScaleReward(MetaProgressManager.GoldPerLevelCleared) * curve.Levels.Count;
+            curve.ClearEssence = rewardFear.ScaleReward(MetaProgressManager.EssencePerLevelCleared) * curve.Levels.Count;
 
             for (int i = 1; i < curve.Levels.Count; i++)
             {
@@ -377,7 +400,8 @@ namespace Assets.Scripts.Balance
             return total / roster.Count;
         }
 
-        private static LevelCurve BuildLevel(int index, RunLevelEntry entry, PartyBaseline party, BalanceRulesSO rules)
+        private static LevelCurve BuildLevel(int index, RunLevelEntry entry, PartyBaseline party, BalanceRulesSO rules,
+            RunFear fear = null)
         {
             var level = new LevelCurve
             {
@@ -387,7 +411,8 @@ namespace Assets.Scripts.Balance
                 Layout = entry.ManualLayout,
                 Boss = entry.BossEnemy,
                 Entry = entry,
-                Tuning = entry.EnemyTuning,
+                Tuning = LevelEnemyTuning.WithFear(entry.EnemyTuning, fear),
+                Fear = fear != null && fear.IsRevisit ? fear : null,
 
                 // Room kinds are a level-template quota, and they cut both ways: each one is a fight
                 // the level does not have, and a cache or a refuge it does. A hand-drawn layout's
@@ -734,7 +759,15 @@ namespace Assets.Scripts.Balance
             // party's health and potions - otherwise adding one reads as pure difficulty relief the
             // curve cannot see.
             int restHealing = RoomKindRewards.ExpectedRestHealing(level.RestRooms, party.HealthPool);
-            int sustain = party.SustainPool + restHealing;
+            int healing = party.HealingPool;
+            if (level.Fear != null)
+            {
+                // A revisit's No Respite cuts what potions and refuges give back, never the bar
+                // the party walks in with.
+                restHealing = level.Fear.ScaleHeroHealing(restHealing);
+                healing = level.Fear.ScaleHeroHealing(healing);
+            }
+            int sustain = party.HealthPool + healing + restHealing;
             level.PartySize = party.Size;
             level.RestHealing = restHealing;
             level.SustainPool = sustain;

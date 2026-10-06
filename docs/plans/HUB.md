@@ -349,9 +349,9 @@ per hero. Directions to weigh (none chosen):
 
 1. **Fold it into gold**, so the Forge charges gold. One fewer currency, but gold would then buy power
    directly, which `InvestmentPointsPerGold` would have to price.
-2. **Make it the revisit currency** (`REVISITS.md`): paid by heat, so it is the thing that harder
+2. **Make it the revisit currency** (`REVISITS.md`): paid by Fear level, so it is the thing that harder
    re-clears produce and the Forge becomes the endgame sink. **Leaning this way (owner, 2026-10-06):**
-   revisits already scale Essence with heat, and a guide after the second run will point the player
+   revisits already scale Essence with Fear level, and a guide after the second run will point the player
    at a revisit and Essence together. What Essence *buys* is still open.
 3. **Tie it to knowledge**, paid for Bestiary entries, first kills and combo discoveries, so it
    rewards exploring the systems rather than grinding floors.
@@ -364,7 +364,7 @@ Touch points: `MetaProgressManager` (award + Forge costs), `MagicForgeUI`, the l
 ### 3d. Bounties — a reason to go back *(opened 2026-10-06)*
 
 A hub building (or a Bestiary / Merchant ladder level) that posts **rotating contracts on cleared
-runs**: *"clear Rotwater Deep at heat 2 with the Rogue fielded"*, *"kill three Bog Shamans in the
+runs**: *"clear Rotwater Deep at Fear level 2 with the Rogue fielded"*, *"kill three Bog Shamans in the
 Drowned March"*, *"clear the Ashen Deep without a refuge"*. Each pays a **named** reward, usually a
 specific material, so the player chooses where to revisit by what they need. It gives revisits a
 direction beyond "the run that pays best".
@@ -374,6 +374,6 @@ direction beyond "the run that pays best".
 - A natural home for **hero-specific** conditions ("bring the Cultist"), which pulls benched and late
   heroes into play without paying anyone for sitting out.
 - **Depends on `REVISITS.md`**: there is nothing to contract until cleared runs are repeatable, and the
-  condition vocabulary should be shared with revisit heat, not built twice.
+  condition vocabulary should be shared with revisit Fear level, not built twice.
 - Open: how contracts rotate (per run cleared? per hub visit?), whether an unfinished one can be
   abandoned, and whether a contract may ask for something the balance model cannot see (a hero ban).

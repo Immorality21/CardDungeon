@@ -128,15 +128,15 @@ namespace Assets.Scripts.Enemies
         }
 
         /// <summary>
-        /// A revisit's "more enemies" condition (<see cref="RunHeat.ExtraEnemiesPerRoom"/>): extra
+        /// A revisit's "more enemies" condition (<see cref="RunFear.ExtraEnemiesPerRoom"/>): extra
         /// bodies drawn from the room's own spawn table, only in a room that already rolled a fight
         /// (an empty room stays a breather) and never past the stage's design size. Drawn from the
-        /// dungeon's seeded stream, and a run's heat is fixed, so a resumed floor regenerates the
+        /// dungeon's seeded stream, and a run's fear is fixed, so a resumed floor regenerates the
         /// same extras.
         /// </summary>
         private void AddRevisitExtras(Room room, List<EnemySpawnEntry> spawnTable, GameObject prefab)
         {
-            int extra = RunHeat.Current.ExtraEnemiesPerRoom;
+            int extra = RunFear.Current.ExtraEnemiesPerRoom;
             if (extra <= 0 || room.Enemies.Count == 0)
             {
                 return;

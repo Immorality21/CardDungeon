@@ -12,18 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 262185ac98f6453ca6809d8b254c2e8d, type: 3}
   m_Name: Revisits
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RevisitRulesSO
-  BaseEnemyHealthPercent: 50
-  BaseEnemyDamagePercent: 50
+  BaseEnemyStatPercent: 50
   BaseRewardPercent: 25
-  RewardPercentPerHeat: 10
-  NewBestHeatOnly:
+  RewardPercentPerFear: 10
+  NewBestFearOnly:
   - {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
   Modifiers:
   - Key: hardened-foes
     DisplayName: Hardened Foes
     Description: Enemies have +{0}% more health.
     MaxRank: 3
-    HeatPerRank: 1
+    FearPerRank: 1
     Effects:
     - Kind: 0
       AmountPerRank: 25
@@ -31,15 +30,23 @@ MonoBehaviour:
     DisplayName: Sharpened Blades
     Description: Enemies deal +{0}% more damage.
     MaxRank: 3
-    HeatPerRank: 1
+    FearPerRank: 1
     Effects:
     - Kind: 1
+      AmountPerRank: 25
+  - Key: quickened-foes
+    DisplayName: Quickened Foes
+    Description: Enemies are +{0}% faster - they act sooner and more often.
+    MaxRank: 2
+    FearPerRank: 2
+    Effects:
+    - Kind: 4
       AmountPerRank: 25
   - Key: swarming-halls
     DisplayName: Swarming Halls
     Description: Every fight brings {0} more foe(s), up to five.
     MaxRank: 2
-    HeatPerRank: 2
+    FearPerRank: 2
     Effects:
     - Kind: 2
       AmountPerRank: 1
@@ -47,7 +54,7 @@ MonoBehaviour:
     DisplayName: No Respite
     Description: Heroes receive {0}% less healing - spells, potions and refuges alike.
     MaxRank: 2
-    HeatPerRank: 2
+    FearPerRank: 2
     Effects:
     - Kind: 3
       AmountPerRank: -50

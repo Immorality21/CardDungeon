@@ -22,6 +22,12 @@ namespace Assets.Scripts.Dungeon
 
         /// <summary>N% per rank on healing heroes receive. Author negative: -50 halves it, -100 stops it.</summary>
         HeroHealingPercent = 3,
+
+        /// <summary>
+        /// +N% enemy Agility per rank: they act sooner and more often. Added after the first playtest
+        /// found fear 0 trivial because a fast party simply acted first (revisit playtest finding 12).
+        /// </summary>
+        EnemyAgilityPercent = 4,
     }
 
     [Serializable]
@@ -53,8 +59,8 @@ namespace Assets.Scripts.Dungeon
 
         [Min(1)] public int MaxRank = 1;
 
-        [Tooltip("Heat each rank adds. Heat is what the rewards scale with.")]
-        [Min(0)] public int HeatPerRank = 1;
+        [Tooltip("Fear each rank adds. Fear is what the rewards scale with.")]
+        [Min(0)] public int FearPerRank = 1;
 
         public List<RunModifierEffect> Effects = new List<RunModifierEffect>();
     }

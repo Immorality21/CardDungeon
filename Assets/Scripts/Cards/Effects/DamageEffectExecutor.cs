@@ -31,8 +31,7 @@ namespace Assets.Scripts.Cards.Effects
                 // Resolved per target, because PowerMode.PercentOfMaxHealth reads the bar of the unit
                 // the effect lands on. Flat power comes from the definition (a combo's bonus effect, a
                 // room event's outcome) rather than from whoever happened to trigger it.
-                int rawAttack = RunHeat.Current.ScaleOutgoingDamage(
-                    caster, SpellPower.Resolve(effect, caster, target, buffTracker, flatPower));
+                int rawAttack = SpellPower.Resolve(effect, caster, target, buffTracker, flatPower);
 
                 // Magic (an Intelligence- or Spirit-scaled effect) is met by Spirit, everything else
                 // by Endurance — DefenseRules owns the split.
@@ -52,6 +51,7 @@ namespace Assets.Scripts.Cards.Effects
                     {
                         Target = target,
                         Text = $"+{heal}",
+                        Healed = heal,
                         Color = HealColor,
                         Delay = EffectDelay
                     });

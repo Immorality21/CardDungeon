@@ -114,6 +114,14 @@ optimising the wrong thing.
 5. **Hard floor:** the campaign's **last** floor may never clear on under **15%** of a hero's grid
    (`MinGridShareForLastFloor`). A floor only — no upper bound, no band, because rule 4 says a depth
    build should be able to finish on a different share than a breadth build. Currently **37%**.
+6. **Revisits pace the campaign** *(owner, 2026-10-06)*. The moment a run can be replayed is where
+   the game starts nudging the player to replay it, and the way it nudges is that **the content
+   after it gets harder**. A run that opens after a replayable one is tuned so the party that walks
+   straight in is pushed (its worst ordinary floor reaches `RevisitNudgeMinAttrition`, 0.70, where
+   death starts). A few Fear level 0 revisits of the run behind it then catch the party up (every
+   ordinary floor under `RevisitCatchUpMaxAttrition`, 0.64, within `RevisitCatchUpMaxRevisits`, 3;
+   more than that reads as grinding). Before the first replayable run the campaign stays
+   straight-line. `RevisitModel` measures it and `EvaluateRevisits` reports it (§5ab).
 
 **The trap this sets for the model:** `SphereGridOps.GreedySpend` buys best power-per-XP, which after
 §5s's depth-pricing is always a cheap shallow node — so **it is a breadth build by construction**, and
@@ -2584,3 +2592,52 @@ had thin jobs). Rules in `Assets/Scripts/Combat/CLAUDE.md` ("Physical vs magic",
 - **Not re-tuned**, and two levers were left alone on purpose: `StatCatalog` power weights (Spirit
   is still weighted 2 though it now defends) and damage-over-time, which still reads Endurance.
   Re-measure both when the balance pause lifts.
+
+## §5ab — Revisits in the model, and the pacing they set (2026-10-06)
+
+Revisits (`docs/plans/REVISITS.md`) were the first content the balance model could not see. Two pieces
+landed together.
+
+**A Fear level rides on the enemy tuning.** `LevelEnemyTuning.WithFear(tuning, fear)` puts a revisit
+on a copy of the floor's tuning, and the static helpers (`StatsFor`, `XpFor`, `GoldFor`,
+`MagicPowerScaleFor`) fold it in. The live game (`DungeonManager`) and the model
+(`RunCurve.Build(..., fear)`) make the same call, so a revisit is priced by the rule that spawns it.
+That is also why the damage condition is applied **through the stats** (Strength, Intelligence and
+spell base power) rather than per hit: a per-hit multiplier is invisible to the closed form.
+**Not modelled:** Swarming Halls' extra foes, since the room model takes bodies from spawn tables.
+Hero healing (No Respite) is modelled, by scaling the potion and refuge part of the sustain pool.
+
+**`RevisitModel` measures §0 rule 6.** Two measurements:
+- each replayable run, revisited at Fear level 0 by the party that just cleared it: the XP per hero
+  one revisit pays, and its worst ordinary floor;
+- each run downstream of a replayable one: its worst ordinary floor for the straight-line party, then
+  again with 1..3 revisits' XP added.
+
+**Boss floors are kept out of the judgement.** The closed form overstates a sealed room of dense
+bodies several times over (§5k), and finales are tier gates the frontier judges. With bosses in, the
+Fear level 0 revisit of the Warrens read as attrition 13.2, while a playtester cleared the Drowned
+March revisit without taking damage. A one-floor run (The Hollow Vault) falls back to its boss floor,
+so its finding is not to be trusted until the floor simulator replaces the closed form there.
+
+**What it says about today's campaign** (closed form, no gear; the campaign is unfinished and these
+are playtest runs):
+
+| replayable run | XP per hero per revisit | worst ordinary floor on the revisit |
+|---|---|---|
+| The Drowned March | 269 | 0.55 |
+| The Warrens | 255 | 2.51 (two-hero party) |
+| The Ashen Deep | 388 | 1.00 |
+
+| run after a replayable one | straight-line peak | after 1 / 2 / 3 revisits |
+|---|---|---|
+| The Ashen Deep (← Drowned March) | **0.33** | 0.30 / 0.20 / 0.14 |
+| The Drowned Chapel (← Drowned March) | **0.21** | 0.17 / 0.12 / 0.08 |
+| The Hollow Vault (← Ashen Deep) | boss-only, unreliable | 0.96 / 0.85 / 0.85 |
+
+So by rule 6 **the content after the Drowned March is too easy**: neither run pushes a straight-line
+party anywhere near 0.70. The analyzer reports both as "No reason to revisit The Drowned March first".
+That is the target for the next content and tuning pass, not something to fix by lowering the bar.
+
+**Follow-ups:** judge with the floor simulator (wipe rate) when `Simulate` is on, since it does not
+overstate dense rooms; model Swarming Halls; and measure the Hollow Vault from the party that has done
+*both* its prerequisites (it is an `All` node, so "weakest prerequisite" undersells who arrives).

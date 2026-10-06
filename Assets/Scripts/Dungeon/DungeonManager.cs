@@ -220,8 +220,11 @@ namespace Assets.Scripts.Dungeon
             // An EnemySO is a template; this level owns the numbers. Set before anything spawns,
             // and it covers SpawnSingle too - the boss, and whatever a room event wakes up.
             var levelEntry = CurrentLevelEntry;
-            EnemyManager.Instance.SetLevelTuning(levelEntry != null ? levelEntry.EnemyTuning : null);
-            ApplyRunHeat();
+            // The Fear level first: it rides on the tuning, so every spawn (and the boss, and
+            // whatever a room event wakes) is scaled by the same rule the balance model prices.
+            ApplyRunFear();
+            EnemyManager.Instance.SetLevelTuning(
+                LevelEnemyTuning.WithFear(levelEntry != null ? levelEntry.EnemyTuning : null, RunFear.Current));
 
             EnemyManager.Instance.CleanupEnemies();
 
@@ -318,8 +321,11 @@ namespace Assets.Scripts.Dungeon
             // An EnemySO is a template; this level owns the numbers. Set before anything spawns,
             // and it covers SpawnSingle too - the boss, and whatever a room event wakes up.
             var levelEntry = CurrentLevelEntry;
-            EnemyManager.Instance.SetLevelTuning(levelEntry != null ? levelEntry.EnemyTuning : null);
-            ApplyRunHeat();
+            // The Fear level first: it rides on the tuning, so every spawn (and the boss, and
+            // whatever a room event wakes) is scaled by the same rule the balance model prices.
+            ApplyRunFear();
+            EnemyManager.Instance.SetLevelTuning(
+                LevelEnemyTuning.WithFear(levelEntry != null ? levelEntry.EnemyTuning : null, RunFear.Current));
 
             EnemyManager.Instance.CleanupEnemies();
 
@@ -1281,7 +1287,7 @@ namespace Assets.Scripts.Dungeon
                 level.GuaranteedMaterials, RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
             foreach (var award in awards)
             {
-                if (!award.IsEmpty && !RunHeat.Current.Withholds(award.Item.Key))
+                if (!award.IsEmpty && !RunFear.Current.Withholds(award.Item.Key))
                 {
                     InventoryManager.Instance.AddItem(award);
                 }
@@ -1289,31 +1295,31 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
-        /// Resolves the run's revisit conditions into <see cref="RunHeat.Current"/> before anything
+        /// Resolves the run's revisit conditions into <see cref="RunFear.Current"/> before anything
         /// spawns. Set on every level build rather than once per run, so a resume, a Continue straight
         /// to the next floor and a fresh scene all read the same thing, and free play or the sandbox
-        /// (no active run) can never inherit a previous run's heat.
+        /// (no active run) can never inherit a previous run's fear.
         /// </summary>
-        private void ApplyRunHeat()
+        private void ApplyRunFear()
         {
             if (ActiveRun == null)
             {
-                RunHeat.Current = RunHeat.None;
+                RunFear.Current = RunFear.None;
                 return;
             }
 
             var runSave = _fileHandler.Load<RunSaveData>();
             var rules = RevisitRulesSO.Load();
-            var heat = RevisitOps.Resolve(rules, runSave.IsRevisit, runSave.Modifiers);
-            RevisitOps.ApplyScarcity(heat, rules,
-                MetaProgressManager.Instance.GetBestRevisitHeat(CampaignOps.RunKeyOf(ActiveRun)));
-            RunHeat.Current = heat;
-            if (RunHeat.Current.IsRevisit)
+            var fear = RevisitOps.Resolve(rules, runSave.IsRevisit, runSave.Modifiers);
+            RevisitOps.ApplyScarcity(fear, rules,
+                MetaProgressManager.Instance.GetBestRevisitFear(CampaignOps.RunKeyOf(ActiveRun)));
+            RunFear.Current = fear;
+            if (RunFear.Current.IsRevisit)
             {
-                Debug.Log($"Revisit of {ActiveRun.DisplayName}: heat {RunHeat.Current.Heat}, "
-                          + $"enemy health x{RunHeat.Current.EnemyHealthMultiplier:0.##}, "
-                          + $"damage x{RunHeat.Current.EnemyDamageMultiplier:0.##}, "
-                          + $"rewards x{RunHeat.Current.RewardMultiplier:0.##}.");
+                Debug.Log($"Revisit of {ActiveRun.DisplayName}: Fear level {RunFear.Current.Level}, "
+                          + $"enemy health x{RunFear.Current.EnemyHealthMultiplier:0.##}, "
+                          + $"damage x{RunFear.Current.EnemyDamageMultiplier:0.##}, "
+                          + $"rewards x{RunFear.Current.RewardMultiplier:0.##}.");
             }
         }
 
@@ -1331,8 +1337,8 @@ namespace Assets.Scripts.Dungeon
             var summary = new LevelClearSummary
             {
                 GoldFound = MetaProgressManager.Instance.PendingRunGold,
-                GoldBonus = RunHeat.Current.ScaleReward(MetaProgressManager.GoldPerLevelCleared),
-                Essence = RunHeat.Current.ScaleReward(MetaProgressManager.EssencePerLevelCleared),
+                GoldBonus = RunFear.Current.ScaleReward(MetaProgressManager.GoldPerLevelCleared),
+                Essence = RunFear.Current.ScaleReward(MetaProgressManager.EssencePerLevelCleared),
             };
 
             // Award persistent meta-currency for clearing the level. A revisit pays the flat clear
@@ -1395,11 +1401,12 @@ namespace Assets.Scripts.Dungeon
                     MetaProgressManager.Instance.MarkRunCompleted(runSave.RunKey);
                     if (runSave.IsRevisit)
                     {
-                        MetaProgressManager.Instance.RecordRevisitHeat(runSave.RunKey, RunHeat.Current.Heat);
+                        MetaProgressManager.Instance.RecordRevisitFear(runSave.RunKey, RunFear.Current.Level);
                     }
                     _fileHandler.Delete(runSave);
                     ActiveRun = null;
-                    Assets.Scripts.Hub.HubManager.MarkRunCompleted(runSave.RunKey);
+                    Assets.Scripts.Hub.HubManager.MarkRunCompleted(runSave.RunKey,
+                        runSave.IsRevisit ? RunFear.Current.Level : -1, RunFear.Current.RewardMultiplier);
                 }
             }
 

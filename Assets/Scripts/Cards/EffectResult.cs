@@ -20,6 +20,12 @@ namespace Assets.Scripts.Cards
         // reads, so finishing a 2 HP enemy with a 30 damage hit drains off 2, not 30.
         public int Landed;
 
+        // Health this entry restored to its target. Set by every healing path (Heal, Drain, an
+        // absorbed hit) so a reader such as the room-event report can tell a heal from a hit
+        // without parsing Text - which once called every event heal "takes N damage"
+        // (revisit playtest finding 7).
+        public int Healed;
+
         // How resistance affected this hit (Weak/Resisted/Immune/…) — the presenter turns a
         // non-Normal value into a coloured popup. Default Normal for non-damage entries.
         public DamageEffectiveness Effectiveness = DamageEffectiveness.Normal;

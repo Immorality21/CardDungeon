@@ -143,9 +143,25 @@ namespace Assets.Scripts.Hub
 
         public static void MarkRunCompleted(string runKey)
         {
+            MarkRunCompleted(runKey, -1, 1f);
+        }
+
+        /// <summary>
+        /// <see cref="MarkRunCompleted(string)"/> for a run that may have been a revisit:
+        /// <paramref name="revisitFear"/> is its fear, or -1 for a first clear. The screen names the
+        /// fear and the bonus instead of re-listing roads the first clear already opened (revisit
+        /// playtest finding 1).
+        /// </summary>
+        public static void MarkRunCompleted(string runKey, int revisitFear, float rewardMultiplier)
+        {
             _justCompletedRun = true;
             _completedRunKey = runKey;
+            _completedRevisitFear = revisitFear;
+            _completedRewardMultiplier = rewardMultiplier;
         }
+
+        private static int _completedRevisitFear = -1;
+        private static float _completedRewardMultiplier = 1f;
 
         /// <summary>The title screen's New Game: start the tutorial on arrival.</summary>
         public static void RequestNewGame()
@@ -1092,9 +1108,20 @@ namespace Assets.Scripts.Hub
                 _levelCount.text = $"Level {levelIndex + 1} of {run.Levels.Count}";
                 if (_runSaveData.IsRevisit)
                 {
-                    var heat = RevisitOps.Resolve(RevisitRulesSO.Load(), true, _runSaveData.Modifiers);
-                    _levelCount.text += $" · Revisit, heat {heat.Heat}";
+                    _levelCount.text += " · Revisit";
                 }
+            }
+
+            // A revisit says what it does before the player commits, not just its fear number
+            // (revisit playtest finding 3).
+            var revisitLine = _progressView.Q<Label>("progress-revisit");
+            if (revisitLine != null)
+            {
+                string summary = _runSaveData.IsRevisit
+                    ? RevisitOps.Summary(RevisitOps.Resolve(RevisitRulesSO.Load(), true, _runSaveData.Modifiers))
+                    : string.Empty;
+                revisitLine.text = summary;
+                SetShown(revisitLine, !string.IsNullOrEmpty(summary));
             }
             _levelName.text = levelEntry.LevelName;
             BuildLevelPips(run.Levels.Count, levelIndex);
@@ -1181,6 +1208,8 @@ namespace Assets.Scripts.Hub
             ResetKeyboardNavigation();
             _justCompletedRun = false;
             _completedRunKey = null;
+            _completedRevisitFear = -1;
+            _completedRewardMultiplier = 1f;
         }
 
         /// <summary>
@@ -1205,6 +1234,24 @@ namespace Assets.Scripts.Hub
             }
             rewards.Clear();
 
+            if (_completedRevisitFear >= 0)
+            {
+                // A revisit opens nothing new - the first clear did that - so say what this one was.
+                int bonus = Mathf.RoundToInt((_completedRewardMultiplier - 1f) * 100f);
+                if (message != null)
+                {
+                    message.text = $"Revisit cleared at Fear level {_completedRevisitFear}. Every reward on the way paid +{bonus}%.";
+                }
+                int best = run != null ? MetaProgressManager.Instance.GetBestRevisitFear(CampaignOps.RunKeyOf(run)) : -1;
+                if (best >= 0)
+                {
+                    rewards.Add(CompleteRow("Highest Fear level cleared", best.ToString()));
+                }
+                rewards.Add(CompleteRow("Next time", "Raise the Fear level for bigger rewards"));
+                SetShown(rewards, true);
+                return;
+            }
+
             var owned = _partyRoster != null ? HeroRoster.GetOwnedKeys(_partyRoster) : null;
             var opened = CampaignOps.OpenedBy(_campaign, run, MetaProgressManager.Instance.GetCompletedRunKeys(), owned);
             if (message != null)
@@ -1215,17 +1262,30 @@ namespace Assets.Scripts.Hub
             }
             foreach (var next in opened)
             {
-                var row = new VisualElement { pickingMode = PickingMode.Ignore };
-                row.AddToClassList("cd-victory-row");
-                var label = new Label("Now open") { pickingMode = PickingMode.Ignore };
-                label.AddToClassList("cd-victory-row__label");
-                var value = new Label(CampaignOps.DisplayNameOf(next)) { pickingMode = PickingMode.Ignore };
-                value.AddToClassList("cd-victory-row__value");
-                row.Add(label);
-                row.Add(value);
-                rewards.Add(row);
+                rewards.Add(CompleteRow("Now open", CampaignOps.DisplayNameOf(next)));
             }
-            SetShown(rewards, opened.Count > 0);
+
+            // A first clear of a run that can be revisited says so: revisits were invisible until
+            // the button appeared (revisit playtest finding 4).
+            bool revisitable = RevisitOps.IsRevisitable(run);
+            if (revisitable)
+            {
+                rewards.Add(CompleteRow("Revisit", "Run it again from the story map, harder, for bigger rewards"));
+            }
+            SetShown(rewards, opened.Count > 0 || revisitable);
+        }
+
+        private static VisualElement CompleteRow(string labelText, string valueText)
+        {
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("cd-victory-row");
+            var label = new Label(labelText) { pickingMode = PickingMode.Ignore };
+            label.AddToClassList("cd-victory-row__label");
+            var value = new Label(valueText) { pickingMode = PickingMode.Ignore };
+            value.AddToClassList("cd-victory-row__value");
+            row.Add(label);
+            row.Add(value);
+            return row;
         }
 
         // ============================================================

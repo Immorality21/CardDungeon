@@ -80,6 +80,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 | `BalanceMath` | closed-form metrics: damage, hits-to-kill, ticks, **danger index**, power score |
 | `EncounterModel` | `WeightedEnemyGroup` + `RoomEncounter` — fractional spawn-table expectation |
 | `RunCurveModel` | `LevelCurve` / `RunCurve` — attrition, peak danger, boss ratio, difficulty jumps |
+| `RevisitModel` | **revisits**: each replayable run at Fear level 0 (`RunCurve.Build(..., fear)`, the Fear level riding on `LevelEnemyTuning.WithFear` exactly as in the game), XP per revisit, and the **pacing guideline** for the runs after a replayable one (straight-line party pushed, a few revisits catch it up). Boss floors are kept out of the judgement — see `docs/BALANCING.md` §0 rule 6 and §5ab |
 | `RoomEventModel` | what a level's **room events** cost and pay: placement odds, check odds, weighted outcome pools |
 | `EnemyMagicModel` | what an enemy's **own casts** are worth: cast share, expected damage and healing per cast |
 | `EnemyBehaviorModel` | what an enemy's **authored repertoire** is worth per turn: the offense multiplier, healing, idle share |

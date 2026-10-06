@@ -181,6 +181,11 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   forfeiture and hub resolution for free. And a material drop states its own flat `Chance` rather
   than inheriting `LootRoller`'s rarity + depth curve, which is the *gear* regime and would suppress
   a deep material at the depth it was authored for. Do not fold materials back into a currency.
+- **Revisits pace the campaign** *(owner, 2026-10-06)*. From the moment a run can be replayed, the
+  game nudges the player to replay it by making the content after it harder: a straight-line party is
+  pushed, and a few Fear level 0 revisits catch it up. The guideline is `BALANCING.md` §0 rule 6,
+  measured by `RevisitModel` / `EvaluateRevisits`. The difficulty a player picks for a revisit is the
+  **Fear level**, our own name, not Hades' "Heat".
 - **The seven stats stay seven; Spirit and Luck got second jobs** *(2026-10-03)*. Spirit is the
   defence against magic (Intelligence/Spirit-scaled effects) in a clean split with Endurance, and
   Luck dodges physical hits only, on both sides. Do not add Magic Defense, Evasion or Accuracy stats.
@@ -227,7 +232,8 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| — | **Re-clearable runs at a player-selected difficulty** — composable heat (Hades), +50% enemy health/damage base, rewards in Essence + XP + gold | ✅ **first version built 2026-10-06**: the picker on the story map, four conditions, Void Shard only on a new best heat. Next: the Essence guide, more conditions, the balance model |
+| — | **Re-clearable runs at a player-selected difficulty** — composable **Fear level** (our own name, not Hades' Heat), +50% to every enemy stat as the base, rewards in Essence + XP + gold | ✅ **built 2026-10-06**: the picker on the story map, five conditions, Void Shard only on a new best Fear level, enemy damage-over-time scaled, **the balance model prices revisits** (`RevisitModel`, `BALANCING.md` §5ab). Next: the Essence guide, more conditions, retune the content after the Drowned March to the pacing guideline |
+| — | **Revisit playtest — 15 findings** | **worked through 2026-10-06** → [`docs/playtest-revisit/TODO.md`](playtest-revisit/TODO.md) has a status per finding. Finding 12 answered: the base is now +50% to every enemy stat. Delete the folder after a Fear level 0 replay confirms it |
 
 ### [Open balance work](plans/BALANCE_OPEN.md)
 
@@ -265,10 +271,10 @@ One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` 
 per-subsystem `CLAUDE.md` files — not here.
 
 - **Revisits, first version** (2026-10-06) — `plans/REVISITS.md`. A cleared run (Drowned March,
-  Warrens, Ashen Deep) can be revisited at heat built from composable conditions: +50% enemy health
+  Warrens, Ashen Deep) can be revisited at Fear level built from composable conditions: +50% enemy health
   and damage as the base, plus Hardened Foes, Sharpened Blades, Swarming Halls and No Respite. Rewards
-  (XP, gold, Essence) scale with heat; Void Shard drops only on a new best heat; the Warrens boss no
-  longer drops it at all. `RunHeat`, `RevisitOps`, `Resources/Revisits.asset`; `RevisitTests`; suite
+  (XP, gold, Essence) scale with Fear level; Void Shard drops only on a new best Fear level; the Warrens boss no
+  longer drops it at all. `RunFear`, `RevisitOps`, `Resources/Revisits.asset`; `RevisitTests`; suite
   1,329 / 0; checked in play mode.
 
 - **The Cultist's branch summons** (2026-10-05) — Abyssal Nightmare

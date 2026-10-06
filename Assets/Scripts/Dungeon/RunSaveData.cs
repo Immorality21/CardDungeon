@@ -19,7 +19,7 @@ namespace Assets.Scripts.Dungeon
         public List<SummonChargeSaveData> SummonCharges = new List<SummonChargeSaveData>();
 
         // A re-clear of a run already completed, and the conditions chosen for it (docs/plans/REVISITS.md).
-        // Fixed when the run is picked; DungeonManager resolves them into RunHeat on every level build.
+        // Fixed when the run is picked; DungeonManager resolves them into RunFear on every level build.
         public bool IsRevisit;
         public List<RunModifierSelection> Modifiers = new List<RunModifierSelection>();
 

@@ -535,9 +535,24 @@ namespace Assets.Scripts.Items.UI
                 }
             }
 
+            // One row per kind of item, with a count: six loose Leather Caps were six identical rows
+            // (revisit playtest finding 11). Equipping takes the first copy.
+            var bagOrder = new List<string>();
+            var bagFirst = new Dictionary<string, ItemSaveData>();
+            var bagCount = new Dictionary<string, int>();
             foreach (var item in bag)
             {
-                AddCandidate(item, null);
+                if (!bagFirst.ContainsKey(item.ItemKey))
+                {
+                    bagOrder.Add(item.ItemKey);
+                    bagFirst[item.ItemKey] = item;
+                    bagCount[item.ItemKey] = 0;
+                }
+                bagCount[item.ItemKey]++;
+            }
+            foreach (var key in bagOrder)
+            {
+                AddCandidate(bagFirst[key], null, bagCount[key]);
             }
             foreach (var item in others)
             {
@@ -553,7 +568,7 @@ namespace Assets.Scripts.Items.UI
             }
         }
 
-        private void AddCandidate(ItemSaveData item, string wornBy)
+        private void AddCandidate(ItemSaveData item, string wornBy, int copies = 1)
         {
             var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
             var gear = ItemPresenter.SwapIn(CurrentGear(), so);
@@ -571,6 +586,10 @@ namespace Assets.Scripts.Items.UI
             string caption = wornBy != null
                 ? $"Worn by {wornBy}"
                 : ItemPresenter.RarityLabel(so.Rarity);
+            if (copies > 1)
+            {
+                caption = $"×{copies} · " + caption;
+            }
             // The chips are the change from what this hero wears, not what the item grants - say so,
             // or "+2 STR" here reads as a contradiction of the detail's "Grants +4 STR" (playtest 2
             // finding 4).

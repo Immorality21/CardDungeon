@@ -87,6 +87,7 @@
             <ui:VisualElement class="hub-entry__body">
                 <ui:Label name="level-name" text="" class="hub-entry__name" />
                 <ui:VisualElement name="level-pips" class="hub-entry__pips" />
+                <ui:Label name="progress-revisit" text="" class="cm-fear-summary cd-hidden" />
                 <ui:Label text="Marching out" class="cd-inv-col__title hub-entry__party-title" />
                 <ui:VisualElement name="progress-party-tiles" class="hub-entry__party" />
                 <ui:Label name="progress-party" text="" class="cd-inv-detail__note" />

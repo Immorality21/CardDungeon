@@ -53,6 +53,9 @@ namespace Assets.Scripts.Heroes.UI
         private const float FrontierMinZoom = 0.7f;
         private const float FrontierMaxZoom = 1.1f;
 
+        // How many steps past the frontier the opening frame reaches, so a fresh hero sees the fork.
+        private const int FrameLookahead = 3;
+
         public event Action OnClosed;
 
         /// <summary>Raised after a node is bought, with its key.</summary>
@@ -348,7 +351,37 @@ namespace Assets.Scripts.Heroes.UI
                     frontier.Add(pair.Key);
                 }
             }
-            _view.FrameNodes(frontier, FrontierMinZoom, FrontierMaxZoom);
+
+            // And a few steps past it: a fresh hero's frontier is the trunk alone, which framed the
+            // view so tight that both branches were off screen (revisit playtest finding 11). Three
+            // rings out reaches the first fork on every grid, showing where each path goes without
+            // shrinking the whole grid to specks.
+            // Symmetric adjacency: an edge is authored on one of its two nodes only, so walking a
+            // node's own Neighbors list misses half the graph.
+            var adjacency = SphereGridOps.BuildAdjacency(grid);
+            var framed = new List<string>(frontier);
+            var ring = new List<string>(frontier);
+            for (int step = 0; step < FrameLookahead; step++)
+            {
+                var nextRing = new List<string>();
+                foreach (var key in ring)
+                {
+                    if (!adjacency.TryGetValue(key, out var neighbours))
+                    {
+                        continue;
+                    }
+                    foreach (var next in neighbours)
+                    {
+                        if (!string.IsNullOrEmpty(next) && !framed.Contains(next))
+                        {
+                            framed.Add(next);
+                            nextRing.Add(next);
+                        }
+                    }
+                }
+                ring = nextRing;
+            }
+            _view.FrameNodes(framed, FrontierMinZoom, FrontierMaxZoom);
         }
 
         // --- refresh ------------------------------------------------------------------
@@ -394,7 +427,13 @@ namespace Assets.Scripts.Heroes.UI
                 SetDetail("Select a node.", "", "Click a node, or move to one with the arrow keys.", "");
                 SetShown(_detailKind, false);
                 SetReason(string.Empty);
-                _activateButton?.SetEnabled(false);
+                if (_activateButton != null)
+                {
+                    // Reset the label too, or switching hero after an activation left the button
+                    // reading "Activated" over an empty selection (revisit playtest finding 9).
+                    _activateButton.text = "Activate";
+                    _activateButton.SetEnabled(false);
+                }
                 return;
             }
 
@@ -507,8 +546,13 @@ namespace Assets.Scripts.Heroes.UI
             var without = new List<string>(activated);
             without.Remove(node.Key);
             var with = new List<string>(without) { node.Key };
-            var before = HeroStatCalculator.BaseStatsForNodes(_selectedHero, without);
-            var after = HeroStatCalculator.BaseStatsForNodes(_selectedHero, with);
+            // With gear, so the numbers match the Storehouse and the fight. Base-only previews said
+            // "Health 38 -> 48" while the Storehouse said 56 (revisit playtest finding 11).
+            var gear = Items.InventoryManager.HasInstance
+                ? Items.InventoryManager.Instance.GetEquippedItems(_selectedHero.SaveKey)
+                : new List<Items.ItemSO>();
+            var before = HeroStatCalculator.WithGear(HeroStatCalculator.BaseStatsForNodes(_selectedHero, without), gear);
+            var after = HeroStatCalculator.WithGear(HeroStatCalculator.BaseStatsForNodes(_selectedHero, with), gear);
 
             foreach (var entry in node.Gains.NonZero())
             {

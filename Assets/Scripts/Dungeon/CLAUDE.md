@@ -48,15 +48,15 @@ the answer to it - see `docs/BALANCING.md` §5e for the four tuning passes that 
 
 The tutorial forks: `DrownedMarch` is the main line (one-shot, escalating), `TheWarrens` is an optional repeatable dead end whose job is to fund the hub's Gold sinks (it predates the removal of the party-slot purchase). Its boss **does not drop Void Shard** (2026-10-06): a guaranteed scarce drop on a repeatable run is an infinite tap. Re-clearable runs in general are `docs/plans/REVISITS.md`. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
 
-## Revisits — a cleared run played again, at a heat the player picks
+## Revisits — a cleared run played again, at a Fear level the player picks
 
 A completed `Repeatable` run is a **revisit** (`docs/plans/REVISITS.md`). The story map's
 **Revisit…** opens a condition picker. The choice goes into `RunSaveData.IsRevisit` + `Modifiers`,
-and `DungeonManager.ApplyRunHeat` resolves it into `Combat.RunHeat.Current` on every level build.
+and `DungeonManager.ApplyRunFear` resolves it into `Combat.RunFear.Current` on every level build.
 That static is what enemy spawning, damage, healing and rewards read. With no active run it is
-`RunHeat.None`, so free play and the sandbox are never affected. Story pays once: captives and
+`RunFear.None`, so free play and the sandbox are never affected. Story pays once: captives and
 `JoinsOnClear` already skip an owned hero, and completion is already recorded. Scarce materials
-(`RevisitRulesSO.NewBestHeatOnly`) drop only when a revisit beats the run's best heat
+(`RevisitRulesSO.NewBestFearOnly`) drop only when a revisit beats the run's best Fear level
 (`MetaProgressSaveData.RevisitRecords`). **A boss on a repeatable run must not guarantee a scarce
 material any other way.** Conditions live in `Resources/Revisits.asset`.
 

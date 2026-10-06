@@ -34,7 +34,7 @@ namespace Assets.Scripts.Cards.Effects
                 return;
             }
 
-            int heal = RunHeat.Current.ScaleHealing(caster, Amount(effect.Power, DamageDealt(result, caster)));
+            int heal = RunFear.Current.ScaleHealing(caster, Amount(effect.Power, DamageDealt(result, caster)));
             if (heal <= 0)
             {
                 return;
@@ -52,6 +52,7 @@ namespace Assets.Scripts.Cards.Effects
             {
                 Target = caster,
                 Text = $"+{healed}",
+                Healed = healed,
                 Color = DrainColor,
                 Delay = EffectDelay
             });

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Assets.Scripts.Dungeon
 {
     /// <summary>
-    /// The rules of a revisit: what every re-clear does on its own, how rewards scale with heat, and
+    /// The rules of a revisit: what every re-clear does on its own, how rewards scale with fear, and
     /// every condition the player can add (<c>docs/plans/REVISITS.md</c>). One asset,
     /// <c>Resources/Revisits.asset</c>, loaded like <c>Campaign.asset</c> so neither the hub nor the
     /// dungeon needs it wired.
@@ -16,23 +16,23 @@ namespace Assets.Scripts.Dungeon
         public const string ResourcePath = "Revisits";
 
         [Header("Every revisit")]
-        [Tooltip("Enemy MaxHealth added on every revisit, before any condition. 50 = +50%.")]
-        public int BaseEnemyHealthPercent = 50;
-
-        [Tooltip("Enemy damage added on every revisit, before any condition. 50 = +50%.")]
-        public int BaseEnemyDamagePercent = 50;
+        [Tooltip("Added to every stat of every enemy on every revisit, before any condition: health, " +
+                 "Strength, Endurance, Agility, Intelligence, Spirit, Luck - and the base power of its " +
+                 "spells. 50 = +50%. A stat the enemy does not have stays 0. One rule rather than a " +
+                 "health and a damage dial (owner, 2026-10-06): stats drive everything, speed included.")]
+        public int BaseEnemyStatPercent = 50;
 
         [Header("Rewards")]
-        [Tooltip("Extra XP, gold and Essence on every revisit at heat 0, paying for the base above.")]
+        [Tooltip("Extra XP, gold and Essence on every revisit at fear 0, paying for the base above.")]
         public int BaseRewardPercent = 25;
 
-        [Tooltip("Extra XP, gold and Essence per point of heat.")]
-        public int RewardPercentPerHeat = 10;
+        [Tooltip("Extra XP, gold and Essence per point of fear.")]
+        public int RewardPercentPerFear = 10;
 
         [Tooltip("Scarce materials a revisit drops only when it is beating the run's best cleared " +
-                 "heat. Without this a repeatable run whose boss guarantees one is an infinite tap; " +
+                 "fear. Without this a repeatable run whose boss guarantees one is an infinite tap; " +
                  "with it, more of them is a reward for doing something harder.")]
-        public List<ItemSO> NewBestHeatOnly = new List<ItemSO>();
+        public List<ItemSO> NewBestFearOnly = new List<ItemSO>();
 
         [Header("Conditions")]
         public List<RunModifier> Modifiers = new List<RunModifier>();

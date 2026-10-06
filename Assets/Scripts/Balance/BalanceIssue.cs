@@ -187,6 +187,12 @@ namespace Assets.Scripts.Balance
         public PartyBaseline Party;
         public List<EnemyMetrics> Enemies = new List<EnemyMetrics>();
         public List<RunCurve> Runs = new List<RunCurve>();
+
+        /// <summary>Each replayable run revisited at Fear level 0 by the party that cleared it (<see cref="RevisitModel"/>).</summary>
+        public List<RevisitCurve> Revisits = new List<RevisitCurve>();
+
+        /// <summary>Each run downstream of a replayable one, judged against the revisit-pacing guideline.</summary>
+        public List<RevisitNudge> RevisitNudges = new List<RevisitNudge>();
         public VarietyReport Variety;
         public ProgressionMap Progression;
 

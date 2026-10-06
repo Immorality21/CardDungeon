@@ -9,7 +9,7 @@ namespace Tests.EditMode
 {
     /// <summary>
     /// Revisits (docs/plans/REVISITS.md): the pure rules that turn chosen conditions into a
-    /// <see cref="RunHeat"/>, what that heat does to damage, healing and rewards, and the project's
+    /// <see cref="RunFear"/>, what that fear does to damage, healing and rewards, and the project's
     /// real rules asset and run list.
     /// </summary>
     public class RevisitTests
@@ -24,17 +24,16 @@ namespace Tests.EditMode
                 Object.DestroyImmediate(obj);
             }
             _created.Clear();
-            RunHeat.Current = RunHeat.None;
+            RunFear.Current = RunFear.None;
         }
 
         private RevisitRulesSO MakeRules()
         {
             var rules = ScriptableObject.CreateInstance<RevisitRulesSO>();
             _created.Add(rules);
-            rules.BaseEnemyHealthPercent = 50;
-            rules.BaseEnemyDamagePercent = 50;
+            rules.BaseEnemyStatPercent = 50;
             rules.BaseRewardPercent = 25;
-            rules.RewardPercentPerHeat = 10;
+            rules.RewardPercentPerFear = 10;
             rules.Modifiers = new List<RunModifier>
             {
                 Modifier("health", 3, 1, RunModifierEffectKind.EnemyHealthPercent, 25),
@@ -45,7 +44,7 @@ namespace Tests.EditMode
             return rules;
         }
 
-        private static RunModifier Modifier(string key, int maxRank, int heat, RunModifierEffectKind kind, int amount)
+        private static RunModifier Modifier(string key, int maxRank, int fear, RunModifierEffectKind kind, int amount)
         {
             return new RunModifier
             {
@@ -53,7 +52,7 @@ namespace Tests.EditMode
                 DisplayName = key,
                 Description = "+{0}",
                 MaxRank = maxRank,
-                HeatPerRank = heat,
+                FearPerRank = fear,
                 Effects = new List<RunModifierEffect> { new RunModifierEffect { Kind = kind, AmountPerRank = amount } },
             };
         }
@@ -73,47 +72,82 @@ namespace Tests.EditMode
         [Test]
         public void Resolve_NotARevisit_IsTheIdentity()
         {
-            var heat = RevisitOps.Resolve(MakeRules(), false, Pick(("health", 3)));
+            var fear = RevisitOps.Resolve(MakeRules(), false, Pick(("health", 3)));
 
-            Assert.AreSame(RunHeat.None, heat);
-            Assert.AreEqual(1f, heat.EnemyHealthMultiplier);
-            Assert.AreEqual(1f, heat.RewardMultiplier);
+            Assert.AreSame(RunFear.None, fear);
+            Assert.AreEqual(1f, fear.EnemyHealthMultiplier);
+            Assert.AreEqual(1f, fear.RewardMultiplier);
         }
 
         [Test]
-        public void Resolve_RevisitWithNoConditions_AppliesTheBaseFiftyPercent()
+        public void Resolve_RevisitWithNoConditions_AppliesTheBaseFiftyPercentToEveryStat()
         {
-            var heat = RevisitOps.Resolve(MakeRules(), true, null);
+            var fear = RevisitOps.Resolve(MakeRules(), true, null);
 
-            Assert.IsTrue(heat.IsRevisit);
-            Assert.AreEqual(0, heat.Heat);
-            Assert.AreEqual(1.5f, heat.EnemyHealthMultiplier, 1e-4f);
-            Assert.AreEqual(1.5f, heat.EnemyDamageMultiplier, 1e-4f);
-            Assert.AreEqual(1.25f, heat.RewardMultiplier, 1e-4f, "the base pays for itself");
-            Assert.AreEqual(1f, heat.HeroHealingMultiplier, 1e-4f);
+            Assert.IsTrue(fear.IsRevisit);
+            Assert.AreEqual(0, fear.Level);
+            Assert.AreEqual(1.5f, fear.EnemyStatMultiplier, 1e-4f);
+            Assert.AreEqual(1f, fear.EnemyHealthMultiplier, 1e-4f, "conditions only");
+            Assert.AreEqual(1f, fear.EnemyDamageMultiplier, 1e-4f, "conditions only");
+            Assert.AreEqual(1.25f, fear.RewardMultiplier, 1e-4f, "the base pays for itself");
+            Assert.AreEqual(1f, fear.HeroHealingMultiplier, 1e-4f);
         }
 
         [Test]
-        public void Resolve_ConditionsStackOnTheBase_AndAddHeat()
+        public void Resolve_ConditionsStackOnTheBase_AndAddFear()
         {
-            var heat = RevisitOps.Resolve(MakeRules(), true,
+            var fear = RevisitOps.Resolve(MakeRules(), true,
                 Pick(("health", 2), ("damage", 1), ("swarm", 1), ("no-heal", 2)));
 
-            Assert.AreEqual(2 + 1 + 2 + 4, heat.Heat);
-            Assert.AreEqual(2.0f, heat.EnemyHealthMultiplier, 1e-4f, "50 + 2 x 25");
-            Assert.AreEqual(1.75f, heat.EnemyDamageMultiplier, 1e-4f, "50 + 25");
-            Assert.AreEqual(1, heat.ExtraEnemiesPerRoom);
-            Assert.AreEqual(0f, heat.HeroHealingMultiplier, 1e-4f, "two ranks of -50% is no healing");
-            Assert.AreEqual(1f + (25 + 9 * 10) / 100f, heat.RewardMultiplier, 1e-4f);
+            Assert.AreEqual(2 + 1 + 2 + 4, fear.Level);
+            Assert.AreEqual(1.5f, fear.EnemyStatMultiplier, 1e-4f, "the base, untouched by conditions");
+            Assert.AreEqual(1.5f, fear.EnemyHealthMultiplier, 1e-4f, "2 x 25, on top of the base");
+            Assert.AreEqual(1.25f, fear.EnemyDamageMultiplier, 1e-4f);
+            Assert.AreEqual(1, fear.ExtraEnemiesPerRoom);
+            Assert.AreEqual(0f, fear.HeroHealingMultiplier, 1e-4f, "two ranks of -50% is no healing");
+            Assert.AreEqual(1f + (25 + 9 * 10) / 100f, fear.RewardMultiplier, 1e-4f);
         }
 
         [Test]
         public void Resolve_UnknownKeysAndOverRanks_AreIgnoredAndClamped()
         {
-            var heat = RevisitOps.Resolve(MakeRules(), true, Pick(("gone", 3), ("health", 9)));
+            var fear = RevisitOps.Resolve(MakeRules(), true, Pick(("gone", 3), ("health", 9)));
 
-            Assert.AreEqual(3, heat.Heat, "rank clamped to the condition's max of 3");
-            Assert.AreEqual(2.25f, heat.EnemyHealthMultiplier, 1e-4f);
+            Assert.AreEqual(3, fear.Level, "rank clamped to the condition's max of 3");
+            Assert.AreEqual(1.75f, fear.EnemyHealthMultiplier, 1e-4f);
+        }
+
+        [Test]
+        public void Resolve_SpeedCondition_ScalesEnemyAgility()
+        {
+            var rules = MakeRules();
+            rules.Modifiers.Add(Modifier("speed", 2, 2, RunModifierEffectKind.EnemyAgilityPercent, 25));
+
+            var fear = RevisitOps.Resolve(rules, true, Pick(("speed", 2)));
+
+            Assert.AreEqual(1.5f, fear.EnemyAgilityMultiplier, 1e-4f);
+            Assert.AreEqual(4, fear.Level);
+            Assert.AreEqual(9, fear.ScaleEnemyAgility(6));
+            Assert.AreEqual(1f, RevisitOps.Resolve(rules, true, null).EnemyAgilityMultiplier, 1e-4f,
+                "the Speed condition stacks on the base; the base itself rides EnemyStatMultiplier");
+        }
+
+        [Test]
+        public void Summary_NamesEveryChangeAndTheReward()
+        {
+            var rules = MakeRules();
+            rules.Modifiers.Add(Modifier("speed", 2, 2, RunModifierEffectKind.EnemyAgilityPercent, 25));
+
+            string baseLine = RevisitOps.Summary(RevisitOps.Resolve(rules, true, null));
+            Assert.AreEqual("Fear level 0: enemies +50% to every stat. Rewards +25% XP, gold and Essence.", baseLine);
+
+            string hot = RevisitOps.Summary(RevisitOps.Resolve(rules, true,
+                Pick(("speed", 1), ("swarm", 1), ("no-heal", 2))));
+            StringAssert.Contains("+25% more speed", hot);
+            StringAssert.Contains("+1 foe per fight", hot);
+            StringAssert.Contains("no healing", hot);
+
+            Assert.AreEqual(string.Empty, RevisitOps.Summary(RunFear.None));
         }
 
         // --- Picker edits -----------------------------------------------------------------
@@ -164,7 +198,7 @@ namespace Tests.EditMode
             var item = ScriptableObject.CreateInstance<ItemSO>();
             _created.Add(item);
             item.Key = itemKey;
-            rules.NewBestHeatOnly = new List<ItemSO> { item };
+            rules.NewBestFearOnly = new List<ItemSO> { item };
             return rules;
         }
 
@@ -172,34 +206,34 @@ namespace Tests.EditMode
         public void ApplyScarcity_FirstRevisit_PaysTheScarceMaterial()
         {
             var rules = RulesWithScarce("VoidShard");
-            var heat = RevisitOps.Resolve(rules, true, null);
+            var fear = RevisitOps.Resolve(rules, true, null);
 
-            RevisitOps.ApplyScarcity(heat, rules, -1);
+            RevisitOps.ApplyScarcity(fear, rules, -1);
 
-            Assert.IsFalse(heat.Withholds("VoidShard"));
+            Assert.IsFalse(fear.Withholds("VoidShard"));
         }
 
         [Test]
-        public void ApplyScarcity_AtOrBelowTheBestHeat_WithholdsIt()
+        public void ApplyScarcity_AtOrBelowTheBestFear_WithholdsIt()
         {
             var rules = RulesWithScarce("VoidShard");
-            var heat = RevisitOps.Resolve(rules, true, Pick(("health", 2)));
+            var fear = RevisitOps.Resolve(rules, true, Pick(("health", 2)));
 
-            RevisitOps.ApplyScarcity(heat, rules, 2);
+            RevisitOps.ApplyScarcity(fear, rules, 2);
 
-            Assert.IsTrue(heat.Withholds("VoidShard"));
-            Assert.IsFalse(heat.Withholds("ScrapIron"), "only the listed materials are withheld");
+            Assert.IsTrue(fear.Withholds("VoidShard"));
+            Assert.IsFalse(fear.Withholds("ScrapIron"), "only the listed materials are withheld");
         }
 
         [Test]
-        public void ApplyScarcity_BeatingTheBestHeat_PaysIt()
+        public void ApplyScarcity_BeatingTheBestFear_PaysIt()
         {
             var rules = RulesWithScarce("VoidShard");
-            var heat = RevisitOps.Resolve(rules, true, Pick(("health", 3)));
+            var fear = RevisitOps.Resolve(rules, true, Pick(("health", 3)));
 
-            RevisitOps.ApplyScarcity(heat, rules, 2);
+            RevisitOps.ApplyScarcity(fear, rules, 2);
 
-            Assert.IsFalse(heat.Withholds("VoidShard"));
+            Assert.IsFalse(fear.Withholds("VoidShard"));
         }
 
         [Test]
@@ -207,48 +241,136 @@ namespace Tests.EditMode
         {
             var rules = RulesWithScarce("VoidShard");
 
-            RevisitOps.ApplyScarcity(RunHeat.None, rules, 5);
+            RevisitOps.ApplyScarcity(RunFear.None, rules, 5);
 
-            Assert.IsFalse(RunHeat.None.Withholds("VoidShard"));
+            Assert.IsFalse(RunFear.None.Withholds("VoidShard"));
         }
 
-        // --- What the heat does -----------------------------------------------------------
+        // --- What the fear does -----------------------------------------------------------
 
         [Test]
-        public void ScaleOutgoingDamage_ScalesEnemiesOnly()
+        public void DamageCondition_RaisesWhatTheEnemyHitsWith()
         {
-            var heat = new RunHeat { EnemyDamageMultiplier = 1.5f };
-            var enemy = new MockCombatUnit("Foe", 5, 0, 20, 5, false);
-            var hero = new MockCombatUnit("Hero", 5, 0, 20, 5, true);
+            var fear = new RunFear { EnemyStatMultiplier = 1.5f, EnemyDamageMultiplier = 1.5f };
+            var stats = new Assets.Scripts.UnitStats.StatBlock();
+            stats[Assets.Scripts.UnitStats.StatType.Strength] = 4;
+            stats[Assets.Scripts.UnitStats.StatType.Intelligence] = 2;
+            stats[Assets.Scripts.UnitStats.StatType.Endurance] = 2;
 
-            Assert.AreEqual(15, heat.ScaleOutgoingDamage(enemy, 10));
-            Assert.AreEqual(10, heat.ScaleOutgoingDamage(hero, 10));
-            Assert.AreEqual(1, new RunHeat { EnemyDamageMultiplier = 0.1f }.ScaleOutgoingDamage(enemy, 1),
-                "never scales a hit to nothing");
+            fear.ScaleEnemyStats(stats);
+
+            Assert.AreEqual(9, stats[Assets.Scripts.UnitStats.StatType.Strength], "4 x 1.5 = 6, x 1.5 = 9");
+            Assert.AreEqual(4, stats[Assets.Scripts.UnitStats.StatType.Intelligence], "2 x 1.5 = 3, x 1.5 = 4.5 -> 4 (RoundToInt rounds halves to even)");
+            Assert.AreEqual(3, stats[Assets.Scripts.UnitStats.StatType.Endurance], "defence is not damage");
+            Assert.AreEqual(2.25f, fear.EnemySpellPowerScale, 1e-4f);
+        }
+
+        [Test]
+        public void OverTimePower_ScalesLikeEnemySpells()
+        {
+            var fear = new RunFear { EnemyStatMultiplier = 1.5f };
+
+            Assert.AreEqual(6, fear.ScaleEnemyOverTimePower(4));
+            Assert.AreEqual(0, fear.ScaleEnemyOverTimePower(0));
+            Assert.AreEqual(4, RunFear.None.ScaleEnemyOverTimePower(4));
+        }
+
+        [Test]
+        public void EnemyPoison_OnAFearLevel_TicksHarder_ButAHeroPoisonDoesNot()
+        {
+            var effect = new Assets.Scripts.Cards.SpellEffect
+            {
+                EffectType = Assets.Scripts.Cards.SpellEffectType.Debuff,
+                BuffType = Assets.Scripts.Cards.BuffType.Poisoned,
+                Power = 4,
+                Duration = 3,
+                ScalingStat = Assets.Scripts.UnitStats.StatType.None,
+            };
+            var enemy = new MockCombatUnit("Foe", 5, 0, 20, 5, false);
+            var hero = new MockCombatUnit("Hero", 5, 0, 40, 5, true);
+            var otherEnemy = new MockCombatUnit("Other", 5, 0, 40, 5, false);
+            var executor = new Assets.Scripts.Cards.Effects.DebuffEffectExecutor();
+
+            RunFear.Current = new RunFear { IsRevisit = true, EnemyStatMultiplier = 1.5f };
+            var tracker = new Assets.Scripts.Cards.CombatBuffTracker();
+            executor.Execute(effect, enemy, new System.Collections.Generic.List<ICombatUnit> { hero }, tracker,
+                new Assets.Scripts.Cards.EffectResult());
+            executor.Execute(effect, hero, new System.Collections.Generic.List<ICombatUnit> { otherEnemy }, tracker,
+                new Assets.Scripts.Cards.EffectResult());
+
+            int heroBefore = hero.Stats.Health;
+            int enemyBefore = otherEnemy.Stats.Health;
+            tracker.ResolveOverTime(hero);
+            tracker.ResolveOverTime(otherEnemy);
+
+            Assert.AreEqual(6, heroBefore - hero.Stats.Health, "the enemy's poison: 4 x 1.5");
+            Assert.AreEqual(4, enemyBefore - otherEnemy.Stats.Health, "the hero's poison is untouched");
+        }
+
+        [Test]
+        public void WithFear_PutsTheLevelOnACopy_AndStatsForReadsIt()
+        {
+            var enemy = ScriptableObject.CreateInstance<Assets.Scripts.Enemies.EnemySO>();
+            _created.Add(enemy);
+            enemy.BaseStats = new Assets.Scripts.UnitStats.StatBlock();
+            enemy.BaseStats[Assets.Scripts.UnitStats.StatType.MaxHealth] = 20;
+            enemy.BaseStats[Assets.Scripts.UnitStats.StatType.Strength] = 4;
+            enemy.XpReward = 10;
+            var authored = new Assets.Scripts.Enemies.LevelEnemyTuning { Difficulty = 2f };
+            var fear = RevisitOps.Resolve(MakeRules(), true, null);
+
+            var tuned = Assets.Scripts.Enemies.LevelEnemyTuning.WithFear(authored, fear);
+
+            Assert.IsNull(authored.Fear, "the authored tuning never carries a Fear level");
+            Assert.AreEqual(60, Assets.Scripts.Enemies.LevelEnemyTuning.StatsFor(enemy, tuned)[Assets.Scripts.UnitStats.StatType.MaxHealth],
+                "20 x Difficulty 2 = 40, x 1.5 = 60");
+            Assert.AreEqual(40, Assets.Scripts.Enemies.LevelEnemyTuning.StatsFor(enemy, tuned, includeFear: false)[Assets.Scripts.UnitStats.StatType.MaxHealth]);
+            Assert.AreEqual(12, Assets.Scripts.Enemies.LevelEnemyTuning.XpFor(enemy, tuned), "10 x 1.25 = 12.5 -> 12 (halves to even)");
+            Assert.AreSame(authored, Assets.Scripts.Enemies.LevelEnemyTuning.WithFear(authored, RunFear.None),
+                "no revisit, no copy");
         }
 
         [Test]
         public void ScaleHealing_ScalesHeroesOnly_AndZeroMeansZero()
         {
-            var heat = new RunHeat { HeroHealingMultiplier = 0f };
+            var fear = new RunFear { HeroHealingMultiplier = 0f };
             var enemy = new MockCombatUnit("Foe", 5, 0, 20, 5, false);
             var hero = new MockCombatUnit("Hero", 5, 0, 20, 5, true);
 
-            Assert.AreEqual(0, heat.ScaleHealing(hero, 12));
-            Assert.AreEqual(12, heat.ScaleHealing(enemy, 12), "an enemy healer still heals");
+            Assert.AreEqual(0, fear.ScaleHealing(hero, 12));
+            Assert.AreEqual(12, fear.ScaleHealing(enemy, 12), "an enemy healer still heals");
 
-            heat.HeroHealingMultiplier = 0.5f;
-            Assert.AreEqual(5, heat.ScaleHealing(hero, 11), "rounded down");
+            fear.HeroHealingMultiplier = 0.5f;
+            Assert.AreEqual(5, fear.ScaleHealing(hero, 11), "rounded down");
+        }
+
+        [Test]
+        public void ScaleEnemyStats_ScalesEveryStat_ThenTheConditionsOnTop()
+        {
+            var fear = new RunFear { EnemyStatMultiplier = 1.5f, EnemyHealthMultiplier = 1.5f };
+            var stats = new Assets.Scripts.UnitStats.StatBlock();
+            stats[Assets.Scripts.UnitStats.StatType.MaxHealth] = 20;
+            stats[Assets.Scripts.UnitStats.StatType.Strength] = 4;
+            stats[Assets.Scripts.UnitStats.StatType.Agility] = 6;
+            stats[Assets.Scripts.UnitStats.StatType.Endurance] = 2;
+
+            fear.ScaleEnemyStats(stats);
+
+            Assert.AreEqual(45, stats[Assets.Scripts.UnitStats.StatType.MaxHealth], "20 x 1.5 = 30, then x 1.5 for the condition");
+            Assert.AreEqual(6, stats[Assets.Scripts.UnitStats.StatType.Strength]);
+            Assert.AreEqual(9, stats[Assets.Scripts.UnitStats.StatType.Agility]);
+            Assert.AreEqual(3, stats[Assets.Scripts.UnitStats.StatType.Endurance]);
+            Assert.AreEqual(0, stats[Assets.Scripts.UnitStats.StatType.Luck], "a stat the enemy does not have stays 0");
         }
 
         [Test]
         public void ScaleReward_AndEnemyHealth_NeverScaleToNothing()
         {
-            var heat = new RunHeat { RewardMultiplier = 1.25f, EnemyHealthMultiplier = 1.5f };
+            var fear = new RunFear { RewardMultiplier = 1.25f, EnemyHealthMultiplier = 1.5f };
 
-            Assert.AreEqual(5, heat.ScaleReward(4));
-            Assert.AreEqual(0, heat.ScaleReward(0));
-            Assert.AreEqual(30, heat.ScaleEnemyMaxHealth(20));
+            Assert.AreEqual(5, fear.ScaleReward(4));
+            Assert.AreEqual(0, fear.ScaleReward(0));
+            Assert.AreEqual(30, fear.ScaleEnemyMaxHealth(20));
         }
 
         [Test]
@@ -256,10 +378,9 @@ namespace Tests.EditMode
         {
             var unit = new MockCombatUnit("Foe", 5, 0, 20, 5, false);
 
-            Assert.AreEqual(10, RunHeat.None.ScaleOutgoingDamage(unit, 10));
-            Assert.AreEqual(10, RunHeat.None.ScaleHealing(new MockCombatUnit("Hero", 5, 0, 20, 5, true), 10));
-            Assert.AreEqual(7, RunHeat.None.ScaleReward(7));
-            Assert.AreEqual(0, RunHeat.None.ExtraEnemiesPerRoom);
+            Assert.AreEqual(10, RunFear.None.ScaleHealing(new MockCombatUnit("Hero", 5, 0, 20, 5, true), 10));
+            Assert.AreEqual(7, RunFear.None.ScaleReward(7));
+            Assert.AreEqual(0, RunFear.None.ExtraEnemiesPerRoom);
         }
 
         // --- The project's assets ---------------------------------------------------------
@@ -278,7 +399,7 @@ namespace Tests.EditMode
                 Assert.IsFalse(keys.Contains(modifier.Key), $"duplicate condition key '{modifier.Key}'");
                 keys.Add(modifier.Key);
                 Assert.GreaterOrEqual(modifier.MaxRank, 1, modifier.Key);
-                Assert.Greater(modifier.HeatPerRank, 0, $"'{modifier.Key}' adds no heat, so it pays nothing for being harder");
+                Assert.Greater(modifier.FearPerRank, 0, $"'{modifier.Key}' adds no fear, so it pays nothing for being harder");
                 Assert.IsNotEmpty(modifier.Effects, $"'{modifier.Key}' does nothing");
             }
         }
@@ -287,8 +408,8 @@ namespace Tests.EditMode
         public void RulesAsset_WithholdsVoidShard()
         {
             var rules = RevisitRulesSO.Load();
-            Assert.IsTrue(rules.NewBestHeatOnly.Exists(i => i != null && i.Key == "VoidShard"),
-                "Void Shard must be withheld below a run's best heat, or every repeatable boss is an infinite tap.");
+            Assert.IsTrue(rules.NewBestFearOnly.Exists(i => i != null && i.Key == "VoidShard"),
+                "Void Shard must be withheld below a run's best fear, or every repeatable boss is an infinite tap.");
         }
 
         [Test]

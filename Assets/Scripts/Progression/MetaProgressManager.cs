@@ -239,15 +239,15 @@ namespace Assets.Scripts.Progression
 
         // --- Revisits ---
 
-        /// <summary>The highest heat this save has cleared <paramref name="runKey"/> at as a revisit, or -1 if never.</summary>
-        public int GetBestRevisitHeat(string runKey)
+        /// <summary>The highest fear this save has cleared <paramref name="runKey"/> at as a revisit, or -1 if never.</summary>
+        public int GetBestRevisitFear(string runKey)
         {
             var record = _saveData.RevisitRecords?.Find(r => r != null && r.RunKey == runKey);
-            return record != null ? record.BestHeat : -1;
+            return record != null ? record.BestFear : -1;
         }
 
-        /// <summary>Records a cleared revisit; keeps the best heat. Persists immediately.</summary>
-        public void RecordRevisitHeat(string runKey, int heat)
+        /// <summary>Records a cleared revisit; keeps the best fear. Persists immediately.</summary>
+        public void RecordRevisitFear(string runKey, int fear)
         {
             if (string.IsNullOrEmpty(runKey))
             {
@@ -261,11 +261,11 @@ namespace Assets.Scripts.Progression
             var record = _saveData.RevisitRecords.Find(r => r != null && r.RunKey == runKey);
             if (record == null)
             {
-                _saveData.RevisitRecords.Add(new RevisitRecord { RunKey = runKey, BestHeat = Mathf.Max(0, heat), Clears = 1 });
+                _saveData.RevisitRecords.Add(new RevisitRecord { RunKey = runKey, BestFear = Mathf.Max(0, fear), Clears = 1 });
             }
             else
             {
-                record.BestHeat = Mathf.Max(record.BestHeat, heat);
+                record.BestFear = Mathf.Max(record.BestFear, fear);
                 record.Clears++;
             }
             Save();

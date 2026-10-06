@@ -182,13 +182,44 @@ namespace Assets.Scripts.Rooms.Events
                     continue;
                 }
 
-                bool isHeal = !string.IsNullOrEmpty(entry.Text) && entry.Text.StartsWith("+");
-                report.Lines.Add(isHeal
-                    ? $"{entry.Target.DisplayName} recovers {entry.Text.TrimStart('+')} health."
-                    : $"{entry.Target.DisplayName} takes {entry.Text} damage.");
+                // Read the amounts, never the text: a heal's Text is a bare number, so sniffing for a
+                // "+" reported every event heal as damage (revisit playtest finding 7).
+                string line = DescribeEntry(entry);
+                if (line == null)
+                {
+                    continue;
+                }
+                report.Lines.Add(line);
 
-                ShowFloatingText(entry.Target, entry.Text, isHeal ? HealColor : DamageColor);
+                bool isHeal = entry.Healed > 0;
+                ShowFloatingText(entry.Target, isHeal ? $"+{entry.Healed}" : entry.Text, isHeal ? HealColor : DamageColor);
             }
+        }
+
+        /// <summary>
+        /// One report line for an effect entry, from its amounts: a heal says how much it restored
+        /// (or that the hero was already whole), a hit how much it took. Null for an entry that is
+        /// neither, so a status label is never worded as damage.
+        /// </summary>
+        public static string DescribeEntry(EffectEntry entry)
+        {
+            if (entry == null || entry.Target == null)
+            {
+                return null;
+            }
+            if (entry.Healed > 0)
+            {
+                return $"{entry.Target.DisplayName} recovers {entry.Healed} health.";
+            }
+            if (entry.Impact > 0)
+            {
+                return $"{entry.Target.DisplayName} takes {entry.Impact} damage.";
+            }
+            if (entry.Text == "0")
+            {
+                return $"{entry.Target.DisplayName} was already whole.";
+            }
+            return null;
         }
 
         /// <summary>

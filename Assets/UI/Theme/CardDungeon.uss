@@ -3151,8 +3151,20 @@
 }
 
 /* ---- Revisit conditions (docs/plans/REVISITS.md) ---- */
+/* The rows scroll inside the detail body (which clips), and the fear summary below keeps its
+   height. Its own scroller stays thin so it does not eat the row width. */
+.cm-fear-scroll {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.cm-fear-summary {
+    flex-shrink: 0;
+}
+
 /* One condition: a button so the mouse can cycle its rank; the map's own cursor walks them. */
-.cm-heat-row {
+.cm-fear-row {
     flex-direction: column;
     align-items: stretch;
     margin: 2px 0;
@@ -3164,41 +3176,41 @@
     -unity-text-align: upper-left;
 }
 
-.cm-heat-row--on {
+.cm-fear-row--on {
     border-color: var(--cd-gold);
     background-color: rgba(236, 190, 72, 0.10);
 }
 
-.cm-heat-row--cursor {
+.cm-fear-row--cursor {
     border-color: var(--cd-text-light);
     border-width: 2px;
 }
 
-.cm-heat-row__head {
+.cm-fear-row__head {
     flex-direction: row;
     justify-content: space-between;
 }
 
-.cm-heat-row__name {
+.cm-fear-row__name {
     font-size: 17px;
     color: var(--cd-text-light);
     padding: 0;
     margin: 0;
 }
 
-.cm-heat-row--on .cm-heat-row__name {
+.cm-fear-row--on .cm-fear-row__name {
     color: var(--cd-gold);
     -unity-font-style: bold;
 }
 
-.cm-heat-row__rank {
+.cm-fear-row__rank {
     font-size: 15px;
     color: var(--cd-gold);
     padding: 0;
     margin: 0;
 }
 
-.cm-heat-row__desc {
+.cm-fear-row__desc {
     font-size: 14px;
     color: var(--cd-text-light);
     opacity: 0.8;
@@ -3207,7 +3219,7 @@
     margin: 0;
 }
 
-.cm-heat-summary {
+.cm-fear-summary {
     font-size: 16px;
     color: var(--cd-gold);
     white-space: normal;

@@ -116,6 +116,8 @@ namespace Assets.Scripts.Balance
             // Run curves come first now: they know the campaign order, so they are the authority on
             // which party meets which enemy.
             BuildRunCurves(input, rules, report);
+            // Revisits read those curves: a replayable run is revisited by the party that cleared it.
+            RevisitModel.Build(input.Campaign, report, rules);
 
             var partyByEnemy = report.Runs.Count > 0
                 ? BuildEncounterPartiesFromCurves(report)
@@ -142,6 +144,7 @@ namespace Assets.Scripts.Balance
             EvaluateParty(report, rules, input);
             EvaluateEnemies(report, rules);
             EvaluateRuns(report, rules, input);
+            EvaluateRevisits(report, rules);
             EvaluateEvents(report, rules, input);
             EvaluateVariety(report, rules);
             EvaluateProgression(report, rules);
@@ -299,6 +302,69 @@ namespace Assets.Scripts.Balance
                 }
             }
             return tiers;
+        }
+
+        /// <summary>
+        /// The revisit-pacing guideline (owner, 2026-10-06; docs/BALANCING.md "Revisits pace the
+        /// campaign"): from the moment a run can be replayed, the content after it is tuned so the
+        /// straight-line party is pushed and a few revisits catch it up. Warnings, never Critical -
+        /// it is a pacing target, and the campaign is still being written.
+        /// </summary>
+        private static void EvaluateRevisits(BalanceReport report, BalanceRulesSO rules)
+        {
+            foreach (var revisit in report.Revisits)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Run, revisit.Name,
+                    $"A Fear level 0 revisit pays {revisit.XpPerHero:0} XP per hero")
+                {
+                    Detail = $"Revisited by the party that just cleared it, its worst ordinary floor sits at "
+                             + $"attrition {revisit.PeakAttrition:0.00} (the finale reads {revisit.BossAttrition:0.00}, which "
+                             + "the closed form overstates for sealed rooms). Rewards include the revisit's bonus; "
+                             + "Swarming Halls is not modelled.",
+                });
+            }
+
+            foreach (var nudge in report.RevisitNudges)
+            {
+                string feeder = nudge.Feeder != null ? nudge.Feeder.Name : "its replayable prerequisite";
+                string after = string.Join(" / ", nudge.PeakAfterRevisits.ConvertAll(p => p.ToString("0.00")));
+
+                if (nudge.StraightLinePeak < rules.RevisitNudgeMinAttrition)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Run, nudge.Name,
+                        $"No reason to revisit {feeder} first")
+                    {
+                        Detail = $"The party that arrives without revisiting peaks at attrition {nudge.StraightLinePeak:0.00} "
+                                 + $"on its ordinary floors (finale {nudge.StraightLineBossAttrition:0.00}, judged by the frontier), "
+                                 + $"under the {rules.RevisitNudgeMinAttrition:0.00} where death starts. Once a run can be "
+                                 + "replayed, the run after it should push a straight-line party, so going back is "
+                                 + "the answer the game offers rather than a chore.",
+                        Suggestion = $"Raise {nudge.Name}'s hardest floor (EnemyTuning.Difficulty or enemy count) until "
+                                     + $"a straight-line party peaks near {rules.RevisitNudgeMinAttrition:0.00}; peak after "
+                                     + $"1..{nudge.PeakAfterRevisits.Count} revisits: {after}.",
+                    });
+                }
+
+                if (nudge.RevisitsToCatchUp < 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Run, nudge.Name,
+                        $"Revisiting {feeder} does not catch the party up")
+                    {
+                        Detail = $"After {nudge.PeakAfterRevisits.Count} Fear level 0 revisits the worst floor still "
+                                 + $"peaks at {(nudge.PeakAfterRevisits.Count > 0 ? nudge.PeakAfterRevisits[nudge.PeakAfterRevisits.Count - 1] : nudge.StraightLinePeak):0.00} "
+                                 + $"(target {rules.RevisitCatchUpMaxAttrition:0.00}). Past that many, revisiting reads as grinding.",
+                        Suggestion = $"Soften {nudge.Name}'s worst floor, or raise what a revisit of {feeder} pays.",
+                    });
+                }
+                else if (nudge.StraightLinePeak >= rules.RevisitNudgeMinAttrition)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Run, nudge.Name,
+                        $"Paced by revisits: {nudge.RevisitsToCatchUp} of {feeder} catch the party up")
+                    {
+                        Detail = $"Straight-line peak {nudge.StraightLinePeak:0.00}; after 1..{nudge.PeakAfterRevisits.Count} revisits: {after}.",
+                    });
+                }
+            }
         }
 
         private static int TotalBankedXp(RunCurve curve)

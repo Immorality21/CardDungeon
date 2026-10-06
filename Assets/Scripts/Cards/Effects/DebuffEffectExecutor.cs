@@ -28,9 +28,19 @@ namespace Assets.Scripts.Cards.Effects
 
             // Flat-power debuffs stay as authored; a cast one adds a fraction of the caster's
             // stat, so a high-Spirit caster's shields are better without dwarfing the stat changed.
+            // A revisit's Fear level scales the base of a damage-over-time effect an enemy lays on
+            // (a poison, a burn) the way it scales the enemy's spells. Only the base: the caster's
+            // stat part below already rides the scaled stats. Stat debuffs are left alone - a -3
+            // Endurance is not damage.
+            int basePower = effect.Power;
+            if (caster != null && !caster.IsHero && handler is IOverTimeBuffHandler overTime && !overTime.Heals)
+            {
+                basePower = RunFear.Current.ScaleEnemyOverTimePower(basePower);
+            }
+
             int magnitude = flatPower
-                ? effect.Power
-                : effect.Power + SpellScaling.BuffContribution(caster, effect.ScalingStat, buffTracker);
+                ? basePower
+                : basePower + SpellScaling.BuffContribution(caster, effect.ScalingStat, buffTracker);
 
             foreach (var target in targets)
             {

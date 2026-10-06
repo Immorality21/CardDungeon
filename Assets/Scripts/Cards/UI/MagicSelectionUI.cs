@@ -750,6 +750,7 @@ namespace Assets.Scripts.Cards.UI
             // under "Attacks with" because the resistance list is the long one - with both on the
             // left the page needed a scrollbar at 720p.
             BestiaryLineView.AddSection(_inspectRight, "Stats", LiveStatLines(enemy));
+            BestiaryLineView.AddSection(_inspectRight, "Revisit", RevisitLines(enemy));
             BestiaryLineView.AddSection(_inspectRight, "Condition", ConditionLines(enemy));
             BestiaryLineView.AddSection(
                 _inspectRight, "Abilities", BestiaryPresenter.CompactSpellLines(definition, known));
@@ -776,6 +777,43 @@ namespace Assets.Scripts.Cards.UI
         /// than the definition's base line the hub bestiary shows. The player is looking straight at
         /// the thing, so these are never gated.
         /// </summary>
+        /// <summary>
+        /// On a revisit, what the fear did to this enemy beside the floor's own number: the player
+        /// could see "60" here and "20" in the Bestiary and had no way to tell the floor's scaling
+        /// from the revisit's (revisit playtest finding 6). Empty, so no section, on anything else.
+        /// </summary>
+        private static List<BestiaryLine> RevisitLines(Enemy enemy)
+        {
+            var lines = new List<BestiaryLine>();
+            var fear = RunFear.Current;
+            if (!fear.IsRevisit || enemy == null || enemy.Definition == null)
+            {
+                return lines;
+            }
+
+            int floorHealth = LevelEnemyTuning.StatsFor(enemy.Definition, enemy.Tuning, includeFear: false)[StatType.MaxHealth];
+            lines.Add(new BestiaryLine("Every stat", Percent(fear.EnemyStatMultiplier), BestiaryTone.Bad));
+            lines.Add(new BestiaryLine("Floor's own health", floorHealth.ToString(), BestiaryTone.Neutral));
+            if (fear.EnemyHealthMultiplier > 1.001f)
+            {
+                lines.Add(new BestiaryLine("More health", Percent(fear.EnemyHealthMultiplier), BestiaryTone.Bad));
+            }
+            if (fear.EnemyDamageMultiplier > 1.001f)
+            {
+                lines.Add(new BestiaryLine("More damage", Percent(fear.EnemyDamageMultiplier), BestiaryTone.Bad));
+            }
+            if (fear.EnemyAgilityMultiplier > 1.001f)
+            {
+                lines.Add(new BestiaryLine("More speed", Percent(fear.EnemyAgilityMultiplier), BestiaryTone.Bad));
+            }
+            return lines;
+        }
+
+        private static string Percent(float multiplier)
+        {
+            return $"+{Mathf.RoundToInt((multiplier - 1f) * 100f)}%";
+        }
+
         private List<BestiaryLine> LiveStatLines(Enemy enemy)
         {
             var lines = new List<BestiaryLine>();

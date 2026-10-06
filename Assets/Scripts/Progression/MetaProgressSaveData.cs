@@ -24,12 +24,12 @@ namespace Assets.Scripts.Progression
         public int Level;
     }
 
-    /// <summary>One run's revisit history: the best heat it has been cleared at, and how often.</summary>
+    /// <summary>One run's revisit history: the best fear it has been cleared at, and how often.</summary>
     [Serializable]
     public class RevisitRecord
     {
         public string RunKey;
-        public int BestHeat;
+        public int BestFear;
         public int Clears;
     }
 
@@ -91,7 +91,7 @@ namespace Assets.Scripts.Progression
         // Gates the main menu: a non-repeatable run - the tutorial - cannot be started again.
         public List<string> CompletedRunKeys = new List<string>();
 
-        // Revisits cleared, per run: the best heat and how many times (docs/plans/REVISITS.md).
+        // Revisits cleared, per run: the best fear and how many times (docs/plans/REVISITS.md).
         public List<RevisitRecord> RevisitRecords = new List<RevisitRecord>();
 
         // The guided first hour (docs/TUTORIAL.md). Only its two ends are stored - which step the

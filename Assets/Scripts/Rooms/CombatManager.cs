@@ -1679,7 +1679,7 @@ namespace Assets.Scripts.Rooms
                     // worth to whoever drinks it. ItemSO owns the arithmetic so the balance model
                     // and this agree by construction.
                     target.Stats.Health = Mathf.Min(
-                        target.Stats.Health + RunHeat.Current.ScaleHealing(target, item.HealAmountFor(max)), max);
+                        target.Stats.Health + RunFear.Current.ScaleHealing(target, item.HealAmountFor(max)), max);
                     int healed = target.Stats.Health - before;
                     CombatAudio.Play(CombatSound.ItemUse);
                     CombatAudio.Play(CombatSound.Heal);
@@ -2048,9 +2048,7 @@ namespace Assets.Scripts.Rooms
             // Buff the stat this attacker actually swings with, not Strength unconditionally.
             int attackBonus = BuffTracker.GetBuffAmount(attacker, attacker.AttackStat);
             int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Endurance);
-            // A revisit hits harder: enemy raw damage is scaled here and in DamageEffectExecutor.
-            int rawAttack = RunHeat.Current.ScaleOutgoingDamage(attacker,
-                Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * damageMultiplier));
+            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * damageMultiplier);
             int defense = target.GetEffectiveStat(StatType.Endurance) + defenseBonus;
 
             // Physical attacks carry the attacker's element, so elemental resistance applies to them too.
@@ -2492,8 +2490,8 @@ namespace Assets.Scripts.Rooms
             foreach (var award in LootRoller.Roll(
                          enemy.LootTable, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f)))
             {
-                // A revisit below its best heat does not pay the scarce materials (docs/plans/REVISITS.md).
-                if (RunHeat.Current.Withholds(award.Item.Key))
+                // A revisit below its best fear does not pay the scarce materials (docs/plans/REVISITS.md).
+                if (RunFear.Current.Withholds(award.Item.Key))
                 {
                     continue;
                 }

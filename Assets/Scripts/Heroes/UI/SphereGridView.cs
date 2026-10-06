@@ -353,6 +353,30 @@ namespace Assets.Scripts.Heroes.UI
                 return null;
             }
 
+            // Follow the graph's own edges first: a node connected to this one that lies that way is
+            // what the player means. Picking from every node let the cursor leap across a gap to an
+            // unconnected node on another branch (revisit playtest finding 11). Only when no
+            // neighbour lies that way does the pick fall back to the whole graph.
+            if (!string.IsNullOrEmpty(fromKey) && _nodes.TryGetValue(fromKey, out var origin))
+            {
+                _navKeys.Clear();
+                _navPoints.Clear();
+                foreach (var edge in _edges)
+                {
+                    string other = edge.A == fromKey ? edge.B : edge.B == fromKey ? edge.A : null;
+                    if (other != null && _nodes.TryGetValue(other, out var neighbour) && !_navKeys.Contains(other))
+                    {
+                        _navKeys.Add(other);
+                        _navPoints.Add(neighbour.Position);
+                    }
+                }
+                int viaEdge = DirectionalNav.PickInDirection(_navPoints, origin.Position, direction);
+                if (viaEdge >= 0)
+                {
+                    return _navKeys[viaEdge];
+                }
+            }
+
             _navKeys.Clear();
             _navPoints.Clear();
             int from = -1;
