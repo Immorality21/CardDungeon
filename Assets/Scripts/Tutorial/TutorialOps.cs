@@ -196,7 +196,7 @@ namespace Assets.Scripts.Tutorial
         /// The node the tutorial walks the player to: the cheapest one they can buy right now with XP
         /// alone, ties broken by the grid's own list order (the authored spine first). Null when there
         /// is none — which <see cref="CurrentStep"/> reads as "skip the step", never "wait for it".
-        /// Nodes that also cost materials are passed over: the tutorial promises an XP spend.
+        /// Nodes that also cost materials or Essence are passed over: the tutorial promises an XP spend.
         /// </summary>
         public static string GuidedNodeKey(SphereGridSO grid, ICollection<string> activated, int bank)
         {
@@ -210,6 +210,7 @@ namespace Assets.Scripts.Tutorial
             foreach (var node in SphereGridOps.Frontier(grid, owned))
             {
                 if (SphereGridOps.HasMaterialCost(node)
+                    || SphereGridOps.HasEssenceCost(node)
                     || !SphereGridOps.CanActivate(grid, owned, bank, node.Key))
                 {
                     continue;

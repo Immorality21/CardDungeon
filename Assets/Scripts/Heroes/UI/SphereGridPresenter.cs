@@ -24,9 +24,10 @@ namespace Assets.Scripts.Heroes.UI
     /// </summary>
     public static class SphereGridPresenter
     {
-        /// <param name="canPayMaterials">Whether the material half of a node's price is covered.
-        /// Null means "assume yes" - the editor window previews a grid with no inventory behind it,
-        /// and a preview that painted every material node unaffordable would say nothing useful.</param>
+        /// <param name="canPayMaterials">Whether the rest of a node's price - materials, Essence - is
+        /// covered. Null means "assume yes" - the editor window previews a grid with no inventory
+        /// behind it, and a preview that painted every material node unaffordable would say nothing
+        /// useful.</param>
         public static NodeUiState Classify(
             SphereGridSO grid,
             ICollection<string> activated,
@@ -50,8 +51,8 @@ namespace Assets.Scripts.Heroes.UI
             {
                 return NodeUiState.Adjacent;
             }
-            // Materials are the second half of the price, so failing them reads exactly like failing
-            // the XP half: reachable, wanted, not yet payable.
+            // Materials and Essence are the rest of the price, so failing them reads exactly like
+            // failing the XP half: reachable, wanted, not yet payable.
             if (canPayMaterials != null && !canPayMaterials(node))
             {
                 return NodeUiState.Adjacent;
@@ -128,10 +129,22 @@ namespace Assets.Scripts.Heroes.UI
                 return "Activated";
             }
 
+            // An Essence node is priced in Essence instead of XP, so a 0 XP line is left out.
+            var parts = new List<string>();
+            if (node.XpCost > 0 || !SphereGridOps.HasEssenceCost(node))
+            {
+                parts.Add($"{node.XpCost} XP");
+            }
+            if (SphereGridOps.HasEssenceCost(node))
+            {
+                parts.Add($"{node.EssenceCost} Essence");
+            }
             string materials = DescribeMaterialCost(node);
-            return string.IsNullOrEmpty(materials)
-                ? $"Costs {node.XpCost} XP"
-                : $"Costs {node.XpCost} XP + {materials}";
+            if (!string.IsNullOrEmpty(materials))
+            {
+                parts.Add(materials);
+            }
+            return "Costs " + string.Join(" + ", parts);
         }
 
         /// <summary>The sg-node--* USS class for a state (see CardDungeon.uss).</summary>
@@ -164,6 +177,7 @@ namespace Assets.Scripts.Heroes.UI
                     return "sg-node--resist";
                 case SphereNodeKind.MagicSlot:
                 case SphereNodeKind.MagicKnown:
+                case SphereNodeKind.MagicAwaken:
                 case SphereNodeKind.Summon:
                 case SphereNodeKind.SummonPower:
                 case SphereNodeKind.SummonDuration:
@@ -203,6 +217,8 @@ namespace Assets.Scripts.Heroes.UI
                     return "M";
                 case SphereNodeKind.MagicKnown:
                     return "✦";
+                case SphereNodeKind.MagicAwaken:
+                    return "✧";
                 case SphereNodeKind.Summon:
                     return "◆";
                 case SphereNodeKind.Ultra:
@@ -269,6 +285,12 @@ namespace Assets.Scripts.Heroes.UI
                 // as much the payload as the spell name is.
                 string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
                 return $"Learns {name} — {Mathf.Max(1, node.GrantedCharges)} charges per run";
+            }
+            if (node.Kind == SphereNodeKind.MagicAwaken)
+            {
+                string from = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
+                string to = string.IsNullOrEmpty(node.AwakenedMagicKey) ? "(unset)" : node.AwakenedMagicKey;
+                return $"Awakens {from} into {to} — same slot, same charges";
             }
             if (node.Kind == SphereNodeKind.Ultra)
             {
@@ -377,6 +399,8 @@ namespace Assets.Scripts.Heroes.UI
                     return "Ability slot";
                 case SphereNodeKind.MagicKnown:
                     return "Known ability";
+                case SphereNodeKind.MagicAwaken:
+                    return "Awakening";
                 case SphereNodeKind.Summon:
                     return "Summon";
                 case SphereNodeKind.Ultra:

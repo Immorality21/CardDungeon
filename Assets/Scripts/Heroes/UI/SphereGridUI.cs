@@ -344,7 +344,7 @@ namespace Assets.Scripts.Heroes.UI
             var save = HeroRoster.GetHeroSave(_selectedHero) ?? new HeroSaveData();
             var frontier = new List<string>();
             foreach (var pair in SphereGridPresenter.ClassifyAll(grid, save.ActivatedNodes ?? new List<string>(),
-                         save.CurrentXp, HeroRoster.CanPayMaterials))
+                         save.CurrentXp, HeroRoster.CanPayNonXpCost))
             {
                 if (pair.Value != NodeUiState.Locked)
                 {
@@ -403,7 +403,7 @@ namespace Assets.Scripts.Heroes.UI
             if (grid != null)
             {
                 foreach (var pair in SphereGridPresenter.ClassifyAll(
-                    grid, activated, save.CurrentXp, HeroRoster.CanPayMaterials))
+                    grid, activated, save.CurrentXp, HeroRoster.CanPayNonXpCost))
                 {
                     _view.SetNodeState(pair.Key, SphereGridPresenter.StateClass(pair.Value));
                 }
@@ -446,7 +446,7 @@ namespace Assets.Scripts.Heroes.UI
             AddChanges(node, activated, isActive);
 
             bool canActivate = SphereGridOps.CanActivate(grid, activated, save.CurrentXp, node.Key)
-                               && HeroRoster.CanPayMaterials(node);
+                               && HeroRoster.CanPayNonXpCost(node);
             if (_activateButton != null)
             {
                 _activateButton.text = isActive ? "Activated" : "Activate";
@@ -465,6 +465,11 @@ namespace Assets.Scripts.Heroes.UI
             {
                 SetReason($"Need {node.XpCost} XP — {save.CurrentXp} banked.");
             }
+            else if (!HeroRoster.CanPayEssence(node))
+            {
+                int purse = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.Essence : 0;
+                SetReason($"Need {node.EssenceCost} Essence — {purse} in the purse. Revisits pay Essence.");
+            }
             else
             {
                 SetReason($"Needs {SphereGridPresenter.DescribeMaterialCost(node)}.");
@@ -482,6 +487,8 @@ namespace Assets.Scripts.Heroes.UI
             {
                 case SphereNodeKind.MagicKnown:
                     return MagicName(node.GrantedMagicKey);
+                case SphereNodeKind.MagicAwaken:
+                    return MagicName(node.AwakenedMagicKey);
                 case SphereNodeKind.Summon:
                     return SummonName(node.GrantedSummonKey);
                 case SphereNodeKind.Ultra:
@@ -507,6 +514,17 @@ namespace Assets.Scripts.Heroes.UI
                                   + "Carry it by giving it a slot in the Storehouse.";
                     return magic != null && !string.IsNullOrEmpty(magic.Description)
                         ? magic.Description + "\n\n" + line
+                        : line;
+                }
+                case SphereNodeKind.MagicAwaken:
+                {
+                    // What it becomes, then what it replaces: the awakened ability keeps the base's
+                    // slot and charges, so nothing about the loadout changes.
+                    var awakened = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(node.AwakenedMagicKey) : null;
+                    string line = $"Awakens {MagicName(node.GrantedMagicKey)} into {MagicName(node.AwakenedMagicKey)}. "
+                                  + "It keeps its slot and charges.";
+                    return awakened != null && !string.IsNullOrEmpty(awakened.Description)
+                        ? awakened.Description + "\n\n" + line
                         : line;
                 }
                 case SphereNodeKind.MagicSlot:
@@ -651,11 +669,21 @@ namespace Assets.Scripts.Heroes.UI
                 {
                     MetaProgressManager.Instance.MarkMagicDiscovered(node.GrantedMagicKey);
                 }
+                if (node.Kind == SphereNodeKind.MagicAwaken && !string.IsNullOrEmpty(node.AwakenedMagicKey))
+                {
+                    MetaProgressManager.Instance.MarkMagicDiscovered(node.AwakenedMagicKey);
+                }
 
-                SetFeedback($"{SphereGridPresenter.NodeName(node)} activated.");
+                SetFeedback(node.Kind == SphereNodeKind.MagicAwaken
+                    ? $"{MagicName(node.GrantedMagicKey)} awakens into {MagicName(node.AwakenedMagicKey)}."
+                    : $"{SphereGridPresenter.NodeName(node)} activated.");
                 Refresh();
                 NodeActivated?.Invoke(node.Key);
                 return;
+            }
+            else if (!HeroRoster.CanPayEssence(node))
+            {
+                SetFeedback($"Not enough Essence — needs {node.EssenceCost}. Revisits pay Essence.");
             }
             else if (!HeroRoster.CanPayMaterials(node))
             {

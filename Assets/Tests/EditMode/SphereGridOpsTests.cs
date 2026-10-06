@@ -189,6 +189,79 @@ namespace Tests.EditMode
             Assert.AreEqual(2, granted[0].Value);
         }
 
+        // --- Essence nodes and awakenings (docs/plans/HUB.md §3c) -------------
+
+        /// <summary>start - cry (War Cry, 2 charges) - awaken (Essence 100, War Cry -> WarCryAwakened).</summary>
+        private static SphereGridSO AwakeningGrid()
+        {
+            var cry = Node("cry", 20, "awaken");
+            cry.Kind = SphereNodeKind.MagicKnown;
+            cry.GrantedMagicKey = "WarCry";
+            cry.GrantedCharges = 2;
+            var slash = Node("slash", 20);
+            slash.Kind = SphereNodeKind.MagicKnown;
+            slash.GrantedMagicKey = "Slash";
+            var awaken = Node("awaken", 0);
+            awaken.Kind = SphereNodeKind.MagicAwaken;
+            awaken.GrantedMagicKey = "WarCry";
+            awaken.AwakenedMagicKey = "WarCryAwakened";
+            awaken.EssenceCost = 100;
+            return Grid("start", Node("start", 10, "cry", "slash"), cry, slash, awaken);
+        }
+
+        [Test]
+        public void KnownMagicForNodes_Awakening_ReplacesTheBaseInPlace_KeepingCharges()
+        {
+            var grid = AwakeningGrid();
+
+            var known = SphereGridOps.KnownMagicForNodes(grid, new List<string> { "start", "cry", "slash", "awaken" });
+
+            Assert.AreEqual(2, known.Count);
+            Assert.AreEqual("WarCryAwakened", known[0].Key, "The awakened ability takes the base's position.");
+            Assert.AreEqual(2, known[0].Value, "And its charges.");
+            Assert.AreEqual("Slash", known[1].Key);
+        }
+
+        [Test]
+        public void KnownMagicForNodes_AwakeningWithoutTheBase_GrantsNothing()
+        {
+            var grid = AwakeningGrid();
+
+            // Not reachable this way in play, but a re-authored grid can leave it so.
+            var known = SphereGridOps.KnownMagicForNodes(grid, new List<string> { "start", "slash", "awaken" });
+
+            Assert.AreEqual(1, known.Count);
+            Assert.AreEqual("Slash", known[0].Key);
+        }
+
+        [Test]
+        public void GreedySpend_NeverBuysAnEssenceNode()
+        {
+            var grid = AwakeningGrid();
+
+            var bought = SphereGridOps.GreedySpend(grid, null, 1000, out int spent);
+
+            CollectionAssert.DoesNotContain(bought, "awaken",
+                "The model spends XP and has no Essence; at 0 XP the node would otherwise be free.");
+            Assert.AreEqual(50, spent);
+        }
+
+        [Test]
+        public void CheapestFrontierCost_IgnoresEssenceNodes()
+        {
+            var grid = AwakeningGrid();
+
+            Assert.AreEqual(-1, SphereGridOps.CheapestFrontierCost(grid, new List<string> { "start", "cry", "slash" }),
+                "Only an Essence node is left, and it has no XP price to report.");
+        }
+
+        [Test]
+        public void HasEssenceCost_OnlyForAPositivePrice()
+        {
+            Assert.IsFalse(SphereGridOps.HasEssenceCost(Node("plain", 10)));
+            Assert.IsTrue(SphereGridOps.HasEssenceCost(AwakeningGrid().Nodes[3]));
+        }
+
         [Test]
         public void TotalGridCost_ExcludesDefaultUnlocks()
         {

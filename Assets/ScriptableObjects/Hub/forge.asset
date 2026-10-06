@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.BuildingSO
   Key: forge
   DisplayName: Ability Forge
-  Blurb: Essence goes in. What comes out is an ability that hits harder.
+  Blurb: Essence goes in. What comes out is a combo that hits harder.
   Service: 2
   Position: {x: 120, y: 250}
   HitSize: {x: 150, y: 110}
@@ -34,8 +34,8 @@ MonoBehaviour:
     Amount: 2
   GoldPerUpgrade: 250
   LevelGrants:
-  - Forge abilities and combos up to Lv 1.
-  - Forge abilities and combos up to Lv 3.
-  - Forge abilities and combos up to Lv 5, as far as the craft goes.
+  - Forge combos up to Lv 1.
+  - Forge combos up to Lv 3.
+  - Forge combos up to Lv 5, as far as the craft goes.
   RequiredRunKeys:
   - TutorialRun

@@ -149,6 +149,16 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
+        /// Whether this node is priced in Essence, the revisit currency (docs/plans/HUB.md §3c).
+        /// Like <see cref="HasMaterialCost"/> it lives outside <see cref="CanActivate"/>: the Essence
+        /// half is checked where the purse lives (<c>HeroRoster.TryActivateNode</c>).
+        /// </summary>
+        public static bool HasEssenceCost(SphereGridNode node)
+        {
+            return node != null && node.EssenceCost > 0;
+        }
+
+        /// <summary>
         /// Symmetric adjacency over the authored <see cref="SphereGridNode.Neighbors"/> lists:
         /// listing B on A links both directions, duplicates collapse, and neighbour keys that match
         /// no node are dropped. Every node with a key gets an entry, even if isolated.
@@ -443,7 +453,49 @@ namespace Assets.Scripts.Heroes
                 granted.Add(new KeyValuePair<string, int>(node.GrantedMagicKey, charges));
             }
 
+            // An awakened ability takes its base's place - same position, same charges - so the
+            // loadout's auto-fill and the slot it sat in are unchanged by the upgrade.
+            foreach (var pair in AwakeningsForNodes(grid, activated))
+            {
+                int index = granted.FindIndex(entry => entry.Key == pair.Key);
+                if (index >= 0)
+                {
+                    granted[index] = new KeyValuePair<string, int>(pair.Value, granted[index].Value);
+                }
+            }
+
             return granted;
+        }
+
+        /// <summary>
+        /// Base ability key to awakened ability key, for every active <see cref="SphereNodeKind.MagicAwaken"/>
+        /// node (docs/plans/HUB.md §3c). Includes awakenings of abilities the hero does not know:
+        /// <see cref="KnownMagicForNodes"/> applies only the ones that match. The first node for a
+        /// base wins, in grid order.
+        /// </summary>
+        public static Dictionary<string, string> AwakeningsForNodes(SphereGridSO grid, IEnumerable<string> activated)
+        {
+            var awakenings = new Dictionary<string, string>();
+            if (grid == null || grid.Nodes == null)
+            {
+                return awakenings;
+            }
+
+            var owned = ActiveNodes(grid, activated);
+            foreach (var node in grid.Nodes)
+            {
+                if (node == null
+                    || node.Kind != SphereNodeKind.MagicAwaken
+                    || string.IsNullOrEmpty(node.GrantedMagicKey)
+                    || string.IsNullOrEmpty(node.AwakenedMagicKey)
+                    || !owned.Contains(node.Key)
+                    || awakenings.ContainsKey(node.GrantedMagicKey))
+                {
+                    continue;
+                }
+                awakenings[node.GrantedMagicKey] = node.AwakenedMagicKey;
+            }
+            return awakenings;
         }
 
         /// <summary>
@@ -748,8 +800,8 @@ namespace Assets.Scripts.Heroes
             return result;
         }
 
-        /// <summary>Cheapest frontier node's cost, or -1 when the frontier is empty (grid fully
-        /// activated, or no grid at all).</summary>
+        /// <summary>Cheapest XP-priced frontier node's cost, or -1 when there is none (grid fully
+        /// activated, no grid at all, or only Essence nodes left).</summary>
         public static int CheapestFrontierCost(SphereGridSO grid, ICollection<string> activated)
         {
             var frontier = Frontier(grid, activated);
@@ -761,12 +813,16 @@ namespace Assets.Scripts.Heroes
             int cheapest = int.MaxValue;
             foreach (var node in frontier)
             {
+                if (HasEssenceCost(node))
+                {
+                    continue;   // priced in Essence, not XP
+                }
                 if (node.XpCost < cheapest)
                 {
                     cheapest = node.XpCost;
                 }
             }
-            return cheapest;
+            return cheapest == int.MaxValue ? -1 : cheapest;
         }
 
         /// <summary>
@@ -796,6 +852,13 @@ namespace Assets.Scripts.Heroes
                 SphereGridNode pick = null;
                 foreach (var node in frontier)
                 {
+                    // The model spends XP and has no Essence, so an Essence node is never bought:
+                    // at 0 XP it would otherwise be free.
+                    if (HasEssenceCost(node))
+                    {
+                        continue;
+                    }
+
                     // Frontier preserves Nodes order, so "strictly cheaper" keeps the first
                     // (lowest-index) node on a cost tie.
                     if (node.XpCost <= budget - spent && (pick == null || node.XpCost < pick.XpCost))

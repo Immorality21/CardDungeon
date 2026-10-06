@@ -20,6 +20,7 @@ MonoBehaviour:
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -29,7 +30,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-trunk-1
@@ -39,6 +42,7 @@ MonoBehaviour:
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -48,7 +52,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-slash
@@ -58,6 +64,7 @@ MonoBehaviour:
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -65,7 +72,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Slash
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors: []
   - Key: warrior-trunk-2
@@ -74,6 +83,7 @@ MonoBehaviour:
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -85,7 +95,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-start
@@ -95,6 +107,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -360}
     Gains:
       Values: []
@@ -102,7 +115,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-trunk-2
@@ -112,6 +127,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -110, y: -325}
     Gains:
       Values:
@@ -121,7 +137,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-trunk-2
@@ -131,6 +149,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -205, y: -380}
     Gains:
       Values:
@@ -140,7 +159,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-1
@@ -150,6 +171,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -300, y: -435}
     Gains:
       Values: []
@@ -157,7 +179,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: ShieldUp
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-2
@@ -167,6 +191,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -395, y: -490}
     Gains:
       Values:
@@ -176,7 +201,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-3
@@ -186,6 +213,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -490, y: -545}
     Gains:
       Values: []
@@ -193,7 +221,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-4
@@ -203,6 +233,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -585, y: -600}
     Gains:
       Values: []
@@ -210,7 +241,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Bulwark
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-5
@@ -220,6 +253,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -680, y: -655}
     Gains:
       Values:
@@ -231,7 +265,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-6
@@ -241,6 +277,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -185, y: -250}
     Gains:
       Values: []
@@ -248,7 +285,9 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-1
@@ -258,6 +297,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -280, y: -305}
     Gains:
       Values:
@@ -267,7 +307,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-2
@@ -277,6 +319,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -470, y: -415}
     Gains:
       Values:
@@ -286,7 +329,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-4
@@ -296,6 +341,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -660, y: -525}
     Gains:
       Values: []
@@ -303,7 +349,9 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-6
@@ -313,6 +361,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -775, y: -710}
     Gains:
       Values: []
@@ -320,7 +369,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Ward
     GrantedCharges: 1
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-7
@@ -330,6 +381,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -755, y: -580}
     Gains:
       Values:
@@ -339,7 +391,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-7
@@ -349,6 +403,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 110, y: -325}
     Gains:
       Values:
@@ -358,7 +413,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-trunk-2
@@ -368,6 +425,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 205, y: -380}
     Gains:
       Values:
@@ -377,7 +435,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-1
@@ -387,6 +447,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 300, y: -435}
     Gains:
       Values: []
@@ -394,7 +455,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Sunder
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-2
@@ -404,6 +467,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 395, y: -490}
     Gains:
       Values:
@@ -413,7 +477,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-3
@@ -423,6 +489,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 490, y: -545}
     Gains:
       Values: []
@@ -430,7 +497,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-4
@@ -440,6 +509,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 585, y: -600}
     Gains:
       Values: []
@@ -447,7 +517,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Cleave
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-5
@@ -457,6 +529,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 680, y: -655}
     Gains:
       Values:
@@ -466,7 +539,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-6
@@ -476,6 +551,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 185, y: -250}
     Gains:
       Values:
@@ -485,7 +561,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-1
@@ -495,6 +573,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 280, y: -305}
     Gains:
       Values:
@@ -504,7 +583,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-2
@@ -514,6 +595,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 470, y: -415}
     Gains:
       Values:
@@ -523,7 +605,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-4
@@ -533,6 +617,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 660, y: -525}
     Gains:
       Values:
@@ -542,7 +627,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-6
@@ -556,6 +643,7 @@ MonoBehaviour:
       Amount: 2
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
+    EssenceCost: 0
     Position: {x: 775, y: -710}
     Gains:
       Values: []
@@ -563,7 +651,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: WarCry
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-7
@@ -573,6 +663,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 755, y: -580}
     Gains:
       Values:
@@ -584,7 +675,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-7
@@ -598,6 +691,7 @@ MonoBehaviour:
       Amount: 2
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
       Amount: 3
+    EssenceCost: 0
     Position: {x: 850, y: -635}
     Gains:
       Values: []
@@ -605,7 +699,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: BloodfangBoar
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-edge
@@ -615,6 +711,7 @@ MonoBehaviour:
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 945, y: -690}
     Gains:
       Values: []
@@ -622,7 +719,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: BloodfangBoar
+    GrantedUltraKey: 
     SummonAmount: 10
     Neighbors:
     - warrior-boar
@@ -632,6 +731,7 @@ MonoBehaviour:
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 1040, y: -745}
     Gains:
       Values: []
@@ -639,7 +739,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: BloodfangBoar
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-boar-fury
@@ -653,6 +755,7 @@ MonoBehaviour:
       Amount: 1
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
       Amount: 2
+    EssenceCost: 0
     Position: {x: 1135, y: -800}
     Gains:
       Values: []
@@ -660,7 +763,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: BloodfangBoar
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-boar-endurance
@@ -674,6 +779,7 @@ MonoBehaviour:
       Amount: 2
     - Material: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
       Amount: 3
+    EssenceCost: 0
     Position: {x: -850, y: -635}
     Gains:
       Values: []
@@ -681,7 +787,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: CairnGolem
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-a-hold
@@ -691,6 +799,7 @@ MonoBehaviour:
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -945, y: -690}
     Gains:
       Values: []
@@ -698,7 +807,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: CairnGolem
+    GrantedUltraKey: 
     SummonAmount: 50
     Neighbors:
     - warrior-golem
@@ -708,6 +819,7 @@ MonoBehaviour:
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -1040, y: -745}
     Gains:
       Values: []
@@ -715,7 +827,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: CairnGolem
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-golem-bulk
@@ -729,6 +843,7 @@ MonoBehaviour:
       Amount: 1
     - Material: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
       Amount: 2
+    EssenceCost: 0
     Position: {x: -1135, y: -800}
     Gains:
       Values: []
@@ -736,7 +851,49 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
     GrantedSummonKey: CairnGolem
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-golem-stay
+  - Key: warrior-a-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 100
+    Position: {x: -560, y: -700}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Bulwark
+    GrantedCharges: 2
+    AwakenedMagicKey: UnbrokenLine
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-a-6
+  - Key: warrior-b-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 150
+    Position: {x: 800, y: -805}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: WarCry
+    GrantedCharges: 2
+    AwakenedMagicKey: RallyingRoar
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-b-cry

@@ -852,15 +852,15 @@ namespace Assets.Scripts.Rooms
         private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex, Room room)
         {
             // Use Instance (auto-creates + loads Meta.json) rather than HasInstance: the
-            // manager may not exist yet mid-combat, and we must still apply upgrades and
-            // record combo discovery.
+            // manager may not exist yet mid-combat, and we must still apply combo upgrades and
+            // record combo discovery. Abilities themselves have no upgrade level since the Forge
+            // stopped selling ability upgrades (2026-10-06, docs/plans/HUB.md §3c): an ability
+            // grows on the sphere grid, so it always resolves at power bonus 0, level 0.
             var meta = MetaProgressManager.Instance;
-            int powerBonus = castAction.Magic != null ? meta.GetMagicPowerBonus(castAction.Magic.Key) : 0;
-            int magicLevel = castAction.Magic != null ? meta.GetMagicUpgradeLevel(castAction.Magic.Key) : 0;
             Func<string, int> comboLevelLookup = meta.GetComboUpgradeLevel;
 
             var result = _calculator.Execute(
-                castAction, BuffTracker, _tagTracker, _comboDetector, powerBonus, magicLevel, comboLevelLookup);
+                castAction, BuffTracker, _tagTracker, _comboDetector, 0, 0, comboLevelLookup);
             _lastTurnLog = result.BuildLog(castAction);
             CombatAudio.Play(CombatSound.MagicCast);
 
@@ -873,7 +873,7 @@ namespace Assets.Scripts.Rooms
             // ...and what the cast taught the player about the enemies it hit. Read off the magic's
             // live Damage effects rather than the result entries, because an entry carries the
             // number and the popup word but not the element that produced them.
-            RecordCastDamageObserved(castAction, magicLevel);
+            RecordCastDamageObserved(castAction);
 
             yield return _presenter.Present(
                 result,
@@ -1223,7 +1223,7 @@ namespace Assets.Scripts.Rooms
             var action = new SpellcastAction { Magic = castable, Caster = hero, Targets = targets, CastSlot = -1 };
             var result = _calculator.Execute(action, BuffTracker);
             _lastTurnLog = $"{hero.DisplayName} unleashes {ultra.Label}!";
-            RecordCastDamageObserved(action, 0);
+            RecordCastDamageObserved(action);
             yield return _presenter.Present(result, hero, castable);
 
             if (_currentCombatRoom != null)
@@ -1612,7 +1612,7 @@ namespace Assets.Scripts.Rooms
             var result = _calculator.Execute(action, BuffTracker);
             _lastTurnLog = result.BuildLog(action);
             CombatAudio.Play(isSignature ? CombatSound.BossSignature : CombatSound.MagicCast);
-            RecordCastDamageObserved(action, 0);
+            RecordCastDamageObserved(action);
             yield return _presenter.Present(result, caster, magic);
 
             var deadEnemies = room.Enemies.Where(e => e != null && !e.IsAlive).ToList();
@@ -2350,7 +2350,7 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>Every element the cast actually delivered, against every enemy it landed on.</summary>
-        private static void RecordCastDamageObserved(SpellcastAction castAction, int magicLevel)
+        private static void RecordCastDamageObserved(SpellcastAction castAction)
         {
             if (castAction == null || castAction.Magic == null ||
                 castAction.Magic.Effects == null || castAction.Targets == null)
@@ -2360,10 +2360,10 @@ namespace Assets.Scripts.Rooms
 
             foreach (var effect in castAction.Magic.Effects)
             {
-                // Skip effects the magic has not unlocked yet - they never fired, so they taught
-                // the player nothing.
+                // Skip effects gated behind an upgrade level - abilities have none since the Forge
+                // stopped upgrading them, so those never fired and taught the player nothing.
                 if (effect == null || effect.EffectType != SpellEffectType.Damage ||
-                    effect.UnlockLevel > magicLevel)
+                    effect.UnlockLevel > 0)
                 {
                     continue;
                 }

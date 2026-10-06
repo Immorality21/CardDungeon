@@ -3289,7 +3289,11 @@ namespace Assets.Scripts.Rooms
             AddLevelSection("Gold", $"+{summary.GoldTotal}");
             AddLevelDetail($"{summary.GoldFound} found  ·  {summary.GoldBonus} for the clear", string.Empty);
 
-            AddLevelSection("Essence", $"+{summary.Essence}");
+            // Only a revisit pays Essence; a "+0" row on every first clear would only confuse.
+            if (summary.Essence > 0)
+            {
+                AddLevelSection("Essence", $"+{summary.Essence}");
+            }
 
             if (summary.Xp.Count > 0)
             {

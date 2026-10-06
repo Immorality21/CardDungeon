@@ -5,13 +5,6 @@ using Assets.Scripts.IO;
 
 namespace Assets.Scripts.Progression
 {
-    [Serializable]
-    public class MagicUpgradeEntry
-    {
-        public string MagicKey;
-        public int Level;
-    }
-
     /// <summary>
     /// One hub lot the player has placed, and how far it is upgraded. Progress lives here rather
     /// than on <c>BuildingSO</c> for the same reason <c>CompletedRunKeys</c> does: the authored
@@ -43,15 +36,14 @@ namespace Assets.Scripts.Progression
     /// <summary>
     /// Persistent meta-progression that survives runs and party death.
     /// Gold is the flow currency (spent at the merchant); Essence is the
-    /// investment currency (spent upgrading magic and buying extra slots).
-    /// Magic upgrade levels are tracked per magic key (per magic type).
+    /// investment currency, paid by revisits and spent on Essence-priced sphere-grid
+    /// nodes and on combo upgrades at the Forge (docs/plans/HUB.md §3c).
     /// </summary>
     [Serializable]
     public class MetaProgressSaveData : IWriteable
     {
         public int Gold;
         public int Essence;
-        public List<MagicUpgradeEntry> MagicUpgrades = new List<MagicUpgradeEntry>();
         public List<ComboUpgradeEntry> ComboUpgrades = new List<ComboUpgradeEntry>();
         // Legacy: Essence-bought global magic slots, retired when the sphere grid took slot growth
         // over (MagicSlot nodes, per hero). Kept only so old saves deserialize; MetaProgressManager

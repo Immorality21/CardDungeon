@@ -266,12 +266,11 @@ namespace Assets.Scripts.Cards.UI
                 // is deterministic, so the number shown here is the number that will be charged.
                 if (_mode == SelectionMode.Cast && !slot.IsEmpty)
                 {
-                    int upgradeLevel = MagicUpgradeLevelOf(slot.Magic);
-                    int healthCost = SpellPower.TotalHealthCost(slot.Magic, _currentHero, upgradeLevel);
+                    int healthCost = SpellPower.TotalHealthCost(slot.Magic, _currentHero, 0);
                     if (healthCost > 0)
                     {
                         meta = $"{meta}  {healthCost} HP";
-                        if (!SpellPower.CanAfford(slot.Magic, _currentHero, upgradeLevel))
+                        if (!SpellPower.CanAfford(slot.Magic, _currentHero, 0))
                         {
                             selectable = false;
                         }
@@ -1041,23 +1040,9 @@ namespace Assets.Scripts.Cards.UI
         // ============================================================
 
         /// <summary>
-        /// A magic's upgrade level, which gates which of its effects are live and therefore what it
-        /// costs. Uses <c>Instance</c> rather than <c>HasInstance</c> for the same reason
-        /// <c>CombatManager.ExecuteCastAction</c> does: the manager may not exist yet mid-combat and
-        /// the quoted price still has to match the one the resolver will apply.
-        /// </summary>
-        private static int MagicUpgradeLevelOf(MagicSO magic)
-        {
-            if (magic == null)
-            {
-                return 0;
-            }
-            return Progression.MetaProgressManager.Instance.GetMagicUpgradeLevel(magic.Key);
-        }
-
-        /// <summary>
         /// The footer text for one ability slot: flavour plus what it does in this hero's hands
-        /// (<see cref="AbilityDescriber"/>), with the Forge bonus and upgrade gates the cast will use.
+        /// (<see cref="AbilityDescriber"/>). Abilities carry no upgrade bonus since the Forge stopped
+        /// selling ability upgrades, so it is described at bonus 0, level 0 - what the cast uses.
         /// </summary>
         private string DescribeSlot(MagicSlot slot)
         {
@@ -1066,11 +1051,8 @@ namespace Assets.Scripts.Cards.UI
                 return null;
             }
 
-            var meta = Progression.MetaProgressManager.HasInstance ? Progression.MetaProgressManager.Instance : null;
-            int powerBonus = meta != null ? meta.GetMagicPowerBonus(slot.Magic.Key) : 0;
-            int upgradeLevel = meta != null ? MagicUpgradeLevelOf(slot.Magic) : 0;
             var tracker = CombatManager.HasInstance ? CombatManager.Instance.BuffTracker : null;
-            return AbilityDescriber.Full(slot.Magic, _currentHero, tracker, powerBonus, upgradeLevel);
+            return AbilityDescriber.Full(slot.Magic, _currentHero, tracker, 0, 0);
         }
 
         // Rows mirror the command menu: a ▸ cursor on the selected row, icon, dark name, meta.

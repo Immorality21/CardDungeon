@@ -148,7 +148,6 @@ namespace Assets.Scripts.Balance
             EvaluateEvents(report, rules, input);
             EvaluateVariety(report, rules);
             EvaluateProgression(report, rules);
-            EvaluateEconomy(report, rules);
             EvaluateMaterials(report, input);
             EvaluateSimulations(report, rules);
             EvaluateFloorSimulations(report, rules);
@@ -848,8 +847,7 @@ namespace Assets.Scripts.Balance
                     {
                         Magic = magic,
                         Charges = charges,
-                        MaxCharges = charges,
-                        UpgradeLevel = UpgradeLevelFor(magic, save)
+                        MaxCharges = charges
                     });
                 }
 
@@ -907,24 +905,6 @@ namespace Assets.Scripts.Balance
                 }
             }
             return null;
-        }
-
-        private static int UpgradeLevelFor(MagicSO magic, SaveAudit save)
-        {
-            if (save == null || magic == null)
-            {
-                return 0;
-            }
-
-            string key = string.IsNullOrEmpty(magic.Key) ? magic.name : magic.Key;
-            foreach (var upgrade in save.MagicUpgrades)
-            {
-                if (upgrade.Key == key)
-                {
-                    return upgrade.Level;
-                }
-            }
-            return 0;
         }
 
         // ------------------------------------------------------------------ party
@@ -2782,43 +2762,6 @@ namespace Assets.Scripts.Balance
                                    + "room off the combat count), or clear the MaterialTable."
                     });
                 }
-            }
-        }
-
-        private static void EvaluateEconomy(BalanceReport report, BalanceRulesSO rules)
-        {
-            var save = report.Save;
-            float clearsToFirst = save != null
-                ? save.ClearsToFirstUpgrade
-                : (float)MetaProgressManager.MagicUpgradeCostForNextLevel(0) / MetaProgressManager.EssencePerLevelCleared;
-            float clearsToMax = save != null
-                ? save.ClearsToMaxOneMagic
-                : (float)SaveAudit.TotalEssenceToMaxOneMagic() / MetaProgressManager.EssencePerLevelCleared;
-
-            if (clearsToFirst > rules.TargetClearsToFirstUpgrade * 1.5f)
-            {
-                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Economy, "Essence",
-                    $"First magic upgrade takes {clearsToFirst:0.0} level-clears")
-                {
-                    Detail = $"{MetaProgressManager.MagicUpgradeCostForNextLevel(0)} Essence at "
-                           + $"{MetaProgressManager.EssencePerLevelCleared} per clear; the target is "
-                           + $"{rules.TargetClearsToFirstUpgrade}.",
-                    Suggestion = "Raise EssencePerLevelCleared or lower the base upgrade cost — the first upgrade "
-                           + "is what teaches the player the meta-loop exists."
-                });
-            }
-
-            if (clearsToMax > rules.MaxClearsToMaxOneMagic)
-            {
-                report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Economy, "Essence",
-                    $"Maxing one magic takes {clearsToMax:0} level-clears")
-                {
-                    Detail = $"{SaveAudit.TotalEssenceToMaxOneMagic()} Essence total at "
-                           + $"{MetaProgressManager.EssencePerLevelCleared} per clear, and that is for a single "
-                           + $"magic out of the whole catalog. Ceiling in the rules is {rules.MaxClearsToMaxOneMagic}.",
-                    Suggestion = "Intentional grind or not, this is the shape of the Essence economy — worth a "
-                           + "deliberate decision rather than an accident of two constants."
-                });
             }
         }
 

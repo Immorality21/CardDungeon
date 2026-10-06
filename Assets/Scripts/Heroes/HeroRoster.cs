@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.IO;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
@@ -151,15 +152,16 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
-        /// Spends banked XP - and, on a node that asks for them, materials - to activate one
+        /// Spends banked XP - and, on a node that asks for them, materials and Essence - to activate one
         /// sphere-grid node: validate → spend → save. Hub-only: the dungeon never calls this, which
         /// is what keeps room-event spawn thresholds (<c>DungeonManager.BestRosterStats</c>) stable
         /// across a run.
         ///
-        /// <para>The two prices are checked together and paid together. XP lives in
-        /// <c>Party.json</c> and materials in the inventory, so a node that charges both has two
-        /// stores to keep consistent; both are verified before either moves, and a failed material
-        /// spend puts the XP straight back rather than leaving a node bought for free.</para>
+        /// <para>The prices are checked together and paid together. XP lives in <c>Party.json</c>,
+        /// materials in the inventory and Essence in <c>Meta.json</c>, so a node that charges more
+        /// than one has several stores to keep consistent; all are verified before any moves, and a
+        /// failed spend puts the earlier ones straight back rather than leaving a node bought for
+        /// free.</para>
         /// </summary>
         public static bool TryActivateNode(HeroSO hero, string nodeKey)
         {
@@ -179,6 +181,11 @@ namespace Assets.Scripts.Heroes
             {
                 return false;
             }
+            bool chargesEssence = SphereGridOps.HasEssenceCost(node);
+            if (chargesEssence && !CanPayEssence(node))
+            {
+                return false;
+            }
 
             var handler = new FileHandler();
             var save = handler.Load<PartySaveData>();
@@ -194,15 +201,55 @@ namespace Assets.Scripts.Heroes
                 return false;
             }
 
-            if (chargesMaterials && !InventoryManager.Instance.SpendMaterials(node.MaterialCosts))
+            if (chargesEssence && !MetaProgressManager.Instance.TrySpendEssence(node.EssenceCost))
             {
                 entry.CurrentXp += node.XpCost;
                 entry.ActivatedNodes.Remove(nodeKey);
                 return false;
             }
 
+            if (chargesMaterials && !InventoryManager.Instance.SpendMaterials(node.MaterialCosts))
+            {
+                entry.CurrentXp += node.XpCost;
+                entry.ActivatedNodes.Remove(nodeKey);
+                if (chargesEssence)
+                {
+                    MetaProgressManager.Instance.AddEssence(node.EssenceCost);
+                }
+                return false;
+            }
+
             handler.Save(save);
+
+            if (node.Kind == SphereNodeKind.MagicAwaken)
+            {
+                // The awakened ability takes the base's place in the loadout and any run's slots.
+                AwakeningSaves.Apply(handler, hero.SaveKey, node.GrantedMagicKey, node.AwakenedMagicKey);
+            }
             return true;
+        }
+
+        /// <summary>
+        /// Whether everything a node charges besides XP - materials and Essence - is covered right
+        /// now. The predicate the grid screen and the hub badge classify nodes with.
+        /// </summary>
+        public static bool CanPayNonXpCost(SphereGridNode node)
+        {
+            return CanPayMaterials(node) && CanPayEssence(node);
+        }
+
+        /// <summary>
+        /// Whether the Essence half of a node's price is covered right now. False with no purse in
+        /// the scene, for the same reason as <see cref="CanPayMaterials"/>.
+        /// </summary>
+        public static bool CanPayEssence(SphereGridNode node)
+        {
+            if (!SphereGridOps.HasEssenceCost(node))
+            {
+                return true;
+            }
+
+            return MetaProgressManager.HasInstance && MetaProgressManager.Instance.Essence >= node.EssenceCost;
         }
 
         /// <summary>

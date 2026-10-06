@@ -9,25 +9,25 @@ namespace Assets.Scripts.Progression
 {
     /// <summary>
     /// Owns the persistent meta-progression currencies (Gold, Essence) and permanent
-    /// magic upgrades (per magic key) plus purchased party slots. Persists
-    /// immediately on every change, so awards survive party death even though
-    /// dungeon/run saves are wiped. (Extra magic slots moved to the sphere grid —
-    /// per-hero MagicSlot nodes bought with XP.)
+    /// combo upgrades (per combo key). Persists immediately on every change, so awards
+    /// survive party death even though dungeon/run saves are wiped. (Extra magic slots
+    /// moved to the sphere grid - per-hero MagicSlot nodes bought with XP - and so, on
+    /// 2026-10-06, did growing an ability: the Forge no longer upgrades abilities.)
     /// </summary>
     public class MetaProgressManager : SingletonBehaviour<MetaProgressManager>
     {
-        // --- Magic upgrade tuning ---
+        // --- Combo upgrade tuning ---
         public const int PowerPerUpgradeLevel = 2;
 
         /// <summary>
-        /// The highest an ability or combo can ever be upgraded, at a fully raised Forge. Nothing
+        /// The highest a combo can ever be upgraded, at a fully raised Forge. Nothing
         /// past this is buyable at any hub state, so the <i>endgame</i> power ceiling is this
         /// constant and the Forge's level decides only how soon it is reached.
         /// </summary>
-        public const int MaxMagicUpgradeLevel = 5;
+        public const int MaxComboUpgradeLevel = 5;
 
-        private const int BaseMagicUpgradeCost = 15;
-        private const int MagicUpgradeCostIncrement = 15;
+        private const int BaseComboUpgradeCost = 15;
+        private const int ComboUpgradeCostIncrement = 15;
 
         /// <summary>
         /// Upgrade ceiling per Forge building level: no Forge buys nothing, and levels 1-3 open 1,
@@ -37,13 +37,15 @@ namespace Assets.Scripts.Progression
 
         // --- Award tuning ---
         public const int GoldPerLevelCleared = 25;
-        public const int EssencePerLevelCleared = 5;
+        /// <summary>Essence per floor of a <b>revisit</b>, before its reward multiplier. A first clear
+        /// pays none: Essence is the revisit currency (docs/plans/HUB.md §3c).</summary>
+        public const int EssencePerRevisitLevel = 12;
         public const int GoldPerLevelOnDeath = 10;
 
         private FileHandler _fileHandler;
         private MetaProgressSaveData _saveData;
 
-        /// <summary>Raised whenever gold, essence, a magic upgrade, or slot count changes.</summary>
+        /// <summary>Raised whenever gold, essence, a combo upgrade, or other meta state changes.</summary>
         public event Action OnChanged;
 
         public int Gold => _saveData.Gold;
@@ -79,8 +81,8 @@ namespace Assets.Scripts.Progression
 
         // --- Pure helpers (no state / disk) so economy math is unit-testable ---
 
-        /// <summary>Flat power added to Damage/Heal effects for a magic at the given upgrade level.</summary>
-        public static int MagicPowerBonusForLevel(int level)
+        /// <summary>Flat power added to a combo's Damage/Heal bonus effects at the given upgrade level.</summary>
+        public static int ComboPowerBonusForLevel(int level)
         {
             if (level <= 0)
             {
@@ -90,26 +92,26 @@ namespace Assets.Scripts.Progression
         }
 
         /// <summary>Essence cost to go from currentLevel to currentLevel + 1.</summary>
-        public static int MagicUpgradeCostForNextLevel(int currentLevel)
+        public static int ComboUpgradeCostForNextLevel(int currentLevel)
         {
             if (currentLevel < 0)
             {
                 currentLevel = 0;
             }
-            return BaseMagicUpgradeCost + (currentLevel * MagicUpgradeCostIncrement);
+            return BaseComboUpgradeCost + (currentLevel * ComboUpgradeCostIncrement);
         }
 
         /// <summary>
-        /// How far an ability or combo can be upgraded at a Forge of this building level — the first
+        /// How far a combo can be upgraded at a Forge of this building level — the first
         /// thing a hub building level ever <i>granted</i> (<c>docs/plans/HUB.md</c> §7 phase 6).
         ///
         /// <para><b>It gates buying, not what has been bought.</b> A level already paid for keeps
         /// its power forever; raising the ceiling only puts more rungs on sale. That is what makes
-        /// the dial safe to author — no hub change can ever reach back into a spell the player is
-        /// already carrying — and it is why <see cref="GetMagicPowerBonus"/> does not consult it.</para>
+        /// the dial safe to author — no hub change can ever reach back into a combo the player has
+        /// already raised — and it is why <see cref="GetComboPowerBonus"/> does not consult it.</para>
         ///
         /// <para><b>It is access, not power.</b> A fully raised Forge lands on
-        /// <see cref="MaxMagicUpgradeLevel"/>, exactly where a flat constant used to sit, so the
+        /// <see cref="MaxComboUpgradeLevel"/>, exactly where a flat constant used to sit, so the
         /// power available at the end of the game is unchanged and only the <i>ramp</i> is gated.
         /// That keeps a building a hard precondition on the investment frontier rather than a second
         /// route from gold to power, which is the rule <c>docs/plans/HUB.md</c> sets for every
@@ -131,17 +133,17 @@ namespace Assets.Scripts.Progression
         /// <summary>
         /// The upgrade ceiling this save is playing under, read from the Forge lot it has built.
         ///
-        /// <para>Falls back to <see cref="MaxMagicUpgradeLevel"/> when there is no authored town at
+        /// <para>Falls back to <see cref="MaxComboUpgradeLevel"/> when there is no authored town at
         /// all, matching <c>HubState.LevelOf</c>'s rule: a scene with no hub asset degrades to the
         /// old fixed behaviour rather than to a screen that offers nothing.</para>
         /// </summary>
-        public int MagicUpgradeCeiling
+        public int ComboUpgradeCeiling
         {
             get
             {
                 if (Hub.HubState.Town() == null)
                 {
-                    return MaxMagicUpgradeLevel;
+                    return MaxComboUpgradeLevel;
                 }
                 return UpgradeCeilingForForgeLevel(Hub.HubState.LevelOf(Hub.HubService.Forge));
             }
@@ -221,7 +223,7 @@ namespace Assets.Scripts.Progression
         /// accumulated kill-gold plus the flat level-clear bonus.</summary>
         public void AwardLevelClear()
         {
-            AwardLevelClear(GoldPerLevelCleared, EssencePerLevelCleared);
+            AwardLevelClear(GoldPerLevelCleared, 0);
         }
 
         /// <summary>
@@ -284,85 +286,10 @@ namespace Assets.Scripts.Progression
             OnChanged?.Invoke();
         }
 
-        // --- Magic upgrades (per magic key) ---
-
-        public int GetMagicUpgradeLevel(string magicKey)
-        {
-            if (string.IsNullOrEmpty(magicKey))
-            {
-                return 0;
-            }
-
-            foreach (var entry in _saveData.MagicUpgrades)
-            {
-                if (entry.MagicKey == magicKey)
-                {
-                    return entry.Level;
-                }
-            }
-            return 0;
-        }
-
-        /// <summary>Flat power bonus applied to this magic's Damage/Heal effects.</summary>
-        public int GetMagicPowerBonus(string magicKey)
-        {
-            return MagicPowerBonusForLevel(GetMagicUpgradeLevel(magicKey));
-        }
-
-        /// <summary>Essence cost of the next upgrade, or 0 when the Forge offers no rung above
-        /// the current level.</summary>
-        public int GetMagicUpgradeCost(string magicKey)
-        {
-            int level = GetMagicUpgradeLevel(magicKey);
-            if (level >= MagicUpgradeCeiling)
-            {
-                return 0;
-            }
-            return MagicUpgradeCostForNextLevel(level);
-        }
-
-        public bool CanUpgradeMagic(string magicKey)
-        {
-            if (string.IsNullOrEmpty(magicKey))
-            {
-                return false;
-            }
-
-            int level = GetMagicUpgradeLevel(magicKey);
-            if (level >= MagicUpgradeCeiling)
-            {
-                return false;
-            }
-            return _saveData.Essence >= MagicUpgradeCostForNextLevel(level);
-        }
-
-        /// <summary>Spends Essence to raise a magic's upgrade level by one. Returns false if unaffordable or maxed.</summary>
-        public bool TryUpgradeMagic(string magicKey)
-        {
-            if (!CanUpgradeMagic(magicKey))
-            {
-                return false;
-            }
-
-            int level = GetMagicUpgradeLevel(magicKey);
-            int cost = MagicUpgradeCostForNextLevel(level);
-            _saveData.Essence -= cost;
-
-            var entry = _saveData.MagicUpgrades.Find(e => e.MagicKey == magicKey);
-            if (entry == null)
-            {
-                entry = new MagicUpgradeEntry { MagicKey = magicKey, Level = 0 };
-                _saveData.MagicUpgrades.Add(entry);
-            }
-            entry.Level += 1;
-
-            Save();
-            OnChanged?.Invoke();
-            return true;
-        }
-
         // --- Combo upgrades (per combo key) ---
-        // Reuse the magic upgrade curves so combos and magic share one progression feel.
+        // The Forge's only upgrade since 2026-10-06: per-ability upgrades were retired when Essence
+        // became the revisit currency and abilities started growing on the sphere grid instead
+        // (docs/plans/HUB.md §3c).
 
         public int GetComboUpgradeLevel(string comboKey)
         {
@@ -384,7 +311,7 @@ namespace Assets.Scripts.Progression
         /// <summary>Flat power bonus applied to this combo's Damage/Heal bonus effects.</summary>
         public int GetComboPowerBonus(string comboKey)
         {
-            return MagicPowerBonusForLevel(GetComboUpgradeLevel(comboKey));
+            return ComboPowerBonusForLevel(GetComboUpgradeLevel(comboKey));
         }
 
         /// <summary>Essence cost of the next combo upgrade, or 0 when the Forge offers no rung
@@ -392,11 +319,11 @@ namespace Assets.Scripts.Progression
         public int GetComboUpgradeCost(string comboKey)
         {
             int level = GetComboUpgradeLevel(comboKey);
-            if (level >= MagicUpgradeCeiling)
+            if (level >= ComboUpgradeCeiling)
             {
                 return 0;
             }
-            return MagicUpgradeCostForNextLevel(level);
+            return ComboUpgradeCostForNextLevel(level);
         }
 
         public bool CanUpgradeCombo(string comboKey)
@@ -407,11 +334,11 @@ namespace Assets.Scripts.Progression
             }
 
             int level = GetComboUpgradeLevel(comboKey);
-            if (level >= MagicUpgradeCeiling)
+            if (level >= ComboUpgradeCeiling)
             {
                 return false;
             }
-            return _saveData.Essence >= MagicUpgradeCostForNextLevel(level);
+            return _saveData.Essence >= ComboUpgradeCostForNextLevel(level);
         }
 
         /// <summary>Spends Essence to raise a combo's upgrade level by one. Returns false if unaffordable or maxed.</summary>
@@ -423,7 +350,7 @@ namespace Assets.Scripts.Progression
             }
 
             int level = GetComboUpgradeLevel(comboKey);
-            int cost = MagicUpgradeCostForNextLevel(level);
+            int cost = ComboUpgradeCostForNextLevel(level);
             _saveData.Essence -= cost;
 
             var entry = _saveData.ComboUpgrades.Find(e => e.ComboKey == comboKey);

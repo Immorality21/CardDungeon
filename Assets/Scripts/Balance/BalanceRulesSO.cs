@@ -306,13 +306,6 @@ namespace Assets.Scripts.Balance
                  "runs dozens of mixes and only needs the wipe rate to a couple of points.")]
         [Range(10, 2000)] public int FrontierTrials = 120;
 
-        [Header("Economy / progression")]
-        [Tooltip("Level-clears a player should need to afford their first magic upgrade.")]
-        public int TargetClearsToFirstUpgrade = 3;
-
-        [Tooltip("Warn when maxing a single magic takes more level-clears than this.")]
-        public int MaxClearsToMaxOneMagic = 25;
-
         /// <summary>
         /// Investment <paramref name="tier"/> should demand, or -1 when none is authored. The deepest
         /// authored budget covers everything past it, so adding a run to the end of the campaign does

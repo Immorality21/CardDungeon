@@ -89,7 +89,7 @@ building printed its costs read like a spreadsheet. Beside each name there is on
 - a **hammer** when there is something to build or raise (`LotBadge.Build`);
 - a **padlock** when the lot is not on offer yet (`LotBadge.Locked`);
 - a **gold pip** on a *built* lot with something waiting inside (`LotBadge.New`, 2026-09-30): a grid
-  node some owned hero can buy now, a Forge upgrade the purse covers, or a Bestiary with more enemies
+  node some owned hero can buy now, a combo upgrade at the Forge the purse covers, or a Bestiary with more enemies
   met than when it was last opened (`BestiaryViewedCount`). It wins over the hammer. `HubManager.BadgeWithNews`
   decides it, since it needs the roster and the save; the presenter stays pure;
 - nothing when the lot is finished.
@@ -149,23 +149,25 @@ The moment a level grants power, gold reaches power by a second route and `Inves
 knowledge; leave stats to gear and the grid.
 
 **The Ability Forge is the first lot with a ladder** (2026-09-17). `MaxLevel 3`, `GoldPerUpgrade`
-250, and what each level buys is the **upgrade ceiling** for abilities and combos: 1 → 3 → 5.
-`MetaProgressManager.UpgradeCeilingForForgeLevel` is the pure mapping, `MagicUpgradeCeiling` the
-save-aware read, and every Can/Cost/Try path for both magic and combos consults it instead of the
-old flat constant.
+250, and what each level buys is the **upgrade ceiling** for combos: 1 → 3 → 5.
+`MetaProgressManager.UpgradeCeilingForForgeLevel` is the pure mapping, `ComboUpgradeCeiling` the
+save-aware read, and every combo Can/Cost/Try path consults it instead of the old flat constant.
+*(It covered abilities too until 2026-10-06, when the Forge stopped upgrading abilities: Essence
+became the revisit currency and an ability grows on its hero's sphere grid through Essence-priced
+nodes, `docs/plans/HUB.md` §3c. The Abilities tab is a read-only collection now.)*
 
 Three properties make it safe, and they are the template for the next lot:
 
 - **It gates buying, not what has been bought.** A level already paid for keeps its power forever —
-  `GetMagicPowerBonus` deliberately does not consult the ceiling. No hub change can reach back into
-  a spell the player is carrying.
-- **A full Forge lands exactly on `MaxMagicUpgradeLevel`**, where the flat constant used to sit, so
+  `GetComboPowerBonus` deliberately does not consult the ceiling. No hub change can reach back into
+  a combo the player has already raised.
+- **A full Forge lands exactly on `MaxComboUpgradeLevel`**, where the flat constant used to sit, so
   the *endgame* power ceiling is unchanged and only the ramp is gated.
   `HubContentTests.TheForge_CanBeRaisedToTheGamesUpgradeCeiling` fails if the authored ladder and the
-  code ceiling ever drift apart — authored short and the deep ability levels become unsellable;
+  code ceiling ever drift apart — authored short and the deep combo levels become unsellable;
   authored tall and a level of the lot buys nothing.
 - **It says so on screen before the player pays.** The Forge header carries `Forge ceiling: Lv N`,
-  a capped ability reads *"raise the Forge to go further"* rather than showing a dead button, and
+  a capped combo reads *"raise the Forge to go further"* rather than showing a dead button, and
   the lot panel carries the promise beside the price.
 
 **Two pieces of shared machinery landed with it**, and every later lot inherits them:
@@ -173,7 +175,7 @@ Three properties make it safe, and they are the template for the next lot:
 - **`BuildingOps.UpgradeCost`** — the authored `GoldPerUpgrade` buys the *first* rung, and each one
   after costs a multiple (`UpgradeCostForLevel`: 250 / 500 / 750). Flat pricing makes a ladder stop
   mattering the moment the player can afford one rung; the curve is the one `PartySlots.CostForNext`
-  and `MagicUpgradeCostForNextLevel` already use, so the three ladders escalate alike. Read the cost
+  and `ComboUpgradeCostForNextLevel` already use, so the three ladders escalate alike. Read the cost
   through this, never off `GoldPerUpgrade` directly.
 - **`BuildingSO.LevelGrants` + `HubPresenter.DescribeNextGrant`** — one authored line per level,
   shown in the lot panel as *"Level 2: …"*. Authored on the building because what a level means is
@@ -379,8 +381,8 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   who gear is compared against, and a detail column reusing the inventory's grants block
   (`InventoryHubUI.AddItemLines`, `StatCell`, `SetIcon`, `ApplyRarity` are `internal static` for this).
   Same row-selects / detail-acts split as the campfire, driven by the shared navigator.
-- **MagicForgeUI** (`Cards/UI`) — Essence sink + collection grid, All Magic / Combos tabs, `?` for
-  undiscovered. **Requires a `MagicCatalog` in the scene** or it logs a warning and shows empty.
+- **MagicForgeUI** (`Cards/UI`) — Essence sink for **combos** plus the ability collection
+  (Abilities tab read-only since 2026-10-06), undiscovered entries folded into one count row. **Requires a `MagicCatalog` in the scene** or it logs a warning and shows empty.
 - **InventoryHubUI** (`Items/UI`) — the between-runs bag: Equipment / Abilities / Consumables /
   Materials. Equipment is managed *only* here. **Redesigned 2026-09-28** into one fixed frame: a header
   band with the tabs, a portrait hero strip (muted, never hidden, on the party-wide tabs), three

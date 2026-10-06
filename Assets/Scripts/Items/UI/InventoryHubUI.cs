@@ -1077,14 +1077,6 @@ namespace Assets.Scripts.Items.UI
             SetDetailHead(magic.Icon, magic.DisplayName,
                 $"{AbilityDescriber.TargetLabel(magic.TargetType)} · {charges} charges a run", null);
 
-            int level = 0;
-            int bonus = 0;
-            if (MetaProgressManager.HasInstance)
-            {
-                level = MetaProgressManager.Instance.GetMagicUpgradeLevel(key);
-                bonus = MetaProgressManager.Instance.GetMagicPowerBonus(key);
-            }
-
             // Described through the hero's own stats (grid + gear), so the numbers are the ones this
             // hero will hit for - a null caster would read them as base values. Flavour in italics,
             // the mechanics upright under their own heading.
@@ -1092,7 +1084,7 @@ namespace Assets.Scripts.Items.UI
             {
                 AddDescription(magic.Description.Trim());
             }
-            var effects = AbilityDescriber.EffectLines(magic, unit, null, bonus, level);
+            var effects = AbilityDescriber.EffectLines(magic, unit, null, 0, 0);
             _detailBody?.Add(BestiaryLineView.Section("Effect"));
             if (effects.Count == 0)
             {
@@ -1102,11 +1094,6 @@ namespace Assets.Scripts.Items.UI
             {
                 AddLine(effect);
             }
-            if (level > 0)
-            {
-                AddLine($"Forge level {level}.");
-            }
-
             if (inRun)
             {
                 AddNote("In this run's slots until the run ends. Its charges come back at a refuge.");

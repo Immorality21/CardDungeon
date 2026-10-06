@@ -540,12 +540,14 @@ namespace Assets.Scripts.Heroes.Editor
             AddField(element, "XpCost");
             AddField(element, "UnlockedByDefault");
             AddField(element, "MaterialCosts");
+            AddField(element, "EssenceCost");
             AddField(element, "Position");
             AddField(element, "Gains");
             AddField(element, "ResistType");
             AddField(element, "ResistPercent");
             AddField(element, "GrantedMagicKey");
             AddField(element, "GrantedCharges");
+            AddField(element, "AwakenedMagicKey");
             AddField(element, "GrantedSummonKey");
             AddField(element, "SummonAmount");
             AddField(element, "GrantedUltraKey");

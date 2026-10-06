@@ -1338,7 +1338,10 @@ namespace Assets.Scripts.Dungeon
             {
                 GoldFound = MetaProgressManager.Instance.PendingRunGold,
                 GoldBonus = RunFear.Current.ScaleReward(MetaProgressManager.GoldPerLevelCleared),
-                Essence = RunFear.Current.ScaleReward(MetaProgressManager.EssencePerLevelCleared),
+                // Essence is the revisit currency (docs/plans/HUB.md §3c): a first clear pays none.
+                Essence = RunFear.Current.IsRevisit
+                    ? RunFear.Current.ScaleReward(MetaProgressManager.EssencePerRevisitLevel)
+                    : 0,
             };
 
             // Award persistent meta-currency for clearing the level. A revisit pays the flat clear

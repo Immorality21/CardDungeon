@@ -414,8 +414,9 @@ namespace Assets.Scripts.Hub
                 {
                     continue;
                 }
+                // No XP is not "nothing to buy": an Essence node costs no XP.
                 var save = HeroRoster.GetHeroSave(hero);
-                if (save == null || save.CurrentXp <= 0)
+                if (save == null)
                 {
                     continue;
                 }
@@ -423,7 +424,7 @@ namespace Assets.Scripts.Hub
                 foreach (var node in hero.SphereGrid.Nodes)
                 {
                     if (node != null && SphereGridOps.CanActivate(hero.SphereGrid, activated, save.CurrentXp, node.Key)
-                        && HeroRoster.CanPayMaterials(node))
+                        && HeroRoster.CanPayNonXpCost(node))
                     {
                         return true;
                     }
@@ -432,7 +433,7 @@ namespace Assets.Scripts.Hub
             return false;
         }
 
-        /// <summary>A discovered ability or combo whose next upgrade the purse covers.</summary>
+        /// <summary>A discovered combo whose next upgrade the purse covers.</summary>
         private static bool AnyForgeUpgradeAffordable()
         {
             if (!MetaProgressManager.HasInstance)
@@ -440,16 +441,6 @@ namespace Assets.Scripts.Hub
                 return false;
             }
             var meta = MetaProgressManager.Instance;
-            if (Cards.MagicCatalog.HasInstance)
-            {
-                foreach (var magic in Cards.MagicCatalog.Instance.AllMagic)
-                {
-                    if (magic != null && meta.IsMagicDiscovered(magic.Key) && meta.CanUpgradeMagic(magic.Key))
-                    {
-                        return true;
-                    }
-                }
-            }
             if (Cards.MagicComboCatalog.HasInstance)
             {
                 foreach (var combo in Cards.MagicComboCatalog.Instance.AllCombos)

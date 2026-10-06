@@ -15,7 +15,6 @@ namespace Assets.Scripts.Balance
         public MagicSO Magic;
         public int Charges;
         public int MaxCharges;
-        public int UpgradeLevel;
 
         public bool CanCast => Magic != null && Charges > 0;
 
@@ -25,8 +24,7 @@ namespace Assets.Scripts.Balance
             {
                 Magic = Magic,
                 Charges = Charges,
-                MaxCharges = MaxCharges,
-                UpgradeLevel = UpgradeLevel
+                MaxCharges = MaxCharges
             };
         }
     }

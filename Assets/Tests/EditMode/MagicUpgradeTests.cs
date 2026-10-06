@@ -9,6 +9,8 @@ using UnityEngine;
 
 namespace Tests.EditMode
 {
+    /// <summary>The upgrade bonus the resolver folds into an effect (combos are the only thing the
+    /// Forge upgrades since 2026-10-06, HUB.md §3c) and the pure economy helpers.</summary>
     public class MagicUpgradeTests
     {
         private EffectResolver _calculator;
@@ -180,25 +182,25 @@ namespace Tests.EditMode
         // ---- Economy math (pure helpers) ----
 
         [Test]
-        public void MagicPowerBonusForLevel_ScalesLinearly()
+        public void ComboPowerBonusForLevel_ScalesLinearly()
         {
-            Assert.AreEqual(0, MetaProgressManager.MagicPowerBonusForLevel(0));
-            Assert.AreEqual(MetaProgressManager.PowerPerUpgradeLevel, MetaProgressManager.MagicPowerBonusForLevel(1));
-            Assert.AreEqual(3 * MetaProgressManager.PowerPerUpgradeLevel, MetaProgressManager.MagicPowerBonusForLevel(3));
+            Assert.AreEqual(0, MetaProgressManager.ComboPowerBonusForLevel(0));
+            Assert.AreEqual(MetaProgressManager.PowerPerUpgradeLevel, MetaProgressManager.ComboPowerBonusForLevel(1));
+            Assert.AreEqual(3 * MetaProgressManager.PowerPerUpgradeLevel, MetaProgressManager.ComboPowerBonusForLevel(3));
         }
 
         [Test]
-        public void MagicPowerBonusForLevel_NegativeClampsToZero()
+        public void ComboPowerBonusForLevel_NegativeClampsToZero()
         {
-            Assert.AreEqual(0, MetaProgressManager.MagicPowerBonusForLevel(-2));
+            Assert.AreEqual(0, MetaProgressManager.ComboPowerBonusForLevel(-2));
         }
 
         [Test]
-        public void MagicUpgradeCost_IncreasesWithLevel()
+        public void ComboUpgradeCost_IncreasesWithLevel()
         {
-            int cost0 = MetaProgressManager.MagicUpgradeCostForNextLevel(0);
-            int cost1 = MetaProgressManager.MagicUpgradeCostForNextLevel(1);
-            int cost2 = MetaProgressManager.MagicUpgradeCostForNextLevel(2);
+            int cost0 = MetaProgressManager.ComboUpgradeCostForNextLevel(0);
+            int cost1 = MetaProgressManager.ComboUpgradeCostForNextLevel(1);
+            int cost2 = MetaProgressManager.ComboUpgradeCostForNextLevel(2);
 
             Assert.Greater(cost1, cost0);
             Assert.Greater(cost2, cost1);
@@ -225,7 +227,7 @@ namespace Tests.EditMode
             // constant used to sit, so what a finished save can reach is unchanged and only the
             // ramp is gated. If this ever drifts, a building level has quietly become a power
             // source and the investment frontier is pricing the wrong thing.
-            Assert.AreEqual(MetaProgressManager.MaxMagicUpgradeLevel,
+            Assert.AreEqual(MetaProgressManager.MaxComboUpgradeLevel,
                 MetaProgressManager.UpgradeCeilingForForgeLevel(3));
         }
 
@@ -233,7 +235,7 @@ namespace Tests.EditMode
         public void UpgradeCeiling_ClampsOutsideTheLadder()
         {
             Assert.AreEqual(0, MetaProgressManager.UpgradeCeilingForForgeLevel(-1));
-            Assert.AreEqual(MetaProgressManager.MaxMagicUpgradeLevel,
+            Assert.AreEqual(MetaProgressManager.MaxComboUpgradeLevel,
                 MetaProgressManager.UpgradeCeilingForForgeLevel(99),
                 "A lot authored taller than the ladder must not read as no Forge at all.");
         }
@@ -244,7 +246,7 @@ namespace Tests.EditMode
             for (int forgeLevel = 0; forgeLevel <= 10; forgeLevel++)
             {
                 Assert.LessOrEqual(MetaProgressManager.UpgradeCeilingForForgeLevel(forgeLevel),
-                    MetaProgressManager.MaxMagicUpgradeLevel,
+                    MetaProgressManager.MaxComboUpgradeLevel,
                     $"Forge level {forgeLevel} offers a rung past the game's own ceiling.");
             }
         }

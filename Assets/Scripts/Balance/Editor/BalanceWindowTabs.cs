@@ -1249,37 +1249,6 @@ namespace Assets.Scripts.Balance.Editor
             BalanceGui.Cell($"Combos discovered {save.DiscoveredComboCount}", 180f);
             EditorGUILayout.EndHorizontal();
 
-            if (save.MagicUpgrades.Count > 0)
-            {
-                EditorGUILayout.Space(4f);
-                foreach (var upgrade in save.MagicUpgrades)
-                {
-                    BalanceGui.Paragraph(
-                        $"{upgrade.Key} — upgrade level {upgrade.Level} (+{upgrade.PowerBonus} power)",
-                        BalanceGui.WrapMiniStyle);
-                }
-            }
-
-            BalanceGui.SectionHeader(
-                "Essence pacing",
-                "Derived from MetaProgressManager's own constants — the shape of the economy, whatever the "
-                + "current wallet happens to hold.");
-
-            var firstSeverity = save.ClearsToFirstUpgrade > _rules.TargetClearsToFirstUpgrade * 1.5f
-                ? BalanceSeverity.Warning
-                : BalanceSeverity.Ok;
-            var maxSeverity = save.ClearsToMaxOneMagic > _rules.MaxClearsToMaxOneMagic
-                ? BalanceSeverity.Info
-                : BalanceSeverity.Ok;
-
-            EditorGUILayout.BeginHorizontal();
-            BalanceGui.Cell($"{save.EssencePerClear} Essence per level-clear", 220f);
-            BalanceGui.Cell($"first upgrade: {save.ClearsToFirstUpgrade:0.0} clears", 220f, firstSeverity,
-                $"Target is {_rules.TargetClearsToFirstUpgrade} clears.");
-            BalanceGui.Cell($"max one magic: {save.ClearsToMaxOneMagic:0} clears", 220f, maxSeverity,
-                $"{save.EssenceToMaxOneMagic} Essence total; ceiling is {_rules.MaxClearsToMaxOneMagic} clears.");
-            EditorGUILayout.EndHorizontal();
-
             EditorGUILayout.Space(6f);
             BalanceGui.Paragraph(
                 "Findings for this save (including the level it would die on) are listed on the Issues tab "

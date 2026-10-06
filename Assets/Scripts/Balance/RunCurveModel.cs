@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using Assets.Scripts.Combat;
+using Assets.Scripts.Combat;
+
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
@@ -347,7 +348,10 @@ namespace Assets.Scripts.Balance
             // A revisit pays its clear bonus and Essence at its reward multiplier, as AwardLevelClear does.
             var rewardFear = fear != null && fear.IsRevisit ? fear : RunFear.None;
             curve.ClearGold = rewardFear.ScaleReward(MetaProgressManager.GoldPerLevelCleared) * curve.Levels.Count;
-            curve.ClearEssence = rewardFear.ScaleReward(MetaProgressManager.EssencePerLevelCleared) * curve.Levels.Count;
+            // Essence is paid by revisits only (docs/plans/HUB.md §3c).
+            curve.ClearEssence = rewardFear.IsRevisit
+                ? rewardFear.ScaleReward(MetaProgressManager.EssencePerRevisitLevel) * curve.Levels.Count
+                : 0;
 
             for (int i = 1; i < curve.Levels.Count; i++)
             {

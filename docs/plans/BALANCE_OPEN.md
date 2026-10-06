@@ -178,8 +178,10 @@ cleared floor is ~85 gold and a run that dies on floor 3 pays roughly **190 gold
   many failed attempts does it take to afford it?* Two or three reads as learning; ten reads as
   grinding. At today's numbers a failed run pays ~190 gold and the third party slot costs 300 — so
   **two failures** buy it. Probably right for run 1 and much too cheap for the secret run.
-- **Price every Gold sink against run income.** `EvaluateEconomy` checks **Essence only**
-  (`ClearsToFirstUpgrade`). No Gold sink is priced against Gold income anywhere — not party slots,
+- **Price every Gold sink against run income.** There is no economy check left: `EvaluateEconomy`
+  priced the first *ability* upgrade in floor clears, and was deleted on 2026-10-06 when the Forge
+  stopped upgrading abilities and Essence became revisit-only (`HUB.md` §3c). Essence pacing now
+  belongs to `RevisitModel`. No Gold sink is priced against Gold income anywhere — not party slots,
   not the Merchant, not the §3 sinks. The check to add is *attempts-to-afford* per sink, using
   `LevelCurve.ExpectedGold` over the floors a stopped player can actually clear, flagged when it
   falls outside the intended attempts-per-tier band.

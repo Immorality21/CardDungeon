@@ -104,8 +104,8 @@ Finding 12 (Fear level 0 trivial because speed never rose) was answered by the o
 ### Still to do
 
 - **The Essence guide** (owner, 2026-10-06): after the tutorial and the next run, point the player at a
-  revisit and explain what it grants. That belongs with `docs/TUTORIAL.md`, and it waits on §3c settling
-  what Essence buys.
+  revisit and explain what it grants. That belongs with `docs/TUTORIAL.md`. §3c is settled (2026-10-06):
+  Essence is paid by revisits only and buys Essence-priced grid nodes and combo upgrades.
 - **More condition kinds:** elites, a starting affliction, a smaller party, no refuges, no summons/Ultra,
   a required or banned hero (or leave that last one to bounties, HUB.md §3d).
 - **Decide whether items scale** (more rolls, or better rarity at higher Fear levels).

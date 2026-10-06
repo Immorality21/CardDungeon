@@ -1284,8 +1284,8 @@ namespace Assets.Scripts.Balance
                 buffTracker,
                 tagTracker,
                 comboDetector,
-                MetaProgressManager.MagicPowerBonusForLevel(slot.UpgradeLevel),
-                slot.UpgradeLevel,
+                0,
+                0,
                 null);
         }
 
@@ -1447,13 +1447,14 @@ namespace Assets.Scripts.Balance
         private static float EstimateMagicDamage(SimUnit caster, SimMagicSlot slot, SimUnit target, CombatBuffTracker buffTracker)
         {
             float total = 0f;
-            int powerBonus = MetaProgressManager.MagicPowerBonusForLevel(slot.UpgradeLevel);
+            // Abilities carry no upgrade bonus since the Forge stopped upgrading them (HUB.md §3c).
+            const int powerBonus = 0;
             int attackBonus = buffTracker.GetBuffAmount(caster, caster.AttackStat);
             float dodge = slot.Magic.IsPhysicalAttack() ? DefenseRules.DodgeChanceFor(target) : 0f;
 
             foreach (var effect in slot.Magic.Effects)
             {
-                if (effect.EffectType != SpellEffectType.Damage || effect.UnlockLevel > slot.UpgradeLevel)
+                if (effect.EffectType != SpellEffectType.Damage || effect.UnlockLevel > 0)
                 {
                     continue;
                 }

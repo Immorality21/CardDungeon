@@ -72,7 +72,6 @@ since 2026-08-29 (§5m) and is not comparable to anything written before it. §5
 grid, so every *investment point* number written before 2026-09-02 is also incomparable.
 
 ### Decisions already taken — do not relitigate
-### Decisions already taken — do not relitigate
 
 - **Death is mandatory to progress.** Deeper tiers should be unclearable until the player invests.
   Do **not** add a death penalty or reduce the payout for dying (§3b).
@@ -169,7 +168,7 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   precondition the model tests, not a currency it prices. A level that grants power gives gold a
   second route to power and makes `InvestmentPointsPerGold` measure the wrong world. The Forge is
   the worked example — its levels raise the *upgrade ceiling* (1 → 3 → 5), a full Forge lands
-  exactly on the old flat `MaxMagicUpgradeLevel`, so the endgame ceiling is unchanged and only the
+  exactly on the old flat `MaxComboUpgradeLevel`, so the endgame ceiling is unchanged and only the
   ramp is gated. Do not author a level that adds a stat, and do not let a ladder move what a
   finished save can reach.
 - **Crafting is one of the last features, not one of the next** *(2026-09-04, §7 phase 7)*. Materials
@@ -186,6 +185,10 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
   pushed, and a few Fear level 0 revisits catch it up. The guideline is `BALANCING.md` §0 rule 6,
   measured by `RevisitModel` / `EvaluateRevisits`. The difficulty a player picks for a revisit is the
   **Fear level**, our own name, not Hades' "Heat".
+- **Essence is the revisit currency** *(owner, 2026-10-06, `plans/HUB.md` §3c)*. Only revisits pay
+  it, never a first clear. It buys **Essence-priced sphere-grid nodes** (specific upgrades such as an
+  awakened War Cry, not ranks on nodes already bought) and **combo upgrades** at the Forge. The
+  Forge no longer upgrades abilities; an ability grows on its hero's grid.
 - **The seven stats stay seven; Spirit and Luck got second jobs** *(2026-10-03)*. Spirit is the
   defence against magic (Intelligence/Spirit-scaled effects) in a clean split with Endurance, and
   Luck dodges physical hits only, on both sides. Do not add Magic Defense, Evasion or Accuracy stats.
@@ -225,7 +228,7 @@ backlog.**
 |---|---|---|
 | **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05; **phase 6 started 2026-09-17** — the rule is set (*a level grants access, capacity or information, never a raw stat*), and the **Forge** and **Campfire** both have ladders. Bestiary / Merchant next; Sphere Hall is phase 5 |
 | **3** | Sharpen hub sinks | open |
-| **3c** | **Essence needs rethinking** — one flat tap, one sink (Forge upgrades); four directions listed | opened 2026-10-06 |
+| **3c** | **Essence is the revisit currency** — only revisits pay it; it buys Essence-priced grid nodes (**awakenings**) and combo upgrades; the Forge's ability upgrades are retired | ✅ **built 2026-10-06**; the Warrior has two awakenings. Next: awakenings for the other seven heroes, priced from `RevisitModel` |
 | **3d** | **Bounties** — rotating contracts on cleared runs paying named materials | opened 2026-10-06; depends on Revisits |
 
 ### [Revisits](plans/REVISITS.md)
@@ -269,6 +272,13 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **Essence becomes the revisit currency** (2026-10-06) — `plans/HUB.md` §3c. Only revisits pay
+  Essence (12 a floor × the reward multiplier). It buys **awakenings**: Essence-priced, 0 XP grid nodes
+  (`SphereNodeKind.MagicAwaken`) that swap a known ability for a flashier version in the same slot. The
+  Warrior's two: Unbroken Line (Bulwark + regeneration) and Rallying Roar (War Cry + Agility). The
+  Forge's per-ability upgrades and `EvaluateEconomy` are gone; combos still upgrade. Suite green;
+  bought in play mode on a throwaway save.
 
 - **Revisits, first version** (2026-10-06) — `plans/REVISITS.md`. A cleared run (Drowned March,
   Warrens, Ashen Deep) can be revisited at Fear level built from composable conditions: +50% enemy health
@@ -481,7 +491,7 @@ per-subsystem `CLAUDE.md` files — not here.
   properties are the part worth copying. It **gates buying, not what has been bought**
   (`GetMagicPowerBonus` deliberately never consults the ceiling, so no hub change can reach back
   into a spell the player is carrying); a full Forge lands **exactly** on the old flat
-  `MaxMagicUpgradeLevel`, so *what a finished save can reach is unchanged and only the ramp is
+  `MaxComboUpgradeLevel`, so *what a finished save can reach is unchanged and only the ramp is
   gated* — which is why `RunCurveModel`'s "everything built" default still reports what it always
   did; and the player is told **before** paying rather than meeting a dead button. Two pieces of
   shared machinery landed with it and every later lot inherits them: `BuildingOps.UpgradeCost`

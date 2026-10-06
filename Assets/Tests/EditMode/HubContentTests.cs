@@ -257,10 +257,10 @@ namespace Tests.EditMode
             var forge = LoadHub().Find(HubService.Forge);
             Assert.IsNotNull(forge, "No lot opens the Forge.");
 
-            Assert.AreEqual(MetaProgressManager.MaxMagicUpgradeLevel,
+            Assert.AreEqual(MetaProgressManager.MaxComboUpgradeLevel,
                 MetaProgressManager.UpgradeCeilingForForgeLevel(forge.MaxLevel),
                 "A fully raised Forge must reach the game's own upgrade ceiling. Authored short, "
-                + "the deepest ability levels exist but nothing in the game can ever sell them; "
+                + "the deepest combo levels exist but nothing in the game can ever sell them; "
                 + "authored tall, a level of the lot buys nothing.");
         }
 
@@ -270,7 +270,7 @@ namespace Tests.EditMode
             var forge = LoadHub().Find(HubService.Forge);
 
             Assert.Less(MetaProgressManager.UpgradeCeilingForForgeLevel(1),
-                MetaProgressManager.MaxMagicUpgradeLevel,
+                MetaProgressManager.MaxComboUpgradeLevel,
                 "A freshly placed Forge that already offers everything makes its own ladder scenery.");
         }
     }

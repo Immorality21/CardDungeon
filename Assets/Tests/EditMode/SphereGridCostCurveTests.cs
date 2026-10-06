@@ -72,6 +72,17 @@ namespace Tests.EditMode
                         }
                         continue;
                     }
+                    // An Essence node is priced in Essence instead (docs/plans/HUB.md §3c), and at 0
+                    // XP: an XP price would make the balance model's greedy spend want it.
+                    if (SphereGridOps.HasEssenceCost(node))
+                    {
+                        if (node.XpCost != 0)
+                        {
+                            offCurve.Add($"{grid.name}/{node.Key} costs {node.EssenceCost} Essence and "
+                                         + $"{node.XpCost} XP; an Essence node must be priced at 0 XP.");
+                        }
+                        continue;
+                    }
                     int expected = SphereGridOps.CostForDepth(depth);
                     if (node.XpCost != expected)
                     {

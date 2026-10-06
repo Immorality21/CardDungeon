@@ -48,6 +48,17 @@
   read by `SphereGridOps.UltrasForNodes` → `Hero.KnownUltras`). An Ultra's transform rides on
   `Hero.FormMaxHealthPercent` / `FormAttackDamageType` (primitives, since Cards depends on Heroes),
   set and cleared by `CombatManager`.
+- **Essence nodes and awakenings** *(2026-10-06, `docs/plans/HUB.md` §3c)*. `SphereGridNode.EssenceCost`
+  prices a node in Essence, the revisit currency, at **0 XP**. Like materials it lives outside
+  `SphereGridOps.CanActivate`: `HeroRoster.TryActivateNode` checks and spends it (and refunds it on a
+  failed later spend), `HeroRoster.CanPayNonXpCost` is the screen's and the hub badge's "can pay the
+  rest" predicate, and `GreedySpend` / `CheapestFrontierCost` / the tutorial skip Essence nodes, because
+  the model has no Essence and a 0 XP node would otherwise be free. The first Essence kind is
+  **`MagicAwaken`**: `GrantedMagicKey` (a known ability) becomes `AwakenedMagicKey` (its own `MagicSO`,
+  with more flair) in `KnownMagicForNodes`, same position and charges. Buying one rewrites the key in
+  `MagicLoadout.json` and in a run's saved slots (`Dungeon/AwakeningSaves`), so the slot keeps its place.
+  The awakened ability must be in the `MagicCatalog` prefab, and counts as "on a grid" for the coverage
+  checks. The Warrior has two (`warrior-a-awaken`, `warrior-b-awaken`).
 - **`MagicKnown` nodes are the *only* source of magic in the game** *(since 2026-09-04, when Draw was removed — see `docs/plans/SPECIALIZATION.md` §9b)*. A node teaches `GrantedMagicKey` permanently, at `GrantedCharges` per run.
 
   **Learning is not carrying.** A `MagicKnown` node used to bring its own slot, because under Draw the two were the same thing. Now the grid only grows what a hero *knows*, while slots stay scarce (`EquippedMagicState.DefaultSlotCount`, **2**, plus one per `MagicSlot` node), and the gap between the two is the whole reason a kit is a decision. `SphereGridOps.SlotBonusForNodes` therefore counts **MagicSlot only**; the choice of which known spells fill the slots is made on the hub Inventory screen's **Abilities** tab and resolved by `MagicLoadoutOps.Resolve`.

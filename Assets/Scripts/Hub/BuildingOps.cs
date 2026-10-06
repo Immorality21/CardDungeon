@@ -131,7 +131,7 @@ namespace Assets.Scripts.Hub
         /// stops mattering the moment the player can afford one, and <c>docs/plans/HUB.md</c> §3
         /// wants the opposite - a gold drain that scales forever. The curve is deliberately the one
         /// already in <c>PartySlots.CostForNext</c> and
-        /// <c>MetaProgressManager.MagicUpgradeCostForNextLevel</c> (linear, base per step), so the
+        /// <c>MetaProgressManager.ComboUpgradeCostForNextLevel</c> (linear, base per step), so the
         /// three places the player spends on a ladder all escalate the same way.</para>
         /// </summary>
         public static int UpgradeCostForLevel(int goldPerUpgrade, int currentLevel)

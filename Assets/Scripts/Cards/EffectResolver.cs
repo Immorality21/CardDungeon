@@ -240,7 +240,7 @@ namespace Assets.Scripts.Cards
             int comboLevel = comboLevelLookup != null && !string.IsNullOrEmpty(combo.Key)
                 ? comboLevelLookup(combo.Key)
                 : 0;
-            int comboPowerBonus = MetaProgressManager.MagicPowerBonusForLevel(comboLevel);
+            int comboPowerBonus = MetaProgressManager.ComboPowerBonusForLevel(comboLevel);
 
             foreach (var effect in combo.BonusEffects)
             {

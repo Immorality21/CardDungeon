@@ -10,7 +10,8 @@ using UnityEngine;
 namespace Assets.Scripts.Balance
 {
     /// <summary>
-    /// One place a magic can be learned: a <c>MagicKnown</c> node on a specific hero's sphere grid.
+    /// One place a magic can be learned: a <c>MagicKnown</c> node on a specific hero's sphere grid,
+    /// or the <c>MagicAwaken</c> node that turns a known ability into its awakened version.
     ///
     /// <para><b>This replaced <c>DrawSource</c> on 2026-09-04.</b> A source used to be an enemy in a
     /// level of a run, and the question the map answered was "has the player walked past something
@@ -38,6 +39,12 @@ namespace Assets.Scripts.Balance
         /// dominated by the branch leading to it.
         /// </summary>
         public int PathCost;
+
+        /// <summary>
+        /// Essence on top of <see cref="PathCost"/>: non-zero for an awakening, whose price is
+        /// Essence rather than XP. The XP model never buys one (<c>SphereGridOps.GreedySpend</c>).
+        /// </summary>
+        public int EssenceCost;
 
         /// <summary>Charges the node grants — the run's whole allowance of the spell.</summary>
         public int Charges;
@@ -327,7 +334,8 @@ namespace Assets.Scripts.Balance
         // ============================================================
 
         /// <summary>
-        /// Every <c>MagicKnown</c> node on every hero's grid, recorded against the magic it teaches.
+        /// Every <c>MagicKnown</c> and <c>MagicAwaken</c> node on every hero's grid, recorded against
+        /// the magic it teaches.
         /// This is the whole supply side now.
         /// </summary>
         private static void CollectGridSources(
@@ -351,15 +359,18 @@ namespace Assets.Scripts.Balance
 
                 foreach (var node in grid.Nodes)
                 {
-                    if (node == null
-                        || node.Kind != SphereNodeKind.MagicKnown
-                        || string.IsNullOrEmpty(node.GrantedMagicKey))
+                    // An awakening is the one source of its awakened ability (docs/plans/HUB.md §3c).
+                    string taught = node == null ? null
+                        : node.Kind == SphereNodeKind.MagicKnown ? node.GrantedMagicKey
+                        : node.Kind == SphereNodeKind.MagicAwaken ? node.AwakenedMagicKey
+                        : null;
+                    if (string.IsNullOrEmpty(taught))
                     {
                         continue;
                     }
 
                     MagicAvailability availability;
-                    if (!byKey.TryGetValue(node.GrantedMagicKey, out availability))
+                    if (!byKey.TryGetValue(taught, out availability))
                     {
                         // A node naming a magic the catalog does not have. BalanceAnalyzer reports
                         // that separately; here it simply is not a source of anything.
@@ -388,6 +399,7 @@ namespace Assets.Scripts.Balance
                         NodeKey = node.Key,
                         Depth = depth,
                         NodeCost = node.XpCost,
+                        EssenceCost = node.EssenceCost,
                         PathCost = pathCost,
                         Charges = Mathf.Max(1, node.GrantedCharges)
                     };

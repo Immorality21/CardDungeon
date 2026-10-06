@@ -28,7 +28,10 @@ namespace Assets.Scripts.Heroes
         SummonPromote = 9,  // +SummonAmount promotions: each raises the weakest troop one tier
 
         // Ultras (docs/plans/COMBAT_DEPTH.md §13). Appended, as above.
-        Ultra = 10          // teaches GrantedUltraKey: used from the Ultra command once the gauge is full
+        Ultra = 10,         // teaches GrantedUltraKey: used from the Ultra command once the gauge is full
+
+        // Essence nodes (docs/plans/HUB.md §3c). Appended, as above.
+        MagicAwaken = 11    // replaces known GrantedMagicKey with AwakenedMagicKey, same slot and charges
     }
 
     /// <summary>
@@ -64,6 +67,12 @@ namespace Assets.Scripts.Heroes
                  "the far end of a branch. Empty (the default) means XP alone.")]
         public List<MaterialCost> MaterialCosts = new List<MaterialCost>();
 
+        [Tooltip("A price in Essence, the revisit currency (docs/plans/HUB.md §3c). An Essence node " +
+                 "costs Essence instead of XP: price its XpCost 0. The balance model never buys one " +
+                 "(SphereGridOps.GreedySpend skips it), because it spends XP and has no Essence. " +
+                 "0 (the default) means not an Essence node.")]
+        public int EssenceCost;
+
         [Tooltip("Authored 2D layout position, consumed only by the grid UI and editor window.")]
         public Vector2 Position;
 
@@ -80,7 +89,8 @@ namespace Assets.Scripts.Heroes
                  "is the ONLY way a hero ever gets a spell - Draw was removed on 2026-09-04. " +
                  "Learning is not carrying: a known spell still has to fit one of the hero's slots " +
                  "(see MagicSlot), which is what makes a branch a kit rather than a collection. A " +
-                 "key with no catalog entry is skipped rather than failing.")]
+                 "key with no catalog entry is skipped rather than failing. Kind == MagicAwaken: the " +
+                 "known ability this node awakens.")]
         public string GrantedMagicKey;
 
         [Tooltip("Kind == MagicKnown: charges this spell starts a run with when carried. It refills " +
@@ -88,6 +98,12 @@ namespace Assets.Scripts.Heroes
                  "which makes it the node's real power dial, more so than XpCost.")]
         [Range(1, 9)]
         public int GrantedCharges = 2;
+
+        [Tooltip("Kind == MagicAwaken: MagicSO.Key of the awakened version that replaces " +
+                 "GrantedMagicKey in the hero's known list - same slot, same charges. The awakened " +
+                 "ability is a separate asset with more flair (another effect, every enemy, a rider). " +
+                 "Does nothing until the hero knows GrantedMagicKey.")]
+        public string AwakenedMagicKey;
 
         [Tooltip("Kind == Summon: SummonSO.Key of the summon this hero learns. Kind == SummonPower / " +
                  "SummonDuration / SummonCharge: the summon this node upgrades. An upgrade for a summon " +

@@ -281,13 +281,20 @@ namespace Tests.EditMode
                     {
                         taught.Add(node.GrantedMagicKey);
                     }
+                    // An awakened ability is reached by awakening its base, not by being learned.
+                    if (node != null
+                        && node.Kind == Assets.Scripts.Heroes.SphereNodeKind.MagicAwaken
+                        && !string.IsNullOrEmpty(node.AwakenedMagicKey))
+                    {
+                        taught.Add(node.AwakenedMagicKey);
+                    }
                 }
             }
 
             var missing = magicKeys.Where(key => !taught.Contains(key)).ToList();
             CollectionAssert.IsEmpty(missing,
                 "No sphere grid teaches: " + string.Join(", ", missing)
-                + ". A MagicKnown node is the only way a hero learns a spell.");
+                + ". A MagicKnown node (or a MagicAwaken node, for an awakened ability) is the only way a hero gets one.");
         }
     }
 }

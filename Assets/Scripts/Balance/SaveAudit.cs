@@ -42,7 +42,7 @@ namespace Assets.Scripts.Balance
         public List<ItemSO> Gear = new List<ItemSO>();
     }
 
-    /// <summary>A magic the player has actually invested Essence in.</summary>
+    /// <summary>A combo the player has actually invested Essence in.</summary>
     public class SavedUpgrade
     {
         public string Key = "";
@@ -74,7 +74,6 @@ namespace Assets.Scripts.Balance
         /// Essence and zeroes this on its next launch; reported so the audit explains the pending
         /// refund rather than showing a stat that no longer does anything.</summary>
         public int LegacyBonusSlots;
-        public List<SavedUpgrade> MagicUpgrades = new List<SavedUpgrade>();
         public List<SavedUpgrade> ComboUpgrades = new List<SavedUpgrade>();
         public int DiscoveredMagicCount;
         public int DiscoveredComboCount;
@@ -91,11 +90,7 @@ namespace Assets.Scripts.Balance
         public PartyBaseline Party;
 
         // ---- Economy pacing, derived from MetaProgressManager's own numbers ----
-        public int EssencePerClear = MetaProgressManager.EssencePerLevelCleared;
         public int GoldPerClear = MetaProgressManager.GoldPerLevelCleared;
-        public int EssenceToMaxOneMagic;
-        public float ClearsToFirstUpgrade;
-        public float ClearsToMaxOneMagic;
 
         /// <summary>
         /// Loads and interprets the save set. <paramref name="resolveHero"/> and
@@ -112,14 +107,6 @@ namespace Assets.Scripts.Balance
                 SaveDirectory = $"{Application.persistentDataPath}/savedata"
             };
 
-            audit.EssenceToMaxOneMagic = TotalEssenceToMaxOneMagic();
-            audit.ClearsToFirstUpgrade = audit.EssencePerClear > 0
-                ? (float)MetaProgressManager.MagicUpgradeCostForNextLevel(0) / audit.EssencePerClear
-                : 0f;
-            audit.ClearsToMaxOneMagic = audit.EssencePerClear > 0
-                ? (float)audit.EssenceToMaxOneMagic / audit.EssencePerClear
-                : 0f;
-
             var fileHandler = new FileHandler();
 
             audit.HasPartySave = File.Exists($"{audit.SaveDirectory}/Party.json");
@@ -134,23 +121,6 @@ namespace Assets.Scripts.Balance
             audit.DiscoveredMagicCount = meta.DiscoveredMagicKeys != null ? meta.DiscoveredMagicKeys.Count : 0;
             audit.DiscoveredComboCount = meta.DiscoveredComboKeys != null ? meta.DiscoveredComboKeys.Count : 0;
 
-            if (meta.MagicUpgrades != null)
-            {
-                foreach (var entry in meta.MagicUpgrades)
-                {
-                    if (entry == null)
-                    {
-                        continue;
-                    }
-                    audit.MagicUpgrades.Add(new SavedUpgrade
-                    {
-                        Key = entry.MagicKey,
-                        Level = entry.Level,
-                        PowerBonus = MetaProgressManager.MagicPowerBonusForLevel(entry.Level)
-                    });
-                }
-            }
-
             if (meta.ComboUpgrades != null)
             {
                 foreach (var entry in meta.ComboUpgrades)
@@ -163,7 +133,7 @@ namespace Assets.Scripts.Balance
                     {
                         Key = entry.ComboKey,
                         Level = entry.Level,
-                        PowerBonus = MetaProgressManager.MagicPowerBonusForLevel(entry.Level)
+                        PowerBonus = MetaProgressManager.ComboPowerBonusForLevel(entry.Level)
                     });
                 }
             }
@@ -331,17 +301,6 @@ namespace Assets.Scripts.Balance
             }
 
             return byHero;
-        }
-
-        /// <summary>Total Essence needed to take one magic from level 0 to the cap.</summary>
-        public static int TotalEssenceToMaxOneMagic()
-        {
-            int total = 0;
-            for (int level = 0; level < MetaProgressManager.MaxMagicUpgradeLevel; level++)
-            {
-                total += MetaProgressManager.MagicUpgradeCostForNextLevel(level);
-            }
-            return total;
         }
     }
 }

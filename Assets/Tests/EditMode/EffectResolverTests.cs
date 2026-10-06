@@ -826,7 +826,7 @@ namespace Tests.EditMode
             var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector, comboLevelLookup: k => 5);
 
             int cardDmg = ExpectedDamage(10 + 5, 3);
-            int comboDmg = ExpectedDamage(15 + Assets.Scripts.Progression.MetaProgressManager.MagicPowerBonusForLevel(5), 3);
+            int comboDmg = ExpectedDamage(15 + Assets.Scripts.Progression.MetaProgressManager.ComboPowerBonusForLevel(5), 3);
             Assert.AreEqual(before - cardDmg - comboDmg, _enemy.Stats.Health);
         }
 

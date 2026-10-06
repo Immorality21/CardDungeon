@@ -205,7 +205,7 @@ template rather than a one-off:
 - **It gates buying, not what has been bought.** A level already paid for keeps its power forever;
   `GetMagicPowerBonus` does not consult the ceiling. No hub change can reach back into a spell the
   player is already carrying, which is what makes the dial safe to retune later.
-- **A full Forge lands exactly on `MaxMagicUpgradeLevel`.** The power a finished save can reach is
+- **A full Forge lands exactly on `MaxComboUpgradeLevel`.** The power a finished save can reach is
   *unchanged* — only the ramp is gated — so `RunCurveModel`'s "everything built" default reports
   what it always did, and only partial hub states move. That is precisely what the hard axis is for.
   A test fails if the authored ladder and the code ceiling ever drift apart.
@@ -332,34 +332,56 @@ a new `Assets/Scripts/Hub/`, `Assets/Scripts/Progression/MetaProgressSaveData.cs
 > to be placed and upgraded before it sells anything. Build sinks now, but prefer ones a building
 > *level* can later scale (stock rarity, hero tier, upgrade cap) over one-shot purchases.
 
-### 3c. Essence needs rethinking *(opened 2026-10-06)*
+### 3c. Essence is the revisit currency *(opened and built 2026-10-06)*
 
-The owner was unsure what Essence does, which is the finding: a currency the designer cannot place
-has no identity to a player either. What it does today:
+**What it was.** A flat 5 Essence on every floor clear, spent only at the Ability Forge to raise one
+ability or combo by a level (+2 power). The owner was unsure what it did, which was the finding: a
+currency the designer cannot place has no identity to a player either. It was a second XP that paid
+per floor rather than per kill.
 
-- **Earned:** a flat `EssencePerLevelCleared` (5) on every floor clear. Nothing else pays it, and
-  nothing scales it with depth or difficulty.
-- **Spent:** only at the **Ability Forge**, to upgrade one ability or combo by a level (cost 15 / 30 /
-  45 / 60 / 75; +2 Damage/Heal power per level, and it unlocks any effect gated by
-  `SpellEffect.UnlockLevel`). The Forge's building level caps how far (1 → 3 → 5).
-- **Shown:** in the hub purse and on the level-clear window.
+**Decided (owner, 2026-10-06), and built the same day:**
 
-So it is a second XP that pays per floor rather than per kill and is spent per ability rather than
-per hero. Directions to weigh (none chosen):
+- **Only revisits pay Essence.** A first clear pays none. A revisit pays
+  `MetaProgressManager.EssencePerRevisitLevel` (**12**) per floor, times its reward multiplier
+  (Fear level 0 is +25%, each Fear level +10%). A Fear level 0 Drowned March revisit pays about 75.
+  The level-clear window shows no Essence row when there is none.
+- **It buys Essence-priced sphere-grid nodes.** `SphereGridNode.EssenceCost`, priced at **0 XP**
+  (`SphereGridCostCurveTests` enforces it). The first kind is the **awakening**
+  (`SphereNodeKind.MagicAwaken`): it names a known ability (`GrantedMagicKey`) and an awakened
+  `MagicSO` (`AwakenedMagicKey`) that replaces it in the hero's known list, in the same position and
+  at the same charges (`SphereGridOps.KnownMagicForNodes` / `AwakeningsForNodes`). The awakened
+  ability is its own asset with **more flair** (owner): the base's effects plus another one, or a
+  wider target. Buying one rewrites the base key to the awakened one in `MagicLoadout.json` and in a
+  run underway (`AwakeningSaves`), so the slot keeps its place and its spent charges.
+- **Combo upgrades stay at the Forge.** A combo belongs to no single hero.
+- **The Forge's per-ability upgrades are retired** (owner). The Abilities tab is a read-only
+  collection; abilities grow on their hero's grid.
+- **Not chosen:** Essence ranks on nodes already bought (a general deepening). Essence buys specific
+  things.
 
-1. **Fold it into gold**, so the Forge charges gold. One fewer currency, but gold would then buy power
-   directly, which `InvestmentPointsPerGold` would have to price.
-2. **Make it the revisit currency** (`REVISITS.md`): paid by Fear level, so it is the thing that harder
-   re-clears produce and the Forge becomes the endgame sink. **Leaning this way (owner, 2026-10-06):**
-   revisits already scale Essence with Fear level, and a guide after the second run will point the player
-   at a revisit and Essence together. What Essence *buys* is still open.
-3. **Tie it to knowledge**, paid for Bestiary entries, first kills and combo discoveries, so it
-   rewards exploring the systems rather than grinding floors.
-4. **Delete the Forge's power upgrades** and let the sphere grid be the only route to ability power.
-   Essence goes with them.
+**The balance model never buys an Essence node.** It spends XP and has no Essence, so
+`SphereGridOps.GreedySpend` and `CheapestFrontierCost` skip them, as the tutorial's guided spend does.
+`ProgressionMap` counts an awakening as the source of its awakened ability (with the Essence price on
+`MagicSource.EssenceCost`). `BalanceAnalyzer.EvaluateEconomy` was deleted: both of its checks priced
+ability upgrades per floor clear.
 
-Touch points: `MetaProgressManager` (award + Forge costs), `MagicForgeUI`, the level-clear summary,
-`BalanceAnalyzer.EvaluateEconomy` (the only economy check, and it covers Essence only).
+**First content: the Warrior** (first-draft numbers):
+
+| node | awakens | into | adds | price |
+|---|---|---|---|---|
+| `warrior-a-awaken` (off Bulwark) | Bulwark | **Unbroken Line** | +2 regeneration a turn to every ally, 3 turns | 100 Essence |
+| `warrior-b-awaken` (off War Cry) | War Cry | **Rallying Roar** | +2 Agility to every ally, 3 turns | 150 Essence |
+
+**Still to do:**
+
+- **Awakenings for the other seven heroes**, one or two per grid, at the branch tips. Read the hero's
+  vision first.
+- **Price them against supply.** `RevisitModel` should report how many revisits an awakening costs at
+  each Fear level, and the prices should follow from that rather than from a guess.
+- **Other Essence node kinds**, if awakenings prove too narrow (an awakened summon, say).
+- **The Essence guide** (`REVISITS.md`, "Still to do").
+- **An awakening looks like any other node** (glyph ✧) and sits at a branch tip, often off screen when
+  the grid opens. Give it its own look if players miss it.
 
 ### 3d. Bounties — a reason to go back *(opened 2026-10-06)*
 
