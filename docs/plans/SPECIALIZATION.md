@@ -424,8 +424,8 @@ hero's cast - the oil branch feeds the fire branch.
   branch - so every party reaching the Ashen Deep owns it. See "The Mage" below.
 - **The mechs are probably strong** - the first sandbox run had the Warrior Mech's Piston Punch
   one-shot a Clockwork Sentry for 48 off a full grid. First-draft numbers; the balance pass decides.
-- **Unit traits** exist (`UnitTraits`: Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental)
-  but only the three machines carry any. Tag the rest when something reads them.
+- ~~**Unit traits** only on the three machines~~ - every enemy tagged 2026-10-07 (Enemies guide).
+  No enemy is Undead yet.
 
 #### The Mage — an elemental caster *(built 2026-10-07)*
 
@@ -450,8 +450,8 @@ The owner's call (2026-10-07): the Mage goes in, as an **early** unlock. What sh
 - **Vision:** a *draft* written by Claude, marked as such - the owner's to rewrite. **No summons or Ultra
   yet**; like the Cleric and Rogue, those wait on the vision.
 
-**Open:** his summons/Ultra; whether Chain Lightning is the right storm capstone; Chain Lightning
-reuses Lightning Bolt's icon; the full-grid numbers are high (48 to every enemy off INT 45 in the
+**Open:** his summons; MultiCast and Focus (his signature and Ultra, details undecided); whether
+Chain Lightning is the right storm capstone (it has its own icon since 2026-10-07); the full-grid numbers are high (48 to every enemy off INT 45 in the
 sandbox, `Sandbox/MageShowcase`) - the same balance pass as the mechs.
 
 **"Start with 6" was a scope target, not a starting roster** *(clarified 2026-09-04)*. It means

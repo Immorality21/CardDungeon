@@ -24,6 +24,12 @@
 - **`LootTable`** (`List<LootDrop>`, replaced the single `LootItem` on 2026-09-05) is **rolled entry by entry** - a table is a list of things this kill *can* yield, not a pick-one, so a monster drops both its signature gear and the raw stuff it is made of. An entry with `Chance` **0** falls back on `LootRoller`'s rarity + run-depth math, which is the gear regime and suppresses an over-level item; an entry with an explicit `Chance` is that flat probability at any depth, which is what **materials** use - a material is gated by *which* monster carries it, not by how deep the player is. `MinQuantity`/`MaxQuantity` only bite on stacking items (consumables, materials); equipment always drops one, because an inventory entry carries which hero has it equipped. Bosses author their signature material at `Chance: 1`. The Bestiary lists **one row per entry**, each `???` until that drop has actually been seen (`BestiaryPresenter.LootLines`) - so the page says how many secrets are left as well as which are known.
 
 - **`Traits`** (`UnitTraits`, 2026-10-07) say what an enemy *is* - Mechanical, Construct, Undead... -
+  judged from the art and tagged on every enemy the same day: **Demon** Abyssal Warden, Cinder Imp,
+  Cinder Tyrant, Dark Jailor; **Flying** Cinder Imp, Drakeling, Floating Eye, Gilded Mote; **Beast**
+  Drakeling, Slag Hound; **Elemental** Cinder Tyrant, Slag Hound; **Construct** Stone Sentinel, Gilded
+  Mote; **Mechanical** the two machines below; none for the people (Bog Shaman, Hex Weaver), the
+  Mirefather and the Gilded Hoarder. **No enemy is Undead** - a holy-vs-undead ability has nothing to
+  bite on until one exists. Only Disassemble reads a trait today -
   and **`SalvageTable`** (rolled like `LootTable`, on top of it) is what taking a machine apart with the
   Tinkerer's Disassemble yields (`HealthCause.Disassemble`). Mechanical today: the **Clockwork Sentry**
   (fast, fragile, an Aggressor) and the **Steam Automaton** (slow Bruiser, no flinch), both weak to

@@ -371,8 +371,10 @@ Two consequences worth holding on to:
   `CombatManager.RequestUltraList`) **even for one** — the owner's call, like FFX's Overdrive menu:
   the footer says what it does before the gauge is spent.
   **The gauge** (`UltraOps`): per hero, **per fight**, credited with health lost
-  (`CombatManager.UpdateUltraGauges`, once per turn before the turn is reported, against the health
-  last read — so blows, ticks and health costs all count and healing never does); losing
+  (`CombatManager.UpdateUltraGauges`, once per turn before the turn is reported, from the turn's net
+  health change summed off `HealthChange` (`TrackHealth`, since 2026-10-07; it used to re-read the
+  bars) — so blows, ticks and health costs all count, healing never does on its own, and a heal in
+  the same turn nets against the damage); losing
   `FillShare` (60%) of the bar fills it; using an Ultra empties it. One kind, **`Transform`**
   (Demon Form): for `Turns` of the hero's turns after the one it is used on, `MaxHealthPercent` more
   health **keeping the share filled** both ways (`UltraOps.KeepShare`), basic Attack in

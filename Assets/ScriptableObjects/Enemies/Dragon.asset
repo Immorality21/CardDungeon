@@ -25,6 +25,7 @@ MonoBehaviour:
   - {fileID: -5895658033070702852, guid: f335a4a0f5f37ce43a996b7de362f9b0, type: 3}
   IsBoss: 0
   CombatScale: 1
+  Traits: 24
   BaseStats:
     Values:
     - Type: 1
@@ -66,5 +67,6 @@ MonoBehaviour:
     Chance: 0.3
     MinQuantity: 1
     MaxQuantity: 2
+  SalvageTable: []
   Triggers: []
   Flinches: 1

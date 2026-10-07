@@ -22,6 +22,8 @@ work, then open only the plan file your work touches:
 | `docs/plans/EVENTS.md` | event-driven rules: the health funnel, the fight's and the game's event streams, reactions on items/enemies/summons, items that grow; passive grid nodes (after the demo) |
 | `docs/plans/POLISH_CONTENT.md` | battle/room polish, player-facing information, content volume, **the tutorial** (§1, §2, §6, §8, §14–§20) |
 
+**Before changing hero design** (visions, grid kits, summons, Ultras, awakenings, gear reactions or item milestones), check the **Hero Workbook** the owner is filling in. The index has its link and the rule: no conflicting changes until the owner says it is done.
+
 Don't read the whole backlog to answer one question — the index says which file to open. The
 **do-not-relitigate** list lives in the index and applies to every plan.
 

@@ -174,10 +174,15 @@ namespace Assets.Scripts.Rooms
         private UltraSO _pendingUltra;
         private ICombatUnit _pendingUltraTarget;
 
-        // ---- Ultras (COMBAT_DEPTH §13): each hero's gauge this fight, the health it was last read
-        // ---- at, and the form a hero is in while a Transform Ultra lasts.
+        // ---- Ultras (COMBAT_DEPTH §13): each hero's gauge this fight, the net health change since it
+        // ---- was last credited (summed from HealthChange), and the form a hero is in while a
+        // ---- Transform Ultra lasts.
         private readonly Dictionary<Hero, int> _ultraGauge = new Dictionary<Hero, int>();
-        private readonly Dictionary<Hero, int> _gaugeHealth = new Dictionary<Hero, int>();
+        private readonly Dictionary<Hero, int> _gaugeNet = new Dictionary<Hero, int>();
+
+        // ---- Threat: the net health change of every unit standing when the current hero action
+        // ---- began, summed from HealthChange; null between actions.
+        private Dictionary<ICombatUnit, int> _threatWindow;
         private readonly Dictionary<Hero, ActiveForm> _forms = new Dictionary<Hero, ActiveForm>();
 
         /// <summary>A hero's Transform Ultra while it lasts.</summary>
@@ -589,12 +594,13 @@ namespace Assets.Scripts.Rooms
             _mounts.Clear();
             // Every gauge starts the fight empty (UltraOps: per fight, not per run).
             _ultraGauge.Clear();
-            _gaugeHealth.Clear();
+            _gaugeNet.Clear();
+            _threatWindow = null;
             _forms.Clear();
             foreach (var hero in party.Heroes.Where(h => h != null))
             {
                 _ultraGauge[hero] = 0;
-                _gaugeHealth[hero] = hero.Stats.Health;
+                _gaugeNet[hero] = 0;
             }
             _threat.Reset();
             _pendingDeaths.Clear();
@@ -605,6 +611,8 @@ namespace Assets.Scripts.Rooms
             // The game's own bookkeeping listens first (order 0 is the default), so authored reactions
             // always see a death after it has been queued for its rewards.
             Events.Subscribe<UnitDefeated>(_pendingDeaths.Add);
+            // The Ultra gauge and threat are fed from the health stream, not from re-reading bars.
+            Events.Subscribe<HealthChange>(TrackHealth);
             BuffTracker = new CombatBuffTracker { Events = Events };
             _turnManager.SetBuffTracker(BuffTracker);
             // A TurnDelay effect (Exatrix's claws) pushes units back on this fight's clock.
@@ -771,7 +779,7 @@ namespace Assets.Scripts.Rooms
                     // Threat is what the action changed: health taken off enemies, health put back
                     // on the hero side. Measured around the whole action rather than inside each
                     // executor, so attacks, abilities, items and summons all count the same way.
-                    var threatSnapshot = SnapshotHealth();
+                    OpenThreatWindow();
 
                     if (_pendingAction == HeroAction.Attack)
                     {
@@ -812,12 +820,11 @@ namespace Assets.Scripts.Rooms
 
                     if (_pendingAction == HeroAction.Summon && _pendingSummon?.Summon != null)
                     {
-                        CreditThreat(unit, threatSnapshot,
-                            _pendingSummon.Summon.ThreatMultiplier, _pendingSummon.Summon.BonusThreat);
+                        CreditThreat(unit, _pendingSummon.Summon.ThreatMultiplier, _pendingSummon.Summon.BonusThreat);
                     }
                     else
                     {
-                        CreditThreat(unit, threatSnapshot, ThreatSourceFor(_pendingAction));
+                        CreditThreat(unit, ThreatSourceFor(_pendingAction));
                     }
                 }
                 else
@@ -932,7 +939,8 @@ namespace Assets.Scripts.Rooms
             {
                 Won = outcome == CombatOutcome.Victory,
                 HadBoss = _currentCombatHadBoss,
-                HeroKeys = _fielded.Where(h => h != null).Select(h => h.HeroKey).ToList()
+                HeroKeys = _fielded.Where(h => h != null).Select(h => h.HeroKey).ToList(),
+                FoesStanding = room.Enemies.Where(e => e != null && e.IsAlive).Select(e => e.DisplayName).ToList()
             });
             Events = null;
             _calculator.Events = null;
@@ -1218,27 +1226,53 @@ namespace Assets.Scripts.Rooms
         // ------------------------------------------------------------------ Ultras
 
         /// <summary>
-        /// Credits every hero's gauge with the health they have lost since it was last read, and
-        /// re-reads it. Run once per turn, just before the turn is reported, so a blow, a tick and a
-        /// blood price all count the same way and the party window shows the gauge it is about to
-        /// offer. Healing moves nothing.
+        /// Credits every hero's gauge with the health they have lost, net, since it was last credited
+        /// (<see cref="TrackHealth"/>). Run once per turn, just before the turn is reported, so a
+        /// blow, a tick and a blood price all count the same way and the party window shows the gauge
+        /// it is about to offer. Healing moves nothing on its own; within one turn it nets against
+        /// the damage.
         /// </summary>
         private void UpdateUltraGauges()
         {
-            foreach (var hero in _gaugeHealth.Keys.ToList())
+            foreach (var hero in _gaugeNet.Keys.ToList())
             {
-                if (hero == null)
-                {
-                    continue;
-                }
-                int now = Mathf.Max(0, hero.Stats.Health);
-                int lost = _gaugeHealth[hero] - now;
-                if (lost > 0 && hero.IsAlive)
+                int lost = -_gaugeNet[hero];
+                if (hero != null && lost > 0 && hero.IsAlive)
                 {
                     _ultraGauge.TryGetValue(hero, out int gauge);
                     _ultraGauge[hero] = UltraOps.Add(gauge, UltraOps.GainFor(lost, hero.GetEffectiveMaxHealth()));
                 }
-                _gaugeHealth[hero] = now;
+                _gaugeNet[hero] = 0;
+            }
+        }
+
+        /// <summary>
+        /// Every change to a bar, summed per unit for the Ultra gauge (each fielded hero, settled once
+        /// a turn) and for threat (every unit standing when a hero's action began, settled when it
+        /// ends). Summing <c>After - Before</c>, floored at 0, telescopes to "the bar now less the bar
+        /// then", so damage and healing in the same window still net against each other exactly as
+        /// re-reading the bars did - and <see cref="HealthOps"/> being the only writer of health is
+        /// what makes the sum complete. A form starting or ending rescales the bar; that is not damage
+        /// taken or healing done, so it is left out.
+        /// </summary>
+        private void TrackHealth(HealthChange change)
+        {
+            if (change?.Target == null || change.Cause == HealthCause.Form)
+            {
+                return;
+            }
+            int delta = Mathf.Max(0, change.After) - Mathf.Max(0, change.Before);
+            if (delta == 0)
+            {
+                return;
+            }
+            if (change.Target is Hero hero && _gaugeNet.ContainsKey(hero))
+            {
+                _gaugeNet[hero] += delta;
+            }
+            if (_threatWindow != null && _threatWindow.ContainsKey(change.Target))
+            {
+                _threatWindow[change.Target] += delta;
             }
         }
 
@@ -1284,7 +1318,6 @@ namespace Assets.Scripts.Rooms
             hero.InForm = true;
             HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth()),
                 new HealthSource(hero, HealthCause.Form), Events);
-            _gaugeHealth[hero] = hero.Stats.Health;   // the form's new bar is not damage taken
             SetHeroFrames(hero, ultra.FormFrames, ultra.FormFps);
             _forms[hero] = new ActiveForm { Ultra = ultra, TurnsLeft = ultra.Turns, TakenThisTurn = true };
 
@@ -1553,7 +1586,6 @@ namespace Assets.Scripts.Rooms
                 HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth()),
                     new HealthSource(hero, HealthCause.Form), Events);
             }
-            _gaugeHealth[hero] = Mathf.Max(0, hero.Stats.Health);
             SetHeroFrames(hero, hero.HeroSO != null ? hero.HeroSO.AnimationFrames : null,
                 hero.HeroSO != null ? hero.HeroSO.AnimationFps : 4f);
             if (hero.HeroSO != null && (hero.HeroSO.AnimationFrames == null || hero.HeroSO.AnimationFrames.Length == 0))
@@ -2879,48 +2911,52 @@ namespace Assets.Scripts.Rooms
 
         // ------------------------------------------------------------------ threat
 
-        /// <summary>Health of every living unit on both sides, taken just before an action.</summary>
-        private Dictionary<ICombatUnit, int> SnapshotHealth()
+        /// <summary>
+        /// Starts counting what the coming action does to every unit standing on both sides
+        /// (<see cref="TrackHealth"/>). A unit that arrives during the action is not in the window.
+        /// </summary>
+        private void OpenThreatWindow()
         {
-            var health = new Dictionary<ICombatUnit, int>();
+            _threatWindow = new Dictionary<ICombatUnit, int>();
             foreach (var unit in GetAliveEnemies().Concat(HeroSideUnits()))
             {
-                health[unit] = unit.Stats.Health;
+                _threatWindow[unit] = 0;
             }
-            return health;
         }
 
         /// <summary>
         /// Credits <paramref name="actor"/> with the damage its action dealt to enemies and the
-        /// healing it landed on its own side. Only what landed counts: a kill is worth the health the
-        /// enemy had left, an overheal nothing past full.
+        /// healing it landed on its own side, then closes the window. Only what landed counts: a kill
+        /// is worth the health the enemy had left, an overheal nothing past full.
         /// </summary>
-        private void CreditThreat(ICombatUnit actor, Dictionary<ICombatUnit, int> before, MagicSO source)
+        private void CreditThreat(ICombatUnit actor, MagicSO source)
         {
-            CreditThreat(actor, before,
+            CreditThreat(actor,
                 source != null ? source.ThreatMultiplier : 1f,
                 source != null ? source.BonusThreat : 0);
         }
 
         /// <summary>The same credit with the threat settings given directly - a summoning's come
         /// from its <c>SummonSO</c>, not from an ability.</summary>
-        private void CreditThreat(ICombatUnit actor, Dictionary<ICombatUnit, int> before, float multiplier, int bonus)
+        private void CreditThreat(ICombatUnit actor, float multiplier, int bonus)
         {
             int damage = 0;
             int healing = 0;
-            foreach (var entry in before)
+            if (_threatWindow != null)
             {
-                int now = entry.Key.IsAlive ? entry.Key.Stats.Health : 0;
-                int delta = now - entry.Value;
-                if (entry.Key.IsHero)
+                foreach (var entry in _threatWindow)
                 {
-                    healing += Mathf.Max(0, delta);
-                }
-                else
-                {
-                    damage += Mathf.Max(0, -delta);
+                    if (entry.Key.IsHero)
+                    {
+                        healing += Mathf.Max(0, entry.Value);
+                    }
+                    else
+                    {
+                        damage += Mathf.Max(0, -entry.Value);
+                    }
                 }
             }
+            _threatWindow = null;
 
             _threat.Credit(actor, damage, healing, multiplier, bonus);
         }

@@ -2183,14 +2183,20 @@
     font-size: 21px;
     -unity-font-style: bold;
     color: var(--cd-text-dark);
+    flex-shrink: 0;
+    margin-right: 12px;
 }
 
+/* Long values ("Stone Sentinel, Hex Weaver and Floating Eye") wrap inside the row rather than
+   running past the window's edge. */
 .cd-victory-row__value {
     font-size: 22px;
     -unity-font-style: bold;
 
     color: var(--cd-text-dark);
     -unity-text-align: middle-right;
+    flex-shrink: 1;
+    white-space: normal;
 }
 
 .cd-victory-loot {
@@ -3143,6 +3149,11 @@
 
 .cm-floor--ahead {
     opacity: 0.85;
+}
+
+/* A line of the run's attempt history (docs/plans/POLISH_CONTENT.md §15): long enough to wrap. */
+.cm-attempt {
+    white-space: normal;
 }
 
 .cm-start {

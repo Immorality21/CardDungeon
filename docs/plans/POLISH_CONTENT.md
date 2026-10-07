@@ -197,6 +197,16 @@ Touch points: `Assets/UI/Rooms/RoomAction.uxml`, `Assets/Scripts/Rooms/UI/RoomAc
 
 ### 15. Run summary and statistics
 
+> **First version shipped 2026-10-07.** `RunHistory.json` (`Progression/RunHistory.cs` +
+> `RunHistoryRecorder`), written entirely from `GameEvents`: one record per attempt, from a run's
+> first floor to a wipe or a clear (leaving the dungeon is a *retreat*, not an end), the last 30 kept.
+> What happened (kills, fights, rooms, retreats) counts at once; what was kept (XP, gold, Essence,
+> items) waits for its floor to be banked. Shown on the **death screen** (fell on floor N of M, fell to
+> whom, this run's kills/fights), the **run-complete panel** (totals) and the **story map** (per run:
+> attempts, clears, falls, deepest floor, the last attempt). `RunHistoryTests`. Not done: a hub
+> **Records** screen listing every attempt, per-hero numbers, and the analyzer reading it as telemetry
+> (`SaveAudit`).
+
 `MetaProgressSaveData` records Gold, Essence, upgrades, the Bestiary and completed runs — **nothing
 about how a run went.** The death screen says *"Your Party Has Fallen..."* and stops.
 

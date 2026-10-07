@@ -23,7 +23,9 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
   one). Over-time ticks are not redirected. The mech under its rider is the only user.
 - **`UnitTraits`** (`[Flags]`, on `EnemySO.Traits`, read through `IHasTraits` by `Enemy` and `SimUnit`):
   Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental - what a unit *is*. `UnitTraitOps.Has`
-  is the check. Serialized as a bit mask: append, never reuse a bit. Only Disassemble reads it today.
+  is the check. Serialized as a bit mask: append, never reuse a bit. Only Disassemble reads it today
+(Mechanical); every enemy is tagged since 2026-10-07 (see the Enemies guide). **No enemy is Undead
+yet.**
 
 ## ICombatUnit
 
@@ -96,8 +98,9 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
 `ThreatTable` (pure, `ThreatTableTests`) — WoW-style, and **biased, never certain** (the owner's rule):
 `chance = 0.5/n + 0.5 * (T + 10) / sum(T + 10)`, so with two heroes nobody is ever under 25% or over
 75%. Damage dealt earns ×1, healing ×0.5, only what landed. `CombatManager` owns one table per fight
-(reset in `RunCombat`), credits each hero-side action from an HP snapshot around it
-(`SnapshotHealth` / `CreditThreat`), wipes a fallen hero's threat in `ResolveDeaths`, and passes
+(reset in `RunCombat`), credits each hero-side action from the net health change of every unit standing when it began,
+summed off `HealthChange` (`OpenThreatWindow` / `TrackHealth` / `CreditThreat`; a snapshot of the
+bars until 2026-10-07, same numbers), wipes a fallen hero's threat in `ResolveDeaths`, and passes
 it to enemies through `EnemyCombatContext.Threat`. Abilities tune their own draw with
 `MagicSO.ThreatMultiplier` / `BonusThreat` (a taunt is just a big `BonusThreat`). **Any new
 single-hero enemy pick must go through `ThreatTable.Pick`** — a bare `Random.Range` over the heroes

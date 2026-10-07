@@ -393,7 +393,7 @@
                     <ui:Label name="campaign-detail-status" text="" class="cd-inv-detail__sub cm-detail__status" />
                     <ui:Label name="campaign-detail-blurb" text="" class="cd-inv-detail__desc" />
                     <ui:Label name="campaign-detail-requires" text="" class="cd-reason cm-detail__requires" />
-                    <ui:VisualElement name="campaign-detail-body" class="cm-detail__body" />
+                    <ui:ScrollView name="campaign-detail-body" class="cm-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
                     <ui:Label name="campaign-feedback" text="" class="cd-camp-feedback sg-feedback" />
                     <ui:Button name="campaign-start" text="Begin" class="cd-inv-tab cm-start" />
                 </ui:VisualElement>

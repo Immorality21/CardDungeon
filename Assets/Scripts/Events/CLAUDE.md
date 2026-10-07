@@ -27,7 +27,7 @@ throwing handler logged without stopping the others.
 | `CurrencyChanged` (Gold/Essence, delta, source, `Pending`) | `MetaProgressManager` - every add, spend, pending gain, forfeit and bank |
 | `XpAwarded` (per hero) | `Party.DistributeXp` |
 | `EnemyDefeated` (enemy key, boss, killer hero key) | `CombatManager.HandleEnemyDeath` |
-| `CombatFinished` (won, boss, fielded hero keys) | `CombatManager.RunCombat`'s end |
+| `CombatFinished` (won, boss, fielded hero keys, foes still standing) | `CombatManager.RunCombat`'s end |
 | `RoomEntered` | `GameManager.EnterRoom` |
 | `LevelStarted` (fresh or resumed) / `LevelCleared` / `LevelForfeited` (died / left) | `DungeonManager` |
 | `HeroJoined` | `Party.MarkOwnedDeferred` |
@@ -36,6 +36,14 @@ throwing handler logged without stopping the others.
 
 **A new way of changing one of these must go through its chokepoint**, or it skips the event too. The
 gain methods take a **required** `EconomySource` for that reason: the compiler finds every caller.
+
+## Who listens today
+
+- `InventoryManager` - item counters (kills, boss kills, victories) for items that grow.
+- `Progression/RunHistoryRecorder` - the run history (`RunHistory.json`): a static class that
+  subscribes itself at `BeforeSceneLoad`, after `GameEvents` is reset at `SubsystemRegistration`, so
+  no scene carries it. It is the worked example of both rules below: kills count at once, XP and items
+  wait for `LevelCleared`.
 
 ## Provisional vs kept
 

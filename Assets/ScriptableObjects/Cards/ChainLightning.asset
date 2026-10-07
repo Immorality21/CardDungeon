@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: ChainLightning
   DisplayName: Chain Lightning
   Description: Lightning leaps from foe to foe, striking every enemy.
-  Icon: {fileID: -3149389169688070996, guid: 42328d3ac1525034896b30dd88c80e50, type: 3}
+  Icon: {fileID: 21300000, guid: 1ed75fd21a77474383b111727b9097f7, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 1

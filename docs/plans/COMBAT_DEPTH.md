@@ -170,8 +170,9 @@ chance_i = 0.5 / n  +  0.5 * weight_i / sum(weight)  (FlatShare 0.5: half of eve
   ceiling. However lopsided the table gets, the quiet hero can still be hit and the loud one can
   still be spared.
 - **What earns it.** Damage dealt ×1, healing landed ×0.5 (the WoW split). Only what *landed*: a kill
-  is worth the health the enemy had left, an overheal nothing past full. Measured as an HP snapshot
-  around each hero-side action in `CombatManager` (`SnapshotHealth` / `CreditThreat`), so attacks,
+  is worth the health the enemy had left, an overheal nothing past full. Measured as the net health change
+  of every unit standing when a hero-side action begins, summed off `HealthChange` until it ends
+  (`CombatManager.OpenThreatWindow` / `TrackHealth` / `CreditThreat`; an HP snapshot until 2026-10-07), so attacks,
   abilities, items and summons all count the same way with no executor changes. Damage-over-time
   ticks land in upkeep, outside the snapshot, and earn nothing.
 - **Per ability** (`MagicSO`, drawn in its inspector under *Threat*): `ThreatMultiplier` (default 1)

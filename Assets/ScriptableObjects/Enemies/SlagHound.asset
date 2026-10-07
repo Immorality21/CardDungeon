@@ -25,6 +25,7 @@ MonoBehaviour:
   - {fileID: 4112082057333749592, guid: b4d724f7618451348860c5bb4ec5aebb, type: 3}
   IsBoss: 0
   CombatScale: 1
+  Traits: 80
   BaseStats:
     Values:
     - Type: 1
@@ -54,6 +55,7 @@ MonoBehaviour:
     Chance: 0.4
     MinQuantity: 1
     MaxQuantity: 2
+  SalvageTable: []
   Triggers:
   - Label: Pack Fury
     When: 7

@@ -128,7 +128,12 @@ safety sweep covers both sides); selling a grown copy of an item; a stricter hea
    Storehouse row instead of stacking with fresh ones. The balance model keeps `ItemSO` lists (fresh gear).
 2. **Achievements and hub quests/bounties** (`HUB.md` §3d) are the next consumers of `GameEvents`.
    Rule of thumb from `Events/CLAUDE.md`: count kept changes, or hold a tally until `LevelCleared`.
-3. **The Ultra gauge and threat still poll health snapshots** (`UpdateUltraGauges`, `CreditThreat`).
+3. ~~**The Ultra gauge and threat still poll health snapshots**~~ - **done 2026-10-07, same
+   numbers.** Both sum `HealthChange` (`CombatManager.TrackHealth`): `After - Before`, floored at 0,
+   per hero per turn for the gauge and per unit per hero action for threat. The sum telescopes to "bar
+   now less bar then", so a heal still nets against damage in the same window - the behaviour change
+   the note below worried about was avoided by keeping the windows, not by changing them. The form
+   resize (`HealthCause.Form`) is left out, as the old re-read after it did. The original note:
    Both could listen to `HealthChange` instead; deliberately left alone because the per-turn diff nets
    heals against damage within a turn, and an event listener would not - a behaviour change to decide
    on, not a refactor.

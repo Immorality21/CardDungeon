@@ -1240,6 +1240,7 @@ namespace Assets.Scripts.Hub
                     rewards.Add(CompleteRow("Highest Fear level cleared", best.ToString()));
                 }
                 rewards.Add(CompleteRow("Next time", "Raise the Fear level for bigger rewards"));
+                AddRunTotals(rewards, run);
                 SetShown(rewards, true);
                 return;
             }
@@ -1264,7 +1265,36 @@ namespace Assets.Scripts.Hub
             {
                 rewards.Add(CompleteRow("Revisit", "Run it again from the story map, harder, for bigger rewards"));
             }
-            SetShown(rewards, opened.Count > 0 || revisitable);
+            bool totals = AddRunTotals(rewards, run);
+            SetShown(rewards, opened.Count > 0 || revisitable || totals);
+        }
+
+        /// <summary>
+        /// What the attempt that just cleared the run added up to, from the run history
+        /// (docs/plans/POLISH_CONTENT.md §15). Returns false when there is no record of it.
+        /// </summary>
+        private static bool AddRunTotals(VisualElement rewards, RunDefinitionSO run)
+        {
+            var record = RunHistoryRecorder.Latest;
+            if (run == null || record == null || record.Outcome != RunOutcome.Cleared
+                || record.RunKey != CampaignOps.RunKeyOf(run))
+            {
+                return false;
+            }
+            rewards.Add(CompleteRow("Enemies felled", record.BossKills > 0
+                ? $"{record.Kills} ({record.BossKills} {(record.BossKills == 1 ? "boss" : "bosses")})"
+                : record.Kills.ToString()));
+            rewards.Add(CompleteRow("Gold earned", record.GoldKept.ToString()));
+            if (record.EssenceKept > 0)
+            {
+                rewards.Add(CompleteRow("Essence earned", record.EssenceKept.ToString()));
+            }
+            rewards.Add(CompleteRow("XP earned", record.XpKept.ToString()));
+            if (record.Retreats > 0)
+            {
+                rewards.Add(CompleteRow("Retreats", record.Retreats.ToString()));
+            }
+            return true;
         }
 
         private static VisualElement CompleteRow(string labelText, string valueText)

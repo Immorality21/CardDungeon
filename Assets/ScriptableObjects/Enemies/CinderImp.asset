@@ -25,6 +25,7 @@ MonoBehaviour:
   - {fileID: -2202159102496537776, guid: cf321fb2e1ed26c45a863364351a1319, type: 3}
   IsBoss: 0
   CombatScale: 1
+  Traits: 40
   BaseStats:
     Values:
     - Type: 1
@@ -62,6 +63,7 @@ MonoBehaviour:
     Chance: 0.35
     MinQuantity: 1
     MaxQuantity: 1
+  SalvageTable: []
   Triggers:
   - Label: Cinder Burst
     When: 6

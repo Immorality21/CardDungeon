@@ -313,6 +313,8 @@ namespace Assets.Scripts.Hub
                     done ? "cm-floor--done" : here ? "cm-floor--current" : "cm-floor--ahead"));
             }
 
+            AddAttemptHistory(run, inProgress);
+
             var opens = new List<string>();
             foreach (var state in _states)
             {
@@ -333,6 +335,57 @@ namespace Assets.Scripts.Hub
                     _detailBody.Add(MakeLabel("→  " + name, "cm-floor", "cm-floor--ahead"));
                 }
             }
+        }
+
+        /// <summary>
+        /// How earlier attempts at this run went (docs/plans/POLISH_CONTENT.md §15): the map is where
+        /// the player decides whether to go back in, and "fell twice on floor 3" is what that decision
+        /// should rest on. Nothing is shown for a run never attempted.
+        /// </summary>
+        private void AddAttemptHistory(RunDefinitionSO run, bool inProgress)
+        {
+            string key = CampaignOps.RunKeyOf(run);
+            var summary = RunHistoryOps.Summarize(RunHistoryRecorder.Data, key);
+            var current = RunHistoryRecorder.Current;
+            bool live = inProgress && current != null && current.RunKey == key;
+            if (summary.Attempts == 0 && !live)
+            {
+                return;
+            }
+
+            _detailBody.Add(MakeLabel("Your attempts", "cd-inv-col__title"));
+            if (live)
+            {
+                _detailBody.Add(AttemptLine($"▸  This attempt: {current.FloorsCleared} cleared, {current.Kills} felled"
+                    + (current.Retreats > 0 ? $", {current.Retreats} {(current.Retreats == 1 ? "retreat" : "retreats")}" : string.Empty),
+                    "cm-floor", "cm-floor--current"));
+            }
+            if (summary.Attempts > 0)
+            {
+                var parts = new List<string> { $"{summary.Attempts} {(summary.Attempts == 1 ? "attempt" : "attempts")}" };
+                if (summary.Clears > 0)
+                {
+                    parts.Add($"{summary.Clears} cleared");
+                }
+                if (summary.Falls > 0)
+                {
+                    parts.Add($"{summary.Falls} fell");
+                }
+                if (summary.Clears == 0 && summary.DeepestFloor > 0)
+                {
+                    parts.Add($"deepest floor {summary.DeepestFloor}");
+                }
+                _detailBody.Add(AttemptLine("·  " + string.Join(" · ", parts), "cm-floor", "cm-floor--ahead"));
+                _detailBody.Add(AttemptLine("·  Last: " + RunHistoryOps.DescribeEnd(summary.Last, withFloorName: false),
+                    "cm-floor", "cm-floor--ahead"));
+            }
+        }
+
+        private static Label AttemptLine(string text, string className, string extraClass)
+        {
+            var label = MakeLabel(text, className, extraClass);
+            label.AddToClassList("cm-attempt");
+            return label;
         }
 
         private static Label MakeLabel(string text, string className, string extraClass = null)

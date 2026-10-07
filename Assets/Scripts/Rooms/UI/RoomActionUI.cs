@@ -2889,6 +2889,7 @@ namespace Assets.Scripts.Rooms
                 return;
             }
             _detailRows.Clear();
+            AddRunStoryRows();
             if (DungeonManager.ActiveRun != null)
             {
                 int levels = DungeonManager.RunLevelIndex + 1;
@@ -2912,6 +2913,29 @@ namespace Assets.Scripts.Rooms
                     ? $"{banked} XP banked - spend it in the Hall of Progression"
                     : "Spend banked XP in the Hall of Progression"));
             SetShown(_detailRows, true);
+        }
+
+        /// <summary>
+        /// Where the run ended and to what, before what it costs (docs/plans/POLISH_CONTENT.md §15): a
+        /// wipe is meant to teach, and "floor 3 of 5, to Mirefather and 2 Bog Shamans" is the lesson.
+        /// Read from the run history, which has counted the attempt from its first floor.
+        /// </summary>
+        private void AddRunStoryRows()
+        {
+            var attempt = Progression.RunHistoryRecorder.Current;
+            if (DungeonManager.ActiveRun == null || attempt == null)
+            {
+                return;
+            }
+            _detailRows.Add(MakeVictoryRow("Fell on",
+                $"Floor {DungeonManager.RunLevelIndex + 1} of {DungeonManager.ActiveRun.Levels.Count}"));
+            string foes = Progression.RunHistoryOps.DescribeFoes(Progression.RunHistoryRecorder.LastFoes);
+            if (!string.IsNullOrEmpty(foes))
+            {
+                _detailRows.Add(MakeVictoryRow("Fell to", foes));
+            }
+            _detailRows.Add(MakeVictoryRow("This run",
+                $"{attempt.Kills} felled · {attempt.FightsWon} {(attempt.FightsWon == 1 ? "fight" : "fights")} won"));
         }
 
         /// <summary>The fielded heroes' unspent XP as it stands on disk - what a wipe leaves them.</summary>

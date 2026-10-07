@@ -73,6 +73,21 @@ has the corrected surface, and §5k is what shipped. Every floor number is price
 since 2026-08-29 (§5m) and is not comparable to anything written before it. §5s repriced the sphere
 grid, so every *investment point* number written before 2026-09-02 is also incomparable.
 
+### The hero workbook — read it before changing hero design *(2026-10-07)*
+
+The owner is filling in a phone-editable **Hero Workbook** (a claude.ai artifact with a database,
+**https://claude.ai/artifact/SuVhJCmnxSFpnbKQPhBXAT**, owned by the owner's *personal* claude.ai
+account, so read it while signed in to that account). It holds, per hero: the vision, three branches
+with their kits and summons, up to three Ultras, every grid ability with whether it gets an Essence
+**awakening**, and every piece of gear with a **reaction** / **grows-with-use** idea.
+
+**Until the owner says it is filled in, do not make changes that would conflict with it**: hero
+visions, sphere-grid kits, summons, Ultras, awakenings, gear reactions or item milestones. Fields the
+document marks in `drafts` (keys with `~` separators, value `true`) are Claude's suggestions the
+owner has not reviewed yet, not decisions. When it is done, it is applied in one pass (the Cleric and
+Rogue builds, awakenings, gear reactions, Ultras), and **then** the balance pass. Read it with the
+`ArtifactData` tool: collections `heroes/<HeroSO.Key>` and `gear/<ItemSO.Key>`.
+
 ### Decisions already taken — do not relitigate
 
 - **Death is mandatory to progress.** Deeper tiers should be unclearable until the player invests.
@@ -214,7 +229,7 @@ backlog.**
 | **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
 | — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) **Ultras for the other six heroes** - the gauge is universal but only the Warlock and the Cultist can spend it (§13 below) |
-| — | **The Mage — an elemental caster** | ✅ **on the roster 2026-10-07** — rescued in the new **Sealed Archive** (main line, before the March); three-branch grid (storm / frost / fire, Fire Cloak early for the Ashen Deep), new Chain Lightning. **Open:** his signature and Ultra are MultiCast (spend Focus to cast 2-4 times, owner 2026-10-07, details open); summons are drafts in the hero workbook; Chain Lightning has a borrowed icon |
+| — | **The Mage — an elemental caster** | ✅ **on the roster 2026-10-07** — rescued in the new **Sealed Archive** (main line, before the March); three-branch grid (storm / frost / fire, Fire Cloak early for the Ashen Deep), new Chain Lightning. **Open:** his signature and Ultra are MultiCast (spend Focus to cast 2-4 times, owner 2026-10-07, details open); summons are drafts in the hero workbook |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
 
@@ -229,7 +244,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| — | **Item/enemy/summon-specific rules as data** — `HealthOps` (the one health writer), one death path, `CombatEvents` per fight shared with the simulator, `TriggeredEffect` reactions on items/enemies/summons, `GameEvents` with a required `EconomySource`, item counters + milestones | ✅ **plumbing shipped 2026-10-07**; no content uses reactions or milestones yet. Open: Ultra gauge/threat still poll health, gear pricing ignores reactions |
+| — | **Item/enemy/summon-specific rules as data** — `HealthOps` (the one health writer), one death path, `CombatEvents` per fight shared with the simulator, `TriggeredEffect` reactions on items/enemies/summons, `GameEvents` with a required `EconomySource`, item counters + milestones | ✅ **plumbing shipped 2026-10-07**; no content uses reactions or milestones yet. Open: gear pricing ignores reactions (the gauge and threat read the health stream since 2026-10-07) |
 | — | **Scaling items** — items that grow with use (`ItemSO.Milestones`: "after 50 kills, +3 STR"; counters per copy in the save) | mechanism ✅ 2026-10-07; **no item uses it yet**. The hub shows grown stats since 2026-10-07 (`GearPiece`: every hub stat total and swap preview reads each copy's own counters; a grown copy gets its own Storehouse row). To do: author the first scaling items |
 | — | **Reactions** — items, enemies and summons that act on their own when something happens in a fight (`TriggeredEffect`): a sword that heals its wearer on a kill, an imp that explodes when it dies, armour that may poison whoever hits it, an orc that enrages when an ally falls | mechanism ✅ 2026-10-07; **first three enemy reactions ✅ 2026-10-07** - Cinder Imp *Cinder Burst* (explodes on death), Slag Hound *Pack Fury* (enrages when an ally falls), Gilded Hoarder *Molten Gold* (burns back whoever hits it with fire); seen firing in play (`Sandbox/EnemyReactions`). **They make Emberfall's finale harder (wipes 0.21 → 0.45), accepted by the owner - retune the floor in the balance pass** (`BALANCING.md` §5ac). To do: reactions on gear and summons; decide whether a reaction is described on the item card / Bestiary (ignored for now, owner 2026-10-07) |
 | — | **Passive sphere-grid nodes** — a node grants a `TriggeredEffect` list | decided yes (owner, 2026-10-07); **after the first real demo**. One appended `SphereNodeKind`, read by `Hero.GetTriggers` |
@@ -270,7 +285,7 @@ backlog.**
 | **6** | Stats — one open note (`BuffType` is a second per-stat list) | structural |
 | **8** | Migrate to the new Input System | *nice to have* |
 | **14** | The dungeon map, the party bar, and the pause menu | ✅ **complete** — 14b + 14c 2026-09-06, **14a (the map) 2026-09-08** |
-| **15** | Run summary and statistics | not started |
+| **15** | Run summary and statistics | ✅ **first version 2026-10-07** — run history from `GameEvents`, on the death screen, run-complete panel and story map; open: a Records screen, per-hero numbers, the analyzer reading it |
 | **16** | A compendium — explain the systems | not started |
 | **20** | **A tutorial — guide the player through the first hour** | **first loop shipped 2026-09-29** (New Game → floor 1 → build the Hall of Progression → first grid node → the road); learnings + todos in `docs/TUTORIAL.md` |
 | **17** | Content volume is the biggest single gap | not started |
@@ -284,6 +299,17 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **Run history** (2026-10-07) — `plans/POLISH_CONTENT.md` §15. `RunHistory.json`, recorded from
+  `GameEvents` by `RunHistoryRecorder` (no scene wiring); `CombatFinished.FoesStanding` names who a
+  lost fight fell to. The death screen says where and to whom, the run-complete panel totals the run,
+  the story map lists each run's attempts. `RunHistoryTests`; seen in play on the sandbox's throwaway
+  save (death screen and story map).
+- **Every enemy has traits** (2026-10-07) — the Enemies guide. Demon / Flying / Beast / Elemental /
+  Construct from the art; no gameplay change (only Disassemble reads them). No enemy is Undead yet.
+- **Ultra gauge and threat read the health stream** (2026-10-07) — `plans/EVENTS.md` §4.3. Same
+  numbers, no more re-reading bars; checked in play (a hit fills the gauge, an attack earns threat).
+- **Chain Lightning has its own icon** (2026-10-07) — PixelLab pixen, 32 px, seed 9001.
 
 - **The Mage joins the roster** (2026-10-07) — `plans/SPECIALIZATION.md`, "The Mage";
   `BALANCING.md` §5ad. A new main-line run, **The Sealed Archive** (Threshold → Archive → Drowned
