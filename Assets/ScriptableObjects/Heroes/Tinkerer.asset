@@ -17,14 +17,34 @@ MonoBehaviour:
   Blurb: Solves most problems with something she brought, and the rest with something
     she makes.
   Vision:
-    Fantasy: 
-    Role: 
-    SignatureMechanic: 
-    UltraStyle: 
-    Ultras: []
+    Fantasy: 'A hero that solves almost everything with tools and steam-punk style
+      of abilities. '
+    Role: Support and damage dealer mainly
+    SignatureMechanic: 'Can dissassemble ''mechanical'' enemies. Similar to how rikku
+      can do it in FFX. Dissassemble is achieved in the root of the sphere grid.
+      It has a % success rate, which becomes bigger the more often you have defeated
+      that specific enemy. '
+    UltraStyle: Assemble Mech. Mount a mech, so the tinkerer jumps onto its body.
+      The tinkerer basically gets a 'shield', and the mech body also has its own
+      actions. Both tinkerer and mech can act. When the tinkerer summons, the mech
+      can directly act after. the tinkerer's turn is spent. The next turn cycle,
+      tinkerer and mech should come one after the other (they share the same agility
+      for turns)
+    Ultras:
+    - Name: Warior Mech
+      Effect: A warrior-type mech with offensive abilities
+      Unlock: a
+    - Name: Oil Spewing Mech
+      Effect: A mech that focusses on debuffing the enemy. All its attacks inflict
+        oil
+      Unlock: b
+    - Name: Flamethrower Mech
+      Effect: Ranged-type mech that focusses primarlly on fire-type attacks.
+      Unlock: c
     Branches: []
-    Overlaps: 
-    OpenQuestions: 
+    Overlaps: x
+    OpenQuestions: 'Not a question, but a todo: Unit types. E.g. undead, mechnanical,
+      flying etc. These tags are needed for the tinkerer to disassemble enemies. '
   Sprite: {fileID: -5779569602528658, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
   AnimationFrames:
   - {fileID: -5779569602528658, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
