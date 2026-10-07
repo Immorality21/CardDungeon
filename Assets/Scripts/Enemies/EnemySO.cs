@@ -28,6 +28,10 @@ namespace Assets.Scripts.Enemies
         public Sprite[] AnimationFrames;
         public float AnimationFps = 8f;
 
+        [Tooltip("The hit reaction: shown once, briefly, whenever it is struck - if it flinches at all " +
+                 "(Flinches). Same size and facing as the idle frames. Empty = it only recoils.")]
+        public Sprite[] HitFrames;
+
         [Tooltip("Marks this definition as a boss: drives the boss HP bar, the no-flee rule, " +
                  "the intro banner, and the run-complete fanfare. Placement is via RunLevelEntry.BossEnemy.")]
         public bool IsBoss;
@@ -86,6 +90,10 @@ namespace Assets.Scripts.Enemies
                  "\"enrages when an ally falls\". The effects resolve with the enemy as their source, " +
                  "in play and in the balance model alike.")]
         public List<Combat.Triggers.TriggeredEffect> Triggers = new List<Combat.Triggers.TriggeredEffect>();
+
+        [Tooltip("Recoils when struck - the hit reaction. Off for anything that should read as heavy: " +
+                 "bosses, golems, statues. Presentation only.")]
+        public bool Flinches = true;
 
         /// <summary>
         /// The behaviour to fight with: the assigned asset, or the built-in preset for

@@ -16,6 +16,7 @@ MonoBehaviour:
   DisplayName: Lash
   Description: The whip finds the gap in the armour.
   Icon: {fileID: 0}
+  Delivery: 1
   TargetType: 0
   Rarity: 0
   Effects:

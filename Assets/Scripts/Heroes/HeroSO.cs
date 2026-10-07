@@ -28,6 +28,10 @@ namespace Assets.Scripts.Heroes
         public Sprite[] AnimationFrames;
         public float AnimationFps = 8f;
 
+        [Tooltip("The hit reaction: shown once, briefly, whenever the hero is struck (CombatFeedback). " +
+                 "Same size and facing as the idle frames. Empty = the hero only recoils.")]
+        public Sprite[] HitFrames;
+
         [Tooltip("Starting stats. Absent entries read as 0, so only list what this hero has.")]
         public StatBlock BaseStats = StatBlock.Defaults();
 

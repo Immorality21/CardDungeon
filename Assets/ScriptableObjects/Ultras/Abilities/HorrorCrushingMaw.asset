@@ -16,6 +16,7 @@ MonoBehaviour:
   DisplayName: Crushing Maw
   Description: Something that was a fighter's arm closes like a jaw.
   Icon: {fileID: 0}
+  Delivery: 1
   TargetType: 0
   Rarity: 2
   Effects:

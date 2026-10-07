@@ -16,6 +16,7 @@ MonoBehaviour:
   DisplayName: Lashing Tendrils
   Description: Too many limbs, all of them fast.
   Icon: {fileID: 0}
+  Delivery: 1
   TargetType: 1
   Rarity: 2
   Effects:

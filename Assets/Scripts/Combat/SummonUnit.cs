@@ -19,7 +19,7 @@ namespace Assets.Scripts.Combat
     /// no level afflictions, and fresh health every time it is called. The balance model builds its
     /// stand-in from the same function.</para>
     /// </summary>
-    public class SummonUnit : MonoBehaviour, ICombatUnit, Triggers.ITriggerSource
+    public class SummonUnit : MonoBehaviour, ICombatUnit, Triggers.ITriggerSource, IFlinches
     {
         public SummonSO Summon { get; private set; }
 
@@ -68,6 +68,12 @@ namespace Assets.Scripts.Combat
         {
             return GetEffectiveStat(AttackStat);
         }
+
+        /// <summary>Whether it recoils when struck (<see cref="SummonSO.Flinches"/>).</summary>
+        public bool Flinches => Summon == null || Summon.Flinches;
+
+        /// <summary>Its summon's drawn hit reaction (<see cref="SummonSO.HitFrames"/>), if it has one.</summary>
+        public Sprite[] HitFrames => Summon != null ? Summon.HitFrames : null;
 
         /// <summary>The reactions its summon carries (<see cref="SummonSO.Triggers"/>).</summary>
         public IEnumerable<Triggers.CarriedTrigger> GetTriggers()

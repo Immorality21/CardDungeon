@@ -21,6 +21,7 @@ MonoBehaviour:
   - {fileID: 243748549531115787, guid: d0c88a722fa0401f8fe36f5ba76fd956, type: 3}
   AnimationFps: 4
   IsBoss: 0
+  CombatScale: 1
   BaseStats:
     Values:
     - Type: 1
@@ -50,9 +51,7 @@ MonoBehaviour:
     Percent: 50
   - DamageType: 3
     Percent: -50
-  StatusImmunities:
-  - 17
-  - 16
+  StatusImmunities: 1100000010000000
   LootTable:
   - Item: {fileID: 11400000, guid: d584e10d49b161a4ebb6040a496455d6, type: 2}
     Chance: 0
@@ -62,3 +61,5 @@ MonoBehaviour:
     Chance: 0.5
     MinQuantity: 1
     MaxQuantity: 2
+  Triggers: []
+  Flinches: 0

@@ -20,6 +20,9 @@ MonoBehaviour:
   - {fileID: 4119179973865602462, guid: 777f5aff1fbc258d9fd03b107a1c718c, type: 3}
   - {fileID: 100827220157303006, guid: 777f5aff1fbc258d9fd03b107a1c718c, type: 3}
   AnimationFps: 4
+  HitFrames:
+  - {fileID: 4904327379372963058, guid: cf321fb2e1ed26c45a863364351a1319, type: 3}
+  - {fileID: -2202159102496537776, guid: cf321fb2e1ed26c45a863364351a1319, type: 3}
   IsBoss: 0
   CombatScale: 1
   BaseStats:
@@ -76,3 +79,4 @@ MonoBehaviour:
       BuffType: 0
       Duration: 3
       UnlockLevel: 0
+  Flinches: 1

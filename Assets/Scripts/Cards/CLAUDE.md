@@ -429,7 +429,7 @@ Two consequences worth holding on to:
 - **Combo system**: `MagicComboSO` (`RequiredTags` + `BonusEffects`), `ComboDetector`, `MagicTagTracker` (active tags on units with durations).
 - **Buff system**: `CombatBuffTracker` (stat buffs + status effects with turn durations); `BuffType`; handlers under `Buffs/` via `BuffHandlerRegistry`.
 - **Effects/**: `IEffectExecutor`, `EffectExecutorFactory`, `Damage/Heal/Buff/DebuffEffectExecutor`.
-- **EffectResult** / **EffectPresenter**: floating-text presentation of a cast's results.
+- **EffectResult** / **EffectPresenter**: floating-text presentation of a cast's results. **How a hit arrives is `MagicSO.Delivery`** *(2026-10-07)*: `Projectile` (default, 0 - every older asset keeps its bolt) flies the icon from the caster (Fireball, arrows, darts, shadow bolts); `Strike` draws the icon across the target where it stands, no flight (Slash, Cleave, Sunder, Backstab, Smite, Consecrate, and the melee summon/Ultra abilities). Presentation only. A projectile turns to face where it flies, which assumes the art points **right**; **`MagicSO.ProjectileArtAngle`** says where it really points (Aimed Shot's arrow 45, Volley and Cinderstorm -90) and is subtracted. **Set it whenever an ability gets a new projectile icon** - an arrow drawn diagonally flies sideways otherwise. A killing hit plays its delivery and impact too - both used to be gated on `IsAlive`, and since damage is applied before presentation, a lethal cast showed nothing and the unit simply dropped.
 
 ## UI (`Cards/UI`)
 

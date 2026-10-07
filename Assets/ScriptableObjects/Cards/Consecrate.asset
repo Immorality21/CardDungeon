@@ -11,11 +11,12 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
   m_Name: Consecrate
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Consecrate
   DisplayName: Consecrate
   Description: The ground itself turns against everything standing on it.
   Icon: {fileID: 21300000, guid: 1d267e1e1ffd4fcf864dbd188cb4d167, type: 3}
+  Delivery: 1
   TargetType: 1
   Rarity: 2
   Effects:
@@ -29,3 +30,5 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0

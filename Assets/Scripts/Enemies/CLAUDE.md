@@ -43,6 +43,8 @@ meaning across difficulty tiers - a flat number does not scale with `LevelEnemyT
 Measure a new one with the floor simulator before keeping it - the imp's burst tipped Emberfall from
 0.21 to 0.41 wipes on its own (`docs/BALANCING.md` §5ac). `Sandbox/EnemyReactions.asset` shows all three.
 
+**Does it flinch?** `EnemySO.Flinches` (default on) makes it recoil when struck - the Final Fantasy hit reaction (Combat guide). Turn it off for anything that should read as heavy: today the four bosses and the Stone Sentinel stand their ground. A flinching enemy also needs **`HitFrames`** — its drawn wince, a 2-frame `<name>-hit.png` next to its idle strip (`docs/PIXEL_ART.md` §5b); every flinching enemy has one today.
+
 ## Per-level tuning (`LevelEnemyTuning`)
 
 `RunLevelEntry.EnemyTuning` is where a fight's real numbers come from. Resolution order:

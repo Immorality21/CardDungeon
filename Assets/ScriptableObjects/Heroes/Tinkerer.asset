@@ -11,17 +11,29 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
   m_Name: Tinkerer
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Tinkerer
   Label: Tinkerer
-  Blurb: Solves most problems with something she brought, and the rest with something she makes.
-  RecruitCost: 0
+  Blurb: Solves most problems with something she brought, and the rest with something
+    she makes.
+  Vision:
+    Fantasy: 
+    Role: 
+    SignatureMechanic: 
+    UltraStyle: 
+    Ultras: []
+    Branches: []
+    Overlaps: 
+    OpenQuestions: 
   Sprite: {fileID: -5779569602528658, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
   AnimationFrames:
   - {fileID: -5779569602528658, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
   - {fileID: -1420325704527083, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
   - {fileID: -4346296731830717, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
   AnimationFps: 4
+  HitFrames:
+  - {fileID: 8442706028702698766, guid: 4c2d0d54524479b4ba623747ea6c2157, type: 3}
+  - {fileID: 5426540061373631462, guid: 4c2d0d54524479b4ba623747ea6c2157, type: 3}
   BaseStats:
     Values:
     - Type: 1

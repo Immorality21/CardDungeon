@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Heroes
 {
-    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource
+    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches
     {
         public HeroSO HeroSO;
         public Stats Stats;
@@ -171,6 +171,19 @@ namespace Assets.Scripts.Heroes
             float percent = pct[stat] + (stat == StatType.MaxHealth ? FormMaxHealthPercent : 0);
             return Mathf.RoundToInt(value * (1f + percent / 100f));
         }
+
+        /// <summary>Every hero recoils when struck.</summary>
+        public bool Flinches => true;
+
+        /// <summary>
+        /// True while an Ultra's form is on (set by <c>CombatManager</c>): the hero wears the form's art,
+        /// so their own hit frames would flash the wrong figure. A primitive, like the form's other
+        /// fields here, because Heroes does not depend on Cards.
+        /// </summary>
+        public bool InForm { get; set; }
+
+        /// <summary>The hero's drawn hit reaction - none while a form is on.</summary>
+        public Sprite[] HitFrames => InForm || HeroSO == null ? null : HeroSO.HitFrames;
 
         /// <summary>The reactions this hero's equipped gear carries (<see cref="ItemSO.Triggers"/>).</summary>
         public IEnumerable<CarriedTrigger> GetTriggers()

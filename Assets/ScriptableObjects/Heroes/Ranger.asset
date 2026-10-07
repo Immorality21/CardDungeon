@@ -21,6 +21,8 @@ MonoBehaviour:
     Role: Tempo and precision. Attack and abilities scale off Agility.
     SignatureMechanic: 'Turn delay: the Ranger''s control pushes enemies back on
       the turn order (Exatrix''s Rend, Snare''s Agility cut).'
+    UltraStyle: 
+    Ultras: []
     Branches:
     - GridBranch: a
       Becomes: 'Precision and attrition: poison and volleys of arrows.'
@@ -41,6 +43,9 @@ MonoBehaviour:
   - {fileID: -2127025001236718, guid: 0c844200eddb44309e8049ef00b58d16, type: 3}
   - {fileID: -7201053973933084, guid: 0c844200eddb44309e8049ef00b58d16, type: 3}
   AnimationFps: 4
+  HitFrames:
+  - {fileID: -1562507630358291934, guid: 34fcd9f583c1a5844ba2bf8c9f860e42, type: 3}
+  - {fileID: 3736310046898211171, guid: 34fcd9f583c1a5844ba2bf8c9f860e42, type: 3}
   BaseStats:
     Values:
     - Type: 1

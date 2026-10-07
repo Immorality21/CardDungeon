@@ -16,11 +16,23 @@ namespace Assets.Scripts.Cards
             foreach (var entry in result.Entries)
             {
                 // Offensive magic: fly a bolt from the caster to the target so a cast reads as a
-                // ranged strike (vs. the melee lunge), landing just before the impact.
-                if (caster != null && entry.Impact > 0 && entry.Target != null && entry.Target.IsAlive
+                // ranged strike (vs. the melee lunge), landing just before the impact. Not gated on the
+                // target being alive: the damage is already applied when this plays, so a killing cast
+                // used to show no bolt and the unit simply dropped. Deaths resolve after this
+                // (CombatManager.ResolveDeaths), so the target is still on the stage.
+                if (caster != null && entry.Impact > 0 && entry.Target != null
                     && caster.Transform != null && entry.Target.Transform != null)
                 {
-                    yield return FlyProjectile(caster.Transform.position, entry.Target.Transform.position, entry.Color, magic != null ? magic.Icon : null);
+                    if (magic != null && magic.Delivery == MagicDelivery.Strike)
+                    {
+                        // A blade does not cross the stage: the cut lands where the target stands.
+                        yield return StrikeOnTarget(entry.Target, magic.Icon);
+                    }
+                    else
+                    {
+                        yield return FlyProjectile(caster.Transform.position, entry.Target.Transform.position, entry.Color, magic != null ? magic.Icon : null,
+                            magic != null ? magic.ProjectileArtAngle : 0f);
+                    }
                 }
 
                 if (entry.Target != null && entry.Target.Transform != null && FloatingTextHandler.HasInstance)
@@ -65,7 +77,9 @@ namespace Assets.Scripts.Cards
 
                 // Impact juice for damaging entries: flash the target, shake the camera,
                 // and a brief hit-stop so magic hits land with weight.
-                if (entry.Impact > 0 && entry.Target != null && entry.Target.IsAlive)
+                // The killing hit lands too (flash, shake); Flinch skips a dead unit by itself, since
+                // the death effect is its reaction.
+                if (entry.Impact > 0 && entry.Target != null && entry.Target.Transform != null)
                 {
                     CombatFeedback.Instance.PlayImpact(entry.Target, entry.Impact);
                     yield return new WaitForSecondsRealtime(0.04f);
@@ -144,13 +158,61 @@ namespace Assets.Scripts.Cards
             }
         }
 
+        // The strike: how long it shows, how big it is against the target, and how far it cuts.
+        private const float StrikeDuration = 0.24f;
+        private const float StrikeHeightShare = 0.9f;
+        private const float StrikeTravel = 0.35f;
+
+        /// <summary>
+        /// The ability's art (<see cref="MagicSO.Delivery"/> Strike) drawn across the target: it pops
+        /// in at full size, sweeps a short way down and across like a cut, and fades - over before the
+        /// impact flash, so the blow and the flinch read as one. Untinted, so drawn art keeps its colours.
+        /// </summary>
+        private IEnumerator StrikeOnTarget(ICombatUnit target, Sprite sprite)
+        {
+            var go = new GameObject("MagicStrike");
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite != null ? sprite : CombatIcons.Get("burst");
+            sr.sortingOrder = 850;
+
+            var targetRenderer = target.Transform.GetComponent<SpriteRenderer>();
+            float targetHeight = targetRenderer != null ? targetRenderer.bounds.size.y : 1f;
+            float spriteHeight = sr.sprite != null ? Mathf.Max(0.01f, sr.sprite.bounds.size.y) : 1f;
+            float scale = targetHeight * StrikeHeightShare / spriteHeight;
+
+            Vector3 centre = targetRenderer != null ? targetRenderer.bounds.center : target.Transform.position;
+            // Top-left to bottom-right, the way a right-handed swing reads from the party's side.
+            Vector3 cut = new Vector3(1f, -1f, 0f).normalized * StrikeTravel * targetHeight;
+            Vector3 from = centre - cut * 0.5f;
+            Vector3 to = centre + cut * 0.5f;
+
+            float elapsed = 0f;
+            while (elapsed < StrikeDuration && go != null)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / StrikeDuration);
+                go.transform.position = Vector3.Lerp(from, to, 1f - (1f - t) * (1f - t));
+                go.transform.localScale = Vector3.one * scale * Mathf.Lerp(0.85f, 1.1f, t);
+                var c = Color.white;
+                c.a = t < 0.6f ? 1f : 1f - (t - 0.6f) / 0.4f;
+                sr.color = c;
+                yield return null;
+            }
+
+            if (go != null)
+            {
+                UnityEngine.Object.Destroy(go);
+            }
+        }
+
         /// <summary>A short glowing bolt that streaks from <paramref name="from"/> to
         /// <paramref name="to"/>, then is destroyed. Tinted to match the effect's colour.</summary>
         private IEnumerator FlyProjectile(
             Vector3 from,
             Vector3 to,
             Color color,
-            Sprite projectileSprite)
+            Sprite projectileSprite,
+            float artAngle = 0f)
         {
             var go = new GameObject("MagicBolt");
             var sr = go.AddComponent<SpriteRenderer>();
@@ -209,8 +271,10 @@ namespace Assets.Scripts.Cards
                         Mathf.Atan2(direction.y, direction.x)
                         * Mathf.Rad2Deg;
 
+                    // Less the way the art itself points (MagicSO.ProjectileArtAngle), so an arrow
+                    // drawn at 45 degrees still flies head first.
                     go.transform.rotation =
-                        Quaternion.Euler(0f, 0f, angle);
+                        Quaternion.Euler(0f, 0f, angle - artAngle);
                 }
 
 

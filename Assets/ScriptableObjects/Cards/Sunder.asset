@@ -11,11 +11,12 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
   m_Name: Sunder
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Sunder
   DisplayName: Sunder
   Description: A brutal overhead blow that splits armour as readily as flesh.
   Icon: {fileID: 21300000, guid: 5a450d9560da48c4910a7ebb3873ab46, type: 3}
+  Delivery: 1
   TargetType: 0
   Rarity: 2
   Effects:
@@ -37,3 +38,5 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 05000000
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0

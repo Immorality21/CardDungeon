@@ -11,11 +11,13 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
   m_Name: AimedShot
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: AimedShot
   DisplayName: Aimed Shot
   Description: One shot, taken slowly, that goes exactly where it was sent.
   Icon: {fileID: 21300000, guid: 7fce12d2d12a4cc5bfa70f3b8a500ddf, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 45
   TargetType: 0
   Rarity: 1
   Effects:
@@ -29,3 +31,5 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 06000000
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0

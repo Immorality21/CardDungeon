@@ -16,6 +16,7 @@ MonoBehaviour:
   DisplayName: Engulf
   Description: A wall of flesh that will not let anything past it.
   Icon: {fileID: 0}
+  Delivery: 1
   TargetType: 0
   Rarity: 2
   Effects:

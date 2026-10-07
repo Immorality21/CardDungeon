@@ -49,6 +49,7 @@ MonoBehaviour:
     Percent: 50
   - DamageType: 2
     Percent: -50
+  StatusImmunities: 
   LootTable:
   - Item: {fileID: 11400000, guid: 098bb76c9957858418ab9ec1d033fcd7, type: 2}
     Chance: 0
@@ -62,3 +63,5 @@ MonoBehaviour:
     Chance: 1
     MinQuantity: 1
     MaxQuantity: 2
+  Triggers: []
+  Flinches: 0

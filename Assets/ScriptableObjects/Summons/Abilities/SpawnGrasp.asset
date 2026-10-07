@@ -16,6 +16,7 @@ MonoBehaviour:
   DisplayName: Grasp
   Description: A tendril finds an ankle.
   Icon: {fileID: 0}
+  Delivery: 1
   TargetType: 0
   Rarity: 0
   Effects:

@@ -51,18 +51,21 @@ MonoBehaviour:
         multiple demons)
     Overlaps: Tinkerer is the other Intelligence caster - to settle once the Tinkerer
       is redefined.
-    OpenQuestions: 'Felguards and bigger troops for the Demon Army - deferred until
+    OpenQuestions: "Felguards and bigger troops for the Demon Army - deferred until
       the grid has room, and material-gated when they come (no early spike). Rain
       of Fire and Soul Harvest are first-draft Demonology Ultras (Claude, 2026-10-04)
       - keep, change or replace? Balance: every Warlock number is a first draft (see
-      docs/BALANCING.md §5aa). The sacrifice-a-party-member Ultra moved to
-      the Cultist (2026-10-04).'
+      docs/BALANCING.md \xA75aa). The sacrifice-a-party-member Ultra moved to the
+      Cultist (2026-10-04)."
   Sprite: {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
   AnimationFrames:
   - {fileID: -1295332705813320, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
   - {fileID: -6369361678509686, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
   - {fileID: -5271396423488739, guid: 385e32a42ff240a4ac5e53b41c5ec3df, type: 3}
   AnimationFps: 4
+  HitFrames:
+  - {fileID: -4456273463398992367, guid: 71d3bc77f18e9a143becabdc053aa410, type: 3}
+  - {fileID: -2893251596553804902, guid: 71d3bc77f18e9a143becabdc053aa410, type: 3}
   BaseStats:
     Values:
     - Type: 1

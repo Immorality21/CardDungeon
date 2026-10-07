@@ -93,6 +93,11 @@ namespace Assets.Scripts.Combat
             _barRoot.SetParent(transform, false);
             _barTopY = topY;
             _barRoot.localPosition = new Vector3(0f, topY, -1f);
+            // Take a big enemy's CombatScale back off: the root is a child of the unit, so a boss drawn
+            // 1.8x was also drawing its status icons 1.8x (playtest 2026-10-07). Icons are UI and keep
+            // one size whatever wears them.
+            float combatScale = _enemy != null && _enemy.Definition != null ? _enemy.Definition.CombatScale : 1f;
+            _barRoot.localScale = Vector3.one / Mathf.Max(0.1f, combatScale);
 
             // Boss bars get a crimson backdrop so they read as the climax fight.
             // A light frame behind the dark track: the track alone is dark-on-dark against the stage,
@@ -144,6 +149,7 @@ namespace Assets.Scripts.Combat
         /// </summary>
         private void KeepClearOfHud()
         {
+            _barTopY = HeadTopLocal();
             float offset = 0f;
             var hud = CombatHudLayout.TurnOrderViewport;
             var cam = Camera.main;
@@ -151,8 +157,9 @@ namespace Assets.Scripts.Combat
             if (hud.width > 0f && cam != null && cam.orthographic && scaleX > 0f)
             {
                 Vector3 centre = transform.TransformPoint(new Vector3(0f, _barTopY, -1f));
-                float halfWorld = _barWidth * 0.5f * scaleX;
-                float halfHeightWorld = _barHeight * 0.5f * Mathf.Abs(transform.lossyScale.y);
+                // The root's own scale, not the unit's: a big enemy's root is scaled back down.
+                float halfWorld = _barWidth * 0.5f * Mathf.Abs(_barRoot.lossyScale.x);
+                float halfHeightWorld = _barHeight * 0.5f * Mathf.Abs(_barRoot.lossyScale.y);
                 Vector3 right = cam.WorldToViewportPoint(centre + new Vector3(halfWorld, 0f, 0f));
                 Vector3 top = cam.WorldToViewportPoint(centre + new Vector3(0f, halfHeightWorld, 0f));
                 Vector3 bottom = cam.WorldToViewportPoint(centre - new Vector3(0f, halfHeightWorld, 0f));
@@ -171,6 +178,27 @@ namespace Assets.Scripts.Combat
             {
                 _barRoot.localPosition = wanted;
             }
+        }
+
+        // Space between the top of the sprite and the icon row, in world units.
+        private const float HeadClearance = 0.18f;
+
+        /// <summary>
+        /// Just over the unit's head, in the unit's own local space. The sprite's local bounds plus a
+        /// world-sized gap divided back into local units: the old version added the sprite's
+        /// <b>world</b> height as a <b>local</b> offset, so a scaled-up unit (a boss at 1.8x) had its
+        /// icons pushed up by its own scale a second time, far above its head. Re-read every frame,
+        /// because the stage rescales a unit after the bar is built.
+        /// </summary>
+        private float HeadTopLocal()
+        {
+            var sr = GetComponent<SpriteRenderer>();
+            float scaleY = Mathf.Abs(transform.lossyScale.y);
+            if (sr == null || sr.sprite == null || scaleY < 0.0001f)
+            {
+                return _barTopY;
+            }
+            return sr.sprite.bounds.max.y + HeadClearance / scaleY;
         }
 
         public Vector3 EffectPopupPosition

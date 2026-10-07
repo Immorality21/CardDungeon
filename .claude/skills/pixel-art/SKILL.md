@@ -25,8 +25,14 @@ import settings and verification recipe, and it overrides the defaults below. Th
 - **Heroes and normal enemies are 32×32 @ 32 PPU; bosses may be 64×64 @ 38 PPU** with
   `EnemySO.CombatScale` 1.8. Match the sprite being replaced.
 - **Author enemies facing right (or dead front)** — the battle stage mirrors them to face the party.
-- Idle animations are **3-frame horizontal strips** in `Assets/Sprites/Animation/`, wired through
-  `AnimationFrames` + `AnimationFps: 4`. There is no procedural idle to fall back on.
+- Idle animations are **3-frame horizontal strips** (`<name>-idle.png`) in the unit's folder —
+  `Assets/Sprites/Heroes/`, `Enemies/` or `Summons/` — wired through `AnimationFrames` +
+  `AnimationFps: 4`. There is no procedural idle to fall back on.
+- **Generating or replacing a hero or an enemy? Also make its hit frames** — the wince it shows
+  when struck (`docs/PIXEL_ART.md` §5b): a 2-frame `<name>-hit.png` strip, assigned to
+  `HeroSO.HitFrames` / `EnemySO.HitFrames`. Ask for it in the same pass. Skip it only for an enemy
+  with `Flinches` off (bosses, golems). **Summons need it only if they are a party replacement**
+  (`SummonKind.ReplaceParty`, `SummonSO.HitFrames`) — those take hits alone and flinch like a hero.
 - **Verify in the sandbox** (`docs/SANDBOX.md`, `SandboxLauncher.Launch`), not by spawning into a
   random room — that writes the player's bestiary.
 

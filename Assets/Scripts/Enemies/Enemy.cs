@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Enemies
 {
-    public class Enemy : MonoBehaviour, ICombatUnit, IStatusImmune, Combat.Triggers.ITriggerSource
+    public class Enemy : MonoBehaviour, ICombatUnit, IStatusImmune, Combat.Triggers.ITriggerSource, IFlinches
     {
         public bool IsImmuneTo(BuffType type)
         {
@@ -67,6 +67,12 @@ namespace Assets.Scripts.Enemies
 
         /// <summary>The definition this enemy was spawned from (set by <see cref="Initialize"/>).</summary>
         public EnemySO Definition { get; private set; }
+
+        /// <summary>Whether it recoils when struck (<see cref="EnemySO.Flinches"/>).</summary>
+        public bool Flinches => Definition == null || Definition.Flinches;
+
+        /// <summary>Its drawn hit reaction (<see cref="EnemySO.HitFrames"/>), if it has one.</summary>
+        public Sprite[] HitFrames => Definition != null ? Definition.HitFrames : null;
 
         /// <summary>The reactions its definition carries (<see cref="EnemySO.Triggers"/>).</summary>
         public IEnumerable<Combat.Triggers.CarriedTrigger> GetTriggers()

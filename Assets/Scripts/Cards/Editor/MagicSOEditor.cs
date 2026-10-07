@@ -150,6 +150,12 @@ public class MagicSOEditor : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("DisplayName"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Description"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Icon"));
+        var deliveryProp = serializedObject.FindProperty("Delivery");
+        EditorGUILayout.PropertyField(deliveryProp);
+        if (deliveryProp.enumValueIndex == (int)MagicDelivery.Projectile)
+        {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("ProjectileArtAngle"));
+        }
         EditorGUILayout.PropertyField(serializedObject.FindProperty("TargetType"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Rarity"));
 

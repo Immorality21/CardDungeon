@@ -11,17 +11,28 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bfcb709b487afd749b8fbd2c4c50e261, type: 3}
   m_Name: Rogue
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Rogue
   Label: Rogue
   Blurb: Ends fights early, or is somewhere else by the time they get going.
-  RecruitCost: 0
+  Vision:
+    Fantasy: 
+    Role: 
+    SignatureMechanic: 
+    UltraStyle: 
+    Ultras: []
+    Branches: []
+    Overlaps: 
+    OpenQuestions: 
   Sprite: {fileID: -5190396849498360, guid: 33fd245b235b4692a03ee55b26224b3f, type: 3}
   AnimationFrames:
   - {fileID: -5190396849498360, guid: 33fd245b235b4692a03ee55b26224b3f, type: 3}
   - {fileID: -7883634123198006, guid: 33fd245b235b4692a03ee55b26224b3f, type: 3}
   - {fileID: -3757123978800419, guid: 33fd245b235b4692a03ee55b26224b3f, type: 3}
   AnimationFps: 4
+  HitFrames:
+  - {fileID: -1395831477143777677, guid: 9b546430a64dd6444b0f5f688ee0f794, type: 3}
+  - {fileID: -2926177904296494459, guid: 9b546430a64dd6444b0f5f688ee0f794, type: 3}
   BaseStats:
     Values:
     - Type: 1

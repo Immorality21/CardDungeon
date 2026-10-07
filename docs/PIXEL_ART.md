@@ -6,7 +6,9 @@ or replacing any sprite, and add to it when a pass teaches something new.
 
 **Short version:** PixelLab MCP for anything that matters, **match the size of the sprite you are
 replacing**, animate with `animate_image`, pick three frames, overwrite the PNG in place, then
-**watch it animate in a real fight** through the Unity MCP. The old hand-drawn `pixel-art` skill
+**watch it animate in a real fight** through the Unity MCP. **A new or replaced hero or enemy also
+needs its hit frames (the wince, §5b)**: ask for them in the same pass, not as a follow-up. A summon
+needs them only if it is a **party replacement** (`SummonKind.ReplaceParty`). The old hand-drawn `pixel-art` skill
 path is a fallback for when PixelLab is out of generations.
 
 ---
@@ -170,12 +172,53 @@ for k, f in enumerate([f0, dip, other_frame]):
     strip.paste(f, (k * f0.width, 0))
 ```
 
+## 5b. Hit frames — the wince
+
+Struck units **flinch** (`CombatFeedback.Flinch`): a knock-back away from the other side, plus,
+when the definition has them, a one-shot of **drawn hit frames** over the idle loop
+(`SpriteAnimator.PlayOnce`, all frames together over 0.4 s - the first frame is the impact, the second the held wince). The code recoil alone was lost under the
+camera shake (2026-10-07), which is why the drawn frames exist. Read through `IFlinches.HitFrames`.
+
+**Who needs them — check this whenever you generate or replace a unit:**
+
+| unit | hit frames? | field |
+|---|---|---|
+| **Hero** | **always** — every hero flinches | `HeroSO.HitFrames` |
+| **Enemy that flinches** | **always** | `EnemySO.HitFrames` |
+| Enemy with `Flinches` off (bosses, golems, statues — anything meant to read as heavy) | no | — |
+| **Party-replacement summon** (`SummonKind.ReplaceParty`) | **yes** — it stands alone on the field, takes the hits, and flinches like a hero (unless `Flinches` is off, e.g. the Cairn Golem) | `SummonSO.HitFrames` |
+| Any other summon (special attack, beside the party) | no (owner's rule, 2026-10-07) | — |
+
+An Ultra form shows no hit frames (`Hero.InForm`): the hero wears the form's art, so their own wince
+would flash the wrong figure. A form sprite therefore needs none.
+
+**How they were made (2026-10-07, 17 units):**
+
+1. `animate_image(first_frame_url=<the idle strip's frame 0>, action="gets hit and recoils, flinches
+   backwards in pain, wince, then recovers", frame_count=4)` — one generation per unit, run in waves
+   of 8.
+2. Download all 5 frames and lay them out as a contact sheet (4x, on the combat purple). **Frames 2
+   and 3 were the recoil for every one of the 17**, and none of them changed identity — at 32 px the
+   wince reads as a lean back and a squint, which is what you want.
+3. Same rule as §5: reject a frame that turns the face or drops a prop the unit is known by.
+
+**Files:** a 2-frame horizontal strip next to the idle, `<name>-hit.png` (64×32 for a 32 px unit),
+sliced `<name>_hit_0` / `_1`, same import settings as the idle strip (§6). It must match the idle's
+**size and facing** — enemies are drawn facing right and flipped in combat, and the hit frames get
+the same flip. A unit with no hit frames still flinches; it just only recoils.
+
 ## 6. Importing into Unity
 
 - **Replacing a sprite: overwrite the PNG in place.** Same size, same slicing → the `.meta` (GUID,
   sprite `internalID`s) is untouched and every `EnemySO`/`HeroSO` reference keeps working. The
   Paladin swap was a single file copy.
-- **Strips** live in `Assets/Sprites/Animation/<name>-idle.png`: horizontal, 3 frames, full-frame
+- **Where things live** (reorganised 2026-10-07; there is no `Animation/` folder any more):
+  `Assets/Sprites/Heroes/` (`<hero>-idle.png`, `<hero>-hit.png`, an Ultra form as
+  `<hero>-<form>-idle.png`), `Assets/Sprites/Enemies/` (`<enemy>-idle.png`, `<enemy>-hit.png`, the
+  static `<Enemy>.png`), `Assets/Sprites/Summons/`, `Items/`, `Abilities/`, `Environment/`, `Hub/`,
+  `UI/`, `Backgrounds/`. `_Unused/` holds art nothing references — some legacy, some not wired up yet.
+  Move sprites with `AssetDatabase.MoveAsset`, never on disk, so the GUIDs and references survive.
+- **Strips** are `<name>-idle.png` in their unit's folder: horizontal, 3 frames, full-frame
   slices (`x = k × width`, `y = 0`), `spriteMode: 2`, `filterMode: 0` (point),
   `textureCompression: 0` on every platform, pivot centre. Copy an existing strip's meta as the
   template; give each slice a unique `internalID` and list it in both `internalIDToNameTable` and

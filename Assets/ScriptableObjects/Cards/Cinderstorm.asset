@@ -16,6 +16,8 @@ MonoBehaviour:
   DisplayName: Cinderstorm
   Description: A gale of burning ash that scours everything in front of it.
   Icon: {fileID: 21300000, guid: 64265e59b4da49ae842d6c083b334cce, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: -90
   TargetType: 1
   Rarity: 3
   Effects:
@@ -29,3 +31,5 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 00000000
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0

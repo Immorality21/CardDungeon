@@ -16,6 +16,7 @@ MonoBehaviour:
   DisplayName: Slash
   Description: A swift blade strike against a single enemy.
   Icon: {fileID: -7438242413743671978, guid: f9b9570a47bee3541b17abf0c1f0c6c7, type: 3}
+  Delivery: 1
   TargetType: 0
   Rarity: 0
   Effects:
@@ -37,3 +38,5 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 06000000
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0

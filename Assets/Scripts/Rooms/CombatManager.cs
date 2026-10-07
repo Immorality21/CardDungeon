@@ -1260,6 +1260,7 @@ namespace Assets.Scripts.Rooms
             int oldMax = hero.GetEffectiveMaxHealth();
             hero.FormMaxHealthPercent = ultra.MaxHealthPercent;
             hero.FormAttackDamageType = ultra.AttackDamageType;
+            hero.InForm = true;
             HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth()),
                 new HealthSource(hero, HealthCause.Form), Events);
             _gaugeHealth[hero] = hero.Stats.Health;   // the form's new bar is not damage taken
@@ -1401,6 +1402,7 @@ namespace Assets.Scripts.Rooms
             int oldMax = hero.GetEffectiveMaxHealth();
             hero.FormMaxHealthPercent = 0;
             hero.FormAttackDamageType = DamageType.Normal;
+            hero.InForm = false;
             if (hero.IsAlive)
             {
                 HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth()),

@@ -384,7 +384,7 @@ land one effect or replace the *whole* party. The owner wants it built first, an
 screen-fit check: combat is laid out for four heroes, so where does a fifth unit go at 1280x720?
 
 **Exists as a bare minimum** *(2026-10-04)*: `Heroes/Cultist.asset` — key, blurb, placeholder stats,
-the vision above, and a PixelLab sprite (`Sprites/Animation/cultist-idle.png`, bone mask under a
+the vision above, and a PixelLab sprite (`Sprites/Heroes/cultist-idle.png`, bone mask under a
 horned red hood, green demon flame). **No grid, not on `PartyRoster`, no unlock source** — it is in
 the game's data and the Hero Vision window only. The old Cultist's art moved with him as
 `warlock-idle.png` (its slices still carry `cultist-idle_*` names).

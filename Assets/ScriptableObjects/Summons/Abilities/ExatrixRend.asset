@@ -17,6 +17,7 @@ MonoBehaviour:
   Description: Shadow claws that tear through the moment. Whatever they catch is
     set back on its way to its next move.
   Icon: {fileID: 21300000, guid: ed6b7473d63649cba459421252fa5f44, type: 3}
+  Delivery: 1
   TargetType: 0
   Rarity: 0
   Effects:

@@ -22,6 +22,8 @@ MonoBehaviour:
       a few offensive spells off int AND spirit. '
     SignatureMechanic: "Is the main source for reviving, although most likely not
       the only one. However, should be the only one with access to mass-revive. \t"
+    UltraStyle: 
+    Ultras: []
     Branches:
     - GridBranch: a
       Becomes: "A pure healer with ensuring others stay topped off. \t"
@@ -45,6 +47,9 @@ MonoBehaviour:
   - {fileID: -3464631348977564, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}
   - {fileID: -7848032403509558, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}
   AnimationFps: 4
+  HitFrames:
+  - {fileID: 6465429950036576812, guid: 756883ee68531764ba957cfec8570ac8, type: 3}
+  - {fileID: -8350911562712003675, guid: 756883ee68531764ba957cfec8570ac8, type: 3}
   BaseStats:
     Values:
     - Type: 1

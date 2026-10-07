@@ -11,11 +11,12 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
   m_Name: Smite
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   Key: Smite
   DisplayName: Smite
   Description: A blow struck with more conviction than muscle.
   Icon: {fileID: 21300000, guid: bdcb49df4fab46dcbd7da883b5760765, type: 3}
+  Delivery: 1
   TargetType: 0
   Rarity: 1
   Effects:
@@ -29,3 +30,5 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 05000000
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0

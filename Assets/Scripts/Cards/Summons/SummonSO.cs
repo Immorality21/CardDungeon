@@ -108,6 +108,15 @@ namespace Assets.Scripts.Cards
                  "Only a summon that stays - beside the party or in its place - is around to react.")]
         public List<Combat.Triggers.TriggeredEffect> Triggers = new List<Combat.Triggers.TriggeredEffect>();
 
+        [Tooltip("Recoils when struck, as the heroes do. Off for anything that should read as heavy " +
+                 "(the Cairn Golem, the Blood Idol). Presentation only.")]
+        public bool Flinches = true;
+
+        [Tooltip("The hit reaction: shown once, briefly, whenever it is struck (if it flinches). Only a " +
+                 "summon that stands on the field and gets hit needs one - a party replacement. Same size " +
+                 "and facing as its idle frames. Empty = it only recoils.")]
+        public Sprite[] HitFrames;
+
         [Tooltip("Charges per run before any upgrade node. Refilled with ability charges: at run " +
                  "start and when resting in a refuge.")]
         [Min(1)] public int BaseCharges = 1;

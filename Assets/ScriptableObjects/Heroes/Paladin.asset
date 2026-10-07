@@ -54,6 +54,9 @@ MonoBehaviour:
   - {fileID: -6482093923986577, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}
   - {fileID: -4621225683566614, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}
   AnimationFps: 4
+  HitFrames:
+  - {fileID: 8984468634625761959, guid: d06a5d42ebf56034b9f69d068adb9dfa, type: 3}
+  - {fileID: 3333253707095661055, guid: d06a5d42ebf56034b9f69d068adb9dfa, type: 3}
   BaseStats:
     Values:
     - Type: 1

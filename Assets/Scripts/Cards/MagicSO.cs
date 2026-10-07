@@ -14,6 +14,18 @@ namespace Assets.Scripts.Cards
         [TextArea(2, 4)]
         public string Description;
         public Sprite Icon;
+
+        [Tooltip("How a damaging hit reaches its target. Projectile: the icon flies from the caster " +
+                 "(Fireball, an arrow). Strike: the icon lands on the target where it stands, no flight " +
+                 "(Slash, Cleave, a bolt from the sky). Presentation only.")]
+        public MagicDelivery Delivery;
+
+        [Tooltip("Which way the icon's art points, in degrees (0 = right, 90 = up, -90 = down, 45 = up " +
+                 "and to the right). A projectile turns to face where it is flying, which is only " +
+                 "right if the art itself points right - the Aimed Shot arrow is drawn at 45.")]
+        [Range(-180f, 180f)]
+        public float ProjectileArtAngle;
+
         public MagicTargetType TargetType;
         public MagicRarity Rarity;
         public List<SpellEffect> Effects = new List<SpellEffect>();

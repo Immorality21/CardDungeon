@@ -20,7 +20,11 @@ MonoBehaviour:
   - {fileID: 2551795952124036636, guid: c295439c960a4015a9ca929c9d75d5f2, type: 3}
   - {fileID: 3614987737062014534, guid: c295439c960a4015a9ca929c9d75d5f2, type: 3}
   AnimationFps: 4
+  HitFrames:
+  - {fileID: -7511266888530475035, guid: 10039bef82056424ea9e0a33a3f2ef8f, type: 3}
+  - {fileID: 1283791095087179113, guid: 10039bef82056424ea9e0a33a3f2ef8f, type: 3}
   IsBoss: 0
+  CombatScale: 1
   BaseStats:
     Values:
     - Type: 1
@@ -42,8 +46,11 @@ MonoBehaviour:
     Percent: -50
   - DamageType: 3
     Percent: 25
+  StatusImmunities: 
   LootTable:
   - Item: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
     Chance: 0.3
     MinQuantity: 1
     MaxQuantity: 1
+  Triggers: []
+  Flinches: 1
