@@ -149,6 +149,15 @@ namespace Assets.Scripts.Cards
                  "delay) is the first. Empty keeps the plain Attack.")]
         public MagicSO AttackAbility;
 
+        [Tooltip("Its abilities lay their tags and can set off combos, like a hero's cast (a mech's oil " +
+                 "and fire make Ignite). Off for every other summon: their abilities resolve tagless.")]
+        public bool UsesTags;
+
+        [Tooltip("A mech (UltraKind.Mount): the idle frames once its rider has climbed in - the mech " +
+                 "with the rider drawn aboard. The rider is hidden while these play. Empty keeps the " +
+                 "mech's own frames and leaves the rider hidden all the same.")]
+        public Sprite[] MountedFrames;
+
         [Tooltip("JoinParty / ReplaceParty, optional: its Attack command cycles through Actions, one " +
                  "per turn (turn 1 = Actions[0]), and the row is labelled with the ability's name. For a " +
                  "summon that never attacks - the Blood Idol's rotating party rites.")]

@@ -31,9 +31,19 @@ namespace Assets.Scripts.Cards.Effects
             EffectResult result,
             bool flatPower = false)
         {
-            foreach (var target in targets)
+            foreach (var aimed in targets)
             {
-                if (!target.IsAlive)
+                if (!aimed.IsAlive)
+                {
+                    continue;
+                }
+
+                // A guarded unit's blows land on its guard (a mech its rider, GuardTable). When the
+                // guard is a target of this same effect it is struck on its own, so a blast that
+                // reaches both does not hit the mech twice.
+                var guards = _events?.Invoke()?.Guards;
+                var target = guards != null ? guards.Redirect(aimed) : aimed;
+                if (!ReferenceEquals(target, aimed) && targets.Contains(target))
                 {
                     continue;
                 }

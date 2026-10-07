@@ -80,7 +80,7 @@ are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-gene
 | Cleric | Spirit | Renew→Benediction · Smite→Ward |
 | Ranger | Agility | PoisonDart→Volley · Snare→Hush |
 | Warlock | Intelligence | BloodPact→LifeTap (+Cinderstorm) · DrainLife→SiphonSoul (+OilSlick) · demons — three, re-authored 2026-10-04. **One summon, the Demon Army, on the trunk; every branch improves it** (C: more troops, Succubi). **Demon Form** (Ultra) on the trunk behind 3 Void Shards |
-| Tinkerer | Intelligence | the three cloaks as a field kit · IceShard→WaterSplash→Fireball |
+| Tinkerer | Intelligence | **Disassemble** (root) + Patch Kit · RivetGun→SteamBurst → **Warrior Mech** · OilFlask→GearJam → **Oil Spewing Mech** · FlareCannon→IncendiaryBomb → **Flamethrower Mech** — rebuilt 2026-10-07; the mechs are Mount Ultras (Magic guide). Her old elemental grid is now the stub `MageGrid` (the Mage is off the roster) |
 | Rogue | Agility | PoisonDart→AimedShot · SmokeBomb→Hush |
 | Cultist | Intelligence | **Writhing Spawn→The Watcher** (horrors beside the party) + Sacrifice · WhisperOfMadness→Dread (+MindRot) → **Abyssal Nightmare** · BloodRite→RiteOfWarding (+DarkCommunion) → **Blood Idol** — added 2026-10-05, rescued in The Hollow Vault |
 

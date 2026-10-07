@@ -84,8 +84,13 @@ namespace Assets.Scripts.Balance
 
         /// <summary>The Ultra the policy would use now, or null. A Sacrifice waits for a hero below
         /// <see cref="SacrificeBelow"/> and never takes the last one standing.</summary>
-        public UltraSO Ready(SimUnit hero, List<SimUnit> heroes = null)
+        public UltraSO Ready(SimUnit hero, List<SimUnit> heroes = null, SimAllies allies = null)
         {
+            // Already riding a mech: keep the gauge for when it breaks.
+            if (allies != null && allies.MountOf(hero) != null)
+            {
+                return null;
+            }
             if (hero == null || !UltraOps.IsFull(Gauge(hero)) || IsTransformed(hero) || hero.Ultras == null)
             {
                 return null;
@@ -138,6 +143,16 @@ namespace Assets.Scripts.Balance
             List<SimUnit> heroes = null, SimAllies allies = null, TurnManager clock = null)
         {
             _gauge[hero] = 0;
+            if (ultra.Kind == UltraKind.Mount)
+            {
+                // The mech is assembled, takes the rider's blows and acts after each of the rider's
+                // turns - CombatManager.ExecuteMount, without the stage.
+                if (allies != null && ultra.Mech != null)
+                {
+                    allies.ArriveMount(hero, ultra.Mech);
+                }
+                return;
+            }
             if (ultra.Kind == UltraKind.Sacrifice)
             {
                 var victim = SacrificeVictim(heroes);

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d03ef8fb4f65d04aacc66749b7be8c3, type: 3}
+  m_Name: TinkererMountShowcase
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Sandbox.SandboxConfigSO
+  Heroes:
+  - Hero: {fileID: 11400000, guid: 8572c8c8edc04a8ea398ee885ba38e88, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 1
+    Abilities:
+    - {fileID: 11400000, guid: 8822ef14ac99ecf418d0623a487305fc, type: 2}
+    - {fileID: 11400000, guid: 1d6f0e05f1bb2a24cba7aa530fd984c7, type: 2}
+    - {fileID: 11400000, guid: 089227621df50c04bac6fc9dc8b668ef, type: 2}
+    - {fileID: 11400000, guid: 19bd0210a56a193409898c7f48eedf15, type: 2}
+  - Hero: {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 600
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  Level: {fileID: 11400000, guid: 7373b5a84f0ff9e42b3097b34eb9bc04, type: 2}
+  Seed: 4242
+  Enemies:
+  - {fileID: 11400000, guid: 22e41873772e193458e78644a737b90d, type: 2}
+  - {fileID: 11400000, guid: 22e41873772e193458e78644a737b90d, type: 2}
+  EnemyDifficulty: 0.6
+  ClearOtherRooms: 1
+  WalkIntoEncounter: 1
+  CopyInventory: 0
+  CopyMetaProgress: 0
+  Items: []

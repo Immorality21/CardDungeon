@@ -41,7 +41,11 @@ namespace Assets.Scripts.Combat
 
         /// <summary>Bookkeeping, not an event in the game: a fresh floor's full heal, a hero joining at
         /// full health, a saved bar restored, the balance model resetting a clone.</summary>
-        Refill
+        Refill,
+
+        /// <summary>The Tinkerer's Disassemble took a machine apart: it falls outright, and its salvage
+        /// is paid on top of the kill (<c>EnemySO.SalvageTable</c>).</summary>
+        Disassemble
     }
 
     /// <summary>

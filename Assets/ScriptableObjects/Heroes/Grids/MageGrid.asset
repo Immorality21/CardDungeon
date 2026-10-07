@@ -1,0 +1,567 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338a729ae8df09741b388cbb693e01f5, type: 3}
+  m_Name: MageGrid
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.SphereGridSO
+  StartNodeKey: mage-sig
+  Nodes:
+  - Key: mage-start
+    DisplayName: 
+    Kind: 0
+    XpCost: 30
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -180}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-trunk-1
+  - Key: mage-trunk-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 20
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -90}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-sig
+  - Key: mage-sig
+    DisplayName: 
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: 0}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: LightningBolt
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors: []
+  - Key: mage-trunk-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 45
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -270}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 1
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-start
+  - Key: mage-trunk-slot
+    DisplayName: 
+    Kind: 2
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -360}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-trunk-2
+  - Key: mage-a-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -107, y: -325}
+    Gains:
+      Values:
+      - Type: 2
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-trunk-2
+  - Key: mage-a-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -200, y: -380}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-1
+  - Key: mage-a-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -292, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: StormCloak
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-2
+  - Key: mage-a-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -385, y: -490}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-3
+  - Key: mage-a-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -478, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-4
+  - Key: mage-a-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -570, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: FireCloak
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-5
+  - Key: mage-a-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -663, y: -655}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-6
+  - Key: mage-a-8
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -756, y: -710}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: FrostCloak
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-7
+  - Key: mage-a-res
+    DisplayName: 
+    Kind: 1
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -352, y: -360}
+    Gains:
+      Values: []
+    ResistType: 3
+    ResistPercent: 12
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-3
+  - Key: mage-a-tip-a
+    DisplayName: 
+    Kind: 0
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -851, y: -765}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-8
+  - Key: mage-a-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -816, y: -640}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-8
+  - Key: mage-b-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 107, y: -325}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-trunk-2
+  - Key: mage-b-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 200, y: -380}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-1
+  - Key: mage-b-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 292, y: -435}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: IceShard
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-2
+  - Key: mage-b-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 385, y: -490}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-3
+  - Key: mage-b-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 478, y: -545}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-4
+  - Key: mage-b-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 570, y: -600}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: WaterSplash
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-5
+  - Key: mage-b-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 663, y: -655}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-6
+  - Key: mage-b-8
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 756, y: -710}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Fireball
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-7
+  - Key: mage-b-tip-a
+    DisplayName: 
+    Kind: 0
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 851, y: -765}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-8
+  - Key: mage-b-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 816, y: -640}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-8

@@ -7,6 +7,24 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
 - **Turn order** is determined by the Agility stat. Higher agility = more frequent turns. `TurnManager` uses tick-based scheduling (`100 / Agility` ticks per turn).
 - **Delay** (`TurnManager.Delay`, 2026-10-01) pushes a unit's counter back by a fraction of its *own* turn, at once, capped at `MaxDelayedTurns` (2) of its turns - one extra turn at most, never a lock. A suspended unit is off the clock and cannot be delayed. Reached by the `TurnDelay` effect through `EffectResolver.Clock` (see the Magic guide); Slow is the other tempo lever and only stretches the turns after the next.
 
+- **Followers** (`TurnManager.Follow`, 2026-10-07): a follower keeps **no counter of its own** and takes
+  its turn straight after each of its leader's (`actsNow` also gives it the very next turn). The two
+  share the leader's pace whatever either's Agility or Haste says - the Tinkerer's mech after her. The
+  preview lists it after the leader; `RemoveUnit` (either side) breaks the link; a suspended leader
+  freezes its follower too.
+
+## Guards, and what a unit is *(2026-10-07)*
+
+- **`GuardTable`** (on `CombatEvents.Guards`, so the live fight and the simulator share it): a guarded
+  unit's blows land on its living guard. Consulted **where a hit picks its victim, before the damage
+  is worked out**, so the guard's own Endurance, Luck and resistances answer it: `CombatManager.ExecuteAttack`,
+  `DamageEffectExecutor` and `EncounterSimulator.ResolveAttack`. A blast that reaches both the guarded
+  unit and its guard hits the guard once (the executor and the enemy area blow both skip the guarded
+  one). Over-time ticks are not redirected. The mech under its rider is the only user.
+- **`UnitTraits`** (`[Flags]`, on `EnemySO.Traits`, read through `IHasTraits` by `Enemy` and `SimUnit`):
+  Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental - what a unit *is*. `UnitTraitOps.Has`
+  is the check. Serialized as a bit mask: append, never reuse a bit. Only Disassemble reads it today.
+
 ## ICombatUnit
 
 - Shared by `Hero` and `Enemy` MonoBehaviours. Provides `DisplayName`, `Icon`, `Stats`, `IsAlive`, `IsHero`, `Resistances`, `Transform`, `GetEffectiveAttackPower()`, `GetEffectiveDefense()`.

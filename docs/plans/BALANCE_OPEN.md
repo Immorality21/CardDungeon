@@ -103,6 +103,11 @@ surface) lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606
   new ability costs 120 and sits three nodes deep.
 - **Early attrition decides runs** *(same playtest, finding 15)*. The only wipe was The Threshold's
   floor 2, with two heroes and two heal charges.
+- **The Tinkerer's mechs are first drafts and probably strong** *(2026-10-07)*. In the sandbox the
+  Warrior Mech's Piston Punch one-shot a Clockwork Sentry for 48 off a full grid. The Clockwork Foundry
+  room was thinned once already to keep the Ashen Deep's Cinder Gate → Slag Halls step under the 75%
+  ceiling (attrition 0.41 with a 2-sentry room). The Ashen Deep also lost the Fire Cloak (now on the
+  off-roster Mage) - re-judge the run's elemental answer in the pass.
 
 
 Current analyzer state: **0 critical / 77 warning**; suite **813 passed / 0 failed**.

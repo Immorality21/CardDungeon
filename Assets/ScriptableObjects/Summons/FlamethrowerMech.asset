@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8167baed5bc052409b86b3942399fa5, type: 3}
+  m_Name: FlamethrowerMech
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
+  Key: FlamethrowerMech
+  DisplayName: Flamethrower Mech
+  Description: Fuel tanks, a pilot light and a very long nozzle. It keeps its distance
+    and sets the room alight.
+  Sprite: {fileID: 21300000, guid: 0396b8f2cba044f58c8e032de6db203e, type: 3}
+  AnimationFrames:
+  - {fileID: 21300000, guid: a5609bea490640f4b290e1580570d930, type: 3}
+  - {fileID: 21300000, guid: 1a6680b284ae4ee6856f03480be2ff99, type: 3}
+  - {fileID: 21300000, guid: d59faa8cd53f4f898892d682ddb24242, type: 3}
+  AnimationFps: 4
+  Facing: 0
+  ArrivalSound: {fileID: 0}
+  ArrivalSoundVolume: 0.9
+  Kind: 2
+  TargetType: 0
+  Effects: []
+  RandomTargetEffects: []
+  SummonerHealthCostPercent: 0
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  Triggers: []
+  Flinches: 0
+  HitFrames: []
+  BaseCharges: 1
+  StatPercents:
+    Values:
+    - Type: 7
+      Amount: 130
+    - Type: 1
+      Amount: 80
+    - Type: 2
+      Amount: 100
+    - Type: 3
+      Amount: 100
+    - Type: 4
+      Amount: 150
+    - Type: 5
+      Amount: 100
+    - Type: 6
+      Amount: 50
+  CopySummonerResistances: 1
+  TurnsActive: 99
+  Actions: []
+  Signature: {fileID: 11400000, guid: c525e368ad94cea4fbdcf5ff19988d8d, type: 2}
+  AttackAbility: {fileID: 11400000, guid: 5dbf40b5751cad947b11f1a7ffb6c433, type: 2}
+  UsesTags: 1
+  MountedFrames:
+  - {fileID: 21300000, guid: 24649c97eb664dbdbadc187c4d714726, type: 3}
+  - {fileID: 21300000, guid: 3bae77afd3344b27bb9aa0603fecfa94, type: 3}
+  - {fileID: 21300000, guid: 187c718a77834f9487827c7ac9b8900b, type: 3}
+  RotateActions: 0
+  SquadTiers: []
+  SquadSize: 3
+  MaxSquadSize: 4

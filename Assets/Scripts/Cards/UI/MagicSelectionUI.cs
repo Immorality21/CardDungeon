@@ -525,10 +525,8 @@ namespace Assets.Scripts.Cards.UI
                 var captured = ultra;
                 Sprite icon = ultra.FormFrames != null && ultra.FormFrames.Length > 0 ? ultra.FormFrames[0] : null;
                 // With the hero as the caster, so a Strike's numbers include their stats.
-                string what = UltraOps.Describe(ultra, hero);
-                string description = string.IsNullOrEmpty(ultra.Description)
-                    ? what
-                    : ultra.Description.Trim() + "\n" + what;
+                // What it does only - no flavour text in combat.
+                string description = UltraOps.Describe(ultra, hero);
                 // A Sacrifice with no one it may take (the last hero cannot be given) is listed, dimmed.
                 bool usable = CombatManager.Instance.CanUseUltra(hero, ultra);
                 _listScroll.Add(CreateRow(icon, ultra.Label, usable ? "Ready" : "No one to give", usable,
@@ -1051,8 +1049,10 @@ namespace Assets.Scripts.Cards.UI
                 return null;
             }
 
+            // In combat the footer is what it does, nothing else: the flavour text lives on the hub
+            // screens (the owner, 2026-10-07: "in combat, the text should be minimal").
             var tracker = CombatManager.HasInstance ? CombatManager.Instance.BuffTracker : null;
-            return AbilityDescriber.Full(slot.Magic, _currentHero, tracker, 0, 0);
+            return AbilityDescriber.Full(slot.Magic, _currentHero, tracker, 0, 0, withDescription: false);
         }
 
         // Rows mirror the command menu: a ▸ cursor on the selected row, icon, dark name, meta.

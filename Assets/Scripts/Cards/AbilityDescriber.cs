@@ -108,7 +108,8 @@ namespace Assets.Scripts.Cards
             ICombatUnit caster,
             CombatBuffTracker buffTracker,
             int powerBonus = 0,
-            int upgradeLevel = 0)
+            int upgradeLevel = 0,
+            bool withDescription = true)
         {
             if (magic == null)
             {
@@ -116,7 +117,7 @@ namespace Assets.Scripts.Cards
             }
 
             var parts = new List<string>();
-            if (!string.IsNullOrEmpty(magic.Description))
+            if (withDescription && !string.IsNullOrEmpty(magic.Description))
             {
                 parts.Add(magic.Description.Trim());
             }
@@ -162,6 +163,8 @@ namespace Assets.Scripts.Cards
                     return effect.Power == 1
                         ? "restores 1 charge to an ability"
                         : $"restores {effect.Power} charges to an ability";
+                case SpellEffectType.Disassemble:
+                    return "takes a machine apart outright - likelier the more of its kind you have defeated";
                 default:
                     return null;
             }

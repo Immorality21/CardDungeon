@@ -8,12 +8,15 @@ using UnityEngine;
 
 namespace Assets.Scripts.Enemies
 {
-    public class Enemy : MonoBehaviour, ICombatUnit, IStatusImmune, Combat.Triggers.ITriggerSource, IFlinches
+    public class Enemy : MonoBehaviour, ICombatUnit, IStatusImmune, Combat.Triggers.ITriggerSource, IFlinches, IHasTraits
     {
         public bool IsImmuneTo(BuffType type)
         {
             return Definition != null && StatusImmunity.ListContains(Definition.StatusImmunities, type);
         }
+
+        /// <summary>What it is (<see cref="EnemySO.Traits"/>) - Mechanical, Undead...</summary>
+        public UnitTraits Traits => Definition != null ? Definition.Traits : UnitTraits.None;
 
         public Stats Stats;
         public Room Room;

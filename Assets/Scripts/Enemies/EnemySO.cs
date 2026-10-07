@@ -42,6 +42,11 @@ namespace Assets.Scripts.Enemies
                  "because a normal enemy shares its column and a bigger one overlaps its neighbours.")]
         [Min(0.1f)] public float CombatScale = 1f;
 
+        [Tooltip("What it is: Mechanical, Undead, Flying... Abilities read it to decide whether they " +
+                 "apply at all - the Tinkerer's Disassemble takes apart only Mechanical units. Several at " +
+                 "once are fine.")]
+        public Combat.UnitTraits Traits;
+
         [Header("Base stats")]
         [Tooltip("This enemy's stats, MaxHealth included. Absent entries read as 0.")]
         public StatBlock BaseStats = StatBlock.Defaults();
@@ -85,6 +90,10 @@ namespace Assets.Scripts.Enemies
                  "explicit Chance is that flat probability, which is what materials use so a drop is " +
                  "gated by *which* monster rather than by depth.")]
         public List<LootDrop> LootTable = new List<LootDrop>();
+
+        [Tooltip("What taking it apart yields, on top of LootTable: rolled only when the Tinkerer's " +
+                 "Disassemble removes it (a Mechanical unit). Rolls like LootTable.")]
+        public List<LootDrop> SalvageTable = new List<LootDrop>();
 
         [Tooltip("Reactions this enemy carries (docs/plans/EVENTS.md) - \"explodes when it dies\", " +
                  "\"enrages when an ally falls\". The effects resolve with the enemy as their source, " +

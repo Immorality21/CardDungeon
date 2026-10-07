@@ -41,7 +41,19 @@ MonoBehaviour:
     - Name: Flamethrower Mech
       Effect: Ranged-type mech that focusses primarlly on fire-type attacks.
       Unlock: c
-    Branches: []
+    Branches:
+    - GridBranch: a
+      Becomes: 'Offense: the gadgets that hit, and the brawler mech.'
+      IntendedKit: Rivet Gun -> Steam Burst
+      Summon: Warrior Mech (Ultra) - piston fists, Steam Hammer.
+    - GridBranch: b
+      Becomes: 'Debuff: oil and jammed gears slow everything down.'
+      IntendedKit: Oil Flask -> Gear Jam
+      Summon: Oil Spewing Mech (Ultra) - every attack oils its target.
+    - GridBranch: c
+      Becomes: 'Fire: flares and bombs; oil from branch b sets off Ignite.'
+      IntendedKit: Flare Cannon -> Incendiary Bomb
+      Summon: Flamethrower Mech (Ultra) - Flame Jet, Inferno Sweep.
     Overlaps: x
     OpenQuestions: 'Not a question, but a todo: Unit types. E.g. undead, mechnanical,
       flying etc. These tags are needed for the tinkerer to disassemble enemies. '

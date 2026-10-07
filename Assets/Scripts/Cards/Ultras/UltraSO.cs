@@ -21,7 +21,14 @@ namespace Assets.Scripts.Cards
         /// floor, and <see cref="UltraSO.Creature"/> rises in their place, built off <b>their</b> stats,
         /// at full health, for the rest of the fight. Its Attack is picked by the fallen hero's highest
         /// stat (<see cref="UltraSO.StatAbilities"/>).</summary>
-        Sacrifice = 2
+        Sacrifice = 2,
+
+        /// <summary>The Tinkerer's mechs: <see cref="UltraSO.Mech"/> is assembled where the hero stands
+        /// and the hero climbs on. The mech fights beside the party with its own menu, takes every blow
+        /// aimed at its rider (<c>GuardTable</c>), and acts straight after each of the rider's turns -
+        /// the two share the rider's pace. It stays until it breaks, the rider falls, or the fight
+        /// ends; using it again rebuilds it.</summary>
+        Mount = 3
     }
 
     /// <summary>Sacrifice: the Attack a horror rises with when <see cref="Stat"/> is the sacrificed
@@ -71,6 +78,12 @@ namespace Assets.Scripts.Cards
         [Tooltip("Sacrifice: its Attack by the sacrificed hero's highest stat - a Warrior makes something " +
                  "that tears, a Cleric something that whispers. Ties go to the first listed.")]
         public List<UltraStatAbility> StatAbilities = new List<UltraStatAbility>();
+
+        [Header("Mount")]
+        [Tooltip("Mount: the mech assembled and ridden. Built like a summon fighting beside the party " +
+                 "(StatPercents of the rider's stats, its own Attack and Signature) but with no turn " +
+                 "limit - it stays until it breaks.")]
+        public SummonSO Mech;
 
         [Header("Transform")]
         [Tooltip("How many of the hero's own turns the form lasts, not counting the turn it is taken on.")]

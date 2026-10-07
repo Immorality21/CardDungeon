@@ -39,6 +39,15 @@ namespace Assets.Scripts.Cards
         /// (<see cref="EffectResolver.Charges"/>): inert through a resolver that has none.
         /// Appended, for the reason above.
         /// </summary>
-        RestoreCharge = 7
+        RestoreCharge = 7,
+
+        /// <summary>
+        /// The Tinkerer's Disassemble: takes a <see cref="Combat.UnitTraits.Mechanical"/> target apart
+        /// outright, with a chance that grows with how many of that enemy the Bestiary has recorded
+        /// killed (<see cref="Combat.DisassembleOps"/>). A success removes it as a kill credited to the
+        /// caster and also yields its salvage (<c>EnemySO.SalvageTable</c>); a failure, or a target that
+        /// is not a machine, does nothing. <c>Power</c> is unused. Appended, for the reason above.
+        /// </summary>
+        Disassemble = 8
     }
 }

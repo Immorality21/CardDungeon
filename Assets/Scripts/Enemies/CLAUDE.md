@@ -23,6 +23,13 @@
 - **EnemyManager** spawns enemies into rooms (with optional manual-layout overrides) and tracks/cleans up live enemies. For each entry it instantiates the shared prefab and calls `Enemy.Initialize(entry.Enemy)`.
 - **`LootTable`** (`List<LootDrop>`, replaced the single `LootItem` on 2026-09-05) is **rolled entry by entry** - a table is a list of things this kill *can* yield, not a pick-one, so a monster drops both its signature gear and the raw stuff it is made of. An entry with `Chance` **0** falls back on `LootRoller`'s rarity + run-depth math, which is the gear regime and suppresses an over-level item; an entry with an explicit `Chance` is that flat probability at any depth, which is what **materials** use - a material is gated by *which* monster carries it, not by how deep the player is. `MinQuantity`/`MaxQuantity` only bite on stacking items (consumables, materials); equipment always drops one, because an inventory entry carries which hero has it equipped. Bosses author their signature material at `Chance: 1`. The Bestiary lists **one row per entry**, each `???` until that drop has actually been seen (`BestiaryPresenter.LootLines`) - so the page says how many secrets are left as well as which are known.
 
+- **`Traits`** (`UnitTraits`, 2026-10-07) say what an enemy *is* - Mechanical, Construct, Undead... -
+  and **`SalvageTable`** (rolled like `LootTable`, on top of it) is what taking a machine apart with the
+  Tinkerer's Disassemble yields (`HealthCause.Disassemble`). Mechanical today: the **Clockwork Sentry**
+  (fast, fragile, an Aggressor) and the **Steam Automaton** (slow Bruiser, no flinch), both weak to
+  Lightning and immune to Bleed/Poison, met in the **Clockwork Foundry** room of the Ashen Deep's Slag
+  Halls. The Stone Sentinel is a `Construct` - built by magic, so not something Disassemble applies to.
+
 - **Enemy** implements `ICombatUnit` (see the Combat guide). `Initialize(EnemySO)` applies the definition (sprite, `Stats`, archetype, spell list, resistances, the drop table, and `gameObject.name`); `DisplayName` comes from `Definition.DisplayName` (so it's the SO's name, **not** "Prefab(Clone)"). `GetEffectiveAttackPower()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Runtime charge state (`ChargingEntryIndex`, `ChargeTarget`) is not persisted.
 
 ## Reactions (`EnemySO.Triggers`) - what an enemy does on its own *(2026-10-07)*

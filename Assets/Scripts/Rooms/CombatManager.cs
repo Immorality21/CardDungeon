@@ -210,8 +210,19 @@ namespace Assets.Scripts.Rooms
         // *with* the party while a replacement summon fights.
         private readonly List<SummonUnit> _standIns = new List<SummonUnit>();
 
+        // Mechs (UltraKind.Mount), by rider. Each is also one of the guests above - the hero side, its
+        // own menu, sent home with its rider - but it stands where the rider stood rather than in the
+        // vanguard column, takes the rider's blows (Events.Guards) and acts after the rider's turns.
+        private readonly Dictionary<Hero, SummonUnit> _mounts = new Dictionary<Hero, SummonUnit>();
+
         /// <summary>Every summon fighting beside the party, guests first.</summary>
         private IEnumerable<SummonUnit> BesideParty => _allies.Concat(_standIns);
+
+        /// <summary>The guests that stand in the vanguard column: every living one but the mechs.</summary>
+        private List<SummonUnit> ColumnAllies()
+        {
+            return _allies.Where(a => a != null && a.IsAlive && !_mounts.ContainsValue(a)).ToList();
+        }
         private string _lastTurnLog;
         private Room _currentCombatRoom;
         private Party _currentParty;
@@ -575,6 +586,7 @@ namespace Assets.Scripts.Rooms
             _squad.Clear();
             _allies.Clear();
             _standIns.Clear();
+            _mounts.Clear();
             // Every gauge starts the fight empty (UltraOps: per fight, not per run).
             _ultraGauge.Clear();
             _gaugeHealth.Clear();
@@ -598,6 +610,8 @@ namespace Assets.Scripts.Rooms
             // A TurnDelay effect (Exatrix's claws) pushes units back on this fight's clock.
             _calculator.Clock = _turnManager;
             _calculator.Events = Events;
+            // Disassemble's odds grow with the Bestiary's kills of that enemy (DisassembleOps).
+            _calculator.KillsOf = BestiaryKills;
             // Authored reactions (items, enemies, summons) listen after the bookkeeping above, and the
             // log and floating text after them. The registry needs no reference kept: the stream holds it.
             new TriggerRegistry(Events, _calculator, BuffTracker, () => HeroSideUnits().Concat(GetAliveEnemies()));
@@ -1098,9 +1112,13 @@ namespace Assets.Scripts.Rooms
             // A replacement fights alone: every guest goes home first. A stand-in is not a guest - it
             // holds a hero's place - so it steps out with the party instead, frozen and hidden, and comes
             // back with them.
-            var standing = _standIns.Where(a => a != null && a.IsAlive).ToList();
-            bool alliesLeft = _allies.Count > 0;
-            foreach (var guest in _allies.ToList())
+            // A mech is not sent home either: its rider is part of the party, so the mech steps out
+            // with her and comes back, still ridden, when the summon leaves (owner, 2026-10-07). It
+            // keeps no clock of its own - it follows its rider's, which the party's suspension freezes.
+            var standing = _standIns.Where(a => a != null && a.IsAlive)
+                .Concat(_mounts.Values.Where(m => m != null && m.IsAlive)).ToList();
+            bool alliesLeft = _allies.Any(a => !_mounts.ContainsValue(a));
+            foreach (var guest in _allies.Where(a => !_mounts.ContainsValue(a)).ToList())
             {
                 EndAlly(guest, SummonExit.Dismissed);
             }
@@ -1185,7 +1203,7 @@ namespace Assets.Scripts.Rooms
                 unit.OverrideAttack(firstRite);
             }
             _allies.Add(unit);
-            CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive).ToList(), arriving: unit);
+            CombatStage.Instance.PlaceAllies(ColumnAllies(), arriving: unit);
             yield return SummonPresenter.Arrive(unit);
             OnSummonEnded?.Invoke();
 
@@ -1246,6 +1264,9 @@ namespace Assets.Scripts.Rooms
                     break;
                 case UltraKind.Sacrifice:
                     yield return ExecuteSacrifice(hero, ultra, target as Hero);
+                    break;
+                case UltraKind.Mount:
+                    yield return ExecuteMount(hero, ultra);
                     break;
                 default:
                     yield return ExecuteTransform(hero, ultra);
@@ -1369,6 +1390,130 @@ namespace Assets.Scripts.Rooms
                 : $"{cultist.DisplayName} sacrifices {victim.DisplayName}, and {horror.DisplayName} rises in their place!{how}";
         }
 
+        /// <summary>
+        /// A Mount Ultra (<see cref="UltraKind.Mount"/>, the Tinkerer's mechs): <see cref="UltraSO.Mech"/>
+        /// is assembled where the hero stands and the hero climbs on top. The mech is a guest of the
+        /// party - its own menu, the enemies may hit it, it goes when its rider falls - with three
+        /// differences: it takes every blow aimed at its rider (<see cref="GuardTable"/>), it acts at once
+        /// and then straight after each of the rider's turns (<see cref="TurnManager.Follow"/>), and it
+        /// has no turn limit, staying until it breaks or the fight ends. A rider already on a mech
+        /// rebuilds it.
+        /// </summary>
+        private IEnumerator ExecuteMount(Hero hero, UltraSO ultra)
+        {
+            if (ultra.Mech == null)
+            {
+                _lastTurnLog = $"{hero.DisplayName} reaches for parts that are not there.";
+                yield break;
+            }
+            if (_mounts.TryGetValue(hero, out var previous))
+            {
+                EndAlly(previous, SummonExit.Dismissed);
+            }
+
+            var spot = hero.transform.position;
+            CombatAudio.Play(CombatSound.BossSignature);
+            CombatFeedback.Instance.Shake(0.2f, 0.35f);
+            ScreenFade.Instance.Flash(new Color(0.85f, 0.6f, 0.25f), 0.4f, 0.05f, 0.3f);
+            ShowFloatingLabel(spot + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(1f, 0.75f, 0.35f), 0.2f);
+
+            // No turn limit: the mech's health is what ends it (int.MaxValue / 2, as a Sacrifice horror).
+            var mech = SummonUnit.Create(ultra.Mech, null, hero, int.MaxValue / 2);
+            _allies.Add(mech);
+            _mounts[hero] = mech;
+            CombatStage.Instance.PlaceAt(mech, spot);
+            yield return SummonPresenter.Arrive(mech);
+
+            EnsureHealthBars(new List<ICombatUnit> { mech });
+            Events.Guards.Set(hero, mech);
+            _turnManager.Follow(mech, hero, actsNow: true);
+            // She climbs in: one figure on the stage, drawn as the mech with her at the controls
+            // (SummonSO.MountedFrames), and one bar - the mech's, which is her shield.
+            SetRiderShown(hero, false);
+            SetUnitFrames(mech, ultra.Mech.MountedFrames, ultra.Mech.AnimationFps);
+            // A blow wound up at the rider now lands on the mech.
+            foreach (var enemy in AliveEnemyComponents())
+            {
+                if (ReferenceEquals(enemy.ChargeTarget, hero))
+                {
+                    enemy.ChargeTarget = mech;
+                }
+            }
+
+            _lastTurnLog = previous != null
+                ? $"{hero.DisplayName} rebuilds {mech.DisplayName} and climbs back on!"
+                : $"{hero.DisplayName} assembles {mech.DisplayName} and climbs on!";
+        }
+
+        /// <summary>The rider climbs down from <paramref name="mech"/>: no longer shielded, and walked
+        /// back to where they stood. Safe to call for any ally; a no-op unless it is a mech.</summary>
+        private void Dismount(SummonUnit mech)
+        {
+            var rider = _mounts.FirstOrDefault(p => ReferenceEquals(p.Value, mech)).Key;
+            if (rider == null)
+            {
+                return;
+            }
+            _mounts.Remove(rider);
+            Events?.Guards.ClearGuard(mech);
+            // She climbs out where she stood; a rider who fell while aboard stays down.
+            if (rider.IsAlive)
+            {
+                SetRiderShown(rider, true);
+            }
+        }
+
+        /// <summary>Shows or hides a rider - sprite and health bar together. While she is aboard, the
+        /// mech's mounted frames draw her and the mech's bar is the one that matters.</summary>
+        private static void SetRiderShown(Hero hero, bool shown)
+        {
+            if (hero == null)
+            {
+                return;
+            }
+            var sr = hero.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.enabled = shown;
+            }
+            var bar = hero.GetComponent<UnitHealthBar>();
+            if (bar != null)
+            {
+                bar.Hidden = !shown;
+            }
+        }
+
+        /// <summary>Puts <paramref name="frames"/> on a summon's sprite (a mech with its rider aboard).
+        /// Nothing to show keeps what is there.</summary>
+        private static void SetUnitFrames(SummonUnit unit, Sprite[] frames, float fps)
+        {
+            var valid = frames != null ? frames.Where(f => f != null).ToArray() : new Sprite[0];
+            if (unit == null || valid.Length == 0)
+            {
+                return;
+            }
+            var sr = unit.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.sprite = valid[0];
+            }
+            var animator = unit.GetComponent<SpriteAnimator>() ?? unit.gameObject.AddComponent<SpriteAnimator>();
+            animator.Initialize(valid, Mathf.Max(1f, fps));
+        }
+
+        /// <summary>How many of <paramref name="unit"/>'s kind the Bestiary has recorded killed -
+        /// Disassemble's odds (<see cref="DisassembleOps"/>). Anything that is not an enemy reads 0.</summary>
+        private static int BestiaryKills(ICombatUnit unit)
+        {
+            var enemy = unit as Enemy;
+            if (enemy == null || enemy.Definition == null || !MetaProgressManager.HasInstance)
+            {
+                return 0;
+            }
+            var entry = MetaProgressManager.Instance.GetBestiaryEntry(enemy.Definition.SaveKey);
+            return entry != null ? entry.Kills : 0;
+        }
+
         /// <summary>One of a transformed hero's turns is over: the form counts it down and comes off
         /// after the last. The turn the Ultra was used on does not count.</summary>
         private void AfterFormTurn(ICombatUnit unit)
@@ -1471,6 +1616,7 @@ namespace Assets.Scripts.Rooms
             ally.Stay.Leave(exit);
             _turnManager.RemoveUnit(ally);
             _threat.Clear(ally);
+            Dismount(ally);
             foreach (var enemy in AliveEnemyComponents())
             {
                 if (ReferenceEquals(enemy.ChargeTarget, ally))
@@ -1483,7 +1629,7 @@ namespace Assets.Scripts.Rooms
             // Close the gap it left in the column. Not at the end of the fight: the stage is coming down.
             if (exit != SummonExit.Victory && CombatStage.HasInstance)
             {
-                CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive).ToList());
+                CombatStage.Instance.PlaceAllies(ColumnAllies());
             }
         }
 
@@ -1618,6 +1764,11 @@ namespace Assets.Scripts.Rooms
             {
                 CombatStage.Instance.RestoreParty();
             }
+            // A rider comes back aboard: the stage shows every hero's bar again, so hide hers.
+            foreach (var rider in _mounts.Keys)
+            {
+                SetRiderShown(rider, false);
+            }
         }
 
         /// <summary>
@@ -1690,7 +1841,20 @@ namespace Assets.Scripts.Rooms
             }
 
             var action = new SpellcastAction { Magic = magic, Caster = caster, Targets = live };
-            var result = _calculator.Execute(action, BuffTracker);
+            // A mech's abilities lay their tags and set off combos like a hero's cast (SummonSO.UsesTags);
+            // every other summon's resolve tagless.
+            bool tags = caster.Summon != null && caster.Summon.UsesTags;
+            var result = tags
+                ? _calculator.Execute(action, BuffTracker, _tagTracker, _comboDetector, 0, 0,
+                    MetaProgressManager.Instance.GetComboUpgradeLevel)
+                : _calculator.Execute(action, BuffTracker);
+            if (tags)
+            {
+                foreach (var comboKey in result.TriggeredComboKeys)
+                {
+                    MetaProgressManager.Instance.MarkComboDiscovered(comboKey);
+                }
+            }
             _lastTurnLog = result.BuildLog(action);
             CombatAudio.Play(isSignature ? CombatSound.BossSignature : CombatSound.MagicCast);
             RecordCastDamageObserved(action);
@@ -2027,6 +2191,12 @@ namespace Assets.Scripts.Rooms
                 {
                     continue;
                 }
+                // A rider whose mech is also in the blast is covered by it: the mech takes one blow, not two.
+                var guard = Events.Guards.GuardOf(target);
+                if (guard != null && targets.Contains(guard))
+                {
+                    continue;
+                }
                 yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "smashes");
                 ResolveDeaths();
             }
@@ -2123,8 +2293,10 @@ namespace Assets.Scripts.Rooms
                     }
                     _lastTurnLog += cause == HealthCause.OverTime
                         ? $" {enemy.DisplayName} succumbs!"
-                        : $" {enemy.DisplayName} defeated!";
-                    HandleEnemyDeath(enemy, killer);
+                        : cause == HealthCause.Disassemble
+                            ? $" {enemy.DisplayName} is taken apart!"
+                            : $" {enemy.DisplayName} defeated!";
+                    HandleEnemyDeath(enemy, killer, cause);
                     break;
 
                 case Hero hero:
@@ -2198,6 +2370,12 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteAttack(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor, float damageMultiplier = 1f, string verb = "attacks")
         {
+            // A guarded unit's blows land on its guard - the mech under its rider (GuardTable) - and
+            // the guard's own Endurance, Luck and resistances answer them.
+            if (Events != null)
+            {
+                target = Events.Guards.Redirect(target);
+            }
             CombatAudio.Play(CombatSound.MeleeSwing);
             yield return LungeAnimation(attacker.Transform, lungeDirection);
 
@@ -2603,7 +2781,7 @@ namespace Assets.Scripts.Rooms
         /// <summary>An enemy's death, paid out: XP, gold, loot, the bestiary, then off the clock and out
         /// of the room. Only <see cref="ResolveDeath"/> calls it. <paramref name="killer"/> is whoever
         /// struck the blow, or null.</summary>
-        private void HandleEnemyDeath(Enemy enemy, ICombatUnit killer)
+        private void HandleEnemyDeath(Enemy enemy, ICombatUnit killer, HealthCause cause = HealthCause.Attack)
         {
             if (enemy == null)
             {
@@ -2628,8 +2806,12 @@ namespace Assets.Scripts.Rooms
             // Loot: every line of the drop table rolls on its own, so one kill can yield a piece of
             // gear and the raw material the thing was made of. Only what actually landed in the bag
             // reaches the victory summary and the bestiary.
+            // Taken apart (the Tinkerer's Disassemble): its salvage rolls on top of its loot.
+            var table = cause == HealthCause.Disassemble && enemy.Definition != null && enemy.Definition.SalvageTable != null
+                ? enemy.LootTable.Concat(enemy.Definition.SalvageTable).ToList()
+                : enemy.LootTable;
             foreach (var award in LootRoller.Roll(
-                         enemy.LootTable, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f)))
+                         table, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f)))
             {
                 // A revisit below its best fear does not pay the scarce materials (docs/plans/REVISITS.md).
                 if (RunFear.Current.Withholds(award.Item.Key))

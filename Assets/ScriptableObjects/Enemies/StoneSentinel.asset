@@ -20,8 +20,10 @@ MonoBehaviour:
   - {fileID: -1906541606131161870, guid: d0c88a722fa0401f8fe36f5ba76fd956, type: 3}
   - {fileID: 243748549531115787, guid: d0c88a722fa0401f8fe36f5ba76fd956, type: 3}
   AnimationFps: 4
+  HitFrames: []
   IsBoss: 0
   CombatScale: 1
+  Traits: 2
   BaseStats:
     Values:
     - Type: 1
@@ -61,5 +63,6 @@ MonoBehaviour:
     Chance: 0.5
     MinQuantity: 1
     MaxQuantity: 2
+  SalvageTable: []
   Triggers: []
   Flinches: 0

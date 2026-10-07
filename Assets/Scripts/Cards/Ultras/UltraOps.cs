@@ -86,6 +86,17 @@ namespace Assets.Scripts.Cards
                         }
                     }
                 }
+                // A mech's own Attack and Signature are reached through the Ultra too.
+                if (ultra.Mech != null)
+                {
+                    foreach (var ability in new[] { ultra.Mech.AttackAbility, ultra.Mech.Signature })
+                    {
+                        if (ability != null && !string.IsNullOrEmpty(ability.Key))
+                        {
+                            keys.Add(ability.Key);
+                        }
+                    }
+                }
                 if (ultra.StatAbilities != null)
                 {
                     foreach (var entry in ultra.StatAbilities)
@@ -178,6 +189,19 @@ namespace Assets.Scripts.Cards
                 string creature = ultra.Creature != null ? ultra.Creature.Label : "a horror";
                 return $"An ally falls for the rest of the floor; {creature} rises in their place, built off their stats, "
                        + "for the rest of the fight. Its attack follows their highest stat";
+            }
+            if (ultra.Kind == UltraKind.Mount)
+            {
+                var mount = new List<string> { "Rides a mech that takes the hits" };
+                if (ultra.Mech != null && ultra.Mech.AttackAbility != null)
+                {
+                    mount.Add(ultra.Mech.AttackAbility.DisplayName);
+                }
+                if (ultra.Mech != null && ultra.Mech.Signature != null)
+                {
+                    mount.Add(ultra.Mech.Signature.DisplayName);
+                }
+                return string.Join(" · ", mount);
             }
             if (ultra.Kind == UltraKind.Strike)
             {

@@ -38,9 +38,21 @@ namespace Assets.Scripts.Cards
         /// </summary>
         public CombatEvents Events { get; set; }
 
+        /// <summary>
+        /// How many of a unit's kind the player has defeated, which a
+        /// <see cref="SpellEffectType.Disassemble"/> reads for its odds. <c>CombatManager</c> answers
+        /// from the Bestiary; null everywhere else (the balance model included), where every machine
+        /// reads as never defeated - the cautious odds.
+        /// </summary>
+        public Func<ICombatUnit, int> KillsOf { get; set; }
+
+        /// <summary>The roll behind chance-based effects (Disassemble): uniform in [0, 1). Null uses
+        /// <c>Random.Range(0f, 1f)</c>; tests set a fixed one.</summary>
+        public Func<float> Roll { get; set; }
+
         public EffectResolver()
         {
-            _factory = new EffectExecutorFactory(() => Clock, () => Charges, () => Events);
+            _factory = new EffectExecutorFactory(() => Clock, () => Charges, () => Events, () => KillsOf, () => Roll);
         }
 
         /// <param name="powerBonus">Flat power added to the magic's Damage/Heal effects (from its upgrade level).</param>

@@ -22,6 +22,11 @@ namespace Assets.Scripts.Combat
         // A unit that takes the very next turn, ahead of the clock (a summon's arrival turn).
         private ICombatUnit _actsNext;
 
+        // Units that keep no counter of their own and act straight after a leader's every turn (a
+        // mech after its rider), keyed by the leader; and the follower whose turn is due now.
+        private readonly Dictionary<ICombatUnit, ICombatUnit> _followerOf = new Dictionary<ICombatUnit, ICombatUnit>();
+        private ICombatUnit _followerDue;
+
         public void SetBuffTracker(CombatBuffTracker buffTracker)
         {
             _buffTracker = buffTracker;
@@ -32,6 +37,8 @@ namespace Assets.Scripts.Combat
             _ticksUntilTurn.Clear();
             _suspended.Clear();
             _actsNext = null;
+            _followerOf.Clear();
+            _followerDue = null;
 
             foreach (var unit in units)
             {
@@ -41,6 +48,27 @@ namespace Assets.Scripts.Combat
         }
 
         public ICombatUnit GetNextUnit()
+        {
+            // A follower whose leader has just acted goes now, costing the clock nothing.
+            if (_followerDue != null)
+            {
+                var follower = _followerDue;
+                _followerDue = null;
+                if (follower.IsAlive)
+                {
+                    return follower;
+                }
+            }
+
+            var next = NextOnClock();
+            if (next != null && _followerOf.TryGetValue(next, out var due) && due != null && due.IsAlive)
+            {
+                _followerDue = due;
+            }
+            return next;
+        }
+
+        private ICombatUnit NextOnClock()
         {
             // A unit inserted to act next goes first and costs the clock nothing: no time passes for
             // anyone else. It then joins the clock as if it had just acted.
@@ -95,6 +123,67 @@ namespace Assets.Scripts.Combat
             {
                 _actsNext = null;
             }
+            Unfollow(unit);
+            _followerOf.Remove(unit);
+        }
+
+        /// <summary>
+        /// <paramref name="follower"/> stops keeping a clock of its own and takes its turn straight
+        /// after each of <paramref name="leader"/>'s - the two share the leader's pace, whatever either
+        /// one's Agility or Haste says. With <paramref name="actsNow"/> it also takes the very next turn
+        /// (a mech moving at once after its rider climbs on). One follower per leader.
+        /// </summary>
+        public void Follow(ICombatUnit follower, ICombatUnit leader, bool actsNow)
+        {
+            if (follower == null || leader == null || ReferenceEquals(follower, leader))
+            {
+                return;
+            }
+            Unfollow(follower);
+            _ticksUntilTurn.Remove(follower);
+            _suspended.Remove(follower);
+            if (ReferenceEquals(_actsNext, follower))
+            {
+                _actsNext = null;
+            }
+            _followerOf[leader] = follower;
+            if (actsNow)
+            {
+                _followerDue = follower;
+            }
+        }
+
+        /// <summary>Ends <paramref name="follower"/>'s link to its leader. It is then off the clock
+        /// altogether until something adds it back.</summary>
+        public void Unfollow(ICombatUnit follower)
+        {
+            if (follower == null)
+            {
+                return;
+            }
+            ICombatUnit leader = null;
+            foreach (var pair in _followerOf)
+            {
+                if (ReferenceEquals(pair.Value, follower))
+                {
+                    leader = pair.Key;
+                    break;
+                }
+            }
+            if (leader != null)
+            {
+                _followerOf.Remove(leader);
+            }
+            if (ReferenceEquals(_followerDue, follower))
+            {
+                _followerDue = null;
+            }
+        }
+
+        /// <summary>The unit acting straight after <paramref name="leader"/>'s turns, or null.</summary>
+        public ICombatUnit FollowerOf(ICombatUnit leader)
+        {
+            return leader != null && _followerOf.TryGetValue(leader, out var follower) ? follower : null;
         }
 
         /// <summary>
@@ -186,14 +275,21 @@ namespace Assets.Scripts.Combat
             var snapshot = new Dictionary<ICombatUnit, float>(_ticksUntilTurn);
             var order = new List<ICombatUnit>();
 
+            // A follower already due leads, exactly as GetNextUnit will take it.
+            if (_followerDue != null && _followerDue.IsAlive && count > 0)
+            {
+                order.Add(_followerDue);
+            }
+
             // The inserted unit leads the preview, exactly as GetNextUnit will take it.
-            if (_actsNext != null && _actsNext.IsAlive && snapshot.ContainsKey(_actsNext) && count > 0)
+            if (_actsNext != null && _actsNext.IsAlive && snapshot.ContainsKey(_actsNext) && order.Count < count)
             {
                 order.Add(_actsNext);
                 snapshot[_actsNext] = BASE_TICKS / Mathf.Max(1, GetEffectiveAgility(_actsNext));
+                AddFollower(order, _actsNext, count);
             }
 
-            for (int i = order.Count; i < count; i++)
+            while (order.Count < count)
             {
                 ICombatUnit next = null;
                 float lowest = float.MaxValue;
@@ -221,9 +317,18 @@ namespace Assets.Scripts.Combat
                 float agility = Mathf.Max(1, GetEffectiveAgility(next));
                 snapshot[next] = BASE_TICKS / agility;
                 order.Add(next);
+                AddFollower(order, next, count);
             }
 
             return order;
+        }
+
+        private void AddFollower(List<ICombatUnit> order, ICombatUnit leader, int count)
+        {
+            if (order.Count < count && _followerOf.TryGetValue(leader, out var follower) && follower != null && follower.IsAlive)
+            {
+                order.Add(follower);
+            }
         }
 
         private int GetEffectiveAgility(ICombatUnit unit)

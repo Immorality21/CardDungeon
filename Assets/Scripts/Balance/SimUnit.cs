@@ -118,8 +118,11 @@ namespace Assets.Scripts.Balance
     /// <c>GetEffectiveStat(MaxHealth)</c>. It did not always, which is why this note exists: the
     /// model was right and the game was short by exactly the gear bonus.
     /// </summary>
-    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource
+    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource, IHasTraits
     {
+        /// <summary>Mirrors <c>Enemy.Traits</c> off the same definition.</summary>
+        public UnitTraits Traits => Definition != null ? Definition.Traits : UnitTraits.None;
+
         /// <summary>
         /// The reactions this unit carries - its gear's for a hero (set by <c>PartyBaseline</c>), its
         /// definition's for an enemy or a summon - fired by the encounter loop's

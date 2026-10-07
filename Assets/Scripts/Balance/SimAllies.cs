@@ -44,6 +44,46 @@ namespace Assets.Scripts.Balance
             _enemies = enemies ?? new List<SimUnit>();
         }
 
+        /// <summary>The fight's stream, whose <see cref="CombatEvents.Guards"/> a mech is entered in.
+        /// Without one a mech still fights but shields nobody.</summary>
+        public CombatEvents Events { get; set; }
+
+        // Mechs by rider (UltraKind.Mount); each is also one of the guests.
+        private readonly Dictionary<SimUnit, SimAlly> _mounts = new Dictionary<SimUnit, SimAlly>();
+
+        /// <summary>The mech <paramref name="rider"/> is on, or null.</summary>
+        public SimAlly MountOf(SimUnit rider)
+        {
+            return rider != null && _mounts.TryGetValue(rider, out var mech) ? mech : null;
+        }
+
+        /// <summary>
+        /// A mech is assembled under <paramref name="rider"/>, as <c>CombatManager.ExecuteMount</c> does
+        /// it: built off the rider's stats with no turn limit, guarding the rider, and following the
+        /// rider on the clock - acting at once, then after each of the rider's turns. Replaces the
+        /// rider's previous mech.
+        /// </summary>
+        public SimAlly ArriveMount(SimUnit rider, SummonSO mech)
+        {
+            var previous = MountOf(rider);
+            if (previous != null)
+            {
+                End(previous);
+            }
+            var ally = new SimAlly
+            {
+                Unit = SimUnit.FromSummon(mech, null, rider),
+                Summoner = rider,
+                Stay = new SummonStay(mech, int.MaxValue / 2),
+                Attack = SummonOps.RotatingAbility(mech, 0)
+            };
+            _guests.Add(ally);
+            _mounts[rider] = ally;
+            Events?.Guards.Set(rider, ally.Unit);
+            _clock.Follow(ally.Unit, rider, actsNow: true);
+            return ally;
+        }
+
         /// <summary>Every summon beside the party - guests first, then stand-ins, each in the order it
         /// arrived. A fresh list: adding to it changes nothing.</summary>
         public IReadOnlyList<SimAlly> All => new List<SimAlly>(Everyone());
@@ -164,6 +204,12 @@ namespace Assets.Scripts.Balance
         {
             foreach (var guest in _guests.ToArray())
             {
+                // A mech steps out with its rider and comes back with her (CombatManager.SummonReplacement);
+                // following her frozen clock, it takes no turns meanwhile.
+                if (ReferenceEquals(MountOf(guest.Summoner), guest))
+                {
+                    continue;
+                }
                 End(guest);
             }
         }
@@ -195,6 +241,11 @@ namespace Assets.Scripts.Balance
             }
             ally.Stay.Leave(ally.Unit.IsAlive ? SummonExit.TurnsSpent : SummonExit.Fell);
             _clock.RemoveUnit(ally.Unit);
+            Events?.Guards.ClearGuard(ally.Unit);
+            if (ReferenceEquals(MountOf(ally.Summoner), ally))
+            {
+                _mounts.Remove(ally.Summoner);
+            }
             foreach (var enemy in _enemies)
             {
                 if (ReferenceEquals(enemy.ChargeTarget, ally.Unit))

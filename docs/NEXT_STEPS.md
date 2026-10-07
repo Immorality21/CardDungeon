@@ -208,7 +208,7 @@ backlog.**
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **done** — shipped 2026-09-06; **every hero has a source since 2026-09-30** (run clear, room event, secret run) |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **Next, in unlock order: Tinkerer**, then Cleric, Rogue, Warlock; then measure the per-summon frontier. **Blocked on hero visions (2026-10-03):** the Cleric, Warlock, Tinkerer and Rogue have no defined identity yet — their grids borrow catalog spells (the Tinkerer's is an elemental mage). Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
+| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the Fire Cloak is now on the off-roster Mage, and the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
 | — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) **Ultras for the other six heroes** - the gauge is universal but only the Warlock and the Cultist can spend it (§13 below) |
 | — | **The Mage — an elemental caster** | planned 2026-10-04; takes over the elemental spells when the Tinkerer becomes gadgets; bare-minimum asset + sprite exist (no grid, not on the roster) |
@@ -281,6 +281,18 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **The Tinkerer rebuilt** (2026-10-07) — `plans/SPECIALIZATION.md`, "The Tinkerer". Disassemble
+  (`SpellEffectType.Disassemble`: Mechanical targets, odds from Bestiary kills, salvage on success);
+  `UltraKind.Mount` (a mech that guards its rider through `GuardTable`, follows her turns through
+  `TurnManager.Follow`, lays tags via `SummonSO.UsesTags`, and steps out with the party for a
+  replacement summon); `UnitTraits`; a 36-node grid; the elemental spells moved to a stub Mage grid;
+  Clockwork Sentry and Steam Automaton in a new Slag Halls room; steampunk art for her, the mechs, the
+  enemies and 14 icons. Suite 1,399 / 0; mount, turn order and Disassemble seen in the sandbox
+  (`Sandbox/TinkererMechs`).
+- **The hub shows grown items' stats** (2026-10-07) — `plans/EVENTS.md` §4.1. `GearPiece` (an item and
+  its copy's save entry) through `WithGear` and the swap helpers, so every hub stat reads a copy's
+  reached milestones.
 
 - **Event-driven rules** (2026-10-07) — `plans/EVENTS.md`. `HealthOps` is the only writer of health
   (a guard test scans for others) and raises `UnitDefeated` with the killer; one death path

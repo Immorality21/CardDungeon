@@ -146,7 +146,7 @@ The seven base heroes (§5b) and the kind of destination each should be able to 
 | **Cleric** | ? | a dedicated healer — or a holy fighter who trades throughput for sustain |
 | **Ranger** | ? | tempo and single-target precision — or control and traps |
 | **Warlock** | ? | blood magic: pays health for stronger attacks, drains it back (was the Cultist until 2026-10-04) |
-| **Tinkerer** | ? | *to be worked* — the obvious pull is items, gadgets and summons |
+| **Tinkerer** | **3** | steampunk tools: offense (Warrior Mech) — debuff and oil (Oil Spewing Mech) — fire (Flamethrower Mech). Built 2026-10-07, see "The Tinkerer" below |
 | **Rogue** | ? | *to be worked* — the obvious pull is burst, evasion and Steal (§13) |
 
 **Branch count is per-hero, not fixed.** Only the Paladin's **3** was stated outright; the Warrior's
@@ -389,7 +389,48 @@ horned red hood, green demon flame). **No grid, not on `PartyRoster`, no unlock 
 the game's data and the Hero Vision window only. The old Cultist's art moved with him as
 `warlock-idle.png` (its slices still carry `cultist-idle_*` names).
 
+#### The Tinkerer — tools, Disassemble and mechs *(built 2026-10-07)*
+
+The owner wrote the vision (`HeroSO.Vision`, `Tools ▸ Heroes ▸ Hero Vision`): a female steampunk
+inventor who solves everything with tools; support and damage; **Disassemble** at the root of the
+grid, like Rikku taking machina apart in FFX; her **Ultra style is to assemble a mech and climb
+in**, one mech per branch. Decided with the owner the same day:
+
+| decision | value |
+|---|---|
+| what a branch ends in | **its mech Ultra, nothing else** - the mechs are her summon-equivalent, so she has no separate summons |
+| the mech's shield | **the mech's health takes every blow aimed at her** (`GuardTable`); once it breaks she is hit normally. A blast that reaches both hits the mech once |
+| how long a mech stays | **until it breaks, she falls, or the fight ends** - no turn limit; using the Ultra again rebuilds it |
+| a party-replacing summon | **replaces everything, the mech included**: the mech steps out with the party (hidden, its turns frozen behind hers) and she comes back still riding when the summon is dismissed or falls. Other guests are sent home as before |
+| turn order | the mech acts **straight after** her, at once on arrival and then after each of her turns (`TurnManager.Follow`) - they share her pace whatever either's Agility or Haste says |
+| presentation | the mech arrives like any ally summon and stands where she stood; she is hidden (sprite and bar) and the mech switches to frames with her drawn aboard (`SummonSO.MountedFrames`) |
+| Disassemble success | the machine is **removed as a kill** (normal XP/gold, credited to her) **plus salvage** (`EnemySO.SalvageTable`, Scrap Iron / Slag Coal); a failure costs the turn |
+| Disassemble odds | **25% + 5% per Bestiary kill of that enemy, at most 90%; half on a boss** (`DisassembleOps`). Only `UnitTraits.Mechanical` targets |
+| the elemental spells | moved to a **stub Mage grid** (`MageGrid.asset`, the old Tinkerer grid re-keyed `mage-*`), so every spell stays taught; the Mage is still off the roster |
+| machine enemies | two new ones, **Clockwork Sentry** and **Steam Automaton**, in a new **Clockwork Foundry** room in the Ashen Deep's Slag Halls (the first run after she joins); the Stone Sentinel is tagged `Construct`, not Mechanical |
+
+**The grid** (`TinkererGrid.asset`, 36 nodes, the Warlock's cost ladder): trunk Disassemble (3 charges,
+free) → INT/HP/END → slot, and **Patch Kit** (INT heal) off the slot. **a** Rivet Gun → Steam Burst →
+**Warrior Mech** (350 + 3 Scrap Iron + 1 Void Shard); **b** Oil Flask → Gear Jam (damage + 60% turn
+delay) → **Oil Spewing Mech** (+ 3 Rotted Timber); **c** Flare Cannon → Incendiary Bomb → **Flamethrower
+Mech** (+ 3 Slag Coal). Every ability scales off Intelligence, her stat. A mech is a `JoinParty`
+`SummonSO` with `UsesTags` on, so its Oil and Fire abilities lay tags and set off **Ignite** like a
+hero's cast - the oil branch feeds the fire branch.
+
+**Open:**
+- **The Fire Cloak is unobtainable for now.** It was the Ashen Deep's intended answer and the reason
+  she joins before that run; it moved to the Mage with the other elemental spells, and the Mage has no
+  unlock. Her branch c has a 15% Fire resistance node. Decide: Mage on the roster, the cloaks back on
+  her as field kit, or a different answer for the Ashen Deep.
+- **The mechs are probably strong** - the first sandbox run had the Warrior Mech's Piston Punch
+  one-shot a Clockwork Sentry for 48 off a full grid. First-draft numbers; the balance pass decides.
+- **Unit traits** exist (`UnitTraits`: Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental)
+  but only the three machines carry any. Tag the rest when something reads them.
+
 #### The Mage — an elemental caster *(planned 2026-10-04)*
+
+> **2026-10-07:** the elemental spells moved here when the Tinkerer was rebuilt - `MageGrid.asset`
+> is the old Tinkerer grid, re-keyed. Still no roster slot and no unlock.
 
 The owner's call: once the Tinkerer is redefined (gadgets, not an elemental mage), **no hero teaches
 the elemental spells**, and `ElementalContentTests.EveryMagicInTheCatalog_IsTaughtBySomeSphereGrid`

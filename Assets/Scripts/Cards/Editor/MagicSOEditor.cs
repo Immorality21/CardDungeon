@@ -41,7 +41,8 @@ public class MagicSOEditor : Editor
             }
             else if (effectType == SpellEffectType.TurnDelay
                      || effectType == SpellEffectType.Drain
-                     || effectType == SpellEffectType.RestoreCharge)
+                     || effectType == SpellEffectType.RestoreCharge
+                     || effectType == SpellEffectType.Disassemble)
             {
                 // EffectType + Power (percent of a turn / percent of the damage / charges) + UnlockLevel
                 lines = 3;
@@ -92,7 +93,8 @@ public class MagicSOEditor : Editor
             // A turn delay is a percentage of the target's own turn: no caster stat goes into it.
             // Neither does a drain (a percentage of the damage dealt) or a charge restore (a count).
             if (effectType != SpellEffectType.HealthCost && effectType != SpellEffectType.TurnDelay
-                && effectType != SpellEffectType.Drain && effectType != SpellEffectType.RestoreCharge)
+                && effectType != SpellEffectType.Drain && effectType != SpellEffectType.RestoreCharge
+                && effectType != SpellEffectType.Disassemble)
             {
                 EditorGUI.PropertyField(
                     new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),

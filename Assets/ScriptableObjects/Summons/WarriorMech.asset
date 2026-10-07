@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8167baed5bc052409b86b3942399fa5, type: 3}
+  m_Name: WarriorMech
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
+  Key: WarriorMech
+  DisplayName: Warrior Mech
+  Description: Brass plate, piston fists and a boiler for a heart. It hits hard and
+    takes harder.
+  Sprite: {fileID: 21300000, guid: 2f8389e69b00452bad68fde0b427266e, type: 3}
+  AnimationFrames:
+  - {fileID: 21300000, guid: 7074dffe07634f67aaf86f6ae2c5dbdf, type: 3}
+  - {fileID: 21300000, guid: db2c89d4b7e14d58a758b50c38e621a0, type: 3}
+  - {fileID: 21300000, guid: 6cd2aad8e63f47868892bab78169b9ad, type: 3}
+  AnimationFps: 4
+  Facing: 0
+  ArrivalSound: {fileID: 0}
+  ArrivalSoundVolume: 0.9
+  Kind: 2
+  TargetType: 0
+  Effects: []
+  RandomTargetEffects: []
+  SummonerHealthCostPercent: 0
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  Triggers: []
+  Flinches: 0
+  HitFrames: []
+  BaseCharges: 1
+  StatPercents:
+    Values:
+    - Type: 7
+      Amount: 170
+    - Type: 1
+      Amount: 100
+    - Type: 2
+      Amount: 160
+    - Type: 3
+      Amount: 100
+    - Type: 4
+      Amount: 130
+    - Type: 5
+      Amount: 100
+    - Type: 6
+      Amount: 50
+  CopySummonerResistances: 1
+  TurnsActive: 99
+  Actions: []
+  Signature: {fileID: 11400000, guid: 852982d87ccda224cb7affa3e383ec1b, type: 2}
+  AttackAbility: {fileID: 11400000, guid: 1964d3dd573507e459df809ff3bc19d8, type: 2}
+  UsesTags: 1
+  MountedFrames:
+  - {fileID: 21300000, guid: 7e4e2346c34547188ceca40a9e23e770, type: 3}
+  - {fileID: 21300000, guid: aa3250ed73734e9b9c0283c721569ba9, type: 3}
+  - {fileID: 21300000, guid: f1dd7190be794093879962ae17290537, type: 3}
+  RotateActions: 0
+  SquadTiers: []
+  SquadSize: 3
+  MaxSquadSize: 4

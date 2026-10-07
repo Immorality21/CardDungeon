@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: ClockworkSentry
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: ClockworkSentry
+  DisplayName: Clockwork Sentry
+  Sprite: {fileID: 21300000, guid: ac4b5497191844ff8cd117af8ffaeedb, type: 3}
+  AnimationFrames:
+  - {fileID: 4550001729334824978, guid: 8c5d937aa93d4ec5b386ce7c1a51a58c, type: 3}
+  - {fileID: -2993420055968670611, guid: 8c5d937aa93d4ec5b386ce7c1a51a58c, type: 3}
+  - {fileID: -1661779607858381465, guid: 8c5d937aa93d4ec5b386ce7c1a51a58c, type: 3}
+  AnimationFps: 4
+  HitFrames:
+  - {fileID: 1366805091603586275, guid: dc06dcf37b024fc7b8ac61526651a85c, type: 3}
+  - {fileID: -3942002688922841963, guid: dc06dcf37b024fc7b8ac61526651a85c, type: 3}
+  IsBoss: 0
+  CombatScale: 1
+  Traits: 1
+  BaseStats:
+    Values:
+    - Type: 7
+      Amount: 12
+    - Type: 1
+      Amount: 4
+    - Type: 2
+      Amount: 4
+    - Type: 3
+      Amount: 5
+    - Type: 6
+      Amount: 2
+  XpReward: 10
+  GoldReward: 5
+  AttackDamageType: 0
+  Archetype: 0
+  Behavior: {fileID: 11400000, guid: e39746458aa1a9349a14f391d883c636, type: 2}
+  Spells: []
+  Resistances:
+  - DamageType: 3
+    Percent: -50
+  - DamageType: 1
+    Percent: 25
+  StatusImmunities: 1100000010000000
+  LootTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
+    Chance: 0.4
+    MinQuantity: 1
+    MaxQuantity: 1
+  SalvageTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
+    Chance: 1
+    MinQuantity: 1
+    MaxQuantity: 2
+  - Item: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
+    Chance: 0.3
+    MinQuantity: 1
+    MaxQuantity: 1
+  Triggers: []
+  Flinches: 1

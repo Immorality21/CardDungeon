@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: SteamAutomaton
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: SteamAutomaton
+  DisplayName: Steam Automaton
+  Sprite: {fileID: 21300000, guid: 792c3b450b0d4ac8b93bc863e29a1e81, type: 3}
+  AnimationFrames:
+  - {fileID: 1055341637942373122, guid: e6966f954b5d4233b8913c6796639de1, type: 3}
+  - {fileID: 840477633072632294, guid: e6966f954b5d4233b8913c6796639de1, type: 3}
+  - {fileID: 3905912178139923620, guid: e6966f954b5d4233b8913c6796639de1, type: 3}
+  AnimationFps: 4
+  HitFrames:
+  - {fileID: -3753308946079837470, guid: e34fee44f11140da8ef42cec4eebb3db, type: 3}
+  - {fileID: 3511712042358370120, guid: e34fee44f11140da8ef42cec4eebb3db, type: 3}
+  IsBoss: 0
+  CombatScale: 1
+  Traits: 1
+  BaseStats:
+    Values:
+    - Type: 7
+      Amount: 22
+    - Type: 1
+      Amount: 6
+    - Type: 2
+      Amount: 6
+    - Type: 3
+      Amount: 2
+    - Type: 5
+      Amount: 1
+  XpReward: 16
+  GoldReward: 8
+  AttackDamageType: 0
+  Archetype: 1
+  Behavior: {fileID: 11400000, guid: 4e488eb6f46ea754c8935d9ba246b19c, type: 2}
+  Spells: []
+  Resistances:
+  - DamageType: 1
+    Percent: 50
+  - DamageType: 3
+    Percent: -50
+  - DamageType: 2
+    Percent: -25
+  StatusImmunities: 1100000010000000
+  LootTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
+    Chance: 0.4
+    MinQuantity: 1
+    MaxQuantity: 2
+  SalvageTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
+    Chance: 1
+    MinQuantity: 2
+    MaxQuantity: 3
+  - Item: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
+    Chance: 0.6
+    MinQuantity: 1
+    MaxQuantity: 2
+  Triggers: []
+  Flinches: 0

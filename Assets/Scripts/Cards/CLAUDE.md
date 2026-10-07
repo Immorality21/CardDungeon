@@ -86,6 +86,18 @@ hides Scaling Stat for it.
   ability with "nothing spent" when there is nothing to refill, rather than charging its price for
   nothing. Charges are a run resource that only a refuge restores, so price a restore in health.
 
+## `Disassemble`: the Tinkerer takes a machine apart *(2026-10-07)*
+
+`SpellEffectType.Disassemble` (`DisassembleEffectExecutor`): each target that is
+`UnitTraits.Mechanical` rolls once against `DisassembleOps.Chance(kills, isBoss)` - **25% + 5% per
+Bestiary kill of that enemy, at most 90%, halved on a boss**. A success puts it down through
+`HealthOps.Set(..., HealthCause.Disassemble)`, so it is an ordinary kill credited to the caster, and
+`CombatManager.HandleEnemyDeath` rolls its `EnemySO.SalvageTable` on top of its loot for that cause.
+A failure floats "Failed (25%)"; a target that is not a machine, "Not a machine". `Power` is unused.
+The kill count comes from **`EffectResolver.KillsOf`** (the Bestiary, set by `CombatManager`; null
+elsewhere, which reads every machine as never defeated - the cautious odds the balance model uses),
+and the roll from **`EffectResolver.Roll`** (null = `Random.Range(0f, 1f)`; tests pin it).
+
 ## Resistance buffs
 
 The five resistance `BuffType`s were a **no-op** until 2026-08-25: `ResistanceBuffHandler.Apply` was an empty method, so a cloak showed "+40 FireResistance" and changed nothing. They now go through `CombatBuffTracker.ApplyResistance` / `GetResistanceBonus`.
@@ -388,6 +400,23 @@ Two consequences worth holding on to:
   falls through `HealthOps.Set` and `ResolveDeaths`, credited to the Cultist. The defeat check stays
   heroes-only. Sim: `SimAllies.ArriveStandIn` (guests and stand-ins in two lists there too), policy in
   `SimUltras.SacrificeVictim`.
+  **A fourth kind, `Mount`** (the Tinkerer's mechs, 2026-10-07): `UltraSO.Mech` (a `JoinParty`
+  `SummonSO`) is assembled where the hero stands and she climbs in - she is hidden (sprite and bar,
+  `CombatManager.SetRiderShown`) and the mech plays `SummonSO.MountedFrames`, the mech with her drawn
+  aboard. It is one of `_allies` (its own menu, enemies may hit it, it goes when she falls) and is
+  also in `CombatManager._mounts`, which changes three things: it **takes every blow aimed at her**
+  (`CombatEvents.Guards`, see the Combat guide), it **acts at once and then straight after each of her
+  turns** (`TurnManager.Follow` - no clock of its own), and it has **no turn limit** (it stays until it
+  breaks or the fight ends; using the Ultra again rebuilds it). It is kept out of the vanguard column
+  (`ColumnAllies`). **A party-replacing summon replaces it too** (owner): it steps out with the party
+  through `HideUnits`, frozen behind her suspended clock, and comes back ridden; other guests are sent
+  home as before. Sim: `SimAllies.ArriveMount` / `MountOf`, `DismissAll` skips mechs, and
+  `SimUltras.Ready` holds the gauge while she already rides.
+- **A summon's abilities can lay tags** *(2026-10-07)*: `SummonSO.UsesTags` makes
+  `ExecuteSummonAbility` (and the sim's `TakeReplacementTurn`) pass the tag tracker and combo detector,
+  and marks triggered combos discovered - so the Oil mech's oil and the Flamethrower mech's fire make
+  **Ignite**. Off for every other summon, which still resolve tagless. A mech's Attack and Signature
+  are listed by `UltraOps.AbilityKeys`, so they never count as a hero's magic.
 - **A replacement's own Attack** *(2026-10-01)*: `SummonSO.AttackAbility` (optional, a single-enemy
   `MagicSO`) is what its Attack command does instead of the plain Strength swing. The row still says
   *Attack*, **Silence never closes it** (`ExecuteSummonAbility` exempts it), the sim swings it, and
@@ -433,7 +462,7 @@ Two consequences worth holding on to:
 
 ## UI (`Cards/UI`)
 
-- **MagicSelectionUI** (was `CardSelectionUI`): the in-combat picker, and now also the enemy knowledge page. Three panels: one lists the hero's equipped slots (name + charges) for casting; one picks a combat unit (cast target, attack target, or Inspect subject); and `#inspect-panel` is the **Inspect** page itself, rendered through `BestiaryPresenter`/`BestiaryLineView` (see the Enemies guide). Attack targeting also routes through this component. Inspect is the odd one out in that it **submits nothing** — it hands the turn straight back (see the Rooms guide), and its page is read-and-dismissed rather than cursor-navigated, so every confirm/cancel key closes it. Rows are a **cursor-driven selection list** styled like the command menu (`.cd-sel-row` + `▸`), navigable by keyboard/controller (Up/Down/Enter/Esc) — its panel root is made `focusable` only while a picker is open (see the focus-ownership invariant in the Rooms guide). **Single-target bypass:** with only one valid target, Cast/Attack skip the target picker and act directly (fewer clicks). **The list has a description footer** (`#list-desc`): the selected row's text, following the cursor and the mouse. For an ability it is `AbilityDescriber.Full` — the authored `Description` (flavour; it rarely states mechanics) plus a line generated from the effects: who it hits, damage/heal *before* defense with the caster's stat folded in, **the hero's raw Attack beside any damage** so the comparison the player is making is on screen, and each status with its duration (and a gloss for Frozen/Slow/Haste/Silenced, whose names do not say what they do). Generated rather than authored so it cannot drift from the spell; `AbilityDescriberTests` fails on any catalog spell that describes no effect. Items show their `Description`, summons `SummonOps.Describe`. *(The three-mode Draw flow — `DrawTarget` → `DrawChoice` → `DrawPlacement` — was deleted with the mechanic.)*
+- **MagicSelectionUI** (was `CardSelectionUI`): the in-combat picker, and now also the enemy knowledge page. Three panels: one lists the hero's equipped slots (name + charges) for casting; one picks a combat unit (cast target, attack target, or Inspect subject); and `#inspect-panel` is the **Inspect** page itself, rendered through `BestiaryPresenter`/`BestiaryLineView` (see the Enemies guide). Attack targeting also routes through this component. Inspect is the odd one out in that it **submits nothing** — it hands the turn straight back (see the Rooms guide), and its page is read-and-dismissed rather than cursor-navigated, so every confirm/cancel key closes it. Rows are a **cursor-driven selection list** styled like the command menu (`.cd-sel-row` + `▸`), navigable by keyboard/controller (Up/Down/Enter/Esc) — its panel root is made `focusable` only while a picker is open (see the focus-ownership invariant in the Rooms guide). **Single-target bypass:** with only one valid target, Cast/Attack skip the target picker and act directly (fewer clicks). **The list has a description footer** (`#list-desc`): the selected row's text, following the cursor and the mouse. For an ability it is `AbilityDescriber.Full(..., withDescription: false)` — **no flavour text in combat** (owner, 2026-10-07: in-combat text stays minimal; the authored `Description` shows on the hub screens), only lines generated from the effects: who it hits, damage/heal *before* defense with the caster's stat folded in, **the hero's raw Attack beside any damage** so the comparison the player is making is on screen, and each status with its duration (and a gloss for Frozen/Slow/Haste/Silenced, whose names do not say what they do). Generated rather than authored so it cannot drift from the spell; `AbilityDescriberTests` fails on any catalog spell that describes no effect. Items show their `Description`, summons `SummonOps.Describe`. *(The three-mode Draw flow — `DrawTarget` → `DrawChoice` → `DrawPlacement` — was deleted with the mechanic.)*
 - **MagicForgeUI** (was `CardUpgradeUI`): the hub "Forge" — Abilities / Combos tabs on the inventory frame (2026-09-30): the *known* entries as a list, undiscovered ones folded into one count row, the chosen one's detail always beside it. **Only combos upgrade** (with Upgrade and the reason it is dimmed); the Abilities tab is a read-only collection since 2026-10-06. Effect text is **`AbilityDescriber.ForgeLine`** (no caster: it names the scaling stat, and previews the next level's number), so the Forge and the combat picker cannot word the same spell differently. See the Progression guide.
 - **The loadout screen is not here.** Which known spells a hero carries is chosen on the hub **Inventory** screen's **Abilities** tab (`Items/UI/InventoryHubUI`), beside their gear — both are between-run equipment decisions. The tab shows the slots as pips, what is carried, and each ability's effect worked out for that hero; when the slots are full it says which pick a new one would put away (`MagicLoadoutOps.Toggle` drops the oldest). The Forge is a *collection*; the loadout is a *kit*.
 - **Mid-run the hub shows the run's kit, not the loadout** (2026-10-02). `MagicLoadoutOps.RunKit(runEntry, known, chosen, slots)` is the next floor's slots: the run's own (`RunKitSource.Load`, which reads the paused floor's save when there is one and `Run.json` otherwise), spent charges and all, then loadout picks in the empty slots at full charges. It mirrors `Restore` + `SeedFromLoadout`. A spell the run holds reads "In this run" and cannot be put away until the run ends; `MagicLoadoutOps.ToggleMidRun` only moves the free slots. Otherwise swapping a spent spell for a fresh one between floors would be the charge cheese the party lock closed. The Storehouse and the campfire both read it.

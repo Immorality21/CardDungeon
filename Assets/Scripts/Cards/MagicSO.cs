@@ -113,6 +113,9 @@ namespace Assets.Scripts.Cards
                     case SpellEffectType.RestoreCharge:
                         sb.Append($"+{effect.Power} charge");
                         break;
+                    case SpellEffectType.Disassemble:
+                        sb.Append("Disassemble");
+                        break;
                 }
             }
 

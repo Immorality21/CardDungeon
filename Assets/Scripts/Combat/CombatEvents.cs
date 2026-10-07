@@ -17,6 +17,9 @@ namespace Assets.Scripts.Combat
     /// </summary>
     public sealed class CombatEvents : EventStream
     {
+        /// <summary>Who is shielding whom in this fight (a mech its rider). Lives with the stream so
+        /// the live fight and the simulator share it, and goes with the fight.</summary>
+        public GuardTable Guards { get; } = new GuardTable();
     }
 
     // ------------------------------------------------------------------ the events themselves

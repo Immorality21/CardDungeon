@@ -288,7 +288,7 @@ namespace Assets.Scripts.Balance
             // Summons fighting beside the party (SummonKind.JoinParty), one per summoner. They join
             // the side the enemies pick from, but never keep a fight going on their own: the loop
             // ends when the party is down, as CombatManager.HasAliveHeroes does.
-            var allies = new SimAllies(turnManager, enemies);
+            var allies = new SimAllies(turnManager, enemies) { Events = events };
 
             // Ultras (COMBAT_DEPTH §13): every gauge starts the fight empty, read once per turn.
             var ultras = new SimUltras(heroes) { Events = events };
@@ -380,7 +380,7 @@ namespace Assets.Scripts.Balance
                 }
                 else if (actingAlly != null)
                 {
-                    TakeAllyTurn(actingAlly, enemies, buffTracker, resolver, allies.With(heroes));
+                    TakeAllyTurn(actingAlly, enemies, buffTracker, resolver, allies.With(heroes), tagTracker, comboDetector);
                 }
                 else if (actor.IsHero)
                 {
@@ -548,9 +548,10 @@ namespace Assets.Scripts.Balance
         /// <summary>An ally plays as a replacement does: its Signature first, then its Attack on the
         /// weakest enemy. The rest of the bookkeeping is <see cref="SimAllies"/>.</summary>
         private static void TakeAllyTurn(SimAlly ally, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver,
-            List<SimUnit> side)
+            List<SimUnit> side, MagicTagTracker tagTracker = null, ComboDetector comboDetector = null)
         {
-            TakeReplacementTurn(new SimReplacement { Unit = ally.Unit, Stay = ally.Stay, Attack = ally.Attack }, enemies, buffTracker, resolver, side);
+            TakeReplacementTurn(new SimReplacement { Unit = ally.Unit, Stay = ally.Stay, Attack = ally.Attack }, enemies, buffTracker, resolver, side,
+                tagTracker, comboDetector);
         }
 
         /// <summary>
@@ -621,8 +622,15 @@ namespace Assets.Scripts.Balance
         /// </summary>
         private static void TakeReplacementTurn(
             SimReplacement replacement, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver,
-            List<SimUnit> side)
+            List<SimUnit> side, MagicTagTracker tagTracker = null, ComboDetector comboDetector = null)
         {
+            // A mech's abilities lay tags and set off combos (SummonSO.UsesTags), as in
+            // CombatManager.ExecuteSummonAbility; every other summon's resolve tagless.
+            if (replacement.Stay.Summon == null || !replacement.Stay.Summon.UsesTags)
+            {
+                tagTracker = null;
+                comboDetector = null;
+            }
             var unit = replacement.Unit;
             side = side ?? new List<SimUnit> { unit };
             bool silenced = buffTracker.HasStatusEffect(unit, BuffType.Silenced);
@@ -633,7 +641,8 @@ namespace Assets.Scripts.Balance
                 if (targets.Count > 0)
                 {
                     replacement.Stay.MarkSignatureUsed();
-                    resolver.Execute(new SpellcastAction { Magic = signature, Caster = unit, Targets = targets }, buffTracker);
+                    resolver.Execute(new SpellcastAction { Magic = signature, Caster = unit, Targets = targets }, buffTracker,
+                        tagTracker, comboDetector);
                     return;
                 }
             }
@@ -644,7 +653,8 @@ namespace Assets.Scripts.Balance
             // A rite aimed at the party (the Blood Idol's) lands on the side, not on an enemy.
             if (attack != null && attack.TargetType != MagicTargetType.SingleEnemy && attack.TargetType != MagicTargetType.AllEnemies)
             {
-                resolver.Execute(new SpellcastAction { Magic = attack, Caster = unit, Targets = ResolveTargets(attack, unit, side, enemies) }, buffTracker);
+                resolver.Execute(new SpellcastAction { Magic = attack, Caster = unit, Targets = ResolveTargets(attack, unit, side, enemies) }, buffTracker,
+                    tagTracker, comboDetector);
                 return;
             }
             var target = WeakestAlive(enemies);
@@ -657,7 +667,7 @@ namespace Assets.Scripts.Balance
                 resolver.Execute(new SpellcastAction
                 {
                     Magic = attack, Caster = unit, Targets = new List<ICombatUnit> { target }
-                }, buffTracker);
+                }, buffTracker, tagTracker, comboDetector);
                 return;
             }
             ResolveAttack(unit, target, buffTracker);
@@ -1239,7 +1249,7 @@ namespace Assets.Scripts.Balance
             // Ultra open; the form's ability is a cast and Silence closes it.
             if (settings.Policy != SimPolicy.AttackOnly && ultras != null)
             {
-                var ready = ultras.Ready(hero, heroes);
+                var ready = ultras.Ready(hero, heroes, allies);
                 if (ready != null)
                 {
                     ultras.Use(hero, ready, side, enemies, buffTracker, resolver, heroes, allies, turnManager);
@@ -1721,6 +1731,11 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static int ResolveAttack(SimUnit attacker, SimUnit target, CombatBuffTracker buffTracker, float multiplier = 1f)
         {
+            // A rider's blows land on her mech, as in CombatManager.ExecuteAttack (GuardTable).
+            if (buffTracker.Events != null && buffTracker.Events.Guards.Redirect(target) is SimUnit guard)
+            {
+                target = guard;
+            }
             if (DefenseRules.RollDodge(target))
             {
                 return 0;
