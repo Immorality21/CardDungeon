@@ -380,6 +380,24 @@ namespace Assets.Scripts.Items
             return SumBonuses(perItem, bonusType);
         }
 
+        /// <summary>Sums the bonuses of the given type across worn copies, each with the milestones
+        /// its own entry has reached - what the hero actually fights with.</summary>
+        public static Dictionary<StatType, float> ComputeBonuses(IEnumerable<GearPiece> gear, BonusType bonusType)
+        {
+            var perItem = new List<IEnumerable<ItemBonus>>();
+            if (gear != null)
+            {
+                foreach (var piece in gear)
+                {
+                    if (piece != null)
+                    {
+                        perItem.Add(piece.Bonuses);
+                    }
+                }
+            }
+            return SumBonuses(perItem, bonusType);
+        }
+
         /// <summary>Sums the bonuses of the given type over each item's list of bonuses.</summary>
         public static Dictionary<StatType, float> SumBonuses(IEnumerable<IEnumerable<ItemBonus>> perItem, BonusType bonusType)
         {

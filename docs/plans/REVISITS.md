@@ -92,7 +92,7 @@ Verified 2026-10-06 in play mode, against a throwaway save folder: picker by key
 the entry screen ("Revisit, Fear level 6"), and a live floor where enemy health was ×2, every fight had
 its extra foe, and XP per kill was ×1.85. Suite 1,329 / 0.
 
-**The first playtest** (2026-10-06, `docs/playtest-revisit/TODO.md`) found Fear level 0 trivial for the party
+**The first playtest** (2026-10-06; its folder was deleted 2026-10-07, the balance observations live in `BALANCE_OPEN.md` §0) found Fear level 0 trivial for the party
 that had just cleared the run, and nothing tying the revisit or a loss to the sphere grid. Fixed the same
 day: the picker defines Fear level and names the Hall of Progression, the entry screen spells out the Fear level
 (`RevisitOps.Summary`), the run-complete screen names the Fear level and the bonus instead of re-listing

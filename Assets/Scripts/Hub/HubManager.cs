@@ -1179,7 +1179,7 @@ namespace Assets.Scripts.Hub
                 var nodes = save != null && save.ActivatedNodes != null ? save.ActivatedNodes : new List<string>();
                 var stats = Balance.HeroStatCalculator.WithGear(
                     Balance.HeroStatCalculator.BaseStatsForNodes(hero, nodes),
-                    InventoryManager.Instance.GetEquippedItems(hero.SaveKey));
+                    InventoryManager.Instance.GetEquippedGear(hero.SaveKey));
                 var hp = new Label($"HP {stats[UnitStats.StatType.MaxHealth]}") { pickingMode = PickingMode.Ignore };
                 hp.AddToClassList("hub-entry__hero-hp");
                 tile.Add(hp);

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Balance;
 using Assets.Scripts.Events;
 using Assets.Scripts.Items;
+using Assets.Scripts.Rooms;
 using Assets.Scripts.UnitStats;
 using NUnit.Framework;
 using UnityEngine;
@@ -88,6 +90,66 @@ namespace Tests.EditMode
             var raw = InventoryOperations.ComputeBonuses(new[] { _sword }, BonusType.Raw);
 
             Assert.AreEqual(4f, raw[StatType.Strength]);
+        }
+
+        // ------------------------------------------------------------------ what the hub shows
+
+        private static Stats TenStrength()
+        {
+            return new Stats(new StatBlock(new UnitStat(StatType.MaxHealth, 30), new UnitStat(StatType.Strength, 10)));
+        }
+
+        private GearPiece GrownSword()
+        {
+            var entry = new ItemSaveData { ItemKey = _sword.Key };
+            ItemGrowth.Add(entry, ItemGrowth.KeyOf(ItemCounterKind.Kills), 50);
+            return new GearPiece(_sword, entry);
+        }
+
+        [Test]
+        public void WithGear_AGrownCopy_ShowsWhatItFightsWith()
+        {
+            var stats = HeroStatCalculator.WithGear(TenStrength(), new[] { GrownSword() });
+
+            Assert.AreEqual(17, stats[StatType.Strength], "10 base + the sword's 4 + the 50-kill milestone's 3");
+        }
+
+        [Test]
+        public void WithGear_AFreshCopy_MatchesTheBalanceModelsView()
+        {
+            var fresh = HeroStatCalculator.WithGear(TenStrength(), new[] { new GearPiece(_sword, null) });
+            var model = HeroStatCalculator.WithGear(TenStrength(), new[] { _sword });
+
+            Assert.AreEqual(model[StatType.Strength], fresh[StatType.Strength]);
+            Assert.AreEqual(14, fresh[StatType.Strength]);
+        }
+
+        [Test]
+        public void SwapIn_KeepsTheGrowthOfWhatStaysOn_AndBringsTheCandidates()
+        {
+            _sword.SlotType = SlotType.MainHand;
+            var helm = ScriptableObject.CreateInstance<ItemSO>();
+            try
+            {
+                helm.Key = "helm";
+                helm.SlotType = SlotType.Head;
+                var worn = new List<GearPiece> { GrownSword() };
+
+                var withHelm = ItemPresenter.SwapIn(worn, new GearPiece(helm, null));
+                var freshSword = ItemPresenter.SwapIn(worn, new GearPiece(_sword, null));
+
+                Assert.AreEqual(17, HeroStatCalculator.WithGear(TenStrength(), withHelm)[StatType.Strength],
+                    "the grown sword stays on beside the helm");
+                Assert.AreEqual(14, HeroStatCalculator.WithGear(TenStrength(), freshSword)[StatType.Strength],
+                    "a fresh copy replaces the grown one in its slot");
+                Assert.AreEqual(10, HeroStatCalculator.WithGear(TenStrength(),
+                    ItemPresenter.SwapOut(worn, SlotType.MainHand))[StatType.Strength]);
+                Assert.AreEqual(1, worn.Count, "the input list is not modified");
+            }
+            finally
+            {
+                Object.DestroyImmediate(helm);
+            }
         }
 
         [Test]

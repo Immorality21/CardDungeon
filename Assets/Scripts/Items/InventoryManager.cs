@@ -538,19 +538,31 @@ namespace Assets.Scripts.Items
             return InventoryOperations.ComputeResistances(GetEquippedItems(heroKey));
         }
 
+        /// <summary>Every copy a hero has equipped, each with its own save entry - so a grown item
+        /// counts its reached milestones. Use this, not <see cref="GetEquippedItems"/>, for any stat
+        /// a hero fights with.</summary>
+        public List<GearPiece> GetEquippedGear(string heroKey)
+        {
+            var gear = new List<GearPiece>();
+            if (heroKey != null && _equipped.TryGetValue(heroKey, out var slots))
+            {
+                foreach (var entry in slots.Values)
+                {
+                    var so = GetItemSO(entry.ItemKey);
+                    if (so != null)
+                    {
+                        gear.Add(new GearPiece(so, entry));
+                    }
+                }
+            }
+            return gear;
+        }
+
         /// <summary>The hero's gear bonuses of one type, each item with the milestones its own entry
         /// has reached (<see cref="ItemGrowth"/>).</summary>
         private Dictionary<StatType, float> ComputeBonuses(string heroKey, BonusType bonusType)
         {
-            var perItem = new List<IEnumerable<ItemBonus>>();
-            if (_equipped.TryGetValue(heroKey, out var slots))
-            {
-                foreach (var entry in slots.Values)
-                {
-                    perItem.Add(ItemGrowth.BonusesOf(GetItemSO(entry.ItemKey), entry));
-                }
-            }
-            return InventoryOperations.SumBonuses(perItem, bonusType);
+            return InventoryOperations.ComputeBonuses(GetEquippedGear(heroKey), bonusType);
         }
 
         public void Save()

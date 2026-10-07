@@ -567,8 +567,8 @@ namespace Assets.Scripts.Heroes.UI
             // With gear, so the numbers match the Storehouse and the fight. Base-only previews said
             // "Health 38 -> 48" while the Storehouse said 56 (revisit playtest finding 11).
             var gear = Items.InventoryManager.HasInstance
-                ? Items.InventoryManager.Instance.GetEquippedItems(_selectedHero.SaveKey)
-                : new List<Items.ItemSO>();
+                ? Items.InventoryManager.Instance.GetEquippedGear(_selectedHero.SaveKey)
+                : new List<Items.GearPiece>();
             var before = HeroStatCalculator.WithGear(HeroStatCalculator.BaseStatsForNodes(_selectedHero, without), gear);
             var after = HeroStatCalculator.WithGear(HeroStatCalculator.BaseStatsForNodes(_selectedHero, with), gear);
 

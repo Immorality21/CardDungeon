@@ -49,7 +49,7 @@ namespace Assets.Scripts.Items.UI
             public Action Confirm;
 
             /// <summary>The loadout this entry would leave the hero in (equipment list only).</summary>
-            public List<ItemSO> Gear;
+            public List<GearPiece> Gear;
         }
 
         private readonly VisualElement _root;
@@ -505,7 +505,7 @@ namespace Assets.Scripts.Items.UI
                     Gear = ItemPresenter.SwapOut(CurrentGear(), slot),
                     Preview = () => ShowItemDetail(worn, SlotRemovalPreview(slot),
                         $"Taking it off leaves the {ItemPresenter.SlotLabel(slot).ToLowerInvariant()} slot empty.",
-                        removing: true),
+                        InventoryManager.Instance.GetEquipped(slot, _selectedHeroKey), removing: true),
                     Confirm = () => Unequip(slot),
                 };
                 remove.Row = BuildRow(null, "Take off " + worn.DisplayName, "Leave the slot empty",
@@ -536,19 +536,21 @@ namespace Assets.Scripts.Items.UI
             }
 
             // One row per kind of item, with a count: six loose Leather Caps were six identical rows
-            // (revisit playtest finding 11). Equipping takes the first copy.
+            // (revisit playtest finding 11). Equipping takes the first copy. A copy that has counted
+            // anything (ItemGrowth) is not identical to a fresh one, so it gets a row of its own.
             var bagOrder = new List<string>();
             var bagFirst = new Dictionary<string, ItemSaveData>();
             var bagCount = new Dictionary<string, int>();
             foreach (var item in bag)
             {
-                if (!bagFirst.ContainsKey(item.ItemKey))
+                string group = CopyGroup(item);
+                if (!bagFirst.ContainsKey(group))
                 {
-                    bagOrder.Add(item.ItemKey);
-                    bagFirst[item.ItemKey] = item;
-                    bagCount[item.ItemKey] = 0;
+                    bagOrder.Add(group);
+                    bagFirst[group] = item;
+                    bagCount[group] = 0;
                 }
-                bagCount[item.ItemKey]++;
+                bagCount[group]++;
             }
             foreach (var key in bagOrder)
             {
@@ -568,10 +570,30 @@ namespace Assets.Scripts.Items.UI
             }
         }
 
+        /// <summary>What makes two loose copies interchangeable: the item and everything it has
+        /// counted. Fresh copies count nothing, so they still stack.</summary>
+        private static string CopyGroup(ItemSaveData item)
+        {
+            if (item.Counters == null || item.Counters.Count == 0)
+            {
+                return item.ItemKey;
+            }
+            var parts = new List<string>();
+            foreach (var counter in item.Counters)
+            {
+                if (counter != null && counter.Value != 0)
+                {
+                    parts.Add(counter.Key + "=" + counter.Value);
+                }
+            }
+            parts.Sort(StringComparer.Ordinal);
+            return parts.Count == 0 ? item.ItemKey : item.ItemKey + "|" + string.Join(",", parts);
+        }
+
         private void AddCandidate(ItemSaveData item, string wornBy, int copies = 1)
         {
             var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
-            var gear = ItemPresenter.SwapIn(CurrentGear(), so);
+            var gear = ItemPresenter.SwapIn(CurrentGear(), new GearPiece(so, item));
             var preview = StatsWith(gear);
             var current = StatsWith(CurrentGear());
 
@@ -579,7 +601,7 @@ namespace Assets.Scripts.Items.UI
             {
                 Gear = gear,
                 Preview = () => ShowItemDetail(so, preview,
-                    wornBy != null ? $"Worn by {wornBy} - equipping it takes it from them." : null),
+                    wornBy != null ? $"Worn by {wornBy} - equipping it takes it from them." : null, item),
                 Confirm = () => Equip(item, so),
             };
 
@@ -683,9 +705,10 @@ namespace Assets.Scripts.Items.UI
             return saved != null ? InventoryManager.Instance.GetItemSO(saved.ItemKey) : null;
         }
 
-        private List<ItemSO> CurrentGear()
+        /// <summary>What the selected hero wears, copy by copy, so grown items count their milestones.</summary>
+        private List<GearPiece> CurrentGear()
         {
-            return InventoryManager.Instance.GetEquippedItems(_selectedHeroKey);
+            return InventoryManager.Instance.GetEquippedGear(_selectedHeroKey);
         }
 
         private StatBlock SlotRemovalPreview(SlotType slot)
@@ -1034,7 +1057,8 @@ namespace Assets.Scripts.Items.UI
         /// An item to put on (or the slot to empty): its description and bonuses, then every stat
         /// as it is now against what it would be.
         /// </summary>
-        private void ShowItemDetail(ItemSO item, StatBlock preview, string note, bool removing = false)
+        private void ShowItemDetail(ItemSO item, StatBlock preview, string note, ItemSaveData entry = null,
+            bool removing = false)
         {
             if (item == null)
             {
@@ -1044,7 +1068,7 @@ namespace Assets.Scripts.Items.UI
 
             SetDetailHead(item.Icon, item.DisplayName,
                 $"{ItemPresenter.SlotLabel(item.SlotType)} · {ItemPresenter.RarityLabel(item.Rarity)}", item);
-            AddItemLines(item);
+            AddItemLines(item, entry);
             if (!string.IsNullOrEmpty(note))
             {
                 AddNote(note);
@@ -1222,11 +1246,11 @@ namespace Assets.Scripts.Items.UI
             var nodeResist = hero != null
                 ? SphereGridOps.ResistancesForNodes(hero.SphereGrid, ActivatedNodesOf(hero))
                 : null;
-            var resistNow = ItemPresenter.SumResistances(CurrentGear(), nodeResist);
+            var resistNow = ItemPresenter.SumResistances(GearPiece.ItemsOf(CurrentGear()), nodeResist);
             Dictionary<DamageType, float> resistThen = null;
             if (preview != null && _listIndex >= 0 && _listIndex < _listEntries.Count)
             {
-                resistThen = ItemPresenter.SumResistances(PreviewGear(), nodeResist);
+                resistThen = ItemPresenter.SumResistances(GearPiece.ItemsOf(PreviewGear()), nodeResist);
             }
 
             var types = new List<DamageType>(resistNow.Keys);
@@ -1291,7 +1315,7 @@ namespace Assets.Scripts.Items.UI
         /// The gear the highlighted list entry would leave the hero in - carried on the entry itself,
         /// so it cannot drift from the order the list was built in.
         /// </summary>
-        private List<ItemSO> PreviewGear()
+        private List<GearPiece> PreviewGear()
         {
             if (_tab == Tab.Equipment && _listIndex >= 0 && _listIndex < _listEntries.Count
                 && _listEntries[_listIndex].Gear != null)
@@ -1360,7 +1384,7 @@ namespace Assets.Scripts.Items.UI
         /// The selected hero's effective stats with <paramref name="gear"/> worn: base + bought grid
         /// nodes + gear, exactly as a fight computes them.
         /// </summary>
-        private StatBlock StatsWith(IEnumerable<ItemSO> gear)
+        private StatBlock StatsWith(IEnumerable<GearPiece> gear)
         {
             var hero = FindHero(_selectedHeroKey);
             if (hero == null)
@@ -1373,7 +1397,7 @@ namespace Assets.Scripts.Items.UI
 
         private HeroSnapshotUnit SnapshotOf(HeroSO hero)
         {
-            var gear = InventoryManager.Instance.GetEquippedItems(hero.SaveKey);
+            var gear = InventoryManager.Instance.GetEquippedGear(hero.SaveKey);
             var baseStats = HeroStatCalculator.BaseStatsForNodes(hero, ActivatedNodesOf(hero));
             return new HeroSnapshotUnit(hero, HeroStatCalculator.WithGear(baseStats, gear));
         }

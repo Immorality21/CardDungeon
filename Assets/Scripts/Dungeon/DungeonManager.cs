@@ -1120,7 +1120,7 @@ namespace Assets.Scripts.Dungeon
 
                 var baseStats = HeroStatCalculator.BaseStatsForNodes(heroSO, SavedNodesFor(partySave, heroSO.SaveKey));
                 var gear = InventoryManager.HasInstance
-                    ? InventoryManager.Instance.GetEquippedItems(heroSO.SaveKey)
+                    ? InventoryManager.Instance.GetEquippedGear(heroSO.SaveKey)
                     : null;
                 var effective = HeroStatCalculator.WithGear(baseStats, gear);
 

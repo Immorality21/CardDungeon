@@ -276,6 +276,49 @@ namespace Assets.Scripts.Items
         }
 
         /// <summary>
+        /// <see cref="SwapIn(IEnumerable{ItemSO}, ItemSO)"/> over worn copies, so the pieces left on
+        /// keep their grown bonuses and the candidate brings its own. The input list is not modified.
+        /// </summary>
+        public static List<GearPiece> SwapIn(IEnumerable<GearPiece> equipped, GearPiece candidate)
+        {
+            var slot = candidate?.Item != null ? candidate.Item.SlotType : (SlotType?)null;
+            var result = new List<GearPiece>();
+            if (equipped != null)
+            {
+                foreach (var piece in equipped)
+                {
+                    if (piece?.Item != null && (slot == null || piece.Item.SlotType != slot.Value))
+                    {
+                        result.Add(piece);
+                    }
+                }
+            }
+            if (candidate?.Item != null)
+            {
+                result.Add(candidate);
+            }
+            return result;
+        }
+
+        /// <summary>The worn copies with <paramref name="slot"/> emptied. The input list is not modified.</summary>
+        public static List<GearPiece> SwapOut(IEnumerable<GearPiece> equipped, SlotType slot)
+        {
+            var result = new List<GearPiece>();
+            if (equipped == null)
+            {
+                return result;
+            }
+            foreach (var piece in equipped)
+            {
+                if (piece?.Item != null && piece.Item.SlotType != slot)
+                {
+                    result.Add(piece);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Total resistance per damage type from a loadout plus any extra sources (the sphere grid's
         /// resistance nodes), summed the way combat sums them. Types that total zero are left out.
         /// </summary>

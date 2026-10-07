@@ -674,7 +674,7 @@ namespace Assets.Scripts.Hub
         {
             return HeroStatCalculator.WithGear(
                 HeroStatCalculator.BaseStatsForNodes(hero, NodesOf(hero)),
-                InventoryManager.Instance.GetEquippedItems(hero.SaveKey));
+                InventoryManager.Instance.GetEquippedGear(hero.SaveKey));
         }
 
         private static List<string> NodesOf(HeroSO hero)

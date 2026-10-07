@@ -419,11 +419,12 @@ namespace Assets.Scripts.Hub
             var save = HeroRoster.GetHeroSave(hero);
             var nodes = save != null && save.ActivatedNodes != null ? save.ActivatedNodes : new List<string>();
             var baseStats = HeroStatCalculator.BaseStatsForNodes(hero, nodes);
-            var worn = InventoryManager.Instance.GetEquippedItems(hero.SaveKey);
+            var worn = InventoryManager.Instance.GetEquippedGear(hero.SaveKey);
             var now = HeroStatCalculator.WithGear(baseStats, worn);
-            var then = HeroStatCalculator.WithGear(baseStats, ItemPresenter.SwapIn(worn, item));
+            // A shop sells fresh copies: the candidate has counted nothing.
+            var then = HeroStatCalculator.WithGear(baseStats, ItemPresenter.SwapIn(worn, new GearPiece(item, null)));
 
-            var inSlot = worn.FirstOrDefault(w => w != null && w.SlotType == item.SlotType);
+            var inSlot = GearPiece.ItemsOf(worn).FirstOrDefault(w => w.SlotType == item.SlotType);
             _detailBody.Add(MakeLabel(inSlot != null
                     ? $"{hero.DisplayName} wears {inSlot.DisplayName} there now."
                     : $"{hero.DisplayName} has nothing in that slot.",

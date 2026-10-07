@@ -72,7 +72,7 @@ Those constants were made `public` **for this purpose** — do not copy their va
 |---|---|
 | `BalanceRulesSO` | the target bands (a `SO/Balance Rules` asset) |
 | `BalanceIssue` / `BalanceReport` | findings + the per-area records, severity `Ok/Info/Warning/Critical` |
-| `HeroStatCalculator` | pure hero stats from `HeroSO` + activated sphere-grid nodes + gear (`Hero` itself needs `InventoryManager.Instance`). `BaseStatsForNodes` + `WithGear`; the level methods are gone with `LevelConfiguration` |
+| `HeroStatCalculator` | pure hero stats from `HeroSO` + activated sphere-grid nodes + gear (`Hero` itself needs `InventoryManager.Instance`). `BaseStatsForNodes` + `WithGear` (over `ItemSO`s for the model's fresh gear, or over `GearPiece`s - worn copies with their grown milestones - for the hub); the level methods are gone with `LevelConfiguration` |
 | `MaterialYieldModel` | expected **raw-material** units a floor/run hands over, split kills vs caches, plus the two reachability checks (a material nothing drops; a level whose `MaterialTable` has no cache to roll in). Reported on the Elements & Unlocks tab and as `Economy` findings |
 | `SimUnit` | headless `ICombatUnit` for heroes and enemies, incl. per-fight enemy state |
 | `PartyBaseline` | the reference party every other metric is measured against |

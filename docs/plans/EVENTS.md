@@ -120,11 +120,12 @@ safety sweep covers both sides); selling a grown copy of an item; a stricter hea
 
 ## 4. Follow-ups (open)
 
-1. **Scaling items: hub stat totals do not include milestone bonuses** (roadmap row "Scaling items"). The hub works out stats from `ItemSO` lists
-   (`HeroStatCalculator.WithGear`, the swap previews), which cannot see a copy's counters. Combat and the
-   item card are right; the hub's Stats section understates a grown item. Fix by passing entries (or a
-   per-item bonus lookup) through `WithGear` and the swap helpers - about ten call sites. Needed before
-   the first milestone item ships.
+1. ~~**Scaling items: hub stat totals do not include milestone bonuses**~~ - **fixed 2026-10-07.** A worn
+   copy is a `GearPiece` (the `ItemSO` plus its save entry); `InventoryManager.GetEquippedGear`,
+   `HeroStatCalculator.WithGear` and `ItemPresenter.SwapIn`/`SwapOut` take pieces, and every hub view
+   (Storehouse, merchant comparison, campfire, sphere-grid preview, run entry) and the dungeon's
+   `BestRosterStats` use them. A shop's candidate is a fresh piece; a grown loose copy gets its own
+   Storehouse row instead of stacking with fresh ones. The balance model keeps `ItemSO` lists (fresh gear).
 2. **Achievements and hub quests/bounties** (`HUB.md` §3d) are the next consumers of `GameEvents`.
    Rule of thumb from `Events/CLAUDE.md`: count kept changes, or hold a tally until `LevelCleared`.
 3. **The Ultra gauge and threat still poll health snapshots** (`UpdateUltraGauges`, `CreditThreat`).

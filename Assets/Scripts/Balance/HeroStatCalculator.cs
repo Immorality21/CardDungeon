@@ -40,9 +40,24 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static StatBlock WithGear(Stats baseStats, IEnumerable<ItemSO> gear)
         {
-            var raw = InventoryOperations.ComputeBonuses(gear, BonusType.Raw);
-            var pct = InventoryOperations.ComputeBonuses(gear, BonusType.Percentage);
+            return Fold(baseStats,
+                InventoryOperations.ComputeBonuses(gear, BonusType.Raw),
+                InventoryOperations.ComputeBonuses(gear, BonusType.Percentage));
+        }
 
+        /// <summary>
+        /// The same fold over worn copies, each with the milestones its own entry has reached
+        /// (<see cref="ItemGrowth"/>) - what the hub shows, so a grown item reads as it fights.
+        /// </summary>
+        public static StatBlock WithGear(Stats baseStats, IEnumerable<GearPiece> gear)
+        {
+            return Fold(baseStats,
+                InventoryOperations.ComputeBonuses(gear, BonusType.Raw),
+                InventoryOperations.ComputeBonuses(gear, BonusType.Percentage));
+        }
+
+        private static StatBlock Fold(Stats baseStats, Dictionary<StatType, float> raw, Dictionary<StatType, float> pct)
+        {
             var result = new StatBlock();
             foreach (var stat in StatCatalog.Types)
             {

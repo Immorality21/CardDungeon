@@ -98,6 +98,11 @@ surface) lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606
   Enemies now bias their targeting toward whoever deals and heals the most; `BalanceMath` and
   `EncounterSimulator` still assume an even spread, so they read slightly optimistic for the party's
   top damage dealer.
+- **Grid costs ramp quickly** *(revisit playtest 2026-10-06, finding 14)*. 20 → 30 → 45 → 65 → 90 →
+  120 → 155 → 195: the tester was often 1–2 XP short of the next node (63 vs 65, 119 vs 120), and each
+  new ability costs 120 and sits three nodes deep.
+- **Early attrition decides runs** *(same playtest, finding 15)*. The only wipe was The Threshold's
+  floor 2, with two heroes and two heal charges.
 
 
 Current analyzer state: **0 critical / 77 warning**; suite **813 passed / 0 failed**.
