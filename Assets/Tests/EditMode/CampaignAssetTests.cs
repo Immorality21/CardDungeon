@@ -241,7 +241,7 @@ namespace Tests.EditMode
                 }
             }
 
-            CollectionAssert.Contains(startable, "DrownedMarch", "the main line must open");
+            CollectionAssert.Contains(startable, "SealedArchive", "the main line must open");
             CollectionAssert.Contains(startable, "TheWarrens", "the repeatable branch must open");
         }
 

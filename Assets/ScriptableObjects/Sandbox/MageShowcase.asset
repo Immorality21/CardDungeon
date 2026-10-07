@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d03ef8fb4f65d04aacc66749b7be8c3, type: 3}
+  m_Name: MageShowcase
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Sandbox.SandboxConfigSO
+  Heroes:
+  - Hero: {fileID: 11400000, guid: 33f087f09ace9034fa5978269cb9e4f6, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 1
+    Abilities:
+    - {fileID: 11400000, guid: 436c0de133d1f1e4291b57b988e1b781, type: 2}
+    - {fileID: 11400000, guid: deb21fb233d948bd9cc682419cb51afd, type: 2}
+    - {fileID: 11400000, guid: 8b88a57198b74076a36370c4a8e2d243, type: 2}
+    - {fileID: 11400000, guid: 88d655764fb875d409ecd3e5947d8d8c, type: 2}
+    - {fileID: 11400000, guid: 7eb83123e11d47b3ae4da91e88d37cb0, type: 2}
+  - Hero: {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 300
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  Level: {fileID: 11400000, guid: 53234665d5538de47ae853dea701a3c6, type: 2}
+  Seed: 4242
+  Enemies:
+  - {fileID: 11400000, guid: a848d09629a0a134084775e476779b74, type: 2}
+  - {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
+  - {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+  EnemyDifficulty: 1.75
+  ClearOtherRooms: 1
+  WalkIntoEncounter: 1
+  CopyInventory: 0
+  CopyMetaProgress: 0
+  Items: []

@@ -50,7 +50,9 @@ Three threads are live:
    an unlock source since 2026-09-30**: the Tinkerer joins on clearing the Drowned March, the Rogue is
    a room-event gamble in The Warrens, and the Cleric is the captive of a new secret run, **The Drowned
    Chapel**, the first node keyed on a hero. The **Warlock** (the Cultist until 2026-10-04) is the captive at the bottom of **The
-   Blood Stair** *(2026-09-28)*, a challenge run meant for late parties (`RunDefinitionSO.Challenge`).
+   Blood Stair** *(2026-09-28)*, a challenge run meant for late parties (`RunDefinitionSO.Challenge`). The **Mage** joined
+   *2026-10-07* as an early unlock: the captive of **The Sealed Archive**, a new two-floor run on the
+   main line between the Threshold and the Drowned March.
 2. **Balance / losability** (§0–§0g) — making the campaign losable and gating depth behind
    investment. The gate ladder exists and the frontier is measured per floor. Mature; mostly
    decisions waiting on the user now. **Caveat updated 2026-09-04:** §9b's model rework landed with
@@ -103,8 +105,9 @@ grid, so every *investment point* number written before 2026-09-02 is also incom
 - **Tank is not a hero** *(2026-09-04, §5b)* — it is a place a grid can end up, reachable from more
   than one base. The Tank hero, its grid and its sprites are deleted. The player starts with **one**
   hero and unlocks the rest; the party is 4 drawn from the roster. **The roster's size is not
-  fixed**: it is eight today (Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue, and the
-  eldritch-horror-summoning **Cultist**, rescued in The Hollow Vault since 2026-10-05) (`plans/SPECIALIZATION.md`, "The Cultist"), but the
+  fixed**: it is nine today (Warrior, Paladin, Cleric, Ranger, Warlock, Tinkerer, Rogue, the
+  eldritch-horror-summoning **Cultist**, rescued in The Hollow Vault since 2026-10-05, and the elemental
+  **Mage**, rescued in The Sealed Archive since 2026-10-07) (`plans/SPECIALIZATION.md`, "The Cultist"), but the
   whiteboard's "start with 6" was a *scope* target, and "seven, closed" was a misreading — corrected
   by the owner 2026-10-04. Adding, splitting or pivoting a hero is open.
 - **The grid is where a hero specializes, and specializations are not named** *(2026-09-04, §4c)*.
@@ -208,10 +211,10 @@ backlog.**
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **done** — shipped 2026-09-06; **every hero has a source since 2026-09-30** (run clear, room event, secret run) |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the Fire Cloak is now on the off-roster Mage, and the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
+| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c |
 | — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) **Ultras for the other six heroes** - the gauge is universal but only the Warlock and the Cultist can spend it (§13 below) |
-| — | **The Mage — an elemental caster** | planned 2026-10-04; takes over the elemental spells when the Tinkerer becomes gadgets; bare-minimum asset + sprite exist (no grid, not on the roster) |
+| — | **The Mage — an elemental caster** | ✅ **on the roster 2026-10-07** — rescued in the new **Sealed Archive** (main line, before the March); three-branch grid (storm / frost / fire, Fire Cloak early for the Ashen Deep), new Chain Lightning. **Open:** her vision is a Claude draft for the owner to rewrite; no summons/Ultra yet (blocked on the vision, like the Cleric and Rogue); Chain Lightning has a borrowed icon |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
 
@@ -281,6 +284,15 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **The Mage joins the roster** (2026-10-07) — `plans/SPECIALIZATION.md`, "The Mage";
+  `BALANCING.md` §5ad. A new main-line run, **The Sealed Archive** (Threshold → Archive → Drowned
+  March; two floors, Mage captive on floor 1, Stone Sentinel boss), with templates `AshStacks` /
+  `BrokenOrrery` and the `ArchiveStacksRoom`. Her grid rebuilt into storm / frost / fire branches with
+  the Fire Cloak at the fire branch's third node, so the Ashen Deep's answer is back; new ability
+  **Chain Lightning**. The March retuned for a three-hero arrival (floors 2.85 / 2.75 / 3 / 3.1 / 3) and
+  the Blood Stair's first two floors nudged (1.95 / 2.4). Suite 1,399 / 0; Chain Lightning cast in the
+  sandbox (`Sandbox/MageShowcase`).
 
 - **The Tinkerer rebuilt** (2026-10-07) — `plans/SPECIALIZATION.md`, "The Tinkerer". Disassemble
   (`SpellEffectType.Disassemble`: Mechanical targets, odds from Bestiary kills, salvage on success);

@@ -43,10 +43,12 @@ Tinkerer joins on that same clear. The **Cleric** is its captive, on floor 1 so 
 with you; the Chapel Cell rooms are where the **Dark Jailor** finally has a home. Secret
 means hidden on the map until it unlocks, so it fails silently in two directions (unreachable, or
 never hidden); `CampaignAssetTests` asserts both. **The Ashen Deep is a fire biome on purpose**: its
-boss attacks as Fire and resists it, so the Fire Cloak learned on the Tinkerer's grid is
-the answer to it - see `docs/BALANCING.md` §5e for the four tuning passes that shape took.
+boss attacks as Fire and resists it, so the Fire Cloak is the answer to it - see
+`docs/BALANCING.md` §5e for the four tuning passes that shape took. The cloak is the **Mage's** since
+2026-10-07 (third node of her fire branch), and she is guaranteed before the Ashen Deep because the
+Sealed Archive sits on the main line ahead of the March.
 
-The tutorial forks: `DrownedMarch` is the main line (one-shot, escalating), `TheWarrens` is an optional repeatable dead end whose job is to fund the hub's Gold sinks (it predates the removal of the party-slot purchase). Its boss **does not drop Void Shard** (2026-10-06): a guaranteed scarce drop on a repeatable run is an infinite tap. Re-clearable runs in general are `docs/plans/REVISITS.md`. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
+The tutorial forks: the main line runs **`SealedArchive` → `DrownedMarch`** *(the Archive inserted 2026-10-07)*. The Sealed Archive is two short floors whose captive is the **Mage**, on floor 1 so she fights the Broken Orrery's Stone Sentinel (weak to Lightning) with you; it is repeatable like every ordinary run, which makes the March the run rule 6 judges (`BALANCING.md` §5ad). The other branch, `TheWarrens`, is an optional repeatable dead end whose job is to fund the hub's Gold sinks (it predates the removal of the party-slot purchase). Its boss **does not drop Void Shard** (2026-10-06): a guaranteed scarce drop on a repeatable run is an infinite tap. Re-clearable runs in general are `docs/plans/REVISITS.md`. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
 
 ## Revisits — a cleared run played again, at a Fear level the player picks
 

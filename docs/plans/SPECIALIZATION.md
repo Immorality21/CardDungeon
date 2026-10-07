@@ -148,6 +148,7 @@ The seven base heroes (§5b) and the kind of destination each should be able to 
 | **Warlock** | ? | blood magic: pays health for stronger attacks, drains it back (was the Cultist until 2026-10-04) |
 | **Tinkerer** | **3** | steampunk tools: offense (Warrior Mech) — debuff and oil (Oil Spewing Mech) — fire (Flamethrower Mech). Built 2026-10-07, see "The Tinkerer" below |
 | **Rogue** | ? | *to be worked* — the obvious pull is burst, evasion and Steal (§13) |
+| **Mage** | **3** | storm (speed, Chain Lightning) — frost and water (Freeze, sturdier) — fire (Fire Cloak, Fireball). Built 2026-10-07, see "The Mage" below |
 
 **Branch count is per-hero, not fixed.** Only the Paladin's **3** was stated outright; the Warrior's
 2 is inferred from the two destinations named for it, and the rest are open. The Paladin's three is the first concrete number and it
@@ -406,7 +407,7 @@ in**, one mech per branch. Decided with the owner the same day:
 | presentation | the mech arrives like any ally summon and stands where she stood; she is hidden (sprite and bar) and the mech switches to frames with her drawn aboard (`SummonSO.MountedFrames`) |
 | Disassemble success | the machine is **removed as a kill** (normal XP/gold, credited to her) **plus salvage** (`EnemySO.SalvageTable`, Scrap Iron / Slag Coal); a failure costs the turn |
 | Disassemble odds | **25% + 5% per Bestiary kill of that enemy, at most 90%; half on a boss** (`DisassembleOps`). Only `UnitTraits.Mechanical` targets |
-| the elemental spells | moved to a **stub Mage grid** (`MageGrid.asset`, the old Tinkerer grid re-keyed `mage-*`), so every spell stays taught; the Mage is still off the roster |
+| the elemental spells | moved to the **Mage** (`MageGrid.asset`); she joined the roster 2026-10-07 - see "The Mage" below |
 | machine enemies | two new ones, **Clockwork Sentry** and **Steam Automaton**, in a new **Clockwork Foundry** room in the Ashen Deep's Slag Halls (the first run after she joins); the Stone Sentinel is tagged `Construct`, not Mechanical |
 
 **The grid** (`TinkererGrid.asset`, 36 nodes, the Warlock's cost ladder): trunk Disassemble (3 charges,
@@ -418,29 +419,40 @@ Mech** (+ 3 Slag Coal). Every ability scales off Intelligence, her stat. A mech 
 hero's cast - the oil branch feeds the fire branch.
 
 **Open:**
-- **The Fire Cloak is unobtainable for now.** It was the Ashen Deep's intended answer and the reason
-  she joins before that run; it moved to the Mage with the other elemental spells, and the Mage has no
-  unlock. Her branch c has a 15% Fire resistance node. Decide: Mage on the roster, the cloaks back on
-  her as field kit, or a different answer for the Ashen Deep.
+- ~~**The Fire Cloak is unobtainable for now.**~~ **Resolved 2026-10-07:** the Mage is on the roster,
+  rescued in the new Sealed Archive on the main line, and the Fire Cloak is the third node of her fire
+  branch - so every party reaching the Ashen Deep owns it. See "The Mage" below.
 - **The mechs are probably strong** - the first sandbox run had the Warrior Mech's Piston Punch
   one-shot a Clockwork Sentry for 48 off a full grid. First-draft numbers; the balance pass decides.
 - **Unit traits** exist (`UnitTraits`: Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental)
   but only the three machines carry any. Tag the rest when something reads them.
 
-#### The Mage — an elemental caster *(planned 2026-10-04)*
+#### The Mage — an elemental caster *(built 2026-10-07)*
 
-> **2026-10-07:** the elemental spells moved here when the Tinkerer was rebuilt - `MageGrid.asset`
-> is the old Tinkerer grid, re-keyed. Still no roster slot and no unlock.
+The owner's call (2026-10-07): the Mage goes in, as an **early** unlock. What shipped:
 
-The owner's call: once the Tinkerer is redefined (gadgets, not an elemental mage), **no hero teaches
-the elemental spells**, and `ElementalContentTests.EveryMagicInTheCatalog_IsTaughtBySomeSphereGrid`
-would fail. The Mage inherits them: Lightning Bolt, Ice Shard, Water Splash, Fireball, and possibly
-the Storm/Fire/Frost Cloaks (open: those may stay with the Tinkerer as field kit). Move the spells
-in the same change that re-authors the Tinkerer's grid, or the test goes red.
+- **Where she comes from: The Sealed Archive**, a new two-floor run on the **main line**, between the
+  Threshold and the Drowned March (Threshold → Sealed Archive → Drowned March). She is the captive on
+  floor 1 (The Ash Stacks), so she fights floor 2 (The Broken Orrery) with you. Its boss is a **Stone
+  Sentinel** (60 HP, STR 8, with a Hex Weaver and a Floating Eye) - armoured, weak to Lightning, so the
+  run shows off what she brings. New content: `Runs/SealedArchive/SealedArchive.asset`, level templates
+  `AshStacks` and `BrokenOrrery`, and one room, `ArchiveStacksRoom` (Floating Eye + Cinder Imp).
+  Repeatable, like every ordinary run (`RevisitTests` expects it).
+- **Why on the main line rather than a side branch:** the Fire Cloak has to be owned before the Ashen
+  Deep, and the balance model seeds an `All`-mode node from its *weakest* prerequisite, so a parallel
+  branch would have made the model forget the March's heroes. A chain keeps both honest.
+- **The grid** (`MageGrid.asset`, 33 nodes, the Tinkerer's cost ladder): Lightning Bolt at the root;
+  **a — storm** (Storm Cloak → **Chain Lightning**, new: Lightning to all enemies, power 3),
+  **b — frost and water** (Ice Shard → Water Splash → Frost Cloak; Freeze on her own), **c — fire**
+  (**Fire Cloak at the third node**, then Fireball). Each branch has a 15% resistance off its first
+  ability. Fireball also sets off Ignite with the Tinkerer's oil.
+- **Stats:** INT 11, HP 22, END 4, SPR 6 - a little sturdier than the placeholder, since she arrives early.
+- **Vision:** a *draft* written by Claude, marked as such - the owner's to rewrite. **No summons or Ultra
+  yet**; like the Cleric and Rogue, those wait on the vision.
 
-Same bare minimum as the Cultist: `Heroes/Mage.asset` (working name), placeholder stats (INT 12),
-a PixelLab sprite (`mage-idle.png`, blue hat, fire orb, crystal staff), a stub vision — no grid, not
-on the roster, no unlock source.
+**Open:** her summons/Ultra; whether Chain Lightning is the right storm capstone; Chain Lightning
+reuses Lightning Bolt's icon; the full-grid numbers are high (48 to every enemy off INT 45 in the
+sandbox, `Sandbox/MageShowcase`) - the same balance pass as the mechs.
 
 **"Start with 6" was a scope target, not a starting roster** *(clarified 2026-09-04)*. It means
 *build six or seven heroes*. **The player starts with one** and unlocks every other through

@@ -2680,3 +2680,55 @@ are percentages, so they keep their meaning across difficulty tiers without per-
 
 `Assets/ScriptableObjects/Sandbox/EnemyReactions.asset` puts all three in one room (Hoarder, imp, two
 hounds against a Fireball-carrying Tinkerer) to see them fire.
+
+## §5ad — An early third hero, and the March re-tuned around it (2026-10-07)
+
+The Mage was put on the main line as an early unlock: **Threshold → The Sealed Archive → Drowned
+March**, with the Mage rescued on the Archive's floor 1. Closed form, no gear, frontier sweeps off.
+
+**Why a chain and not a side branch.** The Fire Cloak has to be owned before the Ashen Deep. Making the
+Ashen Deep require both the March and a parallel Archive would have been an `All` node, and
+`BuildRunCurves` seeds a run from its *weakest* prerequisite, so the model would have measured the
+Ashen Deep with the Archive's three heroes and none of the March's. Inserting the Archive into the
+line keeps the model's straight-line party true.
+
+**What a third hero does to the March** (attrition per floor, before → after the Mage, untuned):
+
+| floor | party then → now | attrition |
+|---|---|---|
+| Silt Shallows | 2 → 3 | 0.94 → 0.37 |
+| The Reedcage | 2 → 3 | 0.88 → 0.34 |
+| The Weeping Causeway | 3 → 4 | 0.36 → 0.21 |
+| Rotwater Deep | 3 → 4 | 0.25 → 0.17 |
+| The Mire Throne | 3 → 4 | 0.87 → 0.59 |
+
+One extra hero roughly **halves** a floor's attrition at this depth (the same lever §5i/§5j found).
+And since the Archive is repeatable, the March now falls under §0 rule 6: its worst ordinary floor
+should reach 0.70 for a party that goes straight through.
+
+**The retune** (Difficulty, bisected per floor in memory against the analyzer, then rounded):
+floors 1-2 to the rule 6 line, 3-5 raised moderately rather than restored. A search that restored
+floors 3-4 exactly wanted 3.55 / 4.15, past the Ashen Deep's own numbers, and over-correcting floors
+that were already easy before this change (the "content after the March is too easy" item) is not
+this pass's job.
+
+| floor | Difficulty | attrition |
+|---|---|---|
+| Silt Shallows | 2 → 2.85 | 0.70 |
+| The Reedcage | 1.85 → 2.75 | 0.72 |
+| The Weeping Causeway | 2.5 → 3 | 0.30 |
+| Rotwater Deep | 2.75 → 3.1 | 0.21 |
+| The Mire Throne | 2.55 → 3 | 0.77 (boss danger 0.24) |
+
+The Archive itself: The Ash Stacks 0.64 (two heroes), The Broken Orrery 0.81 with the Mage (boss
+3.7x its trash; it needed a second add to clear the boss-ratio floor). A Fear level 0 revisit pays
+105 XP per hero, and with it the analyzer no longer reports "no reason to revisit the Archive".
+
+**A knock-on in the Blood Stair.** The challenge run is measured against the *strongest* end state,
+and the Mage changed which party that is: The Chapel of Knives fell to 0.18 while The Ossuary Gate rose
+to 0.36, a 98% step. Raising the Chapel to 2.4 moved the spike back a floor, so The Bleeding Steps went
+to 1.95 as well: 0.12 / 0.21 / 0.36 / 0.60 / 1.15. **Every new hero on the straight line can do
+this**, because it changes the strongest party's composition, not just its size.
+
+Not done: the floor simulator was not run over the new March numbers; a playtest of the
+Threshold → Archive → March opening should come first.

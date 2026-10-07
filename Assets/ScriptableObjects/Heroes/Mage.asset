@@ -16,20 +16,34 @@ MonoBehaviour:
   Label: Mage
   Blurb: Commands fire, frost and storm, and is rarely careful about which.
   Vision:
-    Fantasy: 'An elemental mage. Added 2026-10-04: once the Tinkerer is redefined
-      as gadgets, nobody else teaches the elemental spells.'
-    Role: Intelligence caster dealing elemental damage (fire, ice, lightning) and
-      exploiting weaknesses.
-    SignatureMechanic: 
+    Fantasy: 'An elemental mage, found walled up in the Sealed Archive. Commands
+      storm, frost and fire, and is rarely careful about which. DRAFT by Claude
+      2026-10-07 - the owner''s to rewrite.'
+    Role: 'Intelligence caster: elemental damage, area hits and the tag combos
+      (Freeze in her own frost branch, Ignite with the Tinkerer''s oil), plus the
+      self-cast cloaks that answer an elemental floor.'
+    SignatureMechanic: Lightning Bolt from the start; the three cloaks.
     UltraStyle: 
     Ultras: []
-    Branches: []
-    Overlaps: 
-    OpenQuestions: 'Bare minimum: no grid, not on the party roster, no unlock source.
-      Inherits the elemental spells the Tinkerer''s grid teaches today: Lightning
-      Bolt, Ice Shard, Water Splash, Fireball - and the Storm/Fire/Frost Cloaks (or
-      do those stay with the Tinkerer as field kit?). Working name ''Mage''. Stats
-      are placeholders.'
+    Branches:
+    - GridBranch: a
+      Becomes: 'Storm: speed and reach.'
+      IntendedKit: Storm Cloak -> Chain Lightning
+      Summon: 
+    - GridBranch: b
+      Becomes: 'Frost and water: Freeze on her own, and the sturdier body.'
+      IntendedKit: Ice Shard -> Water Splash -> Frost Cloak
+      Summon: 
+    - GridBranch: c
+      Becomes: 'Fire: the Ashen Deep''s answer first (Fire Cloak at the third node),
+        then the blast.'
+      IntendedKit: Fire Cloak -> Fireball
+      Summon: 
+    Overlaps: 'Warlock and Cultist are Intelligence casters too, but shadow and
+      blood; the Mage owns the elements.'
+    OpenQuestions: 'No summons or Ultra yet - define them here first. Is Chain
+      Lightning (all enemies, power 3) the right storm capstone? Working name
+      ''Mage''.'
   Sprite: {fileID: -3489762990729566, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
   AnimationFrames:
   - {fileID: -3489762990729566, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
@@ -48,12 +62,12 @@ MonoBehaviour:
     - Type: 3
       Amount: 6
     - Type: 4
-      Amount: 12
+      Amount: 11
     - Type: 5
-      Amount: 5
+      Amount: 6
     - Type: 6
       Amount: 5
     - Type: 7
-      Amount: 20
+      Amount: 22
   AttackStat: 4
   SphereGrid: {fileID: 11400000, guid: 190fd39f9fc92c44385e312f91b8296b, type: 2}
