@@ -21,6 +21,7 @@ MonoBehaviour:
   - {fileID: 3776541782682343308, guid: 3fc8f2c7719b7b6a958f1bb626bdb25c, type: 3}
   AnimationFps: 4
   IsBoss: 0
+  CombatScale: 1
   BaseStats:
     Values:
     - Type: 1
@@ -44,8 +45,26 @@ MonoBehaviour:
     Percent: 50
   - DamageType: 2
     Percent: -50
+  StatusImmunities: 
   LootTable:
   - Item: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
     Chance: 0.4
     MinQuantity: 1
     MaxQuantity: 2
+  Triggers:
+  - Label: Pack Fury
+    When: 7
+    Chance: 1
+    Limit: 2
+    FilterDamageType: 0
+    DamageType: 0
+    Target: 0
+    Effects:
+    - EffectType: 2
+      Power: 50
+      PowerMode: 3
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 1
+      Duration: 99
+      UnlockLevel: 0

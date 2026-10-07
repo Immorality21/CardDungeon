@@ -2641,3 +2641,42 @@ That is the target for the next content and tuning pass, not something to fix by
 **Follow-ups:** judge with the floor simulator (wipe rate) when `Simulate` is on, since it does not
 overstate dense rooms; model Swarming Halls; and measure the Hollow Vault from the party that has done
 *both* its prerequisites (it is an `All` node, so "weakest prerequisite" undersells who arrives).
+
+## §5ac — The first enemy reactions, and a finale on a knife-edge (2026-10-07)
+
+The first authored reactions (`TriggeredEffect`, `docs/plans/EVENTS.md`): **Cinder Burst** on the
+Cinder Imp (on death, 6% of each hero's max health as Fire), **Pack Fury** on the Slag Hound (when an
+ally falls, +50% of its own Strength for the fight, once per fight) and **Molten Gold** on the Gilded
+Hoarder (when struck by Fire, 15% of the attacker's max health back as Fire, once per turn). All three
+are percentages, so they keep their meaning across difficulty tiers without per-level tuning.
+
+**Measured with the floor simulator** (Adaptive, 200 trials; frontier sweeps off), before → after:
+
+| floor | wipe | end health |
+|---|---|---|
+| Ashen Deep / Cinder Gate | 0.00 → 0.00 | 0.87 → 0.82 |
+| Ashen Deep / The Slag Halls | 0.00 → 0.00 | 0.76 → 0.71 |
+| **Ashen Deep / Emberfall** (finale) | **0.21 → 0.45** | 0.36 → 0.26 |
+| Threshold / Sunken Depths | 0.00 → 0.01 | 0.56 → 0.51 |
+| Blood Stair / The Altar of the Last Initiate | 0.00 → 0.00 | 0.76 → 0.71 |
+| Warrens / The Counting Room (Hoarder) | 1.00 → 1.00 | unchanged (gated finale) |
+
+**What it taught:**
+
+- **Emberfall was already on a knife-edge, and any imp burst tips it.** The floor's simulated party
+  drinks its whole belt (2.00 of 2 potions) before the end. With no healing left, even a 3% burst
+  (≈1 HP a hero, per imp, across a floor of imps) moved wipes 0.21 → 0.41 - the same as 6%. Burst
+  *size* barely mattered past "any"; a killer-only 12% burst measured the same (0.40). A controlled run
+  with an inert imp reaction reproduced 0.21 exactly, so it is the attrition, not the simulator.
+  **The owner accepted the harder finale (2026-10-07); retune Emberfall itself, not the imp, in the
+  balance pass.**
+- **Pack Fury is cheap on paper**: +50% of a template-difficulty hound's Strength is +1. On Emberfall
+  it added 0.41 → 0.45 on top of the burst; elsewhere nothing measurable.
+- **Measure reactions with the frontier off.** Set `BalanceRulesSO.MeasureInvestmentFrontiers = false`
+  *in memory* for a reaction pass: the floor sims take under a minute instead of minutes, and a whole
+  analysis freezes the editor (it runs on the main thread).
+- **Isolate by clearing one bearer's list in memory**, re-run, restore - that is how the burst was
+  shown to carry the whole Emberfall shift and Pack Fury almost none.
+
+`Assets/ScriptableObjects/Sandbox/EnemyReactions.asset` puts all three in one room (Hoarder, imp, two
+hounds against a Fireball-carrying Tinkerer) to see them fire.

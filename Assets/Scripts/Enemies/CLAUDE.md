@@ -25,6 +25,24 @@
 
 - **Enemy** implements `ICombatUnit` (see the Combat guide). `Initialize(EnemySO)` applies the definition (sprite, `Stats`, archetype, spell list, resistances, the drop table, and `gameObject.name`); `DisplayName` comes from `Definition.DisplayName` (so it's the SO's name, **not** "Prefab(Clone)"). `GetEffectiveAttackPower()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Runtime charge state (`ChargingEntryIndex`, `ChargeTarget`) is not persisted.
 
+## Reactions (`EnemySO.Triggers`) - what an enemy does on its own *(2026-10-07)*
+
+An enemy can carry `TriggeredEffect`s: when something happens to it in a fight (it dies, an ally falls,
+it is hit by an element...), ordinary ability effects resolve with it as the source. They fire in play
+and in the balance simulator alike; the closed-form danger index does not see them (the analyzer says
+so per enemy). Full mechanics: the Combat guide and `docs/plans/EVENTS.md`. **Author them as
+percentages** (`PercentOfMaxHealth` on damage, `PercentOfTargetStat` on a buff) so they keep their
+meaning across difficulty tiers - a flat number does not scale with `LevelEnemyTuning`.
+
+| enemy | reaction | does |
+|---|---|---|
+| Cinder Imp | **Cinder Burst** | on death: 6% of every hero's max health as Fire |
+| Slag Hound | **Pack Fury** | when an ally falls: +50% of its own Strength for the fight, once per fight |
+| Gilded Hoarder | **Molten Gold** | when hit by Fire: 15% of the attacker's max health back as Fire, once per turn - its fire weakness becomes a trade |
+
+Measure a new one with the floor simulator before keeping it - the imp's burst tipped Emberfall from
+0.21 to 0.41 wipes on its own (`docs/BALANCING.md` §5ac). `Sandbox/EnemyReactions.asset` shows all three.
+
 ## Per-level tuning (`LevelEnemyTuning`)
 
 `RunLevelEntry.EnemyTuning` is where a fight's real numbers come from. Resolution order:

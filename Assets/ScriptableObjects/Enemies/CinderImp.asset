@@ -21,6 +21,7 @@ MonoBehaviour:
   - {fileID: 100827220157303006, guid: 777f5aff1fbc258d9fd03b107a1c718c, type: 3}
   AnimationFps: 4
   IsBoss: 0
+  CombatScale: 1
   BaseStats:
     Values:
     - Type: 1
@@ -48,6 +49,7 @@ MonoBehaviour:
     Percent: 50
   - DamageType: 2
     Percent: -50
+  StatusImmunities: 
   LootTable:
   - Item: {fileID: 11400000, guid: 0af466e4089275b4d9535cd9f2710019, type: 2}
     Chance: 0
@@ -57,3 +59,20 @@ MonoBehaviour:
     Chance: 0.35
     MinQuantity: 1
     MaxQuantity: 1
+  Triggers:
+  - Label: Cinder Burst
+    When: 6
+    Chance: 1
+    Limit: 0
+    FilterDamageType: 0
+    DamageType: 0
+    Target: 3
+    Effects:
+    - EffectType: 0
+      Power: 6
+      PowerMode: 2
+      ScalingStat: 0
+      DamageType: 1
+      BuffType: 0
+      Duration: 3
+      UnlockLevel: 0

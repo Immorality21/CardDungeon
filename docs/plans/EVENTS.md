@@ -139,9 +139,9 @@ safety sweep covers both sides); selling a grown copy of an item; a stricter hea
 6. **Simulator target order**: `SimAllies.With` now lists guests before stand-ins, so in the rare fight
    with both out at once the enemies' random picks map differently than before. Not re-baselined; the
    regression suite runs closed-form only.
-7. **No reaction has fired in play mode yet** - there is no content carrying one. The registry is covered
-   by `TriggerTests` (in isolation and inside the simulator), but the floating text and log line of
-   `ShowReaction` want one look with the first authored reaction.
+7. ~~No reaction has fired in play mode yet.~~ **Done 2026-10-07**: the first three enemy reactions
+   (Cinder Imp, Slag Hound, Gilded Hoarder - `BALANCING.md` §5ac) fire on screen with their name over
+   the bearer and a line in the combat log (`Sandbox/EnemyReactions`).
 8. `EncounterSimulator.CastResolver.Events` is static and set per encounter without a try/finally; an
    exception mid-fight leaves the last stream attached until the next encounter replaces it. Harmless
    today (nothing reads it outside an encounter).
