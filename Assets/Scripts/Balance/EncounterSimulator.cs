@@ -264,10 +264,16 @@ namespace Assets.Scripts.Balance
                 units.Add(enemy);
             }
 
-            var buffTracker = new CombatBuffTracker();
+            // The fight's event stream, exactly as CombatManager builds it: every health change and
+            // every death is raised through HealthOps here too, so a reaction subscribed to it runs
+            // in the model as it runs in the game.
+            var events = new CombatEvents();
+            var buffTracker = new CombatBuffTracker { Events = events };
             var tagTracker = new MagicTagTracker();
             var comboDetector = new ComboDetector(settings.Combos ?? new List<MagicComboSO>());
-            var resolver = new EffectResolver();
+            var resolver = new EffectResolver { Events = events };
+            // The shared enemy-cast resolver has no per-fight state but this one; it is put back below.
+            CastResolver.Events = events;
 
             var turnManager = new TurnManager();
             turnManager.SetBuffTracker(buffTracker);
@@ -285,7 +291,28 @@ namespace Assets.Scripts.Balance
             var allies = new SimAllies(turnManager, enemies);
 
             // Ultras (COMBAT_DEPTH §13): every gauge starts the fight empty, read once per turn.
-            var ultras = new SimUltras(heroes);
+            var ultras = new SimUltras(heroes) { Events = events };
+
+            // Authored reactions fire here exactly as they fire in CombatManager: same registry, same
+            // stream, same resolver - so an item's or an enemy's reaction is in the model the moment
+            // it is authored. Everyone standing on either side is who "all allies/enemies" means.
+            // Skipped when nothing in the fight can react: this loop runs thousands of times a report.
+            if (AnyReactions(heroes, enemies))
+            {
+                new Combat.Triggers.TriggerRegistry(events, resolver, buffTracker, () =>
+                {
+                    var standing = new List<ICombatUnit>();
+                    standing.AddRange(allies.With(HeroSide(heroes, replacement)));
+                    standing.AddRange(enemies);
+                    return standing;
+                });
+            }
+
+            events.Publish(new CombatStarted
+            {
+                Heroes = heroes.FindAll(h => h.IsAlive).ConvertAll(h => (ICombatUnit)h),
+                Enemies = enemies.ConvertAll(e => (ICombatUnit)e)
+            });
 
             int turns = 0;
             while (AnyAlive(HeroSide(heroes, replacement)) && AnyAlive(enemies) && turns < settings.MaxTurns)
@@ -306,6 +333,7 @@ namespace Assets.Scripts.Balance
 
                 // As CombatManager does: a buff a unit lands on itself this turn skips this upkeep.
                 buffTracker.BeginTurn(unit);
+                events.Publish(new TurnStarted { Unit = unit });
 
                 // Harm at the start of the turn, before the unit acts or a freeze is checked -
                 // exactly as CombatManager's turn loop does. A lethal tick ends the turn here, so
@@ -319,6 +347,7 @@ namespace Assets.Scripts.Balance
                     allies.AfterTurn(unit);
                     ultras.Read();
                     ultras.AfterTurn(unit);
+                    events.Publish(new TurnEnded { Unit = unit });
                     continue;
                 }
 
@@ -333,6 +362,7 @@ namespace Assets.Scripts.Balance
                     allies.AfterTurn(unit);
                     ultras.Read();
                     ultras.AfterTurn(unit);
+                    events.Publish(new TurnEnded { Unit = unit });
                     continue;
                 }
 
@@ -383,7 +413,7 @@ namespace Assets.Scripts.Balance
 
                 replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
 
-                // Dead units leave the tick queue, as HandleEnemyDeath / ResolveHeroDamaged do.
+                // Dead units leave the tick queue, as CombatManager.ResolveDeaths takes them off it.
                 foreach (var enemy in enemies)
                 {
                     if (!enemy.IsAlive)
@@ -402,12 +432,59 @@ namespace Assets.Scripts.Balance
                 allies.AfterTurn(unit);
                 ultras.Read();
                 ultras.AfterTurn(unit);
+                events.Publish(new TurnEnded { Unit = unit });
             }
 
             // Forms come off with the fight: the party carries its health into the next room.
             ultras.EndAll();
 
             result.EnemiesAlive = AnyAlive(enemies);
+            events.Publish(new CombatEnded { PartyWon = !result.EnemiesAlive && AnyAlive(heroes) });
+            CastResolver.Events = null;
+        }
+
+        /// <summary>Whether anything that can take part in this fight carries a reaction: a hero's gear,
+        /// an enemy, or a summon (or squad troop, or Sacrifice horror) a hero could bring in.</summary>
+        private static bool AnyReactions(List<SimUnit> heroes, List<SimUnit> enemies)
+        {
+            foreach (var enemy in enemies)
+            {
+                if (enemy.Triggers.Count > 0)
+                {
+                    return true;
+                }
+            }
+            foreach (var hero in heroes)
+            {
+                if (hero.Triggers.Count > 0)
+                {
+                    return true;
+                }
+                foreach (var slot in hero.Summons)
+                {
+                    if (CarriesReactions(slot?.Summon))
+                    {
+                        return true;
+                    }
+                    if (slot?.Summon != null && slot.Summon.SquadTiers != null && slot.Summon.SquadTiers.Exists(CarriesReactions))
+                    {
+                        return true;
+                    }
+                }
+                foreach (var ultra in hero.Ultras)
+                {
+                    if (ultra != null && CarriesReactions(ultra.Creature))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static bool CarriesReactions(SummonSO summon)
+        {
+            return summon != null && summon.Triggers != null && summon.Triggers.Count > 0;
         }
 
         // ---------------------------------------------------------------- party replacement
@@ -1072,7 +1149,7 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
                 int healed = Mathf.Max(1, Mathf.FloorToInt(max * fraction));
-                hero.Stats.Health = Mathf.Min(max, hero.Stats.Health + healed);
+                HealthOps.Heal(hero, healed, new HealthSource(null, HealthCause.Rest), null);
             }
         }
 
@@ -1142,9 +1219,8 @@ namespace Assets.Scripts.Balance
                     {
                         potionsLeft--;
                         result.PotionsUsed++;
-                        wounded.Stats.Health = Mathf.Min(
-                            wounded.Stats.Health + settings.PotionHealAmount,
-                            wounded.Stats.MaxHealth);
+                        HealthOps.Heal(wounded, settings.PotionHealAmount,
+                            new HealthSource(hero, HealthCause.Item), buffTracker.Events);
                         return;
                     }
 
@@ -1211,7 +1287,7 @@ namespace Assets.Scripts.Balance
                                                   && SummonOps.CanAfford(s.Summon, hero));
                 if (ally != null)
                 {
-                    PayBlood(hero, ally.Summon);
+                    PayBlood(hero, ally.Summon, buffTracker.Events);
                     ally.Charges--;
                     result.Summons++;
                     unitCalled = ally;
@@ -1319,7 +1395,7 @@ namespace Assets.Scripts.Balance
             EffectResolver resolver,
             TrialResult result)
         {
-            PayBlood(caster, slot.Summon);
+            PayBlood(caster, slot.Summon, buffTracker.Events);
             slot.Charges--;
             result.Summons++;
             var targets = ResolveTargets(slot.Castable, caster, heroes, enemies);
@@ -1342,12 +1418,12 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>A summon's blood price (the Blood Idol), floor 1 - as <c>CombatManager</c> takes it.</summary>
-        private static void PayBlood(SimUnit summoner, SummonSO summon)
+        private static void PayBlood(SimUnit summoner, SummonSO summon, CombatEvents events)
         {
             int cost = SummonOps.HealthCost(summon, summoner);
             if (cost > 0)
             {
-                summoner.Stats.Health -= Mathf.Min(cost, Mathf.Max(0, summoner.Stats.Health - 1));
+                HealthOps.Pay(summoner, cost, new HealthSource(summoner, HealthCause.Cost), events);
             }
         }
 
@@ -1573,7 +1649,7 @@ namespace Assets.Scripts.Balance
                     var target = decision.Target;
                     if (target != null && target.IsAlive)
                     {
-                        target.Stats.Health = Mathf.Min(target.Stats.Health + decision.Amount, target.Stats.MaxHealth);
+                        HealthOps.Heal(target, decision.Amount, new HealthSource(enemy, HealthCause.EnemyHeal), buffTracker.Events);
                     }
                     break;
                 }
@@ -1658,21 +1734,17 @@ namespace Assets.Scripts.Balance
                 rawAttack, defense, attacker.AttackDamageType, target.Resistances,
                 buffTracker.GetResistanceBonus(target, attacker.AttackDamageType));
 
-            if (damage > 0 && Random.Range(0f, 1f) < CombatManager.CritChanceFor(attacker))
+            bool crit = damage > 0 && Random.Range(0f, 1f) < CombatManager.CritChanceFor(attacker);
+            if (crit)
             {
                 damage = Mathf.Max(damage + 1, Mathf.RoundToInt(damage * CombatManager.CritMultiplier));
             }
 
-            if (damage < 0)
-            {
-                // Absorbed, clamped to the target's maximum — same rule as CombatManager.ExecuteAttack.
-                int absorbed = Mathf.Min(-damage, Mathf.Max(0, target.Stats.MaxHealth - target.Stats.Health));
-                target.Stats.Health += absorbed;
-                return -absorbed;
-            }
-
-            target.Stats.Health -= damage;
-            return damage;
+            // Absorbed (negative) heals, clamped to the target's maximum - the same HealthOps call, and
+            // so the same rule, as CombatManager.ExecuteAttack.
+            var hit = HealthOps.Damage(target, damage,
+                new HealthSource(attacker, HealthCause.Attack, attacker.AttackDamageType, crit), buffTracker.Events);
+            return damage < 0 ? -hit.Healed : damage;
         }
 
         // ---------------------------------------------------------------- helpers

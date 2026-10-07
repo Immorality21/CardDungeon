@@ -100,7 +100,7 @@ the captive assumed present for every kill, integer division per kill.
    `MenuScene` — the button reads New Game and everything after writes there. **Any script recompile
    mid-play reloads the domain and resets the override to null** (i.e. back to the real save folder),
    so never edit scripts while such a session is running: stop play first.
-5. **Clearing floor 1 without playing it:** `DungeonManager.Instance.Party.DistributeXp(20)` (the
+5. **Clearing floor 1 without playing it:** `DungeonManager.Instance.Party.DistributeXp(20, EconomySource.Kill)` (the
    Warrior's pessimistic share) then `CombatManager.Instance.NotifyDungeonCleared()`, then press
    `level-clear-continue`. That runs the real clear path — guaranteed timber, XP commit, run advance.
    `DungeonManager.Instance.HandlePartyDeath()` + `LoadScene("HubScene")` is the wipe path.

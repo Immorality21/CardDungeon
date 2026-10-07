@@ -5,6 +5,7 @@ using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
+using Assets.Scripts.Combat.Triggers;
 using Assets.Scripts.Audio;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
@@ -15,6 +16,7 @@ using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Rooms
 {
@@ -111,8 +113,9 @@ namespace Assets.Scripts.Rooms
         }
         public const float CritMultiplier = 1.6f;
 
-        public event Action OnCombatStarted;
-        public event Action<string> OnTurnExecuted;
+        /// <summary>A turn is over and reported: the UI refreshes the party window. The rules-side
+        /// view of the same moment is <see cref="TurnEnded"/> on <see cref="Events"/>.</summary>
+        public event Action OnTurnExecuted;
         public event Action<CombatResult> OnCombatEnded;
         public event Action<List<ICombatUnit>> OnTurnOrderChanged;
         public event Action<ICombatUnit> OnHeroTurnStarted;
@@ -193,9 +196,22 @@ namespace Assets.Scripts.Rooms
         /// <summary>Whether a party-replacing summon (or what is left of its squad) is on the field.</summary>
         private bool ReplacementOut => _squad.Any(u => u != null && u.IsAlive);
 
-        // Summons fighting beside the party (SummonKind.JoinParty), at most one per summoner, in the
-        // order they arrived. Part of the hero side while the party is: see HeroSideUnits.
+        // Summons fighting beside the party, in two roles kept in two lists - the role is which list a
+        // unit is in, never a flag on it. Both are part of the hero side while the party is (see
+        // HeroSideUnits); neither keeps a fight going on its own (HasAliveHeroes).
+        //
+        // Guests (SummonKind.JoinParty): one of each kind per summoner, in the order they arrived. Bound
+        // to their summoner, laid out in the vanguard column, sent home by Dismiss, by a replacement
+        // summon arriving, or by their summoner falling.
         private readonly List<SummonUnit> _allies = new List<SummonUnit>();
+
+        // Stand-ins (UltraKind.Sacrifice): a horror holding a fallen hero's place for the rest of the
+        // fight. Bound to nobody, never dismissed, standing where its hero stood, and stepping out
+        // *with* the party while a replacement summon fights.
+        private readonly List<SummonUnit> _standIns = new List<SummonUnit>();
+
+        /// <summary>Every summon fighting beside the party, guests first.</summary>
+        private IEnumerable<SummonUnit> BesideParty => _allies.Concat(_standIns);
         private string _lastTurnLog;
         private Room _currentCombatRoom;
         private Party _currentParty;
@@ -209,6 +225,30 @@ namespace Assets.Scripts.Rooms
         private bool _currentCombatHadBoss;
         private MagicTagTracker _tagTracker;
         private ComboDetector _comboDetector;
+
+        /// <summary>
+        /// This fight's event stream (see <see cref="CombatEvents"/>): rebuilt per fight, raised by
+        /// <see cref="HealthOps"/>, the death sweep and the turn loop. Null outside a fight.
+        /// </summary>
+        public CombatEvents Events { get; private set; }
+
+        /// <summary>Units that went down since the last <see cref="ResolveDeaths"/>, in the order they
+        /// fell, each with whoever struck the blow. Filled by the <see cref="UnitDefeated"/> event.</summary>
+        private readonly List<UnitDefeated> _pendingDeaths = new List<UnitDefeated>();
+
+        /// <summary>Heroes this fight has already run through the death path, so a second notice of
+        /// the same fall (the safety-net sweep) cannot hide them twice.</summary>
+        private readonly HashSet<Hero> _fallen = new HashSet<Hero>();
+
+        /// <summary>The heroes who took the field this fight (standing when it began) - who a victory
+        /// counts for, and who the death sweep watches.</summary>
+        private readonly List<Hero> _fielded = new List<Hero>();
+
+        /// <summary>Lines for the reactions that fired this turn. Kept apart from <see cref="_lastTurnLog"/>,
+        /// which every action path assigns, and added to it once the turn closes
+        /// (<see cref="CloseTurn"/>) - a reaction usually fires mid-action, before the action has
+        /// written its own line.</summary>
+        private readonly List<string> _reactionLog = new List<string>();
         private EffectResolver _calculator = new EffectResolver();
         private EffectPresenter _presenter = new EffectPresenter();
 
@@ -220,8 +260,12 @@ namespace Assets.Scripts.Rooms
         /// <summary>The party-replacing summon on the field, or null when the party is fighting.</summary>
         public SummonUnit ActiveSummon => _squad.FirstOrDefault(u => u != null && u.IsAlive);
 
-        /// <summary>The summons fighting beside the party right now, in the order they arrived.</summary>
-        public IReadOnlyList<SummonUnit> ActiveAllies => _allies;
+        /// <summary>Whether Dismiss can send <paramref name="summon"/> home: anything but a stand-in,
+        /// which has nowhere to go - it is what is left of a hero.</summary>
+        public bool CanDismiss(SummonUnit summon)
+        {
+            return summon != null && !_standIns.Contains(summon);
+        }
 
         /// <summary>
         /// <b>The</b> hero side of the fight, and the one place that answers it: the summon alone
@@ -244,7 +288,7 @@ namespace Assets.Scripts.Rooms
             return _currentParty.Heroes
                 .Where(h => h != null && h.IsAlive)
                 .Cast<ICombatUnit>()
-                .Concat(_allies.Where(a => a != null && a.IsAlive))
+                .Concat(BesideParty.Where(a => a != null && a.IsAlive))
                 .ToList();
         }
 
@@ -318,7 +362,7 @@ namespace Assets.Scripts.Rooms
         /// <summary>Whether this one Ultra can be used now - a Sacrifice needs someone to give.</summary>
         public bool CanUseUltra(ICombatUnit hero, UltraSO ultra)
         {
-            return ultra != null && (ultra.Kind != UltraKind.Sacrifice || SacrificeTargets().Count > 0);
+            return ultra != null && (!UltraOps.NeedsTarget(ultra) || SacrificeTargets().Count > 0);
         }
 
         /// <summary>The abilities <paramref name="hero"/>'s current form grants - free to use while it lasts.</summary>
@@ -530,6 +574,7 @@ namespace Assets.Scripts.Rooms
             _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
             _squad.Clear();
             _allies.Clear();
+            _standIns.Clear();
             // Every gauge starts the fight empty (UltraOps: per fight, not per run).
             _ultraGauge.Clear();
             _gaugeHealth.Clear();
@@ -540,10 +585,23 @@ namespace Assets.Scripts.Rooms
                 _gaugeHealth[hero] = hero.Stats.Health;
             }
             _threat.Reset();
-            BuffTracker = new CombatBuffTracker();
+            _pendingDeaths.Clear();
+            _fallen.Clear();
+            _fielded.Clear();
+            _reactionLog.Clear();
+            Events = new CombatEvents();
+            // The game's own bookkeeping listens first (order 0 is the default), so authored reactions
+            // always see a death after it has been queued for its rewards.
+            Events.Subscribe<UnitDefeated>(_pendingDeaths.Add);
+            BuffTracker = new CombatBuffTracker { Events = Events };
             _turnManager.SetBuffTracker(BuffTracker);
             // A TurnDelay effect (Exatrix's claws) pushes units back on this fight's clock.
             _calculator.Clock = _turnManager;
+            _calculator.Events = Events;
+            // Authored reactions (items, enemies, summons) listen after the bookkeeping above, and the
+            // log and floating text after them. The registry needs no reference kept: the stream holds it.
+            new TriggerRegistry(Events, _calculator, BuffTracker, () => HeroSideUnits().Concat(GetAliveEnemies()));
+            Events.Subscribe<ReactionResolved>(ShowReaction, TriggerRegistry.Order + 1);
             // A RestoreCharge effect (Life Tap) gives charges back to the run's ability slots.
             _calculator.Charges = DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null
                 ? new EquippedChargeBank(DungeonManager.Instance.MagicState)
@@ -577,7 +635,6 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            OnCombatStarted?.Invoke();
 
             // Swap the floor's bed for a fight (a boss gets its own climax track).
             LevelMusic.PlayCombat(_currentCombatHadBoss);
@@ -609,9 +666,18 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
+            _fielded.AddRange(units.OfType<Hero>());
             _turnManager.Initialize(units);
             EnsureHealthBars(units);
             BroadcastTurnOrder();
+
+            Events.Publish(new CombatStarted
+            {
+                Heroes = units.Where(u => u.IsHero).ToList(),
+                Enemies = units.Where(u => !u.IsHero).ToList()
+            });
+            // A reaction at the start of the fight may already have felled something.
+            ResolveDeaths();
 
             var fullLog = "";
 
@@ -631,6 +697,10 @@ namespace Assets.Scripts.Rooms
 
                 // A buff this unit lands on itself this turn is not ticked by this turn's upkeep.
                 BuffTracker.BeginTurn(unit);
+                _lastTurnLog = string.Empty;
+                Events.Publish(new TurnStarted { Unit = unit });
+                // A reaction at the turn's start may already have felled someone - the actor included.
+                ResolveDeaths();
 
                 // Point the on-field turn marker at whoever is acting.
                 TurnIndicator.Instance.SetTarget(unit);
@@ -639,14 +709,13 @@ namespace Assets.Scripts.Rooms
                 // unit acts - and before a freeze is checked, so freezing something does not shelter
                 // it. A tick that kills ends the turn right here: the whole point of the split is
                 // that a lethal damage-over-time denies the action.
-                _lastTurnLog = string.Empty;
-                yield return ResolveOverTimeTicks(unit, room, TickTiming.StartOfTurn);
+                yield return ResolveOverTimeTicks(unit, TickTiming.StartOfTurn);
                 if (!unit.IsAlive)
                 {
+                    CloseTurn(unit);
                     _lastTurnLog = _lastTurnLog.Trim();
                     fullLog += _lastTurnLog + "\n";
-                    UpdateUltraGauges();
-                    OnTurnExecuted?.Invoke(_lastTurnLog);
+                    OnTurnExecuted?.Invoke();
                     BroadcastTurnOrder();
                     continue;
                 }
@@ -655,12 +724,12 @@ namespace Assets.Scripts.Rooms
                 if (skipMessage != null)
                 {
                     _lastTurnLog = skipMessage;
-                    yield return EndOfTurnUpkeep(unit, room);
+                    yield return EndOfTurnUpkeep(unit);
                     AfterSummonTurn(unit, dismissed: false);
                     AfterFormTurn(unit);
+                    CloseTurn(unit);
                     fullLog += _lastTurnLog + "\n";
-                    UpdateUltraGauges();
-                    OnTurnExecuted?.Invoke(_lastTurnLog);
+                    OnTurnExecuted?.Invoke();
                     BroadcastTurnOrder();
                     continue;
                 }
@@ -696,7 +765,7 @@ namespace Assets.Scripts.Rooms
                     }
                     else if (_pendingAction == HeroAction.Cast && _pendingCastAction != null)
                     {
-                        yield return ExecuteCastAction(_pendingCastAction, _pendingCastSlot, room);
+                        yield return ExecuteCastAction(_pendingCastAction, _pendingCastSlot);
                     }
                     else if (_pendingAction == HeroAction.UseItem && _pendingUseItem != null)
                     {
@@ -704,20 +773,20 @@ namespace Assets.Scripts.Rooms
                     }
                     else if (_pendingAction == HeroAction.Summon && _pendingSummon != null)
                     {
-                        yield return ExecuteSummonAction(unit, _pendingSummon, room);
+                        yield return ExecuteSummonAction(unit, _pendingSummon);
                     }
                     else if (_pendingAction == HeroAction.SummonAbility && _pendingSummonAbility != null
                              && unit is SummonUnit abilityCaster)
                     {
-                        yield return ExecuteSummonAbility(abilityCaster, _pendingSummonAbility, _pendingSummonTargets, room);
+                        yield return ExecuteSummonAbility(abilityCaster, _pendingSummonAbility, _pendingSummonTargets);
                     }
                     else if (_pendingAction == HeroAction.Ultra && _pendingUltra != null && unit is Hero ultraHero)
                     {
                         yield return ExecuteUltra(ultraHero, _pendingUltra, _pendingUltraTarget);
                     }
-                    else if (_pendingAction == HeroAction.Dismiss && unit is SummonUnit dismissing)
+                    else if (_pendingAction == HeroAction.Dismiss && unit is SummonUnit dismissing && CanDismiss(dismissing))
                     {
-                        _lastTurnLog = IsAlly(dismissing)
+                        _lastTurnLog = _allies.Contains(dismissing)
                             ? $"{dismissing.DisplayName} is dismissed."
                             : $"{dismissing.DisplayName} is dismissed, and the party steps back in.";
                         yield return new WaitForSeconds(_turnDelay * 0.5f);
@@ -743,13 +812,27 @@ namespace Assets.Scripts.Rooms
                     yield return ExecuteEnemyTurn(unit, party);
                 }
 
-                yield return EndOfTurnUpkeep(unit, room);
-                AfterSummonTurn(unit, dismissed: _pendingAction == HeroAction.Dismiss && unit is SummonUnit);
+                // Every action path resolves its own deaths where they belong in its presentation;
+                // this catches anything a path did not (an item, a reaction) before the turn moves on.
+                ResolveDeaths();
+
+                yield return EndOfTurnUpkeep(unit);
+                AfterSummonTurn(unit, dismissed: _pendingAction == HeroAction.Dismiss && unit is SummonUnit leaving && CanDismiss(leaving));
                 AfterFormTurn(unit);
+                CloseTurn(unit);
                 fullLog += _lastTurnLog + "\n";
-                UpdateUltraGauges();
-                OnTurnExecuted?.Invoke(_lastTurnLog);
+                OnTurnExecuted?.Invoke();
                 BroadcastTurnOrder();
+            }
+
+            // A turn-end reaction can fell the last enemy as the loop's condition is checked: its death
+            // still pays out.
+            ResolveDeaths();
+            if (_reactionLog.Count > 0)
+            {
+                _lastTurnLog = string.Empty;
+                FlushReactionLog();
+                fullLog += _lastTurnLog.Trim() + "\n";
             }
 
             // The last enemy fell while a summon was out: the party comes back for an ordinary
@@ -830,6 +913,15 @@ namespace Assets.Scripts.Rooms
                 RunCompleted = levelCleared && DungeonManager.IsFinalRunLevel
             };
 
+            Events.Publish(new CombatEnded { PartyWon = outcome == CombatOutcome.Victory });
+            GameEvents.Publish(new CombatFinished
+            {
+                Won = outcome == CombatOutcome.Victory,
+                HadBoss = _currentCombatHadBoss,
+                HeroKeys = _fielded.Where(h => h != null).Select(h => h.HeroKey).ToList()
+            });
+            Events = null;
+            _calculator.Events = null;
             OnCombatEnded?.Invoke(result);
             // Stage teardown + OnDungeonCleared are deferred to FinishVictory (the summary's Continue).
         }
@@ -849,7 +941,7 @@ namespace Assets.Scripts.Rooms
             _lastVictoryRoom?.EnableAllDoors();
         }
 
-        private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex, Room room)
+        private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex)
         {
             // Use Instance (auto-creates + loads Meta.json) rather than HasInstance: the
             // manager may not exist yet mid-combat, and we must still apply combo upgrades and
@@ -896,13 +988,7 @@ namespace Assets.Scripts.Rooms
                 DungeonManager.Instance.MagicState.TryCast(hero.HeroKey, slotIndex);
             }
 
-            // Check for enemy deaths caused by the cast
-            var deadEnemies = room.Enemies.Where(e => e != null && !e.IsAlive).ToList();
-            foreach (var dead in deadEnemies)
-            {
-                _lastTurnLog += $" {dead.DisplayName} defeated!";
-                HandleEnemyDeath(dead, room);
-            }
+            ResolveDeaths();
         }
 
         /// <summary>
@@ -911,7 +997,7 @@ namespace Assets.Scripts.Rooms
         /// its grid nodes add are folded into a throwaway castable (<see cref="SummonOps.BuildCastable"/>),
         /// which takes no Forge bonus and triggers no combo.
         /// </summary>
-        private IEnumerator ExecuteSummonAction(ICombatUnit caster, SummonSlot slot, Room room)
+        private IEnumerator ExecuteSummonAction(ICombatUnit caster, SummonSlot slot)
         {
             var hero = caster as Hero;
             var summon = slot != null ? slot.Summon : null;
@@ -949,8 +1035,7 @@ namespace Assets.Scripts.Rooms
             int bloodPrice = SummonOps.HealthCost(summon, hero);
             if (bloodPrice > 0)
             {
-                int paid = Mathf.Min(bloodPrice, Mathf.Max(0, hero.Stats.Health - 1));
-                hero.Stats.Health -= paid;
+                int paid = HealthOps.Pay(hero, bloodPrice, new HealthSource(hero, HealthCause.Cost), Events).Landed;
                 ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.3f, 0f), $"-{paid} HP", new Color(0.9f, 0.35f, 0.35f), 0.15f);
             }
 
@@ -996,12 +1081,7 @@ namespace Assets.Scripts.Rooms
             Destroy(castable);
 
             // A damaging summon can kill; the Bloodfang Boar does not, but the next one will.
-            var deadEnemies = room.Enemies.Where(e => e != null && !e.IsAlive).ToList();
-            foreach (var dead in deadEnemies)
-            {
-                _lastTurnLog += $" {dead.DisplayName} defeated!";
-                HandleEnemyDeath(dead, room);
-            }
+            ResolveDeaths();
         }
 
         /// <summary>
@@ -1015,12 +1095,12 @@ namespace Assets.Scripts.Rooms
             var summon = slot.Summon;
             OnSummonStarted?.Invoke(summoner, summon);
 
-            // A replacement fights alone: anything fighting beside the party goes home first. A
-            // Sacrifice horror is not a guest - it stands in a hero's place - so it steps out with the
-            // party instead, frozen and hidden, and comes back with them.
-            var horrors = _allies.Where(a => a != null && a.IsAlive && a.IsSacrifice).ToList();
-            bool alliesLeft = _allies.Count > horrors.Count;
-            foreach (var guest in _allies.Where(a => !horrors.Contains(a)).ToList())
+            // A replacement fights alone: every guest goes home first. A stand-in is not a guest - it
+            // holds a hero's place - so it steps out with the party instead, frozen and hidden, and comes
+            // back with them.
+            var standing = _standIns.Where(a => a != null && a.IsAlive).ToList();
+            bool alliesLeft = _allies.Count > 0;
+            foreach (var guest in _allies.ToList())
             {
                 EndAlly(guest, SummonExit.Dismissed);
             }
@@ -1032,7 +1112,7 @@ namespace Assets.Scripts.Rooms
                 .Select(troop => SummonUnit.Create(troop, slot.Grant, summoner, turns))
                 .ToList();
             CombatStage.Instance.HideParty();
-            CombatStage.Instance.HideUnits(horrors.Cast<Component>());
+            CombatStage.Instance.HideUnits(standing.Cast<Component>());
             if (summon.IsSquad)
             {
                 CombatStage.Instance.PlaceSquad(units);
@@ -1050,7 +1130,7 @@ namespace Assets.Scripts.Rooms
             OnSummonEnded?.Invoke();
 
             // The whole hero side swaps in one step, so nothing can ever see both or neither.
-            _turnManager.Suspend(_currentParty.Heroes.Cast<ICombatUnit>().Concat(horrors.Cast<ICombatUnit>()));
+            _turnManager.Suspend(_currentParty.Heroes.Cast<ICombatUnit>().Concat(standing.Cast<ICombatUnit>()));
             _squad.Clear();
             _squad.AddRange(units);
             for (int i = 0; i < units.Count; i++)
@@ -1105,7 +1185,7 @@ namespace Assets.Scripts.Rooms
                 unit.OverrideAttack(firstRite);
             }
             _allies.Add(unit);
-            CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive && !a.IsSacrifice).ToList(), arriving: unit);
+            CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive).ToList(), arriving: unit);
             yield return SummonPresenter.Arrive(unit);
             OnSummonEnded?.Invoke();
 
@@ -1159,21 +1239,29 @@ namespace Assets.Scripts.Rooms
             }
             _ultraGauge[hero] = 0;
 
-            if (ultra.Kind == UltraKind.Strike)
+            switch (ultra.Kind)
             {
-                yield return ExecuteUltraStrike(hero, ultra);
-                yield break;
+                case UltraKind.Strike:
+                    yield return ExecuteUltraStrike(hero, ultra);
+                    break;
+                case UltraKind.Sacrifice:
+                    yield return ExecuteSacrifice(hero, ultra, target as Hero);
+                    break;
+                default:
+                    yield return ExecuteTransform(hero, ultra);
+                    break;
             }
-            if (ultra.Kind == UltraKind.Sacrifice)
-            {
-                yield return ExecuteSacrifice(hero, ultra, target as Hero);
-                yield break;
-            }
+        }
 
+        /// <summary>A Transform Ultra: the hero takes the form for its turns - a bigger bar with the same
+        /// share filled, the form's attack element and art, its abilities on the Ability list.</summary>
+        private IEnumerator ExecuteTransform(Hero hero, UltraSO ultra)
+        {
             int oldMax = hero.GetEffectiveMaxHealth();
             hero.FormMaxHealthPercent = ultra.MaxHealthPercent;
             hero.FormAttackDamageType = ultra.AttackDamageType;
-            hero.Stats.Health = UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth());
+            HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth()),
+                new HealthSource(hero, HealthCause.Form), Events);
             _gaugeHealth[hero] = hero.Stats.Health;   // the form's new bar is not damage taken
             SetHeroFrames(hero, ultra.FormFrames, ultra.FormFps);
             _forms[hero] = new ActiveForm { Ultra = ultra, TurnsLeft = ultra.Turns, TakenThisTurn = true };
@@ -1225,15 +1313,7 @@ namespace Assets.Scripts.Rooms
             _lastTurnLog = $"{hero.DisplayName} unleashes {ultra.Label}!";
             RecordCastDamageObserved(action);
             yield return _presenter.Present(result, hero, castable);
-
-            if (_currentCombatRoom != null)
-            {
-                foreach (var dead in _currentCombatRoom.Enemies.Where(e => e != null && !e.IsAlive).ToList())
-                {
-                    _lastTurnLog += $" {dead.DisplayName} defeated!";
-                    HandleEnemyDeath(dead, _currentCombatRoom);
-                }
-            }
+            ResolveDeaths();
         }
 
         /// <summary>
@@ -1261,18 +1341,16 @@ namespace Assets.Scripts.Rooms
             ScreenFade.Instance.Flash(new Color(0.15f, 0.55f, 0.25f), 0.5f, 0.05f, 0.4f);
             ShowFloatingLabel(victim.Transform.position + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(0.5f, 1f, 0.55f), 0.2f);
 
-            // The hero falls - for the floor, exactly as a killing blow leaves them.
-            victim.Stats.Health = 0;
-            _threat.Clear(victim);
-            HandleHeroDeath(victim);
-            _turnManager.RemoveUnit(victim);
+            // The hero falls - for the floor, exactly as a killing blow leaves them, and through the
+            // same death path (the rite is credited to whoever performed it).
+            HealthOps.Set(victim, 0, new HealthSource(cultist, HealthCause.Sacrifice), Events);
+            ResolveDeaths();
 
             // Built off the fallen hero (a living unit's stats, so the snapshot has their gear), and
             // never bound to them: it is what is left of them.
             var horror = SummonUnit.Create(ultra.Creature, null, victim, int.MaxValue / 2);
-            horror.IsSacrifice = true;
             horror.OverrideAttack(attack);
-            _allies.Add(horror);
+            _standIns.Add(horror);
             CombatStage.Instance.PlaceAt(horror, spot);
             yield return SummonPresenter.Arrive(horror);
 
@@ -1325,7 +1403,8 @@ namespace Assets.Scripts.Rooms
             hero.FormAttackDamageType = DamageType.Normal;
             if (hero.IsAlive)
             {
-                hero.Stats.Health = UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth());
+                HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth()),
+                    new HealthSource(hero, HealthCause.Form), Events);
             }
             _gaugeHealth[hero] = Mathf.Max(0, hero.Stats.Health);
             SetHeroFrames(hero, hero.HeroSO != null ? hero.HeroSO.AnimationFrames : null,
@@ -1361,17 +1440,17 @@ namespace Assets.Scripts.Rooms
             animator.Initialize(valid, Mathf.Max(1f, fps));
         }
 
-        /// <summary>Whether <paramref name="unit"/> is one of the summons fighting beside the party.</summary>
-        private bool IsAlly(SummonUnit unit)
+        /// <summary>Whether <paramref name="unit"/> fights beside the party (a guest or a stand-in).</summary>
+        private bool IsBesideParty(SummonUnit unit)
         {
-            return unit != null && _allies.Contains(unit);
+            return unit != null && (_allies.Contains(unit) || _standIns.Contains(unit));
         }
 
         /// <summary>The <paramref name="summon"/> <paramref name="summoner"/> has on the field (any of
         /// theirs when no summon is named), or null.</summary>
         private SummonUnit AllyOf(Hero summoner, SummonSO summon = null)
         {
-            return _allies.FirstOrDefault(a => a != null && !a.IsSacrifice && ReferenceEquals(a.Summoner, summoner)
+            return _allies.FirstOrDefault(a => a != null && ReferenceEquals(a.Summoner, summoner)
                                                && (summon == null || ReferenceEquals(a.Summon, summon)));
         }
 
@@ -1383,7 +1462,7 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void EndAlly(SummonUnit ally, SummonExit exit)
         {
-            if (ally == null || !_allies.Remove(ally))
+            if (ally == null || !(_allies.Remove(ally) || _standIns.Remove(ally)))
             {
                 return;
             }
@@ -1402,13 +1481,13 @@ namespace Assets.Scripts.Rooms
             // Close the gap it left in the column. Not at the end of the fight: the stage is coming down.
             if (exit != SummonExit.Victory && CombatStage.HasInstance)
             {
-                CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive && !a.IsSacrifice).ToList());
+                CombatStage.Instance.PlaceAllies(_allies.Where(a => a != null && a.IsAlive).ToList());
             }
         }
 
         private void EndAllAllies(SummonExit exit)
         {
-            foreach (var ally in _allies.ToList())
+            foreach (var ally in BesideParty.ToList())
             {
                 EndAlly(ally, exit);
             }
@@ -1421,7 +1500,7 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
-            foreach (var ally in _allies.Where(a => a != null && !a.IsSacrifice && ReferenceEquals(a.Summoner, summoner)).ToList())
+            foreach (var ally in _allies.Where(a => a != null && ReferenceEquals(a.Summoner, summoner)).ToList())
             {
                 _lastTurnLog += $" {ally.DisplayName} vanishes with its summoner.";
                 EndAlly(ally, SummonExit.Dismissed);
@@ -1436,7 +1515,7 @@ namespace Assets.Scripts.Rooms
         private void AfterSummonTurn(ICombatUnit unit, bool dismissed)
         {
             var summon = unit as SummonUnit;
-            if (IsAlly(summon))
+            if (IsBesideParty(summon))
             {
                 bool lastTurn = summon.Stay.EndTurn();
                 // A rotating summon (the Blood Idol) moves on to its next rite.
@@ -1550,10 +1629,10 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
-            // An ally simply falls; the party fighting beside it is untouched.
-            if (IsAlly(summon))
+            // A summon beside the party simply falls; the party fighting beside it is untouched.
+            if (IsBesideParty(summon))
             {
-                summon.Stats.Health = 0;
+                HealthOps.Set(summon, 0, new HealthSource(null, HealthCause.Clamp), Events);
                 _lastTurnLog += $" {summon.DisplayName} falls!";
                 EndAlly(summon, SummonExit.Fell);
                 return;
@@ -1562,7 +1641,7 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
-            summon.Stats.Health = 0;
+            HealthOps.Set(summon, 0, new HealthSource(null, HealthCause.Clamp), Events);
             LeaveSquad(summon, SummonExit.Fell, $" {summon.DisplayName} crumbles");
         }
 
@@ -1571,7 +1650,7 @@ namespace Assets.Scripts.Rooms
         /// no Forge bonus, no tag tracker, no combo detector, no charge - the ratios and the upgrade
         /// nodes are the summon's one progression (§4b). Silence stops it, as it stops any cast.
         /// </summary>
-        private IEnumerator ExecuteSummonAbility(SummonUnit caster, MagicSO magic, List<ICombatUnit> targets, Room room)
+        private IEnumerator ExecuteSummonAbility(SummonUnit caster, MagicSO magic, List<ICombatUnit> targets)
         {
             bool isSignature = caster.Summon != null && ReferenceEquals(magic, caster.Summon.Signature);
             // Its own Attack (SummonSO.AttackAbility) is the basic attack: Silence never stops it.
@@ -1614,14 +1693,7 @@ namespace Assets.Scripts.Rooms
             CombatAudio.Play(isSignature ? CombatSound.BossSignature : CombatSound.MagicCast);
             RecordCastDamageObserved(action);
             yield return _presenter.Present(result, caster, magic);
-
-            var deadEnemies = room.Enemies.Where(e => e != null && !e.IsAlive).ToList();
-            foreach (var dead in deadEnemies)
-            {
-                _lastTurnLog += $" {dead.DisplayName} defeated!";
-                HandleEnemyDeath(dead, room);
-            }
-            ResolveSummonDamaged(caster);   // an ability with a health cost could, in principle
+            ResolveDeaths();
         }
 
         private List<Enemy> AliveEnemyComponents()
@@ -1674,13 +1746,11 @@ namespace Assets.Scripts.Rooms
             {
                 case ConsumableEffectType.RestoreHealth:
                     int max = target.GetEffectiveStat(StatType.MaxHealth);
-                    int before = target.Stats.Health;
                     // Scales off the TARGET's bar, not the user's - a potion is worth what it is
                     // worth to whoever drinks it. ItemSO owns the arithmetic so the balance model
                     // and this agree by construction.
-                    target.Stats.Health = Mathf.Min(
-                        target.Stats.Health + RunFear.Current.ScaleHealing(target, item.HealAmountFor(max)), max);
-                    int healed = target.Stats.Health - before;
+                    int healed = HealthOps.Heal(target, RunFear.Current.ScaleHealing(target, item.HealAmountFor(max)),
+                        new HealthSource(heroUnit, HealthCause.Item), Events).Healed;
                     CombatAudio.Play(CombatSound.ItemUse);
                     CombatAudio.Play(CombatSound.Heal);
                     ShowDamageText(target.Transform.position, healed, Color.green);
@@ -1711,6 +1781,7 @@ namespace Assets.Scripts.Rooms
                     break;
             }
 
+            Events?.Publish(new ItemUsed { User = heroUnit, Target = target, Item = item });
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -1731,12 +1802,7 @@ namespace Assets.Scripts.Rooms
             }
 
             yield return ExecuteAttack(hero, target, Vector3.right, Color.white);
-
-            if (!target.IsAlive)
-            {
-                _lastTurnLog += $" {target.DisplayName} defeated!";
-                HandleEnemyDeath(target as Enemy, room);
-            }
+            ResolveDeaths();
         }
 
         private IEnumerator ExecuteEnemyTurn(ICombatUnit enemyUnit, Party party)
@@ -1851,13 +1917,7 @@ namespace Assets.Scripts.Rooms
                 castAction.Magic
             );
 
-            foreach (var target in targets)
-            {
-                if (target.IsHero)
-                {
-                    ResolveHeroDamaged(target);
-                }
-            }
+            ResolveDeaths();
         }
 
         private IEnumerator ExecuteEnemyBasicAttack(ICombatUnit enemyUnit, ICombatUnit target, Party party, float multiplier = 1f, string verb = "attacks")
@@ -1874,7 +1934,7 @@ namespace Assets.Scripts.Rooms
             }
 
             yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, verb);
-            ResolveHeroDamaged(target);
+            ResolveDeaths();
         }
 
         private IEnumerator ExecuteEnemyCharge(Enemy enemy, ICombatUnit target, int entryIndex)
@@ -1912,7 +1972,7 @@ namespace Assets.Scripts.Rooms
             }
 
             yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "unleashes a heavy blow on");
-            ResolveHeroDamaged(target);
+            ResolveDeaths();
         }
 
         private IEnumerator ExecuteEnemyChargeAoe(Enemy enemy, int entryIndex)
@@ -1966,7 +2026,7 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
                 yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "smashes");
-                ResolveHeroDamaged(target);
+                ResolveDeaths();
             }
         }
 
@@ -1978,10 +2038,7 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
-            int before = target.Stats.Health;
-            target.Stats.Health = Mathf.Min(
-                target.Stats.Health + amount, target.GetEffectiveStat(StatType.MaxHealth));
-            int healed = target.Stats.Health - before;
+            int healed = HealthOps.Heal(target, amount, new HealthSource(enemyUnit, HealthCause.EnemyHeal), Events).Healed;
 
             CombatAudio.Play(CombatSound.Heal);
             ShowDamageText(target.Transform.position, healed, Color.green);
@@ -2003,20 +2060,127 @@ namespace Assets.Scripts.Rooms
             yield return new WaitForSeconds(_turnDelay);
         }
 
-        private void ResolveHeroDamaged(ICombatUnit target)
+        /// <summary>
+        /// Runs everything that went down since the last call through its side's death path: an enemy
+        /// pays out and leaves, a hero falls for the floor, a summon leaves the field. <b>The one place
+        /// deaths are handled</b>, called at the point each action's presentation wants them - after a
+        /// swing lands, after a cast's numbers have floated - and once more after every action.
+        ///
+        /// <para>Deaths arrive as <see cref="UnitDefeated"/> events, raised by <see cref="HealthOps"/>
+        /// the moment a bar crosses zero, which is what lets a kill be credited to whoever struck it.
+        /// A sweep of both sides follows as a safety net for anything that went down without one - nothing
+        /// should, since every health write goes through <see cref="HealthOps"/>
+        /// (<c>CombatEventsTests.OnlyHealthOps_WritesHealth</c>), but a runaway reaction chain the stream
+        /// cut short can lose an event, and a lost death must not leave a corpse on the clock.</para>
+        /// </summary>
+        private void ResolveDeaths()
         {
-            if (target is SummonUnit summon)
+            var deaths = _pendingDeaths.ToList();
+            _pendingDeaths.Clear();
+            foreach (var death in deaths)
+            {
+                ResolveDeath(death.Victim, death.Killer, death.Cause);
+            }
+
+            if (_currentCombatRoom != null)
+            {
+                foreach (var enemy in _currentCombatRoom.Enemies.Where(e => e != null && !e.IsAlive).ToList())
+                {
+                    ResolveDeath(enemy, null, HealthCause.Attack);
+                }
+            }
+            foreach (var hero in _fielded.Where(h => h != null && !h.IsAlive && !_fallen.Contains(h)).ToList())
+            {
+                ResolveDeath(hero, null, HealthCause.Attack);
+            }
+            foreach (var summon in BesideParty.Concat(_squad).Where(u => u != null && u.Stats.Health <= 0 && !u.Stay.HasLeft).ToList())
             {
                 ResolveSummonDamaged(summon);
+            }
+        }
+
+        private void ResolveDeath(ICombatUnit victim, ICombatUnit killer, HealthCause cause)
+        {
+            // Back on its feet since (an absorbed hit after the killing blow): not a death any more.
+            if (victim == null || victim.IsAlive)
+            {
                 return;
             }
-            if (!target.IsAlive)
+
+            switch (victim)
             {
-                _lastTurnLog += $" {target.DisplayName} has fallen!";
-                // A fallen hero's threat goes with them: back on their feet, they start clean.
-                _threat.Clear(target);
-                HandleHeroDeath(target as Hero);
-                _turnManager.RemoveUnit(target);
+                case SummonUnit summon:
+                    ResolveSummonDamaged(summon);
+                    break;
+
+                case Enemy enemy:
+                    // Already paid out and removed: the room no longer holds it.
+                    if (_currentCombatRoom == null || !_currentCombatRoom.Enemies.Contains(enemy))
+                    {
+                        return;
+                    }
+                    _lastTurnLog += cause == HealthCause.OverTime
+                        ? $" {enemy.DisplayName} succumbs!"
+                        : $" {enemy.DisplayName} defeated!";
+                    HandleEnemyDeath(enemy, killer);
+                    break;
+
+                case Hero hero:
+                    if (!_fallen.Add(hero))
+                    {
+                        return;
+                    }
+                    _lastTurnLog += $" {hero.DisplayName} has fallen!";
+                    // A fallen hero's threat goes with them: back on their feet, they start clean.
+                    _threat.Clear(hero);
+                    HandleHeroDeath(hero);
+                    _turnManager.RemoveUnit(hero);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Closes a unit's turn on the rules side: the gauges read the turn's damage, <see cref="TurnEnded"/>
+        /// goes out (a turn-end reaction may fire), anything that fell is resolved, and the turn's
+        /// reaction lines join its log. Every turn path calls it before the log is kept.
+        /// </summary>
+        private void CloseTurn(ICombatUnit unit)
+        {
+            UpdateUltraGauges();
+            Events.Publish(new TurnEnded { Unit = unit });
+            ResolveDeaths();
+            FlushReactionLog();
+        }
+
+        private void FlushReactionLog()
+        {
+            foreach (var line in _reactionLog)
+            {
+                _lastTurnLog += line;
+            }
+            _reactionLog.Clear();
+        }
+
+        /// <summary>
+        /// A triggered reaction resolved: its name over the bearer, its numbers over whoever it landed
+        /// on, a line in the turn's log. Presentation only - the effects already happened - so it runs
+        /// alongside whatever the turn is animating rather than holding it up.
+        /// </summary>
+        private void ShowReaction(ReactionResolved reaction)
+        {
+            if (reaction?.Bearer == null)
+            {
+                return;
+            }
+            _reactionLog.Add($" {reaction.Bearer.DisplayName}'s {reaction.Name}!");
+            if (reaction.Bearer.Transform != null)
+            {
+                ShowFloatingLabel(reaction.Bearer.Transform.position + new Vector3(0f, 0.55f, 0f),
+                    reaction.Name, new Color(1f, 0.8f, 0.35f), 0.14f);
+            }
+            if (reaction.Result != null && reaction.Result.Entries.Count > 0)
+            {
+                StartCoroutine(_presenter.Present(reaction.Result));
             }
         }
 
@@ -2065,18 +2229,12 @@ namespace Assets.Scripts.Rooms
                 dmg = Mathf.Max(dmg + 1, Mathf.RoundToInt(dmg * CritMultiplier));
             }
 
+            // Absorbed (resistance above 100%) heals instead, clamped to the target's maximum - without
+            // the clamp an absorbing unit heals past full and the popup reads "-7".
+            var hit = HealthOps.Damage(target, dmg, new HealthSource(attacker, HealthCause.Attack, damageType, crit), Events);
             if (dmg < 0)
             {
-                // Absorbed: resistance above 100% turns the hit into healing. Clamp to the target's
-                // maximum — without this an absorbing unit heals past full and the popup reads "-7".
-                int absorbed = Mathf.Min(
-                    -dmg, Mathf.Max(0, target.GetEffectiveStat(StatType.MaxHealth) - target.Stats.Health));
-                target.Stats.Health += absorbed;
-                dmg = -absorbed;
-            }
-            else
-            {
-                target.Stats.Health -= dmg;
+                dmg = -hit.Healed;
             }
 
             // Impact juice: flash + damage-scaled shake (extra punch on heavy/crit blows) + hit-stop.
@@ -2145,9 +2303,9 @@ namespace Assets.Scripts.Rooms
         /// time in a CTB system — which is what makes Haste and Slow change how often something
         /// burns, for free.</para>
         /// </summary>
-        private IEnumerator EndOfTurnUpkeep(ICombatUnit unit, Room room)
+        private IEnumerator EndOfTurnUpkeep(ICombatUnit unit)
         {
-            yield return ResolveOverTimeTicks(unit, room, TickTiming.EndOfTurn);
+            yield return ResolveOverTimeTicks(unit, TickTiming.EndOfTurn);
 
             BuffTracker.TickBuffs(unit);
             _tagTracker.TickTags(unit);
@@ -2158,7 +2316,7 @@ namespace Assets.Scripts.Rooms
         /// them, and runs the death path if one of them killed it. Shared by the start and the end of
         /// the turn so a tick kills the same way whenever it lands.
         /// </summary>
-        private IEnumerator ResolveOverTimeTicks(ICombatUnit unit, Room room, TickTiming timing)
+        private IEnumerator ResolveOverTimeTicks(ICombatUnit unit, TickTiming timing)
         {
             var ticks = BuffTracker.ResolveOverTime(unit, timing);
 
@@ -2169,31 +2327,9 @@ namespace Assets.Scripts.Rooms
                     ShowOverTimeTick(unit, tick);
                 }
 
-                // A unit killed by a tick has to run the same death path a killing blow does, or its
-                // XP, gold and loot are silently lost and TurnManager keeps scheduling a corpse.
-                //
-                // The hero branch mirrors ResolveHeroDamaged rather than calling HandleHeroDeath
-                // alone: that method only hides the sprite, and the log line and the turn-manager
-                // removal both live at its call sites. HandleEnemyDeath is self-contained.
-                if (unit is SummonUnit tickedSummon)
-                {
-                    ResolveSummonDamaged(tickedSummon);
-                }
-                else if (!unit.IsAlive)
-                {
-                    var deadEnemy = unit as Enemy;
-                    if (deadEnemy != null)
-                    {
-                        _lastTurnLog += $" {deadEnemy.DisplayName} succumbs!";
-                        HandleEnemyDeath(deadEnemy, room);
-                    }
-                    else
-                    {
-                        _lastTurnLog += $" {unit.DisplayName} has fallen!";
-                        HandleHeroDeath(unit as Hero);
-                        _turnManager.RemoveUnit(unit);
-                    }
-                }
+                // A unit killed by a tick runs the same death path a killing blow does, credited to
+                // whoever applied the effect (CombatBuff.Source).
+                ResolveDeaths();
 
                 yield return new WaitForSeconds(OverTimeTickPause);
             }
@@ -2462,7 +2598,10 @@ namespace Assets.Scripts.Rooms
             return paid;
         }
 
-        private void HandleEnemyDeath(Enemy enemy, Room room)
+        /// <summary>An enemy's death, paid out: XP, gold, loot, the bestiary, then off the clock and out
+        /// of the room. Only <see cref="ResolveDeath"/> calls it. <paramref name="killer"/> is whoever
+        /// struck the blow, or null.</summary>
+        private void HandleEnemyDeath(Enemy enemy, ICombatUnit killer)
         {
             if (enemy == null)
             {
@@ -2476,12 +2615,12 @@ namespace Assets.Scripts.Rooms
             if (xp > 0)
             {
                 _combatXp += xp;
-                _currentParty?.DistributeXp(xp);
+                _currentParty?.DistributeXp(xp, EconomySource.Kill);
             }
             if (gold > 0)
             {
                 _combatGold += gold;
-                MetaProgressManager.Instance.AddPendingGold(gold);
+                MetaProgressManager.Instance.AddPendingGold(gold, EconomySource.Kill);
             }
 
             // Loot: every line of the drop table rolls on its own, so one kill can yield a piece of
@@ -2495,15 +2634,23 @@ namespace Assets.Scripts.Rooms
                 {
                     continue;
                 }
-                InventoryManager.Instance.AddItem(award);
+                InventoryManager.Instance.AddItem(award, EconomySource.Kill);
                 Debug.Log($"Item dropped: {award.Item.DisplayName} ({award.Item.Key}) x{award.Quantity}");
                 _combatLoot.Add(award);
                 RecordLootObserved(enemy, award.Item);
             }
 
             RecordEnemyKilled(enemy);
+            GameEvents.Publish(new EnemyDefeated
+            {
+                Enemy = enemy.Definition,
+                EnemyKey = enemy.Definition != null ? enemy.Definition.SaveKey : null,
+                IsBoss = enemy.IsBoss,
+                // A poison's kill is its poisoner's (CombatBuff.Source); a summon's is nobody's hero.
+                KillerHeroKey = (killer as Hero)?.HeroKey
+            });
             _turnManager.RemoveUnit(enemy);
-            room.Enemies.Remove(enemy);
+            _currentCombatRoom?.Enemies.Remove(enemy);
             // Removed from combat immediately; the object lingers only for its pop/fade.
             CombatAudio.Play(CombatSound.EnemyDeath);
             CombatFeedback.Instance.KillWithEffect(enemy.gameObject);

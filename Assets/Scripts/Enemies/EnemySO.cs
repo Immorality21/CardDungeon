@@ -82,6 +82,11 @@ namespace Assets.Scripts.Enemies
                  "gated by *which* monster rather than by depth.")]
         public List<LootDrop> LootTable = new List<LootDrop>();
 
+        [Tooltip("Reactions this enemy carries (docs/plans/EVENTS.md) - \"explodes when it dies\", " +
+                 "\"enrages when an ally falls\". The effects resolve with the enemy as their source, " +
+                 "in play and in the balance model alike.")]
+        public List<Combat.Triggers.TriggeredEffect> Triggers = new List<Combat.Triggers.TriggeredEffect>();
+
         /// <summary>
         /// The behaviour to fight with: the assigned asset, or the built-in preset for
         /// <see cref="Archetype"/>. Never null, so no caller has to branch.

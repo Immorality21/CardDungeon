@@ -6,7 +6,7 @@ namespace Assets.Scripts.Cards.Buffs
 {
     public class SlowBuffHandler : IBuffHandler
     {
-        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker)
+        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker, ICombatUnit source = null)
         {
             // The power arrives signed (DebuffEffectExecutor negates it) and is used as a magnitude:
             // Slow always lowers Agility. Negating the signed value, as this did, turned a Slow cast as

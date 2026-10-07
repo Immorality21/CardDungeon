@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
@@ -9,6 +10,15 @@ namespace Assets.Scripts.Cards.Effects
     {
         private static readonly Color HealColor = Color.green;
         private const float EffectDelay = 0.2f;
+
+        private readonly Func<CombatEvents> _events;
+
+        /// <param name="events">The fight's event stream, read when the effect lands. Null (a room
+        /// event, a test) changes health without telling anyone.</param>
+        public HealEffectExecutor(Func<CombatEvents> events = null)
+        {
+            _events = events;
+        }
 
         public void Execute(
             SpellEffect effect,
@@ -30,10 +40,8 @@ namespace Assets.Scripts.Cards.Effects
                 // percentage heal reads the bar of whoever it lands on, so it is resolved per target.
                 int healAmount = RunFear.Current.ScaleHealing(
                     target, SpellPower.Resolve(effect, caster, target, buffTracker, flatPower));
-                int newHealth = Mathf.Min(
-                    target.Stats.Health + healAmount, target.GetEffectiveStat(StatType.MaxHealth));
-                int actualHeal = newHealth - target.Stats.Health;
-                target.Stats.Health = newHealth;
+                int actualHeal = HealthOps.Heal(
+                    target, healAmount, new HealthSource(caster, HealthCause.Ability), _events?.Invoke()).Healed;
 
                 result.Entries.Add(new EffectEntry
                 {

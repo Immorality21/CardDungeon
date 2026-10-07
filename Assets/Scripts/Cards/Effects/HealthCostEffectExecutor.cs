@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
@@ -19,6 +20,15 @@ namespace Assets.Scripts.Cards.Effects
         private static readonly Color CostColor = new Color(0.9f, 0.35f, 0.35f);
         private const float EffectDelay = 0.2f;
 
+        private readonly Func<CombatEvents> _events;
+
+        /// <param name="events">The fight's event stream, read when the effect lands. Null (a room
+        /// event, a test) changes health without telling anyone.</param>
+        public HealthCostEffectExecutor(Func<CombatEvents> events = null)
+        {
+            _events = events;
+        }
+
         public void Execute(
             SpellEffect effect,
             ICombatUnit caster,
@@ -38,13 +48,12 @@ namespace Assets.Scripts.Cards.Effects
                 return;
             }
 
-            int paid = Mathf.Min(cost, Mathf.Max(0, caster.Stats.Health - 1));
+            int paid = HealthOps.Pay(
+                caster, cost, new HealthSource(caster, HealthCause.Cost), _events?.Invoke()).Landed;
             if (paid <= 0)
             {
                 return;
             }
-
-            caster.Stats.Health -= paid;
 
             result.Entries.Add(new EffectEntry
             {

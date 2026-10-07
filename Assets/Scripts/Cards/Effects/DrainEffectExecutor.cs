@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.UnitStats;
@@ -21,6 +22,15 @@ namespace Assets.Scripts.Cards.Effects
         private static readonly Color DrainColor = new Color(0.75f, 0.2f, 0.35f);
         private const float EffectDelay = 0.3f;
 
+        private readonly Func<CombatEvents> _events;
+
+        /// <param name="events">The fight's event stream, read when the effect lands. Null (a room
+        /// event, a test) changes health without telling anyone.</param>
+        public DrainEffectExecutor(Func<CombatEvents> events = null)
+        {
+            _events = events;
+        }
+
         public void Execute(
             SpellEffect effect,
             ICombatUnit caster,
@@ -40,13 +50,12 @@ namespace Assets.Scripts.Cards.Effects
                 return;
             }
 
-            int max = caster.GetEffectiveStat(StatType.MaxHealth);
-            int healed = Mathf.Min(heal, Mathf.Max(0, max - caster.Stats.Health));
+            int healed = HealthOps.Heal(
+                caster, heal, new HealthSource(caster, HealthCause.Ability), _events?.Invoke()).Healed;
             if (healed <= 0)
             {
                 return;
             }
-            caster.Stats.Health += healed;
 
             result.Entries.Add(new EffectEntry
             {

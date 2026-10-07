@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Combat;
 using Assets.Scripts.IO;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Rooms;
 using UnityEngine;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Heroes
 {
@@ -103,7 +105,7 @@ namespace Assets.Scripts.Heroes
             if (hero != null && hero.Stats != null)
             {
                 // Joins at full health: they were not in the fights that wore the party down.
-                hero.Stats.Health = hero.GetEffectiveMaxHealth();
+                HealthOps.Set(hero, hero.GetEffectiveMaxHealth(), new HealthSource(null, HealthCause.Refill), null);
             }
 
             if (hero != null && isNewToTheSave)
@@ -311,6 +313,7 @@ namespace Assets.Scripts.Heroes
             if (!_saveData.OwnedHeroKeys.Contains(heroSO.SaveKey))
             {
                 _saveData.OwnedHeroKeys.Add(heroSO.SaveKey);
+                GameEvents.Publish(new HeroJoined { HeroKey = heroSO.SaveKey });
             }
 
             MarkFieldedDeferred(heroSO);
@@ -378,7 +381,7 @@ namespace Assets.Scripts.Heroes
             {
                 if (hero.Stats != null)
                 {
-                    hero.Stats.Health = hero.GetEffectiveMaxHealth();
+                    HealthOps.Set(hero, hero.GetEffectiveMaxHealth(), new HealthSource(null, HealthCause.Refill), null);
                 }
             }
         }
@@ -398,7 +401,9 @@ namespace Assets.Scripts.Heroes
         /// per kill, in memory, and <see cref="CommitProgress"/> writes it on level clear - so a wipe
         /// forfeits the run's XP along with its gold and loot.</para>
         /// </summary>
-        public void DistributeXp(int amount)
+        /// <param name="source">Where the XP came from, told to the game's event stream as one
+        /// <see cref="XpAwarded"/> per hero paid.</param>
+        public void DistributeXp(int amount, EconomySource source)
         {
             var shares = XpSplit.Split(amount, Heroes.Count, FavouredHeroIndex());
             for (int i = 0; i < shares.Length; i++)
@@ -409,6 +414,10 @@ namespace Assets.Scripts.Heroes
                     Heroes[i].AddXp(shares[i]);
                     XpEarnedThisLevel.TryGetValue(Heroes[i], out int earned);
                     XpEarnedThisLevel[Heroes[i]] = earned + shares[i];
+                    if (shares[i] > 0)
+                    {
+                        GameEvents.Publish(new XpAwarded { HeroKey = Heroes[i].HeroKey, Amount = shares[i], Source = source });
+                    }
                 }
             }
         }

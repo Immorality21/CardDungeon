@@ -30,9 +30,17 @@ namespace Assets.Scripts.Cards
         /// </summary>
         public IChargeBank Charges { get; set; }
 
+        /// <summary>
+        /// The fight's event stream, raised by every effect that moves health - which is how a kill
+        /// made by an ability is credited to its caster. Set by whoever owns the fight, like
+        /// <see cref="Clock"/>; null everywhere else (room events), where health still moves but
+        /// nobody is told.
+        /// </summary>
+        public CombatEvents Events { get; set; }
+
         public EffectResolver()
         {
-            _factory = new EffectExecutorFactory(() => Clock, () => Charges);
+            _factory = new EffectExecutorFactory(() => Clock, () => Charges, () => Events);
         }
 
         /// <param name="powerBonus">Flat power added to the magic's Damage/Heal effects (from its upgrade level).</param>
@@ -130,7 +138,67 @@ namespace Assets.Scripts.Cards
                 }
             }
 
+            // Raised here, not by each caller, so the live fight and the simulator - which both resolve
+            // every cast, summon, Ultra strike and enemy spell through this method - cannot disagree
+            // about when an ability was used. A throwaway castable (a summon's, an Ultra's) is valid
+            // only while handlers run.
+            Events?.Publish(new AbilityUsed
+            {
+                Caster = action.Caster,
+                Ability = action.Magic,
+                Targets = action.Targets != null ? new List<ICombatUnit>(action.Targets) : new List<ICombatUnit>()
+            });
             return result;
+        }
+
+        /// <summary>
+        /// Resolves a loose list of effects with <paramref name="source"/> as their caster - a triggered
+        /// reaction's (<c>TriggerRegistry</c>), which has no <see cref="MagicSO"/> of its own. The same
+        /// three passes a cast runs (benefits, then drains, then costs) and the same executors, so a
+        /// reaction can be anything an ability can be; no dodge roll, no tags, no combo and no upgrade
+        /// bonus. Power scales off the source's stats as authored (<c>ScalingStat</c>), so a flat
+        /// reaction is authored with <c>StatType.None</c>.
+        /// </summary>
+        public EffectResult ExecuteEffects(
+            IList<SpellEffect> effects,
+            ICombatUnit source,
+            List<ICombatUnit> targets,
+            CombatBuffTracker buffTracker)
+        {
+            var result = new EffectResult();
+            if (effects == null || targets == null)
+            {
+                return result;
+            }
+
+            foreach (var pass in EffectPasses)
+            {
+                foreach (var effect in effects)
+                {
+                    if (effect == null || PassOf(effect.EffectType) != pass)
+                    {
+                        continue;
+                    }
+                    _factory.GetExecutor(effect.EffectType).Execute(effect, source, targets, buffTracker, result);
+                }
+            }
+            return result;
+        }
+
+        private static readonly int[] EffectPasses = { 0, 1, 2 };
+
+        /// <summary>Which of the three passes an effect resolves in: benefits 0, drains 1, costs 2.</summary>
+        private static int PassOf(SpellEffectType type)
+        {
+            switch (type)
+            {
+                case SpellEffectType.Drain:
+                    return 1;
+                case SpellEffectType.HealthCost:
+                    return 2;
+                default:
+                    return 0;
+            }
         }
 
         /// <summary>

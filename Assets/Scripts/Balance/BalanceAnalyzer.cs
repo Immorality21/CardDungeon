@@ -149,6 +149,7 @@ namespace Assets.Scripts.Balance
             EvaluateVariety(report, rules);
             EvaluateProgression(report, rules);
             EvaluateMaterials(report, input);
+            EvaluateUnpricedMechanics(report, input);
             EvaluateSimulations(report, rules);
             EvaluateFloorSimulations(report, rules);
             EvaluateFrontiers(report, rules);
@@ -2761,6 +2762,84 @@ namespace Assets.Scripts.Balance
                         Suggestion = "Raise TreasureRooms (which also lowers the floor's attrition by taking a "
                                    + "room off the combat count), or clear the MaterialTable."
                     });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Says where the model is half-blind, rather than letting a number pass for complete. A
+        /// reaction (<c>Triggers</c>) on an item, enemy or summon is fired by the encounter and floor
+        /// simulations - they build the same <c>TriggerRegistry</c> the game does - but the closed-form
+        /// danger index, the run curve and the gear pricing know nothing of it. An item's milestones
+        /// (<c>ItemSO.Milestones</c>) are earned with use, so every model fights with fresh gear and
+        /// prices only the authored bonuses. Info, not a warning: authoring one is not a mistake,
+        /// trusting a closed-form number about it would be.
+        /// </summary>
+        private static void EvaluateUnpricedMechanics(BalanceReport report, BalanceInput input)
+        {
+            const string ReactionDetail = "Its reactions fire in the encounter and floor simulations, which build the "
+                                        + "same TriggerRegistry as the game, but the closed-form danger index, the run "
+                                        + "curve's attrition and the gear pricing do not see them.";
+            foreach (var enemy in input.Enemies)
+            {
+                if (enemy != null && enemy.Triggers != null && enemy.Triggers.Count > 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy,
+                        enemy.DisplayName, $"Carries {enemy.Triggers.Count} reaction(s) only the simulator prices")
+                    {
+                        Asset = enemy,
+                        Detail = ReactionDetail,
+                        Suggestion = "Read this enemy's danger off the simulation results, not the danger index."
+                    });
+                }
+            }
+
+            foreach (var item in input.Items)
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+                if (item.Triggers != null && item.Triggers.Count > 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Economy,
+                        item.DisplayName, $"Carries {item.Triggers.Count} reaction(s) only the simulator prices")
+                    {
+                        Asset = item,
+                        Detail = ReactionDetail + " GearLoadout ranks gear by its stat bonuses, so this item is "
+                               + "bought (or not) on its stats alone.",
+                        Suggestion = "Judge it with the floor simulation and the frontier, not the gear spend's ranking."
+                    });
+                }
+                if (item.Milestones != null && item.Milestones.Count > 0)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Economy,
+                        item.DisplayName, $"Grows with use ({item.Milestones.Count} milestone(s)) - modelled fresh")
+                    {
+                        Asset = item,
+                        Detail = "Milestone bonuses are earned in play (kills, boss kills, victories while worn). "
+                               + "Every model fights with fresh gear, so this item is priced on its authored "
+                               + "bonuses only and its grown power is invisible to the report.",
+                        Suggestion = "Keep a milestone's bonus inside what the tier it is reachable in can absorb."
+                    });
+                }
+            }
+
+            var summons = SummonCatalogSO.Load();
+            if (summons != null)
+            {
+                foreach (var summon in summons.Summons)
+                {
+                    if (summon != null && summon.Triggers != null && summon.Triggers.Count > 0)
+                    {
+                        report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Progression,
+                            summon.Label, $"Carries {summon.Triggers.Count} reaction(s) only the simulator prices")
+                        {
+                            Asset = summon,
+                            Detail = ReactionDetail,
+                            Suggestion = "Judge it with the per-summon frontier sweep."
+                        });
+                    }
                 }
             }
         }

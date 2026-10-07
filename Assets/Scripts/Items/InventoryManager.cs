@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Events;
 using Assets.Scripts.IO;
 using Assets.Scripts.UnitStats;
 using ImmoralityGaming.Fundamentals;
@@ -23,8 +24,6 @@ namespace Assets.Scripts.Items
         private Dictionary<string, Dictionary<SlotType, ItemSaveData>> _equipped =
             new Dictionary<string, Dictionary<SlotType, ItemSaveData>>();
 
-        public event Action OnInventoryChanged;
-
         private bool _deferSaves;
 
         /// <summary>
@@ -46,6 +45,69 @@ namespace Assets.Scripts.Items
             base.Awake();
             _fileHandler = new FileHandler();
             Load();
+            if (ReferenceEquals(Instance, this))
+            {
+                // Items that grow with use count off the game's events; combat never calls in here.
+                GameEvents.Subscribe<EnemyDefeated>(CountKill);
+                GameEvents.Subscribe<CombatFinished>(CountVictory);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            GameEvents.Unsubscribe<EnemyDefeated>(CountKill);
+            GameEvents.Unsubscribe<CombatFinished>(CountVictory);
+        }
+
+        private void CountKill(EnemyDefeated kill)
+        {
+            if (string.IsNullOrEmpty(kill?.KillerHeroKey))
+            {
+                return;
+            }
+            AddToWornCounters(kill.KillerHeroKey, ItemCounterKind.Kills, 1);
+            if (kill.IsBoss)
+            {
+                AddToWornCounters(kill.KillerHeroKey, ItemCounterKind.BossKills, 1);
+            }
+        }
+
+        private void CountVictory(CombatFinished fight)
+        {
+            if (fight == null || !fight.Won)
+            {
+                return;
+            }
+            foreach (var heroKey in fight.HeroKeys)
+            {
+                AddToWornCounters(heroKey, ItemCounterKind.Victories, 1);
+            }
+        }
+
+        /// <summary>
+        /// Adds to <paramref name="kind"/> on every item <paramref name="heroKey"/> wears that counts it.
+        /// Respects deferred saves like any other change, so a level's counting is kept on the stairs
+        /// and forfeited with the level (<see cref="Load"/> reverts the entries).
+        /// </summary>
+        public void AddToWornCounters(string heroKey, ItemCounterKind kind, int amount)
+        {
+            if (string.IsNullOrEmpty(heroKey) || amount == 0 || !_equipped.TryGetValue(heroKey, out var slots))
+            {
+                return;
+            }
+            bool changed = false;
+            foreach (var entry in slots.Values)
+            {
+                if (ItemGrowth.Counts(GetItemSO(entry.ItemKey), kind))
+                {
+                    ItemGrowth.Add(entry, ItemGrowth.KeyOf(kind), amount);
+                    changed = true;
+                }
+            }
+            if (changed && !_deferSaves)
+            {
+                Save();
+            }
         }
 
         public void SetDeferSaves(bool defer)
@@ -72,7 +134,9 @@ namespace Assets.Scripts.Items
         /// Adds <paramref name="count"/> of an item. Stacking items (consumables, materials) pile
         /// into one entry; equipment becomes <paramref name="count"/> separate ones.
         /// </summary>
-        public void AddItem(ItemSO item, int count = 1)
+        /// <param name="source">Where it came from, told to the game's event stream
+        /// (<see cref="ItemAcquired"/>). Required, so every new way of handing out items has to say.</param>
+        public void AddItem(ItemSO item, int count, EconomySource source)
         {
             if (item == null || count <= 0)
             {
@@ -85,43 +149,51 @@ namespace Assets.Scripts.Items
             {
                 Save();
             }
-            OnInventoryChanged?.Invoke();
+            GameEvents.Publish(new ItemAcquired { Item = item, Quantity = count, Source = source });
         }
 
         /// <summary>Adds a rolled drop-table award (see <see cref="LootRoller.Roll"/>).</summary>
-        public void AddItem(LootAward award)
+        public void AddItem(LootAward award, EconomySource source)
         {
             if (!award.IsEmpty)
             {
-                AddItem(award.Item, award.Quantity);
-            }
-        }
-
-        public void RemoveItem(string itemKey)
-        {
-            var index = _saveData.Items.FindIndex(x => x.ItemKey == itemKey);
-            if (index >= 0)
-            {
-                _saveData.Items.RemoveAt(index);
-                if (!_deferSaves)
-                {
-                    Save();
-                }
-                OnInventoryChanged?.Invoke();
+                AddItem(award.Item, award.Quantity, source);
             }
         }
 
         /// <summary>
         /// Removes one <b>un-equipped</b> equipment entry with this key (a "bag" copy), never an
         /// item a hero has equipped. Used by selling so a hero can't be stripped by selling a
-        /// duplicate. Returns true if a bag copy was found and removed.
+        /// duplicate. Of several bag copies the least grown goes (<see cref="ItemGrowth"/>), so selling
+        /// "a spare" never sells the one that has been counting. Returns true if a bag copy was found
+        /// and removed.
         /// </summary>
-        public bool RemoveBagEquipment(string itemKey)
+        public bool RemoveBagEquipment(string itemKey, ItemRemovalReason reason)
         {
-            var index = _saveData.Items.FindIndex(i =>
-                i.ItemKey == itemKey &&
-                string.IsNullOrEmpty(i.EquippedSlot) &&
-                IsCategory(i, ItemCategory.Equipment));
+            int index = -1;
+            int leastGrown = int.MaxValue;
+            for (int i = 0; i < _saveData.Items.Count; i++)
+            {
+                var entry = _saveData.Items[i];
+                if (entry.ItemKey != itemKey || !string.IsNullOrEmpty(entry.EquippedSlot)
+                    || !IsCategory(entry, ItemCategory.Equipment))
+                {
+                    continue;
+                }
+                int growth = 0;
+                if (entry.Counters != null)
+                {
+                    foreach (var counter in entry.Counters)
+                    {
+                        growth += counter != null ? counter.Value : 0;
+                    }
+                }
+                if (growth < leastGrown)
+                {
+                    leastGrown = growth;
+                    index = i;
+                }
+            }
 
             if (index < 0)
             {
@@ -133,7 +205,7 @@ namespace Assets.Scripts.Items
             {
                 Save();
             }
-            OnInventoryChanged?.Invoke();
+            GameEvents.Publish(new ItemRemoved { Item = GetItemSO(itemKey), Quantity = 1, Reason = reason });
             return true;
         }
 
@@ -205,7 +277,16 @@ namespace Assets.Scripts.Items
             {
                 Save();
             }
-            OnInventoryChanged?.Invoke();
+            foreach (var price in cost)
+            {
+                if (price != null && price.IsValid)
+                {
+                    GameEvents.Publish(new ItemRemoved
+                    {
+                        Item = price.Material, Quantity = price.Amount, Reason = ItemRemovalReason.Spent
+                    });
+                }
+            }
             return true;
         }
 
@@ -225,7 +306,7 @@ namespace Assets.Scripts.Items
         /// Spends one unit of a consumable, removing the stack when it hits zero. Returns false if
         /// none are carried. Respects deferred saves (spending happens in-dungeon).
         /// </summary>
-        public bool TryConsume(string itemKey)
+        public bool TryConsume(string itemKey, ItemRemovalReason reason = ItemRemovalReason.Used)
         {
             if (!InventoryOperations.TryConsume(_saveData.Items, itemKey, GetItemSO))
             {
@@ -238,7 +319,7 @@ namespace Assets.Scripts.Items
             {
                 Save();
             }
-            OnInventoryChanged?.Invoke();
+            GameEvents.Publish(new ItemRemoved { Item = GetItemSO(itemKey), Quantity = 1, Reason = reason });
             return true;
         }
 
@@ -276,12 +357,8 @@ namespace Assets.Scripts.Items
                 }
             }
 
+            // Catching the bags up to what the save already recorded is not a new spend: no event.
             _dungeonConsumption = InventoryOperations.MergeSpends(_dungeonConsumption, saved);
-
-            if (shortfall.Count > 0)
-            {
-                OnInventoryChanged?.Invoke();
-            }
         }
 
         /// <summary>
@@ -292,7 +369,8 @@ namespace Assets.Scripts.Items
         {
             int before = item != null ? GetConsumableQuantity(item.Key) : 0;
             InventoryOperations.TopUpConsumableToCap(_saveData.Items, item, cap, GetItemSO);
-            if (item == null || GetConsumableQuantity(item.Key) == before)
+            int added = item != null ? GetConsumableQuantity(item.Key) - before : 0;
+            if (added <= 0)
             {
                 return;
             }
@@ -301,7 +379,7 @@ namespace Assets.Scripts.Items
             {
                 Save();
             }
-            OnInventoryChanged?.Invoke();
+            GameEvents.Publish(new ItemAcquired { Item = item, Quantity = added, Source = EconomySource.BeltRefill });
         }
 
         private bool IsCategory(ItemSaveData item, ItemCategory category)
@@ -402,7 +480,7 @@ namespace Assets.Scripts.Items
             {
                 Save();
             }
-            OnInventoryChanged?.Invoke();
+            GameEvents.Publish(new ItemEquipChanged { Item = so, HeroKey = heroKey, Equipped = true });
         }
 
         public void Unequip(SlotType slot, string heroKey)
@@ -418,7 +496,10 @@ namespace Assets.Scripts.Items
                     {
                         Save();
                     }
-                    OnInventoryChanged?.Invoke();
+                    GameEvents.Publish(new ItemEquipChanged
+                    {
+                        Item = GetItemSO(existing.ItemKey), HeroKey = heroKey, Equipped = false
+                    });
                 }
             }
         }
@@ -457,9 +538,19 @@ namespace Assets.Scripts.Items
             return InventoryOperations.ComputeResistances(GetEquippedItems(heroKey));
         }
 
+        /// <summary>The hero's gear bonuses of one type, each item with the milestones its own entry
+        /// has reached (<see cref="ItemGrowth"/>).</summary>
         private Dictionary<StatType, float> ComputeBonuses(string heroKey, BonusType bonusType)
         {
-            return InventoryOperations.ComputeBonuses(GetEquippedItems(heroKey), bonusType);
+            var perItem = new List<IEnumerable<ItemBonus>>();
+            if (_equipped.TryGetValue(heroKey, out var slots))
+            {
+                foreach (var entry in slots.Values)
+                {
+                    perItem.Add(ItemGrowth.BonusesOf(GetItemSO(entry.ItemKey), entry));
+                }
+            }
+            return InventoryOperations.SumBonuses(perItem, bonusType);
         }
 
         public void Save()

@@ -11,6 +11,7 @@ using Assets.Scripts.Resources;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Hub
 {
@@ -491,13 +492,13 @@ namespace Assets.Scripts.Hub
 
         private void OnBuy(string key, ItemSO so, int price)
         {
-            if (!MetaProgressManager.Instance.TrySpendGold(price))
+            if (!MetaProgressManager.Instance.TrySpendGold(price, EconomySource.Merchant))
             {
                 SetFeedback("Not enough gold.");
                 return;
             }
 
-            InventoryManager.Instance.AddItem(so);
+            InventoryManager.Instance.AddItem(so, 1, EconomySource.Merchant);
             MetaProgressManager.Instance.RemoveFromShopStock(key);
             SetFeedback($"Bought {so.DisplayName}.");
             Refresh();
@@ -505,7 +506,7 @@ namespace Assets.Scripts.Hub
 
         private void OnRestock()
         {
-            if (!MetaProgressManager.Instance.TrySpendGold(RestockCost))
+            if (!MetaProgressManager.Instance.TrySpendGold(RestockCost, EconomySource.Merchant))
             {
                 SetFeedback("Not enough gold to restock.");
                 return;
@@ -520,12 +521,12 @@ namespace Assets.Scripts.Hub
         private void OnSell(string key, ItemSO so, int price)
         {
             // Only ever sell an un-equipped (bag) copy, and only pay out if one was actually removed.
-            if (!InventoryManager.Instance.RemoveBagEquipment(key))
+            if (!InventoryManager.Instance.RemoveBagEquipment(key, ItemRemovalReason.Sold))
             {
                 SetFeedback("Nothing to sell.");
                 return;
             }
-            MetaProgressManager.Instance.AddGold(price);
+            MetaProgressManager.Instance.AddGold(price, EconomySource.Merchant);
             SetFeedback($"Sold {so.DisplayName} for {price}g.");
             Refresh();
         }
@@ -533,7 +534,7 @@ namespace Assets.Scripts.Hub
         private void OnBuyPotionBelt()
         {
             int cost = PotionBeltCost();
-            if (!MetaProgressManager.Instance.TrySpendGold(cost))
+            if (!MetaProgressManager.Instance.TrySpendGold(cost, EconomySource.Merchant))
             {
                 SetFeedback("Not enough gold.");
                 return;

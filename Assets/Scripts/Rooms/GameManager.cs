@@ -3,6 +3,7 @@ using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Rooms
 {
@@ -53,6 +54,8 @@ namespace Assets.Scripts.Rooms
             {
                 DungeonSaveManager.Instance.Save(room);
             }
+
+            GameEvents.Publish(new RoomEntered { Room = room });
         }
 
         /// <summary>Puts the camera straight onto its follow target (fast travel), rather than lerping there.</summary>

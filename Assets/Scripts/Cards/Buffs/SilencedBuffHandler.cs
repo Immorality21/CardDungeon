@@ -18,7 +18,7 @@ namespace Assets.Scripts.Cards.Buffs
     /// </summary>
     public class SilencedBuffHandler : IBuffHandler
     {
-        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker)
+        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker, ICombatUnit source = null)
         {
             if (target == null || buffTracker == null || duration <= 0)
             {

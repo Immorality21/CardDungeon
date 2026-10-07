@@ -222,6 +222,16 @@ backlog.**
 | **12** | Enemy action vocabulary — the four missing verbs | not started |
 | **13** | Hero identity — the Ultra gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the **Ultra** gauge (working name for a Limit/Overdrive, 2026-10-04) is what is left; per-hero styles collected in Hero Vision |
 
+### [Events and reactions](plans/EVENTS.md)
+
+| § | | state |
+|---|---|---|
+| — | **Item/enemy/summon-specific rules as data** — `HealthOps` (the one health writer), one death path, `CombatEvents` per fight shared with the simulator, `TriggeredEffect` reactions on items/enemies/summons, `GameEvents` with a required `EconomySource`, item counters + milestones | ✅ **plumbing shipped 2026-10-07**; no content uses reactions or milestones yet. Open: Ultra gauge/threat still poll health, gear pricing ignores reactions |
+| — | **Scaling items** — items that grow with use (`ItemSO.Milestones`: "after 50 kills, +3 STR"; counters per copy in the save) | mechanism ✅ 2026-10-07; **no item uses it yet**. To do: (1) **the hub's Stats section ignores milestone bonuses** - combat and the item card are right, but `InventoryHubUI`'s stat totals and "Stats if equipped" previews add gear from `ItemSO`s and cannot see a copy's counters, so a grown sword reads +4 STR where combat gives +7 (`EVENTS.md` §4.1, ~10 call sites through `HeroStatCalculator.WithGear` and the swap helpers) - **fix before the first scaling item ships**; (2) author the first scaling items |
+| — | **Reactions** — items, enemies and summons that act on their own when something happens in a fight (`TriggeredEffect`): a sword that heals its wearer on a kill, an imp that explodes when it dies, armour that may poison whoever hits it, an orc that enrages when an ally falls | mechanism ✅ 2026-10-07 (fires in play and in the balance simulator); **no content uses it yet**. To do: author the first reactions on gear, enemies and summons; watch one in play mode (floating name + log line, never seen on screen yet - `EVENTS.md` §4.7); decide whether a reaction is described on the item card (ignored for now, owner 2026-10-07) |
+| — | **Passive sphere-grid nodes** — a node grants a `TriggeredEffect` list | decided yes (owner, 2026-10-07); **after the first real demo**. One appended `SphereNodeKind`, read by `Hero.GetTriggers` |
+| — | **Achievements and hub quests** | not started; they listen to `GameEvents` (`Events/CLAUDE.md`: count kept changes, or hold a tally until `LevelCleared`). Bounties are `HUB.md` §3d |
+
 ### [The hub becomes a place](plans/HUB.md)
 
 | § | | state |
@@ -262,7 +272,7 @@ backlog.**
 | **16** | A compendium — explain the systems | not started |
 | **20** | **A tutorial — guide the player through the first hour** | **first loop shipped 2026-09-29** (New Game → floor 1 → build the Hall of Progression → first grid node → the road); learnings + todos in `docs/TUTORIAL.md` |
 | **17** | Content volume is the biggest single gap | not started |
-| **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses to come** — the 4-piece Shadowweave set is authored, no set logic yet (§18a-sets) |
+| **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses deferred** (owner unsure they make sense, 2026-10-07) — the 4-piece Shadowweave set is authored, no set logic (§18a-sets) |
 | **19** | Shipping surface | not started |
 | **21** | **Art pass** — every outdated sprite | **enemies done 2026-09-29** (the five still enemies redrawn + animated, both bosses at Warden size, a 32 px Dark Jailor); menu backdrops, combat backgrounds, floor rock and item icons done 2026-09-28. **all seven heroes in one style 2026-09-29** (Warrior, Cultist, Cleric, Ranger, Tinkerer redone). Left: optional attack/hit animations, optional attack/hit animations, and the parked `productName` / save-folder rename |
 
@@ -272,6 +282,15 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **Event-driven rules** (2026-10-07) — `plans/EVENTS.md`. `HealthOps` is the only writer of health
+  (a guard test scans for others) and raises `UnitDefeated` with the killer; one death path
+  (`ResolveDeaths`) replaced six corpse scans and fixed two unhandled deaths; `CombatEvents` per fight in
+  the game and the simulator; `TriggeredEffect` reactions on items, enemies and summons; `GameEvents`
+  for items, currency, XP, kills, levels, heroes and nodes, with a required `EconomySource`; items count
+  kills/boss kills/victories per copy and grow at milestones; Sacrifice's `IsSacrifice` flag became a
+  guests/stand-ins split. Reviewed independently the same day, ten findings fixed. Suite 1,381 / 0;
+  sandbox fights checked in play mode.
 
 - **Essence becomes the revisit currency** (2026-10-06) — `plans/HUB.md` §3c. Only revisits pay
   Essence (12 a floor × the reward multiplier). It buys **awakenings**: Essence-priced, 0 XP grid nodes

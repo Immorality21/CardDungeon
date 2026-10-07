@@ -29,6 +29,16 @@ namespace Assets.Scripts.Items
                  "and absorb that element instead of taking it.")]
         public List<Combat.Resistance> Resistances = new List<Combat.Resistance>();
 
+        [Tooltip("Reactions this item gives its wearer in a fight (docs/plans/EVENTS.md): when something " +
+                 "happens to the wearer, the effects resolve with the wearer as their source. Simulated " +
+                 "by the balance model exactly as they fire in play.")]
+        public List<Combat.Triggers.TriggeredEffect> Triggers = new List<Combat.Triggers.TriggeredEffect>();
+
+        [Tooltip("Thresholds on what this item has counted while worn (kills, boss kills, victories) and " +
+                 "the bonuses reaching them adds - \"after 50 kills, +3 Strength\". Each copy counts for " +
+                 "itself, in its save entry. See ItemGrowth.")]
+        public List<ItemMilestone> Milestones = new List<ItemMilestone>();
+
         [Header("Consumable (Category == Consumable)")]
         public ConsumableEffectType ConsumableEffect = ConsumableEffectType.RestoreHealth;
 

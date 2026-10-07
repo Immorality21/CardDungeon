@@ -289,7 +289,9 @@ namespace Assets.Scripts.Balance
                     EffectiveAttackPower = AttackPowerFor(definition, effective),
                     // Heroes deal physical damage; node + gear resistance folds in like Hero does.
                     AttackDamageType = Combat.DamageType.Normal,
-                    Resistances = resistances
+                    Resistances = resistances,
+                    // ...and so do the gear's reactions, which the encounter loop fires like the game.
+                    Triggers = new List<Combat.Triggers.CarriedTrigger>(Combat.Triggers.TriggerSources.FromItems(gear))
                 };
 
                 baseline.Heroes.Add(hero);
@@ -347,7 +349,7 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
                 var clone = hero.Unit.Clone();
-                clone.Stats.Health = clone.Stats.MaxHealth;
+                HealthOps.Set(clone, clone.Stats.MaxHealth, new HealthSource(null, HealthCause.Refill), null);
                 clones.Add(clone);
             }
             return clones;

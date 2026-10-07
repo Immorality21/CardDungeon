@@ -150,10 +150,9 @@ Five rules worth not re-deriving:
   calling, so a poison authored as a Debuff arrives negative and a regeneration authored as a Buff
   arrives positive — both mean "this much per turn". Direction is the handler's `Heals`, never the
   sign, so no authoring choice can produce a poison that heals.
-- **A tick can kill**, and `EndOfTurnUpkeep` runs the same death path a killing blow does. Note the
-  hero branch has to mirror `ResolveHeroDamaged` rather than just calling `HandleHeroDeath`: that
-  method only hides the sprite, and the log line and `_turnManager.RemoveUnit` live at its call sites.
-  `HandleEnemyDeath` is self-contained.
+- **A tick can kill**, and runs the same death path a killing blow does: the tick goes through
+  `HealthOps`, which raises `UnitDefeated` credited to `CombatBuff.Source` (whoever applied the effect),
+  and `CombatManager.ResolveDeaths` handles it like any other death.
 - **An absorbed element heals through the tick path too** (`ApplyDamageTick` → `ApplyHealTick`), the
   same rule a cast follows above 100% resistance.
 
@@ -382,10 +381,13 @@ Two consequences worth holding on to:
   hero standing). The hero falls for the floor and `UltraSO.Creature` rises in their spot, built off
   *their* stats (`SummonUnit.Create(creature, null, victim, ...)`), its Attack picked from
   `UltraSO.StatAbilities` by their highest stat (`UltraOps.PickStatAbility`, held on the unit via
-  `SummonUnit.OverrideAttack` / `AttackAbility`). `SummonUnit.IsSacrifice` marks it: not bound to a
-  summoner, not re-laid-out with the ally column, Skip instead of Dismiss, and it steps out *with* the
-  party when a replacement summon arrives (`CombatStage.HideUnits`). The defeat check stays
-  heroes-only. Sim: `SimAllies.ArriveHorror`, policy in `SimUltras.SacrificeVictim`.
+  `SummonUnit.OverrideAttack` / `AttackAbility`). It is a **stand-in**, and its role is the list it is
+  in (`CombatManager._standIns`, beside the guests in `_allies`), not a flag: not bound to a summoner,
+  not re-laid-out with the ally column, Skip instead of Dismiss (`CombatManager.CanDismiss`), and it
+  steps out *with* the party when a replacement summon arrives (`CombatStage.HideUnits`). The victim
+  falls through `HealthOps.Set` and `ResolveDeaths`, credited to the Cultist. The defeat check stays
+  heroes-only. Sim: `SimAllies.ArriveStandIn` (guests and stand-ins in two lists there too), policy in
+  `SimUltras.SacrificeVictim`.
 - **A replacement's own Attack** *(2026-10-01)*: `SummonSO.AttackAbility` (optional, a single-enemy
   `MagicSO`) is what its Attack command does instead of the plain Strength swing. The row still says
   *Attack*, **Silence never closes it** (`ExecuteSummonAbility` exempts it), the sim swings it, and

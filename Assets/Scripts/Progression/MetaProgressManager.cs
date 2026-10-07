@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Events;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
 using ImmoralityGaming.Fundamentals;
@@ -45,9 +46,6 @@ namespace Assets.Scripts.Progression
         private FileHandler _fileHandler;
         private MetaProgressSaveData _saveData;
 
-        /// <summary>Raised whenever gold, essence, a combo upgrade, or other meta state changes.</summary>
-        public event Action OnChanged;
-
         public int Gold => _saveData.Gold;
         public int Essence => _saveData.Essence;
 
@@ -73,10 +71,11 @@ namespace Assets.Scripts.Progression
             }
 
             int n = _saveData.BonusSlots;
-            _saveData.Essence += 40 * n + 40 * n * (n - 1) / 2;
+            int refund = 40 * n + 40 * n * (n - 1) / 2;
+            _saveData.Essence += refund;
             _saveData.BonusSlots = 0;
             Save();
-            OnChanged?.Invoke();
+            Publish(Currency.Essence, refund, EconomySource.Migration);
         }
 
         // --- Pure helpers (no state / disk) so economy math is unit-testable ---
@@ -150,8 +149,20 @@ namespace Assets.Scripts.Progression
         }
 
         // --- Currency ---
+        //
+        // Every change says where it came from or went (EconomySource) and is told to the game's event
+        // stream as a CurrencyChanged - the one place gold and Essence move, so nothing listening (an
+        // achievement, a hub quest) can miss a route.
 
-        public void AddGold(int amount)
+        private static void Publish(Currency currency, int delta, EconomySource source, bool pending = false)
+        {
+            if (delta != 0)
+            {
+                GameEvents.Publish(new CurrencyChanged { Currency = currency, Delta = delta, Source = source, Pending = pending });
+            }
+        }
+
+        public void AddGold(int amount, EconomySource source)
         {
             if (amount <= 0)
             {
@@ -159,10 +170,10 @@ namespace Assets.Scripts.Progression
             }
             _saveData.Gold += amount;
             Save();
-            OnChanged?.Invoke();
+            Publish(Currency.Gold, amount, source);
         }
 
-        public void AddEssence(int amount)
+        public void AddEssence(int amount, EconomySource source)
         {
             if (amount <= 0)
             {
@@ -170,10 +181,10 @@ namespace Assets.Scripts.Progression
             }
             _saveData.Essence += amount;
             Save();
-            OnChanged?.Invoke();
+            Publish(Currency.Essence, amount, source);
         }
 
-        public bool TrySpendGold(int amount)
+        public bool TrySpendGold(int amount, EconomySource source)
         {
             if (amount <= 0 || _saveData.Gold < amount)
             {
@@ -181,11 +192,11 @@ namespace Assets.Scripts.Progression
             }
             _saveData.Gold -= amount;
             Save();
-            OnChanged?.Invoke();
+            Publish(Currency.Gold, -amount, source);
             return true;
         }
 
-        public bool TrySpendEssence(int amount)
+        public bool TrySpendEssence(int amount, EconomySource source)
         {
             if (amount <= 0 || _saveData.Essence < amount)
             {
@@ -193,7 +204,7 @@ namespace Assets.Scripts.Progression
             }
             _saveData.Essence -= amount;
             Save();
-            OnChanged?.Invoke();
+            Publish(Currency.Essence, -amount, source);
             return true;
         }
 
@@ -204,39 +215,40 @@ namespace Assets.Scripts.Progression
         private int _pendingRunGold;
         public int PendingRunGold => _pendingRunGold;
 
-        /// <summary>Accumulate kill-gold for the current level (not persisted until level-clear).</summary>
-        public void AddPendingGold(int amount)
+        /// <summary>Accumulate gold found on the current level - kills, caches, events - not persisted
+        /// until level-clear. Told to the event stream as a <i>pending</i> change.</summary>
+        public void AddPendingGold(int amount, EconomySource source)
         {
             if (amount > 0)
             {
                 _pendingRunGold += amount;
+                Publish(Currency.Gold, amount, source, pending: true);
             }
         }
 
-        /// <summary>Forfeit the current level's accumulated kill-gold (party death / new level).</summary>
+        /// <summary>Forfeit the current level's accumulated gold (party death, leaving the dungeon).</summary>
         public void DiscardPendingGold()
         {
+            int lost = _pendingRunGold;
             _pendingRunGold = 0;
-        }
-
-        /// <summary>Reward for clearing a dungeon level (exit room cleared): banks the level's
-        /// accumulated kill-gold plus the flat level-clear bonus.</summary>
-        public void AwardLevelClear()
-        {
-            AwardLevelClear(GoldPerLevelCleared, 0);
+            Publish(Currency.Gold, -lost, EconomySource.Forfeit, pending: true);
         }
 
         /// <summary>
-        /// <see cref="AwardLevelClear()"/> with the flat bonus and Essence already decided by the
-        /// caller - a revisit scales both by its reward multiplier (docs/plans/REVISITS.md).
+        /// Reward for taking the stairs: banks the level's pending gold plus the flat bonus and the
+        /// Essence the caller decided (a revisit scales both by its reward multiplier,
+        /// docs/plans/REVISITS.md). Told to the stream as one <b>kept</b> gold change of the whole
+        /// amount - the pending gold included - so a listener counting gold earned counts kept changes.
         /// </summary>
         public void AwardLevelClear(int goldBonus, int essence)
         {
-            _saveData.Gold += Mathf.Max(0, goldBonus) + _pendingRunGold;
+            int gold = Mathf.Max(0, goldBonus) + _pendingRunGold;
+            _saveData.Gold += gold;
             _saveData.Essence += Mathf.Max(0, essence);
             _pendingRunGold = 0;
             Save();
-            OnChanged?.Invoke();
+            Publish(Currency.Gold, gold, EconomySource.LevelClear);
+            Publish(Currency.Essence, Mathf.Max(0, essence), EconomySource.LevelClear);
         }
 
         // --- Revisits ---
@@ -271,7 +283,6 @@ namespace Assets.Scripts.Progression
                 record.Clears++;
             }
             Save();
-            OnChanged?.Invoke();
         }
 
         /// <summary>
@@ -283,7 +294,7 @@ namespace Assets.Scripts.Progression
             int levelsReached = Mathf.Max(0, levelIndexReached) + 1;
             _saveData.Gold += GoldPerLevelOnDeath * levelsReached;
             Save();
-            OnChanged?.Invoke();
+            Publish(Currency.Gold, GoldPerLevelOnDeath * levelsReached, EconomySource.RunDeath);
         }
 
         // --- Combo upgrades (per combo key) ---
@@ -352,6 +363,7 @@ namespace Assets.Scripts.Progression
             int level = GetComboUpgradeLevel(comboKey);
             int cost = ComboUpgradeCostForNextLevel(level);
             _saveData.Essence -= cost;
+            Publish(Currency.Essence, -cost, EconomySource.Forge);
 
             var entry = _saveData.ComboUpgrades.Find(e => e.ComboKey == comboKey);
             if (entry == null)
@@ -362,7 +374,6 @@ namespace Assets.Scripts.Progression
             entry.Level += 1;
 
             Save();
-            OnChanged?.Invoke();
             return true;
         }
 
@@ -387,7 +398,6 @@ namespace Assets.Scripts.Progression
             }
             _saveData.DiscoveredMagicKeys.Add(magicKey);
             Save();
-            OnChanged?.Invoke();
         }
 
         public bool IsComboDiscovered(string comboKey)
@@ -404,7 +414,6 @@ namespace Assets.Scripts.Progression
             }
             _saveData.DiscoveredComboKeys.Add(comboKey);
             Save();
-            OnChanged?.Invoke();
         }
 
         // --- Bestiary (permanent enemy knowledge; survives death) ---
@@ -490,7 +499,6 @@ namespace Assets.Scripts.Progression
                 return;
             }
             Save();
-            OnChanged?.Invoke();
         }
 
         // --- Run completion (which runs have been cleared to the end) ---
@@ -526,7 +534,6 @@ namespace Assets.Scripts.Progression
             }
             _saveData.CompletedRunKeys.Add(runKey);
             Save();
-            OnChanged?.Invoke();
         }
 
         // --- The tutorial (only its two ends; the step is derived, see TutorialOps) ---
@@ -543,7 +550,6 @@ namespace Assets.Scripts.Progression
             }
             _saveData.TutorialStarted = true;
             Save();
-            OnChanged?.Invoke();
         }
 
         /// <summary>Ends it for good — the loop was walked, or it was skipped. Persists immediately.</summary>
@@ -555,7 +561,6 @@ namespace Assets.Scripts.Progression
             }
             _saveData.TutorialFinished = true;
             Save();
-            OnChanged?.Invoke();
         }
 
         // --- Hub buildings (which lots are placed, and at what level) ---
@@ -595,7 +600,7 @@ namespace Assets.Scripts.Progression
             }
 
             Save();
-            OnChanged?.Invoke();
+            GameEvents.Publish(new BuildingLevelChanged { BuildingKey = buildingKey, Level = level });
             return true;
         }
 
@@ -649,7 +654,6 @@ namespace Assets.Scripts.Progression
             _saveData.XpSplitMode = mode;
             _saveData.XpFocusHeroKey = focusHeroKey ?? "";
             Save();
-            OnChanged?.Invoke();
         }
 
         // --- Merchant gear stock (item keys) ---

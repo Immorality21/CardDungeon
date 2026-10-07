@@ -11,6 +11,7 @@ using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Sandbox
 {
@@ -223,7 +224,7 @@ namespace Assets.Scripts.Sandbox
             var inventory = InventoryManager.Instance;
             foreach (var grant in config.Items.Where(g => g != null && g.Item != null))
             {
-                inventory.AddItem(grant.Item, grant.Count);
+                inventory.AddItem(grant.Item, grant.Count, EconomySource.Sandbox);
                 if (grant.EquipOn == null || grant.Item.Category != ItemCategory.Equipment)
                 {
                     continue;

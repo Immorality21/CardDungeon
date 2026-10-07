@@ -364,8 +364,24 @@ namespace Assets.Scripts.Items
             stack.Quantity += cap - have;
         }
 
-        /// <summary>Sums equipment bonuses of the given <paramref name="bonusType"/> across equipped items.</summary>
+        /// <summary>Sums equipment bonuses of the given <paramref name="bonusType"/> across equipped
+        /// items, as authored - fresh gear with nothing counted, which is what the balance model fights
+        /// with. A worn item's reached milestones come in through <see cref="SumBonuses"/>.</summary>
         public static Dictionary<StatType, float> ComputeBonuses(IEnumerable<ItemSO> equippedItems, BonusType bonusType)
+        {
+            var perItem = new List<IEnumerable<ItemBonus>>();
+            if (equippedItems != null)
+            {
+                foreach (var so in equippedItems)
+                {
+                    perItem.Add(ItemGrowth.BonusesOf(so, null));
+                }
+            }
+            return SumBonuses(perItem, bonusType);
+        }
+
+        /// <summary>Sums the bonuses of the given type over each item's list of bonuses.</summary>
+        public static Dictionary<StatType, float> SumBonuses(IEnumerable<IEnumerable<ItemBonus>> perItem, BonusType bonusType)
         {
             var result = new Dictionary<StatType, float>();
             foreach (StatType stat in Enum.GetValues(typeof(StatType)))
@@ -373,20 +389,20 @@ namespace Assets.Scripts.Items
                 result[stat] = 0f;
             }
 
-            if (equippedItems == null)
+            if (perItem == null)
             {
                 return result;
             }
 
-            foreach (var so in equippedItems)
+            foreach (var bonuses in perItem)
             {
-                if (so == null)
+                if (bonuses == null)
                 {
                     continue;
                 }
-                foreach (var bonus in so.Bonuses)
+                foreach (var bonus in bonuses)
                 {
-                    if (bonus.BonusType == bonusType)
+                    if (bonus != null && bonus.BonusType == bonusType)
                     {
                         result[bonus.StatType] += bonus.Value;
                     }

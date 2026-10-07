@@ -15,6 +15,7 @@ using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Hub
 {
@@ -758,7 +759,7 @@ namespace Assets.Scripts.Hub
                     return;
                 }
             }
-            else if (!MetaProgressManager.Instance.TrySpendGold(BuildingOps.UpgradeCost(_selectedLot, progress)))
+            else if (!MetaProgressManager.Instance.TrySpendGold(BuildingOps.UpgradeCost(_selectedLot, progress), EconomySource.Building))
             {
                 SetLotFeedback("The gold went missing between checking and paying.");
                 return;

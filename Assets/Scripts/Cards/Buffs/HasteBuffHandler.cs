@@ -6,7 +6,7 @@ namespace Assets.Scripts.Cards.Buffs
 {
     public class HasteBuffHandler : IBuffHandler
     {
-        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker)
+        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker, ICombatUnit source = null)
         {
             buffTracker.ApplyBuff(target, StatType.Agility, power, duration);
             buffTracker.ApplyStatusEffect(target, BuffType.Haste, duration);

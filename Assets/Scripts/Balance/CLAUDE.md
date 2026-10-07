@@ -356,6 +356,16 @@ the real game). That is the drift risk. `EncounterSimulatorTests.ResolveAttack_A
 pins the simulated hit to `CombatManager.ExecuteAttack`'s exact arithmetic — **keep that test passing
 when you touch either side.**
 
+**Health, deaths and reactions are shared, not copied** *(2026-10-07)*. Every simulated hit, heal,
+tick, price and Sacrifice goes through `Combat/HealthOps`, as the live fight's do, and `RunEncounter`
+builds the same per-fight `CombatEvents` and `TriggerRegistry` that `CombatManager.RunCombat` builds -
+so an authored reaction (`TriggeredEffect` on an item, enemy or summon) fires in the model exactly as in
+play. `SimUnit.Triggers` carries them: an enemy's and a summon's from their definitions, a hero's from
+the gear `PartyBaseline` puts on them. The **closed-form** model (danger index, run curve, gear pricing)
+does not see reactions, nor an item's milestones (earned in play; every model fights fresh gear), and
+`EvaluateUnpricedMechanics` reports each such asset as an Info rather than let a number pass for complete.
+`SimAllies` keeps guests and Sacrifice stand-ins in two lists, as `CombatManager` does.
+
 Enemy decisions are **not** re-implemented: `TakeEnemyTurn` calls the same `EnemyActionPlanner.Plan`
 the combat loop calls, and `ResolveCast` goes through the real `EffectResolver` with the same arguments
 `CombatManager.ExecuteEnemyCast` uses. Only the turn loop and the player's choices are simulated.

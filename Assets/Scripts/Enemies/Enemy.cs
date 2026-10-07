@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Enemies
 {
-    public class Enemy : MonoBehaviour, ICombatUnit, IStatusImmune
+    public class Enemy : MonoBehaviour, ICombatUnit, IStatusImmune, Combat.Triggers.ITriggerSource
     {
         public bool IsImmuneTo(BuffType type)
         {
@@ -67,6 +67,12 @@ namespace Assets.Scripts.Enemies
 
         /// <summary>The definition this enemy was spawned from (set by <see cref="Initialize"/>).</summary>
         public EnemySO Definition { get; private set; }
+
+        /// <summary>The reactions its definition carries (<see cref="EnemySO.Triggers"/>).</summary>
+        public IEnumerable<Combat.Triggers.CarriedTrigger> GetTriggers()
+        {
+            return Combat.Triggers.TriggerSources.From(Definition != null ? Definition.Triggers : null, DisplayName);
+        }
 
         /// <summary>
         /// The level tuning this enemy was spawned under, or null for the template's own numbers.

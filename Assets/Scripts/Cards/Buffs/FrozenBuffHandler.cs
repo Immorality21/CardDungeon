@@ -4,7 +4,7 @@ namespace Assets.Scripts.Cards.Buffs
 {
     public class FrozenBuffHandler : IBuffHandler
     {
-        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker)
+        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker, ICombatUnit source = null)
         {
             buffTracker.ApplyStatusEffect(target, BuffType.Frozen, duration);
         }

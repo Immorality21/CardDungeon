@@ -57,7 +57,7 @@ namespace Assets.Scripts.Cards.Buffs
         /// </summary>
         public TickTiming Timing => Heals ? TickTiming.EndOfTurn : TickTiming.StartOfTurn;
 
-        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker)
+        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker, ICombatUnit source = null)
         {
             if (target == null || buffTracker == null)
             {
@@ -72,7 +72,7 @@ namespace Assets.Scripts.Cards.Buffs
                 return;
             }
 
-            buffTracker.ApplyOverTime(target, _type, perTurn, duration);
+            buffTracker.ApplyOverTime(target, _type, perTurn, duration, source);
         }
 
         public string GetDisplayText(int power)

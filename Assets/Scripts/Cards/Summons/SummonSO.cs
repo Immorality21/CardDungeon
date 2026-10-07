@@ -104,6 +104,10 @@ namespace Assets.Scripts.Cards
                  "carry their own threat settings.")]
         [Min(0)] public int BonusThreat;
 
+        [Tooltip("Reactions the summoned unit carries while it is on the field (docs/plans/EVENTS.md). " +
+                 "Only a summon that stays - beside the party or in its place - is around to react.")]
+        public List<Combat.Triggers.TriggeredEffect> Triggers = new List<Combat.Triggers.TriggeredEffect>();
+
         [Tooltip("Charges per run before any upgrade node. Refilled with ability charges: at run " +
                  "start and when resting in a refuge.")]
         [Min(1)] public int BaseCharges = 1;

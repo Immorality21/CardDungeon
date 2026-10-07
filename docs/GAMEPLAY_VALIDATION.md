@@ -451,8 +451,14 @@ menu. These are what the pickers call, so the resolution is the real one:
 | Inspect | `CombatManager.RequestInspectTargets(hero, enemies)` - free, opens the page; hide `hero-bar` yourself first or the menu draws over it (the real command does) |
 
 **An auto-player for a whole fight.** Subscribe to `CombatManager.OnHeroTurnStarted` and submit
-from the handler; `OnTurnExecuted` hands you each turn's log line. Static handlers in the command
-survive until play mode ends. `Time.timeScale` speeds the fight up (hit-flashes run on unscaled time,
+from the handler. To *watch* the fight, subscribe to the fight's event stream once it has started -
+`CombatManager.Instance.Events.Subscribe<UnitDefeated>(...)`, `<TurnEnded>`, `<AbilityUsed>`,
+`<HealthChange>` - and to `Assets.Scripts.Events.GameEvents` for kills, rewards and the fight's end
+(`EnemyDefeated`, `CurrencyChanged`, `XpAwarded`, `ItemAcquired`, `CombatFinished`); see
+`docs/plans/EVENTS.md`. Static handlers in the command survive until play mode ends.
+`HealthOps.Damage(unit, n, new HealthSource(null, HealthCause.Attack), cm.Events)` is the honest way
+to wound a unit from a command (it fills an Ultra gauge like a real hit - how the Sacrifice was
+checked on 2026-10-07). `Time.timeScale` speeds the fight up (hit-flashes run on unscaled time,
 so a very high scale can outrun them). This is how the threat system was checked - one hero attacking,
 one skipping, logging `CombatManager.ThreatOf(hero)` and who each enemy hit:
 
@@ -465,9 +471,9 @@ internal static class Driver
         if (unit.DisplayName == "Warrior") { cm.SubmitAttackAction(cm.GetAliveEnemies().First()); }
         else { cm.SubmitHeroAction(HeroAction.Skip); }
     }
-    public static void OnTurn(string log) { Debug.Log("[Drive] " + log); }
+    public static void OnTurn(TurnEnded e) { Debug.Log("[Drive] " + e.Unit.DisplayName + " done"); }
 }
-// Execute: cm.OnHeroTurnStarted += Driver.OnHero; cm.OnTurnExecuted += Driver.OnTurn; then press Fight.
+// Execute: press Fight, then cm.OnHeroTurnStarted += Driver.OnHero; cm.Events.Subscribe<TurnEnded>(Driver.OnTurn);
 ```
 
 > ### ⚠️ `worldBound` is NOT `panel.Pick`'s coordinate space
@@ -562,7 +568,7 @@ the region coordinates are wrong (or you used `Camera_Capture`) — not a render
 - `CombatManager.SubmitAttackAction(target)`, `.SubmitCastAction(magic, slot, caster, targets)`,
   `.SubmitUseItemAction(item, target)`, `.SubmitSummonAction(slot)`,
   `.SubmitHeroAction(HeroAction.Skip)`, `.RequestInspectTargets(hero, enemies)`, `.GetAliveEnemies()`,
-  `.ThreatOf(unit)`; events `OnHeroTurnStarted`, `OnTurnExecuted`
+  `.ThreatOf(unit)`, `.Events` (the fight's `CombatEvents`, null outside one); event `OnHeroTurnStarted`
 - Combat keys (`RoomActionUI.OnCombatHotkey`): Fight/Flee bar and hero command menu are cursors -
   ↑/↓ + Enter/Space, sent as `KeyDownEvent` to the focused root; **M** opens the floor map. No letter
   hotkeys for commands any more (removed); press `fight-btn` with a `NavigationSubmitEvent`

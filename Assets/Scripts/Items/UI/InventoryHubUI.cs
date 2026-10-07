@@ -1017,7 +1017,7 @@ namespace Assets.Scripts.Items.UI
             {
                 SetDetailHead(worn.Icon, worn.DisplayName,
                     $"{ItemPresenter.SlotLabel(slot)} · {ItemPresenter.RarityLabel(worn.Rarity)}", worn);
-                AddItemLines(worn);
+                AddItemLines(worn, InventoryManager.Instance.GetEquipped(slot, _selectedHeroKey));
             }
             else
             {
@@ -1135,16 +1135,36 @@ namespace Assets.Scripts.Items.UI
                 : "Enter to carry it into the next run.");
         }
 
-        private void AddItemLines(ItemSO item)
+        private void AddItemLines(ItemSO item, ItemSaveData entry = null)
         {
             if (_detailBody != null)
             {
-                AddItemLines(_detailBody, item);
+                AddItemLines(_detailBody, item, entry);
             }
         }
 
-        /// <summary>An item's description and what it grants, as chips. Shared with the merchant.</summary>
-        internal static void AddItemLines(VisualElement body, ItemSO item)
+        /// <summary>An item's description and what it grants, as chips, then what it grows into with
+        /// use - with this copy's progress when its <paramref name="entry"/> is known. Shared with the
+        /// merchant, which sells fresh copies.</summary>
+        internal static void AddItemLines(VisualElement body, ItemSO item, ItemSaveData entry = null)
+        {
+            AddGrants(body, item);
+
+            var growth = ItemPresenter.MilestoneLines(item, entry);
+            if (growth.Count == 0)
+            {
+                return;
+            }
+            body.Add(BestiaryLineView.Section("Grows"));
+            foreach (var text in growth)
+            {
+                var line = new Label(text);
+                line.AddToClassList("cd-inv-detail__desc");
+                body.Add(line);
+            }
+        }
+
+        private static void AddGrants(VisualElement body, ItemSO item)
         {
             if (!string.IsNullOrEmpty(item.Description))
             {

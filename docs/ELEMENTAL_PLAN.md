@@ -251,6 +251,8 @@ decision avoided, kept for the reasoning:
   `ResolveHeroDamaged`, so unlike `ExecuteAttack` there is no death log, no visual, no
   `_turnManager.RemoveUnit`. `IsAlive` is derived from health so they stop acting, and a wipe is still
   caught by the combat loop — but the death is invisible. Needs the same handling the attack path has.
+  *(Resolved 2026-10-07: every death on either side now runs through `CombatManager.ResolveDeaths`,
+  fed by the `UnitDefeated` event `HealthOps` raises - see `docs/plans/EVENTS.md`.)*
 
 **Fire Cloak** (`TargetType: Self`, `Rarity: Common`, tag `Fire`):
 

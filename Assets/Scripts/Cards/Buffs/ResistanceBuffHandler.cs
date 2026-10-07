@@ -21,7 +21,7 @@ namespace Assets.Scripts.Cards.Buffs
             _displayName = displayName;
         }
 
-        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker)
+        public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker, ICombatUnit source = null)
         {
             if (target == null || buffTracker == null || power == 0)
             {

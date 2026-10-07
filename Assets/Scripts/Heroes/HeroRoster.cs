@@ -3,6 +3,7 @@ using Assets.Scripts.Dungeon;
 using Assets.Scripts.IO;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Heroes
 {
@@ -201,7 +202,7 @@ namespace Assets.Scripts.Heroes
                 return false;
             }
 
-            if (chargesEssence && !MetaProgressManager.Instance.TrySpendEssence(node.EssenceCost))
+            if (chargesEssence && !MetaProgressManager.Instance.TrySpendEssence(node.EssenceCost, EconomySource.SphereGrid))
             {
                 entry.CurrentXp += node.XpCost;
                 entry.ActivatedNodes.Remove(nodeKey);
@@ -214,7 +215,7 @@ namespace Assets.Scripts.Heroes
                 entry.ActivatedNodes.Remove(nodeKey);
                 if (chargesEssence)
                 {
-                    MetaProgressManager.Instance.AddEssence(node.EssenceCost);
+                    MetaProgressManager.Instance.AddEssence(node.EssenceCost, EconomySource.Refund);
                 }
                 return false;
             }
@@ -226,6 +227,7 @@ namespace Assets.Scripts.Heroes
                 // The awakened ability takes the base's place in the loadout and any run's slots.
                 AwakeningSaves.Apply(handler, hero.SaveKey, node.GrantedMagicKey, node.AwakenedMagicKey);
             }
+            GameEvents.Publish(new NodeActivated { HeroKey = hero.SaveKey, NodeKey = nodeKey });
             return true;
         }
 

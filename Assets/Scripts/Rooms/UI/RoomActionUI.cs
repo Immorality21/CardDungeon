@@ -12,6 +12,7 @@ using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Rooms
 {
@@ -1014,13 +1015,13 @@ namespace Assets.Scripts.Rooms
             {
                 // Pending, not banked: cache gold is forfeited on death exactly like a kill's, so
                 // carrying it out of the level is the reward.
-                MetaProgressManager.Instance.AddPendingGold(gold);
+                MetaProgressManager.Instance.AddPendingGold(gold, EconomySource.Cache);
             }
 
             var item = RollTreasureItem();
             if (item != null && InventoryManager.HasInstance)
             {
-                InventoryManager.Instance.AddItem(item);
+                InventoryManager.Instance.AddItem(item, 1, EconomySource.Cache);
             }
 
             // The floor's own raw stuff, rolled separately from the gear slot above - see
@@ -1028,7 +1029,7 @@ namespace Assets.Scripts.Rooms
             var materials = RollTreasureMaterials();
             foreach (var award in materials)
             {
-                InventoryManager.Instance.AddItem(award);
+                InventoryManager.Instance.AddItem(award, EconomySource.Cache);
             }
 
             TakePayload();
@@ -1158,10 +1159,9 @@ namespace Assets.Scripts.Rooms
                     }
 
                     int max = hero.GetEffectiveMaxHealth();
-                    int healed = Mathf.Min(
+                    int healed = HealthOps.Heal(hero,
                         RunFear.Current.ScaleHeroHealing(RoomKindRewards.RestHealAmount(max)),
-                        Mathf.Max(0, max - hero.Stats.Health));
-                    hero.Stats.Health += healed;
+                        new HealthSource(null, HealthCause.Rest), null).Healed;
                     lines.Add(healed > 0
                         ? $"{hero.DisplayName} recovers {healed} health."
                         : $"{hero.DisplayName} was already whole.");
@@ -1545,9 +1545,9 @@ namespace Assets.Scripts.Rooms
                 });
             }
             _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
-            // A Sacrifice horror is what is left of a hero, not a guest: there is nothing to send it home
-            // to, so it gets Skip where a summon gets Dismiss.
-            if (summon.IsSacrifice)
+            // A stand-in (a Sacrifice horror) is what is left of a hero, not a guest: there is nothing to
+            // send it home to, so it gets Skip where a summon gets Dismiss.
+            if (!CombatManager.Instance.CanDismiss(summon))
             {
                 _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
             }
@@ -2813,7 +2813,7 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        private void OnTurnExecuted(string log)
+        private void OnTurnExecuted()
         {
             // The turn is over: the row stops claiming it, or the hero stayed lit through the
             // enemy's turn that follows. The next hero turn lights its own row.

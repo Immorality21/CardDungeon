@@ -41,5 +41,11 @@ namespace Assets.Scripts.Cards
         /// <see cref="CombatBuffTracker.TickBuffs"/> on that unit.
         /// </summary>
         public bool SkipNextUpkeep;
+
+        /// <summary>
+        /// Who put an over-time effect on the unit, credited with what its ticks do (a poison kill is
+        /// the poisoner's). Null when nobody can be - an affliction seeded from a room event.
+        /// </summary>
+        public ICombatUnit Source;
     }
 }

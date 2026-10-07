@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
+using Assets.Scripts.Combat.Triggers;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
 using Assets.Scripts.UnitStats;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Heroes
 {
-    public class Hero : MonoBehaviour, ICombatUnit
+    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource
     {
         public HeroSO HeroSO;
         public Stats Stats;
@@ -169,6 +170,13 @@ namespace Assets.Scripts.Heroes
             float value = Stats[stat] + raw[stat];
             float percent = pct[stat] + (stat == StatType.MaxHealth ? FormMaxHealthPercent : 0);
             return Mathf.RoundToInt(value * (1f + percent / 100f));
+        }
+
+        /// <summary>The reactions this hero's equipped gear carries (<see cref="ItemSO.Triggers"/>).</summary>
+        public IEnumerable<CarriedTrigger> GetTriggers()
+        {
+            return TriggerSources.FromItems(
+                InventoryManager.HasInstance ? InventoryManager.Instance.GetEquippedItems(HeroKey) : null);
         }
 
         /// <summary>Convenience for the HP bar and heal clamps; MaxHealth is just another stat.</summary>

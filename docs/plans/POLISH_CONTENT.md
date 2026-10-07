@@ -401,10 +401,13 @@ just a negative `ItemBonus`, and it immediately interacts with the CTB turn orde
 frontier's `GearLoadout` greedy spend handles negative bonuses sensibly before authoring any — a
 greedy ranker that sums weighted stats will handle it correctly, but it has never been given one.
 
-Set bonuses and procs are larger and want their own decision; procs in particular need a hook point
-in `DamageCalculator`/`CombatManager` that does not exist.
+Set bonuses and procs are larger and want their own decision. *(Procs have their hook point since
+2026-10-07: an item's `TriggeredEffect` reactions - see `plans/EVENTS.md`. Authoring one is content
+now, not engineering.)*
 
-**18a-sets. Set bonuses — introduce later (owner's request, 2026-09-28).** The first set exists, but
+**18a-sets. Set bonuses — deferred (owner, 2026-10-07: not sure they make sense; first asked for
+2026-09-28).** If they come, "while N of the set are worn" is a condition on a trigger source or a
+milestone-like rule on the item, not a system of its own (`plans/EVENTS.md` §3). The first set exists, but
 only as authored items. **Shadowweave** is four Rare, ItemLevel-4 pieces:
 
 | piece | slot | grants |

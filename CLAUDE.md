@@ -19,6 +19,7 @@ work, then open only the plan file your work touches:
 | `docs/plans/HUB.md` | campfire, materials, buildings, gold sinks (§3, §7) |
 | `docs/plans/BALANCE_OPEN.md` | open balance steps and findings, losability, the retry economy (§0–§0g, §3b) |
 | `docs/plans/REVISITS.md` | re-clearing runs at a player-selected difficulty (conditions and limits) |
+| `docs/plans/EVENTS.md` | event-driven rules: the health funnel, the fight's and the game's event streams, reactions on items/enemies/summons, items that grow; passive grid nodes (after the demo) |
 | `docs/plans/POLISH_CONTENT.md` | battle/room polish, player-facing information, content volume, **the tutorial** (§1, §2, §6, §8, §14–§20) |
 
 Don't read the whole backlog to answer one question — the index says which file to open. The
@@ -45,6 +46,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 **`ImmoralityGaming.*`** — Reusable game framework (engine-agnostic patterns):
 - `Fundamentals/` — `SingletonBehaviour<T>`, `ObjectPooler`, `CoroutineHandler`, `FloatingTextHandler`, camera control (`MainCamera`)
 - `Extensions/` — Utility extension methods for List, Enumerable, Vector2/3, Color, Transform, etc.
+- `Fundamentals/EventStream` — the typed, synchronous event stream both of the game's streams are built on (ordered, re-entrant events queued, runaway chains capped)
 - `Menu/` — UI system with `MenuManager` (singleton), `MenuPanel` base class, `PopupManager`, and the **keyboard cursor** shared by every screen in the game: `DirectionalNav` (the "which one is that way" maths, used by menu buttons, graph nodes and the doors of a room alike) and `KeyboardNavigator` (an arrow-key cursor over whatever buttons a UI Toolkit subtree currently shows) and `PanelKeyboard` (what actually makes the OS keyboard reach a runtime UITK panel — focus alone does not)
 - `Editor/` — Custom Unity editor tools
 
@@ -54,12 +56,13 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 - `Rooms/Events/` — **room events**: the stat-resolved gambles behind a room's **Action** button (`RoomEventSO`, `RoomEventSpawn`, `RoomEventResolver`, `RoomEventRunner`, `LevelAfflictionTracker`) — see its own `CLAUDE.md`
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `HeroSaveData`, **the sphere grid** (`SphereGridSO` node-graph assets + `SphereGridOps`, the pure rules — XP is a per-hero bank spent on nodes at the hub; `LevelConfiguration` is gone), and `UI/` (`SphereGridView` — the UITK graph renderer shared by the hub screen and the `Tools ▸ Heroes ▸ Sphere Grid Editor` window — `SphereGridPresenter`, `SphereGridUI`)
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`, **the bestiary** (`EnemyCatalogSO` + the pure `BestiaryPresenter` and `UI/BestiaryLineView`/`UI/BestiaryUI` — what the player has *observed* about each enemy, shown by the in-combat Inspect page and the hub Bestiary screen)
-- `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`
+- `Combat/` — `ICombatUnit` interface, `TurnManager` (FFX CTB system), `DamageCalculator`, `DamageType`, `Resistance`, **`HealthOps`** (the only writer of health; raises `HealthChange`/`UnitDefeated` with the killer), **`CombatEvents`** (one fight's event stream, shared by the live fight and the simulator), and `Triggers/` (**reactions** authored on items, enemies and summons - `TriggeredEffect`, `TriggerRegistry`)
+- `Events/` — **`GameEvents`**, the game-wide event stream (items, gold/Essence, XP, kills, rooms, levels, heroes, nodes) that item growth, achievements and hub quests listen to - see its own `CLAUDE.md`
 - `Audio/` — **everything the game plays and the dials that scale it**: combat SFX (`CombatAudio`, `CombatSound`, `SoundBankSO`), the crossfading music bed (`MusicPlayer`, `MusicTrack`, `MusicBankSO`) and the player's volume/mute settings (`AudioOptions`, `AudioChannel`, `AudioOptionsSaveData` → `savedata/Audio.json`). Music clips live in `Assets/Audio/Music/` as **OGG** (never WAV — the repo pays the source size, the build re-encodes anyway) and never in a `Resources/` folder.
 - `Cards/` — Magic system (namespace still `Cards`): `MagicSO`, `MagicTag` (enum), `MagicCatalog`, `EquippedMagicState` (equipped slots + charges), **`MagicLoadoutOps`** (which known spells fill those slots), `EffectResolver`, `ComboDetector`, `CombatBuffTracker`, `MagicTagTracker`, `MagicComboSO`
 - `Cards/Effects/` — Effect executors: `IEffectExecutor`, `DamageEffectExecutor`, `HealEffectExecutor`, `BuffEffectExecutor`, `DebuffEffectExecutor`, `EffectExecutorFactory`
 - `Cards/UI/` — `MagicSelectionUI`, `MagicForgeUI`. **On screen these are "Abilities"** — some heroes cast and some do not, so the general noun won (2026-09-06); the namespace, the assets and the catalog keep the `Magic` naming
-- `Items/` — `ItemSO` (equipment, consumables and **materials** via `ItemCategory`/`ConsumableEffectType`), `InventoryManager` (+ pure `InventoryOperations`), `ItemCatalogSO` (Resources-loaded item DB so the hub resolves items without scene wiring), `LootRoller` + `LootDrop` (rarity/depth-scaled drops and per-enemy/per-level **drop tables**), `MaterialCost` (a price in raw stuff, for the hub buildings and grid nodes to come), `UI/InventoryHubUI` (hub equip / spells / consumables / materials screen)
+- `Items/` — `ItemSO` (equipment, consumables and **materials** via `ItemCategory`/`ConsumableEffectType`), `InventoryManager` (+ pure `InventoryOperations`), `ItemGrowth` (**items that grow with use**: generic key/value counters on an item's save entry, fed from `GameEvents`, and milestones that add bonuses once reached), `ItemCatalogSO` (Resources-loaded item DB so the hub resolves items without scene wiring), `LootRoller` + `LootDrop` (rarity/depth-scaled drops and per-enemy/per-level **drop tables**), `MaterialCost` (a price in raw stuff, for the hub buildings and grid nodes to come), `UI/InventoryHubUI` (hub equip / spells / consumables / materials screen)
 - `Dungeon/` — `DungeonManager`, `DungeonSaveManager`, `LevelDefinitionSO`, `RunDefinitionSO`, `RunLevelEntry`, `RunSaveData`, and **the campaign graph** (`CampaignSO` + `CampaignOps` — which runs exist, what unlocks them, and which branches are optional/secret)
 - `Resources/` — `PartyResourceManager`, `PartyResourceType`
 - `IO/` — `FileHandler`, `IWriteable`
@@ -78,6 +81,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Audio** (SFX banks, the music bed and its crossfade, volume/mute and where they are applied) → `Assets/Scripts/Audio/CLAUDE.md`
 - **Dungeon generation + combat flow + the room bar + runtime controls** → `Assets/Scripts/Rooms/CLAUDE.md`
 - **Room events** (spawn odds, stat gates, checks, outcome weighting, level afflictions) → `Assets/Scripts/Rooms/Events/CLAUDE.md`
+- **Game events** (the game-wide stream, where each event is raised, provisional vs kept, how to add one) → `Assets/Scripts/Events/CLAUDE.md`. The fight's own stream, health and reactions are in the Combat guide; the whole design is `docs/plans/EVENTS.md`
 - **Magic system** (magic defs, the known-pool/loadout split, charges, effects, combos, buffs) → `Assets/Scripts/Cards/CLAUDE.md`
 - **Run progression + deferred persistence** → `Assets/Scripts/Dungeon/CLAUDE.md`
 - **Meta-progression / hub** (Gold, Essence, card upgrades) → `Assets/Scripts/Progression/CLAUDE.md`
@@ -99,6 +103,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Singleton** — All managers inherit `SingletonBehaviour<T>` (auto-creates if missing, supports DontDestroyOnLoad). Use `HasInstance` to safely check before accessing.
 - **ScriptableObjects** — Room types, hero definitions, items, cards, combos, level definitions, run definitions as `.asset` files in `Assets/ScriptableObjects/`
 - **Strategy pattern** — Card effect executors implement `IEffectExecutor`, created via `EffectExecutorFactory`
+- **Event-driven rules** — state changes at one chokepoint each and raises a typed event there (`HealthOps` -> `CombatEvents` in a fight, `InventoryManager`/`MetaProgressManager`/... -> `GameEvents` outside it). Item-, enemy- and summon-specific behaviour is authored data that listens (`TriggeredEffect`, `ItemMilestone`), never a new branch in `CombatManager`. See `docs/plans/EVENTS.md`
 - **Object pooling** — `ObjectPooler` reuses inactive GameObjects (used by `FloatingTextHandler`)
 - **Editor-built UI** — Menu/hub panels are constructed in the scene and their `[SerializeField]` refs wired by editor scripts (e.g. `MainMenuUISetup`), never at runtime. See the MainMenu guide.
 - **Prefabs** — `Room.prefab`, `Door.prefab`, `Square.prefab` (tile), enemy prefabs in `Assets/`

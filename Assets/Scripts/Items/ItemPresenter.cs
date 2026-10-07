@@ -113,6 +113,73 @@ namespace Assets.Scripts.Items
             return chips;
         }
 
+        /// <summary>
+        /// One line per milestone (<see cref="ItemSO.Milestones"/>): "50 kills: +3 STR", with this
+        /// copy's progress when its save entry is known - "50 kills: +3 STR (12/50)", or a tick once
+        /// reached. What counts is the item's own business, so it is spelled out rather than hidden.
+        /// </summary>
+        public static List<string> MilestoneLines(ItemSO item, ItemSaveData entry = null)
+        {
+            var lines = new List<string>();
+            if (item == null || item.Milestones == null)
+            {
+                return lines;
+            }
+
+            foreach (var milestone in item.Milestones)
+            {
+                if (milestone == null)
+                {
+                    continue;
+                }
+                var grants = new List<string>();
+                if (milestone.Bonuses != null)
+                {
+                    foreach (var bonus in milestone.Bonuses)
+                    {
+                        if (bonus == null || bonus.StatType == StatType.None || Mathf.Approximately(bonus.Value, 0f))
+                        {
+                            continue;
+                        }
+                        string sign = bonus.Value > 0f ? "+" : string.Empty;
+                        string unit = bonus.BonusType == BonusType.Percentage ? "%" : string.Empty;
+                        grants.Add($"{sign}{FormatNumber(bonus.Value)}{unit} {StatCatalog.ShortName(bonus.StatType)}");
+                    }
+                }
+                if (grants.Count == 0)
+                {
+                    continue;
+                }
+
+                string line = $"{milestone.Threshold} {CounterNoun(milestone.Counter, milestone.Threshold)}: {string.Join(", ", grants)}";
+                if (entry != null)
+                {
+                    int have = ItemGrowth.Get(entry, milestone.Counter);
+                    line = have >= milestone.Threshold
+                        ? "✓ " + line
+                        : $"{line} ({have}/{milestone.Threshold})";
+                }
+                lines.Add(line);
+            }
+            return lines;
+        }
+
+        private static string CounterNoun(ItemCounterKind kind, int count)
+        {
+            bool one = count == 1;
+            switch (kind)
+            {
+                case ItemCounterKind.Kills:
+                    return one ? "kill" : "kills";
+                case ItemCounterKind.BossKills:
+                    return one ? "boss slain" : "bosses slain";
+                case ItemCounterKind.Victories:
+                    return one ? "victory" : "victories";
+                default:
+                    return kind.ToString();
+            }
+        }
+
         /// <summary>One line per resistance the item grants: "Fire +25%", "Ice -10%".</summary>
         public static List<string> ResistanceLines(ItemSO item)
         {

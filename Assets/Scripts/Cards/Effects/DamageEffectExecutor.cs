@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
@@ -12,6 +13,15 @@ namespace Assets.Scripts.Cards.Effects
         private static readonly Color DamageColor = Color.white;
         private static readonly Color HealColor = Color.green;
         private const float EffectDelay = 0.2f;
+
+        private readonly Func<CombatEvents> _events;
+
+        /// <param name="events">The fight's event stream, read when the effect lands. Null (a room
+        /// event, a test) changes health without telling anyone.</param>
+        public DamageEffectExecutor(Func<CombatEvents> events = null)
+        {
+            _events = events;
+        }
 
         public void Execute(
             SpellEffect effect,
@@ -42,11 +52,10 @@ namespace Assets.Scripts.Cards.Effects
                 int damage = DamageCalculator.Calculate(
                     rawAttack, defense, effect.DamageType, target.Resistances, resistanceBonus);
 
+                var source = new HealthSource(caster, HealthCause.Ability, effect.DamageType);
                 if (damage < 0)
                 {
-                    int heal = Mathf.Min(
-                        -damage, target.GetEffectiveStat(StatType.MaxHealth) - target.Stats.Health);
-                    target.Stats.Health += heal;
+                    int heal = HealthOps.Damage(target, damage, source, _events?.Invoke()).Healed;
                     result.Entries.Add(new EffectEntry
                     {
                         Target = target,
@@ -58,8 +67,7 @@ namespace Assets.Scripts.Cards.Effects
                 }
                 else
                 {
-                    int landed = Mathf.Min(damage, Mathf.Max(0, target.Stats.Health));
-                    target.Stats.Health -= damage;
+                    int landed = HealthOps.Damage(target, damage, source, _events?.Invoke()).Landed;
 
                     foreach (var statusEffect in buffTracker.GetActiveStatusEffects(target))
                     {

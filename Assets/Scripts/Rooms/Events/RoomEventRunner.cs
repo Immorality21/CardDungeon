@@ -9,6 +9,7 @@ using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Rooms.Events
 {
@@ -233,7 +234,7 @@ namespace Assets.Scripts.Rooms.Events
             {
                 if (target.Stats != null && target.Stats.Health < 1)
                 {
-                    target.Stats.Health = 1;
+                    HealthOps.Set(target, 1, new HealthSource(null, HealthCause.RoomEvent), null);
                     report.Lines.Add($"{target.DisplayName} is barely standing.");
                 }
             }
@@ -263,7 +264,7 @@ namespace Assets.Scripts.Rooms.Events
                 return;
             }
 
-            MetaProgressManager.Instance.AddPendingGold(outcome.Gold);
+            MetaProgressManager.Instance.AddPendingGold(outcome.Gold, EconomySource.RoomEvent);
             report.Lines.Add($"+{outcome.Gold} gold.");
         }
 
@@ -287,7 +288,7 @@ namespace Assets.Scripts.Rooms.Events
                     continue;
                 }
 
-                InventoryManager.Instance.AddItem(item);
+                InventoryManager.Instance.AddItem(item, 1, EconomySource.RoomEvent);
                 report.Lines.Add($"Found: {item.DisplayName}.");
                 anyDropped = true;
             }
@@ -313,7 +314,7 @@ namespace Assets.Scripts.Rooms.Events
                     continue;
                 }
 
-                if (InventoryManager.Instance.TryConsume(entry.ItemKey))
+                if (InventoryManager.Instance.TryConsume(entry.ItemKey, ItemRemovalReason.Lost))
                 {
                     var item = InventoryManager.Instance.GetItemSO(entry.ItemKey);
                     string name = item != null ? item.DisplayName : entry.ItemKey;

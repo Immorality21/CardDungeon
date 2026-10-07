@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Combat;
+using Assets.Scripts.Combat.Triggers;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Enemies.Behaviors;
 using Assets.Scripts.Rooms;
@@ -117,8 +118,20 @@ namespace Assets.Scripts.Balance
     /// <c>GetEffectiveStat(MaxHealth)</c>. It did not always, which is why this note exists: the
     /// model was right and the game was short by exactly the gear bonus.
     /// </summary>
-    public class SimUnit : ICombatUnit, IStatusImmune
+    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource
     {
+        /// <summary>
+        /// The reactions this unit carries - its gear's for a hero (set by <c>PartyBaseline</c>), its
+        /// definition's for an enemy or a summon - fired by the encounter loop's
+        /// <see cref="TriggerRegistry"/> exactly as the live fight fires them.
+        /// </summary>
+        public List<CarriedTrigger> Triggers = new List<CarriedTrigger>();
+
+        public IEnumerable<CarriedTrigger> GetTriggers()
+        {
+            return Triggers;
+        }
+
         /// <summary>Mirrors <c>Enemy.IsImmuneTo</c> off the same definition, so the model refuses what the game refuses.</summary>
         public bool IsImmuneTo(BuffType type)
         {
@@ -208,7 +221,8 @@ namespace Assets.Scripts.Balance
                 Definition = Definition,
                 Archetype = Archetype,
                 Tuning = Tuning,
-                Behavior = Behavior
+                Behavior = Behavior,
+                Triggers = new List<CarriedTrigger>(Triggers)
             };
 
             foreach (var slot in MagicSlots)
@@ -245,7 +259,9 @@ namespace Assets.Scripts.Balance
                     ? new List<Resistance>(summoner.Resistances)
                     : new List<Resistance>(),
                 AttackStat = StatType.Strength,
-                EffectiveAttackPower = block[StatType.Strength]
+                EffectiveAttackPower = block[StatType.Strength],
+                Triggers = new List<CarriedTrigger>(TriggerSources.From(summon != null ? summon.Triggers : null,
+                    summon != null ? summon.Label : "Summon"))
             };
         }
 
@@ -282,7 +298,9 @@ namespace Assets.Scripts.Balance
                 Definition = definition,
                 Archetype = definition.ArchetypeOf,
                 Tuning = tuning,
-                Behavior = definition.ResolvedBehavior
+                Behavior = definition.ResolvedBehavior,
+                Triggers = new List<CarriedTrigger>(TriggerSources.From(definition.Triggers,
+                    string.IsNullOrEmpty(definition.DisplayName) ? definition.name : definition.DisplayName))
             };
         }
     }

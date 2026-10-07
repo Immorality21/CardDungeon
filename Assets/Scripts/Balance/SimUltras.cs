@@ -31,6 +31,10 @@ namespace Assets.Scripts.Balance
         private readonly Dictionary<SimUnit, int> _lastHealth = new Dictionary<SimUnit, int>();
         private readonly Dictionary<SimUnit, Form> _forms = new Dictionary<SimUnit, Form>();
 
+        /// <summary>The fight's event stream, raised when a Sacrifice fells a hero or a form resizes a
+        /// bar - as the live fight raises it. Null leaves both silent.</summary>
+        public CombatEvents Events { get; set; }
+
         /// <summary>Opens the fight: every hero who knows an Ultra starts it with an empty gauge.</summary>
         public SimUltras(IEnumerable<SimUnit> heroes)
         {
@@ -142,13 +146,14 @@ namespace Assets.Scripts.Balance
                     return;
                 }
                 var attack = UltraOps.PickStatAbility(ultra, victim.GetEffectiveStat);
-                victim.Stats.Health = 0;        // down for the floor, as in the live fight
+                // Down for the floor, as in the live fight, and credited to whoever performed the rite.
+                HealthOps.Set(victim, 0, new HealthSource(hero, HealthCause.Sacrifice), Events);
                 clock.RemoveUnit(victim);
                 if (_forms.ContainsKey(victim))
                 {
                     End(victim);
                 }
-                allies.ArriveHorror(victim, ultra.Creature, attack);
+                allies.ArriveStandIn(victim, ultra.Creature, attack);
                 return;
             }
             if (ultra.Kind == UltraKind.Strike)
@@ -267,7 +272,8 @@ namespace Assets.Scripts.Balance
             int oldMax = hero.Effective[StatType.MaxHealth];
             hero.Effective[StatType.MaxHealth] = newMax;
             hero.Stats[StatType.MaxHealth] = newMax;
-            hero.Stats.Health = UltraOps.KeepShare(hero.Stats.Health, oldMax, newMax);
+            HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, newMax),
+                new HealthSource(hero, HealthCause.Form), Events);
             if (_lastHealth.ContainsKey(hero))
             {
                 _lastHealth[hero] = hero.Stats.Health;

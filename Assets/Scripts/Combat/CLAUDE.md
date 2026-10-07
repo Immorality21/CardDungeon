@@ -35,13 +35,51 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
   Imp (8), Slag Hound (6) and Hex Weaver (5) are authored to. Tests swap `DefenseRules.Roll`.
 - **ICombatUnit** provides a `Resistances` list for per-unit elemental resistances.
 
+## Health, deaths and the fight's event stream *(2026-10-07, `docs/plans/EVENTS.md`)*
+
+- **`HealthOps` is the only code that writes `Stats.Health`.** `Damage` (a negative amount is an
+  absorbed hit and heals, clamped at max; overkill is not counted in `Landed`), `Heal` (clamped at the
+  *effective* max, never cuts a bar already over it), `Pay` (a price, 1 HP floor) and `Set` (Sacrifice,
+  a form resizing the bar, a fallen summon clamped, a saved bar restored). Each takes a
+  `HealthSource` - who, why (`HealthCause`), element, crit - and returns a `HealthChange`.
+  **`CombatEventsTests.OnlyHealthOps_WritesHealth` scans the game code and fails on any other write.**
+  The live fight, the simulator, room events, rests, refills and save restore all go through it.
+- **`CombatEvents`** (an `ImmoralityGaming.Fundamentals.EventStream`) is one fight's typed event
+  stream, built by `CombatManager.RunCombat` and by `EncounterSimulator.RunEncounter` alike, and thrown
+  away with the fight. `HealthOps` raises `HealthChange` and, when a bar crosses zero, `UnitDefeated`
+  with the killer; `EffectResolver.Execute` raises `AbilityUsed` (so both loops do, identically); the
+  loops raise `CombatStarted`, `TurnStarted`, `TurnEnded`, `ItemUsed` and `CombatEnded`. A killing blow
+  and its `UnitDefeated` go out as a pair (`EventStream.Publish(a, b)`), so no reaction to the hit is
+  heard before the death. `CombatManager.CloseTurn` publishes `TurnEnded`, resolves deaths and only then
+  adds the turn's reaction lines to its log (a reaction fires mid-action, before the action has written
+  its own line). Dispatch is synchronous and ordered (subscription order, then sequence); an event
+  raised while another is being delivered is **queued**, so a chain of reactions resolves breadth-first,
+  and `MaxChain` (256) stops a runaway with an error. **Raise events where state changes, never where an
+  animation plays** - that is what lets the simulator, which has no animations, run the same handlers.
+- **Kill credit.** A blow's killer is its attacker; an ability's is its caster; a damage-over-time
+  tick's is `CombatBuff.Source` - whoever applied it, passed through `IBuffHandler.Apply(..., source)` by
+  the Buff/Debuff executors (falling back to the unit whose turn was open); a Sacrifice's is the Cultist.
+  **On-kill reactions count only foes**: a Sacrifice credits the Cultist but never pays an on-kill item.
+- **Reactions (`Combat/Triggers/`).** `TriggeredEffect` on `ItemSO`, `EnemySO` and `SummonSO`: *when*
+  (`TriggerKind`: OnCombatStart, OnTurnStart/End, OnDealDamage, OnTakeDamage, OnKill, OnDefeated,
+  OnAllyDefeated, OnAbilityUsed), chance, limit (per turn / per combat), an optional element filter,
+  *who* (`TriggerTarget`) and a list of ordinary `SpellEffect`s resolved through
+  `EffectResolver.ExecuteEffects` with the bearer as caster. `TriggerRegistry` (built per fight, after
+  the bookkeeping subscribers) asks the units involved for their triggers (`ITriggerSource`: `Hero` from
+  equipped gear, `Enemy`/`SummonUnit` from their definitions, `SimUnit` from all three) whenever an
+  event happens - nothing is cached. **A reaction's hits never cause hit reactions** (`HealthOps.ReactionScope`
+  marks them; its kills still count). `ReactionResolved` is raised after, and `CombatManager.ShowReaction`
+  floats its name and numbers. The simulator builds the same registry, so a reaction is priced by the
+  encounter/floor simulations; the closed-form model does not see it, and the analyzer says so
+  (`EvaluateUnpricedMechanics`).
+
 ## Threat (who the enemies go for)
 
 `ThreatTable` (pure, `ThreatTableTests`) — WoW-style, and **biased, never certain** (the owner's rule):
 `chance = 0.5/n + 0.5 * (T + 10) / sum(T + 10)`, so with two heroes nobody is ever under 25% or over
 75%. Damage dealt earns ×1, healing ×0.5, only what landed. `CombatManager` owns one table per fight
 (reset in `RunCombat`), credits each hero-side action from an HP snapshot around it
-(`SnapshotHealth` / `CreditThreat`), wipes a fallen hero's threat in `ResolveHeroDamaged`, and passes
+(`SnapshotHealth` / `CreditThreat`), wipes a fallen hero's threat in `ResolveDeaths`, and passes
 it to enemies through `EnemyCombatContext.Threat`. Abilities tune their own draw with
 `MagicSO.ThreatMultiplier` / `BonusThreat` (a taunt is just a big `BonusThreat`). **Any new
 single-hero enemy pick must go through `ThreatTable.Pick`** — a bare `Random.Range` over the heroes

@@ -14,6 +14,7 @@ using Assets.Scripts.UnitStats;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Dungeon
 {
@@ -118,6 +119,10 @@ namespace Assets.Scripts.Dungeon
         /// rooms (index order) and the start room. Not raised on a resume.
         /// </summary>
         public static event System.Action<List<Room>, Room> FreshDungeonSpawned;
+
+        /// <summary>The active run's key (its asset name when it has none), or null outside a run.</summary>
+        private static string CurrentRunKey =>
+            ActiveRun == null ? null : (!string.IsNullOrEmpty(ActiveRun.Key) ? ActiveRun.Key : ActiveRun.name);
 
         /// <summary>True when the active run is on its last level (drives the run-complete fanfare).</summary>
         public static bool IsFinalRunLevel =>
@@ -503,6 +508,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             FreshDungeonSpawned?.Invoke(rooms, startRoom);
+            GameEvents.Publish(new LevelStarted { RunKey = CurrentRunKey, LevelIndex = RunLevelIndex, Fresh = true });
 
             GameManager.Instance.EnterRoom(startRoom);
         }
@@ -571,8 +577,8 @@ namespace Assets.Scripts.Dungeon
                 {
                     continue;
                 }
-                hero.Stats.Health = PartyHealthSnapshot.HealthFor(
-                    saveData.HeroHealth, hero.HeroKey, hero.GetEffectiveMaxHealth());
+                HealthOps.Set(hero, PartyHealthSnapshot.HealthFor(saveData.HeroHealth, hero.HeroKey, hero.GetEffectiveMaxHealth()),
+                    new HealthSource(null, HealthCause.Refill), null);
             }
 
             Party.PlaceInRoom(currentRoom);
@@ -627,6 +633,7 @@ namespace Assets.Scripts.Dungeon
 
             DungeonSaveManager.Instance.Initialize(
                 saveData.Seed, LevelKeyForSave(), rooms, saveData.StartRoomIndex);
+            GameEvents.Publish(new LevelStarted { RunKey = CurrentRunKey, LevelIndex = RunLevelIndex, Fresh = false });
             GameManager.Instance.EnterRoom(currentRoom);
         }
 
@@ -1289,7 +1296,7 @@ namespace Assets.Scripts.Dungeon
             {
                 if (!award.IsEmpty && !RunFear.Current.Withholds(award.Item.Key))
                 {
-                    InventoryManager.Instance.AddItem(award);
+                    InventoryManager.Instance.AddItem(award, EconomySource.LevelClear);
                 }
             }
         }
@@ -1325,6 +1332,14 @@ namespace Assets.Scripts.Dungeon
 
         private void OnDungeonCleared()
         {
+            // Read before the run advances (and, on its last level, is cleared away).
+            var cleared = new LevelCleared
+            {
+                RunKey = CurrentRunKey,
+                LevelIndex = RunLevelIndex,
+                Revisit = RunFear.Current.IsRevisit
+            };
+
             GrantRunClearHero();
 
             // Commit all deferred progress to persistent save files
@@ -1408,10 +1423,13 @@ namespace Assets.Scripts.Dungeon
                     }
                     _fileHandler.Delete(runSave);
                     ActiveRun = null;
+                    cleared.RunCompleted = true;
                     Assets.Scripts.Hub.HubManager.MarkRunCompleted(runSave.RunKey,
                         runSave.IsRevisit ? RunFear.Current.Level : -1, RunFear.Current.RewardMultiplier);
                 }
             }
+
+            GameEvents.Publish(cleared);
 
             // Everything is banked by now, so the summary is a statement, not a choice: quitting the
             // game while it is up loses nothing. Continue goes back to the hub, never to the title
@@ -1548,6 +1566,11 @@ namespace Assets.Scripts.Dungeon
 
         public void HandlePartyDeath()
         {
+            var forfeited = new LevelForfeited
+            {
+                RunKey = CurrentRunKey, LevelIndex = RunLevelIndex, Reason = ForfeitReason.PartyDied
+            };
+
             // Award consolation meta-currency for run progress before wiping saves.
             // Meta-progress persists immediately, so this survives the death wipe.
             if (ActiveRun != null)
@@ -1578,6 +1601,8 @@ namespace Assets.Scripts.Dungeon
                 InventoryManager.Instance.Load();
                 InventoryManager.Instance.SetDeferSaves(false);
             }
+
+            GameEvents.Publish(forfeited);
         }
 
         /// <summary>
@@ -1626,6 +1651,11 @@ namespace Assets.Scripts.Dungeon
                 InventoryManager.Instance.Load();
                 InventoryManager.Instance.SetDeferSaves(false);
             }
+
+            GameEvents.Publish(new LevelForfeited
+            {
+                RunKey = CurrentRunKey, LevelIndex = RunLevelIndex, Reason = ForfeitReason.LeftTheDungeon
+            });
         }
 
         public void LoadSavedDungeon(int seed)

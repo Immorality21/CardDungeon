@@ -287,6 +287,9 @@ namespace Tests.EditMode
                 EffectiveAttackPower = 0,
                 Resistances = Resist(DamageType.Fire, 200f)
             };
+            // The absorb clamp reads the effective maximum (HealthOps), as the live game does; every
+            // SimUnit the model builds carries both blocks.
+            target.Effective = target.Stats.Attributes.Clone();
 
             int result = EncounterSimulator.ResolveAttack(attacker, target, new Assets.Scripts.Cards.CombatBuffTracker());
 

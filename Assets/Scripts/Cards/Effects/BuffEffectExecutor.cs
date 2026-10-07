@@ -76,7 +76,7 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
-                handler.Apply(target, magnitude, effect.Duration, buffTracker);
+                handler.Apply(target, magnitude, effect.Duration, buffTracker, caster);
 
                 result.Entries.Add(new EffectEntry
                 {

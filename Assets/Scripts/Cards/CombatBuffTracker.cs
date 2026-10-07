@@ -15,6 +15,13 @@ namespace Assets.Scripts.Cards
         private ICombatUnit _actingUnit;
 
         /// <summary>
+        /// The fight's event stream, raised when an over-time tick moves health. Set by whoever owns
+        /// the fight (<c>CombatManager</c>, the simulator's encounter loop); null in tests and room
+        /// events, where ticks still land but nobody is told.
+        /// </summary>
+        public CombatEvents Events { get; set; }
+
+        /// <summary>
         /// Opens <paramref name="unit"/>'s turn. Anything applied to that same unit before its
         /// <see cref="TickBuffs"/> is marked <see cref="CombatBuff.SkipNextUpkeep"/>, so the upkeep at
         /// the end of the turn it was cast in does not eat one of its turns. Without this a 3-turn
@@ -139,7 +146,11 @@ namespace Assets.Scripts.Cards
         /// into a race the closed-form balance model cannot price — <c>BalanceMath</c> needs an
         /// expected damage per application, and an unbounded stack has none.</para>
         /// </summary>
-        public void ApplyOverTime(ICombatUnit unit, BuffType type, int amountPerTurn, int duration)
+        /// <param name="source">Who applied it, credited with what its ticks do - a poison kill is the
+        /// poisoner's. Defaults to the unit whose turn is open (<see cref="BeginTurn"/>), which is the
+        /// caster for every cast, combo and summon; pass it when something else is the author.</param>
+        public void ApplyOverTime(ICombatUnit unit, BuffType type, int amountPerTurn, int duration,
+            ICombatUnit source = null)
         {
             if (unit == null || amountPerTurn <= 0 || duration <= 0 || StatusImmunity.IsImmune(unit, type))
             {
@@ -154,10 +165,13 @@ namespace Assets.Scripts.Cards
             var existing = _activeBuffs[unit]
                 .FirstOrDefault(b => b.IsStatusEffect && b.BuffType == type);
 
+            source = source ?? _actingUnit;
             if (existing != null)
             {
+                // The latest application is the one credited: it is the one keeping it going.
                 existing.Amount = Mathf.Max(existing.Amount, amountPerTurn);
                 existing.TurnsRemaining = Mathf.Max(existing.TurnsRemaining, duration);
+                existing.Source = source ?? existing.Source;
                 MarkIfOwnTurn(unit, existing);
                 return;
             }
@@ -167,7 +181,8 @@ namespace Assets.Scripts.Cards
                 BuffType = type,
                 IsStatusEffect = true,
                 Amount = amountPerTurn,
-                TurnsRemaining = duration
+                TurnsRemaining = duration,
+                Source = source
             };
             _activeBuffs[unit].Add(buff);
             MarkIfOwnTurn(unit, buff);
@@ -231,7 +246,7 @@ namespace Assets.Scripts.Cards
                 }
 
                 int moved = overTime.Heals
-                    ? ApplyHealTick(unit, buff.Amount)
+                    ? ApplyHealTick(unit, buff.Amount, buff.Source)
                     : ApplyDamageTick(unit, buff, overTime);
 
                 if (moved == 0)
@@ -260,12 +275,10 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>Returns the health moved: positive healed, negative damaged, 0 for nothing.</summary>
-        private int ApplyHealTick(ICombatUnit unit, int amount)
+        private int ApplyHealTick(ICombatUnit unit, int amount, ICombatUnit source)
         {
-            int room = unit.GetEffectiveStat(StatType.MaxHealth) - unit.Stats.Health;
-            int healed = Mathf.Clamp(RunFear.Current.ScaleHealing(unit, amount), 0, Mathf.Max(0, room));
-            unit.Stats.Health += healed;
-            return healed;
+            return HealthOps.Heal(unit, RunFear.Current.ScaleHealing(unit, amount),
+                new HealthSource(source, HealthCause.OverTime), Events).Healed;
         }
 
         /// <summary>Returns the health moved: negative damaged, positive absorbed, 0 for immune.</summary>
@@ -282,7 +295,7 @@ namespace Assets.Scripts.Cards
             if (damage < 0)
             {
                 // Absorbed: the element heals this target. Same rule the cast path already follows.
-                return ApplyHealTick(unit, -damage);
+                return ApplyHealTick(unit, -damage, buff.Source);
             }
 
             if (damage == 0)
@@ -290,7 +303,8 @@ namespace Assets.Scripts.Cards
                 return 0;
             }
 
-            unit.Stats.Health -= damage;
+            HealthOps.Damage(unit, damage,
+                new HealthSource(buff.Source, HealthCause.OverTime, overTime.TickDamageType), Events);
             return -damage;
         }
 

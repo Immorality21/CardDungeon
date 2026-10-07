@@ -19,18 +19,15 @@ namespace Assets.Scripts.Combat
     /// no level afflictions, and fresh health every time it is called. The balance model builds its
     /// stand-in from the same function.</para>
     /// </summary>
-    public class SummonUnit : MonoBehaviour, ICombatUnit
+    public class SummonUnit : MonoBehaviour, ICombatUnit, Triggers.ITriggerSource
     {
         public SummonSO Summon { get; private set; }
+
+        /// <summary>Who called it - or, for a Sacrifice horror, the fallen hero it was made from and
+        /// stands in for. Which of the two it is, is the fight's to know (<c>CombatManager</c> keeps
+        /// guests and stand-ins apart), not a flag on the unit.</summary>
         public Hero Summoner { get; private set; }
         public SummonStay Stay { get; private set; }
-
-        /// <summary>
-        /// A Sacrifice horror (<c>UltraKind.Sacrifice</c>): it stands in a fallen hero's place rather
-        /// than fighting for a summoner, so it does not leave when <see cref="Summoner"/> (the hero it
-        /// was made from) is down, counts toward the party standing, and stays for the fight.
-        /// </summary>
-        public bool IsSacrifice { get; set; }
 
         /// <summary>This unit's Attack: its own (a horror's is picked per sacrifice), else the summon's.</summary>
         public MagicSO AttackAbility => _attackOverride != null ? _attackOverride : (Summon != null ? Summon.AttackAbility : null);
@@ -70,6 +67,12 @@ namespace Assets.Scripts.Combat
         public int GetEffectiveAttackPower()
         {
             return GetEffectiveStat(AttackStat);
+        }
+
+        /// <summary>The reactions its summon carries (<see cref="SummonSO.Triggers"/>).</summary>
+        public IEnumerable<Triggers.CarriedTrigger> GetTriggers()
+        {
+            return Triggers.TriggerSources.From(Summon != null ? Summon.Triggers : null, DisplayName);
         }
 
         /// <summary>
