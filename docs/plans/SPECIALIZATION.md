@@ -407,7 +407,7 @@ in**, one mech per branch. Decided with the owner the same day:
 | presentation | the mech arrives like any ally summon and stands where she stood; she is hidden (sprite and bar) and the mech switches to frames with her drawn aboard (`SummonSO.MountedFrames`) |
 | Disassemble success | the machine is **removed as a kill** (normal XP/gold, credited to her) **plus salvage** (`EnemySO.SalvageTable`, Scrap Iron / Slag Coal); a failure costs the turn |
 | Disassemble odds | **25% + 5% per Bestiary kill of that enemy, at most 90%; half on a boss** (`DisassembleOps`). Only `UnitTraits.Mechanical` targets |
-| the elemental spells | moved to the **Mage** (`MageGrid.asset`); she joined the roster 2026-10-07 - see "The Mage" below |
+| the elemental spells | moved to the **Mage** (`MageGrid.asset`); he joined the roster 2026-10-07 - see "The Mage" below |
 | machine enemies | two new ones, **Clockwork Sentry** and **Steam Automaton**, in a new **Clockwork Foundry** room in the Ashen Deep's Slag Halls (the first run after she joins); the Stone Sentinel is tagged `Construct`, not Mechanical |
 
 **The grid** (`TinkererGrid.asset`, 36 nodes, the Warlock's cost ladder): trunk Disassemble (3 charges,
@@ -420,7 +420,7 @@ hero's cast - the oil branch feeds the fire branch.
 
 **Open:**
 - ~~**The Fire Cloak is unobtainable for now.**~~ **Resolved 2026-10-07:** the Mage is on the roster,
-  rescued in the new Sealed Archive on the main line, and the Fire Cloak is the third node of her fire
+  rescued in the new Sealed Archive on the main line, and the Fire Cloak is the third node of his fire
   branch - so every party reaching the Ashen Deep owns it. See "The Mage" below.
 - **The mechs are probably strong** - the first sandbox run had the Warrior Mech's Piston Punch
   one-shot a Clockwork Sentry for 48 off a full grid. First-draft numbers; the balance pass decides.
@@ -431,11 +431,11 @@ hero's cast - the oil branch feeds the fire branch.
 
 The owner's call (2026-10-07): the Mage goes in, as an **early** unlock. What shipped:
 
-- **Where she comes from: The Sealed Archive**, a new two-floor run on the **main line**, between the
-  Threshold and the Drowned March (Threshold → Sealed Archive → Drowned March). She is the captive on
-  floor 1 (The Ash Stacks), so she fights floor 2 (The Broken Orrery) with you. Its boss is a **Stone
+- **Where he comes from: The Sealed Archive**, a new two-floor run on the **main line**, between the
+  Threshold and the Drowned March (Threshold → Sealed Archive → Drowned March). He is the captive on
+  floor 1 (The Ash Stacks), so he fights floor 2 (The Broken Orrery) with you. Its boss is a **Stone
   Sentinel** (60 HP, STR 8, with a Hex Weaver and a Floating Eye) - armoured, weak to Lightning, so the
-  run shows off what she brings. New content: `Runs/SealedArchive/SealedArchive.asset`, level templates
+  run shows off what he brings. New content: `Runs/SealedArchive/SealedArchive.asset`, level templates
   `AshStacks` and `BrokenOrrery`, and one room, `ArchiveStacksRoom` (Floating Eye + Cinder Imp).
   Repeatable, like every ordinary run (`RevisitTests` expects it).
 - **Why on the main line rather than a side branch:** the Fire Cloak has to be owned before the Ashen
@@ -443,14 +443,14 @@ The owner's call (2026-10-07): the Mage goes in, as an **early** unlock. What sh
   branch would have made the model forget the March's heroes. A chain keeps both honest.
 - **The grid** (`MageGrid.asset`, 33 nodes, the Tinkerer's cost ladder): Lightning Bolt at the root;
   **a — storm** (Storm Cloak → **Chain Lightning**, new: Lightning to all enemies, power 3),
-  **b — frost and water** (Ice Shard → Water Splash → Frost Cloak; Freeze on her own), **c — fire**
+  **b — frost and water** (Ice Shard → Water Splash → Frost Cloak; Freeze on his own), **c — fire**
   (**Fire Cloak at the third node**, then Fireball). Each branch has a 15% resistance off its first
   ability. Fireball also sets off Ignite with the Tinkerer's oil.
-- **Stats:** INT 11, HP 22, END 4, SPR 6 - a little sturdier than the placeholder, since she arrives early.
+- **Stats:** INT 11, HP 22, END 4, SPR 6 - a little sturdier than the placeholder, since he arrives early.
 - **Vision:** a *draft* written by Claude, marked as such - the owner's to rewrite. **No summons or Ultra
   yet**; like the Cleric and Rogue, those wait on the vision.
 
-**Open:** her summons/Ultra; whether Chain Lightning is the right storm capstone; Chain Lightning
+**Open:** his summons/Ultra; whether Chain Lightning is the right storm capstone; Chain Lightning
 reuses Lightning Bolt's icon; the full-grid numbers are high (48 to every enemy off INT 45 in the
 sandbox, `Sandbox/MageShowcase`) - the same balance pass as the mechs.
 

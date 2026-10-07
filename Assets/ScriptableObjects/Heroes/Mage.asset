@@ -20,18 +20,24 @@ MonoBehaviour:
       storm, frost and fire, and is rarely careful about which. DRAFT by Claude
       2026-10-07 - the owner''s to rewrite.'
     Role: 'Intelligence caster: elemental damage, area hits and the tag combos
-      (Freeze in her own frost branch, Ignite with the Tinkerer''s oil), plus the
+      (Freeze in his own frost branch, Ignite with the Tinkerer''s oil), plus the
       self-cast cloaks that answer an elemental floor.'
-    SignatureMechanic: Lightning Bolt from the start; the three cloaks.
-    UltraStyle: 
-    Ultras: []
+    SignatureMechanic: 'Focus and MultiCast: he builds Focus during combat (how exactly
+      is not decided yet) and spends it to double-cast, triple-cast or even quadruple-cast.
+      MultiCast is both his signature and his Ultra.'
+    UltraStyle: MultiCast
+    Ultras:
+    - Name: MultiCast
+      Effect: Spend Focus to cast the next ability 2, 3 or 4 times (double-, triple-,
+        quadruple-cast). A rough idea; the details are not decided.
+      Unlock: Signature (trunk)
     Branches:
     - GridBranch: a
       Becomes: 'Storm: speed and reach.'
       IntendedKit: Storm Cloak -> Chain Lightning
       Summon: 
     - GridBranch: b
-      Becomes: 'Frost and water: Freeze on her own, and the sturdier body.'
+      Becomes: 'Frost and water: Freeze on his own, and the sturdier body.'
       IntendedKit: Ice Shard -> Water Splash -> Frost Cloak
       Summon: 
     - GridBranch: c
@@ -41,9 +47,10 @@ MonoBehaviour:
       Summon: 
     Overlaps: 'Warlock and Cultist are Intelligence casters too, but shadow and
       blood; the Mage owns the elements.'
-    OpenQuestions: 'No summons or Ultra yet - define them here first. Is Chain
-      Lightning (all enemies, power 3) the right storm capstone? Working name
-      ''Mage''.'
+    OpenQuestions: 'How Focus is built (per cast? per turn? per element switch?) and
+      how much each tier costs. Is MultiCast spent through the shared Ultra gauge, or
+      does Focus replace the gauge for him? Is Chain Lightning the right storm capstone?
+      Summons per branch are Claude drafts in the hero workbook. Working name ''Mage''.'
   Sprite: {fileID: -3489762990729566, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
   AnimationFrames:
   - {fileID: -3489762990729566, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
