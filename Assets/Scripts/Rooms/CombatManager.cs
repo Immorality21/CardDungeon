@@ -680,9 +680,8 @@ namespace Assets.Scripts.Rooms
             {
                 if (enemy != null && enemy.IsAlive)
                 {
-                    // Fresh per-combat runtime state (cadence + charge) for behaviors.
-                    enemy.TurnsTaken = 0;
-                    enemy.ClearCharge();
+                    // Fresh per-combat runtime state (cadence, charge, limited actions) for behaviors.
+                    enemy.ResetForCombat();
                     units.Add(enemy);
                     RecordEnemySeen(enemy);
                 }
@@ -2018,7 +2017,10 @@ namespace Assets.Scripts.Rooms
                 ChargingEntryIndex = enemy != null ? enemy.ChargingEntryIndex : EnemyActionPlanner.NoCharge,
                 SelfTurnCount = enemy != null ? enemy.TurnsTaken : 0,
                 Spells = enemy != null ? enemy.Spells : null,
-                Threat = _threat
+                Threat = _threat,
+                Guards = Events.Guards,
+                OpenSlots = EnemyFormation.DesignMax - GetAliveEnemies().Count,
+                ActionUses = enemy != null ? enemy.ActionUses : null
             };
 
             // One authored list decides everything: gate, then priority, then weight. Casting is an
@@ -2049,6 +2051,15 @@ namespace Assets.Scripts.Rooms
                     break;
                 case EnemyActionType.Debuff:
                     yield return ExecuteEnemyDebuff(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration);
+                    break;
+                case EnemyActionType.BuffAlly:
+                    yield return ExecuteEnemyBuffAlly(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration);
+                    break;
+                case EnemyActionType.Guard:
+                    yield return ExecuteEnemyGuard(enemyUnit, decision.Target, decision.Amount, decision.Duration);
+                    break;
+                case EnemyActionType.Summon:
+                    yield return ExecuteEnemySummon(enemyUnit, enemy, decision);
                     break;
                 default:
                     string verb = decision.Multiplier > 1f ? "strikes savagely at" : "attacks";
@@ -2264,6 +2275,102 @@ namespace Assets.Scripts.Rooms
             yield return new WaitForSeconds(_turnDelay);
         }
 
+        private IEnumerator ExecuteEnemyBuffAlly(ICombatUnit enemyUnit, ICombatUnit target, StatType stat, int amount, int duration)
+        {
+            if (target == null || !target.IsAlive)
+            {
+                _lastTurnLog = $"{enemyUnit.DisplayName} has no one to empower.";
+                yield break;
+            }
+
+            BuffTracker.ApplyBuff(target, stat, amount, duration);
+            CombatAudio.Play(CombatSound.MagicCast);
+            ShowFloatingLabel(target.Transform.position, $"+{amount} {StatCatalog.ShortName(stat)}", new Color(1f, 0.6f, 0.25f));
+            _lastTurnLog = ReferenceEquals(target, enemyUnit)
+                ? $"{enemyUnit.DisplayName} raises its own {StatCatalog.DisplayName(stat)}!"
+                : $"{enemyUnit.DisplayName} raises {target.DisplayName}'s {StatCatalog.DisplayName(stat)}!";
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
+        /// <summary>
+        /// An enemy covers an ally until its own next turn (<see cref="GuardTable.Cover"/>): a single-target
+        /// blow aimed at the ally lands on the guard instead. <paramref name="brace"/> is an Endurance buff
+        /// the guard takes for the job, 0 for none.
+        /// </summary>
+        private IEnumerator ExecuteEnemyGuard(ICombatUnit enemyUnit, ICombatUnit target, int brace, int duration)
+        {
+            if (target == null || !target.IsAlive)
+            {
+                _lastTurnLog = $"{enemyUnit.DisplayName} has no one to guard.";
+                yield break;
+            }
+
+            Events.Guards.Cover(target, enemyUnit);
+            if (brace > 0)
+            {
+                BuffTracker.ApplyBuff(enemyUnit, StatType.Endurance, brace, duration);
+            }
+            CombatAudio.Play(CombatSound.ItemUse);
+            ShowFloatingLabel(enemyUnit.Transform.position, "Guard", new Color(0.75f, 0.85f, 1f));
+            ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Covered", new Color(0.75f, 0.85f, 1f), 0.14f);
+            _lastTurnLog = $"{enemyUnit.DisplayName} guards {target.DisplayName}.";
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
+        /// <summary>
+        /// An enemy calls more of its kind into the fight. Each body is spawned into the room, set down in
+        /// the re-ranked formation, put on the clock to act after a full turn of its own, and marked
+        /// <see cref="Enemy.IsSummoned"/> so its death pays nothing.
+        /// </summary>
+        private IEnumerator ExecuteEnemySummon(ICombatUnit enemyUnit, Enemy enemy, EnemyDecision decision)
+        {
+            if (enemy != null && decision.EntryIndex >= 0)
+            {
+                enemy.ActionUses.TryGetValue(decision.EntryIndex, out int used);
+                enemy.ActionUses[decision.EntryIndex] = used + 1;
+            }
+
+            var called = new List<ICombatUnit>();
+            if (decision.SummonDefinition != null && _currentCombatRoom != null && EnemyManager.HasInstance)
+            {
+                for (int i = 0; i < decision.SummonCount && GetAliveEnemies().Count < EnemyFormation.DesignMax; i++)
+                {
+                    var body = EnemyManager.Instance.SpawnSingle(decision.SummonDefinition, _currentCombatRoom);
+                    if (body == null)
+                    {
+                        break;
+                    }
+                    body.IsSummoned = true;
+                    body.ResetForCombat();
+                    called.Add(body);
+                }
+            }
+
+            if (called.Count == 0)
+            {
+                _lastTurnLog = $"{enemyUnit.DisplayName} calls out, but no one answers.";
+                yield break;
+            }
+
+            CombatStage.Instance.RelayoutEnemies(GetAliveEnemies(), called);
+            foreach (var body in called)
+            {
+                _turnManager.AddUnit(body, actsNext: false);
+                RecordEnemySeen(body as Enemy);
+                ShowFloatingLabel(body.Transform.position, "!", new Color(1f, 0.55f, 0.3f), 0.2f);
+            }
+            EnsureHealthBars(called);
+            BroadcastTurnOrder();
+
+            CombatAudio.Play(CombatSound.BossSignature);
+            ShowFloatingLabel(enemyUnit.Transform.position, "Summon", new Color(1f, 0.55f, 0.3f));
+            string what = called.Count == 1
+                ? decision.SummonDefinition.Label
+                : $"{called.Count} {decision.SummonDefinition.Label}s";
+            _lastTurnLog = $"{enemyUnit.DisplayName} calls {what} into the fight!";
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
         /// <summary>
         /// Runs everything that went down since the last call through its side's death path: an enemy
         /// pays out and leaves, a hero falls for the floor, a summon leaves the field. <b>The one place
@@ -2406,7 +2513,14 @@ namespace Assets.Scripts.Rooms
             // the guard's own Endurance, Luck and resistances answer them.
             if (Events != null)
             {
+                var aimed = target;
                 target = Events.Guards.Redirect(target);
+                // An enemy's cover says so: the player picked one target and another took the blow.
+                if (!ReferenceEquals(aimed, target) && Events.Guards.IsCovered(aimed) && target.Transform != null)
+                {
+                    ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Cover",
+                        new Color(0.75f, 0.85f, 1f), 0.14f);
+                }
             }
             CombatAudio.Play(CombatSound.MeleeSwing);
             yield return LungeAnimation(attacker.Transform, lungeDirection);
@@ -2842,6 +2956,12 @@ namespace Assets.Scripts.Rooms
             var table = cause == HealthCause.Disassemble && enemy.Definition != null && enemy.Definition.SalvageTable != null
                 ? enemy.LootTable.Concat(enemy.Definition.SalvageTable).ToList()
                 : enemy.LootTable;
+            // A body another enemy called in pays nothing (XpReward and GoldReward are 0 for it too), so a
+            // summoner cannot be farmed.
+            if (enemy.IsSummoned)
+            {
+                table = new List<LootDrop>();
+            }
             foreach (var award in LootRoller.Roll(
                          table, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f)))
             {

@@ -205,6 +205,12 @@ namespace Assets.Scripts.Balance
         public bool IsCharging => ChargingEntryIndex >= 0;
         public int TurnsTaken;
 
+        /// <summary>Uses of each limited authored action this fight. Mirrors <c>Enemy.ActionUses</c>.</summary>
+        public readonly Dictionary<int, int> ActionUses = new Dictionary<int, int>();
+
+        /// <summary>A body another enemy called into this fight. Mirrors <c>Enemy.IsSummoned</c>.</summary>
+        public bool IsSummoned;
+
         public bool IsBoss => Definition != null && Definition.IsBoss;
 
         /// <summary>A fresh copy at full health — one per simulated battle.</summary>

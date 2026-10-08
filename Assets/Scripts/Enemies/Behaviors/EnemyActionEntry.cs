@@ -24,8 +24,27 @@ namespace Assets.Scripts.Enemies.Behaviors
         /// <summary>A negative stat buff on a hero that does not already carry one.</summary>
         Debuff,
 
-        /// <summary>Casts a magic — a named one, or one picked from this enemy's Draw list.</summary>
-        CastMagic
+        /// <summary>Casts a magic — a named one, or one picked from this enemy's own spell list.</summary>
+        CastMagic,
+
+        /// <summary>
+        /// A positive stat buff on the strongest of its side (itself included) that does not already
+        /// carry one on that stat — "haste the boss". What makes a support enemy a priority target.
+        /// </summary>
+        BuffAlly,
+
+        /// <summary>
+        /// Covers the most wounded ally against single-target blows until this enemy's next turn
+        /// (<c>GuardTable.Cover</c>), optionally bracing itself with an Endurance buff. The enemy-side
+        /// mirror of threat: the covered unit can only be reached through the guard or an area attack.
+        /// </summary>
+        Guard,
+
+        /// <summary>
+        /// Calls <see cref="EnemyActionEntry.Summons"/> into the fight, up to the stage's five bodies.
+        /// A called body pays nothing when it dies (no XP, gold or loot), so a summoner cannot be farmed.
+        /// </summary>
+        Summon
     }
 
     /// <summary>The gate on whether an action is available at all this turn.</summary>
@@ -116,14 +135,27 @@ namespace Assets.Scripts.Enemies.Behaviors
         [Tooltip("Damage multiplier, for Attack / HeavyAttack / AoeAttack.")]
         public float Multiplier = 1f;
 
-        [Tooltip("Heal amount, or debuff magnitude.")]
+        [Tooltip("Heal amount, debuff or buff magnitude, or (Guard) the Endurance the guard braces " +
+                 "itself with while it covers - 0 for none.")]
         public int Power;
 
-        [Tooltip("Debuff duration in turns.")]
+        [Tooltip("Debuff / buff / brace duration in turns.")]
         public int Duration = 3;
 
-        [Tooltip("Which stat a Debuff reduces.")]
+        [Tooltip("Which stat a Debuff reduces or a BuffAlly raises.")]
         public StatType TargetStat = StatType.Strength;
+
+        [Tooltip("Summon only: the enemy this action calls into the fight.")]
+        public EnemySO Summons;
+
+        [Tooltip("Summon only: how many bodies one use calls, capped by the room left on the stage.")]
+        [Min(1)]
+        public int SummonCount = 1;
+
+        [Tooltip("Summon only: how many times per fight this action can be used. 0 means no limit " +
+                 "beyond the stage's five bodies.")]
+        [Min(0)]
+        public int MaxUses = 1;
 
         [Tooltip("CastMagic only. Leave empty to pick from this enemy's own Spells, weighted by " +
                  "CastWeight. Name a magic here for a signature that is not on that list.")]
@@ -138,6 +170,9 @@ namespace Assets.Scripts.Enemies.Behaviors
 
         /// <summary>Whether this entry actually spends a turn winding up.</summary>
         public bool IsTelegraphed => Telegraphed && CanTelegraph;
+
+        /// <summary>True when this entry is limited to <see cref="MaxUses"/> per fight.</summary>
+        public bool IsLimited => Kind == EnemyActionKind.Summon && MaxUses > 0;
 
         public string DescribeForEditor()
         {

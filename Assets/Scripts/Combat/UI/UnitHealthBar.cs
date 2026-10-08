@@ -34,6 +34,7 @@ namespace Assets.Scripts.Combat
         private static readonly Color Yellow = new Color(0.98f, 0.85f, 0.25f);
         private static readonly Color SlowBlue = new Color(0.55f, 0.6f, 0.85f);
         private static readonly Color IntentRed = new Color(0.95f, 0.4f, 0.35f);
+        private static readonly Color CoverBlue = new Color(0.75f, 0.85f, 1f);
         private static readonly Color Orange = new Color(1f, 0.6f, 0.15f);
         private static readonly Color Purple = new Color(0.78f, 0.45f, 0.95f);
         private static readonly Color PoisonGreen = new Color(0.65f, 0.9f, 0.3f);
@@ -315,6 +316,17 @@ namespace Assets.Scripts.Combat
             {
                 list.Add(new IconDesc { Name = "shield", Tint = def > 0 ? Green : Red });
             }
+            int agi = bt.GetBuffAmount(_unit, StatType.Agility);
+            if (agi != 0)
+            {
+                list.Add(new IconDesc { Name = "arrow", Tint = agi > 0 ? Green : Red, FlipY = agi < 0 });
+            }
+            // Under an enemy guard's cover: single-target blows land on the guard (GuardTable).
+            var guards = CombatManager.Instance.Events?.Guards;
+            if (guards != null && guards.IsCovered(_unit))
+            {
+                list.Add(new IconDesc { Name = "shield", Tint = CoverBlue });
+            }
 
             foreach (var status in bt.GetActiveStatusEffects(_unit))
             {
@@ -390,6 +402,12 @@ namespace Assets.Scripts.Combat
                     return new IconDesc { Name = "cross", Tint = Green };
                 case EnemyActionType.Debuff:
                     return new IconDesc { Name = "arrow", Tint = Purple, FlipY = true };
+                case EnemyActionType.BuffAlly:
+                    return new IconDesc { Name = "arrow", Tint = Orange };
+                case EnemyActionType.Guard:
+                    return new IconDesc { Name = "shield", Tint = CoverBlue };
+                case EnemyActionType.Summon:
+                    return new IconDesc { Name = "burst", Tint = Yellow };
                 case EnemyActionType.ChargeHeavy:
                 case EnemyActionType.HeavyAttack:
                 case EnemyActionType.ChargeAoe:

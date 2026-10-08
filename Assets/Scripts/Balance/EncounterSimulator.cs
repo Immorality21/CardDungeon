@@ -401,7 +401,7 @@ namespace Assets.Scripts.Balance
                 }
                 else
                 {
-                    TakeEnemyTurn(actor, EnemyTargets(heroes, replacement, allies), enemies, buffTracker);
+                    TakeEnemyTurn(actor, EnemyTargets(heroes, replacement, allies), enemies, buffTracker, turnManager);
                 }
 
                 // End-of-turn over-time effects (regeneration) fire before durations tick down,
@@ -1587,7 +1587,8 @@ namespace Assets.Scripts.Balance
             SimUnit enemy,
             List<SimUnit> heroes,
             List<SimUnit> enemies,
-            CombatBuffTracker buffTracker)
+            CombatBuffTracker buffTracker,
+            TurnManager turnManager)
         {
             var behavior = enemy.Behavior != null
                 ? enemy.Behavior
@@ -1600,7 +1601,10 @@ namespace Assets.Scripts.Balance
                 BuffTracker = buffTracker,
                 ChargingEntryIndex = enemy.ChargingEntryIndex,
                 SelfTurnCount = enemy.TurnsTaken,
-                Spells = enemy.Definition != null ? enemy.Definition.Spells : null
+                Spells = enemy.Definition != null ? enemy.Definition.Spells : null,
+                Guards = buffTracker.Events != null ? buffTracker.Events.Guards : null,
+                OpenSlots = EnemyFormation.DesignMax - CountAlive(enemies),
+                ActionUses = enemy.ActionUses
             };
 
             // The same planner call CombatManager.ExecuteEnemyTurn makes, so there is no second
@@ -1674,6 +1678,35 @@ namespace Assets.Scripts.Balance
                     break;
                 }
 
+                // The three verbs of COMBAT_DEPTH section 12, resolved as CombatManager resolves them.
+                case EnemyActionType.BuffAlly:
+                {
+                    var target = decision.Target;
+                    if (target != null && target.IsAlive)
+                    {
+                        buffTracker.ApplyBuff(target, decision.DebuffStat, decision.Amount, decision.Duration);
+                    }
+                    break;
+                }
+
+                case EnemyActionType.Guard:
+                {
+                    var target = decision.Target;
+                    if (target != null && target.IsAlive && buffTracker.Events != null)
+                    {
+                        buffTracker.Events.Guards.Cover(target, enemy);
+                        if (decision.Amount > 0)
+                        {
+                            buffTracker.ApplyBuff(enemy, StatType.Endurance, decision.Amount, decision.Duration);
+                        }
+                    }
+                    break;
+                }
+
+                case EnemyActionType.Summon:
+                    CallIn(enemy, decision, enemies, turnManager);
+                    break;
+
                 default:
                 {
                     var target = decision.Target as SimUnit;
@@ -1690,6 +1723,48 @@ namespace Assets.Scripts.Balance
             }
 
             enemy.TurnsTaken++;
+        }
+
+        /// <summary>
+        /// An enemy's Summon: counts the use, then adds up to the decision's count of fresh bodies at the
+        /// summoner's level tuning, capped at the stage's five, each waiting a full turn of its own -
+        /// <c>CombatManager.ExecuteEnemySummon</c>'s rules.
+        /// </summary>
+        public static int CallIn(SimUnit summoner, EnemyDecision decision, List<SimUnit> enemies, TurnManager turnManager)
+        {
+            if (decision.EntryIndex >= 0)
+            {
+                summoner.ActionUses.TryGetValue(decision.EntryIndex, out int used);
+                summoner.ActionUses[decision.EntryIndex] = used + 1;
+            }
+            if (decision.SummonDefinition == null)
+            {
+                return 0;
+            }
+
+            int called = 0;
+            for (int i = 0; i < decision.SummonCount && CountAlive(enemies) < EnemyFormation.DesignMax; i++)
+            {
+                var body = SimUnit.FromEnemy(decision.SummonDefinition, summoner.Tuning);
+                body.IsSummoned = true;
+                enemies.Add(body);
+                turnManager?.AddUnit(body, actsNext: false);
+                called++;
+            }
+            return called;
+        }
+
+        private static int CountAlive(List<SimUnit> units)
+        {
+            int count = 0;
+            foreach (var unit in units)
+            {
+                if (unit != null && unit.IsAlive)
+                {
+                    count++;
+                }
+            }
+            return count;
         }
 
         /// <summary>

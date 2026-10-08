@@ -258,6 +258,36 @@ namespace Assets.Scripts.Enemies.Editor
                             MessageType.None);
                     }
                     break;
+
+                case EnemyActionKind.BuffAlly:
+                    EditorGUILayout.PropertyField(
+                        entry.FindPropertyRelative("Power"), new GUIContent("Buff amount"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("Duration"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("TargetStat"));
+                    EditorGUILayout.HelpBox(
+                        "Lands on the hardest hitter on its side (itself included) that is not already "
+                        + "buffed on this stat.", MessageType.None);
+                    break;
+
+                case EnemyActionKind.Guard:
+                    EditorGUILayout.PropertyField(
+                        entry.FindPropertyRelative("Power"),
+                        new GUIContent("Brace", "Endurance the guard gains while it covers. 0 for none."));
+                    EditorGUILayout.PropertyField(
+                        entry.FindPropertyRelative("Duration"), new GUIContent("Brace duration"));
+                    EditorGUILayout.HelpBox(
+                        "Covers the most wounded ally against single-target blows until this enemy's next "
+                        + "turn. Area attacks still reach it.", MessageType.None);
+                    break;
+
+                case EnemyActionKind.Summon:
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("Summons"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("SummonCount"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("MaxUses"));
+                    EditorGUILayout.HelpBox(
+                        "Called bodies pay no XP, gold or loot, and never push the stage past five.",
+                        MessageType.None);
+                    break;
             }
 
             EditorGUILayout.PropertyField(entry.FindPropertyRelative("Conditions"), true);

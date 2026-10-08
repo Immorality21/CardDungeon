@@ -20,7 +20,11 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
   is worked out**, so the guard's own Endurance, Luck and resistances answer it: `CombatManager.ExecuteAttack`,
   `DamageEffectExecutor` and `EncounterSimulator.ResolveAttack`. A blast that reaches both the guarded
   unit and its guard hits the guard once (the executor and the enemy area blow both skip the guarded
-  one). Over-time ticks are not redirected. The mech under its rider is the only user.
+  one). Over-time ticks are not redirected. Two kinds *(2026-10-08)*: a **full guard** (`Set`, the
+  mech under its rider) takes everything, and a **cover** (`Cover`, an enemy's Guard action) takes only
+  single-target blows (`RedirectAreaHit` lets an area effect through) and ends when its guard's turn
+  starts (`ExpireCovers`, subscribed to `TurnStarted` in the `CombatEvents` constructor so both loops
+  share it). A covered unit wears a light-blue shield icon; a redirected swing floats "Cover".
 - **`UnitTraits`** (`[Flags]`, on `EnemySO.Traits`, read through `IHasTraits` by `Enemy` and `SimUnit`):
   Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental - what a unit *is*. `UnitTraitOps.Has`
   is the check. Serialized as a bit mask: append, never reuse a bit. Only Disassemble reads it today

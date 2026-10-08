@@ -77,6 +77,21 @@ namespace Assets.Scripts.Hub
                  "list falls back to the last entry.")]
         public Sprite[] LevelSprites = new Sprite[0];
 
+        // --- ambience (presentation only; HubView draws it) ------------------------
+
+        [Tooltip("Frames played in a loop once the lot is built, in place of its level sprite - a fire " +
+                 "that moves. Frame 0 should be the built sprite itself. Only author these for a " +
+                 "building whose level sprites are all the same art, since they replace every level.")]
+        public Sprite[] IdleFrames = new Sprite[0];
+
+        [Min(1f)]
+        [Tooltip("Frames per second for IdleFrames.")]
+        public float IdleFps = 8f;
+
+        [Tooltip("Lights that live on the lot once it is built: a glow that flickers, sparks, smoke. " +
+                 "Points are measured from the top-left of the DrawRect, in design pixels.")]
+        public List<HubAmbientLight> Lights = new List<HubAmbientLight>();
+
         // --- progression (authored now, read from HUB.md phase 4 onward) -----------
 
         [Tooltip("Placed on a fresh save, free, and can never be un-built. The campfire is the one " +

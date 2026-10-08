@@ -207,28 +207,45 @@ Touch points: `Assets/Scripts/Enemies/Behaviors/EnemyTargeting.cs`, `EnemyAction
 `Assets/Scripts/Rooms/CombatManager.cs`, `Assets/Scripts/Cards/CombatBuffTracker.cs`,
 `Assets/Scripts/Balance/BalanceMath.cs` / `EncounterSimulator.cs`.
 
-### 12. Enemy action vocabulary — the four missing verbs
+### 12. Enemy action vocabulary — ✅ three verbs shipped 2026-10-08; Steal / Flee dropped
 
-`EnemyActionKind` is **Attack / HeavyAttack / AoeAttack / Heal / Debuff / CastMagic**, and it is a
-closed enum *on purpose*: `BalanceMath` has to price a behaviour in closed form. Four obvious verbs
-are absent, each of which would need a price:
+`EnemyActionKind` is **Attack / HeavyAttack / AoeAttack / Heal / Debuff / CastMagic / BuffAlly / Guard
+/ Summon** (the last three appended, so every older asset keeps its ordinals). Still a closed enum
+on purpose: `BalanceMath` has to price a behaviour in closed form. The owner picked three of the four
+on 2026-10-08 and **dropped Steal / Flee**.
 
-- **Summon / call for help** — adds a body mid-fight. Also the natural home for §5o's escort
-  mechanic, and the single strongest way to make a fight escalate rather than decay. Pricing is the
-  hard part: an enemy that adds bodies makes `PartyTurnsToKill` recursive.
-- **BuffAlly** — there is a Heal but no "haste the boss". The counterpart to `Debuff`, and the thing
-  that makes a support enemy a *priority target* rather than a formality.
-- **Guard / cover an ally** — the enemy-side mirror of §11, and what makes a healer actually need
-  focusing.
-- **Steal / Flee** — an enemy that takes gold or an item and leaves. A different kind of pressure
-  (act now or lose something) that no current enemy can express.
+| verb | what it does | priced how |
+|---|---|---|
+| **BuffAlly** | a positive stat buff (`TargetStat`, `Power`, `Duration`) on the hardest hitter of its side, itself included, that is not already buffed on that stat | closed form: a stat shift credited to the caster (it cannot see who); the sims run it for real |
+| **Guard** | covers the most wounded ally (the frailest when all are whole; never one already covered) **until the guard's next turn** - single-target blows land on the guard, **area attacks still reach the covered unit**. `Power` > 0 also braces the guard with that much Endurance for `Duration` turns | closed form: an idle turn plus the brace; the soaked blows are **not** priced (an Info finding says so); the sims run it for real |
+| **Summon** | calls `SummonCount` of `Summons` into the fight, at most `MaxUses` times per fight (0 = no limit) and never past the stage's five bodies. **A called body pays nothing**: no XP, gold or loot, and the dungeon save does not count it | closed form: `EnemyBehaviorModel.ExpectedSummons` adds `min(MaxUses, claim × 3 turns)` uses' worth of bodies to the room as if they stood from the start (pessimistic on purpose); the sims call them in for real |
 
-Do these **after** §11, which establishes the targeting machinery two of them need, and after §9,
-since an enemy that applies a DoT is more interesting than most of these.
+How it is built (details in the Enemies and Combat guides):
 
-Touch points: `Assets/Scripts/Enemies/Behaviors/EnemyActionEntry.cs` (the enum + per-kind fields),
-`EnemyActionPlanner.cs`, `Assets/Scripts/Enemies/Editor/EnemyBehaviorSOEditor.cs` (draws per-kind
-fields), `Assets/Scripts/Balance/` (`EnemyBehaviorModel`, `BalanceMath`).
+- **Cover lives on the existing `GuardTable`** beside the mech's full guard. `GuardTable.Cover` vs
+  `Set`; `RedirectAreaHit` is what `DamageEffectExecutor` asks when an effect has several targets.
+  `CombatEvents` expires a guard's covers on its `TurnStarted`, so both loops share one rule.
+- **The planner owns eligibility** (`HasSomewhereToLand`): no target, no room on the stage or no uses
+  left means the entry falls through, like a Heal with nobody wounded.
+- **Live fight**: `CombatManager.ExecuteEnemyBuffAlly / ExecuteEnemyGuard / ExecuteEnemySummon`; a
+  called body is spawned with `EnemyManager.SpawnSingle`, set down by `CombatStage.RelayoutEnemies`
+  (the standing ones glide to their new ranks) and added to the clock to act after a full turn. Floating
+  "Guard" / "Covered" / "Cover" / "Summon" labels, a light-blue shield over a covered unit, and intent
+  icons for all three.
+- **Simulator**: `EncounterSimulator.TakeEnemyTurn` mirrors all three (`CallIn` for Summon).
+- Tests: `EnemyVerbTests`.
+
+**First content (2026-10-08)** - all on existing enemies, no new art:
+
+- **Bog Shaman - War chant**: +2 Strength for 3 turns on its side's hardest hitter, 35% of turns.
+- **Steam Automaton - Shield an ally**: its own behaviour now (`BehaviorSteamAutomaton`, the Bruiser
+  preset plus Guard), covers 40% of the turns it is not winding up, bracing +3 Endurance; it fights
+  beside the fragile Clockwork Sentry in the Foundry.
+- **Gilded Hoarder - Spill the hoard**: once, the first turn it is under 60% health, two Gilded Motes.
+
+Open: the balance pass should read the floor sims for The Drowned March (Shaman), the Ashen Deep's
+Slag Halls (Automaton) and The Warrens' finale (Hoarder) - see `BALANCING.md` §5ae for the measured
+before/after. A Steal / Flee verb can be reopened later; the design notes above still apply.
 
 ### 13. Hero identity — the Ultra gauge
 

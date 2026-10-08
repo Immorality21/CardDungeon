@@ -14,7 +14,10 @@ namespace Assets.Scripts.Enemies.Behaviors
         Debuff,
         ChargeAoe,   // boss: telegraph a signature move that hits the whole party next turn
         AoeAttack,   // boss: deliver the telegraphed signature across all living heroes
-        CastMagic    // cast one of the enemy's Spells (see EnemyMagicPlan)
+        CastMagic,   // cast one of the enemy's Spells (see EnemyMagicPlan)
+        BuffAlly,    // a positive stat buff on one of its own side
+        Guard,       // cover an ally against single-target blows until its next turn
+        Summon       // call more enemies into the fight
     }
 
     /// <summary>
@@ -27,8 +30,12 @@ namespace Assets.Scripts.Enemies.Behaviors
         public ICombatUnit Target;
         public float Multiplier = 1f;         // damage multiplier for HeavyAttack
         public int Amount;                    // heal amount / debuff magnitude
-        public int Duration;                  // debuff duration in turns
-        public StatType DebuffStat = StatType.Strength;
+        public int Duration;                  // debuff / buff / brace duration in turns
+        public StatType DebuffStat = StatType.Strength;   // the stat a Debuff lowers or a BuffAlly raises
+
+        /// <summary>What a <see cref="EnemyActionType.Summon"/> calls, and how many of it.</summary>
+        public EnemySO SummonDefinition;
+        public int SummonCount;
 
         /// <summary>The magic to cast, for <see cref="EnemyActionType.CastMagic"/>.</summary>
         public Assets.Scripts.Cards.MagicSO Magic;

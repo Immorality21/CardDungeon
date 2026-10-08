@@ -291,6 +291,24 @@ namespace Assets.Scripts.Hub
             }
         }
 
+        /// <summary>The idle loop a lot plays now: its <see cref="BuildingSO.IdleFrames"/> once built, else none.</summary>
+        public static Sprite[] FramesFor(BuildingSO building, HubProgress progress)
+        {
+            return building != null && building.IdleFrames != null && building.IdleFrames.Length > 1
+                   && StateOf(building, progress) == BuildingState.Built
+                ? building.IdleFrames
+                : null;
+        }
+
+        /// <summary>The lights a lot shows now: its <see cref="BuildingSO.Lights"/> once built, else none.</summary>
+        public static List<HubAmbientLight> LightsFor(BuildingSO building, HubProgress progress)
+        {
+            return building != null && building.Lights != null && building.Lights.Count > 0
+                   && StateOf(building, progress) == BuildingState.Built
+                ? building.Lights
+                : null;
+        }
+
         // --- authoring validators -------------------------------------------------
         // Reported rather than thrown: a half-authored town should render, and a test should be what
         // fails. Same contract as CampaignOps' validators.

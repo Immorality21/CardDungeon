@@ -24,11 +24,18 @@ namespace Assets.Scripts.Balance
         /// <summary>MaxHealth after the level's tuning — <b>not</b> the template's authored value.</summary>
         public int MaxHealth => Unit != null ? Unit.Stats.MaxHealth : 0;
 
-        /// <summary>XP this level pays for the kill.</summary>
-        public int Xp => LevelEnemyTuning.XpFor(Definition, Tuning);
+        /// <summary>
+        /// True for the bodies a summoner in the group is expected to call in (an enemy's Summon
+        /// action, COMBAT_DEPTH §12). They fight and are priced like anyone else, but pay nothing,
+        /// never drop loot, and are not placed by the simulator - which calls them in for real.
+        /// </summary>
+        public bool IsSummoned;
 
-        /// <summary>Gold this level pays for the kill.</summary>
-        public int Gold => LevelEnemyTuning.GoldFor(Definition, Tuning);
+        /// <summary>XP this level pays for the kill (nothing for a called-in body).</summary>
+        public int Xp => IsSummoned ? 0 : LevelEnemyTuning.XpFor(Definition, Tuning);
+
+        /// <summary>Gold this level pays for the kill (nothing for a called-in body).</summary>
+        public int Gold => IsSummoned ? 0 : LevelEnemyTuning.GoldFor(Definition, Tuning);
     }
 
     /// <summary>A fractional enemy group, and the pool/output arithmetic that goes with it.</summary>
@@ -57,14 +64,52 @@ namespace Assets.Scripts.Balance
 
         public bool IsEmpty => TotalCount <= 0f;
 
+        /// <summary>
+        /// Bodies the room starts with: <see cref="TotalCount"/> less the ones a summoner calls in, which
+        /// the game caps at the stage's five as they arrive.
+        /// </summary>
+        public float PlacedCount
+        {
+            get
+            {
+                float total = 0f;
+                foreach (var member in Members)
+                {
+                    if (!member.IsSummoned)
+                    {
+                        total += member.Weight;
+                    }
+                }
+                return total;
+            }
+        }
+
+        /// <summary>
+        /// Adds <paramref name="weight"/> of an enemy, plus the bodies its behaviour is expected to call
+        /// in (<see cref="EnemyBehaviorModel.ExpectedSummons"/>) as summoned members. A called-in body's
+        /// own summons are not expanded: one generation is the estimate, not a chain.
+        /// </summary>
         public void Add(EnemySO enemy, float weight)
+        {
+            AddMember(enemy, weight, summoned: false);
+            if (enemy == null || weight <= 0f)
+            {
+                return;
+            }
+            foreach (var call in EnemyBehaviorModel.ExpectedSummons(enemy.ResolvedBehavior))
+            {
+                AddMember(call.Key, weight * call.Value, summoned: true);
+            }
+        }
+
+        private void AddMember(EnemySO enemy, float weight, bool summoned)
         {
             if (enemy == null || weight <= 0f)
             {
                 return;
             }
 
-            var existing = Members.Find(m => m.Definition == enemy);
+            var existing = Members.Find(m => m.Definition == enemy && m.IsSummoned == summoned);
             if (existing != null)
             {
                 existing.Weight += weight;
@@ -76,7 +121,8 @@ namespace Assets.Scripts.Balance
                 Definition = enemy,
                 Unit = SimUnit.FromEnemy(enemy, Tuning),
                 Weight = weight,
-                Tuning = Tuning
+                Tuning = Tuning,
+                IsSummoned = summoned
             });
         }
 
@@ -281,8 +327,11 @@ namespace Assets.Scripts.Balance
                 return units;
             }
 
+            // Called-in bodies are left out: the simulator's summoners call them in for real.
+            var placed = Members.FindAll(m => !m.IsSummoned);
+
             float total = 0f;
-            foreach (var member in Members)
+            foreach (var member in placed)
             {
                 total += Mathf.Max(0f, member.Weight);
             }
@@ -295,7 +344,7 @@ namespace Assets.Scripts.Balance
 
             // Whole units first, so a member expected three times still turns up three times.
             var remainders = new List<WeightedEnemy>();
-            foreach (var member in Members)
+            foreach (var member in placed)
             {
                 int whole = Mathf.FloorToInt(Mathf.Max(0f, member.Weight));
                 for (int i = 0; i < whole && units.Count < seats; i++)

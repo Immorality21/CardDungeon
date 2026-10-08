@@ -259,6 +259,9 @@ namespace Assets.Scripts.Hub.UI
                     Label = building.Label,
                     Glyph = Glyph(building),
                     Sprite = BuildingOps.SpriteFor(building, progress),
+                    Frames = BuildingOps.FramesFor(building, progress),
+                    FramesPerSecond = building.IdleFps,
+                    Lights = BuildingOps.LightsFor(building, progress),
                     Tooltip = building.Blurb
                 });
             }

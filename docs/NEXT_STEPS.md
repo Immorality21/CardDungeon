@@ -237,7 +237,7 @@ backlog.**
 |---|---|---|
 | **9** | Status effects — over-time, Silence, the cure loop | ✅ shipped 2026-09-03; follow-ups open |
 | **11** | Threat — a reason for a defensive build | ✅ threat shipped 2026-09-28; balance model + threat UI open |
-| **12** | Enemy action vocabulary — the four missing verbs | not started |
+| **12** | Enemy action vocabulary — the missing verbs | ✅ **BuffAlly, Guard, Summon shipped 2026-10-08** (Bog Shaman, Steam Automaton, Gilded Hoarder); Steal / Flee dropped by the owner |
 | **13** | Hero identity — the Ultra gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the **Ultra** gauge (working name for a Limit/Overdrive, 2026-10-04) is what is left; per-hero styles collected in Hero Vision |
 
 ### [Events and reactions](plans/EVENTS.md)
@@ -299,6 +299,16 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **Enemy support verbs** (2026-10-08) — `plans/COMBAT_DEPTH.md` §12, `BALANCING.md` §5ae. BuffAlly,
+  Guard (a single-target *cover* on `GuardTable`, until the guard's next turn) and Summon (called bodies
+  pay nothing) in the planner, the live fight, the simulator and the closed form; on the Bog Shaman,
+  Steam Automaton and Gilded Hoarder. `EnemyVerbTests`; suite 1,438 / 0; all three seen in the sandbox
+  (`Sandbox/EnemyVerbs`).
+- **The town and the menu backdrops come alive** (2026-10-08) — the Hub guide, `docs/PIXEL_ART.md` §8d.
+  PixelLab idle loops for the campfire and forge (7 frames each), and `AmbienceLayer`: flickering glows,
+  sparks, chimney smoke and twinkling stars over the hub, plus the title / level-entry torches and the
+  story map's lanterns (`Resources/BackdropAmbience.asset`). Seen in play.
 
 - **Run history** (2026-10-07) — `plans/POLISH_CONTENT.md` §15. `RunHistory.json`, recorded from
   `GameEvents` by `RunHistoryRecorder` (no scene wiring); `CombatFinished.FoesStanding` names who a

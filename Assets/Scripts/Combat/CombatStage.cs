@@ -351,6 +351,59 @@ namespace Assets.Scripts.Combat
             }
         }
 
+        /// <summary>
+        /// Re-ranks the enemy side after bodies join mid-fight (an enemy's Summon action): the whole
+        /// living set is laid out again by <see cref="EnemyFormation"/>, the ones already standing glide to
+        /// their new spots and each of <paramref name="arriving"/> is set down at once at its stage size.
+        /// </summary>
+        public void RelayoutEnemies(IList<ICombatUnit> enemies, ICollection<ICombatUnit> arriving)
+        {
+            if (enemies == null || enemies.Count == 0)
+            {
+                return;
+            }
+
+            int bossIndex = -1;
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                if (enemies[i] is Enemy e && e.IsBoss)
+                {
+                    bossIndex = i;
+                    break;
+                }
+            }
+            float bossHalfWidth = bossIndex >= 0
+                ? StageHalfWidth(enemies[bossIndex])
+                : EnemyFormation.DefaultBossHalfWidth;
+            var slots = EnemyFormation.Layout(enemies.Count, bossIndex, _halfW, _halfH, bossHalfWidth);
+
+            for (int i = 0; i < enemies.Count && i < slots.Count; i++)
+            {
+                var unit = enemies[i];
+                if (unit?.Transform == null)
+                {
+                    continue;
+                }
+                var spot = new Vector3(_anchorX + slots[i].Offset.x, _centerY + slots[i].Offset.y, -1f);
+                int sorting = UnitSortOrder + MaxRanks - slots[i].Rank;
+                if (arriving != null && arriving.Contains(unit))
+                {
+                    PlaceUnit(unit, spot, faceRight: false, isHero: false,
+                        scale: EnemyStageScale(unit), sortingOrder: sorting);
+                    continue;
+                }
+                if ((unit.Transform.position - spot).sqrMagnitude > 0.0001f)
+                {
+                    StartCoroutine(Glide(unit.Transform, spot));
+                }
+                var sr = unit.Transform.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.sortingOrder = sorting;
+                }
+            }
+        }
+
         private const float AllyGlideTime = 0.3f;
 
         /// <summary>An ally stepping to its new place in the column, eased so the shuffle reads as a

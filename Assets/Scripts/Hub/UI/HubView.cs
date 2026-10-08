@@ -48,6 +48,14 @@ namespace Assets.Scripts.Hub.UI
             public string Glyph;
             public Sprite Sprite;
             public string Tooltip;
+
+            /// <summary>An idle loop to play in place of <see cref="Sprite"/>, or null (see <see cref="BuildingSO.IdleFrames"/>).</summary>
+            public Sprite[] Frames;
+
+            public float FramesPerSecond;
+
+            /// <summary>The lot's living lights, or null (see <see cref="BuildingSO.Lights"/>).</summary>
+            public List<HubAmbientLight> Lights;
         }
 
         private readonly VisualElement _canvas;
@@ -55,7 +63,9 @@ namespace Assets.Scripts.Hub.UI
         /// <summary>Design-space height a caption needs below its lot: one line, the name and its badge.</summary>
         private const float CaptionRoom = 44f;
         private readonly VisualElement _backdrop;
+        private readonly AmbienceLayer _backFxLayer;
         private readonly VisualElement _spriteLayer;
+        private readonly AmbienceLayer _fxLayer;
         private readonly VisualElement _lotLayer;
         private readonly Dictionary<string, Button> _buttons = new Dictionary<string, Button>();
         private readonly Dictionary<string, VisualElement> _sprites = new Dictionary<string, VisualElement>();
@@ -81,11 +91,19 @@ namespace Assets.Scripts.Hub.UI
             Stretch(_backdrop);
             _canvas.Add(_backdrop);
 
+            // The backdrop's own life (stars, the glowing pools on the ground) paints under the
+            // buildings; a building's fire, sparks and smoke paint over them.
+            _backFxLayer = new AmbienceLayer { name = "hub-back-fx" };
+            _canvas.Add(_backFxLayer);
+
             // Sprites below, buttons above: the art may overlap freely, while input stays on the tidy
             // rectangles HubContentTests keeps apart.
             _spriteLayer = new VisualElement { name = "hub-sprites", pickingMode = PickingMode.Ignore };
             Stretch(_spriteLayer);
             _canvas.Add(_spriteLayer);
+
+            _fxLayer = new AmbienceLayer { name = "hub-fx" };
+            _canvas.Add(_fxLayer);
 
             _lotLayer = new VisualElement { name = "hub-lots", pickingMode = PickingMode.Ignore };
             Stretch(_lotLayer);
@@ -113,6 +131,7 @@ namespace Assets.Scripts.Hub.UI
         {
             _spriteLayer.Clear();
             _lotLayer.Clear();
+            _fxLayer.ClearAll();
             _buttons.Clear();
             _sprites.Clear();
             _order.Clear();
@@ -134,6 +153,7 @@ namespace Assets.Scripts.Hub.UI
                     var art = MakeSprite(lot);
                     _sprites[lot.Key] = art;
                     _spriteLayer.Add(art);
+                    SetLotAmbience(lot.Key, lot.Frames, lot.FramesPerSecond, lot.Lights, lot.DrawRect.position);
 
                     var button = MakeLot(lot);
                     _buttons[lot.Key] = button;
@@ -233,6 +253,32 @@ namespace Assets.Scripts.Hub.UI
             }
         }
 
+        // --- ambience ---------------------------------------------------------------
+
+        /// <summary>
+        /// The backdrop's life: the glow every light paints with, the backdrop's own lights and the
+        /// twinkling stars (<see cref="AmbienceLayer"/>). Call before <see cref="SetTown"/>, which hands the
+        /// same glow to every lot's lights; calling again replaces it.
+        /// </summary>
+        public void SetBackdropAmbience(Sprite glow, IReadOnlyList<HubAmbientLight> lights, int stars, Rect starField)
+        {
+            _backFxLayer.ClearAll();
+            _backFxLayer.GlowSprite = glow;
+            _fxLayer.GlowSprite = glow;
+            _backFxLayer.SetGroup("backdrop", lights, Vector2.zero);
+            _backFxLayer.SetStars(stars, starField);
+        }
+
+        /// <summary>
+        /// A lot's idle loop and lights, replacing whatever it had. Null frames and lights clear it - an
+        /// unbuilt lot is still. <paramref name="origin"/> is the lot's DrawRect corner, which every
+        /// light's <see cref="HubAmbientLight.Point"/> is measured from.
+        /// </summary>
+        public void SetLotAmbience(string key, Sprite[] frames, float fps, IReadOnlyList<HubAmbientLight> lights, Vector2 origin)
+        {
+            _fxLayer.SetGroup(key, lights, origin, _sprites.TryGetValue(key, out var art) ? art : null, frames, fps);
+        }
+
         // --- state ----------------------------------------------------------------
 
         /// <summary>Swaps a lot's state class on both its button and its sprite. Every other state
@@ -272,6 +318,8 @@ namespace Assets.Scripts.Hub.UI
             }
 
             ApplySprite(art, sprite);
+            // The caller re-arms the loop (SetLotAmbience) for the lot's new state.
+            _fxLayer.StopFrames(key);
             if (_buttons.TryGetValue(key, out var button))
             {
                 ApplyArtMode(button, button.Q<Label>("hub-glyph-" + key), sprite != null);

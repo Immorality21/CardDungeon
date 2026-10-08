@@ -47,6 +47,10 @@ public class MainMenuManager : MonoBehaviour
         }
         _root = _document.rootVisualElement;
 
+        // The torches either side of the gate flicker (BackdropAmbienceSO). Presentation only - the
+        // title still reads no save.
+        Assets.Scripts.Hub.UI.BackdropAmbienceView.AttachTo(_root.Q<VisualElement>("bg"))?.Show("cd-bg--title");
+
         _titleView = _root.Q<VisualElement>("title-view");
         _optionsView = _root.Q<VisualElement>("options-view");
 

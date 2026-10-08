@@ -25,6 +25,37 @@ MonoBehaviour:
   AvailableSprite: {fileID: 21300000, guid: e2ab04e90dc34fe68147e4a7f02d3b2c, type: 3}
   LevelSprites:
   - {fileID: 21300000, guid: a82555602d954851b835fd3929d1877c, type: 3}
+  IdleFrames:
+  - {fileID: 21300000, guid: a82555602d954851b835fd3929d1877c, type: 3}
+  - {fileID: 21300000, guid: 184e8c0a40604f97859b1a9054db38db, type: 3}
+  - {fileID: 21300000, guid: eb7360c00c2b47f9a8c499762e1f6c25, type: 3}
+  - {fileID: 21300000, guid: abbecbf26b454b81986a7b639142e81b, type: 3}
+  - {fileID: 21300000, guid: 283dc493b2cd48e5929bc25bd6183251, type: 3}
+  - {fileID: 21300000, guid: 17de8b30d9414a498c07b3924a6b9414, type: 3}
+  - {fileID: 21300000, guid: 6a7c12b0bcc946919b780b1719f893cd, type: 3}
+  IdleFps: 7
+  Lights:
+  - Point: {x: 129, y: 135}
+    Radius: 72
+    Color: {r: 1, g: 0.5, b: 0.2, a: 1}
+    Intensity: 0.38
+    Flicker: 0.45
+    EmbersPerSecond: 1.2
+    SmokePerSecond: 0
+  - Point: {x: 72, y: 123}
+    Radius: 34
+    Color: {r: 1, g: 0.5, b: 0.2, a: 1}
+    Intensity: 0.3
+    Flicker: 0.35
+    EmbersPerSecond: 0
+    SmokePerSecond: 0
+  - Point: {x: 45, y: 9}
+    Radius: 0
+    Color: {r: 1, g: 0.5, b: 0.2, a: 1}
+    Intensity: 0
+    Flicker: 0
+    EmbersPerSecond: 0
+    SmokePerSecond: 1.4
   PlacedByDefault: 0
   MaxLevel: 3
   PlacementCost:

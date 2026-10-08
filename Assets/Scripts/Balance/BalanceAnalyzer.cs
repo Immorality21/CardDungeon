@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Enemies.Behaviors;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
@@ -1941,7 +1942,7 @@ namespace Assets.Scripts.Balance
             // designed for (EnemyFormation), so this fires however winnable the room is.
             foreach (var room in level.Rooms)
             {
-                float bodies = room.WorstCase != null ? room.WorstCase.TotalCount : 0f;
+                float bodies = room.WorstCase != null ? room.WorstCase.PlacedCount : 0f;
                 if (bodies <= rules.MaxBodiesPerRoom)
                 {
                     continue;
@@ -2789,6 +2790,30 @@ namespace Assets.Scripts.Balance
                     {
                         Asset = enemy,
                         Detail = ReactionDetail,
+                        Suggestion = "Read this enemy's danger off the simulation results, not the danger index."
+                    });
+                }
+
+                // The section 12 verbs the closed form only half prices: a cover's redirected blows are
+                // not priced at all, and a summoner's bodies are an estimate (EnemyBehaviorModel).
+                var actions = enemy != null && enemy.ResolvedBehavior != null ? enemy.ResolvedBehavior.Actions : null;
+                if (actions == null)
+                {
+                    continue;
+                }
+                bool hasGuard = actions.Exists(a => a != null && a.Kind == EnemyActionKind.Guard);
+                bool hasSummon = actions.Exists(a => a != null && a.Kind == EnemyActionKind.Summon);
+                if (hasGuard || hasSummon)
+                {
+                    string what = hasGuard && hasSummon ? "Guard and Summon" : hasGuard ? "Guard" : "Summon";
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Enemy,
+                        enemy.DisplayName, $"Its {what} action is only approximated by the danger index")
+                    {
+                        Asset = enemy,
+                        Detail = "The encounter and floor simulations run Guard and Summon for real. The closed form "
+                               + "prices a Guard turn as a turn that lands nothing (plus any brace), never the blows "
+                               + "its cover soaks, and prices a Summon by EnemyBehaviorModel.ExpectedSummons - the "
+                               + "bodies it is expected to call, as if they stood from the start.",
                         Suggestion = "Read this enemy's danger off the simulation results, not the danger index."
                     });
                 }

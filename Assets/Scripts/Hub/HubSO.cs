@@ -34,6 +34,23 @@ namespace Assets.Scripts.Hub
                  "enough to play against before any art exists.")]
         public Sprite Backdrop;
 
+        // --- ambience (presentation only; HubView draws it) ------------------------
+
+        [Tooltip("The soft light every HubAmbientLight paints with: a white glow, tinted per light.")]
+        public Sprite GlowSprite;
+
+        [Tooltip("The backdrop's own fires and lamps - the glowing pools painted on the ground - so they " +
+                 "flicker with the rest of the town. Points are in ReferenceSize pixels.")]
+        public List<HubAmbientLight> BackdropLights = new List<HubAmbientLight>();
+
+        [Tooltip("Stars that twinkle over the backdrop's sky, scattered at random (a fixed seed) inside " +
+                 "StarField. 0 for none.")]
+        [Min(0)]
+        public int TwinklingStars;
+
+        [Tooltip("Where the twinkling stars may sit, in ReferenceSize pixels - the sky above the horizon.")]
+        public Rect StarField = new Rect(0f, 0f, 1280f, 120f);
+
         public List<BuildingSO> Buildings = new List<BuildingSO>();
 
         /// <summary>The building with this save key, or null.</summary>

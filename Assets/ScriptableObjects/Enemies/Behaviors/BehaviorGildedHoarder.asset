@@ -27,6 +27,24 @@ MonoBehaviour:
     TargetStat: 1
     Magic: {fileID: 0}
     Conditions: []
+  - Label: Spill the hoard
+    Kind: 8
+    Priority: 15
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 0
+    Multiplier: 1
+    Power: 0
+    Duration: 3
+    TargetStat: 1
+    Magic: {fileID: 0}
+    Summons: {fileID: 11400000, guid: 2ad323473fd341edb4cff1ccae486514, type: 2}
+    SummonCount: 2
+    MaxUses: 1
+    Conditions: 
+    - Kind: 1
+      Value: 0.6
+      Stat: 1
   - Label: Signature
     Kind: 2
     Priority: 10

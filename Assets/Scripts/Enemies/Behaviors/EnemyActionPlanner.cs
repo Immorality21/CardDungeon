@@ -216,7 +216,7 @@ namespace Assets.Scripts.Enemies.Behaviors
             {
                 var entry = actions[i];
                 if (entry == null || !ConditionsHold(entry, self, context)
-                    || !HasSomewhereToLand(entry, self, context))
+                    || !HasSomewhereToLand(entry, i, self, context))
                 {
                     continue;
                 }
@@ -267,6 +267,12 @@ namespace Assets.Scripts.Enemies.Behaviors
                     return EnemyActionType.Debuff;
                 case EnemyActionKind.CastMagic:
                     return EnemyActionType.CastMagic;
+                case EnemyActionKind.BuffAlly:
+                    return EnemyActionType.BuffAlly;
+                case EnemyActionKind.Guard:
+                    return EnemyActionType.Guard;
+                case EnemyActionKind.Summon:
+                    return EnemyActionType.Summon;
                 default:
                     return EnemyActionType.Attack;
             }
@@ -320,7 +326,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                 }
             }
 
-            return HasSomewhereToLand(entry, self, context);
+            return HasSomewhereToLand(entry, index, self, context);
         }
 
         /// <summary>Whether one condition holds. Every kind here must be priceable by <c>EnemyBehaviorModel</c>.</summary>
@@ -361,10 +367,22 @@ namespace Assets.Scripts.Enemies.Behaviors
         }
 
         private static bool HasSomewhereToLand(
-            EnemyActionEntry entry, ICombatUnit self, EnemyCombatContext context)
+            EnemyActionEntry entry, int index, ICombatUnit self, EnemyCombatContext context)
         {
             switch (entry.Kind)
             {
+                case EnemyActionKind.BuffAlly:
+                    return BuffAllyTarget(entry, self, context) != null;
+
+                case EnemyActionKind.Guard:
+                    return CoverTarget(context) != null && HasLivingHero(context);
+
+                case EnemyActionKind.Summon:
+                    // Something to call, room on the stage for it, and uses left this fight.
+                    return entry.Summons != null
+                        && context.OpenSlots > 0
+                        && (!entry.IsLimited || context.UsesOf(index) < entry.MaxUses);
+
                 case EnemyActionKind.Heal:
                     return MostWoundedAlly(self, context) != null;
 
@@ -485,6 +503,36 @@ namespace Assets.Scripts.Enemies.Behaviors
                     };
                 }
 
+                case EnemyActionKind.BuffAlly:
+                    return new EnemyDecision
+                    {
+                        Type = EnemyActionType.BuffAlly,
+                        Target = BuffAllyTarget(entry, self, context),
+                        Amount = entry.Power,
+                        Duration = entry.Duration,
+                        DebuffStat = entry.TargetStat,
+                        EntryIndex = index
+                    };
+
+                case EnemyActionKind.Guard:
+                    return new EnemyDecision
+                    {
+                        Type = EnemyActionType.Guard,
+                        Target = CoverTarget(context),
+                        Amount = entry.Power,
+                        Duration = entry.Duration,
+                        EntryIndex = index
+                    };
+
+                case EnemyActionKind.Summon:
+                    return new EnemyDecision
+                    {
+                        Type = EnemyActionType.Summon,
+                        SummonDefinition = entry.Summons,
+                        SummonCount = Mathf.Clamp(entry.SummonCount, 1, Mathf.Max(1, context.OpenSlots)),
+                        EntryIndex = index
+                    };
+
                 default:
                     return Swing(self, context, rolls, entry.Multiplier, index);
             }
@@ -534,6 +582,34 @@ namespace Assets.Scripts.Enemies.Behaviors
                 candidates.Add(self);
             }
             return EnemyTargeting.MostWounded(candidates);
+        }
+
+        /// <summary>
+        /// Who a <see cref="EnemyActionKind.BuffAlly"/> lands on: the hardest hitter on its side, itself
+        /// included, that does not already carry a positive buff on the stat - so a shaman hastes the
+        /// boss rather than itself, and re-buffs nobody who is still buffed.
+        /// </summary>
+        public static ICombatUnit BuffAllyTarget(EnemyActionEntry entry, ICombatUnit self, EnemyCombatContext context)
+        {
+            var candidates = new List<ICombatUnit>();
+            if (context.Allies != null)
+            {
+                candidates.AddRange(context.Allies);
+            }
+            if (self != null)
+            {
+                candidates.Add(self);
+            }
+            return EnemyTargeting.StrongestWithoutBuff(candidates, context.BuffTracker, entry.TargetStat);
+        }
+
+        /// <summary>
+        /// Who a <see cref="EnemyActionKind.Guard"/> covers: the most wounded ally nobody covers yet,
+        /// the frailest when all are whole. Never itself - a guard covering itself is a wasted turn.
+        /// </summary>
+        public static ICombatUnit CoverTarget(EnemyCombatContext context)
+        {
+            return EnemyTargeting.CoverCandidate(context.Allies, context.Guards);
         }
 
         private static bool HasLivingHero(EnemyCombatContext context)

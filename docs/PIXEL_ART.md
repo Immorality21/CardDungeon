@@ -329,6 +329,20 @@ sitting: **2 candidates each with `create_image_pixflux` (64×64, the campfire 9
 - **Draw at a whole multiple.** The placeholders drew 64 px art at 200×190 (3.1×, uneven pixels);
   the new rects are exactly 3×. The backdrop is 4×, which is close enough to read as one world.
 
+## 8d. Hub idle loops — what the 2026-10-08 pass learned
+
+The campfire and forge animated with `animate_image` from the shipped PNG (passed inline as a
+`data:` URL - both are under 6 KB), `frame_count=6`, seeds 7301 / 7302, 1 generation each.
+
+- **Describe what must stay still**: *"... logs and stones stay completely still"* /
+  *"building stays completely still"*. The forge came back with only the door and windows moving.
+- **Even so, check outside the moving part.** The campfire's generated frames lightened the stone ring
+  slightly (a handful of pixels outside the flame), which would flicker the ring. The fix that keeps
+  the art exact: paste only the flame's box from each generated frame onto the original
+  (`box=(34,0,63,37)` on the 96x64 sprite) - measure where frames differ from frame 0 first.
+- **Smoke, sparks and glow are code, not frames** (`AmbienceLayer`): the model did not draw chimney
+  smoke when asked, and code effects can spill outside the sprite's box.
+
 ## 9. Unused designs
 
 Every generation is kept in the PixelLab gallery. The armoured-guardian Warden candidate became the

@@ -30,6 +30,21 @@ MonoBehaviour:
     - Kind: 1
       Value: 0.4
       Stat: 1
+  - Label: War chant
+    Kind: 6
+    Priority: 12
+    Weight: 1
+    ChanceGate: 0.35
+    Telegraphed: 0
+    Multiplier: 1
+    Power: 2
+    Duration: 3
+    TargetStat: 1
+    Magic: {fileID: 0}
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
+    Conditions: []
   - Label: Mend an ally
     Kind: 3
     Priority: 10

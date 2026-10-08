@@ -40,9 +40,12 @@ namespace Assets.Scripts.Cards.Effects
 
                 // A guarded unit's blows land on its guard (a mech its rider, GuardTable). When the
                 // guard is a target of this same effect it is struck on its own, so a blast that
-                // reaches both does not hit the mech twice.
+                // reaches both does not hit the mech twice. An enemy's cover only intercepts
+                // single-target blows, so an area effect reaches the covered unit (GuardTable).
                 var guards = _events?.Invoke()?.Guards;
-                var target = guards != null ? guards.Redirect(aimed) : aimed;
+                var target = guards == null
+                    ? aimed
+                    : targets.Count > 1 ? guards.RedirectAreaHit(aimed) : guards.Redirect(aimed);
                 if (!ReferenceEquals(target, aimed) && targets.Contains(target))
                 {
                     continue;

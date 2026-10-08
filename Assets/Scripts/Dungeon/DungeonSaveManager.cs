@@ -67,7 +67,7 @@ namespace Assets.Scripts.Dungeon
                 {
                     RoomIndex = room.RoomIndex,
                     IsExplored = room.IsExplored,
-                    EnemyCount = room.Enemies.Count(e => e != null && e.IsAlive),
+                    EnemyCount = room.Enemies.Count(e => e != null && e.IsAlive && !e.IsSummoned),
                     EventConsumed = room.EventConsumed,
                     EventKey = room.RoomEvent != null ? room.RoomEvent.SaveKey : null,
                     EventOptionIndex = room.EventOptionIndex,

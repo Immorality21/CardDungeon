@@ -52,6 +52,7 @@ namespace Assets.Scripts.Hub
         private VisualElement _hubScrim;
         private VisualElement _campaignView;
         private VisualElement _backdrop;
+        private BackdropAmbienceView _backdropFx;
         private VisualElement _progressView;
         private VisualElement _completeView;
         private VisualElement _merchantView;
@@ -196,6 +197,8 @@ namespace Assets.Scripts.Hub
             _hubScrim = root.Q<VisualElement>("hub-scrim");
             _campaignView = root.Q<VisualElement>("campaign-view");
             _backdrop = root.Q<VisualElement>("bg");
+            // The backdrops' torches and lanterns (BackdropAmbienceSO); RefreshBackdrop picks which.
+            _backdropFx = BackdropAmbienceView.AttachTo(_backdrop);
             _progressView = root.Q<VisualElement>("progress-view");
             _completeView = root.Q<VisualElement>("complete-view");
             _merchantView = root.Q<VisualElement>("merchant-view");
@@ -336,6 +339,8 @@ namespace Assets.Scripts.Hub
                 return;
             }
 
+            // The backdrop's life first: it also hands the view the glow every lot's light paints with.
+            _town.SetBackdropAmbience(_hub.GlowSprite, _hub.BackdropLights, _hub.TwinklingStars, _hub.StarField);
             var lots = new List<HubView.LotInfo>();
             HubPresenter.BuildViewModel(_hub, Progress(), lots);
             _town.SetTown(_hub.ReferenceSize, _hub.Backdrop, lots);
@@ -771,6 +776,10 @@ namespace Assets.Scripts.Hub
             // here, on a confirmed build, which is why a build is confirmed in the hub at all.
             var after = Progress();
             _town.SetLotSprite(_selectedLot.SaveKey, BuildingOps.SpriteFor(_selectedLot, after), phaseIn: true);
+            // A built fire starts burning (and an upgraded one keeps burning): the loop and the lights
+            // follow the lot's new state.
+            _town.SetLotAmbience(_selectedLot.SaveKey, BuildingOps.FramesFor(_selectedLot, after), _selectedLot.IdleFps,
+                BuildingOps.LightsFor(_selectedLot, after), BuildingOps.DrawRect(_selectedLot).position);
             _town.SetLotState(_selectedLot.SaveKey,
                 HubPresenter.StateClass(BuildingOps.StateOf(_selectedLot, after)));
             _town.SetLotBadge(_selectedLot.SaveKey, BadgeWithNews(_selectedLot, after));
@@ -970,6 +979,9 @@ namespace Assets.Scripts.Hub
             }
             SetClass(_backdrop, "cd-bg--level-entry", IsShown(_progressView));
             SetClass(_backdrop, "cd-bg--story-map", IsShown(_campaignView));
+            _backdropFx?.Show(IsShown(_progressView) ? "cd-bg--level-entry"
+                : IsShown(_campaignView) ? "cd-bg--story-map"
+                : null);
         }
 
         private static void SetClass(VisualElement element, string className, bool on)

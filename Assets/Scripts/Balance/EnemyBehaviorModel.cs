@@ -113,6 +113,21 @@ namespace Assets.Scripts.Balance
         public const float LowHealthOccupancy = 0.25f;
 
         /// <summary>
+        /// Turns a summoner is expected to take before it dies, for pricing a Summon in closed form.
+        ///
+        /// <para>A body called in mid-fight makes the party's time-to-kill recursive (§12), which a
+        /// closed form cannot solve. So a summoner is credited with <c>claim × this</c> uses, capped by
+        /// the action's <c>MaxUses</c>, and every body it calls is priced as if it stood from the start.
+        /// Both halves lean pessimistic - late arrivals act less than that - which is the side the owner
+        /// prefers the model to err on. The floor simulation runs the real thing; read it before tuning
+        /// a summoner off this number.</para>
+        /// </summary>
+        public const float SummonerTurnsPerFight = 3f;
+
+        /// <summary>A Summon with no <c>MaxUses</c> limit is priced as this many uses.</summary>
+        public const int UnlimitedSummonUses = 2;
+
+        /// <summary>
         /// Prices a behaviour. <paramref name="castMultiplier"/> is the expected damage of one cast
         /// expressed in the same multiples-of-a-swing currency, so casting folds into the one number
         /// instead of being blended on afterwards.
@@ -129,65 +144,7 @@ namespace Assets.Scripts.Balance
                 return profile;
             }
 
-            // Availability per entry: its gate times the share of turns its conditions hold.
-            var available = new float[actions.Count];
-            for (int i = 0; i < actions.Count; i++)
-            {
-                var entry = actions[i];
-                if (entry == null)
-                {
-                    continue;
-                }
-                float gate = entry.ChanceGate > 0f ? entry.ChanceGate : 1f;
-                available[i] = gate * Occupancy(entry);
-            }
-
-            // Selection is a priority cascade: the top tier takes the turn whenever *any* of its
-            // entries is available, and what it leaves passes down. Independence across entries is an
-            // approximation - two entries gated on opposite sides of a health threshold are really
-            // exclusive - and it is why this is a model rather than a simulation.
-            var claims = new float[actions.Count];
-            float remaining = 1f;
-
-            foreach (int priority in DescendingPriorities(actions))
-            {
-                if (remaining <= 0f)
-                {
-                    break;
-                }
-
-                float noneAvailable = 1f;
-                float weighted = 0f;
-                for (int i = 0; i < actions.Count; i++)
-                {
-                    if (actions[i] == null || actions[i].Priority != priority || available[i] <= 0f)
-                    {
-                        continue;
-                    }
-                    noneAvailable *= 1f - Mathf.Clamp01(available[i]);
-                    weighted += WeightOf(actions[i]) * available[i];
-                }
-
-                float tierShare = remaining * (1f - noneAvailable);
-                if (tierShare <= 0f || weighted <= 0f)
-                {
-                    continue;
-                }
-
-                for (int i = 0; i < actions.Count; i++)
-                {
-                    if (actions[i] == null || actions[i].Priority != priority || available[i] <= 0f)
-                    {
-                        continue;
-                    }
-                    claims[i] += tierShare * (WeightOf(actions[i]) * available[i] / weighted);
-                }
-
-                remaining -= tierShare;
-            }
-
-            // Anything unclaimed is the planner's fallback swing.
-            float fallback = Mathf.Max(0f, remaining);
+            var claims = ClaimsOf(actions, out float fallback);
 
             // A telegraphed action costs *two* turns for one payload: the wind-up and the delivery. So
             // a decision turn is worth more than one turn of the clock, and everything below is
@@ -253,6 +210,42 @@ namespace Assets.Scripts.Balance
                         });
                         break;
 
+                    case EnemyActionKind.BuffAlly:
+                        // The buff lands on someone on its side - usually the hardest hitter. A
+                        // per-enemy closed form cannot see who, so it is credited to this enemy's own
+                        // stats, the approximation the floor simulation corrects.
+                        profile.IdleShare += claim;
+                        profile.StatShifts.Add(new StatShift
+                        {
+                            Stat = entry.TargetStat,
+                            Power = entry.Power,
+                            Uptime = Uptime(claim, entry.Duration),
+                            OnHeroSide = false
+                        });
+                        break;
+
+                    case EnemyActionKind.Guard:
+                        // What the cover is worth - the party's blows wasted on a tougher body - is
+                        // not priced (the analyzer says so); only the guard's own brace is.
+                        profile.IdleShare += claim;
+                        if (entry.Power > 0)
+                        {
+                            profile.StatShifts.Add(new StatShift
+                            {
+                                Stat = StatType.Endurance,
+                                Power = entry.Power,
+                                Uptime = Uptime(claim, entry.Duration),
+                                OnHeroSide = false
+                            });
+                        }
+                        break;
+
+                    case EnemyActionKind.Summon:
+                        // The turn lands nothing; the bodies it calls are priced into the room
+                        // (WeightedEnemyGroup, through ExpectedSummons).
+                        profile.IdleShare += claim;
+                        break;
+
                     case EnemyActionKind.CastMagic:
                         damage += claim * castMultiplier;
                         profile.CastShare += claim;
@@ -271,6 +264,113 @@ namespace Assets.Scripts.Balance
             profile.Claims = claims;
             profile.TurnsPerDecision = turnsPerDecision;
             return profile;
+        }
+
+        /// <summary>
+        /// Share of turns each authored action is chosen, parallel to <paramref name="actions"/>, and
+        /// the share nothing claims (the planner's fallback swing). The selection maths every price here
+        /// is drawn from.
+        /// </summary>
+        public static float[] ClaimsOf(IList<EnemyActionEntry> actions, out float fallback)
+        {
+            fallback = 1f;
+            if (actions == null || actions.Count == 0)
+            {
+                return new float[0];
+            }
+
+            // Availability per entry: its gate times the share of turns its conditions hold.
+            var available = new float[actions.Count];
+            for (int i = 0; i < actions.Count; i++)
+            {
+                var entry = actions[i];
+                if (entry == null)
+                {
+                    continue;
+                }
+                float gate = entry.ChanceGate > 0f ? entry.ChanceGate : 1f;
+                available[i] = gate * Occupancy(entry);
+            }
+
+            // Selection is a priority cascade: the top tier takes the turn whenever *any* of its
+            // entries is available, and what it leaves passes down. Independence across entries is an
+            // approximation - two entries gated on opposite sides of a health threshold are really
+            // exclusive - and it is why this is a model rather than a simulation.
+            var claims = new float[actions.Count];
+            float remaining = 1f;
+
+            foreach (int priority in DescendingPriorities(actions))
+            {
+                if (remaining <= 0f)
+                {
+                    break;
+                }
+
+                float noneAvailable = 1f;
+                float weighted = 0f;
+                for (int i = 0; i < actions.Count; i++)
+                {
+                    if (actions[i] == null || actions[i].Priority != priority || available[i] <= 0f)
+                    {
+                        continue;
+                    }
+                    noneAvailable *= 1f - Mathf.Clamp01(available[i]);
+                    weighted += WeightOf(actions[i]) * available[i];
+                }
+
+                float tierShare = remaining * (1f - noneAvailable);
+                if (tierShare <= 0f || weighted <= 0f)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < actions.Count; i++)
+                {
+                    if (actions[i] == null || actions[i].Priority != priority || available[i] <= 0f)
+                    {
+                        continue;
+                    }
+                    claims[i] += tierShare * (WeightOf(actions[i]) * available[i] / weighted);
+                }
+
+                remaining -= tierShare;
+            }
+
+            // Anything unclaimed is the planner's fallback swing.
+            fallback = Mathf.Max(0f, remaining);
+            return claims;
+        }
+
+        /// <summary>
+        /// Every body a behaviour is expected to call into one fight, per summoner: the enemy and how
+        /// many of it. See <see cref="SummonerTurnsPerFight"/> for what the estimate assumes.
+        /// </summary>
+        public static List<KeyValuePair<EnemySO, float>> ExpectedSummons(EnemyBehaviorSO behavior)
+        {
+            var result = new List<KeyValuePair<EnemySO, float>>();
+            var actions = behavior != null ? behavior.Actions : null;
+            if (actions == null || actions.Count == 0)
+            {
+                return result;
+            }
+
+            var claims = ClaimsOf(actions, out _);
+            for (int i = 0; i < actions.Count; i++)
+            {
+                var entry = actions[i];
+                if (entry == null || entry.Kind != EnemyActionKind.Summon || entry.Summons == null || claims[i] <= 0f)
+                {
+                    continue;
+                }
+                int cap = entry.MaxUses > 0 ? entry.MaxUses : UnlimitedSummonUses;
+                float uses = Mathf.Min(cap, claims[i] * SummonerTurnsPerFight);
+                float bodies = Mathf.Min(uses * Mathf.Max(1, entry.SummonCount), Combat.EnemyFormation.DesignMax - 1);
+                if (bodies > 0f)
+                {
+                    result.Add(new KeyValuePair<EnemySO, float>(entry.Summons, bodies));
+                }
+            }
+            return result;
         }
 
         /// <summary>

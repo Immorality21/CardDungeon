@@ -269,6 +269,29 @@ classes** (`hub-lot--available` …); `.hub-art.hub-lot--*` clears their slab ba
 box paints behind the sprite. The `hub-*` classes live at the end of
 `Assets/UI/Theme/CardDungeon.uss` — but **before** `.cd-nav--selected`, which must stay last.
 
+### Ambience — the town is alive *(2026-10-08)*
+
+Presentation only; nothing else reads it.
+
+- **`BuildingSO.IdleFrames` + `IdleFps`** play in place of a *built* lot's sprite (`BuildingOps.FramesFor`
+  - only when built, and only author them for a lot whose level sprites are all the same art). The
+  campfire and forge have 7-frame PixelLab loops (`bld_campfire_1..6.png`, `bld_forge_1..6.png`, frame 0
+  the original).
+- **`HubAmbientLight`** (`BuildingSO.Lights`, `HubSO.BackdropLights`): a point in design pixels (from the
+  lot's DrawRect corner, or the town's), a glow (`Radius`, `Color`, `Intensity`, `Flicker`) and optional
+  `EmbersPerSecond` / `SmokePerSecond`. `HubSO.TwinklingStars` + `StarField` scatter stars over the sky.
+- **`UI/AmbienceLayer`** draws all of it: the glow is `fx_glow.png` (a stepped, pixel-art radial, tinted per
+  light), sparks and smoke are one-backdrop-pixel squares snapped to the 4x grid, and one scheduled tick
+  (50 ms) drives everything. The maths is pure in **`HubAmbience`** (`HubAmbienceTests`): flicker is two
+  octaves of Perlin noise per light, never a random value per frame (a strobe). `HubView` has two layers -
+  the backdrop's under the buildings, the lots' over them - and `SetLotAmbience` re-arms a lot after a
+  build. Capped at 90 particles.
+- **Menu backdrops** (`.cd-bg--title / --level-entry / --story-map`): `UI/BackdropAmbienceView` lays an
+  `AmbienceLayer` on a canvas the image's size x4 and cover-scales it exactly as
+  `scale-and-crop` scales the image, so a glow stays on its torch at any window size. Data:
+  `Resources/BackdropAmbience.asset` (`BackdropAmbienceSO`), keyed by the backdrop class.
+  `HubManager.RefreshBackdrop` and `MainMenuManager.Start` attach and switch it.
+
 ## UI Toolkit (this is how all game UI works)
 
 All UI is **UI Toolkit** (UXML + USS), not uGUI. The pattern, used identically by every screen:

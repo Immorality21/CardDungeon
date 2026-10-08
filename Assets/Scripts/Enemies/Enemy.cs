@@ -68,6 +68,27 @@ namespace Assets.Scripts.Enemies
         // (e.g. the boss's signature move). Reset per combat; not persisted.
         [System.NonSerialized] public int TurnsTaken;
 
+        /// <summary>
+        /// Uses of each limited authored action this fight (a Summon's <c>MaxUses</c>), by index into
+        /// <see cref="Behavior"/>'s Actions. Reset per combat; not persisted.
+        /// </summary>
+        [System.NonSerialized] public readonly Dictionary<int, int> ActionUses = new Dictionary<int, int>();
+
+        /// <summary>
+        /// True for a body another enemy called into a fight (a Summon action). It pays nothing when it
+        /// dies - no XP, gold or loot - so a summoner cannot be farmed, and it is not part of the room the
+        /// dungeon save counts.
+        /// </summary>
+        [System.NonSerialized] public bool IsSummoned;
+
+        /// <summary>Fresh per-combat runtime state: cadence, telegraph and limited-action counts.</summary>
+        public void ResetForCombat()
+        {
+            TurnsTaken = 0;
+            ClearCharge();
+            ActionUses.Clear();
+        }
+
         /// <summary>The definition this enemy was spawned from (set by <see cref="Initialize"/>).</summary>
         public EnemySO Definition { get; private set; }
 
@@ -90,10 +111,10 @@ namespace Assets.Scripts.Enemies
         public LevelEnemyTuning Tuning { get; private set; }
 
         /// <summary>XP this kill pays, after the level's tuning (a revisit's Fear level rides on it).</summary>
-        public int XpReward => LevelEnemyTuning.XpFor(Definition, Tuning);
+        public int XpReward => IsSummoned ? 0 : LevelEnemyTuning.XpFor(Definition, Tuning);
 
         /// <summary>Gold this kill pays, after the level's tuning (a revisit's Fear level rides on it).</summary>
-        public int GoldReward => LevelEnemyTuning.GoldFor(Definition, Tuning);
+        public int GoldReward => IsSummoned ? 0 : LevelEnemyTuning.GoldFor(Definition, Tuning);
 
         /// <summary>
         /// Multiplier on the base Power of anything this enemy casts, so its magic escalates across

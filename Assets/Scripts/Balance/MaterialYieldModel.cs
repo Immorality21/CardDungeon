@@ -57,7 +57,8 @@ namespace Assets.Scripts.Balance
 
                 foreach (var member in room.Expected.Members)
                 {
-                    if (member == null || member.Definition == null || member.Definition.LootTable == null)
+                    // A called-in body drops nothing (CombatManager.HandleEnemyDeath).
+                    if (member == null || member.IsSummoned || member.Definition == null || member.Definition.LootTable == null)
                     {
                         continue;
                     }

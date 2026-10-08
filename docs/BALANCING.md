@@ -2732,3 +2732,28 @@ this**, because it changes the strongest party's composition, not just its size.
 
 Not done: the floor simulator was not run over the new March numbers; a playtest of the
 Threshold → Archive → March opening should come first.
+
+## §5ae — Support verbs on three enemies, measured (2026-10-08)
+
+`COMBAT_DEPTH.md` §12: BuffAlly (Bog Shaman's **War chant**, +2 STR for 3 turns, 35% of turns), Guard
+(Steam Automaton's **Shield an ally**, 40% of non-wind-up turns, +3 END brace) and Summon (Gilded
+Hoarder's **Spill the hoard**, two Gilded Motes once under 60%). Floor simulations (Adaptive policy)
+and the analyzer, before and after the content, the code already in:
+
+| floor | wipe before → after | closed-form attrition |
+|---|---|---|
+| every floor except the two below | unchanged | within ±0.02 |
+| The Warrens / The Counting Room (Hoarder) | 1.00 → 1.00 | 4.36 → 4.59 |
+| The Hollow Vault | 1.00 → 1.00 | 14.96 → 15.44 |
+| analyzer | 7 critical / 223 warning → 7 / 221 | |
+
+- **Nothing moved a wipe rate.** The Counting Room was already a 100% wipe in the sim *before* this
+  change (a pre-existing finding, not caused here); the Hoarder's Motes raise its closed-form attrition
+  by ~5% because `ExpectedSummons` prices called bodies as if present from the start.
+- **The Shaman's buff reads as cheaper than before** in closed form (March floors -0.01/-0.02): a BuffAlly
+  turn is an idle turn credited as a self stat shift, and the Shaman's own Strength matters little. The
+  floor sim is the honest number - read it, not the danger index, for a support enemy.
+- **Found in play: a healer starves a health-gated summon.** In the sandbox (`Sandbox/EnemyVerbs`) the
+  Shaman's mend kept lifting the Hoarder back over 60%, so Spill never fired until the Shaman was dead.
+  Not a bug - killing the healer first is the counterplay - but a condition on `SelfHealthBelow` beside
+  an enemy healer fires far later than its occupancy (0.25) assumes.

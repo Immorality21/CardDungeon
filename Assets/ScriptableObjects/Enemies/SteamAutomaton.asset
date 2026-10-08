@@ -42,7 +42,7 @@ MonoBehaviour:
   GoldReward: 8
   AttackDamageType: 0
   Archetype: 1
-  Behavior: {fileID: 11400000, guid: 4e488eb6f46ea754c8935d9ba246b19c, type: 2}
+  Behavior: {fileID: 11400000, guid: 271d54c587f44d7cafbff1fe2e204314, type: 2}
   Spells: []
   Resistances:
   - DamageType: 1

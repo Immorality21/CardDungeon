@@ -110,11 +110,13 @@ EnemyBehaviorSO
 
 EnemyActionEntry
   Kind          Attack | HeavyAttack | AoeAttack | Heal | Debuff | CastMagic
+                | BuffAlly | Guard | Summon   (2026-10-08, COMBAT_DEPTH §12)
   Priority      higher tiers pre-empt lower ones entirely
   Weight        relative likelihood within a tier
   ChanceGate    independent chance the entry is considered at all (0 = no gate)
   Telegraphed   spend a turn winding up, then deliver (Heavy/Aoe only)
   Multiplier / Power / Duration / TargetStat / Magic
+  Summons / SummonCount / MaxUses   (Summon only)
   Conditions    every one must hold
 ```
 
@@ -141,6 +143,28 @@ is winding up no longer says what it is about to deliver.
 form — every danger and attrition number in the project comes from that — so a condition the analyzer
 cannot reason about would silently opt an enemy out of being measured. **Adding a member means
 teaching `EnemyBehaviorModel` its expected occupancy in the same change.**
+
+### The support verbs: BuffAlly, Guard, Summon *(2026-10-08)*
+
+- **BuffAlly** - `+Power` on `TargetStat` for `Duration` turns, on the hardest hitter of its side
+  (itself included) not already buffed on that stat (`EnemyTargeting.StrongestWithoutBuff`). Nobody
+  left to buff means it falls through. The Bog Shaman's **War chant**.
+- **Guard** - covers an ally until **its own next turn** (`GuardTable.Cover`; `CombatEvents` expires it on
+  the guard's `TurnStarted`): the most wounded ally nobody covers yet, the frailest when all are whole
+  (`EnemyTargeting.CoverCandidate`). Only single-target blows are taken over - an area attack still
+  reaches the covered unit, which is the player's answer besides killing the guard. `Power` > 0 braces
+  the guard with that much Endurance for `Duration`. A lone enemy cannot guard. The Steam Automaton's
+  **Shield an ally**.
+- **Summon** - calls `SummonCount` of `Summons`, at most `MaxUses` times a fight (0 = unlimited), never
+  past `EnemyFormation.DesignMax` living enemies (`EnemyCombatContext.OpenSlots`). Uses are counted on
+  `Enemy.ActionUses` / `SimUnit.ActionUses`, reset by `Enemy.ResetForCombat`. **A called body
+  (`Enemy.IsSummoned`) pays nothing** - no XP, gold or loot - so a summoner cannot be farmed, and the
+  dungeon save does not count it. The Gilded Hoarder's **Spill the hoard** (two Gilded Motes, once,
+  below 60% health).
+- **Pricing**: BuffAlly and a Guard's brace are stat shifts on the enemy side; a cover's soaked blows
+  are not priced; a Summon's bodies are added to the room as summoned members of `WeightedEnemyGroup`
+  (`EnemyBehaviorModel.ExpectedSummons`, pessimistic). The simulator runs all three for real, and
+  `EvaluateUnpricedMechanics` reports Guard/Summon users as an Info. Tests: `EnemyVerbTests`.
 
 ### Presets — duplicate one to make a variant
 

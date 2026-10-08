@@ -20,6 +20,14 @@ namespace Assets.Scripts.Combat
         /// <summary>Who is shielding whom in this fight (a mech its rider). Lives with the stream so
         /// the live fight and the simulator share it, and goes with the fight.</summary>
         public GuardTable Guards { get; } = new GuardTable();
+
+        public CombatEvents()
+        {
+            // An enemy's cover lasts until its guard's next turn. Both loops raise TurnStarted, so
+            // expiring it here keeps the live fight and the simulator on one rule - including a guard
+            // whose turn is skipped by a freeze, whose turn still opened.
+            Subscribe<TurnStarted>(e => Guards.ExpireCovers(e.Unit));
+        }
     }
 
     // ------------------------------------------------------------------ the events themselves

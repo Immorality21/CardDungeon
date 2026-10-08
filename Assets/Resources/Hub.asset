@@ -15,6 +15,36 @@ MonoBehaviour:
   DisplayName: Camp
   ReferenceSize: {x: 1280, y: 720}
   Backdrop: {fileID: 21300000, guid: b83480fb5872489a9fbaaf4ac7657fc7, type: 3}
+  GlowSprite: {fileID: 21300000, guid: 281f8d0f542c4a01ace978226a36c529, type: 3}
+  BackdropLights:
+  - Point: {x: 664, y: 308}
+    Radius: 64
+    Color: {r: 1, g: 0.66, b: 0.32, a: 1}
+    Intensity: 0.3
+    Flicker: 0.5
+    EmbersPerSecond: 0
+    SmokePerSecond: 0
+  - Point: {x: 944, y: 392}
+    Radius: 64
+    Color: {r: 1, g: 0.66, b: 0.32, a: 1}
+    Intensity: 0.3
+    Flicker: 0.5
+    EmbersPerSecond: 0
+    SmokePerSecond: 0
+  - Point: {x: 272, y: 572}
+    Radius: 56
+    Color: {r: 1, g: 0.66, b: 0.32, a: 1}
+    Intensity: 0.3
+    Flicker: 0.5
+    EmbersPerSecond: 0
+    SmokePerSecond: 0
+  TwinklingStars: 16
+  StarField:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1280
+    height: 90
   Buildings:
   - {fileID: 11400000, guid: 46d36611b76987e4992a9229428d457e, type: 2}
   - {fileID: 11400000, guid: 414b75d33d3e803459329127c6704f01, type: 2}

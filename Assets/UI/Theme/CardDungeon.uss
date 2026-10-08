@@ -3597,6 +3597,26 @@
     scale: 0.82 0.82;
 }
 
+/* The town's living lights (HubView ambience, HubAmbience for the maths). Sizes and positions
+   come from code; these only say what each thing looks like. A glow is the stepped fx_glow
+   sprite tinted per light, a spark one backdrop pixel of colour, smoke a grey square that grows.
+   Opacity is driven every tick, so none of these may carry a transition. */
+.hub-fx-glow {
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.hub-fx-ember {
+    background-color: rgb(255, 200, 120);
+}
+
+.hub-fx-smoke {
+    background-color: rgb(176, 168, 190);
+}
+
+.hub-fx-star {
+    background-color: rgb(235, 232, 255);
+}
+
 .hub-lot {
     background-color: var(--cd-stone);
     border-width: 2px;
