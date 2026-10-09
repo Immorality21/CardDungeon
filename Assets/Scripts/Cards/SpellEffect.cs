@@ -41,6 +41,26 @@ namespace Assets.Scripts.Cards
         public int UnlockLevel = 0;
 
         /// <summary>
+        /// Percent chance a <see cref="SpellEffectType.Debuff"/> takes hold, rolled once per target
+        /// through <see cref="AfflictionRules"/> - every debuff, a stat cut and a status alike, so a
+        /// Silence, a Blind or a Poison is a likely outcome rather than a certainty. 100 (the
+        /// default, and what every asset authored before the field reads as) always lands. Ignored
+        /// by every other effect type: a buff on your own side is not a gamble.
+        /// </summary>
+        [UnityEngine.Range(1, 100)]
+        public int ApplyChance = AfflictionRules.Certain;
+
+        /// <summary>
+        /// A field-for-field copy, for the places that adjust an authored effect before it resolves
+        /// (an upgrade bonus, a summon's grid upgrades). Copying by hand dropped a field each time
+        /// one was added - <see cref="ScalingStat"/> once, which silently made upgraded spells weaker.
+        /// </summary>
+        public SpellEffect Clone()
+        {
+            return (SpellEffect)MemberwiseClone();
+        }
+
+        /// <summary>
         /// A physical hit: damage scaled off a physical stat (Strength, Agility), which Endurance
         /// defends and Luck can dodge. Magic (Intelligence/Spirit), flat and percentage damage are
         /// not. See <see cref="DefenseRules"/>.

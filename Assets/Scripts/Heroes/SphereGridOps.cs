@@ -453,6 +453,21 @@ namespace Assets.Scripts.Heroes
                 granted.Add(new KeyValuePair<string, int>(node.GrantedMagicKey, charges));
             }
 
+            // Charges bought on the grid (a MagicUpgrade node) are part of the run allowance, so they
+            // ride with what the hero knows: every reader of charges - the loadout, a run's slots, the
+            // hub and the balance model - gets them without asking separately. Applied before the
+            // awakening below, which keeps the base's charges.
+            var upgrades = AbilityUpgradesForNodes(grid, activated);
+            for (int i = 0; i < granted.Count; i++)
+            {
+                AbilityGrant upgrade;
+                if (upgrades.TryGetValue(granted[i].Key, out upgrade) && upgrade.ChargeBonus != 0)
+                {
+                    granted[i] = new KeyValuePair<string, int>(granted[i].Key,
+                        Mathf.Max(1, granted[i].Value + upgrade.ChargeBonus));
+                }
+            }
+
             // An awakened ability takes its base's place - same position, same charges - so the
             // loadout's auto-fill and the slot it sat in are unchanged by the upgrade.
             foreach (var pair in AwakeningsForNodes(grid, activated))
@@ -504,6 +519,59 @@ namespace Assets.Scripts.Heroes
         /// the grid's shape normally guarantees that (upgrades hang past the summon), and this makes
         /// it a rule rather than a layout accident. Two nodes teaching the same summon teach it once.
         /// </summary>
+        /// <summary>
+        /// Every ability the activated <see cref="SphereNodeKind.MagicUpgrade"/> nodes deepen, keyed by
+        /// ability, each with every upgrade bought for it summed. An upgrade bought for a base ability
+        /// is listed under its awakening too, so buying the awakening never takes it away. Includes
+        /// abilities the hero does not know (a re-authored grid can leave one so); nothing asks for those.
+        /// </summary>
+        public static Dictionary<string, AbilityGrant> AbilityUpgradesForNodes(SphereGridSO grid, IEnumerable<string> activated)
+        {
+            var grants = new Dictionary<string, AbilityGrant>();
+            if (grid == null || grid.Nodes == null)
+            {
+                return grants;
+            }
+
+            var owned = ActiveNodes(grid, activated);
+            foreach (var node in grid.Nodes)
+            {
+                if (node == null || node.Kind != SphereNodeKind.MagicUpgrade
+                    || string.IsNullOrEmpty(node.GrantedMagicKey) || !owned.Contains(node.Key))
+                {
+                    continue;
+                }
+                AbilityGrant grant;
+                if (!grants.TryGetValue(node.GrantedMagicKey, out grant))
+                {
+                    grant = new AbilityGrant { Key = node.GrantedMagicKey };
+                    grants[node.GrantedMagicKey] = grant;
+                }
+                grant.Add(node.UpgradeType, node.UpgradeAmount);
+            }
+
+            foreach (var pair in AwakeningsForNodes(grid, activated))
+            {
+                AbilityGrant baseGrant;
+                if (grants.TryGetValue(pair.Key, out baseGrant) && !grants.ContainsKey(pair.Value))
+                {
+                    grants[pair.Value] = baseGrant.CopyAs(pair.Value);
+                }
+            }
+            return grants;
+        }
+
+        /// <summary>The upgrades this hero's grid has bought for one ability, or null when there are none.</summary>
+        public static AbilityGrant AbilityUpgradesFor(SphereGridSO grid, IEnumerable<string> activated, string abilityKey)
+        {
+            if (string.IsNullOrEmpty(abilityKey))
+            {
+                return null;
+            }
+            AbilityGrant grant;
+            return AbilityUpgradesForNodes(grid, activated).TryGetValue(abilityKey, out grant) ? grant : null;
+        }
+
         /// <summary>The Ultras an activated set of nodes teaches, by key, in grid order, each once.</summary>
         public static List<string> UltrasForNodes(SphereGridSO grid, IEnumerable<string> activated)
         {

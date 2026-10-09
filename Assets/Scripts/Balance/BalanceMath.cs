@@ -366,8 +366,14 @@ namespace Assets.Scripts.Balance
             }
 
             bool anyHeroShift = false;
+            float blindUptime = 0f;
             foreach (var shift in shifts)
             {
+                if (shift.Blinds && shift.OnHeroSide)
+                {
+                    blindUptime += shift.Uptime;
+                    continue;
+                }
                 if (!shift.OnHeroSide || shift.Expected == 0)
                 {
                     continue;
@@ -381,6 +387,10 @@ namespace Assets.Scripts.Balance
 
             var shielded = new List<SimUnit> { WithOwnBuffs(target) };
             float after = GroupDamagePerTick(anyHeroShift ? debuffed : attackers, shielded);
+
+            // The party's output here is basic attacks, every one physical, so a Blind's miss chance
+            // takes its whole share for as long as it is up.
+            after *= 1f - DefenseRules.BlindMissChance * Mathf.Clamp01(blindUptime);
 
             return Mathf.Clamp(after / baseline, 0.01f, 1f);
         }

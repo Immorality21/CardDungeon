@@ -31,7 +31,10 @@ namespace Assets.Scripts.Heroes
         Ultra = 10,         // teaches GrantedUltraKey: used from the Ultra command once the gauge is full
 
         // Essence nodes (docs/plans/HUB.md §3c). Appended, as above.
-        MagicAwaken = 11    // replaces known GrantedMagicKey with AwakenedMagicKey, same slot and charges
+        MagicAwaken = 11,   // replaces known GrantedMagicKey with AwakenedMagicKey, same slot and charges
+
+        // Abilities deepened on the grid (2026-10-09). Appended, as above.
+        MagicUpgrade = 12   // GrantedMagicKey (and its awakening) gains UpgradeAmount of UpgradeType - see AbilityGrant
     }
 
     /// <summary>
@@ -90,7 +93,7 @@ namespace Assets.Scripts.Heroes
                  "Learning is not carrying: a known spell still has to fit one of the hero's slots " +
                  "(see MagicSlot), which is what makes a branch a kit rather than a collection. A " +
                  "key with no catalog entry is skipped rather than failing. Kind == MagicAwaken: the " +
-                 "known ability this node awakens.")]
+                 "known ability this node awakens. Kind == MagicUpgrade: the ability it deepens.")]
         public string GrantedMagicKey;
 
         [Tooltip("Kind == MagicKnown: charges this spell starts a run with when carried. It refills " +
@@ -104,6 +107,14 @@ namespace Assets.Scripts.Heroes
                  "ability is a separate asset with more flair (another effect, every enemy, a rider). " +
                  "Does nothing until the hero knows GrantedMagicKey.")]
         public string AwakenedMagicKey;
+
+        [Tooltip("Kind == MagicUpgrade: what it deepens - Power (base power on Damage/Heal), " +
+                 "CritChance (percentage points, and it can crit at all), Duration (turns on every timed " +
+                 "effect), ApplyChance (percentage points on its debuffs) or Charges (per run).")]
+        public AbilityUpgradeType UpgradeType;
+
+        [Tooltip("Kind == MagicUpgrade: how much - points of power, percentage points, turns or charges.")]
+        public int UpgradeAmount = 1;
 
         [Tooltip("Kind == Summon: SummonSO.Key of the summon this hero learns. Kind == SummonPower / " +
                  "SummonDuration / SummonCharge: the summon this node upgrades. An upgrade for a summon " +

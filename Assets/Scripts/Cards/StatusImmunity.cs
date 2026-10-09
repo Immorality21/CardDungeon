@@ -45,6 +45,7 @@ namespace Assets.Scripts.Cards
                 case BuffType.Bleeding:
                 case BuffType.Regenerating:
                 case BuffType.Silenced:
+                case BuffType.Blinded:
                     return true;
                 default:
                     return false;

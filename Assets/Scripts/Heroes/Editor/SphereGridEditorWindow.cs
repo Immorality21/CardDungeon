@@ -548,6 +548,8 @@ namespace Assets.Scripts.Heroes.Editor
             AddField(element, "GrantedMagicKey");
             AddField(element, "GrantedCharges");
             AddField(element, "AwakenedMagicKey");
+            AddField(element, "UpgradeType");
+            AddField(element, "UpgradeAmount");
             AddField(element, "GrantedSummonKey");
             AddField(element, "SummonAmount");
             AddField(element, "GrantedUltraKey");

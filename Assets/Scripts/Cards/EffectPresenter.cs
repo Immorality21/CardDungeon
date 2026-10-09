@@ -8,6 +8,8 @@ namespace Assets.Scripts.Cards
 {
     public class EffectPresenter
     {
+        private static readonly Color CritColor = new Color(1f, 0.82f, 0.2f);
+
         public IEnumerator Present(
             EffectResult result,
             ICombatUnit caster = null,
@@ -44,15 +46,28 @@ namespace Assets.Scripts.Cards
                         entry.Color,
                         1f,
                         0.8f,
-                        0.15f,
+                        entry.Crit ? 0.24f : 0.15f,
                         TextFadeMode.FadeUp);
+
+                    // A critical hit is called out like a critical basic attack (ExecuteAttack).
+                    if (entry.Crit)
+                    {
+                        FloatingTextHandler.Instance.CreateFloatingText(
+                            position + new Vector3(0f, 0.45f, 0f),
+                            "CRIT!",
+                            CritColor,
+                            1f,
+                            0.8f,
+                            0.16f,
+                            TextFadeMode.FadeUp);
+                    }
 
                     // Surface the resistance outcome (Weak! / Resisted / …) as a small popup above.
                     var eff = EffectivenessPopup(entry.Effectiveness);
                     if (eff.HasValue)
                     {
                         FloatingTextHandler.Instance.CreateFloatingText(
-                            position + new Vector3(0f, 0.45f, 0f),
+                            position + new Vector3(0f, entry.Crit ? 0.75f : 0.45f, 0f),
                             eff.Value.Item1,
                             eff.Value.Item2,
                             1f,
@@ -81,8 +96,8 @@ namespace Assets.Scripts.Cards
                 // the death effect is its reaction.
                 if (entry.Impact > 0 && entry.Target != null && entry.Target.Transform != null)
                 {
-                    CombatFeedback.Instance.PlayImpact(entry.Target, entry.Impact);
-                    yield return new WaitForSecondsRealtime(0.04f);
+                    CombatFeedback.Instance.PlayImpact(entry.Target, entry.Impact, entry.Crit ? 1.4f : 1f);
+                    yield return new WaitForSecondsRealtime(entry.Crit ? 0.075f : 0.04f);
                 }
 
                 yield return new WaitForSeconds(entry.Delay);

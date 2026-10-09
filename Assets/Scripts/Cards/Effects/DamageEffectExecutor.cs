@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Cards.Effects
 {
-    public class DamageEffectExecutor : IEffectExecutor
+    public class DamageEffectExecutor : ICastAwareEffectExecutor
     {
         private static readonly Color DamageColor = Color.white;
         private static readonly Color HealColor = Color.green;
@@ -23,6 +23,18 @@ namespace Assets.Scripts.Cards.Effects
             _events = events;
         }
 
+        /// <summary>A cast: the targets the resolver rolled a crit for are struck critically.</summary>
+        public void Execute(
+            SpellEffect effect,
+            SpellcastAction action,
+            List<ICombatUnit> targets,
+            CombatBuffTracker buffTracker,
+            EffectResult result)
+        {
+            Resolve(effect, action.Caster, targets, buffTracker, result, false, action.CritTargets);
+        }
+
+        /// <summary>No cast to read (a combo's bonus, a reaction, a room event): never a crit.</summary>
         public void Execute(
             SpellEffect effect,
             ICombatUnit caster,
@@ -30,6 +42,18 @@ namespace Assets.Scripts.Cards.Effects
             CombatBuffTracker buffTracker,
             EffectResult result,
             bool flatPower = false)
+        {
+            Resolve(effect, caster, targets, buffTracker, result, flatPower, null);
+        }
+
+        private void Resolve(
+            SpellEffect effect,
+            ICombatUnit caster,
+            List<ICombatUnit> targets,
+            CombatBuffTracker buffTracker,
+            EffectResult result,
+            bool flatPower,
+            List<ICombatUnit> critTargets)
         {
             foreach (var aimed in targets)
             {
@@ -65,7 +89,15 @@ namespace Assets.Scripts.Cards.Effects
                 int damage = DamageCalculator.Calculate(
                     rawAttack, defense, effect.DamageType, target.Resistances, resistanceBonus);
 
-                var source = new HealthSource(caster, HealthCause.Ability, effect.DamageType);
+                // The crit was rolled against the unit the caster aimed at, so a blow its guard takes
+                // instead is still the critical one.
+                bool crit = damage > 0 && critTargets != null && critTargets.Contains(aimed);
+                if (crit)
+                {
+                    damage = CritRules.Apply(damage);
+                }
+
+                var source = new HealthSource(caster, HealthCause.Ability, effect.DamageType, crit);
                 if (damage < 0)
                 {
                     int heal = HealthOps.Damage(target, damage, source, _events?.Invoke()).Healed;
@@ -99,6 +131,7 @@ namespace Assets.Scripts.Cards.Effects
                         Delay = EffectDelay,
                         Impact = damage,
                         Landed = landed,
+                        Crit = crit,
                         Effectiveness = DamageCalculator.Classify(
                             effect.DamageType, target.Resistances, resistanceBonus)
                     });

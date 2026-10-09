@@ -70,9 +70,21 @@ The systems layer is deeper than the *verbs* sitting on it. §9 shipped; §10 is
   without moving any number the analyzer reports), but it means two of the three new statuses are
   **player-only tools**. Pricing a command gate needs a *turn-denial* term the closed form does not
   have — the nearest existing idiom is `EnemySupportModel`'s measured output-suppression.
-- **Stun, Blind and Shield/Absorb were scoped out, with reasons.** Stun is a harder `Frozen` and the
-  first question is whether `Frozen` should simply *become* it rather than shipping two; Blind needs
-  a **miss** concept the game does not have (or it degenerates into a large Strength debuff); an
+- **Blind shipped 2026-10-09** (owner: Blind *is* the miss concept, no Accuracy stat). A blinded
+  unit's physical hits miss 50% of the time, before the target's dodge; magic never misses. Smoke
+  Bomb (Rogue) is the first source, and **every debuff now lands on a chance**
+  (`SpellEffect.ApplyChance`, `AfflictionRules`) so no status is a certainty. The owner's chances
+  (2026-10-09): Poison Dart 75%, every bleed 60%, every Silence 50%, the Freeze combo 50% (it locks a
+  target out entirely, and the combo still has to be set up). Mind Rot and every stat cut stay 100%.
+  The **Hex Weaver** blinds the party (Blinding Hex, an enemy-only copy of Smoke Bomb, cast weight 0.5); the Floating Eye was tried first
+  and withdrawn, because The Threshold's one-hero opening floor cannot get any softer (`BALANCING.md` §5af).
+  **Next: status resistances** *(owner, 2026-10-09)* - "items grant immunity" is the common form. The
+  hook exists: `StatusImmunity.IsImmune` is the one check, and today only `Enemy` and `SimUnit` answer
+  it (`IStatusImmune`, from `EnemySO.StatusImmunities`). A hero answering from equipped gear (an
+  `ItemSO.StatusImmunities` list) is the immunity half; a partial resistance would be a second factor
+  in `AfflictionRules.Lands`, which takes no target today.
+- **Stun and Shield/Absorb were scoped out, with reasons.** Stun is a harder `Frozen` and the
+  first question is whether `Frozen` should simply *become* it rather than shipping two; an
   absorb shield is a damage pool that soaks before HP, which needs its own field — the executors
   clamp against effective max health, so it is not a heal.
 - **The numbers have had no tuning pass.** 2/turn poison, 1/turn bleed and a 3/turn Ignite burn were

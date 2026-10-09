@@ -244,6 +244,8 @@ namespace Assets.Scripts.Enemies.Editor
                         entry.FindPropertyRelative("Power"), new GUIContent("Debuff amount"));
                     EditorGUILayout.PropertyField(entry.FindPropertyRelative("Duration"));
                     EditorGUILayout.PropertyField(entry.FindPropertyRelative("TargetStat"));
+                    EditorGUILayout.PropertyField(
+                        entry.FindPropertyRelative("ApplyChance"), new GUIContent("Apply chance %"));
                     break;
 
                 case EnemyActionKind.CastMagic:

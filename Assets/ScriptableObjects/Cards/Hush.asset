@@ -27,5 +27,6 @@ MonoBehaviour:
     BuffType: 19
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 50
   Tags: 08000000
   TagDuration: 3

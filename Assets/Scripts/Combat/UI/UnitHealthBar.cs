@@ -39,6 +39,7 @@ namespace Assets.Scripts.Combat
         private static readonly Color Purple = new Color(0.78f, 0.45f, 0.95f);
         private static readonly Color PoisonGreen = new Color(0.65f, 0.9f, 0.3f);
         private static readonly Color BloodRed = new Color(0.9f, 0.25f, 0.3f);
+        private static readonly Color BlindGrey = new Color(0.72f, 0.72f, 0.78f);
 
         private static Sprite _centerSprite;
         private static Sprite _leftSprite;
@@ -358,6 +359,9 @@ namespace Assets.Scripts.Combat
                         break;
                     case BuffType.Silenced:
                         list.Add(new IconDesc { Name = "mute", Tint = Purple });
+                        break;
+                    case BuffType.Blinded:
+                        list.Add(new IconDesc { Name = "eye", Tint = BlindGrey });
                         break;
                 }
             }

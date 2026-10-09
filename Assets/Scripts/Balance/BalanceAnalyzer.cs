@@ -874,6 +874,10 @@ namespace Assets.Scripts.Balance
                     });
                 }
 
+                // ...what the grid has deepened its abilities by (power, crit, turns, apply chance;
+                // charges are already in `known`)...
+                hero.Unit.AbilityUpgrades = SphereGridOps.AbilityUpgradesForNodes(grid, hero.ActivatedNodes);
+
                 // ...and Ultras (COMBAT_DEPTH §13), resolved through the Resources catalog as the game does.
                 hero.Unit.Ultras.Clear();
                 foreach (var key in SphereGridOps.UltrasForNodes(grid, hero.ActivatedNodes))

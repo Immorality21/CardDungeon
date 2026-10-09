@@ -32,6 +32,7 @@ namespace Assets.Scripts.Enemies.Behaviors
         public int Amount;                    // heal amount / debuff magnitude
         public int Duration;                  // debuff / buff / brace duration in turns
         public StatType DebuffStat = StatType.Strength;   // the stat a Debuff lowers or a BuffAlly raises
+        public int ApplyChance = 100;         // percent chance a Debuff takes hold (AfflictionRules)
 
         /// <summary>What a <see cref="EnemyActionType.Summon"/> calls, and how many of it.</summary>
         public EnemySO SummonDefinition;

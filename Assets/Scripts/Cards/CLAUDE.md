@@ -190,6 +190,24 @@ still has a turn worth taking rather than three turns of Skip. *(Draw used to be
 exception here — blocking the player's only acquisition verb for three turns cost far more than
 blocking three casts. There is no acquisition verb any more.)*
 
+**Blind is the miss status** *(owner, 2026-10-09)*. `BlindedBuffHandler`: a blinded unit's physical
+hits miss 50% of the time (`DefenseRules.RollMiss`, before the dodge — see the Combat guide), magic is
+untouched. It never skips the turn. Curable, immune-able, a crossed-eye icon. **Smoke Bomb** (Rogue) is
+the first source: every enemy, 3 turns, 50% each — it used to be a party Agility buff. The **Hex
+Weaver**'s Blind is its own enemy-only copy, **Blinding Hex** (`MagicSO.EnemyOnly`, see the Enemies
+guide), cast weight 0.5, so the Rogue's Smoke Bomb can be retuned without moving it.
+
+**Every debuff is a chance** *(owner, 2026-10-09)*. `SpellEffect.ApplyChance` (percent, default
+`AfflictionRules.Certain` = 100) is rolled once per target by **`AfflictionRules.Lands`** in
+`DebuffEffectExecutor`, after the immunity check, so casts, combos, summons, reactions and enemy spells
+all honour it; an enemy's own Debuff action has `EnemyActionEntry.ApplyChance`, rolled by
+`CombatManager` and the simulator. Stat cuts and statuses alike, damage-over-time included. A failed
+roll on a cast that was only the debuff floats grey **"Unaffected"**; a failed rider on a hit that
+already landed (Slash's bleed) passes quietly. The describer adds ", 60% chance" to any debuff under
+100. The owner's numbers (2026-10-09): Poison Dart 75%, every bleed 60%, every Silence 50%, the
+Freeze combo 50%, Smoke Bomb 50%; Mind Rot and the stat cuts are still 100%. Buffs never
+roll. Tests swap `AfflictionRules.Roll`.
+
 **The cure loop.** `ConsumableEffectType.CureStatus` + `CombatBuffTracker.CureStatusEffects` + the
 **Antidote Salve** (drops from the Floating Eye). `BuffHandlerRegistry.IsCurable` lists what a cure
 removes **in one place**, because "harmful" is a design judgement rather than a handler property —
@@ -205,14 +223,16 @@ level-scoped health pool, and a cure would clear it only until the next room re-
 ## Magic definitions & effects
 
 - **MagicSO** (ScriptableObject, `SO/Magic`): defines a magic with `Key`, `DisplayName`, `Description`, `Icon`, `TargetType` (`MagicTargetType`: Enemy/Ally/Self/AllEnemies/AllAllies), `Rarity` (`MagicRarity`), `Effects` (list of `SpellEffect`), `Tags` (list of `MagicTag`), `TagDuration`. Pure data — no acquisition/slot logic.
-- **SpellEffect**: `EffectType` (`SpellEffectType`: Damage/Heal/Buff/Debuff/**HealthCost**/**TurnDelay**/**Drain**/**RestoreCharge**), `Power`, **`PowerMode`**, `ScalingStat`, `DamageType`, `BuffType`, `Duration`, `UnlockLevel`.
+- **SpellEffect**: `EffectType` (`SpellEffectType`: Damage/Heal/Buff/Debuff/**HealthCost**/**TurnDelay**/**Drain**/**RestoreCharge**), `Power`, **`PowerMode`**, `ScalingStat`, `DamageType`, `BuffType`, `Duration`, `UnlockLevel`, **`ApplyChance`** (Debuff only). Copy one with **`Clone()`** — the three hand copies (`ApplyPowerBonus`, two in `SummonOps`) each dropped a field the day one was added.
+- **`MagicSO.CanCrit`**: its damage can crit (`CritRules`, see the Combat guide). Otherwise only a hero whose grid bought a crit upgrade for it crits with it. The ability text adds the caster's real chance (", 40% crit") to the damage line, or ", can crit" with no caster.
+- **Ability upgrades from the grid** *(2026-10-09, the Heroes guide)*: `EffectResolver.Execute` asks the caster for its `AbilityGrant` (`UpgradesOf`) and folds it into **copies** of the effects - power through the same `ApplyPowerBonus` path the old Forge bonus took, then `ApplyUpgrades` (turns on timed Buffs/Debuffs, apply chance on Debuffs), and the crit bonus into `RollCrits`. `AbilityDescriber` folds the same grant in, so the picker and the hub Abilities tab show the upgraded numbers. Summon and Ultra castables, enemies and combos have no grant.
 - **The catalog is 31 magics, and 14 of them exist because a hero needed them.** A spell is only worth a grid node if the hero's stats scale it — `SpellEffect.ScalingStat` — so each new hero came with the spells its stat line could actually use. **Check the scaling stat before putting a spell on a grid**: the retired Scout's Intelligence-scaled `OilSlick` on a hero with INT 4 was a node that bought nothing.
 
   | added for | spells |
   |---|---|
   | Warrior (2026-09-04) | **Cleave** (STR, AllEnemies, Physical) · **Sunder** (STR, damage + Endurance debuff, Metal) · **Bulwark** (STR, AllAllies Endurance — the mirror of War Cry) |
   | Paladin / Cleric (2026-09-05) | **Smite** (SPR, Holy, single) · **Consecrate** (SPR, Holy, AllEnemies) · **Benediction** (SPR, AllAllies heal) · **HolyTouch** (SPR, SingleAlly heal — the Paladin's free starting signature, so it is deliberately the weakest heal in the game) |
-  | Ranger / Rogue | **AimedShot** (AGI, single) · **Volley** (AGI, AllEnemies) · **Snare** (AGI, Agility debuff) · **Backstab** (AGI, damage + Bleeding) · **SmokeBomb** (flat, party Agility) |
+  | Ranger / Rogue | **AimedShot** (AGI, single) · **Volley** (AGI, AllEnemies) · **Snare** (AGI, Agility debuff) · **Backstab** (AGI, damage + Bleeding) · **SmokeBomb** (Blind on every enemy, 50% each — a party Agility buff until 2026-10-09) |
   | Warlock | **Bloodbolt** (INT, Shadow, costs 8% max health) · **Blood Pact** (was Sacrifice: INT+STR on an ally for 15% max health) · **Drain Life** · **Life Tap** · **Siphon Soul** (2026-10-04) |
 
   Several carry combo tags deliberately: Cleave is Physical (Infection) and lays it on the *whole room*, Sunder and Smite are Metal (Conductor). And the holy line is why the Mirefather and the Abyssal Warden are now **weak to Holy** while the Stone Sentinel resists it — a damage type nothing reacts to is arithmetically inert, which `ElementalContentTests` fails on.

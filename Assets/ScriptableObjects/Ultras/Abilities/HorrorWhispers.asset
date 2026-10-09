@@ -35,6 +35,7 @@ MonoBehaviour:
     BuffType: 19
     Duration: 2
     UnlockLevel: 0
+    ApplyChance: 50
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1

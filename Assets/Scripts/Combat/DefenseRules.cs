@@ -20,6 +20,13 @@ namespace Assets.Scripts.Combat
     /// to learn. Base chance is 0: a unit with no Luck never dodges, which is every enemy that is not
     /// authored to. Damage-over-time ticks, combo bonuses and room-event damage are not attacks and
     /// cannot be dodged.</para>
+    ///
+    /// <para><b>Blind is the game's only miss</b> (owner, 2026-10-09): a blinded attacker's physical
+    /// hits miss <see cref="BlindMissChance"/> of the time, rolled before the target's dodge, so the two
+    /// stack as <c>(1 - miss) * (1 - dodge)</c>. There is no base miss and no Accuracy stat - an
+    /// unblinded swing always connects unless the target dodges. Magic never misses, the same split
+    /// as dodge. Whether the attacker is blinded is the caller's question (the buff tracker lives in
+    /// Cards), answered with <see cref="MissChanceFor"/>'s argument.</para>
     /// </summary>
     public static class DefenseRules
     {
@@ -28,6 +35,9 @@ namespace Assets.Scripts.Combat
 
         /// <summary>Luck at which half of <see cref="MaxLuckDodge"/> is reached (10 Luck ≈ 10%).</summary>
         public const float LuckDodgeConstant = 20f;
+
+        /// <summary>Chance a blinded attacker's physical hit misses outright.</summary>
+        public const float BlindMissChance = 0.5f;
 
         /// <summary>
         /// The roll every dodge check uses, uniform in [0, 1). A seam for tests only — production code
@@ -56,6 +66,28 @@ namespace Assets.Scripts.Combat
             }
             float luck = Mathf.Max(0, target.GetEffectiveStat(StatType.Luck));
             return MaxLuckDodge * (luck / (luck + LuckDodgeConstant));
+        }
+
+        /// <summary>Chance an attacker's physical hit misses: <see cref="BlindMissChance"/> when blinded, else 0.</summary>
+        public static float MissChanceFor(bool attackerBlinded)
+        {
+            return attackerBlinded ? BlindMissChance : 0f;
+        }
+
+        /// <summary>
+        /// Chance a physical hit connects at all: the attacker does not miss and the target does not
+        /// dodge. What the balance model multiplies an expected physical hit by.
+        /// </summary>
+        public static float HitChance(bool attackerBlinded, ICombatUnit target)
+        {
+            return (1f - MissChanceFor(attackerBlinded)) * (1f - DodgeChanceFor(target));
+        }
+
+        /// <summary>Rolls a miss for a physical hit by an attacker who is or is not blinded.</summary>
+        public static bool RollMiss(bool attackerBlinded)
+        {
+            float chance = MissChanceFor(attackerBlinded);
+            return chance > 0f && Roll() < chance;
         }
 
         /// <summary>Rolls a dodge for a physical hit on <paramref name="target"/>.</summary>

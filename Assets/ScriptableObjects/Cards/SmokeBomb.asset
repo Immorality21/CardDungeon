@@ -16,16 +16,17 @@ MonoBehaviour:
   DisplayName: Smoke Bomb
   Description: Nobody can hit what nobody can see.
   Icon: {fileID: 21300000, guid: 5c0203b103434024b229f3acbec26cc3, type: 3}
-  TargetType: 4
+  TargetType: 1
   Rarity: 2
   Effects:
-  - EffectType: 2
-    Power: 3
+  - EffectType: 3
+    Power: 0
     PowerMode: 0
     ScalingStat: 0
     DamageType: 0
-    BuffType: 3
+    BuffType: 20
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 50
   Tags: 
   TagDuration: 3

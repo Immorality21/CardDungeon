@@ -33,3 +33,4 @@ MonoBehaviour:
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
+  CanCrit: 1

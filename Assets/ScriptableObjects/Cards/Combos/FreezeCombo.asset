@@ -25,3 +25,4 @@ MonoBehaviour:
     DamageType: 0
     BuffType: 12
     Duration: 2
+    ApplyChance: 50

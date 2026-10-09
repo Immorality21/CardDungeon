@@ -1399,7 +1399,7 @@ namespace Assets.Scripts.Items.UI
         {
             var gear = InventoryManager.Instance.GetEquippedGear(hero.SaveKey);
             var baseStats = HeroStatCalculator.BaseStatsForNodes(hero, ActivatedNodesOf(hero));
-            return new HeroSnapshotUnit(hero, HeroStatCalculator.WithGear(baseStats, gear));
+            return new HeroSnapshotUnit(hero, HeroStatCalculator.WithGear(baseStats, gear), null, ActivatedNodesOf(hero));
         }
 
         private struct StatChange

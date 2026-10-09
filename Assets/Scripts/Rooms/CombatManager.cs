@@ -72,11 +72,11 @@ namespace Assets.Scripts.Rooms
         [SerializeField] private float _lungeDistance = 0.3f;
         [SerializeField] private float _lungeDuration = 0.12f;
 
-        // Basic-attack critical hits (heroes and enemies).
-        // Public so the balance model (Assets/Scripts/Balance) reads the real crit numbers
-        // instead of duplicating them and drifting.
+        // Critical hits (heroes and enemies, basic attacks and abilities that can crit). The numbers
+        // live in CritRules so the cast path can reach them; these forward, so existing readers - the
+        // balance model among them - keep one source.
         /// <summary>Crit chance at zero Luck. Luck adds to this - see <see cref="CritChanceFor"/>.</summary>
-        public const float CritChance = 0.12f;
+        public const float CritChance = CritRules.BaseChance;
 
         /// <summary>
         /// Beat held after an over-time tick so the number can be read before the next turn starts.
@@ -89,29 +89,20 @@ namespace Assets.Scripts.Rooms
         private const float OverTimeTickPunch = 0.35f;
 
         /// <summary>Most crit chance Luck can add on top of <see cref="CritChance"/>.</summary>
-        public const float MaxLuckCritBonus = 0.30f;
+        public const float MaxLuckCritBonus = CritRules.MaxLuckBonus;
 
-        /// <summary>
-        /// Luck at which half of <see cref="MaxLuckCritBonus"/> is reached. Diminishing rather than
-        /// linear, using the same stat/(stat+K) shape as the defense curve, so Luck never runs away
-        /// and the player only has to learn one curve.
-        /// </summary>
-        public const float LuckCritConstant = 20f;
+        /// <summary>Luck at which half of <see cref="MaxLuckCritBonus"/> is reached.</summary>
+        public const float LuckCritConstant = CritRules.LuckConstant;
 
         /// <summary>
         /// Crit chance for a specific unit. Everything that rolls or models a crit must go through
-        /// this rather than reading <see cref="CritChance"/> directly, or Luck silently does nothing.
+        /// this (or <see cref="CritRules.ChanceFor"/>, which it forwards to), or Luck silently does nothing.
         /// </summary>
         public static float CritChanceFor(ICombatUnit unit)
         {
-            if (unit == null)
-            {
-                return CritChance;
-            }
-            float luck = Mathf.Max(0, unit.GetEffectiveStat(StatType.Luck));
-            return CritChance + MaxLuckCritBonus * (luck / (luck + LuckCritConstant));
+            return CritRules.ChanceFor(unit);
         }
-        public const float CritMultiplier = 1.6f;
+        public const float CritMultiplier = CritRules.Multiplier;
 
         /// <summary>A turn is over and reported: the UI refreshes the party window. The rules-side
         /// view of the same moment is <see cref="TurnEnded"/> on <see cref="Events"/>.</summary>
@@ -2050,7 +2041,7 @@ namespace Assets.Scripts.Rooms
                     yield return ExecuteEnemyHeal(enemyUnit, decision.Target, decision.Amount);
                     break;
                 case EnemyActionType.Debuff:
-                    yield return ExecuteEnemyDebuff(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration);
+                    yield return ExecuteEnemyDebuff(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration, decision.ApplyChance);
                     break;
                 case EnemyActionType.BuffAlly:
                     yield return ExecuteEnemyBuffAlly(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration);
@@ -2261,11 +2252,20 @@ namespace Assets.Scripts.Rooms
             yield return new WaitForSeconds(_turnDelay);
         }
 
-        private IEnumerator ExecuteEnemyDebuff(ICombatUnit enemyUnit, ICombatUnit target, StatType stat, int amount, int duration)
+        private IEnumerator ExecuteEnemyDebuff(ICombatUnit enemyUnit, ICombatUnit target, StatType stat, int amount, int duration, int applyChance)
         {
             if (target == null || !target.IsAlive)
             {
                 _lastTurnLog = $"{enemyUnit.DisplayName} has no target.";
+                yield break;
+            }
+
+            // Every debuff is a chance (AfflictionRules), an enemy's own included.
+            if (!AfflictionRules.Lands(applyChance))
+            {
+                ShowFloatingLabel(target.Transform.position, Cards.Effects.DebuffEffectExecutor.UnaffectedText, new Color(0.6f, 0.6f, 0.65f));
+                _lastTurnLog = $"{enemyUnit.DisplayName} tries to weaken {target.DisplayName}, who is unaffected.";
+                yield return new WaitForSeconds(_turnDelay);
                 yield break;
             }
 
@@ -2525,7 +2525,16 @@ namespace Assets.Scripts.Rooms
             CombatAudio.Play(CombatSound.MeleeSwing);
             yield return LungeAnimation(attacker.Transform, lungeDirection);
 
-            // A basic attack is always physical, so the target's Luck may dodge it (DefenseRules).
+            // A basic attack is always physical: a blinded attacker may miss it outright, and then
+            // the target's Luck may dodge it (DefenseRules).
+            if (DefenseRules.RollMiss(BlindedBuffHandler.IsBlinded(BuffTracker, attacker)))
+            {
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Miss", new Color(0.8f, 0.8f, 0.85f), 0.16f);
+                RecordAttackTypeObserved(attacker);
+                yield return new WaitForSecondsRealtime(0.045f);
+                _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName} and misses!";
+                yield break;
+            }
             if (DefenseRules.RollDodge(target))
             {
                 ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Dodge", new Color(0.8f, 0.8f, 0.85f), 0.16f);
@@ -2549,10 +2558,10 @@ namespace Assets.Scripts.Rooms
                 rawAttack, defense, damageType, target.Resistances, resistanceBonus);
 
             // Critical hit: a chance for a harder blow, called out with a gold popup + bigger number.
-            bool crit = dmg > 0 && UnityEngine.Random.Range(0f, 1f) < CritChanceFor(attacker);
+            bool crit = dmg > 0 && CritRules.RollCrit(attacker);
             if (crit)
             {
-                dmg = Mathf.Max(dmg + 1, Mathf.RoundToInt(dmg * CritMultiplier));
+                dmg = CritRules.Apply(dmg);
             }
 
             // Absorbed (resistance above 100%) heals instead, clamped to the target's maximum - without

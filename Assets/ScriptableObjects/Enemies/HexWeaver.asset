@@ -25,6 +25,7 @@ MonoBehaviour:
   - {fileID: -1891721618320958740, guid: 3abd1377f16b53b46b0702af5bf3442a, type: 3}
   IsBoss: 0
   CombatScale: 1
+  Traits: 0
   BaseStats:
     Values:
     - Type: 1
@@ -55,6 +56,8 @@ MonoBehaviour:
     CastWeight: 0
   - Magic: {fileID: 11400000, guid: c0de51110001a4b1c2d3e4f506172839, type: 2}
     CastWeight: 0
+  - Magic: {fileID: 11400000, guid: eeb32568f5d4a1440a1496d3b758160e, type: 2}
+    CastWeight: 0.5
   Resistances:
   - DamageType: 3
     Percent: 50
@@ -70,5 +73,6 @@ MonoBehaviour:
     Chance: 0.4
     MinQuantity: 1
     MaxQuantity: 2
+  SalvageTable: []
   Triggers: []
   Flinches: 1

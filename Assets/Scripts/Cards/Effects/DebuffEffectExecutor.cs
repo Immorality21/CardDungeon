@@ -10,6 +10,9 @@ namespace Assets.Scripts.Cards.Effects
         private static readonly Color DebuffColor = new Color(0.8f, 0.2f, 0.8f);
         private const float EffectDelay = 0.2f;
 
+        /// <summary>Floated when a debuff fails its <see cref="SpellEffect.ApplyChance"/>.</summary>
+        public const string UnaffectedText = "Unaffected";
+
         public void Execute(
             SpellEffect effect,
             ICombatUnit caster,
@@ -62,6 +65,25 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
+                // Every debuff is a chance, not a certainty (AfflictionRules). A failed rider on a hit
+                // that already landed (Slash's bleed, Sunder's Endurance cut) passes quietly - the
+                // damage number is the news, and the missing icon says the rest. A cast that was
+                // only the debuff says so, or it reads as having done nothing.
+                if (!AfflictionRules.Lands(effect.ApplyChance))
+                {
+                    if (!WasStruck(result, target))
+                    {
+                        result.Entries.Add(new EffectEntry
+                        {
+                            Target = target,
+                            Text = UnaffectedText,
+                            Color = Color.gray,
+                            Delay = EffectDelay
+                        });
+                    }
+                    continue;
+                }
+
                 handler.Apply(target, -magnitude, effect.Duration, buffTracker, caster);
 
                 result.Entries.Add(new EffectEntry
@@ -72,6 +94,19 @@ namespace Assets.Scripts.Cards.Effects
                     Delay = EffectDelay
                 });
             }
+        }
+
+        /// <summary>Whether this cast has already hit <paramref name="target"/> for damage.</summary>
+        private static bool WasStruck(EffectResult result, ICombatUnit target)
+        {
+            foreach (var entry in result.Entries)
+            {
+                if (ReferenceEquals(entry.Target, target) && entry.Impact > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

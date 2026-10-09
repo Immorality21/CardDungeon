@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Cards.Effects;
 using Assets.Scripts.Combat;
+using Assets.Scripts.Heroes;
 using Assets.Scripts.Progression;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ namespace Assets.Scripts.Cards
         private static readonly Color ComboNameColor = new Color(1f, 0.6f, 0f);
         private static readonly Color DodgeColor = new Color(0.8f, 0.8f, 0.85f);
         private const string DodgeText = "Dodge";
+        private const string MissText = "Miss";
         private const float ComboDelay = 0.3f;
 
         private readonly EffectExecutorFactory _factory;
@@ -77,7 +79,12 @@ namespace Assets.Scripts.Cards
             float powerScale = 1f)
         {
             var result = new EffectResult();
-            var targets = DodgeFilter(action, result);
+            // What the caster's sphere grid has added to this ability (MagicUpgrade nodes), folded into
+            // copies of its effects below - the asset is shared and never changed. Null for an enemy, a
+            // summon, or an ability with no upgrades.
+            var upgrades = UpgradesOf(action);
+            var targets = HitFilter(action, buffTracker, result);
+            RollCrits(action, targets, upgrades);
 
             // Three passes: benefits, then drains, then costs. A HealthCost authored first would take
             // the caster down before the buff it paid for was applied, and BuffEffectExecutor skips
@@ -92,7 +99,9 @@ namespace Assets.Scripts.Cards
                 {
                     continue;
                 }
-                var effectToUse = ApplyPowerBonus(effect, powerBonus, powerScale);
+                var effectToUse = ApplyUpgrades(
+                    ApplyPowerBonus(effect, powerBonus + (upgrades != null ? upgrades.PowerBonus : 0), powerScale),
+                    upgrades);
                 var executor = _factory.GetExecutor(effectToUse.EffectType);
                 if (executor is ICastAwareEffectExecutor castAware)
                 {
@@ -214,34 +223,135 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
-        /// The targets a physical attack actually reaches: each living target other than the caster
-        /// rolls its Luck-based dodge once, and one that dodges is dropped for every effect, tag and
-        /// combo of the cast (and gets a "Dodge" popup). Magic and non-attacks pass through untouched.
-        /// The health-cost pass still reads <c>action.Targets</c> — a dodge does not refund the price.
+        /// The targets a physical attack actually reaches. For each living target other than the
+        /// caster, a <b>blinded</b> caster first rolls its miss (<see cref="DefenseRules.RollMiss"/>),
+        /// then the target rolls its Luck-based dodge; a target missed or dodged is dropped for every
+        /// effect, tag and combo of the cast and gets a "Miss" or "Dodge" popup. Magic and non-attacks
+        /// pass through untouched. The health-cost pass still reads <c>action.Targets</c> — a miss does
+        /// not refund the price.
         /// </summary>
-        private static List<ICombatUnit> DodgeFilter(SpellcastAction action, EffectResult result)
+        private static List<ICombatUnit> HitFilter(SpellcastAction action, CombatBuffTracker buffTracker, EffectResult result)
         {
             if (action.Magic == null || action.Targets == null || !action.Magic.IsPhysicalAttack())
             {
                 return action.Targets;
             }
 
+            bool blinded = Buffs.BlindedBuffHandler.IsBlinded(buffTracker, action.Caster);
             var reached = new List<ICombatUnit>(action.Targets.Count);
             foreach (var target in action.Targets)
             {
-                if (target != action.Caster && target.IsAlive && DefenseRules.RollDodge(target))
+                if (target != action.Caster && target.IsAlive)
                 {
-                    result.Entries.Add(new EffectEntry
+                    string avoided = DefenseRules.RollMiss(blinded) ? MissText
+                        : DefenseRules.RollDodge(target) ? DodgeText
+                        : null;
+                    if (avoided != null)
                     {
-                        Target = target,
-                        Text = DodgeText,
-                        Color = DodgeColor
-                    });
-                    continue;
+                        result.Entries.Add(new EffectEntry
+                        {
+                            Target = target,
+                            Text = avoided,
+                            Color = DodgeColor
+                        });
+                        continue;
+                    }
                 }
                 reached.Add(target);
             }
             return reached;
+        }
+
+        /// <summary>
+        /// What <paramref name="caster"/>'s sphere grid has added to <paramref name="magic"/> (MagicUpgrade
+        /// nodes), or null. Only a unit with a grid answers (<see cref="IAbilityUpgrades"/>: a hero, or the
+        /// balance model's stand-in for one).
+        /// </summary>
+        public static AbilityGrant UpgradesOf(MagicSO magic, ICombatUnit caster)
+        {
+            return magic != null && caster is IAbilityUpgrades upgraded ? upgraded.UpgradesFor(magic.Key) : null;
+        }
+
+        private static AbilityGrant UpgradesOf(SpellcastAction action)
+        {
+            return UpgradesOf(action.Magic, action.Caster);
+        }
+
+        /// <summary>
+        /// Whether this cast's damage can crit: the ability is authored to (<see cref="MagicSO.CanCrit"/>),
+        /// or its caster's grid bought a crit upgrade for it (<see cref="AbilityGrant.CanCrit"/>).
+        /// </summary>
+        public static bool CanCrit(MagicSO magic, ICombatUnit caster)
+        {
+            if (magic == null || !magic.HasEffectType(SpellEffectType.Damage))
+            {
+                return false;
+            }
+            var upgrades = UpgradesOf(magic, caster);
+            return magic.CanCrit || (upgrades != null && upgrades.CanCrit);
+        }
+
+        /// <summary>
+        /// The crit chance <paramref name="caster"/> has with <paramref name="magic"/>: its Luck-based
+        /// chance plus the ability's crit upgrades. 0 when the ability cannot crit at all. What the
+        /// describer and the balance model read, so they agree with <see cref="RollCrits"/>.
+        /// </summary>
+        public static float CritChanceWith(MagicSO magic, ICombatUnit caster)
+        {
+            if (!CanCrit(magic, caster))
+            {
+                return 0f;
+            }
+            var upgrades = UpgradesOf(magic, caster);
+            return Mathf.Clamp01(CritRules.ChanceFor(caster) + (upgrades != null ? upgrades.CritChanceBonus / 100f : 0f));
+        }
+
+        /// <summary>
+        /// Rolls a crit once per reached enemy-side target for an ability that can crit, at the
+        /// caster's own crit chance (<see cref="CritRules.ChanceFor"/>) plus the ability's crit upgrades,
+        /// so a multi-hit cast and the riders on it agree on which targets were struck critically.
+        /// </summary>
+        private static void RollCrits(SpellcastAction action, List<ICombatUnit> targets, AbilityGrant upgrades)
+        {
+            action.CritTargets.Clear();
+            if (targets == null || !CanCrit(action.Magic, action.Caster))
+            {
+                return;
+            }
+            float bonus = upgrades != null ? upgrades.CritChanceBonus / 100f : 0f;
+            foreach (var target in targets)
+            {
+                if (target != action.Caster && target.IsAlive && CritRules.RollCrit(action.Caster, bonus))
+                {
+                    action.CritTargets.Add(target);
+                }
+            }
+        }
+
+        /// <summary>
+        /// A copy of <paramref name="effect"/> with an ability's grid upgrades folded in: more turns on
+        /// a timed Buff or Debuff, and a better chance on a Debuff (never past certain). Power is folded
+        /// in by <see cref="ApplyPowerBonus"/>, the same path the old Forge bonus took. Returns the
+        /// effect untouched when nothing applies, so an un-upgraded cast allocates nothing.
+        /// </summary>
+        public static SpellEffect ApplyUpgrades(SpellEffect effect, AbilityGrant upgrades)
+        {
+            if (effect == null || upgrades == null)
+            {
+                return effect;
+            }
+            bool timed = (effect.EffectType == SpellEffectType.Buff || effect.EffectType == SpellEffectType.Debuff)
+                         && effect.Duration > 0;
+            int turns = timed ? upgrades.DurationBonus : 0;
+            int chance = effect.EffectType == SpellEffectType.Debuff ? upgrades.ApplyChanceBonus : 0;
+            if (turns == 0 && chance == 0)
+            {
+                return effect;
+            }
+            var copy = effect.Clone();
+            copy.Duration = Mathf.Max(1, effect.Duration + turns);
+            copy.ApplyChance = Mathf.Clamp(effect.ApplyChance + chance, 1, AfflictionRules.Certain);
+            return copy;
         }
 
         /// <summary>
@@ -276,22 +386,11 @@ namespace Assets.Scripts.Cards
                 power = Mathf.Max(1, Mathf.RoundToInt(power * powerScale));
             }
 
-            return new SpellEffect
-            {
-                EffectType = effect.EffectType,
-                Power = power,
-                // Every other field has to be carried across, or the copy quietly differs from the
-                // authored effect. ScalingStat was the one that mattered: it defaults to None, so an
-                // upgraded magic lost its caster contribution entirely - upgrading a caster's spell
-                // made it weaker by that caster's whole scaling stat, and still hit for a plausible
-                // number, so nothing looked wrong.
-                ScalingStat = effect.ScalingStat,
-                PowerMode = effect.PowerMode,
-                DamageType = effect.DamageType,
-                BuffType = effect.BuffType,
-                Duration = effect.Duration,
-                UnlockLevel = effect.UnlockLevel
-            };
+            // Clone, not a hand copy: a copy that names its fields drops the next one added. It
+            // dropped ScalingStat once, so an upgraded magic lost its caster's stat entirely.
+            var copy = effect.Clone();
+            copy.Power = power;
+            return copy;
         }
 
         private void ApplyCombo(

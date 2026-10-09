@@ -31,9 +31,13 @@ public class MagicSOEditor : Editor
             {
                 lines = 5; // + PowerMode
             }
-            else if (effectType == SpellEffectType.Buff || effectType == SpellEffectType.Debuff)
+            else if (effectType == SpellEffectType.Buff)
             {
                 lines = 6; // + BuffType + Duration
+            }
+            else if (effectType == SpellEffectType.Debuff)
+            {
+                lines = 7; // + BuffType + Duration + ApplyChance
             }
             else if (effectType == SpellEffectType.HealthCost)
             {
@@ -123,6 +127,16 @@ public class MagicSOEditor : Editor
                     new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
                     element.FindPropertyRelative("Duration"));
                 rect.y += lineHeight;
+
+                if (effectType == SpellEffectType.Debuff)
+                {
+                    EditorGUI.PropertyField(
+                        new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                        element.FindPropertyRelative("ApplyChance"),
+                        new GUIContent("Apply Chance %", "Percent chance this debuff takes hold on each "
+                            + "target (AfflictionRules). 100 always lands."));
+                    rect.y += lineHeight;
+                }
             }
 
             // Upgrade level at which this effect unlocks (0 = always active).
@@ -160,6 +174,12 @@ public class MagicSOEditor : Editor
         }
         EditorGUILayout.PropertyField(serializedObject.FindProperty("TargetType"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Rarity"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("CanCrit"),
+            new GUIContent("Can Crit", "Its damage can be a critical hit at the caster's crit chance. "
+                + "A grid's MagicUpgrade node (CritChance) can grant this per hero instead."));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("EnemyOnly"),
+            new GUIContent("Enemy Only", "An enemy's own ability: never on a grid, never in the "
+                + "MagicCatalog. EnemyAbilityTests enforces both."));
 
         EditorGUILayout.Space(8);
         _effectsList.DoLayoutList();

@@ -12,15 +12,20 @@ namespace Assets.Scripts.Heroes
     /// described through it reads the numbers it will actually hit for in the next run, instead of
     /// the caster-less base values <c>AbilityDescriber</c> falls back to with a null caster.
     /// </summary>
-    public class HeroSnapshotUnit : ICombatUnit
+    public class HeroSnapshotUnit : ICombatUnit, IAbilityUpgrades
     {
         private readonly HeroSO _hero;
         private readonly StatBlock _effective;
         private readonly List<Resistance> _resistances;
+        private readonly List<string> _activatedNodes;
 
-        public HeroSnapshotUnit(HeroSO hero, StatBlock effectiveStats, List<Resistance> resistances = null)
+        /// <param name="activatedNodes">The hero's bought grid nodes, so an ability described through
+        /// this snapshot shows its grid upgrades (<see cref="IAbilityUpgrades"/>). Null reads none.</param>
+        public HeroSnapshotUnit(HeroSO hero, StatBlock effectiveStats, List<Resistance> resistances = null,
+            IEnumerable<string> activatedNodes = null)
         {
             _hero = hero;
+            _activatedNodes = activatedNodes != null ? new List<string>(activatedNodes) : new List<string>();
             _effective = effectiveStats ?? new StatBlock();
             _resistances = resistances ?? new List<Resistance>();
             Stats = new Stats(_effective.Clone());
@@ -46,6 +51,11 @@ namespace Assets.Scripts.Heroes
         public int GetEffectiveAttackPower()
         {
             return GetEffectiveStat(AttackStat);
+        }
+
+        public AbilityGrant UpgradesFor(string abilityKey)
+        {
+            return SphereGridOps.AbilityUpgradesFor(_hero != null ? _hero.SphereGrid : null, _activatedNodes, abilityKey);
         }
     }
 }

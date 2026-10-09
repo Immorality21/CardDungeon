@@ -489,12 +489,41 @@ namespace Assets.Scripts.Heroes.UI
                     return MagicName(node.GrantedMagicKey);
                 case SphereNodeKind.MagicAwaken:
                     return MagicName(node.AwakenedMagicKey);
+                case SphereNodeKind.MagicUpgrade:
+                    return $"{MagicName(node.GrantedMagicKey)}: {SphereGridPresenter.DescribeUpgrade(node.UpgradeType, node.UpgradeAmount)}";
                 case SphereNodeKind.Summon:
                     return SummonName(node.GrantedSummonKey);
                 case SphereNodeKind.Ultra:
                     return UltraName(node.GrantedUltraKey);
                 case SphereNodeKind.MagicSlot:
                     return "+1 ability slot";
+                default:
+                    return SphereGridPresenter.DescribePayload(node);
+            }
+        }
+
+        /// <summary>
+        /// What an ability upgrade does, said in full: the number, what it applies to, and that it is
+        /// this hero's alone (the ability is shared; the upgrade rides on the hero's grid).
+        /// </summary>
+        private static string UpgradePayload(SphereGridNode node)
+        {
+            string name = MagicName(node.GrantedMagicKey);
+            int amount = node.UpgradeAmount;
+            switch (node.UpgradeType)
+            {
+                case AbilityUpgradeType.Power:
+                    return $"{name} hits (or heals) for {amount} more, before its scaling stat.";
+                case AbilityUpgradeType.CritChance:
+                    return $"{name} can land critical hits, at {amount}% better odds than this hero's own - "
+                           + "Luck raises both.";
+                case AbilityUpgradeType.Duration:
+                    return $"Everything {name} leaves behind - buffs, debuffs, poisons, burns - lasts "
+                           + (amount == 1 ? "1 turn" : $"{amount} turns") + " longer.";
+                case AbilityUpgradeType.ApplyChance:
+                    return $"{name}'s debuffs are {amount}% likelier to take hold.";
+                case AbilityUpgradeType.Charges:
+                    return $"{name} has {(amount == 1 ? "1 more charge" : $"{amount} more charges")} every run.";
                 default:
                     return SphereGridPresenter.DescribePayload(node);
             }
@@ -527,6 +556,8 @@ namespace Assets.Scripts.Heroes.UI
                         ? awakened.Description + "\n\n" + line
                         : line;
                 }
+                case SphereNodeKind.MagicUpgrade:
+                    return UpgradePayload(node);
                 case SphereNodeKind.MagicSlot:
                     return "Carry one more of the abilities this hero knows into every run.";
                 case SphereNodeKind.Summon:

@@ -145,6 +145,11 @@ namespace Assets.Scripts.Enemies.Behaviors
         [Tooltip("Which stat a Debuff reduces or a BuffAlly raises.")]
         public StatType TargetStat = StatType.Strength;
 
+        [Tooltip("Debuff only: percent chance it takes hold (AfflictionRules) - every debuff in the " +
+                 "game is a chance, so a fight is not decided before it starts. 100 always lands.")]
+        [Range(1, 100)]
+        public int ApplyChance = 100;
+
         [Tooltip("Summon only: the enemy this action calls into the fight.")]
         public EnemySO Summons;
 

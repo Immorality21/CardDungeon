@@ -20,6 +20,7 @@ MonoBehaviour:
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -29,7 +30,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-trunk-1
@@ -39,6 +44,7 @@ MonoBehaviour:
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -48,7 +54,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-sig
@@ -58,6 +68,7 @@ MonoBehaviour:
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -65,7 +76,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: AimedShot
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors: []
   - Key: ranger-trunk-2
@@ -74,6 +89,7 @@ MonoBehaviour:
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -85,7 +101,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-start
@@ -95,6 +115,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -360}
     Gains:
       Values: []
@@ -102,7 +123,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-trunk-2
@@ -112,6 +137,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -107, y: -325}
     Gains:
       Values:
@@ -121,7 +147,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-trunk-2
@@ -131,6 +161,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -200, y: -380}
     Gains:
       Values:
@@ -140,7 +171,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-a-1
@@ -150,6 +185,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -292, y: -435}
     Gains:
       Values: []
@@ -157,7 +193,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: PoisonDart
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-a-2
@@ -167,6 +207,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -385, y: -490}
     Gains:
       Values:
@@ -176,7 +217,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-a-3
@@ -186,6 +231,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -478, y: -545}
     Gains:
       Values: []
@@ -193,7 +239,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-a-4
@@ -203,6 +253,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -570, y: -600}
     Gains:
       Values: []
@@ -210,7 +261,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Volley
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-a-5
@@ -220,6 +275,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -663, y: -655}
     Gains:
       Values:
@@ -229,7 +285,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-a-6
@@ -239,6 +299,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -758, y: -710}
     Gains:
       Values:
@@ -248,7 +309,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-a-7
@@ -258,6 +323,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -723, y: -585}
     Gains:
       Values:
@@ -267,16 +333,175 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-a-7
+  - Key: ranger-a-volley-crit
+    DisplayName: 
+    Kind: 12
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -500, y: -690}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Volley
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 1
+    UpgradeAmount: 15
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - ranger-a-6
+  - Key: ranger-sig-power
+    DisplayName: 
+    Kind: 12
+    XpCost: 20
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 110, y: 40}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: AimedShot
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 2
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - ranger-sig
+  - Key: ranger-sig-keen
+    DisplayName: 
+    Kind: 12
+    XpCost: 30
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 215, y: 75}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: AimedShot
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 1
+    UpgradeAmount: 15
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - ranger-sig-power
+  - Key: ranger-a-dart-turns
+    DisplayName: 
+    Kind: 12
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -245, y: -540}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: PoisonDart
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 2
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - ranger-a-3
+  - Key: ranger-a-dart-sure
+    DisplayName: 
+    Kind: 12
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -200, y: -640}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: PoisonDart
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 3
+    UpgradeAmount: 15
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - ranger-a-dart-turns
+  - Key: ranger-a-volley-charge
+    DisplayName: 
+    Kind: 12
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -455, y: -780}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Volley
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 4
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - ranger-a-volley-crit
+  - Key: ranger-b-hush-sure
+    DisplayName: 
+    Kind: 12
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 500, y: -700}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Hush
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 3
+    UpgradeAmount: 15
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - ranger-b-6
   - Key: ranger-b-1
     DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 107, y: -325}
     Gains:
       Values:
@@ -286,7 +511,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-trunk-2
@@ -296,6 +525,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 200, y: -380}
     Gains:
       Values:
@@ -305,7 +535,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-1
@@ -315,6 +549,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 292, y: -435}
     Gains:
       Values: []
@@ -322,7 +557,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Snare
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-2
@@ -332,6 +571,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 385, y: -490}
     Gains:
       Values:
@@ -341,7 +581,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-3
@@ -351,6 +595,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 478, y: -545}
     Gains:
       Values: []
@@ -358,7 +603,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-4
@@ -368,6 +617,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 570, y: -600}
     Gains:
       Values: []
@@ -375,7 +625,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Hush
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-5
@@ -385,6 +639,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 663, y: -655}
     Gains:
       Values:
@@ -394,7 +649,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-6
@@ -404,6 +663,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 352, y: -360}
     Gains:
       Values: []
@@ -411,7 +671,11 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-3
@@ -421,6 +685,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 758, y: -710}
     Gains:
       Values:
@@ -430,7 +695,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-7
@@ -440,6 +709,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 723, y: -585}
     Gains:
       Values:
@@ -449,7 +719,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-7
@@ -463,6 +737,7 @@ MonoBehaviour:
       Amount: 2
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
+    EssenceCost: 0
     Position: {x: -853, y: -765}
     Gains:
       Values: []
@@ -470,7 +745,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Galewing
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-a-tip-a
@@ -480,6 +759,7 @@ MonoBehaviour:
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -948, y: -820}
     Gains:
       Values: []
@@ -487,7 +767,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Galewing
+    GrantedUltraKey: 
     SummonAmount: 4
     Neighbors:
     - ranger-galewing
@@ -497,6 +781,7 @@ MonoBehaviour:
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -1043, y: -875}
     Gains:
       Values: []
@@ -504,7 +789,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Galewing
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-galewing-power
@@ -518,6 +807,7 @@ MonoBehaviour:
       Amount: 1
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 2
+    EssenceCost: 0
     Position: {x: -1138, y: -930}
     Gains:
       Values: []
@@ -525,7 +815,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Galewing
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-galewing-stay
@@ -539,6 +833,7 @@ MonoBehaviour:
       Amount: 2
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 3
+    EssenceCost: 0
     Position: {x: 853, y: -765}
     Gains:
       Values: []
@@ -546,7 +841,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Exatrix
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-b-tip-a
@@ -556,6 +855,7 @@ MonoBehaviour:
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 948, y: -820}
     Gains:
       Values: []
@@ -563,7 +863,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Exatrix
+    GrantedUltraKey: 
     SummonAmount: 30
     Neighbors:
     - ranger-exatrix
@@ -573,6 +877,7 @@ MonoBehaviour:
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 1043, y: -875}
     Gains:
       Values: []
@@ -580,7 +885,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Exatrix
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-exatrix-power
@@ -594,6 +903,7 @@ MonoBehaviour:
       Amount: 1
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 2
+    EssenceCost: 0
     Position: {x: 1138, y: -930}
     Gains:
       Values: []
@@ -601,7 +911,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Exatrix
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - ranger-exatrix-stay

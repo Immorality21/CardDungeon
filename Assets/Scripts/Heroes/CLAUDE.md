@@ -59,6 +59,22 @@
   `MagicLoadout.json` and in a run's saved slots (`Dungeon/AwakeningSaves`), so the slot keeps its place.
   The awakened ability must be in the `MagicCatalog` prefab, and counts as "on a grid" for the coverage
   checks. The Warrior has two (`warrior-a-awaken`, `warrior-b-awaken`).
+- **`MagicUpgrade` - abilities are built around on the grid** *(owner, 2026-10-09)*. A node names an
+  ability (`GrantedMagicKey`), an `UpgradeType` and an `UpgradeAmount`: **Power** (+base power on its
+  Damage and Heal), **CritChance** (+percentage points, and it can crit at all), **Duration** (+turns on
+  every timed Buff/Debuff), **ApplyChance** (+points on its debuffs, capped at 100) or **Charges** (+per
+  run). `SphereGridOps.AbilityUpgradesForNodes` sums every bought node per ability into an
+  **`AbilityGrant`** and lists it under the ability's **awakening** too, so awakening never takes an
+  upgrade away; charges are folded straight into `KnownMagicForNodes`, so every reader of the run
+  allowance gets them for free. Everything else is **folded in at the cast** by `EffectResolver`
+  (`UpgradesOf` / `ApplyUpgrades` / `CritChanceWith`) into *copies* of the effects - the `MagicSO` is
+  shared by every hero and enemy and is never changed. Worked out from the activated nodes each time
+  (`Hero.UpgradesFor`, `IAbilityUpgrades`; the hub's `HeroSnapshotUnit` and the model's `SimUnit` answer
+  it too), like everything a grid grants. Glyph ▲, kind label "Ability upgrade", title
+  "<ability>: +2 power". Priced on the depth curve like any XP node; the balance model buys them.
+  **Showcase: the Ranger** - Aimed Shot +2 power and +15% crit (off the signature), Poison Dart +1 turn
+  and +15% to land, Volley +15% crit (`ranger-a-volley-crit`) and +1 charge, Hush +15% to land. Other
+  heroes' upgrade spurs go through the Hero Workbook.
 - **`MagicKnown` nodes are the *only* source of magic in the game** *(since 2026-09-04, when Draw was removed — see `docs/plans/SPECIALIZATION.md` §9b)*. A node teaches `GrantedMagicKey` permanently, at `GrantedCharges` per run.
 
   **Learning is not carrying.** A `MagicKnown` node used to bring its own slot, because under Draw the two were the same thing. Now the grid only grows what a hero *knows*, while slots stay scarce (`EquippedMagicState.DefaultSlotCount`, **2**, plus one per `MagicSlot` node), and the gap between the two is the whole reason a kit is a decision. `SphereGridOps.SlotBonusForNodes` therefore counts **MagicSlot only**; the choice of which known spells fill the slots is made on the hub Inventory screen's **Abilities** tab and resolved by `MagicLoadoutOps.Resolve`.

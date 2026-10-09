@@ -24,6 +24,13 @@ namespace Assets.Scripts.Balance
         /// <summary>True for a debuff on the party, false for a buff on this enemy.</summary>
         public bool OnHeroSide;
 
+        /// <summary>
+        /// A Blind on the party rather than a stat change: <see cref="Stat"/> is None and only
+        /// <see cref="Uptime"/> matters. <c>BalanceMath.OutputSuppressionOf</c> cuts the party's
+        /// physical output by <c>DefenseRules.BlindMissChance</c> for that share of the time.
+        /// </summary>
+        public bool Blinds;
+
         /// <summary>Uptime-weighted magnitude, which is what a closed form can apply.</summary>
         public int Expected => Mathf.RoundToInt(Power * Mathf.Clamp01(Uptime));
     }
@@ -205,7 +212,8 @@ namespace Assets.Scripts.Balance
                         {
                             Stat = entry.TargetStat,
                             Power = entry.Power,
-                            Uptime = Uptime(claim, entry.Duration),
+                            // Only the share of attempts that take hold (AfflictionRules).
+                            Uptime = Uptime(claim * Cards.AfflictionRules.Chance(entry.ApplyChance), entry.Duration),
                             OnHeroSide = true
                         });
                         break;

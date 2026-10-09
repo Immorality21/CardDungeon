@@ -24,5 +24,12 @@ namespace Assets.Scripts.Cards
         /// topped itself up would cost nothing.
         /// </summary>
         public int CastSlot = -1;
+
+        /// <summary>
+        /// The targets this cast struck critically, rolled once per target by <c>EffectResolver</c>
+        /// before any effect runs, so every damage effect of the cast agrees. Empty for an ability
+        /// that cannot crit. Read by <c>DamageEffectExecutor</c>.
+        /// </summary>
+        public List<ICombatUnit> CritTargets = new List<ICombatUnit>();
     }
 }

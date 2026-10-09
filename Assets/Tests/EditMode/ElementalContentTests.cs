@@ -35,9 +35,10 @@ namespace Tests.EditMode
         }
 
         /// <summary>
-        /// Every magic a hero can learn: all of it, minus the abilities a summon casts and the ones an
-        /// Ultra's form grants. Those are reached through the summon or the form, never a grid node,
-        /// the Forge or a loadout (SummonOps.AbilityKeys, UltraOps.AbilityKeys).
+        /// Every magic a hero can learn: all of it, minus the abilities a summon casts, the ones an
+        /// Ultra's form grants and an enemy's own (MagicSO.EnemyOnly). Those are reached through the
+        /// summon, the form or the enemy, never a grid node, the Forge or a loadout
+        /// (SummonOps.AbilityKeys, UltraOps.AbilityKeys, EnemyAbilityTests).
         /// </summary>
         private static List<MagicSO> LoadHeroMagic()
         {
@@ -47,7 +48,7 @@ namespace Tests.EditMode
                 .Select(g => AssetDatabase.LoadAssetAtPath<UltraSO>(AssetDatabase.GUIDToAssetPath(g)));
             var notLearnable = SummonOps.AbilityKeys(summons);
             notLearnable.UnionWith(UltraOps.AbilityKeys(ultras));
-            return LoadAllMagic().Where(m => !notLearnable.Contains(m.Key)).ToList();
+            return LoadAllMagic().Where(m => !notLearnable.Contains(m.Key) && !m.EnemyOnly).ToList();
         }
 
         [Test]

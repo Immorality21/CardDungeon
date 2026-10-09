@@ -44,6 +44,21 @@ namespace Assets.Scripts.Cards
         [Min(0)]
         public int BonusThreat;
 
+        [Tooltip("Whether this ability's damage can be a critical hit, at the caster's crit chance " +
+                 "(CritRules - Luck raises it) for CritRules.Multiplier damage. Off by default: basic " +
+                 "attacks always may crit, an ability only when authored to, or when its caster's " +
+                 "sphere grid bought a crit upgrade for it (a MagicUpgrade node). An awakened ability is its own asset " +
+                 "and carries its own flag.")]
+        public bool CanCrit;
+
+        [Tooltip("An enemy's own ability, which no hero can ever learn: it is never on a sphere grid, " +
+                 "never in the MagicCatalog (so never in the Forge or a loadout), and an enemy reaches " +
+                 "it through its EnemySO.Spells or a behaviour action. Keep these in " +
+                 "ScriptableObjects/Enemies/Abilities. A hero ability an enemy also casts (Poison Dart, " +
+                 "Slash) is shared and not flagged - duplicate it into an enemy-only copy when the " +
+                 "enemy's version should be tuned on its own.")]
+        public bool EnemyOnly;
+
         public bool HasEffectType(SpellEffectType type)
         {
             return Effects.Any(e => e.EffectType == type);

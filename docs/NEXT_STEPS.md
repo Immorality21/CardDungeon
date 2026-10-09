@@ -207,9 +207,21 @@ Rogue builds, awakenings, gear reactions, Ultras), and **then** the balance pass
   it, never a first clear. It buys **Essence-priced sphere-grid nodes** (specific upgrades such as an
   awakened War Cry, not ranks on nodes already bought) and **combo upgrades** at the Forge. The
   Forge no longer upgrades abilities; an ability grows on its hero's grid.
-- **The seven stats stay seven; Spirit and Luck got second jobs** *(2026-10-03)*. Spirit is the
-  defence against magic (Intelligence/Spirit-scaled effects) in a clean split with Endurance, and
-  Luck dodges physical hits only, on both sides. Do not add Magic Defense, Evasion or Accuracy stats.
+- **Spirit and Luck got second jobs** *(2026-10-03)*. Spirit is the defence against magic
+  (Intelligence/Spirit-scaled effects) in a clean split with Endurance, and Luck dodges physical hits
+  only, on both sides. *(This entry used to add "Do not add Magic Defense, Evasion or Accuracy stats".
+  The owner did not make that rule (2026-10-09) and an Accuracy stat is open to them. They chose
+  **Blind as the game's miss** instead, to keep it simple, which is the next entry.)*
+- **Abilities are something to build around** *(owner, 2026-10-09)*. The grid deepens an ability with
+  authored **ability-upgrade nodes** (`MagicUpgrade`: power, crit chance, duration, debuff chance,
+  charges), not with runes or free points. Deepening one ability is a build, alongside branches and
+  awakenings. The Heroes guide.
+- **Misses come from Blind, crits from Luck, and every debuff is a chance** *(owner, 2026-10-09)*.
+  A blinded unit's physical hits miss half the time; there is **no base miss chance** and no
+  Accuracy stat. An ability crits only when it **can** (`MagicSO.CanCrit`, or unlocked per hero by
+  a `MagicCrit` sphere-grid node). **Every debuff** — stat cuts, Silence, Blind, Burn, Poison,
+  Bleed — lands on an authored `ApplyChance`, because a status that always lands makes a fight
+  trivial and predictable. The Combat and Magic guides.
 
 ---
 
@@ -227,7 +239,7 @@ backlog.**
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **done** — shipped 2026-09-06; **every hero has a source since 2026-09-30** (run clear, room event, secret run) |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
 | **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
-| **4** | Sphere grid — follow-ups | mostly superseded by §4c |
+| **4** | Sphere grid — follow-ups | mostly superseded by §4c. **Ability upgrades (`MagicUpgrade`) built 2026-10-09** with the Ranger as showcase; other heroes' spurs wait on the Hero Workbook |
 | — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) **Ultras for the other six heroes** - the gauge is universal but only the Warlock and the Cultist can spend it (§13 below) |
 | — | **The Mage — an elemental caster** | ✅ **on the roster 2026-10-07** — rescued in the new **Sealed Archive** (main line, before the March); three-branch grid (storm / frost / fire, Fire Cloak early for the Ashen Deep), new Chain Lightning. **Open:** his signature and Ultra are MultiCast (spend Focus to cast 2-4 times, owner 2026-10-07, details open); summons are drafts in the hero workbook |
 
@@ -235,7 +247,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **9** | Status effects — over-time, Silence, the cure loop | ✅ shipped 2026-09-03; follow-ups open |
+| **9** | Status effects — over-time, Silence, the cure loop | ✅ shipped 2026-09-03; **Blind + per-debuff apply chance 2026-10-09**; next: **status resistances** - gear (and later other sources) that grant immunity or resistance to an ailment (owner, 2026-10-09) |
 | **11** | Threat — a reason for a defensive build | ✅ threat shipped 2026-09-28; balance model + threat UI open |
 | **12** | Enemy action vocabulary — the missing verbs | ✅ **BuffAlly, Guard, Summon shipped 2026-10-08** (Bog Shaman, Steam Automaton, Gilded Hoarder); Steal / Flee dropped by the owner |
 | **13** | Hero identity — the Ultra gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the **Ultra** gauge (working name for a Limit/Overdrive, 2026-10-04) is what is left; per-hero styles collected in Hero Vision |
@@ -300,6 +312,26 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Ability upgrades on the sphere grid** (2026-10-09) — the Heroes and Magic guides. One node kind,
+  `MagicUpgrade` (it replaced the crit-only node from earlier the same day): Power, CritChance, Duration,
+  ApplyChance or Charges on one ability, summed per hero into an `AbilityGrant`, carried to the
+  ability's awakening, folded into copies of the effects at the cast; the ability text, the hub tab and
+  the balance model all read the same grant. **Showcase: the Ranger**, seven ▲ spurs (Aimed Shot,
+  Poison Dart, Volley, Hush). Checked in play: the text, a +2 Aimed Shot landing 29 not 27, the grid
+  screen. Suite 1469 / 0. **Next:** upgrade spurs for the other heroes, via the Hero Workbook.
+- **Crits, misses (Blind) and debuff chances** (2026-10-09) — the Combat and Magic guides,
+  `BALANCING.md` §5af. `CritRules` (crit numbers moved off `CombatManager`); `MagicSO.CanCrit`, on for
+  Slash, Sunder, Backstab, Aimed Shot and Poison Dart; `SphereNodeKind.MagicCrit` (first one:
+  `ranger-a-volley-crit`, a spur off Volley); the summon/Ultra physical single-target hits can crit too
+  (Exatrix's Rend, Radiant Cut, Succubus Lash, the Horror's Crushing Maw / Engulf / Wrong Angles). `BuffType.Blinded` + `DefenseRules.RollMiss` (50%,
+  physical only, before the dodge); **Smoke Bomb now blinds every enemy** (50% each, 3 turns) instead
+  of the party Agility buff. `SpellEffect.ApplyChance` / `EnemyActionEntry.ApplyChance` rolled by
+  `AfflictionRules` on every debuff (default 100). Owner's chances: Poison Dart 75%, every bleed 60%,
+  every Silence 50%, the Freeze combo 50%; Smoke Bomb 50%. **The Hex Weaver blinds the party**
+  with **Blinding Hex**, the first **enemy-only ability** (`MagicSO.EnemyOnly`: never on a grid or in
+  the catalog, `EnemyAbilityTests`), cast weight 0.5 - at 1 the Blood Stair's step went to 75.2%. The balance
+  model prices all three, Blind included (`StatShift.Blinds`). `CritMissAfflictionTests`; suite
+  1459 / 0; seen in play (`Sandbox/CritBlind`).
 - **Art and UI pass** (2026-10-08) — `POLISH_CONTENT.md` §21, `docs/PIXEL_ART.md` §8e. Combat backgrounds
   for the 8 floors that had none (`combat_halls/caverns/archive/chapel`, PixelLab pro, 15 generations
   each) and the battle art bottom-anchored at 1.3x so its floor meets the formation

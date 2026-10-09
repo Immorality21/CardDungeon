@@ -165,6 +165,11 @@ namespace Assets.Scripts.Balance
                     // point of building for it. Skipping it would price an absorbed cast as merely
                     // harmless instead of helpful.
                     perTarget = AverageAgainst(effect, RawPower(effect, powerScale, caster), heroes);
+                    // An ability that can crit lands its expected crit on average, as a basic attack does.
+                    if (EffectResolver.CanCrit(magic, caster) && perTarget > 0f)
+                    {
+                        perTarget *= BalanceMath.ExpectedCritMultiplier(caster);
+                    }
                 }
                 else
                 {
@@ -172,6 +177,11 @@ namespace Assets.Scripts.Balance
                     if (perTarget <= 0f)
                     {
                         continue;   // not an over-time effect at all, or one that heals
+                    }
+                    // A debuff takes hold only ApplyChance of the time (AfflictionRules).
+                    if (effect.EffectType == SpellEffectType.Debuff)
+                    {
+                        perTarget *= AfflictionRules.Chance(effect.ApplyChance);
                     }
                 }
 
@@ -307,6 +317,26 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
+                // A debuff takes hold only on the share of casts where it lands (AfflictionRules).
+                float landing = effect.EffectType == SpellEffectType.Debuff
+                    ? AfflictionRules.Chance(effect.ApplyChance)
+                    : 1f;
+
+                // Blind is a status, not a stat, but what it does is cut the party's physical output,
+                // which is exactly what a stat shift is priced as. Leaving it out would read a blinding
+                // enemy as one that wastes its turn.
+                if (effect.EffectType == SpellEffectType.Debuff && effect.BuffType == BuffType.Blinded && onHeroSide)
+                {
+                    into.Add(new StatShift
+                    {
+                        Stat = StatType.None,
+                        Blinds = true,
+                        Uptime = EnemyBehaviorModel.Uptime(claim * landing, effect.Duration),
+                        OnHeroSide = true
+                    });
+                    continue;
+                }
+
                 StatType stat;
                 if (!System.Enum.TryParse(effect.BuffType.ToString(), out stat)
                     || stat == StatType.None
@@ -319,7 +349,7 @@ namespace Assets.Scripts.Balance
                 {
                     Stat = stat,
                     Power = Mathf.Abs(effect.Power),
-                    Uptime = EnemyBehaviorModel.Uptime(claim, effect.Duration),
+                    Uptime = EnemyBehaviorModel.Uptime(claim * landing, effect.Duration),
                     OnHeroSide = onHeroSide
                 });
             }
@@ -360,8 +390,8 @@ namespace Assets.Scripts.Balance
 
         /// <summary>
         /// Average damage one effect lands on a uniformly random living hero — which is how
-        /// <see cref="EnemyMagicPlan.ResolveTargets"/> picks a single target. Deliberately
-        /// crit-free: <see cref="Cards.Effects.DamageEffectExecutor"/> has no crit roll.
+        /// <see cref="EnemyMagicPlan.ResolveTargets"/> picks a single target. Crit-free:
+        /// <see cref="DamageOfCast"/> applies the expected crit for an ability that can crit.
         /// </summary>
         private static float AverageAgainst(SpellEffect effect, int rawPower, IList<SimUnit> heroes)
         {

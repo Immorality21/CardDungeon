@@ -473,6 +473,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                         Amount = entry.Power,
                         Duration = entry.Duration,
                         DebuffStat = entry.TargetStat,
+                        ApplyChance = entry.ApplyChance,
                         EntryIndex = index
                     };
 

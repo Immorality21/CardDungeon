@@ -1533,10 +1533,17 @@ namespace Assets.Scripts.Balance
         private static float EstimateMagicDamage(SimUnit caster, SimMagicSlot slot, SimUnit target, CombatBuffTracker buffTracker)
         {
             float total = 0f;
-            // Abilities carry no upgrade bonus since the Forge stopped upgrading them (HUB.md §3c).
-            const int powerBonus = 0;
+            // The Forge no longer upgrades abilities (HUB.md §3c); the grid does, through the caster's
+            // MagicUpgrade nodes - the same grant EffectResolver folds in at the cast.
+            var upgrades = EffectResolver.UpgradesOf(slot.Magic, caster);
+            int powerBonus = upgrades != null ? upgrades.PowerBonus : 0;
             int attackBonus = buffTracker.GetBuffAmount(caster, caster.AttackStat);
-            float dodge = slot.Magic.IsPhysicalAttack() ? DefenseRules.DodgeChanceFor(target) : 0f;
+            // A physical ability reaches the target only when the caster does not miss (Blind) and
+            // the target does not dodge; magic always reaches.
+            float hit = slot.Magic.IsPhysicalAttack()
+                ? DefenseRules.HitChance(BlindedBuffHandler.IsBlinded(buffTracker, caster), target)
+                : 1f;
+            float crit = 1f + EffectResolver.CritChanceWith(slot.Magic, caster) * (CombatManager.CritMultiplier - 1f);
 
             foreach (var effect in slot.Magic.Effects)
             {
@@ -1568,7 +1575,7 @@ namespace Assets.Scripts.Balance
                     buffTracker.GetResistanceBonus(target, effect.DamageType));
             }
 
-            return total * (1f - dodge);
+            return total * hit * crit;
         }
 
         private static float BasicAttackDamage(SimUnit attacker, SimUnit target, CombatBuffTracker buffTracker)
@@ -1578,7 +1585,7 @@ namespace Assets.Scripts.Balance
             return DamageCalculator.Calculate(
                 attacker.GetEffectiveAttackPower() + attackBonus, defense, attacker.AttackDamageType,
                 target.Resistances, buffTracker.GetResistanceBonus(target, attacker.AttackDamageType))
-                * (1f - DefenseRules.DodgeChanceFor(target));
+                * DefenseRules.HitChance(BlindedBuffHandler.IsBlinded(buffTracker, attacker), target);
         }
 
         // ---------------------------------------------------------------- enemy turns
@@ -1671,7 +1678,7 @@ namespace Assets.Scripts.Balance
                 case EnemyActionType.Debuff:
                 {
                     var target = decision.Target;
-                    if (target != null && target.IsAlive)
+                    if (target != null && target.IsAlive && AfflictionRules.Lands(decision.ApplyChance))
                     {
                         buffTracker.ApplyBuff(target, decision.DebuffStat, -decision.Amount, decision.Duration);
                     }
@@ -1811,6 +1818,10 @@ namespace Assets.Scripts.Balance
             {
                 target = guard;
             }
+            if (DefenseRules.RollMiss(BlindedBuffHandler.IsBlinded(buffTracker, attacker)))
+            {
+                return 0;
+            }
             if (DefenseRules.RollDodge(target))
             {
                 return 0;
@@ -1824,10 +1835,10 @@ namespace Assets.Scripts.Balance
                 rawAttack, defense, attacker.AttackDamageType, target.Resistances,
                 buffTracker.GetResistanceBonus(target, attacker.AttackDamageType));
 
-            bool crit = damage > 0 && Random.Range(0f, 1f) < CombatManager.CritChanceFor(attacker);
+            bool crit = damage > 0 && CritRules.RollCrit(attacker);
             if (crit)
             {
-                damage = Mathf.Max(damage + 1, Mathf.RoundToInt(damage * CombatManager.CritMultiplier));
+                damage = CritRules.Apply(damage);
             }
 
             // Absorbed (negative) heals, clamped to the target's maximum - the same HealthOps call, and

@@ -31,9 +31,13 @@ public class MagicComboSOEditor : Editor
             {
                 lines = 4; // + DamageType
             }
-            else if (effectType == SpellEffectType.Buff || effectType == SpellEffectType.Debuff)
+            else if (effectType == SpellEffectType.Buff)
             {
                 lines = 5; // + BuffType + Duration
+            }
+            else if (effectType == SpellEffectType.Debuff)
+            {
+                lines = 6; // + BuffType + Duration + ApplyChance
             }
             return lines * (EditorGUIUtility.singleLineHeight + 2) + 4;
         };
@@ -75,6 +79,16 @@ public class MagicComboSOEditor : Editor
                     new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
                     element.FindPropertyRelative("Duration"));
                 rect.y += lineHeight;
+
+                if (effectType == SpellEffectType.Debuff)
+                {
+                    EditorGUI.PropertyField(
+                        new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                        element.FindPropertyRelative("ApplyChance"),
+                        new GUIContent("Apply Chance %", "Percent chance this debuff takes hold on each "
+                            + "target (AfflictionRules). 100 always lands."));
+                    rect.y += lineHeight;
+                }
             }
 
             // Upgrade level at which this effect unlocks (0 = always active).

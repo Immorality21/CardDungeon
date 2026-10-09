@@ -163,6 +163,29 @@ namespace Assets.Scripts.Heroes.UI
             }
         }
 
+        /// <summary>
+        /// What one ability upgrade adds, in the words the grid screen and the payload line share:
+        /// "+2 power", "+15% crit chance", "+1 turn", "+10% to land its debuffs", "+1 charge a run".
+        /// </summary>
+        public static string DescribeUpgrade(AbilityUpgradeType type, int amount)
+        {
+            switch (type)
+            {
+                case AbilityUpgradeType.Power:
+                    return $"+{amount} power";
+                case AbilityUpgradeType.CritChance:
+                    return $"+{amount}% crit chance";
+                case AbilityUpgradeType.Duration:
+                    return amount == 1 ? "+1 turn" : $"+{amount} turns";
+                case AbilityUpgradeType.ApplyChance:
+                    return $"+{amount}% to land its debuffs";
+                case AbilityUpgradeType.Charges:
+                    return amount == 1 ? "+1 charge a run" : $"+{amount} charges a run";
+                default:
+                    return type.ToString();
+            }
+        }
+
         /// <summary>The sg-node--* USS kind class for a node.</summary>
         public static string KindClass(SphereGridNode node)
         {
@@ -178,6 +201,7 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.MagicSlot:
                 case SphereNodeKind.MagicKnown:
                 case SphereNodeKind.MagicAwaken:
+                case SphereNodeKind.MagicUpgrade:
                 case SphereNodeKind.Summon:
                 case SphereNodeKind.SummonPower:
                 case SphereNodeKind.SummonDuration:
@@ -219,6 +243,8 @@ namespace Assets.Scripts.Heroes.UI
                     return "✦";
                 case SphereNodeKind.MagicAwaken:
                     return "✧";
+                case SphereNodeKind.MagicUpgrade:
+                    return "▲";
                 case SphereNodeKind.Summon:
                     return "◆";
                 case SphereNodeKind.Ultra:
@@ -291,6 +317,11 @@ namespace Assets.Scripts.Heroes.UI
                 string from = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
                 string to = string.IsNullOrEmpty(node.AwakenedMagicKey) ? "(unset)" : node.AwakenedMagicKey;
                 return $"Awakens {from} into {to} — same slot, same charges";
+            }
+            if (node.Kind == SphereNodeKind.MagicUpgrade)
+            {
+                string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
+                return $"{name}: {DescribeUpgrade(node.UpgradeType, node.UpgradeAmount)}";
             }
             if (node.Kind == SphereNodeKind.Ultra)
             {
@@ -401,6 +432,8 @@ namespace Assets.Scripts.Heroes.UI
                     return "Known ability";
                 case SphereNodeKind.MagicAwaken:
                     return "Awakening";
+                case SphereNodeKind.MagicUpgrade:
+                    return "Ability upgrade";
                 case SphereNodeKind.Summon:
                     return "Summon";
                 case SphereNodeKind.Ultra:

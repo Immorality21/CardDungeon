@@ -39,6 +39,8 @@ namespace Assets.Scripts.Cards
         Bleeding = 17,
         Regenerating = 18,
         // Command gate: blocks casting for a hero and every CastMagic action for an enemy.
-        Silenced = 19
+        Silenced = 19,
+        // Miss chance: a blinded unit's physical hits miss half the time (DefenseRules.BlindMissChance).
+        Blinded = 20
     }
 }

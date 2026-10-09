@@ -40,6 +40,18 @@ namespace Assets.Scripts.Cards
                 return lines;
             }
 
+            // The caster's grid upgrades for this ability (MagicUpgrade nodes) are folded in exactly as
+            // EffectResolver folds them in at the cast, so the text shows the numbers it will hit for.
+            var upgrades = EffectResolver.UpgradesOf(magic, caster);
+            int bonus = powerBonus + (upgrades != null ? upgrades.PowerBonus : 0);
+
+            // Whether it can crit depends on the caster too (a grid node can unlock it), so it is said
+            // on the damage line rather than read off the asset alone - with the real chance when there
+            // is a caster to read it from.
+            bool canCrit = EffectResolver.CanCrit(magic, caster);
+            string critText = caster != null
+                ? $", {Mathf.RoundToInt(EffectResolver.CritChanceWith(magic, caster) * 100f)}% crit"
+                : ", can crit";
             foreach (var effect in magic.Effects)
             {
                 if (effect == null || effect.UnlockLevel > upgradeLevel)
@@ -47,9 +59,13 @@ namespace Assets.Scripts.Cards
                     continue;
                 }
 
-                string line = Describe(effect, caster, buffTracker, powerBonus);
+                string line = Describe(EffectResolver.ApplyUpgrades(effect, upgrades), caster, buffTracker, bonus);
                 if (!string.IsNullOrEmpty(line))
                 {
+                    if (canCrit && effect.EffectType == SpellEffectType.Damage)
+                    {
+                        line += critText;
+                    }
                     lines.Add(line);
                 }
             }
@@ -233,7 +249,14 @@ namespace Assets.Scripts.Cards
             }
 
             int turns = Mathf.Max(0, effect.Duration);
-            return turns > 0 ? $"{text}, {turns} turn{(turns == 1 ? "" : "s")}" : text;
+            text = turns > 0 ? $"{text}, {turns} turn{(turns == 1 ? "" : "s")}" : text;
+
+            // Every debuff is a chance (AfflictionRules); a certain one says nothing.
+            if (sign < 0 && effect.ApplyChance < AfflictionRules.Certain)
+            {
+                text += $", {effect.ApplyChance}% chance";
+            }
+            return text;
         }
 
         /// <summary>
@@ -246,6 +269,7 @@ namespace Assets.Scripts.Cards
             { BuffType.Slow, "acts less often" },
             { BuffType.Haste, "acts more often" },
             { BuffType.Silenced, "cannot use abilities" },
+            { BuffType.Blinded, "physical hits may miss" },
         };
     }
 }

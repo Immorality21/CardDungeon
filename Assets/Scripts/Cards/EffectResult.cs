@@ -29,6 +29,10 @@ namespace Assets.Scripts.Cards
         // How resistance affected this hit (Weak/Resisted/Immune/…) — the presenter turns a
         // non-Normal value into a coloured popup. Default Normal for non-damage entries.
         public DamageEffectiveness Effectiveness = DamageEffectiveness.Normal;
+
+        // A critical hit: the presenter adds the gold CRIT! popup, a bigger number and more punch,
+        // the same dressing a critical basic attack gets in CombatManager.ExecuteAttack.
+        public bool Crit;
     }
 
     public class EffectResult

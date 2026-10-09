@@ -2757,3 +2757,40 @@ and the analyzer, before and after the content, the code already in:
   Shaman's mend kept lifting the Hoarder back over 60%, so Spill never fired until the Shaman was dead.
   Not a bug - killing the healer first is the counterplay - but a condition on `SelfHealthBelow` beside
   an enemy healer fires far later than its occupancy (0.25) assumes.
+
+## §5af — Crits, Blind and debuff chances in the model, and a floor on the ceiling (2026-10-09)
+
+**What the model prices.** All three are in both the simulator and the closed form, through the
+same rule classes the game uses:
+
+| | simulator | closed form |
+|---|---|---|
+| ability crit (`CanCrit` / `MagicCrit` node) | rolled in `EffectResolver` | enemy spells: `× ExpectedCritMultiplier` in `EnemyMagicModel.DamageOfCast`; hero abilities are not in the closed form (basic attacks only), so a hero crit moves nothing there |
+| Blind (a blinded attacker's physical hits miss 50%) | rolled in `ResolveAttack` and the cast's hit filter; the heroes' targeting estimates multiply by `DefenseRules.HitChance` | an enemy's party Blind is a `StatShift` with `Blinds = true`; `OutputSuppressionOf` cuts party output by `0.5 × uptime` |
+| debuff `ApplyChance` | rolled in `DebuffEffectExecutor` and the enemy Debuff action | damage-over-time × chance, stat-shift uptime from `claim × chance` |
+
+**A status with no stat priced as nothing until this pass.** `CollectStatShifts` only knew stat debuffs,
+so a Blind cast read as a wasted enemy turn. That is the Silence problem in `COMBAT_DEPTH.md` §9, and the
+fix is the same shape for any future control status: say what it costs the party's output, in the
+output-suppression term, or the analyzer reads the enemy as weaker for having it.
+
+**The Threshold's first step sits at 74% against a 75% ceiling.** Giving the Floating Eye Smoke Bomb
+(a third spell, cast weight 1) took the opening floor's load from 0.414 to 0.389 and the step to 79%,
+and even weight 0.25 left it at 75.3%. With Blind priced, the loss is still net: on a one-hero floor a
+non-damaging cast in place of an Ice Shard costs the Eye more than the miss chance gains it. So the
+opening floor cannot get *any* softer without `RunDifficultyEscalates` failing. Know this before
+touching Dungeon Entrance's enemies. The Eye keeps its two spells, and a blinding enemy belongs
+further in.
+
+**Crit-capable hero abilities barely move the curve** (±0.001 load on The Threshold) because the
+closed form prices heroes on basic attacks. Their effect shows in the simulator and the frontier, not
+the attrition bands.
+
+**The Hex Weaver's Blind (Blinding Hex, then a shared Smoke Bomb), and a curve that is not monotonic.** The Blood Stair's Chapel of Knives →
+Ossuary Gate step against the Hex Weaver's Smoke Bomb cast weight: 0 → 71.5%, 0.5 → 70.8%, 0.75 →
+75.4%, 1 → 75.2% (ceiling 75%). Every floor gets a little softer as the weight rises, but not evenly,
+and the step is not monotonic in the weight, so **probe a few values rather than bisecting**. Shipped at
+0.5, which also leaves the analyzer at the same 96 warnings as no Smoke Bomb at all. The owner's
+debuff chances (Poison Dart 75%, bleed 60%, Silence 50%, Freeze combo 50%) moved the closed form by
+less than 0.002 load anywhere: the closed form prices hero output on basic attacks, and the only enemy
+debuff they touch is Poison Dart's poison.

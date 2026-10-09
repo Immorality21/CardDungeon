@@ -35,5 +35,7 @@ MonoBehaviour:
     BuffType: 16
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 75
   Tags: 04000000
   TagDuration: 3
+  CanCrit: 1

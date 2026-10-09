@@ -335,7 +335,10 @@ re-applied effect (the tracker refreshes rather than stacks) and one that outliv
 over-counted.
 
 **What is still not priced:** a resistance buff (`FireResistance`), a turn-denial status (`Frozen`) and
-a **command gate** (`Silenced`). `BuffType` maps to `StatType` by name, the same way
+a **command gate** (`Silenced`). (A party **Blind** is priced since 2026-10-09: a `StatShift` with
+`Blinds` set, which `OutputSuppressionOf` turns into a cut of the party's physical output - see
+`docs/BALANCING.md` §5af. Hero **ability upgrades** reach the simulator through `SimUnit.AbilityUpgrades`;
+the closed form prices heroes on basic attacks, so it does not see them.) `BuffType` maps to `StatType` by name, the same way
 `BuffHandlerRegistry` builds its stat handlers, and anything with no matching stat is **skipped rather
 than guessed at** — putting an invented number into the danger index would be worse than a known
 omission. Silence is the one that bites hardest: it removes a hero's entire magic verb and prices as

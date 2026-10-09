@@ -18,6 +18,16 @@
   **This was `DrawableMagicEntry`, and it was the Draw list.** Until 2026-09-04 the same entries were what the player extracted with the Draw command, and a `Charges` field said how many casts a draw granted. Draw was removed (`docs/plans/SPECIALIZATION.md` §9b) and the list kept only the half that was always the monster's: what it can throw. `Charges` went with it — it was never read by the cast path.
 
   **`CastWeight: 0` means "in the repertoire but never chosen"** — a zero-weight entry is skipped by `EnemyMagicPlan.Select` while every other entry has a weight. Under Draw that combination was load-bearing: it is how the defensive cloaks were placed on enemies (a cloak wards the element that enemy *deals*, so casting one would waste its turn) while still being obtainable. With Draw gone a zero-weight entry is inert content — the cloaks now live on sphere grids instead, and any remaining `CastWeight: 0` entry is worth a second look. (Beware the edge: if *every* entry on an enemy is 0 the pick is uniform, so 0 only means "never" alongside non-zero siblings.)
+- **Shared or enemy-only** *(2026-10-09)*. An entry is an ordinary `MagicSO`, and most are the
+  **hero's own asset** (the Hex Weaver's Poison Dart is the Ranger's), so tuning it tunes both. When
+  an enemy's version should be tuned alone, give it its own copy with **`MagicSO.EnemyOnly`** in
+  `ScriptableObjects/Enemies/Abilities/`. An enemy-only ability is never on a grid, never in the
+  `MagicCatalog` (so never in the Forge or a loadout) and must be carried by some enemy:
+  `EnemyAbilityTests` enforces all three, and the grid-coverage and catalog tests and the balance
+  collector leave it out of "hero magic". Nothing else changes: the enemy reaches it through its
+  reference, as the Bestiary does. First one: **Blinding Hex** (the Hex Weaver's Blind, split off the
+  Rogue's Smoke Bomb). The content rule that every ability sits on some grid exempts only these,
+  summon abilities and Ultra abilities, so a new enemy ability is either a hero's or flagged.
 - **EnemyMagicPlan**: the pure helpers a `CastMagic` action uses — which magic (weighted by `CastWeight`) and at whom. `MagicTargetType` is authored from the *player's* side, so for an enemy "enemy" means the hero side and "ally" means the other monsters (a single-ally cast picks the most wounded). Called by `EnemyActionPlanner`, covered by `EnemyCastingTests`.
 - **EnemyBehaviorSO** is an enemy's repertoire as data — see *Behaviors* below. `EnemySO.Behavior` points at one; `ResolvedBehavior` falls back to the built-in preset for `Archetype`, and `ArchetypeOf` reports the assigned behaviour's label so the two cannot drift.
 - **EnemyManager** spawns enemies into rooms (with optional manual-layout overrides) and tracks/cleans up live enemies. For each entry it instantiates the shared prefab and calls `Enemy.Initialize(entry.Enemy)`.

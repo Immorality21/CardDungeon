@@ -393,6 +393,8 @@ namespace Assets.Scripts.Enemies
                     return "Regen";
                 case Cards.BuffType.Silenced:
                     return "Silence";
+                case Cards.BuffType.Blinded:
+                    return "Blind";
                 default:
                     return type.ToString();
             }

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Heroes
 {
-    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches
+    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches, IAbilityUpgrades
     {
         public HeroSO HeroSO;
         public Stats Stats;
@@ -112,6 +112,16 @@ namespace Assets.Scripts.Heroes
             {
                 return SphereGridOps.UltrasForNodes(HeroSO != null ? HeroSO.SphereGrid : null, ActivatedNodes);
             }
+        }
+
+        /// <summary>
+        /// What this hero's grid has added to <paramref name="abilityKey"/> (MagicUpgrade nodes), or null.
+        /// Worked out from the activated nodes each time it is asked, like everything else the grid
+        /// grants - the save holds only node keys.
+        /// </summary>
+        public AbilityGrant UpgradesFor(string abilityKey)
+        {
+            return SphereGridOps.AbilityUpgradesFor(HeroSO != null ? HeroSO.SphereGrid : null, ActivatedNodes, abilityKey);
         }
 
         public List<SummonGrant> KnownSummons

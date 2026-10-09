@@ -56,7 +56,9 @@ namespace Assets.Scripts.Balance.Editor
                 // A summon's own abilities (the Cairn Golem's Brace and Quake) are MagicSO assets, but
                 // no hero ever learns or carries them - they are reached through the summon. Left in,
                 // every supply-chain check would report them as magic no grid teaches.
-                Magic = FindAll<MagicSO>().FindAll(m => !summonAbilityKeys.Contains(m.Key)),
+                // Enemy-only abilities (MagicSO.EnemyOnly) likewise: an enemy reaches them through its
+                // own Spells list, which the enemy-magic model reads directly.
+                Magic = FindAll<MagicSO>().FindAll(m => !summonAbilityKeys.Contains(m.Key) && !m.EnemyOnly),
                 Combos = FindAll<MagicComboSO>(),
                 Items = items,
                 // Reached through the room pools by the run curves; collected here as well so the

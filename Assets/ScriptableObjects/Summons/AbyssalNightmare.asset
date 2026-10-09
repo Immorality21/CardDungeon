@@ -62,6 +62,7 @@ MonoBehaviour:
     BuffType: 19
     Duration: 2
     UnlockLevel: 0
+    ApplyChance: 50
   SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0

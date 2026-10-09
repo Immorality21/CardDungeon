@@ -51,17 +51,11 @@ namespace Assets.Scripts.Cards
             int turns = grant != null ? grant.DurationBonus : 0;
             foreach (var effect in summon.Effects.Where(e => e != null))
             {
-                effects.Add(new SpellEffect
-                {
-                    EffectType = effect.EffectType,
-                    Power = effect.Power + (effects.Count == 0 ? power : 0),
-                    PowerMode = effect.PowerMode,
-                    ScalingStat = effect.ScalingStat,
-                    DamageType = effect.DamageType,
-                    BuffType = effect.BuffType,
-                    Duration = effect.Duration > 0 ? effect.Duration + turns : effect.Duration,
-                    UnlockLevel = 0
-                });
+                var copy = effect.Clone();
+                copy.Power = effect.Power + (effects.Count == 0 ? power : 0);
+                copy.Duration = effect.Duration > 0 ? effect.Duration + turns : effect.Duration;
+                copy.UnlockLevel = 0;
+                effects.Add(copy);
             }
             return effects;
         }
@@ -102,11 +96,12 @@ namespace Assets.Scripts.Cards
             magic.DisplayName = summon.Label;
             magic.TargetType = MagicTargetType.SingleEnemy;
             magic.Tags = new List<MagicTag>();
-            magic.Effects = summon.RandomTargetEffects.Where(e => e != null).Select(e => new SpellEffect
+            magic.Effects = summon.RandomTargetEffects.Where(e => e != null).Select(e =>
             {
-                EffectType = e.EffectType, Power = e.Power, PowerMode = e.PowerMode, ScalingStat = e.ScalingStat,
-                DamageType = e.DamageType, BuffType = e.BuffType,
-                Duration = e.Duration > 0 ? e.Duration + turns : e.Duration, UnlockLevel = 0
+                var copy = e.Clone();
+                copy.Duration = e.Duration > 0 ? e.Duration + turns : e.Duration;
+                copy.UnlockLevel = 0;
+                return copy;
             }).ToList();
             return magic;
         }
