@@ -15,7 +15,7 @@ MonoBehaviour:
   Name: Hallway
   Width: 5
   Height: 2
-  Color: {r: 0.31140804, g: 0.972549, b: 0.2980393, a: 1}
+  Color: {r: 0.28, g: 0.3, b: 0.26, a: 1}
   Kind: 1
   PossibleEvents: []
   EnemySpawnTable: []

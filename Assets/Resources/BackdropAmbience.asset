@@ -18,9 +18,9 @@ MonoBehaviour:
     ImageSize: {x: 384, y: 216}
     Lights:
     - Point: {x: 552, y: 424}
-      Radius: 150
+      Radius: 105
       Color: {r: 1, g: 0.6, b: 0.25, a: 1}
-      Intensity: 0.4
+      Intensity: 0.3
       Flicker: 0.6
       EmbersPerSecond: 0
       SmokePerSecond: 0
@@ -32,9 +32,9 @@ MonoBehaviour:
       EmbersPerSecond: 2.5
       SmokePerSecond: 0
     - Point: {x: 1012, y: 432}
-      Radius: 150
+      Radius: 105
       Color: {r: 1, g: 0.6, b: 0.25, a: 1}
-      Intensity: 0.4
+      Intensity: 0.3
       Flicker: 0.6
       EmbersPerSecond: 0
       SmokePerSecond: 0
@@ -127,6 +127,30 @@ MonoBehaviour:
       Intensity: 0.22
       Flicker: 0.45
       EmbersPerSecond: 0
+      SmokePerSecond: 0
+    TwinklingStars: 0
+    StarField:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+  - BackdropClass: cd-bg--death
+    ImageSize: {x: 384, y: 216}
+    Lights:
+    - Point: {x: 1120, y: 664}
+      Radius: 110
+      Color: {r: 1, g: 0.5, b: 0.22, a: 1}
+      Intensity: 0.3
+      Flicker: 0.75
+      EmbersPerSecond: 0
+      SmokePerSecond: 0
+    - Point: {x: 1120, y: 640}
+      Radius: 0
+      Color: {r: 1, g: 0.5, b: 0.22, a: 1}
+      Intensity: 0
+      Flicker: 0
+      EmbersPerSecond: 1.2
       SmokePerSecond: 0
     TwinklingStars: 0
     StarField:

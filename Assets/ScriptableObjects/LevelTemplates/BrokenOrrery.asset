@@ -36,7 +36,7 @@ MonoBehaviour:
     MinQuantity: 1
     MaxQuantity: 2
   GuaranteedMaterials: []
-  CombatBackground: {fileID: 0}
+  CombatBackground: {fileID: 21300000, guid: f274a8fe29ba42bdb3715699714536a3, type: 3}
   MapBackdrop: {fileID: 0}
   ExplorationMusic: {fileID: 0}
   CombatMusic: {fileID: 0}

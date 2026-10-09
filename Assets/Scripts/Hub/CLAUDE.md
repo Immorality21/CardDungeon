@@ -309,6 +309,12 @@ All UI is **UI Toolkit** (UXML + USS), not uGUI. The pattern, used identically b
   **Tools → MainMenu → Setup Main Menu UI** for MenuScene. Both operate on *the open scene*. Re-run
   after editing structure, then save the scene.
 
+**Every window wears one pixel-art frame** (2026-10-08): `Assets/UI/Frames/window_frame.png`, 24px with
+6px nine-slice borders drawn at 3x (`-unity-slice-*`, `-unity-slice-scale: 3px`) on `.cd-window` and
+the combat panels (`.cd-bar`, `.cd-command-window`, `.cd-party-status`, `.cd-turn-order`,
+`.cd-victory`). The border is an 8px **transparent** border so content never paints over the rim, and
+the fill is part of the image. A new window class should reuse that block rather than a flat border.
+
 `HubUISetup` wires `_document`, `_runDefinition` and `_partyRoster`, and additionally guarantees the
 EventSystem, a camera and the three prefab instances. `MainMenuUISetup` now wires **only**
 `_document` — the run definition and the roster left with the screens that needed them, which is the

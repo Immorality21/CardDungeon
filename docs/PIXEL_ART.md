@@ -343,6 +343,24 @@ The campfire and forge animated with `animate_image` from the shipped PNG (passe
 - **Smoke, sparks and glow are code, not frames** (`AmbienceLayer`): the model did not draw chimney
   smoke when asked, and code effects can spill outside the sprite's box.
 
+## 8e. Combat backgrounds and the death screen — the 2026-10-08 pass
+
+Four combat backgrounds (`Sprites/Backgrounds/combat_halls|caverns|archive|chapel.png`) and the death
+backdrop (`UI/Backdrops/death.png`), all `create_image_pro` at 320x180 (the death screen 384x216, like
+the other menu backdrops), `no_background: false`, **15 generations each** (25 for 384x216), one
+candidate each, every one used first time.
+
+- **Style reference: an existing background, halved and quantized to 32 colours** (`combat_blood`,
+  then `level_entry` for the death screen) passed as a `data:` URL - about 6-9 KB of base64. The full
+  PNGs are 30-45 KB and too big to pass inline; style only needs palette, outline and shading.
+- **Prompt shape**: *"side-view battle backdrop for a dark fantasy dungeon RPG: <place, 4-6 concrete
+  props>, a broad flat floor across the bottom third left open for combatants, no characters, no
+  creatures, <palette> with <light source>"*. The floor-band clause is what makes it work with
+  `CombatStage.BackgroundFloorLift`.
+- **Composition for a screen with a dialog**: say where the focus goes ("on the right half ... the left
+  half is deep shadow and plain wall") and dock the dialog on the empty side.
+- No baked borders this time - still check the corners.
+
 ## 9. Unused designs
 
 Every generation is kept in the PixelLab gallery. The armoured-guardian Warden candidate became the

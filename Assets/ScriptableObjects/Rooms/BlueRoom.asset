@@ -15,7 +15,7 @@ MonoBehaviour:
   Name: Blue Room
   Width: 4
   Height: 5
-  Color: {r: 0.2979263, g: 0.2979263, b: 0.9716981, a: 1}
+  Color: {r: 0.27, g: 0.27, b: 0.36, a: 1}
   IsConnectorRoom: 0
   PossibleEvents: []
   EnemySpawnTable:

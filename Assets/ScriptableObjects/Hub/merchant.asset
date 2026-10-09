@@ -25,6 +25,16 @@ MonoBehaviour:
   AvailableSprite: {fileID: 21300000, guid: e2ab04e90dc34fe68147e4a7f02d3b2c, type: 3}
   LevelSprites:
   - {fileID: 21300000, guid: 40b29153b7a34d96a65e9d41835a1030, type: 3}
+  IdleFrames: []
+  IdleFps: 8
+  Lights:
+  - Point: {x: 162, y: 87}
+    Radius: 34
+    Color: {r: 1, g: 0.66, b: 0.3, a: 1}
+    Intensity: 0.4
+    Flicker: 0.4
+    EmbersPerSecond: 0
+    SmokePerSecond: 0
   PlacedByDefault: 0
   MaxLevel: 1
   PlacementCost:

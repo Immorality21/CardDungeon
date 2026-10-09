@@ -484,7 +484,11 @@ namespace Assets.Scripts.Rooms
                 {
                     var tilePos = startPos + new Vector2Int(w, h);
                     var obj = Instantiate(_tilePrefab, new Vector3(tilePos.x, tilePos.y, 1), Quaternion.identity, roomObj.transform);
-                    obj.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.white, roomNode.roomData.Color, 0.5f);
+                    var floor = obj.GetComponent<SpriteRenderer>();
+                    floor.color = Color.Lerp(Color.white, roomNode.roomData.Color, 0.5f);
+                    // Every cell is the same 32px flagstone tile; mirroring it on a fixed pattern of
+                    // cells breaks up the repeat without more art (the running bond stays seamless).
+                    floor.flipX = (((tilePos.x * 73856093) ^ (tilePos.y * 19349663)) & 1) == 1;
                     _occupiedTiles.Add(tilePos);
                 }
             }

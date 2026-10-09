@@ -48,10 +48,21 @@
     max-height: 62%;
     margin-bottom: 8%;
     padding: 14px 16px 16px 16px;
+    /* The pixel-art frame (Assets/UI/Frames/window_frame.png, 24px, 6px nine-slice borders drawn
+       at 3x): a dark rim, a purple bevel and gold corner studs, so every window belongs to the
+       same painted world as the art behind it. The fill is part of the image; the background
+       colour only shows if the image is missing. */
     background-color: var(--cd-parchment);
-    border-width: 4px;
-    border-color: var(--cd-frame);
-    border-radius: 8px;
+    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 3px;
+    /* Transparent, so the frame image shows through; 8px keeps content off the rim. */
+    border-width: 8px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
 }
 
 .cd-title {
@@ -230,11 +241,18 @@
    Sized like the command menu opposite it (2026-09-29): compact rows, tight to its corner. */
 .cd-party-status {
     min-width: 200px;
-    background-color: var(--cd-parchment);
-    border-width: 4px;
-    border-color: var(--cd-frame);
-    border-radius: 8px;
     overflow: hidden;
+    background-color: var(--cd-parchment);
+    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 3px;
+    /* Transparent, so the frame image shows through; 8px keeps content off the rim. */
+    border-width: 8px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
 }
 
 .cd-party-status__header {
@@ -401,12 +419,19 @@
    Frame colour says the side (purple = party, red = enemy), and the actor's tile is the big one. */
 .cd-turn-order {
     width: 64px;
-    background-color: var(--cd-parchment);
-    border-width: 4px;
-    border-color: var(--cd-frame);
-    border-radius: 8px;
     /* Visible, so the acting unit's tile can pop out of the column to the left (FFX's offset). */
     overflow: visible;
+    background-color: var(--cd-parchment);
+    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 3px;
+    /* Transparent, so the frame image shows through; 8px keeps content off the rim. */
+    border-width: 8px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
 }
 
 /* Tucked 8px from the right edge, like the party panel below it. */
@@ -814,9 +839,16 @@
     align-items: center;
     padding: 10px 12px;
     background-color: var(--cd-parchment);
-    border-width: 4px;
-    border-color: var(--cd-frame);
-    border-radius: 8px;
+    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 3px;
+    /* Transparent, so the frame image shows through; 8px keeps content off the rim. */
+    border-width: 8px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
 }
 
 /* A command button used in bars and the hero command window. */
@@ -848,11 +880,18 @@
    cursor menu, and the 560px it kept from the old horizontal button row was mostly empty frame. */
 .cd-command-window {
     min-width: 190px;
-    background-color: var(--cd-parchment);
-    border-width: 4px;
-    border-color: var(--cd-frame);
-    border-radius: 8px;
     overflow: hidden;
+    background-color: var(--cd-parchment);
+    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 3px;
+    /* Transparent, so the frame image shows through; 8px keeps content off the rim. */
+    border-width: 8px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
 }
 
 .cd-command-window__header {
@@ -961,6 +1000,18 @@
     -unity-background-image-tint-color: rgb(170, 160, 190);
 }
 
+/* The death screen: a dying campfire among the fallen party's gear, on the right - the dialog
+   docks left (.cd-window--death) so the scene stays in view. */
+.cd-bg--death {
+    background-image: url("project://database/Assets/UI/Backdrops/death.png");
+    -unity-background-image-tint-color: rgb(190, 180, 210);
+}
+
+.cd-window--death.cd-dock-center {
+    left: 5%;
+    translate: 0 -50%;
+}
+
 .cd-bg--story-map {
     background-image: url("project://database/Assets/UI/Backdrops/story_map.png");
     -unity-background-image-tint-color: rgb(170, 160, 190);
@@ -981,6 +1032,28 @@
 .cd-title--large {
     font-size: 34px;
     margin-bottom: 18px;
+}
+
+/* The title screen's window: a low strip over the stairs, so the gate and its torches stay in view. */
+.cd-window--title {
+    width: 720px;
+    padding: 10px 16px 12px 16px;
+}
+
+.cd-window--title .cd-title--large {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.cd-title-row {
+    flex-direction: row;
+}
+
+.cd-title-row > .cd-menu-button {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: 46px;
+    margin: 0 6px;
 }
 
 .cd-info-label {
@@ -2103,14 +2176,21 @@
     max-height: 88%;
     padding: 0 0 20px 0;
 
-    background-color: var(--cd-parchment);
 
-    border-width: 4px;
-    border-color: var(--cd-frame);
-    border-radius: 14px;
 
     overflow: hidden;
     align-items: center;
+    background-color: var(--cd-parchment);
+    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 3px;
+    /* Transparent, so the frame image shows through; 8px keeps content off the rim. */
+    border-width: 8px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
 }
 
 .cd-victory__title {
@@ -2518,9 +2598,18 @@
 .cd-command-window,
 .cd-party-status,
 .cd-turn-order {
-    border-radius: 12px;
     border-width: 2px;
-    border-color: var(--cd-frame);
+    background-color: var(--cd-parchment);
+    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 3px;
+    /* Transparent, so the frame image shows through; 8px keeps content off the rim. */
+    border-width: 8px;
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
 }
 
 .cd-cmd-row,

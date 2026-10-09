@@ -24,6 +24,10 @@ namespace Assets.Scripts.Combat
         // 900 and floating text at 1000). Bumping units to 600 is mandatory — enemies start at
         // sortingOrder 5, i.e. *below* the background, and would otherwise be hidden.
         private const int BackgroundSortOrder = 400;
+
+        // How much larger than a plain cover-fit the battle art is drawn, bottom-anchored, so its floor
+        // band meets the formation rather than sitting under the command menu (RaiseBackground).
+        private const float BackgroundFloorLift = 1.3f;
         private const int UnitSortOrder = 600;
         private const int MaxRanks = 2; // EnemyFormation ranks 0..2 sort at 602..600
         private const float CombatUnitScale = 1.5f;
@@ -631,8 +635,13 @@ namespace Assets.Scripts.Combat
             {
                 // Uniform cover-fit so real art keeps its aspect (crops overflow, no stretch).
                 var size = art.bounds.size;
-                float scale = Mathf.Max(coverW / Mathf.Max(0.01f, size.x), coverH / Mathf.Max(0.01f, size.y));
+                float scale = Mathf.Max(coverW / Mathf.Max(0.01f, size.x), coverH / Mathf.Max(0.01f, size.y))
+                              * BackgroundFloorLift;
                 _backgroundGo.transform.localScale = new Vector3(scale, scale, 1f);
+                // Bottom-anchored: the extra size crops the ceiling, never the floor, and lifts the art's
+                // floor band (its bottom third) up to where the formation stands - the stage sits above
+                // the middle to clear the command menu, which put every unit on the back wall.
+                _backgroundGo.transform.localPosition = new Vector3(0f, size.y * scale * 0.5f - coverH * 0.5f, 10f);
             }
             else
             {

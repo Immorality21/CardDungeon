@@ -63,6 +63,7 @@ namespace Assets.Scripts.Rooms
         private readonly Dictionary<Heroes.Hero, VisualElement> _partyGaugeFills = new Dictionary<Heroes.Hero, VisualElement>();
         private Label _fightFoes;
         private VisualElement _dialogScrim;
+        private VisualElement _deathBackdrop;
         private Label _detailChip;
         private VisualElement _detailRows;
 
@@ -193,6 +194,7 @@ namespace Assets.Scripts.Rooms
             _combatBar = root.Q<VisualElement>("combat-bar");
             _fightFoes = root.Q<Label>("fight-foes");
             _dialogScrim = root.Q<VisualElement>("dialog-scrim");
+            _deathBackdrop = root.Q<VisualElement>("death-bg");
             _detailChip = root.Q<Label>("detail-chip");
             _detailRows = root.Q<VisualElement>("detail-rows");
             _heroBar = root.Q<VisualElement>("hero-bar");
@@ -2856,6 +2858,12 @@ namespace Assets.Scripts.Rooms
             SetShown(_combatBar, false);
             // What dying costs and what it keeps, as rows (2026-09-30) - it used to be the generic
             // detail dialog with the raw combat log dumped in it.
+            // A painted scene rather than the dungeon behind a dimmed dialog: the fire is going out
+            // and the gear lies where it fell. The dialog docks left so it stays in view; nothing
+            // follows this screen but the hub, so neither change is ever undone.
+            SetShown(_deathBackdrop, true);
+            Assets.Scripts.Hub.UI.BackdropAmbienceView.AttachTo(_deathBackdrop)?.Show("cd-bg--death");
+            _detailWindow?.AddToClassList("cd-window--death");
             ShowDetail("The Party Has Fallen", DefeatSummary());
             _detailOk.text = "Return to town";
             AddDefeatRows();

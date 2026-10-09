@@ -291,7 +291,7 @@ backlog.**
 | **17** | Content volume is the biggest single gap | not started |
 | **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses deferred** (owner unsure they make sense, 2026-10-07) — the 4-piece Shadowweave set is authored, no set logic (§18a-sets) |
 | **19** | Shipping surface | not started |
-| **21** | **Art pass** — every outdated sprite | **enemies done 2026-09-29** (the five still enemies redrawn + animated, both bosses at Warden size, a 32 px Dark Jailor); menu backdrops, combat backgrounds, floor rock and item icons done 2026-09-28. **all seven heroes in one style 2026-09-29** (Warrior, Cultist, Cleric, Ranger, Tinkerer redone). Left: optional attack/hit animations, optional attack/hit animations, and the parked `productName` / save-folder rename |
+| **21** | **Art pass** — every outdated sprite | **enemies done 2026-09-29** (the five still enemies redrawn + animated, both bosses at Warden size, a 32 px Dark Jailor); menu backdrops, combat backgrounds, floor rock and item icons done 2026-09-28. **all seven heroes in one style 2026-09-29** (Warrior, Cultist, Cleric, Ranger, Tinkerer redone). **2026-10-08: every floor has a biome combat background** (four new: Threshold halls and caverns, the Archive, the Drowned Chapel), **a pixel-art window frame** on every window, **a painted death screen**, **a calm flagstone dungeon floor**, and the title menu docked over the stairs. Left (deferred to polish by the owner): attack/hit animations; a title logo (the title is a placeholder); the parked `productName` / save-folder rename |
 
 ---
 
@@ -300,6 +300,14 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **Art and UI pass** (2026-10-08) — `POLISH_CONTENT.md` §21, `docs/PIXEL_ART.md` §8e. Combat backgrounds
+  for the 8 floors that had none (`combat_halls/caverns/archive/chapel`, PixelLab pro, 15 generations
+  each) and the battle art bottom-anchored at 1.3x so its floor meets the formation
+  (`CombatStage.BackgroundFloorLift`); a 24px nine-slice window frame (`UI/Frames/window_frame.png`) on
+  `.cd-window` and the five combat panels; a death screen backdrop with a guttering fire
+  (`UI/Backdrops/death.png`, the dialog docked left); lights on the Hall of Progression, Merchant and
+  Bestiary; a neutral flagstone `floor-tile.png` (it was blue bricks that read as text), mirrored per cell,
+  and the seven legacy saturated room tints muted. All seen in play.
 - **Enemy support verbs** (2026-10-08) — `plans/COMBAT_DEPTH.md` §12, `BALANCING.md` §5ae. BuffAlly,
   Guard (a single-target *cover* on `GuardTable`, until the guard's next turn) and Summon (called bodies
   pay nothing) in the planner, the live fight, the simulator and the closed form; on the Bog Shaman,

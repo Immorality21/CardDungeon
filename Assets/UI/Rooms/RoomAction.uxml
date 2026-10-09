@@ -66,6 +66,10 @@
         <!-- Behind every dialog (event, detail, map, pause): "the game is waiting for you" reads apart
              from "you are walking". Shown by RoomActionUI.Update whenever one of them is up. -->
         <ui:VisualElement name="dialog-scrim" class="cd-dialog-scrim cd-hidden" />
+
+        <!-- The death screen's painted backdrop: over the dungeon and every HUD panel, under the
+             dialog. Shown only by RoomActionUI.ShowDeathScreen. -->
+        <ui:VisualElement name="death-bg" class="cd-bg cd-bg--death cd-hidden" picking-mode="Ignore" />
         <!-- Room event: the prompt, how well the party can read its odds, and the choices -->
         <ui:VisualElement name="event-window" class="cd-window cd-dock-center cd-hidden">
             <ui:Label name="event-title" text="" class="cd-title" />

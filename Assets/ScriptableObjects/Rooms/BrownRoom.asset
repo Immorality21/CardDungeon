@@ -15,7 +15,7 @@ MonoBehaviour:
   Name: Brown Room
   Width: 4
   Height: 4
-  Color: {r: 0.990566, g: 0.46101812, b: 0.11681201, a: 1}
+  Color: {r: 0.36, g: 0.26, b: 0.2, a: 1}
   IsConnectorRoom: 0
   PossibleEvents:
   - {fileID: 11400000, guid: 2fd1a731a1db42b79da28ade75858bb8, type: 2}

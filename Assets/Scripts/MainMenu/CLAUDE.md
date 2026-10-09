@@ -7,6 +7,13 @@ whole folder.
 [the Hub guide](../Hub/CLAUDE.md) for the town, the run flow, the panels and the keyboard rules. This
 file covers only what is left in `MenuScene`.
 
+## Layout *(2026-10-08)*
+
+The title window is a low strip docked over the stairs (`cd-window--title cd-dock-bottom`, the buttons
+in a row), not a centred window: the gate and its two torches are the picture, and the centred window
+covered all three. The torches flicker through `BackdropAmbienceView` (the Hub guide) - presentation
+only, so the title still reads no save.
+
 ## What this scene is for
 
 ```
