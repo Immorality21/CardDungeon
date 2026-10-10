@@ -17,13 +17,13 @@ MonoBehaviour:
   Blurb: Solves most problems with something she brought, and the rest with something
     she makes.
   Vision:
-    Fantasy: 'A hero that solves almost everything with tools and steam-punk style
-      of abilities. '
+    Fantasy: A hero that solves almost everything with tools and steam-punk style
+      of abilities.
     Role: Support and damage dealer mainly
-    SignatureMechanic: 'Can dissassemble ''mechanical'' enemies. Similar to how rikku
+    SignatureMechanic: Can dissassemble 'mechanical' enemies. Similar to how rikku
       can do it in FFX. Dissassemble is achieved in the root of the sphere grid.
       It has a % success rate, which becomes bigger the more often you have defeated
-      that specific enemy. '
+      that specific enemy.
     UltraStyle: Assemble Mech. Mount a mech, so the tinkerer jumps onto its body.
       The tinkerer basically gets a 'shield', and the mech body also has its own
       actions. Both tinkerer and mech can act. When the tinkerer summons, the mech
@@ -45,18 +45,18 @@ MonoBehaviour:
     - GridBranch: a
       Becomes: 'Offense: the gadgets that hit, and the brawler mech.'
       IntendedKit: Rivet Gun -> Steam Burst
-      Summon: Warrior Mech (Ultra) - piston fists, Steam Hammer.
+      Summon: 'Warrior Mech - Mech (Ultra, mounts): piston fists, Steam Hammer.'
     - GridBranch: b
       Becomes: 'Debuff: oil and jammed gears slow everything down.'
       IntendedKit: Oil Flask -> Gear Jam
-      Summon: Oil Spewing Mech (Ultra) - every attack oils its target.
+      Summon: 'Oil Spewing Mech - Mech (Ultra, mounts): every attack oils its target.'
     - GridBranch: c
       Becomes: 'Fire: flares and bombs; oil from branch b sets off Ignite.'
       IntendedKit: Flare Cannon -> Incendiary Bomb
-      Summon: Flamethrower Mech (Ultra) - Flame Jet, Inferno Sweep.
+      Summon: 'Flamethrower Mech - Mech (Ultra, mounts): Flame Jet, Inferno Sweep.'
     Overlaps: x
     OpenQuestions: 'Not a question, but a todo: Unit types. E.g. undead, mechnanical,
-      flying etc. These tags are needed for the tinkerer to disassemble enemies. '
+      flying etc. These tags are needed for the tinkerer to disassemble enemies.'
   Sprite: {fileID: -5779569602528658, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}
   AnimationFrames:
   - {fileID: -5779569602528658, guid: d6d4ce3416bf4391976a4097612404d9, type: 3}

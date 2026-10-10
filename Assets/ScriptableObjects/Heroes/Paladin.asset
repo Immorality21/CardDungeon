@@ -28,6 +28,12 @@ MonoBehaviour:
         from hitting the target, taking it instead at an extra 50% damage reduction.
         Afterwards retaliate with holy damage.
       Unlock: Tank branch early.
+    - Name: Judgement Day
+      Effect: Holy damage to every enemy; double against Undead.
+      Unlock: b
+    - Name: Lay on Hands
+      Effect: Fully heals one ally and clears every debuff on them.
+      Unlock: c
     Branches:
     - GridBranch: a
       Becomes: A front-liner who protects by drawing the enemy's attention.

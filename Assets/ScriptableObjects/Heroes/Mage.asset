@@ -16,12 +16,12 @@ MonoBehaviour:
   Label: Mage
   Blurb: Commands fire, frost and storm, and is rarely careful about which.
   Vision:
-    Fantasy: 'An elemental mage, found walled up in the Sealed Archive. Commands
-      storm, frost and fire, and is rarely careful about which. DRAFT by Claude
-      2026-10-07 - the owner''s to rewrite.'
-    Role: 'Intelligence caster: elemental damage, area hits and the tag combos
-      (Freeze in his own frost branch, Ignite with the Tinkerer''s oil), plus the
-      self-cast cloaks that answer an elemental floor.'
+    Fantasy: An elemental mage, found walled up in the Sealed Archive. Commands storm,
+      frost and fire, and is rarely careful about which. DRAFT by Claude 2026-10-07
+      - the owner's to rewrite.
+    Role: 'Intelligence caster: elemental damage, area hits and the tag combos (Freeze
+      in his own frost branch, Ignite with the Tinkerer''s oil), plus the self-cast
+      cloaks that answer an elemental floor.'
     SignatureMechanic: 'Focus and MultiCast: he builds Focus during combat (how exactly
       is not decided yet) and spends it to double-cast, triple-cast or even quadruple-cast.
       MultiCast is both his signature and his Ultra.'
@@ -35,22 +35,28 @@ MonoBehaviour:
     - GridBranch: a
       Becomes: 'Storm: speed and reach.'
       IntendedKit: Storm Cloak -> Chain Lightning
-      Summon: 
+      Summon: 'Qyraxis (lightning bird) - special attack: Lightning on every enemy
+        twice, then Agility down for 2 turns.'
     - GridBranch: b
       Becomes: 'Frost and water: Freeze on his own, and the sturdier body.'
       IntendedKit: Ice Shard -> Water Splash -> Frost Cloak
-      Summon: 
+      Summon: "Glacius, a frost bear - special attack: It causes a single target
+        melee ice claw attack. its Attack lays Ice, so Water from the party sets
+        off Freeze. \nSecondarily he grants a temporary health bonus to allies (starts
+        of low, 5% or something. Can be upgraded)"
     - GridBranch: c
       Becomes: 'Fire: the Ashen Deep''s answer first (Fire Cloak at the third node),
         then the blast.'
-      IntendedKit: Fire Cloak -> Fireball
-      Summon: 
-    Overlaps: 'Warlock and Cultist are Intelligence casters too, but shadow and
-      blood; the Mage owns the elements.'
-    OpenQuestions: 'How Focus is built (per cast? per turn? per element switch?) and
-      how much each tier costs. Is MultiCast spent through the shared Ultra gauge, or
-      does Focus replace the gauge for him? Is Chain Lightning the right storm capstone?
-      Summons per branch are Claude drafts in the hero workbook. Working name ''Mage''.'
+      IntendedKit: Fireball -> fire cloak? -> emberstorm? (Was on warlock before?)
+      Summon: 'Ifrit - party replacement: Standard replacement, has a normal attacks
+        and a ranged single target fire attack that burns. When he dies or is dismissdd,
+        he casts hell fire. Heavy aoe damage to all enemies'
+    Overlaps: Warlock and Cultist are Intelligence casters too, but shadow and blood;
+      the Mage owns the elements.
+    OpenQuestions: How Focus is built (per cast? per turn? per element switch?) and
+      how much each tier costs. Is MultiCast spent through the shared Ultra gauge,
+      or does Focus replace the gauge for him? Is Chain Lightning (all enemies, power
+      3) the right storm capstone? Working name 'Mage'.
   Sprite: {fileID: -3489762990729566, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
   AnimationFrames:
   - {fileID: -3489762990729566, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}

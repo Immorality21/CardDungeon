@@ -18,29 +18,47 @@ MonoBehaviour:
   Vision:
     Fantasy: A devout healer. Will prioritise others over herself, with the strongest
       focus being on healing and support.
-    Role: 'The strongest backline healer. Almost everything scales of spirit, perhaps
-      a few offensive spells off int AND spirit. '
-    SignatureMechanic: "Is the main source for reviving, although most likely not
-      the only one. However, should be the only one with access to mass-revive. \t"
-    UltraStyle: 
-    Ultras: []
+    Role: The strongest backline healer. Almost everything scales of spirit, perhaps
+      a few offensive spells off int AND spirit.
+    SignatureMechanic: Is the main source for reviving, although most likely not
+      the only one. However, should be the only one with access to mass-revive.
+    UltraStyle: Miracles
+    Ultras:
+    - Name: Miracle of Light
+      Effect: Heals the party and clears every debuff. (full heal is too powerful
+        i think)
+      Unlock: a
+    - Name: Miracle of Hope
+      Effect: Every hero regains 1 ability charge. (can be upgraded to give more
+        charges, but  costly)
+      Unlock: b
+    - Name: Miracle of Righteousness
+      Effect: Holy damage to every enemy; Undead under 30% health are destroyed outright.
+        (excluding bosses)
+      Unlock: c
     Branches:
     - GridBranch: a
-      Becomes: "A pure healer with ensuring others stay topped off. \t"
+      Becomes: A pure healer with ensuring others stay topped off.
       IntendedKit: A direct heal => a magic shield => regen => Revive
-      Summon: Phoenix, Mass revive and heal (both start out at low %)
+      Summon: 'Phoenix - special attack: Mass revive and heal (both start out at
+        low %)'
     - GridBranch: b
       Becomes: A more supportive role with aim on tempo improvements
-      IntendedKit: Endurance +x% to all => restore 1 ability charge for 1 hero =>
-        ???
-      Summon: '[name], Protective shield for X% of total health to all + endurance
-        buff '
+      IntendedKit: Sanctuary (+Endurance % to all) => Inspire (restore 1 ability
+        charge to one hero) => Quicken (Haste on one ally)
+      Summon: 'Guardian Angel - special attack: Protective shield for X% of total
+        health to all + endurance buff'
     - GridBranch: c
-      Becomes: 'Holy damage dealer with extra damage to undead type of enemies '
-      IntendedKit: Divine bolt => ???
-      Summon: '[name], A replacement summon, oriented around holy damage'
+      Becomes: Holy damage dealer with extra damage to undead type of enemies
+      IntendedKit: Divine Bolt => Purge (Holy to all, double vs Undead) => Searing
+        Light (Holy + Silence)
+      Summon: 'Archon - party replacement: A replacement summon, oriented around
+        holy damage'
     Overlaps: Paladin on healing
-    OpenQuestions: 
+    OpenQuestions: Revive and mass revive need a new effect type. Holy-vs-Undead
+      needs enemies tagged Undead (UnitTraits exists, nothing is tagged yet). Her
+      grid today (Heal, Renew, Benediction, Smite, Ward) predates this vision and
+      gets rebuilt to it.
   Sprite: {fileID: -7638688258575627, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}
   AnimationFrames:
   - {fileID: -7638688258575627, guid: 5b84e8191cb4496cb9e98edbda4387c6, type: 3}

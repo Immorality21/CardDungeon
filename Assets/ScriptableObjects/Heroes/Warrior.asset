@@ -20,15 +20,16 @@ MonoBehaviour:
       no tricks, just someone who stands in front and hits hard.'
     Role: Front line. Attack and abilities scale off Strength. Takes the hits or
       deals them - the grid decides which.
-    SignatureMechanic: 
+    SignatureMechanic: 'Momentum: every hit he lands in a row adds a little Strength
+      for the fight; a turn spent not attacking resets it. The Paladin endures, the
+      Warrior builds.'
     UltraStyle: Rage
     Ultras:
     - Name: Flurry
       Effect: Multiple slashes to random enemies
       Unlock: Damage branch
     - Name: Take Cover
-      Effect: 'Brace for impact, reducing damage for the whole team by 30% for 1
-        turn. '
+      Effect: Brace for impact, reducing damage for the whole team by 30% for 1 turn.
       Unlock: Tank branch
     Branches:
     - GridBranch: a

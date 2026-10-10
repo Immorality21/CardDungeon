@@ -16,8 +16,8 @@ MonoBehaviour:
   Label: Warlock
   Blurb: Has found that the shortest route to power runs straight through himself.
   Vision:
-    Fantasy: "Dark-caster type of hero. Somewhat evil, and looks for opportunities
-      to gain power at the cost of others.\t"
+    Fantasy: Dark-caster type of hero. Somewhat evil, and looks for opportunities
+      to gain power at the cost of others.
     Role: Blood-magic caster. can sacrifice HP to cast, should have a kit that allows
       draining health from enemies and spending his own health for certain skills.
       He is best played mixing branches together.
@@ -34,21 +34,30 @@ MonoBehaviour:
         bolt, but deals shadow damage). Lasts 3 turns
       Unlock: It is on the Trunk, but requires a special material that is only found
         later in the game
+    - Name: Rain of Fire
+      Effect: 'First draft (Claude, 2026-10-04): fire on every enemy.'
+      Unlock: trunk
+    - Name: Soul Harvest
+      Effect: 'First draft (Claude, 2026-10-04): shadow damage that heals him per
+        enemy hit.'
+      Unlock: trunk
     Branches:
     - GridBranch: a
       Becomes: Blood magic user, sacrifice health for damage.
-      IntendedKit: Blood bolt => Life Tap (health for an ability charge, WoW-style)
-        => ?
-      Summon: '?'
+      IntendedKit: Bloodbolt => Blood Pact => Life Tap => Blood shower
+      Summon: 'Demon Army (shared) - No summon of its own: branch a raises the Demon
+        Army''s power, as decided 2026-10-04.'
     - GridBranch: b
       Becomes: Self-heal focussed
-      IntendedKit: Drain life => ?
-      Summon: '?'
+      IntendedKit: Drain Life => Siphon Soul => (Oil Slick sits at the tip today
+        - replace with something drain-flavoured?)
+      Summon: 'Demon Army (shared) - No summon of its own: branch b raises the Demon
+        Army''s power.'
     - GridBranch: c
       Becomes: Demon summoner
       IntendedKit: Summon imp => Summon succubus => Summon ??
-      Summon: Summon demon army (replacemenet summon, but instead of 1 it summons
-        multiple demons)
+      Summon: 'Demon Army - squad (joins the party): Replacement-style summon, but
+        instead of one it brings several demons (Imps, promoted to Succubi).'
     Overlaps: Tinkerer is the other Intelligence caster - to settle once the Tinkerer
       is redefined.
     OpenQuestions: "Felguards and bigger troops for the Demon Army - deferred until
