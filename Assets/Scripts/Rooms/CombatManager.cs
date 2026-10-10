@@ -162,6 +162,9 @@ namespace Assets.Scripts.Rooms
         private SummonSlot _pendingSummon;
         private MagicSO _pendingSummonAbility;
         private List<ICombatUnit> _pendingSummonTargets;
+
+        // The ally a summon aimed at one ally (or one fallen ally) was pointed at; null for the rest.
+        private ICombatUnit _pendingSummonTarget;
         private UltraSO _pendingUltra;
         private ICombatUnit _pendingUltraTarget;
 
@@ -367,10 +370,41 @@ namespace Assets.Scripts.Rooms
                    && KnownUltras(hero).Any(u => CanUseUltra(hero, u));
         }
 
-        /// <summary>Whether this one Ultra can be used now - a Sacrifice needs someone to give.</summary>
+        /// <summary>Whether this one Ultra can be used now - a Sacrifice needs someone to give, a
+        /// revive someone fallen.</summary>
         public bool CanUseUltra(ICombatUnit hero, UltraSO ultra)
         {
-            return ultra != null && (!UltraOps.NeedsTarget(ultra) || SacrificeTargets().Count > 0);
+            return ultra != null && (!UltraOps.NeedsTarget(ultra) || UltraTargets(ultra).Count > 0);
+        }
+
+        /// <summary>Whom an Ultra that takes a target may be aimed at: the Sacrifice's candidates, the
+        /// fallen for a revive, the living party for a single-ally Strike.</summary>
+        public List<ICombatUnit> UltraTargets(UltraSO ultra)
+        {
+            if (ultra == null)
+            {
+                return new List<ICombatUnit>();
+            }
+            if (ultra.Kind == UltraKind.Sacrifice)
+            {
+                return SacrificeTargets();
+            }
+            return PickableAllies(ultra.TargetType);
+        }
+
+        /// <summary>The allies a picker offers for a one-ally target type: the fallen for a revive,
+        /// the living hero side otherwise. Empty for any other type.</summary>
+        public List<ICombatUnit> PickableAllies(MagicTargetType type)
+        {
+            switch (type)
+            {
+                case MagicTargetType.FallenAlly:
+                    return GetFallenHeroes();
+                case MagicTargetType.SingleAlly:
+                    return HeroSideUnits();
+                default:
+                    return new List<ICombatUnit>();
+            }
         }
 
         /// <summary>The abilities <paramref name="hero"/>'s current form grants - free to use while it lasts.</summary>
@@ -414,6 +448,10 @@ namespace Assets.Scripts.Rooms
                     return GetAliveEnemies();
                 case MagicTargetType.AllAllies:
                     return HeroSideUnits();
+                case MagicTargetType.FallenAlly:
+                    // The fallen heroes, picked from (RoomActionUI); revived ones wait off the stage
+                    // with the rest of the party until the summon leaves (HandleRevived).
+                    return GetFallenHeroes();
                 default:
                     return new List<ICombatUnit> { summon };
             }
@@ -508,9 +546,10 @@ namespace Assets.Scripts.Rooms
         /// Submits summoning <paramref name="slot"/>'s summon for the current hero turn. It uses the
         /// turn, like casting (§4b); the charge is spent when it resolves.
         /// </summary>
-        public void SubmitSummonAction(SummonSlot slot)
+        public void SubmitSummonAction(SummonSlot slot, ICombatUnit target = null)
         {
             _pendingSummon = slot;
+            _pendingSummonTarget = target;
             _pendingAction = HeroAction.Summon;
         }
 
@@ -793,7 +832,7 @@ namespace Assets.Scripts.Rooms
                     }
                     else if (_pendingAction == HeroAction.Summon && _pendingSummon != null)
                     {
-                        yield return ExecuteSummonAction(unit, _pendingSummon);
+                        yield return ExecuteSummonAction(unit, _pendingSummon, _pendingSummonTarget);
                     }
                     else if (_pendingAction == HeroAction.SummonAbility && _pendingSummonAbility != null
                              && unit is SummonUnit abilityCaster)
@@ -1017,7 +1056,7 @@ namespace Assets.Scripts.Rooms
         /// its grid nodes add are folded into a throwaway castable (<see cref="SummonOps.BuildCastable"/>),
         /// which takes no Forge bonus and triggers no combo.
         /// </summary>
-        private IEnumerator ExecuteSummonAction(ICombatUnit caster, SummonSlot slot)
+        private IEnumerator ExecuteSummonAction(ICombatUnit caster, SummonSlot slot, ICombatUnit chosen = null)
         {
             var hero = caster as Hero;
             var summon = slot != null ? slot.Summon : null;
@@ -1078,7 +1117,7 @@ namespace Assets.Scripts.Rooms
             {
                 Magic = castable,
                 Caster = caster,
-                Targets = SummonTargets(castable.TargetType, caster)
+                Targets = SummonTargets(castable.TargetType, caster, chosen)
             };
             var result = _calculator.Execute(action, BuffTracker);
             _lastTurnLog = $"{caster.DisplayName} summons {summon.Label}!";
@@ -1292,7 +1331,7 @@ namespace Assets.Scripts.Rooms
             switch (ultra.Kind)
             {
                 case UltraKind.Strike:
-                    yield return ExecuteUltraStrike(hero, ultra);
+                    yield return ExecuteUltraStrike(hero, ultra, target);
                     break;
                 case UltraKind.Sacrifice:
                     yield return ExecuteSacrifice(hero, ultra, target as Hero);
@@ -1335,7 +1374,7 @@ namespace Assets.Scripts.Rooms
         /// A Strike Ultra: the big blow lands and it is over. Resolved like a summon's special attack -
         /// the throwaway castable carries no tags and no Forge bonus - with the hero's own stats.
         /// </summary>
-        private IEnumerator ExecuteUltraStrike(Hero hero, UltraSO ultra)
+        private IEnumerator ExecuteUltraStrike(Hero hero, UltraSO ultra, ICombatUnit chosen = null)
         {
             var castable = UltraOps.CastableFor(ultra);
 
@@ -1349,7 +1388,7 @@ namespace Assets.Scripts.Rooms
             for (int hit = 0; hit < UltraOps.HitsOf(ultra); hit++)
             {
                 var targets = UltraOps.StrikeTargets(ultra, (ICombatUnit)hero, GetAliveEnemies(), HeroSideUnits(),
-                    count => UnityEngine.Random.Range(0, count));
+                    count => UnityEngine.Random.Range(0, count), chosen);
                 if (targets.Count == 0)
                 {
                     break;
@@ -1894,9 +1933,9 @@ namespace Assets.Scripts.Rooms
             return _currentCombatRoom.Enemies.Where(e => e != null && e.IsAlive).ToList();
         }
 
-        /// <summary>Who a summon's effects land on. A summon has no target picker: its target type
-        /// is always a whole side or the summoner.</summary>
-        private List<ICombatUnit> SummonTargets(MagicTargetType type, ICombatUnit caster)
+        /// <summary>Who a summon's effects land on: a whole side or the summoner, or - for a summon aimed
+        /// at one ally or one fallen ally - the one picked on the summon list (<paramref name="chosen"/>).</summary>
+        private List<ICombatUnit> SummonTargets(MagicTargetType type, ICombatUnit caster, ICombatUnit chosen = null)
         {
             switch (type)
             {
@@ -1905,6 +1944,10 @@ namespace Assets.Scripts.Rooms
                     return GetAliveEnemies();
                 case MagicTargetType.Self:
                     return new List<ICombatUnit> { caster };
+                case MagicTargetType.FallenAlly:
+                    return chosen != null ? new List<ICombatUnit> { chosen } : new List<ICombatUnit>();
+                case MagicTargetType.SingleAlly:
+                    return new List<ICombatUnit> { chosen ?? caster };
                 default:
                     return GetAliveHeroes(_currentParty);
             }
@@ -3023,7 +3066,9 @@ namespace Assets.Scripts.Rooms
         /// <summary>Heroes who fell in this fight and are still down - who a Revive can reach.</summary>
         public List<ICombatUnit> GetFallenHeroes()
         {
-            return _fallen.Where(h => h != null && !h.IsAlive).Cast<ICombatUnit>().ToList();
+            var sacrificed = Events != null ? Events.Sacrificed : null;
+            return _fallen.Where(h => h != null && !h.IsAlive && (sacrificed == null || !sacrificed.Contains(h)))
+                .Cast<ICombatUnit>().ToList();
         }
 
         /// <summary>The fallen a party-wide Revive reaches: the heroes' own, never an enemy's.</summary>
@@ -3045,7 +3090,15 @@ namespace Assets.Scripts.Rooms
                 sr.enabled = true;
             }
             _turnManager.AddUnit(hero, false);
-            _lastTurnLog += $" {hero.DisplayName} is back on their feet!";
+            // Revived while a summon has taken the party's place: they wait off the stage with the rest
+            // of the party, and come back with it (CombatStage.RestoreParty, TurnManager.Resume).
+            if (ReplacementOut)
+            {
+                CombatStage.Instance.HideUnits(new Component[] { hero });
+                _turnManager.Suspend(new ICombatUnit[] { hero });
+            }
+            // Through the reaction log: the action writes its own line after this, which would drop it.
+            _reactionLog.Add($" {hero.DisplayName} is back on their feet!");
             BroadcastTurnOrder();
         }
 

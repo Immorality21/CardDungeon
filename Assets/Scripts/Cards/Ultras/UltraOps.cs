@@ -130,7 +130,7 @@ namespace Assets.Scripts.Cards
         /// side. Shared by the live fight and the simulator, so the two pick alike.
         /// </summary>
         public static List<T> StrikeTargets<T>(UltraSO ultra, T hero, List<T> enemies, List<T> side,
-            System.Func<int, int> pick) where T : Combat.ICombatUnit
+            System.Func<int, int> pick, T chosen = null) where T : class, Combat.ICombatUnit
         {
             var targets = new List<T>();
             switch (ultra.TargetType)
@@ -162,6 +162,16 @@ namespace Assets.Scripts.Cards
                 case MagicTargetType.Self:
                     targets.Add(hero);
                     break;
+                case MagicTargetType.FallenAlly:
+                    // Picked on the Ultra list (NeedsTarget); nobody picked revives nobody.
+                    if (chosen != null)
+                    {
+                        targets.Add(chosen);
+                    }
+                    break;
+                case MagicTargetType.SingleAlly:
+                    targets.Add(chosen ?? hero);
+                    break;
                 default:
                     targets.AddRange(side);
                     break;
@@ -169,10 +179,22 @@ namespace Assets.Scripts.Cards
             return targets;
         }
 
-        /// <summary>Whether using <paramref name="ultra"/> asks for a target first (a Sacrifice does).</summary>
+        /// <summary>Whether using <paramref name="ultra"/> asks for a target first: a Sacrifice (whom to
+        /// give), and a Strike aimed at one ally or at one fallen ally (whom to mend or revive).</summary>
         public static bool NeedsTarget(UltraSO ultra)
         {
-            return ultra != null && ultra.Kind == UltraKind.Sacrifice;
+            if (ultra == null)
+            {
+                return false;
+            }
+            return ultra.Kind == UltraKind.Sacrifice
+                   || (ultra.Kind == UltraKind.Strike && TargetsOneAlly(ultra.TargetType));
+        }
+
+        /// <summary>A target type the player picks one of their own for: a living ally or a fallen one.</summary>
+        public static bool TargetsOneAlly(MagicTargetType type)
+        {
+            return type == MagicTargetType.SingleAlly || type == MagicTargetType.FallenAlly;
         }
 
         /// <summary>

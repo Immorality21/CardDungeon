@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d03ef8fb4f65d04aacc66749b7be8c3, type: 3}
+  m_Name: CatacombsLich
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Sandbox.SandboxConfigSO
+  Heroes:
+  - Hero: {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 350
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  - Hero: {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 350
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  - Hero: {fileID: 11400000, guid: 417d412fa1fe407cb763056439898d1d, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 350
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  Level: {fileID: 11400000, guid: ba2d10b4551609d4ebd27338b9f4e8e9, type: 2}
+  Seed: 22
+  Enemies:
+  - {fileID: 11400000, guid: e29639bd2a1665e4191672c385617952, type: 2}
+  - {fileID: 11400000, guid: eaa6b30e7c013504ca95da0365eb252a, type: 2}
+  - {fileID: 11400000, guid: eaa6b30e7c013504ca95da0365eb252a, type: 2}
+  EnemyDifficulty: 1.2
+  ClearOtherRooms: 1
+  WalkIntoEncounter: 1
+  CopyInventory: 0
+  CopyMetaProgress: 0
+  Items: []

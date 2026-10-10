@@ -303,9 +303,10 @@ namespace Assets.Scripts.Cards
                 return 0;
             }
 
-            HealthOps.Damage(unit, damage,
+            var hit = HealthOps.Damage(unit, damage,
                 new HealthSource(buff.Source, HealthCause.OverTime, overTime.TickDamageType), Events);
-            return -damage;
+            // A barrier soaked part of it: the popup shows what reached the bar (0 skips the tick).
+            return -(damage - hit.Absorbed);
         }
 
         /// <summary>
@@ -572,6 +573,16 @@ namespace Assets.Scripts.Cards
         public List<string> GetActiveTagsOnUnit(ICombatUnit unit)
         {
             return new List<string>();
+        }
+
+        /// <summary>Takes every buff, debuff, status and resistance off one unit - a revived hero
+        /// stands up clean.</summary>
+        public void ClearUnit(ICombatUnit unit)
+        {
+            if (unit != null)
+            {
+                _activeBuffs.Remove(unit);
+            }
         }
 
         public void Clear()

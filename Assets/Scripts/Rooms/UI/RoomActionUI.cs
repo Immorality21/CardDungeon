@@ -1348,6 +1348,12 @@ namespace Assets.Scripts.Rooms
                 CombatManager.Instance.RequestSummonAbilityTarget(summon, ability, targets);
                 return;
             }
+            // A revive asks whom, even of one - the list says who is down.
+            if (ability.TargetType == Cards.MagicTargetType.FallenAlly && targets.Count > 0)
+            {
+                CombatManager.Instance.RequestSummonAbilityTarget(summon, ability, targets);
+                return;
+            }
             CombatManager.Instance.SubmitSummonAbility(ability, targets);
         }
 

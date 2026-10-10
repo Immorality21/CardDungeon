@@ -45,8 +45,11 @@ namespace Assets.Scripts.Cards.UI
             // The Ultra command: which Ultra to use (always a list, even of one).
             UltraChoice,
 
-            // A Sacrifice Ultra: which ally is given.
-            UltraTarget
+            // An Ultra that takes a target: which ally is given (Sacrifice), mended or revived.
+            UltraTarget,
+
+            // A summon aimed at one ally or one fallen ally: which one.
+            SummonTarget
         }
 
         [SerializeField] private UIDocument _document;
@@ -84,6 +87,10 @@ namespace Assets.Scripts.Cards.UI
         // target list returns to the list.
         private List<UltraSO> _ultraList;
         private UltraSO _selectedUltra;
+
+        // The summon list on screen, and the summon waiting for its one ally (or fallen ally) to be picked.
+        private List<SummonSlot> _summonList;
+        private SummonSlot _selectedSummon;
 
         // The unit a RestoreCharge ability is refilling, while the player picks which ability.
         private ICombatUnit _chargeTarget;
@@ -482,6 +489,7 @@ namespace Assets.Scripts.Cards.UI
             }
 
             _currentHero = hero;
+            _summonList = summons;
             _mode = SelectionMode.SummonChoice;
             _listTitle.text = "Summon";
             _listScroll.Clear();
@@ -501,7 +509,14 @@ namespace Assets.Scripts.Cards.UI
                 {
                     meta += $"  {bloodPrice} HP";
                 }
-                _listScroll.Add(CreateRow(slot.Summon.Sprite, slot.Summon.Label, meta, slot.CanUse && affordable,
+                // A summon aimed at one ally needs one to aim at - a revive with nobody down is dimmed.
+                bool hasTarget = !SummonOps.NeedsTarget(slot.Summon)
+                                 || CombatManager.Instance.PickableAllies(slot.Summon.TargetType).Count > 0;
+                if (!hasTarget)
+                {
+                    meta += "  nobody fallen";
+                }
+                _listScroll.Add(CreateRow(slot.Summon.Sprite, slot.Summon.Label, meta, slot.CanUse && affordable && hasTarget,
                     () => SubmitSummon(captured), SummonOps.Describe(slot.Summon, slot.Grant)));
             }
 
@@ -540,9 +555,11 @@ namespace Assets.Scripts.Cards.UI
                 // With the hero as the caster, so a Strike's numbers include their stats.
                 // What it does only - no flavour text in combat.
                 string description = UltraOps.Describe(ultra, hero);
-                // A Sacrifice with no one it may take (the last hero cannot be given) is listed, dimmed.
+                // A Sacrifice with no one it may take (the last hero cannot be given), or a revive with
+                // nobody down, is listed, dimmed.
                 bool usable = CombatManager.Instance.CanUseUltra(hero, ultra);
-                _listScroll.Add(CreateRow(icon, ultra.Label, usable ? "Ready" : "No one to give", usable,
+                string blocked = ultra.Kind == UltraKind.Sacrifice ? "No one to give" : "Nobody fallen";
+                _listScroll.Add(CreateRow(icon, ultra.Label, usable ? "Ready" : blocked, usable,
                     () => OnUltraChosen(captured), description));
             }
 
@@ -562,7 +579,22 @@ namespace Assets.Scripts.Cards.UI
             }
             _selectedUltra = ultra;
             _mode = SelectionMode.UltraTarget;
-            PopulateTargetRows(CombatManager.Instance.SacrificeTargets(), "Sacrifice whom?");
+            PopulateTargetRows(CombatManager.Instance.UltraTargets(ultra), TargetPrompt(ultra));
+        }
+
+        /// <summary>What the target picker asks for an Ultra or summon aimed at one of the party.</summary>
+        private static string TargetPrompt(UltraSO ultra)
+        {
+            if (ultra != null && ultra.Kind == UltraKind.Sacrifice)
+            {
+                return "Sacrifice whom?";
+            }
+            return ultra != null ? AllyPrompt(ultra.TargetType) : "Select Ally Target";
+        }
+
+        private static string AllyPrompt(MagicTargetType type)
+        {
+            return type == MagicTargetType.FallenAlly ? "Revive whom?" : "Select Ally Target";
         }
 
         private void SubmitUltra(UltraSO ultra, ICombatUnit target = null)
@@ -576,10 +608,24 @@ namespace Assets.Scripts.Cards.UI
 
         private void SubmitSummon(SummonSlot slot)
         {
+            // A summon aimed at one ally or one fallen ally asks which first.
+            if (SummonOps.NeedsTarget(slot.Summon))
+            {
+                _selectedSummon = slot;
+                _mode = SelectionMode.SummonTarget;
+                PopulateTargetRows(CombatManager.Instance.PickableAllies(slot.Summon.TargetType), AllyPrompt(slot.Summon.TargetType));
+                return;
+            }
+            SubmitSummonTo(slot, null);
+        }
+
+        private void SubmitSummonTo(SummonSlot slot, ICombatUnit target)
+        {
             _mode = SelectionMode.Idle;
             HidePanel(_listPanel);
+            HidePanel(_targetPanel);
             ReleaseFocus();
-            CombatManager.Instance.SubmitSummonAction(slot);
+            CombatManager.Instance.SubmitSummonAction(slot, target);
         }
 
         /// <summary>A party-replacing summon's single-enemy ability, with more than one enemy up.</summary>
@@ -593,7 +639,9 @@ namespace Assets.Scripts.Cards.UI
             _currentHero = summon;
             _selectedSummonAbility = ability;
             _mode = SelectionMode.SummonAbilityTarget;
-            PopulateTargetRows(enemies, "Select Enemy Target");
+            PopulateTargetRows(enemies, ability != null && ability.TargetType == MagicTargetType.FallenAlly
+                ? "Revive whom?"
+                : "Select Enemy Target");
         }
 
         // ============================================================
@@ -934,6 +982,9 @@ namespace Assets.Scripts.Cards.UI
                 case SelectionMode.UltraTarget:
                     SubmitUltra(_selectedUltra, target);
                     return;
+                case SelectionMode.SummonTarget:
+                    SubmitSummonTo(_selectedSummon, target);
+                    return;
                 case SelectionMode.SummonAbilityTarget:
                     _mode = SelectionMode.Idle;
                     HidePanel(_targetPanel);
@@ -978,10 +1029,17 @@ namespace Assets.Scripts.Cards.UI
         {
             HidePanel(_targetPanel);
 
-            // A Sacrifice's target list steps back to the Ultra list.
+            // A Sacrifice's (or a revive's) target list steps back to the Ultra list.
             if (_mode == SelectionMode.UltraTarget && _ultraList != null)
             {
                 ShowUltraList(_currentHero, _ultraList);
+                return;
+            }
+
+            // A one-ally summon's target list steps back to the summon list.
+            if (_mode == SelectionMode.SummonTarget && _summonList != null)
+            {
+                ShowSummonList(_currentHero, _summonList);
                 return;
             }
 

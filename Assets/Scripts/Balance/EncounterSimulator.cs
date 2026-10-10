@@ -286,7 +286,7 @@ namespace Assets.Scripts.Balance
             // and puts them back on this clock - CombatManager's rule, from the same event.
             var startedStanding = heroes.FindAll(h => h.IsAlive);
             resolver.FallenAllies = caster => caster != null && caster.IsHero
-                ? startedStanding.FindAll(h => !h.IsAlive).ConvertAll(h => (ICombatUnit)h)
+                ? startedStanding.FindAll(h => !h.IsAlive && !events.Sacrificed.Contains(h)).ConvertAll(h => (ICombatUnit)h)
                 : new List<ICombatUnit>();
             events.Subscribe<UnitRevived>(e => turnManager.AddUnit(e.Unit, false));
 
@@ -1276,7 +1276,7 @@ namespace Assets.Scripts.Balance
             // Ultra open; the form's ability is a cast and Silence closes it.
             if (settings.Policy != SimPolicy.AttackOnly && ultras != null)
             {
-                var ready = ultras.Ready(hero, heroes, allies);
+                var ready = ultras.Ready(hero, heroes, allies, resolver.FallenAllies);
                 if (ready != null)
                 {
                     ultras.Use(hero, ready, side, enemies, buffTracker, resolver, heroes, allies, turnManager);
@@ -1334,7 +1334,10 @@ namespace Assets.Scripts.Balance
 
             if (settings.Policy != SimPolicy.AttackOnly && !silenced && summonsAllowed && hero.Summons != null && summonReady)
             {
-                var summon = hero.Summons.Find(s => s.CanUse && s.IsSpecialAttack);
+                // A summon that revives one ally waits for someone to have fallen.
+                var summon = hero.Summons.Find(s => s.CanUse && s.IsSpecialAttack
+                    && (s.Summon.TargetType != MagicTargetType.FallenAlly
+                        || (resolver.FallenAllies != null && resolver.FallenAllies(hero).Count > 0)));
                 if (summon != null)
                 {
                     Summon(hero, summon, side, enemies, buffTracker, resolver, result);
@@ -1436,6 +1439,12 @@ namespace Assets.Scripts.Balance
             slot.Charges--;
             result.Summons++;
             var targets = ResolveTargets(slot.Castable, caster, heroes, enemies);
+            // A summon that revives one ally lands on the first of the fallen, as the player would pick.
+            if (slot.Castable.TargetType == MagicTargetType.FallenAlly)
+            {
+                var fallen = resolver.FallenAllies != null ? resolver.FallenAllies(caster) : new List<ICombatUnit>();
+                targets = fallen.Count > 0 ? new List<ICombatUnit> { fallen[0] } : new List<ICombatUnit>();
+            }
             resolver.Execute(new SpellcastAction { Magic = slot.Castable, Caster = caster, Targets = targets }, buffTracker);
 
             // The part that lands on one target at random (the Abyssal Nightmare's Silence).

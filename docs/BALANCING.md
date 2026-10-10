@@ -2794,3 +2794,19 @@ and the step is not monotonic in the weight, so **probe a few values rather than
 debuff chances (Poison Dart 75%, bleed 60%, Silence 50%, Freeze combo 50%) moved the closed form by
 less than 0.002 load anywhere: the closed form prices hero output on basic attacks, and the only enemy
 debuff they touch is Poison Dart's poison.
+
+## §5ag — Inserting a run into the main line (2026-10-10, the Catacombs)
+
+- **A new main-line run moves every run after it.** It adds a run of XP, and the run curves seed each
+  run from its prerequisite's end state, so everything downstream reads easier. Measured: the
+  Catacombs at XP x2.25 pulled the **Blood Stair** (a challenge run, seeded from the *strongest* end
+  state) from 0.33 to 0.27 on its third floor, which turned its next step into a 113% spike and failed
+  `RunDifficultyEscalates`. XP x1.75 restored it exactly. Check the challenge runs after any change to
+  campaign-wide XP.
+- **A party of three at ~300 XP walks through difficulty-1.8 trash.** The first pass measured 0.11 /
+  0.13 attrition on the Catacombs' trash floors against the Sealed Archive's 0.64 / 0.81 just before
+  it, and the boss room read 10x its trash. Difficulty 2.45-2.8 plus denser rooms (a second spawn
+  roll in most rooms) and one more point of Skeleton Agility brought it to 0.35 / 0.46 / 0.87, boss
+  ratio 5.3x.
+- **An elite needs a kill-time check.** The Bone Golem at HP 40 took 11 party turns; HP 30 took 8.7.
+

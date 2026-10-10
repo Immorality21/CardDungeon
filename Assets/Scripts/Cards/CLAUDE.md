@@ -398,8 +398,16 @@ Two consequences worth holding on to:
   grow a Damage effect's raw hit against that kind (Purge doubles on Undead). **`BuffType.Barrier`**
   puts points on `CombatEvents.Barriers` (`Combat/BarrierTable`), soaked in `HealthOps.Damage` before
   the bar - hits, casts and ticks, never prices; authored with `PercentOfMaxHealth` it is that share of
-  each target's own bar. The simulator casts a Revive first whenever someone fell. **No enemy is
-  Undead yet**, so Purge's bonus and Miracle of Righteousness's execute do nothing in today's campaign.
+  each target's own bar. The simulator casts a Revive first whenever someone fell. The undead
+  are the Catacombs set (Enemies guide), where Purge doubles and Miracle of Righteousness executes. A
+  revive never reaches a hero given to a Sacrifice (`CombatEvents.Sacrificed` - gone, not fallen), and a
+  revived hero stands up clean (`CombatBuffTracker.ClearUnit`, `BarrierTable.Clear`, Momentum reset).
+  **Picking one ally works everywhere the player aims** *(2026-10-10)*: an ability (`FallenAlly` /
+  `SingleAlly`), an **Ultra** (`UltraOps.NeedsTarget` now covers a Strike at one ally or one fallen ally -
+  the Ultra list asks "Revive whom?" through `CombatManager.UltraTargets`, the same step a Sacrifice uses),
+  a **special-attack summon** (`SummonOps.NeedsTarget`, the summon list asks, dimmed "nobody fallen"), and a
+  **party-replacing summon's ability** (a hero revived while the party is replaced waits off the stage and
+  returns with it). Enemies cannot revive: a fallen enemy is paid out and removed (`EnemyMagicPlan`).
 - **Ultras (`Cards/Ultras/`, COMBAT_DEPTH §13 — 2026-10-04).** `UltraSO` (`Resources/UltraCatalog`),
   taught by `SphereNodeKind.Ultra`, used from the **Ultra** command once the hero's gauge is full.
   **The command always opens the Ultra list** (`MagicSelectionUI.ShowUltraList`, via

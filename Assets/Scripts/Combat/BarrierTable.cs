@@ -70,6 +70,15 @@ namespace Assets.Scripts.Combat
             return soaked;
         }
 
+        /// <summary>Takes a unit's barrier away (a revived hero starts clean).</summary>
+        public void Clear(ICombatUnit unit)
+        {
+            if (unit != null)
+            {
+                _barriers.Remove(unit);
+            }
+        }
+
         public void TurnStarted(ICombatUnit unit)
         {
             _acting = unit;

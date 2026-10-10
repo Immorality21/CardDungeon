@@ -16,7 +16,7 @@ MonoBehaviour:
   DisplayName: The Drowned Chapel
   Blurb: A chapel went down with the March, bells and all. Pump the nave low enough
     and the door at the bottom opens again - and someone behind it is still singing.
-  SequenceIndex: 2
+  SequenceIndex: 4
   Repeatable: 0
   Challenge: 0
   JoinsOnClear: {fileID: 0}

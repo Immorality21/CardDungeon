@@ -84,7 +84,8 @@ namespace Assets.Scripts.Balance
 
         /// <summary>The Ultra the policy would use now, or null. A Sacrifice waits for a hero below
         /// <see cref="SacrificeBelow"/> and never takes the last one standing.</summary>
-        public UltraSO Ready(SimUnit hero, List<SimUnit> heroes = null, SimAllies allies = null)
+        public UltraSO Ready(SimUnit hero, List<SimUnit> heroes = null, SimAllies allies = null,
+            System.Func<ICombatUnit, List<ICombatUnit>> fallen = null)
         {
             // Already riding a mech: keep the gauge for when it breaks.
             if (allies != null && allies.MountOf(hero) != null)
@@ -99,6 +100,15 @@ namespace Assets.Scripts.Balance
             {
                 if (ultra == null)
                 {
+                    continue;
+                }
+                // A revive is held until someone has fallen.
+                if (ultra.Kind == UltraKind.Strike && ultra.TargetType == MagicTargetType.FallenAlly)
+                {
+                    if (fallen != null && fallen(hero).Count > 0)
+                    {
+                        return ultra;
+                    }
                     continue;
                 }
                 if (ultra.Kind != UltraKind.Sacrifice || SacrificeVictim(heroes) != null)
@@ -178,7 +188,8 @@ namespace Assets.Scripts.Balance
                 {
                     var standing = new List<ICombatUnit>(enemies.FindAll(e => e.IsAlive));
                     var targets = UltraOps.StrikeTargets(ultra, (ICombatUnit)hero, standing,
-                        new List<ICombatUnit>(side.FindAll(u => u.IsAlive)), count => Random.Range(0, count));
+                        new List<ICombatUnit>(side.FindAll(u => u.IsAlive)), count => Random.Range(0, count),
+                        ChosenAlly(ultra.TargetType, hero, side, resolver));
                     if (targets.Count == 0)
                     {
                         break;
@@ -199,6 +210,32 @@ namespace Assets.Scripts.Balance
             SetMaxHealth(hero, Mathf.RoundToInt(form.BaseMaxHealth * (1f + ultra.MaxHealthPercent / 100f)));
             hero.AttackDamageType = ultra.AttackDamageType;
             _forms[hero] = form;
+        }
+
+        /// <summary>Whom the policy aims a one-ally Strike at: the first of the fallen for a revive, the
+        /// most wounded living ally otherwise; null for any other target type.</summary>
+        public static ICombatUnit ChosenAlly(MagicTargetType type, SimUnit hero, List<SimUnit> side, EffectResolver resolver)
+        {
+            if (type == MagicTargetType.FallenAlly)
+            {
+                var fallen = resolver != null && resolver.FallenAllies != null ? resolver.FallenAllies(hero) : null;
+                return fallen != null && fallen.Count > 0 ? fallen[0] : null;
+            }
+            if (type != MagicTargetType.SingleAlly || side == null)
+            {
+                return null;
+            }
+            SimUnit worst = null;
+            foreach (var unit in side)
+            {
+                if (unit != null && unit.IsAlive && (worst == null
+                    || (float)unit.Stats.Health / Mathf.Max(1, unit.GetEffectiveStat(StatType.MaxHealth))
+                       < (float)worst.Stats.Health / Mathf.Max(1, worst.GetEffectiveStat(StatType.MaxHealth))))
+                {
+                    worst = unit;
+                }
+            }
+            return worst;
         }
 
         /// <summary>The form's first damaging ability, cast for free while it lasts; null outside a form.</summary>

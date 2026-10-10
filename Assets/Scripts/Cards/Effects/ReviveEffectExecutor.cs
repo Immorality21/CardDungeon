@@ -12,6 +12,9 @@ namespace Assets.Scripts.Cards.Effects
     /// <see cref="HealthCause.Revive"/>, then <see cref="UnitRevived"/> goes out so the fight's owner puts
     /// them back on the clock and the stage - the live fight and the simulator alike.
     ///
+    /// <para>A hero given to a Sacrifice is gone and is never revived (<see cref="CombatEvents.Sacrificed"/>),
+    /// and a revived hero stands up clean - buffs, debuffs, ticks and barrier all cleared.</para>
+    ///
     /// <para>Who: a single-target cast revives the fallen ally it was aimed at; a cast on the whole party
     /// (the Phoenix) revives every fallen hero of the caster's side, read from
     /// <see cref="EffectResolver.FallenAllies"/>. A standing target is left alone.</para>
@@ -35,13 +38,13 @@ namespace Assets.Scripts.Cards.Effects
         {
             var caster = action != null ? action.Caster : null;
             bool wholeParty = action != null && action.Magic != null && action.Magic.TargetType == MagicTargetType.AllAllies;
-            Revive(effect, caster, wholeParty ? FallenOf(caster) : targets, result);
+            Revive(effect, caster, wholeParty ? FallenOf(caster) : targets, buffTracker, result);
         }
 
         public void Execute(SpellEffect effect, ICombatUnit caster, List<ICombatUnit> targets,
             CombatBuffTracker buffTracker, EffectResult result, bool flatPower = false)
         {
-            Revive(effect, caster, targets, result);
+            Revive(effect, caster, targets, buffTracker, result);
         }
 
         private List<ICombatUnit> FallenOf(ICombatUnit caster)
@@ -57,7 +60,8 @@ namespace Assets.Scripts.Cards.Effects
             return Mathf.Clamp(Mathf.FloorToInt(max * Mathf.Max(0, percent) / 100f), 1, Mathf.Max(1, max));
         }
 
-        private void Revive(SpellEffect effect, ICombatUnit caster, List<ICombatUnit> targets, EffectResult result)
+        private void Revive(SpellEffect effect, ICombatUnit caster, List<ICombatUnit> targets, CombatBuffTracker buffTracker,
+            EffectResult result)
         {
             if (targets == null)
             {
@@ -66,10 +70,15 @@ namespace Assets.Scripts.Cards.Effects
             var events = _events?.Invoke();
             foreach (var target in new List<ICombatUnit>(targets))
             {
-                if (target == null || target.IsAlive || !target.IsHero)
+                // A hero given to a Sacrifice is gone, not fallen.
+                if (target == null || target.IsAlive || !target.IsHero
+                    || (events != null && events.Sacrificed.Contains(target)))
                 {
                     continue;
                 }
+                // They stand up clean: no buffs, debuffs, ticks or barrier from before they fell.
+                buffTracker?.ClearUnit(target);
+                events?.Barriers.Clear(target);
                 int health = HealthFor(target, effect.Power);
                 HealthOps.Set(target, health, new HealthSource(caster, HealthCause.Revive), events);
                 events?.Publish(new UnitRevived { Unit = target, By = caster });

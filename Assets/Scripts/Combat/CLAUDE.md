@@ -27,9 +27,10 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
   share it). A covered unit wears a light-blue shield icon; a redirected swing floats "Cover".
 - **`UnitTraits`** (`[Flags]`, on `EnemySO.Traits`, read through `IHasTraits` by `Enemy` and `SimUnit`):
   Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental - what a unit *is*. `UnitTraitOps.Has`
-  is the check. Serialized as a bit mask: append, never reuse a bit. Only Disassemble reads it today
-(Mechanical); every enemy is tagged since 2026-10-07 (see the Enemies guide). **No enemy is Undead
-yet.**
+  is the check. Serialized as a bit mask: append, never reuse a bit. Read by Disassemble (Mechanical)
+and by the Cleric's Purge / Execute and the Archon's Hallowing (Undead, `SpellEffect.BonusVsTrait`);
+every enemy is tagged since 2026-10-07 (see the Enemies guide). **The undead are the Catacombs set**
+(2026-10-10).
 
 ## ICombatUnit
 

@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: HollowVault
   DisplayName: The Hollow Vault
   Blurb: The Hoarder was counting for someone. There is a door behind the ledger.
-  SequenceIndex: 3
+  SequenceIndex: 5
   Repeatable: 0
   Challenge: 0
   JoinsOnClear: {fileID: 0}

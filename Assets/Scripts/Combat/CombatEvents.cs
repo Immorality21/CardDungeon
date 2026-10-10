@@ -25,10 +25,21 @@ namespace Assets.Scripts.Combat
         /// Lives with the stream for the same reason as <see cref="Guards"/>.</summary>
         public BarrierTable Barriers { get; } = new BarrierTable();
 
+        /// <summary>Heroes given to a Sacrifice this fight. They are gone, not fallen: a Revive never
+        /// reaches them (owner, 2026-10-10). Kept with the stream so the live fight and the simulator agree.</summary>
+        public HashSet<ICombatUnit> Sacrificed { get; } = new HashSet<ICombatUnit>();
+
         public CombatEvents()
         {
             Subscribe<TurnStarted>(e => Barriers.TurnStarted(e.Unit));
             Subscribe<TurnEnded>(e => Barriers.TurnEnded(e.Unit));
+            Subscribe<UnitDefeated>(e =>
+            {
+                if (e.Cause == HealthCause.Sacrifice && e.Victim != null)
+                {
+                    Sacrificed.Add(e.Victim);
+                }
+            });
             // An enemy's cover lasts until its guard's next turn. Both loops raise TurnStarted, so
             // expiring it here keeps the live fight and the simulator on one rule - including a guard
             // whose turn is skipped by a freeze, whose turn still opened.

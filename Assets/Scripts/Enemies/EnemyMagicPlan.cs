@@ -170,6 +170,12 @@ namespace Assets.Scripts.Enemies
                     }
                     AddAlive(targets, allies);
                     break;
+
+                case MagicTargetType.FallenAlly:
+                    // Not supported for enemies: a fallen enemy is paid out and taken off the stage
+                    // (CombatManager.HandleEnemyDeath), so there is nobody to revive. No targets, so the
+                    // planner never chooses such a cast.
+                    break;
             }
 
             return targets;

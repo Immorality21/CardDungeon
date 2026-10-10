@@ -38,8 +38,8 @@
   Cinder Tyrant, Dark Jailor; **Flying** Cinder Imp, Drakeling, Floating Eye, Gilded Mote; **Beast**
   Drakeling, Slag Hound; **Elemental** Cinder Tyrant, Slag Hound; **Construct** Stone Sentinel, Gilded
   Mote; **Mechanical** the two machines below; none for the people (Bog Shaman, Hex Weaver), the
-  Mirefather and the Gilded Hoarder. **No enemy is Undead** - a holy-vs-undead ability has nothing to
-  bite on until one exists. Only Disassemble reads a trait today -
+  Mirefather and the Gilded Hoarder. **Undead** *(2026-10-10)*: the Catacombs set below - so far the only
+  undead in the game; sprinkle them into other levels' spawn tables when a floor wants them. Disassemble reads Mechanical, and the Cleric's Purge and Execute (and the Archon's Hallowing) read Undead -
   and **`SalvageTable`** (rolled like `LootTable`, on top of it) is what taking a machine apart with the
   Tinkerer's Disassemble yields (`HealthCause.Disassemble`). Mechanical today: the **Clockwork Sentry**
   (fast, fragile, an Aggressor) and the **Steam Automaton** (slow Bruiser, no flinch), both weak to
@@ -47,6 +47,23 @@
   Halls. The Stone Sentinel is a `Construct` - built by magic, so not something Disassemble applies to.
 
 - **Enemy** implements `ICombatUnit` (see the Combat guide). `Initialize(EnemySO)` applies the definition (sprite, `Stats`, archetype, spell list, resistances, the drop table, and `gameObject.name`); `DisplayName` comes from `Definition.DisplayName` (so it's the SO's name, **not** "Prefab(Clone)"). `GetEffectiveAttackPower()`/`GetEffectiveDefense()` return raw stats (no item bonuses). Runtime charge state (`ChargingEntryIndex`, `ChargeTarget`) is not persisted.
+
+## The undead - the Catacombs set *(2026-10-10)*
+
+Five enemies, all `Undead`, all **weak to Holy** (the Cleric's and Paladin's element), immune to Bleed
+and Poison, built for **The Catacombs** run (Sealed Archive -> Catacombs -> Drowned March, three floors,
+difficulty 2.45 / 2.8 / 2.6, XP x1.75). PixelLab art, picked from two candidates each.
+
+| enemy | shape | does |
+|---|---|---|
+| **Skeleton** | HP 13 STR 4 END 4 AGI 5 | plain swings; resists Shadow 50, Ice 25 |
+| **Ghoul** | HP 16 STR 5 AGI 6 | *Paralysing claw* (-3 Agility, 2 turns, 30%); weak to Fire too |
+| **Wight** | HP 18 INT 6 SPI 4, Ice attack | casts *Grave Touch* (Shadow + 50% drain), *Sap the will* (-2 Strength); resists Ice/Shadow 50 |
+| **Bone Golem** | HP 30 STR 7 END 7 AGI 2, Undead + Construct | **rare elite** (35% in the Boneworks room): telegraphed *Scythe sweep* on the whole party; no flinch; 64 px |
+| **Lich** | boss, pinned HP 72 STR 7 on its floor, INT 9 | *Soul Bolt*, *Death Chill* (Ice to all + Slow), *Raise the dead* (2 Skeletons, twice, below 70%), plus the boss signature; 64 px, `CombatScale` 1.8 |
+
+Grave Touch, Soul Bolt and Death Chill are `EnemyOnly` (`Enemies/Abilities/`). Rooms: Ossuary, Ghoul Pit,
+Crypt, Sepulchre, Boneworks. Sandbox: `CatacombsTrash` and `CatacombsLich`.
 
 ## Reactions (`EnemySO.Triggers`) - what an enemy does on its own *(2026-10-07)*
 

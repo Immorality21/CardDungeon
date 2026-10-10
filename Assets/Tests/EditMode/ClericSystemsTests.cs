@@ -165,6 +165,118 @@ namespace Tests.EditMode
             Object.DestroyImmediate(phoenix);
         }
 
+        [Test]
+        public void Revive_NeverReachesAHeroGivenToASacrifice()
+        {
+            var events = new CombatEvents();
+            var tracker = new CombatBuffTracker { Events = events };
+            var cleric = new MockCombatUnit("Cleric", 1, 0, 20);
+            var victim = new MockCombatUnit("Warrior", 1, 0, 50);
+            HealthOps.Set(victim, 0, new HealthSource(cleric, HealthCause.Sacrifice), events);
+            var resolver = new EffectResolver { Events = events, FallenAllies = c => new List<ICombatUnit> { victim } };
+            var phoenix = Magic(MagicTargetType.AllAllies, new SpellEffect { EffectType = SpellEffectType.Revive, Power = 50 });
+            var single = Magic(MagicTargetType.FallenAlly, new SpellEffect { EffectType = SpellEffectType.Revive, Power = 50 });
+
+            Cast(resolver, tracker, phoenix, cleric, cleric);
+            Cast(resolver, tracker, single, cleric, victim);
+            Assert.AreEqual(0, victim.Stats.Health, "a sacrificed hero is gone, not fallen");
+            Assert.IsTrue(events.Sacrificed.Contains(victim));
+            Object.DestroyImmediate(phoenix);
+            Object.DestroyImmediate(single);
+        }
+
+        [Test]
+        public void Revive_StandsTheHeroUpClean()
+        {
+            var events = new CombatEvents();
+            var tracker = new CombatBuffTracker { Events = events };
+            var resolver = new EffectResolver { Events = events };
+            var cleric = new MockCombatUnit("Cleric", 1, 0, 20);
+            var fallen = new MockCombatUnit("Warrior", 1, 0, 50);
+            tracker.ApplyStatusEffect(fallen, BuffType.Silenced, 3);
+            tracker.ApplyBuff(fallen, StatType.Strength, -2, 3);
+            tracker.SetKeyedBuff(fallen, StatType.Strength, 5, MomentumTracker.BuffKey);
+            events.Barriers.Add(fallen, 10, 3);
+            HealthOps.Damage(fallen, 70, new HealthSource(null, HealthCause.Attack), events);
+            var revive = Magic(MagicTargetType.FallenAlly, new SpellEffect { EffectType = SpellEffectType.Revive, Power = 30 });
+
+            var change = (HealthChange)null;
+            events.Subscribe<HealthChange>(c => change = c);
+            Cast(resolver, tracker, revive, cleric, fallen);
+            Assert.AreEqual(15, fallen.Stats.Health);
+            Assert.IsFalse(tracker.HasStatusEffect(fallen, BuffType.Silenced));
+            Assert.AreEqual(0, tracker.GetBuffAmount(fallen, StatType.Strength));
+            Assert.AreEqual(0, events.Barriers.PointsOf(fallen));
+            Assert.AreEqual(15, change.Healed, "from a bar below zero only what lands above zero is healing");
+            Object.DestroyImmediate(revive);
+        }
+
+        [Test]
+        public void Barrier_ATickItSoaksReportsOnlyWhatReachedTheBar()
+        {
+            var events = new CombatEvents();
+            var tracker = new CombatBuffTracker { Events = events };
+            var hero = new MockCombatUnit("Hero", 1, 0, 50);
+            tracker.ApplyOverTime(hero, BuffType.Poisoned, 6, 3);
+            events.Barriers.Add(hero, 4, 3);
+
+            var ticks = tracker.ResolveOverTime(hero);
+            Assert.AreEqual(48, hero.Stats.Health);
+            Assert.AreEqual(1, ticks.Count);
+            Assert.AreEqual(2, ticks[0].Amount);
+        }
+
+        // ---------------------------------------------------------------- picking one ally (revive targets)
+
+        [Test]
+        public void Ultra_AimedAtOneAllyOrOneFallenAlly_AsksForATarget()
+        {
+            var ultra = ScriptableObject.CreateInstance<UltraSO>();
+            ultra.Kind = UltraKind.Strike;
+            ultra.TargetType = MagicTargetType.AllEnemies;
+            Assert.IsFalse(UltraOps.NeedsTarget(ultra));
+            ultra.TargetType = MagicTargetType.FallenAlly;
+            Assert.IsTrue(UltraOps.NeedsTarget(ultra));
+            ultra.TargetType = MagicTargetType.SingleAlly;
+            Assert.IsTrue(UltraOps.NeedsTarget(ultra));
+            ultra.Kind = UltraKind.Sacrifice;
+            ultra.TargetType = MagicTargetType.AllEnemies;
+            Assert.IsTrue(UltraOps.NeedsTarget(ultra));
+            Object.DestroyImmediate(ultra);
+        }
+
+        [Test]
+        public void StrikeTargets_OneAlly_LandsOnTheOnePicked()
+        {
+            var ultra = ScriptableObject.CreateInstance<UltraSO>();
+            ultra.Kind = UltraKind.Strike;
+            ultra.TargetType = MagicTargetType.FallenAlly;
+            var hero = new MockCombatUnit("Cleric", 1, 0, 20);
+            var fallen = new MockCombatUnit("Warrior", 1, 0, 50);
+            fallen.Stats.Health = 0;
+            var none = new List<ICombatUnit>();
+
+            Assert.AreSame(fallen, UltraOps.StrikeTargets<ICombatUnit>(ultra, hero, none, none, c => 0, fallen)[0]);
+            Assert.IsEmpty(UltraOps.StrikeTargets<ICombatUnit>(ultra, hero, none, none, c => 0), "a revive with nobody picked revives nobody");
+            ultra.TargetType = MagicTargetType.SingleAlly;
+            Assert.AreSame(hero, UltraOps.StrikeTargets<ICombatUnit>(ultra, hero, none, none, c => 0)[0], "an unpicked one-ally Strike lands on the user");
+            Object.DestroyImmediate(ultra);
+        }
+
+        [Test]
+        public void Summon_AimedAtOneFallenAlly_AsksForATarget_OnlyAsASpecialAttack()
+        {
+            var summon = ScriptableObject.CreateInstance<SummonSO>();
+            summon.Kind = SummonKind.SpecialAttack;
+            summon.TargetType = MagicTargetType.AllAllies;
+            Assert.IsFalse(SummonOps.NeedsTarget(summon));
+            summon.TargetType = MagicTargetType.FallenAlly;
+            Assert.IsTrue(SummonOps.NeedsTarget(summon));
+            summon.Kind = SummonKind.ReplaceParty;
+            Assert.IsFalse(SummonOps.NeedsTarget(summon));
+            Object.DestroyImmediate(summon);
+        }
+
         // ---------------------------------------------------------------- Cure
 
         [Test]

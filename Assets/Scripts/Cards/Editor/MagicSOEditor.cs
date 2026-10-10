@@ -20,38 +20,8 @@ public class MagicSOEditor : Editor
 
         _effectsList.elementHeightCallback = index =>
         {
-            var element = effectsProp.GetArrayElementAtIndex(index);
-            var effectType = (SpellEffectType)element.FindPropertyRelative("EffectType").enumValueIndex;
-            int lines = 4; // EffectType + Power + ScalingStat + UnlockLevel
-            if (effectType == SpellEffectType.Damage)
-            {
-                lines = 6; // + PowerMode + DamageType
-            }
-            else if (effectType == SpellEffectType.Heal)
-            {
-                lines = 5; // + PowerMode
-            }
-            else if (effectType == SpellEffectType.Buff)
-            {
-                lines = 6; // + BuffType + Duration
-            }
-            else if (effectType == SpellEffectType.Debuff)
-            {
-                lines = 7; // + BuffType + Duration + ApplyChance
-            }
-            else if (effectType == SpellEffectType.HealthCost)
-            {
-                lines = 4; // EffectType + Power + PowerMode + UnlockLevel (no scaling stat)
-            }
-            else if (effectType == SpellEffectType.TurnDelay
-                     || effectType == SpellEffectType.Drain
-                     || effectType == SpellEffectType.RestoreCharge
-                     || effectType == SpellEffectType.Disassemble)
-            {
-                // EffectType + Power (percent of a turn / percent of the damage / charges) + UnlockLevel
-                lines = 3;
-            }
-            return lines * (EditorGUIUtility.singleLineHeight + 2) + 4;
+            var effectType = (SpellEffectType)effectsProp.GetArrayElementAtIndex(index).FindPropertyRelative("EffectType").enumValueIndex;
+            return LinesFor(effectType) * (EditorGUIUtility.singleLineHeight + 2) + 4;
         };
 
         _effectsList.drawElementCallback = (rect, index, isActive, isFocused) =>
@@ -75,11 +45,8 @@ public class MagicSOEditor : Editor
 
             // How Power is read. Sits directly under Power because it changes what the number
             // means: 10 is 10 damage in BasePower/Flat and 10% of a health bar in PercentOfMaxHealth.
-            // Buff/Debuff magnitudes are stat deltas and ignore the mode, so it is not drawn for them.
-            bool honoursPowerMode = effectType == SpellEffectType.Damage
-                                 || effectType == SpellEffectType.Heal
-                                 || effectType == SpellEffectType.HealthCost;
-            if (honoursPowerMode)
+            // A buff reads it too: PercentOfTargetStat for a stat buff, PercentOfMaxHealth for a barrier.
+            if (ShowsPowerMode(effectType))
             {
                 EditorGUI.PropertyField(
                     new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
@@ -87,18 +54,16 @@ public class MagicSOEditor : Editor
                     new GUIContent("Power Mode", "BasePower adds the caster's Scaling Stat. Flat uses "
                         + "Power as authored. PercentOfMaxHealth reads Power as a percentage of the "
                         + "max health of the unit the effect lands on (the caster, for a health cost), "
-                        + "rounded down with a floor of 1, and takes no upgrade bonus."));
+                        + "rounded down with a floor of 1, and takes no upgrade bonus. A Barrier buff "
+                        + "honours it too; a stat buff honours PercentOfTargetStat."));
                 rect.y += lineHeight;
             }
 
             // Which caster stat is added to Power. Sits next to Power because the two are read
             // together: Power is the floor, the stat is what a good caster brings. A health cost has
-            // no caster contribution at all, so the field would be a lie there.
-            // A turn delay is a percentage of the target's own turn: no caster stat goes into it.
-            // Neither does a drain (a percentage of the damage dealt) or a charge restore (a count).
-            if (effectType != SpellEffectType.HealthCost && effectType != SpellEffectType.TurnDelay
-                && effectType != SpellEffectType.Drain && effectType != SpellEffectType.RestoreCharge
-                && effectType != SpellEffectType.Disassemble)
+            // no caster contribution at all, so the field would be a lie there; nor does a turn delay,
+            // a drain, a charge restore, a revive, a cure or an execute (all percentages or counts).
+            if (ShowsScalingStat(effectType))
             {
                 EditorGUI.PropertyField(
                     new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
@@ -114,6 +79,27 @@ public class MagicSOEditor : Editor
                 EditorGUI.PropertyField(
                     new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
                     element.FindPropertyRelative("DamageType"));
+                rect.y += lineHeight;
+
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("BonusVsTrait"),
+                    new GUIContent("Bonus Vs", "A kind of unit this hits harder (Purge on the Undead). None = no bonus."));
+                rect.y += lineHeight;
+
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("BonusPercent"),
+                    new GUIContent("Bonus %", "Extra raw damage against Bonus Vs, in percent: 100 doubles it."));
+                rect.y += lineHeight;
+            }
+            else if (effectType == SpellEffectType.Execute)
+            {
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("BonusVsTrait"),
+                    new GUIContent("Only Destroys", "The kind of unit this destroys at or under Power % health. "
+                        + "None = any unit. Bosses never are."));
                 rect.y += lineHeight;
             }
             else if (effectType == SpellEffectType.Buff || effectType == SpellEffectType.Debuff)
@@ -144,6 +130,64 @@ public class MagicSOEditor : Editor
                 new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
                 element.FindPropertyRelative("UnlockLevel"));
         };
+    }
+
+    /// <summary>Whether an effect of this type reads <c>PowerMode</c>.</summary>
+    private static bool ShowsPowerMode(SpellEffectType type)
+    {
+        return type == SpellEffectType.Damage || type == SpellEffectType.Heal
+               || type == SpellEffectType.HealthCost || type == SpellEffectType.Buff;
+    }
+
+    /// <summary>Whether an effect of this type adds a caster stat to its Power.</summary>
+    private static bool ShowsScalingStat(SpellEffectType type)
+    {
+        switch (type)
+        {
+            case SpellEffectType.HealthCost:
+            case SpellEffectType.TurnDelay:
+            case SpellEffectType.Drain:
+            case SpellEffectType.RestoreCharge:
+            case SpellEffectType.Disassemble:
+            case SpellEffectType.Revive:
+            case SpellEffectType.Cure:
+            case SpellEffectType.Execute:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    /// <summary>How many rows the drawer gives an effect - counted from the same rules it draws by,
+    /// so the height can never disagree with what is drawn.</summary>
+    private static int LinesFor(SpellEffectType type)
+    {
+        int lines = 3; // EffectType + Power + UnlockLevel
+        if (ShowsPowerMode(type))
+        {
+            lines++;
+        }
+        if (ShowsScalingStat(type))
+        {
+            lines++;
+        }
+        if (type == SpellEffectType.Damage)
+        {
+            lines += 3; // DamageType + BonusVsTrait + BonusPercent
+        }
+        else if (type == SpellEffectType.Execute)
+        {
+            lines += 1; // BonusVsTrait
+        }
+        else if (type == SpellEffectType.Buff)
+        {
+            lines += 2; // BuffType + Duration
+        }
+        else if (type == SpellEffectType.Debuff)
+        {
+            lines += 3; // BuffType + Duration + ApplyChance
+        }
+        return lines;
     }
 
     public override void OnInspectorGUI()

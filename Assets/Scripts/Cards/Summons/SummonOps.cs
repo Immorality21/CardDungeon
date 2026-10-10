@@ -15,6 +15,13 @@ namespace Assets.Scripts.Cards
     /// </summary>
     public static class SummonOps
     {
+        /// <summary>Whether summoning <paramref name="summon"/> asks for a target first: a special
+        /// attack aimed at one living ally or one fallen ally (a single revive).</summary>
+        public static bool NeedsTarget(SummonSO summon)
+        {
+            return summon != null && summon.Kind == SummonKind.SpecialAttack && UltraOps.TargetsOneAlly(summon.TargetType);
+        }
+
         /// <summary>Prefix of the transient magic's key, so a summon's cast can never collide with,
         /// or be upgraded as, a real ability.</summary>
         public const string CastKeyPrefix = "summon:";

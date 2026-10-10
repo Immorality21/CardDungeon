@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: Ghoul
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: Ghoul
+  DisplayName: Ghoul
+  Sprite: {fileID: 21300000, guid: 7d588814f0124668917aa2b10b09dc3f, type: 3}
+  AnimationFrames:
+  - {fileID: 3845630207546853816, guid: 4cd27ece9bae4e15b391242b4d8b585f, type: 3}
+  - {fileID: 1355352099813675875, guid: 4cd27ece9bae4e15b391242b4d8b585f, type: 3}
+  - {fileID: 1661775754986977983, guid: 4cd27ece9bae4e15b391242b4d8b585f, type: 3}
+  AnimationFps: 4
+  HitFrames:
+  - {fileID: 2629050202976785320, guid: 1fdb99d1db2245b18e91eeee4c3d7965, type: 3}
+  - {fileID: 3934257505658918079, guid: 1fdb99d1db2245b18e91eeee4c3d7965, type: 3}
+  IsBoss: 0
+  CombatScale: 1
+  Traits: 4
+  BaseStats:
+    Values:
+    - Type: 7
+      Amount: 16
+    - Type: 1
+      Amount: 5
+    - Type: 2
+      Amount: 3
+    - Type: 3
+      Amount: 6
+  XpReward: 12
+  GoldReward: 6
+  AttackDamageType: 0
+  Archetype: 0
+  Behavior: {fileID: 11400000, guid: 01d3ce75a9b6fd8419d5a96390c20d16, type: 2}
+  Spells: []
+  Resistances:
+  - DamageType: 5
+    Percent: 30
+  - DamageType: 4
+    Percent: -50
+  - DamageType: 1
+    Percent: -25
+  StatusImmunities: 1000000011000000
+  LootTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa010000000000000000ab01, type: 2}
+    Chance: 0.3
+    MinQuantity: 1
+    MaxQuantity: 1
+  SalvageTable: []
+  Triggers: []
+  Flinches: 1

@@ -39,6 +39,12 @@ namespace Assets.Scripts.Cards
             events.Subscribe<TurnStarted>(e => _landed.Remove(e.Unit));
             events.Subscribe<HealthChange>(OnHealthChange);
             events.Subscribe<TurnEnded>(OnTurnEnded);
+            // A revived hero starts over (the keyed buff went with the rest of their buffs).
+            events.Subscribe<UnitRevived>(e =>
+            {
+                _stacks.Remove(e.Unit);
+                _landed.Remove(e.Unit);
+            });
         }
 
         /// <summary>A unit's stacks right now (0 for anyone without Momentum).</summary>

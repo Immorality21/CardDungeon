@@ -16,7 +16,7 @@ MonoBehaviour:
   DisplayName: The Drowned March
   Blurb: The water that filled the lower halls came from somewhere. Something down
     there is still breathing.
-  SequenceIndex: 1
+  SequenceIndex: 3
   Repeatable: 1
   Challenge: 0
   JoinsOnClear: {fileID: 11400000, guid: 8572c8c8edc04a8ea398ee885ba38e88, type: 2}

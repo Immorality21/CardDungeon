@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af198de09aeca534b959292a4b71d567, type: 3}
+  m_Name: BoneworksRoom
+  m_EditorClassIdentifier: 
+  Name: Boneworks
+  Width: 5
+  Height: 5
+  Color: {r: 0.36, g: 0.34, b: 0.3, a: 1}
+  Kind: 0
+  PossibleEvents:
+  - {fileID: 11400000, guid: 2fd1a731a1db42b79da28ade75858bb8, type: 2}
+  - {fileID: 11400000, guid: b731fb0552a046489a7988e04a9a52fc, type: 2}
+  EnemySpawnTable:
+  - Enemy: {fileID: 11400000, guid: 244a2bd9a1a7c2942a3bc5e0e4d14224, type: 2}
+    SpawnChance: 0.35
+    EvaluationCount: 1
+  - Enemy: {fileID: 11400000, guid: eaa6b30e7c013504ca95da0365eb252a, type: 2}
+    SpawnChance: 0.9
+    EvaluationCount: 1
+  - Enemy: {fileID: 11400000, guid: eaa6b30e7c013504ca95da0365eb252a, type: 2}
+    SpawnChance: 0.5
+    EvaluationCount: 1

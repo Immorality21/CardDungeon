@@ -140,7 +140,8 @@ namespace Assets.Scripts.Combat
             }
             else
             {
-                change.Healed = value - change.Before;
+                // From a bar below zero (a fallen unit) only what lands above zero is healing.
+                change.Healed = value - Mathf.Max(0, change.Before);
             }
             return Finish(change, events);
         }
