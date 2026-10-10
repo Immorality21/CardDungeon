@@ -52,9 +52,16 @@ namespace Assets.Scripts.Cards
         /// <c>Random.Range(0f, 1f)</c>; tests set a fixed one.</summary>
         public Func<float> Roll { get; set; }
 
+        /// <summary>
+        /// The fallen heroes on a caster's side, for a party-wide Revive (the Phoenix). Set by the
+        /// fight's owner - <c>CombatManager</c> and the simulator - beside <see cref="Clock"/>; null
+        /// (nobody to revive party-wide) in tests and room events.
+        /// </summary>
+        public Func<ICombatUnit, List<ICombatUnit>> FallenAllies { get; set; }
+
         public EffectResolver()
         {
-            _factory = new EffectExecutorFactory(() => Clock, () => Charges, () => Events, () => KillsOf, () => Roll);
+            _factory = new EffectExecutorFactory(() => Clock, () => Charges, () => Events, () => KillsOf, () => Roll, () => FallenAllies);
         }
 
         /// <param name="powerBonus">Flat power added to the magic's Damage/Heal effects (from its upgrade level).</param>

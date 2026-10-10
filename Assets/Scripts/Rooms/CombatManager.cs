@@ -619,6 +619,10 @@ namespace Assets.Scripts.Rooms
             // The Warrior's Momentum: stacks of Strength for every turn in a row he lands a hit.
             _momentum = new MomentumTracker(Events, BuffTracker);
             _momentum.Changed += ShowMomentum;
+            // A Revive (the Cleric's) stands a hero who fell in this fight back up; the effect sets the
+            // bar and announces it, and this puts them back on the stage and the clock.
+            _calculator.FallenAllies = FallenAlliesOf;
+            Events.Subscribe<UnitRevived>(HandleRevived);
             // A RestoreCharge effect (Life Tap) gives charges back to the run's ability slots.
             _calculator.Charges = DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null
                 ? new EquippedChargeBank(DungeonManager.Instance.MagicState)
@@ -2568,6 +2572,12 @@ namespace Assets.Scripts.Rooms
             {
                 dmg = -hit.Healed;
             }
+            else if (hit.Absorbed > 0)
+            {
+                // A barrier soaked part of the blow: the number shows what reached the bar.
+                dmg -= hit.Absorbed;
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), $"{hit.Absorbed} absorbed", new Color(0.6f, 0.85f, 1f), 0.13f);
+            }
 
             // Impact juice: flash + damage-scaled shake (extra punch on heavy/crit blows) + hit-stop.
             float punch = (damageMultiplier > 1f ? 1.6f : 1f) * (crit ? 1.4f : 1f);
@@ -3008,6 +3018,35 @@ namespace Assets.Scripts.Rooms
             // Removed from combat immediately; the object lingers only for its pop/fade.
             CombatAudio.Play(CombatSound.EnemyDeath);
             CombatFeedback.Instance.KillWithEffect(enemy.gameObject);
+        }
+
+        /// <summary>Heroes who fell in this fight and are still down - who a Revive can reach.</summary>
+        public List<ICombatUnit> GetFallenHeroes()
+        {
+            return _fallen.Where(h => h != null && !h.IsAlive).Cast<ICombatUnit>().ToList();
+        }
+
+        /// <summary>The fallen a party-wide Revive reaches: the heroes' own, never an enemy's.</summary>
+        private List<ICombatUnit> FallenAlliesOf(ICombatUnit caster)
+        {
+            return caster == null || caster is Enemy ? new List<ICombatUnit>() : GetFallenHeroes();
+        }
+
+        /// <summary>A fallen hero was revived: back on the stage, back on the clock (acting in turn, not at once).</summary>
+        private void HandleRevived(UnitRevived revived)
+        {
+            if (!(revived?.Unit is Hero hero) || !_fallen.Remove(hero))
+            {
+                return;
+            }
+            var sr = hero.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.enabled = true;
+            }
+            _turnManager.AddUnit(hero, false);
+            _lastTurnLog += $" {hero.DisplayName} is back on their feet!";
+            BroadcastTurnOrder();
         }
 
         private void HandleHeroDeath(Hero hero)

@@ -333,6 +333,11 @@ namespace Assets.Scripts.Combat
             {
                 list.Add(new IconDesc { Name = "shield", Tint = Yellow });
             }
+            // A barrier soaking damage before the bar (Sacred Shield, the Guardian Angel).
+            if (guards != null && CombatManager.Instance.Events.Barriers.PointsOf(_unit) > 0)
+            {
+                list.Add(new IconDesc { Name = "shield", Tint = Cyan });
+            }
 
             foreach (var status in bt.GetActiveStatusEffects(_unit))
             {

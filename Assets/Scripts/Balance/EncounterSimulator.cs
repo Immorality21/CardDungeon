@@ -282,6 +282,13 @@ namespace Assets.Scripts.Balance
             turnManager.Initialize(units);
             // A TurnDelay effect pushes units back on this clock, as CombatManager's does live.
             resolver.Clock = turnManager;
+            // A Revive reaches the heroes who fell in this fight (not a hero already down when it began),
+            // and puts them back on this clock - CombatManager's rule, from the same event.
+            var startedStanding = heroes.FindAll(h => h.IsAlive);
+            resolver.FallenAllies = caster => caster != null && caster.IsHero
+                ? startedStanding.FindAll(h => !h.IsAlive).ConvertAll(h => (ICombatUnit)h)
+                : new List<ICombatUnit>();
+            events.Subscribe<UnitRevived>(e => turnManager.AddUnit(e.Unit, false));
 
             // A party-replacing summon on the field (section 4b), or null. While it is out it is the
             // whole hero side - the one rule CombatManager.HeroSideUnits states for the live game.
@@ -1221,6 +1228,24 @@ namespace Assets.Scripts.Balance
             // Counted down on every turn the summoner takes - a potion turn and a silenced turn
             // included - because the buff it is waiting out ticks on all of them.
             bool summonReady = CountDownSummonWait(hero, summonTurnsLeft) <= 0;
+
+            // A fallen ally comes first: a Revive (the Cleric's) on whoever fell in this fight.
+            if (settings.Policy != SimPolicy.AttackOnly && !silenced && resolver.FallenAllies != null)
+            {
+                var fallen = resolver.FallenAllies(hero);
+                var reviveSlot = fallen.Count > 0 ? FindSlot(hero, SpellEffectType.Revive) : null;
+                if (reviveSlot != null)
+                {
+                    reviveSlot.Charges--;
+                    result.Casts++;
+                    var targets = reviveSlot.Magic.TargetType == MagicTargetType.AllAllies
+                        ? side.FindAll(u => u.IsAlive).ConvertAll(u => (ICombatUnit)u)
+                        : new List<ICombatUnit> { fallen[0] };
+                    resolver.Execute(new SpellcastAction { Magic = reviveSlot.Magic, Caster = hero, Targets = targets },
+                        buffTracker, tagTracker, comboDetector, 0, 0, null);
+                    return;
+                }
+            }
 
             if (settings.Policy == SimPolicy.Adaptive)
             {

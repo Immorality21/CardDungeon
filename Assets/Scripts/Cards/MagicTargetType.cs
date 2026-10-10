@@ -6,6 +6,8 @@ namespace Assets.Scripts.Cards
         AllEnemies,
         Self,
         SingleAlly,
-        AllAllies
+        AllAllies,
+        /// <summary>One fallen hero of the caster's side - a Revive. Appended: serialized by ordinal.</summary>
+        FallenAlly
     }
 }

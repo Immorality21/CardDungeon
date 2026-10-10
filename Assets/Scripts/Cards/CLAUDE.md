@@ -231,11 +231,11 @@ level-scoped health pool, and a cure would clear it only until the next room re-
   | added for | spells |
   |---|---|
   | Warrior (2026-09-04) | **Cleave** (STR, AllEnemies, Physical) · **Sunder** (STR, damage + Endurance debuff, Metal) · **Bulwark** (STR, AllAllies Endurance — the mirror of War Cry) |
-  | Paladin / Cleric (2026-09-05) | **Smite** (SPR, Holy, single) · **Consecrate** (SPR, Holy, AllEnemies) · **Benediction** (SPR, AllAllies heal) · **HolyTouch** (SPR, SingleAlly heal — the Paladin's free starting signature, so it is deliberately the weakest heal in the game) |
+  | Paladin / Cleric (2026-09-05) | ~~Smite~~ (removed 2026-10-10; the Cleric's Divine Bolt replaced it) · **Consecrate** (SPR, Holy, AllEnemies) · **Benediction** (SPR, AllAllies heal) · **HolyTouch** (SPR, SingleAlly heal — the Paladin's free starting signature, so it is deliberately the weakest heal in the game) |
   | Ranger / Rogue | **AimedShot** (AGI, single) · **Volley** (AGI, AllEnemies) · **Snare** (AGI, Agility debuff) · **Backstab** (AGI, damage + Bleeding) · **SmokeBomb** (Blind on every enemy, 50% each — a party Agility buff until 2026-10-09) |
   | Warlock | **Bloodbolt** (INT, Shadow, costs 8% max health) · **Blood Pact** (was Sacrifice: INT+STR on an ally for 15% max health) · **Drain Life** · **Life Tap** · **Siphon Soul** (2026-10-04) |
 
-  Several carry combo tags deliberately: Cleave is Physical (Infection) and lays it on the *whole room*, Sunder and Smite are Metal (Conductor). And the holy line is why the Mirefather and the Abyssal Warden are now **weak to Holy** while the Stone Sentinel resists it — a damage type nothing reacts to is arithmetically inert, which `ElementalContentTests` fails on.
+  Several carry combo tags deliberately: Cleave is Physical (Infection) and lays it on the *whole room*, Sunder is Metal (Conductor; Smite was too until it was removed). And the holy line is why the Mirefather and the Abyssal Warden are now **weak to Holy** while the Stone Sentinel resists it — a damage type nothing reacts to is arithmetically inert, which `ElementalContentTests` fails on.
 - **MagicCatalog** (singleton): scene-wired `List<MagicSO>` of every magic in the game, keyed by `Key`. Used to resolve saved magic keys when restoring equipped slots, and to list the ability collection in the hub Forge. **Edit `_allMagic` on `Assets/Prefabs/MagicCatalog.prefab`, not on the scene instance.** It is a prefab instance in *both* scenes, and overriding the array *size* on an instance grows it with **nulls** — which is how the cloaks first shipped castable in combat but unresolvable from a save and invisible in the Forge. `ElementalContentTests.EveryMagicAsset_IsInTheCatalogPrefab` fails on both mistakes now.
 
 ## Knowing, carrying, and charges
@@ -385,6 +385,21 @@ Two consequences worth holding on to:
   turns leaves alone (`LeaveSquad`), the last one out brings the party back (`EndSummon`), and
   **Dismiss sends the whole squad home**. The sim's `SimSquad` mirrors it. Troops are in the summon
   catalog; `SummonContentTests` counts them as taught through their squad.
+- **The Cleric's effects** *(2026-10-10)*. Three `SpellEffectType`s, one target type, one buff and a
+  field, all appended: **`Revive`** (`ReviveEffectExecutor`: a fallen hero stands up at `Power`% of
+  max health through `HealthOps` with `HealthCause.Revive`, then `UnitRevived` goes out and the fight's
+  owner puts them back on the clock - `CombatManager.HandleRevived`, the simulator's subscription. A
+  single-target cast aims at **`MagicTargetType.FallenAlly`** (the picker lists `GetFallenHeroes`, the
+  row greys "nobody fallen"); a party-wide cast revives everyone in `EffectResolver.FallenAllies`.
+  **Only heroes who fell in this fight** can be reached - one down from an earlier room is off the
+  stage). **`Cure`** (`CombatBuffTracker.CureDebuffs`: curable statuses and stat cuts, `Power` of them
+  or all at 0). **`Execute`** (destroys a target at or under `Power`% health, of
+  `SpellEffect.BonusVsTrait` if set, never a boss). **`SpellEffect.BonusVsTrait` + `BonusPercent`**
+  grow a Damage effect's raw hit against that kind (Purge doubles on Undead). **`BuffType.Barrier`**
+  puts points on `CombatEvents.Barriers` (`Combat/BarrierTable`), soaked in `HealthOps.Damage` before
+  the bar - hits, casts and ticks, never prices; authored with `PercentOfMaxHealth` it is that share of
+  each target's own bar. The simulator casts a Revive first whenever someone fell. **No enemy is
+  Undead yet**, so Purge's bonus and Miracle of Righteousness's execute do nothing in today's campaign.
 - **Ultras (`Cards/Ultras/`, COMBAT_DEPTH §13 — 2026-10-04).** `UltraSO` (`Resources/UltraCatalog`),
   taught by `SphereNodeKind.Ultra`, used from the **Ultra** command once the hero's gauge is full.
   **The command always opens the Ultra list** (`MagicSelectionUI.ShowUltraList`, via
@@ -486,7 +501,7 @@ Two consequences worth holding on to:
 - **Combo system**: `MagicComboSO` (`RequiredTags` + `BonusEffects`), `ComboDetector`, `MagicTagTracker` (active tags on units with durations).
 - **Buff system**: `CombatBuffTracker` (stat buffs + status effects with turn durations); `BuffType`; handlers under `Buffs/` via `BuffHandlerRegistry`.
 - **Effects/**: `IEffectExecutor`, `EffectExecutorFactory`, `Damage/Heal/Buff/DebuffEffectExecutor`.
-- **EffectResult** / **EffectPresenter**: floating-text presentation of a cast's results. **How a hit arrives is `MagicSO.Delivery`** *(2026-10-07)*: `Projectile` (default, 0 - every older asset keeps its bolt) flies the icon from the caster (Fireball, arrows, darts, shadow bolts); `Strike` draws the icon across the target where it stands, no flight (Slash, Cleave, Sunder, Backstab, Smite, Consecrate, and the melee summon/Ultra abilities). Presentation only. A projectile turns to face where it flies, which assumes the art points **right**; **`MagicSO.ProjectileArtAngle`** says where it really points (Aimed Shot's arrow 45, Volley and Cinderstorm -90) and is subtracted. **Set it whenever an ability gets a new projectile icon** - an arrow drawn diagonally flies sideways otherwise. A killing hit plays its delivery and impact too - both used to be gated on `IsAlive`, and since damage is applied before presentation, a lethal cast showed nothing and the unit simply dropped.
+- **EffectResult** / **EffectPresenter**: floating-text presentation of a cast's results. **How a hit arrives is `MagicSO.Delivery`** *(2026-10-07)*: `Projectile` (default, 0 - every older asset keeps its bolt) flies the icon from the caster (Fireball, arrows, darts, shadow bolts); `Strike` draws the icon across the target where it stands, no flight (Slash, Cleave, Sunder, Backstab, Consecrate, Purge, and the melee summon/Ultra abilities). Presentation only. A projectile turns to face where it flies, which assumes the art points **right**; **`MagicSO.ProjectileArtAngle`** says where it really points (Aimed Shot's arrow 45, Volley and Cinderstorm -90) and is subtracted. **Set it whenever an ability gets a new projectile icon** - an arrow drawn diagonally flies sideways otherwise. A killing hit plays its delivery and impact too - both used to be gated on `IsAlive`, and since damage is applied before presentation, a lethal cast showed nothing and the unit simply dropped.
 
 ## UI (`Cards/UI`)
 

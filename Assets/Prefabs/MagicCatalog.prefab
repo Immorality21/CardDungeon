@@ -47,7 +47,6 @@ MonoBehaviour:
   dontDestroyOnLoad: 0
   DetachFromRoot: 0
   _allMagic:
-  - {fileID: 11400000, guid: 95c7bea2bb8441bfb1673598aff27cb9, type: 2}
   - {fileID: 11400000, guid: 5b106eb02aeb436ba268493141f780d8, type: 2}
   - {fileID: 11400000, guid: 5a52699bb6504331b2e223dc962c66b5, type: 2}
   - {fileID: 11400000, guid: 4ff642ce8a6e4fc2b9d84d92f6089fb1, type: 2}
@@ -99,3 +98,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 089227621df50c04bac6fc9dc8b668ef, type: 2}
   - {fileID: 11400000, guid: 9e325c30af2c03d408f5d33cd10559ae, type: 2}
   - {fileID: 11400000, guid: 436c0de133d1f1e4291b57b988e1b781, type: 2}
+  - {fileID: 11400000, guid: c6c69adbc30d39249818f962fe3c023d, type: 2}
+  - {fileID: 11400000, guid: 1e922a992322eb74bbea6e87ceab1404, type: 2}
+  - {fileID: 11400000, guid: d7718f29c0bdbe24f8130a9145e048f5, type: 2}
+  - {fileID: 11400000, guid: 053877c710641994285b44a8c72cede3, type: 2}
+  - {fileID: 11400000, guid: 0b6ad0c71d53b0a4ea7de717f3d20589, type: 2}
+  - {fileID: 11400000, guid: b7febf7cf4ca82e478e5af4b563b9b4b, type: 2}
+  - {fileID: 11400000, guid: 3c9b9488c9b10c946bb3a372e2b7b2a5, type: 2}
+  - {fileID: 11400000, guid: 5896062b2a6d1084486fac1083dabc0b, type: 2}
+  - {fileID: 11400000, guid: d4051ca9944f9264f9518520a6a7eed3, type: 2}
+  - {fileID: 11400000, guid: fe4e57fd15586b147aa2113bef6cf538, type: 2}

@@ -76,12 +76,16 @@ namespace Assets.Scripts.Cards.Effects
                     continue;
                 }
 
-                handler.Apply(target, magnitude, effect.Duration, buffTracker, caster);
+                // A barrier authored as a share of the bar is that share of each target's own.
+                int amount = effect.PowerMode == PowerMode.PercentOfMaxHealth && handler is BarrierBuffHandler
+                    ? SpellPower.PercentOfStat(effect.Power, target, Assets.Scripts.UnitStats.StatType.MaxHealth)
+                    : magnitude;
+                handler.Apply(target, amount, effect.Duration, buffTracker, caster);
 
                 result.Entries.Add(new EffectEntry
                 {
                     Target = target,
-                    Text = handler.GetDisplayText(magnitude),
+                    Text = handler.GetDisplayText(amount),
                     Color = BuffColor,
                     Delay = EffectDelay
                 });

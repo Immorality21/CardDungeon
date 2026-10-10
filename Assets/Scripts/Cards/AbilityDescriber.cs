@@ -111,6 +111,8 @@ namespace Assets.Scripts.Cards
                     return "One ally";
                 case MagicTargetType.AllAllies:
                     return "Whole party";
+                case MagicTargetType.FallenAlly:
+                    return "One fallen ally";
                 default:
                     return "One enemy";
             }
@@ -181,9 +183,23 @@ namespace Assets.Scripts.Cards
                         : $"restores {effect.Power} charges to an ability";
                 case SpellEffectType.Disassemble:
                     return "takes a machine apart outright - likelier the more of its kind you have defeated";
+                case SpellEffectType.Revive:
+                    return $"revives a fallen hero with {effect.Power}% of max HP";
+                case SpellEffectType.Cure:
+                    return effect.Power <= 0
+                        ? "clears every debuff"
+                        : effect.Power == 1 ? "clears one debuff" : $"clears {effect.Power} debuffs";
+                case SpellEffectType.Execute:
+                    return $"destroys {TraitName(effect.BonusVsTrait, "a foe")} under {effect.Power}% health outright (not bosses)";
                 default:
                     return null;
             }
+        }
+
+        /// <summary>"Undead" for a trait, or <paramref name="none"/> when there is none.</summary>
+        private static string TraitName(UnitTraits trait, string none)
+        {
+            return trait == UnitTraits.None ? none : trait.ToString();
         }
 
         private static string DamageLine(SpellEffect effect, ICombatUnit caster, CombatBuffTracker buffTracker, int powerBonus)
@@ -195,6 +211,12 @@ namespace Assets.Scripts.Cards
             }
 
             string line = $"{Magnitude(effect, caster, buffTracker, powerBonus)}{element} damage";
+            if (effect.BonusPercent != 0 && effect.BonusVsTrait != UnitTraits.None)
+            {
+                line += effect.BonusPercent == 100
+                    ? $", double vs {TraitName(effect.BonusVsTrait, "")}"
+                    : $", +{effect.BonusPercent}% vs {TraitName(effect.BonusVsTrait, "")}";
+            }
             if (caster != null)
             {
                 int attack = caster.GetEffectiveAttackPower()
@@ -237,9 +259,17 @@ namespace Assets.Scripts.Cards
             }
             else
             {
-                int magnitude = effect.Power + SpellScaling.BuffContribution(caster, effect.ScalingStat, buffTracker);
-                // The handlers' texts are combat popups ("Frozen!"); a description does not shout.
-                text = handler.GetDisplayText(sign * magnitude).TrimEnd('!');
+                if (effect.PowerMode == PowerMode.PercentOfMaxHealth)
+                {
+                    // A share of each target's own bar (a barrier): "Barrier of 25% max HP".
+                    text = handler.GetDisplayText(0).Replace(" 0", "") + $" of {effect.Power}% max HP";
+                }
+                else
+                {
+                    int magnitude = effect.Power + SpellScaling.BuffContribution(caster, effect.ScalingStat, buffTracker);
+                    // The handlers' texts are combat popups ("Frozen!"); a description does not shout.
+                    text = handler.GetDisplayText(sign * magnitude).TrimEnd('!');
+                }
             }
 
             string gloss;

@@ -45,7 +45,10 @@ namespace Assets.Scripts.Combat
 
         /// <summary>The Tinkerer's Disassemble took a machine apart: it falls outright, and its salvage
         /// is paid on top of the kill (<c>EnemySO.SalvageTable</c>).</summary>
-        Disassemble
+        Disassemble,
+
+        /// <summary>A fallen hero is brought back by a Revive (the Cleric's), at a share of their bar.</summary>
+        Revive
     }
 
     /// <summary>
@@ -96,6 +99,10 @@ namespace Assets.Scripts.Combat
 
         /// <summary>Health actually restored (a heal, or an absorbed hit). 0 for damage.</summary>
         public int Healed;
+
+        /// <summary>Damage a barrier soaked before the bar was touched (<see cref="BarrierTable"/>).
+        /// Not part of <see cref="Landed"/>.</summary>
+        public int Absorbed;
 
         /// <summary>The bar crossed from standing to down with this change.</summary>
         public bool Killed => Before > 0 && After <= 0;

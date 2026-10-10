@@ -68,6 +68,17 @@ namespace Assets.Scripts.Combat
             {
                 return Empty(target, source);
             }
+            // A barrier soaks a blow, a cast or a tick before the bar is touched; a price never.
+            if (events != null && amount > 0 && BarrierTable.Soaks(source.Cause))
+            {
+                change.Absorbed = events.Barriers.Absorb(target, amount);
+                amount -= change.Absorbed;
+                if (amount <= 0)
+                {
+                    change.After = change.Before;
+                    return change;
+                }
+            }
             change.Landed = Mathf.Min(amount, Mathf.Max(0, change.Before));
             target.Stats.Health = change.Before - amount;
             return Finish(change, events);

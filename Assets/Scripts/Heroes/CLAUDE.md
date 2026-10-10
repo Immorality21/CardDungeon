@@ -93,7 +93,7 @@ are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-gene
 |---|---|---|
 | Warrior | Strength | health/END + ShieldUp→Bulwark→Ward (+**Take Cover** Ultra, `warrior-a-cover`) · STR/AGI/LCK + Sunder→Cleave→WarCry (+**Flurry** Ultra, `warrior-b-flurry`). Signature: **Momentum** (`HeroSO.Momentum`, Combat guide) |
 | Paladin | Strength | shield + Ward · Sunder→Consecrate · Heal→Renew — **three**, per §4c |
-| Cleric | Spirit | Renew→Benediction · Smite→Ward |
+| Cleric | Spirit | **Mend** (root) · SacredShield→Renew→**Revive** (+Benediction, awakened to Absolution) → **Phoenix** · Sanctuary→Inspire→Quicken → **Guardian Angel** · DivineBolt→Purge→SearingLight → **Archon** — rebuilt to her vision 2026-10-10, three branches on the Paladin's layout; one Miracle Ultra mid-branch on each (Light / Hope / Righteousness). Summon art is placeholder (Galewing, Judgement Seraph) |
 | Ranger | Agility | PoisonDart→Volley · Snare→Hush |
 | Warlock | Intelligence | BloodPact→LifeTap (+Cinderstorm) · DrainLife→SiphonSoul (+OilSlick) · demons — three, re-authored 2026-10-04. **One summon, the Demon Army, on the trunk; every branch improves it** (C: more troops, Succubi). **Demon Form** (Ultra) on the trunk behind 3 Void Shards |
 | Tinkerer | Intelligence | **Disassemble** (root) + Patch Kit · RivetGun→SteamBurst → **Warrior Mech** · OilFlask→GearJam → **Oil Spewing Mech** · FlareCannon→IncendiaryBomb → **Flamethrower Mech** — rebuilt 2026-10-07; the mechs are Mount Ultras (Magic guide). Her old elemental grid is now the stub `MageGrid` (the Mage is off the roster) |

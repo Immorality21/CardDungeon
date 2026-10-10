@@ -79,6 +79,11 @@ namespace Assets.Scripts.Cards.Effects
                 // the effect lands on. Flat power comes from the definition (a combo's bonus effect, a
                 // room event's outcome) rather than from whoever happened to trigger it.
                 int rawAttack = SpellPower.Resolve(effect, caster, target, buffTracker, flatPower);
+                // Meant for a kind of unit (Purge on the Undead): the raw hit grows before defense.
+                if (effect.BonusPercent != 0 && UnitTraitOps.Has(target, effect.BonusVsTrait))
+                {
+                    rawAttack = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.RoundToInt(rawAttack * (1f + effect.BonusPercent / 100f)));
+                }
 
                 // Magic (an Intelligence- or Spirit-scaled effect) is met by Spirit, everything else
                 // by Endurance — DefenseRules owns the split.
@@ -112,7 +117,8 @@ namespace Assets.Scripts.Cards.Effects
                 }
                 else
                 {
-                    int landed = HealthOps.Damage(target, damage, source, _events?.Invoke()).Landed;
+                    var hit = HealthOps.Damage(target, damage, source, _events?.Invoke());
+                    int landed = hit.Landed;
 
                     foreach (var statusEffect in buffTracker.GetActiveStatusEffects(target))
                     {
@@ -126,7 +132,8 @@ namespace Assets.Scripts.Cards.Effects
                     result.Entries.Add(new EffectEntry
                     {
                         Target = target,
-                        Text = damage.ToString(),
+                        // A barrier soaked part of it: the number is what reached the bar.
+                        Text = hit.Absorbed > 0 ? $"{damage - hit.Absorbed} ({hit.Absorbed} absorbed)" : damage.ToString(),
                         Color = DamageColor,
                         Delay = EffectDelay,
                         Impact = damage,

@@ -44,6 +44,9 @@ namespace Assets.Scripts.Cards
         Blinded = 20,
         // Resistance to every element, Normal included: Power% less from every hit, before defense.
         // The Warrior's Take Cover. Not a status - it rides the resistance channel.
-        Guarded = 21
+        Guarded = 21,
+        // A pool of points soaking damage before the bar (Combat.BarrierTable): the Cleric's Sacred
+        // Shield and the Guardian Angel. Not a status - it lives on the fight's event stream.
+        Barrier = 22
     }
 }

@@ -22,7 +22,8 @@ namespace Assets.Scripts.Cards.Effects
             Func<IChargeBank> charges = null,
             Func<CombatEvents> events = null,
             Func<Func<ICombatUnit, int>> killsOf = null,
-            Func<Func<float>> roll = null)
+            Func<Func<float>> roll = null,
+            Func<Func<ICombatUnit, List<ICombatUnit>>> fallen = null)
         {
             _executors = new Dictionary<SpellEffectType, IEffectExecutor>
             {
@@ -34,7 +35,10 @@ namespace Assets.Scripts.Cards.Effects
                 { SpellEffectType.TurnDelay, new TurnDelayEffectExecutor(clock) },
                 { SpellEffectType.Drain, new DrainEffectExecutor(events) },
                 { SpellEffectType.RestoreCharge, new RestoreChargeEffectExecutor(charges) },
-                { SpellEffectType.Disassemble, new DisassembleEffectExecutor(killsOf, roll, events) }
+                { SpellEffectType.Disassemble, new DisassembleEffectExecutor(killsOf, roll, events) },
+                { SpellEffectType.Revive, new ReviveEffectExecutor(events, fallen) },
+                { SpellEffectType.Cure, new CureEffectExecutor() },
+                { SpellEffectType.Execute, new ExecuteEffectExecutor(events) }
             };
         }
 

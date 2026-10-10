@@ -48,6 +48,28 @@ namespace Assets.Scripts.Cards
         /// caster and also yields its salvage (<c>EnemySO.SalvageTable</c>); a failure, or a target that
         /// is not a machine, does nothing. <c>Power</c> is unused. Appended, for the reason above.
         /// </summary>
-        Disassemble = 8
+        Disassemble = 8,
+
+        /// <summary>
+        /// Brings a fallen hero back to their feet at <c>Power</c> percent of their max health (at least
+        /// 1), back on the clock - the Cleric's Revive. Single-target casts revive the fallen ally picked
+        /// (<see cref="MagicTargetType.FallenAlly"/>); a party-wide one revives every fallen hero of the
+        /// caster's side (the Phoenix). Needs the fight's list of the fallen
+        /// (<see cref="EffectResolver.FallenAllies"/>). Appended, for the reason above.
+        /// </summary>
+        Revive = 9,
+
+        /// <summary>
+        /// Clears debuffs from each target: curable statuses and stat cuts, at most <c>Power</c> of them,
+        /// or every one when <c>Power</c> is 0 (Miracle of Light, the awakened Benediction). Appended.
+        /// </summary>
+        Cure = 10,
+
+        /// <summary>
+        /// Destroys each target standing at or under <c>Power</c> percent of its max health, if it has
+        /// <see cref="SpellEffect.BonusVsTrait"/> (any unit when that is None). Bosses are never destroyed.
+        /// Put it after a damage effect and the blow sets it up (Miracle of Righteousness). Appended.
+        /// </summary>
+        Execute = 11
     }
 }

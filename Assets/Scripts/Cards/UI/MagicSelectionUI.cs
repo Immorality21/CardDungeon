@@ -276,6 +276,14 @@ namespace Assets.Scripts.Cards.UI
                         }
                     }
 
+                    // A Revive with nobody down has nothing to do.
+                    if (slot.Magic.TargetType == MagicTargetType.FallenAlly
+                        && CombatManager.Instance.GetFallenHeroes().Count == 0)
+                    {
+                        selectable = false;
+                        meta = $"{meta}  nobody fallen";
+                    }
+
                     // A Life Tap with nothing spent to refill would charge its price for nothing.
                     if (slot.Magic.HasEffectType(SpellEffectType.RestoreCharge)
                         && ChargeTargets(slot.Magic, i).Count == 0)
@@ -346,6 +354,11 @@ namespace Assets.Scripts.Cards.UI
             {
                 targets = CombatManager.Instance.GetAliveEnemies();
                 prompt = "Select Enemy Target";
+            }
+            else if (targetType == MagicTargetType.FallenAlly)
+            {
+                targets = CombatManager.Instance.GetFallenHeroes();
+                prompt = "Select Fallen Ally";
             }
             else
             {

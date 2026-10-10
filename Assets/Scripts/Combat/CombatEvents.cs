@@ -21,8 +21,14 @@ namespace Assets.Scripts.Combat
         /// the live fight and the simulator share it, and goes with the fight.</summary>
         public GuardTable Guards { get; } = new GuardTable();
 
+        /// <summary>Barriers soaking damage before the bar (the Cleric's), read by <see cref="HealthOps.Damage"/>.
+        /// Lives with the stream for the same reason as <see cref="Guards"/>.</summary>
+        public BarrierTable Barriers { get; } = new BarrierTable();
+
         public CombatEvents()
         {
+            Subscribe<TurnStarted>(e => Barriers.TurnStarted(e.Unit));
+            Subscribe<TurnEnded>(e => Barriers.TurnEnded(e.Unit));
             // An enemy's cover lasts until its guard's next turn. Both loops raise TurnStarted, so
             // expiring it here keeps the live fight and the simulator on one rule - including a guard
             // whose turn is skipped by a freeze, whose turn still opened.
@@ -54,6 +60,14 @@ namespace Assets.Scripts.Combat
     public class TurnStarted
     {
         public ICombatUnit Unit;
+    }
+
+    /// <summary>A fallen hero stood back up (a Revive). Raised by the effect after the bar was set, so the
+    /// fight's owner can put them back on the clock and on the stage.</summary>
+    public class UnitRevived
+    {
+        public ICombatUnit Unit;
+        public ICombatUnit By;
     }
 
     /// <summary>A unit's turn is over, after its upkeep.</summary>

@@ -438,6 +438,43 @@ namespace Assets.Scripts.Cards
         }
 
         /// <summary>
+        /// Clears debuffs from <paramref name="unit"/> - curable statuses (<see cref="BuffHandlerRegistry.IsCurable"/>)
+        /// and stat cuts (a negative stat entry no mechanic owns) - at most <paramref name="max"/> of them,
+        /// newest first, or every one when <paramref name="max"/> is 0. Returns how many went. The
+        /// Cleric's Cure; buffs on the party's own side are never touched.
+        /// </summary>
+        public int CureDebuffs(ICombatUnit unit, int max)
+        {
+            if (unit == null || !_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                return 0;
+            }
+            int cleared = 0;
+            for (int i = buffs.Count - 1; i >= 0; i--)
+            {
+                if (max > 0 && cleared >= max)
+                {
+                    break;
+                }
+                var buff = buffs[i];
+                bool debuff = buff.IsStatusEffect
+                    ? BuffHandlerRegistry.IsCurable(buff.BuffType)
+                    : !buff.IsResistance && buff.Key == null && buff.Amount < 0;
+                if (!debuff)
+                {
+                    continue;
+                }
+                buffs.RemoveAt(i);
+                cleared++;
+            }
+            if (buffs.Count == 0)
+            {
+                _activeBuffs.Remove(unit);
+            }
+            return cleared;
+        }
+
+        /// <summary>
         /// Removes every curable status effect from <paramref name="unit"/> and returns what was
         /// removed, so the caller can name them. See <see cref="BuffHandlerRegistry.IsCurable"/> for
         /// why the list is a design judgement rather than a handler property — a cure must not strip

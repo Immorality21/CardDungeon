@@ -20,15 +20,22 @@ MonoBehaviour:
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -180}
     Gains:
       Values:
       - Type: 7
         Amount: 4
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-trunk-1
   - Key: cleric-trunk-1
@@ -37,15 +44,22 @@ MonoBehaviour:
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -90}
     Gains:
       Values:
       - Type: 5
         Amount: 3
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-sig
   - Key: cleric-sig
@@ -54,13 +68,20 @@ MonoBehaviour:
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: 0}
     Gains:
       Values: []
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: Heal
-    GrantedCharges: 2
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Mend
+    GrantedCharges: 3
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors: []
   - Key: cleric-trunk-2
     DisplayName: 
@@ -68,6 +89,7 @@ MonoBehaviour:
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -75,10 +97,16 @@ MonoBehaviour:
         Amount: 1
       - Type: 7
         Amount: 4
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-start
   - Key: cleric-trunk-slot
@@ -87,13 +115,20 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -360}
     Gains:
       Values: []
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-a-1
@@ -102,15 +137,22 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -107, y: -325}
+    EssenceCost: 0
+    Position: {x: -132, y: -325}
     Gains:
       Values:
       - Type: 5
-        Amount: 5
-    ResistType: 0
-    ResistPercent: 0
+        Amount: 4
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-a-2
@@ -119,15 +161,22 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -200, y: -380}
+    EssenceCost: 0
+    Position: {x: -246, y: -380}
     Gains:
       Values:
       - Type: 7
         Amount: 6
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-a-1
   - Key: cleric-a-3
@@ -136,13 +185,20 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -292, y: -435}
+    EssenceCost: 0
+    Position: {x: -360, y: -435}
     Gains:
       Values: []
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: Renew
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: SacredShield
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-a-2
   - Key: cleric-a-4
@@ -151,15 +207,22 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -385, y: -490}
+    EssenceCost: 0
+    Position: {x: -474, y: -490}
     Gains:
       Values:
       - Type: 5
-        Amount: 5
-    ResistType: 0
-    ResistPercent: 0
+        Amount: 4
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-a-3
   - Key: cleric-a-5
@@ -168,13 +231,20 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -478, y: -545}
+    EssenceCost: 0
+    Position: {x: -588, y: -545}
     Gains:
       Values: []
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-a-4
   - Key: cleric-a-6
@@ -183,13 +253,20 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -570, y: -600}
+    EssenceCost: 0
+    Position: {x: -702, y: -600}
     Gains:
       Values: []
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: Benediction
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Renew
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-a-5
   - Key: cleric-a-7
@@ -198,15 +275,22 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -663, y: -655}
+    EssenceCost: 0
+    Position: {x: -816, y: -655}
     Gains:
       Values:
       - Type: 5
-        Amount: 6
-    ResistType: 0
-    ResistPercent: 0
+        Amount: 5
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-a-6
   - Key: cleric-a-res
@@ -215,13 +299,20 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -352, y: -360}
+    EssenceCost: 0
+    Position: {x: -420, y: -360}
     Gains:
       Values: []
     ResistType: 4
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-a-3
   - Key: cleric-a-tip-a
@@ -230,15 +321,22 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -758, y: -710}
+    EssenceCost: 0
+    Position: {x: -911, y: -710}
     Gains:
       Values:
       - Type: 5
         Amount: 4
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-a-7
   - Key: cleric-a-tip-b
@@ -247,32 +345,208 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -723, y: -585}
+    EssenceCost: 0
+    Position: {x: -876, y: -585}
     Gains:
       Values:
       - Type: 7
         Amount: 5
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-a-7
+  - Key: cleric-a-bless
+    DisplayName: 
+    Kind: 3
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -640, y: -700}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Benediction
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-a-6
+  - Key: cleric-a-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: -600, y: -790}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Benediction
+    GrantedCharges: 2
+    AwakenedMagicKey: Absolution
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-a-bless
+  - Key: cleric-a-revive
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -840, y: -760}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Revive
+    GrantedCharges: 1
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-a-7
+  - Key: cleric-a-miracle
+    DisplayName: 
+    Kind: 10
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -500, y: -640}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: MiracleOfLight
+    SummonAmount: 1
+    Neighbors:
+    - cleric-a-5
+  - Key: cleric-phoenix
+    DisplayName: 
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
+      Amount: 3
+    EssenceCost: 0
+    Position: {x: -1006, y: -765}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Phoenix
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-a-tip-a
+  - Key: cleric-phoenix-power
+    DisplayName: 
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -1101, y: -820}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Phoenix
+    GrantedUltraKey: 
+    SummonAmount: 10
+    Neighbors:
+    - cleric-phoenix
+  - Key: cleric-phoenix-charge
+    DisplayName: 
+    Kind: 7
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
+      Amount: 2
+    EssenceCost: 0
+    Position: {x: -1196, y: -875}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Phoenix
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-phoenix-power
   - Key: cleric-b-1
     DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 107, y: -325}
+    EssenceCost: 0
+    Position: {x: 0, y: -450}
     Gains:
       Values:
-      - Type: 5
-        Amount: 5
-    ResistType: 0
-    ResistPercent: 0
+      - Type: 2
+        Amount: 2
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-b-2
@@ -281,15 +555,22 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 200, y: -380}
+    EssenceCost: 0
+    Position: {x: 0, y: -540}
     Gains:
       Values:
-      - Type: 2
-        Amount: 3
-    ResistType: 0
-    ResistPercent: 0
+      - Type: 3
+        Amount: 2
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-b-1
   - Key: cleric-b-3
@@ -298,13 +579,20 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 292, y: -435}
+    EssenceCost: 0
+    Position: {x: 0, y: -630}
     Gains:
       Values: []
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: Smite
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Sanctuary
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-b-2
   - Key: cleric-b-4
@@ -313,15 +601,22 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 385, y: -490}
+    EssenceCost: 0
+    Position: {x: 0, y: -720}
     Gains:
       Values:
       - Type: 5
-        Amount: 5
-    ResistType: 0
-    ResistPercent: 0
+        Amount: 3
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-b-3
   - Key: cleric-b-5
@@ -330,13 +625,20 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 478, y: -545}
+    EssenceCost: 0
+    Position: {x: 0, y: -810}
     Gains:
       Values: []
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-b-4
   - Key: cleric-b-6
@@ -345,13 +647,20 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 570, y: -600}
+    EssenceCost: 0
+    Position: {x: 0, y: -900}
     Gains:
       Values: []
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: Ward
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Inspire
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-b-5
   - Key: cleric-b-7
@@ -360,15 +669,22 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 663, y: -655}
+    EssenceCost: 0
+    Position: {x: 0, y: -990}
     Gains:
       Values:
       - Type: 7
         Amount: 6
-    ResistType: 0
-    ResistPercent: 0
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-b-6
   - Key: cleric-b-res
@@ -377,13 +693,20 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 352, y: -360}
+    EssenceCost: 0
+    Position: {x: 60, y: -690}
     Gains:
       Values: []
     ResistType: 5
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-b-3
   - Key: cleric-b-tip-a
@@ -392,15 +715,22 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 758, y: -710}
+    EssenceCost: 0
+    Position: {x: 95, y: -1045}
     Gains:
       Values:
-      - Type: 5
-        Amount: 4
-    ResistType: 0
-    ResistPercent: 0
+      - Type: 2
+        Amount: 2
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-b-7
   - Key: cleric-b-tip-b
@@ -409,14 +739,533 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 723, y: -585}
+    EssenceCost: 0
+    Position: {x: -95, y: -920}
     Gains:
       Values:
-      - Type: 7
-        Amount: 5
-    ResistType: 0
-    ResistPercent: 0
+      - Type: 3
+        Amount: 2
+    ResistType: 1
+    ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - cleric-b-7
+  - Key: cleric-b-quicken
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -95, y: -1060}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Quicken
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-b-7
+  - Key: cleric-b-miracle
+    DisplayName: 
+    Kind: 10
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 95, y: -790}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: MiracleOfHope
+    SummonAmount: 1
+    Neighbors:
+    - cleric-b-5
+  - Key: cleric-angel
+    DisplayName: 
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
+      Amount: 3
+    EssenceCost: 0
+    Position: {x: 190, y: -1100}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: GuardianAngel
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-b-tip-a
+  - Key: cleric-angel-power
+    DisplayName: 
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 285, y: -1155}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: GuardianAngel
+    GrantedUltraKey: 
+    SummonAmount: 5
+    Neighbors:
+    - cleric-angel
+  - Key: cleric-angel-stay
+    DisplayName: 
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 380, y: -1210}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: GuardianAngel
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-angel-power
+  - Key: cleric-angel-charge
+    DisplayName: 
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
+      Amount: 2
+    EssenceCost: 0
+    Position: {x: 475, y: -1265}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: GuardianAngel
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-angel-stay
+  - Key: cleric-c-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 132, y: -325}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 3
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-trunk-2
+  - Key: cleric-c-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 246, y: -380}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-1
+  - Key: cleric-c-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 360, y: -435}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: DivineBolt
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-2
+  - Key: cleric-c-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 474, y: -490}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 4
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-3
+  - Key: cleric-c-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 588, y: -545}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-4
+  - Key: cleric-c-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 702, y: -600}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Purge
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-5
+  - Key: cleric-c-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 816, y: -655}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 3
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-6
+  - Key: cleric-c-res
+    DisplayName: 
+    Kind: 1
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 420, y: -360}
+    Gains:
+      Values: []
+    ResistType: 3
+    ResistPercent: 12
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-3
+  - Key: cleric-c-tip-a
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 911, y: -710}
+    Gains:
+      Values:
+      - Type: 5
+        Amount: 4
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-7
+  - Key: cleric-c-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 876, y: -585}
+    Gains:
+      Values:
+      - Type: 4
+        Amount: 2
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-7
+  - Key: cleric-c-searing
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 840, y: -760}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: SearingLight
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-7
+  - Key: cleric-c-miracle
+    DisplayName: 
+    Kind: 10
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 500, y: -640}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: MiracleOfRighteousness
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-5
+  - Key: cleric-archon
+    DisplayName: 
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
+      Amount: 3
+    EssenceCost: 0
+    Position: {x: 1006, y: -765}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Archon
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-c-tip-a
+  - Key: cleric-archon-power
+    DisplayName: 
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 1101, y: -820}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Archon
+    GrantedUltraKey: 
+    SummonAmount: 30
+    Neighbors:
+    - cleric-archon
+  - Key: cleric-archon-stay
+    DisplayName: 
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 1196, y: -875}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Archon
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-archon-power
+  - Key: cleric-archon-charge
+    DisplayName: 
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
+      Amount: 2
+    EssenceCost: 0
+    Position: {x: 1291, y: -930}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Archon
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-archon-stay

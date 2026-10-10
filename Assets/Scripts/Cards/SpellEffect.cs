@@ -51,6 +51,16 @@ namespace Assets.Scripts.Cards
         public int ApplyChance = AfflictionRules.Certain;
 
         /// <summary>
+        /// A kind of unit this effect is meant for (Undead, say). A Damage effect hits such a unit
+        /// <see cref="BonusPercent"/> harder; an Execute only destroys units of it. None for every
+        /// effect authored before the field, which therefore reads as no bonus.
+        /// </summary>
+        public UnitTraits BonusVsTrait = UnitTraits.None;
+
+        /// <summary>Extra damage against <see cref="BonusVsTrait"/>, in percent: 100 doubles the raw hit.</summary>
+        public int BonusPercent;
+
+        /// <summary>
         /// A field-for-field copy, for the places that adjust an authored effect before it resolves
         /// (an upgrade bonus, a summon's grid upgrades). Copying by hand dropped a field each time
         /// one was added - <see cref="ScalingStat"/> once, which silently made upgraded spells weaker.
