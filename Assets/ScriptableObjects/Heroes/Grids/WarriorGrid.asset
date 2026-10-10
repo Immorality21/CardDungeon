@@ -31,6 +31,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -53,6 +55,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -73,6 +77,8 @@ MonoBehaviour:
     GrantedMagicKey: Slash
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -96,6 +102,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -116,6 +124,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -138,6 +148,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -160,6 +172,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -180,6 +194,8 @@ MonoBehaviour:
     GrantedMagicKey: ShieldUp
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -202,6 +218,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -222,6 +240,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -242,6 +262,8 @@ MonoBehaviour:
     GrantedMagicKey: Bulwark
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -266,6 +288,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -286,6 +310,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -308,6 +334,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -330,6 +358,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -350,6 +380,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -370,6 +402,8 @@ MonoBehaviour:
     GrantedMagicKey: Ward
     GrantedCharges: 1
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -392,6 +426,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -414,6 +450,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -436,6 +474,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -456,6 +496,8 @@ MonoBehaviour:
     GrantedMagicKey: Sunder
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -478,6 +520,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -498,6 +542,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -518,6 +564,8 @@ MonoBehaviour:
     GrantedMagicKey: Cleave
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -540,6 +588,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -562,6 +612,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -584,6 +636,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -606,6 +660,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -628,6 +684,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -652,6 +710,8 @@ MonoBehaviour:
     GrantedMagicKey: WarCry
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -676,6 +736,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -700,6 +762,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: BloodfangBoar
     GrantedUltraKey: 
     SummonAmount: 1
@@ -720,6 +784,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: BloodfangBoar
     GrantedUltraKey: 
     SummonAmount: 10
@@ -740,6 +806,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: BloodfangBoar
     GrantedUltraKey: 
     SummonAmount: 1
@@ -764,6 +832,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: BloodfangBoar
     GrantedUltraKey: 
     SummonAmount: 1
@@ -788,6 +858,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: CairnGolem
     GrantedUltraKey: 
     SummonAmount: 1
@@ -808,6 +880,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: CairnGolem
     GrantedUltraKey: 
     SummonAmount: 50
@@ -828,6 +902,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: CairnGolem
     GrantedUltraKey: 
     SummonAmount: 1
@@ -852,6 +928,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: CairnGolem
     GrantedUltraKey: 
     SummonAmount: 1
@@ -872,6 +950,8 @@ MonoBehaviour:
     GrantedMagicKey: Bulwark
     GrantedCharges: 2
     AwakenedMagicKey: UnbrokenLine
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -892,8 +972,54 @@ MonoBehaviour:
     GrantedMagicKey: WarCry
     GrantedCharges: 2
     AwakenedMagicKey: RallyingRoar
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - warrior-b-cry
+  - Key: warrior-a-cover
+    DisplayName: 
+    Kind: 10
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -400, y: -610}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: TakeCover
+    SummonAmount: 1
+    Neighbors:
+    - warrior-a-5
+  - Key: warrior-b-flurry
+    DisplayName: 
+    Kind: 10
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 400, y: -610}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: Flurry
+    SummonAmount: 1
+    Neighbors:
+    - warrior-b-5

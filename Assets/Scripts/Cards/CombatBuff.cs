@@ -47,5 +47,19 @@ namespace Assets.Scripts.Cards
         /// the poisoner's). Null when nobody can be - an affliction seeded from a room event.
         /// </summary>
         public ICombatUnit Source;
+
+        /// <summary>
+        /// A resistance that answers <b>every</b> element, Normal included (<see cref="IsResistance"/>
+        /// with <see cref="ResistanceType"/> ignored) - the Warrior's Take Cover. Resistance is applied
+        /// before defense, so 30% of it is a straight 30% cut to every hit.
+        /// </summary>
+        public bool ResistsAll;
+
+        /// <summary>
+        /// Set for a stat change a mechanic owns and replaces as a whole (the Warrior's Momentum):
+        /// <see cref="CombatBuffTracker.SetKeyedBuff"/> swaps the entry with the same key, and it never
+        /// counts down - its owner removes it. Null for every authored buff.
+        /// </summary>
+        public string Key;
     }
 }

@@ -111,6 +111,64 @@ namespace Assets.Scripts.Cards
             return keys;
         }
 
+        /// <summary>How many times a Strike's effects land, never fewer than one.</summary>
+        public static int HitsOf(UltraSO ultra)
+        {
+            return ultra != null ? Mathf.Max(1, ultra.Hits) : 1;
+        }
+
+        /// <summary>Whether each hit of a Strike picks a random enemy rather than the weakest.</summary>
+        public static bool StrikeRandomly(UltraSO ultra)
+        {
+            return ultra != null && ultra.RandomTargets && ultra.TargetType == MagicTargetType.SingleEnemy;
+        }
+
+        /// <summary>
+        /// Who one hit of a Strike lands on, from the units standing on each side: the whole enemy side,
+        /// one enemy (the weakest, or a random one when <see cref="StrikeRandomly"/> - picked with
+        /// <paramref name="pick"/>, which takes a count and returns an index), the hero, or the hero's
+        /// side. Shared by the live fight and the simulator, so the two pick alike.
+        /// </summary>
+        public static List<T> StrikeTargets<T>(UltraSO ultra, T hero, List<T> enemies, List<T> side,
+            System.Func<int, int> pick) where T : Combat.ICombatUnit
+        {
+            var targets = new List<T>();
+            switch (ultra.TargetType)
+            {
+                case MagicTargetType.AllEnemies:
+                    targets.AddRange(enemies);
+                    break;
+                case MagicTargetType.SingleEnemy:
+                    if (enemies.Count == 0)
+                    {
+                        break;
+                    }
+                    if (StrikeRandomly(ultra))
+                    {
+                        targets.Add(enemies[Mathf.Clamp(pick(enemies.Count), 0, enemies.Count - 1)]);
+                        break;
+                    }
+                    // No target picker on the Ultra list: the weakest enemy standing.
+                    T weakest = enemies[0];
+                    foreach (var enemy in enemies)
+                    {
+                        if (enemy.Stats.Health < weakest.Stats.Health)
+                        {
+                            weakest = enemy;
+                        }
+                    }
+                    targets.Add(weakest);
+                    break;
+                case MagicTargetType.Self:
+                    targets.Add(hero);
+                    break;
+                default:
+                    targets.AddRange(side);
+                    break;
+            }
+            return targets;
+        }
+
         /// <summary>Whether using <paramref name="ultra"/> asks for a target first (a Sacrifice does).</summary>
         public static bool NeedsTarget(UltraSO ultra)
         {
@@ -206,7 +264,9 @@ namespace Assets.Scripts.Cards
             if (ultra.Kind == UltraKind.Strike)
             {
                 var lines = AbilityDescriber.EffectLines(CastableFor(ultra), caster, null);
-                return AbilityDescriber.TargetLabel(ultra.TargetType) + ": " + string.Join(" · ", lines);
+                string who = StrikeRandomly(ultra) ? "Random enemies" : AbilityDescriber.TargetLabel(ultra.TargetType);
+                string hits = HitsOf(ultra) > 1 ? $" ({HitsOf(ultra)} hits)" : "";
+                return who + hits + ": " + string.Join(" · ", lines);
             }
             var parts = new List<string> { ultra.Turns == 1 ? "Transforms for 1 turn" : $"Transforms for {ultra.Turns} turns" };
             if (ultra.MaxHealthPercent > 0)

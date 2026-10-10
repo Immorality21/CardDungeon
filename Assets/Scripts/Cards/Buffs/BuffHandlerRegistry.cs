@@ -26,6 +26,7 @@ namespace Assets.Scripts.Cards.Buffs
                 { BuffType.LightningResistance, new ResistanceBuffHandler(DamageType.Lightning, "Lightning Res") },
                 { BuffType.HolyResistance, new ResistanceBuffHandler(DamageType.Holy, "Holy Res") },
                 { BuffType.ShadowResistance, new ResistanceBuffHandler(DamageType.Shadow, "Shadow Res") },
+                { BuffType.Guarded, ResistanceBuffHandler.ToAll("Guard") },
                 { BuffType.Frozen, new FrozenBuffHandler() },
                 { BuffType.Slow, new SlowBuffHandler() },
                 { BuffType.Haste, new HasteBuffHandler() },

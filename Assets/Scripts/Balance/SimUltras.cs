@@ -173,36 +173,18 @@ namespace Assets.Scripts.Balance
             }
             if (ultra.Kind == UltraKind.Strike)
             {
-                var targets = new List<ICombatUnit>();
-                switch (ultra.TargetType)
+                // Each hit picks its targets again from whoever is still standing, as the live fight does.
+                for (int hit = 0; hit < UltraOps.HitsOf(ultra); hit++)
                 {
-                    case MagicTargetType.AllEnemies:
-                        targets.AddRange(enemies.FindAll(e => e.IsAlive));
-                        break;
-                    case MagicTargetType.SingleEnemy:
+                    var standing = new List<ICombatUnit>(enemies.FindAll(e => e.IsAlive));
+                    var targets = UltraOps.StrikeTargets(ultra, (ICombatUnit)hero, standing,
+                        new List<ICombatUnit>(side.FindAll(u => u.IsAlive)), count => Random.Range(0, count));
+                    if (targets.Count == 0)
                     {
-                        SimUnit weakest = null;
-                        foreach (var enemy in enemies)
-                        {
-                            if (enemy.IsAlive && (weakest == null || enemy.Stats.Health < weakest.Stats.Health))
-                            {
-                                weakest = enemy;
-                            }
-                        }
-                        if (weakest != null)
-                        {
-                            targets.Add(weakest);
-                        }
                         break;
                     }
-                    case MagicTargetType.Self:
-                        targets.Add(hero);
-                        break;
-                    default:
-                        targets.AddRange(side.FindAll(u => u.IsAlive));
-                        break;
+                    resolver.Execute(new SpellcastAction { Magic = UltraOps.CastableFor(ultra), Caster = hero, Targets = targets }, buffTracker);
                 }
-                resolver.Execute(new SpellcastAction { Magic = UltraOps.CastableFor(ultra), Caster = hero, Targets = targets }, buffTracker);
                 return;
             }
 

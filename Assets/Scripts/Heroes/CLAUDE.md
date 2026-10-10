@@ -91,7 +91,7 @@ are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-gene
 
 | hero | attack stat | branches (payload only — never named in data) |
 |---|---|---|
-| Warrior | Strength | health/END + ShieldUp→Bulwark→Ward · STR/AGI/LCK + Sunder→Cleave→WarCry |
+| Warrior | Strength | health/END + ShieldUp→Bulwark→Ward (+**Take Cover** Ultra, `warrior-a-cover`) · STR/AGI/LCK + Sunder→Cleave→WarCry (+**Flurry** Ultra, `warrior-b-flurry`). Signature: **Momentum** (`HeroSO.Momentum`, Combat guide) |
 | Paladin | Strength | shield + Ward · Sunder→Consecrate · Heal→Renew — **three**, per §4c |
 | Cleric | Spirit | Renew→Benediction · Smite→Ward |
 | Ranger | Agility | PoisonDart→Volley · Snare→Hush |

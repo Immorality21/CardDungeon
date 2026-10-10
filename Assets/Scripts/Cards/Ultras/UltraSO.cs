@@ -69,6 +69,14 @@ namespace Assets.Scripts.Cards
         [Tooltip("Strike: what lands, scaled off the hero's stats like an ability's effects.")]
         public List<SpellEffect> Effects = new List<SpellEffect>();
 
+        [Tooltip("Strike: how many times the effects land. Each hit picks its targets again, so a " +
+                 "fallen enemy is never hit twice.")]
+        [Min(1)] public int Hits = 1;
+
+        [Tooltip("Strike on a single enemy: each hit lands on a random enemy standing instead of the " +
+                 "weakest - the Warrior's Flurry.")]
+        public bool RandomTargets;
+
         [Header("Sacrifice")]
         [Tooltip("Sacrifice: the creature that rises. Its StatPercents read the SACRIFICED hero's stats " +
                  "(base + gear), so every stat they had carries over; it arrives at full health and stays " +

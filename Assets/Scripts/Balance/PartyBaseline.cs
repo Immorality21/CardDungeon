@@ -291,7 +291,9 @@ namespace Assets.Scripts.Balance
                     AttackDamageType = Combat.DamageType.Normal,
                     Resistances = resistances,
                     // ...and so do the gear's reactions, which the encounter loop fires like the game.
-                    Triggers = new List<Combat.Triggers.CarriedTrigger>(Combat.Triggers.TriggerSources.FromItems(gear))
+                    Triggers = new List<Combat.Triggers.CarriedTrigger>(Combat.Triggers.TriggerSources.FromItems(gear)),
+                    // ...and the hero's own signature passive, built the same way the game builds it.
+                    Momentum = definition != null ? definition.Momentum : null
                 };
 
                 baseline.Heroes.Add(hero);

@@ -54,6 +54,10 @@ namespace Assets.Scripts.Heroes
             get { return StatCatalog.CanScalePower(AttackStat) ? AttackStat : StatType.Strength; }
         }
 
+        [Tooltip("The Warrior's signature: each turn in a row he lands a hit adds a stack of Strength for " +
+                 "the fight; a turn landing nothing drops them. Leave at 0 for every other hero.")]
+        public Combat.MomentumRule Momentum = new Combat.MomentumRule();
+
         [Tooltip("This hero's progression grid. XP banked per hero is spent here at the hub — " +
                  "see SphereGridOps for the rules.")]
         public SphereGridSO SphereGrid;

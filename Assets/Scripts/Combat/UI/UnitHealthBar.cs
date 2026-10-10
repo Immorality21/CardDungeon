@@ -328,6 +328,11 @@ namespace Assets.Scripts.Combat
             {
                 list.Add(new IconDesc { Name = "shield", Tint = CoverBlue });
             }
+            // Taking less from every hit (Take Cover).
+            if (bt.HasResistanceToAll(_unit))
+            {
+                list.Add(new IconDesc { Name = "shield", Tint = Yellow });
+            }
 
             foreach (var status in bt.GetActiveStatusEffects(_unit))
             {

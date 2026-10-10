@@ -318,6 +318,22 @@ namespace Assets.Scripts.Cards
         /// </summary>
         public void ApplyResistance(ICombatUnit unit, DamageType type, int percent, int duration)
         {
+            AddResistance(unit, type, percent, duration, false);
+        }
+
+        /// <summary>
+        /// Grants <paramref name="percent"/> extra resistance to <b>every</b> element, Normal included,
+        /// for <paramref name="duration"/> turns - a flat cut to every hit (the Warrior's Take Cover).
+        /// Same lifetime and same call-site plumbing as an elemental resistance, which is why every
+        /// damage path honours it without being told about it.
+        /// </summary>
+        public void ApplyResistanceToAll(ICombatUnit unit, int percent, int duration)
+        {
+            AddResistance(unit, DamageType.Normal, percent, duration, true);
+        }
+
+        private void AddResistance(ICombatUnit unit, DamageType type, int percent, int duration, bool all)
+        {
             if (!_activeBuffs.ContainsKey(unit))
             {
                 _activeBuffs[unit] = new List<CombatBuff>();
@@ -327,11 +343,57 @@ namespace Assets.Scripts.Cards
             {
                 IsResistance = true,
                 ResistanceType = type,
+                ResistsAll = all,
                 Amount = percent,
                 TurnsRemaining = duration
             };
             _activeBuffs[unit].Add(buff);
             MarkIfOwnTurn(unit, buff);
+        }
+
+        /// <summary>Whether <paramref name="unit"/> carries a resistance to every element (Take Cover).</summary>
+        public bool HasResistanceToAll(ICombatUnit unit)
+        {
+            return unit != null && _activeBuffs.TryGetValue(unit, out var buffs) && buffs.Any(b => b.IsResistance && b.ResistsAll);
+        }
+
+        /// <summary>
+        /// Puts a stat change owned by a mechanic on <paramref name="unit"/>, replacing whatever that
+        /// mechanic put there before (same <paramref name="key"/>). It does not count down; the owner
+        /// takes it off with <see cref="RemoveKeyedBuff"/>, and the fight's end clears it with everything
+        /// else. An amount of 0 just removes it.
+        /// </summary>
+        public void SetKeyedBuff(ICombatUnit unit, StatType stat, int amount, string key)
+        {
+            if (unit == null || string.IsNullOrEmpty(key))
+            {
+                return;
+            }
+            RemoveKeyedBuff(unit, key);
+            if (amount == 0)
+            {
+                return;
+            }
+            if (!_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                buffs = new List<CombatBuff>();
+                _activeBuffs[unit] = buffs;
+            }
+            buffs.Add(new CombatBuff { Stat = stat, Amount = amount, TurnsRemaining = 1, Key = key });
+        }
+
+        /// <summary>Takes off the stat change <see cref="SetKeyedBuff"/> put there under <paramref name="key"/>.</summary>
+        public void RemoveKeyedBuff(ICombatUnit unit, string key)
+        {
+            if (unit == null || !_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                return;
+            }
+            buffs.RemoveAll(b => b.Key == key);
+            if (buffs.Count == 0)
+            {
+                _activeBuffs.Remove(unit);
+            }
         }
 
         /// <summary>
@@ -347,7 +409,7 @@ namespace Assets.Scripts.Cards
                 return 0f;
             }
 
-            return buffs.Where(b => b.IsResistance && b.ResistanceType == type).Sum(b => b.Amount);
+            return buffs.Where(b => b.IsResistance && (b.ResistsAll || b.ResistanceType == type)).Sum(b => b.Amount);
         }
 
         public bool HasStatusEffect(ICombatUnit unit, BuffType type)
@@ -435,6 +497,10 @@ namespace Assets.Scripts.Cards
                 {
                     buff.SkipNextUpkeep = false;
                     continue;
+                }
+                if (buff.Key != null)
+                {
+                    continue;   // owned by a mechanic, which takes it off itself
                 }
                 buff.TurnsRemaining--;
             }

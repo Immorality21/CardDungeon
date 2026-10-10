@@ -14,11 +14,25 @@ namespace Assets.Scripts.Cards.Buffs
     {
         private readonly DamageType _damageType;
         private readonly string _displayName;
+        private readonly bool _allTypes;
 
         public ResistanceBuffHandler(DamageType damageType, string displayName)
         {
             _damageType = damageType;
             _displayName = displayName;
+        }
+
+        private ResistanceBuffHandler(string displayName)
+        {
+            _displayName = displayName;
+            _allTypes = true;
+        }
+
+        /// <summary>A resistance to every element, Normal included - a flat cut to every hit
+        /// (<see cref="BuffType.Guarded"/>, the Warrior's Take Cover).</summary>
+        public static ResistanceBuffHandler ToAll(string displayName)
+        {
+            return new ResistanceBuffHandler(displayName);
         }
 
         public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker, ICombatUnit source = null)
@@ -28,11 +42,20 @@ namespace Assets.Scripts.Cards.Buffs
                 return;
             }
 
+            if (_allTypes)
+            {
+                buffTracker.ApplyResistanceToAll(target, power, duration);
+                return;
+            }
             buffTracker.ApplyResistance(target, _damageType, power, duration);
         }
 
         public string GetDisplayText(int power)
         {
+            if (_allTypes)
+            {
+                return power >= 0 ? $"{power}% less damage" : $"{-power}% more damage";
+            }
             if (power >= 0)
             {
                 return $"+{power}% {_displayName}";

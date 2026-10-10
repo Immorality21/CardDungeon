@@ -231,6 +231,7 @@ namespace Assets.Scripts.Rooms
         private Room _lastVictoryRoom;
         private bool _currentCombatHadBoss;
         private MagicTagTracker _tagTracker;
+        private MomentumTracker _momentum;
         private ComboDetector _comboDetector;
 
         /// <summary>
@@ -615,6 +616,9 @@ namespace Assets.Scripts.Rooms
             // log and floating text after them. The registry needs no reference kept: the stream holds it.
             new TriggerRegistry(Events, _calculator, BuffTracker, () => HeroSideUnits().Concat(GetAliveEnemies()));
             Events.Subscribe<ReactionResolved>(ShowReaction, TriggerRegistry.Order + 1);
+            // The Warrior's Momentum: stacks of Strength for every turn in a row he lands a hit.
+            _momentum = new MomentumTracker(Events, BuffTracker);
+            _momentum.Changed += ShowMomentum;
             // A RestoreCharge effect (Life Tap) gives charges back to the run's ability slots.
             _calculator.Charges = DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null
                 ? new EquippedChargeBank(DungeonManager.Instance.MagicState)
@@ -1330,35 +1334,28 @@ namespace Assets.Scripts.Rooms
         private IEnumerator ExecuteUltraStrike(Hero hero, UltraSO ultra)
         {
             var castable = UltraOps.CastableFor(ultra);
-            List<ICombatUnit> targets;
-            switch (ultra.TargetType)
-            {
-                case MagicTargetType.AllEnemies:
-                    targets = GetAliveEnemies();
-                    break;
-                case MagicTargetType.SingleEnemy:
-                    // No target picker on the Ultra list: the weakest enemy standing.
-                    targets = GetAliveEnemies().OrderBy(e => e.Stats.Health).Take(1).ToList();
-                    break;
-                case MagicTargetType.Self:
-                    targets = new List<ICombatUnit> { hero };
-                    break;
-                default:
-                    targets = HeroSideUnits();
-                    break;
-            }
 
             CombatAudio.Play(CombatSound.BossSignature);
             CombatFeedback.Instance.Shake(0.25f, 0.4f);
             ScreenFade.Instance.Flash(new Color(0.55f, 0.1f, 0.25f), 0.45f, 0.05f, 0.35f);
             ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(1f, 0.35f, 0.45f), 0.2f);
-
-            var action = new SpellcastAction { Magic = castable, Caster = hero, Targets = targets, CastSlot = -1 };
-            var result = _calculator.Execute(action, BuffTracker);
             _lastTurnLog = $"{hero.DisplayName} unleashes {ultra.Label}!";
-            RecordCastDamageObserved(action);
-            yield return _presenter.Present(result, hero, castable);
-            ResolveDeaths();
+
+            // Each hit picks its targets again from whoever is still standing (Flurry's slashes).
+            for (int hit = 0; hit < UltraOps.HitsOf(ultra); hit++)
+            {
+                var targets = UltraOps.StrikeTargets(ultra, (ICombatUnit)hero, GetAliveEnemies(), HeroSideUnits(),
+                    count => UnityEngine.Random.Range(0, count));
+                if (targets.Count == 0)
+                {
+                    break;
+                }
+                var action = new SpellcastAction { Magic = castable, Caster = hero, Targets = targets, CastSlot = -1 };
+                var result = _calculator.Execute(action, BuffTracker);
+                RecordCastDamageObserved(action);
+                yield return _presenter.Present(result, hero, castable);
+                ResolveDeaths();
+            }
         }
 
         /// <summary>
@@ -2893,6 +2890,18 @@ namespace Assets.Scripts.Rooms
             {
                 ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.45f, 0f), word, color, 0.13f);
             }
+        }
+
+        /// <summary>A Momentum stack built or lost: "Momentum 3" over the hero, or "Momentum lost".</summary>
+        private void ShowMomentum(ICombatUnit unit, int stacks)
+        {
+            if (unit?.Transform == null)
+            {
+                return;
+            }
+            string text = stacks > 0 ? $"Momentum {stacks}" : "Momentum lost";
+            var color = stacks > 0 ? new Color(1f, 0.6f, 0.2f) : new Color(0.7f, 0.7f, 0.7f);
+            ShowFloatingLabel(unit.Transform.position + new Vector3(0f, 0.7f, 0f), text, color, 0.13f);
         }
 
         private void ShowFloatingLabel(Vector3 position, string text, Color color, float scale = 0.15f)

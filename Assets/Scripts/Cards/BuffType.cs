@@ -41,6 +41,9 @@ namespace Assets.Scripts.Cards
         // Command gate: blocks casting for a hero and every CastMagic action for an enemy.
         Silenced = 19,
         // Miss chance: a blinded unit's physical hits miss half the time (DefenseRules.BlindMissChance).
-        Blinded = 20
+        Blinded = 20,
+        // Resistance to every element, Normal included: Power% less from every hit, before defense.
+        // The Warrior's Take Cover. Not a status - it rides the resistance channel.
+        Guarded = 21
     }
 }

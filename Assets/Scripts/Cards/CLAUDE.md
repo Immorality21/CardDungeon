@@ -406,7 +406,13 @@ Two consequences worth holding on to:
   **A second kind, `Strike`** (2026-10-04): `Effects` on `TargetType`, resolved once through a
   cached tagless `ultra:`-keyed castable (`UltraOps.CastableFor`) - a summon's special attack in
   Ultra form. The Ultra list has no target picker, so a single-enemy Strike hits the weakest enemy.
-  The Warlock's **Rain of Fire** and **Soul Harvest** are Strikes. **The balance sim models Ultras**
+  The Warlock's **Rain of Fire** and **Soul Harvest** are Strikes. A Strike may land **several times** (`UltraSO.Hits`), each hit picking its
+  targets again from whoever stands (`UltraOps.StrikeTargets`, shared with the sim), and with
+  `RandomTargets` a single-enemy Strike picks a random enemy per hit instead of the weakest - the
+  Warrior's **Flurry** (4 hits, branch B). His **Take Cover** (branch A) is a Strike on the party
+  of `BuffType.Guarded` 30 for 1 turn: a resistance to **every** element, Normal included
+  (`CombatBuffTracker.ApplyResistanceToAll`), so every damage path that already passes
+  `GetResistanceBonus` cuts the hit with no new plumbing; a gold shield on the HP bar. **The balance sim models Ultras**
   (`Balance/SimUltras`, same `UltraOps` rules): policy = use the first Ultra the turn the gauge is
   full; while transformed, cast the form's damaging ability every turn; forms come off between
   rooms.

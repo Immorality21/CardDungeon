@@ -269,6 +269,8 @@ namespace Assets.Scripts.Balance
             // in the model as it runs in the game.
             var events = new CombatEvents();
             var buffTracker = new CombatBuffTracker { Events = events };
+            // The Warrior's Momentum, worked off the same events as in the live fight.
+            new MomentumTracker(events, buffTracker);
             var tagTracker = new MagicTagTracker();
             var comboDetector = new ComboDetector(settings.Combos ?? new List<MagicComboSO>());
             var resolver = new EffectResolver { Events = events };

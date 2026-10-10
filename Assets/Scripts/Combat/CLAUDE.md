@@ -104,6 +104,17 @@ yet.**
   encounter/floor simulations; the closed-form model does not see it, and the analyzer says so
   (`EvaluateUnpricedMechanics`).
 
+## Momentum - the Warrior's signature *(2026-10-10)*
+
+`MomentumRule` on `HeroSO.Momentum` (Warrior: 10% Strength per stack, 5 stacks), worked by
+`Cards.MomentumTracker` off the fight's `CombatEvents`: a turn on which the bearer's Attack or ability
+takes health off the other side adds a stack, any other turn (guarding, healing, a miss, a freeze)
+drops them all (`MomentumOps`). The stacks' worth sits on the bearer as one **keyed** Strength buff
+(`CombatBuffTracker.SetKeyedBuff`, never counts down, leaves authored buffs alone). Ticks, prices and a
+reaction's hits never count. Built per fight by `CombatManager.RunCombat` (floats "Momentum N" /
+"Momentum lost") and `EncounterSimulator.RunEncounter`, so the model has it; `SimUnit.Momentum` comes
+from `PartyBaseline`. The closed form does not price it.
+
 ## Threat (who the enemies go for)
 
 `ThreatTable` (pure, `ThreatTableTests`) — WoW-style, and **biased, never certain** (the owner's rule):
