@@ -233,6 +233,8 @@ touches `HealthCost` at all (upgrading a card should not raise its cost).
 
 ## Phase 2 — `HealthCost`, and Fire Cloak
 
+> **2026-10-10 (owner):** the cloaks and Ward no longer cost health — blood prices are the Warlock's. The costs below are history.
+
 ```csharp
 public enum SpellEffectType { Damage = 0, Heal = 1, Buff = 2, Debuff = 3, HealthCost = 4 }
 ```

@@ -93,6 +93,14 @@ public class MagicSOEditor : Editor
                     new GUIContent("Bonus %", "Extra raw damage against Bonus Vs, in percent: 100 doubles it."));
                 rect.y += lineHeight;
             }
+            else if (effectType == SpellEffectType.Retaliate)
+            {
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("DamageType"),
+                    new GUIContent("Strike Element", "The element of the counterstrike."));
+                rect.y += lineHeight;
+            }
             else if (effectType == SpellEffectType.Execute)
             {
                 EditorGUI.PropertyField(
@@ -152,6 +160,7 @@ public class MagicSOEditor : Editor
             case SpellEffectType.Revive:
             case SpellEffectType.Cure:
             case SpellEffectType.Execute:
+            case SpellEffectType.Intercept:
                 return false;
             default:
                 return true;
@@ -175,9 +184,9 @@ public class MagicSOEditor : Editor
         {
             lines += 3; // DamageType + BonusVsTrait + BonusPercent
         }
-        else if (type == SpellEffectType.Execute)
+        else if (type == SpellEffectType.Execute || type == SpellEffectType.Retaliate)
         {
-            lines += 1; // BonusVsTrait
+            lines += 1; // BonusVsTrait / DamageType
         }
         else if (type == SpellEffectType.Buff)
         {

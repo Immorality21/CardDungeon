@@ -38,7 +38,9 @@ namespace Assets.Scripts.Cards.Effects
                 { SpellEffectType.Disassemble, new DisassembleEffectExecutor(killsOf, roll, events) },
                 { SpellEffectType.Revive, new ReviveEffectExecutor(events, fallen) },
                 { SpellEffectType.Cure, new CureEffectExecutor() },
-                { SpellEffectType.Execute, new ExecuteEffectExecutor(events) }
+                { SpellEffectType.Execute, new ExecuteEffectExecutor(events) },
+                { SpellEffectType.Intercept, new InterceptEffectExecutor(events) },
+                { SpellEffectType.Retaliate, new RetaliateEffectExecutor(events) }
             };
         }
 

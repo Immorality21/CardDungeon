@@ -579,7 +579,7 @@ namespace Assets.Scripts.Cards.UI
             }
             _selectedUltra = ultra;
             _mode = SelectionMode.UltraTarget;
-            PopulateTargetRows(CombatManager.Instance.UltraTargets(ultra), TargetPrompt(ultra));
+            PopulateTargetRows(CombatManager.Instance.UltraTargets(ultra, _currentHero), TargetPrompt(ultra));
         }
 
         /// <summary>What the target picker asks for an Ultra or summon aimed at one of the party.</summary>

@@ -92,7 +92,7 @@ are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-gene
 | hero | attack stat | branches (payload only — never named in data) |
 |---|---|---|
 | Warrior | Strength | health/END + ShieldUp→Bulwark→Ward (+**Take Cover** Ultra, `warrior-a-cover`) · STR/AGI/LCK + Sunder→Cleave→WarCry (+**Flurry** Ultra, `warrior-b-flurry`). Signature: **Momentum** (`HeroSO.Momentum`, Combat guide) |
-| Paladin | Strength | shield + Ward · Sunder→Consecrate · Heal→Renew — **three**, per §4c |
+| Paladin | Strength | shield + Ward · Sunder→Consecrate · Heal→Renew — **three**, per §4c. Ultras (2026-10-10): **Divine Intervention** (early on A), **Judgement Day** (B), **Lay on Hands** (C). Awakenings: ShieldUp→**Aegis**, Renew→**Renewal**, Consecrate→**Hallowed Ground**→**Heavenly Fire** (a chain: owning both resolves to the last, `SphereGridOps.AwakeningsForNodes`) |
 | Cleric | Spirit | **Mend** (root) · SacredShield→Renew→**Revive** (+Benediction, awakened to Absolution) → **Phoenix** · Sanctuary→Inspire→Quicken → **Guardian Angel** · DivineBolt→Purge→SearingLight → **Archon** — rebuilt to her vision 2026-10-10, three branches on the Paladin's layout; one Miracle Ultra mid-branch on each (Light / Hope / Righteousness). Summon art is placeholder (Galewing, Judgement Seraph) |
 | Ranger | Agility | PoisonDart→Volley · Snare→Hush |
 | Warlock | Intelligence | BloodPact→LifeTap (+Cinderstorm) · DrainLife→SiphonSoul (+OilSlick) · demons — three, re-authored 2026-10-04. **One summon, the Demon Army, on the trunk; every branch improves it** (C: more troops, Succubi). **Demon Form** (Ultra) on the trunk behind 3 Void Shards |

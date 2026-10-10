@@ -44,7 +44,7 @@ The `flatPower` argument the executors already took (a combo's bonus effect, a r
 
 ## `HealthCost`: spells that cost blood
 
-`SpellEffectType.HealthCost` charges the **caster** health, ignoring defense, resistance and the upgrade bonus — upgrading a spell must never raise its price. It is what makes the cloaks (`FireCloak` / `FrostCloak` / `StormCloak` / `Ward`) a decision instead of a free buff.
+`SpellEffectType.HealthCost` charges the **caster** health, ignoring defense, resistance and the upgrade bonus — upgrading a spell must never raise its price. **Blood prices are the Warlock's** (and the Cultist's rites) *(owner, 2026-10-10)*: the cloaks (`FireCloak` / `FrostCloak` / `StormCloak` / `Ward`) used to cost 10-20% of the caster's health and no longer do - on a defensive spell it read as far too harsh, and a charge is price enough. Don't put a health cost on a non-Warlock ability.
 
 - **Costs resolve last.** `EffectResolver.Execute` runs two passes, benefits then costs. A cost authored first would take the caster down before the buff it paid for was applied — and `BuffEffectExecutor` skips dead targets — so the card would charge for nothing. Ordering it in the resolver means the card works however it is authored.
 - **The cast is gated, not survivable.** `SpellPower.CanAfford` refuses a magic whose total cost is `>=` the caster's current health, and `MagicSelectionUI` greys the row out and shows the price beside the charges. This is why there is no death-mid-cast problem: `ExecuteCastAction` has no death handling, so a caster who killed themselves would stop acting with no log and no visual. `HealthCostEffectExecutor` keeps a **1 HP floor** as a safety net for the same reason.
@@ -408,6 +408,15 @@ Two consequences worth holding on to:
   a **special-attack summon** (`SummonOps.NeedsTarget`, the summon list asks, dimmed "nobody fallen"), and a
   **party-replacing summon's ability** (a hero revived while the party is replaced waits off the stage and
   returns with it). Enemies cannot revive: a fallen enemy is paid out and removed (`EnemyMagicPlan`).
+- **The Paladin's Divine Intervention** *(2026-10-10)*: two effect types. **`Intercept`** - the caster
+  covers each ally target (`GuardTable.Cover`: single-target blows land on the caster until the caster's
+  next turn) and takes `Power`% less from every hit for a turn. **`Retaliate`** - arms
+  `CombatEvents.Retaliations` with a strike (`Power` + `ScalingStat` as `DamageType`), fired once by
+  `RetaliationTracker` at the first enemy whose blow lands on (or is soaked by) the bearer before its next
+  turn, as a reaction (`HealthOps.ReactionScope`, raised as `ReactionResolved` "Retribution"). Built per
+  fight in `CombatManager` and the simulator. The ally picker never offers the caster for an Ultra
+  that intercepts (`UltraOps.ProtectsOthers`; the sim's `ChosenAlly(..., notSelf)` agrees). The owner asked for "the next physical hit"; a cover takes
+  every single-target blow, physical or magic, until the Paladin acts again - a first draft.
 - **Ultras (`Cards/Ultras/`, COMBAT_DEPTH §13 — 2026-10-04).** `UltraSO` (`Resources/UltraCatalog`),
   taught by `SphereNodeKind.Ultra`, used from the **Ultra** command once the hero's gauge is full.
   **The command always opens the Ultra list** (`MagicSelectionUI.ShowUltraList`, via

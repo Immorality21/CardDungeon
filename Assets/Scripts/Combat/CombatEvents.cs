@@ -29,9 +29,13 @@ namespace Assets.Scripts.Combat
         /// reaches them (owner, 2026-10-10). Kept with the stream so the live fight and the simulator agree.</summary>
         public HashSet<ICombatUnit> Sacrificed { get; } = new HashSet<ICombatUnit>();
 
+        /// <summary>Counterstrikes readied this fight (Divine Intervention); they end with their bearer's next turn.</summary>
+        public RetaliationTable Retaliations { get; } = new RetaliationTable();
+
         public CombatEvents()
         {
             Subscribe<TurnStarted>(e => Barriers.TurnStarted(e.Unit));
+            Subscribe<TurnStarted>(e => Retaliations.TurnStarted(e.Unit));
             Subscribe<TurnEnded>(e => Barriers.TurnEnded(e.Unit));
             Subscribe<UnitDefeated>(e =>
             {

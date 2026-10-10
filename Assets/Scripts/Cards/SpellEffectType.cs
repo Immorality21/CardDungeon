@@ -70,6 +70,19 @@ namespace Assets.Scripts.Cards
         /// <see cref="SpellEffect.BonusVsTrait"/> (any unit when that is None). Bosses are never destroyed.
         /// Put it after a damage effect and the blow sets it up (Miracle of Righteousness). Appended.
         /// </summary>
-        Execute = 11
+        Execute = 11,
+
+        /// <summary>
+        /// The caster steps in front of each ally target: single-target blows aimed at them land on the
+        /// caster until the caster's next turn, and the caster takes <c>Power</c> percent less from every
+        /// hit for one turn. The Paladin's Divine Intervention. Appended.
+        /// </summary>
+        Intercept = 12,
+
+        /// <summary>
+        /// Readies the caster to strike back once at the first enemy whose blow lands on them before their
+        /// next turn: <c>Power</c> + <c>ScalingStat</c> as <c>DamageType</c>. Appended.
+        /// </summary>
+        Retaliate = 13
     }
 }

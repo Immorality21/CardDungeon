@@ -374,12 +374,12 @@ namespace Assets.Scripts.Rooms
         /// revive someone fallen.</summary>
         public bool CanUseUltra(ICombatUnit hero, UltraSO ultra)
         {
-            return ultra != null && (!UltraOps.NeedsTarget(ultra) || UltraTargets(ultra).Count > 0);
+            return ultra != null && (!UltraOps.NeedsTarget(ultra) || UltraTargets(ultra, hero).Count > 0);
         }
 
         /// <summary>Whom an Ultra that takes a target may be aimed at: the Sacrifice's candidates, the
         /// fallen for a revive, the living party for a single-ally Strike.</summary>
-        public List<ICombatUnit> UltraTargets(UltraSO ultra)
+        public List<ICombatUnit> UltraTargets(UltraSO ultra, ICombatUnit user = null)
         {
             if (ultra == null)
             {
@@ -389,7 +389,13 @@ namespace Assets.Scripts.Rooms
             {
                 return SacrificeTargets();
             }
-            return PickableAllies(ultra.TargetType);
+            var allies = PickableAllies(ultra.TargetType);
+            // Stepping in front of yourself protects nobody (Divine Intervention).
+            if (user != null && UltraOps.ProtectsOthers(ultra))
+            {
+                allies.Remove(user);
+            }
+            return allies;
         }
 
         /// <summary>The allies a picker offers for a one-ally target type: the fallen for a revive,
@@ -661,6 +667,8 @@ namespace Assets.Scripts.Rooms
             // A Revive (the Cleric's) stands a hero who fell in this fight back up; the effect sets the
             // bar and announces it, and this puts them back on the stage and the clock.
             _calculator.FallenAllies = FallenAlliesOf;
+            // Divine Intervention's counterstrike, fired off the same stream.
+            new RetaliationTracker(Events, _calculator, BuffTracker);
             Events.Subscribe<UnitRevived>(HandleRevived);
             // A RestoreCharge effect (Life Tap) gives charges back to the run's ability slots.
             _calculator.Charges = DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null

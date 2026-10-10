@@ -20,6 +20,7 @@ MonoBehaviour:
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -29,7 +30,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-trunk-1
@@ -39,6 +44,7 @@ MonoBehaviour:
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -48,7 +54,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-sig
@@ -58,6 +68,7 @@ MonoBehaviour:
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -65,7 +76,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: HolyTouch
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors: []
   - Key: paladin-trunk-2
@@ -74,6 +89,7 @@ MonoBehaviour:
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -85,7 +101,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-start
@@ -95,6 +115,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -360}
     Gains:
       Values: []
@@ -102,7 +123,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-trunk-2
@@ -112,6 +137,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -132, y: -325}
     Gains:
       Values:
@@ -121,7 +147,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-trunk-2
@@ -131,6 +161,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -246, y: -380}
     Gains:
       Values:
@@ -140,7 +171,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-1
@@ -150,6 +185,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -360, y: -435}
     Gains:
       Values: []
@@ -157,7 +193,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: ShieldUp
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-2
@@ -167,6 +207,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -474, y: -490}
     Gains:
       Values:
@@ -176,7 +217,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-3
@@ -186,6 +231,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -588, y: -545}
     Gains:
       Values: []
@@ -193,7 +239,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-4
@@ -203,6 +253,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -702, y: -600}
     Gains:
       Values: []
@@ -210,7 +261,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Ward
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-5
@@ -220,6 +275,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -816, y: -655}
     Gains:
       Values:
@@ -229,7 +285,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-6
@@ -239,6 +299,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -420, y: -360}
     Gains:
       Values: []
@@ -246,7 +307,11 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-3
@@ -256,6 +321,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -911, y: -710}
     Gains:
       Values:
@@ -265,7 +331,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-7
@@ -275,6 +345,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -876, y: -585}
     Gains:
       Values:
@@ -284,7 +355,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-7
@@ -294,6 +369,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -450}
     Gains:
       Values:
@@ -303,7 +379,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-trunk-2
@@ -313,6 +393,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -322,7 +403,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-b-1
@@ -332,6 +417,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -630}
     Gains:
       Values: []
@@ -339,7 +425,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Sunder
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-b-2
@@ -349,6 +439,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -720}
     Gains:
       Values:
@@ -358,7 +449,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-b-3
@@ -368,6 +463,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -375,7 +471,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-b-4
@@ -385,6 +485,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -392,7 +493,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Consecrate
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-b-5
@@ -402,6 +507,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -411,7 +517,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-b-6
@@ -421,6 +531,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 95, y: -1045}
     Gains:
       Values:
@@ -430,7 +541,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-b-7
@@ -440,6 +555,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -95, y: -920}
     Gains:
       Values:
@@ -449,7 +565,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-b-7
@@ -459,6 +579,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 132, y: -325}
     Gains:
       Values:
@@ -468,7 +589,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-trunk-2
@@ -478,6 +603,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 246, y: -380}
     Gains:
       Values:
@@ -487,7 +613,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-1
@@ -497,6 +627,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 360, y: -435}
     Gains:
       Values: []
@@ -504,7 +635,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Heal
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-2
@@ -514,6 +649,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 474, y: -490}
     Gains:
       Values:
@@ -523,7 +659,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-3
@@ -533,6 +673,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 588, y: -545}
     Gains:
       Values: []
@@ -540,7 +681,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-4
@@ -550,6 +695,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 702, y: -600}
     Gains:
       Values: []
@@ -557,7 +703,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Renew
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-5
@@ -567,6 +717,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 816, y: -655}
     Gains:
       Values:
@@ -576,7 +727,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-6
@@ -586,6 +741,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 420, y: -360}
     Gains:
       Values: []
@@ -593,7 +749,11 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-3
@@ -603,6 +763,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 911, y: -710}
     Gains:
       Values:
@@ -612,7 +773,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-7
@@ -622,6 +787,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 876, y: -585}
     Gains:
       Values:
@@ -631,7 +797,11 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-7
@@ -645,6 +815,7 @@ MonoBehaviour:
       Amount: 2
     - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
       Amount: 3
+    EssenceCost: 0
     Position: {x: -1006, y: -765}
     Gains:
       Values: []
@@ -652,7 +823,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: AegisLion
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-a-tip-a
@@ -662,6 +837,7 @@ MonoBehaviour:
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -1101, y: -820}
     Gains:
       Values: []
@@ -669,7 +845,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: AegisLion
+    GrantedUltraKey: 
     SummonAmount: 25
     Neighbors:
     - paladin-lion
@@ -679,6 +859,7 @@ MonoBehaviour:
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -1196, y: -875}
     Gains:
       Values: []
@@ -686,7 +867,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: AegisLion
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-lion-power
@@ -700,6 +885,7 @@ MonoBehaviour:
       Amount: 1
     - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
       Amount: 2
+    EssenceCost: 0
     Position: {x: -1291, y: -930}
     Gains:
       Values: []
@@ -707,7 +893,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: AegisLion
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-lion-stay
@@ -721,6 +911,7 @@ MonoBehaviour:
       Amount: 2
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 3
+    EssenceCost: 0
     Position: {x: 190, y: -1100}
     Gains:
       Values: []
@@ -728,7 +919,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: JudgementSeraph
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-b-tip-a
@@ -738,6 +933,7 @@ MonoBehaviour:
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 285, y: -1155}
     Gains:
       Values: []
@@ -745,7 +941,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: JudgementSeraph
+    GrantedUltraKey: 
     SummonAmount: 30
     Neighbors:
     - paladin-seraph
@@ -755,6 +955,7 @@ MonoBehaviour:
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 380, y: -1210}
     Gains:
       Values: []
@@ -762,7 +963,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: JudgementSeraph
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-seraph-power
@@ -776,6 +981,7 @@ MonoBehaviour:
       Amount: 1
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 2
+    EssenceCost: 0
     Position: {x: 475, y: -1265}
     Gains:
       Values: []
@@ -783,7 +989,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: JudgementSeraph
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-seraph-stay
@@ -797,6 +1007,7 @@ MonoBehaviour:
       Amount: 2
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
+    EssenceCost: 0
     Position: {x: 1006, y: -765}
     Gains:
       Values: []
@@ -804,7 +1015,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DawnStag
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-c-tip-a
@@ -814,6 +1029,7 @@ MonoBehaviour:
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 1101, y: -820}
     Gains:
       Values: []
@@ -821,7 +1037,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DawnStag
+    GrantedUltraKey: 
     SummonAmount: 10
     Neighbors:
     - paladin-stag
@@ -831,6 +1051,7 @@ MonoBehaviour:
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 1196, y: -875}
     Gains:
       Values: []
@@ -838,7 +1059,11 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DawnStag
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-stag-power
@@ -852,6 +1077,7 @@ MonoBehaviour:
       Amount: 1
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 2
+    EssenceCost: 0
     Position: {x: 1291, y: -930}
     Gains:
       Values: []
@@ -859,7 +1085,165 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DawnStag
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - paladin-stag-stay
+  - Key: paladin-a-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 100
+    Position: {x: -290, y: -520}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: ShieldUp
+    GrantedCharges: 2
+    AwakenedMagicKey: Aegis
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - paladin-a-3
+  - Key: paladin-c-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: 640, y: -700}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Renew
+    GrantedCharges: 2
+    AwakenedMagicKey: Renewal
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - paladin-c-6
+  - Key: paladin-b-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 100
+    Position: {x: 95, y: -860}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Consecrate
+    GrantedCharges: 2
+    AwakenedMagicKey: HallowedGround
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - paladin-b-6
+  - Key: paladin-b-awaken-2
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 150
+    Position: {x: 190, y: -900}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: HallowedGround
+    GrantedCharges: 2
+    AwakenedMagicKey: HeavenlyFire
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - paladin-b-awaken
+  - Key: paladin-a-intervention
+    DisplayName: 
+    Kind: 10
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -190, y: -470}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: DivineIntervention
+    SummonAmount: 1
+    Neighbors:
+    - paladin-a-2
+  - Key: paladin-b-judgement
+    DisplayName: 
+    Kind: 10
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -95, y: -790}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: JudgementDay
+    SummonAmount: 1
+    Neighbors:
+    - paladin-b-5
+  - Key: paladin-c-hands
+    DisplayName: 
+    Kind: 10
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 500, y: -640}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: LayOnHands
+    SummonAmount: 1
+    Neighbors:
+    - paladin-c-5

@@ -510,6 +510,19 @@ namespace Assets.Scripts.Heroes
                 }
                 awakenings[node.GrantedMagicKey] = node.AwakenedMagicKey;
             }
+
+            // An awakening can be awakened again (Consecrate -> Hallowed Ground -> Heavenly Fire): the base
+            // resolves to the end of its chain, so owning both nodes means the last one.
+            foreach (var key in new List<string>(awakenings.Keys))
+            {
+                string end = awakenings[key];
+                int guard = 0;
+                while (awakenings.TryGetValue(end, out string next) && guard++ < 8)
+                {
+                    end = next;
+                }
+                awakenings[key] = end;
+            }
             return awakenings;
         }
 

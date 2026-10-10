@@ -118,11 +118,11 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void EveryCloak_CostsSomethingAndDefendsSomething()
+        public void EveryCloak_DefendsTheCaster_WithoutABloodPrice()
         {
-            // The defensive cards are the point of the layer: a cloak that stopped costing health
-            // would be a free permanent resistance, and one that stopped granting resistance would be
-            // a spell that only hurts its caster.
+            // The defensive cards are the point of the layer. They used to cost health; the owner
+            // dropped that on 2026-10-10 - paying in blood is the Warlock's identity, and on a ward it
+            // read as far too harsh. A charge is their price now, like any other ability.
             var cloaks = new[] { "FireCloak", "FrostCloak", "StormCloak", "Ward" };
             var all = LoadAllMagic();
 
@@ -131,18 +131,11 @@ namespace Tests.EditMode
                 var magic = all.FirstOrDefault(m => m.Key == key);
                 Assert.IsNotNull(magic, $"No magic asset with key {key}.");
 
-                Assert.IsTrue(magic.HasEffectType(SpellEffectType.HealthCost),
-                    $"{key} grants resistance for free.");
+                Assert.IsFalse(magic.HasEffectType(SpellEffectType.HealthCost),
+                    $"{key} charges health; blood prices belong to the Warlock.");
                 Assert.IsTrue(magic.Effects.Any(e => e.EffectType == SpellEffectType.Buff),
-                    $"{key} charges health and grants nothing.");
-                Assert.AreEqual(MagicTargetType.Self, magic.TargetType,
-                    $"{key} is a self-defence; the health cost is always paid by the caster.");
-
-                foreach (var cost in magic.Effects.Where(e => e.EffectType == SpellEffectType.HealthCost))
-                {
-                    Assert.AreEqual(PowerMode.PercentOfMaxHealth, cost.PowerMode,
-                        $"{key}'s cost is flat, so it goes stale as health bars grow.");
-                }
+                    $"{key} grants nothing.");
+                Assert.AreEqual(MagicTargetType.Self, magic.TargetType, $"{key} is a self-defence.");
             }
         }
 

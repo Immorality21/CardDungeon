@@ -189,6 +189,11 @@ namespace Assets.Scripts.Cards
                     return effect.Power <= 0
                         ? "clears every debuff"
                         : effect.Power == 1 ? "clears one debuff" : $"clears {effect.Power} debuffs";
+                case SpellEffectType.Intercept:
+                    return $"takes the single-target blows aimed at them until your next turn, at {effect.Power}% less damage";
+                case SpellEffectType.Retaliate:
+                    return $"strikes back once at the next attacker for {Magnitude(effect, caster, buffTracker, powerBonus)}"
+                           + (effect.DamageType != DamageType.Normal ? $" {effect.DamageType}" : "") + " damage";
                 case SpellEffectType.Execute:
                     return $"destroys {TraitName(effect.BonusVsTrait, "a foe")} under {effect.Power}% health outright (not bosses)";
                 default:

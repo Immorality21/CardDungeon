@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: FrostCloak
   DisplayName: Frost Cloak
-  Description: A rime of frost turns the cold aside, at the cost of the caster's
-    own vigour.
+  Description: A rime of frost turns the cold aside.
   Icon: {fileID: 21300000, guid: 013e46b359b949c3bbac3a2da41f2d41, type: 3}
   TargetType: 2
   Rarity: 0
@@ -27,14 +26,6 @@ MonoBehaviour:
     DamageType: 0
     BuffType: 8
     Duration: 3
-    UnlockLevel: 0
-  - EffectType: 4
-    Power: 10
-    PowerMode: 2
-    ScalingStat: 0
-    DamageType: 0
-    BuffType: 0
-    Duration: 0
     UnlockLevel: 0
   Tags: 
   TagDuration: 3

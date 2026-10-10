@@ -191,6 +191,24 @@ namespace Assets.Scripts.Cards
                    || (ultra.Kind == UltraKind.Strike && TargetsOneAlly(ultra.TargetType));
         }
 
+        /// <summary>Whether the Ultra steps in front of its target (an Intercept): the user is never a
+        /// sensible pick for it.</summary>
+        public static bool ProtectsOthers(UltraSO ultra)
+        {
+            if (ultra == null || ultra.Effects == null)
+            {
+                return false;
+            }
+            foreach (var effect in ultra.Effects)
+            {
+                if (effect != null && effect.EffectType == SpellEffectType.Intercept)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>A target type the player picks one of their own for: a living ally or a fallen one.</summary>
         public static bool TargetsOneAlly(MagicTargetType type)
         {

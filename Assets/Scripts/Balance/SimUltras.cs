@@ -189,7 +189,7 @@ namespace Assets.Scripts.Balance
                     var standing = new List<ICombatUnit>(enemies.FindAll(e => e.IsAlive));
                     var targets = UltraOps.StrikeTargets(ultra, (ICombatUnit)hero, standing,
                         new List<ICombatUnit>(side.FindAll(u => u.IsAlive)), count => Random.Range(0, count),
-                        ChosenAlly(ultra.TargetType, hero, side, resolver));
+                        ChosenAlly(ultra.TargetType, hero, side, resolver, UltraOps.ProtectsOthers(ultra)));
                     if (targets.Count == 0)
                     {
                         break;
@@ -214,7 +214,8 @@ namespace Assets.Scripts.Balance
 
         /// <summary>Whom the policy aims a one-ally Strike at: the first of the fallen for a revive, the
         /// most wounded living ally otherwise; null for any other target type.</summary>
-        public static ICombatUnit ChosenAlly(MagicTargetType type, SimUnit hero, List<SimUnit> side, EffectResolver resolver)
+        public static ICombatUnit ChosenAlly(MagicTargetType type, SimUnit hero, List<SimUnit> side, EffectResolver resolver,
+            bool notSelf = false)
         {
             if (type == MagicTargetType.FallenAlly)
             {
@@ -228,7 +229,7 @@ namespace Assets.Scripts.Balance
             SimUnit worst = null;
             foreach (var unit in side)
             {
-                if (unit != null && unit.IsAlive && (worst == null
+                if (unit != null && unit.IsAlive && !(notSelf && ReferenceEquals(unit, hero)) && (worst == null
                     || (float)unit.Stats.Health / Mathf.Max(1, unit.GetEffectiveStat(StatType.MaxHealth))
                        < (float)worst.Stats.Health / Mathf.Max(1, worst.GetEffectiveStat(StatType.MaxHealth))))
                 {
