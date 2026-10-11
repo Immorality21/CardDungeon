@@ -1023,3 +1023,313 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - warrior-b-5
+  - Key: warrior-c-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -450}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-trunk-2
+  - Key: warrior-c-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -540}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-1
+  - Key: warrior-c-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -630}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Hamstring
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-2
+  - Key: warrior-c-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -720}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 3
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-3
+  - Key: warrior-c-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -810}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-4
+  - Key: warrior-c-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -900}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: PressTheAttack
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-5
+  - Key: warrior-c-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -990}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-6
+  - Key: warrior-c-finish
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    EssenceCost: 0
+    Position: {x: 95, y: -1045}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: FinishingBlow
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-7
+  - Key: warrior-c-tip
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -95, y: -1045}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 2
+      - Type: 6
+        Amount: 2
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-7
+  - Key: warrior-charger
+    DisplayName: Bloodfang Boar
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
+      Amount: 3
+    EssenceCost: 0
+    Position: {x: -95, y: -1135}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: IronCharger
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-tip
+  - Key: warrior-charger-power
+    DisplayName: Boar's Fury
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -95, y: -1225}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: IronCharger
+    GrantedUltraKey: 
+    SummonAmount: 2
+    Neighbors:
+    - warrior-charger
+  - Key: warrior-charger-charge
+    DisplayName: Boar's Second Wind
+    Kind: 7
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
+      Amount: 2
+    EssenceCost: 0
+    Position: {x: -95, y: -1315}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: IronCharger
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-charger-power
+  - Key: warrior-earthsplitter
+    DisplayName: 
+    Kind: 10
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 105, y: -790}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: Earthsplitter
+    SummonAmount: 1
+    Neighbors:
+    - warrior-c-5

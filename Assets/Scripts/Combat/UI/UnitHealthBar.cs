@@ -41,6 +41,10 @@ namespace Assets.Scripts.Combat
         private static readonly Color BloodRed = new Color(0.9f, 0.25f, 0.3f);
         private static readonly Color BlindGrey = new Color(0.72f, 0.72f, 0.78f);
         private static readonly Color LeechMagenta = new Color(0.9f, 0.3f, 0.6f);
+        private static readonly Color ConfuseYellow = new Color(1f, 0.85f, 0.3f);
+        private static readonly Color MarkOrange = new Color(1f, 0.55f, 0.2f);
+        private static readonly Color ShadowViolet = new Color(0.6f, 0.5f, 0.85f);
+        private static readonly Color DeathRed = new Color(0.85f, 0.15f, 0.2f);
 
         private static Sprite _centerSprite;
         private static Sprite _leftSprite;
@@ -377,6 +381,24 @@ namespace Assets.Scripts.Combat
                     // Leeching Curse: the cross says "healing comes from this", magenta says whose.
                     case BuffType.Leeched:
                         list.Add(new IconDesc { Name = "cross", Tint = LeechMagenta });
+                        break;
+                    // Mass Hysteria: a burst, the colour of a mind coming loose.
+                    case BuffType.Confused:
+                        list.Add(new IconDesc { Name = "burst", Tint = ConfuseYellow });
+                        break;
+                    // Hunter's Mark: an arrow pointing at the prey.
+                    case BuffType.Marked:
+                        list.Add(new IconDesc { Name = "arrow", Tint = MarkOrange });
+                        break;
+                    // The Rogue's tricks: out of sight, out of reach, and marked for death.
+                    case BuffType.Hidden:
+                        list.Add(new IconDesc { Name = "eye", Tint = ShadowViolet });
+                        break;
+                    case BuffType.Evasive:
+                        list.Add(new IconDesc { Name = "chevrons", Tint = ShadowViolet });
+                        break;
+                    case BuffType.DeathMarked:
+                        list.Add(new IconDesc { Name = "burst", Tint = DeathRed });
                         break;
                 }
             }

@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8167baed5bc052409b86b3942399fa5, type: 3}
+  m_Name: MurderOfCrows
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
+  Key: MurderOfCrows
+  DisplayName: Murder of Crows
+  Description: A black cloud of wings and beaks that goes for the eyes.
+  Sprite: {fileID: 21300000, guid: 6de311f24b1e43c592487f045e183e9f, type: 3}
+  AnimationFrames:
+  - {fileID: 21300000, guid: 6ccc474cb4004483924995d70791adf8, type: 3}
+  - {fileID: 21300000, guid: 0dee2dc8b355454baf68e228075d64e0, type: 3}
+  - {fileID: 21300000, guid: 3d89936a17764fb6bd5d8d7314acd3bd, type: 3}
+  - {fileID: 21300000, guid: 4c883e7e676f4162a5fa69525f336c5e, type: 3}
+  - {fileID: 21300000, guid: b9df31551d26497387ca9146828b4559, type: 3}
+  AnimationFps: 4
+  Facing: 0
+  ArrivalSound: {fileID: 0}
+  ArrivalSoundVolume: 0.9
+  Kind: 0
+  TargetType: 1
+  Effects:
+  - EffectType: 3
+    Power: 1
+    PowerMode: 0
+    ScalingStat: 0
+    DamageType: 0
+    BuffType: 20
+    Duration: 2
+    UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  - EffectType: 3
+    Power: 3
+    PowerMode: 0
+    ScalingStat: 0
+    DamageType: 0
+    BuffType: 3
+    Duration: 2
+    UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  - EffectType: 3
+    Power: 3
+    PowerMode: 0
+    ScalingStat: 0
+    DamageType: 0
+    BuffType: 6
+    Duration: 2
+    UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames: []
+  BaseCharges: 1
+  StatPercents:
+    Values: []
+  CopySummonerResistances: 1
+  TurnsActive: 3
+  Actions: []
+  Signature: {fileID: 0}
+  AttackAbility: {fileID: 0}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
+  RotateActions: 0
+  ActsAlone: 0
+  SquadTiers: []
+  SquadSize: 3
+  MaxSquadSize: 4

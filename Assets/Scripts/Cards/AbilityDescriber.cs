@@ -218,6 +218,12 @@ namespace Assets.Scripts.Cards
                            + (effect.Duration > 0 ? $" for {effect.Duration} turns" : "");
                 case SpellEffectType.Execute:
                     return $"destroys {TraitName(effect.BonusVsTrait, "a foe")} under {effect.Power}% health outright (not bosses)";
+                case SpellEffectType.Steal:
+                    return effect.Power >= 100
+                        ? "steals an item or gold, certain"
+                        : "steals an item or gold, odds from Luck (once per enemy)";
+                case SpellEffectType.FightGoldBonus:
+                    return $"+{effect.Power}% gold from this fight's kills and steals";
                 default:
                     return null;
             }
@@ -243,6 +249,17 @@ namespace Assets.Scripts.Cards
                 line += effect.BonusPercent == 100
                     ? $", double vs {TraitName(effect.BonusVsTrait, "")}"
                     : $", +{effect.BonusPercent}% vs {TraitName(effect.BonusVsTrait, "")}";
+            }
+            else if (effect.BonusPercent != 0 && effect.BonusPerDebuff)
+            {
+                line += $", +{effect.BonusPercent}% per debuff on the target (up to {SpellEffect.MaxDebuffBonuses})";
+            }
+            else if (effect.BonusPercent != 0 && effect.BonusVsStatus != BuffType.None)
+            {
+                string status = effect.BonusVsStatus.ToString().ToLowerInvariant();
+                line += effect.BonusPercent == 100
+                    ? $", double vs {status}"
+                    : $", +{effect.BonusPercent}% vs {status}";
             }
             if (caster != null)
             {
@@ -328,6 +345,11 @@ namespace Assets.Scripts.Cards
             { BuffType.Silenced, "cannot use abilities" },
             { BuffType.Blinded, "physical hits may miss" },
             { BuffType.Leeched, "of each hit on it heals the caster" },
+            { BuffType.Confused, "may strike its own side" },
+            { BuffType.Marked, "more damage from every hit" },
+            { BuffType.Hidden, "cannot be targeted" },
+            { BuffType.Evasive, "physical blows on them miss" },
+            { BuffType.DeathMarked, "every hit on it is a harder crit" },
         };
     }
 }

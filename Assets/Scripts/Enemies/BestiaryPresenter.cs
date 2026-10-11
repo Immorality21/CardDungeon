@@ -403,6 +403,12 @@ namespace Assets.Scripts.Enemies
                     return "Blind";
                 case Cards.BuffType.Leeched:
                     return "Leech";
+                case Cards.BuffType.Confused:
+                    return "Confuse";
+                case Cards.BuffType.Marked:
+                    return "Mark";
+                case Cards.BuffType.DeathMarked:
+                    return "Death Mark";
                 default:
                     return type.ToString();
             }

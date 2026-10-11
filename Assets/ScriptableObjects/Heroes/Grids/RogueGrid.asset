@@ -20,6 +20,7 @@ MonoBehaviour:
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -29,6 +30,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-trunk-1
   - Key: rogue-trunk-1
@@ -37,6 +44,7 @@ MonoBehaviour:
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -46,6 +54,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-sig
   - Key: rogue-sig
@@ -54,6 +68,7 @@ MonoBehaviour:
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -61,6 +76,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Backstab
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors: []
   - Key: rogue-trunk-2
     DisplayName: 
@@ -68,6 +89,7 @@ MonoBehaviour:
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -79,6 +101,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-start
   - Key: rogue-trunk-slot
@@ -87,6 +115,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -360}
     Gains:
       Values: []
@@ -94,6 +123,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-a-1
@@ -102,6 +137,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -107, y: -325}
     Gains:
       Values:
@@ -111,6 +147,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-a-2
@@ -119,6 +161,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -200, y: -380}
     Gains:
       Values:
@@ -128,6 +171,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-a-1
   - Key: rogue-a-3
@@ -136,6 +185,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -292, y: -435}
     Gains:
       Values: []
@@ -143,6 +193,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: PoisonDart
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-a-2
   - Key: rogue-a-4
@@ -151,6 +207,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -385, y: -490}
     Gains:
       Values:
@@ -160,6 +217,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-a-3
   - Key: rogue-a-5
@@ -168,6 +231,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -478, y: -545}
     Gains:
       Values: []
@@ -175,6 +239,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-a-4
   - Key: rogue-a-6
@@ -183,13 +253,20 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -570, y: -600}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: AimedShot
+    GrantedMagicKey: Eviscerate
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-a-5
   - Key: rogue-a-7
@@ -198,6 +275,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -663, y: -655}
     Gains:
       Values:
@@ -207,6 +285,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-a-6
   - Key: rogue-a-tip-a
@@ -215,6 +299,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -758, y: -710}
     Gains:
       Values:
@@ -224,6 +309,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-a-7
   - Key: rogue-a-tip-b
@@ -232,6 +323,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -723, y: -585}
     Gains:
       Values:
@@ -241,6 +333,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-a-7
   - Key: rogue-b-1
@@ -249,6 +347,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 107, y: -325}
     Gains:
       Values:
@@ -258,6 +357,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-b-2
@@ -266,6 +371,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 200, y: -380}
     Gains:
       Values:
@@ -275,6 +381,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-b-1
   - Key: rogue-b-3
@@ -283,6 +395,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 292, y: -435}
     Gains:
       Values: []
@@ -290,6 +403,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: SmokeBomb
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-b-2
   - Key: rogue-b-4
@@ -298,6 +417,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 385, y: -490}
     Gains:
       Values:
@@ -307,6 +427,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-b-3
   - Key: rogue-b-5
@@ -315,6 +441,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 478, y: -545}
     Gains:
       Values: []
@@ -322,6 +449,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-b-4
   - Key: rogue-b-6
@@ -330,13 +463,20 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 570, y: -600}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: Hush
+    GrantedMagicKey: Vanish
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-b-5
   - Key: rogue-b-7
@@ -345,6 +485,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 663, y: -655}
     Gains:
       Values:
@@ -354,6 +495,12 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-b-6
   - Key: rogue-b-res
@@ -362,6 +509,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 352, y: -360}
     Gains:
       Values: []
@@ -369,23 +517,34 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-b-3
   - Key: rogue-b-tip-a
     DisplayName: 
-    Kind: 0
+    Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 758, y: -710}
     Gains:
-      Values:
-      - Type: 3
-        Amount: 4
+      Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: 
+    GrantedMagicKey: Shadowstep
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-b-7
   - Key: rogue-b-tip-b
@@ -394,6 +553,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 723, y: -585}
     Gains:
       Values:
@@ -403,5 +563,596 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
     Neighbors:
     - rogue-b-7
+  - Key: rogue-steal
+    DisplayName: 
+    Kind: 3
+    XpCost: 30
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -110, y: -150}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Steal
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-trunk-1
+  - Key: rogue-sig-keen
+    DisplayName: 
+    Kind: 12
+    XpCost: 20
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 110, y: 40}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Backstab
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 1
+    UpgradeAmount: 15
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-sig
+  - Key: rogue-a-evis-keen
+    DisplayName: 
+    Kind: 12
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -500, y: -690}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Eviscerate
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 1
+    UpgradeAmount: 25
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-a-6
+  - Key: rogue-twin
+    DisplayName: 
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
+      Amount: 3
+    EssenceCost: 0
+    Position: {x: -853, y: -765}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: DarkTwin
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-a-tip-a
+  - Key: rogue-twin-power
+    DisplayName: 
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -948, y: -820}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: DarkTwin
+    GrantedUltraKey: 
+    SummonAmount: 30
+    Neighbors:
+    - rogue-twin
+  - Key: rogue-twin-stay
+    DisplayName: 
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -1043, y: -875}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: DarkTwin
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-twin-power
+  - Key: rogue-twin-charge
+    DisplayName: 
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
+      Amount: 2
+    EssenceCost: 0
+    Position: {x: -1138, y: -930}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: DarkTwin
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-twin-stay
+  - Key: rogue-death-mark
+    DisplayName: 
+    Kind: 10
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -818, y: -530}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: DeathMark
+    SummonAmount: 1
+    Neighbors:
+    - rogue-a-tip-b
+  - Key: rogue-crows
+    DisplayName: 
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+      Amount: 3
+    EssenceCost: 0
+    Position: {x: 853, y: -765}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: MurderOfCrows
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-b-tip-a
+  - Key: rogue-crows-stay
+    DisplayName: 
+    Kind: 6
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 948, y: -820}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: MurderOfCrows
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-crows
+  - Key: rogue-crows-charge
+    DisplayName: 
+    Kind: 7
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+      Amount: 2
+    EssenceCost: 0
+    Position: {x: 1043, y: -875}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: MurderOfCrows
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-crows-stay
+  - Key: rogue-smoke-mirrors
+    DisplayName: 
+    Kind: 10
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 818, y: -530}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: SmokeAndMirrors
+    SummonAmount: 1
+    Neighbors:
+    - rogue-b-tip-b
+  - Key: rogue-c-1
+    DisplayName: 
+    Kind: 0
+    XpCost: 65
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -450}
+    Gains:
+      Values:
+      - Type: 3
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-trunk-2
+  - Key: rogue-c-2
+    DisplayName: 
+    Kind: 0
+    XpCost: 90
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -540}
+    Gains:
+      Values:
+      - Type: 6
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-1
+  - Key: rogue-c-3
+    DisplayName: 
+    Kind: 3
+    XpCost: 120
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -630}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Mug
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-2
+  - Key: rogue-c-4
+    DisplayName: 
+    Kind: 0
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -720}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 6
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-3
+  - Key: rogue-c-5
+    DisplayName: 
+    Kind: 2
+    XpCost: 195
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -810}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-4
+  - Key: rogue-c-6
+    DisplayName: 
+    Kind: 3
+    XpCost: 245
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -900}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Maim
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-5
+  - Key: rogue-c-7
+    DisplayName: 
+    Kind: 0
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -990}
+    Gains:
+      Values:
+      - Type: 1
+        Amount: 4
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-6
+  - Key: rogue-c-tip-a
+    DisplayName: 
+    Kind: 3
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 95, y: -1045}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Fence
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-7
+  - Key: rogue-c-tip-b
+    DisplayName: 
+    Kind: 0
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -95, y: -1045}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 5
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-7
+  - Key: rogue-ferret
+    DisplayName: 
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+      Amount: 3
+    EssenceCost: 0
+    Position: {x: 0, y: -1135}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: GoldenFerret
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-tip-a
+    - rogue-c-tip-b
+  - Key: rogue-ferret-power
+    DisplayName: 
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -1225}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: GoldenFerret
+    GrantedUltraKey: 
+    SummonAmount: 15
+    Neighbors:
+    - rogue-ferret
+  - Key: rogue-ferret-charge
+    DisplayName: 
+    Kind: 7
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+      Amount: 2
+    EssenceCost: 0
+    Position: {x: 0, y: -1315}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: GoldenFerret
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-ferret-power
+  - Key: rogue-grand-heist
+    DisplayName: 
+    Kind: 10
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 190, y: -1135}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: GrandHeist
+    SummonAmount: 1
+    Neighbors:
+    - rogue-c-tip-a

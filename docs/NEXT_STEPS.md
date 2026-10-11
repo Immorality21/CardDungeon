@@ -88,6 +88,52 @@ owner has not reviewed yet, not decisions. When it is done, it is applied in one
 Rogue builds, awakenings, gear reactions, Ultras), and **then** the balance pass. Read it with the
 `ArtifactData` tool: collections `heroes/<HeroSO.Key>` and `gear/<ItemSO.Key>`.
 
+**Apply pass status (2026-10-11): every hero is built.** The last four went in on 2026-10-11 from the
+owner's text plus Claude's drafts for the gaps (owner: "fill them in for now"): the **Rogue** rebuilt on
+three branches (Steal on the trunk; Eviscerate/Vanish replace Aimed Shot/Hush, which stay the Ranger's;
+Dark Twin, Murder of Crows, Golden Ferret; Death Mark, Smoke and Mirrors, Grand Heist), the **Ranger's**
+third branch (Hunter's Mark, Flushing Shot, Grey Fang) with three Ultras and two awakenings, the
+**Warrior's** third branch (Hamstring, Press the Attack, Finishing Blow, Iron Charger, Earthsplitter) and
+the **Cultist's** two Ultras (Mass Hysteria, Blood Moon) and awakenings (Terror, Blood Circle). Drafts are
+marked as such in the workbook.
+
+### Before the balance pass — do these first *(2026-10-11)*
+
+In order. The balance pass starts only when this list is empty.
+
+1. **Write the workbook back.** The new pieces (Rogue, Ranger, Warrior, Cultist branches, summons,
+   Ultras, awakenings) still read "Not built" in the Hero Workbook. It only opens under the owner's
+   personal claude.ai account, so log in with that one and push the statuses. The corrections to go in
+   with them:
+   - **Smoke Bomb**: Claude's draft calls it single-target - wrong. It already blinds every enemy (50%,
+     3 turns) and was left that way.
+   - **Shadowstep**: built as "the next physical blow misses"; the guaranteed crit after the dodge is not.
+   - **Earthsplitter**: a Strength hit on every enemy; it does not *spend* Momentum (Momentum only helps
+     through the Strength it already adds).
+   - **Press the Attack**: two hits, but one hit for Momentum.
+   - **Terror**: Dread already hit every enemy, so the owner's "Terror: Dread hits every enemy" changed
+     nothing. Built as Dread + a 30% chance to Confuse each enemy.
+   - **Grey Fang**: player-driven, so it does not go for the marked enemy by itself.
+2. **The owner reviews Claude's drafts** in the workbook (orange "Claude draft" fields) - keep, rewrite
+   or drop - and anything changed is rebuilt. Includes the two Rogue "Maybe" awakenings, **Ambush** and
+   **Coup de Grace**, which are not built.
+3. **Gear reactions and grows-with-use.** The workbook's gear tab is untouched (20 items). Fill it in,
+   then build the reactions (`TriggeredEffect`) and milestones (`ItemMilestone`).
+4. **See the last untested pieces in play**: Vanish keeping enemies off the Rogue, Shadowstep's Evade
+   on a basic attack, and Blood Moon's party buff. A full-grid Rogue is too fast for enemies to act, so
+   test with a partly-grown Rogue and fast enemies (`Sandbox/RogueKit.asset` is the starting point).
+5. **Commit** the pass (owner).
+
+Then the balance pass, starting with what this pass already showed:
+- **Full-grid heroes are far too fast** - a full-grid party took ~500 turns to the hounds' 13
+  (Agility on the grids vs enemy speed). Blind and other statuses that count down on the victim's turn
+  last almost forever as a result.
+- **Full-grid damage one-shots rooms** (Flushing Shot on a marked hound: 200; Cleric, Mage the same).
+- **`BalanceRegressionTests.RunDifficultyEscalates` fails**: The Blood Stair, Ossuary Gate -> Red
+  Cloister, attrition 0.28 -> 0.58 (ceiling 75%). A baseline without the 2026-10-11 pass is green, so
+  the new branches moved the modelled party.
+- Every number of the 2026-10-11 pass is a first draft.
+
 ### Decisions already taken — do not relitigate
 
 - **Death is mandatory to progress.** Deeper tiers should be unclearable until the player invests.
@@ -240,8 +286,9 @@ backlog.**
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
 | **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c. **Ability upgrades (`MagicUpgrade`) built 2026-10-09** with the Ranger as showcase; other heroes' spurs wait on the Hero Workbook |
-| — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) **Ultras for the other six heroes** - the gauge is universal but only the Warlock and the Cultist can spend it (§13 below) |
+| — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) ~~Ultras for the other six heroes~~ - every hero has Ultras since the 2026-10-11 workbook pass (the Mage's is MultiCast) |
 | — | **The Mage — an elemental caster** | ✅ **on the roster 2026-10-07** — rescued in the new **Sealed Archive** (main line, before the March); three-branch grid (storm / frost / fire, Fire Cloak early for the Ashen Deep), new Chain Lightning. **Open:** his signature and Ultra are MultiCast (spend Focus to cast 2-4 times, owner 2026-10-07, details open); summons are drafts in the hero workbook |
+| — | **Future heroes (long term)** | not started: **the Pirate** (owner, 2026-10-11), name only so far. Comes after the current hero pass and the balance pass; needs a vision first (§5, "Future heroes") |
 
 ### [Combat depth](plans/COMBAT_DEPTH.md)
 

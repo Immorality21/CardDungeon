@@ -90,6 +90,21 @@ namespace Assets.Scripts.Cards
         /// the attacker as <c>DamageType</c>, for <c>Duration</c> of its turns
         /// (<see cref="Combat.ThornsTable"/>). The Mage's cloaks. No caster stat. Appended.
         /// </summary>
-        Thorns = 14
+        Thorns = 14,
+
+        /// <summary>
+        /// The Rogue's Steal: lifts one thing from each target - an item off its drop table, else a
+        /// little gold - at <see cref="StealOps.Chance"/> (Luck-based; <c>Power</c> is bonus percentage
+        /// points, 100 = certain). Each enemy can be robbed once per fight. Needs the fight's loot
+        /// (<see cref="EffectResolver.StealFrom"/>): without it a success takes nothing. Appended.
+        /// </summary>
+        Steal = 15,
+
+        /// <summary>
+        /// The Rogue's Fence: every kill and steal for the rest of this fight pays <c>Power</c> percent
+        /// more gold. Does not stack - a second cast keeps the larger bonus. Needs the fight
+        /// (<see cref="EffectResolver.AddGoldBonus"/>); inert without one. Appended.
+        /// </summary>
+        FightGoldBonus = 16
     }
 }

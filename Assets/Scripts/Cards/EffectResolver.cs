@@ -14,6 +14,7 @@ namespace Assets.Scripts.Cards
         private static readonly Color DodgeColor = new Color(0.8f, 0.8f, 0.85f);
         private const string DodgeText = "Dodge";
         private const string MissText = "Miss";
+        private const string EvadeText = "Evade";
         private const float ComboDelay = 0.3f;
 
         private readonly EffectExecutorFactory _factory;
@@ -66,10 +67,22 @@ namespace Assets.Scripts.Cards
         /// </summary>
         public Func<ICombatUnit, List<ICombatUnit>> LivingAllies { get; set; }
 
+        /// <summary>
+        /// The Rogue's Steal, handed the thief and the mark once the odds have been won: gives the goods
+        /// and answers with the text to float ("Stole Iron Sword", "Nothing left"). Set by
+        /// <c>CombatManager</c>; null (a success takes nothing) in tests and the balance model.
+        /// </summary>
+        public Func<ICombatUnit, ICombatUnit, string> StealFrom { get; set; }
+
+        /// <summary>The Rogue's Fence: raises this fight's gold bonus to at least the percent given. Set by
+        /// <c>CombatManager</c>; null (inert) elsewhere.</summary>
+        public Action<int> AddGoldBonus { get; set; }
+
         public EffectResolver()
         {
             _factory = new EffectExecutorFactory(
-                () => Clock, () => Charges, () => Events, () => KillsOf, () => Roll, () => FallenAllies, () => LivingAllies);
+                () => Clock, () => Charges, () => Events, () => KillsOf, () => Roll, () => FallenAllies, () => LivingAllies,
+                () => StealFrom, () => AddGoldBonus);
         }
 
         /// <param name="powerBonus">Flat power added to the magic's Damage/Heal effects (from its upgrade level).</param>
@@ -99,7 +112,7 @@ namespace Assets.Scripts.Cards
             // summon, or an ability with no upgrades.
             var upgrades = UpgradesOf(action);
             var targets = HitFilter(action, buffTracker, result);
-            RollCrits(action, targets, upgrades);
+            RollCrits(action, targets, upgrades, buffTracker);
 
             // Three passes: benefits, then drains, then costs. A HealthCost authored first would take
             // the caster down before the buff it paid for was applied, and BuffEffectExecutor skips
@@ -259,6 +272,7 @@ namespace Assets.Scripts.Cards
                 if (target != action.Caster && target.IsAlive)
                 {
                     string avoided = DefenseRules.RollMiss(blinded) ? MissText
+                        : Buffs.EvasiveBuffHandler.TryEvade(buffTracker, target) ? EvadeText
                         : DefenseRules.RollDodge(target) ? DodgeText
                         : null;
                     if (avoided != null)
@@ -326,17 +340,34 @@ namespace Assets.Scripts.Cards
         /// caster's own crit chance (<see cref="CritRules.ChanceFor"/>) plus the ability's crit upgrades,
         /// so a multi-hit cast and the riders on it agree on which targets were struck critically.
         /// </summary>
-        private static void RollCrits(SpellcastAction action, List<ICombatUnit> targets, AbilityGrant upgrades)
+        private static void RollCrits(SpellcastAction action, List<ICombatUnit> targets, AbilityGrant upgrades,
+            CombatBuffTracker buffTracker = null)
         {
             action.CritTargets.Clear();
-            if (targets == null || !CanCrit(action.Magic, action.Caster))
+            if (targets == null)
+            {
+                return;
+            }
+            // A Death-Marked target takes every damaging hit as a crit, from abilities that cannot crit too.
+            if (action.Magic != null && action.Magic.HasEffectType(SpellEffectType.Damage))
+            {
+                foreach (var target in targets)
+                {
+                    if (target != action.Caster && target.IsAlive && Buffs.DeathMarkedBuffHandler.IsMarked(buffTracker, target))
+                    {
+                        action.CritTargets.Add(target);
+                    }
+                }
+            }
+            if (!CanCrit(action.Magic, action.Caster))
             {
                 return;
             }
             float bonus = upgrades != null ? upgrades.CritChanceBonus / 100f : 0f;
             foreach (var target in targets)
             {
-                if (target != action.Caster && target.IsAlive && CritRules.RollCrit(action.Caster, bonus))
+                if (target != action.Caster && target.IsAlive && !action.CritTargets.Contains(target)
+                    && CritRules.RollCrit(action.Caster, bonus))
                 {
                     action.CritTargets.Add(target);
                 }

@@ -410,7 +410,10 @@ namespace Assets.Scripts.Cards
                 return 0f;
             }
 
-            return buffs.Where(b => b.IsResistance && (b.ResistsAll || b.ResistanceType == type)).Sum(b => b.Amount);
+            // A marked unit (Hunter's Mark) takes its mark's percent more from every hit: a negative
+            // resistance to everything, so every damage path that honours resistance honours it.
+            float marked = buffs.Where(b => b.IsStatusEffect && b.BuffType == BuffType.Marked).Sum(b => b.Amount);
+            return buffs.Where(b => b.IsResistance && (b.ResistsAll || b.ResistanceType == type)).Sum(b => b.Amount) - marked;
         }
 
         public bool HasStatusEffect(ICombatUnit unit, BuffType type)
@@ -456,6 +459,19 @@ namespace Assets.Scripts.Cards
         /// newest first, or every one when <paramref name="max"/> is 0. Returns how many went. The
         /// Cleric's Cure; buffs on the party's own side are never touched.
         /// </summary>
+        /// <summary>How many debuffs <paramref name="unit"/> carries - what <see cref="CureDebuffs"/> would
+        /// clear: curable statuses and stat cuts. The Rogue's Eviscerate counts them.</summary>
+        public int DebuffCount(ICombatUnit unit)
+        {
+            if (unit == null || !_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                return 0;
+            }
+            return buffs.Count(buff => buff.IsStatusEffect
+                ? BuffHandlerRegistry.IsCurable(buff.BuffType)
+                : !buff.IsResistance && buff.Key == null && buff.Amount < 0);
+        }
+
         public int CureDebuffs(ICombatUnit unit, int max)
         {
             if (unit == null || !_activeBuffs.TryGetValue(unit, out var buffs))

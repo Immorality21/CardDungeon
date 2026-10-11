@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d03ef8fb4f65d04aacc66749b7be8c3, type: 3}
+  m_Name: HeroPassKit
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Sandbox.SandboxConfigSO
+  Heroes:
+  - Hero: {fileID: 11400000, guid: 09b6a3424e4546719cda1391729e96cc, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 1
+    Abilities:
+    - {fileID: 11400000, guid: eafb4f2809b2a2a4a914269a5bfda29e, type: 2}
+    - {fileID: 11400000, guid: 0bbb1bed5c21d464ea13de2541b55be7, type: 2}
+    - {fileID: 11400000, guid: b9bcb505cc0902c43acf2842bb7b5c83, type: 2}
+    - {fileID: 11400000, guid: d79c0ece7fd5a30479e0b05df6e2e333, type: 2}
+    - {fileID: 11400000, guid: acc8c120e457e494faab1c492ebaf9ca, type: 2}
+    - {fileID: 11400000, guid: ce622b2b0226f484ead7b0ac065c7b55, type: 2}
+    - {fileID: 11400000, guid: 7d48fd4e606e6aa4a93fe9ee934d6552, type: 2}
+  - Hero: {fileID: 11400000, guid: 77ccb730251741f08e684dabd9144b76, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 1
+    Abilities:
+    - {fileID: 11400000, guid: 8a06e7ee10b2a57499e3947ee82ac161, type: 2}
+    - {fileID: 11400000, guid: b21c74a6dd08eb5429e8c856364b851a, type: 2}
+    - {fileID: 11400000, guid: 6c8b4ab3d358457fba4f969ceeb5d95d, type: 2}
+    - {fileID: 11400000, guid: c0de51110001a4b1c2d3e4f506172839, type: 2}
+  - Hero: {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 1
+    Abilities:
+    - {fileID: 11400000, guid: d333867f283989344ac0acd3e4126a73, type: 2}
+    - {fileID: 11400000, guid: dbcbe68fede346f4c9b14de45390b316, type: 2}
+    - {fileID: 11400000, guid: e4d626c0deb485447a56a9172ae9a5a8, type: 2}
+  - Hero: {fileID: 11400000, guid: d930ce0ffd89cf4408229b730a560cdf, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 1
+    Abilities:
+    - {fileID: 11400000, guid: be9bd392f129f084b9c6ce8529de7c46, type: 2}
+    - {fileID: 11400000, guid: 9a579920cad1c414f98d226df4fa8a25, type: 2}
+  Level: {fileID: 11400000, guid: 6c8584fe41cba744eb2cf4dc5ccd72ae, type: 2}
+  Seed: 31
+  Enemies:
+  - {fileID: 11400000, guid: 3ae1e1da14b3441f9f6653735a868762, type: 2}
+  - {fileID: 11400000, guid: 3ae1e1da14b3441f9f6653735a868762, type: 2}
+  - {fileID: 11400000, guid: 3ae1e1da14b3441f9f6653735a868762, type: 2}
+  - {fileID: 11400000, guid: 3ae1e1da14b3441f9f6653735a868762, type: 2}
+  - {fileID: 11400000, guid: 3ae1e1da14b3441f9f6653735a868762, type: 2}
+  EnemyDifficulty: 25
+  ClearOtherRooms: 1
+  WalkIntoEncounter: 1
+  CopyInventory: 0
+  CopyMetaProgress: 0
+  Items: []

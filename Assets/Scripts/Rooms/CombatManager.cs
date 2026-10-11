@@ -236,6 +236,10 @@ namespace Assets.Scripts.Rooms
         private int _combatXp;
         private readonly Dictionary<Hero, int> _xpAtCombatStart = new Dictionary<Hero, int>();
         private int _combatGold;
+        // The Rogue's Fence: percent more gold from this fight's kills and steals.
+        private int _fightGoldBonus;
+        // Enemies already robbed this fight (Steal works once per enemy).
+        private readonly List<ICombatUnit> _robbed = new List<ICombatUnit>();
         private Room _lastVictoryRoom;
         private bool _currentCombatHadBoss;
         private MagicTagTracker _tagTracker;
@@ -545,7 +549,8 @@ namespace Assets.Scripts.Rooms
 
             var context = new EnemyCombatContext
             {
-                Heroes = HeroSideUnits(),
+                // A Vanished hero (the Rogue) is not offered as a target.
+                Heroes = TargetableHeroes(),
                 Allies = GetAliveEnemies().Where(u => !ReferenceEquals(u, enemy)).ToList(),
                 BuffTracker = BuffTracker,
                 ChargingEntryIndex = enemy.ChargingEntryIndex,
@@ -657,6 +662,8 @@ namespace Assets.Scripts.Rooms
                 _xpAtCombatStart[pair.Key] = pair.Value;
             }
             _combatGold = 0;
+            _fightGoldBonus = 0;
+            _robbed.Clear();
             _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
             _squad.Clear();
             _allies.Clear();
@@ -708,6 +715,9 @@ namespace Assets.Scripts.Rooms
             _calculator.LivingAllies = caster => caster == null || caster is Enemy
                 ? new List<ICombatUnit>()
                 : HeroSideUnits();
+            // The Rogue's Steal and Fence pay out of this fight.
+            _calculator.StealFrom = StealFrom;
+            _calculator.AddGoldBonus = percent => _fightGoldBonus = Mathf.Max(_fightGoldBonus, percent);
             // Divine Intervention's counterstrike, fired off the same stream.
             new RetaliationTracker(Events, _calculator, BuffTracker);
             // The Warlock's Leeching Curse: the party's hits on a cursed enemy heal him.
@@ -2291,6 +2301,28 @@ namespace Assets.Scripts.Rooms
         private IEnumerator ExecuteEnemyTurn(ICombatUnit enemyUnit, Party party)
         {
             var enemy = enemyUnit as Enemy;
+
+            // Mass Hysteria: a confused enemy may turn on its own side instead of acting. The
+            // confusion is spent with this turn whichever way the roll goes.
+            if (ConfusedBuffHandler.IsConfused(BuffTracker, enemyUnit))
+            {
+                BuffTracker.RemoveStatusEffect(enemyUnit, BuffType.Confused);
+                var allies = GetAliveEnemies().Where(u => u != enemyUnit).ToList();
+                if (allies.Count > 0 && UnityEngine.Random.Range(0f, 1f) < ConfusedBuffHandler.Chance)
+                {
+                    var victim = allies[UnityEngine.Random.Range(0, allies.Count)];
+                    ShowFloatingLabel(enemyUnit.Transform.position + new Vector3(0f, 0.3f, 0f), "Confused!",
+                        new Color(1f, 0.85f, 0.3f), 0.16f);
+                    yield return ExecuteAttack(enemyUnit, victim, Vector3.left, Color.red, 1f, "turns on");
+                    ResolveDeaths();
+                    if (enemy != null)
+                    {
+                        enemy.TurnsTaken++;
+                    }
+                    yield break;
+                }
+            }
+
             var behavior = enemy != null && enemy.Behavior != null
                 ? enemy.Behavior
                 : EnemyBehaviorSO.BuiltInPreset(enemy != null ? enemy.Archetype : EnemyArchetype.Aggressor);
@@ -2830,6 +2862,15 @@ namespace Assets.Scripts.Rooms
                 _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName} and misses!";
                 yield break;
             }
+            // Shadowstep / Smoke and Mirrors: a held evasion is spent before Luck gets its roll.
+            if (EvasiveBuffHandler.TryEvade(BuffTracker, target))
+            {
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Evade", new Color(0.8f, 0.8f, 0.85f), 0.16f);
+                RecordAttackTypeObserved(attacker);
+                yield return new WaitForSecondsRealtime(0.045f);
+                _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName}, who is not there!";
+                yield break;
+            }
             if (DefenseRules.RollDodge(target))
             {
                 ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Dodge", new Color(0.8f, 0.8f, 0.85f), 0.16f);
@@ -2853,10 +2894,12 @@ namespace Assets.Scripts.Rooms
                 rawAttack, defense, damageType, target.Resistances, resistanceBonus);
 
             // Critical hit: a chance for a harder blow, called out with a gold popup + bigger number.
-            bool crit = dmg > 0 && CritRules.RollCrit(attacker);
+            // Death Mark: every hit on the marked unit crits, harder than usual.
+            bool deathMarked = DeathMarkedBuffHandler.IsMarked(BuffTracker, target);
+            bool crit = dmg > 0 && (deathMarked || CritRules.RollCrit(attacker));
             if (crit)
             {
-                dmg = CritRules.Apply(dmg);
+                dmg = CritRules.Apply(dmg, deathMarked);
             }
 
             // Absorbed (resistance above 100%) heals instead, clamped to the target's maximum - without
@@ -3270,7 +3313,7 @@ namespace Assets.Scripts.Rooms
             // Kill rewards: XP (awarded now), gold (accumulated, banked on clear).
             // Through the enemy, not the definition: a level scales its rewards alongside its stats.
             int xp = enemy.XpReward;
-            int gold = enemy.GoldReward;
+            int gold = StealOps.WithBonus(enemy.GoldReward, _fightGoldBonus);
             if (xp > 0)
             {
                 _combatXp += xp;
@@ -3323,6 +3366,55 @@ namespace Assets.Scripts.Rooms
             // Removed from combat immediately; the object lingers only for its pop/fade.
             CombatAudio.Play(CombatSound.EnemyDeath);
             CombatFeedback.Instance.KillWithEffect(enemy.gameObject);
+        }
+
+        /// <summary>
+        /// The Rogue's Steal, once the odds are won (<see cref="StealEffectExecutor"/>): one random line of
+        /// the enemy's drop table goes into the bag at its smallest quantity, or, when it has none, half its
+        /// kill gold - Fence's bonus included either way. Once per enemy per fight; a called-in body has
+        /// nothing on it. A revisit's withheld materials are skipped as they are on a kill.
+        /// </summary>
+        private string StealFrom(ICombatUnit thief, ICombatUnit mark)
+        {
+            var enemy = mark as Enemy;
+            if (enemy == null || enemy.IsSummoned)
+            {
+                return "Nothing to steal";
+            }
+            if (_robbed.Contains(mark))
+            {
+                return "Already robbed";
+            }
+            _robbed.Add(mark);
+
+            var lines = enemy.LootTable
+                .Where(d => d != null && d.Item != null && !RunFear.Current.Withholds(d.Item.Key))
+                .ToList();
+            if (lines.Count > 0)
+            {
+                var line = lines[UnityEngine.Random.Range(0, lines.Count)];
+                var award = new LootAward(line.Item, Mathf.Max(1, line.MinQuantity));
+                InventoryManager.Instance.AddItem(award, EconomySource.Kill);
+                _combatLoot.Add(award);
+                RecordLootObserved(enemy, award.Item);
+                return $"Stole {award.Item.DisplayName}";
+            }
+
+            int gold = StealOps.WithBonus(StealOps.FallbackGold(enemy.GoldReward), _fightGoldBonus);
+            _combatGold += gold;
+            MetaProgressManager.Instance.AddPendingGold(gold, EconomySource.Kill);
+            return $"Stole {gold} gold";
+        }
+
+        /// <summary>
+        /// The heroes an enemy may pick as a target: the hero side less anyone Vanished
+        /// (<see cref="BuffType.Hidden"/>) - unless that leaves nobody, when everyone is fair game again.
+        /// </summary>
+        private List<ICombatUnit> TargetableHeroes()
+        {
+            var all = HeroSideUnits();
+            var seen = all.Where(u => !HiddenBuffHandler.IsHidden(BuffTracker, u)).ToList();
+            return seen.Count > 0 ? seen : all;
         }
 
         /// <summary>Heroes who fell in this fight and are still down - who a Revive can reach.</summary>
@@ -3398,7 +3490,7 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private ICombatUnit GetRandomAliveHero(Party party)
         {
-            return ThreatTable.Pick(HeroSideUnits(), _threat, UnityEngine.Random.Range(0f, 1f));
+            return ThreatTable.Pick(TargetableHeroes(), _threat, UnityEngine.Random.Range(0f, 1f));
         }
 
         // ------------------------------------------------------------------ threat

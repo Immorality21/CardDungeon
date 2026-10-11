@@ -20,6 +20,7 @@ MonoBehaviour:
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -27,6 +28,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: EldritchLash
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -37,6 +41,7 @@ MonoBehaviour:
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -46,6 +51,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -57,6 +65,7 @@ MonoBehaviour:
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -66,6 +75,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -77,6 +89,7 @@ MonoBehaviour:
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -88,6 +101,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -99,6 +115,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -360}
     Gains:
       Values: []
@@ -106,6 +123,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -117,6 +137,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -132, y: -325}
     Gains:
       Values:
@@ -126,6 +147,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -137,6 +161,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -246, y: -380}
     Gains:
       Values:
@@ -146,6 +171,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -157,6 +185,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -360, y: -435}
     Gains:
       Values: []
@@ -164,6 +193,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: WrithingSpawn
     GrantedUltraKey: 
     SummonAmount: 1
@@ -175,6 +207,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -474, y: -490}
     Gains:
       Values:
@@ -184,6 +217,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -195,6 +231,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -588, y: -545}
     Gains:
       Values: []
@@ -202,6 +239,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: WrithingSpawn
     GrantedUltraKey: 
     SummonAmount: 1
@@ -215,6 +255,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
+    EssenceCost: 0
     Position: {x: -702, y: -600}
     Gains:
       Values: []
@@ -222,6 +263,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Watcher
     GrantedUltraKey: 
     SummonAmount: 1
@@ -233,6 +277,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -816, y: -655}
     Gains:
       Values:
@@ -242,6 +287,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -253,6 +301,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -420, y: -360}
     Gains:
       Values: []
@@ -260,6 +309,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: WrithingSpawn
     GrantedUltraKey: 
     SummonAmount: 20
@@ -273,6 +325,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 3
+    EssenceCost: 0
     Position: {x: -911, y: -710}
     Gains:
       Values: []
@@ -280,6 +333,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: Sacrifice
     SummonAmount: 1
@@ -293,6 +349,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
+    EssenceCost: 0
     Position: {x: -876, y: -585}
     Gains:
       Values: []
@@ -300,6 +357,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: Watcher
     GrantedUltraKey: 
     SummonAmount: 1
@@ -311,6 +371,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -450}
     Gains:
       Values:
@@ -320,6 +381,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -331,6 +395,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -340,6 +405,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -351,6 +419,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -630}
     Gains:
       Values: []
@@ -358,6 +427,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: WhisperOfMadness
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -369,6 +441,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -720}
     Gains:
       Values:
@@ -378,6 +451,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -389,6 +465,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -396,6 +473,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -407,6 +487,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -414,6 +495,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: Dread
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -425,6 +509,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -434,6 +519,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -445,6 +533,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 105, y: -605}
     Gains:
       Values: []
@@ -452,6 +541,9 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -463,6 +555,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 95, y: -1045}
     Gains:
       Values: []
@@ -470,6 +563,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: MindRot
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -481,6 +577,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -95, y: -1045}
     Gains:
       Values:
@@ -490,6 +587,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -501,6 +601,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 132, y: -325}
     Gains:
       Values:
@@ -510,6 +611,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -521,6 +625,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 246, y: -380}
     Gains:
       Values:
@@ -530,6 +635,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -541,6 +649,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 360, y: -435}
     Gains:
       Values: []
@@ -548,6 +657,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: BloodRite
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -559,6 +671,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 474, y: -490}
     Gains:
       Values:
@@ -570,6 +683,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -581,6 +697,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 588, y: -545}
     Gains:
       Values: []
@@ -588,6 +705,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -599,6 +719,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 702, y: -600}
     Gains:
       Values: []
@@ -606,6 +727,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: RiteOfWarding
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -617,6 +741,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 816, y: -655}
     Gains:
       Values:
@@ -626,6 +751,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -637,6 +765,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 420, y: -360}
     Gains:
       Values: []
@@ -644,6 +773,9 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -655,6 +787,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 911, y: -710}
     Gains:
       Values: []
@@ -662,6 +795,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: DarkCommunion
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -673,6 +809,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 876, y: -585}
     Gains:
       Values:
@@ -682,86 +819,193 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - cultist-c-7
   - Key: cultist-b-nightmare
-    DisplayName:
+    DisplayName: 
     Kind: 4
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 2
+    EssenceCost: 0
     Position: {x: 0, y: -1135}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 10
-    GrantedMagicKey:
+    GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: AbyssalNightmare
-    GrantedUltraKey:
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - cultist-b-tip-a
     - cultist-b-tip-b
   - Key: cultist-b-nightmare-up
-    DisplayName:
+    DisplayName: 
     Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -1225}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 10
-    GrantedMagicKey:
+    GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: AbyssalNightmare
-    GrantedUltraKey:
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - cultist-b-nightmare
   - Key: cultist-c-idol
-    DisplayName:
+    DisplayName: 
     Kind: 4
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 2
+    EssenceCost: 0
     Position: {x: 1000, y: -650}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 10
-    GrantedMagicKey:
+    GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: BloodIdol
-    GrantedUltraKey:
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - cultist-c-tip-a
     - cultist-c-tip-b
   - Key: cultist-c-idol-up
-    DisplayName:
+    DisplayName: 
     Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 1095, y: -700}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 10
-    GrantedMagicKey:
+    GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: BloodIdol
-    GrantedUltraKey:
+    GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - cultist-c-idol
+  - Key: cultist-b-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: -105, y: -880}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: Dread
+    GrantedCharges: 2
+    AwakenedMagicKey: Terror
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-6
+  - Key: cultist-c-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: 740, y: -510}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: RiteOfWarding
+    GrantedCharges: 2
+    AwakenedMagicKey: BloodCircle
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-6
+  - Key: cultist-mass-hysteria
+    DisplayName: 
+    Kind: 10
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -190, y: -1135}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: MassHysteria
+    SummonAmount: 1
+    Neighbors:
+    - cultist-b-tip-b
+  - Key: cultist-blood-moon
+    DisplayName: 
+    Kind: 10
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 960, y: -510}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: BloodMoon
+    SummonAmount: 1
+    Neighbors:
+    - cultist-c-tip-b

@@ -79,10 +79,12 @@ namespace Assets.Scripts.Cards.Effects
                 // the effect lands on. Flat power comes from the definition (a combo's bonus effect, a
                 // room event's outcome) rather than from whoever happened to trigger it.
                 int rawAttack = SpellPower.Resolve(effect, caster, target, buffTracker, flatPower);
-                // Meant for a kind of unit (Purge on the Undead): the raw hit grows before defense.
-                if (effect.BonusPercent != 0 && UnitTraitOps.Has(target, effect.BonusVsTrait))
+                // Meant for a kind of unit (Purge on the Undead) or a marked one (Flushing Shot): the
+                // raw hit grows before defense.
+                float bonus = effect.BonusFactor(target, buffTracker);
+                if (bonus != 1f)
                 {
-                    rawAttack = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.RoundToInt(rawAttack * (1f + effect.BonusPercent / 100f)));
+                    rawAttack = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.RoundToInt(rawAttack * bonus));
                 }
 
                 // Magic (an Intelligence- or Spirit-scaled effect) is met by Spirit, everything else
@@ -99,7 +101,7 @@ namespace Assets.Scripts.Cards.Effects
                 bool crit = damage > 0 && critTargets != null && critTargets.Contains(aimed);
                 if (crit)
                 {
-                    damage = CritRules.Apply(damage);
+                    damage = CritRules.Apply(damage, DeathMarkedBuffHandler.IsMarked(buffTracker, target));
                 }
 
                 var source = new HealthSource(caster, HealthCause.Ability, effect.DamageType, crit);

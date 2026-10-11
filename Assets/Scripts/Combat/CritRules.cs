@@ -66,5 +66,18 @@ namespace Assets.Scripts.Combat
         {
             return damage > 0 ? Mathf.Max(damage + 1, Mathf.RoundToInt(damage * Multiplier)) : damage;
         }
+
+        /// <summary>A crit on a Death-Marked unit: half as much again on top of the normal crit.</summary>
+        public const float MarkedMultiplier = Multiplier + 0.5f;
+
+        /// <summary>A crit's damage, harder on a Death-Marked target (<paramref name="marked"/>).</summary>
+        public static int Apply(int damage, bool marked)
+        {
+            if (!marked)
+            {
+                return Apply(damage);
+            }
+            return damage > 0 ? Mathf.Max(damage + 1, Mathf.RoundToInt(damage * MarkedMultiplier)) : damage;
+        }
     }
 }

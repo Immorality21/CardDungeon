@@ -512,6 +512,11 @@ replaced — the tavern is removed and heroes become progression unlocks; see §
 - ~~**A tavern recruit is invisible to the whole balance model.**~~ **Resolved by §5b** (2026-09-04):
   with the tavern gone, every hero arrives on the modelled path. `MustyTome`'s Intelligence 6 gate
   reading as never-met was a symptom of this and should re-measure correctly once §5b lands.
+- **Future heroes — long term.** Heroes the owner wants on the roster eventually, not part of the
+  current hero pass or the demo. Each needs a vision (`HeroSO.Vision` / the Hero Workbook) before any
+  grid, summon or unlock work starts.
+  - **The Pirate** *(owner, 2026-10-11)*. Only the name is decided; the fantasy, role, branches
+    and how the Pirate is unlocked are all still open.
 - **Hero art is short by more than it looks.** The Tank, Acolyte and Scout are all retired (§5b),
   and the Acolyte and Scout were only ever borrowing the Warrior's and Tank's sprites anyway. Of the
   seven heroes, **only the Warrior has art** — the standing need is **six** hero sprite sets, not

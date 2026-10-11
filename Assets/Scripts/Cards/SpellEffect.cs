@@ -57,8 +57,57 @@ namespace Assets.Scripts.Cards
         /// </summary>
         public UnitTraits BonusVsTrait = UnitTraits.None;
 
-        /// <summary>Extra damage against <see cref="BonusVsTrait"/>, in percent: 100 doubles the raw hit.</summary>
+        /// <summary>Extra damage against <see cref="BonusVsTrait"/> or <see cref="BonusVsStatus"/>, in
+        /// percent: 100 doubles the raw hit.</summary>
         public int BonusPercent;
+
+        /// <summary>
+        /// A status that earns <see cref="BonusPercent"/>, like a trait does: the Ranger's Flushing Shot
+        /// on a <see cref="BuffType.Marked"/> target. None (every effect authored before the field) = no
+        /// status bonus.
+        /// </summary>
+        public BuffType BonusVsStatus = BuffType.None;
+
+        /// <summary>
+        /// The Rogue's Eviscerate: <see cref="BonusPercent"/> is earned once per debuff the target carries
+        /// (<see cref="CombatBuffTracker.DebuffCount"/>), up to <see cref="MaxDebuffBonuses"/> times.
+        /// </summary>
+        public bool BonusPerDebuff;
+
+        /// <summary>The most debuffs <see cref="BonusPerDebuff"/> counts.</summary>
+        public const int MaxDebuffBonuses = 3;
+
+        /// <summary>
+        /// The multiplier on the raw hit against <paramref name="target"/>: 1 + <see cref="BonusPercent"/>
+        /// once for a trait or status match, or once per debuff (capped) with <see cref="BonusPerDebuff"/>.
+        /// </summary>
+        public float BonusFactor(ICombatUnit target, CombatBuffTracker buffTracker)
+        {
+            if (BonusPercent == 0 || target == null)
+            {
+                return 1f;
+            }
+            if (BonusPerDebuff)
+            {
+                int debuffs = buffTracker != null ? System.Math.Min(MaxDebuffBonuses, buffTracker.DebuffCount(target)) : 0;
+                return 1f + BonusPercent * debuffs / 100f;
+            }
+            return EarnsBonus(target, buffTracker) ? 1f + BonusPercent / 100f : 1f;
+        }
+
+        /// <summary>Whether the bonus applies to <paramref name="target"/>: it has the trait, or carries the status.</summary>
+        public bool EarnsBonus(ICombatUnit target, CombatBuffTracker buffTracker)
+        {
+            if (BonusPercent == 0 || target == null)
+            {
+                return false;
+            }
+            if (UnitTraitOps.Has(target, BonusVsTrait))
+            {
+                return true;
+            }
+            return BonusVsStatus != BuffType.None && buffTracker != null && buffTracker.HasStatusEffect(target, BonusVsStatus);
+        }
 
         /// <summary>
         /// A <see cref="SpellEffectType.Drain"/> that heals every living unit on the caster's side by

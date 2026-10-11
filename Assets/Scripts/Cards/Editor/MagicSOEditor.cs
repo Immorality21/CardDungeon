@@ -92,6 +92,18 @@ public class MagicSOEditor : Editor
                     element.FindPropertyRelative("BonusPercent"),
                     new GUIContent("Bonus %", "Extra raw damage against Bonus Vs, in percent: 100 doubles it."));
                 rect.y += lineHeight;
+
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("BonusVsStatus"),
+                    new GUIContent("Bonus Vs Status", "A status that also earns Bonus % (Flushing Shot on a Marked target). None = no status bonus."));
+                rect.y += lineHeight;
+
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("BonusPerDebuff"),
+                    new GUIContent("Bonus Per Debuff", "Earn Bonus % once per debuff on the target, up to 3 (Eviscerate)."));
+                rect.y += lineHeight;
             }
             else if (effectType == SpellEffectType.Retaliate)
             {
@@ -185,6 +197,8 @@ public class MagicSOEditor : Editor
             case SpellEffectType.Execute:
             case SpellEffectType.Intercept:
             case SpellEffectType.Thorns:
+            case SpellEffectType.Steal:
+            case SpellEffectType.FightGoldBonus:
                 return false;
             default:
                 return true;
@@ -206,7 +220,7 @@ public class MagicSOEditor : Editor
         }
         if (type == SpellEffectType.Damage)
         {
-            lines += 3; // DamageType + BonusVsTrait + BonusPercent
+            lines += 5; // DamageType + BonusVsTrait + BonusPercent + BonusVsStatus + BonusPerDebuff
         }
         else if (type == SpellEffectType.Execute || type == SpellEffectType.Retaliate
                  || type == SpellEffectType.Drain)

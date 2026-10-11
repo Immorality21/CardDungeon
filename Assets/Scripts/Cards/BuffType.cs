@@ -51,6 +51,21 @@ namespace Assets.Scripts.Cards
         // The Warlock's Leeching Curse: a share of every hit the curser's side lands on the unit heals
         // the curser (Cards.LeechTracker). The percent rides in CombatBuff.Amount, the curser in
         // CombatBuff.Source. A status, so it is curable, immune-able and on the HP bar; it never ticks.
-        Leeched = 23
+        Leeched = 23,
+        // The Cultist's Mass Hysteria: on its next turn the unit may strike one of its own allies
+        // instead (ConfusedBuffHandler.Chance). A status, so it is curable and immune-able.
+        Confused = 24,
+        // The Ranger's Hunter's Mark: the unit takes Amount percent more from every hit, read where
+        // resistance is (CombatBuffTracker.GetResistanceBonus). The percent rides in CombatBuff.Amount.
+        // A status: curable, immune-able, on the HP bar; it never ticks.
+        Marked = 25,
+        // The Rogue's Vanish: enemies cannot pick the unit as a target (CombatManager.TargetableHeroes).
+        Hidden = 26,
+        // The Rogue's Shadowstep and Smoke and Mirrors: the next Amount physical blows aimed at the unit
+        // miss outright (EvasiveBuffHandler.TryEvade), before its Luck dodge is rolled.
+        Evasive = 27,
+        // The Rogue's Death Mark: every damaging hit on the unit is a critical one, and harder than a
+        // normal crit (CritRules.MarkedMultiplier).
+        DeathMarked = 28
     }
 }

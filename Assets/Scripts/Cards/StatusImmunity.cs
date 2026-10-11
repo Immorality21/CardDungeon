@@ -47,6 +47,11 @@ namespace Assets.Scripts.Cards
                 case BuffType.Silenced:
                 case BuffType.Blinded:
                 case BuffType.Leeched:
+                case BuffType.Confused:
+                case BuffType.Marked:
+                case BuffType.Hidden:
+                case BuffType.Evasive:
+                case BuffType.DeathMarked:
                     return true;
                 default:
                     return false;

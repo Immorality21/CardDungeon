@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8167baed5bc052409b86b3942399fa5, type: 3}
+  m_Name: DarkTwin
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
+  Key: DarkTwin
+  DisplayName: Dark Twin
+  Description: Her shadow, stepped off the wall, faster than she is.
+  Sprite: {fileID: 21300000, guid: ee4b5adc137847b892161b8cc5d6af34, type: 3}
+  AnimationFrames:
+  - {fileID: 21300000, guid: 5cd1e429d385499eac3fe32dcb918f4a, type: 3}
+  - {fileID: 21300000, guid: 5a33bdc6a88b4e869ded44a0ea5267ff, type: 3}
+  - {fileID: 21300000, guid: 22825a3b7cc343d2a44b293390f255d6, type: 3}
+  - {fileID: 21300000, guid: ed9184c62ed74f9a9f05b2a74d491220, type: 3}
+  - {fileID: 21300000, guid: a5a2f02a1918431b8ac31aa485d7f640, type: 3}
+  AnimationFps: 4
+  Facing: 0
+  ArrivalSound: {fileID: 0}
+  ArrivalSoundVolume: 0.9
+  Kind: 1
+  TargetType: 1
+  Effects: []
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames:
+  - {fileID: 21300000, guid: eab053c70e6d41579c6e920c2bab1e42, type: 3}
+  - {fileID: 21300000, guid: 3d650cb68a0c44558f38291844537464, type: 3}
+  BaseCharges: 1
+  StatPercents:
+    Values:
+    - Type: 7
+      Amount: 120
+    - Type: 1
+      Amount: 80
+    - Type: 2
+      Amount: 80
+    - Type: 3
+      Amount: 120
+    - Type: 4
+      Amount: 50
+    - Type: 5
+      Amount: 70
+    - Type: 6
+      Amount: 120
+  CopySummonerResistances: 1
+  TurnsActive: 3
+  Actions: []
+  Signature: {fileID: 11400000, guid: 80f26a193382f7f42a9bf268a8c82a10, type: 2}
+  AttackAbility: {fileID: 11400000, guid: 14ededbde2bd805438121b463391a16b, type: 2}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
+  RotateActions: 0
+  ActsAlone: 0
+  SquadTiers: []
+  SquadSize: 3
+  MaxSquadSize: 4

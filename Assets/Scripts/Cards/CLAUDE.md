@@ -110,6 +110,42 @@ The kill count comes from **`EffectResolver.KillsOf`** (the Bestiary, set by `Co
 elsewhere, which reads every machine as never defeated - the cautious odds the balance model uses),
 and the roll from **`EffectResolver.Roll`** (null = `Random.Range(0f, 1f)`; tests pin it).
 
+## The last workbook pass: Rogue, Ranger, Warrior, Cultist *(2026-10-11)*
+
+New verbs, all appended to their enums:
+
+- **`SpellEffectType.Steal`** (`StealEffectExecutor`, `StealOps`): odds 40% + 2% per Luck (buffs
+  included), capped at 90%, halved on a boss; `Power` adds percentage points after the cap (Grand Heist's
+  100 = certain). A success calls **`EffectResolver.StealFrom`**, which `CombatManager.StealFrom` answers:
+  once per enemy per fight (`_robbed`), one random line of its drop table at its smallest quantity
+  (a revisit's withheld materials skipped), else half its kill gold; a called-in body has nothing.
+  Paid as `EconomySource.Kill`. Without the hook (tests, the balance model) a success takes nothing.
+- **`SpellEffectType.FightGoldBonus`** (Fence): `EffectResolver.AddGoldBonus` raises the fight's
+  `_fightGoldBonus` (largest wins, no stacking); kill gold and steal gold pay `StealOps.WithBonus`.
+- **`BuffType.Confused`** (Mass Hysteria, Terror): on a confused enemy's next turn
+  `CombatManager.ExecuteEnemyTurn` removes it and, at `ConfusedBuffHandler.Chance` (50%), swings at a
+  random ally instead of acting. Curable. Not in the simulator.
+- **`BuffType.Marked`** (Hunter's Mark): the percent rides in `CombatBuff.Amount` and is **subtracted in
+  `CombatBuffTracker.GetResistanceBonus`** - a negative resistance to everything, so every damage path
+  honours it with no code of its own. **`SpellEffect.BonusVsStatus`** earns `BonusPercent` against a unit
+  carrying that status (Flushing Shot, Bite, Pack Hunt on a Marked target), the way `BonusVsTrait` does
+  for a kind of unit; **`SpellEffect.BonusPerDebuff`** earns it once per debuff (`DebuffCount`, at most
+  3 - Eviscerate). `SpellEffect.BonusFactor` is the one place both are read.
+- **`BuffType.Hidden`** (Vanish): `CombatManager.TargetableHeroes` leaves a hidden hero out of what the
+  enemy planner and the fallback target pick from (everyone again if all are hidden). Not curable.
+- **`BuffType.Evasive`** (Shadowstep: 1 for 3 turns; Smoke and Mirrors: 99 for 1 turn on the party): the
+  next `Amount` physical blows miss outright, spent by `EvasiveBuffHandler.TryEvade` in
+  `ExecuteAttack` and `EffectResolver.HitFilter` before Luck's dodge. Floats "Evade".
+- **`BuffType.DeathMarked`** (Death Mark): every damaging hit on the unit crits - abilities that cannot
+  crit included (`RollCrits` adds it first) - at `CritRules.MarkedMultiplier` (1.6 + 0.5).
+
+Verified in play 2026-10-11 through `Sandbox/HeroPassKit.asset` and `Sandbox/RogueKit.asset` with a
+scripted driver: Steal/Mug/Grand Heist loot, Fence's gold, Hunter's Mark + Flushing Shot, Grey Fang, Iron
+Charger, Murder of Crows, Golden Ferret's Luck, Dark Twin's Twin Strike, Death Mark's 2.1x crit, Mass
+Hysteria (a hound hit its ally), Pin Down, Rain of Arrows, Pack Hunt, Earthsplitter. **Not seen in play**
+(the full-grid Rogue is too fast for the enemies to act): Vanish's targeting and Evade on a basic attack -
+`HeroPassKitTests` covers the status and the ability path. The new summons' art is PixelLab (2026-10-11).
+
 ## Resistance buffs
 
 The five resistance `BuffType`s were a **no-op** until 2026-08-25: `ResistanceBuffHandler.Apply` was an empty method, so a cloak showed "+40 FireResistance" and changed nothing. They now go through `CombatBuffTracker.ApplyResistance` / `GetResistanceBonus`.
