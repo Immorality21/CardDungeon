@@ -19,7 +19,7 @@ namespace Assets.Scripts.Combat
     /// no level afflictions, and fresh health every time it is called. The balance model builds its
     /// stand-in from the same function.</para>
     /// </summary>
-    public class SummonUnit : MonoBehaviour, ICombatUnit, Triggers.ITriggerSource, IFlinches
+    public class SummonUnit : MonoBehaviour, ICombatUnit, Triggers.ITriggerSource, IFlinches, IAbilityUpgrades
     {
         public SummonSO Summon { get; private set; }
 
@@ -41,6 +41,13 @@ namespace Assets.Scripts.Combat
 
         private Stats _stats;
         private List<Resistance> _resistances = new List<Resistance>();
+        private SummonGrant _grant;
+
+        /// <summary>What its summoner's grid added to its own abilities (<see cref="SummonOps.UpgradesFor"/>).</summary>
+        public AbilityGrant UpgradesFor(string abilityKey)
+        {
+            return SummonOps.UpgradesFor(Summon, _grant, abilityKey);
+        }
 
         public string DisplayName => Summon != null ? Summon.Label : "Summon";
         public Sprite Icon => Summon != null ? Summon.Sprite : null;
@@ -113,6 +120,7 @@ namespace Assets.Scripts.Combat
             unit.Summon = summon;
             unit.Summoner = summoner;
             unit.Stay = new SummonStay(summon, turns);
+            unit._grant = grant;
 
             // Base + gear, never the buff tracker: that is what "no buff-then-summon loop" means.
             var block = SummonOps.StatsFor(summon, grant,

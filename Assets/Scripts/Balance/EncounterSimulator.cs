@@ -1410,8 +1410,7 @@ namespace Assets.Scripts.Balance
                 {
                     return;
                 }
-                resolver.Execute(new SpellcastAction { Magic = slot.Magic, Caster = caster, Targets = targets },
-                    buffTracker, tagTracker, comboDetector, 0, 0, null);
+                ResolveHeroCast(slot.Magic, caster, targets, enemies, buffTracker, tagTracker, comboDetector, resolver);
             }
         }
 
@@ -1440,21 +1439,38 @@ namespace Assets.Scripts.Balance
             slot.Charges--;
             result.Casts++;
 
-            var action = new SpellcastAction
-            {
-                Magic = slot.Magic,
-                Caster = caster,
-                Targets = targets
-            };
+            ResolveHeroCast(slot.Magic, caster, targets, enemies, buffTracker, tagTracker, comboDetector, resolver);
+        }
 
-            resolver.Execute(
-                action,
-                buffTracker,
-                tagTracker,
-                comboDetector,
-                0,
-                0,
-                null);
+        /// <summary>One hero cast, as <c>CombatManager.ExecuteCastAction</c> resolves it: on its targets, or -
+        /// for a many-shot ability (<see cref="MagicSO.RandomHits"/>) - once per shot at a random standing enemy.</summary>
+        private static void ResolveHeroCast(
+            MagicSO magic,
+            SimUnit caster,
+            List<ICombatUnit> targets,
+            List<SimUnit> enemies,
+            CombatBuffTracker buffTracker,
+            MagicTagTracker tagTracker,
+            ComboDetector comboDetector,
+            EffectResolver resolver)
+        {
+            if (!magic.HasRandomHits)
+            {
+                resolver.Execute(new SpellcastAction { Magic = magic, Caster = caster, Targets = targets },
+                    buffTracker, tagTracker, comboDetector, 0, 0, null);
+                return;
+            }
+            for (int hit = 0; hit < magic.RandomHits; hit++)
+            {
+                var standing = enemies.FindAll(e => e.IsAlive);
+                if (standing.Count == 0)
+                {
+                    return;
+                }
+                var shot = new List<ICombatUnit> { standing[UnityEngine.Random.Range(0, standing.Count)] };
+                resolver.Execute(new SpellcastAction { Magic = magic, Caster = caster, Targets = shot },
+                    buffTracker, tagTracker, comboDetector, 0, 0, null);
+            }
         }
 
         /// <summary>

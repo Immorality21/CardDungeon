@@ -363,7 +363,7 @@ namespace Assets.Scripts.Cards.UI
                 _detailBody.Add(MakeLabel(magic.Description.Trim(), "cd-inv-detail__desc"));
             }
 
-            _detailBody.Add(BestiaryLineView.Section(AbilityDescriber.TargetLabel(magic.TargetType)));
+            _detailBody.Add(BestiaryLineView.Section(AbilityDescriber.TargetLabel(magic)));
             if (magic.Effects != null)
             {
                 foreach (var effect in magic.Effects)
@@ -444,7 +444,7 @@ namespace Assets.Scripts.Cards.UI
         private static string CaptionOf(Entry entry)
         {
             return entry.Magic != null
-                ? AbilityDescriber.TargetLabel(entry.Magic.TargetType)
+                ? AbilityDescriber.TargetLabel(entry.Magic)
                 : LevelCaption(LevelOf(entry));
         }
 

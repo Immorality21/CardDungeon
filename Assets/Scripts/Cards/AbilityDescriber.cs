@@ -59,7 +59,13 @@ namespace Assets.Scripts.Cards
                     continue;
                 }
 
-                string line = Describe(EffectResolver.ApplyUpgrades(effect, upgrades), caster, buffTracker, bonus);
+                var upgraded = EffectResolver.ApplyUpgrades(effect, upgrades);
+                // A dormant debuff (0%, waiting on an upgrade) is not part of what the ability does yet.
+                if (upgraded.EffectType == SpellEffectType.Debuff && upgraded.ApplyChance <= 0)
+                {
+                    continue;
+                }
+                string line = Describe(upgraded, caster, buffTracker, bonus);
                 if (!string.IsNullOrEmpty(line))
                 {
                     if (canCrit && effect.EffectType == SpellEffectType.Damage)
@@ -96,6 +102,17 @@ namespace Assets.Scripts.Cards
                           && effect.PowerMode != PowerMode.Flat && effect.PowerMode != PowerMode.PercentOfMaxHealth
                           && StatCatalog.CanScalePower(effect.ScalingStat);
             return scales ? $"{line} + {StatCatalog.ShortName(effect.ScalingStat)}" : line;
+        }
+
+        /// <summary>Who the ability lands on, as a player would say it - "3 shots, random enemies" for a
+        /// many-shot ability (<see cref="MagicSO.RandomHits"/>).</summary>
+        public static string TargetLabel(MagicSO magic)
+        {
+            if (magic == null)
+            {
+                return string.Empty;
+            }
+            return magic.HasRandomHits ? $"{magic.RandomHits} shots, random enemies" : TargetLabel(magic.TargetType);
         }
 
         /// <summary>Who the ability lands on, as a player would say it.</summary>
@@ -143,7 +160,7 @@ namespace Assets.Scripts.Cards
             // One effect per line: the picker window is narrow, and a joined line wrapped mid-number
             // ("Bleed 2/" | "turn").
             var effects = EffectLines(magic, caster, buffTracker, powerBonus, upgradeLevel);
-            string target = TargetLabel(magic.TargetType);
+            string target = TargetLabel(magic);
             if (effects.Count == 0)
             {
                 parts.Add(target);

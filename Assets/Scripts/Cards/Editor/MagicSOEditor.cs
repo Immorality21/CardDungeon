@@ -255,6 +255,9 @@ public class MagicSOEditor : Editor
             EditorGUILayout.PropertyField(serializedObject.FindProperty("ProjectileArtAngle"));
         }
         EditorGUILayout.PropertyField(serializedObject.FindProperty("TargetType"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("RandomHits"),
+            new GUIContent("Random Hits", "More than 1: fires this many shots, each at a random standing "
+                + "enemy (Rivet Storm). Author it All Enemies so it asks for no target."));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Rarity"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("CanCrit"),
             new GUIContent("Can Crit", "Its damage can be a critical hit at the caster's crit chance. "

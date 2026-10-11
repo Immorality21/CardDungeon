@@ -652,6 +652,9 @@ namespace Assets.Scripts.Heroes
                     case SphereNodeKind.SummonPromote:
                         grant.Promotions += node.SummonAmount;
                         break;
+                    case SphereNodeKind.SummonApplyChance:
+                        grant.ApplyChanceBonus += node.SummonAmount;
+                        break;
                 }
             }
             return grants;

@@ -399,7 +399,7 @@ in**, one mech per branch. Decided with the owner the same day:
 
 | decision | value |
 |---|---|
-| what a branch ends in | **its mech Ultra, nothing else** - the mechs are her summon-equivalent, so she has no separate summons |
+| what a branch ends in | **its mech Ultra, nothing else** - the mechs are her summon-equivalent. *(2026-10-11, workbook: one summon after all - the **Auto Turret**, a spur off Steam Burst, mid-branch, not a tip)* |
 | the mech's shield | **the mech's health takes every blow aimed at her** (`GuardTable`); once it breaks she is hit normally. A blast that reaches both hits the mech once |
 | how long a mech stays | **until it breaks, she falls, or the fight ends** - no turn limit; using the Ultra again rebuilds it |
 | a party-replacing summon | **replaces everything, the mech included**: the mech steps out with the party (hidden, its turns frozen behind hers) and she comes back still riding when the summon is dismissed or falls. Other guests are sent home as before |
@@ -417,6 +417,8 @@ delay) → **Oil Spewing Mech** (+ 3 Rotted Timber); **c** Flare Cannon → Ince
 Mech** (+ 3 Slag Coal). Every ability scales off Intelligence, her stat. A mech is a `JoinParty`
 `SummonSO` with `UsesTags` on, so its Oil and Fire abilities lay tags and set off **Ignite** like a
 hero's cast - the oil branch feeds the fire branch.
+
+**Workbook pass (2026-10-11):** Rivet Gun awakens to **Rivet Storm** (3 shots of 4 + INT, each at a random enemy, `MagicSO.RandomHits`); **Incendiary Bomb is single-target** now (5 + INT Fire + Burn) and awakens to **Cluster Bomb** (4 + INT Fire + Burn, every enemy) - both 120 Essence; the **Auto Turret** (295 XP + 4 Scrap Iron + 1 Void Shard, off Steam Burst - an extra, so priced like a summon) fights beside the party on its own for 3 turns, and **Blinding Rounds** (350 XP + 2 Scrap Iron) give its shots 35% Blind. Gear Jam has no awakening (owner). Numbers are first drafts; the turret's art is PixelLab (static, no idle strip).
 
 **Open:**
 - ~~**The Fire Cloak is unobtainable for now.**~~ **Resolved 2026-10-07:** the Mage is on the roster,

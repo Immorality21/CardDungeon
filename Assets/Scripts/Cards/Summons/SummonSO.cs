@@ -183,6 +183,11 @@ namespace Assets.Scripts.Cards
                  "summon that never attacks - the Blood Idol's rotating party rites.")]
         public bool RotateActions;
 
+        [Tooltip("JoinParty: it takes its turns on its own - no command menu - casting its Attack at a " +
+                 "random enemy (the Tinkerer's Auto Turret). Dismissing it is not offered; it leaves when " +
+                 "its turns or health run out.")]
+        public bool ActsAlone;
+
         [Header("Squad (ReplaceParty only)")]
         [Tooltip("ReplaceParty, optional: the troops this summon brings instead of being one unit itself, " +
                  "weakest tier first (the Demon Army: Imp, Succubus). Each troop is its own SummonSO - " +

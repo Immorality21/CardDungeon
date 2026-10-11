@@ -76,9 +76,17 @@ namespace Tests.EditMode
                 Assert.Greater(summon.StatPercents[Assets.Scripts.UnitStats.StatType.Strength], 0,
                     $"{summon.name} has no Strength, so its Attack does nothing.");
                 Assert.GreaterOrEqual(summon.TurnsActive, 1, $"{summon.name} never stays.");
-                // Its big move: a Signature, or a parting blow as it leaves (Ifrit's Hellfire).
-                Assert.IsTrue(summon.Signature != null || summon.PartingAbility != null,
-                    $"{summon.name} has no Signature and no parting blow.");
+                // Its big move: a Signature, or a parting blow as it leaves (Ifrit's Hellfire). One that
+                // acts alone (the Auto Turret) never picks a move, so it needs its Attack instead.
+                if (summon.ActsAlone)
+                {
+                    Assert.IsNotNull(summon.AttackAbility, $"{summon.name} acts alone but has no Attack to fire.");
+                }
+                else
+                {
+                    Assert.IsTrue(summon.Signature != null || summon.PartingAbility != null,
+                        $"{summon.name} has no Signature and no parting blow.");
+                }
                 Assert.That(summon.Actions.All(a => a != null), $"{summon.name} has an empty action slot.");
                 Assert.That(summon.AnimationFrames.All(f => f != null), $"{summon.name} has an empty animation frame.");
             }
@@ -178,7 +186,7 @@ namespace Tests.EditMode
         {
             return kind == SphereNodeKind.SummonPower || kind == SphereNodeKind.SummonDuration
                    || kind == SphereNodeKind.SummonCharge || kind == SphereNodeKind.SummonSize
-                   || kind == SphereNodeKind.SummonPromote;
+                   || kind == SphereNodeKind.SummonPromote || kind == SphereNodeKind.SummonApplyChance;
         }
     }
 }

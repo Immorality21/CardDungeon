@@ -208,6 +208,7 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.SummonCharge:
                 case SphereNodeKind.SummonSize:
                 case SphereNodeKind.SummonPromote:
+                case SphereNodeKind.SummonApplyChance:
                 case SphereNodeKind.Ultra:
                     return "sg-node--slot";
                 default:
@@ -254,6 +255,7 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.SummonCharge:
                 case SphereNodeKind.SummonSize:
                 case SphereNodeKind.SummonPromote:
+                case SphereNodeKind.SummonApplyChance:
                     return "+";
                 default:
                     return StatGlyph(node.Gains);
@@ -356,6 +358,10 @@ namespace Assets.Scripts.Heroes.UI
                     ? $"{summon}: its weakest troop becomes a stronger one"
                     : $"{summon}: its {node.SummonAmount} weakest troops become stronger ones";
             }
+            if (node.Kind == SphereNodeKind.SummonApplyChance)
+            {
+                return $"{summon}: +{node.SummonAmount}% chance its attacks inflict their effects";
+            }
 
             var parts = new List<string>();
             if (node.Gains != null)
@@ -443,6 +449,7 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.SummonCharge:
                 case SphereNodeKind.SummonSize:
                 case SphereNodeKind.SummonPromote:
+                case SphereNodeKind.SummonApplyChance:
                     return "Summon upgrade";
                 default:
                     return "Stat";

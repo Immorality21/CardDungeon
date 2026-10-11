@@ -277,8 +277,21 @@ namespace Assets.Scripts.Balance
         {
             var block = SummonOps.StatsFor(summon, grant,
                 stat => summoner != null ? summoner.GetEffectiveStat(stat) : 0);
+            var upgrades = new Dictionary<string, Heroes.AbilityGrant>();
+            if (summon != null)
+            {
+                foreach (var key in SummonOps.AbilityKeys(new[] { summon }))
+                {
+                    var upgrade = SummonOps.UpgradesFor(summon, grant, key);
+                    if (upgrade != null)
+                    {
+                        upgrades[key] = upgrade;
+                    }
+                }
+            }
             return new SimUnit
             {
+                AbilityUpgrades = upgrades,
                 DisplayName = summon != null ? summon.Label : "Summon",
                 IsHero = true,
                 Stats = new Stats(block),

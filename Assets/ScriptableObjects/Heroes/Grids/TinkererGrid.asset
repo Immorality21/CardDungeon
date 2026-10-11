@@ -785,3 +785,97 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - tinkerer-c-mech
+  - Key: tinkerer-a-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: -330, y: -525}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: RivetGun
+    GrantedCharges: 2
+    AwakenedMagicKey: RivetStorm
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - tinkerer-a-3
+  - Key: tinkerer-a-turret
+    DisplayName: 
+    Kind: 4
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
+      Amount: 4
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 1
+    EssenceCost: 0
+    Position: {x: -660, y: -700}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: AutoTurret
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - tinkerer-a-6
+  - Key: tinkerer-a-turret-blind
+    DisplayName: 
+    Kind: 13
+    XpCost: 350
+    UnlockedByDefault: 0
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
+      Amount: 2
+    EssenceCost: 0
+    Position: {x: -700, y: -790}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: AutoTurret
+    GrantedUltraKey: 
+    SummonAmount: 35
+    Neighbors:
+    - tinkerer-a-turret
+  - Key: tinkerer-c-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: 680, y: -700}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: IncendiaryBomb
+    GrantedCharges: 2
+    AwakenedMagicKey: ClusterBomb
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - tinkerer-c-6

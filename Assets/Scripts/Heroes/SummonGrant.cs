@@ -24,5 +24,9 @@ namespace Assets.Scripts.Heroes
 
         /// <summary>A squad summon: troop promotions, each raising the weakest troop one tier.</summary>
         public int Promotions;
+
+        /// <summary>Percentage points added to the apply chance of the debuffs its own abilities carry
+        /// (an ally's Attack, Signature and actions) - the Auto Turret's blinding rounds.</summary>
+        public int ApplyChanceBonus;
     }
 }

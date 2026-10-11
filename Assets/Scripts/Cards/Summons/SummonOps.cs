@@ -347,6 +347,22 @@ namespace Assets.Scripts.Cards
             return keys;
         }
 
+        /// <summary>
+        /// What the summon's grid adds to one of its own abilities (<paramref name="abilityKey"/>): the
+        /// <c>SummonApplyChance</c> points, as an <see cref="AbilityGrant"/> so <c>EffectResolver</c>
+        /// folds them in exactly as it folds a hero's ability upgrades. Null when nothing was bought or
+        /// the ability is not the summon's.
+        /// </summary>
+        public static AbilityGrant UpgradesFor(SummonSO summon, SummonGrant grant, string abilityKey)
+        {
+            if (summon == null || grant == null || grant.ApplyChanceBonus == 0 || string.IsNullOrEmpty(abilityKey)
+                || !AbilityKeys(new[] { summon }).Contains(abilityKey))
+            {
+                return null;
+            }
+            return new AbilityGrant { Key = abilityKey, ApplyChanceBonus = grant.ApplyChanceBonus };
+        }
+
         /// <summary>One line for the grid, the report and the tooltip: "+50% STR for 3 turns · 1 charge".</summary>
         public static string Describe(SummonSO summon, SummonGrant grant)
         {
@@ -399,7 +415,8 @@ namespace Assets.Scripts.Cards
             var parts = new List<string>
             {
                 summon.Kind == SummonKind.JoinParty
-                    ? (summon.RotateActions ? "Stands beside the party" : "Fights beside the party")
+                    ? (summon.RotateActions ? "Stands beside the party"
+                        : summon.ActsAlone ? "Fights beside the party on its own" : "Fights beside the party")
                     : "Takes the party's place"
             };
             if (summon.SummonerHealthCostPercent > 0)

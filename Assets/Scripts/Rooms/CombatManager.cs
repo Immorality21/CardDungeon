@@ -860,7 +860,20 @@ namespace Assets.Scripts.Rooms
                     _pendingSummonTargets = null;
                     _pendingUltra = null;
                     _pendingUltraTarget = null;
-                    OnHeroTurnStarted?.Invoke(unit);
+
+                    if (unit is SummonUnit automaton && automaton.Summon != null && automaton.Summon.ActsAlone
+                        && automaton.AttackAbility != null)
+                    {
+                        // It needs no orders (the Auto Turret): its Attack, at a random enemy
+                        // (ExecuteSummonAbility picks one when no target is given).
+                        yield return new WaitForSeconds(_turnDelay);
+                        _pendingSummonAbility = automaton.AttackAbility;
+                        _pendingAction = HeroAction.SummonAbility;
+                    }
+                    else
+                    {
+                        OnHeroTurnStarted?.Invoke(unit);
+                    }
 
                     while (_pendingAction == HeroAction.None)
                     {
@@ -1131,6 +1144,45 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex, bool spendCharge = true)
         {
+            if (castAction.Magic != null && castAction.Magic.HasRandomHits)
+            {
+                // Rivet Storm: each shot picks its own enemy from whoever is still standing.
+                string log = "";
+                for (int hit = 0; hit < castAction.Magic.RandomHits; hit++)
+                {
+                    var standing = GetAliveEnemies();
+                    if (standing.Count == 0)
+                    {
+                        break;
+                    }
+                    var shot = new SpellcastAction
+                    {
+                        Magic = castAction.Magic,
+                        Caster = castAction.Caster,
+                        Targets = new List<ICombatUnit> { standing[UnityEngine.Random.Range(0, standing.Count)] },
+                        ChargeSlot = castAction.ChargeSlot,
+                        CastSlot = castAction.CastSlot
+                    };
+                    yield return ResolveCast(shot);
+                    log += (log.Length > 0 ? " " : "") + _lastTurnLog;
+                }
+                _lastTurnLog = log;
+            }
+            else
+            {
+                yield return ResolveCast(castAction);
+            }
+
+            if (spendCharge)
+            {
+                SpendCharge(castAction.Caster, slotIndex);
+            }
+        }
+
+        /// <summary>One cast of a hero's ability on its targets: effects, tags and combos, presentation, deaths.
+        /// The charge is the caller's (<see cref="ExecuteCastAction"/>), so a many-shot ability pays once.</summary>
+        private IEnumerator ResolveCast(SpellcastAction castAction)
+        {
             // Use Instance (auto-creates + loads Meta.json) rather than HasInstance: the
             // manager may not exist yet mid-combat, and we must still apply combo upgrades and
             // record combo discovery. Abilities themselves have no upgrade level since the Forge
@@ -1167,12 +1219,6 @@ namespace Assets.Scripts.Rooms
             {
                 CombatFeedback.Instance.Shake(0.2f, 0.28f);
                 yield return new WaitForSecondsRealtime(0.12f);
-            }
-
-            // Spend a charge from the cast slot
-            if (spendCharge)
-            {
-                SpendCharge(castAction.Caster, slotIndex);
             }
 
             ResolveDeaths();

@@ -45,6 +45,13 @@ namespace Assets.Scripts.Cards.Effects
                 ? basePower
                 : basePower + SpellScaling.BuffContribution(caster, effect.ScalingStat, buffTracker);
 
+            // A debuff authored at 0% is dormant until an upgrade raises its odds (the Auto Turret's
+            // blinding rounds): it does nothing and says nothing.
+            if (effect.ApplyChance <= 0)
+            {
+                return;
+            }
+
             foreach (var target in targets)
             {
                 if (!target.IsAlive)

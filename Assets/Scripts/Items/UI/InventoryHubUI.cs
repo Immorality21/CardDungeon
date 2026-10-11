@@ -1099,7 +1099,7 @@ namespace Assets.Scripts.Items.UI
             }
 
             SetDetailHead(magic.Icon, magic.DisplayName,
-                $"{AbilityDescriber.TargetLabel(magic.TargetType)} · {charges} charges a run", null);
+                $"{AbilityDescriber.TargetLabel(magic)} · {charges} charges a run", null);
 
             // Described through the hero's own stats (grid + gear), so the numbers are the ones this
             // hero will hit for - a null caster would read them as base values. Flavour in italics,
@@ -1112,7 +1112,7 @@ namespace Assets.Scripts.Items.UI
             _detailBody?.Add(BestiaryLineView.Section("Effect"));
             if (effects.Count == 0)
             {
-                AddLine(AbilityDescriber.TargetLabel(magic.TargetType));
+                AddLine(AbilityDescriber.TargetLabel(magic));
             }
             foreach (var effect in effects)
             {

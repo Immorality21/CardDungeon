@@ -34,7 +34,10 @@ namespace Assets.Scripts.Heroes
         MagicAwaken = 11,   // replaces known GrantedMagicKey with AwakenedMagicKey, same slot and charges
 
         // Abilities deepened on the grid (2026-10-09). Appended, as above.
-        MagicUpgrade = 12   // GrantedMagicKey (and its awakening) gains UpgradeAmount of UpgradeType - see AbilityGrant
+        MagicUpgrade = 12,  // GrantedMagicKey (and its awakening) gains UpgradeAmount of UpgradeType - see AbilityGrant
+
+        // Summon upgrades, continued (2026-10-11). Appended, as above.
+        SummonApplyChance = 13 // +SummonAmount percentage points on the odds of GrantedSummonKey's abilities' debuffs
     }
 
     /// <summary>

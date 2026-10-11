@@ -59,6 +59,14 @@ namespace Assets.Scripts.Cards
                  "enemy's version should be tuned on its own.")]
         public bool EnemyOnly;
 
+        [Tooltip("More than 1: the ability fires this many times, each shot at a random standing enemy " +
+                 "picked afresh (Rivet Storm's rivets). Author it AllEnemies, so it asks for no target. " +
+                 "0 or 1: it lands once, on its targets.")]
+        [Min(0)] public int RandomHits;
+
+        /// <summary>Fires <see cref="RandomHits"/> times at random enemies rather than once at its targets.</summary>
+        public bool HasRandomHits => RandomHits > 1;
+
         public bool HasEffectType(SpellEffectType type)
         {
             return Effects.Any(e => e.EffectType == type);
