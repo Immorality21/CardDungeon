@@ -16,6 +16,8 @@ MonoBehaviour:
   DisplayName: Fire Cloak
   Description: Sheathes the caster in a fire-warding ward.
   Icon: {fileID: 21300000, guid: 64265e59b4da49ae842d6c083b334cce, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 2
   Rarity: 0
   Effects:
@@ -27,5 +29,23 @@ MonoBehaviour:
     BuffType: 7
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+  - EffectType: 14
+    Power: 25
+    PowerMode: 0
+    ScalingStat: 0
+    DamageType: 1
+    BuffType: 0
+    Duration: 3
+    UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
   Tags: 
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0

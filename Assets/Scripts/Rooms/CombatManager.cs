@@ -156,6 +156,8 @@ namespace Assets.Scripts.Rooms
         private HeroAction _pendingAction = HeroAction.None;
         private SpellcastAction _pendingCastAction;
         private int _pendingCastSlot;
+        // The pending cast is a MultiCast (the Mage's Ultra): it spends his Focus and repeats.
+        private bool _pendingMultiCast;
         private ItemSO _pendingUseItem;
         private ICombatUnit _pendingUseItemTarget;
         private ICombatUnit _pendingAttackTarget;
@@ -167,6 +169,9 @@ namespace Assets.Scripts.Rooms
         private ICombatUnit _pendingSummonTarget;
         private UltraSO _pendingUltra;
         private ICombatUnit _pendingUltraTarget;
+
+        // Summons that left with a parting blow still to land (Ifrit's Hellfire), cast before the turn closes.
+        private readonly List<SummonUnit> _parting = new List<SummonUnit>();
 
         // ---- Ultras (COMBAT_DEPTH §13): each hero's gauge this fight, the net health change since it
         // ---- was last credited (summed from HealthChange), and the form a hero is in while a
@@ -235,6 +240,7 @@ namespace Assets.Scripts.Rooms
         private bool _currentCombatHadBoss;
         private MagicTagTracker _tagTracker;
         private MomentumTracker _momentum;
+        private FocusTracker _focus;
         private ComboDetector _comboDetector;
 
         /// <summary>
@@ -363,18 +369,44 @@ namespace Assets.Scripts.Rooms
             return hero is Hero component && _forms.ContainsKey(component);
         }
 
-        /// <summary>Whether the Ultra command is open: a full gauge, an Ultra known, not already transformed.</summary>
+        /// <summary>Whether the Ultra command is open: an Ultra known and ready (a full gauge, or Focus for
+        /// a MultiCast) and usable, and the hero not already transformed.</summary>
         public bool CanUseUltra(ICombatUnit hero)
         {
-            return InCombat && UltraOps.IsFull(UltraGauge(hero)) && !IsTransformed(hero)
-                   && KnownUltras(hero).Any(u => CanUseUltra(hero, u));
+            return InCombat && !IsTransformed(hero) && KnownUltras(hero).Any(u => CanUseUltra(hero, u));
         }
 
-        /// <summary>Whether this one Ultra can be used now - a Sacrifice needs someone to give, a
-        /// revive someone fallen.</summary>
+        /// <summary>Whether this one Ultra can be used now: ready (<see cref="UltraOps.IsReady"/>), and a
+        /// Sacrifice needs someone to give, a revive someone fallen, a MultiCast an ability to cast.</summary>
         public bool CanUseUltra(ICombatUnit hero, UltraSO ultra)
         {
-            return ultra != null && (!UltraOps.NeedsTarget(ultra) || UltraTargets(ultra, hero).Count > 0);
+            if (ultra == null || !UltraOps.IsReady(ultra, UltraGauge(hero), FocusOf(hero)))
+            {
+                return false;
+            }
+            if (UltraOps.IsMultiCast(ultra))
+            {
+                return CanMultiCast(hero);
+            }
+            return !UltraOps.NeedsTarget(ultra) || UltraTargets(ultra, hero).Count > 0;
+        }
+
+        /// <summary>How much Focus <paramref name="hero"/> has built this fight (the Mage's signature).</summary>
+        public int FocusOf(ICombatUnit hero)
+        {
+            return _focus != null ? _focus.FocusOf(hero) : 0;
+        }
+
+        /// <summary>A MultiCast needs an ability to repeat: a charged slot, and no Silence.</summary>
+        private bool CanMultiCast(ICombatUnit hero)
+        {
+            var component = hero as Hero;
+            if (component == null || BuffTracker == null || BuffTracker.HasStatusEffect(hero, BuffType.Silenced))
+            {
+                return false;
+            }
+            return DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null
+                   && DungeonManager.Instance.MagicState.HasAnyCastable(component.HeroKey);
         }
 
         /// <summary>Whom an Ultra that takes a target may be aimed at: the Sacrifice's candidates, the
@@ -534,8 +566,9 @@ namespace Assets.Scripts.Rooms
         /// <summary>Submits casting the magic in <paramref name="slotIndex"/> at the chosen targets.
         /// <paramref name="chargeSlot"/> is the ability a Life Tap refills, when the player picked one.</summary>
         public void SubmitCastAction(MagicSO magic, int slotIndex, ICombatUnit caster, List<ICombatUnit> targets,
-            int chargeSlot = SpellcastAction.AnyChargeSlot)
+            int chargeSlot = SpellcastAction.AnyChargeSlot, bool multiCast = false)
         {
+            _pendingMultiCast = multiCast;
             _pendingCastAction = new SpellcastAction
             {
                 Magic = magic,
@@ -629,6 +662,7 @@ namespace Assets.Scripts.Rooms
             _allies.Clear();
             _standIns.Clear();
             _mounts.Clear();
+            _parting.Clear();
             // Every gauge starts the fight empty (UltraOps: per fight, not per run).
             _ultraGauge.Clear();
             _gaugeNet.Clear();
@@ -664,6 +698,9 @@ namespace Assets.Scripts.Rooms
             // The Warrior's Momentum: stacks of Strength for every turn in a row he lands a hit.
             _momentum = new MomentumTracker(Events, BuffTracker);
             _momentum.Changed += ShowMomentum;
+            // The Mage's Focus: a point for every turn he casts, spent by MultiCast.
+            _focus = new FocusTracker(Events);
+            _focus.Changed += ShowFocus;
             // A Revive (the Cleric's) stands a hero who fell in this fight back up; the effect sets the
             // bar and announces it, and this puts them back on the stage and the clock.
             _calculator.FallenAllies = FallenAlliesOf;
@@ -779,6 +816,7 @@ namespace Assets.Scripts.Rooms
                 yield return ResolveOverTimeTicks(unit, TickTiming.StartOfTurn);
                 if (!unit.IsAlive)
                 {
+                    yield return ResolveParting();
                     CloseTurn(unit);
                     _lastTurnLog = _lastTurnLog.Trim();
                     fullLog += _lastTurnLog + "\n";
@@ -794,6 +832,7 @@ namespace Assets.Scripts.Rooms
                     yield return EndOfTurnUpkeep(unit);
                     AfterSummonTurn(unit, dismissed: false);
                     AfterFormTurn(unit);
+                    yield return ResolveParting();
                     CloseTurn(unit);
                     fullLog += _lastTurnLog + "\n";
                     OnTurnExecuted?.Invoke();
@@ -806,6 +845,7 @@ namespace Assets.Scripts.Rooms
                     // Wait for player input
                     _pendingAction = HeroAction.None;
                     _pendingCastAction = null;
+                    _pendingMultiCast = false;
                     _pendingAttackTarget = null;
                     _pendingUseItem = null;
                     _pendingUseItemTarget = null;
@@ -832,7 +872,9 @@ namespace Assets.Scripts.Rooms
                     }
                     else if (_pendingAction == HeroAction.Cast && _pendingCastAction != null)
                     {
-                        yield return ExecuteCastAction(_pendingCastAction, _pendingCastSlot);
+                        yield return _pendingMultiCast
+                            ? ExecuteMultiCast(_pendingCastAction, _pendingCastSlot)
+                            : ExecuteCastAction(_pendingCastAction, _pendingCastSlot);
                     }
                     else if (_pendingAction == HeroAction.UseItem && _pendingUseItem != null)
                     {
@@ -885,6 +927,7 @@ namespace Assets.Scripts.Rooms
                 yield return EndOfTurnUpkeep(unit);
                 AfterSummonTurn(unit, dismissed: _pendingAction == HeroAction.Dismiss && unit is SummonUnit leaving && CanDismiss(leaving));
                 AfterFormTurn(unit);
+                yield return ResolveParting();
                 CloseTurn(unit);
                 fullLog += _lastTurnLog + "\n";
                 OnTurnExecuted?.Invoke();
@@ -1008,7 +1051,79 @@ namespace Assets.Scripts.Rooms
             _lastVictoryRoom?.EnableAllDoors();
         }
 
-        private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex)
+        /// <summary>
+        /// The Mage's MultiCast: all his Focus is spent and the ability he picked is cast once plus once per
+        /// point (<see cref="FocusOps.Casts"/>), each repeat aimed afresh at whoever still stands - a single
+        /// target that fell passes to the weakest enemy. One charge pays for all of it, spent after the last,
+        /// as an ordinary cast spends its one. Each repeat lays its tags and may set off a combo.
+        /// </summary>
+        private IEnumerator ExecuteMultiCast(SpellcastAction castAction, int slotIndex)
+        {
+            var caster = castAction.Caster;
+            int focus = _focus != null ? _focus.Spend(caster) : 0;
+            int casts = FocusOps.Casts(focus);
+            if (casts < 2)
+            {
+                yield return ExecuteCastAction(castAction, slotIndex);
+                yield break;
+            }
+
+            ShowFloatingLabel(caster.Transform.position + new Vector3(0f, 0.7f, 0f), FocusOps.CastName(focus) + "!",
+                new Color(0.55f, 0.75f, 1f), 0.15f);
+            string log = "";
+            for (int i = 0; i < casts; i++)
+            {
+                var repeat = new SpellcastAction
+                {
+                    Magic = castAction.Magic,
+                    Caster = caster,
+                    Targets = RepeatTargets(castAction),
+                    ChargeSlot = castAction.ChargeSlot,
+                    CastSlot = castAction.CastSlot
+                };
+                if (repeat.Targets.Count == 0)
+                {
+                    break;
+                }
+                yield return ExecuteCastAction(repeat, slotIndex, spendCharge: false);
+                log += (log.Length > 0 ? " " : "") + _lastTurnLog;
+            }
+            // One charge pays for every repeat - spent once, however many landed before the field emptied.
+            SpendCharge(caster, slotIndex);
+            _lastTurnLog = $"{caster.DisplayName} MultiCasts {castAction.Magic.DisplayName} x{casts}! " + log;
+        }
+
+        /// <summary>Spends one charge from <paramref name="caster"/>'s slot <paramref name="slotIndex"/>.</summary>
+        private static void SpendCharge(ICombatUnit caster, int slotIndex)
+        {
+            if (caster is Hero hero && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            {
+                DungeonManager.Instance.MagicState.TryCast(hero.HeroKey, slotIndex);
+            }
+        }
+
+        /// <summary>Who a MultiCast's next repeat lands on: the living of the first cast's targets, the
+        /// enemies standing for an area cast, and the weakest enemy when a single target has fallen.</summary>
+        private List<ICombatUnit> RepeatTargets(SpellcastAction first)
+        {
+            var magic = first.Magic;
+            if (magic.TargetType == MagicTargetType.AllEnemies)
+            {
+                return GetAliveEnemies();
+            }
+            var living = first.Targets != null ? first.Targets.Where(t => t != null && t.IsAlive).ToList() : new List<ICombatUnit>();
+            if (living.Count == 0 && magic.TargetType == MagicTargetType.SingleEnemy)
+            {
+                var weakest = GetAliveEnemies().OrderBy(e => e.Stats.Health).FirstOrDefault();
+                if (weakest != null)
+                {
+                    living.Add(weakest);
+                }
+            }
+            return living;
+        }
+
+        private IEnumerator ExecuteCastAction(SpellcastAction castAction, int slotIndex, bool spendCharge = true)
         {
             // Use Instance (auto-creates + loads Meta.json) rather than HasInstance: the
             // manager may not exist yet mid-combat, and we must still apply combo upgrades and
@@ -1049,10 +1164,9 @@ namespace Assets.Scripts.Rooms
             }
 
             // Spend a charge from the cast slot
-            var hero = castAction.Caster as Hero;
-            if (hero != null && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            if (spendCharge)
             {
-                DungeonManager.Instance.MagicState.TryCast(hero.HeroKey, slotIndex);
+                SpendCharge(castAction.Caster, slotIndex);
             }
 
             ResolveDeaths();
@@ -1127,9 +1241,32 @@ namespace Assets.Scripts.Rooms
                 Caster = caster,
                 Targets = SummonTargets(castable.TargetType, caster, chosen)
             };
-            var result = _calculator.Execute(action, BuffTracker);
+            // A summon authored to lay tags (Glacius's Ice) lays them and can set off a combo, as a cast does.
+            var result = summon.UsesTags
+                ? _calculator.Execute(action, BuffTracker, _tagTracker, _comboDetector, 0, 0,
+                    MetaProgressManager.Instance.GetComboUpgradeLevel)
+                : _calculator.Execute(action, BuffTracker);
+            if (summon.UsesTags)
+            {
+                foreach (var comboKey in result.TriggeredComboKeys)
+                {
+                    MetaProgressManager.Instance.MarkComboDiscovered(comboKey);
+                }
+            }
             _lastTurnLog = $"{caster.DisplayName} summons {summon.Label}!";
             yield return _presenter.Present(result, caster, castable);
+
+            // ...then what it gives the party (Glacius's frost hide).
+            var partyCastable = SummonOps.BuildPartyCastable(summon, slot.Grant);
+            if (partyCastable != null)
+            {
+                var partyAction = new SpellcastAction
+                {
+                    Magic = partyCastable, Caster = caster, Targets = HeroSideUnits()
+                };
+                yield return _presenter.Present(_calculator.Execute(partyAction, BuffTracker), caster, partyCastable);
+                Destroy(partyCastable);
+            }
 
             // ...then the part that lands on one target at random (the Nightmare's Silence).
             var randomCastable = SummonOps.BuildRandomCastable(summon, slot.Grant);
@@ -1329,8 +1466,10 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private IEnumerator ExecuteUltra(Hero hero, UltraSO ultra, ICombatUnit target)
         {
-            if (!CanUseUltra(hero) || !KnownUltras(hero).Contains(ultra))
+            if (IsTransformed(hero) || !CanUseUltra(hero, ultra) || !KnownUltras(hero).Contains(ultra)
+                || UltraOps.IsMultiCast(ultra))
             {
+                // A MultiCast never comes through here: it is cast from the Ability list (ExecuteMultiCast).
                 _lastTurnLog = $"{hero.DisplayName} reaches for something that is not there yet.";
                 yield break;
             }
@@ -1683,6 +1822,7 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
+            QueueParting(ally, exit);
             ally.Stay.Leave(exit);
             _turnManager.RemoveUnit(ally);
             _threat.Clear(ally);
@@ -1783,6 +1923,7 @@ namespace Assets.Scripts.Rooms
                 return;
             }
             _lastTurnLog += why + ".";
+            QueueParting(unit, exit);
             unit.Stay.Leave(exit);
             _turnManager.RemoveUnit(unit);
             foreach (var enemy in AliveEnemyComponents())
@@ -1814,6 +1955,10 @@ namespace Assets.Scripts.Rooms
             {
                 // A troop that already went home (fell, or its time ran out) left the stage then.
                 bool stillHere = !unit.Stay.HasLeft;
+                if (stillHere)
+                {
+                    QueueParting(unit, exit);
+                }
                 unit.Stay.Leave(exit);
                 _turnManager.RemoveUnit(unit);
                 foreach (var enemy in AliveEnemyComponents())
@@ -1838,6 +1983,45 @@ namespace Assets.Scripts.Rooms
             foreach (var rider in _mounts.Keys)
             {
                 SetRiderShown(rider, false);
+            }
+        }
+
+        /// <summary>A summon with a parting blow (<see cref="SummonSO.PartingAbility"/>) is leaving a fight
+        /// that is not over: its blow lands before the turn closes (<see cref="ResolveParting"/>).</summary>
+        private void QueueParting(SummonUnit unit, SummonExit exit)
+        {
+            if (unit != null && exit != SummonExit.Victory && unit.Summon != null
+                && unit.Summon.PartingAbility != null && !_parting.Contains(unit))
+            {
+                _parting.Add(unit);
+            }
+        }
+
+        /// <summary>
+        /// Lands every queued parting blow (Ifrit's Hellfire): cast with the leaving summon as the caster
+        /// on the Boar's path - no tags, no combo, no charge - at every enemy standing. Fallen or not, it
+        /// casts off the stats it arrived with. Shown without a projectile: the caster is already going.
+        /// </summary>
+        private IEnumerator ResolveParting()
+        {
+            while (_parting.Count > 0)
+            {
+                var unit = _parting[0];
+                _parting.RemoveAt(0);
+                var enemies = GetAliveEnemies();
+                if (enemies.Count == 0)
+                {
+                    _parting.Clear();
+                    yield break;
+                }
+                var magic = unit.Summon.PartingAbility;
+                var targets = magic.TargetType == MagicTargetType.SingleEnemy
+                    ? new List<ICombatUnit> { enemies.OrderBy(e => e.Stats.Health).First() }
+                    : enemies;
+                var result = _calculator.Execute(new SpellcastAction { Magic = magic, Caster = unit, Targets = targets }, BuffTracker);
+                _lastTurnLog += $" {unit.DisplayName} unleashes {magic.DisplayName} as it leaves!";
+                yield return _presenter.Present(result, null, magic);
+                ResolveDeaths();
             }
         }
 
@@ -1947,8 +2131,15 @@ namespace Assets.Scripts.Rooms
         {
             switch (type)
             {
-                case MagicTargetType.AllEnemies:
                 case MagicTargetType.SingleEnemy:
+                    // The enemy picked (Glacius's claw); the weakest standing if the pick is gone.
+                    if (chosen != null && chosen.IsAlive && !chosen.IsHero)
+                    {
+                        return new List<ICombatUnit> { chosen };
+                    }
+                    var weakest = GetAliveEnemies().OrderBy(e => e.Stats.Health).FirstOrDefault();
+                    return weakest != null ? new List<ICombatUnit> { weakest } : new List<ICombatUnit>();
+                case MagicTargetType.AllEnemies:
                     return GetAliveEnemies();
                 case MagicTargetType.Self:
                     return new List<ICombatUnit> { caster };
@@ -2963,6 +3154,17 @@ namespace Assets.Scripts.Rooms
             string text = stacks > 0 ? $"Momentum {stacks}" : "Momentum lost";
             var color = stacks > 0 ? new Color(1f, 0.6f, 0.2f) : new Color(0.7f, 0.7f, 0.7f);
             ShowFloatingLabel(unit.Transform.position + new Vector3(0f, 0.7f, 0f), text, color, 0.13f);
+        }
+
+        /// <summary>Focus built or spent: "Focus 2" over the Mage.</summary>
+        private void ShowFocus(ICombatUnit unit, int focus)
+        {
+            if (unit?.Transform == null || focus <= 0)
+            {
+                return;
+            }
+            ShowFloatingLabel(unit.Transform.position + new Vector3(0f, 0.7f, 0f), $"Focus {focus}",
+                new Color(0.55f, 0.75f, 1f), 0.13f);
         }
 
         private void ShowFloatingLabel(Vector3 position, string text, Color color, float scale = 0.15f)

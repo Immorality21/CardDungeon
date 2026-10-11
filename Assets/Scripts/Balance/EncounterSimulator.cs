@@ -300,8 +300,9 @@ namespace Assets.Scripts.Balance
             // ends when the party is down, as CombatManager.HasAliveHeroes does.
             var allies = new SimAllies(turnManager, enemies) { Events = events };
 
-            // Ultras (COMBAT_DEPTH §13): every gauge starts the fight empty, read once per turn.
-            var ultras = new SimUltras(heroes) { Events = events };
+            // Ultras (COMBAT_DEPTH §13): every gauge starts the fight empty, read once per turn. The
+            // Mage's Focus is built off the same events as in CombatManager.
+            var ultras = new SimUltras(heroes) { Events = events, Focus = new FocusTracker(events) };
 
             // Authored reactions fire here exactly as they fire in CombatManager: same registry, same
             // stream, same resolver - so an item's or an enemy's reaction is in the model the moment
@@ -351,7 +352,7 @@ namespace Assets.Scripts.Balance
                 buffTracker.ResolveOverTime(unit, TickTiming.StartOfTurn);
                 if (!unit.IsAlive)
                 {
-                    replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
+                    replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies, resolver, buffTracker);
                     turnManager.RemoveUnit(unit);
                     // A summoner killed by a tick takes their ally with them here, not a turn later.
                     allies.AfterTurn(unit);
@@ -368,7 +369,7 @@ namespace Assets.Scripts.Balance
                     buffTracker.ResolveOverTime(unit, TickTiming.EndOfTurn);
                     buffTracker.TickBuffs(unit);
                     tagTracker.TickTags(unit);
-                    replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
+                    replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies, resolver, buffTracker);
                     allies.AfterTurn(unit);
                     ultras.Read();
                     ultras.AfterTurn(unit);
@@ -421,7 +422,7 @@ namespace Assets.Scripts.Balance
                 buffTracker.TickBuffs(unit);
                 tagTracker.TickTags(unit);
 
-                replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies);
+                replacement = AfterReplacementTurn(unit, replacement, turnManager, enemies, resolver, buffTracker);
 
                 // Dead units leave the tick queue, as CombatManager.ResolveDeaths takes them off it.
                 foreach (var enemy in enemies)
@@ -691,7 +692,8 @@ namespace Assets.Scripts.Balance
         /// back only when the last has gone. Returns the replacement still on the field, or null.
         /// </summary>
         private static SimSquad AfterReplacementTurn(
-            ICombatUnit unit, SimSquad replacement, TurnManager turnManager, List<SimUnit> enemies)
+            ICombatUnit unit, SimSquad replacement, TurnManager turnManager, List<SimUnit> enemies,
+            EffectResolver resolver = null, CombatBuffTracker buffTracker = null)
         {
             if (replacement == null)
             {
@@ -715,6 +717,16 @@ namespace Assets.Scripts.Balance
                 }
                 member.Stay.Leave(member.Unit.IsAlive ? SummonExit.TurnsSpent : SummonExit.Fell);
                 turnManager.RemoveUnit(member.Unit);
+                // Its parting blow (Ifrit's Hellfire), while anything stands - CombatManager.ResolveParting.
+                var parting = member.Stay.Summon != null ? member.Stay.Summon.PartingAbility : null;
+                if (parting != null && resolver != null && AnyAlive(enemies))
+                {
+                    resolver.Execute(new SpellcastAction
+                    {
+                        Magic = parting, Caster = member.Unit,
+                        Targets = ResolveTargets(parting, member.Unit, new List<SimUnit>(), enemies)
+                    }, buffTracker);
+                }
                 foreach (var enemy in enemies)
                 {
                     if (ReferenceEquals(enemy.ChargeTarget, member.Unit))
@@ -1341,7 +1353,7 @@ namespace Assets.Scripts.Balance
                         || (resolver.FallenAllies != null && resolver.FallenAllies(hero).Count > 0)));
                 if (summon != null)
                 {
-                    Summon(hero, summon, side, enemies, buffTracker, resolver, result);
+                    Summon(hero, summon, side, enemies, buffTracker, resolver, result, tagTracker, comboDetector);
                     summonTurnsLeft[hero] = Mathf.Max(1, summon.LongestDuration);
                     return;
                 }
@@ -1350,6 +1362,12 @@ namespace Assets.Scripts.Balance
             if (settings.Policy != SimPolicy.AttackOnly && !silenced)
             {
                 var damageSlot = BestDamageSlot(hero, enemies, buffTracker);
+                if (damageSlot != null && ultras != null && ultras.MultiCastReady(hero))
+                {
+                    MultiCast(hero, damageSlot, side, enemies, buffTracker, tagTracker, comboDetector, resolver, result,
+                        FocusOps.Casts(ultras.Focus.Spend(hero)));
+                    return;
+                }
                 if (damageSlot != null)
                 {
                     Cast(hero, damageSlot, side, enemies, buffTracker, tagTracker, comboDetector, resolver, result);
@@ -1361,6 +1379,34 @@ namespace Assets.Scripts.Balance
             if (target != null)
             {
                 ResolveAttack(hero, target, buffTracker);
+            }
+        }
+
+        /// <summary>The Mage's MultiCast, as <c>CombatManager.ExecuteMultiCast</c> resolves it: one charge,
+        /// <paramref name="casts"/> casts, each aimed afresh at whoever stands.</summary>
+        private static void MultiCast(
+            SimUnit caster,
+            SimMagicSlot slot,
+            List<SimUnit> heroes,
+            List<SimUnit> enemies,
+            CombatBuffTracker buffTracker,
+            MagicTagTracker tagTracker,
+            ComboDetector comboDetector,
+            EffectResolver resolver,
+            TrialResult result,
+            int casts)
+        {
+            slot.Charges--;
+            result.Casts++;
+            for (int i = 0; i < casts; i++)
+            {
+                var targets = ResolveTargets(slot.Magic, caster, heroes, enemies);
+                if (targets.Count == 0)
+                {
+                    return;
+                }
+                resolver.Execute(new SpellcastAction { Magic = slot.Magic, Caster = caster, Targets = targets },
+                    buffTracker, tagTracker, comboDetector, 0, 0, null);
             }
         }
 
@@ -1434,7 +1480,9 @@ namespace Assets.Scripts.Balance
             List<SimUnit> enemies,
             CombatBuffTracker buffTracker,
             EffectResolver resolver,
-            TrialResult result)
+            TrialResult result,
+            MagicTagTracker tagTracker = null,
+            ComboDetector comboDetector = null)
         {
             PayBlood(caster, slot.Summon, buffTracker.Events);
             slot.Charges--;
@@ -1446,7 +1494,21 @@ namespace Assets.Scripts.Balance
                 var fallen = resolver.FallenAllies != null ? resolver.FallenAllies(caster) : new List<ICombatUnit>();
                 targets = fallen.Count > 0 ? new List<ICombatUnit> { fallen[0] } : new List<ICombatUnit>();
             }
-            resolver.Execute(new SpellcastAction { Magic = slot.Castable, Caster = caster, Targets = targets }, buffTracker);
+            // A summon authored to lay tags (Glacius's Ice) lays them, as CombatManager.ExecuteSummonAction does.
+            bool tags = slot.Summon != null && slot.Summon.UsesTags;
+            resolver.Execute(new SpellcastAction { Magic = slot.Castable, Caster = caster, Targets = targets }, buffTracker,
+                tags ? tagTracker : null, tags ? comboDetector : null);
+
+            // What it gives the party (Glacius's frost hide).
+            var party = SummonOps.BuildPartyCastable(slot.Summon, slot.Grant);
+            if (party != null)
+            {
+                resolver.Execute(new SpellcastAction
+                {
+                    Magic = party, Caster = caster, Targets = heroes.FindAll(h => h.IsAlive).ConvertAll(h => (ICombatUnit)h)
+                }, buffTracker);
+                Object.DestroyImmediate(party);
+            }
 
             // The part that lands on one target at random (the Abyssal Nightmare's Silence).
             var random = SummonOps.BuildRandomCastable(slot.Summon, slot.Grant);

@@ -58,6 +58,10 @@ namespace Assets.Scripts.Heroes
                  "the fight; a turn landing nothing drops them. Leave at 0 for every other hero.")]
         public Combat.MomentumRule Momentum = new Combat.MomentumRule();
 
+        [Tooltip("The Mage's signature: Focus built on each turn he casts an ability, spent by his " +
+                 "MultiCast Ultra to repeat the next one. Leave at 0 for every other hero.")]
+        public Combat.FocusRule Focus = new Combat.FocusRule();
+
         [Tooltip("This hero's progression grid. XP banked per hero is spent here at the hub — " +
                  "see SphereGridOps for the rules.")]
         public SphereGridSO SphereGrid;

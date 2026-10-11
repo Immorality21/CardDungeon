@@ -83,6 +83,13 @@ namespace Assets.Scripts.Cards
         /// Readies the caster to strike back once at the first enemy whose blow lands on them before their
         /// next turn: <c>Power</c> + <c>ScalingStat</c> as <c>DamageType</c>. Appended.
         /// </summary>
-        Retaliate = 13
+        Retaliate = 13,
+
+        /// <summary>
+        /// Thorns on each target: <c>Power</c> percent of every enemy blow that lands on it goes back at
+        /// the attacker as <c>DamageType</c>, for <c>Duration</c> of its turns
+        /// (<see cref="Combat.ThornsTable"/>). The Mage's cloaks. No caster stat. Appended.
+        /// </summary>
+        Thorns = 14
     }
 }

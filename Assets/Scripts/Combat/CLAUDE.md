@@ -116,6 +116,29 @@ reaction's hits never count. Built per fight by `CombatManager.RunCombat` (float
 "Momentum lost") and `EncounterSimulator.RunEncounter`, so the model has it; `SimUnit.Momentum` comes
 from `PartyBaseline`. The closed form does not price it.
 
+## Focus - the Mage's signature *(2026-10-10)*
+
+`FocusRule` on `HeroSO.Focus` (Mage: +1 per turn he casts an ability, max 3), worked by
+`Cards.FocusTracker` off `AbilityUsed`/`TurnEnded`: a summon's or an Ultra's throwaway castable
+(`summon:` / `ultra:` keys) is not a cast, and the turn Focus is spent builds none. It is spent whole by
+his **MultiCast** Ultra (`UltraKind.MultiCast`), which is ready on Focus instead of the gauge
+(`UltraOps.IsReady`): the Ultra list opens the Ability list titled "Double/Triple/Quadruple-cast", and
+`CombatManager.ExecuteMultiCast` casts the pick `1 + Focus` times, each repeat re-aimed at who stands,
+for **one** charge spent after the last (`SpendCharge` - tying it to the last repeat let a field that
+emptied early skip the charge). The party window's gauge bar shows Focus for a Focus hero, and the Ultra
+command's dim reason reads "No Focus". Sim: `SimUltras.Focus` + `MultiCastReady` (first-draft policy:
+wait for max Focus, then MultiCast the best damage slot). How Focus is built and priced were open
+questions in his vision - these are drafts.
+
+## Thorns - damage returned *(2026-10-10)*
+
+`SpellEffectType.Thorns` puts `CombatEvents.Thorns` (`ThornsTable`) on its targets: `Power`% of every
+enemy hit or ability that lands on the bearer (barrier-soaked part included) goes back at the attacker
+as `DamageType`, for `Duration` of the bearer's turns (timed like a barrier). Resistances apply, defense
+does not, minimum 1. Fired by `Cards.RetaliationTracker` as a reaction ("Thorns"), so it never chains.
+The three elemental cloaks carry 25% thorns in their element (owner's note on the Mage's cloaks);
+Ward does not.
+
 ## Threat (who the enemies go for)
 
 `ThreatTable` (pure, `ThreatTableTests`) — WoW-style, and **biased, never certain** (the owner's rule):

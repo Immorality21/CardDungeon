@@ -28,7 +28,12 @@ namespace Assets.Scripts.Cards
         /// aimed at its rider (<c>GuardTable</c>), and acts straight after each of the rider's turns -
         /// the two share the rider's pace. It stays until it breaks, the rider falls, or the fight
         /// ends; using it again rebuilds it.</summary>
-        Mount = 3
+        Mount = 3,
+
+        /// <summary>The Mage's signature: spends his Focus (<c>Combat.FocusRule</c>, not the gauge) to cast
+        /// the ability he picks next once plus once per point - a double-, triple- or quadruple-cast. Ready
+        /// whenever he has Focus to spend; the gauge is left alone.</summary>
+        MultiCast = 4
     }
 
     /// <summary>Sacrifice: the Attack a horror rises with when <see cref="Stat"/> is the sacrificed

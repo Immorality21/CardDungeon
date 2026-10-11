@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8167baed5bc052409b86b3942399fa5, type: 3}
+  m_Name: Ifrit
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
+  Key: Ifrit
+  DisplayName: Ifrit
+  Description: A fire spirit takes the party's place. When it goes, fallen or sent
+    away, it takes the field with it.
+  Sprite: {fileID: 21300000, guid: 667705648629424bb73c59a7a62085fd, type: 3}
+  AnimationFrames:
+  - {fileID: 21300000, guid: 3a007fa362fd4bac91d4c812013767f8, type: 3}
+  - {fileID: 21300000, guid: fc0fcb92d2a242b7b3a3e682fe089ac1, type: 3}
+  - {fileID: 21300000, guid: a237f73d9f954fe1990ed1825c632469, type: 3}
+  - {fileID: 21300000, guid: 601bdd8faca24edfbd7f2515ed26056e, type: 3}
+  - {fileID: 21300000, guid: 9800eaccdcee45cca20118d64a870763, type: 3}
+  AnimationFps: 6
+  Facing: 0
+  ArrivalSound: {fileID: 0}
+  ArrivalSoundVolume: 0.9
+  Kind: 1
+  TargetType: 0
+  Effects: []
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames:
+  - {fileID: 21300000, guid: bf5fed04d882494c95ef7175335044d0, type: 3}
+  - {fileID: 21300000, guid: 3a02d326730e41648dcdba5543965e5e, type: 3}
+  BaseCharges: 1
+  StatPercents:
+    Values:
+    - Type: 7
+      Amount: 150
+    - Type: 1
+      Amount: 300
+    - Type: 2
+      Amount: 120
+    - Type: 3
+      Amount: 110
+    - Type: 4
+      Amount: 120
+    - Type: 5
+      Amount: 100
+  CopySummonerResistances: 1
+  TurnsActive: 3
+  Actions:
+  - {fileID: 11400000, guid: aa9b59703d1e0304796009769a819b20, type: 2}
+  Signature: {fileID: 0}
+  AttackAbility: {fileID: 0}
+  UsesTags: 0
+  PartingAbility: {fileID: 11400000, guid: 3009b4bc5d38f0643924ffe61146c895, type: 2}
+  MountedFrames: []
+  RotateActions: 0
+  SquadTiers: []
+  SquadSize: 3
+  MaxSquadSize: 4

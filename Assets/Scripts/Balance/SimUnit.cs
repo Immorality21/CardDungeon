@@ -118,7 +118,7 @@ namespace Assets.Scripts.Balance
     /// <c>GetEffectiveStat(MaxHealth)</c>. It did not always, which is why this note exists: the
     /// model was right and the game was short by exactly the gear bonus.
     /// </summary>
-    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource, IHasTraits, Heroes.IAbilityUpgrades, IHasMomentum
+    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource, IHasTraits, Heroes.IAbilityUpgrades, IHasMomentum, IHasFocus
     {
         /// <summary>Mirrors <c>Enemy.Traits</c> off the same definition.</summary>
         public UnitTraits Traits => Definition != null ? Definition.Traits : UnitTraits.None;
@@ -189,6 +189,9 @@ namespace Assets.Scripts.Balance
         /// <summary>The hero's Momentum (the Warrior's signature), off their definition, as <c>Hero</c> has it.</summary>
         public MomentumRule Momentum { get; set; }
 
+        /// <summary>The hero's Focus (the Mage's signature), off their definition, as <c>Hero</c> has it.</summary>
+        public FocusRule Focus { get; set; }
+
         /// <summary>What this hero's grid has added to each ability (SphereGridOps.AbilityUpgradesForNodes).</summary>
         public Dictionary<string, Heroes.AbilityGrant> AbilityUpgrades = new Dictionary<string, Heroes.AbilityGrant>();
 
@@ -244,7 +247,8 @@ namespace Assets.Scripts.Balance
                 Tuning = Tuning,
                 Behavior = Behavior,
                 Triggers = new List<CarriedTrigger>(Triggers),
-                Momentum = Momentum
+                Momentum = Momentum,
+                Focus = Focus
             };
 
             foreach (var slot in MagicSlots)

@@ -1627,7 +1627,7 @@ namespace Assets.Scripts.Rooms
                 _commands.Add(new CommandEntry
                 {
                     Command = HeroCommand.Ultra, Label = "Ultra", Enabled = CombatManager.Instance.CanUseUltra(hero),
-                    Reason = transformed ? "Active" : CombatManager.Instance.UltraGauge(hero) + "%"
+                    Reason = transformed ? "Active" : UltraWaitReason(hero)
                 });
             }
             _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem, Reason = "None" });
@@ -1635,6 +1635,19 @@ namespace Assets.Scripts.Rooms
             // Skip rather than among the actions that spend the turn.
             _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
             _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
+        }
+
+        /// <summary>What a closed Ultra command waits for: the gauge's fill, or Focus for a hero whose only
+        /// Ultras are MultiCasts (the Mage).</summary>
+        private static string UltraWaitReason(ICombatUnit hero)
+        {
+            var known = CombatManager.Instance.KnownUltras(hero);
+            if (known.Count > 0 && known.TrueForAll(Cards.UltraOps.IsMultiCast))
+            {
+                int focus = CombatManager.Instance.FocusOf(hero);
+                return focus > 0 ? "Focus " + focus : "No Focus";
+            }
+            return CombatManager.Instance.UltraGauge(hero) + "%";
         }
 
         private int FirstEnabledCommand()
@@ -2784,6 +2797,13 @@ namespace Assets.Scripts.Rooms
                     // Outside a fight there is no gauge (it starts every fight empty), so it reads empty.
                     var combat = CombatManager.HasInstance ? CombatManager.Instance : null;
                     int gauge = combat != null && combat.InCombat ? combat.UltraGauge(hero) : 0;
+                    // A hero who builds Focus (the Mage) spends that on his Ultra, so the bar shows it instead.
+                    var focusRule = hero.HeroSO != null ? hero.HeroSO.Focus : null;
+                    if (focusRule != null && focusRule.IsActive)
+                    {
+                        int focus = combat != null && combat.InCombat ? combat.FocusOf(hero) : 0;
+                        gauge = Mathf.RoundToInt(focus * (float)Cards.UltraOps.Max / focusRule.Max);
+                    }
                     gaugeFill.style.width = Length.Percent(gauge * 100f / Cards.UltraOps.Max);
                     gaugeFill.EnableInClassList("cd-party-row__gauge-fill--full", Cards.UltraOps.IsFull(gauge));
                     gaugeFill.EnableInClassList("cd-party-row__gauge-fill--active",

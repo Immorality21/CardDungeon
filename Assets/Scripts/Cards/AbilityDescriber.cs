@@ -194,6 +194,9 @@ namespace Assets.Scripts.Cards
                 case SpellEffectType.Retaliate:
                     return $"strikes back once at the next attacker for {Magnitude(effect, caster, buffTracker, powerBonus)}"
                            + (effect.DamageType != DamageType.Normal ? $" {effect.DamageType}" : "") + " damage";
+                case SpellEffectType.Thorns:
+                    return $"returns {effect.Power}% of each blow taken as {effect.DamageType} damage"
+                           + (effect.Duration > 0 ? $" for {effect.Duration} turns" : "");
                 case SpellEffectType.Execute:
                     return $"destroys {TraitName(effect.BonusVsTrait, "a foe")} under {effect.Power}% health outright (not bosses)";
                 default:

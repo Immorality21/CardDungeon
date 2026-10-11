@@ -83,4 +83,10 @@ MonoBehaviour:
     - Type: 7
       Amount: 22
   AttackStat: 4
+  Momentum:
+    PercentPerStack: 0
+    MaxStacks: 0
+  Focus:
+    PerCast: 1
+    Max: 3
   SphereGrid: {fileID: 11400000, guid: 190fd39f9fc92c44385e312f91b8296b, type: 2}

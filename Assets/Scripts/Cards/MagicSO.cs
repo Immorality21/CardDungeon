@@ -131,6 +131,9 @@ namespace Assets.Scripts.Cards
                     case SpellEffectType.Disassemble:
                         sb.Append("Disassemble");
                         break;
+                    case SpellEffectType.Thorns:
+                        sb.Append($"Thorns {effect.Power}% {effect.DamageType}");
+                        break;
                 }
             }
 

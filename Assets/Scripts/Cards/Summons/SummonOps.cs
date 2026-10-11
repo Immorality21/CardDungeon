@@ -16,10 +16,11 @@ namespace Assets.Scripts.Cards
     public static class SummonOps
     {
         /// <summary>Whether summoning <paramref name="summon"/> asks for a target first: a special
-        /// attack aimed at one living ally or one fallen ally (a single revive).</summary>
+        /// attack aimed at one living ally, one fallen ally (a single revive) or one enemy (Glacius's claw).</summary>
         public static bool NeedsTarget(SummonSO summon)
         {
-            return summon != null && summon.Kind == SummonKind.SpecialAttack && UltraOps.TargetsOneAlly(summon.TargetType);
+            return summon != null && summon.Kind == SummonKind.SpecialAttack
+                   && (UltraOps.TargetsOneAlly(summon.TargetType) || summon.TargetType == MagicTargetType.SingleEnemy);
         }
 
         /// <summary>Prefix of the transient magic's key, so a summon's cast can never collide with,
@@ -54,9 +55,35 @@ namespace Assets.Scripts.Cards
                 return effects;
             }
 
-            int power = grant != null ? grant.PowerBonus : 0;
-            int turns = grant != null ? grant.DurationBonus : 0;
-            foreach (var effect in summon.Effects.Where(e => e != null))
+            int power = grant != null && !summon.PowerRaisesPartyEffects ? grant.PowerBonus : 0;
+            return Upgraded(summon.Effects, power, grant != null ? grant.DurationBonus : 0);
+        }
+
+        /// <summary>
+        /// The half of a special attack that lands on the summoner's side (<see cref="SummonSO.PartyEffects"/>),
+        /// upgraded like <see cref="EffectsFor"/>: duration on every timed effect, and the power bonus on the
+        /// first when <see cref="SummonSO.PowerRaisesPartyEffects"/> says that is the half that grows.
+        /// </summary>
+        public static List<SpellEffect> PartyEffectsFor(SummonSO summon, SummonGrant grant)
+        {
+            if (summon == null)
+            {
+                return new List<SpellEffect>();
+            }
+            int power = grant != null && summon.PowerRaisesPartyEffects ? grant.PowerBonus : 0;
+            return Upgraded(summon.PartyEffects, power, grant != null ? grant.DurationBonus : 0);
+        }
+
+        /// <summary>Copies of <paramref name="source"/>: <paramref name="power"/> on the first, <paramref name="turns"/>
+        /// on every timed one.</summary>
+        private static List<SpellEffect> Upgraded(List<SpellEffect> source, int power, int turns)
+        {
+            var effects = new List<SpellEffect>();
+            if (source == null)
+            {
+                return effects;
+            }
+            foreach (var effect in source.Where(e => e != null))
             {
                 var copy = effect.Clone();
                 copy.Power = effect.Power + (effects.Count == 0 ? power : 0);
@@ -65,6 +92,26 @@ namespace Assets.Scripts.Cards
                 effects.Add(copy);
             }
             return effects;
+        }
+
+        /// <summary>The party half of a special attack (<see cref="SummonSO.PartyEffects"/>) as a throwaway
+        /// castable aimed at the summoner's whole side. Null when it has none.</summary>
+        public static MagicSO BuildPartyCastable(SummonSO summon, SummonGrant grant)
+        {
+            var effects = PartyEffectsFor(summon, grant);
+            if (effects.Count == 0)
+            {
+                return null;
+            }
+            var magic = ScriptableObject.CreateInstance<MagicSO>();
+            magic.hideFlags = HideFlags.DontSave;
+            magic.name = CastKeyPrefix + summon.Key + ":party";
+            magic.Key = magic.name;
+            magic.DisplayName = summon.Label;
+            magic.TargetType = MagicTargetType.AllAllies;
+            magic.Tags = new List<MagicTag>();
+            magic.Effects = effects;
+            return magic;
         }
 
         /// <summary>
@@ -83,7 +130,11 @@ namespace Assets.Scripts.Cards
             magic.Description = summon != null ? summon.Description : "";
             magic.TargetType = summon != null ? summon.TargetType : MagicTargetType.AllAllies;
             magic.Effects = EffectsFor(summon, grant);
-            magic.Tags = new List<MagicTag>();
+            // Tagless unless the summon is authored to lay its own (Glacius's Ice).
+            magic.Tags = summon != null && summon.UsesTags && summon.Tags != null
+                ? new List<MagicTag>(summon.Tags)
+                : new List<MagicTag>();
+            magic.TagDuration = summon != null ? summon.TagDuration : 3;
             return magic;
         }
 
@@ -288,6 +339,10 @@ namespace Assets.Scripts.Cards
                 {
                     keys.Add(summon.AttackAbility.Key);
                 }
+                if (summon.PartingAbility != null && !string.IsNullOrEmpty(summon.PartingAbility.Key))
+                {
+                    keys.Add(summon.PartingAbility.Key);
+                }
             }
             return keys;
         }
@@ -309,6 +364,11 @@ namespace Assets.Scripts.Cards
                 parts.Add(DescribeEffect(effect));
             }
             parts = CollapseRepeats(parts);
+            var party = PartyEffectsFor(summon, grant);
+            if (party.Count > 0)
+            {
+                parts.Add("the party: " + string.Join(", ", party.Select(DescribeEffect)));
+            }
             if (summon.RandomTargetEffects != null && summon.RandomTargetEffects.Count > 0)
             {
                 var random = new List<string>();
@@ -360,6 +420,10 @@ namespace Assets.Scripts.Cards
             }
             int turns = TurnsFor(summon, grant);
             parts.Add(turns == 1 ? "1 turn" : $"{turns} turns");
+            if (summon.PartingAbility != null)
+            {
+                parts.Add($"{summon.PartingAbility.DisplayName} as it leaves");
+            }
             int charges = MaxCharges(summon, grant);
             parts.Add(charges == 1 ? "1 charge per run" : $"{charges} charges per run");
             return string.Join(" · ", parts);
@@ -423,6 +487,12 @@ namespace Assets.Scripts.Cards
                     if (effect.BuffType == BuffType.Regenerating)
                     {
                         return $"regenerates {effect.Power} a turn{turns}";
+                    }
+                    if (effect.BuffType == BuffType.Barrier)
+                    {
+                        return effect.PowerMode == PowerMode.PercentOfMaxHealth
+                            ? $"a barrier of {effect.Power}% of health{turns}"
+                            : $"a barrier of {effect.Power}{turns}";
                     }
                     return effect.PowerMode == PowerMode.PercentOfTargetStat
                         ? $"+{effect.Power}% {effect.BuffType}{turns}"

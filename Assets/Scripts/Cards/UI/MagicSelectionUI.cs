@@ -88,6 +88,9 @@ namespace Assets.Scripts.Cards.UI
         private List<UltraSO> _ultraList;
         private UltraSO _selectedUltra;
 
+        // The ability list was opened by MultiCast (the Mage's Ultra): the cast it submits repeats.
+        private bool _multiCast;
+
         // The summon list on screen, and the summon waiting for its one ally (or fallen ally) to be picked.
         private List<SummonSlot> _summonList;
         private SummonSlot _selectedSummon;
@@ -244,9 +247,33 @@ namespace Assets.Scripts.Cards.UI
 
             _currentHero = hero;
             _mode = SelectionMode.Cast;
+            _multiCast = false;
             _selectedMagic = null;
             _listTitle.text = "Ability";
             PopulateSlotRows(slots);
+        }
+
+        /// <summary>MultiCast: the hero's run slots, and what is picked is cast once more per point of Focus.</summary>
+        private void ShowMultiCastList()
+        {
+            var hero = _currentHero as Hero;
+            if (hero == null || !DungeonManager.HasInstance || DungeonManager.Instance.MagicState == null)
+            {
+                return;
+            }
+            _mode = SelectionMode.Cast;
+            _multiCast = true;
+            _selectedMagic = null;
+            _listTitle.text = SlotListTitle();
+            PopulateSlotRows(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
+        }
+
+        /// <summary>"Ability", or what a MultiCast will do ("Triple-cast").</summary>
+        private string SlotListTitle()
+        {
+            return _multiCast
+                ? Combat.FocusOps.CastName(CombatManager.Instance.FocusOf(_currentHero))
+                : "Ability";
         }
 
         private void PopulateSlotRows(List<MagicSlot> slots)
@@ -389,7 +416,9 @@ namespace Assets.Scripts.Cards.UI
             HidePanel(_targetPanel);
             HidePanel(_inspectPanel);
             ReleaseFocus();
-            CombatManager.Instance.SubmitCastAction(_selectedMagic, _selectedSlotIndex, _currentHero, targets, chargeSlot);
+            bool multiCast = _multiCast;
+            _multiCast = false;
+            CombatManager.Instance.SubmitCastAction(_selectedMagic, _selectedSlotIndex, _currentHero, targets, chargeSlot, multiCast);
         }
 
         // ============================================================
@@ -510,8 +539,7 @@ namespace Assets.Scripts.Cards.UI
                     meta += $"  {bloodPrice} HP";
                 }
                 // A summon aimed at one ally needs one to aim at - a revive with nobody down is dimmed.
-                bool hasTarget = !SummonOps.NeedsTarget(slot.Summon)
-                                 || CombatManager.Instance.PickableAllies(slot.Summon.TargetType).Count > 0;
+                bool hasTarget = !SummonOps.NeedsTarget(slot.Summon) || SummonCandidates(slot.Summon).Count > 0;
                 if (!hasTarget)
                 {
                     meta += "  nobody fallen";
@@ -558,8 +586,9 @@ namespace Assets.Scripts.Cards.UI
                 // A Sacrifice with no one it may take (the last hero cannot be given), or a revive with
                 // nobody down, is listed, dimmed.
                 bool usable = CombatManager.Instance.CanUseUltra(hero, ultra);
-                string blocked = ultra.Kind == UltraKind.Sacrifice ? "No one to give" : "Nobody fallen";
-                _listScroll.Add(CreateRow(icon, ultra.Label, usable ? "Ready" : blocked, usable,
+                int focus = CombatManager.Instance.FocusOf(hero);
+                string ready = UltraOps.IsMultiCast(ultra) ? $"x{Combat.FocusOps.Casts(focus)}" : "Ready";
+                _listScroll.Add(CreateRow(icon, ultra.Label, usable ? ready : BlockedReason(hero, ultra), usable,
                     () => OnUltraChosen(captured), description));
             }
 
@@ -569,9 +598,30 @@ namespace Assets.Scripts.Cards.UI
             BeginNavigation();
         }
 
-        /// <summary>An Ultra that takes a target (a Sacrifice) asks for it; anything else is used at once.</summary>
+        /// <summary>Why an Ultra in the list is dimmed: not ready yet, or nothing to use it on.</summary>
+        private static string BlockedReason(ICombatUnit hero, UltraSO ultra)
+        {
+            int focus = CombatManager.Instance.FocusOf(hero);
+            if (!UltraOps.IsReady(ultra, CombatManager.Instance.UltraGauge(hero), focus))
+            {
+                return UltraOps.IsMultiCast(ultra) ? "No Focus" : "Not ready";
+            }
+            if (UltraOps.IsMultiCast(ultra))
+            {
+                return "Nothing to cast";
+            }
+            return ultra.Kind == UltraKind.Sacrifice ? "No one to give" : "Nobody fallen";
+        }
+
+        /// <summary>An Ultra that takes a target (a Sacrifice) asks for it; MultiCast opens the ability list;
+        /// anything else is used at once.</summary>
         private void OnUltraChosen(UltraSO ultra)
         {
+            if (UltraOps.IsMultiCast(ultra))
+            {
+                ShowMultiCastList();
+                return;
+            }
             if (!UltraOps.NeedsTarget(ultra))
             {
                 SubmitUltra(ultra);
@@ -608,15 +658,31 @@ namespace Assets.Scripts.Cards.UI
 
         private void SubmitSummon(SummonSlot slot)
         {
-            // A summon aimed at one ally or one fallen ally asks which first.
+            // A summon aimed at one ally, one fallen ally or one enemy asks which first.
             if (SummonOps.NeedsTarget(slot.Summon))
             {
+                var candidates = SummonCandidates(slot.Summon);
+                bool atEnemy = slot.Summon.TargetType == MagicTargetType.SingleEnemy;
+                // One enemy standing: no picker, as a cast at one target skips it.
+                if (atEnemy && candidates.Count == 1)
+                {
+                    SubmitSummonTo(slot, candidates[0]);
+                    return;
+                }
                 _selectedSummon = slot;
                 _mode = SelectionMode.SummonTarget;
-                PopulateTargetRows(CombatManager.Instance.PickableAllies(slot.Summon.TargetType), AllyPrompt(slot.Summon.TargetType));
+                PopulateTargetRows(candidates, atEnemy ? "Select Enemy Target" : AllyPrompt(slot.Summon.TargetType));
                 return;
             }
             SubmitSummonTo(slot, null);
+        }
+
+        /// <summary>Whom a summon aimed at one unit may be aimed at: the enemies for a claw, the party otherwise.</summary>
+        private static List<ICombatUnit> SummonCandidates(SummonSO summon)
+        {
+            return summon.TargetType == MagicTargetType.SingleEnemy
+                ? CombatManager.Instance.GetAliveEnemies()
+                : CombatManager.Instance.PickableAllies(summon.TargetType);
         }
 
         private void SubmitSummonTo(SummonSlot slot, ICombatUnit target)
@@ -1007,6 +1073,13 @@ namespace Assets.Scripts.Cards.UI
 
         private void OnListBack()
         {
+            // MultiCast's ability list steps back to the Ultra list it came from.
+            if (_mode == SelectionMode.Cast && _multiCast && _ultraList != null)
+            {
+                _multiCast = false;
+                ShowUltraList(_currentHero, _ultraList);
+                return;
+            }
             // The charge picker steps back to the ability list it came from.
             if (_mode == SelectionMode.ChargeChoice && _chargeFromAllyPicker)
             {
@@ -1048,7 +1121,7 @@ namespace Assets.Scripts.Cards.UI
             if (_mode == SelectionMode.Cast && _currentHero is Hero hero &&
                 DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
-                _listTitle.text = "Ability";
+                _listTitle.text = SlotListTitle();
                 PopulateSlotRows(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
                 return;
             }
@@ -1065,6 +1138,7 @@ namespace Assets.Scripts.Cards.UI
         private void ReturnToActions()
         {
             _mode = SelectionMode.Idle;
+            _multiCast = false;
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
             HidePanel(_inspectPanel);
@@ -1095,6 +1169,7 @@ namespace Assets.Scripts.Cards.UI
         private void CloseAllPanels()
         {
             _mode = SelectionMode.Idle;
+            _multiCast = false;
             if (_refsReady)
             {
                 HidePanel(_listPanel);

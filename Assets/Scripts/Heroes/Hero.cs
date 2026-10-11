@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Heroes
 {
-    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches, IAbilityUpgrades, IHasMomentum
+    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches, IAbilityUpgrades, IHasMomentum, IHasFocus
     {
         public HeroSO HeroSO;
         public Stats Stats;
@@ -161,6 +161,9 @@ namespace Assets.Scripts.Heroes
 
         /// <summary>This hero's Momentum (the Warrior's signature), from their definition.</summary>
         public MomentumRule Momentum => HeroSO != null ? HeroSO.Momentum : null;
+
+        /// <summary>This hero's Focus (the Mage's signature), from their definition.</summary>
+        public FocusRule Focus => HeroSO != null ? HeroSO.Focus : null;
 
         public int GetEffectiveAttackPower()
         {

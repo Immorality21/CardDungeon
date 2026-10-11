@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf4153f8ca8247ad925134d6e34baf44, type: 3}
+  m_Name: IfritFlame
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
+  Key: IfritFlame
+  DisplayName: Ifrit's Flame
+  Description: A lance of flame at one enemy, and it catches.
+  Icon: {fileID: -8176323626317577203, guid: 0258ccea7d255c5429e5f53dde1a61da, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
+  TargetType: 0
+  Rarity: 2
+  Effects:
+  - EffectType: 0
+    Power: 4
+    PowerMode: 0
+    ScalingStat: 4
+    DamageType: 1
+    BuffType: 0
+    Duration: 0
+    UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+  - EffectType: 3
+    Power: 3
+    PowerMode: 0
+    ScalingStat: 0
+    DamageType: 1
+    BuffType: 15
+    Duration: 3
+    UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+  Tags: 
+  TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0

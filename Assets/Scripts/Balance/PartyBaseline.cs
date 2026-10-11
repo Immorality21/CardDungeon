@@ -293,7 +293,8 @@ namespace Assets.Scripts.Balance
                     // ...and so do the gear's reactions, which the encounter loop fires like the game.
                     Triggers = new List<Combat.Triggers.CarriedTrigger>(Combat.Triggers.TriggerSources.FromItems(gear)),
                     // ...and the hero's own signature passive, built the same way the game builds it.
-                    Momentum = definition != null ? definition.Momentum : null
+                    Momentum = definition != null ? definition.Momentum : null,
+                    Focus = definition != null ? definition.Focus : null
                 };
 
                 baseline.Heroes.Add(hero);

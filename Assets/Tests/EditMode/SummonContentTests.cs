@@ -76,7 +76,9 @@ namespace Tests.EditMode
                 Assert.Greater(summon.StatPercents[Assets.Scripts.UnitStats.StatType.Strength], 0,
                     $"{summon.name} has no Strength, so its Attack does nothing.");
                 Assert.GreaterOrEqual(summon.TurnsActive, 1, $"{summon.name} never stays.");
-                Assert.IsNotNull(summon.Signature, $"{summon.name} has no Signature.");
+                // Its big move: a Signature, or a parting blow as it leaves (Ifrit's Hellfire).
+                Assert.IsTrue(summon.Signature != null || summon.PartingAbility != null,
+                    $"{summon.name} has no Signature and no parting blow.");
                 Assert.That(summon.Actions.All(a => a != null), $"{summon.name} has an empty action slot.");
                 Assert.That(summon.AnimationFrames.All(f => f != null), $"{summon.name} has an empty animation frame.");
             }

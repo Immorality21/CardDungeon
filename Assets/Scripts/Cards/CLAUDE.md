@@ -353,6 +353,9 @@ Two consequences worth holding on to:
   | Paladin | C (Heal, Renew) | **Dawn Stag** | special attack | every hero healed 40% of their health, then regenerates 3 a turn for 3 turns |
   | Ranger | A (Poison Dart, Volley) | **Galewing** | special attack | a hawk: 2 hits of the Ranger's Agility on every enemy, then -3 Endurance for 2 turns |
   | Ranger | B (Snare, Hush) | **Exatrix** | replaces the party | a shade, medium: 150% HP, 130% AGI; her Attack is **Rend** (damage + turn delay), Signature **Nightfall** (damage + Agility cut, all) |
+  | Mage | A (storm) | **Qyraxis** | special attack | a lightning bird: 2 Lightning hits (2 + INT) on every enemy, then -3 Agility for 2 turns |
+  | Mage | B (frost) | **Glacius** | special attack | a frost bear: one claw (5 + INT Ice) at a **picked enemy** that lays **Ice** (Water then sets off Freeze), and a **barrier of 5% of health** on the whole party - its power node grows the barrier (`PowerRaisesPartyEffects`) |
+  | Mage | C (fire) | **Ifrit** | replaces the party | 150% HP, 300% STR; plain Attack + **Ifrit's Flame** (Fire + Burn); no Signature - its big move is **Hellfire** (10 + INT Fire, all) cast as it leaves, fallen, dismissed or out of turns (`PartingAbility`) |
 - **The ally kind (`JoinParty`, the Warlock's Imp and Succubus — 2026-10-04).** The same unit as a
   replacement (`SummonUnit`, `StatPercents`, `TurnsActive`, `AttackAbility`, `Signature`, its own menu),
   but it fights **beside** the party: `CombatManager._allies`, placed by `CombatStage.PlaceAllies` in a
@@ -472,6 +475,14 @@ Two consequences worth holding on to:
   through `HideUnits`, frozen behind her suspended clock, and comes back ridden; other guests are sent
   home as before. Sim: `SimAllies.ArriveMount` / `MountOf`, `DismissAll` skips mechs, and
   `SimUltras.Ready` holds the gauge while she already rides.
+- **The Mage's summon fields** *(2026-10-10)*: `SummonSO.PartyEffects` (a special attack's second half on
+  the summoner's whole side, `SummonOps.BuildPartyCastable`) + `PowerRaisesPartyEffects`; `SummonSO.Tags`
+  (a special attack with `UsesTags` lays them and may set off a combo, live and in the sim); a
+  **single-enemy special attack asks for its target** (`SummonOps.NeedsTarget`, the summon list's enemy
+  picker, weakest enemy as the fallback); and `SummonSO.PartingAbility`, cast at the enemies by a unit
+  summon as it leaves while any stand (`CombatManager.QueueParting`/`ResolveParting`, before the turn
+  closes; the sim's `AfterReplacementTurn`; not for `JoinParty` in the sim yet). `SummonContentTests`
+  accepts a parting blow in place of a Signature.
 - **A summon's abilities can lay tags** *(2026-10-07)*: `SummonSO.UsesTags` makes
   `ExecuteSummonAbility` (and the sim's `TakeReplacementTurn`) pass the tag tracker and combo detector,
   and marks triggered combos discovered - so the Oil mech's oil and the Flamethrower mech's fire make

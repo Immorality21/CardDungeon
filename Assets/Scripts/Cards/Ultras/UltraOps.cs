@@ -245,6 +245,28 @@ namespace Assets.Scripts.Cards
 
         private static readonly Dictionary<string, MagicSO> CastableCache = new Dictionary<string, MagicSO>();
 
+        /// <summary>Prefix of a Strike's throwaway castable, so it can never be taken for a real ability.</summary>
+        public const string CastKeyPrefix = "ultra:";
+
+        /// <summary>A MultiCast (the Mage's): fed by Focus rather than the gauge.</summary>
+        public static bool IsMultiCast(UltraSO ultra)
+        {
+            return ultra != null && ultra.Kind == UltraKind.MultiCast;
+        }
+
+        /// <summary>
+        /// Whether <paramref name="ultra"/> is ready: a MultiCast whenever there is Focus to spend (a
+        /// double-cast at least), any other Ultra on a full gauge.
+        /// </summary>
+        public static bool IsReady(UltraSO ultra, int gauge, int focus)
+        {
+            if (ultra == null)
+            {
+                return false;
+            }
+            return IsMultiCast(ultra) ? Combat.FocusOps.Casts(focus) >= 2 : IsFull(gauge);
+        }
+
         /// <summary>
         /// The throwaway <see cref="MagicSO"/> a Strike resolves through - the same engine an ability
         /// uses, with no tags (no combo) and an <c>ultra:</c> key (no Forge bonus). Cached per Ultra,
@@ -256,7 +278,7 @@ namespace Assets.Scripts.Cards
             {
                 return null;
             }
-            string key = "ultra:" + ultra.Key;
+            string key = CastKeyPrefix + ultra.Key;
             if (!CastableCache.TryGetValue(key, out var castable) || castable == null)
             {
                 castable = ScriptableObject.CreateInstance<MagicSO>();
@@ -281,6 +303,11 @@ namespace Assets.Scripts.Cards
             if (ultra == null)
             {
                 return "";
+            }
+            if (ultra.Kind == UltraKind.MultiCast)
+            {
+                return "Next ability: cast once, +1 per Focus, for one charge · all Focus spent\n"
+                       + "Focus: +1 each turn you cast";
             }
             if (ultra.Kind == UltraKind.Sacrifice)
             {

@@ -32,11 +32,16 @@ namespace Assets.Scripts.Combat
         /// <summary>Counterstrikes readied this fight (Divine Intervention); they end with their bearer's next turn.</summary>
         public RetaliationTable Retaliations { get; } = new RetaliationTable();
 
+        /// <summary>Damage returned to attackers this fight (the Mage's cloaks), for a few of the bearer's turns.</summary>
+        public ThornsTable Thorns { get; } = new ThornsTable();
+
         public CombatEvents()
         {
             Subscribe<TurnStarted>(e => Barriers.TurnStarted(e.Unit));
             Subscribe<TurnStarted>(e => Retaliations.TurnStarted(e.Unit));
+            Subscribe<TurnStarted>(e => Thorns.TurnStarted(e.Unit));
             Subscribe<TurnEnded>(e => Barriers.TurnEnded(e.Unit));
+            Subscribe<TurnEnded>(e => Thorns.TurnEnded(e.Unit));
             Subscribe<UnitDefeated>(e =>
             {
                 if (e.Cause == HealthCause.Sacrifice && e.Victim != null)

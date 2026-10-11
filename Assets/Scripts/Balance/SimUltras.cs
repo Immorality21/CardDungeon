@@ -35,6 +35,24 @@ namespace Assets.Scripts.Balance
         /// bar - as the live fight raises it. Null leaves both silent.</summary>
         public CombatEvents Events { get; set; }
 
+        /// <summary>The fight's Focus (the Mage's signature), built off the same events as in the live
+        /// fight. Null: nobody builds any, and a MultiCast is never ready.</summary>
+        public FocusTracker Focus { get; set; }
+
+        /// <summary>
+        /// Whether the policy MultiCasts now (first draft): the hero knows a MultiCast and has built all the
+        /// Focus their rule allows - a quadruple-cast for the Mage - and the caller has an ability for it.
+        /// Waiting for the top tier is the greedy read of "build Focus, then spend it".
+        /// </summary>
+        public bool MultiCastReady(SimUnit hero)
+        {
+            if (hero == null || Focus == null || hero.Ultras == null || hero.Focus == null || !hero.Focus.IsActive)
+            {
+                return false;
+            }
+            return hero.Ultras.Exists(UltraOps.IsMultiCast) && Focus.FocusOf(hero) >= hero.Focus.Max;
+        }
+
         /// <summary>Opens the fight: every hero who knows an Ultra starts it with an empty gauge.</summary>
         public SimUltras(IEnumerable<SimUnit> heroes)
         {
@@ -98,7 +116,8 @@ namespace Assets.Scripts.Balance
             }
             foreach (var ultra in hero.Ultras)
             {
-                if (ultra == null)
+                // A MultiCast spends Focus, not the gauge: the caster's turn decides it (MultiCastReady).
+                if (ultra == null || UltraOps.IsMultiCast(ultra))
                 {
                     continue;
                 }

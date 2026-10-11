@@ -90,6 +90,20 @@ namespace Assets.Scripts.Cards
                  "targets, after Effects - the Abyssal Nightmare Silences one enemy at random.")]
         public List<SpellEffect> RandomTargetEffects = new List<SpellEffect>();
 
+        [Tooltip("SpecialAttack, optional: effects that land on the summoner's whole side after Effects - " +
+                 "Glacius's frost hide, a barrier on every hero. Duration upgrades lengthen them too.")]
+        public List<SpellEffect> PartyEffects = new List<SpellEffect>();
+
+        [Tooltip("SpecialAttack: a SummonPower node raises the first of PartyEffects instead of the first " +
+                 "of Effects - for a summon whose growing half is what it gives the party (Glacius).")]
+        public bool PowerRaisesPartyEffects;
+
+        [Tooltip("SpecialAttack with UsesTags: the tags its Effects lay on what they hit, as an ability's " +
+                 "do - Glacius's claw lays Ice, so the party's Water sets off Freeze.")]
+        public List<MagicTag> Tags = new List<MagicTag>();
+
+        [Min(1)] public int TagDuration = 3;
+
         [Tooltip("Health the summoner pays to call it, as a percentage of their max health (floor 1). " +
                  "Refused when it would leave them at 0. The Blood Idol costs the Cultist blood. 0 = free.")]
         [Min(0)] public int SummonerHealthCostPercent;
@@ -150,8 +164,14 @@ namespace Assets.Scripts.Cards
         public MagicSO AttackAbility;
 
         [Tooltip("Its abilities lay their tags and can set off combos, like a hero's cast (a mech's oil " +
-                 "and fire make Ignite). Off for every other summon: their abilities resolve tagless.")]
+                 "and fire make Ignite) - and a special attack lays its Tags. Off for every other summon: " +
+                 "their abilities resolve tagless.")]
         public bool UsesTags;
+
+        [Tooltip("ReplaceParty / JoinParty, optional: cast on the enemies as it leaves while any stand - " +
+                 "fallen, dismissed or out of turns (Ifrit's Hellfire). Cast with the summon as the caster, " +
+                 "on the Boar's path. Not when the fight is already won.")]
+        public MagicSO PartingAbility;
 
         [Tooltip("A mech (UltraKind.Mount): the idle frames once its rider has climbed in - the mech " +
                  "with the rider drawn aboard. The rider is hidden while these play. Empty keeps the " +

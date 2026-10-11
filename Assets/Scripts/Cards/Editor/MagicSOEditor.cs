@@ -101,6 +101,20 @@ public class MagicSOEditor : Editor
                     new GUIContent("Strike Element", "The element of the counterstrike."));
                 rect.y += lineHeight;
             }
+            else if (effectType == SpellEffectType.Thorns)
+            {
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("DamageType"),
+                    new GUIContent("Return Element", "The element the returned share strikes back in."));
+                rect.y += lineHeight;
+
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("Duration"),
+                    new GUIContent("Duration", "How many of the bearer's turns the thorns last."));
+                rect.y += lineHeight;
+            }
             else if (effectType == SpellEffectType.Execute)
             {
                 EditorGUI.PropertyField(
@@ -161,6 +175,7 @@ public class MagicSOEditor : Editor
             case SpellEffectType.Cure:
             case SpellEffectType.Execute:
             case SpellEffectType.Intercept:
+            case SpellEffectType.Thorns:
                 return false;
             default:
                 return true;
@@ -187,6 +202,10 @@ public class MagicSOEditor : Editor
         else if (type == SpellEffectType.Execute || type == SpellEffectType.Retaliate)
         {
             lines += 1; // BonusVsTrait / DamageType
+        }
+        else if (type == SpellEffectType.Thorns)
+        {
+            lines += 2; // DamageType + Duration
         }
         else if (type == SpellEffectType.Buff)
         {

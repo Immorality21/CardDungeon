@@ -29,6 +29,8 @@ MonoBehaviour:
     GrantedMagicKey: LightningBolt
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -50,6 +52,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -72,6 +76,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -96,6 +102,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -116,6 +124,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -140,6 +150,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -162,6 +174,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -182,6 +196,8 @@ MonoBehaviour:
     GrantedMagicKey: StormCloak
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -202,6 +218,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -224,6 +242,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -244,6 +264,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -264,6 +286,8 @@ MonoBehaviour:
     GrantedMagicKey: ChainLightning
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -288,6 +312,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -310,6 +336,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -334,6 +362,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -356,6 +386,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -376,6 +408,8 @@ MonoBehaviour:
     GrantedMagicKey: IceShard
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -396,6 +430,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -418,6 +454,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -438,6 +476,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -458,6 +498,8 @@ MonoBehaviour:
     GrantedMagicKey: WaterSplash
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -482,6 +524,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -502,6 +546,8 @@ MonoBehaviour:
     GrantedMagicKey: FrostCloak
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -524,6 +570,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -546,6 +594,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -570,6 +620,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -590,6 +642,8 @@ MonoBehaviour:
     GrantedMagicKey: FireCloak
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -610,6 +664,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -632,6 +688,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -652,6 +710,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -672,6 +732,8 @@ MonoBehaviour:
     GrantedMagicKey: Fireball
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -694,6 +756,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -716,8 +780,362 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - mage-c-7
+  - Key: mage-multicast
+    DisplayName: MultiCast
+    Kind: 10
+    XpCost: 45
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 100, y: -180}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: MultiCast
+    SummonAmount: 1
+    Neighbors:
+    - mage-start
+  - Key: mage-a-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: -640, y: -700}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: ChainLightning
+    GrantedCharges: 2
+    AwakenedMagicKey: Tempest
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-6
+  - Key: mage-b-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 100
+    Position: {x: -95, y: -860}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: WaterSplash
+    GrantedCharges: 2
+    AwakenedMagicKey: Deluge
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-6
+  - Key: mage-c-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: 640, y: -700}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Fireball
+    GrantedCharges: 2
+    AwakenedMagicKey: Inferno
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-c-6
+  - Key: mage-qyraxis
+    DisplayName: Qyraxis
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -1006, y: -765}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Qyraxis
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-a-tip
+  - Key: mage-qyraxis-power
+    DisplayName: 'Qyraxis: Charged Wings'
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -1101, y: -820}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Qyraxis
+    GrantedUltraKey: 
+    SummonAmount: 4
+    Neighbors:
+    - mage-qyraxis
+  - Key: mage-qyraxis-stay
+    DisplayName: 'Qyraxis: Long Storm'
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -1196, y: -875}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Qyraxis
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-qyraxis-power
+  - Key: mage-qyraxis-charge
+    DisplayName: 'Qyraxis: Second Flight'
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -1291, y: -930}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Qyraxis
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-qyraxis-stay
+  - Key: mage-glacius
+    DisplayName: Glacius
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -190, y: -1100}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Glacius
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-tip
+  - Key: mage-glacius-power
+    DisplayName: 'Glacius: Thick Frost'
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -285, y: -1155}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Glacius
+    GrantedUltraKey: 
+    SummonAmount: 5
+    Neighbors:
+    - mage-glacius
+  - Key: mage-glacius-stay
+    DisplayName: 'Glacius: Long Winter'
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -380, y: -1210}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Glacius
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-glacius-power
+  - Key: mage-glacius-charge
+    DisplayName: 'Glacius: Second Thaw'
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -475, y: -1265}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Glacius
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-glacius-stay
+  - Key: mage-ifrit
+    DisplayName: Ifrit
+    Kind: 4
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 1006, y: -765}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Ifrit
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-c-tip
+  - Key: mage-ifrit-power
+    DisplayName: 'Ifrit: Stoked'
+    Kind: 5
+    XpCost: 475
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 1101, y: -820}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Ifrit
+    GrantedUltraKey: 
+    SummonAmount: 30
+    Neighbors:
+    - mage-ifrit
+  - Key: mage-ifrit-stay
+    DisplayName: 'Ifrit: Slow Burn'
+    Kind: 6
+    XpCost: 540
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 1196, y: -875}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Ifrit
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-ifrit-power
+  - Key: mage-ifrit-charge
+    DisplayName: 'Ifrit: Rekindled'
+    Kind: 7
+    XpCost: 615
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 1291, y: -930}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Ifrit
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-ifrit-stay

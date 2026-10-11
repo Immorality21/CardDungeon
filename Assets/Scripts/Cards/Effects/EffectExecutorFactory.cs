@@ -40,7 +40,8 @@ namespace Assets.Scripts.Cards.Effects
                 { SpellEffectType.Cure, new CureEffectExecutor() },
                 { SpellEffectType.Execute, new ExecuteEffectExecutor(events) },
                 { SpellEffectType.Intercept, new InterceptEffectExecutor(events) },
-                { SpellEffectType.Retaliate, new RetaliateEffectExecutor(events) }
+                { SpellEffectType.Retaliate, new RetaliateEffectExecutor(events) },
+                { SpellEffectType.Thorns, new ThornsEffectExecutor(events) }
             };
         }
 
