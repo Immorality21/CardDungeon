@@ -23,7 +23,7 @@ MonoBehaviour:
   SpawnModifierStat: 6
   SpawnModifierRate: 5
   SpawnRequirements: []
-  Difficulty: 8
+  Difficulty: 20
   Options:
   - Label: Catch the rope
     Kind: 0

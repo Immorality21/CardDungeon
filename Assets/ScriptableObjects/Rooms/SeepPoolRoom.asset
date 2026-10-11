@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af198de09aeca534b959292a4b71d567, type: 3}
+  m_Name: SeepPoolRoom
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.RoomSO
+  Name: Seep Pool
+  Width: 4
+  Height: 5
+  Color: {r: 0.13, g: 0.22, b: 0.18, a: 1}
+  Kind: 0
+  PossibleEvents: []
+  EnemySpawnTable:
+  - Enemy: {fileID: 11400000, guid: 9685597a4b344794c80f56087feb9731, type: 2}
+    SpawnChance: 1
+    EvaluationCount: 1
+  - Enemy: {fileID: 11400000, guid: 9685597a4b344794c80f56087feb9731, type: 2}
+    SpawnChance: 0.9
+    EvaluationCount: 1
+  - Enemy: {fileID: 11400000, guid: 04bc3cd3328fee344b87f24b45b373e1, type: 2}
+    SpawnChance: 0.6
+    EvaluationCount: 1
+  - Enemy: {fileID: 11400000, guid: 9685597a4b344794c80f56087feb9731, type: 2}
+    SpawnChance: 0.3
+    EvaluationCount: 1

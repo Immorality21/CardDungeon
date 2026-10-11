@@ -106,6 +106,13 @@ namespace Assets.Scripts.Heroes.UI
             }
         }
 
+        /// <summary>
+        /// Draws an arrowhead at the B end of every edge. Off by default: a sphere grid is undirected.
+        /// The campaign map editor turns it on, because a campaign link reads "A opens B" and which end
+        /// is which is the whole point of the line.
+        /// </summary>
+        public bool DrawArrows { get; set; }
+
         public Vector2 Pan
         {
             get { return _pan; }
@@ -631,6 +638,11 @@ namespace Assets.Scripts.Heroes.UI
                 painter.MoveTo(a.Position);
                 painter.LineTo(b.Position);
                 painter.Stroke();
+
+                if (DrawArrows)
+                {
+                    DrawArrowhead(painter, a.Position, b.Position, b.IsStart ? NodeRadius + 5f : NodeRadius);
+                }
             }
 
             if (_ghostVisible && _nodes.TryGetValue(_ghostFromKey, out var from))
@@ -641,6 +653,30 @@ namespace Assets.Scripts.Heroes.UI
                 painter.LineTo(_ghostTo);
                 painter.Stroke();
             }
+        }
+
+        /// <summary>A filled arrowhead on the from-to line, its tip on the target node's rim.</summary>
+        private void DrawArrowhead(Painter2D painter, Vector2 from, Vector2 to, float targetRadius)
+        {
+            var line = to - from;
+            if (line.sqrMagnitude < 1f)
+            {
+                return;
+            }
+
+            var direction = line.normalized;
+            var normal = new Vector2(-direction.y, direction.x);
+            var tip = to - direction * (targetRadius + 2f);
+            const float length = 14f;
+            const float halfWidth = 7f;
+
+            painter.fillColor = painter.strokeColor;
+            painter.BeginPath();
+            painter.MoveTo(tip);
+            painter.LineTo(tip - direction * length + normal * halfWidth);
+            painter.LineTo(tip - direction * length - normal * halfWidth);
+            painter.ClosePath();
+            painter.Fill();
         }
 
         private Color EdgeColorFor(string a, string b)

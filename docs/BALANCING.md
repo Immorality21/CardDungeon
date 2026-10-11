@@ -2810,3 +2810,28 @@ debuff they touch is Poison Dart's poison.
   ratio 5.3x.
 - **An elite needs a kill-time check.** The Bone Golem at HP 40 took 11 party turns; HP 30 took 8.7.
 
+## §5ah — A challenge branch off an optional run (2026-10-11, the Seeping Cistern)
+
+The Cistern opens after **The Warrens** and is `Challenge`, so the suite measures it against the
+strongest end state. That is only one of the three parties worth checking - build the curve seeded
+from the Warrens' and the March's end states too (`RunCurve.Build(run, report.Party, rules,
+seed.EndRoster, seed.EndLifetimeXp)`):
+
+| party walking in | The Sump / The Mother Pool (closed form) |
+|---|---|
+| Warrens graduate (Warrior + Paladin; the Rogue joins on floor 1) | 2.94 / 0.58 |
+| after the Drowned March (4 wide) | 0.36 / 0.53 |
+| strongest end state (what the suite reads) | 0.31 / 0.47 |
+
+- **Rooms with a 50% third body read as nothing to a four-wide party.** The first draft (one sure body,
+  two rolled) gave 0.14 / 0.40 at the strongest state and a boss room **7.5x** its trash, which failed
+  `BossesStandProportionateToTheirLevel`. Making the second body certain in every room (and Difficulty
+  3.4 -> 3.6 on floor 1) took the trash to 0.15 average room danger, the finale to 0.47 and the ratio to
+  **3.6x** without touching the boss. Same lesson as §5x: for a wide party the body count is the dial.
+- **The same change multiplies the graduate's load** (1.30 -> 2.94 on floor 1). That is the intended
+  wall - the run shows up early and is meant for later - but it means a challenge run's floor 1 cannot
+  be tuned for a teaser the way the Blood Stair's was (§5w): Bloater-heavy rooms punish a two-hero party
+  far more than a four-hero one.
+- **The Bloater's death burst is not in the closed form** (reactions never are). The suite reads the
+  Cistern without it; measure it with the floor simulator before tightening the run further.
+

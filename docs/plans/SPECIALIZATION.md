@@ -329,7 +329,7 @@ candidate for.
    | hero | source | where | why there |
    |---|---|---|---|
    | **Tinkerer** | **clearing a run** (`RunDefinitionSO.JoinsOnClear`) | The Drowned March | the Ashen Deep's answer, the **Fire Cloak**, is on the Tinkerer's grid - so the Tinkerer has to arrive *before* the fire biome, not after it |
-   | **Rogue** | **a room event** (`RoomEventOutcome.JoinsHero`) | the Cutpurse, in The Warrens' Thieves' Den | a chance, in a repeatable run: miss the Agility check and they escape with a potion, and turn up again another night |
+   | **Rogue** | **a room event** (`RoomEventOutcome.JoinsHero`) | the Cutpurse, in The Warrens' Thieves' Den | a chance, in a repeatable run: miss the Agility check and they escape with a potion, and turn up again another night. **Since 2026-10-11 a long shot (Agility 20); the sure source is the captive of The Seeping Cistern**, the Warrens' secret challenge branch |
    | **Cleric** | **a secret node** (a captive in it) | **The Drowned Chapel**, new, off the Drowned March | the first **hero-keyed** node: it gates on the Tinkerer, the first gate whose answer is a *specific* thing |
 
    The roster now arrives Warrior → Paladin (tutorial) → Ranger + Tinkerer (Drowned March) → Cleric

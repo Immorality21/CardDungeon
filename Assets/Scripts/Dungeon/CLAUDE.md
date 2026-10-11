@@ -7,6 +7,7 @@
 - **CampaignSO** (`Assets/Resources/Campaign.asset`, Resources-loaded like `ItemCatalogSO`) is the story line: a **directed graph of runs**, not a list. Each `CampaignNodeEntry` holds a `RunDefinitionSO`, the runs that must be cleared before it opens (`Requires` + `UnlockMode` All/Any), `Secret` (hidden on the map until unlocked), `Optional` (drawn as side content), and a `MapPosition`. Branching is the point: clearing one run can open two, one rejoining the main line (`UnlockMode.Any` on the rejoin node) and one dead-ending as optional/secret content.
 - **CampaignOps** is the pure rules layer over `(campaign, completedRunKeys, activeRunKey)` — the same shape as `SphereGridOps`. `GetStates` resolves every node to `Hidden / Locked / Available / InProgress / Completed` plus `CanStart`/`CanContinue`. **While a run is in progress nothing else is startable**, because starting a second run would overwrite `Run.json` and silently discard the first.
 - **Completion is meta progress, not run state.** `MetaProgressSaveData.CompletedRunKeys` records every run cleared to its final level (written by `DungeonManager.OnDungeonCleared` via `MetaProgressManager.MarkRunCompleted`), so it survives death and re-authoring. `RunDefinitionSO.Repeatable` decides whether a cleared run can be started again — **false for the tutorial**, which is what stops it being replayed.
+- **Edit the graph in `Tools ▸ Dungeon ▸ Campaign Map Editor`** (`Editor/CampaignMapEditorWindow`, or the Open button on the asset's inspector) *(2026-10-11)*. It draws **every** node, secret ones included, on the same `SphereGridView` the hub map uses, with arrows from prerequisite to the run it opens (`SphereGridView.DrawArrows`) and a caption naming who each run hands over and which hero it needs. Drag moves `MapPosition` (snapped to 10); **Connect** toggles an entry in the target's `Requires`; **Add Run** places a run asset (or the first one not yet on the map; **New Run…** makes one); the side pane edits the node and, under it, the run asset itself. **Preview save** runs `CampaignOps.GetStates` over a pretend save - click runs to mark them cleared, owned heroes are the starting lineup plus everyone the cleared runs hand over - and fades whatever the map would hide. A red ring is a problem the guard-rail tests would fail on; the empty-selection pane lists them all.
 - **Authoring guard rails.** `CampaignOps` also answers every way a graph can be authored wrong: nodes with no run, duplicate runs, prerequisites outside the campaign, no root, and cycles/anything downstream of one (`GetUnreachableNodes`). `CampaignAssetTests` runs all of these over the real asset, plus "every run in the project is on the map".
 - **The map screen** is `Assets/Scripts/MainMenu/CampaignMapUI.cs` (+ `CampaignPresenter`), reusing `SphereGridView` as its graph renderer. Positions are authored, or auto-laid-out by tier when none are set. See the MainMenu guide.
 - **Play order is the graph, not `SequenceIndex`.** `CampaignOps.ComputeTiers` resolves how many runs sit before each one, using the same rule as unlocking: an `All` node lands one past its *deepest* prerequisite, an `Any` node one past its *shallowest* (the route the player can actually arrive on). `GetNodesInPlayOrder` sorts by that. Cycle members never resolve and stay at tier 0 - `GetUnreachableNodes` is what reports them. The balance analyzer walks this order; `SequenceIndex` survives only as a hint the graph supersedes.
@@ -22,6 +23,7 @@
 | The Hollow Vault | `HollowVault` | 1 | no | Ashen Deep **and** The Warrens (`All`) | Gilded Hoarder (120 HP override) |
 | The Blood Stair | `BloodStair` | 5, all hand-drawn | no | The Threshold (optional, **`Challenge`**) | Abyssal Warden (floor 4), **Cinder Tyrant** (floor 5) |
 | The Drowned Chapel | `DrownedChapel` | 2 | no | The Drowned March **+ the Tinkerer** (optional, **`Secret`**) | Abyssal Warden (120 HP override) + 2 Bog Shamans |
+| The Seeping Cistern | `SeepingCistern` | 2 | no | The Warrens (optional, **`Secret`**, **`Challenge`**) | **Mother Ooze** (160 HP / 16 Str override) + 2 Spore Bloaters - the **Rogue** is the captive on floor 1 |
 
 **The Blood Stair is a challenge run** *(2026-09-28)*. `RunDefinitionSO.Challenge` means *opens early,
 meant late*: it sits on the map right after the tutorial so a new player sees that far bigger fights
@@ -47,6 +49,16 @@ boss attacks as Fire and resists it, so the Fire Cloak is the answer to it - see
 `docs/BALANCING.md` §5e for the four tuning passes that shape took. The cloak is the **Mage's** since
 2026-10-07 (third node of her fire branch), and she is guaranteed before the Ashen Deep because the
 Sealed Archive sits on the main line ahead of the March.
+
+**The Seeping Cistern** *(2026-10-11)* is the Warrens' second branch: a `Secret` + `Challenge` run that
+appears once the Warrens is cleared - it rewards the player who explores the side branch - but is
+balanced for a party that has walked the March. The **Rogue** is its captive (floor 1, The Sump), the
+guaranteed way in; the Cutpurse gamble in the Warrens is still there, at Agility 20 so most players
+meet the Rogue here instead. The biome is poison: Bile Slimes (Caustic Spit), Spore Bloaters that burst
+into poison when they die, and the **Mother Ooze**, who buds two slimes off below 60% health. Every one of
+them is weak to Fire. Modelled attrition (closed form): **2.94 / 0.58** for the Warrior + Paladin a
+Warrens clear produces (a wall on purpose), **0.36 / 0.53** after the Drowned March, **0.31 / 0.47**
+against the strongest end state the suite measures it at. Sandbox: `Sandbox/SeepingCistern.asset`.
 
 The tutorial forks: the main line runs **`SealedArchive` → `DrownedMarch`** *(the Archive inserted 2026-10-07)*. The Sealed Archive is two short floors whose captive is the **Mage**, on floor 1 so he fights the Broken Orrery's Stone Sentinel (weak to Lightning) with you; it is repeatable like every ordinary run, which makes the March the run rule 6 judges (`BALANCING.md` §5ad). The other branch, `TheWarrens`, is an optional repeatable dead end whose job is to fund the hub's Gold sinks (it predates the removal of the party-slot purchase). Its boss **does not drop Void Shard** (2026-10-06): a guaranteed scarce drop on a repeatable run is an infinite tap. Re-clearable runs in general are `docs/plans/REVISITS.md`. Modelled attrition: tutorial `0.25 / 0.34 / 0.32 / 0.32`, Drowned March `0.18 / 0.29 / 0.44 / 0.54`, Warrens `0.22 / 0.32`.
 
@@ -171,14 +183,15 @@ the intended behaviour, not a bug to design around.
 - **The party that enters is the party the player picked.** `DungeonManager.FieldedHeroes()` returns `PartySaveData.SelectedHeroKeys` resolved through `HeroRoster` and clamped to `MetaProgressManager.GetPartyCap()` — not every hero owned. It feeds `Party.Initialize` on both the fresh and the resumed path, and `BestRosterStats()` (the room-event stat gates), so a benched hero's Intelligence cannot open a tome they are not there to read. Falls back to the inline `_heroDefinitions` when no `PartyRosterSO` is wired, which is what keeps free-play in the scene working.
 - **Where heroes come from** *(2026-09-30)* - three sources, and `HeroUnlockTests.EveryHeroInTheRoster_HasAWayIn`
   fails the build if a roster hero has none:
-  - **a captive** - `RunLevelEntry.RescueHero` (Paladin, Ranger, Warlock, Cleric), below;
+  - **a captive** - `RunLevelEntry.RescueHero` (Paladin, Mage, Ranger, Warlock, Cleric, Cultist, Rogue), below;
   - **a run's clear** - `RunDefinitionSO.JoinsOnClear` (the **Tinkerer**, Drowned March). Granted by
     `DungeonManager.GrantRunClearHero` on the final level, before `Party.CommitProgress`, so it rides
     the clear's own write and cannot be forfeited. Counted as guaranteed by
     `CampaignOps.AddRescuedHeroKeys`, so a node may gate on it, and grown into `RunCurve.EndRoster` so
     the runs it opens are measured with them;
   - **a room event** - `RoomEventOutcome.JoinsHero` (the **Rogue**, the Cutpurse in The Warrens'
-    Thieves' Den). A chance, not a promise: **not** counted as guaranteed and invisible to the balance
+    Thieves' Den - a long shot since 2026-10-11; the Rogue's sure source is now the captive of The
+    Seeping Cistern). A chance, not a promise: **not** counted as guaranteed and invisible to the balance
     model, so never gate a node on a hero met this way. See the Room Events guide.
 
   Every mid-level join goes through `DungeonManager.JoinParty` (live party, magic slots, summons,

@@ -88,3 +88,11 @@ MonoBehaviour:
     Secret: 0
     Optional: 0
     MapPosition: {x: 380, y: -60}
+  - Run: {fileID: 11400000, guid: 00d9c466aa413b1428906eb698af9567, type: 2}
+    Requires:
+    - {fileID: 11400000, guid: e90ff9758e2770148a54d188a5913394, type: 2}
+    RequiresHeroes: []
+    UnlockMode: 0
+    Secret: 1
+    Optional: 1
+    MapPosition: {x: 380, y: 130}

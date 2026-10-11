@@ -46,8 +46,9 @@ does still carry an unused `ScalingStat` if that ever needs revisiting.
   level and are owned only once it is cleared. `RoomEventSpawn.GrantsOnlyOwnedHeroes` keeps such an
   event from being placed once every hero it can grant is owned (read off the *committed* roster, so
   placement is stable across a save and resume). A failed attempt therefore leaves the meeting for a
-  later run, which is why the one authored so far - **the Cutpurse** (Agility 8, Rogue on a pass, a
-  lost consumable on a miss) - lives in a room only **The Warrens**, a repeatable run, builds (the
+  later run, which is why the one authored so far - **the Cutpurse** (Agility **20** since 2026-10-11 -
+  roughly a 1-in-4 pass for an early party, so most players meet the Rogue as the captive of The
+  Seeping Cistern instead; Rogue on a pass, a lost consumable on a miss) - lives in a room only **The Warrens**, a repeatable run, builds (the
   Thieves' Den). A hero met this way is a chance, not a guarantee: never gate a campaign node on one.
 - **Nothing here is a parallel effect system.** Damage/heal run through the same `IEffectExecutor`s
   magic uses (with `flatPower: true` — an event's numbers are the event's, and there is no caster),

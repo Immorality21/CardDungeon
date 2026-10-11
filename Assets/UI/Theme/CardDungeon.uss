@@ -3497,6 +3497,22 @@
     color: var(--cd-parchment);
 }
 
+/* Campaign Map Editor only (CampaignMapEditorWindow): the game never draws a secret node until it
+   opens, and never draws a hidden one at all, so neither class reaches the hub screen. */
+.cm-node--secret {
+    border-color: rgb(120, 200, 160);
+}
+
+.cm-node--hidden {
+    opacity: 0.2;
+}
+
+/* An authoring problem the guard-rail tests would fail on. */
+.cm-node--warning {
+    border-color: rgb(230, 60, 60);
+    border-width: 4px;
+}
+
 /* ---- Home window sizing ---- */
 /* Home stacks ten menu buttons plus the purse. At the shared 62% cap the flex layout
    ran out of room and squeezed the last child to zero height, so Gold/Essence rendered outside

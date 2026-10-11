@@ -312,6 +312,15 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The Seeping Cistern + the Campaign Map Editor** (2026-10-11) — the Dungeon, Enemies and Room Events
+  guides, `BALANCING.md` §5ah. A new two-floor **`Secret` + `Challenge`** run off **The Warrens** (it
+  appears once the Warrens is cleared): the **Rogue** is its captive, the guaranteed way in, and the
+  Cutpurse gamble is now a long shot (Agility **8 → 20**). Three PixelLab enemies, all weak to Fire: the
+  **Bile Slime** (Caustic Spit, poison), the **Spore Bloater** (bursts into poison on death, a reaction),
+  and the boss **Mother Ooze** (Toxic Deluge on everyone, buds off two slimes). Attrition 2.94 / 0.58 for
+  a Warrens graduate, 0.36 / 0.53 after the March. **`Tools ▸ Dungeon ▸ Campaign Map Editor`**: the story
+  graph with secret nodes, arrows, drag/connect/add/remove, the run asset inline, a preview save and the
+  guard-rail checks. Suite 1538 / 0; the boss fight checked in play (`Sandbox/SeepingCistern.asset`).
 - **The Warlock's workbook pass** (2026-10-11) — the Heroes, Magic, Combat and Enemies guides. From the
   owner's reviewed workbook rows: **Blood Shower** (10 + INT Shadow on every enemy, 12% health) replaces
   Cinderstorm at the blood branch's tip (Cinderstorm is now the Cinder Tyrant's enemy-only spell);

@@ -68,6 +68,20 @@ difficulty 2.45 / 2.8 / 2.6, XP x1.75). PixelLab art, picked from two candidates
 Grave Touch, Soul Bolt and Death Chill are `EnemyOnly` (`Enemies/Abilities/`). Rooms: Ossuary, Ghoul Pit,
 Crypt, Sepulchre, Boneworks. Sandbox: `CatacombsTrash` and `CatacombsLich`.
 
+## The oozes - the Seeping Cistern set *(2026-10-11)*
+
+Three enemies for **The Seeping Cistern** (the Warrens' secret challenge branch, the Rogue's captivity).
+All immune to Poison and **weak to Fire** (-50%); PixelLab art, two candidates each.
+
+| enemy | shape | does |
+|---|---|---|
+| **Bile Slime** | HP 17 STR 4 END 3 AGI 4, `Bloodless` | *Caustic Spit* (35%): Strength-scaled hit + Poison 2 for 3 turns (60% to land); resists Ice 25 |
+| **Spore Bloater** | HP 10 STR 3 AGI 3, filler wage (5 XP) | reaction **Rupture**: on death, Poison 2 for 3 turns on every hero (70% each) - kill it last, or cure after |
+| **Mother Ooze** | boss, pinned HP 160 STR 16 on its floor, 64 px, `CombatScale` 1.8 | *Toxic Deluge* (all heroes: hit + Poison, 50%), *Caustic Spit*, **Bud off** (2 Bile Slimes, once, below 60%), plus the boss signature; resists Ice 50 / Shadow 25 |
+
+Caustic Spit and Toxic Deluge are `EnemyOnly` (`Enemies/Abilities/`). Rooms: Sump Channel, Bloat Nest,
+Seep Pool. Slimes drop the Antidote Salve (25%). Sandbox: `SeepingCistern`.
+
 ## Reactions (`EnemySO.Triggers`) - what an enemy does on its own *(2026-10-07)*
 
 An enemy can carry `TriggeredEffect`s: when something happens to it in a fight (it dies, an ally falls,
@@ -81,6 +95,7 @@ meaning across difficulty tiers - a flat number does not scale with `LevelEnemyT
 |---|---|---|
 | Cinder Imp | **Cinder Burst** | on death: 6% of every hero's max health as Fire |
 | Slag Hound | **Pack Fury** | when an ally falls: +50% of its own Strength for the fight, once per fight |
+| Spore Bloater | **Rupture** | on death: Poison 2 for 3 turns on every hero, 70% each |
 | Gilded Hoarder | **Molten Gold** | when hit by Fire: 15% of the attacker's max health back as Fire, once per turn - its fire weakness becomes a trade |
 
 Measure a new one with the floor simulator before keeping it - the imp's burst tipped Emberfall from
