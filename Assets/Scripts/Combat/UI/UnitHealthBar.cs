@@ -40,6 +40,7 @@ namespace Assets.Scripts.Combat
         private static readonly Color PoisonGreen = new Color(0.65f, 0.9f, 0.3f);
         private static readonly Color BloodRed = new Color(0.9f, 0.25f, 0.3f);
         private static readonly Color BlindGrey = new Color(0.72f, 0.72f, 0.78f);
+        private static readonly Color LeechMagenta = new Color(0.9f, 0.3f, 0.6f);
 
         private static Sprite _centerSprite;
         private static Sprite _leftSprite;
@@ -372,6 +373,10 @@ namespace Assets.Scripts.Combat
                         break;
                     case BuffType.Blinded:
                         list.Add(new IconDesc { Name = "eye", Tint = BlindGrey });
+                        break;
+                    // Leeching Curse: the cross says "healing comes from this", magenta says whose.
+                    case BuffType.Leeched:
+                        list.Add(new IconDesc { Name = "cross", Tint = LeechMagenta });
                         break;
                 }
             }

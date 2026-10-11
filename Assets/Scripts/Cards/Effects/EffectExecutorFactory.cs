@@ -17,13 +17,16 @@ namespace Assets.Scripts.Cards.Effects
         /// <param name="killsOf">How many of a unit's kind the player has defeated (the Bestiary), read
         /// by <see cref="SpellEffectType.Disassemble"/>. Null reads every machine as never defeated.</param>
         /// <param name="roll">A uniform roll in [0, 1) for chance-based effects. Null uses Unity's.</param>
+        /// <param name="living">The living units on a caster's side, read by a drain shared with the
+        /// party. Null heals the caster alone.</param>
         public EffectExecutorFactory(
             Func<TurnManager> clock = null,
             Func<IChargeBank> charges = null,
             Func<CombatEvents> events = null,
             Func<Func<ICombatUnit, int>> killsOf = null,
             Func<Func<float>> roll = null,
-            Func<Func<ICombatUnit, List<ICombatUnit>>> fallen = null)
+            Func<Func<ICombatUnit, List<ICombatUnit>>> fallen = null,
+            Func<Func<ICombatUnit, List<ICombatUnit>>> living = null)
         {
             _executors = new Dictionary<SpellEffectType, IEffectExecutor>
             {
@@ -33,7 +36,7 @@ namespace Assets.Scripts.Cards.Effects
                 { SpellEffectType.Debuff, new DebuffEffectExecutor() },
                 { SpellEffectType.HealthCost, new HealthCostEffectExecutor(events) },
                 { SpellEffectType.TurnDelay, new TurnDelayEffectExecutor(clock) },
-                { SpellEffectType.Drain, new DrainEffectExecutor(events) },
+                { SpellEffectType.Drain, new DrainEffectExecutor(events, living) },
                 { SpellEffectType.RestoreCharge, new RestoreChargeEffectExecutor(charges) },
                 { SpellEffectType.Disassemble, new DisassembleEffectExecutor(killsOf, roll, events) },
                 { SpellEffectType.Revive, new ReviveEffectExecutor(events, fallen) },

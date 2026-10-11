@@ -29,3 +29,5 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 03000000
   TagDuration: 3
+  CanCrit: 0
+  EnemyOnly: 1

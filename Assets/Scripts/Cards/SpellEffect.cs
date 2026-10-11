@@ -61,6 +61,14 @@ namespace Assets.Scripts.Cards
         public int BonusPercent;
 
         /// <summary>
+        /// A <see cref="SpellEffectType.Drain"/> that heals every living unit on the caster's side by
+        /// the drained amount, not just the caster - the awakened Siphon Soul (Soul Feast). Needs the
+        /// fight's side (<see cref="EffectResolver.LivingAllies"/>); without one only the caster is
+        /// healed. Ignored by every other effect type.
+        /// </summary>
+        public bool DrainToParty;
+
+        /// <summary>
         /// A field-for-field copy, for the places that adjust an authored effect before it resolves
         /// (an upgrade bonus, a summon's grid upgrades). Copying by hand dropped a field each time
         /// one was added - <see cref="ScalingStat"/> once, which silently made upgraded spells weaker.

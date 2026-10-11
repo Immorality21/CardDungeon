@@ -68,7 +68,19 @@ hides Scaling Stat for it.
   with a 30 damage bolt drains off 2), so it composes with any Damage effect: Drain Life is Damage +
   Drain 50. A drain that heals nothing (caster at full) floats nothing. `EffectResolver.Execute` runs **three** passes now: benefits, then drains (so a
   drain reads the whole cast's damage whatever the authoring order), then costs. No upgrade bonus, no
-  caster stat; floor of 1 when anything landed, clamped at max health.
+  caster stat; floor of 1 when anything landed, clamped at max health. **`SpellEffect.DrainToParty`**
+  *(2026-10-11, Soul Feast)* heals every living unit on the caster's side the full drained amount
+  (not a split), read off **`EffectResolver.LivingAllies`** (set by `CombatManager` to `HeroSideUnits()`
+  and by the simulator to the standing heroes, like `FallenAllies`); with no side known it heals the
+  caster alone. The inspector draws it as "Shared With Party" on a Drain.
+- **`BuffType.Leeched`** *(2026-10-11, the Leeching Curse)*: a debuff whose `Power` is a percent. Its
+  handler stores it through `ApplyOverTime` - the record that carries an amount and a source (the
+  curser) - but is not an `IOverTimeBuffHandler`, so it never ticks. **`LeechTracker`** (built per fight
+  beside the `RetaliationTracker`, live and in the simulator) heals the curser that share of every
+  Attack/Ability hit his side lands on the cursed unit (at least 1; ticks, prices and reactions don't
+  feed it; a fallen curser gets nothing), as a reaction announced "Leeching Curse". A status: curable,
+  immune-able, a magenta cross on the HP bar, "Leech" in the Bestiary. `CombatBuffTracker.GetStatus`
+  reads the record.
 - **`SpellEffectType.RestoreCharge`** gives `Power` charges back to one of the target's ability
   slots (Life Tap). Which slot is `SpellcastAction.ChargeSlot` — the player's pick from the picker
   `MagicSelectionUI.ShowChargeChoice` opens — or `AnyChargeSlot` (-1): the most-spent one. A pick only
@@ -179,7 +191,10 @@ stat changes are answered by stats, and `StatusImmunityTests` fails on an asset 
 **Shown once one has been defeated**: the Inspect page and the hub Bestiary list them under
 "Immune to" (`BestiaryPresenter.ImmunityLines`). Before the first kill *every* enemy shows one
 `???` row, immune or not, so the row itself leaks nothing; after it, an enemy with no immunities
-has no section. The Stone Sentinel is immune to Bleed and Poison.
+has no section. The Stone Sentinel is immune to Bleed and Poison. **An immunity can also come from what
+a unit is** *(2026-10-11)*: a `UnitTraits.Bloodless` enemy never bleeds (`StatusImmunity.TraitImmune`,
+folded into `DefinitionImmune`, which `Enemy` and `SimUnit` both call), and `ImmunityLines` lists it
+like an authored one.
 
 **Silence gates casting and nothing else.** A silenced hero's Magic command is disabled
 (`RoomActionUI.BuildCommandMenu`), a silenced enemy's `CastMagic` actions become ineligible
@@ -233,7 +248,7 @@ level-scoped health pool, and a cure would clear it only until the next room re-
   | Warrior (2026-09-04) | **Cleave** (STR, AllEnemies, Physical) · **Sunder** (STR, damage + Endurance debuff, Metal) · **Bulwark** (STR, AllAllies Endurance — the mirror of War Cry) |
   | Paladin / Cleric (2026-09-05) | ~~Smite~~ (removed 2026-10-10; the Cleric's Divine Bolt replaced it) · **Consecrate** (SPR, Holy, AllEnemies) · **Benediction** (SPR, AllAllies heal) · **HolyTouch** (SPR, SingleAlly heal — the Paladin's free starting signature, so it is deliberately the weakest heal in the game) |
   | Ranger / Rogue | **AimedShot** (AGI, single) · **Volley** (AGI, AllEnemies) · **Snare** (AGI, Agility debuff) · **Backstab** (AGI, damage + Bleeding) · **SmokeBomb** (Blind on every enemy, 50% each — a party Agility buff until 2026-10-09) |
-  | Warlock | **Bloodbolt** (INT, Shadow, costs 8% max health) · **Blood Pact** (was Sacrifice: INT+STR on an ally for 15% max health) · **Drain Life** · **Life Tap** · **Siphon Soul** (2026-10-04) |
+  | Warlock | **Bloodbolt** (INT, Shadow, costs 8% max health) · **Blood Pact** (was Sacrifice: INT+STR on an ally for 15% max health) · **Drain Life** · **Life Tap** · **Siphon Soul** (2026-10-04) · **Blood Shower** (INT, Shadow, all enemies, 12% health - replaced Cinderstorm, now the Cinder Tyrant's `EnemyOnly` spell) and the awakenings **Dark Pact** / **Dark Pact II** (Life Tap restoring 2 / 3), **Crimson Rain** (Blood Shower + 60% Bleed) and **Soul Feast** (Siphon Soul, drain shared with the party) and **Leeching Curse** (the drain tip, which replaced Oil Slick - now the Dragon's and Hex Weaver's `EnemyOnly` spell) (2026-10-11) |
 
   Several carry combo tags deliberately: Cleave is Physical (Infection) and lays it on the *whole room*, Sunder is Metal (Conductor; Smite was too until it was removed). And the holy line is why the Mirefather and the Abyssal Warden are now **weak to Holy** while the Stone Sentinel resists it — a damage type nothing reacts to is arithmetically inert, which `ElementalContentTests` fails on.
 - **MagicCatalog** (singleton): scene-wired `List<MagicSO>` of every magic in the game, keyed by `Key`. Used to resolve saved magic keys when restoring equipped slots, and to list the ability collection in the hub Forge. **Edit `_allMagic` on `Assets/Prefabs/MagicCatalog.prefab`, not on the scene instance.** It is a prefab instance in *both* scenes, and overriding the array *size* on an instance grows it with **nulls** — which is how the cloaks first shipped castable in combat but unresolvable from a save and invisible in the Forge. `ElementalContentTests.EveryMagicAsset_IsInTheCatalogPrefab` fails on both mistakes now.

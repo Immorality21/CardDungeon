@@ -33,6 +33,7 @@ namespace Assets.Scripts.Cards.Buffs
                 { BuffType.Haste, new HasteBuffHandler() },
                 { BuffType.Silenced, new SilencedBuffHandler() },
                 { BuffType.Blinded, new BlindedBuffHandler() },
+                { BuffType.Leeched, new LeechedBuffHandler() },
 
                 // Over-time effects. Their differences are the whole point, so they are stated here
                 // rather than buried per class:
@@ -111,6 +112,7 @@ namespace Assets.Scripts.Cards.Buffs
             BuffType.Slow,
             BuffType.Silenced,
             BuffType.Blinded,
+            BuffType.Leeched,
             BuffType.Burning,
             BuffType.Poisoned,
             BuffType.Bleeding

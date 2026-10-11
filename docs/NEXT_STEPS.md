@@ -312,6 +312,23 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The Warlock's workbook pass** (2026-10-11) — the Heroes, Magic, Combat and Enemies guides. From the
+  owner's reviewed workbook rows: **Blood Shower** (10 + INT Shadow on every enemy, 12% health) replaces
+  Cinderstorm at the blood branch's tip (Cinderstorm is now the Cinder Tyrant's enemy-only spell);
+  Essence awakenings **Life Tap → Dark Pact (2 charges) → Dark Pact II (3)**, **Blood Shower → Crimson
+  Rain** (+60% Bleed on every enemy) and **Siphon Soul → Soul Feast** (the drain heals the whole party,
+  `SpellEffect.DrainToParty` + `EffectResolver.LivingAllies`). New trait **`UnitTraits.Bloodless`** -
+  never bleeds (`StatusImmunity.TraitImmune`), shown in the Bestiary; Skeleton, Bone Golem, Lich, Wight,
+  both machines and the Stone Sentinel; the Ghoul now bleeds (owner). `WarlockKitTests`; suite 1526 / 0; checked in play
+  (`Sandbox/WarlockKit.asset`): Blood Shower's price, Soul Feast healing both heroes 23 off 68 damage,
+  Dark Pact II refilling a slot, Crimson Rain bleeding a Slag Hound and not the Skeletons. **Leeching
+  Curse** (owner's pick) replaced Oil Slick at the drain branch's tip: `BuffType.Leeched` on one enemy,
+  3 turns - 30% of every blow or ability the Warlock's side lands on it heals him (`Cards/LeechTracker`,
+  live and in the simulator; a magenta cross on the HP bar; curable). Oil Slick is now the Dragon's and
+  Hex Weaver's `EnemyOnly` spell. Checked in play: +12 off his own 42 Bloodbolt, +7 off the Warrior's 26.
+  **Every Warlock ability has a +1 charge spur** (`MagicUpgrade` Charges, owner 2026-10-11; carried to its
+  awakening), so a full grid carries 3 of each and Dark Pact II's third charge lands. Suite 1531 / 0.
+  **Open:** Crimson Rain is a draft name; all numbers are first drafts.
 - **Ability upgrades on the sphere grid** (2026-10-09) — the Heroes and Magic guides. One node kind,
   `MagicUpgrade` (it replaced the crit-only node from earlier the same day): Power, CritChance, Duration,
   ApplyChance or Charges on one ability, summed per hero into an `AbilityGrant`, carried to the

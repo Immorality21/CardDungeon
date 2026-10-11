@@ -23,7 +23,7 @@ MonoBehaviour:
   HitFrames: []
   IsBoss: 0
   CombatScale: 1
-  Traits: 6
+  Traits: 134
   BaseStats:
     Values:
     - Type: 7

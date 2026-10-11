@@ -260,6 +260,115 @@ namespace Tests.EditMode
             Assert.IsFalse(result.Entries.Exists(e => ReferenceEquals(e.Target, caster)), "No \"+0\" over the caster.");
         }
 
+        [Test]
+        public void Drain_SharedWithParty_HealsEveryLivingAllyTheDrainedAmount()
+        {
+            var caster = new MockCombatUnit("Warlock", 1, 0, 40);
+            caster.Stats.Health = 10;
+            var ally = new MockCombatUnit("Warrior", 1, 0, 40);
+            ally.Stats.Health = 30;
+            var fallen = new MockCombatUnit("Cleric", 1, 0, 40);
+            fallen.Stats.Health = 0;
+            var enemy = new MockCombatUnit("Enemy", 1, 0, 100, isHero: false);
+            var drain = Flat(SpellEffectType.Drain, 50);
+            drain.DrainToParty = true;
+            var magic = Magic(MagicTargetType.SingleEnemy, Flat(SpellEffectType.Damage, 20), drain);
+            var resolver = new EffectResolver
+            {
+                LivingAllies = _ => new List<ICombatUnit> { caster, ally, fallen }
+            };
+
+            var result = resolver.Execute(
+                new SpellcastAction { Magic = magic, Caster = caster, Targets = new List<ICombatUnit> { enemy } },
+                new CombatBuffTracker());
+
+            Assert.AreEqual(20, caster.Stats.Health, "The caster gets the full 10.");
+            Assert.AreEqual(40, ally.Stats.Health, "So does every ally, not a split of it.");
+            Assert.AreEqual(0, fallen.Stats.Health, "A drain does not raise the fallen.");
+            Assert.AreEqual(2, result.Entries.Count(e => e.Healed > 0));
+        }
+
+        // --- Leeching Curse -----------------------------------------------------------------------
+
+        /// <summary>The Warlock curses <paramref name="enemy"/> through the real cast path.</summary>
+        private static void Curse(EffectResolver resolver, CombatBuffTracker tracker, ICombatUnit warlock, ICombatUnit enemy)
+        {
+            var curse = Magic(MagicTargetType.SingleEnemy, new SpellEffect
+            {
+                EffectType = SpellEffectType.Debuff, BuffType = BuffType.Leeched, Power = 30, Duration = 3
+            });
+            resolver.Execute(new SpellcastAction { Magic = curse, Caster = warlock, Targets = new List<ICombatUnit> { enemy } }, tracker);
+        }
+
+        [Test]
+        public void LeechingCurse_AnAllysHitOnTheCursed_HealsTheCurser()
+        {
+            var events = new CombatEvents();
+            var tracker = new CombatBuffTracker { Events = events };
+            var resolver = new EffectResolver { Events = events };
+            new LeechTracker(events, tracker);
+            var warlock = new MockCombatUnit("Warlock", 1, 0, 40);
+            warlock.Stats.Health = 10;
+            var warrior = new MockCombatUnit("Warrior", 10, 0, 40);
+            var enemy = new MockCombatUnit("Ghoul", 3, 0, 100, isHero: false);
+
+            Curse(resolver, tracker, warlock, enemy);
+            Assert.IsTrue(tracker.HasStatusEffect(enemy, BuffType.Leeched));
+
+            HealthOps.Damage(enemy, 20, new HealthSource(warrior, HealthCause.Attack), events);
+
+            Assert.AreEqual(16, warlock.Stats.Health, "30% of the Warrior's 20 goes to the Warlock.");
+            Assert.AreEqual(40, warrior.Stats.Health);
+        }
+
+        [Test]
+        public void LeechingCurse_IgnoresTheEnemySide_Ticks_AndAFallenCurser()
+        {
+            var events = new CombatEvents();
+            var tracker = new CombatBuffTracker { Events = events };
+            var resolver = new EffectResolver { Events = events };
+            new LeechTracker(events, tracker);
+            var warlock = new MockCombatUnit("Warlock", 1, 0, 40);
+            warlock.Stats.Health = 10;
+            var enemy = new MockCombatUnit("Ghoul", 3, 0, 100, isHero: false);
+            var otherEnemy = new MockCombatUnit("Skeleton", 3, 0, 100, isHero: false);
+            Curse(resolver, tracker, warlock, enemy);
+
+            HealthOps.Damage(enemy, 20, new HealthSource(otherEnemy, HealthCause.Attack), events);
+            HealthOps.Damage(enemy, 20, new HealthSource(warlock, HealthCause.OverTime), events);
+            Assert.AreEqual(10, warlock.Stats.Health, "only the curser's side's blows and abilities feed it");
+
+            warlock.Stats.Health = 0;
+            HealthOps.Damage(enemy, 20, new HealthSource(warlock, HealthCause.Ability), events);
+            Assert.AreEqual(0, warlock.Stats.Health, "a fallen curser is not healed");
+        }
+
+        [Test]
+        public void LeechingCurse_IsCurable_AndShowsAsAStatus()
+        {
+            Assert.IsTrue(StatusImmunity.IsStatus(BuffType.Leeched));
+            Assert.IsTrue(Assets.Scripts.Cards.Buffs.BuffHandlerRegistry.IsCurable(BuffType.Leeched));
+            Assert.AreEqual(1, LeechTracker.Leeched(2, 30), "at least 1 when anything landed");
+            Assert.AreEqual(0, LeechTracker.Leeched(0, 30));
+        }
+
+        [Test]
+        public void Drain_SharedWithParty_WithNoSideKnown_HealsTheCasterAlone()
+        {
+            var caster = new MockCombatUnit("Warlock", 1, 0, 40);
+            caster.Stats.Health = 10;
+            var enemy = new MockCombatUnit("Enemy", 1, 0, 100, isHero: false);
+            var drain = Flat(SpellEffectType.Drain, 50);
+            drain.DrainToParty = true;
+            var magic = Magic(MagicTargetType.SingleEnemy, Flat(SpellEffectType.Damage, 20), drain);
+
+            new EffectResolver().Execute(
+                new SpellcastAction { Magic = magic, Caster = caster, Targets = new List<ICombatUnit> { enemy } },
+                new CombatBuffTracker());
+
+            Assert.AreEqual(20, caster.Stats.Health);
+        }
+
         // --- the summon that fights beside the party -----------------------------------------------
 
         [Test]

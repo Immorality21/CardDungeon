@@ -12,7 +12,8 @@ namespace Assets.Scripts.Enemies
     {
         public bool IsImmuneTo(BuffType type)
         {
-            return Definition != null && StatusImmunity.ListContains(Definition.StatusImmunities, type);
+            return Definition != null
+                && StatusImmunity.DefinitionImmune(Definition.StatusImmunities, Definition.Traits, type);
         }
 
         /// <summary>What it is (<see cref="EnemySO.Traits"/>) - Mechanical, Undead...</summary>

@@ -423,6 +423,18 @@ namespace Assets.Scripts.Cards
             return buffs.Any(b => b.IsStatusEffect && b.BuffType == type);
         }
 
+        /// <summary>The record of a status on <paramref name="unit"/> - its amount and who applied it -
+        /// or null when it has none. Read-only use: the Leeching Curse's percent and curser.</summary>
+        public CombatBuff GetStatus(ICombatUnit unit, BuffType type)
+        {
+            if (unit == null || !_activeBuffs.TryGetValue(unit, out var buffs))
+            {
+                return null;
+            }
+
+            return buffs.FirstOrDefault(b => b.IsStatusEffect && b.BuffType == type);
+        }
+
         public void RemoveStatusEffect(ICombatUnit unit, BuffType type)
         {
             if (!_activeBuffs.TryGetValue(unit, out var buffs))

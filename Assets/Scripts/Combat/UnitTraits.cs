@@ -26,7 +26,11 @@ namespace Assets.Scripts.Combat
         Flying = 1 << 3,
         Beast = 1 << 4,
         Demon = 1 << 5,
-        Elemental = 1 << 6
+        Elemental = 1 << 6,
+
+        /// <summary>No blood to spill - bones, gears, stone. Never bleeds
+        /// (<see cref="Cards.StatusImmunity.TraitImmune"/>), whatever its own immunity list says.</summary>
+        Bloodless = 1 << 7
     }
 
     /// <summary>A unit whose <see cref="UnitTraits"/> can be read: <c>Enemy</c> and the balance model's

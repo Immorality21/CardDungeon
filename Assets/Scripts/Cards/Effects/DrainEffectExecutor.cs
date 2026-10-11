@@ -23,12 +23,18 @@ namespace Assets.Scripts.Cards.Effects
         private const float EffectDelay = 0.3f;
 
         private readonly Func<CombatEvents> _events;
+        private readonly Func<Func<ICombatUnit, List<ICombatUnit>>> _living;
 
         /// <param name="events">The fight's event stream, read when the effect lands. Null (a room
         /// event, a test) changes health without telling anyone.</param>
-        public DrainEffectExecutor(Func<CombatEvents> events = null)
+        /// <param name="living">The living units on a caster's side, for a drain shared with the party
+        /// (<see cref="SpellEffect.DrainToParty"/>). Null heals the caster alone.</param>
+        public DrainEffectExecutor(
+            Func<CombatEvents> events = null,
+            Func<Func<ICombatUnit, List<ICombatUnit>>> living = null)
         {
             _events = events;
+            _living = living;
         }
 
         public void Execute(
@@ -44,27 +50,54 @@ namespace Assets.Scripts.Cards.Effects
                 return;
             }
 
-            int heal = RunFear.Current.ScaleHealing(caster, Amount(effect.Power, DamageDealt(result, caster)));
-            if (heal <= 0)
+            int drained = Amount(effect.Power, DamageDealt(result, caster));
+            if (drained <= 0)
             {
                 return;
             }
 
-            int healed = HealthOps.Heal(
-                caster, heal, new HealthSource(caster, HealthCause.Ability), _events?.Invoke()).Healed;
-            if (healed <= 0)
+            foreach (var unit in Recipients(effect, caster))
             {
-                return;
+                int heal = RunFear.Current.ScaleHealing(unit, drained);
+                if (heal <= 0)
+                {
+                    continue;
+                }
+                int healed = HealthOps.Heal(
+                    unit, heal, new HealthSource(caster, HealthCause.Ability), _events?.Invoke()).Healed;
+                if (healed <= 0)
+                {
+                    continue;
+                }
+                result.Entries.Add(new EffectEntry
+                {
+                    Target = unit,
+                    Text = $"+{healed}",
+                    Healed = healed,
+                    Color = DrainColor,
+                    Delay = EffectDelay
+                });
             }
+        }
 
-            result.Entries.Add(new EffectEntry
+        /// <summary>Who the drain heals: the caster, or with <see cref="SpellEffect.DrainToParty"/>
+        /// every living unit on the caster's side (the caster always among them).</summary>
+        private List<ICombatUnit> Recipients(SpellEffect effect, ICombatUnit caster)
+        {
+            var recipients = new List<ICombatUnit> { caster };
+            var living = effect.DrainToParty ? _living?.Invoke() : null;
+            if (living == null)
             {
-                Target = caster,
-                Text = $"+{healed}",
-                Healed = healed,
-                Color = DrainColor,
-                Delay = EffectDelay
-            });
+                return recipients;
+            }
+            foreach (var unit in living(caster))
+            {
+                if (unit != null && unit.IsAlive && !recipients.Contains(unit))
+                {
+                    recipients.Add(unit);
+                }
+            }
+            return recipients;
         }
 
         /// <summary>What <paramref name="percent"/> of <paramref name="damage"/> drains: rounded

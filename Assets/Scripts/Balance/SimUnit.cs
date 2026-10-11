@@ -138,7 +138,8 @@ namespace Assets.Scripts.Balance
         /// <summary>Mirrors <c>Enemy.IsImmuneTo</c> off the same definition, so the model refuses what the game refuses.</summary>
         public bool IsImmuneTo(BuffType type)
         {
-            return Definition != null && StatusImmunity.ListContains(Definition.StatusImmunities, type);
+            return Definition != null
+                && StatusImmunity.DefinitionImmune(Definition.StatusImmunities, Definition.Traits, type);
         }
 
         public string DisplayName { get; set; }

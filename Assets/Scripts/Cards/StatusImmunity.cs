@@ -46,6 +46,7 @@ namespace Assets.Scripts.Cards
                 case BuffType.Regenerating:
                 case BuffType.Silenced:
                 case BuffType.Blinded:
+                case BuffType.Leeched:
                     return true;
                 default:
                     return false;
@@ -56,6 +57,22 @@ namespace Assets.Scripts.Cards
         public static bool ListContains(List<BuffType> immunities, BuffType type)
         {
             return immunities != null && type != BuffType.None && immunities.Contains(type);
+        }
+
+        /// <summary>
+        /// Immunities that come with what a unit <i>is</i> rather than with its list: a
+        /// <see cref="UnitTraits.Bloodless"/> unit never bleeds. A rule, so a new skeleton is covered
+        /// by its trait without anyone remembering to list Bleed on it.
+        /// </summary>
+        public static bool TraitImmune(UnitTraits traits, BuffType type)
+        {
+            return type == BuffType.Bleeding && (traits & UnitTraits.Bloodless) != 0;
+        }
+
+        /// <summary>The whole check for an authored definition: its list, then its traits.</summary>
+        public static bool DefinitionImmune(List<BuffType> immunities, UnitTraits traits, BuffType type)
+        {
+            return ListContains(immunities, type) || (IsStatus(type) && TraitImmune(traits, type));
         }
     }
 }

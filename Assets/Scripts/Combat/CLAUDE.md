@@ -26,7 +26,8 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
   starts (`ExpireCovers`, subscribed to `TurnStarted` in the `CombatEvents` constructor so both loops
   share it). A covered unit wears a light-blue shield icon; a redirected swing floats "Cover".
 - **`UnitTraits`** (`[Flags]`, on `EnemySO.Traits`, read through `IHasTraits` by `Enemy` and `SimUnit`):
-  Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental - what a unit *is*. `UnitTraitOps.Has`
+  Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental, **Bloodless** (2026-10-11: never
+  bleeds - the owner's rule for Blood Shower's bleed) - what a unit *is*. `UnitTraitOps.Has`
   is the check. Serialized as a bit mask: append, never reuse a bit. Read by Disassemble (Mechanical)
 and by the Cleric's Purge / Execute and the Archon's Hallowing (Undead, `SpellEffect.BonusVsTrait`);
 every enemy is tagged since 2026-10-07 (see the Enemies guide). **The undead are the Catacombs set**

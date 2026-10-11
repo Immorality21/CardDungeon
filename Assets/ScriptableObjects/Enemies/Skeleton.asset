@@ -25,7 +25,7 @@ MonoBehaviour:
   - {fileID: 8277127022244453497, guid: ca81382d33fe4ed9950c3d399b258e4b, type: 3}
   IsBoss: 0
   CombatScale: 1
-  Traits: 4
+  Traits: 132
   BaseStats:
     Values:
     - Type: 7

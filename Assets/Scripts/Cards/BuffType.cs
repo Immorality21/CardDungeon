@@ -47,6 +47,10 @@ namespace Assets.Scripts.Cards
         Guarded = 21,
         // A pool of points soaking damage before the bar (Combat.BarrierTable): the Cleric's Sacred
         // Shield and the Guardian Angel. Not a status - it lives on the fight's event stream.
-        Barrier = 22
+        Barrier = 22,
+        // The Warlock's Leeching Curse: a share of every hit the curser's side lands on the unit heals
+        // the curser (Cards.LeechTracker). The percent rides in CombatBuff.Amount, the curser in
+        // CombatBuff.Source. A status, so it is curable, immune-able and on the HP bar; it never ticks.
+        Leeched = 23
     }
 }

@@ -176,7 +176,9 @@ namespace Assets.Scripts.Cards
                 case SpellEffectType.TurnDelay:
                     return $"pushes its next turn back {effect.Power}% of a turn";
                 case SpellEffectType.Drain:
-                    return $"heals the caster {effect.Power}% of the damage dealt";
+                    return effect.DrainToParty
+                        ? $"heals the whole party {effect.Power}% of the damage dealt"
+                        : $"heals the caster {effect.Power}% of the damage dealt";
                 case SpellEffectType.RestoreCharge:
                     return effect.Power == 1
                         ? "restores 1 charge to an ability"
@@ -308,6 +310,7 @@ namespace Assets.Scripts.Cards
             { BuffType.Haste, "acts more often" },
             { BuffType.Silenced, "cannot use abilities" },
             { BuffType.Blinded, "physical hits may miss" },
+            { BuffType.Leeched, "of each hit on it heals the caster" },
         };
     }
 }

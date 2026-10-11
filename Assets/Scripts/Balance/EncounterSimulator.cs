@@ -288,8 +288,13 @@ namespace Assets.Scripts.Balance
             resolver.FallenAllies = caster => caster != null && caster.IsHero
                 ? startedStanding.FindAll(h => !h.IsAlive && !events.Sacrificed.Contains(h)).ConvertAll(h => (ICombatUnit)h)
                 : new List<ICombatUnit>();
+            // A drain shared with the party (Soul Feast) heals every standing hero.
+            resolver.LivingAllies = caster => caster != null && caster.IsHero
+                ? heroes.FindAll(h => h.IsAlive).ConvertAll(h => (ICombatUnit)h)
+                : new List<ICombatUnit>();
             events.Subscribe<UnitRevived>(e => turnManager.AddUnit(e.Unit, false));
             new RetaliationTracker(events, resolver, buffTracker);
+            new LeechTracker(events, buffTracker);
 
             // A party-replacing summon on the field (section 4b), or null. While it is out it is the
             // whole hero side - the one rule CombatManager.HeroSideUnits states for the live game.

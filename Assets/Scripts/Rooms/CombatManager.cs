@@ -704,8 +704,14 @@ namespace Assets.Scripts.Rooms
             // A Revive (the Cleric's) stands a hero who fell in this fight back up; the effect sets the
             // bar and announces it, and this puts them back on the stage and the clock.
             _calculator.FallenAllies = FallenAlliesOf;
+            // A drain shared with the party (Soul Feast) heals the whole hero side.
+            _calculator.LivingAllies = caster => caster == null || caster is Enemy
+                ? new List<ICombatUnit>()
+                : HeroSideUnits();
             // Divine Intervention's counterstrike, fired off the same stream.
             new RetaliationTracker(Events, _calculator, BuffTracker);
+            // The Warlock's Leeching Curse: the party's hits on a cursed enemy heal him.
+            new LeechTracker(Events, BuffTracker);
             Events.Subscribe<UnitRevived>(HandleRevived);
             // A RestoreCharge effect (Life Tap) gives charges back to the run's ability slots.
             _calculator.Charges = DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null

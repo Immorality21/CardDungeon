@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Progression;
 using NUnit.Framework;
@@ -140,6 +141,45 @@ namespace Tests.EditMode
         public void ImmunityLines_AfterAKill_NoImmunities_NoSection()
         {
             Assert.IsEmpty(BestiaryPresenter.ImmunityLines(Golem(), new BestiaryEntry { Kills = 3 }));
+        }
+
+        // --- Bloodless: an immunity that comes with what a unit is -----------------------
+
+        [Test]
+        public void Bloodless_NeverBleeds_EvenWithNothingListed()
+        {
+            Assert.IsTrue(StatusImmunity.DefinitionImmune(null, UnitTraits.Bloodless | UnitTraits.Undead, BuffType.Bleeding));
+            Assert.IsFalse(StatusImmunity.DefinitionImmune(null, UnitTraits.Bloodless, BuffType.Poisoned),
+                "Bloodless rules out Bleed only.");
+            Assert.IsFalse(StatusImmunity.DefinitionImmune(null, UnitTraits.Undead, BuffType.Bleeding),
+                "Undead alone is not bloodless - a ghoul still bleeds.");
+        }
+
+        [Test]
+        public void ImmunityLines_AfterAKill_NameBleed_ForABloodlessEnemy()
+        {
+            var skeleton = Golem();
+            skeleton.Traits = UnitTraits.Bloodless;
+
+            var lines = BestiaryPresenter.ImmunityLines(skeleton, new BestiaryEntry { Kills = 1 });
+
+            Assert.AreEqual(1, lines.Count);
+            Assert.AreEqual("Bleed", lines[0].Label);
+
+            skeleton.StatusImmunities = new List<BuffType> { BuffType.Bleeding };
+            Assert.AreEqual(1, BestiaryPresenter.ImmunityLines(skeleton, new BestiaryEntry { Kills = 1 }).Count,
+                "A listed Bleed and the trait's are one row.");
+        }
+
+        [Test]
+        public void Skeletons_AndMachines_AreBloodless()
+        {
+            foreach (var name in new[] { "Skeleton", "BoneGolem", "Lich", "Wight", "ClockworkSentry", "SteamAutomaton", "StoneSentinel" })
+            {
+                var enemy = AssetDatabase.LoadAssetAtPath<EnemySO>($"Assets/ScriptableObjects/Enemies/{name}.asset");
+                Assert.IsNotNull(enemy, name);
+                Assert.IsTrue((enemy.Traits & UnitTraits.Bloodless) != 0, name + " should be Bloodless.");
+            }
         }
 
         [Test]

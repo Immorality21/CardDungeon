@@ -39,7 +39,10 @@
   Drakeling, Slag Hound; **Elemental** Cinder Tyrant, Slag Hound; **Construct** Stone Sentinel, Gilded
   Mote; **Mechanical** the two machines below; none for the people (Bog Shaman, Hex Weaver), the
   Mirefather and the Gilded Hoarder. **Undead** *(2026-10-10)*: the Catacombs set below - so far the only
-  undead in the game; sprinkle them into other levels' spawn tables when a floor wants them. Disassemble reads Mechanical, and the Cleric's Purge and Execute (and the Archon's Hallowing) read Undead -
+  undead in the game; sprinkle them into other levels' spawn tables when a floor wants them.
+  **Bloodless** *(2026-10-11)*: Skeleton, Bone Golem, Lich, Wight, the two machines and the Stone
+  Sentinel - they never bleed, whatever their list says; the Ghoul is flesh and bleeds (owner,
+  2026-10-11). Disassemble reads Mechanical, and the Cleric's Purge and Execute (and the Archon's Hallowing) read Undead -
   and **`SalvageTable`** (rolled like `LootTable`, on top of it) is what taking a machine apart with the
   Tinkerer's Disassemble yields (`HealthCause.Disassemble`). Mechanical today: the **Clockwork Sentry**
   (fast, fragile, an Aggressor) and the **Steam Automaton** (slow Bruiser, no flinch), both weak to
@@ -50,8 +53,8 @@
 
 ## The undead - the Catacombs set *(2026-10-10)*
 
-Five enemies, all `Undead`, all **weak to Holy** (the Cleric's and Paladin's element), immune to Bleed
-and Poison, built for **The Catacombs** run (Sealed Archive -> Catacombs -> Drowned March, three floors,
+Five enemies, all `Undead`, all **weak to Holy** (the Cleric's and Paladin's element), immune to Poison
+and - all but the Ghoul, which bleeds - to Bleed, built for **The Catacombs** run (Sealed Archive -> Catacombs -> Drowned March, three floors,
 difficulty 2.45 / 2.8 / 2.6, XP x1.75). PixelLab art, picked from two candidates each.
 
 | enemy | shape | does |

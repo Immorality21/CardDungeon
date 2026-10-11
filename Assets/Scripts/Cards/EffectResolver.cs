@@ -59,9 +59,17 @@ namespace Assets.Scripts.Cards
         /// </summary>
         public Func<ICombatUnit, List<ICombatUnit>> FallenAllies { get; set; }
 
+        /// <summary>
+        /// The living units on a caster's side, the caster included, for a drain shared with the party
+        /// (<see cref="SpellEffect.DrainToParty"/>, Soul Feast). Set by the fight's owner beside
+        /// <see cref="FallenAllies"/>; null (only the caster is healed) in tests and room events.
+        /// </summary>
+        public Func<ICombatUnit, List<ICombatUnit>> LivingAllies { get; set; }
+
         public EffectResolver()
         {
-            _factory = new EffectExecutorFactory(() => Clock, () => Charges, () => Events, () => KillsOf, () => Roll, () => FallenAllies);
+            _factory = new EffectExecutorFactory(
+                () => Clock, () => Charges, () => Events, () => KillsOf, () => Roll, () => FallenAllies, () => LivingAllies);
         }
 
         /// <param name="powerBonus">Flat power added to the magic's Damage/Heal effects (from its upgrade level).</param>

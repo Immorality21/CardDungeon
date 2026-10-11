@@ -361,12 +361,18 @@ namespace Assets.Scripts.Enemies
                 return lines;
             }
 
-            if (definition.StatusImmunities == null)
+            // The authored list, then what the enemy's traits rule out (a Bloodless unit never bleeds).
+            var candidates = new List<Cards.BuffType>();
+            if (definition.StatusImmunities != null)
             {
-                return lines;
+                candidates.AddRange(definition.StatusImmunities);
+            }
+            if (Cards.StatusImmunity.TraitImmune(definition.Traits, Cards.BuffType.Bleeding))
+            {
+                candidates.Add(Cards.BuffType.Bleeding);
             }
             var listed = new List<Cards.BuffType>();
-            foreach (var type in definition.StatusImmunities)
+            foreach (var type in candidates)
             {
                 if (!Cards.StatusImmunity.IsStatus(type) || listed.Contains(type))
                 {
@@ -395,6 +401,8 @@ namespace Assets.Scripts.Enemies
                     return "Silence";
                 case Cards.BuffType.Blinded:
                     return "Blind";
+                case Cards.BuffType.Leeched:
+                    return "Leech";
                 default:
                     return type.ToString();
             }

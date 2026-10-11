@@ -272,7 +272,7 @@ MonoBehaviour:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: Cinderstorm
+    GrantedMagicKey: BloodShower
     GrantedCharges: 2
     GrantedSummonKey: 
     GrantedUltraKey: 
@@ -462,7 +462,7 @@ MonoBehaviour:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: OilSlick
+    GrantedMagicKey: LeechingCurse
     GrantedCharges: 2
     GrantedSummonKey: 
     GrantedUltraKey: 
@@ -793,3 +793,245 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - warlock-b-6
+  - Key: warlock-a-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: -650, y: -705}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: LifeTap
+    GrantedCharges: 2
+    AwakenedMagicKey: DarkPact
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-a-6
+  - Key: warlock-a-awaken-2
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 160
+    Position: {x: -560, y: -760}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: DarkPact
+    GrantedCharges: 2
+    AwakenedMagicKey: DarkPactII
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-a-awaken
+  - Key: warlock-a-tip-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 150
+    Position: {x: -880, y: -830}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: BloodShower
+    GrantedCharges: 2
+    AwakenedMagicKey: CrimsonRain
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-a-tip-a
+  - Key: warlock-b-awaken
+    DisplayName: 
+    Kind: 11
+    XpCost: 0
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 120
+    Position: {x: -105, y: -880}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: SiphonSoul
+    GrantedCharges: 2
+    AwakenedMagicKey: SoulFeast
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-b-6
+  - Key: warlock-sig-charge
+    DisplayName: 
+    Kind: 12
+    XpCost: 20
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -90, y: 30}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: Bloodbolt
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 4
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-sig
+  - Key: warlock-a-pact-charge
+    DisplayName: 
+    Kind: 12
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -315, y: -530}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: BloodPact
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 4
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-a-3
+  - Key: warlock-a-tap-charge
+    DisplayName: 
+    Kind: 12
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -740, y: -500}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: LifeTap
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 4
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-a-6
+  - Key: warlock-a-shower-charge
+    DisplayName: 
+    Kind: 12
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -1010, y: -640}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: BloodShower
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 4
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-a-tip-a
+  - Key: warlock-b-drain-charge
+    DisplayName: 
+    Kind: 12
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: -105, y: -620}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: DrainLife
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 4
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-b-3
+  - Key: warlock-b-siphon-charge
+    DisplayName: 
+    Kind: 12
+    XpCost: 295
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 110, y: -840}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: SiphonSoul
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 4
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-b-6
+  - Key: warlock-b-curse-charge
+    DisplayName: 
+    Kind: 12
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 190, y: -1100}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: LeechingCurse
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 4
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warlock-b-tip-a

@@ -115,6 +115,15 @@ public class MagicSOEditor : Editor
                     new GUIContent("Duration", "How many of the bearer's turns the thorns last."));
                 rect.y += lineHeight;
             }
+            else if (effectType == SpellEffectType.Drain)
+            {
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+                    element.FindPropertyRelative("DrainToParty"),
+                    new GUIContent("Shared With Party", "Every living unit on the caster's side is healed "
+                        + "the drained amount, not just the caster (Soul Feast)."));
+                rect.y += lineHeight;
+            }
             else if (effectType == SpellEffectType.Execute)
             {
                 EditorGUI.PropertyField(
@@ -199,9 +208,10 @@ public class MagicSOEditor : Editor
         {
             lines += 3; // DamageType + BonusVsTrait + BonusPercent
         }
-        else if (type == SpellEffectType.Execute || type == SpellEffectType.Retaliate)
+        else if (type == SpellEffectType.Execute || type == SpellEffectType.Retaliate
+                 || type == SpellEffectType.Drain)
         {
-            lines += 1; // BonusVsTrait / DamageType
+            lines += 1; // BonusVsTrait / DamageType / DrainToParty
         }
         else if (type == SpellEffectType.Thorns)
         {
