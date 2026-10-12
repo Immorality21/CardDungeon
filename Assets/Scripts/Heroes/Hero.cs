@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Heroes
 {
-    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches, IAbilityUpgrades, IHasMomentum, IHasFocus
+    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches, IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage
     {
         public HeroSO HeroSO;
         public Stats Stats;
@@ -207,6 +207,11 @@ namespace Assets.Scripts.Heroes
             return TriggerSources.FromItems(
                 InventoryManager.HasInstance ? InventoryManager.Instance.GetEquippedItems(HeroKey) : null);
         }
+
+        /// <summary>What this hero's worn sets add to their ability damage (<see cref="ItemSets"/>).</summary>
+        public OutgoingDamage OutgoingDamage => InventoryManager.HasInstance
+            ? ItemSets.OutgoingFor(InventoryManager.Instance.GetEquippedItems(HeroKey))
+            : OutgoingDamage.None;
 
         /// <summary>Convenience for the HP bar and heal clamps; MaxHealth is just another stat.</summary>
         public int GetEffectiveMaxHealth()

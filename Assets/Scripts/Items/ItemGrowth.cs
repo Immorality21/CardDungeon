@@ -26,7 +26,10 @@ namespace Assets.Scripts.Items
         BossKills = 1,
 
         /// <summary>Fights won while it was worn by a fielded hero.</summary>
-        Victories = 2
+        Victories = 2,
+
+        /// <summary>Abilities the wearer used from their loadout (<c>GameEvents.AbilityCast</c>).</summary>
+        AbilitiesUsed = 3
     }
 
     /// <summary>
@@ -68,6 +71,8 @@ namespace Assets.Scripts.Items
                     return "boss-kills";
                 case ItemCounterKind.Victories:
                     return "victories";
+                case ItemCounterKind.AbilitiesUsed:
+                    return "abilities-used";
                 default:
                     return kind.ToString();
             }

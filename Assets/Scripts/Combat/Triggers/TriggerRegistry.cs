@@ -61,6 +61,13 @@ namespace Assets.Scripts.Combat.Triggers
             _events.Subscribe<HealthChange>(OnHealthChange, Order);
             _events.Subscribe<UnitDefeated>(OnUnitDefeated, Order);
             _events.Subscribe<AbilityUsed>(e => Fire(e.Caster, TriggerKind.OnAbilityUsed, null), Order);
+            _events.Subscribe<HitAvoided>(e =>
+            {
+                if (e.Dodged && e.Target != null)
+                {
+                    Fire(e.Target, TriggerKind.OnDodge, e.Attacker);
+                }
+            }, Order);
         }
 
         private void OnCombatStarted(CombatStarted e)
@@ -86,11 +93,11 @@ namespace Assets.Scripts.Combat.Triggers
             var attacker = change.Attacker;
             if (attacker != null && !ReferenceEquals(attacker, change.Target))
             {
-                Fire(attacker, TriggerKind.OnDealDamage, change.Target, change.Source.DamageType);
+                Fire(attacker, TriggerKind.OnDealDamage, change.Target, change.Source.DamageType, change.Cause);
             }
             if (change.Target.IsAlive && !ReferenceEquals(attacker, change.Target))
             {
-                Fire(change.Target, TriggerKind.OnTakeDamage, attacker, change.Source.DamageType);
+                Fire(change.Target, TriggerKind.OnTakeDamage, attacker, change.Source.DamageType, change.Cause);
             }
         }
 
@@ -118,7 +125,8 @@ namespace Assets.Scripts.Combat.Triggers
         }
 
         /// <summary>Fires every trigger <paramref name="bearer"/> carries for <paramref name="kind"/>.</summary>
-        private void Fire(ICombatUnit bearer, TriggerKind kind, ICombatUnit other, DamageType? damageType = null)
+        private void Fire(ICombatUnit bearer, TriggerKind kind, ICombatUnit other, DamageType? damageType = null,
+            HealthCause? cause = null)
         {
             if (!(bearer is ITriggerSource source))
             {
@@ -138,6 +146,10 @@ namespace Assets.Scripts.Combat.Triggers
                     continue;
                 }
                 if (trigger.FilterDamageType && (!damageType.HasValue || damageType.Value != trigger.DamageType))
+                {
+                    continue;
+                }
+                if (trigger.IgnoreOverTime && cause == HealthCause.OverTime)
                 {
                     continue;
                 }

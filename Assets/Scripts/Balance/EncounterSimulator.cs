@@ -1940,10 +1940,12 @@ namespace Assets.Scripts.Balance
             }
             if (DefenseRules.RollMiss(BlindedBuffHandler.IsBlinded(buffTracker, attacker)))
             {
+                buffTracker.Events?.Publish(new HitAvoided { Attacker = attacker, Target = target, Dodged = false });
                 return 0;
             }
             if (DefenseRules.RollDodge(target))
             {
+                buffTracker.Events?.Publish(new HitAvoided { Attacker = attacker, Target = target, Dodged = true });
                 return 0;
             }
 

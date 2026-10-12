@@ -101,7 +101,7 @@ marked as such in the workbook.
 
 In order. The balance pass starts only when this list is empty.
 
-1. **Write the workbook back.** The new pieces (Rogue, Ranger, Warrior, Cultist branches, summons,
+1. ~~**Write the workbook back.**~~ *Done 2026-10-12.* The new pieces (Rogue, Ranger, Warrior, Cultist branches, summons,
    Ultras, awakenings) still read "Not built" in the Hero Workbook. It only opens under the owner's
    personal claude.ai account, so log in with that one and push the statuses. The corrections to go in
    with them:
@@ -117,12 +117,20 @@ In order. The balance pass starts only when this list is empty.
 2. **The owner reviews Claude's drafts** in the workbook (orange "Claude draft" fields) - keep, rewrite
    or drop - and anything changed is rebuilt. Includes the two Rogue "Maybe" awakenings, **Ambush** and
    **Coup de Grace**, which are not built.
-3. **Gear reactions and grows-with-use.** The workbook's gear tab is untouched (20 items). Fill it in,
-   then build the reactions (`TriggeredEffect`) and milestones (`ItemMilestone`).
+3. ~~**Gear reactions and grows-with-use.**~~ *Built 2026-10-12 from the owner's gear tab; `GearReactionTests`
+   pass (22), full suite green but for the known Blood Stair test. Not yet seen in a fight or in the
+   item pane (which does not scroll - check Shadowweave's set lines fit).* Seven reactions
+   (Arcane Circlet, Ember Greaves, Luckstone Charm, Ruby Amulet, Tower Shield, Warden's Helm, Warding
+   Gauntlets), three milestones (Oak Staff 40 abilities used, Runed Blade 5 bosses, Swift Boots 15
+   victories), the **Shadowweave set** (`ItemSetSO`) and the new **Blood Sword** (owner's note on the Iron
+   Sword; stats are a Claude draft: Uncommon, item level 3, +5 STR, icon a recoloured Iron Sword; sold
+   by the merchant through the catalog, on no drop table yet). New pieces: `TriggerKind.OnDodge`,
+   `TriggeredEffect.IgnoreOverTime`/`Text`, `SpellEffectType.RefundCharge`, `ItemCounterKind.AbilitiesUsed`
+   (fed by `GameEvents.AbilityCast`), and the item pane's Reacts / set sections.
 4. **See the last untested pieces in play**: Vanish keeping enemies off the Rogue, Shadowstep's Evade
    on a basic attack, and Blood Moon's party buff. A full-grid Rogue is too fast for enemies to act, so
    test with a partly-grown Rogue and fast enemies (`Sandbox/RogueKit.asset` is the starting point).
-5. **Commit** the pass (owner).
+5. ~~**Commit** the pass (owner).~~ *Done 2026-10-12.*
 
 Then the balance pass, starting with what this pass already showed:
 - **Full-grid heroes are far too fast** - a full-grid party took ~500 turns to the hounds' 13

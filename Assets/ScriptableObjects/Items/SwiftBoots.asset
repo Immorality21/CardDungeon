@@ -25,3 +25,12 @@ MonoBehaviour:
   - StatType: 7
     BonusType: 0
     Value: 6
+  Triggers: []
+  Milestones:
+  - Counter: 2
+    Threshold: 15
+    Bonuses:
+    - StatType: 3
+      BonusType: 0
+      Value: 1
+  Set: {fileID: 0}

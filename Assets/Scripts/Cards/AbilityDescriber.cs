@@ -224,6 +224,8 @@ namespace Assets.Scripts.Cards
                         : "steals an item or gold, odds from Luck (once per enemy)";
                 case SpellEffectType.FightGoldBonus:
                     return $"+{effect.Power}% gold from this fight's kills and steals";
+                case SpellEffectType.RefundCharge:
+                    return "the cast costs no charge";
                 default:
                     return null;
             }

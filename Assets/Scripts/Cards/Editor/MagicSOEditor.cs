@@ -199,6 +199,7 @@ public class MagicSOEditor : Editor
             case SpellEffectType.Thorns:
             case SpellEffectType.Steal:
             case SpellEffectType.FightGoldBonus:
+            case SpellEffectType.RefundCharge:
                 return false;
             default:
                 return true;

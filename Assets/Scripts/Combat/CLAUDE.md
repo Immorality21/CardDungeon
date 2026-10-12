@@ -95,7 +95,11 @@ every enemy is tagged since 2026-10-07 (see the Enemies guide). **The undead are
   **On-kill reactions count only foes**: a Sacrifice credits the Cultist but never pays an on-kill item.
 - **Reactions (`Combat/Triggers/`).** `TriggeredEffect` on `ItemSO`, `EnemySO` and `SummonSO`: *when*
   (`TriggerKind`: OnCombatStart, OnTurnStart/End, OnDealDamage, OnTakeDamage, OnKill, OnDefeated,
-  OnAllyDefeated, OnAbilityUsed), chance, limit (per turn / per combat), an optional element filter,
+  OnAllyDefeated, OnAbilityUsed, **OnDodge** - a physical blow aimed at the bearer missed it by Luck or a
+  held evasion, off `HitAvoided`, raised at the three dodge sites; a blind attacker's miss is not a
+  dodge), chance, limit (per turn / per combat), an optional element filter, `IgnoreOverTime` (only
+  blows and abilities count - "when struck"), the item pane's wording (`Text`; the pane lists nothing
+  without it),
   *who* (`TriggerTarget`) and a list of ordinary `SpellEffect`s resolved through
   `EffectResolver.ExecuteEffects` with the bearer as caster. `TriggerRegistry` (built per fight, after
   the bookkeeping subscribers) asks the units involved for their triggers (`ITriggerSource`: `Hero` from
@@ -105,6 +109,14 @@ every enemy is tagged since 2026-10-07 (see the Enemies guide). **The undead are
   floats its name and numbers. The simulator builds the same registry, so a reaction is priced by the
   encounter/floor simulations; the closed-form model does not see it, and the analyzer says so
   (`EvaluateUnpricedMechanics`).
+- **Gear damage bonuses** *(2026-10-12)*: `IOutgoingDamage` (`Hero`, `SimUnit`) hands
+  `DamageEffectExecutor` what a worn **item set** adds - a percent on one element's hits and an extra
+  element on an ability's hit (Shadowweave). The extra share meets the target's resistance, not its
+  defense, and is folded into the hit's number. Basic attacks are untouched.
+- **Free casts** *(2026-10-12)*: `SpellEffectType.RefundCharge` (the Arcane Circlet) fires from an
+  on-ability-used reaction, which hears of a cast **before** its charge is spent, so it marks the cast
+  free (`EffectResolver.FreeCast` -> `CombatManager._freeCasts`, read by `SpendCharge`, cleared at
+  every turn's start) instead of restoring a charge. Inert in the balance model.
 
 ## Momentum - the Warrior's signature *(2026-10-10)*
 

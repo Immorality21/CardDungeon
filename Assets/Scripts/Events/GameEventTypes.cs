@@ -192,6 +192,15 @@ namespace Assets.Scripts.Events
         public string NodeKey;
     }
 
+    /// <summary>A hero used an ability from their loadout in a fight (a cast that spends a charge, or
+    /// would have - the Arcane Circlet's free cast still counts). Raised by
+    /// <c>CombatManager.SpendCharge</c>. Summons' and Ultras' abilities are not loadout casts.</summary>
+    public class AbilityCast
+    {
+        public string HeroKey;
+        public string AbilityKey;
+    }
+
     /// <summary>A hub building was placed or raised to a new level.</summary>
     public class BuildingLevelChanged
     {

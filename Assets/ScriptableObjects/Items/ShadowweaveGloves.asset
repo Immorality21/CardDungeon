@@ -34,6 +34,9 @@ MonoBehaviour:
   Resistances:
   - DamageType: 5
     Percent: 10
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 11400000, guid: 02c053026d7a4537b5a57818bd70861f, type: 2}
   ConsumableEffect: 0
   ConsumableAmount: 0
   ConsumablePercent: 0

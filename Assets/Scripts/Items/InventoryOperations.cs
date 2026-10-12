@@ -376,6 +376,7 @@ namespace Assets.Scripts.Items
                 {
                     perItem.Add(ItemGrowth.BonusesOf(so, null));
                 }
+                perItem.Add(ItemSets.BonusesOf(equippedItems));
             }
             return SumBonuses(perItem, bonusType);
         }
@@ -394,6 +395,7 @@ namespace Assets.Scripts.Items
                         perItem.Add(piece.Bonuses);
                     }
                 }
+                perItem.Add(ItemSets.BonusesOf(GearPiece.ItemsOf(gear)));
             }
             return SumBonuses(perItem, bonusType);
         }

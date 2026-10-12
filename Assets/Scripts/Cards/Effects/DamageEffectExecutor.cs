@@ -31,7 +31,7 @@ namespace Assets.Scripts.Cards.Effects
             CombatBuffTracker buffTracker,
             EffectResult result)
         {
-            Resolve(effect, action.Caster, targets, buffTracker, result, false, action.CritTargets);
+            Resolve(effect, action.Caster, targets, buffTracker, result, false, action.CritTargets, true);
         }
 
         /// <summary>No cast to read (a combo's bonus, a reaction, a room event): never a crit.</summary>
@@ -53,8 +53,13 @@ namespace Assets.Scripts.Cards.Effects
             CombatBuffTracker buffTracker,
             EffectResult result,
             bool flatPower,
-            List<ICombatUnit> critTargets)
+            List<ICombatUnit> critTargets,
+            bool isCast = false)
         {
+            // A worn set's damage bonuses (Shadowweave): an element's share on any hit the wearer's
+            // power drives, the extra element on an ability's hit only.
+            var outgoing = !flatPower && caster is IOutgoingDamage gear ? gear.OutgoingDamage : null;
+
             foreach (var aimed in targets)
             {
                 if (!aimed.IsAlive)
@@ -86,6 +91,11 @@ namespace Assets.Scripts.Cards.Effects
                 {
                     rawAttack = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.RoundToInt(rawAttack * bonus));
                 }
+                float elementBonus = outgoing != null ? outgoing.BonusFor(effect.DamageType) : 0f;
+                if (elementBonus != 0f)
+                {
+                    rawAttack = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.RoundToInt(rawAttack * (1f + elementBonus / 100f)));
+                }
 
                 // Magic (an Intelligence- or Spirit-scaled effect) is met by Spirit, everything else
                 // by Endurance — DefenseRules owns the split.
@@ -95,6 +105,10 @@ namespace Assets.Scripts.Cards.Effects
                 float resistanceBonus = buffTracker.GetResistanceBonus(target, effect.DamageType);
                 int damage = DamageCalculator.Calculate(
                     rawAttack, defense, effect.DamageType, target.Resistances, resistanceBonus);
+                if (isCast && damage > 0 && outgoing != null && outgoing.AbilityExtraPercent > 0f)
+                {
+                    damage += ExtraDamage(rawAttack, outgoing, target, buffTracker);
+                }
 
                 // The crit was rolled against the unit the caster aimed at, so a blow its guard takes
                 // instead is still the critical one.
@@ -146,6 +160,23 @@ namespace Assets.Scripts.Cards.Effects
                     });
                 }
             }
+        }
+
+        /// <summary>
+        /// The extra element a worn set adds to an ability's hit (Shadowweave 4/4: 10% as Shadow):
+        /// that share of the raw hit, met by the target's resistance to the extra element but not by
+        /// its defense - the hit it rides on already paid that - and never below zero. Folded into the
+        /// hit's number rather than floated on its own.
+        /// </summary>
+        public static int ExtraDamage(int rawAttack, OutgoingDamage outgoing, ICombatUnit target, CombatBuffTracker buffTracker)
+        {
+            int raw = UnityEngine.Mathf.RoundToInt(rawAttack * outgoing.AbilityExtraPercent / 100f);
+            if (raw <= 0)
+            {
+                return 0;
+            }
+            float resistanceBonus = buffTracker != null ? buffTracker.GetResistanceBonus(target, outgoing.AbilityExtraType) : 0f;
+            return UnityEngine.Mathf.Max(0, DamageCalculator.Calculate(raw, 0, outgoing.AbilityExtraType, target.Resistances, resistanceBonus));
         }
     }
 }

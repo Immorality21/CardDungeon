@@ -292,6 +292,8 @@ namespace Assets.Scripts.Balance
                     Resistances = resistances,
                     // ...and so do the gear's reactions, which the encounter loop fires like the game.
                     Triggers = new List<Combat.Triggers.CarriedTrigger>(Combat.Triggers.TriggerSources.FromItems(gear)),
+                    // ...and what a worn set adds to ability damage (Shadowweave).
+                    OutgoingDamage = ItemSets.OutgoingFor(gear),
                     // ...and the hero's own signature passive, built the same way the game builds it.
                     Momentum = definition != null ? definition.Momentum : null,
                     Focus = definition != null ? definition.Focus : null

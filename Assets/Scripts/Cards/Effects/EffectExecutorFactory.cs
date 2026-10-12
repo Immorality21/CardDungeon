@@ -28,7 +28,8 @@ namespace Assets.Scripts.Cards.Effects
             Func<Func<ICombatUnit, List<ICombatUnit>>> fallen = null,
             Func<Func<ICombatUnit, List<ICombatUnit>>> living = null,
             Func<Func<ICombatUnit, ICombatUnit, string>> stealFrom = null,
-            Func<Action<int>> addGoldBonus = null)
+            Func<Action<int>> addGoldBonus = null,
+            Func<Func<ICombatUnit, bool>> freeCast = null)
         {
             _executors = new Dictionary<SpellEffectType, IEffectExecutor>
             {
@@ -48,7 +49,8 @@ namespace Assets.Scripts.Cards.Effects
                 { SpellEffectType.Retaliate, new RetaliateEffectExecutor(events) },
                 { SpellEffectType.Thorns, new ThornsEffectExecutor(events) },
                 { SpellEffectType.Steal, new StealEffectExecutor(stealFrom, roll) },
-                { SpellEffectType.FightGoldBonus, new FightGoldBonusEffectExecutor(addGoldBonus) }
+                { SpellEffectType.FightGoldBonus, new FightGoldBonusEffectExecutor(addGoldBonus) },
+                { SpellEffectType.RefundCharge, new RefundChargeEffectExecutor(freeCast) }
             };
         }
 

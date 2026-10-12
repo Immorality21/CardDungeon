@@ -118,8 +118,12 @@ namespace Assets.Scripts.Balance
     /// <c>GetEffectiveStat(MaxHealth)</c>. It did not always, which is why this note exists: the
     /// model was right and the game was short by exactly the gear bonus.
     /// </summary>
-    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource, IHasTraits, Heroes.IAbilityUpgrades, IHasMomentum, IHasFocus
+    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource, IHasTraits, Heroes.IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage
     {
+        /// <summary>What a hero's worn sets add to their ability damage - set by <c>PartyBaseline</c>,
+        /// as <c>Hero.OutgoingDamage</c> reads it in the game.</summary>
+        public OutgoingDamage OutgoingDamage { get; set; } = OutgoingDamage.None;
+
         /// <summary>Mirrors <c>Enemy.Traits</c> off the same definition.</summary>
         public UnitTraits Traits => Definition != null ? Definition.Traits : UnitTraits.None;
 
@@ -248,6 +252,7 @@ namespace Assets.Scripts.Balance
                 Tuning = Tuning,
                 Behavior = Behavior,
                 Triggers = new List<CarriedTrigger>(Triggers),
+                OutgoingDamage = OutgoingDamage,
                 Momentum = Momentum,
                 Focus = Focus
             };

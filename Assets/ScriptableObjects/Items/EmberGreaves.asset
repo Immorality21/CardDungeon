@@ -32,6 +32,33 @@ MonoBehaviour:
   Resistances:
   - DamageType: 1
     Percent: 25
+  Triggers:
+  - Label:
+    Text: 'When struck by a blow or ability: 20% chance to Burn the attacker.'
+    When: 4
+    Chance: 0.2
+    Limit: 0
+    FilterDamageType: 0
+    DamageType: 0
+    IgnoreOverTime: 1
+    Target: 1
+    Effects:
+    - EffectType: 3
+      Power: 2
+      PowerMode: 1
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 15
+      Duration: 2
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+  Milestones: []
+  Set: {fileID: 0}
   ConsumableEffect: 0
   ConsumableAmount: 0
   MaxStack: 99

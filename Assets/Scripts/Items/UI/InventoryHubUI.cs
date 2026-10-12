@@ -1173,14 +1173,19 @@ namespace Assets.Scripts.Items.UI
         internal static void AddItemLines(VisualElement body, ItemSO item, ItemSaveData entry = null)
         {
             AddGrants(body, item);
+            AddLines(body, "Reacts", ItemPresenter.ReactionLines(item));
+            AddLines(body, item.Set != null ? item.Set.DisplayName + " set" : "Set", ItemPresenter.SetLines(item));
+            AddLines(body, "Grows", ItemPresenter.MilestoneLines(item, entry));
+        }
 
-            var growth = ItemPresenter.MilestoneLines(item, entry);
-            if (growth.Count == 0)
+        private static void AddLines(VisualElement body, string title, List<string> lines)
+        {
+            if (lines.Count == 0)
             {
                 return;
             }
-            body.Add(BestiaryLineView.Section("Grows"));
-            foreach (var text in growth)
+            body.Add(BestiaryLineView.Section(title));
+            foreach (var text in lines)
             {
                 var line = new Label(text);
                 line.AddToClassList("cd-inv-detail__desc");

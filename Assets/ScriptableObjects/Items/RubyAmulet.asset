@@ -26,6 +26,33 @@ MonoBehaviour:
   Resistances:
   - DamageType: 1
     Percent: 25
+  Triggers:
+  - Label:
+    Text: 'When hurt by Fire: +2 Strength for 2 turns.'
+    When: 4
+    Chance: 1
+    Limit: 0
+    FilterDamageType: 1
+    DamageType: 1
+    IgnoreOverTime: 0
+    Target: 0
+    Effects:
+    - EffectType: 2
+      Power: 2
+      PowerMode: 1
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 1
+      Duration: 2
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+  Milestones: []
+  Set: {fileID: 0}
   ConsumableEffect: 0
   ConsumableAmount: 0
   MaxStack: 99

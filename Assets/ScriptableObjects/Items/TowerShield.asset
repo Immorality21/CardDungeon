@@ -27,6 +27,33 @@ MonoBehaviour:
     BonusType: 0
     Value: 6
   Resistances: []
+  Triggers:
+  - Label:
+    Text: 'When hurt: 15% chance of +3 Endurance until the next turn.'
+    When: 4
+    Chance: 0.15
+    Limit: 0
+    FilterDamageType: 0
+    DamageType: 0
+    IgnoreOverTime: 0
+    Target: 0
+    Effects:
+    - EffectType: 2
+      Power: 3
+      PowerMode: 1
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 2
+      Duration: 1
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+  Milestones: []
+  Set: {fileID: 0}
   ConsumableEffect: 0
   ConsumableAmount: 0
   MaxStack: 99

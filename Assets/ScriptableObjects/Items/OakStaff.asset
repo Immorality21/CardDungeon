@@ -27,6 +27,15 @@ MonoBehaviour:
     BonusType: 0
     Value: 2
   Resistances: []
+  Triggers: []
+  Milestones:
+  - Counter: 3
+    Threshold: 40
+    Bonuses:
+    - StatType: 4
+      BonusType: 0
+      Value: 2
+  Set: {fileID: 0}
   ConsumableEffect: 0
   ConsumableAmount: 0
   MaxStack: 99

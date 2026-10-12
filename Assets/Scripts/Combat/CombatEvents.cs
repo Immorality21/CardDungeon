@@ -108,6 +108,17 @@ namespace Assets.Scripts.Combat
         public List<ICombatUnit> Targets = new List<ICombatUnit>();
     }
 
+    /// <summary>A physical blow aimed at <see cref="Target"/> did not land: it missed (the attacker was
+    /// blinded) or the target got out of the way (<see cref="Dodged"/>: a Luck dodge or a held evasion).
+    /// Raised where the roll is made - <c>CombatManager.ExecuteAttack</c>, <c>EffectResolver</c>'s hit
+    /// filter and <c>EncounterSimulator.ResolveAttack</c>.</summary>
+    public class HitAvoided
+    {
+        public ICombatUnit Attacker;
+        public ICombatUnit Target;
+        public bool Dodged;
+    }
+
     /// <summary>A consumable was used in combat, after its effect.</summary>
     public class ItemUsed
     {

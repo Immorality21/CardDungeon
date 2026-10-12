@@ -28,6 +28,7 @@ throwing handler logged without stopping the others.
 | `XpAwarded` (per hero) | `Party.DistributeXp` |
 | `EnemyDefeated` (enemy key, boss, killer hero key) | `CombatManager.HandleEnemyDeath` |
 | `CombatFinished` (won, boss, fielded hero keys, foes still standing) | `CombatManager.RunCombat`'s end |
+| `AbilityCast` (hero key, ability key) - a loadout cast, free ones included | `CombatManager.SpendCharge` |
 | `RoomEntered` | `GameManager.EnterRoom` |
 | `LevelStarted` (fresh or resumed) / `LevelCleared` / `LevelForfeited` (died / left) | `DungeonManager` |
 | `HeroJoined` | `Party.MarkOwnedDeferred` |
@@ -39,7 +40,7 @@ gain methods take a **required** `EconomySource` for that reason: the compiler f
 
 ## Who listens today
 
-- `InventoryManager` - item counters (kills, boss kills, victories) for items that grow.
+- `InventoryManager` - item counters (kills, boss kills, victories, abilities used) for items that grow.
 - `Progression/RunHistoryRecorder` - the run history (`RunHistory.json`): a static class that
   subscribes itself at `BeforeSceneLoad`, after `GameEvents` is reset at `SubsystemRegistration`, so
   no scene carries it. It is the worked example of both rules below: kills count at once, XP and items

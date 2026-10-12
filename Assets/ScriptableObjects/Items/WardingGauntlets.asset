@@ -29,6 +29,33 @@ MonoBehaviour:
   Resistances:
   - DamageType: 5
     Percent: 15
+  Triggers:
+  - Label:
+    Text: 'When hurt by Shadow: heal 5% of max health.'
+    When: 4
+    Chance: 1
+    Limit: 0
+    FilterDamageType: 1
+    DamageType: 5
+    IgnoreOverTime: 0
+    Target: 0
+    Effects:
+    - EffectType: 1
+      Power: 5
+      PowerMode: 2
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 0
+      Duration: 0
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+  Milestones: []
+  Set: {fileID: 0}
   ConsumableEffect: 0
   ConsumableAmount: 0
   MaxStack: 99

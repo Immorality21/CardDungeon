@@ -30,6 +30,33 @@ MonoBehaviour:
     BonusType: 0
     Value: 4
   Resistances: []
+  Triggers:
+  - Label:
+    Text: 'After an ability: 10% chance it costs no charge (once per fight).'
+    When: 8
+    Chance: 0.1
+    Limit: 2
+    FilterDamageType: 0
+    DamageType: 0
+    IgnoreOverTime: 0
+    Target: 0
+    Effects:
+    - EffectType: 17
+      Power: 0
+      PowerMode: 0
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 0
+      Duration: 0
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+  Milestones: []
+  Set: {fileID: 0}
   ConsumableEffect: 0
   ConsumableAmount: 0
   MaxStack: 99

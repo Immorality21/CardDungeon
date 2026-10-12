@@ -37,7 +37,11 @@ namespace Assets.Scripts.Combat.Triggers
         OnAllyDefeated = 7,
 
         /// <summary>The bearer used an ability (a cast, a summon's ability, an Ultra's strike).</summary>
-        OnAbilityUsed = 8
+        OnAbilityUsed = 8,
+
+        /// <summary>A physical blow aimed at the bearer did not land on it: a Luck dodge or a held
+        /// evasion (Shadowstep). An attacker's blind miss is not the bearer's dodge.</summary>
+        OnDodge = 9
     }
 
     /// <summary>How often a trigger may fire for one bearer.</summary>
@@ -85,6 +89,10 @@ namespace Assets.Scripts.Combat.Triggers
         [Tooltip("Shown in the combat log when it fires, e.g. \"Soul Hunger\". Empty falls back to the item, enemy or summon's name.")]
         public string Label;
 
+        [Tooltip("How the item pane words this reaction, e.g. \"When hit: 20% chance to Burn the attacker.\" " +
+                 "Empty shows nothing - write one for every item reaction, the player cannot see it otherwise.")]
+        public string Text;
+
         [Tooltip("When it fires, from the bearer's point of view.")]
         public TriggerKind When;
 
@@ -99,6 +107,9 @@ namespace Assets.Scripts.Combat.Triggers
         public bool FilterDamageType;
 
         public DamageType DamageType;
+
+        [Tooltip("OnDealDamage / OnTakeDamage only: ignore damage-over-time ticks - only blows and abilities count.")]
+        public bool IgnoreOverTime;
 
         [Tooltip("Who the effects land on.")]
         public TriggerTarget Target;

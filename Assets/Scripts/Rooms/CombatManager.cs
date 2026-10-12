@@ -240,6 +240,10 @@ namespace Assets.Scripts.Rooms
         private int _fightGoldBonus;
         // Enemies already robbed this fight (Steal works once per enemy).
         private readonly List<ICombatUnit> _robbed = new List<ICombatUnit>();
+
+        /// <summary>Heroes whose cast in progress costs no charge (the Arcane Circlet). Cleared at every
+        /// turn's start, so a mark made by a cast that spends nothing (an Ultra's) never carries over.</summary>
+        private static readonly List<ICombatUnit> _freeCasts = new List<ICombatUnit>();
         private Room _lastVictoryRoom;
         private bool _currentCombatHadBoss;
         private MagicTagTracker _tagTracker;
@@ -664,6 +668,7 @@ namespace Assets.Scripts.Rooms
             _combatGold = 0;
             _fightGoldBonus = 0;
             _robbed.Clear();
+            _freeCasts.Clear();
             _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
             _squad.Clear();
             _allies.Clear();
@@ -718,6 +723,8 @@ namespace Assets.Scripts.Rooms
             // The Rogue's Steal and Fence pay out of this fight.
             _calculator.StealFrom = StealFrom;
             _calculator.AddGoldBonus = percent => _fightGoldBonus = Mathf.Max(_fightGoldBonus, percent);
+            // The Arcane Circlet: the cast in progress keeps its charge (SpendCharge reads the mark).
+            _calculator.FreeCast = unit => unit is Hero && !_freeCasts.Contains(unit) && AddFreeCast(unit);
             // Divine Intervention's counterstrike, fired off the same stream.
             new RetaliationTracker(Events, _calculator, BuffTracker);
             // The Warlock's Leeching Curse: the party's hits on a cursed enemy heal him.
@@ -818,6 +825,7 @@ namespace Assets.Scripts.Rooms
                 // A buff this unit lands on itself this turn is not ticked by this turn's upkeep.
                 BuffTracker.BeginTurn(unit);
                 _lastTurnLog = string.Empty;
+                _freeCasts.Clear();
                 Events.Publish(new TurnStarted { Unit = unit });
                 // A reaction at the turn's start may already have felled someone - the actor included.
                 ResolveDeaths();
@@ -1122,13 +1130,31 @@ namespace Assets.Scripts.Rooms
             _lastTurnLog = $"{caster.DisplayName} MultiCasts {castAction.Magic.DisplayName} x{casts}! " + log;
         }
 
-        /// <summary>Spends one charge from <paramref name="caster"/>'s slot <paramref name="slotIndex"/>.</summary>
+        private static bool AddFreeCast(ICombatUnit unit)
+        {
+            _freeCasts.Add(unit);
+            return true;
+        }
+
+        /// <summary>Spends one charge from <paramref name="caster"/>'s slot <paramref name="slotIndex"/> -
+        /// unless a reaction made this cast free - and tells the game a hero used an ability.</summary>
         private static void SpendCharge(ICombatUnit caster, int slotIndex)
         {
-            if (caster is Hero hero && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            if (!(caster is Hero hero))
+            {
+                return;
+            }
+            var slots = DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null
+                ? DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey)
+                : null;
+            string abilityKey = slots != null && slotIndex >= 0 && slotIndex < slots.Count && slots[slotIndex]?.Magic != null
+                ? slots[slotIndex].Magic.Key
+                : null;
+            if (!_freeCasts.Remove(caster) && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 DungeonManager.Instance.MagicState.TryCast(hero.HeroKey, slotIndex);
             }
+            GameEvents.Publish(new AbilityCast { HeroKey = hero.HeroKey, AbilityKey = abilityKey });
         }
 
         /// <summary>Who a MultiCast's next repeat lands on: the living of the first cast's targets, the
@@ -2856,6 +2882,7 @@ namespace Assets.Scripts.Rooms
             // the target's Luck may dodge it (DefenseRules).
             if (DefenseRules.RollMiss(BlindedBuffHandler.IsBlinded(BuffTracker, attacker)))
             {
+                Events?.Publish(new HitAvoided { Attacker = attacker, Target = target, Dodged = false });
                 ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Miss", new Color(0.8f, 0.8f, 0.85f), 0.16f);
                 RecordAttackTypeObserved(attacker);
                 yield return new WaitForSecondsRealtime(0.045f);
@@ -2865,6 +2892,7 @@ namespace Assets.Scripts.Rooms
             // Shadowstep / Smoke and Mirrors: a held evasion is spent before Luck gets its roll.
             if (EvasiveBuffHandler.TryEvade(BuffTracker, target))
             {
+                Events?.Publish(new HitAvoided { Attacker = attacker, Target = target, Dodged = true });
                 ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Evade", new Color(0.8f, 0.8f, 0.85f), 0.16f);
                 RecordAttackTypeObserved(attacker);
                 yield return new WaitForSecondsRealtime(0.045f);
@@ -2873,6 +2901,7 @@ namespace Assets.Scripts.Rooms
             }
             if (DefenseRules.RollDodge(target))
             {
+                Events?.Publish(new HitAvoided { Attacker = attacker, Target = target, Dodged = true });
                 ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Dodge", new Color(0.8f, 0.8f, 0.85f), 0.16f);
                 RecordAttackTypeObserved(attacker);
                 yield return new WaitForSecondsRealtime(0.045f);

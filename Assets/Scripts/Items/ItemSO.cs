@@ -39,6 +39,10 @@ namespace Assets.Scripts.Items
                  "itself, in its save entry. See ItemGrowth.")]
         public List<ItemMilestone> Milestones = new List<ItemMilestone>();
 
+        [Tooltip("The set this piece belongs to (Shadowweave), or none. Wearing several different pieces " +
+                 "of one set adds the set's tiers - see ItemSetSO.")]
+        public ItemSetSO Set;
+
         [Header("Consumable (Category == Consumable)")]
         public ConsumableEffectType ConsumableEffect = ConsumableEffectType.RestoreHealth;
 

@@ -164,6 +164,43 @@ namespace Assets.Scripts.Items
             return lines;
         }
 
+        /// <summary>One line per reaction the item gives its wearer (<see cref="ItemSO.Triggers"/>), as
+        /// authored in its <c>Text</c>; a reaction with no text is not listed.</summary>
+        public static List<string> ReactionLines(ItemSO item)
+        {
+            var lines = new List<string>();
+            if (item == null || item.Triggers == null)
+            {
+                return lines;
+            }
+            foreach (var trigger in item.Triggers)
+            {
+                if (trigger != null && !string.IsNullOrEmpty(trigger.Text))
+                {
+                    lines.Add(trigger.Text);
+                }
+            }
+            return lines;
+        }
+
+        /// <summary>The set a piece belongs to, one line per tier: "2 pieces: +10% Shadow damage".</summary>
+        public static List<string> SetLines(ItemSO item)
+        {
+            var lines = new List<string>();
+            if (item == null || item.Set == null || item.Set.Tiers == null)
+            {
+                return lines;
+            }
+            foreach (var tier in item.Set.Tiers)
+            {
+                if (tier != null && !string.IsNullOrEmpty(tier.Text))
+                {
+                    lines.Add($"{tier.Pieces} pieces: {tier.Text}");
+                }
+            }
+            return lines;
+        }
+
         private static string CounterNoun(ItemCounterKind kind, int count)
         {
             bool one = count == 1;
@@ -175,6 +212,8 @@ namespace Assets.Scripts.Items
                     return one ? "boss slain" : "bosses slain";
                 case ItemCounterKind.Victories:
                     return one ? "victory" : "victories";
+                case ItemCounterKind.AbilitiesUsed:
+                    return one ? "ability used" : "abilities used";
                 default:
                     return kind.ToString();
             }

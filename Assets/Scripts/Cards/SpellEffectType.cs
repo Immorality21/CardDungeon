@@ -105,6 +105,13 @@ namespace Assets.Scripts.Cards
         /// more gold. Does not stack - a second cast keeps the larger bonus. Needs the fight
         /// (<see cref="EffectResolver.AddGoldBonus"/>); inert without one. Appended.
         /// </summary>
-        FightGoldBonus = 16
+        FightGoldBonus = 16,
+
+        /// <summary>
+        /// The Arcane Circlet: the cast its target is making costs no charge. Meant for an
+        /// on-ability-used reaction, which hears of the cast before its charge is spent. Needs the fight
+        /// (<see cref="EffectResolver.FreeCast"/>); inert without one. <c>Power</c> is unused. Appended.
+        /// </summary>
+        RefundCharge = 17
     }
 }

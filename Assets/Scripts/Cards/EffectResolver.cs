@@ -78,11 +78,15 @@ namespace Assets.Scripts.Cards
         /// <c>CombatManager</c>; null (inert) elsewhere.</summary>
         public Action<int> AddGoldBonus { get; set; }
 
+        /// <summary>The Arcane Circlet: makes the cast its unit is making cost no charge, answering whether
+        /// it did. Set by <c>CombatManager</c>; null (inert) elsewhere, the balance model included.</summary>
+        public Func<ICombatUnit, bool> FreeCast { get; set; }
+
         public EffectResolver()
         {
             _factory = new EffectExecutorFactory(
                 () => Clock, () => Charges, () => Events, () => KillsOf, () => Roll, () => FallenAllies, () => LivingAllies,
-                () => StealFrom, () => AddGoldBonus);
+                () => StealFrom, () => AddGoldBonus, () => FreeCast);
         }
 
         /// <param name="powerBonus">Flat power added to the magic's Damage/Heal effects (from its upgrade level).</param>
@@ -277,6 +281,12 @@ namespace Assets.Scripts.Cards
                         : null;
                     if (avoided != null)
                     {
+                        buffTracker?.Events?.Publish(new HitAvoided
+                        {
+                            Attacker = action.Caster,
+                            Target = target,
+                            Dodged = avoided != MissText
+                        });
                         result.Entries.Add(new EffectEntry
                         {
                             Target = target,

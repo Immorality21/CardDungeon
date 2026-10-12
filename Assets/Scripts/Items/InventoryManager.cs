@@ -50,6 +50,7 @@ namespace Assets.Scripts.Items
                 // Items that grow with use count off the game's events; combat never calls in here.
                 GameEvents.Subscribe<EnemyDefeated>(CountKill);
                 GameEvents.Subscribe<CombatFinished>(CountVictory);
+                GameEvents.Subscribe<AbilityCast>(CountAbility);
             }
         }
 
@@ -57,6 +58,15 @@ namespace Assets.Scripts.Items
         {
             GameEvents.Unsubscribe<EnemyDefeated>(CountKill);
             GameEvents.Unsubscribe<CombatFinished>(CountVictory);
+            GameEvents.Unsubscribe<AbilityCast>(CountAbility);
+        }
+
+        private void CountAbility(AbilityCast cast)
+        {
+            if (!string.IsNullOrEmpty(cast?.HeroKey))
+            {
+                AddToWornCounters(cast.HeroKey, ItemCounterKind.AbilitiesUsed, 1);
+            }
         }
 
         private void CountKill(EnemyDefeated kill)
