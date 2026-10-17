@@ -142,9 +142,17 @@ New verbs, all appended to their enums:
 Verified in play 2026-10-11 through `Sandbox/HeroPassKit.asset` and `Sandbox/RogueKit.asset` with a
 scripted driver: Steal/Mug/Grand Heist loot, Fence's gold, Hunter's Mark + Flushing Shot, Grey Fang, Iron
 Charger, Murder of Crows, Golden Ferret's Luck, Dark Twin's Twin Strike, Death Mark's 2.1x crit, Mass
-Hysteria (a hound hit its ally), Pin Down, Rain of Arrows, Pack Hunt, Earthsplitter. **Not seen in play**
-(the full-grid Rogue is too fast for the enemies to act): Vanish's targeting and Evade on a basic attack -
-`HeroPassKitTests` covers the status and the ability path. The new summons' art is PixelLab (2026-10-11).
+Hysteria (a hound hit its ally), Pin Down, Rain of Arrows, Pack Hunt, Earthsplitter. The new summons'
+art is PixelLab (2026-10-11).
+
+**Vanish, Shadowstep and Blood Moon seen in play 2026-10-17** (`Sandbox/RogueKit.asset`, the hounds given
++40 Agility so they act between her turns - even a partly grown Rogue has 46 to their 4). That pass found
+**Vanish did nothing**: the live enemy turn built its planner context from `HeroSideUnits()`, and only
+`PredictIntent` used `TargetableHeroes()`, so the intent icon honoured Hidden and the swing did not. Fixed
+in `ExecuteEnemyTurn`; afterwards six enemy turns with the Rogue hidden all went to the Cultist. A charge
+locked on her *before* she vanished still lands (`ChargeTarget` is stored) - a design question, not
+changed. Shadowstep's Evade spent on a hound's basic attack; Blood Moon's percent STR/INT buff reached
+both heroes and cost 30% of the Cultist's bar. The balance model does not know Hidden.
 
 ## Resistance buffs
 

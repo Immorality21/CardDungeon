@@ -118,8 +118,7 @@ In order. The balance pass starts only when this list is empty.
    or drop - and anything changed is rebuilt. Includes the two Rogue "Maybe" awakenings, **Ambush** and
    **Coup de Grace**, which are not built.
 3. ~~**Gear reactions and grows-with-use.**~~ *Built 2026-10-12 from the owner's gear tab; `GearReactionTests`
-   pass (22), full suite green but for the known Blood Stair test. Not yet seen in a fight or in the
-   item pane (which does not scroll - check Shadowweave's set lines fit).* Seven reactions
+   pass (22), full suite green but for the known Blood Stair test. Seen in play 2026-10-17 (item 4).* Seven reactions
    (Arcane Circlet, Ember Greaves, Luckstone Charm, Ruby Amulet, Tower Shield, Warden's Helm, Warding
    Gauntlets), three milestones (Oak Staff 40 abilities used, Runed Blade 5 bosses, Swift Boots 15
    victories), the **Shadowweave set** (`ItemSetSO`) and the new **Blood Sword** (owner's note on the Iron
@@ -127,9 +126,14 @@ In order. The balance pass starts only when this list is empty.
    by the merchant through the catalog, on no drop table yet). New pieces: `TriggerKind.OnDodge`,
    `TriggeredEffect.IgnoreOverTime`/`Text`, `SpellEffectType.RefundCharge`, `ItemCounterKind.AbilitiesUsed`
    (fed by `GameEvents.AbilityCast`), and the item pane's Reacts / set sections.
-4. **See the last untested pieces in play**: Vanish keeping enemies off the Rogue, Shadowstep's Evade
-   on a basic attack, and Blood Moon's party buff. A full-grid Rogue is too fast for enemies to act, so
-   test with a partly-grown Rogue and fast enemies (`Sandbox/RogueKit.asset` is the starting point).
+4. ~~**See the last untested pieces in play**~~ *Done 2026-10-17.* Vanish, Shadowstep and Blood Moon
+   (`Sandbox/RogueKit.asset`) and every gear reaction, milestone and the Shadowweave set
+   (`Sandbox/GearCheck.asset`) seen working in real fights. **Vanish was broken** (enemies still swung
+   at a hidden Rogue - the live turn ignored Hidden; fixed in `CombatManager.ExecuteEnemyTurn`, see the
+   Magic guide). Left open: the hub item pane (`inv-detail-body`) overflows on gear with set or growth
+   lines - it scrolls by mouse wheel only, with a hidden scrollbar and no sign there is more, so the
+   hero's Stats/Resistances can sit out of sight; and a charge locked on the Rogue before Vanish still
+   lands.
 5. ~~**Commit** the pass (owner).~~ *Done 2026-10-12.*
 
 Then the balance pass, starting with what this pass already showed:

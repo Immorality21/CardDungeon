@@ -2355,7 +2355,8 @@ namespace Assets.Scripts.Rooms
 
             var context = new EnemyCombatContext
             {
-                Heroes = HeroSideUnits(),
+                // A Vanished hero (the Rogue) is not offered as a target - the same list PredictIntent reads.
+                Heroes = TargetableHeroes(),
                 Allies = GetAliveEnemies().Where(u => u != enemyUnit).ToList(),
                 BuffTracker = BuffTracker,
                 ChargingEntryIndex = enemy != null ? enemy.ChargingEntryIndex : EnemyActionPlanner.NoCharge,
