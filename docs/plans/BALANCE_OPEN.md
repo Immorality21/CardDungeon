@@ -6,6 +6,30 @@ Losability, the investment gates, and the findings the analyzer is currently rep
 
 ---
 
+### The 2026-10-17 balance pass — what was decided
+
+Findings and the owner's calls live in the **Balance Strategy** artifact
+(<https://claude.ai/artifact/Stsoi3SxXdeG8c9LtbvZkS>, owner's personal account; collections `decisions`,
+`notes`). Decided:
+
+- **The tool is a feasibility check**, judged by the floor simulator (wipe rate, ending health), not the
+  closed-form bands. First step: fix the solo-fight party, quiet per-enemy noise on wide parties.
+- **A rising difficulty curve, not one band.** Early runs forgive (players are still learning):
+
+  | runs | straight-line party: finale wipes | ordinary floors end at | revisits to bring the finale under 10% |
+  |---|---|---|---|
+  | Threshold, Sealed Archive | 5–15% | 50–75% health | 1 |
+  | Warrens, Catacombs, Drowned March | 15–30% | 35–65% | 1–2 |
+  | Ashen Deep onward, challenge runs | 30–45% | 25–55% | 2–3 |
+
+  "Trivial" (ending above ~90%) is judged for the **straight-line** party only (no gear, no revisits); a
+  geared party breezing an early floor is the reward working (owner note).
+- **Tune for four heroes** from the Drowned March on.
+- **Speed:** enemy stats scale per level (several stats, configurable per level; later also by Fear level),
+  plus diminishing returns on hero Agility for turn speed (proposal: full value to 15, half above).
+- **Endgame:** a full grid clears max Fear on early runs easily, but not on the last ones.
+- **Blood Stair red test:** make the earlier floors harder; never soften Red Cloister to pass it.
+
 ### Open balance steps
 
 1. **Re-derive the tier budgets against the new grid, then settle the Hollow Vault.** §5s doubled the

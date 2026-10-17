@@ -2835,3 +2835,38 @@ seed.EndRoster, seed.EndLifetimeXp)`):
 - **The Bloater's death burst is not in the closed form** (reactions never are). The suite reads the
   Cistern without it; measure it with the floor simulator before tightening the run further.
 
+
+## §5ai — The tool becomes a feasibility check, and the Threshold's finale gets teeth (2026-10-17)
+
+The owner's calls and the measurement behind them live in the Balance Strategy artifact (link in
+`docs/plans/BALANCE_OPEN.md`, "The 2026-10-17 balance pass"). The headline: past the opening, the
+straight-line party (no gear, no revisits) was never in danger, and party width is why.
+
+**The tool, cleaned up first:**
+- **Floors are judged against a rising curve per campaign tier** (`BalanceRulesSO.TierFloorBands`,
+  `EvaluateFloorAgainstCurve`): ordinary floors' ending health and finales' wipe rate, early tiers
+  forgiving. A finale that its tier budget marks as a gate *and* that really wipes past the curve is an
+  Info ("acts as its tier's gate"), so the Counting Room and the Hollow Vault are not curve failures.
+- **Solo fights use the party that meets the enemy on that floor** (`PartyMeeting`). The per-enemy
+  first-encounter party produced four bogus "party never wins" criticals (a Threshold party against an
+  Emberfall Drakeling).
+- **Per-enemy noise for wide parties is Info**: "no threat at all" when three or more heroes meet a
+  non-boss, and "attack-spam plays as well as thinking" on a solo fight (142 warnings). A floor's
+  hardest room keeps its depth warning.
+- **`BalanceAnalyzer.SimulateFloor(input, run, levelIndex)`** simulates one floor in seconds. It
+  reproduces the full analysis exactly; use it for every in-memory experiment instead of a full
+  simulated `Analyze` (minutes).
+
+**The Threshold** sat inside the early band except its finale (1% wipes against 5-15%). The Warden's
+own stats barely move the floor; Difficulty (which also scales its add) does:
+
+| Sunken Depths | wipe | ending health |
+|---|---|---|
+| Difficulty 1.6, Warden HP 65 (was) | 1% | 56% |
+| 1.8, 65 | 4% | 36% |
+| 1.6, 80 | 1% | 48% |
+| **1.8, 70 (shipped)** | **7%** | **35%** |
+| 1.9, 65 | 15% | 31% |
+
+Difficulty does not change XP, so nothing downstream moved. Floors 1-3 were already in band (59%,
+70%, 58%) and were left alone: "the tutorial stays easy" (owner, 2026-10-02) still holds.

@@ -229,6 +229,19 @@ namespace Assets.Scripts.Balance
                  "nothing that happened on it was a decision.")]
         [Range(0f, 1f)] public float TrivialFloorEndHealth = 0.85f;
 
+        [Tooltip("The difficulty curve the floor simulator judges a straight-line party against (no gear, " +
+                 "no revisits), indexed by campaign tier and clamped to the last entry. Early tiers forgive " +
+                 "because players are still learning; later tiers push. Owner, 2026-10-17 " +
+                 "(docs/plans/BALANCE_OPEN.md). A tier gate is exempt: it is meant to stop that party.")]
+        public List<FloorTierBand> TierFloorBands = new List<FloorTierBand>
+        {
+            new FloorTierBand { MinEndHealth = 0.50f, MaxEndHealth = 0.75f, MinFinaleWipe = 0.05f, MaxFinaleWipe = 0.15f },
+            new FloorTierBand { MinEndHealth = 0.50f, MaxEndHealth = 0.75f, MinFinaleWipe = 0.05f, MaxFinaleWipe = 0.15f },
+            new FloorTierBand { MinEndHealth = 0.35f, MaxEndHealth = 0.65f, MinFinaleWipe = 0.15f, MaxFinaleWipe = 0.30f },
+            new FloorTierBand { MinEndHealth = 0.35f, MaxEndHealth = 0.65f, MinFinaleWipe = 0.15f, MaxFinaleWipe = 0.30f },
+            new FloorTierBand { MinEndHealth = 0.25f, MaxEndHealth = 0.55f, MinFinaleWipe = 0.30f, MaxFinaleWipe = 0.45f }
+        };
+
         [Header("Investment frontier — what each tier asks, and how the player may pay it")]
         [Tooltip("Sweep every run's final floor across party width and sphere-grid XP, and report " +
                  "the minimal mixes that clear it. Needs simulation; costs about a minute.")]
@@ -320,6 +333,17 @@ namespace Assets.Scripts.Balance
             return TierInvestmentBudgets[Mathf.Min(tier, TierInvestmentBudgets.Count - 1)];
         }
 
+        /// <summary>The floor curve for <paramref name="tier"/>, clamped to the last authored entry; null
+        /// with no campaign tier (an unplaced run) or no bands.</summary>
+        public FloorTierBand? FloorBandForTier(int tier)
+        {
+            if (tier < 0 || TierFloorBands == null || TierFloorBands.Count == 0)
+            {
+                return null;
+            }
+            return TierFloorBands[Mathf.Min(tier, TierFloorBands.Count - 1)];
+        }
+
         /// <summary>
         /// An in-memory rules object with the defaults above, used when no rules asset exists yet so
         /// the window and tests work out of the box.
@@ -330,5 +354,19 @@ namespace Assets.Scripts.Balance
             rules.name = "Default Balance Rules";
             return rules;
         }
+    }
+
+    /// <summary>
+    /// One campaign tier's slice of the difficulty curve, as the floor simulator measures it for a
+    /// straight-line party: how much health an ordinary floor should leave, and how often the run's
+    /// finale should wipe it.
+    /// </summary>
+    [System.Serializable]
+    public struct FloorTierBand
+    {
+        [Range(0f, 1f)] public float MinEndHealth;
+        [Range(0f, 1f)] public float MaxEndHealth;
+        [Range(0f, 1f)] public float MinFinaleWipe;
+        [Range(0f, 1f)] public float MaxFinaleWipe;
     }
 }

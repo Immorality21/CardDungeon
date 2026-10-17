@@ -113,6 +113,11 @@ Finding 12 (Fear level 0 trivial because speed never rose) was answered by the o
   `Simulate` is on, model Swarming Halls, and measure the Hollow Vault from a party that has done both
   its prerequisites (`BALANCING.md` §5ab).
 - **XP taper** for trivial revisits (open question 5 below).
+- **Rethink Fear beyond Hades-style multipliers** *(owner, 2026-10-17, roadmap)*. Today every Fear level is
+  a stat or count multiplier. The owner wants **fixed effects** too - a new enemy that only appears from a
+  given Fear level, a new room event - and **bigger power jumps on early revisits** than late ones (replaying
+  an early run should pay off more). Neither fits the current composable conditions; it needs a design pass.
+  Out of scope for the 2026-10-17 balance pass.
 
 ### The original proposal (kept for its reasoning; superseded where the sections above differ)
 

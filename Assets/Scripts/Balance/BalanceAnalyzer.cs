@@ -152,7 +152,7 @@ namespace Assets.Scripts.Balance
             EvaluateMaterials(report, input);
             EvaluateUnpricedMechanics(report, input);
             EvaluateSimulations(report, rules);
-            EvaluateFloorSimulations(report, rules);
+            EvaluateFloorSimulations(report, rules, input);
             EvaluateFrontiers(report, rules);
             EvaluateSave(report, rules, input);
 
@@ -405,6 +405,32 @@ namespace Assets.Scripts.Balance
                 }
             }
             return result;
+        }
+
+        /// <summary>The party the run curve meets this placement with (its run and floor), or null for an
+        /// unplaced enemy. Each <see cref="EnemyMetrics"/> is one placement, so this is the party its
+        /// numbers were computed against.</summary>
+        private static PartyBaseline PartyMeeting(BalanceReport report, EnemyMetrics metrics)
+        {
+            if (metrics == null || metrics.Run == null)
+            {
+                return null;
+            }
+            foreach (var curve in report.Runs)
+            {
+                if (curve.Run != metrics.Run)
+                {
+                    continue;
+                }
+                foreach (var level in curve.Levels)
+                {
+                    if (level.Index == metrics.LevelIndex)
+                    {
+                        return level.Party;
+                    }
+                }
+            }
+            return null;
         }
 
         private static Dictionary<EnemySO, PartyBaseline> BuildFirstEncounterParties(
@@ -736,10 +762,12 @@ namespace Assets.Scripts.Balance
                 };
                 simReport.Enemies.Add(unit);
 
-                // Fight it with the party that actually meets it, not the starting party - the boss
-                // is never fought solo, and reporting it as unwinnable was an artefact of doing so.
-                PartyBaseline against;
-                if (!report.PartyByEnemy.TryGetValue(metrics.Definition, out against) || against == null)
+                // Fight it with the party that meets it *on this floor*. The per-enemy first-encounter
+                // party was wrong for every placement after the first: a Drakeling tuned for Emberfall
+                // was fought by the Threshold's two heroes and read as "never wins" (2026-10-17).
+                PartyBaseline against = PartyMeeting(report, metrics);
+                if (against == null
+                    && (!report.PartyByEnemy.TryGetValue(metrics.Definition, out against) || against == null))
                 {
                     against = report.Party;
                 }
@@ -1411,7 +1439,14 @@ namespace Assets.Scripts.Balance
                     // Healers are exempt: the danger index measures a damage race, and a Healer's cost to
                     // the player is the turns it adds by undoing damage, not the damage it deals. Judging
                     // one on offence would always read as "no threat".
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Reference,
+                    // Against three or more heroes no single trash enemy can matter on its own (party width
+                    // roughly halves per-enemy danger, BALANCING.md 1, consequence 2): the room's body count
+                    // is the dial there, so this is a note, not a finding (2026-10-17).
+                    var meeting = PartyMeeting(report, metrics);
+                    var noThreatSeverity = meeting != null && meeting.Size >= 3 && !metrics.IsBoss
+                        ? BalanceSeverity.Info
+                        : BalanceSeverity.Warning;
+                    report.Issues.Add(new BalanceIssue(noThreatSeverity, BalanceCategory.Enemy, metrics.Reference,
                         $"{metrics.Reference} is no threat at all (danger {metrics.SoloDangerIndex:0.000})")
                     {
                         Asset = metrics.Definition,
@@ -2923,7 +2958,13 @@ namespace Assets.Scripts.Balance
                 if (simulation.DepthGap <= rules.DominantStrategyTolerance && best.WinRate > 0f)
                 {
                     var attackOnly = simulation.AttackOnly;
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, simulation.Label,
+                    // One enemy fought alone rarely asks for a decision, so per enemy this is a note: it
+                    // was 142 warnings that buried the floor findings (2026-10-17). A floor's hardest room
+                    // is where the lack of a decision costs the game, and stays a warning.
+                    var depthSeverity = simulation.Label.EndsWith("(solo)")
+                        ? BalanceSeverity.Info
+                        : BalanceSeverity.Warning;
+                    report.Issues.Add(new BalanceIssue(depthSeverity, BalanceCategory.Simulation, simulation.Label,
                         "Attack-spam plays this fight as well as thinking does")
                     {
                         Asset = simulation.Asset,
@@ -2956,45 +2997,88 @@ namespace Assets.Scripts.Balance
             {
                 foreach (var level in run.Levels)
                 {
-                    var rooms = BuildFloorRooms(level);
-                    if (rooms.Count == 0)
+                    var floorReport = SimulateLevel(input, rules, report, run, level);
+                    if (floorReport != null)
                     {
-                        continue;
+                        report.Floors.Add(floorReport);
                     }
-
-                    var settings = new EncounterSimulator.FloorSimSettings
-                    {
-                        Trials = rules.SimulationTrials,
-                        Seed = rules.SimulationSeed,
-                        MaxTurns = rules.MaxSimTurns,
-                        Combos = input.Combos,
-                        PotionCount = level.Party.PotionCount,
-                        PotionHealAmount = level.Party.PotionHealAmount,
-                        RestRooms = level.RestRooms,
-                        RestHealFraction = RoomKindRewards.RestHealFraction,
-
-                        // Charges are a run resource: only floor 0 starts full. Granting every floor
-                        // full charges is exactly the optimism the per-room simulation carries.
-                        StartsWithFullCharges = level.Index == 0
-                    };
-
-                    // Same loadout rules as the per-room sims, so the two are comparable.
-                    AssignMagicLoadout(level.Party, report.Save, input.Magic);
-
-                    var floorReport = new FloorSimReport
-                    {
-                        Label = $"{run.Name} / {level.Reference}",
-                        Asset = run.Run,
-                        Run = run.Run,
-                        LevelIndex = level.Index,
-                        Rooms = rooms.Count,
-                        PredictedAttrition = level.AttritionLoad,
-                        StartsWithFullCharges = settings.StartsWithFullCharges
-                    };
-                    floorReport.Outcomes = EncounterSimulator.RunAllPoliciesOnFloor(level.Party, rooms, settings);
-                    report.Floors.Add(floorReport);
                 }
             }
+        }
+
+        /// <summary>
+        /// The floor simulation for one floor of one run, against the same straight-line party the full
+        /// analysis uses (run curves built, nothing else) - the cheap loop for a tuning pass: mutate a
+        /// floor in memory, call this, restore. Null when the run or floor is not modelled or has no
+        /// combat. A whole simulated <see cref="Analyze"/> takes minutes; this takes seconds.
+        /// </summary>
+        public static FloorSimReport SimulateFloor(BalanceInput input, RunDefinitionSO run, int levelIndex)
+        {
+            if (input == null || run == null)
+            {
+                return null;
+            }
+            var rules = input.Rules ?? BalanceRulesSO.CreateDefault();
+            var report = new BalanceReport();
+            report.Party = BuildReferenceParty(input, rules, null);
+            BuildRunCurves(input, rules, report);
+            foreach (var curve in report.Runs)
+            {
+                if (curve.Run != run)
+                {
+                    continue;
+                }
+                foreach (var level in curve.Levels)
+                {
+                    if (level.Index == levelIndex)
+                    {
+                        return SimulateLevel(input, rules, report, curve, level);
+                    }
+                }
+            }
+            return null;
+        }
+
+        private static FloorSimReport SimulateLevel(BalanceInput input, BalanceRulesSO rules, BalanceReport report,
+            RunCurve run, LevelCurve level)
+        {
+            var rooms = BuildFloorRooms(level);
+            if (rooms.Count == 0)
+            {
+                return null;
+            }
+
+            var settings = new EncounterSimulator.FloorSimSettings
+            {
+                Trials = rules.SimulationTrials,
+                Seed = rules.SimulationSeed,
+                MaxTurns = rules.MaxSimTurns,
+                Combos = input.Combos,
+                PotionCount = level.Party.PotionCount,
+                PotionHealAmount = level.Party.PotionHealAmount,
+                RestRooms = level.RestRooms,
+                RestHealFraction = RoomKindRewards.RestHealFraction,
+
+                // Charges are a run resource: only floor 0 starts full. Granting every floor
+                // full charges is exactly the optimism the per-room simulation carries.
+                StartsWithFullCharges = level.Index == 0
+            };
+
+            // Same loadout rules as the per-room sims, so the two are comparable.
+            AssignMagicLoadout(level.Party, report.Save, input.Magic);
+
+            var floorReport = new FloorSimReport
+            {
+                Label = $"{run.Name} / {level.Reference}",
+                Asset = run.Run,
+                Run = run.Run,
+                LevelIndex = level.Index,
+                Rooms = rooms.Count,
+                PredictedAttrition = level.AttritionLoad,
+                StartsWithFullCharges = settings.StartsWithFullCharges
+            };
+            floorReport.Outcomes = EncounterSimulator.RunAllPoliciesOnFloor(level.Party, rooms, settings);
+            return floorReport;
         }
 
         /// <summary>
@@ -3110,8 +3194,10 @@ namespace Assets.Scripts.Balance
             return rooms;
         }
 
-        private static void EvaluateFloorSimulations(BalanceReport report, BalanceRulesSO rules)
+        private static void EvaluateFloorSimulations(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
         {
+            var tiers = EffectiveTiers(input != null ? input.Campaign : null);
+
             // A run's last floor is the one that has to be able to end the run.
             var finalFloorOf = new Dictionary<RunDefinitionSO, int>();
             foreach (var floor in report.Floors)
@@ -3134,6 +3220,33 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
+                bool isFinalFloor = floor.Run != null
+                    && finalFloorOf.TryGetValue(floor.Run, out int deepest)
+                    && floor.LevelIndex == deepest;
+
+                int tier = floor.Run != null && tiers.TryGetValue(CampaignOps.RunKeyOf(floor.Run), out int t) ? t : -1;
+                var band = rules.FloorBandForTier(tier);
+
+                // A tier gate (BALANCE_OPEN.md 0g, "death is mandatory to progress") is meant to stop the
+                // straight-line party, so a finale the budget marks as a gate *and* that really wipes past
+                // its tier's curve is reported as the gate it is, not as a floor out of band. The frontier
+                // judges it. A gate-budgeted finale that does not stop the party falls through to the
+                // curve like any other floor.
+                if (isFinalFloor && band.HasValue && outcome.WipeRate > band.Value.MaxFinaleWipe
+                    && IsGateFinale(report, floor, rules, tiers))
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Simulation, floor.Label,
+                        $"Acts as its tier's gate (wipes {outcome.WipeRate:P0})")
+                    {
+                        Asset = floor.Asset,
+                        Detail = $"The straight-line party wipes {outcome.WipeRate:P0} of the time here, past the "
+                               + $"{band.Value.MaxFinaleWipe:P0} its tier's curve allows an ordinary finale. Its tier "
+                               + "budget marks it as a gate, so that is the design: judge it by its investment "
+                               + "frontier."
+                    });
+                    continue;
+                }
+
                 if (outcome.WipeRate > rules.MaxFloorWipeRate)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
@@ -3150,11 +3263,11 @@ namespace Assets.Scripts.Balance
                     });
                 }
 
-                bool isFinalFloor = floor.Run != null
-                    && finalFloorOf.TryGetValue(floor.Run, out int deepest)
-                    && floor.LevelIndex == deepest;
-
-                if (isFinalFloor && outcome.WipeRate < rules.MinFinalFloorWipeRate)
+                if (band.HasValue)
+                {
+                    EvaluateFloorAgainstCurve(report, floor, outcome, band.Value, tier, isFinalFloor, rules);
+                }
+                else if (isFinalFloor && outcome.WipeRate < rules.MinFinalFloorWipeRate)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
                         "The run's last floor cannot end the run")
@@ -3172,7 +3285,7 @@ namespace Assets.Scripts.Balance
                     });
                 }
 
-                if (outcome.WipeRate <= 0f && outcome.AverageEndHealthFraction > rules.TrivialFloorEndHealth)
+                if (!band.HasValue && outcome.WipeRate <= 0f && outcome.AverageEndHealthFraction > rules.TrivialFloorEndHealth)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Simulation, floor.Label,
                         "Floor never spends the party's resources")
@@ -3196,6 +3309,95 @@ namespace Assets.Scripts.Balance
                     });
                 }
             }
+        }
+
+        /// <summary>
+        /// One floor against its tier's slice of the difficulty curve (owner, 2026-10-17). The party is
+        /// the run curve's straight-line one - no gear, no revisits - so "too easy" means too easy for the
+        /// player who just walks in; a geared or revisiting party breezing through is the reward working.
+        /// </summary>
+        private static void EvaluateFloorAgainstCurve(BalanceReport report, FloorSimReport floor,
+            EncounterSimulator.FloorOutcome outcome, FloorTierBand band, int tier, bool isFinalFloor,
+            BalanceRulesSO rules)
+        {
+            string curve = $"tier {tier}'s curve";
+            if (isFinalFloor)
+            {
+                if (outcome.WipeRate < band.MinFinaleWipe)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
+                        $"Finale is too safe for its tier (wipes {outcome.WipeRate:P0})")
+                    {
+                        Asset = floor.Asset,
+                        Detail = $"A straight-line party wipes {outcome.WipeRate:P0} of the time and ends at "
+                               + $"{outcome.AverageEndHealthFraction:P0} health; {curve} wants "
+                               + $"{band.MinFinaleWipe:P0}-{band.MaxFinaleWipe:P0} wipes on a run's finale. A run "
+                               + "with no failure state makes every decision inside it free.",
+                        Suggestion = "Add bodies to the finale's rooms (the lever with headroom for a wide party), "
+                               + "raise its Difficulty, or cut the sustain it hands back."
+                    });
+                }
+                else if (outcome.WipeRate > band.MaxFinaleWipe && outcome.WipeRate <= rules.MaxFloorWipeRate)
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
+                        $"Finale is harsher than its tier (wipes {outcome.WipeRate:P0})")
+                    {
+                        Asset = floor.Asset,
+                        Detail = $"{curve} wants {band.MinFinaleWipe:P0}-{band.MaxFinaleWipe:P0} wipes on a run's "
+                               + "finale for a straight-line party.",
+                        Suggestion = "Thin the finale or lower its Difficulty - or, if it is meant to stop the "
+                               + "party until it invests, give its tier a budget that marks it as a gate."
+                    });
+                }
+                return;
+            }
+
+            if (outcome.AverageEndHealthFraction > band.MaxEndHealth)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
+                    $"Floor is easier than its tier (ends at {outcome.AverageEndHealthFraction:P0} health)")
+                {
+                    Asset = floor.Asset,
+                    Detail = $"A straight-line party ends at {outcome.AverageEndHealthFraction:P0} health having used "
+                           + $"{outcome.AveragePotionsUsed:0.0} potions; {curve} wants an ordinary floor to leave "
+                           + $"{band.MinEndHealth:P0}-{band.MaxEndHealth:P0}.",
+                    Suggestion = "Add bodies or raise the floor's Difficulty."
+                });
+            }
+            else if (outcome.AverageEndHealthFraction < band.MinEndHealth && outcome.WipeRate <= rules.MaxFloorWipeRate)
+            {
+                report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
+                    $"Floor is harsher than its tier (ends at {outcome.AverageEndHealthFraction:P0} health)")
+                {
+                    Asset = floor.Asset,
+                    Detail = $"A straight-line party ends at {outcome.AverageEndHealthFraction:P0} health, wiping "
+                           + $"{outcome.WipeRate:P0} of the time; {curve} wants an ordinary floor to leave "
+                           + $"{band.MinEndHealth:P0}-{band.MaxEndHealth:P0}.",
+                    Suggestion = "Thin the floor, add a refuge, or lower its Difficulty."
+                });
+            }
+        }
+
+        /// <summary>Whether this floor is a run's finale its tier budget marks as a gate
+        /// (<see cref="GateBudgetFor"/>), read off the run curve it was simulated from.</summary>
+        private static bool IsGateFinale(BalanceReport report, FloorSimReport floor, BalanceRulesSO rules,
+            IDictionary<string, int> tiers)
+        {
+            foreach (var curve in report.Runs)
+            {
+                if (curve.Run != floor.Run)
+                {
+                    continue;
+                }
+                foreach (var level in curve.Levels)
+                {
+                    if (level.Index == floor.LevelIndex)
+                    {
+                        return GateBudgetFor(curve, level, rules, tiers) >= 0;
+                    }
+                }
+            }
+            return false;
         }
 
         // ------------------------------------------------- investment frontiers

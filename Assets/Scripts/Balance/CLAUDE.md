@@ -393,8 +393,12 @@ early compounds for every room after), and a potion belt that is spent rather th
 `StartsWithFullCharges` is true only for floor 0, matching charges being a run resource.
 
 So: **`Run` judges an asset, `RunFloor` judges a floor.** `BalanceAnalyzer.RunFloorSimulations` fills
-`BalanceReport.Floors`, and `EvaluateFloorSimulations` reads it against `MaxFloorWipeRate`,
-`MinFinalFloorWipeRate` and `TrivialFloorEndHealth`. Attrition and wipe rate are calibrated against
+`BalanceReport.Floors`, and `EvaluateFloorSimulations` reads it against `MaxFloorWipeRate` and **the
+difficulty curve, `TierFloorBands`** (per campaign tier: ordinary floors' ending health, finales' wipe
+rate; owner, 2026-10-17). A finale the tier budget marks as a gate and that wipes past the curve is an
+Info, not a failure. `MinFinalFloorWipeRate` / `TrivialFloorEndHealth` only apply to a run with no
+campaign tier. **To tune one floor, call `BalanceAnalyzer.SimulateFloor(input, run, levelIndex)`** -
+seconds, the same numbers as the full analysis. Attrition and wipe rate are calibrated against
 each other in `docs/BALANCING.md` §5h — **death starts around attrition 0.70** — so tune with the
 cheap closed-form dial and confirm with the floor sim. **That calibration was measured on one-enemy
 rooms and does not extend to dense ones** (§5k): on a floor of three-enemy rooms the closed form runs
