@@ -3018,3 +3018,23 @@ Ordinary floors keep their bands: the wall is the finale. Two consequences:
 pays off at once, which reads as the reward the owner asked for. **The sphere grid will grow
 substantially (owner)**: every number here is against today's grid and XP prices; re-measure all tiers
 when it grows.
+
+**The revisit party buys gear, and the Ashen Deep becomes the first wall (same day).** Funded by XP
+alone, three Drowned March revisits (322 XP per hero each) only brought Emberfall at Agility x1.5 from
+94% to 32% wipes - a 90%+ wall that replaying could not open. But a replay also pays gold (a March
+revisit: ~730 kill and clear gold), and §5p found gear worth ~2.4x XP. `RevisitFundedCurve` now spends
+the revisits' own gold on gear with the frontier's buyer (`GearLoadout.Spend`;
+`BalanceRulesSO.RevisitPartyBuysGear`). Only the replays' gold - campaign gold before them stays
+unspent, so the two parties differ by the replays alone. It makes one revisit far stronger: the
+Catacombs' and the March's finales now fall to 0% after one.
+
+| Ashen Deep | Agility | Difficulty | straight through | +1 / +2 / +3 revisits |
+|---|---|---|---|---|
+| Cinder Gate | x3.5 | 3.0 -> 3.2 | 2% wipes, 63% health | (ordinary floor; above band, the run's opener) |
+| The Slag Halls | x2.5 | 3.75 -> 3.9 | 4%, 53% | |
+| **Emberfall** | **x3** | 3.15 | **100%** | **52% / 2% / 0%** |
+
+Emberfall needs two replays: the first halves the wall, the second opens it. Gentler Agility opened it
+in one (x2: 100% -> 8%), steeper made the first replay nearly worthless. Boss ratio 3.2, boss danger
+1.03. **Caveat:** with gear in the revisit party, its power jump depends on the shop catalog and prices;
+a catalog change moves every catch-up number.

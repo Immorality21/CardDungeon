@@ -3067,7 +3067,7 @@ namespace Assets.Scripts.Balance
             if (feederRevisits > 0)
             {
                 RevisitModel.Build(input.Campaign, report, rules);
-                target = RevisitFundedCurve(report, rules, report.RevisitNudges.Find(n => n.Run == run), feederRevisits);
+                target = RevisitFundedCurve(report, rules, report.RevisitNudges.Find(n => n.Run == run), feederRevisits, input);
             }
 
             if (target == null)
@@ -3090,7 +3090,7 @@ namespace Assets.Scripts.Balance
         /// <see cref="RevisitModel"/> uses for its catch-up curves. Null without a feeder.
         /// </summary>
         private static RunCurve RevisitFundedCurve(BalanceReport report, BalanceRulesSO rules, RevisitNudge nudge,
-            int revisits)
+            int revisits, BalanceInput input)
         {
             var feederCleared = nudge?.Feeder != null ? report.Runs.Find(c => c.Run == nudge.Feeder.Run) : null;
             if (feederCleared == null)
@@ -3102,7 +3102,34 @@ namespace Assets.Scripts.Balance
             {
                 funded[pair.Key] = pair.Value + Mathf.FloorToInt(nudge.Feeder.XpPerHero * revisits);
             }
-            return RunCurve.Build(nudge.Run, report.Party, rules, feederCleared.EndRoster, funded);
+
+            // A replay pays gold and loot too, and a player spends it on gear between runs - the
+            // XP-only funding read three Ashen Deep revisits as worth a fraction of what they are
+            // (2026-10-17). The gold the revisits themselves earn (kills and floor clears) buys
+            // gear with the frontier's own buyer; campaign gold before them stays unspent, so the
+            // straight-line party and this one differ by the replays alone.
+            var party = report.Party;
+            int gold = Mathf.FloorToInt(revisits * GoldPerRevisit(nudge.Feeder));
+            if (rules.RevisitPartyBuysGear && gold > 0 && input?.Items != null && feederCleared.EndRoster.Count > 0)
+            {
+                int xpPerHero = 0;
+                foreach (var hero in feederCleared.EndRoster)
+                {
+                    xpPerHero += funded.TryGetValue(hero, out int xp) ? xp : 0;
+                }
+                xpPerHero /= feederCleared.EndRoster.Count;
+                var spend = GearLoadout.Spend(feederCleared.EndRoster, xpPerHero, input.Items, gold, rules.WeightFor);
+                party = PartyBaseline.Build(feederCleared.EndRoster, xpPerHero, spend.Lookup,
+                    report.Party.PotionItem, report.Party.PotionCount);
+            }
+            return RunCurve.Build(nudge.Run, party, rules, feederCleared.EndRoster, funded);
+        }
+
+        /// <summary>Gold one Fear level 0 revisit of <paramref name="feeder"/> pays the party: its kills
+        /// and its floor-clear bonuses, at the revisit's reward multiplier.</summary>
+        private static float GoldPerRevisit(RevisitCurve feeder)
+        {
+            return feeder?.Curve == null ? 0f : feeder.Curve.TotalExpectedGold + feeder.Curve.ClearGold;
         }
 
         /// <summary>
@@ -3133,7 +3160,7 @@ namespace Assets.Scripts.Balance
 
                 for (int k = 1; k <= CatchUpRevisitsFor(nudge.Run, rules, tiers); k++)
                 {
-                    var curve = RevisitFundedCurve(report, rules, nudge, k);
+                    var curve = RevisitFundedCurve(report, rules, nudge, k, input);
                     var level = curve?.Levels.Find(l => l.Index == finale);
                     var floor = level != null ? SimulateLevel(input, rules, report, curve, level) : null;
                     if (floor?.Adaptive == null)

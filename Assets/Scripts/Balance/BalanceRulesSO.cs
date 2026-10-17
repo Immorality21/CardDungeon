@@ -249,6 +249,10 @@ namespace Assets.Scripts.Balance
                  "2026-10-17). Judged only when the analysis simulates.")]
         [Range(0f, 1f)] public float RevisitCatchUpMaxFinaleWipe = 0.10f;
 
+        [Tooltip("The revisit party also spends the gold its revisits earn on gear, the way a player does " +
+                 "between runs. Off measures XP alone, which undersells a replay (2026-10-17).")]
+        public bool RevisitPartyBuysGear = true;
+
         [Header("Investment frontier — what each tier asks, and how the player may pay it")]
         [Tooltip("Sweep every run's final floor across party width and sphere-grid XP, and report " +
                  "the minimal mixes that clear it. Needs simulation; costs about a minute.")]
