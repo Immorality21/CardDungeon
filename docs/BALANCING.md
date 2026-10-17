@@ -2912,3 +2912,11 @@ Paladin stalled at 61 XP against 65-XP nodes; the Merchant cannot be built on th
 gold is idle; the Warden's wind-up is only a small icon; the victory log prints negative HP for fallen
 heroes; the sandbox misplays a whole floor (difficulty applied after spawn, the encounter room emptied
 with no encounter set, no run boss).
+
+**The Sealed Archive** (tier 1, the early band). The Ash Stacks already sat in band (66% health). The
+Broken Orrery wiped 0% (65% health). Following the Threshold's lesson, the climax went onto the boss
+rather than the trash: Difficulty 1.75 -> 2.2 only reached 1% wipes while making every room deadlier.
+**Stone Sentinel override 60/8 -> 85 HP / 11 STR**: 6% wipes, 50% health, boss danger 0.87, boss
+ratio 4.1, step from floor 1 66%. Hero deaths per run 0.66 - a hero often falls on the boss (nothing
+revives mid-floor). "No reason to revisit the Sealed Archive first" is the Catacombs' finding (rule 6,
+the run after a replayable one) and is handled with the Catacombs.
