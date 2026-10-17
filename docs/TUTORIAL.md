@@ -35,7 +35,7 @@ pulsing gold outline (plus a bobbing ▼ over a town lot). Everything else is di
 | promise | where it is kept | guard |
 |---|---|---|
 | Floor 1 pays for the hall | `DungeonEntrance.GuaranteedMaterials` = 1 Rotted Timber; the hall costs exactly 1 | `TutorialContentTests.TheFirstFloor_GuaranteesTheGuideBuildingsPrice` |
-| Floor 1 pays for a first node | 2 sure EyeBall kills × 10 XP × `XpMultiplier` 2 = 40, split with the rescued Paladin = **20** for the Warrior; `warrior-start` costs **15** | `TutorialContentTests.TheFirstFloor_PaysTheStartingHeroForAFirstNode` |
+| Floor 1 pays for a first node | 2 sure EyeBall kills × 10 XP × `XpMultiplier` 2 = 40, split with the rescued Paladin = **20** for the Warrior (a 2026-10-17 playtest paid him 30); the node the guide offers (+3 STR) costs **20**, and `warrior-start` itself is now 30 | `TutorialContentTests.TheFirstFloor_PaysTheStartingHeroForAFirstNode` |
 
 Both were already true before the tutorial existed — the opening beat had been priced for it — so
 no drop or price changed. The XP test counts pessimistically: only spawns with `SpawnChance ≥ 1`,

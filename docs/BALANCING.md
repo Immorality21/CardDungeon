@@ -2870,3 +2870,45 @@ own stats barely move the floor; Difficulty (which also scales its add) does:
 
 Difficulty does not change XP, so nothing downstream moved. Floors 1-3 were already in band (59%,
 70%, 58%) and were left alone: "the tutorial stays easy" (owner, 2026-10-02) still holds.
+
+**Revised the same day after a scripted playtest** (an agent playing the floor 5 times in the sandbox):
+the Warden was tense but fair, the *floor* was not. Trash crits (a Stone Sentinel crit for 22 on a
+38-HP Warrior) and the Cinder Imp's group Fireball decided runs, and the party reached the boss with
+anywhere from 8 to 68 of 73 health depending on the rooms drawn. **The floor simulator cannot see that
+spread**: it fights the *expected* room mix, so a floor whose risk is in its bad rolls reads safer than
+it plays. Fix: a **refuge** on Sunken Depths (`SunkenDepths.asset` `RestRooms` 0 -> 1, only the
+Threshold uses the template) and the climax moved onto the readable boss (Warden HP 70 -> **90**, STR
+9 -> **11**). Simulated: 0% wipes, ending at 47% health, boss ratio 4.1, boss danger 1.17. That is
+under the early band's 5% finale minimum on purpose: for the tutorial, "never ends the run on a bad
+roll" won over "wipes 5%". A refuge barely answers to Difficulty (1.8 -> 2.0 moved ending health 63% ->
+62%), because it removes a trash room and heals 35%.
+
+**Revised again after a "real player" playthrough** (an agent playing a New Game through the whole
+Threshold on a throwaway save, spending XP on the grid in town between floors). Cleared first try.
+Two things the floor simulator could not show:
+- **Floor 3 (Collapsed Caverns) was the run's real spike**: no refuge, a Sentinel + Imp room cost both
+  potions and left the Warrior at 6 HP. Health refills each floor, ability charges do not, so the
+  party reached Sunken Depths at full health but **0 charges**.
+- **Sunken Depths was fair but easy**, ending at ~75% health against the simulator's 47%: the player
+  saved the refuge for right before the boss, so it refilled both health and charges at the moment
+  that matters. The simulator spreads refuges through the floor, so it **overstates a finale's danger
+  when the refuge sits before the boss** (open follow-up: let the floor sim rest before the boss room).
+
+Shipped: **Collapsed Caverns gets a refuge** (`CollapsedCaverns.asset` `RestRooms` 0 -> 1, Threshold
+only) with Difficulty 1.5 -> **1.8**, and the **Warden goes to 100 HP / 12 STR**.
+
+| floor | wipe | ending health |
+|---|---|---|
+| Collapsed Caverns (refuge, 1.8) | 0% | 84% (a recovery floor before the finale, above the band on purpose) |
+| Sunken Depths (refuge, Warden 100/12) | 5% | 40% |
+
+Boss danger 1.35 (ceiling 1.40), boss ratio 4.7, steps 73% / -3% / 42%. **Raising Caverns' Difficulty
+further is the wrong lever**: 2.2 brings its average into band (69%) but lifts hero deaths per run
+0.01 -> 0.18, because Difficulty scales the trash crits that made the floor swingy in play.
+
+Playtest UI/flow notes (not balance; backlog): the floor-entry screen shows health but not ability
+charges; the early grid is a straight line and offers "+1 ability slot" to heroes with one ability; the
+Paladin stalled at 61 XP against 65-XP nodes; the Merchant cannot be built on the first run (Scrap), so
+gold is idle; the Warden's wind-up is only a small icon; the victory log prints negative HP for fallen
+heroes; the sandbox misplays a whole floor (difficulty applied after spawn, the encounter room emptied
+with no encounter set, no run boss).

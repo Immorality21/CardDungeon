@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d03ef8fb4f65d04aacc66749b7be8c3, type: 3}
+  m_Name: ThresholdFinale
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Sandbox.SandboxConfigSO
+  Heroes:
+  - Hero: {fileID: 11400000, guid: a6d2375f82eee194ebc63c77676a3894, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 160
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  - Hero: {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 160
+    UnlockPathTo: []
+    UnlockEntireGrid: 0
+    Abilities: []
+  Level: {fileID: 11400000, guid: 6517393ec276405b8c88463d92983e27, type: 2}
+  Seed: 0
+  Enemies: []
+  EnemyDifficulty: 1.8
+  ClearOtherRooms: 0
+  WalkIntoEncounter: 0
+  CopyInventory: 0
+  CopyMetaProgress: 0
+  Items:
+  - Item: {fileID: 11400000, guid: b1e7c0a94f6d4a2b8c3d5e6f70819a2b, type: 2}
+    Count: 2
+    EquipOn: {fileID: 0}
