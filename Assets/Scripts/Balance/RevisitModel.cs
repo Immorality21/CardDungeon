@@ -59,6 +59,20 @@ namespace Assets.Scripts.Balance
 
         /// <summary>Fewest revisits after which every floor sits under the catch-up line, or -1.</summary>
         public int RevisitsToCatchUp = -1;
+
+        /// <summary>
+        /// The run's finale, simulated (<c>BalanceAnalyzer.SimulateRevisitFinales</c>): its wipe rate
+        /// for the straight-line party, or -1 when the analysis did not simulate. This, not the
+        /// closed-form peak above, is what the revisit judgement reads since 2026-10-17 - the owner's
+        /// curve keeps ordinary floors deliberately under the attrition the old rule asked for.
+        /// </summary>
+        public float StraightLineFinaleWipe = -1f;
+
+        /// <summary>The finale's simulated wipe rate after k revisits; entry 0 is one revisit.</summary>
+        public List<float> FinaleWipeAfterRevisits = new List<float>();
+
+        /// <summary>Fewest revisits after which the simulated finale wipes under the catch-up line, or -1.</summary>
+        public int RevisitsToCatchUpSimulated = -1;
     }
 
     /// <summary>

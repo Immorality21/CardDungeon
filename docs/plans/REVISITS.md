@@ -80,7 +80,7 @@ pacing guideline. See `BALANCING.md` §5ab for today's numbers.
 of effect is one `RunModifierEffectKind` member (append only: it is serialized by ordinal), one case
 in `RevisitOps.Resolve`, one field on `RunFear`, and whatever reads that field.
 
-**First-draft numbers** (not measured): base +50% to every stat (`BaseEnemyStatPercent`), rewards +25% at Fear level 0 and +10% per Fear level.
+**First-draft numbers** (not measured): base +50% to every stat (`BaseEnemyStatPercent`), rewards +25% at Fear level 0 (+50% since 2026-10-17, so a few replays catch a party up - BALANCE_OPEN.md) and +10% per Fear level.
 Hardened Foes (+25% health ×3, 1 Fear level each), Sharpened Blades (+25% damage ×3, 1 Fear level each),
 Quickened Foes (+25% Agility ×2, 2 Fear level each — added after the first playtest, finding 12), Swarming
 Halls (+1 foe ×2, 2 Fear level each), No Respite (−50% healing ×2, 2 Fear level each). The maximum is Fear level 18,

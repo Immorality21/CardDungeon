@@ -13,6 +13,28 @@ namespace Assets.Scripts.Combat
         // hardcoding a second copy of this constant.
         public const float BASE_TICKS = 100f;
 
+        /// <summary>Agility up to here counts in full toward turn speed (owner, 2026-10-17).</summary>
+        public const int SpeedKnee = 15;
+
+        /// <summary>What each point of Agility past <see cref="SpeedKnee"/> is worth toward turn speed.</summary>
+        public const float SpeedPastKnee = 0.5f;
+
+        /// <summary>
+        /// The Agility a unit's turns are paced by: full value up to <see cref="SpeedKnee"/>, half past
+        /// it. Without the bend a grown Rogue (Agility 30-46 against enemies' 2-8) took 6-10 turns per
+        /// enemy turn, so statuses that count down on the enemy's turn lasted almost forever and the
+        /// enemy side barely acted. Only turn order bends: dodge and anything that scales off Agility
+        /// read the stat itself. Shared by the live fight, the simulator and the closed form.
+        /// </summary>
+        public static float SpeedFor(int agility)
+        {
+            if (agility <= SpeedKnee)
+            {
+                return agility;
+            }
+            return SpeedKnee + (agility - SpeedKnee) * SpeedPastKnee;
+        }
+
         private Dictionary<ICombatUnit, float> _ticksUntilTurn = new Dictionary<ICombatUnit, float>();
         private CombatBuffTracker _buffTracker;
 
@@ -42,7 +64,7 @@ namespace Assets.Scripts.Combat
 
             foreach (var unit in units)
             {
-                float agility = Mathf.Max(1, GetEffectiveAgility(unit));
+                float agility = Mathf.Max(1, GetEffectiveSpeed(unit));
                 _ticksUntilTurn[unit] = BASE_TICKS / agility;
             }
         }
@@ -78,7 +100,7 @@ namespace Assets.Scripts.Combat
                 _actsNext = null;
                 if (inserted.IsAlive && _ticksUntilTurn.ContainsKey(inserted))
                 {
-                    _ticksUntilTurn[inserted] = BASE_TICKS / Mathf.Max(1, GetEffectiveAgility(inserted));
+                    _ticksUntilTurn[inserted] = BASE_TICKS / Mathf.Max(1, GetEffectiveSpeed(inserted));
                     return inserted;
                 }
             }
@@ -109,7 +131,7 @@ namespace Assets.Scripts.Combat
             }
 
             // The acting unit gets a new turn timer based on their effective agility
-            float agility = Mathf.Max(1, GetEffectiveAgility(next));
+            float agility = Mathf.Max(1, GetEffectiveSpeed(next));
             _ticksUntilTurn[next] = BASE_TICKS / agility;
 
             return next;
@@ -197,7 +219,7 @@ namespace Assets.Scripts.Combat
             {
                 return;
             }
-            _ticksUntilTurn[unit] = BASE_TICKS / Mathf.Max(1, GetEffectiveAgility(unit));
+            _ticksUntilTurn[unit] = BASE_TICKS / Mathf.Max(1, GetEffectiveSpeed(unit));
             if (actsNext)
             {
                 _actsNext = unit;
@@ -254,7 +276,7 @@ namespace Assets.Scripts.Combat
             {
                 return 0f;
             }
-            float turn = BASE_TICKS / Mathf.Max(1, GetEffectiveAgility(unit));
+            float turn = BASE_TICKS / Mathf.Max(1, GetEffectiveSpeed(unit));
             float delayed = Mathf.Min(ticks + fractionOfTurn * turn, MaxDelayedTurns * turn);
             if (delayed <= ticks)
             {
@@ -285,7 +307,7 @@ namespace Assets.Scripts.Combat
             if (_actsNext != null && _actsNext.IsAlive && snapshot.ContainsKey(_actsNext) && order.Count < count)
             {
                 order.Add(_actsNext);
-                snapshot[_actsNext] = BASE_TICKS / Mathf.Max(1, GetEffectiveAgility(_actsNext));
+                snapshot[_actsNext] = BASE_TICKS / Mathf.Max(1, GetEffectiveSpeed(_actsNext));
                 AddFollower(order, _actsNext, count);
             }
 
@@ -314,7 +336,7 @@ namespace Assets.Scripts.Combat
                     snapshot[unit] -= lowest;
                 }
 
-                float agility = Mathf.Max(1, GetEffectiveAgility(next));
+                float agility = Mathf.Max(1, GetEffectiveSpeed(next));
                 snapshot[next] = BASE_TICKS / agility;
                 order.Add(next);
                 AddFollower(order, next, count);
@@ -331,17 +353,17 @@ namespace Assets.Scripts.Combat
             }
         }
 
-        private int GetEffectiveAgility(ICombatUnit unit)
+        private float GetEffectiveSpeed(ICombatUnit unit)
         {
             // Item/level bonuses fold in via the unit's own effective stat; combat buffs/debuffs
-            // stack on top of that.
-            int baseAgility = unit.GetEffectiveStat(StatType.Agility);
+            // stack on top of that, and only then does the knee bend it (SpeedFor).
+            int agility = unit.GetEffectiveStat(StatType.Agility);
             if (_buffTracker != null)
             {
-                baseAgility += _buffTracker.GetBuffAmount(unit, StatType.Agility);
+                agility += _buffTracker.GetBuffAmount(unit, StatType.Agility);
             }
 
-            return baseAgility;
+            return SpeedFor(agility);
         }
     }
 }

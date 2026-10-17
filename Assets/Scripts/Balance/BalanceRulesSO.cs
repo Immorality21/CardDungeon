@@ -235,12 +235,19 @@ namespace Assets.Scripts.Balance
                  "(docs/plans/BALANCE_OPEN.md). A tier gate is exempt: it is meant to stop that party.")]
         public List<FloorTierBand> TierFloorBands = new List<FloorTierBand>
         {
-            new FloorTierBand { MinEndHealth = 0.50f, MaxEndHealth = 0.75f, MinFinaleWipe = 0.05f, MaxFinaleWipe = 0.15f },
-            new FloorTierBand { MinEndHealth = 0.50f, MaxEndHealth = 0.75f, MinFinaleWipe = 0.05f, MaxFinaleWipe = 0.15f },
-            new FloorTierBand { MinEndHealth = 0.35f, MaxEndHealth = 0.65f, MinFinaleWipe = 0.15f, MaxFinaleWipe = 0.30f },
-            new FloorTierBand { MinEndHealth = 0.35f, MaxEndHealth = 0.65f, MinFinaleWipe = 0.15f, MaxFinaleWipe = 0.30f },
-            new FloorTierBand { MinEndHealth = 0.25f, MaxEndHealth = 0.55f, MinFinaleWipe = 0.30f, MaxFinaleWipe = 0.45f }
+            // Revised the same day (owner): later runs must be near-unclearable without replaying, and
+            // replaying must reliably fix that. Ordinary floors keep their bands; the wall is the finale.
+            new FloorTierBand { MinEndHealth = 0.50f, MaxEndHealth = 0.75f, MinFinaleWipe = 0.05f, MaxFinaleWipe = 0.15f, CatchUpRevisits = 1 },
+            new FloorTierBand { MinEndHealth = 0.50f, MaxEndHealth = 0.75f, MinFinaleWipe = 0.05f, MaxFinaleWipe = 0.15f, CatchUpRevisits = 1 },
+            new FloorTierBand { MinEndHealth = 0.35f, MaxEndHealth = 0.65f, MinFinaleWipe = 0.30f, MaxFinaleWipe = 0.50f, CatchUpRevisits = 1 },
+            new FloorTierBand { MinEndHealth = 0.35f, MaxEndHealth = 0.65f, MinFinaleWipe = 0.60f, MaxFinaleWipe = 0.80f, CatchUpRevisits = 2 },
+            new FloorTierBand { MinEndHealth = 0.25f, MaxEndHealth = 0.55f, MinFinaleWipe = 0.90f, MaxFinaleWipe = 1.00f, CatchUpRevisits = 3 }
         };
+
+        [Tooltip("A run after a replayable one is caught up when its finale's simulated wipe rate falls under " +
+                 "this within its tier's CatchUpRevisits Fear level 0 revisits of the run before it (owner, " +
+                 "2026-10-17). Judged only when the analysis simulates.")]
+        [Range(0f, 1f)] public float RevisitCatchUpMaxFinaleWipe = 0.10f;
 
         [Header("Investment frontier — what each tier asks, and how the player may pay it")]
         [Tooltip("Sweep every run's final floor across party width and sphere-grid XP, and report " +
@@ -368,5 +375,10 @@ namespace Assets.Scripts.Balance
         [Range(0f, 1f)] public float MaxEndHealth;
         [Range(0f, 1f)] public float MinFinaleWipe;
         [Range(0f, 1f)] public float MaxFinaleWipe;
+
+        [Tooltip("How many Fear level 0 revisits of the run before may be needed to bring this tier's " +
+                 "finale under RevisitCatchUpMaxFinaleWipe. More reads as grinding. 0 falls back to " +
+                 "RevisitCatchUpMaxRevisits.")]
+        [Min(0)] public int CatchUpRevisits;
     }
 }

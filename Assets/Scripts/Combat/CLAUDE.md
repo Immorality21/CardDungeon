@@ -4,7 +4,8 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
 
 ## Turn System (FFX CTB-style)
 
-- **Turn order** is determined by the Agility stat. Higher agility = more frequent turns. `TurnManager` uses tick-based scheduling (`100 / Agility` ticks per turn).
+- **Turn order** is determined by the Agility stat. Higher agility = more frequent turns. `TurnManager` uses tick-based scheduling (`100 / speed` ticks per turn).
+- **Speed bends past a knee** *(owner, 2026-10-17)*: `TurnManager.SpeedFor` counts Agility in full up to `SpeedKnee` (15) and at `SpeedPastKnee` (half) above it, for every unit. A grown Rogue (Agility 30-46 against enemies' 2-8) used to take 6-10 turns per enemy turn, so statuses that count down on the enemy's turn lasted almost forever. Only turn order bends - dodge and anything else that scales off Agility read the stat itself. The live clock, the simulator (same `TurnManager`) and the closed form (`BalanceMath.TurnsPerTick`) all go through it. The other half of the fix is data: later runs raise enemy Agility per floor through `LevelEnemyTuning.StatScales` (see `docs/BALANCING.md` §5ai).
 - **Delay** (`TurnManager.Delay`, 2026-10-01) pushes a unit's counter back by a fraction of its *own* turn, at once, capped at `MaxDelayedTurns` (2) of its turns - one extra turn at most, never a lock. A suspended unit is off the clock and cannot be delayed. Reached by the `TurnDelay` effect through `EffectResolver.Clock` (see the Magic guide); Slow is the other tempo lever and only stretches the turns after the next.
 
 - **Followers** (`TurnManager.Follow`, 2026-10-07): a follower keeps **no counter of its own** and takes

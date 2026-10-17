@@ -2920,3 +2920,101 @@ rather than the trash: Difficulty 1.75 -> 2.2 only reached 1% wipes while making
 ratio 4.1, step from floor 1 66%. Hero deaths per run 0.66 - a hero often falls on the boss (nothing
 revives mid-floor). "No reason to revisit the Sealed Archive first" is the Catacombs' finding (rule 6,
 the run after a replayable one) and is handled with the Catacombs.
+
+**The Catacombs** (tier 2, the middle band; the first run after a replayable one, so rule 6 applies).
+`BalanceAnalyzer.SimulateFloor(input, run, level, feederRevisits)` now also measures a floor for the
+party that revisited the run before it N times at Fear level 0 (funded as `RevisitModel` funds it).
+
+| floor | was | now | change |
+|---|---|---|---|
+| The Ossuary Stair | 0% / 86% | 1% wipes / 62% | refuge removed (`OssuaryStair.asset` RestRooms 1 -> 0), Difficulty 2.45 -> 2.6 |
+| The Bone Galleries | 1% / 71% | 4% / 61% | Difficulty 2.8 -> 3.0 |
+| The Lich's Sepulchre | 0% / 66% | **14%** / 50% | Difficulty 2.6 -> 2.8; Lich 72/7 -> **85 HP / 8 STR / 14 INT** |
+| ...after 1 / 2 Archive revisits | 1% / 0% | **4% / 2%** | the replay reward, measured |
+
+Five things this run taught:
+- **A revisit buys little XP** (~105 per hero for the Archive). Two of them moved the old finale from 66%
+  to 73% health, so the catch-up only works when the straight-line finale sits near the edge. It does
+  now: 14% -> 4% after one revisit.
+- **A refuge on a run's first floor is close to free** (charges start full there). Removing it was the
+  lever for the Ossuary Stair, which barely answered to Difficulty (3.4 still left 76%).
+- **The Bone Galleries is steep**: 3.1 left 59%, 3.4 wiped 33%. Tune it in 0.1 steps.
+- **Pin a caster boss's Intelligence.** An `Overrides` row exempts the boss from the level's spell-power
+  scale, so the Lich's casts ran at template power. Adding INT to the override made its spells the
+  threat, and moving threat from HP/STR to INT is also what brought the closed-form boss ratio down
+  (100/10/13 read 6.4x and 1.54; 85/8/14 reads 5.7x and 1.42, an Info on a tier gate).
+- **Two harness traps.** Writing `stats[X] = 0` into an override *adds* a 0 entry, which overrides the
+  stat to 0 (remove the entry instead). And `Resources.UnloadAsset` on a run breaks the campaign's
+  reference to it until the campaign itself is unloaded and reloaded; the run then measures as if it
+  had no prerequisites (a lone starting hero, 100% wipes). Neither reaches disk, but both corrupt every
+  measurement after them in the same editor session.
+
+Still open: `RevisitModel`'s "no reason to revisit" check judges by closed-form attrition on ordinary
+floors (>= 0.70), which the new curve deliberately keeps lower; switch it to the finale's simulated wipe
+rate with and without revisits, which is what was measured above. The Bone Golem elite reads 8-9 party
+turns to kill (a time-to-kill warning).
+
+**The revisit check reads the simulator now** (same day). The old rule asked a straight-line party's
+worst *ordinary* floor for closed-form attrition >= 0.70, which the owner's curve deliberately keeps
+lower, so it reported every run as "no reason to revisit". `SimulateRevisitFinales` simulates each paced
+run's finale straight through and after 1..N Fear level 0 revisits of the run before it (N per tier:
+1 / 1 / 2 / 2 / 3, `FloorTierBand.CatchUpRevisits`), and `EvaluateRevisits` asks for a pushed finale
+(the tier's `MinFinaleWipe`) that revisits bring under 10% (`RevisitCatchUpMaxFinaleWipe`). Unpushed
+reads as an Info beside the floor finding; not catching up is the Warning; a tier gate that revisits do
+not open is an Info. Closed form only, it says the check needs the simulator.
+
+First reading: the Catacombs 14% -> 4% after one Archive revisit (paced, 1 point under its band's 15%);
+the Drowned March 0%, the Ashen Deep 3% and the Drowned Chapel 0% (unpushed - the next runs to tune);
+the Hollow Vault 100% -> 0% after one Ashen Deep revisit, **which is a model artifact**: its straight
+curve is seeded from its weakest prerequisite (the Warrens, two heroes) and its revisit curve from the
+Ashen Deep's four, so the jump is party width, not XP (REVISITS.md lists it: measure the Vault from a
+party that has done both prerequisites).
+
+**The Drowned March - the first four-hero run, and why speed came first.** Difficulty barely moves a
+four-hero floor: Rotwater Deep at Difficulty 4.9 still ended at 85% health, the Weeping Causeway at 4.8
+at 75%. Four fast heroes act so often that enemies barely get turns, so more enemy health and Strength
+only lengthen fights. **Enemy Agility is the lever** (`StatScales`, Agility, per floor): the Causeway at
+x3 went 93% -> 37%. Two changes shipped together (owner, 2026-10-17):
+- **Hero speed bends past Agility 15** (`TurnManager.SpeedFor`, half value above; Combat guide). It
+  moved none of the tuned runs (the model's broad builds rarely pass 15 this early) - it is for invested
+  Rogue/Ranger builds and later tiers.
+- **Enemy Agility per floor**, rising from the March:
+
+| floor | Agility | Difficulty | wipe | ending health |
+|---|---|---|---|---|
+| Silt Shallows (3 heroes) | x1.5 | 2.85 | 2% | 57% (was 71%) |
+| The Reedcage (3) | x1.5 | 2.75 | 6% | 51% (was 77%) |
+| The Weeping Causeway (4) | x2.5 | 3.0 | 2% | 58% (was 93%) |
+| Rotwater Deep (4) | x3 | 3.1 -> 3.6 | 1% | 59% (was 96%) |
+| **The Mire Throne** (4) | x2 | 3.0 -> 3.15 | **19%** | 37% (was 0% / 83%) |
+| ...after 1 / 2 Catacombs revisits | | | **2% / 1%** | 50% / 58% |
+
+- **Agility steps are coarse on small templates**: x1.75 and x2 on an Agility-4 enemy are 7 and 8, and
+  the Mire Throne went 8% -> 13% -> 64% wipes across x1.75 / x2 / x2.5. Tune Agility first in 0.25-0.5
+  steps, then finish with Difficulty.
+- **A long floor (the Mire Throne, 16 rooms) compounds**: small per-room changes swing its wipe rate
+  hard, and one revisit's XP (166 per hero) swings it back. That makes it a good revisit gate.
+- Closed form after: boss ratio 2.5, boss danger 0.45, a 112% step onto the finale (exempt - a tier
+  gate), and "the Reedcage leaves only 4% of the party's resources" (closed form; the simulator ends it
+  at 51% with 6% wipes).
+
+**The curve steepened (owner, same day): "a straight-through party should wipe way more on later runs -
+close to 90% - but the game must really reward replaying."** Finale targets are now 5-15% (tiers 0-1),
+**30-50%** (2, the Catacombs), **60-80%** (3, the March) and **90%+** (4+: Ashen Deep, Drowned Chapel,
+Hollow Vault, challenge runs), each to fall under 10% within 1 / 2 / 3 revisits of the run before.
+Ordinary floors keep their bands: the wall is the finale. Two consequences:
+- **The revisit reward went +25% -> +50%** (`Revisits.asset` `BaseRewardPercent`; XP, gold and Essence
+  alike). At +25% one Archive revisit (105 XP per hero) left the Catacombs' finale at 17% wipes; at +50%
+  (126) it falls to 6%. The gold and Essence side is unmeasured - no gold-economy check exists yet.
+- **The generic 35% floor-wipe ceiling no longer applies to a finale with a tier band**, and a finale over
+  its band's maximum is reported however high it goes.
+
+| finale | straight through | after 1 revisit | change |
+|---|---|---|---|
+| The Lich's Sepulchre | 33% (was 14%) | 6% | Difficulty 2.8 -> 2.9 |
+| The Mire Throne | 64% (was 19%) | 7% | Agility x2 -> x2.5, Difficulty 3.15 -> 3.0 |
+
+**One revisit is enough on both**, so the 2-revisit budget the March was allowed is unused - replaying
+pays off at once, which reads as the reward the owner asked for. **The sphere grid will grow
+substantially (owner)**: every number here is against today's grid and XP prices; re-measure all tiers
+when it grows.

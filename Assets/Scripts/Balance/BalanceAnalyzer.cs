@@ -136,6 +136,7 @@ namespace Assets.Scripts.Balance
             {
                 RunSimulations(input, rules, report);
                 RunFloorSimulations(input, rules, report);
+                SimulateRevisitFinales(input, rules, report);
                 if (rules.MeasureInvestmentFrontiers)
                 {
                     RunFrontierSweeps(input, rules, report);
@@ -145,7 +146,7 @@ namespace Assets.Scripts.Balance
             EvaluateParty(report, rules, input);
             EvaluateEnemies(report, rules);
             EvaluateRuns(report, rules, input);
-            EvaluateRevisits(report, rules);
+            EvaluateRevisits(report, rules, input);
             EvaluateEvents(report, rules, input);
             EvaluateVariety(report, rules);
             EvaluateProgression(report, rules);
@@ -311,8 +312,10 @@ namespace Assets.Scripts.Balance
         /// straight-line party is pushed and a few revisits catch it up. Warnings, never Critical -
         /// it is a pacing target, and the campaign is still being written.
         /// </summary>
-        private static void EvaluateRevisits(BalanceReport report, BalanceRulesSO rules)
+        private static void EvaluateRevisits(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
         {
+            var tiers = EffectiveTiers(input != null ? input.Campaign : null);
+
             foreach (var revisit in report.Revisits)
             {
                 report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Run, revisit.Name,
@@ -325,44 +328,75 @@ namespace Assets.Scripts.Balance
                 });
             }
 
+            // Judged on the finale's simulated wipe rate (owner, 2026-10-17): the straight-line party should
+            // be pushed by the finale, and a few revisits of the run before should bring it under the
+            // catch-up line. The closed-form attrition rule this replaced asked ordinary floors for a load
+            // the difficulty curve deliberately keeps lower, so it reported every paced run as unpaced.
             foreach (var nudge in report.RevisitNudges)
             {
                 string feeder = nudge.Feeder != null ? nudge.Feeder.Name : "its replayable prerequisite";
-                string after = string.Join(" / ", nudge.PeakAfterRevisits.ConvertAll(p => p.ToString("0.00")));
 
-                if (nudge.StraightLinePeak < rules.RevisitNudgeMinAttrition)
+                if (nudge.StraightLineFinaleWipe < 0f)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Run, nudge.Name,
-                        $"No reason to revisit {feeder} first")
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Run, nudge.Name,
+                        $"Revisit pacing after {feeder} is judged by the simulator")
                     {
-                        Detail = $"The party that arrives without revisiting peaks at attrition {nudge.StraightLinePeak:0.00} "
-                                 + $"on its ordinary floors (finale {nudge.StraightLineBossAttrition:0.00}, judged by the frontier), "
-                                 + $"under the {rules.RevisitNudgeMinAttrition:0.00} where death starts. Once a run can be "
-                                 + "replayed, the run after it should push a straight-line party, so going back is "
-                                 + "the answer the game offers rather than a chore.",
-                        Suggestion = $"Raise {nudge.Name}'s hardest floor (EnemyTuning.Difficulty or enemy count) until "
-                                     + $"a straight-line party peaks near {rules.RevisitNudgeMinAttrition:0.00}; peak after "
-                                     + $"1..{nudge.PeakAfterRevisits.Count} revisits: {after}.",
+                        Detail = "Turn on Simulate to measure whether this run's finale pushes a straight-line party "
+                                 + $"and how many revisits of {feeder} bring it within reach. Closed form, for context: "
+                                 + $"worst ordinary floor {nudge.StraightLinePeak:0.00}, finale {nudge.StraightLineBossAttrition:0.00}.",
                     });
+                    continue;
                 }
 
-                if (nudge.RevisitsToCatchUp < 0)
+                int tier = nudge.Run != null && tiers.TryGetValue(CampaignOps.RunKeyOf(nudge.Run), out int t) ? t : -1;
+                var band = rules.FloorBandForTier(tier);
+                float pushedAt = band.HasValue ? band.Value.MinFinaleWipe : rules.MinFinalFloorWipeRate;
+                int allowed = CatchUpRevisitsFor(nudge.Run, rules, tiers);
+                string after = nudge.FinaleWipeAfterRevisits.Count > 0
+                    ? string.Join(" / ", nudge.FinaleWipeAfterRevisits.ConvertAll(w => w.ToString("P0")))
+                    : "not measured";
+
+                if (nudge.StraightLineFinaleWipe < pushedAt)
+                {
+                    // The floor check already reports the finale as too safe; this names what it costs.
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Run, nudge.Name,
+                        $"No reason to revisit {feeder} first (finale wipes {nudge.StraightLineFinaleWipe:P0})")
+                    {
+                        Detail = $"A straight-line party wipes {nudge.StraightLineFinaleWipe:P0} of the time on the finale, "
+                                 + $"under the {pushedAt:P0} its tier's curve asks for, so revisiting {feeder} buys "
+                                 + $"nothing the run needs. After 1..{nudge.FinaleWipeAfterRevisits.Count} revisits: {after}.",
+                        Suggestion = $"Raise {nudge.Name}'s finale until a straight-line party is pushed (see its "
+                                     + "floor finding)."
+                    });
+                }
+                else if (nudge.RevisitsToCatchUpSimulated < 0 && IsGatingFinale(report, nudge, band, rules, tiers))
+                {
+                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Run, nudge.Name,
+                        $"Gated: {allowed} revisit(s) of {feeder} are not meant to be enough")
+                    {
+                        Detail = $"The finale is its tier's gate (wipes {nudge.StraightLineFinaleWipe:P0} straight through, "
+                                 + $"{after} after revisits). Its price is judged by the investment frontier."
+                    });
+                }
+                else if (nudge.RevisitsToCatchUpSimulated < 0)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Run, nudge.Name,
                         $"Revisiting {feeder} does not catch the party up")
                     {
-                        Detail = $"After {nudge.PeakAfterRevisits.Count} Fear level 0 revisits the worst floor still "
-                                 + $"peaks at {(nudge.PeakAfterRevisits.Count > 0 ? nudge.PeakAfterRevisits[nudge.PeakAfterRevisits.Count - 1] : nudge.StraightLinePeak):0.00} "
-                                 + $"(target {rules.RevisitCatchUpMaxAttrition:0.00}). Past that many, revisiting reads as grinding.",
-                        Suggestion = $"Soften {nudge.Name}'s worst floor, or raise what a revisit of {feeder} pays.",
+                        Detail = $"The finale wipes {nudge.StraightLineFinaleWipe:P0} straight through and still "
+                                 + $"{after} after 1..{allowed} Fear level 0 revisits of {feeder}; the tier allows "
+                                 + $"{allowed} to bring it under {rules.RevisitCatchUpMaxFinaleWipe:P0}. More reads as grinding.",
+                        Suggestion = $"Soften {nudge.Name}'s finale, or raise what a revisit of {feeder} pays."
                     });
                 }
-                else if (nudge.StraightLinePeak >= rules.RevisitNudgeMinAttrition)
+                else
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Info, BalanceCategory.Run, nudge.Name,
-                        $"Paced by revisits: {nudge.RevisitsToCatchUp} of {feeder} catch the party up")
+                        $"Paced by revisits: {nudge.RevisitsToCatchUpSimulated} of {feeder} bring the finale under "
+                        + $"{rules.RevisitCatchUpMaxFinaleWipe:P0}")
                     {
-                        Detail = $"Straight-line peak {nudge.StraightLinePeak:0.00}; after 1..{nudge.PeakAfterRevisits.Count} revisits: {after}.",
+                        Detail = $"Finale wipes {nudge.StraightLineFinaleWipe:P0} straight through; after "
+                                 + $"1..{nudge.FinaleWipeAfterRevisits.Count} revisits: {after}.",
                     });
                 }
             }
@@ -3012,7 +3046,13 @@ namespace Assets.Scripts.Balance
         /// floor in memory, call this, restore. Null when the run or floor is not modelled or has no
         /// combat. A whole simulated <see cref="Analyze"/> takes minutes; this takes seconds.
         /// </summary>
-        public static FloorSimReport SimulateFloor(BalanceInput input, RunDefinitionSO run, int levelIndex)
+        /// <param name="feederRevisits">When above 0, the party is the one that went back and revisited the
+        /// replayable run before this one that many times at Fear level 0 first - funded exactly as
+        /// <see cref="RevisitModel"/> funds its catch-up curves. That is the target's second question:
+        /// does a little replay bring this floor within reach (owner, 2026-10-17)? Null when the run has
+        /// no replayable prerequisite.</param>
+        public static FloorSimReport SimulateFloor(BalanceInput input, RunDefinitionSO run, int levelIndex,
+            int feederRevisits = 0)
         {
             if (input == null || run == null)
             {
@@ -3022,21 +3062,117 @@ namespace Assets.Scripts.Balance
             var report = new BalanceReport();
             report.Party = BuildReferenceParty(input, rules, null);
             BuildRunCurves(input, rules, report);
-            foreach (var curve in report.Runs)
+
+            RunCurve target = report.Runs.Find(c => c.Run == run);
+            if (feederRevisits > 0)
             {
-                if (curve.Run != run)
+                RevisitModel.Build(input.Campaign, report, rules);
+                target = RevisitFundedCurve(report, rules, report.RevisitNudges.Find(n => n.Run == run), feederRevisits);
+            }
+
+            if (target == null)
+            {
+                return null;
+            }
+            foreach (var level in target.Levels)
+            {
+                if (level.Index == levelIndex)
                 {
-                    continue;
-                }
-                foreach (var level in curve.Levels)
-                {
-                    if (level.Index == levelIndex)
-                    {
-                        return SimulateLevel(input, rules, report, curve, level);
-                    }
+                    return SimulateLevel(input, rules, report, target, level);
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// <paramref name="nudge"/>'s run as played by the party that first revisited its replayable
+        /// prerequisite <paramref name="revisits"/> times at Fear level 0 - the same funding
+        /// <see cref="RevisitModel"/> uses for its catch-up curves. Null without a feeder.
+        /// </summary>
+        private static RunCurve RevisitFundedCurve(BalanceReport report, BalanceRulesSO rules, RevisitNudge nudge,
+            int revisits)
+        {
+            var feederCleared = nudge?.Feeder != null ? report.Runs.Find(c => c.Run == nudge.Feeder.Run) : null;
+            if (feederCleared == null)
+            {
+                return null;
+            }
+            var funded = new Dictionary<HeroSO, int>();
+            foreach (var pair in feederCleared.EndLifetimeXp)
+            {
+                funded[pair.Key] = pair.Value + Mathf.FloorToInt(nudge.Feeder.XpPerHero * revisits);
+            }
+            return RunCurve.Build(nudge.Run, report.Party, rules, feederCleared.EndRoster, funded);
+        }
+
+        /// <summary>
+        /// The revisit judgement's measurement (owner, 2026-10-17): each run that opens after a replayable
+        /// one has its finale simulated straight through (read from the floor simulations) and after
+        /// 1..N revisits of the run before it, N being its tier's <see cref="FloorTierBand.CatchUpRevisits"/>.
+        /// Stops at the first revisit count that brings the finale under the catch-up line.
+        /// </summary>
+        private static void SimulateRevisitFinales(BalanceInput input, BalanceRulesSO rules, BalanceReport report)
+        {
+            var tiers = EffectiveTiers(input != null ? input.Campaign : null);
+            foreach (var nudge in report.RevisitNudges)
+            {
+                var straight = report.Runs.Find(c => c.Run == nudge.Run);
+                if (straight == null || straight.Levels.Count == 0)
+                {
+                    continue;
+                }
+                int finale = straight.Levels[straight.Levels.Count - 1].Index;
+                var straightFloor = report.Floors.Find(f => f.Run == nudge.Run && f.LevelIndex == finale);
+                if (straightFloor?.Adaptive == null)
+                {
+                    continue;
+                }
+                nudge.StraightLineFinaleWipe = straightFloor.Adaptive.WipeRate;
+                nudge.FinaleWipeAfterRevisits.Clear();
+                nudge.RevisitsToCatchUpSimulated = -1;
+
+                for (int k = 1; k <= CatchUpRevisitsFor(nudge.Run, rules, tiers); k++)
+                {
+                    var curve = RevisitFundedCurve(report, rules, nudge, k);
+                    var level = curve?.Levels.Find(l => l.Index == finale);
+                    var floor = level != null ? SimulateLevel(input, rules, report, curve, level) : null;
+                    if (floor?.Adaptive == null)
+                    {
+                        break;
+                    }
+                    nudge.FinaleWipeAfterRevisits.Add(floor.Adaptive.WipeRate);
+                    if (floor.Adaptive.WipeRate < rules.RevisitCatchUpMaxFinaleWipe)
+                    {
+                        nudge.RevisitsToCatchUpSimulated = k;
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>Whether <paramref name="nudge"/>'s finale is a tier gate that really stops the
+        /// straight-line party - the same test the floor check uses.</summary>
+        private static bool IsGatingFinale(BalanceReport report, RevisitNudge nudge, FloorTierBand? band,
+            BalanceRulesSO rules, IDictionary<string, int> tiers)
+        {
+            var straight = report.Runs.Find(c => c.Run == nudge.Run);
+            if (straight == null || straight.Levels.Count == 0 || !band.HasValue
+                || nudge.StraightLineFinaleWipe <= band.Value.MaxFinaleWipe)
+            {
+                return false;
+            }
+            int finale = straight.Levels[straight.Levels.Count - 1].Index;
+            var floor = report.Floors.Find(f => f.Run == nudge.Run && f.LevelIndex == finale);
+            return floor != null && IsGateFinale(report, floor, rules, tiers);
+        }
+
+        private static int CatchUpRevisitsFor(RunDefinitionSO run, BalanceRulesSO rules, IDictionary<string, int> tiers)
+        {
+            int tier = run != null && tiers.TryGetValue(CampaignOps.RunKeyOf(run), out int t) ? t : -1;
+            var band = rules.FloorBandForTier(tier);
+            return band.HasValue && band.Value.CatchUpRevisits > 0
+                ? band.Value.CatchUpRevisits
+                : Mathf.Max(1, rules.RevisitCatchUpMaxRevisits);
         }
 
         private static FloorSimReport SimulateLevel(BalanceInput input, BalanceRulesSO rules, BalanceReport report,
@@ -3247,7 +3383,9 @@ namespace Assets.Scripts.Balance
                     continue;
                 }
 
-                if (outcome.WipeRate > rules.MaxFloorWipeRate)
+                // A finale with a tier band is judged by that band alone: from the March on the curve asks
+                // finales for 60-100% wipes on purpose (owner, 2026-10-17), far past this ceiling.
+                if (outcome.WipeRate > rules.MaxFloorWipeRate && !(isFinalFloor && band.HasValue))
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
                         $"Floor wipes the party {outcome.WipeRate:P0} of the time")
@@ -3337,7 +3475,7 @@ namespace Assets.Scripts.Balance
                                + "raise its Difficulty, or cut the sustain it hands back."
                     });
                 }
-                else if (outcome.WipeRate > band.MaxFinaleWipe && outcome.WipeRate <= rules.MaxFloorWipeRate)
+                else if (outcome.WipeRate > band.MaxFinaleWipe)
                 {
                     report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Simulation, floor.Label,
                         $"Finale is harsher than its tier (wipes {outcome.WipeRate:P0})")

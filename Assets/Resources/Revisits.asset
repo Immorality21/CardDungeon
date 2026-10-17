@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Revisits
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RevisitRulesSO
   BaseEnemyStatPercent: 50
-  BaseRewardPercent: 25
+  BaseRewardPercent: 50
   RewardPercentPerFear: 10
   NewBestFearOnly:
   - {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}

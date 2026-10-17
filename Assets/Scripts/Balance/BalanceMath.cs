@@ -80,15 +80,16 @@ namespace Assets.Scripts.Balance
             return counted > 0 ? total / counted : 0f;
         }
 
-        /// <summary>Turns a unit gets per CTB tick: it acts once every BASE_TICKS/agility ticks.</summary>
+        /// <summary>Turns a unit gets per CTB tick: it acts once every BASE_TICKS/speed ticks, speed being
+        /// its Agility bent past the knee exactly as the live clock bends it (<see cref="TurnManager.SpeedFor"/>).</summary>
         public static float TurnsPerTick(ICombatUnit unit)
         {
             if (unit == null)
             {
                 return 0f;
             }
-            float agility = Mathf.Max(1, unit.GetEffectiveStat(StatType.Agility));
-            return agility / TurnManager.BASE_TICKS;
+            float speed = Mathf.Max(1f, TurnManager.SpeedFor(unit.GetEffectiveStat(StatType.Agility)));
+            return speed / TurnManager.BASE_TICKS;
         }
 
         /// <summary>Whole hits needed to drop a health total at the given average damage.</summary>

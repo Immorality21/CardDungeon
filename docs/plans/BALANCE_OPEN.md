@@ -16,11 +16,21 @@ Findings and the owner's calls live in the **Balance Strategy** artifact
   closed-form bands. First step: fix the solo-fight party, quiet per-enemy noise on wide parties.
 - **A rising difficulty curve, not one band.** Early runs forgive (players are still learning):
 
-  | runs | straight-line party: finale wipes | ordinary floors end at | revisits to bring the finale under 10% |
+  **Revised the same day (owner): "later runs should not be clearable without replaying, and the game
+  must really reward replaying."** The wall is the finale; ordinary floors keep their bands so a player
+  reaches the boss, sees what they are up against, and replays.
+
+  | runs (campaign tier) | straight-line party: finale wipes | ordinary floors end at | revisits of the run before to bring the finale under 10% |
   |---|---|---|---|
-  | Threshold, Sealed Archive | 5–15% | 50–75% health | 1 |
-  | Warrens, Catacombs, Drowned March | 15–30% | 35–65% | 1–2 |
-  | Ashen Deep onward, challenge runs | 30–45% | 25–55% | 2–3 |
+  | Threshold, Sealed Archive (0-1) | 5–15% | 50–75% health | optional |
+  | Catacombs (2; the Warrens sits in tier 1 but its finale is a gate) | 30–50% | 35–65% | 1 |
+  | Drowned March (3) | 60–80% | 35–65% | 2 |
+  | Ashen Deep, Drowned Chapel, Hollow Vault, challenge runs (4+) | **90%+** | 25–55% | 2–3 |
+
+  **Revisits may pay more** where 2-3 are not enough (owner): raise the revisit reward rather than soften
+  the wall. **The sphere grid will grow substantially** (owner): every number here is against today's
+  grid and must be re-measured when it grows; prefer levers that scale (revisit rewards as a multiplier
+  of what the run pays) over fixed XP amounts.
 
   "Trivial" (ending above ~90%) is judged for the **straight-line** party only (no gear, no revisits); a
   geared party breezing an early floor is the reward working (owner note).
