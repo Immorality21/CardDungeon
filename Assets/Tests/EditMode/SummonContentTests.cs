@@ -177,6 +177,30 @@ namespace Tests.EditMode
             Assert.IsEmpty(orphans, "Summons no grid teaches (unreachable): " + string.Join(", ", orphans));
         }
 
+        /// <summary>
+        /// The Warrior's cross-branch test node (2026-10-22): on the boar branch, an optional leaf that
+        /// makes the Cairn Golem - taught on the other branch - hit 50% harder, and only opens once the
+        /// golem is learned.
+        /// </summary>
+        [Test]
+        public void WarriorBoarBranch_GolemDamageNode_RequiresTheGolem()
+        {
+            var grid = AllGrids().Single(g => g.name == "WarriorGrid");
+            var node = SphereGridOps.FindNode(grid, "warrior-b-golem-fury");
+            Assert.IsNotNull(node, "warrior-b-golem-fury is missing from the Warrior's grid.");
+            Assert.AreEqual(SphereNodeKind.SummonDamage, node.Kind);
+            Assert.AreEqual(50, node.SummonAmount);
+            Assert.AreEqual(SphereGridOps.FindNode(grid, "warrior-golem").GrantedSummonKey, node.GrantedSummonKey);
+            CollectionAssert.AreEqual(new List<string> { "warrior-golem" }, node.RequiredNodes);
+
+            var path = SphereGridOps.PathTo(grid, node.Key);
+            CollectionAssert.Contains(path, "warrior-boar", "It belongs to the boar's branch.");
+            CollectionAssert.DoesNotContain(path, "warrior-golem", "The golem is on the other branch.");
+
+            var grants = SphereGridOps.SummonsForNodes(grid, SphereGridOps.UnlockPathTo(grid, node.Key));
+            Assert.AreEqual(50, grants.Single(g => g.Key == node.GrantedSummonKey).DamagePercent);
+        }
+
         private static bool IsSummonKind(SphereNodeKind kind)
         {
             return kind == SphereNodeKind.Summon || IsUpgradeKind(kind);
@@ -186,7 +210,8 @@ namespace Tests.EditMode
         {
             return kind == SphereNodeKind.SummonPower || kind == SphereNodeKind.SummonDuration
                    || kind == SphereNodeKind.SummonCharge || kind == SphereNodeKind.SummonSize
-                   || kind == SphereNodeKind.SummonPromote || kind == SphereNodeKind.SummonApplyChance;
+                   || kind == SphereNodeKind.SummonPromote || kind == SphereNodeKind.SummonApplyChance
+                   || kind == SphereNodeKind.SummonDamage;
         }
     }
 }

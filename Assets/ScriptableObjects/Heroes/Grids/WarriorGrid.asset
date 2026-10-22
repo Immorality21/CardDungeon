@@ -21,6 +21,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -45,6 +46,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -69,6 +71,7 @@ MonoBehaviour:
     UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -90,6 +93,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -116,6 +120,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -360}
     Gains:
       Values: []
@@ -138,6 +143,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -100, y: -205}
     Gains:
       Values:
@@ -162,6 +168,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -205, y: -380}
     Gains:
       Values:
@@ -186,6 +193,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -110, y: -325}
     Gains:
       Values: []
@@ -208,6 +216,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -165, y: -450}
     Gains:
       Values:
@@ -232,6 +241,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -395, y: -490}
     Gains:
       Values: []
@@ -254,6 +264,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -585, y: -600}
     Gains:
       Values: []
@@ -276,6 +287,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -680, y: -655}
     Gains:
       Values:
@@ -302,6 +314,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -185, y: -250}
     Gains:
       Values: []
@@ -324,6 +337,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -280, y: -305}
     Gains:
       Values:
@@ -348,6 +362,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -470, y: -415}
     Gains:
       Values:
@@ -372,6 +387,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -660, y: -525}
     Gains:
       Values: []
@@ -394,6 +410,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -775, y: -710}
     Gains:
       Values: []
@@ -416,6 +433,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -755, y: -580}
     Gains:
       Values:
@@ -440,6 +458,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 100, y: -205}
     Gains:
       Values:
@@ -464,6 +483,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 205, y: -380}
     Gains:
       Values:
@@ -488,6 +508,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 110, y: -325}
     Gains:
       Values: []
@@ -510,6 +531,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 165, y: -450}
     Gains:
       Values:
@@ -534,6 +556,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 395, y: -490}
     Gains:
       Values: []
@@ -556,6 +579,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 585, y: -600}
     Gains:
       Values: []
@@ -578,6 +602,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 680, y: -655}
     Gains:
       Values:
@@ -602,6 +627,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 185, y: -250}
     Gains:
       Values:
@@ -626,6 +652,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 280, y: -305}
     Gains:
       Values:
@@ -650,6 +677,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 470, y: -415}
     Gains:
       Values:
@@ -674,6 +702,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 660, y: -525}
     Gains:
       Values:
@@ -702,6 +731,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 775, y: -710}
     Gains:
       Values: []
@@ -724,6 +754,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 755, y: -580}
     Gains:
       Values:
@@ -754,6 +785,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 490, y: -545}
     Gains:
       Values: []
@@ -776,6 +808,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 850, y: -635}
     Gains:
       Values: []
@@ -798,6 +831,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 945, y: -690}
     Gains:
       Values: []
@@ -824,6 +858,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 1040, y: -745}
     Gains:
       Values: []
@@ -850,6 +885,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -490, y: -545}
     Gains:
       Values: []
@@ -872,6 +908,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -850, y: -635}
     Gains:
       Values: []
@@ -894,6 +931,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -945, y: -690}
     Gains:
       Values: []
@@ -920,6 +958,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -1040, y: -745}
     Gains:
       Values: []
@@ -942,6 +981,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 100
+    RequiredNodes: []
     Position: {x: -560, y: -700}
     Gains:
       Values: []
@@ -964,6 +1004,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 150
+    RequiredNodes: []
     Position: {x: 800, y: -805}
     Gains:
       Values: []
@@ -986,6 +1027,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -300, y: -435}
     Gains:
       Values: []
@@ -1008,6 +1050,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 300, y: -435}
     Gains:
       Values: []
@@ -1030,6 +1073,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -60, y: -375}
     Gains:
       Values:
@@ -1054,6 +1098,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -1078,6 +1123,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -450}
     Gains:
       Values: []
@@ -1100,6 +1146,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 75, y: -560}
     Gains:
       Values:
@@ -1124,6 +1171,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -720}
     Gains:
       Values: []
@@ -1146,6 +1194,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -1168,6 +1217,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -1196,6 +1246,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 95, y: -1045}
     Gains:
       Values: []
@@ -1218,6 +1269,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -1045}
     Gains:
       Values:
@@ -1248,6 +1300,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -1270,6 +1323,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -1225}
     Gains:
       Values: []
@@ -1296,6 +1350,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -1315}
     Gains:
       Values: []
@@ -1318,6 +1373,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -630}
     Gains:
       Values: []
@@ -1333,3 +1389,27 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - warrior-c-2
+  - Key: warrior-b-golem-fury
+    DisplayName: 
+    Kind: 14
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    RequiredNodes:
+    - warrior-golem
+    Position: {x: 800, y: -500}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: CairnGolem
+    GrantedUltraKey: 
+    SummonAmount: 50
+    Neighbors:
+    - warrior-b-edge

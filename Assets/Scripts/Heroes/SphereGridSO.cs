@@ -37,7 +37,10 @@ namespace Assets.Scripts.Heroes
         MagicUpgrade = 12,  // GrantedMagicKey (and its awakening) gains UpgradeAmount of UpgradeType - see AbilityGrant
 
         // Summon upgrades, continued (2026-10-11). Appended, as above.
-        SummonApplyChance = 13 // +SummonAmount percentage points on the odds of GrantedSummonKey's abilities' debuffs
+        SummonApplyChance = 13, // +SummonAmount percentage points on the odds of GrantedSummonKey's abilities' debuffs
+
+        // Appended 2026-10-22, as above.
+        SummonDamage = 14       // +SummonAmount% damage on every hit GrantedSummonKey lands (a unit summon: attacks and abilities)
     }
 
     /// <summary>
@@ -135,8 +138,8 @@ namespace Assets.Scripts.Heroes
         [Tooltip("Ultra: the key of the UltraSO this node teaches.")]
         public string GrantedUltraKey;
 
-        [Tooltip("Kind == SummonPower / SummonDuration / SummonCharge: how much this node adds - " +
-                 "Power points, turns, or charges.")]
+        [Tooltip("Kind == SummonPower / SummonDuration / SummonCharge / SummonDamage: how much this node " +
+                 "adds - Power points, turns, charges, or percent more damage.")]
         public int SummonAmount = 1;
 
         [Tooltip("Keys of neighbouring nodes. Edges are undirected: listing B on A is enough.")]

@@ -217,6 +217,7 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.SummonSize:
                 case SphereNodeKind.SummonPromote:
                 case SphereNodeKind.SummonApplyChance:
+                case SphereNodeKind.SummonDamage:
                 case SphereNodeKind.Ultra:
                     return "sg-node--slot";
                 default:
@@ -264,6 +265,7 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.SummonSize:
                 case SphereNodeKind.SummonPromote:
                 case SphereNodeKind.SummonApplyChance:
+                case SphereNodeKind.SummonDamage:
                     return "+";
                 default:
                     return StatGlyph(node.Gains);
@@ -369,6 +371,10 @@ namespace Assets.Scripts.Heroes.UI
             if (node.Kind == SphereNodeKind.SummonApplyChance)
             {
                 return $"{summon}: +{node.SummonAmount}% chance its attacks inflict their effects";
+            }
+            if (node.Kind == SphereNodeKind.SummonDamage)
+            {
+                return $"{summon}: +{node.SummonAmount}% damage";
             }
 
             var parts = new List<string>();
@@ -501,6 +507,7 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.SummonSize:
                 case SphereNodeKind.SummonPromote:
                 case SphereNodeKind.SummonApplyChance:
+                case SphereNodeKind.SummonDamage:
                     return "Summon upgrade";
                 default:
                     return "Stat";

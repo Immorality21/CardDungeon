@@ -219,7 +219,13 @@ Three rules when adding nodes:
   shows such a node as **gated** (a gold ring, `sg-node--gated`) with a dashed gold arrow from what it
   waits for, and says "Requires X first." Use it for an optional upgrade on one branch that needs
   another branch's summon, or for a gate that forces two branches. `EveryRequiredNode_ExistsAndCanBeOwned`
-  fails on a typo or a requirement loop.
+  fails on a typo or a requirement loop. The first one is the Warrior's `warrior-b-golem-fury`: an
+  optional leaf on the boar branch (depth 12) that needs `warrior-golem` from the other branch.
+- **`SummonDamage` (kind 14) is "+N% damage" for a unit summon** (a party replacement, an ally, a
+  mech): `SummonGrant.DamagePercent` becomes `OutgoingDamage.AllPercent` on the unit it fields
+  (`SummonUnit`, `SimUnit.FromSummon`), which grows its Attack (`OutgoingDamage.AttackFactor`, read in
+  `CombatManager.ExecuteAttack` and `EncounterSimulator.ResolveAttack`) and every ability hit
+  (`BonusFor`, in `DamageEffectExecutor`). A special attack has no unit; raise it with `SummonPower`.
 - **Every node must be reachable.** The grid editor window makes it easy to drop an edgeless node;
   the test catches it, but an unreachable node is content nobody sees.
 

@@ -19,7 +19,7 @@ namespace Assets.Scripts.Combat
     /// no level afflictions, and fresh health every time it is called. The balance model builds its
     /// stand-in from the same function.</para>
     /// </summary>
-    public class SummonUnit : MonoBehaviour, ICombatUnit, Triggers.ITriggerSource, IFlinches, IAbilityUpgrades
+    public class SummonUnit : MonoBehaviour, ICombatUnit, Triggers.ITriggerSource, IFlinches, IAbilityUpgrades, IOutgoingDamage
     {
         public SummonSO Summon { get; private set; }
 
@@ -48,6 +48,9 @@ namespace Assets.Scripts.Combat
         {
             return SummonOps.UpgradesFor(Summon, _grant, abilityKey);
         }
+
+        /// <summary>What its summoner's <c>SummonDamage</c> nodes add to every hit it lands.</summary>
+        public OutgoingDamage OutgoingDamage => OutgoingDamage.ForSummon(_grant);
 
         public string DisplayName => Summon != null ? Summon.Label : "Summon";
         public Sprite Icon => Summon != null ? Summon.Sprite : null;

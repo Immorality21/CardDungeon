@@ -558,6 +558,28 @@ namespace Tests.EditMode
             CollectionAssert.IsEmpty(SphereGridOps.UnlockPathTo(grid, "b"));
         }
 
+        [Test]
+        public void SummonDamage_AddsToTheGrant_AndEveryHitItsUnitLands()
+        {
+            var summon = Node("summon", 10);
+            summon.Kind = SphereNodeKind.Summon;
+            summon.GrantedSummonKey = "Golem";
+            var fury = Node("fury", 10);
+            fury.Kind = SphereNodeKind.SummonDamage;
+            fury.GrantedSummonKey = "Golem";
+            fury.SummonAmount = 50;
+            var grid = Grid("summon", summon, fury);
+            summon.Neighbors.Add("fury");
+
+            var grant = SphereGridOps.SummonsForNodes(grid, new List<string> { "summon", "fury" })[0];
+            var outgoing = OutgoingDamage.ForSummon(grant);
+
+            Assert.AreEqual(50, grant.DamagePercent);
+            Assert.AreEqual(1.5f, outgoing.AttackFactor, 1e-4f, "Its Attack hits 50% harder.");
+            Assert.AreEqual(50f, outgoing.BonusFor(DamageType.Fire), 1e-4f, "So does every ability, of any element.");
+            Assert.AreSame(OutgoingDamage.None, OutgoingDamage.ForSummon(new SummonGrant { Key = "Golem" }));
+        }
+
         // --- recruit seeding ---------------------------------------------------------
 
         [Test]

@@ -1702,8 +1702,9 @@ namespace Assets.Scripts.Balance
         {
             int attackBonus = buffTracker.GetBuffAmount(attacker, attacker.AttackStat);
             int defense = target.GetEffectiveStat(StatType.Endurance) + buffTracker.GetBuffAmount(target, StatType.Endurance);
+            float outgoing = attacker.OutgoingDamage != null ? attacker.OutgoingDamage.AttackFactor : 1f;
             return DamageCalculator.Calculate(
-                attacker.GetEffectiveAttackPower() + attackBonus, defense, attacker.AttackDamageType,
+                Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * outgoing), defense, attacker.AttackDamageType,
                 target.Resistances, buffTracker.GetResistanceBonus(target, attacker.AttackDamageType))
                 * DefenseRules.HitChance(BlindedBuffHandler.IsBlinded(buffTracker, attacker), target);
         }
@@ -1951,7 +1952,8 @@ namespace Assets.Scripts.Balance
 
             int attackBonus = buffTracker.GetBuffAmount(attacker, attacker.AttackStat);
             int defenseBonus = buffTracker.GetBuffAmount(target, StatType.Endurance);
-            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * multiplier);
+            float outgoing = attacker.OutgoingDamage != null ? attacker.OutgoingDamage.AttackFactor : 1f;
+            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * multiplier * outgoing);
             int defense = target.GetEffectiveStat(StatType.Endurance) + defenseBonus;
             int damage = DamageCalculator.Calculate(
                 rawAttack, defense, attacker.AttackDamageType, target.Resistances,

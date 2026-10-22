@@ -306,6 +306,7 @@ namespace Assets.Scripts.Balance
                     : new List<Resistance>(),
                 AttackStat = StatType.Strength,
                 EffectiveAttackPower = block[StatType.Strength],
+                OutgoingDamage = OutgoingDamage.ForSummon(grant),
                 Triggers = new List<CarriedTrigger>(TriggerSources.From(summon != null ? summon.Triggers : null,
                     summon != null ? summon.Label : "Summon"))
             };

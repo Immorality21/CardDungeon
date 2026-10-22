@@ -2913,7 +2913,11 @@ namespace Assets.Scripts.Rooms
             // Buff the stat this attacker actually swings with, not Strength unconditionally.
             int attackBonus = BuffTracker.GetBuffAmount(attacker, attacker.AttackStat);
             int defenseBonus = BuffTracker.GetBuffAmount(target, StatType.Endurance);
-            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * damageMultiplier);
+            // A summon's SummonDamage nodes (OutgoingDamage.AllPercent) grow its Attack too.
+            float outgoing = attacker is IOutgoingDamage dealer && dealer.OutgoingDamage != null
+                ? dealer.OutgoingDamage.AttackFactor
+                : 1f;
+            int rawAttack = Mathf.RoundToInt((attacker.GetEffectiveAttackPower() + attackBonus) * damageMultiplier * outgoing);
             int defense = target.GetEffectiveStat(StatType.Endurance) + defenseBonus;
 
             // Physical attacks carry the attacker's element, so elemental resistance applies to them too.
