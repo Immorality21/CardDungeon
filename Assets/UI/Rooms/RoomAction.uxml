@@ -99,7 +99,17 @@
         <ui:VisualElement name="level-clear-window" class="cd-victory cd-level-clear cd-dock-center cd-hidden">
             <ui:Label name="level-clear-title" text="Level Cleared!" class="cd-victory__title" />
             <ui:Label name="level-clear-subtitle" text="" class="cd-level-clear__subtitle" />
-            <ui:ScrollView name="level-clear-body" class="cd-victory__rewards cd-level-clear__body" mode="Vertical" />
+            <!-- Who joined, the three totals as tiles, each hero's XP with a portrait, then what was
+                 found as an icon grid (2026-10-22 redesign: the single list buried XP and newcomers
+                 below the fold). RoomActionUI fills each container from the LevelClearSummary. -->
+            <ui:ScrollView name="level-clear-body" class="cd-victory__rewards cd-level-clear__body" mode="Vertical">
+                <ui:VisualElement name="level-clear-joined" class="cd-lc-joined" />
+                <ui:VisualElement name="level-clear-tallies" class="cd-lc-tallies" />
+                <ui:Label name="level-clear-xp-heading" text="Experience" class="cd-lc-heading" />
+                <ui:VisualElement name="level-clear-xp" class="cd-lc-heroes" />
+                <ui:Label name="level-clear-loot-heading" text="Found on this floor" class="cd-lc-heading" />
+                <ui:VisualElement name="level-clear-loot" class="cd-lc-loot" />
+            </ui:ScrollView>
             <ui:Label name="level-clear-next" text="" class="cd-level-clear__next" />
             <!-- Continue goes straight down to the run's next level; hidden on the last level and
                  while the tutorial runs. Left/Right pick, Enter confirms (RoomActionUI). -->

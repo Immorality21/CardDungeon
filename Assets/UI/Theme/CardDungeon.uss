@@ -2404,6 +2404,184 @@
     flex-shrink: 0;
 }
 
+/* The 2026-10-22 layout: a joined banner, three tiles, hero cards, an icon grid. */
+.cd-lc-heading {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--cd-accent);
+    letter-spacing: 1px;
+    margin: 10px 0 4px 2px;
+}
+
+.cd-lc-joined {
+    margin-top: 6px;
+}
+
+.cd-lc-joined__row {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 10px;
+    margin-bottom: 4px;
+    background-color: var(--cd-well);
+    border-width: 1px;
+    border-color: var(--cd-gold);
+    border-radius: 4px;
+}
+
+.cd-lc-joined__portrait {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-lc-joined__text {
+    font-size: 19px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    white-space: normal;
+    flex-shrink: 1;
+}
+
+.cd-lc-tallies {
+    flex-direction: row;
+    margin-top: 8px;
+}
+
+.cd-lc-tally {
+    flex-grow: 1;
+    flex-basis: 0;
+    align-items: center;
+    padding: 6px 6px;
+    margin: 0 4px;
+    background-color: var(--cd-well);
+    border-width: 1px;
+    border-color: var(--cd-well-border);
+    border-radius: 4px;
+}
+
+.cd-lc-tally__value {
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+}
+
+.cd-lc-tally--gold .cd-lc-tally__value {
+    color: var(--cd-gold);
+}
+
+.cd-lc-tally--essence .cd-lc-tally__value {
+    color: var(--cd-accent);
+}
+
+.cd-lc-tally__label {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+}
+
+.cd-lc-tally__note {
+    font-size: 13px;
+    color: var(--cd-text-light);
+    opacity: 0.7;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-top: 0;
+}
+
+.cd-lc-heroes,
+.cd-lc-loot {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.cd-lc-hero {
+    width: 25%;
+    flex-direction: row;
+    align-items: center;
+    padding: 2px;
+}
+
+.cd-lc-hero__portrait {
+    width: 36px;
+    height: 36px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-lc-hero__text {
+    flex-shrink: 1;
+}
+
+.cd-lc-hero__name {
+    font-size: 14px;
+    color: var(--cd-text-light);
+}
+
+.cd-lc-hero__xp {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+}
+
+.cd-lc-item {
+    width: 50%;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 6px 4px 2px;
+}
+
+.cd-lc-item__icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cd-lc-item__name {
+    font-size: 16px;
+    color: var(--cd-text-light);
+    white-space: normal;
+    flex-shrink: 1;
+    flex-grow: 1;
+}
+
+.cd-lc-item__count {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+.cd-lc-item__name.cd-rarity--uncommon {
+    color: rgb(120, 220, 120);
+}
+
+.cd-lc-item__name.cd-rarity--rare {
+    color: rgb(110, 160, 255);
+}
+
+.cd-lc-item__name.cd-rarity--epic {
+    color: rgb(225, 130, 255);
+}
+
+.cd-lc-item__name.cd-rarity--legendary {
+    color: var(--cd-gold);
+}
+
+.cd-lc-empty {
+    font-size: 16px;
+    color: var(--cd-text-light);
+    opacity: 0.7;
+    margin-left: 2px;
+}
+
 /* An indented line under a section row: where a total came from. */
 .cd-level-detail {
     flex-direction: row;
@@ -3080,6 +3258,12 @@
     -unity-text-align: middle-center;
     margin: 0;
     padding: 0;
+}
+
+/* An ability, summon or Ultra node draws what it teaches instead of a glyph. */
+.sg-node__icon {
+    width: 70%;
+    height: 70%;
 }
 
 /* A stat node's short name ("STR", "HP") inside the same 44px circle. */

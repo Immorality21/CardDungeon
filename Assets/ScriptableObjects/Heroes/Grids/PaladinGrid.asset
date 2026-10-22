@@ -138,7 +138,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -132, y: -325}
+    Position: {x: -105, y: -215}
     Gains:
       Values:
       - Type: 7
@@ -178,15 +178,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-a-1
+    - paladin-a-3
   - Key: paladin-a-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -360, y: -435}
+    Position: {x: -132, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -200,15 +200,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-a-2
+    - paladin-trunk-2
   - Key: paladin-a-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -474, y: -490}
+    Position: {x: -285, y: -310}
     Gains:
       Values:
       - Type: 7
@@ -224,15 +224,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-a-3
+    - paladin-a-2
   - Key: paladin-a-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -588, y: -545}
+    Position: {x: -344, y: -430}
     Gains:
       Values: []
     ResistType: 0
@@ -246,15 +246,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-a-4
+    - paladin-a-2
   - Key: paladin-a-6
     DisplayName: 
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -702, y: -600}
+    Position: {x: -572, y: -540}
     Gains:
       Values: []
     ResistType: 0
@@ -268,15 +268,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-a-5
+    - paladin-lion
   - Key: paladin-a-7
     DisplayName: 
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -816, y: -655}
+    Position: {x: -686, y: -595}
     Gains:
       Values:
       - Type: 2
@@ -296,7 +296,7 @@ MonoBehaviour:
   - Key: paladin-a-res
     DisplayName: 
     Kind: 1
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -314,15 +314,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-a-3
+    - paladin-a-2
   - Key: paladin-a-tip-a
     DisplayName: 
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -911, y: -710}
+    Position: {x: -781, y: -650}
     Gains:
       Values:
       - Type: 1
@@ -342,11 +342,11 @@ MonoBehaviour:
   - Key: paladin-a-tip-b
     DisplayName: 
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -876, y: -585}
+    Position: {x: -746, y: -525}
     Gains:
       Values:
       - Type: 7
@@ -370,7 +370,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -450}
+    Position: {x: -60, y: -320}
     Gains:
       Values:
       - Type: 1
@@ -410,15 +410,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-b-1
+    - paladin-b-3
   - Key: paladin-b-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -630}
+    Position: {x: 0, y: -450}
     Gains:
       Values: []
     ResistType: 0
@@ -432,15 +432,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-b-2
+    - paladin-trunk-2
   - Key: paladin-b-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -720}
+    Position: {x: 75, y: -560}
     Gains:
       Values:
       - Type: 1
@@ -456,15 +456,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-b-3
+    - paladin-b-2
   - Key: paladin-b-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -810}
+    Position: {x: 0, y: -720}
     Gains:
       Values: []
     ResistType: 0
@@ -478,7 +478,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-b-4
+    - paladin-b-judgement
   - Key: paladin-b-6
     DisplayName: 
     Kind: 3
@@ -500,7 +500,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-b-5
+    - paladin-seraph
   - Key: paladin-b-7
     DisplayName: 
     Kind: 0
@@ -580,7 +580,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 132, y: -325}
+    Position: {x: 105, y: -215}
     Gains:
       Values:
       - Type: 5
@@ -620,15 +620,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-c-1
+    - paladin-c-3
   - Key: paladin-c-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 360, y: -435}
+    Position: {x: 132, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -642,15 +642,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-c-2
+    - paladin-trunk-2
   - Key: paladin-c-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 474, y: -490}
+    Position: {x: 315, y: -340}
     Gains:
       Values:
       - Type: 2
@@ -666,15 +666,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-c-3
+    - paladin-c-2
   - Key: paladin-c-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 588, y: -545}
+    Position: {x: 474, y: -490}
     Gains:
       Values: []
     ResistType: 0
@@ -688,7 +688,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-c-4
+    - paladin-c-hands
   - Key: paladin-c-6
     DisplayName: 
     Kind: 3
@@ -710,7 +710,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-c-5
+    - paladin-stag
   - Key: paladin-c-7
     DisplayName: 
     Kind: 0
@@ -756,7 +756,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-c-3
+    - paladin-c-hands
   - Key: paladin-c-tip-a
     DisplayName: 
     Kind: 0
@@ -808,7 +808,7 @@ MonoBehaviour:
   - Key: paladin-lion
     DisplayName: Aegis Lion
     Kind: 4
-    XpCost: 410
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -816,7 +816,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: -1006, y: -765}
+    Position: {x: -458, y: -485}
     Gains:
       Values: []
     ResistType: 1
@@ -830,15 +830,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-a-tip-a
+    - paladin-a-5
   - Key: paladin-lion-power
     DisplayName: 'Aegis Lion: Iron Mane'
     Kind: 5
-    XpCost: 475
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1101, y: -820}
+    Position: {x: -876, y: -705}
     Gains:
       Values: []
     ResistType: 1
@@ -852,15 +852,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 25
     Neighbors:
-    - paladin-lion
+    - paladin-a-tip-a
   - Key: paladin-lion-stay
     DisplayName: 'Aegis Lion: Long Watch'
     Kind: 6
-    XpCost: 540
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1196, y: -875}
+    Position: {x: -971, y: -760}
     Gains:
       Values: []
     ResistType: 1
@@ -878,7 +878,7 @@ MonoBehaviour:
   - Key: paladin-lion-charge
     DisplayName: 'Aegis Lion: Second Roar'
     Kind: 7
-    XpCost: 615
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -886,7 +886,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: -1291, y: -930}
+    Position: {x: -1066, y: -815}
     Gains:
       Values: []
     ResistType: 1
@@ -904,7 +904,7 @@ MonoBehaviour:
   - Key: paladin-seraph
     DisplayName: Judgement Seraph
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -912,7 +912,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: 190, y: -1100}
+    Position: {x: 0, y: -810}
     Gains:
       Values: []
     ResistType: 1
@@ -926,15 +926,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-b-tip-a
+    - paladin-b-5
   - Key: paladin-seraph-power
     DisplayName: 'Judgement Seraph: Tempered'
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 285, y: -1155}
+    Position: {x: 190, y: -1100}
     Gains:
       Values: []
     ResistType: 1
@@ -948,15 +948,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 30
     Neighbors:
-    - paladin-seraph
+    - paladin-b-tip-a
   - Key: paladin-seraph-stay
     DisplayName: 'Judgement Seraph: Vigil'
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 380, y: -1210}
+    Position: {x: 285, y: -1155}
     Gains:
       Values: []
     ResistType: 1
@@ -974,7 +974,7 @@ MonoBehaviour:
   - Key: paladin-seraph-charge
     DisplayName: 'Judgement Seraph: Second Descent'
     Kind: 7
-    XpCost: 615
+    XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -982,7 +982,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: 475, y: -1265}
+    Position: {x: 380, y: -1210}
     Gains:
       Values: []
     ResistType: 1
@@ -1000,7 +1000,7 @@ MonoBehaviour:
   - Key: paladin-stag
     DisplayName: Dawn Stag
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1008,7 +1008,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: 1006, y: -765}
+    Position: {x: 588, y: -545}
     Gains:
       Values: []
     ResistType: 1
@@ -1022,15 +1022,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-c-tip-a
+    - paladin-c-5
   - Key: paladin-stag-power
     DisplayName: 'Dawn Stag: Brighter Dawn'
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1101, y: -820}
+    Position: {x: 1006, y: -765}
     Gains:
       Values: []
     ResistType: 1
@@ -1044,15 +1044,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 10
     Neighbors:
-    - paladin-stag
+    - paladin-c-tip-a
   - Key: paladin-stag-stay
     DisplayName: 'Dawn Stag: Long Morning'
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1196, y: -875}
+    Position: {x: 1101, y: -820}
     Gains:
       Values: []
     ResistType: 1
@@ -1070,7 +1070,7 @@ MonoBehaviour:
   - Key: paladin-stag-charge
     DisplayName: 'Dawn Stag: Second Light'
     Kind: 7
-    XpCost: 615
+    XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1078,7 +1078,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: 1291, y: -930}
+    Position: {x: 1196, y: -875}
     Gains:
       Values: []
     ResistType: 1
@@ -1114,7 +1114,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - paladin-a-3
+    - paladin-a-2
   - Key: paladin-c-awaken
     DisplayName: 
     Kind: 11
@@ -1206,11 +1206,11 @@ MonoBehaviour:
   - Key: paladin-b-judgement
     DisplayName: 
     Kind: 10
-    XpCost: 245
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -95, y: -790}
+    Position: {x: 0, y: -630}
     Gains:
       Values: []
     ResistType: 1
@@ -1224,15 +1224,15 @@ MonoBehaviour:
     GrantedUltraKey: JudgementDay
     SummonAmount: 1
     Neighbors:
-    - paladin-b-5
+    - paladin-b-2
   - Key: paladin-c-hands
     DisplayName: 
     Kind: 10
-    XpCost: 245
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 500, y: -640}
+    Position: {x: 360, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -1246,4 +1246,4 @@ MonoBehaviour:
     GrantedUltraKey: LayOnHands
     SummonAmount: 1
     Neighbors:
-    - paladin-c-5
+    - paladin-c-2

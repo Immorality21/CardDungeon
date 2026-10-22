@@ -563,6 +563,17 @@ namespace Assets.Scripts.Progression
             Save();
         }
 
+        // --- Party deaths ---
+
+        public int PartyDeaths => _saveData.PartyDeaths;
+
+        /// <summary>Counts one wipe. Called by the death flow, after the death screen. Persists immediately.</summary>
+        public void RecordPartyDeath()
+        {
+            _saveData.PartyDeaths++;
+            Save();
+        }
+
         // --- Hub buildings (which lots are placed, and at what level) ---
 
         /// <summary>Every lot the player has placed. Never null.</summary>

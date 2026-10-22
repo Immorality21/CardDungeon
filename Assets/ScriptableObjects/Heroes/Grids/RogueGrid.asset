@@ -138,7 +138,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -107, y: -325}
+    Position: {x: -90, y: -230}
     Gains:
       Values:
       - Type: 3
@@ -178,15 +178,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-a-1
+    - rogue-a-3
   - Key: rogue-a-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -292, y: -435}
+    Position: {x: -107, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -200,15 +200,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-a-2
+    - rogue-trunk-2
   - Key: rogue-a-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -385, y: -490}
+    Position: {x: -240, y: -310}
     Gains:
       Values:
       - Type: 3
@@ -224,15 +224,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-a-3
+    - rogue-a-2
   - Key: rogue-a-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -478, y: -545}
+    Position: {x: -385, y: -490}
     Gains:
       Values: []
     ResistType: 0
@@ -246,7 +246,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-a-4
+    - rogue-death-mark
   - Key: rogue-a-6
     DisplayName: 
     Kind: 3
@@ -268,7 +268,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-a-5
+    - rogue-twin
   - Key: rogue-a-7
     DisplayName: 
     Kind: 0
@@ -348,7 +348,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 107, y: -325}
+    Position: {x: 100, y: -205}
     Gains:
       Values:
       - Type: 3
@@ -388,15 +388,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-b-1
+    - rogue-b-3
   - Key: rogue-b-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 292, y: -435}
+    Position: {x: 107, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -410,15 +410,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-b-2
+    - rogue-trunk-2
   - Key: rogue-b-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 385, y: -490}
+    Position: {x: 270, y: -340}
     Gains:
       Values:
       - Type: 7
@@ -434,15 +434,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-b-3
+    - rogue-b-2
   - Key: rogue-b-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 478, y: -545}
+    Position: {x: 385, y: -490}
     Gains:
       Values: []
     ResistType: 0
@@ -456,7 +456,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-b-4
+    - rogue-smoke-mirrors
   - Key: rogue-b-6
     DisplayName: 
     Kind: 3
@@ -478,7 +478,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-b-5
+    - rogue-crows
   - Key: rogue-b-7
     DisplayName: 
     Kind: 0
@@ -524,7 +524,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-b-3
+    - rogue-smoke-mirrors
   - Key: rogue-b-tip-a
     DisplayName: 
     Kind: 3
@@ -640,7 +640,7 @@ MonoBehaviour:
   - Key: rogue-twin
     DisplayName: 
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -648,7 +648,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: -853, y: -765}
+    Position: {x: -478, y: -545}
     Gains:
       Values: []
     ResistType: 1
@@ -662,15 +662,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-a-tip-a
+    - rogue-a-5
   - Key: rogue-twin-power
     DisplayName: 
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -948, y: -820}
+    Position: {x: -853, y: -765}
     Gains:
       Values: []
     ResistType: 1
@@ -684,15 +684,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 30
     Neighbors:
-    - rogue-twin
+    - rogue-a-tip-a
   - Key: rogue-twin-stay
     DisplayName: 
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1043, y: -875}
+    Position: {x: -948, y: -820}
     Gains:
       Values: []
     ResistType: 1
@@ -710,7 +710,7 @@ MonoBehaviour:
   - Key: rogue-twin-charge
     DisplayName: 
     Kind: 7
-    XpCost: 615
+    XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -718,7 +718,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: -1138, y: -930}
+    Position: {x: -1043, y: -875}
     Gains:
       Values: []
     ResistType: 1
@@ -736,11 +736,11 @@ MonoBehaviour:
   - Key: rogue-death-mark
     DisplayName: 
     Kind: 10
-    XpCost: 410
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -818, y: -530}
+    Position: {x: -292, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -754,17 +754,39 @@ MonoBehaviour:
     GrantedUltraKey: DeathMark
     SummonAmount: 1
     Neighbors:
-    - rogue-a-tip-b
+    - rogue-a-2
   - Key: rogue-crows
     DisplayName: 
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 2
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
+    EssenceCost: 0
+    Position: {x: 478, y: -545}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: MurderOfCrows
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - rogue-b-5
+  - Key: rogue-crows-stay
+    DisplayName: 
+    Kind: 6
+    XpCost: 410
+    UnlockedByDefault: 0
+    MaterialCosts: []
     EssenceCost: 0
     Position: {x: 853, y: -765}
     Gains:
@@ -781,32 +803,10 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - rogue-b-tip-a
-  - Key: rogue-crows-stay
-    DisplayName: 
-    Kind: 6
-    XpCost: 475
-    UnlockedByDefault: 0
-    MaterialCosts: []
-    EssenceCost: 0
-    Position: {x: 948, y: -820}
-    Gains:
-      Values: []
-    ResistType: 1
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    AwakenedMagicKey: 
-    UpgradeType: 0
-    UpgradeAmount: 1
-    GrantedSummonKey: MurderOfCrows
-    GrantedUltraKey: 
-    SummonAmount: 1
-    Neighbors:
-    - rogue-crows
   - Key: rogue-crows-charge
     DisplayName: 
     Kind: 7
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -814,7 +814,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: 1043, y: -875}
+    Position: {x: 948, y: -820}
     Gains:
       Values: []
     ResistType: 1
@@ -832,11 +832,11 @@ MonoBehaviour:
   - Key: rogue-smoke-mirrors
     DisplayName: 
     Kind: 10
-    XpCost: 410
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 818, y: -530}
+    Position: {x: 292, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -850,7 +850,7 @@ MonoBehaviour:
     GrantedUltraKey: SmokeAndMirrors
     SummonAmount: 1
     Neighbors:
-    - rogue-b-tip-b
+    - rogue-b-2
   - Key: rogue-c-1
     DisplayName: 
     Kind: 0
@@ -858,7 +858,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -450}
+    Position: {x: -60, y: -375}
     Gains:
       Values:
       - Type: 3
@@ -898,15 +898,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-c-1
+    - rogue-c-3
   - Key: rogue-c-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -630}
+    Position: {x: 0, y: -450}
     Gains:
       Values: []
     ResistType: 0
@@ -920,15 +920,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-c-2
+    - rogue-trunk-2
   - Key: rogue-c-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -720}
+    Position: {x: 75, y: -560}
     Gains:
       Values:
       - Type: 7
@@ -944,15 +944,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-c-3
+    - rogue-c-2
   - Key: rogue-c-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -810}
+    Position: {x: 0, y: -720}
     Gains:
       Values: []
     ResistType: 0
@@ -966,7 +966,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-c-4
+    - rogue-grand-heist
   - Key: rogue-c-6
     DisplayName: 
     Kind: 3
@@ -988,7 +988,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-c-5
+    - rogue-ferret
   - Key: rogue-c-7
     DisplayName: 
     Kind: 0
@@ -1059,10 +1059,11 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - rogue-c-7
+    - rogue-c-tip-a
   - Key: rogue-ferret
     DisplayName: 
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1070,7 +1071,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: 0, y: -1135}
+    Position: {x: 0, y: -810}
     Gains:
       Values: []
     ResistType: 1
@@ -1084,16 +1085,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-c-tip-a
-    - rogue-c-tip-b
+    - rogue-c-5
   - Key: rogue-ferret-power
     DisplayName: 
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -1225}
+    Position: {x: 45, y: -1140}
     Gains:
       Values: []
     ResistType: 1
@@ -1107,11 +1107,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 15
     Neighbors:
-    - rogue-ferret
+    - rogue-c-tip-a
   - Key: rogue-ferret-charge
     DisplayName: 
     Kind: 7
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1119,7 +1119,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: 0, y: -1315}
+    Position: {x: 45, y: -1230}
     Gains:
       Values: []
     ResistType: 1
@@ -1137,11 +1137,11 @@ MonoBehaviour:
   - Key: rogue-grand-heist
     DisplayName: 
     Kind: 10
-    XpCost: 410
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 190, y: -1135}
+    Position: {x: 0, y: -630}
     Gains:
       Values: []
     ResistType: 1
@@ -1155,4 +1155,4 @@ MonoBehaviour:
     GrantedUltraKey: GrandHeist
     SummonAmount: 1
     Neighbors:
-    - rogue-c-tip-a
+    - rogue-c-2

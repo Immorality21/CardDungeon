@@ -138,7 +138,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -110, y: -325}
+    Position: {x: -100, y: -205}
     Gains:
       Values:
       - Type: 7
@@ -178,15 +178,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-a-1
+    - warrior-a-3
   - Key: warrior-a-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -300, y: -435}
+    Position: {x: -110, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -200,15 +200,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-a-2
+    - warrior-trunk-2
   - Key: warrior-a-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -395, y: -490}
+    Position: {x: -165, y: -450}
     Gains:
       Values:
       - Type: 7
@@ -224,15 +224,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-a-3
+    - warrior-a-2
   - Key: warrior-a-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -490, y: -545}
+    Position: {x: -395, y: -490}
     Gains:
       Values: []
     ResistType: 0
@@ -246,7 +246,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-a-4
+    - warrior-a-cover
   - Key: warrior-a-6
     DisplayName: 
     Kind: 3
@@ -268,7 +268,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-a-5
+    - warrior-golem
   - Key: warrior-a-7
     DisplayName: 
     Kind: 0
@@ -316,7 +316,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-a-1
+    - warrior-a-3
   - Key: warrior-a-plate
     DisplayName: 
     Kind: 0
@@ -364,7 +364,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-a-4
+    - warrior-a-5
   - Key: warrior-a-shadow
     DisplayName: 
     Kind: 1
@@ -440,7 +440,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 110, y: -325}
+    Position: {x: 100, y: -205}
     Gains:
       Values:
       - Type: 1
@@ -480,15 +480,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-b-1
+    - warrior-b-3
   - Key: warrior-b-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 300, y: -435}
+    Position: {x: 110, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -502,15 +502,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-b-2
+    - warrior-trunk-2
   - Key: warrior-b-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 395, y: -490}
+    Position: {x: 165, y: -450}
     Gains:
       Values:
       - Type: 1
@@ -526,15 +526,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-b-3
+    - warrior-b-2
   - Key: warrior-b-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 490, y: -545}
+    Position: {x: 395, y: -490}
     Gains:
       Values: []
     ResistType: 0
@@ -548,7 +548,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-b-4
+    - warrior-b-flurry
   - Key: warrior-b-6
     DisplayName: 
     Kind: 3
@@ -570,7 +570,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-b-5
+    - warrior-boar
   - Key: warrior-b-7
     DisplayName: 
     Kind: 0
@@ -618,7 +618,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-b-1
+    - warrior-b-3
   - Key: warrior-b-quick
     DisplayName: 
     Kind: 0
@@ -666,7 +666,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-b-4
+    - warrior-b-5
   - Key: warrior-b-fortune
     DisplayName: 
     Kind: 0
@@ -746,7 +746,7 @@ MonoBehaviour:
   - Key: warrior-boar
     DisplayName: Bloodfang Boar
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -754,7 +754,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: 850, y: -635}
+    Position: {x: 490, y: -545}
     Gains:
       Values: []
     ResistType: 1
@@ -768,15 +768,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-b-edge
+    - warrior-b-5
   - Key: warrior-boar-fury
     DisplayName: Boar's Fury
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 945, y: -690}
+    Position: {x: 850, y: -635}
     Gains:
       Values: []
     ResistType: 1
@@ -790,15 +790,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 10
     Neighbors:
-    - warrior-boar
+    - warrior-b-edge
   - Key: warrior-boar-endurance
     DisplayName: Boar's Endurance
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1040, y: -745}
+    Position: {x: 945, y: -690}
     Gains:
       Values: []
     ResistType: 1
@@ -816,7 +816,7 @@ MonoBehaviour:
   - Key: warrior-boar-charge
     DisplayName: Boar's Second Wind
     Kind: 7
-    XpCost: 615
+    XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -824,7 +824,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: 1135, y: -800}
+    Position: {x: 1040, y: -745}
     Gains:
       Values: []
     ResistType: 1
@@ -842,7 +842,7 @@ MonoBehaviour:
   - Key: warrior-golem
     DisplayName: Cairn Golem
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -850,7 +850,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: -850, y: -635}
+    Position: {x: -490, y: -545}
     Gains:
       Values: []
     ResistType: 0
@@ -864,15 +864,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-a-hold
+    - warrior-a-5
   - Key: warrior-golem-bulk
     DisplayName: Golem's Bulk
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -945, y: -690}
+    Position: {x: -850, y: -635}
     Gains:
       Values: []
     ResistType: 0
@@ -886,15 +886,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 50
     Neighbors:
-    - warrior-golem
+    - warrior-a-hold
   - Key: warrior-golem-stay
     DisplayName: Golem's Vigil
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1040, y: -745}
+    Position: {x: -945, y: -690}
     Gains:
       Values: []
     ResistType: 0
@@ -912,7 +912,7 @@ MonoBehaviour:
   - Key: warrior-golem-charge
     DisplayName: Golem's Return
     Kind: 7
-    XpCost: 615
+    XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -920,7 +920,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: -1135, y: -800}
+    Position: {x: -1040, y: -745}
     Gains:
       Values: []
     ResistType: 0
@@ -982,11 +982,11 @@ MonoBehaviour:
   - Key: warrior-a-cover
     DisplayName: 
     Kind: 10
-    XpCost: 245
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -400, y: -610}
+    Position: {x: -300, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -1000,15 +1000,15 @@ MonoBehaviour:
     GrantedUltraKey: TakeCover
     SummonAmount: 1
     Neighbors:
-    - warrior-a-5
+    - warrior-a-2
   - Key: warrior-b-flurry
     DisplayName: 
     Kind: 10
-    XpCost: 245
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 400, y: -610}
+    Position: {x: 300, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -1022,7 +1022,7 @@ MonoBehaviour:
     GrantedUltraKey: Flurry
     SummonAmount: 1
     Neighbors:
-    - warrior-b-5
+    - warrior-b-2
   - Key: warrior-c-1
     DisplayName: 
     Kind: 0
@@ -1030,7 +1030,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -450}
+    Position: {x: -60, y: -375}
     Gains:
       Values:
       - Type: 1
@@ -1070,15 +1070,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-c-1
+    - warrior-c-3
   - Key: warrior-c-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -630}
+    Position: {x: 0, y: -450}
     Gains:
       Values: []
     ResistType: 0
@@ -1092,15 +1092,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-c-2
+    - warrior-trunk-2
   - Key: warrior-c-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -720}
+    Position: {x: 75, y: -560}
     Gains:
       Values:
       - Type: 1
@@ -1116,15 +1116,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-c-3
+    - warrior-c-2
   - Key: warrior-c-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -810}
+    Position: {x: 0, y: -720}
     Gains:
       Values: []
     ResistType: 0
@@ -1138,7 +1138,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-c-4
+    - warrior-earthsplitter
   - Key: warrior-c-6
     DisplayName: 
     Kind: 3
@@ -1160,7 +1160,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-c-5
+    - warrior-charger
   - Key: warrior-c-7
     DisplayName: 
     Kind: 0
@@ -1240,7 +1240,7 @@ MonoBehaviour:
   - Key: warrior-charger
     DisplayName: Bloodfang Boar
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1248,7 +1248,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: -95, y: -1135}
+    Position: {x: 0, y: -810}
     Gains:
       Values: []
     ResistType: 1
@@ -1262,11 +1262,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-c-tip
+    - warrior-c-5
   - Key: warrior-charger-power
     DisplayName: Boar's Fury
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -1284,11 +1284,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 2
     Neighbors:
-    - warrior-charger
+    - warrior-c-tip
   - Key: warrior-charger-charge
     DisplayName: Boar's Second Wind
     Kind: 7
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1314,11 +1314,11 @@ MonoBehaviour:
   - Key: warrior-earthsplitter
     DisplayName: 
     Kind: 10
-    XpCost: 245
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 105, y: -790}
+    Position: {x: 0, y: -630}
     Gains:
       Values: []
     ResistType: 1
@@ -1332,4 +1332,4 @@ MonoBehaviour:
     GrantedUltraKey: Earthsplitter
     SummonAmount: 1
     Neighbors:
-    - warrior-c-5
+    - warrior-c-2

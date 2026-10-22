@@ -558,8 +558,8 @@ namespace Assets.Scripts.Balance
                     && (summonKey == null || n.GrantedSummonKey == summonKey))
                 : null;
             return summonNode != null
-                ? Heroes.SphereGridOps.BeelineThenGreedy(grid, summonNode.Key, xp)
-                : Heroes.SphereGridOps.GreedySpend(grid, null, xp, out _);
+                ? Heroes.SphereGridOps.BeelineThenGreedy(grid, summonNode.Key, xp, Cards.EquippedMagicState.DefaultSlotCount)
+                : Heroes.SphereGridOps.GreedySpend(grid, null, xp, out _, Cards.EquippedMagicState.DefaultSlotCount);
         }
 
         /// <summary>Every summon some hero on the roster can learn, in grid order, each once.</summary>

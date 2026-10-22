@@ -1218,7 +1218,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             Party.MarkOwnedDeferred(heroSO);
-            _joinedThisLevel.Add(heroSO.DisplayName);
+            _joinedThisLevel.Add(new LevelClearSummary.Line(heroSO.DisplayName, 0, heroSO.Sprite));
 
             // Give the newcomer their own magic slots, or they cannot cast anything this run - and
             // fill them from their loadout, since the run-start seeding already happened and a hero
@@ -1254,7 +1254,7 @@ namespace Assets.Scripts.Dungeon
         private readonly Dictionary<Room, GameObject> _captiveMarkers = new Dictionary<Room, GameObject>();
 
         // Heroes freed on this floor, for the level-clear summary. Per scene, like the Party.
-        private readonly List<string> _joinedThisLevel = new List<string>();
+        private readonly List<LevelClearSummary.Line> _joinedThisLevel = new List<LevelClearSummary.Line>();
 
         // What the floor handed out before play began (the potion-belt refill), held in memory like
         // everything else while saves are deferred. The summary counts it as already owned.
@@ -1467,7 +1467,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             Party.MarkOwnedDeferred(joiner);
-            _joinedThisLevel.Add(joiner.DisplayName);
+            _joinedThisLevel.Add(new LevelClearSummary.Line(joiner.DisplayName, 0, joiner.Sprite));
             Debug.Log($"{joiner.DisplayName} joins for clearing {ActiveRun.DisplayName}.");
         }
 
@@ -1530,7 +1530,7 @@ namespace Assets.Scripts.Dungeon
                 {
                     if (hero != null && Party.XpEarnedThisLevel.TryGetValue(hero, out int xp) && xp > 0)
                     {
-                        summary.Xp.Add(new LevelClearSummary.Line(hero.DisplayName, xp));
+                        summary.Xp.Add(new LevelClearSummary.Line(hero.DisplayName, xp, hero.Icon));
                     }
                 }
             }
@@ -1552,7 +1552,7 @@ namespace Assets.Scripts.Dungeon
                 {
                     continue;
                 }
-                var line = new LevelClearSummary.Line(item.DisplayName, gain.Value);
+                var line = new LevelClearSummary.Line(item.DisplayName, gain.Value, item.Icon, item);
                 if (item.Category == ItemCategory.Material)
                 {
                     summary.Materials.Add(line);
@@ -1580,6 +1580,7 @@ namespace Assets.Scripts.Dungeon
 
             // Forfeit this level's un-banked kill-gold.
             MetaProgressManager.Instance.DiscardPendingGold();
+            MetaProgressManager.Instance.RecordPartyDeath();
 
             // Delete dungeon save — all in-memory XP/items are discarded with the scene
             if (DungeonSaveManager.HasInstance)

@@ -2841,6 +2841,13 @@ The owner's calls and the measurement behind them live in the Balance Strategy a
 `docs/plans/BALANCE_OPEN.md`, "The 2026-10-17 balance pass"). The headline: past the opening, the
 straight-line party (no gear, no revisits) was never in danger, and party width is why.
 
+**"No floor is free" is a straight-line rule only** (owner's playtest note, 2026-10-17; recorded
+2026-10-22). Every floor band here — "ordinary floors end at 30-60% health", "flag a floor that ends above
+90%" — judges the party that comes straight through, never a geared or revisiting one. A fully decked-out
+party walking through the first level at Fear 1 without taking a hit is fine and expected; it is the same
+call as the endgame note (max Fear on an early level should be easy for a full grid, the last levels not).
+Do not tune an early floor against a strong party.
+
 **The tool, cleaned up first:**
 - **Floors are judged against a rising curve per campaign tier** (`BalanceRulesSO.TierFloorBands`,
   `EvaluateFloorAgainstCurve`): ordinary floors' ending health and finales' wipe rate, early tiers
@@ -3106,3 +3113,67 @@ never sees the Hoarder. On a run that is one floor the wall cannot sit at the fi
 revisited party reaches it (progress 0.91 after one replay, a full clear after two). If the owner wants the
 straight party to reach the boss, split the Vault into two floors. The Warrens' Counting Room stays a hard
 gate (100%), as the curve table notes. Suite 1577 / 0.
+
+## §5aj — Abilities, Ultras and summons moved earlier; what it costs in stats (2026-10-22)
+
+**The change (owner, playtest notepad: "ability unlock sooner, summons sooner, ultimates sooner"; plan
+approved the same day).** On all nine grids each branch now runs **ability (depth 4, 160 XP from the start)
+-> stat -> Ultra (6, 370) -> slot (7) -> summon (8, 720) -> the second ability (9)**, done by swapping
+places with the stat nodes in front: keys move with their content, prices stay on `CostForDepth`, saves keep
+what they bought. Before, the second ability cost 370, Ultras 965-2,020 and summons 2,020 against a
+campaign paying ~1,400 per hero. Skipped: the Cultist's Watcher (no stat node in reach) and the Tinkerer's
+Patch Kit (one step only).
+
+**The model had to learn to spend like a player first.** Plain cheapest-first bought all three branch
+openers - now abilities - and every Ultra, none of which it could carry or use at once. `GreedySpend(...,
+baseSlots)` now defers dead weight (an ability past the hero's slots, a second Ultra, a second summon) and
+prices an uncarried opener as itself plus the cheapest useful node behind it. That is player-like and
+cheap, but it did **not** move the failures: the gap is real, not a modelling artefact.
+
+**What it costs.** Each branch's two shallow stat nodes were the ones displaced (to the tips, ~410 XP), so at
+the same XP a hero holds ~3 fewer stat nodes per branch walked:
+
+| model hero, no gear | old grids | new grids |
+|---|---|---|
+| Warrior at 400 XP | 48 HP / 19 STR | 38 HP / 13 STR |
+| Rogue Agility at 400 / 800 / 1,400 XP | 25 / 30 / 36 | 15 / 15 / 15 |
+
+| floor (straight-line party, Adaptive) | old grids | new grids |
+|---|---|---|
+| Silt Shallows / The Reedcage | 2% / 6% wipes | 54% / 92% |
+| Cinder Gate / The Slag Halls | 2% / 4% | 36% / 88% |
+| The Flooded Nave | 4% | 62% |
+| Blood Stair floors 1-4 | 0-1% | 20-84% |
+| The Sump / The Mother Pool | 1% / 35% | 60% / 100% |
+
+The suite went from 1577 / 0 to 1573 / 4 (`EveryRunLevelIsClearableOnOneHealthBar`, `NothingIsCritically
+OutOfBand`, `EveryEnemyIsInsideItsDangerBand`, `EveryHeroSurvivesTheMinimumNumberOfHits` - Warrior 2 hits).
+This is the "put durability shallow" rule (Heroes guide) biting: early HP is what lets enemy damage grow.
+The model still under-reads the gain side - it does not value an early Ultra or summon beyond what the
+simulator plays - so the true gap is smaller than this table, but not zero. **Open for the owner:** put the
+displaced stats back near the start (richer shallow nodes or stat spurs at depth 4-5), or retune the floors
+and XP from the Drowned March on.
+
+**Resolved: the owner chose the stat spurs (same day).** The displaced stat nodes left the chain and became
+**leaf spurs**: each branch's first displaced stat (its old depth-4 node, the `-1` key) hangs off the trunk hub
+at **depth 4, 65 XP** - exactly where and what it cost before - and the second (the `-4` key, old depth 7)
+hangs off the stat after the ability at **depth 6, 120**. The nodes under them closed up one step and were
+repriced, so every grid got ~75 XP cheaper. Keys stayed with their content again, so saves are safe.
+
+| floor (Adaptive) | old grids | moved, stats at tips | spurs at d5 / d6 | **spurs at d4 / d6 (shipped)** |
+|---|---|---|---|---|
+| Silt Shallows / The Reedcage | 2% / 6% | 54% / 92% | 33% / 89% | **5% / 19%** |
+| The Mire Throne (boss) | 64% | 97% | 100% | **74%** |
+| Cinder Gate / The Slag Halls | 2% / 4% | 36% / 88% | 8% / 40% | **23% / 59%** |
+| The Flooded Nave | 4% | 62% | 23% | **32%** |
+| Blood Stair floors 1-4 | 0-1% | 20-84% | 0-3% | **0-2%** |
+| Altar of the Last Initiate | 73% | 100% | 68% | **29%** |
+| The Sump / The Mother Pool | 1% / 35% | 60% / 100% | 1% / 26% | **0% / 8%** |
+
+The suite is back to **1577 / 0**. **Lesson: a stat behind an ability costs a stat.** Hanging the first stat
+off the ability (depth 5) instead of the hub doubled its real price (65 ability + 90 = 155 vs 65), and
+the Drowned March felt it straight away; one depth on the cheapest node is worth more than any deep shuffle.
+What is left is the real trade the owner asked for: from 300 to 800 XP the spend now buys one or two abilities
+where the old grids bought stats (Warrior at 400 XP: 6 STR from the grid instead of 9), so the Ashen Deep
+and the Flooded Nave sit higher than before (23-59% wipes on the model party, no gear, which the model
+plays without valuing the extra abilities). They are inside the bands; watch them in play before tuning.

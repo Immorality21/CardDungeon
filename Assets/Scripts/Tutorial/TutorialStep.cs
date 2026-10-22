@@ -52,5 +52,6 @@ namespace Assets.Scripts.Tutorial
         ActivateNode = 7,
         NodeLearned = 8,
         TakeTheRoad = 9,
+        FirstDeath = 10, // the death screen, the first time the party falls (not a step: any save sees it)
     }
 }

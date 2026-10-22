@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Items;
+using UnityEngine;
 
 namespace Assets.Scripts.Dungeon
 {
@@ -18,11 +19,17 @@ namespace Assets.Scripts.Dungeon
         {
             public string Label;
             public int Amount;
+            /// <summary>What the window draws beside it: the item's icon or the hero's portrait. May be null.</summary>
+            public Sprite Icon;
+            /// <summary>The item, for its rarity colour. Null on a hero line.</summary>
+            public ItemSO Item;
 
-            public Line(string label, int amount)
+            public Line(string label, int amount, Sprite icon = null, ItemSO item = null)
             {
                 Label = label;
                 Amount = amount;
+                Icon = icon;
+                Item = item;
             }
         }
 
@@ -47,8 +54,9 @@ namespace Assets.Scripts.Dungeon
         public List<Line> Materials = new List<Line>();
         /// <summary>Equipment and consumables gained, by display name.</summary>
         public List<Line> Items = new List<Line>();
-        /// <summary>Heroes who joined on this floor - freed, met, or earned by the run clear - theirs for good now.</summary>
-        public List<string> Joined = new List<string>();
+        /// <summary>Heroes who joined on this floor - freed, met, or earned by the run clear - theirs for
+        /// good now. Name and portrait; <see cref="Line.Amount"/> is unused.</summary>
+        public List<Line> Joined = new List<Line>();
 
         public int GoldTotal => GoldFound + GoldBonus;
 

@@ -36,7 +36,7 @@ namespace Assets.Scripts.Items
                 return 0f;
             }
 
-            float chance = RarityBaseChance(item.Rarity);
+            float chance = RarityBaseChance(item.Rarity) * Mathf.Clamp01(item.FindChanceScale);
 
             // Depth is 1-based (level index 0 == depth 1). Items above the current depth are rarer.
             int depth = Mathf.Max(1, runLevelIndex + 1);

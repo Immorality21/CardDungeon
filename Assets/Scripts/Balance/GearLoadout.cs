@@ -260,7 +260,8 @@ namespace Assets.Scripts.Balance
             {
                 return null;
             }
-            var nodes = SphereGridOps.GreedySpend(hero.SphereGrid, null, Mathf.Max(0, xpBudget), out _);
+            var nodes = SphereGridOps.GreedySpend(hero.SphereGrid, null, Mathf.Max(0, xpBudget), out _,
+                Cards.EquippedMagicState.DefaultSlotCount);
             return HeroStatCalculator.BaseStatsForNodes(hero, nodes);
         }
 
@@ -276,7 +277,8 @@ namespace Assets.Scripts.Balance
             {
                 return new List<Resistance>();
             }
-            var nodes = SphereGridOps.GreedySpend(hero.SphereGrid, null, Mathf.Max(0, xpBudget), out _);
+            var nodes = SphereGridOps.GreedySpend(hero.SphereGrid, null, Mathf.Max(0, xpBudget), out _,
+                Cards.EquippedMagicState.DefaultSlotCount);
             return SphereGridOps.ResistancesForNodes(hero.SphereGrid, nodes);
         }
 

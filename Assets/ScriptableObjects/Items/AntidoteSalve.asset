@@ -17,6 +17,7 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: cdeebf67b54d4252b172ed072970eeb0, type: 3}
   Rarity: 0
   ItemLevel: 1
+  FindChanceScale: 0.35
   Category: 1
   SlotType: 0
   Bonuses: []

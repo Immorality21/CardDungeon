@@ -916,12 +916,22 @@ namespace Assets.Scripts.Heroes
         /// never changes the model. Returns the full activated set (including
         /// <paramref name="alreadyActivated"/>); <paramref name="spent"/> is the XP consumed from
         /// <paramref name="budget"/> by the new activations only.
+        ///
+        /// <para><paramref name="baseSlots"/> (the hero's ability slots before any MagicSlot node)
+        /// turns on the <b>player-like</b> spend the balance model uses: a node that would add
+        /// nothing in a fight is bought only once nothing useful is affordable - an ability with no
+        /// slot left to carry it, a second Ultra (one gauge drives them all), a second summon. Since
+        /// 2026-10-22 every branch opens with its ability and the Ultra and summon sit a few nodes
+        /// in, so plain cheapest-first bought all three branch openers and stalled on dead weight
+        /// where it used to buy stats; this way the model commits to one branch first, as a player
+        /// does. Negative (the default) is plain cheapest-first, which a full-grid spend needs.</para>
         /// </summary>
         public static List<string> GreedySpend(
             SphereGridSO grid,
             IEnumerable<string> alreadyActivated,
             int budget,
-            out int spent)
+            out int spent,
+            int baseSlots = -1)
         {
             var activated = SanitizeActivated(grid, alreadyActivated);
             spent = 0;
@@ -930,10 +940,13 @@ namespace Assets.Scripts.Heroes
                 return activated;
             }
 
+            var adjacency = baseSlots >= 0 ? BuildAdjacency(grid) : null;
             while (true)
             {
                 var frontier = Frontier(grid, activated);
                 SphereGridNode pick = null;
+                int pickCost = int.MaxValue;
+                SphereGridNode fallback = null;
                 foreach (var node in frontier)
                 {
                     // The model spends XP and has no Essence, so an Essence node is never bought:
@@ -942,15 +955,38 @@ namespace Assets.Scripts.Heroes
                     {
                         continue;
                     }
+                    if (node.XpCost > budget - spent)
+                    {
+                        continue;
+                    }
 
                     // Frontier preserves Nodes order, so "strictly cheaper" keeps the first
                     // (lowest-index) node on a cost tie.
-                    if (node.XpCost <= budget - spent && (pick == null || node.XpCost < pick.XpCost))
+                    int effective = node.XpCost;
+                    if (baseSlots >= 0 && IsDeadWeight(grid, activated, node, baseSlots))
+                    {
+                        // Dead weight is still worth buying as a gate: every branch opens on its
+                        // ability, so an uncarried opener is priced as itself plus the cheapest useful
+                        // node behind it and competes with the rest on that.
+                        int behind = CheapestUsefulBehind(grid, adjacency, activated, node, baseSlots, budget - spent - node.XpCost);
+                        if (behind < 0)
+                        {
+                            if (fallback == null || node.XpCost < fallback.XpCost)
+                            {
+                                fallback = node;
+                            }
+                            continue;
+                        }
+                        effective = node.XpCost + behind;
+                    }
+                    if (pick == null || effective < pickCost)
                     {
                         pick = node;
+                        pickCost = effective;
                     }
                 }
 
+                pick = pick ?? fallback;
                 if (pick == null)
                 {
                     return activated;
@@ -973,15 +1009,71 @@ namespace Assets.Scripts.Heroes
         /// cannot see what committing to a branch buys (docs/BALANCING.md §0 rule 3). Prices only
         /// XP; a node's material cost is not modelled here.</para>
         /// </summary>
-        public static List<string> BeelineThenGreedy(SphereGridSO grid, string targetKey, int budget)
+        public static List<string> BeelineThenGreedy(SphereGridSO grid, string targetKey, int budget, int baseSlots = -1)
         {
             var path = PathTo(grid, targetKey);
             int pathCost = TotalCostOf(grid, path);
             if (path.Count == 0 || pathCost > budget)
             {
-                return GreedySpend(grid, null, budget, out _);
+                return GreedySpend(grid, null, budget, out _, baseSlots);
             }
-            return GreedySpend(grid, path, budget - pathCost, out _);
+            return GreedySpend(grid, path, budget - pathCost, out _, baseSlots);
+        }
+
+        /// <summary>
+        /// The cheapest node <paramref name="gate"/> would open that is worth having once it is
+        /// bought, within <paramref name="budget"/>; -1 when there is none.
+        /// </summary>
+        private static int CheapestUsefulBehind(SphereGridSO grid, Dictionary<string, List<string>> adjacency,
+            List<string> activated, SphereGridNode gate, int baseSlots, int budget)
+        {
+            if (budget < 0 || !adjacency.TryGetValue(gate.Key, out var neighbors))
+            {
+                return -1;
+            }
+            var withGate = new List<string>(activated) { gate.Key };
+            int best = -1;
+            foreach (var key in neighbors)
+            {
+                if (activated.Contains(key))
+                {
+                    continue;
+                }
+                var next = FindNode(grid, key);
+                if (next == null || HasEssenceCost(next) || next.XpCost > budget
+                    || IsDeadWeight(grid, withGate, next, baseSlots))
+                {
+                    continue;
+                }
+                if (best < 0 || next.XpCost < best)
+                {
+                    best = next.XpCost;
+                }
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// Whether buying <paramref name="node"/> now would add nothing in a fight: an ability with
+        /// every slot already carrying one, or a second Ultra or summon. See <see cref="GreedySpend"/>.
+        /// </summary>
+        public static bool IsDeadWeight(SphereGridSO grid, ICollection<string> activated, SphereGridNode node, int baseSlots)
+        {
+            if (node == null)
+            {
+                return false;
+            }
+            switch (node.Kind)
+            {
+                case SphereNodeKind.MagicKnown:
+                    return KnownMagicForNodes(grid, activated).Count >= baseSlots + SlotBonusForNodes(grid, activated);
+                case SphereNodeKind.Ultra:
+                    return UltrasForNodes(grid, activated).Count > 0;
+                case SphereNodeKind.Summon:
+                    return SummonsForNodes(grid, activated).Count > 0;
+                default:
+                    return false;
+            }
         }
 
         /// <summary>Lifetime XP a save entry represents: the unspent bank plus the cost of

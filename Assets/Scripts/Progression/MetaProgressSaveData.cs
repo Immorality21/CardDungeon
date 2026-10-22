@@ -93,6 +93,10 @@ namespace Assets.Scripts.Progression
         public bool TutorialStarted;
         public bool TutorialFinished;
 
+        // Party wipes, ever (survives death by definition). The death screen explains dying once,
+        // on the first; nothing else reads it yet.
+        public int PartyDeaths;
+
         /// <summary>How many enemies the bestiary had recorded when it was last opened - the hub's
         /// "something new here" badge shows on the Bestiary while more have been met since.</summary>
         public int BestiaryViewedCount;

@@ -29,6 +29,8 @@ MonoBehaviour:
     GrantedMagicKey: Disassemble
     GrantedCharges: 3
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -50,6 +52,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -72,6 +76,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -80,11 +86,11 @@ MonoBehaviour:
   - Key: tinkerer-trunk-2
     DisplayName: 
     Kind: 0
-    XpCost: 45
+    XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -270}
+    Position: {x: -95, y: -420}
     Gains:
       Values:
       - Type: 2
@@ -96,14 +102,38 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - tinkerer-patch
+  - Key: tinkerer-trunk-slot
+    DisplayName: 
+    Kind: 2
+    XpCost: 45
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -270}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
     - tinkerer-start
-  - Key: tinkerer-trunk-slot
+  - Key: tinkerer-patch
     DisplayName: 
-    Kind: 2
+    Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -113,29 +143,11 @@ MonoBehaviour:
       Values: []
     ResistType: 1
     ResistPercent: 10
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    AwakenedMagicKey: 
-    GrantedSummonKey: 
-    GrantedUltraKey: 
-    SummonAmount: 1
-    Neighbors:
-    - tinkerer-trunk-2
-  - Key: tinkerer-patch
-    DisplayName: 
-    Kind: 3
-    XpCost: 90
-    UnlockedByDefault: 0
-    MaterialCosts: []
-    EssenceCost: 0
-    Position: {x: -95, y: -420}
-    Gains:
-      Values: []
-    ResistType: 1
-    ResistPercent: 10
     GrantedMagicKey: PatchKit
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -148,7 +160,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -132, y: -325}
+    Position: {x: -105, y: -215}
     Gains:
       Values:
       - Type: 4
@@ -158,11 +170,13 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-2
+    - tinkerer-trunk-slot
   - Key: tinkerer-a-2
     DisplayName: 
     Kind: 0
@@ -180,19 +194,21 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-1
+    - tinkerer-a-3
   - Key: tinkerer-a-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -360, y: -435}
+    Position: {x: -132, y: -325}
     Gains:
       Values: []
     ResistType: 1
@@ -200,19 +216,21 @@ MonoBehaviour:
     GrantedMagicKey: RivetGun
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-2
+    - tinkerer-trunk-slot
   - Key: tinkerer-a-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -474, y: -490}
+    Position: {x: -285, y: -310}
     Gains:
       Values:
       - Type: 2
@@ -222,19 +240,21 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-3
+    - tinkerer-a-2
   - Key: tinkerer-a-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -588, y: -545}
+    Position: {x: -474, y: -490}
     Gains:
       Values: []
     ResistType: 1
@@ -242,11 +262,13 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-4
+    - tinkerer-a-mech
   - Key: tinkerer-a-6
     DisplayName: 
     Kind: 3
@@ -262,11 +284,13 @@ MonoBehaviour:
     GrantedMagicKey: SteamBurst
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-5
+    - tinkerer-a-turret
   - Key: tinkerer-a-7
     DisplayName: 
     Kind: 0
@@ -284,6 +308,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -304,15 +330,17 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-3
+    - tinkerer-a-mech
   - Key: tinkerer-a-mech
     DisplayName: 
     Kind: 10
-    XpCost: 350
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
@@ -320,7 +348,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
-    Position: {x: -911, y: -710}
+    Position: {x: -360, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -328,19 +356,21 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: WarriorMech
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-7
+    - tinkerer-a-2
   - Key: tinkerer-a-tip
     DisplayName: 
     Kind: 0
-    XpCost: 410
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1006, y: -765}
+    Position: {x: -911, y: -710}
     Gains:
       Values:
       - Type: 4
@@ -350,11 +380,13 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-mech
+    - tinkerer-a-7
   - Key: tinkerer-b-1
     DisplayName: 
     Kind: 0
@@ -362,7 +394,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -450}
+    Position: {x: -60, y: -320}
     Gains:
       Values:
       - Type: 4
@@ -374,11 +406,13 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-2
+    - tinkerer-trunk-slot
   - Key: tinkerer-b-2
     DisplayName: 
     Kind: 0
@@ -396,19 +430,21 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-b-1
+    - tinkerer-b-3
   - Key: tinkerer-b-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -630}
+    Position: {x: 0, y: -450}
     Gains:
       Values: []
     ResistType: 1
@@ -416,11 +452,13 @@ MonoBehaviour:
     GrantedMagicKey: OilFlask
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-b-2
+    - tinkerer-trunk-slot
   - Key: tinkerer-b-4
     DisplayName: 
     Kind: 0
@@ -438,11 +476,13 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-b-3
+    - tinkerer-b-mech
   - Key: tinkerer-b-5
     DisplayName: 
     Kind: 2
@@ -458,6 +498,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -478,6 +520,8 @@ MonoBehaviour:
     GrantedMagicKey: GearJam
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -500,6 +544,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -520,15 +566,17 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-b-3
+    - tinkerer-b-mech
   - Key: tinkerer-b-mech
     DisplayName: 
     Kind: 10
-    XpCost: 350
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa010000000000000000ab01, type: 2}
@@ -536,7 +584,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
-    Position: {x: 95, y: -1045}
+    Position: {x: 0, y: -630}
     Gains:
       Values: []
     ResistType: 1
@@ -544,11 +592,13 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: OilSpewingMech
     SummonAmount: 1
     Neighbors:
-    - tinkerer-b-7
+    - tinkerer-b-2
   - Key: tinkerer-b-tip
     DisplayName: 
     Kind: 0
@@ -566,6 +616,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -578,7 +630,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 132, y: -325}
+    Position: {x: 105, y: -215}
     Gains:
       Values:
       - Type: 4
@@ -588,11 +640,13 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-2
+    - tinkerer-trunk-slot
   - Key: tinkerer-c-2
     DisplayName: 
     Kind: 0
@@ -610,19 +664,21 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-c-1
+    - tinkerer-c-3
   - Key: tinkerer-c-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 360, y: -435}
+    Position: {x: 132, y: -325}
     Gains:
       Values: []
     ResistType: 1
@@ -630,11 +686,13 @@ MonoBehaviour:
     GrantedMagicKey: FlareCannon
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-c-2
+    - tinkerer-trunk-slot
   - Key: tinkerer-c-4
     DisplayName: 
     Kind: 0
@@ -652,11 +710,13 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-c-3
+    - tinkerer-c-mech
   - Key: tinkerer-c-5
     DisplayName: 
     Kind: 2
@@ -672,6 +732,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -692,6 +754,8 @@ MonoBehaviour:
     GrantedMagicKey: IncendiaryBomb
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -714,6 +778,8 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -734,15 +800,17 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-c-3
+    - tinkerer-c-mech
   - Key: tinkerer-c-mech
     DisplayName: 
     Kind: 10
-    XpCost: 350
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
@@ -750,7 +818,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
-    Position: {x: 911, y: -710}
+    Position: {x: 360, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -758,19 +826,21 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: FlamethrowerMech
     SummonAmount: 1
     Neighbors:
-    - tinkerer-c-7
+    - tinkerer-c-2
   - Key: tinkerer-c-tip
     DisplayName: 
     Kind: 0
-    XpCost: 410
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1006, y: -765}
+    Position: {x: 911, y: -710}
     Gains:
       Values:
       - Type: 4
@@ -780,11 +850,13 @@ MonoBehaviour:
     GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-c-mech
+    - tinkerer-c-7
   - Key: tinkerer-a-awaken
     DisplayName: 
     Kind: 11
@@ -806,11 +878,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-3
+    - tinkerer-a-mech
   - Key: tinkerer-a-turret
     DisplayName: 
     Kind: 4
-    XpCost: 295
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
@@ -818,7 +890,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
-    Position: {x: -660, y: -700}
+    Position: {x: -588, y: -545}
     Gains:
       Values: []
     ResistType: 0
@@ -832,11 +904,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-6
+    - tinkerer-a-5
   - Key: tinkerer-a-turret-blind
     DisplayName: 
     Kind: 13
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
@@ -856,7 +928,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 35
     Neighbors:
-    - tinkerer-a-turret
+    - tinkerer-a-6
   - Key: tinkerer-c-awaken
     DisplayName: 
     Kind: 11

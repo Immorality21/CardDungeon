@@ -138,7 +138,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -132, y: -325}
+    Position: {x: -105, y: -215}
     Gains:
       Values:
       - Type: 5
@@ -178,15 +178,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-a-1
+    - cleric-a-3
   - Key: cleric-a-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -360, y: -435}
+    Position: {x: -132, y: -325}
     Gains:
       Values: []
     ResistType: 1
@@ -200,15 +200,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-a-2
+    - cleric-trunk-2
   - Key: cleric-a-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -474, y: -490}
+    Position: {x: -285, y: -310}
     Gains:
       Values:
       - Type: 5
@@ -224,15 +224,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-a-3
+    - cleric-a-2
   - Key: cleric-a-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -588, y: -545}
+    Position: {x: -474, y: -490}
     Gains:
       Values: []
     ResistType: 1
@@ -246,7 +246,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-a-4
+    - cleric-a-miracle
   - Key: cleric-a-6
     DisplayName: 
     Kind: 3
@@ -268,7 +268,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-a-5
+    - cleric-phoenix
   - Key: cleric-a-7
     DisplayName: 
     Kind: 0
@@ -314,7 +314,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-a-3
+    - cleric-a-miracle
   - Key: cleric-a-tip-a
     DisplayName: 
     Kind: 0
@@ -432,11 +432,11 @@ MonoBehaviour:
   - Key: cleric-a-miracle
     DisplayName: 
     Kind: 10
-    XpCost: 245
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -500, y: -640}
+    Position: {x: -360, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -450,11 +450,11 @@ MonoBehaviour:
     GrantedUltraKey: MiracleOfLight
     SummonAmount: 1
     Neighbors:
-    - cleric-a-5
+    - cleric-a-2
   - Key: cleric-phoenix
     DisplayName: 
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -462,7 +462,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: -1006, y: -765}
+    Position: {x: -588, y: -545}
     Gains:
       Values: []
     ResistType: 1
@@ -476,15 +476,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-a-tip-a
+    - cleric-a-5
   - Key: cleric-phoenix-power
     DisplayName: 
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1101, y: -820}
+    Position: {x: -1006, y: -765}
     Gains:
       Values: []
     ResistType: 1
@@ -498,11 +498,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 10
     Neighbors:
-    - cleric-phoenix
+    - cleric-a-tip-a
   - Key: cleric-phoenix-charge
     DisplayName: 
     Kind: 7
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -510,7 +510,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: -1196, y: -875}
+    Position: {x: -1101, y: -820}
     Gains:
       Values: []
     ResistType: 1
@@ -532,7 +532,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -450}
+    Position: {x: -60, y: -320}
     Gains:
       Values:
       - Type: 2
@@ -572,15 +572,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-b-1
+    - cleric-b-3
   - Key: cleric-b-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -630}
+    Position: {x: 0, y: -450}
     Gains:
       Values: []
     ResistType: 1
@@ -594,15 +594,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-b-2
+    - cleric-trunk-2
   - Key: cleric-b-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -720}
+    Position: {x: 75, y: -560}
     Gains:
       Values:
       - Type: 5
@@ -618,15 +618,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-b-3
+    - cleric-b-2
   - Key: cleric-b-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -810}
+    Position: {x: 0, y: -720}
     Gains:
       Values: []
     ResistType: 1
@@ -640,7 +640,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-b-4
+    - cleric-b-miracle
   - Key: cleric-b-6
     DisplayName: 
     Kind: 3
@@ -662,7 +662,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-b-5
+    - cleric-angel
   - Key: cleric-b-7
     DisplayName: 
     Kind: 0
@@ -708,7 +708,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-b-3
+    - cleric-b-miracle
   - Key: cleric-b-tip-a
     DisplayName: 
     Kind: 0
@@ -782,11 +782,11 @@ MonoBehaviour:
   - Key: cleric-b-miracle
     DisplayName: 
     Kind: 10
-    XpCost: 245
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 95, y: -790}
+    Position: {x: 0, y: -630}
     Gains:
       Values: []
     ResistType: 1
@@ -800,11 +800,11 @@ MonoBehaviour:
     GrantedUltraKey: MiracleOfHope
     SummonAmount: 1
     Neighbors:
-    - cleric-b-5
+    - cleric-b-2
   - Key: cleric-angel
     DisplayName: 
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -812,7 +812,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: 190, y: -1100}
+    Position: {x: 0, y: -810}
     Gains:
       Values: []
     ResistType: 1
@@ -826,15 +826,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-b-tip-a
+    - cleric-b-5
   - Key: cleric-angel-power
     DisplayName: 
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 285, y: -1155}
+    Position: {x: 190, y: -1100}
     Gains:
       Values: []
     ResistType: 1
@@ -848,15 +848,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 5
     Neighbors:
-    - cleric-angel
+    - cleric-b-tip-a
   - Key: cleric-angel-stay
     DisplayName: 
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 380, y: -1210}
+    Position: {x: 285, y: -1155}
     Gains:
       Values: []
     ResistType: 1
@@ -874,7 +874,7 @@ MonoBehaviour:
   - Key: cleric-angel-charge
     DisplayName: 
     Kind: 7
-    XpCost: 615
+    XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -882,7 +882,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: 475, y: -1265}
+    Position: {x: 380, y: -1210}
     Gains:
       Values: []
     ResistType: 1
@@ -904,7 +904,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 132, y: -325}
+    Position: {x: 105, y: -215}
     Gains:
       Values:
       - Type: 5
@@ -944,15 +944,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-c-1
+    - cleric-c-3
   - Key: cleric-c-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 360, y: -435}
+    Position: {x: 132, y: -325}
     Gains:
       Values: []
     ResistType: 1
@@ -966,15 +966,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-c-2
+    - cleric-trunk-2
   - Key: cleric-c-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 474, y: -490}
+    Position: {x: 315, y: -340}
     Gains:
       Values:
       - Type: 5
@@ -990,15 +990,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-c-3
+    - cleric-c-2
   - Key: cleric-c-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 588, y: -545}
+    Position: {x: 474, y: -490}
     Gains:
       Values: []
     ResistType: 1
@@ -1012,7 +1012,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-c-4
+    - cleric-c-miracle
   - Key: cleric-c-6
     DisplayName: 
     Kind: 3
@@ -1034,7 +1034,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-c-5
+    - cleric-archon
   - Key: cleric-c-7
     DisplayName: 
     Kind: 0
@@ -1080,7 +1080,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-c-3
+    - cleric-c-miracle
   - Key: cleric-c-tip-a
     DisplayName: 
     Kind: 0
@@ -1154,11 +1154,11 @@ MonoBehaviour:
   - Key: cleric-c-miracle
     DisplayName: 
     Kind: 10
-    XpCost: 245
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 500, y: -640}
+    Position: {x: 360, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -1172,11 +1172,11 @@ MonoBehaviour:
     GrantedUltraKey: MiracleOfRighteousness
     SummonAmount: 1
     Neighbors:
-    - cleric-c-5
+    - cleric-c-2
   - Key: cleric-archon
     DisplayName: 
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1184,7 +1184,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: 1006, y: -765}
+    Position: {x: 588, y: -545}
     Gains:
       Values: []
     ResistType: 1
@@ -1198,15 +1198,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-c-tip-a
+    - cleric-c-5
   - Key: cleric-archon-power
     DisplayName: 
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1101, y: -820}
+    Position: {x: 1006, y: -765}
     Gains:
       Values: []
     ResistType: 1
@@ -1220,15 +1220,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 30
     Neighbors:
-    - cleric-archon
+    - cleric-c-tip-a
   - Key: cleric-archon-stay
     DisplayName: 
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1196, y: -875}
+    Position: {x: 1101, y: -820}
     Gains:
       Values: []
     ResistType: 1
@@ -1246,7 +1246,7 @@ MonoBehaviour:
   - Key: cleric-archon-charge
     DisplayName: 
     Kind: 7
-    XpCost: 615
+    XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1254,7 +1254,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: 1291, y: -930}
+    Position: {x: 1196, y: -875}
     Gains:
       Values: []
     ResistType: 1

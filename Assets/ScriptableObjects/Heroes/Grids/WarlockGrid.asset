@@ -20,6 +20,7 @@ MonoBehaviour:
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -27,6 +28,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: Bloodbolt
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -37,6 +41,7 @@ MonoBehaviour:
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -46,6 +51,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -57,6 +65,7 @@ MonoBehaviour:
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -66,6 +75,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -77,6 +89,7 @@ MonoBehaviour:
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -86,6 +99,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -97,6 +113,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -360}
     Gains:
       Values: []
@@ -104,6 +121,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -115,7 +135,8 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -132, y: -325}
+    EssenceCost: 0
+    Position: {x: -105, y: -215}
     Gains:
       Values:
       - Type: 7
@@ -124,6 +145,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -135,6 +159,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -246, y: -380}
     Gains:
       Values:
@@ -144,35 +169,43 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-a-1
+    - warlock-a-3
   - Key: warlock-a-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -360, y: -435}
+    EssenceCost: 0
+    Position: {x: -132, y: -325}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: BloodPact
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-a-2
+    - warlock-trunk-2
   - Key: warlock-a-4
     DisplayName: 
     Kind: 0
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -474, y: -490}
     Gains:
       Values:
@@ -182,17 +215,21 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-a-3
+    - warlock-rain-of-fire
   - Key: warlock-a-5
     DisplayName: 
     Kind: 2
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -588, y: -545}
     Gains:
       Values: []
@@ -200,6 +237,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -211,6 +251,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -702, y: -600}
     Gains:
       Values: []
@@ -218,6 +259,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: LifeTap
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -229,6 +273,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -816, y: -655}
     Gains:
       Values:
@@ -238,6 +283,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -249,6 +297,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -420, y: -360}
     Gains:
       Values: []
@@ -256,17 +305,21 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-a-3
+    - warlock-rain-of-fire
   - Key: warlock-a-tip-a
     DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -911, y: -710}
     Gains:
       Values: []
@@ -274,6 +327,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: BloodShower
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -285,6 +341,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -876, y: -585}
     Gains:
       Values:
@@ -294,6 +351,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -305,7 +365,8 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 0, y: -450}
+    EssenceCost: 0
+    Position: {x: -60, y: -320}
     Gains:
       Values:
       - Type: 4
@@ -314,6 +375,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -325,6 +389,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -334,35 +399,43 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-b-1
+    - warlock-b-3
   - Key: warlock-b-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 0, y: -630}
+    EssenceCost: 0
+    Position: {x: 0, y: -450}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 0
     GrantedMagicKey: DrainLife
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-b-2
+    - warlock-trunk-2
   - Key: warlock-b-4
     DisplayName: 
     Kind: 0
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -720}
     Gains:
       Values:
@@ -372,17 +445,21 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-b-3
+    - warlock-soul-harvest
   - Key: warlock-b-5
     DisplayName: 
     Kind: 2
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -390,6 +467,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -401,6 +481,7 @@ MonoBehaviour:
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -408,6 +489,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: SiphonSoul
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -419,6 +503,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -428,6 +513,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -439,6 +527,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 105, y: -605}
     Gains:
       Values: []
@@ -446,17 +535,21 @@ MonoBehaviour:
     ResistPercent: 12
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-b-3
+    - warlock-soul-harvest
   - Key: warlock-b-tip-a
     DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 95, y: -1045}
     Gains:
       Values: []
@@ -464,6 +557,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: LeechingCurse
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -475,6 +571,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -95, y: -1045}
     Gains:
       Values:
@@ -484,6 +581,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -495,6 +595,7 @@ MonoBehaviour:
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 132, y: -325}
     Gains:
       Values:
@@ -504,6 +605,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -515,6 +619,7 @@ MonoBehaviour:
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 246, y: -380}
     Gains:
       Values:
@@ -524,6 +629,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -535,6 +643,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 360, y: -435}
     Gains:
       Values: []
@@ -542,6 +651,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
     SummonAmount: 1
@@ -553,6 +665,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 474, y: -490}
     Gains:
       Values:
@@ -562,6 +675,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -573,6 +689,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 588, y: -545}
     Gains:
       Values: []
@@ -580,6 +697,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
     SummonAmount: 1
@@ -593,6 +713,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
+    EssenceCost: 0
     Position: {x: 702, y: -600}
     Gains:
       Values: []
@@ -600,6 +721,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
     SummonAmount: 1
@@ -611,6 +735,7 @@ MonoBehaviour:
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 816, y: -655}
     Gains:
       Values:
@@ -620,6 +745,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -631,6 +759,7 @@ MonoBehaviour:
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 420, y: -360}
     Gains:
       Values: []
@@ -638,6 +767,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
     SummonAmount: 10
@@ -649,6 +781,7 @@ MonoBehaviour:
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: 911, y: -710}
     Gains:
       Values: []
@@ -656,6 +789,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
     SummonAmount: 1
@@ -669,6 +805,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
+    EssenceCost: 0
     Position: {x: 876, y: -585}
     Gains:
       Values: []
@@ -676,6 +813,9 @@ MonoBehaviour:
     ResistPercent: 0
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
     SummonAmount: 1
@@ -689,6 +829,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
+    EssenceCost: 0
     Position: {x: 95, y: -420}
     Gains:
       Values: []
@@ -696,6 +837,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
     SummonAmount: 1
@@ -709,6 +853,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 3
+    EssenceCost: 0
     Position: {x: -95, y: -420}
     Gains:
       Values: []
@@ -716,6 +861,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: DemonForm
     SummonAmount: 1
@@ -727,6 +875,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -540, y: -430}
     Gains:
       Values: []
@@ -734,6 +883,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
     SummonAmount: 5
@@ -745,6 +897,7 @@ MonoBehaviour:
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
+    EssenceCost: 0
     Position: {x: -105, y: -745}
     Gains:
       Values: []
@@ -752,6 +905,9 @@ MonoBehaviour:
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
     SummonAmount: 5
@@ -760,39 +916,47 @@ MonoBehaviour:
   - Key: warlock-rain-of-fire
     DisplayName: 
     Kind: 10
-    XpCost: 410
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: -1006, y: -765}
+    EssenceCost: 0
+    Position: {x: -360, y: -435}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: RainOfFire
     SummonAmount: 1
     Neighbors:
-    - warlock-a-tip-a
+    - warlock-a-2
   - Key: warlock-soul-harvest
     DisplayName: 
     Kind: 10
-    XpCost: 295
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
-    Position: {x: 95, y: -960}
+    EssenceCost: 0
+    Position: {x: 0, y: -630}
     Gains:
       Values: []
     ResistType: 0
     ResistPercent: 10
     GrantedMagicKey: 
     GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: SoulHarvest
     SummonAmount: 1
     Neighbors:
-    - warlock-b-6
+    - warlock-b-2
   - Key: warlock-a-awaken
     DisplayName: 
     Kind: 11
@@ -924,7 +1088,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-a-3
+    - warlock-rain-of-fire
   - Key: warlock-a-tap-charge
     DisplayName: 
     Kind: 12
@@ -990,7 +1154,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warlock-b-3
+    - warlock-soul-harvest
   - Key: warlock-b-siphon-charge
     DisplayName: 
     Kind: 12

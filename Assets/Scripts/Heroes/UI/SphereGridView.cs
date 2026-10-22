@@ -35,6 +35,12 @@ namespace Assets.Scripts.Heroes.UI
             public bool IsStart;
 
             /// <summary>
+            /// Optional art drawn in place of the glyph - the ability, summon or Ultra a node teaches
+            /// (playtest 2026-10-19: those nodes read as empty). Null draws the glyph as before.
+            /// </summary>
+            public Sprite Icon;
+
+            /// <summary>
             /// Optional text drawn under the node. <b>Opt-in, and only the campaign map sets it</b>
             /// (the run's name - playtest 2026-09-28, finding 11): a sphere grid node is identified
             /// by its glyph and the detail panel, and a caption under every one of dozens of nodes
@@ -196,14 +202,23 @@ namespace Assets.Scripts.Heroes.UI
                 button.AddToClassList("sg-node--start");
             }
 
-            var glyph = new Label(node.Glyph) { pickingMode = PickingMode.Ignore };
-            glyph.AddToClassList("sg-node__glyph");
-            if (node.Glyph != null && node.Glyph.Length > 1)
+            if (node.Icon != null)
             {
-                // A stat's short name ("STR") rather than a symbol: smaller, to fit the circle.
-                glyph.AddToClassList("sg-node__glyph--word");
+                var icon = new Image { sprite = node.Icon, scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
+                icon.AddToClassList("sg-node__icon");
+                button.Add(icon);
             }
-            button.Add(glyph);
+            else
+            {
+                var glyph = new Label(node.Glyph) { pickingMode = PickingMode.Ignore };
+                glyph.AddToClassList("sg-node__glyph");
+                if (node.Glyph != null && node.Glyph.Length > 1)
+                {
+                    // A stat's short name ("STR") rather than a symbol: smaller, to fit the circle.
+                    glyph.AddToClassList("sg-node__glyph--word");
+                }
+                button.Add(glyph);
+            }
 
             if (!string.IsNullOrEmpty(node.Caption))
             {

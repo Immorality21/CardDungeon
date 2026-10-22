@@ -33,3 +33,5 @@ MonoBehaviour:
     Text: Your hero grew stronger. Head back to town - the road down is open again.
   - Cue: 9
     Text: The town is yours now. When you are ready, take The Story to continue The Threshold.
+  - Cue: 10
+    Text: Every party falls, and falling is how you get stronger. What you banked is safe - spend it in town, then go back down.

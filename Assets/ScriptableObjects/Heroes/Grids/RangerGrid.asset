@@ -138,7 +138,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -107, y: -325}
+    Position: {x: -100, y: -205}
     Gains:
       Values:
       - Type: 3
@@ -178,15 +178,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-a-1
+    - ranger-a-3
   - Key: ranger-a-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -292, y: -435}
+    Position: {x: -107, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -200,15 +200,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-a-2
+    - ranger-trunk-2
   - Key: ranger-a-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -385, y: -490}
+    Position: {x: -240, y: -310}
     Gains:
       Values:
       - Type: 3
@@ -224,15 +224,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-a-3
+    - ranger-a-2
   - Key: ranger-a-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -478, y: -545}
+    Position: {x: -385, y: -490}
     Gains:
       Values: []
     ResistType: 0
@@ -246,7 +246,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-a-4
+    - ranger-rain-of-arrows
   - Key: ranger-a-6
     DisplayName: 
     Kind: 3
@@ -268,7 +268,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-a-5
+    - ranger-galewing
   - Key: ranger-a-7
     DisplayName: 
     Kind: 0
@@ -428,7 +428,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-a-3
+    - ranger-rain-of-arrows
   - Key: ranger-a-dart-sure
     DisplayName: 
     Kind: 12
@@ -502,7 +502,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 107, y: -325}
+    Position: {x: 100, y: -205}
     Gains:
       Values:
       - Type: 6
@@ -542,15 +542,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-b-1
+    - ranger-b-3
   - Key: ranger-b-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 292, y: -435}
+    Position: {x: 107, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -564,15 +564,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-b-2
+    - ranger-trunk-2
   - Key: ranger-b-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 385, y: -490}
+    Position: {x: 270, y: -340}
     Gains:
       Values:
       - Type: 3
@@ -588,15 +588,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-b-3
+    - ranger-b-2
   - Key: ranger-b-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 478, y: -545}
+    Position: {x: 385, y: -490}
     Gains:
       Values: []
     ResistType: 0
@@ -610,7 +610,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-b-4
+    - ranger-pin-down
   - Key: ranger-b-6
     DisplayName: 
     Kind: 3
@@ -632,7 +632,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-b-5
+    - ranger-exatrix
   - Key: ranger-b-7
     DisplayName: 
     Kind: 0
@@ -678,7 +678,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-b-3
+    - ranger-pin-down
   - Key: ranger-b-tip-a
     DisplayName: 
     Kind: 0
@@ -730,7 +730,7 @@ MonoBehaviour:
   - Key: ranger-galewing
     DisplayName: 
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -738,7 +738,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: -853, y: -765}
+    Position: {x: -478, y: -545}
     Gains:
       Values: []
     ResistType: 1
@@ -752,15 +752,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-a-tip-a
+    - ranger-a-5
   - Key: ranger-galewing-power
     DisplayName: 
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -948, y: -820}
+    Position: {x: -853, y: -765}
     Gains:
       Values: []
     ResistType: 1
@@ -774,15 +774,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 4
     Neighbors:
-    - ranger-galewing
+    - ranger-a-tip-a
   - Key: ranger-galewing-stay
     DisplayName: 
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1043, y: -875}
+    Position: {x: -948, y: -820}
     Gains:
       Values: []
     ResistType: 1
@@ -800,7 +800,7 @@ MonoBehaviour:
   - Key: ranger-galewing-charge
     DisplayName: 
     Kind: 7
-    XpCost: 615
+    XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -808,7 +808,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: -1138, y: -930}
+    Position: {x: -1043, y: -875}
     Gains:
       Values: []
     ResistType: 1
@@ -826,7 +826,7 @@ MonoBehaviour:
   - Key: ranger-exatrix
     DisplayName: 
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -834,7 +834,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: 853, y: -765}
+    Position: {x: 478, y: -545}
     Gains:
       Values: []
     ResistType: 1
@@ -848,15 +848,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-b-tip-a
+    - ranger-b-5
   - Key: ranger-exatrix-power
     DisplayName: 
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 948, y: -820}
+    Position: {x: 853, y: -765}
     Gains:
       Values: []
     ResistType: 1
@@ -870,15 +870,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 30
     Neighbors:
-    - ranger-exatrix
+    - ranger-b-tip-a
   - Key: ranger-exatrix-stay
     DisplayName: 
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1043, y: -875}
+    Position: {x: 948, y: -820}
     Gains:
       Values: []
     ResistType: 1
@@ -896,7 +896,7 @@ MonoBehaviour:
   - Key: ranger-exatrix-charge
     DisplayName: 
     Kind: 7
-    XpCost: 615
+    XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -904,7 +904,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 2
     EssenceCost: 0
-    Position: {x: 1138, y: -930}
+    Position: {x: 1043, y: -875}
     Gains:
       Values: []
     ResistType: 1
@@ -926,7 +926,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -450}
+    Position: {x: -60, y: -375}
     Gains:
       Values:
       - Type: 3
@@ -966,15 +966,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-c-1
+    - ranger-c-3
   - Key: ranger-c-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -630}
+    Position: {x: 0, y: -450}
     Gains:
       Values: []
     ResistType: 0
@@ -988,15 +988,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-c-2
+    - ranger-trunk-2
   - Key: ranger-c-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -720}
+    Position: {x: 75, y: -560}
     Gains:
       Values:
       - Type: 3
@@ -1012,15 +1012,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-c-3
+    - ranger-c-2
   - Key: ranger-c-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -810}
+    Position: {x: 0, y: -720}
     Gains:
       Values: []
     ResistType: 0
@@ -1034,7 +1034,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-c-4
+    - ranger-pack-hunt
   - Key: ranger-c-6
     DisplayName: 
     Kind: 3
@@ -1056,7 +1056,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-c-5
+    - ranger-greyfang
   - Key: ranger-c-7
     DisplayName: 
     Kind: 0
@@ -1129,10 +1129,11 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - ranger-c-7
+    - ranger-c-tip-a
   - Key: ranger-greyfang
     DisplayName: 
     Kind: 4
-    XpCost: 410
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1140,7 +1141,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
     EssenceCost: 0
-    Position: {x: 0, y: -1135}
+    Position: {x: 0, y: -810}
     Gains:
       Values: []
     ResistType: 1
@@ -1154,16 +1155,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-c-tip-a
-    - ranger-c-tip-b
+    - ranger-c-5
   - Key: ranger-greyfang-power
     DisplayName: 
     Kind: 5
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -1225}
+    Position: {x: 45, y: -1140}
     Gains:
       Values: []
     ResistType: 1
@@ -1177,15 +1177,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 20
     Neighbors:
-    - ranger-greyfang
+    - ranger-c-tip-a
   - Key: ranger-greyfang-stay
     DisplayName: 
     Kind: 6
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -1315}
+    Position: {x: 45, y: -1230}
     Gains:
       Values: []
     ResistType: 1
@@ -1203,11 +1203,11 @@ MonoBehaviour:
   - Key: ranger-pack-hunt
     DisplayName: 
     Kind: 10
-    XpCost: 410
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 190, y: -1135}
+    Position: {x: 0, y: -630}
     Gains:
       Values: []
     ResistType: 1
@@ -1221,15 +1221,15 @@ MonoBehaviour:
     GrantedUltraKey: PackHunt
     SummonAmount: 1
     Neighbors:
-    - ranger-c-tip-a
+    - ranger-c-2
   - Key: ranger-rain-of-arrows
     DisplayName: 
     Kind: 10
-    XpCost: 410
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -818, y: -530}
+    Position: {x: -292, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -1243,15 +1243,15 @@ MonoBehaviour:
     GrantedUltraKey: RainOfArrows
     SummonAmount: 1
     Neighbors:
-    - ranger-a-tip-b
+    - ranger-a-2
   - Key: ranger-pin-down
     DisplayName: 
     Kind: 10
-    XpCost: 410
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 818, y: -530}
+    Position: {x: 292, y: -435}
     Gains:
       Values: []
     ResistType: 1
@@ -1265,7 +1265,7 @@ MonoBehaviour:
     GrantedUltraKey: PinDown
     SummonAmount: 1
     Neighbors:
-    - ranger-b-tip-b
+    - ranger-b-2
   - Key: ranger-a-awaken
     DisplayName: 
     Kind: 11

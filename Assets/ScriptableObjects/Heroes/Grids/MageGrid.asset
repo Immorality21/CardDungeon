@@ -138,7 +138,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -132, y: -325}
+    Position: {x: -105, y: -215}
     Gains:
       Values:
       - Type: 4
@@ -180,15 +180,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-a-1
+    - mage-a-3
   - Key: mage-a-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -360, y: -435}
+    Position: {x: -132, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -202,11 +202,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-a-2
+    - mage-trunk-2
   - Key: mage-a-res
     DisplayName: 
     Kind: 1
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -224,15 +224,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-a-3
+    - mage-a-2
   - Key: mage-a-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -474, y: -490}
+    Position: {x: -285, y: -310}
     Gains:
       Values:
       - Type: 4
@@ -248,15 +248,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-a-3
+    - mage-a-2
   - Key: mage-a-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -588, y: -545}
+    Position: {x: -344, y: -430}
     Gains:
       Values: []
     ResistType: 0
@@ -270,15 +270,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-a-4
+    - mage-a-2
   - Key: mage-a-6
     DisplayName: 
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -702, y: -600}
+    Position: {x: -572, y: -540}
     Gains:
       Values: []
     ResistType: 0
@@ -292,15 +292,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-a-5
+    - mage-qyraxis
   - Key: mage-a-7
     DisplayName: 
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -816, y: -655}
+    Position: {x: -686, y: -595}
     Gains:
       Values:
       - Type: 3
@@ -322,11 +322,11 @@ MonoBehaviour:
   - Key: mage-a-tip
     DisplayName: 
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -911, y: -710}
+    Position: {x: -781, y: -650}
     Gains:
       Values:
       - Type: 4
@@ -350,7 +350,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -450}
+    Position: {x: -60, y: -320}
     Gains:
       Values:
       - Type: 4
@@ -392,15 +392,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-b-1
+    - mage-b-3
   - Key: mage-b-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -630}
+    Position: {x: 0, y: -450}
     Gains:
       Values: []
     ResistType: 0
@@ -414,11 +414,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-b-2
+    - mage-trunk-2
   - Key: mage-b-res
     DisplayName: 
     Kind: 1
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -436,15 +436,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-b-3
+    - mage-b-2
   - Key: mage-b-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -720}
+    Position: {x: -40, y: -610}
     Gains:
       Values:
       - Type: 5
@@ -460,15 +460,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-b-3
+    - mage-b-2
   - Key: mage-b-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -810}
+    Position: {x: 0, y: -720}
     Gains:
       Values: []
     ResistType: 0
@@ -482,11 +482,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-b-4
+    - mage-b-2
   - Key: mage-b-6
     DisplayName: 
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -504,11 +504,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-b-5
+    - mage-glacius
   - Key: mage-b-7
     DisplayName: 
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -534,7 +534,7 @@ MonoBehaviour:
   - Key: mage-b-8
     DisplayName: 
     Kind: 3
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -556,7 +556,7 @@ MonoBehaviour:
   - Key: mage-b-tip
     DisplayName: 
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -584,7 +584,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 132, y: -325}
+    Position: {x: 80, y: -260}
     Gains:
       Values:
       - Type: 4
@@ -626,15 +626,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-c-1
+    - mage-c-3
   - Key: mage-c-3
     DisplayName: 
     Kind: 3
-    XpCost: 120
+    XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 360, y: -435}
+    Position: {x: 132, y: -325}
     Gains:
       Values: []
     ResistType: 0
@@ -648,11 +648,11 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-c-2
+    - mage-trunk-2
   - Key: mage-c-res
     DisplayName: 
     Kind: 1
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -670,15 +670,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-c-3
+    - mage-c-2
   - Key: mage-c-4
     DisplayName: 
     Kind: 0
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 474, y: -490}
+    Position: {x: 315, y: -340}
     Gains:
       Values:
       - Type: 4
@@ -694,15 +694,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-c-3
+    - mage-c-2
   - Key: mage-c-5
     DisplayName: 
     Kind: 2
-    XpCost: 195
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 588, y: -545}
+    Position: {x: 344, y: -430}
     Gains:
       Values: []
     ResistType: 0
@@ -716,15 +716,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-c-4
+    - mage-c-2
   - Key: mage-c-6
     DisplayName: 
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 702, y: -600}
+    Position: {x: 572, y: -540}
     Gains:
       Values: []
     ResistType: 0
@@ -738,15 +738,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-c-5
+    - mage-ifrit
   - Key: mage-c-7
     DisplayName: 
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 816, y: -655}
+    Position: {x: 686, y: -595}
     Gains:
       Values:
       - Type: 7
@@ -766,11 +766,11 @@ MonoBehaviour:
   - Key: mage-c-tip
     DisplayName: 
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 911, y: -710}
+    Position: {x: 781, y: -650}
     Gains:
       Values:
       - Type: 4
@@ -816,7 +816,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
-    Position: {x: -640, y: -700}
+    Position: {x: -510, y: -640}
     Gains:
       Values: []
     ResistType: 0
@@ -860,7 +860,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
-    Position: {x: 640, y: -700}
+    Position: {x: 510, y: -640}
     Gains:
       Values: []
     ResistType: 0
@@ -878,11 +878,11 @@ MonoBehaviour:
   - Key: mage-qyraxis
     DisplayName: Qyraxis
     Kind: 4
-    XpCost: 410
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1006, y: -765}
+    Position: {x: -458, y: -485}
     Gains:
       Values: []
     ResistType: 0
@@ -896,15 +896,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-a-tip
+    - mage-a-5
   - Key: mage-qyraxis-power
     DisplayName: 'Qyraxis: Charged Wings'
     Kind: 5
-    XpCost: 475
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1101, y: -820}
+    Position: {x: -876, y: -705}
     Gains:
       Values: []
     ResistType: 0
@@ -918,15 +918,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 4
     Neighbors:
-    - mage-qyraxis
+    - mage-a-tip
   - Key: mage-qyraxis-stay
     DisplayName: 'Qyraxis: Long Storm'
     Kind: 6
-    XpCost: 540
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1196, y: -875}
+    Position: {x: -971, y: -760}
     Gains:
       Values: []
     ResistType: 0
@@ -944,11 +944,11 @@ MonoBehaviour:
   - Key: mage-qyraxis-charge
     DisplayName: 'Qyraxis: Second Flight'
     Kind: 7
-    XpCost: 615
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -1291, y: -930}
+    Position: {x: -1066, y: -815}
     Gains:
       Values: []
     ResistType: 0
@@ -966,7 +966,29 @@ MonoBehaviour:
   - Key: mage-glacius
     DisplayName: Glacius
     Kind: 4
-    XpCost: 410
+    XpCost: 155
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    Position: {x: 0, y: -810}
+    Gains:
+      Values: []
+    ResistType: 0
+    ResistPercent: 0
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: Glacius
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-b-5
+  - Key: mage-glacius-power
+    DisplayName: 'Glacius: Thick Frost'
+    Kind: 5
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -982,39 +1004,17 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Glacius
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 5
     Neighbors:
     - mage-b-tip
-  - Key: mage-glacius-power
-    DisplayName: 'Glacius: Thick Frost'
-    Kind: 5
-    XpCost: 475
+  - Key: mage-glacius-stay
+    DisplayName: 'Glacius: Long Winter'
+    Kind: 6
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
     Position: {x: -285, y: -1155}
-    Gains:
-      Values: []
-    ResistType: 0
-    ResistPercent: 0
-    GrantedMagicKey: 
-    GrantedCharges: 2
-    AwakenedMagicKey: 
-    UpgradeType: 0
-    UpgradeAmount: 1
-    GrantedSummonKey: Glacius
-    GrantedUltraKey: 
-    SummonAmount: 5
-    Neighbors:
-    - mage-glacius
-  - Key: mage-glacius-stay
-    DisplayName: 'Glacius: Long Winter'
-    Kind: 6
-    XpCost: 540
-    UnlockedByDefault: 0
-    MaterialCosts: []
-    EssenceCost: 0
-    Position: {x: -380, y: -1210}
     Gains:
       Values: []
     ResistType: 0
@@ -1032,11 +1032,11 @@ MonoBehaviour:
   - Key: mage-glacius-charge
     DisplayName: 'Glacius: Second Thaw'
     Kind: 7
-    XpCost: 615
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -475, y: -1265}
+    Position: {x: -380, y: -1210}
     Gains:
       Values: []
     ResistType: 0
@@ -1054,11 +1054,11 @@ MonoBehaviour:
   - Key: mage-ifrit
     DisplayName: Ifrit
     Kind: 4
-    XpCost: 410
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1006, y: -765}
+    Position: {x: 458, y: -485}
     Gains:
       Values: []
     ResistType: 0
@@ -1072,15 +1072,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-c-tip
+    - mage-c-5
   - Key: mage-ifrit-power
     DisplayName: 'Ifrit: Stoked'
     Kind: 5
-    XpCost: 475
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1101, y: -820}
+    Position: {x: 876, y: -705}
     Gains:
       Values: []
     ResistType: 0
@@ -1094,15 +1094,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 30
     Neighbors:
-    - mage-ifrit
+    - mage-c-tip
   - Key: mage-ifrit-stay
     DisplayName: 'Ifrit: Slow Burn'
     Kind: 6
-    XpCost: 540
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1196, y: -875}
+    Position: {x: 971, y: -760}
     Gains:
       Values: []
     ResistType: 0
@@ -1120,11 +1120,11 @@ MonoBehaviour:
   - Key: mage-ifrit-charge
     DisplayName: 'Ifrit: Rekindled'
     Kind: 7
-    XpCost: 615
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 1291, y: -930}
+    Position: {x: 1066, y: -815}
     Gains:
       Values: []
     ResistType: 0

@@ -76,7 +76,8 @@ namespace Assets.Scripts.Sandbox
 
             if (setup.SpendXpOnGrid > 0)
             {
-                activated = SphereGridOps.GreedySpend(grid, activated, setup.SpendXpOnGrid, out _);
+                activated = SphereGridOps.GreedySpend(grid, activated, setup.SpendXpOnGrid, out _,
+                    Cards.EquippedMagicState.DefaultSlotCount);
             }
 
             entry.ActivatedNodes = activated;

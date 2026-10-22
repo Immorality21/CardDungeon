@@ -12,6 +12,13 @@ namespace Assets.Scripts.Items
         public ItemRarity Rarity;
         public int ItemLevel = 1;
 
+        [Range(0f, 1f)]
+        [Tooltip("Scales the rarity/depth chance this item wins a cache's or an event's item roll. 1 is " +
+                 "plain rarity; lower makes a common item turn up less without making it uncommon - the " +
+                 "Antidote Salve is 0.35, since a cache with three consumables to pick from handed one " +
+                 "out most of the time (playtest 2026-10-19). Drop tables with an explicit Chance ignore it.")]
+        public float FindChanceScale = 1f;
+
         [TextArea(2, 4)]
         [Tooltip("One line of flavour, shown where the item is looked at rather than used - the hub " +
                  "Materials tab today. Optional; blank simply shows nothing.")]

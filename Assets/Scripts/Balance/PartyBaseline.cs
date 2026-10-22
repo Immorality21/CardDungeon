@@ -251,7 +251,8 @@ namespace Assets.Scripts.Balance
                 else
                 {
                     budget = Mathf.Max(0, xpBudgetFor != null ? xpBudgetFor(definition) : 0);
-                    nodes = SphereGridOps.GreedySpend(definition.SphereGrid, null, budget, out _);
+                    nodes = SphereGridOps.GreedySpend(definition.SphereGrid, null, budget, out _,
+                        Cards.EquippedMagicState.DefaultSlotCount);
                 }
 
                 var baseStats = HeroStatCalculator.BaseStatsForNodes(definition, nodes);

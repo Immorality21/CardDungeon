@@ -81,7 +81,12 @@ account, so read it while signed in to that account). It holds, per hero: the vi
 with their kits and summons, up to three Ultras, every grid ability with whether it gets an Essence
 **awakening**, and every piece of gear with a **reaction** / **grows-with-use** idea.
 
-**Until the owner says it is filled in, do not make changes that would conflict with it**: hero
+**Marked done for now by the owner (2026-10-22, playtest notepad): "the hero workbook can be marked as
+done for now".** Hero design may change again without waiting on it - the first such change is moving
+abilities, summons and Ultras earlier on the grids. It stays the reference for the owner's visions; still
+read it before rewriting a hero's identity, and never treat a `drafts` field as a decision.
+
+*The rule as it stood until then:* **until the owner says it is filled in, do not make changes that would conflict with it**: hero
 visions, sphere-grid kits, summons, Ultras, awakenings, gear reactions or item milestones. Fields the
 document marks in `drafts` (keys with `~` separators, value `true`) are Claude's suggestions the
 owner has not reviewed yet, not decisions. When it is done, it is applied in one pass (the Cleric and

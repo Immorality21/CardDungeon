@@ -115,6 +115,11 @@ namespace Assets.Scripts.Rooms
         private Label _levelTitle;
         private Label _levelSubtitle;
         private ScrollView _levelBody;
+        private VisualElement _levelJoined;
+        private VisualElement _levelTallies;
+        private VisualElement _levelXp;
+        private Label _levelXpHeading;
+        private VisualElement _levelLoot;
         private Label _levelNext;
         private Button _levelContinue;
         private Action _levelContinueAction;
@@ -170,6 +175,7 @@ namespace Assets.Scripts.Rooms
         private KeyboardNavigator _barNav;
         private KeyboardNavigator _combatNav;
         private KeyboardNavigator _eventNav;
+        private KeyboardNavigator _detailNav;
 
         private bool EnsureRefs()
         {
@@ -228,6 +234,11 @@ namespace Assets.Scripts.Rooms
             _levelTitle = root.Q<Label>("level-clear-title");
             _levelSubtitle = root.Q<Label>("level-clear-subtitle");
             _levelBody = root.Q<ScrollView>("level-clear-body");
+            _levelJoined = root.Q<VisualElement>("level-clear-joined");
+            _levelTallies = root.Q<VisualElement>("level-clear-tallies");
+            _levelXp = root.Q<VisualElement>("level-clear-xp");
+            _levelXpHeading = root.Q<Label>("level-clear-xp-heading");
+            _levelLoot = root.Q<VisualElement>("level-clear-loot");
             _levelNext = root.Q<Label>("level-clear-next");
             _levelContinue = root.Q<Button>("level-clear-continue");
             _levelNextLevel = root.Q<Button>("level-clear-next-level");
@@ -380,6 +391,11 @@ namespace Assets.Scripts.Rooms
                     KeyboardNavigator.Press(_eventBack);
                 }
             };
+
+            // The detail dialog's buttons carry the cursor from the moment it opens, like Fight/Flee:
+            // a question or a statement wants Enter to answer it, and the player should see which
+            // button that is. Escape is handled in HandleDialogKey, which knows whether Cancel exists.
+            _detailNav = new KeyboardNavigator(_detailWindow);
 
             // While the command menu is up, swallow UI Toolkit's built-in navigation so it can't
             // blur/steal keyboard focus off the root after the first arrow (our cursor nav owns it).
@@ -870,6 +886,7 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void ShowDetail(string title, string message)
         {
+            _detailNav?.Reset();
             SetShown(_detailCancel, false);
             _detailCancelAction = null;
             _detailTitle.text = title;
@@ -2357,10 +2374,20 @@ namespace Assets.Scripts.Rooms
             {
                 switch (evt.keyCode)
                 {
+                    case KeyCode.UpArrow:
+                    case KeyCode.DownArrow:
+                    case KeyCode.LeftArrow:
+                    case KeyCode.RightArrow:
+                    case KeyCode.Tab:
+                        return _detailNav != null && _detailNav.HandleKey(evt);
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
                     case KeyCode.Space:
-                        _detailOkAction?.Invoke();
+                        // The highlighted button answers; with no cursor yet (the frame it opened) Ok does.
+                        if (_detailNav == null || !_detailNav.HandleKey(evt))
+                        {
+                            _detailOkAction?.Invoke();
+                        }
                         return true;
                     case KeyCode.Escape:
                     case KeyCode.Backspace:
@@ -2456,6 +2483,13 @@ namespace Assets.Scripts.Rooms
             if (IsShown(_combatBar))
             {
                 _combatNav?.SelectFirst();
+            }
+
+            // The same for the detail dialog: Ok (first in the document) carries the cursor, so
+            // Confirm/Cancel reads as a choice the arrows can change.
+            if (IsShown(_detailWindow))
+            {
+                _detailNav?.SelectFirst();
             }
 
             var text = NavHintText();
@@ -2890,7 +2924,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_deathBackdrop, true);
             Assets.Scripts.Hub.UI.BackdropAmbienceView.AttachTo(_deathBackdrop)?.Show("cd-bg--death");
             _detailWindow?.AddToClassList("cd-window--death");
-            ShowDetail("The Party Has Fallen", DefeatSummary());
+            ShowDetail("The Party Has Fallen", DefeatSummary() + FirstDeathLesson());
             _detailOk.text = "Return to town";
             AddDefeatRows();
             _detailOkAction = () =>
@@ -2904,6 +2938,21 @@ namespace Assets.Scripts.Rooms
                 SceneManager.LoadScene("HubScene");
             };
             SetShown(_detailWindow, true);
+        }
+
+        /// <summary>
+        /// The first wipe of a save says that dying is expected (a playtest finding: a new player read
+        /// it as failure). Read before <c>HandlePartyDeath</c> counts this one, so 0 means first.
+        /// </summary>
+        private static string FirstDeathLesson()
+        {
+            if (!MetaProgressManager.HasInstance || MetaProgressManager.Instance.PartyDeaths > 0)
+            {
+                return string.Empty;
+            }
+            var tutorial = UnityEngine.Resources.Load<Tutorial.TutorialSO>(Tutorial.TutorialSO.ResourcePath);
+            string text = tutorial != null ? tutorial.TextFor(Tutorial.TutorialCue.FirstDeath) : string.Empty;
+            return string.IsNullOrEmpty(text) ? string.Empty : "\n\n" + text;
         }
 
         private static string DefeatSummary()
@@ -3017,6 +3066,7 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_mainBar, false);
             SetShown(_combatBar, false);
+            _detailNav?.Reset();
             _detailTitle.text = title;
             _detailMessage.text = message;
             _detailOkAction = () =>
@@ -3338,43 +3388,7 @@ namespace Assets.Scripts.Rooms
             _levelTitle.text = summary.RunCompleted ? "Run Complete!" : "Level Cleared!";
             SetText(_levelSubtitle, LevelClearSubtitle(summary));
 
-            _levelBody.Clear();
-            // What the floor gave that is rare comes first (2026-09-30): the materials and items
-            // gate buildings and gear, and below gold, essence and XP they sat under the fold.
-            AddLevelLines("Materials", summary.Materials);
-            AddLevelLines("Items", summary.Items);
-
-            AddLevelSection("Gold", $"+{summary.GoldTotal}");
-            AddLevelDetail($"{summary.GoldFound} found  ·  {summary.GoldBonus} for the clear", string.Empty);
-
-            // Only a revisit pays Essence; a "+0" row on every first clear would only confuse.
-            if (summary.Essence > 0)
-            {
-                AddLevelSection("Essence", $"+{summary.Essence}");
-            }
-
-            if (summary.Xp.Count > 0)
-            {
-                int total = 0;
-                foreach (var line in summary.Xp)
-                {
-                    total += line.Amount;
-                }
-                AddLevelSection("XP", $"+{total}");
-                foreach (var line in summary.Xp)
-                {
-                    AddLevelDetail(line.Label, $"+{line.Amount}");
-                }
-            }
-
-            if (summary.Joined.Count > 0)
-            {
-                AddLevelSection("Joined the party", string.Empty);
-                foreach (var name in summary.Joined)
-                {
-                    AddLevelDetail(name, "yours for good");
-                }
-            }
+            FillLevelClearBody(summary);
 
             SetText(_levelNext, summary.RunCompleted
                 ? "The run is complete."
@@ -3401,38 +3415,118 @@ namespace Assets.Scripts.Rooms
             return string.IsNullOrEmpty(summary.RunName) ? level : $"{summary.RunName} · {level}";
         }
 
-        private void AddLevelSection(string label, string value)
+        /// <summary>
+        /// The window's body, most telling first (2026-10-22 redesign): a newcomer, then the totals as
+        /// tiles, then each hero's XP with a portrait, then the finds as an icon grid. The single list
+        /// it replaced pushed XP and newcomers below the scroll fold on any floor that dropped much.
+        /// </summary>
+        private void FillLevelClearBody(LevelClearSummary summary)
         {
-            _levelBody.Add(MakeVictoryRow(label, value));
+            _levelJoined?.Clear();
+            foreach (var hero in summary.Joined)
+            {
+                var row = new VisualElement();
+                row.AddToClassList("cd-lc-joined__row");
+                row.Add(Portrait(hero.Icon, "cd-lc-joined__portrait"));
+                var text = new Label($"{hero.Label} joins the party for good");
+                text.AddToClassList("cd-lc-joined__text");
+                row.Add(text);
+                _levelJoined?.Add(row);
+            }
+
+            int xpTotal = 0;
+            foreach (var line in summary.Xp)
+            {
+                xpTotal += line.Amount;
+            }
+            _levelTallies?.Clear();
+            AddTally("cd-lc-tally--gold", $"+{summary.GoldTotal}", "Gold",
+                $"{summary.GoldFound} found · {summary.GoldBonus} for the clear");
+            AddTally("cd-lc-tally--xp", $"+{xpTotal}", "XP", "banked for the sphere grid");
+            // Only a revisit pays Essence; a "+0" tile on every first clear would only confuse.
+            if (summary.Essence > 0)
+            {
+                AddTally("cd-lc-tally--essence", $"+{summary.Essence}", "Essence", "from the revisit");
+            }
+
+            _levelXp?.Clear();
+            SetShown(_levelXpHeading, summary.Xp.Count > 0);
+            foreach (var line in summary.Xp)
+            {
+                var card = new VisualElement();
+                card.AddToClassList("cd-lc-hero");
+                card.Add(Portrait(line.Icon, "cd-lc-hero__portrait"));
+                var text = new VisualElement();
+                text.AddToClassList("cd-lc-hero__text");
+                var name = new Label(line.Label);
+                name.AddToClassList("cd-lc-hero__name");
+                text.Add(name);
+                var xp = new Label($"+{line.Amount} XP");
+                xp.AddToClassList("cd-lc-hero__xp");
+                text.Add(xp);
+                card.Add(text);
+                _levelXp?.Add(card);
+            }
+
+            // Materials first: they gate buildings, and they are what a floor is for finding.
+            _levelLoot?.Clear();
+            AddLootCells(summary.Materials);
+            AddLootCells(summary.Items);
+            if (summary.Materials.Count == 0 && summary.Items.Count == 0)
+            {
+                var none = new Label("Nothing this time.");
+                none.AddToClassList("cd-lc-empty");
+                _levelLoot?.Add(none);
+            }
         }
 
-        private void AddLevelDetail(string label, string value)
+        private void AddTally(string kindClass, string value, string label, string note)
         {
-            var row = new VisualElement();
-            row.AddToClassList("cd-level-detail");
+            var tile = new VisualElement();
+            tile.AddToClassList("cd-lc-tally");
+            tile.AddToClassList(kindClass);
+            var v = new Label(value);
+            v.AddToClassList("cd-lc-tally__value");
+            tile.Add(v);
             var l = new Label(label);
-            l.AddToClassList("cd-level-detail__label");
-            row.Add(l);
-            if (!string.IsNullOrEmpty(value))
-            {
-                var v = new Label(value);
-                v.AddToClassList("cd-level-detail__value");
-                row.Add(v);
-            }
-            _levelBody.Add(row);
+            l.AddToClassList("cd-lc-tally__label");
+            tile.Add(l);
+            var n = new Label(note);
+            n.AddToClassList("cd-lc-tally__note");
+            tile.Add(n);
+            _levelTallies?.Add(tile);
         }
 
-        private void AddLevelLines(string section, List<LevelClearSummary.Line> lines)
+        private void AddLootCells(List<LevelClearSummary.Line> lines)
         {
-            if (lines == null || lines.Count == 0)
-            {
-                return;
-            }
-            AddLevelSection(section, string.Empty);
             foreach (var line in lines)
             {
-                AddLevelDetail(line.Label, $"x{line.Amount}");
+                var cell = new VisualElement();
+                cell.AddToClassList("cd-lc-item");
+                cell.Add(Portrait(line.Icon, "cd-lc-item__icon"));
+                var name = new Label(line.Label);
+                name.AddToClassList("cd-lc-item__name");
+                if (line.Item != null)
+                {
+                    name.AddToClassList(ItemPresenter.RarityClass(line.Item.Rarity));
+                }
+                cell.Add(name);
+                var count = new Label($"x{line.Amount}");
+                count.AddToClassList("cd-lc-item__count");
+                cell.Add(count);
+                _levelLoot?.Add(cell);
             }
+        }
+
+        private static VisualElement Portrait(Sprite sprite, string className)
+        {
+            var image = new VisualElement { pickingMode = PickingMode.Ignore };
+            image.AddToClassList(className);
+            if (sprite != null)
+            {
+                image.style.backgroundImage = new StyleBackground(sprite);
+            }
+            return image;
         }
 
         private void OnLevelClearContinue()

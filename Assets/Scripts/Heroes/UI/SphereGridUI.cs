@@ -335,6 +335,7 @@ namespace Assets.Scripts.Heroes.UI
             var nodes = new List<SphereGridView.NodeInfo>();
             var edges = new List<(string A, string B)>();
             SphereGridPresenter.BuildViewModel(grid, nodes, edges);
+            AttachIcons(grid, nodes);
 
             _view.SetGraph(nodes, edges);
 
@@ -609,6 +610,66 @@ namespace Assets.Scripts.Heroes.UI
                     $"{before[entry.Type]} → {after[entry.Type]}", 1, StatCatalog.DisplayName(entry.Type));
                 cell.style.width = new Length(100f, LengthUnit.Percent);
                 _detailBody.Add(cell);
+            }
+        }
+
+        /// <summary>
+        /// Puts the taught thing's art on ability, summon and Ultra nodes. Done here rather than in the
+        /// presenter, which stays catalog-free so the editor window can draw a grid with no scene.
+        /// </summary>
+        private static void AttachIcons(SphereGridSO grid, List<SphereGridView.NodeInfo> nodes)
+        {
+            var byKey = new Dictionary<string, SphereGridNode>();
+            foreach (var node in grid.Nodes)
+            {
+                if (node != null && !string.IsNullOrEmpty(node.Key))
+                {
+                    byKey[node.Key] = node;
+                }
+            }
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                if (!byKey.TryGetValue(nodes[i].Key, out var node))
+                {
+                    continue;
+                }
+                var info = nodes[i];
+                info.Icon = NodeIcon(node);
+                nodes[i] = info;
+            }
+        }
+
+        private static Sprite NodeIcon(SphereGridNode node)
+        {
+            switch (node.Kind)
+            {
+                case SphereNodeKind.MagicKnown:
+                {
+                    var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(node.GrantedMagicKey) : null;
+                    return magic != null ? magic.Icon : null;
+                }
+                case SphereNodeKind.MagicAwaken:
+                {
+                    var awakened = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(node.AwakenedMagicKey) : null;
+                    if (awakened != null && awakened.Icon != null)
+                    {
+                        return awakened.Icon;
+                    }
+                    var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(node.GrantedMagicKey) : null;
+                    return magic != null ? magic.Icon : null;
+                }
+                case SphereNodeKind.Summon:
+                {
+                    var summon = string.IsNullOrEmpty(node.GrantedSummonKey) ? null : SummonCatalogSO.Resolve(node.GrantedSummonKey);
+                    return summon != null ? summon.Sprite : null;
+                }
+                case SphereNodeKind.Ultra:
+                {
+                    var ultra = string.IsNullOrEmpty(node.GrantedUltraKey) ? null : UltraCatalogSO.Resolve(node.GrantedUltraKey);
+                    return ultra != null && ultra.FormFrames != null && ultra.FormFrames.Length > 0 ? ultra.FormFrames[0] : null;
+                }
+                default:
+                    return null;
             }
         }
 
