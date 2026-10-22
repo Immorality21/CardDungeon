@@ -211,6 +211,15 @@ Three rules when adding nodes:
   ability (depth 4) and its first stat is a **spur off the trunk hub at depth 4** beside it, the second
   a spur off the stat after the ability (depth 6). Hanging that first stat off the ability instead made
   it cost 155 instead of 65 and pushed the Reedcage from 19% to 89% wipes (BALANCING §5aj).
+- **Cross-branch conditions are `RequiredNodes`, not edges.** A node can name other nodes that must
+  already be active (`SphereGridNode.RequiredNodes`, since 2026-10-22): it still opens only next to
+  something active, and the requirement is a second condition on top. `CanActivate` and `Frontier`
+  enforce it, so the hub, the tutorial and the balance spend all obey it. `UnlockPathTo` is `PathTo`
+  plus everything the steps require, which is what the sandbox and `BeelineThenGreedy` use. The hub
+  shows such a node as **gated** (a gold ring, `sg-node--gated`) with a dashed gold arrow from what it
+  waits for, and says "Requires X first." Use it for an optional upgrade on one branch that needs
+  another branch's summon, or for a gate that forces two branches. `EveryRequiredNode_ExistsAndCanBeOwned`
+  fails on a typo or a requirement loop.
 - **Every node must be reachable.** The grid editor window makes it easy to drop an edgeless node;
   the test catches it, but an unreachable node is content nobody sees.
 

@@ -61,7 +61,7 @@ namespace Assets.Scripts.Sandbox
                     {
                         continue;
                     }
-                    var path = SphereGridOps.PathTo(grid, target);
+                    var path = SphereGridOps.UnlockPathTo(grid, target);
                     if (path.Count == 0)
                     {
                         problems?.Add($"{setup.Hero.DisplayName}: no node '{target}' reachable on {grid.name}.");

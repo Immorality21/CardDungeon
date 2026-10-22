@@ -72,6 +72,30 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Classify_RequiredNodeNotActive_ReadsGatedAndSaysWhatItWaitsFor()
+        {
+            // start forks to a and b; c hangs off a and requires b.
+            var grid = Chain();
+            SphereGridOps.FindNode(grid, "start").Neighbors.Add("c");
+            grid.Nodes.Add(new SphereGridNode
+            {
+                Key = "c", XpCost = 5, DisplayName = "Golem: +50% damage",
+                Neighbors = new List<string> { "a" }, RequiredNodes = new List<string> { "b" }
+            });
+            SphereGridOps.FindNode(grid, "b").DisplayName = "Cairn Golem";
+
+            var owned = new List<string> { "start", "a" };
+
+            Assert.AreEqual(NodeUiState.Gated, SphereGridPresenter.Classify(grid, owned, 999, "c"),
+                "Next to something owned, but no amount of XP opens it.");
+            Assert.AreEqual("Requires Cairn Golem first.",
+                SphereGridPresenter.DescribeMissingRequirements(grid, owned, "c"));
+            Assert.AreEqual(NodeUiState.Available,
+                SphereGridPresenter.Classify(grid, new List<string> { "start", "a", "b" }, 999, "c"));
+            Assert.AreEqual("sg-node--gated", SphereGridPresenter.StateClass(NodeUiState.Gated));
+        }
+
+        [Test]
         public void DescribeCost_SaysWhatEachKindOfNodeCosts()
         {
             var grid = Chain();

@@ -66,7 +66,7 @@ namespace Assets.Scripts.Sandbox
         [Tooltip("Spend this much XP on the grid the way the balance model does: cheapest reachable node first.")]
         [Min(0)] public int SpendXpOnGrid;
 
-        [Tooltip("Node keys to reach. Every node on the shortest path from the start is unlocked, free.")]
+        [Tooltip("Node keys to reach. Every node on the shortest path from the start is unlocked, free, and so is every node one of them requires (and its path).")]
         public List<string> UnlockPathTo = new List<string>();
 
         [Tooltip("Unlock every reachable node, free.")]

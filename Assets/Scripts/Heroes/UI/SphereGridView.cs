@@ -48,6 +48,13 @@ namespace Assets.Scripts.Heroes.UI
             /// exactly as before.
             /// </summary>
             public string Caption;
+
+            /// <summary>
+            /// Keys of the nodes this one requires (<c>SphereGridNode.RequiredNodes</c>), drawn as a
+            /// dashed gold link from each to this node - so a cross-branch condition can be seen, not
+            /// only read in the detail panel. Null or empty draws nothing.
+            /// </summary>
+            public List<string> Requires;
         }
 
         public const float NodeRadius = 22f;
@@ -66,6 +73,10 @@ namespace Assets.Scripts.Heroes.UI
         // Gold rather than --cd-parchment: parchment is a near-black ink in this theme, and a drag
         // line the designer cannot see is worse than no line at all.
         private static readonly Color GhostEdge = new Color(236f / 255f, 190f / 255f, 72f / 255f, 0.7f); // --cd-gold
+        private static readonly Color RequirementMet = new Color(236f / 255f, 190f / 255f, 72f / 255f, 0.9f);  // --cd-gold
+        private static readonly Color RequirementOpen = new Color(236f / 255f, 190f / 255f, 72f / 255f, 0.35f);
+        private const float DashLength = 10f;
+        private const float DashGap = 8f;
 
         private readonly VisualElement _content;
         private readonly Dictionary<string, Button> _buttons = new Dictionary<string, Button>();
@@ -252,7 +263,7 @@ namespace Assets.Scripts.Heroes.UI
 
         private static readonly string[] SphereGridStateClasses =
         {
-            "sg-node--activated", "sg-node--available", "sg-node--adjacent", "sg-node--locked"
+            "sg-node--activated", "sg-node--available", "sg-node--adjacent", "sg-node--locked", "sg-node--gated"
         };
 
         /// <summary>
@@ -660,12 +671,58 @@ namespace Assets.Scripts.Heroes.UI
                 }
             }
 
+            DrawRequirementLinks(painter);
+
             if (_ghostVisible && _nodes.TryGetValue(_ghostFromKey, out var from))
             {
                 painter.strokeColor = GhostEdge;
                 painter.BeginPath();
                 painter.MoveTo(from.Position);
                 painter.LineTo(_ghostTo);
+                painter.Stroke();
+            }
+        }
+
+        /// <summary>
+        /// A dashed line from every required node to the node that needs it, with an arrowhead on
+        /// the gated end: bright once the requirement is bought, faint until then.
+        /// </summary>
+        private void DrawRequirementLinks(Painter2D painter)
+        {
+            foreach (var node in _nodes.Values)
+            {
+                if (node.Requires == null)
+                {
+                    continue;
+                }
+                foreach (var key in node.Requires)
+                {
+                    if (!_nodes.TryGetValue(key, out var required))
+                    {
+                        continue;
+                    }
+                    bool met = _stateClasses.TryGetValue(key, out var state) && state == EdgeStrongStateClass;
+                    painter.strokeColor = met ? RequirementMet : RequirementOpen;
+                    DrawDashed(painter, required.Position, node.Position);
+                    DrawArrowhead(painter, required.Position, node.Position, node.IsStart ? NodeRadius + 5f : NodeRadius);
+                }
+            }
+        }
+
+        private static void DrawDashed(Painter2D painter, Vector2 from, Vector2 to)
+        {
+            var line = to - from;
+            float length = line.magnitude;
+            if (length < 1f)
+            {
+                return;
+            }
+            var direction = line / length;
+            for (float at = 0f; at < length; at += DashLength + DashGap)
+            {
+                painter.BeginPath();
+                painter.MoveTo(from + direction * at);
+                painter.LineTo(from + direction * Mathf.Min(length, at + DashLength));
                 painter.Stroke();
             }
         }

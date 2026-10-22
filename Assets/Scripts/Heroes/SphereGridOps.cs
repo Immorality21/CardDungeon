@@ -251,9 +251,66 @@ namespace Assets.Scripts.Heroes
             return false;
         }
 
+        /// <summary>Whether the node names any <see cref="SphereGridNode.RequiredNodes"/>.</summary>
+        public static bool HasRequirements(SphereGridNode node)
+        {
+            if (node == null || node.RequiredNodes == null)
+            {
+                return false;
+            }
+            foreach (var key in node.RequiredNodes)
+            {
+                if (!string.IsNullOrEmpty(key))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
-        /// Full XP-side activation gate: the node exists, is not already active, is reachable, and
-        /// the bank covers its cost. Deliberately says nothing about <see cref="HasMaterialCost"/> -
+        /// The node's <see cref="SphereGridNode.RequiredNodes"/> that are not active yet, in authored
+        /// order - the UI's "requires X first" line. A key that matches no node counts as missing, so
+        /// a typo keeps the node shut rather than handing it out free. Empty when nothing is missing.
+        /// </summary>
+        public static List<string> MissingRequirements(SphereGridSO grid, ICollection<string> activated, string key)
+        {
+            var missing = new List<string>();
+            var node = FindNode(grid, key);
+            if (!HasRequirements(node))
+            {
+                return missing;
+            }
+            var active = ActiveNodes(grid, activated);
+            foreach (var required in node.RequiredNodes)
+            {
+                if (!string.IsNullOrEmpty(required) && !active.Contains(required) && !missing.Contains(required))
+                {
+                    missing.Add(required);
+                }
+            }
+            return missing;
+        }
+
+        private static bool RequirementsMet(SphereGridNode node, ICollection<string> active)
+        {
+            if (!HasRequirements(node))
+            {
+                return true;
+            }
+            foreach (var required in node.RequiredNodes)
+            {
+                if (!string.IsNullOrEmpty(required) && (active == null || !active.Contains(required)))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Full XP-side activation gate: the node exists, is not already active, is reachable, its
+        /// <see cref="SphereGridNode.RequiredNodes"/> are all active, and the bank covers its cost. Deliberately says nothing about <see cref="HasMaterialCost"/> -
         /// that half is checked where the inventory lives (<c>HeroRoster.TryActivateNode</c>), so
         /// the balance model can keep spending a grid with no inventory to spend from.
         /// </summary>
@@ -272,6 +329,11 @@ namespace Assets.Scripts.Heroes
             }
 
             if (!IsReachable(grid, BuildAdjacency(grid), active, key))
+            {
+                return false;
+            }
+
+            if (!RequirementsMet(node, active))
             {
                 return false;
             }
@@ -784,6 +846,64 @@ namespace Assets.Scripts.Heroes
         }
 
         /// <summary>
+        /// Everything a hero has to buy to own <paramref name="targetKey"/>, in an order that is legal
+        /// to activate: <see cref="PathTo"/>, with each step's <see cref="SphereGridNode.RequiredNodes"/>
+        /// (and their own paths and requirements) walked in front of it. Same as <see cref="PathTo"/>
+        /// on a grid without requirements. Empty when the target is missing, unreachable, or gated on
+        /// a node that can never be owned (a missing key, or a requirement that sits behind the node
+        /// that requires it).
+        /// </summary>
+        public static List<string> UnlockPathTo(SphereGridSO grid, string targetKey)
+        {
+            var order = new List<string>();
+            if (!AppendUnlockPath(grid, targetKey, order, new List<string>()))
+            {
+                order.Clear();
+            }
+            return order;
+        }
+
+        private static bool AppendUnlockPath(SphereGridSO grid, string key, List<string> order, List<string> resolving)
+        {
+            if (order.Contains(key))
+            {
+                return true;
+            }
+            if (resolving.Contains(key))
+            {
+                return false;   // a requirement loop: nothing on it can be bought first
+            }
+            var path = PathTo(grid, key);
+            if (path.Count == 0)
+            {
+                return false;
+            }
+
+            resolving.Add(key);
+            foreach (var step in path)
+            {
+                if (order.Contains(step))
+                {
+                    continue;
+                }
+                var node = FindNode(grid, step);
+                if (HasRequirements(node))
+                {
+                    foreach (var required in node.RequiredNodes)
+                    {
+                        if (!string.IsNullOrEmpty(required) && !AppendUnlockPath(grid, required, order, resolving))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                order.Add(step);
+            }
+            resolving.Remove(key);
+            return true;
+        }
+
+        /// <summary>
         /// The authored price of a node <paramref name="depth"/> edges from the start.
         ///
         /// <para><b>Superlinear on purpose.</b> Before 2026-09-02 the whole spread was 15..80 — 5x
@@ -850,8 +970,9 @@ namespace Assets.Scripts.Heroes
             return total;
         }
 
-        /// <summary>Every reachable, unactivated node — the UI's "can buy next" set and the
-        /// analyzer's probe. Ordered by position in <see cref="SphereGridSO.Nodes"/>.</summary>
+        /// <summary>Every reachable, unactivated node whose required nodes are all active — the UI's
+        /// "can buy next" set and the analyzer's probe. Ordered by position in
+        /// <see cref="SphereGridSO.Nodes"/>.</summary>
         public static List<SphereGridNode> Frontier(SphereGridSO grid, ICollection<string> activated)
         {
             var result = new List<SphereGridNode>();
@@ -876,7 +997,7 @@ namespace Assets.Scripts.Heroes
                     continue;
                 }
 
-                if (IsReachable(grid, adjacency, active, node.Key))
+                if (IsReachable(grid, adjacency, active, node.Key) && RequirementsMet(node, active))
                 {
                     result.Add(node);
                 }
@@ -1011,7 +1132,7 @@ namespace Assets.Scripts.Heroes
         /// </summary>
         public static List<string> BeelineThenGreedy(SphereGridSO grid, string targetKey, int budget, int baseSlots = -1)
         {
-            var path = PathTo(grid, targetKey);
+            var path = UnlockPathTo(grid, targetKey);
             int pathCost = TotalCostOf(grid, path);
             if (path.Count == 0 || pathCost > budget)
             {
@@ -1032,6 +1153,7 @@ namespace Assets.Scripts.Heroes
                 return -1;
             }
             var withGate = new List<string>(activated) { gate.Key };
+            var activeWithGate = ActiveNodes(grid, withGate);
             int best = -1;
             foreach (var key in neighbors)
             {
@@ -1041,6 +1163,7 @@ namespace Assets.Scripts.Heroes
                 }
                 var next = FindNode(grid, key);
                 if (next == null || HasEssenceCost(next) || next.XpCost > budget
+                    || !RequirementsMet(next, activeWithGate)
                     || IsDeadWeight(grid, withGate, next, baseSlots))
                 {
                     continue;

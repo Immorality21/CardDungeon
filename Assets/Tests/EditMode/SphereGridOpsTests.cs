@@ -464,6 +464,100 @@ namespace Tests.EditMode
             Assert.AreEqual(30, spent, "Only the new activation draws on the budget.");
         }
 
+        // --- required nodes (cross-branch conditions) -----------------------------------
+
+        /// <summary>
+        /// start(10) forks to a(20) and b(30); g(5) hangs off a but requires b - a node on the
+        /// other branch, the shape of a cross-branch summon upgrade.
+        /// </summary>
+        private static SphereGridSO Gated()
+        {
+            var g = Node("g", 5);
+            g.RequiredNodes = new List<string> { "b" };
+            return Grid("start",
+                Node("start", 10, "a", "b"),
+                Node("a", 20, "g"),
+                Node("b", 30),
+                g);
+        }
+
+        [Test]
+        public void CanActivate_RequiredNodeNotActive_False()
+        {
+            var grid = Gated();
+
+            Assert.IsTrue(SphereGridOps.IsReachable(grid, new List<string> { "start", "a" }, "g"),
+                "Requirements are a second condition, not an edge: g is still next to a.");
+            Assert.IsFalse(SphereGridOps.CanActivate(grid, new List<string> { "start", "a" }, 999, "g"));
+            Assert.IsTrue(SphereGridOps.CanActivate(grid, new List<string> { "start", "a", "b" }, 5, "g"));
+        }
+
+        [Test]
+        public void Frontier_LeavesOutAGatedNode_UntilItsRequirementIsActive()
+        {
+            var grid = Gated();
+
+            var shut = SphereGridOps.Frontier(grid, new List<string> { "start", "a" }).ConvertAll(n => n.Key);
+            var open = SphereGridOps.Frontier(grid, new List<string> { "start", "a", "b" }).ConvertAll(n => n.Key);
+
+            CollectionAssert.AreEqual(new List<string> { "b" }, shut);
+            CollectionAssert.AreEqual(new List<string> { "g" }, open);
+        }
+
+        [Test]
+        public void MissingRequirements_UnknownKey_CountsAsMissing()
+        {
+            var grid = Gated();
+            SphereGridOps.FindNode(grid, "g").RequiredNodes.Add("no-such-node");
+
+            CollectionAssert.AreEqual(new List<string> { "b", "no-such-node" },
+                SphereGridOps.MissingRequirements(grid, new List<string> { "start", "a" }, "g"));
+            CollectionAssert.AreEqual(new List<string> { "no-such-node" },
+                SphereGridOps.MissingRequirements(grid, new List<string> { "start", "a", "b" }, "g"),
+                "A typo keeps the node shut rather than handing it out free.");
+        }
+
+        [Test]
+        public void TryActivate_GatedNode_RefusesWithoutSpending()
+        {
+            var entry = new HeroSaveData { CurrentXp = 100, ActivatedNodes = new List<string> { "start", "a" } };
+
+            Assert.IsFalse(SphereGridOps.TryActivate(Gated(), entry, "g"));
+            Assert.AreEqual(100, entry.CurrentXp);
+            CollectionAssert.DoesNotContain(entry.ActivatedNodes, "g");
+        }
+
+        [Test]
+        public void GreedySpend_BuysTheGatedNode_OnlyAfterItsRequirement()
+        {
+            var bought = SphereGridOps.GreedySpend(Gated(), null, 65, out int spent);
+
+            CollectionAssert.AreEqual(new List<string> { "start", "a", "b", "g" }, bought,
+                "g is the cheapest node on the grid, but it waits for b.");
+            Assert.AreEqual(65, spent);
+        }
+
+        [Test]
+        public void UnlockPathTo_WalksTheRequirementFirst()
+        {
+            CollectionAssert.AreEqual(new List<string> { "start", "a", "b", "g" },
+                SphereGridOps.UnlockPathTo(Gated(), "g"),
+                "Every step is legal in order: b, which g requires, comes before g.");
+            CollectionAssert.AreEqual(new List<string> { "start", "a" }, SphereGridOps.UnlockPathTo(Gated(), "a"),
+                "Without requirements it is exactly PathTo.");
+        }
+
+        [Test]
+        public void UnlockPathTo_RequirementBehindTheNodeItself_IsEmpty()
+        {
+            // a requires b, but b only opens behind a: neither can ever be bought.
+            var a = Node("a", 20, "b");
+            a.RequiredNodes = new List<string> { "b" };
+            var grid = Grid("start", Node("start", 10, "a"), a, Node("b", 30));
+
+            CollectionAssert.IsEmpty(SphereGridOps.UnlockPathTo(grid, "b"));
+        }
+
         // --- recruit seeding ---------------------------------------------------------
 
         [Test]

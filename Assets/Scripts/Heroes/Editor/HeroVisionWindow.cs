@@ -512,12 +512,13 @@ namespace Assets.Scripts.Heroes.Editor
             return string.IsNullOrWhiteSpace(branch) ? null : branch.Trim().ToLowerInvariant();
         }
 
-        /// <summary>XP to walk the shortest route from the start to this node, free nodes excluded.</summary>
+        /// <summary>XP to walk the shortest route from the start to this node, and to any node it requires,
+        /// free nodes excluded.</summary>
         private static int CostToReach(SphereGridSO grid, string key, out bool materials)
         {
             int cost = 0;
             materials = false;
-            foreach (var step in SphereGridOps.PathTo(grid, key))
+            foreach (var step in SphereGridOps.UnlockPathTo(grid, key))
             {
                 var node = SphereGridOps.FindNode(grid, step);
                 if (node == null || SphereGridOps.IsDefaultUnlocked(node))

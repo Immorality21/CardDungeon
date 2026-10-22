@@ -541,6 +541,7 @@ namespace Assets.Scripts.Heroes.Editor
             AddField(element, "UnlockedByDefault");
             AddField(element, "MaterialCosts");
             AddField(element, "EssenceCost");
+            AddField(element, "RequiredNodes");
             AddField(element, "Position");
             AddField(element, "Gains");
             AddField(element, "ResistType");

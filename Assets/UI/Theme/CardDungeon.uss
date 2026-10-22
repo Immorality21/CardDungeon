@@ -3229,6 +3229,14 @@
     opacity: 0.45;
 }
 
+/* On the frontier but waiting on a node elsewhere (SphereGridNode.RequiredNodes): a gold frame
+   says "a condition, not a price", and the dashed gold link shows what it waits for. */
+.sg-node--gated {
+    background-color: var(--cd-stone-disabled);
+    border-color: var(--cd-gold);
+    opacity: 0.7;
+}
+
 /* The cursor: a thick gold ring and a lift, readable at any zoom (a 1px white ring was not). */
 .sg-node--selected {
     border-color: var(--cd-gold);

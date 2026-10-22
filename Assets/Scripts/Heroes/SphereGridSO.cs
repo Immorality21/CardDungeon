@@ -79,6 +79,14 @@ namespace Assets.Scripts.Heroes
                  "0 (the default) means not an Essence node.")]
         public int EssenceCost;
 
+        [Tooltip("Keys of nodes that must already be active before this one can be bought, wherever " +
+                 "they sit on the grid. Not edges: the node still opens only next to something active, " +
+                 "and this is a second condition on top. Use it for cross-branch nodes (a summon " +
+                 "upgrade on another branch that needs the summon) and for gates that need two " +
+                 "branches walked. A key that matches no node keeps this one shut, and the grid tests " +
+                 "fail on it. Empty (the default) means no condition.")]
+        public List<string> RequiredNodes = new List<string>();
+
         [Tooltip("Authored 2D layout position, consumed only by the grid UI and editor window.")]
         public Vector2 Position;
 

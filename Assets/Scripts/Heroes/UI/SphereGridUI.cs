@@ -462,6 +462,10 @@ namespace Assets.Scripts.Heroes.UI
             {
                 SetReason("Activate a node next to it first.");
             }
+            else if (SphereGridOps.MissingRequirements(grid, activated, node.Key).Count > 0)
+            {
+                SetReason(SphereGridPresenter.DescribeMissingRequirements(grid, activated, node.Key, Title));
+            }
             else if (save.CurrentXp < node.XpCost)
             {
                 SetReason($"Need {node.XpCost} XP — {save.CurrentXp} banked.");

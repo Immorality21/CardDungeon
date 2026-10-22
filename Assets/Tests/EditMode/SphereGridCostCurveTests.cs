@@ -119,6 +119,39 @@ namespace Tests.EditMode
         }
 
         /// <summary>
+        /// A required node is a hand-typed key, so a typo, a node requiring itself, or a requirement
+        /// that only opens behind the node that needs it would shut that node - and everything past
+        /// it - for good, without anything else noticing.
+        /// </summary>
+        [Test]
+        public void EveryRequiredNode_ExistsAndCanBeOwned()
+        {
+            var broken = new List<string>();
+            foreach (var grid in LoadEveryGrid())
+            {
+                foreach (var node in grid.Nodes)
+                {
+                    if (!SphereGridOps.HasRequirements(node))
+                    {
+                        continue;
+                    }
+                    foreach (var key in node.RequiredNodes)
+                    {
+                        if (!string.IsNullOrEmpty(key) && (key == node.Key || SphereGridOps.FindNode(grid, key) == null))
+                        {
+                            broken.Add($"{grid.name}/{node.Key} requires '{key}'");
+                        }
+                    }
+                    if (SphereGridOps.UnlockPathTo(grid, node.Key).Count == 0)
+                    {
+                        broken.Add($"{grid.name}/{node.Key} can never be bought (a requirement loop)");
+                    }
+                }
+            }
+            CollectionAssert.IsEmpty(broken, string.Join("; ", broken));
+        }
+
+        /// <summary>
         /// The signatures a hero is meant to arrive holding. <c>UnlockedByDefault</c> is a bool in
         /// hand-edited YAML, so this pins both halves of the wiring at once: that the flag survived
         /// serialization, and that the spell behind it actually resolves off an <i>empty</i> save —

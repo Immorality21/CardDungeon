@@ -12,7 +12,8 @@ namespace Assets.Scripts.Heroes.UI
         Activated,  // bought
         Available,  // reachable and affordable — the "buy me" state
         Adjacent,   // reachable but the bank does not cover it
-        Locked      // no activated neighbour yet
+        Locked,     // no activated neighbour yet
+        Gated       // next to something active, but a node it requires (SphereGridNode.RequiredNodes) is not
     }
 
     /// <summary>
@@ -44,6 +45,11 @@ namespace Assets.Scripts.Heroes.UI
             if (!SphereGridOps.IsReachable(grid, activated, key))
             {
                 return NodeUiState.Locked;
+            }
+            // Its own state rather than Locked: it sits on the frontier, and no amount of XP opens it.
+            if (SphereGridOps.MissingRequirements(grid, activated, key).Count > 0)
+            {
+                return NodeUiState.Gated;
             }
 
             var node = SphereGridOps.FindNode(grid, key);
@@ -158,6 +164,8 @@ namespace Assets.Scripts.Heroes.UI
                     return "sg-node--available";
                 case NodeUiState.Adjacent:
                     return "sg-node--adjacent";
+                case NodeUiState.Gated:
+                    return "sg-node--gated";
                 default:
                     return "sg-node--locked";
             }
@@ -404,7 +412,8 @@ namespace Assets.Scripts.Heroes.UI
                     Position = node.Position,
                     KindClass = KindClass(node),
                     Glyph = Glyph(node, node.Key == start),
-                    IsStart = node.Key == start
+                    IsStart = node.Key == start,
+                    Requires = RequiredKeys(node)
                 });
             }
 
@@ -418,6 +427,48 @@ namespace Assets.Scripts.Heroes.UI
                     }
                 }
             }
+        }
+
+        /// <summary>The node's required keys, blanks and repeats dropped; null when it has none.</summary>
+        private static List<string> RequiredKeys(SphereGridNode node)
+        {
+            if (!SphereGridOps.HasRequirements(node))
+            {
+                return null;
+            }
+            var keys = new List<string>();
+            foreach (var key in node.RequiredNodes)
+            {
+                if (!string.IsNullOrEmpty(key) && !keys.Contains(key))
+                {
+                    keys.Add(key);
+                }
+            }
+            return keys;
+        }
+
+        /// <summary>
+        /// Why a gated node is shut, naming what it waits for: "Requires Cairn Golem first." or, for
+        /// several, "Requires Cairn Golem and Boar first." Empty when nothing is missing.
+        /// </summary>
+        public static string DescribeMissingRequirements(SphereGridSO grid, ICollection<string> activated, string key,
+            Func<SphereGridNode, string> nameOf = null)
+        {
+            var missing = SphereGridOps.MissingRequirements(grid, activated, key);
+            if (missing.Count == 0)
+            {
+                return "";
+            }
+            var names = new List<string>();
+            foreach (var required in missing)
+            {
+                var node = SphereGridOps.FindNode(grid, required);
+                names.Add(node == null ? required : (nameOf != null ? nameOf(node) : NodeName(node)));
+            }
+            string list = names.Count == 1
+                ? names[0]
+                : string.Join(", ", names.GetRange(0, names.Count - 1)) + " and " + names[names.Count - 1];
+            return $"Requires {list} first.";
         }
 
         /// <summary>The kind as a player-facing word.</summary>
