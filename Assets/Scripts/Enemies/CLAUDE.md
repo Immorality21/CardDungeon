@@ -172,6 +172,10 @@ roll-injected so combat, `EncounterSimulator` and the tests decide identically):
    swallowing it would make the telegraph a lie.
 2. An entry is eligible only if every condition holds, its `ChanceGate` roll passes, **and the action
    has somewhere to land** — a Heal with nobody wounded must not win a turn and then do nothing.
+   "Wounded" means under **`EnemyActionPlanner.WoundedBelow` (80%)**, for Heal and for `AllyWounded`
+   alike, so a healer swings at a party that only scratched its side. **Gate every heal**: an ungated
+   Heal above the attack tier wins every turn someone is hurt, which made the Bog Shaman heal itself
+   every turn and never attack (playtest 2026-10-22; its heals are now 60% / 50%).
 3. The highest eligible `Priority` takes the turn outright.
 4. `Weight` picks between entries tied at that priority. Nothing eligible means a plain swing, so a
    half-authored behaviour never wastes a turn.

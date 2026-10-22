@@ -20,8 +20,20 @@ namespace Assets.Scripts.Tutorial
         /// <summary>The hall stands; the starting hero has banked XP and bought nothing with it.</summary>
         SpendXp = 3,
 
-        /// <summary>The loop is closed. The town is unlocked and the road is pointed at once.</summary>
+        /// <summary>
+        /// The first loop is closed: the town is unlocked and the road points at the gear floor (the
+        /// run's second). Going down no longer finishes the tutorial - the gear step is still ahead.
+        /// </summary>
         TakeTheRoad = 4,
+
+        /// <summary>
+        /// Home from the gear floor with a piece of equipment in the bag and nobody wearing anything:
+        /// the town is locked to the Storehouse, and its screen to equipping it.
+        /// </summary>
+        EquipGear = 5,
+
+        /// <summary>Something is equipped. The town is open; going down finishes the tutorial.</summary>
+        GoOn = 6,
     }
 
     /// <summary>Which screen the tutorial is being asked about — the same step says different things on each.</summary>
@@ -34,6 +46,9 @@ namespace Assets.Scripts.Tutorial
         GuideLot = 2,
 
         Grid = 3,
+
+        /// <summary>The Storehouse's inventory screen.</summary>
+        Inventory = 4,
     }
 
     /// <summary>
@@ -53,5 +68,10 @@ namespace Assets.Scripts.Tutorial
         NodeLearned = 8,
         TakeTheRoad = 9,
         FirstDeath = 10, // the death screen, the first time the party falls (not a step: any save sees it)
+        OpenStorehouseInTown = 11,
+        EnterStorehouseOnPanel = 12,
+        EquipGear = 13,
+        GearEquipped = 14,
+        GoOn = 15,
     }
 }

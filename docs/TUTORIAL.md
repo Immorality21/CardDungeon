@@ -57,6 +57,17 @@ the captive assumed present for every kill, integer division per kill.
 
 ---
 
+### The gear step (2026-10-22)
+
+After the grid step the road leads to floor 2 (`TakeTheRoad`) and going down **no longer finishes the
+tutorial**. Clearing floor 2 (`TutorialSO.GearLevelIndex`) pays `TutorialSO.GearReward` (the Simple
+Sword), awarded by `TutorialRewards.OnLevelCleared` (called from the level clear) only while the tutorial runs and only on that
+run and level, so revisits never pay it again. Home, `EquipGear` locks the town to the Storehouse
+(`GearBuildingKey`), its panel to Enter, and the inventory's Back (and Escape, via
+`InventoryHubUI.CanClose`) until any hero wears anything. Then `GoOn` opens the town, points at the
+inventory's Back and the road, and going down finishes the tutorial. Skipped (straight to `GoOn`) when
+the bag holds no unworn equipment. Guarded by `TutorialContentTests.TheGearFloor_PaysEquipmentTheStorehouseCanShow`.
+
 ## How it works — the rules worth knowing before changing it
 
 - **Only the two ends are stored** (`MetaProgressSaveData.TutorialStarted` / `TutorialFinished`).

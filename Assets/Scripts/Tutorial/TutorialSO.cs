@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
+using Assets.Scripts.Items;
 using UnityEngine;
 
 namespace Assets.Scripts.Tutorial
@@ -32,6 +33,17 @@ namespace Assets.Scripts.Tutorial
 
         [Tooltip("BuildingSO.Key of the lot the tutorial walks the player to: build it, enter it, spend XP.")]
         public string GuideBuildingKey = "sphere-hall";
+
+        [Tooltip("Equipment awarded for clearing FirstRun's level GearLevelIndex while the tutorial runs - " +
+                 "the piece the gear step has the player equip. Awarded only while the tutorial is " +
+                 "active, so a revisit of the run never pays it again.")]
+        public ItemSO GearReward;
+
+        [Tooltip("Which level of FirstRun pays GearReward on clear (0-based: 1 is the second floor).")]
+        [Min(0)] public int GearLevelIndex = 1;
+
+        [Tooltip("BuildingSO.Key of the lot the gear step walks the player to: the inventory's building.")]
+        public string GearBuildingKey = "storehouse";
 
         public List<TutorialLine> Lines = new List<TutorialLine>();
 

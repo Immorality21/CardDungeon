@@ -276,6 +276,8 @@ namespace Assets.Scripts.Hub
             _forge.OnClosed += ShowTown;
             _bestiary.OnClosed += ShowTown;
             _inventory.OnClosed += ShowTown;
+            _inventory.CanClose = () => TutorialOps.AllowsLeaving(_tutorialStep);
+            _inventory.Equipped += RefreshTutorial;
 
             SetUpKeyboardNavigation();
 
@@ -491,7 +493,7 @@ namespace Assets.Scripts.Hub
             }
 
             SetFeedback(string.Empty);
-            if (!TutorialOps.AllowsLot(_tutorialStep, building.SaveKey, GuideKey()))
+            if (!TutorialOps.AllowsLot(_tutorialStep, building.SaveKey, GuidedLot()))
             {
                 return;
             }
@@ -1428,8 +1430,8 @@ namespace Assets.Scripts.Hub
                 ? _runSaveData.ActiveDungeonSeed
                 : (int?)null;
 
-            // The tutorial's last step is "take the road"; going down is how it is finished.
-            if (_tutorialStep == TutorialStep.TakeTheRoad && MetaProgressManager.HasInstance)
+            // The tutorial's last step is "go on" (after the gear step); going down is how it is finished.
+            if (TutorialOps.FinishesOnDescent(_tutorialStep) && MetaProgressManager.HasInstance)
             {
                 MetaProgressManager.Instance.FinishTutorial();
             }
@@ -1452,6 +1454,13 @@ namespace Assets.Scripts.Hub
         private string GuideKey()
         {
             return _tutorial != null ? _tutorial.GuideBuildingKey : null;
+        }
+
+        /// <summary>The lot the current step walks the player to: the hall, or the Storehouse for the gear step.</summary>
+        private string GuidedLot()
+        {
+            return TutorialOps.GuidedLotKey(_tutorialStep, GuideKey(),
+                _tutorial != null ? _tutorial.GearBuildingKey : null);
         }
 
         /// <summary>The hero the tutorial walks through the grid: the first starting hero the save owns.</summary>
@@ -1509,6 +1518,15 @@ namespace Assets.Scripts.Hub
                 progress.HeroCanAffordNode = TutorialOps.GuidedNodeKey(
                     hero.SphereGrid, save.ActivatedNodes, save.CurrentXp) != null;
             }
+
+            progress.GearFloorCleared = TutorialOps.LevelCleared(
+                RunKeyOf(_tutorial.FirstRun), hub.CompletedRunKeys,
+                _runSaveData.RunKey, _runSaveData.CurrentLevelIndex, _tutorial.GearLevelIndex);
+            // Instance, not HasInstance (learning 1 in docs/TUTORIAL.md): the hub places no inventory.
+            var inventory = InventoryManager.Instance;
+            int bagGear = inventory.GetBagEquipment().Count;
+            progress.HasGearToEquip = bagGear > 0;
+            progress.AnyGearEquipped = inventory.GetAllEquipment().Count > bagGear;
             return progress;
         }
 
@@ -1560,7 +1578,7 @@ namespace Assets.Scripts.Hub
         {
             _tutorialStep = TutorialOps.CurrentStep(ReadTutorialProgress());
             var step = _tutorialStep;
-            var guideKey = GuideKey();
+            var guideKey = GuidedLot();
 
             if (_town != null && _hub != null)
             {
@@ -1582,11 +1600,16 @@ namespace Assets.Scripts.Hub
             bool onGuideLot = _selectedLot != null && _selectedLot.SaveKey == guideKey;
             SetEnabled(_lotCloseButton, !onGuideLot || TutorialOps.AllowsLeaving(step));
             SetClass(_lotActionButton, HubView.TutorialTargetClass, onGuideLot && step == TutorialStep.BuildHall);
-            SetClass(_lotEnterButton, HubView.TutorialTargetClass, onGuideLot && step == TutorialStep.SpendXp);
+            SetClass(_lotEnterButton, HubView.TutorialTargetClass,
+                onGuideLot && (step == TutorialStep.SpendXp || step == TutorialStep.EquipGear));
 
             // Once the node is bought the only way on is back to town, so the grid's Back is what gets
             // pointed at. Keyed on the step alone: the class only shows while the grid does.
             SetClass(_root.Q<Button>("grid-close"), HubView.TutorialTargetClass, step == TutorialStep.TakeTheRoad);
+            // The gear step's screen: shut until something is worn, then its Back is the way on.
+            var inventoryClose = _root.Q<Button>("inventory-close");
+            SetEnabled(inventoryClose, step != TutorialStep.EquipGear);
+            SetClass(inventoryClose, HubView.TutorialTargetClass, step == TutorialStep.GoOn);
 
             RefreshTutorialBanner();
         }
@@ -1604,7 +1627,7 @@ namespace Assets.Scripts.Hub
                 _sphereGrid != null && _sphereGrid.IsGuidedNodeSelected);
             // The grid window leaves only ~90px above it, and the full-size banner ran over its top
             // edge (playtest 2 finding 7): over the grid the banner is set smaller and tighter.
-            bool compact = screen == TutorialScreen.Grid;
+            bool compact = screen == TutorialScreen.Grid || screen == TutorialScreen.Inventory;
             if (_tutorialBanner.ClassListContains(TutorialCompactClass) != compact)
             {
                 SetClass(_tutorialBanner, TutorialCompactClass, compact);
@@ -1627,9 +1650,13 @@ namespace Assets.Scripts.Hub
             {
                 return TutorialScreen.Grid;
             }
+            if (IsShown(_inventoryView))
+            {
+                return TutorialScreen.Inventory;
+            }
             if (IsShown(_lotView))
             {
-                return _selectedLot != null && _selectedLot.SaveKey == GuideKey()
+                return _selectedLot != null && _selectedLot.SaveKey == GuidedLot()
                     ? TutorialScreen.GuideLot
                     : TutorialScreen.Other;
             }

@@ -149,6 +149,22 @@ namespace Tests.EditMode
                 $"{partySize}) and that buys no node - the grid step of the tutorial would be skipped.");
         }
 
+        /// <summary>The gear step promises a piece to equip; with none it is skipped silently.</summary>
+        [Test]
+        public void TheGearFloor_PaysEquipmentTheStorehouseCanShow()
+        {
+            var tutorial = Tutorial();
+            Assert.IsNotNull(tutorial.GearReward, "The tutorial names no gear reward - the equip step would be skipped.");
+            Assert.AreEqual(ItemCategory.Equipment, tutorial.GearReward.Category, "The gear reward must be equipment.");
+            Assert.Less(tutorial.GearLevelIndex, tutorial.FirstRun.Levels.Count,
+                "GearLevelIndex is past the tutorial run's last level - nothing would pay the reward.");
+
+            var catalog = UnityEngine.Resources.Load<ItemCatalogSO>(ItemCatalogSO.ResourcePath);
+            Assert.IsNotNull(catalog, "No ItemCatalog in Resources.");
+            Assert.IsTrue(catalog.Items.Contains(tutorial.GearReward),
+                "The gear reward is not in the ItemCatalog, so the hub cannot resolve it.");
+        }
+
         [Test]
         public void EveryCue_HasAuthoredWords()
         {

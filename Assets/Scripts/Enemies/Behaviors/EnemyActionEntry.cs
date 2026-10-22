@@ -59,7 +59,7 @@ namespace Assets.Scripts.Enemies.Behaviors
         /// <summary>This enemy's health fraction is above <see cref="EnemyActionCondition.Value"/>.</summary>
         SelfHealthAbove,
 
-        /// <summary>This enemy or one of its allies is below full health.</summary>
+        /// <summary>This enemy or one of its allies is below <see cref="EnemyActionPlanner.WoundedBelow"/> (80%) health.</summary>
         AllyWounded,
 
         /// <summary>Some living hero does not yet carry a negative buff on <see cref="EnemyActionCondition.Stat"/>.</summary>

@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Tutorial.TutorialSO
   FirstRun: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
   GuideBuildingKey: sphere-hall
+  GearReward: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
+  GearLevelIndex: 1
+  GearBuildingKey: storehouse
   Lines:
   - Cue: 1
     Text: The dungeon is still waiting. Take The Story to go back down.
@@ -35,3 +38,13 @@ MonoBehaviour:
     Text: The town is yours now. When you are ready, take The Story to continue The Threshold.
   - Cue: 10
     Text: Every party falls, and falling is how you get stronger. What you banked is safe - spend it in town, then go back down.
+  - Cue: 11
+    Text: The floor paid out a sword. Gear is vital to survival down there - open the Storehouse and put it on.
+  - Cue: 12
+    Text: Enter the Storehouse. Everything you bring home is kept here.
+  - Cue: 13
+    Text: Pick the Main Hand slot, then the sword, and equip it. A party without gear does not last long.
+  - Cue: 14
+    Text: Equipped. Check here after every run - better gear turns up the deeper you go. Back to town when ready.
+  - Cue: 15
+    Text: Your party is armed. When you are ready, take The Story to continue The Threshold.

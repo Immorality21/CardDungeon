@@ -36,6 +36,7 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 11400000, guid: 417d412fa1fe407cb763056439898d1d, type: 2}
     AllowRoomEvents: 1
+    IntendedHard: 1
   - LevelTemplate: {fileID: 11400000, guid: e8db09f0f92a0cc47b675e7d77753a37, type: 2}
     LevelName: The Drowned Choir
     ManualLayout: {fileID: 0}

@@ -2,6 +2,11 @@
 
 `DungeonManager` orchestrates a dungeon level's lifecycle and is the chokepoint for committing/discarding progress. `DungeonSaveManager` handles the per-dungeon save. Save-file formats are catalogued in `Assets/Scripts/IO/CLAUDE.md`.
 
+> **Keep feature rules out of `DungeonManager`** (owner, 2026-10-22). It is ~1,700 lines and only
+> orchestrates: a feature that needs a hook on level clear or level start gets its own class in its
+> own folder and one call from here (`TutorialRewards.OnLevelCleared` is the example). When you next
+> refactor it, look for more of these to move out; remove this note once it reads as wiring only.
+
 ## The Campaign (which runs exist, and in what order)
 
 - **CampaignSO** (`Assets/Resources/Campaign.asset`, Resources-loaded like `ItemCatalogSO`) is the story line: a **directed graph of runs**, not a list. Each `CampaignNodeEntry` holds a `RunDefinitionSO`, the runs that must be cleared before it opens (`Requires` + `UnlockMode` All/Any), `Secret` (hidden on the map until unlocked), `Optional` (drawn as side content), and a `MapPosition`. Branching is the point: clearing one run can open two, one rejoining the main line (`UnlockMode.Any` on the rejoin node) and one dead-ending as optional/secret content.

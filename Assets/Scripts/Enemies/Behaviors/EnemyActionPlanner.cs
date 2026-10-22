@@ -568,8 +568,17 @@ namespace Assets.Scripts.Enemies.Behaviors
         }
 
         /// <summary>
-        /// The most wounded of this enemy and its allies, or null when every one of them is at full
-        /// health. Includes self, matching the old <c>HealerBehavior</c>, which could mend itself.
+        /// Health fraction an enemy-side unit must be under to count as wounded - what gates every
+        /// Heal action and the <see cref="EnemyConditionKind.AllyWounded"/> condition. Below 1 so a
+        /// healer swings at a party that only scratched its side, rather than spending the turn
+        /// topping up a point or two (playtest, 2026-10-22: the Bog Shaman never attacked).
+        /// </summary>
+        public const float WoundedBelow = 0.8f;
+
+        /// <summary>
+        /// The most wounded of this enemy and its allies, or null when every one of them is above
+        /// <see cref="WoundedBelow"/>. Includes self, matching the old <c>HealerBehavior</c>, which
+        /// could mend itself.
         /// </summary>
         public static ICombatUnit MostWoundedAlly(ICombatUnit self, EnemyCombatContext context)
         {
@@ -582,7 +591,7 @@ namespace Assets.Scripts.Enemies.Behaviors
             {
                 candidates.Add(self);
             }
-            return EnemyTargeting.MostWounded(candidates);
+            return EnemyTargeting.MostWounded(candidates, WoundedBelow);
         }
 
         /// <summary>

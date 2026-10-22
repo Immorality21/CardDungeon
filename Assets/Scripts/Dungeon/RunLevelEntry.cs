@@ -58,6 +58,12 @@ namespace Assets.Scripts.Dungeon
                  "rooms keep their PossibleEvents; this only stops them being placed here.")]
         public bool AllowRoomEvents = true;
 
+        [Tooltip("A floor the owner wants harder than one health bar comfortably covers. The balance " +
+                 "analyzer still measures it and still reports the overrun, but as an Info rather than " +
+                 "a failure, so a deliberate wall does not fail the regression suite. Every other check " +
+                 "on the floor still applies.")]
+        public bool IntendedHard;
+
         /// <summary>
         /// The boss's escort, flattened to one <see cref="EnemySO"/> per body, skipping null and
         /// non-positive rows. Empty when this level has no boss - an add without a boss is an

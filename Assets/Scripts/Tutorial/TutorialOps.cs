@@ -29,6 +29,15 @@ namespace Assets.Scripts.Tutorial
 
         /// <summary>The starting hero can buy a node right now — <see cref="TutorialOps.GuidedNodeKey"/> found one.</summary>
         public bool HeroCanAffordNode;
+
+        /// <summary>The gear floor (<c>TutorialSO.GearLevelIndex</c>) has been cleared at least once.</summary>
+        public bool GearFloorCleared;
+
+        /// <summary>Some hero wears at least one piece of equipment.</summary>
+        public bool AnyGearEquipped;
+
+        /// <summary>The bag holds a piece of equipment nobody wears — something to equip.</summary>
+        public bool HasGearToEquip;
     }
 
     /// <summary>
@@ -66,7 +75,21 @@ namespace Assets.Scripts.Tutorial
             {
                 return TutorialStep.SpendXp;
             }
-            return TutorialStep.TakeTheRoad;
+            if (!p.GearFloorCleared)
+            {
+                return TutorialStep.TakeTheRoad;
+            }
+            if (!p.AnyGearEquipped && p.HasGearToEquip)
+            {
+                return TutorialStep.EquipGear;
+            }
+            return TutorialStep.GoOn;
+        }
+
+        /// <summary>Whether entering the dungeon at <paramref name="step"/> finishes the tutorial.</summary>
+        public static bool FinishesOnDescent(TutorialStep step)
+        {
+            return step == TutorialStep.GoOn;
         }
 
         /// <summary>
@@ -80,6 +103,20 @@ namespace Assets.Scripts.Tutorial
             IReadOnlyList<string> completedRunKeys,
             string activeRunKey,
             int activeLevelIndex)
+        {
+            return LevelCleared(tutorialRunKey, completedRunKeys, activeRunKey, activeLevelIndex, 0);
+        }
+
+        /// <summary>
+        /// <see cref="FirstFloorCleared"/> for any level of the tutorial run: the run was finished, or
+        /// the run save has moved past <paramref name="levelIndex"/>.
+        /// </summary>
+        public static bool LevelCleared(
+            string tutorialRunKey,
+            IReadOnlyList<string> completedRunKeys,
+            string activeRunKey,
+            int activeLevelIndex,
+            int levelIndex)
         {
             if (string.IsNullOrEmpty(tutorialRunKey))
             {
@@ -95,7 +132,22 @@ namespace Assets.Scripts.Tutorial
                     }
                 }
             }
-            return activeRunKey == tutorialRunKey && activeLevelIndex >= 1;
+            return activeRunKey == tutorialRunKey && activeLevelIndex > levelIndex;
+        }
+
+        /// <summary>
+        /// Whether a step locks the town to one building (<see cref="GuidedLotKey"/>): the hall's two
+        /// steps and the Storehouse's.
+        /// </summary>
+        private static bool GuidesBuilding(TutorialStep step)
+        {
+            return step == TutorialStep.BuildHall || step == TutorialStep.SpendXp || step == TutorialStep.EquipGear;
+        }
+
+        /// <summary>The lot the step walks the player to: the Storehouse for the gear step, else the hall.</summary>
+        public static string GuidedLotKey(TutorialStep step, string hallKey, string gearKey)
+        {
+            return step == TutorialStep.EquipGear ? gearKey : hallKey;
         }
 
         /// <summary>
@@ -104,9 +156,7 @@ namespace Assets.Scripts.Tutorial
         /// </summary>
         public static bool LocksTown(TutorialStep step)
         {
-            return step == TutorialStep.ClearFirstFloor
-                || step == TutorialStep.BuildHall
-                || step == TutorialStep.SpendXp;
+            return step == TutorialStep.ClearFirstFloor || GuidesBuilding(step);
         }
 
         /// <summary>Whether a lot can be clicked. While the town is locked, only the guide building can.</summary>
@@ -116,7 +166,7 @@ namespace Assets.Scripts.Tutorial
             {
                 return false;
             }
-            if (step == TutorialStep.BuildHall || step == TutorialStep.SpendXp)
+            if (GuidesBuilding(step))
             {
                 return !string.IsNullOrEmpty(lotKey) && lotKey == guideKey;
             }
@@ -126,26 +176,27 @@ namespace Assets.Scripts.Tutorial
         /// <summary>Whether a lot carries the tutorial's pointer.</summary>
         public static bool GuidesLot(TutorialStep step, string lotKey, string guideKey)
         {
-            return (step == TutorialStep.BuildHall || step == TutorialStep.SpendXp)
+            return GuidesBuilding(step)
                 && !string.IsNullOrEmpty(lotKey) && lotKey == guideKey;
         }
 
         /// <summary>The road is shut exactly while the tutorial is pointing at something else.</summary>
         public static bool AllowsRoad(TutorialStep step)
         {
-            return step != TutorialStep.BuildHall && step != TutorialStep.SpendXp;
+            return !GuidesBuilding(step);
         }
 
         /// <summary>Whether the road carries the pointer: to go back down, or once the loop is closed.</summary>
         public static bool GuidesRoad(TutorialStep step)
         {
-            return step == TutorialStep.ClearFirstFloor || step == TutorialStep.TakeTheRoad;
+            return step == TutorialStep.ClearFirstFloor || step == TutorialStep.TakeTheRoad
+                || step == TutorialStep.GoOn;
         }
 
-        /// <summary>Whether the guided screens (the hall's panel, the grid) may be backed out of.</summary>
+        /// <summary>Whether the guided screens (the guided lot's panel, the grid, the inventory) may be backed out of.</summary>
         public static bool AllowsLeaving(TutorialStep step)
         {
-            return step != TutorialStep.BuildHall && step != TutorialStep.SpendXp;
+            return !GuidesBuilding(step);
         }
 
         /// <summary>
@@ -186,6 +237,26 @@ namespace Assets.Scripts.Tutorial
                         return TutorialCue.TakeTheRoad;
                     }
                     return screen == TutorialScreen.Grid ? TutorialCue.NodeLearned : TutorialCue.None;
+
+                case TutorialStep.EquipGear:
+                    switch (screen)
+                    {
+                        case TutorialScreen.Town:
+                            return TutorialCue.OpenStorehouseInTown;
+                        case TutorialScreen.GuideLot:
+                            return TutorialCue.EnterStorehouseOnPanel;
+                        case TutorialScreen.Inventory:
+                            return TutorialCue.EquipGear;
+                        default:
+                            return TutorialCue.None;
+                    }
+
+                case TutorialStep.GoOn:
+                    if (screen == TutorialScreen.Town)
+                    {
+                        return TutorialCue.GoOn;
+                    }
+                    return screen == TutorialScreen.Inventory ? TutorialCue.GearEquipped : TutorialCue.None;
 
                 default:
                     return TutorialCue.None;

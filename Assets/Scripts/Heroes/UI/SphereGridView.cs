@@ -89,6 +89,7 @@ namespace Assets.Scripts.Heroes.UI
         private readonly List<(string A, string B)> _edges = new List<(string A, string B)>();
 
         private string _selectedKey;
+        private string _hoveredKey;
         private string _ghostFromKey;
         private Vector2 _ghostTo;
         private bool _ghostVisible;
@@ -174,6 +175,7 @@ namespace Assets.Scripts.Heroes.UI
             _stateClasses.Clear();
             _edges.Clear();
             _selectedKey = null;
+            _hoveredKey = null;
             _ghostVisible = false;
 
             if (edges != null)
@@ -248,6 +250,19 @@ namespace Assets.Scripts.Heroes.UI
             {
                 NodePointerDown?.Invoke(captured, evt);
             });
+            button.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                _hoveredKey = captured;
+                _content.MarkDirtyRepaint();
+            });
+            button.RegisterCallback<PointerLeaveEvent>(_ =>
+            {
+                if (_hoveredKey == captured)
+                {
+                    _hoveredKey = null;
+                    _content.MarkDirtyRepaint();
+                }
+            });
 
             return button;
         }
@@ -317,6 +332,8 @@ namespace Assets.Scripts.Heroes.UI
             {
                 current.AddToClassList("sg-node--selected");
             }
+            // Requirement links follow the focused node, so a new selection redraws them.
+            _content.MarkDirtyRepaint();
         }
 
         /// <summary>Adds/removes an arbitrary class on one node (editor: connect-mode source).</summary>
@@ -684,8 +701,10 @@ namespace Assets.Scripts.Heroes.UI
         }
 
         /// <summary>
-        /// A dashed line from every required node to the node that needs it, with an arrowhead on
-        /// the gated end: bright once the requirement is bought, faint until then.
+        /// A dashed line from a required node to the node that needs it, with an arrowhead on the
+        /// gated end: bright once the requirement is bought, faint until then. Drawn only for the node
+        /// under the pointer or the selected one (either end of the link), because a cross-branch
+        /// requirement drawn all the time is a long line across the whole grid.
         /// </summary>
         private void DrawRequirementLinks(Painter2D painter)
         {
@@ -697,7 +716,7 @@ namespace Assets.Scripts.Heroes.UI
                 }
                 foreach (var key in node.Requires)
                 {
-                    if (!_nodes.TryGetValue(key, out var required))
+                    if (!_nodes.TryGetValue(key, out var required) || !IsFocused(node.Key, key))
                     {
                         continue;
                     }
@@ -707,6 +726,12 @@ namespace Assets.Scripts.Heroes.UI
                     DrawArrowhead(painter, required.Position, node.Position, node.IsStart ? NodeRadius + 5f : NodeRadius);
                 }
             }
+        }
+
+        private bool IsFocused(string gatedKey, string requiredKey)
+        {
+            return gatedKey == _selectedKey || gatedKey == _hoveredKey
+                || requiredKey == _selectedKey || requiredKey == _hoveredKey;
         }
 
         private static void DrawDashed(Painter2D painter, Vector2 from, Vector2 to)

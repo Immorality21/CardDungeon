@@ -91,6 +91,15 @@ namespace Assets.Scripts.Items.UI
 
         public event Action OnClosed;
 
+        /// <summary>Fires after a piece of equipment is put on - the tutorial's gear step listens.</summary>
+        public event Action Equipped;
+
+        /// <summary>
+        /// Asked before closing, by Back and by Escape alike. Null means always. The tutorial's gear
+        /// step keeps the screen up until something is worn.
+        /// </summary>
+        public Func<bool> CanClose { get; set; }
+
         public InventoryHubUI(VisualElement root, PartyRosterSO roster)
         {
             _root = root;
@@ -184,6 +193,10 @@ namespace Assets.Scripts.Items.UI
 
         public void Hide()
         {
+            if (CanClose != null && !CanClose())
+            {
+                return;
+            }
             _isShown = false;
             _root.style.display = DisplayStyle.None;
             _root.focusable = false; // stop being a focus/nav target once closed
@@ -689,6 +702,7 @@ namespace Assets.Scripts.Items.UI
             _focus = Focus.Slots;
             RefreshHeroes();
             RefreshBody();
+            Equipped?.Invoke();
         }
 
         private void Unequip(SlotType slot)

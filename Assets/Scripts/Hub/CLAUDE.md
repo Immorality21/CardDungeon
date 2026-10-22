@@ -6,6 +6,12 @@ The town between runs, and every service that hangs off it. `HubManager` drives 
 (`Items/UI/InventoryHubUI`) and the Sphere Grid (`Heroes/UI/SphereGridUI`) live with their subsystems
 but are constructed and driven from here.
 
+> **Pending split - do it when you next refactor or add to `HubManager`** (owner, 2026-10-22).
+> `HubManager.cs` is ~1,800 lines. Its "THE TUTORIAL" region (~200 lines: `ReadTutorialProgress`,
+> `RefreshTutorial`, the banner, the guided grid) should become its own controller in
+> `Assets/Scripts/Tutorial/`, with `HubManager` only calling it on state changes; the services
+> region is the next candidate. Own change, play-tested; remove this note when done.
+
 ## Three scenes, and the loop between them
 
 ```

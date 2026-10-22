@@ -19,8 +19,11 @@ namespace Assets.Scripts.Enemies.Behaviors
             return ThreatTable.Pick(units, threat, roll);
         }
 
-        /// <summary>Living unit with the lowest health fraction, or null if all are at full health.</summary>
-        public static ICombatUnit MostWounded(List<ICombatUnit> units)
+        /// <summary>
+        /// Living unit with the lowest health fraction below <paramref name="below"/>, or null if
+        /// nobody is under it (by default: nobody is hurt at all).
+        /// </summary>
+        public static ICombatUnit MostWounded(List<ICombatUnit> units, float below = 1f)
         {
             if (units == null)
             {
@@ -28,7 +31,7 @@ namespace Assets.Scripts.Enemies.Behaviors
             }
 
             ICombatUnit best = null;
-            float bestRatio = 1f;
+            float bestRatio = below;
 
             foreach (var unit in units)
             {

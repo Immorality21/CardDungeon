@@ -2,6 +2,14 @@
 
 `RoomManager` (dungeon generation), `CombatManager` (combat flow/orchestration), and `GameManager` live here. Core combat *mechanics* (turn order, damage) are in `Assets/Scripts/Combat/CLAUDE.md`.
 
+> **Pending split - do it when you next refactor or add to these files** (owner, 2026-10-22).
+> `CombatManager.cs` (~3,600 lines) and `UI/RoomActionUI.cs` (~3,700 lines) each do several unrelated
+> jobs, which makes every change in them expensive to read around. Split along the seams they already
+> have: CombatManager into enemy-turn execution, hero commands and the fight's setup/teardown;
+> RoomActionUI into the command menu, the HUD and the level-clear screen. Move pure rules into
+> `*Ops`/planner classes (the `EnemyActionPlanner` pattern) and leave the MonoBehaviour as wiring.
+> Do it as its own change with a play test, not inside a feature, and remove this note when done.
+
 ## Dungeon Generation Pipeline (RoomManager)
 
 1. **Graph generation** — Creates a tree of `RoomNode` connections

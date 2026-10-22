@@ -19,7 +19,7 @@ MonoBehaviour:
     Kind: 3
     Priority: 15
     Weight: 1
-    ChanceGate: 0
+    ChanceGate: 0.6
     Telegraphed: 0
     Multiplier: 1
     Power: 28
@@ -49,7 +49,7 @@ MonoBehaviour:
     Kind: 3
     Priority: 10
     Weight: 1
-    ChanceGate: 0
+    ChanceGate: 0.5
     Telegraphed: 0
     Multiplier: 1
     Power: 14

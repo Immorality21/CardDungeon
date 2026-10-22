@@ -1996,15 +1996,19 @@ namespace Assets.Scripts.Balance
                 // calling a floor broken: one floor's simulation costs seconds.
                 var confirm = ConfirmByFloorSimulation(report, rules, input, run, level);
                 bool clears = confirm?.Adaptive != null && confirm.Adaptive.WipeRate <= rules.MaxFloorWipeRate;
+                // Marked hard on purpose (RunLevelEntry.IntendedHard): still reported, never a failure.
+                bool intendedHard = level.Entry != null && level.Entry.IntendedHard;
                 string simulated = confirm?.Adaptive == null
                     ? string.Empty
                     : $" The floor simulator wipes {confirm.Adaptive.WipeRate:P0} and ends at "
                       + $"{confirm.Adaptive.AverageEndHealthFraction:P0} health.";
-                report.Issues.Add(new BalanceIssue(clears ? BalanceSeverity.Info : BalanceSeverity.Critical,
+                report.Issues.Add(new BalanceIssue(clears || intendedHard ? BalanceSeverity.Info : BalanceSeverity.Critical,
                     BalanceCategory.Level, subject,
                     clears
                         ? $"{level.Reference} reads unclearable in closed form; the simulator clears it"
-                        : $"{level.Reference} is unclearable on one health bar")
+                        : intendedHard
+                            ? $"{level.Reference} is unclearable on one health bar (marked IntendedHard)"
+                            : $"{level.Reference} is unclearable on one health bar")
                 {
                     Asset = run.Run,
                     Detail = $"Expected cost {level.ExpectedHealthCost:0} HP against a sustain pool of "
@@ -2013,7 +2017,9 @@ namespace Assets.Scripts.Balance
                            + "Health only refills between levels, so the party runs out mid-level." + simulated,
                     Suggestion = clears
                         ? "Trust the simulator here; the closed form overstates dense rooms of fast enemies."
-                        : $"Cut expected combat rooms to about "
+                        : intendedHard
+                            ? "Hard on purpose. Untick IntendedHard on the run's level entry to judge it normally again."
+                            : $"Cut expected combat rooms to about "
                           + $"{level.ExpectedCombatRooms * (1f - rules.MinAttritionMargin) / Mathf.Max(0.01f, level.AttritionLoad):0.0}, "
                           + "soften the spawn tables, or raise party HP."
                 });

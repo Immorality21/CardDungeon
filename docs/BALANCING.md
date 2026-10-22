@@ -3177,3 +3177,19 @@ What is left is the real trade the owner asked for: from 300 to 800 XP the spend
 where the old grids bought stats (Warrior at 400 XP: 6 STR from the grid instead of 9), so the Ashen Deep
 and the Flooded Nave sit higher than before (23-59% wipes on the model party, no gear, which the model
 plays without valuing the extra abilities). They are inside the bands; watch them in play before tuning.
+
+## §5ak — A healer that stops healing is a hitter (2026-10-22, the Bog Shaman)
+
+Playtest: the Bog Shaman healed itself every turn and never attacked. Its two Heal entries were
+ungated and sat above the attack tier, so any wound at all won the turn. Fix: heals gated (Desperate
+mending 60%, Mend an ally 50%), "wounded" now means under 80% (`EnemyActionPlanner.WoundedBelow`),
+and Heal was taken out of its cast list (it cast it at full health).
+
+**What it cost:** the turns it stopped healing became swings and Water Splashes, and The Flooded Nave
+(Drowned Chapel floor 1, Difficulty 5) went from passing to *unclearable on one health bar* (expected
+cost 205 HP against a 184 pool, floor-sim wipes 39%). Difficulty 5 → 4.7 on that floor alone
+brings it back inside every band, but the owner kept **5** (lowering it would make the floor too
+easy), so the floor is marked **`RunLevelEntry.IntendedHard`** instead: the analyzer still reports the
+overrun, as an Info, and the suite passes. Use that flag only for a wall the owner wants. Lesson: the closed-form model prices an ungated heal as lost damage,
+so making a support enemy behave better *raises* danger wherever it spawns densely - re-run the
+Balance suite after any behaviour change, not only stat changes.

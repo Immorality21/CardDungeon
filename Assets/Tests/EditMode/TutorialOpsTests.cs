@@ -52,6 +52,56 @@ namespace Tests.EditMode
 
             p.HeroHasSpent = true;
             Assert.AreEqual(TutorialStep.TakeTheRoad, TutorialOps.CurrentStep(p));
+
+            p.GearFloorCleared = true;
+            p.HasGearToEquip = true;
+            Assert.AreEqual(TutorialStep.EquipGear, TutorialOps.CurrentStep(p));
+
+            p.AnyGearEquipped = true;
+            Assert.AreEqual(TutorialStep.GoOn, TutorialOps.CurrentStep(p));
+        }
+
+        [Test]
+        public void CurrentStep_NoGearInTheBag_SkipsToGoOn()
+        {
+            var p = Fresh();
+            p.FirstFloorCleared = true;
+            p.GuideBuilt = true;
+            p.HeroHasSpent = true;
+            p.GearFloorCleared = true;
+            Assert.AreEqual(TutorialStep.GoOn, TutorialOps.CurrentStep(p));
+        }
+
+        [Test]
+        public void FinishesOnDescent_OnlyAfterTheGearStep()
+        {
+            Assert.IsFalse(TutorialOps.FinishesOnDescent(TutorialStep.TakeTheRoad));
+            Assert.IsFalse(TutorialOps.FinishesOnDescent(TutorialStep.EquipGear));
+            Assert.IsTrue(TutorialOps.FinishesOnDescent(TutorialStep.GoOn));
+        }
+
+        [Test]
+        public void EquipGear_LocksTheTownToTheStorehouse()
+        {
+            const string store = "storehouse";
+            var step = TutorialStep.EquipGear;
+            Assert.AreEqual(store, TutorialOps.GuidedLotKey(step, Hall, store));
+            Assert.AreEqual(Hall, TutorialOps.GuidedLotKey(TutorialStep.SpendXp, Hall, store));
+            Assert.IsTrue(TutorialOps.AllowsLot(step, store, store));
+            Assert.IsFalse(TutorialOps.AllowsLot(step, Hall, store));
+            Assert.IsTrue(TutorialOps.GuidesLot(step, store, store));
+            Assert.IsFalse(TutorialOps.AllowsRoad(step));
+            Assert.IsFalse(TutorialOps.AllowsLeaving(step));
+            Assert.AreEqual(TutorialCue.EquipGear, TutorialOps.CueFor(step, TutorialScreen.Inventory, false));
+            Assert.AreEqual(TutorialCue.GearEquipped, TutorialOps.CueFor(TutorialStep.GoOn, TutorialScreen.Inventory, false));
+        }
+
+        [Test]
+        public void LevelCleared_ReadsPastTheGivenLevel()
+        {
+            Assert.IsFalse(TutorialOps.LevelCleared("T", null, "T", 1, 1), "on floor 2");
+            Assert.IsTrue(TutorialOps.LevelCleared("T", null, "T", 2, 1), "moved on to floor 3");
+            Assert.IsTrue(TutorialOps.LevelCleared("T", new List<string> { "T" }, null, 0, 1), "run finished");
         }
 
         /// <summary>A locked town with nothing affordable to click is a soft-lock, so the step is skipped.</summary>

@@ -217,7 +217,8 @@ Three rules when adding nodes:
   enforce it, so the hub, the tutorial and the balance spend all obey it. `UnlockPathTo` is `PathTo`
   plus everything the steps require, which is what the sandbox and `BeelineThenGreedy` use. The hub
   shows such a node as **gated** (a gold ring, `sg-node--gated`) with a dashed gold arrow from what it
-  waits for, and says "Requires X first." Use it for an optional upgrade on one branch that needs
+  waits for - drawn **only while either end is hovered or selected** (2026-10-22: a cross-branch arrow
+  drawn all the time ran across the whole screen) - and says "Requires X first." Use it for an optional upgrade on one branch that needs
   another branch's summon, or for a gate that forces two branches. `EveryRequiredNode_ExistsAndCanBeOwned`
   fails on a typo or a requirement loop. The first one is the Warrior's `warrior-b-golem-fury`: an
   optional leaf on the boar branch (depth 12) that needs `warrior-golem` from the other branch.

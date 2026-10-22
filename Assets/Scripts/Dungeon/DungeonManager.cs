@@ -10,6 +10,7 @@ using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Resources;
 using Assets.Scripts.Rooms;
+using Assets.Scripts.Tutorial;
 using Assets.Scripts.UnitStats;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
@@ -1369,6 +1370,7 @@ namespace Assets.Scripts.Dungeon
                 // else the floor produced - and are forfeited by the same rule if the party wipes
                 // instead of clearing.
                 AwardGuaranteedMaterials();
+                TutorialRewards.OnLevelCleared(ActiveRun, RunLevelIndex);
                 // Diffed against disk *before* the commit: with saves deferred, disk still holds the
                 // bags as the level found them.
                 FillItemGains(summary);

@@ -401,7 +401,9 @@ campaign tier. **To tune one floor, call `BalanceAnalyzer.SimulateFloor(input, r
 seconds, the same numbers as the full analysis. **The closed form flags, the simulator decides**
 (2026-10-17): a floor the closed form reads as "unclearable on one health bar" is simulated on the spot
 (`ConfirmByFloorSimulation`) and reported as an Info when the party clears it, because attrition composes
-per enemy and overstates dense rooms of fast enemies. Attrition and wipe rate are calibrated against
+per enemy and overstates dense rooms of fast enemies. A floor marked **`RunLevelEntry.IntendedHard`**
+(owner's call - the Flooded Nave, 2026-10-22) is reported as an Info too, even when the simulator wipes:
+a deliberate wall is still measured, it just does not fail the suite. Attrition and wipe rate are calibrated against
 each other in `docs/BALANCING.md` §5h — **death starts around attrition 0.70** — so tune with the
 cheap closed-form dial and confirm with the floor sim. **That calibration was measured on one-enemy
 rooms and does not extend to dense ones** (§5k): on a floor of three-enemy rooms the closed form runs
