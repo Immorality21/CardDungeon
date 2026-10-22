@@ -27,8 +27,10 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 3.6
-      StatScales: []
+      Difficulty: 4.2
+      StatScales:
+      - Stat: 3
+        Multiplier: 3
       XpMultiplier: 3
       GoldMultiplier: 1
       Overrides: []
@@ -42,8 +44,10 @@ MonoBehaviour:
     - Enemy: {fileID: 11400000, guid: 04bc3cd3328fee344b87f24b45b373e1, type: 2}
       Count: 2
     EnemyTuning:
-      Difficulty: 3.6
-      StatScales: []
+      Difficulty: 4.4
+      StatScales:
+      - Stat: 3
+        Multiplier: 3
       XpMultiplier: 3
       GoldMultiplier: 1
       Overrides:
@@ -51,9 +55,9 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 160
+            Amount: 240
           - Type: 1
-            Amount: 16
+            Amount: 22
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

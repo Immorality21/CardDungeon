@@ -171,9 +171,12 @@ namespace Assets.Scripts.Balance
         /// </summary>
         /// <summary>
         /// Models every run, walking the campaign shallowest-first so a run inherits the party its
-        /// prerequisites left behind. Where a run has several prerequisites the player can only have
-        /// arrived via one of them, so the *weakest* incoming state is used - the run has to be
-        /// clearable by whoever reaches it first, not only by a completionist.
+        /// prerequisites left behind. Where a run opens on <i>any</i> of several prerequisites the player
+        /// can have arrived via only one of them, so the *weakest* incoming state is used - the run has
+        /// to be clearable by whoever reaches it first, not only by a completionist. Where it needs
+        /// <i>all</i> of them (<see cref="CampaignUnlockMode.All"/>) the player has provably cleared each,
+        /// so the *strongest* is used (The Hollow Vault, after the Ashen Deep and the Warrens - read from
+        /// the Warrens' two heroes it measured party width, not difficulty; 2026-10-18).
         ///
         /// <para>Falls back to measuring every run against the starting party when no campaign is
         /// authored, which is what the analyzer did before the graph existed.</para>
@@ -221,23 +224,24 @@ namespace Assets.Scripts.Balance
                 List<HeroSO> seedRoster = null;
                 Dictionary<HeroSO, int> seedXp = null;
 
-                RunCurve weakest = null;
+                bool needsAll = node.UnlockMode == CampaignUnlockMode.All;
+                RunCurve seed = null;
                 foreach (var prerequisite in node.Requires)
                 {
-                    if (prerequisite == null)
+                    if (prerequisite == null || !byKey.TryGetValue(CampaignOps.RunKeyOf(prerequisite), out var prior))
                     {
                         continue;
                     }
-                    if (byKey.TryGetValue(CampaignOps.RunKeyOf(prerequisite), out var prior) &&
-                        (weakest == null || TotalBankedXp(prior) < TotalBankedXp(weakest)))
+                    if (seed == null
+                        || (needsAll ? TotalBankedXp(prior) > TotalBankedXp(seed) : TotalBankedXp(prior) < TotalBankedXp(seed)))
                     {
-                        weakest = prior;
+                        seed = prior;
                     }
                 }
-                if (weakest != null)
+                if (seed != null)
                 {
-                    seedRoster = weakest.EndRoster;
-                    seedXp = weakest.EndLifetimeXp;
+                    seedRoster = seed.EndRoster;
+                    seedXp = seed.EndLifetimeXp;
                 }
 
                 var curve = RunCurve.Build(run, report.Party, rules, seedRoster, seedXp);
@@ -1851,7 +1855,7 @@ namespace Assets.Scripts.Balance
 
                 foreach (var level in run.Levels)
                 {
-                    EvaluateLevel(run, level, report, rules, GateBudgetFor(run, level, rules, tiers));
+                    EvaluateLevel(run, level, report, rules, GateBudgetFor(run, level, rules, tiers), input);
                 }
 
                 for (int i = 0; i < run.DifficultyJumps.Count; i++)
@@ -1929,8 +1933,21 @@ namespace Assets.Scripts.Balance
         /// budget is above what the curve's own party is carrying; -1 otherwise. A gate is meant to
         /// be unclearable by the party walking into it, so the attrition verdict changes meaning.
         /// </param>
+        /// <summary>The floor simulation for <paramref name="level"/>: the analysis's own when it ran one,
+        /// else one simulated now. Null without an input to simulate from.</summary>
+        private static FloorSimReport ConfirmByFloorSimulation(BalanceReport report, BalanceRulesSO rules,
+            BalanceInput input, RunCurve run, LevelCurve level)
+        {
+            var existing = report.Floors.Find(f => f.Run == run.Run && f.LevelIndex == level.Index);
+            if (existing != null)
+            {
+                return existing;
+            }
+            return input != null ? SimulateLevel(input, rules, report, run, level) : null;
+        }
+
         private static void EvaluateLevel(RunCurve run, LevelCurve level, BalanceReport report,
-            BalanceRulesSO rules, int gateBudget = -1)
+            BalanceRulesSO rules, int gateBudget = -1, BalanceInput input = null)
         {
             string subject = $"{run.Name} / {level.Reference}";
 
@@ -1973,17 +1990,32 @@ namespace Assets.Scripts.Balance
             }
             else if (level.AttritionMargin < 0f)
             {
-                report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Level, subject,
-                    $"{level.Reference} is unclearable on one health bar")
+                // The closed form flags, the simulator decides (owner, 2026-10-17). Attrition composes per
+                // enemy and never sees a party focus-firing a room down, so a dense floor of fast enemies
+                // reads "unclearable" while the floor simulator ends it at half health. Confirm before
+                // calling a floor broken: one floor's simulation costs seconds.
+                var confirm = ConfirmByFloorSimulation(report, rules, input, run, level);
+                bool clears = confirm?.Adaptive != null && confirm.Adaptive.WipeRate <= rules.MaxFloorWipeRate;
+                string simulated = confirm?.Adaptive == null
+                    ? string.Empty
+                    : $" The floor simulator wipes {confirm.Adaptive.WipeRate:P0} and ends at "
+                      + $"{confirm.Adaptive.AverageEndHealthFraction:P0} health.";
+                report.Issues.Add(new BalanceIssue(clears ? BalanceSeverity.Info : BalanceSeverity.Critical,
+                    BalanceCategory.Level, subject,
+                    clears
+                        ? $"{level.Reference} reads unclearable in closed form; the simulator clears it"
+                        : $"{level.Reference} is unclearable on one health bar")
                 {
                     Asset = run.Run,
                     Detail = $"Expected cost {level.ExpectedHealthCost:0} HP against a sustain pool of "
                            + $"{level.SustainPool} ({level.PartySize} hero(es) + potions) across "
                            + $"{level.ExpectedCombatRooms:0.0} combat rooms{EventShare(level)}. "
-                           + "Health only refills between levels, so the party runs out mid-level.",
-                    Suggestion = $"Cut expected combat rooms to about "
-                           + $"{level.ExpectedCombatRooms * (1f - rules.MinAttritionMargin) / Mathf.Max(0.01f, level.AttritionLoad):0.0}, "
-                           + "soften the spawn tables, or raise party HP."
+                           + "Health only refills between levels, so the party runs out mid-level." + simulated,
+                    Suggestion = clears
+                        ? "Trust the simulator here; the closed form overstates dense rooms of fast enemies."
+                        : $"Cut expected combat rooms to about "
+                          + $"{level.ExpectedCombatRooms * (1f - rules.MinAttritionMargin) / Mathf.Max(0.01f, level.AttritionLoad):0.0}, "
+                          + "soften the spawn tables, or raise party HP."
                 });
             }
             else if (level.AttritionMargin < rules.MinAttritionMargin)

@@ -30,8 +30,10 @@ MonoBehaviour:
     - Enemy: {fileID: 11400000, guid: 2ad323473fd341edb4cff1ccae486514, type: 2}
       Count: 2
     EnemyTuning:
-      Difficulty: 2.8
-      StatScales: []
+      Difficulty: 3.8
+      StatScales:
+      - Stat: 3
+        Multiplier: 2.5
       XpMultiplier: 4
       GoldMultiplier: 2
       Overrides:

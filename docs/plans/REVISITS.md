@@ -109,9 +109,8 @@ Finding 12 (Fear level 0 trivial because speed never rose) was answered by the o
 - **More condition kinds:** elites, a starting affliction, a smaller party, no refuges, no summons/Ultra,
   a required or banned hero (or leave that last one to bounties, HUB.md §3d).
 - **Decide whether items scale** (more rolls, or better rarity at higher Fear levels).
-- **The model's revisit judgement uses the closed form.** Switch it to the floor simulator when
-  `Simulate` is on, model Swarming Halls, and measure the Hollow Vault from a party that has done both
-  its prerequisites (`BALANCING.md` §5ab).
+- **The model's revisit judgement** reads the floor simulator (2026-10-17) and measures the Hollow Vault
+  from the stronger of its prerequisites (2026-10-18). Still open: model Swarming Halls (`BALANCING.md` §5ab).
 - **XP taper** for trivial revisits (open question 5 below).
 - **Rethink Fear beyond Hades-style multipliers** *(owner, 2026-10-17, roadmap)*. Today every Fear level is
   a stat or count multiplier. The owner wants **fixed effects** too - a new enemy that only appears from a

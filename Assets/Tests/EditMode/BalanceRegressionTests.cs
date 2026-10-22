@@ -69,8 +69,11 @@ namespace Tests.EditMode
         [Test]
         public void EveryRunLevelIsClearableOnOneHealthBar()
         {
+            // Info excluded: a floor the closed form reads as unclearable but the floor simulator clears
+            // is reported as an Info (the closed form flags, the simulator decides - 2026-10-17).
             AssertNoIssues(
-                issue => issue.Category == BalanceCategory.Level && issue.Title.Contains("unclearable"),
+                issue => issue.Category == BalanceCategory.Level && issue.Title.Contains("unclearable")
+                         && issue.Severity >= BalanceSeverity.Warning,
                 "A level costs more health than the party's HP and potion pool can cover, and health only "
                 + "refills between levels.");
         }

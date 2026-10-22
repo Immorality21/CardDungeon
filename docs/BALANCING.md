@@ -1203,9 +1203,8 @@ They are upper bounds against a party the design intends to fail. The frontier i
   5.05-7.82). Three kinds at one roll each is as tight as the tail gets without dropping to two —
   which is exactly what the Warrens did, and it is the only one of the four with no tail finding.
   Worth considering for the other three.
-- **`CampaignOps` seeds an `All`-mode node from its *weakest* prerequisite.** For The Hollow Vault —
-  which requires The Ashen Deep *and* The Warrens — the player has provably played both, so the
-  correct seed is the strongest, not the weakest. The rule is right for `Any` and wrong for `All`.
+- ~~**`CampaignOps` seeds an `All`-mode node from its *weakest* prerequisite.**~~ Fixed 2026-10-18
+  (§5ai): an `All` node now takes the strongest prerequisite, an `Any` node still the weakest.
 
 ## 6. Standing traps
 
@@ -3038,3 +3037,72 @@ Emberfall needs two replays: the first halves the wall, the second opens it. Gen
 in one (x2: 100% -> 8%), steeper made the first replay nearly worthless. Boss ratio 3.2, boss danger
 1.03. **Caveat:** with gear in the revisit party, its power jump depends on the shop catalog and prices;
 a catalog change moves every catch-up number.
+
+**The Drowned Chapel** (tier 4; two floors, the Cleric's rescue run). Agility alone could not hold a
+short run's wall against a revisit's gear: x3.5 reached 45% wipes and one March revisit took it to 0%;
+x4-4.5 reached 70-86% and still 0% after one. Agility past x3 also turns the speed problem around (a
+Paladin, Warlock or Cultist gains no Agility on the grid, so a x4 enemy at 12-24 acts 3-5 times per
+their turn). So Agility stops at x3 and the rest comes from Difficulty and the pinned boss:
+
+| floor | Agility | Difficulty | result |
+|---|---|---|---|
+| The Flooded Nave | x3 | 3.8 -> 5.0 | 4% wipes, 50% health |
+| **The Drowned Choir** | x3 | 3.6 -> 5.0; Warden 120/15 -> **160/20** | **98%** straight, **0%** after one March revisit |
+
+Boss danger 1.86 (an Info on a tier gate), ratio 3.9, no one-shot criticals. **A short run is opened by a
+single replay**: its wall is two floors deep, so the gear a March revisit buys (~730 gold) outclasses it
+at once. That fits "within 3 revisits" but is the most generous late wall; a longer run (Emberfall)
+holds for two. **Keep enemy Agility at x3 or below** unless the slow heroes get a speed answer.
+
+**The Blood Stair, and the suite green again (same day).** A challenge run, measured against the
+strongest end state, tier 5: the finale is a 90%+ wall, and there is no revisit check (no run before it to
+replay). Agility alone barely moved floors 1-3 (78-84% health at x3); Difficulty on top did:
+
+| floor | Agility | Difficulty | wipe | ending health |
+|---|---|---|---|---|
+| The Bleeding Steps | x3 | 1.95 -> 3.6 | 1% | 54% (was 100%) |
+| The Chapel of Knives | x3 | 2.4 -> 3.4 | 8% | 54% (was 94%) |
+| The Ossuary Gate | x3 | 2.55 -> 3.15 | 13% | 64% (was 97%; deaths rise fast past 3.15) |
+| The Red Cloister | x2.5 | 3.2 | 15% | 54% (was 92%) |
+| **The Altar of the Last Initiate** | x2.5 | 5 | **92%** | 11% (was 1% / 70%) |
+
+The Altar is where the Warlock is rescued, so his unlock now sits behind the run's wall. **This fixes
+`RunDifficultyEscalates`** (the 109% step is gone - floors 1-3 rose to meet the Cloister, as the owner
+chose). But the closed form then read all four ordinary floors as "unclearable on one health bar"
+(attrition 1.01-1.53) while the simulator ends them at 54-64% health: attrition composes per enemy, and
+fast enemies make that worse. **The closed form now flags and the simulator decides**: `EvaluateLevel`
+simulates a floor the closed form calls unclearable (`ConfirmByFloorSimulation`, reusing the analysis's
+own floor simulation when there is one) and reports it as an Info when the party clears it within
+`MaxFloorWipeRate`. `EveryRunLevelIsClearableOnOneHealthBar` counts only Warning and above. **Suite:
+1577 passed, 0 failed** - green for the first time since the 2026-10-11 hero pass.
+
+**The Seeping Cistern** (challenge, tier 5). The Rogue is rescued on its first floor, so she is not behind
+the wall. The Sump: Agility x3, Difficulty 3.6 -> 4.2 (5% wipes, 48% health; was 88%). The Mother Pool:
+Agility x3, Difficulty 3.6 -> 4.4, Mother Ooze 160/16 -> **240/22**: **90%** wipes (was 0%). Difficulty
+alone reached 40% (4.2) and 70% (4.8); the pinned boss carries the rest. Boss ratio 4.1, boss danger 2.14
+(an Info on a gate). The closed form warns that a bad spawn roll on either floor is unwinnable (worst-case
+danger 1.16 / 1.20) - closed form, on the run meant as a wall. Suite 1577 / 0.
+
+**The Hollow Vault, and `All` nodes seed from the strongest prerequisite (2026-10-18).** The Vault needs
+the Ashen Deep *and* the Warrens, but `BuildRunCurves` seeded it from the weaker (the Warrens: two heroes)
+while its revisit party came from the Ashen Deep's four, so "100% -> 0% after one revisit" measured party
+width. An `All`-mode node now takes the **strongest** prerequisite (the player has cleared each); `Any`
+keeps the weakest. Only the Vault has two run prerequisites, so nothing else moved. Re-seeded, the Vault
+at its old tuning was trivial: **0% wipes, 72% health** for a straight-through Ashen Deep graduate.
+
+| Hollow Vault (one 17-room floor, tier 4) | straight | +1 / +2 / +3 Ashen Deep revisits |
+|---|---|---|
+| Agility x2, Difficulty 2.8 | 96% | 0% |
+| Agility x3, Difficulty 3.5 | 100% | 96% / 15% / 0% |
+| Agility x2.5, Difficulty 3.5 | 100% | 16% / 0% |
+| **Agility x2.5, Difficulty 3.8** (shipped) | **100%** | **56% / 0%** |
+| Agility x2.5, Difficulty 4.1 | 100% | 68% / 1% |
+
+Shipped: Agility x2.5, Difficulty 2.8 -> 3.8 - the Emberfall shape (the first replay halves the wall, the
+second opens it). Boss untouched (Gilded Hoarder 112/16): **the boss is not the lever on a one-floor run**
+- 180/22 and 240/26 moved the straight wipe rate 30% -> 48% at Agility x1.75, while Agility x1.5 -> x2 moved
+it 4% -> 96%. The cost: **a straight-through party dies around room 9 of 17** (floor progress 0.54) and
+never sees the Hoarder. On a run that is one floor the wall cannot sit at the finale alone; the
+revisited party reaches it (progress 0.91 after one replay, a full clear after two). If the owner wants the
+straight party to reach the boss, split the Vault into two floors. The Warrens' Counting Room stays a hard
+gate (100%), as the curve table notes. Suite 1577 / 0.

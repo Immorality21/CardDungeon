@@ -28,8 +28,10 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 1.95
-      StatScales: []
+      Difficulty: 3.6
+      StatScales:
+      - Stat: 3
+        Multiplier: 3
       XpMultiplier: 3
       GoldMultiplier: 1.5
       Overrides: []
@@ -41,8 +43,10 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 2.4
-      StatScales: []
+      Difficulty: 3.4
+      StatScales:
+      - Stat: 3
+        Multiplier: 3
       XpMultiplier: 3.5
       GoldMultiplier: 1.5
       Overrides: []
@@ -54,8 +58,10 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 2.55
-      StatScales: []
+      Difficulty: 3.15
+      StatScales:
+      - Stat: 3
+        Multiplier: 3
       XpMultiplier: 4
       GoldMultiplier: 1.5
       Overrides: []
@@ -70,7 +76,9 @@ MonoBehaviour:
       Count: 2
     EnemyTuning:
       Difficulty: 3.2
-      StatScales: []
+      StatScales:
+      - Stat: 3
+        Multiplier: 2.5
       XpMultiplier: 4
       GoldMultiplier: 1.5
       Overrides:
@@ -94,7 +102,9 @@ MonoBehaviour:
       Count: 2
     EnemyTuning:
       Difficulty: 5
-      StatScales: []
+      StatScales:
+      - Stat: 3
+        Multiplier: 2.5
       XpMultiplier: 4.5
       GoldMultiplier: 2
       Overrides:
