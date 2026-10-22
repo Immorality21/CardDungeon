@@ -60,7 +60,7 @@ namespace Assets.Scripts.Dungeon.Editor
         private Vector2 _dragStart;
         private int _dragPointerId = -1;
 
-        [MenuItem("Tools/Dungeon/Campaign Map Editor")]
+        [MenuItem("Tools/Campaign Map Editor", false, 22)]
         public static void Open()
         {
             var window = GetWindow<CampaignMapEditorWindow>("Campaign Map Editor");

@@ -273,8 +273,8 @@ secret (`HollowVault`, gated on **both** branches). Open:
 - **A fourth tier**, and **nothing uses `UnlockMode.Any`** (two branches rejoining) yet.
 - **Map positions are auto-laid-out.** `CampaignPresenter.ResolvePositions` tiers nodes by longest
   prerequisite chain. Good enough to play; a hand-placed map wants a **Campaign Map Editor** window —
-  the obvious sibling to `Tools ▸ Dungeon ▸ Manual Level Layout Editor` and
-  `Tools ▸ Heroes ▸ Sphere Grid Editor`, both of which already do node-drag + connect over the same
+  the obvious sibling to `Tools ▸ Level Layout Editor` and
+  `Tools ▸ Sphere Grid Editor`, both of which already do node-drag + connect over the same
   widget.
 - **No way to abandon a run.** While one is in progress every other node is deliberately
   un-startable, because starting a second would overwrite `Run.json`. The player finishes or dies

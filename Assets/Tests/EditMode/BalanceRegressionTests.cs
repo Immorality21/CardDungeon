@@ -195,7 +195,7 @@ namespace Tests.EditMode
                 message.AppendLine();
             }
 
-            message.AppendLine("Open Tools ▸ Balance ▸ Balance Analyzer to edit these values in place.");
+            message.AppendLine("Open Tools ▸ Balance Analyzer to edit these values in place.");
             Assert.Fail(message.ToString());
         }
     }

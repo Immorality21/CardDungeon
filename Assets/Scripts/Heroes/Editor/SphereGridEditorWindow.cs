@@ -46,7 +46,7 @@ namespace Assets.Scripts.Heroes.Editor
         private Vector2 _dragOffset;
         private int _dragPointerId = -1;
 
-        [MenuItem("Tools/Heroes/Sphere Grid Editor")]
+        [MenuItem("Tools/Sphere Grid Editor", false, 20)]
         public static void Open()
         {
             var window = GetWindow<SphereGridEditorWindow>("Sphere Grid Editor");

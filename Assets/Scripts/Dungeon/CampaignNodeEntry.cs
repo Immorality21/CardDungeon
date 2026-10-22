@@ -46,7 +46,7 @@ namespace Assets.Scripts.Dungeon
         public bool Optional;
 
         [Tooltip("Position on the campaign map screen, in graph units. Authored in " +
-                 "Tools > Dungeon > Campaign Map Editor.")]
+                 "Tools > Campaign Map Editor.")]
         public Vector2 MapPosition;
     }
 }

@@ -66,12 +66,11 @@ deliberate **Main Menu** button.
 
 ## Setup
 
-**Tools → MainMenu → Setup Main Menu UI** creates the shared `PanelSettings`
-(`Assets/UI/CardDungeonPanelSettings.asset`, sorting order 100 so UITK renders above any world/uGUI),
-drops a `UIDocument` into the open scene wired to `Assets/UI/MainMenu/MainMenu.uxml`, and wires the
-controller's serialized refs. It now wires **only `_document`** — `_runDefinition` and `_partyRoster`
-went to `HubUISetup` with the screens that used them. Re-run after editing structure, then save the
-scene.
+MenuScene holds a `UIDocument` on the shared `PanelSettings` (`Assets/UI/CardDungeonPanelSettings.asset`,
+sorting order 100 so UITK renders above any world/uGUI), pointed at `Assets/UI/MainMenu/MainMenu.uxml`,
+with `MainMenuManager` beside it. Its only serialized ref is **`_document`** — `_runDefinition` and
+`_partyRoster` went to the hub with the screens that used them. (The `MainMenuUISetup` bootstrap that
+built it was removed on 2026-10-22; the scene is the source of truth.)
 
 `MusicPlayer.Play(MusicTrack.Hub)` runs here as well as in the hub. Requesting the track already
 playing is a no-op, so the walk from title screen into town is seamless and costs nothing.

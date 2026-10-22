@@ -20,7 +20,7 @@ namespace Assets.Scripts.Sandbox.Editor
         private Vector2 _scroll;
         private readonly Dictionary<int, int> _nodePick = new Dictionary<int, int>();
 
-        [MenuItem("Tools/Sandbox")]
+        [MenuItem("Tools/Sandbox", false, 1)]
         public static void Open()
         {
             GetWindow<SandboxWindow>("Sandbox").Show();

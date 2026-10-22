@@ -20,7 +20,7 @@ namespace Assets.Scripts.Heroes
                  "hint at the stat line, since the player is choosing a role.")]
         public string Blurb;
 
-        [Tooltip("Design intent — developer-facing, never shown. Edit it in Tools ▸ Heroes ▸ Hero Vision.")]
+        [Tooltip("Design intent — developer-facing, never shown. Edit it in Tools ▸ Hero Vision.")]
         public HeroVision Vision = new HeroVision();
 
         public Sprite Sprite;

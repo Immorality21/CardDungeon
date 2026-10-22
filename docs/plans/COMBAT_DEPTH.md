@@ -295,7 +295,7 @@ What is left here is one addition:
 of special attack is a large part of a hero's identity, e.g. a Tinkerer who combines two consumables.
 **A hero can have several Ultras, and they are not tied to a grid branch** — a style shared by all of
 them, then individual Ultras each with its own unlock (from the start, any grid node, a run, a boss).
-Each hero's ideas are collected in `HeroSO.Vision.UltraStyle` / `Vision.Ultras` (`Tools ▸ Heroes ▸
+Each hero's ideas are collected in `HeroSO.Vision.UltraStyle` / `Vision.Ultras` (`Tools ▸
 Hero Vision`); read those before designing the gauge.
 
 Note the interaction with §4b: a summon at a branch tip and an Ultra on every hero are both "big

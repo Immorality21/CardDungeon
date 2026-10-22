@@ -43,7 +43,7 @@ namespace Assets.Scripts.Heroes.Editor
         private Dictionary<string, MagicSO> _magicByKey;
         private Dictionary<string, SummonSO> _summonByKey;
 
-        [MenuItem("Tools/Heroes/Hero Vision")]
+        [MenuItem("Tools/Hero Vision", false, 21)]
         public static void Open()
         {
             var window = GetWindow<HeroVisionWindow>("Hero Vision");

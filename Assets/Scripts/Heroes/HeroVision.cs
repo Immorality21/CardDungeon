@@ -7,7 +7,7 @@ namespace Assets.Scripts.Heroes
     /// <summary>
     /// What a hero is <i>meant</i> to be — the design intent behind the stats, the grid and the art,
     /// written down so grid authoring, ability design and summons have something to answer to rather
-    /// than an interpretation of the hero's name. Edited in <c>Tools ▸ Heroes ▸ Hero Vision</c>.
+    /// than an interpretation of the hero's name. Edited in <c>Tools ▸ Hero Vision</c>.
     ///
     /// <para>Developer-facing only: nothing in the game reads or shows it. It is plain serialized
     /// data rather than editor-only, because a field under <c>#if UNITY_EDITOR</c> changes the

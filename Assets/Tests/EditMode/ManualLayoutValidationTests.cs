@@ -60,7 +60,7 @@ namespace Tests.EditMode
                 Assert.IsEmpty(broken,
                     $"Layout '{layout.name}': door(s) {string.Join(", ", broken)} connect rooms that " +
                     "do not share an edge, so they will not exist in-game. Fix the layout in " +
-                    "Tools > Dungeon > Manual Level Layout Editor.");
+                    "Tools > Level Layout Editor.");
             }
         }
 

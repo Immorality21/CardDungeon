@@ -5,7 +5,7 @@
 > spent XP to 64 HP and 176. One authored stat block provably cannot be right in both places, so the
 > template carries the enemy's **identity** and the level it appears in carries its **numbers**. See
 > *Per-level tuning* below; the `EnemySO` inspector deliberately has no balance footer any more,
-> because the numbers it would show belong to a level. Use `Tools > Balance > Balance Analyzer`,
+> because the numbers it would show belong to a level. Use `Tools > Balance Analyzer`,
 > whose Enemies tab is one row per enemy **per level**.
 
 - **EnemySO** (ScriptableObject, `SO/Enemy`, assets in `Assets/ScriptableObjects/Enemies/`): the **definition of an enemy type** — `Key`, `DisplayName`, `Sprite`, base stats (`Attack`/`Defense`/`Health`/`Agility`), **kill rewards** (`XpReward`, `GoldReward`), `Archetype`, `Spells` (its **own** repertoire — see below), `Resistances`, `LootTable`. This is the single source of truth for what an enemy *is*. On death (`CombatManager.HandleEnemyDeath`): the whole drop table rolls, `XpReward` is split evenly across the fielded party immediately (`Party.DistributeXp`), and `GoldReward` accumulates into `MetaProgressManager` pending gold (banked only on level-clear — see the Progression guide).

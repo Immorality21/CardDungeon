@@ -76,7 +76,7 @@ namespace Assets.Scripts.Balance.Editor
         /// <summary>Set by OpenFor(...) so the Levels tab lands on the run you came from.</summary>
         private RunDefinitionSO _focusRun;
 
-        [MenuItem("Tools/Balance/Balance Analyzer")]
+        [MenuItem("Tools/Balance Analyzer", false, 2)]
         public static BalanceWindow Open()
         {
             var window = GetWindow<BalanceWindow>("Balance");

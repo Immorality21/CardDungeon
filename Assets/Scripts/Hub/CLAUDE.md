@@ -41,7 +41,8 @@ question 5 recommended keeping it that way, and that recommendation was delibera
 - **HubScene must carry its own `MagicCatalog` and `MagicComboCatalog` prefab instances.** They are
   scene-wired `SingletonBehaviour`s with `[SerializeField]` lists, and `SingletonBehaviour`
   auto-creates a bare GameObject when it finds none — so a scene missing them does not throw, it
-  produces an **empty** catalog and the Forge renders nothing. `HubUISetup` instantiates them for you.
+  produces an **empty** catalog and the Forge renders nothing. Keep them in the scene (the prefabs are
+  `Assets/Prefabs/MagicCatalog.prefab` and `MagicComboCatalog.prefab`).
   `MetaProgressManager`, `InventoryManager` and `PartyResourceManager` load from disk in `Awake` and
   would survive auto-creation; the meta-progress prefab is placed anyway so the scene states its
   dependencies.
@@ -305,9 +306,10 @@ All UI is **UI Toolkit** (UXML + USS), not uGUI. The pattern, used identically b
 - A **controller MonoBehaviour** on a `UIDocument` queries elements by name, registers `clicked`
   callbacks, and toggles views via `style.display`. Dynamic lists are built as `VisualElement`s in
   code — **no prefabs, and never at runtime what could be authored**.
-- An **editor bootstrap** wires the serialized refs: **Tools → Hub → Setup Hub UI** for HubScene,
-  **Tools → MainMenu → Setup Main Menu UI** for MenuScene. Both operate on *the open scene*. Re-run
-  after editing structure, then save the scene.
+- The `UIDocument` and its controller **live in the scene**, their serialized refs set in the
+  inspector. The editor bootstraps that first built them (`HubUISetup`, `MainMenuUISetup` and the
+  others) were removed on 2026-10-22: every scene already holds its UI, and re-running one only ever
+  risked rebuilding it in the wrong scene.
 
 **Every window wears one pixel-art frame** (2026-10-08): `Assets/UI/Frames/window_frame.png`, 24px with
 6px nine-slice borders drawn at 3x (`-unity-slice-*`, `-unity-slice-scale: 3px`) on `.cd-window` and
@@ -315,10 +317,10 @@ the combat panels (`.cd-bar`, `.cd-command-window`, `.cd-party-status`, `.cd-tur
 `.cd-victory`). The border is an 8px **transparent** border so content never paints over the rim, and
 the fill is part of the image. A new window class should reuse that block rather than a flat border.
 
-`HubUISetup` wires `_document`, `_runDefinition` and `_partyRoster`, and additionally guarantees the
-EventSystem, a camera and the three prefab instances. `MainMenuUISetup` now wires **only**
-`_document` — the run definition and the roster left with the screens that needed them, which is the
-split working.
+HubScene's `HubManager` holds `_document`, `_runDefinition` and `_partyRoster`, and the scene also
+needs an EventSystem, a camera and the three prefab instances (`MagicCatalog`, `MagicComboCatalog`,
+`MetaProgressManager`). MenuScene's `MainMenuManager` holds **only** `_document` — the run
+definition and the roster left with the screens that needed them, which is the split working.
 
 **The hit-test trap** is the most load-bearing UI rule here: a `cd-dock-center` window that *changes
 size* leaves UITK's input hit-testing on the old transform, offsetting every click. That is why

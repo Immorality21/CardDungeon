@@ -65,7 +65,7 @@ namespace Assets.Scripts.Rooms
                         Debug.LogError(
                             $"Manual layout '{layout.name}': authored door {door.RoomIndexA} <-> " +
                             $"{door.RoomIndexB} could not be placed - the rooms do not share an " +
-                            "edge. Fix the layout (Tools > Dungeon > Manual Level Layout Editor); " +
+                            "edge. Fix the layout (Tools > Level Layout Editor); " +
                             "part of the level may be unreachable.");
                     }
                 }

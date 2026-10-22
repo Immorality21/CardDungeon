@@ -33,7 +33,7 @@ namespace Assets.Scripts.Dungeon.Editor
         private const float LeftPanelWidth = 280f;
         private const float ToolbarHeight = 30f;
 
-        [MenuItem("Tools/Dungeon/Manual Level Layout Editor")]
+        [MenuItem("Tools/Level Layout Editor", false, 23)]
         public static ManualLevelLayoutEditorWindow Open()
         {
             var window = GetWindow<ManualLevelLayoutEditorWindow>("Level Layout Editor");

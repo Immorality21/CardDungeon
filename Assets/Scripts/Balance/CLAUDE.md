@@ -16,7 +16,7 @@ singleton, no `AssetDatabase`. `Assets/Scripts/Balance/Editor/` is the only plac
 `AssetDatabase` or draws GUI. That split is what lets three different consumers share one definition
 of "balanced":
 
-1. **`BalanceWindow`** — `Tools ▸ Balance ▸ Balance Analyzer`. Tables, colours, inline editing.
+1. **`BalanceWindow`** — `Tools ▸ Balance Analyzer`. Tables, colours, inline editing.
 2. **`BalanceRegressionTests`** (`Assets/Tests/EditMode/`) — the same analysis as assertions, so a
    balance regression fails a test instead of waiting for someone to open a window.
 
@@ -507,7 +507,7 @@ Two supporting pieces:
   **0 ms**. Before this, focus re-measured unconditionally — with `Simulate` remembered across
   sessions in `EditorPrefs`, that made every click into the window a ~19 s editor freeze.
 - **Opening the window never simulates**, even with the toggle remembered on. The first report is
-  always the cheap one, flagged stale; otherwise `Tools ▸ Balance ▸ Balance Analyzer` is a 19 s stall
+  always the cheap one, flagged stale; otherwise `Tools ▸ Balance Analyzer` is a 19 s stall
   with a blank window and nothing to explain it.
 
 If the simulation itself ever needs to be faster, the blocker is `EncounterSimulator`'s use of

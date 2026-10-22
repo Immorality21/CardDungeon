@@ -232,7 +232,7 @@ namespace Assets.Scripts.Balance.Editor
         /// <summary>
         /// The sphere grid's *numbers*, per hero — cost and gains per node, with the same
         /// half-of-base severity tint the old level curve had. Graph shape (positions, edges, adding
-        /// and deleting nodes) is authored in Tools ▸ Heroes ▸ Sphere Grid Editor; this table exists
+        /// and deleting nodes) is authored in Tools ▸ Sphere Grid Editor; this table exists
         /// so a balance pass can retune costs and gains next to the findings they cause.
         /// </summary>
         private void DrawSphereGridSection(PartyBaseline party)
@@ -241,7 +241,7 @@ namespace Assets.Scripts.Balance.Editor
                 "Sphere grids",
                 "XP banked per hero (kills split evenly — XpSplit) is spent on nodes at the hub. "
                 + "Costs and stat gains are editable here; the graph itself is edited in "
-                + "Tools ▸ Heroes ▸ Sphere Grid Editor.");
+                + "Tools ▸ Sphere Grid Editor.");
 
             foreach (var hero in party.Heroes)
             {

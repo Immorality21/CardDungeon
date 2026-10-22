@@ -301,7 +301,7 @@ backlog.**
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **done** — shipped 2026-09-06; **every hero has a source since 2026-09-30** (run clear, room event, secret run) |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Heroes ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
+| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c. **Ability upgrades (`MagicUpgrade`) built 2026-10-09** with the Ranger as showcase; other heroes' spurs wait on the Hero Workbook |
 | — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) ~~Ultras for the other six heroes~~ - every hero has Ultras since the 2026-10-11 workbook pass (the Mage's is MultiCast) |
 | — | **The Mage — an elemental caster** | ✅ **on the roster 2026-10-07** — rescued in the new **Sealed Archive** (main line, before the March); three-branch grid (storm / frost / fire, Fire Cloak early for the Ashen Deep), new Chain Lightning. **Open:** his signature and Ultra are MultiCast (spend Focus to cast 2-4 times, owner 2026-10-07, details open); summons are drafts in the hero workbook |
@@ -382,7 +382,7 @@ per-subsystem `CLAUDE.md` files — not here.
   Cutpurse gamble is now a long shot (Agility **8 → 20**). Three PixelLab enemies, all weak to Fire: the
   **Bile Slime** (Caustic Spit, poison), the **Spore Bloater** (bursts into poison on death, a reaction),
   and the boss **Mother Ooze** (Toxic Deluge on everyone, buds off two slimes). Attrition 2.94 / 0.58 for
-  a Warrens graduate, 0.36 / 0.53 after the March. **`Tools ▸ Dungeon ▸ Campaign Map Editor`**: the story
+  a Warrens graduate, 0.36 / 0.53 after the March. **`Tools ▸ Campaign Map Editor`**: the story
   graph with secret nodes, arrows, drag/connect/add/remove, the run asset inline, a preview save and the
   guard-rail checks. Suite 1538 / 0; the boss fight checked in play (`Sandbox/SeepingCistern.asset`).
 - **The Warlock's workbook pass** (2026-10-11) — the Heroes, Magic, Combat and Enemies guides. From the
@@ -529,7 +529,7 @@ per-subsystem `CLAUDE.md` files — not here.
   gives a dodge chance against physical hits only (basic attacks and Strength/Agility abilities — a
   dodge voids the whole ability on that target). Three nimble enemies got Luck. `DefenseRulesTests`;
   suite green.
-- **Hero visions** (2026-10-03) — the Heroes guide. `HeroSO.Vision` + `Tools ▸ Heroes ▸ Hero Vision`:
+- **Hero visions** (2026-10-03) — the Heroes guide. `HeroSO.Vision` + `Tools ▸ Hero Vision`:
   each hero's intended fantasy, role, signature and branches beside what the grid grants today.
   Warrior/Paladin/Ranger pre-filled; the other four are the owner's to write.
 
@@ -898,7 +898,7 @@ per-subsystem `CLAUDE.md` files — not here.
 - **Boss encounters** (2026-08) — `EnemySO.IsBoss` + `BossBehavior` (telegraphed party-wide signature,
   enrage under 30%), placed via `RunLevelEntry.BossEnemy`, alone in a sealed exit room. `BossAdds`
   escorts added 2026-08-30; every boss now has one.
-- **Balance analyzer** — `Assets/Scripts/Balance/` + the `Tools ▸ Balance ▸ Balance Analyzer` window +
+- **Balance analyzer** — `Assets/Scripts/Balance/` + the `Tools ▸ Balance Analyzer` window +
   `BalanceRegressionTests`. *(No `BalanceRules.asset` is checked in; the window's "Create rules asset"
   button writes one. Until then it runs on code defaults.)*
 - **Elements & Unlocks tab** — `ProgressionMap` models the **sphere grids** as a supply chain: unlock

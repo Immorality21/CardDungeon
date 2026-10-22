@@ -264,7 +264,7 @@ acquisition mechanic for a stat tree and gained nothing.
 Touch points: `Assets/ScriptableObjects/Heroes/Grids/*.asset` (all four, re-authored),
 `Assets/Scripts/Heroes/SphereGridSO.cs`, `SphereGridOps.cs`,
 `Assets/Scripts/Heroes/UI/SphereGridView.cs` + `SphereGridPresenter.cs`,
-`Tools ▸ Heroes ▸ Sphere Grid Editor`, `Assets/Scripts/Balance/InvestmentFrontier.cs`.
+`Tools ▸ Sphere Grid Editor`, `Assets/Scripts/Balance/InvestmentFrontier.cs`.
 
 ### 5b. Heroes are unlocked, not bought — the tavern is removed *(added 2026-09-04)*
 
@@ -392,7 +392,7 @@ the game's data and the Hero Vision window only. The old Cultist's art moved wit
 
 #### The Tinkerer — tools, Disassemble and mechs *(built 2026-10-07)*
 
-The owner wrote the vision (`HeroSO.Vision`, `Tools ▸ Heroes ▸ Hero Vision`): a female steampunk
+The owner wrote the vision (`HeroSO.Vision`, `Tools ▸ Hero Vision`): a female steampunk
 inventor who solves everything with tools; support and damage; **Disassemble** at the root of the
 grid, like Rikku taking machina apart in FFX; her **Ultra style is to assemble a mech and climb
 in**, one mech per branch. Decided with the owner the same day:
