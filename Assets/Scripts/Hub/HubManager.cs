@@ -137,6 +137,9 @@ namespace Assets.Scripts.Hub
         private VisualElement _tutorialBanner;
         private Label _tutorialText;
 
+        // The story map's one challenge warning, for the visit it is shown on; empty otherwise.
+        private string _challengeWarning = string.Empty;
+
         // Which view the party screen was opened from, so Back goes where the player came from.
         private bool _partyOpenedFromProgress;
 
@@ -1351,6 +1354,7 @@ namespace Assets.Scripts.Hub
                 HideTown();
                 SetShown(_lotView, false);
                 _campaignMap.Show(_runSaveData.RunKey, _runSaveData.CurrentLevelIndex);
+                WarnOfChallengeOnce();
                 return;
             }
 
@@ -1627,12 +1631,17 @@ namespace Assets.Scripts.Hub
                 _sphereGrid != null && _sphereGrid.IsGuidedNodeSelected);
             // The grid window leaves only ~90px above it, and the full-size banner ran over its top
             // edge (playtest 2 finding 7): over the grid the banner is set smaller and tighter.
-            bool compact = screen == TutorialScreen.Grid || screen == TutorialScreen.Inventory;
+            bool compact = screen == TutorialScreen.Grid || screen == TutorialScreen.Inventory
+                || screen == TutorialScreen.CampaignMap;
             if (_tutorialBanner.ClassListContains(TutorialCompactClass) != compact)
             {
                 SetClass(_tutorialBanner, TutorialCompactClass, compact);
             }
             string text = _tutorial != null ? _tutorial.TextFor(cue) : string.Empty;
+            if (screen == TutorialScreen.CampaignMap && !string.IsNullOrEmpty(_challengeWarning))
+            {
+                text = _challengeWarning;
+            }
             if (_tutorialText.text != text)
             {
                 _tutorialText.text = text;
@@ -1654,6 +1663,10 @@ namespace Assets.Scripts.Hub
             {
                 return TutorialScreen.Inventory;
             }
+            if (IsShown(_campaignView))
+            {
+                return TutorialScreen.CampaignMap;
+            }
             if (IsShown(_lotView))
             {
                 return _selectedLot != null && _selectedLot.SaveKey == GuidedLot()
@@ -1661,6 +1674,29 @@ namespace Assets.Scripts.Hub
                     : TutorialScreen.Other;
             }
             return IsTownActive() ? TutorialScreen.Town : TutorialScreen.Other;
+        }
+
+        /// <summary>
+        /// The map was just opened: if a challenge run is open and the save was never warned, say so
+        /// on this visit (the banner reads <see cref="_challengeWarning"/>) and write the warning down,
+        /// so it is said once. "{run}" in the line becomes the run's name.
+        /// </summary>
+        private void WarnOfChallengeOnce()
+        {
+            _challengeWarning = string.Empty;
+            if (_tutorial == null || _campaignMap == null || !MetaProgressManager.HasInstance)
+            {
+                return;
+            }
+            var meta = MetaProgressManager.Instance;
+            var run = TutorialOps.ChallengeToWarnOf(meta.ChallengeWarned, _campaignMap.States);
+            string line = _tutorial.TextFor(TutorialCue.ChallengeAhead);
+            if (run == null || string.IsNullOrEmpty(line))
+            {
+                return;
+            }
+            _challengeWarning = line.Replace("{run}", CampaignOps.DisplayNameOf(run));
+            meta.MarkChallengeWarned();
         }
 
         /// <summary>A node was bought on the grid. If that closed the guided step, the screen is handed back.</summary>

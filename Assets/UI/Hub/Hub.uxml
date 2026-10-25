@@ -149,7 +149,7 @@
                         <ui:Button name="merchant-action" text="" class="cd-inv-tab cd-camp-action" />
                     </ui:VisualElement>
                     <ui:Label name="merchant-reason" text="" class="cd-reason" />
-                    <ui:ScrollView name="merchant-detail-body" class="cd-inv-detail__body" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
+                    <ui:ScrollView name="merchant-detail-body" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
                     <ui:Label name="merchant-feedback" text="" class="cd-camp-feedback" />
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -201,7 +201,7 @@
                         <ui:Button name="party-lead" text="Lead the party" class="cd-inv-tab cd-camp-action" />
                     </ui:VisualElement>
                     <ui:Label name="party-reason" text="" class="cd-reason" />
-                    <ui:ScrollView name="party-detail-body" class="cd-inv-detail__body" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
+                    <ui:ScrollView name="party-detail-body" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
                 </ui:VisualElement>
 
                 <ui:VisualElement class="cd-inv-col cd-camp-col--split">
@@ -252,7 +252,7 @@
                         <ui:Button name="forge-upgrade" text="Upgrade" class="cd-inv-tab cd-camp-action" />
                     </ui:VisualElement>
                     <ui:Label name="forge-reason" text="" class="cd-reason" />
-                    <ui:ScrollView name="forge-detail-body" class="cd-inv-detail__body" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
+                    <ui:ScrollView name="forge-detail-body" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
                     <ui:Label name="forge-feedback" text="" class="cd-camp-feedback sg-feedback" />
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -331,7 +331,7 @@
                             <ui:Label name="inv-detail-sub" text="" class="cd-inv-detail__sub" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:ScrollView name="inv-detail-body" class="cd-inv-detail__body" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
+                    <ui:ScrollView name="inv-detail-body" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
                 </ui:VisualElement>
             </ui:VisualElement>
 

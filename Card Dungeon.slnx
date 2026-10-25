@@ -11,4 +11,5 @@
   <Project Path="CardDungeon.IO.Editor.csproj" />
   <Project Path="CardDungeon.Cards.Editor.csproj" />
   <Project Path="CardDungeon.Combat.Editor.csproj" />
+  <Project Path="CardDungeon.Tutorial.Editor.csproj" />
 </Solution>

@@ -49,6 +49,9 @@ namespace Assets.Scripts.Tutorial
 
         /// <summary>The Storehouse's inventory screen.</summary>
         Inventory = 4,
+
+        /// <summary>The story map (run selection).</summary>
+        CampaignMap = 5,
     }
 
     /// <summary>
@@ -73,5 +76,6 @@ namespace Assets.Scripts.Tutorial
         EquipGear = 13,
         GearEquipped = 14,
         GoOn = 15,
+        ChallengeAhead = 16, // the story map, once, when a challenge run first opens (not a step: any save sees it)
     }
 }

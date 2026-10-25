@@ -91,6 +91,24 @@ the bag holds no unworn equipment. Guarded by `TutorialContentTests.TheGearFloor
 
 ---
 
+### The challenge warning (2026-10-25)
+
+The first time the story map opens with a **challenge run** (`RunDefinitionSO.Challenge`) open and never
+cleared - today the Blood Stair, beside the Sealed Archive once The Threshold is done - the tutorial
+banner says so (`TutorialCue.ChallengeAhead`; `{run}` in the line becomes the run's name). Said once:
+`MetaProgressSaveData.ChallengeWarned` is written when it is shown, and the banner stays for that visit.
+Not a step - any save sees it, like the first-death lesson. Rule: `TutorialOps.ChallengeToWarnOf`;
+wiring: `HubManager.WarnOfChallengeOnce`.
+
+### Hand-testing it: `Tools ▸ Tutorial` (2026-10-25)
+
+- **Play From New Game (throwaway save)** - play mode from the title screen against a fresh
+  `savedata_tutorial` folder (`TutorialTestSession`, the sandbox's `SessionState` pattern), so the title
+  offers New Game and the real save is never touched. Audio settings are copied over.
+- **Clear This Floor** - only inside such a session and outside a fight: frees the floor's captive, pays
+  40 XP (floor 1's sure XP) and runs the real level clear (learning 5). The whole tutorial, gear step and
+  challenge warning included, can be walked in a couple of minutes.
+
 ## Learnings
 
 1. **`HasInstance` lies on the hub's first frame.** `HubManager.CanPayFor` asked
@@ -126,8 +144,8 @@ Roughly in the order they bite. The first two are decisions for the owner.
       town is Alt-F4. Fine while the steps are this short; revisit if a step ever gets long. (Options
       is only reachable from the title screen today.)
 - [ ] **Skip and replay.** §20 wants both; neither exists. Skip = `FinishTutorial()` behind a button
-      on the banner; replay = an Options toggle that clears both flags. A dev-only
-      `Tools ▸ Tutorial ▸ Reset` would make hand-testing cheaper right now.
+      on the banner; replay = an Options toggle that clears both flags. *(The dev-only half is done:
+      `Tools ▸ Tutorial ▸ Play From New Game`, 2026-10-25.)*
 - [ ] **The level-clear Continue is hidden while the tutorial is active** (2026-09-29), so the
       floor-1 clear can only go to town. Once the tutorial finishes (the next time the player goes
       down), Continue appears on every level clear but the run's last.
@@ -135,9 +153,8 @@ Roughly in the order they bite. The first two are decisions for the owner.
       fine (the town says it next), but it is the one moment the player sees the timber arrive.
 - [ ] **The in-dungeon half teaches nothing yet**: moving between rooms, the combat menu, Slash,
       freeing the Paladin. Floor 1 is authored quiet (`AllowRoomEvents: 0`, no caches) for this.
-- [ ] **The fork warning on the campaign map** (§20, requested 2026-09-28): the first time the map
-      offers a choice after The Threshold, warn that some roads are far beyond you (the Blood Stair).
-      A new `TutorialScreen.CampaignMap` + cue; needs a "seen" flag, since it is not derivable.
+- [x] **The fork warning on the campaign map** (§20, requested 2026-09-28) - built 2026-10-25 as the
+      challenge warning above. Not yet seen in play.
 - [ ] **The "spend your XP" nudge after N cleared levels** (§20): the loop above covers the *first*
       spend; the plan also wants a reminder later, when XP has piled up unspent.
 - [ ] **The Paladin's XP.** Rescued on floor 1, the Paladin arrives with a starter bank and the grid

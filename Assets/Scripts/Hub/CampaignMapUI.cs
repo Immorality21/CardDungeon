@@ -63,6 +63,9 @@ namespace Assets.Scripts.Hub
 
         public event Action OnClosed;
 
+        /// <summary>Every node resolved against the save, as of the last <see cref="Show"/>.</summary>
+        public IReadOnlyList<CampaignNodeState> States => _states;
+
         public CampaignMapUI(VisualElement root, CampaignSO campaign, PartyRosterSO roster = null)
         {
             _root = root;

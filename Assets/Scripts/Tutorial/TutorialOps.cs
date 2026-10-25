@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
 
 namespace Assets.Scripts.Tutorial
@@ -261,6 +262,30 @@ namespace Assets.Scripts.Tutorial
                 default:
                     return TutorialCue.None;
             }
+        }
+
+        /// <summary>
+        /// The run the story map warns about, once: the first challenge run (<see cref="RunDefinitionSO.Challenge"/>)
+        /// that is open and never cleared. Null once <paramref name="warned"/> or while none is open.
+        /// Not a step - it is not part of the guided loop and any save sees it, like the first-death
+        /// lesson - because a challenge run opens beside the main line (the Blood Stair beside the
+        /// Sealed Archive) and nothing else on the map says it is built for a far stronger party.
+        /// </summary>
+        public static RunDefinitionSO ChallengeToWarnOf(bool warned, IReadOnlyList<CampaignNodeState> states)
+        {
+            if (warned || states == null)
+            {
+                return null;
+            }
+            foreach (var state in states)
+            {
+                var run = state?.Node?.Run;
+                if (run != null && run.Challenge && state.Status == CampaignNodeStatus.Available)
+                {
+                    return run;
+                }
+            }
+            return null;
         }
 
         /// <summary>

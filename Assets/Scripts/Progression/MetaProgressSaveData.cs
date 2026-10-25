@@ -93,6 +93,10 @@ namespace Assets.Scripts.Progression
         public bool TutorialStarted;
         public bool TutorialFinished;
 
+        // The story map has warned once that a challenge run is open (docs/TUTORIAL.md, "The
+        // challenge warning"). Not derivable from the rest of the save, so it is stored.
+        public bool ChallengeWarned;
+
         // Party wipes, ever (survives death by definition). The death screen explains dying once,
         // on the first; nothing else reads it yet.
         public int PartyDeaths;

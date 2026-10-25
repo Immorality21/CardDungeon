@@ -132,7 +132,9 @@ New verbs, all appended to their enums:
   for a kind of unit; **`SpellEffect.BonusPerDebuff`** earns it once per debuff (`DebuffCount`, at most
   3 - Eviscerate). `SpellEffect.BonusFactor` is the one place both are read.
 - **`BuffType.Hidden`** (Vanish): `CombatManager.TargetableHeroes` leaves a hidden hero out of what the
-  enemy planner and the fallback target pick from (everyone again if all are hidden). Not curable.
+  enemy planner and the fallback target pick from (everyone again if all are hidden). Not curable. A heavy
+  blow wound up on a hero who then vanishes re-aims at delivery, like one aimed at a hero who fell
+  (`ExecuteEnemyHeavyAttack`, 2026-10-25).
 - **`BuffType.Evasive`** (Shadowstep: 1 for 3 turns; Smoke and Mirrors: 99 for 1 turn on the party): the
   next `Amount` physical blows miss outright, spent by `EvasiveBuffHandler.TryEvade` in
   `ExecuteAttack` and `EffectResolver.HitFilter` before Luck's dodge. Floats "Evade".
@@ -150,8 +152,8 @@ art is PixelLab (2026-10-11).
 **Vanish did nothing**: the live enemy turn built its planner context from `HeroSideUnits()`, and only
 `PredictIntent` used `TargetableHeroes()`, so the intent icon honoured Hidden and the swing did not. Fixed
 in `ExecuteEnemyTurn`; afterwards six enemy turns with the Rogue hidden all went to the Cultist. A charge
-locked on her *before* she vanished still lands (`ChargeTarget` is stored) - a design question, not
-changed. Shadowstep's Evade spent on a hound's basic attack; Blood Moon's percent STR/INT buff reached
+locked on her *before* she vanished still landed (`ChargeTarget` is stored) - re-aimed since
+2026-10-25 at the owner's request. Shadowstep's Evade spent on a hound's basic attack; Blood Moon's percent STR/INT buff reached
 both heroes and cost 30% of the Cultist's bar. The balance model does not know Hidden.
 
 ## Resistance buffs

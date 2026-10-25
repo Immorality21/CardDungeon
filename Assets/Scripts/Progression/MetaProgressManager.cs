@@ -563,6 +563,20 @@ namespace Assets.Scripts.Progression
             Save();
         }
 
+        /// <summary>Whether the story map has already warned that a challenge run is open.</summary>
+        public bool ChallengeWarned => _saveData.ChallengeWarned;
+
+        /// <summary>The story map showed its one challenge warning. Persists immediately.</summary>
+        public void MarkChallengeWarned()
+        {
+            if (_saveData.ChallengeWarned)
+            {
+                return;
+            }
+            _saveData.ChallengeWarned = true;
+            Save();
+        }
+
         // --- Party deaths ---
 
         public int PartyDeaths => _saveData.PartyDeaths;

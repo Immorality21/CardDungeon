@@ -2507,8 +2507,11 @@ namespace Assets.Scripts.Rooms
 
         private IEnumerator ExecuteEnemyHeavyAttack(ICombatUnit enemyUnit, Enemy enemy, Party party, float multiplier)
         {
+            // The aim was locked at wind-up. It moves if that hero has since fallen or Vanished (the
+            // Rogue hiding mid-charge dodges it, owner 2026-10-25), picked again by threat from who can
+            // still be seen - which is everyone again if the whole party is hidden.
             ICombatUnit target = enemy != null ? enemy.ChargeTarget : null;
-            if (target == null || !target.IsAlive)
+            if (target == null || !target.IsAlive || HiddenBuffHandler.IsHidden(BuffTracker, target))
             {
                 target = GetRandomAliveHero(party);
             }

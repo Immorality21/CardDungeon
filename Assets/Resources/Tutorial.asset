@@ -48,3 +48,5 @@ MonoBehaviour:
     Text: Equipped. Check here after every run - better gear turns up the deeper you go. Back to town when ready.
   - Cue: 15
     Text: Your party is armed. When you are ready, take The Story to continue The Threshold.
+  - Cue: 16
+    Text: Not every open road is meant for you yet. {run} is built for a far stronger party - most go elsewhere first.

@@ -135,10 +135,9 @@ In order. The balance pass starts only when this list is empty.
    (`Sandbox/RogueKit.asset`) and every gear reaction, milestone and the Shadowweave set
    (`Sandbox/GearCheck.asset`) seen working in real fights. **Vanish was broken** (enemies still swung
    at a hidden Rogue - the live turn ignored Hidden; fixed in `CombatManager.ExecuteEnemyTurn`, see the
-   Magic guide). Left open: the hub item pane (`inv-detail-body`) overflows on gear with set or growth
-   lines - it scrolls by mouse wheel only, with a hidden scrollbar and no sign there is more, so the
-   hero's Stats/Resistances can sit out of sight; and a charge locked on the Rogue before Vanish still
-   lands.
+   Magic guide). The two left open were fixed 2026-10-25: the hub detail panes (`inv-detail-body` and
+   the Merchant/Campfire/Forge ones) show their scrollbar when they overflow, and a heavy blow wound up
+   on the Rogue re-aims if she vanishes before it lands.
 5. ~~**Commit** the pass (owner).~~ *Done 2026-10-12.*
 
 Then the balance pass, starting with what this pass already showed:

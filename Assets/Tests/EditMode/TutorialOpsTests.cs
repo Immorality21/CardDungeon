@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Tutorial;
@@ -235,6 +236,43 @@ namespace Tests.EditMode
             var grid = Grid(priced, Node("a", 10));
 
             Assert.IsNull(TutorialOps.GuidedNodeKey(grid, new List<string>(), 100));
+        }
+
+        // --- the challenge warning ----------------------------------------------
+
+        private static CampaignNodeState MapNode(bool challenge, CampaignNodeStatus status)
+        {
+            var run = ScriptableObject.CreateInstance<RunDefinitionSO>();
+            run.Challenge = challenge;
+            return new CampaignNodeState { Node = new CampaignNodeEntry { Run = run }, Status = status };
+        }
+
+        [Test]
+        public void ChallengeToWarnOf_OpenChallengeRun_IsWarnedOf()
+        {
+            var challenge = MapNode(true, CampaignNodeStatus.Available);
+            var states = new List<CampaignNodeState> { MapNode(false, CampaignNodeStatus.Available), challenge };
+            Assert.AreSame(challenge.Node.Run, TutorialOps.ChallengeToWarnOf(false, states));
+        }
+
+        [Test]
+        public void ChallengeToWarnOf_OnlyOnce()
+        {
+            var states = new List<CampaignNodeState> { MapNode(true, CampaignNodeStatus.Available) };
+            Assert.IsNull(TutorialOps.ChallengeToWarnOf(true, states));
+        }
+
+        [Test]
+        public void ChallengeToWarnOf_LockedOrClearedChallenge_SaysNothing()
+        {
+            var states = new List<CampaignNodeState>
+            {
+                MapNode(true, CampaignNodeStatus.Locked),
+                MapNode(true, CampaignNodeStatus.Hidden),
+                MapNode(true, CampaignNodeStatus.Completed),
+                MapNode(false, CampaignNodeStatus.Available),
+            };
+            Assert.IsNull(TutorialOps.ChallengeToWarnOf(false, states));
         }
     }
 }
