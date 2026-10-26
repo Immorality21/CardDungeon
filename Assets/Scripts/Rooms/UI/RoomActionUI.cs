@@ -92,6 +92,10 @@ namespace Assets.Scripts.Rooms
         private Label _bossBannerName;
         private VisualElement _summonBanner;
         private Label _summonBannerName;
+        private VisualElement _abilityBanner;
+        private Label _abilityBannerName;
+        // Bumped per banner, so the timer of an older one cannot hide a newer one.
+        private int _abilityBannerShown;
 
         private VisualElement _commandList;
         private VisualElement _turnOrder;
@@ -267,6 +271,8 @@ namespace Assets.Scripts.Rooms
             _bossBannerName = root.Q<Label>("boss-banner-name");
             _summonBanner = root.Q<VisualElement>("summon-banner");
             _summonBannerName = root.Q<Label>("summon-banner-name");
+            _abilityBanner = root.Q<VisualElement>("ability-banner");
+            _abilityBannerName = root.Q<Label>("ability-banner-name");
 
             _actionBtn.clicked += OnAction;
             if (_searchBtn != null)
@@ -1252,6 +1258,7 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.OnCombatEnded += OnCombatEnded;
             CombatManager.Instance.OnHeroTurnStarted += OnHeroTurnStarted;
             CombatManager.Instance.OnSummonStarted += OnSummonStarted;
+            CombatManager.Instance.OnEnemyAbilityUsed += OnEnemyAbilityUsed;
             CombatManager.Instance.OnSummonEnded += OnSummonEnded;
             CombatManager.Instance.OnTurnExecuted += OnTurnExecuted;
             CombatManager.Instance.OnTurnOrderChanged += OnTurnOrderChanged;
@@ -1392,6 +1399,34 @@ namespace Assets.Scripts.Rooms
         private void OnSummonEnded()
         {
             SetShown(_summonBanner, false);
+        }
+
+        // Long enough to read a two-word name while the projectile flies; gone before the next turn.
+        private const long AbilityBannerMs = 1600;
+
+        /// <summary>
+        /// Names what an enemy uses, FFX-style (playtest 3 finding 12): the name alone, no flavour -
+        /// combat text stays minimal.
+        /// </summary>
+        private void OnEnemyAbilityUsed(ICombatUnit enemy, string name)
+        {
+            if (_abilityBanner == null || string.IsNullOrEmpty(name))
+            {
+                return;
+            }
+            if (_abilityBannerName != null)
+            {
+                _abilityBannerName.text = name;
+            }
+            SetShown(_abilityBanner, true);
+            int shown = ++_abilityBannerShown;
+            _abilityBanner.schedule.Execute(() =>
+            {
+                if (shown == _abilityBannerShown)
+                {
+                    SetShown(_abilityBanner, false);
+                }
+            }).StartingIn(AbilityBannerMs);
         }
 
         private void OnHeroItem()
@@ -2301,7 +2336,7 @@ namespace Assets.Scripts.Rooms
             }
             SetText(_pauseNote, _quitArmed
                 ? "You will start this floor again, from the entrance, with every enemy back - and "
-                  + "just as hurt as you are now. Anything you have not banked yet is lost."
+                  + "just as hurt as you are now. What this floor has given you so far is lost."
                 : "The run waits for you on the story map.");
         }
 
@@ -2888,6 +2923,8 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.OnCombatEnded -= OnCombatEnded;
             CombatManager.Instance.OnHeroTurnStarted -= OnHeroTurnStarted;
             CombatManager.Instance.OnSummonStarted -= OnSummonStarted;
+            CombatManager.Instance.OnEnemyAbilityUsed -= OnEnemyAbilityUsed;
+            SetShown(_abilityBanner, false);
             CombatManager.Instance.OnSummonEnded -= OnSummonEnded;
             SetShown(_summonBanner, false);
             CombatManager.Instance.OnTurnExecuted -= OnTurnExecuted;
@@ -2979,7 +3016,7 @@ namespace Assets.Scripts.Rooms
                 _detailRows.Add(MakeVictoryRow($"Gold for reaching level {levels}",
                     "+" + MetaProgressManager.GoldPerLevelOnDeath * levels));
             }
-            _detailRows.Add(MakeVictoryRow("Everything banked before this floor", "kept"));
+            _detailRows.Add(MakeVictoryRow("Everything from earlier floors", "kept"));
             int pending = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.PendingRunGold : 0;
             if (pending > 0)
             {
@@ -2988,41 +3025,32 @@ namespace Assets.Scripts.Rooms
             _detailRows.Add(MakeVictoryRow("XP, items and materials from this floor", "lost"));
 
             // Point at the way to get stronger. Nothing after a wipe used to link losing to the
-            // sphere grid (revisit playtest finding 5). Banked XP is read off disk: saves are
-            // deferred, so disk holds what survives this wipe.
-            int banked = BankedPartyXp();
-            _detailRows.Add(MakeVictoryRow("Grow stronger",
-                banked > 0
-                    ? $"{banked} XP banked - spend it in the Hall of Progression"
-                    : "Spend banked XP in the Hall of Progression"));
+            // sphere grid (revisit playtest finding 5). The XP is read off disk: saves are deferred,
+            // so disk holds what survives this wipe. Worded "XP Gained", never "banked" - the owner
+            // wants that word out of the game (playtest 3 finding 17).
+            int unspent = UnspentPartyXp();
+            _detailRows.Add(MakeVictoryRow(unspent > 0 ? $"{unspent} XP Gained" : "Grow stronger",
+                "Spend it in the Hall of Progression"));
             SetShown(_detailRows, true);
         }
 
         /// <summary>
-        /// Where the run ended and to what, before what it costs (docs/plans/POLISH_CONTENT.md §15): a
-        /// wipe is meant to teach, and "floor 3 of 5, to Mirefather and 2 Bog Shamans" is the lesson.
-        /// Read from the run history, which has counted the attempt from its first floor.
+        /// Where the run ended (docs/plans/POLISH_CONTENT.md §15). The "Fell to" foes and the run's
+        /// kill/fight tally were cut (playtest 3 finding 17): the owner does not want them, and the
+        /// extra rows pushed the Return button off the bottom of the screen.
         /// </summary>
         private void AddRunStoryRows()
         {
-            var attempt = Progression.RunHistoryRecorder.Current;
-            if (DungeonManager.ActiveRun == null || attempt == null)
+            if (DungeonManager.ActiveRun == null)
             {
                 return;
             }
             _detailRows.Add(MakeVictoryRow("Fell on",
                 $"Floor {DungeonManager.RunLevelIndex + 1} of {DungeonManager.ActiveRun.Levels.Count}"));
-            string foes = Progression.RunHistoryOps.DescribeFoes(Progression.RunHistoryRecorder.LastFoes);
-            if (!string.IsNullOrEmpty(foes))
-            {
-                _detailRows.Add(MakeVictoryRow("Fell to", foes));
-            }
-            _detailRows.Add(MakeVictoryRow("This run",
-                $"{attempt.Kills} felled · {attempt.FightsWon} {(attempt.FightsWon == 1 ? "fight" : "fights")} won"));
         }
 
         /// <summary>The fielded heroes' unspent XP as it stands on disk - what a wipe leaves them.</summary>
-        private static int BankedPartyXp()
+        private static int UnspentPartyXp()
         {
             var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
             if (party == null)
@@ -3341,7 +3369,7 @@ namespace Assets.Scripts.Rooms
                 // frame of every floor it was teaching text that never went away.
                 bool teaching = MetaProgressManager.HasInstance && !MetaProgressManager.Instance.TutorialFinished;
                 SetText(_hudGold, teaching
-                    ? $"Gold found  +{gold}   (banked when you take the stairs)"
+                    ? $"Gold found  +{gold}   (yours when you take the stairs)"
                     : $"+{gold} gold");
             }
         }
@@ -3442,7 +3470,7 @@ namespace Assets.Scripts.Rooms
             _levelTallies?.Clear();
             AddTally("cd-lc-tally--gold", $"+{summary.GoldTotal}", "Gold",
                 $"{summary.GoldFound} found · {summary.GoldBonus} for the clear");
-            AddTally("cd-lc-tally--xp", $"+{xpTotal}", "XP", "banked for the sphere grid");
+            AddTally("cd-lc-tally--xp", $"+{xpTotal}", "XP", "for the sphere grid");
             // Only a revisit pays Essence; a "+0" tile on every first clear would only confuse.
             if (summary.Essence > 0)
             {

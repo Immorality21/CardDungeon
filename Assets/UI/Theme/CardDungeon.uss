@@ -1428,6 +1428,25 @@
     -unity-text-align: middle-right;
 }
 
+/* Gear another hero is wearing: its "Worn by" line in amber, so worn and loose gear tell apart at a
+   glance (playtest 3 finding 1). The name keeps its rarity colour. */
+.cd-inv-row__caption.cd-inv-row__caption--worn {
+    color: rgb(240, 170, 80);
+    -unity-font-style: bold;
+    opacity: 1;
+}
+
+/* The reassign question, centred over the inventory window. */
+.cd-inv-confirm {
+    align-items: center;
+    justify-content: center;
+}
+
+.cd-inv-confirm__window {
+    width: 520px;
+    margin-bottom: 0;
+}
+
 .cd-inv-row--empty .cd-inv-row__name {
     opacity: 0.45;
     -unity-font-style: italic;
@@ -2684,6 +2703,28 @@
     -unity-text-align: middle-center;
 }
 
+/* The enemy ability banner: one line, top-center, a plain dark bar like FFX's, so it never reads
+   as the summon banner's gold. */
+.cd-ability-banner {
+    position: absolute;
+    top: 48px;
+    left: 50%;
+    translate: -50% 0;
+    padding: 6px 30px;
+    background-color: rgba(10, 6, 20, 0.9);
+    border-width: 2px;
+    border-color: rgb(150, 70, 70);
+    border-radius: 4px;
+}
+
+.cd-ability-banner__name {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: var(--cd-text-light);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
 /* Merchant gear shop (buy/sell rows). */
 /* A section head inside a window (Options, Pause): the inventory column title's accent and rule,
    at row-label size so it reads as a heading, not a lesser label. */
@@ -3432,11 +3473,6 @@
     opacity: 0.85;
 }
 
-/* A line of the run's attempt history (docs/plans/POLISH_CONTENT.md §15): long enough to wrap. */
-.cm-attempt {
-    white-space: normal;
-}
-
 .cm-start {
     flex-shrink: 0;
     margin-top: 4px;
@@ -4013,9 +4049,24 @@
     border-radius: 8px;
 }
 
-/* Something to build or raise here. */
+/* On offer, but not affordable yet: the hammer, dimmed. */
 .hub-lot__badge--build {
     background-image: url("project://database/Assets/UI/Icons/hub_hammer.png");
+    opacity: 0.45;
+}
+
+/* Can be built or raised right now (playtest 3 finding 16): the hammer on a gold disc, and the
+   lot's name in gold. */
+.hub-lot__badge--ready {
+    background-image: url("project://database/Assets/UI/Icons/hub_hammer.png");
+    background-color: rgba(232, 184, 74, 0.35);
+    border-width: 2px;
+    border-color: var(--cd-gold);
+    border-radius: 15px;
+}
+
+.hub-lot--ready .hub-lot__label {
+    color: var(--cd-gold);
 }
 
 /* Not on offer yet. */

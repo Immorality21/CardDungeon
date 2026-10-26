@@ -121,6 +121,20 @@ namespace Assets.Scripts.Items.UI
             _detailBody = root.Q<ScrollView>("inv-detail-body");
             _hint = root.Q<Label>("inventory-hint");
             _closeButton = root.Q<Button>("inventory-close");
+            _confirm = root.Q<VisualElement>("inv-confirm");
+            _confirmMessage = root.Q<Label>("inv-confirm-message");
+            _confirmOk = root.Q<Button>("inv-confirm-ok");
+            _confirmCancel = root.Q<Button>("inv-confirm-cancel");
+            if (_confirmOk != null)
+            {
+                _confirmOk.clicked += AcceptConfirm;
+                _confirmOk.focusable = false;
+            }
+            if (_confirmCancel != null)
+            {
+                _confirmCancel.clicked += CloseConfirm;
+                _confirmCancel.focusable = false;
+            }
 
             WireTab(_tabEquipment, Tab.Equipment);
             WireTab(_tabSpells, Tab.Spells);
@@ -197,6 +211,7 @@ namespace Assets.Scripts.Items.UI
             {
                 return;
             }
+            CloseConfirm();
             _isShown = false;
             _root.style.display = DisplayStyle.None;
             _root.focusable = false; // stop being a focus/nav target once closed
@@ -615,7 +630,9 @@ namespace Assets.Scripts.Items.UI
                 Gear = gear,
                 Preview = () => ShowItemDetail(so, preview,
                     wornBy != null ? $"Worn by {wornBy} - equipping it takes it from them." : null, item),
-                Confirm = () => Equip(item, so),
+                Confirm = wornBy != null
+                    ? () => AskReassign(item, so, wornBy)
+                    : (Action)(() => Equip(item, so)),
             };
 
             string caption = wornBy != null
@@ -634,6 +651,10 @@ namespace Assets.Scripts.Items.UI
                 caption += $" · vs {worn.DisplayName}";
             }
             entry.Row = BuildRow(so.Icon, so.DisplayName, caption, string.Empty, so, out entry.Cursor);
+            if (wornBy != null)
+            {
+                entry.Row.Q<Label>(className: "cd-inv-row__caption")?.AddToClassList("cd-inv-row__caption--worn");
+            }
 
             // The two biggest changes it makes, each in its own colour: one number alone lied - a
             // staff read "+5 INT" while costing 4 Strength.
@@ -703,6 +724,95 @@ namespace Assets.Scripts.Items.UI
             RefreshHeroes();
             RefreshBody();
             Equipped?.Invoke();
+        }
+
+        // ============================================================
+        //  REASSIGN CONFIRM (gear worn by another hero)
+        // ============================================================
+
+        private VisualElement _confirm;
+        private Label _confirmMessage;
+        private Button _confirmOk;
+        private Button _confirmCancel;
+        private Action _onConfirm;
+        // 0 = Reassign, 1 = Cancel. Reassign first: the row the player pressed already said who wears it.
+        private int _confirmIndex;
+
+        private bool ConfirmOpen => _onConfirm != null;
+
+        /// <summary>
+        /// Taking gear off another hero asks first (playtest 3 finding 1): the row said "Worn by", but
+        /// one keypress quietly stripped a piece off a hero who was not on screen.
+        /// </summary>
+        private void AskReassign(ItemSaveData item, ItemSO so, string wornBy)
+        {
+            if (_confirm == null)
+            {
+                Equip(item, so);
+                return;
+            }
+            var hero = FindHero(_selectedHeroKey);
+            string to = hero != null ? hero.DisplayName : "this hero";
+            if (_confirmMessage != null)
+            {
+                _confirmMessage.text =
+                    $"{so.DisplayName} is already equipped by {wornBy}. Do you want to reassign it to {to}?";
+            }
+            _onConfirm = () => Equip(item, so);
+            _confirmIndex = 0;
+            RenderConfirmCursor();
+            SetShown(_confirm, true);
+        }
+
+        private void AcceptConfirm()
+        {
+            var action = _onConfirm;
+            CloseConfirm();
+            action?.Invoke();
+        }
+
+        private void CloseConfirm()
+        {
+            _onConfirm = null;
+            SetShown(_confirm, false);
+        }
+
+        private void RenderConfirmCursor()
+        {
+            _confirmOk?.EnableInClassList("cd-nav--selected", _confirmIndex == 0);
+            _confirmCancel?.EnableInClassList("cd-nav--selected", _confirmIndex == 1);
+        }
+
+        /// <summary>The dialog owns the keyboard while it is up: arrows or Tab pick, Enter presses, Esc cancels.</summary>
+        private void OnConfirmKey(KeyCode key)
+        {
+            switch (key)
+            {
+                case KeyCode.LeftArrow:
+                case KeyCode.RightArrow:
+                case KeyCode.UpArrow:
+                case KeyCode.DownArrow:
+                case KeyCode.Tab:
+                    _confirmIndex = 1 - _confirmIndex;
+                    RenderConfirmCursor();
+                    break;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                case KeyCode.Space:
+                    if (_confirmIndex == 0)
+                    {
+                        AcceptConfirm();
+                    }
+                    else
+                    {
+                        CloseConfirm();
+                    }
+                    break;
+                case KeyCode.Escape:
+                case KeyCode.Backspace:
+                    CloseConfirm();
+                    break;
+            }
         }
 
         private void Unequip(SlotType slot)
@@ -1627,6 +1737,12 @@ namespace Assets.Scripts.Items.UI
         {
             if (!_isShown)
             {
+                return;
+            }
+            if (ConfirmOpen)
+            {
+                OnConfirmKey(evt.keyCode);
+                evt.StopPropagation();
                 return;
             }
             switch (evt.keyCode)

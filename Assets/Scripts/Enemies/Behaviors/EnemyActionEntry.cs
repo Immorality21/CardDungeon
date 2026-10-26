@@ -110,6 +110,10 @@ namespace Assets.Scripts.Enemies.Behaviors
         [Tooltip("Authoring label only — never shown to the player. Say what the action is for.")]
         public string Label = "";
 
+        [Tooltip("The name the player sees in the banner as the enemy uses it (FFX-style). Empty " +
+                 "shows no banner. A cast always names its spell instead, so leave this empty there.")]
+        public string DisplayName = "";
+
         public EnemyActionKind Kind = EnemyActionKind.Attack;
 
         [Tooltip("Higher tiers pre-empt lower ones entirely. Entries that share a priority compete " +

@@ -61,16 +61,23 @@ namespace Tests.EditMode
         // --- the town's badge (hammer / padlock / none) ------------------------------
 
         [Test]
-        public void BadgeFor_AnOfferedLot_ShowsTheHammer()
+        public void BadgeFor_AnOfferedLotYouCanPayFor_ShowsTheLitHammer()
         {
-            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Build,
+            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Ready,
                 Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(Lot("merchant"), HubProgress.Fresh));
         }
 
         [Test]
-        public void BadgeFor_ABuiltLotThatCanRise_ShowsTheHammer()
+        public void BadgeFor_AnOfferedLotYouCannotPayFor_ShowsTheDimmedHammer()
         {
             Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Build,
+                Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(Lot("merchant"), HubProgress.Fresh, canPayPlacement: false));
+        }
+
+        [Test]
+        public void BadgeFor_ABuiltLotThatCanRise_ShowsTheLitHammer()
+        {
+            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Ready,
                 Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(
                     Lot("campfire", placedByDefault: true, maxLevel: 3), HubProgress.Fresh));
         }
@@ -83,7 +90,7 @@ namespace Tests.EditMode
 
             Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.None,
                 Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(campfire, HubProgress.Fresh, 35));
-            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Build,
+            Assert.AreEqual(Assets.Scripts.Hub.UI.LotBadge.Ready,
                 Assets.Scripts.Hub.UI.HubPresenter.BadgeFor(campfire, HubProgress.Fresh, 300));
         }
 

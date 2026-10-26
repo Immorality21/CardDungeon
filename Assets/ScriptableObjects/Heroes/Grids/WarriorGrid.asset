@@ -121,7 +121,7 @@ MonoBehaviour:
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 0, y: -360}
+    Position: {x: 60, y: -375}
     Gains:
       Values: []
     ResistType: 0

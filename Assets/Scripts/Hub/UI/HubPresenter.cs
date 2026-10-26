@@ -12,10 +12,13 @@ namespace Assets.Scripts.Hub.UI
     public enum LotBadge
     {
         None,
+        // On offer, but the bag cannot pay for it yet: a dimmed hammer.
         Build,
         Locked,
         // Something waits inside a built lot: XP to spend, an upgrade to afford, a new entry to read.
         New,
+        // Can be built or raised right now: the hammer, lit (playtest 3 finding 16). Appended.
+        Ready,
     }
 
     public static class HubPresenter
@@ -110,8 +113,14 @@ namespace Assets.Scripts.Hub.UI
         /// <para>A standing lot's next level only earns the hammer once <paramref name="gold"/> covers
         /// it: the campfire showed one with its upgrade 265 gold out of reach, which read as a job
         /// waiting (playtest 2 finding 10). Leave it out to ignore money.</para>
+        ///
+        /// <para>What can be paid for <i>now</i> is <see cref="LotBadge.Ready"/>, a lit hammer; an
+        /// unbuilt lot the bag cannot cover yet keeps a dimmed one (<paramref name="canPayPlacement"/>),
+        /// because the town gave no way to tell "on offer" from "you can buy this" (playtest 3
+        /// finding 16).</para>
         /// </summary>
-        public static LotBadge BadgeFor(BuildingSO building, HubProgress progress, int gold = int.MaxValue)
+        public static LotBadge BadgeFor(BuildingSO building, HubProgress progress, int gold = int.MaxValue,
+            bool canPayPlacement = true)
         {
             if (building == null)
             {
@@ -122,10 +131,10 @@ namespace Assets.Scripts.Hub.UI
             {
                 case BuildingState.Built:
                     return BuildingOps.CanUpgrade(building, progress) && gold >= BuildingOps.UpgradeCost(building, progress)
-                        ? LotBadge.Build
+                        ? LotBadge.Ready
                         : LotBadge.None;
                 case BuildingState.Available:
-                    return LotBadge.Build;
+                    return canPayPlacement ? LotBadge.Ready : LotBadge.Build;
                 default:
                     return LotBadge.Locked;
             }
@@ -142,6 +151,8 @@ namespace Assets.Scripts.Hub.UI
                     return "hub-lot__badge--locked";
                 case LotBadge.New:
                     return "hub-lot__badge--new";
+                case LotBadge.Ready:
+                    return "hub-lot__badge--ready";
                 default:
                     return null;
             }

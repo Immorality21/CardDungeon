@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 4
   Actions:
   - Label: Cast from Draw list
+    DisplayName: 
     Kind: 5
     Priority: 20
     Weight: 1
@@ -28,6 +29,7 @@ MonoBehaviour:
     Magic: {fileID: 0}
     Conditions: []
   - Label: Signature
+    DisplayName: Bog Surge
     Kind: 2
     Priority: 10
     Weight: 1
@@ -49,6 +51,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Signature (enraged)
+    DisplayName: Bog Surge
     Kind: 2
     Priority: 10
     Weight: 1
@@ -70,6 +73,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Enraged blow
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -85,6 +89,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Blow
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1

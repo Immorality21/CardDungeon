@@ -389,7 +389,9 @@ namespace Assets.Scripts.Hub
         private LotBadge BadgeWithNews(BuildingSO building, HubProgress progress)
         {
             int gold = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.Gold : 0;
-            var badge = HubPresenter.BadgeFor(building, progress, gold);
+            bool canPayPlacement = BuildingOps.StateOf(building, progress) != BuildingState.Available
+                || CanPayFor(building, progress);
+            var badge = HubPresenter.BadgeFor(building, progress, gold, canPayPlacement);
             if (BuildingOps.StateOf(building, progress) == BuildingState.Built && HasNews(building.Service))
             {
                 return LotBadge.New;

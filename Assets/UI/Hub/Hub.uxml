@@ -336,6 +336,19 @@
             </ui:VisualElement>
 
             <ui:Label name="inventory-hint" text="" class="cd-inv-hint" />
+
+            <!-- Asked before taking a piece of gear off another hero (playtest 3 finding 1). Over the
+                 whole window, so nothing behind it can be clicked while it is up. -->
+            <ui:VisualElement name="inv-confirm" class="cd-dialog-scrim cd-inv-confirm cd-hidden">
+                <ui:VisualElement class="cd-window cd-inv-confirm__window">
+                    <ui:Label name="inv-confirm-title" text="Reassign?" class="cd-title" />
+                    <ui:Label name="inv-confirm-message" text="" class="cd-message" />
+                    <ui:VisualElement class="cd-detail-buttons">
+                        <ui:Button name="inv-confirm-ok" text="Reassign" class="cd-button cd-button--wide" />
+                        <ui:Button name="inv-confirm-cancel" text="Cancel" class="cd-button cd-button--wide" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
 
 

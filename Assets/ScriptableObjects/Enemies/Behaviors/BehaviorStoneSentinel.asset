@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 1
   Actions:
   - Label: Cast from Draw list
+    DisplayName: 
     Kind: 5
     Priority: 20
     Weight: 1
@@ -28,6 +29,7 @@ MonoBehaviour:
     Magic: {fileID: 0}
     Conditions: []
   - Label: Heavy blow
+    DisplayName: Heavy Blow
     Kind: 1
     Priority: 10
     Weight: 1
@@ -40,6 +42,7 @@ MonoBehaviour:
     Magic: {fileID: 0}
     Conditions: []
   - Label: Attack
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1

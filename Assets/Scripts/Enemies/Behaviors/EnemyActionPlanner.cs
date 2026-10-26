@@ -91,7 +91,8 @@ namespace Assets.Scripts.Enemies.Behaviors
                 var pending = actions[context.ChargingEntryIndex];
                 if (pending != null && pending.CanTelegraph)
                 {
-                    return Deliver(pending, self, context, rolls);
+                    // The index rides along so the delivery can be named (AnnouncedName).
+                    return Deliver(pending, self, context, rolls, context.ChargingEntryIndex);
                 }
             }
 
@@ -407,6 +408,38 @@ namespace Assets.Scripts.Enemies.Behaviors
                 default:
                     return HasLivingHero(context);
             }
+        }
+
+        /// <summary>
+        /// What the ability banner says as an enemy acts on <paramref name="decision"/>, or null for no
+        /// banner (playtest 3 finding 12: the enemy did something and the player could not tell what).
+        /// A cast names its spell; any other action its authored <see cref="EnemyActionEntry.DisplayName"/>.
+        /// A plain swing and the wind-up turn of a telegraph say nothing - the wind-up already floats
+        /// "Charging!", and its name shows when it lands.
+        /// </summary>
+        public static string AnnouncedName(EnemyDecision decision, IList<EnemyActionEntry> actions)
+        {
+            if (decision == null)
+            {
+                return null;
+            }
+            switch (decision.Type)
+            {
+                case EnemyActionType.Attack:
+                case EnemyActionType.ChargeHeavy:
+                case EnemyActionType.ChargeAoe:
+                    return null;
+                case EnemyActionType.CastMagic:
+                    return decision.Magic != null && !string.IsNullOrEmpty(decision.Magic.DisplayName)
+                        ? decision.Magic.DisplayName
+                        : null;
+            }
+            if (actions == null || decision.EntryIndex < 0 || decision.EntryIndex >= actions.Count)
+            {
+                return null;
+            }
+            var entry = actions[decision.EntryIndex];
+            return entry != null && !string.IsNullOrEmpty(entry.DisplayName) ? entry.DisplayName : null;
         }
 
         // ------------------------------------------------------------------ building the decision

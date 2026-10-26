@@ -46,6 +46,12 @@
             <ui:Label name="summon-banner-name" text="" class="cd-summon-banner__name" />
         </ui:VisualElement>
 
+        <!-- Ability banner (top-center, FFX-style): names what an enemy uses, anything but a plain
+             swing, for a moment as it acts (playtest 3 finding 12). -->
+        <ui:VisualElement name="ability-banner" class="cd-ability-banner cd-hidden" picking-mode="Ignore">
+            <ui:Label name="ability-banner-name" text="" class="cd-ability-banner__name" />
+        </ui:VisualElement>
+
         <!-- Turn-order list (FFX-style, top-right): upcoming turns, current on top -->
         <ui:VisualElement name="turn-order" class="cd-turn-order cd-dock-top-right cd-hidden">
             <ui:VisualElement name="turn-order-list" class="cd-turn-order__list" />

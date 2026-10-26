@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 4
   Actions:
   - Label: Signature
+    DisplayName: Crushing Sweep
     Kind: 2
     Priority: 10
     Weight: 1
@@ -37,6 +38,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Signature (enraged)
+    DisplayName: Crushing Sweep
     Kind: 2
     Priority: 10
     Weight: 1
@@ -58,6 +60,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Enraged blow
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -73,6 +76,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Blow
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1

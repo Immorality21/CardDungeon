@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 1
   Actions:
   - Label: Heavy blow
+    DisplayName: Heavy Blow
     Kind: 1
     Priority: 10
     Weight: 1
@@ -28,6 +29,7 @@ MonoBehaviour:
     Magic: {fileID: 0}
     Conditions: []
   - Label: Attack
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1

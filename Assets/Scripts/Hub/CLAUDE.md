@@ -93,7 +93,10 @@ does not wrap. A lot within `CaptionRoom` of the town's bottom edge (the campfir
 
 **The town prints no costs or requirements** (the owner's call, 2026-09-28). A town where every
 building printed its costs read like a spreadsheet. Beside each name there is one badge instead:
-- a **hammer** when there is something to build or raise (`LotBadge.Build`);
+- a **lit hammer** on a gold disc, and the lot's name in gold, when it can be built or raised **right
+  now** (`LotBadge.Ready`, playtest 3 finding 16: the town could not tell "on offer" from "you can buy
+  this"); a **dimmed hammer** on an unbuilt lot the bag cannot pay for yet (`LotBadge.Build`). An
+  upgrade nobody can afford shows nothing, as before;
 - a **padlock** when the lot is not on offer yet (`LotBadge.Locked`);
 - a **gold pip** on a *built* lot with something waiting inside (`LotBadge.New`, 2026-09-30): a grid
   node some owned hero can buy now, a combo upgrade at the Forge the purse covers, or a Bestiary with more enemies

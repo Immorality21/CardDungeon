@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 1
   Actions:
   - Label: Scythe sweep
+    DisplayName: Scythe Sweep
     Kind: 2
     Priority: 10
     Weight: 1
@@ -35,6 +36,7 @@ MonoBehaviour:
       Value: 0
       Stat: 1
   - Label: Scythe
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1

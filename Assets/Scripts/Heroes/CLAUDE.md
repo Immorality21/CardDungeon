@@ -233,4 +233,9 @@ Three rules when adding nodes:
 Layout convention: spine straight down from the start at `x: 0`, 90 units per step; branches
 diagonally at `dx 110` for the first step then 95, `dy -55` per step, mirrored to negative `x` for
 left-hand branches. Positions are read only by the UI and the editor window — no game rule uses them.
+**But a node must never sit on a line it does not end** (`SphereGridLayoutTests`, which also fails
+on two crossing lines): an edge is drawn straight, so a node 0-30 px from one reads as a step on that
+path. Every grid's trunk ability slot sat exactly on the hub-to-middle-branch line, so it looked like
+the gate to that branch while the branch could be bought without it (playtest 3 finding 4). The slot
+is a spur at `(60, -375)` now, mirroring the middle branch's first stat spur at `(-60, -375)`.
 

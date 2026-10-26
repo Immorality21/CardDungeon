@@ -25,11 +25,11 @@ MonoBehaviour:
   - Cue: 3
     Text: Build the Hall of Progression. It costs the timber you just brought home.
   - Cue: 4
-    Text: The hall stands. Step inside to spend the XP your hero banked.
+    Text: The hall stands. Step inside to spend the XP your hero gained.
   - Cue: 5
-    Text: The hall stands. Enter it to spend the XP your hero banked.
+    Text: The hall stands. Enter it to spend the XP your hero gained.
   - Cue: 6
-    Text: Every fight banked XP for your hero. Click the glowing node - you can afford it.
+    Text: Every fight gave your hero XP. Click the glowing node - you can afford it.
   - Cue: 7
     Text: Now press Activate to spend the XP.
   - Cue: 8
@@ -37,7 +37,7 @@ MonoBehaviour:
   - Cue: 9
     Text: The town is yours now. When you are ready, take The Story to continue The Threshold.
   - Cue: 10
-    Text: Every party falls, and falling is how you get stronger. What you banked is safe - spend it in town, then go back down.
+    Text: Every party falls, and falling is how you get stronger. What you earned on earlier floors is safe - spend it in town, then go back down.
   - Cue: 11
     Text: The floor paid out a sword. Gear is vital to survival down there - open the Storehouse and put it on.
   - Cue: 12

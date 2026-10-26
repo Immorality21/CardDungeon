@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Key: ShieldUp
   DisplayName: Shield Up
-  Description: Raises a sturdy shield, boosting defense.
+  Description: Raises a sturdy shield, boosting defense and drawing the enemy's eye.
   Icon: {fileID: -2164995633088822925, guid: 019bdde453dc7aa4cacf3cbc9e373216, type: 3}
   TargetType: 2
   Rarity: 0
@@ -29,3 +29,5 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 05000000
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 20

@@ -118,6 +118,9 @@ namespace Assets.Scripts.Rooms
 
         /// <summary>A hero has summoned: the UI shows the name banner until <see cref="OnSummonEnded"/>.</summary>
         public event Action<ICombatUnit, SummonSO> OnSummonStarted;
+
+        /// <summary>An enemy uses something other than a plain swing: its name, for the ability banner.</summary>
+        public event Action<ICombatUnit, string> OnEnemyAbilityUsed;
         public event Action OnSummonEnded;
 
         /// <summary>A party-replacing summon wants a single enemy for an ability: the selection UI
@@ -669,6 +672,8 @@ namespace Assets.Scripts.Rooms
             _fightGoldBonus = 0;
             _robbed.Clear();
             _freeCasts.Clear();
+            // A cast cut off mid-presentation must not leave a plate frozen into the next fight.
+            HealthDisplay.ReleaseAll();
             _currentCombatHadBoss = room.Enemies.Any(e => e != null && e.IsBoss);
             _squad.Clear();
             _allies.Clear();
@@ -1227,6 +1232,8 @@ namespace Assets.Scripts.Rooms
             var meta = MetaProgressManager.Instance;
             Func<string, int> comboLevelLookup = meta.GetComboUpgradeLevel;
 
+            // The plates keep showing the health from before the cast until each hit lands.
+            HoldHealthDisplay();
             var result = _calculator.Execute(
                 castAction, BuffTracker, _tagTracker, _comboDetector, 0, 0, comboLevelLookup);
             _lastTurnLog = result.BuildLog(castAction);
@@ -1248,6 +1255,7 @@ namespace Assets.Scripts.Rooms
                 castAction.Caster,
                 castAction.Magic
             );
+            HealthDisplay.ReleaseAll();
 
             // Combo flourish: a camera punch + brief hit-stop so a triggered combo lands with weight
             // (the combo name already floats up in orange from the resolver).
@@ -2374,6 +2382,12 @@ namespace Assets.Scripts.Rooms
             var decision = EnemyActionPlanner.Plan(
                 enemyUnit, context, behavior, EnemyPlanRolls.Random(behavior.Actions.Count));
 
+            string announced = EnemyActionPlanner.AnnouncedName(decision, behavior.Actions);
+            if (!string.IsNullOrEmpty(announced))
+            {
+                OnEnemyAbilityUsed?.Invoke(enemyUnit, announced);
+            }
+
             switch (decision.Type)
             {
                 case EnemyActionType.CastMagic:
@@ -2458,6 +2472,9 @@ namespace Assets.Scripts.Rooms
             };
 
             float powerScale = enemy != null ? enemy.MagicPowerScale : 1f;
+            // The plates keep showing the health from before the cast until each hit lands: a
+            // party-wide spell used to drop every hero's bar before its first bolt flew.
+            HoldHealthDisplay();
             var result = _calculator.Execute(
                 castAction, BuffTracker, null, null, 0, 0, null, powerScale);
 
@@ -2470,8 +2487,17 @@ namespace Assets.Scripts.Rooms
                 castAction.Caster,
                 castAction.Magic
             );
+            HealthDisplay.ReleaseAll();
 
             ResolveDeaths();
+        }
+
+        /// <summary>Freezes every unit's HP plate at its current health until the presenter releases
+        /// it as that unit's hit lands (<see cref="HealthDisplay"/>).</summary>
+        private void HoldHealthDisplay()
+        {
+            HealthDisplay.Hold(HeroSideUnits());
+            HealthDisplay.Hold(GetAliveEnemies());
         }
 
         private IEnumerator ExecuteEnemyBasicAttack(ICombatUnit enemyUnit, ICombatUnit target, Party party, float multiplier = 1f, string verb = "attacks")

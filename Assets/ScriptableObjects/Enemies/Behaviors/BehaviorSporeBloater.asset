@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 0
   Actions:
   - Label: Attack
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1

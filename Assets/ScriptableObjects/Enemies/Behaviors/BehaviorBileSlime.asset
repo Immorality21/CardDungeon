@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 0
   Actions:
   - Label: Caustic spit
+    DisplayName: 
     Kind: 5
     Priority: 20
     Weight: 1
@@ -32,6 +33,7 @@ MonoBehaviour:
     Magic: {fileID: 11400000, guid: f90847199d979ef42acdb847339989b1, type: 2}
     Conditions: []
   - Label: Attack
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1

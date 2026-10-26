@@ -292,6 +292,12 @@ Then the balance pass, starting with what this pass already showed:
 Every item, one line each, grouped by the plan file that holds it. **Open the plan, not the whole
 backlog.**
 
+### [Playtest 3](PLAYTEST_3.md) — 2026-10-26, 22 findings, not yet worked on
+
+- Hub/UI, combat presentation, art, the potion-belt rework, Paladin kit, downed heroes staying down,
+  Catacombs/Drowned March too easy (the model's reference party wears no gear), and one to-verify
+  (a rescued Rogue lost after a later wipe). Delete the file once its findings ship or move to a plan.
+
 ### [The specialization rebuild](plans/SPECIALIZATION.md) — the live thread
 
 | § | | state |

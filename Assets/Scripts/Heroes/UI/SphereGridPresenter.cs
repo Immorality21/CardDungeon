@@ -248,7 +248,9 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.Resistance:
                     return "R";
                 case SphereNodeKind.MagicSlot:
-                    return "M";
+                    // "+1": one more ability carried. It read "M" (for the code's MagicSlot), which
+                    // told the player nothing (playtest 3 finding 4).
+                    return "+1";
                 case SphereNodeKind.MagicKnown:
                     return "✦";
                 case SphereNodeKind.MagicAwaken:

@@ -37,6 +37,10 @@ namespace Assets.Scripts.Cards
                     }
                 }
 
+                // The hit has landed: this target's plate catches up with its real health, in step
+                // with its number (HealthDisplay - a held bar used to drop before the bolt flew).
+                HealthDisplay.Release(entry.Target);
+
                 if (entry.Target != null && entry.Target.Transform != null && FloatingTextHandler.HasInstance)
                 {
                     var position = entry.Target.Transform.position + entry.PositionOffset;

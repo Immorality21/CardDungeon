@@ -116,7 +116,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: 0, y: -360}
+    Position: {x: 60, y: -375}
     Gains:
       Values: []
     ResistType: 0
@@ -372,7 +372,7 @@ MonoBehaviour:
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
-    Position: {x: -60, y: -320}
+    Position: {x: -60, y: -375}
     Gains:
       Values:
       - Type: 5

@@ -353,7 +353,10 @@ namespace Assets.Scripts.Hub.UI
             element.EnableInClassList("hub-lot__badge--build", badge == LotBadge.Build);
             element.EnableInClassList("hub-lot__badge--locked", badge == LotBadge.Locked);
             element.EnableInClassList("hub-lot__badge--new", badge == LotBadge.New);
+            element.EnableInClassList("hub-lot__badge--ready", badge == LotBadge.Ready);
             element.EnableInClassList("cd-hidden", badge == LotBadge.None);
+            // A lot that can be built or raised now says so with its name as well as its badge.
+            button.EnableInClassList("hub-lot--ready", badge == LotBadge.Ready);
         }
 
         /// <summary>

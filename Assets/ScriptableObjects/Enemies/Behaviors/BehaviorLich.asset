@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 4
   Actions:
   - Label: Cast from Draw list
+    DisplayName: 
     Kind: 5
     Priority: 20
     Weight: 1
@@ -32,6 +33,7 @@ MonoBehaviour:
     Magic: {fileID: 0}
     Conditions: []
   - Label: Raise the dead
+    DisplayName: Raise Dead
     Kind: 8
     Priority: 25
     Weight: 1
@@ -51,6 +53,7 @@ MonoBehaviour:
       Value: 0.7
       Stat: 1
   - Label: Signature
+    DisplayName: Death Nova
     Kind: 2
     Priority: 10
     Weight: 1
@@ -76,6 +79,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Signature (enraged)
+    DisplayName: Death Nova
     Kind: 2
     Priority: 10
     Weight: 1
@@ -101,6 +105,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Enraged blow
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -120,6 +125,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Blow
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1

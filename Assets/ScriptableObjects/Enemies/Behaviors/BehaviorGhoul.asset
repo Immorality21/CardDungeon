@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 0
   Actions:
   - Label: Paralysing claw
+    DisplayName: Paralysing Claw
     Kind: 4
     Priority: 10
     Weight: 1
@@ -35,6 +36,7 @@ MonoBehaviour:
       Value: 0
       Stat: 3
   - Label: Attack
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1

@@ -166,7 +166,8 @@ namespace Assets.Scripts.Rooms.UI
         private static void UpdateHp(ICombatUnit unit, Plate plate)
         {
             int max = Mathf.Max(1, unit.GetEffectiveStat(StatType.MaxHealth));
-            int current = Mathf.Max(0, unit.Stats.Health);
+            // What the plate shows can lag the unit while a cast's hits are still flying (HealthDisplay).
+            int current = Mathf.Max(0, HealthDisplay.Shown(unit));
             string text = $"{current}/{max}";
             if (text == plate.LastHpText)
             {

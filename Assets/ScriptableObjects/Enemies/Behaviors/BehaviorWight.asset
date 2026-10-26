@@ -16,6 +16,7 @@ MonoBehaviour:
   Archetype: 3
   Actions:
   - Label: Cast from Draw list
+    DisplayName: 
     Kind: 5
     Priority: 20
     Weight: 1
@@ -32,6 +33,7 @@ MonoBehaviour:
     Magic: {fileID: 0}
     Conditions: []
   - Label: Sap the will
+    DisplayName: Sap Will
     Kind: 4
     Priority: 10
     Weight: 1
@@ -51,6 +53,7 @@ MonoBehaviour:
       Value: 0
       Stat: 1
   - Label: Attack
+    DisplayName: 
     Kind: 0
     Priority: 0
     Weight: 1
