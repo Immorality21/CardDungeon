@@ -59,18 +59,46 @@ namespace Tests.EditMode
             Assert.AreEqual(TutorialStep.EquipGear, TutorialOps.CurrentStep(p));
 
             p.AnyGearEquipped = true;
+            Assert.AreEqual(TutorialStep.RevisitHall, TutorialOps.CurrentStep(p));
+
+            p.HallRevisited = true;
             Assert.AreEqual(TutorialStep.GoOn, TutorialOps.CurrentStep(p));
         }
 
         [Test]
-        public void CurrentStep_NoGearInTheBag_SkipsToGoOn()
+        public void CurrentStep_NoGearInTheBag_SkipsToTheHall()
         {
             var p = Fresh();
             p.FirstFloorCleared = true;
             p.GuideBuilt = true;
             p.HeroHasSpent = true;
             p.GearFloorCleared = true;
+            Assert.AreEqual(TutorialStep.RevisitHall, TutorialOps.CurrentStep(p));
+
+            p.HallRevisited = true;
             Assert.AreEqual(TutorialStep.GoOn, TutorialOps.CurrentStep(p));
+        }
+
+        /// <summary>
+        /// After the gear step the town is locked to the hall again so the player sees that the Paladin
+        /// can spend too (playtest 3 finding 2) - but nothing is forced: the grid can be left, and
+        /// leaving is the step.
+        /// </summary>
+        [Test]
+        public void RevisitHall_LocksTheTownToTheHall_ButForcesNothing()
+        {
+            var step = TutorialStep.RevisitHall;
+            Assert.AreEqual(Hall, TutorialOps.GuidedLotKey(step, Hall, "storehouse"));
+            Assert.IsTrue(TutorialOps.AllowsLot(step, Hall, Hall));
+            Assert.IsFalse(TutorialOps.AllowsLot(step, "merchant", Hall));
+            Assert.IsTrue(TutorialOps.GuidesLot(step, Hall, Hall));
+            Assert.IsFalse(TutorialOps.AllowsRoad(step));
+            Assert.IsTrue(TutorialOps.AllowsLeaving(step), "the grid's Back must work - spending is optional");
+            Assert.IsFalse(TutorialOps.FinishesOnDescent(step));
+            Assert.AreEqual(TutorialCue.RevisitHallInTown, TutorialOps.CueFor(step, TutorialScreen.Town, false));
+            Assert.AreEqual(TutorialCue.EnterHallOnPanel, TutorialOps.CueFor(step, TutorialScreen.GuideLot, false));
+            Assert.AreEqual(TutorialCue.RevisitHallOnGrid, TutorialOps.CueFor(step, TutorialScreen.Grid, false));
+            Assert.AreEqual(TutorialCue.GearEquipped, TutorialOps.CueFor(step, TutorialScreen.Inventory, false));
         }
 
         [Test]

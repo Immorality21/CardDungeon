@@ -68,6 +68,17 @@ run and level, so revisits never pay it again. Home, `EquipGear` locks the town 
 inventory's Back and the road, and going down finishes the tutorial. Skipped (straight to `GoOn`) when
 the bag holds no unworn equipment. Guarded by `TutorialContentTests.TheGearFloor_PaysEquipmentTheStorehouseCanShow`.
 
+### Back to the hall (2026-10-27, playtest 3 finding 2)
+
+Once something is equipped (or the gear step was skipped), `RevisitHall` locks the town to the Hall of
+Progression again: floor 2 paid both heroes, and nothing told the player the Paladin can spend too. Its grid
+opens on the hero the tutorial has not walked through (`HubManager.SecondTutorialHero` ->
+`SphereGridUI.PreferredHero`, used once, locks nothing), and **nothing has to be bought**: Back works, and
+leaving the grid is the step (`MetaProgressSaveData.TutorialHallRevisited`, written in `OnGridClosed`). Then
+`GoOn` as before. Lines: `RevisitHallInTown` (17) and `RevisitHallOnGrid` (18) in `Tutorial.asset`; the
+inventory keeps saying `GearEquipped` and pointing at its Back during the step. Walked in play 2026-10-27
+through `Tools ▸ Tutorial` (town locked to the hall, grid on the Paladin with 40 XP, Back -> road opens).
+
 ## How it works — the rules worth knowing before changing it
 
 - **Only the two ends are stored** (`MetaProgressSaveData.TutorialStarted` / `TutorialFinished`).
@@ -157,9 +168,7 @@ Roughly in the order they bite. The first two are decisions for the owner.
       challenge warning above. Not yet seen in play.
 - [ ] **The "spend your XP" nudge after N cleared levels** (§20): the loop above covers the *first*
       spend; the plan also wants a reminder later, when XP has piled up unspent.
-- [ ] **The Paladin's XP.** Rescued on floor 1, the Paladin arrives with a starter bank and the grid
-      tabs lock them out during the guided step. Nothing tells the player they have a second hero to
-      spend on afterwards.
+- [x] **The Paladin's XP.** Answered by the return to the hall after the gear step (2026-10-27).
 - [ ] **Step content is only partly authored.** The words are in `Tutorial.asset`; *which* screen
       and target each step uses is still `TutorialOps` code. §20's end state is a `TutorialStepSO`
       list — worth doing when the third or fourth step type lands, not before.

@@ -97,6 +97,10 @@ namespace Assets.Scripts.Progression
         // challenge warning"). Not derivable from the rest of the save, so it is stored.
         public bool ChallengeWarned;
 
+        // The tutorial's return to the Hall of Progression after the gear step is done (docs/TUTORIAL.md).
+        // Visiting is the whole step - nothing has to be bought - so it is stored, not derived.
+        public bool TutorialHallRevisited;
+
         // Party wipes, ever (survives death by definition). The death screen explains dying once,
         // on the first; nothing else reads it yet.
         public int PartyDeaths;

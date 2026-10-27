@@ -34,6 +34,14 @@ namespace Assets.Scripts.Tutorial
 
         /// <summary>Something is equipped. The town is open; going down finishes the tutorial.</summary>
         GoOn = 6,
+
+        /// <summary>
+        /// After the gear step, back to the Hall of Progression (playtest 3 finding 2): the second floor
+        /// paid both heroes XP, and nothing told the player the Paladin can spend too. The town is locked
+        /// to the hall, its grid opens on the Paladin, and nothing has to be bought - leaving the grid
+        /// ends the step (<c>MetaProgressSaveData.TutorialHallRevisited</c>). Comes before <see cref="GoOn"/>.
+        /// </summary>
+        RevisitHall = 7,
     }
 
     /// <summary>Which screen the tutorial is being asked about — the same step says different things on each.</summary>
@@ -77,5 +85,7 @@ namespace Assets.Scripts.Tutorial
         GearEquipped = 14,
         GoOn = 15,
         ChallengeAhead = 16, // the story map, once, when a challenge run first opens (not a step: any save sees it)
+        RevisitHallInTown = 17,
+        RevisitHallOnGrid = 18,
     }
 }

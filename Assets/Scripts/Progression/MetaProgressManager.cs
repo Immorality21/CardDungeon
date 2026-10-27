@@ -577,6 +577,20 @@ namespace Assets.Scripts.Progression
             Save();
         }
 
+        /// <summary>Whether the tutorial's return to the Hall of Progression has been walked.</summary>
+        public bool TutorialHallRevisited => _saveData.TutorialHallRevisited;
+
+        /// <summary>The player opened and left the hall after the gear step. Persists immediately.</summary>
+        public void MarkTutorialHallRevisited()
+        {
+            if (_saveData.TutorialHallRevisited)
+            {
+                return;
+            }
+            _saveData.TutorialHallRevisited = true;
+            Save();
+        }
+
         // --- Party deaths ---
 
         public int PartyDeaths => _saveData.PartyDeaths;

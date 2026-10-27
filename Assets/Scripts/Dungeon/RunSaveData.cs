@@ -23,6 +23,9 @@ namespace Assets.Scripts.Dungeon
         public bool IsRevisit;
         public List<RunModifierSelection> Modifiers = new List<RunModifierSelection>();
 
+        // Heroes who fell and stay down on the run's next floor; emptied by a visit to town (DownedCarry).
+        public List<string> DownedHeroKeys = new List<string>();
+
         public string GetFileName()
         {
             return "Run";

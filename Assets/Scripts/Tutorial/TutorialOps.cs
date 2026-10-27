@@ -39,6 +39,9 @@ namespace Assets.Scripts.Tutorial
 
         /// <summary>The bag holds a piece of equipment nobody wears — something to equip.</summary>
         public bool HasGearToEquip;
+
+        /// <summary>The grid was opened and left again after the gear step (<see cref="TutorialStep.RevisitHall"/>).</summary>
+        public bool HallRevisited;
     }
 
     /// <summary>
@@ -83,6 +86,10 @@ namespace Assets.Scripts.Tutorial
             if (!p.AnyGearEquipped && p.HasGearToEquip)
             {
                 return TutorialStep.EquipGear;
+            }
+            if (p.GuideBuilt && !p.HallRevisited)
+            {
+                return TutorialStep.RevisitHall;
             }
             return TutorialStep.GoOn;
         }
@@ -142,7 +149,8 @@ namespace Assets.Scripts.Tutorial
         /// </summary>
         private static bool GuidesBuilding(TutorialStep step)
         {
-            return step == TutorialStep.BuildHall || step == TutorialStep.SpendXp || step == TutorialStep.EquipGear;
+            return step == TutorialStep.BuildHall || step == TutorialStep.SpendXp || step == TutorialStep.EquipGear
+                || step == TutorialStep.RevisitHall;
         }
 
         /// <summary>The lot the step walks the player to: the Storehouse for the gear step, else the hall.</summary>
@@ -194,10 +202,13 @@ namespace Assets.Scripts.Tutorial
                 || step == TutorialStep.GoOn;
         }
 
-        /// <summary>Whether the guided screens (the guided lot's panel, the grid, the inventory) may be backed out of.</summary>
+        /// <summary>
+        /// Whether the guided screens (the guided lot's panel, the grid, the inventory) may be backed out
+        /// of. The return to the hall forces nothing: leaving the grid is how that step ends.
+        /// </summary>
         public static bool AllowsLeaving(TutorialStep step)
         {
-            return !GuidesBuilding(step);
+            return !GuidesBuilding(step) || step == TutorialStep.RevisitHall;
         }
 
         /// <summary>
@@ -248,6 +259,22 @@ namespace Assets.Scripts.Tutorial
                             return TutorialCue.EnterStorehouseOnPanel;
                         case TutorialScreen.Inventory:
                             return TutorialCue.EquipGear;
+                        default:
+                            return TutorialCue.None;
+                    }
+
+                case TutorialStep.RevisitHall:
+                    switch (screen)
+                    {
+                        case TutorialScreen.Town:
+                            return TutorialCue.RevisitHallInTown;
+                        case TutorialScreen.GuideLot:
+                            return TutorialCue.EnterHallOnPanel;
+                        case TutorialScreen.Grid:
+                            return TutorialCue.RevisitHallOnGrid;
+                        case TutorialScreen.Inventory:
+                            // The step starts the moment something is worn, with the Storehouse still up.
+                            return TutorialCue.GearEquipped;
                         default:
                             return TutorialCue.None;
                     }

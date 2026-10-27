@@ -179,6 +179,14 @@ namespace Assets.Scripts.Hub
             _fileHandler = new FileHandler();
             _runSaveData = _fileHandler.Load<RunSaveData>();
 
+            // Back in town every hero is whole again: a hero who fell stays down only for the floors
+            // walked straight through (playtest 3 finding 9, DownedCarry).
+            if (_runSaveData != null && _runSaveData.DownedHeroKeys != null && _runSaveData.DownedHeroKeys.Count > 0)
+            {
+                _runSaveData.DownedHeroKeys.Clear();
+                _fileHandler.Save(_runSaveData);
+            }
+
             // Both Resources-loaded like the item catalog, so the hub resolves the run graph and the
             // town without scene wiring - and without AssetDatabase, which does not exist in a build.
             _campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
@@ -273,7 +281,7 @@ namespace Assets.Scripts.Hub
             }
             _merchant.OnClosed += ShowTown;
             _partySelect.OnClosed += OnPartyClosed;
-            _sphereGrid.OnClosed += ShowTown;
+            _sphereGrid.OnClosed += OnGridClosed;
             _sphereGrid.NodeActivated += OnGridNodeActivated;
             _sphereGrid.SelectionChanged += RefreshTutorial;
             _forge.OnClosed += ShowTown;
@@ -1533,6 +1541,7 @@ namespace Assets.Scripts.Hub
             int bagGear = inventory.GetBagEquipment().Count;
             progress.HasGearToEquip = bagGear > 0;
             progress.AnyGearEquipped = inventory.GetAllEquipment().Count > bagGear;
+            progress.HallRevisited = meta.TutorialHallRevisited;
             return progress;
         }
 
@@ -1607,7 +1616,8 @@ namespace Assets.Scripts.Hub
             SetEnabled(_lotCloseButton, !onGuideLot || TutorialOps.AllowsLeaving(step));
             SetClass(_lotActionButton, HubView.TutorialTargetClass, onGuideLot && step == TutorialStep.BuildHall);
             SetClass(_lotEnterButton, HubView.TutorialTargetClass,
-                onGuideLot && (step == TutorialStep.SpendXp || step == TutorialStep.EquipGear));
+                onGuideLot && (step == TutorialStep.SpendXp || step == TutorialStep.EquipGear
+                               || step == TutorialStep.RevisitHall));
 
             // Once the node is bought the only way on is back to town, so the grid's Back is what gets
             // pointed at. Keyed on the step alone: the class only shows while the grid does.
@@ -1615,7 +1625,8 @@ namespace Assets.Scripts.Hub
             // The gear step's screen: shut until something is worn, then its Back is the way on.
             var inventoryClose = _root.Q<Button>("inventory-close");
             SetEnabled(inventoryClose, step != TutorialStep.EquipGear);
-            SetClass(inventoryClose, HubView.TutorialTargetClass, step == TutorialStep.GoOn);
+            SetClass(inventoryClose, HubView.TutorialTargetClass,
+                step == TutorialStep.GoOn || step == TutorialStep.RevisitHall);
 
             RefreshTutorialBanner();
         }
@@ -1701,6 +1712,36 @@ namespace Assets.Scripts.Hub
             meta.MarkChallengeWarned();
         }
 
+        /// <summary>
+        /// The grid was left. During the return to the hall that is the whole step - nothing had to be
+        /// bought - so it is written down and the town opens.
+        /// </summary>
+        private void OnGridClosed()
+        {
+            if (_tutorialStep == TutorialStep.RevisitHall && MetaProgressManager.HasInstance)
+            {
+                MetaProgressManager.Instance.MarkTutorialHallRevisited();
+            }
+            ShowTown();
+        }
+
+        /// <summary>
+        /// The hero the return to the hall opens on: the first owned hero with a grid who is not
+        /// <see cref="TutorialHero"/> - the Paladin, rescued on floor 1. Null leaves the grid's own choice.
+        /// </summary>
+        private HeroSO SecondTutorialHero()
+        {
+            var first = TutorialHero();
+            foreach (var hero in HeroRoster.GetOwnedHeroes(_partyRoster))
+            {
+                if (hero != null && hero != first && hero.SphereGrid != null)
+                {
+                    return hero;
+                }
+            }
+            return null;
+        }
+
         /// <summary>A node was bought on the grid. If that closed the guided step, the screen is handed back.</summary>
         private void OnGridNodeActivated(string nodeKey)
         {
@@ -1738,6 +1779,11 @@ namespace Assets.Scripts.Hub
             SetShown(_lotView, false);
 
             RefreshTutorial();
+            if (_tutorialStep == TutorialStep.RevisitHall)
+            {
+                // Back after the gear step: open on the hero the tutorial has not walked through yet.
+                _sphereGrid.PreferredHero = SecondTutorialHero();
+            }
             var hero = _tutorialStep == TutorialStep.SpendXp ? TutorialHero() : null;
             if (hero != null)
             {

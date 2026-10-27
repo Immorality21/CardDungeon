@@ -408,6 +408,10 @@ namespace Assets.Scripts.Dungeon
             Party = partyObj.GetComponent<Party>();
             Party.Initialize(FieldedHeroes());
             Party.HealAll();
+            if (ActiveRun != null)
+            {
+                DownedCarry.KeepDown(Party, _fileHandler.Load<RunSaveData>(), CurrentRunKey, RunLevelIndex);
+            }
             // Afflictions and the consumption ledger are level-scoped like health, so a fresh level
             // starts clean on all three.
             Afflictions.Clear();
@@ -1435,6 +1439,10 @@ namespace Assets.Scripts.Dungeon
                 runSave.RunKey = !string.IsNullOrEmpty(ActiveRun.Key) ? ActiveRun.Key : ActiveRun.name;
                 runSave.CurrentLevelIndex = RunLevelIndex + 1;
                 runSave.ActiveDungeonSeed = 0;
+
+                // Whoever fell on this floor is still down on the next one, unless the party goes back
+                // to town first. A revive could only reach them in the fight they fell in.
+                DownedCarry.Record(runSave, Party);
 
                 // Carry equipped magic to the next level of the run - merged, like summons, so a
                 // hero benched for this floor keeps their slots. The opening floor replaces.

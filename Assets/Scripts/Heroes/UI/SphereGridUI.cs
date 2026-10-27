@@ -70,6 +70,12 @@ namespace Assets.Scripts.Heroes.UI
         /// <summary>Whether that node is the one selected — the cue for "now press Activate".</summary>
         public bool IsGuidedNodeSelected => IsGuiding && _selectedNodeKey == _guideNodeKey;
 
+        /// <summary>
+        /// The hero the next <see cref="Show"/> opens on, if owned - used once and cleared. Unlike the
+        /// guide it locks nothing: the tutorial's return to the hall opens on the Paladin this way.
+        /// </summary>
+        public HeroSO PreferredHero { get; set; }
+
         public SphereGridUI(VisualElement root, PartyRosterSO catalog)
         {
             _root = root;
@@ -125,10 +131,16 @@ namespace Assets.Scripts.Heroes.UI
             {
                 _selectedHero = _guideHero;
             }
+            else if (PreferredHero != null && PreferredHero.SphereGrid != null && _heroes.Contains(PreferredHero))
+            {
+                _selectedHero = PreferredHero;
+            }
             else if (_selectedHero == null || !_heroes.Contains(_selectedHero))
             {
                 _selectedHero = FirstHeroWithGrid();
             }
+
+            PreferredHero = null;
 
             BuildHeroTabs();
             RebuildGraph();
