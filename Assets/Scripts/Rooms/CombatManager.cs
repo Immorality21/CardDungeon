@@ -3506,6 +3506,12 @@ namespace Assets.Scripts.Rooms
             {
                 sr.enabled = true;
             }
+            // Up from where they lay: the idle loop runs again.
+            var animator = hero.GetComponent<SpriteAnimator>();
+            if (animator != null)
+            {
+                animator.Resume();
+            }
             _turnManager.AddUnit(hero, false);
             // Revived while a summon has taken the party's place: they wait off the stage with the rest
             // of the party, and come back with it (CombatStage.RestoreParty, TurnManager.Resume).
@@ -3529,13 +3535,25 @@ namespace Assets.Scripts.Rooms
             EndAlliesOf(hero);
             EndForm(hero, log: false);
 
-            // Disable the hero's sprite to show they've fallen
+            // A hero with a drawn fall plays it and lies there for the rest of the fight (playtest 3
+            // finding 7); one without simply vanishes. Either way the body is gone from the next fight:
+            // only living heroes are placed on the stage, and RestoreAfterCombat hides every hero.
             var sr = hero.GetComponent<SpriteRenderer>();
+            var animator = hero.GetComponent<SpriteAnimator>();
+            var fall = hero.HeroSO != null && !hero.InForm ? hero.HeroSO.DeathFrames : null;
+            if (fall != null && fall.Length > 0 && animator != null && sr != null)
+            {
+                animator.PlayOnceAndHold(fall, DeathAnimationSeconds);
+                return;
+            }
             if (sr != null)
             {
                 sr.enabled = false;
             }
         }
+
+        // How long a hero's fall takes before the last frame (lying down) holds.
+        private const float DeathAnimationSeconds = 0.6f;
 
         private Enemy GetRandomAliveEnemy(Room room)
         {

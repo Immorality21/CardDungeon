@@ -14,6 +14,9 @@ public class SpriteAnimator : MonoBehaviour
     private float _oneShotFrameDuration;
     private float _oneShotTimer;
 
+    // Set while a one-shot ends on a held pose (the fall): no loop runs until Resume.
+    private bool _holdLast;
+
     public void Initialize(Sprite[] frames, float fps)
     {
         _renderer = GetComponent<SpriteRenderer>();
@@ -49,7 +52,32 @@ public class SpriteAnimator : MonoBehaviour
         _oneShot = frames;
         _oneShotFrameDuration = seconds / frames.Length;
         _oneShotTimer = 0f;
+        _holdLast = false;
         _renderer.sprite = frames[0];
+    }
+
+    /// <summary>
+    /// <see cref="PlayOnce"/>, then stays on the last frame instead of going back to the loop - a hero
+    /// falling and lying where they fell. <see cref="Resume"/> lets the loop run again.
+    /// </summary>
+    public void PlayOnceAndHold(Sprite[] frames, float seconds)
+    {
+        PlayOnce(frames, seconds);
+        if (_oneShot != null)
+        {
+            _holdLast = true;
+        }
+    }
+
+    /// <summary>Back to the loop after a held pose (a revive).</summary>
+    public void Resume()
+    {
+        _holdLast = false;
+        _oneShot = null;
+        if (_renderer != null && _frames != null && _frames.Length > 0)
+        {
+            _renderer.sprite = _frames[_frame % _frames.Length];
+        }
     }
 
     private void Update()
@@ -61,6 +89,11 @@ public class SpriteAnimator : MonoBehaviour
             if (index < _oneShot.Length)
             {
                 _renderer.sprite = _oneShot[index];
+                return;
+            }
+            if (_holdLast)
+            {
+                _renderer.sprite = _oneShot[_oneShot.Length - 1];
                 return;
             }
             _oneShot = null;

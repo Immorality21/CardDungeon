@@ -32,6 +32,11 @@ namespace Assets.Scripts.Heroes
                  "Same size and facing as the idle frames. Empty = the hero only recoils.")]
         public Sprite[] HitFrames;
 
+        [Tooltip("The fall: shown once when the hero goes down, and the LAST frame (lying on the floor) " +
+                 "stays until the fight ends or a revive stands them up. Same size and facing as the " +
+                 "idle frames. Empty = the hero simply vanishes, as before (playtest 3 finding 7).")]
+        public Sprite[] DeathFrames;
+
         [Tooltip("Starting stats. Absent entries read as 0, so only list what this hero has.")]
         public StatBlock BaseStats = StatBlock.Defaults();
 

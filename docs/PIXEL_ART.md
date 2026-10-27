@@ -93,7 +93,8 @@ Jobs are async: queue them in parallel, then `wait_for_jobs` (free) instead of p
 
 - **Enemies (pixflux, 64×64):** subject + materials + silhouette props + "full body front view,
   boss monster for a dark fantasy dungeon RPG". Two seeds per enemy gave a real choice.
-- **Heroes (pixen, 32×32): heroes have BIG heads** (owner's rule, 2026-09-29). The reference is
+- **Heroes now share the PALADIN's proportions, not big chibi heads** (owner, 2026-10-27, playtest 3 finding 18: "the Rogue, Ranger and Warrior have a bigger head than the Paladin"). About 2.5 heads tall with a neck, shoulders and longer legs - the Paladin, Cleric, Mage, Tinkerer and Cultist. The Warrior, Ranger and Rogue were redrawn to it; the Warlock is still big-headed, pending the owner. **The paragraph below is the superseded 2026-09-29 rule**, kept for how its prompt worked:
+- ~~**Heroes (pixen, 32×32): heroes have BIG heads** (owner's rule, 2026-09-29).~~ The reference is
   the **Rogue**: its hood/head fills rows 0–19 of 32 — about **60% of the sprite's height**, ~26 px
   wide — over a small body, and that head is where the detail (the face) lives. "Cute chibi, big
   head" is not enough on its own: the first Warrior round (2026-09-29) came back with heads a third
@@ -378,3 +379,22 @@ Dark Jailor; the realistic Paladin candidates (`0e5d9e6b…`, `98990fed…`) and
   other themes.
 - **The 3/4 corner angle is fine on the floor**, but the chests fill the whole canvas and read a little larger
   than the stairs; trim a pixel of margin if that ever bothers.
+
+## 5c. Death frames — the fall (2026-10-27)
+
+`HeroSO.DeathFrames`: a strip played once over 0.6 s when the hero falls (`SpriteAnimator.PlayOnceAndHold`),
+the **last frame held** - the hero lying where they stood - until the fight ends; a revive calls
+`Resume`. Without them a hero vanishes as before. Files: `<hero>-death.png`, 4 frames (128x32 for a 32 px
+hero), sliced `<hero>_death_0..3`, the same import settings as the idle strip.
+
+**How the Warrior's was made:** `animate_image` from the rest frame alone dropped the shield and sword
+off the canvas and ended on a close-up of the face. What worked: generate the **lying pose first**
+(whole body on the back, shield and sword on the floor beside him, all inside 32x32, body on the
+bottom rows), then animate from the rest frame **with the lying pose pinned as the last frame**, and
+pick three in-betweens. The face does not show when lying; the hair, outfit and shield carry identity.
+
+**The 2026-10-27 hero redraw:** the Warrior took 21 options to land (five text rounds and two edit
+rounds). The owner's taste, for next time: young and clean, a clear readable face, upright stance, sword
+in the right hand and shield on the left (anatomical, so for an east-facing hero the shield is the near
+arm), not scruffy, bearded, bulky or small-faced. Inpaint edits cost **10 generations each**; text
+rounds of five cost 5-10.
