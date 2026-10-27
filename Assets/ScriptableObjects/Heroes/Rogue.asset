@@ -33,6 +33,11 @@ MonoBehaviour:
   HitFrames:
   - {fileID: -1395831477143777677, guid: 9b546430a64dd6444b0f5f688ee0f794, type: 3}
   - {fileID: -2926177904296494459, guid: 9b546430a64dd6444b0f5f688ee0f794, type: 3}
+  DeathFrames:
+  - {fileID: 3192596526249133989, guid: 19e3e38163fc444bb37c98793115c3ec, type: 3}
+  - {fileID: 2933767263541958792, guid: 19e3e38163fc444bb37c98793115c3ec, type: 3}
+  - {fileID: 2432142097882634002, guid: 19e3e38163fc444bb37c98793115c3ec, type: 3}
+  - {fileID: -1291340696186765692, guid: 19e3e38163fc444bb37c98793115c3ec, type: 3}
   BaseStats:
     Values:
     - Type: 1
