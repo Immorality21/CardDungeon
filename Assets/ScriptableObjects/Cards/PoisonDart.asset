@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: PoisonDart
   DisplayName: Poison Dart
   Description: A toxic dart that damages and poisons an enemy.
-  Icon: {fileID: 3051856151345990285, guid: 94e7b8b322f3cb0448fb8457fe320ded, type: 3}
+  Icon: {fileID: 21300000, guid: 508bc31b89414b54804a35bc759cbd04, type: 3}
   TargetType: 0
   Rarity: 1
   Effects:

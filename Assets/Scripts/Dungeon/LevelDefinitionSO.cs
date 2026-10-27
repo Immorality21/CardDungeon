@@ -62,5 +62,24 @@ namespace Assets.Scripts.Dungeon
         [Tooltip("Optional per-level combat music. When set it wins over the MusicBank's Combat " +
                  "track. Boss fights ignore it and use the bank's BossCombat track.")]
         public AudioClip CombatMusic;
+
+        [Tooltip("Optional stairs drawn in the exit room, so a biome's way down looks like it belongs " +
+                 "there (playtest 3 finding 14). Empty uses DungeonManager's default stairs.")]
+        public Sprite ExitMarker;
+
+        [Tooltip("The chests a cache room on this floor can show, each a closed and an opened sprite " +
+                 "(a sunken chest in the March). One is picked per room. Empty uses DungeonManager's " +
+                 "generic chests.")]
+        public List<ChestSkin> Chests = new List<ChestSkin>();
+    }
+
+    /// <summary>A cache room's chest: how it looks before and after it is opened.</summary>
+    [System.Serializable]
+    public class ChestSkin
+    {
+        public Sprite Closed;
+        public Sprite Open;
+
+        public bool IsValid => Closed != null && Open != null;
     }
 }

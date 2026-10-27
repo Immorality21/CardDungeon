@@ -182,6 +182,16 @@ namespace Assets.Scripts.Balance
         public int ClearGold;
         public int ClearEssence;
 
+        /// <summary>
+        /// Gold the straight-line party had earned before this run: its prerequisite's
+        /// <see cref="GoldEarnedThrough"/>. Part of it is spent on gear before the run starts
+        /// (<c>BalanceRulesSO.StraightPartyGearShare</c>).
+        /// </summary>
+        public float GoldEarnedBefore;
+
+        /// <summary>Gold earned up to and including this run.</summary>
+        public float GoldEarnedThrough => GoldEarnedBefore + TotalExpectedGold + ClearGold;
+
         /// <summary>Level-to-level growth in difficulty score; entry i is the jump from level i to i+1.</summary>
         public List<float> DifficultyJumps = new List<float>();
 

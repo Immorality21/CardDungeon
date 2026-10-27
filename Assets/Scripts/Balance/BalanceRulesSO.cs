@@ -253,6 +253,14 @@ namespace Assets.Scripts.Balance
                  "between runs. Off measures XP alone, which undersells a replay (2026-10-17).")]
         public bool RevisitPartyBuysGear = true;
 
+        [Tooltip("Share of the gold the straight-line party has earned before a run that it spends on gear " +
+                 "before entering it, the way a player does at the Merchant. The rest is assumed to go on " +
+                 "buildings and the potion belt. 0 measures a party that never buys anything, which is what " +
+                 "every number before 2026-10-26 described - and why geared play felt far easier than the " +
+                 "bands said (playtest 3 findings 10 and 13). Ignored when ReferencePartyGoldBudget or saved " +
+                 "gear dresses the party instead.")]
+        [Range(0f, 1f)] public float StraightPartyGearShare = 0.5f;
+
         [Header("Investment frontier — what each tier asks, and how the player may pay it")]
         [Tooltip("Sweep every run's final floor across party width and sphere-grid XP, and report " +
                  "the minimal mixes that clear it. Needs simulation; costs about a minute.")]

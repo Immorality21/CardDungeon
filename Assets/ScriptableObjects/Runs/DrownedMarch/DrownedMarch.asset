@@ -42,7 +42,7 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 2.75
+      Difficulty: 3.2
       StatScales:
       - Stat: 3
         Multiplier: 1.5
@@ -72,7 +72,7 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 3.6
+      Difficulty: 3.2
       StatScales:
       - Stat: 3
         Multiplier: 3
@@ -87,9 +87,9 @@ MonoBehaviour:
     BossEnemy: {fileID: 11400000, guid: e62cccd795c1c1942b396724ce782f6f, type: 2}
     BossAdds:
     - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
-      Count: 1
+      Count: 2
     EnemyTuning:
-      Difficulty: 3
+      Difficulty: 2.6
       StatScales:
       - Stat: 3
         Multiplier: 2.5
@@ -100,9 +100,9 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 92
+            Amount: 170
           - Type: 1
-            Amount: 13
+            Amount: 18
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

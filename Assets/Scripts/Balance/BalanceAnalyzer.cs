@@ -244,7 +244,10 @@ namespace Assets.Scripts.Balance
                     seedXp = seed.EndLifetimeXp;
                 }
 
-                var curve = RunCurve.Build(run, report.Party, rules, seedRoster, seedXp);
+                float goldBefore = seed != null ? seed.GoldEarnedThrough : 0f;
+                var party = StraightLineParty(input, rules, report, seedRoster, seedXp, goldBefore);
+                var curve = RunCurve.Build(run, party, rules, seedRoster, seedXp);
+                curve.GoldEarnedBefore = goldBefore;
                 report.Runs.Add(curve);
                 byKey[CampaignOps.RunKeyOf(run)] = curve;
             }
@@ -262,9 +265,16 @@ namespace Assets.Scripts.Balance
             }
             foreach (var run in challenges)
             {
-                report.Runs.Add(strongest != null
-                    ? RunCurve.Build(run, report.Party, rules, strongest.EndRoster, strongest.EndLifetimeXp)
-                    : RunCurve.Build(run, report.Party, rules));
+                if (strongest == null)
+                {
+                    report.Runs.Add(RunCurve.Build(run, report.Party, rules));
+                    continue;
+                }
+                var party = StraightLineParty(input, rules, report, strongest.EndRoster, strongest.EndLifetimeXp,
+                    strongest.GoldEarnedThrough);
+                var curve = RunCurve.Build(run, party, rules, strongest.EndRoster, strongest.EndLifetimeXp);
+                curve.GoldEarnedBefore = strongest.GoldEarnedThrough;
+                report.Runs.Add(curve);
             }
 
             // Runs that exist as assets but are not on the map still get measured, as a fresh start -
@@ -276,6 +286,41 @@ namespace Assets.Scripts.Balance
                     report.Runs.Add(RunCurve.Build(run, report.Party, rules));
                 }
             }
+        }
+
+        /// <summary>
+        /// The party that walks into a run on the straight line: the roster and XP it inherits, wearing
+        /// gear bought with <see cref="BalanceRulesSO.StraightPartyGearShare"/> of the gold earned before
+        /// it. Until 2026-10-26 it wore nothing, so the bands described a player who never visits the
+        /// Merchant, and a geared party walked through the Catacombs and the Drowned March (playtest 3
+        /// findings 10 and 13: with 500 gold of gear every finale there wiped 0-2%, against 38-74%
+        /// bare). Same buyer as the revisit party (<see cref="RevisitFundedCurve"/>).
+        /// </summary>
+        private static PartyBaseline StraightLineParty(BalanceInput input, BalanceRulesSO rules, BalanceReport report,
+            List<HeroSO> roster, Dictionary<HeroSO, int> lifetimeXp, float goldEarned)
+        {
+            int budget = Mathf.FloorToInt(goldEarned * rules.StraightPartyGearShare);
+            // A designed budget or a saved loadout already dresses the reference party; do not dress it twice.
+            bool dressedElsewhere = rules.ReferencePartyGoldBudget > 0 || rules.ReferencePartyUsesSavedGear;
+            if (budget <= 0 || dressedElsewhere || input?.Items == null || roster == null || roster.Count == 0)
+            {
+                return report.Party;
+            }
+            return DressedParty(roster, lifetimeXp, budget, input, rules, report);
+        }
+
+        /// <summary><paramref name="roster"/> at its average XP, wearing what <paramref name="gold"/> buys.</summary>
+        private static PartyBaseline DressedParty(List<HeroSO> roster, Dictionary<HeroSO, int> lifetimeXp, int gold,
+            BalanceInput input, BalanceRulesSO rules, BalanceReport report)
+        {
+            int xpPerHero = 0;
+            foreach (var hero in roster)
+            {
+                xpPerHero += lifetimeXp != null && lifetimeXp.TryGetValue(hero, out int xp) ? xp : 0;
+            }
+            xpPerHero /= roster.Count;
+            var spend = GearLoadout.Spend(roster, xpPerHero, input.Items, gold, rules.WeightFor);
+            return PartyBaseline.Build(roster, xpPerHero, spend.Lookup, report.Party.PotionItem, report.Party.PotionCount);
         }
 
         /// <summary>
@@ -3144,23 +3189,23 @@ namespace Assets.Scripts.Balance
             // A replay pays gold and loot too, and a player spends it on gear between runs - the
             // XP-only funding read three Ashen Deep revisits as worth a fraction of what they are
             // (2026-10-17). The gold the revisits themselves earn (kills and floor clears) buys
-            // gear with the frontier's own buyer; campaign gold before them stays unspent, so the
-            // straight-line party and this one differ by the replays alone.
+            // gear with the frontier's own buyer, on top of the straight-line party's own share of
+            // the campaign's gold (2026-10-26), so the two parties still differ by the replays alone.
             var party = report.Party;
-            int gold = Mathf.FloorToInt(revisits * GoldPerRevisit(nudge.Feeder));
-            if (rules.RevisitPartyBuysGear && gold > 0 && input?.Items != null && feederCleared.EndRoster.Count > 0)
+            int straight = Mathf.FloorToInt(feederCleared.GoldEarnedThrough * rules.StraightPartyGearShare);
+            if (rules.ReferencePartyGoldBudget > 0 || rules.ReferencePartyUsesSavedGear)
             {
-                int xpPerHero = 0;
-                foreach (var hero in feederCleared.EndRoster)
-                {
-                    xpPerHero += funded.TryGetValue(hero, out int xp) ? xp : 0;
-                }
-                xpPerHero /= feederCleared.EndRoster.Count;
-                var spend = GearLoadout.Spend(feederCleared.EndRoster, xpPerHero, input.Items, gold, rules.WeightFor);
-                party = PartyBaseline.Build(feederCleared.EndRoster, xpPerHero, spend.Lookup,
-                    report.Party.PotionItem, report.Party.PotionCount);
+                straight = 0;
             }
-            return RunCurve.Build(nudge.Run, party, rules, feederCleared.EndRoster, funded);
+            int replays = rules.RevisitPartyBuysGear ? Mathf.FloorToInt(revisits * GoldPerRevisit(nudge.Feeder)) : 0;
+            int gold = straight + replays;
+            if (gold > 0 && input?.Items != null && feederCleared.EndRoster.Count > 0)
+            {
+                party = DressedParty(feederCleared.EndRoster, funded, gold, input, rules, report);
+            }
+            var curve = RunCurve.Build(nudge.Run, party, rules, feederCleared.EndRoster, funded);
+            curve.GoldEarnedBefore = feederCleared.GoldEarnedThrough;
+            return curve;
         }
 
         /// <summary>Gold one Fear level 0 revisit of <paramref name="feeder"/> pays the party: its kills

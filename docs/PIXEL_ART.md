@@ -366,3 +366,15 @@ candidate each, every one used first time.
 Every generation is kept in the PixelLab gallery. The armoured-guardian Warden candidate became the
 Dark Jailor; the realistic Paladin candidates (`0e5d9e6b…`, `98990fed…`) and the img2img one
 (`f9e6df74…`) are still there if a future hero or enemy wants them.
+
+## Map markers and per-level variants (2026-10-26)
+
+- **Stairs and chests are per level now.** `LevelDefinitionSO.ExitMarker` (a sprite) and `Chests` (closed/open
+  pairs) override `DungeonManager`'s defaults in `Managers.prefab` (`_exitRoomMarkerSprite`, `_genericChests`).
+  A cache picks its pair by room index, not the seeded RNG, so a resume shows the same chest. The art is in
+  `Sprites/Environment/Markers/` (32x32, PPU 32, uncompressed).
+- **A matching open/closed pair comes from editing the closed sprite**, not from two generations: same seed
+  alone did not keep the shape. **Five stairs as one family** came from generating one and editing it into the
+  other themes.
+- **The 3/4 corner angle is fine on the floor**, but the chests fill the whole canvas and read a little larger
+  than the stairs; trim a pixel of margin if that ever bothers.

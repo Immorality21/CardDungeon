@@ -167,7 +167,14 @@ MonoBehaviour:
   _randomGenerateOn: 1
   _customSeed: 0
   _testLevel: {fileID: 11400000, guid: eac98a3da612d49499a92d78cd394b7f, type: 2}
-  _exitRoomMarkerSprite: {fileID: 21300000, guid: e7e6586b7a8746a0b6dcfb59fe3be8a3, type: 3}
+  _exitRoomMarkerSprite: {fileID: 21300000, guid: 3c7cfefdf054432d8bea954c5f8a4271, type: 3}
+  _genericChests:
+  - Closed: {fileID: 21300000, guid: d0b3082781d847f188790d1c773262d5, type: 3}
+    Open: {fileID: 21300000, guid: d3d97bd1140a41feb055e3482cd7bc1b, type: 3}
+  - Closed: {fileID: 21300000, guid: 8e89e08c2abe4b1bb3f4d52d89619411, type: 3}
+    Open: {fileID: 21300000, guid: 52ca65b7e9bd47fc92e23664d751bbb4, type: 3}
+  - Closed: {fileID: 21300000, guid: 73892966f3b54e56aeeea8ed3919cb8f, type: 3}
+    Open: {fileID: 21300000, guid: 103d5d7fff0f4ccfa48c3859314f4a39, type: 3}
 --- !u!1 &3613005434373047218
 GameObject:
   m_ObjectHideFlags: 0

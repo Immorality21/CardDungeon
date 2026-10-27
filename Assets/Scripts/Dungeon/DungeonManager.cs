@@ -98,6 +98,11 @@ namespace Assets.Scripts.Dungeon
         [SerializeField]
         private Sprite _exitRoomMarkerSprite;
 
+        [Tooltip("The chests a cache room shows on a floor whose level names none of its own " +
+                 "(LevelDefinitionSO.Chests). One is picked per room.")]
+        [SerializeField]
+        private List<ChestSkin> _genericChests = new List<ChestSkin>();
+
         public static int? SeedToLoad;
         public static LevelDefinitionSO LevelToLoad;
         public static RunDefinitionSO ActiveRun;
@@ -980,7 +985,8 @@ namespace Assets.Scripts.Dungeon
             }
 
             bool treasure = room.Kind == RoomKind.Treasure;
-            var sprite = Combat.CombatIcons.Get(treasure ? "chest" : "campfire");
+            var chest = treasure ? ChestFor(room) : null;
+            var sprite = chest != null ? chest.Closed : Combat.CombatIcons.Get(treasure ? "chest" : "campfire");
             if (sprite == null)
             {
                 return;
@@ -993,7 +999,39 @@ namespace Assets.Scripts.Dungeon
             sr.sprite = sprite;
             sr.sortingOrder = 3;
             room.KindMarker = sr;
-            room.KindMarkerSpent = Combat.CombatIcons.Get(treasure ? "chest_open" : "campfire_out");
+            room.KindMarkerSpent = chest != null
+                ? chest.Open
+                : Combat.CombatIcons.Get(treasure ? "chest_open" : "campfire_out");
+        }
+
+        /// <summary>
+        /// The chest a cache room shows: one of its level's own (a sunken chest in the March), else one
+        /// of the generic ones (playtest 3 finding 14). Picked from the room's index rather than the
+        /// seeded RNG, so a resumed floor shows the same chest without shifting what the seed places.
+        /// Null falls back to the Resources chest.
+        /// </summary>
+        private ChestSkin ChestFor(Room room)
+        {
+            var pool = new List<ChestSkin>();
+            var source = CurrentLevel != null && CurrentLevel.Chests != null && CurrentLevel.Chests.Count > 0
+                ? CurrentLevel.Chests
+                : _genericChests;
+            if (source != null)
+            {
+                foreach (var skin in source)
+                {
+                    if (skin != null && skin.IsValid)
+                    {
+                        pool.Add(skin);
+                    }
+                }
+            }
+            if (pool.Count == 0)
+            {
+                return null;
+            }
+            int index = Mathf.Abs(room.RoomIndex * 7 + 3) % pool.Count;
+            return pool[index];
         }
 
         private void PlaceRoomEvents(List<Room> rooms, Room startRoom)
@@ -1263,7 +1301,11 @@ namespace Assets.Scripts.Dungeon
 
         private void PlaceExitMarker(Room room)
         {
-            if (_exitRoomMarkerSprite == null)
+            // The level's own stairs (a flooded stair in the March), else the default.
+            var stairs = CurrentLevel != null && CurrentLevel.ExitMarker != null
+                ? CurrentLevel.ExitMarker
+                : _exitRoomMarkerSprite;
+            if (stairs == null)
             {
                 return;
             }
@@ -1272,7 +1314,7 @@ namespace Assets.Scripts.Dungeon
             markerObj.transform.SetParent(room.transform, false);
             markerObj.transform.position = room.ClaimSpot(markerObj, -0.5f);
             var sr = markerObj.AddComponent<SpriteRenderer>();
-            sr.sprite = _exitRoomMarkerSprite;
+            sr.sprite = stairs;
             sr.sortingOrder = 3;
         }
 

@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: HuntersMark
   DisplayName: Hunter's Mark
   Description: He picks one, and from then on everyone knows which.
-  Icon: {fileID: 3051856151345990285, guid: 94e7b8b322f3cb0448fb8457fe320ded, type: 3}
+  Icon: {fileID: 21300000, guid: c0c8b8b3dc5841f285cea4875008458c, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 0

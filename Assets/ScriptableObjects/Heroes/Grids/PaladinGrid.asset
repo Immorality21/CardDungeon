@@ -74,7 +74,7 @@ MonoBehaviour:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: HolyTouch
+    GrantedMagicKey: HolyStrike
     GrantedCharges: 2
     AwakenedMagicKey: 
     UpgradeType: 0
@@ -633,7 +633,7 @@ MonoBehaviour:
       Values: []
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: Heal
+    GrantedMagicKey: HolyTouch
     GrantedCharges: 2
     AwakenedMagicKey: 
     UpgradeType: 0

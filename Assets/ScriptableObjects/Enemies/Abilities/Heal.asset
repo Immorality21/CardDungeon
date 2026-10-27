@@ -29,3 +29,4 @@ MonoBehaviour:
     UnlockLevel: 0
   Tags: 
   TagDuration: 3
+  EnemyOnly: 1

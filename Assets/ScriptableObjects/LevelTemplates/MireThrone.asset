@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.LevelDefinitionSO
   Key: MireThrone
   RoomPool:
-  - {fileID: 11400000, guid: 2746458f24f978b4eb0fa89fa0f4a04f, type: 2}
-  - {fileID: 11400000, guid: 8a98a175962275c4f84e7b71e66db482, type: 2}
-  - {fileID: 11400000, guid: fb04f7b71dcc6e945a5967851bfcdf09, type: 2}
+  - {fileID: 11400000, guid: 1aa7f74298a0457ca93adfe4356c54ae, type: 2}
+  - {fileID: 11400000, guid: 36de689b1873460e8d83c4e27ebd6e47, type: 2}
+  - {fileID: 11400000, guid: 4b598f335e69402eabf98651db8a0243, type: 2}
   RoomsToGenerate: 16
   ChainBias: 0.95
   MomentumBias: 0.498
@@ -38,3 +38,7 @@ MonoBehaviour:
   MapBackdrop: {fileID: 21300000, guid: 30ca23d39e3f46b6a6bb7bc05f314d31, type: 3}
   ExplorationMusic: {fileID: 0}
   CombatMusic: {fileID: 0}
+  ExitMarker: {fileID: 21300000, guid: a4ecdc864e0f4f0aa8ba8af1eb88c02a, type: 3}
+  Chests:
+  - Closed: {fileID: 21300000, guid: d3e26dcff8c54d988d87f69636dbc9cf, type: 3}
+    Open: {fileID: 21300000, guid: 21699b4e53ae40c9bb2a33677c214b5d, type: 3}

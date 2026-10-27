@@ -39,3 +39,7 @@ MonoBehaviour:
   MapBackdrop: {fileID: 21300000, guid: 30ca23d39e3f46b6a6bb7bc05f314d31, type: 3}
   ExplorationMusic: {fileID: 0}
   CombatMusic: {fileID: 0}
+  ExitMarker: {fileID: 21300000, guid: a4ecdc864e0f4f0aa8ba8af1eb88c02a, type: 3}
+  Chests:
+  - Closed: {fileID: 21300000, guid: d3e26dcff8c54d988d87f69636dbc9cf, type: 3}
+    Open: {fileID: 21300000, guid: 21699b4e53ae40c9bb2a33677c214b5d, type: 3}

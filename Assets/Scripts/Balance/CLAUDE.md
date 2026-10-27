@@ -182,6 +182,8 @@ roll here is unwinnable"* and suggests lowering `SpawnChance`, a field the exit 
 
 **Two modelling corrections worth not regressing.** `EnemyManager.SpawnEnemies` skips the room the party is in, so `RunCurveModel` takes the start room out of both the manual and generated room counts — every level used to be overstated by one room's worth of enemies. And `ReplaceExitRoomWithBoss` now spreads the boss's displaced room across all combat entries instead of deleting one outright: deleting an entry whose expected occurrence was exactly 1.0 removed an enemy from the level entirely, which once made Bog Shaman — and therefore `Heal` — unreachable.
 
+**The straight-line party buys gear (2026-10-26, `BALANCING.md` §5al).** `StraightPartyGearShare` (0.5) of the gold a run's prerequisites earned (`RunCurve.GoldEarnedBefore`) is spent with `GearLoadout.Spend` before the run; every band is judged against that party. The two routes below override it.
+
 **Gear reaches the model two ways, and only one of them can back a published number.**
 `ReferencePartyUsesSavedGear` reads the local save file — right for auditing one player's progress,
 useless for a report, which is why `BalanceRegressionTests` never turns it on, which is why it

@@ -3193,3 +3193,59 @@ easy), so the floor is marked **`RunLevelEntry.IntendedHard`** instead: the anal
 overrun, as an Info, and the suite passes. Use that flag only for a wall the owner wants. Lesson: the closed-form model prices an ungated heal as lost damage,
 so making a support enemy behave better *raises* danger wherever it spawns densely - re-run the
 Balance suite after any behaviour change, not only stat changes.
+
+## §5al — The straight-line party buys gear, and the Catacombs and the March re-tuned for it (2026-10-26)
+
+**The finding (playtest 3, findings 10 and 13).** The owner, equipped and with Hall nodes bought, never
+wiped in the Catacombs and found the Drowned March "way too easy, one enemy per room, each dies in one
+hit". The model agreed once it was asked the right question: every band since §5ai judged a party
+**wearing nothing**. Measured with a reference gear budget (`ReferencePartyGoldBudget`, in memory):
+
+| | no gear | 500 gold of gear | 1000 gold |
+|---|---|---|---|
+| Lich's Sepulchre (finale) | 38% wipes | 0% | 0% |
+| Mire Throne (finale) | 74% | 2% | 0% |
+| ordinary floors, ending health | 45-61% | 73-85% | 79-91% |
+
+The straight line has earned ~460 gold before the Catacombs and ~780 before the March (the Warrens off
+the line), so a player who spends at the Merchant was always far above the party the bands described.
+And **no single difficulty serves both**: with the March densified, settings where a bare party wiped
+16-34% on ordinary floors (the suite's ceiling is 35%) left a party with 1000 gold of gear at 0% wipes and
+67-83% health. Gear is the axis §5p measured at ~2.4x XP; tuning against a bare party tunes for a
+player who ignores it.
+
+**The change:** `BalanceRulesSO.StraightPartyGearShare` (0.5). Each run on the straight line is entered by
+its prerequisite's party wearing gear bought (`GearLoadout.Spend`, the frontier's buyer) with half the
+gold earned before it (`RunCurve.GoldEarnedBefore` / `GoldEarnedThrough`); the other half is assumed to
+go on buildings and the potion belt. The revisit party gets the same share plus its replays' gold.
+Ignored when `ReferencePartyGoldBudget` or saved gear dresses the party. **Every band is now judged
+against a party that shops**, and a player who never buys gear is expected to struggle - which is rule 1.
+
+**The March got more bodies** (owner: "with four heroes I should meet at least 2-3 enemies a room").
+Its rooms were shared with seven other runs, so it got its own copies (`March*Room.asset`: Hollow, Pool,
+Shrine, Swamp, Court, Blue, Cavern), each the original plus a third spawn line and higher chances,
+~2.2-2.5 expected enemies instead of 1-2. The five March templates and the Reedcage layout point at them.
+
+| | was (geared model) | now | change |
+|---|---|---|---|
+| Ossuary Stair | 0% / 82% | 2% / 53% | enemy Agility x2 |
+| Bone Galleries | 0% / 88% | 9% / 48% | Agility x2 |
+| Lich's Sepulchre | 0% / 73% | ~20-25% / 46% | Agility x1.5, Lich HP 85 -> 80 (boss ratio ceiling) |
+| Silt Shallows | 0% / 74% | 4% / 40% | denser rooms |
+| The Reedcage | 0% / 73% | 0% / 62% | denser rooms, Difficulty 2.75 -> 3.2 |
+| Weeping Causeway | 0% / 75% | 0% / 57% | denser rooms |
+| Rotwater Deep | 0% / 76% | 8% / 42% | denser rooms, Difficulty 3.6 -> 3.2 |
+| **The Mire Throne** | 2% / 43% | **79%** | denser rooms, Difficulty 3.0 -> 2.6, Mirefather 92/13 -> **170 HP / 18 STR**, 2 Floating Eye adds |
+| ...finales after 1 revisit | | Lich 1%, Mire Throne 1% | |
+
+Four things this pass learned:
+- **Difficulty barely moves a geared party; enemy Agility does** - the March's lesson (§5ai) holds for the
+  Catacombs' three heroes once they wear gear: Difficulty 3.7 on the Lich's floor still never wiped.
+- **Agility moves in whole points on small templates**, so x1.5 and x1.75 on the Lich's floor are one
+  step apart and 20% vs 69% wipes. There is nothing in between; finish with Difficulty or a boss stat.
+- **Denser trash breaks the boss ratio** (Mirefather read 1.0x its floor). The boss had to grow with
+  the rooms; lowering the floor's Difficulty pays for it.
+- **The other runs now read easy in the tool**, because they always were for a geared player: the Ashen
+  Deep's ordinary floors end at 73-77% health, the Hollow Vault wipes 46% (target 90%+), and the Blood
+  Stair and Seeping Cistern never wipe. Re-tune them in the next pass against this party; nothing in
+  the game got easier, only the measurement got honest.

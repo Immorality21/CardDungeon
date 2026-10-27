@@ -28,7 +28,9 @@ MonoBehaviour:
     BossAdds: []
     EnemyTuning:
       Difficulty: 2.6
-      StatScales: []
+      StatScales:
+      - Stat: 3
+        Multiplier: 2
       XpMultiplier: 1.75
       GoldMultiplier: 1
       Overrides: []
@@ -41,7 +43,9 @@ MonoBehaviour:
     BossAdds: []
     EnemyTuning:
       Difficulty: 3.0
-      StatScales: []
+      StatScales:
+      - Stat: 3
+        Multiplier: 2
       XpMultiplier: 1.75
       GoldMultiplier: 1
       Overrides: []
@@ -56,7 +60,9 @@ MonoBehaviour:
       Count: 2
     EnemyTuning:
       Difficulty: 2.9
-      StatScales: []
+      StatScales:
+      - Stat: 3
+        Multiplier: 1.5
       XpMultiplier: 1.75
       GoldMultiplier: 1
       Overrides:
@@ -64,7 +70,7 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 85
+            Amount: 80
           - Type: 1
             Amount: 8
           - Type: 4

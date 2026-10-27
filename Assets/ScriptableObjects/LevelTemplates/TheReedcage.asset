@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.LevelDefinitionSO
   Key: TheReedcage
   RoomPool:
-  - {fileID: 11400000, guid: 2746458f24f978b4eb0fa89fa0f4a04f, type: 2}
-  - {fileID: 11400000, guid: b2d5f8c31a6e5d0f9b4c7e2a3f8d5b01, type: 2}
-  - {fileID: 11400000, guid: fb04f7b71dcc6e945a5967851bfcdf09, type: 2}
+  - {fileID: 11400000, guid: 1aa7f74298a0457ca93adfe4356c54ae, type: 2}
+  - {fileID: 11400000, guid: e294c97b137943aa8c7feec6d2cbc178, type: 2}
+  - {fileID: 11400000, guid: 4b598f335e69402eabf98651db8a0243, type: 2}
   RoomsToGenerate: 6
   ChainBias: 0.9
   MomentumBias: 0.498
@@ -34,3 +34,7 @@ MonoBehaviour:
   MapBackdrop: {fileID: 21300000, guid: 30ca23d39e3f46b6a6bb7bc05f314d31, type: 3}
   ExplorationMusic: {fileID: 0}
   CombatMusic: {fileID: 0}
+  ExitMarker: {fileID: 21300000, guid: a4ecdc864e0f4f0aa8ba8af1eb88c02a, type: 3}
+  Chests:
+  - Closed: {fileID: 21300000, guid: d3e26dcff8c54d988d87f69636dbc9cf, type: 3}
+    Open: {fileID: 21300000, guid: 21699b4e53ae40c9bb2a33677c214b5d, type: 3}
