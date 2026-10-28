@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: GolemBrace
   DisplayName: Brace
   Description: The golem sinks its weight into the ground and hardens.
-  Icon: {fileID: -2164995633088822925, guid: 019bdde453dc7aa4cacf3cbc9e373216, type: 3}
+  Icon: {fileID: 21300000, guid: 4c0abd5b4fb34b35b99123aeee88e8e6, type: 3}
   TargetType: 2
   Rarity: 0
   Effects:

@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: DarkPact
   DisplayName: Dark Pact
   Description: A better bargain with a worse partner.
-  Icon: {fileID: 21300000, guid: 6cd9a4cead7747c6b1be1203b6ddf7af, type: 3}
+  Icon: {fileID: 21300000, guid: 9b3bc30804a649939bd8bfed980ad233, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 2

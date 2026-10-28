@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: ClusterBomb
   DisplayName: Cluster Bomb
   Description: The shell splits in the air. Every piece has its own fuse, and every one of them is lit.
-  Icon: {fileID: 21300000, guid: e0137c8249144955bff3d556193d58a9, type: 3}
+  Icon: {fileID: 21300000, guid: 343ff99eef7f4a59a0eed06028362538, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 1

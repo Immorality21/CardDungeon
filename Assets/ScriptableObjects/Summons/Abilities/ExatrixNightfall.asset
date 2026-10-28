@@ -16,7 +16,7 @@ MonoBehaviour:
   DisplayName: Nightfall
   Description: She becomes the dark between the torches, and is at every throat at
     once. They move slower after.
-  Icon: {fileID: 3051856151345990285, guid: 94e7b8b322f3cb0448fb8457fe320ded, type: 3}
+  Icon: {fileID: 21300000, guid: 9c16f8b077414374a99b5fe4d77d17df, type: 3}
   TargetType: 1
   Rarity: 0
   Effects:

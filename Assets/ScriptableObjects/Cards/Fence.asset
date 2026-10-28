@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Fence
   DisplayName: Fence
   Description: She already knows who will buy it, and for how much.
-  Icon: {fileID: 3051856151345990285, guid: 94e7b8b322f3cb0448fb8457fe320ded, type: 3}
+  Icon: {fileID: 21300000, guid: 7c42b136e6b34407ae4844bceb701103, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 2

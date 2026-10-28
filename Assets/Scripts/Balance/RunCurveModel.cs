@@ -307,7 +307,7 @@ namespace Assets.Scripts.Balance
                     ? party
                     : PartyBaseline.Build(roster,
                         h => Mathf.FloorToInt(lifetime.TryGetValue(h, out var xp) ? xp : 0f),
-                        party.GearLookup, party.PotionItem, party.PotionCount, null);
+                        party.GearLookup, party.PotionItem, party.PotionCount, null, party.PotionHealBonus);
 
                 var level = BuildLevel(i, entry, levelParty, rules, fear);
                 level.RescuedHere = entry.RescueHero;

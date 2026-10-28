@@ -58,6 +58,11 @@ namespace Assets.Scripts.Items
                  "moment a hero buys health on the grid.")]
         public int ConsumableAmount;
 
+        [Min(0)]
+        [Tooltip("Ability charges given back to the drinker's most-spent ability (RestoreCharge, " +
+                 "HealAndCharge). The potion belt's potency steps add to it.")]
+        public int ConsumableCharges;
+
         [Range(0f, 1f)]
         [Tooltip("Fraction of the TARGET's max health restored, added to ConsumableAmount. This is " +
                  "the half that keeps a potion worth drinking as heroes grow - a flat 5 HP was " +
@@ -67,6 +72,16 @@ namespace Assets.Scripts.Items
         [Tooltip("Stack ceiling for anything that stacks - consumables and materials. Equipment " +
                  "ignores it: a sword is always one entry so it can carry its own equipped slot.")]
         public int MaxStack = 99;
+
+        [Tooltip("-1: drops wherever a table lists it. 0 or more: drops ONLY on a revisit at this Fear " +
+                 "level or higher, so a first clear never pays it - the belt's late upgrade materials " +
+                 "(playtest 3 finding 5). Enforced by RunFear.Withholds at every drop site.")]
+        public int RevisitFear = -1;
+
+        [Tooltip("A revisit-only material's run, in the player's words (\"the Sealed Archive\"). The Merchant " +
+                 "names it when a belt step is short of this material - the one place the player would " +
+                 "otherwise be stuck (docs/TUTORIAL.md).")]
+        public string RevisitRun;
 
         /// <summary>
         /// What this consumable actually restores to a target with <paramref name="maxHealth"/>:
@@ -85,12 +100,23 @@ namespace Assets.Scripts.Items
         /// </summary>
         public int HealAmountFor(int maxHealth)
         {
-            if (ConsumableEffect != ConsumableEffectType.RestoreHealth)
+            return HealAmountFor(maxHealth, 0f);
+        }
+
+        /// <summary>
+        /// The same, with the potion belt's bought potency (<c>PotionBeltOps.HealBonus</c>) added to
+        /// the percentage. Play passes it; the balance model calls the overload above, so it keeps
+        /// pricing the base potion (owner, 2026-10-27).
+        /// </summary>
+        public int HealAmountFor(int maxHealth, float bonusPercent)
+        {
+            if (ConsumableEffect != ConsumableEffectType.RestoreHealth
+                && ConsumableEffect != ConsumableEffectType.HealAndCharge)
             {
                 return 0;
             }
 
-            float scaled = ConsumablePercent * Mathf.Max(0, maxHealth);
+            float scaled = (ConsumablePercent + Mathf.Max(0f, bonusPercent)) * Mathf.Max(0, maxHealth);
             int total = Mathf.Max(0, ConsumableAmount) + Mathf.CeilToInt(scaled);
             if (total <= 0 && (ConsumableAmount > 0 || ConsumablePercent > 0f))
             {

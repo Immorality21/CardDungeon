@@ -16,7 +16,7 @@ MonoBehaviour:
   DisplayName: Absolution
   Description: 'The blessing finishes what it started: wounds close, and whatever
     clings to them lets go.'
-  Icon: {fileID: 21300000, guid: a568b630111a4323825b1937cca7f8ed, type: 3}
+  Icon: {fileID: 21300000, guid: 0c04872fcbf84d8e83ee6f4e65322e0b, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 4

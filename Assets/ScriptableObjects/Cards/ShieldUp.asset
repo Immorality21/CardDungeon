@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: ShieldUp
   DisplayName: Shield Up
   Description: Raises a sturdy shield, boosting defense and drawing the enemy's eye.
-  Icon: {fileID: -2164995633088822925, guid: 019bdde453dc7aa4cacf3cbc9e373216, type: 3}
+  Icon: {fileID: 21300000, guid: 8a51e70095bc4789b91f496a992b7cc1, type: 3}
   TargetType: 2
   Rarity: 0
   Effects:

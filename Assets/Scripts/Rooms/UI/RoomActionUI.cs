@@ -1124,7 +1124,7 @@ namespace Assets.Scripts.Rooms
             var materials = RoomKindRewards.TreasureMaterials(
                 level.MaterialTable, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
             // A revisit below its best fear does not pay the scarce materials (docs/plans/REVISITS.md).
-            materials.RemoveAll(a => a.Item != null && RunFear.Current.Withholds(a.Item.Key));
+            materials.RemoveAll(a => a.Item != null && RunFear.Current.Withholds(a.Item));
             return materials;
         }
 

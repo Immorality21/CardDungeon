@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: HeavenlyFire
   DisplayName: Heavenly Fire
   Description: The holy ground catches. Everything standing on it keeps burning.
-  Icon: {fileID: 21300000, guid: 1d267e1e1ffd4fcf864dbd188cb4d167, type: 3}
+  Icon: {fileID: 21300000, guid: 3fe5a371b9e24058ae17e4bc5db7077f, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
   TargetType: 1

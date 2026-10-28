@@ -24,6 +24,7 @@ namespace Assets.Scripts.MainMenu
         private readonly VisualElement _musicBar;
         private readonly VisualElement _sfxBar;
         private readonly Button _muteButton;
+        private readonly Button _speedButton;
         private readonly Label _note;
         private readonly Button _closeButton;
 
@@ -39,6 +40,7 @@ namespace Assets.Scripts.MainMenu
             _musicBar = root.Q<VisualElement>("music-bar");
             _sfxBar = root.Q<VisualElement>("sfx-bar");
             _muteButton = root.Q<Button>("options-mute");
+            _speedButton = root.Q<Button>("options-speed");
             _note = root.Q<Label>("options-note");
             _closeButton = root.Q<Button>("options-close");
 
@@ -54,6 +56,18 @@ namespace Assets.Scripts.MainMenu
                 _muteButton.clicked += () =>
                 {
                     AudioOptions.ToggleMute();
+                    Refresh();
+                };
+            }
+            if (_speedButton != null)
+            {
+                // Combat speed (playtest 3 finding 21): cycles x1 -> x2 -> x3, applied at once when the
+                // pause overlay is up mid-fight.
+                _speedButton.clicked += () =>
+                {
+                    bool inCombat = Rooms.CombatManager.HasInstance && Rooms.CombatManager.Instance.InCombat;
+                    Combat.CombatSpeed.Cycle(inCombat);
+                    CombatAudio.Play(CombatSound.CursorMove);
                     Refresh();
                 };
             }
@@ -110,6 +124,10 @@ namespace Assets.Scripts.MainMenu
             if (_muteButton != null)
             {
                 _muteButton.text = muted ? "On" : "Off";
+            }
+            if (_speedButton != null)
+            {
+                _speedButton.text = Combat.CombatSpeed.Label(Combat.CombatSpeed.Current);
             }
             SetText(_note, muted
                 ? "Everything is silenced. The dials keep their settings."

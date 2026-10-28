@@ -16,7 +16,7 @@ MonoBehaviour:
   DisplayName: Unbroken Line
   Description: You plant yourself, and the line does more than hold - it mends behind
     you.
-  Icon: {fileID: 21300000, guid: 1c664bf6742e4c20af3a92643babd7e4, type: 3}
+  Icon: {fileID: 21300000, guid: ae1b4dfb11b746bd8682bd3bb2d88f8c, type: 3}
   TargetType: 4
   Rarity: 3
   Effects:

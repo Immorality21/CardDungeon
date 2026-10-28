@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: ChaosBolt
   DisplayName: Chaos Bolt
   Description: What Bloodbolt was always trying to be.
-  Icon: {fileID: 21300000, guid: 36a46adcc1f64306b25c975af90f737b, type: 3}
+  Icon: {fileID: 21300000, guid: b5a93ae4dff04c6caa53835b3604e610, type: 3}
   TargetType: 0
   Rarity: 3
   Effects:

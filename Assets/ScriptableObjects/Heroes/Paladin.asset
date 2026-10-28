@@ -47,7 +47,7 @@ MonoBehaviour:
         Radiant Cut and Judgement (Holy).'
     - GridBranch: c
       Becomes: A healer.
-      IntendedKit: Heal -> Renew
+      IntendedKit: Holy Touch -> Renew
       Summon: 'Dawn Stag - special attack: heals 40% of each hero''s health, then
         regeneration for 3 turns.'
     Overlaps: 'Warrior (front-liner, damage) and Cleric (healer). Three branches

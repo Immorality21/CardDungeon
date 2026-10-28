@@ -169,6 +169,13 @@ Roughly in the order they bite. The first two are decisions for the owner.
 - [ ] **The "spend your XP" nudge after N cleared levels** (§20): the loop above covers the *first*
       spend; the plan also wants a reminder later, when XP has piled up unspent.
 - [x] **The Paladin's XP.** Answered by the return to the hall after the gear step (2026-10-27).
+- [x] **Where the belt's late materials come from** *(built 2026-10-28: the Merchant's belt detail adds a gold line
+      "Sealing Wax only turns up when you revisit the Sealed Archive at Fear 1 or higher" for each
+      revisit-only material the step is short of - `ItemSO.RevisitRun`, `MerchantUI.AddRevisitHints`)* (playtest 3 finding 5, owner 2026-10-27): the
+      Merchant's later potion-belt steps need Sealing Wax / Grave Salt / Bog Pearl / Cinder Glass,
+      which only drop on revisits at Fear 1+. The owner wants a light step pointing there; per the
+      mystery-over-hand-holding rule, fire it only where the player would otherwise be stuck - e.g.
+      the first time a belt step is blocked on a revisit-only material.
 - [ ] **Step content is only partly authored.** The words are in `Tutorial.asset`; *which* screen
       and target each step uses is still `TutorialOps` code. §20's end state is a `TutorialStepSO`
       list — worth doing when the third or fourth step type lands, not before.

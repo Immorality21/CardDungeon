@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: HorrorUnmaking
   DisplayName: Unmaking
   Description: It remembers a spell, and forgets the part that kept it safe.
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 199503202db84fa5808d5ee363d2ce96, type: 3}
   TargetType: 0
   Rarity: 2
   Effects:

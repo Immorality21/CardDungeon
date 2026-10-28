@@ -493,10 +493,6 @@ namespace Assets.Scripts.Heroes.UI
             }
         }
 
-        // The reason line is red; a material already covered is drawn green inside it.
-        private const string HaveColour = "#8FE08F";
-        private const string ShortColour = "#FF8C82";
-
         /// <summary>
         /// Each material the node asks for as "Name have/need", green when the bag covers it and red
         /// when it does not. The whole line used to be red ("Needs 2 Void Shard · 3 Mire Hide"), so
@@ -504,25 +500,7 @@ namespace Assets.Scripts.Heroes.UI
         /// </summary>
         private static string DescribeMaterialShortfall(SphereGridNode node)
         {
-            var parts = new List<string>();
-            if (node.MaterialCosts != null)
-            {
-                foreach (var line in node.MaterialCosts)
-                {
-                    if (line == null || !line.IsValid)
-                    {
-                        continue;
-                    }
-                    string name = string.IsNullOrEmpty(line.Material.DisplayName)
-                        ? line.Material.Key
-                        : line.Material.DisplayName;
-                    int need = Mathf.Max(1, line.Amount);
-                    int have = Items.InventoryManager.Instance.GetMaterialQuantity(line.Material.Key);
-                    string colour = have >= need ? HaveColour : ShortColour;
-                    parts.Add($"<color={colour}>{name} {Mathf.Min(have, need)}/{need}</color>");
-                }
-            }
-            return string.Join(" · ", parts);
+            return Items.UI.MaterialCostText.Describe(node.MaterialCosts);
         }
 
         /// <summary>The thing itself: an authored name, else the ability, summon or stat it grants.</summary>

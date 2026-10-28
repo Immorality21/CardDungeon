@@ -261,6 +261,12 @@
                 <ui:Button name="options-mute" text="" class="cd-button cd-option-toggle" />
             </ui:VisualElement>
 
+            <!-- Combat speed (playtest 3 finding 21): x1, x2, x3 while a fight runs. Same toggle as Mute. -->
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="Combat speed" class="cd-option-label" />
+                <ui:Button name="options-speed" text="" class="cd-button cd-option-toggle" />
+            </ui:VisualElement>
+
             <ui:Button name="pause-quit" text="Leave the Dungeon" class="cd-button cd-button--wide" />
             <ui:Label name="pause-note" text="" class="cd-info-label cd-hint" />
         </ui:VisualElement>

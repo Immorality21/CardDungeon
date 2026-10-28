@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: PressTheAttack
   DisplayName: Press the Attack
   Description: Two blows before it has its guard back up.
-  Icon: {fileID: -7438242413743671978, guid: f9b9570a47bee3541b17abf0c1f0c6c7, type: 3}
+  Icon: {fileID: 21300000, guid: f37d616b0d81440b91c98ef952f50908, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
   TargetType: 0

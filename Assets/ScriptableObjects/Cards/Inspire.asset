@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Inspire
   DisplayName: Inspire
   Description: A word of faith that gives an ally back what they spent.
-  Icon: {fileID: 1194596290848904516, guid: ba5d4e7c0f0b6c94b9cdc9d1e3821d0e, type: 3}
+  Icon: {fileID: 21300000, guid: 3565c8c3f73f4d7089b3a58e1d057118, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 3

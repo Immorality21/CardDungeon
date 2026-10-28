@@ -28,7 +28,7 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 3.6
+      Difficulty: 9
       StatScales:
       - Stat: 3
         Multiplier: 3
@@ -43,7 +43,7 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 3.4
+      Difficulty: 8.5
       StatScales:
       - Stat: 3
         Multiplier: 3
@@ -58,7 +58,7 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 3.15
+      Difficulty: 7.9
       StatScales:
       - Stat: 3
         Multiplier: 3

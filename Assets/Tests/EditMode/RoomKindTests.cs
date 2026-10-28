@@ -219,6 +219,18 @@ namespace Tests.EditMode
             Assert.AreEqual(0, RoomKindRewards.ExpectedRestHealing(0, partyPool));
         }
 
+        [Test]
+        public void PickTreasureItem_NeverPicksAConsumable()
+        {
+            var potion = Item("Potion", ItemRarity.Common, itemLevel: 1);
+            potion.Category = ItemCategory.Consumable;
+            var rag = Item("Rag", ItemRarity.Common, itemLevel: 1);
+
+            var picked = RoomKindRewards.PickTreasureItem(new List<ItemSO> { potion, rag }, 0, () => 0f);
+
+            Assert.AreSame(rag, picked);
+        }
+
         private static ItemSO Item(string key, ItemRarity rarity, int itemLevel)
         {
             var item = ScriptableObject.CreateInstance<ItemSO>();

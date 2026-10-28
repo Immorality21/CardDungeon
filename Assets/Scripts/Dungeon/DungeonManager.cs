@@ -35,9 +35,6 @@ namespace Assets.Scripts.Dungeon
         [SerializeField]
         private List<HeroSO> _heroDefinitions;
 
-        [SerializeField]
-        [Tooltip("Healing-potion consumable topped up to the belt cap on each fresh dungeon entry.")]
-        private ItemSO _healingPotion;
 
         /// <summary>
         /// The heroes that actually enter the dungeon: the party the player *selected* in the hub, not
@@ -488,19 +485,27 @@ namespace Assets.Scripts.Dungeon
                 Summons.Restore(_fileHandler.Load<RunSaveData>().SummonCharges);
             }
 
-            // Top the healing-potion belt back up to its cap for the new dungeon. Consumables
-            // now live in the item inventory; the "belt" is just the carry cap the Merchant raises.
-            if (_healingPotion != null && InventoryManager.HasInstance && PartyResourceManager.Instance != null)
+            // Stock the potion belt - on a run's FIRST floor only (owner, playtest 3 finding 5): potions
+            // drunk on floor 1 stay gone for floor 2. Each slotted type is filled to its capacity and an
+            // unslotted type emptied: the belt is what the party carries, and potions are found nowhere
+            // else. The balance model still assumes a full healing belt every floor, on purpose - see
+            // docs/BALANCING.md §5am.
+            var belt = PotionBeltSO.Load();
+            if (belt != null && InventoryManager.HasInstance && MetaProgressManager.HasInstance
+                && EquippedMagicState.RefillsOnLevelStart(RunLevelIndex))
             {
-                int cap = PartyResourceManager.Instance.GetMax(PartyResourceType.HealingPotion);
-                int before = InventoryManager.Instance.GetConsumableQuantity(_healingPotion.Key);
-                InventoryManager.Instance.TopUpConsumableToCap(_healingPotion, cap);
-                int refilled = InventoryManager.Instance.GetConsumableQuantity(_healingPotion.Key) - before;
-                if (refilled > 0)
+                var stock = PotionBeltOps.RunStartStock(belt, PotionBeltState.Loadout(belt), PotionBeltState.Capacity);
+                foreach (var line in stock)
                 {
-                    // Saves are deferred, so the refill is not on disk: without this the level-clear
-                    // summary would list the belt's own refill as potions found on the floor.
-                    _levelStartGrants.Add(new ItemSaveData { ItemKey = _healingPotion.Key, Quantity = refilled });
+                    int before = InventoryManager.Instance.GetConsumableQuantity(line.Key.Key);
+                    InventoryManager.Instance.SetBeltStock(line.Key, line.Value);
+                    int refilled = line.Value - before;
+                    if (refilled > 0)
+                    {
+                        // Saves are deferred, so the refill is not on disk: without this the level-clear
+                        // summary would list the belt's own refill as potions found on the floor.
+                        _levelStartGrants.Add(new ItemSaveData { ItemKey = line.Key.Key, Quantity = refilled });
+                    }
                 }
             }
 
@@ -1341,7 +1346,7 @@ namespace Assets.Scripts.Dungeon
                 level.GuaranteedMaterials, RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
             foreach (var award in awards)
             {
-                if (!award.IsEmpty && !RunFear.Current.Withholds(award.Item.Key))
+                if (!award.IsEmpty && !RunFear.Current.Withholds(award.Item))
                 {
                     InventoryManager.Instance.AddItem(award, EconomySource.LevelClear);
                 }

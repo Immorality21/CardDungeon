@@ -211,6 +211,16 @@
                     <ui:Button name="party-split-catchup" text="Catch Up" class="cd-inv-tab cd-camp-mode" />
                     <ui:Button name="party-split-focus" text="" class="cd-inv-tab cd-camp-focus" />
                     <ui:Label name="party-split-desc" text="" class="cd-camp-split-desc" />
+                    <!-- The potion belt (playtest 3 finding 5): one button per slot bought; a press cycles the
+                         potion type in it. Hidden past the slots this save has. Locked once a run starts. -->
+                    <ui:Label text="Potion belt" class="cd-inv-col__title cd-camp-belt-title" />
+                    <ui:VisualElement class="cd-camp-belt">
+                        <ui:Button name="party-belt-0" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
+                        <ui:Button name="party-belt-1" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
+                        <ui:Button name="party-belt-2" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
+                        <ui:Button name="party-belt-3" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
+                    </ui:VisualElement>
+                    <ui:Label name="party-belt-desc" text="" class="cd-camp-split-desc" />
                     <ui:Label name="party-feedback" text="" class="cd-camp-feedback" />
                 </ui:VisualElement>
             </ui:VisualElement>

@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: WatcherGaze
   DisplayName: Unblinking Gaze
   Description: It looks, and keeps looking.
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 24be758d07ec495393ac899c3d01d76c, type: 3}
   TargetType: 0
   Rarity: 0
   Effects:

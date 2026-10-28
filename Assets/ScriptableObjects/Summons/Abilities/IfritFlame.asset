@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: IfritFlame
   DisplayName: Ifrit's Flame
   Description: A lance of flame at one enemy, and it catches.
-  Icon: {fileID: -8176323626317577203, guid: 0258ccea7d255c5429e5f53dde1a61da, type: 3}
+  Icon: {fileID: 21300000, guid: af6259d8f10e466dadba7b363a11f243, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 0

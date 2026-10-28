@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: SiphonSoul
   DisplayName: Siphon Soul
   Description: Every heart in the room beats a little for him.
-  Icon: {fileID: 21300000, guid: 36a46adcc1f64306b25c975af90f737b, type: 3}
+  Icon: {fileID: 21300000, guid: 02c7df1916b242a3a1f68817b4f81ef0, type: 3}
   TargetType: 1
   Rarity: 3
   Effects:

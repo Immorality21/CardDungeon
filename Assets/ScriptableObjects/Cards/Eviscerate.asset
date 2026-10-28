@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Eviscerate
   DisplayName: Eviscerate
   Description: She finds the wound that is already there, and makes it worse.
-  Icon: {fileID: 21300000, guid: 7fce12d2d12a4cc5bfa70f3b8a500ddf, type: 3}
+  Icon: {fileID: 21300000, guid: 1ef63e66efa6491ab526d9ec56ad9255, type: 3}
   Delivery: 1
   ProjectileArtAngle: 45
   TargetType: 0

@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: ArrowStorm
   DisplayName: Arrow Storm
   Description: The sky goes dark with shafts, and every one of them draws blood.
-  Icon: {fileID: 21300000, guid: bc92ff21f61d42e39fb58f13dd1e2c6c, type: 3}
+  Icon: {fileID: 21300000, guid: 1f5b15c3ee0141788df32aeff230077c, type: 3}
   Delivery: 0
   ProjectileArtAngle: -90
   TargetType: 1

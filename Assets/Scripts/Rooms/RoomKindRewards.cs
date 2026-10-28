@@ -69,7 +69,9 @@ namespace Assets.Scripts.Rooms
 
             foreach (var item in candidates)
             {
-                if (item == null || item.Category == ItemCategory.Material)
+                // Gear only. Materials are rolled by TreasureMaterials below; consumables are never
+                // found - potions come from the belt alone (owner, playtest 3 finding 5).
+                if (item == null || item.Category != ItemCategory.Equipment)
                 {
                     continue;
                 }

@@ -68,6 +68,19 @@ namespace Assets.Scripts.Rooms
 
     public class CombatManager : SingletonBehaviour<CombatManager>
     {
+        /// <summary>
+        /// A fight cut off by a scene change (a quit from the pause overlay mid-fight) never reaches the
+        /// end of <c>RunCombat</c>, so the speed it set would otherwise leak into the hub.
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (InCombat)
+            {
+                CombatSpeed.Apply(false);
+            }
+        }
+
+
         [SerializeField] private float _turnDelay = 0.6f;
         [SerializeField] private float _lungeDistance = 0.3f;
         [SerializeField] private float _lungeDuration = 0.12f;
@@ -659,6 +672,8 @@ namespace Assets.Scripts.Rooms
         private IEnumerator RunCombat(Party party, Room room)
         {
             InCombat = true;
+            // The player's combat speed (Options) runs only while the fight does.
+            CombatSpeed.Apply(true);
             _currentCombatRoom = room;
             _currentParty = party;
             _combatLoot.Clear();
@@ -1047,6 +1062,7 @@ namespace Assets.Scripts.Rooms
             _tagTracker.Clear();
             _currentCombatRoom = null;
             InCombat = false;
+            CombatSpeed.Apply(false);
 
             bool levelCleared = outcome == CombatOutcome.Victory && room.IsExit && !HasAliveEnemies(room);
             bool bossDefeated = outcome == CombatOutcome.Victory && _currentCombatHadBoss;
@@ -2272,16 +2288,18 @@ namespace Assets.Scripts.Rooms
             switch (item.ConsumableEffect)
             {
                 case ConsumableEffectType.RestoreHealth:
-                    int max = target.GetEffectiveStat(StatType.MaxHealth);
-                    // Scales off the TARGET's bar, not the user's - a potion is worth what it is
-                    // worth to whoever drinks it. ItemSO owns the arithmetic so the balance model
-                    // and this agree by construction.
-                    int healed = HealthOps.Heal(target, RunFear.Current.ScaleHealing(target, item.HealAmountFor(max)),
-                        new HealthSource(heroUnit, HealthCause.Item), Events).Healed;
-                    CombatAudio.Play(CombatSound.ItemUse);
-                    CombatAudio.Play(CombatSound.Heal);
-                    ShowDamageText(target.Transform.position, healed, Color.green);
+                    int healed = DrinkHeal(heroUnit, item, target);
                     _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, restoring {healed} HP.";
+                    break;
+                case ConsumableEffectType.RestoreCharge:
+                    CombatAudio.Play(CombatSound.ItemUse);
+                    _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}"
+                        + DrinkCharges(item, target) + ".";
+                    break;
+                case ConsumableEffectType.HealAndCharge:
+                    int mended = DrinkHeal(heroUnit, item, target);
+                    _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, restoring {mended} HP"
+                        + DrinkCharges(item, target) + ".";
                     break;
                 case ConsumableEffectType.CureStatus:
                     var cured = BuffTracker.CureStatusEffects(target);
@@ -2310,6 +2328,41 @@ namespace Assets.Scripts.Rooms
 
             Events?.Publish(new ItemUsed { User = heroUnit, Target = target, Item = item });
             yield return new WaitForSeconds(_turnDelay);
+        }
+
+        /// <summary>A drunk potion's heal. Scales off the TARGET's bar - a potion is worth what it is
+        /// worth to whoever drinks it; ItemSO owns the arithmetic so the balance model agrees.</summary>
+        private int DrinkHeal(ICombatUnit user, ItemSO item, ICombatUnit target)
+        {
+            int max = target.GetEffectiveStat(StatType.MaxHealth);
+            int amount = item.HealAmountFor(max, PotionBeltState.HealBonusFor(item));
+            int healed = HealthOps.Heal(target, RunFear.Current.ScaleHealing(target, amount),
+                new HealthSource(user, HealthCause.Item), Events).Healed;
+            CombatAudio.Play(CombatSound.ItemUse);
+            CombatAudio.Play(CombatSound.Heal);
+            ShowDamageText(target.Transform.position, healed, Color.green);
+            return healed;
+        }
+
+        /// <summary>
+        /// A drunk potion's charges, back to the target's most-spent ability through the same bank
+        /// Life Tap uses. Returns the log's tail (", restoring 1 charge to Fireball").
+        /// </summary>
+        private string DrinkCharges(ItemSO item, ICombatUnit target)
+        {
+            int charges = Mathf.Max(1, item.ConsumableCharges + PotionBeltState.ChargeBonusFor(item));
+            var bank = _calculator != null ? _calculator.Charges : null;
+            if (bank == null || !bank.Carries(target))
+            {
+                return ", but it has no abilities to restore";
+            }
+            var restored = bank.Restore(target, SpellcastAction.AnyChargeSlot, charges, -1);
+            if (restored.Added <= 0 || restored.Magic == null)
+            {
+                return ", but every ability is already full";
+            }
+            ShowFloatingLabel(target.Transform.position, $"+{restored.Added} {restored.Magic.DisplayName}", new Color(0.55f, 0.75f, 1f));
+            return $", restoring {restored.Added} charge{(restored.Added == 1 ? "" : "s")} to {restored.Magic.DisplayName}";
         }
 
         private IEnumerator ExecuteHeroTurn(ICombatUnit hero, Room room)
@@ -3405,7 +3458,7 @@ namespace Assets.Scripts.Rooms
                          table, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f)))
             {
                 // A revisit below its best fear does not pay the scarce materials (docs/plans/REVISITS.md).
-                if (RunFear.Current.Withholds(award.Item.Key))
+                if (RunFear.Current.Withholds(award.Item))
                 {
                     continue;
                 }
@@ -3451,7 +3504,7 @@ namespace Assets.Scripts.Rooms
             _robbed.Add(mark);
 
             var lines = enemy.LootTable
-                .Where(d => d != null && d.Item != null && !RunFear.Current.Withholds(d.Item.Key))
+                .Where(d => d != null && d.Item != null && !RunFear.Current.Withholds(d.Item))
                 .ToList();
             if (lines.Count > 0)
             {

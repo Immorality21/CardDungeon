@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Renew
   DisplayName: Renew
   Description: Knits an ally's wounds a little at a time.
-  Icon: {fileID: 2291012834914130869, guid: f75b4f2ca4ebefc4c938f40515ffba65, type: 3}
+  Icon: {fileID: 21300000, guid: 97c7ddafeee04031ab643aa55e4c556d, type: 3}
   TargetType: 3
   Rarity: 1
   Effects:

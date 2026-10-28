@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Mug
   DisplayName: Mug
   Description: A knee to the gut, and a hand in the purse on the way past.
-  Icon: {fileID: 21300000, guid: ed6b7473d63649cba459421252fa5f44, type: 3}
+  Icon: {fileID: 21300000, guid: eb79284618a140f088de64accc56e427, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
   TargetType: 0

@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Renewal
   DisplayName: Renewal
   Description: The mending spreads to everyone he can reach.
-  Icon: {fileID: 2291012834914130869, guid: f75b4f2ca4ebefc4c938f40515ffba65, type: 3}
+  Icon: {fileID: 21300000, guid: 2846a39eb2c840f6abd37b0f8eee44f5, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 4

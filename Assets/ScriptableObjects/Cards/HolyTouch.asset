@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: HolyTouch
   DisplayName: Holy Touch
   Description: A steadying hand. Restores health to one ally, or to yourself.
-  Icon: {fileID: 2291012834914130869, guid: f75b4f2ca4ebefc4c938f40515ffba65, type: 3}
+  Icon: {fileID: 21300000, guid: 44f25a1252994c1eaf9e9a2332be0971, type: 3}
   TargetType: 3
   Rarity: 0
   Effects:

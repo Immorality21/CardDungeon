@@ -245,7 +245,7 @@ namespace Assets.Scripts.Balance
                 }
 
                 float goldBefore = seed != null ? seed.GoldEarnedThrough : 0f;
-                var party = StraightLineParty(input, rules, report, seedRoster, seedXp, goldBefore);
+                var party = AssumedBelt(StraightLineParty(input, rules, report, seedRoster, seedXp, goldBefore), byKey.Values);
                 var curve = RunCurve.Build(run, party, rules, seedRoster, seedXp);
                 curve.GoldEarnedBefore = goldBefore;
                 report.Runs.Add(curve);
@@ -270,8 +270,8 @@ namespace Assets.Scripts.Balance
                     report.Runs.Add(RunCurve.Build(run, report.Party, rules));
                     continue;
                 }
-                var party = StraightLineParty(input, rules, report, strongest.EndRoster, strongest.EndLifetimeXp,
-                    strongest.GoldEarnedThrough);
+                var party = AssumedBelt(StraightLineParty(input, rules, report, strongest.EndRoster, strongest.EndLifetimeXp,
+                    strongest.GoldEarnedThrough), byKey.Values);
                 var curve = RunCurve.Build(run, party, rules, strongest.EndRoster, strongest.EndLifetimeXp);
                 curve.GoldEarnedBefore = strongest.GoldEarnedThrough;
                 report.Runs.Add(curve);
@@ -307,6 +307,42 @@ namespace Assets.Scripts.Balance
                 return report.Party;
             }
             return DressedParty(roster, lifetimeXp, budget, input, rules, report);
+        }
+
+        /// <summary>
+        /// <paramref name="party"/> carrying the healing belt the player is assumed to have maxed as
+        /// soon as the campaign allows (owner, 2026-10-28, playtest 3 finding 5): every Healing capacity
+        /// and potency step whose materials drop somewhere in <paramref name="cleared"/> is bought,
+        /// revisit-only drops included (a cleared run can be revisited), gold ignored. Deliberately
+        /// generous - it makes the model read the game as easier, so tuning errs hard. Only Healing:
+        /// the other potion types stay unpriced. The real game refills per run; this still refills
+        /// every floor (docs/BALANCING.md §5am).
+        /// </summary>
+        private static PartyBaseline AssumedBelt(PartyBaseline party, IEnumerable<RunCurve> cleared)
+        {
+            var belt = PotionBeltSO.Load();
+            var healing = belt != null ? belt.Find(PotionBeltState.HealingKey) : null;
+            if (party == null || healing == null)
+            {
+                return party;
+            }
+            var obtainable = new HashSet<string>();
+            foreach (var run in cleared)
+            {
+                foreach (var yield in MaterialYieldModel.ForRun(run))
+                {
+                    if (yield.Material != null && yield.Total > 0f)
+                    {
+                        obtainable.Add(yield.Material.Key);
+                    }
+                }
+            }
+            PotionBeltOps.AssumedSteps(healing, item => obtainable.Contains(item.Key), out int capacity, out int potency);
+            int count = Mathf.Max(party.PotionCount, capacity);
+            float bonus = PotionBeltOps.HealBonus(healing, potency);
+            return count == party.PotionCount && Mathf.Approximately(bonus, party.PotionHealBonus)
+                ? party
+                : party.WithBelt(count, bonus);
         }
 
         /// <summary><paramref name="roster"/> at its average XP, wearing what <paramref name="gold"/> buys.</summary>

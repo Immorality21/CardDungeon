@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Hellfire
   DisplayName: Hellfire
   Description: 'What the Ifrit leaves behind: the whole field in flames.'
-  Icon: {fileID: -8176323626317577203, guid: 0258ccea7d255c5429e5f53dde1a61da, type: 3}
+  Icon: {fileID: 21300000, guid: 0f6ddfbb74594f8b99295ecd5860b5e6, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
   TargetType: 1

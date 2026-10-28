@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Purge
   DisplayName: Purge
   Description: Light poured over every enemy. The dead burn twice as bright.
-  Icon: {fileID: 21300000, guid: 1d267e1e1ffd4fcf864dbd188cb4d167, type: 3}
+  Icon: {fileID: 21300000, guid: 8950174e912b452ba1d93a129cf1fe72, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
   TargetType: 1

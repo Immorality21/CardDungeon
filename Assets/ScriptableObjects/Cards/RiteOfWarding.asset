@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: RiteOfWarding
   DisplayName: Rite of Warding
   Description: A circle drawn in his own blood. Nothing crosses it lightly.
-  Icon: {fileID: 21300000, guid: 6cd9a4cead7747c6b1be1203b6ddf7af, type: 3}
+  Icon: {fileID: 21300000, guid: e47dd950d3a2411980334eb99a4c1daf, type: 3}
   TargetType: 4
   Rarity: 2
   Effects:

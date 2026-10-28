@@ -212,6 +212,12 @@ on purpose** *(2026-10-26)*: a cast is resolved before it is presented, so the p
 before they resolve and `EffectPresenter` releases per target as its hit lands. A party-wide enemy
 spell used to drop every bar before its first bolt flew (playtest 3 finding 3). Summon and Ultra
 paths do not hold yet.
+- **Combat speed** *(2026-10-28, playtest 3 finding 21)*: `CombatSpeed` (x1/x2/x3, `savedata/Gameplay.json`) is
+  set as `Time.timeScale` by `CombatManager` when a fight starts and put back to 1 when it ends (and in its
+  `OnDestroy`, for a fight cut off by a scene change), so the floor, the hub and the victory summary always run
+  at x1. The Options button (`options-speed`, title screen and pause overlay, driven by `AudioOptionsUI`)
+  applies a change at once mid-fight. Unscaled waits (hit-stops, the hit-frame wince) keep their length on
+  purpose. Tested in play 2026-10-28: a whole fight at x3, reset to 1 on the victory window.
 - **CombatIcons** (`Combat/CombatIcons.cs`): loads/caches the neutral white glyphs from `Resources/CombatIcons` (sword, shield, snowflake, chevrons, cross, burst, arrow, **flame, droplet, mute, eye**), tinted/flipped per meaning.
 - **TurnIndicator** (`Combat/TurnIndicator.cs`): a bobbing arrow (the `arrow` glyph, turned a quarter) on the **outer side** of the unit whose turn it is — left of a hero, right of an enemy — pointing in at its middle. It floated above the sprite until 2026-09-28, which in a column of heroes is also the feet/HP bar of the one above, so with two heroes it read as pointing at either — the on-field "you're up" cue to complement the top-right turn-order list. Auto-created; `CombatManager.RunCombat` calls `SetTarget(unit)` at each turn start and `Clear()` when the loop ends. Follows the unit each frame; hides outside combat or once the unit dies.
 - **No procedural idle.** `CombatIdleMotion` (a vertical scale pulse faking "breathing") was removed 2026-09-27: units now idle through their own sprite frames (`AnimationFrames` on `HeroSO`/`EnemySO`, played by `SpriteAnimator`), and the scale pulse stretched that art on top of it. Don't reintroduce a transform-driven idle; give the unit frames instead.

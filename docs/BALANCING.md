@@ -3249,3 +3249,59 @@ Four things this pass learned:
   Deep's ordinary floors end at 73-77% health, the Hollow Vault wipes 46% (target 90%+), and the Blood
   Stair and Seeping Cistern never wipe. Re-tune them in the next pass against this party; nothing in
   the game got easier, only the measurement got honest.
+
+## §5am — The potion belt refills per run; the model still refills per floor (2026-10-28, playtest 3 finding 5)
+
+The real game now tops the healing-potion belt up on a run's **first floor only**, and the Merchant
+sells potency steps (+10/20/30/40% of max HP on top of the potion's own 30%). **The model was
+deliberately left alone** (owner): `PartyBaseline.SustainPool` and the floor simulator still give
+every floor a full belt at the save's capacity, and price the potion at its base potency
+(`ItemSO.HealAmountFor(max)` - play calls the overload with the bonus). The owner rarely drinks
+potions and clears floors easily, so the model is read as erring easy; the per-run refill is meant to
+make the real game harder than the model says. Two things now pull in opposite directions and are
+**not priced**: per-run refill (harder than the model from floor 2 on) and bought potency (easier).
+**Revised the same day (owner): the model assumes the Healing belt is maxed as soon as possible.**
+`BalanceAnalyzer.AssumedBelt` gives each run's party every Healing capacity and potency step whose
+materials drop somewhere in the runs before it (`MaterialYieldModel.ForRun`), revisit-only drops
+included, gold ignored (`PotionBeltOps.AssumedSteps`). Deliberately generous, so the model reads the
+game as easier and tuning errs hard. Measured: the Threshold 2 potions x 10 HP, the Sealed Archive 3 x
+16, the Catacombs 4 x 15, the Drowned March 5 x 16, the Ashen Deep 6 x 28 (+20%), everything after it
+6 x 39-50 (+40%). The regression suite stayed inside every band, so nothing was retuned for it. It
+still refills every floor. **The typed slots (same day) are unpriced too**: Antidote, Energy (+1 charge) and Elixir (heal + charge) never reach the model,
+and a player who slots something other than Healing carries fewer healing potions than the model
+assumes. Potions no longer drop
+anywhere (caches roll gear only, the Bog Shaman/Eye Ball/Bile Slime entries are gone), which the
+model never counted anyway.
+
+## §5an — The late runs made a bit harder, and what bosses respond to (2026-10-28)
+
+Owner: "make them a bit more difficult" (the runs §5al left reading easy). Measured with the belted,
+geared straight-line party (§5am), adaptive floor sim, wipes / ending health:
+
+| floor | Difficulty | before | after |
+|---|---|---|---|
+| Cinder Gate | 3.2 -> 5.6 | 0% / 79% | 2% / 69% |
+| The Slag Halls | 3.9 -> 6.8 | 0% / 76% | 2% / 67% |
+| The Bleeding Steps | 3.6 -> 9 | 0% / 86% | 0% / 70% |
+| The Chapel of Knives | 3.4 -> 8.5 | 0% / 90% | 5% / 69% |
+| The Ossuary Gate | 3.15 -> 7.9 | 0% / 93% | 14% / 72% |
+| The Sump | 4.2 -> 10.5 | 0% / 84% | 10% / 67% |
+
+**The boss floors were left alone** (Emberfall 30% wipes, the Hollow Vault, the Red Cloister, the Altar
+and the Mother Pool at 0%). What this pass learned:
+- **Ordinary late floors have a threshold, not a slope.** Difficulty x1.5, Endurance x2, Intelligence x2
+  and Agility +1 each moved ending health by 1-5 points; x2.5 Difficulty is where wipes start. The
+  geared party clears three short rooms before the enemies land much. The challenge runs (Blood
+  Stair, Cistern) need the biggest multipliers because they are measured against the strongest end
+  state in the campaign.
+- **Every boss here has an absolute override** (`EnemyTuning.Overrides`, per floor, because the Cinder
+  Tyrant appears in two runs), so a boss floor's Difficulty only moves its trash and its adds. Raising
+  it broke the boss ratio (Red Cloister 1.0x, Altar 1.4x) - the suite caught it.
+- **Boss health and strength barely move a geared party**: x1.5 on the Blood Stair and Cistern bosses
+  stayed at 0% wipes, and the Mother Pool hit the boss-ratio rule first. The levers left are the
+  boss's turns (Agility) and its adds (`BossAdds`); next pass.
+- **Owner's direction (same day):** tune bosses by their own absolute numbers (they are met once) and
+  leave percentage modifiers to the Fear levels. That is already how the data is shaped; keep it.
+- **Measuring gotcha:** never `Resources.UnloadAsset` a run asset mid-sweep - cached references (the
+  campaign) keep the dead copy and every floor reads 100% wipes until a script reload. Restore swept
+  values in a `finally` instead.

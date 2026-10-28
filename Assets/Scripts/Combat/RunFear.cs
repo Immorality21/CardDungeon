@@ -74,6 +74,26 @@ namespace Assets.Scripts.Combat
         /// </summary>
         public List<string> WithheldItemKeys { get; set; } = new List<string>();
 
+        /// <summary>
+        /// Whether a drop of <paramref name="item"/> is withheld on this run: a scarce material below the
+        /// best fear (above), or a revisit-only one (<c>ItemSO.RevisitFear</c>) on a first clear or below
+        /// its fear. Every drop site asks this one.
+        /// </summary>
+        public bool Withholds(Items.ItemSO item)
+        {
+            if (item == null)
+            {
+                return false;
+            }
+            return Withholds(item.Key) || !RevisitAllows(item.RevisitFear, IsRevisit, Level);
+        }
+
+        /// <summary>Whether an item that drops only from <paramref name="revisitFear"/> (-1 = anywhere) can drop here.</summary>
+        public static bool RevisitAllows(int revisitFear, bool isRevisit, int level)
+        {
+            return revisitFear < 0 || (isRevisit && level >= revisitFear);
+        }
+
         /// <summary>Whether a drop of <paramref name="itemKey"/> is withheld on this run.</summary>
         public bool Withholds(string itemKey)
         {

@@ -1934,6 +1934,30 @@
     white-space: normal;
 }
 
+/* The potion belt under the XP split (playtest 3 finding 5): a gap above its title so the two
+   sections read apart. */
+/* The Merchant's hint on where a revisit-only material drops: gold, so it reads as guidance, not an error. */
+.cd-belt-hint {
+    color: var(--cd-gold);
+}
+
+.cd-camp-belt-title {
+    margin-top: 14px;
+}
+
+/* Two slots a row, so four fit under the XP split without pushing the hint off the column. */
+.cd-camp-belt {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.cd-camp-belt__slot {
+    width: 48%;
+    -unity-text-align: middle-center;
+}
+
 .cd-camp-split-desc {
     font-size: 16px;
     color: var(--cd-text-light);

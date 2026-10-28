@@ -1045,7 +1045,8 @@ namespace Assets.Scripts.Items.UI
                 int quantity = item.Quantity;
                 var entry = new Entry
                 {
-                    Preview = () => ShowStackDetail(so, quantity, ItemPresenter.ConsumableEffectLine(so)),
+                    Preview = () => ShowStackDetail(so, quantity, ItemPresenter.ConsumableEffectLine(so, 0,
+                        PotionBeltState.HealBonusFor(so), PotionBeltState.ChargeBonusFor(so))),
                 };
                 entry.Row = BuildRow(so.Icon, so.DisplayName, ItemPresenter.RarityLabel(so.Rarity),
                     "x" + quantity, so, out entry.Cursor);

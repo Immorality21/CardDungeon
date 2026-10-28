@@ -88,6 +88,23 @@ namespace Assets.Scripts.Balance
         public int PotionHealAmount;
         public ItemSO PotionItem;
 
+        /// <summary>Share of max health the assumed potency steps add to each potion (<see cref="WithBelt"/>).</summary>
+        public float PotionHealBonus;
+
+        /// <summary>
+        /// This party carrying <paramref name="potionCount"/> potions at <paramref name="healBonus"/>
+        /// extra potency - the belt the model assumes bought by this point of the campaign. A shallow
+        /// copy: the original (often the shared reference party) is left as it was.
+        /// </summary>
+        public PartyBaseline WithBelt(int potionCount, float healBonus)
+        {
+            var copy = (PartyBaseline)MemberwiseClone();
+            copy.PotionCount = potionCount;
+            copy.PotionHealBonus = healBonus;
+            copy.PotionHealAmount = ResolvePotionHeal(PotionItem, Heroes, healBonus);
+            return copy;
+        }
+
         public List<SimUnit> Units
         {
             get
@@ -214,9 +231,10 @@ namespace Assets.Scripts.Balance
             System.Func<HeroSO, List<ItemSO>> gearLookup,
             ItemSO potionItem,
             int potionCount,
-            System.Func<HeroSO, List<string>> nodesLookup)
+            System.Func<HeroSO, List<string>> nodesLookup,
+            float potionHealBonus = 0f)
         {
-            var baseline = new PartyBaseline();
+            var baseline = new PartyBaseline { PotionHealBonus = potionHealBonus };
 
             if (potionItem != null)
             {
@@ -307,13 +325,13 @@ namespace Assets.Scripts.Balance
             // poured into (ItemSO.HealAmountFor) and there is no bar to scale against until the
             // party exists. Averaged over the party for the same reason the analyzer does: one
             // authored potion, several bars.
-            baseline.PotionHealAmount = ResolvePotionHeal(potionItem, baseline.Heroes);
+            baseline.PotionHealAmount = ResolvePotionHeal(potionItem, baseline.Heroes, potionHealBonus);
             return baseline;
         }
 
         /// <summary>What one potion restores to this party on average, or 0 when there is no
         /// healing consumable at all.</summary>
-        private static int ResolvePotionHeal(ItemSO potionItem, List<HeroBaseline> heroes)
+        private static int ResolvePotionHeal(ItemSO potionItem, List<HeroBaseline> heroes, float healBonus)
         {
             if (potionItem == null || heroes == null || heroes.Count == 0)
             {
@@ -325,7 +343,7 @@ namespace Assets.Scripts.Balance
             {
                 totalBar += hero.Effective[StatType.MaxHealth];
             }
-            return potionItem.HealAmountFor(totalBar / heroes.Count);
+            return potionItem.HealAmountFor(totalBar / heroes.Count, healBonus);
         }
 
         /// <summary>

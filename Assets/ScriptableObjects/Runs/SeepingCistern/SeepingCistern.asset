@@ -27,7 +27,7 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 4.2
+      Difficulty: 10.5
       StatScales:
       - Stat: 3
         Multiplier: 3

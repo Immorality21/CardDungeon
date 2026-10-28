@@ -58,7 +58,7 @@ the game's numbers:
 | whether an enemy casts, and which spell | `EnemyMagicPlan.ShouldCast` / `.Select` / `.ScalePower` |
 | an enemy's spell power at a level | `LevelEnemyTuning.MagicPowerScaleFor` |
 | economy pacing | `MetaProgressManager` constants |
-| potion belt capacity | `PartyResourceManager.DEFAULT_HEALING_POTION_MAX` |
+| potion belt capacity | `PartyResourceManager.DEFAULT_HEALING_POTION_MAX`; per run, `BalanceAnalyzer.AssumedBelt` (every Healing belt step whose materials drop in an earlier run, via `PotionBeltOps.AssumedSteps`) |
 | room-event placement odds | `RoomEventSpawn.ChancePercent` / `.MeetsRequirements` |
 | room-event check odds and outcome weights | `RoomEventResolver.SuccessChance` / `.EffectiveWeight` |
 | loot drop odds | `LootRoller.DropChance` |

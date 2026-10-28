@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: HorrorWhispers
   DisplayName: Whispers
   Description: A prayer turned inside out.
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 41b8f7ea1417480aa41c1695498d5971, type: 3}
   TargetType: 0
   Rarity: 2
   Effects:

@@ -50,6 +50,8 @@ namespace Assets.Scripts.Hub
         private readonly Label _shareLabel;
         private readonly Label _feedbackLabel;
         private readonly Button[] _seats = new Button[SeatCount];
+        private readonly List<Button> _beltSlots = new List<Button>();
+        private readonly Label _beltDesc;
         private readonly ScrollView _rosterList;
 
         private readonly VisualElement _detailIcon;
@@ -102,6 +104,16 @@ namespace Assets.Scripts.Hub
             _splitFocusButton = root.Q<Button>("party-split-focus");
             _splitDescLabel = root.Q<Label>("party-split-desc");
             _closeButton = root.Q<Button>("party-close");
+            _beltDesc = root.Q<Label>("party-belt-desc");
+
+            // As many slot buttons as the markup authors; a belt with fewer slots hides the rest.
+            for (int i = 0; root.Q<Button>("party-belt-" + i) != null; i++)
+            {
+                var slot = root.Q<Button>("party-belt-" + i);
+                int index = i;
+                slot.clicked += () => OnBeltSlotClicked(index);
+                _beltSlots.Add(slot);
+            }
 
             for (int i = 0; i < SeatCount; i++)
             {
@@ -211,6 +223,7 @@ namespace Assets.Scripts.Hub
             BuildRoster(owned, fieldedKeys);
             RefreshDetail(owned, fieldedKeys, cap);
             RefreshSplitControls(fieldedKeys);
+            RefreshBelt();
         }
 
         /// <summary>The four seats, leader first. An empty seat is a frame the cursor skips.</summary>
@@ -478,6 +491,59 @@ namespace Assets.Scripts.Hub
         /// a disabled button here never reads as a bug. The chosen mode stays enabled so the
         /// keyboard cursor can land on it.</para>
         /// </summary>
+        // --- The potion belt --------------------------------------------------
+
+        /// <summary>
+        /// One button per slot the belt has: the potion in it and how many a run starts with, or
+        /// "Empty". Packed for the run once it is underway, like the lineup.
+        /// </summary>
+        private void RefreshBelt()
+        {
+            var belt = PotionBeltSO.Load();
+            int slots = belt != null ? PotionBeltState.Slots(belt) : 0;
+            var loadout = belt != null ? PotionBeltState.Loadout(belt) : new List<string>();
+            for (int i = 0; i < _beltSlots.Count; i++)
+            {
+                var button = _beltSlots[i];
+                bool shown = i < slots;
+                button.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+                if (!shown)
+                {
+                    continue;
+                }
+                var type = belt.Find(loadout[i]);
+                button.text = type != null ? $"{type.DisplayName} ×{PotionBeltState.Capacity(type)}" : "Empty";
+                button.tooltip = type != null ? ItemPresenter.ConsumableEffectLine(type.Potion) : string.Empty;
+                button.EnableInClassList("cd-camp-mode--chosen", type != null);
+            }
+            SetText(_beltDesc, _lockedReason != null
+                ? "Packed for this run."
+                : "Refilled when a run begins. Press a slot to change it.");
+        }
+
+        private void OnBeltSlotClicked(int index)
+        {
+            if (_lockedReason != null)
+            {
+                SetFeedback("The belt is packed for this run.");
+                return;
+            }
+            var belt = PotionBeltSO.Load();
+            if (belt == null)
+            {
+                return;
+            }
+            var loadout = PotionBeltState.Loadout(belt);
+            if (index >= loadout.Count)
+            {
+                return;
+            }
+            loadout[index] = PotionBeltOps.Cycle(belt, loadout, index, key => PotionBeltState.Unlocked(belt.Find(key)));
+            PotionBeltState.SetLoadout(loadout);
+            SetFeedback(string.Empty);
+            RefreshBelt();
+        }
+
         private void RefreshSplitControls(List<string> fieldedKeys)
         {
             int campfireLevel = HubState.LevelOf(HubService.Party);

@@ -416,7 +416,7 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   (`.hub-entry`): run name + "Level N of M", a pip per floor (`BuildLevelPips`), the fielded party as
   portrait tiles with HP (`BuildPartyTiles`), and Enter Dungeon / Change Party / Back in that order (Change Party hidden once the run is
   underway).
-- **MerchantUI** — the Gold sink (gear, and the healing-potion carry cap). See the Progression guide.
+- **MerchantUI** — the Gold sink (gear, and the potion belt: slots, recipes, and each type's capacity and potency, for gold plus materials - `PotionBeltSO`). The campfire's **Potion belt** section (`party-belt-0..3`, two per row) picks the type per slot; a press cycles it, and it locks with the lineup once a run starts. See the Progression guide.
   **On the inventory frame since 2026-09-30**: Buy / Sell / Potion Belt tabs, a hero strip choosing
   who gear is compared against, and a detail column reusing the inventory's grants block
   (`InventoryHubUI.AddItemLines`, `StatCell`, `SetIcon`, `ApplyRarity` are `internal static` for this).

@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: FireCloak
   DisplayName: Fire Cloak
   Description: Sheathes the caster in a fire-warding ward.
-  Icon: {fileID: 21300000, guid: 64265e59b4da49ae842d6c083b334cce, type: 3}
+  Icon: {fileID: 21300000, guid: 68ec0bf3bac34fbda4071d3884d8c780, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 2

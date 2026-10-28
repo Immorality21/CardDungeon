@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: WhisperOfMadness
   DisplayName: Whisper of Madness
   Description: A word the mind cannot hold, and cannot drop.
-  Icon: {fileID: 3051856151345990285, guid: 94e7b8b322f3cb0448fb8457fe320ded, type: 3}
+  Icon: {fileID: 21300000, guid: 8b6f03dcd7c64c5eb80969ef536ed2b5, type: 3}
   TargetType: 0
   Rarity: 1
   Effects:

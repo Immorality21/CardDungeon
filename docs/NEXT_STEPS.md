@@ -292,11 +292,29 @@ Then the balance pass, starting with what this pass already showed:
 Every item, one line each, grouped by the plan file that holds it. **Open the plan, not the whole
 backlog.**
 
-### [Playtest 3](PLAYTEST_3.md) — 2026-10-26, 22 findings, not yet worked on
+### Next up
 
-- Hub/UI, combat presentation, art, the potion-belt rework, Paladin kit, downed heroes staying down,
-  Catacombs/Drowned March too easy (the model's reference party wears no gear), and one to-verify
-  (a rescued Rogue lost after a later wipe). Delete the file once its findings ship or move to a plan.
+- **Boss balancing — first** (owner, 2026-10-28). The late runs' bosses were left at their old numbers
+  in the last pass (Emberfall 30% wipes; the Hollow Vault, Red Cloister, Altar of the Last Initiate and
+  Mother Pool 0%). Tune each boss by its own absolute numbers (`EnemyTuning.Overrides` per floor; bosses
+  are met once) and leave percentage modifiers to the Fear levels. Health and strength barely move a
+  geared party, so try the boss's speed (Agility) and its adds (`BossAdds`). Start from
+  `BALANCING.md` §5an.
+
+### [Needs a playtest](TO_PLAYTEST.md) — built, not yet played by a human
+
+- Everything playtest 3 (2026-10-26) changed, as a checklist, plus the owner's to-dos (boss finisher
+  names, the Hero Workbook). Playtest 3's findings all shipped or moved here and below; its file is gone.
+
+### Later, small
+
+- **Warlock head size — small, later** (owner, 2026-10-28): the Warrior, Ranger and Rogue were redrawn
+  to the Paladin's smaller head (playtest 3 finding 17, `PIXEL_ART.md`'s proportion rule); the Warlock
+  may need the same. Owner to judge in play first.
+- **Resistance potions for the belt — later** (owner, 2026-10-28): a *resistance* potion type
+  (Frost Resistance first, then Fire, ...) sharing one type's slot and upgrades, unlocked through
+  quests once quests exist. The typed belt is built for it (`PotionBeltSO.Types`; a type's potion
+  becomes a list). Needs a resistance-buff consumable effect (`ELEMENTAL_PLAN.md`).
 
 ### [The specialization rebuild](plans/SPECIALIZATION.md) — the live thread
 

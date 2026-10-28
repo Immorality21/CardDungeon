@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: FlushingShot
   DisplayName: Flushing Shot
   Description: An arrow that drives its quarry out of cover and off its stride.
-  Icon: {fileID: 21300000, guid: 7fce12d2d12a4cc5bfa70f3b8a500ddf, type: 3}
+  Icon: {fileID: 21300000, guid: 6b29457d0bf046b3b626b95398bb97f5, type: 3}
   Delivery: 0
   ProjectileArtAngle: 45
   TargetType: 0

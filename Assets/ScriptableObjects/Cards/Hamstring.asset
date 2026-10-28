@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Hamstring
   DisplayName: Hamstring
   Description: A cut behind the knee. It will not be chasing anyone.
-  Icon: {fileID: -7438242413743671978, guid: f9b9570a47bee3541b17abf0c1f0c6c7, type: 3}
+  Icon: {fileID: 21300000, guid: f9b73ec30bf4410fb077ee6e452fc349, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
   TargetType: 0

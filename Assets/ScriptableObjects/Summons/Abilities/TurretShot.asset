@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: TurretShot
   DisplayName: Turret Shot
   Description: A bolt of iron from the tripod gun, at whatever moves.
-  Icon: {fileID: 21300000, guid: e4db1b811ed04f9db0a199fe251615ef, type: 3}
+  Icon: {fileID: 21300000, guid: c1f2e5c460b348ec9b5ecadabf1a6932, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 0

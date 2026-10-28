@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: IdolCrimsonVigor
   DisplayName: Crimson Vigor
   Description: The idol drinks, and the party grows strong on it.
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 9a69b16b5af742e5ba9b7c09c2c9f34f, type: 3}
   TargetType: 4
   Rarity: 0
   Effects:

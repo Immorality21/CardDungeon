@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: Ward
   DisplayName: Ward
   Description: A thinner ward against fire, ice and storm at once.
-  Icon: {fileID: 21300000, guid: 8a51e70095bc4789b91f496a992b7cc1, type: 3}
+  Icon: {fileID: 21300000, guid: 690b7127e76f4c699c1931235d857e1f, type: 3}
   TargetType: 2
   Rarity: 2
   Effects:

@@ -28,7 +28,6 @@ namespace Assets.Scripts.Hub
     /// </summary>
     public class MerchantUI
     {
-        private const int PotionCostPerCurrentMax = 25;
         private const int StockSize = 4;
         private const int RestockCost = 25;
         private const string PotionItemKey = "HealingPotion";
@@ -47,6 +46,20 @@ namespace Assets.Scripts.Hub
             public string Key;
             public int Price;
             public Button Row;
+
+            // Potion Belt tab only: what is on offer, for which potion type, and its next step
+            // (null once that ladder is all bought).
+            public BeltOffer Offer;
+            public BeltPotionType Type;
+            public BeltPrice Upgrade;
+        }
+
+        private enum BeltOffer
+        {
+            Slot,
+            Recipe,
+            Capacity,
+            Potency,
         }
 
         private readonly VisualElement _root;
@@ -149,10 +162,16 @@ namespace Assets.Scripts.Hub
             };
         }
 
-        private int PotionBeltCost()
+        /// <summary>Whether the bags and the purse both cover <paramref name="price"/>.</summary>
+        private static bool CanPay(BeltPrice price)
         {
-            int currentMax = PartyResourceManager.Instance.GetMax(PartyResourceType.HealingPotion);
-            return PotionCostPerCurrentMax * Mathf.Max(1, currentMax);
+            return price != null && Gold >= price.Gold && InventoryManager.Instance.CanAfford(price.Materials);
+        }
+
+        /// <summary>A healing potion's share of max health with the potency bought, as a whole percent.</summary>
+        private static int PotionPercent(ItemSO potion, float bonus)
+        {
+            return Mathf.RoundToInt(((potion != null ? potion.ConsumablePercent : 0f) + bonus) * 100f);
         }
 
         private static int Gold => MetaProgressManager.Instance.Gold;
@@ -280,8 +299,9 @@ namespace Assets.Scripts.Hub
                     break;
 
                 case Tab.Belt:
-                    SetText(_listTitle, "Upgrades");
-                    AddEntry(new Entry { Item = inv.GetItemSO(PotionItemKey), Key = PotionItemKey, Price = PotionBeltCost() });
+                    SetText(_listTitle, "Potion belt");
+                    AddBeltEntries(inv.GetItemSO(PotionItemKey));
+                    empty = "The merchant has no belt work today.";
                     break;
             }
 
@@ -315,9 +335,12 @@ namespace Assets.Scripts.Hub
             text.Add(MakeLabel(RowCaption(entry), "cd-inv-row__caption"));
             row.Add(text);
 
-            // Buying: the price, red when it is out of reach. Selling: what it fetches.
-            var price = MakeLabel($"{entry.Price}g", "cd-inv-row__meta", "cd-shop-price");
-            price.EnableInClassList("cd-shop-price--short", _tab != Tab.Sell && Gold < entry.Price);
+            // Buying: the price, red when it is out of reach. Selling: what it fetches. A belt step
+            // is red when its materials are short too; a ladder bought to the top says so.
+            bool beltMaxed = _tab == Tab.Belt && entry.Upgrade == null;
+            var price = MakeLabel(beltMaxed ? "Max" : $"{entry.Price}g", "cd-inv-row__meta", "cd-shop-price");
+            bool short_ = _tab == Tab.Belt ? !beltMaxed && !CanPay(entry.Upgrade) : _tab != Tab.Sell && Gold < entry.Price;
+            price.EnableInClassList("cd-shop-price--short", short_);
             row.Add(price);
 
             entry.Row = row;
@@ -327,15 +350,28 @@ namespace Assets.Scripts.Hub
 
         private string RowName(Entry entry)
         {
-            return _tab == Tab.Belt ? "Enlarge the potion belt" : entry.Item.DisplayName;
+            if (_tab == Tab.Belt)
+            {
+                switch (entry.Offer)
+                {
+                    case BeltOffer.Slot:
+                        return "Another belt slot";
+                    case BeltOffer.Recipe:
+                        return $"Learn: {entry.Type.Potion.DisplayName}";
+                    case BeltOffer.Capacity:
+                        return $"{entry.Type.DisplayName}: carry more";
+                    default:
+                        return $"{entry.Type.DisplayName}: stronger";
+                }
+            }
+            return entry.Item.DisplayName;
         }
 
         private string RowCaption(Entry entry)
         {
             if (_tab == Tab.Belt)
             {
-                int max = PartyResourceManager.Instance.GetMax(PartyResourceType.HealingPotion);
-                return $"{max} → {max + 1} potions carried";
+                return BeltChange(entry);
             }
             return $"{ItemPresenter.SlotLabel(entry.Item.SlotType)} · {ItemPresenter.RarityLabel(entry.Item.Rarity)}";
         }
@@ -444,18 +480,161 @@ namespace Assets.Scripts.Hub
             _detailBody.Add(grid);
         }
 
+        /// <summary>
+        /// One row per belt offer: another slot, then per potion type its capacity and potency
+        /// ladders once known, or its recipe once on sale. A recipe still gated behind a run is not
+        /// listed at all - the merchant does not advertise what the player has not reached.
+        /// </summary>
+        private void AddBeltEntries(ItemSO healingPotion)
+        {
+            var belt = PotionBeltSO.Load();
+            if (belt == null)
+            {
+                return;
+            }
+            AddBelt(BeltOffer.Slot, null, PotionBeltOps.NextSlot(belt, PotionBeltState.Slots(belt)), healingPotion);
+            foreach (var type in belt.Types)
+            {
+                if (type == null || type.Potion == null)
+                {
+                    continue;
+                }
+                if (PotionBeltState.Unlocked(type))
+                {
+                    if (type.CapacityTiers.Count > 0)
+                    {
+                        AddBelt(BeltOffer.Capacity, type, PotionBeltOps.NextCapacity(type, PotionBeltState.Capacity(type)), type.Potion);
+                    }
+                    if (type.PotencyTiers.Count > 0)
+                    {
+                        AddBelt(BeltOffer.Potency, type, PotionBeltOps.NextPotency(type, PotionBeltState.Potency(type)), type.Potion);
+                    }
+                }
+                else if (PotionBeltState.OnSale(type))
+                {
+                    AddBelt(BeltOffer.Recipe, type, type.Unlock, type.Potion);
+                }
+            }
+        }
+
+        private void AddBelt(BeltOffer offer, BeltPotionType type, BeltPrice step, ItemSO icon)
+        {
+            AddEntry(new Entry
+            {
+                Item = icon, Key = PotionItemKey, Offer = offer, Type = type, Upgrade = step,
+                Price = step != null ? step.Gold : 0,
+            });
+        }
+
+        /// <summary>Whether <paramref name="type"/>'s potency is charges (Energy) rather than healing.</summary>
+        private static bool PotencyIsCharges(BeltPotionType type)
+        {
+            return type.PotencyTiers.Exists(t => t != null && t.Charges > 0);
+        }
+
+        private static int ChargesAt(BeltPotionType type, int bought)
+        {
+            return Mathf.Max(1, type.Potion.ConsumableCharges + PotionBeltOps.ChargeBonus(type, bought));
+        }
+
+        /// <summary>What a belt step changes ("2 → 3 slots", "1 → 2 per run"), or where its ladder tops out.</summary>
+        private string BeltChange(Entry entry)
+        {
+            var belt = PotionBeltSO.Load();
+            var type = entry.Type;
+            switch (entry.Offer)
+            {
+                case BeltOffer.Slot:
+                    int slots = PotionBeltState.Slots(belt);
+                    return entry.Upgrade is BeltSlotTier more
+                        ? $"{slots} → {more.Slots} slots"
+                        : $"{slots} slots, the most a belt holds";
+                case BeltOffer.Recipe:
+                    return "A new potion for the belt";
+                case BeltOffer.Capacity:
+                    int cap = PotionBeltState.Capacity(type);
+                    return entry.Upgrade is BeltCapacityTier size
+                        ? $"{cap} → {size.Capacity} per run"
+                        : $"{cap} per run, the most it carries";
+                default:
+                    int bought = PotionBeltState.Potency(type);
+                    if (PotencyIsCharges(type))
+                    {
+                        int now = ChargesAt(type, bought);
+                        return entry.Upgrade != null
+                            ? $"{now} → {ChargesAt(type, bought + 1)} charges restored"
+                            : $"{now} charges restored, the strongest brew";
+                    }
+                    int pct = PotionPercent(type.Potion, PotionBeltOps.HealBonus(type, bought));
+                    return entry.Upgrade is BeltPotencyTier brew
+                        ? $"{pct}% → {PotionPercent(type.Potion, brew.HealPercent)}% of max health"
+                        : $"{pct}% of max health, the strongest brew";
+            }
+        }
+
         private void ShowBeltDetail(Entry entry)
         {
-            int max = PartyResourceManager.Instance.GetMax(PartyResourceType.HealingPotion);
             InventoryHubUI.SetIcon(_detailIcon, entry.Item != null ? entry.Item.Icon : null, null);
-            SetText(_detailName, "Potion belt");
+            SetText(_detailName, RowName(entry));
             InventoryHubUI.ApplyRarity(_detailName, null);
-            SetText(_detailSub, $"Carries {max} healing potion{(max == 1 ? "" : "s")}");
-            SetAction($"Enlarge to {max + 1} — {entry.Price} gold", Gold >= entry.Price,
-                $"Need {entry.Price} gold — you have {Gold}.");
-            _detailBody?.Add(MakeLabel(
-                "How many healing potions the party can carry into a run. Each size costs more than the last.",
-                "cd-inv-detail__desc"));
+            SetText(_detailSub, BeltChange(entry));
+
+            var step = entry.Upgrade;
+            if (step == null)
+            {
+                SetAction("Fully upgraded", false, string.Empty);
+            }
+            else
+            {
+                string reason = Gold < step.Gold
+                    ? $"Need {step.Gold} gold — you have {Gold}."
+                    : "Not enough materials."; // which ones: the coloured line below
+                SetAction($"Buy — {step.Gold} gold", CanPay(step), reason);
+            }
+
+            string desc;
+            switch (entry.Offer)
+            {
+                case BeltOffer.Slot:
+                    desc = "Each slot carries one kind of potion, chosen at the campfire before a run. The belt refills when a run begins, not between floors.";
+                    break;
+                case BeltOffer.Recipe:
+                    desc = ItemPresenter.ConsumableEffectLine(entry.Type.Potion) + " Once learned, put it in a belt slot at the campfire.";
+                    break;
+                case BeltOffer.Capacity:
+                    desc = $"How many {entry.Type.Potion.DisplayName}s a slot carries into a run.";
+                    break;
+                default:
+                    desc = $"Every {entry.Type.Potion.DisplayName} restores more.";
+                    break;
+            }
+            _detailBody?.Add(MakeLabel(desc, "cd-inv-detail__desc"));
+            if (step != null && step.Materials != null && step.Materials.Count > 0)
+            {
+                _detailBody?.Add(MakeLabel("Materials: " + MaterialCostText.Describe(step.Materials), "cd-inv-detail__note"));
+                AddRevisitHints(step);
+            }
+        }
+
+        /// <summary>
+        /// The belt's tutorial hint (playtest 3 finding 5): a step short of a revisit-only material
+        /// says where it drops, since nothing else in the game does. Only when short - a player who
+        /// has the material already found it.
+        /// </summary>
+        private void AddRevisitHints(BeltPrice step)
+        {
+            foreach (var line in step.Materials)
+            {
+                var material = line != null ? line.Material : null;
+                if (material == null || material.RevisitFear < 0 || string.IsNullOrEmpty(material.RevisitRun)
+                    || InventoryManager.Instance.GetMaterialQuantity(material.Key) >= line.Amount)
+                {
+                    continue;
+                }
+                _detailBody?.Add(MakeLabel(
+                    $"{material.DisplayName} only turns up when you revisit {material.RevisitRun} at Fear {Mathf.Max(1, material.RevisitFear)} or higher.",
+                    "cd-inv-detail__note", "cd-belt-hint"));
+            }
         }
 
         private void SetAction(string text, bool enabled, string reasonWhenDisabled)
@@ -486,7 +665,7 @@ namespace Assets.Scripts.Hub
                     OnSell(entry.Key, entry.Item, entry.Price);
                     break;
                 case Tab.Belt:
-                    OnBuyPotionBelt();
+                    OnBuyPotionBelt(entry);
                     break;
             }
         }
@@ -532,18 +711,44 @@ namespace Assets.Scripts.Hub
             Refresh();
         }
 
-        private void OnBuyPotionBelt()
+        private void OnBuyPotionBelt(Entry entry)
         {
-            int cost = PotionBeltCost();
-            if (!MetaProgressManager.Instance.TrySpendGold(cost, EconomySource.Merchant))
+            var step = entry.Upgrade;
+            // Checked whole first, so the gold is never taken for a step the bags cannot finish paying.
+            if (!CanPay(step))
             {
-                SetFeedback("Not enough gold.");
+                SetFeedback(step == null ? "Fully upgraded." : "You cannot pay for that yet.");
+                return;
+            }
+            if (!MetaProgressManager.Instance.TrySpendGold(step.Gold, EconomySource.Merchant)
+                || !InventoryManager.Instance.SpendMaterials(step.Materials))
+            {
+                SetFeedback("You cannot pay for that yet.");
                 return;
             }
 
-            int newMax = PartyResourceManager.Instance.GetMax(PartyResourceType.HealingPotion) + 1;
-            PartyResourceManager.Instance.SetMax(PartyResourceType.HealingPotion, newMax);
-            SetFeedback($"Potion belt enlarged to {newMax}!");
+            var type = entry.Type;
+            switch (entry.Offer)
+            {
+                case BeltOffer.Slot:
+                    int slots = ((BeltSlotTier)step).Slots;
+                    PotionBeltState.SetSlots(slots);
+                    SetFeedback($"The belt has {slots} slots now. Fill them at the campfire.");
+                    break;
+                case BeltOffer.Recipe:
+                    PotionBeltState.Unlock(type);
+                    SetFeedback($"Learned the {type.Potion.DisplayName}. Put it in a belt slot at the campfire.");
+                    break;
+                case BeltOffer.Capacity:
+                    int cap = ((BeltCapacityTier)step).Capacity;
+                    PotionBeltState.SetCapacity(type, cap);
+                    SetFeedback($"A {type.DisplayName} slot carries {cap} now.");
+                    break;
+                default:
+                    PotionBeltState.AddPotency(type);
+                    SetFeedback($"{type.Potion.DisplayName}s are stronger now.");
+                    break;
+            }
             Refresh();
         }
 

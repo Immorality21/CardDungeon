@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: HorrorMadness
   DisplayName: Madness
   Description: It speaks, once. Nobody who hears it acts quickly afterwards.
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 8c1e742fd6e84c4eabd66f38e83c34a5, type: 3}
   TargetType: 1
   Rarity: 2
   Effects:

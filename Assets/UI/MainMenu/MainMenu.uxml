@@ -88,6 +88,11 @@
                 <ui:Button name="options-mute" text="" class="cd-button cd-option-toggle" />
             </ui:VisualElement>
             <ui:Label name="options-note" text="" class="cd-info-label cd-hint" />
+            <!-- Combat speed (playtest 3 finding 21): x1, x2, x3 while a fight runs. Same toggle as Mute. -->
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="Combat speed" class="cd-option-label" />
+                <ui:Button name="options-speed" text="" class="cd-button cd-option-toggle" />
+            </ui:VisualElement>
             <ui:Button name="options-close" text="Back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 

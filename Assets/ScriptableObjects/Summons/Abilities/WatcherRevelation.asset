@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: WatcherRevelation
   DisplayName: Revelation
   Description: Every eye opens at once.
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: a39dc7ec685a408cbaa82599c9644da6, type: 3}
   TargetType: 1
   Rarity: 0
   Effects:

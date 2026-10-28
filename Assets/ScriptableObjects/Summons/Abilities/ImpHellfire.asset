@@ -16,7 +16,7 @@ MonoBehaviour:
   DisplayName: Hellfire
   Description: The imp empties itself over the room. Four of them at once is a lot
     of fire.
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 87e6545a435f48fb9ed3720530639dee, type: 3}
   TargetType: 1
   Rarity: 0
   Effects:

@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: ImpFirebolt
   DisplayName: Firebolt
   Description: A spit of hellfire.
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: a7bbe1b1021b4cdca790dcdffb1ec710, type: 3}
   TargetType: 0
   Rarity: 0
   Effects:

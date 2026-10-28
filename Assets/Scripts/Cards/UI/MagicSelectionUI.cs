@@ -735,7 +735,8 @@ namespace Assets.Scripts.Cards.UI
         /// </summary>
         private static string DescribeItem(ItemSO item)
         {
-            string effect = ItemPresenter.ConsumableEffectLine(item);
+            string effect = ItemPresenter.ConsumableEffectLine(item, 0,
+                PotionBeltState.HealBonusFor(item), PotionBeltState.ChargeBonusFor(item));
             if (string.IsNullOrEmpty(item.Description))
             {
                 return effect;

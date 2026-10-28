@@ -591,6 +591,94 @@ namespace Assets.Scripts.Progression
             Save();
         }
 
+        // --- Potion belt ---
+
+        /// <summary>Potency steps bought at the Merchant (<see cref="Items.PotionBeltSO.PotencyTiers"/>).</summary>
+        public int PotionPotency => _saveData.PotionPotency;
+
+        /// <summary>One more potency step bought. Persists immediately.</summary>
+        public void AddPotionPotency()
+        {
+            _saveData.PotionPotency++;
+            Save();
+        }
+
+        /// <summary>Belt slots bought; 0 = the belt's starting count. Read through Items.PotionBeltState.</summary>
+        public int BeltSlots => _saveData.BeltSlots;
+
+        public void SetBeltSlots(int slots)
+        {
+            _saveData.BeltSlots = slots;
+            Save();
+        }
+
+        /// <summary>The type key in each belt slot as last chosen at the campfire (may be stale; PotionBeltOps.Loadout cleans it).</summary>
+        public List<string> BeltLoadout => _saveData.BeltLoadout ?? (_saveData.BeltLoadout = new List<string>());
+
+        public void SetBeltLoadout(List<string> loadout)
+        {
+            _saveData.BeltLoadout = new List<string>(loadout);
+            Save();
+        }
+
+        public bool IsPotionTypeUnlocked(string key)
+        {
+            return _saveData.UnlockedPotionTypes != null && _saveData.UnlockedPotionTypes.Contains(key);
+        }
+
+        public void UnlockPotionType(string key)
+        {
+            if (_saveData.UnlockedPotionTypes == null)
+            {
+                _saveData.UnlockedPotionTypes = new List<string>();
+            }
+            if (!_saveData.UnlockedPotionTypes.Contains(key))
+            {
+                _saveData.UnlockedPotionTypes.Add(key);
+                Save();
+            }
+        }
+
+        /// <summary>A non-healing type's raised capacity, 0 when never raised.</summary>
+        public int PotionTypeCapacity(string key)
+        {
+            var entry = FindPotionType(key, false);
+            return entry != null ? entry.Capacity : 0;
+        }
+
+        public void SetPotionTypeCapacity(string key, int capacity)
+        {
+            FindPotionType(key, true).Capacity = capacity;
+            Save();
+        }
+
+        public int PotionTypePotency(string key)
+        {
+            var entry = FindPotionType(key, false);
+            return entry != null ? entry.Potency : 0;
+        }
+
+        public void AddPotionTypePotency(string key)
+        {
+            FindPotionType(key, true).Potency++;
+            Save();
+        }
+
+        private PotionTypeProgress FindPotionType(string key, bool create)
+        {
+            if (_saveData.PotionTypes == null)
+            {
+                _saveData.PotionTypes = new List<PotionTypeProgress>();
+            }
+            var entry = _saveData.PotionTypes.Find(p => p != null && p.Key == key);
+            if (entry == null && create)
+            {
+                entry = new PotionTypeProgress { Key = key };
+                _saveData.PotionTypes.Add(entry);
+            }
+            return entry;
+        }
+
         // --- Party deaths ---
 
         public int PartyDeaths => _saveData.PartyDeaths;

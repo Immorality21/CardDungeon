@@ -392,6 +392,30 @@ namespace Assets.Scripts.Items
             GameEvents.Publish(new ItemAcquired { Item = item, Quantity = added, Source = EconomySource.BeltRefill });
         }
 
+        /// <summary>
+        /// Sets how many of a belt potion the bags hold, up or down - the run-start stocking
+        /// (<see cref="PotionBeltOps.RunStartStock"/>). Not a spend: nothing reaches the level's
+        /// consumption ledger, and a trim raises no event.
+        /// </summary>
+        public void SetBeltStock(ItemSO item, int quantity)
+        {
+            if (item == null)
+            {
+                return;
+            }
+            bool trimmed = false;
+            while (GetConsumableQuantity(item.Key) > quantity
+                   && InventoryOperations.TryConsume(_saveData.Items, item.Key, GetItemSO))
+            {
+                trimmed = true;
+            }
+            if (trimmed && !_deferSaves)
+            {
+                Save();
+            }
+            TopUpConsumableToCap(item, quantity);
+        }
+
         private bool IsCategory(ItemSaveData item, ItemCategory category)
         {
             var so = GetItemSO(item.ItemKey);

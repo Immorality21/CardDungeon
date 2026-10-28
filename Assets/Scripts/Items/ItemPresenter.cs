@@ -243,7 +243,7 @@ namespace Assets.Scripts.Items
         /// What a consumable does, as one sentence. <paramref name="maxHealth"/> is optional: with
         /// it, a healing item says what it restores for that hero rather than its formula.
         /// </summary>
-        public static string ConsumableEffectLine(ItemSO item, int maxHealth = 0)
+        public static string ConsumableEffectLine(ItemSO item, int maxHealth = 0, float potencyBonus = 0f, int extraCharges = 0)
         {
             if (item == null)
             {
@@ -255,12 +255,27 @@ namespace Assets.Scripts.Items
                 return "Cures burning, poison, bleeding, freezing, slow and silence.";
             }
 
+            int charges = Mathf.Max(1, item.ConsumableCharges + extraCharges);
+            string chargeText = charges == 1 ? "1 ability charge" : $"{charges} ability charges";
+            if (item.ConsumableEffect == ConsumableEffectType.RestoreCharge)
+            {
+                return $"Restores {chargeText} to the drinker's most-used ability.";
+            }
+            if (item.ConsumableEffect == ConsumableEffectType.HealAndCharge)
+            {
+                return HealLine(item, maxHealth, potencyBonus) + $" Also restores {chargeText}.";
+            }
+            return HealLine(item, maxHealth, potencyBonus);
+        }
+
+        private static string HealLine(ItemSO item, int maxHealth, float potencyBonus)
+        {
             if (maxHealth > 0)
             {
-                return $"Restores {item.HealAmountFor(maxHealth)} health.";
+                return $"Restores {item.HealAmountFor(maxHealth, potencyBonus)} health.";
             }
 
-            int percent = Mathf.RoundToInt(item.ConsumablePercent * 100f);
+            int percent = Mathf.RoundToInt((item.ConsumablePercent + Mathf.Max(0f, potencyBonus)) * 100f);
             if (item.ConsumableAmount > 0 && percent > 0)
             {
                 return $"Restores {item.ConsumableAmount} health plus {percent}% of the drinker's maximum.";

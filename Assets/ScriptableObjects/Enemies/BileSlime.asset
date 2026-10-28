@@ -53,10 +53,6 @@ MonoBehaviour:
     Percent: 25
   StatusImmunities: 1000000011000000
   LootTable:
-  - Item: {fileID: 11400000, guid: c0de51110003a4b1c2d3e4f506172839, type: 2}
-    Chance: 0.25
-    MinQuantity: 1
-    MaxQuantity: 1
   - Item: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
     Chance: 0.4
     MinQuantity: 1

@@ -101,6 +101,18 @@ namespace Assets.Scripts.Progression
         // Visiting is the whole step - nothing has to be bought - so it is stored, not derived.
         public bool TutorialHallRevisited;
 
+        // Potion potency steps bought at the Merchant (PotionBeltSO.PotencyTiers). The belt's size
+        // lives with the other carry caps in ResourceMaximums.json.
+        public int PotionPotency;
+
+        // The typed potion belt (Items.PotionBeltState): slots bought (0 = the starting count), the
+        // type in each slot as chosen at the campfire, the recipes bought, and every non-healing
+        // type's capacity and potency. Healing keeps its old homes (above, and ResourceMaximums.json).
+        public int BeltSlots;
+        public List<string> BeltLoadout = new List<string>();
+        public List<string> UnlockedPotionTypes = new List<string>();
+        public List<PotionTypeProgress> PotionTypes = new List<PotionTypeProgress>();
+
         // Party wipes, ever (survives death by definition). The death screen explains dying once,
         // on the first; nothing else reads it yet.
         public int PartyDeaths;
@@ -113,5 +125,18 @@ namespace Assets.Scripts.Progression
         {
             return "Meta";
         }
+    }
+
+    /// <summary>One potion type's bought steps (<c>Items.PotionBeltState</c>).</summary>
+    [System.Serializable]
+    public class PotionTypeProgress
+    {
+        public string Key;
+
+        // Potions a slot carries; 0 = never raised, the type's base capacity.
+        public int Capacity;
+
+        // Potency steps bought.
+        public int Potency;
     }
 }

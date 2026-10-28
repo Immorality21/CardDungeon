@@ -398,3 +398,12 @@ rounds). The owner's taste, for next time: young and clean, a clear readable fac
 in the right hand and shield on the left (anatomical, so for an east-facing hero the shield is the near
 arm), not scruffy, bearded, bulky or small-faced. Inpaint edits cost **10 generations each**; text
 rounds of five cost 5-10.
+
+## Every ability has its own icon (2026-10-28)
+
+92 new 32x32 icons (PixelLab, 115 generations), one per player ability that had none of its own or
+shared one, named `Sprites/Abilities/<MagicSO.Key>.png`. Fireball, Ice Shard, Lightning Bolt and Shield
+Up now use their namesake files. Mend, Slash, War Cry and Water Splash keep their older sprite-sheet
+icons. Enemy-only abilities still share. Weaker ones to redo some day: the three elemental cloaks
+(all a hooded figure), Aegis vs Sacred Shield (both gold discs), Watcher Gaze vs Mesmerize (both eyes),
+Ward, Mug, Hamstring vs Maim, Twin Strike (swords, not daggers).

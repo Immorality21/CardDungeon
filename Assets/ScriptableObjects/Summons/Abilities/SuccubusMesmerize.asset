@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: SuccubusMesmerize
   DisplayName: Mesmerize
   Description: It forgets, for a while, that it is in a fight.
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 0d3d23e3618f4c168504703fa09d1fd1, type: 3}
   TargetType: 0
   Rarity: 0
   Effects:
