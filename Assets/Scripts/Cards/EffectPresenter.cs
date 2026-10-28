@@ -2,6 +2,7 @@ using Assets.Scripts.Combat;
 using ImmoralityGaming.Fundamentals;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Cards
@@ -15,7 +16,14 @@ namespace Assets.Scripts.Cards
             ICombatUnit caster = null,
             MagicSO magic = null)
         {
-            foreach (var entry in result.Entries)
+            // Every spell gathers light around its caster first, as in FFVIII. Physical abilities
+            // (a cut, an arrow) do not, nor do summons and Ultras, which bring their own entrance.
+            if (caster != null && magic != null && IsSpell(magic))
+            {
+                yield return SpellVfx.Cast(caster);
+            }
+
+            foreach (var entry in HitsFirst(result.Entries))
             {
                 // Offensive magic: fly a bolt from the caster to the target so a cast reads as a
                 // ranged strike (vs. the melee lunge), landing just before the impact. Not gated on the
@@ -81,6 +89,13 @@ namespace Assets.Scripts.Cards
                     }
                 }
 
+                // A status, buff or heal shows landing on its target, not just its number.
+                if (entry.Impact <= 0 && entry.Target != null && entry.Target.Transform != null && entry.Target.IsAlive)
+                {
+                    bool harmful = entry.Healed <= 0 && caster != null && caster.IsHero != entry.Target.IsHero;
+                    SpellVfx.Afflict(entry.Target, AfflictTint(entry, harmful), harmful);
+                }
+
                 if (magic != null &&
                     magic.Icon != null &&
                     entry.Target != null &&
@@ -106,6 +121,69 @@ namespace Assets.Scripts.Cards
 
                 yield return new WaitForSeconds(entry.Delay);
             }
+        }
+
+        private static bool IsSpell(MagicSO magic)
+        {
+            string key = magic.Key ?? "";
+            return !magic.IsPhysicalAttack()
+                && !key.StartsWith(SummonOps.CastKeyPrefix)
+                && !key.StartsWith(UltraOps.CastKeyPrefix);
+        }
+
+        private static Color AfflictTint(EffectEntry entry, bool harmful)
+        {
+            if (entry.Healed > 0)
+            {
+                return SpellVfx.HealColor;
+            }
+            return harmful ? SpellVfx.HarmColor : SpellVfx.BoonColor;
+        }
+
+        /// <summary>
+        /// The entries in play order, with each target's status entries held back until that
+        /// target's hit has landed: a spell authored debuff-first would otherwise show its debuff
+        /// before its bolt set off. Otherwise the resolver's order is kept.
+        /// </summary>
+        private static List<EffectEntry> HitsFirst(List<EffectEntry> entries)
+        {
+            var ordered = new List<EffectEntry>(entries.Count);
+            var waiting = new List<EffectEntry>();
+            for (int i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i];
+                if (entry.Impact <= 0 && entry.Target != null && HitComesLater(entries, i, entry.Target))
+                {
+                    waiting.Add(entry);
+                    continue;
+                }
+                ordered.Add(entry);
+                if (entry.Impact > 0)
+                {
+                    for (int w = waiting.Count - 1; w >= 0; w--)
+                    {
+                        if (ReferenceEquals(waiting[w].Target, entry.Target))
+                        {
+                            ordered.Add(waiting[w]);
+                            waiting.RemoveAt(w);
+                        }
+                    }
+                }
+            }
+            ordered.AddRange(waiting);
+            return ordered;
+        }
+
+        private static bool HitComesLater(List<EffectEntry> entries, int from, ICombatUnit target)
+        {
+            for (int i = from + 1; i < entries.Count; i++)
+            {
+                if (entries[i].Impact > 0 && ReferenceEquals(entries[i].Target, target))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>Popup word + colour for a resistance outcome, or null for a normal hit.</summary>

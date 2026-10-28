@@ -62,6 +62,7 @@ namespace Assets.Scripts.Combat
         private string _statusSig;
         private string _intentSig;
         private float _refreshTimer;
+        private bool _wasHeld;
         private bool _built;
 
         private struct IconDesc
@@ -259,15 +260,23 @@ namespace Assets.Scripts.Combat
 
             // HP fill — every frame (cheap).
             float max = Mathf.Max(1, _unit.GetEffectiveStat(StatType.MaxHealth));
-            float ratio = Mathf.Clamp01(_unit.Stats.Health / max);
+            // What the plate shows can lag the real health while a cast is presented (HealthDisplay).
+            float ratio = Mathf.Clamp01(HealthDisplay.Shown(_unit) / max);
             _fill.transform.localScale = new Vector3(_barWidth * ratio, _barHeight * 0.72f, 1f);
             _fill.color = ratio > 0.5f
                 ? Color.Lerp(Yellow, Green, (ratio - 0.5f) * 2f)
                 : Color.Lerp(Red, Yellow, ratio * 2f);
 
-            // Status + intent — throttled.
+            // Status + intent — throttled. A held unit keeps the icons it had before the cast until
+            // its hit lands (HealthDisplay), then catches up at once.
+            bool held = HealthDisplay.IsHeld(_unit);
+            if (_wasHeld && !held)
+            {
+                _refreshTimer = 0f;
+            }
+            _wasHeld = held;
             _refreshTimer -= Time.deltaTime;
-            if (_refreshTimer <= 0f)
+            if (_refreshTimer <= 0f && !held)
             {
                 _refreshTimer = RefreshInterval;
                 RefreshStatusIcons();

@@ -1354,6 +1354,7 @@ namespace Assets.Scripts.Rooms
                 Targets = SummonTargets(castable.TargetType, caster, chosen)
             };
             // A summon authored to lay tags (Glacius's Ice) lays them and can set off a combo, as a cast does.
+            HoldHealthDisplay();
             var result = summon.UsesTags
                 ? _calculator.Execute(action, BuffTracker, _tagTracker, _comboDetector, 0, 0,
                     MetaProgressManager.Instance.GetComboUpgradeLevel)
@@ -1367,6 +1368,7 @@ namespace Assets.Scripts.Rooms
             }
             _lastTurnLog = $"{caster.DisplayName} summons {summon.Label}!";
             yield return _presenter.Present(result, caster, castable);
+            HealthDisplay.ReleaseAll();
 
             // ...then what it gives the party (Glacius's frost hide).
             var partyCastable = SummonOps.BuildPartyCastable(summon, slot.Grant);
@@ -1376,7 +1378,9 @@ namespace Assets.Scripts.Rooms
                 {
                     Magic = partyCastable, Caster = caster, Targets = HeroSideUnits()
                 };
+                HoldHealthDisplay();
                 yield return _presenter.Present(_calculator.Execute(partyAction, BuffTracker), caster, partyCastable);
+                HealthDisplay.ReleaseAll();
                 Destroy(partyCastable);
             }
 
@@ -1389,7 +1393,9 @@ namespace Assets.Scripts.Rooms
                 {
                     var pick = pool[UnityEngine.Random.Range(0, pool.Count)];
                     var randomAction = new SpellcastAction { Magic = randomCastable, Caster = caster, Targets = new List<ICombatUnit> { pick } };
+                    HoldHealthDisplay();
                     yield return _presenter.Present(_calculator.Execute(randomAction, BuffTracker), caster, randomCastable);
+                    HealthDisplay.ReleaseAll();
                 }
                 Destroy(randomCastable);
             }
@@ -1653,9 +1659,11 @@ namespace Assets.Scripts.Rooms
                     break;
                 }
                 var action = new SpellcastAction { Magic = castable, Caster = hero, Targets = targets, CastSlot = -1 };
+                HoldHealthDisplay();
                 var result = _calculator.Execute(action, BuffTracker);
                 RecordCastDamageObserved(action);
                 yield return _presenter.Present(result, hero, castable);
+                HealthDisplay.ReleaseAll();
                 ResolveDeaths();
             }
         }
@@ -2130,9 +2138,11 @@ namespace Assets.Scripts.Rooms
                 var targets = magic.TargetType == MagicTargetType.SingleEnemy
                     ? new List<ICombatUnit> { enemies.OrderBy(e => e.Stats.Health).First() }
                     : enemies;
+                HoldHealthDisplay();
                 var result = _calculator.Execute(new SpellcastAction { Magic = magic, Caster = unit, Targets = targets }, BuffTracker);
                 _lastTurnLog += $" {unit.DisplayName} unleashes {magic.DisplayName} as it leaves!";
                 yield return _presenter.Present(result, null, magic);
+                HealthDisplay.ReleaseAll();
                 ResolveDeaths();
             }
         }
@@ -2210,6 +2220,7 @@ namespace Assets.Scripts.Rooms
             // A mech's abilities lay their tags and set off combos like a hero's cast (SummonSO.UsesTags);
             // every other summon's resolve tagless.
             bool tags = caster.Summon != null && caster.Summon.UsesTags;
+            HoldHealthDisplay();
             var result = tags
                 ? _calculator.Execute(action, BuffTracker, _tagTracker, _comboDetector, 0, 0,
                     MetaProgressManager.Instance.GetComboUpgradeLevel)
@@ -2225,6 +2236,7 @@ namespace Assets.Scripts.Rooms
             CombatAudio.Play(isSignature ? CombatSound.BossSignature : CombatSound.MagicCast);
             RecordCastDamageObserved(action);
             yield return _presenter.Present(result, caster, magic);
+            HealthDisplay.ReleaseAll();
             ResolveDeaths();
         }
 
@@ -2680,8 +2692,10 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
+            yield return SpellVfx.Cast(enemyUnit);
             int healed = HealthOps.Heal(target, amount, new HealthSource(enemyUnit, HealthCause.EnemyHeal), Events).Healed;
 
+            SpellVfx.Afflict(target, SpellVfx.HealColor, false);
             CombatAudio.Play(CombatSound.Heal);
             ShowDamageText(target.Transform.position, healed, Color.green);
             _lastTurnLog = $"{enemyUnit.DisplayName} heals {target.DisplayName} for {healed}.";
@@ -2696,6 +2710,10 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
+            // The enemy gathers its power before the curse lands - a Weaken used to show only a number.
+            yield return SpellVfx.Cast(enemyUnit);
+            CombatAudio.Play(CombatSound.MagicCast);
+
             // Every debuff is a chance (AfflictionRules), an enemy's own included.
             if (!AfflictionRules.Lands(applyChance))
             {
@@ -2705,6 +2723,8 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
+            SpellVfx.Afflict(target, SpellVfx.HarmColor, true);
+            yield return new WaitForSeconds(SpellVfx.AfflictLands);
             BuffTracker.ApplyBuff(target, stat, -amount, duration);
             ShowFloatingLabel(target.Transform.position, $"-{amount} {stat}", new Color(0.7f, 0.4f, 1f));
             _lastTurnLog = $"{enemyUnit.DisplayName} weakens {target.DisplayName}'s {stat}!";
@@ -2719,8 +2739,11 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
-            BuffTracker.ApplyBuff(target, stat, amount, duration);
             CombatAudio.Play(CombatSound.MagicCast);
+            yield return SpellVfx.Cast(enemyUnit);
+            SpellVfx.Afflict(target, SpellVfx.BoonColor, false);
+            yield return new WaitForSeconds(SpellVfx.AfflictLands);
+            BuffTracker.ApplyBuff(target, stat, amount, duration);
             ShowFloatingLabel(target.Transform.position, $"+{amount} {StatCatalog.ShortName(stat)}", new Color(1f, 0.6f, 0.25f));
             _lastTurnLog = ReferenceEquals(target, enemyUnit)
                 ? $"{enemyUnit.DisplayName} raises its own {StatCatalog.DisplayName(stat)}!"

@@ -210,8 +210,21 @@ All auto-wired (no scene setup) and code/Resources-only — no manual assets:
 on purpose** *(2026-10-26)*: a cast is resolved before it is presented, so the plates draw
 `HealthDisplay.Shown(unit)`, which the hero and enemy cast paths freeze (`HoldHealthDisplay`) just
 before they resolve and `EffectPresenter` releases per target as its hit lands. A party-wide enemy
-spell used to drop every bar before its first bolt flew (playtest 3 finding 3). Summon and Ultra
-paths do not hold yet.
+spell used to drop every bar before its first bolt flew (playtest 3 finding 3). **The status icons
+wait too** *(2026-10-28)*: `UnitHealthBar` skips its icon refresh while `HealthDisplay.IsHeld(unit)`,
+so Lightning Bolt's Agility cut appears as the bolt lands, not as it sets off. Every cast path holds
+now - hero and enemy casts, summons (all three halves), Ultra hits, a unit summon's abilities and a
+parting blow. `EffectPresenter` also plays a target's status entries **after** that target's hit
+(`HitsFirst`), so a spell authored debuff-first still shows the hit first.
+- **Spell effects** (`Combat/SpellVfx`, 2026-10-28, owner's request): procedural pixel sprites, no
+  art. **`Cast(caster)`** is the one generic casting effect, FFVIII-style - a pale-blue glow, a ring
+  opening on the ground and rising sparks, 0.5 s - played by `EffectPresenter.Present` before every
+  **spell** (not physical abilities, summons or Ultras, which have their own delivery) and by the
+  enemy Heal / Debuff / BuffAlly actions. **`Afflict(target, tint, falling)`** shows a status, buff or
+  heal landing: a glow behind the unit and sparks falling onto it (harmful, purple) or rising through
+  it (boon gold, heal green); non-blocking, so a party-wide buff does not stall. The enemy's own
+  Weaken used to show nothing but its number; it now casts, then the curse falls and the stat drops
+  as the sparks land (`AfflictLands`). The glow sits **behind** the sprite - over it, it hid the unit.
 - **Combat speed** *(2026-10-28, playtest 3 finding 21)*: `CombatSpeed` (x1/x2/x3, `savedata/Gameplay.json`) is
   set as `Time.timeScale` by `CombatManager` when a fight starts and put back to 1 when it ends (and in its
   `OnDestroy`, for a fight cut off by a scene change), so the floor, the hub and the victory summary always run

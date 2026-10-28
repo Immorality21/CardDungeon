@@ -36,7 +36,13 @@ Everything here came out of playtest 3 (2026-10-26 to 2026-10-28).
 ## Combat
 
 - [ ] **Health bars wait for the hit** - a party-wide enemy spell (the Floating Eye) drops each bar as
-      its bolt lands. Summon and Ultra casts do not wait yet.
+      its bolt lands; summons and Ultras now wait too.
+- [ ] **Debuffs wait for the hit** - Lightning Bolt's status icon appears as the bolt lands, not as
+      it sets off.
+- [ ] **Spell effects** (new) - every spell starts with the same blue casting glow on the caster; a
+      status, buff or heal lands with a coloured aura and sparks (purple falling for a curse, gold
+      rising for a buff, green for a heal). An enemy's Weaken now casts and shows its curse landing.
+      Judge the timing (each spell is ~0.5 s longer) and whether the glow is too strong.
 - [ ] **Enemy ability banner** - every enemy spell and named move shows its name at the top.
 - [ ] **Death animations** - every hero falls and stays lying; a revive gets them back up.
 - [ ] **Downed heroes stay down** until the party goes back to town; refuges do not revive them.
