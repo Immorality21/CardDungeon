@@ -278,16 +278,22 @@
              hit-testing on the old transform, offsetting every click. -->
         <!-- On the inventory frame (2026-09-30): met enemies as rows, the unmet folded into compact
              rows at the bottom, and the chosen one's page beside the list - portrait and name on top,
-             then two columns so a normal entry never scrolls. Keeps its own Up/Down cursor. -->
+             then two columns so a normal entry never scrolls. Keeps its own Up/Down cursor.
+             The Hall of Knowledge since 2026-10-29: a Recipes tab beside the monsters, every recipe
+             in its tree under what it is made from, the unfound ones as selectable ??? rows. -->
         <ui:VisualElement name="bestiary-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
             <ui:VisualElement class="cd-inv-header">
-                <ui:Label text="Bestiary" class="cd-inv-header__title" />
+                <ui:Label text="Hall of Knowledge" class="cd-inv-header__title" />
+                <ui:VisualElement class="cd-inv-tabs">
+                    <ui:Button name="bestiary-tab-monsters" text="Monsters" class="cd-inv-tab cd-inv-tab--active" />
+                    <ui:Button name="bestiary-tab-recipes" text="Recipes" class="cd-inv-tab" />
+                </ui:VisualElement>
                 <ui:Label name="bestiary-progress" text="" class="cd-camp-header__cap" />
                 <ui:Button name="bestiary-close" text="Back" class="cd-inv-close" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-inv-body">
                 <ui:VisualElement class="cd-inv-col cd-shop-col--list">
-                    <ui:Label text="Enemies met" class="cd-inv-col__title" />
+                    <ui:Label name="bestiary-list-title" text="Enemies met" class="cd-inv-col__title" />
                     <ui:ScrollView name="bestiary-list" class="cd-inv-list" mode="Vertical" />
                 </ui:VisualElement>
                 <ui:VisualElement class="cd-inv-col cd-inv-col--detail">
@@ -301,7 +307,7 @@
                     <ui:ScrollView name="bestiary-detail" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="bestiary-hint" text="&#8593;&#8595; select  &#183;  Esc back" class="cd-inv-hint" />
+            <ui:Label name="bestiary-hint" text="&#8593;&#8595; select  &#183;  &#8592;&#8594; tab  &#183;  Esc back" class="cd-inv-hint" />
         </ui:VisualElement>
 
         <!-- INVENTORY -->

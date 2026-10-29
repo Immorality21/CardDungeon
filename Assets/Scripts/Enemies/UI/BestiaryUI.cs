@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Items;
+using Assets.Scripts.Items.UI;
 using Assets.Scripts.Progression;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -20,10 +22,18 @@ namespace Assets.Scripts.Enemies.UI
     /// <para>All wording and colour come from <see cref="BestiaryPresenter"/> and
     /// <see cref="BestiaryLineView"/>, which the combat page uses too, so the two can never
     /// disagree about what a 120% fire resistance is called.</para>
+    ///
+    /// <para><b>The Hall of Knowledge since 2026-10-29</b> (owner): the lot was renamed and the screen
+    /// grew a <b>Recipes</b> tab (Left/Right switch tabs). Every recipe is shown in its tree under the
+    /// item it is made from (<see cref="RecipeTreeOps"/>); one not yet found is a selectable "???" row
+    /// in its true place - the owner's choice, so a hint can be added to that row later. The code keeps
+    /// the Bestiary's names (<c>HubService.Bestiary</c>, the <c>bestiary</c> save key).</para>
     /// </summary>
     public class BestiaryUI
     {
         private const string UnknownName = "? ? ?";
+
+        private enum Tab { Monsters, Recipes }
 
         private readonly VisualElement _root;
         private readonly Label _progress;
@@ -33,6 +43,13 @@ namespace Assets.Scripts.Enemies.UI
         private readonly VisualElement _portrait;
         private readonly Label _name;
         private readonly Label _sub;
+        private readonly Label _listTitle;
+        private readonly Button _tabMonsters;
+        private readonly Button _tabRecipes;
+        private Tab _tab = Tab.Monsters;
+
+        // The Recipes tab's rows, parallel to _rows while that tab is up.
+        private readonly List<RecipeTreeNode> _recipeRows = new List<RecipeTreeNode>();
 
         // Only the met enemies are rows the cursor walks; _rowEntries maps a row to its catalog index.
         private readonly List<VisualElement> _rows = new List<VisualElement>();
@@ -53,6 +70,24 @@ namespace Assets.Scripts.Enemies.UI
             _portrait = root.Q<VisualElement>("bestiary-portrait");
             _name = root.Q<Label>("bestiary-name");
             _sub = root.Q<Label>("bestiary-sub");
+            _listTitle = root.Q<Label>("bestiary-list-title");
+            _tabMonsters = root.Q<Button>("bestiary-tab-monsters");
+            _tabRecipes = root.Q<Button>("bestiary-tab-recipes");
+            foreach (var tab in new[] { _tabMonsters, _tabRecipes })
+            {
+                if (tab != null)
+                {
+                    tab.focusable = false;
+                }
+            }
+            if (_tabMonsters != null)
+            {
+                _tabMonsters.clicked += () => SetTab(Tab.Monsters);
+            }
+            if (_tabRecipes != null)
+            {
+                _tabRecipes.clicked += () => SetTab(Tab.Recipes);
+            }
 
             if (_closeButton != null)
             {
@@ -80,17 +115,7 @@ namespace Assets.Scripts.Enemies.UI
             _isShown = true;
             _root.style.display = DisplayStyle.Flex;
             _catalog = LoadCatalog();
-            _selected = -1;
-            RefreshList();
-            // Open on the first enemy met rather than a "Select an enemy." page beside a live list.
-            if (_rows.Count > 0)
-            {
-                Select(0);
-            }
-            else
-            {
-                ShowEmptyDetail();
-            }
+            SetTab(Tab.Monsters);
 
             _root.focusable = true;
             if (_root.panel != null)
@@ -108,7 +133,39 @@ namespace Assets.Scripts.Enemies.UI
             _detail?.Clear();
             _rows.Clear();
             _rowEntries.Clear();
+            _recipeRows.Clear();
             OnClosed?.Invoke();
+        }
+
+        /// <summary>Shows one tab and opens it on its first row.</summary>
+        private void SetTab(Tab tab)
+        {
+            _tab = tab;
+            _tabMonsters?.EnableInClassList("cd-inv-tab--active", tab == Tab.Monsters);
+            _tabRecipes?.EnableInClassList("cd-inv-tab--active", tab == Tab.Recipes);
+            if (_listTitle != null)
+            {
+                _listTitle.text = tab == Tab.Monsters ? "Enemies met" : "Recipe trees";
+            }
+            _selected = -1;
+            if (tab == Tab.Monsters)
+            {
+                RefreshList();
+            }
+            else
+            {
+                RefreshRecipes();
+            }
+            // Open on the first entry rather than a "Select an enemy." page beside a live list.
+            if (_rows.Count > 0)
+            {
+                Select(0);
+                _list?.ScrollTo(_rows[0]);
+            }
+            else
+            {
+                ShowEmptyDetail();
+            }
         }
 
         // ============================================================
@@ -130,6 +187,12 @@ namespace Assets.Scripts.Enemies.UI
                     break;
                 case KeyCode.DownArrow:
                     MoveSelection(1);
+                    evt.StopPropagation();
+                    break;
+                case KeyCode.LeftArrow:
+                case KeyCode.RightArrow:
+                case KeyCode.Tab:
+                    SetTab(_tab == Tab.Monsters ? Tab.Recipes : Tab.Monsters);
                     evt.StopPropagation();
                     break;
                 case KeyCode.Escape:
@@ -270,6 +333,11 @@ namespace Assets.Scripts.Enemies.UI
         {
             _selected = rowIndex;
             RenderSelection();
+            if (_tab == Tab.Recipes)
+            {
+                ShowRecipeDetail(_recipeRows[rowIndex]);
+                return;
+            }
             ShowDetail(_catalog[_rowEntries[rowIndex]]);
         }
 
@@ -288,6 +356,11 @@ namespace Assets.Scripts.Enemies.UI
         private void ShowEmptyDetail()
         {
             _detail.Clear();
+            if (_tab == Tab.Recipes)
+            {
+                SetHead(null, "No recipes in the world", "There is nothing for the Forge to make yet.");
+                return;
+            }
             SetHead(null, "No enemies met yet", "Everything the party survives is written down here.");
         }
 
@@ -305,6 +378,8 @@ namespace Assets.Scripts.Enemies.UI
             {
                 _sub.text = sub;
             }
+            // A recipe's page colours the name by rarity; every other page starts plain.
+            InventoryHubUI.ApplyRarity(_name, null);
         }
 
         /// <summary>
@@ -347,6 +422,147 @@ namespace Assets.Scripts.Enemies.UI
 
             // One row, the same as the combat Inspect page: the names seen, then how many are left.
             _detail.Add(BestiaryLineView.Row(BestiaryPresenter.LootSummary(definition, known)));
+        }
+        // ============================================================
+        //  RECIPES
+        // ============================================================
+
+        /// <summary>
+        /// Every recipe in its tree, one row each, indented under what it is made from. Known recipes and
+        /// base items show their name and icon; a recipe not yet found is "???" in its place and is
+        /// still a row the cursor stops on, because that is where its hint will go.
+        /// </summary>
+        private void RefreshRecipes()
+        {
+            _list.Clear();
+            _rows.Clear();
+            _rowEntries.Clear();
+            _recipeRows.Clear();
+
+            var inventory = InventoryManager.Instance;
+            var all = CraftingOps.Recipes(inventory.AllItems());
+            int known = 0;
+            foreach (var recipe in all)
+            {
+                if (inventory.KnowsRecipe(recipe))
+                {
+                    known++;
+                }
+            }
+            _progress.text = $"{known} of {all.Count} recipes known";
+
+            foreach (var node in RecipeTreeOps.Flatten(RecipeTreeOps.Build(all, inventory.KnowsRecipe)))
+            {
+                int rowIndex = _rows.Count;
+                var row = node.Known
+                    ? MakeRow(node.Item.Icon, NameOf(node.Item), RecipeCaption(node))
+                    : MakeRow(null, UnknownName, "Recipe not yet found");
+                if (!node.Known)
+                {
+                    row.AddToClassList("cd-recipe-row--unknown");
+                }
+                // Indent by depth so a line of descent reads down the list.
+                row.style.marginLeft = node.Depth * 28;
+                row.RegisterCallback<ClickEvent>(_ => Select(rowIndex));
+                _list.Add(row);
+                _rows.Add(row);
+                _recipeRows.Add(node);
+            }
+
+            RenderSelection();
+        }
+
+        private static string RecipeCaption(RecipeTreeNode node)
+        {
+            if (!node.IsRecipe)
+            {
+                return "Found or bought";
+            }
+            return node.Recipe.KnownWithForge ? "Taught by the Forge" : "Recipe found";
+        }
+
+        /// <summary>
+        /// One row's page. A known recipe: what goes in and what it makes. A base item: what it is and
+        /// what it can become. A recipe not yet found: only where it sits - this is the page a hint
+        /// will be added to.
+        /// </summary>
+        private void ShowRecipeDetail(RecipeTreeNode node)
+        {
+            _detail.Clear();
+            _detail.scrollOffset = Vector2.zero;
+
+            if (!node.Known)
+            {
+                SetHead(null, UnknownName, "Recipe not yet found");
+                if (node.Recipe.CraftBase != null)
+                {
+                    _detail.Add(DetailLine($"Made from a {NameOf(node.Recipe.CraftBase)}.", "cd-inv-detail__line"));
+                }
+                _detail.Add(DetailLine("Recipes are found on monsters and on cleared floors.", "cd-inv-detail__note"));
+                AddLeadsTo(node);
+                return;
+            }
+
+            var item = node.Item;
+            string kind = item.Category == ItemCategory.Equipment
+                ? $"{ItemPresenter.RarityLabel(item.Rarity)} · {ItemPresenter.SlotLabel(item.SlotType)}"
+                : ItemPresenter.RarityLabel(item.Rarity);
+            SetHead(item.Icon, NameOf(item), kind);
+            InventoryHubUI.ApplyRarity(_name, item);
+
+            if (node.IsRecipe)
+            {
+                _detail.Add(BestiaryLineView.Section(node.Recipe.KnownWithForge ? "Recipe · taught by the Forge" : "Recipe"));
+                if (node.Recipe.CraftBase != null)
+                {
+                    _detail.Add(DetailLine($"{NameOf(node.Recipe.CraftBase)}, worked into it", "cd-inv-detail__line"));
+                }
+                foreach (var line in node.Recipe.CraftMaterials)
+                {
+                    if (line != null && line.IsValid)
+                    {
+                        _detail.Add(DetailLine($"{NameOf(line.Material)} ×{Mathf.Max(1, line.Amount)}", "cd-inv-detail__line"));
+                    }
+                }
+                if (node.Recipe.CraftGold > 0)
+                {
+                    _detail.Add(DetailLine($"{node.Recipe.CraftGold} gold", "cd-inv-detail__line"));
+                }
+                _detail.Add(DetailLine("Made at the Forge.", "cd-inv-detail__note"));
+            }
+            else
+            {
+                _detail.Add(DetailLine("Not made at the Forge: found in the dungeon or bought.", "cd-inv-detail__note"));
+            }
+
+            AddLeadsTo(node);
+            InventoryHubUI.AddItemLines(_detail, item);
+        }
+
+        /// <summary>What this row's item can become, unknown recipes as "???".</summary>
+        private void AddLeadsTo(RecipeTreeNode node)
+        {
+            if (node.Children.Count == 0)
+            {
+                return;
+            }
+            _detail.Add(BestiaryLineView.Section("Can become"));
+            foreach (var child in node.Children)
+            {
+                _detail.Add(DetailLine(child.Known ? NameOf(child.Item) : UnknownName, "cd-inv-detail__line"));
+            }
+        }
+
+        private static Label DetailLine(string text, string className)
+        {
+            var label = new Label(text) { pickingMode = PickingMode.Ignore };
+            label.AddToClassList(className);
+            return label;
+        }
+
+        private static string NameOf(ItemSO item)
+        {
+            return item == null ? string.Empty : string.IsNullOrEmpty(item.DisplayName) ? item.Key : item.DisplayName;
         }
     }
 }

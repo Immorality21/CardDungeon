@@ -7,6 +7,9 @@ Everything here came out of playtest 3 (2026-10-26 to 2026-10-28).
 
 ## Hub and menus
 
+- [ ] **Hall of Knowledge** (2026-10-29) - the Bestiary lot is renamed; Left/Right (or the tabs) switch
+      Monsters / Recipes; recipe trees indent under their base item; an unfound recipe is a "???" row you
+      can select, saying what it is made from. Real arrow keys not yet pressed.
 - [ ] **Crafting at the Forge** (2026-10-29) - the Craft tab lists the Forge's three basic recipes plus
       any found; have/need per input, gold on the right; Forge spends them and the item lands in the
       Storehouse. Forging from a *worn* base puts the result on that hero. A recipe drop on a kill or a

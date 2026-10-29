@@ -310,6 +310,10 @@ Every `EnemySO` now has its **own** sprite. They did not: `AbyssalWarden`/`Stone
 Resistances are **hidden until observed**, by design (see `docs/ELEMENTAL_PLAN.md`). This is the
 machinery that makes that playable rather than a memory test.
 
+> **On screen the hub page is the Hall of Knowledge** since 2026-10-29: `BestiaryUI` gained a Recipes
+> tab beside the monsters (see the Hub guide). Everything below is the Monsters tab and the combat
+> Inspect page; the code keeps the Bestiary name.
+
 - **The record** lives in `MetaProgressSaveData.Bestiary` — a `List<BestiaryEntry>` keyed by
   `EnemySO.SaveKey` — and the pure `BestiaryOps` holds its rules. See the Progression guide for the
   write path and why every mutator reports whether it changed anything.

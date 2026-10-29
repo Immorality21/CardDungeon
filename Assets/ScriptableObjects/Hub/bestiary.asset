@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: bestiary
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.BuildingSO
   Key: bestiary
-  DisplayName: Bestiary
-  Blurb: Everything the party has survived, written down.
+  DisplayName: Hall of Knowledge
+  Blurb: Everything the party has survived, and everything the Forge could make, written down.
   Service: 4
   Position: {x: 215, y: 420}
   HitSize: {x: 150, y: 110}

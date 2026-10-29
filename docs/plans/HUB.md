@@ -297,8 +297,15 @@ Knowledge, and the first pass is a **small starter set**.
   price materials. Folding crafting into the frontier is open work for the balance pass.
 - **Combo upgrades stay at the Forge as they were**; the owner wants to rethink them later.
 
-**Next, from the same notes:** the Bestiary becomes the **Hall of Knowledge** (monsters, recipes and
-recipe trees; upgrading it hints where a rare recipe drops), and **quests** become a third recipe source.
+**The Hall of Knowledge, the same day.** The Bestiary lot and screen were renamed (the code keeps
+`HubService.Bestiary` and the `bestiary` key) and gained a **Recipes** tab: every recipe in its tree
+under the item it is made from (`RecipeTreeOps`), and a recipe not yet found shown as a selectable
+"???" row in its true place. The owner chose that over hiding unfound recipes *"because later, we
+can add a hint on that record to guide the player"*.
+
+**Next, from the same notes:** that hint (where a rare recipe drops), unlocked by **upgrading the
+Hall**, which is a level granting *information*, so it fits the phase-6 rule. And **quests** become a
+third recipe source.
 
 #### What phase 1 actually landed (2026-09-05) — and the two things it settled
 

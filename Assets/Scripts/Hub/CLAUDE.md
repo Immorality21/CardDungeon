@@ -214,7 +214,7 @@ and the wrong one for a gate.
 | Campfire | placed by default | — |
 | Storehouse | placed by default | — (your own bag, never gated) |
 | Hall of Progression (`sphere-hall`) | from the start | 1 Rotted Timber |
-| Bestiary | from the start | 4 Scrap Iron |
+| Hall of Knowledge (`bestiary`) | from the start | 4 Scrap Iron |
 | Merchant | from the start | 10 Scrap Iron · 1 Rotted Timber (was 8 + 2 until playtest 2 finding 14: timber only drops from caches) |
 | Forge | after `TutorialRun` | 3 Ember Iron · 2 Slag Coal |
 
@@ -441,9 +441,13 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   every hero who had spent XP. Abilities are described through `HeroSnapshotUnit`, so the numbers
   are the hero's own. Item wording (slot names, bonus lines, rarity classes, the swap maths) is
   `Items/ItemPresenter` (`ItemPresenterTests`).
-- **BestiaryUI** (`Enemies/UI`) — the enemy knowledge collection. On the inventory frame since
-  2026-09-30: met enemies as rows, the unmet as compact unselectable rows at the bottom, a portrait
-  page in two columns; opens on the first enemy met. Keeps its own Up/Down cursor.
+- **BestiaryUI** (`Enemies/UI`) — the **Hall of Knowledge** on screen since 2026-10-29 (the lot's
+  `DisplayName`; the code, the service and the `bestiary` key keep the old name). Two tabs, Left/Right
+  to switch. **Monsters**: on the inventory frame since 2026-09-30, met enemies as rows, the unmet as
+  compact unselectable rows at the bottom, a portrait page in two columns. **Recipes**: every recipe
+  in its tree (`Items/RecipeTreeOps`), indented under what it is made from; an unfound recipe is a
+  **selectable** "???" row in place, the slot for a later hint (`docs/plans/HUB.md` §7 phase 7). Keeps
+  its own Up/Down cursor.
 - **SphereGridUI** (`Heroes/UI`) — the one place XP is ever spent. On the inventory frame since
   2026-09-30 (portrait strip with banked XP, frontier framing via `SphereGridView.FrameNodes`, a
   detail column with a `grid-reason` line). Keeps its own cursor (it pans content the shared

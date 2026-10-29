@@ -3144,6 +3144,16 @@
     -unity-font-style: italic;
 }
 
+/* A recipe not yet found: still a row the cursor stops on (its hint will live there), dimmed and in
+   italics so the tree's gaps read as gaps. */
+.cd-recipe-row--unknown {
+    opacity: 0.6;
+}
+
+.cd-recipe-row--unknown .cd-inv-row__name {
+    -unity-font-style: italic;
+}
+
 .cd-bestiary__cols {
     flex-direction: row;
     flex-grow: 1;
