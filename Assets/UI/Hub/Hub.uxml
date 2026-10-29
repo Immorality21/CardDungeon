@@ -230,13 +230,15 @@
 
         <!-- FORGE -->
         <ui:VisualElement name="forge-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
-            <!-- On the inventory frame (2026-09-30): the known abilities as a list, the chosen one's
-                 detail always beside it, Upgrade in the detail column. It used to be a wall of "?"
-                 tiles that swapped for an inspect page and resized the window on every click. -->
+            <!-- On the inventory frame (2026-09-30): the known entries as a list, the chosen one's
+                 detail always beside it, the action in the detail column. It used to be a wall of "?"
+                 tiles that swapped for an inspect page and resized the window on every click.
+                 Craft (recipes) is the first tab since 2026-10-29; forge-upgrade crafts there. -->
             <ui:VisualElement class="cd-inv-header">
-                <ui:Label text="Ability Forge" class="cd-inv-header__title" />
+                <ui:Label text="Forge" class="cd-inv-header__title" />
                 <ui:VisualElement class="cd-inv-tabs">
-                    <ui:Button name="forge-tab-magic" text="Abilities" class="cd-inv-tab cd-inv-tab--active" />
+                    <ui:Button name="forge-tab-craft" text="Craft" class="cd-inv-tab cd-inv-tab--active" />
+                    <ui:Button name="forge-tab-magic" text="Abilities" class="cd-inv-tab" />
                     <ui:Button name="forge-tab-combos" text="Combos" class="cd-inv-tab" />
                 </ui:VisualElement>
                 <ui:Label name="forge-essence" text="" class="cd-camp-header__gold" />

@@ -69,6 +69,10 @@ MonoBehaviour:
     Chance: 0.5
     MinQuantity: 1
     MaxQuantity: 1
+  - Item: {fileID: 11400000, guid: 88bcc0be104d4b12a4938f5dafe88919, type: 2}
+    Chance: 0.1
+    MinQuantity: 1
+    MaxQuantity: 1
   SalvageTable: []
   Triggers: []
   Flinches: 0

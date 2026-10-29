@@ -21,6 +21,12 @@ namespace Assets.Scripts.Dungeon
 {
     public class DungeonManager : SingletonBehaviour<DungeonManager>
     {
+        /// <summary>Sorting order of the things standing in a room - a chest/campfire, the stairs, a
+        /// captive. Above the wall overlays (<see cref="Rooms.WallGenerator"/>, order 5), which
+        /// otherwise cut into a marker on a tile next to a wall, and below the party (10) and the
+        /// doors (20).</summary>
+        private const int RoomMarkerSortOrder = 6;
+
         [SerializeField]
         private RoomManager _roomManager;
 
@@ -1006,7 +1012,7 @@ namespace Assets.Scripts.Dungeon
             markerObj.transform.position = room.ClaimSpot(markerObj, -0.5f);
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = sprite;
-            sr.sortingOrder = 3;
+            sr.sortingOrder = RoomMarkerSortOrder;
             room.KindMarker = sr;
             room.KindMarkerSpent = chest != null
                 ? chest.Open
@@ -1213,7 +1219,7 @@ namespace Assets.Scripts.Dungeon
 
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = captive.Sprite;
-            sr.sortingOrder = 2;
+            sr.sortingOrder = RoomMarkerSortOrder;
             sr.color = new Color(0.55f, 0.55f, 0.7f, 1f);
             _captiveMarkers[room] = markerObj;
         }
@@ -1324,7 +1330,7 @@ namespace Assets.Scripts.Dungeon
             markerObj.transform.position = room.ClaimSpot(markerObj, -0.5f);
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = stairs;
-            sr.sortingOrder = 3;
+            sr.sortingOrder = RoomMarkerSortOrder;
         }
 
         /// <summary>
@@ -1345,6 +1351,32 @@ namespace Assets.Scripts.Dungeon
             var awards = LootRoller.Roll(
                 level.GuaranteedMaterials, RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
             foreach (var award in awards)
+            {
+                if (!award.IsEmpty && !RunFear.Current.Withholds(award.Item)
+                    && !InventoryManager.Instance.AlreadyKnown(award.Item))
+                {
+                    InventoryManager.Instance.AddItem(award, EconomySource.LevelClear);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Rolls <see cref="LevelDefinitionSO.RecipeTable"/> on a clear: each recipe on its own chance,
+        /// skipped once known (<see cref="InventoryManager.AlreadyKnown"/>), so a floor teaches its
+        /// recipe once and then pays its other rewards.
+        /// </summary>
+        private void AwardClearRecipes()
+        {
+            var level = CurrentLevel;
+            if (level == null || level.RecipeTable == null || level.RecipeTable.Count == 0)
+            {
+                return;
+            }
+
+            var unknown = level.RecipeTable
+                .Where(d => d != null && d.Item != null && !InventoryManager.Instance.AlreadyKnown(d.Item))
+                .ToList();
+            foreach (var award in LootRoller.Roll(unknown, RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f)))
             {
                 if (!award.IsEmpty && !RunFear.Current.Withholds(award.Item))
                 {
@@ -1421,6 +1453,7 @@ namespace Assets.Scripts.Dungeon
                 // else the floor produced - and are forfeited by the same rule if the party wipes
                 // instead of clearing.
                 AwardGuaranteedMaterials();
+                AwardClearRecipes();
                 TutorialRewards.OnLevelCleared(ActiveRun, RunLevelIndex);
                 // Diffed against disk *before* the commit: with saves deferred, disk still holds the
                 // bags as the level found them.

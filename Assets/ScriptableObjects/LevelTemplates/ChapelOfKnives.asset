@@ -46,3 +46,8 @@ MonoBehaviour:
   Chests:
   - Closed: {fileID: 21300000, guid: 1075bfa40a2e4f7abc8cfdbec8b1edbc, type: 3}
     Open: {fileID: 21300000, guid: 3fe548a2508445a59d2d384edb157d4b, type: 3}
+  RecipeTable:
+  - Item: {fileID: 11400000, guid: 2821f9005d394c5c9069c52a884ad13f, type: 2}
+    Chance: 0.4
+    MinQuantity: 1
+    MaxQuantity: 1

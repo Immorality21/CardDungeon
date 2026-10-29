@@ -99,7 +99,7 @@ building printed its costs read like a spreadsheet. Beside each name there is on
   upgrade nobody can afford shows nothing, as before;
 - a **padlock** when the lot is not on offer yet (`LotBadge.Locked`);
 - a **gold pip** on a *built* lot with something waiting inside (`LotBadge.New`, 2026-09-30): a grid
-  node some owned hero can buy now, a combo upgrade at the Forge the purse covers, or a Bestiary with more enemies
+  node some owned hero can buy now, a combo upgrade at the Forge the purse covers or a recipe found since the last visit, or a Bestiary with more enemies
   met than when it was last opened (`BestiaryViewedCount`). It wins over the hammer. `HubManager.BadgeWithNews`
   decides it, since it needs the roster and the save; the presenter stays pure;
 - nothing when the lot is finished.
@@ -200,7 +200,8 @@ The other four lots are still `MaxLevel 1`. `HubState.LevelOf(service)` is the s
 when its turn comes — the merchant would size its stock off it, the Sphere Hall gate grid depth
 (that one is `HUB.md` phase **5**, and it changes `GreedySpend`). The **Storehouse deliberately has
 no ladder**: `InventoryManager` has no capacity cap and inventing one to have something to sell
-would be a nerf dressed as content. It gets its rungs when crafting lands (phase 7).
+would be a nerf dressed as content. Crafting landed on 2026-10-29 without one; give it rungs only
+when crafting needs something a capacity could sell.
 
 #### The opening sequence (provisional)
 
@@ -215,7 +216,7 @@ and the wrong one for a gate.
 | Hall of Progression (`sphere-hall`) | from the start | 1 Rotted Timber |
 | Bestiary | from the start | 4 Scrap Iron |
 | Merchant | from the start | 10 Scrap Iron · 1 Rotted Timber (was 8 + 2 until playtest 2 finding 14: timber only drops from caches) |
-| Magic Forge | after `TutorialRun` | 3 Ember Iron · 2 Slag Coal |
+| Forge | after `TutorialRun` | 3 Ember Iron · 2 Slag Coal |
 
 The Sphere Hall is deliberately the cheapest thing in town and is **not** gated on a run: the grid
 is where banked XP goes, and making a player finish a run before they can spend any of what they
@@ -421,8 +422,14 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   who gear is compared against, and a detail column reusing the inventory's grants block
   (`InventoryHubUI.AddItemLines`, `StatCell`, `SetIcon`, `ApplyRarity` are `internal static` for this).
   Same row-selects / detail-acts split as the campfire, driven by the shared navigator.
-- **MagicForgeUI** (`Cards/UI`) — Essence sink for **combos** plus the ability collection
-  (Abilities tab read-only since 2026-10-06), undiscovered entries folded into one count row. **Requires a `MagicCatalog` in the scene** or it logs a warning and shows empty.
+- **MagicForgeUI** (`Cards/UI`) — the **Forge** (no longer "Ability Forge", 2026-10-29). Three tabs:
+  **Craft** (opens first) - the known recipes, each input as have/need, the result's stats from the
+  Storehouse's own lines, **Forge** with the reason it is dimmed; rules in `Items/CraftingOps`, the
+  transaction `InventoryManager.TryCraft` (gold, then base and materials, then the result; a worn base
+  hands its slot to the result). **Combos** - the Essence sink, unchanged. **Abilities** - the read-only
+  collection. Undiscovered entries fold into one count row. The town's news pip shows while more
+  recipes are known than at the last visit (`MetaProgressSaveData.RecipesViewedCount`). See
+  `docs/plans/HUB.md` §7 phase 7. **Requires a `MagicCatalog` in the scene** or it logs a warning and shows empty.
 - **InventoryHubUI** (`Items/UI`) — the between-runs bag: Equipment / Abilities / Consumables /
   Materials. Equipment is managed *only* here. **Redesigned 2026-09-28** into one fixed frame: a header
   band with the tabs, a portrait hero strip (muted, never hidden, on the party-wide tabs), three

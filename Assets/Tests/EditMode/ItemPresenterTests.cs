@@ -83,7 +83,8 @@ namespace Tests.EditMode
             var shared = new List<string>();
             foreach (var item in LoadEveryItem())
             {
-                if (item.Icon == null)
+                // Recipes share the scroll on purpose: the Forge shows what one makes by the result's icon.
+                if (item.Icon == null || item.Category == ItemCategory.Recipe)
                 {
                     continue;
                 }

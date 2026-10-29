@@ -34,7 +34,7 @@ namespace Assets.Scripts.Events
         Building,
         /// <summary>Buying a sphere-grid node.</summary>
         SphereGrid,
-        /// <summary>Upgrading a combo at the Forge.</summary>
+        /// <summary>Crafting an item or upgrading a combo at the Forge.</summary>
         Forge,
         /// <summary>A spend handed back because a later step of the same purchase failed.</summary>
         Refund,
@@ -70,7 +70,9 @@ namespace Assets.Scripts.Events
         /// <summary>Sold at the Merchant.</summary>
         Sold,
         /// <summary>Taken by a room event.</summary>
-        Lost
+        Lost,
+        /// <summary>Worked into a new item at the Forge - a recipe's base item.</summary>
+        Crafted
     }
 
     /// <summary>Items left the inventory. Raised by <c>InventoryManager</c>'s spending paths.</summary>

@@ -278,7 +278,8 @@ namespace Assets.Scripts.Rooms.Events
             bool anyDropped = false;
             foreach (var item in outcome.LootTable)
             {
-                if (item == null)
+                // A recipe already known teaches nothing, so an event does not hand it over again.
+                if (item == null || InventoryManager.Instance.AlreadyKnown(item))
                 {
                     continue;
                 }

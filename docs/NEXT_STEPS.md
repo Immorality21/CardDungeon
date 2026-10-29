@@ -251,9 +251,13 @@ Then the balance pass, starting with what this pass already showed:
   exactly on the old flat `MaxComboUpgradeLevel`, so the endgame ceiling is unchanged and only the
   ramp is gated. Do not author a level that adds a stat, and do not let a ladder move what a
   finished save can reach.
-- **Crafting is one of the last features, not one of the next** *(2026-09-04, §7 phase 7)*. Materials
-  land first as a building and sphere-grid cost; crafting is a second drain and is only tunable once
-  the taps and the first drain are measured.
+- **Recipes are items, and owning one is knowing it** *(owner, 2026-10-29, §7 phase 7)*. Crafting
+  was set as one of the last features (2026-09-04); the owner brought it forward. A recipe
+  (`ItemCategory.Recipe`) drops from enemies and floor clears, is banked and forfeited like any find,
+  and is **never used up**; a known recipe stops dropping. Building the Forge teaches two or three
+  basic recipes (`KnownWithForge`). A craft costs materials, **gold**, and sometimes a base item
+  (Simple Sword → Flaming Short Sword). Crafted gear is priced to sit beside shop gear of its level,
+  not above it, and the balance model does not see `CraftOnly` gear yet.
 - **Materials are items, and a material's drop odds are authored** *(2026-09-05, §7 phase 1)*. Not a
   currency on `MetaProgressSaveData`, not a `PartyResourceType` — `ItemSO`s with
   `ItemCategory.Material`, which is what gives them stacking, the Bestiary drop record, wipe
@@ -353,7 +357,10 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05; **phase 6 started 2026-09-17** — the rule is set (*a level grants access, capacity or information, never a raw stat*), and the **Forge** and **Campfire** both have ladders. Bestiary / Merchant next; Sphere Hall is phase 5 |
+| **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05; **phase 6 started 2026-09-17** — the rule is set (*a level grants access, capacity or information, never a raw stat*), and the **Forge** and **Campfire** both have ladders. Bestiary / Merchant next; Sphere Hall is phase 5. **Phase 7 (crafting) started 2026-10-29**: recipes, the Forge's Craft tab, 8 recipes |
+| **7b** | **Hall of Knowledge** — the Bestiary renamed, with recipes and recipe trees beside the monsters; upgrading it hints where a rare recipe drops (owner, 2026-10-29) | next after crafting |
+| **7c** | **Combo upgrades at the Forge** — left as they are; how they should work is to be rethought (owner, 2026-10-29) | open |
+| **7d** | **Recipes from quests** — a third source beside drops and floor clears (owner, 2026-10-29) | waits for hub quests |
 | **3** | Sharpen hub sinks | open |
 | **3c** | **Essence is the revisit currency** — only revisits pay it; it buys Essence-priced grid nodes (**awakenings**) and combo upgrades; the Forge's ability upgrades are retired | ✅ **built 2026-10-06**; the Warrior has two awakenings. Next: awakenings for the other seven heroes, priced from `RevisitModel` |
 | **3d** | **Bounties** — rotating contracts on cleared runs paying named materials | opened 2026-10-06; depends on Revisits |
@@ -388,7 +395,7 @@ backlog.**
 | **16** | A compendium — explain the systems | not started |
 | **20** | **A tutorial — guide the player through the first hour** | **first loop shipped 2026-09-29** (New Game → floor 1 → build the Hall of Progression → first grid node → the road); learnings + todos in `docs/TUTORIAL.md` |
 | **17** | Content volume is the biggest single gap | not started |
-| **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses deferred** (owner unsure they make sense, 2026-10-07) — the 4-piece Shadowweave set is authored, no set logic (§18a-sets) |
+| **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses deferred** (owner unsure they make sense, 2026-10-07) — the 4-piece Shadowweave set is authored, no set logic (§18a-sets); **§18d gear restrictions** — equipment types on items + per-hero eligibilities, so a mage wears cloth and wands, not plate (opened 2026-10-29, owner; not started, four decisions open) |
 | **19** | Shipping surface | not started |
 | **21** | **Art pass** — every outdated sprite | **enemies done 2026-09-29** (the five still enemies redrawn + animated, both bosses at Warden size, a 32 px Dark Jailor); menu backdrops, combat backgrounds, floor rock and item icons done 2026-09-28. **all seven heroes in one style 2026-09-29** (Warrior, Cultist, Cleric, Ranger, Tinkerer redone). **2026-10-08: every floor has a biome combat background** (four new: Threshold halls and caverns, the Archive, the Drowned Chapel), **a pixel-art window frame** on every window, **a painted death screen**, **a calm flagstone dungeon floor**, and the title menu docked over the stairs. Left (deferred to polish by the owner): attack/hit animations; a title logo (the title is a placeholder); the parked `productName` / save-folder rename |
 
@@ -398,6 +405,15 @@ backlog.**
 
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
+
+- **Crafting at the Forge** (2026-10-29) — `plans/HUB.md` §7 phase 7, the Hub guide. Recipes are items
+  (`ItemCategory.Recipe`, `CraftingOps`, `InventoryManager.TryCraft`): found on enemies and on floor
+  clears (`LevelDefinitionSO.RecipeTable`), kept forever, skipped once known at every drop site. The
+  Forge (renamed from Ability Forge) opens on a **Craft** tab: known recipes, have/need per input, the
+  result's stats; a worn base hands its slot to the result. The Forge teaches Simple Sword, Leather Cap
+  and Padded Jerkin; five more drop (Flaming Short Sword, Bog Hood, Hexsilk Gloves, Gilded Charm, the
+  rare Voidforged Blade), with PixelLab icons. `CraftingOpsTests` + `CraftingContentTests`; suite
+  1648 / 0; two crafts checked in play on a throwaway save.
 
 - **The Seeping Cistern + the Campaign Map Editor** (2026-10-11) — the Dungeon, Enemies and Room Events
   guides, `BALANCING.md` §5ah. A new two-floor **`Secret` + `Challenge`** run off **The Warrens** (it

@@ -8,7 +8,7 @@ Campfire, materials, buildings and a staged unlock of the game — plus the gold
 
 ### 7. The hub becomes a place — buildings, materials, and a staged unlock of the game
 
-> **Status: phases 1-4 shipped 2026-09-05; phase 6 started 2026-09-17; phases 5 and 7 not started**
+> **Status: phases 1-4 shipped 2026-09-05; phase 6 started 2026-09-17; phase 7 (crafting) started 2026-10-29; phase 5 not started**
 > (outlined 2026-09-01, extended 2026-09-04). **Phase 6's open question — what a building *level*
 > grants — was answered on 2026-09-17: see "What phase 6 decided" below.** The phases are ordered so
 > the game is playable after every one; the open questions at the end decide data shapes that are
@@ -151,7 +151,7 @@ early-game contract, not a whole-game one.**
 | 4 | ✅ **Turn the gates on** *(2026-09-05)* | `RequiredRunKeys` + `PlacementCost` live; campfire **and storehouse** free, Sphere Hall/Bestiary/Merchant offered at once, **only the Forge** behind the tutorial; prices set against the phase-1 yield table | The actual design work, against a hub that already renders |
 | 5 | **Grid gates + frontier axis** | `RequiredBuildingKey`, hub state through `SphereGridOps`, `InvestmentFrontier` | Needs 4 authored before it can be tuned |
 | 6 | **Upgrades** — *started 2026-09-17: two lots done* | The governing rule (**a level grants access, capacity or information, never a raw stat**), the two shared pieces every later lot uses (`BuildingOps.UpgradeCost`'s escalating price, `BuildingSO.LevelGrants`' promise beside it), the **Ability Forge ladder** (`MaxLevel 3`, 250/500 gold, upgrade ceiling 1 → 3 → 5) and the **Campfire ladder** (`MaxLevel 3`, 300/600 gold, granting XP-split modes Even → Mentor → Catch Up) — which arrived with the **party-slot purchase removed**. Four lots still `MaxLevel 1`. | The long tail; each level is a content dial, not new plumbing — and the dial is the part still to author |
-| 7 | **Crafting** | Materials spend into items, not only into buildings and nodes | *(2026-09-04)* Deliberately last. Crafting is a **second drain** on the same drops; a sink is only tunable once the taps (drop rates, phase 1) and the first drain (buildings and grid nodes) are measured. Building it early makes both of those unmeasurable |
+| 7 | **Crafting** — *started 2026-10-29, brought forward by the owner* | Materials spend into items, not only into buildings and nodes. See "What phase 7 landed" below | *(2026-09-04)* Planned last: crafting is a **second drain** on the same drops, and a sink is only tunable once the taps and the first drain are measured. The owner brought it forward on 2026-10-29; the measuring is now the balance pass's job |
 
 #### Open questions — settle these before Phase 2
 
@@ -265,6 +265,40 @@ sell would be a nerf dressed as content, and it gets its rungs with crafting in 
 *authored, not measured*. They are a new gold sink competing with gear, and the frontier has not
 been taught the hub axis yet, so treat them as a starting point to verify against
 `InvestmentPointsPerGold` rather than as a tuned number.
+
+#### What phase 7 landed (2026-10-29) — crafting, first pass
+
+From the owner's playtest notes of 2026-10-29: *"The forge should be all about crafting items from
+recipes found. Most recipes come from drops of enemies or completion of levels. Some recipes must be
+very rare … Crafting items needs materials, but sometimes also other items"*, and *"When you craft the
+forge you unlock 2 or 3 very basic recipes like a basic sword, hat and armor. The rest is found through
+drops, level clear and later quests."* Decisions the owner took: a found recipe is **learned forever**,
+a craft costs **materials, gold and sometimes a base item**, crafting comes **before** the Hall of
+Knowledge, and the first pass is a **small starter set**.
+
+- **A recipe is an item** (`ItemCategory.Recipe`, its fields on `ItemSO`: `CraftResult`, `CraftBase`,
+  `CraftMaterials`, `CraftGold`, `KnownWithForge`). So it drops through the ordinary tables, is
+  banked on a clear and forfeited on a wipe, and shows on the level-clear screen and in the Bestiary's
+  drop record, all without new code. The same reasoning that made materials items.
+- **Owning one is knowing it, and it is never used up.** `CraftingOps.IsKnown`. Every drop site
+  skips a recipe already known (`InventoryManager.AlreadyKnown`, beside `RunFear.Withholds`), so a rare
+  recipe stops taking a drop slot once found.
+- **The Forge teaches three**: Simple Sword, Leather Cap, Padded Jerkin (`KnownWithForge`, never in
+  a drop table; `CraftingContentTests` enforces both halves).
+- **Where the others drop**: Flaming Short Sword (Cinder Imp 8%, Emberfall clear 50%), Bog Hood
+  (Mirefather 35%, Bog Shaman 6%), Hexsilk Gloves (Hex Weaver 8%, Chapel of Knives clear 40%), Gilded
+  Charm (Gilded Hoarder 20%), Voidforged Blade, the rare one (Lich 10%, Cinder Tyrant 5%). A floor's
+  clear drops come from `LevelDefinitionSO.RecipeTable`.
+- **A base item** is taken from the bags first (the least grown copy), else from a hero, who then
+  wears the result in the same slot.
+- **Crafted gear is `CraftOnly`**: never in the Merchant's stock or a cache. Its stats sit beside shop
+  gear of the same item level, not above it. **The balance model leaves it out**
+  (`GearLoadout.Equipment`), because its gear axis is gold buying from the Merchant and it does not
+  price materials. Folding crafting into the frontier is open work for the balance pass.
+- **Combo upgrades stay at the Forge as they were**; the owner wants to rethink them later.
+
+**Next, from the same notes:** the Bestiary becomes the **Hall of Knowledge** (monsters, recipes and
+recipe trees; upgrading it hints where a rare recipe drops), and **quests** become a third recipe source.
 
 #### What phase 1 actually landed (2026-09-05) — and the two things it settled
 

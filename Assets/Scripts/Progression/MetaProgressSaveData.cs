@@ -121,6 +121,11 @@ namespace Assets.Scripts.Progression
         /// "something new here" badge shows on the Bestiary while more have been met since.</summary>
         public int BestiaryViewedCount;
 
+        /// <summary>How many recipes were known when the Forge was last opened - the Forge's "something
+        /// new here" badge shows while more have been found since. -1 until the Forge is first opened, so
+        /// a save that never looked badges the recipes the Forge teaches.</summary>
+        public int RecipesViewedCount = -1;
+
         public string GetFileName()
         {
             return "Meta";

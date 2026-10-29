@@ -7,6 +7,12 @@ Everything here came out of playtest 3 (2026-10-26 to 2026-10-28).
 
 ## Hub and menus
 
+- [ ] **Crafting at the Forge** (2026-10-29) - the Craft tab lists the Forge's three basic recipes plus
+      any found; have/need per input, gold on the right; Forge spends them and the item lands in the
+      Storehouse. Forging from a *worn* base puts the result on that hero. A recipe drop on a kill or a
+      floor clear (Emberfall, Chapel of Knives), and that it never drops again once known. The town's
+      gold pip on the Forge for newly found recipes.
+
 - [ ] **Storehouse reassign dialog** - equipping gear another hero wears asks Reassign / Cancel; Enter,
       arrows and Esc all work; "Worn by X" reads in amber.
 - [ ] **Town build badges** - a lot you can build or raise now shows a lit hammer and a gold name; an

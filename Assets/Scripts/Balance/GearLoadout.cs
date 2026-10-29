@@ -285,7 +285,9 @@ namespace Assets.Scripts.Balance
         /// <summary>
         /// Every piece of equipment in <paramref name="catalog"/>, in a stable order. Consumables
         /// are not gear and a null row is an authoring accident, so both are dropped here rather
-        /// than guarded at three call sites.
+        /// than guarded at three call sites. Craft-only gear is left out too: the gear axis is gold
+        /// buying from the Merchant, and a crafted piece is paid in materials the model does not price
+        /// yet (<c>docs/plans/HUB.md</c> §7 phase 7).
         /// </summary>
         public static List<ItemSO> Equipment(IList<ItemSO> catalog)
         {
@@ -297,7 +299,7 @@ namespace Assets.Scripts.Balance
 
             foreach (var item in catalog)
             {
-                if (item != null && item.Category == ItemCategory.Equipment && !equipment.Contains(item))
+                if (item != null && item.Category == ItemCategory.Equipment && !item.CraftOnly && !equipment.Contains(item))
                 {
                     equipment.Add(item);
                 }

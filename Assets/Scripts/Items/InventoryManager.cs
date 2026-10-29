@@ -300,6 +300,92 @@ namespace Assets.Scripts.Items
             return true;
         }
 
+        // ============================================================
+        //  CRAFTING
+        // ============================================================
+
+        /// <summary>Whether a recipe is known: one the Forge teaches, or one in the bags.</summary>
+        public bool KnowsRecipe(ItemSO recipe)
+        {
+            return CraftingOps.IsKnown(recipe, _saveData.Items);
+        }
+
+        /// <summary>
+        /// Whether a drop of <paramref name="item"/> would teach nothing - a recipe already known - and is
+        /// skipped. Every drop site asks this beside <c>RunFear.Withholds</c>.
+        /// </summary>
+        public bool AlreadyKnown(ItemSO item)
+        {
+            return CraftingOps.AlreadyKnown(item, _saveData.Items);
+        }
+
+        /// <summary>What stops <paramref name="recipe"/> being made with what is carried and the purse.</summary>
+        public CraftBlock CheckCraft(ItemSO recipe, int gold)
+        {
+            return CraftingOps.Check(recipe, _saveData.Items, gold, GetItemSO);
+        }
+
+        /// <summary>
+        /// Makes a recipe's result at the Forge: the gold, then the base item and the materials, then the
+        /// result into the bags - or onto the hero who wore the base. All or nothing; a gold payment is
+        /// handed back if the items somehow fail after it. Hub-only, so it saves at once.
+        /// </summary>
+        /// <param name="made">The result, or null when nothing was made.</param>
+        public bool TryCraft(ItemSO recipe, out ItemSO made)
+        {
+            made = null;
+            var meta = Progression.MetaProgressManager.Instance;
+            if (CheckCraft(recipe, meta.Gold) != CraftBlock.None)
+            {
+                return false;
+            }
+
+            int gold = Mathf.Max(0, recipe.CraftGold);
+            if (gold > 0 && !meta.TrySpendGold(gold, EconomySource.Forge))
+            {
+                return false;
+            }
+
+            if (!CraftingOps.Craft(_saveData.Items, recipe, GetItemSO, out var usedBase, out var entry))
+            {
+                if (gold > 0)
+                {
+                    meta.AddGold(gold, EconomySource.Refund);
+                }
+                return false;
+            }
+
+            RebuildEquippedCache();
+            if (!_deferSaves)
+            {
+                Save();
+            }
+
+            made = recipe.CraftResult;
+            if (usedBase != null)
+            {
+                GameEvents.Publish(new ItemRemoved { Item = recipe.CraftBase, Quantity = 1, Reason = ItemRemovalReason.Crafted });
+            }
+            foreach (var price in recipe.CraftMaterials)
+            {
+                if (price != null && price.IsValid)
+                {
+                    GameEvents.Publish(new ItemRemoved
+                    {
+                        Item = price.Material, Quantity = price.Amount, Reason = ItemRemovalReason.Spent
+                    });
+                }
+            }
+            GameEvents.Publish(new ItemAcquired { Item = made, Quantity = 1, Source = EconomySource.Forge });
+            if (entry != null && !string.IsNullOrEmpty(entry.EquippedHeroKey))
+            {
+                // The worn base became the result in the same hand.
+                GameEvents.Publish(new ItemEquipChanged { Item = recipe.CraftBase, HeroKey = entry.EquippedHeroKey, Equipped = false });
+                GameEvents.Publish(new ItemEquipChanged { Item = made, HeroKey = entry.EquippedHeroKey, Equipped = true });
+            }
+            return true;
+        }
+
         /// <summary>Total carried quantity of a consumable across stacks (0 if none).</summary>
         public int GetConsumableQuantity(string itemKey)
         {

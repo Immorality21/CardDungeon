@@ -46,6 +46,12 @@ namespace Assets.Scripts.Dungeon
                  "Forfeited on a wipe like every other gain - you have to CLEAR the floor.")]
         public List<LootDrop> GuaranteedMaterials = new List<LootDrop>();
 
+        [Tooltip("Recipes this level can hand over when it is CLEARED (ItemCategory.Recipe). Each entry " +
+                 "rolls on its own chance at the stairs, and one the player already knows is skipped - " +
+                 "so a Chance of 1 teaches it on the first clear and never again. Forfeited on a wipe " +
+                 "like every other gain. Enemy drop tables can carry recipes too.")]
+        public List<LootDrop> RecipeTable = new List<LootDrop>();
+
         [Tooltip("Optional per-level combat backdrop. When set, the battle stage uses this instead " +
                  "of the default Resources background — lets each level/biome look distinct.")]
         public Sprite CombatBackground;

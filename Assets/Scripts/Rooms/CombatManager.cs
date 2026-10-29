@@ -3481,7 +3481,8 @@ namespace Assets.Scripts.Rooms
                          table, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f)))
             {
                 // A revisit below its best fear does not pay the scarce materials (docs/plans/REVISITS.md).
-                if (RunFear.Current.Withholds(award.Item))
+                // A recipe already known teaches nothing, so it is not dropped again.
+                if (RunFear.Current.Withholds(award.Item) || InventoryManager.Instance.AlreadyKnown(award.Item))
                 {
                     continue;
                 }
@@ -3527,7 +3528,8 @@ namespace Assets.Scripts.Rooms
             _robbed.Add(mark);
 
             var lines = enemy.LootTable
-                .Where(d => d != null && d.Item != null && !RunFear.Current.Withholds(d.Item))
+                .Where(d => d != null && d.Item != null && !RunFear.Current.Withholds(d.Item)
+                            && !InventoryManager.Instance.AlreadyKnown(d.Item))
                 .ToList();
             if (lines.Count > 0)
             {

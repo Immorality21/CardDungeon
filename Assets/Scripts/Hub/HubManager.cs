@@ -414,7 +414,7 @@ namespace Assets.Scripts.Hub
                 case HubService.SphereGrid:
                     return AnyGridNodeAffordable();
                 case HubService.Forge:
-                    return AnyForgeUpgradeAffordable();
+                    return AnyForgeUpgradeAffordable() || ForgeHasNewRecipes();
                 case HubService.Bestiary:
                     return BestiaryHasNewEntries();
                 default:
@@ -476,6 +476,16 @@ namespace Assets.Scripts.Hub
         }
 
         /// <summary>More enemies met than the bestiary had recorded when it was last opened.</summary>
+        /// <summary>Recipes found since the Forge was last opened (the ones it teaches count on a first visit).</summary>
+        private static bool ForgeHasNewRecipes()
+        {
+            if (!MetaProgressManager.HasInstance)
+            {
+                return false;
+            }
+            return Cards.UI.MagicForgeUI.KnownRecipeCount() > MetaProgressManager.Instance.RecipesViewedCount;
+        }
+
         private static bool BestiaryHasNewEntries()
         {
             var catalog = Enemies.EnemyCatalogSO.Load();

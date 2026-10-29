@@ -135,13 +135,15 @@ namespace Assets.Scripts.Balance
 
                 // Materials are excluded: two enemies dropping the same iron is the *point* of a
                 // material - it is the shared stuff a hub cost can be priced in - and counting it
-                // as lost variety would flag every drop table in the game.
+                // as lost variety would flag every drop table in the game. Recipes likewise: a rare
+                // recipe is spread over a few enemies on purpose, so it can be hunted in more than one run.
                 if (enemy.LootTable != null)
                 {
                     foreach (var drop in enemy.LootTable)
                     {
                         if (drop == null || drop.Item == null
-                            || drop.Item.Category == Items.ItemCategory.Material)
+                            || drop.Item.Category == Items.ItemCategory.Material
+                            || drop.Item.Category == Items.ItemCategory.Recipe)
                         {
                             continue;
                         }

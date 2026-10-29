@@ -436,6 +436,19 @@ namespace Assets.Scripts.Progression
             Save();
         }
 
+        public int RecipesViewedCount => _saveData.RecipesViewedCount;
+
+        /// <summary>The Forge was opened with <paramref name="knownCount"/> recipes known.</summary>
+        public void MarkRecipesViewed(int knownCount)
+        {
+            if (_saveData.RecipesViewedCount == knownCount)
+            {
+                return;
+            }
+            _saveData.RecipesViewedCount = knownCount;
+            Save();
+        }
+
         public List<BestiaryEntry> GetBestiary()
         {
             return _saveData.Bestiary ?? (_saveData.Bestiary = new List<BestiaryEntry>());

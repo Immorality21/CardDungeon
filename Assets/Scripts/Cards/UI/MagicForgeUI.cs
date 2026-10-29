@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Enemies.UI;
+using Assets.Scripts.Items;
 using Assets.Scripts.Items.UI;
 using Assets.Scripts.Progression;
 using UnityEngine;
@@ -9,9 +10,16 @@ using UnityEngine.UIElements;
 namespace Assets.Scripts.Cards.UI
 {
     /// <summary>
-    /// Hub "Forge" (UI Toolkit view-controller): spend Essence to upgrade combos, which raises their
-    /// power and unlocks level-gated effects, beside a read-only collection of every known ability.
-    /// Two tabs (Abilities / Combos). Operates on a VisualElement subtree; not a MonoBehaviour.
+    /// Hub "Forge" (UI Toolkit view-controller): <b>craft</b> items from known recipes, spend Essence to
+    /// upgrade combos, and read the collection of every known ability. Three tabs (Craft / Abilities /
+    /// Combos). Operates on a VisualElement subtree; not a MonoBehaviour.
+    ///
+    /// <para><b>Crafting since 2026-10-29</b> (<c>docs/plans/HUB.md</c> §7 phase 7, the owner's call to
+    /// bring it forward): a recipe is an item (<see cref="ItemCategory.Recipe"/>), found like loot and
+    /// never used up; the Forge teaches a few basic ones itself. A craft costs the recipe's materials,
+    /// its gold and sometimes a base item. The rules are <see cref="CraftingOps"/>, the transaction
+    /// <see cref="InventoryManager.TryCraft"/>. Combo upgrades stay here as they were - how they should
+    /// work is to be rethought later (owner).</para>
     ///
     /// <para><b>Abilities are not upgraded here since 2026-10-06</b> (<c>docs/plans/HUB.md</c> §3c):
     /// Essence became the revisit currency, and an ability grows on its hero's sphere grid, through
@@ -27,19 +35,20 @@ namespace Assets.Scripts.Cards.UI
     /// </summary>
     public class MagicForgeUI
     {
-        private enum Tab { Magic, Combos }
+        private enum Tab { Craft, Magic, Combos }
 
-        /// <summary>One entry - a known ability (view only) or an upgradeable combo - and its row.</summary>
+        /// <summary>One entry - a known recipe, a known ability (view only) or an upgradeable combo - and its row.</summary>
         private class Entry
         {
+            public ItemSO Recipe;
             public MagicSO Magic;
             public MagicComboSO Combo;
             public Button Row;
-            public string Key => Magic != null ? Magic.Key : Combo.Key;
         }
 
         private readonly VisualElement _root;
         private readonly Label _essenceLabel;
+        private readonly Button _tabCraft;
         private readonly Button _tabMagic;
         private readonly Button _tabCombos;
         private readonly Button _closeButton;
@@ -55,7 +64,7 @@ namespace Assets.Scripts.Cards.UI
         private readonly Label _feedbackLabel;
 
         private readonly List<Entry> _entries = new List<Entry>();
-        private Tab _tab = Tab.Magic;
+        private Tab _tab = Tab.Craft;
         private int _index;
 
         public event Action OnClosed;
@@ -64,6 +73,7 @@ namespace Assets.Scripts.Cards.UI
         {
             _root = root;
             _essenceLabel = root.Q<Label>("forge-essence");
+            _tabCraft = root.Q<Button>("forge-tab-craft");
             _tabMagic = root.Q<Button>("forge-tab-magic");
             _tabCombos = root.Q<Button>("forge-tab-combos");
             _closeButton = root.Q<Button>("forge-close");
@@ -78,6 +88,7 @@ namespace Assets.Scripts.Cards.UI
             _detailBody = root.Q<ScrollView>("forge-detail-body");
             _feedbackLabel = root.Q<Label>("forge-feedback");
 
+            _tabCraft.clicked += () => SetTab(Tab.Craft);
             _tabMagic.clicked += () => SetTab(Tab.Magic);
             _tabCombos.clicked += () => SetTab(Tab.Combos);
             _closeButton.clicked += Hide;
@@ -96,7 +107,29 @@ namespace Assets.Scripts.Cards.UI
 
             _root.style.display = DisplayStyle.Flex;
             SetText(_feedbackLabel, string.Empty);
-            SetTab(Tab.Magic);
+            SetTab(Tab.Craft);
+            MetaProgressManager.Instance.MarkRecipesViewed(KnownRecipeCount());
+        }
+
+        /// <summary>
+        /// How many recipes are known - the Forge's own and every one in the bags. The hub's news badge
+        /// compares it with the count at the last visit.
+        /// </summary>
+        public static int KnownRecipeCount()
+        {
+            if (!InventoryManager.HasInstance)
+            {
+                return 0;
+            }
+            int known = 0;
+            foreach (var recipe in CraftingOps.Recipes(InventoryManager.Instance.AllItems()))
+            {
+                if (InventoryManager.Instance.KnowsRecipe(recipe))
+                {
+                    known++;
+                }
+            }
+            return known;
         }
 
         public void Hide()
@@ -115,6 +148,7 @@ namespace Assets.Scripts.Cards.UI
         {
             _tab = tab;
             _index = 0;
+            _tabCraft.EnableInClassList("cd-inv-tab--active", tab == Tab.Craft);
             _tabMagic.EnableInClassList("cd-inv-tab--active", tab == Tab.Magic);
             _tabCombos.EnableInClassList("cd-inv-tab--active", tab == Tab.Combos);
             Refresh();
@@ -134,7 +168,22 @@ namespace Assets.Scripts.Cards.UI
             var meta = MetaProgressManager.Instance;
             int undiscovered = 0;
 
-            if (_tab == Tab.Magic)
+            if (_tab == Tab.Craft)
+            {
+                SetText(_listTitle, "Known recipes");
+                foreach (var recipe in CraftingOps.Recipes(InventoryManager.Instance.AllItems()))
+                {
+                    if (InventoryManager.Instance.KnowsRecipe(recipe))
+                    {
+                        AddEntry(new Entry { Recipe = recipe });
+                    }
+                    else
+                    {
+                        undiscovered++;
+                    }
+                }
+            }
+            else if (_tab == Tab.Magic)
             {
                 SetText(_listTitle, "Known abilities");
                 foreach (var magic in MagicCatalog.Instance.AllMagic)
@@ -180,17 +229,12 @@ namespace Assets.Scripts.Cards.UI
             // costs one row instead of the screen.
             if (undiscovered > 0)
             {
-                _list.Add(StaticRow("?", $"{undiscovered} undiscovered",
-                    _tab == Tab.Magic ? "Learned on a hero's sphere grid" : "Found by triggering them in combat"));
+                _list.Add(StaticRow("?", $"{undiscovered} undiscovered", UndiscoveredCaption()));
             }
 
             bool none = _entries.Count == 0;
             SetShown(_emptyLabel, none);
-            SetText(_emptyLabel, none
-                ? (_tab == Tab.Magic
-                    ? "No abilities learned yet. Learn one on a hero's sphere grid."
-                    : "No combos found yet. Chain the right abilities in combat.")
-                : string.Empty);
+            SetText(_emptyLabel, none ? EmptyText() : string.Empty);
             _index = none ? -1 : Mathf.Clamp(_index, 0, _entries.Count - 1);
             PaintSelection();
         }
@@ -204,10 +248,17 @@ namespace Assets.Scripts.Cards.UI
 
             var icon = new VisualElement { pickingMode = PickingMode.Ignore };
             icon.AddToClassList("cd-inv-row__icon");
-            var sprite = entry.Magic != null ? entry.Magic.Icon : entry.Combo.Icon;
-            if (sprite != null)
+            if (entry.Recipe != null)
             {
-                icon.style.backgroundImage = new StyleBackground(sprite);
+                InventoryHubUI.SetIcon(icon, entry.Recipe.CraftResult.Icon, entry.Recipe.CraftResult);
+            }
+            else
+            {
+                var sprite = entry.Magic != null ? entry.Magic.Icon : entry.Combo.Icon;
+                if (sprite != null)
+                {
+                    icon.style.backgroundImage = new StyleBackground(sprite);
+                }
             }
             row.Add(icon);
 
@@ -216,6 +267,14 @@ namespace Assets.Scripts.Cards.UI
             text.Add(MakeLabel(NameOf(entry), "cd-inv-row__name"));
             text.Add(MakeLabel(CaptionOf(entry), "cd-inv-row__caption"));
             row.Add(text);
+
+            // A recipe's gold on the right, red when anything is missing - which part, the detail says.
+            if (entry.Recipe != null)
+            {
+                var price = MakeLabel($"{Mathf.Max(0, entry.Recipe.CraftGold)} g", "cd-inv-row__meta", "cd-shop-price");
+                price.EnableInClassList("cd-shop-price--short", CraftBlockOf(entry.Recipe) != CraftBlock.None);
+                row.Add(price);
+            }
 
             // A combo's next price on the right, red when it is out of reach, "MAX" when there is
             // none. An ability has no price: it is in the list to be read, not bought.
@@ -281,13 +340,21 @@ namespace Assets.Scripts.Cards.UI
             if (entry == null)
             {
                 SetIcon(null);
-                SetText(_detailName, _tab == Tab.Magic ? "No ability chosen" : "No combo chosen");
+                InventoryHubUI.ApplyRarity(_detailName, null);
+                SetText(_detailName, _tab == Tab.Craft ? "No recipe chosen"
+                    : _tab == Tab.Magic ? "No ability chosen" : "No combo chosen");
                 SetText(_detailSub, string.Empty);
                 SetText(_reasonLabel, string.Empty);
                 SetShown(_upgradeButton, false);
                 return;
             }
 
+            InventoryHubUI.ApplyRarity(_detailName, null);
+            if (entry.Recipe != null)
+            {
+                RefreshRecipeDetail(entry.Recipe);
+                return;
+            }
             if (entry.Magic != null)
             {
                 RefreshAbilityDetail(entry.Magic);
@@ -346,6 +413,103 @@ namespace Assets.Scripts.Cards.UI
         }
 
         /// <summary>
+        /// A known recipe: what it makes, every input with have / need, and Forge with the reason it is
+        /// dimmed. The result is described by the Storehouse's own lines, so a crafted sword reads the
+        /// same here as in the bags.
+        /// </summary>
+        private void RefreshRecipeDetail(ItemSO recipe)
+        {
+            var result = recipe.CraftResult;
+            InventoryHubUI.SetIcon(_detailIcon, result.Icon, result);
+            SetText(_detailName, CraftingOps.ResultName(recipe));
+            InventoryHubUI.ApplyRarity(_detailName, result);
+            SetText(_detailSub, result.Category == ItemCategory.Equipment
+                ? $"{ItemPresenter.RarityLabel(result.Rarity)} · {ItemPresenter.SlotLabel(result.SlotType)}"
+                : ItemPresenter.RarityLabel(result.Rarity));
+
+            var block = CraftBlockOf(recipe);
+            int gold = Mathf.Max(0, recipe.CraftGold);
+            SetShown(_upgradeButton, true);
+            _upgradeButton.text = gold > 0 ? $"Forge — {gold} gold" : "Forge";
+            _upgradeButton.SetEnabled(block == CraftBlock.None);
+            SetText(_reasonLabel, CraftReason(recipe, block));
+
+            _detailBody.Add(BestiaryLineView.Section("Needs"));
+            if (recipe.CraftBase != null)
+            {
+                _detailBody.Add(RichLine(BaseLine(recipe.CraftBase)));
+            }
+            var inventory = InventoryManager.Instance;
+            foreach (var line in recipe.CraftMaterials)
+            {
+                if (line == null || !line.IsValid)
+                {
+                    continue;
+                }
+                int need = Mathf.Max(1, line.Amount);
+                int have = inventory.GetMaterialQuantity(line.Material.Key);
+                _detailBody.Add(RichLine(HaveNeed(line.Material.DisplayName, have, need)));
+            }
+            if (gold > 0)
+            {
+                _detailBody.Add(RichLine(HaveNeed("Gold", MetaProgressManager.Instance.Gold, gold)));
+            }
+
+            // What it makes: the Storehouse's own lines (description, grants, reactions).
+            InventoryHubUI.AddItemLines(_detailBody, result);
+        }
+
+        /// <summary>The base item's line: in the bags, on a hero (who will get the result), or missing.</summary>
+        private static string BaseLine(ItemSO baseItem)
+        {
+            string name = string.IsNullOrEmpty(baseItem.DisplayName) ? baseItem.Key : baseItem.DisplayName;
+            var copy = CraftingOps.FindBase(InventoryManager.Instance.GetItems(), baseItem.Key);
+            if (copy == null)
+            {
+                return $"<color={MaterialCostText.ShortColour}>{name} 0/1</color>";
+            }
+            if (!string.IsNullOrEmpty(copy.EquippedHeroKey))
+            {
+                return $"<color={MaterialCostText.HaveColour}>{name} 1/1</color> (worn - the new piece goes on in its place)";
+            }
+            return $"<color={MaterialCostText.HaveColour}>{name} 1/1</color>";
+        }
+
+        private static string HaveNeed(string name, int have, int need)
+        {
+            string colour = have >= need ? MaterialCostText.HaveColour : MaterialCostText.ShortColour;
+            return $"<color={colour}>{name} {Mathf.Min(have, need)}/{need}</color>";
+        }
+
+        private static Label RichLine(string text)
+        {
+            var label = MakeLabel(text, "cd-inv-detail__line");
+            label.enableRichText = true;
+            return label;
+        }
+
+        private static CraftBlock CraftBlockOf(ItemSO recipe)
+        {
+            return InventoryManager.Instance.CheckCraft(recipe, MetaProgressManager.Instance.Gold);
+        }
+
+        /// <summary>Why Forge is dimmed, in one line; which input is short, the Needs list colours.</summary>
+        private static string CraftReason(ItemSO recipe, CraftBlock block)
+        {
+            switch (block)
+            {
+                case CraftBlock.NoBase:
+                    return $"Needs a {recipe.CraftBase.DisplayName} to work into it.";
+                case CraftBlock.Materials:
+                    return "Not enough materials.";
+                case CraftBlock.Gold:
+                    return $"Need {recipe.CraftGold} gold — you have {MetaProgressManager.Instance.Gold}.";
+                default:
+                    return string.Empty;
+            }
+        }
+
+        /// <summary>
         /// A known ability, read-only: what it does, with no price and no Upgrade button. Effects
         /// gated behind an upgrade level are left out - nothing raises an ability's level any more,
         /// so they can never fire.
@@ -400,6 +564,11 @@ namespace Assets.Scripts.Cards.UI
         private void OnUpgrade()
         {
             var entry = Current;
+            if (entry != null && entry.Recipe != null)
+            {
+                OnCraft(entry.Recipe);
+                return;
+            }
             if (entry == null || entry.Combo == null)
             {
                 return;
@@ -414,12 +583,54 @@ namespace Assets.Scripts.Cards.UI
             }
         }
 
+        private void OnCraft(ItemSO recipe)
+        {
+            if (!InventoryManager.Instance.TryCraft(recipe, out var made))
+            {
+                return;
+            }
+            int keep = _index;
+            Refresh();
+            Select(keep);
+            SetText(_feedbackLabel, $"Forged a {made.DisplayName}. It is in the Storehouse.");
+        }
+
         // ============================================================
         //  HELPERS
         // ============================================================
 
+        private string UndiscoveredCaption()
+        {
+            switch (_tab)
+            {
+                case Tab.Craft:
+                    return "Found on monsters and on cleared floors";
+                case Tab.Magic:
+                    return "Learned on a hero's sphere grid";
+                default:
+                    return "Found by triggering them in combat";
+            }
+        }
+
+        private string EmptyText()
+        {
+            switch (_tab)
+            {
+                case Tab.Craft:
+                    return "No recipes known yet. Monsters and cleared floors give them up.";
+                case Tab.Magic:
+                    return "No abilities learned yet. Learn one on a hero's sphere grid.";
+                default:
+                    return "No combos found yet. Chain the right abilities in combat.";
+            }
+        }
+
         private static string NameOf(Entry entry)
         {
+            if (entry.Recipe != null)
+            {
+                return CraftingOps.ResultName(entry.Recipe);
+            }
             return entry.Magic != null ? entry.Magic.DisplayName : entry.Combo.ComboName;
         }
 
@@ -440,9 +651,23 @@ namespace Assets.Scripts.Cards.UI
             return entry.Combo != null && MetaProgressManager.Instance.CanUpgradeCombo(entry.Combo.Key);
         }
 
-        /// <summary>The row's second line: a combo's level, an ability's targeting.</summary>
+        /// <summary>The row's second line: a recipe's readiness, a combo's level, an ability's targeting.</summary>
         private static string CaptionOf(Entry entry)
         {
+            if (entry.Recipe != null)
+            {
+                switch (CraftBlockOf(entry.Recipe))
+                {
+                    case CraftBlock.None:
+                        return "Ready to forge";
+                    case CraftBlock.NoBase:
+                        return $"Needs a {entry.Recipe.CraftBase.DisplayName}";
+                    case CraftBlock.Gold:
+                        return "Short of gold";
+                    default:
+                        return "Short of materials";
+                }
+            }
             return entry.Magic != null
                 ? AbilityDescriber.TargetLabel(entry.Magic)
                 : LevelCaption(LevelOf(entry));
@@ -474,6 +699,11 @@ namespace Assets.Scripts.Cards.UI
 
         private void UpdateEssence()
         {
+            if (_tab == Tab.Craft)
+            {
+                SetText(_essenceLabel, $"{MetaProgressManager.Instance.Gold} gold");
+                return;
+            }
             int ceiling = MetaProgressManager.Instance.ComboUpgradeCeiling;
             SetText(_essenceLabel, ceiling < MetaProgressManager.MaxComboUpgradeLevel
                 ? $"{MetaProgressManager.Instance.Essence} essence   ·   Forge allows Lv {ceiling}"

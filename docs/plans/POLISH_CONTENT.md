@@ -492,6 +492,58 @@ awkward in three ways, and the owner wants it looked at as a whole rather than p
 
 Decide what the belt *is* before touching the numbers.
 
+**18d. Gear restrictions — who may wear what** *(opened 2026-10-29, owner)*. Today any hero can equip
+any item: `SlotType` is the only gate, so the Mage can wear Steel Plate and swing a Tower Shield. The
+owner wants gear to belong to heroes: plate is not for a mage, and a mage wears cloth and carries wands.
+
+**Model (proposal).**
+- **An equipment type on every item.** It is a new enum, finer than `SlotType`: armour by weight
+  (`Cloth`, `Leather`, `Mail`, `Plate`), weapons by kind (`Sword`, `Axe`, `Mace`, `Dagger`, `Bow`,
+  `Staff`, `Wand`, `Tome`, `Gadget`, ...) and off-hands (`Shield`, `Focus`). `SlotType` still says
+  *where* an item goes; the type says *who* may use it. The default is **`None`, which anyone may
+  wear**, so untagged items and jewellery (`Necklace`, charms) stay universal and nothing breaks
+  before the content is tagged.
+- **Eligibilities on the hero.** `HeroSO` gets a list of the equipment types the hero may use, for
+  example Mage = Cloth + Wand + Staff + Tome + Focus, Warrior = everything up to Plate + Sword/Axe/Mace
+  + Shield. Use a list or a `[Flags]` enum, not a per-class table, so another source can add an
+  entry later.
+- **One pure rule.** Add `GearRules.CanEquip(hero, item)` in `Items/`. Every path that equips an item
+  asks it: the Storehouse, the swap preview, the Sandbox setup, the Merchant's "who can use this"
+  hint and the balance model's `GearLoadout`. No caller checks the type on its own.
+
+**Things to decide (owner).**
+1. **Hard lock or penalty?** Either ineligible gear cannot be equipped at all, or it can be worn at a
+   cost (−Agility, a spell-failure chance). A hard lock is simpler and clearer.
+2. **Can the grid grant an eligibility?** A "Heavy Armour Training" node on the Paladin's or
+   Warrior's grid would make eligibility a specialisation choice (§4c). It also fits the
+   `SphereNodeKind` pattern. If yes, the list on `HeroSO` is the *base* and `Hero` computes the
+   effective set.
+3. **How fine?** Four armour weights plus about ten weapon kinds, or a coarser Light/Medium/Heavy plus
+   Melee/Ranged/Arcane? Finer types say more about each hero but take more authoring work.
+4. **Existing saves.** An already-equipped item that becomes ineligible either goes back to the
+   Storehouse when the save loads, or stays on until it is swapped. Unequipping is the honest choice.
+   Log it once so a playtester is not surprised.
+
+**What it touches.**
+- **Balance, most of all.** `GearLoadout`'s greedy spend currently gives every hero the best item
+  per slot. With restrictions, a hero has a smaller pool, so the gear axis of the investment frontier
+  shrinks for some heroes (casters lose the high-HP armour). Re-run the frontier and
+  `BalanceRegressionTests` after tagging (`BALANCING.md`). Expect the casters to need their own good
+  cloth and wand pieces.
+- **Loot and the Merchant.** If drops and stock ignore the party, a solo Mage keeps finding plate.
+  Either weight `LootRoller` and `MerchantUI.GenerateStock` toward the types the current party can
+  use, or accept the dead drops and make sure they sell for something.
+- **UI.** The Storehouse greys out an ineligible row for the selected hero and says why, in one line
+  ("Plate: Warrior, Paladin"). The item card lists its type.
+- **Content.** Tag the existing items (Steel Plate, Tower Shield, Oak Staff, the Shadowweave
+  set, ...) and fill each hero's list from their vision. Check the Hero Workbook's gear tab first,
+  because it already pairs gear with heroes.
+
+Touch points: `Items/SlotType.cs` (sibling enum), `Items/ItemSO.cs`, `Heroes/HeroSO.cs` / `Hero.cs`,
+`Items/InventoryManager.cs` + `InventoryOperations`, `Items/UI/InventoryHubUI.cs`,
+`Items/ItemPresenter.cs`, `Hub/MerchantUI.cs`, `Items/LootRoller.cs`, `Balance/GearLoadout.cs`,
+`Sandbox/SandboxSession.cs`.
+
 ### 19. Shipping surface
 
 Small individually; collectively this is what stands between the project and a build someone else can

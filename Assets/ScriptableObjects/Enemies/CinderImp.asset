@@ -63,6 +63,10 @@ MonoBehaviour:
     Chance: 0.35
     MinQuantity: 1
     MaxQuantity: 1
+  - Item: {fileID: 11400000, guid: 22e425939c0c4c27be280e766b4cad8e, type: 2}
+    Chance: 0.08
+    MinQuantity: 1
+    MaxQuantity: 1
   SalvageTable: []
   Triggers:
   - Label: Cinder Burst

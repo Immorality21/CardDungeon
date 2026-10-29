@@ -50,6 +50,31 @@ namespace Assets.Scripts.Items
                  "of one set adds the set's tiers - see ItemSetSO.")]
         public ItemSetSO Set;
 
+        [Tooltip("Only ever made at the Forge: never in the Merchant's stock, never a cache's find, and " +
+                 "left out of the balance model's gold-bought gear. A recipe must make it - " +
+                 "CraftingContentTests fails on one nothing makes.")]
+        public bool CraftOnly;
+
+        [Header("Recipe (Category == Recipe)")]
+        [Tooltip("What the Forge makes from this recipe.")]
+        public ItemSO CraftResult;
+
+        [Tooltip("An item worked into the result and used up by it (a Simple Sword for a Flaming Short " +
+                 "Sword), or none. A spare in the bags goes first; failing that a worn one, and the result " +
+                 "goes on in its place.")]
+        public ItemSO CraftBase;
+
+        [Tooltip("The materials a craft spends.")]
+        public List<MaterialCost> CraftMaterials = new List<MaterialCost>();
+
+        [Min(0)]
+        [Tooltip("The gold a craft costs on top of its materials.")]
+        public int CraftGold;
+
+        [Tooltip("Known from the moment the Forge stands - the basic recipes it teaches. Never put one " +
+                 "in a drop table; it would drop as something the player already knows.")]
+        public bool KnownWithForge;
+
         [Header("Consumable (Category == Consumable)")]
         public ConsumableEffectType ConsumableEffect = ConsumableEffectType.RestoreHealth;
 
@@ -128,8 +153,10 @@ namespace Assets.Scripts.Items
         /// <summary>
         /// Whether this item piles into one inventory entry with a quantity, rather than taking a
         /// row of its own. Consumables and materials do; equipment never can, because an entry
-        /// carries which hero has it equipped.
+        /// carries which hero has it equipped. A recipe stacks too, so a second copy found
+        /// piles onto the first instead of taking a row (it never drops once known anyway).
         /// </summary>
-        public bool Stacks => Category == ItemCategory.Consumable || Category == ItemCategory.Material;
+        public bool Stacks => Category == ItemCategory.Consumable || Category == ItemCategory.Material
+            || Category == ItemCategory.Recipe;
     }
 }
