@@ -5,7 +5,8 @@
 > `Assets/Scripts/Rooms/CLAUDE.md` (generation, the room bar, the map, click-to-walk) ·
 > `docs/PIXEL_ART.md` (sizes, the PixelLab workflow).
 >
-> **Status: plan, written 2026-10-30; phase 0 decided the same day (below); nothing built.** From the owner's playtest note of 2026-10-29:
+> **Status: plan, written 2026-10-30; phase 0 decided the same day (below); phase 1 spike built the
+> same day, waiting on the owner's look (see *Phase 1: what the spike found*).** From the owner's playtest note of 2026-10-29:
 > *"Dungeon rooms need more flair/artwork. Room events should also be somewhat visible from art
 > instead of just a button. Also more variations, maybe even rethink how we generate these."*
 
@@ -106,7 +107,7 @@ Each phase leaves the game playable and is checked in play before the next one s
 | # | phase | what lands | why here |
 |---|---|---|---|
 | **0** | ✅ **Decided 2026-10-30** | C; same room count; walking later; hidden rooms optional, no retry; Elites last and a surprise | see above |
-| **1** | **Spike: one biome, one floor** | Tilemap rendering of floors and walls with a one-tile north wall face, one biome's tiles (PixelLab), props on free tiles, in the sandbox. Screenshots beside the two FF references. No gameplay change, door-to-door movement kept | proves the look and the tile pipeline before anything is converted; cheap to throw away |
+| **1** | 🔶 **Spike built 2026-10-30, needs the owner's eye** — one biome, one floor | Tilemap rendering of floors and walls with a one-tile north wall face, one biome's tiles (PixelLab), props on free tiles, in the sandbox. Screenshots beside the two FF references. No gameplay change, door-to-door movement kept | proves the look and the tile pipeline before anything is converted; cheap to throw away |
 | **2** | **Biomes and props everywhere** | a `BiomeSO` per area (floor variants, wall Rule Tiles, door arch, prop set with weights, lights), one per run family (crypt, ember forge, swamp, archive, vault); templates grow one row for the wall; the old tint and `WallGenerator` retire | the visual upgrade on every floor at once, still no new mechanics |
 | **3** | **Events and kinds you can see** | each `RoomEventSO` gets a world sprite (and a spent one), placed on entry and visible before the fight, clicked once the room is clear (the button stays for the keyboard); a new kind **Shrine** (a refuge with a price) | content the new rooms can show off; independent of movement |
 | **4** | **Authored room shapes** | templates as painted tilemaps with door sockets and spots (option C); a socket-matching generator; pillars, L-shapes, carpets, alcoves; enemies, markers and props placed on the walkable mask | needs 1-2's pipeline |
@@ -117,6 +118,42 @@ Each phase leaves the game playable and is checked in play before the next one s
 
 **Backlog, later (owner):** more room events, and a pool of events per area so each region has its
 own. Not part of this plan's phases.
+
+## Phase 1: what the spike found (2026-10-30)
+
+**What was built.** `BiomeSO` (floors, wall faces, an archway, a thin-edge texture, weighted floor
+and wall props), the pure `RoomTileOps` (which piece, variant and prop goes in each cell; 10 tests in
+`RoomTileOpsTests`) and `RoomTilePainter` (one Grid + Tilemaps per room, so `Room.Hide` still works -
+it now switches every `Renderer`, not only sprites). A floor is drawn this way only when a biome is
+set: `LevelDefinitionSO.Biome` (**no level sets one yet**) or the sandbox's `SandboxConfigSO.Biome`
+(`DungeonManager.BiomeOverride`). The one biome is `ScriptableObjects/Biomes/Crypt.asset`, seen
+through `Sandbox/RoomSpike.asset` (Bone Galleries, seed 21). Every campaign floor is unchanged:
+with no biome the wall-row count is 0 and generation is byte-for-byte the old path (suite 1,706 / 0).
+
+**How the wall row works.** A biome gives each room one extra grid row above its floor
+(`Room.WallRows`, `Room.FootprintHeight`): the north wall face. Floors still overlap side by side
+(doors there are gaps in the thin wall); above and below, footprints meet, and the door sits in the
+lower room's face as an archway with the party standing on the floor tile either side. `RoomSO`
+sizes, `GetCenter`, `ClaimSpot` and therefore every encounter are untouched; the camera clearance,
+the map's room boxes and click-to-walk use the footprint. Decoration draws on
+`RoomTileOps.DecorSeed(seed, room origin)`, never the content stream (relaunching seed 21 reproduced
+every prop). Occupants keep off floor-prop tiles while the room has other free tiles (`Room.PropCells`).
+
+**Findings to decide on:**
+- **Enemies are drawn at half a tile on the walking view** (`localScale 0.5`) while the party is a
+  full tile. Against real stone they read as specks; in FF a foe on the map is the size of a hero.
+  Growing them is a one-line change with layout consequences (five foes in a 2-row room) - an owner call.
+- **The door sprite fights the archway.** The blue door icon still sits in every doorway, on top of
+  the archway art. It is also the click target and the keyboard cursor (`Door.SetHighlighted`
+  tints/scales its sprite), so replacing it means a new highlight - phase 2.
+- **Décor must be quieter than units.** The first pass had a skull pile brighter and bigger than the
+  ghouls. The floor tiles were darkened to ~70%, wall faces ~85%, floor props ~72%, and the pile
+  removed. Rule for phase 2: the floor is the darkest, quietest thing in the room.
+- **Room size: no growth needed yet** beyond the wall row (the open question below). A 4x3 floor
+  with a face reads as a room; 2-row floors are the tightest and should be watched in play.
+- **Manual layouts keep the old look**: their authored grid positions assume no wall row, so they
+  need re-placing (or a converter) in phase 2 - the tutorial's floors among them.
+- Not done in the spike: lights, a door arch on the side walls, per-room shapes, any campaign level.
 
 ## Open questions
 

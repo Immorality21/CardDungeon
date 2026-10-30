@@ -1,4 +1,4 @@
-using ImmoralityGaming.Localization;
+﻿using ImmoralityGaming.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -2439,7 +2439,7 @@ namespace Assets.Scripts.Rooms
                 {
                     Index = room.RoomIndex,
                     Bounds = new RectInt(
-                        room.GridPosition.x, room.GridPosition.y, room.RoomSO.Width, room.RoomSO.Height),
+                        room.GridPosition.x, room.GridPosition.y, room.RoomSO.Width, room.FootprintHeight),
                     IsExplored = room.IsExplored,
                     IsExit = room.IsExit,
                     HasEnemies = room.Enemies.Any(e => e != null && e.IsAlive),

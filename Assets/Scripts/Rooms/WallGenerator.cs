@@ -37,6 +37,12 @@ namespace Assets.Scripts.Rooms
             _sortingOrder = sortingOrder;
             GenerateSprites();
         }
+        /// <summary>The band sprite for an edge mask (Top=1, Right=2, Bottom=4, Left=8), or null for 0.</summary>
+        public Sprite SpriteFor(int mask)
+        {
+            return _wallSprites.TryGetValue(mask, out var sprite) ? sprite : null;
+        }
+
         /// <summary>
         /// Places walls around all rooms, skipping door edges.
         /// Walls appear on any edge where the neighbor tile belongs to a different room or is empty.

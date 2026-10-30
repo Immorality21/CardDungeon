@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
 using ImmoralityGaming.Fundamentals;
@@ -105,7 +105,8 @@ namespace Assets.Scripts.Rooms
             }
 
             // Tiles are centred on integer coordinates, so a room's floor runs half a tile past them.
-            var bounds = new Rect(room.GridPosition.x - 0.5f, room.GridPosition.y - 0.5f, room.RoomSO.Width, room.RoomSO.Height);
+            // The wall face above a biome-drawn floor is part of the room on screen, so it is kept clear too.
+            var bounds = new Rect(room.GridPosition.x - 0.5f, room.GridPosition.y - 0.5f, room.RoomSO.Width, room.FootprintHeight);
             var half = new Vector2(cam.orthographicSize * cam.aspect, cam.orthographicSize);
             return CameraSafeArea.Nudge(bounds, target, half, _safePanels, RoomSafeMargin);
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Dungeon;
@@ -26,6 +26,10 @@ namespace Assets.Scripts.Sandbox
         [Header("Dungeon")]
         [Tooltip("The floor to generate. Empty uses the scene's test level (DungeonManager._testLevel).")]
         public LevelDefinitionSO Level;
+
+        [Tooltip("Draw the floor with this biome instead of the level's own look (the room-design " +
+                 "spike, docs/plans/DUNGEON_ROOMS.md). Empty uses LevelDefinitionSO.Biome, if any.")]
+        public Assets.Scripts.Rooms.BiomeSO Biome;
 
         [Tooltip("0 = a new random layout every launch. Anything else reproduces the same floor.")]
         public int Seed;

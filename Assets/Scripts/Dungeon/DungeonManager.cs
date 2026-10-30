@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
@@ -121,6 +121,10 @@ namespace Assets.Scripts.Dungeon
         /// <summary>Tooling hand-off: the seed a freshly generated free-play dungeon uses, when set.
         /// Ignored when resuming a saved dungeon.</summary>
         public static int? SeedOverride;
+
+        /// <summary>Tooling hand-off (the sandbox): draws generated floors with this biome instead
+        /// of the level's own. Null in normal play.</summary>
+        public static BiomeSO BiomeOverride;
 
         /// <summary>
         /// Raised once a fresh dungeon is fully built and the party placed, just before the party
@@ -353,7 +357,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             // Step 1: Generate rooms, doors, and walls
-            var rooms = _roomManager.GenerateDungeon(_level);
+            var rooms = _roomManager.GenerateDungeon(_level, seed, BiomeOverride);
 
             // Step 2: Assign stable room indices
             for (int i = 0; i < rooms.Count; i++)

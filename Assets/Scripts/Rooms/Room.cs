@@ -10,6 +10,17 @@ namespace Assets.Scripts.Rooms
         public RoomSO RoomSO;
         public List<Door> Doors = new List<Door>();
         public Vector2Int GridPosition;
+
+        /// <summary>
+        /// Rows of north wall face drawn above the floor - 1 on a floor drawn with a <see cref="BiomeSO"/>,
+        /// 0 on the old look. Part of the room's footprint on the grid, never walkable: the floor is
+        /// still <c>RoomSO.Width</c> x <c>RoomSO.Height</c> from <see cref="GridPosition"/>.
+        /// </summary>
+        public int WallRows;
+
+        /// <summary>How many grid rows the room takes: its floor plus its wall face.</summary>
+        public int FootprintHeight => RoomSO.Height + WallRows;
+
         public List<Enemy> Enemies = new List<Enemy>();
 
         /// <summary>
@@ -141,9 +152,10 @@ namespace Assets.Scripts.Rooms
 
         private void SetChildRenderersEnabled(bool enabled)
         {
-            foreach (var sr in GetComponentsInChildren<SpriteRenderer>())
+            // Renderer, not SpriteRenderer: a biome-drawn room is painted on Tilemaps.
+            foreach (var r in GetComponentsInChildren<Renderer>())
             {
-                sr.enabled = enabled;
+                r.enabled = enabled;
             }
         }
 
@@ -242,13 +254,30 @@ namespace Assets.Scripts.Rooms
                 avoid.Add(RoomSpotOps.EntrySpot(doorTile, center));
             }
 
-            var spot = RoomSpotOps.Choose(RoomSpotOps.Tiles(GridPosition, RoomSO.Width, RoomSO.Height), avoid, center);
+            var tiles = RoomSpotOps.Tiles(GridPosition, RoomSO.Width, RoomSO.Height);
+            if (PropCells.Count > 0)
+            {
+                // Keep off the props while there is floor enough; a crowded room still uses them.
+                var clear = tiles.FindAll(t => !PropCells.Contains(Vector2Int.RoundToInt(t)));
+                if (clear.Count > _spots.Count)
+                {
+                    tiles = clear;
+                }
+            }
+
+            var spot = RoomSpotOps.Choose(tiles, avoid, center);
             if (owner != null)
             {
                 _spots[owner] = spot;
             }
             return new Vector3(spot.x, spot.y, z);
         }
+
+        /// <summary>
+        /// Floor cells a biome prop lies on (<see cref="RoomTilePainter"/>). <see cref="ClaimSpot"/> keeps
+        /// occupants off them while the room has other free tiles, so a skull is not drawn under a foe.
+        /// </summary>
+        public readonly HashSet<Vector2Int> PropCells = new HashSet<Vector2Int>();
 
         /// <summary>Frees the tile <paramref name="owner"/> claimed, so later occupants may use it.</summary>
         public void ReleaseSpot(object owner)

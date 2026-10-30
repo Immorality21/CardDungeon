@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1656e8375cd51e419be64ade96f31dd, type: 3}
+  m_Name: Crypt
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.BiomeSO
+  Key: crypt
+  Floors:
+  - {fileID: 21300000, guid: 213d5780cefc805418dfee4bb2b4bbf6, type: 3}
+  - {fileID: 21300000, guid: 8548d3464e097f64dba5b9c395f02e85, type: 3}
+  - {fileID: 21300000, guid: ab7190d08f9233845816bd87fbd7547a, type: 3}
+  - {fileID: 21300000, guid: c49d83de03f7c4b459f08cf1b6f91d11, type: 3}
+  - {fileID: 21300000, guid: 619815004eeeeaf4aa3f640e6f03fcec, type: 3}
+  FloorVariantChance: 0.3
+  WallFaces:
+  - {fileID: 21300000, guid: abce0ad9d17ff4243bd99a0f3466de90, type: 3}
+  - {fileID: 21300000, guid: e24aa2a37c858054fab884ce27dc569e, type: 3}
+  - {fileID: 21300000, guid: 9af415621826a224699d840af373b8e6, type: 3}
+  - {fileID: 21300000, guid: 0baf097e10184584ab6102f3bfeaecfe, type: 3}
+  - {fileID: 21300000, guid: 8099d60cda44ed84d9dadfaf1320b771, type: 3}
+  WallFaceVariantChance: 0.3
+  Archway: {fileID: 21300000, guid: ec6ffee79f328124fb4c024453b9ecff, type: 3}
+  EdgeTexture: {fileID: 2800000, guid: 39e1b52a3b09ee640b52a3d150e07d12, type: 3}
+  EdgeColor: {r: 1, g: 1, b: 1, a: 1}
+  Props:
+  - Sprite: {fileID: 21300000, guid: d05071bae6092334c87c93f6845c18d0, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: c0377e75405cb3a47a9d7525dfebef09, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: bfbe4490c534a5d45a5893488d32c23b, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: b15f14dd16a84324b897b1dbc3f286c2, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: cd1993a09942b96408df6f11af735e32, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 5e7dc75ed40d696479ffbe8875187b44, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: ea8c614b111c4fa498410a6cffa5f24d, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 11e10770539b57d4c8923c0aa7a63c79, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: c76a7d3e0e401c843b8c486e24a62b50, type: 3}
+    Place: 0
+    Weight: 0.5
+  - Sprite: {fileID: 21300000, guid: 14ddbe8720a1ff644b4a6b39283d537e, type: 3}
+    Place: 1
+    Weight: 1.5
+  - Sprite: {fileID: 21300000, guid: ca775779abc858a4b9b3f748ac6b86ea, type: 3}
+    Place: 1
+    Weight: 1.5
+  - Sprite: {fileID: 21300000, guid: cc093a015bb792846988c2fe5c96eeca, type: 3}
+    Place: 1
+    Weight: 1.5
+  - Sprite: {fileID: 21300000, guid: 26b08346a3c4dc3439a99930d6a070cd, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: ed40d271ad788f144952b9679419b8ee, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 4588540b91e00a1409c6102d8de4b946, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 487ca93444c026b40ab396a913de0810, type: 3}
+    Place: 1
+    Weight: 0.5
+  FloorPropChance: 0.1
+  WallPropChance: 0.3

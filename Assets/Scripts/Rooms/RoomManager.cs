@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Dungeon;
 using ImmoralityGaming.Extensions;
@@ -22,6 +22,11 @@ namespace Assets.Scripts.Rooms
         private List<(RoomNode, RoomNode)> _placementPairs = new List<(RoomNode, RoomNode)>();
         private GameObject _backdrop;
 
+        // The floor's biome, or null for the old look (tinted flagstone and WallGenerator bands).
+        // A biome gives every room one row of north wall face above its floor; see Room.WallRows.
+        private BiomeSO _biome;
+        private int _wallRows;
+
         /// <summary>
         /// Builds an authored level. <paramref name="level"/> is the run entry's template - a manual
         /// layout replaces the room *graph*, not the level it belongs to, and the template still
@@ -33,6 +38,10 @@ namespace Assets.Scripts.Rooms
             // Set before anything reads it: the wall pass below used to dereference whatever
             // GenerateDungeon had left here, which on the manual path is null.
             _currentLevel = level;
+            // Authored layouts keep the old look for now: their grid positions were placed for rooms
+            // with no wall row, so a face would push them into each other (DUNGEON_ROOMS.md, phase 2).
+            _biome = null;
+            _wallRows = 0;
 
             SpawnedRooms.DestroyAndClear(true);
             _spawnedDoors.DestroyAndClear(true);
@@ -93,9 +102,17 @@ namespace Assets.Scripts.Rooms
             return SpawnedRooms.ToList();
         }
 
-        public List<Room> GenerateDungeon(LevelDefinitionSO level)
+        /// <summary>
+        /// Generates a floor from <paramref name="level"/> on the current <c>UnityEngine.Random</c>
+        /// state. <paramref name="biome"/> overrides the level's own (<see cref="LevelDefinitionSO.Biome"/>);
+        /// with either set the floor is drawn on Tilemaps and decorated from <paramref name="decorSeed"/>,
+        /// a stream of its own, so props never move the content.
+        /// </summary>
+        public List<Room> GenerateDungeon(LevelDefinitionSO level, int decorSeed = 0, BiomeSO biome = null)
         {
             _currentLevel = level;
+            _biome = biome != null ? biome : level.Biome;
+            _wallRows = _biome != null ? 1 : 0;
 
             SpawnedRooms.DestroyAndClear(true);
             _spawnedDoors.DestroyAndClear(true);
@@ -119,11 +136,18 @@ namespace Assets.Scripts.Rooms
             }
 
             // Place walls around rooms (after doors so we can skip door edges)
-            var wallGen = new WallGenerator(
-                _currentLevel.WallTexture,
-                _currentLevel.WallColor
-            );
-            wallGen.PlaceWalls(SpawnedRooms);
+            if (_biome != null)
+            {
+                new RoomTilePainter(_biome).Paint(SpawnedRooms, decorSeed);
+            }
+            else
+            {
+                var wallGen = new WallGenerator(
+                    _currentLevel.WallTexture,
+                    _currentLevel.WallColor
+                );
+                wallGen.PlaceWalls(SpawnedRooms);
+            }
             PlaceBackdrop();
 
             return SpawnedRooms;
@@ -330,15 +354,16 @@ namespace Assets.Scripts.Rooms
             }
             else if (direction == Vector2Int.up)
             {
-                candidate += new Vector2Int(0, parent.Height);
+                candidate += new Vector2Int(0, FootprintHeight(parent));
             }
             else if (direction == Vector2Int.down)
             {
-                candidate += new Vector2Int(0, -child.Height);
+                candidate += new Vector2Int(0, -FootprintHeight(child));
             }
 
             // Add a random slide offset along the shared edge so rooms aren't always corner-aligned.
             // The offset is clamped so at least 1 tile of overlap remains (required for door placement).
+            // Side by side it is the *floors* that must overlap, not the wall faces, so this uses Height.
             if (direction == Vector2Int.right || direction == Vector2Int.left)
             {
                 int maxSlide = parent.Height + child.Height - 2; // total range preserving 1-tile overlap
@@ -370,8 +395,13 @@ namespace Assets.Scripts.Rooms
 
             int aRight = a.position.x + a.roomData.Width;
             int bRight = b.position.x + b.roomData.Width;
+            // Floors meet side by side; footprints (floor + wall face) meet above and below, where the
+            // door is an archway through the lower room's face and the party stands on the floor tile
+            // either side of it.
             int aTop = a.position.y + a.roomData.Height;
             int bTop = b.position.y + b.roomData.Height;
+            int aFootTop = a.position.y + FootprintHeight(a.roomData);
+            int bFootTop = b.position.y + FootprintHeight(b.roomData);
 
             // Check if b is directly to the right of a (shared vertical edge)
             if (!found && aRight == b.position.x)
@@ -402,7 +432,7 @@ namespace Assets.Scripts.Rooms
             }
 
             // Check if b is directly above a (shared horizontal edge)
-            if (!found && aTop == b.position.y)
+            if (!found && aFootTop == b.position.y)
             {
                 int overlapMin = Mathf.Max(a.position.x, b.position.x);
                 int overlapMax = Mathf.Min(aRight, bRight);
@@ -416,7 +446,7 @@ namespace Assets.Scripts.Rooms
             }
 
             // Check if b is directly below a
-            if (!found && bTop == a.position.y)
+            if (!found && bFootTop == a.position.y)
             {
                 int overlapMin = Mathf.Max(a.position.x, b.position.x);
                 int overlapMax = Mathf.Min(aRight, bRight);
@@ -454,7 +484,7 @@ namespace Assets.Scripts.Rooms
         {
             for (int w = 0; w < room.Width; w++)
             {
-                for (int h = 0; h < room.Height; h++)
+                for (int h = 0; h < FootprintHeight(room); h++)
                 {
                     var tile = startPos + new Vector2Int(w, h);
                     if (_occupiedTiles.Contains(tile))
@@ -475,25 +505,38 @@ namespace Assets.Scripts.Rooms
 
             roomBehaviour.RoomSO = roomNode.roomData;
             roomBehaviour.GridPosition = startPos;
+            roomBehaviour.WallRows = _wallRows;
 
             SpawnedRooms.Add(roomBehaviour);
 
             for (int w = 0; w < roomNode.roomData.Width; w++)
             {
-                for (int h = 0; h < roomNode.roomData.Height; h++)
+                for (int h = 0; h < FootprintHeight(roomNode.roomData); h++)
                 {
                     var tilePos = startPos + new Vector2Int(w, h);
+                    _occupiedTiles.Add(tilePos);
+                    if (_biome != null || h >= roomNode.roomData.Height)
+                    {
+                        // Painted afterwards by RoomTilePainter, once the doors are known.
+                        continue;
+                    }
+
                     var obj = Instantiate(_tilePrefab, new Vector3(tilePos.x, tilePos.y, 1), Quaternion.identity, roomObj.transform);
                     var floor = obj.GetComponent<SpriteRenderer>();
                     floor.color = Color.Lerp(Color.white, roomNode.roomData.Color, 0.5f);
                     // Every cell is the same 32px flagstone tile; mirroring it on a fixed pattern of
                     // cells breaks up the repeat without more art (the running bond stays seamless).
                     floor.flipX = (((tilePos.x * 73856093) ^ (tilePos.y * 19349663)) & 1) == 1;
-                    _occupiedTiles.Add(tilePos);
                 }
             }
 
             return roomBehaviour;
+        }
+
+        /// <summary>The grid rows a room takes on this floor: its floor plus the wall face above it.</summary>
+        private int FootprintHeight(RoomSO room)
+        {
+            return room.Height + _wallRows;
         }
     }
 }

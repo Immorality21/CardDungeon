@@ -417,3 +417,34 @@ to its first frame. Pixen, seed 9001 for the set, `no_background`, `single color
 centered, clean readable silhouette"* (mechs and bags: "single object"). Metas copied from
 `Abilities/AimedShot.png.meta` with fresh GUIDs. 24 generations, no rerolls. Weaker ones to redo some
 day: Earthsplitter and the Flamethrower Mech (figures, not symbols), Pack Hunt (one wolf, not three).
+
+## Dungeon tiles and props — the 2026-10-30 room spike
+
+The first biome (crypt, `Sprites/Environment/Biomes/Crypt/`, `docs/plans/DUNGEON_ROOMS.md` phase 1).
+What the pass learned, for the next biome:
+
+- **`create_building_kit` (square_topdown) does not fit our grid.** It draws in a low top-down
+  projection: 52x63 canvases, a floor 32x24 and walls 33 px tall, and the floor came out a flat grey.
+  10 generations spent and none used.
+- **`create_tiles_pro` with `tile_view: "top-down"`, numbered prompts, 32 px is the right tool.** One
+  call (10 generations) returned 16 tiles, two per numbered item: four floors, six wall faces seen from
+  the front, two archways. Number the wall faces as "seen straight from the front" or they come back
+  top-down.
+- **Every tile has a pure-black 1 px frame.** Tiled, that draws a 2 px black grid. Post-process:
+  floors keep one mortar-coloured joint on the left and bottom (copy the inner column/row over the
+  right and top), walls lose the side frame so the bricks run on and keep the dark base line where
+  wall meets floor (ten lines of PIL).
+- **`create_image_pro` at 32x32 is the prop shop**: 64 candidates for 10 generations. A prompt naming
+  several objects ("a skull, scattered bones, a broken urn, candle stubs, rubble, a chain, a cobweb")
+  returns a varied sheet, not 64 copies of one thing. Wall decorations ("hung on a stone dungeon wall,
+  seen from the front") come back drawn *on* matching stone with a small mount plate behind them,
+  which reads as a sconce.
+- **Props fill the tile (24-28 px), and the floor must be the quietest thing in the room.** The raw
+  tiles and bone-white props were brighter than the enemies. Shipped values: floors x0.66-0.74 (blue
+  kept highest), wall faces x0.85, floor props x0.72-0.8, and nothing tile-filling and pale (the skull
+  pile was dropped). Check it against an enemy on the walking view, which is drawn at half scale.
+- **The thin side walls and cap** use `BiomeSO.EdgeTexture` through `WallGenerator`'s bands, which
+  only tint *toward* a colour (30%). A light stone top needs a brightened texture
+  (`crypt_edge.png` = wall face x1.45), not a colour. It must be imported **Read/Write** (it is read
+  with `GetPixel`).
+- Import as every sprite here: 32 PPU, Point, uncompressed, Full Rect, pivot centre.

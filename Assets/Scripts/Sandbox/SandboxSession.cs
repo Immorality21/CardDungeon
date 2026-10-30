@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -81,6 +81,7 @@ namespace Assets.Scripts.Sandbox
             DungeonManager.PartyOverride = heroes.Count > 0 ? heroes : null;
             DungeonManager.LevelToLoad = config.Level;
             DungeonManager.SeedOverride = config.Seed != 0 ? config.Seed : (int?)null;
+            DungeonManager.BiomeOverride = config.Biome;
             DungeonManager.ActiveRun = null;
             DungeonManager.SeedToLoad = null;
             DungeonManager.RunLevelIndex = 0;
@@ -104,6 +105,7 @@ namespace Assets.Scripts.Sandbox
             DungeonManager.FreshDungeonSpawned -= OnFreshDungeonSpawned;
             DungeonManager.PartyOverride = null;
             DungeonManager.SeedOverride = null;
+            DungeonManager.BiomeOverride = null;
             FileHandler.DirectoryOverride = null;
             IsActive = false;
             Config = null;

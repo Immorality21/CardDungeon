@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
 using UnityEngine;
@@ -60,6 +60,12 @@ namespace Assets.Scripts.Dungeon
                  "imported with Mesh Type Full Rect and Wrap Mode Repeat, since it is tiled. When " +
                  "empty the default Resources/DungeonBackdrops/bedrock is used.")]
         public Sprite MapBackdrop;
+
+        [Tooltip("Optional: draw this floor with a biome's tiles (a tile-tall north wall, thin side " +
+                 "walls, props) instead of the tinted flagstone. Gives every room one extra row for " +
+                 "its wall, so it changes the floor's layout - and a save made mid-floor without it. " +
+                 "Generated floors only; a manual layout keeps the old look.")]
+        public BiomeSO Biome;
 
         [Tooltip("Optional per-level music while walking the floor. When set it wins over the " +
                  "MusicBank's Exploration track, so a biome can sound distinct as well as look it.")]

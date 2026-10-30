@@ -20,6 +20,16 @@
      32px flagstone tile, 2026-10-08), tinted per room by `Color.Lerp(white, RoomSO.Color, 0.5)` and
      mirrored on a checkerboard of cells so the repeat does not show. Keep `RoomSO.Color` **muted** -
      it tints stone; the old saturated test colours (pure blue, hot pink) were toned down that day.
+   - **Or a biome** (`BiomeSO`, the room-design spike of 2026-10-30, `docs/plans/DUNGEON_ROOMS.md`):
+     when `LevelDefinitionSO.Biome` or the sandbox's `DungeonManager.BiomeOverride` is set, the floor
+     is painted on per-room Tilemaps by `RoomTilePainter` from the pure `RoomTileOps` plan instead of
+     the tile prefab and `WallGenerator`. Each room gains **one row of north wall face** above its floor
+     (`Room.WallRows` / `FootprintHeight`): layout, overlap checks and vertical doors use the footprint,
+     side-by-side doors still need the *floors* to overlap, and a north door is an archway in the face.
+     The floor itself (`RoomSO.Width x Height`, `GetCenter`, `ClaimSpot`) is unchanged. Props draw on
+     their own stream (`RoomTileOps.DecorSeed`), never the content stream. Generated floors only - a
+     manual layout keeps the old look, since its positions assume no wall row. **No campaign level sets
+     a biome yet.**
 4. **Exit room** — BFS from start room, farthest room is designated `IsExit = true`; an exit marker sprite is placed in the room (see *Where things stand* below)
 5. **Contents, in this order** (all in `DungeonManager`, all drawing on the same seeded RNG stream, which is what lets a resumed dungeon reproduce them): `PlaceRoomKinds` → `EnemyManager.SpawnEnemies` → `PlaceBossIfConfigured` → `PlaceCaptiveIfConfigured` → `PlaceRoomEvents`. The order matters — events skip rooms that already hold a captive, and the boss has already claimed the exit room. Each pass is documented where it belongs: bosses and captives in `Assets/Scripts/Dungeon/CLAUDE.md`, events in `Assets/Scripts/Rooms/Events/CLAUDE.md`.
 6. **Seeding** — Supports custom seed for reproducible generation. Everything above is a pure function of the seed, so the same seed regenerates the same level; the dungeon save stores only what the player *changed* (rooms explored, enemies killed, events resolved), not the layout.
