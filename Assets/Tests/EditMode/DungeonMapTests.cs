@@ -461,5 +461,93 @@ namespace Tests.EditMode
             Assert.AreEqual(1, model.Rooms.Count);
             Assert.IsEmpty(model.Links);
         }
+        // ------------------------------------------------------------ click to walk
+
+        [Test]
+        public void RoomAt_FindsTheRoomUnderAPoint_TilesCentredOnWholeNumbers()
+        {
+            var rooms = new List<MapRoomInput> { Room(0), Room(1) };
+
+            Assert.AreEqual(0, DungeonMapOps.RoomAt(rooms, new Vector2(-0.4f, 0f)), "half a tile before x=0 is still room 0");
+            Assert.AreEqual(0, DungeonMapOps.RoomAt(rooms, new Vector2(4.4f, 3.4f)));
+            Assert.AreEqual(-1, DungeonMapOps.RoomAt(rooms, new Vector2(6f, 1f)), "the gap between rooms is nobody's");
+            Assert.AreEqual(1, DungeonMapOps.RoomAt(rooms, new Vector2(8f, 1f)));
+        }
+
+        [Test]
+        public void WalkRoute_ToAnExploredRoom_IsTheMapsFastTravel()
+        {
+            var rooms = new List<MapRoomInput>
+            {
+                Room(0, explored: true, neighbours: new[] { 1 }),
+                Room(1, explored: true, neighbours: new[] { 0, 2 }),
+                Room(2, explored: true, neighbours: new[] { 1 }),
+            };
+
+            Assert.That(DungeonMapOps.WalkRoute(rooms, 0, 2), Is.EqualTo(DungeonMapOps.RouteTo(rooms, 0, 2)));
+        }
+
+        [Test]
+        public void WalkRoute_ANewRoomNextDoor_IsOneStep()
+        {
+            var rooms = new List<MapRoomInput>
+            {
+                Room(0, explored: true, neighbours: new[] { 1 }),
+                Room(1, neighbours: new[] { 0 }),
+            };
+
+            Assert.That(DungeonMapOps.WalkRoute(rooms, 0, 1), Is.EqualTo(new[] { 0, 1 }));
+        }
+
+        [Test]
+        public void WalkRoute_ANewRoomPastExploredOnes_TravelsThenStepsIn()
+        {
+            var rooms = new List<MapRoomInput>
+            {
+                Room(0, explored: true, neighbours: new[] { 1 }),
+                Room(1, explored: true, neighbours: new[] { 0, 2 }),
+                Room(2, neighbours: new[] { 1 }),
+            };
+
+            Assert.That(DungeonMapOps.WalkRoute(rooms, 0, 2), Is.EqualTo(new[] { 0, 1, 2 }));
+        }
+
+        [Test]
+        public void WalkRoute_NeverStepsInThroughARoomWithEnemies()
+        {
+            var rooms = new List<MapRoomInput>
+            {
+                Room(0, explored: true, neighbours: new[] { 1 }),
+                Room(1, explored: true, enemies: true, neighbours: new[] { 0, 2 }),
+                Room(2, neighbours: new[] { 1 }),
+            };
+
+            Assert.IsEmpty(DungeonMapOps.WalkRoute(rooms, 0, 2));
+        }
+
+        [Test]
+        public void WalkRoute_NeverTwoNewRoomsInARow()
+        {
+            var rooms = new List<MapRoomInput>
+            {
+                Room(0, explored: true, neighbours: new[] { 1 }),
+                Room(1, neighbours: new[] { 0, 2 }),
+                Room(2, neighbours: new[] { 1 }),
+            };
+
+            Assert.IsEmpty(DungeonMapOps.WalkRoute(rooms, 0, 2));
+        }
+
+        [Test]
+        public void WalkRoute_NotWhileEnemiesHoldThePartysRoom()
+        {
+            var rooms = new List<MapRoomInput>
+            {
+                Room(0, explored: true, enemies: true, neighbours: new[] { 1 }),
+                Room(1, explored: true, neighbours: new[] { 0 }),
+            };
+
+            Assert.IsEmpty(DungeonMapOps.WalkRoute(rooms, 0, 1), "a click is not a free Flee");
+        }
     }
 }

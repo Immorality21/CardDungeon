@@ -42,6 +42,14 @@ Everything here came out of playtest 3 (2026-10-26 to 2026-10-28).
 - [ ] **Revisit-only materials** drop on revisits at Fear 1+ (the Archive cache, the Lich, the Mirefather,
       the Cinder Tyrant, the late caches), never on a first clear.
 
+## The dungeon
+
+- [ ] **Click a room to walk there** (2026-10-30) - with the mouse: an explored room across the floor
+      (fast travel), a dark room right next door (same as its door), a dark room beside an explored one
+      (travel, then step in). Refused: out of a room with enemies, through one, two dark rooms deep.
+      "No safe way there" floats on an explored room you cannot reach. Clicking on the party window or
+      a bar must not walk. **A real mouse click has not been tried** (the agent called the walk directly).
+
 ## Combat
 
 - [ ] **Health bars wait for the hit** - a party-wide enemy spell (the Floating Eye) drops each bar as

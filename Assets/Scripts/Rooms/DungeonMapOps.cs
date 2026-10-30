@@ -409,6 +409,105 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
+        /// The room whose floor covers <paramref name="world"/>, or -1. A room's tiles are centred on
+        /// whole numbers (<c>Room.GetCenter</c>), so its floor runs from half a tile before
+        /// <c>Bounds.x</c> to half a tile past its last column.
+        /// </summary>
+        public static int RoomAt(IReadOnlyList<MapRoomInput> rooms, Vector2 world)
+        {
+            if (rooms == null)
+            {
+                return -1;
+            }
+            foreach (var room in rooms)
+            {
+                var b = room.Bounds;
+                if (world.x >= b.x - 0.5f && world.x < b.x + b.width - 0.5f
+                    && world.y >= b.y - 0.5f && world.y < b.y + b.height - 0.5f)
+                {
+                    return room.Index;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// The walk a click in the dungeon asks for (playtest 2026-10-29: "as if you tapped that door,
+        /// but also for multiple rooms at once"), or an empty list when it may not be taken.
+        ///
+        /// <list type="bullet">
+        /// <item>An <b>explored</b> room: exactly the map's fast travel, <see cref="RouteTo"/>, with
+        /// all its rules.</item>
+        /// <item>A room <b>not yet entered</b>: allowed only one step past somewhere the party can
+        /// stand safely - the room it is in, or an explored room with no enemies that travel can reach
+        /// - so the last step is an ordinary walk through a door, into whatever is waiting. The
+        /// shortest such walk wins. Never deeper: two unexplored rooms in a row would skip one.</item>
+        /// </list>
+        /// </summary>
+        public static List<int> WalkRoute(IReadOnlyList<MapRoomInput> rooms, int currentIndex, int targetIndex)
+        {
+            var none = new List<int>();
+            if (rooms == null || targetIndex < 0 || targetIndex == currentIndex)
+            {
+                return none;
+            }
+
+            MapRoomInput? target = null;
+            MapRoomInput? current = null;
+            foreach (var room in rooms)
+            {
+                if (room.Index == targetIndex)
+                {
+                    target = room;
+                }
+                if (room.Index == currentIndex)
+                {
+                    current = room;
+                }
+            }
+            if (target == null || current == null || current.Value.HasEnemies)
+            {
+                return none;
+            }
+            if (target.Value.IsExplored)
+            {
+                return RouteTo(rooms, currentIndex, targetIndex);
+            }
+
+            if (current.Value.Neighbours != null && current.Value.Neighbours.Contains(targetIndex))
+            {
+                return new List<int> { currentIndex, targetIndex };
+            }
+
+            List<int> best = null;
+            foreach (int index in TravellableRooms(rooms, currentIndex))
+            {
+                MapRoomInput? via = null;
+                foreach (var room in rooms)
+                {
+                    if (room.Index == index)
+                    {
+                        via = room;
+                        break;
+                    }
+                }
+                // Passed through on the way, so it must be safe to stand in.
+                if (via == null || via.Value.HasEnemies || via.Value.Neighbours == null
+                    || !via.Value.Neighbours.Contains(targetIndex))
+                {
+                    continue;
+                }
+                var route = RouteTo(rooms, currentIndex, index);
+                if (route.Count >= 2 && (best == null || route.Count + 1 < best.Count))
+                {
+                    route.Add(targetIndex);
+                    best = route;
+                }
+            }
+            return best ?? none;
+        }
+
+        /// <summary>
         /// The line under the map. It says what travel is offering, and when travel is off it says
         /// <i>why</i> rather than going quiet - "nowhere to go" and "you may not leave" are different
         /// facts and the player can act on only one of them.

@@ -2250,6 +2250,142 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
+        /// Click-to-walk (playtest 2026-10-29): a click on the floor of another room walks the party
+        /// there when the way is safe - <see cref="DungeonMapOps.WalkRoute"/>, the map's fast-travel
+        /// rules plus one step into a room not yet entered. Only while the doors are live
+        /// (<see cref="DoorNavActive"/>), so never in a fight, under a dialog or over the map.
+        ///
+        /// <para>A door under the pointer is left to its own click (<c>Door.OnMouseDown</c>, which
+        /// runs before this), and so is anything on the UI panel. A click on an explored room with no
+        /// safe way there floats a line saying so; a click on darkness says nothing, so it cannot tell
+        /// the player a hidden room is there.</para>
+        /// </summary>
+        private void TickRoomClick()
+        {
+            if (!Input.GetMouseButtonDown(0) || _currentRoom == null || !DoorNavActive())
+            {
+                return;
+            }
+            var cam = Camera.main;
+            if (cam == null || PointerOverUi(Input.mousePosition))
+            {
+                return;
+            }
+
+            Vector2 world = cam.ScreenToWorldPoint(Input.mousePosition);
+            var hit = Physics2D.OverlapPoint(world);
+            if (hit != null && hit.GetComponentInParent<Door>() != null)
+            {
+                return;
+            }
+
+            var rooms = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentRooms : null;
+            int target = DungeonMapOps.RoomAt(BuildMapInputs(rooms), world);
+            if (target < 0 || target == _currentRoom.RoomIndex)
+            {
+                return;
+            }
+
+            var destination = RoomByIndex(rooms, target);
+            if (!TryWalkTo(target) && destination != null && destination.IsExplored && FloatingTextHandler.HasInstance)
+            {
+                FloatingTextHandler.Instance.CreateFloatingText(
+                    new Vector3(world.x, world.y, -2f), "No safe way there", new Color(1f, 0.75f, 0.45f));
+            }
+        }
+
+        /// <summary>
+        /// Walks the party to <paramref name="roomIndex"/> by <see cref="DungeonMapOps.WalkRoute"/>, as
+        /// a click on that room does: false, and nothing moves, when the way is not safe or the doors
+        /// are not live. Public so a scripted check can drive the walk the mouse would.
+        /// </summary>
+        public bool TryWalkTo(int roomIndex)
+        {
+            if (_currentRoom == null || !DoorNavActive())
+            {
+                return false;
+            }
+            var rooms = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentRooms : null;
+            var route = DungeonMapOps.WalkRoute(BuildMapInputs(rooms), _currentRoom.RoomIndex, roomIndex);
+            var destination = RoomByIndex(rooms, roomIndex);
+            if (route.Count < 2 || destination == null)
+            {
+                return false;
+            }
+
+            // One step: exactly a door click.
+            if (route.Count == 2)
+            {
+                var door = DoorBetween(_currentRoom, destination);
+                if (door != null)
+                {
+                    OnDoorSelected(door);
+                }
+                return door != null;
+            }
+
+            if (destination.IsExplored)
+            {
+                TravelTo(roomIndex);
+                return true;
+            }
+
+            // Travel to the safe room beside it, then walk the last door - stopping there if arriving
+            // put anything in the way (the doors are no longer live).
+            int via = route[route.Count - 2];
+            TravelTo(via);
+            if (_currentRoom != null && _currentRoom.RoomIndex == via && DoorNavActive())
+            {
+                var door = DoorBetween(_currentRoom, destination);
+                if (door != null)
+                {
+                    OnDoorSelected(door);
+                }
+            }
+            return true;
+        }
+
+        /// <summary>Whether the pointer is over something on the UI panel (its root does not pick).</summary>
+        private bool PointerOverUi(Vector2 screen)
+        {
+            var panel = _root != null ? _root.panel : null;
+            if (panel == null)
+            {
+                return false;
+            }
+            var local = RuntimePanelUtils.ScreenToPanel(panel, new Vector2(screen.x, Screen.height - screen.y));
+            return panel.Pick(local) != null;
+        }
+
+        private static Room RoomByIndex(IReadOnlyList<Room> rooms, int index)
+        {
+            if (rooms == null)
+            {
+                return null;
+            }
+            foreach (var room in rooms)
+            {
+                if (room != null && room.RoomIndex == index)
+                {
+                    return room;
+                }
+            }
+            return null;
+        }
+
+        private static Door DoorBetween(Room from, Room to)
+        {
+            foreach (var door in from.Doors)
+            {
+                if (door != null && door.GetOtherRoom(from) == to)
+                {
+                    return door;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Reads the live rooms into the plain inputs <see cref="DungeonMapOps"/> works on. The
         /// adjacency comes off the doors rather than the generator's <c>RoomNode.connections</c>,
         /// because a door is what the player can actually walk through - a connection with no door
@@ -2512,6 +2648,8 @@ namespace Assets.Scripts.Rooms
             // selection and with it the keyboard. Re-claiming here costs a null check and means the
             // arrows cannot go dead halfway across a floor the player is walking with the mouse.
             PanelKeyboard.Claim();
+
+            TickRoomClick();
 
             // Fight/Flee is a question, so it carries its cursor from the moment it appears - the
             // command menu already does, and Enter should not need an arrow press to wake it up.
