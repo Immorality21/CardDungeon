@@ -54,6 +54,7 @@
 
         <!-- Turn-order list (FFX-style, top-right): upcoming turns, current on top -->
         <ui:VisualElement name="turn-order" class="cd-turn-order cd-dock-top-right cd-hidden">
+            <ui:Label name="turn-order-title" text="#ui.room.turn-order-title" class="cd-turn-order__title" />
             <ui:VisualElement name="turn-order-list" class="cd-turn-order__list" />
         </ui:VisualElement>
 

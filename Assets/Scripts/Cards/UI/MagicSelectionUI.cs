@@ -61,6 +61,7 @@ namespace Assets.Scripts.Cards.UI
         private VisualElement _targetPanel;
         private Label _listTitle;
         private Label _listDesc;
+        private Label _targetDesc;
         private Label _targetPrompt;
         private ScrollView _listScroll;
         private ScrollView _targetScroll;
@@ -169,6 +170,8 @@ namespace Assets.Scripts.Cards.UI
             // UXML texts are keys (#ui...); turn them into words once, as the tree is first bound.
 
             global::ImmoralityGaming.Localization.Loc.Localize(root);
+
+            global::ImmoralityGaming.Menu.HoverTips.Attach(root);
             _root = root;
             // Only focusable while a picker is open (set in BeginNavigation) — otherwise this
             // idle panel root would steal keyboard focus from the command menu's arrow nav.
@@ -184,6 +187,7 @@ namespace Assets.Scripts.Cards.UI
             _targetPanel = root.Q<VisualElement>("target-panel");
             _listTitle = root.Q<Label>("list-title");
             _listDesc = root.Q<Label>("list-desc");
+            _targetDesc = root.Q<Label>("target-desc");
             _targetPrompt = root.Q<Label>("target-prompt");
             _listScroll = root.Q<ScrollView>("list-scroll");
             _targetScroll = root.Q<ScrollView>("target-scroll");
@@ -1016,6 +1020,54 @@ namespace Assets.Scripts.Cards.UI
         //  TARGET ROWS (shared)
         // ============================================================
 
+        /// <summary>
+        /// What the Inspect page knows about an enemy, in two or three lines for the target picker's
+        /// footer: what it attacks with, and the weaknesses and resistances the party has seen
+        /// (playtest 2026-10-30: "why not show the information to begin with?"). Only what has been
+        /// observed, by the same rules as the Inspect page; null for a hero or ally.
+        /// </summary>
+        private static string TargetSummary(ICombatUnit target)
+        {
+            var enemy = target as Enemies.Enemy;
+            if (enemy == null || enemy.Definition == null || !MetaProgressManager.HasInstance)
+            {
+                return null;
+            }
+            var definition = enemy.Definition;
+            var known = MetaProgressManager.Instance.GetBestiaryEntry(definition.SaveKey);
+
+            var lines = new List<string>();
+            var attack = BestiaryPresenter.AttackLine(definition, known);
+            lines.Add(Loc.Format("abilities.target.summary-line", ("label", attack.Label), ("value", attack.Value)));
+
+            var weak = new List<string>();
+            var resists = new List<string>();
+            foreach (var line in BestiaryPresenter.ResistanceLines(definition, known))
+            {
+                if (line.Tone == BestiaryTone.Good)
+                {
+                    weak.Add(line.Label);
+                }
+                else if (line.Tone == BestiaryTone.Bad)
+                {
+                    resists.Add(line.Label);
+                }
+            }
+            if (weak.Count > 0)
+            {
+                lines.Add(Loc.Format("abilities.target.weak-to", ("types", string.Join(", ", weak))));
+            }
+            if (resists.Count > 0)
+            {
+                lines.Add(Loc.Format("abilities.target.resists", ("types", string.Join(", ", resists))));
+            }
+            if (weak.Count == 0 && resists.Count == 0)
+            {
+                lines.Add(Loc.Get("abilities.target.nothing-learned"));
+            }
+            return string.Join("\n", lines);
+        }
+
         private void PopulateTargetRows(List<ICombatUnit> targets, string prompt)
         {
             _targetScroll.Clear();
@@ -1026,7 +1078,8 @@ namespace Assets.Scripts.Cards.UI
             {
                 var captured = target;
                 string meta = Loc.Format("abilities.menu.target-health", ("health", target.Stats.Health));
-                _targetScroll.Add(CreateRow(target.Icon, target.DisplayName, meta, true, () => OnTargetSelected(captured)));
+                _targetScroll.Add(CreateRow(target.Icon, target.DisplayName, meta, true, () => OnTargetSelected(captured),
+                    TargetSummary(target)));
             }
 
             HidePanel(_listPanel);
@@ -1272,7 +1325,7 @@ namespace Assets.Scripts.Cards.UI
         /// <summary>Select the first row, draw the cursor, and focus the panel for key input.</summary>
         private void BeginNavigation()
         {
-            _navSelected = _navRows.Count > 0 ? 0 : -1;
+            _navSelected = _navRows.Count > 0 ? 0 : (VisibleBack() != null ? 0 : -1);
             RenderNavCursor();
             if (_root != null && _root.panel != null)
             {
@@ -1298,8 +1351,31 @@ namespace Assets.Scripts.Cards.UI
                 _navCursors[i].text = selected ? "▸" : string.Empty;
                 _navRows[i].EnableInClassList("cd-sel-row--selected", selected);
             }
+            bool onBack = BackSelected;
+            var back = VisibleBack();
+            _listBack?.EnableInClassList("cd-nav--selected", onBack && back == _listBack);
+            _targetBack?.EnableInClassList("cd-nav--selected", onBack && back == _targetBack);
             RenderDescription();
         }
+
+        /// <summary>The Back button of the panel that is up, or null. It is the cursor's last stop,
+        /// after the rows (playtest 2026-10-30: the arrows could not reach it).</summary>
+        private Button VisibleBack()
+        {
+            if (IsShown(_targetPanel) && _targetBack != null && IsShown(_targetBack))
+            {
+                return _targetBack;
+            }
+            if (IsShown(_listPanel) && _listBack != null && IsShown(_listBack))
+            {
+                return _listBack;
+            }
+            return null;
+        }
+
+        private int NavStops => _navRows.Count + (VisibleBack() != null ? 1 : 0);
+
+        private bool BackSelected => _navSelected == _navRows.Count && VisibleBack() != null;
 
         /// <summary>
         /// Shows the selected row's description under the list, or hides the footer when it has
@@ -1307,16 +1383,23 @@ namespace Assets.Scripts.Cards.UI
         /// </summary>
         private void RenderDescription()
         {
-            if (_listDesc == null)
-            {
-                return;
-            }
-
             string text = _navSelected >= 0 && _navSelected < _navDescriptions.Count
                 ? _navDescriptions[_navSelected]
                 : null;
-            _listDesc.text = text ?? string.Empty;
-            _listDesc.EnableInClassList("cd-hidden", string.IsNullOrEmpty(text));
+            // The target picker has its own footer: what is known about the enemy under the cursor.
+            bool targets = IsShown(_targetPanel);
+            SetDescription(_listDesc, targets ? null : text);
+            SetDescription(_targetDesc, targets ? text : null);
+        }
+
+        private static void SetDescription(Label label, string text)
+        {
+            if (label == null)
+            {
+                return;
+            }
+            label.text = text ?? string.Empty;
+            label.EnableInClassList("cd-hidden", string.IsNullOrEmpty(text));
         }
 
         private void SetNavSelected(int index)
@@ -1331,16 +1414,22 @@ namespace Assets.Scripts.Cards.UI
 
         private void MoveNav(int delta)
         {
-            if (_navRows.Count == 0)
+            int stops = NavStops;
+            if (stops == 0)
             {
                 return;
             }
-            _navSelected = (_navSelected + delta + _navRows.Count) % _navRows.Count;
+            _navSelected = (_navSelected + delta + stops) % stops;
             RenderNavCursor();
         }
 
         private void ConfirmNav()
         {
+            if (BackSelected)
+            {
+                BackNav();
+                return;
+            }
             if (_navSelected >= 0 && _navSelected < _navActions.Count)
             {
                 _navActions[_navSelected]?.Invoke();
@@ -1377,9 +1466,11 @@ namespace Assets.Scripts.Cards.UI
                 {
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
+                    case KeyCode.Z:
                     case KeyCode.Space:
                     case KeyCode.Escape:
                     case KeyCode.Backspace:
+                    case KeyCode.X:
                         OnInspectBack();
                         evt.StopPropagation();
                         break;
@@ -1399,12 +1490,14 @@ namespace Assets.Scripts.Cards.UI
                     break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
+                case KeyCode.Z:
                 case KeyCode.Space:
                     ConfirmNav();
                     evt.StopPropagation();
                     break;
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
+                case KeyCode.X:
                     BackNav();
                     evt.StopPropagation();
                     break;

@@ -29,7 +29,7 @@ namespace Tests.EditMode
             var lines = AbilityDescriber.EffectLines(slash, caster, null);
 
             Assert.AreEqual(2, lines.Count);
-            Assert.AreEqual("9 damage (STR 6)", lines[0]);
+            Assert.AreEqual("9 damage", lines[0]);
             Assert.AreEqual("Bleed 1/turn, 3 turns", lines[1]);
         }
 
@@ -42,7 +42,7 @@ namespace Tests.EditMode
 
             var lines = AbilityDescriber.EffectLines(slash, caster, null, powerBonus: 2);
 
-            Assert.AreEqual("11 damage (STR 6)", lines[0]);
+            Assert.AreEqual("11 damage", lines[0]);
         }
 
         [Test]

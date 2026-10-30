@@ -456,7 +456,35 @@ namespace Assets.Scripts.Heroes.UI
             int target = from >= 0
                 ? DirectionalNav.PickInDirection(_navPoints, from, direction)
                 : 0;
-            return target >= 0 ? _navKeys[target] : null;
+            if (target >= 0)
+            {
+                return _navKeys[target];
+            }
+
+            // Last resort: the connected node that lies most nearly the way pressed, anywhere within
+            // 90 degrees. Both cones can miss on a sparse branch, and the cursor then sat on a node
+            // near the start and would not move (playtest 2026-10-30).
+            if (from >= 0)
+            {
+                var originPoint = _navPoints[from];
+                _navKeys.Clear();
+                _navPoints.Clear();
+                foreach (var edge in _edges)
+                {
+                    string other = edge.A == fromKey ? edge.B : edge.B == fromKey ? edge.A : null;
+                    if (other != null && _nodes.TryGetValue(other, out var neighbour) && !_navKeys.Contains(other))
+                    {
+                        _navKeys.Add(other);
+                        _navPoints.Add(neighbour.Position);
+                    }
+                }
+                int loose = DirectionalNav.PickInHalfPlane(_navPoints, originPoint, direction);
+                if (loose >= 0)
+                {
+                    return _navKeys[loose];
+                }
+            }
+            return null;
         }
 
         /// <summary>

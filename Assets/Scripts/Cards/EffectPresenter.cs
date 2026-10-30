@@ -117,6 +117,8 @@ namespace Assets.Scripts.Cards
                 if (entry.Impact > 0 && entry.Target != null && entry.Target.Transform != null)
                 {
                     CombatFeedback.Instance.PlayImpact(entry.Target, entry.Impact, entry.Crit ? 1.4f : 1f);
+                    // An ability hit sounds like one (playtest 2026-10-30: Hamstring and others were silent).
+                    Assets.Scripts.Audio.CombatAudio.Play(Assets.Scripts.Audio.CombatSound.Impact, entry.Crit ? 1f : 0.9f);
                     yield return new WaitForSecondsRealtime(entry.Crit ? 0.075f : 0.04f);
                 }
 

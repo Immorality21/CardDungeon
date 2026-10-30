@@ -227,6 +227,14 @@ namespace Assets.Scripts.UnitStats
             return stat == StatType.None ? Loc.Get("stat.none.name") : Of(stat).DisplayName;
         }
 
+        /// <summary>"Strength: what it does" - the stat's hover tip wherever a stat is shown.</summary>
+        public static string Explain(StatType stat)
+        {
+            return stat == StatType.None
+                ? DisplayName(stat)
+                : Loc.Format("stat.tooltip", ("name", DisplayName(stat)), ("description", Of(stat).Description));
+        }
+
         /// <summary>Stats that can be a source of power - everything that is not a pool.</summary>
         public static bool CanScalePower(StatType stat)
         {

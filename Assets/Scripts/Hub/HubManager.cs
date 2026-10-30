@@ -96,6 +96,7 @@ namespace Assets.Scripts.Hub
 
         private VisualElement _root;
         private KeyboardNavigator _nav;
+        private bool _armCursor;
 
         private HubSO _hub;
         private HubView _town;
@@ -884,6 +885,8 @@ namespace Assets.Scripts.Hub
         private void SetUpKeyboardNavigation()
         {
             _nav = new KeyboardNavigator(_root);
+            // Runtime panels draw no tooltips; this shows them on hover and under the cursor.
+            _nav.Tips = HoverTips.Attach(_root);
             _nav.Cancelled += OnNavigatorCancelled;
 
             _root.focusable = true;
@@ -992,6 +995,57 @@ namespace Assets.Scripts.Hub
             PanelKeyboard.Claim();
             RefreshBackdrop();
             RefreshTutorialBanner();
+            ArmCursorOnModalScreen();
+            CursorToTutorialTarget();
+        }
+
+        /// <summary>
+        /// While the tutorial guides a button the shared cursor can reach, an empty cursor starts on
+        /// it, so the forced step answers Enter at once and the arrows still work (playtest
+        /// 2026-10-30: "if you're forced into doing something, the keyboard doesn't work"). The
+        /// buttons the step locks are disabled, so the cursor cannot leave for them.
+        /// </summary>
+        private void CursorToTutorialTarget()
+        {
+            if (_nav == null || _nav.HasSelection || _tutorialStep == TutorialStep.None || !NavigatesCurrentView())
+            {
+                return;
+            }
+            VisualElement target = null;
+            _root.Query<Button>(className: HubView.TutorialTargetClass).ForEach(button =>
+            {
+                if (target == null && button.enabledInHierarchy && button.resolvedStyle.display != DisplayStyle.None)
+                {
+                    target = button;
+                }
+            });
+            if (target != null)
+            {
+                _nav.SelectElement(target);
+            }
+        }
+
+        /// <summary>
+        /// The run-complete and level-entry screens take Enter from the moment they open: the cursor
+        /// starts on their first button (playtest 2026-10-30: the summary needed Tab, then Enter). The
+        /// town keeps its "no cursor until the first arrow" rule. Done from Update because on the
+        /// frame a view is shown its buttons are not laid out yet.
+        /// </summary>
+        private void ArmCursorOnModalScreen()
+        {
+            if (!_armCursor)
+            {
+                return;
+            }
+            if (_nav == null || !(IsShown(_completeView) || IsShown(_progressView)))
+            {
+                _armCursor = false;
+                return;
+            }
+            if (_nav.SelectFirst())
+            {
+                _armCursor = false;
+            }
         }
 
         /// <summary>
@@ -1120,6 +1174,7 @@ namespace Assets.Scripts.Hub
             SetShown(_completeView, false);
             SetShown(_partyView, false);
             ResetKeyboardNavigation();
+            _armCursor = true;
 
             var run = ActiveRunDefinition();
             if (run == null || run.Levels.Count == 0)
@@ -1238,6 +1293,7 @@ namespace Assets.Scripts.Hub
             FillRunComplete();
             SetShown(_completeView, true);
             ResetKeyboardNavigation();
+            _armCursor = true;
             _justCompletedRun = false;
             _completedRunKey = null;
             _completedRevisitFear = -1;

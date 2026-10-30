@@ -18,13 +18,13 @@ namespace Assets.Scripts.Cards
     ///
     /// <para>Numbers come from the same arithmetic the executors run - <see cref="SpellPower"/>,
     /// <see cref="SpellScaling"/>, the Forge's power bonus - and are <b>before</b> the target's
-    /// defense and resistances, which the picker cannot know yet. Attack's number is given beside
-    /// the damage for the same reason: both are raw, so the comparison is fair.</para>
+    /// defense and resistances, which the picker cannot know yet. Combat shows the short form
+    /// ("18 damage"); the hub asks for the long one ("18 damage, scales with Strength", owner 2026-10-30).</para>
     /// </summary>
     public static class AbilityDescriber
     {
         /// <summary>
-        /// One line per active effect, e.g. "9 damage (STR 7)" or "Bleeding 1/turn, 3 turns".
+        /// One line per active effect, e.g. "9 damage" or "Bleeding 1/turn, 3 turns".
         /// Effects locked behind a higher upgrade level are left out, as the resolver skips them.
         /// Health costs are left out too - the picker row already shows the price.
         /// </summary>
@@ -33,7 +33,8 @@ namespace Assets.Scripts.Cards
             ICombatUnit caster,
             CombatBuffTracker buffTracker,
             int powerBonus = 0,
-            int upgradeLevel = 0)
+            int upgradeLevel = 0,
+            bool scalesWith = false)
         {
             var lines = new List<string>();
             if (magic == null || magic.Effects == null)
@@ -72,6 +73,10 @@ namespace Assets.Scripts.Cards
                         line = caster != null
                             ? Loc.Format("abilities.describe.crit-chance", ("line", line), ("chance", critChance))
                             : Loc.Format("abilities.describe.can-crit", ("line", line));
+                    }
+                    if (scalesWith)
+                    {
+                        line = WithScaling(line, upgraded);
                     }
                     lines.Add(line);
                 }
@@ -145,7 +150,8 @@ namespace Assets.Scripts.Cards
             CombatBuffTracker buffTracker,
             int powerBonus = 0,
             int upgradeLevel = 0,
-            bool withDescription = true)
+            bool withDescription = true,
+            bool scalesWith = false)
         {
             if (magic == null)
             {
@@ -160,7 +166,7 @@ namespace Assets.Scripts.Cards
 
             // One effect per line: the picker window is narrow, and a joined line wrapped mid-number
             // ("Bleed 2/" | "turn").
-            var effects = EffectLines(magic, caster, buffTracker, powerBonus, upgradeLevel);
+            var effects = EffectLines(magic, caster, buffTracker, powerBonus, upgradeLevel, scalesWith);
             string target = TargetLabel(magic);
             if (effects.Count == 0)
             {
@@ -234,6 +240,16 @@ namespace Assets.Scripts.Cards
             }
         }
 
+        /// <summary>The long form for the hub (owner, 2026-10-30): "18 damage, scales with Strength" on a
+        /// damage or heal effect whose number grows with a caster stat. Combat shows the short form.</summary>
+        private static string WithScaling(string line, SpellEffect effect)
+        {
+            bool scales = (effect.EffectType == SpellEffectType.Damage || effect.EffectType == SpellEffectType.Heal)
+                          && (effect.PowerMode == PowerMode.BasePower)
+                          && StatCatalog.CanScalePower(effect.ScalingStat);
+            return scales ? Loc.Format("abilities.describe.scales-with", ("line", line), ("stat", StatCatalog.DisplayName(effect.ScalingStat))) : line;
+        }
+
         /// <summary>"Undead" for a trait, or <paramref name="none"/> when there is none.</summary>
         private static string TraitName(UnitTraits trait, string none)
         {
@@ -270,13 +286,6 @@ namespace Assets.Scripts.Cards
                 line = effect.BonusPercent == 100
                     ? Loc.Format("abilities.describe.bonus-double", ("line", line), ("versus", status))
                     : Loc.Format("abilities.describe.bonus-percent", ("line", line), ("percent", effect.BonusPercent), ("versus", status));
-            }
-            if (caster != null)
-            {
-                int attack = caster.GetEffectiveAttackPower()
-                    + (buffTracker != null ? buffTracker.GetBuffAmount(caster, caster.AttackStat) : 0);
-                // The stat grid's name for it ("STR 7"), not a second word for the same number.
-                line = Loc.Format("abilities.describe.with-attack", ("line", line), ("stat", StatCatalog.ShortName(caster.AttackStat)), ("value", attack));
             }
             return line;
         }

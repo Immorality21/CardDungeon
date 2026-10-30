@@ -20,6 +20,7 @@
         <ui:VisualElement name="target-panel" class="cd-window cd-window--combat cd-window--picker cd-dock-bottom-left cd-hidden">
             <ui:Label name="target-prompt" text="#ui.combat.target-prompt" class="cd-command-window__header" />
             <ui:ScrollView name="target-scroll" class="cd-select-scroll" mode="Vertical" />
+            <ui:Label name="target-desc" text="" class="cd-sel-desc cd-picker-desc cd-hidden" />
             <ui:Button name="target-back" text="#ui.common.back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 

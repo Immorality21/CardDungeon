@@ -1255,7 +1255,8 @@ namespace Assets.Scripts.Rooms
             var result = _calculator.Execute(
                 castAction, BuffTracker, _tagTracker, _comboDetector, 0, 0, comboLevelLookup);
             _lastTurnLog = result.BuildLog(castAction);
-            CombatAudio.Play(CombatSound.MagicCast);
+            // A weapon ability swings; a spell casts (playtest 2026-10-30: a physical ability sounded like magic).
+            CombatAudio.Play(castAction.Magic != null && castAction.Magic.IsPhysicalAttack() ? CombatSound.MeleeSwing : CombatSound.MagicCast);
 
             // Record any triggered combos as discovered (permanent, survives death).
             foreach (var comboKey in result.TriggeredComboKeys)

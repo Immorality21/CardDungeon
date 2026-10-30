@@ -799,6 +799,7 @@ namespace Assets.Scripts.Items.UI
                     break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
+                case KeyCode.Z:
                 case KeyCode.Space:
                     if (_confirmIndex == 0)
                     {
@@ -811,6 +812,7 @@ namespace Assets.Scripts.Items.UI
                     break;
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
+                case KeyCode.X:
                     CloseConfirm();
                     break;
             }
@@ -1236,7 +1238,7 @@ namespace Assets.Scripts.Items.UI
             {
                 AddDescription(magic.Description.Trim());
             }
-            var effects = AbilityDescriber.EffectLines(magic, unit, null, 0, 0);
+            var effects = AbilityDescriber.EffectLines(magic, unit, null, 0, 0, scalesWith: true);
             _detailBody?.Add(BestiaryLineView.Section(Loc.Get("items.inv.section.effect")));
             if (effects.Count == 0)
             {
@@ -1370,7 +1372,7 @@ namespace Assets.Scripts.Items.UI
                 grid.Add(StatCell(StatCatalog.ShortName(stat),
                     changes ? $"{now} \u2192 {then}" : now.ToString(),
                     changes ? (then > now ? 1 : -1) : 0,
-                    StatCatalog.DisplayName(stat)));
+                    StatCatalog.Explain(stat)));
             }
             _detailBody?.Add(grid);
 
@@ -1763,6 +1765,7 @@ namespace Assets.Scripts.Items.UI
                     break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
+                case KeyCode.Z:
                 case KeyCode.Space:
                     Confirm();
                     evt.StopPropagation();
@@ -1791,6 +1794,7 @@ namespace Assets.Scripts.Items.UI
                     break;
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
+                case KeyCode.X:
                     Back();
                     evt.StopPropagation();
                     break;

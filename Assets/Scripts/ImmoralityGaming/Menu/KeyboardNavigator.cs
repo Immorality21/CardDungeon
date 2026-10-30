@@ -54,6 +54,10 @@ namespace ImmoralityGaming.Menu
         /// </summary>
         public bool HasSelection => _selected != null;
 
+        /// <summary>Optional: shows the selected button's tooltip as the cursor moves, so a keyboard
+        /// player reads what a mouse player gets on hover.</summary>
+        public HoverTips Tips { get; set; }
+
         /// <summary>Drops the cursor - call it whenever the screen underneath changes.</summary>
         public void Reset()
         {
@@ -84,6 +88,25 @@ namespace ImmoralityGaming.Menu
         }
 
         /// <summary>
+        /// Puts the cursor on <paramref name="element"/> when it is one of the buttons the cursor can
+        /// reach right now (shown and enabled). Returns whether it did.
+        /// </summary>
+        public bool SelectElement(VisualElement element)
+        {
+            if (element == null)
+            {
+                return false;
+            }
+            Rebuild();
+            if (!_items.Contains(element))
+            {
+                return false;
+            }
+            Select(element);
+            return true;
+        }
+
+        /// <summary>
         /// Handles one key. Returns whether it was used, so the caller can decide about
         /// <c>StopPropagation</c>: an unused arrow still belongs to whatever else is listening.
         /// </summary>
@@ -103,10 +126,12 @@ namespace ImmoralityGaming.Menu
                     return Step(evt.shiftKey ? -1 : 1);
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
+                case KeyCode.Z:
                 case KeyCode.Space:
                     return Activate();
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
+                case KeyCode.X:
                     if (Cancelled == null)
                     {
                         return false;
@@ -211,6 +236,18 @@ namespace ImmoralityGaming.Menu
 
             _selected = element;
             _styled = element;
+
+            if (Tips != null)
+            {
+                if (element != null)
+                {
+                    Tips.ShowFor(element);
+                }
+                else
+                {
+                    Tips.Hide();
+                }
+            }
 
             if (element == null)
             {

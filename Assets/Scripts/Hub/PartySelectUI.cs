@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies.UI;
 using Assets.Scripts.Heroes;
@@ -451,9 +452,11 @@ namespace Assets.Scripts.Hub
             foreach (var stat in StatCatalog.Types)
             {
                 grid.Add(InventoryHubUI.StatCell(StatCatalog.ShortName(stat), stats[stat].ToString(), 0,
-                    StatCatalog.DisplayName(stat)));
+                    StatCatalog.Explain(stat)));
             }
             _detailBody.Add(grid);
+            AddCombatNumbers(hero, stats);
+            AddSignature(hero);
 
             var save = HeroRoster.GetHeroSave(hero);
             int xp = save != null ? save.CurrentXp : 0;
@@ -484,6 +487,60 @@ namespace Assets.Scripts.Hub
             {
                 _detailBody.Add(MakeLabel(Loc.Get("hub.camp.leader-note"),
                     "cd-inv-detail__note"));
+            }
+        }
+
+        // --- The hero's status (playtest 2026-10-30: "what do the stats do?") ---------------
+
+        /// <summary>
+        /// What the stats add up to in a fight, worked out by the same rules the fight uses
+        /// (<see cref="CritRules"/>, <see cref="DefenseRules"/>, <see cref="DamageCalculator"/>), so the
+        /// screen cannot promise a number combat does not deliver.
+        /// </summary>
+        private void AddCombatNumbers(HeroSO hero, StatBlock stats)
+        {
+            var unit = new HeroSnapshotUnit(hero, stats, null, NodesOf(hero));
+            _detailBody.Add(BestiaryLineView.Section(Loc.Get("hub.camp.section.combat")));
+            var grid = new VisualElement();
+            grid.AddToClassList("cd-inv-stats");
+            grid.Add(InventoryHubUI.StatCell(Loc.Get("hub.camp.combat.attack"), unit.GetEffectiveAttackPower().ToString(), 0,
+                Loc.Format("hub.camp.combat.attack-tip", ("stat", StatCatalog.DisplayName(unit.AttackStat)))));
+            grid.Add(InventoryHubUI.StatCell(Loc.Get("hub.camp.combat.crit"), Percent(CritRules.ChanceFor(unit)), 0,
+                Loc.Get("hub.camp.combat.crit-tip")));
+            grid.Add(InventoryHubUI.StatCell(Loc.Get("hub.camp.combat.dodge"), Percent(DefenseRules.DodgeChanceFor(unit)), 0,
+                Loc.Get("hub.camp.combat.dodge-tip")));
+            grid.Add(InventoryHubUI.StatCell(Loc.Get("hub.camp.combat.physical"), Percent(Reduction(stats[StatType.Endurance])), 0,
+                Loc.Get("hub.camp.combat.physical-tip")));
+            grid.Add(InventoryHubUI.StatCell(Loc.Get("hub.camp.combat.magic"), Percent(Reduction(stats[StatType.Spirit])), 0,
+                Loc.Get("hub.camp.combat.magic-tip")));
+            _detailBody.Add(grid);
+        }
+
+        /// <summary>The share of a hit a defense stat takes off, as <see cref="DamageCalculator"/> works it.</summary>
+        private static float Reduction(int defense)
+        {
+            float d = Mathf.Max(0, defense);
+            return d / (d + DamageCalculator.EnduranceConstant);
+        }
+
+        private static string Percent(float fraction)
+        {
+            return Loc.Format("hub.camp.combat.percent", ("value", Mathf.RoundToInt(fraction * 100f)));
+        }
+
+        /// <summary>The hero's signature mechanic in one line, for the heroes who have one.</summary>
+        private void AddSignature(HeroSO hero)
+        {
+            if (hero.Momentum != null && hero.Momentum.IsActive)
+            {
+                _detailBody.Add(MakeLabel(Loc.Format("hub.camp.signature.momentum",
+                    ("percent", hero.Momentum.PercentPerStack), ("stat", StatCatalog.DisplayName(StatType.Strength)),
+                    ("max", hero.Momentum.MaxStacks)), "cd-inv-detail__line"));
+            }
+            if (hero.Focus != null && hero.Focus.IsActive)
+            {
+                _detailBody.Add(MakeLabel(Loc.Format("hub.camp.signature.focus",
+                    ("per", hero.Focus.PerCast), ("max", hero.Focus.Max)), "cd-inv-detail__line"));
             }
         }
 

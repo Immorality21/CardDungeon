@@ -870,6 +870,7 @@ namespace Assets.Scripts.Heroes.UI
             {
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
+                case KeyCode.X:
                     Hide();
                     evt.StopPropagation();
                     break;
@@ -899,6 +900,7 @@ namespace Assets.Scripts.Heroes.UI
                     break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
+                case KeyCode.Z:
                 case KeyCode.Space:
                     OnActivate();
                     evt.StopPropagation();

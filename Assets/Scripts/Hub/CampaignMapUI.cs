@@ -418,6 +418,7 @@ namespace Assets.Scripts.Hub
             {
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
+                case KeyCode.X:
                     Hide();
                     evt.StopPropagation();
                     break;
@@ -439,6 +440,7 @@ namespace Assets.Scripts.Hub
                     break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
+                case KeyCode.Z:
                 case KeyCode.Space:
                     OnStart();
                     evt.StopPropagation();
@@ -618,6 +620,7 @@ namespace Assets.Scripts.Hub
             {
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
+                case KeyCode.X:
                     _picking = false;
                     RefreshDetail();
                     return true;
@@ -642,6 +645,7 @@ namespace Assets.Scripts.Hub
                     return true;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
+                case KeyCode.Z:
                 case KeyCode.Space:
                     OnStart();
                     return true;

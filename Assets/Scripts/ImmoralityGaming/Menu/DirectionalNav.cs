@@ -97,5 +97,91 @@ namespace ImmoralityGaming.Menu
 
             return best;
         }
+
+        /// <summary>
+        /// The point whose bearing from <paramref name="origin"/> is closest to
+        /// <paramref name="direction"/>, among any that lie less than 90 degrees off it; -1 when none
+        /// do. The last resort after <see cref="PickInDirection"/>'s cone finds nothing, so a cursor on
+        /// a sparse graph is never stuck when something lies roughly the way pressed.
+        /// </summary>
+        public static int PickInHalfPlane(IReadOnlyList<Vector2> points, Vector2 origin, Vector2 direction)
+        {
+            if (points == null || points.Count == 0)
+            {
+                return -1;
+            }
+            var dir = direction.normalized;
+            if (dir.sqrMagnitude < 0.5f)
+            {
+                return -1;
+            }
+            int best = -1;
+            float bestCos = 0f;
+            for (int i = 0; i < points.Count; i++)
+            {
+                var delta = points[i] - origin;
+                float length = delta.magnitude;
+                if (length < MinAlong)
+                {
+                    continue;
+                }
+                float cos = Vector2.Dot(delta, dir) / length;
+                if (cos > bestCos + 1e-4f || (best >= 0 && Mathf.Abs(cos - bestCos) <= 1e-4f && length < (points[best] - origin).magnitude))
+                {
+                    bestCos = cos;
+                    best = i;
+                }
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// The point on the side of a box that <paramref name="direction"/> faces - the door in the
+        /// bottom wall for Down - nearest to <paramref name="origin"/>, or -1 when no point sits on
+        /// that side. A point's side is the one it is furthest out towards, measured against the box's
+        /// half extents, so a wide room's side doors do not count as its top or bottom ones.
+        ///
+        /// <para>Used for the first arrow press in a room, before a cursor exists: measuring from the
+        /// party alone picked the door beside it for Down when the party stood next to a side door
+        /// (playtest 2026-10-30).</para>
+        /// </summary>
+        public static int PickOnSide(IReadOnlyList<Vector2> points, Vector2 center, Vector2 halfExtents, Vector2 direction, Vector2 origin)
+        {
+            if (points == null || points.Count == 0 || halfExtents.x <= 0f || halfExtents.y <= 0f)
+            {
+                return -1;
+            }
+            var dir = direction.normalized;
+            if (dir.sqrMagnitude < 0.5f)
+            {
+                return -1;
+            }
+            Vector2 side = Mathf.Abs(dir.x) >= Mathf.Abs(dir.y)
+                ? new Vector2(Mathf.Sign(dir.x), 0f)
+                : new Vector2(0f, Mathf.Sign(dir.y));
+
+            int best = -1;
+            float bestDistance = float.MaxValue;
+            for (int i = 0; i < points.Count; i++)
+            {
+                var offset = points[i] - center;
+                float nx = offset.x / halfExtents.x;
+                float ny = offset.y / halfExtents.y;
+                Vector2 pointSide = Mathf.Abs(nx) >= Mathf.Abs(ny)
+                    ? new Vector2(Mathf.Sign(nx), 0f)
+                    : new Vector2(0f, Mathf.Sign(ny));
+                if (pointSide != side)
+                {
+                    continue;
+                }
+                float distance = (points[i] - origin).sqrMagnitude;
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = i;
+                }
+            }
+            return best;
+        }
     }
 }

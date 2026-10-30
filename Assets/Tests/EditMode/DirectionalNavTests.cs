@@ -153,5 +153,51 @@ namespace Tests.EditMode
             Assert.AreEqual(-1, DirectionalNav.PickInDirection(Column(), -1, Down));
             Assert.AreEqual(-1, DirectionalNav.PickInDirection(Column(), 0, Vector2.zero));
         }
+
+        // The playtest room (2026-10-30), world space: a wide room 8 x 3 centred on the origin, the
+        // party just inside its right-hand door, a second door in the bottom wall far to the left.
+        private static readonly Vector2 WorldDown = new Vector2(0f, -1f);
+        private static readonly Vector2 WorldRight = new Vector2(1f, 0f);
+        private static readonly Vector2 RoomHalf = new Vector2(4f, 1.5f);
+        private static readonly Vector2 PartyBySideDoor = new Vector2(3f, -0.4f);
+
+        private static List<Vector2> PlaytestDoors()
+        {
+            return new List<Vector2> { new Vector2(4f, -0.5f), new Vector2(-3f, -1.5f) };
+        }
+
+        [Test]
+        public void PickOnSide_DownNextToASideDoor_TakesTheBottomWallDoor()
+        {
+            Assert.AreEqual(1, DirectionalNav.PickOnSide(PlaytestDoors(), Vector2.zero, RoomHalf, WorldDown, PartyBySideDoor));
+        }
+
+        [Test]
+        public void PickOnSide_RightNextToASideDoor_TakesTheSideDoor()
+        {
+            Assert.AreEqual(0, DirectionalNav.PickOnSide(PlaytestDoors(), Vector2.zero, RoomHalf, WorldRight, PartyBySideDoor));
+        }
+
+        [Test]
+        public void PickInHalfPlane_OutsideTheCone_StillTakesTheClosestBearing()
+        {
+            // From the origin, Left: nothing lies within the cone, but (-1, 3) is the one most to the left.
+            var points = new List<Vector2> { new Vector2(0.2f, 3f), new Vector2(-1f, 3f), new Vector2(2f, 0f) };
+            Assert.AreEqual(1, DirectionalNav.PickInHalfPlane(points, Vector2.zero, new Vector2(-1f, 0f)));
+            Assert.AreEqual(-1, DirectionalNav.PickInDirection(points, Vector2.zero, new Vector2(-1f, 0f)));
+        }
+
+        [Test]
+        public void PickInHalfPlane_NothingThatWay_FindsNothing()
+        {
+            var points = new List<Vector2> { new Vector2(2f, 0f), new Vector2(1f, 1f) };
+            Assert.AreEqual(-1, DirectionalNav.PickInHalfPlane(points, Vector2.zero, new Vector2(-1f, 0f)));
+        }
+
+        [Test]
+        public void PickOnSide_NoDoorInThatWall_FindsNothing()
+        {
+            Assert.AreEqual(-1, DirectionalNav.PickOnSide(PlaytestDoors(), Vector2.zero, RoomHalf, new Vector2(0f, 1f), PartyBySideDoor));
+        }
     }
 }

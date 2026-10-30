@@ -201,6 +201,7 @@ namespace Assets.Scripts.Enemies.UI
                     break;
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
+                case KeyCode.X:
                     Hide();
                     evt.StopPropagation();
                     break;

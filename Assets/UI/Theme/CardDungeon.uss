@@ -759,7 +759,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    font-size: 16px;
+    font-size: 18px;
     -unity-font-style: bold;
     color: rgb(255, 255, 255);
     -unity-text-outline-width: 1px;
@@ -778,8 +778,8 @@
    floating world bar above the head sat nearer the unit above it than its own, and doubled the
    plate's number. The low colour matches the number's. */
 .cd-nameplate__bar {
-    width: 88px;
-    height: 21px;
+    width: 96px;
+    height: 24px;
     margin: 2px 0 2px 0;
     background-color: rgb(16, 12, 24);
     border-width: 1px;
@@ -803,7 +803,7 @@
 
 .cd-nameplate--boss .cd-nameplate__bar {
     width: 170px;
-    height: 24px;
+    height: 27px;
     background-color: rgb(46, 10, 13);
 }
 
@@ -2900,6 +2900,29 @@
     height: 54px;
 }
 
+/* The column's name and the acting tile's "Now" tag (playtest 2026-10-30: the tester never saw
+   the turn order - a column of portraits with no label read as decoration). */
+.cd-turn-order__title {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 2px 0 0 0;
+}
+
+.cd-turn-row__now {
+    position: absolute;
+    bottom: -9px;
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(20, 10, 30);
+    background-color: var(--cd-gold);
+    border-radius: 2px;
+    padding: 0 4px;
+    margin: 0;
+}
+
 /* Hover */
 
 .cd-cmd-row:hover,
@@ -4584,6 +4607,20 @@
 .hub-road:disabled,
 .hub-bar .cd-button:disabled {
     opacity: 0.4;
+}
+
+/* The hover tip (ImmoralityGaming.Menu.HoverTips): runtime panels draw no tooltips, so this box
+   shows an element's tooltip beside it, on hover and under the keyboard cursor. */
+.cd-tip {
+    max-width: 320px;
+    padding: 6px 9px;
+    font-size: 14px;
+    white-space: normal;
+    color: var(--cd-text-light);
+    background-color: rgba(14, 7, 28, 0.96);
+    border-width: 1px;
+    border-color: var(--cd-gold);
+    border-radius: 3px;
 }
 
 /* ============================================================

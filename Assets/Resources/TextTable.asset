@@ -6668,12 +6668,6 @@ MonoBehaviour:
     - '{line}, +{percent}% per debuff on the target (up to {max})'
     Reviewed: 1
     Note: ability damage line bonus
-  - Key: abilities.describe.with-attack
-    Values:
-    - '{line} ({stat} {value})'
-    Reviewed: 0
-    Note: ability damage line with caster's attack; stat = short stat name, value
-      = attack
   - Key: abilities.describe.status-max-hp
     Values:
     - '{status} of {percent}% max HP'
@@ -8443,11 +8437,6 @@ MonoBehaviour:
     - Nothing carried.
     Reviewed: 0
     Note: campfire detail when no abilities are carried
-  - Key: hub.camp.charges-left
-    Values:
-    - '{charges} of {max} charges left'
-    Reviewed: 0
-    Note: carried ability mid-run; charges = left, max = max
   - Key: hub.camp.charges
     Values:
     - '{max} charges'
@@ -8935,16 +8924,6 @@ MonoBehaviour:
     - Slots
     Reviewed: 0
     Note: label before the ability slot pips
-  - Key: items.abilities.charges-left
-    Values:
-    - '{charges} of {max} charges left this run'
-    Reviewed: 0
-    Note: carried ability row mid-run; charges = left, max = max
-  - Key: items.abilities.charges-next-floor
-    Values:
-    - "{max} charges \xB7 joins on the next floor"
-    Reviewed: 0
-    Note: carried ability row added mid-run; max = charges
   - Key: items.abilities.charges-a-run
     Values:
     - '{max} charges a run'
@@ -9465,7 +9444,7 @@ MonoBehaviour:
     Note: Full stat name for player text and buff labels
   - Key: stat.strength.description
     Values:
-    - Physical power. Scales melee-flavoured attacks and abilities.
+    - Physical power. Raises basic attacks and Strength abilities.
     Reviewed: 0
     Note: Stat tooltip description
   - Key: stat.endurance.short
@@ -9481,8 +9460,7 @@ MonoBehaviour:
     Note: Full stat name for player text and buff labels
   - Key: stat.endurance.description
     Values:
-    - Reduces physical damage (basic attacks, Strength/Agility abilities), through
-      the diminishing curve in DamageCalculator.
+    - Toughness. Reduces physical damage taken.
     Reviewed: 0
     Note: Stat tooltip description
   - Key: stat.agility.short
@@ -9498,7 +9476,7 @@ MonoBehaviour:
     Note: Full stat name for player text and buff labels
   - Key: stat.agility.description
     Values:
-    - Turn frequency - TurnManager schedules on it, so it compounds.
+    - Speed. More Agility means more turns.
     Reviewed: 0
     Note: Stat tooltip description
   - Key: stat.intelligence.short
@@ -9514,7 +9492,7 @@ MonoBehaviour:
     Note: Full stat name for player text and buff labels
   - Key: stat.intelligence.description
     Values:
-    - Scales offensive and arcane ability power - a caster's Strength.
+    - Magical power. Raises offensive spells.
     Reviewed: 0
     Note: Stat tooltip description
   - Key: stat.spirit.short
@@ -9530,9 +9508,7 @@ MonoBehaviour:
     Note: Full stat name for player text and buff labels
   - Key: stat.spirit.description
     Values:
-    - Scales restorative and protective ability power - healing, shields, Holy -
-      and reduces magic damage (Intelligence/Spirit abilities) the way Endurance
-      reduces physical.
+    - Willpower. Raises healing and protective spells, and reduces magic damage taken.
     Reviewed: 0
     Note: Stat tooltip description
   - Key: stat.luck.short
@@ -9565,7 +9541,7 @@ MonoBehaviour:
     Note: Full stat name for player text and buff labels
   - Key: stat.max-health.description
     Values:
-    - Size of the health bar. Current health is a resource, not a stat.
+    - Maximum health.
     Reviewed: 0
     Note: Stat tooltip description
   - Key: stat.none.short
@@ -10027,3 +10003,120 @@ MonoBehaviour:
     Reviewed: 0
     Note: 'Gated node: two or more required node names; {names} all but the last
       joined by ", ", {last} the last name'
+  - Key: abilities.describe.scales-with
+    Values:
+    - '{line}, scales with {stat}'
+    Reviewed: 0
+    Note: Hub ability text, long form. {stat} is the stat the effect grows with.
+  - Key: stat.tooltip
+    Values:
+    - '{name}: {description}'
+    Reviewed: 0
+    Note: Hover tip on a stat cell (campfire, Storehouse).
+  - Key: hub.camp.section.combat
+    Values:
+    - Combat
+    Reviewed: 0
+    Note: 'Campfire hero detail: section title over the derived combat numbers.'
+  - Key: hub.camp.combat.attack
+    Values:
+    - ATK
+    Reviewed: 0
+    Note: 'Campfire: basic attack power cell label.'
+  - Key: hub.camp.combat.attack-tip
+    Values:
+    - Damage of a basic Attack, before the enemy's defence. Comes from {stat}.
+    Reviewed: 0
+    Note: Hover tip. {stat} is the hero's attack stat.
+  - Key: hub.camp.combat.crit
+    Values:
+    - CRIT
+    Reviewed: 0
+    Note: 'Campfire: crit chance cell label.'
+  - Key: hub.camp.combat.crit-tip
+    Values:
+    - Chance a basic Attack lands a critical hit for x1.6 damage. Luck raises it.
+      An ability can only crit if it says so.
+    Reviewed: 0
+    Note: Hover tip.
+  - Key: hub.camp.combat.dodge
+    Values:
+    - DODGE
+    Reviewed: 0
+    Note: 'Campfire: dodge chance cell label.'
+  - Key: hub.camp.combat.dodge-tip
+    Values:
+    - Chance to avoid a physical hit completely. Luck raises it. Magic is never dodged.
+    Reviewed: 0
+    Note: Hover tip.
+  - Key: hub.camp.combat.physical
+    Values:
+    - P.DEF
+    Reviewed: 0
+    Note: 'Campfire: physical damage reduction cell label.'
+  - Key: hub.camp.combat.physical-tip
+    Values:
+    - Physical damage taken is cut by this much. Endurance raises it, with diminishing
+      returns.
+    Reviewed: 0
+    Note: Hover tip.
+  - Key: hub.camp.combat.magic
+    Values:
+    - M.DEF
+    Reviewed: 0
+    Note: 'Campfire: magic damage reduction cell label.'
+  - Key: hub.camp.combat.magic-tip
+    Values:
+    - Magic damage taken is cut by this much. Spirit raises it, with diminishing
+      returns.
+    Reviewed: 0
+    Note: Hover tip.
+  - Key: hub.camp.combat.percent
+    Values:
+    - '{value}%'
+    Reviewed: 0
+    Note: A percentage value in the campfire's combat numbers.
+  - Key: hub.camp.signature.momentum
+    Values:
+    - 'Momentum: each turn this hero lands a hit adds +{percent}% {stat}, up to {max}
+      stacks. A turn without a hit drops them all.'
+    Reviewed: 0
+    Note: Campfire hero detail, the Warrior's signature.
+  - Key: hub.camp.signature.focus
+    Values:
+    - 'Focus: +{per} each turn this hero casts an ability, up to {max}. The MultiCast
+      Ultra spends it all to repeat the next ability.'
+    Reviewed: 0
+    Note: Campfire hero detail, the Mage's signature.
+  - Key: ui.room.turn-order-title
+    Values:
+    - Turns
+    Reviewed: 0
+    Note: Header over the combat turn-order column (top right).
+  - Key: room.turn-order.now
+    Values:
+    - NOW
+    Reviewed: 0
+    Note: Tag on the acting unit's tile in the turn-order column.
+  - Key: abilities.target.summary-line
+    Values:
+    - '{label}: {value}'
+    Reviewed: 0
+    Note: 'Target picker footer: one line of what the party knows about the enemy
+      under the cursor.'
+  - Key: abilities.target.weak-to
+    Values:
+    - Weak to {types}
+    Reviewed: 0
+    Note: 'Target picker footer: the elements this enemy is known to be weak to.'
+  - Key: abilities.target.resists
+    Values:
+    - Resists {types}
+    Reviewed: 0
+    Note: 'Target picker footer: the elements this enemy is known to resist, be immune
+      to or absorb.'
+  - Key: abilities.target.nothing-learned
+    Values:
+    - No weaknesses found yet.
+    Reviewed: 0
+    Note: Target picker footer, when no resistance of this enemy has been observed.

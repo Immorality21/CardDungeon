@@ -203,6 +203,8 @@ namespace Assets.Scripts.Rooms
             // UXML texts are keys (#ui...); turn them into words once, as the tree is first bound.
 
             global::ImmoralityGaming.Localization.Loc.Localize(root);
+
+            global::ImmoralityGaming.Menu.HoverTips.Attach(root);
             _root = root;
 
             _mainBar = root.Q<VisualElement>("main-bar");
@@ -1847,6 +1849,11 @@ namespace Assets.Scripts.Rooms
                 if (shown == 0)
                 {
                     row.AddToClassList("cd-turn-row--current");
+                    // "Now" on the acting tile, so the column reads as a turn order at a glance (playtest
+                    // 2026-10-30: the tester never noticed it).
+                    var now = new Label(Loc.Get("room.turn-order.now")) { pickingMode = PickingMode.Ignore };
+                    now.AddToClassList("cd-turn-row__now");
+                    row.Add(now);
                 }
                 row.EnableInClassList("cd-turn-row--enemy", unit is Enemies.Enemy);
                 row.tooltip = unit.DisplayName;
@@ -1886,7 +1893,7 @@ namespace Assets.Scripts.Rooms
             // it is up it is the only thing the keyboard reaches.
             if (IsShown(_pauseWindow))
             {
-                if (evt.keyCode == KeyCode.Escape || evt.keyCode == KeyCode.Backspace)
+                if (evt.keyCode == KeyCode.Escape || evt.keyCode == KeyCode.Backspace || evt.keyCode == KeyCode.X || evt.keyCode == KeyCode.C)
                 {
                     ClosePause();
                 }
@@ -1905,7 +1912,8 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
-            if (evt.keyCode == KeyCode.Escape && CanOpenPause())
+            // C is the RPG Maker menu key (playtest 2026-10-30), beside Escape.
+            if ((evt.keyCode == KeyCode.Escape || evt.keyCode == KeyCode.C) && CanOpenPause())
             {
                 OpenPause();
                 evt.StopPropagation();
@@ -1950,6 +1958,7 @@ namespace Assets.Scripts.Rooms
                         break;
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
+                    case KeyCode.Z:
                     case KeyCode.Space:
                         ConfirmCommand();
                         evt.StopPropagation();
@@ -2112,12 +2121,14 @@ namespace Assets.Scripts.Rooms
             {
                 case KeyCode.Escape:
                 case KeyCode.Backspace:
+                case KeyCode.X:
                 case KeyCode.M:
                     CloseMap();
                     return;
 
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
+                case KeyCode.Z:
                 case KeyCode.Space:
                     // With no room picked yet, Enter is the way out rather than a no-op: the map is
                     // read far more often than it is travelled with.
@@ -2509,6 +2520,7 @@ namespace Assets.Scripts.Rooms
                         return true;
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
+                    case KeyCode.Z:
                     case KeyCode.Space:
                         if (_levelChoiceIsNext && _levelNextLevelAction != null)
                         {
@@ -2530,9 +2542,11 @@ namespace Assets.Scripts.Rooms
                 {
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
+                    case KeyCode.Z:
                     case KeyCode.Space:
                     case KeyCode.Escape:
                     case KeyCode.Backspace:
+                    case KeyCode.X:
                         OnVictoryContinue();
                         return true;
                 }
@@ -2556,6 +2570,7 @@ namespace Assets.Scripts.Rooms
                         return _detailNav != null && _detailNav.HandleKey(evt);
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
+                    case KeyCode.Z:
                     case KeyCode.Space:
                         // The highlighted button answers; with no cursor yet (the frame it opened) Ok does.
                         if (_detailNav == null || !_detailNav.HandleKey(evt))
@@ -2565,6 +2580,7 @@ namespace Assets.Scripts.Rooms
                         return true;
                     case KeyCode.Escape:
                     case KeyCode.Backspace:
+                    case KeyCode.X:
                         // Only a dialog that is actually offering a way out has one; a statement with a
                         // single OK is dismissed by Escape too rather than trapping the player.
                         if (_detailCancel != null && IsShown(_detailCancel))
@@ -2756,6 +2772,7 @@ namespace Assets.Scripts.Rooms
                     return _barNav != null && _barNav.HandleKey(evt);
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
+                case KeyCode.Z:
                 case KeyCode.Space:
                     if (_barNav != null && _barNav.HasSelection)
                     {
@@ -2805,8 +2822,19 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
+            // First press: the door in the wall the arrow points at, nearest the party. Only when that
+            // wall has none does it fall back to "the door that way from us", then the nearest door.
             var origin = PartyPosition();
-            int target = DirectionalNav.PickInDirection(_navDoorPoints, origin, direction);
+            int target = -1;
+            if (_currentRoom != null && _currentRoom.RoomSO != null)
+            {
+                var half = new Vector2(_currentRoom.RoomSO.Width / 2f, _currentRoom.RoomSO.Height / 2f);
+                target = DirectionalNav.PickOnSide(_navDoorPoints, _currentRoom.GetCenter(), half, direction, origin);
+            }
+            if (target < 0)
+            {
+                target = DirectionalNav.PickInDirection(_navDoorPoints, origin, direction);
+            }
             SetDoorCursor(_navDoors[target >= 0 ? target : NearestDoorIndex(origin)]);
         }
 
