@@ -1183,12 +1183,12 @@ MonoBehaviour:
     - paladin-b-awaken
   - Key: paladin-a-intervention
     Kind: 10
-    XpCost: 120
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: -190, y: -470}
+    Position: {x: 110, y: 40}
     Gains:
       Values: []
     ResistType: 1
@@ -1202,7 +1202,7 @@ MonoBehaviour:
     GrantedUltraKey: DivineIntervention
     SummonAmount: 1
     Neighbors:
-    - paladin-a-2
+    - paladin-sig
   - Key: paladin-b-judgement
     Kind: 10
     XpCost: 120

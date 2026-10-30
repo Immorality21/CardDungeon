@@ -18,6 +18,9 @@ namespace Assets.Scripts.Dungeon
         // Summon charges left, carried across levels of the run beside the ability charges.
         public List<SummonChargeSaveData> SummonCharges = new List<SummonChargeSaveData>();
 
+        // Each hero's Ultra gauge, kept for the run (COMBAT_DEPTH §13); a new run starts empty.
+        public List<UltraGaugeSaveData> UltraGauges = new List<UltraGaugeSaveData>();
+
         // A re-clear of a run already completed, and the conditions chosen for it (docs/plans/REVISITS.md).
         // Fixed when the run is picked; DungeonManager resolves them into RunFear on every level build.
         public bool IsRevisit;

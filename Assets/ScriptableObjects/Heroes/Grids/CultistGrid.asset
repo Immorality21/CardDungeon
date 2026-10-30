@@ -413,6 +413,7 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - cultist-b-3
+    - cultist-b-5
   - Key: cultist-b-3
     Kind: 3
     XpCost: 65
@@ -461,7 +462,7 @@ MonoBehaviour:
     - cultist-b-2
   - Key: cultist-b-5
     Kind: 2
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -479,11 +480,10 @@ MonoBehaviour:
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
-    Neighbors:
-    - cultist-mass-hysteria
+    Neighbors: []
   - Key: cultist-b-6
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -505,7 +505,7 @@ MonoBehaviour:
     - cultist-b-nightmare
   - Key: cultist-b-7
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -529,7 +529,7 @@ MonoBehaviour:
     - cultist-b-6
   - Key: cultist-b-res
     Kind: 1
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -548,10 +548,10 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cultist-mass-hysteria
+    - cultist-b-2
   - Key: cultist-b-tip-a
     Kind: 3
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -573,7 +573,7 @@ MonoBehaviour:
     - cultist-b-7
   - Key: cultist-b-tip-b
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -831,7 +831,7 @@ MonoBehaviour:
     - cultist-c-tip-a
   - Key: cultist-b-nightmare
     Kind: 4
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -855,7 +855,7 @@ MonoBehaviour:
     - cultist-b-5
   - Key: cultist-b-nightmare-up
     Kind: 6
-    XpCost: 410
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -967,12 +967,12 @@ MonoBehaviour:
     - cultist-c-6
   - Key: cultist-mass-hysteria
     Kind: 10
-    XpCost: 120
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 0, y: -630}
+    Position: {x: 110, y: 40}
     Gains:
       Values: []
     ResistType: 1
@@ -986,7 +986,7 @@ MonoBehaviour:
     GrantedUltraKey: MassHysteria
     SummonAmount: 1
     Neighbors:
-    - cultist-b-2
+    - cultist-sig
   - Key: cultist-blood-moon
     Kind: 10
     XpCost: 120

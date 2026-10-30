@@ -847,14 +847,12 @@ MonoBehaviour:
     - warlock-trunk-slot
   - Key: warlock-demon-form
     Kind: 10
-    XpCost: 90
-    UnlockedByDefault: 0
-    MaterialCosts:
-    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
-      Amount: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 90, y: -470}
+    Position: {x: 90, y: 30}
     Gains:
       Values: []
     ResistType: 0
@@ -868,7 +866,7 @@ MonoBehaviour:
     GrantedUltraKey: DemonForm
     SummonAmount: 1
     Neighbors:
-    - warlock-trunk-slot
+    - warlock-sig
   - Key: warlock-a-army
     Kind: 5
     XpCost: 195

@@ -42,6 +42,9 @@ namespace Assets.Scripts.Dungeon
         /// <summary>Summon charges left on this level, for a mid-level resume.</summary>
         public List<SummonChargeSaveData> SummonCharges = new List<SummonChargeSaveData>();
 
+        /// <summary>Each hero's Ultra gauge on this level, for a mid-level resume.</summary>
+        public List<UltraGaugeSaveData> UltraGauges = new List<UltraGaugeSaveData>();
+
         /// <summary>
         /// Buffs and debuffs room events hung on the party for the rest of the level. Saved so that
         /// quitting to the menu is not a cure for a curse.

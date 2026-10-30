@@ -197,6 +197,10 @@ namespace Assets.Scripts.Balance
         /// <summary>The hero's Focus (the Mage's signature), off their definition, as <c>Hero</c> has it.</summary>
         public FocusRule Focus { get; set; }
 
+        /// <summary>This hero's Ultra gauge (<see cref="SimUltras"/>). Kept on the unit, so a floor's
+        /// party carries it from room to room as a run does; a clone carries it too.</summary>
+        public int UltraGauge;
+
         /// <summary>What this hero's grid has added to each ability (SphereGridOps.AbilityUpgradesForNodes).</summary>
         public Dictionary<string, Heroes.AbilityGrant> AbilityUpgrades = new Dictionary<string, Heroes.AbilityGrant>();
 
@@ -254,7 +258,8 @@ namespace Assets.Scripts.Balance
                 Triggers = new List<CarriedTrigger>(Triggers),
                 OutgoingDamage = OutgoingDamage,
                 Momentum = Momentum,
-                Focus = Focus
+                Focus = Focus,
+                UltraGauge = UltraGauge
             };
 
             foreach (var slot in MagicSlots)

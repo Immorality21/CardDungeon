@@ -212,6 +212,7 @@ namespace Assets.Scripts.Balance
             public int PotionsUsed;
             public int Casts;
             public int Summons;
+            public int Ultras;
             public float EndHealthFraction;
 
             /// <summary>Set by the encounter loop so scoring does not have to re-walk the enemies.</summary>
@@ -305,7 +306,8 @@ namespace Assets.Scripts.Balance
             // ends when the party is down, as CombatManager.HasAliveHeroes does.
             var allies = new SimAllies(turnManager, enemies) { Events = events };
 
-            // Ultras (COMBAT_DEPTH §13): every gauge starts the fight empty, read once per turn. The
+            // Ultras (COMBAT_DEPTH §13): each gauge opens the fight where the hero left it (a floor
+            // carries it from room to room, a lone encounter starts empty), settled once per turn. The
             // Mage's Focus is built off the same events as in CombatManager.
             var ultras = new SimUltras(heroes) { Events = events, Focus = new FocusTracker(events) };
 
@@ -453,6 +455,7 @@ namespace Assets.Scripts.Balance
 
             // Forms come off with the fight: the party carries its health into the next room.
             ultras.EndAll();
+            result.Ultras += ultras.Used;
 
             result.EnemiesAlive = AnyAlive(enemies);
             events.Publish(new CombatEnded { PartyWon = !result.EnemiesAlive && AnyAlive(heroes) });
@@ -831,6 +834,10 @@ namespace Assets.Scripts.Balance
             public float AveragePotionsUsed;
             public float AverageCastsUsed;
             public float AverageSummonsUsed;
+
+            /// <summary>Ultras used over the floor, the whole party together. Against the floor's room
+            /// count it reads how often a gauge fills (COMBAT_DEPTH §13).</summary>
+            public float AverageUltrasUsed;
             public float AverageTurns;
 
             /// <summary>Over surviving trials only - a wipe has no end health worth averaging.</summary>
@@ -886,6 +893,7 @@ namespace Assets.Scripts.Balance
             float castTotal = 0f;
             float clearedTotal = 0f;
             float summonTotal = 0f;
+            float ultraTotal = 0f;
             int survived = 0;
 
             try
@@ -899,6 +907,7 @@ namespace Assets.Scripts.Balance
                     potionTotal += floor.PotionsUsed;
                     castTotal += floor.Casts;
                     summonTotal += floor.Summons;
+                    ultraTotal += floor.Ultras;
                     clearedTotal += floor.RoomsCleared;
                     deathTotal += floor.HeroDeaths;
 
@@ -929,6 +938,7 @@ namespace Assets.Scripts.Balance
                 outcome.AverageCastsUsed = castTotal / outcome.Trials;
                 outcome.AverageRoomsCleared = clearedTotal / outcome.Trials;
                 outcome.AverageSummonsUsed = summonTotal / outcome.Trials;
+                outcome.AverageUltrasUsed = ultraTotal / outcome.Trials;
                 outcome.AverageHeroDeaths = deathTotal / outcome.Trials;
             }
             outcome.AverageEndHealthFraction = survived > 0 ? endHealthTotal / survived : 0f;
@@ -979,6 +989,7 @@ namespace Assets.Scripts.Balance
             public int PotionsUsed;
             public int Casts;
             public int Summons;
+            public int Ultras;
             public int HeroDeaths;
             public float EndHealthFraction;
         }
@@ -1024,6 +1035,7 @@ namespace Assets.Scripts.Balance
                 trial.PotionsUsed += step.PotionsUsed;
                 trial.Casts += step.Casts;
                 trial.Summons += step.Summons;
+                trial.Ultras += step.Ultras;
 
                 if (!AnyAlive(heroes))
                 {

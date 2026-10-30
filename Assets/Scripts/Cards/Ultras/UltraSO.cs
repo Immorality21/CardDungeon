@@ -48,8 +48,8 @@ namespace Assets.Scripts.Cards
 
     /// <summary>
     /// An Ultra (docs/plans/COMBAT_DEPTH.md §13): a hero's big move, used from the <b>Ultra</b>
-    /// command once the hero's Ultra gauge is full. The gauge fills as the hero loses health in a
-    /// fight - a comeback mechanic - and empties when the Ultra is used. Taught by a
+    /// command once the hero's Ultra gauge is full. The gauge fills on damage taken, dealt and healed,
+    /// is kept for the run (<see cref="UltraOps"/>) and empties when the Ultra is used. Taught by a
     /// <c>SphereNodeKind.Ultra</c> node that names it by <see cref="Key"/>; resolved through
     /// <see cref="UltraCatalogSO"/>. Ultras are deliberately smaller than summons and universal, where
     /// a summon is the earned, charge-limited payoff (decided 2026-10-04).

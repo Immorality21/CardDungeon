@@ -179,6 +179,7 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - ranger-a-3
+    - ranger-a-5
   - Key: ranger-a-3
     Kind: 3
     XpCost: 65
@@ -227,7 +228,7 @@ MonoBehaviour:
     - ranger-a-2
   - Key: ranger-a-5
     Kind: 2
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -245,11 +246,10 @@ MonoBehaviour:
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
-    Neighbors:
-    - ranger-rain-of-arrows
+    Neighbors: []
   - Key: ranger-a-6
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -271,7 +271,7 @@ MonoBehaviour:
     - ranger-galewing
   - Key: ranger-a-7
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -295,7 +295,7 @@ MonoBehaviour:
     - ranger-a-6
   - Key: ranger-a-tip-a
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -319,7 +319,7 @@ MonoBehaviour:
     - ranger-a-7
   - Key: ranger-a-tip-b
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -343,7 +343,7 @@ MonoBehaviour:
     - ranger-a-7
   - Key: ranger-a-volley-crit
     Kind: 12
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -409,7 +409,7 @@ MonoBehaviour:
     - ranger-sig-power
   - Key: ranger-a-dart-turns
     Kind: 12
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -428,10 +428,10 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-rain-of-arrows
+    - ranger-a-2
   - Key: ranger-a-dart-sure
     Kind: 12
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -453,7 +453,7 @@ MonoBehaviour:
     - ranger-a-dart-turns
   - Key: ranger-a-volley-charge
     Kind: 12
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -729,7 +729,7 @@ MonoBehaviour:
     - ranger-b-7
   - Key: ranger-galewing
     Kind: 4
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -755,7 +755,7 @@ MonoBehaviour:
     - ranger-a-5
   - Key: ranger-galewing-power
     Kind: 5
-    XpCost: 410
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -777,7 +777,7 @@ MonoBehaviour:
     - ranger-a-tip-a
   - Key: ranger-galewing-stay
     Kind: 6
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -799,7 +799,7 @@ MonoBehaviour:
     - ranger-galewing-power
   - Key: ranger-galewing-charge
     Kind: 7
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1224,12 +1224,12 @@ MonoBehaviour:
     - ranger-c-2
   - Key: ranger-rain-of-arrows
     Kind: 10
-    XpCost: 120
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: -292, y: -435}
+    Position: {x: -110, y: 40}
     Gains:
       Values: []
     ResistType: 1
@@ -1243,7 +1243,7 @@ MonoBehaviour:
     GrantedUltraKey: RainOfArrows
     SummonAmount: 1
     Neighbors:
-    - ranger-a-2
+    - ranger-sig
   - Key: ranger-pin-down
     Kind: 10
     XpCost: 120

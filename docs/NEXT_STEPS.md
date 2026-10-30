@@ -300,7 +300,17 @@ backlog.**
 
 - **Rethink Ultras — first** (owner, 2026-10-30). The gauge should **keep its charge between fights**
   (today it empties at the end of each), and Ultras should be **unlocked from the start** instead of
-  bought on the sphere grid. A broader rethink, not a tweak: `plans/COMBAT_DEPTH.md` §13.
+  bought on the sphere grid. A broader rethink, not a tweak: `plans/COMBAT_DEPTH.md` §13. **Decided
+  2026-10-30:** one fill rule for all (damage dealt, damage taken, healing done; the Mage stays on
+  Focus), the charge lasts the run, one Ultra free per hero with more in some branches, old Ultra nodes
+  decided hero by hero; taking damage fills fastest; starting Ultras picked (§13). **Built
+  2026-10-30:** starting Ultras moved to the trunk (free), the gauge kept for the run and filled by
+  taken/dealt/healed. To do: see it in play (sandbox); decide the remaining Ultra nodes hero by hero.
+- **No way back to town mid-run — right after the Ultra rethink** (owner, 2026-10-30, outside
+  playtest). The hub is reached only at the end of a run; split the tutorial run (the Threshold) into
+  separate runs so the player is sent home to upgrade on the sphere grid and to equip a weapon between
+  them. Avoids abuse, confusion and bugs (the "charges left this run" in town came from exactly this).
+  `plans/POLISH_CONTENT.md` §20, `TUTORIAL.md`.
 - **Boss balancing** (owner, 2026-10-28). The late runs' bosses were left at their old numbers
   in the last pass (Emberfall 30% wipes; the Hollow Vault, Red Cloister, Altar of the Last Initiate and
   Mother Pool 0%). Tune each boss by its own absolute numbers (`EnemyTuning.Overrides` per floor; bosses
@@ -315,9 +325,6 @@ backlog.**
 
 ### Later, small
 
-- **No way back to town mid-run** (owner, 2026-10-30, outside playtest): lock going back to town until
-  the run is completed, and split the tutorial into separate runs instead. Avoids abuse, confusion and
-  bugs (the "charges left this run" in town came from exactly this). `plans/POLISH_CONTENT.md` §20.
 - **Delete the dead combat log** (2026-10-30): no screen shows it, but `CombatManager` still builds it
   (`_lastTurnLog`, `CombatResult.Log`, ~90 lines, the `combat.log.*` texts). Do it with the planned
   `CombatManager` split (Rooms guide), not on its own.

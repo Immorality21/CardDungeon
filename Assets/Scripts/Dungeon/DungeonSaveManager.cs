@@ -86,6 +86,10 @@ namespace Assets.Scripts.Dungeon
             {
                 data.SummonCharges = DungeonManager.Instance.Summons.GetSaveData();
             }
+            if (DungeonManager.HasInstance && DungeonManager.Instance.UltraGauges != null)
+            {
+                data.UltraGauges = DungeonManager.Instance.UltraGauges.GetSaveData();
+            }
 
             if (DungeonManager.HasInstance && DungeonManager.Instance.Afflictions != null)
             {

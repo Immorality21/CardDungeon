@@ -8,30 +8,86 @@ namespace Assets.Scripts.Cards
     /// The pure rules of the Ultra gauge and the transform (docs/plans/COMBAT_DEPTH.md §13). Covered
     /// by <c>UltraTests</c>.
     ///
-    /// <para><b>The gauge fills on health lost, in this fight.</b> Losing <see cref="FillShare"/> of
-    /// the hero's max health fills it from empty - a blow, a burn or a blood price all count, which is
-    /// what makes the Warlock's own health costs feed his Demon Form. It starts every fight empty and
-    /// is spent whole on use. Per fight rather than per run because a gauge carried between rooms would
-    /// be charged in an easy room and spent in the next, which is not a comeback.</para>
+    /// <para><b>The gauge fills on everything a hero does in a fight</b> (owner, 2026-10-30): damage
+    /// taken, damage dealt and healing done, each weighted (<see cref="Credit"/>) and measured against
+    /// the hero's own max health, so a frail caster and a big Warrior fill at comparable speeds. Taking
+    /// damage fills fastest; a blood price counts as damage taken, which is what makes the Warlock's own
+    /// health costs feed his Demon Form. It is spent whole on use and <b>kept for the run</b>, carried
+    /// between fights and floors (<see cref="UltraGaugeState"/>) - so it is a resource to charge and
+    /// save, not a comeback inside one fight.</para>
     /// </summary>
     public static class UltraOps
     {
         /// <summary>A full gauge.</summary>
         public const int Max = 100;
 
-        /// <summary>The share of a hero's max health they must lose in one fight to fill the gauge
-        /// from empty. First-draft number.</summary>
+        /// <summary>How much weighted health (<see cref="Credit"/>), as a share of the hero's max
+        /// health, fills the gauge from empty. Tuned so a full gauge comes about every two to three
+        /// fights (COMBAT_DEPTH §13).</summary>
         public const float FillShare = 0.6f;
 
-        /// <summary>Gauge points for losing <paramref name="healthLost"/> of a <paramref name="maxHealth"/>
-        /// bar. Rounded up, so any real loss moves it.</summary>
-        public static int GainFor(int healthLost, int maxHealth)
+        /// <summary>Weight of a point of damage the hero takes (a blood price included). The fastest
+        /// filler.</summary>
+        public const float TakenWeight = 1f;
+
+        /// <summary>Weight of a point of damage the hero deals - well below taking it, so the hitters
+        /// do not outrun the tanks.</summary>
+        public const float DealtWeight = 0.5f;
+
+        /// <summary>Weight of a point of health the hero restores to their own side.</summary>
+        public const float HealedWeight = 1f;
+
+        /// <summary>Gauge points for <paramref name="weighted"/> health (<see cref="Credit"/>'s sum) on
+        /// a <paramref name="maxHealth"/> bar. Rounded up, so any real gain moves it.</summary>
+        public static int GainFor(float weighted, int maxHealth)
         {
-            if (healthLost <= 0 || maxHealth <= 0)
+            if (weighted <= 0f || maxHealth <= 0)
             {
                 return 0;
             }
-            return Mathf.CeilToInt(healthLost * Max / (maxHealth * FillShare));
+            return Mathf.CeilToInt(weighted * Max / (maxHealth * FillShare));
+        }
+
+        /// <summary>
+        /// Who one health change fills the gauge of, and by how much weighted health: the hero it
+        /// landed on (<see cref="TakenWeight"/>), and the unit that caused it - for damage to the other
+        /// side (<see cref="DealtWeight"/>) or healing on their own (<see cref="HealedWeight"/>). Counts
+        /// what landed or was restored, never overkill or overheal. A form resizing the bar, a
+        /// Sacrifice, a summon clamped on leaving, a room event and a potion fill nothing. Shared by the
+        /// live fight and the simulator; callers keep only the units that hold a gauge.
+        /// </summary>
+        public static void Credit(Combat.HealthChange change, System.Action<Combat.ICombatUnit, float> credit)
+        {
+            if (change?.Target == null || credit == null)
+            {
+                return;
+            }
+            switch (change.Cause)
+            {
+                case Combat.HealthCause.Form:
+                case Combat.HealthCause.Sacrifice:
+                case Combat.HealthCause.Clamp:
+                case Combat.HealthCause.RoomEvent:
+                case Combat.HealthCause.Item:
+                    return;
+            }
+            var target = change.Target;
+            var source = change.Attacker;
+            if (change.Landed > 0)
+            {
+                if (target.IsHero)
+                {
+                    credit(target, change.Landed * TakenWeight);
+                }
+                if (source != null && source.IsHero != target.IsHero)
+                {
+                    credit(source, change.Landed * DealtWeight);
+                }
+            }
+            if (change.Healed > 0 && source != null && source.IsHero && target.IsHero)
+            {
+                credit(source, change.Healed * HealedWeight);
+            }
         }
 
         /// <summary>The gauge after a gain, clamped to <see cref="Max"/>.</summary>

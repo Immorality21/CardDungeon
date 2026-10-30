@@ -3305,3 +3305,21 @@ and the Mother Pool at 0%). What this pass learned:
 - **Measuring gotcha:** never `Resources.UnloadAsset` a run asset mid-sweep - cached references (the
   campaign) keep the dead copy and every floor reads 100% wipes until a script reload. Restore swept
   values in a `finally` instead.
+
+## §5ao — The Ultra gauge kept for the run, and how fast it fills (2026-10-30)
+
+Owner: the gauge keeps its charge between fights and fills on damage taken, dealt and healed, taking
+damage fastest (COMBAT_DEPTH §13). Rule: `UltraOps.Credit`, weights taken 1 / dealt 0.5 / healed 1,
+full at `FillShare` 0.6 of the hero's max health in weighted health. Target: a full gauge about every
+2-3 fights per hero.
+
+- **Measured, not guessed:** `BalanceAnalyzer.SimulateFloor` over every campaign floor, adaptive
+  policy, read `FloorOutcome.AverageUltrasUsed` (new). 113 fights, 114.5 Ultras - about **1.0 per
+  fight for the whole party**. Two-hero Threshold: ~0.43 per hero per fight (every ~2.3 fights).
+  Three-to-four-hero runs: every 3-4 fights. The challenge runs fill faster (Blood Stair floor 1:
+  5.3 in 3 fights) because they hit harder - the gauge follows the damage, as intended.
+- **`FillShare` left at 0.6**; the balance suite stayed green with the starting Ultras free and the
+  carried gauge.
+- **The model under-reads it slightly:** each simulated floor starts the gauge empty (the game
+  carries it across floors), and the policy fires an Ultra the moment it is full rather than holding
+  it for the boss.

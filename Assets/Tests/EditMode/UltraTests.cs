@@ -31,11 +31,100 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void Gauge_AnyRealLossMovesIt_AndNothingElseDoes()
+        public void Gauge_AnyRealCreditMovesIt_AndNothingElseDoes()
         {
             Assert.Greater(UltraOps.GainFor(1, 1000), 0);
             Assert.AreEqual(0, UltraOps.GainFor(0, 50));
-            Assert.AreEqual(0, UltraOps.GainFor(-10, 50), "Healing is not damage.");
+            Assert.AreEqual(0, UltraOps.GainFor(-10, 50), "A negative credit is no credit.");
+        }
+
+        private static Dictionary<ICombatUnit, float> Credited(HealthChange change)
+        {
+            var credited = new Dictionary<ICombatUnit, float>();
+            UltraOps.Credit(change, (unit, amount) =>
+            {
+                credited.TryGetValue(unit, out float sum);
+                credited[unit] = sum + amount;
+            });
+            return credited;
+        }
+
+        [Test]
+        public void Credit_DamageFillsTheHeroHitAndTheHeroWhoHit_TakingFastest()
+        {
+            var hero = new MockCombatUnit("Hero", 10, 5, 50);
+            var enemy = new MockCombatUnit("Enemy", 10, 5, 50, isHero: false);
+
+            var taken = Credited(new HealthChange
+            {
+                Target = hero, Source = new HealthSource(enemy, HealthCause.Attack), Before = 50, After = 40, Landed = 10
+            });
+            var dealt = Credited(new HealthChange
+            {
+                Target = enemy, Source = new HealthSource(hero, HealthCause.Ability), Before = 50, After = 40, Landed = 10
+            });
+
+            Assert.AreEqual(10f * UltraOps.TakenWeight, taken[hero]);
+            // The enemy is credited for its blow too; a caller keeps only the units that hold a gauge.
+            Assert.AreEqual(10f * UltraOps.DealtWeight, taken[enemy]);
+            Assert.AreEqual(10f * UltraOps.DealtWeight, dealt[hero]);
+            Assert.Greater(UltraOps.TakenWeight, UltraOps.DealtWeight, "Taking damage fills fastest (owner, 2026-10-30).");
+        }
+
+        [Test]
+        public void Credit_HealingFillsTheHealer_AndABloodPriceCountsAsTaken()
+        {
+            var healer = new MockCombatUnit("Cleric", 5, 5, 40);
+            var ally = new MockCombatUnit("Warrior", 10, 5, 60);
+
+            var healed = Credited(new HealthChange
+            {
+                Target = ally, Source = new HealthSource(healer, HealthCause.Ability), Before = 20, After = 35, Healed = 15
+            });
+            var price = Credited(new HealthChange
+            {
+                Target = healer, Source = new HealthSource(healer, HealthCause.Cost), Before = 40, After = 36, Landed = 4
+            });
+
+            Assert.AreEqual(15f * UltraOps.HealedWeight, healed[healer]);
+            Assert.IsFalse(healed.ContainsKey(ally), "Being healed fills nothing.");
+            Assert.AreEqual(4f * UltraOps.TakenWeight, price[healer], "The Warlock's blood price still feeds his gauge.");
+        }
+
+        [Test]
+        public void Credit_FormsPotionsAndSacrificesFillNothing()
+        {
+            var hero = new MockCombatUnit("Hero", 10, 5, 50);
+            foreach (var cause in new[] { HealthCause.Form, HealthCause.Item, HealthCause.Sacrifice, HealthCause.Clamp })
+            {
+                var credited = Credited(new HealthChange
+                {
+                    Target = hero, Source = new HealthSource(hero, cause), Before = 50, After = 30, Landed = 20, Healed = 20
+                });
+                Assert.IsEmpty(credited, cause.ToString());
+            }
+        }
+
+        [Test]
+        public void GaugeState_IsKeptForTheRun_AndABenchedHeroKeepsTheirs()
+        {
+            var floorOne = new UltraGaugeState();
+            floorOne.Set("warrior", 70);
+            floorOne.Set("cleric", 500);
+            Assert.AreEqual(UltraOps.Max, floorOne.Get("cleric"), "Clamped at full.");
+            Assert.AreEqual(0, floorOne.Get("rogue"), "A hero never seen starts empty.");
+
+            // Floor two fields only the Warrior; the Cleric sat it out.
+            var floorTwo = new UltraGaugeState();
+            floorTwo.Restore(floorOne.GetSaveData());
+            floorTwo.Set("warrior", 10);
+            var merged = UltraGaugeState.MergeSaveData(floorOne.GetSaveData(),
+                new List<UltraGaugeSaveData> { new UltraGaugeSaveData { HeroKey = "warrior", Gauge = 10 } });
+
+            var floorThree = new UltraGaugeState();
+            floorThree.Restore(merged);
+            Assert.AreEqual(10, floorThree.Get("warrior"));
+            Assert.AreEqual(UltraOps.Max, floorThree.Get("cleric"));
         }
 
         [Test]
@@ -209,14 +298,28 @@ namespace Tests.EditMode
             return hero;
         }
 
+        /// <summary>A blow of <paramref name="amount"/> on <paramref name="hero"/>, raised on the fight's
+        /// stream as HealthOps raises it.</summary>
+        private static void Hit(CombatEvents events, SimUnit hero, int amount)
+        {
+            var enemy = new SimUnit { DisplayName = "enemy", Stats = TestStats.Make(1, 0, 50, 5), Effective = TestStats.Block(1, 0, 50, 5) };
+            int before = hero.Stats.Health;
+            hero.Stats.Health = before - amount;
+            events.Publish(new HealthChange
+            {
+                Target = hero, Source = new HealthSource(enemy, HealthCause.Attack),
+                Before = before, After = hero.Stats.Health, Landed = amount
+            });
+        }
+
         [Test]
         public void SimUltras_FillOnLoss_TransformKeepsTheShare_AndComesOff()
         {
             var form = DemonForm();
             var hero = SimHero(100, form);
-            var ultras = new SimUltras(new[] { hero });
+            var ultras = new SimUltras(new[] { hero }) { Events = new CombatEvents() };
 
-            hero.Stats.Health = 40;          // lost 60 of 100: the fill share
+            Hit(ultras.Events, hero, 60);    // lost 60 of 100: the fill share
             ultras.Read();
             Assert.AreSame(form, ultras.Ready(hero));
 
@@ -236,6 +339,24 @@ namespace Tests.EditMode
             Assert.AreEqual(100, hero.GetEffectiveStat(StatType.MaxHealth));
             Assert.AreEqual(40, hero.Stats.Health);
             Assert.AreEqual(DamageType.Normal, hero.AttackDamageType);
+        }
+
+        [Test]
+        public void SimUltras_TheGaugeCarriesIntoTheNextRoom()
+        {
+            var hero = SimHero(100, DemonForm());
+            var roomOne = new SimUltras(new[] { hero }) { Events = new CombatEvents() };
+            Hit(roomOne.Events, hero, 30);
+            roomOne.Read();
+            int built = roomOne.Gauge(hero);
+            Assert.Greater(built, 0);
+            Assert.IsFalse(UltraOps.IsFull(built));
+
+            var roomTwo = new SimUltras(new[] { hero }) { Events = new CombatEvents() };
+            Assert.AreEqual(built, roomTwo.Gauge(hero), "Kept for the run, not emptied per fight.");
+            Hit(roomTwo.Events, hero, 30);
+            roomTwo.Read();
+            Assert.IsTrue(UltraOps.IsFull(roomTwo.Gauge(hero)), "Half the fill share in each of two rooms fills it.");
         }
 
         [Test]
@@ -329,8 +450,8 @@ namespace Tests.EditMode
             var clock = new TurnManager();
             clock.Initialize(new List<ICombatUnit> { cultist, warrior });
             var allies = new SimAllies(clock, new List<SimUnit>());
-            var ultras = new SimUltras(heroes);
-            cultist.Stats.Health = 40;
+            var ultras = new SimUltras(heroes) { Events = new CombatEvents() };
+            Hit(ultras.Events, cultist, 60);
             ultras.Read();                                   // 60 lost: the gauge is full
             Assert.AreSame(rite, ultras.Ready(cultist, heroes));
 

@@ -12,9 +12,12 @@ namespace Assets.Scripts.Balance
     /// simulated half of <c>CombatManager</c>'s Ultra bookkeeping, on the same <see cref="UltraOps"/>
     /// rules so the two cannot disagree about when a gauge fills or what a form does.
     ///
-    /// <para><b>The policy</b> (first draft): use the hero's first Ultra the turn the gauge is full -
-    /// a comeback move held for nothing, since the gauge starts every fight empty. While transformed,
-    /// cast the form's first damaging ability every turn (it is free).</para>
+    /// <para><b>The gauge lives on the hero</b> (<see cref="SimUnit.UltraGauge"/>), so a floor's
+    /// simulated party carries it from room to room as the run does in the game; it is credited off the
+    /// fight's health stream through <see cref="UltraOps.Credit"/>, the live fight's rule.</para>
+    ///
+    /// <para><b>The policy</b> (first draft): use the hero's first Ultra the turn the gauge is full.
+    /// While transformed, cast the form's first damaging ability every turn (it is free).</para>
     /// </summary>
     public class SimUltras
     {
@@ -27,13 +30,44 @@ namespace Assets.Scripts.Balance
             public DamageType BaseAttackType;
         }
 
-        private readonly Dictionary<SimUnit, int> _gauge = new Dictionary<SimUnit, int>();
-        private readonly Dictionary<SimUnit, int> _lastHealth = new Dictionary<SimUnit, int>();
+        // Weighted health credited to each gauge holder since the gauges were last settled (Read).
+        private readonly Dictionary<SimUnit, float> _credit = new Dictionary<SimUnit, float>();
         private readonly Dictionary<SimUnit, Form> _forms = new Dictionary<SimUnit, Form>();
 
-        /// <summary>The fight's event stream, raised when a Sacrifice fells a hero or a form resizes a
-        /// bar - as the live fight raises it. Null leaves both silent.</summary>
-        public CombatEvents Events { get; set; }
+        private CombatEvents _events;
+
+        /// <summary>The fight's event stream: the gauges are credited off its health changes, and it is
+        /// raised when a Sacrifice fells a hero or a form resizes a bar - as in the live fight. Null
+        /// leaves the gauges unfilled and both silent.</summary>
+        public CombatEvents Events
+        {
+            get { return _events; }
+            set
+            {
+                _events = value;
+                _events?.Subscribe<HealthChange>(TrackHealth);
+            }
+        }
+
+        /// <summary>Ultras used since this fight began (the floor report counts them).</summary>
+        public int Used { get; private set; }
+
+        /// <summary>Who holds a gauge: a hero who knows an Ultra.</summary>
+        private static bool HoldsGauge(SimUnit hero)
+        {
+            return hero != null && hero.Ultras != null && hero.Ultras.Count > 0;
+        }
+
+        private void TrackHealth(HealthChange change)
+        {
+            UltraOps.Credit(change, (unit, amount) =>
+            {
+                if (unit is SimUnit hero && _credit.ContainsKey(hero))
+                {
+                    _credit[hero] += amount;
+                }
+            });
+        }
 
         /// <summary>The fight's Focus (the Mage's signature), built off the same events as in the live
         /// fight. Null: nobody builds any, and a MultiCast is never ready.</summary>
@@ -53,7 +87,7 @@ namespace Assets.Scripts.Balance
             return hero.Ultras.Exists(UltraOps.IsMultiCast) && Focus.FocusOf(hero) >= hero.Focus.Max;
         }
 
-        /// <summary>Opens the fight: every hero who knows an Ultra starts it with an empty gauge.</summary>
+        /// <summary>Opens the fight: every hero who knows an Ultra starts it with the gauge they carry.</summary>
         public SimUltras(IEnumerable<SimUnit> heroes)
         {
             if (heroes == null)
@@ -62,10 +96,9 @@ namespace Assets.Scripts.Balance
             }
             foreach (var hero in heroes)
             {
-                if (hero != null && hero.Ultras != null && hero.Ultras.Count > 0)
+                if (HoldsGauge(hero))
                 {
-                    _gauge[hero] = 0;
-                    _lastHealth[hero] = hero.Stats.Health;
+                    _credit[hero] = 0f;
                 }
             }
         }
@@ -73,7 +106,7 @@ namespace Assets.Scripts.Balance
         /// <summary>How full <paramref name="hero"/>'s gauge is.</summary>
         public int Gauge(SimUnit hero)
         {
-            return hero != null && _gauge.TryGetValue(hero, out int gauge) ? gauge : 0;
+            return hero != null && _credit.ContainsKey(hero) ? hero.UltraGauge : 0;
         }
 
         public bool IsTransformed(SimUnit hero)
@@ -81,19 +114,18 @@ namespace Assets.Scripts.Balance
             return hero != null && _forms.ContainsKey(hero);
         }
 
-        /// <summary>Credits each gauge with the health lost since it was last read - once per turn,
-        /// as the live fight does.</summary>
+        /// <summary>Settles each gauge with what was credited since it was last settled - once per turn,
+        /// as the live fight does. A fallen hero gains nothing.</summary>
         public void Read()
         {
-            foreach (var hero in new List<SimUnit>(_lastHealth.Keys))
+            foreach (var hero in new List<SimUnit>(_credit.Keys))
             {
-                int now = Mathf.Max(0, hero.Stats.Health);
-                int lost = _lastHealth[hero] - now;
-                if (lost > 0 && hero.IsAlive)
+                float credit = _credit[hero];
+                if (credit > 0f && hero.IsAlive)
                 {
-                    _gauge[hero] = UltraOps.Add(_gauge[hero], UltraOps.GainFor(lost, hero.GetEffectiveStat(StatType.MaxHealth)));
+                    hero.UltraGauge = UltraOps.Add(hero.UltraGauge, UltraOps.GainFor(credit, hero.GetEffectiveStat(StatType.MaxHealth)));
                 }
-                _lastHealth[hero] = now;
+                _credit[hero] = 0f;
             }
         }
 
@@ -171,7 +203,26 @@ namespace Assets.Scripts.Balance
             CombatBuffTracker buffTracker, EffectResolver resolver,
             List<SimUnit> heroes = null, SimAllies allies = null, TurnManager clock = null)
         {
-            _gauge[hero] = 0;
+            hero.UltraGauge = 0;
+            Used++;
+            try
+            {
+                Resolve(hero, ultra, side, enemies, buffTracker, resolver, heroes, allies, clock);
+            }
+            finally
+            {
+                // An Ultra never pays into the gauge it was just spent from, as in the live fight.
+                if (_credit.ContainsKey(hero))
+                {
+                    _credit[hero] = 0f;
+                }
+            }
+        }
+
+        private void Resolve(SimUnit hero, UltraSO ultra, List<SimUnit> side, List<SimUnit> enemies,
+            CombatBuffTracker buffTracker, EffectResolver resolver,
+            List<SimUnit> heroes, SimAllies allies, TurnManager clock)
+        {
             if (ultra.Kind == UltraKind.Mount)
             {
                 // The mech is assembled, takes the rider's blows and acts after each of the rider's
@@ -313,14 +364,10 @@ namespace Assets.Scripts.Balance
             _forms.Remove(hero);
             SetMaxHealth(hero, form.BaseMaxHealth);
             hero.AttackDamageType = form.BaseAttackType;
-            if (_lastHealth.ContainsKey(hero))
-            {
-                _lastHealth[hero] = Mathf.Max(0, hero.Stats.Health);
-            }
         }
 
         /// <summary>Resizes the bar keeping the share filled (<see cref="UltraOps.KeepShare"/>); the new
-        /// bar is not damage taken, so the gauge's reading moves with it.</summary>
+        /// bar is not damage taken, and <see cref="UltraOps.Credit"/> leaves a form's resize out.</summary>
         private void SetMaxHealth(SimUnit hero, int newMax)
         {
             int oldMax = hero.Effective[StatType.MaxHealth];
@@ -328,10 +375,6 @@ namespace Assets.Scripts.Balance
             hero.Stats[StatType.MaxHealth] = newMax;
             HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, newMax),
                 new HealthSource(hero, HealthCause.Form), Events);
-            if (_lastHealth.ContainsKey(hero))
-            {
-                _lastHealth[hero] = hero.Stats.Health;
-            }
         }
     }
 }

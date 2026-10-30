@@ -789,12 +789,12 @@ MonoBehaviour:
     - mage-c-7
   - Key: mage-multicast
     Kind: 10
-    XpCost: 45
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 100, y: -180}
+    Position: {x: 110, y: 40}
     Gains:
       Values: []
     ResistType: 0
@@ -808,7 +808,7 @@ MonoBehaviour:
     GrantedUltraKey: MultiCast
     SummonAmount: 1
     Neighbors:
-    - mage-start
+    - mage-sig
   - Key: mage-a-awaken
     Kind: 11
     XpCost: 0

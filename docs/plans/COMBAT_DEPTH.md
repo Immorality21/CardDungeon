@@ -269,6 +269,44 @@ before/after. A Steal / Flee verb can be reopened later; the design notes above 
 > between fights and floors (the run save, like charges?), whether it survives leaving to town, what
 > happens to the existing Ultra grid nodes (keys are save data: repurpose, never delete), and how the
 > balance model (`SimUltras`) carries a gauge across a floor.
+>
+> **Decided (owner, 2026-10-30):**
+> - **One fill rule for everyone, for now: dealing damage, taking damage and healing all fill it.**
+>   Once the charge carries over, health lost alone stops being a comeback and becomes "charge it,
+>   save it for the boss", so the gauge is fed by everything a hero does in a fight. A hero *may*
+>   deviate later where it makes sense (FFX's Overdrive modes), but all stay the same for now — the
+>   Mage is the only exception (MultiCast stays on Focus). Per-hero rules were floated and set aside
+>   (owner, 2026-10-30). **Weights:** each source is measured against the hero's own max health
+>   (gain = taken + a·dealt + b·healed, over max health), and **taking damage fills fastest** — damage
+>   dealt is weighted well below it (a ≈ 0.5 first draft, b ≈ 1), so the hitters do not outrun the
+>   tanks. Tune a, b and the fill share by measurement: about one full gauge every 2–3 fights.
+> - **Starting Ultras:** Warrior *Flurry*, Warlock *Demon Form*, Paladin *Divine Intervention*,
+>   Cleric *Miracle of Light*, Cultist *Mass Hysteria* (Sacrifice stays in the demon branch),
+>   Ranger *Rain of Arrows*, Rogue *Death Mark*, Tinkerer *Warrior Mech*, Mage *MultiCast*.
+> - **The charge lasts the run**: carried across rooms and floors in the run save beside
+>   `SummonCharges`; every run starts empty.
+> - **One Ultra free from the start per hero**; some heroes unlock more in certain grid branches, not
+>   in every branch.
+> - **The existing Ultra nodes are decided hero by hero** (keys are save data: repurpose, never delete).
+> - ✅ **Starting Ultras moved to the trunk (2026-10-30, owner):** each starting Ultra's node (same
+>   key) now hangs off the hero's signature node, `UnlockedByDefault`, priced 0, no materials. Where it
+>   sat mid-branch the branch closes over the gap (its `-2` node links straight to its `-5` node, and
+>   the side leaves that hung off it moved to the `-2` node), so the branch is one node shorter and
+>   everything past it, the summon included, is cheaper by one depth step. 61 nodes were repriced
+>   to `CostForDepth`; the layout keeps the gap for now. A save that bought one of these nodes keeps
+>   no refund (`ActiveNodes` dedupes it). The other Ultras stay where they were, still bought.
+> - ✅ **The gauge rebuilt (2026-10-30):** filled by `UltraOps.Credit` (taken 1, dealt 0.5, healed 1,
+>   over `FillShare` 60% of max health), kept for the run in `UltraGaugeState` (Run.json + the dungeon
+>   save, empty on a run's first floor), shown in combat only (owner: not between fights). The
+>   simulator carries it room to room. **Measured** over every campaign floor: ~1.0 Ultra per fight for
+>   the party - a full gauge every ~2.3 fights per hero on the two-hero Threshold, every 3-4 later,
+>   faster in the challenge runs - so `FillShare` stayed at 60%. Balance suite unchanged (all green).
+>   **Seen in play 2026-10-30** (`Sandbox/UltraGauge.asset`, fresh Warrior + Paladin, scripted
+>   driver): both know their free Ultra with no nodes bought; the gauge carried fight to fight (the
+>   second fight opened at Warrior 100 / Paladin 31) and is in the dungeon save; Flurry emptied it and
+>   its own kill put nothing back. **Watch in a human playtest:** at zero XP the bars are small (26 /
+>   25 HP), so the Warrior filled in his first fight against two Skeletons and the Paladin by the
+>   second - quicker than the model's floor average.
 
 > **A minimal gauge shipped 2026-10-04** with the Warlock's Demon Form — see
 > the Magic guide. Decided by the owner: Ultras **coexist** with

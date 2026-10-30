@@ -190,11 +190,12 @@ namespace Assets.Scripts.Rooms
         // Summons that left with a parting blow still to land (Ifrit's Hellfire), cast before the turn closes.
         private readonly List<SummonUnit> _parting = new List<SummonUnit>();
 
-        // ---- Ultras (COMBAT_DEPTH §13): each hero's gauge this fight, the net health change since it
-        // ---- was last credited (summed from HealthChange), and the form a hero is in while a
-        // ---- Transform Ultra lasts.
+        // ---- Ultras (COMBAT_DEPTH §13): each hero's gauge (kept for the run in
+        // ---- DungeonManager.UltraGauges, read when the fight opens and written back on every change),
+        // ---- the weighted health credited since the gauge was last settled (UltraOps.Credit), and
+        // ---- the form a hero is in while a Transform Ultra lasts.
         private readonly Dictionary<Hero, int> _ultraGauge = new Dictionary<Hero, int>();
-        private readonly Dictionary<Hero, int> _gaugeNet = new Dictionary<Hero, int>();
+        private readonly Dictionary<Hero, float> _gaugeCredit = new Dictionary<Hero, float>();
 
         // ---- Threat: the net health change of every unit standing when the current hero action
         // ---- began, summed from HealthChange; null between actions.
@@ -696,15 +697,16 @@ namespace Assets.Scripts.Rooms
             _standIns.Clear();
             _mounts.Clear();
             _parting.Clear();
-            // Every gauge starts the fight empty (UltraOps: per fight, not per run).
+            // Every gauge opens the fight where the run left it (UltraOps: kept for the run).
             _ultraGauge.Clear();
-            _gaugeNet.Clear();
+            _gaugeCredit.Clear();
             _threatWindow = null;
             _forms.Clear();
+            var runGauges = DungeonManager.HasInstance ? DungeonManager.Instance.UltraGauges : null;
             foreach (var hero in party.Heroes.Where(h => h != null))
             {
-                _ultraGauge[hero] = 0;
-                _gaugeNet[hero] = 0;
+                _ultraGauge[hero] = runGauges != null ? runGauges.Get(hero.HeroKey) : 0;
+                _gaugeCredit[hero] = 0f;
             }
             _threat.Reset();
             _pendingDeaths.Clear();
@@ -1531,34 +1533,46 @@ namespace Assets.Scripts.Rooms
         // ------------------------------------------------------------------ Ultras
 
         /// <summary>
-        /// Credits every hero's gauge with the health they have lost, net, since it was last credited
-        /// (<see cref="TrackHealth"/>). Run once per turn, just before the turn is reported, so a
-        /// blow, a tick and a blood price all count the same way and the party window shows the gauge
-        /// it is about to offer. Healing moves nothing on its own; within one turn it nets against
-        /// the damage.
+        /// Settles every hero's gauge with the weighted health credited since it was last settled
+        /// (<see cref="TrackHealth"/>, <see cref="UltraOps.Credit"/>: damage taken, damage dealt,
+        /// healing done). Run once per turn, just before the turn is reported, so the party window
+        /// shows the gauge it is about to offer. A fallen hero's gauge keeps what it had and gains
+        /// nothing.
         /// </summary>
         private void UpdateUltraGauges()
         {
-            foreach (var hero in _gaugeNet.Keys.ToList())
+            foreach (var hero in _gaugeCredit.Keys.ToList())
             {
-                int lost = -_gaugeNet[hero];
-                if (hero != null && lost > 0 && hero.IsAlive)
+                float credit = _gaugeCredit[hero];
+                if (hero != null && credit > 0f && hero.IsAlive)
                 {
                     _ultraGauge.TryGetValue(hero, out int gauge);
-                    _ultraGauge[hero] = UltraOps.Add(gauge, UltraOps.GainFor(lost, hero.GetEffectiveMaxHealth()));
+                    SetUltraGauge(hero, UltraOps.Add(gauge, UltraOps.GainFor(credit, hero.GetEffectiveMaxHealth())));
                 }
-                _gaugeNet[hero] = 0;
+                _gaugeCredit[hero] = 0f;
+            }
+        }
+
+        /// <summary>Sets a hero's gauge for this fight and for the run, so a gauge built or spent here
+        /// is what the next fight opens with.</summary>
+        private void SetUltraGauge(Hero hero, int gauge)
+        {
+            _ultraGauge[hero] = gauge;
+            if (DungeonManager.HasInstance && DungeonManager.Instance.UltraGauges != null)
+            {
+                DungeonManager.Instance.UltraGauges.Set(hero.HeroKey, gauge);
             }
         }
 
         /// <summary>
-        /// Every change to a bar, summed per unit for the Ultra gauge (each fielded hero, settled once
-        /// a turn) and for threat (every unit standing when a hero's action began, settled when it
-        /// ends). Summing <c>After - Before</c>, floored at 0, telescopes to "the bar now less the bar
-        /// then", so damage and healing in the same window still net against each other exactly as
-        /// re-reading the bars did - and <see cref="HealthOps"/> being the only writer of health is
-        /// what makes the sum complete. A form starting or ending rescales the bar; that is not damage
-        /// taken or healing done, so it is left out.
+        /// Every change to a bar, credited to the Ultra gauges (<see cref="UltraOps.Credit"/>: the hero
+        /// hit, the hero who hit or healed; settled once a turn) and summed per unit for threat (every
+        /// unit standing when a hero's action began, settled when it ends). For threat, summing
+        /// <c>After - Before</c>, floored at 0, telescopes to "the bar now less the bar then", so damage
+        /// and healing in the same window net against each other exactly as re-reading the bars did -
+        /// and <see cref="HealthOps"/> being the only writer of health is what makes the sum complete.
+        /// A form starting or ending rescales the bar; that is not damage taken or healing done, so it
+        /// is left out.
         /// </summary>
         private void TrackHealth(HealthChange change)
         {
@@ -1566,14 +1580,17 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
+            UltraOps.Credit(change, (unit, amount) =>
+            {
+                if (unit is Hero credited && _gaugeCredit.ContainsKey(credited))
+                {
+                    _gaugeCredit[credited] += amount;
+                }
+            });
             int delta = Mathf.Max(0, change.After) - Mathf.Max(0, change.Before);
             if (delta == 0)
             {
                 return;
-            }
-            if (change.Target is Hero hero && _gaugeNet.ContainsKey(hero))
-            {
-                _gaugeNet[hero] += delta;
             }
             if (_threatWindow != null && _threatWindow.ContainsKey(change.Target))
             {
@@ -1596,7 +1613,7 @@ namespace Assets.Scripts.Rooms
                 _lastTurnLog = Loc.Format("combat.log.ultra-not-ready", ("hero", hero.DisplayName));
                 yield break;
             }
-            _ultraGauge[hero] = 0;
+            SetUltraGauge(hero, 0);
 
             switch (ultra.Kind)
             {
@@ -1612,6 +1629,12 @@ namespace Assets.Scripts.Rooms
                 default:
                     yield return ExecuteTransform(hero, ultra);
                     break;
+            }
+            // An Ultra never pays into the gauge it was just spent from: what the Strike dealt or
+            // healed is dropped before the turn settles.
+            if (_gaugeCredit.ContainsKey(hero))
+            {
+                _gaugeCredit[hero] = 0f;
             }
         }
 

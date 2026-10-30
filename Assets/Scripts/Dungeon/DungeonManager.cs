@@ -143,6 +143,10 @@ namespace Assets.Scripts.Dungeon
         /// <see cref="MagicState"/> (full at run start, restored at refuges, carried in Run.json).</summary>
         public SummonState Summons { get; private set; }
 
+        /// <summary>Each hero's Ultra gauge, kept for the run and carried in Run.json beside the
+        /// summons (COMBAT_DEPTH §13).</summary>
+        public UltraGaugeState UltraGauges { get; private set; }
+
         /// <summary>
         /// Buffs and debuffs room events hung on the party, standing until the level is cleared.
         /// Level-scoped like health: <c>CombatManager</c> seeds each fight's buff tracker from here,
@@ -491,6 +495,14 @@ namespace Assets.Scripts.Dungeon
                 Summons.Restore(_fileHandler.Load<RunSaveData>().SummonCharges);
             }
 
+            // Ultra gauges are kept for the run (COMBAT_DEPTH §13): empty on its first floor, otherwise
+            // whatever the earlier floors built.
+            UltraGauges = new UltraGaugeState();
+            if (ActiveRun != null && !EquippedMagicState.RefillsOnLevelStart(RunLevelIndex))
+            {
+                UltraGauges.Restore(_fileHandler.Load<RunSaveData>().UltraGauges);
+            }
+
             // Stock the potion belt - on a run's FIRST floor only (owner, playtest 3 finding 5): potions
             // drunk on floor 1 stay gone for floor 2. Each slotted type is filled to its capacity and an
             // unslotted type emptied: the belt is what the party carries, and potions are found nowhere
@@ -639,6 +651,9 @@ namespace Assets.Scripts.Dungeon
             Summons = new SummonState();
             Summons.Initialize(Party.Heroes, SummonCatalogSO.Resolve);
             Summons.Restore(saveData.SummonCharges);
+
+            UltraGauges = new UltraGaugeState();
+            UltraGauges.Restore(saveData.UltraGauges);
 
             Afflictions.Restore(saveData.Afflictions);
 
@@ -1497,6 +1512,13 @@ namespace Assets.Scripts.Dungeon
                     runSave.SummonCharges = EquippedMagicState.RefillsOnLevelStart(RunLevelIndex)
                         ? Summons.GetSaveData()
                         : SummonState.MergeSaveData(runSave.SummonCharges, Summons.GetSaveData());
+                }
+                if (UltraGauges != null)
+                {
+                    // Merged like summons, so a benched hero keeps the gauge they built.
+                    runSave.UltraGauges = EquippedMagicState.RefillsOnLevelStart(RunLevelIndex)
+                        ? UltraGauges.GetSaveData()
+                        : UltraGaugeState.MergeSaveData(runSave.UltraGauges, UltraGauges.GetSaveData());
                 }
 
                 _fileHandler.Save(runSave);

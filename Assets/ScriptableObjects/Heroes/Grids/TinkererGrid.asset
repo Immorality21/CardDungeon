@@ -201,6 +201,7 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - tinkerer-a-3
+    - tinkerer-a-5
   - Key: tinkerer-a-3
     Kind: 3
     XpCost: 65
@@ -249,7 +250,7 @@ MonoBehaviour:
     - tinkerer-a-2
   - Key: tinkerer-a-5
     Kind: 2
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -267,11 +268,10 @@ MonoBehaviour:
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
-    Neighbors:
-    - tinkerer-a-mech
+    Neighbors: []
   - Key: tinkerer-a-6
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -293,7 +293,7 @@ MonoBehaviour:
     - tinkerer-a-turret
   - Key: tinkerer-a-7
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -317,7 +317,7 @@ MonoBehaviour:
     - tinkerer-a-6
   - Key: tinkerer-a-res
     Kind: 1
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -336,19 +336,15 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-mech
+    - tinkerer-a-2
   - Key: tinkerer-a-mech
     Kind: 10
-    XpCost: 120
-    UnlockedByDefault: 0
-    MaterialCosts:
-    - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
-      Amount: 3
-    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
-      Amount: 1
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: -360, y: -435}
+    Position: {x: 110, y: 40}
     Gains:
       Values: []
     ResistType: 1
@@ -362,10 +358,10 @@ MonoBehaviour:
     GrantedUltraKey: WarriorMech
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-2
+    - tinkerer-sig
   - Key: tinkerer-a-tip
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -878,10 +874,10 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-a-mech
+    - tinkerer-a-2
   - Key: tinkerer-a-turret
     Kind: 4
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
@@ -907,7 +903,7 @@ MonoBehaviour:
     - tinkerer-a-5
   - Key: tinkerer-a-turret-blind
     Kind: 13
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}

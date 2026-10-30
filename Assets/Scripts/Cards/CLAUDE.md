@@ -501,12 +501,20 @@ Two consequences worth holding on to:
   **The command always opens the Ultra list** (`MagicSelectionUI.ShowUltraList`, via
   `CombatManager.RequestUltraList`) **even for one** — the owner's call, like FFX's Overdrive menu:
   the footer says what it does before the gauge is spent.
-  **The gauge** (`UltraOps`): per hero, **per fight**, credited with health lost
-  (`CombatManager.UpdateUltraGauges`, once per turn before the turn is reported, from the turn's net
-  health change summed off `HealthChange` (`TrackHealth`, since 2026-10-07; it used to re-read the
-  bars) — so blows, ticks and health costs all count, healing never does on its own, and a heal in
-  the same turn nets against the damage); losing
-  `FillShare` (60%) of the bar fills it; using an Ultra empties it. One kind, **`Transform`**
+  **The gauge** (`UltraOps`, reworked 2026-10-30): per hero, **kept for the run** -
+  `UltraGaugeState` on `DungeonManager.UltraGauges`, carried in `Run.json` (merged per hero like
+  summon charges) and the dungeon save, empty on a run's first floor; `CombatManager` reads it when a
+  fight opens and writes every change back (`SetUltraGauge`). It fills on **damage taken, damage dealt
+  and healing done**, one rule for every hero (the Mage's MultiCast stays on Focus): `UltraOps.Credit`
+  turns each `HealthChange` into weighted health for the hero hit (`TakenWeight` 1, a blood price
+  included) and the hero who caused it (`DealtWeight` 0.5 on the other side, `HealedWeight` 1 on their
+  own); forms, potions, Sacrifices and clamps fill nothing. `UpdateUltraGauges` settles it once per
+  turn against the hero's max health: `FillShare` (60%) of the bar in weighted health fills it. Using
+  an Ultra empties it, and what that Ultra itself dealt is dropped. A fallen hero keeps their gauge
+  and gains nothing. Measured 2026-10-30: about one Ultra per fight for the whole party across the
+  campaign's floors - a full gauge every 2-3 fights per hero on the two-hero Threshold, 3-4 later.
+  **The starting Ultra is free** (owner, 2026-10-30): one `UnlockedByDefault` Ultra node per hero
+  hangs off the signature node; the rest stay bought on their branches. One kind, **`Transform`**
   (Demon Form): for `Turns` of the hero's turns after the one it is used on, `MaxHealthPercent` more
   health **keeping the share filled** both ways (`UltraOps.KeepShare`), basic Attack in
   `AttackDamageType`, the form's `Abilities` **appended after the real slots** on the Ability list
@@ -524,9 +532,11 @@ Two consequences worth holding on to:
   of `BuffType.Guarded` 30 for 1 turn: a resistance to **every** element, Normal included
   (`CombatBuffTracker.ApplyResistanceToAll`), so every damage path that already passes
   `GetResistanceBonus` cuts the hit with no new plumbing; a gold shield on the HP bar. **The balance sim models Ultras**
-  (`Balance/SimUltras`, same `UltraOps` rules): policy = use the first Ultra the turn the gauge is
-  full; while transformed, cast the form's damaging ability every turn; forms come off between
-  rooms.
+  (`Balance/SimUltras`, same `UltraOps.Credit` rule off the fight's stream): the gauge lives on the
+  hero (`SimUnit.UltraGauge`), so a floor carries it from room to room (each floor still starts it
+  empty); policy = use the first Ultra the turn the gauge is full; while transformed, cast the form's
+  damaging ability every turn; forms come off between rooms. `FloorOutcome.AverageUltrasUsed` counts
+  them.
   **A third kind, `Sacrifice`** (the Cultist): the Ultra takes a target (`UltraOps.NeedsTarget` - the
   list opens a "Sacrifice whom?" picker, `CombatManager.SacrificeTargets`, never offering the last
   hero standing). The hero falls for the floor and `UltraSO.Creature` rises in their spot, built off

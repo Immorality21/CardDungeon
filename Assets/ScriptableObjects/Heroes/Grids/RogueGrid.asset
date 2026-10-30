@@ -179,6 +179,7 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - rogue-a-3
+    - rogue-a-5
   - Key: rogue-a-3
     Kind: 3
     XpCost: 65
@@ -227,7 +228,7 @@ MonoBehaviour:
     - rogue-a-2
   - Key: rogue-a-5
     Kind: 2
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -245,11 +246,10 @@ MonoBehaviour:
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
-    Neighbors:
-    - rogue-death-mark
+    Neighbors: []
   - Key: rogue-a-6
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -271,7 +271,7 @@ MonoBehaviour:
     - rogue-twin
   - Key: rogue-a-7
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -295,7 +295,7 @@ MonoBehaviour:
     - rogue-a-6
   - Key: rogue-a-tip-a
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -319,7 +319,7 @@ MonoBehaviour:
     - rogue-a-7
   - Key: rogue-a-tip-b
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -617,7 +617,7 @@ MonoBehaviour:
     - rogue-sig
   - Key: rogue-a-evis-keen
     Kind: 12
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -639,7 +639,7 @@ MonoBehaviour:
     - rogue-a-6
   - Key: rogue-twin
     Kind: 4
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -665,7 +665,7 @@ MonoBehaviour:
     - rogue-a-5
   - Key: rogue-twin-power
     Kind: 5
-    XpCost: 410
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -687,7 +687,7 @@ MonoBehaviour:
     - rogue-a-tip-a
   - Key: rogue-twin-stay
     Kind: 6
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -709,7 +709,7 @@ MonoBehaviour:
     - rogue-twin-power
   - Key: rogue-twin-charge
     Kind: 7
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -735,12 +735,12 @@ MonoBehaviour:
     - rogue-twin-stay
   - Key: rogue-death-mark
     Kind: 10
-    XpCost: 120
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: -292, y: -435}
+    Position: {x: -110, y: 40}
     Gains:
       Values: []
     ResistType: 1
@@ -754,7 +754,7 @@ MonoBehaviour:
     GrantedUltraKey: DeathMark
     SummonAmount: 1
     Neighbors:
-    - rogue-a-2
+    - rogue-sig
   - Key: rogue-crows
     Kind: 4
     XpCost: 195

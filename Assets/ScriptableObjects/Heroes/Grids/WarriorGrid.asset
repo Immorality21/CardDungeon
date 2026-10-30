@@ -481,6 +481,7 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - warrior-b-3
+    - warrior-b-5
   - Key: warrior-b-3
     Kind: 3
     XpCost: 65
@@ -529,7 +530,7 @@ MonoBehaviour:
     - warrior-b-2
   - Key: warrior-b-5
     Kind: 2
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -547,11 +548,10 @@ MonoBehaviour:
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
-    Neighbors:
-    - warrior-b-flurry
+    Neighbors: []
   - Key: warrior-b-6
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -573,7 +573,7 @@ MonoBehaviour:
     - warrior-boar
   - Key: warrior-b-7
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -645,7 +645,7 @@ MonoBehaviour:
     - warrior-b-2
   - Key: warrior-b-hone
     Kind: 0
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -669,7 +669,7 @@ MonoBehaviour:
     - warrior-b-5
   - Key: warrior-b-fortune
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -693,7 +693,7 @@ MonoBehaviour:
     - warrior-b-6
   - Key: warrior-b-cry
     Kind: 3
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
@@ -719,7 +719,7 @@ MonoBehaviour:
     - warrior-b-7
   - Key: warrior-b-edge
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -745,7 +745,7 @@ MonoBehaviour:
     - warrior-b-7
   - Key: warrior-boar
     Kind: 4
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -771,7 +771,7 @@ MonoBehaviour:
     - warrior-b-5
   - Key: warrior-boar-fury
     Kind: 5
-    XpCost: 410
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -793,7 +793,7 @@ MonoBehaviour:
     - warrior-b-edge
   - Key: warrior-boar-endurance
     Kind: 6
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -815,7 +815,7 @@ MonoBehaviour:
     - warrior-boar-fury
   - Key: warrior-boar-charge
     Kind: 7
-    XpCost: 540
+    XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -1003,12 +1003,12 @@ MonoBehaviour:
     - warrior-a-2
   - Key: warrior-b-flurry
     Kind: 10
-    XpCost: 120
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 300, y: -435}
+    Position: {x: 110, y: 40}
     Gains:
       Values: []
     ResistType: 1
@@ -1022,7 +1022,7 @@ MonoBehaviour:
     GrantedUltraKey: Flurry
     SummonAmount: 1
     Neighbors:
-    - warrior-b-2
+    - warrior-slash
   - Key: warrior-c-1
     Kind: 0
     XpCost: 65
@@ -1335,7 +1335,7 @@ MonoBehaviour:
     - warrior-c-2
   - Key: warrior-b-golem-fury
     Kind: 14
-    XpCost: 410
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0

@@ -179,6 +179,7 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - cleric-a-3
+    - cleric-a-5
   - Key: cleric-a-3
     Kind: 3
     XpCost: 65
@@ -227,7 +228,7 @@ MonoBehaviour:
     - cleric-a-2
   - Key: cleric-a-5
     Kind: 2
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -245,11 +246,10 @@ MonoBehaviour:
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
-    Neighbors:
-    - cleric-a-miracle
+    Neighbors: []
   - Key: cleric-a-6
     Kind: 3
-    XpCost: 245
+    XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -271,7 +271,7 @@ MonoBehaviour:
     - cleric-phoenix
   - Key: cleric-a-7
     Kind: 0
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -295,7 +295,7 @@ MonoBehaviour:
     - cleric-a-6
   - Key: cleric-a-res
     Kind: 1
-    XpCost: 155
+    XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -314,10 +314,10 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-a-miracle
+    - cleric-a-2
   - Key: cleric-a-tip-a
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -341,7 +341,7 @@ MonoBehaviour:
     - cleric-a-7
   - Key: cleric-a-tip-b
     Kind: 0
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -365,7 +365,7 @@ MonoBehaviour:
     - cleric-a-7
   - Key: cleric-a-bless
     Kind: 3
-    XpCost: 295
+    XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -409,7 +409,7 @@ MonoBehaviour:
     - cleric-a-bless
   - Key: cleric-a-revive
     Kind: 3
-    XpCost: 350
+    XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -431,12 +431,12 @@ MonoBehaviour:
     - cleric-a-7
   - Key: cleric-a-miracle
     Kind: 10
-    XpCost: 120
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: -360, y: -435}
+    Position: {x: 110, y: 40}
     Gains:
       Values: []
     ResistType: 1
@@ -450,10 +450,10 @@ MonoBehaviour:
     GrantedUltraKey: MiracleOfLight
     SummonAmount: 1
     Neighbors:
-    - cleric-a-2
+    - cleric-sig
   - Key: cleric-phoenix
     Kind: 4
-    XpCost: 195
+    XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
@@ -479,7 +479,7 @@ MonoBehaviour:
     - cleric-a-5
   - Key: cleric-phoenix-power
     Kind: 5
-    XpCost: 410
+    XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
@@ -501,7 +501,7 @@ MonoBehaviour:
     - cleric-a-tip-a
   - Key: cleric-phoenix-charge
     Kind: 7
-    XpCost: 475
+    XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
