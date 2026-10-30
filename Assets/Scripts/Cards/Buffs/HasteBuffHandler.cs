@@ -1,6 +1,7 @@
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -14,7 +15,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return "Haste!";
+            return Loc.Get("combat.status.haste");
         }
 
         public bool SkipsTurn => false;

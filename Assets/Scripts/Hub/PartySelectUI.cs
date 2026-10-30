@@ -13,6 +13,7 @@ using Assets.Scripts.UnitStats;
 using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Hub
 {
@@ -184,7 +185,7 @@ namespace Assets.Scripts.Hub
             var fielded = HeroRoster.GetSelectedHeroes(_catalog, Cap());
             if (fielded.Count == 0)
             {
-                return "No party selected.";
+                return Loc.Get("hub.progress.no-party");
             }
 
             var names = new List<string>();
@@ -192,7 +193,7 @@ namespace Assets.Scripts.Hub
             {
                 names.Add(hero.DisplayName);
             }
-            return $"Party ({fielded.Count}): {string.Join(", ", names)}";
+            return Loc.Format("hub.camp.fielded-summary", ("count", fielded.Count), ("names", string.Join(", ", names)));
         }
 
         // --- Refresh -----------------------------------------------------------
@@ -209,15 +210,18 @@ namespace Assets.Scripts.Hub
                 _selectedKey = fieldedKeys.Count > 0 ? fieldedKeys[0] : (owned.Count > 0 ? owned[0].SaveKey : null);
             }
 
-            SetText(_goldLabel, $"{MetaProgressManager.Instance.Gold} gold");
-            SetText(_capLabel, $"Marching out: {fieldedKeys.Count} of {cap}"
-                             + (owned.Count > fieldedKeys.Count ? $"   ·   {owned.Count} in the roster" : string.Empty));
+            SetText(_goldLabel, Loc.Format("hub.camp.gold", ("gold", MetaProgressManager.Instance.Gold)));
+            SetText(_capLabel, owned.Count > fieldedKeys.Count
+                ? Loc.Format("hub.camp.marching-roster", ("count", fieldedKeys.Count), ("cap", cap), ("owned", owned.Count))
+                : Loc.Format("hub.camp.marching", ("count", fieldedKeys.Count), ("cap", cap)));
 
             int size = Mathf.Max(1, fieldedKeys.Count);
             var mode = MetaProgressManager.Instance.GetXpSplitMode();
             SetText(_shareLabel, mode == XpSplitMode.Even
-                ? $"Each hero earns {100 / size}% of the XP"
-                : $"{size} {(size == 1 ? "hero shares" : "heroes share")} the XP ({CampfireOps.Label(mode)})");
+                ? Loc.Format("hub.camp.share-even", ("percent", 100 / size))
+                : size == 1
+                    ? Loc.Format("hub.camp.share-mode-one", ("count", size), ("mode", CampfireOps.Label(mode)))
+                    : Loc.Format("hub.camp.share-mode", ("count", size), ("mode", CampfireOps.Label(mode))));
 
             RefreshSeats(fieldedKeys);
             BuildRoster(owned, fieldedKeys);
@@ -250,7 +254,7 @@ namespace Assets.Scripts.Hub
 
                 if (empty)
                 {
-                    seat.Add(MakeLabel("Empty seat", "cd-camp-seat__name"));
+                    seat.Add(MakeLabel(Loc.Get("hub.camp.empty-seat"), "cd-camp-seat__name"));
                     continue;
                 }
 
@@ -264,7 +268,7 @@ namespace Assets.Scripts.Hub
                 seat.Add(MakeLabel(hero.DisplayName, "cd-camp-seat__name"));
                 if (i == 0)
                 {
-                    seat.Add(MakeLabel("Leads", "cd-camp-seat__lead"));
+                    seat.Add(MakeLabel(Loc.Get("hub.camp.leads"), "cd-camp-seat__lead"));
                 }
             }
         }
@@ -327,7 +331,7 @@ namespace Assets.Scripts.Hub
                 // The gold bar already says "marching"; the tag only names the leader and the benched.
                 if (seat <= 0)
                 {
-                    top.Add(MakeLabel(seat == 0 ? "Leads" : "Resting", "cd-inv-row__meta"));
+                    top.Add(MakeLabel(seat == 0 ? Loc.Get("hub.camp.leads") : Loc.Get("hub.camp.resting"), "cd-inv-row__meta"));
                 }
                 text.Add(top);
                 text.Add(MakeLabel(RoleLine(StatsOf(hero)), "cd-inv-row__caption"));
@@ -351,10 +355,10 @@ namespace Assets.Scripts.Hub
             }
             best.Sort((a, b) => stats[b].CompareTo(stats[a]));
 
-            var parts = new List<string> { $"HP {stats[StatType.MaxHealth]}" };
+            var parts = new List<string> { Loc.Format("hub.camp.role.hp", ("hp", stats[StatType.MaxHealth])) };
             for (int i = 0; i < best.Count && i < 2; i++)
             {
-                parts.Add($"{StatCatalog.ShortName(best[i])} {stats[best[i]]}");
+                parts.Add(Loc.Format("hub.camp.role.stat", ("stat", StatCatalog.ShortName(best[i])), ("value", stats[best[i]])));
             }
             return string.Join(" · ", parts);
         }
@@ -369,7 +373,7 @@ namespace Assets.Scripts.Hub
             var hero = FindOwned(owned, _selectedKey);
             if (hero == null)
             {
-                SetText(_detailName, "Nobody here");
+                SetText(_detailName, Loc.Get("hub.camp.nobody-here"));
                 SetText(_detailSub, string.Empty);
                 SetText(_reasonLabel, string.Empty);
                 _toggleButton?.SetEnabled(false);
@@ -385,9 +389,9 @@ namespace Assets.Scripts.Hub
                 _detailIcon.style.backgroundImage = hero.Sprite != null ? new StyleBackground(hero.Sprite) : null;
             }
             SetText(_detailName, hero.DisplayName);
-            SetText(_detailSub, seat == 0 ? "Leads the party"
-                              : fielded ? $"Marching out · seat {seat + 1}"
-                              : "Staying behind");
+            SetText(_detailSub, seat == 0 ? Loc.Get("hub.camp.leads-the-party")
+                              : fielded ? Loc.Format("hub.camp.marching-seat", ("seat", seat + 1))
+                              : Loc.Get("hub.camp.staying-behind"));
 
             // The one action, and - when it is dimmed - the reason, always in the same place.
             string reason = string.Empty;
@@ -396,33 +400,33 @@ namespace Assets.Scripts.Hub
                 bool canToggle;
                 if (_lockedReason != null)
                 {
-                    _toggleButton.text = fielded ? "Stay behind" : "March out";
+                    _toggleButton.text = fielded ? Loc.Get("hub.camp.stay-behind") : Loc.Get("hub.camp.march-out");
                     canToggle = false;
                     reason = _lockedReason;
                 }
                 else if (fielded)
                 {
-                    _toggleButton.text = "Stay behind";
+                    _toggleButton.text = Loc.Get("hub.camp.stay-behind");
                     canToggle = fieldedKeys.Count > 1;
                     if (!canToggle)
                     {
-                        reason = "Somebody has to go.";
+                        reason = Loc.Get("hub.camp.somebody-has-to-go");
                     }
                 }
                 else
                 {
-                    _toggleButton.text = "March out";
+                    _toggleButton.text = Loc.Get("hub.camp.march-out");
                     canToggle = fieldedKeys.Count < cap;
                     if (!canToggle)
                     {
-                        reason = $"All {cap} seats are taken. Bench someone first.";
+                        reason = Loc.Format("hub.camp.seats-taken", ("cap", cap));
                     }
                 }
                 _toggleButton.SetEnabled(canToggle);
             }
             if (_leadButton != null)
             {
-                _leadButton.text = seat == 0 ? "Leads the party" : "Lead the party";
+                _leadButton.text = seat == 0 ? Loc.Get("hub.camp.leads-the-party") : Loc.Get("hub.camp.lead-the-party");
                 _leadButton.SetEnabled(fielded && seat > 0);
             }
             SetText(_reasonLabel, reason);
@@ -441,7 +445,7 @@ namespace Assets.Scripts.Hub
             }
 
             var stats = StatsOf(hero);
-            _detailBody.Add(BestiaryLineView.Section("Stats"));
+            _detailBody.Add(BestiaryLineView.Section(Loc.Get("hub.camp.section.stats")));
             var grid = new VisualElement();
             grid.AddToClassList("cd-inv-stats");
             foreach (var stat in StatCatalog.Types)
@@ -453,9 +457,9 @@ namespace Assets.Scripts.Hub
 
             var save = HeroRoster.GetHeroSave(hero);
             int xp = save != null ? save.CurrentXp : 0;
-            _detailBody.Add(MakeLabel($"{xp} XP to spend on the sphere grid", "cd-inv-detail__line"));
+            _detailBody.Add(MakeLabel(Loc.Format("hub.camp.xp-to-spend", ("xp", xp)), "cd-inv-detail__line"));
 
-            _detailBody.Add(BestiaryLineView.Section("Carried abilities"));
+            _detailBody.Add(BestiaryLineView.Section(Loc.Get("hub.camp.section.carried")));
             var nodes = NodesOf(hero);
             var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, nodes);
             int slots = EquippedMagicState.DefaultSlotCount + SphereGridOps.SlotBonusForNodes(hero.SphereGrid, nodes);
@@ -465,20 +469,20 @@ namespace Assets.Scripts.Hub
             var carried = MagicLoadoutOps.RunKit(runEntry, known, _loadout?.ChosenFor(hero.SaveKey), slots);
             if (carried.Count == 0)
             {
-                _detailBody.Add(MakeLabel("Nothing carried.", "cd-inv-detail__line"));
+                _detailBody.Add(MakeLabel(Loc.Get("hub.camp.nothing-carried"), "cd-inv-detail__line"));
             }
             foreach (var slot in carried)
             {
                 var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(slot.Key) : null;
                 string name = magic != null ? magic.DisplayName : slot.Key;
-                string charges = slot.InRun ? $"{slot.Charges} of {slot.MaxCharges} charges left"
-                               : $"{slot.MaxCharges} charges";
-                _detailBody.Add(MakeLabel($"{name}  ·  {charges}", "cd-inv-detail__line"));
+                string charges = slot.InRun ? Loc.Format("hub.camp.charges-left", ("charges", slot.Charges), ("max", slot.MaxCharges))
+                               : Loc.Format("hub.camp.charges", ("max", slot.MaxCharges));
+                _detailBody.Add(MakeLabel(Loc.Format("hub.camp.carried-line", ("name", name), ("charges", charges)), "cd-inv-detail__line"));
             }
 
             if (seat == 0)
             {
-                _detailBody.Add(MakeLabel("The leader walks at the front and takes any XP an even split leaves over.",
+                _detailBody.Add(MakeLabel(Loc.Get("hub.camp.leader-note"),
                     "cd-inv-detail__note"));
             }
         }
@@ -512,20 +516,20 @@ namespace Assets.Scripts.Hub
                     continue;
                 }
                 var type = belt.Find(loadout[i]);
-                button.text = type != null ? $"{type.DisplayName} ×{PotionBeltState.Capacity(type)}" : "Empty";
+                button.text = type != null ? Loc.Format("hub.camp.belt-slot", ("potion", type.DisplayName), ("count", PotionBeltState.Capacity(type))) : Loc.Get("hub.camp.belt-empty");
                 button.tooltip = type != null ? ItemPresenter.ConsumableEffectLine(type.Potion) : string.Empty;
                 button.EnableInClassList("cd-camp-mode--chosen", type != null);
             }
             SetText(_beltDesc, _lockedReason != null
-                ? "Packed for this run."
-                : "Refilled when a run begins. Press a slot to change it.");
+                ? Loc.Get("hub.camp.belt-packed")
+                : Loc.Get("hub.camp.belt-desc"));
         }
 
         private void OnBeltSlotClicked(int index)
         {
             if (_lockedReason != null)
             {
-                SetFeedback("The belt is packed for this run.");
+                SetFeedback(Loc.Get("hub.camp.belt-packed-feedback"));
                 return;
             }
             var belt = PotionBeltSO.Load();
@@ -560,8 +564,8 @@ namespace Assets.Scripts.Hub
             {
                 var focus = FocusHero(fieldedKeys);
                 _splitFocusButton.text = focus == null
-                    ? "Choose who is mentored"
-                    : $"Mentoring {focus.DisplayName} (change)";
+                    ? Loc.Get("hub.camp.choose-mentored")
+                    : Loc.Format("hub.camp.mentoring", ("hero", focus.DisplayName));
                 _splitFocusButton.SetEnabled(fieldedKeys.Count > 0);
             }
 
@@ -578,8 +582,8 @@ namespace Assets.Scripts.Hub
 
             bool offered = CampfireOps.Offers(campfireLevel, mode);
             button.text = !offered
-                ? $"{CampfireOps.Label(mode)} · Campfire Lv {levelNeeded}"
-                : chosen == mode ? $"✓ {CampfireOps.Label(mode)}" : CampfireOps.Label(mode);
+                ? Loc.Format("hub.camp.mode-needs-level", ("mode", CampfireOps.Label(mode)), ("level", levelNeeded))
+                : chosen == mode ? Loc.Format("hub.camp.mode-chosen", ("mode", CampfireOps.Label(mode))) : CampfireOps.Label(mode);
             button.SetEnabled(offered);
             button.EnableInClassList("cd-camp-mode--chosen", chosen == mode);
         }
@@ -641,21 +645,21 @@ namespace Assets.Scripts.Hub
             {
                 if (keys.Count <= 1)
                 {
-                    SetFeedback("Somebody has to go.");
+                    SetFeedback(Loc.Get("hub.camp.somebody-has-to-go"));
                     return;
                 }
                 keys.Remove(hero.SaveKey);
-                SetFeedback($"{hero.DisplayName} stays behind.");
+                SetFeedback(Loc.Format("hub.camp.feedback.stays-behind", ("hero", hero.DisplayName)));
             }
             else
             {
                 if (keys.Count >= cap)
                 {
-                    SetFeedback($"Only {cap} can march out. Bench someone first.");
+                    SetFeedback(Loc.Format("hub.camp.feedback.only-cap", ("cap", cap)));
                     return;
                 }
                 keys.Add(hero.SaveKey);
-                SetFeedback($"{hero.DisplayName} marches out.");
+                SetFeedback(Loc.Format("hub.camp.feedback.marches-out", ("hero", hero.DisplayName)));
             }
 
             HeroRoster.SetSelectedKeys(_catalog, keys, cap);
@@ -678,7 +682,7 @@ namespace Assets.Scripts.Hub
             keys.Insert(0, _selectedKey);
             HeroRoster.SetSelectedKeys(_catalog, keys, cap);
             var hero = FindOwned(HeroRoster.GetOwnedHeroes(_catalog), _selectedKey);
-            SetFeedback($"{(hero != null ? hero.DisplayName : "They")} leads the party.");
+            SetFeedback(hero != null ? Loc.Format("hub.camp.feedback.leads", ("hero", hero.DisplayName)) : Loc.Get("hub.camp.feedback.they-lead"));
             Refresh();
         }
 
@@ -687,7 +691,7 @@ namespace Assets.Scripts.Hub
             int campfireLevel = HubState.LevelOf(HubService.Party);
             if (!CampfireOps.Offers(campfireLevel, mode))
             {
-                SetFeedback("The campfire is not big enough for that yet.");
+                SetFeedback(Loc.Get("hub.camp.feedback.too-small"));
                 return;
             }
             if (MetaProgressManager.Instance.GetXpSplitMode() == mode)
@@ -708,7 +712,7 @@ namespace Assets.Scripts.Hub
             MetaProgressManager.Instance.SetXpSplit(mode, focus);
             // Just what changed - the rule itself is already on screen under the buttons, and
             // printing it twice makes the panel look like it is arguing with itself.
-            SetFeedback($"XP is now shared: {CampfireOps.Label(mode)}.");
+            SetFeedback(Loc.Format("hub.camp.feedback.xp-shared", ("mode", CampfireOps.Label(mode))));
             Refresh();
         }
 
@@ -720,7 +724,7 @@ namespace Assets.Scripts.Hub
             var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, Cap());
             if (fieldedKeys.Count == 0)
             {
-                SetFeedback("Nobody is marching out to mentor.");
+                SetFeedback(Loc.Get("hub.camp.feedback.nobody-to-mentor"));
                 return;
             }
 

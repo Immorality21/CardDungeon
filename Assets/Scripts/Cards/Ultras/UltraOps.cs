@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards
 {
@@ -306,18 +307,16 @@ namespace Assets.Scripts.Cards
             }
             if (ultra.Kind == UltraKind.MultiCast)
             {
-                return "Next ability: cast once, +1 per Focus, for one charge · all Focus spent\n"
-                       + "Focus: +1 each turn you cast";
+                return Loc.Get("abilities.ultra.multicast");
             }
             if (ultra.Kind == UltraKind.Sacrifice)
             {
-                string creature = ultra.Creature != null ? ultra.Creature.Label : "a horror";
-                return $"An ally falls for the rest of the floor; {creature} rises in their place, built off their stats, "
-                       + "for the rest of the fight. Its attack follows their highest stat";
+                string creature = ultra.Creature != null ? ultra.Creature.Label : Loc.Get("abilities.ultra.sacrifice-creature");
+                return Loc.Format("abilities.ultra.sacrifice", ("creature", creature));
             }
             if (ultra.Kind == UltraKind.Mount)
             {
-                var mount = new List<string> { "Rides a mech that takes the hits" };
+                var mount = new List<string> { Loc.Get("abilities.ultra.mount") };
                 if (ultra.Mech != null && ultra.Mech.AttackAbility != null)
                 {
                     mount.Add(ultra.Mech.AttackAbility.DisplayName);
@@ -326,23 +325,25 @@ namespace Assets.Scripts.Cards
                 {
                     mount.Add(ultra.Mech.Signature.DisplayName);
                 }
-                return string.Join(" · ", mount);
+                return string.Join(Loc.Get("abilities.ultra.part-separator"), mount);
             }
             if (ultra.Kind == UltraKind.Strike)
             {
                 var lines = AbilityDescriber.EffectLines(CastableFor(ultra), caster, null);
-                string who = StrikeRandomly(ultra) ? "Random enemies" : AbilityDescriber.TargetLabel(ultra.TargetType);
-                string hits = HitsOf(ultra) > 1 ? $" ({HitsOf(ultra)} hits)" : "";
-                return who + hits + ": " + string.Join(" · ", lines);
+                string who = StrikeRandomly(ultra) ? Loc.Get("abilities.ultra.random-enemies") : AbilityDescriber.TargetLabel(ultra.TargetType);
+                string effects = string.Join(Loc.Get("abilities.ultra.part-separator"), lines);
+                return HitsOf(ultra) > 1
+                    ? Loc.Format("abilities.ultra.strike-hits", ("target", who), ("hits", HitsOf(ultra)), ("effects", effects))
+                    : Loc.Format("abilities.ultra.strike", ("target", who), ("effects", effects));
             }
-            var parts = new List<string> { ultra.Turns == 1 ? "Transforms for 1 turn" : $"Transforms for {ultra.Turns} turns" };
+            var parts = new List<string> { ultra.Turns == 1 ? Loc.Get("abilities.ultra.transform-turn") : Loc.Format("abilities.ultra.transform-turns", ("turns", ultra.Turns)) };
             if (ultra.MaxHealthPercent > 0)
             {
-                parts.Add($"+{ultra.MaxHealthPercent}% health");
+                parts.Add(Loc.Format("abilities.ultra.transform-health", ("percent", ultra.MaxHealthPercent)));
             }
             if (ultra.AttackDamageType != Combat.DamageType.Normal)
             {
-                parts.Add($"{ultra.AttackDamageType} attack");
+                parts.Add(Loc.Format("abilities.ultra.transform-attack", ("element", ultra.AttackDamageType)));
             }
             if (ultra.Abilities != null)
             {
@@ -354,7 +355,7 @@ namespace Assets.Scripts.Cards
                     }
                 }
             }
-            return string.Join(" · ", parts);
+            return string.Join(Loc.Get("abilities.ultra.part-separator"), parts);
         }
     }
 }

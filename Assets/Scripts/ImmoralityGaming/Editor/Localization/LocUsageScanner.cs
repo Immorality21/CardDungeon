@@ -21,15 +21,21 @@ namespace ImmoralityGaming.Editor.Localization
         /// <summary>An asset text that may be left empty (an item with no description): such a key is
         /// not reported as missing from the table.</summary>
         public bool Optional;
+
+        /// <summary>A key stem the code completes at runtime (<c>"items.rarity." + rarity</c>): it
+        /// counts as a use of every key that starts with it.</summary>
+        public bool Prefix;
     }
 
     /// <summary>
     /// Finds where text keys are used, for the Texts window's "where used" and missing/unused report.
     ///
-    /// <para>Literal keys are found by text search: <c>Loc.Get/GetOrEmpty/Format/Has("key")</c> in C# and
-    /// <c>"#key"</c> attributes in UXML. Keys that are built at runtime (an asset's
-    /// <c>hero.{Key}.name</c>) cannot be found that way, so whoever builds them registers a
-    /// <see cref="Providers"/> entry that lists them per asset.</para>
+    /// <para>Literal keys are found by text search: <c>Loc.Get/GetOrEmpty/Format/Has("key")</c> in C#
+    /// (a required use: reported missing when the table lacks it), any other lowercase dotted string
+    /// literal in C# (a key handed around as a value - counted as a use, never reported missing), and
+    /// <c>"#key"</c> attributes in UXML. A literal ending in a dot is a stem completed at runtime and
+    /// covers every key under it (<see cref="Index"/>). Keys built from an asset's identity
+    /// (<c>hero.{Key}.name</c>) come from <see cref="Providers"/>.</para>
     /// </summary>
     public static class LocUsageScanner
     {
@@ -37,13 +43,15 @@ namespace ImmoralityGaming.Editor.Localization
         public static readonly List<Func<IEnumerable<LocUsage>>> Providers = new List<Func<IEnumerable<LocUsage>>>();
 
         private static readonly Regex CodeKey = new Regex(@"Loc\.(?:GetOrEmpty|Get|Format|Has)\(\s*""([^""]+)""", RegexOptions.Compiled);
+        private static readonly Regex CodeLiteral = new Regex(@"""([a-z][a-z0-9\-]*(?:\.[a-z0-9\-]+)+\.?)""", RegexOptions.Compiled);
         private static readonly Regex UxmlKey = new Regex(@"=""" + Regex.Escape(Loc.KeyPrefix.ToString()) + @"([A-Za-z0-9_.\-]+)""", RegexOptions.Compiled);
 
         public static List<LocUsage> ScanAll()
         {
             var usages = new List<LocUsage>();
-            ScanFiles("*.cs", CodeKey, usages);
-            ScanFiles("*.uxml", UxmlKey, usages);
+            ScanFiles("*.cs", CodeKey, false, usages);
+            ScanFiles("*.cs", CodeLiteral, true, usages);
+            ScanFiles("*.uxml", UxmlKey, false, usages);
             foreach (var provider in Providers)
             {
                 try
@@ -58,7 +66,40 @@ namespace ImmoralityGaming.Editor.Localization
             return usages;
         }
 
-        private static void ScanFiles(string pattern, Regex regex, List<LocUsage> usages)
+        /// <summary>Usages grouped by the table key they use, with each stem's usages added to every
+        /// key in <paramref name="table"/> that starts with it.</summary>
+        public static Dictionary<string, List<LocUsage>> Index(List<LocUsage> usages, TextTableSO table)
+        {
+            var index = new Dictionary<string, List<LocUsage>>(StringComparer.Ordinal);
+            foreach (var usage in usages)
+            {
+                if (!usage.Prefix)
+                {
+                    AddTo(index, usage.Key, usage);
+                    continue;
+                }
+                foreach (var entry in table.Entries)
+                {
+                    if (entry.Key != null && entry.Key.StartsWith(usage.Key, StringComparison.Ordinal))
+                    {
+                        AddTo(index, entry.Key, usage);
+                    }
+                }
+            }
+            return index;
+        }
+
+        private static void AddTo(Dictionary<string, List<LocUsage>> index, string key, LocUsage usage)
+        {
+            if (!index.TryGetValue(key, out var list))
+            {
+                list = new List<LocUsage>();
+                index[key] = list;
+            }
+            list.Add(usage);
+        }
+
+        private static void ScanFiles(string pattern, Regex regex, bool optional, List<LocUsage> usages)
         {
             string root = Application.dataPath;
             foreach (string file in Directory.GetFiles(root, pattern, SearchOption.AllDirectories))
@@ -79,7 +120,16 @@ namespace ImmoralityGaming.Editor.Localization
                     }
                     foreach (Match match in regex.Matches(lines[i]))
                     {
-                        usages.Add(new LocUsage { Key = match.Groups[1].Value, Path = relative, Line = i + 1 });
+                        string key = match.Groups[1].Value;
+                        bool prefix = key.EndsWith(".", StringComparison.Ordinal);
+                        usages.Add(new LocUsage
+                        {
+                            Key = key,
+                            Path = relative,
+                            Line = i + 1,
+                            Optional = optional || prefix,
+                            Prefix = prefix,
+                        });
                     }
                 }
             }

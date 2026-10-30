@@ -1,6 +1,7 @@
 using System;
 using Assets.Scripts.Audio;
 using UnityEngine.UIElements;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.MainMenu
 {
@@ -123,15 +124,15 @@ namespace Assets.Scripts.MainMenu
 
             if (_muteButton != null)
             {
-                _muteButton.text = muted ? "On" : "Off";
+                _muteButton.text = muted ? Loc.Get("menu.options.mute-on") : Loc.Get("menu.options.mute-off");
             }
             if (_speedButton != null)
             {
                 _speedButton.text = Combat.CombatSpeed.Label(Combat.CombatSpeed.Current);
             }
             SetText(_note, muted
-                ? "Everything is silenced. The dials keep their settings."
-                : "Master scales everything; the other two scale their own kind on top of it.");
+                ? Loc.Get("menu.options.note-muted")
+                : Loc.Get("menu.options.note"));
         }
 
         /// <summary>

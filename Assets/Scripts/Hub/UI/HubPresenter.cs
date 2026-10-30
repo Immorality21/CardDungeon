@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Hub.UI
 {
@@ -92,12 +93,12 @@ namespace Assets.Scripts.Hub.UI
                     int level = BuildingOps.LevelOf(building, progress);
                     if (BuildingOps.CanUpgrade(building, progress))
                     {
-                        return $"Level {level} · upgrade {BuildingOps.UpgradeCost(building, progress)}g";
+                        return Loc.Format("hub.lot.level-upgrade", ("level", level), ("cost", BuildingOps.UpgradeCost(building, progress)));
                     }
-                    return building.MaxLevel > 1 ? $"Level {level} (max)" : "";
+                    return building.MaxLevel > 1 ? Loc.Format("hub.lot.level-max", ("level", level)) : "";
                 case BuildingState.Available:
                     string price = DescribePlacementCost(building);
-                    return string.IsNullOrEmpty(price) ? "Ready to build" : "Needs " + price;
+                    return string.IsNullOrEmpty(price) ? Loc.Get("hub.lot.ready-to-build") : Loc.Format("hub.lot.needs", ("price", price));
                 default:
                     return DescribeLock(building);
             }
@@ -163,9 +164,9 @@ namespace Assets.Scripts.Hub.UI
         {
             if (building == null || building.RequiredRunKeys == null || building.RequiredRunKeys.Count == 0)
             {
-                return "Not yet";
+                return Loc.Get("hub.lot.not-yet");
             }
-            return "Locked";
+            return Loc.Get("hub.lot.locked");
         }
 
         /// <summary>A lot's placement price as one line ("2 Ember Iron · 1 Void Shard"), or empty
@@ -187,7 +188,7 @@ namespace Assets.Scripts.Hub.UI
                 string material = string.IsNullOrEmpty(line.Material.DisplayName)
                     ? line.Material.Key
                     : line.Material.DisplayName;
-                parts.Add($"{(line.Amount < 1 ? 1 : line.Amount)} {material}");
+                parts.Add(Loc.Format("hub.lot.cost-part", ("amount", line.Amount < 1 ? 1 : line.Amount), ("material", material)));
             }
             return string.Join(" · ", parts);
         }
@@ -208,7 +209,7 @@ namespace Assets.Scripts.Hub.UI
                 return "";
             }
             int next = BuildingOps.NextLevel(building, progress);
-            return next <= 1 ? grant : $"Level {next}: {grant}";
+            return next <= 1 ? grant : Loc.Format("hub.lot.next-grant", ("level", next), ("grant", grant));
         }
 
         /// <summary>
@@ -221,11 +222,11 @@ namespace Assets.Scripts.Hub.UI
             // says what it does. It used to repeat the status line word for word.
             if (BuildingOps.CanPlace(building, progress))
             {
-                return "Build";
+                return Loc.Get("hub.lot.action.build");
             }
             if (BuildingOps.CanUpgrade(building, progress))
             {
-                return $"Upgrade to Lv {BuildingOps.NextLevel(building, progress)}";
+                return Loc.Format("hub.lot.action.upgrade", ("level", BuildingOps.NextLevel(building, progress)));
             }
             return "";
         }

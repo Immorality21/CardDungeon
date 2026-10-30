@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 using System.Collections.Generic;
 using Assets.Scripts.Heroes;
 
@@ -478,7 +479,7 @@ namespace Assets.Scripts.Dungeon
         {
             if (run == null)
             {
-                return "(missing run)";
+                return Loc.Get("dungeon.campaign.missing-run");
             }
             return !string.IsNullOrEmpty(run.DisplayName) ? run.DisplayName : RunKeyOf(run);
         }

@@ -4,6 +4,7 @@ using System.Globalization;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Enemies
 {
@@ -64,7 +65,10 @@ namespace Assets.Scripts.Enemies
     public static class BestiaryPresenter
     {
         /// <summary>Shown wherever the player has not earned the answer yet.</summary>
-        public const string Unknown = "???";
+        public static string Unknown
+        {
+            get { return Loc.Get("bestiary.unknown"); }
+        }
 
         /// <summary>
         /// The elements a bestiary page lists, in a fixed order so a page never reshuffles between
@@ -84,7 +88,23 @@ namespace Assets.Scripts.Enemies
         /// <summary><see cref="DamageType.Normal"/> reads as "Physical"; every other type is its own name.</summary>
         public static string DamageTypeLabel(DamageType type)
         {
-            return type == DamageType.Normal ? "Physical" : type.ToString();
+            switch (type)
+            {
+                case DamageType.Normal:
+                    return Loc.Get("bestiary.element.physical");
+                case DamageType.Fire:
+                    return Loc.Get("bestiary.element.fire");
+                case DamageType.Ice:
+                    return Loc.Get("bestiary.element.ice");
+                case DamageType.Lightning:
+                    return Loc.Get("bestiary.element.lightning");
+                case DamageType.Holy:
+                    return Loc.Get("bestiary.element.holy");
+                case DamageType.Shadow:
+                    return Loc.Get("bestiary.element.shadow");
+                default:
+                    return type.ToString();
+            }
         }
 
         // ============================================================
@@ -128,16 +148,16 @@ namespace Assets.Scripts.Enemies
             switch (effectiveness)
             {
                 case DamageEffectiveness.Absorbed:
-                    return "Absorbs " + Percent(percent);
+                    return Loc.Format("bestiary.resistance.absorbs", ("percent", Percent(percent)));
                 case DamageEffectiveness.Immune:
-                    return "Immune";
+                    return Loc.Get("bestiary.resistance.immune");
                 case DamageEffectiveness.Resisted:
-                    return "Resists " + Percent(percent);
+                    return Loc.Format("bestiary.resistance.resists", ("percent", Percent(percent)));
                 case DamageEffectiveness.Weak:
-                    return "Weak " + Percent(percent);
+                    return Loc.Format("bestiary.resistance.weak", ("percent", Percent(percent)));
                 default:
                     // A word, not a dash: "Physical: -" read as a missing value (playtest finding 15).
-                    return "Normal";
+                    return Loc.Get("bestiary.resistance.normal");
             }
         }
 
@@ -170,12 +190,12 @@ namespace Assets.Scripts.Enemies
         {
             if (definition == null || known == null || !known.AttackTypeKnown)
             {
-                return new BestiaryLine("Attacks with", Unknown, BestiaryTone.Unknown);
+                return new BestiaryLine(Loc.Get("bestiary.label.attacks-with"), Unknown, BestiaryTone.Unknown);
             }
 
             var type = definition.AttackDamageType;
             return new BestiaryLine(
-                "Attacks with",
+                Loc.Get("bestiary.label.attacks-with"),
                 DamageTypeLabel(type),
                 type == DamageType.Normal ? BestiaryTone.Neutral : BestiaryTone.Bad,
                 valueElement: type);
@@ -201,7 +221,7 @@ namespace Assets.Scripts.Enemies
             var lines = new List<BestiaryLine>();
             if (definition == null || known == null)
             {
-                lines.Add(new BestiaryLine("Drops", Unknown, BestiaryTone.Unknown));
+                lines.Add(new BestiaryLine(Loc.Get("bestiary.label.drops"), Unknown, BestiaryTone.Unknown));
                 return lines;
             }
 
@@ -218,7 +238,7 @@ namespace Assets.Scripts.Enemies
                     any = true;
                     bool seen = BestiaryOps.KnowsLoot(known, drop.Item.Key);
                     lines.Add(new BestiaryLine(
-                        lines.Count == 0 ? "Drops" : "",
+                        lines.Count == 0 ? Loc.Get("bestiary.label.drops") : "",
                         seen ? drop.Item.DisplayName : Unknown,
                         seen ? BestiaryTone.Good : BestiaryTone.Unknown));
                 }
@@ -226,7 +246,7 @@ namespace Assets.Scripts.Enemies
 
             if (!any)
             {
-                lines.Add(new BestiaryLine("Drops", "Nothing", BestiaryTone.Neutral));
+                lines.Add(new BestiaryLine(Loc.Get("bestiary.label.drops"), Loc.Get("bestiary.loot.nothing"), BestiaryTone.Neutral));
             }
             return lines;
         }
@@ -244,7 +264,7 @@ namespace Assets.Scripts.Enemies
             var lines = LootLines(definition, known);
             if (definition == null || known == null)
             {
-                return new BestiaryLine("Drops", Unknown, BestiaryTone.Unknown);
+                return new BestiaryLine(Loc.Get("bestiary.label.drops"), Unknown, BestiaryTone.Unknown);
             }
             if (lines.Count == 1 && lines[0].Tone == BestiaryTone.Neutral)
             {
@@ -268,14 +288,14 @@ namespace Assets.Scripts.Enemies
             {
                 names.Add(NotYetSeen(unseen));
             }
-            return new BestiaryLine("Drops", string.Join("  ·  ", names),
+            return new BestiaryLine(Loc.Get("bestiary.label.drops"), string.Join("  ·  ", names),
                 unseen == lines.Count ? BestiaryTone.Unknown : BestiaryTone.Good);
         }
 
         /// <summary>"1 not yet seen" / "3 not yet seen": the size of what is still hidden, as one phrase.</summary>
         public static string NotYetSeen(int count)
         {
-            return count + " not yet seen";
+            return Loc.Format("bestiary.not-yet-seen", ("count", count));
         }
 
         // ============================================================
@@ -379,7 +399,7 @@ namespace Assets.Scripts.Enemies
                     continue;
                 }
                 listed.Add(type);
-                lines.Add(new BestiaryLine(StatusLabel(type), "immune", BestiaryTone.Bad));
+                lines.Add(new BestiaryLine(StatusLabel(type), Loc.Get("bestiary.status.immune"), BestiaryTone.Bad));
             }
             return lines;
         }
@@ -390,25 +410,25 @@ namespace Assets.Scripts.Enemies
             switch (type)
             {
                 case Cards.BuffType.Bleeding:
-                    return "Bleed";
+                    return Loc.Get("bestiary.status.bleed");
                 case Cards.BuffType.Poisoned:
-                    return "Poison";
+                    return Loc.Get("bestiary.status.poison");
                 case Cards.BuffType.Burning:
-                    return "Burn";
+                    return Loc.Get("bestiary.status.burn");
                 case Cards.BuffType.Regenerating:
-                    return "Regen";
+                    return Loc.Get("bestiary.status.regen");
                 case Cards.BuffType.Silenced:
-                    return "Silence";
+                    return Loc.Get("bestiary.status.silence");
                 case Cards.BuffType.Blinded:
-                    return "Blind";
+                    return Loc.Get("bestiary.status.blind");
                 case Cards.BuffType.Leeched:
-                    return "Leech";
+                    return Loc.Get("bestiary.status.leech");
                 case Cards.BuffType.Confused:
-                    return "Confuse";
+                    return Loc.Get("bestiary.status.confuse");
                 case Cards.BuffType.Marked:
-                    return "Mark";
+                    return Loc.Get("bestiary.status.mark");
                 case Cards.BuffType.DeathMarked:
-                    return "Death Mark";
+                    return Loc.Get("bestiary.status.death-mark");
                 default:
                     return type.ToString();
             }
@@ -419,9 +439,9 @@ namespace Assets.Scripts.Enemies
         {
             if (known == null)
             {
-                return new BestiaryLine("Slain", Unknown, BestiaryTone.Unknown);
+                return new BestiaryLine(Loc.Get("bestiary.label.slain"), Unknown, BestiaryTone.Unknown);
             }
-            return new BestiaryLine("Slain", known.Kills.ToString(), BestiaryTone.Neutral);
+            return new BestiaryLine(Loc.Get("bestiary.label.slain"), known.Kills.ToString(), BestiaryTone.Neutral);
         }
 
         /// <summary>
@@ -457,7 +477,7 @@ namespace Assets.Scripts.Enemies
                 bool seen = BestiaryOps.KnowsSpell(known, entry.Magic.Key);
                 lines.Add(new BestiaryLine(
                     seen ? entry.Magic.DisplayName : Unknown,
-                    seen ? "seen" : "",
+                    seen ? Loc.Get("bestiary.spell.seen") : "",
                     seen ? BestiaryTone.Neutral : BestiaryTone.Unknown));
             }
             return lines;

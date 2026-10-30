@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards
 {
@@ -46,12 +47,12 @@ namespace Assets.Scripts.Cards
 
         public string BuildLog(SpellcastAction action)
         {
-            var log = $"{action.Caster.DisplayName} casts {action.Magic.DisplayName}!";
             if (!string.IsNullOrEmpty(ComboName))
             {
-                log += $" COMBO: {ComboName}!";
+                return Loc.Format("combat.log.cast-combo",
+                    ("caster", action.Caster.DisplayName), ("ability", action.Magic.DisplayName), ("combo", ComboName));
             }
-            return log;
+            return Loc.Format("combat.log.cast", ("caster", action.Caster.DisplayName), ("ability", action.Magic.DisplayName));
         }
     }
 }

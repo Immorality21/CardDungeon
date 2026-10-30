@@ -185,10 +185,36 @@ namespace ImmoralityGaming.Localization
             {
                 return template;
             }
-            var sb = new StringBuilder(template);
-            foreach (var (name, value) in args)
+            // One pass over the template, so a value that itself contains "{x}" (an authored name)
+            // is never substituted into.
+            var sb = new StringBuilder(template.Length + 16);
+            int i = 0;
+            while (i < template.Length)
             {
-                sb.Replace("{" + name + "}", value?.ToString() ?? "");
+                int open = template.IndexOf('{', i);
+                int close = open < 0 ? -1 : template.IndexOf('}', open + 1);
+                if (open < 0 || close < 0)
+                {
+                    sb.Append(template, i, template.Length - i);
+                    break;
+                }
+                sb.Append(template, i, open - i);
+                string name = template.Substring(open + 1, close - open - 1);
+                bool found = false;
+                foreach (var arg in args)
+                {
+                    if (arg.Name == name)
+                    {
+                        sb.Append(arg.Value?.ToString() ?? "");
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    sb.Append(template, open, close - open + 1);
+                }
+                i = close + 1;
             }
             return sb.ToString();
         }

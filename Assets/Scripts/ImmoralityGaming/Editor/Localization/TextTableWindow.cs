@@ -371,20 +371,18 @@ namespace ImmoralityGaming.Editor.Localization
             }
         }
 
-        /// <summary>Areas are the first one and two segments of every key: <c>ui</c>, <c>ui.hub</c>.</summary>
+        /// <summary>Areas are the first segment of every key: <c>ability</c>, <c>tutorial</c>, <c>ui</c>.
+        /// Narrower than that is what the search box is for.</summary>
         private void RefreshAreas()
         {
             var areas = new SortedSet<string>(StringComparer.Ordinal);
             foreach (var entry in _table.Entries)
             {
-                string[] parts = (entry.Key ?? "").Split('.');
-                if (parts.Length > 1)
+                string key = entry.Key ?? "";
+                int dot = key.IndexOf('.');
+                if (dot > 0)
                 {
-                    areas.Add(parts[0]);
-                }
-                if (parts.Length > 2)
-                {
-                    areas.Add(parts[0] + "." + parts[1]);
+                    areas.Add(key.Substring(0, dot));
                 }
             }
             var choices = new List<string> { AllAreas };
@@ -523,16 +521,7 @@ namespace ImmoralityGaming.Editor.Localization
 
         private void Scan()
         {
-            _usages = new Dictionary<string, List<LocUsage>>(StringComparer.Ordinal);
-            foreach (var usage in LocUsageScanner.ScanAll())
-            {
-                if (!_usages.TryGetValue(usage.Key, out var list))
-                {
-                    list = new List<LocUsage>();
-                    _usages[usage.Key] = list;
-                }
-                list.Add(usage);
-            }
+            _usages = LocUsageScanner.Index(LocUsageScanner.ScanAll(), _table);
             Refresh();
         }
 

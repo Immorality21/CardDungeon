@@ -3,6 +3,7 @@ using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards
 {
@@ -49,9 +50,7 @@ namespace Assets.Scripts.Cards
             // on the damage line rather than read off the asset alone - with the real chance when there
             // is a caster to read it from.
             bool canCrit = EffectResolver.CanCrit(magic, caster);
-            string critText = caster != null
-                ? $", {Mathf.RoundToInt(EffectResolver.CritChanceWith(magic, caster) * 100f)}% crit"
-                : ", can crit";
+            int critChance = caster != null ? Mathf.RoundToInt(EffectResolver.CritChanceWith(magic, caster) * 100f) : 0;
             foreach (var effect in magic.Effects)
             {
                 if (effect == null || effect.UnlockLevel > upgradeLevel)
@@ -70,7 +69,9 @@ namespace Assets.Scripts.Cards
                 {
                     if (canCrit && effect.EffectType == SpellEffectType.Damage)
                     {
-                        line += critText;
+                        line = caster != null
+                            ? Loc.Format("abilities.describe.crit-chance", ("line", line), ("chance", critChance))
+                            : Loc.Format("abilities.describe.can-crit", ("line", line));
                     }
                     lines.Add(line);
                 }
@@ -96,12 +97,12 @@ namespace Assets.Scripts.Cards
                 return effect.EffectType.ToString();
             }
             string next = nextPowerBonus != powerBonus ? Describe(effect, null, null, nextPowerBonus) : now;
-            string line = next != now ? $"{now} → {next}" : now;
+            string line = next != now ? Loc.Format("abilities.describe.forge-preview", ("now", now), ("next", next)) : now;
 
             bool scales = (effect.EffectType == SpellEffectType.Damage || effect.EffectType == SpellEffectType.Heal)
                           && effect.PowerMode != PowerMode.Flat && effect.PowerMode != PowerMode.PercentOfMaxHealth
                           && StatCatalog.CanScalePower(effect.ScalingStat);
-            return scales ? $"{line} + {StatCatalog.ShortName(effect.ScalingStat)}" : line;
+            return scales ? Loc.Format("abilities.describe.forge-scales", ("line", line), ("stat", StatCatalog.ShortName(effect.ScalingStat))) : line;
         }
 
         /// <summary>Who the ability lands on, as a player would say it - "3 shots, random enemies" for a
@@ -112,7 +113,7 @@ namespace Assets.Scripts.Cards
             {
                 return string.Empty;
             }
-            return magic.HasRandomHits ? $"{magic.RandomHits} shots, random enemies" : TargetLabel(magic.TargetType);
+            return magic.HasRandomHits ? Loc.Format("abilities.target.random-shots", ("count", magic.RandomHits)) : TargetLabel(magic.TargetType);
         }
 
         /// <summary>Who the ability lands on, as a player would say it.</summary>
@@ -121,17 +122,17 @@ namespace Assets.Scripts.Cards
             switch (targetType)
             {
                 case MagicTargetType.AllEnemies:
-                    return "All enemies";
+                    return Loc.Get("abilities.target.all-enemies");
                 case MagicTargetType.Self:
-                    return "Self";
+                    return Loc.Get("abilities.target.self");
                 case MagicTargetType.SingleAlly:
-                    return "One ally";
+                    return Loc.Get("abilities.target.one-ally");
                 case MagicTargetType.AllAllies:
-                    return "Whole party";
+                    return Loc.Get("abilities.target.whole-party");
                 case MagicTargetType.FallenAlly:
-                    return "One fallen ally";
+                    return Loc.Get("abilities.target.fallen-ally");
                 default:
-                    return "One enemy";
+                    return Loc.Get("abilities.target.one-enemy");
             }
         }
 
@@ -167,10 +168,10 @@ namespace Assets.Scripts.Cards
             }
             else
             {
-                parts.Add($"{target}: {effects[0]}");
+                parts.Add(Loc.Format("abilities.describe.first-line", ("target", target), ("effect", effects[0])));
                 for (int i = 1; i < effects.Count; i++)
                 {
-                    parts.Add("+ " + effects[i]);
+                    parts.Add(Loc.Format("abilities.describe.more-line", ("effect", effects[i])));
                 }
             }
             return string.Join("\n", parts);
@@ -184,48 +185,50 @@ namespace Assets.Scripts.Cards
                     return DamageLine(effect, caster, buffTracker, powerBonus);
                 case SpellEffectType.Heal:
                     return effect.PowerMode == PowerMode.PercentOfMaxHealth
-                        ? $"heals {effect.Power}% of max HP"
-                        : $"heals {Magnitude(effect, caster, buffTracker, powerBonus)} HP";
+                        ? Loc.Format("abilities.describe.heal-percent", ("percent", effect.Power))
+                        : Loc.Format("abilities.describe.heal", ("amount", Magnitude(effect, caster, buffTracker, powerBonus)));
                 case SpellEffectType.Buff:
                     return StatusLine(effect, caster, buffTracker, +1);
                 case SpellEffectType.Debuff:
                     return StatusLine(effect, caster, buffTracker, -1);
                 case SpellEffectType.TurnDelay:
-                    return $"pushes its next turn back {effect.Power}% of a turn";
+                    return Loc.Format("abilities.describe.turn-delay", ("percent", effect.Power));
                 case SpellEffectType.Drain:
                     return effect.DrainToParty
-                        ? $"heals the whole party {effect.Power}% of the damage dealt"
-                        : $"heals the caster {effect.Power}% of the damage dealt";
+                        ? Loc.Format("abilities.describe.drain-party", ("percent", effect.Power))
+                        : Loc.Format("abilities.describe.drain-caster", ("percent", effect.Power));
                 case SpellEffectType.RestoreCharge:
                     return effect.Power == 1
-                        ? "restores 1 charge to an ability"
-                        : $"restores {effect.Power} charges to an ability";
+                        ? Loc.Get("abilities.describe.restore-charge-one")
+                        : Loc.Format("abilities.describe.restore-charges", ("count", effect.Power));
                 case SpellEffectType.Disassemble:
-                    return "takes a machine apart outright - likelier the more of its kind you have defeated";
+                    return Loc.Get("abilities.describe.disassemble");
                 case SpellEffectType.Revive:
-                    return $"revives a fallen hero with {effect.Power}% of max HP";
+                    return Loc.Format("abilities.describe.revive", ("percent", effect.Power));
                 case SpellEffectType.Cure:
                     return effect.Power <= 0
-                        ? "clears every debuff"
-                        : effect.Power == 1 ? "clears one debuff" : $"clears {effect.Power} debuffs";
+                        ? Loc.Get("abilities.describe.cure-all")
+                        : effect.Power == 1 ? Loc.Get("abilities.describe.cure-one") : Loc.Format("abilities.describe.cure-many", ("count", effect.Power));
                 case SpellEffectType.Intercept:
-                    return $"takes the single-target blows aimed at them until your next turn, at {effect.Power}% less damage";
+                    return Loc.Format("abilities.describe.intercept", ("percent", effect.Power));
                 case SpellEffectType.Retaliate:
-                    return $"strikes back once at the next attacker for {Magnitude(effect, caster, buffTracker, powerBonus)}"
-                           + (effect.DamageType != DamageType.Normal ? $" {effect.DamageType}" : "") + " damage";
+                    return effect.DamageType != DamageType.Normal
+                        ? Loc.Format("abilities.describe.retaliate-element", ("amount", Magnitude(effect, caster, buffTracker, powerBonus)), ("element", effect.DamageType))
+                        : Loc.Format("abilities.describe.retaliate", ("amount", Magnitude(effect, caster, buffTracker, powerBonus)));
                 case SpellEffectType.Thorns:
-                    return $"returns {effect.Power}% of each blow taken as {effect.DamageType} damage"
-                           + (effect.Duration > 0 ? $" for {effect.Duration} turns" : "");
+                    return effect.Duration > 0
+                        ? Loc.Format("abilities.describe.thorns-turns", ("percent", effect.Power), ("element", effect.DamageType), ("turns", effect.Duration))
+                        : Loc.Format("abilities.describe.thorns", ("percent", effect.Power), ("element", effect.DamageType));
                 case SpellEffectType.Execute:
-                    return $"destroys {TraitName(effect.BonusVsTrait, "a foe")} under {effect.Power}% health outright (not bosses)";
+                    return Loc.Format("abilities.describe.execute", ("target", TraitName(effect.BonusVsTrait, Loc.Get("abilities.describe.execute-any-foe"))), ("percent", effect.Power));
                 case SpellEffectType.Steal:
                     return effect.Power >= 100
-                        ? "steals an item or gold, certain"
-                        : "steals an item or gold, odds from Luck (once per enemy)";
+                        ? Loc.Get("abilities.describe.steal-certain")
+                        : Loc.Get("abilities.describe.steal-luck");
                 case SpellEffectType.FightGoldBonus:
-                    return $"+{effect.Power}% gold from this fight's kills and steals";
+                    return Loc.Format("abilities.describe.fight-gold", ("percent", effect.Power));
                 case SpellEffectType.RefundCharge:
-                    return "the cast costs no charge";
+                    return Loc.Get("abilities.describe.refund-charge");
                 default:
                     return null;
             }
@@ -239,36 +242,41 @@ namespace Assets.Scripts.Cards
 
         private static string DamageLine(SpellEffect effect, ICombatUnit caster, CombatBuffTracker buffTracker, int powerBonus)
         {
-            string element = effect.DamageType != DamageType.Normal ? $" {effect.DamageType}" : string.Empty;
+            bool elemental = effect.DamageType != DamageType.Normal;
             if (effect.PowerMode == PowerMode.PercentOfMaxHealth)
             {
-                return $"{effect.Power}% of max HP{element} damage";
+                return elemental
+                    ? Loc.Format("abilities.describe.damage-percent-element", ("percent", effect.Power), ("element", effect.DamageType))
+                    : Loc.Format("abilities.describe.damage-percent", ("percent", effect.Power));
             }
 
-            string line = $"{Magnitude(effect, caster, buffTracker, powerBonus)}{element} damage";
+            int amount = Magnitude(effect, caster, buffTracker, powerBonus);
+            string line = elemental
+                ? Loc.Format("abilities.describe.damage-element", ("amount", amount), ("element", effect.DamageType))
+                : Loc.Format("abilities.describe.damage", ("amount", amount));
             if (effect.BonusPercent != 0 && effect.BonusVsTrait != UnitTraits.None)
             {
-                line += effect.BonusPercent == 100
-                    ? $", double vs {TraitName(effect.BonusVsTrait, "")}"
-                    : $", +{effect.BonusPercent}% vs {TraitName(effect.BonusVsTrait, "")}";
+                line = effect.BonusPercent == 100
+                    ? Loc.Format("abilities.describe.bonus-double", ("line", line), ("versus", TraitName(effect.BonusVsTrait, "")))
+                    : Loc.Format("abilities.describe.bonus-percent", ("line", line), ("percent", effect.BonusPercent), ("versus", TraitName(effect.BonusVsTrait, "")));
             }
             else if (effect.BonusPercent != 0 && effect.BonusPerDebuff)
             {
-                line += $", +{effect.BonusPercent}% per debuff on the target (up to {SpellEffect.MaxDebuffBonuses})";
+                line = Loc.Format("abilities.describe.bonus-per-debuff", ("line", line), ("percent", effect.BonusPercent), ("max", SpellEffect.MaxDebuffBonuses));
             }
             else if (effect.BonusPercent != 0 && effect.BonusVsStatus != BuffType.None)
             {
                 string status = effect.BonusVsStatus.ToString().ToLowerInvariant();
-                line += effect.BonusPercent == 100
-                    ? $", double vs {status}"
-                    : $", +{effect.BonusPercent}% vs {status}";
+                line = effect.BonusPercent == 100
+                    ? Loc.Format("abilities.describe.bonus-double", ("line", line), ("versus", status))
+                    : Loc.Format("abilities.describe.bonus-percent", ("line", line), ("percent", effect.BonusPercent), ("versus", status));
             }
             if (caster != null)
             {
                 int attack = caster.GetEffectiveAttackPower()
                     + (buffTracker != null ? buffTracker.GetBuffAmount(caster, caster.AttackStat) : 0);
                 // The stat grid's name for it ("STR 7"), not a second word for the same number.
-                line += $" ({StatCatalog.ShortName(caster.AttackStat)} {attack})";
+                line = Loc.Format("abilities.describe.with-attack", ("line", line), ("stat", StatCatalog.ShortName(caster.AttackStat)), ("value", attack));
             }
             return line;
         }
@@ -308,7 +316,7 @@ namespace Assets.Scripts.Cards
                 if (effect.PowerMode == PowerMode.PercentOfMaxHealth)
                 {
                     // A share of each target's own bar (a barrier): "Barrier of 25% max HP".
-                    text = handler.GetDisplayText(0).Replace(" 0", "") + $" of {effect.Power}% max HP";
+                    text = Loc.Format("abilities.describe.status-max-hp", ("status", handler.GetDisplayText(0).Replace(" 0", "")), ("percent", effect.Power));
                 }
                 else
                 {
@@ -318,40 +326,45 @@ namespace Assets.Scripts.Cards
                 }
             }
 
-            string gloss;
-            if (Glosses.TryGetValue(effect.BuffType, out gloss))
+            string glossKey;
+            if (Glosses.TryGetValue(effect.BuffType, out glossKey))
             {
-                text += $" ({gloss})";
+                text = Loc.Format("abilities.describe.status-gloss", ("status", text), ("gloss", Loc.Get(glossKey)));
             }
 
             int turns = Mathf.Max(0, effect.Duration);
-            text = turns > 0 ? $"{text}, {turns} turn{(turns == 1 ? "" : "s")}" : text;
+            if (turns > 0)
+            {
+                text = turns == 1
+                    ? Loc.Format("abilities.describe.status-turn", ("status", text), ("turns", turns))
+                    : Loc.Format("abilities.describe.status-turns", ("status", text), ("turns", turns));
+            }
 
             // Every debuff is a chance (AfflictionRules); a certain one says nothing.
             if (sign < 0 && effect.ApplyChance < AfflictionRules.Certain)
             {
-                text += $", {effect.ApplyChance}% chance";
+                text = Loc.Format("abilities.describe.status-chance", ("status", text), ("chance", effect.ApplyChance));
             }
             return text;
         }
 
         /// <summary>
         /// The statuses whose name does not say what they do. Stat changes and damage-over-time
-        /// already read as numbers ("+2 Endurance", "Bleeding 1/turn") and get nothing.
+        /// already read as numbers ("+2 Endurance", "Bleeding 1/turn") and get nothing. Values are text keys.
         /// </summary>
         private static readonly Dictionary<BuffType, string> Glosses = new Dictionary<BuffType, string>
         {
-            { BuffType.Frozen, "loses its turns" },
-            { BuffType.Slow, "acts less often" },
-            { BuffType.Haste, "acts more often" },
-            { BuffType.Silenced, "cannot use abilities" },
-            { BuffType.Blinded, "physical hits may miss" },
-            { BuffType.Leeched, "of each hit on it heals the caster" },
-            { BuffType.Confused, "may strike its own side" },
-            { BuffType.Marked, "more damage from every hit" },
-            { BuffType.Hidden, "cannot be targeted" },
-            { BuffType.Evasive, "physical blows on them miss" },
-            { BuffType.DeathMarked, "every hit on it is a harder crit" },
+            { BuffType.Frozen, "abilities.gloss.frozen" },
+            { BuffType.Slow, "abilities.gloss.slow" },
+            { BuffType.Haste, "abilities.gloss.haste" },
+            { BuffType.Silenced, "abilities.gloss.silenced" },
+            { BuffType.Blinded, "abilities.gloss.blinded" },
+            { BuffType.Leeched, "abilities.gloss.leeched" },
+            { BuffType.Confused, "abilities.gloss.confused" },
+            { BuffType.Marked, "abilities.gloss.marked" },
+            { BuffType.Hidden, "abilities.gloss.hidden" },
+            { BuffType.Evasive, "abilities.gloss.evasive" },
+            { BuffType.DeathMarked, "abilities.gloss.death-marked" },
         };
     }
 }

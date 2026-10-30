@@ -1,5 +1,6 @@
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -24,7 +25,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return $"Leeched {Mathf.Abs(power)}%!";
+            return Loc.Format("combat.status.leeched", ("power", Mathf.Abs(power)));
         }
 
         public bool SkipsTurn => false;

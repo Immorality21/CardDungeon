@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 using UnityEngine;
 
 namespace Assets.Scripts.Combat
@@ -39,7 +40,7 @@ namespace Assets.Scripts.Combat
         /// <summary>The chance as the player reads it: "45%".</summary>
         public static string Percent(float chance)
         {
-            return Mathf.RoundToInt(chance * 100f) + "%";
+            return Loc.Format("combat.format.percent", ("value", Mathf.RoundToInt(chance * 100f)));
         }
     }
 }

@@ -4,6 +4,7 @@ using ImmoralityGaming.Menu;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using ImmoralityGaming.Localization;
 
 /// <summary>
 /// The title screen (UI Toolkit): Continue, Options, Quit — and nothing else.
@@ -64,7 +65,7 @@ public class MainMenuManager : MonoBehaviour
         // Same button, same destination - only the word changes. A brand-new save used to be greeted
         // with "Continue" (playtest 2026-09-28, finding 14).
         _isNewGame = !HasSaveGame();
-        _continueButton.text = _isNewGame ? "New Game" : "Continue";
+        _continueButton.text = _isNewGame ? Loc.Get("menu.title.new-game") : Loc.Get("ui.common.continue");
         _optionsButton.clicked += OnOptions;
         if (_quitButton != null)
         {

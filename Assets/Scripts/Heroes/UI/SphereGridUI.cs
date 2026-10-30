@@ -6,6 +6,7 @@ using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Heroes.UI
 {
@@ -263,7 +264,7 @@ namespace Assets.Scripts.Heroes.UI
                 if (hero.SphereGrid == null)
                 {
                     card.SetEnabled(false);
-                    card.tooltip = "No grid authored for this hero yet.";
+                    card.tooltip = Loc.Get("grid.hero.no-grid");
                 }
                 else if (IsGuiding && hero != _guideHero)
                 {
@@ -286,7 +287,7 @@ namespace Assets.Scripts.Heroes.UI
                 int xp = save != null ? save.CurrentXp : 0;
                 if (xp > 0)
                 {
-                    var badge = new Label($"{xp} XP") { pickingMode = PickingMode.Ignore };
+                    var badge = new Label(Loc.Format("grid.hero.xp-badge", ("xp", xp))) { pickingMode = PickingMode.Ignore };
                     badge.AddToClassList("sg-hero-xp");
                     card.Add(badge);
                 }
@@ -408,8 +409,8 @@ namespace Assets.Scripts.Heroes.UI
             if (_xpLabel != null)
             {
                 _xpLabel.text = _selectedHero != null
-                    ? $"{_selectedHero.DisplayName}: {save.CurrentXp} XP to spend"
-                    : "No heroes owned.";
+                    ? Loc.Format("grid.xp-to-spend", ("hero", _selectedHero.DisplayName), ("xp", save.CurrentXp))
+                    : Loc.Get("grid.no-heroes");
             }
             BuildHeroTabs();
 
@@ -437,14 +438,14 @@ namespace Assets.Scripts.Heroes.UI
             var node = SphereGridOps.FindNode(grid, _selectedNodeKey);
             if (node == null)
             {
-                SetDetail("Select a node.", "", "Click a node, or move to one with the arrow keys.", "");
+                SetDetail(Loc.Get("grid.detail.select-title"), "", Loc.Get("grid.detail.select-hint"), "");
                 SetShown(_detailKind, false);
                 SetReason(string.Empty);
                 if (_activateButton != null)
                 {
                     // Reset the label too, or switching hero after an activation left the button
                     // reading "Activated" over an empty selection (revisit playtest finding 9).
-                    _activateButton.text = "Activate";
+                    _activateButton.text = Loc.Get("grid.button.activate");
                     _activateButton.SetEnabled(false);
                 }
                 return;
@@ -462,7 +463,7 @@ namespace Assets.Scripts.Heroes.UI
                                && HeroRoster.CanPayNonXpCost(node);
             if (_activateButton != null)
             {
-                _activateButton.text = isActive ? "Activated" : "Activate";
+                _activateButton.text = isActive ? Loc.Get("grid.button.activated") : Loc.Get("grid.button.activate");
                 _activateButton.SetEnabled(canActivate);
             }
 
@@ -472,7 +473,7 @@ namespace Assets.Scripts.Heroes.UI
             }
             else if (!SphereGridOps.IsReachable(grid, activated, node.Key))
             {
-                SetReason("Activate a node next to it first.");
+                SetReason(Loc.Get("grid.reason.not-reachable"));
             }
             else if (SphereGridOps.MissingRequirements(grid, activated, node.Key).Count > 0)
             {
@@ -480,16 +481,16 @@ namespace Assets.Scripts.Heroes.UI
             }
             else if (save.CurrentXp < node.XpCost)
             {
-                SetReason($"Need {node.XpCost} XP — you have {save.CurrentXp}.");
+                SetReason(Loc.Format("grid.reason.xp", ("cost", node.XpCost), ("have", save.CurrentXp)));
             }
             else if (!HeroRoster.CanPayEssence(node))
             {
                 int purse = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.Essence : 0;
-                SetReason($"Need {node.EssenceCost} Essence — {purse} in the purse. Revisits pay Essence.");
+                SetReason(Loc.Format("grid.reason.essence", ("cost", node.EssenceCost), ("purse", purse)));
             }
             else
             {
-                SetReason("Needs " + DescribeMaterialShortfall(node));
+                SetReason(Loc.Format("grid.reason.materials", ("materials", DescribeMaterialShortfall(node))));
             }
         }
 
@@ -517,13 +518,13 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.MagicAwaken:
                     return MagicName(node.AwakenedMagicKey);
                 case SphereNodeKind.MagicUpgrade:
-                    return $"{MagicName(node.GrantedMagicKey)}: {SphereGridPresenter.DescribeUpgrade(node.UpgradeType, node.UpgradeAmount)}";
+                    return Loc.Format("grid.payload.ability-upgrade", ("ability", MagicName(node.GrantedMagicKey)), ("upgrade", SphereGridPresenter.DescribeUpgrade(node.UpgradeType, node.UpgradeAmount)));
                 case SphereNodeKind.Summon:
                     return SummonName(node.GrantedSummonKey);
                 case SphereNodeKind.Ultra:
                     return UltraName(node.GrantedUltraKey);
                 case SphereNodeKind.MagicSlot:
-                    return "+1 ability slot";
+                    return Loc.Get("grid.title.ability-slot");
                 default:
                     return SphereGridPresenter.DescribePayload(node);
             }
@@ -540,17 +541,19 @@ namespace Assets.Scripts.Heroes.UI
             switch (node.UpgradeType)
             {
                 case AbilityUpgradeType.Power:
-                    return $"{name} hits (or heals) for {amount} more, before its scaling stat.";
+                    return Loc.Format("grid.upgrade-detail.power", ("ability", name), ("amount", amount));
                 case AbilityUpgradeType.CritChance:
-                    return $"{name} can land critical hits, at {amount}% better odds than this hero's own - "
-                           + "Luck raises both.";
+                    return Loc.Format("grid.upgrade-detail.crit-chance", ("ability", name), ("amount", amount));
                 case AbilityUpgradeType.Duration:
-                    return $"Everything {name} leaves behind - buffs, debuffs, poisons, burns - lasts "
-                           + (amount == 1 ? "1 turn" : $"{amount} turns") + " longer.";
+                    return amount == 1
+                        ? Loc.Format("grid.upgrade-detail.duration.one", ("ability", name))
+                        : Loc.Format("grid.upgrade-detail.duration.many", ("ability", name), ("amount", amount));
                 case AbilityUpgradeType.ApplyChance:
-                    return $"{name}'s debuffs are {amount}% likelier to take hold.";
+                    return Loc.Format("grid.upgrade-detail.apply-chance", ("ability", name), ("amount", amount));
                 case AbilityUpgradeType.Charges:
-                    return $"{name} has {(amount == 1 ? "1 more charge" : $"{amount} more charges")} every run.";
+                    return amount == 1
+                        ? Loc.Format("grid.upgrade-detail.charges.one", ("ability", name))
+                        : Loc.Format("grid.upgrade-detail.charges.many", ("ability", name), ("amount", amount));
                 default:
                     return SphereGridPresenter.DescribePayload(node);
             }
@@ -566,8 +569,7 @@ namespace Assets.Scripts.Heroes.UI
                     // Learned is not carried: it still has to win a slot in the Storehouse, and the
                     // charge count is the whole run's allowance of it.
                     var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(node.GrantedMagicKey) : null;
-                    string line = $"Learns {MagicName(node.GrantedMagicKey)}, {Mathf.Max(1, node.GrantedCharges)} charges a run. "
-                                  + "Carry it by giving it a slot in the Storehouse.";
+                    string line = Loc.Format("grid.detail.learns", ("ability", MagicName(node.GrantedMagicKey)), ("charges", Mathf.Max(1, node.GrantedCharges)));
                     return magic != null && !string.IsNullOrEmpty(magic.Description)
                         ? magic.Description + "\n\n" + line
                         : line;
@@ -577,8 +579,7 @@ namespace Assets.Scripts.Heroes.UI
                     // What it becomes, then what it replaces: the awakened ability keeps the base's
                     // slot and charges, so nothing about the loadout changes.
                     var awakened = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(node.AwakenedMagicKey) : null;
-                    string line = $"Awakens {MagicName(node.GrantedMagicKey)} into {MagicName(node.AwakenedMagicKey)}. "
-                                  + "It keeps its slot and charges.";
+                    string line = Loc.Format("grid.detail.awakens", ("from", MagicName(node.GrantedMagicKey)), ("to", MagicName(node.AwakenedMagicKey)));
                     return awakened != null && !string.IsNullOrEmpty(awakened.Description)
                         ? awakened.Description + "\n\n" + line
                         : line;
@@ -586,18 +587,17 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.MagicUpgrade:
                     return UpgradePayload(node);
                 case SphereNodeKind.MagicSlot:
-                    return "Carry one more of the abilities this hero knows into every run.";
+                    return Loc.Get("grid.detail.ability-slot");
                 case SphereNodeKind.Summon:
-                    return $"Learns the summon {SummonName(node.GrantedSummonKey)}. Always carried and cast with Summon; it takes no ability slot.";
+                    return Loc.Format("grid.detail.summon", ("summon", SummonName(node.GrantedSummonKey)));
                 case SphereNodeKind.Ultra:
                 {
                     var ultra = string.IsNullOrEmpty(node.GrantedUltraKey) ? null : UltraCatalogSO.Resolve(node.GrantedUltraKey);
                     string what = ultra != null ? UltraOps.Describe(ultra) + ". " : "";
-                    return $"Learns the Ultra {UltraName(node.GrantedUltraKey)}. {what}"
-                           + "Use it from the Ultra command once the gauge is full - losing health in a fight fills it.";
+                    return Loc.Format("grid.detail.ultra", ("ultra", UltraName(node.GrantedUltraKey)), ("what", what));
                 }
                 case SphereNodeKind.Stat:
-                    return "Raises this hero's stats for good.";
+                    return Loc.Get("grid.detail.stat");
                 case SphereNodeKind.Resistance:
                     return SphereGridPresenter.DescribePayload(node);
                 default:
@@ -633,7 +633,7 @@ namespace Assets.Scripts.Heroes.UI
             foreach (var entry in node.Gains.NonZero())
             {
                 var cell = Items.UI.InventoryHubUI.StatCell(StatCatalog.DisplayName(entry.Type),
-                    $"{before[entry.Type]} → {after[entry.Type]}", 1, StatCatalog.DisplayName(entry.Type));
+                    Loc.Format("grid.detail.stat-change", ("before", before[entry.Type]), ("after", after[entry.Type])), 1, StatCatalog.DisplayName(entry.Type));
                 cell.style.width = new Length(100f, LengthUnit.Percent);
                 _detailBody.Add(cell);
             }
@@ -793,26 +793,25 @@ namespace Assets.Scripts.Heroes.UI
                 }
 
                 SetFeedback(node.Kind == SphereNodeKind.MagicAwaken
-                    ? $"{MagicName(node.GrantedMagicKey)} awakens into {MagicName(node.AwakenedMagicKey)}."
-                    : $"{SphereGridPresenter.NodeName(node)} activated.");
+                    ? Loc.Format("grid.feedback.awakened", ("from", MagicName(node.GrantedMagicKey)), ("to", MagicName(node.AwakenedMagicKey)))
+                    : Loc.Format("grid.feedback.activated", ("node", SphereGridPresenter.NodeName(node))));
                 Refresh();
                 NodeActivated?.Invoke(node.Key);
                 return;
             }
             else if (!HeroRoster.CanPayEssence(node))
             {
-                SetFeedback($"Not enough Essence — needs {node.EssenceCost}. Revisits pay Essence.");
+                SetFeedback(Loc.Format("grid.feedback.no-essence", ("cost", node.EssenceCost)));
             }
             else if (!HeroRoster.CanPayMaterials(node))
             {
                 // The one failure the player cannot fix at the hub, so it is worth naming: XP is
                 // banked from kills, materials only drop in a run.
-                SetFeedback("Not enough materials — needs "
-                            + SphereGridPresenter.DescribeMaterialCost(node) + ".");
+                SetFeedback(Loc.Format("grid.feedback.no-materials", ("materials", SphereGridPresenter.DescribeMaterialCost(node))));
             }
             else
             {
-                SetFeedback("Cannot activate that node.");
+                SetFeedback(Loc.Get("grid.feedback.cannot-activate"));
             }
             Refresh();
         }

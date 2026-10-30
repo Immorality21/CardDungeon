@@ -1,4 +1,5 @@
 using Assets.Scripts.Combat;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -22,7 +23,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return $"Barrier {power}";
+            return Loc.Format("combat.status.barrier", ("power", power));
         }
 
         public bool SkipsTurn => false;

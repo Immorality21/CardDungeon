@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 namespace Assets.Scripts.Rooms
 {
     /// <summary>
@@ -59,13 +60,13 @@ namespace Assets.Scripts.Rooms
             switch (kind)
             {
                 case RoomKind.Connector:
-                    return "Passage";
+                    return Loc.Get("room.kind.connector");
                 case RoomKind.Treasure:
-                    return "Cache";
+                    return Loc.Get("room.kind.treasure");
                 case RoomKind.Rest:
-                    return "Refuge";
+                    return Loc.Get("room.kind.rest");
                 default:
-                    return "Chamber";
+                    return Loc.Get("room.kind.chamber");
             }
         }
     }

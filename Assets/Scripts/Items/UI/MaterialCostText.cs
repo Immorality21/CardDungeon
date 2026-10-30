@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Items.UI
 {
@@ -32,7 +33,7 @@ namespace Assets.Scripts.Items.UI
                 int need = Mathf.Max(1, line.Amount);
                 int have = InventoryManager.Instance.GetMaterialQuantity(line.Material.Key);
                 string colour = have >= need ? HaveColour : ShortColour;
-                parts.Add($"<color={colour}>{name} {Mathf.Min(have, need)}/{need}</color>");
+                parts.Add($"<color={colour}>{Loc.Format("items.material-cost.part", ("name", name), ("have", Mathf.Min(have, need)), ("need", need))}</color>");
             }
             return string.Join(" · ", parts);
         }

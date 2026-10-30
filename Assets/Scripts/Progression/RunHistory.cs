@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.IO;
@@ -343,17 +344,20 @@ namespace Assets.Scripts.Progression
             {
                 return string.Empty;
             }
-            string floor = $"floor {record.FloorIndex + 1} of {record.TotalFloors}"
-                           + (!withFloorName || string.IsNullOrEmpty(record.FloorName) ? string.Empty : $" ({record.FloorName})");
+            string floor = !withFloorName || string.IsNullOrEmpty(record.FloorName)
+                ? Loc.Format("dungeon.history.floor", ("floor", record.FloorIndex + 1), ("total", record.TotalFloors))
+                : Loc.Format("dungeon.history.floor-named", ("floor", record.FloorIndex + 1), ("total", record.TotalFloors), ("name", record.FloorName));
             switch (record.Outcome)
             {
                 case RunOutcome.Cleared:
-                    return "Cleared every floor";
+                    return Loc.Get("dungeon.history.end.cleared");
                 case RunOutcome.Fell:
                     string foes = DescribeFoes(record.FellTo);
-                    return string.IsNullOrEmpty(foes) ? $"Fell on {floor}" : $"Fell on {floor} to {foes}";
+                    return string.IsNullOrEmpty(foes)
+                        ? Loc.Format("dungeon.history.end.fell", ("floor", floor))
+                        : Loc.Format("dungeon.history.end.fell-to", ("floor", floor), ("foes", foes));
                 default:
-                    return $"On {floor}";
+                    return Loc.Format("dungeon.history.end.on", ("floor", floor));
             }
         }
 
@@ -383,13 +387,13 @@ namespace Assets.Scripts.Progression
             foreach (var name in order)
             {
                 int n = counts[name];
-                parts.Add(n == 1 ? name : $"{n} {Plural(name)}");
+                parts.Add(n == 1 ? name : Loc.Format("dungeon.history.foes.counted", ("count", n), ("name", Plural(name))));
             }
             if (parts.Count == 1)
             {
                 return parts[0];
             }
-            return string.Join(", ", parts.GetRange(0, parts.Count - 1)) + " and " + parts[parts.Count - 1];
+            return Loc.Format("dungeon.history.foes.list", ("first", string.Join(Loc.Get("dungeon.history.foes.separator"), parts.GetRange(0, parts.Count - 1))), ("last", parts[parts.Count - 1]));
         }
 
         private static string Plural(string name)

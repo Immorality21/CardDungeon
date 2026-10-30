@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -703,33 +704,33 @@ namespace Assets.Scripts.Rooms
             if (option.Kind != Events.RoomEventOptionKind.StatCheck)
             {
                 tone = "safe";
-                return option.Kind == Events.RoomEventOptionKind.Decline ? "leave" : "safe";
+                return option.Kind == Events.RoomEventOptionKind.Decline ? Loc.Get("room.event.tag.leave") : Loc.Get("room.event.tag.safe");
             }
             string stat = StatCatalog.ShortName(roomEvent.GoverningStat);
             if (clarity == Events.OddsClarity.Unknown)
             {
                 tone = "unknown";
-                return stat + " · ?";
+                return Loc.Format("room.event.tag.unknown", ("stat", stat));
             }
             bool good = band >= Events.OddsBand.VeryLikely;
             bool even = band == Events.OddsBand.EvenOdds;
             tone = good ? "good" : even ? "even" : "bad";
             if (clarity == Events.OddsClarity.Vague)
             {
-                return stat + (good ? " · safe-ish" : even ? " · risky" : " · dangerous");
+                return Loc.Format(good ? "room.event.tag.vague.good" : even ? "room.event.tag.vague.even" : "room.event.tag.vague.bad", ("stat", stat));
             }
             switch (band)
             {
                 case Events.OddsBand.AlmostCertain:
-                    return stat + " · certain";
+                    return Loc.Format("room.event.tag.certain", ("stat", stat));
                 case Events.OddsBand.VeryLikely:
-                    return stat + " · likely";
+                    return Loc.Format("room.event.tag.likely", ("stat", stat));
                 case Events.OddsBand.EvenOdds:
-                    return stat + " · even";
+                    return Loc.Format("room.event.tag.even", ("stat", stat));
                 case Events.OddsBand.SlightChance:
-                    return stat + " · slim";
+                    return Loc.Format("room.event.tag.slim", ("stat", stat));
                 default:
-                    return stat + " · hopeless";
+                    return Loc.Format("room.event.tag.hopeless", ("stat", stat));
             }
         }
 
@@ -743,11 +744,10 @@ namespace Assets.Scripts.Rooms
 
             if (_eventActingHero == null)
             {
-                return $"Anything you chance here turns on {statName}. {reading}";
+                return Loc.Format("room.event.odds", ("stat", statName), ("reading", reading));
             }
 
-            return $"Anything you chance here turns on {statName} - "
-                   + $"{_eventActingHero.DisplayName} has the best of it. {reading}";
+            return Loc.Format("room.event.odds-hero", ("stat", statName), ("hero", _eventActingHero.DisplayName), ("reading", reading));
         }
 
         /// <summary>
@@ -770,11 +770,11 @@ namespace Assets.Scripts.Rooms
             {
                 // Walking away leaves the event unconsumed - the choice is deferred, not spent.
                 string declineText = string.IsNullOrEmpty(option.DeclineText)
-                    ? "You leave it be."
+                    ? Loc.Get("room.event.decline.default")
                     : option.DeclineText;
                 // Say so, or the Action button that stays on the bar reads as a bug rather than an
                 // offer still open (revisit playtest finding 11).
-                ShowDetail(_currentEvent.Title, declineText + "\n\nIt will still be here if you change your mind.");
+                ShowDetail(_currentEvent.Title, Loc.Format("room.event.decline.message", ("text", declineText)));
                 _detailOkAction = CloseEventResult;
                 return;
             }
@@ -811,7 +811,7 @@ namespace Assets.Scripts.Rooms
 
         private void ShowEventResult(Events.RoomEventOutcomeReport report, bool? checkPassed = null)
         {
-            string message = string.IsNullOrEmpty(report.Text) ? "Nothing comes of it." : report.Text;
+            string message = string.IsNullOrEmpty(report.Text) ? Loc.Get("room.event.result.nothing") : report.Text;
             if (report.Lines.Count > 0)
             {
                 message += "\n\n" + string.Join("\n", report.Lines);
@@ -822,7 +822,7 @@ namespace Assets.Scripts.Rooms
             // left the player to infer it from the consequences.
             if (checkPassed.HasValue)
             {
-                SetDetailChip(checkPassed.Value ? "Success" : "Failed", checkPassed.Value);
+                SetDetailChip(checkPassed.Value ? Loc.Get("room.event.result.success") : Loc.Get("room.event.result.failed"), checkPassed.Value);
             }
 
             // A woken room is a different room: re-show it so the Fight/Flee bar replaces the
@@ -858,13 +858,13 @@ namespace Assets.Scripts.Rooms
             _detailOk.text = confirmLabel;
             _detailOkAction = () =>
             {
-                _detailOk.text = "Ok";
+                _detailOk.text = Loc.Get("room.detail.ok");
                 SetShown(_detailWindow, false);
                 onConfirm();
             };
             _detailCancelAction = () =>
             {
-                _detailOk.text = "Ok";
+                _detailOk.text = Loc.Get("room.detail.ok");
                 SetShown(_detailWindow, false);
                 ShowMainBar();
             };
@@ -943,7 +943,7 @@ namespace Assets.Scripts.Rooms
                 tile.style.backgroundImage = new StyleBackground(icon);
             }
             row.Add(tile);
-            var label = new Label(quantity > 1 ? $"{name} x{quantity}" : name) { pickingMode = PickingMode.Ignore };
+            var label = new Label(quantity > 1 ? Loc.Format("room.reward.counted", ("name", name), ("count", quantity)) : name) { pickingMode = PickingMode.Ignore };
             label.AddToClassList("cd-victory-loot__name");
             if (rarityOf != null)
             {
@@ -973,17 +973,19 @@ namespace Assets.Scripts.Rooms
             var model = DungeonMapOps.Build(BuildMapInputs(dungeon != null ? dungeon.CurrentRooms : null),
                 _currentRoom.RoomIndex);
             string left = model.FrontierCount > 0
-                ? $"\n\n{model.FrontierCount} {(model.FrontierCount == 1 ? "way" : "ways")} not yet taken will stay unexplored."
+                ? (model.FrontierCount == 1
+                    ? Loc.Format("room.descend.unexplored.one", ("count", model.FrontierCount))
+                    : Loc.Format("room.descend.unexplored.many", ("count", model.FrontierCount)))
                 : string.Empty;
             // The last floor has nothing below it: there the stairs lead home (revisit playtest
             // finding 11).
             bool lastFloor = dungeon != null && DungeonManager.ActiveRun != null
                 && DungeonManager.RunLevelIndex >= DungeonManager.ActiveRun.Levels.Count - 1;
-            ShowConfirm(lastFloor ? "The Way Out" : "The Way Down",
+            ShowConfirm(lastFloor ? Loc.Get("room.descend.title.last") : Loc.Get("room.descend.title"),
                 (lastFloor
-                    ? "The way is clear. Nothing lies deeper - this is the end of the run."
-                    : "The stairs drop away into the dark below.") + left,
-                lastFloor ? "Leave" : "Descend",
+                    ? Loc.Get("room.descend.message.last")
+                    : Loc.Get("room.descend.message")) + left,
+                lastFloor ? Loc.Get("room.descend.confirm.last") : Loc.Get("room.descend.confirm"),
                 () => CombatManager.Instance.NotifyDungeonCleared());
         }
 
@@ -1012,15 +1014,13 @@ namespace Assets.Scripts.Rooms
             {
                 FloatingTextHandler.Instance.CreateFloatingText(
                     GameManager.Instance.Party.transform.position,
-                    $"{captive.DisplayName} joined!",
+                    Loc.Format("room.captive.joined-float", ("hero", captive.DisplayName)),
                     Color.cyan);
             }
 
             string blurb = string.IsNullOrEmpty(captive.Blurb) ? "" : captive.Blurb + "\n\n";
-            ShowDetail($"{captive.DisplayName} joins you",
-                $"{captive.DisplayName} was held captive here. {blurb}"
-                + "They are yours for good once this level is cleared - fall here and they are "
-                + "lost with the rest of the run.");
+            ShowDetail(Loc.Format("room.captive.title", ("hero", captive.DisplayName)),
+                Loc.Format("room.captive.message", ("hero", captive.DisplayName), ("blurb", blurb)));
             return true;
         }
 
@@ -1066,12 +1066,12 @@ namespace Assets.Scripts.Rooms
             if (FloatingTextHandler.HasInstance && GameManager.Instance.Party != null)
             {
                 FloatingTextHandler.Instance.CreateFloatingText(
-                    GameManager.Instance.Party.transform.position, $"+{gold} gold", new Color(1f, 0.85f, 0.25f));
+                    GameManager.Instance.Party.transform.position, Loc.Format("room.cache.gold-float", ("amount", gold)), new Color(1f, 0.85f, 0.25f));
             }
 
-            ShowDetail("A Cache", gold > 0
-                ? $"Coin and oddments, stashed here and forgotten. +{gold} gold."
-                : "Coin and oddments, stashed here and forgotten.");
+            ShowDetail(Loc.Get("room.cache.title"), gold > 0
+                ? Loc.Format("room.cache.message-gold", ("amount", gold))
+                : Loc.Get("room.cache.message"));
             // What was found, as reward rows (the victory window's style) rather than sentences.
             if (item != null)
             {
@@ -1083,7 +1083,7 @@ namespace Assets.Scripts.Rooms
             }
             if (item == null && materials.Count == 0)
             {
-                _detailMessage.text += "\n\nNothing else worth carrying.";
+                _detailMessage.text += Loc.Get("room.cache.nothing-else");
             }
             _detailOkAction = ClosePayloadResult;
         }
@@ -1164,14 +1164,13 @@ namespace Assets.Scripts.Rooms
             SetShown(_mainBar, false);
 
             string state = missing > 0
-                ? $"The party is down {missing} health between them."
-                : "Nobody here is hurt - resting now wastes the place.";
+                ? Loc.Format("room.refuge.state.hurt", ("missing", missing))
+                : Loc.Get("room.refuge.state.whole");
 
-            ShowConfirm("A Refuge",
-                $"Dry ground, and nothing watching. {state}\n\n"
-                + $"Resting restores {Mathf.RoundToInt(RoomKindRewards.RestHealFraction * 100f)}% of "
-                + "each hero's health and refills every ability charge. It can only be done once.",
-                "Rest",
+            ShowConfirm(Loc.Get("room.refuge.title"),
+                Loc.Format("room.refuge.prompt", ("state", state),
+                    ("percent", Mathf.RoundToInt(RoomKindRewards.RestHealFraction * 100f))),
+                Loc.Get("room.refuge.confirm"),
                 ApplyRest);
         }
 
@@ -1194,8 +1193,8 @@ namespace Assets.Scripts.Rooms
                         RunFear.Current.ScaleHeroHealing(RoomKindRewards.RestHealAmount(max)),
                         new HealthSource(null, HealthCause.Rest), null).Healed;
                     lines.Add(healed > 0
-                        ? $"{hero.DisplayName} recovers {healed} health."
-                        : $"{hero.DisplayName} was already whole.");
+                        ? Loc.Format("room.refuge.healed", ("hero", hero.DisplayName), ("amount", healed))
+                        : Loc.Format("room.refuge.already-whole", ("hero", hero.DisplayName)));
                 }
             }
 
@@ -1208,13 +1207,13 @@ namespace Assets.Scripts.Rooms
             if (DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 DungeonManager.Instance.MagicState.RefillCharges();
-                lines.Add("Ability charges are restored.");
+                lines.Add(Loc.Get("room.refuge.ability-charges"));
             }
             if (DungeonManager.HasInstance && DungeonManager.Instance.Summons != null
                 && DungeonManager.Instance.Summons.GetSaveData().Count > 0)
             {
                 DungeonManager.Instance.Summons.RefillCharges();
-                lines.Add("Summon charges are restored.");
+                lines.Add(Loc.Get("room.refuge.summon-charges"));
             }
 
             TakePayload();
@@ -1222,11 +1221,10 @@ namespace Assets.Scripts.Rooms
             if (FloatingTextHandler.HasInstance && party != null)
             {
                 FloatingTextHandler.Instance.CreateFloatingText(
-                    party.transform.position, "Rested", Color.green);
+                    party.transform.position, Loc.Get("room.refuge.rested-float"), Color.green);
             }
 
-            ShowDetail("A Refuge", "You make camp long enough to bind what can be bound.\n\n"
-                + string.Join("\n", lines));
+            ShowDetail(Loc.Get("room.refuge.title"), Loc.Format("room.refuge.result", ("lines", string.Join("\n", lines))));
             _detailOkAction = ClosePayloadResult;
             RefreshPartyStatus();
         }
@@ -1279,7 +1277,7 @@ namespace Assets.Scripts.Rooms
         private void OnHeroTurnStarted(ICombatUnit hero)
         {
             _currentHeroTurn = hero;
-            _heroTitle.text = $"{hero.DisplayName}'s Turn";
+            _heroTitle.text = Loc.Format("room.combat.turn-title", ("hero", hero.DisplayName));
             HighlightActiveHero(hero);
             RefreshPartyStatus();
 
@@ -1576,14 +1574,14 @@ namespace Assets.Scripts.Rooms
                 {
                     // A rotating summon's row is this turn's rite, by name - "Attack" would be a lie.
                     Command = HeroCommand.SummonAbility,
-                    Label = summon.Summon != null && summon.Summon.RotateActions ? summon.AttackAbility.DisplayName : "Attack",
+                    Label = summon.Summon != null && summon.Summon.RotateActions ? summon.AttackAbility.DisplayName : Loc.Get("room.command.attack"),
                     Enabled = true,
                     Ability = summon.AttackAbility
                 });
             }
             else
             {
-                _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
+                _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = Loc.Get("room.command.attack"), Enabled = true });
             }
             if (summon.Summon != null && summon.Summon.Actions != null)
             {
@@ -1606,20 +1604,20 @@ namespace Assets.Scripts.Rooms
                 // see what they have already used rather than wondering where it went.
                 _commands.Add(new CommandEntry
                 {
-                    Command = HeroCommand.SummonAbility, Label = "★ " + summon.Summon.Signature.DisplayName,
+                    Command = HeroCommand.SummonAbility, Label = Loc.Format("room.command.signature", ("ability", summon.Summon.Signature.DisplayName)),
                     Enabled = !silenced && summon.Stay.CanUseSignature, Ability = summon.Summon.Signature
                 });
             }
-            _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = Loc.Get("room.command.inspect"), Enabled = true });
             // A stand-in (a Sacrifice horror) is what is left of a hero, not a guest: there is nothing to
             // send it home to, so it gets Skip where a summon gets Dismiss.
             if (!CombatManager.Instance.CanDismiss(summon))
             {
-                _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
+                _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = Loc.Get("room.command.skip"), Enabled = true });
             }
             else
             {
-                _commands.Add(new CommandEntry { Command = HeroCommand.Dismiss, Label = "Dismiss", Enabled = true });
+                _commands.Add(new CommandEntry { Command = HeroCommand.Dismiss, Label = Loc.Get("room.command.dismiss"), Enabled = true });
             }
         }
 
@@ -1663,19 +1661,19 @@ namespace Assets.Scripts.Rooms
             bool knowsSummon = heroComponent != null && summons != null && summons.Knows(heroComponent.HeroKey);
             bool canSummon = knowsSummon && !silenced && summons.HasAnyUsable(heroComponent.HeroKey);
 
-            _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = "Attack", Enabled = true });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = Loc.Get("room.command.attack"), Enabled = true });
             // A greyed command says why on its own row - "Ability" alone, dimmed, read as a bug.
             _commands.Add(new CommandEntry
             {
-                Command = HeroCommand.Magic, Label = "Ability", Enabled = hasMagic,
-                Reason = silenced ? "Silenced" : carriesAny ? "No charges" : "None carried"
+                Command = HeroCommand.Magic, Label = Loc.Get("room.command.ability"), Enabled = hasMagic,
+                Reason = silenced ? Loc.Get("room.command.reason.silenced") : carriesAny ? Loc.Get("room.command.reason.no-charges") : Loc.Get("room.command.reason.none-carried")
             });
             if (knowsSummon)
             {
                 _commands.Add(new CommandEntry
                 {
-                    Command = HeroCommand.Summon, Label = "Summon", Enabled = canSummon,
-                    Reason = silenced ? "Silenced" : "Spent"
+                    Command = HeroCommand.Summon, Label = Loc.Get("room.command.summon"), Enabled = canSummon,
+                    Reason = silenced ? Loc.Get("room.command.reason.silenced") : Loc.Get("room.command.reason.spent")
                 });
             }
             // Ultra (COMBAT_DEPTH §13): shown to a hero who knows one, open once the gauge is full.
@@ -1684,15 +1682,15 @@ namespace Assets.Scripts.Rooms
                 bool transformed = CombatManager.Instance.IsTransformed(hero);
                 _commands.Add(new CommandEntry
                 {
-                    Command = HeroCommand.Ultra, Label = "Ultra", Enabled = CombatManager.Instance.CanUseUltra(hero),
-                    Reason = transformed ? "Active" : UltraWaitReason(hero)
+                    Command = HeroCommand.Ultra, Label = Loc.Get("room.command.ultra"), Enabled = CombatManager.Instance.CanUseUltra(hero),
+                    Reason = transformed ? Loc.Get("room.command.reason.active") : UltraWaitReason(hero)
                 });
             }
-            _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = "Item", Enabled = hasItem, Reason = "None" });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Item, Label = Loc.Get("room.command.item"), Enabled = hasItem, Reason = Loc.Get("room.command.reason.none") });
             // Inspect is free - it opens a page and hands the turn straight back - so it sits above
             // Skip rather than among the actions that spend the turn.
-            _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = "Inspect", Enabled = true });
-            _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = "Skip", Enabled = true });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Inspect, Label = Loc.Get("room.command.inspect"), Enabled = true });
+            _commands.Add(new CommandEntry { Command = HeroCommand.Skip, Label = Loc.Get("room.command.skip"), Enabled = true });
         }
 
         /// <summary>What a closed Ultra command waits for: the gauge's fill, or Focus for a hero whose only
@@ -1703,9 +1701,9 @@ namespace Assets.Scripts.Rooms
             if (known.Count > 0 && known.TrueForAll(Cards.UltraOps.IsMultiCast))
             {
                 int focus = CombatManager.Instance.FocusOf(hero);
-                return focus > 0 ? "Focus " + focus : "No Focus";
+                return focus > 0 ? Loc.Format("room.command.reason.focus", ("focus", focus)) : Loc.Get("room.command.reason.no-focus");
             }
-            return CombatManager.Instance.UltraGauge(hero) + "%";
+            return Loc.Format("room.command.reason.gauge", ("percent", CombatManager.Instance.UltraGauge(hero)));
         }
 
         private int FirstEnabledCommand()
@@ -2100,7 +2098,7 @@ namespace Assets.Scripts.Rooms
             var entry = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentLevelEntry : null;
             SetText(_mapTitle, entry != null && !string.IsNullOrEmpty(entry.LevelName)
                 ? entry.LevelName
-                : "Map");
+                : Loc.Get("room.map.title"));
         }
 
         /// <summary>
@@ -2294,7 +2292,7 @@ namespace Assets.Scripts.Rooms
             if (!TryWalkTo(target) && destination != null && destination.IsExplored && FloatingTextHandler.HasInstance)
             {
                 FloatingTextHandler.Instance.CreateFloatingText(
-                    new Vector3(world.x, world.y, -2f), "No safe way there", new Color(1f, 0.75f, 0.45f));
+                    new Vector3(world.x, world.y, -2f), Loc.Get("room.map.no-safe-way"), new Color(1f, 0.75f, 0.45f));
             }
         }
 
@@ -2474,12 +2472,11 @@ namespace Assets.Scripts.Rooms
         {
             if (_pauseQuit != null)
             {
-                _pauseQuit.text = _quitArmed ? "Leave - are you sure?" : "Leave the Dungeon";
+                _pauseQuit.text = _quitArmed ? Loc.Get("room.pause.leave-armed") : Loc.Get("room.pause.leave");
             }
             SetText(_pauseNote, _quitArmed
-                ? "You will start this floor again, from the entrance, with every enemy back - and "
-                  + "just as hurt as you are now. What this floor has given you so far is lost."
-                : "The run waits for you on the story map.");
+                ? Loc.Get("room.pause.note-armed")
+                : Loc.Get("room.pause.note"));
         }
 
         /// <summary>Whether a window is stacked over the room, dialog-style.</summary>
@@ -2692,17 +2689,17 @@ namespace Assets.Scripts.Rooms
 
             if (IsShown(_combatBar))
             {
-                return "← → choose · Enter confirm";
+                return Loc.Get("room.keys.combat-bar");
             }
 
             if (IsShown(_heroBar))
             {
-                return "↑↓ choose · Enter confirm";
+                return Loc.Get("room.keys.hero-bar");
             }
 
             if (DoorNavActive())
             {
-                return "Arrows pick a door · Enter walk through · Tab room actions";
+                return Loc.Get("room.keys.doors");
             }
 
             return null;
@@ -2993,7 +2990,7 @@ namespace Assets.Scripts.Rooms
                 }
                 int max = Mathf.Max(1, hero.GetEffectiveMaxHealth());
                 // Overkill leaves Health below zero; the row reads 0, as the plate above the hero does.
-                hp.text = $"{Mathf.Max(0, hero.Stats.Health)}/{max}";
+                hp.text = Loc.Format("room.party.hp", ("current", Mathf.Max(0, hero.Stats.Health)), ("max", max));
                 if (_partyRows.TryGetValue(hero, out var row) && row != null)
                 {
                     row.EnableInClassList("cd-party-row--dead", !hero.IsAlive);
@@ -3033,7 +3030,7 @@ namespace Assets.Scripts.Rooms
                             string text = handler != null
                                 ? handler.GetDisplayText(affliction.Amount).TrimEnd('!')
                                 : affliction.Buff.ToString();
-                            var chip = new Label(text) { pickingMode = PickingMode.Ignore, tooltip = text + " until the stairs" };
+                            var chip = new Label(text) { pickingMode = PickingMode.Ignore, tooltip = Loc.Format("room.party.affliction-tooltip", ("effect", text)) };
                             chip.AddToClassList("cd-party-row__affliction");
                             chips.Add(chip);
                         }
@@ -3105,8 +3102,8 @@ namespace Assets.Scripts.Rooms
             SetShown(_deathBackdrop, true);
             Assets.Scripts.Hub.UI.BackdropAmbienceView.AttachTo(_deathBackdrop)?.Show("cd-bg--death");
             _detailWindow?.AddToClassList("cd-window--death");
-            ShowDetail("The Party Has Fallen", DefeatSummary() + FirstDeathLesson());
-            _detailOk.text = "Return to town";
+            ShowDetail(Loc.Get("room.death.title"), DefeatSummary() + FirstDeathLesson());
+            _detailOk.text = Loc.Get("room.death.return");
             AddDefeatRows();
             _detailOkAction = () =>
             {
@@ -3139,10 +3136,10 @@ namespace Assets.Scripts.Rooms
         private static string DefeatSummary()
         {
             var entry = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentLevelEntry : null;
-            string where = entry != null && !string.IsNullOrEmpty(entry.LevelName) ? entry.LevelName : "the dungeon";
+            string where = entry != null && !string.IsNullOrEmpty(entry.LevelName) ? entry.LevelName : Loc.Get("room.death.where-default");
             return DungeonManager.ActiveRun != null
-                ? $"Somewhere in {where}, the last of them goes down. The run ends here."
-                : $"Somewhere in {where}, the last of them goes down.";
+                ? Loc.Format("room.death.summary-run", ("where", where))
+                : Loc.Format("room.death.summary", ("where", where));
         }
 
         /// <summary>Kept and lost, in the same rows the victory window uses.</summary>
@@ -3157,24 +3154,24 @@ namespace Assets.Scripts.Rooms
             if (DungeonManager.ActiveRun != null)
             {
                 int levels = DungeonManager.RunLevelIndex + 1;
-                _detailRows.Add(MakeVictoryRow($"Gold for reaching level {levels}",
-                    "+" + MetaProgressManager.GoldPerLevelOnDeath * levels));
+                _detailRows.Add(MakeVictoryRow(Loc.Format("room.death.row.level-gold", ("level", levels)),
+                    Loc.Format("room.reward.plus", ("amount", MetaProgressManager.GoldPerLevelOnDeath * levels))));
             }
-            _detailRows.Add(MakeVictoryRow("Everything from earlier floors", "kept"));
+            _detailRows.Add(MakeVictoryRow(Loc.Get("room.death.row.earlier-floors"), Loc.Get("room.death.kept")));
             int pending = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.PendingRunGold : 0;
             if (pending > 0)
             {
-                _detailRows.Add(MakeVictoryRow("Gold found on this floor", "lost"));
+                _detailRows.Add(MakeVictoryRow(Loc.Get("room.death.row.floor-gold"), Loc.Get("room.death.lost")));
             }
-            _detailRows.Add(MakeVictoryRow("XP, items and materials from this floor", "lost"));
+            _detailRows.Add(MakeVictoryRow(Loc.Get("room.death.row.floor-gains"), Loc.Get("room.death.lost")));
 
             // Point at the way to get stronger. Nothing after a wipe used to link losing to the
             // sphere grid (revisit playtest finding 5). The XP is read off disk: saves are deferred,
             // so disk holds what survives this wipe. Worded "XP Gained", never "banked" - the owner
             // wants that word out of the game (playtest 3 finding 17).
             int unspent = UnspentPartyXp();
-            _detailRows.Add(MakeVictoryRow(unspent > 0 ? $"{unspent} XP Gained" : "Grow stronger",
-                "Spend it in the Hall of Progression"));
+            _detailRows.Add(MakeVictoryRow(unspent > 0 ? Loc.Format("room.death.row.xp", ("xp", unspent)) : Loc.Get("room.death.row.grow"),
+                Loc.Get("room.death.row.xp-where")));
             SetShown(_detailRows, true);
         }
 
@@ -3189,8 +3186,8 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
-            _detailRows.Add(MakeVictoryRow("Fell on",
-                $"Floor {DungeonManager.RunLevelIndex + 1} of {DungeonManager.ActiveRun.Levels.Count}"));
+            _detailRows.Add(MakeVictoryRow(Loc.Get("room.death.row.fell-on"),
+                Loc.Format("room.death.row.floor", ("floor", DungeonManager.RunLevelIndex + 1), ("total", DungeonManager.ActiveRun.Levels.Count))));
         }
 
         /// <summary>The fielded heroes' unspent XP as it stands on disk - what a wipe leaves them.</summary>
@@ -3219,7 +3216,7 @@ namespace Assets.Scripts.Rooms
             if (!CombatManager.Instance.CanFlee(party))
             {
                 SetShown(_combatBar, false);
-                ShowCombatResult("Flee", "Nowhere to flee!", showNormalAfter: false, returnToCombat: true);
+                ShowCombatResult(Loc.Get("room.flee.title"), Loc.Get("room.flee.nowhere"), showNormalAfter: false, returnToCombat: true);
                 return;
             }
 
@@ -3273,15 +3270,15 @@ namespace Assets.Scripts.Rooms
             // window says so then (playtest 2 finding 6).
             if (result.RunCompleted)
             {
-                _victoryTitle.text = "Dungeon Conquered!";
+                _victoryTitle.text = Loc.Get("room.victory.title.run");
             }
             else if (result.BossDefeated)
             {
-                _victoryTitle.text = "Boss Slain!";
+                _victoryTitle.text = Loc.Get("room.victory.title.boss");
             }
             else
             {
-                _victoryTitle.text = "Victory!";
+                _victoryTitle.text = Loc.Get("room.victory.title");
             }
             _victoryRewards.Clear();
 
@@ -3290,23 +3287,23 @@ namespace Assets.Scripts.Rooms
             // instead of a "Loot" header above everything with the currencies trailing under it.
             // No "(banked)" on the exit fight: its gold joins the floor's pending pool like any
             // other, banked on the stairs, which is what the HUD says (playtest 2 finding 6).
-            _victoryRewards.Add(MakeVictoryRow("Gold", "+" + result.GoldGained));
+            _victoryRewards.Add(MakeVictoryRow(Loc.Get("room.victory.gold"), Loc.Format("room.reward.plus", ("amount", result.GoldGained))));
 
             // The per-hero split only when there is something to split: "shared" over a party of
             // one reads as a mistake.
             if (result.XpByHero != null && result.XpByHero.Count > 1)
             {
-                _victoryRewards.Add(MakeVictoryRow("XP", "+" + result.XpGained + " shared"));
+                _victoryRewards.Add(MakeVictoryRow(Loc.Get("room.victory.xp"), Loc.Format("room.victory.xp-shared", ("amount", result.XpGained))));
                 foreach (var share in result.XpByHero)
                 {
-                    var row = MakeVictoryRow(share.Key, "+" + share.Value);
+                    var row = MakeVictoryRow(share.Key, Loc.Format("room.reward.plus", ("amount", share.Value)));
                     row.AddToClassList("cd-victory-row--sub");
                     _victoryRewards.Add(row);
                 }
             }
             else
             {
-                _victoryRewards.Add(MakeVictoryRow("XP", "+" + result.XpGained));
+                _victoryRewards.Add(MakeVictoryRow(Loc.Get("room.victory.xp"), Loc.Format("room.reward.plus", ("amount", result.XpGained))));
             }
 
             bool anyLoot = false;
@@ -3320,7 +3317,7 @@ namespace Assets.Scripts.Rooms
                     }
                     if (!anyLoot)
                     {
-                        _victoryRewards.Add(MakeVictoryRow("Loot", string.Empty));
+                        _victoryRewards.Add(MakeVictoryRow(Loc.Get("room.victory.loot"), string.Empty));
                         anyLoot = true;
                     }
                     var loot = new VisualElement();
@@ -3333,7 +3330,7 @@ namespace Assets.Scripts.Rooms
                         icon.style.backgroundImage = new StyleBackground(award.Item.Icon);
                     }
                     var name = new Label(award.Quantity > 1
-                        ? $"{award.Item.DisplayName} x{award.Quantity}"
+                        ? Loc.Format("room.reward.counted", ("name", award.Item.DisplayName), ("count", award.Quantity))
                         : award.Item.DisplayName);
                     name.AddToClassList("cd-victory-loot__name");
                     name.AddToClassList(ItemPresenter.RarityClass(award.Item.Rarity));
@@ -3344,13 +3341,13 @@ namespace Assets.Scripts.Rooms
             }
             if (!anyLoot)
             {
-                _victoryRewards.Add(MakeVictoryRow("Loot", "None"));
+                _victoryRewards.Add(MakeVictoryRow(Loc.Get("room.victory.loot"), Loc.Get("room.victory.loot-none")));
             }
 
             if (result.LevelCleared)
             {
                 // After the run's last boss there is no further floor - the stairs lead out.
-                _victoryRewards.Add(MakeVictoryRow(result.RunCompleted ? "The way out" : "The way down", "open"));
+                _victoryRewards.Add(MakeVictoryRow(result.RunCompleted ? Loc.Get("room.victory.way-out") : Loc.Get("room.victory.way-down"), Loc.Get("room.victory.way-open")));
             }
 
             if (_victoryRewards is ScrollView rewardsScroll)
@@ -3392,14 +3389,14 @@ namespace Assets.Scripts.Rooms
 
             string levelName = entry != null && !string.IsNullOrEmpty(entry.LevelName)
                 ? entry.LevelName
-                : dungeon != null && dungeon.CurrentLevel != null ? SpacedName(dungeon.CurrentLevel.name) : "The Dungeon";
+                : dungeon != null && dungeon.CurrentLevel != null ? SpacedName(dungeon.CurrentLevel.name) : Loc.Get("room.hud.level-default");
             SetText(_hudLevel, levelName);
 
             string runLine = string.Empty;
             if (run != null && run.Levels.Count > 0)
             {
                 string runName = !string.IsNullOrEmpty(run.DisplayName) ? run.DisplayName : run.name;
-                runLine = $"{runName} · Level {DungeonManager.RunLevelIndex + 1} of {run.Levels.Count}";
+                runLine = Loc.Format("room.hud.run-line", ("run", runName), ("level", DungeonManager.RunLevelIndex + 1), ("total", run.Levels.Count));
             }
             SetText(_hudRun, runLine);
             SetShown(_hudRun, !string.IsNullOrEmpty(runLine));
@@ -3407,7 +3404,7 @@ namespace Assets.Scripts.Rooms
             var rooms = dungeon != null ? dungeon.CurrentRooms : null;
             var model = DungeonMapOps.Build(BuildMapInputs(rooms), _currentRoom != null ? _currentRoom.RoomIndex : -1);
             string explore = DungeonMapOps.StatusLine(model);
-            SetText(_hudExplore, string.IsNullOrEmpty(explore) ? "M  map" : $"{explore}  ·  M  map");
+            SetText(_hudExplore, string.IsNullOrEmpty(explore) ? Loc.Get("room.hud.map-key") : Loc.Format("room.hud.explore", ("status", explore)));
 
             _hudGoldShown = -1; // force the gold label to redraw
             TickHud();
@@ -3513,8 +3510,8 @@ namespace Assets.Scripts.Rooms
                 // frame of every floor it was teaching text that never went away.
                 bool teaching = MetaProgressManager.HasInstance && !MetaProgressManager.Instance.TutorialFinished;
                 SetText(_hudGold, teaching
-                    ? $"Gold found  +{gold}   (yours when you take the stairs)"
-                    : $"+{gold} gold");
+                    ? Loc.Format("room.hud.gold-teaching", ("amount", gold))
+                    : Loc.Format("room.hud.gold", ("amount", gold)));
             }
         }
 
@@ -3557,18 +3554,18 @@ namespace Assets.Scripts.Rooms
             // Continue is the default when it is offered: a player clearing a run level by level
             // should not have to reach for the arrows every time.
             SetLevelChoice(onNextLevel != null);
-            _levelTitle.text = summary.RunCompleted ? "Run Complete!" : "Level Cleared!";
+            _levelTitle.text = summary.RunCompleted ? Loc.Get("room.level-clear.title.run") : Loc.Get("room.level-clear.title");
             SetText(_levelSubtitle, LevelClearSubtitle(summary));
 
             FillLevelClearBody(summary);
 
             SetText(_levelNext, summary.RunCompleted
-                ? "The run is complete."
+                ? Loc.Get("room.level-clear.next.done")
                 : string.IsNullOrEmpty(summary.NextLevelName)
-                    ? "The run continues from the story map."
+                    ? Loc.Get("room.level-clear.next.story-map")
                     : onNextLevel != null
-                        ? $"Next: {summary.NextLevelName} - continue now, or rest in town first."
-                        : $"Next: {summary.NextLevelName} - continue it from the story map.");
+                        ? Loc.Format("room.level-clear.next.continue", ("level", summary.NextLevelName))
+                        : Loc.Format("room.level-clear.next.from-map", ("level", summary.NextLevelName)));
 
             _levelBody.scrollOffset = Vector2.zero;
             SetShown(_levelWindow, true);
@@ -3582,9 +3579,9 @@ namespace Assets.Scripts.Rooms
                 return summary.LevelName ?? string.Empty;
             }
             string level = string.IsNullOrEmpty(summary.LevelName)
-                ? $"Level {summary.LevelNumber} of {summary.LevelCount}"
-                : $"{summary.LevelName} - level {summary.LevelNumber} of {summary.LevelCount}";
-            return string.IsNullOrEmpty(summary.RunName) ? level : $"{summary.RunName} · {level}";
+                ? Loc.Format("room.level-clear.subtitle.level", ("number", summary.LevelNumber), ("count", summary.LevelCount))
+                : Loc.Format("room.level-clear.subtitle.named", ("name", summary.LevelName), ("number", summary.LevelNumber), ("count", summary.LevelCount));
+            return string.IsNullOrEmpty(summary.RunName) ? level : Loc.Format("room.level-clear.subtitle.run", ("run", summary.RunName), ("level", level));
         }
 
         /// <summary>
@@ -3600,7 +3597,7 @@ namespace Assets.Scripts.Rooms
                 var row = new VisualElement();
                 row.AddToClassList("cd-lc-joined__row");
                 row.Add(Portrait(hero.Icon, "cd-lc-joined__portrait"));
-                var text = new Label($"{hero.Label} joins the party for good");
+                var text = new Label(Loc.Format("room.level-clear.joined", ("hero", hero.Label)));
                 text.AddToClassList("cd-lc-joined__text");
                 row.Add(text);
                 _levelJoined?.Add(row);
@@ -3612,13 +3609,13 @@ namespace Assets.Scripts.Rooms
                 xpTotal += line.Amount;
             }
             _levelTallies?.Clear();
-            AddTally("cd-lc-tally--gold", $"+{summary.GoldTotal}", "Gold",
-                $"{summary.GoldFound} found · {summary.GoldBonus} for the clear");
-            AddTally("cd-lc-tally--xp", $"+{xpTotal}", "XP", "for the sphere grid");
+            AddTally("cd-lc-tally--gold", Loc.Format("room.reward.plus", ("amount", summary.GoldTotal)), Loc.Get("room.level-clear.gold"),
+                Loc.Format("room.level-clear.gold-note", ("found", summary.GoldFound), ("bonus", summary.GoldBonus)));
+            AddTally("cd-lc-tally--xp", Loc.Format("room.reward.plus", ("amount", xpTotal)), Loc.Get("room.level-clear.xp"), Loc.Get("room.level-clear.xp-note"));
             // Only a revisit pays Essence; a "+0" tile on every first clear would only confuse.
             if (summary.Essence > 0)
             {
-                AddTally("cd-lc-tally--essence", $"+{summary.Essence}", "Essence", "from the revisit");
+                AddTally("cd-lc-tally--essence", Loc.Format("room.reward.plus", ("amount", summary.Essence)), Loc.Get("room.level-clear.essence"), Loc.Get("room.level-clear.essence-note"));
             }
 
             _levelXp?.Clear();
@@ -3633,7 +3630,7 @@ namespace Assets.Scripts.Rooms
                 var name = new Label(line.Label);
                 name.AddToClassList("cd-lc-hero__name");
                 text.Add(name);
-                var xp = new Label($"+{line.Amount} XP");
+                var xp = new Label(Loc.Format("room.level-clear.hero-xp", ("amount", line.Amount)));
                 xp.AddToClassList("cd-lc-hero__xp");
                 text.Add(xp);
                 card.Add(text);
@@ -3646,7 +3643,7 @@ namespace Assets.Scripts.Rooms
             AddLootCells(summary.Items);
             if (summary.Materials.Count == 0 && summary.Items.Count == 0)
             {
-                var none = new Label("Nothing this time.");
+                var none = new Label(Loc.Get("room.level-clear.no-loot"));
                 none.AddToClassList("cd-lc-empty");
                 _levelLoot?.Add(none);
             }
@@ -3683,7 +3680,7 @@ namespace Assets.Scripts.Rooms
                     name.AddToClassList(ItemPresenter.RarityClass(line.Item.Rarity));
                 }
                 cell.Add(name);
-                var count = new Label($"x{line.Amount}");
+                var count = new Label(Loc.Format("room.level-clear.loot-count", ("count", line.Amount)));
                 count.AddToClassList("cd-lc-item__count");
                 cell.Add(count);
                 _levelLoot?.Add(cell);
@@ -3882,7 +3879,7 @@ namespace Assets.Scripts.Rooms
             // The button names the thing ("The Treasury"), not a generic verb.
             if (roomEvent != null && _actionBtn != null)
             {
-                _actionBtn.text = string.IsNullOrEmpty(roomEvent.Title) ? "Investigate" : roomEvent.Title;
+                _actionBtn.text = string.IsNullOrEmpty(roomEvent.Title) ? Loc.Get("room.bar.investigate") : roomEvent.Title;
             }
         }
 

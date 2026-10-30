@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.Enemies;
@@ -168,7 +169,7 @@ namespace Assets.Scripts.Rooms.UI
             int max = Mathf.Max(1, unit.GetEffectiveStat(StatType.MaxHealth));
             // What the plate shows can lag the unit while a cast's hits are still flying (HealthDisplay).
             int current = Mathf.Max(0, HealthDisplay.Shown(unit));
-            string text = $"{current}/{max}";
+            string text = Loc.Format("room.nameplate.hp", ("current", current), ("max", max));
             if (text == plate.LastHpText)
             {
                 return;

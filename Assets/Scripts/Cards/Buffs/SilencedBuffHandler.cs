@@ -1,4 +1,5 @@
 using Assets.Scripts.Combat;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -30,7 +31,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return "Silenced!";
+            return Loc.Get("combat.status.silenced");
         }
 
         public bool SkipsTurn => false;

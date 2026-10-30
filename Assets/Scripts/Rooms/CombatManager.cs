@@ -17,6 +17,7 @@ using Assets.Scripts.UnitStats;
 using ImmoralityGaming.Fundamentals;
 using UnityEngine;
 using Assets.Scripts.Events;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Rooms
 {
@@ -953,13 +954,13 @@ namespace Assets.Scripts.Rooms
                     else if (_pendingAction == HeroAction.Dismiss && unit is SummonUnit dismissing && CanDismiss(dismissing))
                     {
                         _lastTurnLog = _allies.Contains(dismissing)
-                            ? $"{dismissing.DisplayName} is dismissed."
-                            : $"{dismissing.DisplayName} is dismissed, and the party steps back in.";
+                            ? Loc.Format("combat.log.summon-dismissed", ("unit", dismissing.DisplayName))
+                            : Loc.Format("combat.log.summon-dismissed-party-returns", ("unit", dismissing.DisplayName));
                         yield return new WaitForSeconds(_turnDelay * 0.5f);
                     }
                     else
                     {
-                        _lastTurnLog = $"{unit.DisplayName} skips their turn.";
+                        _lastTurnLog = Loc.Format("combat.log.skip-turn", ("unit", unit.DisplayName));
                     }
 
                     if (_pendingAction == HeroAction.Summon && _pendingSummon?.Summon != null)
@@ -1024,7 +1025,7 @@ namespace Assets.Scripts.Rooms
             if (!HasAliveHeroes(party))
             {
                 outcome = CombatOutcome.PlayerDied;
-                fullLog += "\nYour party has been defeated!";
+                fullLog += "\n" + Loc.Get("combat.log.party-defeated");
                 CombatAudio.Play(CombatSound.Defeat);
                 // The bed goes with the party: the defeat stinger and the death screen play out over
                 // silence, and the hub's own track comes up when the menu scene loads.
@@ -1038,7 +1039,7 @@ namespace Assets.Scripts.Rooms
             else
             {
                 outcome = CombatOutcome.Victory;
-                fullLog += "\nAll enemies defeated!";
+                fullLog += "\n" + Loc.Get("combat.log.all-enemies-defeated");
                 CombatAudio.Play(CombatSound.Victory);
                 // Cut the fight's bed so the win stinger lands in the clear; the floor's theme comes
                 // back when the summary is dismissed (FinishVictory).
@@ -1126,7 +1127,7 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
-            ShowFloatingLabel(caster.Transform.position + new Vector3(0f, 0.7f, 0f), FocusOps.CastName(focus) + "!",
+            ShowFloatingLabel(caster.Transform.position + new Vector3(0f, 0.7f, 0f), Loc.Format("combat.float.multi-cast", ("cast", FocusOps.CastName(focus))),
                 new Color(0.55f, 0.75f, 1f), 0.15f);
             string log = "";
             for (int i = 0; i < casts; i++)
@@ -1148,7 +1149,8 @@ namespace Assets.Scripts.Rooms
             }
             // One charge pays for every repeat - spent once, however many landed before the field emptied.
             SpendCharge(caster, slotIndex);
-            _lastTurnLog = $"{caster.DisplayName} MultiCasts {castAction.Magic.DisplayName} x{casts}! " + log;
+            _lastTurnLog = Loc.Format("combat.log.multi-cast",
+                ("caster", caster.DisplayName), ("ability", castAction.Magic.DisplayName), ("casts", casts)) + " " + log;
         }
 
         private static bool AddFreeCast(ICombatUnit unit)
@@ -1301,26 +1303,26 @@ namespace Assets.Scripts.Rooms
             if (summon != null && !slot.IsImplemented)
             {
                 Debug.LogWarning($"[Summon] {summon.Key} is {summon.Kind}, which is not implemented.");
-                _lastTurnLog = $"{caster.DisplayName} calls {summon.Label}, but it does not come.";
+                _lastTurnLog = Loc.Format("combat.log.summon-not-coming", ("caster", caster.DisplayName), ("summon", summon.Label));
                 yield break;
             }
 
             // One at a time: nobody is left to summon a second, but a stale submit must not try.
             if (ReplacementOut)
             {
-                _lastTurnLog = $"{caster.DisplayName} tries to summon, but {ActiveSummon.DisplayName} is already here.";
+                _lastTurnLog = Loc.Format("combat.log.summon-already-here", ("caster", caster.DisplayName), ("summon", ActiveSummon.DisplayName));
                 yield break;
             }
 
             if (summon != null && !SummonOps.CanAfford(summon, caster))
             {
-                _lastTurnLog = $"{caster.DisplayName} has too little blood left to call {summon.Label}.";
+                _lastTurnLog = Loc.Format("combat.log.summon-too-little-blood", ("caster", caster.DisplayName), ("summon", summon.Label));
                 yield break;
             }
 
             if (hero == null || summon == null || summons == null || !summons.TryUse(hero.HeroKey, summon.Key))
             {
-                _lastTurnLog = $"{caster.DisplayName} tries to summon, but nothing answers.";
+                _lastTurnLog = Loc.Format("combat.log.summon-nothing-answers", ("caster", caster.DisplayName));
                 yield break;
             }
 
@@ -1329,7 +1331,7 @@ namespace Assets.Scripts.Rooms
             if (bloodPrice > 0)
             {
                 int paid = HealthOps.Pay(hero, bloodPrice, new HealthSource(hero, HealthCause.Cost), Events).Landed;
-                ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.3f, 0f), $"-{paid} HP", new Color(0.9f, 0.35f, 0.35f), 0.15f);
+                ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Format("combat.float.health-cost", ("amount", paid)), new Color(0.9f, 0.35f, 0.35f), 0.15f);
             }
 
             if (summon.Kind == SummonKind.ReplaceParty)
@@ -1366,7 +1368,7 @@ namespace Assets.Scripts.Rooms
                     MetaProgressManager.Instance.MarkComboDiscovered(comboKey);
                 }
             }
-            _lastTurnLog = $"{caster.DisplayName} summons {summon.Label}!";
+            _lastTurnLog = Loc.Format("combat.log.summons", ("caster", caster.DisplayName), ("summon", summon.Label));
             yield return _presenter.Present(result, caster, castable);
             HealthDisplay.ReleaseAll();
 
@@ -1478,10 +1480,11 @@ namespace Assets.Scripts.Rooms
             }
 
             string arrived = summon.IsSquad
-                ? $"{summon.Label} ({SummonOps.DescribeSquad(SummonOps.SquadFor(summon, slot.Grant))})"
+                ? Loc.Format("combat.log.squad-name", ("summon", summon.Label), ("squad", SummonOps.DescribeSquad(SummonOps.SquadFor(summon, slot.Grant))))
                 : units[0].DisplayName;
-            _lastTurnLog = $"{summoner.DisplayName} summons {arrived}! The party steps back"
-                + (alliesLeft ? ", and their allies are sent away." : ".");
+            _lastTurnLog = alliesLeft
+                ? Loc.Format("combat.log.summon-replaces-party-allies-leave", ("caster", summoner.DisplayName), ("summon", arrived))
+                : Loc.Format("combat.log.summon-replaces-party", ("caster", summoner.DisplayName), ("summon", arrived));
         }
 
         /// <summary>
@@ -1519,8 +1522,9 @@ namespace Assets.Scripts.Rooms
             EnsureHealthBars(new List<ICombatUnit> { unit });
 
             _lastTurnLog = previous != null
-                ? $"{summoner.DisplayName} sends {previous.DisplayName} away and summons {unit.DisplayName}!"
-                : $"{summoner.DisplayName} summons {unit.DisplayName} to fight beside the party!";
+                ? Loc.Format("combat.log.summon-swaps-ally",
+                    ("caster", summoner.DisplayName), ("previous", previous.DisplayName), ("summon", unit.DisplayName))
+                : Loc.Format("combat.log.summon-joins-party", ("caster", summoner.DisplayName), ("summon", unit.DisplayName));
         }
 
         // ------------------------------------------------------------------ Ultras
@@ -1588,7 +1592,7 @@ namespace Assets.Scripts.Rooms
                 || UltraOps.IsMultiCast(ultra))
             {
                 // A MultiCast never comes through here: it is cast from the Ability list (ExecuteMultiCast).
-                _lastTurnLog = $"{hero.DisplayName} reaches for something that is not there yet.";
+                _lastTurnLog = Loc.Format("combat.log.ultra-not-ready", ("hero", hero.DisplayName));
                 yield break;
             }
             _ultraGauge[hero] = 0;
@@ -1630,8 +1634,8 @@ namespace Assets.Scripts.Rooms
                 MainCamera.Instance.ZoomPunch(0.35f, 0.35f);
             }
             ScreenFade.Instance.Flash(new Color(0.55f, 0.1f, 0.25f), 0.45f, 0.05f, 0.35f);
-            ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(1f, 0.35f, 0.45f), 0.2f);
-            _lastTurnLog = $"{hero.DisplayName} unleashes {ultra.Label}!";
+            ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), Loc.Format("combat.float.ultra", ("ultra", ultra.Label)), new Color(1f, 0.35f, 0.45f), 0.2f);
+            _lastTurnLog = Loc.Format("combat.log.ultra-unleashed", ("hero", hero.DisplayName), ("ultra", ultra.Label));
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -1646,8 +1650,8 @@ namespace Assets.Scripts.Rooms
             CombatAudio.Play(CombatSound.BossSignature);
             CombatFeedback.Instance.Shake(0.25f, 0.4f);
             ScreenFade.Instance.Flash(new Color(0.55f, 0.1f, 0.25f), 0.45f, 0.05f, 0.35f);
-            ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(1f, 0.35f, 0.45f), 0.2f);
-            _lastTurnLog = $"{hero.DisplayName} unleashes {ultra.Label}!";
+            ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), Loc.Format("combat.float.ultra", ("ultra", ultra.Label)), new Color(1f, 0.35f, 0.45f), 0.2f);
+            _lastTurnLog = Loc.Format("combat.log.ultra-unleashed", ("hero", hero.DisplayName), ("ultra", ultra.Label));
 
             // Each hit picks its targets again from whoever is still standing (Flurry's slashes).
             for (int hit = 0; hit < UltraOps.HitsOf(ultra); hit++)
@@ -1681,7 +1685,7 @@ namespace Assets.Scripts.Rooms
         {
             if (victim == null || ultra.Creature == null || !SacrificeTargets().Contains(victim))
             {
-                _lastTurnLog = $"{cultist.DisplayName} begins the rite, but there is no one to give.";
+                _lastTurnLog = Loc.Format("combat.log.sacrifice-no-victim", ("cultist", cultist.DisplayName));
                 yield break;
             }
 
@@ -1691,7 +1695,7 @@ namespace Assets.Scripts.Rooms
 
             CombatAudio.Play(CombatSound.BossSignature);
             ScreenFade.Instance.Flash(new Color(0.15f, 0.55f, 0.25f), 0.5f, 0.05f, 0.4f);
-            ShowFloatingLabel(victim.Transform.position + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(0.5f, 1f, 0.55f), 0.2f);
+            ShowFloatingLabel(victim.Transform.position + new Vector3(0f, 0.5f, 0f), Loc.Format("combat.float.ultra", ("ultra", ultra.Label)), new Color(0.5f, 1f, 0.55f), 0.2f);
 
             // The hero falls - for the floor, exactly as a killing blow leaves them, and through the
             // same death path (the rite is credited to whoever performed it).
@@ -1714,10 +1718,11 @@ namespace Assets.Scripts.Rooms
                 enemy.ChargeTarget = horror;
             }
 
-            string how = attack != null ? $" It lashes out with {attack.DisplayName}." : "";
+            string how = attack != null ? " " + Loc.Format("combat.log.sacrifice-attack", ("ability", attack.DisplayName)) : "";
             _lastTurnLog = ReferenceEquals(cultist, victim)
-                ? $"{cultist.DisplayName} gives himself to the rite, and {horror.DisplayName} rises in his place!{how}"
-                : $"{cultist.DisplayName} sacrifices {victim.DisplayName}, and {horror.DisplayName} rises in their place!{how}";
+                ? Loc.Format("combat.log.sacrifice-self", ("cultist", cultist.DisplayName), ("horror", horror.DisplayName)) + how
+                : Loc.Format("combat.log.sacrifice-other",
+                    ("cultist", cultist.DisplayName), ("victim", victim.DisplayName), ("horror", horror.DisplayName)) + how;
         }
 
         /// <summary>
@@ -1733,7 +1738,7 @@ namespace Assets.Scripts.Rooms
         {
             if (ultra.Mech == null)
             {
-                _lastTurnLog = $"{hero.DisplayName} reaches for parts that are not there.";
+                _lastTurnLog = Loc.Format("combat.log.mount-no-parts", ("hero", hero.DisplayName));
                 yield break;
             }
             if (_mounts.TryGetValue(hero, out var previous))
@@ -1745,7 +1750,7 @@ namespace Assets.Scripts.Rooms
             CombatAudio.Play(CombatSound.BossSignature);
             CombatFeedback.Instance.Shake(0.2f, 0.35f);
             ScreenFade.Instance.Flash(new Color(0.85f, 0.6f, 0.25f), 0.4f, 0.05f, 0.3f);
-            ShowFloatingLabel(spot + new Vector3(0f, 0.5f, 0f), ultra.Label + "!", new Color(1f, 0.75f, 0.35f), 0.2f);
+            ShowFloatingLabel(spot + new Vector3(0f, 0.5f, 0f), Loc.Format("combat.float.ultra", ("ultra", ultra.Label)), new Color(1f, 0.75f, 0.35f), 0.2f);
 
             // No turn limit: the mech's health is what ends it (int.MaxValue / 2, as a Sacrifice horror).
             var mech = SummonUnit.Create(ultra.Mech, null, hero, int.MaxValue / 2);
@@ -1771,8 +1776,8 @@ namespace Assets.Scripts.Rooms
             }
 
             _lastTurnLog = previous != null
-                ? $"{hero.DisplayName} rebuilds {mech.DisplayName} and climbs back on!"
-                : $"{hero.DisplayName} assembles {mech.DisplayName} and climbs on!";
+                ? Loc.Format("combat.log.mount-rebuilt", ("hero", hero.DisplayName), ("mech", mech.DisplayName))
+                : Loc.Format("combat.log.mount-assembled", ("hero", hero.DisplayName), ("mech", mech.DisplayName));
         }
 
         /// <summary>The rider climbs down from <paramref name="mech"/>: no longer shielded, and walked
@@ -1895,7 +1900,7 @@ namespace Assets.Scripts.Rooms
             }
             if (log)
             {
-                _lastTurnLog += $" {hero.DisplayName}'s {form.Ultra.Label} fades.";
+                _lastTurnLog += " " + Loc.Format("combat.log.form-fades", ("hero", hero.DisplayName), ("ultra", form.Ultra.Label));
             }
         }
 
@@ -1980,7 +1985,7 @@ namespace Assets.Scripts.Rooms
             }
             foreach (var ally in _allies.Where(a => a != null && ReferenceEquals(a.Summoner, summoner)).ToList())
             {
-                _lastTurnLog += $" {ally.DisplayName} vanishes with its summoner.";
+                _lastTurnLog += " " + Loc.Format("combat.log.ally-vanishes-with-summoner", ("unit", ally.DisplayName));
                 EndAlly(ally, SummonExit.Dismissed);
             }
         }
@@ -2008,7 +2013,7 @@ namespace Assets.Scripts.Rooms
                 }
                 else if (lastTurn)
                 {
-                    _lastTurnLog += $" {summon.DisplayName}'s time is up, and it fades away.";
+                    _lastTurnLog += " " + Loc.Format("combat.log.ally-time-up", ("unit", summon.DisplayName));
                     EndAlly(summon, SummonExit.TurnsSpent);
                 }
                 return;
@@ -2025,7 +2030,7 @@ namespace Assets.Scripts.Rooms
             }
             else if (last)
             {
-                LeaveSquad(summon, SummonExit.TurnsSpent, $" {summon.DisplayName}'s time is up");
+                LeaveSquad(summon, SummonExit.TurnsSpent, "combat.log.squad-time-up", "combat.log.squad-time-up-party-returns");
             }
         }
 
@@ -2033,16 +2038,16 @@ namespace Assets.Scripts.Rooms
         /// One unit of the replacement leaves. While others stand the fight goes on with them; the
         /// last one out brings the party back (<see cref="EndSummon"/>).
         /// </summary>
-        private void LeaveSquad(SummonUnit unit, SummonExit exit, string why)
+        private void LeaveSquad(SummonUnit unit, SummonExit exit, string leaveKey, string lastOutKey)
         {
             bool othersStand = _squad.Any(u => u != null && u != unit && u.IsAlive);
             if (!othersStand)
             {
-                _lastTurnLog += why + ", and the party steps back in.";
+                _lastTurnLog += " " + Loc.Format(lastOutKey, ("unit", unit.DisplayName));
                 EndSummon(exit);
                 return;
             }
-            _lastTurnLog += why + ".";
+            _lastTurnLog += " " + Loc.Format(leaveKey, ("unit", unit.DisplayName));
             QueueParting(unit, exit);
             unit.Stay.Leave(exit);
             _turnManager.RemoveUnit(unit);
@@ -2140,7 +2145,7 @@ namespace Assets.Scripts.Rooms
                     : enemies;
                 HoldHealthDisplay();
                 var result = _calculator.Execute(new SpellcastAction { Magic = magic, Caster = unit, Targets = targets }, BuffTracker);
-                _lastTurnLog += $" {unit.DisplayName} unleashes {magic.DisplayName} as it leaves!";
+                _lastTurnLog += " " + Loc.Format("combat.log.parting-blow", ("unit", unit.DisplayName), ("ability", magic.DisplayName));
                 yield return _presenter.Present(result, null, magic);
                 HealthDisplay.ReleaseAll();
                 ResolveDeaths();
@@ -2162,7 +2167,7 @@ namespace Assets.Scripts.Rooms
             if (IsBesideParty(summon))
             {
                 HealthOps.Set(summon, 0, new HealthSource(null, HealthCause.Clamp), Events);
-                _lastTurnLog += $" {summon.DisplayName} falls!";
+                _lastTurnLog += " " + Loc.Format("combat.log.ally-falls", ("unit", summon.DisplayName));
                 EndAlly(summon, SummonExit.Fell);
                 return;
             }
@@ -2171,7 +2176,7 @@ namespace Assets.Scripts.Rooms
                 return;
             }
             HealthOps.Set(summon, 0, new HealthSource(null, HealthCause.Clamp), Events);
-            LeaveSquad(summon, SummonExit.Fell, $" {summon.DisplayName} crumbles");
+            LeaveSquad(summon, SummonExit.Fell, "combat.log.squad-crumbles", "combat.log.squad-crumbles-party-returns");
         }
 
         /// <summary>
@@ -2186,12 +2191,12 @@ namespace Assets.Scripts.Rooms
             bool isAttack = ReferenceEquals(magic, caster.AttackAbility);
             if (!isAttack && BuffTracker.HasStatusEffect(caster, BuffType.Silenced))
             {
-                _lastTurnLog = $"{caster.DisplayName} is silenced and cannot use {magic.DisplayName}.";
+                _lastTurnLog = Loc.Format("combat.log.cast-silenced", ("caster", caster.DisplayName), ("ability", magic.DisplayName));
                 yield break;
             }
             if (isSignature && !caster.Stay.CanUseSignature)
             {
-                _lastTurnLog = $"{caster.DisplayName} has already used {magic.DisplayName}.";
+                _lastTurnLog = Loc.Format("combat.log.cast-already-used", ("caster", caster.DisplayName), ("ability", magic.DisplayName));
                 yield break;
             }
 
@@ -2206,7 +2211,7 @@ namespace Assets.Scripts.Rooms
             }
             if (live.Count == 0)
             {
-                _lastTurnLog = $"{caster.DisplayName} has no target.";
+                _lastTurnLog = Loc.Format("combat.log.no-target", ("unit", caster.DisplayName));
                 yield break;
             }
 
@@ -2280,7 +2285,7 @@ namespace Assets.Scripts.Rooms
         {
             if (item == null || item.Category != ItemCategory.Consumable)
             {
-                _lastTurnLog = $"{heroUnit.DisplayName} has nothing to use.";
+                _lastTurnLog = Loc.Format("combat.log.item-nothing-to-use", ("hero", heroUnit.DisplayName));
                 yield break;
             }
 
@@ -2293,7 +2298,7 @@ namespace Assets.Scripts.Rooms
             // Spend the item first; if the party isn't actually carrying it, the turn is a no-op.
             if (!InventoryManager.Instance.TryConsume(item.Key))
             {
-                _lastTurnLog = $"{heroUnit.DisplayName} has no {item.DisplayName} left.";
+                _lastTurnLog = Loc.Format("combat.log.item-none-left", ("hero", heroUnit.DisplayName), ("item", item.DisplayName));
                 yield break;
             }
 
@@ -2301,17 +2306,20 @@ namespace Assets.Scripts.Rooms
             {
                 case ConsumableEffectType.RestoreHealth:
                     int healed = DrinkHeal(heroUnit, item, target);
-                    _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, restoring {healed} HP.";
+                    _lastTurnLog = Loc.Format("combat.log.item-heal",
+                        ("hero", heroUnit.DisplayName), ("item", item.DisplayName), ("target", target.DisplayName), ("amount", healed));
                     break;
                 case ConsumableEffectType.RestoreCharge:
                     CombatAudio.Play(CombatSound.ItemUse);
-                    _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}"
-                        + DrinkCharges(item, target) + ".";
+                    _lastTurnLog = Loc.Format("combat.log.item-charges",
+                        ("hero", heroUnit.DisplayName), ("item", item.DisplayName), ("target", target.DisplayName),
+                        ("charges", DrinkCharges(item, target)));
                     break;
                 case ConsumableEffectType.HealAndCharge:
                     int mended = DrinkHeal(heroUnit, item, target);
-                    _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, restoring {mended} HP"
-                        + DrinkCharges(item, target) + ".";
+                    _lastTurnLog = Loc.Format("combat.log.item-heal-charges",
+                        ("hero", heroUnit.DisplayName), ("item", item.DisplayName), ("target", target.DisplayName), ("amount", mended),
+                        ("charges", DrinkCharges(item, target)));
                     break;
                 case ConsumableEffectType.CureStatus:
                     var cured = BuffTracker.CureStatusEffects(target);
@@ -2321,20 +2329,19 @@ namespace Assets.Scripts.Rooms
                         // The item is spent either way — it was already consumed above, and a cure
                         // that refunded itself on a clean target would be a free "is anyone
                         // poisoned?" probe. The log says so rather than pretending nothing happened.
-                        ShowFloatingLabel(target.Transform.position, "Cured!", Color.green);
-                        _lastTurnLog =
-                            $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, "
-                            + $"clearing {string.Join(", ", cured)}.";
+                        ShowFloatingLabel(target.Transform.position, Loc.Get("combat.float.cured"), Color.green);
+                        _lastTurnLog = Loc.Format("combat.log.item-cure",
+                            ("hero", heroUnit.DisplayName), ("item", item.DisplayName), ("target", target.DisplayName),
+                            ("statuses", string.Join(", ", cured)));
                     }
                     else
                     {
-                        _lastTurnLog =
-                            $"{heroUnit.DisplayName} uses {item.DisplayName} on {target.DisplayName}, "
-                            + "but there was nothing to cure.";
+                        _lastTurnLog = Loc.Format("combat.log.item-cure-nothing",
+                            ("hero", heroUnit.DisplayName), ("item", item.DisplayName), ("target", target.DisplayName));
                     }
                     break;
                 default:
-                    _lastTurnLog = $"{heroUnit.DisplayName} uses {item.DisplayName}.";
+                    _lastTurnLog = Loc.Format("combat.log.item-use", ("hero", heroUnit.DisplayName), ("item", item.DisplayName));
                     break;
             }
 
@@ -2366,15 +2373,18 @@ namespace Assets.Scripts.Rooms
             var bank = _calculator != null ? _calculator.Charges : null;
             if (bank == null || !bank.Carries(target))
             {
-                return ", but it has no abilities to restore";
+                return Loc.Get("combat.log.item-charges-no-abilities");
             }
             var restored = bank.Restore(target, SpellcastAction.AnyChargeSlot, charges, -1);
             if (restored.Added <= 0 || restored.Magic == null)
             {
-                return ", but every ability is already full";
+                return Loc.Get("combat.log.item-charges-all-full");
             }
-            ShowFloatingLabel(target.Transform.position, $"+{restored.Added} {restored.Magic.DisplayName}", new Color(0.55f, 0.75f, 1f));
-            return $", restoring {restored.Added} charge{(restored.Added == 1 ? "" : "s")} to {restored.Magic.DisplayName}";
+            ShowFloatingLabel(target.Transform.position,
+                Loc.Format("combat.float.item-charges", ("count", restored.Added), ("ability", restored.Magic.DisplayName)), new Color(0.55f, 0.75f, 1f));
+            return restored.Added == 1
+                ? Loc.Format("combat.log.item-charges-restored-one", ("count", restored.Added), ("ability", restored.Magic.DisplayName))
+                : Loc.Format("combat.log.item-charges-restored-many", ("count", restored.Added), ("ability", restored.Magic.DisplayName));
         }
 
         private IEnumerator ExecuteHeroTurn(ICombatUnit hero, Room room)
@@ -2389,7 +2399,7 @@ namespace Assets.Scripts.Rooms
 
             if (target == null)
             {
-                _lastTurnLog = $"{hero.DisplayName} has no target.";
+                _lastTurnLog = Loc.Format("combat.log.no-target", ("unit", hero.DisplayName));
                 yield break;
             }
 
@@ -2410,9 +2420,9 @@ namespace Assets.Scripts.Rooms
                 if (allies.Count > 0 && UnityEngine.Random.Range(0f, 1f) < ConfusedBuffHandler.Chance)
                 {
                     var victim = allies[UnityEngine.Random.Range(0, allies.Count)];
-                    ShowFloatingLabel(enemyUnit.Transform.position + new Vector3(0f, 0.3f, 0f), "Confused!",
+                    ShowFloatingLabel(enemyUnit.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.status.confused"),
                         new Color(1f, 0.85f, 0.3f), 0.16f);
-                    yield return ExecuteAttack(enemyUnit, victim, Vector3.left, Color.red, 1f, "turns on");
+                    yield return ExecuteAttack(enemyUnit, victim, Vector3.left, Color.red, 1f, "combat.verb.turns-on");
                     ResolveDeaths();
                     if (enemy != null)
                     {
@@ -2486,8 +2496,8 @@ namespace Assets.Scripts.Rooms
                     yield return ExecuteEnemySummon(enemyUnit, enemy, decision);
                     break;
                 default:
-                    string verb = decision.Multiplier > 1f ? "strikes savagely at" : "attacks";
-                    yield return ExecuteEnemyBasicAttack(enemyUnit, decision.Target, party, decision.Multiplier, verb);
+                    string verbKey = decision.Multiplier > 1f ? "combat.verb.strikes-savagely-at" : "combat.verb.attacks";
+                    yield return ExecuteEnemyBasicAttack(enemyUnit, decision.Target, party, decision.Multiplier, verbKey);
                     break;
             }
 
@@ -2565,7 +2575,7 @@ namespace Assets.Scripts.Rooms
             HealthDisplay.Hold(GetAliveEnemies());
         }
 
-        private IEnumerator ExecuteEnemyBasicAttack(ICombatUnit enemyUnit, ICombatUnit target, Party party, float multiplier = 1f, string verb = "attacks")
+        private IEnumerator ExecuteEnemyBasicAttack(ICombatUnit enemyUnit, ICombatUnit target, Party party, float multiplier = 1f, string verbKey = "combat.verb.attacks")
         {
             if (target == null || !target.IsAlive)
             {
@@ -2574,11 +2584,11 @@ namespace Assets.Scripts.Rooms
 
             if (target == null)
             {
-                _lastTurnLog = $"{enemyUnit.DisplayName} has no target.";
+                _lastTurnLog = Loc.Format("combat.log.no-target", ("unit", enemyUnit.DisplayName));
                 yield break;
             }
 
-            yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, verb);
+            yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, verbKey);
             ResolveDeaths();
         }
 
@@ -2591,8 +2601,8 @@ namespace Assets.Scripts.Rooms
 
             enemy.BeginCharge(entryIndex, target);
             SetChargingVisual(enemy, true);
-            ShowFloatingLabel(enemy.Transform.position, "Charging!", new Color(1f, 0.5f, 0.2f));
-            _lastTurnLog = $"{enemy.DisplayName} is winding up a heavy blow!";
+            ShowFloatingLabel(enemy.Transform.position, Loc.Get("combat.float.charging"), new Color(1f, 0.5f, 0.2f));
+            _lastTurnLog = Loc.Format("combat.log.enemy-winds-up", ("enemy", enemy.DisplayName));
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -2615,11 +2625,11 @@ namespace Assets.Scripts.Rooms
 
             if (target == null)
             {
-                _lastTurnLog = $"{enemyUnit.DisplayName} has no target.";
+                _lastTurnLog = Loc.Format("combat.log.no-target", ("unit", enemyUnit.DisplayName));
                 yield break;
             }
 
-            yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "unleashes a heavy blow on");
+            yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "combat.verb.heavy-blow-on");
             ResolveDeaths();
         }
 
@@ -2633,7 +2643,7 @@ namespace Assets.Scripts.Rooms
             enemy.BeginCharge(entryIndex, null);
             SetChargingVisual(enemy, true);
             CombatAudio.Play(CombatSound.BossSignature);
-            ShowFloatingLabel(enemy.Transform.position, "Channeling!", new Color(1f, 0.35f, 0.35f));
+            ShowFloatingLabel(enemy.Transform.position, Loc.Get("combat.float.channeling"), new Color(1f, 0.35f, 0.35f));
 
             // Telegraph who the party-wide signature will hit: a warning marker over every hero.
             if (_currentParty != null)
@@ -2647,7 +2657,7 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            _lastTurnLog = $"{enemy.DisplayName} is channeling a devastating attack!";
+            _lastTurnLog = Loc.Format("combat.log.enemy-channels", ("enemy", enemy.DisplayName));
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -2662,11 +2672,11 @@ namespace Assets.Scripts.Rooms
             var targets = GetAliveHeroes(party);
             if (targets == null || targets.Count == 0)
             {
-                _lastTurnLog = $"{enemyUnit.DisplayName} has no target.";
+                _lastTurnLog = Loc.Format("combat.log.no-target", ("unit", enemyUnit.DisplayName));
                 yield break;
             }
 
-            _lastTurnLog = $"{enemyUnit.DisplayName} unleashes a devastating blow on the whole party!";
+            _lastTurnLog = Loc.Format("combat.log.enemy-aoe", ("enemy", enemyUnit.DisplayName));
             foreach (var target in targets)
             {
                 if (target == null || !target.IsAlive)
@@ -2679,7 +2689,7 @@ namespace Assets.Scripts.Rooms
                 {
                     continue;
                 }
-                yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "smashes");
+                yield return ExecuteAttack(enemyUnit, target, Vector3.left, Color.red, multiplier, "combat.verb.smashes");
                 ResolveDeaths();
             }
         }
@@ -2688,7 +2698,7 @@ namespace Assets.Scripts.Rooms
         {
             if (target == null || !target.IsAlive)
             {
-                _lastTurnLog = $"{enemyUnit.DisplayName} has no one to heal.";
+                _lastTurnLog = Loc.Format("combat.log.enemy-no-one-to-heal", ("enemy", enemyUnit.DisplayName));
                 yield break;
             }
 
@@ -2698,7 +2708,7 @@ namespace Assets.Scripts.Rooms
             SpellVfx.Afflict(target, SpellVfx.HealColor, false);
             CombatAudio.Play(CombatSound.Heal);
             ShowDamageText(target.Transform.position, healed, Color.green);
-            _lastTurnLog = $"{enemyUnit.DisplayName} heals {target.DisplayName} for {healed}.";
+            _lastTurnLog = Loc.Format("combat.log.enemy-heals", ("enemy", enemyUnit.DisplayName), ("target", target.DisplayName), ("amount", healed));
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -2706,7 +2716,7 @@ namespace Assets.Scripts.Rooms
         {
             if (target == null || !target.IsAlive)
             {
-                _lastTurnLog = $"{enemyUnit.DisplayName} has no target.";
+                _lastTurnLog = Loc.Format("combat.log.no-target", ("unit", enemyUnit.DisplayName));
                 yield break;
             }
 
@@ -2718,7 +2728,7 @@ namespace Assets.Scripts.Rooms
             if (!AfflictionRules.Lands(applyChance))
             {
                 ShowFloatingLabel(target.Transform.position, Cards.Effects.DebuffEffectExecutor.UnaffectedText, new Color(0.6f, 0.6f, 0.65f));
-                _lastTurnLog = $"{enemyUnit.DisplayName} tries to weaken {target.DisplayName}, who is unaffected.";
+                _lastTurnLog = Loc.Format("combat.log.enemy-weaken-unaffected", ("enemy", enemyUnit.DisplayName), ("target", target.DisplayName));
                 yield return new WaitForSeconds(_turnDelay);
                 yield break;
             }
@@ -2726,8 +2736,8 @@ namespace Assets.Scripts.Rooms
             SpellVfx.Afflict(target, SpellVfx.HarmColor, true);
             yield return new WaitForSeconds(SpellVfx.AfflictLands);
             BuffTracker.ApplyBuff(target, stat, -amount, duration);
-            ShowFloatingLabel(target.Transform.position, $"-{amount} {stat}", new Color(0.7f, 0.4f, 1f));
-            _lastTurnLog = $"{enemyUnit.DisplayName} weakens {target.DisplayName}'s {stat}!";
+            ShowFloatingLabel(target.Transform.position, Loc.Format("combat.float.stat-down", ("amount", amount), ("stat", stat)), new Color(0.7f, 0.4f, 1f));
+            _lastTurnLog = Loc.Format("combat.log.enemy-weakens", ("enemy", enemyUnit.DisplayName), ("target", target.DisplayName), ("stat", stat));
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -2735,7 +2745,7 @@ namespace Assets.Scripts.Rooms
         {
             if (target == null || !target.IsAlive)
             {
-                _lastTurnLog = $"{enemyUnit.DisplayName} has no one to empower.";
+                _lastTurnLog = Loc.Format("combat.log.enemy-no-one-to-empower", ("enemy", enemyUnit.DisplayName));
                 yield break;
             }
 
@@ -2744,10 +2754,11 @@ namespace Assets.Scripts.Rooms
             SpellVfx.Afflict(target, SpellVfx.BoonColor, false);
             yield return new WaitForSeconds(SpellVfx.AfflictLands);
             BuffTracker.ApplyBuff(target, stat, amount, duration);
-            ShowFloatingLabel(target.Transform.position, $"+{amount} {StatCatalog.ShortName(stat)}", new Color(1f, 0.6f, 0.25f));
+            ShowFloatingLabel(target.Transform.position, Loc.Format("combat.float.stat-up", ("amount", amount), ("stat", StatCatalog.ShortName(stat))), new Color(1f, 0.6f, 0.25f));
             _lastTurnLog = ReferenceEquals(target, enemyUnit)
-                ? $"{enemyUnit.DisplayName} raises its own {StatCatalog.DisplayName(stat)}!"
-                : $"{enemyUnit.DisplayName} raises {target.DisplayName}'s {StatCatalog.DisplayName(stat)}!";
+                ? Loc.Format("combat.log.enemy-buffs-self", ("enemy", enemyUnit.DisplayName), ("stat", StatCatalog.DisplayName(stat)))
+                : Loc.Format("combat.log.enemy-buffs-ally",
+                    ("enemy", enemyUnit.DisplayName), ("target", target.DisplayName), ("stat", StatCatalog.DisplayName(stat)));
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -2760,7 +2771,7 @@ namespace Assets.Scripts.Rooms
         {
             if (target == null || !target.IsAlive)
             {
-                _lastTurnLog = $"{enemyUnit.DisplayName} has no one to guard.";
+                _lastTurnLog = Loc.Format("combat.log.enemy-no-one-to-guard", ("enemy", enemyUnit.DisplayName));
                 yield break;
             }
 
@@ -2770,9 +2781,9 @@ namespace Assets.Scripts.Rooms
                 BuffTracker.ApplyBuff(enemyUnit, StatType.Endurance, brace, duration);
             }
             CombatAudio.Play(CombatSound.ItemUse);
-            ShowFloatingLabel(enemyUnit.Transform.position, "Guard", new Color(0.75f, 0.85f, 1f));
-            ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Covered", new Color(0.75f, 0.85f, 1f), 0.14f);
-            _lastTurnLog = $"{enemyUnit.DisplayName} guards {target.DisplayName}.";
+            ShowFloatingLabel(enemyUnit.Transform.position, Loc.Get("combat.float.guard"), new Color(0.75f, 0.85f, 1f));
+            ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.float.covered"), new Color(0.75f, 0.85f, 1f), 0.14f);
+            _lastTurnLog = Loc.Format("combat.log.enemy-guards", ("enemy", enemyUnit.DisplayName), ("target", target.DisplayName));
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -2807,7 +2818,7 @@ namespace Assets.Scripts.Rooms
 
             if (called.Count == 0)
             {
-                _lastTurnLog = $"{enemyUnit.DisplayName} calls out, but no one answers.";
+                _lastTurnLog = Loc.Format("combat.log.enemy-call-unanswered", ("enemy", enemyUnit.DisplayName));
                 yield break;
             }
 
@@ -2822,11 +2833,11 @@ namespace Assets.Scripts.Rooms
             BroadcastTurnOrder();
 
             CombatAudio.Play(CombatSound.BossSignature);
-            ShowFloatingLabel(enemyUnit.Transform.position, "Summon", new Color(1f, 0.55f, 0.3f));
-            string what = called.Count == 1
-                ? decision.SummonDefinition.Label
-                : $"{called.Count} {decision.SummonDefinition.Label}s";
-            _lastTurnLog = $"{enemyUnit.DisplayName} calls {what} into the fight!";
+            ShowFloatingLabel(enemyUnit.Transform.position, Loc.Get("combat.float.enemy-summon"), new Color(1f, 0.55f, 0.3f));
+            _lastTurnLog = called.Count == 1
+                ? Loc.Format("combat.log.enemy-calls-one", ("enemy", enemyUnit.DisplayName), ("summon", decision.SummonDefinition.Label))
+                : Loc.Format("combat.log.enemy-calls-many",
+                    ("enemy", enemyUnit.DisplayName), ("count", called.Count), ("summon", decision.SummonDefinition.Label));
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -2889,11 +2900,11 @@ namespace Assets.Scripts.Rooms
                     {
                         return;
                     }
-                    _lastTurnLog += cause == HealthCause.OverTime
-                        ? $" {enemy.DisplayName} succumbs!"
+                    _lastTurnLog += " " + (cause == HealthCause.OverTime
+                        ? Loc.Format("combat.log.enemy-succumbs", ("enemy", enemy.DisplayName))
                         : cause == HealthCause.Disassemble
-                            ? $" {enemy.DisplayName} is taken apart!"
-                            : $" {enemy.DisplayName} defeated!";
+                            ? Loc.Format("combat.log.enemy-taken-apart", ("enemy", enemy.DisplayName))
+                            : Loc.Format("combat.log.enemy-defeated", ("enemy", enemy.DisplayName)));
                     HandleEnemyDeath(enemy, killer, cause);
                     break;
 
@@ -2902,7 +2913,7 @@ namespace Assets.Scripts.Rooms
                     {
                         return;
                     }
-                    _lastTurnLog += $" {hero.DisplayName} has fallen!";
+                    _lastTurnLog += " " + Loc.Format("combat.log.hero-fallen", ("hero", hero.DisplayName));
                     // A fallen hero's threat goes with them: back on their feet, they start clean.
                     _threat.Clear(hero);
                     HandleHeroDeath(hero);
@@ -2944,7 +2955,7 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
-            _reactionLog.Add($" {reaction.Bearer.DisplayName}'s {reaction.Name}!");
+            _reactionLog.Add(" " + Loc.Format("combat.log.reaction", ("unit", reaction.Bearer.DisplayName), ("reaction", reaction.Name)));
             if (reaction.Bearer.Transform != null)
             {
                 ShowFloatingLabel(reaction.Bearer.Transform.position + new Vector3(0f, 0.55f, 0f),
@@ -2966,7 +2977,7 @@ namespace Assets.Scripts.Rooms
             sr.color = charging ? new Color(1f, 0.55f, 0.4f) : Color.white;
         }
 
-        private IEnumerator ExecuteAttack(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor, float damageMultiplier = 1f, string verb = "attacks")
+        private IEnumerator ExecuteAttack(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor, float damageMultiplier = 1f, string verbKey = "combat.verb.attacks")
         {
             // A guarded unit's blows land on its guard - the mech under its rider (GuardTable) - and
             // the guard's own Endurance, Luck and resistances answer them.
@@ -2977,7 +2988,7 @@ namespace Assets.Scripts.Rooms
                 // An enemy's cover says so: the player picked one target and another took the blow.
                 if (!ReferenceEquals(aimed, target) && Events.Guards.IsCovered(aimed) && target.Transform != null)
                 {
-                    ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Cover",
+                    ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.float.cover"),
                         new Color(0.75f, 0.85f, 1f), 0.14f);
                 }
             }
@@ -2989,29 +3000,29 @@ namespace Assets.Scripts.Rooms
             if (DefenseRules.RollMiss(BlindedBuffHandler.IsBlinded(BuffTracker, attacker)))
             {
                 Events?.Publish(new HitAvoided { Attacker = attacker, Target = target, Dodged = false });
-                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Miss", new Color(0.8f, 0.8f, 0.85f), 0.16f);
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.float.miss"), new Color(0.8f, 0.8f, 0.85f), 0.16f);
                 RecordAttackTypeObserved(attacker);
                 yield return new WaitForSecondsRealtime(0.045f);
-                _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName} and misses!";
+                _lastTurnLog = Loc.Format("combat.log.attack-miss", ("attacker", attacker.DisplayName), ("verb", Loc.Get(verbKey)), ("target", target.DisplayName));
                 yield break;
             }
             // Shadowstep / Smoke and Mirrors: a held evasion is spent before Luck gets its roll.
             if (EvasiveBuffHandler.TryEvade(BuffTracker, target))
             {
                 Events?.Publish(new HitAvoided { Attacker = attacker, Target = target, Dodged = true });
-                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Evade", new Color(0.8f, 0.8f, 0.85f), 0.16f);
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.float.evade"), new Color(0.8f, 0.8f, 0.85f), 0.16f);
                 RecordAttackTypeObserved(attacker);
                 yield return new WaitForSecondsRealtime(0.045f);
-                _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName}, who is not there!";
+                _lastTurnLog = Loc.Format("combat.log.attack-evaded", ("attacker", attacker.DisplayName), ("verb", Loc.Get(verbKey)), ("target", target.DisplayName));
                 yield break;
             }
             if (DefenseRules.RollDodge(target))
             {
                 Events?.Publish(new HitAvoided { Attacker = attacker, Target = target, Dodged = true });
-                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), "Dodge", new Color(0.8f, 0.8f, 0.85f), 0.16f);
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.float.dodge"), new Color(0.8f, 0.8f, 0.85f), 0.16f);
                 RecordAttackTypeObserved(attacker);
                 yield return new WaitForSecondsRealtime(0.045f);
-                _lastTurnLog = $"{attacker.DisplayName} {verb} {target.DisplayName}, who dodges!";
+                _lastTurnLog = Loc.Format("combat.log.attack-dodged", ("attacker", attacker.DisplayName), ("verb", Loc.Get(verbKey)), ("target", target.DisplayName));
                 yield break;
             }
 
@@ -3052,7 +3063,7 @@ namespace Assets.Scripts.Rooms
             {
                 // A barrier soaked part of the blow: the number shows what reached the bar.
                 dmg -= hit.Absorbed;
-                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), $"{hit.Absorbed} absorbed", new Color(0.6f, 0.85f, 1f), 0.13f);
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Format("combat.float.absorbed", ("amount", hit.Absorbed)), new Color(0.6f, 0.85f, 1f), 0.13f);
             }
 
             // Impact juice: flash + damage-scaled shake (extra punch on heavy/crit blows) + hit-stop.
@@ -3066,7 +3077,7 @@ namespace Assets.Scripts.Rooms
                 crit ? 0.24f : 0.15f);
             if (crit)
             {
-                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.45f, 0f), "CRIT!", new Color(1f, 0.82f, 0.2f), 0.16f);
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.45f, 0f), Loc.Get("combat.float.crit"), new Color(1f, 0.82f, 0.2f), 0.16f);
             }
             ShowEffectiveness(target, damageType, resistanceBonus);
 
@@ -3078,8 +3089,10 @@ namespace Assets.Scripts.Rooms
             yield return new WaitForSecondsRealtime(crit ? 0.075f : 0.045f);
 
             _lastTurnLog = dmg < 0
-                ? $"{attacker.DisplayName} {verb} {target.DisplayName}, who absorbs {-dmg} health!"
-                : $"{attacker.DisplayName} {verb} {target.DisplayName} for {dmg} damage{(crit ? " (CRIT!)" : "")}.";
+                ? Loc.Format("combat.log.attack-absorbed",
+                    ("attacker", attacker.DisplayName), ("verb", Loc.Get(verbKey)), ("target", target.DisplayName), ("amount", -dmg))
+                : Loc.Format(crit ? "combat.log.attack-hit-crit" : "combat.log.attack-hit",
+                    ("attacker", attacker.DisplayName), ("verb", Loc.Get(verbKey)), ("target", target.DisplayName), ("amount", dmg));
         }
 
         private IEnumerator LungeAnimation(Transform unit, Vector3 direction)
@@ -3363,13 +3376,13 @@ namespace Assets.Scripts.Rooms
             switch (DamageCalculator.Classify(type, target.Resistances, resistanceBonus))
             {
                 case DamageEffectiveness.Weak:
-                    word = "Weak!"; color = new Color(1f, 0.85f, 0.2f); break;
+                    word = Loc.Get("combat.float.weak"); color = new Color(1f, 0.85f, 0.2f); break;
                 case DamageEffectiveness.Resisted:
-                    word = "Resisted"; color = new Color(0.6f, 0.7f, 0.85f); break;
+                    word = Loc.Get("combat.float.resisted"); color = new Color(0.6f, 0.7f, 0.85f); break;
                 case DamageEffectiveness.Immune:
-                    word = "Immune"; color = new Color(0.78f, 0.78f, 0.82f); break;
+                    word = Loc.Get("combat.float.immune"); color = new Color(0.78f, 0.78f, 0.82f); break;
                 case DamageEffectiveness.Absorbed:
-                    word = "Absorbed"; color = new Color(0.4f, 0.95f, 0.5f); break;
+                    word = Loc.Get("combat.float.absorbed-effect"); color = new Color(0.4f, 0.95f, 0.5f); break;
             }
 
             if (word != null)
@@ -3385,7 +3398,7 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
-            string text = stacks > 0 ? $"Momentum {stacks}" : "Momentum lost";
+            string text = stacks > 0 ? Loc.Format("combat.float.momentum", ("stacks", stacks)) : Loc.Get("combat.float.momentum-lost");
             var color = stacks > 0 ? new Color(1f, 0.6f, 0.2f) : new Color(0.7f, 0.7f, 0.7f);
             ShowFloatingLabel(unit.Transform.position + new Vector3(0f, 0.7f, 0f), text, color, 0.13f);
         }
@@ -3397,7 +3410,7 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
-            ShowFloatingLabel(unit.Transform.position + new Vector3(0f, 0.7f, 0f), $"Focus {focus}",
+            ShowFloatingLabel(unit.Transform.position + new Vector3(0f, 0.7f, 0f), Loc.Format("combat.float.focus", ("focus", focus)),
                 new Color(0.55f, 0.75f, 1f), 0.13f);
         }
 
@@ -3519,11 +3532,11 @@ namespace Assets.Scripts.Rooms
             var enemy = mark as Enemy;
             if (enemy == null || enemy.IsSummoned)
             {
-                return "Nothing to steal";
+                return Loc.Get("combat.float.nothing-to-steal");
             }
             if (_robbed.Contains(mark))
             {
-                return "Already robbed";
+                return Loc.Get("combat.float.already-robbed");
             }
             _robbed.Add(mark);
 
@@ -3538,13 +3551,13 @@ namespace Assets.Scripts.Rooms
                 InventoryManager.Instance.AddItem(award, EconomySource.Kill);
                 _combatLoot.Add(award);
                 RecordLootObserved(enemy, award.Item);
-                return $"Stole {award.Item.DisplayName}";
+                return Loc.Format("combat.float.stole-item", ("item", award.Item.DisplayName));
             }
 
             int gold = StealOps.WithBonus(StealOps.FallbackGold(enemy.GoldReward), _fightGoldBonus);
             _combatGold += gold;
             MetaProgressManager.Instance.AddPendingGold(gold, EconomySource.Kill);
-            return $"Stole {gold} gold";
+            return Loc.Format("combat.float.stole-gold", ("gold", gold));
         }
 
         /// <summary>
@@ -3599,7 +3612,7 @@ namespace Assets.Scripts.Rooms
                 _turnManager.Suspend(new ICombatUnit[] { hero });
             }
             // Through the reaction log: the action writes its own line after this, which would drop it.
-            _reactionLog.Add($" {hero.DisplayName} is back on their feet!");
+            _reactionLog.Add(" " + Loc.Format("combat.log.hero-revived", ("hero", hero.DisplayName)));
             BroadcastTurnOrder();
         }
 

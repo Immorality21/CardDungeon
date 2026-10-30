@@ -1,4 +1,5 @@
 using Assets.Scripts.IO;
+using ImmoralityGaming.Localization;
 using UnityEngine;
 
 namespace Assets.Scripts.Combat
@@ -83,7 +84,7 @@ namespace Assets.Scripts.Combat
         /// <summary>What the Options button says: "x1", "x2", "x3".</summary>
         public static string Label(int speed)
         {
-            return "x" + speed;
+            return Loc.Format("combat.speed.label", ("speed", speed));
         }
     }
 

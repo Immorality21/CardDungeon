@@ -1,5 +1,6 @@
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -26,7 +27,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return "Vanished!";
+            return Loc.Get("combat.status.vanished");
         }
 
         public bool SkipsTurn => false;
@@ -77,7 +78,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return "Evasive!";
+            return Loc.Get("combat.status.evasive");
         }
 
         public bool SkipsTurn => false;
@@ -116,7 +117,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return "Death Mark!";
+            return Loc.Get("combat.status.death-mark");
         }
 
         public bool SkipsTurn => false;

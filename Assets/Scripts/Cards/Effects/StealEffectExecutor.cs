@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -52,14 +53,14 @@ namespace Assets.Scripts.Cards.Effects
                     result.Entries.Add(new EffectEntry
                     {
                         Target = target,
-                        Text = $"Steal failed ({Mathf.RoundToInt(chance * 100f)}%)",
+                        Text = Loc.Format("combat.float.steal-failed", ("chance", Mathf.RoundToInt(chance * 100f))),
                         Color = Color.gray,
                         Delay = EffectDelay
                     });
                     continue;
                 }
 
-                string text = stealFrom != null ? stealFrom(caster, target) : "Stolen!";
+                string text = stealFrom != null ? stealFrom(caster, target) : Loc.Get("combat.float.stolen");
                 result.Entries.Add(new EffectEntry
                 {
                     Target = target,

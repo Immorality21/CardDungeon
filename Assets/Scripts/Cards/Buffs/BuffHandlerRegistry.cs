@@ -21,12 +21,12 @@ namespace Assets.Scripts.Cards.Buffs
         {
             var handlers = new Dictionary<BuffType, IBuffHandler>
             {
-                { BuffType.FireResistance, new ResistanceBuffHandler(DamageType.Fire, "Fire Res") },
-                { BuffType.IceResistance, new ResistanceBuffHandler(DamageType.Ice, "Ice Res") },
-                { BuffType.LightningResistance, new ResistanceBuffHandler(DamageType.Lightning, "Lightning Res") },
-                { BuffType.HolyResistance, new ResistanceBuffHandler(DamageType.Holy, "Holy Res") },
-                { BuffType.ShadowResistance, new ResistanceBuffHandler(DamageType.Shadow, "Shadow Res") },
-                { BuffType.Guarded, ResistanceBuffHandler.ToAll("Guard") },
+                { BuffType.FireResistance, new ResistanceBuffHandler(DamageType.Fire, "combat.status.fire-res") },
+                { BuffType.IceResistance, new ResistanceBuffHandler(DamageType.Ice, "combat.status.ice-res") },
+                { BuffType.LightningResistance, new ResistanceBuffHandler(DamageType.Lightning, "combat.status.lightning-res") },
+                { BuffType.HolyResistance, new ResistanceBuffHandler(DamageType.Holy, "combat.status.holy-res") },
+                { BuffType.ShadowResistance, new ResistanceBuffHandler(DamageType.Shadow, "combat.status.shadow-res") },
+                { BuffType.Guarded, ResistanceBuffHandler.ToAll("combat.status.guard") },
                 { BuffType.Barrier, new BarrierBuffHandler() },
                 { BuffType.Frozen, new FrozenBuffHandler() },
                 { BuffType.Slow, new SlowBuffHandler() },
@@ -57,22 +57,22 @@ namespace Assets.Scripts.Cards.Buffs
                 {
                     BuffType.Burning,
                     new OverTimeBuffHandler(
-                        BuffType.Burning, "Burn", false, DamageType.Fire, false, DamageType.Ice)
+                        BuffType.Burning, "combat.status.burn", false, DamageType.Fire, false, DamageType.Ice)
                 },
                 {
                     BuffType.Poisoned,
                     new OverTimeBuffHandler(
-                        BuffType.Poisoned, "Poison", false, DamageType.Normal, true)
+                        BuffType.Poisoned, "combat.status.poison", false, DamageType.Normal, true)
                 },
                 {
                     BuffType.Bleeding,
                     new OverTimeBuffHandler(
-                        BuffType.Bleeding, "Bleed", false, DamageType.Normal, false)
+                        BuffType.Bleeding, "combat.status.bleed", false, DamageType.Normal, false)
                 },
                 {
                     BuffType.Regenerating,
                     new OverTimeBuffHandler(
-                        BuffType.Regenerating, "Regen", true, DamageType.Normal, false)
+                        BuffType.Regenerating, "combat.status.regen", true, DamageType.Normal, false)
                 }
             };
 
@@ -87,7 +87,7 @@ namespace Assets.Scripts.Cards.Buffs
                 }
                 if (!handlers.ContainsKey(asBuff))
                 {
-                    handlers[asBuff] = new StatBuffHandler(stat, StatCatalog.DisplayName(stat));
+                    handlers[asBuff] = new StatBuffHandler(stat);
                 }
             }
 

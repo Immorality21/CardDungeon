@@ -27,8 +27,8 @@ namespace Assets.Scripts.Cards
         private readonly CombatEvents _events;
         private readonly EffectResolver _resolver;
         private readonly CombatBuffTracker _buffs;
-        private readonly TriggeredEffect _label = new TriggeredEffect { Label = "Retribution" };
-        private readonly TriggeredEffect _thornsLabel = new TriggeredEffect { Label = "Thorns" };
+        private readonly TriggeredEffect _label = new TriggeredEffect { LabelKey = "abilities.reaction.retribution" };
+        private readonly TriggeredEffect _thornsLabel = new TriggeredEffect { LabelKey = "abilities.reaction.thorns" };
 
         public RetaliationTracker(CombatEvents events, EffectResolver resolver, CombatBuffTracker buffs)
         {

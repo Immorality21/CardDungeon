@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
@@ -147,37 +148,41 @@ namespace Assets.Scripts.Dungeon
 
             var parts = new List<string>
             {
-                $"enemies {Signed(fear.EnemyStatMultiplier)} to every stat",
+                Loc.Format("dungeon.revisit.summary.stats", ("percent", Signed(fear.EnemyStatMultiplier))),
             };
             if (fear.EnemyHealthMultiplier > 1.001f)
             {
-                parts.Add($"{Signed(fear.EnemyHealthMultiplier)} more health");
+                parts.Add(Loc.Format("dungeon.revisit.summary.health", ("percent", Signed(fear.EnemyHealthMultiplier))));
             }
             if (fear.EnemyDamageMultiplier > 1.001f)
             {
-                parts.Add($"{Signed(fear.EnemyDamageMultiplier)} more damage");
+                parts.Add(Loc.Format("dungeon.revisit.summary.damage", ("percent", Signed(fear.EnemyDamageMultiplier))));
             }
             if (fear.EnemyAgilityMultiplier > 1.001f)
             {
-                parts.Add($"{Signed(fear.EnemyAgilityMultiplier)} more speed");
+                parts.Add(Loc.Format("dungeon.revisit.summary.speed", ("percent", Signed(fear.EnemyAgilityMultiplier))));
             }
             if (fear.ExtraEnemiesPerRoom > 0)
             {
-                parts.Add($"+{fear.ExtraEnemiesPerRoom} {(fear.ExtraEnemiesPerRoom == 1 ? "foe" : "foes")} per fight");
+                parts.Add(fear.ExtraEnemiesPerRoom == 1
+                    ? Loc.Format("dungeon.revisit.summary.extra-foes.one", ("count", fear.ExtraEnemiesPerRoom))
+                    : Loc.Format("dungeon.revisit.summary.extra-foes.many", ("count", fear.ExtraEnemiesPerRoom)));
             }
             if (fear.HeroHealingMultiplier < 0.999f)
             {
                 parts.Add(fear.HeroHealingMultiplier <= 0f
-                    ? "no healing"
-                    : $"healing {Signed(fear.HeroHealingMultiplier)}");
+                    ? Loc.Get("dungeon.revisit.summary.no-healing")
+                    : Loc.Format("dungeon.revisit.summary.healing", ("percent", Signed(fear.HeroHealingMultiplier))));
             }
-            return $"Fear level {fear.Level}: {string.Join(", ", parts)}. Rewards {Signed(fear.RewardMultiplier)} XP, gold and Essence.";
+            return Loc.Format("dungeon.revisit.summary", ("level", fear.Level), ("changes", string.Join(Loc.Get("dungeon.revisit.summary.separator"), parts)), ("percent", Signed(fear.RewardMultiplier)));
         }
 
         private static string Signed(float multiplier)
         {
             int percent = Mathf.RoundToInt((multiplier - 1f) * 100f);
-            return percent >= 0 ? $"+{percent}%" : $"−{-percent}%";
+            return percent >= 0
+                ? Loc.Format("dungeon.revisit.percent.plus", ("percent", percent))
+                : Loc.Format("dungeon.revisit.percent.minus", ("percent", -percent));
         }
 
         /// <summary>XP, gold and Essence multiplier of a revisit at <paramref name="fear"/>.</summary>

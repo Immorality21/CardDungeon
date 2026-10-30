@@ -110,7 +110,7 @@ namespace Assets.Scripts.Cards
             {
                 if (i > 0)
                 {
-                    sb.Append(", ");
+                    sb.Append(Loc.Get("abilities.summary.separator"));
                 }
 
                 var effect = Effects[i];
@@ -118,44 +118,42 @@ namespace Assets.Scripts.Cards
                 // A percentage effect reads as "30%" rather than "30", or the summary claims a 10%
                 // cloak costs 10 flat health.
                 string power = effect.PowerMode == PowerMode.PercentOfMaxHealth
-                    ? $"{effect.Power}%"
+                    ? Loc.Format("abilities.summary.percent", ("value", effect.Power))
                     : effect.Power.ToString();
 
                 switch (effect.EffectType)
                 {
                     case SpellEffectType.Damage:
-                        sb.Append($"DMG {power}");
-                        if (effect.DamageType != DamageType.Normal)
-                        {
-                            sb.Append($" {effect.DamageType}");
-                        }
+                        sb.Append(effect.DamageType != DamageType.Normal
+                            ? Loc.Format("abilities.summary.damage-element", ("power", power), ("element", effect.DamageType))
+                            : Loc.Format("abilities.summary.damage", ("power", power)));
                         break;
                     case SpellEffectType.Heal:
-                        sb.Append($"Heal {power}");
+                        sb.Append(Loc.Format("abilities.summary.heal", ("power", power)));
                         break;
                     case SpellEffectType.Buff:
-                        sb.Append($"+{effect.BuffType}");
+                        sb.Append(Loc.Format("abilities.summary.buff", ("status", effect.BuffType)));
                         break;
                     case SpellEffectType.Debuff:
-                        sb.Append($"-{effect.BuffType}");
+                        sb.Append(Loc.Format("abilities.summary.debuff", ("status", effect.BuffType)));
                         break;
                     case SpellEffectType.HealthCost:
-                        sb.Append($"Costs {power} HP");
+                        sb.Append(Loc.Format("abilities.summary.health-cost", ("power", power)));
                         break;
                     case SpellEffectType.TurnDelay:
-                        sb.Append($"Delay {effect.Power}%");
+                        sb.Append(Loc.Format("abilities.summary.turn-delay", ("percent", effect.Power)));
                         break;
                     case SpellEffectType.Drain:
-                        sb.Append($"Drain {effect.Power}%");
+                        sb.Append(Loc.Format("abilities.summary.drain", ("percent", effect.Power)));
                         break;
                     case SpellEffectType.RestoreCharge:
-                        sb.Append($"+{effect.Power} charge");
+                        sb.Append(Loc.Format("abilities.summary.restore-charge", ("count", effect.Power)));
                         break;
                     case SpellEffectType.Disassemble:
-                        sb.Append("Disassemble");
+                        sb.Append(Loc.Get("abilities.summary.disassemble"));
                         break;
                     case SpellEffectType.Thorns:
-                        sb.Append($"Thorns {effect.Power}% {effect.DamageType}");
+                        sb.Append(Loc.Format("abilities.summary.thorns", ("percent", effect.Power), ("element", effect.DamageType)));
                         break;
                 }
             }

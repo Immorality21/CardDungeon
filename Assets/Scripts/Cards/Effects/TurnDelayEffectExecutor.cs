@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -52,7 +53,7 @@ namespace Assets.Scripts.Cards.Effects
                     Target = target,
                     // At the cap the hit still lands; only the delay does not, and the player should
                     // see why the turn order did not move.
-                    Text = moved > 0f ? "Delayed" : "Can't delay further",
+                    Text = moved > 0f ? Loc.Get("combat.float.delayed") : Loc.Get("combat.float.cannot-delay"),
                     Color = moved > 0f ? DelayColor : Color.gray,
                     Delay = EffectDelay
                 });

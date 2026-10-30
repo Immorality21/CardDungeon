@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Cards.Effects;
@@ -169,8 +170,8 @@ namespace Assets.Scripts.Rooms.Events
 
                 afflictions.Add(hero.HeroKey, effect.BuffType, signed);
                 lines.Add(signed < 0
-                    ? $"{hero.DisplayName}: {effect.BuffType} {signed} for the rest of the level."
-                    : $"{hero.DisplayName}: {effect.BuffType} +{signed} for the rest of the level.");
+                    ? Loc.Format("event-text.affliction.minus", ("hero", hero.DisplayName), ("buff", effect.BuffType), ("amount", signed))
+                    : Loc.Format("event-text.affliction.plus", ("hero", hero.DisplayName), ("buff", effect.BuffType), ("amount", signed)));
             }
         }
 
@@ -193,7 +194,7 @@ namespace Assets.Scripts.Rooms.Events
                 report.Lines.Add(line);
 
                 bool isHeal = entry.Healed > 0;
-                ShowFloatingText(entry.Target, isHeal ? $"+{entry.Healed}" : entry.Text, isHeal ? HealColor : DamageColor);
+                ShowFloatingText(entry.Target, isHeal ? Loc.Format("event-text.float.heal", ("amount", entry.Healed)) : entry.Text, isHeal ? HealColor : DamageColor);
             }
         }
 
@@ -210,15 +211,15 @@ namespace Assets.Scripts.Rooms.Events
             }
             if (entry.Healed > 0)
             {
-                return $"{entry.Target.DisplayName} recovers {entry.Healed} health.";
+                return Loc.Format("event-text.report.healed", ("unit", entry.Target.DisplayName), ("amount", entry.Healed));
             }
             if (entry.Impact > 0)
             {
-                return $"{entry.Target.DisplayName} takes {entry.Impact} damage.";
+                return Loc.Format("event-text.report.damaged", ("unit", entry.Target.DisplayName), ("amount", entry.Impact));
             }
             if (entry.Text == "0")
             {
-                return $"{entry.Target.DisplayName} was already whole.";
+                return Loc.Format("event-text.report.already-whole", ("unit", entry.Target.DisplayName));
             }
             return null;
         }
@@ -235,7 +236,7 @@ namespace Assets.Scripts.Rooms.Events
                 if (target.Stats != null && target.Stats.Health < 1)
                 {
                     HealthOps.Set(target, 1, new HealthSource(null, HealthCause.RoomEvent), null);
-                    report.Lines.Add($"{target.DisplayName} is barely standing.");
+                    report.Lines.Add(Loc.Format("event-text.report.barely-standing", ("unit", target.DisplayName)));
                 }
             }
         }
@@ -265,7 +266,7 @@ namespace Assets.Scripts.Rooms.Events
             }
 
             MetaProgressManager.Instance.AddPendingGold(outcome.Gold, EconomySource.RoomEvent);
-            report.Lines.Add($"+{outcome.Gold} gold.");
+            report.Lines.Add(Loc.Format("event-text.report.gold", ("amount", outcome.Gold)));
         }
 
         private void ApplyLoot(RoomEventOutcome outcome, RoomEventOutcomeReport report)
@@ -290,13 +291,13 @@ namespace Assets.Scripts.Rooms.Events
                 }
 
                 InventoryManager.Instance.AddItem(item, 1, EconomySource.RoomEvent);
-                report.Lines.Add($"Found: {item.DisplayName}.");
+                report.Lines.Add(Loc.Format("event-text.report.found", ("item", item.DisplayName)));
                 anyDropped = true;
             }
 
             if (!anyDropped)
             {
-                report.Lines.Add("Nothing worth carrying.");
+                report.Lines.Add(Loc.Get("event-text.report.found-nothing"));
             }
         }
 
@@ -319,12 +320,12 @@ namespace Assets.Scripts.Rooms.Events
                 {
                     var item = InventoryManager.Instance.GetItemSO(entry.ItemKey);
                     string name = item != null ? item.DisplayName : entry.ItemKey;
-                    report.Lines.Add($"Lost: {name}.");
+                    report.Lines.Add(Loc.Format("event-text.report.lost", ("item", name)));
                     return;
                 }
             }
 
-            report.Lines.Add("You had nothing left to lose.");
+            report.Lines.Add(Loc.Get("event-text.report.lost-nothing"));
         }
 
         private void ApplyJoin(RoomEventOutcome outcome, RoomEventOutcomeReport report)
@@ -336,7 +337,7 @@ namespace Assets.Scripts.Rooms.Events
 
             if (DungeonManager.Instance.JoinParty(outcome.JoinsHero) != null)
             {
-                report.Lines.Add($"{outcome.JoinsHero.DisplayName} joins the party.");
+                report.Lines.Add(Loc.Format("event-text.report.joins", ("hero", outcome.JoinsHero.DisplayName)));
             }
         }
 
@@ -370,8 +371,8 @@ namespace Assets.Scripts.Rooms.Events
                 room.Reveal();
                 report.SpawnedEnemies = true;
                 report.Lines.Add(spawned == 1
-                    ? "Something in here is awake now."
-                    : $"{spawned} of them are awake now.");
+                    ? Loc.Get("event-text.report.awakened.one")
+                    : Loc.Format("event-text.report.awakened.many", ("count", spawned)));
             }
         }
     }

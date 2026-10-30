@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.UnitStats;
@@ -121,7 +122,7 @@ namespace Assets.Scripts.Rooms.Events
                 case OddsClarity.Vague:
                     return VaguePhrase(band);
                 default:
-                    return "You have no idea what you are dealing with.";
+                    return Loc.Get("event-text.odds.unknown");
             }
         }
 
@@ -130,15 +131,15 @@ namespace Assets.Scripts.Rooms.Events
             switch (band)
             {
                 case OddsBand.AlmostCertain:
-                    return "You are almost certain to manage it.";
+                    return Loc.Get("event-text.odds.clear.almost-certain");
                 case OddsBand.VeryLikely:
-                    return "You are very likely to manage it.";
+                    return Loc.Get("event-text.odds.clear.very-likely");
                 case OddsBand.EvenOdds:
-                    return "It is an even bet.";
+                    return Loc.Get("event-text.odds.clear.even");
                 case OddsBand.SlightChance:
-                    return "You have only a slight chance.";
+                    return Loc.Get("event-text.odds.clear.slight");
                 default:
-                    return "It looks near hopeless.";
+                    return Loc.Get("event-text.odds.clear.hopeless");
             }
         }
 
@@ -148,11 +149,11 @@ namespace Assets.Scripts.Rooms.Events
             {
                 case OddsBand.AlmostCertain:
                 case OddsBand.VeryLikely:
-                    return "It looks safe enough, though you could not say how safe.";
+                    return Loc.Get("event-text.odds.vague.safe");
                 case OddsBand.EvenOdds:
-                    return "It looks risky, though you could not say how risky.";
+                    return Loc.Get("event-text.odds.vague.risky");
                 default:
-                    return "It looks dangerous, though you could not say how dangerous.";
+                    return Loc.Get("event-text.odds.vague.dangerous");
             }
         }
 

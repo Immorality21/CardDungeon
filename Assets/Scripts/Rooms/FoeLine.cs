@@ -1,3 +1,4 @@
+using ImmoralityGaming.Localization;
 using System.Collections.Generic;
 
 namespace Assets.Scripts.Rooms
@@ -59,20 +60,20 @@ namespace Assets.Scripts.Rooms
             var parts = new List<string>();
             foreach (var kind in order)
             {
-                parts.Add(counts[kind] > 1 ? $"{names[kind]} x{counts[kind]}" : names[kind]);
+                parts.Add(counts[kind] > 1 ? Loc.Format("room.foes.counted", ("name", names[kind]), ("count", counts[kind])) : names[kind]);
             }
             if (unknown > 0)
             {
                 if (parts.Count > 0)
                 {
-                    parts.Add(unknown + " unknown");
+                    parts.Add(Loc.Format("room.foes.unknown-extra", ("count", unknown)));
                 }
                 else
                 {
-                    parts.Add(unknown == 1 ? "An unknown foe" : unknown + " unknown foes");
+                    parts.Add(unknown == 1 ? Loc.Get("room.foes.unknown-one") : Loc.Format("room.foes.unknown-many", ("count", unknown)));
                 }
             }
-            return string.Join(" + ", parts);
+            return string.Join(Loc.Get("room.foes.separator"), parts);
         }
     }
 }

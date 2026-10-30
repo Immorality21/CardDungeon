@@ -5,6 +5,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards
 {
@@ -126,7 +127,7 @@ namespace Assets.Scripts.Cards
             magic.hideFlags = HideFlags.DontSave;
             magic.name = summon != null ? CastKeyPrefix + summon.Key : CastKeyPrefix;
             magic.Key = magic.name;
-            magic.DisplayName = summon != null ? summon.Label : "Summon";
+            magic.DisplayName = summon != null ? summon.Label : Loc.Get("abilities.summon.fallback-name");
             magic.Description = summon != null ? summon.Description : "";
             magic.TargetType = summon != null ? summon.TargetType : MagicTargetType.AllAllies;
             magic.Effects = EffectsFor(summon, grant);
@@ -383,7 +384,7 @@ namespace Assets.Scripts.Cards
             var party = PartyEffectsFor(summon, grant);
             if (party.Count > 0)
             {
-                parts.Add("the party: " + string.Join(", ", party.Select(DescribeEffect)));
+                parts.Add(Loc.Format("abilities.summon.party-effects", ("effects", string.Join(Loc.Get("abilities.summon.effect-separator"), party.Select(DescribeEffect)))));
             }
             if (summon.RandomTargetEffects != null && summon.RandomTargetEffects.Count > 0)
             {
@@ -392,19 +393,19 @@ namespace Assets.Scripts.Cards
                 {
                     random.Add(DescribeEffect(effect));
                 }
-                parts.Add("one at random: " + string.Join(", ", random));
+                parts.Add(Loc.Format("abilities.summon.random-effects", ("effects", string.Join(Loc.Get("abilities.summon.effect-separator"), random))));
             }
             if (summon.SummonerHealthCostPercent > 0)
             {
-                parts.Add($"costs {summon.SummonerHealthCostPercent}% of the summoner's health");
+                parts.Add(Loc.Format("abilities.summon.health-cost", ("percent", summon.SummonerHealthCostPercent)));
             }
             if (summon.BonusThreat > 0)
             {
-                parts.Add("draws the enemies' attention");
+                parts.Add(Loc.Get("abilities.summon.draws-attention"));
             }
             int charges = MaxCharges(summon, grant);
-            parts.Add(charges == 1 ? "1 charge per run" : $"{charges} charges per run");
-            return string.Join(" · ", parts);
+            parts.Add(charges == 1 ? Loc.Get("abilities.summon.charge-one") : Loc.Format("abilities.summon.charges", ("count", charges)));
+            return string.Join(Loc.Get("abilities.summon.part-separator"), parts);
         }
 
         /// <summary>"Takes the party's place · 250% of the summoner's health · 3 turns · 1 charge per run",
@@ -415,13 +416,13 @@ namespace Assets.Scripts.Cards
             var parts = new List<string>
             {
                 summon.Kind == SummonKind.JoinParty
-                    ? (summon.RotateActions ? "Stands beside the party"
-                        : summon.ActsAlone ? "Fights beside the party on its own" : "Fights beside the party")
-                    : "Takes the party's place"
+                    ? (summon.RotateActions ? Loc.Get("abilities.summon.stands-beside")
+                        : summon.ActsAlone ? Loc.Get("abilities.summon.fights-alone") : Loc.Get("abilities.summon.fights-beside"))
+                    : Loc.Get("abilities.summon.replaces-party")
             };
             if (summon.SummonerHealthCostPercent > 0)
             {
-                parts.Add($"costs {summon.SummonerHealthCostPercent}% of the summoner's health");
+                parts.Add(Loc.Format("abilities.summon.health-cost", ("percent", summon.SummonerHealthCostPercent)));
             }
             if (summon.IsSquad)
             {
@@ -432,18 +433,18 @@ namespace Assets.Scripts.Cards
                 int health = PercentFor(summon, grant, StatType.MaxHealth);
                 if (health > 0)
                 {
-                    parts.Add($"{health}% of the summoner's health");
+                    parts.Add(Loc.Format("abilities.summon.health", ("percent", health)));
                 }
             }
             int turns = TurnsFor(summon, grant);
-            parts.Add(turns == 1 ? "1 turn" : $"{turns} turns");
+            parts.Add(turns == 1 ? Loc.Get("abilities.summon.turn-one") : Loc.Format("abilities.summon.turns", ("count", turns)));
             if (summon.PartingAbility != null)
             {
-                parts.Add($"{summon.PartingAbility.DisplayName} as it leaves");
+                parts.Add(Loc.Format("abilities.summon.parting", ("ability", summon.PartingAbility.DisplayName)));
             }
             int charges = MaxCharges(summon, grant);
-            parts.Add(charges == 1 ? "1 charge per run" : $"{charges} charges per run");
-            return string.Join(" · ", parts);
+            parts.Add(charges == 1 ? Loc.Get("abilities.summon.charge-one") : Loc.Format("abilities.summon.charges", ("count", charges)));
+            return string.Join(Loc.Get("abilities.summon.part-separator"), parts);
         }
 
         /// <summary>"3 Imps", "2 Succubi and an Imp": the troops by kind, strongest first.</summary>
@@ -453,18 +454,22 @@ namespace Assets.Scripts.Cards
                 .GroupBy(t => t.Label)
                 .Select(g => new { Name = g.Key, Count = g.Count(), Index = troops.IndexOf(g.First()) })
                 .OrderBy(g => g.Index)
-                .Select(g => g.Count == 1 ? Article(g.Name) + " " + g.Name : g.Count + " " + Plural(g.Name))
+                .Select(g => g.Count == 1
+                    ? Loc.Format("abilities.summon.squad-one", ("article", Article(g.Name)), ("name", g.Name))
+                    : Loc.Format("abilities.summon.squad-many", ("count", g.Count), ("name", Plural(g.Name))))
                 .ToList();
             if (groups.Count <= 1)
             {
                 return groups.Count == 1 ? groups[0] : "";
             }
-            return string.Join(", ", groups.Take(groups.Count - 1)) + " and " + groups[groups.Count - 1];
+            return Loc.Format("abilities.summon.squad-list",
+                ("list", string.Join(Loc.Get("abilities.summon.effect-separator"), groups.Take(groups.Count - 1))),
+                ("last", groups[groups.Count - 1]));
         }
 
         private static string Article(string name)
         {
-            return name.Length > 0 && "AEIOUaeiou".IndexOf(name[0]) >= 0 ? "an" : "a";
+            return name.Length > 0 && "AEIOUaeiou".IndexOf(name[0]) >= 0 ? Loc.Get("abilities.summon.article-an") : Loc.Get("abilities.summon.article-a");
         }
 
         private static string Plural(string name)
@@ -489,7 +494,7 @@ namespace Assets.Scripts.Cards
                 {
                     run++;
                 }
-                collapsed.Add(run > 1 ? $"{parts[i]} ×{run}" : parts[i]);
+                collapsed.Add(run > 1 ? Loc.Format("abilities.summon.repeat", ("effect", parts[i]), ("count", run)) : parts[i]);
                 i += run;
             }
             return collapsed;
@@ -497,46 +502,70 @@ namespace Assets.Scripts.Cards
 
         private static string DescribeEffect(SpellEffect effect)
         {
-            string turns = effect.Duration > 0 ? $" for {effect.Duration} turns" : "";
+            bool timed = effect.Duration > 0;
             switch (effect.EffectType)
             {
                 case SpellEffectType.Buff:
                     if (effect.BuffType == BuffType.Regenerating)
                     {
-                        return $"regenerates {effect.Power} a turn{turns}";
+                        return Timed("abilities.summon.effect.regenerates", "abilities.summon.effect.regenerates-turns", timed, effect, ("amount", effect.Power));
                     }
                     if (effect.BuffType == BuffType.Barrier)
                     {
                         return effect.PowerMode == PowerMode.PercentOfMaxHealth
-                            ? $"a barrier of {effect.Power}% of health{turns}"
-                            : $"a barrier of {effect.Power}{turns}";
+                            ? Timed("abilities.summon.effect.barrier-percent", "abilities.summon.effect.barrier-percent-turns", timed, effect, ("percent", effect.Power))
+                            : Timed("abilities.summon.effect.barrier", "abilities.summon.effect.barrier-turns", timed, effect, ("amount", effect.Power));
                     }
                     return effect.PowerMode == PowerMode.PercentOfTargetStat
-                        ? $"+{effect.Power}% {effect.BuffType}{turns}"
-                        : $"+{effect.Power} {effect.BuffType}{turns}";
+                        ? Timed("abilities.summon.effect.buff-percent", "abilities.summon.effect.buff-percent-turns", timed, effect, ("percent", effect.Power), ("status", effect.BuffType))
+                        : Timed("abilities.summon.effect.buff", "abilities.summon.effect.buff-turns", timed, effect, ("amount", effect.Power), ("status", effect.BuffType));
                 case SpellEffectType.Debuff:
-                    return $"-{effect.Power} {effect.BuffType}{turns}";
+                    return Timed("abilities.summon.effect.debuff", "abilities.summon.effect.debuff-turns", timed, effect, ("amount", effect.Power), ("status", effect.BuffType));
                 case SpellEffectType.Damage:
                 {
-                    string element = effect.DamageType != DamageType.Normal ? $" {effect.DamageType}" : "";
+                    bool elemental = effect.DamageType != DamageType.Normal;
                     if (!StatCatalog.CanScalePower(effect.ScalingStat) || effect.PowerMode != PowerMode.BasePower)
                     {
-                        return $"{effect.Power}{element} damage";
+                        return elemental
+                            ? Loc.Format("abilities.describe.damage-element", ("amount", effect.Power), ("element", effect.DamageType))
+                            : Loc.Format("abilities.describe.damage", ("amount", effect.Power));
                     }
                     string stat = StatCatalog.ShortName(effect.ScalingStat);
-                    return effect.Power > 0 ? $"{effect.Power} + {stat}{element} damage" : $"{stat}{element} damage";
+                    if (effect.Power > 0)
+                    {
+                        return elemental
+                            ? Loc.Format("abilities.summon.effect.damage-plus-stat-element", ("amount", effect.Power), ("stat", stat), ("element", effect.DamageType))
+                            : Loc.Format("abilities.summon.effect.damage-plus-stat", ("amount", effect.Power), ("stat", stat));
+                    }
+                    return elemental
+                        ? Loc.Format("abilities.summon.effect.damage-stat-element", ("stat", stat), ("element", effect.DamageType))
+                        : Loc.Format("abilities.summon.effect.damage-stat", ("stat", stat));
                 }
                 case SpellEffectType.TurnDelay:
-                    return $"delays by {effect.Power}% of a turn";
+                    return Loc.Format("abilities.summon.effect.turn-delay", ("percent", effect.Power));
                 case SpellEffectType.Drain:
-                    return $"drains {effect.Power}% of the damage";
+                    return Loc.Format("abilities.summon.effect.drain", ("percent", effect.Power));
                 case SpellEffectType.Heal:
                     return effect.PowerMode == PowerMode.PercentOfMaxHealth
-                        ? $"heals {effect.Power}% of health"
-                        : $"heals {effect.Power}";
+                        ? Loc.Format("abilities.summon.effect.heal-percent", ("percent", effect.Power))
+                        : Loc.Format("abilities.summon.effect.heal", ("amount", effect.Power));
                 default:
                     return effect.EffectType.ToString();
             }
+        }
+
+        /// <summary>The effect's text, with "for N turns" when it lasts: <paramref name="key"/> and
+        /// <paramref name="key"/><c>-turns</c>, the latter given a <c>{turns}</c> placeholder.</summary>
+        private static string Timed(string key, string turnsKey, bool timed, SpellEffect effect, params (string Name, object Value)[] args)
+        {
+            if (!timed)
+            {
+                return Loc.Format(key, args);
+            }
+            var all = new (string Name, object Value)[args.Length + 1];
+            args.CopyTo(all, 0);
+            all[args.Length] = ("turns", effect.Duration);
+            return Loc.Format(turnsKey, all);
         }
     }
 }

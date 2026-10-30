@@ -4465,3 +4465,5570 @@ MonoBehaviour:
     - you are here
     Reviewed: 0
     Note: 
+  - Key: combat.focus.double-cast
+    Values:
+    - Double-cast
+    Reviewed: 0
+    Note: Mage MultiCast tier name (Ultra list title, floating text)
+  - Key: combat.focus.triple-cast
+    Values:
+    - Triple-cast
+    Reviewed: 0
+    Note: Mage MultiCast tier name
+  - Key: combat.focus.quadruple-cast
+    Values:
+    - Quadruple-cast
+    Reviewed: 0
+    Note: Mage MultiCast tier name
+  - Key: combat.focus.single-cast
+    Values:
+    - Single cast
+    Reviewed: 0
+    Note: MultiCast name with no Focus
+  - Key: combat.focus.multi-cast
+    Values:
+    - '{casts}x cast'
+    Reviewed: 0
+    Note: MultiCast name past four casts; {casts} = number of casts
+  - Key: combat.speed.label
+    Values:
+    - x{speed}
+    Reviewed: 0
+    Note: Options combat-speed button; {speed} = 1, 2 or 3
+  - Key: combat.format.percent
+    Values:
+    - '{value}%'
+    Reviewed: 0
+    Note: A percentage shown to the player (Disassemble odds, audio dials); {value}
+      = whole number
+  - Key: combat.summon.fallback-name
+    Values:
+    - Summon
+    Reviewed: 0
+    Note: Name of a summon unit with no definition (fallback)
+  - Key: combat.float.dodge
+    Values:
+    - Dodge
+    Reviewed: 0
+    Note: 'Floating text: physical hit dodged by Luck'
+  - Key: combat.float.miss
+    Values:
+    - Miss
+    Reviewed: 0
+    Note: 'Floating text: blinded attacker missed'
+  - Key: combat.float.evade
+    Values:
+    - Evade
+    Reviewed: 0
+    Note: 'Floating text: hit spent against an Evasive status'
+  - Key: combat.float.immune
+    Values:
+    - Immune
+    Reviewed: 0
+    Note: 'Floating text: status immunity / 100% resistance'
+  - Key: combat.float.unaffected
+    Values:
+    - Unaffected
+    Reviewed: 0
+    Note: 'Floating text: a debuff''s chance roll failed'
+  - Key: combat.float.cleansed
+    Values:
+    - Cleansed
+    Reviewed: 0
+    Note: 'Floating text: Cure removed one debuff'
+  - Key: combat.float.cleansed-many
+    Values:
+    - Cleansed x{count}
+    Reviewed: 0
+    Note: 'Floating text: Cure removed several debuffs; {count} = how many'
+  - Key: combat.float.damage-absorbed
+    Values:
+    - '{damage} ({absorbed} absorbed)'
+    Reviewed: 0
+    Note: Floating damage number when a barrier soaked part; {damage} = health lost,
+      {absorbed} = soaked by barrier
+  - Key: combat.float.not-a-machine
+    Values:
+    - Not a machine
+    Reviewed: 0
+    Note: 'Floating text: Disassemble on a non-mechanical target'
+  - Key: combat.float.disassemble-failed
+    Values:
+    - Failed ({chance})
+    Reviewed: 0
+    Note: 'Floating text: Disassemble roll failed; {chance} = odds as a percentage
+      text, e.g. 25%'
+  - Key: combat.float.disassembled
+    Values:
+    - Disassembled!
+    Reviewed: 0
+    Note: 'Floating text: Disassemble succeeded'
+  - Key: combat.float.destroyed
+    Values:
+    - Destroyed!
+    Reviewed: 0
+    Note: 'Floating text: Execute killed the target'
+  - Key: combat.float.gold-bonus
+    Values:
+    - +{power}% gold
+    Reviewed: 0
+    Note: 'Floating text: Fence fight gold bonus; {power} = percent'
+  - Key: combat.float.health-cost
+    Values:
+    - -{amount} HP
+    Reviewed: 0
+    Note: 'Floating text: a blood price paid; {amount} = health paid'
+  - Key: combat.float.protected
+    Values:
+    - Protected
+    Reviewed: 0
+    Note: 'Floating text: Intercept covered an ally'
+  - Key: combat.float.charge-kept
+    Values:
+    - Charge kept
+    Reviewed: 0
+    Note: 'Floating text: a free cast (Arcane Circlet)'
+  - Key: combat.float.charge-restored
+    Values:
+    - '{ability} +{count}'
+    Reviewed: 0
+    Note: 'Floating text: RestoreCharge refilled an ability; {ability} = ability
+      name, {count} = charges added'
+  - Key: combat.float.nothing-to-restore
+    Values:
+    - Nothing to restore
+    Reviewed: 0
+    Note: 'Floating text: RestoreCharge found nothing spent'
+  - Key: combat.float.revived
+    Values:
+    - Revived!
+    Reviewed: 0
+    Note: 'Floating text: a fallen hero revived'
+  - Key: combat.float.steal-failed
+    Values:
+    - Steal failed ({chance}%)
+    Reviewed: 0
+    Note: 'Floating text: steal roll failed; {chance} = whole-number percent'
+  - Key: combat.float.stolen
+    Values:
+    - Stolen!
+    Reviewed: 0
+    Note: 'Floating text: steal succeeded with no loot hook'
+  - Key: combat.float.thorns
+    Values:
+    - Thorns {power}%
+    Reviewed: 0
+    Note: 'Floating text: Thorns applied; {power} = percent returned'
+  - Key: combat.float.delayed
+    Values:
+    - Delayed
+    Reviewed: 0
+    Note: 'Floating text: TurnDelay pushed a unit back'
+  - Key: combat.float.cannot-delay
+    Values:
+    - Can't delay further
+    Reviewed: 0
+    Note: 'Floating text: TurnDelay at its cap'
+  - Key: combat.float.multi-cast
+    Values:
+    - '{cast}!'
+    Reviewed: 0
+    Note: Floating text over the Mage when MultiCast fires; {cast} = tier name (combat.focus.*)
+  - Key: combat.float.ultra
+    Values:
+    - '{ultra}!'
+    Reviewed: 0
+    Note: Floating text when an Ultra is used; {ultra} = Ultra name
+  - Key: combat.float.cured
+    Values:
+    - Cured!
+    Reviewed: 0
+    Note: 'Floating text: a cure item cleared statuses'
+  - Key: combat.float.item-charges
+    Values:
+    - +{count} {ability}
+    Reviewed: 0
+    Note: 'Floating text: an item restored ability charges; {count} = charges, {ability}
+      = ability name'
+  - Key: combat.float.charging
+    Values:
+    - Charging!
+    Reviewed: 0
+    Note: 'Floating text: enemy winds up a heavy blow'
+  - Key: combat.float.channeling
+    Values:
+    - Channeling!
+    Reviewed: 0
+    Note: 'Floating text: boss channels a party-wide attack'
+  - Key: combat.float.stat-down
+    Values:
+    - -{amount} {stat}
+    Reviewed: 0
+    Note: 'Floating text: enemy Weaken lowered a stat; {amount} = points, {stat}
+      = stat identifier (StatType name)'
+  - Key: combat.float.stat-up
+    Values:
+    - +{amount} {stat}
+    Reviewed: 0
+    Note: 'Floating text: enemy raised a stat; {amount} = points, {stat} = stat short
+      name'
+  - Key: combat.float.guard
+    Values:
+    - Guard
+    Reviewed: 0
+    Note: Floating text over an enemy using its Guard action
+  - Key: combat.float.covered
+    Values:
+    - Covered
+    Reviewed: 0
+    Note: Floating text over the unit an enemy guards
+  - Key: combat.float.enemy-summon
+    Values:
+    - Summon
+    Reviewed: 0
+    Note: Floating text over an enemy calling allies
+  - Key: combat.float.cover
+    Values:
+    - Cover
+    Reviewed: 0
+    Note: 'Floating text: a swing redirected onto a guard'
+  - Key: combat.float.absorbed
+    Values:
+    - '{amount} absorbed'
+    Reviewed: 0
+    Note: 'Floating text: a barrier soaked part of a basic attack; {amount} = soaked
+      points'
+  - Key: combat.float.crit
+    Values:
+    - CRIT!
+    Reviewed: 0
+    Note: 'Floating text: critical hit'
+  - Key: combat.float.weak
+    Values:
+    - Weak!
+    Reviewed: 0
+    Note: 'Floating text: target weak to the element'
+  - Key: combat.float.resisted
+    Values:
+    - Resisted
+    Reviewed: 0
+    Note: 'Floating text: target resists the element'
+  - Key: combat.float.absorbed-effect
+    Values:
+    - Absorbed
+    Reviewed: 0
+    Note: 'Floating text: target absorbs the element (heals)'
+  - Key: combat.float.momentum
+    Values:
+    - Momentum {stacks}
+    Reviewed: 0
+    Note: 'Floating text: Warrior Momentum stacks; {stacks} = count'
+  - Key: combat.float.momentum-lost
+    Values:
+    - Momentum lost
+    Reviewed: 0
+    Note: 'Floating text: Warrior Momentum dropped'
+  - Key: combat.float.focus
+    Values:
+    - Focus {focus}
+    Reviewed: 0
+    Note: 'Floating text: Mage Focus built; {focus} = points'
+  - Key: combat.float.nothing-to-steal
+    Values:
+    - Nothing to steal
+    Reviewed: 0
+    Note: 'Floating text: steal hit a unit with nothing'
+  - Key: combat.float.already-robbed
+    Values:
+    - Already robbed
+    Reviewed: 0
+    Note: 'Floating text: enemy already robbed this fight'
+  - Key: combat.float.stole-item
+    Values:
+    - Stole {item}
+    Reviewed: 0
+    Note: 'Floating text: steal took an item; {item} = item name'
+  - Key: combat.float.stole-gold
+    Values:
+    - Stole {gold} gold
+    Reviewed: 0
+    Note: 'Floating text: steal took gold; {gold} = amount'
+  - Key: combat.status.barrier
+    Values:
+    - Barrier {power}
+    Reviewed: 0
+    Note: 'Buff text: barrier applied; {power} = barrier points'
+  - Key: combat.status.blinded
+    Values:
+    - Blinded!
+    Reviewed: 0
+    Note: Status text when Blind lands
+  - Key: combat.status.confused
+    Values:
+    - Confused!
+    Reviewed: 0
+    Note: Status text when Confused lands / a confused enemy turns on its ally
+  - Key: combat.status.frozen
+    Values:
+    - Frozen!
+    Reviewed: 0
+    Note: Status text when Frozen lands
+  - Key: combat.status.haste
+    Values:
+    - Haste!
+    Reviewed: 0
+    Note: Status text when Haste lands
+  - Key: combat.status.leeched
+    Values:
+    - Leeched {power}%!
+    Reviewed: 0
+    Note: 'Status text: Leeching Curse; {power} = percent drained'
+  - Key: combat.status.marked
+    Values:
+    - Marked +{power}%!
+    Reviewed: 0
+    Note: 'Status text: Hunter''s Mark; {power} = extra damage percent'
+  - Key: combat.status.silenced
+    Values:
+    - Silenced!
+    Reviewed: 0
+    Note: Status text when Silence lands
+  - Key: combat.status.slow
+    Values:
+    - Slow!
+    Reviewed: 0
+    Note: Status text when Slow lands
+  - Key: combat.status.vanished
+    Values:
+    - Vanished!
+    Reviewed: 0
+    Note: 'Status text: Vanish (Hidden)'
+  - Key: combat.status.evasive
+    Values:
+    - Evasive!
+    Reviewed: 0
+    Note: 'Status text: Evasive (Shadowstep)'
+  - Key: combat.status.death-mark
+    Values:
+    - Death Mark!
+    Reviewed: 0
+    Note: 'Status text: Death Mark'
+  - Key: combat.status.guard-less-damage
+    Values:
+    - '{power}% less damage'
+    Reviewed: 0
+    Note: 'Buff text: Take Cover (resistance to all); {power} = percent'
+  - Key: combat.status.guard-more-damage
+    Values:
+    - '{power}% more damage'
+    Reviewed: 0
+    Note: 'Buff text: negative resistance to all; {power} = percent (positive)'
+  - Key: combat.status.resistance-up
+    Values:
+    - +{power}% {name}
+    Reviewed: 0
+    Note: 'Buff text: elemental resistance up; {power} = percent, {name} = resistance
+      short name (combat.status.*-res)'
+  - Key: combat.status.resistance-down
+    Values:
+    - '{power}% {name}'
+    Reviewed: 0
+    Note: 'Buff text: elemental resistance down; {power} = signed percent, {name}
+      = resistance short name'
+  - Key: combat.status.fire-res
+    Values:
+    - Fire Res
+    Reviewed: 0
+    Note: Short name of the Fire resistance buff
+  - Key: combat.status.ice-res
+    Values:
+    - Ice Res
+    Reviewed: 0
+    Note: Short name of the Ice resistance buff
+  - Key: combat.status.lightning-res
+    Values:
+    - Lightning Res
+    Reviewed: 0
+    Note: Short name of the Lightning resistance buff
+  - Key: combat.status.holy-res
+    Values:
+    - Holy Res
+    Reviewed: 0
+    Note: Short name of the Holy resistance buff
+  - Key: combat.status.shadow-res
+    Values:
+    - Shadow Res
+    Reviewed: 0
+    Note: Short name of the Shadow resistance buff
+  - Key: combat.status.guard
+    Values:
+    - Guard
+    Reviewed: 0
+    Note: Name of the Guarded (resistance to all) buff
+  - Key: combat.status.burn
+    Values:
+    - Burn
+    Reviewed: 0
+    Note: Over-time status name (status text and tick label)
+  - Key: combat.status.poison
+    Values:
+    - Poison
+    Reviewed: 0
+    Note: Over-time status name
+  - Key: combat.status.bleed
+    Values:
+    - Bleed
+    Reviewed: 0
+    Note: Over-time status name
+  - Key: combat.status.regen
+    Values:
+    - Regen
+    Reviewed: 0
+    Note: Over-time status name (heals)
+  - Key: combat.status.over-time
+    Values:
+    - '{name} {power}/turn'
+    Reviewed: 0
+    Note: Status text for an over-time effect; {name} = status name, {power} = amount
+      per turn
+  - Key: combat.status.stat-up
+    Values:
+    - +{power} {stat}
+    Reviewed: 0
+    Note: 'Buff text: stat raised; {power} = points, {stat} = stat display name'
+  - Key: combat.status.stat-down
+    Values:
+    - '{power} {stat}'
+    Reviewed: 0
+    Note: 'Buff text: stat lowered; {power} = signed points, {stat} = stat display
+      name'
+  - Key: combat.skip.frozen
+    Values:
+    - '{unit} is frozen!'
+    Reviewed: 0
+    Note: 'Combat log: a frozen unit loses its turn; {unit} = unit name'
+  - Key: combat.log.cast
+    Values:
+    - '{caster} casts {ability}!'
+    Reviewed: 0
+    Note: 'Combat log: a cast; {caster} = unit name, {ability} = ability name'
+  - Key: combat.log.cast-combo
+    Values:
+    - '{caster} casts {ability}! COMBO: {combo}!'
+    Reviewed: 0
+    Note: 'Combat log: a cast that set off a combo; {combo} = combo name'
+  - Key: combat.log.summon-dismissed
+    Values:
+    - '{unit} is dismissed.'
+    Reviewed: 0
+    Note: 'Combat log: an allied summon dismissed; {unit} = summon name'
+  - Key: combat.log.summon-dismissed-party-returns
+    Values:
+    - '{unit} is dismissed, and the party steps back in.'
+    Reviewed: 0
+    Note: 'Combat log: a party-replacing summon dismissed'
+  - Key: combat.log.skip-turn
+    Values:
+    - '{unit} skips their turn.'
+    Reviewed: 0
+    Note: 'Combat log: Skip command'
+  - Key: combat.log.party-defeated
+    Values:
+    - Your party has been defeated!
+    Reviewed: 0
+    Note: 'Combat log: fight lost'
+  - Key: combat.log.all-enemies-defeated
+    Values:
+    - All enemies defeated!
+    Reviewed: 0
+    Note: 'Combat log: fight won'
+  - Key: combat.log.multi-cast
+    Values:
+    - '{caster} MultiCasts {ability} x{casts}!'
+    Reviewed: 0
+    Note: 'Combat log: Mage MultiCast; {casts} = number of casts (the repeats'' own
+      lines follow)'
+  - Key: combat.log.summon-not-coming
+    Values:
+    - '{caster} calls {summon}, but it does not come.'
+    Reviewed: 0
+    Note: 'Combat log: summon kind not implemented'
+  - Key: combat.log.summon-already-here
+    Values:
+    - '{caster} tries to summon, but {summon} is already here.'
+    Reviewed: 0
+    Note: 'Combat log: a summon already out'
+  - Key: combat.log.summon-too-little-blood
+    Values:
+    - '{caster} has too little blood left to call {summon}.'
+    Reviewed: 0
+    Note: 'Combat log: summon''s blood price would kill the caster'
+  - Key: combat.log.summon-nothing-answers
+    Values:
+    - '{caster} tries to summon, but nothing answers.'
+    Reviewed: 0
+    Note: 'Combat log: summon failed to appear'
+  - Key: combat.log.summons
+    Values:
+    - '{caster} summons {summon}!'
+    Reviewed: 0
+    Note: 'Combat log: special-attack summon'
+  - Key: combat.log.squad-name
+    Values:
+    - '{summon} ({squad})'
+    Reviewed: 0
+    Note: 'Combat log: a summoned squad''s name and its troops; {squad} = troop list
+      text'
+  - Key: combat.log.summon-replaces-party
+    Values:
+    - '{caster} summons {summon}! The party steps back.'
+    Reviewed: 0
+    Note: 'Combat log: party-replacing summon arrives'
+  - Key: combat.log.summon-replaces-party-allies-leave
+    Values:
+    - '{caster} summons {summon}! The party steps back, and their allies are sent
+      away.'
+    Reviewed: 0
+    Note: 'Combat log: party-replacing summon arrives while allies were out'
+  - Key: combat.log.summon-swaps-ally
+    Values:
+    - '{caster} sends {previous} away and summons {summon}!'
+    Reviewed: 0
+    Note: 'Combat log: an ally summon replaces the caster''s previous one'
+  - Key: combat.log.summon-joins-party
+    Values:
+    - '{caster} summons {summon} to fight beside the party!'
+    Reviewed: 0
+    Note: 'Combat log: an ally summon joins'
+  - Key: combat.log.ultra-not-ready
+    Values:
+    - '{hero} reaches for something that is not there yet.'
+    Reviewed: 0
+    Note: 'Combat log: Ultra used with nothing to use'
+  - Key: combat.log.ultra-unleashed
+    Values:
+    - '{hero} unleashes {ultra}!'
+    Reviewed: 0
+    Note: 'Combat log: an Ultra used'
+  - Key: combat.log.sacrifice-no-victim
+    Values:
+    - '{cultist} begins the rite, but there is no one to give.'
+    Reviewed: 0
+    Note: 'Combat log: Sacrifice with no valid victim'
+  - Key: combat.log.sacrifice-attack
+    Values:
+    - It lashes out with {ability}.
+    Reviewed: 0
+    Note: 'Combat log (appended after a sacrifice line): the risen horror''s attack;
+      {ability} = ability name'
+  - Key: combat.log.sacrifice-self
+    Values:
+    - '{cultist} gives himself to the rite, and {horror} rises in his place!'
+    Reviewed: 0
+    Note: 'Combat log: the Cultist sacrifices himself; {horror} = creature name'
+  - Key: combat.log.sacrifice-other
+    Values:
+    - '{cultist} sacrifices {victim}, and {horror} rises in their place!'
+    Reviewed: 0
+    Note: 'Combat log: the Cultist sacrifices an ally'
+  - Key: combat.log.mount-no-parts
+    Values:
+    - '{hero} reaches for parts that are not there.'
+    Reviewed: 0
+    Note: 'Combat log: Tinkerer mount Ultra with no mech'
+  - Key: combat.log.mount-rebuilt
+    Values:
+    - '{hero} rebuilds {mech} and climbs back on!'
+    Reviewed: 0
+    Note: 'Combat log: Tinkerer rebuilds her mech'
+  - Key: combat.log.mount-assembled
+    Values:
+    - '{hero} assembles {mech} and climbs on!'
+    Reviewed: 0
+    Note: 'Combat log: Tinkerer assembles her mech'
+  - Key: combat.log.form-fades
+    Values:
+    - '{hero}''s {ultra} fades.'
+    Reviewed: 0
+    Note: 'Combat log (appended): an Ultra transform ends'
+  - Key: combat.log.ally-vanishes-with-summoner
+    Values:
+    - '{unit} vanishes with its summoner.'
+    Reviewed: 0
+    Note: 'Combat log (appended): ally leaves because its summoner fell'
+  - Key: combat.log.ally-time-up
+    Values:
+    - '{unit}''s time is up, and it fades away.'
+    Reviewed: 0
+    Note: 'Combat log (appended): an ally summon''s turns ran out'
+  - Key: combat.log.squad-time-up
+    Values:
+    - '{unit}''s time is up.'
+    Reviewed: 0
+    Note: 'Combat log (appended): a squad troop''s turns ran out, others remain'
+  - Key: combat.log.squad-time-up-party-returns
+    Values:
+    - '{unit}''s time is up, and the party steps back in.'
+    Reviewed: 0
+    Note: 'Combat log (appended): the last troop''s turns ran out'
+  - Key: combat.log.squad-crumbles
+    Values:
+    - '{unit} crumbles.'
+    Reviewed: 0
+    Note: 'Combat log (appended): a squad troop fell, others remain'
+  - Key: combat.log.squad-crumbles-party-returns
+    Values:
+    - '{unit} crumbles, and the party steps back in.'
+    Reviewed: 0
+    Note: 'Combat log (appended): the last troop fell'
+  - Key: combat.log.parting-blow
+    Values:
+    - '{unit} unleashes {ability} as it leaves!'
+    Reviewed: 0
+    Note: 'Combat log (appended): a summon''s parting ability'
+  - Key: combat.log.ally-falls
+    Values:
+    - '{unit} falls!'
+    Reviewed: 0
+    Note: 'Combat log (appended): an ally summon fell'
+  - Key: combat.log.cast-silenced
+    Values:
+    - '{caster} is silenced and cannot use {ability}.'
+    Reviewed: 0
+    Note: 'Combat log: a silenced cast'
+  - Key: combat.log.cast-already-used
+    Values:
+    - '{caster} has already used {ability}.'
+    Reviewed: 0
+    Note: 'Combat log: a once-only ability already spent'
+  - Key: combat.log.no-target
+    Values:
+    - '{unit} has no target.'
+    Reviewed: 0
+    Note: 'Combat log: an action found no target'
+  - Key: combat.log.item-nothing-to-use
+    Values:
+    - '{hero} has nothing to use.'
+    Reviewed: 0
+    Note: 'Combat log: Item with no item'
+  - Key: combat.log.item-none-left
+    Values:
+    - '{hero} has no {item} left.'
+    Reviewed: 0
+    Note: 'Combat log: item stack empty'
+  - Key: combat.log.item-heal
+    Values:
+    - '{hero} uses {item} on {target}, restoring {amount} HP.'
+    Reviewed: 0
+    Note: 'Combat log: healing item'
+  - Key: combat.log.item-charges
+    Values:
+    - '{hero} uses {item} on {target}{charges}.'
+    Reviewed: 0
+    Note: 'Combat log: charge-restoring item; {charges} = one of the combat.log.item-charges-*
+      fragments'
+  - Key: combat.log.item-heal-charges
+    Values:
+    - '{hero} uses {item} on {target}, restoring {amount} HP{charges}.'
+    Reviewed: 0
+    Note: 'Combat log: heal-and-charge item; {charges} = one of the combat.log.item-charges-*
+      fragments'
+  - Key: combat.log.item-charges-no-abilities
+    Values:
+    - ', but it has no abilities to restore'
+    Reviewed: 0
+    Note: Fragment inside combat.log.item-charges / item-heal-charges (starts with
+      a comma)
+  - Key: combat.log.item-charges-all-full
+    Values:
+    - ', but every ability is already full'
+    Reviewed: 0
+    Note: Fragment inside combat.log.item-charges / item-heal-charges
+  - Key: combat.log.item-charges-restored-one
+    Values:
+    - ', restoring {count} charge to {ability}'
+    Reviewed: 0
+    Note: Fragment inside combat.log.item-charges / item-heal-charges; {count} =
+      1
+  - Key: combat.log.item-charges-restored-many
+    Values:
+    - ', restoring {count} charges to {ability}'
+    Reviewed: 0
+    Note: Fragment inside combat.log.item-charges / item-heal-charges; {count} =
+      charges
+  - Key: combat.log.item-cure
+    Values:
+    - '{hero} uses {item} on {target}, clearing {statuses}.'
+    Reviewed: 0
+    Note: 'Combat log: cure item; {statuses} = comma-separated list of cleared statuses'
+  - Key: combat.log.item-cure-nothing
+    Values:
+    - '{hero} uses {item} on {target}, but there was nothing to cure.'
+    Reviewed: 0
+    Note: 'Combat log: cure item with nothing to cure'
+  - Key: combat.log.item-use
+    Values:
+    - '{hero} uses {item}.'
+    Reviewed: 0
+    Note: 'Combat log: any other item'
+  - Key: combat.log.enemy-winds-up
+    Values:
+    - '{enemy} is winding up a heavy blow!'
+    Reviewed: 0
+    Note: 'Combat log: enemy telegraphs a heavy blow'
+  - Key: combat.log.enemy-channels
+    Values:
+    - '{enemy} is channeling a devastating attack!'
+    Reviewed: 0
+    Note: 'Combat log: boss telegraphs a party-wide attack'
+  - Key: combat.log.enemy-aoe
+    Values:
+    - '{enemy} unleashes a devastating blow on the whole party!'
+    Reviewed: 0
+    Note: 'Combat log: boss party-wide attack lands'
+  - Key: combat.log.enemy-no-one-to-heal
+    Values:
+    - '{enemy} has no one to heal.'
+    Reviewed: 0
+    Note: 'Combat log: enemy heal with no target'
+  - Key: combat.log.enemy-heals
+    Values:
+    - '{enemy} heals {target} for {amount}.'
+    Reviewed: 0
+    Note: 'Combat log: enemy heal'
+  - Key: combat.log.enemy-weaken-unaffected
+    Values:
+    - '{enemy} tries to weaken {target}, who is unaffected.'
+    Reviewed: 0
+    Note: 'Combat log: enemy Weaken''s chance failed'
+  - Key: combat.log.enemy-weakens
+    Values:
+    - '{enemy} weakens {target}''s {stat}!'
+    Reviewed: 0
+    Note: 'Combat log: enemy Weaken; {stat} = stat identifier (StatType name)'
+  - Key: combat.log.enemy-no-one-to-empower
+    Values:
+    - '{enemy} has no one to empower.'
+    Reviewed: 0
+    Note: 'Combat log: enemy buff with no target'
+  - Key: combat.log.enemy-buffs-self
+    Values:
+    - '{enemy} raises its own {stat}!'
+    Reviewed: 0
+    Note: 'Combat log: enemy buffs itself; {stat} = stat display name'
+  - Key: combat.log.enemy-buffs-ally
+    Values:
+    - '{enemy} raises {target}''s {stat}!'
+    Reviewed: 0
+    Note: 'Combat log: enemy buffs an ally'
+  - Key: combat.log.enemy-no-one-to-guard
+    Values:
+    - '{enemy} has no one to guard.'
+    Reviewed: 0
+    Note: 'Combat log: enemy Guard with no target'
+  - Key: combat.log.enemy-guards
+    Values:
+    - '{enemy} guards {target}.'
+    Reviewed: 0
+    Note: 'Combat log: enemy Guard'
+  - Key: combat.log.enemy-call-unanswered
+    Values:
+    - '{enemy} calls out, but no one answers.'
+    Reviewed: 0
+    Note: 'Combat log: enemy summon failed'
+  - Key: combat.log.enemy-calls-one
+    Values:
+    - '{enemy} calls {summon} into the fight!'
+    Reviewed: 0
+    Note: 'Combat log: enemy summons one ally; {summon} = summoned enemy name'
+  - Key: combat.log.enemy-calls-many
+    Values:
+    - '{enemy} calls {count} {summon}s into the fight!'
+    Reviewed: 0
+    Note: 'Combat log: enemy summons several; {count} = number, {summon} = enemy
+      name (plural by appending s)'
+  - Key: combat.log.enemy-succumbs
+    Values:
+    - '{enemy} succumbs!'
+    Reviewed: 0
+    Note: 'Combat log (appended): enemy killed by a damage-over-time tick'
+  - Key: combat.log.enemy-taken-apart
+    Values:
+    - '{enemy} is taken apart!'
+    Reviewed: 0
+    Note: 'Combat log (appended): enemy killed by Disassemble'
+  - Key: combat.log.enemy-defeated
+    Values:
+    - '{enemy} defeated!'
+    Reviewed: 0
+    Note: 'Combat log (appended): enemy killed'
+  - Key: combat.log.hero-fallen
+    Values:
+    - '{hero} has fallen!'
+    Reviewed: 0
+    Note: 'Combat log (appended): hero killed'
+  - Key: combat.log.reaction
+    Values:
+    - '{unit}''s {reaction}!'
+    Reviewed: 0
+    Note: 'Combat log (appended): a triggered reaction fired; {reaction} = reaction
+      name'
+  - Key: combat.log.hero-revived
+    Values:
+    - '{hero} is back on their feet!'
+    Reviewed: 0
+    Note: 'Combat log (appended): hero revived'
+  - Key: combat.log.attack-miss
+    Values:
+    - '{attacker} {verb} {target} and misses!'
+    Reviewed: 0
+    Note: 'Combat log: blinded attack missed; {verb} = combat.verb.*'
+  - Key: combat.log.attack-evaded
+    Values:
+    - '{attacker} {verb} {target}, who is not there!'
+    Reviewed: 0
+    Note: 'Combat log: attack spent on Evasive; {verb} = combat.verb.*'
+  - Key: combat.log.attack-dodged
+    Values:
+    - '{attacker} {verb} {target}, who dodges!'
+    Reviewed: 0
+    Note: 'Combat log: attack dodged; {verb} = combat.verb.*'
+  - Key: combat.log.attack-absorbed
+    Values:
+    - '{attacker} {verb} {target}, who absorbs {amount} health!'
+    Reviewed: 0
+    Note: 'Combat log: element absorbed; {amount} = health healed'
+  - Key: combat.log.attack-hit
+    Values:
+    - '{attacker} {verb} {target} for {amount} damage.'
+    Reviewed: 0
+    Note: 'Combat log: basic/enemy attack lands; {amount} = damage'
+  - Key: combat.log.attack-hit-crit
+    Values:
+    - '{attacker} {verb} {target} for {amount} damage (CRIT!).'
+    Reviewed: 0
+    Note: 'Combat log: critical attack lands'
+  - Key: combat.verb.attacks
+    Values:
+    - attacks
+    Reviewed: 0
+    Note: Verb inside combat.log.attack-* (plain attack)
+  - Key: combat.verb.turns-on
+    Values:
+    - turns on
+    Reviewed: 0
+    Note: Verb inside combat.log.attack-* (confused enemy hits its ally)
+  - Key: combat.verb.strikes-savagely-at
+    Values:
+    - strikes savagely at
+    Reviewed: 0
+    Note: Verb inside combat.log.attack-* (enraged/strong enemy attack)
+  - Key: combat.verb.heavy-blow-on
+    Values:
+    - unleashes a heavy blow on
+    Reviewed: 0
+    Note: Verb inside combat.log.attack-* (telegraphed heavy blow)
+  - Key: combat.verb.smashes
+    Values:
+    - smashes
+    Reviewed: 0
+    Note: Verb inside combat.log.attack-* (boss party-wide blow, per target)
+  - Key: room.map.hint.enemies
+    Values:
+    - Enemies hold this room - clear them or flee before travelling.
+    Reviewed: 0
+    Note: Dungeon map, line under the map when travel is blocked by enemies
+  - Key: room.map.hint.nowhere
+    Values:
+    - Nowhere to travel yet - the floor beyond this room is unexplored.
+    Reviewed: 0
+    Note: Dungeon map, line under the map when no room can be travelled to
+  - Key: room.map.hint.travel
+    Values:
+    - Click an explored room, or arrows then Enter, to travel there instantly.
+    Reviewed: 0
+    Note: Dungeon map, line under the map when travel is possible
+  - Key: room.map.status.rooms.one
+    Values:
+    - 1 room explored
+    Reviewed: 0
+    Note: HUD status line, rooms part (one)
+  - Key: room.map.status.rooms.many
+    Values:
+    - '{count} rooms explored'
+    Reviewed: 0
+    Note: HUD status line, rooms part; {count} = rooms explored
+  - Key: room.map.status.frontier.none
+    Values:
+    - nothing left unopened
+    Reviewed: 0
+    Note: HUD status line, frontier part when zero
+  - Key: room.map.status.frontier.one
+    Values:
+    - 1 way not yet taken
+    Reviewed: 0
+    Note: HUD status line, frontier part (one)
+  - Key: room.map.status.frontier.many
+    Values:
+    - '{count} ways not yet taken'
+    Reviewed: 0
+    Note: HUD status line, frontier part; {count} = unopened ways
+  - Key: room.map.status.exit-found
+    Values:
+    - " \xB7 exit found"
+    Reviewed: 0
+    Note: HUD status line suffix when the exit is found (keep the leading space)
+  - Key: room.map.status
+    Values:
+    - "{rooms} \xB7 {frontier}{exit}"
+    Reviewed: 0
+    Note: HUD status line; {rooms}, {frontier}, {exit} = the room.map.status.* parts
+  - Key: room.map.waiting.fight.one
+    Values:
+    - 1 fight
+    Reviewed: 0
+    Note: Map window waiting line, count of rooms still holding a fight
+  - Key: room.map.waiting.fight.many
+    Values:
+    - '{count} fights'
+    Reviewed: 0
+    Note: Map window waiting line; {count} = number
+  - Key: room.map.waiting.captive.one
+    Values:
+    - 1 captive
+    Reviewed: 0
+    Note: Map window waiting line
+  - Key: room.map.waiting.captive.many
+    Values:
+    - '{count} captives'
+    Reviewed: 0
+    Note: Map window waiting line; {count} = number
+  - Key: room.map.waiting.event.one
+    Values:
+    - 1 event
+    Reviewed: 0
+    Note: Map window waiting line
+  - Key: room.map.waiting.event.many
+    Values:
+    - '{count} events'
+    Reviewed: 0
+    Note: Map window waiting line; {count} = number
+  - Key: room.map.waiting.cache.one
+    Values:
+    - 1 cache
+    Reviewed: 0
+    Note: Map window waiting line
+  - Key: room.map.waiting.cache.many
+    Values:
+    - '{count} caches'
+    Reviewed: 0
+    Note: Map window waiting line; {count} = number
+  - Key: room.map.waiting.refuge.one
+    Values:
+    - 1 refuge
+    Reviewed: 0
+    Note: Map window waiting line
+  - Key: room.map.waiting.refuge.many
+    Values:
+    - '{count} refuges'
+    Reviewed: 0
+    Note: Map window waiting line; {count} = number
+  - Key: room.map.waiting.exit-found
+    Values:
+    - Exit found
+    Reviewed: 0
+    Note: Map window waiting line, exit part
+  - Key: room.map.waiting.exit-not-found
+    Values:
+    - Exit not found yet
+    Reviewed: 0
+    Note: Map window waiting line, exit part
+  - Key: room.map.waiting.none
+    Values:
+    - "{exit} \xB7 nothing left waiting"
+    Reviewed: 0
+    Note: Map window line; {exit} = exit part
+  - Key: room.map.waiting.some
+    Values:
+    - "{exit} \xB7 still waiting: {things}"
+    Reviewed: 0
+    Note: Map window line; {exit} = exit part, {things} = counts joined by the separator
+  - Key: room.map.waiting.separator
+    Values:
+    - " \xB7 "
+    Reviewed: 0
+    Note: Map window waiting line, between the counts (keep the spaces)
+  - Key: event-text.odds.unknown
+    Values:
+    - You have no idea what you are dealing with.
+    Reviewed: 0
+    Note: Room event prompt, odds line when the party cannot read the odds at all
+  - Key: event-text.odds.clear.almost-certain
+    Values:
+    - You are almost certain to manage it.
+    Reviewed: 0
+    Note: Room event odds line (clear read)
+  - Key: event-text.odds.clear.very-likely
+    Values:
+    - You are very likely to manage it.
+    Reviewed: 0
+    Note: Room event odds line (clear read)
+  - Key: event-text.odds.clear.even
+    Values:
+    - It is an even bet.
+    Reviewed: 0
+    Note: Room event odds line (clear read)
+  - Key: event-text.odds.clear.slight
+    Values:
+    - You have only a slight chance.
+    Reviewed: 0
+    Note: Room event odds line (clear read)
+  - Key: event-text.odds.clear.hopeless
+    Values:
+    - It looks near hopeless.
+    Reviewed: 0
+    Note: Room event odds line (clear read)
+  - Key: event-text.odds.vague.safe
+    Values:
+    - It looks safe enough, though you could not say how safe.
+    Reviewed: 0
+    Note: Room event odds line (vague read)
+  - Key: event-text.odds.vague.risky
+    Values:
+    - It looks risky, though you could not say how risky.
+    Reviewed: 0
+    Note: Room event odds line (vague read)
+  - Key: event-text.odds.vague.dangerous
+    Values:
+    - It looks dangerous, though you could not say how dangerous.
+    Reviewed: 0
+    Note: Room event odds line (vague read)
+  - Key: event-text.affliction.minus
+    Values:
+    - '{hero}: {buff} {amount} for the rest of the level.'
+    Reviewed: 0
+    Note: Room event outcome line, level-long debuff; {hero} = hero name, {buff}
+      = stat/buff name (enum), {amount} = negative number incl. minus sign
+  - Key: event-text.affliction.plus
+    Values:
+    - '{hero}: {buff} +{amount} for the rest of the level.'
+    Reviewed: 0
+    Note: Room event outcome line, level-long buff; {hero} = hero name, {buff} =
+      stat/buff name (enum), {amount} = positive number
+  - Key: event-text.float.heal
+    Values:
+    - +{amount}
+    Reviewed: 0
+    Note: Floating text over the party when a room event heals; {amount} = health
+      restored
+  - Key: event-text.report.healed
+    Values:
+    - '{unit} recovers {amount} health.'
+    Reviewed: 0
+    Note: Room event outcome line; {unit} = hero name, {amount} = health
+  - Key: event-text.report.damaged
+    Values:
+    - '{unit} takes {amount} damage.'
+    Reviewed: 0
+    Note: Room event outcome line; {unit} = hero name, {amount} = damage
+  - Key: event-text.report.already-whole
+    Values:
+    - '{unit} was already whole.'
+    Reviewed: 0
+    Note: Room event outcome line, heal on a full-health hero; {unit} = hero name
+  - Key: event-text.report.barely-standing
+    Values:
+    - '{unit} is barely standing.'
+    Reviewed: 0
+    Note: Room event outcome line, damage stopped at 1 health; {unit} = hero name
+  - Key: event-text.report.gold
+    Values:
+    - +{amount} gold.
+    Reviewed: 0
+    Note: Room event outcome line; {amount} = gold
+  - Key: event-text.report.found
+    Values:
+    - 'Found: {item}.'
+    Reviewed: 0
+    Note: Room event outcome line; {item} = item name
+  - Key: event-text.report.found-nothing
+    Values:
+    - Nothing worth carrying.
+    Reviewed: 0
+    Note: Room event outcome line when the loot roll drops nothing
+  - Key: event-text.report.lost
+    Values:
+    - 'Lost: {item}.'
+    Reviewed: 0
+    Note: Room event outcome line; {item} = consumable name
+  - Key: event-text.report.lost-nothing
+    Values:
+    - You had nothing left to lose.
+    Reviewed: 0
+    Note: Room event outcome line when there was no consumable to lose
+  - Key: event-text.report.joins
+    Values:
+    - '{hero} joins the party.'
+    Reviewed: 0
+    Note: Room event outcome line; {hero} = hero name
+  - Key: event-text.report.awakened.one
+    Values:
+    - Something in here is awake now.
+    Reviewed: 0
+    Note: Room event outcome line, one enemy spawned
+  - Key: event-text.report.awakened.many
+    Values:
+    - '{count} of them are awake now.'
+    Reviewed: 0
+    Note: Room event outcome line; {count} = enemies spawned
+  - Key: room.foes.counted
+    Values:
+    - '{name} x{count}'
+    Reviewed: 0
+    Note: Foe line on the room bar, several of one enemy kind; {name} = enemy name,
+      {count} = how many
+  - Key: room.foes.unknown-extra
+    Values:
+    - '{count} unknown'
+    Reviewed: 0
+    Note: Foe line, unseen enemies after the known ones; {count} = how many
+  - Key: room.foes.unknown-one
+    Values:
+    - An unknown foe
+    Reviewed: 0
+    Note: Foe line when the only foe is unseen
+  - Key: room.foes.unknown-many
+    Values:
+    - '{count} unknown foes'
+    Reviewed: 0
+    Note: Foe line when every foe is unseen; {count} = how many
+  - Key: room.foes.separator
+    Values:
+    - ' + '
+    Reviewed: 0
+    Note: Foe line, between enemy groups (keep the spaces)
+  - Key: room.kind.connector
+    Values:
+    - Passage
+    Reviewed: 0
+    Note: Room kind name (connector room)
+  - Key: room.kind.treasure
+    Values:
+    - Cache
+    Reviewed: 0
+    Note: Room kind name (treasure room)
+  - Key: room.kind.rest
+    Values:
+    - Refuge
+    Reviewed: 0
+    Note: Room kind name (rest room)
+  - Key: room.kind.chamber
+    Values:
+    - Chamber
+    Reviewed: 0
+    Note: Room kind name (ordinary room)
+  - Key: room.nameplate.hp
+    Values:
+    - '{current}/{max}'
+    Reviewed: 0
+    Note: Health numbers on a unit's nameplate; {current} = health shown, {max} =
+      max health
+  - Key: dungeon.campaign.missing-run
+    Values:
+    - (missing run)
+    Reviewed: 0
+    Note: Run name shown when a campaign node has no run asset
+  - Key: dungeon.revisit.summary
+    Values:
+    - 'Fear level {level}: {changes}. Rewards {percent} XP, gold and Essence.'
+    Reviewed: 0
+    Note: Revisit summary line (before a revisit and in combat); {level} = Fear level,
+      {changes} = the dungeon.revisit.summary.* parts joined, {percent} = signed
+      reward percent like +50%
+  - Key: dungeon.revisit.summary.separator
+    Values:
+    - ', '
+    Reviewed: 0
+    Note: Revisit summary, between the changes (keep the space)
+  - Key: dungeon.revisit.summary.stats
+    Values:
+    - enemies {percent} to every stat
+    Reviewed: 0
+    Note: Revisit summary part; {percent} = signed percent like +50%
+  - Key: dungeon.revisit.summary.health
+    Values:
+    - '{percent} more health'
+    Reviewed: 0
+    Note: Revisit summary part; {percent} = signed percent
+  - Key: dungeon.revisit.summary.damage
+    Values:
+    - '{percent} more damage'
+    Reviewed: 0
+    Note: Revisit summary part; {percent} = signed percent
+  - Key: dungeon.revisit.summary.speed
+    Values:
+    - '{percent} more speed'
+    Reviewed: 0
+    Note: Revisit summary part; {percent} = signed percent
+  - Key: dungeon.revisit.summary.extra-foes.one
+    Values:
+    - +{count} foe per fight
+    Reviewed: 0
+    Note: Revisit summary part; {count} = extra enemies per room (1)
+  - Key: dungeon.revisit.summary.extra-foes.many
+    Values:
+    - +{count} foes per fight
+    Reviewed: 0
+    Note: Revisit summary part; {count} = extra enemies per room
+  - Key: dungeon.revisit.summary.no-healing
+    Values:
+    - no healing
+    Reviewed: 0
+    Note: Revisit summary part when hero healing is off
+  - Key: dungeon.revisit.summary.healing
+    Values:
+    - healing {percent}
+    Reviewed: 0
+    Note: Revisit summary part; {percent} = signed percent
+  - Key: dungeon.revisit.percent.plus
+    Values:
+    - +{percent}%
+    Reviewed: 0
+    Note: A signed percentage in the revisit summary; {percent} = whole number
+  - Key: dungeon.revisit.percent.minus
+    Values:
+    - "\u2212{percent}%"
+    Reviewed: 0
+    Note: A negative percentage in the revisit summary (uses the minus sign U+2212);
+      {percent} = whole number without sign
+  - Key: dungeon.history.floor
+    Values:
+    - floor {floor} of {total}
+    Reviewed: 0
+    Note: Run history, where a run ended; {floor} = floor number, {total} = floors
+      in the run
+  - Key: dungeon.history.floor-named
+    Values:
+    - floor {floor} of {total} ({name})
+    Reviewed: 0
+    Note: Run history, where a run ended; {floor} = floor number, {total} = floors,
+      {name} = floor name
+  - Key: dungeon.history.end.cleared
+    Values:
+    - Cleared every floor
+    Reviewed: 0
+    Note: Run history, end of a cleared run
+  - Key: dungeon.history.end.fell
+    Values:
+    - Fell on {floor}
+    Reviewed: 0
+    Note: Run history, end of a lost run; {floor} = dungeon.history.floor text
+  - Key: dungeon.history.end.fell-to
+    Values:
+    - Fell on {floor} to {foes}
+    Reviewed: 0
+    Note: Run history, end of a lost run; {floor} = dungeon.history.floor text, {foes}
+      = enemy list
+  - Key: dungeon.history.end.on
+    Values:
+    - On {floor}
+    Reviewed: 0
+    Note: Run history, run still going/abandoned; {floor} = dungeon.history.floor
+      text
+  - Key: dungeon.history.foes.counted
+    Values:
+    - '{count} {name}'
+    Reviewed: 0
+    Note: Run history foe list, repeated enemy; {count} = how many, {name} = enemy
+      name made plural by code (English rules)
+  - Key: dungeon.history.foes.list
+    Values:
+    - '{first} and {last}'
+    Reviewed: 0
+    Note: Run history foe list; {first} = all but the last group joined by the separator,
+      {last} = the last group
+  - Key: dungeon.history.foes.separator
+    Values:
+    - ', '
+    Reviewed: 0
+    Note: Run history foe list, between groups (keep the space)
+  - Key: room.event.tag.leave
+    Values:
+    - leave
+    Reviewed: 0
+    Note: Room event choice tag for walking away
+  - Key: room.event.tag.safe
+    Values:
+    - safe
+    Reviewed: 0
+    Note: Room event choice tag for a sure thing
+  - Key: room.event.tag.unknown
+    Values:
+    - "{stat} \xB7 ?"
+    Reviewed: 0
+    Note: Room event choice tag, odds unreadable; {stat} = short stat name (LCK)
+  - Key: room.event.tag.vague.good
+    Values:
+    - "{stat} \xB7 safe-ish"
+    Reviewed: 0
+    Note: Room event choice tag, vague read; {stat} = short stat name
+  - Key: room.event.tag.vague.even
+    Values:
+    - "{stat} \xB7 risky"
+    Reviewed: 0
+    Note: Room event choice tag, vague read; {stat} = short stat name
+  - Key: room.event.tag.vague.bad
+    Values:
+    - "{stat} \xB7 dangerous"
+    Reviewed: 0
+    Note: Room event choice tag, vague read; {stat} = short stat name
+  - Key: room.event.tag.certain
+    Values:
+    - "{stat} \xB7 certain"
+    Reviewed: 0
+    Note: Room event choice tag, clear read; {stat} = short stat name
+  - Key: room.event.tag.likely
+    Values:
+    - "{stat} \xB7 likely"
+    Reviewed: 0
+    Note: Room event choice tag, clear read; {stat} = short stat name
+  - Key: room.event.tag.even
+    Values:
+    - "{stat} \xB7 even"
+    Reviewed: 0
+    Note: Room event choice tag, clear read; {stat} = short stat name
+  - Key: room.event.tag.slim
+    Values:
+    - "{stat} \xB7 slim"
+    Reviewed: 0
+    Note: Room event choice tag, clear read; {stat} = short stat name
+  - Key: room.event.tag.hopeless
+    Values:
+    - "{stat} \xB7 hopeless"
+    Reviewed: 0
+    Note: Room event choice tag, clear read; {stat} = short stat name
+  - Key: room.event.odds
+    Values:
+    - Anything you chance here turns on {stat}. {reading}
+    Reviewed: 0
+    Note: Room event window odds line; {stat} = stat name, {reading} = event-text.odds.*
+      sentence
+  - Key: room.event.odds-hero
+    Values:
+    - Anything you chance here turns on {stat} - {hero} has the best of it. {reading}
+    Reviewed: 0
+    Note: Room event window odds line; {stat} = stat name, {hero} = acting hero,
+      {reading} = event-text.odds.* sentence
+  - Key: room.event.decline.default
+    Values:
+    - You leave it be.
+    Reviewed: 0
+    Note: Room event, walking away when the option has no text of its own
+  - Key: room.event.decline.message
+    Values:
+    - '{text}
+
+
+      It will still be here if you change your mind.'
+    Reviewed: 0
+    Note: Room event, walking away dialog; {text} = the option's decline text
+  - Key: room.event.result.nothing
+    Values:
+    - Nothing comes of it.
+    Reviewed: 0
+    Note: Room event result when the outcome has no text
+  - Key: room.event.result.success
+    Values:
+    - Success
+    Reviewed: 0
+    Note: Room event result chip
+  - Key: room.event.result.failed
+    Values:
+    - Failed
+    Reviewed: 0
+    Note: Room event result chip
+  - Key: room.detail.ok
+    Values:
+    - Ok
+    Reviewed: 0
+    Note: Dungeon dialog OK button
+  - Key: room.reward.counted
+    Values:
+    - '{name} x{count}'
+    Reviewed: 0
+    Note: Reward row in a dungeon dialog / victory loot; {name} = item name, {count}
+      = quantity
+  - Key: room.descend.unexplored.one
+    Values:
+    - '
+
+
+      {count} way not yet taken will stay unexplored.'
+    Reviewed: 0
+    Note: Stairs confirm, appended warning (starts with a blank line); {count} =
+      1
+  - Key: room.descend.unexplored.many
+    Values:
+    - '
+
+
+      {count} ways not yet taken will stay unexplored.'
+    Reviewed: 0
+    Note: Stairs confirm, appended warning (starts with a blank line); {count} =
+      unopened ways
+  - Key: room.descend.title
+    Values:
+    - The Way Down
+    Reviewed: 0
+    Note: Stairs confirm title
+  - Key: room.descend.title.last
+    Values:
+    - The Way Out
+    Reviewed: 0
+    Note: Stairs confirm title on the last floor
+  - Key: room.descend.message
+    Values:
+    - The stairs drop away into the dark below.
+    Reviewed: 0
+    Note: Stairs confirm text
+  - Key: room.descend.message.last
+    Values:
+    - The way is clear. Nothing lies deeper - this is the end of the run.
+    Reviewed: 0
+    Note: Stairs confirm text on the last floor
+  - Key: room.descend.confirm
+    Values:
+    - Descend
+    Reviewed: 0
+    Note: Stairs confirm button
+  - Key: room.descend.confirm.last
+    Values:
+    - Leave
+    Reviewed: 0
+    Note: Stairs confirm button on the last floor
+  - Key: room.captive.joined-float
+    Values:
+    - '{hero} joined!'
+    Reviewed: 0
+    Note: Floating text when a captive is freed; {hero} = hero name
+  - Key: room.captive.title
+    Values:
+    - '{hero} joins you'
+    Reviewed: 0
+    Note: Captive freed dialog title; {hero} = hero name
+  - Key: room.captive.message
+    Values:
+    - '{hero} was held captive here. {blurb}They are yours for good once this level
+      is cleared - fall here and they are lost with the rest of the run.'
+    Reviewed: 0
+    Note: Captive freed dialog; {hero} = hero name, {blurb} = hero blurb followed
+      by a blank line, or empty
+  - Key: room.cache.gold-float
+    Values:
+    - +{amount} gold
+    Reviewed: 0
+    Note: Floating text when a cache is searched; {amount} = gold
+  - Key: room.cache.title
+    Values:
+    - A Cache
+    Reviewed: 0
+    Note: Cache dialog title
+  - Key: room.cache.message-gold
+    Values:
+    - Coin and oddments, stashed here and forgotten. +{amount} gold.
+    Reviewed: 0
+    Note: Cache dialog; {amount} = gold
+  - Key: room.cache.message
+    Values:
+    - Coin and oddments, stashed here and forgotten.
+    Reviewed: 0
+    Note: Cache dialog when it held no gold
+  - Key: room.cache.nothing-else
+    Values:
+    - '
+
+
+      Nothing else worth carrying.'
+    Reviewed: 0
+    Note: Cache dialog, appended when no item or material was found (starts with
+      a blank line)
+  - Key: room.refuge.state.hurt
+    Values:
+    - The party is down {missing} health between them.
+    Reviewed: 0
+    Note: Refuge prompt, party state; {missing} = total missing health
+  - Key: room.refuge.state.whole
+    Values:
+    - Nobody here is hurt - resting now wastes the place.
+    Reviewed: 0
+    Note: Refuge prompt, party state when nobody is hurt
+  - Key: room.refuge.title
+    Values:
+    - A Refuge
+    Reviewed: 0
+    Note: Refuge dialog title (prompt and result)
+  - Key: room.refuge.prompt
+    Values:
+    - 'Dry ground, and nothing watching. {state}
+
+
+      Resting restores {percent}%
+      of each hero''s health and refills every ability charge. It can only be done
+      once.'
+    Reviewed: 0
+    Note: Refuge confirm text; {state} = room.refuge.state.* sentence, {percent}
+      = share of health restored
+  - Key: room.refuge.confirm
+    Values:
+    - Rest
+    Reviewed: 0
+    Note: Refuge confirm button
+  - Key: room.refuge.healed
+    Values:
+    - '{hero} recovers {amount} health.'
+    Reviewed: 0
+    Note: Refuge result line; {hero} = hero name, {amount} = health
+  - Key: room.refuge.already-whole
+    Values:
+    - '{hero} was already whole.'
+    Reviewed: 0
+    Note: Refuge result line; {hero} = hero name
+  - Key: room.refuge.ability-charges
+    Values:
+    - Ability charges are restored.
+    Reviewed: 0
+    Note: Refuge result line
+  - Key: room.refuge.summon-charges
+    Values:
+    - Summon charges are restored.
+    Reviewed: 0
+    Note: Refuge result line
+  - Key: room.refuge.rested-float
+    Values:
+    - Rested
+    Reviewed: 0
+    Note: Floating text over the party after resting
+  - Key: room.refuge.result
+    Values:
+    - 'You make camp long enough to bind what can be bound.
+
+
+      {lines}'
+    Reviewed: 0
+    Note: Refuge result dialog; {lines} = result lines, one per line
+  - Key: room.combat.turn-title
+    Values:
+    - '{hero}''s Turn'
+    Reviewed: 0
+    Note: Combat command window title; {hero} = acting unit name
+  - Key: room.command.attack
+    Values:
+    - Attack
+    Reviewed: 0
+    Note: Combat command
+  - Key: room.command.signature
+    Values:
+    - "\u2605 {ability}"
+    Reviewed: 0
+    Note: Combat command for a summon's once-per-stay signature; {ability} = ability
+      name
+  - Key: room.command.inspect
+    Values:
+    - Inspect
+    Reviewed: 0
+    Note: Combat command
+  - Key: room.command.skip
+    Values:
+    - Skip
+    Reviewed: 0
+    Note: Combat command
+  - Key: room.command.dismiss
+    Values:
+    - Dismiss
+    Reviewed: 0
+    Note: Combat command (send a summon home)
+  - Key: room.command.ability
+    Values:
+    - Ability
+    Reviewed: 0
+    Note: Combat command
+  - Key: room.command.summon
+    Values:
+    - Summon
+    Reviewed: 0
+    Note: Combat command
+  - Key: room.command.ultra
+    Values:
+    - Ultra
+    Reviewed: 0
+    Note: Combat command
+  - Key: room.command.item
+    Values:
+    - Item
+    Reviewed: 0
+    Note: Combat command
+  - Key: room.command.reason.silenced
+    Values:
+    - Silenced
+    Reviewed: 0
+    Note: Why a combat command is greyed
+  - Key: room.command.reason.no-charges
+    Values:
+    - No charges
+    Reviewed: 0
+    Note: Why the Ability command is greyed
+  - Key: room.command.reason.none-carried
+    Values:
+    - None carried
+    Reviewed: 0
+    Note: Why the Ability command is greyed
+  - Key: room.command.reason.spent
+    Values:
+    - Spent
+    Reviewed: 0
+    Note: Why the Summon command is greyed
+  - Key: room.command.reason.active
+    Values:
+    - Active
+    Reviewed: 0
+    Note: Why the Ultra command is greyed (already transformed)
+  - Key: room.command.reason.none
+    Values:
+    - None
+    Reviewed: 0
+    Note: Why the Item command is greyed
+  - Key: room.command.reason.focus
+    Values:
+    - Focus {focus}
+    Reviewed: 0
+    Note: Why the Ultra command is greyed; {focus} = current Focus
+  - Key: room.command.reason.no-focus
+    Values:
+    - No Focus
+    Reviewed: 0
+    Note: Why the Ultra command is greyed
+  - Key: room.command.reason.gauge
+    Values:
+    - '{percent}%'
+    Reviewed: 0
+    Note: Why the Ultra command is greyed; {percent} = Ultra gauge fill
+  - Key: room.map.title
+    Values:
+    - Map
+    Reviewed: 0
+    Note: Dungeon map window title when the level has no name
+  - Key: room.map.no-safe-way
+    Values:
+    - No safe way there
+    Reviewed: 0
+    Note: Floating text when a clicked map room cannot be reached
+  - Key: room.pause.leave
+    Values:
+    - Leave the Dungeon
+    Reviewed: 0
+    Note: Pause menu button
+  - Key: room.pause.leave-armed
+    Values:
+    - Leave - are you sure?
+    Reviewed: 0
+    Note: Pause menu button after the first press
+  - Key: room.pause.note
+    Values:
+    - The run waits for you on the story map.
+    Reviewed: 0
+    Note: Pause menu note under the leave button
+  - Key: room.pause.note-armed
+    Values:
+    - You will start this floor again, from the entrance, with every enemy back -
+      and just as hurt as you are now. What this floor has given you so far is lost.
+    Reviewed: 0
+    Note: Pause menu note once leaving is armed
+  - Key: room.keys.combat-bar
+    Values:
+    - "\u2190 \u2192 choose \xB7 Enter confirm"
+    Reviewed: 0
+    Note: Keyboard hint while the Fight/Flee bar is up
+  - Key: room.keys.hero-bar
+    Values:
+    - "\u2191\u2193 choose \xB7 Enter confirm"
+    Reviewed: 0
+    Note: Keyboard hint while the combat command window is up
+  - Key: room.keys.doors
+    Values:
+    - "Arrows pick a door \xB7 Enter walk through \xB7 Tab room actions"
+    Reviewed: 0
+    Note: Keyboard hint while picking doors
+  - Key: room.party.hp
+    Values:
+    - '{current}/{max}'
+    Reviewed: 0
+    Note: Party window health; {current} = health, {max} = max health
+  - Key: room.party.affliction-tooltip
+    Values:
+    - '{effect} until the stairs'
+    Reviewed: 0
+    Note: Tooltip on a level affliction chip in the party window; {effect} = the
+      chip text
+  - Key: room.death.title
+    Values:
+    - The Party Has Fallen
+    Reviewed: 0
+    Note: Death screen title
+  - Key: room.death.return
+    Values:
+    - Return to town
+    Reviewed: 0
+    Note: Death screen button
+  - Key: room.death.where-default
+    Values:
+    - the dungeon
+    Reviewed: 0
+    Note: Death screen, where the party fell when the level has no name (goes into
+      {where})
+  - Key: room.death.summary-run
+    Values:
+    - Somewhere in {where}, the last of them goes down. The run ends here.
+    Reviewed: 0
+    Note: Death screen text during a run; {where} = level name
+  - Key: room.death.summary
+    Values:
+    - Somewhere in {where}, the last of them goes down.
+    Reviewed: 0
+    Note: Death screen text outside a run; {where} = level name
+  - Key: room.death.row.level-gold
+    Values:
+    - Gold for reaching level {level}
+    Reviewed: 0
+    Note: Death screen row label; {level} = level reached
+  - Key: room.reward.plus
+    Values:
+    - +{amount}
+    Reviewed: 0
+    Note: A gained amount in reward rows/tiles (death screen, victory, level clear);
+      {amount} = number
+  - Key: room.death.row.earlier-floors
+    Values:
+    - Everything from earlier floors
+    Reviewed: 0
+    Note: Death screen row label
+  - Key: room.death.kept
+    Values:
+    - kept
+    Reviewed: 0
+    Note: Death screen row value
+  - Key: room.death.row.floor-gold
+    Values:
+    - Gold found on this floor
+    Reviewed: 0
+    Note: Death screen row label
+  - Key: room.death.lost
+    Values:
+    - lost
+    Reviewed: 0
+    Note: Death screen row value
+  - Key: room.death.row.floor-gains
+    Values:
+    - XP, items and materials from this floor
+    Reviewed: 0
+    Note: Death screen row label
+  - Key: room.death.row.xp
+    Values:
+    - '{xp} XP Gained'
+    Reviewed: 0
+    Note: Death screen row label; {xp} = unspent XP of the party
+  - Key: room.death.row.grow
+    Values:
+    - Grow stronger
+    Reviewed: 0
+    Note: Death screen row label when the party has no unspent XP
+  - Key: room.death.row.xp-where
+    Values:
+    - Spend it in the Hall of Progression
+    Reviewed: 0
+    Note: Death screen row value next to the XP row
+  - Key: room.death.row.fell-on
+    Values:
+    - Fell on
+    Reviewed: 0
+    Note: Death screen row label
+  - Key: room.death.row.floor
+    Values:
+    - Floor {floor} of {total}
+    Reviewed: 0
+    Note: Death screen row value; {floor} = floor number, {total} = floors in the
+      run
+  - Key: room.flee.title
+    Values:
+    - Flee
+    Reviewed: 0
+    Note: Combat result dialog title when fleeing is impossible
+  - Key: room.flee.nowhere
+    Values:
+    - Nowhere to flee!
+    Reviewed: 0
+    Note: Combat result dialog text when fleeing is impossible
+  - Key: room.victory.title.run
+    Values:
+    - Dungeon Conquered!
+    Reviewed: 0
+    Note: Victory window title after the run's last fight
+  - Key: room.victory.title.boss
+    Values:
+    - Boss Slain!
+    Reviewed: 0
+    Note: Victory window title after a boss
+  - Key: room.victory.title
+    Values:
+    - Victory!
+    Reviewed: 0
+    Note: Victory window title
+  - Key: room.victory.gold
+    Values:
+    - Gold
+    Reviewed: 0
+    Note: Victory window row label
+  - Key: room.victory.xp
+    Values:
+    - XP
+    Reviewed: 0
+    Note: Victory window row label
+  - Key: room.victory.xp-shared
+    Values:
+    - +{amount} shared
+    Reviewed: 0
+    Note: Victory window XP row value when split over heroes; {amount} = total XP
+  - Key: room.victory.loot
+    Values:
+    - Loot
+    Reviewed: 0
+    Note: Victory window row label
+  - Key: room.victory.loot-none
+    Values:
+    - None
+    Reviewed: 0
+    Note: Victory window loot row value when nothing dropped
+  - Key: room.victory.way-out
+    Values:
+    - The way out
+    Reviewed: 0
+    Note: Victory window row label after the run's last level
+  - Key: room.victory.way-down
+    Values:
+    - The way down
+    Reviewed: 0
+    Note: Victory window row label after a level's exit fight
+  - Key: room.victory.way-open
+    Values:
+    - open
+    Reviewed: 0
+    Note: Victory window row value for the way down/out
+  - Key: room.hud.level-default
+    Values:
+    - The Dungeon
+    Reviewed: 0
+    Note: Dungeon HUD level name when nothing else names it
+  - Key: room.hud.run-line
+    Values:
+    - "{run} \xB7 Level {level} of {total}"
+    Reviewed: 0
+    Note: Dungeon HUD run line; {run} = run name, {level} = level number, {total}
+      = levels in run
+  - Key: room.hud.map-key
+    Values:
+    - M  map
+    Reviewed: 0
+    Note: Dungeon HUD map shortcut hint (two spaces)
+  - Key: room.hud.explore
+    Values:
+    - "{status}  \xB7  M  map"
+    Reviewed: 0
+    Note: Dungeon HUD exploration line; {status} = room.map.status text (keep the
+      double spaces)
+  - Key: room.hud.gold-teaching
+    Values:
+    - Gold found  +{amount}   (yours when you take the stairs)
+    Reviewed: 0
+    Note: Dungeon HUD gold during the tutorial; {amount} = pending gold (keep the
+      spacing)
+  - Key: room.hud.gold
+    Values:
+    - +{amount} gold
+    Reviewed: 0
+    Note: Dungeon HUD gold; {amount} = pending gold
+  - Key: room.level-clear.title.run
+    Values:
+    - Run Complete!
+    Reviewed: 0
+    Note: Level-clear window title after the run's last level
+  - Key: room.level-clear.title
+    Values:
+    - Level Cleared!
+    Reviewed: 0
+    Note: Level-clear window title
+  - Key: room.level-clear.next.done
+    Values:
+    - The run is complete.
+    Reviewed: 0
+    Note: Level-clear window, what comes next
+  - Key: room.level-clear.next.story-map
+    Values:
+    - The run continues from the story map.
+    Reviewed: 0
+    Note: Level-clear window, what comes next
+  - Key: room.level-clear.next.continue
+    Values:
+    - 'Next: {level} - continue now, or rest in town first.'
+    Reviewed: 0
+    Note: Level-clear window, what comes next; {level} = next level name
+  - Key: room.level-clear.next.from-map
+    Values:
+    - 'Next: {level} - continue it from the story map.'
+    Reviewed: 0
+    Note: Level-clear window, what comes next; {level} = next level name
+  - Key: room.level-clear.subtitle.level
+    Values:
+    - Level {number} of {count}
+    Reviewed: 0
+    Note: Level-clear subtitle; {number} = level number, {count} = levels in run
+  - Key: room.level-clear.subtitle.named
+    Values:
+    - '{name} - level {number} of {count}'
+    Reviewed: 0
+    Note: Level-clear subtitle; {name} = level name, {number}, {count} as above
+  - Key: room.level-clear.subtitle.run
+    Values:
+    - "{run} \xB7 {level}"
+    Reviewed: 0
+    Note: Level-clear subtitle; {run} = run name, {level} = the level part
+  - Key: room.level-clear.joined
+    Values:
+    - '{hero} joins the party for good'
+    Reviewed: 0
+    Note: Level-clear window, a hero who joined; {hero} = hero name
+  - Key: room.level-clear.gold
+    Values:
+    - Gold
+    Reviewed: 0
+    Note: Level-clear tally label
+  - Key: room.level-clear.gold-note
+    Values:
+    - "{found} found \xB7 {bonus} for the clear"
+    Reviewed: 0
+    Note: Level-clear gold tally note; {found} = gold found, {bonus} = clear bonus
+  - Key: room.level-clear.xp
+    Values:
+    - XP
+    Reviewed: 0
+    Note: Level-clear tally label
+  - Key: room.level-clear.xp-note
+    Values:
+    - for the sphere grid
+    Reviewed: 0
+    Note: Level-clear XP tally note
+  - Key: room.level-clear.essence
+    Values:
+    - Essence
+    Reviewed: 0
+    Note: Level-clear tally label
+  - Key: room.level-clear.essence-note
+    Values:
+    - from the revisit
+    Reviewed: 0
+    Note: Level-clear Essence tally note
+  - Key: room.level-clear.hero-xp
+    Values:
+    - +{amount} XP
+    Reviewed: 0
+    Note: Level-clear, XP of one hero; {amount} = XP
+  - Key: room.level-clear.no-loot
+    Values:
+    - Nothing this time.
+    Reviewed: 0
+    Note: Level-clear, when nothing was found
+  - Key: room.level-clear.loot-count
+    Values:
+    - x{count}
+    Reviewed: 0
+    Note: Level-clear loot cell count; {count} = quantity
+  - Key: room.bar.investigate
+    Values:
+    - Investigate
+    Reviewed: 0
+    Note: Room bar action button when the event has no title
+  - Key: abilities.describe.crit-chance
+    Values:
+    - '{line}, {chance}% crit'
+    Reviewed: 0
+    Note: ability effect line + crit; line = damage line, chance = crit percent
+  - Key: abilities.describe.can-crit
+    Values:
+    - '{line}, can crit'
+    Reviewed: 0
+    Note: ability effect line, no caster; line = damage line
+  - Key: abilities.describe.forge-preview
+    Values:
+    - "{now} \u2192 {next}"
+    Reviewed: 0
+    Note: Forge effect line with next-level preview; now/next = effect lines
+  - Key: abilities.describe.forge-scales
+    Values:
+    - '{line} + {stat}'
+    Reviewed: 0
+    Note: Forge effect line; stat = scaling stat short name
+  - Key: abilities.target.random-shots
+    Values:
+    - '{count} shots, random enemies'
+    Reviewed: 0
+    Note: ability target label; count = number of shots
+  - Key: abilities.target.all-enemies
+    Values:
+    - All enemies
+    Reviewed: 0
+    Note: ability target label
+  - Key: abilities.target.self
+    Values:
+    - Self
+    Reviewed: 0
+    Note: ability target label
+  - Key: abilities.target.one-ally
+    Values:
+    - One ally
+    Reviewed: 0
+    Note: ability target label
+  - Key: abilities.target.whole-party
+    Values:
+    - Whole party
+    Reviewed: 0
+    Note: ability target label
+  - Key: abilities.target.fallen-ally
+    Values:
+    - One fallen ally
+    Reviewed: 0
+    Note: ability target label
+  - Key: abilities.target.one-enemy
+    Values:
+    - One enemy
+    Reviewed: 0
+    Note: ability target label
+  - Key: abilities.describe.first-line
+    Values:
+    - '{target}: {effect}'
+    Reviewed: 0
+    Note: ability description first line; target = target label, effect = first effect
+      line
+  - Key: abilities.describe.more-line
+    Values:
+    - + {effect}
+    Reviewed: 0
+    Note: ability description further effect line
+  - Key: abilities.describe.heal-percent
+    Values:
+    - heals {percent}% of max HP
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.heal
+    Values:
+    - heals {amount} HP
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.turn-delay
+    Values:
+    - pushes its next turn back {percent}% of a turn
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.drain-party
+    Values:
+    - heals the whole party {percent}% of the damage dealt
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.drain-caster
+    Values:
+    - heals the caster {percent}% of the damage dealt
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.restore-charge-one
+    Values:
+    - restores 1 charge to an ability
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.restore-charges
+    Values:
+    - restores {count} charges to an ability
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.disassemble
+    Values:
+    - takes a machine apart outright - likelier the more of its kind you have defeated
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.revive
+    Values:
+    - revives a fallen hero with {percent}% of max HP
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.cure-all
+    Values:
+    - clears every debuff
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.cure-one
+    Values:
+    - clears one debuff
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.cure-many
+    Values:
+    - clears {count} debuffs
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.intercept
+    Values:
+    - takes the single-target blows aimed at them until your next turn, at {percent}%
+      less damage
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.retaliate
+    Values:
+    - strikes back once at the next attacker for {amount} damage
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.retaliate-element
+    Values:
+    - strikes back once at the next attacker for {amount} {element} damage
+    Reviewed: 0
+    Note: ability effect line; element = damage type name
+  - Key: abilities.describe.thorns
+    Values:
+    - returns {percent}% of each blow taken as {element} damage
+    Reviewed: 0
+    Note: ability effect line; element = damage type name
+  - Key: abilities.describe.thorns-turns
+    Values:
+    - returns {percent}% of each blow taken as {element} damage for {turns} turns
+    Reviewed: 0
+    Note: ability effect line; element = damage type name
+  - Key: abilities.describe.execute
+    Values:
+    - destroys {target} under {percent}% health outright (not bosses)
+    Reviewed: 0
+    Note: ability effect line; target = trait name or abilities.describe.execute-any-foe
+  - Key: abilities.describe.execute-any-foe
+    Values:
+    - a foe
+    Reviewed: 0
+    Note: 'ability effect line: Execute with no trait'
+  - Key: abilities.describe.steal-certain
+    Values:
+    - steals an item or gold, certain
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.steal-luck
+    Values:
+    - steals an item or gold, odds from Luck (once per enemy)
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.fight-gold
+    Values:
+    - +{percent}% gold from this fight's kills and steals
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.refund-charge
+    Values:
+    - the cast costs no charge
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.damage-percent
+    Values:
+    - '{percent}% of max HP damage'
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.damage-percent-element
+    Values:
+    - '{percent}% of max HP {element} damage'
+    Reviewed: 0
+    Note: ability effect line; element = damage type name
+  - Key: abilities.describe.damage
+    Values:
+    - '{amount} damage'
+    Reviewed: 0
+    Note: ability effect line
+  - Key: abilities.describe.damage-element
+    Values:
+    - '{amount} {element} damage'
+    Reviewed: 0
+    Note: ability effect line; element = damage type name
+  - Key: abilities.describe.bonus-double
+    Values:
+    - '{line}, double vs {versus}'
+    Reviewed: 0
+    Note: ability damage line bonus; versus = trait name or lowercase status
+  - Key: abilities.describe.bonus-percent
+    Values:
+    - '{line}, +{percent}% vs {versus}'
+    Reviewed: 0
+    Note: ability damage line bonus; versus = trait name or lowercase status
+  - Key: abilities.describe.bonus-per-debuff
+    Values:
+    - '{line}, +{percent}% per debuff on the target (up to {max})'
+    Reviewed: 0
+    Note: ability damage line bonus
+  - Key: abilities.describe.with-attack
+    Values:
+    - '{line} ({stat} {value})'
+    Reviewed: 0
+    Note: ability damage line with caster's attack; stat = short stat name, value
+      = attack
+  - Key: abilities.describe.status-max-hp
+    Values:
+    - '{status} of {percent}% max HP'
+    Reviewed: 0
+    Note: status effect line (barrier); status = status name
+  - Key: abilities.describe.status-gloss
+    Values:
+    - '{status} ({gloss})'
+    Reviewed: 0
+    Note: status effect line with explanation
+  - Key: abilities.describe.status-turn
+    Values:
+    - '{status}, {turns} turn'
+    Reviewed: 0
+    Note: status effect line, 1 turn
+  - Key: abilities.describe.status-turns
+    Values:
+    - '{status}, {turns} turns'
+    Reviewed: 0
+    Note: status effect line, several turns
+  - Key: abilities.describe.status-chance
+    Values:
+    - '{status}, {chance}% chance'
+    Reviewed: 0
+    Note: debuff line with apply chance
+  - Key: abilities.gloss.frozen
+    Values:
+    - loses its turns
+    Reviewed: 0
+    Note: 'status explanation in ability text: Frozen'
+  - Key: abilities.gloss.slow
+    Values:
+    - acts less often
+    Reviewed: 0
+    Note: 'status explanation in ability text: Slow'
+  - Key: abilities.gloss.haste
+    Values:
+    - acts more often
+    Reviewed: 0
+    Note: 'status explanation in ability text: Haste'
+  - Key: abilities.gloss.silenced
+    Values:
+    - cannot use abilities
+    Reviewed: 0
+    Note: 'status explanation in ability text: Silenced'
+  - Key: abilities.gloss.blinded
+    Values:
+    - physical hits may miss
+    Reviewed: 0
+    Note: 'status explanation in ability text: Blinded'
+  - Key: abilities.gloss.leeched
+    Values:
+    - of each hit on it heals the caster
+    Reviewed: 0
+    Note: 'status explanation in ability text: Leeched'
+  - Key: abilities.gloss.confused
+    Values:
+    - may strike its own side
+    Reviewed: 0
+    Note: 'status explanation in ability text: Confused'
+  - Key: abilities.gloss.marked
+    Values:
+    - more damage from every hit
+    Reviewed: 0
+    Note: 'status explanation in ability text: Marked'
+  - Key: abilities.gloss.hidden
+    Values:
+    - cannot be targeted
+    Reviewed: 0
+    Note: 'status explanation in ability text: Hidden'
+  - Key: abilities.gloss.evasive
+    Values:
+    - physical blows on them miss
+    Reviewed: 0
+    Note: 'status explanation in ability text: Evasive'
+  - Key: abilities.gloss.death-marked
+    Values:
+    - every hit on it is a harder crit
+    Reviewed: 0
+    Note: 'status explanation in ability text: DeathMarked'
+  - Key: abilities.summary.separator
+    Values:
+    - ', '
+    Reviewed: 0
+    Note: joins the parts of a short ability effect summary (MagicSO.GetEffectsSummary)
+  - Key: abilities.summary.percent
+    Values:
+    - '{value}%'
+    Reviewed: 0
+    Note: 'short ability summary: a percentage power'
+  - Key: abilities.summary.damage
+    Values:
+    - DMG {power}
+    Reviewed: 0
+    Note: short ability summary
+  - Key: abilities.summary.damage-element
+    Values:
+    - DMG {power} {element}
+    Reviewed: 0
+    Note: short ability summary; element = damage type name
+  - Key: abilities.summary.heal
+    Values:
+    - Heal {power}
+    Reviewed: 0
+    Note: short ability summary
+  - Key: abilities.summary.buff
+    Values:
+    - +{status}
+    Reviewed: 0
+    Note: short ability summary; status = buff type name
+  - Key: abilities.summary.debuff
+    Values:
+    - -{status}
+    Reviewed: 0
+    Note: short ability summary; status = buff type name
+  - Key: abilities.summary.health-cost
+    Values:
+    - Costs {power} HP
+    Reviewed: 0
+    Note: short ability summary
+  - Key: abilities.summary.turn-delay
+    Values:
+    - Delay {percent}%
+    Reviewed: 0
+    Note: short ability summary
+  - Key: abilities.summary.drain
+    Values:
+    - Drain {percent}%
+    Reviewed: 0
+    Note: short ability summary
+  - Key: abilities.summary.restore-charge
+    Values:
+    - +{count} charge
+    Reviewed: 0
+    Note: short ability summary
+  - Key: abilities.summary.disassemble
+    Values:
+    - Disassemble
+    Reviewed: 0
+    Note: short ability summary
+  - Key: abilities.summary.thorns
+    Values:
+    - Thorns {percent}% {element}
+    Reviewed: 0
+    Note: short ability summary; element = damage type name
+  - Key: abilities.summon.fallback-name
+    Values:
+    - Summon
+    Reviewed: 0
+    Note: name of a summon cast when the summon is missing
+  - Key: abilities.summon.party-effects
+    Values:
+    - 'the party: {effects}'
+    Reviewed: 0
+    Note: summon description part; effects = effect texts joined
+  - Key: abilities.summon.random-effects
+    Values:
+    - 'one at random: {effects}'
+    Reviewed: 0
+    Note: summon description part; effects = effect texts joined
+  - Key: abilities.summon.effect-separator
+    Values:
+    - ', '
+    Reviewed: 0
+    Note: joins summon effect texts and squad groups
+  - Key: abilities.summon.part-separator
+    Values:
+    - " \xB7 "
+    Reviewed: 0
+    Note: joins the parts of a summon description
+  - Key: abilities.summon.health-cost
+    Values:
+    - costs {percent}% of the summoner's health
+    Reviewed: 0
+    Note: summon description part
+  - Key: abilities.summon.draws-attention
+    Values:
+    - draws the enemies' attention
+    Reviewed: 0
+    Note: summon description part (taunt)
+  - Key: abilities.summon.charge-one
+    Values:
+    - 1 charge per run
+    Reviewed: 0
+    Note: summon description part
+  - Key: abilities.summon.charges
+    Values:
+    - '{count} charges per run'
+    Reviewed: 0
+    Note: summon description part
+  - Key: abilities.summon.stands-beside
+    Values:
+    - Stands beside the party
+    Reviewed: 0
+    Note: 'summon description: ally that rotates rites'
+  - Key: abilities.summon.fights-alone
+    Values:
+    - Fights beside the party on its own
+    Reviewed: 0
+    Note: 'summon description: ally that acts without orders'
+  - Key: abilities.summon.fights-beside
+    Values:
+    - Fights beside the party
+    Reviewed: 0
+    Note: 'summon description: ally'
+  - Key: abilities.summon.replaces-party
+    Values:
+    - Takes the party's place
+    Reviewed: 0
+    Note: 'summon description: party-replacing summon'
+  - Key: abilities.summon.health
+    Values:
+    - '{percent}% of the summoner''s health'
+    Reviewed: 0
+    Note: summon description part
+  - Key: abilities.summon.turn-one
+    Values:
+    - 1 turn
+    Reviewed: 0
+    Note: 'summon description part: stay'
+  - Key: abilities.summon.turns
+    Values:
+    - '{count} turns'
+    Reviewed: 0
+    Note: 'summon description part: stay'
+  - Key: abilities.summon.parting
+    Values:
+    - '{ability} as it leaves'
+    Reviewed: 0
+    Note: summon description part; ability = parting ability name
+  - Key: abilities.summon.squad-one
+    Values:
+    - '{article} {name}'
+    Reviewed: 0
+    Note: squad troop group of one; article = abilities.summon.article-a/an, name
+      = troop name
+  - Key: abilities.summon.squad-many
+    Values:
+    - '{count} {name}'
+    Reviewed: 0
+    Note: squad troop group; name = troop name made plural in code (English suffix
+      rules)
+  - Key: abilities.summon.squad-list
+    Values:
+    - '{list} and {last}'
+    Reviewed: 0
+    Note: squad troop groups; list = all but the last joined
+  - Key: abilities.summon.article-an
+    Values:
+    - an
+    Reviewed: 0
+    Note: article before a troop name starting with a vowel
+  - Key: abilities.summon.article-a
+    Values:
+    - a
+    Reviewed: 0
+    Note: article before a troop name
+  - Key: abilities.summon.repeat
+    Values:
+    - "{effect} \xD7{count}"
+    Reviewed: 0
+    Note: summon effect repeated count times
+  - Key: abilities.summon.effect.regenerates
+    Values:
+    - regenerates {amount} a turn
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.summon.effect.regenerates-turns
+    Values:
+    - regenerates {amount} a turn for {turns} turns
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.summon.effect.barrier-percent
+    Values:
+    - a barrier of {percent}% of health
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.summon.effect.barrier-percent-turns
+    Values:
+    - a barrier of {percent}% of health for {turns} turns
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.summon.effect.barrier
+    Values:
+    - a barrier of {amount}
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.summon.effect.barrier-turns
+    Values:
+    - a barrier of {amount} for {turns} turns
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.summon.effect.buff-percent
+    Values:
+    - +{percent}% {status}
+    Reviewed: 0
+    Note: summon effect; status = buff type name
+  - Key: abilities.summon.effect.buff-percent-turns
+    Values:
+    - +{percent}% {status} for {turns} turns
+    Reviewed: 0
+    Note: summon effect; status = buff type name
+  - Key: abilities.summon.effect.buff
+    Values:
+    - +{amount} {status}
+    Reviewed: 0
+    Note: summon effect; status = buff type name
+  - Key: abilities.summon.effect.buff-turns
+    Values:
+    - +{amount} {status} for {turns} turns
+    Reviewed: 0
+    Note: summon effect; status = buff type name
+  - Key: abilities.summon.effect.debuff
+    Values:
+    - -{amount} {status}
+    Reviewed: 0
+    Note: summon effect; status = buff type name
+  - Key: abilities.summon.effect.debuff-turns
+    Values:
+    - -{amount} {status} for {turns} turns
+    Reviewed: 0
+    Note: summon effect; status = buff type name
+  - Key: abilities.summon.effect.damage-plus-stat
+    Values:
+    - '{amount} + {stat} damage'
+    Reviewed: 0
+    Note: summon effect; stat = short stat name
+  - Key: abilities.summon.effect.damage-plus-stat-element
+    Values:
+    - '{amount} + {stat} {element} damage'
+    Reviewed: 0
+    Note: summon effect; stat = short stat name, element = damage type
+  - Key: abilities.summon.effect.damage-stat
+    Values:
+    - '{stat} damage'
+    Reviewed: 0
+    Note: summon effect; stat = short stat name
+  - Key: abilities.summon.effect.damage-stat-element
+    Values:
+    - '{stat} {element} damage'
+    Reviewed: 0
+    Note: summon effect; stat = short stat name, element = damage type
+  - Key: abilities.summon.effect.turn-delay
+    Values:
+    - delays by {percent}% of a turn
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.summon.effect.drain
+    Values:
+    - drains {percent}% of the damage
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.summon.effect.heal-percent
+    Values:
+    - heals {percent}% of health
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.summon.effect.heal
+    Values:
+    - heals {amount}
+    Reviewed: 0
+    Note: summon effect
+  - Key: abilities.ultra.multicast
+    Values:
+    - "Next ability: cast once, +1 per Focus, for one charge \xB7 all Focus spent\nFocus:
+      +1 each turn you cast"
+    Reviewed: 0
+    Note: 'Ultra description: MultiCast kind'
+  - Key: abilities.ultra.sacrifice-creature
+    Values:
+    - a horror
+    Reviewed: 0
+    Note: 'Ultra description: Sacrifice with no creature set'
+  - Key: abilities.ultra.sacrifice
+    Values:
+    - An ally falls for the rest of the floor; {creature} rises in their place, built
+      off their stats, for the rest of the fight. Its attack follows their highest
+      stat
+    Reviewed: 0
+    Note: 'Ultra description: Sacrifice; creature = creature name'
+  - Key: abilities.ultra.mount
+    Values:
+    - Rides a mech that takes the hits
+    Reviewed: 0
+    Note: 'Ultra description: Mount, followed by the mech''s ability names'
+  - Key: abilities.ultra.part-separator
+    Values:
+    - " \xB7 "
+    Reviewed: 0
+    Note: joins the parts of an Ultra description
+  - Key: abilities.ultra.random-enemies
+    Values:
+    - Random enemies
+    Reviewed: 0
+    Note: 'Ultra Strike target label: random enemy per hit'
+  - Key: abilities.ultra.strike
+    Values:
+    - '{target}: {effects}'
+    Reviewed: 0
+    Note: Ultra Strike description; target = target label, effects = effect lines
+      joined
+  - Key: abilities.ultra.strike-hits
+    Values:
+    - '{target} ({hits} hits): {effects}'
+    Reviewed: 0
+    Note: Ultra Strike description, several hits
+  - Key: abilities.ultra.transform-turn
+    Values:
+    - Transforms for 1 turn
+    Reviewed: 0
+    Note: Ultra Transform description
+  - Key: abilities.ultra.transform-turns
+    Values:
+    - Transforms for {turns} turns
+    Reviewed: 0
+    Note: Ultra Transform description
+  - Key: abilities.ultra.transform-health
+    Values:
+    - +{percent}% health
+    Reviewed: 0
+    Note: Ultra Transform description part
+  - Key: abilities.ultra.transform-attack
+    Values:
+    - '{element} attack'
+    Reviewed: 0
+    Note: Ultra Transform description part; element = damage type name
+  - Key: abilities.popup.crit
+    Values:
+    - CRIT!
+    Reviewed: 0
+    Note: floating text over a target when an ability crits
+  - Key: abilities.popup.weak
+    Values:
+    - Weak!
+    Reviewed: 0
+    Note: 'floating text: ability hit a weakness'
+  - Key: abilities.popup.resisted
+    Values:
+    - Resisted
+    Reviewed: 0
+    Note: 'floating text: ability hit was resisted'
+  - Key: abilities.popup.immune
+    Values:
+    - Immune
+    Reviewed: 0
+    Note: 'floating text: target immune to the ability''s element'
+  - Key: abilities.popup.absorbed
+    Values:
+    - Absorbed
+    Reviewed: 0
+    Note: 'floating text: target absorbed the ability''s element'
+  - Key: abilities.reaction.leeching-curse
+    Values:
+    - Leeching Curse
+    Reviewed: 0
+    Note: reaction name announced when the Leeched status heals the curser
+  - Key: abilities.reaction.retribution
+    Values:
+    - Retribution
+    Reviewed: 0
+    Note: reaction name announced when a Retaliate strike fires
+  - Key: abilities.reaction.thorns
+    Values:
+    - Thorns
+    Reviewed: 0
+    Note: reaction name announced when Thorns returns damage
+  - Key: abilities.menu.title-ability
+    Values:
+    - Ability
+    Reviewed: 0
+    Note: 'in-combat list title: the hero''s abilities'
+  - Key: abilities.menu.empty-slot
+    Values:
+    - (empty)
+    Reviewed: 0
+    Note: 'in-combat ability list: an empty slot'
+  - Key: abilities.menu.unlimited
+    Values:
+    - "\u221E"
+    Reviewed: 0
+    Note: 'in-combat ability list: a form ability with no charges'
+  - Key: abilities.menu.charges
+    Values:
+    - '{charges}/{max}'
+    Reviewed: 0
+    Note: charges left / max on an ability or summon row
+  - Key: abilities.menu.meta-health-cost
+    Values:
+    - '{meta}  {cost} HP'
+    Reviewed: 0
+    Note: row meta with a health price; meta = charges text
+  - Key: abilities.menu.meta-nobody-fallen
+    Values:
+    - '{meta}  nobody fallen'
+    Reviewed: 0
+    Note: row meta, revive with nobody down; meta = charges text
+  - Key: abilities.menu.meta-nothing-spent
+    Values:
+    - '{meta}  nothing spent'
+    Reviewed: 0
+    Note: row meta, charge restore with nothing to refill; meta = charges text
+  - Key: abilities.menu.prompt-ally
+    Values:
+    - Select Ally Target
+    Reviewed: 0
+    Note: target picker prompt
+  - Key: abilities.menu.prompt-enemy
+    Values:
+    - Select Enemy Target
+    Reviewed: 0
+    Note: target picker prompt
+  - Key: abilities.menu.prompt-fallen
+    Values:
+    - Select Fallen Ally
+    Reviewed: 0
+    Note: target picker prompt
+  - Key: abilities.menu.restore-which
+    Values:
+    - Restore which?
+    Reviewed: 0
+    Note: 'list title: pick an own ability slot to refill'
+  - Key: abilities.menu.restore-whose
+    Values:
+    - Restore {name}'s
+    Reviewed: 0
+    Note: 'list title: pick an ally''s ability slot to refill; name = hero name'
+  - Key: abilities.menu.prompt-attack
+    Values:
+    - Select Attack Target
+    Reviewed: 0
+    Note: target picker prompt
+  - Key: abilities.menu.title-summon
+    Values:
+    - Summon
+    Reviewed: 0
+    Note: 'in-combat list title: summons'
+  - Key: abilities.menu.title-ultra
+    Values:
+    - Ultra
+    Reviewed: 0
+    Note: 'in-combat list title: Ultras'
+  - Key: abilities.menu.ultra-casts
+    Values:
+    - x{casts}
+    Reviewed: 0
+    Note: 'Ultra row: how many times MultiCast casts'
+  - Key: abilities.menu.ultra-ready
+    Values:
+    - Ready
+    Reviewed: 0
+    Note: 'Ultra row: usable'
+  - Key: abilities.menu.ultra-no-focus
+    Values:
+    - No Focus
+    Reviewed: 0
+    Note: 'Ultra row dimmed: MultiCast with no Focus'
+  - Key: abilities.menu.ultra-not-ready
+    Values:
+    - Not ready
+    Reviewed: 0
+    Note: 'Ultra row dimmed: gauge not full'
+  - Key: abilities.menu.ultra-nothing-to-cast
+    Values:
+    - Nothing to cast
+    Reviewed: 0
+    Note: 'Ultra row dimmed: MultiCast with no castable ability'
+  - Key: abilities.menu.ultra-no-one-to-give
+    Values:
+    - No one to give
+    Reviewed: 0
+    Note: 'Ultra row dimmed: Sacrifice with no valid ally'
+  - Key: abilities.menu.ultra-nobody-fallen
+    Values:
+    - Nobody fallen
+    Reviewed: 0
+    Note: 'Ultra row dimmed: revive with nobody down'
+  - Key: abilities.menu.prompt-sacrifice
+    Values:
+    - Sacrifice whom?
+    Reviewed: 0
+    Note: target picker prompt
+  - Key: abilities.menu.prompt-revive
+    Values:
+    - Revive whom?
+    Reviewed: 0
+    Note: target picker prompt
+  - Key: abilities.menu.title-item
+    Values:
+    - Item
+    Reviewed: 0
+    Note: 'in-combat list title: consumables'
+  - Key: abilities.menu.item-description
+    Values:
+    - '{effect}
+
+      {description}'
+    Reviewed: 0
+    Note: in-combat item footer; effect = generated effect line, description = item
+      description
+  - Key: abilities.menu.item-none
+    Values:
+    - (none)
+    Reviewed: 0
+    Note: 'in-combat item list: invalid stack'
+  - Key: abilities.menu.item-quantity
+    Values:
+    - x{count}
+    Reviewed: 0
+    Note: in-combat item row quantity
+  - Key: abilities.menu.prompt-use-item
+    Values:
+    - Use {item} on
+    Reviewed: 0
+    Note: target picker prompt; item = item name
+  - Key: abilities.menu.prompt-inspect
+    Values:
+    - Inspect Which?
+    Reviewed: 0
+    Note: target picker prompt
+  - Key: abilities.menu.target-health
+    Values:
+    - HP {health}
+    Reviewed: 0
+    Note: target picker row meta
+  - Key: abilities.inspect.health
+    Values:
+    - HP {health} / {max}
+    Reviewed: 0
+    Note: Inspect page health line
+  - Key: abilities.inspect.section-resistances
+    Values:
+    - Resistances
+    Reviewed: 0
+    Note: Inspect page section title
+  - Key: abilities.inspect.section-immune-to
+    Values:
+    - Immune to
+    Reviewed: 0
+    Note: Inspect page section title
+  - Key: abilities.inspect.section-stats
+    Values:
+    - Stats
+    Reviewed: 0
+    Note: Inspect page section title
+  - Key: abilities.inspect.section-revisit
+    Values:
+    - Revisit
+    Reviewed: 0
+    Note: Inspect page section title
+  - Key: abilities.inspect.section-condition
+    Values:
+    - Condition
+    Reviewed: 0
+    Note: Inspect page section title
+  - Key: abilities.inspect.section-abilities
+    Values:
+    - Abilities
+    Reviewed: 0
+    Note: Inspect page section title
+  - Key: abilities.inspect.every-stat
+    Values:
+    - Every stat
+    Reviewed: 0
+    Note: Inspect page, revisit section line label
+  - Key: abilities.inspect.floor-health
+    Values:
+    - Floor's own health
+    Reviewed: 0
+    Note: Inspect page, revisit section line label
+  - Key: abilities.inspect.more-health
+    Values:
+    - More health
+    Reviewed: 0
+    Note: Inspect page, revisit section line label
+  - Key: abilities.inspect.more-damage
+    Values:
+    - More damage
+    Reviewed: 0
+    Note: Inspect page, revisit section line label
+  - Key: abilities.inspect.more-speed
+    Values:
+    - More speed
+    Reviewed: 0
+    Note: Inspect page, revisit section line label
+  - Key: abilities.inspect.percent-more
+    Values:
+    - +{percent}%
+    Reviewed: 0
+    Note: Inspect page, revisit section value
+  - Key: abilities.inspect.stat-buffed
+    Values:
+    - '{value} ({buff})'
+    Reviewed: 0
+    Note: Inspect page stat value with combat buff; buff = signed number
+  - Key: abilities.inspect.charging
+    Values:
+    - Charging
+    Reviewed: 0
+    Note: Inspect page condition label
+  - Key: abilities.inspect.charging-detail
+    Values:
+    - Heavy attack incoming
+    Reviewed: 0
+    Note: Inspect page condition value
+  - Key: abilities.inspect.status-active
+    Values:
+    - Active
+    Reviewed: 0
+    Note: Inspect page condition value beside a status name
+  - Key: abilities.forge.title-recipes
+    Values:
+    - Known recipes
+    Reviewed: 0
+    Note: Forge list title, Craft tab
+  - Key: abilities.forge.title-abilities
+    Values:
+    - Known abilities
+    Reviewed: 0
+    Note: Forge list title, Abilities tab
+  - Key: abilities.forge.title-combos
+    Values:
+    - Known combos
+    Reviewed: 0
+    Note: Forge list title, Combos tab
+  - Key: abilities.forge.undiscovered
+    Values:
+    - '{count} undiscovered'
+    Reviewed: 0
+    Note: Forge list row folding the undiscovered entries
+  - Key: abilities.forge.recipe-price
+    Values:
+    - '{gold} g'
+    Reviewed: 0
+    Note: Forge recipe row price
+  - Key: abilities.forge.no-recipe
+    Values:
+    - No recipe chosen
+    Reviewed: 0
+    Note: Forge detail with nothing selected
+  - Key: abilities.forge.no-ability
+    Values:
+    - No ability chosen
+    Reviewed: 0
+    Note: Forge detail with nothing selected
+  - Key: abilities.forge.no-combo
+    Values:
+    - No combo chosen
+    Reviewed: 0
+    Note: Forge detail with nothing selected
+  - Key: abilities.forge.fully-upgraded
+    Values:
+    - Fully upgraded
+    Reviewed: 0
+    Note: Forge combo upgrade button at max
+  - Key: abilities.forge.held-at
+    Values:
+    - Held at Lv {level} by the Forge
+    Reviewed: 0
+    Note: Forge combo upgrade button at the Forge's ceiling
+  - Key: abilities.forge.upgrade
+    Values:
+    - "Upgrade to Lv {level} \u2014 {cost} essence"
+    Reviewed: 0
+    Note: Forge combo upgrade button
+  - Key: abilities.forge.triggered-by
+    Values:
+    - 'Triggered by: {tags}'
+    Reviewed: 0
+    Note: Forge combo detail; tags = tag names joined with ' + '
+  - Key: abilities.forge.section-bonus-effects
+    Values:
+    - Bonus effects
+    Reviewed: 0
+    Note: Forge combo detail section title
+  - Key: abilities.forge.locked-effect
+    Values:
+    - 'Lv {level}: {line}'
+    Reviewed: 0
+    Note: Forge combo effect locked until a level; line = effect line
+  - Key: abilities.forge.result-sub
+    Values:
+    - "{rarity} \xB7 {slot}"
+    Reviewed: 0
+    Note: Forge recipe detail subtitle for equipment
+  - Key: abilities.forge.craft-gold
+    Values:
+    - "Forge \u2014 {gold} gold"
+    Reviewed: 0
+    Note: Forge craft button with a gold price
+  - Key: abilities.forge.craft
+    Values:
+    - Forge
+    Reviewed: 0
+    Note: Forge craft button (the verb)
+  - Key: abilities.forge.section-needs
+    Values:
+    - Needs
+    Reviewed: 0
+    Note: Forge recipe detail section title
+  - Key: abilities.forge.gold
+    Values:
+    - Gold
+    Reviewed: 0
+    Note: 'Forge recipe needs line: gold'
+  - Key: abilities.forge.base-missing
+    Values:
+    - <color={colour}>{name} 0/1</color>
+    Reviewed: 0
+    Note: 'Forge recipe needs: base item missing; colour = rich-text colour, name
+      = item'
+  - Key: abilities.forge.base-worn
+    Values:
+    - <color={colour}>{name} 1/1</color> (worn - the new piece goes on in its place)
+    Reviewed: 0
+    Note: 'Forge recipe needs: base item worn by a hero'
+  - Key: abilities.forge.base-held
+    Values:
+    - <color={colour}>{name} 1/1</color>
+    Reviewed: 0
+    Note: 'Forge recipe needs: base item in the bags'
+  - Key: abilities.forge.have-need
+    Values:
+    - <color={colour}>{name} {have}/{need}</color>
+    Reviewed: 0
+    Note: 'Forge recipe needs: a material or gold'
+  - Key: abilities.forge.reason-no-base
+    Values:
+    - Needs a {item} to work into it.
+    Reviewed: 0
+    Note: 'Forge: why craft is dimmed'
+  - Key: abilities.forge.reason-materials
+    Values:
+    - Not enough materials.
+    Reviewed: 0
+    Note: 'Forge: why craft is dimmed'
+  - Key: abilities.forge.reason-gold
+    Values:
+    - "Need {need} gold \u2014 you have {have}."
+    Reviewed: 0
+    Note: 'Forge: why craft is dimmed'
+  - Key: abilities.forge.ability-sub
+    Values:
+    - Grows on its hero's sphere grid
+    Reviewed: 0
+    Note: Forge ability detail subtitle
+  - Key: abilities.forge.ability-note
+    Values:
+    - Before the target's defense. A hero adds the stat after the +.
+    Reviewed: 0
+    Note: Forge ability detail note under the effect lines
+  - Key: abilities.forge.reason-ceiling
+    Values:
+    - The Forge allows Lv {level}. Raise the Forge to go further.
+    Reviewed: 0
+    Note: 'Forge: why combo upgrade is dimmed'
+  - Key: abilities.forge.reason-essence
+    Values:
+    - "Need {need} essence \u2014 you have {have}."
+    Reviewed: 0
+    Note: 'Forge: why combo upgrade is dimmed'
+  - Key: abilities.forge.upgraded
+    Values:
+    - '{name} is now Lv {level}.'
+    Reviewed: 0
+    Note: Forge feedback after a combo upgrade
+  - Key: abilities.forge.forged
+    Values:
+    - Forged a {item}. It is in the Storehouse.
+    Reviewed: 0
+    Note: Forge feedback after crafting
+  - Key: abilities.forge.undiscovered-recipes
+    Values:
+    - Found on monsters and on cleared floors
+    Reviewed: 0
+    Note: Forge undiscovered row caption, Craft tab
+  - Key: abilities.forge.undiscovered-abilities
+    Values:
+    - Learned on a hero's sphere grid
+    Reviewed: 0
+    Note: Forge undiscovered row caption, Abilities tab
+  - Key: abilities.forge.undiscovered-combos
+    Values:
+    - Found by triggering them in combat
+    Reviewed: 0
+    Note: Forge undiscovered row caption, Combos tab
+  - Key: abilities.forge.empty-recipes
+    Values:
+    - No recipes known yet. Monsters and cleared floors give them up.
+    Reviewed: 0
+    Note: Forge empty list, Craft tab
+  - Key: abilities.forge.empty-abilities
+    Values:
+    - No abilities learned yet. Learn one on a hero's sphere grid.
+    Reviewed: 0
+    Note: Forge empty list, Abilities tab
+  - Key: abilities.forge.empty-combos
+    Values:
+    - No combos found yet. Chain the right abilities in combat.
+    Reviewed: 0
+    Note: Forge empty list, Combos tab
+  - Key: abilities.forge.caption-ready
+    Values:
+    - Ready to forge
+    Reviewed: 0
+    Note: Forge recipe row caption
+  - Key: abilities.forge.caption-no-base
+    Values:
+    - Needs a {item}
+    Reviewed: 0
+    Note: Forge recipe row caption; item = base item
+  - Key: abilities.forge.caption-gold
+    Values:
+    - Short of gold
+    Reviewed: 0
+    Note: Forge recipe row caption
+  - Key: abilities.forge.caption-materials
+    Values:
+    - Short of materials
+    Reviewed: 0
+    Note: Forge recipe row caption
+  - Key: abilities.forge.level-max
+    Values:
+    - "Lv {level} \xB7 fully upgraded"
+    Reviewed: 0
+    Note: Forge combo level caption at max
+  - Key: abilities.forge.level-of
+    Values:
+    - Lv {level} of {ceiling}
+    Reviewed: 0
+    Note: Forge combo level caption
+  - Key: abilities.forge.price-max
+    Values:
+    - MAX
+    Reviewed: 0
+    Note: Forge combo row price at max level
+  - Key: abilities.forge.price-forge-limit
+    Values:
+    - Forge
+    Reviewed: 0
+    Note: Forge combo row price when the Forge's level holds it back
+  - Key: abilities.forge.price-essence
+    Values:
+    - '{cost} ess'
+    Reviewed: 0
+    Note: Forge combo row price in essence
+  - Key: abilities.forge.wallet-gold
+    Values:
+    - '{gold} gold'
+    Reviewed: 0
+    Note: Forge wallet line, Craft tab
+  - Key: abilities.forge.wallet-essence-ceiling
+    Values:
+    - "{essence} essence   \xB7   Forge allows Lv {level}"
+    Reviewed: 0
+    Note: Forge wallet line with the Forge's level ceiling
+  - Key: abilities.forge.wallet-essence
+    Values:
+    - '{essence} essence'
+    Reviewed: 0
+    Note: Forge wallet line
+  - Key: items.material-cost.part
+    Values:
+    - '{name} {have}/{need}'
+    Reviewed: 0
+    Note: material price line (Sphere Grid node, Merchant belt upgrades); name =
+      material, have = owned (capped at need), need = required
+  - Key: hub.campfire.mode.mentor
+    Values:
+    - Mentor
+    Reviewed: 0
+    Note: campfire XP split mode name
+  - Key: hub.campfire.mode.catch-up
+    Values:
+    - Catch Up
+    Reviewed: 0
+    Note: campfire XP split mode name
+  - Key: hub.campfire.mode.even
+    Values:
+    - Even
+    Reviewed: 0
+    Note: campfire XP split mode name
+  - Key: hub.campfire.mode.mentor.desc
+    Values:
+    - A hero you name takes a double share. The rest split what is left.
+    Reviewed: 0
+    Note: campfire mode description
+  - Key: hub.campfire.mode.catch-up.desc
+    Values:
+    - Whoever is furthest behind takes the double share, chosen fresh each time.
+    Reviewed: 0
+    Note: campfire mode description
+  - Key: hub.campfire.mode.even.desc
+    Values:
+    - Everyone who marches out takes an equal share.
+    Reviewed: 0
+    Note: campfire mode description
+  - Key: hub.campaign.status.cleared-rerun
+    Values:
+    - Cleared - can be run again
+    Reviewed: 0
+    Note: campaign map detail panel status
+  - Key: hub.campaign.status.cleared
+    Values:
+    - Cleared
+    Reviewed: 0
+    Note: campaign map detail panel status
+  - Key: hub.campaign.status.open
+    Values:
+    - Open
+    Reviewed: 0
+    Note: campaign map detail panel status
+  - Key: hub.campaign.status.in-progress
+    Values:
+    - In progress
+    Reviewed: 0
+    Note: campaign map detail panel status
+  - Key: hub.campaign.status.locked
+    Values:
+    - Locked
+    Reviewed: 0
+    Note: campaign map detail panel status
+  - Key: menu.title.new-game
+    Values:
+    - New Game
+    Reviewed: 0
+    Note: title screen first button when there is no save (otherwise ui.common.continue)
+  - Key: menu.options.mute-on
+    Values:
+    - On
+    Reviewed: 0
+    Note: Options screen mute toggle while muted
+  - Key: menu.options.mute-off
+    Values:
+    - Off
+    Reviewed: 0
+    Note: Options screen mute toggle while not muted
+  - Key: menu.options.note-muted
+    Values:
+    - Everything is silenced. The dials keep their settings.
+    Reviewed: 0
+    Note: Options screen note under the dials while muted
+  - Key: menu.options.note
+    Values:
+    - Master scales everything; the other two scale their own kind on top of it.
+    Reviewed: 0
+    Note: Options screen note under the dials
+  - Key: items.slot.main-hand
+    Values:
+    - Main Hand
+    Reviewed: 0
+    Note: equipment slot name
+  - Key: items.slot.off-hand
+    Values:
+    - Off Hand
+    Reviewed: 0
+    Note: equipment slot name
+  - Key: items.slot.head
+    Values:
+    - Head
+    Reviewed: 0
+    Note: equipment slot name
+  - Key: items.slot.chest
+    Values:
+    - Chest
+    Reviewed: 0
+    Note: equipment slot name
+  - Key: items.slot.legs
+    Values:
+    - Legs
+    Reviewed: 0
+    Note: equipment slot name
+  - Key: items.slot.hands
+    Values:
+    - Hands
+    Reviewed: 0
+    Note: equipment slot name
+  - Key: items.slot.neck
+    Values:
+    - Neck
+    Reviewed: 0
+    Note: equipment slot name (Necklace slot)
+  - Key: items.rarity.common
+    Values:
+    - Common
+    Reviewed: 0
+    Note: item rarity name
+  - Key: items.rarity.uncommon
+    Values:
+    - Uncommon
+    Reviewed: 0
+    Note: item rarity name
+  - Key: items.rarity.rare
+    Values:
+    - Rare
+    Reviewed: 0
+    Note: item rarity name
+  - Key: items.rarity.epic
+    Values:
+    - Epic
+    Reviewed: 0
+    Note: item rarity name
+  - Key: items.rarity.legendary
+    Values:
+    - Legendary
+    Reviewed: 0
+    Note: item rarity name
+  - Key: items.bonus.line
+    Values:
+    - '{value} {stat}'
+    Reviewed: 0
+    Note: item bonus line, e.g. +3 Strength; value = signed amount with % if percentage,
+      stat = full stat name
+  - Key: items.bonus.chip
+    Values:
+    - '{value} {stat}'
+    Reviewed: 0
+    Note: item bonus chip, e.g. +3 STR; value = signed amount with %, stat = short
+      stat name
+  - Key: items.milestone.line
+    Values:
+    - '{count} {counter}: {grants}'
+    Reviewed: 0
+    Note: 'item growth milestone, e.g. 50 kills: +3 STR; count = threshold, counter
+      = items.counter.* noun, grants = comma-joined bonus chips'
+  - Key: items.milestone.reached
+    Values:
+    - "\u2713 {line}"
+    Reviewed: 0
+    Note: milestone already reached; line = items.milestone.line
+  - Key: items.milestone.progress
+    Values:
+    - '{line} ({have}/{need})'
+    Reviewed: 0
+    Note: milestone in progress; line = items.milestone.line, have = progress, need
+      = threshold
+  - Key: items.set.tier-line
+    Values:
+    - '{pieces} pieces: {text}'
+    Reviewed: 0
+    Note: item set tier line; pieces = pieces worn, text = tier's authored text
+  - Key: items.counter.kill
+    Values:
+    - kill
+    Reviewed: 0
+    Note: milestone counter noun, count 1
+  - Key: items.counter.kills
+    Values:
+    - kills
+    Reviewed: 0
+    Note: milestone counter noun, plural
+  - Key: items.counter.boss-slain
+    Values:
+    - boss slain
+    Reviewed: 0
+    Note: milestone counter noun, count 1
+  - Key: items.counter.bosses-slain
+    Values:
+    - bosses slain
+    Reviewed: 0
+    Note: milestone counter noun, plural
+  - Key: items.counter.victory
+    Values:
+    - victory
+    Reviewed: 0
+    Note: milestone counter noun, count 1
+  - Key: items.counter.victories
+    Values:
+    - victories
+    Reviewed: 0
+    Note: milestone counter noun, plural
+  - Key: items.counter.ability-used
+    Values:
+    - ability used
+    Reviewed: 0
+    Note: milestone counter noun, count 1
+  - Key: items.counter.abilities-used
+    Values:
+    - abilities used
+    Reviewed: 0
+    Note: milestone counter noun, plural
+  - Key: items.resistance.line
+    Values:
+    - '{type} {value}%'
+    Reviewed: 0
+    Note: item resistance line, e.g. Fire +25%; type = damage type name, value =
+      signed number
+  - Key: items.consumable.cure-status
+    Values:
+    - Cures burning, poison, bleeding, freezing, slow and silence.
+    Reviewed: 0
+    Note: CureStatus consumable effect
+  - Key: items.consumable.one-charge
+    Values:
+    - 1 ability charge
+    Reviewed: 0
+    Note: charge count used inside restore-charge / also-restores
+  - Key: items.consumable.charges
+    Values:
+    - '{charges} ability charges'
+    Reviewed: 0
+    Note: charge count (2+) used inside restore-charge / also-restores
+  - Key: items.consumable.restore-charge
+    Values:
+    - Restores {charges} to the drinker's most-used ability.
+    Reviewed: 0
+    Note: RestoreCharge effect; charges = items.consumable.one-charge/charges
+  - Key: items.consumable.also-restores
+    Values:
+    - Also restores {charges}.
+    Reviewed: 0
+    Note: appended after a heal line (code adds the space before it); charges = items.consumable.one-charge/charges
+  - Key: items.consumable.heal-amount
+    Values:
+    - Restores {amount} health.
+    Reviewed: 0
+    Note: heal effect; amount = HP
+  - Key: items.consumable.heal-flat-plus-percent
+    Values:
+    - Restores {amount} health plus {percent}% of the drinker's maximum.
+    Reviewed: 0
+    Note: heal effect; amount = flat HP, percent = % of max HP
+  - Key: items.consumable.heal-percent
+    Values:
+    - Restores {percent}% of the drinker's maximum health.
+    Reviewed: 0
+    Note: heal effect; percent = % of max HP
+  - Key: items.damage-type.physical
+    Values:
+    - Physical
+    Reviewed: 0
+    Note: name of the Normal damage type in item resistance lines
+  - Key: hub.lot.level-upgrade
+    Values:
+    - "Level {level} \xB7 upgrade {cost}g"
+    Reviewed: 0
+    Note: line under a built lot's name; level = current level, cost = upgrade gold
+  - Key: hub.lot.level-max
+    Values:
+    - Level {level} (max)
+    Reviewed: 0
+    Note: line under a fully upgraded lot; level = current level
+  - Key: hub.lot.ready-to-build
+    Values:
+    - Ready to build
+    Reviewed: 0
+    Note: line under an available lot with no material price
+  - Key: hub.lot.needs
+    Values:
+    - Needs {price}
+    Reviewed: 0
+    Note: "line under an available lot; price = hub.lot.cost-part entries joined
+      by ' \xB7 '"
+  - Key: hub.lot.not-yet
+    Values:
+    - Not yet
+    Reviewed: 0
+    Note: line under an absent lot with no run requirement
+  - Key: hub.lot.locked
+    Values:
+    - Locked
+    Reviewed: 0
+    Note: line under an absent lot waiting for a run
+  - Key: hub.lot.cost-part
+    Values:
+    - '{amount} {material}'
+    Reviewed: 0
+    Note: one material in a lot's placement price; amount = count, material = material
+      name
+  - Key: hub.lot.next-grant
+    Values:
+    - 'Level {level}: {grant}'
+    Reviewed: 0
+    Note: what upgrading a lot grants; level = next level, grant = building's authored
+      level text
+  - Key: hub.lot.action.build
+    Values:
+    - Build
+    Reviewed: 0
+    Note: lot panel action button
+  - Key: hub.lot.action.upgrade
+    Values:
+    - Upgrade to Lv {level}
+    Reviewed: 0
+    Note: lot panel action button; level = next level
+  - Key: hub.list.and
+    Values:
+    - and
+    Reviewed: 0
+    Note: word joining a list of two or more missing things on the lot panel (spaces
+      are added around it)
+  - Key: hub.lot.grant.once-built
+    Values:
+    - Once built
+    Reviewed: 0
+    Note: lot panel title above what building grants
+  - Key: hub.lot.grant.level
+    Values:
+    - Level {level}
+    Reviewed: 0
+    Note: lot panel title above what the next upgrade grants; level = next level
+  - Key: hub.lot.enter
+    Values:
+    - Enter
+    Reviewed: 0
+    Note: lot panel button to open a built building
+  - Key: hub.lot.status-sentence
+    Values:
+    - '{status}.'
+    Reviewed: 0
+    Note: lot panel reason line for a locked lot; status = hub.lot.clear-first /
+      hub.lot.not-yet
+  - Key: hub.lot.state.level-of
+    Values:
+    - Level {level} of {max}
+    Reviewed: 0
+    Note: lot panel header state line; level = current, max = max level
+  - Key: hub.lot.state.built
+    Values:
+    - Built
+    Reviewed: 0
+    Note: lot panel header state line for a single-level building
+  - Key: hub.lot.state.not-built
+    Values:
+    - Not built yet
+    Reviewed: 0
+    Note: lot panel header state line for an available lot
+  - Key: hub.lot.missing-material
+    Values:
+    - '{amount} more {material}'
+    Reviewed: 0
+    Note: one part of the lot shortfall; amount = missing count, material = material
+      name
+  - Key: hub.lot.cost.gold
+    Values:
+    - Gold
+    Reviewed: 0
+    Note: lot panel cost row name for an upgrade's gold
+  - Key: hub.lot.missing-gold
+    Values:
+    - '{amount} more gold'
+    Reviewed: 0
+    Note: one part of the lot shortfall; amount = missing gold
+  - Key: hub.lot.shortfall
+    Values:
+    - Need {missing}.
+    Reviewed: 0
+    Note: lot panel reason when the player cannot pay; missing = parts joined with
+      hub.list.and
+  - Key: hub.lot.cost.count
+    Values:
+    - '{have} / {need}'
+    Reviewed: 0
+    Note: lot panel cost row count
+  - Key: hub.lot.clear-first
+    Values:
+    - Clear {runs} first
+    Reviewed: 0
+    Note: why a lot is locked; runs = run names joined with hub.list.and
+  - Key: hub.lot.feedback.no-materials
+    Values:
+    - "Not enough materials \u2014 needs {price}."
+    Reviewed: 0
+    Note: "lot feedback; price = hub.lot.cost-part entries joined by ' \xB7 '"
+  - Key: hub.lot.feedback.no-gold
+    Values:
+    - "Not enough gold \u2014 needs {cost}."
+    Reviewed: 0
+    Note: lot feedback; cost = upgrade gold
+  - Key: hub.lot.feedback.materials-missing
+    Values:
+    - The materials went missing between checking and paying.
+    Reviewed: 0
+    Note: lot feedback (rare failure)
+  - Key: hub.lot.feedback.gold-missing
+    Values:
+    - The gold went missing between checking and paying.
+    Reviewed: 0
+    Note: lot feedback (rare failure)
+  - Key: hub.lot.feedback.built
+    Values:
+    - '{building} built.'
+    Reviewed: 0
+    Note: lot feedback after placing; building = building name
+  - Key: hub.lot.feedback.raised
+    Values:
+    - '{building} raised to level {level}.'
+    Reviewed: 0
+    Note: lot feedback after upgrading; building = building name, level = new level
+  - Key: hub.progress.level-count
+    Values:
+    - Level {level} of {count}
+    Reviewed: 0
+    Note: run progress screen; level = floor number, count = floors in run
+  - Key: hub.progress.level-count-revisit
+    Values:
+    - "{count-line} \xB7 Revisit"
+    Reviewed: 0
+    Note: run progress screen on a revisit; count-line = hub.progress.level-count
+  - Key: hub.progress.party-locked
+    Values:
+    - Party locked until the run ends.
+    Reviewed: 0
+    Note: run progress screen when the party is locked
+  - Key: hub.progress.hero-hp
+    Values:
+    - HP {hp}
+    Reviewed: 0
+    Note: run progress party tile; hp = max health
+  - Key: hub.progress.no-party
+    Values:
+    - No party selected.
+    Reviewed: 0
+    Note: run progress screen with no heroes
+  - Key: hub.progress.nothing-left
+    Values:
+    - Nothing left to run.
+    Reviewed: 0
+    Note: feedback when the run is non-repeatable and already cleared
+  - Key: hub.complete.fallback-run
+    Values:
+    - The dungeon
+    Reviewed: 0
+    Note: run complete screen title when the run is unknown
+  - Key: hub.complete.revisit-message
+    Values:
+    - Revisit cleared at Fear level {fear}. Every reward on the way paid +{bonus}%.
+    Reviewed: 0
+    Note: run complete message; fear = Fear level, bonus = reward bonus percent
+  - Key: hub.complete.best-fear
+    Values:
+    - Highest Fear level cleared
+    Reviewed: 0
+    Note: run complete row label
+  - Key: hub.complete.next-time
+    Values:
+    - Next time
+    Reviewed: 0
+    Note: run complete row label
+  - Key: hub.complete.next-time-value
+    Values:
+    - Raise the Fear level for bigger rewards
+    Reviewed: 0
+    Note: run complete row value after a revisit
+  - Key: hub.complete.message-new-roads
+    Values:
+    - Every floor cleared. The story map has new roads.
+    Reviewed: 0
+    Note: run complete message when new runs opened
+  - Key: hub.complete.message-victorious
+    Values:
+    - Every floor cleared. Your heroes stand victorious.
+    Reviewed: 0
+    Note: run complete message
+  - Key: hub.complete.now-open
+    Values:
+    - Now open
+    Reviewed: 0
+    Note: run complete row label; value is the opened run's name
+  - Key: hub.complete.revisit
+    Values:
+    - Revisit
+    Reviewed: 0
+    Note: run complete row label
+  - Key: hub.complete.revisit-value
+    Values:
+    - Run it again from the story map, harder, for bigger rewards
+    Reviewed: 0
+    Note: run complete row value on a first clear of a revisitable run
+  - Key: hub.complete.enemies-felled
+    Values:
+    - Enemies felled
+    Reviewed: 0
+    Note: run complete row label
+  - Key: hub.complete.kills-with-boss
+    Values:
+    - '{kills} ({bosses} boss)'
+    Reviewed: 0
+    Note: run complete kills value with exactly one boss; kills = total kills, bosses
+      = 1
+  - Key: hub.complete.kills-with-bosses
+    Values:
+    - '{kills} ({bosses} bosses)'
+    Reviewed: 0
+    Note: run complete kills value; kills = total kills, bosses = boss kills
+  - Key: hub.complete.gold-earned
+    Values:
+    - Gold earned
+    Reviewed: 0
+    Note: run complete row label
+  - Key: hub.complete.essence-earned
+    Values:
+    - Essence earned
+    Reviewed: 0
+    Note: run complete row label
+  - Key: hub.complete.xp-earned
+    Values:
+    - XP earned
+    Reviewed: 0
+    Note: run complete row label
+  - Key: hub.complete.retreats
+    Values:
+    - Retreats
+    Reviewed: 0
+    Note: run complete row label
+  - Key: hub.party.locked-reason
+    Values:
+    - The party is set until {run} is cleared.
+    Reviewed: 0
+    Note: why the lineup cannot change; run = run name
+  - Key: hub.campaign.nowhere-yet
+    Values:
+    - Nowhere yet
+    Reviewed: 0
+    Note: story map detail title with nothing selected
+  - Key: hub.campaign.no-campaign
+    Values:
+    - No campaign is authored. Create a Campaign asset in Resources.
+    Reviewed: 0
+    Note: story map detail when no campaign exists (dev-facing)
+  - Key: hub.campaign.pick-a-place
+    Values:
+    - Pick a place on the map.
+    Reviewed: 0
+    Note: story map detail with nothing selected
+  - Key: hub.campaign.in-progress-level
+    Values:
+    - "In progress \xB7 Level {level} of {count}"
+    Reviewed: 0
+    Note: story map detail status for the run underway; level = floor number, count
+      = floors
+  - Key: hub.campaign.status-floor
+    Values:
+    - "{status} \xB7 {count} floor"
+    Reviewed: 0
+    Note: story map detail status, one floor; status = hub.campaign.status.*, count
+      = 1
+  - Key: hub.campaign.status-floors
+    Values:
+    - "{status} \xB7 {count} floors"
+    Reviewed: 0
+    Note: story map detail status; status = hub.campaign.status.*, count = floors
+  - Key: hub.campaign.revisit-choose
+    Values:
+    - "Revisit \xB7 choose the conditions"
+    Reviewed: 0
+    Note: story map detail status while picking revisit conditions
+  - Key: hub.campaign.revisit-blurb
+    Values:
+    - 'Each condition raises the Fear level by its +number: a harder run, bigger
+      rewards. Stronger heroes come from the Hall of Progression.'
+    Reviewed: 0
+    Note: story map detail blurb while picking revisit conditions
+  - Key: hub.campaign.begin-revisit
+    Values:
+    - Begin revisit
+    Reviewed: 0
+    Note: story map start button while picking conditions
+  - Key: hub.campaign.requires
+    Values:
+    - 'Requires: {runs}'
+    Reviewed: 0
+    Note: locked run requirement line; runs = comma-joined run names
+  - Key: hub.campaign.needs-heroes
+    Values:
+    - 'Needs in your roster: {heroes}'
+    Reviewed: 0
+    Note: locked run requirement line; heroes = comma-joined hero names
+  - Key: hub.campaign.not-revisitable
+    Values:
+    - This place cannot be revisited.
+    Reviewed: 0
+    Note: story map detail for a cleared, non-revisitable run
+  - Key: hub.campaign.revisited-best
+    Values:
+    - "Revisited \xB7 highest Fear level cleared: {fear}"
+    Reviewed: 0
+    Note: story map detail; fear = best Fear level
+  - Key: hub.campaign.revisit-button
+    Values:
+    - "Revisit\u2026"
+    Reviewed: 0
+    Note: story map start button for a cleared run
+  - Key: hub.campaign.begin
+    Values:
+    - Begin
+    Reviewed: 0
+    Note: story map start button
+  - Key: hub.campaign.floors
+    Values:
+    - Floors
+    Reviewed: 0
+    Note: story map detail column title
+  - Key: hub.campaign.floor-fallback
+    Values:
+    - Floor {floor}
+    Reviewed: 0
+    Note: floor name when the level has none; floor = floor number
+  - Key: hub.campaign.opened
+    Values:
+    - Opened
+    Reviewed: 0
+    Note: story map detail column title (cleared run)
+  - Key: hub.campaign.clearing-opens
+    Values:
+    - Clearing it opens
+    Reviewed: 0
+    Note: story map detail column title
+  - Key: hub.campaign.still-closed
+    Values:
+    - That way is still closed.
+    Reviewed: 0
+    Note: story map feedback on a locked run
+  - Key: hub.campaign.finish-current
+    Values:
+    - Finish the run you are on first.
+    Reviewed: 0
+    Note: story map feedback while another run is underway
+  - Key: hub.campaign.no-revisit-rules
+    Values:
+    - No revisit rules are authored (Resources/Revisits).
+    Reviewed: 0
+    Note: fear picker when no rules exist (dev-facing)
+  - Key: hub.campaign.revisit-base
+    Values:
+    - 'Every revisit: enemies +{percent}% to every stat - health, damage, speed,
+      defences.'
+    Reviewed: 0
+    Note: fear picker summary; percent = base enemy stat bonus
+  - Key: hub.campaign.conditions
+    Values:
+    - Conditions
+    Reviewed: 0
+    Note: fear picker column title
+  - Key: hub.campaign.fear-summary
+    Values:
+    - "Fear level {fear} \xB7 rewards +{percent}% XP, gold and Essence"
+    Reviewed: 0
+    Note: fear picker summary; fear = Fear level, percent = reward bonus
+  - Key: hub.campaign.highest-cleared
+    Values:
+    - 'Highest cleared: Fear level {fear}'
+    Reviewed: 0
+    Note: fear picker; fear = best Fear level cleared
+  - Key: hub.camp.fielded-summary
+    Values:
+    - 'Party ({count}): {names}'
+    Reviewed: 0
+    Note: who marches out; count = heroes, names = comma-joined hero names
+  - Key: hub.camp.gold
+    Values:
+    - '{gold} gold'
+    Reviewed: 0
+    Note: campfire screen gold label
+  - Key: hub.camp.marching
+    Values:
+    - 'Marching out: {count} of {cap}'
+    Reviewed: 0
+    Note: campfire cap label; count = fielded heroes, cap = seats
+  - Key: hub.camp.marching-roster
+    Values:
+    - "Marching out: {count} of {cap}   \xB7   {owned} in the roster"
+    Reviewed: 0
+    Note: campfire cap label when some heroes stay behind; owned = heroes owned
+  - Key: hub.camp.share-even
+    Values:
+    - Each hero earns {percent}% of the XP
+    Reviewed: 0
+    Note: campfire XP share line in Even mode; percent = share
+  - Key: hub.camp.share-mode-one
+    Values:
+    - '{count} hero shares the XP ({mode})'
+    Reviewed: 0
+    Note: campfire XP share line, one hero; count = 1, mode = campfire mode name
+  - Key: hub.camp.share-mode
+    Values:
+    - '{count} heroes share the XP ({mode})'
+    Reviewed: 0
+    Note: campfire XP share line; count = heroes, mode = campfire mode name
+  - Key: hub.camp.empty-seat
+    Values:
+    - Empty seat
+    Reviewed: 0
+    Note: campfire seat with no hero
+  - Key: hub.camp.leads
+    Values:
+    - Leads
+    Reviewed: 0
+    Note: tag on the lead hero's seat / roster row
+  - Key: hub.camp.resting
+    Values:
+    - Resting
+    Reviewed: 0
+    Note: roster row tag for a hero not marching out
+  - Key: hub.camp.role.hp
+    Values:
+    - HP {hp}
+    Reviewed: 0
+    Note: roster row caption part; hp = max health
+  - Key: hub.camp.role.stat
+    Values:
+    - '{stat} {value}'
+    Reviewed: 0
+    Note: roster row caption part; stat = short stat name, value = stat
+  - Key: hub.camp.nobody-here
+    Values:
+    - Nobody here
+    Reviewed: 0
+    Note: campfire detail title with no hero
+  - Key: hub.camp.leads-the-party
+    Values:
+    - Leads the party
+    Reviewed: 0
+    Note: campfire detail subtitle / lead button for the leader
+  - Key: hub.camp.marching-seat
+    Values:
+    - "Marching out \xB7 seat {seat}"
+    Reviewed: 0
+    Note: campfire detail subtitle; seat = seat number
+  - Key: hub.camp.staying-behind
+    Values:
+    - Staying behind
+    Reviewed: 0
+    Note: campfire detail subtitle
+  - Key: hub.camp.stay-behind
+    Values:
+    - Stay behind
+    Reviewed: 0
+    Note: campfire toggle button
+  - Key: hub.camp.march-out
+    Values:
+    - March out
+    Reviewed: 0
+    Note: campfire toggle button
+  - Key: hub.camp.somebody-has-to-go
+    Values:
+    - Somebody has to go.
+    Reviewed: 0
+    Note: campfire reason / feedback when benching the last hero
+  - Key: hub.camp.seats-taken
+    Values:
+    - All {cap} seats are taken. Bench someone first.
+    Reviewed: 0
+    Note: campfire reason; cap = seats
+  - Key: hub.camp.lead-the-party
+    Values:
+    - Lead the party
+    Reviewed: 0
+    Note: campfire lead button
+  - Key: hub.camp.section.stats
+    Values:
+    - Stats
+    Reviewed: 0
+    Note: campfire detail section title
+  - Key: hub.camp.xp-to-spend
+    Values:
+    - '{xp} XP to spend on the sphere grid'
+    Reviewed: 0
+    Note: campfire detail line; xp = banked XP
+  - Key: hub.camp.section.carried
+    Values:
+    - Carried abilities
+    Reviewed: 0
+    Note: campfire detail section title
+  - Key: hub.camp.nothing-carried
+    Values:
+    - Nothing carried.
+    Reviewed: 0
+    Note: campfire detail when no abilities are carried
+  - Key: hub.camp.charges-left
+    Values:
+    - '{charges} of {max} charges left'
+    Reviewed: 0
+    Note: carried ability mid-run; charges = left, max = max
+  - Key: hub.camp.charges
+    Values:
+    - '{max} charges'
+    Reviewed: 0
+    Note: carried ability at the hub; max = max charges
+  - Key: hub.camp.carried-line
+    Values:
+    - "{name}  \xB7  {charges}"
+    Reviewed: 0
+    Note: carried ability line; name = ability, charges = hub.camp.charges(-left)
+  - Key: hub.camp.leader-note
+    Values:
+    - The leader walks at the front and takes any XP an even split leaves over.
+    Reviewed: 0
+    Note: campfire detail note on the leader
+  - Key: hub.camp.belt-slot
+    Values:
+    - "{potion} \xD7{count}"
+    Reviewed: 0
+    Note: potion belt slot button; potion = potion name, count = per-run capacity
+  - Key: hub.camp.belt-empty
+    Values:
+    - Empty
+    Reviewed: 0
+    Note: potion belt empty slot button
+  - Key: hub.camp.belt-packed
+    Values:
+    - Packed for this run.
+    Reviewed: 0
+    Note: potion belt description during a run
+  - Key: hub.camp.belt-desc
+    Values:
+    - Refilled when a run begins. Press a slot to change it.
+    Reviewed: 0
+    Note: potion belt description
+  - Key: hub.camp.belt-packed-feedback
+    Values:
+    - The belt is packed for this run.
+    Reviewed: 0
+    Note: feedback when clicking a belt slot mid-run
+  - Key: hub.camp.choose-mentored
+    Values:
+    - Choose who is mentored
+    Reviewed: 0
+    Note: Mentor focus button with nobody named
+  - Key: hub.camp.mentoring
+    Values:
+    - Mentoring {hero} (change)
+    Reviewed: 0
+    Note: Mentor focus button; hero = hero name
+  - Key: hub.camp.mode-needs-level
+    Values:
+    - "{mode} \xB7 Campfire Lv {level}"
+    Reviewed: 0
+    Note: campfire mode button not yet offered; mode = mode name, level = campfire
+      level needed
+  - Key: hub.camp.mode-chosen
+    Values:
+    - "\u2713 {mode}"
+    Reviewed: 0
+    Note: campfire mode button when chosen; mode = mode name
+  - Key: hub.camp.feedback.stays-behind
+    Values:
+    - '{hero} stays behind.'
+    Reviewed: 0
+    Note: campfire feedback; hero = hero name
+  - Key: hub.camp.feedback.only-cap
+    Values:
+    - Only {cap} can march out. Bench someone first.
+    Reviewed: 0
+    Note: campfire feedback; cap = seats
+  - Key: hub.camp.feedback.marches-out
+    Values:
+    - '{hero} marches out.'
+    Reviewed: 0
+    Note: campfire feedback; hero = hero name
+  - Key: hub.camp.feedback.leads
+    Values:
+    - '{hero} leads the party.'
+    Reviewed: 0
+    Note: campfire feedback; hero = hero name
+  - Key: hub.camp.feedback.they-lead
+    Values:
+    - They leads the party.
+    Reviewed: 0
+    Note: campfire feedback when the hero is unknown (wording as before)
+  - Key: hub.camp.feedback.too-small
+    Values:
+    - The campfire is not big enough for that yet.
+    Reviewed: 0
+    Note: campfire feedback on a mode not offered
+  - Key: hub.camp.feedback.xp-shared
+    Values:
+    - 'XP is now shared: {mode}.'
+    Reviewed: 0
+    Note: campfire feedback; mode = mode name
+  - Key: hub.camp.feedback.nobody-to-mentor
+    Values:
+    - Nobody is marching out to mentor.
+    Reviewed: 0
+    Note: campfire feedback
+  - Key: hub.merchant.gold
+    Values:
+    - '{gold} gold'
+    Reviewed: 0
+    Note: merchant gold label
+  - Key: hub.merchant.compared-on
+    Values:
+    - Compared on {hero}
+    Reviewed: 0
+    Note: merchant hero strip summary; hero = hero name
+  - Key: hub.merchant.pick-hero
+    Values:
+    - Pick a hero to see the stats on them.
+    Reviewed: 0
+    Note: merchant hero strip summary
+  - Key: hub.merchant.restock
+    Values:
+    - "Restock wares \u2014 {cost} gold"
+    Reviewed: 0
+    Note: merchant restock button; cost = gold
+  - Key: hub.merchant.tab.wares
+    Values:
+    - Wares
+    Reviewed: 0
+    Note: merchant list title (buy tab)
+  - Key: hub.merchant.empty.sold-out
+    Values:
+    - Sold out. Restock for more.
+    Reviewed: 0
+    Note: merchant empty buy list
+  - Key: hub.merchant.tab.spare-gear
+    Values:
+    - Your spare gear
+    Reviewed: 0
+    Note: merchant list title (sell tab)
+  - Key: hub.merchant.empty.no-spare
+    Values:
+    - No spare gear to sell. Worn gear has to come off in the Storehouse first.
+    Reviewed: 0
+    Note: merchant empty sell list
+  - Key: hub.merchant.tab.belt
+    Values:
+    - Potion belt
+    Reviewed: 0
+    Note: merchant list title (belt tab)
+  - Key: hub.merchant.empty.no-belt
+    Values:
+    - The merchant has no belt work today.
+    Reviewed: 0
+    Note: merchant empty belt list
+  - Key: hub.merchant.price-max
+    Values:
+    - Max
+    Reviewed: 0
+    Note: merchant row price for a maxed belt upgrade
+  - Key: hub.merchant.price
+    Values:
+    - '{price}g'
+    Reviewed: 0
+    Note: merchant row price; price = gold
+  - Key: hub.merchant.belt.another-slot
+    Values:
+    - Another belt slot
+    Reviewed: 0
+    Note: belt offer row name
+  - Key: hub.merchant.belt.learn
+    Values:
+    - 'Learn: {potion}'
+    Reviewed: 0
+    Note: belt offer row name; potion = potion item name
+  - Key: hub.merchant.belt.carry-more
+    Values:
+    - '{potion}: carry more'
+    Reviewed: 0
+    Note: belt offer row name; potion = belt potion name
+  - Key: hub.merchant.belt.stronger
+    Values:
+    - '{potion}: stronger'
+    Reviewed: 0
+    Note: belt offer row name; potion = belt potion name
+  - Key: hub.merchant.buy
+    Values:
+    - "Buy \u2014 {price} gold"
+    Reviewed: 0
+    Note: merchant action button; price = gold
+  - Key: hub.merchant.need-gold
+    Values:
+    - "Need {price} gold \u2014 you have {gold}."
+    Reviewed: 0
+    Note: merchant reason; price = cost, gold = owned
+  - Key: hub.merchant.sell
+    Values:
+    - "Sell \u2014 {price} gold"
+    Reviewed: 0
+    Note: merchant action button; price = gold
+  - Key: hub.merchant.wears-now
+    Values:
+    - '{hero} wears {item} there now.'
+    Reviewed: 0
+    Note: merchant detail note; hero = hero name, item = worn item
+  - Key: hub.merchant.slot-empty
+    Values:
+    - '{hero} has nothing in that slot.'
+    Reviewed: 0
+    Note: merchant detail note; hero = hero name
+  - Key: hub.merchant.if-wore
+    Values:
+    - If {hero} wore it
+    Reviewed: 0
+    Note: merchant detail section title; hero = hero name
+  - Key: hub.merchant.belt.slots-change
+    Values:
+    - "{now} \u2192 {next} slots"
+    Reviewed: 0
+    Note: belt slot upgrade; now = current slots, next = after
+  - Key: hub.merchant.belt.slots-max
+    Values:
+    - '{now} slots, the most a belt holds'
+    Reviewed: 0
+    Note: belt slot upgrade maxed; now = slots
+  - Key: hub.merchant.belt.new-potion
+    Values:
+    - A new potion for the belt
+    Reviewed: 0
+    Note: belt recipe offer subtitle
+  - Key: hub.merchant.belt.capacity-change
+    Values:
+    - "{now} \u2192 {next} per run"
+    Reviewed: 0
+    Note: belt capacity upgrade; now/next = potions per run
+  - Key: hub.merchant.belt.capacity-max
+    Values:
+    - '{now} per run, the most it carries'
+    Reviewed: 0
+    Note: belt capacity maxed; now = potions per run
+  - Key: hub.merchant.belt.charges-change
+    Values:
+    - "{now} \u2192 {next} charges restored"
+    Reviewed: 0
+    Note: belt potency upgrade (charge potion); now/next = charges
+  - Key: hub.merchant.belt.charges-max
+    Values:
+    - '{now} charges restored, the strongest brew'
+    Reviewed: 0
+    Note: belt potency maxed (charge potion); now = charges
+  - Key: hub.merchant.belt.heal-change
+    Values:
+    - "{now}% \u2192 {next}% of max health"
+    Reviewed: 0
+    Note: belt potency upgrade (healing potion); now/next = percent
+  - Key: hub.merchant.belt.heal-max
+    Values:
+    - '{now}% of max health, the strongest brew'
+    Reviewed: 0
+    Note: belt potency maxed (healing potion); now = percent
+  - Key: hub.merchant.fully-upgraded
+    Values:
+    - Fully upgraded
+    Reviewed: 0
+    Note: merchant action button for a maxed belt ladder
+  - Key: hub.merchant.not-enough-materials
+    Values:
+    - Not enough materials.
+    Reviewed: 0
+    Note: merchant reason for a belt step
+  - Key: hub.merchant.belt.slot-desc
+    Values:
+    - Each slot carries one kind of potion, chosen at the campfire before a run.
+      The belt refills when a run begins, not between floors.
+    Reviewed: 0
+    Note: belt slot offer description
+  - Key: hub.merchant.belt.recipe-desc
+    Values:
+    - Once learned, put it in a belt slot at the campfire.
+    Reviewed: 0
+    Note: belt recipe offer description, after the potion's effect line (code adds
+      the space)
+  - Key: hub.merchant.belt.capacity-desc
+    Values:
+    - How many {potion}s a slot carries into a run.
+    Reviewed: 0
+    Note: belt capacity offer description; potion = potion item name
+  - Key: hub.merchant.belt.potency-desc
+    Values:
+    - Every {potion} restores more.
+    Reviewed: 0
+    Note: belt potency offer description; potion = potion item name
+  - Key: hub.merchant.materials
+    Values:
+    - 'Materials: {cost}'
+    Reviewed: 0
+    Note: belt step material price; cost = items.material-cost.part entries (rich
+      text)
+  - Key: hub.merchant.revisit-hint
+    Values:
+    - '{material} only turns up when you revisit {run} at Fear {fear} or higher.'
+    Reviewed: 0
+    Note: belt hint; material = material name, run = run name, fear = Fear level
+  - Key: hub.merchant.feedback.not-enough-gold
+    Values:
+    - Not enough gold.
+    Reviewed: 0
+    Note: merchant feedback
+  - Key: hub.merchant.feedback.bought
+    Values:
+    - Bought {item}.
+    Reviewed: 0
+    Note: merchant feedback; item = item name
+  - Key: hub.merchant.feedback.no-restock-gold
+    Values:
+    - Not enough gold to restock.
+    Reviewed: 0
+    Note: merchant feedback
+  - Key: hub.merchant.feedback.restocked
+    Values:
+    - The merchant lays out fresh wares.
+    Reviewed: 0
+    Note: merchant feedback
+  - Key: hub.merchant.feedback.nothing-to-sell
+    Values:
+    - Nothing to sell.
+    Reviewed: 0
+    Note: merchant feedback
+  - Key: hub.merchant.feedback.sold
+    Values:
+    - Sold {item} for {price}g.
+    Reviewed: 0
+    Note: merchant feedback; item = item name, price = gold
+  - Key: hub.merchant.feedback.fully-upgraded
+    Values:
+    - Fully upgraded.
+    Reviewed: 0
+    Note: merchant feedback
+  - Key: hub.merchant.feedback.cannot-pay
+    Values:
+    - You cannot pay for that yet.
+    Reviewed: 0
+    Note: merchant feedback
+  - Key: hub.merchant.feedback.belt-slots
+    Values:
+    - The belt has {slots} slots now. Fill them at the campfire.
+    Reviewed: 0
+    Note: merchant feedback; slots = belt slots
+  - Key: hub.merchant.feedback.learned
+    Values:
+    - Learned the {potion}. Put it in a belt slot at the campfire.
+    Reviewed: 0
+    Note: merchant feedback; potion = potion item name
+  - Key: hub.merchant.feedback.capacity
+    Values:
+    - A {potion} slot carries {cap} now.
+    Reviewed: 0
+    Note: merchant feedback; potion = belt potion name, cap = per run
+  - Key: hub.merchant.feedback.stronger
+    Values:
+    - '{potion}s are stronger now.'
+    Reviewed: 0
+    Note: merchant feedback; potion = potion item name
+  - Key: items.inv.hero-summary
+    Values:
+    - "HP {hp} \xB7 {xp} XP to spend"
+    Reviewed: 0
+    Note: inventory hero strip summary; hp = max health, xp = banked XP
+  - Key: items.inv.gold
+    Values:
+    - '{gold} gold'
+    Reviewed: 0
+    Note: inventory hero strip summary on shared tabs
+  - Key: items.inv.hint.slots
+    Values:
+    - "\u2191\u2193 slot \xB7 Enter choose an item \xB7 Q/E hero \xB7 \u2190\u2192
+      tab \xB7 Esc back"
+    Reviewed: 0
+    Note: inventory key hint, equipment tab on the slots
+  - Key: items.inv.hint.items
+    Values:
+    - "\u2191\u2193 item \xB7 Enter equip \xB7 Esc back to the slots"
+    Reviewed: 0
+    Note: inventory key hint, equipment tab on the item list
+  - Key: items.inv.hint.abilities
+    Values:
+    - "\u2191\u2193 ability \xB7 Enter carry or put away \xB7 Q/E hero \xB7 \u2190\u2192
+      tab \xB7 Esc back"
+    Reviewed: 0
+    Note: inventory key hint, abilities tab
+  - Key: items.inv.hint.browse
+    Values:
+    - "\u2191\u2193 browse \xB7 \u2190\u2192 tab \xB7 Esc back"
+    Reviewed: 0
+    Note: inventory key hint, consumables/materials tabs
+  - Key: items.inv.title.equipped
+    Values:
+    - Equipped
+    Reviewed: 0
+    Note: inventory left column title, equipment tab
+  - Key: items.inv.empty.no-hero-to-equip
+    Values:
+    - No hero to equip yet.
+    Reviewed: 0
+    Note: inventory empty list
+  - Key: items.inv.empty-slot
+    Values:
+    - Empty
+    Reviewed: 0
+    Note: an equipment slot with nothing worn
+  - Key: items.inv.title.fits
+    Values:
+    - Fits {slot}
+    Reviewed: 0
+    Note: inventory list title; slot = slot name
+  - Key: items.inv.take-off-note
+    Values:
+    - Taking it off leaves the {slot} slot empty.
+    Reviewed: 0
+    Note: inventory detail note; slot = slot name, lowercased
+  - Key: items.inv.take-off
+    Values:
+    - Take off {item}
+    Reviewed: 0
+    Note: inventory row to unequip; item = worn item name
+  - Key: items.inv.leave-empty
+    Values:
+    - Leave the slot empty
+    Reviewed: 0
+    Note: inventory row caption for unequip
+  - Key: items.inv.someone
+    Values:
+    - someone
+    Reviewed: 0
+    Note: stand-in wearer name when the hero is unknown (used inside worn-by texts)
+  - Key: items.inv.empty.nothing-fits
+    Values:
+    - Nothing the party owns fits the {slot} slot.
+    Reviewed: 0
+    Note: inventory empty list; slot = slot name, lowercased
+  - Key: items.inv.worn-by-note
+    Values:
+    - Worn by {hero} - equipping it takes it from them.
+    Reviewed: 0
+    Note: inventory detail note; hero = wearer
+  - Key: items.inv.worn-by
+    Values:
+    - Worn by {hero}
+    Reviewed: 0
+    Note: inventory row caption; hero = wearer
+  - Key: items.inv.copies-caption
+    Values:
+    - "\xD7{copies} \xB7 {caption}"
+    Reviewed: 0
+    Note: inventory row caption with copies; copies = count, caption = rest of caption
+  - Key: items.inv.vs-caption
+    Values:
+    - "{caption} \xB7 vs {item}"
+    Reviewed: 0
+    Note: inventory row caption comparing with worn item; caption = rest, item =
+      worn item name
+  - Key: items.inv.this-hero
+    Values:
+    - this hero
+    Reviewed: 0
+    Note: stand-in hero name in the reassign confirmation
+  - Key: items.inv.confirm-reassign
+    Values:
+    - '{item} is already equipped by {from}. Do you want to reassign it to {to}?'
+    Reviewed: 0
+    Note: reassign confirmation; item = item, from = wearer, to = selected hero
+  - Key: items.inv.title.carried
+    Values:
+    - Carried
+    Reviewed: 0
+    Note: inventory left column title, abilities tab
+  - Key: items.inv.title.known-abilities
+    Values:
+    - Known abilities
+    Reviewed: 0
+    Note: inventory list title, abilities tab
+  - Key: items.inv.empty.no-hero
+    Values:
+    - No hero selected.
+    Reviewed: 0
+    Note: inventory empty list, abilities tab
+  - Key: items.inv.slots
+    Values:
+    - Slots
+    Reviewed: 0
+    Note: label before the ability slot pips
+  - Key: items.abilities.charges-left
+    Values:
+    - '{charges} of {max} charges left this run'
+    Reviewed: 0
+    Note: carried ability row mid-run; charges = left, max = max
+  - Key: items.abilities.charges-next-floor
+    Values:
+    - "{max} charges \xB7 joins on the next floor"
+    Reviewed: 0
+    Note: carried ability row added mid-run; max = charges
+  - Key: items.abilities.charges-a-run
+    Values:
+    - '{max} charges a run'
+    Reviewed: 0
+    Note: carried ability row; max = charges
+  - Key: items.inv.nothing-carried
+    Values:
+    - Nothing carried.
+    Reviewed: 0
+    Note: abilities tab when nothing is carried
+  - Key: items.inv.empty.no-abilities
+    Values:
+    - '{hero} knows no abilities yet. Learn one on the sphere grid.'
+    Reviewed: 0
+    Note: abilities tab empty list; hero = hero name
+  - Key: items.inv.ability.in-run
+    Values:
+    - In this run
+    Reviewed: 0
+    Note: known ability row caption
+  - Key: items.inv.ability.carried
+    Values:
+    - Carried
+    Reviewed: 0
+    Note: known ability row caption / detail subtitle
+  - Key: items.inv.ability.not-carried
+    Values:
+    - Not carried
+    Reviewed: 0
+    Note: known ability row caption / detail subtitle
+  - Key: items.inv.title.party-pouch
+    Values:
+    - Party pouch
+    Reviewed: 0
+    Note: inventory left column title, consumables tab
+  - Key: items.inv.title.consumables
+    Values:
+    - Consumables
+    Reviewed: 0
+    Note: inventory list title
+  - Key: items.inv.kinds-summary
+    Values:
+    - "{kinds} kinds \xB7 {total} in all"
+    Reviewed: 0
+    Note: consumables/materials summary; kinds = distinct items, total = count
+  - Key: items.inv.consumables-note
+    Values:
+    - Shared by the whole party, and used from the Item command in a fight.
+    Reviewed: 0
+    Note: consumables tab note
+  - Key: items.inv.empty.no-consumables
+    Values:
+    - No consumables carried.
+    Reviewed: 0
+    Note: consumables tab empty list
+  - Key: items.inv.quantity
+    Values:
+    - x{count}
+    Reviewed: 0
+    Note: consumable/material row count
+  - Key: items.inv.title.stores
+    Values:
+    - Stores
+    Reviewed: 0
+    Note: inventory left column title, materials tab
+  - Key: items.inv.title.materials
+    Values:
+    - Materials
+    Reviewed: 0
+    Note: inventory list title
+  - Key: items.inv.materials-note
+    Values:
+    - Kept in the Storehouse between runs.
+    Reviewed: 0
+    Note: materials tab note
+  - Key: items.inv.empty.no-materials
+    Values:
+    - No materials yet.
+    Reviewed: 0
+    Note: materials tab empty list
+  - Key: items.inv.other-fits-one
+    Values:
+    - '{count} other item fits here - press Enter to choose.'
+    Reviewed: 0
+    Note: slot detail note, exactly one candidate; count = 1
+  - Key: items.inv.other-fits
+    Values:
+    - '{count} other items fit here - press Enter to choose.'
+    Reviewed: 0
+    Note: slot detail note; count = candidates
+  - Key: items.inv.nothing-else-fits
+    Values:
+    - Nothing else the party owns fits here.
+    Reviewed: 0
+    Note: slot detail note
+  - Key: items.inv.section.stats-without
+    Values:
+    - Stats without it
+    Reviewed: 0
+    Note: detail section title when unequipping
+  - Key: items.inv.section.stats-if-equipped
+    Values:
+    - Stats if equipped
+    Reviewed: 0
+    Note: detail section title when previewing an item
+  - Key: items.inv.section.stats
+    Values:
+    - Stats
+    Reviewed: 0
+    Note: detail section title
+  - Key: items.inv.stack-sub
+    Values:
+    - "{rarity} \xB7 x{count}"
+    Reviewed: 0
+    Note: consumable/material detail subtitle; rarity = rarity name, count = quantity
+  - Key: items.inv.ability-sub
+    Values:
+    - "{target} \xB7 {charges} charges a run"
+    Reviewed: 0
+    Note: ability detail subtitle; target = target label, charges = charges a run
+  - Key: items.inv.section.effect
+    Values:
+    - Effect
+    Reviewed: 0
+    Note: ability detail section title
+  - Key: items.inv.note.in-run
+    Values:
+    - In this run's slots until the run ends. Its charges come back at a refuge.
+    Reviewed: 0
+    Note: ability detail note
+  - Key: items.inv.note.carried-last
+    Values:
+    - Carried. A hero always takes at least one ability - carry another to swap this
+      one out.
+    Reviewed: 0
+    Note: ability detail note
+  - Key: items.inv.note.carried
+    Values:
+    - Carried. Enter puts it away.
+    Reviewed: 0
+    Note: ability detail note
+  - Key: items.inv.note.slots-in-use
+    Values:
+    - Every slot is in use this run. It can be carried from the next run on.
+    Reviewed: 0
+    Note: ability detail note
+  - Key: items.inv.note.slots-full
+    Values:
+    - 'Slots are full: carrying this puts {ability} away.'
+    Reviewed: 0
+    Note: ability detail note; ability = displaced ability name
+  - Key: items.inv.note.carry-next-floor
+    Values:
+    - Enter to carry it from the next floor, at full charges.
+    Reviewed: 0
+    Note: ability detail note
+  - Key: items.inv.note.carry-next-run
+    Values:
+    - Enter to carry it into the next run.
+    Reviewed: 0
+    Note: ability detail note
+  - Key: items.inv.section.reacts
+    Values:
+    - Reacts
+    Reviewed: 0
+    Note: item detail section title (reactions)
+  - Key: items.inv.section.named-set
+    Values:
+    - '{set} set'
+    Reviewed: 0
+    Note: item detail section title; set = item set name
+  - Key: items.inv.section.set
+    Values:
+    - Set
+    Reviewed: 0
+    Note: item detail section title
+  - Key: items.inv.section.grows
+    Values:
+    - Grows
+    Reviewed: 0
+    Note: item detail section title (milestones)
+  - Key: items.inv.section.grants
+    Values:
+    - Grants
+    Reviewed: 0
+    Note: item detail section title (bonuses)
+  - Key: items.inv.section.resistances
+    Values:
+    - Resistances
+    Reviewed: 0
+    Note: detail section title
+  - Key: items.inv.resistance-tooltip
+    Values:
+    - '{type} resistance'
+    Reviewed: 0
+    Note: resistance cell tooltip; type = damage type name
+  - Key: bestiary.unknown
+    Values:
+    - ???
+    Reviewed: 0
+    Note: 'Bestiary/Inspect: shown where the player has not learned the answer yet'
+  - Key: bestiary.element.physical
+    Values:
+    - Physical
+    Reviewed: 0
+    Note: Bestiary resistance row label / attack element for Normal damage
+  - Key: bestiary.element.fire
+    Values:
+    - Fire
+    Reviewed: 0
+    Note: Bestiary element name
+  - Key: bestiary.element.ice
+    Values:
+    - Ice
+    Reviewed: 0
+    Note: Bestiary element name
+  - Key: bestiary.element.lightning
+    Values:
+    - Lightning
+    Reviewed: 0
+    Note: Bestiary element name
+  - Key: bestiary.element.holy
+    Values:
+    - Holy
+    Reviewed: 0
+    Note: Bestiary element name
+  - Key: bestiary.element.shadow
+    Values:
+    - Shadow
+    Reviewed: 0
+    Note: Bestiary element name
+  - Key: bestiary.resistance.absorbs
+    Values:
+    - Absorbs {percent}
+    Reviewed: 0
+    Note: Bestiary resistance value; {percent} e.g. 50%
+  - Key: bestiary.resistance.immune
+    Values:
+    - Immune
+    Reviewed: 0
+    Note: Bestiary resistance value
+  - Key: bestiary.resistance.resists
+    Values:
+    - Resists {percent}
+    Reviewed: 0
+    Note: Bestiary resistance value; {percent} e.g. 50%
+  - Key: bestiary.resistance.weak
+    Values:
+    - Weak {percent}
+    Reviewed: 0
+    Note: Bestiary resistance value; {percent} e.g. -50%
+  - Key: bestiary.resistance.normal
+    Values:
+    - Normal
+    Reviewed: 0
+    Note: Bestiary resistance value when unremarkable
+  - Key: bestiary.label.attacks-with
+    Values:
+    - Attacks with
+    Reviewed: 0
+    Note: Bestiary row label; value is an element name
+  - Key: bestiary.label.drops
+    Values:
+    - Drops
+    Reviewed: 0
+    Note: Bestiary row label for the loot table
+  - Key: bestiary.loot.nothing
+    Values:
+    - Nothing
+    Reviewed: 0
+    Note: Bestiary Drops value for an enemy that carries no loot
+  - Key: bestiary.not-yet-seen
+    Values:
+    - '{count} not yet seen'
+    Reviewed: 0
+    Note: 'Bestiary: how many drops/spells are still hidden; {count} number'
+  - Key: bestiary.status.immune
+    Values:
+    - immune
+    Reviewed: 0
+    Note: Bestiary status-immunity row value
+  - Key: bestiary.status.bleed
+    Values:
+    - Bleed
+    Reviewed: 0
+    Note: Status effect name (bestiary immunity rows)
+  - Key: bestiary.status.poison
+    Values:
+    - Poison
+    Reviewed: 0
+    Note: Status effect name
+  - Key: bestiary.status.burn
+    Values:
+    - Burn
+    Reviewed: 0
+    Note: Status effect name
+  - Key: bestiary.status.regen
+    Values:
+    - Regen
+    Reviewed: 0
+    Note: Status effect name
+  - Key: bestiary.status.silence
+    Values:
+    - Silence
+    Reviewed: 0
+    Note: Status effect name
+  - Key: bestiary.status.blind
+    Values:
+    - Blind
+    Reviewed: 0
+    Note: Status effect name
+  - Key: bestiary.status.leech
+    Values:
+    - Leech
+    Reviewed: 0
+    Note: Status effect name
+  - Key: bestiary.status.confuse
+    Values:
+    - Confuse
+    Reviewed: 0
+    Note: Status effect name
+  - Key: bestiary.status.mark
+    Values:
+    - Mark
+    Reviewed: 0
+    Note: Status effect name
+  - Key: bestiary.status.death-mark
+    Values:
+    - Death Mark
+    Reviewed: 0
+    Note: Status effect name
+  - Key: bestiary.label.slain
+    Values:
+    - Slain
+    Reviewed: 0
+    Note: Bestiary kill tally label
+  - Key: bestiary.spell.seen
+    Values:
+    - seen
+    Reviewed: 0
+    Note: Bestiary spell row value once the enemy was seen casting it
+  - Key: bestiary.unknown-name
+    Values:
+    - '? ? ?'
+    Reviewed: 0
+    Note: 'Hall of Knowledge: name of an unmet enemy / unfound recipe row'
+  - Key: bestiary.list.enemies-met
+    Values:
+    - Enemies met
+    Reviewed: 0
+    Note: Hall of Knowledge list title, Monsters tab
+  - Key: bestiary.list.recipe-trees
+    Values:
+    - Recipe trees
+    Reviewed: 0
+    Note: Hall of Knowledge list title, Recipes tab
+  - Key: bestiary.progress.no-catalog
+    Values:
+    - No enemy catalog found.
+    Reviewed: 0
+    Note: Hall of Knowledge progress line when the catalog is missing
+  - Key: bestiary.progress.discovered
+    Values:
+    - '{seen} of {total} discovered'
+    Reviewed: 0
+    Note: Hall of Knowledge progress; {seen} enemies met, {total} in the catalog
+  - Key: bestiary.row.slain
+    Values:
+    - Slain x{kills}
+    Reviewed: 0
+    Note: Hall of Knowledge enemy row caption; {kills} kill count
+  - Key: bestiary.row.seen-not-slain
+    Values:
+    - Seen, not yet slain
+    Reviewed: 0
+    Note: Hall of Knowledge enemy row caption
+  - Key: bestiary.empty.recipes.title
+    Values:
+    - No recipes in the world
+    Reviewed: 0
+    Note: Hall of Knowledge empty Recipes page title
+  - Key: bestiary.empty.recipes.sub
+    Values:
+    - There is nothing for the Forge to make yet.
+    Reviewed: 0
+    Note: Hall of Knowledge empty Recipes page subtitle
+  - Key: bestiary.empty.enemies.title
+    Values:
+    - No enemies met yet
+    Reviewed: 0
+    Note: Hall of Knowledge empty Monsters page title
+  - Key: bestiary.empty.enemies.sub
+    Values:
+    - Everything the party survives is written down here.
+    Reviewed: 0
+    Note: Hall of Knowledge empty Monsters page subtitle
+  - Key: bestiary.detail.not-encountered
+    Values:
+    - Not yet encountered.
+    Reviewed: 0
+    Note: Hall of Knowledge page subtitle for an unmet enemy
+  - Key: bestiary.detail.health-slain
+    Values:
+    - "Health {health}  \xB7  Slain x{kills}"
+    Reviewed: 0
+    Note: Hall of Knowledge enemy page subtitle; {health} base max health, {kills}
+      kill count
+  - Key: bestiary.section.resistances
+    Values:
+    - Resistances
+    Reviewed: 0
+    Note: Hall of Knowledge enemy page section
+  - Key: bestiary.section.immune-to
+    Values:
+    - Immune to
+    Reviewed: 0
+    Note: Hall of Knowledge enemy page section
+  - Key: bestiary.section.base-stats
+    Values:
+    - Base stats
+    Reviewed: 0
+    Note: Hall of Knowledge enemy page section
+  - Key: bestiary.section.abilities
+    Values:
+    - Abilities
+    Reviewed: 0
+    Note: Hall of Knowledge enemy page section
+  - Key: bestiary.progress.recipes-known
+    Values:
+    - '{known} of {total} recipes known'
+    Reviewed: 0
+    Note: Hall of Knowledge progress, Recipes tab
+  - Key: bestiary.recipe.not-found
+    Values:
+    - Recipe not yet found
+    Reviewed: 0
+    Note: 'Recipes tab: caption/subtitle of an unfound recipe'
+  - Key: bestiary.recipe.caption.found-or-bought
+    Values:
+    - Found or bought
+    Reviewed: 0
+    Note: Recipes tab row caption for a base item
+  - Key: bestiary.recipe.caption.taught
+    Values:
+    - Taught by the Forge
+    Reviewed: 0
+    Note: Recipes tab row caption
+  - Key: bestiary.recipe.caption.found
+    Values:
+    - Recipe found
+    Reviewed: 0
+    Note: Recipes tab row caption
+  - Key: bestiary.recipe.made-from
+    Values:
+    - Made from a {item}.
+    Reviewed: 0
+    Note: Recipes tab, unfound recipe page; {item} base item name
+  - Key: bestiary.recipe.where-found
+    Values:
+    - Recipes are found on monsters and on cleared floors.
+    Reviewed: 0
+    Note: Recipes tab, unfound recipe page note
+  - Key: bestiary.recipe.kind
+    Values:
+    - "{rarity} \xB7 {slot}"
+    Reviewed: 0
+    Note: Recipes tab page subtitle for equipment; {rarity} and {slot} labels
+  - Key: bestiary.recipe.section.taught
+    Values:
+    - "Recipe \xB7 taught by the Forge"
+    Reviewed: 0
+    Note: Recipes tab page section title
+  - Key: bestiary.recipe.section
+    Values:
+    - Recipe
+    Reviewed: 0
+    Note: Recipes tab page section title
+  - Key: bestiary.recipe.base-line
+    Values:
+    - '{item}, worked into it'
+    Reviewed: 0
+    Note: Recipes tab ingredient line; {item} base item name
+  - Key: bestiary.recipe.material-line
+    Values:
+    - "{item} \xD7{amount}"
+    Reviewed: 0
+    Note: Recipes tab ingredient line; {item} material name, {amount} count
+  - Key: bestiary.recipe.gold-line
+    Values:
+    - '{gold} gold'
+    Reviewed: 0
+    Note: Recipes tab ingredient line; {gold} amount
+  - Key: bestiary.recipe.made-at-forge
+    Values:
+    - Made at the Forge.
+    Reviewed: 0
+    Note: Recipes tab page note
+  - Key: bestiary.recipe.not-made-at-forge
+    Values:
+    - 'Not made at the Forge: found in the dungeon or bought.'
+    Reviewed: 0
+    Note: Recipes tab page note for a base item
+  - Key: bestiary.recipe.section.can-become
+    Values:
+    - Can become
+    Reviewed: 0
+    Note: Recipes tab page section title
+  - Key: stat.strength.short
+    Values:
+    - STR
+    Reviewed: 0
+    Note: Short stat label for table columns and compact stat lines (bestiary, grid,
+      balance analyzer)
+  - Key: stat.strength.name
+    Values:
+    - Strength
+    Reviewed: 0
+    Note: Full stat name for player text and buff labels
+  - Key: stat.strength.description
+    Values:
+    - Physical power. Scales melee-flavoured attacks and abilities.
+    Reviewed: 0
+    Note: Stat tooltip description
+  - Key: stat.endurance.short
+    Values:
+    - END
+    Reviewed: 0
+    Note: Short stat label for table columns and compact stat lines (bestiary, grid,
+      balance analyzer)
+  - Key: stat.endurance.name
+    Values:
+    - Endurance
+    Reviewed: 0
+    Note: Full stat name for player text and buff labels
+  - Key: stat.endurance.description
+    Values:
+    - Reduces physical damage (basic attacks, Strength/Agility abilities), through
+      the diminishing curve in DamageCalculator.
+    Reviewed: 0
+    Note: Stat tooltip description
+  - Key: stat.agility.short
+    Values:
+    - AGI
+    Reviewed: 0
+    Note: Short stat label for table columns and compact stat lines (bestiary, grid,
+      balance analyzer)
+  - Key: stat.agility.name
+    Values:
+    - Agility
+    Reviewed: 0
+    Note: Full stat name for player text and buff labels
+  - Key: stat.agility.description
+    Values:
+    - Turn frequency - TurnManager schedules on it, so it compounds.
+    Reviewed: 0
+    Note: Stat tooltip description
+  - Key: stat.intelligence.short
+    Values:
+    - INT
+    Reviewed: 0
+    Note: Short stat label for table columns and compact stat lines (bestiary, grid,
+      balance analyzer)
+  - Key: stat.intelligence.name
+    Values:
+    - Intelligence
+    Reviewed: 0
+    Note: Full stat name for player text and buff labels
+  - Key: stat.intelligence.description
+    Values:
+    - Scales offensive and arcane ability power - a caster's Strength.
+    Reviewed: 0
+    Note: Stat tooltip description
+  - Key: stat.spirit.short
+    Values:
+    - SPR
+    Reviewed: 0
+    Note: Short stat label for table columns and compact stat lines (bestiary, grid,
+      balance analyzer)
+  - Key: stat.spirit.name
+    Values:
+    - Spirit
+    Reviewed: 0
+    Note: Full stat name for player text and buff labels
+  - Key: stat.spirit.description
+    Values:
+    - Scales restorative and protective ability power - healing, shields, Holy -
+      and reduces magic damage (Intelligence/Spirit abilities) the way Endurance
+      reduces physical.
+    Reviewed: 0
+    Note: Stat tooltip description
+  - Key: stat.luck.short
+    Values:
+    - LCK
+    Reviewed: 0
+    Note: Short stat label for table columns and compact stat lines (bestiary, grid,
+      balance analyzer)
+  - Key: stat.luck.name
+    Values:
+    - Luck
+    Reviewed: 0
+    Note: Full stat name for player text and buff labels
+  - Key: stat.luck.description
+    Values:
+    - Raises crit chance, gives a chance to dodge physical hits, and improves stat
+      checks on room events.
+    Reviewed: 0
+    Note: Stat tooltip description
+  - Key: stat.max-health.short
+    Values:
+    - HP
+    Reviewed: 0
+    Note: Short stat label for table columns and compact stat lines (bestiary, grid,
+      balance analyzer)
+  - Key: stat.max-health.name
+    Values:
+    - Health
+    Reviewed: 0
+    Note: Full stat name for player text and buff labels
+  - Key: stat.max-health.description
+    Values:
+    - Size of the health bar. Current health is a resource, not a stat.
+    Reviewed: 0
+    Note: Stat tooltip description
+  - Key: stat.none.short
+    Values:
+    - '-'
+    Reviewed: 0
+    Note: Short label for 'no stat'
+  - Key: stat.none.name
+    Values:
+    - None
+    Reviewed: 0
+    Note: Full label for 'no stat' (e.g. a stat dropdown)
+  - Key: grid.cost.material
+    Values:
+    - '{amount} {material}'
+    Reviewed: 0
+    Note: 'Sphere grid node cost: one material line; {amount} count, {material} material
+      name'
+  - Key: grid.cost.default-unlock
+    Values:
+    - "Known from the start \u2014 costs nothing"
+    Reviewed: 0
+    Note: Sphere grid cost line for a node every hero starts with
+  - Key: grid.cost.activated
+    Values:
+    - Activated
+    Reviewed: 0
+    Note: Sphere grid cost line for a bought node
+  - Key: grid.cost.xp
+    Values:
+    - '{xp} XP'
+    Reviewed: 0
+    Note: Sphere grid cost part; {xp} amount
+  - Key: grid.cost.essence
+    Values:
+    - '{essence} Essence'
+    Reviewed: 0
+    Note: Sphere grid cost part; {essence} amount
+  - Key: grid.cost.costs
+    Values:
+    - Costs {price}
+    Reviewed: 0
+    Note: Sphere grid cost line; {price} the parts joined with " + " (e.g. 120 XP
+      + 2 Ember Iron)
+  - Key: grid.upgrade.power
+    Values:
+    - +{amount} power
+    Reviewed: 0
+    Note: Ability upgrade node payload; {amount} power points
+  - Key: grid.upgrade.crit-chance
+    Values:
+    - +{amount}% crit chance
+    Reviewed: 0
+    Note: Ability upgrade node payload; {amount} percentage points
+  - Key: grid.upgrade.duration.one
+    Values:
+    - +1 turn
+    Reviewed: 0
+    Note: Ability upgrade node payload (one turn)
+  - Key: grid.upgrade.duration.many
+    Values:
+    - +{amount} turns
+    Reviewed: 0
+    Note: Ability upgrade node payload; {amount} turns (not 1)
+  - Key: grid.upgrade.apply-chance
+    Values:
+    - +{amount}% to land its debuffs
+    Reviewed: 0
+    Note: Ability upgrade node payload; {amount} percentage points
+  - Key: grid.upgrade.charges.one
+    Values:
+    - +1 charge a run
+    Reviewed: 0
+    Note: Ability upgrade node payload (one charge)
+  - Key: grid.upgrade.charges.many
+    Values:
+    - +{amount} charges a run
+    Reviewed: 0
+    Note: Ability upgrade node payload; {amount} charges (not 1)
+  - Key: grid.glyph.resistance
+    Values:
+    - R
+    Reviewed: 0
+    Note: Letter drawn inside a resistance node on the sphere grid
+  - Key: grid.glyph.stat
+    Values:
+    - S
+    Reviewed: 0
+    Note: Letter drawn inside a stat node that grants nothing
+  - Key: grid.payload.unset
+    Values:
+    - (unset)
+    Reviewed: 0
+    Note: Sphere grid payload placeholder when a node names no ability/summon/Ultra
+      (authoring gap)
+  - Key: grid.payload.resistance
+    Values:
+    - '{element} resistance +{percent}%'
+    Reviewed: 0
+    Note: Resistance node payload; {element} damage type, {percent} whole number
+  - Key: grid.payload.ability-slot
+    Values:
+    - +1 ability slot (carry one more of what you know)
+    Reviewed: 0
+    Note: Ability slot node payload
+  - Key: grid.payload.learns
+    Values:
+    - "Learns {ability} \u2014 {charges} charges per run"
+    Reviewed: 0
+    Note: Known-ability node payload; {ability} ability name, {charges} per-run charges
+  - Key: grid.payload.awakens
+    Values:
+    - "Awakens {from} into {to} \u2014 same slot, same charges"
+    Reviewed: 0
+    Note: Awakening node payload; {from}/{to} ability names
+  - Key: grid.payload.ability-upgrade
+    Values:
+    - '{ability}: {upgrade}'
+    Reviewed: 0
+    Note: Ability upgrade node payload; {ability} name, {upgrade} e.g. "+2 power"
+  - Key: grid.payload.ultra
+    Values:
+    - "Learns the Ultra {ultra} \u2014 used once the Ultra gauge is full"
+    Reviewed: 0
+    Note: Ultra node payload; {ultra} Ultra name
+  - Key: grid.payload.summon
+    Values:
+    - "Learns the summon {summon} \u2014 always carried, cast with Summon"
+    Reviewed: 0
+    Note: Summon node payload; {summon} summon name
+  - Key: grid.payload.summon-power
+    Values:
+    - '{summon}: +{amount} to its effect'
+    Reviewed: 0
+    Note: Summon upgrade payload; {summon} name, {amount} power
+  - Key: grid.payload.summon-duration.one
+    Values:
+    - '{summon}: lasts +{amount} turn'
+    Reviewed: 0
+    Note: Summon upgrade payload (amount 1); {summon} name, {amount} turns
+  - Key: grid.payload.summon-duration.many
+    Values:
+    - '{summon}: lasts +{amount} turns'
+    Reviewed: 0
+    Note: Summon upgrade payload (amount not 1); {summon} name, {amount} turns
+  - Key: grid.payload.summon-charge.one
+    Values:
+    - '{summon}: +{amount} charge per run'
+    Reviewed: 0
+    Note: Summon upgrade payload (amount 1); {summon} name, {amount} charges
+  - Key: grid.payload.summon-charge.many
+    Values:
+    - '{summon}: +{amount} charges per run'
+    Reviewed: 0
+    Note: Summon upgrade payload (amount not 1); {summon} name, {amount} charges
+  - Key: grid.payload.summon-size.one
+    Values:
+    - '{summon}: +{amount} troop'
+    Reviewed: 0
+    Note: Summon upgrade payload (amount 1); {summon} name, {amount} troops
+  - Key: grid.payload.summon-size.many
+    Values:
+    - '{summon}: +{amount} troops'
+    Reviewed: 0
+    Note: Summon upgrade payload (amount not 1); {summon} name, {amount} troops
+  - Key: grid.payload.summon-promote.one
+    Values:
+    - '{summon}: its weakest troop becomes a stronger one'
+    Reviewed: 0
+    Note: Summon upgrade payload (one promotion); {summon} name
+  - Key: grid.payload.summon-promote.many
+    Values:
+    - '{summon}: its {amount} weakest troops become stronger ones'
+    Reviewed: 0
+    Note: Summon upgrade payload; {summon} name, {amount} promotions
+  - Key: grid.payload.summon-apply-chance
+    Values:
+    - '{summon}: +{amount}% chance its attacks inflict their effects'
+    Reviewed: 0
+    Note: Summon upgrade payload; {summon} name, {amount} percentage points
+  - Key: grid.payload.summon-damage
+    Values:
+    - '{summon}: +{amount}% damage'
+    Reviewed: 0
+    Note: Summon upgrade payload; {summon} name, {amount} percent
+  - Key: grid.payload.stat-gain
+    Values:
+    - +{amount} {stat}
+    Reviewed: 0
+    Note: "Stat node payload part (joined with \" \xB7 \"); {amount} points, {stat}
+      short stat name"
+  - Key: grid.payload.nothing
+    Values:
+    - (grants nothing)
+    Reviewed: 0
+    Note: Stat node payload when it grants nothing
+  - Key: grid.requires
+    Values:
+    - Requires {list} first.
+    Reviewed: 0
+    Note: Gated node explanation; {list} one name or grid.requires.list
+  - Key: grid.kind.resistance
+    Values:
+    - Resistance
+    Reviewed: 0
+    Note: Sphere grid node kind label
+  - Key: grid.kind.ability-slot
+    Values:
+    - Ability slot
+    Reviewed: 0
+    Note: Sphere grid node kind label
+  - Key: grid.kind.known-ability
+    Values:
+    - Known ability
+    Reviewed: 0
+    Note: Sphere grid node kind label
+  - Key: grid.kind.awakening
+    Values:
+    - Awakening
+    Reviewed: 0
+    Note: Sphere grid node kind label
+  - Key: grid.kind.ability-upgrade
+    Values:
+    - Ability upgrade
+    Reviewed: 0
+    Note: Sphere grid node kind label
+  - Key: grid.kind.summon
+    Values:
+    - Summon
+    Reviewed: 0
+    Note: Sphere grid node kind label
+  - Key: grid.kind.ultra
+    Values:
+    - Ultra
+    Reviewed: 0
+    Note: Sphere grid node kind label
+  - Key: grid.kind.summon-upgrade
+    Values:
+    - Summon upgrade
+    Reviewed: 0
+    Note: Sphere grid node kind label
+  - Key: grid.kind.stat
+    Values:
+    - Stat
+    Reviewed: 0
+    Note: Sphere grid node kind label
+  - Key: grid.hero.no-grid
+    Values:
+    - No grid authored for this hero yet.
+    Reviewed: 0
+    Note: Sphere grid hero tab tooltip when the hero has no grid
+  - Key: grid.hero.xp-badge
+    Values:
+    - '{xp} XP'
+    Reviewed: 0
+    Note: Sphere grid hero tab badge; {xp} unspent XP bank
+  - Key: grid.xp-to-spend
+    Values:
+    - '{hero}: {xp} XP to spend'
+    Reviewed: 0
+    Note: Sphere grid header; {hero} hero name, {xp} unspent XP
+  - Key: grid.no-heroes
+    Values:
+    - No heroes owned.
+    Reviewed: 0
+    Note: Sphere grid header when no hero is owned
+  - Key: grid.detail.select-title
+    Values:
+    - Select a node.
+    Reviewed: 0
+    Note: Sphere grid detail title with nothing selected
+  - Key: grid.detail.select-hint
+    Values:
+    - Click a node, or move to one with the arrow keys.
+    Reviewed: 0
+    Note: Sphere grid detail text with nothing selected
+  - Key: grid.button.activate
+    Values:
+    - Activate
+    Reviewed: 0
+    Note: Sphere grid Activate button
+  - Key: grid.button.activated
+    Values:
+    - Activated
+    Reviewed: 0
+    Note: Sphere grid Activate button on a bought node
+  - Key: grid.reason.not-reachable
+    Values:
+    - Activate a node next to it first.
+    Reviewed: 0
+    Note: 'Sphere grid: why Activate is dimmed (not reachable)'
+  - Key: grid.reason.xp
+    Values:
+    - "Need {cost} XP \u2014 you have {have}."
+    Reviewed: 0
+    Note: 'Sphere grid: why Activate is dimmed; {cost} node XP price, {have} hero''s
+      bank'
+  - Key: grid.reason.essence
+    Values:
+    - "Need {cost} Essence \u2014 {purse} in the purse. Revisits pay Essence."
+    Reviewed: 0
+    Note: 'Sphere grid: why Activate is dimmed; {cost} Essence price, {purse} Essence
+      owned'
+  - Key: grid.reason.materials
+    Values:
+    - Needs {materials}
+    Reviewed: 0
+    Note: 'Sphere grid: why Activate is dimmed; {materials} per-material have/need
+      line (rich text)'
+  - Key: grid.title.ability-slot
+    Values:
+    - +1 ability slot
+    Reviewed: 0
+    Note: Sphere grid detail title for an ability slot node
+  - Key: grid.upgrade-detail.power
+    Values:
+    - '{ability} hits (or heals) for {amount} more, before its scaling stat.'
+    Reviewed: 0
+    Note: Sphere grid ability upgrade detail; {ability} name, {amount} power
+  - Key: grid.upgrade-detail.crit-chance
+    Values:
+    - '{ability} can land critical hits, at {amount}% better odds than this hero''s
+      own - Luck raises both.'
+    Reviewed: 0
+    Note: Sphere grid ability upgrade detail; {ability} name, {amount} percentage
+      points
+  - Key: grid.upgrade-detail.duration.one
+    Values:
+    - Everything {ability} leaves behind - buffs, debuffs, poisons, burns - lasts
+      1 turn longer.
+    Reviewed: 0
+    Note: Sphere grid ability upgrade detail (+1 turn); {ability} name
+  - Key: grid.upgrade-detail.duration.many
+    Values:
+    - Everything {ability} leaves behind - buffs, debuffs, poisons, burns - lasts
+      {amount} turns longer.
+    Reviewed: 0
+    Note: Sphere grid ability upgrade detail; {ability} name, {amount} turns (not
+      1)
+  - Key: grid.upgrade-detail.apply-chance
+    Values:
+    - '{ability}''s debuffs are {amount}% likelier to take hold.'
+    Reviewed: 0
+    Note: Sphere grid ability upgrade detail; {ability} name, {amount} percentage
+      points
+  - Key: grid.upgrade-detail.charges.one
+    Values:
+    - '{ability} has 1 more charge every run.'
+    Reviewed: 0
+    Note: Sphere grid ability upgrade detail (+1 charge); {ability} name
+  - Key: grid.upgrade-detail.charges.many
+    Values:
+    - '{ability} has {amount} more charges every run.'
+    Reviewed: 0
+    Note: Sphere grid ability upgrade detail; {ability} name, {amount} charges (not
+      1)
+  - Key: grid.detail.learns
+    Values:
+    - Learns {ability}, {charges} charges a run. Carry it by giving it a slot in
+      the Storehouse.
+    Reviewed: 0
+    Note: Sphere grid known-ability node detail (after the ability's description);
+      {ability} name, {charges} per run
+  - Key: grid.detail.awakens
+    Values:
+    - Awakens {from} into {to}. It keeps its slot and charges.
+    Reviewed: 0
+    Note: Sphere grid awakening node detail; {from}/{to} ability names
+  - Key: grid.detail.ability-slot
+    Values:
+    - Carry one more of the abilities this hero knows into every run.
+    Reviewed: 0
+    Note: Sphere grid ability slot node detail
+  - Key: grid.detail.summon
+    Values:
+    - Learns the summon {summon}. Always carried and cast with Summon; it takes no
+      ability slot.
+    Reviewed: 0
+    Note: Sphere grid summon node detail; {summon} summon name
+  - Key: grid.detail.ultra
+    Values:
+    - Learns the Ultra {ultra}. {what}Use it from the Ultra command once the gauge
+      is full - losing health in a fight fills it.
+    Reviewed: 0
+    Note: Sphere grid Ultra node detail; {ultra} Ultra name, {what} the Ultra's description
+      followed by ". " (or empty)
+  - Key: grid.detail.stat
+    Values:
+    - Raises this hero's stats for good.
+    Reviewed: 0
+    Note: Sphere grid stat node detail
+  - Key: grid.detail.stat-change
+    Values:
+    - "{before} \u2192 {after}"
+    Reviewed: 0
+    Note: 'Sphere grid stat node: a stat''s value before and after buying'
+  - Key: grid.feedback.awakened
+    Values:
+    - '{from} awakens into {to}.'
+    Reviewed: 0
+    Note: Sphere grid feedback after buying an awakening; {from}/{to} ability names
+  - Key: grid.feedback.activated
+    Values:
+    - '{node} activated.'
+    Reviewed: 0
+    Note: Sphere grid feedback after buying a node; {node} node name
+  - Key: grid.feedback.no-essence
+    Values:
+    - "Not enough Essence \u2014 needs {cost}. Revisits pay Essence."
+    Reviewed: 0
+    Note: Sphere grid feedback; {cost} Essence price
+  - Key: grid.feedback.no-materials
+    Values:
+    - "Not enough materials \u2014 needs {materials}."
+    Reviewed: 0
+    Note: Sphere grid feedback; {materials} material cost line
+  - Key: grid.feedback.cannot-activate
+    Values:
+    - Cannot activate that node.
+    Reviewed: 0
+    Note: Sphere grid feedback
+  - Key: framework.popup.ok
+    Values:
+    - Ok
+    Reviewed: 0
+    Note: 'Legacy uGUI popup: default confirm button'
+  - Key: framework.popup.close
+    Values:
+    - Close
+    Reviewed: 0
+    Note: 'Legacy uGUI popup: default close button'
+  - Key: framework.popup.no-internet.title
+    Values:
+    - No internet!
+    Reviewed: 0
+    Note: Legacy uGUI popup title (currently unused)
+  - Key: framework.popup.no-internet.message
+    Values:
+    - Failed to connect to the internet. Make sure you have Wifi or Mobile Data enabled
+      and try again.
+    Reviewed: 0
+    Note: Legacy uGUI popup message (currently unused)
+  - Key: framework.popup.retry
+    Values:
+    - Retry
+    Reviewed: 0
+    Note: Legacy uGUI popup button (currently unused)
+  - Key: framework.popup.error.title
+    Values:
+    - Error
+    Reviewed: 0
+    Note: Legacy uGUI generic error popup title
+  - Key: framework.popup.error.message
+    Values:
+    - Something went wrong.
+    Reviewed: 0
+    Note: Legacy uGUI generic error popup message
+  - Key: grid.requires.list
+    Values:
+    - '{names} and {last}'
+    Reviewed: 0
+    Note: 'Gated node: two or more required node names; {names} all but the last
+      joined by ", ", {last} the last name'

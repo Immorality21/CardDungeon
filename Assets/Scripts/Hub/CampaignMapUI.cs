@@ -6,6 +6,7 @@ using Assets.Scripts.Heroes.UI;
 using Assets.Scripts.Progression;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Hub
 {
@@ -210,11 +211,11 @@ namespace Assets.Scripts.Hub
 
             if (selected?.Node?.Run == null)
             {
-                SetText(_detailName, "Nowhere yet");
+                SetText(_detailName, Loc.Get("hub.campaign.nowhere-yet"));
                 SetText(_detailStatus, string.Empty);
                 SetText(_detailBlurb, _states.Count == 0
-                    ? "No campaign is authored. Create a Campaign asset in Resources."
-                    : "Pick a place on the map.");
+                    ? Loc.Get("hub.campaign.no-campaign")
+                    : Loc.Get("hub.campaign.pick-a-place"));
                 SetText(_detailRequires, string.Empty);
                 SetShown(_startButton, false);
                 _detailBody?.Clear();
@@ -228,20 +229,21 @@ namespace Assets.Scripts.Hub
             SetText(_detailName, CampaignOps.DisplayNameOf(run));
             // Where you are, not how long it is: "Level 2 of 4" for the run underway.
             SetText(_detailStatus, inProgress
-                ? $"In progress · Level {current + 1} of {floors}"
-                : $"{CampaignPresenter.StatusLabel(selected)} · {floors} {(floors == 1 ? "floor" : "floors")}");
+                ? Loc.Format("hub.campaign.in-progress-level", ("level", current + 1), ("count", floors))
+                : floors == 1
+                    ? Loc.Format("hub.campaign.status-floor", ("status", CampaignPresenter.StatusLabel(selected)), ("count", floors))
+                    : Loc.Format("hub.campaign.status-floors", ("status", CampaignPresenter.StatusLabel(selected)), ("count", floors)));
             if (_picking)
             {
-                SetText(_detailStatus, "Revisit · choose the conditions");
+                SetText(_detailStatus, Loc.Get("hub.campaign.revisit-choose"));
                 // Fear was never defined, and the empty blurb left a gap (revisit playtest finding 2).
-                SetText(_detailBlurb, "Each condition raises the Fear level by its +number: a harder run, bigger rewards. "
-                    + "Stronger heroes come from the Hall of Progression.");
+                SetText(_detailBlurb, Loc.Get("hub.campaign.revisit-blurb"));
                 SetText(_detailRequires, string.Empty);
                 BuildFearPicker(run);
                 SetShown(_startButton, true);
                 if (_startButton != null)
                 {
-                    _startButton.text = "Begin revisit";
+                    _startButton.text = Loc.Get("hub.campaign.begin-revisit");
                 }
                 return;
             }
@@ -254,11 +256,11 @@ namespace Assets.Scripts.Hub
                 var lines = new List<string>();
                 if (selected.MissingRequirements.Count > 0)
                 {
-                    lines.Add("Requires: " + string.Join(", ", selected.MissingRequirements));
+                    lines.Add(Loc.Format("hub.campaign.requires", ("runs", string.Join(", ", selected.MissingRequirements))));
                 }
                 if (selected.MissingHeroes.Count > 0)
                 {
-                    lines.Add("Needs in your roster: " + string.Join(", ", selected.MissingHeroes));
+                    lines.Add(Loc.Format("hub.campaign.needs-heroes", ("heroes", string.Join(", ", selected.MissingHeroes))));
                 }
                 SetText(_detailRequires, string.Join("\n", lines));
             }
@@ -271,8 +273,8 @@ namespace Assets.Scripts.Hub
                     ? MetaProgressManager.Instance.GetBestRevisitFear(CampaignOps.RunKeyOf(run))
                     : -1;
                 SetText(_detailRequires, !RevisitOps.IsRevisitable(run)
-                    ? "This place cannot be revisited."
-                    : best >= 0 ? $"Revisited · highest Fear level cleared: {best}" : string.Empty);
+                    ? Loc.Get("hub.campaign.not-revisitable")
+                    : best >= 0 ? Loc.Format("hub.campaign.revisited-best", ("fear", best)) : string.Empty);
             }
             else
             {
@@ -284,8 +286,8 @@ namespace Assets.Scripts.Hub
             if (actionable && _startButton != null)
             {
                 _startButton.text = selected.CanContinue
-                    ? "Continue"
-                    : IsRevisitChoice(selected) ? "Revisit…" : "Begin";
+                    ? Loc.Get("ui.common.continue")
+                    : IsRevisitChoice(selected) ? Loc.Get("hub.campaign.revisit-button") : Loc.Get("hub.campaign.begin");
             }
         }
 
@@ -304,11 +306,11 @@ namespace Assets.Scripts.Hub
             var run = selected.Node.Run;
             bool cleared = selected.Status == CampaignNodeStatus.Completed;
 
-            _detailBody.Add(MakeLabel("Floors", "cd-inv-col__title"));
+            _detailBody.Add(MakeLabel(Loc.Get("hub.campaign.floors"), "cd-inv-col__title"));
             for (int i = 0; i < run.Levels.Count; i++)
             {
                 var level = run.Levels[i];
-                string name = level != null && !string.IsNullOrEmpty(level.LevelName) ? level.LevelName : $"Floor {i + 1}";
+                string name = level != null && !string.IsNullOrEmpty(level.LevelName) ? level.LevelName : Loc.Format("hub.campaign.floor-fallback", ("floor", i + 1));
                 bool done = cleared || (inProgress && i < current);
                 bool here = inProgress && i == current;
                 string mark = done ? "✓" : here ? "▸" : "·";
@@ -330,7 +332,7 @@ namespace Assets.Scripts.Hub
             }
             if (opens.Count > 0)
             {
-                _detailBody.Add(MakeLabel(cleared ? "Opened" : "Clearing it opens", "cd-inv-col__title"));
+                _detailBody.Add(MakeLabel(cleared ? Loc.Get("hub.campaign.opened") : Loc.Get("hub.campaign.clearing-opens"), "cd-inv-col__title"));
                 foreach (var name in opens)
                 {
                     _detailBody.Add(MakeLabel("→  " + name, "cm-floor", "cm-floor--ahead"));
@@ -376,8 +378,8 @@ namespace Assets.Scripts.Hub
                 // The only way to reach this is a stale click, but the map must never be the thing
                 // that discards a run in progress.
                 SetFeedback(selected.Status == CampaignNodeStatus.Locked
-                    ? "That way is still closed."
-                    : "Finish the run you are on first.");
+                    ? Loc.Get("hub.campaign.still-closed")
+                    : Loc.Get("hub.campaign.finish-current"));
                 return;
             }
 
@@ -494,14 +496,14 @@ namespace Assets.Scripts.Hub
             var rules = _revisitRules;
             if (rules == null)
             {
-                _detailBody.Add(MakeLabel("No revisit rules are authored (Resources/Revisits).", "cm-floor"));
+                _detailBody.Add(MakeLabel(Loc.Get("hub.campaign.no-revisit-rules"), "cm-floor"));
                 return;
             }
 
             _detailBody.Add(MakeLabel(
-                $"Every revisit: enemies +{rules.BaseEnemyStatPercent}% to every stat - health, damage, speed, defences.",
+                Loc.Format("hub.campaign.revisit-base", ("percent", rules.BaseEnemyStatPercent)),
                 "cm-fear-summary"));
-            _detailBody.Add(MakeLabel("Conditions", "cd-inv-col__title"));
+            _detailBody.Add(MakeLabel(Loc.Get("hub.campaign.conditions"), "cd-inv-col__title"));
 
             var modifiers = rules.Modifiers ?? new List<RunModifier>();
             foreach (var modifier in modifiers)
@@ -528,14 +530,14 @@ namespace Assets.Scripts.Hub
             var fear = RevisitOps.Resolve(rules, true, _selections);
             int rewardPercent = Mathf.RoundToInt((fear.RewardMultiplier - 1f) * 100f);
             _detailBody.Add(MakeLabel(
-                $"Fear level {fear.Level} · rewards +{rewardPercent}% XP, gold and Essence", "cm-fear-summary"));
+                Loc.Format("hub.campaign.fear-summary", ("fear", fear.Level), ("percent", rewardPercent)), "cm-fear-summary"));
 
             int best = MetaProgressManager.HasInstance
                 ? MetaProgressManager.Instance.GetBestRevisitFear(CampaignOps.RunKeyOf(run))
                 : -1;
             if (best >= 0)
             {
-                _detailBody.Add(MakeLabel($"Highest cleared: Fear level {best}", "cm-floor", "cm-floor--done"));
+                _detailBody.Add(MakeLabel(Loc.Format("hub.campaign.highest-cleared", ("fear", best)), "cm-floor", "cm-floor--done"));
             }
         }
 

@@ -12,6 +12,7 @@ using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Assets.Scripts.Events;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Hub
 {
@@ -181,7 +182,7 @@ namespace Assets.Scripts.Hub
         private void Refresh()
         {
             // Only the currency this screen spends - essence has never bought anything here.
-            SetText(_goldLabel, $"{Gold} gold");
+            SetText(_goldLabel, Loc.Format("hub.merchant.gold", ("gold", Gold)));
             _tabBuy?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Buy);
             _tabSell?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Sell);
             _tabBelt?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Belt);
@@ -234,8 +235,8 @@ namespace Assets.Scripts.Hub
             var compare = FindHero(_compareHeroKey);
             if (active && compare != null)
             {
-                summary.Add(MakeLabel($"Compared on {compare.DisplayName}", "cd-inv-heroes__summary-line", "cd-inv-heroes__summary-name"));
-                summary.Add(MakeLabel("Pick a hero to see the stats on them.", "cd-inv-heroes__summary-line"));
+                summary.Add(MakeLabel(Loc.Format("hub.merchant.compared-on", ("hero", compare.DisplayName)), "cd-inv-heroes__summary-line", "cd-inv-heroes__summary-name"));
+                summary.Add(MakeLabel(Loc.Get("hub.merchant.pick-hero"), "cd-inv-heroes__summary-line"));
             }
             _heroesRow.Add(summary);
         }
@@ -251,7 +252,7 @@ namespace Assets.Scripts.Hub
             var line = _heroesRow?.Q<Label>(className: "cd-inv-heroes__summary-name");
             if (line != null && hero != null)
             {
-                line.text = $"Compared on {hero.DisplayName}";
+                line.text = Loc.Format("hub.merchant.compared-on", ("hero", hero.DisplayName));
             }
             RefreshDetail();
         }
@@ -265,7 +266,7 @@ namespace Assets.Scripts.Hub
             SetShown(_restockButton, _tab == Tab.Buy);
             if (_restockButton != null)
             {
-                _restockButton.text = $"Restock wares — {RestockCost} gold";
+                _restockButton.text = Loc.Format("hub.merchant.restock", ("cost", RestockCost));
                 _restockButton.SetEnabled(Gold >= RestockCost);
             }
 
@@ -273,7 +274,7 @@ namespace Assets.Scripts.Hub
             switch (_tab)
             {
                 case Tab.Buy:
-                    SetText(_listTitle, "Wares");
+                    SetText(_listTitle, Loc.Get("hub.merchant.tab.wares"));
                     foreach (var key in MetaProgressManager.Instance.GetShopStock())
                     {
                         var so = inv.GetItemSO(key);
@@ -282,11 +283,11 @@ namespace Assets.Scripts.Hub
                             AddEntry(new Entry { Item = so, Key = key, Price = ShopPricing.BuyPrice(so) });
                         }
                     }
-                    empty = "Sold out. Restock for more.";
+                    empty = Loc.Get("hub.merchant.empty.sold-out");
                     break;
 
                 case Tab.Sell:
-                    SetText(_listTitle, "Your spare gear");
+                    SetText(_listTitle, Loc.Get("hub.merchant.tab.spare-gear"));
                     foreach (var saved in inv.GetBagEquipment())
                     {
                         var so = inv.GetItemSO(saved.ItemKey);
@@ -295,13 +296,13 @@ namespace Assets.Scripts.Hub
                             AddEntry(new Entry { Item = so, Key = saved.ItemKey, Price = ShopPricing.SellPrice(so) });
                         }
                     }
-                    empty = "No spare gear to sell. Worn gear has to come off in the Storehouse first.";
+                    empty = Loc.Get("hub.merchant.empty.no-spare");
                     break;
 
                 case Tab.Belt:
-                    SetText(_listTitle, "Potion belt");
+                    SetText(_listTitle, Loc.Get("hub.merchant.tab.belt"));
                     AddBeltEntries(inv.GetItemSO(PotionItemKey));
-                    empty = "The merchant has no belt work today.";
+                    empty = Loc.Get("hub.merchant.empty.no-belt");
                     break;
             }
 
@@ -338,7 +339,7 @@ namespace Assets.Scripts.Hub
             // Buying: the price, red when it is out of reach. Selling: what it fetches. A belt step
             // is red when its materials are short too; a ladder bought to the top says so.
             bool beltMaxed = _tab == Tab.Belt && entry.Upgrade == null;
-            var price = MakeLabel(beltMaxed ? "Max" : $"{entry.Price}g", "cd-inv-row__meta", "cd-shop-price");
+            var price = MakeLabel(beltMaxed ? Loc.Get("hub.merchant.price-max") : Loc.Format("hub.merchant.price", ("price", entry.Price)), "cd-inv-row__meta", "cd-shop-price");
             bool short_ = _tab == Tab.Belt ? !beltMaxed && !CanPay(entry.Upgrade) : _tab != Tab.Sell && Gold < entry.Price;
             price.EnableInClassList("cd-shop-price--short", short_);
             row.Add(price);
@@ -355,13 +356,13 @@ namespace Assets.Scripts.Hub
                 switch (entry.Offer)
                 {
                     case BeltOffer.Slot:
-                        return "Another belt slot";
+                        return Loc.Get("hub.merchant.belt.another-slot");
                     case BeltOffer.Recipe:
-                        return $"Learn: {entry.Type.Potion.DisplayName}";
+                        return Loc.Format("hub.merchant.belt.learn", ("potion", entry.Type.Potion.DisplayName));
                     case BeltOffer.Capacity:
-                        return $"{entry.Type.DisplayName}: carry more";
+                        return Loc.Format("hub.merchant.belt.carry-more", ("potion", entry.Type.DisplayName));
                     default:
-                        return $"{entry.Type.DisplayName}: stronger";
+                        return Loc.Format("hub.merchant.belt.stronger", ("potion", entry.Type.DisplayName));
                 }
             }
             return entry.Item.DisplayName;
@@ -424,12 +425,12 @@ namespace Assets.Scripts.Hub
 
             if (_tab == Tab.Buy)
             {
-                SetAction($"Buy — {entry.Price} gold", Gold >= entry.Price,
-                    $"Need {entry.Price} gold — you have {Gold}.");
+                SetAction(Loc.Format("hub.merchant.buy", ("price", entry.Price)), Gold >= entry.Price,
+                    Loc.Format("hub.merchant.need-gold", ("price", entry.Price), ("gold", Gold)));
             }
             else
             {
-                SetAction($"Sell — {entry.Price} gold", true, string.Empty);
+                SetAction(Loc.Format("hub.merchant.sell", ("price", entry.Price)), true, string.Empty);
             }
 
             if (_detailBody == null)
@@ -462,11 +463,11 @@ namespace Assets.Scripts.Hub
 
             var inSlot = GearPiece.ItemsOf(worn).FirstOrDefault(w => w.SlotType == item.SlotType);
             _detailBody.Add(MakeLabel(inSlot != null
-                    ? $"{hero.DisplayName} wears {inSlot.DisplayName} there now."
-                    : $"{hero.DisplayName} has nothing in that slot.",
+                    ? Loc.Format("hub.merchant.wears-now", ("hero", hero.DisplayName), ("item", inSlot.DisplayName))
+                    : Loc.Format("hub.merchant.slot-empty", ("hero", hero.DisplayName)),
                 "cd-inv-detail__note"));
 
-            _detailBody.Add(BestiaryLineView.Section($"If {hero.DisplayName} wore it"));
+            _detailBody.Add(BestiaryLineView.Section(Loc.Format("hub.merchant.if-wore", ("hero", hero.DisplayName))));
             var grid = new VisualElement();
             grid.AddToClassList("cd-inv-stats");
             foreach (var stat in StatCatalog.Types)
@@ -547,28 +548,28 @@ namespace Assets.Scripts.Hub
                 case BeltOffer.Slot:
                     int slots = PotionBeltState.Slots(belt);
                     return entry.Upgrade is BeltSlotTier more
-                        ? $"{slots} → {more.Slots} slots"
-                        : $"{slots} slots, the most a belt holds";
+                        ? Loc.Format("hub.merchant.belt.slots-change", ("now", slots), ("next", more.Slots))
+                        : Loc.Format("hub.merchant.belt.slots-max", ("now", slots));
                 case BeltOffer.Recipe:
-                    return "A new potion for the belt";
+                    return Loc.Get("hub.merchant.belt.new-potion");
                 case BeltOffer.Capacity:
                     int cap = PotionBeltState.Capacity(type);
                     return entry.Upgrade is BeltCapacityTier size
-                        ? $"{cap} → {size.Capacity} per run"
-                        : $"{cap} per run, the most it carries";
+                        ? Loc.Format("hub.merchant.belt.capacity-change", ("now", cap), ("next", size.Capacity))
+                        : Loc.Format("hub.merchant.belt.capacity-max", ("now", cap));
                 default:
                     int bought = PotionBeltState.Potency(type);
                     if (PotencyIsCharges(type))
                     {
                         int now = ChargesAt(type, bought);
                         return entry.Upgrade != null
-                            ? $"{now} → {ChargesAt(type, bought + 1)} charges restored"
-                            : $"{now} charges restored, the strongest brew";
+                            ? Loc.Format("hub.merchant.belt.charges-change", ("now", now), ("next", ChargesAt(type, bought + 1)))
+                            : Loc.Format("hub.merchant.belt.charges-max", ("now", now));
                     }
                     int pct = PotionPercent(type.Potion, PotionBeltOps.HealBonus(type, bought));
                     return entry.Upgrade is BeltPotencyTier brew
-                        ? $"{pct}% → {PotionPercent(type.Potion, brew.HealPercent)}% of max health"
-                        : $"{pct}% of max health, the strongest brew";
+                        ? Loc.Format("hub.merchant.belt.heal-change", ("now", pct), ("next", PotionPercent(type.Potion, brew.HealPercent)))
+                        : Loc.Format("hub.merchant.belt.heal-max", ("now", pct));
             }
         }
 
@@ -582,36 +583,36 @@ namespace Assets.Scripts.Hub
             var step = entry.Upgrade;
             if (step == null)
             {
-                SetAction("Fully upgraded", false, string.Empty);
+                SetAction(Loc.Get("hub.merchant.fully-upgraded"), false, string.Empty);
             }
             else
             {
                 string reason = Gold < step.Gold
-                    ? $"Need {step.Gold} gold — you have {Gold}."
-                    : "Not enough materials."; // which ones: the coloured line below
-                SetAction($"Buy — {step.Gold} gold", CanPay(step), reason);
+                    ? Loc.Format("hub.merchant.need-gold", ("price", step.Gold), ("gold", Gold))
+                    : Loc.Get("hub.merchant.not-enough-materials"); // which ones: the coloured line below
+                SetAction(Loc.Format("hub.merchant.buy", ("price", step.Gold)), CanPay(step), reason);
             }
 
             string desc;
             switch (entry.Offer)
             {
                 case BeltOffer.Slot:
-                    desc = "Each slot carries one kind of potion, chosen at the campfire before a run. The belt refills when a run begins, not between floors.";
+                    desc = Loc.Get("hub.merchant.belt.slot-desc");
                     break;
                 case BeltOffer.Recipe:
-                    desc = ItemPresenter.ConsumableEffectLine(entry.Type.Potion) + " Once learned, put it in a belt slot at the campfire.";
+                    desc = ItemPresenter.ConsumableEffectLine(entry.Type.Potion) + " " + Loc.Get("hub.merchant.belt.recipe-desc");
                     break;
                 case BeltOffer.Capacity:
-                    desc = $"How many {entry.Type.Potion.DisplayName}s a slot carries into a run.";
+                    desc = Loc.Format("hub.merchant.belt.capacity-desc", ("potion", entry.Type.Potion.DisplayName));
                     break;
                 default:
-                    desc = $"Every {entry.Type.Potion.DisplayName} restores more.";
+                    desc = Loc.Format("hub.merchant.belt.potency-desc", ("potion", entry.Type.Potion.DisplayName));
                     break;
             }
             _detailBody?.Add(MakeLabel(desc, "cd-inv-detail__desc"));
             if (step != null && step.Materials != null && step.Materials.Count > 0)
             {
-                _detailBody?.Add(MakeLabel("Materials: " + MaterialCostText.Describe(step.Materials), "cd-inv-detail__note"));
+                _detailBody?.Add(MakeLabel(Loc.Format("hub.merchant.materials", ("cost", MaterialCostText.Describe(step.Materials))), "cd-inv-detail__note"));
                 AddRevisitHints(step);
             }
         }
@@ -632,7 +633,7 @@ namespace Assets.Scripts.Hub
                     continue;
                 }
                 _detailBody?.Add(MakeLabel(
-                    $"{material.DisplayName} only turns up when you revisit {material.RevisitRun} at Fear {Mathf.Max(1, material.RevisitFear)} or higher.",
+                    Loc.Format("hub.merchant.revisit-hint", ("material", material.DisplayName), ("run", material.RevisitRun), ("fear", Mathf.Max(1, material.RevisitFear))),
                     "cd-inv-detail__note", "cd-belt-hint"));
             }
         }
@@ -674,13 +675,13 @@ namespace Assets.Scripts.Hub
         {
             if (!MetaProgressManager.Instance.TrySpendGold(price, EconomySource.Merchant))
             {
-                SetFeedback("Not enough gold.");
+                SetFeedback(Loc.Get("hub.merchant.feedback.not-enough-gold"));
                 return;
             }
 
             InventoryManager.Instance.AddItem(so, 1, EconomySource.Merchant);
             MetaProgressManager.Instance.RemoveFromShopStock(key);
-            SetFeedback($"Bought {so.DisplayName}.");
+            SetFeedback(Loc.Format("hub.merchant.feedback.bought", ("item", so.DisplayName)));
             Refresh();
         }
 
@@ -688,12 +689,12 @@ namespace Assets.Scripts.Hub
         {
             if (!MetaProgressManager.Instance.TrySpendGold(RestockCost, EconomySource.Merchant))
             {
-                SetFeedback("Not enough gold to restock.");
+                SetFeedback(Loc.Get("hub.merchant.feedback.no-restock-gold"));
                 return;
             }
 
             MetaProgressManager.Instance.SetShopStock(GenerateStock(StockSize));
-            SetFeedback("The merchant lays out fresh wares.");
+            SetFeedback(Loc.Get("hub.merchant.feedback.restocked"));
             _index = 0;
             Refresh();
         }
@@ -703,11 +704,11 @@ namespace Assets.Scripts.Hub
             // Only ever sell an un-equipped (bag) copy, and only pay out if one was actually removed.
             if (!InventoryManager.Instance.RemoveBagEquipment(key, ItemRemovalReason.Sold))
             {
-                SetFeedback("Nothing to sell.");
+                SetFeedback(Loc.Get("hub.merchant.feedback.nothing-to-sell"));
                 return;
             }
             MetaProgressManager.Instance.AddGold(price, EconomySource.Merchant);
-            SetFeedback($"Sold {so.DisplayName} for {price}g.");
+            SetFeedback(Loc.Format("hub.merchant.feedback.sold", ("item", so.DisplayName), ("price", price)));
             Refresh();
         }
 
@@ -717,13 +718,13 @@ namespace Assets.Scripts.Hub
             // Checked whole first, so the gold is never taken for a step the bags cannot finish paying.
             if (!CanPay(step))
             {
-                SetFeedback(step == null ? "Fully upgraded." : "You cannot pay for that yet.");
+                SetFeedback(step == null ? Loc.Get("hub.merchant.feedback.fully-upgraded") : Loc.Get("hub.merchant.feedback.cannot-pay"));
                 return;
             }
             if (!MetaProgressManager.Instance.TrySpendGold(step.Gold, EconomySource.Merchant)
                 || !InventoryManager.Instance.SpendMaterials(step.Materials))
             {
-                SetFeedback("You cannot pay for that yet.");
+                SetFeedback(Loc.Get("hub.merchant.feedback.cannot-pay"));
                 return;
             }
 
@@ -733,20 +734,20 @@ namespace Assets.Scripts.Hub
                 case BeltOffer.Slot:
                     int slots = ((BeltSlotTier)step).Slots;
                     PotionBeltState.SetSlots(slots);
-                    SetFeedback($"The belt has {slots} slots now. Fill them at the campfire.");
+                    SetFeedback(Loc.Format("hub.merchant.feedback.belt-slots", ("slots", slots)));
                     break;
                 case BeltOffer.Recipe:
                     PotionBeltState.Unlock(type);
-                    SetFeedback($"Learned the {type.Potion.DisplayName}. Put it in a belt slot at the campfire.");
+                    SetFeedback(Loc.Format("hub.merchant.feedback.learned", ("potion", type.Potion.DisplayName)));
                     break;
                 case BeltOffer.Capacity:
                     int cap = ((BeltCapacityTier)step).Capacity;
                     PotionBeltState.SetCapacity(type, cap);
-                    SetFeedback($"A {type.DisplayName} slot carries {cap} now.");
+                    SetFeedback(Loc.Format("hub.merchant.feedback.capacity", ("potion", type.DisplayName), ("cap", cap)));
                     break;
                 default:
                     PotionBeltState.AddPotency(type);
-                    SetFeedback($"{type.Potion.DisplayName}s are stronger now.");
+                    SetFeedback(Loc.Format("hub.merchant.feedback.stronger", ("potion", type.Potion.DisplayName)));
                     break;
             }
             Refresh();

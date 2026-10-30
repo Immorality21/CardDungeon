@@ -6,6 +6,7 @@ using Assets.Scripts.Items.UI;
 using Assets.Scripts.Progression;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.UI
 {
@@ -170,7 +171,7 @@ namespace Assets.Scripts.Cards.UI
 
             if (_tab == Tab.Craft)
             {
-                SetText(_listTitle, "Known recipes");
+                SetText(_listTitle, Loc.Get("abilities.forge.title-recipes"));
                 foreach (var recipe in CraftingOps.Recipes(InventoryManager.Instance.AllItems()))
                 {
                     if (InventoryManager.Instance.KnowsRecipe(recipe))
@@ -185,7 +186,7 @@ namespace Assets.Scripts.Cards.UI
             }
             else if (_tab == Tab.Magic)
             {
-                SetText(_listTitle, "Known abilities");
+                SetText(_listTitle, Loc.Get("abilities.forge.title-abilities"));
                 foreach (var magic in MagicCatalog.Instance.AllMagic)
                 {
                     if (magic == null || string.IsNullOrEmpty(magic.Key))
@@ -204,7 +205,7 @@ namespace Assets.Scripts.Cards.UI
             }
             else
             {
-                SetText(_listTitle, "Known combos");
+                SetText(_listTitle, Loc.Get("abilities.forge.title-combos"));
                 if (MagicComboCatalog.HasInstance)
                 {
                     foreach (var combo in MagicComboCatalog.Instance.AllCombos)
@@ -229,7 +230,7 @@ namespace Assets.Scripts.Cards.UI
             // costs one row instead of the screen.
             if (undiscovered > 0)
             {
-                _list.Add(StaticRow("?", $"{undiscovered} undiscovered", UndiscoveredCaption()));
+                _list.Add(StaticRow("?", Loc.Format("abilities.forge.undiscovered", ("count", undiscovered)), UndiscoveredCaption()));
             }
 
             bool none = _entries.Count == 0;
@@ -271,7 +272,7 @@ namespace Assets.Scripts.Cards.UI
             // A recipe's gold on the right, red when anything is missing - which part, the detail says.
             if (entry.Recipe != null)
             {
-                var price = MakeLabel($"{Mathf.Max(0, entry.Recipe.CraftGold)} g", "cd-inv-row__meta", "cd-shop-price");
+                var price = MakeLabel(Loc.Format("abilities.forge.recipe-price", ("gold", Mathf.Max(0, entry.Recipe.CraftGold))), "cd-inv-row__meta", "cd-shop-price");
                 price.EnableInClassList("cd-shop-price--short", CraftBlockOf(entry.Recipe) != CraftBlock.None);
                 row.Add(price);
             }
@@ -341,8 +342,8 @@ namespace Assets.Scripts.Cards.UI
             {
                 SetIcon(null);
                 InventoryHubUI.ApplyRarity(_detailName, null);
-                SetText(_detailName, _tab == Tab.Craft ? "No recipe chosen"
-                    : _tab == Tab.Magic ? "No ability chosen" : "No combo chosen");
+                SetText(_detailName, _tab == Tab.Craft ? Loc.Get("abilities.forge.no-recipe")
+                    : _tab == Tab.Magic ? Loc.Get("abilities.forge.no-ability") : Loc.Get("abilities.forge.no-combo"));
                 SetText(_detailSub, string.Empty);
                 SetText(_reasonLabel, string.Empty);
                 SetShown(_upgradeButton, false);
@@ -373,10 +374,10 @@ namespace Assets.Scripts.Cards.UI
             SetShown(_upgradeButton, true);
             bool can = CanUpgrade(entry);
             _upgradeButton.text = level >= MetaProgressManager.MaxComboUpgradeLevel
-                ? "Fully upgraded"
+                ? Loc.Get("abilities.forge.fully-upgraded")
                 : level >= ceiling
-                    ? $"Held at Lv {ceiling} by the Forge"
-                    : $"Upgrade to Lv {level + 1} — {cost} essence";
+                    ? Loc.Format("abilities.forge.held-at", ("level", ceiling))
+                    : Loc.Format("abilities.forge.upgrade", ("level", level + 1), ("cost", cost));
             _upgradeButton.SetEnabled(can);
             SetText(_reasonLabel, can ? string.Empty : WhyNot(level, ceiling, cost));
 
@@ -387,14 +388,14 @@ namespace Assets.Scripts.Cards.UI
             }
             if (entry.Combo.RequiredTags != null)
             {
-                _detailBody.Add(MakeLabel($"Triggered by: {string.Join(" + ", entry.Combo.RequiredTags)}", "cd-inv-detail__line"));
+                _detailBody.Add(MakeLabel(Loc.Format("abilities.forge.triggered-by", ("tags", string.Join(" + ", entry.Combo.RequiredTags))), "cd-inv-detail__line"));
             }
 
             // Every effect, now → after the next upgrade; the ones a higher level unlocks, dimmed with it.
             int bonus = MetaProgressManager.ComboPowerBonusForLevel(level);
             int nextBonus = level < ceiling ? MetaProgressManager.ComboPowerBonusForLevel(level + 1) : bonus;
             var effects = entry.Combo.BonusEffects;
-            _detailBody.Add(BestiaryLineView.Section("Bonus effects"));
+            _detailBody.Add(BestiaryLineView.Section(Loc.Get("abilities.forge.section-bonus-effects")));
             if (effects != null)
             {
                 foreach (var effect in effects)
@@ -405,7 +406,7 @@ namespace Assets.Scripts.Cards.UI
                     }
                     bool locked = effect.UnlockLevel > level;
                     string line = AbilityDescriber.ForgeLine(effect, bonus, locked ? bonus : nextBonus);
-                    var label = MakeLabel(locked ? $"Lv {effect.UnlockLevel}: {line}" : line,
+                    var label = MakeLabel(locked ? Loc.Format("abilities.forge.locked-effect", ("level", effect.UnlockLevel), ("line", line)) : line,
                         locked ? "cd-inv-detail__note" : "cd-inv-detail__line");
                     _detailBody.Add(label);
                 }
@@ -424,17 +425,17 @@ namespace Assets.Scripts.Cards.UI
             SetText(_detailName, CraftingOps.ResultName(recipe));
             InventoryHubUI.ApplyRarity(_detailName, result);
             SetText(_detailSub, result.Category == ItemCategory.Equipment
-                ? $"{ItemPresenter.RarityLabel(result.Rarity)} · {ItemPresenter.SlotLabel(result.SlotType)}"
+                ? Loc.Format("abilities.forge.result-sub", ("rarity", ItemPresenter.RarityLabel(result.Rarity)), ("slot", ItemPresenter.SlotLabel(result.SlotType)))
                 : ItemPresenter.RarityLabel(result.Rarity));
 
             var block = CraftBlockOf(recipe);
             int gold = Mathf.Max(0, recipe.CraftGold);
             SetShown(_upgradeButton, true);
-            _upgradeButton.text = gold > 0 ? $"Forge — {gold} gold" : "Forge";
+            _upgradeButton.text = gold > 0 ? Loc.Format("abilities.forge.craft-gold", ("gold", gold)) : Loc.Get("abilities.forge.craft");
             _upgradeButton.SetEnabled(block == CraftBlock.None);
             SetText(_reasonLabel, CraftReason(recipe, block));
 
-            _detailBody.Add(BestiaryLineView.Section("Needs"));
+            _detailBody.Add(BestiaryLineView.Section(Loc.Get("abilities.forge.section-needs")));
             if (recipe.CraftBase != null)
             {
                 _detailBody.Add(RichLine(BaseLine(recipe.CraftBase)));
@@ -452,7 +453,7 @@ namespace Assets.Scripts.Cards.UI
             }
             if (gold > 0)
             {
-                _detailBody.Add(RichLine(HaveNeed("Gold", MetaProgressManager.Instance.Gold, gold)));
+                _detailBody.Add(RichLine(HaveNeed(Loc.Get("abilities.forge.gold"), MetaProgressManager.Instance.Gold, gold)));
             }
 
             // What it makes: the Storehouse's own lines (description, grants, reactions).
@@ -466,19 +467,19 @@ namespace Assets.Scripts.Cards.UI
             var copy = CraftingOps.FindBase(InventoryManager.Instance.GetItems(), baseItem.Key);
             if (copy == null)
             {
-                return $"<color={MaterialCostText.ShortColour}>{name} 0/1</color>";
+                return Loc.Format("abilities.forge.base-missing", ("colour", MaterialCostText.ShortColour), ("name", name));
             }
             if (!string.IsNullOrEmpty(copy.EquippedHeroKey))
             {
-                return $"<color={MaterialCostText.HaveColour}>{name} 1/1</color> (worn - the new piece goes on in its place)";
+                return Loc.Format("abilities.forge.base-worn", ("colour", MaterialCostText.HaveColour), ("name", name));
             }
-            return $"<color={MaterialCostText.HaveColour}>{name} 1/1</color>";
+            return Loc.Format("abilities.forge.base-held", ("colour", MaterialCostText.HaveColour), ("name", name));
         }
 
         private static string HaveNeed(string name, int have, int need)
         {
             string colour = have >= need ? MaterialCostText.HaveColour : MaterialCostText.ShortColour;
-            return $"<color={colour}>{name} {Mathf.Min(have, need)}/{need}</color>";
+            return Loc.Format("abilities.forge.have-need", ("colour", colour), ("name", name), ("have", Mathf.Min(have, need)), ("need", need));
         }
 
         private static Label RichLine(string text)
@@ -499,11 +500,11 @@ namespace Assets.Scripts.Cards.UI
             switch (block)
             {
                 case CraftBlock.NoBase:
-                    return $"Needs a {recipe.CraftBase.DisplayName} to work into it.";
+                    return Loc.Format("abilities.forge.reason-no-base", ("item", recipe.CraftBase.DisplayName));
                 case CraftBlock.Materials:
-                    return "Not enough materials.";
+                    return Loc.Get("abilities.forge.reason-materials");
                 case CraftBlock.Gold:
-                    return $"Need {recipe.CraftGold} gold — you have {MetaProgressManager.Instance.Gold}.";
+                    return Loc.Format("abilities.forge.reason-gold", ("need", recipe.CraftGold), ("have", MetaProgressManager.Instance.Gold));
                 default:
                     return string.Empty;
             }
@@ -518,7 +519,7 @@ namespace Assets.Scripts.Cards.UI
         {
             SetIcon(magic.Icon);
             SetText(_detailName, magic.DisplayName);
-            SetText(_detailSub, "Grows on its hero's sphere grid");
+            SetText(_detailSub, Loc.Get("abilities.forge.ability-sub"));
             SetShown(_upgradeButton, false);
             SetText(_reasonLabel, string.Empty);
 
@@ -539,7 +540,7 @@ namespace Assets.Scripts.Cards.UI
                     _detailBody.Add(MakeLabel(AbilityDescriber.ForgeLine(effect, 0, 0), "cd-inv-detail__line"));
                 }
             }
-            _detailBody.Add(MakeLabel("Before the target's defense. A hero adds the stat after the +.",
+            _detailBody.Add(MakeLabel(Loc.Get("abilities.forge.ability-note"),
                 "cd-inv-detail__note"));
         }
 
@@ -556,9 +557,9 @@ namespace Assets.Scripts.Cards.UI
             }
             if (level >= ceiling)
             {
-                return $"The Forge allows Lv {ceiling}. Raise the Forge to go further.";
+                return Loc.Format("abilities.forge.reason-ceiling", ("level", ceiling));
             }
-            return $"Need {cost} essence — you have {MetaProgressManager.Instance.Essence}.";
+            return Loc.Format("abilities.forge.reason-essence", ("need", cost), ("have", MetaProgressManager.Instance.Essence));
         }
 
         private void OnUpgrade()
@@ -575,11 +576,11 @@ namespace Assets.Scripts.Cards.UI
             }
             if (MetaProgressManager.Instance.TryUpgradeCombo(entry.Combo.Key))
             {
-                SetText(_feedbackLabel, $"{NameOf(entry)} is now Lv {LevelOf(entry)}.");
+                SetText(_feedbackLabel, Loc.Format("abilities.forge.upgraded", ("name", NameOf(entry)), ("level", LevelOf(entry))));
                 int keep = _index;
                 Refresh();
                 Select(keep);
-                SetText(_feedbackLabel, $"{NameOf(entry)} is now Lv {LevelOf(entry)}.");
+                SetText(_feedbackLabel, Loc.Format("abilities.forge.upgraded", ("name", NameOf(entry)), ("level", LevelOf(entry))));
             }
         }
 
@@ -592,7 +593,7 @@ namespace Assets.Scripts.Cards.UI
             int keep = _index;
             Refresh();
             Select(keep);
-            SetText(_feedbackLabel, $"Forged a {made.DisplayName}. It is in the Storehouse.");
+            SetText(_feedbackLabel, Loc.Format("abilities.forge.forged", ("item", made.DisplayName)));
         }
 
         // ============================================================
@@ -604,11 +605,11 @@ namespace Assets.Scripts.Cards.UI
             switch (_tab)
             {
                 case Tab.Craft:
-                    return "Found on monsters and on cleared floors";
+                    return Loc.Get("abilities.forge.undiscovered-recipes");
                 case Tab.Magic:
-                    return "Learned on a hero's sphere grid";
+                    return Loc.Get("abilities.forge.undiscovered-abilities");
                 default:
-                    return "Found by triggering them in combat";
+                    return Loc.Get("abilities.forge.undiscovered-combos");
             }
         }
 
@@ -617,11 +618,11 @@ namespace Assets.Scripts.Cards.UI
             switch (_tab)
             {
                 case Tab.Craft:
-                    return "No recipes known yet. Monsters and cleared floors give them up.";
+                    return Loc.Get("abilities.forge.empty-recipes");
                 case Tab.Magic:
-                    return "No abilities learned yet. Learn one on a hero's sphere grid.";
+                    return Loc.Get("abilities.forge.empty-abilities");
                 default:
-                    return "No combos found yet. Chain the right abilities in combat.";
+                    return Loc.Get("abilities.forge.empty-combos");
             }
         }
 
@@ -659,13 +660,13 @@ namespace Assets.Scripts.Cards.UI
                 switch (CraftBlockOf(entry.Recipe))
                 {
                     case CraftBlock.None:
-                        return "Ready to forge";
+                        return Loc.Get("abilities.forge.caption-ready");
                     case CraftBlock.NoBase:
-                        return $"Needs a {entry.Recipe.CraftBase.DisplayName}";
+                        return Loc.Format("abilities.forge.caption-no-base", ("item", entry.Recipe.CraftBase.DisplayName));
                     case CraftBlock.Gold:
-                        return "Short of gold";
+                        return Loc.Get("abilities.forge.caption-gold");
                     default:
-                        return "Short of materials";
+                        return Loc.Get("abilities.forge.caption-materials");
                 }
             }
             return entry.Magic != null
@@ -678,9 +679,9 @@ namespace Assets.Scripts.Cards.UI
             int ceiling = MetaProgressManager.Instance.ComboUpgradeCeiling;
             if (level >= MetaProgressManager.MaxComboUpgradeLevel)
             {
-                return $"Lv {level} · fully upgraded";
+                return Loc.Format("abilities.forge.level-max", ("level", level));
             }
-            return $"Lv {level} of {ceiling}";
+            return Loc.Format("abilities.forge.level-of", ("level", level), ("ceiling", ceiling));
         }
 
         private static string PriceTag(Entry entry)
@@ -688,26 +689,26 @@ namespace Assets.Scripts.Cards.UI
             int level = LevelOf(entry);
             if (level >= MetaProgressManager.MaxComboUpgradeLevel)
             {
-                return "MAX";
+                return Loc.Get("abilities.forge.price-max");
             }
             if (level >= MetaProgressManager.Instance.ComboUpgradeCeiling)
             {
-                return "Forge";
+                return Loc.Get("abilities.forge.price-forge-limit");
             }
-            return $"{CostOf(entry)} ess";
+            return Loc.Format("abilities.forge.price-essence", ("cost", CostOf(entry)));
         }
 
         private void UpdateEssence()
         {
             if (_tab == Tab.Craft)
             {
-                SetText(_essenceLabel, $"{MetaProgressManager.Instance.Gold} gold");
+                SetText(_essenceLabel, Loc.Format("abilities.forge.wallet-gold", ("gold", MetaProgressManager.Instance.Gold)));
                 return;
             }
             int ceiling = MetaProgressManager.Instance.ComboUpgradeCeiling;
             SetText(_essenceLabel, ceiling < MetaProgressManager.MaxComboUpgradeLevel
-                ? $"{MetaProgressManager.Instance.Essence} essence   ·   Forge allows Lv {ceiling}"
-                : $"{MetaProgressManager.Instance.Essence} essence");
+                ? Loc.Format("abilities.forge.wallet-essence-ceiling", ("essence", MetaProgressManager.Instance.Essence), ("level", ceiling))
+                : Loc.Format("abilities.forge.wallet-essence", ("essence", MetaProgressManager.Instance.Essence)));
         }
 
         private void SetIcon(Sprite icon)

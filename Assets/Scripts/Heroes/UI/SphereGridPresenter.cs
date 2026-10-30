@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Heroes.UI
 {
@@ -109,7 +110,7 @@ namespace Assets.Scripts.Heroes.UI
                 string name = string.IsNullOrEmpty(line.Material.DisplayName)
                     ? line.Material.Key
                     : line.Material.DisplayName;
-                parts.Add($"{Mathf.Max(1, line.Amount)} {name}");
+                parts.Add(Loc.Format("grid.cost.material", ("amount", Mathf.Max(1, line.Amount)), ("material", name)));
             }
             return string.Join(" · ", parts);
         }
@@ -128,29 +129,29 @@ namespace Assets.Scripts.Heroes.UI
 
             if (SphereGridOps.IsDefaultUnlocked(node))
             {
-                return "Known from the start — costs nothing";
+                return Loc.Get("grid.cost.default-unlock");
             }
             if (isActive)
             {
-                return "Activated";
+                return Loc.Get("grid.cost.activated");
             }
 
             // An Essence node is priced in Essence instead of XP, so a 0 XP line is left out.
             var parts = new List<string>();
             if (node.XpCost > 0 || !SphereGridOps.HasEssenceCost(node))
             {
-                parts.Add($"{node.XpCost} XP");
+                parts.Add(Loc.Format("grid.cost.xp", ("xp", node.XpCost)));
             }
             if (SphereGridOps.HasEssenceCost(node))
             {
-                parts.Add($"{node.EssenceCost} Essence");
+                parts.Add(Loc.Format("grid.cost.essence", ("essence", node.EssenceCost)));
             }
             string materials = DescribeMaterialCost(node);
             if (!string.IsNullOrEmpty(materials))
             {
                 parts.Add(materials);
             }
-            return "Costs " + string.Join(" + ", parts);
+            return Loc.Format("grid.cost.costs", ("price", string.Join(" + ", parts)));
         }
 
         /// <summary>The sg-node--* USS class for a state (see CardDungeon.uss).</summary>
@@ -180,15 +181,15 @@ namespace Assets.Scripts.Heroes.UI
             switch (type)
             {
                 case AbilityUpgradeType.Power:
-                    return $"+{amount} power";
+                    return Loc.Format("grid.upgrade.power", ("amount", amount));
                 case AbilityUpgradeType.CritChance:
-                    return $"+{amount}% crit chance";
+                    return Loc.Format("grid.upgrade.crit-chance", ("amount", amount));
                 case AbilityUpgradeType.Duration:
-                    return amount == 1 ? "+1 turn" : $"+{amount} turns";
+                    return amount == 1 ? Loc.Get("grid.upgrade.duration.one") : Loc.Format("grid.upgrade.duration.many", ("amount", amount));
                 case AbilityUpgradeType.ApplyChance:
-                    return $"+{amount}% to land its debuffs";
+                    return Loc.Format("grid.upgrade.apply-chance", ("amount", amount));
                 case AbilityUpgradeType.Charges:
-                    return amount == 1 ? "+1 charge a run" : $"+{amount} charges a run";
+                    return amount == 1 ? Loc.Get("grid.upgrade.charges.one") : Loc.Format("grid.upgrade.charges.many", ("amount", amount));
                 default:
                     return type.ToString();
             }
@@ -246,7 +247,7 @@ namespace Assets.Scripts.Heroes.UI
             switch (node.Kind)
             {
                 case SphereNodeKind.Resistance:
-                    return "R";
+                    return Loc.Get("grid.glyph.resistance");
                 case SphereNodeKind.MagicSlot:
                     // "+1": one more ability carried. It read "M" (for the code's MagicSlot), which
                     // told the player nothing (playtest 3 finding 4).
@@ -288,7 +289,7 @@ namespace Assets.Scripts.Heroes.UI
                     }
                 }
             }
-            return largest == null ? "S" : StatCatalog.ShortName(largest.Type);
+            return largest == null ? Loc.Get("grid.glyph.stat") : StatCatalog.ShortName(largest.Type);
         }
 
         /// <summary>The player-facing name: authored DisplayName, falling back to the payload.</summary>
@@ -311,11 +312,11 @@ namespace Assets.Scripts.Heroes.UI
 
             if (node.Kind == SphereNodeKind.Resistance)
             {
-                return $"{node.ResistType} resistance +{node.ResistPercent:0}%";
+                return Loc.Format("grid.payload.resistance", ("element", node.ResistType), ("percent", node.ResistPercent.ToString("0")));
             }
             if (node.Kind == SphereNodeKind.MagicSlot)
             {
-                return "+1 ability slot (carry one more of what you know)";
+                return Loc.Get("grid.payload.ability-slot");
             }
             if (node.Kind == SphereNodeKind.MagicKnown)
             {
@@ -323,60 +324,66 @@ namespace Assets.Scripts.Heroes.UI
                 // *learned*, not automatically carried - it still has to win a slot on the Spells
                 // screen - and the charge count, which is the whole run's allowance of it and so is
                 // as much the payload as the spell name is.
-                string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
-                return $"Learns {name} — {Mathf.Max(1, node.GrantedCharges)} charges per run";
+                string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? Loc.Get("grid.payload.unset") : node.GrantedMagicKey;
+                return Loc.Format("grid.payload.learns", ("ability", name), ("charges", Mathf.Max(1, node.GrantedCharges)));
             }
             if (node.Kind == SphereNodeKind.MagicAwaken)
             {
-                string from = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
-                string to = string.IsNullOrEmpty(node.AwakenedMagicKey) ? "(unset)" : node.AwakenedMagicKey;
-                return $"Awakens {from} into {to} — same slot, same charges";
+                string from = string.IsNullOrEmpty(node.GrantedMagicKey) ? Loc.Get("grid.payload.unset") : node.GrantedMagicKey;
+                string to = string.IsNullOrEmpty(node.AwakenedMagicKey) ? Loc.Get("grid.payload.unset") : node.AwakenedMagicKey;
+                return Loc.Format("grid.payload.awakens", ("from", from), ("to", to));
             }
             if (node.Kind == SphereNodeKind.MagicUpgrade)
             {
-                string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? "(unset)" : node.GrantedMagicKey;
-                return $"{name}: {DescribeUpgrade(node.UpgradeType, node.UpgradeAmount)}";
+                string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? Loc.Get("grid.payload.unset") : node.GrantedMagicKey;
+                return Loc.Format("grid.payload.ability-upgrade", ("ability", name), ("upgrade", DescribeUpgrade(node.UpgradeType, node.UpgradeAmount)));
             }
             if (node.Kind == SphereNodeKind.Ultra)
             {
-                string ultra = string.IsNullOrEmpty(node.GrantedUltraKey) ? "(unset)" : node.GrantedUltraKey;
-                return $"Learns the Ultra {ultra} — used once the Ultra gauge is full";
+                string ultra = string.IsNullOrEmpty(node.GrantedUltraKey) ? Loc.Get("grid.payload.unset") : node.GrantedUltraKey;
+                return Loc.Format("grid.payload.ultra", ("ultra", ultra));
             }
-            string summon = string.IsNullOrEmpty(node.GrantedSummonKey) ? "(unset)" : node.GrantedSummonKey;
+            string summon = string.IsNullOrEmpty(node.GrantedSummonKey) ? Loc.Get("grid.payload.unset") : node.GrantedSummonKey;
             if (node.Kind == SphereNodeKind.Summon)
             {
                 // Always carried - a summon takes no ability slot - and cast from its own command.
-                return $"Learns the summon {summon} — always carried, cast with Summon";
+                return Loc.Format("grid.payload.summon", ("summon", summon));
             }
             if (node.Kind == SphereNodeKind.SummonPower)
             {
-                return $"{summon}: +{node.SummonAmount} to its effect";
+                return Loc.Format("grid.payload.summon-power", ("summon", summon), ("amount", node.SummonAmount));
             }
             if (node.Kind == SphereNodeKind.SummonDuration)
             {
-                return $"{summon}: lasts +{node.SummonAmount} turn{(node.SummonAmount == 1 ? "" : "s")}";
+                return node.SummonAmount == 1
+                    ? Loc.Format("grid.payload.summon-duration.one", ("summon", summon), ("amount", node.SummonAmount))
+                    : Loc.Format("grid.payload.summon-duration.many", ("summon", summon), ("amount", node.SummonAmount));
             }
             if (node.Kind == SphereNodeKind.SummonCharge)
             {
-                return $"{summon}: +{node.SummonAmount} charge{(node.SummonAmount == 1 ? "" : "s")} per run";
+                return node.SummonAmount == 1
+                    ? Loc.Format("grid.payload.summon-charge.one", ("summon", summon), ("amount", node.SummonAmount))
+                    : Loc.Format("grid.payload.summon-charge.many", ("summon", summon), ("amount", node.SummonAmount));
             }
             if (node.Kind == SphereNodeKind.SummonSize)
             {
-                return $"{summon}: +{node.SummonAmount} troop{(node.SummonAmount == 1 ? "" : "s")}";
+                return node.SummonAmount == 1
+                    ? Loc.Format("grid.payload.summon-size.one", ("summon", summon), ("amount", node.SummonAmount))
+                    : Loc.Format("grid.payload.summon-size.many", ("summon", summon), ("amount", node.SummonAmount));
             }
             if (node.Kind == SphereNodeKind.SummonPromote)
             {
                 return node.SummonAmount == 1
-                    ? $"{summon}: its weakest troop becomes a stronger one"
-                    : $"{summon}: its {node.SummonAmount} weakest troops become stronger ones";
+                    ? Loc.Format("grid.payload.summon-promote.one", ("summon", summon))
+                    : Loc.Format("grid.payload.summon-promote.many", ("summon", summon), ("amount", node.SummonAmount));
             }
             if (node.Kind == SphereNodeKind.SummonApplyChance)
             {
-                return $"{summon}: +{node.SummonAmount}% chance its attacks inflict their effects";
+                return Loc.Format("grid.payload.summon-apply-chance", ("summon", summon), ("amount", node.SummonAmount));
             }
             if (node.Kind == SphereNodeKind.SummonDamage)
             {
-                return $"{summon}: +{node.SummonAmount}% damage";
+                return Loc.Format("grid.payload.summon-damage", ("summon", summon), ("amount", node.SummonAmount));
             }
 
             var parts = new List<string>();
@@ -384,10 +391,10 @@ namespace Assets.Scripts.Heroes.UI
             {
                 foreach (var entry in node.Gains.NonZero())
                 {
-                    parts.Add($"+{entry.Amount} {StatCatalog.ShortName(entry.Type)}");
+                    parts.Add(Loc.Format("grid.payload.stat-gain", ("amount", entry.Amount), ("stat", StatCatalog.ShortName(entry.Type))));
                 }
             }
-            return parts.Count > 0 ? string.Join(" · ", parts) : "(grants nothing)";
+            return parts.Count > 0 ? string.Join(" · ", parts) : Loc.Get("grid.payload.nothing");
         }
 
         /// <summary>
@@ -475,8 +482,8 @@ namespace Assets.Scripts.Heroes.UI
             }
             string list = names.Count == 1
                 ? names[0]
-                : string.Join(", ", names.GetRange(0, names.Count - 1)) + " and " + names[names.Count - 1];
-            return $"Requires {list} first.";
+                : Loc.Format("grid.requires.list", ("names", string.Join(", ", names.GetRange(0, names.Count - 1))), ("last", names[names.Count - 1]));
+            return Loc.Format("grid.requires", ("list", list));
         }
 
         /// <summary>The kind as a player-facing word.</summary>
@@ -490,19 +497,19 @@ namespace Assets.Scripts.Heroes.UI
             switch (node.Kind)
             {
                 case SphereNodeKind.Resistance:
-                    return "Resistance";
+                    return Loc.Get("grid.kind.resistance");
                 case SphereNodeKind.MagicSlot:
-                    return "Ability slot";
+                    return Loc.Get("grid.kind.ability-slot");
                 case SphereNodeKind.MagicKnown:
-                    return "Known ability";
+                    return Loc.Get("grid.kind.known-ability");
                 case SphereNodeKind.MagicAwaken:
-                    return "Awakening";
+                    return Loc.Get("grid.kind.awakening");
                 case SphereNodeKind.MagicUpgrade:
-                    return "Ability upgrade";
+                    return Loc.Get("grid.kind.ability-upgrade");
                 case SphereNodeKind.Summon:
-                    return "Summon";
+                    return Loc.Get("grid.kind.summon");
                 case SphereNodeKind.Ultra:
-                    return "Ultra";
+                    return Loc.Get("grid.kind.ultra");
                 case SphereNodeKind.SummonPower:
                 case SphereNodeKind.SummonDuration:
                 case SphereNodeKind.SummonCharge:
@@ -510,9 +517,9 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.SummonPromote:
                 case SphereNodeKind.SummonApplyChance:
                 case SphereNodeKind.SummonDamage:
-                    return "Summon upgrade";
+                    return Loc.Get("grid.kind.summon-upgrade");
                 default:
-                    return "Stat";
+                    return Loc.Get("grid.kind.stat");
             }
         }
     }

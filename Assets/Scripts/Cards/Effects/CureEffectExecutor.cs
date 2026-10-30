@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -35,7 +36,7 @@ namespace Assets.Scripts.Cards.Effects
                 result.Entries.Add(new EffectEntry
                 {
                     Target = target,
-                    Text = cleared == 1 ? "Cleansed" : $"Cleansed x{cleared}",
+                    Text = cleared == 1 ? Loc.Get("combat.float.cleansed") : Loc.Format("combat.float.cleansed-many", ("count", cleared)),
                     Color = CureColor,
                     Delay = EffectDelay,
                     PositionOffset = Vector3.up * 0.2f

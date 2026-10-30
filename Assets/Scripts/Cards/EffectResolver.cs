@@ -5,6 +5,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Progression;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards
 {
@@ -12,9 +13,9 @@ namespace Assets.Scripts.Cards
     {
         private static readonly Color ComboNameColor = new Color(1f, 0.6f, 0f);
         private static readonly Color DodgeColor = new Color(0.8f, 0.8f, 0.85f);
-        private const string DodgeText = "Dodge";
-        private const string MissText = "Miss";
-        private const string EvadeText = "Evade";
+        private const string DodgeKey = "combat.float.dodge";
+        private const string MissKey = "combat.float.miss";
+        private const string EvadeKey = "combat.float.evade";
         private const float ComboDelay = 0.3f;
 
         private readonly EffectExecutorFactory _factory;
@@ -275,9 +276,9 @@ namespace Assets.Scripts.Cards
             {
                 if (target != action.Caster && target.IsAlive)
                 {
-                    string avoided = DefenseRules.RollMiss(blinded) ? MissText
-                        : Buffs.EvasiveBuffHandler.TryEvade(buffTracker, target) ? EvadeText
-                        : DefenseRules.RollDodge(target) ? DodgeText
+                    string avoided = DefenseRules.RollMiss(blinded) ? MissKey
+                        : Buffs.EvasiveBuffHandler.TryEvade(buffTracker, target) ? EvadeKey
+                        : DefenseRules.RollDodge(target) ? DodgeKey
                         : null;
                     if (avoided != null)
                     {
@@ -285,12 +286,12 @@ namespace Assets.Scripts.Cards
                         {
                             Attacker = action.Caster,
                             Target = target,
-                            Dodged = avoided != MissText
+                            Dodged = avoided != MissKey
                         });
                         result.Entries.Add(new EffectEntry
                         {
                             Target = target,
-                            Text = avoided,
+                            Text = Loc.Get(avoided),
                             Color = DodgeColor
                         });
                         continue;

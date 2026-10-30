@@ -12,6 +12,7 @@ using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Items.UI
 {
@@ -321,11 +322,11 @@ namespace Assets.Scripts.Items.UI
                 var save = HeroRoster.GetHeroSave(selected);
                 int xp = save != null ? save.CurrentXp : 0;
                 AddSummaryLine(summary, selected.DisplayName, "cd-inv-heroes__summary-name");
-                AddSummaryLine(summary, $"HP {stats[StatType.MaxHealth]} \u00b7 {xp} XP to spend", null);
+                AddSummaryLine(summary, Loc.Format("items.inv.hero-summary", ("hp", stats[StatType.MaxHealth]), ("xp", xp)), null);
             }
             else if (MetaProgressManager.HasInstance)
             {
-                AddSummaryLine(summary, $"{MetaProgressManager.Instance.Gold} gold", "cd-inv-heroes__summary-name");
+                AddSummaryLine(summary, Loc.Format("items.inv.gold", ("gold", MetaProgressManager.Instance.Gold)), "cd-inv-heroes__summary-name");
             }
             _heroesRow.Add(summary);
         }
@@ -435,14 +436,14 @@ namespace Assets.Scripts.Items.UI
             {
                 case Tab.Equipment:
                     _hint.text = _focus == Focus.Slots
-                        ? "↑↓ slot · Enter choose an item · Q/E hero · ←→ tab · Esc back"
-                        : "↑↓ item · Enter equip · Esc back to the slots";
+                        ? Loc.Get("items.inv.hint.slots")
+                        : Loc.Get("items.inv.hint.items");
                     break;
                 case Tab.Spells:
-                    _hint.text = "↑↓ ability · Enter carry or put away · Q/E hero · ←→ tab · Esc back";
+                    _hint.text = Loc.Get("items.inv.hint.abilities");
                     break;
                 default:
-                    _hint.text = "↑↓ browse · ←→ tab · Esc back";
+                    _hint.text = Loc.Get("items.inv.hint.browse");
                     break;
             }
         }
@@ -452,11 +453,11 @@ namespace Assets.Scripts.Items.UI
         private void BuildEquipment()
         {
             var hero = FindHero(_selectedHeroKey);
-            SetText(_leftTitle, "Equipped");
+            SetText(_leftTitle, Loc.Get("items.inv.title.equipped"));
             if (hero == null)
             {
                 SetText(_listTitle, string.Empty);
-                ShowEmpty("No hero to equip yet.");
+                ShowEmpty(Loc.Get("items.inv.empty.no-hero-to-equip"));
                 ClearDetail();
                 return;
             }
@@ -480,7 +481,7 @@ namespace Assets.Scripts.Items.UI
                 entry.Row = BuildRow(
                     worn != null ? worn.Icon : null,
                     worn != null ? worn.DisplayName : ItemPresenter.SlotLabel(slot),
-                    worn != null ? ItemPresenter.SlotLabel(slot) : "Empty",
+                    worn != null ? ItemPresenter.SlotLabel(slot) : Loc.Get("items.inv.empty-slot"),
                     string.Empty,
                     worn,
                     out entry.Cursor);
@@ -523,7 +524,7 @@ namespace Assets.Scripts.Items.UI
             _list?.Clear();
             _listEntries.Clear();
             SetShown(_emptyLabel, false);
-            SetText(_listTitle, "Fits " + ItemPresenter.SlotLabel(slot));
+            SetText(_listTitle, Loc.Format("items.inv.title.fits", ("slot", ItemPresenter.SlotLabel(slot))));
 
             var worn = WornItem(slot);
             if (worn != null)
@@ -532,11 +533,11 @@ namespace Assets.Scripts.Items.UI
                 {
                     Gear = ItemPresenter.SwapOut(CurrentGear(), slot),
                     Preview = () => ShowItemDetail(worn, SlotRemovalPreview(slot),
-                        $"Taking it off leaves the {ItemPresenter.SlotLabel(slot).ToLowerInvariant()} slot empty.",
+                        Loc.Format("items.inv.take-off-note", ("slot", ItemPresenter.SlotLabel(slot).ToLowerInvariant())),
                         InventoryManager.Instance.GetEquipped(slot, _selectedHeroKey), removing: true),
                     Confirm = () => Unequip(slot),
                 };
-                remove.Row = BuildRow(null, "Take off " + worn.DisplayName, "Leave the slot empty",
+                remove.Row = BuildRow(null, Loc.Format("items.inv.take-off", ("item", worn.DisplayName)), Loc.Get("items.inv.leave-empty"),
                     string.Empty, null, out remove.Cursor);
                 var glyph = new Label("✕") { pickingMode = PickingMode.Ignore };
                 glyph.AddToClassList("cd-inv-row__glyph");
@@ -589,12 +590,12 @@ namespace Assets.Scripts.Items.UI
                 var wearer = FindHero(item.EquippedHeroKey);
                 AddCandidate(item, wearer != null
                     ? wearer.DisplayName
-                    : (string.IsNullOrEmpty(item.EquippedHeroKey) ? "someone" : item.EquippedHeroKey));
+                    : (string.IsNullOrEmpty(item.EquippedHeroKey) ? Loc.Get("items.inv.someone") : item.EquippedHeroKey));
             }
 
             if (_listEntries.Count == 0)
             {
-                ShowEmpty($"Nothing the party owns fits the {ItemPresenter.SlotLabel(slot).ToLowerInvariant()} slot.");
+                ShowEmpty(Loc.Format("items.inv.empty.nothing-fits", ("slot", ItemPresenter.SlotLabel(slot).ToLowerInvariant())));
             }
         }
 
@@ -629,18 +630,18 @@ namespace Assets.Scripts.Items.UI
             {
                 Gear = gear,
                 Preview = () => ShowItemDetail(so, preview,
-                    wornBy != null ? $"Worn by {wornBy} - equipping it takes it from them." : null, item),
+                    wornBy != null ? Loc.Format("items.inv.worn-by-note", ("hero", wornBy)) : null, item),
                 Confirm = wornBy != null
                     ? () => AskReassign(item, so, wornBy)
                     : (Action)(() => Equip(item, so)),
             };
 
             string caption = wornBy != null
-                ? $"Worn by {wornBy}"
+                ? Loc.Format("items.inv.worn-by", ("hero", wornBy))
                 : ItemPresenter.RarityLabel(so.Rarity);
             if (copies > 1)
             {
-                caption = $"×{copies} · " + caption;
+                caption = Loc.Format("items.inv.copies-caption", ("copies", copies), ("caption", caption));
             }
             // The chips are the change from what this hero wears, not what the item grants - say so,
             // or "+2 STR" here reads as a contradiction of the detail's "Grants +4 STR" (playtest 2
@@ -648,7 +649,7 @@ namespace Assets.Scripts.Items.UI
             var worn = WornItem(so.SlotType);
             if (worn != null && worn != so)
             {
-                caption += $" · vs {worn.DisplayName}";
+                caption = Loc.Format("items.inv.vs-caption", ("caption", caption), ("item", worn.DisplayName));
             }
             entry.Row = BuildRow(so.Icon, so.DisplayName, caption, string.Empty, so, out entry.Cursor);
             if (wornBy != null)
@@ -664,7 +665,7 @@ namespace Assets.Scripts.Items.UI
             foreach (var change in BiggestChanges(current, preview, 2))
             {
                 string sign = change.Amount > 0 ? "+" : "\u2212";
-                var chip = new Label($"{sign}{Mathf.Abs(change.Amount)} {StatCatalog.ShortName(change.Stat)}")
+                var chip = new Label(Loc.Format("items.bonus.chip", ("value", $"{sign}{Mathf.Abs(change.Amount)}"), ("stat", StatCatalog.ShortName(change.Stat))))
                 {
                     pickingMode = PickingMode.Ignore,
                 };
@@ -752,11 +753,11 @@ namespace Assets.Scripts.Items.UI
                 return;
             }
             var hero = FindHero(_selectedHeroKey);
-            string to = hero != null ? hero.DisplayName : "this hero";
+            string to = hero != null ? hero.DisplayName : Loc.Get("items.inv.this-hero");
             if (_confirmMessage != null)
             {
                 _confirmMessage.text =
-                    $"{so.DisplayName} is already equipped by {wornBy}. Do you want to reassign it to {to}?";
+                    Loc.Format("items.inv.confirm-reassign", ("item", so.DisplayName), ("from", wornBy), ("to", to));
             }
             _onConfirm = () => Equip(item, so);
             _confirmIndex = 0;
@@ -851,11 +852,11 @@ namespace Assets.Scripts.Items.UI
         private void BuildSpells()
         {
             var hero = FindHero(_selectedHeroKey);
-            SetText(_leftTitle, "Carried");
-            SetText(_listTitle, "Known abilities");
+            SetText(_leftTitle, Loc.Get("items.inv.title.carried"));
+            SetText(_listTitle, Loc.Get("items.inv.title.known-abilities"));
             if (hero == null)
             {
-                ShowEmpty("No hero selected.");
+                ShowEmpty(Loc.Get("items.inv.empty.no-hero"));
                 ClearDetail();
                 return;
             }
@@ -876,7 +877,7 @@ namespace Assets.Scripts.Items.UI
             // Left: the slots as pips, then what fills them.
             var pips = new VisualElement();
             pips.AddToClassList("cd-inv-pips");
-            var pipsLabel = new Label("Slots");
+            var pipsLabel = new Label(Loc.Get("items.inv.slots"));
             pipsLabel.AddToClassList("cd-inv-pips__label");
             pips.Add(pipsLabel);
             for (int i = 0; i < slots; i++)
@@ -891,9 +892,9 @@ namespace Assets.Scripts.Items.UI
             foreach (var slot in kit)
             {
                 var magic = Magic(slot.Key);
-                string caption = slot.InRun ? $"{slot.Charges} of {slot.MaxCharges} charges left this run"
-                               : runEntry != null ? $"{slot.MaxCharges} charges · joins on the next floor"
-                               : $"{slot.MaxCharges} charges a run";
+                string caption = slot.InRun ? Loc.Format("items.abilities.charges-left", ("charges", slot.Charges), ("max", slot.MaxCharges))
+                               : runEntry != null ? Loc.Format("items.abilities.charges-next-floor", ("max", slot.MaxCharges))
+                               : Loc.Format("items.abilities.charges-a-run", ("max", slot.MaxCharges));
                 var row = BuildRow(magic != null ? magic.Icon : null, magic != null ? magic.DisplayName : slot.Key,
                     caption, string.Empty, null, out _);
                 row.AddToClassList("cd-inv-row--static");
@@ -901,14 +902,14 @@ namespace Assets.Scripts.Items.UI
             }
             if (carried.Count == 0)
             {
-                var none = new Label("Nothing carried.");
+                var none = new Label(Loc.Get("items.inv.nothing-carried"));
                 none.AddToClassList("cd-inv-empty");
                 _left?.Add(none);
             }
 
             if (known.Count == 0)
             {
-                ShowEmpty($"{hero.DisplayName} knows no abilities yet. Learn one on the sphere grid.");
+                ShowEmpty(Loc.Format("items.inv.empty.no-abilities", ("hero", hero.DisplayName)));
                 ClearDetail();
                 return;
             }
@@ -929,7 +930,7 @@ namespace Assets.Scripts.Items.UI
                 listEntry.Row = BuildRow(
                     magic != null ? magic.Icon : null,
                     magic != null ? magic.DisplayName : key,
-                    inRun ? "In this run" : isCarried ? "Carried" : "Not carried",
+                    inRun ? Loc.Get("items.inv.ability.in-run") : isCarried ? Loc.Get("items.inv.ability.carried") : Loc.Get("items.inv.ability.not-carried"),
                     isCarried ? "✓" : string.Empty,
                     null,
                     out listEntry.Cursor);
@@ -1016,8 +1017,8 @@ namespace Assets.Scripts.Items.UI
 
         private void BuildConsumables()
         {
-            SetText(_leftTitle, "Party pouch");
-            SetText(_listTitle, "Consumables");
+            SetText(_leftTitle, Loc.Get("items.inv.title.party-pouch"));
+            SetText(_listTitle, Loc.Get("items.inv.title.consumables"));
 
             var consumables = InventoryManager.Instance.GetConsumables();
             int total = 0;
@@ -1025,12 +1026,12 @@ namespace Assets.Scripts.Items.UI
             {
                 total += Mathf.Max(0, item.Quantity);
             }
-            AddSummary($"{consumables.Count} kinds · {total} in all",
-                "Shared by the whole party, and used from the Item command in a fight.");
+            AddSummary(Loc.Format("items.inv.kinds-summary", ("kinds", consumables.Count), ("total", total)),
+                Loc.Get("items.inv.consumables-note"));
 
             if (consumables.Count == 0)
             {
-                ShowEmpty("No consumables carried.");
+                ShowEmpty(Loc.Get("items.inv.empty.no-consumables"));
                 ClearDetail();
                 return;
             }
@@ -1049,7 +1050,7 @@ namespace Assets.Scripts.Items.UI
                         PotionBeltState.HealBonusFor(so), PotionBeltState.ChargeBonusFor(so))),
                 };
                 entry.Row = BuildRow(so.Icon, so.DisplayName, ItemPresenter.RarityLabel(so.Rarity),
-                    "x" + quantity, so, out entry.Cursor);
+                    Loc.Format("items.inv.quantity", ("count", quantity)), so, out entry.Cursor);
                 AddListEntry(entry);
             }
         }
@@ -1061,8 +1062,8 @@ namespace Assets.Scripts.Items.UI
         /// </summary>
         private void BuildMaterials()
         {
-            SetText(_leftTitle, "Stores");
-            SetText(_listTitle, "Materials");
+            SetText(_leftTitle, Loc.Get("items.inv.title.stores"));
+            SetText(_listTitle, Loc.Get("items.inv.title.materials"));
 
             var materials = InventoryManager.Instance.GetMaterials();
 
@@ -1084,11 +1085,11 @@ namespace Assets.Scripts.Items.UI
             {
                 all += entry.Value;
             }
-            AddSummary($"{order.Count} kinds · {all} in all", "Kept in the Storehouse between runs.");
+            AddSummary(Loc.Format("items.inv.kinds-summary", ("kinds", order.Count), ("total", all)), Loc.Get("items.inv.materials-note"));
 
             if (order.Count == 0)
             {
-                ShowEmpty("No materials yet.");
+                ShowEmpty(Loc.Get("items.inv.empty.no-materials"));
                 ClearDetail();
                 return;
             }
@@ -1112,7 +1113,7 @@ namespace Assets.Scripts.Items.UI
                     Preview = () => ShowStackDetail(so, count, null),
                 };
                 entry.Row = BuildRow(so.Icon, so.DisplayName, ItemPresenter.RarityLabel(so.Rarity),
-                    "x" + count, so, out entry.Cursor);
+                    Loc.Format("items.inv.quantity", ("count", count)), so, out entry.Cursor);
                 AddListEntry(entry);
             }
         }
@@ -1169,12 +1170,14 @@ namespace Assets.Scripts.Items.UI
             }
             else
             {
-                SetDetailHead(null, "Empty", ItemPresenter.SlotLabel(slot), null);
+                SetDetailHead(null, Loc.Get("items.inv.empty-slot"), ItemPresenter.SlotLabel(slot), null);
             }
 
             AddNote(fits > 0
-                ? $"{fits} other item{(fits == 1 ? "" : "s")} fit{(fits == 1 ? "s" : "")} here - press Enter to choose."
-                : "Nothing else the party owns fits here.");
+                ? (fits == 1
+                    ? Loc.Format("items.inv.other-fits-one", ("count", fits))
+                    : Loc.Format("items.inv.other-fits", ("count", fits)))
+                : Loc.Get("items.inv.nothing-else-fits"));
             AddStatSection(StatsWith(CurrentGear()), null);
         }
 
@@ -1198,12 +1201,12 @@ namespace Assets.Scripts.Items.UI
             {
                 AddNote(note);
             }
-            AddStatSection(StatsWith(CurrentGear()), preview, removing ? "Stats without it" : "Stats if equipped");
+            AddStatSection(StatsWith(CurrentGear()), preview, removing ? Loc.Get("items.inv.section.stats-without") : Loc.Get("items.inv.section.stats-if-equipped"));
         }
 
         private void ShowStackDetail(ItemSO item, int count, string effect)
         {
-            SetDetailHead(item.Icon, item.DisplayName, $"{ItemPresenter.RarityLabel(item.Rarity)} · x{count}", item);
+            SetDetailHead(item.Icon, item.DisplayName, Loc.Format("items.inv.stack-sub", ("rarity", ItemPresenter.RarityLabel(item.Rarity)), ("count", count)), item);
             if (!string.IsNullOrEmpty(effect))
             {
                 AddLine(effect);
@@ -1219,12 +1222,12 @@ namespace Assets.Scripts.Items.UI
         {
             if (magic == null)
             {
-                SetDetailHead(null, key, isCarried ? "Carried" : "Not carried", null);
+                SetDetailHead(null, key, isCarried ? Loc.Get("items.inv.ability.carried") : Loc.Get("items.inv.ability.not-carried"), null);
                 return;
             }
 
             SetDetailHead(magic.Icon, magic.DisplayName,
-                $"{AbilityDescriber.TargetLabel(magic)} · {charges} charges a run", null);
+                Loc.Format("items.inv.ability-sub", ("target", AbilityDescriber.TargetLabel(magic)), ("charges", charges)), null);
 
             // Described through the hero's own stats (grid + gear), so the numbers are the ones this
             // hero will hit for - a null caster would read them as base values. Flavour in italics,
@@ -1234,7 +1237,7 @@ namespace Assets.Scripts.Items.UI
                 AddDescription(magic.Description.Trim());
             }
             var effects = AbilityDescriber.EffectLines(magic, unit, null, 0, 0);
-            _detailBody?.Add(BestiaryLineView.Section("Effect"));
+            _detailBody?.Add(BestiaryLineView.Section(Loc.Get("items.inv.section.effect")));
             if (effects.Count == 0)
             {
                 AddLine(AbilityDescriber.TargetLabel(magic));
@@ -1245,15 +1248,15 @@ namespace Assets.Scripts.Items.UI
             }
             if (inRun)
             {
-                AddNote("In this run's slots until the run ends. Its charges come back at a refuge.");
+                AddNote(Loc.Get("items.inv.note.in-run"));
                 return;
             }
             if (isCarried)
             {
                 var carriedNow = MagicLoadoutOps.RunKit(runEntry, known, _loadout.ChosenFor(_selectedHeroKey), slots);
                 AddNote(carriedNow.Count == 1
-                    ? "Carried. A hero always takes at least one ability - carry another to swap this one out."
-                    : "Carried. Enter puts it away.");
+                    ? Loc.Get("items.inv.note.carried-last")
+                    : Loc.Get("items.inv.note.carried"));
                 return;
             }
 
@@ -1275,13 +1278,13 @@ namespace Assets.Scripts.Items.UI
             }
             if (runEntry != null && !after.Contains(key))
             {
-                AddNote("Every slot is in use this run. It can be carried from the next run on.");
+                AddNote(Loc.Get("items.inv.note.slots-in-use"));
                 return;
             }
             AddNote(displaced != null
-                ? $"Slots are full: carrying this puts {displaced} away."
-                : runEntry != null ? "Enter to carry it from the next floor, at full charges."
-                : "Enter to carry it into the next run.");
+                ? Loc.Format("items.inv.note.slots-full", ("ability", displaced))
+                : runEntry != null ? Loc.Get("items.inv.note.carry-next-floor")
+                : Loc.Get("items.inv.note.carry-next-run"));
         }
 
         private void AddItemLines(ItemSO item, ItemSaveData entry = null)
@@ -1298,9 +1301,9 @@ namespace Assets.Scripts.Items.UI
         internal static void AddItemLines(VisualElement body, ItemSO item, ItemSaveData entry = null)
         {
             AddGrants(body, item);
-            AddLines(body, "Reacts", ItemPresenter.ReactionLines(item));
-            AddLines(body, item.Set != null ? item.Set.DisplayName + " set" : "Set", ItemPresenter.SetLines(item));
-            AddLines(body, "Grows", ItemPresenter.MilestoneLines(item, entry));
+            AddLines(body, Loc.Get("items.inv.section.reacts"), ItemPresenter.ReactionLines(item));
+            AddLines(body, item.Set != null ? Loc.Format("items.inv.section.named-set", ("set", item.Set.DisplayName)) : Loc.Get("items.inv.section.set"), ItemPresenter.SetLines(item));
+            AddLines(body, Loc.Get("items.inv.section.grows"), ItemPresenter.MilestoneLines(item, entry));
         }
 
         private static void AddLines(VisualElement body, string title, List<string> lines)
@@ -1335,7 +1338,7 @@ namespace Assets.Scripts.Items.UI
             {
                 return;
             }
-            body.Add(BestiaryLineView.Section("Grants"));
+            body.Add(BestiaryLineView.Section(Loc.Get("items.inv.section.grants")));
             var row = new VisualElement();
             row.AddToClassList("cd-inv-grants");
             foreach (var text in chips)
@@ -1351,9 +1354,11 @@ namespace Assets.Scripts.Items.UI
         /// Every stat, now and - when an item is being considered - after, as a two-column grid of
         /// short names. A one-per-row list ran past the bottom of the pane and hid Health.
         /// </summary>
-        private void AddStatSection(StatBlock current, StatBlock preview, string previewTitle = "Stats if equipped")
+        private void AddStatSection(StatBlock current, StatBlock preview, string previewTitle = null)
         {
-            _detailBody?.Add(BestiaryLineView.Section(preview != null ? previewTitle : "Stats"));
+            _detailBody?.Add(BestiaryLineView.Section(preview != null
+                ? previewTitle ?? Loc.Get("items.inv.section.stats-if-equipped")
+                : Loc.Get("items.inv.section.stats")));
             var grid = new VisualElement();
             grid.AddToClassList("cd-inv-stats");
             foreach (var stat in StatCatalog.Types)
@@ -1400,7 +1405,7 @@ namespace Assets.Scripts.Items.UI
             }
 
             // The same two-column grid as the stats, so the pane fits without scrolling.
-            _detailBody?.Add(BestiaryLineView.Section("Resistances"));
+            _detailBody?.Add(BestiaryLineView.Section(Loc.Get("items.inv.section.resistances")));
             var resistGrid = new VisualElement();
             resistGrid.AddToClassList("cd-inv-stats");
             resistGrid.AddToClassList("cd-inv-stats--wide");
@@ -1417,7 +1422,7 @@ namespace Assets.Scripts.Items.UI
                 resistGrid.Add(StatCell(name,
                     changes ? $"{Percent(now)} → {Percent(then)}" : Percent(now),
                     changes ? (then > now ? 1 : -1) : 0,
-                    name + " resistance"));
+                    Loc.Format("items.inv.resistance-tooltip", ("type", name))));
             }
             _detailBody?.Add(resistGrid);
         }

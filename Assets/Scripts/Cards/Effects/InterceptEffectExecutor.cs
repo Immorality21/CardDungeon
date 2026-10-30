@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -41,7 +42,7 @@ namespace Assets.Scripts.Cards.Effects
                 result.Entries.Add(new EffectEntry
                 {
                     Target = target,
-                    Text = "Protected",
+                    Text = Loc.Get("combat.float.protected"),
                     Color = InterceptColor,
                     Delay = EffectDelay
                 });

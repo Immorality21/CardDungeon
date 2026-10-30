@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes.UI;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Hub
 {
@@ -59,13 +60,13 @@ namespace Assets.Scripts.Hub
             switch (state.Status)
             {
                 case CampaignNodeStatus.Completed:
-                    return state.CanStart ? "Cleared - can be run again" : "Cleared";
+                    return state.CanStart ? Loc.Get("hub.campaign.status.cleared-rerun") : Loc.Get("hub.campaign.status.cleared");
                 case CampaignNodeStatus.Available:
-                    return "Open";
+                    return Loc.Get("hub.campaign.status.open");
                 case CampaignNodeStatus.InProgress:
-                    return "In progress";
+                    return Loc.Get("hub.campaign.status.in-progress");
                 case CampaignNodeStatus.Locked:
-                    return "Locked";
+                    return Loc.Get("hub.campaign.status.locked");
                 default:
                     return string.Empty;
             }

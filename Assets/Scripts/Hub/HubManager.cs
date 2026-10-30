@@ -16,6 +16,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Assets.Scripts.Events;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Hub
 {
@@ -573,7 +574,7 @@ namespace Assets.Scripts.Hub
             SetShown(_lotGrant, hasGrant);
             if (_lotGrantTitle != null)
             {
-                _lotGrantTitle.text = canPlace ? "Once built" : $"Level {BuildingOps.NextLevel(_selectedLot, progress)}";
+                _lotGrantTitle.text = canPlace ? Loc.Get("hub.lot.grant.once-built") : Loc.Format("hub.lot.grant.level", ("level", BuildingOps.NextLevel(_selectedLot, progress)));
             }
             _lotGrant.text = hasGrant ? grant : string.Empty;
 
@@ -583,12 +584,12 @@ namespace Assets.Scripts.Hub
             _lotActionButton.text = action;
             _lotActionButton.SetEnabled(canPay);
             SetShown(_lotEnterButton, built);
-            _lotEnterButton.text = "Enter";
+            _lotEnterButton.text = Loc.Get("hub.lot.enter");
 
             if (_lotReason != null)
             {
                 _lotReason.text = state == BuildingState.Absent
-                    ? DescribeLotStatus(_selectedLot, progress) + "."
+                    ? Loc.Format("hub.lot.status-sentence", ("status", DescribeLotStatus(_selectedLot, progress)))
                     : !string.IsNullOrEmpty(action) && !canPay ? shortfall : string.Empty;
             }
 
@@ -602,11 +603,11 @@ namespace Assets.Scripts.Hub
             {
                 case BuildingState.Built:
                     int level = BuildingOps.LevelOf(building, progress);
-                    return building.MaxLevel > 1 ? $"Level {level} of {building.MaxLevel}" : "Built";
+                    return building.MaxLevel > 1 ? Loc.Format("hub.lot.state.level-of", ("level", level), ("max", building.MaxLevel)) : Loc.Get("hub.lot.state.built");
                 case BuildingState.Available:
-                    return "Not built yet";
+                    return Loc.Get("hub.lot.state.not-built");
                 default:
-                    return "Locked";
+                    return Loc.Get("hub.lot.locked");
             }
         }
 
@@ -653,7 +654,7 @@ namespace Assets.Scripts.Hub
                     AddLotCostRow(line.Material.Icon, name, have, need);
                     if (have < need)
                     {
-                        missing.Add($"{need - have} more {name}");
+                        missing.Add(Loc.Format("hub.lot.missing-material", ("amount", need - have), ("material", name)));
                     }
                 }
             }
@@ -661,17 +662,17 @@ namespace Assets.Scripts.Hub
             {
                 int need = BuildingOps.UpgradeCost(_selectedLot, progress);
                 int have = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.Gold : 0;
-                AddLotCostRow(null, "Gold", have, need);
+                AddLotCostRow(null, Loc.Get("hub.lot.cost.gold"), have, need);
                 if (have < need)
                 {
-                    missing.Add($"{need - have} more gold");
+                    missing.Add(Loc.Format("hub.lot.missing-gold", ("amount", need - have)));
                 }
             }
 
             bool any = _lotCosts != null && _lotCosts.childCount > 0;
             SetShown(_lotCostsTitle, any);
             SetShown(_lotCosts, any);
-            return missing.Count == 0 ? string.Empty : "Need " + string.Join(" and ", missing) + ".";
+            return missing.Count == 0 ? string.Empty : Loc.Format("hub.lot.shortfall", ("missing", string.Join(" " + Loc.Get("hub.list.and") + " ", missing)));
         }
 
         private void AddLotCostRow(Sprite icon, string name, int have, int need)
@@ -692,7 +693,7 @@ namespace Assets.Scripts.Hub
             var label = new Label(name) { pickingMode = PickingMode.Ignore };
             label.AddToClassList("hub-lotpanel__cost-name");
             row.Add(label);
-            var count = new Label($"{have} / {need}") { pickingMode = PickingMode.Ignore };
+            var count = new Label(Loc.Format("hub.lot.cost.count", ("have", have), ("need", need))) { pickingMode = PickingMode.Ignore };
             count.AddToClassList("hub-lotpanel__cost-count");
             count.EnableInClassList("hub-lotpanel__cost-count--short", have < need);
             row.Add(count);
@@ -722,7 +723,7 @@ namespace Assets.Scripts.Hub
                     ? node.Run.DisplayName
                     : runKey);
             }
-            return missing.Count == 0 ? "Not yet" : "Clear " + string.Join(" and ", missing) + " first";
+            return missing.Count == 0 ? Loc.Get("hub.lot.not-yet") : Loc.Format("hub.lot.clear-first", ("runs", string.Join(" " + Loc.Get("hub.list.and") + " ", missing)));
         }
 
         /// <summary>
@@ -777,8 +778,8 @@ namespace Assets.Scripts.Hub
             if (!CanPayFor(_selectedLot, progress))
             {
                 SetLotFeedback(placing
-                    ? "Not enough materials — needs " + HubPresenter.DescribePlacementCost(_selectedLot) + "."
-                    : $"Not enough gold — needs {BuildingOps.UpgradeCost(_selectedLot, progress)}.");
+                    ? Loc.Format("hub.lot.feedback.no-materials", ("price", HubPresenter.DescribePlacementCost(_selectedLot)))
+                    : Loc.Format("hub.lot.feedback.no-gold", ("cost", BuildingOps.UpgradeCost(_selectedLot, progress))));
                 return;
             }
 
@@ -787,13 +788,13 @@ namespace Assets.Scripts.Hub
                 if (_selectedLot.PlacementCost != null && _selectedLot.PlacementCost.Count > 0
                     && !InventoryManager.Instance.SpendMaterials(_selectedLot.PlacementCost))
                 {
-                    SetLotFeedback("The materials went missing between checking and paying.");
+                    SetLotFeedback(Loc.Get("hub.lot.feedback.materials-missing"));
                     return;
                 }
             }
             else if (!MetaProgressManager.Instance.TrySpendGold(BuildingOps.UpgradeCost(_selectedLot, progress), EconomySource.Building))
             {
-                SetLotFeedback("The gold went missing between checking and paying.");
+                SetLotFeedback(Loc.Get("hub.lot.feedback.gold-missing"));
                 return;
             }
 
@@ -812,8 +813,8 @@ namespace Assets.Scripts.Hub
             _town.SetLotBadge(_selectedLot.SaveKey, BadgeWithNews(_selectedLot, after));
 
             SetLotFeedback(placing
-                ? $"{_selectedLot.Label} built."
-                : $"{_selectedLot.Label} raised to level {nextLevel}.");
+                ? Loc.Format("hub.lot.feedback.built", ("building", _selectedLot.Label))
+                : Loc.Format("hub.lot.feedback.raised", ("building", _selectedLot.Label), ("level", nextLevel)));
             RefreshLotPanel();
         }
 
@@ -1136,10 +1137,10 @@ namespace Assets.Scripts.Hub
             _levelIndicator.text = CampaignOps.DisplayNameOf(run);
             if (_levelCount != null)
             {
-                _levelCount.text = $"Level {levelIndex + 1} of {run.Levels.Count}";
+                _levelCount.text = Loc.Format("hub.progress.level-count", ("level", levelIndex + 1), ("count", run.Levels.Count));
                 if (_runSaveData.IsRevisit)
                 {
-                    _levelCount.text += " · Revisit";
+                    _levelCount.text = Loc.Format("hub.progress.level-count-revisit", ("count-line", _levelCount.text));
                 }
             }
 
@@ -1163,7 +1164,7 @@ namespace Assets.Scripts.Hub
             SetShown(_progressPartyButton, !locked);
             if (locked && _progressParty != null && string.IsNullOrEmpty(_progressParty.text))
             {
-                _progressParty.text = "Party locked until the run ends.";
+                _progressParty.text = Loc.Get("hub.progress.party-locked");
             }
         }
 
@@ -1219,14 +1220,14 @@ namespace Assets.Scripts.Hub
                 var stats = Balance.HeroStatCalculator.WithGear(
                     Balance.HeroStatCalculator.BaseStatsForNodes(hero, nodes),
                     InventoryManager.Instance.GetEquippedGear(hero.SaveKey));
-                var hp = new Label($"HP {stats[UnitStats.StatType.MaxHealth]}") { pickingMode = PickingMode.Ignore };
+                var hp = new Label(Loc.Format("hub.progress.hero-hp", ("hp", stats[UnitStats.StatType.MaxHealth]))) { pickingMode = PickingMode.Ignore };
                 hp.AddToClassList("hub-entry__hero-hp");
                 tile.Add(hp);
                 _progressPartyTiles.Add(tile);
             }
             if (_progressParty != null)
             {
-                _progressParty.text = heroes.Count == 0 ? "No party selected." : string.Empty;
+                _progressParty.text = heroes.Count == 0 ? Loc.Get("hub.progress.no-party") : string.Empty;
             }
         }
 
@@ -1257,7 +1258,7 @@ namespace Assets.Scripts.Hub
             var rewards = _completeView.Q<VisualElement>("complete-rewards");
             if (runLabel != null)
             {
-                runLabel.text = run != null ? CampaignOps.DisplayNameOf(run) : "The dungeon";
+                runLabel.text = run != null ? CampaignOps.DisplayNameOf(run) : Loc.Get("hub.complete.fallback-run");
             }
             if (rewards == null)
             {
@@ -1271,14 +1272,14 @@ namespace Assets.Scripts.Hub
                 int bonus = Mathf.RoundToInt((_completedRewardMultiplier - 1f) * 100f);
                 if (message != null)
                 {
-                    message.text = $"Revisit cleared at Fear level {_completedRevisitFear}. Every reward on the way paid +{bonus}%.";
+                    message.text = Loc.Format("hub.complete.revisit-message", ("fear", _completedRevisitFear), ("bonus", bonus));
                 }
                 int best = run != null ? MetaProgressManager.Instance.GetBestRevisitFear(CampaignOps.RunKeyOf(run)) : -1;
                 if (best >= 0)
                 {
-                    rewards.Add(CompleteRow("Highest Fear level cleared", best.ToString()));
+                    rewards.Add(CompleteRow(Loc.Get("hub.complete.best-fear"), best.ToString()));
                 }
-                rewards.Add(CompleteRow("Next time", "Raise the Fear level for bigger rewards"));
+                rewards.Add(CompleteRow(Loc.Get("hub.complete.next-time"), Loc.Get("hub.complete.next-time-value")));
                 AddRunTotals(rewards, run);
                 SetShown(rewards, true);
                 return;
@@ -1289,12 +1290,12 @@ namespace Assets.Scripts.Hub
             if (message != null)
             {
                 message.text = opened.Count > 0
-                    ? "Every floor cleared. The story map has new roads."
-                    : "Every floor cleared. Your heroes stand victorious.";
+                    ? Loc.Get("hub.complete.message-new-roads")
+                    : Loc.Get("hub.complete.message-victorious");
             }
             foreach (var next in opened)
             {
-                rewards.Add(CompleteRow("Now open", CampaignOps.DisplayNameOf(next)));
+                rewards.Add(CompleteRow(Loc.Get("hub.complete.now-open"), CampaignOps.DisplayNameOf(next)));
             }
 
             // A first clear of a run that can be revisited says so: revisits were invisible until
@@ -1302,7 +1303,7 @@ namespace Assets.Scripts.Hub
             bool revisitable = RevisitOps.IsRevisitable(run);
             if (revisitable)
             {
-                rewards.Add(CompleteRow("Revisit", "Run it again from the story map, harder, for bigger rewards"));
+                rewards.Add(CompleteRow(Loc.Get("hub.complete.revisit"), Loc.Get("hub.complete.revisit-value")));
             }
             bool totals = AddRunTotals(rewards, run);
             SetShown(rewards, opened.Count > 0 || revisitable || totals);
@@ -1320,18 +1321,20 @@ namespace Assets.Scripts.Hub
             {
                 return false;
             }
-            rewards.Add(CompleteRow("Enemies felled", record.BossKills > 0
-                ? $"{record.Kills} ({record.BossKills} {(record.BossKills == 1 ? "boss" : "bosses")})"
+            rewards.Add(CompleteRow(Loc.Get("hub.complete.enemies-felled"), record.BossKills > 0
+                ? (record.BossKills == 1
+                    ? Loc.Format("hub.complete.kills-with-boss", ("kills", record.Kills), ("bosses", record.BossKills))
+                    : Loc.Format("hub.complete.kills-with-bosses", ("kills", record.Kills), ("bosses", record.BossKills)))
                 : record.Kills.ToString()));
-            rewards.Add(CompleteRow("Gold earned", record.GoldKept.ToString()));
+            rewards.Add(CompleteRow(Loc.Get("hub.complete.gold-earned"), record.GoldKept.ToString()));
             if (record.EssenceKept > 0)
             {
-                rewards.Add(CompleteRow("Essence earned", record.EssenceKept.ToString()));
+                rewards.Add(CompleteRow(Loc.Get("hub.complete.essence-earned"), record.EssenceKept.ToString()));
             }
-            rewards.Add(CompleteRow("XP earned", record.XpKept.ToString()));
+            rewards.Add(CompleteRow(Loc.Get("hub.complete.xp-earned"), record.XpKept.ToString()));
             if (record.Retreats > 0)
             {
-                rewards.Add(CompleteRow("Retreats", record.Retreats.ToString()));
+                rewards.Add(CompleteRow(Loc.Get("hub.complete.retreats"), record.Retreats.ToString()));
             }
             return true;
         }
@@ -1391,7 +1394,7 @@ namespace Assets.Scripts.Hub
             var runKey = RunKeyOf(_runDefinition);
             if (!_runDefinition.Repeatable && MetaProgressManager.Instance.HasCompletedRun(runKey))
             {
-                SetFeedback("Nothing left to run.");
+                SetFeedback(Loc.Get("hub.progress.nothing-left"));
                 return;
             }
 
@@ -1837,7 +1840,7 @@ namespace Assets.Scripts.Hub
             {
                 return null;
             }
-            return $"The party is set until {CampaignOps.DisplayNameOf(ActiveRunDefinition())} is cleared.";
+            return Loc.Format("hub.party.locked-reason", ("run", CampaignOps.DisplayNameOf(ActiveRunDefinition())));
         }
 
         /// <summary>

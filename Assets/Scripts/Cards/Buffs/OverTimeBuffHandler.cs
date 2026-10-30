@@ -1,5 +1,6 @@
 using System;
 using Assets.Scripts.Combat;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -20,24 +21,23 @@ namespace Assets.Scripts.Cards.Buffs
     public class OverTimeBuffHandler : IBuffHandler, IOverTimeBuffHandler
     {
         private readonly BuffType _type;
-        private readonly string _displayName;
+        private readonly string _nameKey;
         private readonly bool _hasRemover;
         private readonly DamageType _removedBy;
 
         public OverTimeBuffHandler(
             BuffType type,
-            string displayName,
+            string nameKey,
             bool heals,
             DamageType tickDamageType,
             bool ignoresDefense,
             DamageType? removedBy = null)
         {
             _type = type;
-            _displayName = displayName;
+            _nameKey = nameKey;
             Heals = heals;
             TickDamageType = tickDamageType;
             IgnoresDefense = ignoresDefense;
-            TickLabel = displayName;
             _hasRemover = removedBy.HasValue;
             _removedBy = removedBy ?? DamageType.Normal;
         }
@@ -48,7 +48,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public bool IgnoresDefense { get; private set; }
 
-        public string TickLabel { get; private set; }
+        public string TickLabel => Loc.Get(_nameKey);
 
         /// <summary>
         /// Derived from <see cref="Heals"/> rather than registered per effect: the rule is "harm at
@@ -77,7 +77,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return $"{_displayName} {Math.Abs(power)}/turn";
+            return Loc.Format("combat.status.over-time", ("name", Loc.Get(_nameKey)), ("power", Math.Abs(power)));
         }
 
         /// <summary>

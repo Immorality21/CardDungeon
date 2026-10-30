@@ -1,4 +1,5 @@
 using Assets.Scripts.Combat;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -13,26 +14,26 @@ namespace Assets.Scripts.Cards.Buffs
     public class ResistanceBuffHandler : IBuffHandler
     {
         private readonly DamageType _damageType;
-        private readonly string _displayName;
+        private readonly string _nameKey;
         private readonly bool _allTypes;
 
-        public ResistanceBuffHandler(DamageType damageType, string displayName)
+        public ResistanceBuffHandler(DamageType damageType, string nameKey)
         {
             _damageType = damageType;
-            _displayName = displayName;
+            _nameKey = nameKey;
         }
 
-        private ResistanceBuffHandler(string displayName)
+        private ResistanceBuffHandler(string nameKey)
         {
-            _displayName = displayName;
+            _nameKey = nameKey;
             _allTypes = true;
         }
 
         /// <summary>A resistance to every element, Normal included - a flat cut to every hit
         /// (<see cref="BuffType.Guarded"/>, the Warrior's Take Cover).</summary>
-        public static ResistanceBuffHandler ToAll(string displayName)
+        public static ResistanceBuffHandler ToAll(string nameKey)
         {
-            return new ResistanceBuffHandler(displayName);
+            return new ResistanceBuffHandler(nameKey);
         }
 
         public void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker, ICombatUnit source = null)
@@ -54,14 +55,16 @@ namespace Assets.Scripts.Cards.Buffs
         {
             if (_allTypes)
             {
-                return power >= 0 ? $"{power}% less damage" : $"{-power}% more damage";
+                return power >= 0
+                    ? Loc.Format("combat.status.guard-less-damage", ("power", power))
+                    : Loc.Format("combat.status.guard-more-damage", ("power", -power));
             }
             if (power >= 0)
             {
-                return $"+{power}% {_displayName}";
+                return Loc.Format("combat.status.resistance-up", ("power", power), ("name", Loc.Get(_nameKey)));
             }
 
-            return $"{power}% {_displayName}";
+            return Loc.Format("combat.status.resistance-down", ("power", power), ("name", Loc.Get(_nameKey)));
         }
 
         public bool SkipsTurn => false;

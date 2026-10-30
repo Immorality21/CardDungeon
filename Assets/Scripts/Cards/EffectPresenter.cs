@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards
 {
@@ -66,7 +67,7 @@ namespace Assets.Scripts.Cards
                     {
                         FloatingTextHandler.Instance.CreateFloatingText(
                             position + new Vector3(0f, 0.45f, 0f),
-                            "CRIT!",
+                            Loc.Get("abilities.popup.crit"),
                             CritColor,
                             1f,
                             0.8f,
@@ -192,13 +193,13 @@ namespace Assets.Scripts.Cards
             switch (eff)
             {
                 case DamageEffectiveness.Weak:
-                    return ("Weak!", new Color(1f, 0.85f, 0.2f));
+                    return (Loc.Get("abilities.popup.weak"), new Color(1f, 0.85f, 0.2f));
                 case DamageEffectiveness.Resisted:
-                    return ("Resisted", new Color(0.6f, 0.7f, 0.85f));
+                    return (Loc.Get("abilities.popup.resisted"), new Color(0.6f, 0.7f, 0.85f));
                 case DamageEffectiveness.Immune:
-                    return ("Immune", new Color(0.78f, 0.78f, 0.82f));
+                    return (Loc.Get("abilities.popup.immune"), new Color(0.78f, 0.78f, 0.82f));
                 case DamageEffectiveness.Absorbed:
-                    return ("Absorbed", new Color(0.4f, 0.95f, 0.5f));
+                    return (Loc.Get("abilities.popup.absorbed"), new Color(0.4f, 0.95f, 0.5f));
                 default:
                     return null;
             }

@@ -1,4 +1,5 @@
 using Assets.Scripts.Combat;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -33,7 +34,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return "Blinded!";
+            return Loc.Get("combat.status.blinded");
         }
 
         public bool SkipsTurn => false;

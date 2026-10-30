@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -55,7 +56,7 @@ namespace Assets.Scripts.Cards.Effects
                     result.Entries.Add(new EffectEntry
                     {
                         Target = target,
-                        Text = "Not a machine",
+                        Text = Loc.Get("combat.float.not-a-machine"),
                         Color = Color.gray,
                         Delay = EffectDelay
                     });
@@ -69,7 +70,7 @@ namespace Assets.Scripts.Cards.Effects
                     result.Entries.Add(new EffectEntry
                     {
                         Target = target,
-                        Text = $"Failed ({DisassembleOps.Percent(chance)})",
+                        Text = Loc.Format("combat.float.disassemble-failed", ("chance", DisassembleOps.Percent(chance))),
                         Color = Color.gray,
                         Delay = EffectDelay
                     });
@@ -81,7 +82,7 @@ namespace Assets.Scripts.Cards.Effects
                 result.Entries.Add(new EffectEntry
                 {
                     Target = target,
-                    Text = "Disassembled!",
+                    Text = Loc.Get("combat.float.disassembled"),
                     Color = TakenApartColor,
                     Delay = EffectDelay,
                     Impact = before,

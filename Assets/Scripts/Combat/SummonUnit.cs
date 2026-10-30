@@ -4,6 +4,7 @@ using Assets.Scripts.Heroes;
 using Assets.Scripts.Rooms;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Combat
 {
@@ -52,7 +53,7 @@ namespace Assets.Scripts.Combat
         /// <summary>What its summoner's <c>SummonDamage</c> nodes add to every hit it lands.</summary>
         public OutgoingDamage OutgoingDamage => OutgoingDamage.ForSummon(_grant);
 
-        public string DisplayName => Summon != null ? Summon.Label : "Summon";
+        public string DisplayName => Summon != null ? Summon.Label : Loc.Get("combat.summon.fallback-name");
         public Sprite Icon => Summon != null ? Summon.Sprite : null;
         public Stats Stats => _stats;
 

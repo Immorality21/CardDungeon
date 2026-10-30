@@ -1,5 +1,6 @@
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -26,7 +27,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return $"Marked +{Mathf.Abs(power)}%!";
+            return Loc.Format("combat.status.marked", ("power", Mathf.Abs(power)));
         }
 
         public bool SkipsTurn => false;

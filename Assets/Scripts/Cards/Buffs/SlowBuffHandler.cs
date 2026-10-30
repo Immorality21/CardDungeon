@@ -1,6 +1,7 @@
 using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -17,7 +18,7 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return "Slow!";
+            return Loc.Get("combat.status.slow");
         }
 
         public bool SkipsTurn => false;

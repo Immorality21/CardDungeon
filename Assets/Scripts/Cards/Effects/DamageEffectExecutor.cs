@@ -5,6 +5,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -149,7 +150,7 @@ namespace Assets.Scripts.Cards.Effects
                     {
                         Target = target,
                         // A barrier soaked part of it: the number is what reached the bar.
-                        Text = hit.Absorbed > 0 ? $"{damage - hit.Absorbed} ({hit.Absorbed} absorbed)" : damage.ToString(),
+                        Text = hit.Absorbed > 0 ? Loc.Format("combat.float.damage-absorbed", ("damage", damage - hit.Absorbed), ("absorbed", hit.Absorbed)) : damage.ToString(),
                         Color = DamageColor,
                         Delay = EffectDelay,
                         Impact = damage,

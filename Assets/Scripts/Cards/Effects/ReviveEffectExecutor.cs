@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -86,7 +87,7 @@ namespace Assets.Scripts.Cards.Effects
                 result.Entries.Add(new EffectEntry
                 {
                     Target = target,
-                    Text = "Revived!",
+                    Text = Loc.Get("combat.float.revived"),
                     Healed = health,
                     Color = ReviveColor,
                     Delay = EffectDelay

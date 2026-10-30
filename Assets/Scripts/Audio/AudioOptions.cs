@@ -1,4 +1,5 @@
 using Assets.Scripts.IO;
+using ImmoralityGaming.Localization;
 using UnityEngine;
 
 namespace Assets.Scripts.Audio
@@ -178,7 +179,7 @@ namespace Assets.Scripts.Audio
         /// <summary>A dial as a percentage for display, e.g. <c>70%</c>.</summary>
         public static string Percent(float value)
         {
-            return Mathf.RoundToInt(Mathf.Clamp01(value) * 100f) + "%";
+            return Loc.Format("combat.format.percent", ("value", Mathf.RoundToInt(Mathf.Clamp01(value) * 100f)));
         }
     }
 }

@@ -11,6 +11,7 @@ using Assets.Scripts.Rooms;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.UI
 {
@@ -253,7 +254,7 @@ namespace Assets.Scripts.Cards.UI
             _mode = SelectionMode.Cast;
             _multiCast = false;
             _selectedMagic = null;
-            _listTitle.text = "Ability";
+            _listTitle.text = Loc.Get("abilities.menu.title-ability");
             PopulateSlotRows(slots);
         }
 
@@ -277,7 +278,7 @@ namespace Assets.Scripts.Cards.UI
         {
             return _multiCast
                 ? Combat.FocusOps.CastName(CombatManager.Instance.FocusOf(_currentHero))
-                : "Ability";
+                : Loc.Get("abilities.menu.title-ability");
         }
 
         private void PopulateSlotRows(List<MagicSlot> slots)
@@ -295,8 +296,8 @@ namespace Assets.Scripts.Cards.UI
                 }
                 bool selectable = slot.CanCast;
 
-                string name = slot.IsEmpty ? "(empty)" : slot.Magic.DisplayName;
-                string meta = slot.IsEmpty ? "" : slot.Unlimited ? "∞" : $"{slot.Charges}/{slot.MaxCharges}";
+                string name = slot.IsEmpty ? Loc.Get("abilities.menu.empty-slot") : slot.Magic.DisplayName;
+                string meta = slot.IsEmpty ? "" : slot.Unlimited ? Loc.Get("abilities.menu.unlimited") : Loc.Format("abilities.menu.charges", ("charges", slot.Charges), ("max", slot.MaxCharges));
                 Sprite icon = slot.IsEmpty ? null : slot.Magic.Icon;
 
                 // A spell with a health cost shows its price and is refused when the caster cannot
@@ -307,7 +308,7 @@ namespace Assets.Scripts.Cards.UI
                     int healthCost = SpellPower.TotalHealthCost(slot.Magic, _currentHero, 0);
                     if (healthCost > 0)
                     {
-                        meta = $"{meta}  {healthCost} HP";
+                        meta = Loc.Format("abilities.menu.meta-health-cost", ("meta", meta), ("cost", healthCost));
                         if (!SpellPower.CanAfford(slot.Magic, _currentHero, 0))
                         {
                             selectable = false;
@@ -319,7 +320,7 @@ namespace Assets.Scripts.Cards.UI
                         && CombatManager.Instance.GetFallenHeroes().Count == 0)
                     {
                         selectable = false;
-                        meta = $"{meta}  nobody fallen";
+                        meta = Loc.Format("abilities.menu.meta-nobody-fallen", ("meta", meta));
                     }
 
                     // A Life Tap with nothing spent to refill would charge its price for nothing.
@@ -327,7 +328,7 @@ namespace Assets.Scripts.Cards.UI
                         && ChargeTargets(slot.Magic, i).Count == 0)
                     {
                         selectable = false;
-                        meta = $"{meta}  nothing spent";
+                        meta = Loc.Format("abilities.menu.meta-nothing-spent", ("meta", meta));
                     }
                 }
 
@@ -363,7 +364,7 @@ namespace Assets.Scripts.Cards.UI
                     ShowChargeChoice(allies[0], fromAllyPicker: false);
                     return;
                 }
-                PopulateTargetRows(allies, "Select Ally Target");
+                PopulateTargetRows(allies, Loc.Get("abilities.menu.prompt-ally"));
                 return;
             }
 
@@ -391,17 +392,17 @@ namespace Assets.Scripts.Cards.UI
             if (targetType == MagicTargetType.SingleEnemy)
             {
                 targets = CombatManager.Instance.GetAliveEnemies();
-                prompt = "Select Enemy Target";
+                prompt = Loc.Get("abilities.menu.prompt-enemy");
             }
             else if (targetType == MagicTargetType.FallenAlly)
             {
                 targets = CombatManager.Instance.GetFallenHeroes();
-                prompt = "Select Fallen Ally";
+                prompt = Loc.Get("abilities.menu.prompt-fallen");
             }
             else
             {
                 targets = CombatManager.Instance.GetAliveHeroes(GameManager.Instance.Party);
-                prompt = "Select Ally Target";
+                prompt = Loc.Get("abilities.menu.prompt-ally");
             }
 
             // Only one valid target — cast straight at it, no picker.
@@ -472,15 +473,15 @@ namespace Assets.Scripts.Cards.UI
             _chargeTarget = target;
             _mode = SelectionMode.ChargeChoice;
             _listTitle.text = ReferenceEquals(target, _currentHero)
-                ? "Restore which?"
-                : "Restore " + target.DisplayName + "'s";
+                ? Loc.Get("abilities.menu.restore-which")
+                : Loc.Format("abilities.menu.restore-whose", ("name", target.DisplayName));
             _listScroll.Clear();
             ClearNav();
             foreach (int index in restorable)
             {
                 var slot = slots[index];
                 int captured = index;
-                _listScroll.Add(CreateRow(slot.Magic.Icon, slot.Magic.DisplayName, $"{slot.Charges}/{slot.MaxCharges}",
+                _listScroll.Add(CreateRow(slot.Magic.Icon, slot.Magic.DisplayName, Loc.Format("abilities.menu.charges", ("charges", slot.Charges), ("max", slot.MaxCharges)),
                     true, () => SubmitCast(new List<ICombatUnit> { _chargeTarget }, captured), DescribeSlot(slot)));
             }
             ShowPanel(_listPanel);
@@ -502,7 +503,7 @@ namespace Assets.Scripts.Cards.UI
 
             _currentHero = hero;
             _mode = SelectionMode.AttackTarget;
-            PopulateTargetRows(enemies, "Select Attack Target");
+            PopulateTargetRows(enemies, Loc.Get("abilities.menu.prompt-attack"));
         }
 
         // ============================================================
@@ -524,7 +525,7 @@ namespace Assets.Scripts.Cards.UI
             _currentHero = hero;
             _summonList = summons;
             _mode = SelectionMode.SummonChoice;
-            _listTitle.text = "Summon";
+            _listTitle.text = Loc.Get("abilities.menu.title-summon");
             _listScroll.Clear();
             ClearNav();
 
@@ -535,18 +536,18 @@ namespace Assets.Scripts.Cards.UI
                     continue;
                 }
                 var captured = slot;
-                string meta = $"{slot.Charges}/{slot.MaxCharges}";
+                string meta = Loc.Format("abilities.menu.charges", ("charges", slot.Charges), ("max", slot.MaxCharges));
                 int bloodPrice = SummonOps.HealthCost(slot.Summon, hero);
                 bool affordable = SummonOps.CanAfford(slot.Summon, hero);
                 if (bloodPrice > 0)
                 {
-                    meta += $"  {bloodPrice} HP";
+                    meta = Loc.Format("abilities.menu.meta-health-cost", ("meta", meta), ("cost", bloodPrice));
                 }
                 // A summon aimed at one ally needs one to aim at - a revive with nobody down is dimmed.
                 bool hasTarget = !SummonOps.NeedsTarget(slot.Summon) || SummonCandidates(slot.Summon).Count > 0;
                 if (!hasTarget)
                 {
-                    meta += "  nobody fallen";
+                    meta = Loc.Format("abilities.menu.meta-nobody-fallen", ("meta", meta));
                 }
                 _listScroll.Add(CreateRow(slot.Summon.Sprite, slot.Summon.Label, meta, slot.CanUse && affordable && hasTarget,
                     () => SubmitSummon(captured), SummonOps.Describe(slot.Summon, slot.Grant)));
@@ -572,7 +573,7 @@ namespace Assets.Scripts.Cards.UI
             _currentHero = hero;
             _ultraList = ultras;
             _mode = SelectionMode.UltraChoice;
-            _listTitle.text = "Ultra";
+            _listTitle.text = Loc.Get("abilities.menu.title-ultra");
             _listScroll.Clear();
             ClearNav();
 
@@ -591,7 +592,7 @@ namespace Assets.Scripts.Cards.UI
                 // nobody down, is listed, dimmed.
                 bool usable = CombatManager.Instance.CanUseUltra(hero, ultra);
                 int focus = CombatManager.Instance.FocusOf(hero);
-                string ready = UltraOps.IsMultiCast(ultra) ? $"x{Combat.FocusOps.Casts(focus)}" : "Ready";
+                string ready = UltraOps.IsMultiCast(ultra) ? Loc.Format("abilities.menu.ultra-casts", ("casts", Combat.FocusOps.Casts(focus))) : Loc.Get("abilities.menu.ultra-ready");
                 _listScroll.Add(CreateRow(icon, ultra.Label, usable ? ready : BlockedReason(hero, ultra), usable,
                     () => OnUltraChosen(captured), description));
             }
@@ -608,13 +609,13 @@ namespace Assets.Scripts.Cards.UI
             int focus = CombatManager.Instance.FocusOf(hero);
             if (!UltraOps.IsReady(ultra, CombatManager.Instance.UltraGauge(hero), focus))
             {
-                return UltraOps.IsMultiCast(ultra) ? "No Focus" : "Not ready";
+                return UltraOps.IsMultiCast(ultra) ? Loc.Get("abilities.menu.ultra-no-focus") : Loc.Get("abilities.menu.ultra-not-ready");
             }
             if (UltraOps.IsMultiCast(ultra))
             {
-                return "Nothing to cast";
+                return Loc.Get("abilities.menu.ultra-nothing-to-cast");
             }
-            return ultra.Kind == UltraKind.Sacrifice ? "No one to give" : "Nobody fallen";
+            return ultra.Kind == UltraKind.Sacrifice ? Loc.Get("abilities.menu.ultra-no-one-to-give") : Loc.Get("abilities.menu.ultra-nobody-fallen");
         }
 
         /// <summary>An Ultra that takes a target (a Sacrifice) asks for it; MultiCast opens the ability list;
@@ -641,14 +642,14 @@ namespace Assets.Scripts.Cards.UI
         {
             if (ultra != null && ultra.Kind == UltraKind.Sacrifice)
             {
-                return "Sacrifice whom?";
+                return Loc.Get("abilities.menu.prompt-sacrifice");
             }
-            return ultra != null ? AllyPrompt(ultra.TargetType) : "Select Ally Target";
+            return ultra != null ? AllyPrompt(ultra.TargetType) : Loc.Get("abilities.menu.prompt-ally");
         }
 
         private static string AllyPrompt(MagicTargetType type)
         {
-            return type == MagicTargetType.FallenAlly ? "Revive whom?" : "Select Ally Target";
+            return type == MagicTargetType.FallenAlly ? Loc.Get("abilities.menu.prompt-revive") : Loc.Get("abilities.menu.prompt-ally");
         }
 
         private void SubmitUltra(UltraSO ultra, ICombatUnit target = null)
@@ -675,7 +676,7 @@ namespace Assets.Scripts.Cards.UI
                 }
                 _selectedSummon = slot;
                 _mode = SelectionMode.SummonTarget;
-                PopulateTargetRows(candidates, atEnemy ? "Select Enemy Target" : AllyPrompt(slot.Summon.TargetType));
+                PopulateTargetRows(candidates, atEnemy ? Loc.Get("abilities.menu.prompt-enemy") : AllyPrompt(slot.Summon.TargetType));
                 return;
             }
             SubmitSummonTo(slot, null);
@@ -710,8 +711,8 @@ namespace Assets.Scripts.Cards.UI
             _selectedSummonAbility = ability;
             _mode = SelectionMode.SummonAbilityTarget;
             PopulateTargetRows(enemies, ability != null && ability.TargetType == MagicTargetType.FallenAlly
-                ? "Revive whom?"
-                : "Select Enemy Target");
+                ? Loc.Get("abilities.menu.prompt-revive")
+                : Loc.Get("abilities.menu.prompt-enemy"));
         }
 
         // ============================================================
@@ -728,7 +729,7 @@ namespace Assets.Scripts.Cards.UI
             _currentHero = hero;
             _selectedItem = null;
             _mode = SelectionMode.ItemChoice;
-            _listTitle.text = "Item";
+            _listTitle.text = Loc.Get("abilities.menu.title-item");
             PopulateItemRows(consumables);
         }
 
@@ -745,7 +746,7 @@ namespace Assets.Scripts.Cards.UI
             {
                 return effect;
             }
-            return string.IsNullOrEmpty(effect) ? item.Description : effect + "\n" + item.Description;
+            return string.IsNullOrEmpty(effect) ? item.Description : Loc.Format("abilities.menu.item-description", ("effect", effect), ("description", item.Description));
         }
 
         private void PopulateItemRows(List<ItemSaveData> consumables)
@@ -757,8 +758,8 @@ namespace Assets.Scripts.Cards.UI
             {
                 var so = InventoryManager.Instance.GetItemSO(stack.ItemKey);
                 bool valid = so != null && stack.Quantity > 0;
-                string name = valid ? so.DisplayName : "(none)";
-                string meta = valid ? $"x{stack.Quantity}" : string.Empty;
+                string name = valid ? so.DisplayName : Loc.Get("abilities.menu.item-none");
+                string meta = valid ? Loc.Format("abilities.menu.item-quantity", ("count", stack.Quantity)) : string.Empty;
                 Sprite icon = valid ? so.Icon : null;
 
                 var captured = so;
@@ -791,7 +792,7 @@ namespace Assets.Scripts.Cards.UI
             }
 
             _mode = SelectionMode.ItemTarget;
-            PopulateTargetRows(allies, $"Use {item.DisplayName} on");
+            PopulateTargetRows(allies, Loc.Format("abilities.menu.prompt-use-item", ("item", item.DisplayName)));
         }
 
         private void SubmitUseItem(ICombatUnit target)
@@ -830,7 +831,7 @@ namespace Assets.Scripts.Cards.UI
                 ShowInspectDetail(enemies[0]);
                 return;
             }
-            PopulateTargetRows(enemies, "Inspect Which?");
+            PopulateTargetRows(enemies, Loc.Get("abilities.menu.prompt-inspect"));
         }
 
         /// <summary>
@@ -860,7 +861,7 @@ namespace Assets.Scripts.Cards.UI
             }
             _inspectName.text = enemy.DisplayName;
             _inspectHealth.text =
-                $"HP {enemy.Stats.Health} / {enemy.GetEffectiveStat(StatType.MaxHealth)}";
+                Loc.Format("abilities.inspect.health", ("health", enemy.Stats.Health), ("max", enemy.GetEffectiveStat(StatType.MaxHealth)));
 
             _inspectLeft.Clear();
             _inspectRight.Clear();
@@ -871,18 +872,18 @@ namespace Assets.Scripts.Cards.UI
             _inspectLeft.Add(BestiaryLineView.Row(BestiaryPresenter.AttackLine(definition, known)));
             _inspectLeft.Add(BestiaryLineView.Row(BestiaryPresenter.KillsLine(known)));
             BestiaryLineView.AddSection(
-                _inspectLeft, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
+                _inspectLeft, Loc.Get("abilities.inspect.section-resistances"), BestiaryPresenter.ResistanceLines(definition, known));
             BestiaryLineView.AddSection(
-                _inspectLeft, "Immune to", BestiaryPresenter.ImmunityLines(definition, known));
+                _inspectLeft, Loc.Get("abilities.inspect.section-immune-to"), BestiaryPresenter.ImmunityLines(definition, known));
 
             // Right: what it is doing in this fight, then what it drops. Drops sit here rather than
             // under "Attacks with" because the resistance list is the long one - with both on the
             // left the page needed a scrollbar at 720p.
-            BestiaryLineView.AddSection(_inspectRight, "Stats", LiveStatLines(enemy));
-            BestiaryLineView.AddSection(_inspectRight, "Revisit", RevisitLines(enemy));
-            BestiaryLineView.AddSection(_inspectRight, "Condition", ConditionLines(enemy));
+            BestiaryLineView.AddSection(_inspectRight, Loc.Get("abilities.inspect.section-stats"), LiveStatLines(enemy));
+            BestiaryLineView.AddSection(_inspectRight, Loc.Get("abilities.inspect.section-revisit"), RevisitLines(enemy));
+            BestiaryLineView.AddSection(_inspectRight, Loc.Get("abilities.inspect.section-condition"), ConditionLines(enemy));
             BestiaryLineView.AddSection(
-                _inspectRight, "Abilities", BestiaryPresenter.CompactSpellLines(definition, known));
+                _inspectRight, Loc.Get("abilities.inspect.section-abilities"), BestiaryPresenter.CompactSpellLines(definition, known));
             var drops = new VisualElement();
             drops.AddToClassList("cd-scan__group");
             drops.Add(BestiaryLineView.Row(BestiaryPresenter.LootSummary(definition, known)));
@@ -921,26 +922,26 @@ namespace Assets.Scripts.Cards.UI
             }
 
             int floorHealth = LevelEnemyTuning.StatsFor(enemy.Definition, enemy.Tuning, includeFear: false)[StatType.MaxHealth];
-            lines.Add(new BestiaryLine("Every stat", Percent(fear.EnemyStatMultiplier), BestiaryTone.Bad));
-            lines.Add(new BestiaryLine("Floor's own health", floorHealth.ToString(), BestiaryTone.Neutral));
+            lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.every-stat"), Percent(fear.EnemyStatMultiplier), BestiaryTone.Bad));
+            lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.floor-health"), floorHealth.ToString(), BestiaryTone.Neutral));
             if (fear.EnemyHealthMultiplier > 1.001f)
             {
-                lines.Add(new BestiaryLine("More health", Percent(fear.EnemyHealthMultiplier), BestiaryTone.Bad));
+                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.more-health"), Percent(fear.EnemyHealthMultiplier), BestiaryTone.Bad));
             }
             if (fear.EnemyDamageMultiplier > 1.001f)
             {
-                lines.Add(new BestiaryLine("More damage", Percent(fear.EnemyDamageMultiplier), BestiaryTone.Bad));
+                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.more-damage"), Percent(fear.EnemyDamageMultiplier), BestiaryTone.Bad));
             }
             if (fear.EnemyAgilityMultiplier > 1.001f)
             {
-                lines.Add(new BestiaryLine("More speed", Percent(fear.EnemyAgilityMultiplier), BestiaryTone.Bad));
+                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.more-speed"), Percent(fear.EnemyAgilityMultiplier), BestiaryTone.Bad));
             }
             return lines;
         }
 
         private static string Percent(float multiplier)
         {
-            return $"+{Mathf.RoundToInt((multiplier - 1f) * 100f)}%";
+            return Loc.Format("abilities.inspect.percent-more", ("percent", Mathf.RoundToInt((multiplier - 1f) * 100f)));
         }
 
         private List<BestiaryLine> LiveStatLines(Enemy enemy)
@@ -962,7 +963,7 @@ namespace Assets.Scripts.Cards.UI
                 int buff = CombatManager.Instance.BuffTracker != null
                     ? CombatManager.Instance.BuffTracker.GetBuffAmount(enemy, stat)
                     : 0;
-                string text = buff == 0 ? value.ToString() : $"{value} ({buff:+#;-#;0})";
+                string text = buff == 0 ? value.ToString() : Loc.Format("abilities.inspect.stat-buffed", ("value", value), ("buff", buff.ToString("+#;-#;0")));
                 var tone = buff > 0 ? BestiaryTone.Bad : buff < 0 ? BestiaryTone.Good : BestiaryTone.Neutral;
                 lines.Add(new BestiaryLine(StatCatalog.ShortName(stat), text, tone));
             }
@@ -976,7 +977,7 @@ namespace Assets.Scripts.Cards.UI
 
             if (enemy.IsCharging)
             {
-                lines.Add(new BestiaryLine("Charging", "Heavy attack incoming", BestiaryTone.Bad));
+                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.charging"), Loc.Get("abilities.inspect.charging-detail"), BestiaryTone.Bad));
             }
 
             var tracker = CombatManager.Instance.BuffTracker;
@@ -986,7 +987,7 @@ namespace Assets.Scripts.Cards.UI
                 {
                     // A status effect on an *enemy* is something the party put there, so it reads as
                     // in the player's favour.
-                    lines.Add(new BestiaryLine(statusEffect.ToString(), "Active", BestiaryTone.Good));
+                    lines.Add(new BestiaryLine(statusEffect.ToString(), Loc.Get("abilities.inspect.status-active"), BestiaryTone.Good));
                 }
             }
 
@@ -1004,7 +1005,7 @@ namespace Assets.Scripts.Cards.UI
             if (_inspectTargets != null && _inspectTargets.Count > 1)
             {
                 _mode = SelectionMode.InspectTarget;
-                PopulateTargetRows(_inspectTargets, "Inspect Which?");
+                PopulateTargetRows(_inspectTargets, Loc.Get("abilities.menu.prompt-inspect"));
                 return;
             }
 
@@ -1024,7 +1025,7 @@ namespace Assets.Scripts.Cards.UI
             foreach (var target in targets)
             {
                 var captured = target;
-                string meta = $"HP {target.Stats.Health}";
+                string meta = Loc.Format("abilities.menu.target-health", ("health", target.Stats.Health));
                 _targetScroll.Add(CreateRow(target.Icon, target.DisplayName, meta, true, () => OnTargetSelected(captured)));
             }
 
@@ -1089,14 +1090,14 @@ namespace Assets.Scripts.Cards.UI
             if (_mode == SelectionMode.ChargeChoice && _chargeFromAllyPicker)
             {
                 _mode = SelectionMode.Cast;
-                PopulateTargetRows(ChargeTargets(_selectedMagic, _selectedSlotIndex), "Select Ally Target");
+                PopulateTargetRows(ChargeTargets(_selectedMagic, _selectedSlotIndex), Loc.Get("abilities.menu.prompt-ally"));
                 return;
             }
             if (_mode == SelectionMode.ChargeChoice && _currentHero is Hero hero &&
                 DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 _mode = SelectionMode.Cast;
-                _listTitle.text = "Ability";
+                _listTitle.text = Loc.Get("abilities.menu.title-ability");
                 PopulateSlotRows(DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey));
                 return;
             }

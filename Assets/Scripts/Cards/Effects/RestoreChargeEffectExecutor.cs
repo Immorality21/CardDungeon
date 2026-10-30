@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -84,8 +85,8 @@ namespace Assets.Scripts.Cards.Effects
                 {
                     Target = target,
                     Text = restored.Added > 0 && restored.Magic != null
-                        ? $"{restored.Magic.DisplayName} +{restored.Added}"
-                        : "Nothing to restore",
+                        ? Loc.Format("combat.float.charge-restored", ("ability", restored.Magic.DisplayName), ("count", restored.Added))
+                        : Loc.Get("combat.float.nothing-to-restore"),
                     Color = restored.Added > 0 ? RestoreColor : Color.gray,
                     Delay = EffectDelay,
                     PositionOffset = Vector3.up * 0.2f

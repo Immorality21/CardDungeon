@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Items
 {
@@ -31,19 +32,19 @@ namespace Assets.Scripts.Items
             switch (slot)
             {
                 case SlotType.MainHand:
-                    return "Main Hand";
+                    return Loc.Get("items.slot.main-hand");
                 case SlotType.OffHand:
-                    return "Off Hand";
+                    return Loc.Get("items.slot.off-hand");
                 case SlotType.Head:
-                    return "Head";
+                    return Loc.Get("items.slot.head");
                 case SlotType.Chest:
-                    return "Chest";
+                    return Loc.Get("items.slot.chest");
                 case SlotType.Legs:
-                    return "Legs";
+                    return Loc.Get("items.slot.legs");
                 case SlotType.Hands:
-                    return "Hands";
+                    return Loc.Get("items.slot.hands");
                 case SlotType.Necklace:
-                    return "Neck";
+                    return Loc.Get("items.slot.neck");
                 default:
                     return slot.ToString();
             }
@@ -51,7 +52,7 @@ namespace Assets.Scripts.Items
 
         public static string RarityLabel(ItemRarity rarity)
         {
-            return rarity.ToString();
+            return Loc.Get("items.rarity." + Loc.Slug(rarity.ToString()));
         }
 
         /// <summary>The theme class that colours a name or an icon frame by rarity.</summary>
@@ -82,7 +83,7 @@ namespace Assets.Scripts.Items
                 string amount = FormatNumber(bonus.Value);
                 string sign = bonus.Value > 0f ? "+" : string.Empty;
                 string unit = bonus.BonusType == BonusType.Percentage ? "%" : string.Empty;
-                lines.Add($"{sign}{amount}{unit} {StatCatalog.DisplayName(bonus.StatType)}");
+                lines.Add(Loc.Format("items.bonus.line", ("value", $"{sign}{amount}{unit}"), ("stat", StatCatalog.DisplayName(bonus.StatType))));
             }
             return lines;
         }
@@ -108,7 +109,7 @@ namespace Assets.Scripts.Items
 
                 string sign = bonus.Value > 0f ? "+" : string.Empty;
                 string unit = bonus.BonusType == BonusType.Percentage ? "%" : string.Empty;
-                chips.Add($"{sign}{FormatNumber(bonus.Value)}{unit} {StatCatalog.ShortName(bonus.StatType)}");
+                chips.Add(Loc.Format("items.bonus.chip", ("value", $"{sign}{FormatNumber(bonus.Value)}{unit}"), ("stat", StatCatalog.ShortName(bonus.StatType))));
             }
             return chips;
         }
@@ -143,7 +144,7 @@ namespace Assets.Scripts.Items
                         }
                         string sign = bonus.Value > 0f ? "+" : string.Empty;
                         string unit = bonus.BonusType == BonusType.Percentage ? "%" : string.Empty;
-                        grants.Add($"{sign}{FormatNumber(bonus.Value)}{unit} {StatCatalog.ShortName(bonus.StatType)}");
+                        grants.Add(Loc.Format("items.bonus.chip", ("value", $"{sign}{FormatNumber(bonus.Value)}{unit}"), ("stat", StatCatalog.ShortName(bonus.StatType))));
                     }
                 }
                 if (grants.Count == 0)
@@ -151,13 +152,13 @@ namespace Assets.Scripts.Items
                     continue;
                 }
 
-                string line = $"{milestone.Threshold} {CounterNoun(milestone.Counter, milestone.Threshold)}: {string.Join(", ", grants)}";
+                string line = Loc.Format("items.milestone.line", ("count", milestone.Threshold), ("counter", CounterNoun(milestone.Counter, milestone.Threshold)), ("grants", string.Join(", ", grants)));
                 if (entry != null)
                 {
                     int have = ItemGrowth.Get(entry, milestone.Counter);
                     line = have >= milestone.Threshold
-                        ? "✓ " + line
-                        : $"{line} ({have}/{milestone.Threshold})";
+                        ? Loc.Format("items.milestone.reached", ("line", line))
+                        : Loc.Format("items.milestone.progress", ("line", line), ("have", have), ("need", milestone.Threshold));
                 }
                 lines.Add(line);
             }
@@ -195,7 +196,7 @@ namespace Assets.Scripts.Items
             {
                 if (tier != null && !string.IsNullOrEmpty(tier.Text))
                 {
-                    lines.Add($"{tier.Pieces} pieces: {tier.Text}");
+                    lines.Add(Loc.Format("items.set.tier-line", ("pieces", tier.Pieces), ("text", tier.Text)));
                 }
             }
             return lines;
@@ -207,13 +208,13 @@ namespace Assets.Scripts.Items
             switch (kind)
             {
                 case ItemCounterKind.Kills:
-                    return one ? "kill" : "kills";
+                    return one ? Loc.Get("items.counter.kill") : Loc.Get("items.counter.kills");
                 case ItemCounterKind.BossKills:
-                    return one ? "boss slain" : "bosses slain";
+                    return one ? Loc.Get("items.counter.boss-slain") : Loc.Get("items.counter.bosses-slain");
                 case ItemCounterKind.Victories:
-                    return one ? "victory" : "victories";
+                    return one ? Loc.Get("items.counter.victory") : Loc.Get("items.counter.victories");
                 case ItemCounterKind.AbilitiesUsed:
-                    return one ? "ability used" : "abilities used";
+                    return one ? Loc.Get("items.counter.ability-used") : Loc.Get("items.counter.abilities-used");
                 default:
                     return kind.ToString();
             }
@@ -234,7 +235,7 @@ namespace Assets.Scripts.Items
                 {
                     continue;
                 }
-                lines.Add($"{DamageTypeName(resistance.DamageType)} {Signed(resistance.Percent)}%");
+                lines.Add(Loc.Format("items.resistance.line", ("type", DamageTypeName(resistance.DamageType)), ("value", Signed(resistance.Percent))));
             }
             return lines;
         }
@@ -252,18 +253,18 @@ namespace Assets.Scripts.Items
 
             if (item.ConsumableEffect == ConsumableEffectType.CureStatus)
             {
-                return "Cures burning, poison, bleeding, freezing, slow and silence.";
+                return Loc.Get("items.consumable.cure-status");
             }
 
             int charges = Mathf.Max(1, item.ConsumableCharges + extraCharges);
-            string chargeText = charges == 1 ? "1 ability charge" : $"{charges} ability charges";
+            string chargeText = charges == 1 ? Loc.Get("items.consumable.one-charge") : Loc.Format("items.consumable.charges", ("charges", charges));
             if (item.ConsumableEffect == ConsumableEffectType.RestoreCharge)
             {
-                return $"Restores {chargeText} to the drinker's most-used ability.";
+                return Loc.Format("items.consumable.restore-charge", ("charges", chargeText));
             }
             if (item.ConsumableEffect == ConsumableEffectType.HealAndCharge)
             {
-                return HealLine(item, maxHealth, potencyBonus) + $" Also restores {chargeText}.";
+                return HealLine(item, maxHealth, potencyBonus) + " " + Loc.Format("items.consumable.also-restores", ("charges", chargeText));
             }
             return HealLine(item, maxHealth, potencyBonus);
         }
@@ -272,19 +273,19 @@ namespace Assets.Scripts.Items
         {
             if (maxHealth > 0)
             {
-                return $"Restores {item.HealAmountFor(maxHealth, potencyBonus)} health.";
+                return Loc.Format("items.consumable.heal-amount", ("amount", item.HealAmountFor(maxHealth, potencyBonus)));
             }
 
             int percent = Mathf.RoundToInt((item.ConsumablePercent + Mathf.Max(0f, potencyBonus)) * 100f);
             if (item.ConsumableAmount > 0 && percent > 0)
             {
-                return $"Restores {item.ConsumableAmount} health plus {percent}% of the drinker's maximum.";
+                return Loc.Format("items.consumable.heal-flat-plus-percent", ("amount", item.ConsumableAmount), ("percent", percent));
             }
             if (percent > 0)
             {
-                return $"Restores {percent}% of the drinker's maximum health.";
+                return Loc.Format("items.consumable.heal-percent", ("percent", percent));
             }
-            return $"Restores {item.ConsumableAmount} health.";
+            return Loc.Format("items.consumable.heal-amount", ("amount", item.ConsumableAmount));
         }
 
         /// <summary>
@@ -420,7 +421,7 @@ namespace Assets.Scripts.Items
         /// <summary>"Physical" for Normal, the element's own name otherwise.</summary>
         public static string DamageTypeName(DamageType type)
         {
-            return type == DamageType.Normal ? "Physical" : type.ToString();
+            return type == DamageType.Normal ? Loc.Get("items.damage-type.physical") : type.ToString();
         }
 
         private static void AddTo(Dictionary<DamageType, float> totals, Resistance resistance)

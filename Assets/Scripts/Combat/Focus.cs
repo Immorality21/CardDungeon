@@ -1,4 +1,5 @@
 using System;
+using ImmoralityGaming.Localization;
 using UnityEngine;
 
 namespace Assets.Scripts.Combat
@@ -58,13 +59,15 @@ namespace Assets.Scripts.Combat
             switch (Casts(focus))
             {
                 case 2:
-                    return "Double-cast";
+                    return Loc.Get("combat.focus.double-cast");
                 case 3:
-                    return "Triple-cast";
+                    return Loc.Get("combat.focus.triple-cast");
                 case 4:
-                    return "Quadruple-cast";
+                    return Loc.Get("combat.focus.quadruple-cast");
                 default:
-                    return Casts(focus) < 2 ? "Single cast" : $"{Casts(focus)}x cast";
+                    return Casts(focus) < 2
+                        ? Loc.Get("combat.focus.single-cast")
+                        : Loc.Format("combat.focus.multi-cast", ("casts", Casts(focus)));
             }
         }
     }

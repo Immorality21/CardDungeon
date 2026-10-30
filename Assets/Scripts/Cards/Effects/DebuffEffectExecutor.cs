@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards.Buffs;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -11,7 +12,7 @@ namespace Assets.Scripts.Cards.Effects
         private const float EffectDelay = 0.2f;
 
         /// <summary>Floated when a debuff fails its <see cref="SpellEffect.ApplyChance"/>.</summary>
-        public const string UnaffectedText = "Unaffected";
+        public static string UnaffectedText => Loc.Get("combat.float.unaffected");
 
         public void Execute(
             SpellEffect effect,
@@ -65,7 +66,7 @@ namespace Assets.Scripts.Cards.Effects
                     result.Entries.Add(new EffectEntry
                     {
                         Target = target,
-                        Text = "Immune",
+                        Text = Loc.Get("combat.float.immune"),
                         Color = Color.gray,
                         Delay = EffectDelay
                     });

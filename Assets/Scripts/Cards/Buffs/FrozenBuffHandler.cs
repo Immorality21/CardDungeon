@@ -1,4 +1,5 @@
 using Assets.Scripts.Combat;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Buffs
 {
@@ -11,14 +12,14 @@ namespace Assets.Scripts.Cards.Buffs
 
         public string GetDisplayText(int power)
         {
-            return "Frozen!";
+            return Loc.Get("combat.status.frozen");
         }
 
         public bool SkipsTurn => true;
 
         public string GetSkipTurnMessage(ICombatUnit unit)
         {
-            return $"{unit.DisplayName} is frozen!";
+            return Loc.Format("combat.skip.frozen", ("unit", unit.DisplayName));
         }
 
         public bool IsRemovedByDamageType(DamageType damageType)

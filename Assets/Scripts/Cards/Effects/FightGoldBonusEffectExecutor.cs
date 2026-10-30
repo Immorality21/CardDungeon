@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -35,7 +36,7 @@ namespace Assets.Scripts.Cards.Effects
                 result.Entries.Add(new EffectEntry
                 {
                     Target = caster,
-                    Text = $"+{effect.Power}% gold",
+                    Text = Loc.Format("combat.float.gold-bonus", ("power", effect.Power)),
                     Color = GoldColor,
                     Delay = 0.2f
                 });

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ImmoralityGaming.Localization;
 using UnityEngine;
 
 namespace Assets.Scripts.Rooms
@@ -520,13 +521,13 @@ namespace Assets.Scripts.Rooms
             }
             if (model.TravelBlockedByEnemies)
             {
-                return "Enemies hold this room - clear them or flee before travelling.";
+                return Loc.Get("room.map.hint.enemies");
             }
             if (model.TravelCount == 0)
             {
-                return "Nowhere to travel yet - the floor beyond this room is unexplored.";
+                return Loc.Get("room.map.hint.nowhere");
             }
-            return "Click an explored room, or arrows then Enter, to travel there instantly.";
+            return Loc.Get("room.map.hint.travel");
         }
 
         /// <summary>
@@ -593,15 +594,15 @@ namespace Assets.Scripts.Rooms
             }
 
             string rooms = model.ExploredCount == 1
-                ? "1 room explored"
-                : string.Format("{0} rooms explored", model.ExploredCount);
+                ? Loc.Get("room.map.status.rooms.one")
+                : Loc.Format("room.map.status.rooms.many", ("count", model.ExploredCount));
             string frontier = model.FrontierCount == 0
-                ? "nothing left unopened"
+                ? Loc.Get("room.map.status.frontier.none")
                 : model.FrontierCount == 1
-                    ? "1 way not yet taken"
-                    : string.Format("{0} ways not yet taken", model.FrontierCount);
-            string exit = model.ExitFound ? " · exit found" : "";
-            return string.Format("{0} · {1}{2}", rooms, frontier, exit);
+                    ? Loc.Get("room.map.status.frontier.one")
+                    : Loc.Format("room.map.status.frontier.many", ("count", model.FrontierCount));
+            string exit = model.ExitFound ? Loc.Get("room.map.status.exit-found") : "";
+            return Loc.Format("room.map.status", ("rooms", rooms), ("frontier", frontier), ("exit", exit));
         }
 
         /// <summary>
@@ -630,23 +631,23 @@ namespace Assets.Scripts.Rooms
             }
 
             var parts = new List<string>();
-            AddCount(parts, counts[(int)MapMarker.Enemies], "fight", "fights");
-            AddCount(parts, counts[(int)MapMarker.Captive], "captive", "captives");
-            AddCount(parts, counts[(int)MapMarker.Event], "event", "events");
-            AddCount(parts, counts[(int)MapMarker.Cache], "cache", "caches");
-            AddCount(parts, counts[(int)MapMarker.Refuge], "refuge", "refuges");
+            AddCount(parts, counts[(int)MapMarker.Enemies], "room.map.waiting.fight.one", "room.map.waiting.fight.many");
+            AddCount(parts, counts[(int)MapMarker.Captive], "room.map.waiting.captive.one", "room.map.waiting.captive.many");
+            AddCount(parts, counts[(int)MapMarker.Event], "room.map.waiting.event.one", "room.map.waiting.event.many");
+            AddCount(parts, counts[(int)MapMarker.Cache], "room.map.waiting.cache.one", "room.map.waiting.cache.many");
+            AddCount(parts, counts[(int)MapMarker.Refuge], "room.map.waiting.refuge.one", "room.map.waiting.refuge.many");
 
-            string exit = model.ExitFound ? "Exit found" : "Exit not found yet";
+            string exit = model.ExitFound ? Loc.Get("room.map.waiting.exit-found") : Loc.Get("room.map.waiting.exit-not-found");
             return parts.Count == 0
-                ? exit + " · nothing left waiting"
-                : exit + " · still waiting: " + string.Join(" · ", parts);
+                ? Loc.Format("room.map.waiting.none", ("exit", exit))
+                : Loc.Format("room.map.waiting.some", ("exit", exit), ("things", string.Join(Loc.Get("room.map.waiting.separator"), parts)));
         }
 
-        private static void AddCount(List<string> parts, int count, string one, string many)
+        private static void AddCount(List<string> parts, int count, string oneKey, string manyKey)
         {
             if (count > 0)
             {
-                parts.Add(count == 1 ? "1 " + one : count + " " + many);
+                parts.Add(count == 1 ? Loc.Get(oneKey) : Loc.Format(manyKey, ("count", count)));
             }
         }
     }

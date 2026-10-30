@@ -20,7 +20,7 @@ namespace Assets.Scripts.Cards
 
         private readonly CombatEvents _events;
         private readonly CombatBuffTracker _buffs;
-        private readonly TriggeredEffect _label = new TriggeredEffect { Label = "Leeching Curse" };
+        private readonly TriggeredEffect _label = new TriggeredEffect { LabelKey = "abilities.reaction.leeching-curse" };
 
         public LeechTracker(CombatEvents events, CombatBuffTracker buffs)
         {

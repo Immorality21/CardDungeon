@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.UnitStats
 {
@@ -17,14 +18,26 @@ namespace Assets.Scripts.UnitStats
     {
         public StatType Type { get; private set; }
 
+        /// <summary>The stat's segment in its text keys: <c>stat.&lt;key&gt;.short</c>, <c>.name</c>, <c>.description</c>.</summary>
+        public string TextKey { get; private set; }
+
         /// <summary>Three-letter label for table columns and compact stat lines.</summary>
-        public string ShortName { get; private set; }
+        public string ShortName
+        {
+            get { return Loc.Get("stat." + TextKey + ".short"); }
+        }
 
         /// <summary>Full name for player-facing text and buff labels.</summary>
-        public string DisplayName { get; private set; }
+        public string DisplayName
+        {
+            get { return Loc.Get("stat." + TextKey + ".name"); }
+        }
 
         /// <summary>One line on what the stat actually does, for tooltips.</summary>
-        public string Description { get; private set; }
+        public string Description
+        {
+            get { return Loc.Get("stat." + TextKey + ".description"); }
+        }
 
         /// <summary>
         /// What one point is worth when pricing a hero to recruit — the hero's *worth to the player*.
@@ -47,13 +60,11 @@ namespace Assets.Scripts.UnitStats
         /// </summary>
         public bool IsPool { get; private set; }
 
-        public StatDefinition(StatType type, string shortName, string displayName, string description,
+        public StatDefinition(StatType type, string textKey,
             float recruitWeight, float powerWeight, int authoringDefault, bool isPool = false)
         {
             Type = type;
-            ShortName = shortName;
-            DisplayName = displayName;
-            Description = description;
+            TextKey = textKey;
             RecruitWeight = recruitWeight;
             PowerWeight = powerWeight;
             AuthoringDefault = authoringDefault;
@@ -73,32 +84,25 @@ namespace Assets.Scripts.UnitStats
     {
         private static readonly StatDefinition[] Definitions =
         {
-            new StatDefinition(StatType.Strength, "STR", "Strength",
-                "Physical power. Scales melee-flavoured attacks and abilities.",
+            new StatDefinition(StatType.Strength, "strength",
                 recruitWeight: 6f, powerWeight: 6f, authoringDefault: 5),
 
-            new StatDefinition(StatType.Endurance, "END", "Endurance",
-                "Reduces physical damage (basic attacks, Strength/Agility abilities), through the diminishing curve in DamageCalculator.",
+            new StatDefinition(StatType.Endurance, "endurance",
                 recruitWeight: 4f, powerWeight: 4f, authoringDefault: 5),
 
-            new StatDefinition(StatType.Agility, "AGI", "Agility",
-                "Turn frequency - TurnManager schedules on it, so it compounds.",
+            new StatDefinition(StatType.Agility, "agility",
                 recruitWeight: 5f, powerWeight: 3f, authoringDefault: 5),
 
-            new StatDefinition(StatType.Intelligence, "INT", "Intelligence",
-                "Scales offensive and arcane ability power - a caster's Strength.",
+            new StatDefinition(StatType.Intelligence, "intelligence",
                 recruitWeight: 5f, powerWeight: 2f, authoringDefault: 0),
 
-            new StatDefinition(StatType.Spirit, "SPR", "Spirit",
-                "Scales restorative and protective ability power - healing, shields, Holy - and reduces magic damage (Intelligence/Spirit abilities) the way Endurance reduces physical.",
+            new StatDefinition(StatType.Spirit, "spirit",
                 recruitWeight: 5f, powerWeight: 2f, authoringDefault: 0),
 
-            new StatDefinition(StatType.Luck, "LCK", "Luck",
-                "Raises crit chance, gives a chance to dodge physical hits, and improves stat checks on room events.",
+            new StatDefinition(StatType.Luck, "luck",
                 recruitWeight: 4f, powerWeight: 3f, authoringDefault: 0),
 
-            new StatDefinition(StatType.MaxHealth, "HP", "Health",
-                "Size of the health bar. Current health is a resource, not a stat.",
+            new StatDefinition(StatType.MaxHealth, "max-health",
                 recruitWeight: 2f, powerWeight: 1f, authoringDefault: 20, isPool: true)
         };
 
@@ -214,13 +218,13 @@ namespace Assets.Scripts.UnitStats
         /// <summary>Short label, safe for <see cref="StatType.None"/> (returns "-").</summary>
         public static string ShortName(StatType stat)
         {
-            return stat == StatType.None ? "-" : Of(stat).ShortName;
+            return stat == StatType.None ? Loc.Get("stat.none.short") : Of(stat).ShortName;
         }
 
         /// <summary>Full label, safe for <see cref="StatType.None"/> (returns "None").</summary>
         public static string DisplayName(StatType stat)
         {
-            return stat == StatType.None ? "None" : Of(stat).DisplayName;
+            return stat == StatType.None ? Loc.Get("stat.none.name") : Of(stat).DisplayName;
         }
 
         /// <summary>Stats that can be a source of power - everything that is not a pool.</summary>

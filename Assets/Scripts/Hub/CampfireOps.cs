@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Heroes;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Hub
 {
@@ -72,11 +73,11 @@ namespace Assets.Scripts.Hub
             switch (mode)
             {
                 case XpSplitMode.Mentor:
-                    return "Mentor";
+                    return Loc.Get("hub.campfire.mode.mentor");
                 case XpSplitMode.CatchUp:
-                    return "Catch Up";
+                    return Loc.Get("hub.campfire.mode.catch-up");
                 default:
-                    return "Even";
+                    return Loc.Get("hub.campfire.mode.even");
             }
         }
 
@@ -86,11 +87,11 @@ namespace Assets.Scripts.Hub
             switch (mode)
             {
                 case XpSplitMode.Mentor:
-                    return "A hero you name takes a double share. The rest split what is left.";
+                    return Loc.Get("hub.campfire.mode.mentor.desc");
                 case XpSplitMode.CatchUp:
-                    return "Whoever is furthest behind takes the double share, chosen fresh each time.";
+                    return Loc.Get("hub.campfire.mode.catch-up.desc");
                 default:
-                    return "Everyone who marches out takes an equal share.";
+                    return Loc.Get("hub.campfire.mode.even.desc");
             }
         }
     }

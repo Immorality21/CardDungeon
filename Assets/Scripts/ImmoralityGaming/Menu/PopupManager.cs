@@ -1,4 +1,5 @@
 ﻿using ImmoralityGaming.Fundamentals;
+using ImmoralityGaming.Localization;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -43,8 +44,8 @@ namespace ImmoralityGaming.Menu
             Confirm.onClick.RemoveAllListeners();
             Close.onClick.RemoveAllListeners();
 
-            Confirm.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = (settings.PositiveButtonText == string.Empty) ? "Ok" : settings.PositiveButtonText;
-            Close.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = (settings.NegativeButtonText == string.Empty) ? "Close" : settings.NegativeButtonText;
+            Confirm.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = (settings.PositiveButtonText == string.Empty) ? Loc.Get("framework.popup.ok") : settings.PositiveButtonText;
+            Close.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = (settings.NegativeButtonText == string.Empty) ? Loc.Get("framework.popup.close") : settings.NegativeButtonText;
 
             Confirm.interactable = true;
 
@@ -107,10 +108,10 @@ namespace ImmoralityGaming.Menu
         {
             ShowPopup(new PopupSettings
             {
-                Title = "No internet!",
-                Message = "Failed to connect to the internet. Make sure you have Wifi or Mobile Data enabled and try again.",
+                Title = Loc.Get("framework.popup.no-internet.title"),
+                Message = Loc.Get("framework.popup.no-internet.message"),
                 DialogType = DialogType.DoNotCloseOnOk,
-                PositiveButtonText = "Retry",
+                PositiveButtonText = Loc.Get("framework.popup.retry"),
                 //PositiveAction = () =>
                 //{
                 //    if (NetworkManager.InvokeNoInternetActions())
@@ -132,8 +133,8 @@ namespace ImmoralityGaming.Menu
         {
             var settings = new PopupSettings
             {
-                Title = "Error",
-                Message = text == string.Empty ? "Something went wrong." : text
+                Title = Loc.Get("framework.popup.error.title"),
+                Message = text == string.Empty ? Loc.Get("framework.popup.error.message") : text
             };
 
             ShowPopup(settings);

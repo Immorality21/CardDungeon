@@ -82,6 +82,12 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Fill_ValueContainingPlaceholder_IsNotSubstitutedInto()
+        {
+            Assert.AreEqual("{target} hits Goblin", Loc.Fill("{name} hits {target}", ("name", "{target}"), ("target", "Goblin")));
+        }
+
+        [Test]
         public void Find_AfterEntryAdded_NeedsRebuildIndex()
         {
             _table.Entries.Add(new TextEntry { Key = "ui.new", Values = new List<string> { "New" } });

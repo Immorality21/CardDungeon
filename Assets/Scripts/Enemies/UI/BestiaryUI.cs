@@ -5,6 +5,7 @@ using Assets.Scripts.Items.UI;
 using Assets.Scripts.Progression;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Enemies.UI
 {
@@ -31,7 +32,10 @@ namespace Assets.Scripts.Enemies.UI
     /// </summary>
     public class BestiaryUI
     {
-        private const string UnknownName = "? ? ?";
+        private static string UnknownName
+        {
+            get { return Loc.Get("bestiary.unknown-name"); }
+        }
 
         private enum Tab { Monsters, Recipes }
 
@@ -145,7 +149,7 @@ namespace Assets.Scripts.Enemies.UI
             _tabRecipes?.EnableInClassList("cd-inv-tab--active", tab == Tab.Recipes);
             if (_listTitle != null)
             {
-                _listTitle.text = tab == Tab.Monsters ? "Enemies met" : "Recipe trees";
+                _listTitle.text = tab == Tab.Monsters ? Loc.Get("bestiary.list.enemies-met") : Loc.Get("bestiary.list.recipe-trees");
             }
             _selected = -1;
             if (tab == Tab.Monsters)
@@ -265,8 +269,8 @@ namespace Assets.Scripts.Enemies.UI
             var knowledge = MetaProgressManager.Instance.GetBestiary();
             int seenCount = BestiaryPresenter.SeenCount(_catalog, knowledge);
             _progress.text = _catalog.Count == 0
-                ? "No enemy catalog found."
-                : $"{seenCount} of {_catalog.Count} discovered";
+                ? Loc.Get("bestiary.progress.no-catalog")
+                : Loc.Format("bestiary.progress.discovered", ("seen", seenCount), ("total", _catalog.Count));
             // Read: the town stops flagging the Bestiary until someone new is met.
             MetaProgressManager.Instance.MarkBestiaryViewed(seenCount);
 
@@ -283,7 +287,7 @@ namespace Assets.Scripts.Enemies.UI
 
                 int rowIndex = _rows.Count;
                 var row = MakeRow(definition.Sprite, definition.Label,
-                    known.Kills > 0 ? $"Slain x{known.Kills}" : "Seen, not yet slain");
+                    known.Kills > 0 ? Loc.Format("bestiary.row.slain", ("kills", known.Kills)) : Loc.Get("bestiary.row.seen-not-slain"));
                 row.RegisterCallback<ClickEvent>(_ => Select(rowIndex));
                 _list.Add(row);
                 _rows.Add(row);
@@ -358,10 +362,10 @@ namespace Assets.Scripts.Enemies.UI
             _detail.Clear();
             if (_tab == Tab.Recipes)
             {
-                SetHead(null, "No recipes in the world", "There is nothing for the Forge to make yet.");
+                SetHead(null, Loc.Get("bestiary.empty.recipes.title"), Loc.Get("bestiary.empty.recipes.sub"));
                 return;
             }
-            SetHead(null, "No enemies met yet", "Everything the party survives is written down here.");
+            SetHead(null, Loc.Get("bestiary.empty.enemies.title"), Loc.Get("bestiary.empty.enemies.sub"));
         }
 
         private void SetHead(Sprite portrait, string name, string sub)
@@ -394,14 +398,14 @@ namespace Assets.Scripts.Enemies.UI
             var known = MetaProgressManager.Instance.GetBestiaryEntry(definition.SaveKey);
             if (known == null)
             {
-                SetHead(null, UnknownName, "Not yet encountered.");
+                SetHead(null, UnknownName, Loc.Get("bestiary.detail.not-encountered"));
                 return;
             }
 
             // Health comes from the definition's base stats here, not from a live unit: the hub has
             // no fight in progress, and a level's enemy tuning scales this per floor anyway.
             SetHead(definition.Sprite, definition.Label,
-                $"Health {definition.BaseStats[UnitStats.StatType.MaxHealth]}  ·  Slain x{known.Kills}");
+                Loc.Format("bestiary.detail.health-slain", ("health", definition.BaseStats[UnitStats.StatType.MaxHealth]), ("kills", known.Kills)));
 
             _detail.Add(BestiaryLineView.Row(BestiaryPresenter.AttackLine(definition, known)));
 
@@ -415,10 +419,10 @@ namespace Assets.Scripts.Enemies.UI
             page.Add(right);
             _detail.Add(page);
 
-            BestiaryLineView.AddSection(left, "Resistances", BestiaryPresenter.ResistanceLines(definition, known));
-            BestiaryLineView.AddSection(left, "Immune to", BestiaryPresenter.ImmunityLines(definition, known));
-            BestiaryLineView.AddSection(right, "Base stats", BestiaryPresenter.StatLines(definition, known));
-            BestiaryLineView.AddSection(right, "Abilities", BestiaryPresenter.CompactSpellLines(definition, known));
+            BestiaryLineView.AddSection(left, Loc.Get("bestiary.section.resistances"), BestiaryPresenter.ResistanceLines(definition, known));
+            BestiaryLineView.AddSection(left, Loc.Get("bestiary.section.immune-to"), BestiaryPresenter.ImmunityLines(definition, known));
+            BestiaryLineView.AddSection(right, Loc.Get("bestiary.section.base-stats"), BestiaryPresenter.StatLines(definition, known));
+            BestiaryLineView.AddSection(right, Loc.Get("bestiary.section.abilities"), BestiaryPresenter.CompactSpellLines(definition, known));
 
             // One row, the same as the combat Inspect page: the names seen, then how many are left.
             _detail.Add(BestiaryLineView.Row(BestiaryPresenter.LootSummary(definition, known)));
@@ -449,14 +453,14 @@ namespace Assets.Scripts.Enemies.UI
                     known++;
                 }
             }
-            _progress.text = $"{known} of {all.Count} recipes known";
+            _progress.text = Loc.Format("bestiary.progress.recipes-known", ("known", known), ("total", all.Count));
 
             foreach (var node in RecipeTreeOps.Flatten(RecipeTreeOps.Build(all, inventory.KnowsRecipe)))
             {
                 int rowIndex = _rows.Count;
                 var row = node.Known
                     ? MakeRow(node.Item.Icon, NameOf(node.Item), RecipeCaption(node))
-                    : MakeRow(null, UnknownName, "Recipe not yet found");
+                    : MakeRow(null, UnknownName, Loc.Get("bestiary.recipe.not-found"));
                 if (!node.Known)
                 {
                     row.AddToClassList("cd-recipe-row--unknown");
@@ -476,9 +480,9 @@ namespace Assets.Scripts.Enemies.UI
         {
             if (!node.IsRecipe)
             {
-                return "Found or bought";
+                return Loc.Get("bestiary.recipe.caption.found-or-bought");
             }
-            return node.Recipe.KnownWithForge ? "Taught by the Forge" : "Recipe found";
+            return node.Recipe.KnownWithForge ? Loc.Get("bestiary.recipe.caption.taught") : Loc.Get("bestiary.recipe.caption.found");
         }
 
         /// <summary>
@@ -493,46 +497,46 @@ namespace Assets.Scripts.Enemies.UI
 
             if (!node.Known)
             {
-                SetHead(null, UnknownName, "Recipe not yet found");
+                SetHead(null, UnknownName, Loc.Get("bestiary.recipe.not-found"));
                 if (node.Recipe.CraftBase != null)
                 {
-                    _detail.Add(DetailLine($"Made from a {NameOf(node.Recipe.CraftBase)}.", "cd-inv-detail__line"));
+                    _detail.Add(DetailLine(Loc.Format("bestiary.recipe.made-from", ("item", NameOf(node.Recipe.CraftBase))), "cd-inv-detail__line"));
                 }
-                _detail.Add(DetailLine("Recipes are found on monsters and on cleared floors.", "cd-inv-detail__note"));
+                _detail.Add(DetailLine(Loc.Get("bestiary.recipe.where-found"), "cd-inv-detail__note"));
                 AddLeadsTo(node);
                 return;
             }
 
             var item = node.Item;
             string kind = item.Category == ItemCategory.Equipment
-                ? $"{ItemPresenter.RarityLabel(item.Rarity)} · {ItemPresenter.SlotLabel(item.SlotType)}"
+                ? Loc.Format("bestiary.recipe.kind", ("rarity", ItemPresenter.RarityLabel(item.Rarity)), ("slot", ItemPresenter.SlotLabel(item.SlotType)))
                 : ItemPresenter.RarityLabel(item.Rarity);
             SetHead(item.Icon, NameOf(item), kind);
             InventoryHubUI.ApplyRarity(_name, item);
 
             if (node.IsRecipe)
             {
-                _detail.Add(BestiaryLineView.Section(node.Recipe.KnownWithForge ? "Recipe · taught by the Forge" : "Recipe"));
+                _detail.Add(BestiaryLineView.Section(node.Recipe.KnownWithForge ? Loc.Get("bestiary.recipe.section.taught") : Loc.Get("bestiary.recipe.section")));
                 if (node.Recipe.CraftBase != null)
                 {
-                    _detail.Add(DetailLine($"{NameOf(node.Recipe.CraftBase)}, worked into it", "cd-inv-detail__line"));
+                    _detail.Add(DetailLine(Loc.Format("bestiary.recipe.base-line", ("item", NameOf(node.Recipe.CraftBase))), "cd-inv-detail__line"));
                 }
                 foreach (var line in node.Recipe.CraftMaterials)
                 {
                     if (line != null && line.IsValid)
                     {
-                        _detail.Add(DetailLine($"{NameOf(line.Material)} ×{Mathf.Max(1, line.Amount)}", "cd-inv-detail__line"));
+                        _detail.Add(DetailLine(Loc.Format("bestiary.recipe.material-line", ("item", NameOf(line.Material)), ("amount", Mathf.Max(1, line.Amount))), "cd-inv-detail__line"));
                     }
                 }
                 if (node.Recipe.CraftGold > 0)
                 {
-                    _detail.Add(DetailLine($"{node.Recipe.CraftGold} gold", "cd-inv-detail__line"));
+                    _detail.Add(DetailLine(Loc.Format("bestiary.recipe.gold-line", ("gold", node.Recipe.CraftGold)), "cd-inv-detail__line"));
                 }
-                _detail.Add(DetailLine("Made at the Forge.", "cd-inv-detail__note"));
+                _detail.Add(DetailLine(Loc.Get("bestiary.recipe.made-at-forge"), "cd-inv-detail__note"));
             }
             else
             {
-                _detail.Add(DetailLine("Not made at the Forge: found in the dungeon or bought.", "cd-inv-detail__note"));
+                _detail.Add(DetailLine(Loc.Get("bestiary.recipe.not-made-at-forge"), "cd-inv-detail__note"));
             }
 
             AddLeadsTo(node);
@@ -546,7 +550,7 @@ namespace Assets.Scripts.Enemies.UI
             {
                 return;
             }
-            _detail.Add(BestiaryLineView.Section("Can become"));
+            _detail.Add(BestiaryLineView.Section(Loc.Get("bestiary.recipe.section.can-become")));
             foreach (var child in node.Children)
             {
                 _detail.Add(DetailLine(child.Known ? NameOf(child.Item) : UnknownName, "cd-inv-detail__line"));

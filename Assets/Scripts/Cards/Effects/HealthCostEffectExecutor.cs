@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards.Effects
 {
@@ -58,7 +59,7 @@ namespace Assets.Scripts.Cards.Effects
             result.Entries.Add(new EffectEntry
             {
                 Target = caster,
-                Text = $"-{paid} HP",
+                Text = Loc.Format("combat.float.health-cost", ("amount", paid)),
                 Color = CostColor,
                 Delay = EffectDelay
             });
