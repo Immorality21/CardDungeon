@@ -26,7 +26,7 @@ namespace Assets.Scripts.Tutorial
                 return;
             }
             var tutorial = UnityEngine.Resources.Load<TutorialSO>(TutorialSO.ResourcePath);
-            if (tutorial == null || tutorial.GearReward == null || tutorial.FirstRun != run
+            if (tutorial == null || tutorial.GearReward == null || tutorial.GearRunOrFirst != run
                 || tutorial.GearLevelIndex != levelIndex)
             {
                 return;

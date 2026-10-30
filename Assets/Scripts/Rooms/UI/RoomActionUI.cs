@@ -360,7 +360,7 @@ namespace Assets.Scripts.Rooms
             }
             if (_pauseQuit != null)
             {
-                _pauseQuit.clicked += OnQuitToHub;
+                _pauseQuit.clicked += OnQuitToTitle;
             }
             if (_pauseMap != null)
             {
@@ -2461,7 +2461,7 @@ namespace Assets.Scripts.Rooms
         /// exactly as a wipe forfeits them - while the party's health, charges and wounds come back
         /// untouched, so it can never be used to undo a bad fight.
         /// </summary>
-        private void OnQuitToHub()
+        private void OnQuitToTitle()
         {
             if (!_quitArmed)
             {
@@ -2472,11 +2472,11 @@ namespace Assets.Scripts.Rooms
 
             if (DungeonManager.HasInstance)
             {
-                DungeonManager.Instance.HandleQuitToHub();
+                DungeonManager.Instance.HandleQuitToTitle();
             }
-            // The hub, never the title screen - the loop is hub -> dungeon -> hub, and the campaign
-            // map is where the run is picked back up.
-            SceneManager.LoadScene("HubScene");
+            // The title screen, never the hub: the town is reached only at a run's end (owner,
+            // 2026-10-30). Continue there sends the party straight back down (HubManager.Start).
+            SceneManager.LoadScene("MenuScene");
         }
 
         private void RefreshQuitButton()
@@ -2513,7 +2513,8 @@ namespace Assets.Scripts.Rooms
                     case KeyCode.LeftArrow:
                     case KeyCode.RightArrow:
                     case KeyCode.Tab:
-                        if (_levelNextLevelAction != null)
+                        // Only a window offering both ways on has anything to switch between.
+                        if (_levelNextLevelAction != null && _levelContinueAction != null)
                         {
                             SetLevelChoice(!_levelChoiceIsNext);
                         }
@@ -3580,13 +3581,15 @@ namespace Assets.Scripts.Rooms
         /// gold is split into what the floor paid and the clear bonus, because the bonus was the
         /// +30 nobody could account for, and Essence says where it is spent.</para>
         /// </summary>
+        /// <param name="onContinue">Back to Town. Null hides the button: mid-run the town is not a way
+        /// on (owner, 2026-10-30) - only the run's end goes home.</param>
         /// <param name="onNextLevel">Continue: straight down to the next level. Null hides the button,
-        /// leaving the town as the only way on (the run's last level, the tutorial).</param>
+        /// leaving the town as the only way on (the run's last level).</param>
         public void ShowLevelCleared(LevelClearSummary summary, Action onContinue, Action onNextLevel = null)
         {
             if (!EnsureRefs() || _levelWindow == null || summary == null)
             {
-                onContinue?.Invoke();
+                (onNextLevel ?? onContinue)?.Invoke();
                 return;
             }
 
@@ -3603,6 +3606,7 @@ namespace Assets.Scripts.Rooms
             _levelContinueAction = onContinue;
             _levelNextLevelAction = onNextLevel;
             SetShown(_levelNextLevel, onNextLevel != null);
+            SetShown(_levelContinue, onContinue != null);
             // Continue is the default when it is offered: a player clearing a run level by level
             // should not have to reach for the arrows every time.
             SetLevelChoice(onNextLevel != null);

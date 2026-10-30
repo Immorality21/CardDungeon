@@ -265,9 +265,10 @@ Touch points: `Assets/Scripts/UnitStats/StatCatalog.cs` (descriptions exist, unu
 
 **From the outside playtest (2026-10-30, owner):** lock going back to town until the run is completed,
 and split the tutorial into separate runs instead. Going home mid-run invites abuse, confusion (a
-run's spent charges showed in town) and bugs. **Scheduled next after the Ultra rethink** (owner,
-2026-10-30): the Threshold becomes separate runs, each ending at the hub, so the steps that send the
-player home (spend on the sphere grid, equip a weapon) fall between runs.
+run's spent charges showed in town) and bugs. ✅ **Built 2026-10-30**: the Threshold is three runs
+(Dungeon Entrance, Upper Halls, The Threshold), each ending at the hub, so the steps that send the
+player home (spend on the sphere grid, equip a weapon) fall between runs; mid-run there is no way to
+town at all (see `docs/TUTORIAL.md`).
 
 **The game teaches nothing.** A new player lands in a town with two buildings standing, two plots
 waiting and a road, and is told none of it: not that the road is how you leave, not that the

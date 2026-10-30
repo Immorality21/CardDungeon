@@ -181,6 +181,27 @@ namespace Assets.Scripts.Hub
             _fileHandler = new FileHandler();
             _runSaveData = _fileHandler.Load<RunSaveData>();
 
+            // Both Resources-loaded like the item catalog, so the hub resolves the run graph and the
+            // town without scene wiring - and without AssetDatabase, which does not exist in a build.
+            _campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
+            _hub = UnityEngine.Resources.Load<HubSO>(HubSO.ResourcePath);
+            _tutorial = UnityEngine.Resources.Load<TutorialSO>(TutorialSO.ResourcePath);
+
+            // A save from before a chapter was split into runs cleared only its last part's key.
+            foreach (var key in CampaignOps.ImpliedCompletions(_campaign, MetaProgressManager.Instance.GetCompletedRunKeys()))
+            {
+                MetaProgressManager.Instance.MarkRunCompleted(key);
+            }
+
+            // The town is reached only at a run's end (owner, 2026-10-30). A run still underway here
+            // was left from the pause menu (Quit to Title) or by closing the game, and the title's
+            // Continue goes straight back down to it - never into town mid-run.
+            if (!_newGameRequested && CampaignOps.LocksParty(_runSaveData) && ActiveRunDefinition() != null)
+            {
+                OnEnterDungeon();
+                return;
+            }
+
             // Back in town every hero is whole again: a hero who fell stays down only for the floors
             // walked straight through (playtest 3 finding 9, DownedCarry).
             if (_runSaveData != null && _runSaveData.DownedHeroKeys != null && _runSaveData.DownedHeroKeys.Count > 0)
@@ -188,12 +209,6 @@ namespace Assets.Scripts.Hub
                 _runSaveData.DownedHeroKeys.Clear();
                 _fileHandler.Save(_runSaveData);
             }
-
-            // Both Resources-loaded like the item catalog, so the hub resolves the run graph and the
-            // town without scene wiring - and without AssetDatabase, which does not exist in a build.
-            _campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
-            _hub = UnityEngine.Resources.Load<HubSO>(HubSO.ResourcePath);
-            _tutorial = UnityEngine.Resources.Load<TutorialSO>(TutorialSO.ResourcePath);
 
             // A spell a hero starts with is never "bought", so nothing else would ever record it as
             // discovered and the Forge would refuse to upgrade the one spell everyone owns.
@@ -1605,7 +1620,7 @@ namespace Assets.Scripts.Hub
             }
 
             progress.GearFloorCleared = TutorialOps.LevelCleared(
-                RunKeyOf(_tutorial.FirstRun), hub.CompletedRunKeys,
+                RunKeyOf(_tutorial.GearRunOrFirst), hub.CompletedRunKeys,
                 _runSaveData.RunKey, _runSaveData.CurrentLevelIndex, _tutorial.GearLevelIndex);
             // Instance, not HasInstance (learning 1 in docs/TUTORIAL.md): the hub places no inventory.
             var inventory = InventoryManager.Instance;

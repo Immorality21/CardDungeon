@@ -16,38 +16,9 @@ MonoBehaviour:
   SequenceIndex: 0
   Repeatable: 0
   Challenge: 0
+  ReplayHintOnWipe: 0
   JoinsOnClear: {fileID: 0}
   Levels:
-  - LevelTemplate: {fileID: 11400000, guid: b2a362ec7000ace46ad22ed1b533bf55, type: 2}
-    LevelNameKey: run.tutorial-run.level-1.name
-    ManualLayout: {fileID: 11400000, guid: 81a86b4d14ab1a34792bcf19bfcaee94, type: 2}
-    BossEnemy: {fileID: 0}
-    BossAdds: []
-    EnemyTuning:
-      Difficulty: 1
-      StatScales:
-      - Stat: 7
-        Multiplier: 1.5
-      XpMultiplier: 2
-      GoldMultiplier: 1
-      Overrides: []
-    RescueHero: {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
-    AllowRoomEvents: 0
-    IntendedHard: 0
-  - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
-    LevelNameKey: run.tutorial-run.level-2.name
-    ManualLayout: {fileID: 0}
-    BossEnemy: {fileID: 0}
-    BossAdds: []
-    EnemyTuning:
-      Difficulty: 1.15
-      StatScales: []
-      XpMultiplier: 2
-      GoldMultiplier: 1
-      Overrides: []
-    RescueHero: {fileID: 0}
-    AllowRoomEvents: 1
-    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: eac98a3da612d49499a92d78cd394b7f, type: 2}
     LevelNameKey: run.tutorial-run.level-3.name
     ManualLayout: {fileID: 0}

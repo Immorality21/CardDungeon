@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebc985730f692f54eafd123ca62fd64f, type: 3}
+  m_Name: ThresholdHalls
+  m_EditorClassIdentifier: 
+  Key: ThresholdHalls
+  SequenceIndex: 0
+  Repeatable: 0
+  Challenge: 0
+  ReplayHintOnWipe: 0
+  JoinsOnClear: {fileID: 0}
+  Levels:
+  - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
+    LevelNameKey: run.tutorial-run.level-2.name
+    ManualLayout: {fileID: 0}
+    BossEnemy: {fileID: 0}
+    BossAdds: []
+    EnemyTuning:
+      Difficulty: 1.15
+      StatScales: []
+      XpMultiplier: 2
+      GoldMultiplier: 1
+      Overrides: []
+    RescueHero: {fileID: 0}
+    AllowRoomEvents: 1
+    IntendedHard: 0

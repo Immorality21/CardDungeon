@@ -37,6 +37,27 @@ namespace Tests.EditMode
             return AssetDatabase.LoadAssetAtPath<PartyRosterSO>(AssetDatabase.GUIDToAssetPath(guids[0]));
         }
 
+        /// <summary>
+        /// The party goes home only when a run ends (owner, 2026-10-30), so every tutorial step that
+        /// happens in town must come after a whole run: the hall after the first, the gear after the
+        /// second, and the second must open straight off the first.
+        /// </summary>
+        [Test]
+        public void TheTownSteps_EachFollowAWholeRun()
+        {
+            var tutorial = Tutorial();
+            Assert.AreEqual(1, tutorial.FirstRun.Levels.Count,
+                "The first run must be the one floor that pays for the hall - the hall step waits for it to end.");
+            Assert.IsNotNull(tutorial.GearRun, "The tutorial names no gear run.");
+            Assert.AreNotSame(tutorial.FirstRun, tutorial.GearRun);
+
+            var campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
+            var gearNode = campaign.FindNode(CampaignOps.RunKeyOf(tutorial.GearRun));
+            Assert.IsNotNull(gearNode, "The gear run is not on the campaign map.");
+            CollectionAssert.AreEqual(new[] { tutorial.FirstRun }, gearNode.Requires,
+                "The gear run must open on the first run's clear and on nothing else.");
+        }
+
         [Test]
         public void TheFirstRun_IsWhereTheCampaignStarts()
         {
@@ -156,8 +177,9 @@ namespace Tests.EditMode
             var tutorial = Tutorial();
             Assert.IsNotNull(tutorial.GearReward, "The tutorial names no gear reward - the equip step would be skipped.");
             Assert.AreEqual(ItemCategory.Equipment, tutorial.GearReward.Category, "The gear reward must be equipment.");
-            Assert.Less(tutorial.GearLevelIndex, tutorial.FirstRun.Levels.Count,
-                "GearLevelIndex is past the tutorial run's last level - nothing would pay the reward.");
+            Assert.IsNotNull(tutorial.GearRun, "The tutorial names no gear run.");
+            Assert.AreEqual(tutorial.GearRun.Levels.Count - 1, tutorial.GearLevelIndex,
+                "The gear reward must come with the gear run's last floor: no run goes home before its end.");
 
             var catalog = UnityEngine.Resources.Load<ItemCatalogSO>(ItemCatalogSO.ResourcePath);
             Assert.IsNotNull(catalog, "No ItemCatalog in Resources.");

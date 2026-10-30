@@ -431,9 +431,14 @@ namespace Tests.EditMode
             }
         }
 
+        /// <summary>The root and every run that continues its chapter (the Threshold's three parts).</summary>
         private static bool IsTutorial(CampaignSO campaign, CampaignNodeEntry node)
         {
-            return node.Requires == null || node.Requires.Count == 0;
+            while (node != null && node.Continues && node.Requires != null && node.Requires.Count == 1)
+            {
+                node = campaign.FindNode(node.Requires[0]);
+            }
+            return node != null && (node.Requires == null || node.Requires.Count == 0);
         }
     }
 }

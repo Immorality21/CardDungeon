@@ -306,10 +306,12 @@ backlog.**
   decided hero by hero; taking damage fills fastest; starting Ultras picked (§13). **Built
   2026-10-30:** starting Ultras moved to the trunk (free), the gauge kept for the run and filled by
   taken/dealt/healed. To do: see it in play (sandbox); decide the remaining Ultra nodes hero by hero.
-- **No way back to town mid-run — right after the Ultra rethink** (owner, 2026-10-30, outside
-  playtest). The hub is reached only at the end of a run; split the tutorial run (the Threshold) into
-  separate runs so the player is sent home to upgrade on the sphere grid and to equip a weapon between
-  them. Avoids abuse, confusion and bugs (the "charges left this run" in town came from exactly this).
+- **No way back to town mid-run** (owner, 2026-10-30) — ✅ **built the same day**: a mid-run level
+  clear offers only Continue, the pause menu's Leave became **Quit to Title** (the title's Continue
+  goes straight back down), and the Threshold is three runs (Dungeon Entrance → Upper Halls → The
+  Threshold, `CampaignNodeEntry.Continues` keeps them one tier). Walked in play through
+  `Tools ▸ Tutorial`. The split nudged the Lich's boss room to 6.02x its trash (ceiling 6.0x: the
+  model's party goes home twice more in the tutorial); the owner dropped one of its two Skeleton adds.
   `plans/POLISH_CONTENT.md` §20, `TUTORIAL.md`.
 - **Boss balancing** (owner, 2026-10-28). The late runs' bosses were left at their old numbers
   in the last pass (Emberfall 30% wipes; the Hollow Vault, Red Cloister, Altar of the Last Initiate and

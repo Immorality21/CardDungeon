@@ -13,12 +13,31 @@ MonoBehaviour:
   m_Name: Campaign
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.CampaignSO
   Nodes:
-  - Run: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
+  - Run: {fileID: 11400000, guid: d0613f44f8b48854da4854e5c5f8bfb7, type: 2}
     Requires: []
     RequiresHeroes: []
     UnlockMode: 0
     Secret: 0
     Optional: 0
+    Continues: 0
+    MapPosition: {x: -380, y: 0}
+  - Run: {fileID: 11400000, guid: 48aeeeba40c53684e87b9da6523f8d09, type: 2}
+    Requires:
+    - {fileID: 11400000, guid: d0613f44f8b48854da4854e5c5f8bfb7, type: 2}
+    RequiresHeroes: []
+    UnlockMode: 0
+    Secret: 0
+    Optional: 0
+    Continues: 1
+    MapPosition: {x: -190, y: 0}
+  - Run: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
+    Requires:
+    - {fileID: 11400000, guid: 48aeeeba40c53684e87b9da6523f8d09, type: 2}
+    RequiresHeroes: []
+    UnlockMode: 0
+    Secret: 0
+    Optional: 0
+    Continues: 1
     MapPosition: {x: 0, y: 0}
   - Run: {fileID: 11400000, guid: f59f383bb9804c249afa16877f266076, type: 2}
     Requires:
@@ -27,6 +46,7 @@ MonoBehaviour:
     UnlockMode: 0
     Secret: 0
     Optional: 0
+    Continues: 0
     MapPosition: {x: 190, y: -60}
   - Run: {fileID: 11400000, guid: ba50ce57125c4584b8d454bd13545f36, type: 2}
     Requires:
@@ -35,6 +55,7 @@ MonoBehaviour:
     UnlockMode: 0
     Secret: 0
     Optional: 0
+    Continues: 0
     MapPosition: {x: 570, y: -60}
   - Run: {fileID: 11400000, guid: e90ff9758e2770148a54d188a5913394, type: 2}
     Requires:
@@ -43,6 +64,7 @@ MonoBehaviour:
     UnlockMode: 0
     Secret: 0
     Optional: 1
+    Continues: 0
     MapPosition: {x: 190, y: 70}
   - Run: {fileID: 11400000, guid: 148f9f9eaa0cd7345bb2e4703723ac85, type: 2}
     Requires:
@@ -51,6 +73,7 @@ MonoBehaviour:
     UnlockMode: 0
     Secret: 0
     Optional: 0
+    Continues: 0
     MapPosition: {x: 760, y: -60}
   - Run: {fileID: 11400000, guid: 281088d38c802044091ec47dfc8fb2e9, type: 2}
     Requires:
@@ -61,6 +84,7 @@ MonoBehaviour:
     UnlockMode: 0
     Secret: 1
     Optional: 1
+    Continues: 0
     MapPosition: {x: 950, y: 20}
   - Run: {fileID: 11400000, guid: 9a02abfb854ae1345bf877fe6306d847, type: 2}
     Requires:
@@ -69,6 +93,7 @@ MonoBehaviour:
     UnlockMode: 0
     Secret: 0
     Optional: 1
+    Continues: 0
     MapPosition: {x: 170, y: 190}
   - Run: {fileID: 11400000, guid: acc5e58445e1482478fede67ea90f3c0, type: 2}
     Requires:
@@ -78,6 +103,7 @@ MonoBehaviour:
     UnlockMode: 0
     Secret: 1
     Optional: 1
+    Continues: 0
     MapPosition: {x: 760, y: -180}
   - Run: {fileID: 11400000, guid: 4ac8b58699a191b44a32f08f373a61d5, type: 2}
     Requires:
@@ -86,6 +112,7 @@ MonoBehaviour:
     UnlockMode: 0
     Secret: 0
     Optional: 0
+    Continues: 0
     MapPosition: {x: 380, y: -60}
   - Run: {fileID: 11400000, guid: 00d9c466aa413b1428906eb698af9567, type: 2}
     Requires:
@@ -94,4 +121,5 @@ MonoBehaviour:
     UnlockMode: 0
     Secret: 1
     Optional: 1
+    Continues: 0
     MapPosition: {x: 380, y: 130}

@@ -1544,16 +1544,19 @@ namespace Assets.Scripts.Dungeon
             GameEvents.Publish(cleared);
 
             // Everything is banked by now, so the summary is a statement, not a choice: quitting the
-            // game while it is up loses nothing. Continue goes back to the hub, never to the title
-            // screen - the loop is hub -> dungeon -> hub, and MenuScene is only where a save is chosen.
+            // game while it is up loses nothing. Mid-run the only way on is the next level - the town
+            // is reached only at the end of a run (owner, 2026-10-30) - and at the end it is the hub,
+            // never the title screen: the loop is hub -> dungeon -> hub.
+            var next = NextLevelAction(summary);
+            System.Action toTown = () => SceneManager.LoadScene("HubScene");
             var ui = GetRoomActionUI();
             if (ui != null)
             {
-                ui.ShowLevelCleared(summary, () => SceneManager.LoadScene("HubScene"), NextLevelAction(summary));
+                ui.ShowLevelCleared(summary, next == null ? toTown : null, next);
             }
             else
             {
-                SceneManager.LoadScene("HubScene");
+                (next ?? toTown).Invoke();
             }
         }
 
@@ -1584,22 +1587,18 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
-        /// The summary's <b>Continue</b>: straight down to the run's next level, skipping the town.
-        /// Null — and the button hidden — on the run's last level, and while the tutorial is running,
-        /// whose remaining steps all happen in town (docs/TUTORIAL.md).
+        /// The summary's <b>Continue</b>: straight down to the run's next level. Mid-run it is the only
+        /// way on - the town is reached only at a run's end (owner, 2026-10-30), which is why the
+        /// tutorial's town steps each follow a whole run (docs/TUTORIAL.md). Null on the run's last
+        /// level, where Back to Town takes its place.
         ///
         /// <para>Everything the hub would have done is already on disk: the run save was advanced
-        /// above and carries the equipped magic and summons, so this hands the next level over exactly
-        /// as <c>HubManager.OnEnterDungeon</c> does. What the player gives up is the hub visit itself —
-        /// the grid, the shop, a change of party.</para>
+        /// above and carries the equipped magic, summons and Ultra gauges, so this hands the next level
+        /// over exactly as <c>HubManager.OnEnterDungeon</c> does.</para>
         /// </summary>
         private System.Action NextLevelAction(LevelClearSummary summary)
         {
             if (summary.RunCompleted || ActiveRun == null)
-            {
-                return null;
-            }
-            if (MetaProgressManager.Instance.TutorialStarted && !MetaProgressManager.Instance.TutorialFinished)
             {
                 return null;
             }
@@ -1719,8 +1718,10 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
-        /// Leaves a run in progress from the pause menu. The run is left standing, so the campaign
-        /// map offers it as continuable - but <b>the floor is not</b>: it is written with
+        /// Leaves a run in progress from the pause menu, for the title screen (never the town: it is
+        /// reached only at a run's end, owner 2026-10-30). The run is left standing, and the title's
+        /// Continue sends the party straight back down to it (<c>HubManager.Start</c>) - but <b>the
+        /// floor is not</b>: it is written with
         /// <see cref="DungeonSaveData.RestartAtEntrance"/>, so on the way back in the enemies stand
         /// up again and the party starts at the door.
         ///
@@ -1742,7 +1743,7 @@ namespace Assets.Scripts.Dungeon
         /// as hurt as you left - having thrown away the floor's un-banked XP, kill-gold and loot to
         /// do it.</para>
         /// </summary>
-        public void HandleQuitToHub()
+        public void HandleQuitToTitle()
         {
             // Order matters: the save reads the inventory's per-level consumption, so it has to be
             // written before the in-memory inventory is thrown away.

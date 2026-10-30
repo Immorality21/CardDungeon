@@ -17,7 +17,8 @@ only, so the title still reads no save.
 ## What this scene is for
 
 ```
-[ Continue ]  -> SceneManager.LoadScene("HubScene")   ("New Game" on an empty save folder)
+[ Continue ]  -> SceneManager.LoadScene("HubScene")   ("New Game" on an empty save folder;
+                 with a run underway the hub sends the party straight back down - HubManager.Start)
 [ Options  ]  -> options-view (AudioOptionsUI)
 [ Quit     ]
 ```

@@ -31,7 +31,7 @@ namespace Assets.Scripts.Tutorial
         /// <summary>The starting hero can buy a node right now — <see cref="TutorialOps.GuidedNodeKey"/> found one.</summary>
         public bool HeroCanAffordNode;
 
-        /// <summary>The gear floor (<c>TutorialSO.GearLevelIndex</c>) has been cleared at least once.</summary>
+        /// <summary>The gear floor (<c>TutorialSO.GearRun</c>, level <c>GearLevelIndex</c>) has been cleared at least once.</summary>
         public bool GearFloorCleared;
 
         /// <summary>Some hero wears at least one piece of equipment.</summary>

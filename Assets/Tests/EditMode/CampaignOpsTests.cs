@@ -355,5 +355,50 @@ namespace Tests.EditMode
         {
             Assert.IsTrue(CampaignOps.LocksParty(new RunSaveData { RunKey = "Threshold", CurrentLevelIndex = 1 }));
         }
+
+        // --- A chapter split into runs (Continues, 2026-10-30) -------------------------------------
+
+        private CampaignSO SplitChapter(out RunDefinitionSO one, out RunDefinitionSO two, out RunDefinitionSO three,
+            out RunDefinitionSO next)
+        {
+            one = MakeRun("PartOne");
+            two = MakeRun("PartTwo");
+            three = MakeRun("PartThree");
+            next = MakeRun("NextChapter");
+            var twoNode = Node(two, requires: new[] { one });
+            twoNode.Continues = true;
+            var threeNode = Node(three, requires: new[] { two });
+            threeNode.Continues = true;
+            // Authored out of order on purpose: play order must still put the parts in sequence.
+            return MakeCampaign(Node(next, requires: new[] { three }), threeNode, twoNode, Node(one));
+        }
+
+        [Test]
+        public void Continues_KeepsTheChapterInOneTier_AndThePartsInOrder()
+        {
+            var campaign = SplitChapter(out var one, out var two, out var three, out var next);
+
+            var tiers = CampaignOps.ComputeTiers(campaign);
+            Assert.AreEqual(0, tiers["PartOne"]);
+            Assert.AreEqual(0, tiers["PartTwo"]);
+            Assert.AreEqual(0, tiers["PartThree"]);
+            Assert.AreEqual(1, tiers["NextChapter"], "The run after the chapter is one tier deeper, as before the split.");
+
+            var order = CampaignOps.GetNodesInPlayOrder(campaign).ConvertAll(n => n.Run);
+            CollectionAssert.AreEqual(new[] { one, two, three, next }, order);
+        }
+
+        [Test]
+        public void ImpliedCompletions_ALaterPartClearedClearsTheEarlierOnes()
+        {
+            var campaign = SplitChapter(out _, out _, out _, out _);
+
+            CollectionAssert.AreEquivalent(new[] { "PartTwo", "PartOne" },
+                CampaignOps.ImpliedCompletions(campaign, new List<string> { "PartThree" }),
+                "A save from before the split cleared only the chapter's last key.");
+            CollectionAssert.IsEmpty(CampaignOps.ImpliedCompletions(campaign, new List<string> { "PartOne" }));
+            CollectionAssert.IsEmpty(CampaignOps.ImpliedCompletions(campaign,
+                new List<string> { "PartOne", "PartTwo", "PartThree" }));
+        }
     }
 }

@@ -45,6 +45,12 @@ namespace Assets.Scripts.Dungeon
                  "it. Does not affect unlocking.")]
         public bool Optional;
 
+        [Tooltip("The next part of the same chapter as its prerequisite, split off only so the party " +
+                 "goes home between them (the Threshold's three runs): it sits in the same campaign " +
+                 "tier rather than one deeper, so the balance bands and investment budgets indexed by " +
+                 "tier do not shift. Ordering still follows the graph.")]
+        public bool Continues;
+
         [Tooltip("Position on the campaign map screen, in graph units. Authored in " +
                  "Tools > Campaign Map Editor.")]
         public Vector2 MapPosition;

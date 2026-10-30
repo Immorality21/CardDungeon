@@ -504,6 +504,53 @@ namespace Assets.Scripts.Dungeon
             return run.CurrentLevelIndex > 0 || run.ActiveDungeonSeed != 0;
         }
 
+        /// <summary>
+        /// Runs a save should count as cleared but does not: the earlier parts of a chapter whose later
+        /// part it has cleared (<see cref="CampaignNodeEntry.Continues"/>). A save from before a chapter
+        /// was split holds only the key the whole chapter kept - the Threshold kept <c>TutorialRun</c>
+        /// for its last part on 2026-10-30 - and without this its new first parts would sit open on
+        /// the story map as if never played.
+        /// </summary>
+        public static List<string> ImpliedCompletions(CampaignSO campaign, ICollection<string> completedRunKeys)
+        {
+            var implied = new List<string>();
+            if (campaign == null || campaign.Nodes == null || completedRunKeys == null)
+            {
+                return implied;
+            }
+            var pending = new Stack<CampaignNodeEntry>();
+            foreach (var node in campaign.Nodes)
+            {
+                if (node?.Run != null && completedRunKeys.Contains(RunKeyOf(node.Run)))
+                {
+                    pending.Push(node);
+                }
+            }
+            while (pending.Count > 0)
+            {
+                var node = pending.Pop();
+                if (!node.Continues || node.Requires == null)
+                {
+                    continue;
+                }
+                foreach (var earlier in node.Requires)
+                {
+                    string key = earlier != null ? RunKeyOf(earlier) : null;
+                    if (key == null || completedRunKeys.Contains(key) || implied.Contains(key))
+                    {
+                        continue;
+                    }
+                    implied.Add(key);
+                    var earlierNode = FindNode(campaign, earlier);
+                    if (earlierNode != null)
+                    {
+                        pending.Push(earlierNode);
+                    }
+                }
+            }
+            return implied;
+        }
+
         // --- Play order ------------------------------------------------------------------------
 
         /// <summary>
@@ -516,9 +563,17 @@ namespace Assets.Scripts.Dungeon
         /// slowest), an <c>Any</c> node one past its <b>shallowest</b> (it opens on the first).
         /// Nodes inside a prerequisite cycle never resolve and are left at tier 0 - they can never be
         /// played at all, which <see cref="GetUnreachableNodes"/> reports as the authoring fault it
-        /// is.</para>
+        /// is. A node marked <see cref="CampaignNodeEntry.Continues"/> takes its prerequisite's tier
+        /// instead of the next one (one chapter split into runs).</para>
         /// </summary>
         public static Dictionary<string, int> ComputeTiers(CampaignSO campaign)
+        {
+            return ResolveTiers(campaign, true);
+        }
+
+        /// <summary><see cref="ComputeTiers"/>, optionally counting a <see cref="CampaignNodeEntry.Continues"/>
+        /// node one deeper like any other - the raw graph depth, which orders a chapter's parts.</summary>
+        private static Dictionary<string, int> ResolveTiers(CampaignSO campaign, bool honourContinues)
         {
             var tiers = new Dictionary<string, int>();
             if (campaign == null)
@@ -591,15 +646,17 @@ namespace Assets.Scripts.Dungeon
                         }
                     }
 
+                    // A chapter's next part (Continues) shares its prerequisite's tier.
+                    int step = honourContinues && node.Continues ? 0 : 1;
                     if (all && everyPrerequisiteResolved)
                     {
-                        tiers[key] = deepest + 1;
+                        tiers[key] = deepest + step;
                         resolved.Add(key);
                         progressed = true;
                     }
                     else if (!all && anyPrerequisiteResolved)
                     {
-                        tiers[key] = shallowest + 1;
+                        tiers[key] = shallowest + step;
                         resolved.Add(key);
                         progressed = true;
                     }
@@ -611,7 +668,8 @@ namespace Assets.Scripts.Dungeon
 
         /// <summary>
         /// The campaign's nodes shallowest-first, so a consumer can process a run only after
-        /// everything that unlocks it. Ties keep authored order.
+        /// everything that unlocks it. Within a tier the raw graph depth decides (a chapter's parts in
+        /// order), then authored order.
         /// </summary>
         public static List<CampaignNodeEntry> GetNodesInPlayOrder(CampaignSO campaign)
         {
@@ -629,6 +687,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             var tiers = ComputeTiers(campaign);
+            var depths = ResolveTiers(campaign, false);
             var authored = new Dictionary<CampaignNodeEntry, int>();
             for (int i = 0; i < ordered.Count; i++)
             {
@@ -640,7 +699,14 @@ namespace Assets.Scripts.Dungeon
                 tiers.TryGetValue(RunKeyOf(a.Run), out int ta);
                 tiers.TryGetValue(RunKeyOf(b.Run), out int tb);
                 int byTier = ta.CompareTo(tb);
-                return byTier != 0 ? byTier : authored[a].CompareTo(authored[b]);
+                if (byTier != 0)
+                {
+                    return byTier;
+                }
+                depths.TryGetValue(RunKeyOf(a.Run), out int da);
+                depths.TryGetValue(RunKeyOf(b.Run), out int db);
+                int byDepth = da.CompareTo(db);
+                return byDepth != 0 ? byDepth : authored[a].CompareTo(authored[b]);
             });
             return ordered;
         }

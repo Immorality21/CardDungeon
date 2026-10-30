@@ -2997,7 +2997,7 @@ MonoBehaviour:
     Note: 
   - Key: run.tutorial-run.description
     Values:
-    - 'Where every hero starts: four floors down, and a prisoner worth freeing.'
+    - Two floors further down, and the Warden who keeps the way on.
     Reviewed: 0
     Note: 
   - Key: run.tutorial-run.level-1.name
@@ -4416,7 +4416,7 @@ MonoBehaviour:
     Note: 
   - Key: ui.room.pause-quit
     Values:
-    - Leave the Dungeon
+    - Quit to Title
     Reviewed: 0
     Note: 
   - Key: ui.room.pause-resume
@@ -6121,17 +6121,17 @@ MonoBehaviour:
     Note: Floating text when a clicked map room cannot be reached
   - Key: room.pause.leave
     Values:
-    - Leave the Dungeon
+    - Quit to Title
     Reviewed: 0
     Note: Pause menu button
   - Key: room.pause.leave-armed
     Values:
-    - Leave - are you sure?
+    - Quit - are you sure?
     Reviewed: 0
     Note: Pause menu button after the first press
   - Key: room.pause.note
     Values:
-    - The run waits for you on the story map.
+    - Continue on the title screen brings you back to this run.
     Reviewed: 0
     Note: Pause menu note under the leave button
   - Key: room.pause.note-armed
@@ -6374,7 +6374,7 @@ MonoBehaviour:
     Note: Level-clear window, what comes next
   - Key: room.level-clear.next.continue
     Values:
-    - 'Next: {level}. Continue now, or rest in town first.'
+    - 'Next: {level}.'
     Reviewed: 0
     Note: Level-clear window, what comes next; {level} = next level name
   - Key: room.level-clear.next.from-map
@@ -10219,3 +10219,23 @@ MonoBehaviour:
     - A piercing shriek that hits the whole party.
     Reviewed: 0
     Note: 
+  - Key: run.threshold-entrance.name
+    Values:
+    - Dungeon Entrance
+    Reviewed: 0
+    Note: 'Story map: the Threshold''s first run (one floor)'
+  - Key: run.threshold-entrance.description
+    Values:
+    - 'The way in: one floor, and a prisoner worth freeing.'
+    Reviewed: 0
+    Note: Story map blurb
+  - Key: run.threshold-halls.name
+    Values:
+    - Upper Halls
+    Reviewed: 0
+    Note: 'Story map: the Threshold''s second run (one floor)'
+  - Key: run.threshold-halls.description
+    Values:
+    - The halls below the entrance, and the first blade worth keeping.
+    Reviewed: 0
+    Note: Story map blurb

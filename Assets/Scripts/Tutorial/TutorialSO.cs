@@ -42,13 +42,20 @@ namespace Assets.Scripts.Tutorial
         [Tooltip("BuildingSO.Key of the lot the tutorial walks the player to: build it, enter it, spend XP.")]
         public string GuideBuildingKey = "sphere-hall";
 
-        [Tooltip("Equipment awarded for clearing FirstRun's level GearLevelIndex while the tutorial runs - " +
+        [Tooltip("The run whose clear sends the player home for the gear step - the Threshold's second " +
+                 "part since the tutorial was split into runs (2026-10-30). Empty falls back to FirstRun.")]
+        public RunDefinitionSO GearRun;
+
+        [Tooltip("Equipment awarded for clearing GearRun's level GearLevelIndex while the tutorial runs - " +
                  "the piece the gear step has the player equip. Awarded only while the tutorial is " +
                  "active, so a revisit of the run never pays it again.")]
         public ItemSO GearReward;
 
-        [Tooltip("Which level of FirstRun pays GearReward on clear (0-based: 1 is the second floor).")]
-        [Min(0)] public int GearLevelIndex = 1;
+        [Tooltip("Which level of GearRun pays GearReward on clear (0-based).")]
+        [Min(0)] public int GearLevelIndex;
+
+        /// <summary><see cref="GearRun"/>, or <see cref="FirstRun"/> when none is set.</summary>
+        public RunDefinitionSO GearRunOrFirst => GearRun != null ? GearRun : FirstRun;
 
         [Tooltip("BuildingSO.Key of the lot the gear step walks the player to: the inventory's building.")]
         public string GearBuildingKey = "storehouse";

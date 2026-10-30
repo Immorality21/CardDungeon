@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0dadc5ca18a4ea4a5afb001dad2a95f, type: 3}
   m_Name: Tutorial
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Tutorial.TutorialSO
-  FirstRun: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
+  FirstRun: {fileID: 11400000, guid: d0613f44f8b48854da4854e5c5f8bfb7, type: 2}
   GuideBuildingKey: sphere-hall
+  GearRun: {fileID: 11400000, guid: 48aeeeba40c53684e87b9da6523f8d09, type: 2}
   GearReward: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
-  GearLevelIndex: 1
+  GearLevelIndex: 0
   GearBuildingKey: storehouse
   Lines:
   - Cue: 1

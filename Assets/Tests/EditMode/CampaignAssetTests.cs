@@ -133,12 +133,25 @@ namespace Tests.EditMode
             var campaign = LoadCampaign();
             Assert.IsNotNull(campaign);
 
+            // The tutorial is a chapter of three runs since 2026-10-30 (the party goes home only at a
+            // run's end): its first part is the root, and every part is one-shot.
             var tutorial = campaign.FindNode("TutorialRun");
             Assert.IsNotNull(tutorial, "The tutorial run is missing from the campaign.");
-            Assert.IsTrue(tutorial.Requires == null || tutorial.Requires.Count == 0,
+            var first = tutorial;
+            var parts = new List<CampaignNodeEntry> { tutorial };
+            while (first.Continues && first.Requires != null && first.Requires.Count == 1)
+            {
+                first = campaign.FindNode(first.Requires[0]);
+                Assert.IsNotNull(first, "A part of the tutorial chapter is missing from the campaign.");
+                parts.Add(first);
+            }
+            Assert.IsTrue(first.Requires == null || first.Requires.Count == 0,
                 "The tutorial must be startable on a fresh save.");
-            Assert.IsFalse(tutorial.Run.Repeatable,
-                "The tutorial is one-shot content; replaying it is the bug this gate was added for.");
+            foreach (var part in parts)
+            {
+                Assert.IsFalse(part.Run.Repeatable,
+                    $"{part.Run.name}: the tutorial is one-shot content; replaying it is the bug this gate was added for.");
+            }
         }
 
         /// <summary>

@@ -3323,3 +3323,12 @@ full at `FillShare` 0.6 of the hero's max health in weighted health. Target: a f
 - **The model under-reads it slightly:** each simulated floor starts the gauge empty (the game
   carries it across floors), and the policy fires an Ultra the moment it is full rather than holding
   it for the boss.
+
+## §5ap — The Threshold split into three runs; the Lich loses an add (2026-10-30)
+
+The town is now reached only at a run's end, so the Threshold became three runs (Dungeon Entrance,
+Upper Halls, The Threshold), kept in one tier by `CampaignNodeEntry.Continues` so no tier-indexed band
+moved. The model's party now visits town (spends XP, refills charges and the belt) twice more inside
+the tutorial, which reaches the Catacombs a touch stronger: the Lich's Sepulchre boss room went from
+inside the band to **6.016x** its level's trash (ceiling 6.0x). Owner's call: **drop one of the Lich's
+two Skeleton adds** (`Catacombs` level 3 `BossAdds` Count 2 -> 1). Suite green after.

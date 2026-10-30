@@ -125,7 +125,7 @@ empty frame docked at the bottom:
   health the party is actually missing, because resting at full health throws the refuge away - that
   timing is the decision the room exists to pose.
 - **Descend** - a cleared **exit** room; taking it is the *only* way a level completes (see below).
-  What follows is the **level-clear window** (`level-clear-window`, `ShowLevelCleared`): a summary of what the floor banked (since 2026-10-22, most telling first: a gold banner per hero who joined, gold/XP/Essence tiles, each hero's portrait and XP, then the finds as an icon grid with rarity colours — `FillLevelClearBody` fills containers authored in the UXML; the old single list put XP and newcomers below the scroll fold; summary lines carry their `Icon`/`Item` for this), then **Back to Town** and — except on the run's last level and during the tutorial — **Continue**, straight to the next level (the keyboard default; Left/Right switch). It counts as a dialog for every gate (`IsDialogUp`, `DoorNavActive`) and unsubscribes the doors, because the floor is over. Enter/Space press the highlighted choice; Escape deliberately does nothing, since the next thing is a scene load. See the Dungeon guide for what it reports and where each number comes from.
+  What follows is the **level-clear window** (`level-clear-window`, `ShowLevelCleared`): a summary of what the floor banked (since 2026-10-22, most telling first: a gold banner per hero who joined, gold/XP/Essence tiles, each hero's portrait and XP, then the finds as an icon grid with rarity colours — `FillLevelClearBody` fills containers authored in the UXML; the old single list put XP and newcomers below the scroll fold; summary lines carry their `Icon`/`Item` for this), then **Continue** straight to the next level mid-run, or **Back to Town** on the run's last level — never both: the town is reached only at a run's end (owner, 2026-10-30), and Left/Right switch only when a window offers two buttons. It counts as a dialog for every gate (`IsDialogUp`, `DoorNavActive`) and unsubscribes the doors, because the floor is over. Enter/Space press the highlighted choice; Escape deliberately does nothing, since the next thing is a scene load. See the Dungeon guide for what it reports and where each number comes from.
 
 **Anything irreversible asks first.** `ShowConfirm(title, message, confirmLabel, onConfirm)` puts a
 **Cancel** beside the Ok, and `ShowDetail` hides it again for plain statements. Descend goes
@@ -180,11 +180,14 @@ Up while walking the floor, hidden in combat and under the victory / level-clear
     where nothing is ticking, which is what makes the word "Paused" honest without stopping a clock.
     Not during an enemy's turn, and never over a dialog or the ability picker — both of those use
     Escape for their own way out, so pause never has to fight another window for the key.
-  - **"Leave the Dungeon" arms before it fires**, because what it costs is invisible.
-    `DungeonManager.HandleQuitToHub` leaves the *run* standing (the campaign map offers it as
-    continuable) but writes the floor with `DungeonSaveData.RestartAtEntrance`, so **the floor
+  - **"Quit to Title" arms before it fires**, because what it costs is invisible. It goes to the
+    **title screen, never the town** (owner, 2026-10-30: the town is reached only at a run's end).
+    `DungeonManager.HandleQuitToTitle` leaves the *run* standing - the title's Continue goes through
+    `HubManager.Start`, which sees the run underway (`CampaignOps.LocksParty`) and sends the party
+    straight back down - but writes the floor with `DungeonSaveData.RestartAtEntrance`, so **the floor
     restarts**: every enemy stands back up and the party begins at the door again, having forfeited
-    this floor's un-banked XP, kill-gold and loot exactly as a wipe forfeits them.
+    this floor's un-banked XP, kill-gold and loot exactly as a wipe forfeits them. (It was "Leave the
+    Dungeon", into town, until 2026-10-30.)
   - **The party is what does not reset, and that asymmetry is the design.** Health, ability charges,
     afflictions and the potions already drunk all restore, so a hero who went down is *still down*
     and a party on a sliver walks back in on a sliver. Leaving can never buy back a death, a heal, a
@@ -198,7 +201,7 @@ Up while walking the floor, hidden in combat and under the victory / level-clear
     exact thing carrying health across the quit exists to prevent. The event's *awakened enemies*
     are deliberately not respawned on a restart (`respawnAwakened: false`); the room already holds
     its full complement from the seed, so they would stack on top.
-  - `HandleQuitToHub` also has to `DiscardPendingGold` — that counter is a plain field on a
+  - `HandleQuitToTitle` also has to `DiscardPendingGold` — that counter is a plain field on a
     `DontDestroyOnLoad` singleton, so otherwise it rides into the hub and gets banked by the *next*
     run's first level clear.
 - **The floor map** (`map-window`, `DungeonMapOps` + `Rooms/UI/DungeonMapView.cs`) — **M** while

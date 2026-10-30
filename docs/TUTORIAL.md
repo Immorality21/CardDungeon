@@ -6,6 +6,19 @@ building it, and what is still to do**. Add to it after every tutorial pass.
 
 ---
 
+> **The town is reached only at a run's end (owner, 2026-10-30).** The Threshold, once one four-floor
+> run the tutorial left mid-way, is now three runs: **Dungeon Entrance** (`TutorialSO.FirstRun`, one
+> floor - its clear sends the player home for the hall and the first node), **Upper Halls**
+> (`TutorialSO.GearRun`, one floor - its clear pays the sword and sends them home for the gear step and
+> the second hall visit) and **The Threshold** (two floors, the Warden; key `TutorialRun`). Each clear
+> now shows the run-complete screen ("Now open: Upper Halls") before the town. A quit from the pause
+> menu goes to the title, whose Continue goes straight back down; a wipe still deletes the run and
+> leaves the town locked to the road. Where this file says "floor 1" / "floor 2" below, read "the
+> first run" / "the second run". `TutorialContentTests.TheTownSteps_EachFollowAWholeRun` guards it.
+> Walked in play 2026-10-30 (`Tools ▸ Tutorial`): New Game → Dungeon Entrance → Back to Town only →
+> run complete → town locked to the hall; a mid-run clear of the Threshold offers Continue only; Quit
+> to Title on its floor 2, then Continue, lands back on that floor.
+
 ## What ships today (2026-09-29): the first loop, closed
 
 ```
@@ -157,9 +170,9 @@ Roughly in the order they bite. The first two are decisions for the owner.
 - [ ] **Skip and replay.** §20 wants both; neither exists. Skip = `FinishTutorial()` behind a button
       on the banner; replay = an Options toggle that clears both flags. *(The dev-only half is done:
       `Tools ▸ Tutorial ▸ Play From New Game`, 2026-10-25.)*
-- [ ] **The level-clear Continue is hidden while the tutorial is active** (2026-09-29), so the
-      floor-1 clear can only go to town. Once the tutorial finishes (the next time the player goes
-      down), Continue appears on every level clear but the run's last.
+- [x] **The level-clear Continue is hidden while the tutorial is active** - gone 2026-10-30: a
+      mid-run clear offers only Continue, a run's end only Back to Town, and the tutorial's town
+      steps each follow a whole run.
 - [ ] **The floor-1 level-clear screen says nothing** about the timber being for the hall. Probably
       fine (the town says it next), but it is the one moment the player sees the timber arrive.
 - [ ] **The in-dungeon half teaches nothing yet**: moving between rooms, the combat menu, Slash,
