@@ -1,18 +1,32 @@
 using System.Collections.Generic;
 using Assets.Scripts.Heroes;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Dungeon
 {
     [CreateAssetMenu(menuName = "SO/Run Definition")]
     public class RunDefinitionSO : ScriptableObject
     {
+        [TextKeys("run", "name", "description")]
         public string Key;
-        public string DisplayName;
+        [System.NonSerialized] private string _displayName;
 
-        [TextArea(2, 4)]
-        [Tooltip("One or two lines of flavour, shown on the campaign map when this run is selected.")]
-        public string Blurb;
+        /// <summary>From the text table (<c>run.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("run", Key, this, "name"); }
+            set { _displayName = value; }
+        }
+
+        [System.NonSerialized] private string _blurb;
+
+        /// <summary>From the text table (<c>run.{key}.description</c>). Set only on instances built in code.</summary>
+        public string Blurb
+        {
+            get { return _blurb ?? Loc.AssetText("run", Key, this, "description"); }
+            set { _blurb = value; }
+        }
 
         [Tooltip("Where this run sits in the intended play order (0 = first). Runs are not chained yet — " +
                  "MainMenuManager still points at a single run — but the balance analyzer needs an order " +

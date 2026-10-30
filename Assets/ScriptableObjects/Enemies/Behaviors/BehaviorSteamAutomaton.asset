@@ -16,7 +16,7 @@ MonoBehaviour:
   Archetype: 1
   Actions:
   - Label: Heavy blow
-    DisplayName: Heavy Blow
+    DisplayNameKey: move.heavy-blow.name
     Kind: 1
     Priority: 10
     Weight: 1
@@ -26,10 +26,14 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions: []
   - Label: Shield an ally
-    DisplayName: Shield Ally
+    DisplayNameKey: move.shield-ally.name
     Kind: 7
     Priority: 11
     Weight: 1
@@ -39,13 +43,14 @@ MonoBehaviour:
     Power: 3
     Duration: 1
     TargetStat: 2
-    Magic: {fileID: 0}
+    ApplyChance: 100
     Summons: {fileID: 0}
     SummonCount: 1
     MaxUses: 1
+    Magic: {fileID: 0}
     Conditions: []
   - Label: Attack
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -55,5 +60,9 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions: []

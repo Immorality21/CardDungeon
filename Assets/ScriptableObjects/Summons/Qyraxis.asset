@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: Qyraxis
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Qyraxis
-  DisplayName: Qyraxis
-  Description: A bird made of the storm itself. It strikes every enemy twice, and
-    they move like they are wading.
   Sprite: {fileID: 21300000, guid: d070a2a06c1d475aa464b979f793624b, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: d6c0235d54be4cbe80f8ac68bc7ab07b, type: 3}
@@ -41,6 +38,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 0
     Power: 2
     PowerMode: 0
@@ -52,6 +52,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 3
     PowerMode: 0
@@ -63,6 +66,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   RandomTargetEffects: []
   PartyEffects: []
   PowerRaisesPartyEffects: 0
@@ -86,6 +92,7 @@ MonoBehaviour:
   PartingAbility: {fileID: 0}
   MountedFrames: []
   RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

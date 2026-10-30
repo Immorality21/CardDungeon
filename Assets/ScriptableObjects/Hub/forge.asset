@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: forge
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.BuildingSO
   Key: forge
-  DisplayName: Forge
-  Blurb: Bring a recipe, the stuff it calls for and the gold for the fire. Essence still hardens a combo.
   Service: 2
   Position: {x: 120, y: 250}
   HitSize: {x: 150, y: 110}
@@ -64,9 +62,9 @@ MonoBehaviour:
   - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
     Amount: 2
   GoldPerUpgrade: 250
-  LevelGrants:
-  - Forge combos up to Lv 1.
-  - Forge combos up to Lv 3.
-  - Forge combos up to Lv 5, as far as the craft goes.
+  LevelGrantKeys:
+  - building.forge.level-1.grant
+  - building.forge.level-2.grant
+  - building.forge.level-3.grant
   RequiredRunKeys:
   - TutorialRun

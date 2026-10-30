@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Revive
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: Revive
-  DisplayName: Revive
-  Description: Calls a fallen ally back to their feet.
   Icon: {fileID: 21300000, guid: 009bfa0280424a4d9a26f8adcf52bec5, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -32,9 +30,13 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

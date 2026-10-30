@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: IdolBloodWard
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: IdolBloodWard
-  DisplayName: Blood Ward
-  Description: A skin of borrowed blood over every hero.
   Icon: {fileID: 21300000, guid: 3720377249d2446a8a25842968e35787, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 4
   Rarity: 0
   Effects:
@@ -27,7 +27,16 @@ MonoBehaviour:
     BuffType: 2
     Duration: 2
     UnlockLevel: 0
-  Tags:
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 8
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

@@ -15,12 +15,12 @@ MonoBehaviour:
   StartNodeKey: tinkerer-sig
   Nodes:
   - Key: tinkerer-sig
-    DisplayName: 
     Kind: 3
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -36,12 +36,12 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors: []
   - Key: tinkerer-trunk-1
-    DisplayName: 
     Kind: 0
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -60,12 +60,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-sig
   - Key: tinkerer-start
-    DisplayName: 
     Kind: 0
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -84,12 +84,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-trunk-1
   - Key: tinkerer-trunk-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 110, y: -450}
     Gains:
       Values:
@@ -110,12 +110,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-patch
   - Key: tinkerer-trunk-slot
-    DisplayName: 
     Kind: 2
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -270}
     Gains:
       Values: []
@@ -132,12 +132,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-start
   - Key: tinkerer-patch
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 60, y: -375}
     Gains:
       Values: []
@@ -154,12 +154,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-trunk-slot
   - Key: tinkerer-a-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -105, y: -215}
     Gains:
       Values:
@@ -178,12 +178,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-trunk-slot
   - Key: tinkerer-a-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -246, y: -380}
     Gains:
       Values:
@@ -202,12 +202,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-3
   - Key: tinkerer-a-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -132, y: -325}
     Gains:
       Values: []
@@ -224,12 +224,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-trunk-slot
   - Key: tinkerer-a-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -285, y: -310}
     Gains:
       Values:
@@ -248,12 +248,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-2
   - Key: tinkerer-a-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -474, y: -490}
     Gains:
       Values: []
@@ -270,12 +270,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-mech
   - Key: tinkerer-a-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -702, y: -600}
     Gains:
       Values: []
@@ -292,12 +292,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-turret
   - Key: tinkerer-a-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -816, y: -655}
     Gains:
       Values:
@@ -316,12 +316,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-6
   - Key: tinkerer-a-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -420, y: -360}
     Gains:
       Values: []
@@ -338,7 +338,6 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-mech
   - Key: tinkerer-a-mech
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
@@ -348,6 +347,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -360, y: -435}
     Gains:
       Values: []
@@ -364,12 +364,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-2
   - Key: tinkerer-a-tip
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -911, y: -710}
     Gains:
       Values:
@@ -388,12 +388,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-7
   - Key: tinkerer-b-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -60, y: -375}
     Gains:
       Values:
@@ -414,12 +414,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-trunk-slot
   - Key: tinkerer-b-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -438,12 +438,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-b-3
   - Key: tinkerer-b-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -450}
     Gains:
       Values: []
@@ -460,12 +460,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-trunk-slot
   - Key: tinkerer-b-4
-    DisplayName: 
     Kind: 0
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -720}
     Gains:
       Values:
@@ -484,12 +484,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-b-mech
   - Key: tinkerer-b-5
-    DisplayName: 
     Kind: 2
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -506,12 +506,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-b-4
   - Key: tinkerer-b-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -528,12 +528,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-b-5
   - Key: tinkerer-b-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -552,12 +552,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-b-6
   - Key: tinkerer-b-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 105, y: -605}
     Gains:
       Values: []
@@ -574,7 +574,6 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-b-mech
   - Key: tinkerer-b-mech
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
@@ -584,6 +583,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -630}
     Gains:
       Values: []
@@ -600,12 +600,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-b-2
   - Key: tinkerer-b-tip
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -1045}
     Gains:
       Values:
@@ -624,12 +624,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-b-7
   - Key: tinkerer-c-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 105, y: -215}
     Gains:
       Values:
@@ -648,12 +648,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-trunk-slot
   - Key: tinkerer-c-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 246, y: -380}
     Gains:
       Values:
@@ -672,12 +672,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-c-3
   - Key: tinkerer-c-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 132, y: -325}
     Gains:
       Values: []
@@ -694,12 +694,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-trunk-slot
   - Key: tinkerer-c-4
-    DisplayName: 
     Kind: 0
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 474, y: -490}
     Gains:
       Values:
@@ -718,12 +718,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-c-mech
   - Key: tinkerer-c-5
-    DisplayName: 
     Kind: 2
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 588, y: -545}
     Gains:
       Values: []
@@ -740,12 +740,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-c-4
   - Key: tinkerer-c-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 702, y: -600}
     Gains:
       Values: []
@@ -762,12 +762,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-c-5
   - Key: tinkerer-c-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 816, y: -655}
     Gains:
       Values:
@@ -786,12 +786,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-c-6
   - Key: tinkerer-c-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 420, y: -360}
     Gains:
       Values: []
@@ -808,7 +808,6 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-c-mech
   - Key: tinkerer-c-mech
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
@@ -818,6 +817,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 360, y: -435}
     Gains:
       Values: []
@@ -834,12 +834,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-c-2
   - Key: tinkerer-c-tip
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 911, y: -710}
     Gains:
       Values:
@@ -858,12 +858,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-c-7
   - Key: tinkerer-a-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
+    RequiredNodes: []
     Position: {x: -330, y: -525}
     Gains:
       Values: []
@@ -880,7 +880,6 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-mech
   - Key: tinkerer-a-turret
-    DisplayName: 
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -890,6 +889,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -588, y: -545}
     Gains:
       Values: []
@@ -906,7 +906,6 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-5
   - Key: tinkerer-a-turret-blind
-    DisplayName: 
     Kind: 13
     XpCost: 295
     UnlockedByDefault: 0
@@ -914,6 +913,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -700, y: -790}
     Gains:
       Values: []
@@ -930,12 +930,12 @@ MonoBehaviour:
     Neighbors:
     - tinkerer-a-6
   - Key: tinkerer-c-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
+    RequiredNodes: []
     Position: {x: 680, y: -700}
     Gains:
       Values: []

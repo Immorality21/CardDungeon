@@ -198,6 +198,10 @@ namespace Assets.Scripts.Rooms
             {
                 return false;
             }
+
+            // UXML texts are keys (#ui...); turn them into words once, as the tree is first bound.
+
+            global::ImmoralityGaming.Localization.Loc.Localize(root);
             _root = root;
 
             _mainBar = root.Q<VisualElement>("main-bar");

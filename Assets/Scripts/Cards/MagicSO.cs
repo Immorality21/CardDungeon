@@ -3,16 +3,31 @@ using System.Linq;
 using System.Text;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards
 {
     [CreateAssetMenu(menuName = "SO/Magic")]
     public class MagicSO : ScriptableObject
     {
+        [TextKeys("ability", "name", "description")]
         public string Key;
-        public string DisplayName;
-        [TextArea(2, 4)]
-        public string Description;
+        [System.NonSerialized] private string _displayName;
+
+        /// <summary>From the text table (<c>ability.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("ability", Key, this, "name"); }
+            set { _displayName = value; }
+        }
+        [System.NonSerialized] private string _description;
+
+        /// <summary>From the text table (<c>ability.{key}.description</c>). Set only on instances built in code.</summary>
+        public string Description
+        {
+            get { return _description ?? Loc.AssetText("ability", Key, this, "description"); }
+            set { _description = value; }
+        }
         public Sprite Icon;
 
         [Tooltip("How a damaging hit reaches its target. Projectile: the icon flies from the caster " +

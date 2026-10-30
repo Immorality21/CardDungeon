@@ -13,12 +13,10 @@ MonoBehaviour:
   m_Name: FlamingShortSword
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: FlamingShortSword
-  DisplayName: Flaming Short Sword
   Icon: {fileID: 21300000, guid: 3f0b657c2a40493d9cbe202d5fc56779, type: 3}
   Rarity: 1
   ItemLevel: 3
   FindChanceScale: 1
-  Description: 'A plain blade quenched in ember iron. The edge never quite stops smouldering.'
   Category: 0
   SlotType: 0
   Bonuses:
@@ -27,8 +25,8 @@ MonoBehaviour:
     Value: 5
   Resistances: []
   Triggers:
-  - Label:
-    Text: 'On a hit: 20% chance to Burn the target.'
+  - LabelKey: 
+    TextKey: item.flaming-short-sword.reaction-1.text
     When: 3
     Chance: 0.2
     Limit: 0

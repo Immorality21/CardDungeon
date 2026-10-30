@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Enemies;
 using Assets.Scripts.Heroes;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Dungeon
 {
@@ -27,7 +28,18 @@ namespace Assets.Scripts.Dungeon
     public class RunLevelEntry
     {
         public LevelDefinitionSO LevelTemplate;
-        public string LevelName;
+        [System.NonSerialized] private string _levelName;
+
+        /// <summary>From the text table (<see cref="LevelNameKey"/>). Set only on instances built in code.</summary>
+        public string LevelName
+        {
+            get { return _levelName ?? Loc.GetOrEmpty(LevelNameKey); }
+            set { _levelName = value; }
+        }
+
+        [Tooltip("Text table key (Tools > Texts).")]
+        [TextKey]
+        public string LevelNameKey;
         public ManualLevelLayoutSO ManualLayout;
 
         [Tooltip("Optional boss for this level. When set, this enemy is guaranteed in the exit " +

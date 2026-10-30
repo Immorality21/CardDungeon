@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: SmokeAndMirrors
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: SmokeAndMirrors
-  DisplayName: Smoke and Mirrors
-  Description: Smoke, and somewhere in it the party - or a dozen copies of it.
   Kind: 1
   TargetType: 4
   Effects:

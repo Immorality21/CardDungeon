@@ -13,12 +13,30 @@ MonoBehaviour:
   m_Name: SimpleSword
   m_EditorClassIdentifier: 
   Key: SimpleSword
-  DisplayName: Simple Sword
   Icon: {fileID: 21300000, guid: ad316f0080a7cbd4cad3915c9cc72701, type: 3}
-  SlotType: 0
   Rarity: 0
   ItemLevel: 1
+  FindChanceScale: 1
+  Category: 0
+  SlotType: 0
   Bonuses:
   - StatType: 1
     BonusType: 0
     Value: 2
+  Resistances: []
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
+  MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

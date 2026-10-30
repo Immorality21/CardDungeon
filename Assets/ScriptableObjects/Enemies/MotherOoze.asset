@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: MotherOoze
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: MotherOoze
-  DisplayName: Mother Ooze
   Sprite: {fileID: 21300000, guid: a948cc34aa2873a449645d92a066c0da, type: 3}
   AnimationFrames:
   - {fileID: -4479386146100684728, guid: db0835884635c7c469af121784a82b19, type: 3}

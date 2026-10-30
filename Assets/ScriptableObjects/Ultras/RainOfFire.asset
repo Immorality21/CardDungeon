@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: RainOfFire
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: RainOfFire
-  DisplayName: Rain of Fire
-  Description: The sky opens on the Warlock's word and the room burns.
   Kind: 1
   TargetType: 1
   Effects:
@@ -26,6 +24,12 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 3
     PowerMode: 0
@@ -34,6 +38,17 @@ MonoBehaviour:
     BuffType: 15
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  Hits: 1
+  RandomTargets: 0
+  Creature: {fileID: 0}
+  StatAbilities: []
+  Mech: {fileID: 0}
   Turns: 3
   MaxHealthPercent: 50
   AttackDamageType: 0

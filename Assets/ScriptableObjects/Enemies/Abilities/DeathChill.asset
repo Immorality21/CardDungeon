@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: DeathChill
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: DeathChill
-  DisplayName: Death Chill
-  Description: The cold of the grave rolls over the whole party.
   Icon: {fileID: 8503095388028804803, guid: 39a7299db266bfa44bddaf1639df0391, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -32,6 +30,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 0
     PowerMode: 0
@@ -43,9 +44,13 @@ MonoBehaviour:
     ApplyChance: 50
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 1
+  RandomHits: 0

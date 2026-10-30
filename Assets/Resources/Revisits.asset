@@ -19,40 +19,30 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
   Modifiers:
   - Key: hardened-foes
-    DisplayName: Hardened Foes
-    Description: Enemies have +{0}% more health.
     MaxRank: 3
     FearPerRank: 1
     Effects:
     - Kind: 0
       AmountPerRank: 25
   - Key: sharpened-blades
-    DisplayName: Sharpened Blades
-    Description: Enemies deal +{0}% more damage.
     MaxRank: 3
     FearPerRank: 1
     Effects:
     - Kind: 1
       AmountPerRank: 25
   - Key: quickened-foes
-    DisplayName: Quickened Foes
-    Description: Enemies are +{0}% faster - they act sooner and more often.
     MaxRank: 2
     FearPerRank: 2
     Effects:
     - Kind: 4
       AmountPerRank: 25
   - Key: swarming-halls
-    DisplayName: Swarming Halls
-    Description: Every fight brings {0} more foe(s), up to five.
     MaxRank: 2
     FearPerRank: 2
     Effects:
     - Kind: 2
       AmountPerRank: 1
   - Key: no-respite
-    DisplayName: No Respite
-    Description: Heroes receive {0}% less healing - spells, potions and refuges alike.
     MaxRank: 2
     FearPerRank: 2
     Effects:

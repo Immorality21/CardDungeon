@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: HorrorWrongAngles
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: HorrorWrongAngles
-  DisplayName: Wrong Angles
-  Description: It strikes from a direction that is not there.
   Icon: {fileID: 21300000, guid: 845c467c04864015a8bc618d51fd5ea8, type: 3}
   Delivery: 1
+  ProjectileArtAngle: 0
   TargetType: 0
   Rarity: 2
   Effects:
@@ -28,6 +27,12 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 5
     Power: 50
     PowerMode: 0
@@ -36,8 +41,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 1
+  EnemyOnly: 0
+  RandomHits: 0

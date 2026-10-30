@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: BloodPact
   m_EditorClassIdentifier: 
   Key: BloodPact
-  DisplayName: Blood Pact
-  Description: 'A bargain sealed in the Warlock''s blood: the ally it names burns
-    brighter for a while.'
   Icon: {fileID: 21300000, guid: 6cd9a4cead7747c6b1be1203b6ddf7af, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 3
   Rarity: 3
   Effects:
@@ -28,6 +27,12 @@ MonoBehaviour:
     BuffType: 4
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 2
     Power: 3
     PowerMode: 0
@@ -36,6 +41,12 @@ MonoBehaviour:
     BuffType: 1
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 4
     Power: 15
     PowerMode: 2
@@ -44,7 +55,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 09000000
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

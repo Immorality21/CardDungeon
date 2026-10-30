@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: TakeCover
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: TakeCover
-  DisplayName: Take Cover
-  Description: '"Down!" The whole line braces behind his shield until the worst has
-    passed.'
   Kind: 1
   TargetType: 4
   Effects:
@@ -28,6 +25,11 @@ MonoBehaviour:
     Duration: 1
     UnlockLevel: 0
     ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Hits: 1
   RandomTargets: 0
   Creature: {fileID: 0}

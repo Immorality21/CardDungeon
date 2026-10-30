@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: HuntersMark
   m_EditorClassIdentifier: 
   Key: HuntersMark
-  DisplayName: Hunter's Mark
-  Description: He picks one, and from then on everyone knows which.
   Icon: {fileID: 21300000, guid: c0c8b8b3dc5841f285cea4875008458c, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -33,6 +31,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 08000000
   TagDuration: 3

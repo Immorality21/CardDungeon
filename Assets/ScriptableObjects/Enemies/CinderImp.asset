@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: CinderImp
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: CinderImp
-  DisplayName: Cinder Imp
   Sprite: {fileID: 21300000, guid: a1fb566fc3954623b4d197411b1327ea, type: 3}
   AnimationFrames:
   - {fileID: -4141817773342777534, guid: 777f5aff1fbc258d9fd03b107a1c718c, type: 3}
@@ -69,12 +68,14 @@ MonoBehaviour:
     MaxQuantity: 1
   SalvageTable: []
   Triggers:
-  - Label: Cinder Burst
+  - LabelKey: enemy.cinder-imp.reaction-1.label
+    TextKey: 
     When: 6
     Chance: 1
     Limit: 0
     FilterDamageType: 0
     DamageType: 0
+    IgnoreOverTime: 0
     Target: 3
     Effects:
     - EffectType: 0
@@ -85,4 +86,10 @@ MonoBehaviour:
       BuffType: 0
       Duration: 3
       UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
   Flinches: 1

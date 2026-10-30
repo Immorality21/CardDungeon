@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: DivineIntervention
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: DivineIntervention
-  DisplayName: Divine Intervention
-  Description: He steps between an ally and the blow, takes it at half weight, and
-    answers in kind.
   Kind: 1
   TargetType: 3
   Effects:
@@ -30,6 +27,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 13
     Power: 4
     PowerMode: 0
@@ -41,6 +41,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Hits: 1
   RandomTargets: 0
   Creature: {fileID: 0}

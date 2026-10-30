@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: DarkTwin
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: DarkTwin
-  DisplayName: Dark Twin
-  Description: Her shadow, stepped off the wall, faster than she is.
   Sprite: {fileID: 21300000, guid: ee4b5adc137847b892161b8cc5d6af34, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: 5cd1e429d385499eac3fe32dcb918f4a, type: 3}

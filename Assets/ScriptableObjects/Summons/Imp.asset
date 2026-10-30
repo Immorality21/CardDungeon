@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: Imp
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Imp
-  DisplayName: Imp
-  Description: 'A cackling scrap of the pit, bound to the Warlock''s blood. The Demon
-    Army''s rank and file: frail, fast, and full of fire.'
   Sprite: {fileID: 21300000, guid: af051833294a4c03bb7aabe5b57f9f60, type: 3}
   AnimationFrames:
   - {fileID: -1086942912245843823, guid: fb32350fac8446beabaf792e182c4a5c, type: 3}
@@ -28,8 +25,17 @@ MonoBehaviour:
   Kind: 1
   TargetType: 0
   Effects: []
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames: []
   BaseCharges: 2
   StatPercents:
     Values:
@@ -52,6 +58,11 @@ MonoBehaviour:
   Actions: []
   Signature: {fileID: 11400000, guid: 53c19e14585d4f74aad1bd0acc88aa6a, type: 2}
   AttackAbility: {fileID: 11400000, guid: 95a0809823d2b424a933ee9773136b4b, type: 2}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
+  RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

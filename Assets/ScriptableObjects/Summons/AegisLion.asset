@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: AegisLion
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: AegisLion
-  DisplayName: Aegis Lion
-  Description: A lion of hammered light plants itself before the Paladin and roars.
-    The enemies turn on the Paladin, and the Paladin hardens to meet them.
   Sprite: {fileID: 21300000, guid: c13587297cd249eeaa41edb9cc5d7001, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: f4f71fa3282544ea9553e905d3284a38, type: 3}
@@ -37,8 +34,23 @@ MonoBehaviour:
     BuffType: 2
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 60
+  Triggers: []
+  Flinches: 1
+  HitFrames: []
   BaseCharges: 1
   StatPercents:
     Values: []
@@ -46,3 +58,12 @@ MonoBehaviour:
   TurnsActive: 3
   Actions: []
   Signature: {fileID: 0}
+  AttackAbility: {fileID: 0}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
+  RotateActions: 0
+  ActsAlone: 0
+  SquadTiers: []
+  SquadSize: 3
+  MaxSquadSize: 4

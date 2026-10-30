@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: AutoTurret
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: AutoTurret
-  DisplayName: Auto Turret
-  Description: A brass tripod with a rivet gun on top and a boiler underneath. She
-    sets it down, opens the valve and lets it work.
   Sprite: {fileID: 21300000, guid: c1a52958bd0d4de1bcf080ed792ea88f, type: 3}
   AnimationFrames: []
   AnimationFps: 4

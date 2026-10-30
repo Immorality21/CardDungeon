@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: OilMech
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: OilMech
-  DisplayName: Oil Spewing Mech
-  Description: A squat walker with a drum of machine oil on its back. Everything
-    it touches slows down - and catches fire easily.
   Sprite: {fileID: 21300000, guid: 4f8ab4fdd22645b6afe7076320cfc021, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: 6fa692e3d45844f8890c9679ca901bdb, type: 3}
@@ -29,6 +26,10 @@ MonoBehaviour:
   TargetType: 0
   Effects: []
   RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
   SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
@@ -58,11 +59,13 @@ MonoBehaviour:
   Signature: {fileID: 11400000, guid: 7df432196a2cc944db71127b43ab542e, type: 2}
   AttackAbility: {fileID: 11400000, guid: a33435a9cbb0ec848be08ba03a3435ce, type: 2}
   UsesTags: 1
+  PartingAbility: {fileID: 0}
   MountedFrames:
   - {fileID: 21300000, guid: 5db6bbe2d10d443cbb946bb4df42690b, type: 3}
   - {fileID: 21300000, guid: acd0cfb6b597410a9d16f42b083e4133, type: 3}
   - {fileID: 21300000, guid: 972f1da7333f4b049dc3da7fa2fd1595, type: 3}
   RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

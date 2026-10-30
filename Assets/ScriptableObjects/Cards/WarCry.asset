@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WarCry
   m_EditorClassIdentifier: 
   Key: WarCry
-  DisplayName: War Cry
-  Description: A thunderous battle cry that boosts all allies' attack.
   Icon: {fileID: 1194596290848904516, guid: ba5d4e7c0f0b6c94b9cdc9d1e3821d0e, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 4
   Rarity: 2
   Effects:
@@ -27,5 +27,16 @@ MonoBehaviour:
     BuffType: 1
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

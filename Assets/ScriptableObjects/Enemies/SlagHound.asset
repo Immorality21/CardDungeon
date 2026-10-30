@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: SlagHound
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: SlagHound
-  DisplayName: Slag Hound
   Sprite: {fileID: 21300000, guid: 17fe0225aca8418485ad47a1cda56a63, type: 3}
   AnimationFrames:
   - {fileID: -38479400772845821, guid: 3fc8f2c7719b7b6a958f1bb626bdb25c, type: 3}
@@ -57,12 +56,14 @@ MonoBehaviour:
     MaxQuantity: 2
   SalvageTable: []
   Triggers:
-  - Label: Pack Fury
+  - LabelKey: enemy.slag-hound.reaction-1.label
+    TextKey: 
     When: 7
     Chance: 1
     Limit: 2
     FilterDamageType: 0
     DamageType: 0
+    IgnoreOverTime: 0
     Target: 0
     Effects:
     - EffectType: 2
@@ -73,4 +74,10 @@ MonoBehaviour:
       BuffType: 1
       Duration: 99
       UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
   Flinches: 1

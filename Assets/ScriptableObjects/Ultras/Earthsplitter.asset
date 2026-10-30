@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: Earthsplitter
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: Earthsplitter
-  DisplayName: Earthsplitter
-  Description: Everything he has built up goes into one blow, and the floor splits
-    under all of them.
   Kind: 1
   TargetType: 1
   Effects:
@@ -31,6 +28,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Hits: 1
   RandomTargets: 0

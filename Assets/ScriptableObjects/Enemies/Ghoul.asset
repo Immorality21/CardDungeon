@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Ghoul
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: Ghoul
-  DisplayName: Ghoul
   Sprite: {fileID: 21300000, guid: 7d588814f0124668917aa2b10b09dc3f, type: 3}
   AnimationFrames:
   - {fileID: 3845630207546853816, guid: 4cd27ece9bae4e15b391242b4d8b585f, type: 3}

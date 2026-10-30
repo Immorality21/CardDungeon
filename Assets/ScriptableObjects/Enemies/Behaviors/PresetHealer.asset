@@ -16,7 +16,7 @@ MonoBehaviour:
   Archetype: 2
   Actions:
   - Label: Mend an ally
-    DisplayName: Mend
+    DisplayNameKey: move.mend.name
     Kind: 3
     Priority: 10
     Weight: 1
@@ -26,13 +26,17 @@ MonoBehaviour:
     Power: 8
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 3
       Value: 0
       Stat: 1
   - Label: Attack
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -42,5 +46,9 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions: []

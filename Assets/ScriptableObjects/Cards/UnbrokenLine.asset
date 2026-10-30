@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: UnbrokenLine
   m_EditorClassIdentifier: 
   Key: UnbrokenLine
-  DisplayName: Unbroken Line
-  Description: You plant yourself, and the line does more than hold - it mends behind
-    you.
   Icon: {fileID: 21300000, guid: ae1b4dfb11b746bd8682bd3bb2d88f8c, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 4
   Rarity: 3
   Effects:
@@ -28,6 +27,12 @@ MonoBehaviour:
     BuffType: 2
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 2
     Power: 2
     PowerMode: 0
@@ -36,7 +41,16 @@ MonoBehaviour:
     BuffType: 18
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

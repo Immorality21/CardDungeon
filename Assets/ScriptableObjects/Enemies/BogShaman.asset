@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: BogShaman
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: BogShaman
-  DisplayName: Bog Shaman
   Sprite: {fileID: 21300000, guid: fdf9b2ce0da7440ab71e47b23e12e914, type: 3}
   AnimationFrames:
   - {fileID: -4488529334945799317, guid: 7420d29ae99a5dec9bc9ed1d9ddd5c11, type: 3}
@@ -25,6 +24,7 @@ MonoBehaviour:
   - {fileID: 7056855286537691007, guid: 2bad3093c5e3fb247b047c3f3dca6799, type: 3}
   IsBoss: 0
   CombatScale: 1
+  Traits: 0
   BaseStats:
     Values:
     - Type: 1
@@ -66,5 +66,6 @@ MonoBehaviour:
     Chance: 0.06
     MinQuantity: 1
     MaxQuantity: 1
+  SalvageTable: []
   Triggers: []
   Flinches: 1

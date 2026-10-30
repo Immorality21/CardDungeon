@@ -12,25 +12,25 @@
         <!-- Docked over the stairs at the foot of the art, not in the middle: the gate and its two torches
              are the picture, and a centred window covered all three. -->
         <ui:VisualElement name="title-view" class="cd-window cd-window--flush cd-window--title cd-dock-bottom cd-hidden">
-            <ui:Label text="Immoral Dungeon" class="cd-title cd-title--large" />
+            <ui:Label text="#ui.menu.immoral-dungeon" class="cd-title cd-title--large" />
             <ui:VisualElement class="cd-title-row">
-                <ui:Button name="continue-btn" text="Continue" class="cd-menu-button" />
-                <ui:Button name="options-btn" text="Options" class="cd-menu-button" />
-                <ui:Button name="quit-btn" text="Quit" class="cd-menu-button" />
+                <ui:Button name="continue-btn" text="#ui.common.continue" class="cd-menu-button" />
+                <ui:Button name="options-btn" text="#ui.menu.options-btn" class="cd-menu-button" />
+                <ui:Button name="quit-btn" text="#ui.menu.quit-btn" class="cd-menu-button" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- OPTIONS (audio). Stepped buttons rather than sliders so the keyboard cursor, which
              navigates buttons, can reach every control. -->
         <ui:VisualElement name="options-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
-            <ui:Label text="Options" class="cd-title" />
+            <ui:Label text="#ui.menu.options" class="cd-title" />
 
-            <ui:Label text="Audio" class="cd-section-head" />
+            <ui:Label text="#ui.menu.audio" class="cd-section-head" />
             <!-- Each dial: a fixed label column, the nudge buttons either side of a 10-segment bar (one
                  segment per AudioOptions.Step, lit by AudioOptionsUI), the percentage after. Mute is a
                  row like the dials, so it no longer outweighs them. 2026-09-30. -->
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Master" class="cd-option-label" />
+                <ui:Label text="#ui.menu.master" class="cd-option-label" />
                 <ui:Button name="master-down" text="-" class="cd-button cd-button--step" />
                 <ui:VisualElement name="master-bar" class="cd-option-bar" picking-mode="Ignore">
                     <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
@@ -48,7 +48,7 @@
                 <ui:Label name="master-value" text="" class="cd-option-value" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Music" class="cd-option-label" />
+                <ui:Label text="#ui.menu.music" class="cd-option-label" />
                 <ui:Button name="music-down" text="-" class="cd-button cd-button--step" />
                 <ui:VisualElement name="music-bar" class="cd-option-bar" picking-mode="Ignore">
                     <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
@@ -66,7 +66,7 @@
                 <ui:Label name="music-value" text="" class="cd-option-value" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Sound Effects" class="cd-option-label" />
+                <ui:Label text="#ui.menu.sound-effects" class="cd-option-label" />
                 <ui:Button name="sfx-down" text="-" class="cd-button cd-button--step" />
                 <ui:VisualElement name="sfx-bar" class="cd-option-bar" picking-mode="Ignore">
                     <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
@@ -84,16 +84,16 @@
                 <ui:Label name="sfx-value" text="" class="cd-option-value" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Mute" class="cd-option-label" />
+                <ui:Label text="#ui.menu.mute" class="cd-option-label" />
                 <ui:Button name="options-mute" text="" class="cd-button cd-option-toggle" />
             </ui:VisualElement>
             <ui:Label name="options-note" text="" class="cd-info-label cd-hint" />
             <!-- Combat speed (playtest 3 finding 21): x1, x2, x3 while a fight runs. Same toggle as Mute. -->
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Combat speed" class="cd-option-label" />
+                <ui:Label text="#ui.menu.combat-speed" class="cd-option-label" />
                 <ui:Button name="options-speed" text="" class="cd-button cd-option-toggle" />
             </ui:VisualElement>
-            <ui:Button name="options-close" text="Back" class="cd-button cd-button--narrow" />
+            <ui:Button name="options-close" text="#ui.common.back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
     </ui:VisualElement>

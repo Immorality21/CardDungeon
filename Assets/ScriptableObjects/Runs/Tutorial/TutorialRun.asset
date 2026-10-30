@@ -13,14 +13,13 @@ MonoBehaviour:
   m_Name: TutorialRun
   m_EditorClassIdentifier: 
   Key: TutorialRun
-  DisplayName: The Threshold
-  Blurb: 'Where every hero starts: four floors down, and a prisoner worth freeing.'
   SequenceIndex: 0
   Repeatable: 0
   Challenge: 0
+  JoinsOnClear: {fileID: 0}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: b2a362ec7000ace46ad22ed1b533bf55, type: 2}
-    LevelName: Dungeon Entrance
+    LevelNameKey: run.tutorial-run.level-1.name
     ManualLayout: {fileID: 11400000, guid: 81a86b4d14ab1a34792bcf19bfcaee94, type: 2}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -34,8 +33,9 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 11400000, guid: 771225b4c6544088a421bf7c91570ade, type: 2}
     AllowRoomEvents: 0
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: 6b0789730207f3445860e0f9fe8524d4, type: 2}
-    LevelName: Upper Halls
+    LevelNameKey: run.tutorial-run.level-2.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -47,8 +47,9 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: eac98a3da612d49499a92d78cd394b7f, type: 2}
-    LevelName: Collapsed Caverns
+    LevelNameKey: run.tutorial-run.level-3.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -60,8 +61,9 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: 6517393ec276405b8c88463d92983e27, type: 2}
-    LevelName: Sunken Depths
+    LevelNameKey: run.tutorial-run.level-4.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
     BossAdds:
@@ -84,3 +86,4 @@ MonoBehaviour:
         GoldReward: 0
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0

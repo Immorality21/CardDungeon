@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Vanish
   m_EditorClassIdentifier: 
   Key: Vanish
-  DisplayName: Vanish
-  Description: One moment she is there. Then she is somewhere better.
   Icon: {fileID: 21300000, guid: a34438d6079a450bb71d43480a5e4b55, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0

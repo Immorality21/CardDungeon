@@ -13,12 +13,10 @@ MonoBehaviour:
   m_Name: HexsilkGloves
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: HexsilkGloves
-  DisplayName: Hexsilk Gloves
   Icon: {fileID: 21300000, guid: 08250f33818e41cb86bec25146fb80cd, type: 3}
   Rarity: 1
   ItemLevel: 3
   FindChanceScale: 1
-  Description: 'Leather gloves relined in hex silk. The fingers twitch toward the next word of a spell.'
   Category: 0
   SlotType: 5
   Bonuses:

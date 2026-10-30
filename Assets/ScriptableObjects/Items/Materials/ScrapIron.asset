@@ -13,15 +13,27 @@ MonoBehaviour:
   m_Name: ScrapIron
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: ScrapIron
-  DisplayName: Scrap Iron
   Icon: {fileID: 21300000, guid: 6fb1ca22af554563a74bddb778dd52c9, type: 3}
   Rarity: 0
   ItemLevel: 1
-  Description: 'Whatever the dungeon''s dead were wearing, minus the dead.'
+  FindChanceScale: 1
   Category: 2
   SlotType: 0
   Bonuses: []
   Resistances: []
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
   MaxStack: 999
+  RevisitFear: -1
+  RevisitRun: 

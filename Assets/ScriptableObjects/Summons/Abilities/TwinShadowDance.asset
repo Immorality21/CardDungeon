@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: TwinShadowDance
   m_EditorClassIdentifier: 
   Key: TwinShadowDance
-  DisplayName: Shadow Dance
-  Description: It is behind every one of them at once.
   Icon: {fileID: 21300000, guid: 92c3bd986817488d92aa3328d9560739, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0

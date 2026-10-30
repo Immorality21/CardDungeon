@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: campfire
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.BuildingSO
   Key: campfire
-  DisplayName: Campfire
-  Blurb: Four seats and a low fire. Who marches out is decided here.
   Service: 0
   Position: {x: 360, y: 545}
   HitSize: {x: 240, y: 150}
@@ -53,8 +51,8 @@ MonoBehaviour:
   MaxLevel: 3
   PlacementCost: []
   GoldPerUpgrade: 300
-  LevelGrants:
-  - The run's XP is split evenly between everyone who marches out.
-  - 'Mentor: name a hero and they take a double share of every kill.'
-  - 'Catch Up: the double share goes to whoever is furthest behind.'
+  LevelGrantKeys:
+  - building.campfire.level-1.grant
+  - building.campfire.level-2.grant
+  - building.campfire.level-3.grant
   RequiredRunKeys: []

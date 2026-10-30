@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: PressTheAttack
   m_EditorClassIdentifier: 
   Key: PressTheAttack
-  DisplayName: Press the Attack
-  Description: Two blows before it has its guard back up.
   Icon: {fileID: 21300000, guid: f37d616b0d81440b91c98ef952f50908, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
@@ -33,6 +31,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 0
     Power: 2
@@ -46,6 +45,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 06000000
   TagDuration: 3

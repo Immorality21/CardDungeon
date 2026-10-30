@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: DarkPactII
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: DarkPactII
-  DisplayName: Dark Pact II
-  Description: The terms grow kinder. The one offering them does not.
   Icon: {fileID: 21300000, guid: a38b50007b3344c98b0b9acaba9e32ce, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -32,6 +30,8 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 4
     Power: 15
@@ -44,6 +44,8 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 09000000
   TagDuration: 3
@@ -51,3 +53,4 @@ MonoBehaviour:
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

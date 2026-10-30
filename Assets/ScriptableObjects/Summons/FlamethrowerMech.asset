@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: FlamethrowerMech
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: FlamethrowerMech
-  DisplayName: Flamethrower Mech
-  Description: Fuel tanks, a pilot light and a very long nozzle. It keeps its distance
-    and sets the room alight.
   Sprite: {fileID: 21300000, guid: 0396b8f2cba044f58c8e032de6db203e, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: a5609bea490640f4b290e1580570d930, type: 3}
@@ -29,6 +26,10 @@ MonoBehaviour:
   TargetType: 0
   Effects: []
   RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
   SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
@@ -58,11 +59,13 @@ MonoBehaviour:
   Signature: {fileID: 11400000, guid: c525e368ad94cea4fbdcf5ff19988d8d, type: 2}
   AttackAbility: {fileID: 11400000, guid: 5dbf40b5751cad947b11f1a7ffb6c433, type: 2}
   UsesTags: 1
+  PartingAbility: {fileID: 0}
   MountedFrames:
   - {fileID: 21300000, guid: 24649c97eb664dbdbadc187c4d714726, type: 3}
   - {fileID: 21300000, guid: 3bae77afd3344b27bb9aa0603fecfa94, type: 3}
   - {fileID: 21300000, guid: 187c718a77834f9487827c7ac9b8900b, type: 3}
   RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

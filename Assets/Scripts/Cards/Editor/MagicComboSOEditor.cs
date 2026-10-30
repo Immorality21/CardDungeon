@@ -115,8 +115,7 @@ public class MagicComboSOEditor : Editor
             EditorGUILayout.PropertyField(keyProp, new GUIContent("Key (auto)"));
         }
 
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("ComboName"));
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("Description"));
+        ImmoralityGaming.Editor.Localization.TextKeyGUI.DerivedTextsLayout(keyProp, "combo", "name", "description");
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Icon"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("RequiredTags"), true);
 

@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Skeleton
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: Skeleton
-  DisplayName: Skeleton
   Sprite: {fileID: 21300000, guid: 7c3ae16e277b430999aca6d3aedb48f8, type: 3}
   AnimationFrames:
   - {fileID: 5850376882054942644, guid: 043047713786417a9a1dd54c7e62baa5, type: 3}

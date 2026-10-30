@@ -15,12 +15,12 @@ MonoBehaviour:
   StartNodeKey: rogue-sig
   Nodes:
   - Key: rogue-start
-    DisplayName: 
     Kind: 0
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -39,12 +39,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-trunk-1
   - Key: rogue-trunk-1
-    DisplayName: 
     Kind: 0
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -63,12 +63,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-sig
   - Key: rogue-sig
-    DisplayName: 
     Kind: 3
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -84,12 +84,12 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors: []
   - Key: rogue-trunk-2
-    DisplayName: 
     Kind: 0
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -110,12 +110,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-start
   - Key: rogue-trunk-slot
-    DisplayName: 
     Kind: 2
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 60, y: -375}
     Gains:
       Values: []
@@ -132,12 +132,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-a-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -90, y: -230}
     Gains:
       Values:
@@ -156,12 +156,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-a-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -200, y: -380}
     Gains:
       Values:
@@ -180,12 +180,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-3
   - Key: rogue-a-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -107, y: -325}
     Gains:
       Values: []
@@ -202,12 +202,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-a-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -240, y: -310}
     Gains:
       Values:
@@ -226,12 +226,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-2
   - Key: rogue-a-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -385, y: -490}
     Gains:
       Values: []
@@ -248,12 +248,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-death-mark
   - Key: rogue-a-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -570, y: -600}
     Gains:
       Values: []
@@ -270,12 +270,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-twin
   - Key: rogue-a-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -663, y: -655}
     Gains:
       Values:
@@ -294,12 +294,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-6
   - Key: rogue-a-tip-a
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -758, y: -710}
     Gains:
       Values:
@@ -318,12 +318,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-7
   - Key: rogue-a-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -723, y: -585}
     Gains:
       Values:
@@ -342,12 +342,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-7
   - Key: rogue-b-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 100, y: -205}
     Gains:
       Values:
@@ -366,12 +366,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-b-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 200, y: -380}
     Gains:
       Values:
@@ -390,12 +390,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-b-3
   - Key: rogue-b-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 107, y: -325}
     Gains:
       Values: []
@@ -412,12 +412,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-b-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 270, y: -340}
     Gains:
       Values:
@@ -436,12 +436,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-b-2
   - Key: rogue-b-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 385, y: -490}
     Gains:
       Values: []
@@ -458,12 +458,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-smoke-mirrors
   - Key: rogue-b-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 570, y: -600}
     Gains:
       Values: []
@@ -480,12 +480,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-crows
   - Key: rogue-b-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 663, y: -655}
     Gains:
       Values:
@@ -504,12 +504,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-b-6
   - Key: rogue-b-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 352, y: -360}
     Gains:
       Values: []
@@ -526,12 +526,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-smoke-mirrors
   - Key: rogue-b-tip-a
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 758, y: -710}
     Gains:
       Values: []
@@ -548,12 +548,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-b-7
   - Key: rogue-b-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 723, y: -585}
     Gains:
       Values:
@@ -572,12 +572,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-b-7
   - Key: rogue-steal
-    DisplayName: 
     Kind: 3
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -110, y: -150}
     Gains:
       Values: []
@@ -594,12 +594,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-trunk-1
   - Key: rogue-sig-keen
-    DisplayName: 
     Kind: 12
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 110, y: 40}
     Gains:
       Values: []
@@ -616,12 +616,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-sig
   - Key: rogue-a-evis-keen
-    DisplayName: 
     Kind: 12
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -500, y: -690}
     Gains:
       Values: []
@@ -638,7 +638,6 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-6
   - Key: rogue-twin
-    DisplayName: 
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -648,6 +647,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -478, y: -545}
     Gains:
       Values: []
@@ -664,12 +664,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-5
   - Key: rogue-twin-power
-    DisplayName: 
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -853, y: -765}
     Gains:
       Values: []
@@ -686,12 +686,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-tip-a
   - Key: rogue-twin-stay
-    DisplayName: 
     Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -948, y: -820}
     Gains:
       Values: []
@@ -708,7 +708,6 @@ MonoBehaviour:
     Neighbors:
     - rogue-twin-power
   - Key: rogue-twin-charge
-    DisplayName: 
     Kind: 7
     XpCost: 540
     UnlockedByDefault: 0
@@ -718,6 +717,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -1043, y: -875}
     Gains:
       Values: []
@@ -734,12 +734,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-twin-stay
   - Key: rogue-death-mark
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -292, y: -435}
     Gains:
       Values: []
@@ -756,7 +756,6 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-2
   - Key: rogue-crows
-    DisplayName: 
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -766,6 +765,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 478, y: -545}
     Gains:
       Values: []
@@ -782,12 +782,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-b-5
   - Key: rogue-crows-stay
-    DisplayName: 
     Kind: 6
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 853, y: -765}
     Gains:
       Values: []
@@ -804,7 +804,6 @@ MonoBehaviour:
     Neighbors:
     - rogue-b-tip-a
   - Key: rogue-crows-charge
-    DisplayName: 
     Kind: 7
     XpCost: 475
     UnlockedByDefault: 0
@@ -814,6 +813,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 948, y: -820}
     Gains:
       Values: []
@@ -830,12 +830,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-crows-stay
   - Key: rogue-smoke-mirrors
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 292, y: -435}
     Gains:
       Values: []
@@ -852,12 +852,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-b-2
   - Key: rogue-c-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -60, y: -375}
     Gains:
       Values:
@@ -876,12 +876,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-c-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -900,12 +900,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-c-3
   - Key: rogue-c-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -450}
     Gains:
       Values: []
@@ -922,12 +922,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-trunk-2
   - Key: rogue-c-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 75, y: -560}
     Gains:
       Values:
@@ -946,12 +946,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-c-2
   - Key: rogue-c-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -720}
     Gains:
       Values: []
@@ -968,12 +968,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-grand-heist
   - Key: rogue-c-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -990,12 +990,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-ferret
   - Key: rogue-c-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -1014,12 +1014,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-c-6
   - Key: rogue-c-tip-a
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 95, y: -1045}
     Gains:
       Values: []
@@ -1036,12 +1036,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-c-7
   - Key: rogue-c-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -1045}
     Gains:
       Values:
@@ -1061,7 +1061,6 @@ MonoBehaviour:
     - rogue-c-7
     - rogue-c-tip-a
   - Key: rogue-ferret
-    DisplayName: 
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -1071,6 +1070,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -1087,12 +1087,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-c-5
   - Key: rogue-ferret-power
-    DisplayName: 
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 45, y: -1140}
     Gains:
       Values: []
@@ -1109,7 +1109,6 @@ MonoBehaviour:
     Neighbors:
     - rogue-c-tip-a
   - Key: rogue-ferret-charge
-    DisplayName: 
     Kind: 7
     XpCost: 475
     UnlockedByDefault: 0
@@ -1119,6 +1118,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 45, y: -1230}
     Gains:
       Values: []
@@ -1135,12 +1135,12 @@ MonoBehaviour:
     Neighbors:
     - rogue-ferret-power
   - Key: rogue-grand-heist
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -630}
     Gains:
       Values: []

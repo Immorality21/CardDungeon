@@ -13,15 +13,27 @@ MonoBehaviour:
   m_Name: VoidShard
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: VoidShard
-  DisplayName: Void Shard
   Icon: {fileID: 21300000, guid: a6077a0f84124dbb9fd2134ffcc73c4b, type: 3}
   Rarity: 2
   ItemLevel: 4
-  Description: 'A splinter of the dark that holds the deep together. Only the things set to guard it carry any.'
+  FindChanceScale: 1
   Category: 2
   SlotType: 0
   Bonuses: []
   Resistances: []
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
   MaxStack: 999
+  RevisitFear: -1
+  RevisitRun: 

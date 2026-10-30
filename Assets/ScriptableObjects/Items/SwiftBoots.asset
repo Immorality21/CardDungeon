@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: SwiftBoots
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: SwiftBoots
-  DisplayName: Swift Boots
   Icon: {fileID: 21300000, guid: d82d08197918ebf499cc3c4a0268632e, type: 3}
-  SlotType: 4
   Rarity: 1
   ItemLevel: 3
+  FindChanceScale: 1
+  Category: 0
+  SlotType: 4
   Bonuses:
   - StatType: 3
     BonusType: 0
@@ -25,6 +26,7 @@ MonoBehaviour:
   - StatType: 7
     BonusType: 0
     Value: 6
+  Resistances: []
   Triggers: []
   Milestones:
   - Counter: 2
@@ -34,3 +36,16 @@ MonoBehaviour:
       BonusType: 0
       Value: 1
   Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
+  MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

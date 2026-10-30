@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: WrithingSpawn
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: WrithingSpawn
-  DisplayName: Writhing Spawn
-  Description: A knot of the deep that came when he called. It holds things in place.
   Sprite: {fileID: 21300000, guid: bf4b339c31074c70991b550f68b9b8ff, type: 3}
   AnimationFrames:
   - {fileID: -5306700550414525520, guid: d7e8783aa53543dcb696820a1c5e2b44, type: 3}
@@ -27,8 +25,17 @@ MonoBehaviour:
   Kind: 2
   TargetType: 0
   Effects: []
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames: []
   BaseCharges: 2
   StatPercents:
     Values:
@@ -51,6 +58,11 @@ MonoBehaviour:
   Actions: []
   Signature: {fileID: 11400000, guid: e149db72e4b006d4ab2341a448abd0a0, type: 2}
   AttackAbility: {fileID: 11400000, guid: fa27757269514754e8510402d0a5bbf9, type: 2}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
+  RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

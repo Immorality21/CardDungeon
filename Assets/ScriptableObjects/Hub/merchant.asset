@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: merchant
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.BuildingSO
   Key: merchant
-  DisplayName: Merchant
-  Blurb: Gear, potions, and a keen sense of what you can afford.
   Service: 1
   Position: {x: 400, y: 250}
   HitSize: {x: 150, y: 110}
@@ -43,4 +41,5 @@ MonoBehaviour:
   - Material: {fileID: 11400000, guid: c0de5211aa010000000000000000ab01, type: 2}
     Amount: 1
   GoldPerUpgrade: 0
+  LevelGrantKeys: []
   RequiredRunKeys: []

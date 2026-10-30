@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Cleric
   m_EditorClassIdentifier: 
   Key: Cleric
-  Label: Cleric
-  Blurb: Keeps everyone else standing, and is quietly dangerous to the wrong things.
   Vision:
     Fantasy: A devout healer. Will prioritise others over herself, with the strongest
       focus being on healing and support.
@@ -90,4 +88,10 @@ MonoBehaviour:
     - Type: 7
       Amount: 22
   AttackStat: 5
+  Momentum:
+    PercentPerStack: 0
+    MaxStacks: 0
+  Focus:
+    PerCast: 0
+    Max: 0
   SphereGrid: {fileID: 11400000, guid: a628a23676be4669a64a34bac1f7fbb4, type: 2}

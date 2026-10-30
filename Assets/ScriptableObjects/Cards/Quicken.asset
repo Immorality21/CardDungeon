@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Quicken
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: Quicken
-  DisplayName: Quicken
-  Description: A blessing on an ally's step. They act sooner, and more often.
   Icon: {fileID: 21300000, guid: df827bf258a54d028dc82d87d8bc398d, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -32,9 +30,13 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

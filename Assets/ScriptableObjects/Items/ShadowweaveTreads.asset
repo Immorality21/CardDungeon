@@ -13,12 +13,10 @@ MonoBehaviour:
   m_Name: ShadowweaveTreads
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: ShadowweaveTreads
-  DisplayName: Shadowweave Treads
   Icon: {fileID: 21300000, guid: e8acaf86faa141d282d832f3004b8b5c, type: 3}
   Rarity: 2
   ItemLevel: 4
-  Description: Soft enough that the floor keeps no count of you. One of four Shadowweave
-    pieces.
+  FindChanceScale: 1
   Category: 0
   SlotType: 4
   Bonuses:
@@ -34,7 +32,16 @@ MonoBehaviour:
   Triggers: []
   Milestones: []
   Set: {fileID: 11400000, guid: 02c053026d7a4537b5a57818bd70861f, type: 2}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
   ConsumablePercent: 0
   MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

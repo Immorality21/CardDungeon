@@ -16,7 +16,7 @@ MonoBehaviour:
   Archetype: 4
   Actions:
   - Label: Cast from spell list
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 5
     Priority: 20
     Weight: 1
@@ -33,7 +33,7 @@ MonoBehaviour:
     Magic: {fileID: 0}
     Conditions: []
   - Label: Bud off
-    DisplayName: Bud Off
+    DisplayNameKey: move.bud-off.name
     Kind: 8
     Priority: 25
     Weight: 1
@@ -53,7 +53,7 @@ MonoBehaviour:
       Value: 0.6
       Stat: 1
   - Label: Signature
-    DisplayName: Acid Deluge
+    DisplayNameKey: move.acid-deluge.name
     Kind: 2
     Priority: 10
     Weight: 1
@@ -79,7 +79,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Signature (enraged)
-    DisplayName: Acid Deluge
+    DisplayNameKey: move.acid-deluge.name
     Kind: 2
     Priority: 10
     Weight: 1
@@ -105,7 +105,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Enraged blow
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -125,7 +125,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Blow
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1

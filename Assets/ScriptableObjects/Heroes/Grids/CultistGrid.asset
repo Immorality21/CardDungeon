@@ -15,12 +15,12 @@ MonoBehaviour:
   StartNodeKey: cultist-sig
   Nodes:
   - Key: cultist-sig
-    DisplayName: 
     Kind: 3
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -36,12 +36,12 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors: []
   - Key: cultist-trunk-1
-    DisplayName: 
     Kind: 0
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -60,12 +60,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-sig
   - Key: cultist-start
-    DisplayName: 
     Kind: 0
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -84,12 +84,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-trunk-1
   - Key: cultist-trunk-2
-    DisplayName: 
     Kind: 0
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -110,12 +110,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-start
   - Key: cultist-trunk-slot
-    DisplayName: 
     Kind: 2
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 60, y: -375}
     Gains:
       Values: []
@@ -132,12 +132,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-trunk-2
   - Key: cultist-a-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -132, y: -325}
     Gains:
       Values:
@@ -156,12 +156,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-trunk-2
   - Key: cultist-a-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -246, y: -380}
     Gains:
       Values:
@@ -180,12 +180,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-1
   - Key: cultist-a-3
-    DisplayName: 
     Kind: 4
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -360, y: -435}
     Gains:
       Values: []
@@ -202,12 +202,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-2
   - Key: cultist-a-4
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -90, y: -255}
     Gains:
       Values:
@@ -226,12 +226,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-1
   - Key: cultist-a-5
-    DisplayName: 
     Kind: 6
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -588, y: -545}
     Gains:
       Values: []
@@ -248,7 +248,6 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-tip-a
   - Key: cultist-a-6
-    DisplayName: 
     Kind: 4
     XpCost: 245
     UnlockedByDefault: 0
@@ -256,6 +255,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -702, y: -600}
     Gains:
       Values: []
@@ -272,12 +272,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-5
   - Key: cultist-a-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -816, y: -655}
     Gains:
       Values:
@@ -296,12 +296,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-6
   - Key: cultist-a-res
-    DisplayName: 
     Kind: 5
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -420, y: -360}
     Gains:
       Values: []
@@ -318,7 +318,6 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-3
   - Key: cultist-a-tip-a
-    DisplayName: 
     Kind: 10
     XpCost: 155
     UnlockedByDefault: 0
@@ -326,6 +325,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -474, y: -490}
     Gains:
       Values: []
@@ -342,7 +342,6 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-3
   - Key: cultist-a-tip-b
-    DisplayName: 
     Kind: 7
     XpCost: 350
     UnlockedByDefault: 0
@@ -350,6 +349,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -876, y: -585}
     Gains:
       Values: []
@@ -366,12 +366,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-7
   - Key: cultist-b-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -60, y: -375}
     Gains:
       Values:
@@ -390,12 +390,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-trunk-2
   - Key: cultist-b-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -414,12 +414,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-b-3
   - Key: cultist-b-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -450}
     Gains:
       Values: []
@@ -436,12 +436,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-trunk-2
   - Key: cultist-b-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -70, y: -500}
     Gains:
       Values:
@@ -460,12 +460,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-b-2
   - Key: cultist-b-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -720}
     Gains:
       Values: []
@@ -482,12 +482,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-mass-hysteria
   - Key: cultist-b-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -504,12 +504,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-b-nightmare
   - Key: cultist-b-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -528,12 +528,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-b-6
   - Key: cultist-b-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 105, y: -605}
     Gains:
       Values: []
@@ -550,12 +550,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-mass-hysteria
   - Key: cultist-b-tip-a
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 95, y: -1045}
     Gains:
       Values: []
@@ -572,12 +572,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-b-7
   - Key: cultist-b-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -1045}
     Gains:
       Values:
@@ -597,12 +597,12 @@ MonoBehaviour:
     - cultist-b-7
     - cultist-b-tip-a
   - Key: cultist-c-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 105, y: -215}
     Gains:
       Values:
@@ -621,12 +621,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-trunk-2
   - Key: cultist-c-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 246, y: -380}
     Gains:
       Values:
@@ -645,12 +645,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-c-3
   - Key: cultist-c-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 132, y: -325}
     Gains:
       Values: []
@@ -667,12 +667,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-trunk-2
   - Key: cultist-c-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 315, y: -340}
     Gains:
       Values:
@@ -693,12 +693,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-c-2
   - Key: cultist-c-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 474, y: -490}
     Gains:
       Values: []
@@ -715,12 +715,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-blood-moon
   - Key: cultist-c-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 702, y: -600}
     Gains:
       Values: []
@@ -737,12 +737,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-c-idol
   - Key: cultist-c-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 816, y: -655}
     Gains:
       Values:
@@ -761,12 +761,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-c-6
   - Key: cultist-c-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 420, y: -360}
     Gains:
       Values: []
@@ -783,12 +783,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-blood-moon
   - Key: cultist-c-tip-a
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 911, y: -710}
     Gains:
       Values: []
@@ -805,12 +805,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-c-7
   - Key: cultist-c-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 876, y: -585}
     Gains:
       Values:
@@ -830,7 +830,6 @@ MonoBehaviour:
     - cultist-c-7
     - cultist-c-tip-a
   - Key: cultist-b-nightmare
-    DisplayName: 
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -838,6 +837,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -854,12 +854,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-b-5
   - Key: cultist-b-nightmare-up
-    DisplayName: 
     Kind: 6
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 45, y: -1140}
     Gains:
       Values: []
@@ -876,7 +876,6 @@ MonoBehaviour:
     Neighbors:
     - cultist-b-tip-a
   - Key: cultist-c-idol
-    DisplayName: 
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -884,6 +883,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 588, y: -545}
     Gains:
       Values: []
@@ -900,12 +900,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-c-5
   - Key: cultist-c-idol-up
-    DisplayName: 
     Kind: 6
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 1095, y: -700}
     Gains:
       Values: []
@@ -922,12 +922,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-c-tip-a
   - Key: cultist-b-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
+    RequiredNodes: []
     Position: {x: -105, y: -880}
     Gains:
       Values: []
@@ -944,12 +944,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-b-6
   - Key: cultist-c-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
+    RequiredNodes: []
     Position: {x: 740, y: -510}
     Gains:
       Values: []
@@ -966,12 +966,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-c-6
   - Key: cultist-mass-hysteria
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -630}
     Gains:
       Values: []
@@ -988,12 +988,12 @@ MonoBehaviour:
     Neighbors:
     - cultist-b-2
   - Key: cultist-blood-moon
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 360, y: -435}
     Gains:
       Values: []

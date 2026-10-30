@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Items
 {
@@ -81,9 +82,17 @@ namespace Assets.Scripts.Items
     public class BeltPotionType
     {
         [Tooltip("Save id. Never rename one a save may hold.")]
+        [TextKeys("potion", "name")]
         public string Key;
 
-        public string DisplayName;
+        [System.NonSerialized] private string _displayName;
+
+        /// <summary>From the text table (<c>potion.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("potion", Key, null, "name"); }
+            set { _displayName = value; }
+        }
 
         [Tooltip("The potion a slot of this type carries.")]
         public ItemSO Potion;

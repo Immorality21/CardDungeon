@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "CardDungeon",
+        "CardDungeon.ImmoralityGaming.Editor",
         "CardDungeon.Balance.Editor"
     ],
     "includePlatforms": [

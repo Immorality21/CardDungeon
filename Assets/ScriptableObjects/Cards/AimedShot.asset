@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: AimedShot
   m_EditorClassIdentifier: 
   Key: AimedShot
-  DisplayName: Aimed Shot
-  Description: One shot, taken slowly, that goes exactly where it was sent.
   Icon: {fileID: 21300000, guid: 7fce12d2d12a4cc5bfa70f3b8a500ddf, type: 3}
   Delivery: 0
   ProjectileArtAngle: 45
@@ -29,8 +27,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 06000000
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 1
+  EnemyOnly: 0
+  RandomHits: 0

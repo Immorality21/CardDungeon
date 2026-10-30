@@ -202,6 +202,8 @@ namespace Assets.Scripts.Hub
                 _document = GetComponent<UIDocument>();
             }
             var root = _document.rootVisualElement;
+            // UXML texts are keys (#ui...); turn them into words before any screen reads the tree.
+            global::ImmoralityGaming.Localization.Loc.Localize(root);
             _root = root;
 
             _hubView = root.Q<VisualElement>("hub-view");

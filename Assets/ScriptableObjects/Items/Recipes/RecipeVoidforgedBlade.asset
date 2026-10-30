@@ -13,12 +13,10 @@ MonoBehaviour:
   m_Name: RecipeVoidforgedBlade
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: RecipeVoidforgedBlade
-  DisplayName: Recipe - Voidforged Blade
   Icon: {fileID: 21300000, guid: 6d15257a909f4e9abe37e332fc815e50, type: 3}
   Rarity: 2
   ItemLevel: 1
   FindChanceScale: 1
-  Description: 'Torn pages from something old. Most of it is warnings.'
   Category: 3
   SlotType: 0
   Bonuses: []

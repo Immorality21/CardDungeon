@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Cultist
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.HeroSO
   Key: Cultist
-  Label: Cultist
-  Blurb: Speaks to things that should not answer. They answer.
   Vision:
     Fantasy: 'An eldritch-horror summoner: he calls things from below the deep to
       fight beside the party, and pays for his rites in his own blood (decided 2026-10-04/05).'
@@ -80,4 +78,10 @@ MonoBehaviour:
     - Type: 7
       Amount: 20
   AttackStat: 4
+  Momentum:
+    PercentPerStack: 0
+    MaxStacks: 0
+  Focus:
+    PerCast: 0
+    Max: 0
   SphereGrid: {fileID: 11400000, guid: cc0ad32d3adb3884fbdc1c5ed1fc708f, type: 2}

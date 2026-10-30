@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: IdolOffering
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: IdolOffering
-  DisplayName: The Offering
-  Description: The idol gives back all it was fed at once.
   Icon: {fileID: 21300000, guid: 7133fac2a95e406b907efa73907f5fc0, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 4
   Rarity: 0
   Effects:
@@ -27,7 +27,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 0
     UnlockLevel: 0
-  Tags:
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 12
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

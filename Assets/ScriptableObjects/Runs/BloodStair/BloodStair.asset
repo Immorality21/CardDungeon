@@ -13,17 +13,13 @@ MonoBehaviour:
   m_Name: BloodStair
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
   Key: BloodStair
-  DisplayName: The Blood Stair
-  Blurb: A cult carved this stair down to its altar, and its last initiate is still
-    chained at the bottom. Five floors, none of them kind. Most parties turn back.
-    Some don't have to.
   SequenceIndex: 1
   Repeatable: 0
   Challenge: 1
   JoinsOnClear: {fileID: 0}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: 7b0867e47fab1e44f90da83c57d0e609, type: 2}
-    LevelName: The Bleeding Steps
+    LevelNameKey: run.blood-stair.level-1.name
     ManualLayout: {fileID: 11400000, guid: 9cdba10edc5621f4b90375b8c847cb2c, type: 2}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -37,8 +33,9 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: ddb14b0d38fd9924ea955f7398fabae0, type: 2}
-    LevelName: The Chapel of Knives
+    LevelNameKey: run.blood-stair.level-2.name
     ManualLayout: {fileID: 11400000, guid: fc582ba9597ea244999debfec36a58e8, type: 2}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -52,8 +49,9 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: faeaa1ea1ea4a8f408cef907619b1d6a, type: 2}
-    LevelName: The Ossuary Gate
+    LevelNameKey: run.blood-stair.level-3.name
     ManualLayout: {fileID: 11400000, guid: 476f338b5878db848bf49efce5969fcc, type: 2}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -67,8 +65,9 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: 60caa03b7f18bfc4eacb115544597fd6, type: 2}
-    LevelName: The Red Cloister
+    LevelNameKey: run.blood-stair.level-4.name
     ManualLayout: {fileID: 11400000, guid: 2ef590897fff7af4b8651ce4b30fe706, type: 2}
     BossEnemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
     BossAdds:
@@ -93,8 +92,9 @@ MonoBehaviour:
         GoldReward: 0
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: 2fb7407607c807c4793ccc7d74dd4879, type: 2}
-    LevelName: The Altar of the Last Initiate
+    LevelNameKey: run.blood-stair.level-5.name
     ManualLayout: {fileID: 11400000, guid: 199d7513d686edd4b9b0bfac476e1dbb, type: 2}
     BossEnemy: {fileID: 11400000, guid: a3ec74314eaaa1546a44c86e575112d8, type: 2}
     BossAdds:
@@ -119,3 +119,4 @@ MonoBehaviour:
         GoldReward: 0
     RescueHero: {fileID: 11400000, guid: 77ae12aafb9d437f8cc8149bd1cccb2b, type: 2}
     AllowRoomEvents: 1
+    IntendedHard: 0

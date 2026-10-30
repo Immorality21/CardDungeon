@@ -13,12 +13,11 @@ MonoBehaviour:
   m_Name: WarriorMech
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: WarriorMech
-  DisplayName: Warrior Mech
-  Description: She bolts together a brawling mech and climbs on. It takes the blows
-    meant for her.
   Kind: 3
   TargetType: 1
   Effects: []
+  Hits: 1
+  RandomTargets: 0
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 11400000, guid: 813f5aa82bb75d34fb7b196e6d97134d, type: 2}

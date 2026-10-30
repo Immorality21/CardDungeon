@@ -13,15 +13,27 @@ MonoBehaviour:
   m_Name: GildLeaf
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: GildLeaf
-  DisplayName: Gild Leaf
   Icon: {fileID: 21300000, guid: bcf71dd1b3e04797b178eee7f794dbd8, type: 3}
   Rarity: 2
   ItemLevel: 3
-  Description: 'Gold hammered thin enough to read through. The vault is papered in the stuff.'
+  FindChanceScale: 1
   Category: 2
   SlotType: 0
   Bonuses: []
   Resistances: []
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
   MaxStack: 999
+  RevisitFear: -1
+  RevisitRun: 

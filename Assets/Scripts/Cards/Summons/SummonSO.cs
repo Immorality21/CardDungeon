@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards
 {
@@ -52,12 +53,26 @@ namespace Assets.Scripts.Cards
     public class SummonSO : ScriptableObject
     {
         [Tooltip("Stable identifier. Grid nodes name the summon they teach or upgrade by this key.")]
+        [TextKeys("summon", "name", "description")]
         public string Key;
 
-        public string DisplayName;
+        [System.NonSerialized] private string _displayName;
 
-        [TextArea]
-        public string Description;
+        /// <summary>From the text table (<c>summon.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("summon", Key, this, "name"); }
+            set { _displayName = value; }
+        }
+
+        [System.NonSerialized] private string _description;
+
+        /// <summary>From the text table (<c>summon.{key}.description</c>). Set only on instances built in code.</summary>
+        public string Description
+        {
+            get { return _description ?? Loc.AssetText("summon", Key, this, "description"); }
+            set { _description = value; }
+        }
 
         [Tooltip("The creature, drawn large on the battle stage while it is summoned.")]
         public Sprite Sprite;

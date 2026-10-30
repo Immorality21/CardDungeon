@@ -3,6 +3,8 @@ using System.Linq;
 using System.Text;
 using Assets.Scripts.Cards;
 using Assets.Scripts.UnitStats;
+using ImmoralityGaming.Editor.Localization;
+using ImmoralityGaming.Localization;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -193,8 +195,12 @@ namespace Assets.Scripts.Heroes.Editor
             _detail.Add(BuildHeader(hero));
 
             var player = Section("Player-facing");
-            player.Add(Field("Label"));
-            player.Add(Field("Blurb"));
+            string heroId = string.IsNullOrEmpty(hero.Key) ? hero.name : hero.Key;
+            player.Add(new IMGUIContainer(() =>
+            {
+                TextKeyGUI.TextBoxLayout("Name", Loc.KeyFor("hero", heroId, "name"), 1);
+                TextKeyGUI.TextBoxLayout("Blurb", Loc.KeyFor("hero", heroId, "description"), 3);
+            }));
             _detail.Add(player);
 
             var vision = Section("Vision — developer-facing, never shown");

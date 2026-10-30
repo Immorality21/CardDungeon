@@ -15,12 +15,12 @@ MonoBehaviour:
   StartNodeKey: paladin-sig
   Nodes:
   - Key: paladin-start
-    DisplayName: 
     Kind: 0
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -39,12 +39,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-trunk-1
   - Key: paladin-trunk-1
-    DisplayName: 
     Kind: 0
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -63,12 +63,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-sig
   - Key: paladin-sig
-    DisplayName: 
     Kind: 3
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -84,12 +84,12 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors: []
   - Key: paladin-trunk-2
-    DisplayName: 
     Kind: 0
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -110,12 +110,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-start
   - Key: paladin-trunk-slot
-    DisplayName: 
     Kind: 2
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 60, y: -375}
     Gains:
       Values: []
@@ -132,12 +132,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-a-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -105, y: -215}
     Gains:
       Values:
@@ -156,12 +156,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-a-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -246, y: -380}
     Gains:
       Values:
@@ -180,12 +180,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-3
   - Key: paladin-a-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -132, y: -325}
     Gains:
       Values: []
@@ -202,12 +202,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-a-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -285, y: -310}
     Gains:
       Values:
@@ -226,12 +226,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-2
   - Key: paladin-a-5
-    DisplayName: 
     Kind: 2
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -344, y: -430}
     Gains:
       Values: []
@@ -248,12 +248,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-2
   - Key: paladin-a-6
-    DisplayName: 
     Kind: 3
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -572, y: -540}
     Gains:
       Values: []
@@ -270,12 +270,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-lion
   - Key: paladin-a-7
-    DisplayName: 
     Kind: 0
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -686, y: -595}
     Gains:
       Values:
@@ -294,12 +294,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-6
   - Key: paladin-a-res
-    DisplayName: 
     Kind: 1
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -420, y: -360}
     Gains:
       Values: []
@@ -316,12 +316,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-2
   - Key: paladin-a-tip-a
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -781, y: -650}
     Gains:
       Values:
@@ -340,12 +340,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-7
   - Key: paladin-a-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -746, y: -525}
     Gains:
       Values:
@@ -364,12 +364,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-7
   - Key: paladin-b-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -60, y: -375}
     Gains:
       Values:
@@ -388,12 +388,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-b-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -412,12 +412,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-3
   - Key: paladin-b-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -450}
     Gains:
       Values: []
@@ -434,12 +434,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-b-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 75, y: -560}
     Gains:
       Values:
@@ -458,12 +458,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-2
   - Key: paladin-b-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -720}
     Gains:
       Values: []
@@ -480,12 +480,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-judgement
   - Key: paladin-b-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -502,12 +502,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-seraph
   - Key: paladin-b-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -526,12 +526,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-6
   - Key: paladin-b-tip-a
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 95, y: -1045}
     Gains:
       Values:
@@ -550,12 +550,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-7
   - Key: paladin-b-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -920}
     Gains:
       Values:
@@ -574,12 +574,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-7
   - Key: paladin-c-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 105, y: -215}
     Gains:
       Values:
@@ -598,12 +598,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-c-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 246, y: -380}
     Gains:
       Values:
@@ -622,12 +622,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-3
   - Key: paladin-c-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 132, y: -325}
     Gains:
       Values: []
@@ -644,12 +644,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-trunk-2
   - Key: paladin-c-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 315, y: -340}
     Gains:
       Values:
@@ -668,12 +668,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-2
   - Key: paladin-c-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 474, y: -490}
     Gains:
       Values: []
@@ -690,12 +690,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-hands
   - Key: paladin-c-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 702, y: -600}
     Gains:
       Values: []
@@ -712,12 +712,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-stag
   - Key: paladin-c-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 816, y: -655}
     Gains:
       Values:
@@ -736,12 +736,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-6
   - Key: paladin-c-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 420, y: -360}
     Gains:
       Values: []
@@ -758,12 +758,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-hands
   - Key: paladin-c-tip-a
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 911, y: -710}
     Gains:
       Values:
@@ -782,12 +782,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-7
   - Key: paladin-c-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 876, y: -585}
     Gains:
       Values:
@@ -806,7 +806,6 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-7
   - Key: paladin-lion
-    DisplayName: Aegis Lion
     Kind: 4
     XpCost: 155
     UnlockedByDefault: 0
@@ -816,6 +815,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -458, y: -485}
     Gains:
       Values: []
@@ -832,12 +832,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-5
   - Key: paladin-lion-power
-    DisplayName: 'Aegis Lion: Iron Mane'
     Kind: 5
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -876, y: -705}
     Gains:
       Values: []
@@ -854,12 +854,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-tip-a
   - Key: paladin-lion-stay
-    DisplayName: 'Aegis Lion: Long Watch'
     Kind: 6
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -971, y: -760}
     Gains:
       Values: []
@@ -876,7 +876,6 @@ MonoBehaviour:
     Neighbors:
     - paladin-lion-power
   - Key: paladin-lion-charge
-    DisplayName: 'Aegis Lion: Second Roar'
     Kind: 7
     XpCost: 475
     UnlockedByDefault: 0
@@ -886,6 +885,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -1066, y: -815}
     Gains:
       Values: []
@@ -902,7 +902,6 @@ MonoBehaviour:
     Neighbors:
     - paladin-lion-stay
   - Key: paladin-seraph
-    DisplayName: Judgement Seraph
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -912,6 +911,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -928,12 +928,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-5
   - Key: paladin-seraph-power
-    DisplayName: 'Judgement Seraph: Tempered'
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 190, y: -1100}
     Gains:
       Values: []
@@ -950,12 +950,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-tip-a
   - Key: paladin-seraph-stay
-    DisplayName: 'Judgement Seraph: Vigil'
     Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 285, y: -1155}
     Gains:
       Values: []
@@ -972,7 +972,6 @@ MonoBehaviour:
     Neighbors:
     - paladin-seraph-power
   - Key: paladin-seraph-charge
-    DisplayName: 'Judgement Seraph: Second Descent'
     Kind: 7
     XpCost: 540
     UnlockedByDefault: 0
@@ -982,6 +981,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 380, y: -1210}
     Gains:
       Values: []
@@ -998,7 +998,6 @@ MonoBehaviour:
     Neighbors:
     - paladin-seraph-stay
   - Key: paladin-stag
-    DisplayName: Dawn Stag
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -1008,6 +1007,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 588, y: -545}
     Gains:
       Values: []
@@ -1024,12 +1024,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-5
   - Key: paladin-stag-power
-    DisplayName: 'Dawn Stag: Brighter Dawn'
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 1006, y: -765}
     Gains:
       Values: []
@@ -1046,12 +1046,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-tip-a
   - Key: paladin-stag-stay
-    DisplayName: 'Dawn Stag: Long Morning'
     Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 1101, y: -820}
     Gains:
       Values: []
@@ -1068,7 +1068,6 @@ MonoBehaviour:
     Neighbors:
     - paladin-stag-power
   - Key: paladin-stag-charge
-    DisplayName: 'Dawn Stag: Second Light'
     Kind: 7
     XpCost: 540
     UnlockedByDefault: 0
@@ -1078,6 +1077,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 1196, y: -875}
     Gains:
       Values: []
@@ -1094,12 +1094,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-stag-stay
   - Key: paladin-a-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 100
+    RequiredNodes: []
     Position: {x: -290, y: -520}
     Gains:
       Values: []
@@ -1116,12 +1116,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-2
   - Key: paladin-c-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
+    RequiredNodes: []
     Position: {x: 640, y: -700}
     Gains:
       Values: []
@@ -1138,12 +1138,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-c-6
   - Key: paladin-b-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 100
+    RequiredNodes: []
     Position: {x: 95, y: -860}
     Gains:
       Values: []
@@ -1160,12 +1160,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-6
   - Key: paladin-b-awaken-2
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 150
+    RequiredNodes: []
     Position: {x: 190, y: -900}
     Gains:
       Values: []
@@ -1182,12 +1182,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-awaken
   - Key: paladin-a-intervention
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -190, y: -470}
     Gains:
       Values: []
@@ -1204,12 +1204,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-a-2
   - Key: paladin-b-judgement
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -630}
     Gains:
       Values: []
@@ -1226,12 +1226,12 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-2
   - Key: paladin-c-hands
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 360, y: -435}
     Gains:
       Values: []

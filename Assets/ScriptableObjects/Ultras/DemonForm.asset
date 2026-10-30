@@ -13,9 +13,14 @@ MonoBehaviour:
   m_Name: DemonForm
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: DemonForm
-  DisplayName: Demon Form
-  Description: The Warlock lets the thing he bargains with wear him for a while.
   Kind: 0
+  TargetType: 1
+  Effects: []
+  Hits: 1
+  RandomTargets: 0
+  Creature: {fileID: 0}
+  StatAbilities: []
+  Mech: {fileID: 0}
   Turns: 3
   MaxHealthPercent: 50
   AttackDamageType: 5

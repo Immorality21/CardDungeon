@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Deluge
   m_EditorClassIdentifier: 
   Key: Deluge
-  DisplayName: Deluge
-  Description: A wall of water crashes over every enemy and leaves them wading.
   Icon: {fileID: 21300000, guid: a75034aaff4644688b661f4270c000a2, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -32,6 +30,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 5
     Power: 25
     PowerMode: 0
@@ -43,9 +44,13 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 07000000
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

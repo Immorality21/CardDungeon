@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: PackHunt
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: PackHunt
-  DisplayName: Pack Hunt
-  Description: Three grey shapes go through the line, and come back red.
   Kind: 1
   TargetType: 1
   Effects:
@@ -30,6 +28,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 100
     BonusVsStatus: 25
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 3
     Power: 2
@@ -43,6 +42,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Hits: 3
   RandomTargets: 0

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Heal
   m_EditorClassIdentifier: 
   Key: Heal
-  DisplayName: Heal
-  Description: Restores health to yourself.
   Icon: {fileID: 2291012834914130869, guid: f75b4f2ca4ebefc4c938f40515ffba65, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 2
   Rarity: 0
   Effects:
@@ -27,6 +27,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  CanCrit: 0
   EnemyOnly: 1
+  RandomHits: 0

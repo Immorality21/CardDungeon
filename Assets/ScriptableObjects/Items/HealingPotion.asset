@@ -13,14 +13,27 @@ MonoBehaviour:
   m_Name: HealingPotion
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: HealingPotion
-  DisplayName: Healing Potion
   Icon: {fileID: 21300000, guid: ad16d9d0dea44b71aed1ec4f15defac1, type: 3}
   Rarity: 0
   ItemLevel: 1
+  FindChanceScale: 1
   Category: 1
   SlotType: 0
   Bonuses: []
+  Resistances: []
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 2
+  ConsumableCharges: 0
   ConsumablePercent: 0.3
   MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

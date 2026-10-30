@@ -13,18 +13,20 @@ MonoBehaviour:
   m_Name: BloodSword
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: BloodSword
-  DisplayName: Blood Sword
   Icon: {fileID: 21300000, guid: d8adcc2fa9c746e69172542fbc362cff, type: 3}
-  SlotType: 0
   Rarity: 1
   ItemLevel: 3
+  FindChanceScale: 1
+  Category: 0
+  SlotType: 0
   Bonuses:
   - StatType: 1
     BonusType: 0
     Value: 5
+  Resistances: []
   Triggers:
-  - Label:
-    Text: 'On a kill: heal 5% of max health (once per turn).'
+  - LabelKey: 
+    TextKey: item.blood-sword.reaction-1.text
     When: 5
     Chance: 1
     Limit: 1
@@ -49,3 +51,16 @@ MonoBehaviour:
       DrainToParty: 0
   Milestones: []
   Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
+  MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

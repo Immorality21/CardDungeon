@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: WarriorMech
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: WarriorMech
-  DisplayName: Warrior Mech
-  Description: Brass plate, piston fists and a boiler for a heart. It hits hard and
-    takes harder.
   Sprite: {fileID: 21300000, guid: 2f8389e69b00452bad68fde0b427266e, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: 7074dffe07634f67aaf86f6ae2c5dbdf, type: 3}
@@ -29,6 +26,10 @@ MonoBehaviour:
   TargetType: 0
   Effects: []
   RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
   SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
@@ -58,11 +59,13 @@ MonoBehaviour:
   Signature: {fileID: 11400000, guid: 852982d87ccda224cb7affa3e383ec1b, type: 2}
   AttackAbility: {fileID: 11400000, guid: 1964d3dd573507e459df809ff3bc19d8, type: 2}
   UsesTags: 1
+  PartingAbility: {fileID: 0}
   MountedFrames:
   - {fileID: 21300000, guid: 7e4e2346c34547188ceca40a9e23e770, type: 3}
   - {fileID: 21300000, guid: aa3250ed73734e9b9c0283c721569ba9, type: 3}
   - {fileID: 21300000, guid: f1dd7190be794093879962ae17290537, type: 3}
   RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

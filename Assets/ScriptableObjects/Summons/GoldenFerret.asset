@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: GoldenFerret
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: GoldenFerret
-  DisplayName: Golden Ferret
-  Description: It finds the loose coin in every pocket, and the party's luck turns
-    with it.
   Sprite: {fileID: 21300000, guid: 5d103d0221b94e848a90f0833d730255, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: 5d89faddb4794224b52e8d7e3faa5c21, type: 3}

@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Warlock
   m_EditorClassIdentifier: 
   Key: Warlock
-  Label: Warlock
-  Blurb: Has found that the shortest route to power runs straight through himself.
   Vision:
     Fantasy: Dark-caster type of hero. Somewhat evil, and looks for opportunities
       to gain power at the cost of others.
@@ -97,4 +95,10 @@ MonoBehaviour:
     - Type: 7
       Amount: 34
   AttackStat: 4
+  Momentum:
+    PercentPerStack: 0
+    MaxStacks: 0
+  Focus:
+    PerCast: 0
+    Max: 0
   SphereGrid: {fileID: 11400000, guid: cba493db680944de88c95fa4395e04e9, type: 2}

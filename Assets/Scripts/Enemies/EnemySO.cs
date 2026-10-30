@@ -3,6 +3,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Enemies
 {
@@ -18,10 +19,17 @@ namespace Assets.Scripts.Enemies
                  "what the player has learned about it (resistances seen, weaknesses discovered). " +
                  "Never shown to the player. Changing it orphans every save that references the old " +
                  "value, so treat it as write-once. Same contract as HeroSO.Key.")]
+        [TextKeys("enemy", "name")]
         public string Key;
 
-        [Tooltip("Name shown to the player. Safe to rename at any time - it is not a save key.")]
-        public string DisplayName = "Enemy";
+        [System.NonSerialized] private string _displayName;
+
+        /// <summary>From the text table (<c>enemy.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("enemy", Key, this, "name"); }
+            set { _displayName = value; }
+        }
 
         public Sprite Sprite;
 

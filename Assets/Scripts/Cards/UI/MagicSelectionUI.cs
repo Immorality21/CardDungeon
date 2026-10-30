@@ -164,6 +164,10 @@ namespace Assets.Scripts.Cards.UI
             {
                 return false;
             }
+
+            // UXML texts are keys (#ui...); turn them into words once, as the tree is first bound.
+
+            global::ImmoralityGaming.Localization.Loc.Localize(root);
             _root = root;
             // Only focusable while a picker is open (set in BeginNavigation) — otherwise this
             // idle panel root would steal keyboard focus from the command menu's arrow nav.

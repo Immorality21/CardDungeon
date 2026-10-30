@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Heroes
 {
@@ -11,14 +13,26 @@ namespace Assets.Scripts.Heroes
                  "equipped gear (ItemCollection.json) and equipped magic (Run.json) all key off it. " +
                  "Never shown to the player. Changing it orphans every save that references the old " +
                  "value, so treat it as write-once.")]
+        [TextKeys("hero", "name", "description")]
         public string Key;
 
-        [Tooltip("Name shown to the player. Safe to rename at any time — it is not a save key.")]
-        public string Label;
+        [NonSerialized] private string _label;
+        [NonSerialized] private string _blurb;
 
-        [Tooltip("One-line pitch shown when this hero is unlocked or rescued. Flavour plus a " +
-                 "hint at the stat line, since the player is choosing a role.")]
-        public string Blurb;
+        /// <summary>Name shown to the player, from the text table (<c>hero.{key}.name</c>). Safe to
+        /// rename at any time - it is not a save key. Set only on instances built in code.</summary>
+        public string Label
+        {
+            get { return _label ?? Loc.AssetText("hero", Key, this, "name"); }
+            set { _label = value; }
+        }
+
+        /// <summary>One-line pitch shown when this hero is unlocked or rescued (<c>hero.{key}.description</c>).</summary>
+        public string Blurb
+        {
+            get { return _blurb ?? Loc.AssetText("hero", Key, this, "description"); }
+            set { _blurb = value; }
+        }
 
         [Tooltip("Design intent — developer-facing, never shown. Edit it in Tools ▸ Hero Vision.")]
         public HeroVision Vision = new HeroVision();

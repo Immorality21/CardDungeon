@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: Succubus
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Succubus
-  DisplayName: Succubus
-  Description: A demoness of the deep circles, an Imp the Warlock's bargains have
-    raised. She holds the line with whip and glamour.
   Sprite: {fileID: 21300000, guid: 58b68432a9144ab99cc214454e92c47c, type: 3}
   AnimationFrames:
   - {fileID: -1170223534432093050, guid: 71dc192fa3f7412798e47b06aec267db, type: 3}
@@ -28,8 +25,17 @@ MonoBehaviour:
   Kind: 1
   TargetType: 0
   Effects: []
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames: []
   BaseCharges: 1
   StatPercents:
     Values:
@@ -52,6 +58,11 @@ MonoBehaviour:
   Actions: []
   Signature: {fileID: 11400000, guid: 90c85d0690cf1264b87964bb6bfd3ee5, type: 2}
   AttackAbility: {fileID: 11400000, guid: d3227b1ee0787aa49bcd501047f983d9, type: 2}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
+  RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Inspire
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: Inspire
-  DisplayName: Inspire
-  Description: A word of faith that gives an ally back what they spent.
   Icon: {fileID: 21300000, guid: 3565c8c3f73f4d7089b3a58e1d057118, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -32,9 +30,13 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

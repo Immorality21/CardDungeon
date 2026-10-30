@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: SporeBloater
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: SporeBloater
-  DisplayName: Spore Bloater
   Sprite: {fileID: 21300000, guid: 485985c0c3218814ea482806c3bab636, type: 3}
   AnimationFrames:
   - {fileID: 2993648226640418427, guid: 5c9f5bedbc680ec478105f4f00d6f9e4, type: 3}
@@ -55,12 +54,14 @@ MonoBehaviour:
     MaxQuantity: 2
   SalvageTable: []
   Triggers:
-  - Label: Rupture
+  - LabelKey: enemy.spore-bloater.reaction-1.label
+    TextKey: 
     When: 6
     Chance: 1
     Limit: 0
     FilterDamageType: 0
     DamageType: 0
+    IgnoreOverTime: 0
     Target: 3
     Effects:
     - EffectType: 3
@@ -74,5 +75,7 @@ MonoBehaviour:
       ApplyChance: 70
       BonusVsTrait: 0
       BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
       DrainToParty: 0
   Flinches: 1

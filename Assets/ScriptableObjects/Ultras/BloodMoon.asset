@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: BloodMoon
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: BloodMoon
-  DisplayName: Blood Moon
-  Description: The moon comes up red, and every hand in the party is stronger for
-    what he bled.
   Kind: 1
   TargetType: 4
   Effects:
@@ -30,6 +27,8 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 2
     Power: 50
@@ -42,6 +41,8 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 4
     Power: 30
@@ -54,6 +55,8 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Hits: 1
   RandomTargets: 0

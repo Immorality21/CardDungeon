@@ -13,36 +13,34 @@ MonoBehaviour:
   m_Name: TreasuryHoard
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
   Key: TreasuryHoard
-  Title: 'The Treasury'
-  Prompt: 'Strongboxes line the walls, prised open and emptied a long time ago. There is loose coin
-    in the corners for anyone patient enough to go along the shelves - and one gilded chest, lock
-    already sprung, that nobody has touched.'
   GoverningStat: 6
   SpawnChancePercent: 50
   SpawnModifierStat: 6
   SpawnModifierRate: 2
+  SpawnRequirements: []
   Difficulty: 8
   Options:
-  - Label: 'Gather the loose coin'
+  - LabelKey: event.treasury-hoard.option-1.label
     Kind: 1
-    DeclineText: ''
+    DeclineTextKey: 
     Success:
-    - Text: 'You work along the shelves and come away with a respectable double handful. The gilded
-        chest is still sitting there, still untouched, as you leave.'
+    - TextKey: event.treasury-hoard.option-1.success-1.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects: []
       Targets: 0
       LootTable: []
       Gold: 15
       LoseAConsumable: 0
       AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
     Failure: []
-  - Label: 'Throw the lid back on the gilded chest'
+  - LabelKey: event.treasury-hoard.option-2.label
     Kind: 0
-    DeclineText: ''
+    DeclineTextKey: 
     Success:
-    - Text: 'The lid swings clear of a needle you never saw. Underneath: coin, and gear somebody else
-        did not live to use.'
+    - TextKey: event.treasury-hoard.option-2.success-1.text
       Weight: 3
       WeightModifierStat: 6
       WeightModifierRate: 5
@@ -55,43 +53,62 @@ MonoBehaviour:
       Gold: 40
       LoseAConsumable: 0
       AwakenedEnemies: []
-    - Text: 'Empty, but for a fat purse wedged under the lining.'
+      JoinsHero: {fileID: 0}
+    - TextKey: event.treasury-hoard.option-2.success-2.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects: []
       Targets: 0
       LootTable: []
       Gold: 30
       LoseAConsumable: 0
       AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
     Failure:
-    - Text: 'The needle goes in above the knuckle. Whatever was on it burns all the way up the arm,
-        and does not stop burning.'
+    - TextKey: event.treasury-hoard.option-2.failure-1.text
       Weight: 2
       WeightModifierStat: 6
       WeightModifierRate: -5
       Effects:
       - EffectType: 0
         Power: 4
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 0
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       - EffectType: 3
         Power: 2
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 1
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       Targets: 0
       LootTable: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
-    - Text: 'The lid comes back on a spring and the crack of it goes down every corridor on this
-        floor. Something answers.'
+      JoinsHero: {fileID: 0}
+    - TextKey: event.treasury-hoard.option-2.failure-2.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects: []
       Targets: 0
       LootTable: []
@@ -99,8 +116,9 @@ MonoBehaviour:
       LoseAConsumable: 0
       AwakenedEnemies:
       - {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
-  - Label: 'Take nothing and move on'
+      JoinsHero: {fileID: 0}
+  - LabelKey: event.treasury-hoard.option-3.label
     Kind: 2
-    DeclineText: 'You leave the shelves and the chest exactly as you found them.'
+    DeclineTextKey: event.treasury-hoard.option-3.decline
     Success: []
     Failure: []

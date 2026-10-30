@@ -5,7 +5,7 @@
 
         <!-- Ability / slot list window (docked bottom-left, styled like the command menu) -->
         <ui:VisualElement name="magic-list-panel" class="cd-window cd-window--combat cd-window--picker cd-dock-bottom-left cd-hidden">
-            <ui:Label name="list-title" text="Ability" class="cd-command-window__header" />
+            <ui:Label name="list-title" text="#ui.combat.list-title" class="cd-command-window__header" />
             <!-- The description sits BESIDE the list (2026-09-30): stacked under it, the picker grew
                  tall enough to cover the acting hero. -->
             <ui:VisualElement class="cd-picker-body">
@@ -13,14 +13,14 @@
                 <!-- What the selected row does: flavour plus the generated mechanics line. -->
                 <ui:Label name="list-desc" text="" class="cd-sel-desc cd-picker-desc cd-hidden" />
             </ui:VisualElement>
-            <ui:Button name="list-back" text="Back" class="cd-button cd-button--narrow" />
+            <ui:Button name="list-back" text="#ui.common.back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- Target picker window (cast target / attack target) -->
         <ui:VisualElement name="target-panel" class="cd-window cd-window--combat cd-window--picker cd-dock-bottom-left cd-hidden">
-            <ui:Label name="target-prompt" text="Select Target" class="cd-command-window__header" />
+            <ui:Label name="target-prompt" text="#ui.combat.target-prompt" class="cd-command-window__header" />
             <ui:ScrollView name="target-scroll" class="cd-select-scroll" mode="Vertical" />
-            <ui:Button name="target-back" text="Back" class="cd-button cd-button--narrow" />
+            <ui:Button name="target-back" text="#ui.common.back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- Inspect ("Scan") window: everything the party has learned about one enemy. Docked
@@ -43,7 +43,7 @@
                     <ui:VisualElement name="inspect-col-right" class="cd-scan__col cd-scan__col--right" />
                 </ui:VisualElement>
             </ui:ScrollView>
-            <ui:Button name="inspect-close" text="Back" class="cd-button cd-button--narrow" />
+            <ui:Button name="inspect-close" text="#ui.common.back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
     </ui:VisualElement>

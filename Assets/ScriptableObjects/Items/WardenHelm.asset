@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: WardenHelm
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: WardenHelm
-  DisplayName: Warden's Helm
   Icon: {fileID: 21300000, guid: 117b30e2fdfb4706932c60364dea5fec, type: 3}
   Rarity: 2
   ItemLevel: 4
+  FindChanceScale: 1
   Category: 0
   SlotType: 2
   Bonuses:
@@ -30,8 +30,8 @@ MonoBehaviour:
   - DamageType: 3
     Percent: 20
   Triggers:
-  - Label:
-    Text: 'When an ally falls: +4 Endurance for 3 turns.'
+  - LabelKey: 
+    TextKey: item.warden-helm.reaction-1.text
     When: 7
     Chance: 1
     Limit: 0
@@ -56,6 +56,16 @@ MonoBehaviour:
       DrainToParty: 0
   Milestones: []
   Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
   MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

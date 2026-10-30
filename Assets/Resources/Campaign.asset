@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe8a60784fee94b4a9b37ad246d6bb49, type: 3}
   m_Name: Campaign
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.CampaignSO
-  DisplayName: The Story
   Nodes:
   - Run: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
     Requires: []

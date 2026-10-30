@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: ClockworkSentry
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: ClockworkSentry
-  DisplayName: Clockwork Sentry
   Sprite: {fileID: 21300000, guid: ac4b5497191844ff8cd117af8ffaeedb, type: 3}
   AnimationFrames:
   - {fileID: 4550001729334824978, guid: 8c5d937aa93d4ec5b386ce7c1a51a58c, type: 3}

@@ -13,16 +13,13 @@ MonoBehaviour:
   m_Name: SeepingCistern
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
   Key: SeepingCistern
-  DisplayName: The Seeping Cistern
-  Blurb: Under the Warrens the old cistern has turned to something that eats. The
-    cutpurse ran down there with your purse. Something down there caught them.
   SequenceIndex: 3
   Repeatable: 0
   Challenge: 1
   JoinsOnClear: {fileID: 0}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: 5e80800cca406bc40b89ebb8be41fab9, type: 2}
-    LevelName: The Sump
+    LevelNameKey: run.seeping-cistern.level-1.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -36,8 +33,9 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 11400000, guid: 09b6a3424e4546719cda1391729e96cc, type: 2}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: f64bd1cace25b5a41bcb5b5b53ed65ed, type: 2}
-    LevelName: The Mother Pool
+    LevelNameKey: run.seeping-cistern.level-2.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: 193d822f3b9fcf740a2bb06c71007dda, type: 2}
     BossAdds:
@@ -62,3 +60,4 @@ MonoBehaviour:
         GoldReward: 0
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0

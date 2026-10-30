@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: Shadowweave
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSetSO
   Key: Shadowweave
-  DisplayName: Shadowweave
   Tiers:
   - Pieces: 2
-    Text: +10% Shadow damage
+    TextKey: set.shadowweave.tier-1.text
     Bonuses: []
     DamageBonuses:
     - DamageType: 5
@@ -24,7 +23,7 @@ MonoBehaviour:
     AbilityExtraPercent: 0
     AbilityExtraType: 5
   - Pieces: 3
-    Text: +5% Intelligence
+    TextKey: set.shadowweave.tier-2.text
     Bonuses:
     - StatType: 4
       BonusType: 1
@@ -33,7 +32,7 @@ MonoBehaviour:
     AbilityExtraPercent: 0
     AbilityExtraType: 5
   - Pieces: 4
-    Text: Every ability also deals 10% of its power as Shadow damage
+    TextKey: set.shadowweave.tier-3.text
     Bonuses: []
     DamageBonuses: []
     AbilityExtraPercent: 10

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: RallyingRoar
   m_EditorClassIdentifier: 
   Key: RallyingRoar
-  DisplayName: Rallying Roar
-  Description: A roar that shakes the walls. Every ally hits harder and moves quicker.
   Icon: {fileID: 21300000, guid: 5306f863da824925a70397f479faf389, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 4
   Rarity: 3
   Effects:
@@ -27,6 +27,12 @@ MonoBehaviour:
     BuffType: 1
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 2
     Power: 2
     PowerMode: 0
@@ -35,7 +41,16 @@ MonoBehaviour:
     BuffType: 3
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

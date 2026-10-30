@@ -16,7 +16,7 @@ MonoBehaviour:
   Archetype: 2
   Actions:
   - Label: Desperate mending
-    DisplayName: Desperate Mending
+    DisplayNameKey: move.desperate-mending.name
     Kind: 3
     Priority: 15
     Weight: 1
@@ -26,13 +26,17 @@ MonoBehaviour:
     Power: 28
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 1
       Value: 0.4
       Stat: 1
   - Label: War chant
-    DisplayName: War Chant
+    DisplayNameKey: move.war-chant.name
     Kind: 6
     Priority: 12
     Weight: 1
@@ -42,13 +46,14 @@ MonoBehaviour:
     Power: 2
     Duration: 3
     TargetStat: 1
-    Magic: {fileID: 0}
+    ApplyChance: 100
     Summons: {fileID: 0}
     SummonCount: 1
     MaxUses: 1
+    Magic: {fileID: 0}
     Conditions: []
   - Label: Mend an ally
-    DisplayName: Mend
+    DisplayNameKey: move.mend.name
     Kind: 3
     Priority: 10
     Weight: 1
@@ -58,13 +63,17 @@ MonoBehaviour:
     Power: 14
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 3
       Value: 0
       Stat: 1
   - Label: Cast from Draw list
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 5
     Priority: 20
     Weight: 1
@@ -74,10 +83,14 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions: []
   - Label: Attack
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -87,5 +100,9 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions: []

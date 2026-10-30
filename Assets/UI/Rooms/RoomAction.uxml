@@ -18,10 +18,10 @@
 
         <!-- Non-combat room actions -->
         <ui:VisualElement name="main-bar" class="cd-bar cd-dock-bottom cd-hidden">
-            <ui:Button name="action-btn" text="Action" class="cd-cmd" />
-            <ui:Button name="search-btn" text="Open the cache" class="cd-cmd cd-hidden" />
-            <ui:Button name="rest-btn" text="Rest at the refuge" class="cd-cmd cd-hidden" />
-            <ui:Button name="descend-btn" text="Take the stairs" class="cd-cmd cd-hidden" />
+            <ui:Button name="action-btn" text="#ui.room.action-btn" class="cd-cmd" />
+            <ui:Button name="search-btn" text="#ui.room.search-btn" class="cd-cmd cd-hidden" />
+            <ui:Button name="rest-btn" text="#ui.room.rest-btn" class="cd-cmd cd-hidden" />
+            <ui:Button name="descend-btn" text="#ui.room.descend-btn" class="cd-cmd cd-hidden" />
         </ui:VisualElement>
 
         <!-- Enemies present: start or flee -->
@@ -29,20 +29,20 @@
             <!-- Who is in the room, above the choice it asks for (2026-09-30): bestiary names, "???"
                  for an enemy never met, no stats. -->
             <ui:Label name="fight-foes" text="" class="cd-bar__foes" picking-mode="Ignore" />
-            <ui:Button name="fight-btn" text="Fight" class="cd-cmd" />
-            <ui:Button name="flee-btn" text="Flee" class="cd-cmd" />
+            <ui:Button name="fight-btn" text="#ui.room.fight-btn" class="cd-cmd" />
+            <ui:Button name="flee-btn" text="#ui.room.flee-btn" class="cd-cmd" />
         </ui:VisualElement>
 
         <!-- Boss encounter banner (top-center): announces the climax fight while the player
              decides to engage; hidden once combat starts. -->
         <ui:VisualElement name="boss-banner" class="cd-boss-banner cd-hidden" picking-mode="Ignore">
-            <ui:Label name="boss-banner-sub" text="BOSS" class="cd-boss-banner__sub" />
+            <ui:Label name="boss-banner-sub" text="#ui.room.boss-banner-sub" class="cd-boss-banner__sub" />
             <ui:Label name="boss-banner-name" text="" class="cd-boss-banner__name" />
         </ui:VisualElement>
 
         <!-- Summon banner (top-center): names the summon while it appears on the stage. -->
         <ui:VisualElement name="summon-banner" class="cd-summon-banner cd-hidden" picking-mode="Ignore">
-            <ui:Label name="summon-banner-sub" text="SUMMON" class="cd-summon-banner__sub" />
+            <ui:Label name="summon-banner-sub" text="#ui.room.summon-banner-sub" class="cd-summon-banner__sub" />
             <ui:Label name="summon-banner-name" text="" class="cd-summon-banner__name" />
         </ui:VisualElement>
 
@@ -59,7 +59,7 @@
 
         <!-- Party status window (FF-style, bottom-right): hero names + HP -->
         <ui:VisualElement name="party-status" class="cd-party-status cd-dock-bottom-right cd-hidden">
-            <ui:Label name="party-status-title" text="Party" class="cd-party-status__header" />
+            <ui:Label name="party-status-title" text="#ui.room.party-status-title" class="cd-party-status__header" />
             <ui:VisualElement name="party-status-rows" class="cd-party-status__rows" />
         </ui:VisualElement>
 
@@ -84,7 +84,7 @@
             <!-- The fit variant keeps this list content-sized: a flex-grow list inside a window
                  that does not clip spills over the Back button below and eats its clicks. -->
             <ui:ScrollView name="event-options" class="cd-list cd-list--fit" mode="Vertical" />
-            <ui:Button name="event-back" text="Back" class="cd-button cd-button--narrow" />
+            <ui:Button name="event-back" text="#ui.common.back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- Detail / result / death dialog -->
@@ -95,15 +95,15 @@
             <!-- Loot as rows (icon, rarity-coloured name, count) rather than sentences. -->
             <ui:VisualElement name="detail-rows" class="cd-detail-rows cd-hidden" />
             <ui:VisualElement name="detail-buttons" class="cd-detail-buttons">
-                <ui:Button name="detail-ok" text="Ok" class="cd-button cd-button--wide" />
-                <ui:Button name="detail-cancel" text="Cancel" class="cd-button cd-button--wide cd-hidden" />
+                <ui:Button name="detail-ok" text="#ui.room.detail-ok" class="cd-button cd-button--wide" />
+                <ui:Button name="detail-cancel" text="#ui.room.detail-cancel" class="cd-button cd-button--wide cd-hidden" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Level cleared: everything the floor banked, before the hub loads. The body is filled by
              RoomActionUI.ShowLevelCleared; it scrolls because a long floor can drop a lot. -->
         <ui:VisualElement name="level-clear-window" class="cd-victory cd-level-clear cd-dock-center cd-hidden">
-            <ui:Label name="level-clear-title" text="Level Cleared!" class="cd-victory__title" />
+            <ui:Label name="level-clear-title" text="#ui.room.level-clear-title" class="cd-victory__title" />
             <ui:Label name="level-clear-subtitle" text="" class="cd-level-clear__subtitle" />
             <!-- Who joined, the three totals as tiles, each hero's XP with a portrait, then what was
                  found as an icon grid (2026-10-22 redesign: the single list buried XP and newcomers
@@ -111,25 +111,25 @@
             <ui:ScrollView name="level-clear-body" class="cd-victory__rewards cd-level-clear__body" mode="Vertical">
                 <ui:VisualElement name="level-clear-joined" class="cd-lc-joined" />
                 <ui:VisualElement name="level-clear-tallies" class="cd-lc-tallies" />
-                <ui:Label name="level-clear-xp-heading" text="Experience" class="cd-lc-heading" />
+                <ui:Label name="level-clear-xp-heading" text="#ui.room.level-clear-xp-heading" class="cd-lc-heading" />
                 <ui:VisualElement name="level-clear-xp" class="cd-lc-heroes" />
-                <ui:Label name="level-clear-loot-heading" text="Found on this floor" class="cd-lc-heading" />
+                <ui:Label name="level-clear-loot-heading" text="#ui.room.level-clear-loot-heading" class="cd-lc-heading" />
                 <ui:VisualElement name="level-clear-loot" class="cd-lc-loot" />
             </ui:ScrollView>
             <ui:Label name="level-clear-next" text="" class="cd-level-clear__next" />
             <!-- Continue goes straight down to the run's next level; hidden on the last level and
                  while the tutorial runs. Left/Right pick, Enter confirms (RoomActionUI). -->
             <ui:VisualElement class="cd-button-row cd-level-clear__choices">
-                <ui:Button name="level-clear-continue" text="Back to Town" class="cd-button" />
-                <ui:Button name="level-clear-next-level" text="Continue" class="cd-button" />
+                <ui:Button name="level-clear-continue" text="#ui.room.level-clear-continue" class="cd-button" />
+                <ui:Button name="level-clear-next-level" text="#ui.common.continue" class="cd-button" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Victory summary (shown over the battle stage) -->
         <ui:VisualElement name="victory-window" class="cd-victory cd-dock-center cd-hidden">
-            <ui:Label name="victory-title" text="Victory!" class="cd-victory__title" />
+            <ui:Label name="victory-title" text="#ui.room.victory-title" class="cd-victory__title" />
             <ui:ScrollView name="victory-rewards" class="cd-victory__rewards cd-victory__scroll" mode="Vertical" />
-            <ui:Button name="victory-continue" text="Continue" class="cd-button cd-button--narrow" />
+            <ui:Button name="victory-continue" text="#ui.common.continue" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- The floor map. Its own window rather than a panel inside the pause overlay: a map is
@@ -140,7 +140,7 @@
              one glyph per room) exactly the way the hub hosts the sphere grid. The legend is
              static markup, and its glyphs are the ones DungeonMapOps.GlyphFor returns. -->
         <ui:VisualElement name="map-window" class="cd-window cd-window--map cd-window--flush cd-dock-center cd-hidden">
-            <ui:Label name="map-title" text="Map" class="cd-title" />
+            <ui:Label name="map-title" text="#ui.room.map-title" class="cd-title" />
             <ui:VisualElement name="map-canvas" class="dm-host" />
             <ui:Label name="map-status" text="" class="cd-info-label" />
             <!-- The key, glyphs at 20px (the 15px room-box size is for the boxes, not the key), and the
@@ -149,39 +149,39 @@
             <ui:VisualElement class="dm-legend">
                 <ui:VisualElement class="dm-legend__item">
                     <ui:VisualElement class="dm-legend__swatch dm-legend__swatch--here" />
-                    <ui:Label text="you are here" class="dm-legend__text" />
+                    <ui:Label text="#ui.room.you-are-here" class="dm-legend__text" />
                 </ui:VisualElement>
                 <ui:VisualElement class="dm-legend__item">
                     <ui:VisualElement class="dm-legend__swatch dm-legend__swatch--unentered" />
-                    <ui:Label text="not entered" class="dm-legend__text" />
+                    <ui:Label text="#ui.room.not-entered" class="dm-legend__text" />
                 </ui:VisualElement>
                 <ui:VisualElement class="dm-legend__item">
                     <ui:Label text="✖" class="dm-legend__glyph dm-glyph--enemies" />
-                    <ui:Label text="enemies" class="dm-legend__text" />
+                    <ui:Label text="#ui.room.enemies" class="dm-legend__text" />
                 </ui:VisualElement>
                 <ui:VisualElement class="dm-legend__item">
                     <ui:Label text="✦" class="dm-legend__glyph dm-glyph--captive" />
-                    <ui:Label text="captive" class="dm-legend__text" />
+                    <ui:Label text="#ui.room.captive" class="dm-legend__text" />
                 </ui:VisualElement>
                 <ui:VisualElement class="dm-legend__item">
                     <ui:Label text="?" class="dm-legend__glyph dm-glyph--event" />
-                    <ui:Label text="event" class="dm-legend__text" />
+                    <ui:Label text="#ui.room.event" class="dm-legend__text" />
                 </ui:VisualElement>
                 <ui:VisualElement class="dm-legend__item">
                     <ui:Label text="◆" class="dm-legend__glyph dm-glyph--cache" />
-                    <ui:Label text="cache" class="dm-legend__text" />
+                    <ui:Label text="#ui.room.cache" class="dm-legend__text" />
                 </ui:VisualElement>
                 <ui:VisualElement class="dm-legend__item">
                     <ui:Label text="✚" class="dm-legend__glyph dm-glyph--refuge" />
-                    <ui:Label text="refuge" class="dm-legend__text" />
+                    <ui:Label text="#ui.room.refuge" class="dm-legend__text" />
                 </ui:VisualElement>
                 <ui:VisualElement class="dm-legend__item">
                     <ui:Label text="▼" class="dm-legend__glyph dm-glyph--exit" />
-                    <ui:Label text="exit" class="dm-legend__text" />
+                    <ui:Label text="#ui.room.exit" class="dm-legend__text" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="map-hint" text="Arrows pick a room &#183; Enter travel &#183; Esc back" class="cd-info-label cd-hint" />
-            <ui:Button name="map-back" text="Back" class="cd-button cd-button--wide" />
+            <ui:Label name="map-hint" text="#ui.room.map-hint" class="cd-info-label cd-hint" />
+            <ui:Button name="map-back" text="#ui.common.back" class="cd-button cd-button--wide" />
         </ui:VisualElement>
 
         <!-- Pause overlay. Last in the document so it paints over everything else, and the only
@@ -192,18 +192,18 @@
              AudioOptionsUI is a plain view-controller that queries its root by name - so the dungeon
              gets the hub's dials with no second implementation to drift. -->
         <ui:VisualElement name="pause-window" class="cd-window cd-window--flush cd-dock-center cd-hidden">
-            <ui:Label text="Paused" class="cd-title" />
+            <ui:Label text="#ui.room.paused" class="cd-title" />
 
             <!-- Resume first - the default cursor and the common case - then Map, the audio dials
                  under their own heading, and Leave last (it is already two-press). 2026-09-30. -->
-            <ui:Button name="pause-resume" text="Resume" class="cd-button cd-button--wide" />
-            <ui:Button name="pause-map" text="Map" class="cd-button cd-button--wide" />
-            <ui:Label text="Audio" class="cd-section-head" />
+            <ui:Button name="pause-resume" text="#ui.room.pause-resume" class="cd-button cd-button--wide" />
+            <ui:Button name="pause-map" text="#ui.room.pause-map" class="cd-button cd-button--wide" />
+            <ui:Label text="#ui.room.audio" class="cd-section-head" />
             <!-- Each dial: a fixed label column, the nudge buttons either side of a 10-segment bar (one
                  segment per AudioOptions.Step, lit by AudioOptionsUI), the percentage after. Mute is a
                  row like the dials, so it no longer outweighs them. 2026-09-30. -->
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Master" class="cd-option-label" />
+                <ui:Label text="#ui.room.master" class="cd-option-label" />
                 <ui:Button name="master-down" text="-" class="cd-button cd-button--step" />
                 <ui:VisualElement name="master-bar" class="cd-option-bar" picking-mode="Ignore">
                     <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
@@ -221,7 +221,7 @@
                 <ui:Label name="master-value" text="" class="cd-option-value" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Music" class="cd-option-label" />
+                <ui:Label text="#ui.room.music" class="cd-option-label" />
                 <ui:Button name="music-down" text="-" class="cd-button cd-button--step" />
                 <ui:VisualElement name="music-bar" class="cd-option-bar" picking-mode="Ignore">
                     <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
@@ -239,7 +239,7 @@
                 <ui:Label name="music-value" text="" class="cd-option-value" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Sound Effects" class="cd-option-label" />
+                <ui:Label text="#ui.room.sound-effects" class="cd-option-label" />
                 <ui:Button name="sfx-down" text="-" class="cd-button cd-button--step" />
                 <ui:VisualElement name="sfx-bar" class="cd-option-bar" picking-mode="Ignore">
                     <ui:VisualElement class="cd-option-seg" picking-mode="Ignore" />
@@ -257,22 +257,22 @@
                 <ui:Label name="sfx-value" text="" class="cd-option-value" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Mute" class="cd-option-label" />
+                <ui:Label text="#ui.room.mute" class="cd-option-label" />
                 <ui:Button name="options-mute" text="" class="cd-button cd-option-toggle" />
             </ui:VisualElement>
 
             <!-- Combat speed (playtest 3 finding 21): x1, x2, x3 while a fight runs. Same toggle as Mute. -->
             <ui:VisualElement class="cd-option-row">
-                <ui:Label text="Combat speed" class="cd-option-label" />
+                <ui:Label text="#ui.room.combat-speed" class="cd-option-label" />
                 <ui:Button name="options-speed" text="" class="cd-button cd-option-toggle" />
             </ui:VisualElement>
 
-            <ui:Button name="pause-quit" text="Leave the Dungeon" class="cd-button cd-button--wide" />
+            <ui:Button name="pause-quit" text="#ui.room.pause-quit" class="cd-button cd-button--wide" />
             <ui:Label name="pause-note" text="" class="cd-info-label cd-hint" />
         </ui:VisualElement>
 
         <!-- Keyboard hint. Shown only while the arrows actually mean "pick a door". -->
-        <ui:Label name="nav-hint" text="Arrows pick a door &#183; Enter walk through &#183; Tab room actions" class="cd-nav-hint cd-hidden" picking-mode="Ignore" />
+        <ui:Label name="nav-hint" text="#ui.room.nav-hint" class="cd-nav-hint cd-hidden" picking-mode="Ignore" />
 
     </ui:VisualElement>
 </ui:UXML>

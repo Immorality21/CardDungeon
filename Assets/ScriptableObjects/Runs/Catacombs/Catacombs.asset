@@ -13,16 +13,13 @@ MonoBehaviour:
   m_Name: Catacombs
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
   Key: Catacombs
-  DisplayName: The Catacombs
-  Blurb: Below the Archive the dead were stacked, not buried. Somebody has taught
-    them to stand back up.
   SequenceIndex: 2
   Repeatable: 1
   Challenge: 0
   JoinsOnClear: {fileID: 0}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: 00f9fe30cc078384e9ed27da42d1178d, type: 2}
-    LevelName: The Ossuary Stair
+    LevelNameKey: run.catacombs.level-1.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -36,13 +33,14 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: 6c8584fe41cba744eb2cf4dc5ccd72ae, type: 2}
-    LevelName: The Bone Galleries
+    LevelNameKey: run.catacombs.level-2.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 3.0
+      Difficulty: 3
       StatScales:
       - Stat: 3
         Multiplier: 2
@@ -51,8 +49,9 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: ba2d10b4551609d4ebd27338b9f4e8e9, type: 2}
-    LevelName: The Lich's Sepulchre
+    LevelNameKey: run.catacombs.level-3.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: e29639bd2a1665e4191672c385617952, type: 2}
     BossAdds:
@@ -79,3 +78,4 @@ MonoBehaviour:
         GoldReward: 0
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0

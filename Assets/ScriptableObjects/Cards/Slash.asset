@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: Slash
   m_EditorClassIdentifier: 
   Key: Slash
-  DisplayName: Slash
-  Description: A swift blade strike against a single enemy.
   Icon: {fileID: -7438242413743671978, guid: f9b9570a47bee3541b17abf0c1f0c6c7, type: 3}
   Delivery: 1
+  ProjectileArtAngle: 0
   TargetType: 0
   Rarity: 0
   Effects:
@@ -28,6 +27,12 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 1
     PowerMode: 0
@@ -37,8 +42,15 @@ MonoBehaviour:
     Duration: 3
     UnlockLevel: 0
     ApplyChance: 60
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 06000000
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 1
+  EnemyOnly: 0
+  RandomHits: 0

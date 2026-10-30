@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: Phoenix
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Phoenix
-  DisplayName: Phoenix
-  Description: A bird of white fire passes over the line. The fallen rise in its
-    wake, and the standing breathe easier.
   Sprite: {fileID: 21300000, guid: ad5fa80fa9394a8aac55cc9886eeb5aa, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: d27c1fb88d394678b85b2b33e546acba, type: 3}
@@ -44,6 +41,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 1
     Power: 20
     PowerMode: 2
@@ -55,7 +55,14 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
   SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
@@ -71,8 +78,10 @@ MonoBehaviour:
   Signature: {fileID: 0}
   AttackAbility: {fileID: 0}
   UsesTags: 0
+  PartingAbility: {fileID: 0}
   MountedFrames: []
   RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Rooms.Events
 {
@@ -24,14 +25,26 @@ namespace Assets.Scripts.Rooms.Events
         [Tooltip("Stable id, written into the dungeon save so a consumed event stays consumed. " +
                  "Falls back to the asset name when blank, so renaming the asset is the only thing " +
                  "that can break an existing save.")]
+        [TextKeys("event", "title", "prompt")]
         public string Key;
 
-        [Tooltip("Window title, and the label of the entry added to the room's option list.")]
-        public string Title;
+        [System.NonSerialized] private string _title;
 
-        [TextArea]
-        [Tooltip("The fiction. Set the scene and imply the risk; the odds line states it.")]
-        public string Prompt;
+        /// <summary>From the text table (<c>event.{key}.title</c>). Set only on instances built in code.</summary>
+        public string Title
+        {
+            get { return _title ?? Loc.AssetText("event", Key, this, "title"); }
+            set { _title = value; }
+        }
+
+        [System.NonSerialized] private string _prompt;
+
+        /// <summary>From the text table (<c>event.{key}.prompt</c>). Set only on instances built in code.</summary>
+        public string Prompt
+        {
+            get { return _prompt ?? Loc.AssetText("event", Key, this, "prompt"); }
+            set { _prompt = value; }
+        }
 
         [Tooltip("The stat every StatCheck option on this event is resolved against.")]
         public StatType GoverningStat = StatType.Luck;

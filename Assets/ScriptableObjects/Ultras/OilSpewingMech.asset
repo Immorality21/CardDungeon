@@ -13,12 +13,11 @@ MonoBehaviour:
   m_Name: OilSpewingMech
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: OilSpewingMech
-  DisplayName: Oil Spewing Mech
-  Description: She bolts together an oil-spewing walker and climbs on. Everything
-    it hits is oiled - and oil burns.
   Kind: 3
   TargetType: 1
   Effects: []
+  Hits: 1
+  RandomTargets: 0
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 11400000, guid: a8976be192341e54eb229899134e6d70, type: 2}

@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: FinishingBlow
   m_EditorClassIdentifier: 
   Key: FinishingBlow
-  DisplayName: Finishing Blow
-  Description: He has been waiting for it to stumble.
   Icon: {fileID: 21300000, guid: 06ab476b97e741d4b1713323f6a5deec, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
@@ -33,6 +31,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 11
     Power: 25
@@ -46,6 +45,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 06000000
   TagDuration: 3

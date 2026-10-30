@@ -13,20 +13,21 @@ MonoBehaviour:
   m_Name: SealedTomb
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
   Key: SealedTomb
-  Title: 'A Sealed Tomb'
-  Prompt: 'A slab of stone has been dragged over a hole in the cavern floor and mortared down at the edges. Somebody wanted this shut. The mortar is old, and the slab has a lip you could get your hands under.'
   GoverningStat: 1
   SpawnChancePercent: 10
   SpawnModifierStat: 1
   SpawnModifierRate: 5
+  SpawnRequirements: []
   Difficulty: 10
   Options:
-  - Label: 'Heave the slab aside'
+  - LabelKey: event.sealed-tomb.option-1.label
     Kind: 0
-    DeclineText: ''
+    DeclineTextKey: 
     Success:
-    - Text: 'The mortar goes with a crack and the slab slides. Below: a body in good armour that has not needed it for a century.'
+    - TextKey: event.sealed-tomb.option-1.success-1.text
       Weight: 3
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects: []
       Targets: 0
       LootTable:
@@ -35,33 +36,53 @@ MonoBehaviour:
       Gold: 15
       LoseAConsumable: 0
       AwakenedEnemies: []
-    - Text: 'It shifts far enough. You come up with a sword and a badly wrenched shoulder.'
+      JoinsHero: {fileID: 0}
+    - TextKey: event.sealed-tomb.option-1.success-2.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects:
       - EffectType: 0
         Power: 3
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 0
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       Targets: 0
       LootTable:
       - {fileID: 11400000, guid: 098bb76c9957858418ab9ec1d033fcd7, type: 2}
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
     Failure:
-    - Text: 'The slab comes back on your fingers and the whole cavern hears about it. Whatever was sealed in was not the only thing down here.'
+    - TextKey: event.sealed-tomb.option-1.failure-1.text
       Weight: 2
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects:
       - EffectType: 0
         Power: 3
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 0
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       Targets: 0
       LootTable: []
       Gold: 0
@@ -69,23 +90,34 @@ MonoBehaviour:
       AwakenedEnemies:
       - {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
       - {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
-    - Text: 'It will not move. You leave skin on the stone for nothing.'
+      JoinsHero: {fileID: 0}
+    - TextKey: event.sealed-tomb.option-1.failure-2.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects:
       - EffectType: 0
         Power: 4
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 0
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       Targets: 0
       LootTable: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
-  - Label: 'Leave the dead sealed'
+      JoinsHero: {fileID: 0}
+  - LabelKey: event.sealed-tomb.option-2.label
     Kind: 2
-    DeclineText: 'Somebody mortared this down for a reason. You leave the reason where it is.'
+    DeclineTextKey: event.sealed-tomb.option-2.decline
     Success: []
     Failure: []

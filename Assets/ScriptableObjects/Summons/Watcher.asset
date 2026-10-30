@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Watcher
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Watcher
-  DisplayName: The Watcher
-  Description: Something from below the deep comes up to look. What it sees, it unmakes.
   Sprite: {fileID: 21300000, guid: 22188571530747c2a09e95faa0b4bf88, type: 3}
   AnimationFrames:
   - {fileID: -1000820272250432191, guid: 5b3263f276bc4aa09db947eccc8621bd, type: 3}
@@ -27,8 +25,17 @@ MonoBehaviour:
   Kind: 2
   TargetType: 0
   Effects: []
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames: []
   BaseCharges: 1
   StatPercents:
     Values:
@@ -51,6 +58,11 @@ MonoBehaviour:
   Actions: []
   Signature: {fileID: 11400000, guid: d9cbaeacbfd5c9e4d8b1290b2f2f1b35, type: 2}
   AttackAbility: {fileID: 11400000, guid: a0a3d1a1dc5aab142be99e3a6c37fddb, type: 2}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
+  RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

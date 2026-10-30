@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: ArchonHallowing
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: ArchonHallowing
-  DisplayName: Hallowing
-  Description: The Archon opens its hands and the room fills with light. The dead
-    do not survive it well.
   Icon: {fileID: 21300000, guid: f0666507edd94321ace775ee16e40113, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
@@ -33,9 +30,13 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 4
     BonusPercent: 100
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

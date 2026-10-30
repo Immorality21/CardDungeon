@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: FlushingShot
   m_EditorClassIdentifier: 
   Key: FlushingShot
-  DisplayName: Flushing Shot
-  Description: An arrow that drives its quarry out of cover and off its stride.
   Icon: {fileID: 21300000, guid: 6b29457d0bf046b3b626b95398bb97f5, type: 3}
   Delivery: 0
   ProjectileArtAngle: 45
@@ -33,6 +31,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 100
     BonusVsStatus: 25
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 5
     Power: 30
@@ -46,6 +45,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 06000000
   TagDuration: 3

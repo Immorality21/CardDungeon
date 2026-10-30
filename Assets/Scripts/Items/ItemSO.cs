@@ -1,13 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Items
 {
     [CreateAssetMenu(menuName = "SO/Item")]
     public class ItemSO : ScriptableObject
     {
+        [TextKeys("item", "name", "description")]
         public string Key;
-        public string DisplayName;
+        [System.NonSerialized] private string _displayName;
+
+        /// <summary>From the text table (<c>item.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("item", Key, this, "name"); }
+            set { _displayName = value; }
+        }
         public Sprite Icon;
         public ItemRarity Rarity;
         public int ItemLevel = 1;
@@ -19,10 +28,14 @@ namespace Assets.Scripts.Items
                  "out most of the time (playtest 2026-10-19). Drop tables with an explicit Chance ignore it.")]
         public float FindChanceScale = 1f;
 
-        [TextArea(2, 4)]
-        [Tooltip("One line of flavour, shown where the item is looked at rather than used - the hub " +
-                 "Materials tab today. Optional; blank simply shows nothing.")]
-        public string Description;
+        [System.NonSerialized] private string _description;
+
+        /// <summary>From the text table (<c>item.{key}.description</c>). Set only on instances built in code.</summary>
+        public string Description
+        {
+            get { return _description ?? Loc.AssetText("item", Key, this, "description"); }
+            set { _description = value; }
+        }
 
         [Header("Category")]
         public ItemCategory Category = ItemCategory.Equipment;

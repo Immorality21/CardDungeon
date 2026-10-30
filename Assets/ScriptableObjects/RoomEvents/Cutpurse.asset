@@ -13,11 +13,6 @@ MonoBehaviour:
   m_Name: Cutpurse
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
   Key: Cutpurse
-  Title: A Cutpurse on the Rope
-  Prompt: 'Every lock in these tunnels was picked before you reached it. Now you
-    know by whom: someone hangs from a frayed rope over the counting-pit, one hand
-    on the line and the other still holding a purse that is not theirs. ''Evening,''
-    they say. ''I don''t suppose you''d pull?'''
   GoverningStat: 3
   SpawnChancePercent: 40
   SpawnModifierStat: 6
@@ -25,13 +20,11 @@ MonoBehaviour:
   SpawnRequirements: []
   Difficulty: 20
   Options:
-  - Label: Catch the rope
+  - LabelKey: event.cutpurse.option-1.label
     Kind: 0
-    DeclineText: 
+    DeclineTextKey: 
     Success:
-    - Text: You get a hand on the line as it parts and haul them over the lip. They
-        look at you, then at the tunnel, then hand the purse back. 'Fine. You'll
-        want someone who can open things.'
+    - TextKey: event.cutpurse.option-1.success-1.text
       Weight: 1
       WeightModifierStat: 0
       WeightModifierRate: 0
@@ -43,8 +36,7 @@ MonoBehaviour:
       AwakenedEnemies: []
       JoinsHero: {fileID: 11400000, guid: 09b6a3424e4546719cda1391729e96cc, type: 2}
     Failure:
-    - Text: The rope goes. So does the cutpurse - not down, but sideways into a crawlway
-        you never saw, and a little heavier than before.
+    - TextKey: event.cutpurse.option-1.failure-1.text
       Weight: 1
       WeightModifierStat: 0
       WeightModifierRate: 0
@@ -55,8 +47,8 @@ MonoBehaviour:
       LoseAConsumable: 1
       AwakenedEnemies: []
       JoinsHero: {fileID: 0}
-  - Label: Leave them hanging
+  - LabelKey: event.cutpurse.option-2.label
     Kind: 2
-    DeclineText: '''Suit yourselves,'' they call after you. ''I''ll be around.'''
+    DeclineTextKey: event.cutpurse.option-2.decline
     Success: []
     Failure: []

@@ -13,16 +13,20 @@ MonoBehaviour:
   m_Name: FreezeCombo
   m_EditorClassIdentifier: 
   Key: Freeze-2e3d4c5b
-  ComboName: Freeze
-  Description: Ice and water combine to freeze the enemy solid.
   Icon: {fileID: 21300000, guid: b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7, type: 3}
-  RequiredTags:
-  - 1
-  - 7
+  RequiredTags: 0100000007000000
   BonusEffects:
   - EffectType: 3
     Power: 0
+    PowerMode: 0
+    ScalingStat: 0
     DamageType: 0
     BuffType: 12
     Duration: 2
+    UnlockLevel: 0
     ApplyChance: 50
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0

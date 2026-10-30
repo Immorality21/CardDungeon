@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: SacredShield
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: SacredShield
-  DisplayName: Sacred Shield
-  Description: A ward of light that takes the next blows in an ally's place.
   Icon: {fileID: 21300000, guid: 28a3daf7d9134cdfbb7e3a15028d9910, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -32,9 +30,13 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 20
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

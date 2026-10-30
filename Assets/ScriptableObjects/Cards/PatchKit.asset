@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: PatchKit
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: PatchKit
-  DisplayName: Patch Kit
-  Description: Rivets, brass plates and a dab of grease. Not medicine, exactly, but
-    it holds.
   Icon: {fileID: 21300000, guid: 8295437a41484f9a933ace8f7aab190a, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -30,7 +27,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

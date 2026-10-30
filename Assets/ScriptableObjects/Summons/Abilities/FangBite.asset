@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: FangBite
   m_EditorClassIdentifier: 
   Key: FangBite
-  DisplayName: Bite
-  Description: It goes for the one he marked.
   Icon: {fileID: 21300000, guid: f5291106890f4c64957955f429a1bee4, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
@@ -33,6 +31,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 50
     BonusVsStatus: 25
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 3
     Power: 2
@@ -46,6 +45,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 06000000
   TagDuration: 3

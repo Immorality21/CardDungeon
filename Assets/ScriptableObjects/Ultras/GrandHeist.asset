@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: GrandHeist
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: GrandHeist
-  DisplayName: Grand Heist
-  Description: Every pocket in the room, in one pass.
   Kind: 1
   TargetType: 1
   Effects:

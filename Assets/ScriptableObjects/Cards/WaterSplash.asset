@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WaterSplash
   m_EditorClassIdentifier: 
   Key: WaterSplash
-  DisplayName: Water Splash
-  Description: A torrent of water crashes into all enemies.
   Icon: {fileID: -2526447242650933920, guid: 5be6efdf3e9b7ee45bcf2b70f5f77488, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 1
   Rarity: 0
   Effects:
@@ -27,5 +27,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 07000000
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

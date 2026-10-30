@@ -16,7 +16,7 @@ MonoBehaviour:
   Archetype: 4
   Actions:
   - Label: Cast from Draw list
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 5
     Priority: 20
     Weight: 1
@@ -26,10 +26,14 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions: []
   - Label: Spill the hoard
-    DisplayName: Spill the Hoard
+    DisplayNameKey: move.spill-the-hoard.name
     Kind: 8
     Priority: 15
     Weight: 1
@@ -39,16 +43,17 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
-    Magic: {fileID: 0}
+    ApplyChance: 100
     Summons: {fileID: 11400000, guid: 2ad323473fd341edb4cff1ccae486514, type: 2}
     SummonCount: 2
     MaxUses: 1
-    Conditions: 
+    Magic: {fileID: 0}
+    Conditions:
     - Kind: 1
       Value: 0.6
       Stat: 1
   - Label: Signature
-    DisplayName: Coin Storm
+    DisplayNameKey: move.coin-storm.name
     Kind: 2
     Priority: 10
     Weight: 1
@@ -58,6 +63,10 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 5
@@ -70,7 +79,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Signature (enraged)
-    DisplayName: Coin Storm
+    DisplayNameKey: move.coin-storm.name
     Kind: 2
     Priority: 10
     Weight: 1
@@ -80,6 +89,10 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 5
@@ -92,7 +105,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Enraged blow
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -102,13 +115,17 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 1
       Value: 0.3
       Stat: 1
   - Label: Blow
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -118,6 +135,10 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 2

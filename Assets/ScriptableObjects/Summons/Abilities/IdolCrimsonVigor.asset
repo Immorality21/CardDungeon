@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: IdolCrimsonVigor
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: IdolCrimsonVigor
-  DisplayName: Crimson Vigor
-  Description: The idol drinks, and the party grows strong on it.
   Icon: {fileID: 21300000, guid: 9a69b16b5af742e5ba9b7c09c2c9f34f, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 4
   Rarity: 0
   Effects:
@@ -27,7 +27,16 @@ MonoBehaviour:
     BuffType: 1
     Duration: 2
     UnlockLevel: 0
-  Tags:
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 8
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

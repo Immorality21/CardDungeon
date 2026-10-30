@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Dungeon
 {
@@ -48,14 +49,26 @@ namespace Assets.Scripts.Dungeon
     public class RunModifier
     {
         [Tooltip("Save identity, written into Run.json. Write-once once a build reaches a player.")]
+        [TextKeys("modifier", "name", "description")]
         public string Key;
 
-        public string DisplayName;
+        [System.NonSerialized] private string _displayName;
 
-        [TextArea(1, 3)]
-        [Tooltip("What one rank does, in the player's words. {0} is replaced by the rank's total " +
-                 "amount, so \"Enemies have +{0}% health\" reads +25% at rank 1 and +50% at rank 2.")]
-        public string Description;
+        /// <summary>From the text table (<c>modifier.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("modifier", Key, null, "name"); }
+            set { _displayName = value; }
+        }
+
+        [System.NonSerialized] private string _description;
+
+        /// <summary>From the text table (<c>modifier.{key}.description</c>). Set only on instances built in code.</summary>
+        public string Description
+        {
+            get { return _description ?? Loc.AssetText("modifier", Key, null, "description"); }
+            set { _description = value; }
+        }
 
         [Min(1)] public int MaxRank = 1;
 

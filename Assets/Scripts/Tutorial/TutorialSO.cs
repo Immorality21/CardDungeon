@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Items;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Tutorial
 {
@@ -10,10 +11,17 @@ namespace Assets.Scripts.Tutorial
     [Serializable]
     public class TutorialLine
     {
+        [TextKeys("tutorial", "text")]
         public TutorialCue Cue;
 
-        [TextArea(2, 4)]
-        public string Text;
+        [System.NonSerialized] private string _text;
+
+        /// <summary>From the text table (<c>tutorial.{cue}.text</c>). Set only on instances built in code.</summary>
+        public string Text
+        {
+            get { return _text ?? Loc.GetOrEmpty(Loc.KeyFor("tutorial", Cue.ToString(), "text")); }
+            set { _text = value; }
+        }
     }
 
     /// <summary>

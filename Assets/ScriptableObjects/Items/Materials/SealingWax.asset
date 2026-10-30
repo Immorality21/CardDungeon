@@ -13,17 +13,27 @@ MonoBehaviour:
   m_Name: SealingWax
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: SealingWax
-  DisplayName: Sealing Wax
   Icon: {fileID: 21300000, guid: 3a66520656624447994ca3957c53d418, type: 3}
   Rarity: 2
   ItemLevel: 1
-  Description: 'Red wax from the Archive''s sealed shelves, still bearing a seal no one alive can read. Only found when the Archive is braved again.'
+  FindChanceScale: 1
   Category: 2
   SlotType: 0
   Bonuses: []
   Resistances: []
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
   MaxStack: 999
   RevisitFear: 1
   RevisitRun: the Sealed Archive

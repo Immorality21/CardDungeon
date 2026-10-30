@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: SteamAutomaton
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: SteamAutomaton
-  DisplayName: Steam Automaton
   Sprite: {fileID: 21300000, guid: 792c3b450b0d4ac8b93bc863e29a1e81, type: 3}
   AnimationFrames:
   - {fileID: 1055341637942373122, guid: e6966f954b5d4233b8913c6796639de1, type: 3}

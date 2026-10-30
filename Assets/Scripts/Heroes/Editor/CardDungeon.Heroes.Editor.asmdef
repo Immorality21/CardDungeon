@@ -2,7 +2,8 @@
     "name": "CardDungeon.Heroes.Editor",
     "rootNamespace": "",
     "references": [
-        "CardDungeon"
+        "CardDungeon",
+        "CardDungeon.ImmoralityGaming.Editor"
     ],
     "includePlatforms": [
         "Editor"

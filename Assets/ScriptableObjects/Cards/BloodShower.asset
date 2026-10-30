@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: BloodShower
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: BloodShower
-  DisplayName: Blood Shower
-  Description: He opens his veins over the whole room, and it falls on them like rain.
   Icon: {fileID: 21300000, guid: 680f66fbdfa14d63bff756dd46a27380, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
@@ -32,6 +30,8 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 4
     Power: 12
@@ -44,6 +44,8 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 0800000009000000
   TagDuration: 3
@@ -51,3 +53,4 @@ MonoBehaviour:
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

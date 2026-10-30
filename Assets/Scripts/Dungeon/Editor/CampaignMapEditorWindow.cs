@@ -636,7 +636,7 @@ namespace Assets.Scripts.Dungeon.Editor
             var run = CreateInstance<RunDefinitionSO>();
             string name = System.IO.Path.GetFileNameWithoutExtension(path);
             run.Key = name;
-            run.DisplayName = ObjectNames.NicifyVariableName(name);
+            global::ImmoralityGaming.Localization.Loc.EditorSet(global::ImmoralityGaming.Localization.Loc.KeyFor("run", name, "name"), ObjectNames.NicifyVariableName(name));
             AssetDatabase.CreateAsset(run, path);
             AssetDatabase.SaveAssets();
 

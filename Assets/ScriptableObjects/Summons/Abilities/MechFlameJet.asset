@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: MechFlameJet
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: MechFlameJet
-  DisplayName: Flame Jet
-  Description: A tongue of fire from the nozzle arm.
   Icon: {fileID: 21300000, guid: b31804def4514b3981deded560b1dec4, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -29,7 +27,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 00000000
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Combat.Triggers
 {
@@ -86,12 +87,31 @@ namespace Assets.Scripts.Combat.Triggers
     [Serializable]
     public class TriggeredEffect
     {
-        [Tooltip("Shown in the combat log when it fires, e.g. \"Soul Hunger\". Empty falls back to the item, enemy or summon's name.")]
-        public string Label;
+        [System.NonSerialized] private string _label;
 
-        [Tooltip("How the item pane words this reaction, e.g. \"When hit: 20% chance to Burn the attacker.\" " +
-                 "Empty shows nothing - write one for every item reaction, the player cannot see it otherwise.")]
-        public string Text;
+        /// <summary>From the text table (<see cref="LabelKey"/>). Set only on instances built in code.</summary>
+        public string Label
+        {
+            get { return _label ?? Loc.GetOrEmpty(LabelKey); }
+            set { _label = value; }
+        }
+
+        [Tooltip("Text table key (Tools > Texts).")]
+        [TextKey]
+        public string LabelKey;
+
+        [System.NonSerialized] private string _text;
+
+        /// <summary>From the text table (<see cref="TextKey"/>). Set only on instances built in code.</summary>
+        public string Text
+        {
+            get { return _text ?? Loc.GetOrEmpty(TextKey); }
+            set { _text = value; }
+        }
+
+        [Tooltip("Text table key (Tools > Texts).")]
+        [TextKey]
+        public string TextKey;
 
         [Tooltip("When it fires, from the bearer's point of view.")]
         public TriggerKind When;

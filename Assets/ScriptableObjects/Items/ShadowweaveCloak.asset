@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: ShadowweaveCloak
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: ShadowweaveCloak
-  DisplayName: Shadowweave Cloak
   Icon: {fileID: 21300000, guid: 8236202a4cf64b2eb85a88461145bb1d, type: 3}
   Rarity: 2
   ItemLevel: 4
-  Description: Cloth that drinks the light. One of four Shadowweave pieces.
+  FindChanceScale: 1
   Category: 0
   SlotType: 3
   Bonuses:
@@ -36,7 +35,16 @@ MonoBehaviour:
   Triggers: []
   Milestones: []
   Set: {fileID: 11400000, guid: 02c053026d7a4537b5a57818bd70861f, type: 2}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
   ConsumablePercent: 0
   MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

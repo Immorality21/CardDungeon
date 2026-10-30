@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: ArrowStorm
   m_EditorClassIdentifier: 
   Key: ArrowStorm
-  DisplayName: Arrow Storm
-  Description: The sky goes dark with shafts, and every one of them draws blood.
   Icon: {fileID: 21300000, guid: 1f5b15c3ee0141788df32aeff230077c, type: 3}
   Delivery: 0
   ProjectileArtAngle: -90
@@ -33,6 +31,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 3
     Power: 2
@@ -46,6 +45,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 06000000
   TagDuration: 3

@@ -13,15 +13,27 @@ MonoBehaviour:
   m_Name: HexSilk
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: HexSilk
-  DisplayName: Hex Silk
   Icon: {fileID: 21300000, guid: 4afc1db642a84b62ae2d7e5d1c476f50, type: 3}
   Rarity: 1
   ItemLevel: 2
-  Description: 'Spun on a loom that was not a loom, by something that was not a spider.'
+  FindChanceScale: 1
   Category: 2
   SlotType: 0
   Bonuses: []
   Resistances: []
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
   MaxStack: 999
+  RevisitFear: -1
+  RevisitRun: 

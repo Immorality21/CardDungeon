@@ -13,16 +13,13 @@ MonoBehaviour:
   m_Name: DrownedChapel
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
   Key: DrownedChapel
-  DisplayName: The Drowned Chapel
-  Blurb: A chapel went down with the March, bells and all. Pump the nave low enough
-    and the door at the bottom opens again - and someone behind it is still singing.
   SequenceIndex: 4
   Repeatable: 0
   Challenge: 0
   JoinsOnClear: {fileID: 0}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: 24a01969c984b8c469b62445a2bb97e3, type: 2}
-    LevelName: The Flooded Nave
+    LevelNameKey: run.drowned-chapel.level-1.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -38,7 +35,7 @@ MonoBehaviour:
     AllowRoomEvents: 1
     IntendedHard: 1
   - LevelTemplate: {fileID: 11400000, guid: e8db09f0f92a0cc47b675e7d77753a37, type: 2}
-    LevelName: The Drowned Choir
+    LevelNameKey: run.drowned-chapel.level-2.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
     BossAdds:
@@ -63,3 +60,4 @@ MonoBehaviour:
         GoldReward: 0
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0

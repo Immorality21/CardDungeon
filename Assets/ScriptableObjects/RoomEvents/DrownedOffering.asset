@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: DrownedOffering
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
   Key: DrownedOffering
-  Title: 'A Drowned Offering'
-  Prompt: 'Knee-deep in the standing water, a stone bowl still holds its offering: coins, teeth, something folded in oilcloth. The water around it is warmer than the water around your boots.'
   GoverningStat: 5
   SpawnChancePercent: 8
   SpawnModifierStat: 5
@@ -24,27 +22,39 @@ MonoBehaviour:
     Amount: 6
   Difficulty: 10
   Options:
-  - Label: 'Kneel and say the words'
+  - LabelKey: event.drowned-offering.option-1.label
     Kind: 0
-    DeclineText: ''
+    DeclineTextKey: 
     Success:
-    - Text: 'The warmth comes up out of the bowl and goes through all of you. Old wounds close over. Whatever is owed here has been paid before.'
+    - TextKey: event.drowned-offering.option-1.success-1.text
       Weight: 3
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects:
       - EffectType: 1
         Power: 6
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 0
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       Targets: 1
       LootTable: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
-    - Text: 'Nothing answers, but the folded oilcloth is worth having.'
+      JoinsHero: {fileID: 0}
+    - TextKey: event.drowned-offering.option-1.success-2.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects: []
       Targets: 0
       LootTable:
@@ -52,24 +62,37 @@ MonoBehaviour:
       Gold: 10
       LoseAConsumable: 0
       AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
     Failure:
-    - Text: 'You get the words wrong. The water goes cold, the taste of it gets into everyone, and the whole party feels thinner for it.'
+    - TextKey: event.drowned-offering.option-1.failure-1.text
       Weight: 2
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects:
       - EffectType: 3
         Power: 2
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 5
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       Targets: 1
       LootTable: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
-    - Text: 'The bowl tips. Something in the reeds decides it has been insulted.'
+      JoinsHero: {fileID: 0}
+    - TextKey: event.drowned-offering.option-1.failure-2.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects: []
       Targets: 0
       LootTable: []
@@ -77,28 +100,39 @@ MonoBehaviour:
       LoseAConsumable: 0
       AwakenedEnemies:
       - {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
-  - Label: 'Take the coins and go'
+      JoinsHero: {fileID: 0}
+  - LabelKey: event.drowned-offering.option-2.label
     Kind: 1
-    DeclineText: ''
+    DeclineTextKey: 
     Success:
-    - Text: 'You pocket the coins without ceremony. The water stays cold behind you the whole way out.'
+    - TextKey: event.drowned-offering.option-2.success-1.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects:
       - EffectType: 3
         Power: 1
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 5
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       Targets: 1
       LootTable: []
       Gold: 20
       LoseAConsumable: 0
       AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
     Failure: []
-  - Label: 'Leave the bowl alone'
+  - LabelKey: event.drowned-offering.option-3.label
     Kind: 2
-    DeclineText: 'You keep your hands to yourself and wade on past.'
+    DeclineTextKey: event.drowned-offering.option-3.decline
     Success: []
     Failure: []

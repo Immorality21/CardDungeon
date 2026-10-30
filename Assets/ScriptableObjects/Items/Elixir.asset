@@ -13,16 +13,27 @@ MonoBehaviour:
   m_Name: Elixir
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: Elixir
-  DisplayName: Elixir
   Icon: {fileID: 21300000, guid: db00f4f552d84ed48ac356aedf29a8ba, type: 3}
   Rarity: 2
   ItemLevel: 1
-  Description: 'Two brews that should not mix, and do. Closes wounds and steadies the mind at once.'
+  FindChanceScale: 1
   Category: 1
   SlotType: 0
   Bonuses: []
+  Resistances: []
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 3
   ConsumableAmount: 2
   ConsumableCharges: 1
   ConsumablePercent: 0.3
   MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

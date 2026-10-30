@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Rogue
   m_EditorClassIdentifier: 
   Key: Rogue
-  Label: Rogue
-  Blurb: Ends fights early, or is somewhere else by the time they get going.
   Vision:
     Fantasy: 
     Role: 
@@ -55,4 +53,10 @@ MonoBehaviour:
     - Type: 7
       Amount: 21
   AttackStat: 3
+  Momentum:
+    PercentPerStack: 0
+    MaxStacks: 0
+  Focus:
+    PerCast: 0
+    Max: 0
   SphereGrid: {fileID: 11400000, guid: 41402290c75c4e33a9c52a1bd967abc8, type: 2}

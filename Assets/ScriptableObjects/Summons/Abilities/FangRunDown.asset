@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: FangRunDown
   m_EditorClassIdentifier: 
   Key: FangRunDown
-  DisplayName: Run Down
-  Description: It hits the prey at a run and knocks it off its feet.
   Icon: {fileID: 21300000, guid: 6ff2b7adf4b2413d969405da21c7d21d, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
@@ -33,6 +31,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 5
     Power: 40
@@ -46,6 +45,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 06000000
   TagDuration: 3

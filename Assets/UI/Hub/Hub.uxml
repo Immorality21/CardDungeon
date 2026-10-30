@@ -14,21 +14,21 @@
              player out of running (HUB.md section 7, open question 4). -->
         <ui:VisualElement name="hub-view" class="hub-screen cd-hidden">
             <ui:VisualElement name="hub-town" class="hub-town">
-                <ui:Button name="road-btn" text="The Story &#9654;" class="hub-road hub-road--art" />
+                <ui:Button name="road-btn" text="#ui.hub.road-btn" class="hub-road hub-road--art" />
             </ui:VisualElement>
             <!-- The town frame's bottom band, not a strip under it: it closes the frame, and the purse
                  is two chips (the number large, the currency small beneath) like a header's. -->
             <ui:VisualElement class="hub-bar">
-                <ui:Button name="hub-menu-btn" text="Main Menu" class="cd-button cd-button--narrow" />
+                <ui:Button name="hub-menu-btn" text="#ui.hub.hub-menu-btn" class="cd-button cd-button--narrow" />
                 <ui:Label name="hub-feedback" text="" class="cd-feedback" />
                 <ui:VisualElement class="hub-purse">
                     <ui:VisualElement class="hub-purse__chip">
                         <ui:Label name="hub-gold" text="0" class="hub-purse__value" />
-                        <ui:Label text="GOLD" class="hub-purse__label" />
+                        <ui:Label text="#ui.hub.gold" class="hub-purse__label" />
                     </ui:VisualElement>
                     <ui:VisualElement class="hub-purse__chip hub-purse__chip--essence">
                         <ui:Label name="hub-essence" text="0" class="hub-purse__value" />
-                        <ui:Label text="ESSENCE" class="hub-purse__label" />
+                        <ui:Label text="#ui.hub.essence" class="hub-purse__label" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -60,16 +60,16 @@
                 <ui:VisualElement name="lot-art" class="hub-lotpanel__art" />
                 <ui:VisualElement class="hub-lotpanel__info">
                     <ui:Label name="lot-blurb" text="" class="cd-inv-detail__desc" />
-                    <ui:Label name="lot-costs-title" text="Costs" class="cd-inv-col__title" />
+                    <ui:Label name="lot-costs-title" text="#ui.hub.lot-costs-title" class="cd-inv-col__title" />
                     <ui:VisualElement name="lot-costs" class="hub-lotpanel__costs" />
-                    <ui:Label name="lot-grant-title" text="Next level" class="cd-inv-col__title" />
+                    <ui:Label name="lot-grant-title" text="#ui.hub.lot-grant-title" class="cd-inv-col__title" />
                     <ui:Label name="lot-grant" text="" class="cd-inv-detail__line hub-lotpanel__grant" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="hub-lotpanel__actions">
-                <ui:Button name="lot-enter" text="Enter" class="cd-inv-tab cd-camp-action" />
+                <ui:Button name="lot-enter" text="#ui.hub.lot-enter" class="cd-inv-tab cd-camp-action" />
                 <ui:Button name="lot-action" text="" class="cd-inv-tab cd-camp-action" />
-                <ui:Button name="lot-close" text="Back" class="cd-inv-close hub-lotpanel__back" />
+                <ui:Button name="lot-close" text="#ui.common.back" class="cd-inv-close hub-lotpanel__back" />
             </ui:VisualElement>
             <ui:Label name="lot-reason" text="" class="cd-reason hub-lotpanel__reason" />
             <ui:Label name="lot-feedback" text="" class="cd-camp-feedback hub-lotpanel__feedback" />
@@ -88,14 +88,14 @@
                 <ui:Label name="level-name" text="" class="hub-entry__name" />
                 <ui:VisualElement name="level-pips" class="hub-entry__pips" />
                 <ui:Label name="progress-revisit" text="" class="cm-fear-summary cd-hidden" />
-                <ui:Label text="Marching out" class="cd-inv-col__title hub-entry__party-title" />
+                <ui:Label text="#ui.hub.marching-out" class="cd-inv-col__title hub-entry__party-title" />
                 <ui:VisualElement name="progress-party-tiles" class="hub-entry__party" />
                 <ui:Label name="progress-party" text="" class="cd-inv-detail__note" />
             </ui:VisualElement>
             <ui:VisualElement class="hub-lotpanel__actions hub-entry__actions">
-                <ui:Button name="enter-btn" text="Enter Dungeon" class="cd-inv-tab cd-camp-action hub-entry__enter" />
-                <ui:Button name="progress-party-btn" text="Change Party" class="cd-inv-tab cd-camp-action" />
-                <ui:Button name="back-btn" text="Back" class="cd-inv-close hub-lotpanel__back" />
+                <ui:Button name="enter-btn" text="#ui.hub.enter-btn" class="cd-inv-tab cd-camp-action hub-entry__enter" />
+                <ui:Button name="progress-party-btn" text="#ui.hub.progress-party-btn" class="cd-inv-tab cd-camp-action" />
+                <ui:Button name="back-btn" text="#ui.common.back" class="cd-inv-close hub-lotpanel__back" />
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -104,11 +104,11 @@
              what clearing it opened on the story map (HubManager.ShowRunCompletePanel fills the
              rows). It used to be the same two lines whatever run it was. -->
         <ui:VisualElement name="complete-view" class="cd-victory cd-run-complete cd-dock-center cd-hidden">
-            <ui:Label text="Run Complete!" class="cd-victory__title" />
+            <ui:Label text="#ui.hub.run-complete" class="cd-victory__title" />
             <ui:Label name="complete-run" text="" class="cd-run-complete__run" />
             <ui:Label name="complete-message" text="" class="cd-run-complete__message" />
             <ui:VisualElement name="complete-rewards" class="cd-victory__rewards" />
-            <ui:Button name="return-btn" text="Return to town" class="cd-button cd-button--narrow" />
+            <ui:Button name="return-btn" text="#ui.hub.return-btn" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
         <!-- MERCHANT -->
@@ -117,14 +117,14 @@
                  strip that picks who the stats are compared against, the list, and a detail column
                  carrying the price and the one action. Every region exists on every tab. -->
             <ui:VisualElement class="cd-inv-header">
-                <ui:Label text="Merchant" class="cd-inv-header__title" />
+                <ui:Label text="#ui.hub.merchant" class="cd-inv-header__title" />
                 <ui:VisualElement class="cd-inv-tabs">
-                    <ui:Button name="merchant-tab-buy" text="Buy" class="cd-inv-tab cd-inv-tab--active" />
-                    <ui:Button name="merchant-tab-sell" text="Sell" class="cd-inv-tab" />
-                    <ui:Button name="merchant-tab-belt" text="Potion Belt" class="cd-inv-tab" />
+                    <ui:Button name="merchant-tab-buy" text="#ui.hub.merchant-tab-buy" class="cd-inv-tab cd-inv-tab--active" />
+                    <ui:Button name="merchant-tab-sell" text="#ui.hub.merchant-tab-sell" class="cd-inv-tab" />
+                    <ui:Button name="merchant-tab-belt" text="#ui.hub.merchant-tab-belt" class="cd-inv-tab" />
                 </ui:VisualElement>
                 <ui:Label name="merchant-gold" text="" class="cd-camp-header__gold" />
-                <ui:Button name="merchant-close" text="Back" class="cd-inv-close" />
+                <ui:Button name="merchant-close" text="#ui.common.back" class="cd-inv-close" />
             </ui:VisualElement>
 
             <ui:VisualElement name="merchant-heroes" class="cd-inv-heroes" />
@@ -154,7 +154,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:Label text="Arrows move  ·  Enter choose  ·  Esc back" class="cd-inv-hint" />
+            <ui:Label text="#ui.common.arrows-move-enter-choose-esc" class="cd-inv-hint" />
         </ui:VisualElement>
 
         <!-- PARTY SELECT (the campfire). The inventory's fixed frame (cd-inv-window, 1180x720):
@@ -165,10 +165,10 @@
              Button, so the hub's shared keyboard cursor drives the whole screen. -->
         <ui:VisualElement name="party-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
             <ui:VisualElement class="cd-inv-header">
-                <ui:Label text="Campfire" class="cd-inv-header__title" />
+                <ui:Label text="#ui.hub.campfire" class="cd-inv-header__title" />
                 <ui:Label name="party-cap" text="" class="cd-camp-header__cap" />
                 <ui:Label name="party-gold" text="" class="cd-camp-header__gold" />
-                <ui:Button name="party-close" text="Back" class="cd-inv-close" />
+                <ui:Button name="party-close" text="#ui.common.back" class="cd-inv-close" />
             </ui:VisualElement>
 
             <ui:VisualElement class="cd-inv-heroes cd-camp-seats">
@@ -178,13 +178,13 @@
                 <ui:Button name="party-seat-3" class="cd-camp-seat" />
                 <ui:VisualElement class="cd-inv-heroes__summary" picking-mode="Ignore">
                     <ui:Label name="party-share" text="" class="cd-inv-heroes__summary-line cd-inv-heroes__summary-name" />
-                    <ui:Label text="A wider party is safer; a narrower one levels faster." class="cd-inv-heroes__summary-line" />
+                    <ui:Label text="#ui.hub.a-wider-party-is-safer" class="cd-inv-heroes__summary-line" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
             <ui:VisualElement class="cd-inv-body">
                 <ui:VisualElement class="cd-inv-col cd-camp-col--roster">
-                    <ui:Label text="Roster" class="cd-inv-col__title" />
+                    <ui:Label text="#ui.hub.roster" class="cd-inv-col__title" />
                     <ui:ScrollView name="party-roster" class="cd-inv-list" mode="Vertical" />
                 </ui:VisualElement>
 
@@ -198,22 +198,22 @@
                     </ui:VisualElement>
                     <ui:VisualElement class="cd-camp-actions">
                         <ui:Button name="party-toggle" text="" class="cd-inv-tab cd-camp-action" />
-                        <ui:Button name="party-lead" text="Lead the party" class="cd-inv-tab cd-camp-action" />
+                        <ui:Button name="party-lead" text="#ui.hub.party-lead" class="cd-inv-tab cd-camp-action" />
                     </ui:VisualElement>
                     <ui:Label name="party-reason" text="" class="cd-reason" />
                     <ui:ScrollView name="party-detail-body" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
                 </ui:VisualElement>
 
                 <ui:VisualElement class="cd-inv-col cd-camp-col--split">
-                    <ui:Label text="Sharing the XP" class="cd-inv-col__title" />
-                    <ui:Button name="party-split-even" text="Even" class="cd-inv-tab cd-camp-mode" />
-                    <ui:Button name="party-split-mentor" text="Mentor" class="cd-inv-tab cd-camp-mode" />
-                    <ui:Button name="party-split-catchup" text="Catch Up" class="cd-inv-tab cd-camp-mode" />
+                    <ui:Label text="#ui.hub.sharing-the-xp" class="cd-inv-col__title" />
+                    <ui:Button name="party-split-even" text="#ui.hub.party-split-even" class="cd-inv-tab cd-camp-mode" />
+                    <ui:Button name="party-split-mentor" text="#ui.hub.party-split-mentor" class="cd-inv-tab cd-camp-mode" />
+                    <ui:Button name="party-split-catchup" text="#ui.hub.party-split-catchup" class="cd-inv-tab cd-camp-mode" />
                     <ui:Button name="party-split-focus" text="" class="cd-inv-tab cd-camp-focus" />
                     <ui:Label name="party-split-desc" text="" class="cd-camp-split-desc" />
                     <!-- The potion belt (playtest 3 finding 5): one button per slot bought; a press cycles the
                          potion type in it. Hidden past the slots this save has. Locked once a run starts. -->
-                    <ui:Label text="Potion belt" class="cd-inv-col__title cd-camp-belt-title" />
+                    <ui:Label text="#ui.hub.potion-belt" class="cd-inv-col__title cd-camp-belt-title" />
                     <ui:VisualElement class="cd-camp-belt">
                         <ui:Button name="party-belt-0" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
                         <ui:Button name="party-belt-1" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
@@ -225,7 +225,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:Label text="Arrows move  ·  Enter choose  ·  Esc back" class="cd-inv-hint" />
+            <ui:Label text="#ui.common.arrows-move-enter-choose-esc" class="cd-inv-hint" />
         </ui:VisualElement>
 
         <!-- FORGE -->
@@ -235,14 +235,14 @@
                  tiles that swapped for an inspect page and resized the window on every click.
                  Craft (recipes) is the first tab since 2026-10-29; forge-upgrade crafts there. -->
             <ui:VisualElement class="cd-inv-header">
-                <ui:Label text="Forge" class="cd-inv-header__title" />
+                <ui:Label text="#ui.hub.forge" class="cd-inv-header__title" />
                 <ui:VisualElement class="cd-inv-tabs">
-                    <ui:Button name="forge-tab-craft" text="Craft" class="cd-inv-tab cd-inv-tab--active" />
-                    <ui:Button name="forge-tab-magic" text="Abilities" class="cd-inv-tab" />
-                    <ui:Button name="forge-tab-combos" text="Combos" class="cd-inv-tab" />
+                    <ui:Button name="forge-tab-craft" text="#ui.hub.forge-tab-craft" class="cd-inv-tab cd-inv-tab--active" />
+                    <ui:Button name="forge-tab-magic" text="#ui.hub.forge-tab-magic" class="cd-inv-tab" />
+                    <ui:Button name="forge-tab-combos" text="#ui.hub.forge-tab-combos" class="cd-inv-tab" />
                 </ui:VisualElement>
                 <ui:Label name="forge-essence" text="" class="cd-camp-header__gold" />
-                <ui:Button name="forge-close" text="Back" class="cd-inv-close" />
+                <ui:Button name="forge-close" text="#ui.common.back" class="cd-inv-close" />
             </ui:VisualElement>
 
             <ui:VisualElement class="cd-inv-body">
@@ -261,7 +261,7 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="cd-camp-actions">
-                        <ui:Button name="forge-upgrade" text="Upgrade" class="cd-inv-tab cd-camp-action" />
+                        <ui:Button name="forge-upgrade" text="#ui.hub.forge-upgrade" class="cd-inv-tab cd-camp-action" />
                     </ui:VisualElement>
                     <ui:Label name="forge-reason" text="" class="cd-reason" />
                     <ui:ScrollView name="forge-detail-body" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
@@ -269,7 +269,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:Label text="Arrows move  ·  Enter choose  ·  Esc back" class="cd-inv-hint" />
+            <ui:Label text="#ui.common.arrows-move-enter-choose-esc" class="cd-inv-hint" />
         </ui:VisualElement>
 
         <!-- BESTIARY -->
@@ -283,17 +283,17 @@
              in its tree under what it is made from, the unfound ones as selectable ??? rows. -->
         <ui:VisualElement name="bestiary-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
             <ui:VisualElement class="cd-inv-header">
-                <ui:Label text="Hall of Knowledge" class="cd-inv-header__title" />
+                <ui:Label text="#ui.hub.hall-of-knowledge" class="cd-inv-header__title" />
                 <ui:VisualElement class="cd-inv-tabs">
-                    <ui:Button name="bestiary-tab-monsters" text="Monsters" class="cd-inv-tab cd-inv-tab--active" />
-                    <ui:Button name="bestiary-tab-recipes" text="Recipes" class="cd-inv-tab" />
+                    <ui:Button name="bestiary-tab-monsters" text="#ui.hub.bestiary-tab-monsters" class="cd-inv-tab cd-inv-tab--active" />
+                    <ui:Button name="bestiary-tab-recipes" text="#ui.hub.bestiary-tab-recipes" class="cd-inv-tab" />
                 </ui:VisualElement>
                 <ui:Label name="bestiary-progress" text="" class="cd-camp-header__cap" />
-                <ui:Button name="bestiary-close" text="Back" class="cd-inv-close" />
+                <ui:Button name="bestiary-close" text="#ui.common.back" class="cd-inv-close" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-inv-body">
                 <ui:VisualElement class="cd-inv-col cd-shop-col--list">
-                    <ui:Label name="bestiary-list-title" text="Enemies met" class="cd-inv-col__title" />
+                    <ui:Label name="bestiary-list-title" text="#ui.hub.bestiary-list-title" class="cd-inv-col__title" />
                     <ui:ScrollView name="bestiary-list" class="cd-inv-list" mode="Vertical" />
                 </ui:VisualElement>
                 <ui:VisualElement class="cd-inv-col cd-inv-col--detail">
@@ -307,7 +307,7 @@
                     <ui:ScrollView name="bestiary-detail" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="bestiary-hint" text="&#8593;&#8595; select  &#183;  &#8592;&#8594; tab  &#183;  Esc back" class="cd-inv-hint" />
+            <ui:Label name="bestiary-hint" text="#ui.hub.bestiary-hint" class="cd-inv-hint" />
         </ui:VisualElement>
 
         <!-- INVENTORY -->
@@ -317,14 +317,14 @@
              Rows inside the columns are built by InventoryHubUI; the regions themselves live here. -->
         <ui:VisualElement name="inventory-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
             <ui:VisualElement class="cd-inv-header">
-                <ui:Label text="Inventory" class="cd-inv-header__title" />
+                <ui:Label text="#ui.hub.inventory" class="cd-inv-header__title" />
                 <ui:VisualElement name="inventory-tabs" class="cd-inv-tabs">
-                    <ui:Button name="tab-equipment" text="Equipment" class="cd-inv-tab cd-inv-tab--active" />
-                    <ui:Button name="tab-spells" text="Abilities" class="cd-inv-tab" />
-                    <ui:Button name="tab-consumables" text="Consumables" class="cd-inv-tab" />
-                    <ui:Button name="tab-materials" text="Materials" class="cd-inv-tab" />
+                    <ui:Button name="tab-equipment" text="#ui.hub.tab-equipment" class="cd-inv-tab cd-inv-tab--active" />
+                    <ui:Button name="tab-spells" text="#ui.hub.tab-spells" class="cd-inv-tab" />
+                    <ui:Button name="tab-consumables" text="#ui.hub.tab-consumables" class="cd-inv-tab" />
+                    <ui:Button name="tab-materials" text="#ui.hub.tab-materials" class="cd-inv-tab" />
                 </ui:VisualElement>
-                <ui:Button name="inventory-close" text="Back" class="cd-inv-close" />
+                <ui:Button name="inventory-close" text="#ui.common.back" class="cd-inv-close" />
             </ui:VisualElement>
 
             <ui:VisualElement name="inventory-heroes" class="cd-inv-heroes" />
@@ -359,11 +359,11 @@
                  whole window, so nothing behind it can be clicked while it is up. -->
             <ui:VisualElement name="inv-confirm" class="cd-dialog-scrim cd-inv-confirm cd-hidden">
                 <ui:VisualElement class="cd-window cd-inv-confirm__window">
-                    <ui:Label name="inv-confirm-title" text="Reassign?" class="cd-title" />
+                    <ui:Label name="inv-confirm-title" text="#ui.hub.inv-confirm-title" class="cd-title" />
                     <ui:Label name="inv-confirm-message" text="" class="cd-message" />
                     <ui:VisualElement class="cd-detail-buttons">
-                        <ui:Button name="inv-confirm-ok" text="Reassign" class="cd-button cd-button--wide" />
-                        <ui:Button name="inv-confirm-cancel" text="Cancel" class="cd-button cd-button--wide" />
+                        <ui:Button name="inv-confirm-ok" text="#ui.hub.inv-confirm-ok" class="cd-button cd-button--wide" />
+                        <ui:Button name="inv-confirm-cancel" text="#ui.hub.inv-confirm-cancel" class="cd-button cd-button--wide" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -377,9 +377,9 @@
                  each hero's banked XP, and the freed height given to the pannable graph. Still one
                  fixed px size in every state, so hit-testing never desyncs. -->
             <ui:VisualElement class="cd-inv-header">
-                <ui:Label text="Sphere Grid" class="cd-inv-header__title" />
+                <ui:Label text="#ui.hub.sphere-grid" class="cd-inv-header__title" />
                 <ui:Label name="grid-xp" text="" class="cd-camp-header__cap" />
-                <ui:Button name="grid-close" text="Back" class="cd-inv-close" />
+                <ui:Button name="grid-close" text="#ui.common.back" class="cd-inv-close" />
             </ui:VisualElement>
 
             <ui:VisualElement name="grid-heroes" class="cd-inv-heroes" />
@@ -387,20 +387,20 @@
             <ui:VisualElement class="cd-inv-body">
                 <ui:VisualElement name="grid-graph" class="sg-graph-host" />
                 <ui:VisualElement name="grid-detail" class="cd-inv-col sg-detail-col">
-                    <ui:Label name="grid-detail-name" text="Select a node." class="cd-inv-detail__name" />
+                    <ui:Label name="grid-detail-name" text="#ui.hub.grid-detail-name" class="cd-inv-detail__name" />
                     <ui:VisualElement class="sg-detail__chips">
                         <ui:Label name="grid-detail-kind" text="" class="cd-inv-grant" />
                     </ui:VisualElement>
                     <ui:Label name="grid-detail-payload" text="" class="cd-inv-detail__desc sg-detail__payload" />
                     <ui:VisualElement name="grid-detail-body" class="sg-detail__body" />
                     <ui:Label name="grid-detail-cost" text="" class="cd-inv-detail__line sg-detail__cost" />
-                    <ui:Button name="grid-activate" text="Activate" class="cd-inv-tab sg-activate" />
+                    <ui:Button name="grid-activate" text="#ui.hub.grid-activate" class="cd-inv-tab sg-activate" />
                     <ui:Label name="grid-reason" text="" class="cd-reason" />
                     <ui:Label name="grid-feedback" text="" class="cd-camp-feedback sg-feedback" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:Label name="grid-hint" text="Arrows move  ·  Enter activate  ·  Q/E hero  ·  Esc back  ·  drag to pan, scroll to zoom" class="cd-inv-hint" />
+            <ui:Label name="grid-hint" text="#ui.hub.grid-hint" class="cd-inv-hint" />
         </ui:VisualElement>
 
         <!-- CAMPAIGN MAP (fixed size on both axes, same reason as the sphere grid: a pannable
@@ -410,26 +410,26 @@
              clearing it opens. Keeps its own cursor (it pans content the shared one cannot see). -->
         <ui:VisualElement name="campaign-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
             <ui:VisualElement class="cd-inv-header">
-                <ui:Label name="campaign-title" text="The Story" class="cd-inv-header__title" />
+                <ui:Label name="campaign-title" text="#ui.hub.campaign-title" class="cd-inv-header__title" />
                 <ui:Label text="" class="cd-camp-header__cap" />
-                <ui:Button name="campaign-close" text="Back" class="cd-inv-close" />
+                <ui:Button name="campaign-close" text="#ui.common.back" class="cd-inv-close" />
             </ui:VisualElement>
             <ui:VisualElement class="cd-inv-body">
                 <ui:VisualElement class="cm-graph-col">
                     <ui:VisualElement name="campaign-graph" class="cm-graph-host" />
-                    <ui:Label name="campaign-legend" text="&#9654; in progress  &#183;  &#9733; open  &#183;  ? side road  &#183;  &#10003; cleared  &#183;  &#128274; locked" class="cm-legend" />
+                    <ui:Label name="campaign-legend" text="#ui.hub.campaign-legend" class="cm-legend" />
                 </ui:VisualElement>
                 <ui:VisualElement name="campaign-detail" class="cd-inv-col cm-detail-col">
-                    <ui:Label name="campaign-detail-name" text="Pick a place on the map." class="cd-inv-detail__name" />
+                    <ui:Label name="campaign-detail-name" text="#ui.hub.campaign-detail-name" class="cd-inv-detail__name" />
                     <ui:Label name="campaign-detail-status" text="" class="cd-inv-detail__sub cm-detail__status" />
                     <ui:Label name="campaign-detail-blurb" text="" class="cd-inv-detail__desc" />
                     <ui:Label name="campaign-detail-requires" text="" class="cd-reason cm-detail__requires" />
                     <ui:ScrollView name="campaign-detail-body" class="cm-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
                     <ui:Label name="campaign-feedback" text="" class="cd-camp-feedback sg-feedback" />
-                    <ui:Button name="campaign-start" text="Begin" class="cd-inv-tab cm-start" />
+                    <ui:Button name="campaign-start" text="#ui.hub.campaign-start" class="cd-inv-tab cm-start" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="campaign-hint" text="Arrows move  &#183;  Enter begin  &#183;  Esc back  &#183;  drag to pan, scroll to zoom" class="cd-inv-hint" />
+            <ui:Label name="campaign-hint" text="#ui.hub.campaign-hint" class="cd-inv-hint" />
         </ui:VisualElement>
 
         <!-- THE TUTORIAL's one line (docs/TUTORIAL.md). Last in the document on purpose: UI

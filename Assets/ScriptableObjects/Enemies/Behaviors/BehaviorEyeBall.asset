@@ -16,7 +16,7 @@ MonoBehaviour:
   Archetype: 0
   Actions:
   - Label: Cast from Draw list
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 5
     Priority: 20
     Weight: 1
@@ -26,10 +26,14 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions: []
   - Label: Attack
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -39,5 +43,9 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions: []

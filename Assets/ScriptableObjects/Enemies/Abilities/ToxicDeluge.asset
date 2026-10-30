@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: ToxicDeluge
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: ToxicDeluge
-  DisplayName: Toxic Deluge
-  Description: The pool heaves and comes down on everyone.
   Icon: {fileID: 3051856151345990285, guid: 94e7b8b322f3cb0448fb8457fe320ded, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -32,6 +30,8 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 3
     Power: 2
@@ -44,6 +44,8 @@ MonoBehaviour:
     ApplyChance: 50
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Tags: 
   TagDuration: 3

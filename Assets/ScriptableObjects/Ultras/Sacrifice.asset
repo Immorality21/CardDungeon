@@ -13,12 +13,11 @@ MonoBehaviour:
   m_Name: Sacrifice
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: Sacrifice
-  DisplayName: Sacrifice
-  Description: The Cultist gives an ally to what he serves. What comes back is still
-    on your side - mostly.
   Kind: 2
   TargetType: 3
   Effects: []
+  Hits: 1
+  RandomTargets: 0
   Creature: {fileID: 11400000, guid: f8ead745a8f8f3344a1fd9d1ffe6e507, type: 2}
   StatAbilities:
   - Stat: 1
@@ -33,6 +32,7 @@ MonoBehaviour:
     Ability: {fileID: 11400000, guid: 3a150496f83b86940a4a46f885946aa7, type: 2}
   - Stat: 6
     Ability: {fileID: 11400000, guid: fe18e38c77ab69c41bd0d080d438adc4, type: 2}
+  Mech: {fileID: 0}
   Turns: 3
   MaxHealthPercent: 50
   AttackDamageType: 0

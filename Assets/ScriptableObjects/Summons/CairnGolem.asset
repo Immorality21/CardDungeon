@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: CairnGolem
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: CairnGolem
-  DisplayName: Cairn Golem
-  Description: The stones of an old cairn rise and take the party's place. It takes
-    every blow meant for them, and the one that breaks it goes no further.
   Sprite: {fileID: 21300000, guid: d8f8e3267b2a429aa436b59860060def, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: 7b65cfc351fd40e7b4923f372b3cd392, type: 3}
@@ -32,11 +29,16 @@ MonoBehaviour:
   TargetType: 1
   Effects: []
   RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
   SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
   Triggers: []
   Flinches: 0
+  HitFrames: []
   BaseCharges: 1
   StatPercents:
     Values:
@@ -58,7 +60,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0dc0c6840a7f460588d925902ff5de15, type: 2}
   Signature: {fileID: 11400000, guid: e149434aff57485495c6c53587aa1c1a, type: 2}
   AttackAbility: {fileID: 0}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
   RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

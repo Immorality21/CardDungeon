@@ -260,8 +260,7 @@ public class MagicSOEditor : Editor
             EditorGUILayout.PropertyField(keyProp, new GUIContent("Key (auto)"));
         }
 
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("DisplayName"));
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("Description"));
+        ImmoralityGaming.Editor.Localization.TextKeyGUI.DerivedTextsLayout(keyProp, "ability", "name", "description");
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Icon"));
         var deliveryProp = serializedObject.FindProperty("Delivery");
         EditorGUILayout.PropertyField(deliveryProp);

@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: MassHysteria
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: MassHysteria
-  DisplayName: Mass Hysteria
-  Description: A whisper in every head at once. Half of them believe it.
   Kind: 1
   TargetType: 1
   Effects:
@@ -29,6 +27,8 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Hits: 1
   RandomTargets: 0

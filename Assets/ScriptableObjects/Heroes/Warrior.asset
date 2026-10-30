@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Warrior
   m_EditorClassIdentifier: 
   Key: Warrior
-  Label: Warrior
-  Blurb: 'A fighter in heart and essence. '
   Vision:
     Fantasy: 'The first sword through the door. Plain steel, plain courage: no magic,
       no tricks, just someone who stands in front and hits hard.'
@@ -82,4 +80,7 @@ MonoBehaviour:
   Momentum:
     PercentPerStack: 10
     MaxStacks: 5
+  Focus:
+    PerCast: 0
+    Max: 0
   SphereGrid: {fileID: 11400000, guid: 5a20bb614bb7b6e459b527d2ccc971bf, type: 2}

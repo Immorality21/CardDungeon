@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: PinDown
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: PinDown
-  DisplayName: Pin Down
-  Description: Arrows through boots, sleeves and shadows. Nobody is going anywhere
-    soon.
   Kind: 1
   TargetType: 1
   Effects:
@@ -31,6 +28,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 3
     Power: 3
@@ -44,6 +42,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Hits: 1
   RandomTargets: 0

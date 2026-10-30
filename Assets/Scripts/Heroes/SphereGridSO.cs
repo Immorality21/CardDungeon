@@ -4,6 +4,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Heroes
 {
@@ -53,10 +54,17 @@ namespace Assets.Scripts.Heroes
     {
         [Tooltip("Stable save identifier. Written into Party.json when activated; treat as " +
                  "write-once, like HeroSO.Key — renaming it orphans every save that bought it.")]
+        [TextKeys("node", "name")]
         public string Key;
 
-        [Tooltip("Optional player-facing name. Empty falls back to a description of the payload.")]
-        public string DisplayName;
+        [System.NonSerialized] private string _displayName;
+
+        /// <summary>From the text table (<c>node.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("node", Key, null, "name"); }
+            set { _displayName = value; }
+        }
 
         public SphereNodeKind Kind = SphereNodeKind.Stat;
 

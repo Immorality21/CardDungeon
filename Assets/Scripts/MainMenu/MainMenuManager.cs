@@ -46,6 +46,8 @@ public class MainMenuManager : MonoBehaviour
             _document = GetComponent<UIDocument>();
         }
         _root = _document.rootVisualElement;
+        // UXML texts are keys (#ui...); turn them into words before anything reads the tree.
+        global::ImmoralityGaming.Localization.Loc.Localize(_root);
 
         // The torches either side of the gate flicker (BackdropAmbienceSO). Presentation only - the
         // title still reads no save.

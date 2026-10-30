@@ -1,0 +1,4467 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 313dbe743b6937a49a1c20cd0683f1ca, type: 3}
+  m_Name: TextTable
+  m_EditorClassIdentifier: CardDungeon::ImmoralityGaming.Localization.TextTableSO
+  Languages:
+  - en
+  Entries:
+  - Key: hero.cleric.name
+    Values:
+    - Cleric
+    Reviewed: 0
+    Note: 
+  - Key: hero.cleric.description
+    Values:
+    - Keeps everyone else standing, and is quietly dangerous to the wrong things.
+    Reviewed: 0
+    Note: 
+  - Key: hero.cultist.name
+    Values:
+    - Cultist
+    Reviewed: 0
+    Note: 
+  - Key: hero.cultist.description
+    Values:
+    - Speaks to things that should not answer. They answer.
+    Reviewed: 0
+    Note: 
+  - Key: hero.mage.name
+    Values:
+    - Mage
+    Reviewed: 0
+    Note: 
+  - Key: hero.mage.description
+    Values:
+    - Commands fire, frost and storm, and is rarely careful about which.
+    Reviewed: 0
+    Note: 
+  - Key: hero.paladin.name
+    Values:
+    - Paladin
+    Reviewed: 0
+    Note: 
+  - Key: hero.paladin.description
+    Values:
+    - Armoured, patient, and certain. Holds a line, or breaks one, or mends it.
+    Reviewed: 0
+    Note: 
+  - Key: hero.ranger.name
+    Values:
+    - Ranger
+    Reviewed: 0
+    Note: 
+  - Key: hero.ranger.description
+    Values:
+    - Reads the room before anyone else has finished walking into it.
+    Reviewed: 0
+    Note: 
+  - Key: hero.rogue.name
+    Values:
+    - Rogue
+    Reviewed: 0
+    Note: 
+  - Key: hero.rogue.description
+    Values:
+    - Ends fights early, or is somewhere else by the time they get going.
+    Reviewed: 0
+    Note: 
+  - Key: hero.tinkerer.name
+    Values:
+    - Tinkerer
+    Reviewed: 0
+    Note: 
+  - Key: hero.tinkerer.description
+    Values:
+    - Solves most problems with something she brought, and the rest with something
+      she makes.
+    Reviewed: 0
+    Note: 
+  - Key: hero.warlock.name
+    Values:
+    - Warlock
+    Reviewed: 0
+    Note: 
+  - Key: hero.warlock.description
+    Values:
+    - Has found that the shortest route to power runs straight through himself.
+    Reviewed: 0
+    Note: 
+  - Key: hero.warrior.name
+    Values:
+    - Warrior
+    Reviewed: 0
+    Note: 
+  - Key: hero.warrior.description
+    Values:
+    - 'A fighter in heart and essence. '
+    Reviewed: 0
+    Note: 
+  - Key: ability.absolution.name
+    Values:
+    - Absolution
+    Reviewed: 0
+    Note: 
+  - Key: ability.absolution.description
+    Values:
+    - 'The blessing finishes what it started: wounds close, and whatever clings to
+      them lets go.'
+    Reviewed: 0
+    Note: 
+  - Key: ability.aegis.name
+    Values:
+    - Aegis
+    Reviewed: 0
+    Note: 
+  - Key: ability.aegis.description
+    Values:
+    - The shield goes up over the whole line, not just him.
+    Reviewed: 0
+    Note: 
+  - Key: ability.aimed-shot.name
+    Values:
+    - Aimed Shot
+    Reviewed: 0
+    Note: 
+  - Key: ability.aimed-shot.description
+    Values:
+    - One shot, taken slowly, that goes exactly where it was sent.
+    Reviewed: 0
+    Note: 
+  - Key: ability.arrow-storm.name
+    Values:
+    - Arrow Storm
+    Reviewed: 0
+    Note: 
+  - Key: ability.arrow-storm.description
+    Values:
+    - The sky goes dark with shafts, and every one of them draws blood.
+    Reviewed: 0
+    Note: 
+  - Key: ability.backstab.name
+    Values:
+    - Backstab
+    Reviewed: 0
+    Note: 
+  - Key: ability.backstab.description
+    Values:
+    - A short blade, put somewhere armour was never made to cover.
+    Reviewed: 0
+    Note: 
+  - Key: ability.benediction.name
+    Values:
+    - Benediction
+    Reviewed: 0
+    Note: 
+  - Key: ability.benediction.description
+    Values:
+    - A blessing spoken over the whole line at once.
+    Reviewed: 0
+    Note: 
+  - Key: ability.bloodbolt.name
+    Values:
+    - Bloodbolt
+    Reviewed: 0
+    Note: 
+  - Key: ability.bloodbolt.description
+    Values:
+    - Power taken from the only source you are certain of.
+    Reviewed: 0
+    Note: 
+  - Key: ability.blood-circle.name
+    Values:
+    - Blood Circle
+    Reviewed: 0
+    Note: 
+  - Key: ability.blood-circle.description
+    Values:
+    - The circle drinks what he paid, and gives it back to those inside.
+    Reviewed: 0
+    Note: 
+  - Key: ability.blood-pact.name
+    Values:
+    - Blood Pact
+    Reviewed: 0
+    Note: 
+  - Key: ability.blood-pact.description
+    Values:
+    - 'A bargain sealed in the Warlock''s blood: the ally it names burns brighter
+      for a while.'
+    Reviewed: 0
+    Note: 
+  - Key: ability.blood-rite.name
+    Values:
+    - Blood Rite
+    Reviewed: 0
+    Note: 
+  - Key: ability.blood-rite.description
+    Values:
+    - Every hand in the party bleeds a little, and strikes harder for it.
+    Reviewed: 0
+    Note: 
+  - Key: ability.blood-shower.name
+    Values:
+    - Blood Shower
+    Reviewed: 0
+    Note: 
+  - Key: ability.blood-shower.description
+    Values:
+    - He opens his veins over the whole room, and it falls on them like rain.
+    Reviewed: 0
+    Note: 
+  - Key: ability.bulwark.name
+    Values:
+    - Bulwark
+    Reviewed: 0
+    Note: 
+  - Key: ability.bulwark.description
+    Values:
+    - You plant yourself, and the whole line holds behind you.
+    Reviewed: 0
+    Note: 
+  - Key: ability.chain-lightning.name
+    Values:
+    - Chain Lightning
+    Reviewed: 0
+    Note: 
+  - Key: ability.chain-lightning.description
+    Values:
+    - Lightning leaps from foe to foe, striking every enemy.
+    Reviewed: 0
+    Note: 
+  - Key: ability.cleave.name
+    Values:
+    - Cleave
+    Reviewed: 0
+    Note: 
+  - Key: ability.cleave.description
+    Values:
+    - A wide, heavy swing that catches every enemy in front of you.
+    Reviewed: 0
+    Note: 
+  - Key: ability.cluster-bomb.name
+    Values:
+    - Cluster Bomb
+    Reviewed: 0
+    Note: 
+  - Key: ability.cluster-bomb.description
+    Values:
+    - The shell splits in the air. Every piece has its own fuse, and every one of
+      them is lit.
+    Reviewed: 0
+    Note: 
+  - Key: ability.consecrate.name
+    Values:
+    - Consecrate
+    Reviewed: 0
+    Note: 
+  - Key: ability.consecrate.description
+    Values:
+    - The ground itself turns against everything standing on it.
+    Reviewed: 0
+    Note: 
+  - Key: ability.crimson-rain.name
+    Values:
+    - Crimson Rain
+    Reviewed: 0
+    Note: 
+  - Key: ability.crimson-rain.description
+    Values:
+    - The rain does not stop where it lands. Whatever has blood keeps losing it.
+    Reviewed: 0
+    Note: 
+  - Key: ability.dark-communion.name
+    Values:
+    - Dark Communion
+    Reviewed: 0
+    Note: 
+  - Key: ability.dark-communion.description
+    Values:
+    - They share what he paid for. It keeps them standing.
+    Reviewed: 0
+    Note: 
+  - Key: ability.dark-pact.name
+    Values:
+    - Dark Pact
+    Reviewed: 0
+    Note: 
+  - Key: ability.dark-pact.description
+    Values:
+    - A better bargain with a worse partner.
+    Reviewed: 0
+    Note: 
+  - Key: ability.dark-pact-ii.name
+    Values:
+    - Dark Pact II
+    Reviewed: 0
+    Note: 
+  - Key: ability.dark-pact-ii.description
+    Values:
+    - The terms grow kinder. The one offering them does not.
+    Reviewed: 0
+    Note: 
+  - Key: ability.dead-silence.name
+    Values:
+    - Dead Silence
+    Reviewed: 0
+    Note: 
+  - Key: ability.dead-silence.description
+    Values:
+    - One word, and the whole room forgets how to speak.
+    Reviewed: 0
+    Note: 
+  - Key: ability.deluge.name
+    Values:
+    - Deluge
+    Reviewed: 0
+    Note: 
+  - Key: ability.deluge.description
+    Values:
+    - A wall of water crashes over every enemy and leaves them wading.
+    Reviewed: 0
+    Note: 
+  - Key: ability.disassemble.name
+    Values:
+    - Disassemble
+    Reviewed: 0
+    Note: 
+  - Key: ability.disassemble.description
+    Values:
+    - Wrench in hand, she finds the bolt that holds the whole thing together - and
+      pulls it.
+    Reviewed: 0
+    Note: 
+  - Key: ability.divine-bolt.name
+    Values:
+    - Divine Bolt
+    Reviewed: 0
+    Note: 
+  - Key: ability.divine-bolt.description
+    Values:
+    - A lance of light thrown at one foe.
+    Reviewed: 0
+    Note: 
+  - Key: ability.drain-life.name
+    Values:
+    - Drain Life
+    Reviewed: 0
+    Note: 
+  - Key: ability.drain-life.description
+    Values:
+    - The wound closes on the wrong side.
+    Reviewed: 0
+    Note: 
+  - Key: ability.dread.name
+    Values:
+    - Dread
+    Reviewed: 0
+    Note: 
+  - Key: ability.dread.description
+    Values:
+    - The room remembers something it should not.
+    Reviewed: 0
+    Note: 
+  - Key: ability.eldritch-lash.name
+    Values:
+    - Eldritch Lash
+    Reviewed: 0
+    Note: 
+  - Key: ability.eldritch-lash.description
+    Values:
+    - Something answers when he points.
+    Reviewed: 0
+    Note: 
+  - Key: ability.eviscerate.name
+    Values:
+    - Eviscerate
+    Reviewed: 0
+    Note: 
+  - Key: ability.eviscerate.description
+    Values:
+    - She finds the wound that is already there, and makes it worse.
+    Reviewed: 0
+    Note: 
+  - Key: ability.fence.name
+    Values:
+    - Fence
+    Reviewed: 0
+    Note: 
+  - Key: ability.fence.description
+    Values:
+    - She already knows who will buy it, and for how much.
+    Reviewed: 0
+    Note: 
+  - Key: ability.finishing-blow.name
+    Values:
+    - Finishing Blow
+    Reviewed: 0
+    Note: 
+  - Key: ability.finishing-blow.description
+    Values:
+    - He has been waiting for it to stumble.
+    Reviewed: 0
+    Note: 
+  - Key: ability.fireball.name
+    Values:
+    - Fireball
+    Reviewed: 0
+    Note: 
+  - Key: ability.fireball.description
+    Values:
+    - Hurls a ball of fire at all enemies.
+    Reviewed: 0
+    Note: 
+  - Key: ability.fire-cloak.name
+    Values:
+    - Fire Cloak
+    Reviewed: 0
+    Note: 
+  - Key: ability.fire-cloak.description
+    Values:
+    - Sheathes the caster in a fire-warding ward.
+    Reviewed: 0
+    Note: 
+  - Key: ability.flare-cannon.name
+    Values:
+    - Flare Cannon
+    Reviewed: 0
+    Note: 
+  - Key: ability.flare-cannon.description
+    Values:
+    - A hand cannon loaded with a magnesium flare. Bright, loud and very hot.
+    Reviewed: 0
+    Note: 
+  - Key: ability.flushing-shot.name
+    Values:
+    - Flushing Shot
+    Reviewed: 0
+    Note: 
+  - Key: ability.flushing-shot.description
+    Values:
+    - An arrow that drives its quarry out of cover and off its stride.
+    Reviewed: 0
+    Note: 
+  - Key: ability.frost-cloak.name
+    Values:
+    - Frost Cloak
+    Reviewed: 0
+    Note: 
+  - Key: ability.frost-cloak.description
+    Values:
+    - A rime of frost turns the cold aside.
+    Reviewed: 0
+    Note: 
+  - Key: ability.gear-jam.name
+    Values:
+    - Gear Jam
+    Reviewed: 0
+    Note: 
+  - Key: ability.gear-jam.description
+    Values:
+    - A spanner thrown into the works. Whatever it hits loses its rhythm.
+    Reviewed: 0
+    Note: 
+  - Key: ability.hallowed-ground.name
+    Values:
+    - Hallowed Ground
+    Reviewed: 0
+    Note: 
+  - Key: ability.hallowed-ground.description
+    Values:
+    - The ground remembers it is holy. The dead burn on it twice over.
+    Reviewed: 0
+    Note: 
+  - Key: ability.hamstring.name
+    Values:
+    - Hamstring
+    Reviewed: 0
+    Note: 
+  - Key: ability.hamstring.description
+    Values:
+    - A cut behind the knee. It will not be chasing anyone.
+    Reviewed: 0
+    Note: 
+  - Key: ability.heavenly-fire.name
+    Values:
+    - Heavenly Fire
+    Reviewed: 0
+    Note: 
+  - Key: ability.heavenly-fire.description
+    Values:
+    - The holy ground catches. Everything standing on it keeps burning.
+    Reviewed: 0
+    Note: 
+  - Key: ability.holy-strike.name
+    Values:
+    - Holy Strike
+    Reviewed: 0
+    Note: 
+  - Key: ability.holy-strike.description
+    Values:
+    - A blow wreathed in holy light, against a single enemy.
+    Reviewed: 0
+    Note: 
+  - Key: ability.holy-touch.name
+    Values:
+    - Holy Touch
+    Reviewed: 0
+    Note: 
+  - Key: ability.holy-touch.description
+    Values:
+    - A steadying hand. Restores health to one ally, or to yourself.
+    Reviewed: 0
+    Note: 
+  - Key: ability.hunters-mark.name
+    Values:
+    - Hunter's Mark
+    Reviewed: 0
+    Note: 
+  - Key: ability.hunters-mark.description
+    Values:
+    - He picks one, and from then on everyone knows which.
+    Reviewed: 0
+    Note: 
+  - Key: ability.hush.name
+    Values:
+    - Hush
+    Reviewed: 0
+    Note: 
+  - Key: ability.hush.description
+    Values:
+    - Smothers a foe's voice, sealing its abilities for a few turns.
+    Reviewed: 0
+    Note: 
+  - Key: ability.ice-shard.name
+    Values:
+    - Ice Shard
+    Reviewed: 0
+    Note: 
+  - Key: ability.ice-shard.description
+    Values:
+    - Launches a razor-sharp shard of ice at a single enemy.
+    Reviewed: 0
+    Note: 
+  - Key: ability.incendiary-bomb.name
+    Values:
+    - Incendiary Bomb
+    Reviewed: 0
+    Note: 
+  - Key: ability.incendiary-bomb.description
+    Values:
+    - A brass shell packed with coal dust and a short fuse.
+    Reviewed: 0
+    Note: 
+  - Key: ability.inferno.name
+    Values:
+    - Inferno
+    Reviewed: 0
+    Note: 
+  - Key: ability.inferno.description
+    Values:
+    - The fireball does not go out. Everything it touches keeps burning.
+    Reviewed: 0
+    Note: 
+  - Key: ability.inspire.name
+    Values:
+    - Inspire
+    Reviewed: 0
+    Note: 
+  - Key: ability.inspire.description
+    Values:
+    - A word of faith that gives an ally back what they spent.
+    Reviewed: 0
+    Note: 
+  - Key: ability.leeching-curse.name
+    Values:
+    - Leeching Curse
+    Reviewed: 0
+    Note: 
+  - Key: ability.leeching-curse.description
+    Values:
+    - Every wound you open on it, he drinks from.
+    Reviewed: 0
+    Note: 
+  - Key: ability.life-tap.name
+    Values:
+    - Life Tap
+    Reviewed: 0
+    Note: 
+  - Key: ability.life-tap.description
+    Values:
+    - Blood spent is power regained.
+    Reviewed: 0
+    Note: 
+  - Key: ability.lightning-bolt.name
+    Values:
+    - Lightning Bolt
+    Reviewed: 0
+    Note: 
+  - Key: ability.lightning-bolt.description
+    Values:
+    - Strikes an enemy with a crackling bolt of lightning.
+    Reviewed: 0
+    Note: 
+  - Key: ability.maim.name
+    Values:
+    - Maim
+    Reviewed: 0
+    Note: 
+  - Key: ability.maim.description
+    Values:
+    - A cut across the sword arm. It will not swing as hard again.
+    Reviewed: 0
+    Note: 
+  - Key: ability.mend.name
+    Values:
+    - Mend
+    Reviewed: 0
+    Note: 
+  - Key: ability.mend.description
+    Values:
+    - A quiet word and a steady hand. Restores health to one ally, or to herself.
+    Reviewed: 0
+    Note: 
+  - Key: ability.mind-rot.name
+    Values:
+    - Mind Rot
+    Reviewed: 0
+    Note: 
+  - Key: ability.mind-rot.description
+    Values:
+    - It spreads from the inside.
+    Reviewed: 0
+    Note: 
+  - Key: ability.mug.name
+    Values:
+    - Mug
+    Reviewed: 0
+    Note: 
+  - Key: ability.mug.description
+    Values:
+    - A knee to the gut, and a hand in the purse on the way past.
+    Reviewed: 0
+    Note: 
+  - Key: ability.oil-flask.name
+    Values:
+    - Oil Flask
+    Reviewed: 0
+    Note: 
+  - Key: ability.oil-flask.description
+    Values:
+    - A corked flask of black machine oil. It slows whatever it lands on, and it
+      burns beautifully.
+    Reviewed: 0
+    Note: 
+  - Key: ability.patch-kit.name
+    Values:
+    - Patch Kit
+    Reviewed: 0
+    Note: 
+  - Key: ability.patch-kit.description
+    Values:
+    - Rivets, brass plates and a dab of grease. Not medicine, exactly, but it holds.
+    Reviewed: 0
+    Note: 
+  - Key: ability.poison-dart.name
+    Values:
+    - Poison Dart
+    Reviewed: 0
+    Note: 
+  - Key: ability.poison-dart.description
+    Values:
+    - A toxic dart that damages and poisons an enemy.
+    Reviewed: 0
+    Note: 
+  - Key: ability.press-the-attack.name
+    Values:
+    - Press the Attack
+    Reviewed: 0
+    Note: 
+  - Key: ability.press-the-attack.description
+    Values:
+    - Two blows before it has its guard back up.
+    Reviewed: 0
+    Note: 
+  - Key: ability.purge.name
+    Values:
+    - Purge
+    Reviewed: 0
+    Note: 
+  - Key: ability.purge.description
+    Values:
+    - Light poured over every enemy. The dead burn twice as bright.
+    Reviewed: 0
+    Note: 
+  - Key: ability.quicken.name
+    Values:
+    - Quicken
+    Reviewed: 0
+    Note: 
+  - Key: ability.quicken.description
+    Values:
+    - A blessing on an ally's step. They act sooner, and more often.
+    Reviewed: 0
+    Note: 
+  - Key: ability.rallying-roar.name
+    Values:
+    - Rallying Roar
+    Reviewed: 0
+    Note: 
+  - Key: ability.rallying-roar.description
+    Values:
+    - A roar that shakes the walls. Every ally hits harder and moves quicker.
+    Reviewed: 0
+    Note: 
+  - Key: ability.renew.name
+    Values:
+    - Renew
+    Reviewed: 0
+    Note: 
+  - Key: ability.renew.description
+    Values:
+    - Knits an ally's wounds a little at a time.
+    Reviewed: 0
+    Note: 
+  - Key: ability.renewal.name
+    Values:
+    - Renewal
+    Reviewed: 0
+    Note: 
+  - Key: ability.renewal.description
+    Values:
+    - The mending spreads to everyone he can reach.
+    Reviewed: 0
+    Note: 
+  - Key: ability.revive.name
+    Values:
+    - Revive
+    Reviewed: 0
+    Note: 
+  - Key: ability.revive.description
+    Values:
+    - Calls a fallen ally back to their feet.
+    Reviewed: 0
+    Note: 
+  - Key: ability.rite-of-warding.name
+    Values:
+    - Rite of Warding
+    Reviewed: 0
+    Note: 
+  - Key: ability.rite-of-warding.description
+    Values:
+    - A circle drawn in his own blood. Nothing crosses it lightly.
+    Reviewed: 0
+    Note: 
+  - Key: ability.rivet-gun.name
+    Values:
+    - Rivet Gun
+    Reviewed: 0
+    Note: 
+  - Key: ability.rivet-gun.description
+    Values:
+    - A pressurised spike of hot iron, fired at whatever is closest.
+    Reviewed: 0
+    Note: 
+  - Key: ability.rivet-storm.name
+    Values:
+    - Rivet Storm
+    Reviewed: 0
+    Note: 
+  - Key: ability.rivet-storm.description
+    Values:
+    - She stops aiming. The gun empties itself into the room, one hot rivet after
+      another.
+    Reviewed: 0
+    Note: 
+  - Key: ability.sacred-shield.name
+    Values:
+    - Sacred Shield
+    Reviewed: 0
+    Note: 
+  - Key: ability.sacred-shield.description
+    Values:
+    - A ward of light that takes the next blows in an ally's place.
+    Reviewed: 0
+    Note: 
+  - Key: ability.sanctuary.name
+    Values:
+    - Sanctuary
+    Reviewed: 0
+    Note: 
+  - Key: ability.sanctuary.description
+    Values:
+    - Holy ground under the whole line. Every blow lands a little softer.
+    Reviewed: 0
+    Note: 
+  - Key: ability.searing-light.name
+    Values:
+    - Searing Light
+    Reviewed: 0
+    Note: 
+  - Key: ability.searing-light.description
+    Values:
+    - Light too bright to speak through.
+    Reviewed: 0
+    Note: 
+  - Key: ability.shadowstep.name
+    Values:
+    - Shadowstep
+    Reviewed: 0
+    Note: 
+  - Key: ability.shadowstep.description
+    Values:
+    - The blow lands where she was standing.
+    Reviewed: 0
+    Note: 
+  - Key: ability.shield-up.name
+    Values:
+    - Shield Up
+    Reviewed: 0
+    Note: 
+  - Key: ability.shield-up.description
+    Values:
+    - Raises a sturdy shield, boosting defense and drawing the enemy's eye.
+    Reviewed: 0
+    Note: 
+  - Key: ability.siphon-soul.name
+    Values:
+    - Siphon Soul
+    Reviewed: 0
+    Note: 
+  - Key: ability.siphon-soul.description
+    Values:
+    - Every heart in the room beats a little for him.
+    Reviewed: 0
+    Note: 
+  - Key: ability.slash.name
+    Values:
+    - Slash
+    Reviewed: 0
+    Note: 
+  - Key: ability.slash.description
+    Values:
+    - A swift blade strike against a single enemy.
+    Reviewed: 0
+    Note: 
+  - Key: ability.smoke-bomb.name
+    Values:
+    - Smoke Bomb
+    Reviewed: 0
+    Note: 
+  - Key: ability.smoke-bomb.description
+    Values:
+    - Nobody can hit what nobody can see.
+    Reviewed: 0
+    Note: 
+  - Key: ability.snare.name
+    Values:
+    - Snare
+    Reviewed: 0
+    Note: 
+  - Key: ability.snare.description
+    Values:
+    - Cord and tension, left where something heavy is about to step.
+    Reviewed: 0
+    Note: 
+  - Key: ability.soul-feast.name
+    Values:
+    - Soul Feast
+    Reviewed: 0
+    Note: 
+  - Key: ability.soul-feast.description
+    Values:
+    - What he takes from the room, he sets before the whole table.
+    Reviewed: 0
+    Note: 
+  - Key: ability.steal.name
+    Values:
+    - Steal
+    Reviewed: 0
+    Note: 
+  - Key: ability.steal.description
+    Values:
+    - Whatever it was carrying, she is carrying now.
+    Reviewed: 0
+    Note: 
+  - Key: ability.steam-burst.name
+    Values:
+    - Steam Burst
+    Reviewed: 0
+    Note: 
+  - Key: ability.steam-burst.description
+    Values:
+    - She opens every valve at once. Scalding steam fills the room and nobody can
+      see their feet.
+    Reviewed: 0
+    Note: 
+  - Key: ability.storm-cloak.name
+    Values:
+    - Storm Cloak
+    Reviewed: 0
+    Note: 
+  - Key: ability.storm-cloak.description
+    Values:
+    - Grounds the caster against the storm.
+    Reviewed: 0
+    Note: 
+  - Key: ability.sunder.name
+    Values:
+    - Sunder
+    Reviewed: 0
+    Note: 
+  - Key: ability.sunder.description
+    Values:
+    - A brutal overhead blow that splits armour as readily as flesh.
+    Reviewed: 0
+    Note: 
+  - Key: ability.tempest.name
+    Values:
+    - Tempest
+    Reviewed: 0
+    Note: 
+  - Key: ability.tempest.description
+    Values:
+    - The storm stops choosing. Lightning tears through every enemy at once.
+    Reviewed: 0
+    Note: 
+  - Key: ability.terror.name
+    Values:
+    - Terror
+    Reviewed: 0
+    Note: 
+  - Key: ability.terror.description
+    Values:
+    - The room remembers, and some of them cannot bear it.
+    Reviewed: 0
+    Note: 
+  - Key: ability.unbroken-line.name
+    Values:
+    - Unbroken Line
+    Reviewed: 0
+    Note: 
+  - Key: ability.unbroken-line.description
+    Values:
+    - You plant yourself, and the line does more than hold - it mends behind you.
+    Reviewed: 0
+    Note: 
+  - Key: ability.vanish.name
+    Values:
+    - Vanish
+    Reviewed: 0
+    Note: 
+  - Key: ability.vanish.description
+    Values:
+    - One moment she is there. Then she is somewhere better.
+    Reviewed: 0
+    Note: 
+  - Key: ability.volley.name
+    Values:
+    - Volley
+    Reviewed: 0
+    Note: 
+  - Key: ability.volley.description
+    Values:
+    - Arrows loosed high, falling across everything in front of you.
+    Reviewed: 0
+    Note: 
+  - Key: ability.war-cry.name
+    Values:
+    - War Cry
+    Reviewed: 0
+    Note: 
+  - Key: ability.war-cry.description
+    Values:
+    - A thunderous battle cry that boosts all allies' attack.
+    Reviewed: 0
+    Note: 
+  - Key: ability.ward.name
+    Values:
+    - Ward
+    Reviewed: 0
+    Note: 
+  - Key: ability.ward.description
+    Values:
+    - A thinner ward against fire, ice and storm at once.
+    Reviewed: 0
+    Note: 
+  - Key: ability.water-splash.name
+    Values:
+    - Water Splash
+    Reviewed: 0
+    Note: 
+  - Key: ability.water-splash.description
+    Values:
+    - A torrent of water crashes into all enemies.
+    Reviewed: 0
+    Note: 
+  - Key: ability.whisper-of-madness.name
+    Values:
+    - Whisper of Madness
+    Reviewed: 0
+    Note: 
+  - Key: ability.whisper-of-madness.description
+    Values:
+    - A word the mind cannot hold, and cannot drop.
+    Reviewed: 0
+    Note: 
+  - Key: ability.blinding-hex.name
+    Values:
+    - Blinding Hex
+    Reviewed: 0
+    Note: 
+  - Key: ability.blinding-hex.description
+    Values:
+    - A whispered curse that clouds every eye in the party.
+    Reviewed: 0
+    Note: 
+  - Key: ability.caustic-spit.name
+    Values:
+    - Caustic Spit
+    Reviewed: 0
+    Note: 
+  - Key: ability.caustic-spit.description
+    Values:
+    - A gob of digesting bile. It keeps burning after it lands.
+    Reviewed: 0
+    Note: 
+  - Key: ability.cinderstorm.name
+    Values:
+    - Cinderstorm
+    Reviewed: 0
+    Note: 
+  - Key: ability.cinderstorm.description
+    Values:
+    - A gale of burning ash that scours everything in front of it.
+    Reviewed: 0
+    Note: 
+  - Key: ability.death-chill.name
+    Values:
+    - Death Chill
+    Reviewed: 0
+    Note: 
+  - Key: ability.death-chill.description
+    Values:
+    - The cold of the grave rolls over the whole party.
+    Reviewed: 0
+    Note: 
+  - Key: ability.grave-touch.name
+    Values:
+    - Grave Touch
+    Reviewed: 0
+    Note: 
+  - Key: ability.grave-touch.description
+    Values:
+    - A cold hand on the heart. What it takes, the Wight keeps.
+    Reviewed: 0
+    Note: 
+  - Key: ability.heal.name
+    Values:
+    - Heal
+    Reviewed: 0
+    Note: 
+  - Key: ability.heal.description
+    Values:
+    - Restores health to yourself.
+    Reviewed: 0
+    Note: 
+  - Key: ability.oil-slick.name
+    Values:
+    - Oil Slick
+    Reviewed: 0
+    Note: 
+  - Key: ability.oil-slick.description
+    Values:
+    - Douses an enemy in slippery oil, weakening their stats.
+    Reviewed: 0
+    Note: 
+  - Key: ability.soul-bolt.name
+    Values:
+    - Soul Bolt
+    Reviewed: 0
+    Note: 
+  - Key: ability.soul-bolt.description
+    Values:
+    - A shard of a stolen soul, thrown hard.
+    Reviewed: 0
+    Note: 
+  - Key: ability.toxic-deluge.name
+    Values:
+    - Toxic Deluge
+    Reviewed: 0
+    Note: 
+  - Key: ability.toxic-deluge.description
+    Values:
+    - The pool heaves and comes down on everyone.
+    Reviewed: 0
+    Note: 
+  - Key: ability.archon-hallowing.name
+    Values:
+    - Hallowing
+    Reviewed: 0
+    Note: 
+  - Key: ability.archon-hallowing.description
+    Values:
+    - The Archon opens its hands and the room fills with light. The dead do not survive
+      it well.
+    Reviewed: 0
+    Note: 
+  - Key: ability.archon-lance.name
+    Values:
+    - Lance of Dawn
+    Reviewed: 0
+    Note: 
+  - Key: ability.archon-lance.description
+    Values:
+    - A spear of light, thrown hard at one foe.
+    Reviewed: 0
+    Note: 
+  - Key: ability.exatrix-nightfall.name
+    Values:
+    - Nightfall
+    Reviewed: 0
+    Note: 
+  - Key: ability.exatrix-nightfall.description
+    Values:
+    - She becomes the dark between the torches, and is at every throat at once. They
+      move slower after.
+    Reviewed: 0
+    Note: 
+  - Key: ability.exatrix-rend.name
+    Values:
+    - Rend
+    Reviewed: 0
+    Note: 
+  - Key: ability.exatrix-rend.description
+    Values:
+    - Shadow claws that tear through the moment. Whatever they catch is set back
+      on its way to its next move.
+    Reviewed: 0
+    Note: 
+  - Key: ability.fang-bite.name
+    Values:
+    - Bite
+    Reviewed: 0
+    Note: 
+  - Key: ability.fang-bite.description
+    Values:
+    - It goes for the one he marked.
+    Reviewed: 0
+    Note: 
+  - Key: ability.fang-run-down.name
+    Values:
+    - Run Down
+    Reviewed: 0
+    Note: 
+  - Key: ability.fang-run-down.description
+    Values:
+    - It hits the prey at a run and knocks it off its feet.
+    Reviewed: 0
+    Note: 
+  - Key: ability.golem-brace.name
+    Values:
+    - Brace
+    Reviewed: 0
+    Note: 
+  - Key: ability.golem-brace.description
+    Values:
+    - The golem sinks its weight into the ground and hardens.
+    Reviewed: 0
+    Note: 
+  - Key: ability.golem-quake.name
+    Values:
+    - Quake
+    Reviewed: 0
+    Note: 
+  - Key: ability.golem-quake.description
+    Values:
+    - The golem brings both fists down. The ground heaves under every enemy and slows
+      them.
+    Reviewed: 0
+    Note: 
+  - Key: ability.hellfire.name
+    Values:
+    - Hellfire
+    Reviewed: 0
+    Note: 
+  - Key: ability.hellfire.description
+    Values:
+    - 'What the Ifrit leaves behind: the whole field in flames.'
+    Reviewed: 0
+    Note: 
+  - Key: ability.idol-blood-ward.name
+    Values:
+    - Blood Ward
+    Reviewed: 0
+    Note: 
+  - Key: ability.idol-blood-ward.description
+    Values:
+    - A skin of borrowed blood over every hero.
+    Reviewed: 0
+    Note: 
+  - Key: ability.idol-crimson-vigor.name
+    Values:
+    - Crimson Vigor
+    Reviewed: 0
+    Note: 
+  - Key: ability.idol-crimson-vigor.description
+    Values:
+    - The idol drinks, and the party grows strong on it.
+    Reviewed: 0
+    Note: 
+  - Key: ability.idol-lifeblood.name
+    Values:
+    - Lifeblood
+    Reviewed: 0
+    Note: 
+  - Key: ability.idol-lifeblood.description
+    Values:
+    - What was paid flows back, slowly.
+    Reviewed: 0
+    Note: 
+  - Key: ability.idol-offering.name
+    Values:
+    - The Offering
+    Reviewed: 0
+    Note: 
+  - Key: ability.idol-offering.description
+    Values:
+    - The idol gives back all it was fed at once.
+    Reviewed: 0
+    Note: 
+  - Key: ability.ifrit-flame.name
+    Values:
+    - Ifrit's Flame
+    Reviewed: 0
+    Note: 
+  - Key: ability.ifrit-flame.description
+    Values:
+    - A lance of flame at one enemy, and it catches.
+    Reviewed: 0
+    Note: 
+  - Key: ability.imp-firebolt.name
+    Values:
+    - Firebolt
+    Reviewed: 0
+    Note: 
+  - Key: ability.imp-firebolt.description
+    Values:
+    - A spit of hellfire.
+    Reviewed: 0
+    Note: 
+  - Key: ability.imp-hellfire.name
+    Values:
+    - Hellfire
+    Reviewed: 0
+    Note: 
+  - Key: ability.imp-hellfire.description
+    Values:
+    - The imp empties itself over the room. Four of them at once is a lot of fire.
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-flame-jet.name
+    Values:
+    - Flame Jet
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-flame-jet.description
+    Values:
+    - A tongue of fire from the nozzle arm.
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-inferno-sweep.name
+    Values:
+    - Inferno Sweep
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-inferno-sweep.description
+    Values:
+    - The nozzle swings across the room on full pressure.
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-oil-jet.name
+    Values:
+    - Oil Jet
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-oil-jet.description
+    Values:
+    - A thick black jet of oil. Everything it hits slows down and gets slippery.
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-piston-punch.name
+    Values:
+    - Piston Punch
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-piston-punch.description
+    Values:
+    - A steam-driven fist, all pressure and no subtlety.
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-slick-flood.name
+    Values:
+    - Slick Flood
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-slick-flood.description
+    Values:
+    - The whole tank, all at once. Nobody keeps their footing.
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-steam-hammer.name
+    Values:
+    - Steam Hammer
+    Reviewed: 0
+    Note: 
+  - Key: ability.mech-steam-hammer.description
+    Values:
+    - Both fists come down at once and the floor cracks under every enemy.
+    Reviewed: 0
+    Note: 
+  - Key: ability.seraph-judgement.name
+    Values:
+    - Judgement
+    Reviewed: 0
+    Note: 
+  - Key: ability.seraph-judgement.description
+    Values:
+    - The seraph raises the blade and the light comes down on every enemy at once.
+    Reviewed: 0
+    Note: 
+  - Key: ability.seraph-radiant-cut.name
+    Values:
+    - Radiant Cut
+    Reviewed: 0
+    Note: 
+  - Key: ability.seraph-radiant-cut.description
+    Values:
+    - One burning stroke of the greatsword. Holy, so it bites where steel is turned
+      aside.
+    Reviewed: 0
+    Note: 
+  - Key: ability.spawn-grasp.name
+    Values:
+    - Grasp
+    Reviewed: 0
+    Note: 
+  - Key: ability.spawn-grasp.description
+    Values:
+    - A tendril finds an ankle.
+    Reviewed: 0
+    Note: 
+  - Key: ability.spawn-shriek.name
+    Values:
+    - Shriek
+    Reviewed: 0
+    Note: 
+  - Key: ability.spawn-shriek.description
+    Values:
+    - A sound with too many mouths.
+    Reviewed: 0
+    Note: 
+  - Key: ability.succubus-lash.name
+    Values:
+    - Lash
+    Reviewed: 0
+    Note: 
+  - Key: ability.succubus-lash.description
+    Values:
+    - The whip finds the gap in the armour.
+    Reviewed: 0
+    Note: 
+  - Key: ability.succubus-mesmerize.name
+    Values:
+    - Mesmerize
+    Reviewed: 0
+    Note: 
+  - Key: ability.succubus-mesmerize.description
+    Values:
+    - It forgets, for a while, that it is in a fight.
+    Reviewed: 0
+    Note: 
+  - Key: ability.turret-shot.name
+    Values:
+    - Turret Shot
+    Reviewed: 0
+    Note: 
+  - Key: ability.turret-shot.description
+    Values:
+    - A bolt of iron from the tripod gun, at whatever moves.
+    Reviewed: 0
+    Note: 
+  - Key: ability.twin-shadow-dance.name
+    Values:
+    - Shadow Dance
+    Reviewed: 0
+    Note: 
+  - Key: ability.twin-shadow-dance.description
+    Values:
+    - It is behind every one of them at once.
+    Reviewed: 0
+    Note: 
+  - Key: ability.twin-strike.name
+    Values:
+    - Twin Strike
+    Reviewed: 0
+    Note: 
+  - Key: ability.twin-strike.description
+    Values:
+    - Two knives, one shadow.
+    Reviewed: 0
+    Note: 
+  - Key: ability.watcher-gaze.name
+    Values:
+    - Unblinking Gaze
+    Reviewed: 0
+    Note: 
+  - Key: ability.watcher-gaze.description
+    Values:
+    - It looks, and keeps looking.
+    Reviewed: 0
+    Note: 
+  - Key: ability.watcher-revelation.name
+    Values:
+    - Revelation
+    Reviewed: 0
+    Note: 
+  - Key: ability.watcher-revelation.description
+    Values:
+    - Every eye opens at once.
+    Reviewed: 0
+    Note: 
+  - Key: ability.chaos-bolt.name
+    Values:
+    - Chaos Bolt
+    Reviewed: 0
+    Note: 
+  - Key: ability.chaos-bolt.description
+    Values:
+    - What Bloodbolt was always trying to be.
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-crushing-maw.name
+    Values:
+    - Crushing Maw
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-crushing-maw.description
+    Values:
+    - Something that was a fighter's arm closes like a jaw.
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-engulf.name
+    Values:
+    - Engulf
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-engulf.description
+    Values:
+    - A wall of flesh that will not let anything past it.
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-lashing-tendrils.name
+    Values:
+    - Lashing Tendrils
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-lashing-tendrils.description
+    Values:
+    - Too many limbs, all of them fast.
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-madness.name
+    Values:
+    - Madness
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-madness.description
+    Values:
+    - It speaks, once. Nobody who hears it acts quickly afterwards.
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-unmaking.name
+    Values:
+    - Unmaking
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-unmaking.description
+    Values:
+    - It remembers a spell, and forgets the part that kept it safe.
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-whispers.name
+    Values:
+    - Whispers
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-whispers.description
+    Values:
+    - A prayer turned inside out.
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-wrong-angles.name
+    Values:
+    - Wrong Angles
+    Reviewed: 0
+    Note: 
+  - Key: ability.horror-wrong-angles.description
+    Values:
+    - It strikes from a direction that is not there.
+    Reviewed: 0
+    Note: 
+  - Key: item.antidote-salve.name
+    Values:
+    - Antidote Salve
+    Reviewed: 0
+    Note: 
+  - Key: item.arcane-circlet.name
+    Values:
+    - Arcane Circlet
+    Reviewed: 0
+    Note: 
+  - Key: item.arcane-circlet.reaction-1.text
+    Values:
+    - 'After an ability: 10% chance it costs no charge (once per fight).'
+    Reviewed: 0
+    Note: 
+  - Key: item.blood-sword.name
+    Values:
+    - Blood Sword
+    Reviewed: 0
+    Note: 
+  - Key: item.blood-sword.reaction-1.text
+    Values:
+    - 'On a kill: heal 5% of max health (once per turn).'
+    Reviewed: 0
+    Note: 
+  - Key: item.bog-hood.name
+    Values:
+    - Bog Hood
+    Reviewed: 0
+    Note: 
+  - Key: item.bog-hood.description
+    Values:
+    - A cap sewn over with mire hide and lashed with reed. Nothing gets through it,
+      least of all the smell.
+    Reviewed: 0
+    Note: 
+  - Key: item.flaming-short-sword.name
+    Values:
+    - Flaming Short Sword
+    Reviewed: 0
+    Note: 
+  - Key: item.flaming-short-sword.description
+    Values:
+    - A plain blade quenched in ember iron. The edge never quite stops smouldering.
+    Reviewed: 0
+    Note: 
+  - Key: item.flaming-short-sword.reaction-1.text
+    Values:
+    - 'On a hit: 20% chance to Burn the target.'
+    Reviewed: 0
+    Note: 
+  - Key: item.gilded-charm.name
+    Values:
+    - Gilded Charm
+    Reviewed: 0
+    Note: 
+  - Key: item.gilded-charm.description
+    Values:
+    - A luckstone wrapped in vault gold. Luck likes to be flattered.
+    Reviewed: 0
+    Note: 
+  - Key: item.hexsilk-gloves.name
+    Values:
+    - Hexsilk Gloves
+    Reviewed: 0
+    Note: 
+  - Key: item.hexsilk-gloves.description
+    Values:
+    - Leather gloves relined in hex silk. The fingers twitch toward the next word
+      of a spell.
+    Reviewed: 0
+    Note: 
+  - Key: item.padded-jerkin.name
+    Values:
+    - Padded Jerkin
+    Reviewed: 0
+    Note: 
+  - Key: item.padded-jerkin.description
+    Values:
+    - Quilted cloth stuffed with whatever was to hand. It turns a knife, mostly.
+    Reviewed: 0
+    Note: 
+  - Key: item.voidforged-blade.name
+    Values:
+    - Voidforged Blade
+    Reviewed: 0
+    Note: 
+  - Key: item.voidforged-blade.description
+    Values:
+    - Iron hammered around a splinter of the dark. It is heavier than it looks, and
+      hungrier.
+    Reviewed: 0
+    Note: 
+  - Key: item.elixir.name
+    Values:
+    - Elixir
+    Reviewed: 0
+    Note: 
+  - Key: item.elixir.description
+    Values:
+    - Two brews that should not mix, and do. Closes wounds and steadies the mind
+      at once.
+    Reviewed: 0
+    Note: 
+  - Key: item.ember-greaves.name
+    Values:
+    - Ember Greaves
+    Reviewed: 0
+    Note: 
+  - Key: item.ember-greaves.reaction-1.text
+    Values:
+    - 'When struck by a blow or ability: 20% chance to Burn the attacker.'
+    Reviewed: 0
+    Note: 
+  - Key: item.energy-potion.name
+    Values:
+    - Energy Potion
+    Reviewed: 0
+    Note: 
+  - Key: item.energy-potion.description
+    Values:
+    - Fizzes against the teeth. Whatever was spent comes back, a little.
+    Reviewed: 0
+    Note: 
+  - Key: item.greater-healing-potion.name
+    Values:
+    - Greater Healing Potion
+    Reviewed: 0
+    Note: 
+  - Key: item.greater-healing-potion.description
+    Values:
+    - Thicker, darker, and worth the turn it takes to drink.
+    Reviewed: 0
+    Note: 
+  - Key: item.healing-potion.name
+    Values:
+    - Healing Potion
+    Reviewed: 0
+    Note: 
+  - Key: item.iron-sword.name
+    Values:
+    - Iron Sword
+    Reviewed: 0
+    Note: 
+  - Key: item.leather-cap.name
+    Values:
+    - Leather Cap
+    Reviewed: 0
+    Note: 
+  - Key: item.leather-gloves.name
+    Values:
+    - Leather Gloves
+    Reviewed: 0
+    Note: 
+  - Key: item.luckstone-charm.name
+    Values:
+    - Luckstone Charm
+    Reviewed: 0
+    Note: 
+  - Key: item.luckstone-charm.reaction-1.text
+    Values:
+    - 'After a dodge: +2 Agility for 2 turns.'
+    Reviewed: 0
+    Note: 
+  - Key: item.bog-pearl.name
+    Values:
+    - Bog Pearl
+    Reviewed: 0
+    Note: 
+  - Key: item.bog-pearl.description
+    Values:
+    - A murky pearl grown in the March's deepest silt. Only found when the March
+      is braved again.
+    Reviewed: 0
+    Note: 
+  - Key: item.cinder-glass.name
+    Values:
+    - Cinder Glass
+    Reviewed: 0
+    Note: 
+  - Key: item.cinder-glass.description
+    Values:
+    - Black glass with fire still moving in its cracks. Only found when the Ashen
+      Deep is braved again.
+    Reviewed: 0
+    Note: 
+  - Key: item.cut-stone.name
+    Values:
+    - Cut Stone
+    Reviewed: 0
+    Note: 
+  - Key: item.cut-stone.description
+    Values:
+    - Dressed blocks from a wall somebody else went to the trouble of building.
+    Reviewed: 0
+    Note: 
+  - Key: item.ember-iron.name
+    Values:
+    - Ember Iron
+    Reviewed: 0
+    Note: 
+  - Key: item.ember-iron.description
+    Values:
+    - Quenched in something that was alive at the time. It never quite goes cold.
+    Reviewed: 0
+    Note: 
+  - Key: item.gild-leaf.name
+    Values:
+    - Gild Leaf
+    Reviewed: 0
+    Note: 
+  - Key: item.gild-leaf.description
+    Values:
+    - Gold hammered thin enough to read through. The vault is papered in the stuff.
+    Reviewed: 0
+    Note: 
+  - Key: item.grave-salt.name
+    Values:
+    - Grave Salt
+    Reviewed: 0
+    Note: 
+  - Key: item.grave-salt.description
+    Values:
+    - Salt that crusts where the dead lie restless. It glows faintly when no one
+      looks at it. Only found when the Catacombs are braved again.
+    Reviewed: 0
+    Note: 
+  - Key: item.hex-silk.name
+    Values:
+    - Hex Silk
+    Reviewed: 0
+    Note: 
+  - Key: item.hex-silk.description
+    Values:
+    - Spun on a loom that was not a loom, by something that was not a spider.
+    Reviewed: 0
+    Note: 
+  - Key: item.mire-hide.name
+    Values:
+    - Mire Hide
+    Reviewed: 0
+    Note: 
+  - Key: item.mire-hide.description
+    Values:
+    - Thick, sodden and stubbornly waterproof. Smells of the bottom of the marsh.
+    Reviewed: 0
+    Note: 
+  - Key: item.mire-reed.name
+    Values:
+    - Mire Reed
+    Reviewed: 0
+    Note: 
+  - Key: item.mire-reed.description
+    Values:
+    - Tough, wet, and unpleasantly warm. Dries into something you can lash a roof
+      with.
+    Reviewed: 0
+    Note: 
+  - Key: item.rotted-timber.name
+    Values:
+    - Rotted Timber
+    Reviewed: 0
+    Note: 
+  - Key: item.rotted-timber.description
+    Values:
+    - Damp beams prised out of a frame that had already given up. Still holds a nail.
+    Reviewed: 0
+    Note: 
+  - Key: item.scrap-iron.name
+    Values:
+    - Scrap Iron
+    Reviewed: 0
+    Note: 
+  - Key: item.scrap-iron.description
+    Values:
+    - Whatever the dungeon's dead were wearing, minus the dead.
+    Reviewed: 0
+    Note: 
+  - Key: item.sealing-wax.name
+    Values:
+    - Sealing Wax
+    Reviewed: 0
+    Note: 
+  - Key: item.sealing-wax.description
+    Values:
+    - Red wax from the Archive's sealed shelves, still bearing a seal no one alive
+      can read. Only found when the Archive is braved again.
+    Reviewed: 0
+    Note: 
+  - Key: item.slag-coal.name
+    Values:
+    - Slag Coal
+    Reviewed: 0
+    Note: 
+  - Key: item.slag-coal.description
+    Values:
+    - Burns hotter than it has any right to, and longer than you would like.
+    Reviewed: 0
+    Note: 
+  - Key: item.void-shard.name
+    Values:
+    - Void Shard
+    Reviewed: 0
+    Note: 
+  - Key: item.void-shard.description
+    Values:
+    - A splinter of the dark that holds the deep together. Only the things set to
+      guard it carry any.
+    Reviewed: 0
+    Note: 
+  - Key: item.oak-staff.name
+    Values:
+    - Oak Staff
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-bog-hood.name
+    Values:
+    - Recipe - Bog Hood
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-bog-hood.description
+    Values:
+    - A marsh-dweller's pattern, stitched on a strip of hide.
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-flaming-short-sword.name
+    Values:
+    - Recipe - Flaming Short Sword
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-flaming-short-sword.description
+    Values:
+    - Scorched notes on quenching a plain blade in ember iron.
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-gilded-charm.name
+    Values:
+    - Recipe - Gilded Charm
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-gilded-charm.description
+    Values:
+    - A hoarder's ledger page, with a drawing in the margin.
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-hexsilk-gloves.name
+    Values:
+    - Recipe - Hexsilk Gloves
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-hexsilk-gloves.description
+    Values:
+    - A weaver's pattern. The thread count is wrong in a way that matters.
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-leather-cap.name
+    Values:
+    - Recipe - Leather Cap
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-leather-cap.description
+    Values:
+    - One of the Forge's own.
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-padded-jerkin.name
+    Values:
+    - Recipe - Padded Jerkin
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-padded-jerkin.description
+    Values:
+    - One of the Forge's own.
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-simple-sword.name
+    Values:
+    - Recipe - Simple Sword
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-simple-sword.description
+    Values:
+    - One of the Forge's own. Scrap in, sword out.
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-voidforged-blade.name
+    Values:
+    - Recipe - Voidforged Blade
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-voidforged-blade.description
+    Values:
+    - Torn pages from something old. Most of it is warnings.
+    Reviewed: 0
+    Note: 
+  - Key: item.ruby-amulet.name
+    Values:
+    - Ruby Amulet
+    Reviewed: 0
+    Note: 
+  - Key: item.ruby-amulet.reaction-1.text
+    Values:
+    - 'When hurt by Fire: +2 Strength for 2 turns.'
+    Reviewed: 0
+    Note: 
+  - Key: item.runed-blade.name
+    Values:
+    - Runed Blade
+    Reviewed: 0
+    Note: 
+  - Key: item.shadowweave-cloak.name
+    Values:
+    - Shadowweave Cloak
+    Reviewed: 0
+    Note: 
+  - Key: item.shadowweave-cloak.description
+    Values:
+    - Cloth that drinks the light. One of four Shadowweave pieces.
+    Reviewed: 0
+    Note: 
+  - Key: item.shadowweave-gloves.name
+    Values:
+    - Shadowweave Gloves
+    Reviewed: 0
+    Note: 
+  - Key: item.shadowweave-gloves.description
+    Values:
+    - Nothing you touch in these remembers being touched. One of four Shadowweave
+      pieces.
+    Reviewed: 0
+    Note: 
+  - Key: item.shadowweave-hood.name
+    Values:
+    - Shadowweave Hood
+    Reviewed: 0
+    Note: 
+  - Key: item.shadowweave-hood.description
+    Values:
+    - Pull it low and the dark forgets your face. One of four Shadowweave pieces.
+    Reviewed: 0
+    Note: 
+  - Key: item.shadowweave-treads.name
+    Values:
+    - Shadowweave Treads
+    Reviewed: 0
+    Note: 
+  - Key: item.shadowweave-treads.description
+    Values:
+    - Soft enough that the floor keeps no count of you. One of four Shadowweave pieces.
+    Reviewed: 0
+    Note: 
+  - Key: item.simple-sword.name
+    Values:
+    - Simple Sword
+    Reviewed: 0
+    Note: 
+  - Key: item.steel-plate.name
+    Values:
+    - Steel Plate
+    Reviewed: 0
+    Note: 
+  - Key: item.swift-boots.name
+    Values:
+    - Swift Boots
+    Reviewed: 0
+    Note: 
+  - Key: item.tower-shield.name
+    Values:
+    - Tower Shield
+    Reviewed: 0
+    Note: 
+  - Key: item.tower-shield.reaction-1.text
+    Values:
+    - 'When hurt: 15% chance of +3 Endurance until the next turn.'
+    Reviewed: 0
+    Note: 
+  - Key: item.warden-helm.name
+    Values:
+    - Warden's Helm
+    Reviewed: 0
+    Note: 
+  - Key: item.warden-helm.reaction-1.text
+    Values:
+    - 'When an ally falls: +4 Endurance for 3 turns.'
+    Reviewed: 0
+    Note: 
+  - Key: item.warding-gauntlets.name
+    Values:
+    - Warding Gauntlets
+    Reviewed: 0
+    Note: 
+  - Key: item.warding-gauntlets.reaction-1.text
+    Values:
+    - 'When hurt by Shadow: heal 5% of max health.'
+    Reviewed: 0
+    Note: 
+  - Key: item.wooden-shield.name
+    Values:
+    - Wooden Shield
+    Reviewed: 0
+    Note: 
+  - Key: enemy.abyssal-warden.name
+    Values:
+    - Abyssal Warden
+    Reviewed: 0
+    Note: 
+  - Key: enemy.bile-slime.name
+    Values:
+    - Bile Slime
+    Reviewed: 0
+    Note: 
+  - Key: enemy.bog-shaman.name
+    Values:
+    - Bog Shaman
+    Reviewed: 0
+    Note: 
+  - Key: enemy.bone-golem.name
+    Values:
+    - Bone Golem
+    Reviewed: 0
+    Note: 
+  - Key: enemy.cinder-imp.name
+    Values:
+    - Cinder Imp
+    Reviewed: 0
+    Note: 
+  - Key: enemy.cinder-imp.reaction-1.label
+    Values:
+    - Cinder Burst
+    Reviewed: 0
+    Note: 
+  - Key: enemy.cinder-tyrant.name
+    Values:
+    - Cinder Tyrant
+    Reviewed: 0
+    Note: 
+  - Key: enemy.clockwork-sentry.name
+    Values:
+    - Clockwork Sentry
+    Reviewed: 0
+    Note: 
+  - Key: enemy.dark-jailor.name
+    Values:
+    - Dark Jailor
+    Reviewed: 0
+    Note: 
+  - Key: enemy.dragon.name
+    Values:
+    - Drakeling
+    Reviewed: 0
+    Note: 
+  - Key: enemy.eye-ball.name
+    Values:
+    - Floating Eye
+    Reviewed: 0
+    Note: 
+  - Key: enemy.ghoul.name
+    Values:
+    - Ghoul
+    Reviewed: 0
+    Note: 
+  - Key: enemy.gilded-hoarder.name
+    Values:
+    - Gilded Hoarder
+    Reviewed: 0
+    Note: 
+  - Key: enemy.gilded-hoarder.reaction-1.label
+    Values:
+    - Molten Gold
+    Reviewed: 0
+    Note: 
+  - Key: enemy.gilded-mote.name
+    Values:
+    - Gilded Mote
+    Reviewed: 0
+    Note: 
+  - Key: enemy.hex-weaver.name
+    Values:
+    - Hex Weaver
+    Reviewed: 0
+    Note: 
+  - Key: enemy.lich.name
+    Values:
+    - Lich
+    Reviewed: 0
+    Note: 
+  - Key: enemy.mirefather.name
+    Values:
+    - Mirefather
+    Reviewed: 0
+    Note: 
+  - Key: enemy.mother-ooze.name
+    Values:
+    - Mother Ooze
+    Reviewed: 0
+    Note: 
+  - Key: enemy.skeleton.name
+    Values:
+    - Skeleton
+    Reviewed: 0
+    Note: 
+  - Key: enemy.slag-hound.name
+    Values:
+    - Slag Hound
+    Reviewed: 0
+    Note: 
+  - Key: enemy.slag-hound.reaction-1.label
+    Values:
+    - Pack Fury
+    Reviewed: 0
+    Note: 
+  - Key: enemy.spore-bloater.name
+    Values:
+    - Spore Bloater
+    Reviewed: 0
+    Note: 
+  - Key: enemy.spore-bloater.reaction-1.label
+    Values:
+    - Rupture
+    Reviewed: 0
+    Note: 
+  - Key: enemy.steam-automaton.name
+    Values:
+    - Steam Automaton
+    Reviewed: 0
+    Note: 
+  - Key: enemy.stone-sentinel.name
+    Values:
+    - Stone Sentinel
+    Reviewed: 0
+    Note: 
+  - Key: enemy.wight.name
+    Values:
+    - Wight
+    Reviewed: 0
+    Note: 
+  - Key: ultra.blood-moon.name
+    Values:
+    - Blood Moon
+    Reviewed: 0
+    Note: 
+  - Key: ultra.blood-moon.description
+    Values:
+    - The moon comes up red, and every hand in the party is stronger for what he
+      bled.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.death-mark.name
+    Values:
+    - Death Mark
+    Reviewed: 0
+    Note: 
+  - Key: ultra.death-mark.description
+    Values:
+    - She picks the one that dies first, and everyone can see it.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.demon-form.name
+    Values:
+    - Demon Form
+    Reviewed: 0
+    Note: 
+  - Key: ultra.demon-form.description
+    Values:
+    - The Warlock lets the thing he bargains with wear him for a while.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.divine-intervention.name
+    Values:
+    - Divine Intervention
+    Reviewed: 0
+    Note: 
+  - Key: ultra.divine-intervention.description
+    Values:
+    - He steps between an ally and the blow, takes it at half weight, and answers
+      in kind.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.earthsplitter.name
+    Values:
+    - Earthsplitter
+    Reviewed: 0
+    Note: 
+  - Key: ultra.earthsplitter.description
+    Values:
+    - Everything he has built up goes into one blow, and the floor splits under all
+      of them.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.flamethrower-mech.name
+    Values:
+    - Flamethrower Mech
+    Reviewed: 0
+    Note: 
+  - Key: ultra.flamethrower-mech.description
+    Values:
+    - She bolts together a flamethrower mech and climbs on. It sets the whole room
+      alight.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.flurry.name
+    Values:
+    - Flurry
+    Reviewed: 0
+    Note: 
+  - Key: ultra.flurry.description
+    Values:
+    - He stops guarding and simply swings, again and again, at whatever is closest.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.grand-heist.name
+    Values:
+    - Grand Heist
+    Reviewed: 0
+    Note: 
+  - Key: ultra.grand-heist.description
+    Values:
+    - Every pocket in the room, in one pass.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.judgement-day.name
+    Values:
+    - Judgement Day
+    Reviewed: 0
+    Note: 
+  - Key: ultra.judgement-day.description
+    Values:
+    - Light falls on every enemy at once. The dead get no second chance.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.lay-on-hands.name
+    Values:
+    - Lay on Hands
+    Reviewed: 0
+    Note: 
+  - Key: ultra.lay-on-hands.description
+    Values:
+    - His hands on one ally, and everything wrong with them is put right.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.mass-hysteria.name
+    Values:
+    - Mass Hysteria
+    Reviewed: 0
+    Note: 
+  - Key: ultra.mass-hysteria.description
+    Values:
+    - A whisper in every head at once. Half of them believe it.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.miracle-of-hope.name
+    Values:
+    - Miracle of Hope
+    Reviewed: 0
+    Note: 
+  - Key: ultra.miracle-of-hope.description
+    Values:
+    - A prayer for the long road. Everyone finds a little more in reserve.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.miracle-of-light.name
+    Values:
+    - Miracle of Light
+    Reviewed: 0
+    Note: 
+  - Key: ultra.miracle-of-light.description
+    Values:
+    - She asks, and is answered. Wounds close and every curse lifts.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.miracle-of-righteousness.name
+    Values:
+    - Miracle of Righteousness
+    Reviewed: 0
+    Note: 
+  - Key: ultra.miracle-of-righteousness.description
+    Values:
+    - Judgement falls on every enemy, and what should already be dead is made so.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.multi-cast.name
+    Values:
+    - MultiCast
+    Reviewed: 0
+    Note: 
+  - Key: ultra.multi-cast.description
+    Values:
+    - 'Focus spent all at once: the next ability again, and again, and again.'
+    Reviewed: 0
+    Note: 
+  - Key: ultra.oil-spewing-mech.name
+    Values:
+    - Oil Spewing Mech
+    Reviewed: 0
+    Note: 
+  - Key: ultra.oil-spewing-mech.description
+    Values:
+    - She bolts together an oil-spewing walker and climbs on. Everything it hits
+      is oiled - and oil burns.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.pack-hunt.name
+    Values:
+    - Pack Hunt
+    Reviewed: 0
+    Note: 
+  - Key: ultra.pack-hunt.description
+    Values:
+    - Three grey shapes go through the line, and come back red.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.pin-down.name
+    Values:
+    - Pin Down
+    Reviewed: 0
+    Note: 
+  - Key: ultra.pin-down.description
+    Values:
+    - Arrows through boots, sleeves and shadows. Nobody is going anywhere soon.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.rain-of-arrows.name
+    Values:
+    - Rain of Arrows
+    Reviewed: 0
+    Note: 
+  - Key: ultra.rain-of-arrows.description
+    Values:
+    - Five arrows, five targets he never had to aim at.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.rain-of-fire.name
+    Values:
+    - Rain of Fire
+    Reviewed: 0
+    Note: 
+  - Key: ultra.rain-of-fire.description
+    Values:
+    - The sky opens on the Warlock's word and the room burns.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.sacrifice.name
+    Values:
+    - Sacrifice
+    Reviewed: 0
+    Note: 
+  - Key: ultra.sacrifice.description
+    Values:
+    - The Cultist gives an ally to what he serves. What comes back is still on your
+      side - mostly.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.smoke-and-mirrors.name
+    Values:
+    - Smoke and Mirrors
+    Reviewed: 0
+    Note: 
+  - Key: ultra.smoke-and-mirrors.description
+    Values:
+    - Smoke, and somewhere in it the party - or a dozen copies of it.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.soul-harvest.name
+    Values:
+    - Soul Harvest
+    Reviewed: 0
+    Note: 
+  - Key: ultra.soul-harvest.description
+    Values:
+    - Every soul in the room pays a tithe, and the Warlock collects.
+    Reviewed: 0
+    Note: 
+  - Key: ultra.take-cover.name
+    Values:
+    - Take Cover
+    Reviewed: 0
+    Note: 
+  - Key: ultra.take-cover.description
+    Values:
+    - '"Down!" The whole line braces behind his shield until the worst has passed.'
+    Reviewed: 0
+    Note: 
+  - Key: ultra.warrior-mech.name
+    Values:
+    - Warrior Mech
+    Reviewed: 0
+    Note: 
+  - Key: ultra.warrior-mech.description
+    Values:
+    - She bolts together a brawling mech and climbs on. It takes the blows meant
+      for her.
+    Reviewed: 0
+    Note: 
+  - Key: summon.abyssal-nightmare.name
+    Values:
+    - Abyssal Nightmare
+    Reviewed: 0
+    Note: 
+  - Key: summon.abyssal-nightmare.description
+    Values:
+    - No eyes. Only the mouth, and the teeth, and the teeth inside the teeth.
+    Reviewed: 0
+    Note: 
+  - Key: summon.aegis-lion.name
+    Values:
+    - Aegis Lion
+    Reviewed: 0
+    Note: 
+  - Key: summon.aegis-lion.description
+    Values:
+    - A lion of hammered light plants itself before the Paladin and roars. The enemies
+      turn on the Paladin, and the Paladin hardens to meet them.
+    Reviewed: 0
+    Note: 
+  - Key: summon.archon.name
+    Values:
+    - Archon
+    Reviewed: 0
+    Note: 
+  - Key: summon.archon.description
+    Values:
+    - A figure of light takes the party's place. It does not strike so much as judge.
+    Reviewed: 0
+    Note: 
+  - Key: summon.auto-turret.name
+    Values:
+    - Auto Turret
+    Reviewed: 0
+    Note: 
+  - Key: summon.auto-turret.description
+    Values:
+    - A brass tripod with a rivet gun on top and a boiler underneath. She sets it
+      down, opens the valve and lets it work.
+    Reviewed: 0
+    Note: 
+  - Key: summon.bloodfang-boar.name
+    Values:
+    - Bloodfang Boar
+    Reviewed: 0
+    Note: 
+  - Key: summon.bloodfang-boar.description
+    Values:
+    - A primal war boar charges onto the field and bellows. Every hero's Strength
+      rises by half.
+    Reviewed: 0
+    Note: 
+  - Key: summon.blood-idol.name
+    Values:
+    - Blood Idol
+    Reviewed: 0
+    Note: 
+  - Key: summon.blood-idol.description
+    Values:
+    - A shape of clotted red, raised from what the Cultist bleeds. It feeds the party,
+      and the enemy hates it for it.
+    Reviewed: 0
+    Note: 
+  - Key: summon.cairn-golem.name
+    Values:
+    - Cairn Golem
+    Reviewed: 0
+    Note: 
+  - Key: summon.cairn-golem.description
+    Values:
+    - The stones of an old cairn rise and take the party's place. It takes every
+      blow meant for them, and the one that breaks it goes no further.
+    Reviewed: 0
+    Note: 
+  - Key: summon.dark-twin.name
+    Values:
+    - Dark Twin
+    Reviewed: 0
+    Note: 
+  - Key: summon.dark-twin.description
+    Values:
+    - Her shadow, stepped off the wall, faster than she is.
+    Reviewed: 0
+    Note: 
+  - Key: summon.dawn-stag.name
+    Values:
+    - Dawn Stag
+    Reviewed: 0
+    Note: 
+  - Key: summon.dawn-stag.description
+    Values:
+    - A white stag steps out of the morning. Where its light falls, wounds close,
+      and keep closing.
+    Reviewed: 0
+    Note: 
+  - Key: summon.demon-army.name
+    Values:
+    - Demon Army
+    Reviewed: 0
+    Note: 
+  - Key: summon.demon-army.description
+    Values:
+    - The Warlock opens the way and his demons pour through, taking the party's place
+      until the bargain runs out.
+    Reviewed: 0
+    Note: 
+  - Key: summon.exatrix.name
+    Values:
+    - Exatrix
+    Reviewed: 0
+    Note: 
+  - Key: summon.exatrix.description
+    Values:
+    - A shade of something that hunted before there were names takes the party's
+      place. Every wound she opens costs the enemy time.
+    Reviewed: 0
+    Note: 
+  - Key: summon.flamethrower-mech.name
+    Values:
+    - Flamethrower Mech
+    Reviewed: 0
+    Note: 
+  - Key: summon.flamethrower-mech.description
+    Values:
+    - Fuel tanks, a pilot light and a very long nozzle. It keeps its distance and
+      sets the room alight.
+    Reviewed: 0
+    Note: 
+  - Key: summon.galewing.name
+    Values:
+    - Galewing
+    Reviewed: 0
+    Note: 
+  - Key: summon.galewing.description
+    Values:
+    - A great hawk drops out of nowhere and rakes every enemy twice, finding the
+      gaps in their guard.
+    Reviewed: 0
+    Note: 
+  - Key: summon.glacius.name
+    Values:
+    - Glacius
+    Reviewed: 0
+    Note: 
+  - Key: summon.glacius.description
+    Values:
+    - A frost bear. One claw rimes an enemy in ice, ready for the party's water;
+      its breath hardens the party's skin.
+    Reviewed: 0
+    Note: 
+  - Key: summon.golden-ferret.name
+    Values:
+    - Golden Ferret
+    Reviewed: 0
+    Note: 
+  - Key: summon.golden-ferret.description
+    Values:
+    - It finds the loose coin in every pocket, and the party's luck turns with it.
+    Reviewed: 0
+    Note: 
+  - Key: summon.grey-fang.name
+    Values:
+    - Grey Fang
+    Reviewed: 0
+    Note: 
+  - Key: summon.grey-fang.description
+    Values:
+    - The Ranger's hound. It runs down what he marks.
+    Reviewed: 0
+    Note: 
+  - Key: summon.guardian-angel.name
+    Values:
+    - Guardian Angel
+    Reviewed: 0
+    Note: 
+  - Key: summon.guardian-angel.description
+    Values:
+    - Wings close around the whole party. For a while, the blows have to get through
+      her first.
+    Reviewed: 0
+    Note: 
+  - Key: summon.horror.name
+    Values:
+    - Horror
+    Reviewed: 0
+    Note: 
+  - Key: summon.horror.description
+    Values:
+    - 'What the rite leaves of a hero: everything they were, turned outward.'
+    Reviewed: 0
+    Note: 
+  - Key: summon.ifrit.name
+    Values:
+    - Ifrit
+    Reviewed: 0
+    Note: 
+  - Key: summon.ifrit.description
+    Values:
+    - A fire spirit takes the party's place. When it goes, fallen or sent away, it
+      takes the field with it.
+    Reviewed: 0
+    Note: 
+  - Key: summon.imp.name
+    Values:
+    - Imp
+    Reviewed: 0
+    Note: 
+  - Key: summon.imp.description
+    Values:
+    - 'A cackling scrap of the pit, bound to the Warlock''s blood. The Demon Army''s
+      rank and file: frail, fast, and full of fire.'
+    Reviewed: 0
+    Note: 
+  - Key: summon.iron-charger.name
+    Values:
+    - Iron Charger
+    Reviewed: 0
+    Note: 
+  - Key: summon.iron-charger.description
+    Values:
+    - A barded warhorse that comes through the enemy line like a door through a wall.
+    Reviewed: 0
+    Note: 
+  - Key: summon.judgement-seraph.name
+    Values:
+    - Judgement Seraph
+    Reviewed: 0
+    Note: 
+  - Key: summon.judgement-seraph.description
+    Values:
+    - A winged knight takes the party's place. It hits far harder than it can be
+      hit, and the blow that finally breaks it goes no further.
+    Reviewed: 0
+    Note: 
+  - Key: summon.murder-of-crows.name
+    Values:
+    - Murder of Crows
+    Reviewed: 0
+    Note: 
+  - Key: summon.murder-of-crows.description
+    Values:
+    - A black cloud of wings and beaks that goes for the eyes.
+    Reviewed: 0
+    Note: 
+  - Key: summon.oil-mech.name
+    Values:
+    - Oil Spewing Mech
+    Reviewed: 0
+    Note: 
+  - Key: summon.oil-mech.description
+    Values:
+    - A squat walker with a drum of machine oil on its back. Everything it touches
+      slows down - and catches fire easily.
+    Reviewed: 0
+    Note: 
+  - Key: summon.phoenix.name
+    Values:
+    - Phoenix
+    Reviewed: 0
+    Note: 
+  - Key: summon.phoenix.description
+    Values:
+    - A bird of white fire passes over the line. The fallen rise in its wake, and
+      the standing breathe easier.
+    Reviewed: 0
+    Note: 
+  - Key: summon.qyraxis.name
+    Values:
+    - Qyraxis
+    Reviewed: 0
+    Note: 
+  - Key: summon.qyraxis.description
+    Values:
+    - A bird made of the storm itself. It strikes every enemy twice, and they move
+      like they are wading.
+    Reviewed: 0
+    Note: 
+  - Key: summon.succubus.name
+    Values:
+    - Succubus
+    Reviewed: 0
+    Note: 
+  - Key: summon.succubus.description
+    Values:
+    - A demoness of the deep circles, an Imp the Warlock's bargains have raised.
+      She holds the line with whip and glamour.
+    Reviewed: 0
+    Note: 
+  - Key: summon.warrior-mech.name
+    Values:
+    - Warrior Mech
+    Reviewed: 0
+    Note: 
+  - Key: summon.warrior-mech.description
+    Values:
+    - Brass plate, piston fists and a boiler for a heart. It hits hard and takes
+      harder.
+    Reviewed: 0
+    Note: 
+  - Key: summon.watcher.name
+    Values:
+    - The Watcher
+    Reviewed: 0
+    Note: 
+  - Key: summon.watcher.description
+    Values:
+    - Something from below the deep comes up to look. What it sees, it unmakes.
+    Reviewed: 0
+    Note: 
+  - Key: summon.writhing-spawn.name
+    Values:
+    - Writhing Spawn
+    Reviewed: 0
+    Note: 
+  - Key: summon.writhing-spawn.description
+    Values:
+    - A knot of the deep that came when he called. It holds things in place.
+    Reviewed: 0
+    Note: 
+  - Key: combo.conductor-3d-4c-5b-6a.name
+    Values:
+    - Conductor
+    Reviewed: 0
+    Note: 
+  - Key: combo.conductor-3d-4c-5b-6a.description
+    Values:
+    - Lightning arcs through metal for doubled impact!
+    Reviewed: 0
+    Note: 
+  - Key: combo.freeze-2e-3d-4c-5b.name
+    Values:
+    - Freeze
+    Reviewed: 0
+    Note: 
+  - Key: combo.freeze-2e-3d-4c-5b.description
+    Values:
+    - Ice and water combine to freeze the enemy solid.
+    Reviewed: 0
+    Note: 
+  - Key: combo.ignite-1f-2e-3d-4c.name
+    Values:
+    - Ignite
+    Reviewed: 0
+    Note: 
+  - Key: combo.infection-4c-5b-6a-79.name
+    Values:
+    - Infection
+    Reviewed: 0
+    Note: 
+  - Key: combo.infection-4c-5b-6a-79.description
+    Values:
+    - Poison seeps into physical wounds, sapping all strength.
+    Reviewed: 0
+    Note: 
+  - Key: set.shadowweave.name
+    Values:
+    - Shadowweave
+    Reviewed: 0
+    Note: 
+  - Key: set.shadowweave.tier-1.text
+    Values:
+    - +10% Shadow damage
+    Reviewed: 0
+    Note: 
+  - Key: set.shadowweave.tier-2.text
+    Values:
+    - +5% Intelligence
+    Reviewed: 0
+    Note: 
+  - Key: set.shadowweave.tier-3.text
+    Values:
+    - Every ability also deals 10% of its power as Shadow damage
+    Reviewed: 0
+    Note: 
+  - Key: run.ashen-deep.name
+    Values:
+    - The Ashen Deep
+    Reviewed: 0
+    Note: 
+  - Key: run.ashen-deep.description
+    Values:
+    - The water gave out and the rock began to weep heat. Something under the March
+      has been burning for a long time.
+    Reviewed: 0
+    Note: 
+  - Key: run.ashen-deep.level-1.name
+    Values:
+    - Cinder Gate
+    Reviewed: 0
+    Note: 
+  - Key: run.ashen-deep.level-2.name
+    Values:
+    - The Slag Halls
+    Reviewed: 0
+    Note: 
+  - Key: run.ashen-deep.level-3.name
+    Values:
+    - Emberfall
+    Reviewed: 0
+    Note: 
+  - Key: run.blood-stair.name
+    Values:
+    - The Blood Stair
+    Reviewed: 0
+    Note: 
+  - Key: run.blood-stair.description
+    Values:
+    - A cult carved this stair down to its altar, and its last initiate is still
+      chained at the bottom. Five floors, none of them kind. Most parties turn back.
+      Some don't have to.
+    Reviewed: 0
+    Note: 
+  - Key: run.blood-stair.level-1.name
+    Values:
+    - The Bleeding Steps
+    Reviewed: 0
+    Note: 
+  - Key: run.blood-stair.level-2.name
+    Values:
+    - The Chapel of Knives
+    Reviewed: 0
+    Note: 
+  - Key: run.blood-stair.level-3.name
+    Values:
+    - The Ossuary Gate
+    Reviewed: 0
+    Note: 
+  - Key: run.blood-stair.level-4.name
+    Values:
+    - The Red Cloister
+    Reviewed: 0
+    Note: 
+  - Key: run.blood-stair.level-5.name
+    Values:
+    - The Altar of the Last Initiate
+    Reviewed: 0
+    Note: 
+  - Key: run.catacombs.name
+    Values:
+    - The Catacombs
+    Reviewed: 0
+    Note: 
+  - Key: run.catacombs.description
+    Values:
+    - Below the Archive the dead were stacked, not buried. Somebody has taught them
+      to stand back up.
+    Reviewed: 0
+    Note: 
+  - Key: run.catacombs.level-1.name
+    Values:
+    - The Ossuary Stair
+    Reviewed: 0
+    Note: 
+  - Key: run.catacombs.level-2.name
+    Values:
+    - The Bone Galleries
+    Reviewed: 0
+    Note: 
+  - Key: run.catacombs.level-3.name
+    Values:
+    - The Lich's Sepulchre
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-chapel.name
+    Values:
+    - The Drowned Chapel
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-chapel.description
+    Values:
+    - A chapel went down with the March, bells and all. Pump the nave low enough
+      and the door at the bottom opens again - and someone behind it is still singing.
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-chapel.level-1.name
+    Values:
+    - The Flooded Nave
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-chapel.level-2.name
+    Values:
+    - The Drowned Choir
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-march.name
+    Values:
+    - The Drowned March
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-march.description
+    Values:
+    - The water that filled the lower halls came from somewhere. Something down there
+      is still breathing.
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-march.level-1.name
+    Values:
+    - Silt Shallows
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-march.level-2.name
+    Values:
+    - The Reedcage
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-march.level-3.name
+    Values:
+    - The Weeping Causeway
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-march.level-4.name
+    Values:
+    - Rotwater Deep
+    Reviewed: 0
+    Note: 
+  - Key: run.drowned-march.level-5.name
+    Values:
+    - The Mire Throne
+    Reviewed: 0
+    Note: 
+  - Key: run.hollow-vault.name
+    Values:
+    - The Hollow Vault
+    Reviewed: 0
+    Note: 
+  - Key: run.hollow-vault.description
+    Values:
+    - The Hoarder was counting for someone. There is a door behind the ledger.
+    Reviewed: 0
+    Note: 
+  - Key: run.hollow-vault.level-1.name
+    Values:
+    - The Hollow Vault
+    Reviewed: 0
+    Note: 
+  - Key: run.sealed-archive.name
+    Values:
+    - The Sealed Archive
+    Reviewed: 0
+    Note: 
+  - Key: run.sealed-archive.description
+    Values:
+    - A library the dungeon walled up rather than burn. Something in the stacks is
+      still reading - and someone locked in with it is still casting.
+    Reviewed: 0
+    Note: 
+  - Key: run.sealed-archive.level-1.name
+    Values:
+    - The Ash Stacks
+    Reviewed: 0
+    Note: 
+  - Key: run.sealed-archive.level-2.name
+    Values:
+    - The Broken Orrery
+    Reviewed: 0
+    Note: 
+  - Key: run.seeping-cistern.name
+    Values:
+    - The Seeping Cistern
+    Reviewed: 0
+    Note: 
+  - Key: run.seeping-cistern.description
+    Values:
+    - Under the Warrens the old cistern has turned to something that eats. The cutpurse
+      ran down there with your purse. Something down there caught them.
+    Reviewed: 0
+    Note: 
+  - Key: run.seeping-cistern.level-1.name
+    Values:
+    - The Sump
+    Reviewed: 0
+    Note: 
+  - Key: run.seeping-cistern.level-2.name
+    Values:
+    - The Mother Pool
+    Reviewed: 0
+    Note: 
+  - Key: run.tutorial-run.name
+    Values:
+    - The Threshold
+    Reviewed: 0
+    Note: 
+  - Key: run.tutorial-run.description
+    Values:
+    - 'Where every hero starts: four floors down, and a prisoner worth freeing.'
+    Reviewed: 0
+    Note: 
+  - Key: run.tutorial-run.level-1.name
+    Values:
+    - Dungeon Entrance
+    Reviewed: 0
+    Note: 
+  - Key: run.tutorial-run.level-2.name
+    Values:
+    - Upper Halls
+    Reviewed: 0
+    Note: 
+  - Key: run.tutorial-run.level-3.name
+    Values:
+    - Collapsed Caverns
+    Reviewed: 0
+    Note: 
+  - Key: run.tutorial-run.level-4.name
+    Values:
+    - Sunken Depths
+    Reviewed: 0
+    Note: 
+  - Key: run.the-warrens.name
+    Values:
+    - The Warrens
+    Reviewed: 0
+    Note: 
+  - Key: run.the-warrens.description
+    Values:
+    - 'A standing contract: clear the vault tunnels, keep what you carry out. The
+      hoard always grows back.'
+    Reviewed: 0
+    Note: 
+  - Key: run.the-warrens.level-1.name
+    Values:
+    - Warren Tunnels
+    Reviewed: 0
+    Note: 
+  - Key: run.the-warrens.level-2.name
+    Values:
+    - The Counting Room
+    Reviewed: 0
+    Note: 
+  - Key: building.bestiary.name
+    Values:
+    - Hall of Knowledge
+    Reviewed: 0
+    Note: 
+  - Key: building.bestiary.description
+    Values:
+    - Everything the party has survived, and everything the Forge could make, written
+      down.
+    Reviewed: 0
+    Note: 
+  - Key: building.campfire.name
+    Values:
+    - Campfire
+    Reviewed: 0
+    Note: 
+  - Key: building.campfire.description
+    Values:
+    - Four seats and a low fire. Who marches out is decided here.
+    Reviewed: 0
+    Note: 
+  - Key: building.campfire.level-1.grant
+    Values:
+    - The run's XP is split evenly between everyone who marches out.
+    Reviewed: 0
+    Note: 
+  - Key: building.campfire.level-2.grant
+    Values:
+    - 'Mentor: name a hero and they take a double share of every kill.'
+    Reviewed: 0
+    Note: 
+  - Key: building.campfire.level-3.grant
+    Values:
+    - 'Catch Up: the double share goes to whoever is furthest behind.'
+    Reviewed: 0
+    Note: 
+  - Key: building.forge.name
+    Values:
+    - Forge
+    Reviewed: 0
+    Note: 
+  - Key: building.forge.description
+    Values:
+    - Bring a recipe, the stuff it calls for and the gold for the fire. Essence still
+      hardens a combo.
+    Reviewed: 0
+    Note: 
+  - Key: building.forge.level-1.grant
+    Values:
+    - Forge combos up to Lv 1.
+    Reviewed: 0
+    Note: 
+  - Key: building.forge.level-2.grant
+    Values:
+    - Forge combos up to Lv 3.
+    Reviewed: 0
+    Note: 
+  - Key: building.forge.level-3.grant
+    Values:
+    - Forge combos up to Lv 5, as far as the craft goes.
+    Reviewed: 0
+    Note: 
+  - Key: building.merchant.name
+    Values:
+    - Merchant
+    Reviewed: 0
+    Note: 
+  - Key: building.merchant.description
+    Values:
+    - Gear, potions, and a keen sense of what you can afford.
+    Reviewed: 0
+    Note: 
+  - Key: building.sphere-hall.name
+    Values:
+    - Hall of Progression
+    Reviewed: 0
+    Note: 
+  - Key: building.sphere-hall.description
+    Values:
+    - Where a hero decides what they are becoming.
+    Reviewed: 0
+    Note: 
+  - Key: building.storehouse.name
+    Values:
+    - Storehouse
+    Reviewed: 0
+    Note: 
+  - Key: building.storehouse.description
+    Values:
+    - Gear, abilities, potions and the raw stuff you dragged home.
+    Reviewed: 0
+    Note: 
+  - Key: event.ceiling-shaft.title
+    Values:
+    - A Shaft in the Ceiling
+    Reviewed: 0
+    Note: 
+  - Key: event.ceiling-shaft.prompt
+    Values:
+    - A shaft opens in the ceiling well above head height, and something on the ledge
+      up there catches what little light there is. The wall under it is damp and
+      crumbling, with just enough to hold on to.
+    Reviewed: 0
+    Note: 
+  - Key: event.ceiling-shaft.option-1.label
+    Values:
+    - Climb for it
+    Reviewed: 0
+    Note: 
+  - Key: event.ceiling-shaft.option-1.success-1.text
+    Values:
+    - Three quick holds and you are on the ledge. Somebody stashed this up here and
+      never came back for it.
+    Reviewed: 0
+    Note: 
+  - Key: event.ceiling-shaft.option-1.success-2.text
+    Values:
+    - You get up, get a hand on it, and get back down before the wall gives. Coin,
+      and nothing else worth the climb.
+    Reviewed: 0
+    Note: 
+  - Key: event.ceiling-shaft.option-1.failure-1.text
+    Values:
+    - The wall lets go halfway up. You land badly and stay landed for a while.
+    Reviewed: 0
+    Note: 
+  - Key: event.ceiling-shaft.option-1.failure-2.text
+    Values:
+    - You bring most of the wall down with you, and the noise brings something else.
+    Reviewed: 0
+    Note: 
+  - Key: event.ceiling-shaft.option-2.label
+    Values:
+    - Leave whatever it is up there
+    Reviewed: 0
+    Note: 
+  - Key: event.ceiling-shaft.option-2.decline
+    Values:
+    - Whatever is on the ledge can stay on the ledge.
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage.title
+    Values:
+    - A Choked Passage
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage.prompt
+    Values:
+    - Half the ceiling has come down across a side passage, and the draught coming
+      through the gap smells of open air rather than more dungeon. The top slab is
+      the only thing holding the rest up. Somebody could get a shoulder under it.
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage.option-1.label
+    Values:
+    - Get a shoulder under it
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage.option-1.success-1.text
+    Values:
+    - 'You take the weight long enough for the rest of the party to clear the gap,
+      and what is behind it: a dead porter, still carrying.'
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage.option-1.success-2.text
+    Values:
+    - You hold it. It costs you something to hold it, and the passage behind is empty
+      besides a dropped purse.
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage.option-1.failure-1.text
+    Values:
+    - The slab shifts the wrong way and the rest of it follows. Everyone comes out
+      of the dust coughing and bleeding.
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage.option-1.failure-2.text
+    Values:
+    - It settles onto your back before you can get clear. Nothing broken - but nothing
+      works quite right for a while either.
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage.option-2.label
+    Values:
+    - Leave the passage blocked
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage.option-2.decline
+    Values:
+    - The draught is not worth the ceiling. You go the long way.
+    Reviewed: 0
+    Note: 
+  - Key: event.cutpurse.title
+    Values:
+    - A Cutpurse on the Rope
+    Reviewed: 0
+    Note: 
+  - Key: event.cutpurse.prompt
+    Values:
+    - 'Every lock in these tunnels was picked before you reached it. Now you know
+      by whom: someone hangs from a frayed rope over the counting-pit, one hand on
+      the line and the other still holding a purse that is not theirs. ''Evening,''
+      they say. ''I don''t suppose you''d pull?'''
+    Reviewed: 0
+    Note: 
+  - Key: event.cutpurse.option-1.label
+    Values:
+    - Catch the rope
+    Reviewed: 0
+    Note: 
+  - Key: event.cutpurse.option-1.success-1.text
+    Values:
+    - You get a hand on the line as it parts and haul them over the lip. They look
+      at you, then at the tunnel, then hand the purse back. 'Fine. You'll want someone
+      who can open things.'
+    Reviewed: 0
+    Note: 
+  - Key: event.cutpurse.option-1.failure-1.text
+    Values:
+    - The rope goes. So does the cutpurse - not down, but sideways into a crawlway
+      you never saw, and a little heavier than before.
+    Reviewed: 0
+    Note: 
+  - Key: event.cutpurse.option-2.label
+    Values:
+    - Leave them hanging
+    Reviewed: 0
+    Note: 
+  - Key: event.cutpurse.option-2.decline
+    Values:
+    - '''Suit yourselves,'' they call after you. ''I''ll be around.'''
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.title
+    Values:
+    - A Drowned Offering
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.prompt
+    Values:
+    - 'Knee-deep in the standing water, a stone bowl still holds its offering: coins,
+      teeth, something folded in oilcloth. The water around it is warmer than the
+      water around your boots.'
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.option-1.label
+    Values:
+    - Kneel and say the words
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.option-1.success-1.text
+    Values:
+    - The warmth comes up out of the bowl and goes through all of you. Old wounds
+      close over. Whatever is owed here has been paid before.
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.option-1.success-2.text
+    Values:
+    - Nothing answers, but the folded oilcloth is worth having.
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.option-1.failure-1.text
+    Values:
+    - You get the words wrong. The water goes cold, the taste of it gets into everyone,
+      and the whole party feels thinner for it.
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.option-1.failure-2.text
+    Values:
+    - The bowl tips. Something in the reeds decides it has been insulted.
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.option-2.label
+    Values:
+    - Take the coins and go
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.option-2.success-1.text
+    Values:
+    - You pocket the coins without ceremony. The water stays cold behind you the
+      whole way out.
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.option-3.label
+    Values:
+    - Leave the bowl alone
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-offering.option-3.decline
+    Values:
+    - You keep your hands to yourself and wade on past.
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.title
+    Values:
+    - A Musty Tome
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.prompt
+    Values:
+    - A swollen leather tome lies open on a lectern, its pages furred with mould
+      and strung across with old web. Whatever is written in it was worth writing
+      down carefully. Something has been living in the spine for a long time.
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-1.label
+    Values:
+    - Ease it off the lectern
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-1.success-1.text
+    Values:
+    - You lift the cover clear, copy what matters, and leave the rest to the damp.
+      A collector will pay for this.
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-1.success-2.text
+    Values:
+    - You get the pages out intact - and the thing in the spine gets a piece of you
+      on the way past.
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-1.failure-1.text
+    Values:
+    - The spine splits, the web comes alive, and something long-legged sinks its
+      jaws in before you can pull back. The pages are ruined.
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-1.failure-2.text
+    Values:
+    - The lectern gives way. You come out of the mess with nothing but a lighter
+      pack.
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-2.label
+    Values:
+    - Leave it to rot
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-2.decline
+    Values:
+    - You leave the book to the damp. It has waited this long; it can wait longer.
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb.title
+    Values:
+    - A Sealed Tomb
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb.prompt
+    Values:
+    - A slab of stone has been dragged over a hole in the cavern floor and mortared
+      down at the edges. Somebody wanted this shut. The mortar is old, and the slab
+      has a lip you could get your hands under.
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb.option-1.label
+    Values:
+    - Heave the slab aside
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb.option-1.success-1.text
+    Values:
+    - 'The mortar goes with a crack and the slab slides. Below: a body in good armour
+      that has not needed it for a century.'
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb.option-1.success-2.text
+    Values:
+    - It shifts far enough. You come up with a sword and a badly wrenched shoulder.
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb.option-1.failure-1.text
+    Values:
+    - The slab comes back on your fingers and the whole cavern hears about it. Whatever
+      was sealed in was not the only thing down here.
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb.option-1.failure-2.text
+    Values:
+    - It will not move. You leave skin on the stone for nothing.
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb.option-2.label
+    Values:
+    - Leave the dead sealed
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb.option-2.decline
+    Values:
+    - Somebody mortared this down for a reason. You leave the reason where it is.
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.title
+    Values:
+    - The Treasury
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.prompt
+    Values:
+    - Strongboxes line the walls, prised open and emptied a long time ago. There
+      is loose coin in the corners for anyone patient enough to go along the shelves
+      - and one gilded chest, lock already sprung, that nobody has touched.
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.option-1.label
+    Values:
+    - Gather the loose coin
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.option-1.success-1.text
+    Values:
+    - You work along the shelves and come away with a respectable double handful.
+      The gilded chest is still sitting there, still untouched, as you leave.
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.option-2.label
+    Values:
+    - Throw the lid back on the gilded chest
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.option-2.success-1.text
+    Values:
+    - 'The lid swings clear of a needle you never saw. Underneath: coin, and gear
+      somebody else did not live to use.'
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.option-2.success-2.text
+    Values:
+    - Empty, but for a fat purse wedged under the lining.
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.option-2.failure-1.text
+    Values:
+    - The needle goes in above the knuckle. Whatever was on it burns all the way
+      up the arm, and does not stop burning.
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.option-2.failure-2.text
+    Values:
+    - The lid comes back on a spring and the crack of it goes down every corridor
+      on this floor. Something answers.
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.option-3.label
+    Values:
+    - Take nothing and move on
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard.option-3.decline
+    Values:
+    - You leave the shelves and the chest exactly as you found them.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.retry-first-floor.text
+    Values:
+    - The dungeon is still waiting. Take The Story to go back down.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.build-hall-in-town.text
+    Values:
+    - You came home with timber. Click the Hall of Progression's foundation to raise
+      it.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.build-hall-on-panel.text
+    Values:
+    - Build the Hall of Progression. It costs the timber you just brought home.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.open-hall-in-town.text
+    Values:
+    - The hall stands. Step inside to spend the XP your hero gained.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.enter-hall-on-panel.text
+    Values:
+    - The hall stands. Enter it to spend the XP your hero gained.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.pick-node.text
+    Values:
+    - Every fight gave your hero XP. Click the glowing node - you can afford it.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.activate-node.text
+    Values:
+    - Now press Activate to spend the XP.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.node-learned.text
+    Values:
+    - Your hero grew stronger. Head back to town - the road down is open again.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.take-the-road.text
+    Values:
+    - The town is yours now. When you are ready, take The Story to continue The Threshold.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.first-death.text
+    Values:
+    - Every party falls, and falling is how you get stronger. What you earned on
+      earlier floors is safe - spend it in town, then go back down.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.open-storehouse-in-town.text
+    Values:
+    - The floor paid out a sword. Gear is vital to survival down there - open the
+      Storehouse and put it on.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.enter-storehouse-on-panel.text
+    Values:
+    - Enter the Storehouse. Everything you bring home is kept here.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.equip-gear.text
+    Values:
+    - Pick the Main Hand slot, then the sword, and equip it. A party without gear
+      does not last long.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.gear-equipped.text
+    Values:
+    - Equipped. Check here after every run - better gear turns up the deeper you
+      go. Back to town when ready.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.go-on.text
+    Values:
+    - Your party is armed. When you are ready, take The Story to continue The Threshold.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.challenge-ahead.text
+    Values:
+    - Not every open road is meant for you yet. {run} is built for a far stronger
+      party - most go elsewhere first.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.revisit-hall-in-town.text
+    Values:
+    - Both heroes earned XP on that floor. Visit the Hall of Progression - the Paladin
+      can grow too.
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.revisit-hall-on-grid.text
+    Values:
+    - The Paladin has XP to spend as well. Spend it on either hero, or go back when
+      you are ready.
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-multicast.name
+    Values:
+    - MultiCast
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-qyraxis.name
+    Values:
+    - Qyraxis
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-qyraxis-power.name
+    Values:
+    - 'Qyraxis: Charged Wings'
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-qyraxis-stay.name
+    Values:
+    - 'Qyraxis: Long Storm'
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-qyraxis-charge.name
+    Values:
+    - 'Qyraxis: Second Flight'
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-glacius.name
+    Values:
+    - Glacius
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-glacius-power.name
+    Values:
+    - 'Glacius: Thick Frost'
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-glacius-stay.name
+    Values:
+    - 'Glacius: Long Winter'
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-glacius-charge.name
+    Values:
+    - 'Glacius: Second Thaw'
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-ifrit.name
+    Values:
+    - Ifrit
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-ifrit-power.name
+    Values:
+    - 'Ifrit: Stoked'
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-ifrit-stay.name
+    Values:
+    - 'Ifrit: Slow Burn'
+    Reviewed: 0
+    Note: 
+  - Key: node.mage-ifrit-charge.name
+    Values:
+    - 'Ifrit: Rekindled'
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-lion.name
+    Values:
+    - Aegis Lion
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-lion-power.name
+    Values:
+    - 'Aegis Lion: Iron Mane'
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-lion-stay.name
+    Values:
+    - 'Aegis Lion: Long Watch'
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-lion-charge.name
+    Values:
+    - 'Aegis Lion: Second Roar'
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-seraph.name
+    Values:
+    - Judgement Seraph
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-seraph-power.name
+    Values:
+    - 'Judgement Seraph: Tempered'
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-seraph-stay.name
+    Values:
+    - 'Judgement Seraph: Vigil'
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-seraph-charge.name
+    Values:
+    - 'Judgement Seraph: Second Descent'
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-stag.name
+    Values:
+    - Dawn Stag
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-stag-power.name
+    Values:
+    - 'Dawn Stag: Brighter Dawn'
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-stag-stay.name
+    Values:
+    - 'Dawn Stag: Long Morning'
+    Reviewed: 0
+    Note: 
+  - Key: node.paladin-stag-charge.name
+    Values:
+    - 'Dawn Stag: Second Light'
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-boar.name
+    Values:
+    - Bloodfang Boar
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-boar-fury.name
+    Values:
+    - Boar's Fury
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-boar-endurance.name
+    Values:
+    - Boar's Endurance
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-boar-charge.name
+    Values:
+    - Boar's Second Wind
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-golem.name
+    Values:
+    - Cairn Golem
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-golem-bulk.name
+    Values:
+    - Golem's Bulk
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-golem-stay.name
+    Values:
+    - Golem's Vigil
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-golem-charge.name
+    Values:
+    - Golem's Return
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-charger.name
+    Values:
+    - Bloodfang Boar
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-charger-power.name
+    Values:
+    - Boar's Fury
+    Reviewed: 0
+    Note: 
+  - Key: node.warrior-charger-charge.name
+    Values:
+    - Boar's Second Wind
+    Reviewed: 0
+    Note: 
+  - Key: potion.healing.name
+    Values:
+    - Healing
+    Reviewed: 0
+    Note: 
+  - Key: potion.antidote.name
+    Values:
+    - Antidote
+    Reviewed: 0
+    Note: 
+  - Key: potion.energy.name
+    Values:
+    - Energy
+    Reviewed: 0
+    Note: 
+  - Key: potion.elixir.name
+    Values:
+    - Elixir
+    Reviewed: 0
+    Note: 
+  - Key: modifier.hardened-foes.name
+    Values:
+    - Hardened Foes
+    Reviewed: 0
+    Note: 
+  - Key: modifier.hardened-foes.description
+    Values:
+    - Enemies have +{0}% more health.
+    Reviewed: 0
+    Note: 
+  - Key: modifier.sharpened-blades.name
+    Values:
+    - Sharpened Blades
+    Reviewed: 0
+    Note: 
+  - Key: modifier.sharpened-blades.description
+    Values:
+    - Enemies deal +{0}% more damage.
+    Reviewed: 0
+    Note: 
+  - Key: modifier.quickened-foes.name
+    Values:
+    - Quickened Foes
+    Reviewed: 0
+    Note: 
+  - Key: modifier.quickened-foes.description
+    Values:
+    - Enemies are +{0}% faster - they act sooner and more often.
+    Reviewed: 0
+    Note: 
+  - Key: modifier.swarming-halls.name
+    Values:
+    - Swarming Halls
+    Reviewed: 0
+    Note: 
+  - Key: modifier.swarming-halls.description
+    Values:
+    - Every fight brings {0} more foe(s), up to five.
+    Reviewed: 0
+    Note: 
+  - Key: modifier.no-respite.name
+    Values:
+    - No Respite
+    Reviewed: 0
+    Note: 
+  - Key: modifier.no-respite.description
+    Values:
+    - Heroes receive {0}% less healing - spells, potions and refuges alike.
+    Reviewed: 0
+    Note: 
+  - Key: move.abyssal-tide.name
+    Values:
+    - Abyssal Tide
+    Reviewed: 0
+    Note: 
+  - Key: move.desperate-mending.name
+    Values:
+    - Desperate Mending
+    Reviewed: 0
+    Note: 
+  - Key: move.war-chant.name
+    Values:
+    - War Chant
+    Reviewed: 0
+    Note: 
+  - Key: move.mend.name
+    Values:
+    - Mend
+    Reviewed: 0
+    Note: 
+  - Key: move.scythe-sweep.name
+    Values:
+    - Scythe Sweep
+    Reviewed: 0
+    Note: 
+  - Key: move.shackle.name
+    Values:
+    - Shackle
+    Reviewed: 0
+    Note: 
+  - Key: move.heavy-blow.name
+    Values:
+    - Heavy Blow
+    Reviewed: 0
+    Note: 
+  - Key: move.paralysing-claw.name
+    Values:
+    - Paralysing Claw
+    Reviewed: 0
+    Note: 
+  - Key: move.spill-the-hoard.name
+    Values:
+    - Spill the Hoard
+    Reviewed: 0
+    Note: 
+  - Key: move.coin-storm.name
+    Values:
+    - Coin Storm
+    Reviewed: 0
+    Note: 
+  - Key: move.weaken.name
+    Values:
+    - Weaken
+    Reviewed: 0
+    Note: 
+  - Key: move.raise-dead.name
+    Values:
+    - Raise Dead
+    Reviewed: 0
+    Note: 
+  - Key: move.death-nova.name
+    Values:
+    - Death Nova
+    Reviewed: 0
+    Note: 
+  - Key: move.bog-surge.name
+    Values:
+    - Bog Surge
+    Reviewed: 0
+    Note: 
+  - Key: move.bud-off.name
+    Values:
+    - Bud Off
+    Reviewed: 0
+    Note: 
+  - Key: move.acid-deluge.name
+    Values:
+    - Acid Deluge
+    Reviewed: 0
+    Note: 
+  - Key: move.shield-ally.name
+    Values:
+    - Shield Ally
+    Reviewed: 0
+    Note: 
+  - Key: move.sap-will.name
+    Values:
+    - Sap Will
+    Reviewed: 0
+    Note: 
+  - Key: move.crushing-sweep.name
+    Values:
+    - Crushing Sweep
+    Reviewed: 0
+    Note: 
+  - Key: campaign.name
+    Values:
+    - The Story
+    Reviewed: 0
+    Note: 
+  - Key: ui.combat.list-title
+    Values:
+    - Ability
+    Reviewed: 0
+    Note: 
+  - Key: ui.combat.target-prompt
+    Values:
+    - Select Target
+    Reviewed: 0
+    Note: 
+  - Key: ui.common.arrows-move-enter-choose-esc
+    Values:
+    - "Arrows move  \xB7  Enter choose  \xB7  Esc back"
+    Reviewed: 0
+    Note: 
+  - Key: ui.common.back
+    Values:
+    - Back
+    Reviewed: 0
+    Note: 
+  - Key: ui.common.continue
+    Values:
+    - Continue
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.a-wider-party-is-safer
+    Values:
+    - A wider party is safer; a narrower one levels faster.
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.bestiary-hint
+    Values:
+    - "\u2191\u2193 select  \xB7  \u2190\u2192 tab  \xB7  Esc back"
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.bestiary-list-title
+    Values:
+    - Enemies met
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.bestiary-tab-monsters
+    Values:
+    - Monsters
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.bestiary-tab-recipes
+    Values:
+    - Recipes
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.campaign-detail-name
+    Values:
+    - Pick a place on the map.
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.campaign-hint
+    Values:
+    - "Arrows move  \xB7  Enter begin  \xB7  Esc back  \xB7  drag to pan, scroll
+      to zoom"
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.campaign-legend
+    Values:
+    - "\u25B6 in progress  \xB7  \u2605 open  \xB7  ? side road  \xB7  \u2713 cleared 
+      \xB7  \U0001F512 locked"
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.campaign-start
+    Values:
+    - Begin
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.campaign-title
+    Values:
+    - The Story
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.campfire
+    Values:
+    - Campfire
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.enter-btn
+    Values:
+    - Enter Dungeon
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.essence
+    Values:
+    - ESSENCE
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.forge
+    Values:
+    - Forge
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.forge-tab-combos
+    Values:
+    - Combos
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.forge-tab-craft
+    Values:
+    - Craft
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.forge-tab-magic
+    Values:
+    - Abilities
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.forge-upgrade
+    Values:
+    - Upgrade
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.gold
+    Values:
+    - GOLD
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.grid-activate
+    Values:
+    - Activate
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.grid-detail-name
+    Values:
+    - Select a node.
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.grid-hint
+    Values:
+    - "Arrows move  \xB7  Enter activate  \xB7  Q/E hero  \xB7  Esc back  \xB7  drag
+      to pan, scroll to zoom"
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.hall-of-knowledge
+    Values:
+    - Hall of Knowledge
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.hub-menu-btn
+    Values:
+    - Main Menu
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.inv-confirm-cancel
+    Values:
+    - Cancel
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.inv-confirm-ok
+    Values:
+    - Reassign
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.inv-confirm-title
+    Values:
+    - Reassign?
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.inventory
+    Values:
+    - Inventory
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.lot-costs-title
+    Values:
+    - Costs
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.lot-enter
+    Values:
+    - Enter
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.lot-grant-title
+    Values:
+    - Next level
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.marching-out
+    Values:
+    - Marching out
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.merchant
+    Values:
+    - Merchant
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.merchant-tab-belt
+    Values:
+    - Potion Belt
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.merchant-tab-buy
+    Values:
+    - Buy
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.merchant-tab-sell
+    Values:
+    - Sell
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.party-lead
+    Values:
+    - Lead the party
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.party-split-catchup
+    Values:
+    - Catch Up
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.party-split-even
+    Values:
+    - Even
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.party-split-mentor
+    Values:
+    - Mentor
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.potion-belt
+    Values:
+    - Potion belt
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.progress-party-btn
+    Values:
+    - Change Party
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.return-btn
+    Values:
+    - Return to town
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.road-btn
+    Values:
+    - "The Story \u25B6"
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.roster
+    Values:
+    - Roster
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.run-complete
+    Values:
+    - Run Complete!
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.sharing-the-xp
+    Values:
+    - Sharing the XP
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.sphere-grid
+    Values:
+    - Sphere Grid
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.tab-consumables
+    Values:
+    - Consumables
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.tab-equipment
+    Values:
+    - Equipment
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.tab-materials
+    Values:
+    - Materials
+    Reviewed: 0
+    Note: 
+  - Key: ui.hub.tab-spells
+    Values:
+    - Abilities
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.audio
+    Values:
+    - Audio
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.combat-speed
+    Values:
+    - Combat speed
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.immoral-dungeon
+    Values:
+    - Immoral Dungeon
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.master
+    Values:
+    - Master
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.music
+    Values:
+    - Music
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.mute
+    Values:
+    - Mute
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.options
+    Values:
+    - Options
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.options-btn
+    Values:
+    - Options
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.quit-btn
+    Values:
+    - Quit
+    Reviewed: 0
+    Note: 
+  - Key: ui.menu.sound-effects
+    Values:
+    - Sound Effects
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.action-btn
+    Values:
+    - Action
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.audio
+    Values:
+    - Audio
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.boss-banner-sub
+    Values:
+    - BOSS
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.cache
+    Values:
+    - cache
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.captive
+    Values:
+    - captive
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.combat-speed
+    Values:
+    - Combat speed
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.descend-btn
+    Values:
+    - Take the stairs
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.detail-cancel
+    Values:
+    - Cancel
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.detail-ok
+    Values:
+    - Ok
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.enemies
+    Values:
+    - enemies
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.event
+    Values:
+    - event
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.exit
+    Values:
+    - exit
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.fight-btn
+    Values:
+    - Fight
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.flee-btn
+    Values:
+    - Flee
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.level-clear-continue
+    Values:
+    - Back to Town
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.level-clear-loot-heading
+    Values:
+    - Found on this floor
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.level-clear-title
+    Values:
+    - Level Cleared!
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.level-clear-xp-heading
+    Values:
+    - Experience
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.map-hint
+    Values:
+    - "Arrows pick a room \xB7 Enter travel \xB7 Esc back"
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.map-title
+    Values:
+    - Map
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.master
+    Values:
+    - Master
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.music
+    Values:
+    - Music
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.mute
+    Values:
+    - Mute
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.nav-hint
+    Values:
+    - "Arrows pick a door \xB7 Enter walk through \xB7 Tab room actions"
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.not-entered
+    Values:
+    - not entered
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.party-status-title
+    Values:
+    - Party
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.pause-map
+    Values:
+    - Map
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.pause-quit
+    Values:
+    - Leave the Dungeon
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.pause-resume
+    Values:
+    - Resume
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.paused
+    Values:
+    - Paused
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.refuge
+    Values:
+    - refuge
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.rest-btn
+    Values:
+    - Rest at the refuge
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.search-btn
+    Values:
+    - Open the cache
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.sound-effects
+    Values:
+    - Sound Effects
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.summon-banner-sub
+    Values:
+    - SUMMON
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.victory-title
+    Values:
+    - Victory!
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.you-are-here
+    Values:
+    - you are here
+    Reviewed: 0
+    Note: 

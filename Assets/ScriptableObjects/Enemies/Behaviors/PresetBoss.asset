@@ -16,7 +16,7 @@ MonoBehaviour:
   Archetype: 4
   Actions:
   - Label: Signature
-    DisplayName: Crushing Sweep
+    DisplayNameKey: move.crushing-sweep.name
     Kind: 2
     Priority: 10
     Weight: 1
@@ -26,6 +26,10 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 5
@@ -38,7 +42,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Signature (enraged)
-    DisplayName: Crushing Sweep
+    DisplayNameKey: move.crushing-sweep.name
     Kind: 2
     Priority: 10
     Weight: 1
@@ -48,6 +52,10 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 5
@@ -60,7 +68,7 @@ MonoBehaviour:
       Value: 0.3
       Stat: 1
   - Label: Enraged blow
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -70,13 +78,17 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 1
       Value: 0.3
       Stat: 1
   - Label: Blow
-    DisplayName: 
+    DisplayNameKey: 
     Kind: 0
     Priority: 0
     Weight: 1
@@ -86,6 +98,10 @@ MonoBehaviour:
     Power: 0
     Duration: 3
     TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
     - Kind: 2

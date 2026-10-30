@@ -15,12 +15,12 @@ MonoBehaviour:
   StartNodeKey: cleric-sig
   Nodes:
   - Key: cleric-start
-    DisplayName: 
     Kind: 0
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -39,12 +39,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-trunk-1
   - Key: cleric-trunk-1
-    DisplayName: 
     Kind: 0
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -63,12 +63,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-sig
   - Key: cleric-sig
-    DisplayName: 
     Kind: 3
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -84,12 +84,12 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors: []
   - Key: cleric-trunk-2
-    DisplayName: 
     Kind: 0
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -110,12 +110,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-start
   - Key: cleric-trunk-slot
-    DisplayName: 
     Kind: 2
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 60, y: -375}
     Gains:
       Values: []
@@ -132,12 +132,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-a-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -105, y: -215}
     Gains:
       Values:
@@ -156,12 +156,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-a-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -246, y: -380}
     Gains:
       Values:
@@ -180,12 +180,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-3
   - Key: cleric-a-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -132, y: -325}
     Gains:
       Values: []
@@ -202,12 +202,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-a-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -285, y: -310}
     Gains:
       Values:
@@ -226,12 +226,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-2
   - Key: cleric-a-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -474, y: -490}
     Gains:
       Values: []
@@ -248,12 +248,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-miracle
   - Key: cleric-a-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -702, y: -600}
     Gains:
       Values: []
@@ -270,12 +270,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-phoenix
   - Key: cleric-a-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -816, y: -655}
     Gains:
       Values:
@@ -294,12 +294,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-6
   - Key: cleric-a-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -420, y: -360}
     Gains:
       Values: []
@@ -316,12 +316,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-miracle
   - Key: cleric-a-tip-a
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -911, y: -710}
     Gains:
       Values:
@@ -340,12 +340,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-7
   - Key: cleric-a-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -876, y: -585}
     Gains:
       Values:
@@ -364,12 +364,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-7
   - Key: cleric-a-bless
-    DisplayName: 
     Kind: 3
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -640, y: -700}
     Gains:
       Values: []
@@ -386,12 +386,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-6
   - Key: cleric-a-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
+    RequiredNodes: []
     Position: {x: -600, y: -790}
     Gains:
       Values: []
@@ -408,12 +408,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-bless
   - Key: cleric-a-revive
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -840, y: -760}
     Gains:
       Values: []
@@ -430,12 +430,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-7
   - Key: cleric-a-miracle
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -360, y: -435}
     Gains:
       Values: []
@@ -452,7 +452,6 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-2
   - Key: cleric-phoenix
-    DisplayName: 
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -462,6 +461,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -588, y: -545}
     Gains:
       Values: []
@@ -478,12 +478,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-5
   - Key: cleric-phoenix-power
-    DisplayName: 
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -1006, y: -765}
     Gains:
       Values: []
@@ -500,7 +500,6 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-tip-a
   - Key: cleric-phoenix-charge
-    DisplayName: 
     Kind: 7
     XpCost: 475
     UnlockedByDefault: 0
@@ -510,6 +509,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -1101, y: -820}
     Gains:
       Values: []
@@ -526,12 +526,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-phoenix-power
   - Key: cleric-b-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -60, y: -375}
     Gains:
       Values:
@@ -550,12 +550,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-b-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -574,12 +574,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-3
   - Key: cleric-b-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -450}
     Gains:
       Values: []
@@ -596,12 +596,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-b-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 75, y: -560}
     Gains:
       Values:
@@ -620,12 +620,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-2
   - Key: cleric-b-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -720}
     Gains:
       Values: []
@@ -642,12 +642,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-miracle
   - Key: cleric-b-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -664,12 +664,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-angel
   - Key: cleric-b-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -688,12 +688,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-6
   - Key: cleric-b-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 60, y: -690}
     Gains:
       Values: []
@@ -710,12 +710,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-miracle
   - Key: cleric-b-tip-a
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 95, y: -1045}
     Gains:
       Values:
@@ -734,12 +734,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-7
   - Key: cleric-b-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -920}
     Gains:
       Values:
@@ -758,12 +758,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-7
   - Key: cleric-b-quicken
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -1060}
     Gains:
       Values: []
@@ -780,12 +780,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-7
   - Key: cleric-b-miracle
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -630}
     Gains:
       Values: []
@@ -802,7 +802,6 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-2
   - Key: cleric-angel
-    DisplayName: 
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -812,6 +811,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -828,12 +828,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-5
   - Key: cleric-angel-power
-    DisplayName: 
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 190, y: -1100}
     Gains:
       Values: []
@@ -850,12 +850,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-b-tip-a
   - Key: cleric-angel-stay
-    DisplayName: 
     Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 285, y: -1155}
     Gains:
       Values: []
@@ -872,7 +872,6 @@ MonoBehaviour:
     Neighbors:
     - cleric-angel-power
   - Key: cleric-angel-charge
-    DisplayName: 
     Kind: 7
     XpCost: 540
     UnlockedByDefault: 0
@@ -882,6 +881,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 380, y: -1210}
     Gains:
       Values: []
@@ -898,12 +898,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-angel-stay
   - Key: cleric-c-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 105, y: -215}
     Gains:
       Values:
@@ -922,12 +922,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-c-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 246, y: -380}
     Gains:
       Values:
@@ -946,12 +946,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-3
   - Key: cleric-c-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 132, y: -325}
     Gains:
       Values: []
@@ -968,12 +968,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-trunk-2
   - Key: cleric-c-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 315, y: -340}
     Gains:
       Values:
@@ -992,12 +992,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-2
   - Key: cleric-c-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 474, y: -490}
     Gains:
       Values: []
@@ -1014,12 +1014,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-miracle
   - Key: cleric-c-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 702, y: -600}
     Gains:
       Values: []
@@ -1036,12 +1036,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-archon
   - Key: cleric-c-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 816, y: -655}
     Gains:
       Values:
@@ -1060,12 +1060,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-6
   - Key: cleric-c-res
-    DisplayName: 
     Kind: 1
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 420, y: -360}
     Gains:
       Values: []
@@ -1082,12 +1082,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-miracle
   - Key: cleric-c-tip-a
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 911, y: -710}
     Gains:
       Values:
@@ -1106,12 +1106,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-7
   - Key: cleric-c-tip-b
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 876, y: -585}
     Gains:
       Values:
@@ -1130,12 +1130,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-7
   - Key: cleric-c-searing
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 840, y: -760}
     Gains:
       Values: []
@@ -1152,12 +1152,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-7
   - Key: cleric-c-miracle
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 360, y: -435}
     Gains:
       Values: []
@@ -1174,7 +1174,6 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-2
   - Key: cleric-archon
-    DisplayName: 
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -1184,6 +1183,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 3
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 588, y: -545}
     Gains:
       Values: []
@@ -1200,12 +1200,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-5
   - Key: cleric-archon-power
-    DisplayName: 
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 1006, y: -765}
     Gains:
       Values: []
@@ -1222,12 +1222,12 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-tip-a
   - Key: cleric-archon-stay
-    DisplayName: 
     Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 1101, y: -820}
     Gains:
       Values: []
@@ -1244,7 +1244,6 @@ MonoBehaviour:
     Neighbors:
     - cleric-archon-power
   - Key: cleric-archon-charge
-    DisplayName: 
     Kind: 7
     XpCost: 540
     UnlockedByDefault: 0
@@ -1254,6 +1253,7 @@ MonoBehaviour:
     - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 2
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 1196, y: -875}
     Gains:
       Values: []

@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Ranger
   m_EditorClassIdentifier: 
   Key: Ranger
-  Label: Ranger
-  Blurb: Reads the room before anyone else has finished walking into it.
   Vision:
     Fantasy: A hunter who reads the room before anyone else has finished walking
       into it. Fights from range, picks targets, controls the pace.
@@ -68,4 +66,10 @@ MonoBehaviour:
     - Type: 7
       Amount: 29
   AttackStat: 3
+  Momentum:
+    PercentPerStack: 0
+    MaxStacks: 0
+  Focus:
+    PerCast: 0
+    Max: 0
   SphereGrid: {fileID: 11400000, guid: 740829dbed29482194bf0a96222e37d1, type: 2}

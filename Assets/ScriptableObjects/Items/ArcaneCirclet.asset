@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: ArcaneCirclet
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: ArcaneCirclet
-  DisplayName: Arcane Circlet
   Icon: {fileID: 21300000, guid: f5679797660d49beb0c53d538ffa6da0, type: 3}
   Rarity: 1
   ItemLevel: 3
+  FindChanceScale: 1
   Category: 0
   SlotType: 2
   Bonuses:
@@ -31,8 +31,8 @@ MonoBehaviour:
     Value: 4
   Resistances: []
   Triggers:
-  - Label:
-    Text: 'After an ability: 10% chance it costs no charge (once per fight).'
+  - LabelKey: 
+    TextKey: item.arcane-circlet.reaction-1.text
     When: 8
     Chance: 0.1
     Limit: 2
@@ -57,6 +57,16 @@ MonoBehaviour:
       DrainToParty: 0
   Milestones: []
   Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
   MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

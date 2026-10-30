@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: MultiCast
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: MultiCast
-  DisplayName: MultiCast
-  Description: 'Focus spent all at once: the next ability again, and again, and again.'
   Kind: 4
   TargetType: 1
   Effects: []

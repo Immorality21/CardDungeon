@@ -15,12 +15,12 @@ MonoBehaviour:
   StartNodeKey: mage-sig
   Nodes:
   - Key: mage-sig
-    DisplayName: 
     Kind: 3
     XpCost: 0
     UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: 0}
     Gains:
       Values: []
@@ -36,12 +36,12 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors: []
   - Key: mage-trunk-1
-    DisplayName: 
     Kind: 0
     XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -90}
     Gains:
       Values:
@@ -60,12 +60,12 @@ MonoBehaviour:
     Neighbors:
     - mage-sig
   - Key: mage-start
-    DisplayName: 
     Kind: 0
     XpCost: 30
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -180}
     Gains:
       Values:
@@ -84,12 +84,12 @@ MonoBehaviour:
     Neighbors:
     - mage-trunk-1
   - Key: mage-trunk-2
-    DisplayName: 
     Kind: 0
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -270}
     Gains:
       Values:
@@ -110,12 +110,12 @@ MonoBehaviour:
     Neighbors:
     - mage-start
   - Key: mage-trunk-slot
-    DisplayName: 
     Kind: 2
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 60, y: -375}
     Gains:
       Values: []
@@ -132,12 +132,12 @@ MonoBehaviour:
     Neighbors:
     - mage-trunk-2
   - Key: mage-a-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -105, y: -215}
     Gains:
       Values:
@@ -158,12 +158,12 @@ MonoBehaviour:
     Neighbors:
     - mage-trunk-2
   - Key: mage-a-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -246, y: -380}
     Gains:
       Values:
@@ -182,12 +182,12 @@ MonoBehaviour:
     Neighbors:
     - mage-a-3
   - Key: mage-a-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -132, y: -325}
     Gains:
       Values: []
@@ -204,12 +204,12 @@ MonoBehaviour:
     Neighbors:
     - mage-trunk-2
   - Key: mage-a-res
-    DisplayName: 
     Kind: 1
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -420, y: -360}
     Gains:
       Values: []
@@ -226,12 +226,12 @@ MonoBehaviour:
     Neighbors:
     - mage-a-2
   - Key: mage-a-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -285, y: -310}
     Gains:
       Values:
@@ -250,12 +250,12 @@ MonoBehaviour:
     Neighbors:
     - mage-a-2
   - Key: mage-a-5
-    DisplayName: 
     Kind: 2
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -344, y: -430}
     Gains:
       Values: []
@@ -272,12 +272,12 @@ MonoBehaviour:
     Neighbors:
     - mage-a-2
   - Key: mage-a-6
-    DisplayName: 
     Kind: 3
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -572, y: -540}
     Gains:
       Values: []
@@ -294,12 +294,12 @@ MonoBehaviour:
     Neighbors:
     - mage-qyraxis
   - Key: mage-a-7
-    DisplayName: 
     Kind: 0
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -686, y: -595}
     Gains:
       Values:
@@ -320,12 +320,12 @@ MonoBehaviour:
     Neighbors:
     - mage-a-6
   - Key: mage-a-tip
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -781, y: -650}
     Gains:
       Values:
@@ -344,12 +344,12 @@ MonoBehaviour:
     Neighbors:
     - mage-a-7
   - Key: mage-b-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -60, y: -375}
     Gains:
       Values:
@@ -370,12 +370,12 @@ MonoBehaviour:
     Neighbors:
     - mage-trunk-2
   - Key: mage-b-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -540}
     Gains:
       Values:
@@ -394,12 +394,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-3
   - Key: mage-b-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -450}
     Gains:
       Values: []
@@ -416,12 +416,12 @@ MonoBehaviour:
     Neighbors:
     - mage-trunk-2
   - Key: mage-b-res
-    DisplayName: 
     Kind: 1
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 105, y: -605}
     Gains:
       Values: []
@@ -438,12 +438,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-2
   - Key: mage-b-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -40, y: -610}
     Gains:
       Values:
@@ -462,12 +462,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-2
   - Key: mage-b-5
-    DisplayName: 
     Kind: 2
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -720}
     Gains:
       Values: []
@@ -484,12 +484,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-2
   - Key: mage-b-6
-    DisplayName: 
     Kind: 3
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -900}
     Gains:
       Values: []
@@ -506,12 +506,12 @@ MonoBehaviour:
     Neighbors:
     - mage-glacius
   - Key: mage-b-7
-    DisplayName: 
     Kind: 0
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -990}
     Gains:
       Values:
@@ -532,12 +532,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-6
   - Key: mage-b-8
-    DisplayName: 
     Kind: 3
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 95, y: -1045}
     Gains:
       Values: []
@@ -554,12 +554,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-7
   - Key: mage-b-tip
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -95, y: -1045}
     Gains:
       Values:
@@ -578,12 +578,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-7
   - Key: mage-c-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 80, y: -260}
     Gains:
       Values:
@@ -602,12 +602,12 @@ MonoBehaviour:
     Neighbors:
     - mage-trunk-2
   - Key: mage-c-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 246, y: -380}
     Gains:
       Values:
@@ -628,12 +628,12 @@ MonoBehaviour:
     Neighbors:
     - mage-c-3
   - Key: mage-c-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 132, y: -325}
     Gains:
       Values: []
@@ -650,12 +650,12 @@ MonoBehaviour:
     Neighbors:
     - mage-trunk-2
   - Key: mage-c-res
-    DisplayName: 
     Kind: 1
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 420, y: -360}
     Gains:
       Values: []
@@ -672,12 +672,12 @@ MonoBehaviour:
     Neighbors:
     - mage-c-2
   - Key: mage-c-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 320, y: -290}
     Gains:
       Values:
@@ -696,12 +696,12 @@ MonoBehaviour:
     Neighbors:
     - mage-c-2
   - Key: mage-c-5
-    DisplayName: 
     Kind: 2
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 344, y: -430}
     Gains:
       Values: []
@@ -718,12 +718,12 @@ MonoBehaviour:
     Neighbors:
     - mage-c-2
   - Key: mage-c-6
-    DisplayName: 
     Kind: 3
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 572, y: -540}
     Gains:
       Values: []
@@ -740,12 +740,12 @@ MonoBehaviour:
     Neighbors:
     - mage-ifrit
   - Key: mage-c-7
-    DisplayName: 
     Kind: 0
     XpCost: 245
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 686, y: -595}
     Gains:
       Values:
@@ -764,12 +764,12 @@ MonoBehaviour:
     Neighbors:
     - mage-c-6
   - Key: mage-c-tip
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 781, y: -650}
     Gains:
       Values:
@@ -788,12 +788,12 @@ MonoBehaviour:
     Neighbors:
     - mage-c-7
   - Key: mage-multicast
-    DisplayName: MultiCast
     Kind: 10
     XpCost: 45
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 100, y: -180}
     Gains:
       Values: []
@@ -810,12 +810,12 @@ MonoBehaviour:
     Neighbors:
     - mage-start
   - Key: mage-a-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
+    RequiredNodes: []
     Position: {x: -510, y: -640}
     Gains:
       Values: []
@@ -832,12 +832,12 @@ MonoBehaviour:
     Neighbors:
     - mage-a-6
   - Key: mage-b-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 100
+    RequiredNodes: []
     Position: {x: -95, y: -860}
     Gains:
       Values: []
@@ -854,12 +854,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-6
   - Key: mage-c-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 120
+    RequiredNodes: []
     Position: {x: 510, y: -640}
     Gains:
       Values: []
@@ -876,12 +876,12 @@ MonoBehaviour:
     Neighbors:
     - mage-c-6
   - Key: mage-qyraxis
-    DisplayName: Qyraxis
     Kind: 4
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -458, y: -485}
     Gains:
       Values: []
@@ -898,12 +898,12 @@ MonoBehaviour:
     Neighbors:
     - mage-a-5
   - Key: mage-qyraxis-power
-    DisplayName: 'Qyraxis: Charged Wings'
     Kind: 5
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -876, y: -705}
     Gains:
       Values: []
@@ -920,12 +920,12 @@ MonoBehaviour:
     Neighbors:
     - mage-a-tip
   - Key: mage-qyraxis-stay
-    DisplayName: 'Qyraxis: Long Storm'
     Kind: 6
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -971, y: -760}
     Gains:
       Values: []
@@ -942,12 +942,12 @@ MonoBehaviour:
     Neighbors:
     - mage-qyraxis-power
   - Key: mage-qyraxis-charge
-    DisplayName: 'Qyraxis: Second Flight'
     Kind: 7
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -1066, y: -815}
     Gains:
       Values: []
@@ -964,12 +964,12 @@ MonoBehaviour:
     Neighbors:
     - mage-qyraxis-stay
   - Key: mage-glacius
-    DisplayName: Glacius
     Kind: 4
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 0, y: -810}
     Gains:
       Values: []
@@ -986,12 +986,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-5
   - Key: mage-glacius-power
-    DisplayName: 'Glacius: Thick Frost'
     Kind: 5
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -190, y: -1100}
     Gains:
       Values: []
@@ -1008,12 +1008,12 @@ MonoBehaviour:
     Neighbors:
     - mage-b-tip
   - Key: mage-glacius-stay
-    DisplayName: 'Glacius: Long Winter'
     Kind: 6
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -285, y: -1155}
     Gains:
       Values: []
@@ -1030,12 +1030,12 @@ MonoBehaviour:
     Neighbors:
     - mage-glacius-power
   - Key: mage-glacius-charge
-    DisplayName: 'Glacius: Second Thaw'
     Kind: 7
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: -380, y: -1210}
     Gains:
       Values: []
@@ -1052,12 +1052,12 @@ MonoBehaviour:
     Neighbors:
     - mage-glacius-stay
   - Key: mage-ifrit
-    DisplayName: Ifrit
     Kind: 4
     XpCost: 155
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 458, y: -485}
     Gains:
       Values: []
@@ -1074,12 +1074,12 @@ MonoBehaviour:
     Neighbors:
     - mage-c-5
   - Key: mage-ifrit-power
-    DisplayName: 'Ifrit: Stoked'
     Kind: 5
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 876, y: -705}
     Gains:
       Values: []
@@ -1096,12 +1096,12 @@ MonoBehaviour:
     Neighbors:
     - mage-c-tip
   - Key: mage-ifrit-stay
-    DisplayName: 'Ifrit: Slow Burn'
     Kind: 6
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 971, y: -760}
     Gains:
       Values: []
@@ -1118,12 +1118,12 @@ MonoBehaviour:
     Neighbors:
     - mage-ifrit-power
   - Key: mage-ifrit-charge
-    DisplayName: 'Ifrit: Rekindled'
     Kind: 7
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
+    RequiredNodes: []
     Position: {x: 1066, y: -815}
     Gains:
       Values: []

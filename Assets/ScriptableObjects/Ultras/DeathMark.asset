@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: DeathMark
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: DeathMark
-  DisplayName: Death Mark
-  Description: She picks the one that dies first, and everyone can see it.
   Kind: 1
   TargetType: 0
   Effects:

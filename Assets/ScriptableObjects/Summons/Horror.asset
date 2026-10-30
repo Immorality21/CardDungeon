@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Horror
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Horror
-  DisplayName: Horror
-  Description: 'What the rite leaves of a hero: everything they were, turned outward.'
   Sprite: {fileID: 21300000, guid: be1ec3e9a1564fc7a53b150ac72f4e77, type: 3}
   AnimationFrames:
   - {fileID: -2317655124309915001, guid: 2465ffac6a85470ba0e28ad3a577665d, type: 3}
@@ -27,8 +25,17 @@ MonoBehaviour:
   Kind: 2
   TargetType: 0
   Effects: []
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames: []
   BaseCharges: 1
   StatPercents:
     Values:
@@ -51,6 +58,11 @@ MonoBehaviour:
   Actions: []
   Signature: {fileID: 11400000, guid: 9b73fef50480bbc40877991c0b755887, type: 2}
   AttackAbility: {fileID: 11400000, guid: 8da4030883507c34ba4680b3a49072c6, type: 2}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
+  RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: PoisonDart
   m_EditorClassIdentifier: 
   Key: PoisonDart
-  DisplayName: Poison Dart
-  Description: A toxic dart that damages and poisons an enemy.
   Icon: {fileID: 21300000, guid: 508bc31b89414b54804a35bc759cbd04, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 0
   Rarity: 1
   Effects:
@@ -27,6 +27,12 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 2
     PowerMode: 0
@@ -36,6 +42,15 @@ MonoBehaviour:
     Duration: 3
     UnlockLevel: 0
     ApplyChance: 75
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 04000000
   TagDuration: 3
+  ThreatMultiplier: 1
+  BonusThreat: 0
   CanCrit: 1
+  EnemyOnly: 0
+  RandomHits: 0

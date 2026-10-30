@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: MiracleOfLight
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: MiracleOfLight
-  DisplayName: Miracle of Light
-  Description: She asks, and is answered. Wounds close and every curse lifts.
   Kind: 1
   TargetType: 4
   Effects:
@@ -29,6 +27,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 10
     Power: 0
     PowerMode: 0
@@ -40,6 +41,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Hits: 1
   RandomTargets: 0
   Creature: {fileID: 0}

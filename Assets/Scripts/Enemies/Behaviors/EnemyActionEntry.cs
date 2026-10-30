@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Enemies.Behaviors
 {
@@ -110,9 +111,18 @@ namespace Assets.Scripts.Enemies.Behaviors
         [Tooltip("Authoring label only — never shown to the player. Say what the action is for.")]
         public string Label = "";
 
-        [Tooltip("The name the player sees in the banner as the enemy uses it (FFX-style). Empty " +
-                 "shows no banner. A cast always names its spell instead, so leave this empty there.")]
-        public string DisplayName = "";
+        [System.NonSerialized] private string _displayName;
+
+        /// <summary>From the text table (<see cref="DisplayNameKey"/>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.GetOrEmpty(DisplayNameKey); }
+            set { _displayName = value; }
+        }
+
+        [Tooltip("Text table key (Tools > Texts).")]
+        [TextKey]
+        public string DisplayNameKey = "";
 
         public EnemyActionKind Kind = EnemyActionKind.Attack;
 

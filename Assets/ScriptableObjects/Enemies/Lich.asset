@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Lich
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: Lich
-  DisplayName: Lich
   Sprite: {fileID: 21300000, guid: 4a69026500c6481eb1014db49fe54e57, type: 3}
   AnimationFrames:
   - {fileID: 7117089384654556301, guid: 0ddf2865e59040fb983b9da44ec6c664, type: 3}

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Items;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Hub
 {
@@ -22,14 +23,26 @@ namespace Assets.Scripts.Hub
     {
         [Tooltip("Stable save identifier, written into Meta.json when the lot is built. Treat as " +
                  "write-once, like HeroSO.Key - renaming it orphans every save that built it.")]
+        [TextKeys("building", "name", "description")]
         public string Key;
 
-        [Tooltip("Name shown on the lot and in its tooltip. Safe to rename at any time.")]
-        public string DisplayName;
+        [System.NonSerialized] private string _displayName;
 
-        [TextArea(2, 4)]
-        [Tooltip("One line of flavour for the lot's tooltip. Optional.")]
-        public string Blurb;
+        /// <summary>From the text table (<c>building.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("building", Key, this, "name"); }
+            set { _displayName = value; }
+        }
+
+        [System.NonSerialized] private string _blurb;
+
+        /// <summary>From the text table (<c>building.{key}.description</c>). Set only on instances built in code.</summary>
+        public string Blurb
+        {
+            get { return _blurb ?? Loc.AssetText("building", Key, this, "description"); }
+            set { _blurb = value; }
+        }
 
         [Tooltip("Which hub screen clicking this lot opens. Exactly one building per service - a " +
                  "service with no lot is a screen nobody can reach, which HubContentTests fails on.")]
@@ -114,14 +127,20 @@ namespace Assets.Scripts.Hub
                  "slip.")]
         public int GoldPerUpgrade;
 
-        [TextArea(1, 3)]
-        [Tooltip("What each level GRANTS, in the player's words: element 0 describes level 1, " +
-                 "element 1 level 2, and so on. This is the one thing a hub upgrade must always " +
-                 "say - a level on sale that does not name what it buys is the failure phase 6 " +
-                 "exists to avoid - so HubContentTests fails on an upgradable lot that leaves a " +
-                 "rung undescribed. Authored per lot because the VIEW must not know what a forge " +
-                 "level means.")]
-        public string[] LevelGrants = new string[0];
+        [Tooltip("Text table keys of what each level GRANTS, in the player's words: element 0 describes level 1, " +
+                 "element 1 level 2, and so on. HubContentTests fails on an upgradable lot that leaves a rung " +
+                 "undescribed. Edit the wording here or in Tools > Texts.")]
+        [TextKey]
+        public string[] LevelGrantKeys = new string[0];
+
+        [System.NonSerialized] private string[] _levelGrants;
+
+        /// <summary>What each level grants, worded (<see cref="LevelGrantKeys"/>). Set only on instances built in code.</summary>
+        public string[] LevelGrants
+        {
+            get { return _levelGrants ?? Array.ConvertAll(LevelGrantKeys ?? new string[0], Loc.GetOrEmpty); }
+            set { _levelGrants = value; }
+        }
 
         [Tooltip("Run keys that must ALL be cleared before the lot is even offered - the pacing " +
                  "dial. Empty means it is offered from the first visit. A lot nobody can reach is " +

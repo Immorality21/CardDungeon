@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: Galewing
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Galewing
-  DisplayName: Galewing
-  Description: A great hawk drops out of nowhere and rakes every enemy twice, finding
-    the gaps in their guard.
   Sprite: {fileID: 21300000, guid: ad5fa80fa9394a8aac55cc9886eeb5aa, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: d27c1fb88d394678b85b2b33e546acba, type: 3}
@@ -41,6 +38,12 @@ MonoBehaviour:
     BuffType: 0
     Duration: 0
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 0
     Power: 0
     PowerMode: 0
@@ -49,6 +52,12 @@ MonoBehaviour:
     BuffType: 0
     Duration: 0
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 3
     PowerMode: 0
@@ -57,8 +66,23 @@ MonoBehaviour:
     BuffType: 2
     Duration: 2
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
+  SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames: []
   BaseCharges: 1
   StatPercents:
     Values: []
@@ -67,3 +91,11 @@ MonoBehaviour:
   Actions: []
   Signature: {fileID: 0}
   AttackAbility: {fileID: 0}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
+  RotateActions: 0
+  ActsAlone: 0
+  SquadTiers: []
+  SquadSize: 3
+  MaxSquadSize: 4

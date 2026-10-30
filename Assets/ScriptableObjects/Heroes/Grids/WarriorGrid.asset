@@ -15,7 +15,6 @@ MonoBehaviour:
   StartNodeKey: warrior-slash
   Nodes:
   - Key: warrior-start
-    DisplayName: 
     Kind: 0
     XpCost: 30
     UnlockedByDefault: 0
@@ -40,7 +39,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-trunk-1
   - Key: warrior-trunk-1
-    DisplayName: 
     Kind: 0
     XpCost: 20
     UnlockedByDefault: 0
@@ -65,7 +63,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-slash
   - Key: warrior-slash
-    DisplayName: 
     Kind: 3
     XpCost: 0
     UnlockedByDefault: 1
@@ -87,7 +84,6 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors: []
   - Key: warrior-trunk-2
-    DisplayName: 
     Kind: 0
     XpCost: 45
     UnlockedByDefault: 0
@@ -114,7 +110,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-start
   - Key: warrior-trunk-slot
-    DisplayName: 
     Kind: 2
     XpCost: 65
     UnlockedByDefault: 0
@@ -137,7 +132,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-a-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
@@ -162,7 +156,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-a-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
@@ -187,7 +180,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-3
   - Key: warrior-a-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
@@ -210,7 +202,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-a-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
@@ -235,7 +226,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-2
   - Key: warrior-a-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
@@ -258,7 +248,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-cover
   - Key: warrior-a-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
@@ -281,7 +270,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-golem
   - Key: warrior-a-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
@@ -308,7 +296,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-6
   - Key: warrior-a-fire
-    DisplayName: 
     Kind: 1
     XpCost: 90
     UnlockedByDefault: 0
@@ -331,7 +318,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-3
   - Key: warrior-a-plate
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
@@ -356,7 +342,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-2
   - Key: warrior-a-brace
-    DisplayName: 
     Kind: 0
     XpCost: 195
     UnlockedByDefault: 0
@@ -381,7 +366,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-5
   - Key: warrior-a-shadow
-    DisplayName: 
     Kind: 1
     XpCost: 295
     UnlockedByDefault: 0
@@ -404,7 +388,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-6
   - Key: warrior-a-ward
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
@@ -427,7 +410,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-7
   - Key: warrior-a-hold
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
@@ -452,7 +434,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-7
   - Key: warrior-b-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
@@ -477,7 +458,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-b-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
@@ -502,7 +482,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-3
   - Key: warrior-b-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
@@ -525,7 +504,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-b-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
@@ -550,7 +528,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-2
   - Key: warrior-b-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
@@ -573,7 +550,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-flurry
   - Key: warrior-b-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
@@ -596,7 +572,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-boar
   - Key: warrior-b-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
@@ -621,7 +596,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-6
   - Key: warrior-b-luck
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
@@ -646,7 +620,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-3
   - Key: warrior-b-quick
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
@@ -671,7 +644,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-2
   - Key: warrior-b-hone
-    DisplayName: 
     Kind: 0
     XpCost: 195
     UnlockedByDefault: 0
@@ -696,7 +668,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-5
   - Key: warrior-b-fortune
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
@@ -721,7 +692,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-6
   - Key: warrior-b-cry
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
@@ -748,7 +718,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-7
   - Key: warrior-b-edge
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
@@ -775,7 +744,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-7
   - Key: warrior-boar
-    DisplayName: Bloodfang Boar
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -802,7 +770,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-5
   - Key: warrior-boar-fury
-    DisplayName: Boar's Fury
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
@@ -825,7 +792,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-edge
   - Key: warrior-boar-endurance
-    DisplayName: Boar's Endurance
     Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
@@ -848,7 +814,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-boar-fury
   - Key: warrior-boar-charge
-    DisplayName: Boar's Second Wind
     Kind: 7
     XpCost: 540
     UnlockedByDefault: 0
@@ -875,7 +840,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-boar-endurance
   - Key: warrior-golem
-    DisplayName: Cairn Golem
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -902,7 +866,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-5
   - Key: warrior-golem-bulk
-    DisplayName: Golem's Bulk
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
@@ -925,7 +888,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-hold
   - Key: warrior-golem-stay
-    DisplayName: Golem's Vigil
     Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
@@ -948,7 +910,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-golem-bulk
   - Key: warrior-golem-charge
-    DisplayName: Golem's Return
     Kind: 7
     XpCost: 540
     UnlockedByDefault: 0
@@ -975,7 +936,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-golem-stay
   - Key: warrior-a-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
@@ -998,7 +958,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-6
   - Key: warrior-b-awaken
-    DisplayName: 
     Kind: 11
     XpCost: 0
     UnlockedByDefault: 0
@@ -1021,7 +980,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-cry
   - Key: warrior-a-cover
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
@@ -1044,7 +1002,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-2
   - Key: warrior-b-flurry
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
@@ -1067,7 +1024,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-b-2
   - Key: warrior-c-1
-    DisplayName: 
     Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
@@ -1092,7 +1048,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-c-2
-    DisplayName: 
     Kind: 0
     XpCost: 90
     UnlockedByDefault: 0
@@ -1117,7 +1072,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-c-3
   - Key: warrior-c-3
-    DisplayName: 
     Kind: 3
     XpCost: 65
     UnlockedByDefault: 0
@@ -1140,7 +1094,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-trunk-2
   - Key: warrior-c-4
-    DisplayName: 
     Kind: 0
     XpCost: 120
     UnlockedByDefault: 0
@@ -1165,7 +1118,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-c-2
   - Key: warrior-c-5
-    DisplayName: 
     Kind: 2
     XpCost: 155
     UnlockedByDefault: 0
@@ -1188,7 +1140,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-earthsplitter
   - Key: warrior-c-6
-    DisplayName: 
     Kind: 3
     XpCost: 245
     UnlockedByDefault: 0
@@ -1211,7 +1162,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-charger
   - Key: warrior-c-7
-    DisplayName: 
     Kind: 0
     XpCost: 295
     UnlockedByDefault: 0
@@ -1236,7 +1186,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-c-6
   - Key: warrior-c-finish
-    DisplayName: 
     Kind: 3
     XpCost: 350
     UnlockedByDefault: 0
@@ -1263,7 +1212,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-c-7
   - Key: warrior-c-tip
-    DisplayName: 
     Kind: 0
     XpCost: 350
     UnlockedByDefault: 0
@@ -1290,7 +1238,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-c-7
   - Key: warrior-charger
-    DisplayName: Bloodfang Boar
     Kind: 4
     XpCost: 195
     UnlockedByDefault: 0
@@ -1317,7 +1264,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-c-5
   - Key: warrior-charger-power
-    DisplayName: Boar's Fury
     Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
@@ -1340,7 +1286,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-c-tip
   - Key: warrior-charger-charge
-    DisplayName: Boar's Second Wind
     Kind: 7
     XpCost: 475
     UnlockedByDefault: 0
@@ -1367,7 +1312,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-charger-power
   - Key: warrior-earthsplitter
-    DisplayName: 
     Kind: 10
     XpCost: 120
     UnlockedByDefault: 0
@@ -1390,7 +1334,6 @@ MonoBehaviour:
     Neighbors:
     - warrior-c-2
   - Key: warrior-b-golem-fury
-    DisplayName: 
     Kind: 14
     XpCost: 410
     UnlockedByDefault: 0

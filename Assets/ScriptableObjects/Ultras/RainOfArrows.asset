@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: RainOfArrows
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: RainOfArrows
-  DisplayName: Rain of Arrows
-  Description: Five arrows, five targets he never had to aim at.
   Kind: 1
   TargetType: 0
   Effects:
@@ -30,6 +28,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 3
     Power: 2
@@ -43,6 +42,7 @@ MonoBehaviour:
     BonusVsTrait: 0
     BonusPercent: 0
     BonusVsStatus: 0
+    BonusPerDebuff: 0
     DrainToParty: 0
   Hits: 5
   RandomTargets: 1

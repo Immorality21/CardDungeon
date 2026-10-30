@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: SoulHarvest
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: SoulHarvest
-  DisplayName: Soul Harvest
-  Description: Every soul in the room pays a tithe, and the Warlock collects.
   Kind: 1
   TargetType: 1
   Effects:
@@ -26,6 +24,12 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 6
     Power: 50
     PowerMode: 0
@@ -34,6 +38,17 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  Hits: 1
+  RandomTargets: 0
+  Creature: {fileID: 0}
+  StatAbilities: []
+  Mech: {fileID: 0}
   Turns: 3
   MaxHealthPercent: 50
   AttackDamageType: 0

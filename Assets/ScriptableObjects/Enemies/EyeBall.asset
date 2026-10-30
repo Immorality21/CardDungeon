@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: EyeBall
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: EyeBall
-  DisplayName: Floating Eye
   Sprite: {fileID: -4695459402058557536, guid: 04282a561b0708145945b8d75566cab2, type: 3}
   AnimationFrames:
   - {fileID: -4695459402058557536, guid: 04282a561b0708145945b8d75566cab2, type: 3}

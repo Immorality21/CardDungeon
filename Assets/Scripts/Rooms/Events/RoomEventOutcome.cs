@@ -6,6 +6,7 @@ using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Rooms.Events
 {
@@ -33,9 +34,18 @@ namespace Assets.Scripts.Rooms.Events
     [Serializable]
     public class RoomEventOutcome
     {
-        [TextArea]
-        [Tooltip("What the player is told happened. This is the outcome's whole presentation.")]
-        public string Text;
+        [System.NonSerialized] private string _text;
+
+        /// <summary>From the text table (<see cref="TextKey"/>). Set only on instances built in code.</summary>
+        public string Text
+        {
+            get { return _text ?? Loc.GetOrEmpty(TextKey); }
+            set { _text = value; }
+        }
+
+        [Tooltip("Text table key (Tools > Texts).")]
+        [TextKey]
+        public string TextKey;
 
         [Tooltip("Relative likelihood within its pool. Two outcomes at 3 and 1 land 75% / 25%.")]
         public int Weight = 1;

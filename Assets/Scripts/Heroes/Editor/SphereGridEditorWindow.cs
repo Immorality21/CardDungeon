@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Heroes.UI;
+using ImmoralityGaming.Editor.Localization;
+using ImmoralityGaming.Localization;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -535,7 +537,8 @@ namespace Assets.Scripts.Heroes.Editor
                 "Keys are save data — write-once. Renaming a key orphans every save that bought it.",
                 HelpBoxMessageType.Warning));
 
-            AddField(element, "DisplayName");
+            string nodeKey = _selectedKey;
+            _inspector.Add(new IMGUIContainer(() => TextKeyGUI.TextBoxLayout("Name", Loc.KeyFor("node", nodeKey, "name"), 1)));
             AddField(element, "Kind");
             AddField(element, "XpCost");
             AddField(element, "UnlockedByDefault");

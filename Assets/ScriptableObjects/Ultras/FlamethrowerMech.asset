@@ -13,12 +13,11 @@ MonoBehaviour:
   m_Name: FlamethrowerMech
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: FlamethrowerMech
-  DisplayName: Flamethrower Mech
-  Description: She bolts together a flamethrower mech and climbs on. It sets the
-    whole room alight.
   Kind: 3
   TargetType: 1
   Effects: []
+  Hits: 1
+  RandomTargets: 0
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 11400000, guid: d1904d1f4d9d42d45ae829a152533815, type: 2}

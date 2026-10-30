@@ -13,20 +13,21 @@ MonoBehaviour:
   m_Name: CeilingShaft
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
   Key: CeilingShaft
-  Title: 'A Shaft in the Ceiling'
-  Prompt: 'A shaft opens in the ceiling well above head height, and something on the ledge up there catches what little light there is. The wall under it is damp and crumbling, with just enough to hold on to.'
   GoverningStat: 3
   SpawnChancePercent: 10
   SpawnModifierStat: 3
   SpawnModifierRate: 5
+  SpawnRequirements: []
   Difficulty: 8
   Options:
-  - Label: 'Climb for it'
+  - LabelKey: event.ceiling-shaft.option-1.label
     Kind: 0
-    DeclineText: ''
+    DeclineTextKey: 
     Success:
-    - Text: 'Three quick holds and you are on the ledge. Somebody stashed this up here and never came back for it.'
+    - TextKey: event.ceiling-shaft.option-1.success-1.text
       Weight: 3
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects: []
       Targets: 0
       LootTable:
@@ -35,55 +36,86 @@ MonoBehaviour:
       Gold: 15
       LoseAConsumable: 0
       AwakenedEnemies: []
-    - Text: 'You get up, get a hand on it, and get back down before the wall gives. Coin, and nothing else worth the climb.'
+      JoinsHero: {fileID: 0}
+    - TextKey: event.ceiling-shaft.option-1.success-2.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects: []
       Targets: 0
       LootTable: []
       Gold: 25
       LoseAConsumable: 0
       AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
     Failure:
-    - Text: 'The wall lets go halfway up. You land badly and stay landed for a while.'
+    - TextKey: event.ceiling-shaft.option-1.failure-1.text
       Weight: 2
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects:
       - EffectType: 0
         Power: 4
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 0
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       - EffectType: 3
         Power: 2
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 3
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       Targets: 0
       LootTable: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
-    - Text: 'You bring most of the wall down with you, and the noise brings something else.'
+      JoinsHero: {fileID: 0}
+    - TextKey: event.ceiling-shaft.option-1.failure-2.text
       Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
       Effects:
       - EffectType: 0
         Power: 2
+        PowerMode: 0
         ScalingStat: 0
         DamageType: 0
         BuffType: 0
         Duration: 3
         UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
       Targets: 0
       LootTable: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies:
       - {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
-  - Label: 'Leave whatever it is up there'
+      JoinsHero: {fileID: 0}
+  - LabelKey: event.ceiling-shaft.option-2.label
     Kind: 2
-    DeclineText: 'Whatever is on the ledge can stay on the ledge.'
+    DeclineTextKey: event.ceiling-shaft.option-2.decline
     Success: []
     Failure: []

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Dungeon
 {
@@ -25,7 +26,14 @@ namespace Assets.Scripts.Dungeon
     {
         public const string ResourcePath = "Campaign";
 
-        public string DisplayName = "Campaign";
+        [System.NonSerialized] private string _displayName;
+
+        /// <summary>From the text table (<c>campaign.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.GetOrEmpty("campaign.name"); }
+            set { _displayName = value; }
+        }
 
         public List<CampaignNodeEntry> Nodes = new List<CampaignNodeEntry>();
 

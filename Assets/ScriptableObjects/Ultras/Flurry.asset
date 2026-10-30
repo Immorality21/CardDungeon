@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: Flurry
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: Flurry
-  DisplayName: Flurry
-  Description: He stops guarding and simply swings, again and again, at whatever
-    is closest.
   Kind: 1
   TargetType: 0
   Effects:
@@ -28,6 +25,11 @@ MonoBehaviour:
     Duration: 0
     UnlockLevel: 0
     ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Hits: 4
   RandomTargets: 1
   Creature: {fileID: 0}

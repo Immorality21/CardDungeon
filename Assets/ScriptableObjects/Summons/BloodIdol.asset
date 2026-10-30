@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: BloodIdol
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: BloodIdol
-  DisplayName: Blood Idol
-  Description: A shape of clotted red, raised from what the Cultist bleeds. It feeds
-    the party, and the enemy hates it for it.
   Sprite: {fileID: 21300000, guid: 69e07682311e46aeb24ea0fe859da1a4, type: 3}
   AnimationFrames:
   - {fileID: -8292956998558386962, guid: dc3cdddb22444a0a876fb40ad7545d30, type: 3}
@@ -29,11 +26,16 @@ MonoBehaviour:
   TargetType: 0
   Effects: []
   RandomTargetEffects: []
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
   SummonerHealthCostPercent: 20
   ThreatMultiplier: 1
   BonusThreat: 0
   Triggers: []
   Flinches: 0
+  HitFrames: []
   BaseCharges: 1
   StatPercents:
     Values:
@@ -59,7 +61,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8cd017a3fd2846c09c612ea51e1ef28d, type: 2}
   Signature: {fileID: 11400000, guid: 765b153349e74934a9fcbb1dfbd13c0b, type: 2}
   AttackAbility: {fileID: 11400000, guid: e2d8a7f9915745e79abce0b3a8ad581f, type: 2}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
   RotateActions: 1
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

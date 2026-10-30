@@ -13,11 +13,9 @@ MonoBehaviour:
   m_Name: SeraphJudgement
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: SeraphJudgement
-  DisplayName: Judgement
-  Description: The seraph raises the blade and the light comes down on every enemy
-    at once.
   Icon: {fileID: 21300000, guid: 3f8f97fd7fe64c9da4b14c1d1db79a11, type: 3}
   Delivery: 1
+  ProjectileArtAngle: 0
   TargetType: 1
   Rarity: 0
   Effects:
@@ -29,7 +27,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 0
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

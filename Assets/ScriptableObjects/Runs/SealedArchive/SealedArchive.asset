@@ -13,16 +13,13 @@ MonoBehaviour:
   m_Name: SealedArchive
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
   Key: SealedArchive
-  DisplayName: The Sealed Archive
-  Blurb: A library the dungeon walled up rather than burn. Something in the stacks
-    is still reading - and someone locked in with it is still casting.
   SequenceIndex: 1
   Repeatable: 1
   Challenge: 0
   JoinsOnClear: {fileID: 0}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: 6789619db23bada40b1cfe143d0bf819, type: 2}
-    LevelName: The Ash Stacks
+    LevelNameKey: run.sealed-archive.level-1.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     BossAdds: []
@@ -34,8 +31,9 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 11400000, guid: 33f087f09ace9034fa5978269cb9e4f6, type: 2}
     AllowRoomEvents: 1
+    IntendedHard: 0
   - LevelTemplate: {fileID: 11400000, guid: 53234665d5538de47ae853dea701a3c6, type: 2}
-    LevelName: The Broken Orrery
+    LevelNameKey: run.sealed-archive.level-2.name
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: a848d09629a0a134084775e476779b74, type: 2}
     BossAdds:
@@ -60,3 +58,4 @@ MonoBehaviour:
         GoldReward: 0
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
+    IntendedHard: 0

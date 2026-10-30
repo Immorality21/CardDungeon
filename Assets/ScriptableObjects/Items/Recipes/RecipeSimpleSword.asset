@@ -13,12 +13,10 @@ MonoBehaviour:
   m_Name: RecipeSimpleSword
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: RecipeSimpleSword
-  DisplayName: Recipe - Simple Sword
   Icon: {fileID: 21300000, guid: 6d15257a909f4e9abe37e332fc815e50, type: 3}
   Rarity: 0
   ItemLevel: 1
   FindChanceScale: 1
-  Description: 'One of the Forge''s own. Scrap in, sword out.'
   Category: 3
   SlotType: 0
   Bonuses: []

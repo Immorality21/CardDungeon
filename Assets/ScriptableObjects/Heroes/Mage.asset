@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Mage
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Heroes.HeroSO
   Key: Mage
-  Label: Mage
-  Blurb: Commands fire, frost and storm, and is rarely careful about which.
   Vision:
     Fantasy: An elemental mage, found walled up in the Sealed Archive. Commands storm,
       frost and fire, and is rarely careful about which. DRAFT by Claude 2026-10-07

@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: BoneGolem
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
   Key: BoneGolem
-  DisplayName: Bone Golem
   Sprite: {fileID: 21300000, guid: a7a1b762607e45e7a06b1d30d79d400c, type: 3}
   AnimationFrames:
   - {fileID: 8846906001143893161, guid: 7cc257adeab242c7a20d13808d3aea76, type: 3}

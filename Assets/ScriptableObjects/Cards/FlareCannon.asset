@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: FlareCannon
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: FlareCannon
-  DisplayName: Flare Cannon
-  Description: A hand cannon loaded with a magnesium flare. Bright, loud and very
-    hot.
   Icon: {fileID: 21300000, guid: 56b933d99cb54de6a7079a46e5a45b72, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -30,7 +27,16 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 00000000
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

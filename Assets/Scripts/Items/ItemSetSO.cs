@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Items
 {
@@ -13,8 +14,16 @@ namespace Assets.Scripts.Items
     [CreateAssetMenu(menuName = "SO/Item Set")]
     public class ItemSetSO : ScriptableObject
     {
+        [TextKeys("set", "name")]
         public string Key;
-        public string DisplayName;
+        [System.NonSerialized] private string _displayName;
+
+        /// <summary>From the text table (<c>set.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("set", Key, this, "name"); }
+            set { _displayName = value; }
+        }
 
         [Tooltip("What wearing at least that many different pieces adds. Every tier reached applies.")]
         public List<ItemSetTier> Tiers = new List<ItemSetTier>();
@@ -27,8 +36,18 @@ namespace Assets.Scripts.Items
         [Tooltip("Different pieces of the set worn at once.")]
         [Min(2)] public int Pieces = 2;
 
-        [Tooltip("How the item pane words this tier, e.g. \"+10% Shadow damage\".")]
-        public string Text;
+        [System.NonSerialized] private string _text;
+
+        /// <summary>From the text table (<see cref="TextKey"/>). Set only on instances built in code.</summary>
+        public string Text
+        {
+            get { return _text ?? Loc.GetOrEmpty(TextKey); }
+            set { _text = value; }
+        }
+
+        [Tooltip("Text table key (Tools > Texts).")]
+        [TextKey]
+        public string TextKey;
 
         [Tooltip("Stat bonuses, added through the same gear path as an item's own.")]
         public List<ItemBonus> Bonuses = new List<ItemBonus>();

@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: Aegis
   m_EditorClassIdentifier: 
   Key: Aegis
-  DisplayName: Aegis
-  Description: The shield goes up over the whole line, not just him.
   Icon: {fileID: 21300000, guid: 354925614cca4cd68d35b2b16a650330, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
@@ -32,9 +30,13 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 05000000
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

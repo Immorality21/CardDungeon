@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: AbyssalNightmare
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: AbyssalNightmare
-  DisplayName: Abyssal Nightmare
-  Description: No eyes. Only the mouth, and the teeth, and the teeth inside the teeth.
   Sprite: {fileID: 21300000, guid: c03a618c308b427ca813732246325db6, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: 6781bf87e8cd48bc8cd6bfb90336c7cd, type: 3}
@@ -37,6 +35,12 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 3
     PowerMode: 0
@@ -45,6 +49,12 @@ MonoBehaviour:
     BuffType: 5
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 3
     PowerMode: 0
@@ -53,6 +63,12 @@ MonoBehaviour:
     BuffType: 1
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   RandomTargetEffects:
   - EffectType: 3
     Power: 1
@@ -63,9 +79,21 @@ MonoBehaviour:
     Duration: 2
     UnlockLevel: 0
     ApplyChance: 50
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  PartyEffects: []
+  PowerRaisesPartyEffects: 0
+  Tags: 
+  TagDuration: 3
   SummonerHealthCostPercent: 0
   ThreatMultiplier: 1
   BonusThreat: 0
+  Triggers: []
+  Flinches: 1
+  HitFrames: []
   BaseCharges: 1
   StatPercents:
     Values: []
@@ -74,7 +102,11 @@ MonoBehaviour:
   Actions: []
   Signature: {fileID: 0}
   AttackAbility: {fileID: 0}
+  UsesTags: 0
+  PartingAbility: {fileID: 0}
+  MountedFrames: []
   RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4

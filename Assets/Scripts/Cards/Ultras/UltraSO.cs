@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
 using UnityEngine;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Cards
 {
@@ -57,12 +58,26 @@ namespace Assets.Scripts.Cards
     public class UltraSO : ScriptableObject
     {
         [Tooltip("Stable identifier. Grid nodes name the Ultra they teach by this key.")]
+        [TextKeys("ultra", "name", "description")]
         public string Key;
 
-        public string DisplayName;
+        [System.NonSerialized] private string _displayName;
 
-        [TextArea]
-        public string Description;
+        /// <summary>From the text table (<c>ultra.{key}.name</c>). Set only on instances built in code.</summary>
+        public string DisplayName
+        {
+            get { return _displayName ?? Loc.AssetText("ultra", Key, this, "name"); }
+            set { _displayName = value; }
+        }
+
+        [System.NonSerialized] private string _description;
+
+        /// <summary>From the text table (<c>ultra.{key}.description</c>). Set only on instances built in code.</summary>
+        public string Description
+        {
+            get { return _description ?? Loc.AssetText("ultra", Key, this, "description"); }
+            set { _description = value; }
+        }
 
         public UltraKind Kind = UltraKind.Transform;
 

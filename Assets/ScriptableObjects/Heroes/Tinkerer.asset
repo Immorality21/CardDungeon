@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: Tinkerer
   m_EditorClassIdentifier: 
   Key: Tinkerer
-  Label: Tinkerer
-  Blurb: Solves most problems with something she brought, and the rest with something
-    she makes.
   Vision:
     Fantasy: A hero that solves almost everything with tools and steam-punk style
       of abilities.
@@ -88,4 +85,10 @@ MonoBehaviour:
     - Type: 7
       Amount: 24
   AttackStat: 4
+  Momentum:
+    PercentPerStack: 0
+    MaxStacks: 0
+  Focus:
+    PerCast: 0
+    Max: 0
   SphereGrid: {fileID: 11400000, guid: f5e0e1234a3842d2a8ec47803fb71950, type: 2}

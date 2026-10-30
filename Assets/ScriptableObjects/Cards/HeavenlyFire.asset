@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: HeavenlyFire
   m_EditorClassIdentifier: 
   Key: HeavenlyFire
-  DisplayName: Heavenly Fire
-  Description: The holy ground catches. Everything standing on it keeps burning.
   Icon: {fileID: 21300000, guid: 3fe5a371b9e24058ae17e4bc5db7077f, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
@@ -32,6 +30,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 4
     BonusPercent: 100
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 2
     PowerMode: 0
@@ -43,9 +44,13 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
   CanCrit: 0
   EnemyOnly: 0
+  RandomHits: 0

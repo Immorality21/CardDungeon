@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: MiracleOfRighteousness
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: MiracleOfRighteousness
-  DisplayName: Miracle of Righteousness
-  Description: Judgement falls on every enemy, and what should already be dead is
-    made so.
   Kind: 1
   TargetType: 1
   Effects:
@@ -30,6 +27,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 0
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 11
     Power: 30
     PowerMode: 0
@@ -41,6 +41,9 @@ MonoBehaviour:
     ApplyChance: 100
     BonusVsTrait: 4
     BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Hits: 1
   RandomTargets: 0
   Creature: {fileID: 0}

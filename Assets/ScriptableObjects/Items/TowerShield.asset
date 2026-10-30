@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: TowerShield
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: TowerShield
-  DisplayName: Tower Shield
   Icon: {fileID: 21300000, guid: 2e28754de1ae4639b00ee258c01fd1ee, type: 3}
   Rarity: 1
   ItemLevel: 3
+  FindChanceScale: 1
   Category: 0
   SlotType: 1
   Bonuses:
@@ -28,8 +28,8 @@ MonoBehaviour:
     Value: 6
   Resistances: []
   Triggers:
-  - Label:
-    Text: 'When hurt: 15% chance of +3 Endurance until the next turn.'
+  - LabelKey: 
+    TextKey: item.tower-shield.reaction-1.text
     When: 4
     Chance: 0.15
     Limit: 0
@@ -54,6 +54,16 @@ MonoBehaviour:
       DrainToParty: 0
   Milestones: []
   Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
   MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

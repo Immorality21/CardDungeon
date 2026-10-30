@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WhisperOfMadness
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.MagicSO
   Key: WhisperOfMadness
-  DisplayName: Whisper of Madness
-  Description: A word the mind cannot hold, and cannot drop.
   Icon: {fileID: 21300000, guid: 8b6f03dcd7c64c5eb80969ef536ed2b5, type: 3}
+  Delivery: 0
+  ProjectileArtAngle: 0
   TargetType: 0
   Rarity: 1
   Effects:
@@ -27,6 +27,12 @@ MonoBehaviour:
     BuffType: 0
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   - EffectType: 3
     Power: 3
     PowerMode: 0
@@ -35,7 +41,16 @@ MonoBehaviour:
     BuffType: 5
     Duration: 3
     UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
   Tags: 08000000
   TagDuration: 3
   ThreatMultiplier: 1
   BonusThreat: 0
+  CanCrit: 0
+  EnemyOnly: 0
+  RandomHits: 0

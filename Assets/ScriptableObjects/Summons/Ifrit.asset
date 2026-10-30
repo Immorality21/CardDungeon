@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: Ifrit
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.SummonSO
   Key: Ifrit
-  DisplayName: Ifrit
-  Description: A fire spirit takes the party's place. When it goes, fallen or sent
-    away, it takes the field with it.
   Sprite: {fileID: 21300000, guid: 667705648629424bb73c59a7a62085fd, type: 3}
   AnimationFrames:
   - {fileID: 21300000, guid: 3a007fa362fd4bac91d4c812013767f8, type: 3}
@@ -68,6 +65,7 @@ MonoBehaviour:
   PartingAbility: {fileID: 11400000, guid: 3009b4bc5d38f0643924ffe61146c895, type: 2}
   MountedFrames: []
   RotateActions: 0
+  ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4
