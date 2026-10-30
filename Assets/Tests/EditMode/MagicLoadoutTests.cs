@@ -52,14 +52,28 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void Resolve_FallsBackToAutoFillWhenTheChoiceResolvesToNothing()
+        public void Resolve_ChoiceOfOnlyRetiredKeys_FallsBackToAutoFill()
         {
-            // A re-authored grid can retire every node a stored choice named. Sending that hero into
-            // a dungeon with nothing is worse than ignoring a choice they can no longer honour.
+            // A re-authored grid can retire every node a stored choice named. That is not the player
+            // deciding to go unarmed, so an old save auto-fills rather than honouring a dead choice.
             var kit = MagicLoadoutOps.Resolve(
                 Known("Heal", "Fireball"), new List<string> { "Meteor", "Doom" }, 2);
 
             CollectionAssert.AreEqual(new[] { "Heal", "Fireball" }, kit);
+        }
+
+        [Test]
+        public void Resolve_ExplicitEmptyChoice_StaysEmpty_NeverChosenAutoFills()
+        {
+            // Owner, 2026-10-30: a player may empty a hero's ability slots completely. Null is a hero
+            // who never chose and walks in armed; an empty list is a hero whose abilities were all
+            // put away.
+            var known = Known("Heal", "Fireball");
+
+            CollectionAssert.IsEmpty(MagicLoadoutOps.Resolve(known, new List<string>(), 2),
+                "an explicit empty choice carries nothing");
+            CollectionAssert.AreEqual(new[] { "Heal", "Fireball" }, MagicLoadoutOps.Resolve(known, null, 2),
+                "a hero who never chose still auto-fills");
         }
 
         [Test]
@@ -134,6 +148,19 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Toggle_PuttingAwayTheLastAbility_LeavesTheHeroWithNone()
+        {
+            var known = Known("Heal");
+            var chosen = MagicLoadoutOps.Toggle(known, null, "Heal", 2);
+
+            Assert.IsNotNull(chosen);
+            CollectionAssert.IsEmpty(chosen);
+            CollectionAssert.IsEmpty(MagicLoadoutOps.Resolve(known, chosen, 2),
+                "the empty choice is kept, not auto-filled back");
+            CollectionAssert.IsEmpty(MagicLoadoutOps.RunKit(null, known, chosen, 2));
+        }
+
+        [Test]
         public void Toggle_RoundTripsBackToWhereItStarted()
         {
             var known = Known("Heal", "Fireball");
@@ -168,7 +195,7 @@ namespace Tests.EditMode
         {
             var save = new MagicLoadoutSaveData();
 
-            CollectionAssert.IsEmpty(save.ChosenFor("Warrior"));
+            Assert.IsNull(save.ChosenFor("Warrior"), "never chosen is null, not an empty choice");
             Assert.AreEqual(0, save.Heroes.Count, "a read must not create an entry");
 
             save.For("Warrior").EquippedKeys.Add("Slash");
@@ -176,7 +203,11 @@ namespace Tests.EditMode
 
             Assert.AreEqual(1, save.Heroes.Count);
             CollectionAssert.AreEqual(new[] { "Slash", "WarCry" }, save.ChosenFor("Warrior"));
-            CollectionAssert.IsEmpty(save.ChosenFor("Acolyte"), "one hero's choice is not another's");
+            Assert.IsNull(save.ChosenFor("Acolyte"), "one hero's choice is not another's");
+
+            save.For("Acolyte");
+            Assert.IsNotNull(save.ChosenFor("Acolyte"));
+            CollectionAssert.IsEmpty(save.ChosenFor("Acolyte"), "an entry with no keys is an explicit empty choice");
         }
 
         // ---------------------------------------------------------------- mid-run

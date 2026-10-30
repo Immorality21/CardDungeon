@@ -68,6 +68,13 @@ namespace Assets.Scripts.Combat
             {
                 return Empty(target, source);
             }
+            // Divine protection negates the whole of a blow or a cast, before any barrier; never a tick or a price.
+            if (events != null && amount > 0 && ProtectionTable.Negates(source.Cause) && events.Protections.Consume(target))
+            {
+                change.Negated = amount;
+                change.After = change.Before;
+                return change;
+            }
             // A barrier soaks a blow, a cast or a tick before the bar is touched; a price never.
             if (events != null && amount > 0 && BarrierTable.Soaks(source.Cause))
             {

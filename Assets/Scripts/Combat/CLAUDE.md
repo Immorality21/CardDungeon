@@ -144,6 +144,18 @@ command's dim reason reads "No Focus". Sim: `SimUltras.Focus` + `MultiCastReady`
 wait for max Focus, then MultiCast the best damage slot). How Focus is built and priced were open
 questions in his vision - these are drafts.
 
+## Divine protection - a hit negated *(2026-10-30)*
+
+`BuffType.DivineProtection` (the Paladin's Divine Protection, one ally; Aegis, the whole party) puts
+`CombatEvents.Protections` (`ProtectionTable`) on its targets: the next damaging **blow or ability**
+(`HealthCause.Attack` / `Ability`, any element) on the bearer is negated whole in `HealthOps.Damage`,
+before any barrier soaks, for `Duration` of the bearer's turns (timed like a barrier). Ticks and prices
+never spend it. A negated hit changes no health, so it raises no `HealthChange` (no thorns, leech or
+retaliation); `HealthChange.Negated` tells the caller, which floats "Protected" (`ExecuteAttack`,
+`DamageEffectExecutor`). An Execute (`HealthOps.Set`) is not a hit and is not stopped. Gold shield on
+the HP bar. **The balance model ignores it on purpose** (owner, 2026-10-30): the simulator honours the
+rule if something casts it, but its casting policy never chooses Divine Protection, and that is fine.
+
 ## Thorns - damage returned *(2026-10-10)*
 
 `SpellEffectType.Thorns` puts `CombatEvents.Thorns` (`ThornsTable`) on its targets: `Power`% of every

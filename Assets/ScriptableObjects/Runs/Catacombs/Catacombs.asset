@@ -16,6 +16,7 @@ MonoBehaviour:
   SequenceIndex: 2
   Repeatable: 1
   Challenge: 0
+  ReplayHintOnWipe: 1
   JoinsOnClear: {fileID: 0}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: 00f9fe30cc078384e9ed27da42d1178d, type: 2}

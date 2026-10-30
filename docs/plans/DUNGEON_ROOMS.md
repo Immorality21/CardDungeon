@@ -70,7 +70,8 @@ What it actually takes, piece by piece:
 3. **Rooms get bigger, not fewer.** FF rooms are 10-16 tiles across; ours are 3-6, and with a wall
    row and props a 4x4 room has almost no floor left. Templates grow, but a floor keeps its number of
    rooms (decision 2), so encounters per floor and the balance model's room counts stay the same.
-4. **Tile-by-tile walking.** The leader walks: arrows step one tile, a click paths there (A* over the
+4. **Tile-by-tile walking.** (Also answers the outside playtest's "why enter a door with Enter instead of
+   pressing the arrow twice", 2026-10-30: arrows will walk the hero.) The leader walks: arrows step one tile, a click paths there (A* over the
    walkable tiles; across rooms it keeps today's `DungeonMapOps.WalkRoute` safety rules), and walking
    through a doorway is entering the next room. Entering a room with enemies still raises Fight / Flee
    as today; combat itself is untouched (it has its own battle stage). Each hero needs a 4-direction

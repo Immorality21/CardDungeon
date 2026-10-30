@@ -430,8 +430,10 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   collection. Undiscovered entries fold into one count row. The town's news pip shows while more
   recipes are known than at the last visit (`MetaProgressSaveData.RecipesViewedCount`). See
   `docs/plans/HUB.md` §7 phase 7. **Requires a `MagicCatalog` in the scene** or it logs a warning and shows empty.
-- **InventoryHubUI** (`Items/UI`) — the between-runs bag: Equipment / Abilities / Consumables /
-  Materials. Equipment is managed *only* here. **Redesigned 2026-09-28** into one fixed frame: a header
+- **InventoryHubUI** (`Items/UI`) — the between-runs bag: Equipment / All / Abilities / Consumables /
+  Materials. **All** (2026-10-30) is every piece of equipment the party owns, bag and worn, with no slot
+  filter (sorted by slot, rarity, name); Enter equips it on the selected hero through the same path and
+  reassign confirmation as the Equipment list, or takes it off if that hero wears it. Equipment is managed *only* here. **Redesigned 2026-09-28** into one fixed frame: a header
   band with the tabs, a portrait hero strip (muted, never hidden, on the party-wide tabs), three
   px-wide columns and a per-state hint line. Equipment is **FF-style**: the cursor walks the hero's
   slots, the middle column lists what fits the slot under it — the bag *and* what other heroes wear

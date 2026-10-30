@@ -3,7 +3,42 @@
 Built, and checked by the agent through the Unity MCP (scripted presses, screenshots, the simulator),
 but **not yet tried by a human with a real mouse and keyboard**. Tick an item off (or delete it) once
 it has been played; anything that turns out wrong becomes a backlog item in `NEXT_STEPS.md`.
-Everything here came out of playtest 3 (2026-10-26 to 2026-10-28).
+Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
+playtest's fixes (2026-10-30).
+
+## Outside playtest fixes (2026-10-30)
+
+Synthetic key events reached every handler below; what is not known is whether a **real** key press
+does (focus), so press them for real.
+
+- [ ] **Keyboard the tester reported broken, not reproduced:** Enter on the story map, arrows in the
+      town, Right in the Storehouse (now: next tab, All), the revisit condition picker. If one still fails
+      with a real key, it is focus, not the handler.
+- [ ] **Z / X / C** - Z confirms and X backs out everywhere Enter / Escape do; C opens and closes the
+      dungeon pause menu.
+- [ ] **Run complete / level entry** - Enter works without a Tab first.
+- [ ] **Doors** - in a room like the tester's (party by a side door, another door in the bottom wall),
+      Down picks the bottom-wall door.
+- [ ] **Tutorial** - on a forced step the cursor starts on the button the tutorial wants.
+- [ ] **Sphere grid cursor** - never stuck on a node near the start.
+- [ ] **Hover tips** - stats, the campfire's Combat numbers, resistances; and the tip following the hub's
+      keyboard cursor.
+- [ ] **Campfire hero status** - stats with meanings, ATK / CRIT / DODGE / P.DEF / M.DEF, the Momentum and
+      Focus lines.
+- [ ] **Ability text** - "18 damage" in combat; "18 damage, scales with Strength" in the Storehouse.
+- [ ] **Target picker footer** - highlighting an enemy shows what it attacks with and known weaknesses.
+- [ ] **Turn order** - the "Turns" header and NOW tag; the HP plates easier to read.
+- [ ] **A killing projectile** - the enemy's HP plate stays until the projectile lands.
+- [ ] **Ability sounds** - Hamstring and other weapon abilities swing; every ability hit makes an impact
+      sound.
+- [ ] **Revisit ranks** - rank I / II / III read apart (gold / orange / red with a badge).
+- [ ] **Floating Eye** - Eye Laser on one hero, Screech on the party.
+- [ ] **Paladin** - Divine Protection cancels the next blow or ability hit on an ally ("Protected", gold
+      shield icon); Aegis on the whole party; Smite hits harder on undead and demons.
+- [ ] **Empty loadout** - putting away a hero's last ability leaves them with none, in and after a run.
+- [ ] **Storehouse All tab** - with gear owned: every item listed, Enter equips / reassigns / takes off.
+- [ ] **Enemy counts** - a few tries of the same floor feel comparable.
+- [ ] **Catacombs** - the first wipe there (after the tutorial) adds the replay hint to the death screen.
 
 ## Hub and menus
 

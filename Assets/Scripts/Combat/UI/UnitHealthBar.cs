@@ -45,6 +45,7 @@ namespace Assets.Scripts.Combat
         private static readonly Color MarkOrange = new Color(1f, 0.55f, 0.2f);
         private static readonly Color ShadowViolet = new Color(0.6f, 0.5f, 0.85f);
         private static readonly Color DeathRed = new Color(0.85f, 0.15f, 0.2f);
+        private static readonly Color HolyGold = new Color(1f, 0.78f, 0.3f);
 
         private static Sprite _centerSprite;
         private static Sprite _leftSprite;
@@ -351,6 +352,11 @@ namespace Assets.Scripts.Combat
             if (guards != null && CombatManager.Instance.Events.Barriers.PointsOf(_unit) > 0)
             {
                 list.Add(new IconDesc { Name = "shield", Tint = Cyan });
+            }
+            // Divine protection: the next hit is negated outright (Divine Protection, Aegis).
+            if (guards != null && CombatManager.Instance.Events.Protections.HitsOf(_unit) > 0)
+            {
+                list.Add(new IconDesc { Name = "shield", Tint = HolyGold });
             }
 
             foreach (var status in bt.GetActiveStatusEffects(_unit))

@@ -320,6 +320,7 @@
                 <ui:Label text="#ui.hub.inventory" class="cd-inv-header__title" />
                 <ui:VisualElement name="inventory-tabs" class="cd-inv-tabs">
                     <ui:Button name="tab-equipment" text="#ui.hub.tab-equipment" class="cd-inv-tab cd-inv-tab--active" />
+                    <ui:Button name="tab-all" text="#ui.hub.tab-all" class="cd-inv-tab" />
                     <ui:Button name="tab-spells" text="#ui.hub.tab-spells" class="cd-inv-tab" />
                     <ui:Button name="tab-consumables" text="#ui.hub.tab-consumables" class="cd-inv-tab" />
                     <ui:Button name="tab-materials" text="#ui.hub.tab-materials" class="cd-inv-tab" />

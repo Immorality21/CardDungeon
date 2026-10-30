@@ -45,6 +45,10 @@ namespace Assets.Scripts.Dungeon
                  "reporting the design as broken.")]
         public bool Challenge;
 
+        [Tooltip("A wall the party is meant to come back to stronger (the Catacombs): the first wipe in it, once per save, " +
+                 "tells the player to replay earlier runs for XP and gear (playtest 2026-10-30).")]
+        public bool ReplayHintOnWipe;
+
         [Tooltip("Optional hero who joins when this run is cleared - a reward for finishing it, not a " +
                  "captive found along the way. Granted on the final level's clear, in the same commit " +
                  "as its XP and loot, so it cannot be lost afterwards. Skipped when already owned. " +

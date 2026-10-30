@@ -17,6 +17,10 @@ in favour of per-unit sprite idles, and the stage gained FF ranks and large boss
 - **The art pass** moved to **§21** (2026-09-28), which now holds every outdated sprite together
   with the menu backdrops.
 
+- **Battle layout** (outside playtest 2026-10-30, owner): heroes and enemies should stand **on a floor**
+  (e.g. a muddy cave road) with **the area behind them** (the cave wall, or the cave going deeper),
+  not float over a background picture. Fits the biome art of `plans/DUNGEON_ROOMS.md`.
+
 - **A dedicated heal/buff flourish.** Heals still just show green rising text.
 - **Element-tinted damage numbers** per `DamageType`, and richer per-element cast visuals. Pair with
   the colourblind check in §19.
@@ -259,6 +263,10 @@ Touch points: `Assets/Scripts/UnitStats/StatCatalog.cs` (descriptions exist, unu
 > later XP nudge, the in-dungeon half) are in **`docs/TUTORIAL.md`**. Read that first; the open
 > questions below are answered there where they have been.
 
+**From the outside playtest (2026-10-30, owner):** lock going back to town until the run is completed,
+and split the tutorial into separate runs instead. Going home mid-run invites abuse, confusion (a
+run's spent charges showed in town) and bugs.
+
 **The game teaches nothing.** A new player lands in a town with two buildings standing, two plots
 waiting and a road, and is told none of it: not that the road is how you leave, not that the
 foundations are things you build, not that the timber they will come home with is what builds the
@@ -354,6 +362,23 @@ reports it, rather than adding content ad hoc.
 
 Also thin and worth naming: **no run declares its own room-event pool**, so every biome draws on the
 same six.
+
+### 22. Localization follow-ups *(added 2026-10-30)*
+
+The text system (root `CLAUDE.md`, `Localization/`) moved every text into the table with the English
+unchanged. Left for a later pass, found while moving them:
+
+- **Enum names still on screen**: damage types ("Normal" rather than "Physical" on grid resistance
+  nodes), some statuses in the Bestiary (Frozen, Slow, Haste), `BuffType` in affliction lines,
+  `StatType` in the enemy Weaken log ("MaxHealth"). They are passed as placeholder values; give them
+  keys (`StatCatalog` already has them for stats).
+- **English grammar in code**: summon plurals (`SummonOps.Plural`), "a"/"an", enemy-name plurals in run
+  history (`RunHistory.Plural`). Fine in English, a rework before a second language.
+- **Grid nodes show the raw ability/summon/Ultra key** in some payload lines (`SphereGridPresenter`).
+- **`AbilityDescriber.StatusLine` edits a handler's text after lookup** (`.Insert("%")`,
+  `.Replace(" 0", "")`) - breaks once that wording changes.
+- The Texts window's Unused filter cannot see keys built entirely at runtime; name keys in full or end a
+  stem with a dot.
 
 ### 21. Art pass — menu backdrops and every outdated sprite *(added 2026-09-28)*
 

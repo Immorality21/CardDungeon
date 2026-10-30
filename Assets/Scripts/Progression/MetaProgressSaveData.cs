@@ -97,6 +97,10 @@ namespace Assets.Scripts.Progression
         // challenge warning"). Not derivable from the rest of the save, so it is stored.
         public bool ChallengeWarned;
 
+        // The death screen has said once, after a wipe in a run flagged RunDefinitionSO.ReplayHintOnWipe,
+        // that replaying earlier runs makes the party stronger (playtest 2026-10-30, the Catacombs).
+        public bool ReplayHintShown;
+
         // The tutorial's return to the Hall of Progression after the gear step is done (docs/TUTORIAL.md).
         // Visiting is the whole step - nothing has to be bought - so it is stored, not derived.
         public bool TutorialHallRevisited;

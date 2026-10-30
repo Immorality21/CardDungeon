@@ -3130,7 +3130,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_deathBackdrop, true);
             Assets.Scripts.Hub.UI.BackdropAmbienceView.AttachTo(_deathBackdrop)?.Show("cd-bg--death");
             _detailWindow?.AddToClassList("cd-window--death");
-            ShowDetail(Loc.Get("room.death.title"), DefeatSummary() + FirstDeathLesson());
+            ShowDetail(Loc.Get("room.death.title"), DefeatSummary() + FirstDeathLesson() + ReplayHint());
             _detailOk.text = Loc.Get("room.death.return");
             AddDefeatRows();
             _detailOkAction = () =>
@@ -3159,6 +3159,30 @@ namespace Assets.Scripts.Rooms
             var tutorial = UnityEngine.Resources.Load<Tutorial.TutorialSO>(Tutorial.TutorialSO.ResourcePath);
             string text = tutorial != null ? tutorial.TextFor(Tutorial.TutorialCue.FirstDeath) : string.Empty;
             return string.IsNullOrEmpty(text) ? string.Empty : "\n\n" + text;
+        }
+
+        /// <summary>
+        /// The first wipe in a run built as a wall to come back to (<c>RunDefinitionSO.ReplayHintOnWipe</c>, the
+        /// Catacombs) says how to get past it: replay earlier runs for XP and gear. Once per save.
+        /// </summary>
+        private static string ReplayHint()
+        {
+            var run = DungeonManager.ActiveRun;
+            // Only once the tutorial is over: until then there is no earlier run to replay.
+            if (run == null || !run.ReplayHintOnWipe || !MetaProgressManager.HasInstance
+                || !MetaProgressManager.Instance.TutorialFinished
+                || MetaProgressManager.Instance.ReplayHintShown)
+            {
+                return string.Empty;
+            }
+            var tutorial = UnityEngine.Resources.Load<Tutorial.TutorialSO>(Tutorial.TutorialSO.ResourcePath);
+            string text = tutorial != null ? tutorial.TextFor(Tutorial.TutorialCue.ReplayToGetStronger) : string.Empty;
+            if (string.IsNullOrEmpty(text))
+            {
+                return string.Empty;
+            }
+            MetaProgressManager.Instance.MarkReplayHintShown();
+            return "\n\n" + text;
         }
 
         private static string DefeatSummary()

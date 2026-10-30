@@ -25,6 +25,10 @@ namespace Assets.Scripts.Combat
         /// Lives with the stream for the same reason as <see cref="Guards"/>.</summary>
         public BarrierTable Barriers { get; } = new BarrierTable();
 
+        /// <summary>Divine protection negating a unit's next hit (the Paladin's), read by <see cref="HealthOps.Damage"/>
+        /// before any barrier. Lives with the stream for the same reason as <see cref="Guards"/>.</summary>
+        public ProtectionTable Protections { get; } = new ProtectionTable();
+
         /// <summary>Heroes given to a Sacrifice this fight. They are gone, not fallen: a Revive never
         /// reaches them (owner, 2026-10-10). Kept with the stream so the live fight and the simulator agree.</summary>
         public HashSet<ICombatUnit> Sacrificed { get; } = new HashSet<ICombatUnit>();
@@ -38,9 +42,11 @@ namespace Assets.Scripts.Combat
         public CombatEvents()
         {
             Subscribe<TurnStarted>(e => Barriers.TurnStarted(e.Unit));
+            Subscribe<TurnStarted>(e => Protections.TurnStarted(e.Unit));
             Subscribe<TurnStarted>(e => Retaliations.TurnStarted(e.Unit));
             Subscribe<TurnStarted>(e => Thorns.TurnStarted(e.Unit));
             Subscribe<TurnEnded>(e => Barriers.TurnEnded(e.Unit));
+            Subscribe<TurnEnded>(e => Protections.TurnEnded(e.Unit));
             Subscribe<TurnEnded>(e => Thorns.TurnEnded(e.Unit));
             Subscribe<UnitDefeated>(e =>
             {

@@ -253,7 +253,8 @@ namespace Assets.Scripts.Cards
         /// <summary>"Undead" for a trait, or <paramref name="none"/> when there is none.</summary>
         private static string TraitName(UnitTraits trait, string none)
         {
-            return trait == UnitTraits.None ? none : trait.ToString();
+            // A combined mask ("Undead, Demon") reads as either: "Undead/Demon".
+            return trait == UnitTraits.None ? none : trait.ToString().Replace(", ", "/");
         }
 
         private static string DamageLine(SpellEffect effect, ICombatUnit caster, CombatBuffTracker buffTracker, int powerBonus)
@@ -374,6 +375,7 @@ namespace Assets.Scripts.Cards
             { BuffType.Hidden, "abilities.gloss.hidden" },
             { BuffType.Evasive, "abilities.gloss.evasive" },
             { BuffType.DeathMarked, "abilities.gloss.death-marked" },
+            { BuffType.DivineProtection, "abilities.gloss.divine-protection" },
         };
     }
 }

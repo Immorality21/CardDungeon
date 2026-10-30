@@ -104,6 +104,10 @@ namespace Assets.Scripts.Combat
         /// Not part of <see cref="Landed"/>.</summary>
         public int Absorbed;
 
+        /// <summary>Damage a divine protection negated outright (<see cref="ProtectionTable"/>): the whole
+        /// hit, so nothing was absorbed and nothing landed. 0 when the hit was not negated.</summary>
+        public int Negated;
+
         /// <summary>The bar crossed from standing to down with this change.</summary>
         public bool Killed => Before > 0 && After <= 0;
 

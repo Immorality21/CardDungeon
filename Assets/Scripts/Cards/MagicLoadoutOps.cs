@@ -32,9 +32,14 @@ namespace Assets.Scripts.Cards
         /// straight back, so the screen would refuse to do what it just showed the player doing. A
         /// deliberately empty slot has to be allowed to stay empty.</para>
         ///
-        /// <para>Keys the hero no longer knows are dropped rather than carried, and if that leaves
-        /// the choice with nothing at all the auto-fill takes over — a re-authored grid must not send
-        /// someone into a dungeon unarmed.</para>
+        /// <para><b>An explicit empty choice stays empty</b> (owner, 2026-10-30): a player may put
+        /// away every ability a hero knows, and that hero then carries none. <c>null</c> is "never
+        /// chosen"; an empty list is a choice.</para>
+        ///
+        /// <para>Keys the hero no longer knows are dropped rather than carried. A non-empty choice
+        /// that names <i>only</i> keys the hero no longer knows still falls back to the auto-fill: that
+        /// is a grid re-authoring retiring every node the player picked, not a decision to go
+        /// unarmed, and an old save must not send someone into a dungeon empty-handed.</para>
         /// </summary>
         public static List<string> Resolve(
             IList<KeyValuePair<string, int>> known, IList<string> chosen, int slotCount)
@@ -60,7 +65,9 @@ namespace Assets.Scripts.Cards
                 }
             }
 
-            if (result.Count > 0)
+            // Never chosen auto-fills; a choice that names nothing stays empty; a choice whose
+            // keys were all retired by a grid re-authoring auto-fills again.
+            if (result.Count > 0 || (chosen != null && !NamesAnything(chosen)))
             {
                 return result;
             }
@@ -240,6 +247,18 @@ namespace Assets.Scripts.Cards
                 }
             }
             return 0;
+        }
+
+        private static bool NamesAnything(IList<string> chosen)
+        {
+            foreach (var key in chosen)
+            {
+                if (!string.IsNullOrEmpty(key))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static bool Knows(IList<KeyValuePair<string, int>> known, string key)

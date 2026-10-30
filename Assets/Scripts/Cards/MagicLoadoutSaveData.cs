@@ -43,7 +43,8 @@ namespace Assets.Scripts.Cards
     public class MagicLoadoutSaveData : IWriteable
     {
         /// <summary>One entry per hero who has ever changed their kit. A hero with no entry simply
-        /// auto-fills from what they know (<see cref="MagicLoadoutOps.Resolve"/>).</summary>
+        /// auto-fills from what they know (<see cref="MagicLoadoutOps.Resolve"/>); an entry with no
+        /// keys carries nothing.</summary>
         public List<HeroMagicLoadout> Heroes = new List<HeroMagicLoadout>();
 
         /// <summary>The hero's entry, created and appended if absent. Never returns null.</summary>
@@ -62,8 +63,10 @@ namespace Assets.Scripts.Cards
             return created;
         }
 
-        /// <summary>The hero's chosen keys, or an empty list when they have never chosen. Read-only
-        /// lookup — unlike <see cref="For"/> it does not create an entry.</summary>
+        /// <summary>The hero's chosen keys, or <c>null</c> when they have never chosen. The two are
+        /// different answers: null auto-fills from what the hero knows, while an empty list is a
+        /// player who put everything away (<see cref="MagicLoadoutOps.Resolve"/>). Read-only lookup
+        /// — unlike <see cref="For"/> it does not create an entry.</summary>
         public List<string> ChosenFor(string heroKey)
         {
             foreach (var entry in Heroes)
@@ -73,7 +76,7 @@ namespace Assets.Scripts.Cards
                     return entry.EquippedKeys;
                 }
             }
-            return new List<string>();
+            return null;
         }
 
         public string GetFileName()

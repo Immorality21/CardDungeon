@@ -298,10 +298,9 @@ backlog.**
 
 ### Next up
 
-- **[Outside playtest, 2026-10-30](plans/PLAYTEST_2026-10-30.md) — the owner's verdicts, being
-  processed.** Order: 1) **the text system** (one localization table + editor window, keys
-  everywhere, phased), 2) the accepted fixes (combat info, keyboard, Paladin's own kit, status
-  screen, hub), 3) move its roadmap items into the plan files below and delete that file.
+- **Rethink Ultras — first** (owner, 2026-10-30). The gauge should **keep its charge between fights**
+  (today it empties at the end of each), and Ultras should be **unlocked from the start** instead of
+  bought on the sphere grid. A broader rethink, not a tweak: `plans/COMBAT_DEPTH.md` §13.
 - **Boss balancing** (owner, 2026-10-28). The late runs' bosses were left at their old numbers
   in the last pass (Emberfall 30% wipes; the Hollow Vault, Red Cloister, Altar of the Last Initiate and
   Mother Pool 0%). Tune each boss by its own absolute numbers (`EnemyTuning.Overrides` per floor; bosses
@@ -316,6 +315,16 @@ backlog.**
 
 ### Later, small
 
+- **No way back to town mid-run** (owner, 2026-10-30, outside playtest): lock going back to town until
+  the run is completed, and split the tutorial into separate runs instead. Avoids abuse, confusion and
+  bugs (the "charges left this run" in town came from exactly this). `plans/POLISH_CONTENT.md` §20.
+- **Delete the dead combat log** (2026-10-30): no screen shows it, but `CombatManager` still builds it
+  (`_lastTurnLog`, `CombatResult.Log`, ~90 lines, the `combat.log.*` texts). Do it with the planned
+  `CombatManager` split (Rooms guide), not on its own.
+- **Localization follow-ups** (2026-10-30) — `plans/POLISH_CONTENT.md` §22: enum names still shown
+  raw, English grammar in code, grid nodes showing raw ability keys.
+- **Own icons for Divine Protection and Smite** (2026-10-30): they borrow Sacred Shield's and Divine
+  Bolt's.
 - **Warlock head size — small, later** (owner, 2026-10-28): the Warrior, Ranger and Rogue were redrawn
   to the Paladin's smaller head (playtest 3 finding 17, `PIXEL_ART.md`'s proportion rule); the Warlock
   may need the same. Owner to judge in play first.
@@ -334,7 +343,7 @@ backlog.**
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
 | **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
 | **4d** | **Every hero starts with two abilities** (owner, 2026-10-29) — a new hero and the early game play one-note with a single free signature (today's `UnlockedByDefault` start node). Give each hero a second free ability so the first fights already have a choice in them. To decide when building it: which ability (a second free node beside the start, or the cheapest one already on the grid); the two default ability slots (`EquippedMagicState.DefaultSlotCount`) are then both full from the start, so a `MagicSlot` node only matters from the third ability on; check each hero's vision in the Hero Workbook; rerun the balance suite, since the model's heroes get stronger early | open |
-| **4** | Sphere grid — follow-ups | mostly superseded by §4c. **Ability upgrades (`MagicUpgrade`) built 2026-10-09** with the Ranger as showcase; other heroes' spurs wait on the Hero Workbook |
+| **4** | Sphere grid — follow-ups | mostly superseded by §4c. **Ability upgrades (`MagicUpgrade`) built 2026-10-09** with the Ranger as showcase; other heroes' spurs wait on the Hero Workbook. **Outside playtest 2026-10-30:** "+3 to a stat is boring" - make upgrades meaningful (nothing major yet, owner); Cairn Golem's upgrade sits on the far side of the Warrior tree - fix in the grid rework |
 | — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) ~~Ultras for the other six heroes~~ - every hero has Ultras since the 2026-10-11 workbook pass (the Mage's is MultiCast) |
 | — | **The Mage — an elemental caster** | ✅ **on the roster 2026-10-07** — rescued in the new **Sealed Archive** (main line, before the March); three-branch grid (storm / frost / fire, Fire Cloak early for the Ashen Deep), new Chain Lightning. **Open:** his signature and Ultra are MultiCast (spend Focus to cast 2-4 times, owner 2026-10-07, details open); summons are drafts in the hero workbook |
 | — | **Future heroes (long term)** | not started: **the Pirate** (owner, 2026-10-11), name only so far. Comes after the current hero pass and the balance pass; needs a vision first (§5, "Future heroes") |
@@ -346,7 +355,7 @@ backlog.**
 | **9** | Status effects — over-time, Silence, the cure loop | ✅ shipped 2026-09-03; **Blind + per-debuff apply chance 2026-10-09**; next: **status resistances** - gear (and later other sources) that grant immunity or resistance to an ailment (owner, 2026-10-09) |
 | **11** | Threat — a reason for a defensive build | ✅ threat shipped 2026-09-28; balance model + threat UI open |
 | **12** | Enemy action vocabulary — the missing verbs | ✅ **BuffAlly, Guard, Summon shipped 2026-10-08** (Bog Shaman, Steam Automaton, Gilded Hoarder); Steal / Flee dropped by the owner |
-| **13** | Hero identity — the Ultra gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the **Ultra** gauge (working name for a Limit/Overdrive, 2026-10-04) is what is left; per-hero styles collected in Hero Vision |
+| **13** | Hero identity — the Ultra gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the **Ultra** gauge (working name for a Limit/Overdrive, 2026-10-04) is what is left; per-hero styles collected in Hero Vision. **Rethink next (owner, 2026-10-30):** the gauge keeps its charge between fights, Ultras unlocked from the start — see Next up |
 
 ### [Events and reactions](plans/EVENTS.md)
 
@@ -386,6 +395,7 @@ backlog.**
 | **3b** | The retry economy — death pays, deliberately | **decided** — do not relitigate |
 | **0b** | Elemental layer — follow-ups | open |
 | **0c** | Campaign graph — follow-ups | open; gains hero gating from §5b |
+| **0h** | **The run shape, revisited** (outside playtest 2026-10-30) | open: the enemy band (75-125% per floor) is a first pass; enemy scaling and "is this a roguelike?" to be looked at together, later (owner) |
 
 ### [Dungeon rooms](plans/DUNGEON_ROOMS.md) — art, movement, shapes, hidden rooms, routes
 
@@ -399,7 +409,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped; the art pass moved to §21 |
+| **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped; the art pass moved to §21. **Battle layout** (outside playtest 2026-10-30): units should stand on a floor with the area behind them, not float over a picture |
 | **2** | Room variety — the branching half has not shipped | **moved to [DUNGEON_ROOMS.md](plans/DUNGEON_ROOMS.md)** (2026-10-30): branching routes, Elite/Shrine kinds and markers are phases 3 and 7 there |
 | **6** | Stats — one open note (`BuffType` is a second per-stat list) | structural |
 | **8** | Migrate to the new Input System | *nice to have* |
@@ -410,6 +420,7 @@ backlog.**
 | **17** | Content volume is the biggest single gap | not started |
 | **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses deferred** (owner unsure they make sense, 2026-10-07) — the 4-piece Shadowweave set is authored, no set logic (§18a-sets); **§18d gear restrictions** — equipment types on items + per-hero eligibilities, so a mage wears cloth and wands, not plate (opened 2026-10-29, owner; not started, four decisions open) |
 | **19** | Shipping surface | not started |
+| **22** | **Localization follow-ups** — after the 2026-10-30 text system | open: enum names on screen, English grammar in code, raw keys on grid nodes |
 | **21** | **Art pass** — every outdated sprite | **enemies done 2026-09-29** (the five still enemies redrawn + animated, both bosses at Warden size, a 32 px Dark Jailor); menu backdrops, combat backgrounds, floor rock and item icons done 2026-09-28. **all seven heroes in one style 2026-09-29** (Warrior, Cultist, Cleric, Ranger, Tinkerer redone). **2026-10-08: every floor has a biome combat background** (four new: Threshold halls and caverns, the Archive, the Drowned Chapel), **a pixel-art window frame** on every window, **a painted death screen**, **a calm flagstone dungeon floor**, and the title menu docked over the stairs. Left (deferred to polish by the owner): attack/hit animations; a title logo (the title is a placeholder); the parked `productName` / save-folder rename |
 
 ---
@@ -419,6 +430,21 @@ backlog.**
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 
+- **The text system** (2026-10-30) — root `CLAUDE.md` (`Localization/`). Every player-facing text lives
+  in one table (`Resources/TextTable.asset`), edited in `Tools ▸ Texts`; code, UXML and assets hold
+  keys. 1,952 texts (764 from assets, 104 UXML, 1,084 code), English unchanged, then a first rewording
+  pass. `LocTests`; checked in play on every screen.
+- **Outside playtest fixes** (2026-10-30, the itch.io build). Group 1: Gilded Leaf, no run charges in
+  town, revisit ranks coloured, upgrade nodes show their ability's art, 24 Ultra icons (PixelLab), the
+  HP plate waits for a killing projectile. Group 2: Z/X/C keys, Enter works at once on the run-complete
+  and level-entry screens, Back reachable in the ability menu, the first door arrow picks the matching
+  wall, the grid cursor never sticks, the tutorial cursor starts on its target. Group 3: "18 damage"
+  in combat and "scales with Strength" in the hub, hover tips (`HoverTips`), hero status at the
+  campfire. Group 4: turn-order header and NOW tag, bigger HP text, enemy knowledge in the target
+  picker, a readable sword glyph, swing and impact sounds for abilities. Group 5: Floating Eye's Eye
+  Laser and Screech, the Paladin's own kit (Divine Protection, Smite, Aegis), empty ability loadouts,
+  the Storehouse All tab, a per-floor enemy band, the Catacombs replay hint. Suite 1,689 / 0; what is
+  not yet seen in play is in `TO_PLAYTEST.md`.
 - **Click a room to walk there** (2026-10-30) — the Rooms guide. A click on another room's floor
   walks the party there when the way is safe (`DungeonMapOps.WalkRoute` + `RoomAt`,
   `RoomActionUI.TryWalkTo`): the map's fast-travel rules, plus one step into a room not yet entered.

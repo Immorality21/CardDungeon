@@ -28,6 +28,7 @@ namespace Assets.Scripts.Cards.Buffs
                 { BuffType.ShadowResistance, new ResistanceBuffHandler(DamageType.Shadow, "combat.status.shadow-res") },
                 { BuffType.Guarded, ResistanceBuffHandler.ToAll("combat.status.guard") },
                 { BuffType.Barrier, new BarrierBuffHandler() },
+                { BuffType.DivineProtection, new DivineProtectionBuffHandler() },
                 { BuffType.Frozen, new FrozenBuffHandler() },
                 { BuffType.Slow, new SlowBuffHandler() },
                 { BuffType.Haste, new HasteBuffHandler() },

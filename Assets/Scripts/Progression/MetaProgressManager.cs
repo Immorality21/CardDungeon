@@ -590,6 +590,19 @@ namespace Assets.Scripts.Progression
             Save();
         }
 
+        public bool ReplayHintShown => _saveData.ReplayHintShown;
+
+        /// <summary>The death screen gave its one replay hint. Persists immediately.</summary>
+        public void MarkReplayHintShown()
+        {
+            if (_saveData.ReplayHintShown)
+            {
+                return;
+            }
+            _saveData.ReplayHintShown = true;
+            Save();
+        }
+
         /// <summary>Whether the tutorial's return to the Hall of Progression has been walked.</summary>
         public bool TutorialHallRevisited => _saveData.TutorialHallRevisited;
 

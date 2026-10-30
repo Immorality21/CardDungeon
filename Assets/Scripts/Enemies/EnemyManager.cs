@@ -51,6 +51,7 @@ namespace Assets.Scripts.Enemies
 
         public void SpawnEnemies(List<Room> rooms, Room playerRoom, List<ManualRoomEntry> manualEntries)
         {
+            var rolled = new List<RolledRoom>();
             for (int roomIdx = 0; roomIdx < rooms.Count; roomIdx++)
             {
                 var room = rooms[roomIdx];
@@ -70,6 +71,7 @@ namespace Assets.Scripts.Enemies
                 // Determine spawn table: use manual override if provided, otherwise RoomSO table
                 List<EnemySpawnEntry> spawnTable = null;
                 bool guaranteeAll = false;
+                bool authored = false;
 
                 if (manualEntries != null && roomIdx < manualEntries.Count &&
                     manualEntries[roomIdx].EnemySpawnOverride != null &&
@@ -77,6 +79,7 @@ namespace Assets.Scripts.Enemies
                 {
                     spawnTable = manualEntries[roomIdx].EnemySpawnOverride;
                     guaranteeAll = manualEntries[roomIdx].GuaranteeAllSpawns;
+                    authored = true;
                 }
                 else
                 {
@@ -123,7 +126,94 @@ namespace Assets.Scripts.Enemies
                     }
                 }
 
-                AddRevisitExtras(room, spawnTable, prefab);
+                rolled.Add(new RolledRoom { Room = room, Table = spawnTable, Authored = authored });
+            }
+
+            KeepWithinBand(rolled);
+            foreach (var roll in rolled)
+            {
+                AddRevisitExtras(roll.Room, roll.Table, EnemyPrefab());
+            }
+        }
+
+        private struct RolledRoom
+        {
+            public Room Room;
+            public List<EnemySpawnEntry> Table;
+            public bool Authored;
+        }
+
+        /// <summary>How far a floor's enemy total may stray from what its spawn tables expect: 0.25 is
+        /// 75% to 125%. A first pass (playtest 2026-10-30: "10 enemies one try, 2 the next"); the owner
+        /// means to revisit the run shape, so this is deliberately one constant.</summary>
+        public const float BandFraction = 0.25f;
+
+        /// <summary>The allowed range of enemies on a floor that expects <paramref name="expected"/>.</summary>
+        public static Vector2Int Band(float expected)
+        {
+            if (expected <= 0f)
+            {
+                return new Vector2Int(0, 0);
+            }
+            int min = Mathf.FloorToInt(expected * (1f - BandFraction));
+            int max = Mathf.Max(min, Mathf.CeilToInt(expected * (1f + BandFraction)));
+            return new Vector2Int(min, max);
+        }
+
+        /// <summary>
+        /// Trims or tops up the rolled (not authored) rooms so the floor's total falls inside
+        /// <see cref="Band"/>. Trims the fullest room first; tops up the emptiest room that already
+        /// holds a fight, from its own table, so an empty room stays a breather. Draws on the same
+        /// seeded stream as the rolls, so a resumed floor reproduces it.
+        /// </summary>
+        private void KeepWithinBand(List<RolledRoom> rolled)
+        {
+            var rooms = rolled.Where(r => !r.Authored).ToList();
+            float expected = 0f;
+            int total = 0;
+            foreach (var r in rooms)
+            {
+                foreach (var entry in r.Table)
+                {
+                    if (entry != null && entry.Enemy != null)
+                    {
+                        expected += Mathf.Clamp01(entry.SpawnChance) * entry.EvaluationCount;
+                    }
+                }
+                total += r.Room.Enemies.Count;
+            }
+            var band = Band(expected);
+            var prefab = EnemyPrefab();
+
+            while (total > band.y)
+            {
+                var fullest = rooms.OrderByDescending(r => r.Room.Enemies.Count).First().Room;
+                var enemy = fullest.Enemies[fullest.Enemies.Count - 1];
+                fullest.Enemies.RemoveAt(fullest.Enemies.Count - 1);
+                fullest.ReleaseSpot(enemy);
+                _spawnedEnemies.Remove(enemy);
+                Destroy(enemy.gameObject);
+                total--;
+            }
+
+            while (total < band.x && prefab != null)
+            {
+                var open = rooms.Where(r => r.Room.Enemies.Count > 0 && r.Room.Enemies.Count < EnemyFormation.DesignMax
+                                            && r.Table.Any(e => e != null && e.Enemy != null)).ToList();
+                if (open.Count == 0)
+                {
+                    break;
+                }
+                var target = open.OrderBy(r => r.Room.Enemies.Count).First();
+                var candidates = target.Table.Where(e => e != null && e.Enemy != null).ToList();
+                var definition = candidates[Random.Range(0, candidates.Count)].Enemy;
+                var enemyObj = Instantiate(prefab, transform);
+                var added = enemyObj.GetComponent<Enemy>();
+                added.Initialize(definition, LevelTuning);
+                added.PlaceInRoom(target.Room, target.Room.ClaimSpot(added, -1f));
+                target.Room.Enemies.Add(added);
+                _spawnedEnemies.Add(added);
+                total++;
             }
         }
 

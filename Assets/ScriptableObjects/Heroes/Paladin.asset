@@ -35,12 +35,12 @@ MonoBehaviour:
     Branches:
     - GridBranch: a
       Becomes: A front-liner who protects by drawing the enemy's attention.
-      IntendedKit: Shield Up -> Ward
+      IntendedKit: Divine Protection -> Ward
       Summon: 'Aegis Lion - special attack: +50% own Endurance for 3 turns and +60
         threat (a taunt).'
     - GridBranch: b
       Becomes: A holy damage dealer.
-      IntendedKit: Sunder -> Consecrate
+      IntendedKit: Smite -> Consecrate
       Summon: 'Judgement Seraph - party replacement, a hitter: 120% HP / 180% STR,
         Radiant Cut and Judgement (Holy).'
     - GridBranch: c
@@ -51,7 +51,7 @@ MonoBehaviour:
     Overlaps: 'Warrior (front-liner, damage) and Cleric (healer). Three branches
       against their two: broader, never the best at any one.'
     OpenQuestions: What does a Paladin do that the Warrior and the Cleric cannot?
-      Holy damage only so far.
+      Holy damage, and since 2026-10-30 negating a hit outright (Divine Protection, Aegis) - he shares no ability with the Warrior any more.
   Sprite: {fileID: -4830569828500545, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}
   AnimationFrames:
   - {fileID: -4830569828500545, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}

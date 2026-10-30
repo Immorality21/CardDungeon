@@ -66,6 +66,10 @@ namespace Assets.Scripts.Cards
         Evasive = 27,
         // The Rogue's Death Mark: every damaging hit on the unit is a critical one, and harder than a
         // normal crit (CritRules.MarkedMultiplier).
-        DeathMarked = 28
+        DeathMarked = 28,
+        // The Paladin's Divine Protection and Aegis: the next Amount damaging hits on the unit - a blow
+        // or an ability, any element - are negated outright (Combat.ProtectionTable, read by
+        // HealthOps.Damage). Never a tick or a price. Not a status - it lives on the fight's event stream.
+        DivineProtection = 29
     }
 }

@@ -87,5 +87,6 @@ namespace Assets.Scripts.Tutorial
         ChallengeAhead = 16, // the story map, once, when a challenge run first opens (not a step: any save sees it)
         RevisitHallInTown = 17,
         RevisitHallOnGrid = 18,
+        ReplayToGetStronger = 19, // the death screen, the first wipe in a run flagged ReplayHintOnWipe (not a step: any save sees it)
     }
 }

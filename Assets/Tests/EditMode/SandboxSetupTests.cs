@@ -201,7 +201,7 @@ namespace Tests.EditMode
             var loadout = SandboxSetup.BuildLoadout(new[] { chooser, autoFill });
 
             CollectionAssert.AreEqual(new[] { "bolt" }, loadout.ChosenFor("Chooser"));
-            Assert.IsEmpty(loadout.ChosenFor("AutoFill"), "No entry means auto-fill from the grid.");
+            Assert.IsNull(loadout.ChosenFor("AutoFill"), "No entry means auto-fill from the grid.");
             Assert.AreEqual(1, loadout.Heroes.Count);
         }
 

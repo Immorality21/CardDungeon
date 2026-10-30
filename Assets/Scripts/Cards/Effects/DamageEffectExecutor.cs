@@ -13,6 +13,7 @@ namespace Assets.Scripts.Cards.Effects
     {
         private static readonly Color DamageColor = Color.white;
         private static readonly Color HealColor = Color.green;
+        private static readonly Color ProtectedColor = new Color(1f, 0.85f, 0.35f);
         private const float EffectDelay = 0.2f;
 
         private readonly Func<CombatEvents> _events;
@@ -136,6 +137,19 @@ namespace Assets.Scripts.Cards.Effects
                 {
                     var hit = HealthOps.Damage(target, damage, source, _events?.Invoke());
                     int landed = hit.Landed;
+
+                    // Divine protection turned the whole hit away: nothing landed, nothing to show but that.
+                    if (hit.Negated > 0)
+                    {
+                        result.Entries.Add(new EffectEntry
+                        {
+                            Target = target,
+                            Text = Loc.Get("combat.float.protected"),
+                            Color = ProtectedColor,
+                            Delay = EffectDelay
+                        });
+                        continue;
+                    }
 
                     foreach (var statusEffect in buffTracker.GetActiveStatusEffects(target))
                     {

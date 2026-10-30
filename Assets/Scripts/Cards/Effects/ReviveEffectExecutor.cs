@@ -80,6 +80,7 @@ namespace Assets.Scripts.Cards.Effects
                 // They stand up clean: no buffs, debuffs, ticks or barrier from before they fell.
                 buffTracker?.ClearUnit(target);
                 events?.Barriers.Clear(target);
+                events?.Protections.Clear(target);
                 events?.Thorns.Clear(target);
                 int health = HealthFor(target, effect.Power);
                 HealthOps.Set(target, health, new HealthSource(caster, HealthCause.Revive), events);

@@ -124,9 +124,10 @@ MonoBehaviour:
     Note: 
   - Key: ability.aegis.description
     Values:
-    - The shield goes up over the whole line, not just him.
+    - 'Divine protection over the whole line: the next hit on each of them is turned
+      aside.'
     Reviewed: 0
-    Note: 
+    Note: 'UPDATE of existing row: Aegis is now the awakened Divine Protection (party-wide)'
   - Key: ability.aimed-shot.name
     Values:
     - Aimed Shot
@@ -4580,7 +4581,7 @@ MonoBehaviour:
     Values:
     - Protected
     Reviewed: 0
-    Note: 'Floating text: Intercept covered an ally'
+    Note: 'Floating text: divine protection negated a whole hit'
   - Key: combat.float.charge-kept
     Values:
     - Charge kept
@@ -9056,10 +9057,9 @@ MonoBehaviour:
     Note: ability detail note
   - Key: items.inv.note.carried-last
     Values:
-    - Carried. A hero must carry at least one ability. Carry another to replace this
-      one.
+    - Carried. Enter puts it away, and this hero carries no abilities.
     Reviewed: 0
-    Note: ability detail note
+    Note: ability detail note on the only carried ability
   - Key: items.inv.note.carried
     Values:
     - Carried. Enter puts it away.
@@ -10120,3 +10120,102 @@ MonoBehaviour:
     - No weaknesses found yet.
     Reviewed: 0
     Note: Target picker footer, when no resistance of this enemy has been observed.
+  - Key: ability.divine-protection.name
+    Values:
+    - Divine Protection
+    Reviewed: 0
+    Note: Paladin ability name (replaces Shield Up on his grid)
+  - Key: ability.divine-protection.description
+    Values:
+    - 'A holy ward on one ally: the next hit that would strike them is turned aside
+      entirely.'
+    Reviewed: 0
+    Note: Paladin ability flavour text (hub screens)
+  - Key: ability.smite.name
+    Values:
+    - Smite
+    Reviewed: 0
+    Note: Paladin ability name (replaces Sunder on his grid)
+  - Key: ability.smite.description
+    Values:
+    - A blow of righteous fury against one foe, hitting the undead and demons hardest.
+    Reviewed: 0
+    Note: Paladin ability flavour text (hub screens)
+  - Key: combat.status.divine-protection
+    Values:
+    - Divine Protection
+    Reviewed: 0
+    Note: 'Buff text: divine protection applied (next damaging hit negated)'
+  - Key: combat.status.divine-protection-hits
+    Values:
+    - Divine Protection x{hits}
+    Reviewed: 0
+    Note: 'Buff text: divine protection for several hits; {hits} = hits negated'
+  - Key: abilities.gloss.divine-protection
+    Values:
+    - their next hit taken is negated
+    Reviewed: 0
+    Note: 'Status explanation in ability text: Divine Protection'
+  - Key: combat.log.attack-protected
+    Values:
+    - '{attacker} {verb} {target}, but divine protection turns the blow aside!'
+    Reviewed: 0
+    Note: 'Combat log: a basic attack negated by Divine Protection; {verb} = combat.verb.*'
+  - Key: ui.hub.tab-all
+    Values:
+    - All
+    Reviewed: 0
+    Note: 'Storehouse tab: every piece of equipment, no slot filter'
+  - Key: items.inv.title.all-equipment
+    Values:
+    - All equipment
+    Reviewed: 0
+    Note: inventory list title, All tab
+  - Key: items.inv.hint.all
+    Values:
+    - "\u2191\u2193 item \xB7 Enter equip \xB7 Q/E hero \xB7 \u2190\u2192 tab \xB7
+      Esc back"
+    Reviewed: 0
+    Note: inventory key hint, All tab
+  - Key: items.inv.all.slot-caption
+    Values:
+    - "{slot} \xB7 {caption}"
+    Reviewed: 0
+    Note: All tab row caption; slot = slot name, caption = rest of caption
+  - Key: items.inv.all.worn-note
+    Values:
+    - Worn by {hero}. Enter takes it off.
+    Reviewed: 0
+    Note: All tab detail note on an item the selected hero wears; hero = that hero
+  - Key: items.inv.empty.no-equipment
+    Values:
+    - The party owns no equipment yet.
+    Reviewed: 0
+    Note: inventory empty list, All tab
+  - Key: tutorial.replay-to-get-stronger.text
+    Values:
+    - This place is built for a stronger party. Replay earlier runs from the story
+      map to earn XP and gear, grow your heroes in the Hall of Progression, then
+      come back.
+    Reviewed: 0
+    Note: Death screen, the first wipe in the Catacombs after the tutorial.
+  - Key: ability.eye-laser.name
+    Values:
+    - Eye Laser
+    Reviewed: 0
+    Note: The Floating Eye's single-target attack.
+  - Key: ability.eye-laser.description
+    Values:
+    - A beam from the eye at one hero.
+    Reviewed: 0
+    Note: 
+  - Key: ability.screech.name
+    Values:
+    - Screech
+    Reviewed: 0
+    Note: The Floating Eye's attack on the whole party.
+  - Key: ability.screech.description
+    Values:
+    - A piercing shriek that hits the whole party.
+    Reviewed: 0
+    Note: 

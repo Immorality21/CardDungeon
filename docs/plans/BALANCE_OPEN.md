@@ -265,6 +265,16 @@ The defence half shipped 2026-08-25 and the discovery-gated reveal 2026-08-29 (I
   power does not scale; at Difficulty 2.5+ their authored spells fall behind their scaled Strength.
   Either give `EnemyStatOverride` its own spell-power field, or author boss spells at boss power.
 
+### 0h. The run shape, revisited *(outside playtest 2026-10-30)*
+
+The tester asked: "the dungeon RNG is inconsistent (10 enemies one try, 2 the next)", "scaling enemies -
+based on your level or the map?", "is this a roguelike if you don't start from the beginning?". The
+owner wants these looked at together, later, without much effort now. Done so far: a per-floor enemy
+**band** (`EnemyManager.BandFraction`, 75-125% of what the spawn tables expect; manual layouts exempt;
+revisit extras on top) - a first pass. The balance model still prices the unbanded expectation, which
+the band keeps it close to. Catacombs difficulty is intended; the death screen now tells the player
+to replay earlier runs (`RunDefinitionSO.ReplayHintOnWipe`).
+
 ### 0c. Campaign graph — follow-ups
 
 `CampaignSO` + `CampaignOps` + `CampaignMapUI` shipped 2026-08-25 with five runs and the first

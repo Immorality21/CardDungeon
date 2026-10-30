@@ -138,6 +138,14 @@ New verbs, all appended to their enums:
 - **`BuffType.Evasive`** (Shadowstep: 1 for 3 turns; Smoke and Mirrors: 99 for 1 turn on the party): the
   next `Amount` physical blows miss outright, spent by `EvasiveBuffHandler.TryEvade` in
   `ExecuteAttack` and `EffectResolver.HitFilter` before Luck's dodge. Floats "Evade".
+- **`BuffType.DivineProtection`** *(2026-10-30, the Paladin's Divine Protection and Aegis)*: the next
+  `Power` (at least 1) damaging hits on the unit - blows and abilities, any element - are **negated
+  outright**, for `Duration` of its turns. It lives on `CombatEvents.Protections` (`Combat/ProtectionTable`,
+  timed like a barrier) and is spent in `HealthOps.Damage` *before* any barrier, so the live fight and
+  the simulator both honour it; ticks and prices never spend it (`ProtectionTable.Negates`). The hit
+  reports `HealthChange.Negated` and floats "Protected". A buff, not a status: not curable, a gold
+  shield on the HP bar, cleared by a Revive. **`SpellEffect.BonusVsTrait` matches any one of its
+  traits** (`UnitTraitOps.HasAny`), so Smite's Undead|Demon earns the bonus on either.
 - **`BuffType.DeathMarked`** (Death Mark): every damaging hit on the unit crits - abilities that cannot
   crit included (`RollCrits` adds it first) - at `CritRules.MarkedMultiplier` (1.6 + 0.5).
 
@@ -294,7 +302,7 @@ level-scoped health pool, and a cure would clear it only until the next room re-
   | added for | spells |
   |---|---|
   | Warrior (2026-09-04) | **Cleave** (STR, AllEnemies, Physical) · **Sunder** (STR, damage + Endurance debuff, Metal) · **Bulwark** (STR, AllAllies Endurance — the mirror of War Cry) |
-  | Paladin / Cleric (2026-09-05) | ~~Smite~~ (removed 2026-10-10; the Cleric's Divine Bolt replaced it) · **Consecrate** (SPR, Holy, AllEnemies) · **Benediction** (SPR, AllAllies heal) · **HolyTouch** (SPR, SingleAlly heal; the Paladin's free starting signature until 2026-10-26, now the first ability of his healer branch at Heal's power, 6) · **HolyStrike** (STR, Holy, one enemy, Strike, can crit - the Paladin's starting signature since 2026-10-26). Plain **Heal** (self only) is `EnemyOnly` now and lives in `Enemies/Abilities`: the Mirefather still casts it, no hero does |
+  | Paladin / Cleric (2026-09-05) | ~~Smite~~ (removed 2026-10-10; the Cleric's Divine Bolt replaced it - a new **Smite** came back 2026-10-30 as the Paladin's own: STR, Holy, one enemy, Strike, can crit, +50% vs Undead or Demon) · **DivineProtection** (2026-10-30, the Paladin's, replacing his Shield Up; awakened to **Aegis**, the same on the whole party) · **Consecrate** (SPR, Holy, AllEnemies) · **Benediction** (SPR, AllAllies heal) · **HolyTouch** (SPR, SingleAlly heal; the Paladin's free starting signature until 2026-10-26, now the first ability of his healer branch at Heal's power, 6) · **HolyStrike** (STR, Holy, one enemy, Strike, can crit - the Paladin's starting signature since 2026-10-26). Plain **Heal** (self only) is `EnemyOnly` now and lives in `Enemies/Abilities`: the Mirefather still casts it, no hero does |
   | Ranger / Rogue | **AimedShot** (AGI, single) · **Volley** (AGI, AllEnemies) · **Snare** (AGI, Agility debuff) · **Backstab** (AGI, damage + Bleeding) · **SmokeBomb** (Blind on every enemy, 50% each — a party Agility buff until 2026-10-09) |
   | Warlock | **Bloodbolt** (INT, Shadow, costs 8% max health) · **Blood Pact** (was Sacrifice: INT+STR on an ally for 15% max health) · **Drain Life** · **Life Tap** · **Siphon Soul** (2026-10-04) · **Blood Shower** (INT, Shadow, all enemies, 12% health - replaced Cinderstorm, now the Cinder Tyrant's `EnemyOnly` spell) and the awakenings **Dark Pact** / **Dark Pact II** (Life Tap restoring 2 / 3), **Crimson Rain** (Blood Shower + 60% Bleed) and **Soul Feast** (Siphon Soul, drain shared with the party) and **Leeching Curse** (the drain tip, which replaced Oil Slick - now the Dragon's and Hex Weaver's `EnemyOnly` spell) (2026-10-11) |
 
@@ -324,8 +332,13 @@ the player paid for that does nothing until they visit another screen reads as a
 *have* chosen, the choice is taken literally, empty slots and all — the alternative (always
 backfilling free slots from the known pool) is incoherent: with two slots and two known spells,
 unequipping one would silently put it straight back, so the screen would refuse to do what it had
-just shown the player doing. If a choice resolves to nothing at all — every key it names retired by a
-grid re-authoring — the auto-fill takes over rather than sending someone in unarmed.
+just shown the player doing. **An explicit empty choice stays empty** (owner, 2026-10-30): the player
+may put away every ability a hero knows, and that hero carries none. The distinction lives in the
+save: `MagicLoadoutSaveData.ChosenFor` returns `null` for a hero with no entry (never chose, auto-fills)
+and the entry's list, possibly empty, otherwise. A choice that names keys but **only** keys the hero no
+longer knows — every one retired by a grid re-authoring — still falls back to the auto-fill: that is
+not the player deciding to go unarmed, and an old save must not send someone in empty-handed. Mid-run
+nothing changes: a spell the run holds still cannot be put away (`ToggleMidRun`).
 
 **A charge spent is gone until the party rests.** `RefillCharges` runs on the **first floor of a run**
 (`RefillsOnLevelStart`) and in a **refuge** (`RoomKind.Rest`, via `RoomActionUI.ApplyRest`) — not per
@@ -411,8 +424,8 @@ Two consequences worth holding on to:
   |---|---|---|---|---|
   | Warrior | B (damage) | **Bloodfang Boar** | special attack | +50% own Strength, whole party, 3 turns |
   | Warrior | A (defence) | **Cairn Golem** | replaces the party | a wall: 250% HP, Quake (damage + Slow) |
-  | Paladin | A (Shield Up, Ward) | **Aegis Lion** | special attack | the Paladin: +50% own Endurance for 3 turns, and **+60 threat** |
-  | Paladin | B (Sunder, Consecrate) | **Judgement Seraph** | replaces the party | a **hitter**: 120% HP, 180% STR, 70% END; Radiant Cut (Holy, one enemy) + Judgement (Holy, all) |
+  | Paladin | A (Divine Protection, Ward) | **Aegis Lion** | special attack | the Paladin: +50% own Endurance for 3 turns, and **+60 threat** |
+  | Paladin | B (Smite, Consecrate) | **Judgement Seraph** | replaces the party | a **hitter**: 120% HP, 180% STR, 70% END; Radiant Cut (Holy, one enemy) + Judgement (Holy, all) |
   | Paladin | C (Heal, Renew) | **Dawn Stag** | special attack | every hero healed 40% of their health, then regenerates 3 a turn for 3 turns |
   | Ranger | A (Poison Dart, Volley) | **Galewing** | special attack | a hawk: 2 hits of the Ranger's Agility on every enemy, then -3 Endurance for 2 turns |
   | Ranger | B (Snare, Hush) | **Exatrix** | replaces the party | a shade, medium: 150% HP, 130% AGI; her Attack is **Rend** (damage + turn delay), Signature **Nightfall** (damage + Agility cut, all) |

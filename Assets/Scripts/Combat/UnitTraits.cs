@@ -52,6 +52,12 @@ namespace Assets.Scripts.Combat
             return traits != UnitTraits.None && unit is IHasTraits bearer && (bearer.Traits & traits) == traits;
         }
 
+        /// <summary>Whether <paramref name="unit"/> has at least one trait in <paramref name="traits"/>.</summary>
+        public static bool HasAny(ICombatUnit unit, UnitTraits traits)
+        {
+            return traits != UnitTraits.None && unit is IHasTraits bearer && (bearer.Traits & traits) != 0;
+        }
+
         /// <summary>Whether <paramref name="unit"/> is a boss; a unit with no traits never is.</summary>
         public static bool IsBoss(ICombatUnit unit)
         {

@@ -17,8 +17,9 @@ using ImmoralityGaming.Localization;
 namespace Assets.Scripts.Items.UI
 {
     /// <summary>
-    /// Hub inventory (UI Toolkit view-controller). Four tabs - equipment and the ability loadout per
-    /// hero, the carried consumables and the hauled materials party-wide - in one fixed frame:
+    /// Hub inventory (UI Toolkit view-controller). Five tabs - equipment (by slot, and all of it in
+    /// one list) and the ability loadout per hero, the carried consumables and the hauled materials
+    /// party-wide - in one fixed frame:
     /// a header band with the tabs, a hero strip, three columns (what is worn or carried, the list to
     /// choose from, and a detail pane for whatever the cursor is on) and a hint line. The frame is
     /// authored in <c>Hub.uxml</c>; this class only fills its regions with rows.
@@ -27,6 +28,10 @@ namespace Assets.Scripts.Items.UI
     /// lists what fits that slot beside it - the party's bag <i>and</i> what other heroes wear - and
     /// Enter moves into that list, where every item shows its effect on the hero's stats before it
     /// is put on. Enter equips and returns to the slots; Esc backs out a layer at a time.</para>
+    ///
+    /// <para><b>All</b> is the same gear without the slot filter: every piece the party owns, bag
+    /// and worn, in one list sorted by slot, so equipping does not mean cycling through every
+    /// slot. Enter puts the piece on the selected hero (or takes it off, if they wear it).</para>
     ///
     /// <para>Stats here are the ones the hero fights with: base, plus the sphere-grid nodes they
     /// have bought, plus gear (<see cref="HeroStatCalculator"/>) - this screen used to leave the
@@ -37,7 +42,8 @@ namespace Assets.Scripts.Items.UI
     /// </summary>
     public class InventoryHubUI
     {
-        private enum Tab { Equipment, Spells, Consumables, Materials }
+        // Declaration order is the tab row's order: Left/Right step through it.
+        private enum Tab { Equipment, All, Spells, Consumables, Materials }
 
         private enum Focus { Slots, List }
 
@@ -59,6 +65,7 @@ namespace Assets.Scripts.Items.UI
 
         private readonly VisualElement _heroesRow;
         private readonly Button _tabEquipment;
+        private readonly Button _tabAll;
         private readonly Button _tabSpells;
         private readonly Button _tabConsumables;
         private readonly Button _tabMaterials;
@@ -108,6 +115,7 @@ namespace Assets.Scripts.Items.UI
 
             _heroesRow = root.Q<VisualElement>("inventory-heroes");
             _tabEquipment = root.Q<Button>("tab-equipment");
+            _tabAll = root.Q<Button>("tab-all");
             _tabSpells = root.Q<Button>("tab-spells");
             _tabConsumables = root.Q<Button>("tab-consumables");
             _tabMaterials = root.Q<Button>("tab-materials");
@@ -138,6 +146,7 @@ namespace Assets.Scripts.Items.UI
             }
 
             WireTab(_tabEquipment, Tab.Equipment);
+            WireTab(_tabAll, Tab.All);
             WireTab(_tabSpells, Tab.Spells);
             WireTab(_tabConsumables, Tab.Consumables);
             WireTab(_tabMaterials, Tab.Materials);
@@ -232,7 +241,7 @@ namespace Assets.Scripts.Items.UI
         //  TABS AND HEROES
         // ============================================================
 
-        private bool IsPerHeroTab => _tab == Tab.Equipment || _tab == Tab.Spells;
+        private bool IsPerHeroTab => _tab == Tab.Equipment || _tab == Tab.All || _tab == Tab.Spells;
 
         /// <summary>Left/Right step through the tabs, clamped so the ends of the row feel like ends.</summary>
         private void CycleTab(int delta)
@@ -261,6 +270,7 @@ namespace Assets.Scripts.Items.UI
         private void RefreshTabs()
         {
             _tabEquipment?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Equipment);
+            _tabAll?.EnableInClassList("cd-inv-tab--active", _tab == Tab.All);
             _tabSpells?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Spells);
             _tabConsumables?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Consumables);
             _tabMaterials?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Materials);
@@ -368,8 +378,15 @@ namespace Assets.Scripts.Items.UI
             {
                 _focus = Focus.Slots;
             }
+            // The All list does not depend on the hero, so the cursor stays on the same item and
+            // only its preview changes.
+            int keep = _listIndex;
             RefreshHeroes();
             RefreshBody();
+            if (_tab == Tab.All)
+            {
+                SetListIndex(keep);
+            }
         }
 
         private void CycleHero(int delta)
@@ -410,6 +427,9 @@ namespace Assets.Scripts.Items.UI
                 case Tab.Equipment:
                     BuildEquipment();
                     break;
+                case Tab.All:
+                    BuildAll();
+                    break;
                 case Tab.Spells:
                     BuildSpells();
                     break;
@@ -438,6 +458,9 @@ namespace Assets.Scripts.Items.UI
                     _hint.text = _focus == Focus.Slots
                         ? Loc.Get("items.inv.hint.slots")
                         : Loc.Get("items.inv.hint.items");
+                    break;
+                case Tab.All:
+                    _hint.text = Loc.Get("items.inv.hint.all");
                     break;
                 case Tab.Spells:
                     _hint.text = Loc.Get("items.inv.hint.abilities");
@@ -619,22 +642,36 @@ namespace Assets.Scripts.Items.UI
             return parts.Count == 0 ? item.ItemKey : item.ItemKey + "|" + string.Join(",", parts);
         }
 
-        private void AddCandidate(ItemSaveData item, string wornBy, int copies = 1)
+        /// <param name="showSlot">Lead the caption with the item's slot - the All tab, where the list
+        /// is not already one slot's.</param>
+        /// <param name="wornBySelected">The selected hero wears this copy (All tab only): the row
+        /// previews taking it off, and Enter does that.</param>
+        private void AddCandidate(ItemSaveData item, string wornBy, int copies = 1, bool showSlot = false,
+            bool wornBySelected = false)
         {
             var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
-            var gear = ItemPresenter.SwapIn(CurrentGear(), new GearPiece(so, item));
+            var gear = wornBySelected
+                ? ItemPresenter.SwapOut(CurrentGear(), so.SlotType)
+                : ItemPresenter.SwapIn(CurrentGear(), new GearPiece(so, item));
             var preview = StatsWith(gear);
             var current = StatsWith(CurrentGear());
 
-            var entry = new Entry
+            var entry = new Entry { Gear = gear };
+            if (wornBySelected)
             {
-                Gear = gear,
-                Preview = () => ShowItemDetail(so, preview,
-                    wornBy != null ? Loc.Format("items.inv.worn-by-note", ("hero", wornBy)) : null, item),
-                Confirm = wornBy != null
+                var slot = so.SlotType;
+                entry.Preview = () => ShowItemDetail(so, preview,
+                    Loc.Format("items.inv.all.worn-note", ("hero", wornBy)), item, removing: true);
+                entry.Confirm = () => Unequip(slot);
+            }
+            else
+            {
+                entry.Preview = () => ShowItemDetail(so, preview,
+                    wornBy != null ? Loc.Format("items.inv.worn-by-note", ("hero", wornBy)) : null, item);
+                entry.Confirm = wornBy != null
                     ? () => AskReassign(item, so, wornBy)
-                    : (Action)(() => Equip(item, so)),
-            };
+                    : (Action)(() => Equip(item, so));
+            }
 
             string caption = wornBy != null
                 ? Loc.Format("items.inv.worn-by", ("hero", wornBy))
@@ -647,9 +684,14 @@ namespace Assets.Scripts.Items.UI
             // or "+2 STR" here reads as a contradiction of the detail's "Grants +4 STR" (playtest 2
             // finding 4).
             var worn = WornItem(so.SlotType);
-            if (worn != null && worn != so)
+            if (worn != null && worn != so && !wornBySelected)
             {
                 caption = Loc.Format("items.inv.vs-caption", ("caption", caption), ("item", worn.DisplayName));
+            }
+            if (showSlot)
+            {
+                caption = Loc.Format("items.inv.all.slot-caption",
+                    ("slot", ItemPresenter.SlotLabel(so.SlotType)), ("caption", caption));
             }
             entry.Row = BuildRow(so.Icon, so.DisplayName, caption, string.Empty, so, out entry.Cursor);
             if (wornBy != null)
@@ -677,6 +719,138 @@ namespace Assets.Scripts.Items.UI
             meta.RemoveFromHierarchy();
 
             AddListEntry(entry);
+        }
+
+        /// <summary>
+        /// The All tab: every piece of equipment the party owns, in the bag and worn by anyone, with
+        /// no slot filter - sorted by slot, then rarity (best first), then name. The left column shows
+        /// what the selected hero wears, read-only; the rows work as on the Equipment list.
+        /// </summary>
+        private void BuildAll()
+        {
+            var hero = FindHero(_selectedHeroKey);
+            SetText(_leftTitle, Loc.Get("items.inv.title.equipped"));
+            SetText(_listTitle, Loc.Get("items.inv.title.all-equipment"));
+            if (hero == null)
+            {
+                ShowEmpty(Loc.Get("items.inv.empty.no-hero-to-equip"));
+                ClearDetail();
+                return;
+            }
+
+            foreach (var slot in ItemPresenter.SlotOrder)
+            {
+                var worn = WornItem(slot);
+                var slotRow = BuildRow(
+                    worn != null ? worn.Icon : null,
+                    worn != null ? worn.DisplayName : ItemPresenter.SlotLabel(slot),
+                    worn != null ? ItemPresenter.SlotLabel(slot) : Loc.Get("items.inv.empty-slot"),
+                    string.Empty,
+                    worn,
+                    out _);
+                slotRow.EnableInClassList("cd-inv-row--empty", worn == null);
+                slotRow.AddToClassList("cd-inv-row--static");
+                _left?.Add(slotRow);
+            }
+
+            // Loose copies stack by kind, as on the Equipment list; worn copies are one row each,
+            // since each names its wearer.
+            var rows = new List<AllRow>();
+            var bagRows = new Dictionary<string, AllRow>();
+            foreach (var item in InventoryManager.Instance.GetAllEquipment())
+            {
+                var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
+                if (so == null)
+                {
+                    continue;
+                }
+                if (string.IsNullOrEmpty(item.EquippedSlot))
+                {
+                    string group = CopyGroup(item);
+                    if (bagRows.TryGetValue(group, out var existing))
+                    {
+                        existing.Copies++;
+                        continue;
+                    }
+                    var bagRow = new AllRow { Item = item, So = so, Copies = 1 };
+                    bagRows[group] = bagRow;
+                    rows.Add(bagRow);
+                }
+                else
+                {
+                    rows.Add(new AllRow { Item = item, So = so, Copies = 1, Worn = true });
+                }
+            }
+
+            if (rows.Count == 0)
+            {
+                ShowEmpty(Loc.Get("items.inv.empty.no-equipment"));
+                ClearDetail();
+                return;
+            }
+
+            rows.Sort(CompareAllRows);
+            foreach (var row in rows)
+            {
+                if (!row.Worn)
+                {
+                    AddCandidate(row.Item, null, row.Copies, showSlot: true);
+                    continue;
+                }
+                bool mine = row.Item.EquippedHeroKey == _selectedHeroKey;
+                AddCandidate(row.Item, WearerName(row.Item.EquippedHeroKey), 1, showSlot: true, wornBySelected: mine);
+            }
+        }
+
+        /// <summary>One row of the All list: a worn copy, or a stack of identical loose copies.</summary>
+        private class AllRow
+        {
+            public ItemSaveData Item;
+            public ItemSO So;
+            public int Copies;
+            public bool Worn;
+        }
+
+        private static int CompareAllRows(AllRow a, AllRow b)
+        {
+            int bySlot = SlotRank(a.So.SlotType).CompareTo(SlotRank(b.So.SlotType));
+            if (bySlot != 0)
+            {
+                return bySlot;
+            }
+            int byRarity = b.So.Rarity.CompareTo(a.So.Rarity);
+            if (byRarity != 0)
+            {
+                return byRarity;
+            }
+            int byName = string.Compare(a.So.DisplayName, b.So.DisplayName, StringComparison.CurrentCultureIgnoreCase);
+            if (byName != 0)
+            {
+                return byName;
+            }
+            // The bag's copies before the worn ones, then wearers in a stable order.
+            int byWorn = a.Worn.CompareTo(b.Worn);
+            if (byWorn != 0)
+            {
+                return byWorn;
+            }
+            return string.CompareOrdinal(a.Item.EquippedHeroKey ?? string.Empty, b.Item.EquippedHeroKey ?? string.Empty);
+        }
+
+        private static int SlotRank(SlotType slot)
+        {
+            int index = Array.IndexOf(ItemPresenter.SlotOrder, slot);
+            return index < 0 ? int.MaxValue : index;
+        }
+
+        private string WearerName(string heroKey)
+        {
+            var wearer = FindHero(heroKey);
+            if (wearer != null)
+            {
+                return wearer.DisplayName;
+            }
+            return string.IsNullOrEmpty(heroKey) ? Loc.Get("items.inv.someone") : heroKey;
         }
 
         private void MoveSlotTo(int index)
@@ -721,9 +895,7 @@ namespace Assets.Scripts.Items.UI
                 InventoryManager.Instance.Unequip(so.SlotType, item.EquippedHeroKey ?? string.Empty);
             }
             InventoryManager.Instance.Equip(item, so.SlotType, _selectedHeroKey);
-            _focus = Focus.Slots;
-            RefreshHeroes();
-            RefreshBody();
+            RefreshAfterGearChange();
             Equipped?.Invoke();
         }
 
@@ -821,9 +993,21 @@ namespace Assets.Scripts.Items.UI
         private void Unequip(SlotType slot)
         {
             InventoryManager.Instance.Unequip(slot, _selectedHeroKey);
-            _focus = Focus.Slots;
+            RefreshAfterGearChange();
+        }
+
+        /// <summary>Equipment returns to the slots after a change; the All list keeps its cursor
+        /// where it was, since the list is sorted by item rather than by who wears it.</summary>
+        private void RefreshAfterGearChange()
+        {
+            int keep = _listIndex;
+            _focus = _tab == Tab.Equipment ? Focus.Slots : Focus.List;
             RefreshHeroes();
             RefreshBody();
+            if (_tab == Tab.All)
+            {
+                SetListIndex(keep);
+            }
         }
 
         private ItemSO WornItem(SlotType slot)
@@ -847,9 +1031,10 @@ namespace Assets.Scripts.Items.UI
 
         /// <summary>
         /// The loadout: every ability the hero's sphere grid has taught them, with the ones they carry
-        /// into a run marked, against a scarce number of slots. An empty choice auto-fills from what
-        /// they know (<see cref="MagicLoadoutOps.Resolve"/>), and toggling writes the resolved list,
-        /// so the first click also commits whatever the auto-fill had picked.
+        /// into a run marked, against a scarce number of slots. A hero who never chose auto-fills from
+        /// what they know (<see cref="MagicLoadoutOps.Resolve"/>), and toggling writes the resolved
+        /// list, so the first click also commits whatever the auto-fill had picked. Putting the last
+        /// one away is allowed: the hero then carries nothing.
         /// </summary>
         private void BuildSpells()
         {
@@ -955,25 +1140,21 @@ namespace Assets.Scripts.Items.UI
             var nodes = ActivatedNodesOf(hero);
             var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, nodes);
 
-            // A hero never goes in with nothing: an empty choice means "never chosen" and auto-fills
-            // (MagicLoadoutOps.Resolve, by design), so putting away the last one would quietly carry
-            // something else instead. Refuse it; the detail pane already says why.
             int slots = SlotCount(hero, nodes);
             var runEntry = RunEntryFor(_selectedHeroKey);
-            var kit = MagicLoadoutOps.RunKit(runEntry, known, _loadout.ChosenFor(_selectedHeroKey), slots);
-            if (kit.Count == 1 && kit[0].Key == magicKey)
-            {
-                return;
-            }
+            // Read before For(): For creates an empty entry, and an empty choice means "carry
+            // nothing" while a missing one means "never chosen" and auto-fills.
+            var chosen = _loadout.ChosenFor(_selectedHeroKey);
+            var kit = MagicLoadoutOps.RunKit(runEntry, known, chosen, slots);
             // A spell the run already holds stays until the run ends - the detail pane says so.
             if (InRun(kit, magicKey))
             {
                 return;
             }
-            var entry = _loadout.For(_selectedHeroKey);
-            entry.EquippedKeys = runEntry != null
-                ? MagicLoadoutOps.ToggleMidRun(known, runEntry, entry.EquippedKeys, magicKey, slots)
-                : MagicLoadoutOps.Toggle(known, entry.EquippedKeys, magicKey, slots);
+            var next = runEntry != null
+                ? MagicLoadoutOps.ToggleMidRun(known, runEntry, chosen, magicKey, slots)
+                : MagicLoadoutOps.Toggle(known, chosen, magicKey, slots);
+            _loadout.For(_selectedHeroKey).EquippedKeys = next;
             _files.Save(_loadout);
 
             int keep = _listIndex;
@@ -1454,7 +1635,7 @@ namespace Assets.Scripts.Items.UI
         /// </summary>
         private List<GearPiece> PreviewGear()
         {
-            if (_tab == Tab.Equipment && _listIndex >= 0 && _listIndex < _listEntries.Count
+            if ((_tab == Tab.Equipment || _tab == Tab.All) && _listIndex >= 0 && _listIndex < _listEntries.Count
                 && _listEntries[_listIndex].Gear != null)
             {
                 return _listEntries[_listIndex].Gear;

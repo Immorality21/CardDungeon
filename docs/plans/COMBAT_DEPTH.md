@@ -261,6 +261,15 @@ before/after. A Steal / Flee verb can be reopened later; the design notes above 
 
 ### 13. Hero identity — the Ultra gauge
 
+> **Rethink — the first thing to pick up from the roadmap** (owner, 2026-10-30, outside playtest).
+> Two changes, as part of a broader look at Ultras: **the gauge keeps its charge between fights**
+> (today it is per fight, `UltraOps`, credited in `CombatManager.UpdateUltraGauges` and reset with the
+> fight), and **Ultras are unlocked from the start** instead of bought on the sphere grid
+> (`SphereNodeKind.Ultra` nodes today). Questions to settle when it starts: where the charge lives
+> between fights and floors (the run save, like charges?), whether it survives leaving to town, what
+> happens to the existing Ultra grid nodes (keys are save data: repurpose, never delete), and how the
+> balance model (`SimUltras`) carries a gauge across a floor.
+
 > **A minimal gauge shipped 2026-10-04** with the Warlock's Demon Form — see
 > the Magic guide. Decided by the owner: Ultras **coexist** with
 > summons, **small and universal**. Built: per-hero, per-fight gauge filled by health lost

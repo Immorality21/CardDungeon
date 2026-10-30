@@ -102,7 +102,8 @@ namespace Assets.Scripts.Cards
             {
                 return false;
             }
-            if (UnitTraitOps.Has(target, BonusVsTrait))
+            // Any one of the traits earns it: Smite's Undead|Demon hits either kind harder.
+            if (UnitTraitOps.HasAny(target, BonusVsTrait))
             {
                 return true;
             }

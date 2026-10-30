@@ -3056,6 +3056,16 @@ namespace Assets.Scripts.Rooms
             // Absorbed (resistance above 100%) heals instead, clamped to the target's maximum - without
             // the clamp an absorbing unit heals past full and the popup reads "-7".
             var hit = HealthOps.Damage(target, dmg, new HealthSource(attacker, HealthCause.Attack, damageType, crit), Events);
+            // Divine protection turned the whole blow away.
+            if (hit.Negated > 0)
+            {
+                CombatAudio.Play(CombatSound.Impact, 0.6f);
+                ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.float.protected"), new Color(1f, 0.85f, 0.35f), 0.16f);
+                RecordAttackTypeObserved(attacker);
+                yield return new WaitForSecondsRealtime(0.045f);
+                _lastTurnLog = Loc.Format("combat.log.attack-protected", ("attacker", attacker.DisplayName), ("verb", Loc.Get(verbKey)), ("target", target.DisplayName));
+                yield break;
+            }
             if (dmg < 0)
             {
                 dmg = -hit.Healed;
