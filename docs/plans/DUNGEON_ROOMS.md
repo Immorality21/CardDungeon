@@ -37,6 +37,8 @@ walls one tile thick, the floor a single texture, the hero one tile).
    counts do not move.
 3. **Tile walking is a later step.** It stays in the plan (*"walking makes more sense now with more
    reward for exploration"*), but after the look, the events and the room shapes.
+   **Changed by the owner the same day, after the spike: walking comes first** (see *Tile walking,
+   moved ahead of phase 2*).
 4. **Hidden rooms are optional**: never on the path to the stairs, and **no retry** after a failed
    unlock, for now.
 5. **Elites are a surprise** (no mark on the door), and they are **the very last part of the plan**.
@@ -51,6 +53,7 @@ walls one tile thick, the floor a single texture, the hero one tile).
   event list). The floor is a tree of them (`RoomManager`: graph, BFS placement, doors).
 - **Movement is door to door**: the party (one sprite) is placed just inside a door
   (`Party.PlaceAtDoor`); arrows pick a door, a click on a room travels (`TryWalkTo`, 2026-10-30).
+  *(Superseded the same day: arrows/WASD walk tile by tile, see phase 7.)*
 - **Already right for the look**: heroes and normal enemies are 32 px and a tile is 1 unit at 32 PPU,
   so a hero is one tile, as in FF. Unity's 2D Tilemap and Tilemap Extras (Rule Tiles) are installed
   through `com.unity.feature.2d`. PixelLab has top-down tileset, tile and map-object tools and 1,867
@@ -113,7 +116,7 @@ Each phase leaves the game playable and is checked in play before the next one s
 | **4** | **Authored room shapes** | templates as painted tilemaps with door sockets and spots (option C); a socket-matching generator; pillars, L-shapes, carpets, alcoves; enemies, markers and props placed on the walkable mask | needs 1-2's pipeline |
 | **5** | **Hidden rooms** | the generator adds secret rooms behind a **locked door**, always a side room and **never on the path to the stairs**; a new event outcome **Unlock** opens it ("try to pick the lock": success opens it, failure leaves it shut **for good**); the map and the frontier count do not show it until it is open; it holds a cache or a captive | a door state plus one outcome type; easiest once rooms and doors are tiles |
 | **6** | **Branching routes** | floors fork on purpose: a main path to the stairs and side branches that trade danger for reward (a cache, a shrine, a hidden room), told apart by the door art and the map | the open half of `POLISH_CONTENT.md` §2 |
-| **7** | **Tile walking** | the leader walks tile by tile: arrows step, click paths (A*), doorways enter rooms; 4-direction walk cycles; enemies stand on tiles; Fight / Flee on entry as today | the biggest change to how the game feels; the owner wants it after the look and the rooms, as exploration gains rewards |
+| **7** | 🔶 **Tile walking - moved first, core built 2026-10-30** (walk cycles, blocking props still open) | the leader walks tile by tile: arrows step, click paths (A*), doorways enter rooms; 4-direction walk cycles; enemies stand on tiles; Fight / Flee on entry as today | the biggest change to how the game feels; the owner wants it after the look and the rooms, as exploration gains rewards |
 | **8** | **Elites (last)** | a new kind **Elite**: a tougher fight with a better drop table, **not marked** before you walk in (a surprise); placed on side branches more than on the main path | the owner's call: the very last part of the plan |
 
 **Backlog, later (owner):** more room events, and a pool of events per area so each region has its
@@ -143,9 +146,8 @@ every prop). Occupants keep off floor-prop tiles while the room has other free t
 - **Enemies are drawn at half a tile on the walking view** (`localScale 0.5`) while the party is a
   full tile. Against real stone they read as specks; in FF a foe on the map is the size of a hero.
   Growing them is a one-line change with layout consequences (five foes in a 2-row room) - an owner call.
-- **The door sprite fights the archway.** The blue door icon still sits in every doorway, on top of
-  the archway art. It is also the click target and the keyboard cursor (`Door.SetHighlighted`
-  tints/scales its sprite), so replacing it means a new highlight - phase 2.
+- ~~**The door sprite fights the archway.**~~ Resolved with tile walking (below): on a biome floor
+  the door keeps only its collider, and the gap or archway in the tilemap is the door.
 - **Décor must be quieter than units.** The first pass had a skull pile brighter and bigger than the
   ghouls. The floor tiles were darkened to ~70%, wall faces ~85%, floor props ~72%, and the pile
   removed. Rule for phase 2: the floor is the darkest, quietest thing in the room.
@@ -154,6 +156,53 @@ every prop). Occupants keep off floor-prop tiles while the room has other free t
 - **Manual layouts keep the old look**: their authored grid positions assume no wall row, so they
   need re-placing (or a converter) in phase 2 - the tutorial's floors among them.
 - Not done in the spike: lights, a door arch on the side walls, per-room shapes, any campaign level.
+
+## Tile walking, moved ahead of phase 2 (owner, 2026-10-30)
+
+After seeing the spike the owner moved **phase 7 first**: *"doors should be part of the level's
+tilemap. I think we should first move to actual WASD/Arrow moving of the hero (like in FF). And then
+we can just walk through doors. Normal doors just open automatically by walking through them."*
+
+**Built 2026-10-30:** arrows/WASD walk the party a tile at a time (`PartyWalk`, rule in the pure
+`TileWalkOps`, 7 tests); walking off a door's tile the way it leads goes through it, by the same path
+a door click takes, so Fight / Flee, saves, the map and Flee's `PreviousRoom` are unchanged. The
+party always stands on a tile now. WASD no longer pans the camera. The door cursor is gone. On a
+biome floor the door sprite is dropped: the tilemap's gap or archway is the door. Works on the old
+look too (the door sprite stays there, since its walls draw no gap). Checked in the sandbox by
+scripted steps: floor moves, walls and the wall face block, a south door crosses the archway, a side
+door into an occupied room raises Fight / Flee and walking stops.
+
+**Clicks walk too (2026-10-30, same day):** a click on a floor or a door walks there tile by tile;
+across rooms it keeps `DungeonMapOps.WalkRoute`'s safety rules, one leg at a time, and stops at
+whatever a room holds. No A* yet: nothing on a floor blocks a step, so `TileWalkOps.Path` goes
+straight. The map's fast travel still jumps.
+
+**Side and south doors have a look (2026-10-30):** a side door read as a missing strip of wall (owner:
+*"difficult to 'see' as a way through"*), and a first pass of dark boxes with stone posts looked stuck
+on (*"they dont look so nice"*). What stayed, on the owner's direction:
+- **A side door is a door seen edge-on** (`BiomeSO.DoorSide`, after the left column of the owner's
+  reference, a pixel-art door sheet on Pinterest): a stone cap, a foot and the door leaf, standing on the wall
+  between the two rooms and rising above the tile. Both rooms paint it, offset half a tile, so it
+  stays in the tilemaps, hides with its rooms and shows whole once either side has been seen.
+- **A south door is only shade** on the floor tile in front of it (`ShadeSouth`) plus the gap in the
+  wall: from the north you are behind the wall the archway is cut into.
+- **Side doors get the same shade** (`ShadeEast/West`), on the `DoorShade` layer under the party.
+- **The wall cap runs unbroken over an archway**; a break there made the arch and the door look like
+  two separate things.
+
+- **Every door swings open the way the party walks, and stays open** (owner: *"it shouldnt close
+  behind you, just let it stay open"*). A side door's leaf turns out into the room being entered; an
+  arch door has its own art now (`BiomeSO.DoorArch`) and swings away on a walk north, toward the viewer
+  on a walk south. The party waits for the swing (0.15 s, `Door.Swing`), because a 0.14 s step is too
+  short to see it; a door already open costs nothing.
+
+**Not saved yet:** which doors are open is not in the save, so a resumed floor shows them all shut,
+and they swing once more. Map fast travel opens no doors either.
+
+**Still open from phase 7:** 4-direction walk cycles per hero (the sprite only mirrors left/right
+today); chests, campfires, stairs and captives do not block a step yet, and pressing toward one does
+not use it - the room bar still does that; "special" doors (locked, hidden - phase 5) as tiles that do
+not open by walking.
 
 ## Open questions
 

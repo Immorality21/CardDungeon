@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,6 +32,34 @@ namespace Assets.Scripts.Rooms
 
         [Tooltip("A north door: the opening through the wall face.")]
         public Sprite Archway;
+
+        [Tooltip("A door in a side wall, seen edge-on: a tall narrow strip centred on the wall between two " +
+                 "rooms, its feet on the bottom of the door's tile. It may rise above the tile.")]
+        public Sprite DoorSide;
+
+        [Tooltip("A side door swinging open toward the east, closed to open. Same canvas as DoorSide; " +
+                 "mirrored for a walk toward the west.")]
+        public List<Sprite> DoorSideOpening = new List<Sprite>();
+
+        [Tooltip("The door in a north archway, shut. Drawn on the wall face, over the archway.")]
+        public Sprite DoorArch;
+
+        [Tooltip("The arch door swinging away from the viewer, for a walk north, closed to open.")]
+        public List<Sprite> DoorArchOpeningNorth = new List<Sprite>();
+
+        [Tooltip("The arch door swinging toward the viewer, for a walk south, closed to open.")]
+        public List<Sprite> DoorArchOpeningSouth = new List<Sprite>();
+
+        [Tooltip("Shade on the floor tile in front of a door to the east, darkest against the right edge.")]
+        public Sprite ShadeEast;
+
+        [Tooltip("The same for a door to the west, darkest against the left edge.")]
+        public Sprite ShadeWest;
+
+        [Tooltip("The same for a door to the south, darkest against the bottom edge. A south door has no " +
+                 "object of its own: the archway it leads to is the far side of the wall, so this shade " +
+                 "and the gap in the wall are all that show from the north.")]
+        public Sprite ShadeSouth;
 
         [Tooltip("Texture of the thin side and south walls. Empty draws them flat in EdgeColor.")]
         public Texture2D EdgeTexture;

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Combat;
 using Assets.Scripts.IO;
@@ -199,7 +199,15 @@ namespace Assets.Scripts.Heroes
             var door = viaDoor != null && room.Doors.Contains(viaDoor)
                 ? viaDoor
                 : (room.HasClaimedSpots ? room.Doors.FirstOrDefault(d => d != null) : null);
-            transform.position = door != null ? EntryPosition(door, room) : room.GetCenter();
+            if (door != null)
+            {
+                transform.position = EntryPosition(door, room);
+                return;
+            }
+            // The centre falls between tiles when a side is even; the party always stands on one.
+            var floor = new RectInt(room.GridPosition, new Vector2Int(room.RoomSO.Width, room.RoomSO.Height));
+            var tile = TileWalkOps.NearestFloorTile(floor, room.GetCenter());
+            transform.position = new Vector3(tile.x, tile.y, -1f);
         }
 
         public void PlaceAtDoor(Door door, Room fromRoom)
@@ -210,11 +218,30 @@ namespace Assets.Scripts.Heroes
             transform.position = EntryPosition(door, destRoom);
         }
 
-        /// <summary>Just inside <paramref name="door"/> - the same point <c>Room.ClaimSpot</c> keeps contents clear of.</summary>
+        /// <summary>
+        /// On the tile inside <paramref name="door"/>, which <c>Room.ClaimSpot</c> keeps clear. The party
+        /// walks tile by tile (<see cref="PartyWalk"/>), so it always stands on one - it used to stand
+        /// three quarters of a tile in, between tiles.
+        /// </summary>
         private static Vector3 EntryPosition(Door door, Room room)
         {
-            var spot = RoomSpotOps.EntrySpot(door.GetPositionInRoom(room), room.GetCenter());
-            return new Vector3(spot.x, spot.y, -1f);
+            var tile = door.GetPositionInRoom(room);
+            return new Vector3(tile.x, tile.y, -1f);
+        }
+
+        /// <summary>The tile the party stands on.</summary>
+        public Vector2Int Tile => Vector2Int.RoundToInt(transform.position);
+
+        /// <summary>
+        /// Turns the party sprite toward a step: left mirrors it, right restores it, up and down keep
+        /// the last facing (there are no up/down frames yet).
+        /// </summary>
+        public void Face(Vector2Int direction)
+        {
+            if (_spriteRenderer != null && direction.x != 0)
+            {
+                _spriteRenderer.flipX = direction.x < 0;
+            }
         }
 
         /// <summary>

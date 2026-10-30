@@ -28,6 +28,23 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8099d60cda44ed84d9dadfaf1320b771, type: 3}
   WallFaceVariantChance: 0.3
   Archway: {fileID: 21300000, guid: ec6ffee79f328124fb4c024453b9ecff, type: 3}
+  DoorSide: {fileID: 21300000, guid: ab70f228a87a3d1479675af79f99a3df, type: 3}
+  DoorSideOpening:
+  - {fileID: 21300000, guid: 47f1402affec89b47b69b31b656a0f1f, type: 3}
+  - {fileID: 21300000, guid: 5f8b4337c375d4e42bebf5f1bc5dbf65, type: 3}
+  - {fileID: 21300000, guid: ac81a24bc73099045b05f1f2f46b28b1, type: 3}
+  DoorArch: {fileID: 21300000, guid: 143950716d36e864ea394e23ac79e2f8, type: 3}
+  DoorArchOpeningNorth:
+  - {fileID: 21300000, guid: 05a093ac3c679dd4fb3417d5a0cb2d71, type: 3}
+  - {fileID: 21300000, guid: df37868562d086a4e8f8f7260530926d, type: 3}
+  - {fileID: 21300000, guid: bdea947de8a94be4c8d5961bfda5f262, type: 3}
+  DoorArchOpeningSouth:
+  - {fileID: 21300000, guid: 66b9c49db10b6354f8750fd96057d5c9, type: 3}
+  - {fileID: 21300000, guid: 4e7c5ae3aff60ba45a0815a77bcdc8da, type: 3}
+  - {fileID: 21300000, guid: 1f9eca3cc3e371b4eb07513223c1b8b4, type: 3}
+  ShadeEast: {fileID: 21300000, guid: ddfa4736dedd70944a4944b9a56ba009, type: 3}
+  ShadeWest: {fileID: 21300000, guid: 6b63b1d6ae16b764bbc58d4f82b98caa, type: 3}
+  ShadeSouth: {fileID: 21300000, guid: 2bf48ef5694d71b47ac972337ea856cb, type: 3}
   EdgeTexture: {fileID: 2800000, guid: 39e1b52a3b09ee640b52a3d150e07d12, type: 3}
   EdgeColor: {r: 1, g: 1, b: 1, a: 1}
   Props:

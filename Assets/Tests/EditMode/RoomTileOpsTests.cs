@@ -44,13 +44,13 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void Plan_Archway_HasNoCapOverIt()
+        public void Plan_Archway_KeepsTheCapOverIt()
         {
             var doors = new List<RoomDoorway> { new RoomDoorway(new Vector2Int(12, 22), Vector2Int.up) };
 
             var cells = RoomTileOps.Plan(Floor, 1, doors);
 
-            Assert.AreEqual(0, cells.Single(c => c.Cell == new Vector2Int(12, 23)).Edges & RoomTileOps.EdgeTop);
+            Assert.AreNotEqual(0, cells.Single(c => c.Cell == new Vector2Int(12, 23)).Edges & RoomTileOps.EdgeTop);
         }
 
         [Test]

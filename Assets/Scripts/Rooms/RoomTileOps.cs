@@ -52,8 +52,10 @@ namespace Assets.Scripts.Rooms
     /// part of the room's footprint but never walkable. A door north is an archway in that face; a
     /// door any other way is a gap in a thin wall. The thin walls run around the whole footprint -
     /// the sides of the floor and of the face, the bottom of the floor, and the top of the face as its
-    /// cap (not over an archway, which opens into the room above). Two rooms side by side or one
-    /// above the other each draw their own, so between them the walls meet as one thick seam.</para>
+    /// cap. The cap runs unbroken over an archway: the passage goes under the wall, from the arch to
+    /// the door in the room above, and a break in the cap made the two ends look like separate things.
+    /// Two rooms side by side or one above the other each draw their own wall, so between them the
+    /// walls meet as one thick seam.</para>
     ///
     /// <para><b>Decoration draws on its own random stream</b> (<see cref="DecorSeed"/>), never the
     /// dungeon's content stream: a floor is a pure function of its seed, and a prop roll on the
@@ -121,9 +123,7 @@ namespace Assets.Scripts.Rooms
                     }
 
                     // The cap: the face's top, or the floor's when there is no face.
-                    if (y == floor.yMax + wallRows - 1
-                        && piece != RoomTilePiece.Archway
-                        && !gaps.Contains((cell, Vector2Int.up)))
+                    if (y == floor.yMax + wallRows - 1 && !gaps.Contains((cell, Vector2Int.up)))
                     {
                         edges |= EdgeTop;
                     }

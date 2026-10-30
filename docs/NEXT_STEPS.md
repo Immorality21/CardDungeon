@@ -412,7 +412,8 @@ backlog.**
 |---|---|---|
 | **0** | Decisions | ✅ **2026-10-30**: authored rooms on a generated floor; same room count per floor; tile walking later; hidden rooms optional (never on the way to the stairs, no retry); Elites a surprise and last |
 | **1** | Spike: one biome (crypt) on one floor, sandbox only (`Sandbox/RoomSpike`) | 🔶 **built 2026-10-30**, waiting on the owner's look; findings (enemy scale, door sprite vs archway) in the plan |
-| **2-8** | Biomes + props · events you can see + Shrine · authored shapes · hidden rooms · branching routes · tile walking · Elites | after phase 1 is signed off |
+| **7** | **Tile walking, moved first** (owner, 2026-10-30): arrows/WASD walk, doors open by walking through them, doors drawn by the tilemap | 🔶 **core built 2026-10-30**, clicks walk too; open: walk cycles, props that block |
+| **2-6, 8** | Biomes + props · events you can see + Shrine · authored shapes · hidden rooms · branching routes · Elites | after phase 1 is signed off |
 | — | **More room events, and a pool per area** (owner, 2026-10-30) | backlog, later |
 
 ### [Polish, information and content](plans/POLISH_CONTENT.md)

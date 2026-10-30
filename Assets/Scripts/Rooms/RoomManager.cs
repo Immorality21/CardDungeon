@@ -468,6 +468,23 @@ namespace Assets.Scripts.Rooms
             Vector2 doorPos = ((Vector2)doorA + (Vector2)doorB) / 2f;
             var doorObj = Instantiate(_doorPrefab, doorPos, Quaternion.identity, transform);
             var door = doorObj.GetComponent<Door>();
+            if (_biome != null)
+            {
+                // On a biome floor the doorway is drawn in the tilemap - a gap in the thin wall, an
+                // archway in the face - so the door keeps only its collider, for the click.
+                var doorSprite = doorObj.GetComponent<SpriteRenderer>();
+                if (doorSprite != null)
+                {
+                    doorSprite.sprite = null;
+                }
+                // A side door straddles two tiles; at full width its collider would take the half of
+                // each tile nearest the wall, and a click meant for the floor would leave the room.
+                var doorCollider = doorObj.GetComponent<BoxCollider2D>();
+                if (doorCollider != null && doorA.y == doorB.y)
+                {
+                    doorCollider.size = new Vector2(0.5f, doorCollider.size.y);
+                }
+            }
 
             door.RoomA = a.room;
             door.RoomB = b.room;

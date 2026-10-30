@@ -21,6 +21,12 @@ namespace Assets.Scripts.Rooms
             Party = party;
             _roomActionUI = roomActionUI;
             _followParty = true;
+            // WASD walks the party (PartyWalk) and the camera follows it, so the manual pan - which
+            // reads the same keys from raw Input - stays off for the whole floor.
+            if (MainCamera.HasInstance)
+            {
+                MainCamera.Instance.AllowManualPan = false;
+            }
 
             // Both the new-level and the resumed-level paths come through here, so this is the one
             // place a floor's theme has to start. Asking for the track already playing is a no-op,

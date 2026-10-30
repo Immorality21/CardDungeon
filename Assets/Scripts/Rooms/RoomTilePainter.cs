@@ -18,7 +18,9 @@ namespace Assets.Scripts.Rooms
         // The same bands as the old floor: tiles 0, props under the markers (2-3), walls 5.
         private const int FloorOrder = 0;
         private const int PropOrder = 1;
+        private const int ShadeOrder = 4;
         private const int EdgeOrder = 5;
+        private const int DoorOrder = 6;
 
         // The old floor tiles sat at z = 1, behind everything standing in the room.
         private const float Depth = 1f;
@@ -26,6 +28,7 @@ namespace Assets.Scripts.Rooms
         private readonly BiomeSO _biome;
         private readonly WallGenerator _edges;
         private readonly Dictionary<Sprite, Tile> _tiles = new Dictionary<Sprite, Tile>();
+        private readonly Dictionary<(Sprite, int, bool), Tile> _placed = new Dictionary<(Sprite, int, bool), Tile>();
 
         public RoomTilePainter(BiomeSO biome)
         {
@@ -57,7 +60,7 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
                 var tile = Vector2Int.RoundToInt(door.GetPositionInRoom(room));
-                doorways.Add(new RoomDoorway(tile, DirectionOf(door, tile)));
+                doorways.Add(new RoomDoorway(tile, door.DirectionFrom(room)));
                 keepClear.Add(tile);
                 keepClear.Add(Vector2Int.RoundToInt(RoomSpotOps.EntrySpot(tile, center)));
             }
@@ -91,6 +94,8 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
+            PaintDoors(gridObj, room);
+
             if (props.Count > 0)
             {
                 var propLayer = CreateLayer(gridObj, "Props", PropOrder);
@@ -110,15 +115,111 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Which way <paramref name="door"/> leads from <paramref name="tile"/>, the room's tile inside it.
-        /// A side door sits half a tile out; a north door sits in the wall face a whole tile up.
+        /// A door's look: shade on the floor tile in front of it (not north: that side is the wall
+        /// face), and the door itself, which <see cref="Door.Swing"/> opens the way the party walks.
+        ///
+        /// <para>A side door is seen edge-on. Both rooms paint it, offset half a tile onto the wall
+        /// between them, and the two land on the same spot, so it hides with the rooms and still shows
+        /// whole once either side has been seen. A vertical door hangs in the lower room's archway, so
+        /// only that room paints it; from the north all that shows is the shade.</para>
         /// </summary>
-        private static Vector2Int DirectionOf(Door door, Vector2Int tile)
+        private void PaintDoors(GameObject grid, Room room)
         {
-            var offset = (Vector2)door.transform.position - tile;
-            return Mathf.Abs(offset.x) >= Mathf.Abs(offset.y)
-                ? new Vector2Int((int)Mathf.Sign(offset.x), 0)
-                : new Vector2Int(0, (int)Mathf.Sign(offset.y));
+            if (room.Doors.Count == 0)
+            {
+                return;
+            }
+
+            var shades = CreateLayer(grid, "DoorShade", ShadeOrder);
+            Tilemap frames = null;
+            foreach (var door in room.Doors)
+            {
+                if (door == null)
+                {
+                    continue;
+                }
+                var direction = door.DirectionFrom(room);
+                var tile = Vector2Int.RoundToInt(door.GetPositionInRoom(room));
+                var shade = ShadeSprite(direction);
+                if (shade != null)
+                {
+                    shades.SetTile((Vector3Int)tile, TileFor(shade));
+                }
+
+                bool side = direction.x != 0 && _biome.DoorSide != null;
+                bool arch = direction == Vector2Int.up && _biome.DoorArch != null;
+                if (!side && !arch)
+                {
+                    continue;
+                }
+                if (frames == null)
+                {
+                    frames = CreateLayer(grid, "DoorFrames", DoorOrder);
+                }
+
+                if (side)
+                {
+                    // The tile is placed from this room's side; the swing is by the walker's direction.
+                    door.AddPlace(frames, (Vector3Int)tile, PlacedTile(_biome.DoorSide, direction.x, false),
+                        new Dictionary<Vector2Int, IReadOnlyList<TileBase>>
+                        {
+                            { Vector2Int.right, PlacedTiles(_biome.DoorSideOpening, direction.x, false) },
+                            { Vector2Int.left, PlacedTiles(_biome.DoorSideOpening, direction.x, true) },
+                        });
+                }
+                else
+                {
+                    door.AddPlace(frames, (Vector3Int)(tile + Vector2Int.up), TileFor(_biome.DoorArch),
+                        new Dictionary<Vector2Int, IReadOnlyList<TileBase>>
+                        {
+                            { Vector2Int.up, PlacedTiles(_biome.DoorArchOpeningNorth, 0, false) },
+                            { Vector2Int.down, PlacedTiles(_biome.DoorArchOpeningSouth, 0, false) },
+                        });
+                }
+            }
+        }
+
+        private Sprite ShadeSprite(Vector2Int direction)
+        {
+            if (direction == Vector2Int.right)
+            {
+                return _biome.ShadeEast;
+            }
+            if (direction == Vector2Int.left)
+            {
+                return _biome.ShadeWest;
+            }
+            return direction == Vector2Int.down ? _biome.ShadeSouth : null;
+        }
+
+        private List<TileBase> PlacedTiles(List<Sprite> sprites, int side, bool mirrored)
+        {
+            var tiles = new List<TileBase>(sprites.Count);
+            foreach (var sprite in sprites)
+            {
+                tiles.Add(PlacedTile(sprite, side, mirrored));
+            }
+            return tiles;
+        }
+
+        /// <summary>
+        /// A door tile moved half a tile from the door's cell onto the wall (<paramref name="side"/> is
+        /// the way the wall lies, 0 for none) and, for a walk west, mirrored.
+        /// </summary>
+        private Tile PlacedTile(Sprite sprite, int side, bool mirrored)
+        {
+            var key = (sprite, side, mirrored);
+            if (!_placed.TryGetValue(key, out var tile))
+            {
+                tile = ScriptableObject.CreateInstance<Tile>();
+                tile.sprite = sprite;
+                tile.name = sprite.name;
+                tile.transform = Matrix4x4.TRS(
+                    new Vector3(side * 0.5f, 0f, 0f), Quaternion.identity, new Vector3(mirrored ? -1f : 1f, 1f, 1f));
+                tile.flags = TileFlags.LockAll;
+                _placed[key] = tile;
+            }
+            return tile;
         }
 
         private Sprite SpriteFor(RoomTileCell cell)

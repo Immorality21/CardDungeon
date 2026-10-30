@@ -172,11 +172,13 @@ namespace Assets.Scripts.Rooms
         private readonly List<Label> _commandCursors = new List<Label>();
         private int _selectedCommand;
 
-        // Walking the dungeon from the keyboard: the arrows point at doors, Tab reaches the room bar.
+        // Walking the dungeon from the keyboard: arrows/WASD walk the party, Tab reaches the room bar.
         private readonly List<Door> _navDoors = new List<Door>();
-        private readonly List<Vector2> _navDoorPoints = new List<Vector2>();
-        private Door _selectedDoor;
         private bool _doorsLive;
+        private PartyWalk _walk;
+        private Door _walkGoalDoor;
+        private Room _walkGoalRoom;
+        private Vector2Int _walkGoalTile;
         private KeyboardNavigator _barNav;
         private KeyboardNavigator _combatNav;
         private KeyboardNavigator _eventNav;
@@ -2112,7 +2114,7 @@ namespace Assets.Scripts.Rooms
 
         /// <summary>
         /// The map's keyboard. Arrows move a cursor over the rooms travel can reach - the same
-        /// <c>DirectionalNav</c> maths the doors and the sphere grid use - and Enter travels to it.
+        /// <c>DirectionalNav</c> maths the sphere grid uses - and Enter travels to it.
         /// Escape, Backspace and M all leave, so the key that opened it also closes it.
         /// </summary>
         private void HandleMapKey(KeyDownEvent evt)
@@ -2208,6 +2210,8 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
+            // A step still being drawn would otherwise keep moving the party after it has arrived.
+            _walk?.Cancel();
 
             Room Lookup(int index)
             {
@@ -2263,9 +2267,10 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Click-to-walk (playtest 2026-10-29): a click on the floor of another room walks the party
-        /// there when the way is safe - <see cref="DungeonMapOps.WalkRoute"/>, the map's fast-travel
-        /// rules plus one step into a room not yet entered. Only while the doors are live
+        /// Click-to-walk (playtest 2026-10-29, walked rather than jumped since 2026-10-30): a click on
+        /// a floor walks the party to that tile, tile by tile, through <see cref="PartyWalk"/> - in this
+        /// room, or in another when the way is safe (<see cref="DungeonMapOps.WalkRoute"/>, the map's
+        /// fast-travel rules plus one step into a room not yet entered). Only while the doors are live
         /// (<see cref="DoorNavActive"/>), so never in a fight, under a dialog or over the map.
         ///
         /// <para>A door under the pointer is left to its own click (<c>Door.OnMouseDown</c>, which
@@ -2294,13 +2299,13 @@ namespace Assets.Scripts.Rooms
 
             var rooms = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentRooms : null;
             int target = DungeonMapOps.RoomAt(BuildMapInputs(rooms), world);
-            if (target < 0 || target == _currentRoom.RoomIndex)
+            if (target < 0)
             {
                 return;
             }
 
             var destination = RoomByIndex(rooms, target);
-            if (!TryWalkTo(target) && destination != null && destination.IsExplored && FloatingTextHandler.HasInstance)
+            if (!TryWalkTo(target, world) && destination != null && destination.IsExplored && FloatingTextHandler.HasInstance)
             {
                 FloatingTextHandler.Instance.CreateFloatingText(
                     new Vector3(world.x, world.y, -2f), Loc.Get("room.map.no-safe-way"), new Color(1f, 0.75f, 0.45f));
@@ -2308,54 +2313,118 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Walks the party to <paramref name="roomIndex"/> by <see cref="DungeonMapOps.WalkRoute"/>, as
-        /// a click on that room does: false, and nothing moves, when the way is not safe or the doors
-        /// are not live. Public so a scripted check can drive the walk the mouse would.
+        /// Sets the party walking to <paramref name="roomIndex"/> by <see cref="DungeonMapOps.WalkRoute"/>,
+        /// as a click on that room does, to the floor tile nearest <paramref name="point"/> (the room's
+        /// centre when null). The party's own room needs no route. False, and nothing moves, when the
+        /// way is not safe or the doors are not live. Public so a scripted check can drive the walk the
+        /// mouse would.
         /// </summary>
-        public bool TryWalkTo(int roomIndex)
+        public bool TryWalkTo(int roomIndex, Vector2? point = null)
         {
             if (_currentRoom == null || !DoorNavActive())
             {
                 return false;
             }
             var rooms = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentRooms : null;
-            var route = DungeonMapOps.WalkRoute(BuildMapInputs(rooms), _currentRoom.RoomIndex, roomIndex);
             var destination = RoomByIndex(rooms, roomIndex);
-            if (route.Count < 2 || destination == null)
+            if (destination == null)
+            {
+                return false;
+            }
+            if (destination != _currentRoom
+                && DungeonMapOps.WalkRoute(BuildMapInputs(rooms), _currentRoom.RoomIndex, roomIndex).Count < 2)
             {
                 return false;
             }
 
-            // One step: exactly a door click.
-            if (route.Count == 2)
-            {
-                var door = DoorBetween(_currentRoom, destination);
-                if (door != null)
-                {
-                    OnDoorSelected(door);
-                }
-                return door != null;
-            }
-
-            if (destination.IsExplored)
-            {
-                TravelTo(roomIndex);
-                return true;
-            }
-
-            // Travel to the safe room beside it, then walk the last door - stopping there if arriving
-            // put anything in the way (the doors are no longer live).
-            int via = route[route.Count - 2];
-            TravelTo(via);
-            if (_currentRoom != null && _currentRoom.RoomIndex == via && DoorNavActive())
-            {
-                var door = DoorBetween(_currentRoom, destination);
-                if (door != null)
-                {
-                    OnDoorSelected(door);
-                }
-            }
+            var tile = TileWalkOps.NearestFloorTile(FloorOf(destination), point ?? (Vector2)destination.GetCenter());
+            SetWalkGoal(null, destination, tile);
             return true;
+        }
+
+        /// <summary>A door of the room the party is in, which a step could go through.</summary>
+        private bool IsUsableDoor(Door door)
+        {
+            if (!_currentRoom.Doors.Contains(door))
+            {
+                return false;
+            }
+            var collider = door.GetComponent<Collider2D>();
+            return collider == null || collider.enabled;
+        }
+
+        private static RectInt FloorOf(Room room)
+        {
+            return new RectInt(room.GridPosition, new Vector2Int(room.RoomSO.Width, room.RoomSO.Height));
+        }
+
+        /// <summary>Where a click sent the party: a door to go through, or a tile in a room.</summary>
+        private void SetWalkGoal(Door door, Room room, Vector2Int tile)
+        {
+            _walk?.Follow(System.Array.Empty<Vector2Int>());
+            _walkGoalDoor = door;
+            _walkGoalRoom = room;
+            _walkGoalTile = tile;
+        }
+
+        private void ClearWalkGoal()
+        {
+            _walkGoalDoor = null;
+            _walkGoalRoom = null;
+        }
+
+        /// <summary>
+        /// Plans the next leg of a click's walk: up to the door out of this room and through it, or to
+        /// the tile once in the right room. One leg at a time and re-derived on every arrival, so
+        /// whatever a room turns out to hold stops the walk (the doors are no longer live) and the route
+        /// can never go stale. A held key takes over from it.
+        /// </summary>
+        private void ContinueWalkGoal()
+        {
+            if (_walkGoalDoor == null && _walkGoalRoom == null)
+            {
+                return;
+            }
+            if (_walk.IsStepping || _walk.HasPath)
+            {
+                return;
+            }
+            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
+            if (party == null || _currentRoom == null || _walk.KeyHeld || !DoorNavActive())
+            {
+                ClearWalkGoal();
+                return;
+            }
+
+            var door = _walkGoalDoor;
+            if (door != null && !IsUsableDoor(door))
+            {
+                // Clicked while a step through another door was landing, or sealed since.
+                ClearWalkGoal();
+                return;
+            }
+            if (door == null && _walkGoalRoom == _currentRoom)
+            {
+                _walk.Follow(TileWalkOps.Path(party.Tile, _walkGoalTile));
+                ClearWalkGoal();
+                return;
+            }
+            if (door == null)
+            {
+                var rooms = DungeonManager.Instance.CurrentRooms;
+                var route = DungeonMapOps.WalkRoute(BuildMapInputs(rooms), _currentRoom.RoomIndex, _walkGoalRoom.RoomIndex);
+                door = route.Count >= 2 ? DoorBetween(_currentRoom, RoomByIndex(rooms, route[1])) : null;
+                if (door == null || !IsUsableDoor(door))
+                {
+                    ClearWalkGoal();
+                    return;
+                }
+            }
+
+            _walkGoalDoor = null;
+            var steps = TileWalkOps.Path(party.Tile, Vector2Int.RoundToInt(door.GetPositionInRoom(_currentRoom)));
+            steps.Add(door.DirectionFrom(_currentRoom));
+            _walk.Follow(steps);
         }
 
         /// <summary>Whether the pointer is over something on the UI panel (its root does not pick).</summary>
@@ -2668,6 +2737,7 @@ namespace Assets.Scripts.Rooms
             PanelKeyboard.Claim();
 
             TickRoomClick();
+            TickWalk();
 
             // Fight/Flee is a question, so it carries its cursor from the moment it appears - the
             // command menu already does, and Enter should not need an arrow press to wake it up.
@@ -2734,7 +2804,7 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Whether the arrow keys currently mean "pick a door". Doors being subscribed is the same
+        /// Whether the arrow keys currently walk the party. Doors being subscribed is the same
         /// condition as being able to walk through one, but a dialog on top of the room owns the
         /// keyboard while it is up - an arrow key must not move the party out from under an open
         /// event window.
@@ -2748,26 +2818,19 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// The out-of-combat keyboard: arrows point at a door, Enter walks through it, and Tab reaches
-        /// the room bar instead. Two cursors share Enter, and the split is unambiguous because it is
-        /// the last thing the player touched that decides - an arrow key always hands Enter back to
-        /// the doors.
+        /// The out-of-combat keyboard: the arrows (and WASD) walk the party - read by
+        /// <see cref="TickWalk"/>, since a held key must keep walking - and Tab moves a cursor along
+        /// the room bar, which Enter presses. The arrows are still swallowed here, or UI Toolkit would
+        /// move focus off the panel with them.
         /// </summary>
         private bool HandleDungeonKey(KeyDownEvent evt)
         {
             switch (evt.keyCode)
             {
                 case KeyCode.UpArrow:
-                    MoveDoorCursor(new Vector2(0f, 1f));
-                    return true;
                 case KeyCode.DownArrow:
-                    MoveDoorCursor(new Vector2(0f, -1f));
-                    return true;
                 case KeyCode.LeftArrow:
-                    MoveDoorCursor(new Vector2(-1f, 0f));
-                    return true;
                 case KeyCode.RightArrow:
-                    MoveDoorCursor(new Vector2(1f, 0f));
                     return true;
                 case KeyCode.Tab:
                     return _barNav != null && _barNav.HandleKey(evt);
@@ -2775,130 +2838,40 @@ namespace Assets.Scripts.Rooms
                 case KeyCode.KeypadEnter:
                 case KeyCode.Z:
                 case KeyCode.Space:
-                    if (_barNav != null && _barNav.HasSelection)
-                    {
-                        return _barNav.HandleKey(evt);
-                    }
-                    return ConfirmDoor();
+                    return _barNav != null && _barNav.HasSelection && _barNav.HandleKey(evt);
             }
 
             return false;
         }
 
         /// <summary>
-        /// Moves the door cursor. World space, so "up" is +y - unlike the UI cursors, which run in UI
-        /// Toolkit's y-down space.
-        ///
-        /// <para>With no door picked yet the arrow is measured from where the party is standing rather
-        /// than from the room's centre, so the first press means "the door that way from us". If
-        /// nothing lies that way at all, the nearest door is taken instead: a first arrow press that
-        /// appears to do nothing reads as the feature being missing.</para>
+        /// Walks the party while a direction is held and the doors are live (<see cref="DoorNavActive"/>:
+        /// nothing over the room, no fight waiting). A step through a door is <see cref="OnDoorSelected"/>.
+        /// A step hands Enter back from the room bar to walking, as the door cursor's arrows used to.
         /// </summary>
-        private void MoveDoorCursor(Vector2 direction)
+        private void TickWalk()
         {
-            _barNav?.Reset();
-
-            _navDoorPoints.Clear();
-            int from = -1;
-            for (int i = 0; i < _navDoors.Count; i++)
+            if (_walk == null)
             {
-                _navDoorPoints.Add(_navDoors[i].transform.position);
-                if (_navDoors[i] == _selectedDoor)
-                {
-                    from = i;
-                }
+                _walk = new PartyWalk(OnDoorSelected);
             }
-            if (_navDoorPoints.Count == 0)
-            {
-                return;
-            }
-
-            if (from >= 0)
-            {
-                int next = DirectionalNav.PickInDirection(_navDoorPoints, from, direction);
-                if (next >= 0)
-                {
-                    SetDoorCursor(_navDoors[next]);
-                }
-                return;
-            }
-
-            // First press: the door in the wall the arrow points at, nearest the party. Only when that
-            // wall has none does it fall back to "the door that way from us", then the nearest door.
-            var origin = PartyPosition();
-            int target = -1;
-            if (_currentRoom != null && _currentRoom.RoomSO != null)
-            {
-                var half = new Vector2(_currentRoom.RoomSO.Width / 2f, _currentRoom.RoomSO.Height / 2f);
-                target = DirectionalNav.PickOnSide(_navDoorPoints, _currentRoom.GetCenter(), half, direction, origin);
-            }
-            if (target < 0)
-            {
-                target = DirectionalNav.PickInDirection(_navDoorPoints, origin, direction);
-            }
-            SetDoorCursor(_navDoors[target >= 0 ? target : NearestDoorIndex(origin)]);
-        }
-
-        private Vector2 PartyPosition()
-        {
             var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
-            if (party != null)
+            if (_walk.Tick(party, _currentRoom, DoorNavActive(), Time.deltaTime))
             {
-                return party.transform.position;
+                _barNav?.Reset();
             }
-            return _currentRoom != null ? (Vector2)_currentRoom.GetCenter() : Vector2.zero;
+            ContinueWalkGoal();
         }
 
-        private int NearestDoorIndex(Vector2 origin)
+        /// <summary>Takes one step, as a held key would. For scripts and tests: no keyboard involved.</summary>
+        public bool WalkStep(Vector2Int direction)
         {
-            int nearest = 0;
-            float best = float.MaxValue;
-            for (int i = 0; i < _navDoorPoints.Count; i++)
+            if (_walk == null)
             {
-                float distance = (_navDoorPoints[i] - origin).sqrMagnitude;
-                if (distance < best)
-                {
-                    best = distance;
-                    nearest = i;
-                }
+                _walk = new PartyWalk(OnDoorSelected);
             }
-            return nearest;
-        }
-
-        private void SetDoorCursor(Door door)
-        {
-            if (_selectedDoor == door)
-            {
-                return;
-            }
-            if (_selectedDoor != null)
-            {
-                _selectedDoor.SetHighlighted(false);
-            }
-            _selectedDoor = door;
-            if (_selectedDoor != null)
-            {
-                _selectedDoor.SetHighlighted(true);
-            }
-        }
-
-        private void ClearDoorCursor()
-        {
-            SetDoorCursor(null);
-        }
-
-        /// <summary>Walks through the door under the cursor - the same path a click on it takes.</summary>
-        private bool ConfirmDoor()
-        {
-            var door = _selectedDoor;
-            if (door == null)
-            {
-                return false;
-            }
-
-            ClearDoorCursor();
-            OnDoorSelected(door);
-            return true;
+            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
+            return DoorNavActive() && _walk.TryStep(party, _currentRoom, direction);
         }
 
         private static bool IsShown(VisualElement element)
@@ -3826,7 +3799,7 @@ namespace Assets.Scripts.Rooms
                 {
                     continue;
                 }
-                door.OnDoorClicked += OnDoorSelected;
+                door.OnDoorClicked += OnDoorClickedWalk;
                 _navDoors.Add(door);
             }
             // The doors being subscribed is exactly the state in which walking through one is legal,
@@ -3836,7 +3809,6 @@ namespace Assets.Scripts.Rooms
 
         private void UnsubscribeDoors()
         {
-            ClearDoorCursor();
             _doorsLive = false;
             _navDoors.Clear();
 
@@ -3846,7 +3818,7 @@ namespace Assets.Scripts.Rooms
             }
             foreach (var door in _currentRoom.Doors)
             {
-                door.OnDoorClicked -= OnDoorSelected;
+                door.OnDoorClicked -= OnDoorClickedWalk;
             }
             if (_entryDoor != null)
             {
@@ -3854,6 +3826,13 @@ namespace Assets.Scripts.Rooms
             }
         }
 
+        /// <summary>A click on a door: walk to it and through it, from anywhere in the room.</summary>
+        private void OnDoorClickedWalk(Door door)
+        {
+            SetWalkGoal(door, null, default);
+        }
+
+        /// <summary>Goes through <paramref name="door"/>: what the last step of a walk up to it does.</summary>
         private void OnDoorSelected(Door door)
         {
             UnsubscribeDoors();

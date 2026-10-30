@@ -448,3 +448,19 @@ What the pass learned, for the next biome:
   (`crypt_edge.png` = wall face x1.45), not a colour. It must be imported **Read/Write** (it is read
   with `GetPixel`).
 - Import as every sprite here: 32 PPU, Point, uncompressed, Full Rect, pivot centre.
+- **A side door is a door seen edge-on** (`crypt_door_side.png`): one `create_image_pro` at 16x40 with
+  the wanted door as a `reference_images` entry and the biome's colours as `palette`, then pasted on a
+  16x48 canvas with 8 empty rows below the feet, so the centred sprite stands on the bottom of its tile
+  and rises 8 px above it. **Do not pass a wall tile as `style_image_url` here**: it wins over the
+  reference and all 64 candidates came back as brick piers. A small reference goes inline as base64
+  (21x75, 16 colours, 668 bytes).
+- **Door swings are built, not generated**, from one front-facing door (`create_image_pro`, 16x24, in
+  the biome palette; it came back only 10x15 inside the canvas, so check `getbbox` before scaling): the
+  leaf squeezed to narrower widths and shaded. Side door: 64x80 canvas centred on the wall, the leaf
+  standing face-on in the room being entered, the stone cap and foot left in place; mirrored by the tile
+  for a walk west. Arch door: cut to the arch's dark opening; north narrows it into the dark, south
+  (32x48, so it can reach past the tile) ends edge-on over the floor.
+- **Door shade** is not art: a dark colour in hard alpha steps on a transparent 32x32 (232 at the
+  door's edge down to 16 over 20 px). 170 over 14 px was too faint. The tiles are made once and rotated.
+- **A sprite reimported during play does not reach a Tilemap already painted**; it keeps the old
+  image until it is redrawn. Relaunch before judging a tile change.

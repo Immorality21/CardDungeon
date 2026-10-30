@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Enemies;
@@ -51,6 +51,7 @@ namespace Assets.Scripts.Combat
 
         private readonly List<UnitRestore> _restores = new List<UnitRestore>();
         private GameObject _backgroundGo;
+        private bool _panBeforeStage = true;
         private SpriteRenderer _backgroundSr;
         private Material _backgroundMaterial;
         private Party _party;
@@ -102,7 +103,10 @@ namespace Assets.Scripts.Combat
             // Snap the camera to the party centre, then freeze the follow so the stage holds.
             var mainCamera = MainCamera.Instance;
             mainCamera.SetPosition(party.transform.position);
-            mainCamera.AllowManualPan = false; // arrow/WASD drive the command cursor, not the camera
+            // Arrow/WASD drive the command cursor, not the camera. Restored to what it was, not to
+            // true: in the dungeon WASD walks the party and the pan stays off (GameManager).
+            _panBeforeStage = mainCamera.AllowManualPan;
+            mainCamera.AllowManualPan = false;
             if (GameManager.HasInstance)
             {
                 GameManager.Instance.SetCameraFollow(false);
@@ -240,7 +244,7 @@ namespace Assets.Scripts.Combat
             }
             if (MainCamera.HasInstance)
             {
-                MainCamera.Instance.AllowManualPan = true;
+                MainCamera.Instance.AllowManualPan = _panBeforeStage;
             }
             if (GameManager.HasInstance)
             {

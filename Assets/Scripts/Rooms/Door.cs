@@ -1,17 +1,13 @@
-using System;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 namespace Assets.Scripts.Rooms
 {
     public class Door : MonoBehaviour
     {
-        /// <summary>
-        /// How the door under the keyboard cursor is drawn. Tint alone is not enough on a dim sprite
-        /// and scale alone reads as an animation glitch, so it does both.
-        /// </summary>
-        private static readonly Color HighlightTint = new Color(1f, 0.93f, 0.55f);
-        private const float HighlightScale = 1.3f;
-
         public Room RoomA;
         public Room RoomB;
         public Vector2 PositionInA;
@@ -19,48 +15,70 @@ namespace Assets.Scripts.Rooms
 
         public event Action<Door> OnDoorClicked;
 
-        private SpriteRenderer _renderer;
-        private Color _baseColor;
-        private Vector3 _baseScale;
-        private bool _cachedBase;
-        private bool _highlighted;
+        // Seconds per frame of the swing.
+        private const float SwingFrameSeconds = 0.05f;
 
-        /// <summary>
-        /// Marks this door as the one the arrow keys are pointing at. The untouched look is captured
-        /// the first time rather than assumed, so a door prefab that is tinted or scaled by the level
-        /// still returns to exactly what it was.
-        /// </summary>
-        public void SetHighlighted(bool highlighted)
+        // Where this door is painted. A side door is painted by both rooms, each with tiles offset from
+        // its own cell, so a swing is one set of frames per place. Empty on the old look, whose door is
+        // the sprite.
+        private readonly List<DoorPlace> _places = new List<DoorPlace>();
+        private bool _opened;
+
+        private class DoorPlace
         {
-            CacheBaseLook();
-            if (_highlighted == highlighted)
-            {
-                return;
-            }
-
-            _highlighted = highlighted;
-            if (_renderer != null)
-            {
-                _renderer.color = highlighted ? HighlightTint : _baseColor;
-            }
-            // x/y only - z scale means nothing to a sprite and leaving it at 1 keeps the transform
-            // honest for anything that later reads it.
-            transform.localScale = highlighted
-                ? new Vector3(_baseScale.x * HighlightScale, _baseScale.y * HighlightScale, _baseScale.z)
-                : _baseScale;
+            public Tilemap Map;
+            public Vector3Int Cell;
+            public Dictionary<Vector2Int, IReadOnlyList<TileBase>> Swings;
         }
 
-        private void CacheBaseLook()
+        /// <summary>
+        /// Paints the shut door into a room's tilemap, with that room's frames for each way the party
+        /// can walk through it, closed to open.
+        /// </summary>
+        public void AddPlace(Tilemap map, Vector3Int cell, TileBase shut, Dictionary<Vector2Int, IReadOnlyList<TileBase>> swings)
         {
-            if (_cachedBase)
-            {
-                return;
-            }
+            _places.Add(new DoorPlace { Map = map, Cell = cell, Swings = swings });
+            map.SetTile(cell, shut);
+        }
 
-            _renderer = GetComponent<SpriteRenderer>();
-            _baseColor = _renderer != null ? _renderer.color : Color.white;
-            _baseScale = transform.localScale;
-            _cachedBase = true;
+        /// <summary>
+        /// Swings the door open for a party walking in <paramref name="direction"/>. It stays open, the
+        /// way it swung (owner, 2026-10-30): walking back through is just walking. Returns how long the
+        /// opening takes, so the party can wait for it: 0 when the door has no swing or is open already.
+        /// </summary>
+        public float Swing(Vector2Int direction)
+        {
+            int frames = 0;
+            foreach (var place in _places)
+            {
+                if (place.Swings.TryGetValue(direction, out var tiles))
+                {
+                    frames = Mathf.Max(frames, tiles.Count);
+                }
+            }
+            if (_opened || frames == 0 || !isActiveAndEnabled)
+            {
+                return 0f;
+            }
+            _opened = true;
+            StartCoroutine(SwingRoutine(direction, frames));
+            return frames * SwingFrameSeconds;
+        }
+
+        private IEnumerator SwingRoutine(Vector2Int direction, int frames)
+        {
+            var wait = new WaitForSeconds(SwingFrameSeconds);
+            for (int i = 0; i < frames; i++)
+            {
+                foreach (var place in _places)
+                {
+                    if (place.Map != null && place.Swings.TryGetValue(direction, out var tiles) && i < tiles.Count)
+                    {
+                        place.Map.SetTile(place.Cell, tiles[i]);
+                    }
+                }
+                yield return wait;
+            }
         }
 
         public Room GetOtherRoom(Room current)
@@ -71,6 +89,19 @@ namespace Assets.Scripts.Rooms
         public Vector2 GetPositionInRoom(Room room)
         {
             return room == RoomA ? PositionInA : PositionInB;
+        }
+
+        /// <summary>
+        /// The way this door leads out of <paramref name="room"/>, one step on the grid. Read off the
+        /// two tiles either side, so it holds for a north door whose tiles are two apart (an archway
+        /// through a wall face between them).
+        /// </summary>
+        public Vector2Int DirectionFrom(Room room)
+        {
+            var offset = GetPositionInRoom(GetOtherRoom(room)) - GetPositionInRoom(room);
+            return Mathf.Abs(offset.x) >= Mathf.Abs(offset.y)
+                ? new Vector2Int((int)Mathf.Sign(offset.x), 0)
+                : new Vector2Int(0, (int)Mathf.Sign(offset.y));
         }
 
         private void OnMouseDown()

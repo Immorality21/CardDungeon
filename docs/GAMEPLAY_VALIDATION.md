@@ -351,7 +351,7 @@ while (q.Count > 0) {
 ```
 
 ### 3. Walk the route by clicking doors
-A door click is `Door.OnMouseDown()` → fires `OnDoorClicked` → `RoomActionUI.OnDoorSelected`
+**Since 2026-10-30 a door click is a walk, not a jump: it walks the party to the door and through it over several frames, so wait before reading the result. `RoomActionUI.TryWalkTo(roomIndex, point)` is the floor click; `WalkStep(direction)` is one key step.** A door click is `Door.OnMouseDown()` → fires `OnDoorClicked` → `RoomActionUI.OnDoorSelected`
 → `Party.PlaceAtDoor(door, fromRoom)` + `GameManager.EnterRoom(destRoom, door)`. Simulate the
 click with **`door.SendMessage("OnMouseDown")`**. Do it one hop at a time and re-read
 `party.CurrentRoom` after each to confirm the move. Find the right door per hop:

@@ -4396,7 +4396,7 @@ MonoBehaviour:
     Note: 
   - Key: ui.room.nav-hint
     Values:
-    - "Arrows pick a door \xB7 Enter walk through \xB7 Tab room actions"
+    - "Arrows / WASD walk \xB7 Tab room actions"
     Reviewed: 0
     Note: 
   - Key: ui.room.not-entered
@@ -6152,9 +6152,9 @@ MonoBehaviour:
     Note: Keyboard hint while the combat command window is up
   - Key: room.keys.doors
     Values:
-    - "Arrows pick a door \xB7 Enter walk through \xB7 Tab room actions"
+    - "Arrows / WASD walk \xB7 Tab room actions"
     Reviewed: 0
-    Note: Keyboard hint while picking doors
+    Note: Keyboard hint while walking the floor
   - Key: room.party.hp
     Values:
     - '{current}/{max}'
