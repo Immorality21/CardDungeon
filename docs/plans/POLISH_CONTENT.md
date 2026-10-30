@@ -42,6 +42,10 @@ Touch points: `Assets/Scripts/Combat/CombatFeedback.cs`, `Assets/Scripts/Cards/E
 
 ### 2. Room variety — the branching half has not shipped
 
+> **Moved on 2026-10-30 to [DUNGEON_ROOMS.md](DUNGEON_ROOMS.md)**, which takes the owner's art,
+> movement and room-shape asks with it: branching routes are its phase 7, Elite and Shrine kinds and
+> visible markers phase 3. The notes below stay as background.
+
 `RoomKind` (Combat / Connector / Treasure / Rest) and stat-driven room events both shipped. Members
 exist only when they *do* something — an enum entry no code acts on is the dead content this project
 keeps finding. Open:

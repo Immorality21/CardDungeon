@@ -19,6 +19,7 @@ work, then open only the plan file your work touches:
 | `docs/plans/HUB.md` | campfire, materials, buildings, gold sinks, crafting (§3, §7) |
 | `docs/plans/BALANCE_OPEN.md` | open balance steps and findings, losability, the retry economy (§0–§0g, §3b) |
 | `docs/plans/REVISITS.md` | re-clearing runs at a player-selected difficulty (conditions and limits) |
+| `docs/plans/DUNGEON_ROOMS.md` | the dungeon's look and feel: biome tiles and props, events you can see, FF-style tile walking, authored room shapes, hidden rooms, branching routes, Elites (phased; decided 2026-10-30, next is the phase 1 spike) |
 | `docs/plans/EVENTS.md` | event-driven rules: the health funnel, the fight's and the game's event streams, reactions on items/enemies/summons, items that grow; passive grid nodes (after the demo) |
 | `docs/plans/POLISH_CONTENT.md` | battle/room polish, player-facing information, content volume, **the tutorial** (§1, §2, §6, §8, §14–§20) |
 

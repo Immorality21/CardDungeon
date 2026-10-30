@@ -298,7 +298,11 @@ backlog.**
 
 ### Next up
 
-- **Boss balancing — first** (owner, 2026-10-28). The late runs' bosses were left at their old numbers
+- **[Outside playtest, 2026-10-30](plans/PLAYTEST_2026-10-30.md) — the owner's verdicts, being
+  processed.** Order: 1) **the text system** (one localization table + editor window, keys
+  everywhere, phased), 2) the accepted fixes (combat info, keyboard, Paladin's own kit, status
+  screen, hub), 3) move its roadmap items into the plan files below and delete that file.
+- **Boss balancing** (owner, 2026-10-28). The late runs' bosses were left at their old numbers
   in the last pass (Emberfall 30% wipes; the Hollow Vault, Red Cloister, Altar of the Last Initiate and
   Mother Pool 0%). Tune each boss by its own absolute numbers (`EnemyTuning.Overrides` per floor; bosses
   are met once) and leave percentage modifiers to the Fear levels. Health and strength barely move a
@@ -383,12 +387,20 @@ backlog.**
 | **0b** | Elemental layer — follow-ups | open |
 | **0c** | Campaign graph — follow-ups | open; gains hero gating from §5b |
 
+### [Dungeon rooms](plans/DUNGEON_ROOMS.md) — art, movement, shapes, hidden rooms, routes
+
+| phase | | state |
+|---|---|---|
+| **0** | Decisions | ✅ **2026-10-30**: authored rooms on a generated floor; same room count per floor; tile walking later; hidden rooms optional (never on the way to the stairs, no retry); Elites a surprise and last |
+| **1-8** | Spike one biome · biomes + props · events you can see + Shrine · authored shapes · hidden rooms · branching routes · tile walking · Elites | **next: phase 1** |
+| — | **More room events, and a pool per area** (owner, 2026-10-30) | backlog, later |
+
 ### [Polish, information and content](plans/POLISH_CONTENT.md)
 
 | § | | state |
 |---|---|---|
 | **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped; the art pass moved to §21 |
-| **2** | Room variety — the branching half has not shipped | open; **unblocked** by the map (§14a) |
+| **2** | Room variety — the branching half has not shipped | **moved to [DUNGEON_ROOMS.md](plans/DUNGEON_ROOMS.md)** (2026-10-30): branching routes, Elite/Shrine kinds and markers are phases 3 and 7 there |
 | **6** | Stats — one open note (`BuffType` is a second per-stat list) | structural |
 | **8** | Migrate to the new Input System | *nice to have* |
 | **14** | The dungeon map, the party bar, and the pause menu | ✅ **complete** — 14b + 14c 2026-09-06, **14a (the map) 2026-09-08** |
@@ -410,7 +422,7 @@ per-subsystem `CLAUDE.md` files — not here.
 - **Click a room to walk there** (2026-10-30) — the Rooms guide. A click on another room's floor
   walks the party there when the way is safe (`DungeonMapOps.WalkRoute` + `RoomAt`,
   `RoomActionUI.TryWalkTo`): the map's fast-travel rules, plus one step into a room not yet entered.
-  `DungeonMapTests` +7; suite 1659 / 0; every case checked in play, the real mouse path not yet.
+  `DungeonMapTests` +7; suite 1659 / 0; playtested by the owner with the mouse.
 - **The Hall of Knowledge** (2026-10-29) — the Hub guide, `plans/HUB.md` §7 phase 7. The Bestiary lot
   and screen renamed (code keys unchanged); a **Recipes** tab beside Monsters (Left/Right switch):
   every recipe in its tree under what it is made from (`RecipeTreeOps`, `RecipeTreeOpsTests`), base
